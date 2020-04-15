@@ -14,16 +14,7 @@ export interface AccessControlFilterOption {
 }
 
 export type AccessControlFilterCallback = (
-  data: AccessControlFilterMetaObj,
-  user: AccessControlFilterMetaObj,
+  data: unknown,
+  user: unknown,
   acService?: AccessControlFilterService
 ) => Promise<boolean>;
-
-export interface AccessControlFilterMeta {
-  key: string;
-  value: unknown;
-}
-
-export interface AccessControlFilterMetaObj {
-  [key: string]: AccessControlFilterMeta;
-}
