@@ -1,6 +1,4 @@
-import { AccessControlFilterService } from './access-control-filter-service.interface';
 import { AccessControlFilterType } from '../enums/access-control-filter-type.enum';
-import { AccessControlUserRecord } from './access-control-user-record.interface';
 export interface AccessControlFilterOption {
     /**
      * Which request data to check.
@@ -11,4 +9,4 @@ export interface AccessControlFilterOption {
      */
     filter: AccessControlFilterCallback;
 }
-export declare type AccessControlFilterCallback = <U extends AccessControlUserRecord, S extends AccessControlFilterService, D = unknown>(data: D, user: U, acService?: S) => Promise<boolean>;
+export declare type AccessControlFilterCallback = (data: any, user: any, acService?: any) => Promise<boolean>;

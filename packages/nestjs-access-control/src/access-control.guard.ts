@@ -4,7 +4,6 @@ import {Possession} from 'accesscontrol/lib/enums';
 import {AccessControlFilterOption} from './interfaces/access-control-filter-option.interface';
 import {AccessControlGrantOption} from './interfaces/access-control-grant-option.interface';
 import {AccessControlFilterService} from './interfaces/access-control-filter-service.interface';
-import {AccessControlUserRecord} from './interfaces/access-control-user-record.interface';
 import {
   ACCESS_CONTROL_CTLR_CONFIG_KEY,
   ACCESS_CONTROL_FILTERS_CONFIG_KEY,
@@ -139,10 +138,10 @@ export class AccessControlGuard implements CanActivate {
     return this.moduleRef.get(config.service);
   }
 
-  private async getUser(
+  private async getUser<T>(
     context: ExecutionContext
-  ): Promise<AccessControlUserRecord> {
-    return this.getModuleService().getUser<AccessControlUserRecord>(context);
+  ): Promise<T> {
+    return this.getModuleService().getUser<T>(context);
   }
 
   private async getUserRoles(
