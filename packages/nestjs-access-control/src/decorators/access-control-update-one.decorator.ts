@@ -11,7 +11,7 @@ import {AccessControlFilterType} from '../enums/access-control-filter-type.enum'
  */
 export const AccessControlUpdateOne = (
   resource: AccessControlGrantResource,
-  paramFilter: AccessControlFilterCallback
+  paramFilter?: AccessControlFilterCallback
 ) => {
   const acFilter = AccessControlGrant({
     resource: resource,
