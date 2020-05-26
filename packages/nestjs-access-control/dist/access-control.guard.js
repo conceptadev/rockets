@@ -24,15 +24,8 @@ let AccessControlGuard = class AccessControlGuard {
         this.moduleRef = moduleRef;
     }
     async canActivate(context) {
-        // check roles
-        const hasPermission = await this.checkAccessGrants(context);
-        // have permission?
-        if (hasPermission !== true) {
-            // no permission, skip remaining checks
-            return false;
-        }
-        // now we have to check access filters
-        return this.checkAccessFilters(context);
+        // check permissions
+        return this.checkAccessGrants(context);
     }
     async checkAccessGrants(context) {
         const acGrants = this.reflector.get(constants_1.ACCESS_CONTROL_GRANT_CONFIG_KEY, context.getHandler());
@@ -54,7 +47,7 @@ let AccessControlGuard = class AccessControlGuard {
         });
         // have a match?
         if (true === hasAnyPermission) {
-            // yes, we are done here
+            // yes, skip remaining checks (even filters)
             return true;
         }
         const hasOwnPermission = acGrants.some(acGrant => {
@@ -67,7 +60,14 @@ let AccessControlGuard = class AccessControlGuard {
             return permission.granted;
         });
         // have a match?
-        return hasOwnPermission;
+        if (hasOwnPermission) {
+            // yes, now we have to check filters
+            return this.checkAccessFilters(context);
+        }
+        else {
+            // no access
+            return false;
+        }
     }
     async checkAccessFilters(context) {
         // get access filters configuration for handler
