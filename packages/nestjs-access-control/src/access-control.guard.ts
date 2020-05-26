@@ -23,17 +23,8 @@ export class AccessControlGuard implements CanActivate {
   ) {}
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
-    // check roles
-    const hasPermission = await this.checkAccessGrants(context);
-
-    // have permission?
-    if (hasPermission !== true) {
-      // no permission, skip remaining checks
-      return false;
-    }
-
-    // now we have to check access filters
-    return this.checkAccessFilters(context);
+    // check permissions
+    return this.checkAccessGrants(context);
   }
 
   protected async checkAccessGrants(
@@ -65,7 +56,7 @@ export class AccessControlGuard implements CanActivate {
 
     // have a match?
     if (true === hasAnyPermission) {
-      // yes, we are done here
+      // yes, skip remaining checks (even filters)
       return true;
     }
 
@@ -80,7 +71,13 @@ export class AccessControlGuard implements CanActivate {
     });
 
     // have a match?
-    return hasOwnPermission;
+    if (hasOwnPermission) {
+      // yes, now we have to check filters
+      return this.checkAccessFilters(context);
+    } else {
+      // no access
+      return false;
+    }
   }
 
   protected async checkAccessFilters(
