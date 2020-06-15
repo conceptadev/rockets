@@ -1,4 +1,3 @@
-import {AccessControlFilterService} from './access-control-filter-service.interface';
 import {AccessControlFilterType} from '../enums/access-control-filter-type.enum';
 
 export interface AccessControlFilterOption {

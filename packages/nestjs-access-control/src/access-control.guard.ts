@@ -135,9 +135,7 @@ export class AccessControlGuard implements CanActivate {
     return this.moduleRef.get(config.service);
   }
 
-  private async getUser<T>(
-    context: ExecutionContext
-  ): Promise<T> {
+  private async getUser<T>(context: ExecutionContext): Promise<T> {
     return this.getModuleService().getUser<T>(context);
   }
 
