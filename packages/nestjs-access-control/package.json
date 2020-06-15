@@ -1,5 +1,5 @@
 {
-  "name": "nestjs-access-control",
+  "name": "@rockts-org/nestjs-access-control",
   "version": "0.0.2",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
