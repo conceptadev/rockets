@@ -2,7 +2,27 @@
 
 Advanced access control guard for NestJS
 
+## IMPORTANT
+
+When building your ACL, you need to remember these!
+
+> This module only helps you apply a pattern. There is no magic, you are ultimately responsible for
+checking that your ACL works in all contexts.
+
+Here is the pattern:
+
+* Giving `any` access implies that the role IS NOT restricted by ownership, or other rules, to that action/resource combination.
+* Giving `own` access implies that the role IS restricted by ownership to that action/resource combination
+(it is often required to enforce this rule with a filter to check the data layer when not all information required to
+check ownership exists in the parameters or query string.) 
+
+!!! Important !!!
+
+> All roles that are given `any` access to a resource will NOT be passed through access filters since `any` implies they should have all access.
+
 ## Example
+
+These are very rough examples. We intend to improve them ASAP.
 
 ### Simple User Entity
 
