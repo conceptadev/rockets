@@ -1,0 +1,32 @@
+{
+  "name": "@rockts-org/nestjs-email",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@nestjs-modules/mailer": "^1.5.1",
+    "@nestjs/common": "^7.0.7",
+    "@nestjs/core": "^7.0.7",
+    "class-validator": "^0.11.1",
+    "nodemailer": "^6.4.10"
+  },
+  "devDependencies": {
+    "@nestjs/testing": "^7.3.0",
+    "@types/node": "^10.0.3",
+    "@types/nodemailer": "^6.4.0",
+    "gts": "^2.0.0",
+    "jest": "^26.1.0",
+    "typescript": "^3.8.3"
+  },
+  "scripts": {
+    "check": "gts check",
+    "clean": "gts clean",
+    "compile": "./node_modules/.bin/tsc",
+    "fix": "gts fix",
+    "prepare": "yarn clean && yarn compile"
+  }
+}
