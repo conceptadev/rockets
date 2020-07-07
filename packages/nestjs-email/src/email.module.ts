@@ -1,4 +1,4 @@
-import { Module, DynamicModule } from '@nestjs/common';
+import { Module, DynamicModule, Logger } from '@nestjs/common';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { EmailService } from './email.service';
 import { EmailModuleOptions } from './interfaces/email-module-options.interface';
@@ -14,7 +14,7 @@ export class EmailModule {
     return {
       module: EmailModule,
       imports: [MailerModule.forRoot(options)],
-      providers: [EmailService],
+      providers: [Logger, EmailService],
       exports: [EmailService],
     };
   }
@@ -23,7 +23,7 @@ export class EmailModule {
     return {
       module: EmailModule,
       imports: [MailerModule.forRootAsync(options)],
-      providers: [EmailService],
+      providers: [Logger, EmailService],
       exports: [EmailService],
     };
   }
