@@ -11,7 +11,7 @@ export class EmailModule {
    * @param {EmailModuleOptions} options  A configurable options
    * definitions. See the structure of this object in the examples.
    */
-  public static register(options: EmailModuleOptions): DynamicModule {
+  public static forRoot(options: EmailModuleOptions): DynamicModule {
     return {
       module: EmailModule,
       imports: [MailerModule.forRoot(options.nodeMailer)],
@@ -20,7 +20,7 @@ export class EmailModule {
     };
   }
 
-  public static registerAsync(options: EmailModuleAsyncOptions): DynamicModule {
+  public static forRootAsync(options: EmailModuleAsyncOptions): DynamicModule {
     return {
       module: EmailModule,
       imports: [MailerModule.forRootAsync(options.nodeMailer)],
