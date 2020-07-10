@@ -13,7 +13,7 @@ export class EmailModule {
   public static register(options: EmailModuleOptions): DynamicModule {
     return {
       module: EmailModule,
-      imports: [MailerModule.forRoot(options)],
+      imports: [MailerModule.forRoot(options.nodeMailer)],
       providers: [Logger, EmailService],
       exports: [EmailService],
     };
@@ -22,7 +22,7 @@ export class EmailModule {
   public static registerAsync(options: EmailModuleAsyncOptions): DynamicModule {
     return {
       module: EmailModule,
-      imports: [MailerModule.forRootAsync(options)],
+      imports: [MailerModule.forRootAsync(options.nodeMailer)],
       providers: [Logger, EmailService],
       exports: [EmailService],
     };

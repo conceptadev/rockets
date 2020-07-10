@@ -1,3 +1,5 @@
 import { MailerOptions } from '@nestjs-modules/mailer';
 
-export class EmailModuleOptions implements MailerOptions {}
+export interface EmailModuleOptions {
+  nodeMailer: MailerOptions;
+}
