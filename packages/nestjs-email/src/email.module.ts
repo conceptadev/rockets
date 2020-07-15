@@ -1,18 +1,18 @@
 import { Module, DynamicModule, Logger, Global } from '@nestjs/common';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { EmailService } from './email.service';
-import { EmailModuleOptions } from './interfaces';
-import { EmailModuleAsyncOptions } from './interfaces';
+import { EmailConfigOptions } from './interfaces';
+import { EmailConfigAsyncOptions } from './interfaces';
 import { EMAIL_MODULE_OPTIONS_TOKEN } from './email-constants';
 
 @Module({})
 export class EmailModule {
   /**
    * Register a pre-defined email transport
-   * @param {EmailModuleOptions} options  A configurable options
+   * @param {EmailConfigOptions} options  A configurable options
    * definitions. See the structure of this object in the examples.
    */
-  public static forRoot(options: EmailModuleOptions): DynamicModule {
+  public static forRoot(options: EmailConfigOptions): DynamicModule {
     return {
       module: EmailModule,
       imports: [
@@ -24,7 +24,7 @@ export class EmailModule {
     };
   }
 
-  public static forRootAsync(options: EmailModuleAsyncOptions): DynamicModule {
+  public static forRootAsync(options: EmailConfigAsyncOptions): DynamicModule {
     return {
       module: EmailModule,
       imports: [
@@ -32,7 +32,7 @@ export class EmailModule {
         MailerModule.forRootAsync({
           imports: [EmailConfigModule],
           inject: [EMAIL_MODULE_OPTIONS_TOKEN],
-          useFactory: async (config: EmailModuleOptions) => {
+          useFactory: async (config: EmailConfigOptions) => {
             return config.nodeMailer;
           },
         }),
@@ -46,7 +46,7 @@ export class EmailModule {
 @Global()
 @Module({})
 export class EmailConfigModule {
-  static forRoot(options: EmailModuleOptions): DynamicModule {
+  static forRoot(options: EmailConfigOptions): DynamicModule {
     return {
       module: EmailConfigModule,
       providers: [
@@ -59,7 +59,7 @@ export class EmailConfigModule {
     };
   }
 
-  static forRootAsync(options: EmailModuleAsyncOptions): DynamicModule {
+  static forRootAsync(options: EmailConfigAsyncOptions): DynamicModule {
     return {
       module: EmailConfigModule,
       providers: [
