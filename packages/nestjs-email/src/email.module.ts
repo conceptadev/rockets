@@ -1,8 +1,9 @@
-import { Module, DynamicModule, Logger } from '@nestjs/common';
+import { Module, DynamicModule, Logger, Global } from '@nestjs/common';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { EmailService } from './email.service';
 import { EmailModuleOptions } from './interfaces';
 import { EmailModuleAsyncOptions } from './interfaces';
+import { EMAIL_MODULE_OPTIONS_TOKEN } from './email-constants';
 
 @Module({})
 export class EmailModule {
@@ -14,7 +15,10 @@ export class EmailModule {
   public static forRoot(options: EmailModuleOptions): DynamicModule {
     return {
       module: EmailModule,
-      imports: [MailerModule.forRoot(options.nodeMailer)],
+      imports: [
+        EmailConfigModule.forRoot(options),
+        MailerModule.forRoot(options.nodeMailer),
+      ],
       providers: [Logger, EmailService],
       exports: [EmailService],
     };
@@ -23,9 +27,49 @@ export class EmailModule {
   public static forRootAsync(options: EmailModuleAsyncOptions): DynamicModule {
     return {
       module: EmailModule,
-      imports: [MailerModule.forRootAsync(options.nodeMailer)],
+      imports: [
+        EmailConfigModule.forRootAsync(options),
+        MailerModule.forRootAsync({
+          imports: [EmailConfigModule],
+          inject: [EMAIL_MODULE_OPTIONS_TOKEN],
+          useFactory: async (config: EmailModuleOptions) => {
+            return config.nodeMailer;
+          },
+        }),
+      ],
       providers: [Logger, EmailService],
       exports: [EmailService],
+    };
+  }
+}
+
+@Global()
+@Module({})
+export class EmailConfigModule {
+  static forRoot(options: EmailModuleOptions): DynamicModule {
+    return {
+      module: EmailConfigModule,
+      providers: [
+        {
+          provide: EMAIL_MODULE_OPTIONS_TOKEN,
+          useValue: options,
+        },
+      ],
+      exports: [EMAIL_MODULE_OPTIONS_TOKEN],
+    };
+  }
+
+  static forRootAsync(options: EmailModuleAsyncOptions): DynamicModule {
+    return {
+      module: EmailConfigModule,
+      providers: [
+        {
+          provide: EMAIL_MODULE_OPTIONS_TOKEN,
+          inject: options.inject,
+          useFactory: options.useFactory,
+        },
+      ],
+      exports: [EMAIL_MODULE_OPTIONS_TOKEN],
     };
   }
 }
