@@ -1,0 +1,21 @@
+{
+  "extends": "./node_modules/gts/tsconfig-google.json",
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "typeRoots": [
+      "./node_modules/@types"
+    ]
+  },
+  "files": [],
+  "references": [
+    {
+      "path": "packages/nestjs-access-control"
+    },
+    {
+      "path": "packages/nestjs-email"
+    }
+  ]
+}

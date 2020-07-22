@@ -11,17 +11,5 @@
     "@nestjs/common": "^7.0.7",
     "@nestjs/core": "^7.0.7",
     "accesscontrol": "^2.2.1"
-  },
-  "devDependencies": {
-    "gts": "^2.0.0",
-    "typescript": "^3.8.3",
-    "@types/node": "^10.0.3"
-  },
-  "scripts": {
-    "check": "gts check",
-    "clean": "gts clean",
-    "compile": "tsc",
-    "fix": "gts fix",
-    "prepare": "yarn clean && yarn compile"
   }
 }
