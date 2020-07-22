@@ -19,6 +19,7 @@
     "check": "gts check",
     "clean": "./node_modules/.bin/tsc --build --clean",
     "compile": "./node_modules/.bin/tsc --build",
+    "watch": "yarn compile && ./node_modules/.bin/tsc --build --watch",
     "fix": "gts fix",
     "prepare": "yarn clean && yarn compile"
   }
