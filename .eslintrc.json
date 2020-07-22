@@ -1,6 +1,6 @@
 {
   "extends": "./node_modules/gts/",
-  "ignorePatterns": ["dist/*"],
+  "ignorePatterns": ["packages/*/dist"],
   "overrides": [
     {
       "files": "**/*.ts",
