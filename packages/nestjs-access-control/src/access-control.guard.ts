@@ -1,17 +1,17 @@
-import {CanActivate, ExecutionContext, Injectable} from '@nestjs/common';
-import {ModuleRef, Reflector} from '@nestjs/core';
-import {Possession} from 'accesscontrol/lib/enums';
-import {AccessControlFilterOption} from './interfaces/access-control-filter-option.interface';
-import {AccessControlGrantOption} from './interfaces/access-control-grant-option.interface';
-import {AccessControlFilterService} from './interfaces/access-control-filter-service.interface';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { ModuleRef, Reflector } from '@nestjs/core';
+import { Possession } from 'accesscontrol/lib/enums';
+import { AccessControlFilterOption } from './interfaces/access-control-filter-option.interface';
+import { AccessControlGrantOption } from './interfaces/access-control-grant-option.interface';
+import { AccessControlFilterService } from './interfaces/access-control-filter-service.interface';
 import {
   ACCESS_CONTROL_CTLR_CONFIG_KEY,
   ACCESS_CONTROL_FILTERS_CONFIG_KEY,
   ACCESS_CONTROL_GRANT_CONFIG_KEY,
 } from './constants';
-import {InjectAccessControl} from './decorators/inject-access-control.decorator';
-import {AccessControlModuleOptions, AccessControlService} from './interfaces';
-import {IQueryInfo} from 'accesscontrol';
+import { InjectAccessControl } from './decorators/inject-access-control.decorator';
+import { AccessControlModuleOptions, AccessControlService } from './interfaces';
+import { IQueryInfo } from 'accesscontrol';
 
 @Injectable()
 export class AccessControlGuard implements CanActivate {
@@ -121,7 +121,7 @@ export class AccessControlGuard implements CanActivate {
   }
 
   private getModuleService(): AccessControlService {
-    return this.moduleRef.get(this.accessControl.service, {strict: false});
+    return this.moduleRef.get(this.accessControl.service, { strict: false });
   }
 
   private getFilterService(

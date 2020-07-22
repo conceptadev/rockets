@@ -1,4 +1,4 @@
-import {ExecutionContext} from '@nestjs/common';
+import { ExecutionContext } from '@nestjs/common';
 
 export interface AccessControlService {
   getUser<T>(context: ExecutionContext): Promise<T>;
