@@ -1,4 +1,5 @@
 import { AccessControlFilterType } from '../enums/access-control-filter-type.enum';
+import { AccessControlFilterService } from './access-control-filter-service.interface';
 
 export interface AccessControlFilterOption {
   /**
@@ -12,11 +13,12 @@ export interface AccessControlFilterOption {
   filter: AccessControlFilterCallback;
 }
 
-export type AccessControlFilterCallback = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  user: any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  acService?: any
+export type AccessControlFilterCallback<
+  D = unknown,
+  U = unknown,
+  S = unknown
+> = (
+  data: D,
+  user?: U,
+  acService?: S & AccessControlFilterService
 ) => Promise<boolean>;
