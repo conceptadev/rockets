@@ -1,0 +1,12 @@
+version: '3.4'
+
+services:
+  rockets:
+    image: rockets
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    volumes:
+      - .:/workspace:delegated
+    environment:
+      NODE_ENV: development
