@@ -10,7 +10,11 @@ import {
   ACCESS_CONTROL_GRANT_CONFIG_KEY,
 } from './constants';
 import { InjectAccessControl } from './decorators/inject-access-control.decorator';
-import { AccessControlModuleOptions, AccessControlService } from './interfaces';
+import {
+  AccessControlModuleOptions,
+  AccessControlOptions,
+  AccessControlService,
+} from './interfaces';
 import { IQueryInfo } from 'accesscontrol';
 
 @Injectable()
@@ -126,13 +130,18 @@ export class AccessControlGuard implements CanActivate {
 
   private getFilterService(
     context: ExecutionContext
-  ): AccessControlFilterService {
+  ): AccessControlFilterService | undefined {
     const controllerClass = context.getClass();
-    const config = this.reflector.get(
+    const config: AccessControlOptions = this.reflector.get(
       ACCESS_CONTROL_CTLR_CONFIG_KEY,
       controllerClass
     );
-    return this.moduleRef.get(config.service);
+
+    if (config && config?.service) {
+      return this.moduleRef.get(config.service);
+    } else {
+      return;
+    }
   }
 
   private async getUser<T>(context: ExecutionContext): Promise<T> {
