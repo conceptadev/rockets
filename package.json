@@ -20,7 +20,6 @@
     "typescript": "^3.9.7"
   },
   "scripts": {
-    "postinstall": "lerna bootstrap",
     "check": "gts check",
     "clean": "./node_modules/.bin/tsc --build --clean",
     "compile": "./node_modules/.bin/tsc --build",
