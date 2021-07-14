@@ -7,17 +7,31 @@
     ]
   },
   "devDependencies": {
-    "@types/node": "^14.0.24",
+    "@nestjs/cli": "^8.0.0",
+    "@nestjs/schematics": "^8.0.0",
+    "@nestjs/testing": "^8.0.0",
+    "@types/express": "^4.17.13",
+    "@types/jest": "^26.0.24",
+    "@types/node": "^16.0.0",
     "@types/nodemailer": "^6.4.0",
-    "@typescript-eslint/eslint-plugin": "^3.7.0",
-    "@typescript-eslint/parser": "^3.7.0",
-    "eslint": "^7.5.0",
+    "@types/supertest": "^2.0.11",
+    "@typescript-eslint/eslint-plugin": "^4.28.2",
+    "@typescript-eslint/parser": "^4.28.2",
+    "eslint": "^7.30.0",
+    "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prettier": "^3.1.4",
+    "eslint-plugin-prettier": "^3.4.0",
     "gts": "^2.0.2",
-    "jest": "^26.1.0",
+    "jest": "27.0.6",
     "lerna": "^3.22.1",
-    "typescript": "^3.9.7"
+    "prettier": "^2.3.2",
+    "reflect-metadata": "^0.1.13",
+    "supertest": "^6.1.3",
+    "ts-jest": "^27.0.3",
+    "ts-loader": "^9.2.3",
+    "ts-node": "^10.0.0",
+    "tsconfig-paths": "^3.10.1",
+    "typescript": "^4.3.5"
   },
   "scripts": {
     "check": "gts check",
@@ -25,6 +39,37 @@
     "compile": "./node_modules/.bin/tsc --build",
     "watch": "yarn compile && ./node_modules/.bin/tsc --build --watch",
     "fix": "gts fix",
-    "prepare": "yarn clean && yarn compile"
+    "prepare": "yarn clean && yarn compile",
+    "test": "jest"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "moduleNameMapper": {
+      "@rockts-org/nestjs-access-control(.*)": "<rootDir>/packages/nestjs-access-control/src/$1",
+      "@rockts-org/nestjs-email(.*)": "<rootDir>/packages/nestjs-email/src/$1"
+    },
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "tsconfig.jest.json"
+      }
+    },
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "packages/**/*.ts",
+      "!packages/**/*.d.ts",
+      "!packages/**/*.interface.ts",
+      "!**/node_modules/**",
+      "!**/__stubs__/**",
+      "!**/__fixture__/**"
+    ],
+    "coverageDirectory": "coverage",
+    "testEnvironment": "node"
   }
 }
