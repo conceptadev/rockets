@@ -1,8 +1,8 @@
 import { Module, DynamicModule, Logger, Global } from '@nestjs/common';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { EmailService } from './email.service';
-import { EmailConfigOptions } from './interfaces';
-import { EmailConfigAsyncOptions } from './interfaces';
+import { EmailConfigOptions } from './interfaces/email-config-options.interface';
+import { EmailConfigAsyncOptions } from './interfaces/email-config-async-options.interface';
 import { EMAIL_MODULE_OPTIONS_TOKEN } from './email-constants';
 
 @Module({})
