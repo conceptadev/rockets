@@ -23,7 +23,7 @@ export class AccessControlGuard implements CanActivate {
     @InjectAccessControl()
     private readonly accessControl: AccessControlModuleOptions,
     private readonly reflector: Reflector,
-    private moduleRef: ModuleRef
+    private moduleRef: ModuleRef,
   ) {}
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -32,11 +32,11 @@ export class AccessControlGuard implements CanActivate {
   }
 
   protected async checkAccessGrants(
-    context: ExecutionContext
+    context: ExecutionContext,
   ): Promise<boolean> {
     const acGrants = this.reflector.get<AccessControlGrantOption[]>(
       ACCESS_CONTROL_GRANT_CONFIG_KEY,
-      context.getHandler()
+      context.getHandler(),
     );
 
     // get anything?
@@ -48,7 +48,7 @@ export class AccessControlGuard implements CanActivate {
     const userRoles = await this.getUserRoles(context);
 
     // do they have at least one ANY permission?
-    const hasAnyPermission = acGrants.some(acGrant => {
+    const hasAnyPermission = acGrants.some((acGrant) => {
       const query: IQueryInfo = {
         role: userRoles,
         possession: Possession.ANY,
@@ -64,7 +64,7 @@ export class AccessControlGuard implements CanActivate {
       return true;
     }
 
-    const hasOwnPermission = acGrants.some(acGrant => {
+    const hasOwnPermission = acGrants.some((acGrant) => {
       const query: IQueryInfo = {
         role: userRoles,
         possession: Possession.OWN,
@@ -85,12 +85,12 @@ export class AccessControlGuard implements CanActivate {
   }
 
   protected async checkAccessFilters(
-    context: ExecutionContext
+    context: ExecutionContext,
   ): Promise<boolean> {
     // get access filters configuration for handler
     const acFilters = this.reflector.get<AccessControlFilterOption[]>(
       ACCESS_CONTROL_FILTERS_CONFIG_KEY,
-      context.getHandler()
+      context.getHandler(),
     );
 
     // get anything?
@@ -129,12 +129,12 @@ export class AccessControlGuard implements CanActivate {
   }
 
   private getFilterService(
-    context: ExecutionContext
+    context: ExecutionContext,
   ): AccessControlFilterService | undefined {
     const controllerClass = context.getClass();
     const config: AccessControlOptions = this.reflector.get(
       ACCESS_CONTROL_CTLR_CONFIG_KEY,
-      controllerClass
+      controllerClass,
     );
 
     if (config && config?.service) {
@@ -149,7 +149,7 @@ export class AccessControlGuard implements CanActivate {
   }
 
   private async getUserRoles(
-    context: ExecutionContext
+    context: ExecutionContext,
   ): Promise<string | string[]> {
     return this.getModuleService().getUserRoles(context);
   }

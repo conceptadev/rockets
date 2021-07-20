@@ -10,7 +10,7 @@ import { EmailOptions } from './interfaces/email-options.interface';
 export class EmailService {
   constructor(
     private logger: Logger,
-    private readonly mailerService: MailerService
+    private readonly mailerService: MailerService,
   ) {}
 
   public async sendEmail(dto: EmailOptions): Promise<void> {
@@ -21,7 +21,7 @@ export class EmailService {
       this.logger.error(e.message, e.stack, EmailService.name);
       // throw a more friendly error
       throw new InternalServerErrorException(
-        'Fatal error while trying to send email.'
+        'Fatal error while trying to send email.',
       );
     }
   }

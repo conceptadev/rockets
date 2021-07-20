@@ -11,7 +11,7 @@ import { AccessControlFilterType } from '../enums/access-control-filter-type.enu
  */
 export const AccessControlCreateOne = (
   resource: AccessControlGrantResource,
-  paramFilter?: AccessControlFilterCallback
+  paramFilter?: AccessControlFilterCallback,
 ): ReturnType<typeof applyDecorators> => {
   const acFilter = AccessControlGrant({
     resource: resource,
@@ -24,7 +24,7 @@ export const AccessControlCreateOne = (
       AccessControlFilter({
         type: AccessControlFilterType.BODY,
         filter: paramFilter,
-      })
+      }),
     );
   } else {
     return acFilter;

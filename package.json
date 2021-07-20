@@ -37,7 +37,7 @@
     "build": "./node_modules/.bin/tsc --build",
     "watch": "yarn build && ./node_modules/.bin/tsc --build --watch",
     "prepare": "yarn clean && yarn build",
-    "lint": "eslint \"packages/**/{src,test}/**/*.ts\" --fix",
+    "lint": "eslint \"packages/**/{src,test}/**/*.{ts,js,json}\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",

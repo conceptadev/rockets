@@ -16,9 +16,9 @@ export interface AccessControlFilterOption {
 export type AccessControlFilterCallback<
   D = unknown,
   U = unknown,
-  S = unknown
+  S = unknown,
 > = (
   data: D,
   user?: U,
-  acService?: S & AccessControlFilterService
+  acService?: S & AccessControlFilterService,
 ) => Promise<boolean>;

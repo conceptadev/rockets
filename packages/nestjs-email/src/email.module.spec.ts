@@ -38,7 +38,7 @@ describe('EmailModule', () => {
     it('should import the dynamic module asynchronously', async () => {
       const emailConfig = registerAs(
         'EMAIL_CONFIG_KEY',
-        (): EmailConfigOptions => emailConfigPlain
+        (): EmailConfigOptions => emailConfigPlain,
       );
 
       const moduleRef = await Test.createTestingModule({
