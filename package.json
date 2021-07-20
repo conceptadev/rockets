@@ -21,7 +21,6 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^3.4.0",
-    "gts": "^2.0.2",
     "jest": "27.0.6",
     "lerna": "^3.22.1",
     "prettier": "^2.3.2",
@@ -34,11 +33,9 @@
     "typescript": "^4.3.5"
   },
   "scripts": {
-    "check": "gts check",
     "clean": "./node_modules/.bin/tsc --build --clean",
     "compile": "./node_modules/.bin/tsc --build",
     "watch": "yarn compile && ./node_modules/.bin/tsc --build --watch",
-    "fix": "gts fix",
     "prepare": "yarn clean && yarn compile",
     "lint": "eslint \"packages/**/{src,test}/**/*.ts\" --fix",
     "test": "jest",
