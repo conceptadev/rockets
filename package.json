@@ -34,9 +34,9 @@
   },
   "scripts": {
     "clean": "./node_modules/.bin/tsc --build --clean",
-    "compile": "./node_modules/.bin/tsc --build",
-    "watch": "yarn compile && ./node_modules/.bin/tsc --build --watch",
-    "prepare": "yarn clean && yarn compile",
+    "build": "./node_modules/.bin/tsc --build",
+    "watch": "yarn build && ./node_modules/.bin/tsc --build --watch",
+    "prepare": "yarn clean && yarn build",
     "lint": "eslint \"packages/**/{src,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
