@@ -23,7 +23,7 @@ describe('EmailModule', () => {
   });
 
   describe('forRoot', () => {
-    it('should import the dynamic module asynchronously', async () => {
+    it('should import the dynamic module', async () => {
       const moduleRef = await Test.createTestingModule({
         imports: [EmailModule.forRoot(emailConfigPlain)],
       }).compile();
