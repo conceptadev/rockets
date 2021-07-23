@@ -135,7 +135,9 @@ export class AccessControlGuard implements CanActivate {
       controllerClass,
     );
 
-    if (config && config?.service) {
+    const finalConfig = { ...config };
+
+    if (finalConfig.service) {
       return this.moduleRef.get(config.service);
     } else {
       return;
