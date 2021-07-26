@@ -1,35 +1,39 @@
-import { Reflector } from '@nestjs/core';
-import { Controller, ExecutionContext } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
-import { mock } from 'jest-mock-extended';
-import { AccessControl } from 'accesscontrol';
-import { AccessControlModuleOptions } from './interfaces/access-control-module-options.interface';
-import { AccessControlService } from './interfaces/access-control-service.interface';
-import { AccessControlGuard } from './access-control.guard';
-import { UseAccessControl } from './decorators/use-access-control.decorator';
-import { AccessControlReadOne } from './decorators/access-control-read-one.decorator';
 import {
   ACCESS_CONTROL_CTLR_CONFIG_KEY,
   ACCESS_CONTROL_FILTERS_CONFIG_KEY,
   ACCESS_CONTROL_GRANT_CONFIG_KEY,
   ACCESS_CONTROL_OPTIONS_KEY,
 } from './constants';
-import { AccessControlAction } from './enums/access-control-action.enum';
 import {
   AccessControlFilterCallback,
   AccessControlFilterOption,
 } from './interfaces/access-control-filter-option.interface';
-import { HttpArgumentsHost } from '@nestjs/common/interfaces';
-import { AccessControlReadMany } from './decorators/access-control-read-many.decorator';
+import { Controller, ExecutionContext } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+
+import { AccessControl } from 'accesscontrol';
+import { AccessControlAction } from './enums/access-control-action.enum';
+import { AccessControlCreateOne } from './decorators/access-control-create-one.decorator';
+import { AccessControlFilterService } from './interfaces/access-control-filter-service.interface';
 import { AccessControlFilterType } from './enums/access-control-filter-type.enum';
 import { AccessControlGrantOption } from './interfaces/access-control-grant-option.interface';
-import { AccessControlFilterService } from './interfaces/access-control-filter-service.interface';
+import { AccessControlGuard } from './access-control.guard';
+import { AccessControlModuleOptions } from './interfaces/access-control-module-options.interface';
 import { AccessControlOptions } from './interfaces/access-control-options.interface';
+import { AccessControlReadMany } from './decorators/access-control-read-many.decorator';
+import { AccessControlReadOne } from './decorators/access-control-read-one.decorator';
+import { AccessControlService } from './interfaces/access-control-service.interface';
+import { HttpArgumentsHost } from '@nestjs/common/interfaces';
+import { Reflector } from '@nestjs/core';
+import { UseAccessControl } from './decorators/use-access-control.decorator';
+import { mock } from 'jest-mock-extended';
 
 describe('AccessControlModule', () => {
   const resourceNoAccess = 'protected_resource_no_access';
   const resourceGetAny = 'resource_get_any';
   const resourceGetOwn = 'resource_get_own';
+  const resourceGetOneOwn = 'resource_get_one_own';
+  const resourceCreateOwn = 'resource_create_own';
 
   const filterFail: AccessControlFilterCallback = jest
     .fn()
@@ -44,7 +48,9 @@ describe('AccessControlModule', () => {
   }
 
   class TestFilterService implements AccessControlFilterService {
-    foo: 'bar';
+    async anyMethodName() {
+      return true;
+    }
   }
 
   class TestAccessService implements AccessControlService {
@@ -84,6 +90,14 @@ describe('AccessControlModule', () => {
     getOwnFilterPass() {
       return undefined;
     }
+    @AccessControlCreateOne(resourceCreateOwn, filterPass)
+    createOwnFilterPass() {
+      return undefined;
+    }
+    @AccessControlReadOne(resourceGetOneOwn, filterPass)
+    getOneOwnFilterPass() {
+      return undefined;
+    }
   }
 
   @Controller()
@@ -101,6 +115,8 @@ describe('AccessControlModule', () => {
   const rules = new AccessControl();
   rules.grant('role1').readAny(resourceGetAny);
   rules.grant('role1').readOwn(resourceGetOwn);
+  rules.grant('role1').readOwn(resourceGetOneOwn);
+  rules.grant('role1').createOwn(resourceCreateOwn);
   rules.lock();
 
   let moduleRef: TestingModule;
@@ -288,7 +304,7 @@ describe('AccessControlModule', () => {
 
     it('should allow activation, query filtered', async () => {
       const argsHost = mock<HttpArgumentsHost>();
-      argsHost.getRequest.mockReturnValue({ query: { foo: 'bar' } });
+      argsHost.getRequest.mockReturnValue({ query: { q1: 'abc' } });
 
       const context = mock<ExecutionContext>();
       context.getClass.mockReturnValue(TestController);
@@ -297,6 +313,49 @@ describe('AccessControlModule', () => {
 
       const canActivate: boolean = await guard.canActivate(context);
       expect(filterPass).toHaveBeenCalledTimes(1);
+      expect(filterPass).toHaveBeenCalledWith(
+        { q1: 'abc' },
+        { id: 1234 },
+        undefined,
+      );
+      expect(canActivate).toEqual(true);
+    });
+
+    it('should allow activation, body filtered', async () => {
+      const argsHost = mock<HttpArgumentsHost>();
+      argsHost.getRequest.mockReturnValue({ body: { b1: 'xyz' } });
+
+      const context = mock<ExecutionContext>();
+      context.getClass.mockReturnValue(TestController);
+      context.getHandler.mockReturnValue(controller.createOwnFilterPass);
+      context.switchToHttp.mockReturnValue(argsHost);
+
+      const canActivate: boolean = await guard.canActivate(context);
+      expect(filterPass).toHaveBeenCalledTimes(1);
+      expect(filterPass).toHaveBeenCalledWith(
+        { b1: 'xyz' },
+        { id: 1234 },
+        undefined,
+      );
+      expect(canActivate).toEqual(true);
+    });
+
+    it('should allow activation, path filtered', async () => {
+      const argsHost = mock<HttpArgumentsHost>();
+      argsHost.getRequest.mockReturnValue({ params: { id: 7890 } });
+
+      const context = mock<ExecutionContext>();
+      context.getClass.mockReturnValue(TestController);
+      context.getHandler.mockReturnValue(controller.getOneOwnFilterPass);
+      context.switchToHttp.mockReturnValue(argsHost);
+
+      const canActivate: boolean = await guard.canActivate(context);
+      expect(filterPass).toHaveBeenCalledTimes(1);
+      expect(filterPass).toHaveBeenCalledWith(
+        { id: 7890 },
+        { id: 1234 },
+        undefined,
+      );
       expect(canActivate).toEqual(true);
     });
 
@@ -316,7 +375,7 @@ describe('AccessControlModule', () => {
       expect(filterPass).toHaveBeenCalledWith(
         { foo: 'bar' },
         { id: 1234 },
-        TestFilterService,
+        moduleRef.get(TestFilterService),
       );
       expect(canActivate).toEqual(true);
     });
