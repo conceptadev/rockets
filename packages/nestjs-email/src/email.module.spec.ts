@@ -1,14 +1,13 @@
-import { ConfigModule, ConfigType, registerAs } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { EmailModule } from './email.module';
 import { EmailService } from './email.service';
 import { EmailConfigOptions } from './interfaces/email-config-options.interface';
 
 describe('EmailModule', () => {
-  let emailConfigPlain: EmailConfigOptions;
+  let emailConfig: EmailConfigOptions;
 
   beforeEach(async () => {
-    emailConfigPlain = {
+    emailConfig = {
       nodeMailer: {
         transport: {
           host: 'smtp.foo.org',
@@ -23,9 +22,9 @@ describe('EmailModule', () => {
   });
 
   describe('forRoot', () => {
-    it('should import the dynamic module asynchronously', async () => {
+    it('should import the dynamic module', async () => {
       const moduleRef = await Test.createTestingModule({
-        imports: [EmailModule.forRoot(emailConfigPlain)],
+        imports: [EmailModule.forRoot(emailConfig)],
       }).compile();
 
       const emailService = moduleRef.get<EmailService>(EmailService);
@@ -36,21 +35,11 @@ describe('EmailModule', () => {
 
   describe('forRootAsync', () => {
     it('should import the dynamic module asynchronously', async () => {
-      const emailConfig = registerAs(
-        'EMAIL_CONFIG_KEY',
-        (): EmailConfigOptions => emailConfigPlain,
-      );
-
       const moduleRef = await Test.createTestingModule({
         imports: [
-          ConfigModule.forRoot({
-            isGlobal: true,
-            load: [emailConfig],
-          }),
           EmailModule.forRootAsync({
-            inject: [emailConfig.KEY],
-            useFactory: async (config: ConfigType<typeof emailConfig>) => {
-              return config;
+            useFactory: async () => {
+              return emailConfig;
             },
           }),
         ],

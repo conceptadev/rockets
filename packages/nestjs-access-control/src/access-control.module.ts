@@ -1,6 +1,6 @@
 import { Module, DynamicModule, Global } from '@nestjs/common';
 import { ACCESS_CONTROL_OPTIONS_KEY } from './constants';
-import { AccessControlModuleOptions } from './interfaces';
+import { AccessControlModuleOptions } from './interfaces/access-control-module-options.interface';
 
 @Global()
 @Module({})
