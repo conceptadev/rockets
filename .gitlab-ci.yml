@@ -23,9 +23,7 @@ variables:
 
 # Configuration shared for all jobs
 default:
-  # It saves ~10 sec to pull image from project container registry
-  # instead of the default docker.io registry
-  image: $CI_REGISTRY_IMAGE/ci-node:latest
+  image: node:16-alpine
   tags:
     - docker
 
