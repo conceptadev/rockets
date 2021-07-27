@@ -1,99 +1,32 @@
-# References:
-# - https://docs.gitlab.com/ee/ci/yaml
-# - https://docs.gitlab.com/ee/ci/variables/README.html#list-all-environment-variables
-
-# Gitlab doesn't have a runner tagged with shell
-# You need to register you PC as a runner
-# - https://docs.gitlab.com/runner/install/
-# - https://docs.gitlab.com/runner/register/index.html
+image: node:alpine
 
 stages:
-  - install
-  - build_and_test
+  - build
+  - test
 
-# Global config for all jobs
-# Could be set in default section, personnal choice here
-variables:
-  PROJECT_PATH: '$CI_PROJECT_DIR'
-  OUTPUT_PATH: '$CI_PROJECT_DIR/artifacts'
-  APP_OUTPUT_PATH: '$CI_PROJECT_DIR/artifacts/app'
-  DOCKER_IMAGE_NAME: '$CI_REGISTRY_IMAGE/app'
-  DOCKER_IMAGE_TAG: '$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA'
-  IS_RELEASE_PIPELINE: '$CI_COMMIT_TAG'
-
-# Configuration shared for all jobs
-default:
-  image: node:16-alpine
-  tags:
-    - docker
-
-# Define an hidden job to be used with extends
-# Better than default to avoid activating cache for all jobs
-.dependencies_cache:
+build:
+  stage: build
+  script:
+    - yarn install
   cache:
-    key:
-      files:
-        - yarn.lock
     paths:
-      - node_modules
-    policy: pull
-
-# Projects jobs definition
-install_dependencies:
-  stage: install
-  script:
-    - yarn install --ignore-scripts
-
-  # Redefine cache to have default pull-push policy
-  extends: .dependencies_cache
-  cache:
-    policy: pull-push
-  only:
-    changes:
-      - yarn.lock
-
-test_app:
-  stage: build_and_test
-
-  # Use custom image because installing chrome in before_scripts takes ~30 sec
-  image: $CI_REGISTRY_IMAGE/ci-tests:latest
-  script:
-    # Could be in a parallel job during this stage but:
-    # - it would use an additional runner for a ~8 sec task
-    # - the additionnal job would load docker executor and cache (~25 sec)
-    # - the pipeline will fail only after build_app job is over
-    #
-    # Drawbacks for including lint in this stage:
-    # - this job is ~8 sec longer
-    # - when the job fail it can be due to either the lint or build
-    - yarn lint
-    - yarn test:cov
-
-    # Use package to have the average of coverage metrics output by unit tests
-    - coverage-average $OUTPUT_PATH/coverage/text-summary.txt
-
-  # Collects coverage to display in MR an job results
-  coverage: /All files[^|]*\|[^|]*\s+([\d\.]+)/
+      - node_modules/
   artifacts:
-    name: 'tests-and-coverage'
+    expire_in: 1 days
+    when: on_success
+    paths:
+      - node_modules/
+
+test:
+  stage: test
+  coverage: /All files[^|]*\|[^|]*\s+([\d\.]+)/
+  dependencies:
+    - build
+  script:
+    - yarn test:ci
+  artifacts:
+    when: always
     reports:
       junit:
-        - $OUTPUT_PATH/junit.xml
-      cobertura:
-        - $OUTPUT_PATH/coverage/cobertura-coverage.xml
-
-  # Avoids all pipeline artifacts to be fetched
-  dependencies: []
-  extends: .dependencies_cache
-
-build_app:
-  stage: build_and_test
-  script:
-    - yarn build
-  after_script:
-    - cp $PROJECT_PATH/Dockerfile $APP_OUTPUT_PATH
-  artifacts:
-    name: 'rockets-pipeline'
-    paths:
-      - $APP_OUTPUT_PATH
-  extends: .dependencies_cache
+        - junit.xml
+      cobertura: coverage/cobertura-coverage.xml
