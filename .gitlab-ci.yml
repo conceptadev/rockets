@@ -9,7 +9,6 @@ build:
   script:
     - yarn install
   only:
-    - main
     - merge_requests
   cache:
     paths:
@@ -27,6 +26,8 @@ test:
     - build
   script:
     - yarn test:ci
+  only:
+    - merge_requests
   artifacts:
     when: always
     reports:
