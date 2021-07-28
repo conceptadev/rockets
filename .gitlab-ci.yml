@@ -1,8 +1,12 @@
 image: node:alpine
 
+include:
+  - template: Code-Quality.gitlab-ci.yml
+
 stages:
   - build
   - test
+  - code_quality
 
 build:
   stage: build
@@ -34,3 +38,10 @@ test:
       junit:
         - junit.xml
       cobertura: coverage/cobertura-coverage.xml
+
+code_quality:
+  stage: code_quality
+  rules:
+    - if: '$CODE_QUALITY_DISABLED'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"' # Run code quality job in merge request pipelines
