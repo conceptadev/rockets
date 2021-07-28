@@ -1,0 +1,35 @@
+image: node:alpine
+
+stages:
+  - build
+  - test
+
+build:
+  stage: build
+  script:
+    - yarn install
+  only:
+    - main
+    - merge_requests
+  cache:
+    paths:
+      - node_modules/
+  artifacts:
+    expire_in: 1 days
+    when: on_success
+    paths:
+      - node_modules/
+
+test:
+  stage: test
+  coverage: /All files[^|]*\|[^|]*\s+([\d\.]+)/
+  dependencies:
+    - build
+  script:
+    - yarn test:ci
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - junit.xml
+      cobertura: coverage/cobertura-coverage.xml
