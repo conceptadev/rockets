@@ -8,6 +8,8 @@ build:
   stage: build
   script:
     - yarn install
+  only:
+    - main
   cache:
     paths:
       - node_modules/
