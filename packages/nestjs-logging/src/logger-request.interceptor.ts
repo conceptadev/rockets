@@ -1,4 +1,5 @@
-import { Request, Response } from 'express';
+
+import { FastifyRequest as Request, LightMyRequestResponse as Response } from 'fastify';
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 
@@ -8,19 +9,16 @@ import { LoggerService } from './logger.service';
 
 @Injectable()
 export class LoggerRequestInterceptor<T>
-  implements NestInterceptor<T, Response<T>> {
+  implements NestInterceptor<T, Response> {
   constructor(private loggerService: LoggerService) {}
-
+  
   intercept(
     _context: ExecutionContext,
     _next: CallHandler
-  ): Observable<Response<T>> {
+  ): Observable<Response> {
     const req: Request = _context.switchToHttp().getRequest();
     const res: Response = _context.switchToHttp().getResponse();
     const startDate = new Date();
-
-    // set context where it was called from
-    //this.loggerService. setContext(_context.getClass().name);
 
     // format the request message
     const message = this.loggerService.formatRequestMessage(req);
@@ -29,32 +27,35 @@ export class LoggerRequestInterceptor<T>
     this.loggerService.log(message);
 
     return _next.handle().pipe(
-      tap(() => {
-        // format the response message
-        const message = this.loggerService.formatResponseMessage(
-          req,
-          res,
-          startDate
-        );
-        // log the response
-        this.loggerService.log(message);
-      }),
-      // catch all errors
-      catchError((error: Error) => {
-        // format the message
-        const message = this.loggerService.formatResponseMessage(
-          req,
-          res,
-          startDate,
-          error
-        );
-
-        // log as an exception
-        this.loggerService.exception(error, message);
-
-        // all done, re-throw original error
-        return throwError(error);
-      })
+      tap(() => this.responseSuccess(req, res, startDate)),
+      catchError((error: Error) => this.responseError(req, res, startDate, error))
     );
+  }
+
+  responseSuccess (req:any, res:any, startDate:any) {
+    // format the response message
+    const message = this.loggerService.formatResponseMessage(
+      req,
+      res,
+      startDate
+    );
+    // log the response, after method was called
+    this.loggerService.log(message);
+  }
+
+  responseError (req:any, res:any, startDate:any, error: Error) {
+    // format the message
+    const message = this.loggerService.formatResponseMessage(
+      req,
+      res,
+      startDate,
+      error
+    );
+
+    // log as an exception
+    this.loggerService.exception(error, message);
+    
+    // all done, re-throw original error
+    return throwError(error);
   }
 }

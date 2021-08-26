@@ -1,4 +1,7 @@
-import { Request, Response } from 'express';
+import { 
+  FastifyRequest as Request, 
+  LightMyRequestResponse as Response
+} from 'fastify';
 
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { LogLevel } from '@nestjs/common/services/logger.service';

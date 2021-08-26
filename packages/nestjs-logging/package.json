@@ -11,6 +11,7 @@
     "@nestjs/common": "^8.0.2",
     "@nestjs/config": "^1.0.0",
     "@nestjs/core": "^8.0.2",
+    "@nestjs/platform-fastify": "^8.0.6",
     "@sentry/node": "^6.11.0",
     "class-validator": "^0.11.1"
   },
