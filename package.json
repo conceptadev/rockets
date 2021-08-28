@@ -48,7 +48,7 @@
     "test:ci": "yarn test:cov --ci --reporters=default --reporters=jest-junit",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "doc": "rimraf ./documentation && compodoc -p ./tsconfig.doc.json",
+    "doc": "rimraf ./documentation && compodoc -p ./tsconfig.doc.json --disablePrivate --disableProtected",
     "doc:serve": "yarn doc -s",
     "doc:watch": "yarn doc:serve -w",
     "doc:cov": "yarn doc --coverageMinimumPerFile 90 --coverageTestThresholdFail false",
