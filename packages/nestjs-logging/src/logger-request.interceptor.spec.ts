@@ -1,9 +1,8 @@
 import { CallHandler, ExecutionContext } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { of, throwError } from 'rxjs';
-import { Observable } from 'rxjs';
 import { LoggerRequestInterceptor } from './logger-request.interceptor';
 import { LoggerService } from './logger.service';
+import ErrorFormat from './helpers/error.format';
 
 describe('LoggerRequestInterceptor', () => {
   let loggerRequestInterceptor: LoggerRequestInterceptor<any>;
@@ -49,11 +48,15 @@ describe('LoggerRequestInterceptor', () => {
     loggerService = moduleRef.get<LoggerService>(LoggerService);
     loggerRequestInterceptor = moduleRef.get<LoggerRequestInterceptor<any>>(LoggerRequestInterceptor);
     
-    spyFormatRequestMessage = jest.spyOn(loggerService, 'formatRequestMessage');
-    spyFormatResponseMessage = jest.spyOn(loggerService, 'formatResponseMessage');
+    spyFormatRequestMessage = jest.spyOn(ErrorFormat, 'formatRequestMessage');
+    spyFormatResponseMessage = jest.spyOn(ErrorFormat, 'formatResponseMessage');
     spyLog = jest.spyOn(loggerService, 'log');
     spyException = jest.spyOn(loggerService, 'exception');
     
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   describe('IsDefined', () => {
@@ -72,9 +75,19 @@ describe('LoggerRequestInterceptor', () => {
     expect(spyLog).toBeCalledTimes(1);
   });
 
+  it('LoggerRequestInterceptor.intercept_2', async () => {
+    
+    const actualValue = await loggerRequestInterceptor
+      .intercept(executionContext as ExecutionContext , callHandler);
+    
+    expect(actualValue).toBeTruthy();
+    expect(spyFormatRequestMessage).toBeCalledTimes(1);
+    expect(spyLog).toBeCalledTimes(1);
+  });
+
   it('LoggerRequestInterceptor.responseSuccess', async () => {
     
-    await loggerRequestInterceptor.responseSuccess({},{},new Date())
+    await loggerRequestInterceptor.responseSuccess({}, {}, new Date())
     
     expect(spyFormatResponseMessage).toBeCalledTimes(1);
     expect(spyLog).toBeCalledTimes(1);

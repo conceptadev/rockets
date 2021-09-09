@@ -3,7 +3,7 @@ import { ConfigType } from '@nestjs/config';
 import * as Sentry from '@sentry/node';
 
 import { loggerSentryConfig } from '../config/logger-sentry.config';
-import { LoggerTransportInterface } from '../interfaces';
+import { LoggerTransportInterface } from '../interfaces/logger-transport.interface';
 
 @Injectable()
 export class LoggerSentryTransport implements LoggerTransportInterface {
@@ -11,13 +11,22 @@ export class LoggerSentryTransport implements LoggerTransportInterface {
     @Inject(loggerSentryConfig.KEY)
     private config: ConfigType<typeof loggerSentryConfig>
   ) {
-    // init sentry
+    
+    if (!this.config)
+      throw new Error('Sentry Config is required');
+    
     Sentry.init({
       dsn: this.config.dsn,
       logLevel: this.config.logLevel,
     });
   }
 
+  /**
+   * Method to log message to Sentry transport
+   * @param message 
+   * @param logLevel 
+   * @param error 
+   */
   log(message: string, logLevel: LogLevel, error?: Error | string): void {
     // map the internal log level to sentry log severity
     const severity = this.config.logLevelMap(logLevel);

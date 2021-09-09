@@ -1,8 +1,10 @@
 import { LogLevel } from '@nestjs/common';
 import { registerAs } from '@nestjs/config';
+import { LoggerConfigInterface } from '../interfaces/logger-config.interface';
 
-import { LoggerConfigInterface } from '../interfaces';
-
+/**
+ * Configuration for Logger
+ */
 export const loggerConfig = registerAs(
   'LOGGER_MODULE_CONFIG',
   (): LoggerConfigInterface => ({

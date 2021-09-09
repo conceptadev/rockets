@@ -6,12 +6,20 @@ import { catchError, tap } from 'rxjs/operators';
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 
 import { LoggerService } from './logger.service';
+import ErrorFormat from './helpers/error.format';
 
 @Injectable()
 export class LoggerRequestInterceptor<T>
   implements NestInterceptor<T, Response> {
   constructor(private loggerService: LoggerService) {}
   
+  /**
+   * Method to implement a custom intercept 
+   * 
+   * @param _context 
+   * @param _next 
+   * @returns 
+   */
   intercept(
     _context: ExecutionContext,
     _next: CallHandler
@@ -21,7 +29,7 @@ export class LoggerRequestInterceptor<T>
     const startDate = new Date();
 
     // format the request message
-    const message = this.loggerService.formatRequestMessage(req);
+    const message = ErrorFormat.formatRequestMessage(req);
 
     // log the incoming request
     this.loggerService.log(message);
@@ -32,9 +40,15 @@ export class LoggerRequestInterceptor<T>
     );
   }
 
+  /**
+   * Method to log response success
+   * @param req 
+   * @param res 
+   * @param startDate 
+   */
   responseSuccess (req:any, res:any, startDate:any) {
     // format the response message
-    const message = this.loggerService.formatResponseMessage(
+    const message = ErrorFormat.formatResponseMessage(
       req,
       res,
       startDate
@@ -43,9 +57,18 @@ export class LoggerRequestInterceptor<T>
     this.loggerService.log(message);
   }
 
+  /**
+   * Format exception error
+   * 
+   * @param req 
+   * @param res 
+   * @param startDate 
+   * @param error 
+   * @returns 
+   */
   responseError (req:any, res:any, startDate:any, error: Error) {
     // format the message
-    const message = this.loggerService.formatResponseMessage(
+    const message = ErrorFormat.formatResponseMessage(
       req,
       res,
       startDate,

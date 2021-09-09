@@ -1,14 +1,15 @@
 import { LogLevel } from '@nestjs/common';
 import { registerAs } from '@nestjs/config';
 import { Severity as SentryLogSeverity } from '@sentry/types';
+import { LoggerSentryConfigInterface } from '../interfaces/logger-sentry-config.interface';
 
-import { LoggerSentryConfigInterface } from '../interfaces';
+
 
 export const loggerSentryConfig = registerAs(
   'LOGGER_MODULE_SENTRY_CONFIG',
   (): LoggerSentryConfigInterface => ({
     dsn: process.env?.SENTRY_DSN ?? '',
-    logLevelMap: (logLevel: LogLevel) => {
+    logLevelMap: (logLevel: LogLevel): SentryLogSeverity => {
       switch (logLevel) {
         case 'error':
           return SentryLogSeverity.Error;

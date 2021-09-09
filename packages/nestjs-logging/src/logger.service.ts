@@ -1,32 +1,46 @@
-import { 
-  FastifyRequest as Request, 
-  LightMyRequestResponse as Response
-} from 'fastify';
-
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { LogLevel } from '@nestjs/common/services/logger.service';
 
-import { LoggerTransportInterface } from './interfaces';
 import { LoggerTransportService } from './logger-transport.service';
+import { LoggerServiceInterface } from './interfaces/logger-service.interface';
+import { LoggerTransportInterface } from './interfaces/logger-transport.interface';
 
 /**
  * A Custom logger Service
  *
  */
 @Injectable()
-export class LoggerService extends Logger {
+export class LoggerService extends Logger implements LoggerServiceInterface {
   constructor(
     private transportService: LoggerTransportService) {
-    super();
+      super();
+  }
+  
+  /**
+   * Add a transport to be used for every log, it can be multiples
+   * 
+   * @param transport The transport that will be used beside the system logger 
+   */
+  addTransport(transport: LoggerTransportInterface): void {
+    this.transportService.addTransport(transport);
   }
 
-  exception(error: Error, message?: string, context?: string | undefined) {
+  /**
+   * Method to log an exception, if the exception is between 400 and 500 status code
+   * 
+   * it will be logged as a debug log level, otherwise it will be logged as an error
+   * 
+   * @param error 
+   * @param message 
+   * @param context 
+   */
+  exception(error: Error, message?: string, context?: string | undefined): void {
     // message is missing?
     if (!message) {
       // yes, set it
       message = error.message;
     }
-
+    
     // is this a low severity http exception?
     if (
       error instanceof HttpException &&
@@ -45,6 +59,13 @@ export class LoggerService extends Logger {
     }
   }
 
+  /**
+   * Method to be called when a error should be logged 
+   * 
+   * @param message 
+   * @param trace 
+   * @param context 
+   */
   error(
     message: string,
     trace?: string | undefined,
@@ -64,50 +85,43 @@ export class LoggerService extends Logger {
     }
   }
 
+  /**
+   * Method to be used when a warn message should be logged
+   * @param message 
+   * @param context 
+   */
   warn(message: string, context?: string) {
     super.warn(message, context);
     this.transportService.log(message, 'warn' as LogLevel);
   }
 
+  /**
+   * Method to be used when a debug message should be logged
+   * @param message 
+   * @param context 
+   */
   debug(message: string, context?: string) {
     super.debug(message, context);
     this.transportService.log(message, 'debug' as LogLevel);
   }
 
+  /**
+   * Method to be used when a simple log message should be logged
+   * @param message 
+   * @param context 
+   */
   log(message: string, context?: string) {
     super.log(message, context);
     this.transportService.log(message, 'log' as LogLevel);
   }
 
+  /**
+   * Method to be used when a verbose message should be logged
+   * @param message 
+   * @param context 
+   */
   verbose(message: string, context?: string) {
     super.verbose(message, context);
     this.transportService.log(message, 'verbose' as LogLevel);
-  }
-
-  formatRequestMessage(req: Request): string {
-    const { method, url } = req;
-    const now = new Date();
-
-    return `${now.toISOString()} ${method} ${url}`;
-  }
-
-  formatResponseMessage(
-    req: Request,
-    res: Response,
-    startDate: Date,
-    error?: Error
-  ): string {
-    const { method, url } = req;
-    const now = new Date();
-
-    return (
-      `${now.toISOString()} ${method} ${url} ${res.statusCode} ` +
-      `${now.getTime() - startDate.getTime()}ms` +
-      (error ? ` - ${error}` : '')
-    );
-  }
-
-  addTransport(transport: LoggerTransportInterface) {
-    this.transportService.addTransport(transport);
   }
 }
