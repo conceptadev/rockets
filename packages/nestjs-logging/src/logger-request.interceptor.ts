@@ -8,6 +8,9 @@ import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nes
 import { LoggerService } from './logger.service';
 import ErrorFormat from './helpers/error.format';
 
+/**
+ * The Interceptor for request
+ */
 @Injectable()
 export class LoggerRequestInterceptor<T>
   implements NestInterceptor<T, Response> {
@@ -42,9 +45,9 @@ export class LoggerRequestInterceptor<T>
 
   /**
    * Method to log response success
-   * @param req 
-   * @param res 
-   * @param startDate 
+   * @param req Request
+   * @param res Response
+   * @param startDate the date for the message
    */
   responseSuccess (req:any, res:any, startDate:any) {
     // format the response message
