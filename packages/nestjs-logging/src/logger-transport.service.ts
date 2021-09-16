@@ -42,6 +42,10 @@ export class LoggerTransportService {
    */
   private readonly loggerTransports: LoggerTransportInterface[] = [];
 
+  /**
+   * Constructor
+   * @param config 
+   */
   constructor(
     @Inject(loggerConfig.KEY) private config: ConfigType<typeof loggerConfig>,
   ) {

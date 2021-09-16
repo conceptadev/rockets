@@ -40,6 +40,10 @@ export class LoggerService
   extends ConsoleLogger
   implements LoggerServiceInterface
 {
+  /**
+   * Constructor
+   * @param transportService transport service
+   */
   constructor(private transportService: LoggerTransportService) {
     super();
   }

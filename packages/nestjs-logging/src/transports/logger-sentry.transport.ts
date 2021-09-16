@@ -24,6 +24,11 @@ import { LoggerTransportInterface } from '../interfaces/logger-transport.interfa
  */
 @Injectable()
 export class LoggerSentryTransport implements LoggerTransportInterface {
+  
+  /**
+   * Constructor
+   * @param config configuration file injected
+   */
   constructor(
     @Inject(loggerSentryConfig.KEY)
     private config: ConfigType<typeof loggerSentryConfig>,

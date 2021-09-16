@@ -20,9 +20,10 @@ import { LogLevel } from '@nestjs/common';
  * }
  *```
  */
-
 export interface LoggerTransportInterface {
+  
   /**
+   * transport log method
    *
    * @param message Message to be logged
    * @param logLevel The log level that logger should consider
