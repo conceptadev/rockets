@@ -1,7 +1,6 @@
 import { ConsoleLogger, HttpException, Injectable } from '@nestjs/common';
 import { LogLevel } from '@nestjs/common/services/logger.service';
 
-
 import { LoggerTransportService } from './logger-transport.service';
 import { LoggerServiceInterface } from './interfaces/logger-service.interface';
 import { LoggerTransportInterface } from './interfaces/logger-transport.interface';
@@ -9,44 +8,46 @@ import { LoggerTransportInterface } from './interfaces/logger-transport.interfac
 /**
  * A service that extends the Logger class and implements {@link LoggerServiceInterface}.
  *
- * The LoggerService class contains the implementation of a custom Logger 
- * where it will call System logger and any third party transport log that was added. 
- * You will need to create a custom logger and we must ensure that at least one application module imports the LoggerService 
+ * The LoggerService class contains the implementation of a custom Logger
+ * where it will call System logger and any third party transport log that was added.
+ * You will need to create a custom logger and we must ensure that at least one application module imports the LoggerService
  * to trigger Nest to instantiate a singleton instance of our LoggerService class.
  *
  * ### Example
  * ```ts
  * // Initialize a module that have the LoggerService imported
  * const app = await NestFactory.create(AppModule);
- * 
+ *
  * // Get the singleton instance of LoggerService
  * const customLogger = app.get(LoggerService);
- * 
+ *
  * // Get the transport instance
  * const sentry = app.get(LoggerSentryTransport);
- * 
+ *
  * // Add the transports you want to use
  * customLogger.addTransport(sentry);
- * 
+ *
  * // Overwrite the the default Logger for a custom logger
  * // This is to inform that this logger will new used internally
- * // Or it will be used once yuo do a new Logger() 
+ * // Or it will be used once yuo do a new Logger()
  * app.useLogger(customLogger);
- * 
+ *
  * await app.listen(3000);
  *```
  */
- @Injectable()
-export class LoggerService extends ConsoleLogger implements LoggerServiceInterface {
-  constructor(
-    private transportService: LoggerTransportService) {
-      super();
+@Injectable()
+export class LoggerService
+  extends ConsoleLogger
+  implements LoggerServiceInterface
+{
+  constructor(private transportService: LoggerTransportService) {
+    super();
   }
-  
+
   /**
    * Add a transport to be used for every log, it can be multiples
-   * 
-   * @param transport The transport that will be used beside the system logger 
+   *
+   * @param transport The transport that will be used beside the system logger
    */
   addTransport(transport: LoggerTransportInterface): void {
     this.transportService.addTransport(transport);
@@ -54,20 +55,24 @@ export class LoggerService extends ConsoleLogger implements LoggerServiceInterfa
 
   /**
    * Method to log an exception, if the exception is between 400 and 500 status code
-   * 
+   *
    * it will be logged as a debug log level, otherwise it will be logged as an error
-   * 
-   * @param error Error to be registered 
+   *
+   * @param error Error to be registered
    * @param message Error Message
    * @param context Context of current error
    */
-  exception(error: Error, message?: string, context?: string | undefined): void {
+  exception(
+    error: Error,
+    message?: string,
+    context?: string | undefined,
+  ): void {
     // message is missing?
     if (!message) {
       // yes, set it
       message = error.message;
     }
-    
+
     // is this a low severity http exception?
     if (
       error instanceof HttpException &&
@@ -87,8 +92,8 @@ export class LoggerService extends ConsoleLogger implements LoggerServiceInterfa
   }
 
   /**
-   * Method to be called when a error should be logged 
-   * 
+   * Method to be called when a error should be logged
+   *
    * @param message Error Message
    * @param trace Stack trace error
    * @param context Context of current Message
@@ -96,7 +101,7 @@ export class LoggerService extends ConsoleLogger implements LoggerServiceInterfa
   error(
     message: string,
     trace?: string | undefined,
-    context?: string | undefined
+    context?: string | undefined,
   ): void {
     super.error(message, trace, context);
     // get a trace?

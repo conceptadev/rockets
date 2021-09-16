@@ -1,12 +1,9 @@
-import { Severity as SentryLogSeverity } from '@sentry/types';
-
 import { loggerConfig } from './logger.config';
 
-
-jest.mock("@sentry/node")
+jest.mock('@sentry/node');
 
 describe('loggerConfig', () => {
-  let env: any;
+  let env: Record<string, string>;
   beforeEach(async () => {
     env = Object.assign({}, process.env);
   });
@@ -21,11 +18,9 @@ describe('loggerConfig', () => {
     });
   });
 
-
   /**
    * Test with no env
    *
-   * 
    */
   it('loggerConfig.no_env', async () => {
     process.env = null;
@@ -51,7 +46,7 @@ describe('loggerConfig', () => {
    */
   it('loggerConfig.multiple_logs', async () => {
     process.env.LOG_LEVEL = 'log,error';
-    expect(loggerConfig().logLevel).toStrictEqual(['log','error']);
+    expect(loggerConfig().logLevel).toStrictEqual(['log', 'error']);
     expect(loggerConfig().transportLogLevel).toStrictEqual([]);
     process.env = env;
   });
@@ -63,9 +58,8 @@ describe('loggerConfig', () => {
   it('loggerConfig.multiple_logsNTransport', async () => {
     process.env.LOG_LEVEL = 'log,error';
     process.env.TRANSPORT_LOG_LEVEL = 'log,error';
-    expect(loggerConfig().logLevel).toStrictEqual(['log','error']);
-    expect(loggerConfig().transportLogLevel).toStrictEqual(['log','error']);
+    expect(loggerConfig().logLevel).toStrictEqual(['log', 'error']);
+    expect(loggerConfig().transportLogLevel).toStrictEqual(['log', 'error']);
     process.env = env;
   });
-
 });

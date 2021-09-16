@@ -14,7 +14,7 @@ import { LoggerSentryTransport } from './transports/logger-sentry.transport';
  * Logger Module Imports all configuration needed for logger and sentry
  * With classes for request interceptor and Exceptions filters
  * where will automatically log for any request or unhandled exceptions.
- * 
+ *
  * To start using the loggerService all you need to do is inject it on controller
  * ```ts
  * class TestLogger {
@@ -22,9 +22,9 @@ import { LoggerSentryTransport } from './transports/logger-sentry.transport';
  *      constructor(@Inject(LoggerService) private loggerService: LoggerService) { }
  *  }
  * ```
- * 
+ *
  * or create a new instance of Logger
- * 
+ *
  * ```ts
  *      // If you call Logger.log the LoggerService.log will be called
  *      testLoggerLog():void {
@@ -32,28 +32,28 @@ import { LoggerSentryTransport } from './transports/logger-sentry.transport';
  *          logger.log('Message from testLoggerLog');
  *      }
  * ```
- * 
- * 
+ *
+ *
  * ### Example
  * ```ts
  * @Module({
  *   imports: [
  *     LoggerModule
- *   ] 
+ *   ]
  * })
- * 
+ *
  * ...
- * 
+ *
  * // This is to inform that this logger will new used internally
  * // or it will be used when you create a new instance using new Logger()
  * app.useLogger(customLoggerService);
- * 
+ *
  * ...
- * 
- * // To start using loggerService all you need is to inject the loggerService 
+ *
+ * // To start using loggerService all you need is to inject the loggerService
  * // or initialize a new Logger
  * class TestLogger {
- *      
+ *
  *      // Inject Logger Service
  *      constructor(@Inject(LoggerService) private loggerService: LoggerService) { }
  *
@@ -88,8 +88,6 @@ import { LoggerSentryTransport } from './transports/logger-sentry.transport';
       useClass: LoggerExceptionFilter,
     },
   ],
-  exports: [
-    LoggerService
-  ]
+  exports: [LoggerService],
 })
 export class LoggerModule {}

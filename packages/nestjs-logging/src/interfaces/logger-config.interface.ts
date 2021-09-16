@@ -2,7 +2,7 @@ import { LogLevel } from '@nestjs/common';
 
 /**
  * Logger config interface
- * 
+ *
  * ### example
  * ```ts
  * export const loggerConfig = registerAs(
@@ -20,7 +20,6 @@ import { LogLevel } from '@nestjs/common';
  * ```
  */
 export interface LoggerConfigInterface {
-  
   /**
    * list of log levels allowed
    */

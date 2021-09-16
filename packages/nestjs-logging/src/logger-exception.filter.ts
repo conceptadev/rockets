@@ -1,26 +1,30 @@
-import { ArgumentsHost, Catch, HttpServer, Inject, Injectable } from '@nestjs/common';
+import {
+  ArgumentsHost,
+  Catch,
+  HttpServer,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { BaseExceptionFilter, HttpAdapterHost } from '@nestjs/core';
-import { threadId } from 'worker_threads';
 
 import { LoggerService } from './logger.service';
 
 /**
- * 
+ *
  * The Logger Exception Filter Class
- * 
+ *
  * Out of the box, this action is performed by a built-in global exception
  * filter, which handles exceptions of type HttpException
- *  
+ *
  */
 @Catch()
 @Injectable()
 export class LoggerExceptionFilter extends BaseExceptionFilter {
-
-  constructor (
+  constructor(
     @Inject(LoggerService)
     private loggerService: LoggerService,
     @Inject(HttpAdapterHost)
-    applicationRef?: HttpServer
+    applicationRef?: HttpServer,
   ) {
     super(applicationRef);
   }
@@ -32,7 +36,7 @@ export class LoggerExceptionFilter extends BaseExceptionFilter {
     this.loggerService.exception(
       exception,
       undefined,
-      LoggerExceptionFilter.name
+      LoggerExceptionFilter.name,
     );
     super.catch(exception, host);
   }

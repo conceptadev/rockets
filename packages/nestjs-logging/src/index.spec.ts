@@ -3,7 +3,7 @@ import {
   LoggerModule,
   LoggerRequestInterceptor,
   LoggerService,
-  LoggerTransportService
+  LoggerTransportService,
 } from './index';
 
 describe('Index', () => {

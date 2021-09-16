@@ -5,10 +5,10 @@ import { Severity as SentrySeverity } from '@sentry/types';
 /**
  * Interface for Sentry configuration to define the log level
  * mapping to be used on Sentry transport
- * 
+ *
  * ### example
  * ```ts
- * 
+ *
  * export const loggerSentryConfig = registerAs(
  *   'LOGGER_MODULE_SENTRY_CONFIG',
  *   (): LoggerSentryConfigInterface => ({
@@ -32,7 +32,6 @@ import { Severity as SentrySeverity } from '@sentry/types';
  * ```
  */
 export interface LoggerSentryConfigInterface extends SentryNodeOptions {
-  
   /**
    * Method to map the log level from the config with sentry log levels
    */

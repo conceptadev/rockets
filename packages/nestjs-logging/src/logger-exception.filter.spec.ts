@@ -6,12 +6,12 @@ import { LoggerExceptionFilter } from './logger-exception.filter';
 import { LoggerService } from './logger.service';
 
 describe('LoggerExceptionFilter', () => {
-  let httpServer : HttpServer;
-  let loggerService : LoggerService;
-  let argumentsHost : ArgumentsHost;
+  let httpServer: HttpServer;
+  let loggerService: LoggerService;
+  let argumentsHost: ArgumentsHost;
   let loggerExceptionFilter: LoggerExceptionFilter;
-  let spyLoggerServiceException: any;
-  
+  let spyLoggerServiceException: jest.SpyInstance;
+
   beforeEach(async () => {
     httpServer = mock<HttpServer>();
     loggerService = mock<LoggerService>();
@@ -28,11 +28,13 @@ describe('LoggerExceptionFilter', () => {
   });
 
   it('LoggerExceptionFilter.catch', async () => {
-    loggerExceptionFilter = new LoggerExceptionFilter(loggerService, httpServer);
-    loggerExceptionFilter.catch(new Error() , argumentsHost);
-    
+    loggerExceptionFilter = new LoggerExceptionFilter(
+      loggerService,
+      httpServer,
+    );
+    loggerExceptionFilter.catch(new Error(), argumentsHost);
+
     expect(loggerExceptionFilter).toBeDefined();
     expect(spyLoggerServiceException).toBeCalledTimes(1);
   });
-  
 });

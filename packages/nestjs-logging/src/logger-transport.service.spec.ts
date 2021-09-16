@@ -1,4 +1,4 @@
-import { LogLevel } from '@nestjs/common';
+import { Logger, LogLevel } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 
@@ -7,13 +7,14 @@ import { LoggerTransportInterface } from './interfaces/logger-transport.interfac
 import { LoggerTransportService } from './logger-transport.service';
 
 class TestTransport implements LoggerTransportInterface {
-  log(): void { }
+  log(): void {
+    const logger = new Logger();
+    logger.log('Log to external Transport');
+  }
 }
 
 describe('LoggerTransportService', () => {
   let loggerTransportService: LoggerTransportService;
-  let spyAddTransport: jest.SpyInstance;
-  let spyTransportLog: jest.SpyInstance;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -24,16 +25,14 @@ describe('LoggerTransportService', () => {
           useValue: {
             logLevel: ['error', 'warn'],
             transportLogLevel: ['error', 'warn'],
-          }
+          },
         },
       ],
     }).compile();
-    
-    loggerTransportService = moduleRef.get<LoggerTransportService>(LoggerTransportService);
 
-    spyAddTransport = jest.spyOn(loggerTransportService, 'addTransport');
-    spyTransportLog = jest.spyOn(loggerTransportService, 'log');
-    
+    loggerTransportService = moduleRef.get<LoggerTransportService>(
+      LoggerTransportService,
+    );
   });
 
   afterEach(() => {
@@ -53,20 +52,20 @@ describe('LoggerTransportService', () => {
 
   it('loggerService.addTransport_one', () => {
     const transport = new TestTransport();
-    
+
     loggerTransportService.addTransport(transport);
     const transports = loggerTransportService['loggerTransports'];
-    
+
     expect(transports.length).toBe(1);
   });
-  
+
   it('loggerService.addTransport_multiple', () => {
     const transport = new TestTransport();
     const transport_2 = new TestTransport();
-    
+
     loggerTransportService.addTransport(transport);
     loggerTransportService.addTransport(transport_2);
-    
+
     const transports = loggerTransportService['loggerTransports'];
 
     expect(transports.length).toBe(2);
@@ -74,37 +73,37 @@ describe('LoggerTransportService', () => {
 
   it('loggerService.addTransport_one_log', () => {
     const transport = new TestTransport();
-    
+
     loggerTransportService.addTransport(transport);
-    loggerTransportService.log("Log Info", 'log');
+    loggerTransportService.log('Log Info', 'log');
 
     const transports = loggerTransportService['loggerTransports'];
-    
+
     expect(transports.length).toBe(1);
   });
 
   it('loggerService.addTransport_one_log', () => {
     const transport = new TestTransport();
-    
+
     loggerTransportService.addTransport(transport);
-    loggerTransportService.log("Error Info", 'error');
+    loggerTransportService.log('Error Info', 'error');
 
     const transports = loggerTransportService['loggerTransports'];
     const logLevels = loggerTransportService['logLevels'];
-    
+
     expect(logLevels.length).toBe(2);
     expect(transports.length).toBe(1);
   });
 
   it('loggerService.addTransport_one_log_error', () => {
     const transport = new TestTransport();
-    
+
     loggerTransportService.addTransport(transport);
-    loggerTransportService.log("Error Info", 'error', new Error());
+    loggerTransportService.log('Error Info', 'error', new Error());
 
     const transports = loggerTransportService['loggerTransports'];
     const logLevels = loggerTransportService['logLevels'];
-    
+
     expect(logLevels.length).toBe(2);
     expect(transports.length).toBe(1);
   });
@@ -115,7 +114,6 @@ describe('LoggerTransportService', () => {
   });
 
   it('loggerService.logLevel_empty', () => {
-
     const loggerTransportService = new LoggerTransportService({
       logLevel: [],
       transportLogLevel: [],
@@ -126,7 +124,6 @@ describe('LoggerTransportService', () => {
   });
 
   it('loggerService.logLevel_empty_log', () => {
-
     const loggerTransportService = new LoggerTransportService({
       logLevel: [],
       transportLogLevel: [],
@@ -142,14 +139,12 @@ describe('LoggerTransportService', () => {
   });
 
   it('loggerService.logLevel_null', () => {
-
     const loggerTransportService = new LoggerTransportService(null);
 
     const logLevels = loggerTransportService['logLevels'];
     const transports = loggerTransportService['loggerTransports'];
-    
+
     expect(logLevels.length).toBe(1);
     expect(transports.length).toBe(0);
   });
-
 });
