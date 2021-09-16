@@ -1,16 +1,43 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { ConsoleLogger, HttpException, Injectable } from '@nestjs/common';
 import { LogLevel } from '@nestjs/common/services/logger.service';
+
 
 import { LoggerTransportService } from './logger-transport.service';
 import { LoggerServiceInterface } from './interfaces/logger-service.interface';
 import { LoggerTransportInterface } from './interfaces/logger-transport.interface';
 
 /**
- * A Custom logger Service
+ * A service that extends the Logger class and implements {@link LoggerServiceInterface}.
  *
+ * The LoggerService class contains the implementation of a custom Logger 
+ * where it will call System logger and any third party transport log that was added. 
+ * You will need to create a custom logger and we must ensure that at least one application module imports the LoggerService 
+ * to trigger Nest to instantiate a singleton instance of our LoggerService class.
+ *
+ * ### Example
+ * ```ts
+ * // Initialize a module that have the LoggerService imported
+ * const app = await NestFactory.create(AppModule);
+ * 
+ * // Get the singleton instance of LoggerService
+ * const customLogger = app.get(LoggerService);
+ * 
+ * // Get the transport instance
+ * const sentry = app.get(LoggerSentryTransport);
+ * 
+ * // Add the transports you want to use
+ * customLogger.addTransport(sentry);
+ * 
+ * // Overwrite the the default Logger for a custom logger
+ * // This is to inform that this logger will new used internally
+ * // Or it will be used once yuo do a new Logger() 
+ * app.useLogger(customLogger);
+ * 
+ * await app.listen(3000);
+ *```
  */
-@Injectable()
-export class LoggerService extends Logger implements LoggerServiceInterface {
+ @Injectable()
+export class LoggerService extends ConsoleLogger implements LoggerServiceInterface {
   constructor(
     private transportService: LoggerTransportService) {
       super();
@@ -30,9 +57,9 @@ export class LoggerService extends Logger implements LoggerServiceInterface {
    * 
    * it will be logged as a debug log level, otherwise it will be logged as an error
    * 
-   * @param error 
-   * @param message 
-   * @param context 
+   * @param error Error to be registered 
+   * @param message Error Message
+   * @param context Context of current error
    */
   exception(error: Error, message?: string, context?: string | undefined): void {
     // message is missing?
@@ -62,9 +89,9 @@ export class LoggerService extends Logger implements LoggerServiceInterface {
   /**
    * Method to be called when a error should be logged 
    * 
-   * @param message 
-   * @param trace 
-   * @param context 
+   * @param message Error Message
+   * @param trace Stack trace error
+   * @param context Context of current Message
    */
   error(
     message: string,
@@ -87,8 +114,8 @@ export class LoggerService extends Logger implements LoggerServiceInterface {
 
   /**
    * Method to be used when a warn message should be logged
-   * @param message 
-   * @param context 
+   * @param message Warn Message
+   * @param context Context of Message
    */
   warn(message: string, context?: string) {
     super.warn(message, context);
@@ -97,8 +124,8 @@ export class LoggerService extends Logger implements LoggerServiceInterface {
 
   /**
    * Method to be used when a debug message should be logged
-   * @param message 
-   * @param context 
+   * @param message Debug Message
+   * @param context Context of Message
    */
   debug(message: string, context?: string) {
     super.debug(message, context);
@@ -107,8 +134,8 @@ export class LoggerService extends Logger implements LoggerServiceInterface {
 
   /**
    * Method to be used when a simple log message should be logged
-   * @param message 
-   * @param context 
+   * @param message Log message
+   * @param context Context of Message
    */
   log(message: string, context?: string) {
     super.log(message, context);
@@ -117,8 +144,8 @@ export class LoggerService extends Logger implements LoggerServiceInterface {
 
   /**
    * Method to be used when a verbose message should be logged
-   * @param message 
-   * @param context 
+   * @param message Verbose Message
+   * @param context Context Message
    */
   verbose(message: string, context?: string) {
     super.verbose(message, context);

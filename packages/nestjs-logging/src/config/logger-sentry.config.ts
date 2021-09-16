@@ -4,7 +4,10 @@ import { Severity as SentryLogSeverity } from '@sentry/types';
 import { LoggerSentryConfigInterface } from '../interfaces/logger-sentry-config.interface';
 
 
-
+/**
+ * Sentry configuration to be used 
+ * 
+ */
 export const loggerSentryConfig = registerAs(
   'LOGGER_MODULE_SENTRY_CONFIG',
   (): LoggerSentryConfigInterface => ({

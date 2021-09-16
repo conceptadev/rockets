@@ -1,4 +1,4 @@
-import { ForbiddenException, HttpException, Logger, NotFoundException } from '@nestjs/common';
+import { ConsoleLogger, ForbiddenException, HttpException, Logger, NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { LoggerTransportInterface } from './interfaces/logger-transport.interface';
 
@@ -38,14 +38,15 @@ describe('LoggerService', () => {
     spyAddTransport = jest.spyOn(loggerTransportService, 'addTransport');
     spyTransportLog = jest.spyOn(loggerTransportService, 'log');
     
-    spyDebug = jest.spyOn(Logger.prototype, 'debug');
-    spyError = jest.spyOn(Logger.prototype, 'error');
-    spyVerbose = jest.spyOn(Logger.prototype, 'verbose');
-    spyWarn = jest.spyOn(Logger.prototype, 'warn');
-    spyLog = jest.spyOn(Logger.prototype, 'log');
+    spyDebug = jest.spyOn(ConsoleLogger.prototype, 'debug');
+    spyError = jest.spyOn(ConsoleLogger.prototype, 'error');
+    spyVerbose = jest.spyOn(ConsoleLogger.prototype, 'verbose');
+    spyWarn = jest.spyOn(ConsoleLogger.prototype, 'warn');
+    spyLog = jest.spyOn(ConsoleLogger.prototype, 'log');
     
     context = "jest";
     errorMessage = "Error Message";
+
 
   });
   

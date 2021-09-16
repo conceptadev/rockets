@@ -4,20 +4,25 @@ import { threadId } from 'worker_threads';
 
 import { LoggerService } from './logger.service';
 
+/**
+ * 
+ * The Logger Exception Filter Class
+ * 
+ * Out of the box, this action is performed by a built-in global exception
+ * filter, which handles exceptions of type HttpException
+ *  
+ */
 @Catch()
 @Injectable()
 export class LoggerExceptionFilter extends BaseExceptionFilter {
 
-  loggerService: LoggerService;
-
   constructor (
     @Inject(LoggerService)
-    loggerService: LoggerService,
+    private loggerService: LoggerService,
     @Inject(HttpAdapterHost)
     applicationRef?: HttpServer
   ) {
     super(applicationRef);
-    this.loggerService = loggerService;
   }
 
   /**

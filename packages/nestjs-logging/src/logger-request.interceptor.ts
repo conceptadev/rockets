@@ -9,7 +9,13 @@ import { LoggerService } from './logger.service';
 import ErrorFormat from './helpers/error.format';
 
 /**
- * The Interceptor for request
+ * 
+ * The Interceptor to log message for all requests and response errors
+ * 
+ * ### Example
+ * ```ts
+ * 
+ * ```
  */
 @Injectable()
 export class LoggerRequestInterceptor<T>
@@ -45,17 +51,20 @@ export class LoggerRequestInterceptor<T>
 
   /**
    * Method to log response success
+   * 
    * @param req Request
    * @param res Response
    * @param startDate the date for the message
    */
   responseSuccess (req:any, res:any, startDate:any) {
+    
     // format the response message
     const message = ErrorFormat.formatResponseMessage(
       req,
       res,
       startDate
     );
+    
     // log the response, after method was called
     this.loggerService.log(message);
   }
@@ -70,6 +79,7 @@ export class LoggerRequestInterceptor<T>
    * @returns 
    */
   responseError (req:any, res:any, startDate:any, error: Error) {
+    
     // format the message
     const message = ErrorFormat.formatResponseMessage(
       req,
