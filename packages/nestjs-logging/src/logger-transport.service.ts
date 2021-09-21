@@ -49,6 +49,7 @@ export class LoggerTransportService {
   constructor(
     @Inject(loggerConfig.KEY) private config: ConfigType<typeof loggerConfig>,
   ) {
+    
     if (this.config?.transportLogLevel) {
       this.logLevels = this.config.transportLogLevel;
     }

@@ -40,11 +40,11 @@ describe('LoggerService', () => {
     spyAddTransport = jest.spyOn(loggerTransportService, 'addTransport');
     spyTransportLog = jest.spyOn(loggerTransportService, 'log');
 
-    spyDebug = jest.spyOn(ConsoleLogger.prototype, 'debug');
-    spyError = jest.spyOn(ConsoleLogger.prototype, 'error');
-    spyVerbose = jest.spyOn(ConsoleLogger.prototype, 'verbose');
-    spyWarn = jest.spyOn(ConsoleLogger.prototype, 'warn');
-    spyLog = jest.spyOn(ConsoleLogger.prototype, 'log');
+    spyDebug = jest.spyOn(ConsoleLogger.prototype, 'debug').mockImplementation(() => null);
+    spyError = jest.spyOn(ConsoleLogger.prototype, 'error').mockImplementation(() => null);
+    spyVerbose = jest.spyOn(ConsoleLogger.prototype, 'verbose').mockImplementation(() => null);
+    spyWarn = jest.spyOn(ConsoleLogger.prototype, 'warn').mockImplementation(() => null);
+    spyLog = jest.spyOn(ConsoleLogger.prototype, 'log').mockImplementation(() => null);
 
     context = 'jest';
     errorMessage = 'Error Message';

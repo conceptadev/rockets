@@ -1,9 +1,9 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { DynamicModule, FactoryProvider, Module, ModuleMetadata } from '@nestjs/common';
+import {ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 
-import { loggerSentryConfig } from './config/logger-sentry.config';
-import { loggerConfig } from './config/logger.config';
+import { loggerConfig, loggerConfigMerge } from './config/logger.config';
+import { LoggerConfigInterface } from './interfaces/logger-config.interface';
 import { LoggerExceptionFilter } from './logger-exception.filter';
 import { LoggerRequestInterceptor } from './logger-request.interceptor';
 import { LoggerTransportService } from './logger-transport.service';
@@ -70,10 +70,24 @@ import { LoggerSentryTransport } from './transports/logger-sentry.transport';
  *  }
  *```
  */
+
+
+export interface LoggerConfigOptions {
+  loggerConfig: LoggerConfigInterface
+}
+
+export interface LoggerConfigAsyncOptions
+  extends Pick<ModuleMetadata, 'imports'>,
+    Pick<
+      FactoryProvider<LoggerConfigOptions | Promise<LoggerConfigOptions>>,
+      'useFactory' | 'inject'
+    > {}
+
+
 @Module({
   imports: [
-    ConfigModule.forFeature(loggerConfig),
-    ConfigModule.forFeature(loggerSentryConfig),
+    //ConfigModule.forFeature(loggerConfig),
+    //ConfigModule.forFeature(loggerSentryConfig),
   ],
   providers: [
     LoggerService,
@@ -89,5 +103,84 @@ import { LoggerSentryTransport } from './transports/logger-sentry.transport';
     },
   ],
   exports: [LoggerService],
-})
-export class LoggerModule {}
+ }
+)
+export class LoggerModule {
+
+   public static forRoot(options?: LoggerConfigOptions): DynamicModule {
+    return {
+      module: LoggerModule,
+      imports: [
+        ConfigModule.forFeature((() => { return loggerConfigMerge(options?.loggerConfig) })())
+      ],
+      providers: [
+        LoggerService,
+        LoggerTransportService,
+        LoggerSentryTransport,
+        {
+          provide: APP_INTERCEPTOR,
+          useClass: LoggerRequestInterceptor,
+        },
+        {
+          provide: APP_FILTER,
+          useClass: LoggerExceptionFilter,
+        },
+      ],
+      exports: [LoggerService],
+    };
+  }
+
+  public static forRootAsync(options: LoggerConfigAsyncOptions): DynamicModule {
+
+    return {
+      module: LoggerModule,
+      imports: [{
+          module: LoggerModule,
+          imports: [LoggerConfigModule.forRootAsync(options)],
+          providers: [{
+              inject: ['ASYNC_CONFIG'],
+              provide: loggerConfig.KEY,
+              useFactory: async (config: LoggerConfigOptions) => {
+                const finalConfig = loggerConfigMerge(config.loggerConfig);
+                return finalConfig();
+              }
+            }],
+          exports: [loggerConfig.KEY]
+        }
+      ],
+      providers: [
+        LoggerService,
+        LoggerTransportService,
+        LoggerSentryTransport,
+        {
+          provide: APP_INTERCEPTOR,
+          useClass: LoggerRequestInterceptor,
+        },
+        {
+          provide: APP_FILTER,
+          useClass: LoggerExceptionFilter,
+        },
+      ],
+      exports: [LoggerService],
+      
+    };
+  }
+}
+
+
+class LoggerConfigModule {
+
+ public static forRootAsync(options: LoggerConfigAsyncOptions): DynamicModule {
+   return {
+     module: LoggerConfigModule,
+     providers: [
+       {
+         provide: 'ASYNC_CONFIG',
+         inject: options.inject,
+         useFactory: options.useFactory,
+       },
+      ],
+     exports: ['ASYNC_CONFIG'],
+   };
+ }
+}

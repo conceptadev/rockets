@@ -24,7 +24,7 @@ describe('LoggerModule', () => {
   describe('IsDefined', () => {
     it('was module defined', async () => {
       moduleRef = await Test.createTestingModule({
-        imports: [LoggerModule],
+        imports: [LoggerModule.forRoot()],
         providers: [TestLogger],
       }).compile();
 
@@ -36,6 +36,7 @@ describe('LoggerModule', () => {
       );
 
       customLoggerService.addTransport(loggerSentryTransport);
+      //jest.spyOn(customLoggerService, 'log').mockImplementation(() => null);
 
       // This is to inform that this logger will new used internally
       // or it will be used once yuo do a new Logger()
@@ -60,5 +61,8 @@ describe('LoggerModule', () => {
       testLogger.testLoggerLog();
       expect(spyTransportLog).toBeCalledTimes(2);
     });
+
+
+
   });
 });

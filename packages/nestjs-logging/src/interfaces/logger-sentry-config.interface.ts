@@ -35,5 +35,5 @@ export interface LoggerSentryConfigInterface extends SentryNodeOptions {
   /**
    * Method to map the log level from the config with sentry log levels
    */
-  logLevelMap: (logLevel: LogLevel) => SentrySeverity;
+   logLevelMap: (logLevel: LogLevel) => SentrySeverity;
 }
