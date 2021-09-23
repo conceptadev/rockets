@@ -1,8 +1,7 @@
 import { Logger, LogLevel } from '@nestjs/common';
-import { ConfigType } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 
-import { loggerConfig } from './config/logger.config';
+import { LOGGER_MODULE_OPTIONS_TOKEN } from './config/logger.config';
 import { LoggerTransportInterface } from './interfaces/logger-transport.interface';
 import { LoggerTransportService } from './logger-transport.service';
 
@@ -21,7 +20,7 @@ describe('LoggerTransportService', () => {
       providers: [
         LoggerTransportService,
         {
-          provide: loggerConfig.KEY,
+          provide: LOGGER_MODULE_OPTIONS_TOKEN,
           useValue: {
             logLevel: ['error', 'warn'],
             transportLogLevel: ['error', 'warn'],
@@ -117,7 +116,7 @@ describe('LoggerTransportService', () => {
     const loggerTransportService = new LoggerTransportService({
       logLevel: [],
       transportLogLevel: [],
-    } as ConfigType<typeof loggerConfig>);
+    });
 
     const logLevels = loggerTransportService['logLevels'];
     expect(logLevels.length).toBe(0);
@@ -127,7 +126,7 @@ describe('LoggerTransportService', () => {
     const loggerTransportService = new LoggerTransportService({
       logLevel: [],
       transportLogLevel: [],
-    } as ConfigType<typeof loggerConfig>);
+    });
 
     const logLevels = loggerTransportService['logLevels'];
     const transports = loggerTransportService['loggerTransports'];

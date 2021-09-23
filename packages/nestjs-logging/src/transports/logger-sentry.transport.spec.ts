@@ -1,17 +1,16 @@
 import { LogLevel } from '@nestjs/common';
-import { ConfigType } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import * as Sentry from '@sentry/node';
 import { Severity as SentryLogSeverity } from '@sentry/types';
-import { loggerConfig } from '../config/logger.config';
+import { LOGGER_MODULE_OPTIONS_TOKEN } from '../config/logger.config';
+import { LoggerOptionsInterface } from '../interfaces/logger-options.interface';
 
 import { LoggerSentryTransport } from './logger-sentry.transport';
-import { LoggerSentryConfigInterface } from '../interfaces/logger-sentry-config.interface';
 jest.mock('@sentry/node');
 
 describe('loggerSentryTransport', () => {
   let loggerSentryTransport: LoggerSentryTransport;
-  let config: ConfigType<typeof loggerConfig>;
+  let config: LoggerOptionsInterface;
   let spyInit: jest.SpyInstance;
   let spyCaptureException: jest.SpyInstance;
   let spyCaptureMessage: jest.SpyInstance;
@@ -23,13 +22,13 @@ describe('loggerSentryTransport', () => {
       providers: [
         LoggerSentryTransport,
         {
-          provide: loggerConfig.KEY,
+          provide: LOGGER_MODULE_OPTIONS_TOKEN,
           useValue: {
             transportSentryConfig: {
               dsn: '',
               logLevel: 'error',
               logLevelMap: jest.fn().mockReturnValue(SentryLogSeverity.Error),
-            }
+            },
           },
         },
       ],
@@ -38,9 +37,7 @@ describe('loggerSentryTransport', () => {
     loggerSentryTransport = moduleRef.get<LoggerSentryTransport>(
       LoggerSentryTransport,
     );
-    config = moduleRef.get<ConfigType<typeof loggerConfig>>(
-      loggerConfig.KEY,
-    );
+    config = moduleRef.get<LoggerOptionsInterface>(LOGGER_MODULE_OPTIONS_TOKEN);
 
     spyInit = jest.spyOn(Sentry, 'init');
     spyCaptureException = jest.spyOn(Sentry, 'captureException');

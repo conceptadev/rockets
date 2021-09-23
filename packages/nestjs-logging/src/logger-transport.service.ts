@@ -1,18 +1,18 @@
 import { Inject, Injectable, LogLevel } from '@nestjs/common';
-import { ConfigType } from '@nestjs/config';
-
-import { loggerConfig } from './config/logger.config';
+import { LOGGER_MODULE_OPTIONS_TOKEN } from './config/logger.config';
+import { LoggerOptionsInterface } from './interfaces/logger-options.interface';
 import { LoggerTransportInterface } from './interfaces/logger-transport.interface';
 
 /**
- *
  * A transport service that will load all third party transport
  * that will be used to log messages to external
  *
  * ### Example
  * ```ts
  * class TestTransport implements LoggerTransportInterface {
- *     log(): void { }
+ *     log(): void {
+ *       // forward message to transport
+ *     }
  * }
  *
  * const app = await NestFactory.create(AppModule, {
@@ -24,9 +24,7 @@ import { LoggerTransportInterface } from './interfaces/logger-transport.interfac
  * const testTransport = new TestTransport();
  *
  * customLoggerService.addTransport(testTransport);
- *
- *```
- *
+ * ```
  */
 @Injectable()
 export class LoggerTransportService {
@@ -38,18 +36,18 @@ export class LoggerTransportService {
 
   /**
    * External Logger transports
-   *
    */
   private readonly loggerTransports: LoggerTransportInterface[] = [];
 
   /**
    * Constructor
-   * @param config 
+   *
+   * @param config
    */
   constructor(
-    @Inject(loggerConfig.KEY) private config: ConfigType<typeof loggerConfig>,
+    @Inject(LOGGER_MODULE_OPTIONS_TOKEN)
+    private config: LoggerOptionsInterface,
   ) {
-    
     if (this.config?.transportLogLevel) {
       this.logLevels = this.config.transportLogLevel;
     }

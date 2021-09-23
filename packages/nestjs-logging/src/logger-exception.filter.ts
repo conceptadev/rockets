@@ -20,11 +20,10 @@ import { LoggerService } from './logger.service';
 @Catch()
 @Injectable()
 export class LoggerExceptionFilter extends BaseExceptionFilter {
-  
   /**
-   * Constructor 
-   * @param loggerService 
-   * @param applicationRef 
+   * Constructor
+   * @param loggerService
+   * @param applicationRef
    */
   constructor(
     @Inject(LoggerService)

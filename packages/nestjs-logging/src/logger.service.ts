@@ -10,6 +10,7 @@ import { LoggerTransportInterface } from './interfaces/logger-transport.interfac
  *
  * The LoggerService class contains the implementation of a custom Logger
  * where it will call System logger and any third party transport log that was added.
+ *
  * You will need to create a custom logger and we must ensure that at least one application module imports the LoggerService
  * to trigger Nest to instantiate a singleton instance of our LoggerService class.
  *
@@ -58,9 +59,10 @@ export class LoggerService
   }
 
   /**
-   * Method to log an exception, if the exception is between 400 and 500 status code
+   * Method to log an exception
    *
-   * it will be logged as a debug log level, otherwise it will be logged as an error
+   * If the exception is between 400 and 500 status code
+   * it will be logged as a debug log level, otherwise it will be logged as an error.
    *
    * @param error Error to be registered
    * @param message Error Message
@@ -96,7 +98,7 @@ export class LoggerService
   }
 
   /**
-   * Method to be called when a error should be logged
+   * Method to be called when an error should be logged.
    *
    * @param message Error Message
    * @param trace Stack trace error
@@ -122,7 +124,8 @@ export class LoggerService
   }
 
   /**
-   * Method to be used when a warn message should be logged
+   * Method to be used when a warn message should be logged.
+   *
    * @param message Warn Message
    * @param context Context of Message
    */
@@ -132,7 +135,8 @@ export class LoggerService
   }
 
   /**
-   * Method to be used when a debug message should be logged
+   * Method to be used when a debug message should be logged.
+   *
    * @param message Debug Message
    * @param context Context of Message
    */
@@ -142,7 +146,8 @@ export class LoggerService
   }
 
   /**
-   * Method to be used when a simple log message should be logged
+   * Method to be used when a simple log message should be logged.
+   *
    * @param message Log message
    * @param context Context of Message
    */
@@ -152,7 +157,8 @@ export class LoggerService
   }
 
   /**
-   * Method to be used when a verbose message should be logged
+   * Method to be used when a verbose message should be logged.
+   *
    * @param message Verbose Message
    * @param context Context Message
    */

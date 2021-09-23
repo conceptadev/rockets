@@ -13,25 +13,19 @@ import {
 } from '@nestjs/common';
 
 import { LoggerService } from './logger.service';
-import ErrorFormat from './helpers/error.format';
+import { MessageFormatUtil } from './utils/message-format.util';
 
 /**
  *
- * The Interceptor to log message for all requests and response errors
- *
- * ### Example
- * ```ts
- *
- * ```
+ * The Interceptor to log message for all requests and response errors.
  */
 @Injectable()
 export class LoggerRequestInterceptor implements NestInterceptor<Response> {
-  
   /**
    * Constructor
    * @param loggerService The logger service that implements ConsoleLogger
    */
-  constructor(private loggerService: LoggerService) { }
+  constructor(private loggerService: LoggerService) {}
 
   /**
    * Method to implement a custom intercept
@@ -49,7 +43,7 @@ export class LoggerRequestInterceptor implements NestInterceptor<Response> {
     const startDate = new Date();
 
     // format the request message
-    const message = ErrorFormat.formatRequestMessage(req);
+    const message = MessageFormatUtil.formatRequestMessage(req);
 
     // log the incoming request
     this.loggerService.log(message);
@@ -71,7 +65,11 @@ export class LoggerRequestInterceptor implements NestInterceptor<Response> {
    */
   responseSuccess(req: Request, res: Response, startDate: Date) {
     // format the response message
-    const message = ErrorFormat.formatResponseMessage(req, res, startDate);
+    const message = MessageFormatUtil.formatResponseMessage(
+      req,
+      res,
+      startDate,
+    );
 
     // log the response, after method was called
     this.loggerService.log(message);
@@ -88,7 +86,7 @@ export class LoggerRequestInterceptor implements NestInterceptor<Response> {
    */
   responseError(req: Request, res: Response, startDate: Date, error: Error) {
     // format the message
-    const message = ErrorFormat.formatResponseMessage(
+    const message = MessageFormatUtil.formatResponseMessage(
       req,
       res,
       startDate,

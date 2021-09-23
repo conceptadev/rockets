@@ -1,40 +1,35 @@
 import { Inject, Injectable, LogLevel } from '@nestjs/common';
-import { ConfigType } from '@nestjs/config';
 import * as Sentry from '@sentry/node';
 
-import { loggerConfig } from '../config/logger.config';
+import { LOGGER_MODULE_OPTIONS_TOKEN } from '../config/logger.config';
+import { LoggerOptionsInterface } from '../interfaces/logger-options.interface';
 import { LoggerTransportInterface } from '../interfaces/logger-transport.interface';
 
 /**
- *
  * The transport that implements {@link LoggerTransportInterface}
  * to be used on {@link LoggerService} to log external messages
  *
  * ### Example
  * ```ts
- *
  * // Get the transport instance
  * const sentry = app.get(LoggerSentryTransport);
  *
  * // Add the transports you want to use
  * customLogger.addTransport(sentry);
- *
  * ```
- *
  */
 @Injectable()
 export class LoggerSentryTransport implements LoggerTransportInterface {
-  
   /**
    * Constructor
    * @param config configuration file injected
    */
   constructor(
-    @Inject(loggerConfig.KEY)
-    private config: ConfigType<typeof loggerConfig>,
+    @Inject(LOGGER_MODULE_OPTIONS_TOKEN)
+    private config: LoggerOptionsInterface,
   ) {
-    
-    if (!this.config || !this.config.transportSentryConfig) throw new Error('Sentry Config is required');
+    if (!this.config || !this.config.transportSentryConfig)
+      throw new Error('Sentry Config is required');
 
     // Initialize Sentry
     Sentry.init({

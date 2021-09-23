@@ -1,94 +1,65 @@
-import { DynamicModule, FactoryProvider, Module, ModuleMetadata } from '@nestjs/common';
-import {ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { DynamicModule, Module } from '@nestjs/common';
+import {
+  loggerConfig,
+  LOGGER_MODULE_OPTIONS_TOKEN,
+} from './config/logger.config';
 
-import { loggerConfig, loggerConfigMerge } from './config/logger.config';
-import { LoggerConfigInterface } from './interfaces/logger-config.interface';
 import { LoggerExceptionFilter } from './logger-exception.filter';
 import { LoggerRequestInterceptor } from './logger-request.interceptor';
-import { LoggerTransportService } from './logger-transport.service';
-import { LoggerService } from './logger.service';
 import { LoggerSentryTransport } from './transports/logger-sentry.transport';
+import { LoggerService } from './logger.service';
+import { LoggerTransportService } from './logger-transport.service';
+import { LoggerOptionsInterface } from './interfaces/logger-options.interface';
+import { LoggerAsyncOptionsInterface } from './interfaces/logger-async-options.interface';
 
 /**
- * Logger Module Imports all configuration needed for logger and sentry
+ * Logger Module imports all configuration needed for logger and sentry
  * With classes for request interceptor and Exceptions filters
  * where will automatically log for any request or unhandled exceptions.
  *
- * To start using the loggerService all you need to do is inject it on controller
- * ```ts
- * class TestLogger {
- *      // Inject Logger Service
- *      constructor(@Inject(LoggerService) private loggerService: LoggerService) { }
- *  }
- * ```
- *
- * or create a new instance of Logger
- *
- * ```ts
- *      // If you call Logger.log the LoggerService.log will be called
- *      testLoggerLog():void {
- *          const logger = new Logger();
- *          logger.log('Message from testLoggerLog');
- *      }
- * ```
- *
- *
  * ### Example
  * ```ts
+ * // app.module.ts
  * @Module({
  *   imports: [
- *     LoggerModule
+ *     LoggerModule.forRoot({logLevel: ['log', 'error']})
  *   ]
  * })
+ * export class AppModule {}
  *
- * ...
+ * // main.ts
+ * async function bootstrap() {
+ *   // create the app
+ *   const app = await NestFactory.create(AppModule);
  *
- * // This is to inform that this logger will new used internally
- * // or it will be used when you create a new instance using new Logger()
- * app.useLogger(customLoggerService);
+ *   // custom logger
+ *   const customLoggerService = app.get(LoggerService);
+ *   customLoggerService.addTransport(app.get(LoggerSentryTransport));
  *
- * ...
+ *   // inform app of the custom logger
+ *   app.useLogger(customLoggerService);
+ * }
  *
- * // To start using loggerService all you need is to inject the loggerService
- * // or initialize a new Logger
- * class TestLogger {
+ * // test.class.ts
+ * @Injectable()
+ * class TestClass {
+ *   // Inject Logger Service
+ *   constructor(@Inject(LoggerService) private loggerService: LoggerService) {}
  *
- *      // Inject Logger Service
- *      constructor(@Inject(LoggerService) private loggerService: LoggerService) { }
+ *   doSomething() {
+ *     this.loggerService.log('Did something');
+ *   }
+ * }
  *
- *      // Call any method even custom method
- *      testLoggerServiceLog():void {
- *          this.loggerService.log('Message from testLoggerServiceLog');
- *       }
- *
- *      // If you call Logger.log the LoggerService.log will be called
- *      testLoggerLog():void {
- *          const logger = new Logger();
- *          logger.log('Message from testLoggerLog');
- *      }
- *  }
- *```
+ * // my.util.ts
+ * function myHelper() {
+ *   const logger = new Logger(); // <-- using the global logger
+ *   logger.log('My helper ran'); // <-- LoggerService.log will be called
+ * }
+ * ```
  */
-
-
-export interface LoggerConfigOptions {
-  loggerConfig: LoggerConfigInterface
-}
-
-export interface LoggerConfigAsyncOptions
-  extends Pick<ModuleMetadata, 'imports'>,
-    Pick<
-      FactoryProvider<LoggerConfigOptions | Promise<LoggerConfigOptions>>,
-      'useFactory' | 'inject'
-    > {}
-
-
 @Module({
-  imports: [
-    //ConfigModule.forFeature(loggerConfig),
-    //ConfigModule.forFeature(loggerSentryConfig),
-  ],
   providers: [
     LoggerService,
     LoggerTransportService,
@@ -103,17 +74,16 @@ export interface LoggerConfigAsyncOptions
     },
   ],
   exports: [LoggerService],
- }
-)
+})
 export class LoggerModule {
-
-   public static forRoot(options?: LoggerConfigOptions): DynamicModule {
+  public static forRoot(options?: LoggerOptionsInterface): DynamicModule {
     return {
       module: LoggerModule,
-      imports: [
-        ConfigModule.forFeature((() => { return loggerConfigMerge(options?.loggerConfig) })())
-      ],
       providers: [
+        {
+          provide: LOGGER_MODULE_OPTIONS_TOKEN,
+          useValue: options ?? loggerConfig(),
+        },
         LoggerService,
         LoggerTransportService,
         LoggerSentryTransport,
@@ -130,25 +100,18 @@ export class LoggerModule {
     };
   }
 
-  public static forRootAsync(options: LoggerConfigAsyncOptions): DynamicModule {
-
+  public static forRootAsync(
+    options: LoggerAsyncOptionsInterface,
+  ): DynamicModule {
     return {
       module: LoggerModule,
-      imports: [{
-          module: LoggerModule,
-          imports: [LoggerConfigModule.forRootAsync(options)],
-          providers: [{
-              inject: ['ASYNC_CONFIG'],
-              provide: loggerConfig.KEY,
-              useFactory: async (config: LoggerConfigOptions) => {
-                const finalConfig = loggerConfigMerge(config.loggerConfig);
-                return finalConfig();
-              }
-            }],
-          exports: [loggerConfig.KEY]
-        }
-      ],
+      imports: options.imports,
       providers: [
+        {
+          provide: LOGGER_MODULE_OPTIONS_TOKEN,
+          inject: options.inject,
+          useFactory: options.useFactory,
+        },
         LoggerService,
         LoggerTransportService,
         LoggerSentryTransport,
@@ -162,25 +125,6 @@ export class LoggerModule {
         },
       ],
       exports: [LoggerService],
-      
     };
   }
-}
-
-
-class LoggerConfigModule {
-
- public static forRootAsync(options: LoggerConfigAsyncOptions): DynamicModule {
-   return {
-     module: LoggerConfigModule,
-     providers: [
-       {
-         provide: 'ASYNC_CONFIG',
-         inject: options.inject,
-         useFactory: options.useFactory,
-       },
-      ],
-     exports: ['ASYNC_CONFIG'],
-   };
- }
 }

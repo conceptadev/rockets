@@ -2,7 +2,7 @@ import { CallHandler, ExecutionContext } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { LoggerRequestInterceptor } from './logger-request.interceptor';
 import { LoggerService } from './logger.service';
-import ErrorFormat from './helpers/error.format';
+import { MessageFormatUtil } from './utils/message-format.util';
 import {
   FastifyRequest as Request,
   LightMyRequestResponse as Response,
@@ -54,8 +54,14 @@ describe('LoggerRequestInterceptor', () => {
       LoggerRequestInterceptor,
     );
 
-    spyFormatRequestMessage = jest.spyOn(ErrorFormat, 'formatRequestMessage');
-    spyFormatResponseMessage = jest.spyOn(ErrorFormat, 'formatResponseMessage');
+    spyFormatRequestMessage = jest.spyOn(
+      MessageFormatUtil,
+      'formatRequestMessage',
+    );
+    spyFormatResponseMessage = jest.spyOn(
+      MessageFormatUtil,
+      'formatResponseMessage',
+    );
     spyLog = jest.spyOn(loggerService, 'log');
     spyException = jest.spyOn(loggerService, 'exception');
   });
@@ -81,19 +87,12 @@ describe('LoggerRequestInterceptor', () => {
     expect(spyLog).toBeCalledTimes(1);
   });
 
-  it('LoggerRequestInterceptor.intercept_2', async () => {
-    const actualValue = await loggerRequestInterceptor.intercept(
-      executionContext as ExecutionContext,
-      callHandler,
-    );
-
-    expect(actualValue).toBeTruthy();
-    expect(spyFormatRequestMessage).toBeCalledTimes(1);
-    expect(spyLog).toBeCalledTimes(1);
-  });
-
   it('LoggerRequestInterceptor.responseSuccess', async () => {
-    await loggerRequestInterceptor.responseSuccess({} as Request, {} as Response, new Date());
+    await loggerRequestInterceptor.responseSuccess(
+      {} as Request,
+      {} as Response,
+      new Date(),
+    );
 
     expect(spyFormatResponseMessage).toBeCalledTimes(1);
     expect(spyLog).toBeCalledTimes(1);
