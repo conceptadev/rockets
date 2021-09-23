@@ -1,5 +1,5 @@
 {
-  "name": "@rockts-org/nestjs-logging",
+  "name": "@rockts-org/nestjs-logger",
   "version": "3.0.2",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
