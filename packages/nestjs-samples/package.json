@@ -1,6 +1,6 @@
 {
-  "name": "@rockts-org/nestjs-access-control",
-  "version": "3.0.1",
+  "name": "@rockts-org/nestjs-samples",
+  "version": "3.0.2",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "MIT",
@@ -10,10 +10,13 @@
   "dependencies": {
     "@nestjs/common": "^8.0.8",
     "@nestjs/core": "^8.0.8",
-    "accesscontrol": "^2.2.1"
+    "@nestjs/platform-express": "^8.0.8",
+    "@nestjs/platform-fastify": "^8.0.8",
+    "@rockts-org/nestjs-event": "3.0.2"
   },
   "devDependencies": {
     "@nestjs/testing": "^8.0.8",
-    "jest-mock-extended": "^2.0.4"
+    "@types/supertest": "^2.0.11",
+    "supertest": "^6.1.6"
   }
 }
