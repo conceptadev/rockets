@@ -22,6 +22,9 @@
     },
     {
       "path": "packages/nestjs-email"
+    },
+    {
+      "path": "packages/nestjs-event"
     }
   ]
 }
