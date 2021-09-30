@@ -1,0 +1,17 @@
+{
+  "name": "@rockts-org/nestjs-samples",
+  "version": "0.0.1",
+  "description": "",
+  "author": "",
+  "private": true,
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@rockts-org/nestjs-event": "*",
+    "@rockts-org/nestjs-logger": "*",
+    "@nestjs/common": "^8.0.0",
+    "@nestjs/core": "^8.0.0"
+  },
+  "devDependencies": {
+    "@nestjs/testing": "^8.0.2"
+  }
+}

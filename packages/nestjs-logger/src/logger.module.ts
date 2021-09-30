@@ -96,7 +96,7 @@ export class LoggerModule {
           useClass: LoggerExceptionFilter,
         },
       ],
-      exports: [LoggerService],
+      exports: [LoggerSentryTransport, LoggerService],
     };
   }
 
