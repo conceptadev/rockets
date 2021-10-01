@@ -12,7 +12,8 @@
     "@nestjs/core": "^8.0.8",
     "@nestjs/platform-express": "^8.0.8",
     "@nestjs/platform-fastify": "^8.0.8",
-    "@rockts-org/nestjs-event": "3.0.2"
+    "@rockts-org/nestjs-event": "3.0.2",
+    "@rockts-org/nestjs-logger": "3.0.2"
   },
   "devDependencies": {
     "@nestjs/testing": "^8.0.8",

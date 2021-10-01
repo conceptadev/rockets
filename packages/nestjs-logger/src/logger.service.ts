@@ -86,12 +86,12 @@ export class LoggerService
       error.getStatus() < 500
     ) {
       // not severe, log it as debug
-      super.debug(message, context);
+      super.debug(message, this.getContext(context));
       // pass full exception to transport service
       this.transportService.log(message, 'debug' as LogLevel, error);
     } else {
       // log as error
-      super.error(message, error.stack, context);
+      super.error(message, error.stack, this.getContext(context));
       // pass full exception to transport service
       this.transportService.log(message, 'error' as LogLevel, error);
     }
@@ -109,7 +109,7 @@ export class LoggerService
     trace?: string | undefined,
     context?: string | undefined,
   ): void {
-    super.error(message, trace, context);
+    super.error(message, trace, this.getContext(context));
     // get a trace?
     if (trace) {
       // yes, build up real error
@@ -130,7 +130,7 @@ export class LoggerService
    * @param context Context of Message
    */
   warn(message: string, context?: string) {
-    super.warn(message, context);
+    super.warn(message, this.getContext(context));
     this.transportService.log(message, 'warn' as LogLevel);
   }
 
@@ -141,7 +141,7 @@ export class LoggerService
    * @param context Context of Message
    */
   debug(message: string, context?: string) {
-    super.debug(message, context);
+    super.debug(message, this.getContext(context));
     this.transportService.log(message, 'debug' as LogLevel);
   }
 
@@ -152,7 +152,7 @@ export class LoggerService
    * @param context Context of Message
    */
   log(message: string, context?: string) {
-    super.log(message, context);
+    super.log(message, this.getContext(context));
     this.transportService.log(message, 'log' as LogLevel);
   }
 
@@ -163,7 +163,11 @@ export class LoggerService
    * @param context Context Message
    */
   verbose(message: string, context?: string) {
-    super.verbose(message, context);
+    super.verbose(message, this.getContext(context));
     this.transportService.log(message, 'verbose' as LogLevel);
+  }
+
+  private getContext(context?: string) {
+    return context ? context : this.context ?? '';
   }
 }
