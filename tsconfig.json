@@ -25,6 +25,9 @@
     },
     {
       "path": "packages/nestjs-event"
+    },
+    {
+      "path": "packages/nestjs-samples"
     }
   ]
 }
