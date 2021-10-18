@@ -1,5 +1,5 @@
 /**
- * Password Strength Service Interface
+ * Sign Service Interface
  */
 export interface SignServiceInterface {
     /**

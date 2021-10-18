@@ -9,11 +9,13 @@ import { PasswordStrengthServiceInterface } from './interface/password-strength.
 @Injectable()
 export class PasswordStrengthService implements PasswordStrengthServiceInterface {
 
+    /**
+     * constructor
+     * @param config 
+     */
     constructor(
         @Inject()
-        private config: AuthenticationConfigOptionsInterface) {
-        
-    }
+        private config: AuthenticationConfigOptionsInterface) { }
 
     /**
      * Method to check if password is strong
