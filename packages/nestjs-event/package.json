@@ -1,5 +1,5 @@
 {
-  "name": "@rockts-org/nestjs-authentication",
+  "name": "@rockts-org/nestjs-event",
   "version": "3.0.2",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,10 +10,7 @@
   "dependencies": {
     "@nestjs/common": "^8.0.8",
     "@nestjs/core": "^8.0.8",
-    "@nestjs/event-emitter": "^1.0.0",
-    "@types/zxcvbn": "^4.4.1",
-    "bcrypt": "^5.0.1",
-    "zxcvbn": "^4.4.2"
+    "@nestjs/event-emitter": "^1.0.0"
   },
   "peerDependencies": {
     "eventemitter2": "*"
