@@ -3,14 +3,6 @@ import zxcvbn from 'zxcvbn'
 import { AuthenticationConfigOptionsInterface } from './interface/authentication-config-options.interface';
 import { PasswordStrengthServiceInterface } from './interface/password-strength.service.interface';
 
-enum PasswordStrength {
-    none,
-    low,
-    fair,
-    good,
-    Excellent
-
-}
 /**
  * Service to validate password strength
  */

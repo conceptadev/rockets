@@ -2,6 +2,6 @@
  * Authentication module configuration options interface
  */
 export interface AuthenticationConfigOptionsInterface {
-    minPasswordStrength?: number
-  
+    minPasswordStrength?: number,
+    maxPasswordAttempts?: number
 }
