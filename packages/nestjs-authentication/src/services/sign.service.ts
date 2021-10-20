@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { PasswordStorageService } from '.';
-import { SignServiceInterface } from './interface/sign.service.interface';
-import { SignDTOInterface } from './interface/signin.dto.interface';
+import { PasswordStorageService } from '..';
+import { SignServiceInterface } from '../interface/sign.service.interface';
+import { SignDTOInterface } from '../interface/signin.dto.interface';
 
 /**
  * Service with functions related to the sign in
