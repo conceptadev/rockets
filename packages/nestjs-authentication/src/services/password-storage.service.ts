@@ -1,13 +1,14 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { PasswordStrengthService } from '.';
-import { CryptUtil } from './common/crypt.util';
-import { PasswordStorageInterface } from './interface/password-storage-dto.interface copy';
+import { PasswordStrengthService } from '..';
+import { CryptUtil } from '../common/crypt.util';
+import { PasswordStorageInterface } from '../interface/password-storage.interface copy';
+import { PasswordStorageServiceInterface } from '../interface/password-storage.service.interface';
 
 /**
  * Service with functions related to password security
  */
 @Injectable()
-export class PasswordStorageService {
+export class PasswordStorageService implements PasswordStorageServiceInterface {
 
     /**
      * Constructor 
@@ -46,12 +47,11 @@ export class PasswordStorageService {
         return result;
     }
 
-
     /**
      * Validate if password matches and its valid
      * @param passwordPlain Plain Password not encrypted
      * @param passwordCrypt Password encrypted
-     * @param salt salt to be used on plain  password to see it match  
+     * @param salt salt to be used on plain password to see it match  
      */
     async validatePassword(passwordPlain: string, passwordCrypt: string, salt: string): Promise<boolean> {
         return CryptUtil.validatePassword(passwordPlain, passwordCrypt, salt);

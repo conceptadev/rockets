@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { PasswordStrengthService } from '.';
-import { AuthenticationConfigOptionsInterface } from './interface/authentication-config-options.interface';
+import { PasswordStrengthService } from '..';
+import { AuthenticationConfigOptionsInterface } from '../interface/authentication-config-options.interface';
 
 /**
  * Service with functions related to password

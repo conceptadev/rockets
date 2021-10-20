@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PasswordStrengthService } from '.';
+import { PasswordStrengthService } from '..';
+
 
 describe('PasswordStrengthService', () => {
   let service: PasswordStrengthService;

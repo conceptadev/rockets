@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import zxcvbn from 'zxcvbn'
-import { AuthenticationConfigOptionsInterface } from './interface/authentication-config-options.interface';
-import { PasswordStrengthServiceInterface } from './interface/password-strength.service.interface';
+import { AuthenticationConfigOptionsInterface } from '../interface/authentication-config-options.interface';
+import { PasswordStrengthServiceInterface } from '../interface/password-strength.service.interface';
 
 /**
  * Service to validate password strength
@@ -33,6 +33,4 @@ export class PasswordStrengthService implements PasswordStrengthServiceInterface
         // Check if is strong based on configuration
         return result.score >= minStrength;
     }
-
-
 }

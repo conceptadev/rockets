@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { PasswordStorageService } from '.';
 import { SignServiceInterface } from './interface/sign.service.interface';
+import { SignDTOInterface } from './interface/signin.dto.interface';
 
 /**
  * Service with functions related to the sign in
@@ -23,7 +24,12 @@ export class SignService implements SignServiceInterface {
      * @param salt 
      * @returns 
      */
-    async authenticate(passwordPlain: string, passwordCrypt: string, salt: string): Promise<boolean> {
+    async authenticate(singInDto: SignDTOInterface): Promise<boolean> {
+        
+        const passwordPlain: string = "";
+        const passwordCrypt: string = "";
+        const salt: string = "";
+
         return this.passwordStorageService.validatePassword(passwordPlain, passwordCrypt, salt);
     }
 
@@ -33,8 +39,8 @@ export class SignService implements SignServiceInterface {
      * @param password user password
      * @returns 
      */
-    retrieveAccessToken(username: string, password: string): boolean {
-        return true;
+    async retrieveAccessToken(singInDto: SignDTOInterface): Promise<string> {
+        return "";
     }
 
     /**
@@ -43,8 +49,8 @@ export class SignService implements SignServiceInterface {
      * @param password user password
      * @returns 
      */
-    refreshAccessToken(username: string, password: string): boolean {
-        return true;
+    async refreshAccessToken(singInDto: SignDTOInterface): Promise<string> {
+        return "";
     }
 
 }

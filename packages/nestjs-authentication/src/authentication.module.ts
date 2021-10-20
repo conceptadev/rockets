@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AuthenticationConfigModule } from './authentication-config.module';
-import { PasswordCreationService } from './password-creation.service';
-import { PasswordStorageService } from './password-storage.service';
-import { PasswordStrengthService } from './password-strength.service';
+import { PasswordCreationService } from './services/password-creation.service';
+import { PasswordStorageService } from './services/password-storage.service';
+import { PasswordStrengthService } from './services/password-strength.service';
 import { SignController } from './sign.controller';
 
 @Module({
