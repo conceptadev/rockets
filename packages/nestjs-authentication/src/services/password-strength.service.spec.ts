@@ -1,5 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PasswordStrengthService } from '..';
+import { AUTHENTICATION_MODULE_CONFIG } from '../config/authentication.config';
+import { AuthenticationConfigOptionsInterface } from '../interface/authentication-config-options.interface';
 
 
 describe('PasswordStrengthService', () => {
@@ -7,7 +9,14 @@ describe('PasswordStrengthService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [PasswordStrengthService],
+      providers: [{
+        provide: AUTHENTICATION_MODULE_CONFIG,
+        useValue: {
+          maxPasswordAttempts: 3,
+          minPasswordStrength: 8
+        }
+      },
+      PasswordStrengthService],
     }).compile();
 
     service = module.get<PasswordStrengthService>(PasswordStrengthService);

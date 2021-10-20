@@ -1,21 +1,22 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { PasswordStrengthService } from '..';
+import { AUTHENTICATION_MODULE_CONFIG } from '../config/authentication.config';
 import { AuthenticationConfigOptionsInterface } from '../interface/authentication-config-options.interface';
+import { PasswordCreationServiceInterface } from '../interface/password-creation.service.interface';
 
 /**
- * Service with functions related to password
+ * Service with functions related to password creation
  */
 @Injectable()
-export class PasswordCreationService {
+export class PasswordCreationService implements PasswordCreationServiceInterface {
 
     /**
-     * 
-     * @param passwordStrengthService 
+     * Constructor
      */
     constructor(
         @Inject()
         private passwordStrengthService: PasswordStrengthService,
-        @Inject()
+        @Inject(AUTHENTICATION_MODULE_CONFIG)
         private config: AuthenticationConfigOptionsInterface
     ) { }
 
@@ -30,7 +31,7 @@ export class PasswordCreationService {
 
 
     /**
-     * 
+     * Check if attempt is valid
      * @returns Number of attempts user has to try
      */
     checkAttempt(numOfAttempts: number = 0): boolean {

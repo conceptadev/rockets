@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import zxcvbn from 'zxcvbn'
+import { AUTHENTICATION_MODULE_CONFIG } from '../config/authentication.config';
 import { AuthenticationConfigOptionsInterface } from '../interface/authentication-config-options.interface';
 import { PasswordStrengthServiceInterface } from '../interface/password-strength.service.interface';
 
@@ -14,7 +15,7 @@ export class PasswordStrengthService implements PasswordStrengthServiceInterface
      * @param config 
      */
     constructor(
-        @Inject()
+        @Inject(AUTHENTICATION_MODULE_CONFIG)
         private config: AuthenticationConfigOptionsInterface) { }
 
     /**
