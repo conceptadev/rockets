@@ -1,4 +1,4 @@
-import { PasswordStorageInterface } from "./password-storage.interface copy";
+import { PasswordStorageInterface } from "./password-storage.interface";
 
 /**
  * Password Storage Service Interface

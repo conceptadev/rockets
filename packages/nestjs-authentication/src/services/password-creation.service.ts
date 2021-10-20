@@ -14,7 +14,6 @@ export class PasswordCreationService implements PasswordCreationServiceInterface
      * Constructor
      */
     constructor(
-        @Inject()
         private passwordStrengthService: PasswordStrengthService,
         @Inject(AUTHENTICATION_MODULE_CONFIG)
         private config: AuthenticationConfigOptionsInterface

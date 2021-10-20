@@ -14,7 +14,9 @@ export class PasswordStorageService implements PasswordStorageServiceInterface {
      * Constructor 
      * @param passwordStrengthService 
      */
-    constructor(@Inject() private passwordStrengthService: PasswordStrengthService ) { }
+    constructor(
+        private passwordStrengthService: PasswordStrengthService
+    ) { }
 
     /**
      * Generate Salts to safeguard passwords in storage
