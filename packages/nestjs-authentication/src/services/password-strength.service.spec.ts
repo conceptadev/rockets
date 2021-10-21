@@ -165,5 +165,21 @@ describe('PasswordStrengthService', () => {
     expect(isStrong).toBe(true);
   });
 
+  it('PasswordStrengthService.isStrong-Strong_None', async () => {
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [{
+        provide: AUTHENTICATION_MODULE_CONFIG,
+        useValue: null
+      },
+      PasswordStrengthService],
+    }).compile();
+
+    service = module.get<PasswordStrengthService>(PasswordStrengthService);
+
+    const isStrong = service.isStrong(PASSWORD_NONE);
+
+    expect(isStrong).toBe(true);
+  });
   
 });

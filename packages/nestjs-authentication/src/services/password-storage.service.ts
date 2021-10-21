@@ -39,14 +39,17 @@ export class PasswordStorageService implements PasswordStorageServiceInterface {
             throw new BadRequestException('Password is not strong enough.');
 
         let result: PasswordStorageInterface;
-        result.salt = salt
+        let saltPassword = salt;
         
-        if (!result.salt)
-            result.salt = await this.generateSalt();
+        if (!saltPassword)
+            saltPassword = await this.generateSalt();
 
-        result.password = await CryptUtil.hashPassword(password, result.salt);
+        const passwordHash = await CryptUtil.hashPassword(password, saltPassword);
         
-        return result;
+        return {
+            salt: saltPassword,
+            password: passwordHash
+        } as PasswordStorageInterface;
     }
 
     /**

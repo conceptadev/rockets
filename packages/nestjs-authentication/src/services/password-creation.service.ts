@@ -45,7 +45,7 @@ export class PasswordCreationService implements PasswordCreationServiceInterface
     checkAttemptLeft(numOfAttempts: number = 0): number {
         
         // Get number of attempts allowed
-        const attemptsAllowed = this.config.maxPasswordAttempts;
+        const attemptsAllowed = this.config?.maxPasswordAttempts || 0;
         
         // did it reached max
         const canAttemptMore = numOfAttempts <= attemptsAllowed;
