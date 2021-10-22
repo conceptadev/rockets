@@ -1,8 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { PasswordStrengthService } from '..';
-import { AUTHENTICATION_MODULE_CONFIG } from '../config/authentication.config';
+
+import { AUTHENTICATION_MODULE_CONFIG_TOKEN } from '../config/authentication.config';
 import { AuthenticationConfigOptionsInterface } from '../interface/authentication-config-options.interface';
 import { PasswordCreationServiceInterface } from '../interface/service/password-creation.service.interface';
+import { PasswordStrengthService } from './password-strength.service';
 
 /**
  * Service with functions related to password creation
@@ -14,9 +15,9 @@ export class PasswordCreationService implements PasswordCreationServiceInterface
      * Constructor
      */
     constructor(
+        @Inject(AUTHENTICATION_MODULE_CONFIG_TOKEN)
+        private config: AuthenticationConfigOptionsInterface,
         private passwordStrengthService: PasswordStrengthService,
-        @Inject(AUTHENTICATION_MODULE_CONFIG)
-        private config: AuthenticationConfigOptionsInterface
     ) { }
 
     /**

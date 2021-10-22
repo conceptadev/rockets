@@ -1,11 +1,12 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { PasswordStorageService } from '..';
+import { Inject, Injectable } from '@nestjs/common';
 import { AccessTokenInterface } from '../interface/dto/access-token.interface';
 import { SignServiceInterface } from '../interface/service/sign.service.interface';
 import { SignDTOInterface } from '../interface/dto/signin.dto.interface';
 import { CredentialLookupServiceInterface } from '../interface/service/credential-lookup.service.interface';
 import { AuthenticationException } from '../exceptions/authentication.exception';
 import { CredentialLookupInterface } from '../interface/dto/credential-lookup.interface';
+import { PasswordStorageService } from './password-storage.service';
+import { CREDENTIAL_LOOKUP_SERVICE_TOKEN } from '../config/authentication.config';
 
 /**
  * Service with functions related to the sign in
@@ -18,6 +19,7 @@ export class SignService implements SignServiceInterface {
      */
     constructor(
         private passwordStorageService: PasswordStorageService,
+        @Inject(CREDENTIAL_LOOKUP_SERVICE_TOKEN)
         private credentialLookupServiceInterface: CredentialLookupServiceInterface
     ) { }
  

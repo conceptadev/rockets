@@ -9,7 +9,6 @@ import { SignService } from './services/sign.service';
 @Controller('sign')
 export class SignController {
     constructor(
-        @Inject()
         private signService: SignService
     ) {
 

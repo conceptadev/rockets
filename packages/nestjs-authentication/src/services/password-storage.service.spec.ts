@@ -1,18 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PasswordStrengthService } from '..';
+
 import { CryptUtil } from '../common/crypt.util';
-import { AUTHENTICATION_MODULE_CONFIG } from '../config/authentication.config';
+import { AUTHENTICATION_MODULE_CONFIG_TOKEN } from '../config/authentication.config';
 import { PasswordStrengthEnum } from '../enum/password-strength.enum';
 import { AuthenticationConfigOptionsInterface } from '../interface/authentication-config-options.interface';
 import { PasswordStorageService } from './password-storage.service';
 import { mock } from 'jest-mock-extended';
 import { PasswordStorageInterface } from '../interface/dto/password-storage.interface';
+import { PasswordStrengthService } from './password-strength.service';
 
 describe('PasswordStorageService', () => {
   let service: PasswordStorageService;
   let spyGenerateSalt: jest.SpyInstance;
   let isStrong: jest.SpyInstance;
-  let passwordStrengthService: PasswordStrengthService
+  let passwordStrengthService: PasswordStrengthService;
   
   const PASSWORD_NONE: string = "password";
   const PASSWORD_WEAK: string = "A12345678";
@@ -76,8 +77,7 @@ describe('PasswordStorageService', () => {
 
   it('PasswordStorageService.notStrong', async () => {
     
-    isStrong = jest.spyOn(passwordStrengthService, 'isStrong')
-      .mockReturnValue(false);
+    isStrong = jest.spyOn(passwordStrengthService, 'isStrong').mockReturnValue(false);
     
     try {
       // Encrypt password

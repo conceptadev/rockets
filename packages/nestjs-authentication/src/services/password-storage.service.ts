@@ -1,5 +1,5 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { PasswordStrengthService } from '..';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { PasswordStrengthService } from './password-strength.service';
 import { CryptUtil } from '../common/crypt.util';
 import { PasswordStorageInterface } from '../interface/dto/password-storage.interface';
 import { PasswordStorageServiceInterface } from '../interface/service/password-storage.service.interface';
@@ -15,6 +15,7 @@ export class PasswordStorageService implements PasswordStorageServiceInterface {
      * @param passwordStrengthService 
      */
     constructor(
+        @Inject(PasswordStrengthService)
         private passwordStrengthService: PasswordStrengthService
     ) { }
 

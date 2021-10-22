@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PasswordStrengthService } from '..';
-import { AUTHENTICATION_MODULE_CONFIG } from '../config/authentication.config';
+import { AUTHENTICATION_MODULE_CONFIG_TOKEN } from '../config/authentication.config';
 import { PasswordStrengthEnum } from '../enum/password-strength.enum';
 import { AuthenticationConfigOptionsInterface } from '../interface/authentication-config-options.interface';
 
@@ -16,7 +16,7 @@ describe('PasswordStrengthService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [{
-        provide: AUTHENTICATION_MODULE_CONFIG,
+        provide: AUTHENTICATION_MODULE_CONFIG_TOKEN,
         useValue: {
           maxPasswordAttempts: 5,
           minPasswordStrength: PasswordStrengthEnum.Medium
@@ -36,7 +36,7 @@ describe('PasswordStrengthService', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [{
-        provide: AUTHENTICATION_MODULE_CONFIG,
+        provide: AUTHENTICATION_MODULE_CONFIG_TOKEN,
         useValue: {
           maxPasswordAttempts: 5,
           minPasswordStrength: PasswordStrengthEnum.None
@@ -56,7 +56,7 @@ describe('PasswordStrengthService', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [{
-        provide: AUTHENTICATION_MODULE_CONFIG,
+        provide: AUTHENTICATION_MODULE_CONFIG_TOKEN,
         useValue: {
           maxPasswordAttempts: 5,
           minPasswordStrength: PasswordStrengthEnum.Weak
@@ -76,7 +76,7 @@ describe('PasswordStrengthService', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [{
-        provide: AUTHENTICATION_MODULE_CONFIG,
+        provide: AUTHENTICATION_MODULE_CONFIG_TOKEN,
         useValue: {
           minPasswordStrength: PasswordStrengthEnum.Medium
         }
@@ -95,7 +95,7 @@ describe('PasswordStrengthService', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [{
-        provide: AUTHENTICATION_MODULE_CONFIG,
+        provide: AUTHENTICATION_MODULE_CONFIG_TOKEN,
         useValue: {
           minPasswordStrength: PasswordStrengthEnum.Strong
         }
@@ -114,7 +114,7 @@ describe('PasswordStrengthService', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [{
-        provide: AUTHENTICATION_MODULE_CONFIG,
+        provide: AUTHENTICATION_MODULE_CONFIG_TOKEN,
         useValue: {
           minPasswordStrength: PasswordStrengthEnum.Strong
         }
@@ -133,7 +133,7 @@ describe('PasswordStrengthService', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [{
-        provide: AUTHENTICATION_MODULE_CONFIG,
+        provide: AUTHENTICATION_MODULE_CONFIG_TOKEN,
         useValue: {
           minPasswordStrength: PasswordStrengthEnum.Strong
         }
@@ -152,7 +152,7 @@ describe('PasswordStrengthService', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [{
-        provide: AUTHENTICATION_MODULE_CONFIG,
+        provide: AUTHENTICATION_MODULE_CONFIG_TOKEN,
         useValue: { }
       },
       PasswordStrengthService],
@@ -169,7 +169,7 @@ describe('PasswordStrengthService', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [{
-        provide: AUTHENTICATION_MODULE_CONFIG,
+        provide: AUTHENTICATION_MODULE_CONFIG_TOKEN,
         useValue: null
       },
       PasswordStrengthService],

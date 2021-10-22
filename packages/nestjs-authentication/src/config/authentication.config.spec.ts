@@ -1,6 +1,6 @@
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
-import { authenticationConfig, AuthenticationConfigFactory, AUTHENTICATION_MODULE_CONFIG } from './authentication.config';
+import { authenticationConfig, AuthenticationConfigFactory, AUTHENTICATION_MODULE_CONFIG_TOKEN } from './authentication.config';
 
 describe('authentication configuration', () => {
   let envOriginal: NodeJS.ProcessEnv;
@@ -16,7 +16,7 @@ describe('authentication configuration', () => {
 
   describe('options token', () => {
     it('should be defined', async () => {
-      expect(AUTHENTICATION_MODULE_CONFIG).toEqual('AUTHENTICATION_MODULE_CONFIG');
+      expect(AUTHENTICATION_MODULE_CONFIG_TOKEN).toEqual('AUTHENTICATION_MODULE_CONFIG');
     });
   });
 
