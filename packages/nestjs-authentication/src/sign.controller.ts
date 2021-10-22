@@ -1,5 +1,6 @@
 import { Controller, Inject } from '@nestjs/common';
-import { SignDTOInterface } from './interface/signin.dto.interface';
+import { AccessTokenInterface } from './interface/dto/access-token.interface';
+import { SignDTOInterface } from './interface/dto/signin.dto.interface';
 import { SignService } from './services/sign.service';
 
 /**
@@ -19,12 +20,8 @@ export class SignController {
      * @param dto
      * @returns 
      */
-    async authenticate(dto: SignDTOInterface): Promise<string> {
-        const isAuth = this.signService.authenticate(dto);
-        if (isAuth)
-            return await this.signService.retrieveAccessToken(dto);
-        
-        return "";
+    async authenticate(dto: SignDTOInterface): Promise<AccessTokenInterface> {
+        return await this.signService.authenticate(dto);
     }
 
     /**
@@ -32,7 +29,7 @@ export class SignController {
      * @param dto 
      * @returns 
      */
-    async refreshToken(dto: SignDTOInterface): Promise<string> {
+    async refreshToken(dto: SignDTOInterface): Promise<AccessTokenInterface> {
         return await this.signService.refreshAccessToken(dto);
     }
 }

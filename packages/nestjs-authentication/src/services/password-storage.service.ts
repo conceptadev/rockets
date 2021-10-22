@@ -1,8 +1,8 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PasswordStrengthService } from '..';
 import { CryptUtil } from '../common/crypt.util';
-import { PasswordStorageInterface } from '../interface/password-storage.interface';
-import { PasswordStorageServiceInterface } from '../interface/password-storage.service.interface';
+import { PasswordStorageInterface } from '../interface/dto/password-storage.interface';
+import { PasswordStorageServiceInterface } from '../interface/service/password-storage.service.interface';
 
 /**
  * Service with functions related to password security

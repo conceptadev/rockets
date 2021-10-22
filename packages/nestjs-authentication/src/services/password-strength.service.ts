@@ -3,7 +3,8 @@ import zxcvbn from 'zxcvbn'
 import { AUTHENTICATION_MODULE_CONFIG } from '../config/authentication.config';
 import { PasswordStrengthEnum } from '../enum/password-strength.enum';
 import { AuthenticationConfigOptionsInterface } from '../interface/authentication-config-options.interface';
-import { PasswordStrengthServiceInterface } from '../interface/password-strength.service.interface';
+import { PasswordStrengthServiceInterface } from '../interface/service/password-strength.service.interface';
+
 
 /**
  * Service to validate password strength
@@ -31,7 +32,7 @@ export class PasswordStrengthService implements PasswordStrengthServiceInterface
         
         // check strength of the password
         const result = zxcvbn(password);
-        console.log('minStrength', minStrength);
+        
         // Check if is strong based on configuration
         return result.score >= minStrength;
     }

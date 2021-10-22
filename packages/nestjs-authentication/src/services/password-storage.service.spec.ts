@@ -6,7 +6,7 @@ import { PasswordStrengthEnum } from '../enum/password-strength.enum';
 import { AuthenticationConfigOptionsInterface } from '../interface/authentication-config-options.interface';
 import { PasswordStorageService } from './password-storage.service';
 import { mock } from 'jest-mock-extended';
-import { PasswordStorageInterface } from '../interface/password-storage.interface';
+import { PasswordStorageInterface } from '../interface/dto/password-storage.interface';
 
 describe('PasswordStorageService', () => {
   let service: PasswordStorageService;

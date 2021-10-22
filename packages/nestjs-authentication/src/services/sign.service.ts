@@ -1,7 +1,11 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { PasswordStorageService } from '..';
-import { SignServiceInterface } from '../interface/sign.service.interface';
-import { SignDTOInterface } from '../interface/signin.dto.interface';
+import { AccessTokenInterface } from '../interface/dto/access-token.interface';
+import { SignServiceInterface } from '../interface/service/sign.service.interface';
+import { SignDTOInterface } from '../interface/dto/signin.dto.interface';
+import { CredentialLookupServiceInterface } from '../interface/service/credential-lookup.service.interface';
+import { AuthenticationException } from '../exceptions/authentication.exception';
+import { CredentialLookupInterface } from '../interface/dto/credential-lookup.interface';
 
 /**
  * Service with functions related to the sign in
@@ -13,44 +17,68 @@ export class SignService implements SignServiceInterface {
      * constructor
      */
     constructor(
-        @Inject()
-        private passwordStorageService: PasswordStorageService
+        private passwordStorageService: PasswordStorageService,
+        private credentialLookupServiceInterface: CredentialLookupServiceInterface
     ) { }
  
     /**
-     * Check if password matches 
-     * @param passwordPlain 
-     * @param passwordCrypt 
-     * @param salt 
+     * Get user form an service that implements interface and return if password os validated 
+     * @param dto 
      * @returns 
      */
-    async authenticate(singInDto: SignDTOInterface): Promise<boolean> {
+    private async getUser(dto: SignDTOInterface):Promise<CredentialLookupInterface> {
         
-        const passwordPlain: string = "";
-        const passwordCrypt: string = "";
-        const salt: string = "";
-
-        return this.passwordStorageService.validatePassword(passwordPlain, passwordCrypt, salt);
+        const credentialsLookup = await this.credentialLookupServiceInterface.getUser(dto.username);
+        
+        if (!credentialsLookup)
+            throw new AuthenticationException();
+        
+        const isValid = await this.passwordStorageService.validatePassword(dto.password, credentialsLookup.password, credentialsLookup.salt);
+        
+        if (!isValid)
+            throw new AuthenticationException();
+        
+        return credentialsLookup;
     }
 
     /**
-     * Get the access token
-     * @param username email or username
-     * @param password user password
-     * @returns 
+     * Authenticate user and return access token information
+     * @param dto 
+     * @returns Promise<AccessTokenInterface> 
      */
-    async retrieveAccessToken(singInDto: SignDTOInterface): Promise<string> {
-        return "";
+    async authenticate(dto: SignDTOInterface): Promise<AccessTokenInterface> {
+        
+        const credentialsLookup = await this.getUser(dto);
+        
+        return {
+            accessToken: credentialsLookup.accessToken,
+            expireIn: credentialsLookup.expireIn
+        } as AccessTokenInterface;
     }
 
     /**
-     * Refresh access token to increase the expiration date
-     * @param username email or username
-     * @param password user password
-     * @returns 
+     * Get the access token based on username and password
+     * @param dto dto with username and password
+     * @returns Access Token 
      */
-    async refreshAccessToken(singInDto: SignDTOInterface): Promise<string> {
-        return "";
+    async retrieveAccessToken(dto: SignDTOInterface): Promise<AccessTokenInterface> {
+        
+        //TODO: Check if there is a better way to get access token
+        const credentialsLookup = await this.getUser(dto);
+
+        return await this.credentialLookupServiceInterface.getAccessToken(credentialsLookup.username);
+    }
+
+    /**
+     * Refresh and return new access token
+     * @param dto username and password
+     * @returns access token interface
+     */
+    async refreshAccessToken(dto: SignDTOInterface): Promise<AccessTokenInterface> {
+        
+        const credentialsLookup = await this.getUser(dto);
+
+        return await this.credentialLookupServiceInterface.refreshToken(credentialsLookup.username);
     }
 
 }
