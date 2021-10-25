@@ -1,10 +1,15 @@
-import { Inject, Injectable, Module } from '@nestjs/common';
+import { Injectable, Module } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+
 import { AuthenticationModule } from './authentication.module';
-import { AuthenticationConfigOptionsInterface } from './interface/authentication-config-options.interface';
+import {
+    AuthenticationConfigOptionsInterface
+} from './interface/authentication-config-options.interface';
 import { AccessTokenInterface } from './interface/dto/access-token.interface';
 import { CredentialLookupInterface } from './interface/dto/credential-lookup.interface';
-import { CredentialLookupServiceInterface } from './interface/service/credential-lookup.service.interface';
+import {
+    CredentialLookupServiceInterface
+} from './interface/service/credential-lookup.service.interface';
 import { SignController } from './sign.controller';
 
 const test: AuthenticationConfigOptionsInterface = {
@@ -27,9 +32,7 @@ class InjectTest {
 
 }
 @Injectable()
-class TestLookup implements CredentialLookupServiceInterface {
-  
-
+class UserLookup implements CredentialLookupServiceInterface {
   async getUser(username: string): Promise<CredentialLookupInterface> {
     const user: CredentialLookupInterface = {
       username: USERNAME,
@@ -52,7 +55,7 @@ class TestLookup implements CredentialLookupServiceInterface {
 }
  
 @Injectable()
-class TestLookupInjected extends TestLookup {
+class TestLookupInjected extends UserLookup {
   constructor(
     private injectTest: InjectTest) {
     super()
@@ -63,12 +66,12 @@ class TestLookupInjected extends TestLookup {
 @Module({
   providers: [
     InjectTest,
-    TestLookup,
+    UserLookup,
     TestLookupInjected
   ],
   exports: [
     InjectTest,
-    TestLookup,
+    UserLookup,
     TestLookupInjected,
   ],
 })
@@ -76,15 +79,13 @@ export class TestModule { }
 
 describe('AuthenticationModule', () => {
   let controller: SignController;
-  let injectTest: InjectTest;
-  
   
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
         TestModule,
         AuthenticationModule.forRoot({
-          credentialLookupService: new TestLookup()
+          credentialLookupService: new UserLookup()
         })
       ],
     }).compile();

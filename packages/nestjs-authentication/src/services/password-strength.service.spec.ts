@@ -1,9 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PasswordStrengthService } from '..';
+
 import { AUTHENTICATION_MODULE_CONFIG_TOKEN } from '../config/authentication.config';
 import { PasswordStrengthEnum } from '../enum/password-strength.enum';
-import { AuthenticationConfigOptionsInterface } from '../interface/authentication-config-options.interface';
-
+import { PasswordStrengthService } from './password-strength.service';
 
 describe('PasswordStrengthService', () => {
   let service: PasswordStrengthService;

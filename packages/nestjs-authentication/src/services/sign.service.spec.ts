@@ -1,11 +1,14 @@
 import { mock } from 'jest-mock-extended';
-import { PasswordStorageService } from '..';
+
 import { AuthenticationException } from '../exceptions/authentication.exception';
 import { CredentialLookupInterface } from '../interface/dto/credential-lookup.interface';
 import { SignDTOInterface } from '../interface/dto/signin.dto.interface';
-import { CredentialLookupServiceInterface } from '../interface/service/credential-lookup.service.interface';
+import {
+    CredentialLookupServiceInterface
+} from '../interface/service/credential-lookup.service.interface';
+import { PasswordStorageService } from './password-storage.service';
 import { SignService } from './sign.service';
- 
+
 describe('SignServiceService', () => {
   let service: SignService;
   let passwordStorageService: PasswordStorageService;

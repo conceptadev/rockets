@@ -1,12 +1,18 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { AUTHENTICATION_MODULE_CONFIG_TOKEN } from '../config/authentication.config';
-import { AuthenticationConfigOptionsInterface } from '../interface/authentication-config-options.interface';
-import { PasswordCreationServiceInterface } from '../interface/service/password-creation.service.interface';
+import {
+    AuthenticationConfigOptionsInterface
+} from '../interface/authentication-config-options.interface';
+import {
+    PasswordCreationServiceInterface
+} from '../interface/service/password-creation.service.interface';
 import { PasswordStrengthService } from './password-strength.service';
 
 /**
  * Service with functions related to password creation
+ * to check if password is strong, and the number of attempts user can do to update a password
+ * 
  */
 @Injectable()
 export class PasswordCreationService implements PasswordCreationServiceInterface {
@@ -15,9 +21,9 @@ export class PasswordCreationService implements PasswordCreationServiceInterface
      * Constructor
      */
     constructor(
+        private passwordStrengthService: PasswordStrengthService,
         @Inject(AUTHENTICATION_MODULE_CONFIG_TOKEN)
         private config: AuthenticationConfigOptionsInterface,
-        private passwordStrengthService: PasswordStrengthService,
     ) { }
 
     /**

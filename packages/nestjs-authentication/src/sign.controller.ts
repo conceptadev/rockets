@@ -1,4 +1,4 @@
-import { Controller, Inject } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { AccessTokenInterface } from './interface/dto/access-token.interface';
 import { SignDTOInterface } from './interface/dto/signin.dto.interface';
 import { SignService } from './services/sign.service';
@@ -8,11 +8,14 @@ import { SignService } from './services/sign.service';
  */
 @Controller('sign')
 export class SignController {
+
+    /**
+     * Constructor
+     * @param signService 
+     */
     constructor(
         private signService: SignService
-    ) {
-
-    }
+    ) { }
 
     /**
      * Method to authenticate user and return access token

@@ -66,6 +66,7 @@ export class SignService implements SignServiceInterface {
     async retrieveAccessToken(dto: SignDTOInterface): Promise<AccessTokenInterface> {
         
         //TODO: Check if there is a better way to get access token
+        // credentialsLookup.accessToken maybe
         const credentialsLookup = await this.getUser(dto);
 
         return await this.credentialLookupServiceInterface.getAccessToken(credentialsLookup.username);

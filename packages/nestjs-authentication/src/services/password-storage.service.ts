@@ -1,23 +1,16 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { PasswordStrengthService } from './password-strength.service';
+import { Injectable } from '@nestjs/common';
+
 import { CryptUtil } from '../common/crypt.util';
 import { PasswordStorageInterface } from '../interface/dto/password-storage.interface';
-import { PasswordStorageServiceInterface } from '../interface/service/password-storage.service.interface';
+import {
+    PasswordStorageServiceInterface
+} from '../interface/service/password-storage.service.interface';
 
 /**
  * Service with functions related to password security
  */
 @Injectable()
 export class PasswordStorageService implements PasswordStorageServiceInterface {
-
-    /**
-     * Constructor 
-     * @param passwordStrengthService 
-     */
-    constructor(
-        @Inject(PasswordStrengthService)
-        private passwordStrengthService: PasswordStrengthService
-    ) { }
 
     /**
      * Generate Salts to safeguard passwords in storage
@@ -34,12 +27,6 @@ export class PasswordStorageService implements PasswordStorageServiceInterface {
      * @param salt Use salts to safeguard passwords in storage
      */
     async encrypt(password: string, salt?: string): Promise<PasswordStorageInterface> {
-
-        //TODO: should we have this here?
-        if (!this.passwordStrengthService.isStrong(password))
-            throw new BadRequestException('Password is not strong enough.');
-
-        let result: PasswordStorageInterface;
         let saltPassword = salt;
         
         if (!saltPassword)

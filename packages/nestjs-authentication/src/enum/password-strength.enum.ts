@@ -1,3 +1,6 @@
+/**
+ * Enum for password strength
+ */
 export enum PasswordStrengthEnum {
     None = 0,
     Weak = 1,

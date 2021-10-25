@@ -24,8 +24,12 @@ export type AuthenticationConfigFactory = ConfigFactory<AuthenticationConfigOpti
  *
  * ### example
  * ```ts
- *  ...
- * })
+ *  
+ * 
+ * 
+ * 
+ * 
+ * 
  * ```
  */
 export const authenticationConfig: AuthenticationConfigFactory = registerAs(

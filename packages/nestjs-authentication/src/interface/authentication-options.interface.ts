@@ -1,8 +1,15 @@
-import { Abstract, DynamicModule, ForwardReference, Type } from "@nestjs/common";
-import { AuthenticationConfigOptionsInterface } from "./authentication-config-options.interface";
-import { CredentialLookupServiceInterface } from "./service/credential-lookup.service.interface";
+import { Abstract, DynamicModule, ForwardReference, Type } from '@nestjs/common';
 
+import { AuthenticationConfigOptionsInterface } from './authentication-config-options.interface';
+import { CredentialLookupServiceInterface } from './service/credential-lookup.service.interface';
+
+/**
+ * Interface to be iim
+ */
 export interface CredentialLookupProvider {
+    /**
+     * Imports modules that exports instance of the provider to be injected
+     */
     imports?: Array<Type<any> | DynamicModule | Promise<DynamicModule> | ForwardReference>;
     /**
     * Factory function that returns an instance of the provider to be injected.

@@ -1,9 +1,15 @@
 import { mock } from 'jest-mock-extended';
-import { PasswordCreationService, PasswordStrengthService } from '..';
+
 import { PasswordStrengthEnum } from '../enum/password-strength.enum';
-import { AuthenticationConfigOptionsInterface } from '../interface/authentication-config-options.interface';
+import {
+    AuthenticationConfigOptionsInterface
+} from '../interface/authentication-config-options.interface';
+import { PasswordCreationService } from './password-creation.service';
+import { PasswordStrengthService } from './password-strength.service';
 
 describe('PasswordCreationService', () => {
+  const PASSWORD_MEDIUM: string = "AS12378";
+  
   let service: PasswordCreationService;
   let passwordStrengthService: PasswordStrengthService;
   let spyIsStrong: jest.SpyInstance;
@@ -24,8 +30,40 @@ describe('PasswordCreationService', () => {
     expect(service).toBeDefined();
   });
 
-  it('PasswordCreationService.isStrong', () => {
-
-    expect(service).toBeDefined();
+  it('PasswordCreationService.isStrong', async () => {
+    await service.isStrong(PASSWORD_MEDIUM);
+    
+    expect(spyIsStrong).toBeCalled();
   });
+
+  it('PasswordCreationService.checkAttempt', () => {
+    
+    let canAttemptOneMore = service.checkAttempt(1);
+    expect(canAttemptOneMore).toBe(true);
+
+    canAttemptOneMore = service.checkAttempt(2);
+    expect(canAttemptOneMore).toBe(true);
+
+    canAttemptOneMore = service.checkAttempt(5);
+    expect(canAttemptOneMore).toBe(true);
+
+    canAttemptOneMore = service.checkAttempt(6);
+    expect(canAttemptOneMore).toBe(false);
+  });
+
+  it('PasswordCreationService.checkAttempt', () => {
+    
+    let attemptsLeft = service.checkAttemptLeft(1);
+    expect(attemptsLeft).toBe(4);
+
+    attemptsLeft = service.checkAttemptLeft(2);
+    expect(attemptsLeft).toBe(3);
+
+    attemptsLeft = service.checkAttemptLeft(5);
+    expect(attemptsLeft).toBe(0);
+
+    attemptsLeft = service.checkAttemptLeft(6);
+    expect(attemptsLeft).toBe(-1);
+  });
+  
 });
