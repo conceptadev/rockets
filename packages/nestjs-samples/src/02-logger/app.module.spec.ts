@@ -4,10 +4,10 @@ import {
   LoggerSentryTransport,
   LoggerService,
 } from '@rockts-org/nestjs-logger';
-import { OrderService } from './order/order.service';
+import { OrderController } from './order/order.controller';
 
 describe('AppModule', () => {
-  let ordersService: OrderService;
+  let orderController: OrderController;
   let logService: jest.SpyInstance;
 
   beforeEach(async () => {
@@ -15,7 +15,7 @@ describe('AppModule', () => {
       imports: [AppModule],
     }).compile();
 
-    ordersService = app.get<OrderService>(OrderService);
+    orderController = app.get<OrderController>(OrderController);
 
     const loggerSentryTransport = app.get(LoggerSentryTransport);
 
@@ -36,7 +36,7 @@ describe('AppModule', () => {
 
   describe('Order Controller', () => {
     it('Create order log', () => {
-      ordersService.create({
+      orderController.create({
         description: 'Description to log',
         name: 'Order 1',
       });
