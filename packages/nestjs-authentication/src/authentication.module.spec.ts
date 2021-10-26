@@ -94,6 +94,11 @@ describe('AuthenticationModule', () => {
 
   });
 
+  afterEach(async () => {
+    jest.clearAllMocks();
+
+  });
+
   it('should be defined', () => {
     expect(controller).toBeDefined();
     
@@ -133,5 +138,197 @@ describe('AuthenticationModule', () => {
     });
 
     expect(authResponse.accessToken).toBe(ACCESS_TOKEN);
+  });
+
+  it('AuthenticationModule.Authenticate.forRootAsync.fail', async () => {
+    let failed: boolean = false;
+    try {
+        
+      const module: TestingModule = await Test.createTestingModule({
+        imports: [
+          TestModule,
+          AuthenticationModule.forRootAsync({
+            credentialLookupProvider: {
+              inject:[InjectTest],
+              useFactory: async (injectTest: InjectTest) => {
+                return new TestLookupInjected(injectTest);
+              }
+            }
+          })
+        ],
+      }).compile();
+
+    } catch (err) {
+      failed = true;
+    }
+    
+    expect(failed).toBeTruthy();
+
+  });
+
+  it('AuthenticationModule.Authenticate.forRootAsync.fail_1', async () => {
+    let failed: boolean = false;
+    try {
+        
+      const module: TestingModule = await Test.createTestingModule({
+        imports: [
+          AuthenticationModule.forRootAsync({
+            credentialLookupProvider: {
+              useFactory: async (injectTest: InjectTest) => {
+                return new TestLookupInjected(injectTest);
+              }
+            }
+          })
+        ],
+      }).compile();
+      
+      const test = module.get<TestLookupInjected>(TestLookupInjected);
+
+    } catch (err) {
+      failed = true;
+    }
+    
+    expect(failed).toBeTruthy();
+
+  });
+
+  it('AuthenticationModule.Authenticate.forRootAsync.fail_2', async () => {
+    let failed: boolean = false;
+    try {
+        
+      const module: TestingModule = await Test.createTestingModule({
+        imports: [
+          AuthenticationModule.forRootAsync({
+            credentialLookupProvider: null
+          })
+        ],
+      }).compile();
+
+    } catch (err) {
+      failed = true;
+    }
+    
+    expect(failed).toBeTruthy();
+
+  });
+
+  it('AuthenticationModule.Authenticate.forRootAsync.fail_3', async () => {
+    let failed: boolean = false;
+    try {
+        
+      const module: TestingModule = await Test.createTestingModule({
+        imports: [
+          TestModule,
+          AuthenticationModule.forRootAsync({
+            credentialLookupProvider: {
+              imports:[],
+              inject: [],
+              useFactory: null,
+            }
+          })
+        ],
+      }).compile();
+
+    } catch (err) {
+      failed = true;
+    }
+    
+    expect(failed).toBeTruthy();
+
+  });
+  it('AuthenticationModule.Authenticate.forRootAsync.fail_4', async () => {
+    let failed: boolean = false;
+    try {
+        
+      const module: TestingModule = await Test.createTestingModule({
+        imports: [
+          TestModule,
+          AuthenticationModule.forRootAsync({
+            credentialLookupProvider: {
+              imports:[],
+              inject: null,
+              useFactory: null,
+            }
+          })
+        ],
+      }).compile();
+
+    } catch (err) {
+      failed = true;
+    }
+    
+    expect(failed).toBeTruthy();
+  });
+
+  it('AuthenticationModule.Authenticate.forRootAsync.fail_7', async () => {
+    let failed: boolean = false;
+    
+    try {
+        
+      const module: TestingModule = await Test.createTestingModule({
+        imports: [
+          TestModule,
+          AuthenticationModule.forRootAsync(null)
+        ],
+      }).compile();
+
+    } catch (err) {
+      failed = true;
+    }
+    
+    expect(failed).toBeTruthy();
+
+  });
+
+  it('AuthenticationModule.Authenticate.forRootAsyncInject', async () => {
+    
+    let failed = false;
+    try {
+      const module: TestingModule = await Test.createTestingModule({
+        imports: [
+      
+          AuthenticationModule.forRootAsync({
+            credentialLookupProvider: {
+              imports: [],
+              useFactory: async (injectTest: InjectTest) => {
+                return new TestLookupInjected(injectTest);
+              }
+            }
+          })
+        ],
+      }).compile();
+
+      const test = module.get<TestLookupInjected>(TestLookupInjected);
+
+    } catch (err) {
+      failed = true;
+    }
+    expect(failed).toBeTruthy();
+  });
+
+  it('AuthenticationModule.Authenticate.forRootAsyncInject', async () => {
+    
+    let failed = false;
+    try {
+      const module: TestingModule = await Test.createTestingModule({
+        imports: [
+      
+          AuthenticationModule.forRootAsync({
+            credentialLookupProvider: {
+              imports: null,
+              useFactory: async (injectTest: InjectTest) => {
+                return new TestLookupInjected(injectTest);
+              }
+            }
+          })
+        ],
+      }).compile();
+
+      const test = module.get<TestLookupInjected>(TestLookupInjected);
+
+    } catch (err) {
+      failed = true;
+    }
+    expect(failed).toBeTruthy();
   });
 });

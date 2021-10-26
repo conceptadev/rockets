@@ -1,6 +1,7 @@
 import { mock } from 'jest-mock-extended';
 
 import { AuthenticationException } from '../exceptions/authentication.exception';
+import { AccessTokenInterface } from '../interface/dto/access-token.interface';
 import { CredentialLookupInterface } from '../interface/dto/credential-lookup.interface';
 import { SignDTOInterface } from '../interface/dto/signin.dto.interface';
 import {
@@ -15,7 +16,8 @@ describe('SignServiceService', () => {
   let credentialLookupServiceInterface: CredentialLookupServiceInterface;
   
   let spyValidatePassword: jest.SpyInstance;
-  let spyGetUser: jest.SpyInstance; 
+  let spyGetUser: jest.SpyInstance;
+  let spyRetrieveToken: jest.SpyInstance;
   let spyRefreshToken: jest.SpyInstance;
   
   let credentialsLookup: CredentialLookupInterface = {
@@ -76,5 +78,33 @@ describe('SignServiceService', () => {
       return;
     }
     fail();
+  });
+
+  it('PasswordCreationService.retrieveAccessToken', async () => {
+    
+    spyGetUser = jest.spyOn(credentialLookupServiceInterface, "getUser").mockResolvedValueOnce(credentialsLookup);
+    spyRetrieveToken = jest.spyOn(credentialLookupServiceInterface, "getAccessToken").mockResolvedValueOnce({
+      accessToken: credentialsLookup.accessToken
+    } as AccessTokenInterface);
+    
+    const result = await service.retrieveAccessToken(signInDto);
+    
+    expect(spyGetUser).toBeCalled();
+    expect(spyRetrieveToken).toBeCalledWith(credentialsLookup.username);
+
+  });
+
+  it('PasswordCreationService.retrieveAccessToken', async () => {
+    
+    spyGetUser = jest.spyOn(credentialLookupServiceInterface, "getUser").mockResolvedValueOnce(credentialsLookup);
+    spyRetrieveToken = jest.spyOn(credentialLookupServiceInterface, "refreshToken").mockResolvedValueOnce({
+      accessToken: credentialsLookup.accessToken
+    } as AccessTokenInterface);
+    
+    const result = await service.refreshAccessToken(signInDto);
+    
+    expect(spyGetUser).toBeCalled();
+    expect(spyRetrieveToken).toBeCalledWith(credentialsLookup.username);
+
   });
 });

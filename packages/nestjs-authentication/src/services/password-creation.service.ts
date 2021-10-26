@@ -37,7 +37,8 @@ export class PasswordCreationService implements PasswordCreationServiceInterface
 
 
     /**
-     * Check if attempt is valid
+     * Check if number of current attempt is allowed based on the amount of attempts left
+     * if the number of attempts left is greater then 
      * @returns Number of attempts user has to try
      */
     checkAttempt(numOfAttempts: number = 0): boolean {
@@ -51,8 +52,8 @@ export class PasswordCreationService implements PasswordCreationServiceInterface
      */
     checkAttemptLeft(numOfAttempts: number = 0): number {
         
-        // Get number of attempts allowed
-        const attemptsAllowed = this.config?.maxPasswordAttempts || 0;
+        // Get number of max attempts allowed
+        const attemptsAllowed = this.config.maxPasswordAttempts;
         
         // did it reached max
         const canAttemptMore = numOfAttempts <= attemptsAllowed;

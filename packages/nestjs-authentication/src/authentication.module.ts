@@ -61,10 +61,10 @@ import { SignController } from './sign.controller';
  * 
  * ```ts
  *  imports: [
-      AuthenticationModule.forRoot({
-        credentialLookupService: new UserLookupService()
-      })
-    ],
+ *     AuthenticationModule.forRoot({
+ *       credentialLookupService: new UserLookupService()
+ *     })
+ *   ],
  * ```
  */
 @Module({
@@ -124,7 +124,10 @@ export class AuthenticationModule {
   public static forRootAsync(options: AuthenticationOptionsAsyncInterface): DynamicModule {
     return {
       module: AuthenticationModule,
-      imports:[...options.credentialLookupProvider?.imports],
+      imports:
+        options.credentialLookupProvider?.imports?.length > 0
+          ? [...options.credentialLookupProvider.imports]
+          : [],
       providers: [
         PasswordStrengthService,
         PasswordStorageService,
@@ -138,7 +141,7 @@ export class AuthenticationModule {
         {
           provide: CREDENTIAL_LOOKUP_SERVICE_TOKEN,
           inject: options.credentialLookupProvider?.inject,
-          useFactory: options.credentialLookupProvider?.useFactory
+          useFactory: options.credentialLookupProvider.useFactory
         }
       ],
       exports: [

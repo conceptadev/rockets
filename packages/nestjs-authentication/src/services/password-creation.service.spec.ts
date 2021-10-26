@@ -38,7 +38,13 @@ describe('PasswordCreationService', () => {
 
   it('PasswordCreationService.checkAttempt', () => {
     
-    let canAttemptOneMore = service.checkAttempt(1);
+    let canAttemptOneMore = service.checkAttempt(0);
+    expect(canAttemptOneMore).toBe(true);
+
+    canAttemptOneMore = service.checkAttempt();
+    expect(canAttemptOneMore).toBe(true);
+
+    canAttemptOneMore = service.checkAttempt(1);
     expect(canAttemptOneMore).toBe(true);
 
     canAttemptOneMore = service.checkAttempt(2);
@@ -55,6 +61,12 @@ describe('PasswordCreationService', () => {
     
     let attemptsLeft = service.checkAttemptLeft(1);
     expect(attemptsLeft).toBe(4);
+
+    attemptsLeft = service.checkAttemptLeft(0);
+    expect(attemptsLeft).toBe(5);
+
+    attemptsLeft = service.checkAttemptLeft();
+    expect(attemptsLeft).toBe(5);
 
     attemptsLeft = service.checkAttemptLeft(2);
     expect(attemptsLeft).toBe(3);
