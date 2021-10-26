@@ -7,7 +7,9 @@ import { SignDTOInterface } from "./signin.dto.interface"
  */
 export interface CredentialLookupInterface
     extends Partial<Pick<SignDTOInterface, 'username' | 'password'>>,
-    Partial<Pick<PasswordStorageInterface, 'salt'>>,
-    Partial<Pick<AccessTokenInterface, 'accessToken' | 'expireIn' >>{
+    Partial<Pick<PasswordStorageInterface, 'salt'>>
+    {
+    
+    id: string;
     
 }

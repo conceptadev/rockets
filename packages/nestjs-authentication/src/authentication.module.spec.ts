@@ -28,29 +28,38 @@ const PASSWORD_MEDIUM: string = "AS12378";
 const ACCESS_TOKEN: string = "TestLookup_AccessToken";
 
 @Injectable()
-class InjectTest {
+class InjectTest { }
 
-}
 @Injectable()
 class UserLookup implements CredentialLookupServiceInterface {
   async getUser(username: string): Promise<CredentialLookupInterface> {
     const user: CredentialLookupInterface = {
+      id:"1",
       username: USERNAME,
       password: '$2b$10$9y97gOLiusyKnzu7LRdMmOCVpp/xwddaa8M6KtgenvUDao5I.8mJS',
       salt: '$2b$10$9y97gOLiusyKnzu7LRdMmO',
-      accessToken: ACCESS_TOKEN
     }
     return new Promise<CredentialLookupInterface>((resolve, reject) => {
       resolve(user);
     });
   }
     
-  async getAccessToken(username: string): Promise<AccessTokenInterface>{
-    return null;
+  async issueAccessToken(username: string): Promise<AccessTokenInterface>{
+    return new Promise<AccessTokenInterface>((resolve, reject) => {
+      resolve({
+        accessToken: ACCESS_TOKEN,
+        expireIn: new Date()
+      });
+    });
    }
     
   async refreshToken(accessToken: string): Promise<AccessTokenInterface>{
-    return null;
+    return new Promise<AccessTokenInterface>((resolve, reject) => {
+      resolve({
+        accessToken: ACCESS_TOKEN,
+        expireIn: new Date()
+      });
+    });
    }
 }
  
@@ -254,6 +263,7 @@ describe('AuthenticationModule', () => {
       }).compile();
 
     } catch (err) {
+      console.log(err);
       failed = true;
     }
     

@@ -7,9 +7,11 @@ import { AuthenticationException } from '../exceptions/authentication.exception'
 import { CredentialLookupInterface } from '../interface/dto/credential-lookup.interface';
 import { PasswordStorageService } from './password-storage.service';
 import { CREDENTIAL_LOOKUP_SERVICE_TOKEN } from '../config/authentication.config';
+import { AuthenticationResponseInterface } from '../interface/dto/authentication-response.interface';
 
 /**
  * Service with functions related to the sign in
+ * This should be used to authenticate user a user
  */
 @Injectable()
 export class SignService implements SignServiceInterface {
@@ -28,19 +30,56 @@ export class SignService implements SignServiceInterface {
      * @param dto 
      * @returns 
      */
-    private async getUser(dto: SignDTOInterface):Promise<CredentialLookupInterface> {
+    private async getCredentialsInformation(dto: SignDTOInterface):Promise<CredentialLookupInterface> {
         
+        // Get user information with encrypt password and salt
         const credentialsLookup = await this.credentialLookupServiceInterface.getUser(dto.username);
         
         if (!credentialsLookup)
             throw new AuthenticationException();
         
-        const isValid = await this.passwordStorageService.validatePassword(dto.password, credentialsLookup.password, credentialsLookup.salt);
+        return credentialsLookup;
+    }
+
+    /**
+     * Check if password is valid
+     * @param passwordPlain Password not encrypted
+     * @param passwordCrypt Password Encrypted
+     * @param salt "Salt to decrypt password"
+     * @returns 
+     */
+    private async validatePassword(passwordPlain: string, passwordCrypt: string, salt: string):Promise<boolean> {
+         
+        // validate password 
+        const isValid = await this.passwordStorageService.validatePassword(passwordPlain, passwordCrypt, salt);
         
         if (!isValid)
             throw new AuthenticationException();
         
-        return credentialsLookup;
+        return isValid;
+        
+    }
+
+    /**
+     * Issue the access token based on credential information
+     * @param credentialLookup Object with user information
+     * @returns 
+     */
+    private async issueAccessToken(credentialLookup: CredentialLookupInterface):Promise<AuthenticationResponseInterface> {
+         
+        // Issue a access token for the authenticated user
+        const accessToken = await this.credentialLookupServiceInterface.issueAccessToken(credentialLookup.username);
+
+        if (!accessToken)
+            throw new AuthenticationException("Error on access token.");
+        
+        return {
+            id: credentialLookup.id,
+            username: credentialLookup.username,
+            accessToken: accessToken.accessToken,
+            expireIn: accessToken.expireIn
+        } as AuthenticationResponseInterface;
+
     }
 
     /**
@@ -48,28 +87,16 @@ export class SignService implements SignServiceInterface {
      * @param dto 
      * @returns Promise<AccessTokenInterface> 
      */
-    async authenticate(dto: SignDTOInterface): Promise<AccessTokenInterface> {
+    async authenticate(dto: SignDTOInterface): Promise<AuthenticationResponseInterface> {
         
-        const credentialsLookup = await this.getUser(dto);
-        
-        return {
-            accessToken: credentialsLookup.accessToken,
-            expireIn: credentialsLookup.expireIn
-        } as AccessTokenInterface;
-    }
+        // Get user information
+        const credentialsLookup = await this.getCredentialsInformation(dto);
 
-    /**
-     * Get the access token based on username and password
-     * @param dto dto with username and password
-     * @returns Access Token 
-     */
-    async retrieveAccessToken(dto: SignDTOInterface): Promise<AccessTokenInterface> {
+        // validate password or throw an error and error if not valid
+        await this.validatePassword(dto.password, credentialsLookup.password, credentialsLookup.salt);
         
-        //TODO: Check if there is a better way to get access token
-        // credentialsLookup.accessToken maybe
-        const credentialsLookup = await this.getUser(dto);
-
-        return await this.credentialLookupServiceInterface.getAccessToken(credentialsLookup.username);
+        // Issue a access token for the authenticated user
+        return await this.issueAccessToken(credentialsLookup);
     }
 
     /**
@@ -77,11 +104,7 @@ export class SignService implements SignServiceInterface {
      * @param dto username and password
      * @returns access token interface
      */
-    async refreshAccessToken(dto: SignDTOInterface): Promise<AccessTokenInterface> {
-        
-        const credentialsLookup = await this.getUser(dto);
-
-        return await this.credentialLookupServiceInterface.refreshToken(credentialsLookup.username);
+    async refreshAccessToken(accessToken: string): Promise<AccessTokenInterface> {
+        return await this.credentialLookupServiceInterface.refreshToken(accessToken);
     }
-
 }

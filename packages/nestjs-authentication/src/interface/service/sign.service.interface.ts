@@ -1,4 +1,5 @@
 import { AccessTokenInterface } from "../dto/access-token.interface";
+import { AuthenticationResponseInterface } from "../dto/authentication-response.interface";
 import { SignDTOInterface } from "../dto/signin.dto.interface";
 
 /**
@@ -10,18 +11,12 @@ export interface SignServiceInterface {
      * @param signInDTO 
      * @returns 
      */
-    authenticate(signInDTO: SignDTOInterface): Promise<AccessTokenInterface>;
-    /**
-     * Get the access token
-     * @param signInDTO 
-     * @returns 
-     */
-    retrieveAccessToken(signInDTO: SignDTOInterface):  Promise<AccessTokenInterface>;
+    authenticate(signInDTO: SignDTOInterface): Promise<AuthenticationResponseInterface>;
+     
     /**
      * Refresh access token to increase the expiration date
-     * @param signInDTO 
+     * @param accessToken 
      * @returns 
      */
-    
-    refreshAccessToken(signInDTO: SignDTOInterface):  Promise<AccessTokenInterface>;
+    refreshAccessToken(accessToken: string):  Promise<AccessTokenInterface>;
 }

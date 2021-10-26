@@ -9,7 +9,7 @@ export interface CredentialLookupServiceInterface {
     
     getUser(username: string): Promise<CredentialLookupInterface>;
     
-    getAccessToken(username: string): Promise<AccessTokenInterface>;
+    issueAccessToken(username: string): Promise<AccessTokenInterface>;
     
     refreshToken(accessToken: string):  Promise<AccessTokenInterface>;
 }
