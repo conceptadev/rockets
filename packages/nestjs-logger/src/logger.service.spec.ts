@@ -174,7 +174,7 @@ describe('LoggerService', () => {
     it('loggerService.log', async () => {
       await loggerService.log(errorMessage);
 
-      expect(spyLog).toHaveBeenCalledWith(errorMessage, undefined);
+      expect(spyLog).toHaveBeenCalledWith(errorMessage, '');
       expect(spyTransportLog).toBeCalledTimes(1);
     });
 
