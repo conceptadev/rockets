@@ -17,7 +17,6 @@ describe('AppController (e2e)', () => {
     let spySync: jest.SpyInstance;
 
     beforeEach(async () => {
-      
       const moduleFixture: TestingModule = await Test.createTestingModule({
         imports: [AppModule],
       }).compile();
@@ -47,15 +46,13 @@ describe('AppController (e2e)', () => {
 
       return;
     });
-
   });
 
   describe('Fastify', () => {
     let app: NestFastifyApplication;
     let spySync: jest.SpyInstance;
-    
+
     beforeEach(async () => {
-     
       const moduleFixture: TestingModule = await Test.createTestingModule({
         imports: [AppModule],
       }).compile();
@@ -90,6 +87,5 @@ describe('AppController (e2e)', () => {
           expect(spySync).toHaveBeenCalledTimes(1);
         });
     });
-
   });
 });

@@ -1,5 +1,5 @@
 import { LogLevel } from '@nestjs/common';
-import { NodeOptions as SentryNodeOptions } from '@sentry/node/dist/types';
+import { NodeOptions as SentryNodeOptions } from '@sentry/node';
 import { Severity as SentrySeverity } from '@sentry/types';
 
 /**

@@ -20,7 +20,7 @@ export class OrderService {
   ];
 
   constructor(@Inject(LoggerService) private loggerService: LoggerService) {
-    this.loggerService.setContext(OrderService.name)
+    this.loggerService.setContext(OrderService.name);
   }
 
   create(createOrderDto: CreateOrderDto) {
@@ -31,7 +31,7 @@ export class OrderService {
     this.orders.push(order);
 
     this.loggerService.log(`A order was created.`);
-    
+
     return order;
   }
 }

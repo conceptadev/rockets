@@ -2436,6 +2436,11 @@
   resolved "https://registry.yarnpkg.com/@sentry/types/-/types-6.13.2.tgz#8388d5b92ea8608936e7aae842801dc90e0184e6"
   integrity sha512-6WjGj/VjjN8LZDtqJH5ikeB1o39rO1gYS6anBxiS3d0sXNBb3Ux0pNNDFoBxQpOhmdDHXYS57MEptX9EV82gmg==
 
+"@sentry/types@^6.13.3":
+  version "6.13.3"
+  resolved "https://registry.yarnpkg.com/@sentry/types/-/types-6.13.3.tgz#63ad5b6735b0dfd90b3a256a9f8e77b93f0f66b2"
+  integrity sha512-Vrz5CdhaTRSvCQjSyIFIaV9PodjAVFkzJkTRxyY7P77RcegMsRSsG1yzlvCtA99zG9+e6MfoJOgbOCwuZids5A==
+
 "@sentry/utils@6.13.2":
   version "6.13.2"
   resolved "https://registry.yarnpkg.com/@sentry/utils/-/utils-6.13.2.tgz#fb8010e7b67cc8c084d8067d64ef25289269cda5"
@@ -5904,6 +5909,27 @@ fastify@3.21.6:
     pino "^6.13.0"
     proxy-addr "^2.0.7"
     readable-stream "^3.4.0"
+    rfdc "^1.1.4"
+    secure-json-parse "^2.0.0"
+    semver "^7.3.2"
+    tiny-lru "^7.0.0"
+
+fastify@^3.22.1:
+  version "3.22.1"
+  resolved "https://registry.yarnpkg.com/fastify/-/fastify-3.22.1.tgz#0d674dad8538af6cc18caf38726ce26b609ad00c"
+  integrity sha512-TeA4+TzI7VuJrjTNqoxtSXwPEYfCwpT8j9Z3j9WrL8nrt+1bE9G0rP9hLJyvbg4it56p68YsHVhKOee69xyfmA==
+  dependencies:
+    "@fastify/ajv-compiler" "^1.0.0"
+    abstract-logging "^2.0.0"
+    avvio "^7.1.2"
+    fast-json-stringify "^2.5.2"
+    fastify-error "^0.3.0"
+    fastify-warning "^0.2.0"
+    find-my-way "^4.1.0"
+    flatstr "^1.0.12"
+    light-my-request "^4.2.0"
+    pino "^6.13.0"
+    proxy-addr "^2.0.7"
     rfdc "^1.1.4"
     secure-json-parse "^2.0.0"
     semver "^7.3.2"
