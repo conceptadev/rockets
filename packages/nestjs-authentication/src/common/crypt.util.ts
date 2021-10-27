@@ -4,8 +4,6 @@ import * as bcrypt from 'bcrypt';
  * Abstract class with functions to encapsulate encrypt methods
  */
 export abstract class CryptUtil {
-
-
   /**
    * Generate Salt
    * @returns Generate
@@ -15,10 +13,10 @@ export abstract class CryptUtil {
   }
 
   /**
-   * 
+   *
    * @param password Hash password
-   * @param salt 
-   * @returns 
+   * @param salt
+   * @returns
    */
   static async hashPassword(password: string, salt: string): Promise<string> {
     return bcrypt.hash(password, salt);
@@ -26,15 +24,15 @@ export abstract class CryptUtil {
 
   /**
    * Validate password with the hash password
-   * @param passwordPlain 
-   * @param passwordCrypt 
-   * @param salt 
-   * @returns 
+   * @param passwordPlain
+   * @param passwordCrypt
+   * @param salt
+   * @returns
    */
   static async validatePassword(
     passwordPlain: string,
     passwordCrypt: string,
-    salt: string
+    salt: string,
   ): Promise<boolean> {
     const hash = await this.hashPassword(passwordPlain, salt);
     return hash === passwordCrypt;

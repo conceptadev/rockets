@@ -1,10 +1,10 @@
-import { BadRequestException } from "@nestjs/common";
+import { BadRequestException } from '@nestjs/common';
 
 /**
  * Exception for authentication
  */
 export class AuthenticationException extends BadRequestException {
-    constructor(objectOrError?: string | object | any) {
-      super(objectOrError, "Credentials are incorrect.");
-    }
+  constructor(objectOrError?: string | Record<string, unknown>) {
+    super(objectOrError, 'Credentials are incorrect.');
   }
+}

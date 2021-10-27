@@ -1,28 +1,26 @@
 import { mock } from 'jest-mock-extended';
 
 import { PasswordStrengthEnum } from '../enum/password-strength.enum';
-import {
-    AuthenticationConfigOptionsInterface
-} from '../interface/authentication-config-options.interface';
+import { AuthenticationConfigOptionsInterface } from '../interface/authentication-config-options.interface';
 import { PasswordCreationService } from './password-creation.service';
 import { PasswordStrengthService } from './password-strength.service';
 
 describe('PasswordCreationService', () => {
-  const PASSWORD_MEDIUM: string = "AS12378";
-  
+  const PASSWORD_MEDIUM = 'AS12378';
+
   let service: PasswordCreationService;
   let passwordStrengthService: PasswordStrengthService;
   let spyIsStrong: jest.SpyInstance;
-  
+
   const config = {
     maxPasswordAttempts: 5,
-    minPasswordStrength: PasswordStrengthEnum.Strong
+    minPasswordStrength: PasswordStrengthEnum.Strong,
   } as AuthenticationConfigOptionsInterface;
 
   beforeEach(async () => {
     passwordStrengthService = mock<PasswordStrengthService>();
-    spyIsStrong = jest.spyOn(passwordStrengthService, "isStrong");
-    
+    spyIsStrong = jest.spyOn(passwordStrengthService, 'isStrong');
+
     service = new PasswordCreationService(passwordStrengthService, config);
   });
 
@@ -32,12 +30,11 @@ describe('PasswordCreationService', () => {
 
   it('PasswordCreationService.isStrong', async () => {
     await service.isStrong(PASSWORD_MEDIUM);
-    
+
     expect(spyIsStrong).toBeCalled();
   });
 
   it('PasswordCreationService.checkAttempt', () => {
-    
     let canAttemptOneMore = service.checkAttempt(0);
     expect(canAttemptOneMore).toBe(true);
 
@@ -58,7 +55,6 @@ describe('PasswordCreationService', () => {
   });
 
   it('PasswordCreationService.checkAttempt', () => {
-    
     let attemptsLeft = service.checkAttemptLeft(1);
     expect(attemptsLeft).toBe(4);
 
@@ -77,5 +73,4 @@ describe('PasswordCreationService', () => {
     attemptsLeft = service.checkAttemptLeft(6);
     expect(attemptsLeft).toBe(-1);
   });
-  
 });

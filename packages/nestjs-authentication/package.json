@@ -11,6 +11,7 @@
     "@nestjs/common": "^8.0.8",
     "@nestjs/core": "^8.0.8",
     "@nestjs/event-emitter": "^1.0.0",
+    "@nestjs/config": "^1.0.0",
     "@types/zxcvbn": "^4.4.1",
     "bcrypt": "^5.0.1",
     "zxcvbn": "^4.4.2"
@@ -19,6 +20,7 @@
     "eventemitter2": "*"
   },
   "devDependencies": {
-    "@nestjs/testing": "^8.0.8"
+    "@nestjs/testing": "^8.0.8",
+    "jest-mock-extended": "^2.0.4"
   }
 }

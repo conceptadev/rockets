@@ -1,10 +1,13 @@
 import { DynamicModule, Module } from '@nestjs/common';
 
 import {
-    AUTHENTICATION_MODULE_CONFIG_TOKEN, authenticationConfig, CREDENTIAL_LOOKUP_SERVICE_TOKEN
+  AUTHENTICATION_MODULE_CONFIG_TOKEN,
+  authenticationConfig,
+  CREDENTIAL_LOOKUP_SERVICE_TOKEN,
 } from './config/authentication.config';
 import {
-    AuthenticationOptionsAsyncInterface, AuthenticationOptionsInterface
+  AuthenticationOptionsAsyncInterface,
+  AuthenticationOptionsInterface,
 } from './interface/authentication-options.interface';
 import { PasswordCreationService } from './services/password-creation.service';
 import { PasswordStorageService } from './services/password-storage.service';
@@ -16,15 +19,15 @@ import { SignController } from './sign.controller';
  * Authentication Module to handle authentication and password encryption.
  * Its required to setup a service that implements CredentialLookupServiceInterface
  * to return the credentials information to be used for authentication
- * 
+ *
  * ### Example
  * You can setup the module using forRootAsync as the following example.
- * 
+ *
  * ```ts
- * 
+ *
  * @Injectable()
  * class UserLookupService implements CredentialLookupServiceInterface {
- * 
+ *
  *   constructor(
  *     private userService: userService) {
  *     super()
@@ -32,23 +35,23 @@ import { SignController } from './sign.controller';
  *   async getUser(username: string): Promise<CredentialLookupInterface> {
  *     return this.userService.getUser(username);
  *   }
- *     
+ *
  *   async getAccessToken(username: string): Promise<AccessTokenInterface>{
  *     return this.userService.getAccessToken(username);
  *    }
- *     
+ *
  *   async refreshToken(accessToken: string): Promise<AccessTokenInterface>{
  *     return null;
  *    }
  * }
- * 
- * 
+ *
+ *
  * imports: [
  *       TestModule,
  *       AuthenticationModule.forRootAsync({
  *         credentialLookupProvider: {
  *           imports:[TestModule],
- *           inject:[UserLookupService],
+ *           inject:[UserService],
  *           useFactory: async (userService: UserService) => {
  *             return new UserLookupService(userService);
  *           }
@@ -56,9 +59,9 @@ import { SignController } from './sign.controller';
  *       })
  *     ],
  * ```
- * 
+ *
  * or you can also setup module passing it using a forRoot
- * 
+ *
  * ```ts
  *  imports: [
  *     AuthenticationModule.forRoot({
@@ -77,20 +80,20 @@ import { SignController } from './sign.controller';
     PasswordStrengthService,
     PasswordStorageService,
     SignService,
-    SignController
+    SignController,
   ],
   exports: [
     PasswordCreationService,
     PasswordStorageService,
     PasswordStrengthService,
-    SignController
+    SignController,
   ],
-  controllers: [
-    SignController
-  ],
+  controllers: [SignController],
 })
 export class AuthenticationModule {
-  public static forRoot(options: AuthenticationOptionsInterface): DynamicModule {
+  public static forRoot(
+    options: AuthenticationOptionsInterface,
+  ): DynamicModule {
     return {
       module: AuthenticationModule,
       providers: [
@@ -105,23 +108,23 @@ export class AuthenticationModule {
         },
         {
           provide: CREDENTIAL_LOOKUP_SERVICE_TOKEN,
-          useValue: options.credentialLookupService
-        }
+          useValue: options.credentialLookupService,
+        },
       ],
       exports: [
         PasswordStrengthService,
         PasswordStorageService,
         PasswordCreationService,
         SignController,
-        SignService
+        SignService,
       ],
-      controllers: [
-          SignController,
-        ],
+      controllers: [SignController],
     };
   }
 
-  public static forRootAsync(options: AuthenticationOptionsAsyncInterface): DynamicModule {
+  public static forRootAsync(
+    options: AuthenticationOptionsAsyncInterface,
+  ): DynamicModule {
     return {
       module: AuthenticationModule,
       imports:
@@ -141,19 +144,17 @@ export class AuthenticationModule {
         {
           provide: CREDENTIAL_LOOKUP_SERVICE_TOKEN,
           inject: options.credentialLookupProvider?.inject,
-          useFactory: options.credentialLookupProvider.useFactory
-        }
+          useFactory: options.credentialLookupProvider.useFactory,
+        },
       ],
       exports: [
         PasswordStrengthService,
         PasswordStorageService,
         PasswordCreationService,
         SignController,
-        SignService
+        SignService,
       ],
-      controllers: [
-          SignController,
-        ],
+      controllers: [SignController],
     };
   }
 }
