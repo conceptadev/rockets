@@ -22,7 +22,6 @@ export interface CredentialLookupProvider {
    * Factory function that returns an instance of the provider to be injected.
    */
   useFactory: (
-    //@typescript-eslint/no-explicit-any
     ...args: unknown[]
   ) =>
     | Promise<CredentialLookupServiceInterface>
