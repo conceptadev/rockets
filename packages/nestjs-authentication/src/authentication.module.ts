@@ -48,25 +48,36 @@ import { SignController } from './sign.controller';
  *
  * imports: [
  *       TestModule,
- *       AuthenticationModule.forRootAsync({
- *         credentialLookupProvider: {
- *           imports:[TestModule],
- *           inject:[UserService],
- *           useFactory: async (userService: UserService) => {
- *             return new UserLookupService(userService);
- *           }
- *         }
- *       })
+ * AuthenticationModule.forRootAsync({
+ *        imports: [TestModule, ConfigModule.forFeature(authenticationConfig)],
+ *        credentialLookupProvider: UserLookupService,
+ *        config: {
+ *          inject: [authenticationConfig.KEY],
+ *          useFactory: async (
+ *            config: AuthenticationConfigOptionsInterface,
+ *          ): Promise<AuthenticationConfigOptionsInterface> => {
+ *            // overwrite config
+ *            return {
+ *              ...config,
+ *              minPasswordStrength: PasswordStrengthEnum.VeryStrong,
+ *            };
+ *          },
+ *        },
+ *      }),
  *     ],
  * ```
  *
  * or you can also setup module passing it using a forRoot
+ * be aware that if you don't pass the config it will use the default one
+ * 
  *
  * ```ts
+ * 
  *  imports: [
- *     AuthenticationModule.forRoot({
- *       credentialLookupService: new UserLookupService()
- *     })
+ *   AuthenticationModule.forRoot({
+ *       imports: [TestModule],
+ *       credentialLookupProvider: UserLookupService,
+ *     }),
  *   ],
  * ```
  */
