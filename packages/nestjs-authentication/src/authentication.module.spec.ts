@@ -1,7 +1,14 @@
 import { Injectable, Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
+import {
+  AuthenticationConfigAsyncOptionsInterface,
+  AuthenticationConfigOptionsInterface,
+} from '.';
 
 import { AuthenticationModule } from './authentication.module';
+import { authenticationConfig } from './config/authentication.config';
+import { PasswordStrengthEnum } from './enum/password-strength.enum';
 import { AccessTokenInterface } from './interface/dto/access-token.interface';
 import { CredentialLookupInterface } from './interface/dto/credential-lookup.interface';
 import { CredentialLookupServiceInterface } from './interface/service/credential-lookup.service.interface';
@@ -12,7 +19,11 @@ const PASSWORD_MEDIUM = 'AS12378';
 const ACCESS_TOKEN = 'TestLookup_AccessToken';
 
 @Injectable()
-class InjectTest {}
+class InjectTest {
+  getInfo() {
+    return 'info';
+  }
+}
 
 @Injectable()
 class UserLookup implements CredentialLookupServiceInterface {
@@ -53,6 +64,10 @@ class TestLookupInjected extends UserLookup {
   constructor(private injectTest: InjectTest) {
     super();
   }
+
+  getInfo(): string {
+    return this.injectTest.getInfo();
+  }
 }
 
 @Module({
@@ -63,29 +78,100 @@ export class TestModule {}
 
 describe('AuthenticationModule', () => {
   let controller: SignController;
+  let testLookupInjected: TestLookupInjected;
+  let config: AuthenticationConfigOptionsInterface;
+  let configAsync: AuthenticationConfigAsyncOptionsInterface;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        TestModule,
-        AuthenticationModule.forRoot({
-          credentialLookupService: new UserLookup(),
-        }),
-      ],
-    }).compile();
+    config = await authenticationConfig();
 
-    controller = module.get<SignController>(SignController);
+    configAsync = {
+      inject: [authenticationConfig.KEY],
+      useFactory: async (
+        config: AuthenticationConfigOptionsInterface,
+      ): Promise<AuthenticationConfigOptionsInterface> => {
+        // overwrite config
+        return {
+          ...config,
+          minPasswordStrength: PasswordStrengthEnum.VeryStrong,
+        };
+      },
+    };
   });
 
   afterEach(async () => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
+  /**
+   * Check if TestLookupInjected was injected and works fine
+   */
+  it('Is TestLookupInjected Defined', async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [TestModule],
+    }).compile();
+
+    testLookupInjected = module.get<TestLookupInjected>(TestLookupInjected);
+
+    expect(testLookupInjected).toBeDefined();
+    expect(testLookupInjected.getInfo()).toBe('info');
   });
 
   it('AuthenticationModule.Authenticate.ForRoot', async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        TestModule,
+        AuthenticationModule.forRoot({
+          credentialLookupProvider: UserLookup,
+          config,
+        }),
+      ],
+    }).compile();
+
+    controller = module.get<SignController>(SignController);
+
+    const authResponse = await controller.authenticate({
+      username: USERNAME,
+      password: PASSWORD_MEDIUM,
+    });
+
+    expect(authResponse.accessToken).toBe(ACCESS_TOKEN);
+  });
+
+  it('AuthenticationModule.Authenticate.ForRoot With Inject', async () => {
+    const config = await authenticationConfig();
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        AuthenticationModule.forRoot({
+          imports: [TestModule],
+          credentialLookupProvider: TestLookupInjected,
+          config,
+        }),
+      ],
+    }).compile();
+
+    controller = module.get<SignController>(SignController);
+
+    const authResponse = await controller.authenticate({
+      username: USERNAME,
+      password: PASSWORD_MEDIUM,
+    });
+
+    expect(authResponse.accessToken).toBe(ACCESS_TOKEN);
+  });
+
+  it('AuthenticationModule.Authenticate.ForRoot with inject no config', async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        AuthenticationModule.forRoot({
+          imports: [TestModule],
+          credentialLookupProvider: TestLookupInjected,
+        }),
+      ],
+    }).compile();
+
+    controller = module.get<SignController>(SignController);
+
     const authResponse = await controller.authenticate({
       username: USERNAME,
       password: PASSWORD_MEDIUM,
@@ -99,12 +185,38 @@ describe('AuthenticationModule', () => {
       imports: [
         TestModule,
         AuthenticationModule.forRootAsync({
-          credentialLookupProvider: {
-            imports: [TestModule],
-            inject: [InjectTest],
-            useFactory: async (injectTest: InjectTest) => {
-              return new TestLookupInjected(injectTest);
-            },
+          // TODO: TestModule should be imported to make sure TestLookupInjected will
+          // get the injected InjectTest.
+
+          imports: [TestModule, ConfigModule.forFeature(authenticationConfig)],
+          credentialLookupProvider: TestLookupInjected,
+          config: configAsync,
+        }),
+      ],
+    }).compile();
+
+    controller = module.get<SignController>(SignController);
+
+    const authResponse = await controller.authenticate({
+      username: USERNAME,
+      password: PASSWORD_MEDIUM,
+    });
+
+    expect(authResponse.accessToken).toBe(ACCESS_TOKEN);
+  });
+
+  it('AuthenticationModule.Authenticate.forRootAsync', async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        TestModule,
+        AuthenticationModule.forRootAsync({
+          imports: [ConfigModule.forFeature(authenticationConfig)],
+          credentialLookupProvider: UserLookup,
+          config: {
+            useFactory:
+              async (): Promise<AuthenticationConfigOptionsInterface> => {
+                return config;
+              },
           },
         }),
       ],
@@ -120,19 +232,14 @@ describe('AuthenticationModule', () => {
     expect(authResponse.accessToken).toBe(ACCESS_TOKEN);
   });
 
-  it('AuthenticationModule.Authenticate.forRootAsync.fail', async () => {
+  it('AuthenticationModule.Authenticate.forRoot.fail', async () => {
     let failed = false;
     try {
       await Test.createTestingModule({
         imports: [
-          TestModule,
-          AuthenticationModule.forRootAsync({
-            credentialLookupProvider: {
-              inject: [InjectTest],
-              useFactory: async (injectTest: InjectTest) => {
-                return new TestLookupInjected(injectTest);
-              },
-            },
+          AuthenticationModule.forRoot({
+            credentialLookupProvider: TestLookupInjected,
+            config,
           }),
         ],
       }).compile();
@@ -143,22 +250,35 @@ describe('AuthenticationModule', () => {
     expect(failed).toBeTruthy();
   });
 
-  it('AuthenticationModule.Authenticate.forRootAsync.fail_1', async () => {
+  it('AuthenticationModule.Authenticate.forRootAsync.fail', async () => {
     let failed = false;
     try {
-      const module: TestingModule = await Test.createTestingModule({
+      await Test.createTestingModule({
         imports: [
           AuthenticationModule.forRootAsync({
-            credentialLookupProvider: {
-              useFactory: async (injectTest: InjectTest) => {
-                return new TestLookupInjected(injectTest);
-              },
-            },
+            credentialLookupProvider: TestLookupInjected,
+            config: configAsync,
           }),
         ],
       }).compile();
+    } catch (err) {
+      failed = true;
+    }
 
-      module.get<TestLookupInjected>(TestLookupInjected);
+    expect(failed).toBeTruthy();
+  });
+
+  it('AuthenticationModule.Authenticate.forRoot.fail_2', async () => {
+    let failed = false;
+    try {
+      await Test.createTestingModule({
+        imports: [
+          AuthenticationModule.forRoot({
+            credentialLookupProvider: null,
+            config,
+          }),
+        ],
+      }).compile();
     } catch (err) {
       failed = true;
     }
@@ -173,8 +293,22 @@ describe('AuthenticationModule', () => {
         imports: [
           AuthenticationModule.forRootAsync({
             credentialLookupProvider: null,
+            config: configAsync,
           }),
         ],
+      }).compile();
+    } catch (err) {
+      failed = true;
+    }
+
+    expect(failed).toBeTruthy();
+  });
+
+  it('AuthenticationModule.Authenticate.forRoot.fail_3', async () => {
+    let failed = false;
+    try {
+      await Test.createTestingModule({
+        imports: [AuthenticationModule.forRoot(null)],
       }).compile();
     } catch (err) {
       failed = true;
@@ -187,16 +321,7 @@ describe('AuthenticationModule', () => {
     let failed = false;
     try {
       await Test.createTestingModule({
-        imports: [
-          TestModule,
-          AuthenticationModule.forRootAsync({
-            credentialLookupProvider: {
-              imports: [],
-              inject: [],
-              useFactory: null,
-            },
-          }),
-        ],
+        imports: [AuthenticationModule.forRootAsync(null)],
       }).compile();
     } catch (err) {
       failed = true;
@@ -204,20 +329,12 @@ describe('AuthenticationModule', () => {
 
     expect(failed).toBeTruthy();
   });
+
   it('AuthenticationModule.Authenticate.forRootAsync.fail_4', async () => {
     let failed = false;
     try {
       await Test.createTestingModule({
-        imports: [
-          TestModule,
-          AuthenticationModule.forRootAsync({
-            credentialLookupProvider: {
-              imports: [],
-              inject: null,
-              useFactory: null,
-            },
-          }),
-        ],
+        imports: [AuthenticationModule],
       }).compile();
     } catch (err) {
       failed = true;
@@ -226,63 +343,63 @@ describe('AuthenticationModule', () => {
     expect(failed).toBeTruthy();
   });
 
-  it('AuthenticationModule.Authenticate.forRootAsync.fail_7', async () => {
-    let failed = false;
+  // it('AuthenticationModule.Authenticate.forRootAsync.fail_7', async () => {
+  //   let failed = false;
 
-    try {
-      await Test.createTestingModule({
-        imports: [TestModule, AuthenticationModule.forRootAsync(null)],
-      }).compile();
-    } catch (err) {
-      failed = true;
-    }
+  //   try {
+  //     await Test.createTestingModule({
+  //       imports: [TestModule, AuthenticationModule.forRootAsync(null)],
+  //     }).compile();
+  //   } catch (err) {
+  //     failed = true;
+  //   }
 
-    expect(failed).toBeTruthy();
-  });
+  //   expect(failed).toBeTruthy();
+  // });
 
-  it('AuthenticationModule.Authenticate.forRootAsyncInject', async () => {
-    let failed = false;
-    try {
-      const module: TestingModule = await Test.createTestingModule({
-        imports: [
-          AuthenticationModule.forRootAsync({
-            credentialLookupProvider: {
-              imports: [],
-              useFactory: async (injectTest: InjectTest) => {
-                return new TestLookupInjected(injectTest);
-              },
-            },
-          }),
-        ],
-      }).compile();
+  // it('AuthenticationModule.Authenticate.forRootAsyncInject', async () => {
+  //   let failed = false;
+  //   try {
+  //     const module: TestingModule = await Test.createTestingModule({
+  //       imports: [
+  //         AuthenticationModule.forRootAsync({
+  //           credentialLookupProvider: {
+  //             imports: [],
+  //             useFactory: async (injectTest: InjectTest) => {
+  //               return new TestLookupInjected(injectTest);
+  //             },
+  //           },
+  //         }),
+  //       ],
+  //     }).compile();
 
-      module.get<TestLookupInjected>(TestLookupInjected);
-    } catch (err) {
-      failed = true;
-    }
-    expect(failed).toBeTruthy();
-  });
+  //     module.get<TestLookupInjected>(TestLookupInjected);
+  //   } catch (err) {
+  //     failed = true;
+  //   }
+  //   expect(failed).toBeTruthy();
+  // });
 
-  it('AuthenticationModule.Authenticate.forRootAsyncInject', async () => {
-    let failed = false;
-    try {
-      const module: TestingModule = await Test.createTestingModule({
-        imports: [
-          AuthenticationModule.forRootAsync({
-            credentialLookupProvider: {
-              imports: null,
-              useFactory: async (injectTest: InjectTest) => {
-                return new TestLookupInjected(injectTest);
-              },
-            },
-          }),
-        ],
-      }).compile();
+  // it('AuthenticationModule.Authenticate.forRootAsyncInject', async () => {
+  //   let failed = false;
+  //   try {
+  //     const module: TestingModule = await Test.createTestingModule({
+  //       imports: [
+  //         AuthenticationModule.forRootAsync({
+  //           credentialLookupProvider: {
+  //             imports: null,
+  //             useFactory: async (injectTest: InjectTest) => {
+  //               return new TestLookupInjected(injectTest);
+  //             },
+  //           },
+  //         }),
+  //       ],
+  //     }).compile();
 
-      module.get<TestLookupInjected>(TestLookupInjected);
-    } catch (err) {
-      failed = true;
-    }
-    expect(failed).toBeTruthy();
-  });
+  //     module.get<TestLookupInjected>(TestLookupInjected);
+  //   } catch (err) {
+  //     failed = true;
+  //   }
+  //   expect(failed).toBeTruthy();
+  // });
 });

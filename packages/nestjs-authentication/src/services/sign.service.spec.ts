@@ -57,6 +57,10 @@ describe('SignServiceService', () => {
       .spyOn(credentialLookupServiceInterface, 'issueAccessToken')
       .mockResolvedValueOnce(accessToken);
 
+    jest
+      .spyOn(passwordStorageService, 'validatePassword')
+      .mockResolvedValueOnce(true);
+
     const result = await service.authenticate(signInDto);
 
     expect(result.accessToken).toBe(ACCESS_TOKEN);

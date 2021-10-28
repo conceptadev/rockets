@@ -1,4 +1,4 @@
-import { Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { AccessTokenInterface } from './interface/dto/access-token.interface';
 import { AuthenticationResponseInterface } from './interface/dto/authentication-response.interface';
 import { SignDTOInterface } from './interface/dto/signin.dto.interface';
@@ -22,6 +22,7 @@ export class SignController {
    */
   @Post()
   async authenticate(
+    @Body()
     dto: SignDTOInterface,
   ): Promise<AuthenticationResponseInterface> {
     return this.signService.authenticate(dto);

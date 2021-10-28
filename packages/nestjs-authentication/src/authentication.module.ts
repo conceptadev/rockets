@@ -96,6 +96,7 @@ export class AuthenticationModule {
   ): DynamicModule {
     return {
       module: AuthenticationModule,
+      imports: options?.imports,
       providers: [
         PasswordStrengthService,
         PasswordStorageService,
@@ -108,7 +109,7 @@ export class AuthenticationModule {
         },
         {
           provide: CREDENTIAL_LOOKUP_SERVICE_TOKEN,
-          useValue: options.credentialLookupService,
+          useClass: options.credentialLookupProvider,
         },
       ],
       exports: [
@@ -127,10 +128,7 @@ export class AuthenticationModule {
   ): DynamicModule {
     return {
       module: AuthenticationModule,
-      imports:
-        options.credentialLookupProvider?.imports?.length > 0
-          ? [...options.credentialLookupProvider.imports]
-          : [],
+      imports: options?.imports,
       providers: [
         PasswordStrengthService,
         PasswordStorageService,
@@ -139,12 +137,12 @@ export class AuthenticationModule {
         SignController,
         {
           provide: AUTHENTICATION_MODULE_CONFIG_TOKEN,
-          useValue: options.config || authenticationConfig(),
+          inject: options.config?.inject,
+          useFactory: options.config.useFactory,
         },
         {
           provide: CREDENTIAL_LOOKUP_SERVICE_TOKEN,
-          inject: options.credentialLookupProvider?.inject,
-          useFactory: options.credentialLookupProvider.useFactory,
+          useClass: options.credentialLookupProvider,
         },
       ],
       exports: [

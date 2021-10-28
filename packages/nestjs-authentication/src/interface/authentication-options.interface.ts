@@ -1,7 +1,9 @@
 import {
   Abstract,
   DynamicModule,
+  FactoryProvider,
   ForwardReference,
+  ModuleMetadata,
   Type,
 } from '@nestjs/common';
 
@@ -31,18 +33,30 @@ export interface CredentialLookupProvider {
    */
   inject?: Array<Type<unknown> | string | symbol | Abstract<unknown>>;
 }
+
+export interface AuthenticationConfigAsyncOptionsInterface
+  extends Pick<
+    FactoryProvider<
+      | AuthenticationConfigOptionsInterface
+      | Promise<AuthenticationConfigOptionsInterface>
+    >,
+    'useFactory' | 'inject'
+  > {}
+
 /**
  * Authentication module configuration options interface
  */
-export interface AuthenticationOptionsInterface {
-  credentialLookupService: CredentialLookupServiceInterface;
+export interface AuthenticationOptionsInterface
+  extends Pick<ModuleMetadata, 'imports'> {
+  credentialLookupProvider: Type<CredentialLookupServiceInterface>;
   config?: AuthenticationConfigOptionsInterface;
 }
 
 /**
  * Authentication async module configuration options interface
  */
-export interface AuthenticationOptionsAsyncInterface {
-  credentialLookupProvider: CredentialLookupProvider;
-  config?: AuthenticationConfigOptionsInterface;
+export interface AuthenticationOptionsAsyncInterface
+  extends Pick<ModuleMetadata, 'imports'> {
+  credentialLookupProvider: Type<CredentialLookupServiceInterface>;
+  config?: AuthenticationConfigAsyncOptionsInterface;
 }
