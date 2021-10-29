@@ -69,10 +69,10 @@ import { SignController } from './sign.controller';
  *
  * or you can also setup module passing it using a forRoot
  * be aware that if you don't pass the config it will use the default one
- * 
+ *
  *
  * ```ts
- * 
+ *
  *  imports: [
  *   AuthenticationModule.forRoot({
  *       imports: [TestModule],
