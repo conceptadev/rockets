@@ -30,10 +30,10 @@
       "path": "packages/nestjs-logger"
     },
     {
-      "path": "packages/nestjs-samples"
+      "path": "packages/nestjs-authentication"
     },
     {
-      "path": "packages/nestjs-authentication"
-    }
+      "path": "packages/nestjs-samples"
+    },
   ]
 }

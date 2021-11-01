@@ -3,6 +3,9 @@ export * from './sign.controller';
 
 export * from './config/authentication.config';
 
+export * from './enum/password-strength.enum';
+export * from './interface/dto/signin.dto.interface';
+
 export * from './services/password-creation.service';
 export * from './services/password-storage.service';
 export * from './services/password-strength.service';
