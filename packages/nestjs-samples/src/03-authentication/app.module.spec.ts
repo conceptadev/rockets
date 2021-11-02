@@ -1,19 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from './app.module';
 import {
-  SignController,
-  SignDTOInterface,
+  AuthenticationController,
+  AuthenticationStrategyLocalInterface,
 } from '@rockts-org/nestjs-authentication';
 
 describe('AppModule', () => {
-  let signController: SignController;
+  let authController: AuthenticationController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
-    signController = module.get<SignController>(SignController);
+    authController = module.get<AuthenticationController>(
+      AuthenticationController,
+    );
   });
 
   afterEach(() => {
@@ -22,11 +24,11 @@ describe('AppModule', () => {
 
   describe('listening', () => {
     it('Authenticate', async () => {
-      const sign: SignDTOInterface = {
+      const sign: AuthenticationStrategyLocalInterface = {
         username: 'first_user',
         password: 'AS12378',
       };
-      const response = await signController.authenticate(sign);
+      const response = await authController.authenticate(sign);
 
       expect(response.accessToken).toBeDefined();
       expect(response.username).toBe(sign.username);

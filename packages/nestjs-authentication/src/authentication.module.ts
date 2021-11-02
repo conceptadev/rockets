@@ -8,12 +8,12 @@ import {
 import {
   AuthenticationOptionsAsyncInterface,
   AuthenticationOptionsInterface,
-} from './interface/authentication-options.interface';
+} from './interfaces/authentication-options.interface';
 import { PasswordCreationService } from './services/password-creation.service';
 import { PasswordStorageService } from './services/password-storage.service';
 import { PasswordStrengthService } from './services/password-strength.service';
-import { SignService } from './services/sign.service';
-import { SignController } from './sign.controller';
+import { AuthenticationService } from './services/authentication.service';
+import { AuthenticationController } from './authentication.controller';
 
 /**
  * Authentication Module to handle authentication and password encryption.
@@ -90,16 +90,16 @@ import { SignController } from './sign.controller';
     PasswordCreationService,
     PasswordStrengthService,
     PasswordStorageService,
-    SignService,
-    SignController,
+    AuthenticationService,
+    AuthenticationController,
   ],
   exports: [
     PasswordCreationService,
     PasswordStorageService,
     PasswordStrengthService,
-    SignController,
+    AuthenticationController,
   ],
-  controllers: [SignController],
+  controllers: [AuthenticationController],
 })
 export class AuthenticationModule {
   public static forRoot(
@@ -112,8 +112,8 @@ export class AuthenticationModule {
         PasswordStrengthService,
         PasswordStorageService,
         PasswordCreationService,
-        SignService,
-        SignController,
+        AuthenticationService,
+        AuthenticationController,
         {
           provide: AUTHENTICATION_MODULE_CONFIG_TOKEN,
           useValue: options.config || authenticationConfig(),
@@ -127,10 +127,10 @@ export class AuthenticationModule {
         PasswordStrengthService,
         PasswordStorageService,
         PasswordCreationService,
-        SignController,
-        SignService,
+        AuthenticationController,
+        AuthenticationService,
       ],
-      controllers: [SignController],
+      controllers: [AuthenticationController],
     };
   }
 
@@ -144,8 +144,8 @@ export class AuthenticationModule {
         PasswordStrengthService,
         PasswordStorageService,
         PasswordCreationService,
-        SignService,
-        SignController,
+        AuthenticationService,
+        AuthenticationController,
         {
           provide: AUTHENTICATION_MODULE_CONFIG_TOKEN,
           inject: options.config?.inject,
@@ -160,10 +160,10 @@ export class AuthenticationModule {
         PasswordStrengthService,
         PasswordStorageService,
         PasswordCreationService,
-        SignController,
-        SignService,
+        AuthenticationController,
+        AuthenticationService,
       ],
-      controllers: [SignController],
+      controllers: [AuthenticationController],
     };
   }
 }

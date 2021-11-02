@@ -1,19 +1,19 @@
 import { mock } from 'jest-mock-extended';
-import { SignService } from './services/sign.service';
-import { SignController } from './sign.controller';
+import { AuthenticationService } from './services/authentication.service';
+import { AuthenticationController } from './authentication.controller';
 
 describe('SignController', () => {
-  let controller: SignController;
-  let signService: SignService;
+  let controller: AuthenticationController;
+  let authService: AuthenticationService;
   let spyAuthentication: jest.SpyInstance;
   let spyRefreshAccessToken: jest.SpyInstance;
 
   beforeEach(async () => {
-    signService = mock<SignService>();
-    controller = new SignController(signService);
+    authService = mock<AuthenticationService>();
+    controller = new AuthenticationController(authService);
 
-    spyAuthentication = jest.spyOn(signService, 'authenticate');
-    spyRefreshAccessToken = jest.spyOn(signService, 'refreshAccessToken');
+    spyAuthentication = jest.spyOn(authService, 'authenticate');
+    spyRefreshAccessToken = jest.spyOn(authService, 'refreshAccessToken');
   });
 
   it('should be defined', () => {

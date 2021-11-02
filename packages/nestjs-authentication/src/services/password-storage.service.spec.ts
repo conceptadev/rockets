@@ -1,4 +1,4 @@
-import { PasswordStorageInterface } from '../interface/dto/password-storage.interface';
+import { PasswordStorageInterface } from '../interfaces/password-storage.interface';
 import { PasswordStorageService } from './password-storage.service';
 
 describe('PasswordStorageService', () => {

@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { AUTHENTICATION_MODULE_CONFIG_TOKEN } from '../config/authentication.config';
-import { AuthenticationConfigOptionsInterface } from '../interface/authentication-config-options.interface';
-import { PasswordCreationServiceInterface } from '../interface/service/password-creation.service.interface';
+import { AuthenticationConfigOptionsInterface } from '../interfaces/authentication-config-options.interface';
+import { PasswordCreationServiceInterface } from '../interfaces/password-creation-service.interface';
 import { PasswordStrengthService } from './password-strength.service';
 
 /**

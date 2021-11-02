@@ -4,7 +4,7 @@ import {
   registerAs,
 } from '@nestjs/config';
 
-import { AuthenticationConfigOptionsInterface } from '../interface/authentication-config-options.interface';
+import { AuthenticationConfigOptionsInterface } from '../interfaces/authentication-config-options.interface';
 
 /**
  * The token to which all Authentication module options are set.

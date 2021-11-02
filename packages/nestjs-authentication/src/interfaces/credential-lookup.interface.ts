@@ -1,11 +1,13 @@
 import { PasswordStorageInterface } from './password-storage.interface';
-import { SignDTOInterface } from './signin.dto.interface';
+import { AuthenticationStrategyLocalInterface } from './authentication-strategy-local.interface';
 
 /**
  * Credential Lookup Interface
  */
 export interface CredentialLookupInterface
-  extends Partial<Pick<SignDTOInterface, 'username' | 'password'>>,
+  extends Partial<
+      Pick<AuthenticationStrategyLocalInterface, 'username' | 'password'>
+    >,
     Partial<Pick<PasswordStorageInterface, 'salt'>> {
   id: string;
 }

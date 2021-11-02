@@ -1,5 +1,5 @@
-import { AccessTokenInterface } from '../dto/access-token.interface';
-import { CredentialLookupInterface } from '../dto/credential-lookup.interface';
+import { AccessTokenInterface } from './access-token.interface';
+import { CredentialLookupInterface } from './credential-lookup.interface';
 
 /**
  * Credential Lookup Service Interface

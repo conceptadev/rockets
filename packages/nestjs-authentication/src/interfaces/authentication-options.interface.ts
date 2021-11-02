@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 
 import { AuthenticationConfigOptionsInterface } from './authentication-config-options.interface';
-import { CredentialLookupServiceInterface } from './service/credential-lookup.service.interface';
+import { CredentialLookupServiceInterface } from './credential-lookup-service.interface';
 
 /**
  * Interface to be iim

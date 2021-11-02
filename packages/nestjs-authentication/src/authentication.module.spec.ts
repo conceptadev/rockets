@@ -9,10 +9,10 @@ import {
 import { AuthenticationModule } from './authentication.module';
 import { authenticationConfig } from './config/authentication.config';
 import { PasswordStrengthEnum } from './enum/password-strength.enum';
-import { AccessTokenInterface } from './interface/dto/access-token.interface';
-import { CredentialLookupInterface } from './interface/dto/credential-lookup.interface';
-import { CredentialLookupServiceInterface } from './interface/service/credential-lookup.service.interface';
-import { SignController } from './sign.controller';
+import { AccessTokenInterface } from './interfaces/access-token.interface';
+import { CredentialLookupInterface } from './interfaces/credential-lookup.interface';
+import { CredentialLookupServiceInterface } from './interfaces/credential-lookup-service.interface';
+import { AuthenticationController } from './authentication.controller';
 
 const USERNAME = 'TestLookupUsername';
 const PASSWORD_MEDIUM = 'AS12378';
@@ -77,7 +77,7 @@ class TestLookupInjected extends UserLookup {
 export class TestModule {}
 
 describe('AuthenticationModule', () => {
-  let controller: SignController;
+  let controller: AuthenticationController;
   let testLookupInjected: TestLookupInjected;
   let config: AuthenticationConfigOptionsInterface;
   let configAsync: AuthenticationConfigAsyncOptionsInterface;
@@ -128,7 +128,7 @@ describe('AuthenticationModule', () => {
       ],
     }).compile();
 
-    controller = module.get<SignController>(SignController);
+    controller = module.get<AuthenticationController>(AuthenticationController);
 
     const authResponse = await controller.authenticate({
       username: USERNAME,
@@ -150,7 +150,7 @@ describe('AuthenticationModule', () => {
       ],
     }).compile();
 
-    controller = module.get<SignController>(SignController);
+    controller = module.get<AuthenticationController>(AuthenticationController);
 
     const authResponse = await controller.authenticate({
       username: USERNAME,
@@ -170,7 +170,7 @@ describe('AuthenticationModule', () => {
       ],
     }).compile();
 
-    controller = module.get<SignController>(SignController);
+    controller = module.get<AuthenticationController>(AuthenticationController);
 
     const authResponse = await controller.authenticate({
       username: USERNAME,
@@ -195,7 +195,7 @@ describe('AuthenticationModule', () => {
       ],
     }).compile();
 
-    controller = module.get<SignController>(SignController);
+    controller = module.get<AuthenticationController>(AuthenticationController);
 
     const authResponse = await controller.authenticate({
       username: USERNAME,
@@ -222,7 +222,7 @@ describe('AuthenticationModule', () => {
       ],
     }).compile();
 
-    controller = module.get<SignController>(SignController);
+    controller = module.get<AuthenticationController>(AuthenticationController);
 
     const authResponse = await controller.authenticate({
       username: USERNAME,

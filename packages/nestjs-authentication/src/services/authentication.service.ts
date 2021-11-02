@@ -1,20 +1,20 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { AccessTokenInterface } from '../interface/dto/access-token.interface';
-import { SignServiceInterface } from '../interface/service/sign.service.interface';
-import { SignDTOInterface } from '../interface/dto/signin.dto.interface';
-import { CredentialLookupServiceInterface } from '../interface/service/credential-lookup.service.interface';
+import { AccessTokenInterface } from '../interfaces/access-token.interface';
+import { AuthenticationServiceInterface } from '../interfaces/authentication-service.interface';
+import { AuthenticationStrategyLocalInterface } from '../interfaces/authentication-strategy-local.interface';
+import { CredentialLookupServiceInterface } from '../interfaces/credential-lookup-service.interface';
 import { AuthenticationException } from '../exceptions/authentication.exception';
-import { CredentialLookupInterface } from '../interface/dto/credential-lookup.interface';
+import { CredentialLookupInterface } from '../interfaces/credential-lookup.interface';
 import { PasswordStorageService } from './password-storage.service';
 import { CREDENTIAL_LOOKUP_SERVICE_TOKEN } from '../config/authentication.config';
-import { AuthenticationResponseInterface } from '../interface/dto/authentication-response.interface';
+import { AuthenticationResponseInterface } from '../interfaces/authentication-response.interface';
 
 /**
  * Service with functions related to the sign in
  * This should be used to authenticate user a user
  */
 @Injectable()
-export class SignService implements SignServiceInterface {
+export class AuthenticationService implements AuthenticationServiceInterface {
   /**
    * constructor
    */
@@ -30,7 +30,7 @@ export class SignService implements SignServiceInterface {
    * @returns
    */
   private async getCredentialsInformation(
-    dto: SignDTOInterface,
+    dto: AuthenticationStrategyLocalInterface,
   ): Promise<CredentialLookupInterface> {
     // Get user information with encrypt password and salt
     const credentialsLookup =
@@ -96,7 +96,7 @@ export class SignService implements SignServiceInterface {
    * @returns Promise<AccessTokenInterface>
    */
   async authenticate(
-    dto: SignDTOInterface,
+    dto: AuthenticationStrategyLocalInterface,
   ): Promise<AuthenticationResponseInterface> {
     // Get user information
     const credentialsLookup = await this.getCredentialsInformation(dto);

@@ -1,15 +1,15 @@
 import { mock } from 'jest-mock-extended';
 
 import { AuthenticationException } from '../exceptions/authentication.exception';
-import { AccessTokenInterface } from '../interface/dto/access-token.interface';
-import { CredentialLookupInterface } from '../interface/dto/credential-lookup.interface';
-import { SignDTOInterface } from '../interface/dto/signin.dto.interface';
-import { CredentialLookupServiceInterface } from '../interface/service/credential-lookup.service.interface';
+import { AccessTokenInterface } from '../interfaces/access-token.interface';
+import { CredentialLookupInterface } from '../interfaces/credential-lookup.interface';
+import { AuthenticationStrategyLocalInterface } from '../interfaces/authentication-strategy-local.interface';
+import { CredentialLookupServiceInterface } from '../interfaces/credential-lookup-service.interface';
 import { PasswordStorageService } from './password-storage.service';
-import { SignService } from './sign.service';
+import { AuthenticationService } from './authentication.service';
 
 describe('SignServiceService', () => {
-  let service: SignService;
+  let service: AuthenticationService;
   let passwordStorageService: PasswordStorageService;
   let credentialLookupServiceInterface: CredentialLookupServiceInterface;
 
@@ -29,7 +29,7 @@ describe('SignServiceService', () => {
     salt: 'salt',
   };
 
-  const signInDto: SignDTOInterface = {
+  const localStrategyDto: AuthenticationStrategyLocalInterface = {
     username: 'username',
     password: 'password',
   };
@@ -38,7 +38,7 @@ describe('SignServiceService', () => {
     passwordStorageService = mock<PasswordStorageService>();
     credentialLookupServiceInterface = mock<CredentialLookupServiceInterface>();
 
-    service = new SignService(
+    service = new AuthenticationService(
       passwordStorageService,
       credentialLookupServiceInterface,
     );
@@ -61,7 +61,7 @@ describe('SignServiceService', () => {
       .spyOn(passwordStorageService, 'validatePassword')
       .mockResolvedValueOnce(true);
 
-    const result = await service.authenticate(signInDto);
+    const result = await service.authenticate(localStrategyDto);
 
     expect(result.accessToken).toBe(ACCESS_TOKEN);
   });
@@ -75,7 +75,7 @@ describe('SignServiceService', () => {
       .mockResolvedValueOnce(null);
 
     try {
-      await service.authenticate(signInDto);
+      await service.authenticate(localStrategyDto);
     } catch (err) {
       expect(err).toBeInstanceOf(AuthenticationException);
       return;
@@ -88,7 +88,7 @@ describe('SignServiceService', () => {
       .spyOn(credentialLookupServiceInterface, 'getUser')
       .mockResolvedValueOnce(null);
     try {
-      await service.authenticate(signInDto);
+      await service.authenticate(localStrategyDto);
     } catch (err) {
       expect(err).toBeInstanceOf(AuthenticationException);
       return;
@@ -105,7 +105,7 @@ describe('SignServiceService', () => {
       .mockResolvedValueOnce(false);
 
     try {
-      await service.authenticate(signInDto);
+      await service.authenticate(localStrategyDto);
     } catch (err) {
       expect(err).toBeInstanceOf(AuthenticationException);
       return;

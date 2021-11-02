@@ -1,7 +1,7 @@
 import { mock } from 'jest-mock-extended';
 
 import { PasswordStrengthEnum } from '../enum/password-strength.enum';
-import { AuthenticationConfigOptionsInterface } from '../interface/authentication-config-options.interface';
+import { AuthenticationConfigOptionsInterface } from '../interfaces/authentication-config-options.interface';
 import { PasswordCreationService } from './password-creation.service';
 import { PasswordStrengthService } from './password-strength.service';
 
