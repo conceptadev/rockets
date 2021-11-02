@@ -42,6 +42,8 @@ export abstract class EventListenerOn<E extends EventInterface = EventInterface>
 {
   /**
    * Constructor
+   *
+   * @param _options
    */
   constructor(private _options: EventListenOnOptionsInterface = {}) {
     super();
