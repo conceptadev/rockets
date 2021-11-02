@@ -8,8 +8,8 @@ export class EventConfigModule {
   /**
    * Register the event config module.
    *
-   * @param {EventConfigOptionsInterface} options
-   * @returns {DynamicModule}
+   * @param {EventConfigOptionsInterface} options Event configuration options.
+   * @returns {DynamicModule} Dynamic module
    */
   static forRoot(options: EventConfigOptionsInterface): DynamicModule {
     return {

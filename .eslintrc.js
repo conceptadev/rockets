@@ -7,12 +7,14 @@ module.exports = {
   },
   plugins: [
     'import',
+    'jsdoc',
     '@typescript-eslint/eslint-plugin'
   ],
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
+    // 'plugin:jsdoc/recommended',
   ],
   root: true,
   env: {
@@ -30,5 +32,10 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'error',
     '@typescript-eslint/no-empty-interface': 'off',
     'no-console': ['error', { allow: ['warn', 'error'] }],
+  },
+  settings: {
+    jsdoc: {
+      mode: 'typescript',
+    },
   },
 };

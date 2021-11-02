@@ -28,6 +28,8 @@ import { EventInterface } from './interfaces/event.interface';
  * // create an event
  * const myEvent = new MyEvent({id: 1234, active: true});
  * ```
+ *
+ * @template {EventValues} V - Event Values
  */
 export abstract class Event<V extends EventValues = EventValues>
   implements EventInterface<V>
@@ -38,14 +40,18 @@ export abstract class Event<V extends EventValues = EventValues>
   expectsReturnOf: void | Promise<V>;
 
   /**
-   * Event key
+   * Event key.
+   *
+   * @returns {string} The event key string.
    */
   static get key(): string {
     return `${EVENT_MODULE_EVENT_KEY_PREFIX}${this.name}`;
   }
 
   /**
-   * Event key
+   * Event key.
+   *
+   * @returns {string} The event key string.
    */
   get key(): string {
     return `${EVENT_MODULE_EVENT_KEY_PREFIX}${this.constructor.name}`;
@@ -67,6 +73,8 @@ export abstract class Event<V extends EventValues = EventValues>
 
   /**
    * Returns all values that were passed to the constructor.
+   *
+   * @returns {V} The values.
    */
   get values(): V {
     return this._values;

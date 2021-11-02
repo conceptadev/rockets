@@ -7,9 +7,9 @@ import { AccessControlModuleOptions } from './interfaces/access-control-module-o
 export class AccessControlModule {
   /**
    * Register a pre-defined roles
-   * @param {RolesBuilder} accessControl  A list containing the access grant
-   * @param {ACOptions} options  A configurable options
-   * definitions. See the structure of this object in the examples.
+   *
+   * @param {AccessControlModuleOptions} options  A configurable options definitions. See the structure of this object in the examples.
+   * @returns {DynamicModule} The dynamic module.
    */
   public static register(options: AccessControlModuleOptions): DynamicModule {
     return {

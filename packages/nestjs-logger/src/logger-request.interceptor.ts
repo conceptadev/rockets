@@ -23,6 +23,7 @@ import { MessageFormatUtil } from './utils/message-format.util';
 export class LoggerRequestInterceptor implements NestInterceptor<Response> {
   /**
    * Constructor
+   *
    * @param loggerService The logger service that implements ConsoleLogger
    */
   constructor(private loggerService: LoggerService) {}
