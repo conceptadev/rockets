@@ -74,6 +74,7 @@ export const loggerConfig: LoggerConfigFactory = registerAs(
 
       /**
        * Mapping from log level to sentry severity
+       *
        * @param logLevel
        * @returns SentryLogSeverity
        */

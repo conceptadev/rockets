@@ -9,8 +9,10 @@ import { EMAIL_MODULE_OPTIONS_TOKEN } from './email-constants';
 export class EmailModule {
   /**
    * Register a pre-defined email transport
-   * @param {EmailConfigOptions} options  A configurable options
+   *
+   * @param {EmailConfigOptions} options A configurable options
    * definitions. See the structure of this object in the examples.
+   * @returns {DynamicModule} Dynamic module.
    */
   public static forRoot(options: EmailConfigOptions): DynamicModule {
     return {

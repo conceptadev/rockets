@@ -14,6 +14,7 @@ export class EventModule {
    * Register the event module
    *
    * @param {EventConfigOptionsInterface} options Event module configuration.
+   * @returns {DynamicModule} Dynamic event module.
    */
   public static forRoot(options: EventConfigOptionsInterface): DynamicModule {
     return {

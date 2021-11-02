@@ -24,6 +24,9 @@ describe('EventListener', () => {
       },
     ) as EmitterListener;
 
+    /**
+     *
+     */
     function MockEmitterListener() {
       this.emitter = emitter;
       this.event = TestEvent.key;

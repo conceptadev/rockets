@@ -4,6 +4,9 @@ import { ACCESS_CONTROL_FILTERS_CONFIG_KEY } from '../constants';
 
 /**
  * Define access filters required for this route.
+ *
+ * @param {AccessControlFilterOption[]} acFilters Array of access control filters.
+ * @returns {ReturnType<typeof SetMetadata>} Decorator function.
  */
 export const AccessControlFilter = (
   ...acFilters: AccessControlFilterOption[]

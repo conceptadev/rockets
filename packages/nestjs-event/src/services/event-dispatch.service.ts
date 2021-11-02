@@ -48,6 +48,7 @@ export class EventDispatchService {
    *   }
    * }
    * ```
+   *
    * @param {EventSyncInterface} event The event being dispatched.
    * @returns boolean Returns true if the event had listeners, false otherwise.
    */
@@ -105,6 +106,7 @@ export class EventDispatchService {
    *   }
    * }
    * ```
+   *
    * @param {EventAsyncInterface} event The event being dispatched.
    * @returns {Promise<V[]>} An array of values, one for each listener that subscribed to the event.
    */

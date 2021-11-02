@@ -7,7 +7,11 @@ import { AccessControlAction } from '../enums/access-control-action.enum';
 import { AccessControlFilterType } from '../enums/access-control-filter-type.enum';
 
 /**
- * Read many resource filter shortcut
+ * Read many resource filter shortcut.
+ *
+ * @param {AccessControlGrantResource} resource The grant resource.
+ * @param {AccessControlFilterCallback} paramFilter An optional param filter.
+ * @returns {ReturnType<typeof applyDecorators>} Decorator function
  */
 export const AccessControlReadMany = (
   resource: AccessControlGrantResource,

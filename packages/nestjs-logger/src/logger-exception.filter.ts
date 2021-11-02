@@ -22,6 +22,7 @@ import { LoggerService } from './logger.service';
 export class LoggerExceptionFilter extends BaseExceptionFilter {
   /**
    * Constructor
+   *
    * @param loggerService
    * @param applicationRef
    */
@@ -36,6 +37,9 @@ export class LoggerExceptionFilter extends BaseExceptionFilter {
 
   /**
    * Override catch to log before returning exception.
+   *
+   * @param exception
+   * @param host
    */
   catch(exception: Error, host: ArgumentsHost) {
     this.loggerService.exception(

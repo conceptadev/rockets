@@ -4,6 +4,9 @@ import { ACCESS_CONTROL_CTLR_CONFIG_KEY } from '../constants';
 
 /**
  * Define access control filters required for this route.
+ *
+ * @param {AccessControlOptions} options Access control options.
+ * @returns {ReturnType<typeof SetMetadata>} Decorator function.
  */
 export const UseAccessControl = (
   options: AccessControlOptions = {},

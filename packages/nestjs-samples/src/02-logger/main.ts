@@ -5,6 +5,9 @@ import {
   LoggerService,
 } from '@rockts-org/nestjs-logger';
 
+/**
+ *
+ */
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
