@@ -12,7 +12,7 @@ import {
 import { PasswordCreationService } from './services/password-creation.service';
 import { PasswordStorageService } from './services/password-storage.service';
 import { PasswordStrengthService } from './services/password-strength.service';
-import { AuthenticationService } from './services/authentication.service';
+import { CustomAuthenticationService } from './services/custom-authentication.service';
 import { AuthenticationController } from './authentication.controller';
 
 /**
@@ -90,7 +90,7 @@ import { AuthenticationController } from './authentication.controller';
     PasswordCreationService,
     PasswordStrengthService,
     PasswordStorageService,
-    AuthenticationService,
+    CustomAuthenticationService,
     AuthenticationController,
   ],
   exports: [
@@ -112,7 +112,7 @@ export class AuthenticationModule {
         PasswordStrengthService,
         PasswordStorageService,
         PasswordCreationService,
-        AuthenticationService,
+        CustomAuthenticationService,
         AuthenticationController,
         {
           provide: AUTHENTICATION_MODULE_CONFIG_TOKEN,
@@ -128,7 +128,7 @@ export class AuthenticationModule {
         PasswordStorageService,
         PasswordCreationService,
         AuthenticationController,
-        AuthenticationService,
+        CustomAuthenticationService,
       ],
       controllers: [AuthenticationController],
     };
@@ -144,7 +144,7 @@ export class AuthenticationModule {
         PasswordStrengthService,
         PasswordStorageService,
         PasswordCreationService,
-        AuthenticationService,
+        CustomAuthenticationService,
         AuthenticationController,
         {
           provide: AUTHENTICATION_MODULE_CONFIG_TOKEN,
@@ -161,7 +161,7 @@ export class AuthenticationModule {
         PasswordStorageService,
         PasswordCreationService,
         AuthenticationController,
-        AuthenticationService,
+        CustomAuthenticationService,
       ],
       controllers: [AuthenticationController],
     };

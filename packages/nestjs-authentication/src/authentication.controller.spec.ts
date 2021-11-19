@@ -1,15 +1,15 @@
 import { mock } from 'jest-mock-extended';
-import { AuthenticationService } from './services/authentication.service';
+import { CustomAuthenticationService } from './services/custom-authentication.service';
 import { AuthenticationController } from './authentication.controller';
 
 describe('SignController', () => {
   let controller: AuthenticationController;
-  let authService: AuthenticationService;
+  let authService: CustomAuthenticationService;
   let spyAuthentication: jest.SpyInstance;
   let spyRefreshAccessToken: jest.SpyInstance;
 
   beforeEach(async () => {
-    authService = mock<AuthenticationService>();
+    authService = mock<CustomAuthenticationService>();
     controller = new AuthenticationController(authService);
 
     spyAuthentication = jest.spyOn(authService, 'authenticate');

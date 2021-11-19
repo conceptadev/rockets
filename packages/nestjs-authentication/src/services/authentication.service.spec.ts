@@ -6,10 +6,10 @@ import { CredentialLookupInterface } from '../interfaces/credential-lookup.inter
 import { AuthenticationStrategyLocalInterface } from '../interfaces/authentication-strategy-local.interface';
 import { CredentialLookupServiceInterface } from '../interfaces/credential-lookup-service.interface';
 import { PasswordStorageService } from './password-storage.service';
-import { AuthenticationService } from './authentication.service';
+import { CustomAuthenticationService } from './custom-authentication.service';
 
 describe('SignServiceService', () => {
-  let service: AuthenticationService;
+  let service: CustomAuthenticationService;
   let passwordStorageService: PasswordStorageService;
   let credentialLookupServiceInterface: CredentialLookupServiceInterface;
 
@@ -38,7 +38,7 @@ describe('SignServiceService', () => {
     passwordStorageService = mock<PasswordStorageService>();
     credentialLookupServiceInterface = mock<CredentialLookupServiceInterface>();
 
-    service = new AuthenticationService(
+    service = new CustomAuthenticationService(
       passwordStorageService,
       credentialLookupServiceInterface,
     );

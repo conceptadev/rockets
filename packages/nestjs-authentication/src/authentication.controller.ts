@@ -2,7 +2,7 @@ import { Body, Controller, Post } from '@nestjs/common';
 import { AccessTokenInterface } from './interfaces/access-token.interface';
 import { AuthenticationResponseInterface } from './interfaces/authentication-response.interface';
 import { AuthenticationStrategyLocalInterface } from './interfaces/authentication-strategy-local.interface';
-import { AuthenticationService } from './services/authentication.service';
+import { CustomAuthenticationService } from './services/custom-authentication.service';
 
 /**
  * Sign controller
@@ -13,7 +13,7 @@ export class AuthenticationController {
    * Constructor
    * @param authService
    */
-  constructor(private authService: AuthenticationService) {}
+  constructor(private authService: CustomAuthenticationService) {}
 
   /**
    * Method to authenticate user and return access token

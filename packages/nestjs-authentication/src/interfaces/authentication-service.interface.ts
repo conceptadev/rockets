@@ -1,24 +1,14 @@
-import { AccessTokenInterface } from './access-token.interface';
-import { AuthenticationResponseInterface } from './authentication-response.interface';
-import { AuthenticationStrategyLocalInterface } from './authentication-strategy-local.interface';
-
 /**
- * Sign Service Interface
+ * Authentication Service Interface
  */
-export interface AuthenticationServiceInterface {
+export interface AuthenticationServiceInterface<T> {
   /**
-   * Check if password matches
-   * @param localStrategyDto
+   * Authenticate using passport
+   * @param strategy
    * @returns
    */
-  authenticate(
-    localStrategyDto: AuthenticationStrategyLocalInterface,
-  ): Promise<AuthenticationResponseInterface>;
+  // authenticate(
+  //   strategy: string | any,
+  // ): Promise<T | void>;
 
-  /**
-   * Refresh access token to increase the expiration date
-   * @param accessToken
-   * @returns
-   */
-  refreshAccessToken(accessToken: string): Promise<AccessTokenInterface>;
 }
