@@ -14,7 +14,9 @@ import { AuthenticationResponseInterface } from '../interfaces/authentication-re
  * This should be used to authenticate user a user
  */
 @Injectable()
-export class CustomAuthenticationService implements AuthenticationServiceInterface<CredentialLookupInterface> {
+export class CustomAuthenticationService
+  implements AuthenticationServiceInterface<CredentialLookupInterface>
+{
   /**
    * constructor
    */

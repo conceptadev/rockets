@@ -1,1 +1,1 @@
-export const GITHUB_STRATEGY_NAME: string = 'github';
+export const GITHUB_STRATEGY_NAME = 'github';

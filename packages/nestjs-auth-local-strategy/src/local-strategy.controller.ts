@@ -1,45 +1,41 @@
 import { Controller, Post, Request, UseGuards } from '@nestjs/common';
-import { AuthenticationService, StrategyController } from '@rockts-org/nestjs-authentication';
+import {
+  AuthenticationResponseInterface,
+  StrategyController,
+} from '@rockts-org/nestjs-authentication';
 import { LocalAuthGuard } from './local-auth.guard';
-
 
 /**
  * Sign controller
  */
 @Controller('auth')
 export class LocalStrategyController extends StrategyController {
-  /**
-   * Constructor
-   * @param authService
-   */
-  constructor(
-    protected authService: AuthenticationService
-  ) {
-    super(authService);
+  constructor() {
+    super();
   }
 
   /**
-   * Middleware 
-   * @param req 
-   * @returns 
+   * Middleware
+   * @param req
+   * @returns
    */
   @Post('login')
   async authenticate(
-    @Request() req: any
-  ): Promise<any> {
-    return req.user;
+    @Request() req: Request,
+  ): Promise<AuthenticationResponseInterface> {
+    return req['user'];
   }
 
   /**
    * Authenticate using guard
    * @param dto Body
-   * @returns 
+   * @returns
    */
   @UseGuards(LocalAuthGuard)
   @Post('guard/login')
   async authenticateWithGuard(
-    @Request() req: any
-  ): Promise<any> {
-    return req.user;
+    @Request() req: Request,
+  ): Promise<AuthenticationResponseInterface> {
+    return req['user'];
   }
 }

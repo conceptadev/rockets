@@ -1,1 +1,1 @@
-export const LOCAL_STRATEGY_NAME: string = 'local';
+export const LOCAL_STRATEGY_NAME = 'local';

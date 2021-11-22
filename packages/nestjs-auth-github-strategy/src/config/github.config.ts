@@ -4,11 +4,7 @@ import {
   registerAs,
 } from '@nestjs/config';
 
-import { LogLevel } from '@nestjs/common';
-
-import { Severity as SentryLogSeverity } from '@sentry/types';
 import { GithubOptionsInterface } from '../interfaces/github-options.interface';
-
 
 export const GITHUB_MODULE_OPTIONS_TOKEN = 'GITHUB_MODULE_OPTIONS';
 
@@ -16,7 +12,7 @@ export type GithubConfigFactory = ConfigFactory<GithubOptionsInterface> &
   ConfigFactoryKeyHost;
 
 /**
- * Configuration for Logger.
+ * Configuration for Github.
  *
  * ### example
  * ```ts
@@ -33,6 +29,6 @@ export const loggerConfig: GithubConfigFactory = registerAs(
   (): GithubOptionsInterface => ({
     clientId: process.env.GITHUB_CLIENT_ID || '',
     clientSecret: process.env.GITHUB_CLIENT_SECRET || '',
-    callbackURL: process.env.GITHUB_CALLBACK_URL || ''
+    callbackURL: process.env.GITHUB_CALLBACK_URL || '',
   }),
 );

@@ -23,4 +23,3 @@ export * from './interfaces/credential-lookup-service.interface';
 export * from './interfaces/get-user-service.interface';
 export * from './interfaces/issue-token-service.interface';
 export * from './interfaces/refresh-token-service.interface';
-

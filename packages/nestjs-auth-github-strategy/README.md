@@ -1,14 +1,14 @@
-# nestjs-auth-local-strategy
+# nestjs-auth-github-strategy
 
 A nestjs Local strategy for authentication
 
 
 ## Installation
 
-Use the package manager [yarn](https://yarnpkg.com/) to install nestjs-auth-local-strategy.
+Use the package manager [yarn](https://yarnpkg.com/) to install nestjs-auth-github-strategy.
 
 ```bash
-yarn install nestjs-auth-local-strategy
+yarn install nestjs-auth-github-strategy
 ```
 
 

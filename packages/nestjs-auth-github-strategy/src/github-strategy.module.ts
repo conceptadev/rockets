@@ -1,24 +1,24 @@
-import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { GithubStrategyController } from './github-strategy.controller';
 import { GithubStrategyMiddleware } from './github-strategy.middleware';
 import { GithubStrategyService } from './github-strategy.service';
 import { GithubStrategy } from './github.strategy';
 
-
 @Module({
-  imports:[],
+  imports: [],
   providers: [
     GithubStrategyController,
     GithubStrategyMiddleware,
     GithubStrategyService,
-    GithubStrategy
+    GithubStrategy,
   ],
-  exports: [
-    GithubStrategyController
-  ],
-  controllers: [
-    GithubStrategyController
-  ],
+  exports: [GithubStrategyController],
+  controllers: [GithubStrategyController],
 })
 export class GithubStrategyModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

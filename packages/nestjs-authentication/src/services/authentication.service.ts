@@ -8,12 +8,7 @@ import passport, { AuthenticateOptions, Strategy } from 'passport';
  */
 
 @Injectable()
-export class AuthenticationService implements AuthenticationServiceInterface<string> {
-  /**
-   * constructor
-   */
-  constructor() {}
-
+export class AuthenticationService implements AuthenticationServiceInterface {
   /**
    * Authenticate user and return access token information
    * @param dto
@@ -22,18 +17,18 @@ export class AuthenticationService implements AuthenticationServiceInterface<str
   authenticate(
     strategy: string | Strategy,
     options?: AuthenticateOptions,
-    callback?: (...args: any[]) => any
+    callback?: (...args: unknown[]) => unknown,
   ): void {
     // if express
     passport.authenticate(strategy, options, callback);
-    
   }
 
-  use(
-    name: string,
-    strategy: Strategy
-  ): void {
+  /**
+   *
+   * @param name
+   * @param strategy
+   */
+  use(name: string, strategy: Strategy): void {
     passport.use(name, strategy);
   }
-
 }

@@ -14,6 +14,7 @@ import { PasswordStorageService } from './services/password-storage.service';
 import { PasswordStrengthService } from './services/password-strength.service';
 import { CustomAuthenticationService } from './services/custom-authentication.service';
 import { AuthenticationController } from './authentication.controller';
+import { AuthenticationService } from '.';
 
 /**
  * Authentication Module to handle authentication and password encryption.
@@ -112,6 +113,7 @@ export class AuthenticationModule {
         PasswordStrengthService,
         PasswordStorageService,
         PasswordCreationService,
+        AuthenticationService,
         CustomAuthenticationService,
         AuthenticationController,
         {
@@ -129,6 +131,7 @@ export class AuthenticationModule {
         PasswordCreationService,
         AuthenticationController,
         CustomAuthenticationService,
+        AuthenticationService,
       ],
       controllers: [AuthenticationController],
     };
@@ -145,6 +148,7 @@ export class AuthenticationModule {
         PasswordStorageService,
         PasswordCreationService,
         CustomAuthenticationService,
+        AuthenticationService,
         AuthenticationController,
         {
           provide: AUTHENTICATION_MODULE_CONFIG_TOKEN,
@@ -162,6 +166,7 @@ export class AuthenticationModule {
         PasswordCreationService,
         AuthenticationController,
         CustomAuthenticationService,
+        AuthenticationService,
       ],
       controllers: [AuthenticationController],
     };
