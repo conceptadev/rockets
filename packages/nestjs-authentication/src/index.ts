@@ -1,5 +1,4 @@
 export * from './authentication.module';
-export * from './authentication.controller';
 export * from './strategy.controller.abstract';
 
 export * from './config/authentication.config';

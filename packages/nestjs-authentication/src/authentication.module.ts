@@ -3,15 +3,12 @@ import { DynamicModule, Module } from '@nestjs/common';
 import {
   AUTHENTICATION_MODULE_CONFIG_TOKEN,
   authenticationConfig,
-  CREDENTIAL_LOOKUP_SERVICE_TOKEN,
 } from './config/authentication.config';
 
 import { PasswordCreationService } from './services/password-creation.service';
 import { PasswordStorageService } from './services/password-storage.service';
 import { PasswordStrengthService } from './services/password-strength.service';
-import { CustomAuthenticationService } from './services/custom-authentication.service';
-import { AuthenticationController } from './authentication.controller';
-import { AuthenticationService } from '.';
+import { AuthenticationService } from './services/authentication.service';
 import {
   AuthenticationOptionsAsyncInterface,
   AuthenticationOptionsInterface,
@@ -86,22 +83,20 @@ import {
 @Module({
   providers: [
     {
-      provide: authenticationConfig.KEY,
+      provide: AUTHENTICATION_MODULE_CONFIG_TOKEN,
       useValue: authenticationConfig(),
     },
     PasswordCreationService,
     PasswordStrengthService,
     PasswordStorageService,
-    CustomAuthenticationService,
-    AuthenticationController,
+    AuthenticationService,
   ],
   exports: [
     PasswordCreationService,
     PasswordStorageService,
     PasswordStrengthService,
-    AuthenticationController,
+    AuthenticationService,
   ],
-  controllers: [AuthenticationController],
 })
 export class AuthenticationModule {
   public static forRoot(
@@ -115,8 +110,6 @@ export class AuthenticationModule {
         PasswordStorageService,
         PasswordCreationService,
         AuthenticationService,
-        CustomAuthenticationService,
-        AuthenticationController,
         {
           provide: AUTHENTICATION_MODULE_CONFIG_TOKEN,
           useValue: options.config || authenticationConfig(),
@@ -126,11 +119,8 @@ export class AuthenticationModule {
         PasswordStrengthService,
         PasswordStorageService,
         PasswordCreationService,
-        AuthenticationController,
-        CustomAuthenticationService,
         AuthenticationService,
       ],
-      controllers: [AuthenticationController],
     };
   }
 
@@ -144,9 +134,7 @@ export class AuthenticationModule {
         PasswordStrengthService,
         PasswordStorageService,
         PasswordCreationService,
-        CustomAuthenticationService,
         AuthenticationService,
-        AuthenticationController,
         {
           provide: AUTHENTICATION_MODULE_CONFIG_TOKEN,
           inject: options.config?.inject,
@@ -157,11 +145,8 @@ export class AuthenticationModule {
         PasswordStrengthService,
         PasswordStorageService,
         PasswordCreationService,
-        AuthenticationController,
-        CustomAuthenticationService,
         AuthenticationService,
       ],
-      controllers: [AuthenticationController],
     };
   }
 }

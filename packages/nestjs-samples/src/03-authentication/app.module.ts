@@ -26,18 +26,18 @@ import { IssueTokenService } from './user/issue-token.service';
     //     },
     //   },
     // }),
-    LocalStrategyModule.forRoot({
+    AuthenticationModule.forRoot({
+      config: {
+        maxPasswordAttempts: 3,
+        minPasswordStrength: PasswordStrengthEnum.VeryStrong,
+      },
       imports: [
-        UserModule,
-        AuthenticationModule.forRoot({
-          config: {
-            maxPasswordAttempts: 3,
-            minPasswordStrength: PasswordStrengthEnum.VeryStrong,
-          },
+        LocalStrategyModule.forRoot({
+          imports: [UserModule],
+          getUserService: UserLookupService,
+          issueTokenService: IssueTokenService,
         }),
       ],
-      getUserService: UserLookupService,
-      issueTokenService: IssueTokenService,
     }),
   ],
 })

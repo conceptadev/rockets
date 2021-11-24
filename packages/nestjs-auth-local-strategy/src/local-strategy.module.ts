@@ -5,6 +5,7 @@ import {
   NestModule,
   RequestMethod,
 } from '@nestjs/common';
+import { AuthenticationModule } from '@rockts-org/nestjs-authentication';
 import {
   GET_USER_SERVICE_TOKEN,
   ISSUE_TOKEN_SERVICE_TOKEN,
@@ -16,11 +17,12 @@ import { LocalStrategyService } from './local-strategy.service';
 import { LocalStrategy } from './local.strategy';
 
 @Module({
-  imports: [],
+  imports: [AuthenticationModule],
   providers: [
     LocalStrategyController,
     //LocalStrategyService,
-    LocalStrategy],
+    LocalStrategy,
+  ],
   exports: [LocalStrategyController],
   controllers: [LocalStrategyController],
 })
@@ -34,7 +36,7 @@ export class LocalStrategyModule implements NestModule {
   public static forRoot(options: LocalAuthOptionsInterface): DynamicModule {
     return {
       module: LocalStrategyModule,
-      imports: options?.imports,
+      imports: [AuthenticationModule, ...options?.imports],
       providers: [
         LocalStrategyController,
         LocalStrategyService,

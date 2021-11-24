@@ -8,7 +8,6 @@ import { PasswordStrengthEnum } from './enum/password-strength.enum';
 import { AccessTokenInterface } from './interfaces/access-token.interface';
 import { CredentialLookupInterface } from './interfaces/credential-lookup.interface';
 import { CredentialLookupServiceInterface } from './interfaces/credential-lookup-service.interface';
-import { AuthenticationController } from './authentication.controller';
 import { AuthenticationConfigOptionsInterface } from '.';
 import { AuthenticationConfigAsyncOptionsInterface } from './interfaces/authentication-options.interface';
 
@@ -75,7 +74,6 @@ class TestLookupInjected extends UserLookup {
 export class TestModule {}
 
 describe('AuthenticationModule', () => {
-  let controller: AuthenticationController;
   let testLookupInjected: TestLookupInjected;
   let config: AuthenticationConfigOptionsInterface;
   let configAsync: AuthenticationConfigAsyncOptionsInterface;
@@ -113,116 +111,6 @@ describe('AuthenticationModule', () => {
 
     expect(testLookupInjected).toBeDefined();
     expect(testLookupInjected.getInfo()).toBe('info');
-  });
-
-  it('AuthenticationModule.Authenticate.ForRoot', async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        TestModule,
-        AuthenticationModule.forRoot({
-          config,
-        }),
-      ],
-    }).compile();
-
-    controller = module.get<AuthenticationController>(AuthenticationController);
-
-    const authResponse = await controller.authenticate({
-      username: USERNAME,
-      password: PASSWORD_MEDIUM,
-    });
-
-    expect(authResponse.accessToken).toBe(ACCESS_TOKEN);
-  });
-
-  it('AuthenticationModule.Authenticate.ForRoot With Inject', async () => {
-    const config = await authenticationConfig();
-    const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        AuthenticationModule.forRoot({
-          imports: [TestModule],
-          config,
-        }),
-      ],
-    }).compile();
-
-    controller = module.get<AuthenticationController>(AuthenticationController);
-
-    const authResponse = await controller.authenticate({
-      username: USERNAME,
-      password: PASSWORD_MEDIUM,
-    });
-
-    expect(authResponse.accessToken).toBe(ACCESS_TOKEN);
-  });
-
-  it('AuthenticationModule.Authenticate.ForRoot with inject no config', async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        AuthenticationModule.forRoot({
-          imports: [TestModule],
-        }),
-      ],
-    }).compile();
-
-    controller = module.get<AuthenticationController>(AuthenticationController);
-
-    const authResponse = await controller.authenticate({
-      username: USERNAME,
-      password: PASSWORD_MEDIUM,
-    });
-
-    expect(authResponse.accessToken).toBe(ACCESS_TOKEN);
-  });
-
-  it('AuthenticationModule.Authenticate.forRootAsync', async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        TestModule,
-        AuthenticationModule.forRootAsync({
-          // TODO: TestModule should be imported to make sure TestLookupInjected will
-          // get the injected InjectTest.
-
-          imports: [TestModule, ConfigModule.forFeature(authenticationConfig)],
-          config: configAsync,
-        }),
-      ],
-    }).compile();
-
-    controller = module.get<AuthenticationController>(AuthenticationController);
-
-    const authResponse = await controller.authenticate({
-      username: USERNAME,
-      password: PASSWORD_MEDIUM,
-    });
-
-    expect(authResponse.accessToken).toBe(ACCESS_TOKEN);
-  });
-
-  it('AuthenticationModule.Authenticate.forRootAsync', async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        TestModule,
-        AuthenticationModule.forRootAsync({
-          imports: [ConfigModule.forFeature(authenticationConfig)],
-          config: {
-            useFactory:
-              async (): Promise<AuthenticationConfigOptionsInterface> => {
-                return config;
-              },
-          },
-        }),
-      ],
-    }).compile();
-
-    controller = module.get<AuthenticationController>(AuthenticationController);
-
-    const authResponse = await controller.authenticate({
-      username: USERNAME,
-      password: PASSWORD_MEDIUM,
-    });
-
-    expect(authResponse.accessToken).toBe(ACCESS_TOKEN);
   });
 
   it('AuthenticationModule.Authenticate.forRoot.fail', async () => {
