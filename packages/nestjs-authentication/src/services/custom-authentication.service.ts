@@ -13,18 +13,15 @@ import { AuthenticationResponseInterface } from '../interfaces/authentication-re
  * Service with functions related to the sign in
  * This should be used to authenticate user a user
  */
+// TODO: Delete Custom and its references
 @Injectable()
 export class CustomAuthenticationService
-  implements AuthenticationServiceInterface<CredentialLookupInterface>
+  implements AuthenticationServiceInterface
 {
   /**
    * constructor
    */
-  constructor(
-    private passwordStorageService: PasswordStorageService,
-    @Inject(CREDENTIAL_LOOKUP_SERVICE_TOKEN)
-    private credentialLookupServiceInterface: CredentialLookupServiceInterface,
-  ) {}
+  constructor(private passwordStorageService: PasswordStorageService) {}
 
   /**
    * Get user form an service that implements interface and return if password os validated
@@ -35,8 +32,8 @@ export class CustomAuthenticationService
     dto: AuthenticationStrategyLocalInterface,
   ): Promise<CredentialLookupInterface> {
     // Get user information with encrypt password and salt
-    const credentialsLookup =
-      await this.credentialLookupServiceInterface.getUser(dto.username);
+    const credentialsLookup = {} as any;
+    //await this.credentialLookupServiceInterface.getUser(dto.username);
 
     if (!credentialsLookup) throw new AuthenticationException();
 
@@ -76,10 +73,10 @@ export class CustomAuthenticationService
     credentialLookup: CredentialLookupInterface,
   ): Promise<AuthenticationResponseInterface> {
     // Issue a access token for the authenticated user
-    const accessToken =
-      await this.credentialLookupServiceInterface.issueAccessToken(
-        credentialLookup.username,
-      );
+    const accessToken = {} as any;
+    // await this.credentialLookupServiceInterface.issueAccessToken(
+    //   credentialLookup.username,
+    // );
 
     if (!accessToken)
       throw new AuthenticationException('Error on access token.');
@@ -120,8 +117,9 @@ export class CustomAuthenticationService
    * @returns access token interface
    */
   async refreshAccessToken(accessToken: string): Promise<AccessTokenInterface> {
-    return await this.credentialLookupServiceInterface.refreshToken(
-      accessToken,
-    );
+    return null;
+    // return await this.credentialLookupServiceInterface.refreshToken(
+    //   accessToken,
+    // );
   }
 }

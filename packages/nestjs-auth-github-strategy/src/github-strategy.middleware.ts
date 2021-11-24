@@ -13,7 +13,7 @@ export class GithubStrategyMiddleware implements NestMiddleware {
       { session: false },
       // request, response, next
       (request) => {
-        req['user'] = request.user;
+        req['user'] = request['user'];
         next();
       },
     );

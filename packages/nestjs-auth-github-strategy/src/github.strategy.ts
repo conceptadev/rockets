@@ -16,7 +16,7 @@ export class GithubStrategy extends PassportStrategy(
   constructor(
     @Inject(GITHUB_MODULE_OPTIONS_TOKEN)
     private config: GithubOptionsInterface,
-    private userService: GetUserServiceInterface,
+    private userService: GetUserServiceInterface<AuthenticationResponseInterface>,
   ) {
     super({
       clientID: config.clientId,
@@ -30,7 +30,7 @@ export class GithubStrategy extends PassportStrategy(
     refreshToken,
     profile,
   ): Promise<AuthenticationResponseInterface> {
-    const user = await this.userService.getGithubProfileId(profile);
+    const user = await this.userService.getUser(profile);
 
     if (!user) {
       throw new UnauthorizedException();

@@ -10,16 +10,18 @@ import { LOCAL_STRATEGY_NAME } from './constants';
 export class LocalStrategyMiddleware implements NestMiddleware {
   constructor(protected authService: AuthenticationService) {}
 
-  // TODO: Update to use Dinamically Request or response for express or fastify
-  use(req: Request, res: Response, next: NextFunction) {
-    this.authService.authenticate(
+  // TODO: Update to use dynamically request or response for express or fastify
+  async use(req: Request, res: Response, next: NextFunction) {
+    
+    await this.authService.authenticate(
       LOCAL_STRATEGY_NAME,
       { session: false },
       // request, response, next
       (request) => {
-        req['user'] = request.user;
-        next();
+        req['user'] = request['user'];
       },
     );
+
+    next();
   }
 }

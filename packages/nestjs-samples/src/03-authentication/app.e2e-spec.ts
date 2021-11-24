@@ -6,6 +6,7 @@ import { AppModule } from './app.module';
 import { INestApplication } from '@nestjs/common';
 
 import { AuthenticationStrategyLocalInterface } from '@rockts-org/nestjs-authentication';
+jest.setTimeout(10000);
 
 describe('AppController (e2e)', () => {
   describe('Authentication', () => {
@@ -22,7 +23,7 @@ describe('AppController (e2e)', () => {
 
     afterEach(async () => {
       jest.clearAllMocks();
-      await app.close();
+      //await app.close();
     });
 
     it('POST /sign', async () => {
@@ -32,12 +33,26 @@ describe('AppController (e2e)', () => {
       };
 
       await supertest(app.getHttpServer())
-        .post('/sign')
+        .post('/auth/guard/login')
         .send(sign)
         .expect(201)
         .expect((response: AuthenticationStrategyLocalInterface) => {
           return response.username == sign.username;
         });
+
+      return;
+    });
+
+    it('POST /sign wrong', async () => {
+      const sign = {
+        username: 'first_user_2',
+        password: 'AS12378',
+      };
+
+      await supertest(app.getHttpServer())
+        .post('/auth/guard/login')
+        .send(sign)
+        .expect(401);
 
       return;
     });

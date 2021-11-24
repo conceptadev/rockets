@@ -14,7 +14,7 @@ import { GithubStrategy } from './github.strategy';
   providers: [
     GithubStrategyController,
     GithubStrategyMiddleware,
-    GithubStrategyService,
+    //GithubStrategyService,
     GithubStrategy,
   ],
   exports: [GithubStrategyController],

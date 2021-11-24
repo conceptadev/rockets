@@ -1,6 +1,6 @@
 import { IVerifyOptions, Strategy } from 'passport-local';
 
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 
 import {
   GetUserServiceInterface,
@@ -8,9 +8,14 @@ import {
   PasswordStorageService,
   AuthenticationService,
   AuthenticationResponseInterface,
+  CredentialLookupInterface,
 } from '@rockts-org/nestjs-authentication';
 
 import { LOCAL_STRATEGY_NAME } from './constants';
+import {
+  GET_USER_SERVICE_TOKEN,
+  ISSUE_TOKEN_SERVICE_TOKEN,
+} from './config/local.config';
 
 /**
  * Use this service to authenticate using middleware instead of authGuard
@@ -19,8 +24,11 @@ import { LOCAL_STRATEGY_NAME } from './constants';
 export class LocalStrategyService implements OnModuleInit {
   constructor(
     private authenticationService: AuthenticationService,
-    private userService: GetUserServiceInterface,
+    //TODO: Move Service to inside Local?
+    @Inject(GET_USER_SERVICE_TOKEN)
+    private userService: GetUserServiceInterface<CredentialLookupInterface>,
     private passwordService: PasswordStorageService,
+    @Inject(ISSUE_TOKEN_SERVICE_TOKEN)
     private issueTokenService: IssueTokenServiceInterface,
   ) {}
 
@@ -32,7 +40,7 @@ export class LocalStrategyService implements OnModuleInit {
     const localStrategy = new Strategy(this.validate);
 
     // authentication Service will make sure this runs for express or fastify
-    this.authenticationService.use(LOCAL_STRATEGY_NAME, localStrategy);
+    //this.authenticationService.use(LOCAL_STRATEGY_NAME, localStrategy);
   }
 
   /**

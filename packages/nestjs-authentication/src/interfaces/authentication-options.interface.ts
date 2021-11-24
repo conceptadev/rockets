@@ -48,7 +48,6 @@ export interface AuthenticationConfigAsyncOptionsInterface
  */
 export interface AuthenticationOptionsInterface
   extends Pick<ModuleMetadata, 'imports'> {
-  credentialLookupProvider: Type<CredentialLookupServiceInterface>;
   config?: AuthenticationConfigOptionsInterface;
 }
 
@@ -57,6 +56,5 @@ export interface AuthenticationOptionsInterface
  */
 export interface AuthenticationOptionsAsyncInterface
   extends Pick<ModuleMetadata, 'imports'> {
-  credentialLookupProvider: Type<CredentialLookupServiceInterface>;
   config?: AuthenticationConfigAsyncOptionsInterface;
 }

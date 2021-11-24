@@ -14,13 +14,24 @@ export class AuthenticationService implements AuthenticationServiceInterface {
    * @param dto
    * @returns Promise<AccessTokenInterface>
    */
-  authenticate(
+  async authenticate(
     strategy: string | Strategy,
     options?: AuthenticateOptions,
     callback?: (...args: unknown[]) => unknown,
-  ): void {
-    // if express
-    passport.authenticate(strategy, options, callback);
+  ): Promise<unknown> {
+    // return new promise that will resolved passport.authenticate
+    return new Promise<unknown>((resolve, reject) => {
+      passport.authenticate(strategy, options, (...authArgs) => {
+        return resolve(callback(authArgs));
+      });
+     
+    });
+
+            
+
+    // return new Promise((resolve, reject) => {
+    //   resolve(passport.authenticate(strategy, options, callback));
+    // });
   }
 
   /**

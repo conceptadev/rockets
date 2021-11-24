@@ -5,16 +5,17 @@ import {
   authenticationConfig,
   CREDENTIAL_LOOKUP_SERVICE_TOKEN,
 } from './config/authentication.config';
-import {
-  AuthenticationOptionsAsyncInterface,
-  AuthenticationOptionsInterface,
-} from './interfaces/authentication-options.interface';
+
 import { PasswordCreationService } from './services/password-creation.service';
 import { PasswordStorageService } from './services/password-storage.service';
 import { PasswordStrengthService } from './services/password-strength.service';
 import { CustomAuthenticationService } from './services/custom-authentication.service';
 import { AuthenticationController } from './authentication.controller';
 import { AuthenticationService } from '.';
+import {
+  AuthenticationOptionsAsyncInterface,
+  AuthenticationOptionsInterface,
+} from './interfaces/authentication-options.interface';
 
 /**
  * Authentication Module to handle authentication and password encryption.
@@ -120,10 +121,6 @@ export class AuthenticationModule {
           provide: AUTHENTICATION_MODULE_CONFIG_TOKEN,
           useValue: options.config || authenticationConfig(),
         },
-        {
-          provide: CREDENTIAL_LOOKUP_SERVICE_TOKEN,
-          useClass: options.credentialLookupProvider,
-        },
       ],
       exports: [
         PasswordStrengthService,
@@ -154,10 +151,6 @@ export class AuthenticationModule {
           provide: AUTHENTICATION_MODULE_CONFIG_TOKEN,
           inject: options.config?.inject,
           useFactory: options.config.useFactory,
-        },
-        {
-          provide: CREDENTIAL_LOOKUP_SERVICE_TOKEN,
-          useClass: options.credentialLookupProvider,
         },
       ],
       exports: [

@@ -38,10 +38,7 @@ describe('SignServiceService', () => {
     passwordStorageService = mock<PasswordStorageService>();
     credentialLookupServiceInterface = mock<CredentialLookupServiceInterface>();
 
-    service = new CustomAuthenticationService(
-      passwordStorageService,
-      credentialLookupServiceInterface,
-    );
+    service = new CustomAuthenticationService(passwordStorageService);
   });
 
   it('should be defined', () => {

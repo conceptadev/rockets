@@ -17,7 +17,7 @@ export class GithubStrategyService implements OnModuleInit {
   constructor(
     @Inject(GITHUB_MODULE_OPTIONS_TOKEN)
     private config: GithubOptionsInterface,
-    private userService: GetUserServiceInterface,
+    private userService: GetUserServiceInterface<AuthenticationResponseInterface>,
     private authenticationService: AuthenticationService,
   ) {}
 
@@ -34,7 +34,7 @@ export class GithubStrategyService implements OnModuleInit {
 
     strategy.name = GITHUB_STRATEGY_NAME;
 
-    this.authenticationService.use(GITHUB_STRATEGY_NAME, strategy);
+    //this.authenticationService.use(GITHUB_STRATEGY_NAME, strategy);
   }
 
   async validate(
@@ -47,7 +47,7 @@ export class GithubStrategyService implements OnModuleInit {
       options?: IVerifyOptions,
     ) => void,
   ): Promise<void> {
-    const user = await this.userService.getGithubProfileId(profile);
+    const user = await this.userService.getUser(profile);
 
     if (!user) {
       return done(new Error('User does not exists'), null);

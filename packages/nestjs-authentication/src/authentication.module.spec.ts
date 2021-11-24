@@ -1,10 +1,6 @@
 import { Injectable, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  AuthenticationConfigAsyncOptionsInterface,
-  AuthenticationConfigOptionsInterface,
-} from '.';
 
 import { AuthenticationModule } from './authentication.module';
 import { authenticationConfig } from './config/authentication.config';
@@ -13,6 +9,8 @@ import { AccessTokenInterface } from './interfaces/access-token.interface';
 import { CredentialLookupInterface } from './interfaces/credential-lookup.interface';
 import { CredentialLookupServiceInterface } from './interfaces/credential-lookup-service.interface';
 import { AuthenticationController } from './authentication.controller';
+import { AuthenticationConfigOptionsInterface } from '.';
+import { AuthenticationConfigAsyncOptionsInterface } from './interfaces/authentication-options.interface';
 
 const USERNAME = 'TestLookupUsername';
 const PASSWORD_MEDIUM = 'AS12378';
@@ -122,7 +120,6 @@ describe('AuthenticationModule', () => {
       imports: [
         TestModule,
         AuthenticationModule.forRoot({
-          credentialLookupProvider: UserLookup,
           config,
         }),
       ],
@@ -144,7 +141,6 @@ describe('AuthenticationModule', () => {
       imports: [
         AuthenticationModule.forRoot({
           imports: [TestModule],
-          credentialLookupProvider: TestLookupInjected,
           config,
         }),
       ],
@@ -165,7 +161,6 @@ describe('AuthenticationModule', () => {
       imports: [
         AuthenticationModule.forRoot({
           imports: [TestModule],
-          credentialLookupProvider: TestLookupInjected,
         }),
       ],
     }).compile();
@@ -189,7 +184,6 @@ describe('AuthenticationModule', () => {
           // get the injected InjectTest.
 
           imports: [TestModule, ConfigModule.forFeature(authenticationConfig)],
-          credentialLookupProvider: TestLookupInjected,
           config: configAsync,
         }),
       ],
@@ -211,7 +205,6 @@ describe('AuthenticationModule', () => {
         TestModule,
         AuthenticationModule.forRootAsync({
           imports: [ConfigModule.forFeature(authenticationConfig)],
-          credentialLookupProvider: UserLookup,
           config: {
             useFactory:
               async (): Promise<AuthenticationConfigOptionsInterface> => {
@@ -238,7 +231,6 @@ describe('AuthenticationModule', () => {
       await Test.createTestingModule({
         imports: [
           AuthenticationModule.forRoot({
-            credentialLookupProvider: TestLookupInjected,
             config,
           }),
         ],
@@ -256,7 +248,6 @@ describe('AuthenticationModule', () => {
       await Test.createTestingModule({
         imports: [
           AuthenticationModule.forRootAsync({
-            credentialLookupProvider: TestLookupInjected,
             config: configAsync,
           }),
         ],
@@ -274,7 +265,6 @@ describe('AuthenticationModule', () => {
       await Test.createTestingModule({
         imports: [
           AuthenticationModule.forRoot({
-            credentialLookupProvider: null,
             config,
           }),
         ],
@@ -292,7 +282,6 @@ describe('AuthenticationModule', () => {
       await Test.createTestingModule({
         imports: [
           AuthenticationModule.forRootAsync({
-            credentialLookupProvider: null,
             config: configAsync,
           }),
         ],
