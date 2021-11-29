@@ -1,3 +1,1 @@
-export abstract class StrategyController {
-  constructor() {}
-}
+export abstract class StrategyController {}

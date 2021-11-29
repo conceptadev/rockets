@@ -12,20 +12,6 @@ import { IssueTokenService } from './user/issue-token.service';
 @Module({
   imports: [
     UserModule,
-    // AuthenticationModule.forRootAsync({
-    //   imports: [UserModule],
-    //   config: {
-    //     inject: [authenticationConfig.KEY],
-    //     useFactory: async (): Promise<AuthenticationConfigOptionsInterface> => {
-    //       // overwrite config
-    //       const config: AuthenticationConfigOptionsInterface = {
-    //         maxPasswordAttempts: 3,
-    //         minPasswordStrength: PasswordStrengthEnum.VeryStrong,
-    //       };
-    //       return config;
-    //     },
-    //   },
-    // }),
     AuthenticationModule.forRoot({
       config: {
         maxPasswordAttempts: 3,

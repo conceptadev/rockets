@@ -15,24 +15,12 @@ export class LocalStrategyController extends StrategyController {
   }
 
   /**
-   * Middleware
-   * @param req
-   * @returns
-   */
-  @Post('login')
-  async authenticate(
-    @Request() req: Request,
-  ): Promise<AuthenticationResponseInterface> {
-    return req['user'];
-  }
-
-  /**
    * Authenticate using guard
    * @param dto Body
    * @returns
    */
   @UseGuards(LocalAuthGuard)
-  @Post('guard/login')
+  @Post('login')
   async authenticateWithGuard(
     @Request() req: Request,
   ): Promise<AuthenticationResponseInterface> {

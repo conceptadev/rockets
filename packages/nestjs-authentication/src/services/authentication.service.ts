@@ -20,14 +20,11 @@ export class AuthenticationService implements AuthenticationServiceInterface {
     callback?: (...args: unknown[]) => unknown,
   ): Promise<unknown> {
     // return new promise that will resolved passport.authenticate
-    return new Promise<unknown>((resolve, reject) => {
+    return new Promise<unknown>((resolve) => {
       passport.authenticate(strategy, options, (...authArgs) => {
         return resolve(callback(authArgs));
       });
-     
     });
-
-            
 
     // return new Promise((resolve, reject) => {
     //   resolve(passport.authenticate(strategy, options, callback));

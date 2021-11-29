@@ -1,5 +1,4 @@
 import { Injectable, Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AuthenticationModule } from './authentication.module';
@@ -8,11 +7,10 @@ import { PasswordStrengthEnum } from './enum/password-strength.enum';
 import { AccessTokenInterface } from './interfaces/access-token.interface';
 import { CredentialLookupInterface } from './interfaces/credential-lookup.interface';
 import { CredentialLookupServiceInterface } from './interfaces/credential-lookup-service.interface';
-import { AuthenticationConfigOptionsInterface } from '.';
+import { AuthenticationConfigOptionsInterface } from './interfaces/authentication-config-options.interface';
 import { AuthenticationConfigAsyncOptionsInterface } from './interfaces/authentication-options.interface';
 
 const USERNAME = 'TestLookupUsername';
-const PASSWORD_MEDIUM = 'AS12378';
 const ACCESS_TOKEN = 'TestLookup_AccessToken';
 
 @Injectable()

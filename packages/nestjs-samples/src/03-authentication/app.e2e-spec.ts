@@ -33,7 +33,7 @@ describe('AppController (e2e)', () => {
       };
 
       await supertest(app.getHttpServer())
-        .post('/auth/guard/login')
+        .post('/auth/login')
         .send(sign)
         .expect(201)
         .expect((response: AuthenticationStrategyLocalInterface) => {
@@ -50,7 +50,7 @@ describe('AppController (e2e)', () => {
       };
 
       await supertest(app.getHttpServer())
-        .post('/auth/guard/login')
+        .post('/auth/login')
         .send(sign)
         .expect(401);
 

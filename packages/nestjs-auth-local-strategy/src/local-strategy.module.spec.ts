@@ -2,16 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   AccessTokenInterface,
-  AuthenticationConfigOptionsInterface,
   AuthenticationModule,
-  AuthenticationService,
   CredentialLookupInterface,
   GetUserServiceInterface,
   IssueTokenServiceInterface,
   PasswordStrengthEnum,
 } from '@rockts-org/nestjs-authentication';
+import { LocalStrategyController } from '.';
 import { LocalStrategyModule } from './local-strategy.module';
-import { LocalStrategyService } from './local-strategy.service';
 
 const USERNAME = 'TestLookupUsername';
 
@@ -32,7 +30,7 @@ class UserLookup implements GetUserServiceInterface<CredentialLookupInterface> {
 
 @Injectable()
 class IssueToken implements IssueTokenServiceInterface {
-  async issueAccessToken(username: string): Promise<AccessTokenInterface> {
+  async issueAccessToken(): Promise<AccessTokenInterface> {
     const accessToken: AccessTokenInterface = {
       accessToken: 'accessToken',
       expireIn: new Date(),
@@ -44,10 +42,6 @@ class IssueToken implements IssueTokenServiceInterface {
 }
 
 describe('LocalStrategyModuleTest', () => {
-  let localStrategyService: LocalStrategyService;
-
-  beforeEach(async () => {});
-
   afterEach(async () => {
     jest.clearAllMocks();
   });
@@ -58,37 +52,23 @@ describe('LocalStrategyModuleTest', () => {
   it('Is localStrategyService Defined', async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
-        // AuthenticationModule.forRootAsync({
-        //   config: {
-        //     inject: null,
-        //     useFactory: async (): Promise<AuthenticationConfigOptionsInterface> => {
-        //       // overwrite config
-        //       const config: AuthenticationConfigOptionsInterface = {
-        //         maxPasswordAttempts: 3,
-        //         minPasswordStrength: PasswordStrengthEnum.VeryStrong,
-        //       };
-        //       return config;
-        //     },
-        //   },
-        // }),
+        AuthenticationModule.forRoot({
+          config: {
+            maxPasswordAttempts: 3,
+            minPasswordStrength: PasswordStrengthEnum.VeryStrong,
+          },
+        }),
         LocalStrategyModule.forRoot({
-          imports: [
-            AuthenticationModule.forRoot({
-              config: {
-                maxPasswordAttempts: 3,
-                minPasswordStrength: PasswordStrengthEnum.VeryStrong,
-              },
-            }),
-          ],
           getUserService: UserLookup,
           issueTokenService: IssueToken,
         }),
       ],
     }).compile();
 
-    localStrategyService =
-      module.get<LocalStrategyService>(LocalStrategyService);
+    const controller = module.get<LocalStrategyController>(
+      LocalStrategyController,
+    );
 
-    expect(localStrategyService).toBeDefined();
+    expect(controller).toBeDefined();
   });
 });

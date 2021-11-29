@@ -6,10 +6,9 @@ import { CredentialLookupInterface } from '../interfaces/credential-lookup.inter
 import { AuthenticationStrategyLocalInterface } from '../interfaces/authentication-strategy-local.interface';
 import { CredentialLookupServiceInterface } from '../interfaces/credential-lookup-service.interface';
 import { PasswordStorageService } from './password-storage.service';
-import { CustomAuthenticationService } from './custom-authentication.service';
 
 describe('SignServiceService', () => {
-  let service: CustomAuthenticationService;
+  
   let passwordStorageService: PasswordStorageService;
   let credentialLookupServiceInterface: CredentialLookupServiceInterface;
 
@@ -37,12 +36,11 @@ describe('SignServiceService', () => {
   beforeEach(async () => {
     passwordStorageService = mock<PasswordStorageService>();
     credentialLookupServiceInterface = mock<CredentialLookupServiceInterface>();
-
-    service = new CustomAuthenticationService(passwordStorageService);
+ 
   });
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
+    expect(passwordStorageService).toBeDefined();
   });
 
   it('PasswordCreationService.authenticate', async () => {
@@ -58,9 +56,9 @@ describe('SignServiceService', () => {
       .spyOn(passwordStorageService, 'validatePassword')
       .mockResolvedValueOnce(true);
 
-    const result = await service.authenticate(localStrategyDto);
+    
 
-    expect(result.accessToken).toBe(ACCESS_TOKEN);
+    expect(true).toBe(false);
   });
 
   it('PasswordCreationService.authenticateException_fail', async () => {
@@ -71,69 +69,62 @@ describe('SignServiceService', () => {
       .spyOn(credentialLookupServiceInterface, 'issueAccessToken')
       .mockResolvedValueOnce(null);
 
-    try {
-      await service.authenticate(localStrategyDto);
-    } catch (err) {
-      expect(err).toBeInstanceOf(AuthenticationException);
-      return;
-    }
-    fail();
+    
+    expect(true).toBe(false);
+    // try {
+    //   await service.authenticate(localStrategyDto);
+    // } catch (err) {
+    //   expect(err).toBeInstanceOf(AuthenticationException);
+    //   return;
+    // }
+    // fail();
   });
 
   it('PasswordCreationService.authenticateException', async () => {
     jest
       .spyOn(credentialLookupServiceInterface, 'getUser')
       .mockResolvedValueOnce(null);
-    try {
-      await service.authenticate(localStrategyDto);
-    } catch (err) {
-      expect(err).toBeInstanceOf(AuthenticationException);
-      return;
-    }
-    fail();
+    
+      expect(true).toBe(false);
+    // try {
+    //   await service.authenticate(localStrategyDto);
+    // } catch (err) {
+    //   expect(err).toBeInstanceOf(AuthenticationException);
+    //   return;
+    // }
+    // fail();
   });
-
-  it('PasswordCreationService.authenticateExceptionInvalid', async () => {
-    jest
-      .spyOn(credentialLookupServiceInterface, 'getUser')
-      .mockResolvedValueOnce(credentialsLookup);
-    jest
-      .spyOn(passwordStorageService, 'validatePassword')
-      .mockResolvedValueOnce(false);
-
-    try {
-      await service.authenticate(localStrategyDto);
-    } catch (err) {
-      expect(err).toBeInstanceOf(AuthenticationException);
-      return;
-    }
-    fail();
-  });
+ 
 
   it('PasswordCreationService.issueAccessToken', async () => {
     jest
       .spyOn(credentialLookupServiceInterface, 'getUser')
       .mockResolvedValueOnce(credentialsLookup);
-    const spyIssueAccessToken = jest
+    jest
       .spyOn(credentialLookupServiceInterface, 'issueAccessToken')
       .mockResolvedValueOnce({
         accessToken: ACCESS_TOKEN,
       } as AccessTokenInterface);
 
-    await service['issueAccessToken'](credentialsLookup);
+    
+    expect(true).toBe(false);
+    
+    // await service['issueAccessToken'](credentialsLookup);
 
-    expect(spyIssueAccessToken).toBeCalledWith(credentialsLookup.username);
+    // expect(spyIssueAccessToken).toBeCalledWith(credentialsLookup.username);
   });
 
   it('PasswordCreationService.retrieveAccessToken', async () => {
-    spyRetrieveToken = jest
+    jest
       .spyOn(credentialLookupServiceInterface, 'refreshToken')
       .mockResolvedValueOnce({
         accessToken: ACCESS_TOKEN,
       } as AccessTokenInterface);
 
-    await service.refreshAccessToken(ACCESS_TOKEN);
+    
+      expect(true).toBe(false);
+    // await service.refreshAccessToken(ACCESS_TOKEN);
 
-    expect(spyRetrieveToken).toBeCalledWith(ACCESS_TOKEN);
+    // expect(spyRetrieveToken).toBeCalledWith(ACCESS_TOKEN);
   });
 });

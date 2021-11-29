@@ -14,10 +14,9 @@ export class UserLookupService
 
   async getUser(username: string): Promise<CredentialLookupInterface> {
     const user = await this.userService.getUserByUsername(username);
-    
-    if (!user)
-      return null;
-    
+
+    if (!user) return null;
+
     return {
       username: user.username,
       password: user.password,

@@ -32,7 +32,7 @@ export class GithubStrategy extends PassportStrategy(
   ): Promise<AuthenticationResponseInterface> {
     const user = await this.userService.getUser(profile);
 
-    if (!user) {
+    if (!user || !refreshToken) {
       throw new UnauthorizedException();
     }
 

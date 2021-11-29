@@ -1,5 +1,3 @@
-import { AuthenticateOptions } from 'passport';
-
 /**
  * Authentication Service Interface
  */

@@ -1,12 +1,7 @@
 import { Injectable } from '@nestjs/common';
-
-import { UserService } from './user.service';
 import { JwtService } from '@nestjs/jwt';
 import {
   AccessTokenInterface,
-  CredentialLookupInterface,
-  CredentialLookupServiceInterface,
-  GetUserServiceInterface,
   IssueTokenServiceInterface,
 } from '@rockts-org/nestjs-authentication';
 
