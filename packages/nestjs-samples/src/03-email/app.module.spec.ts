@@ -2,8 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from './app.module';
 import { EmailService } from '@rockts-org/nestjs-email';
 import { NotificationController } from './notification/notification.controller';
-import { emailConfig } from './config/email.config';
-import { ConfigModule } from '@nestjs/config';
 
 describe('AppModule', () => {
   let notificationController: NotificationController;

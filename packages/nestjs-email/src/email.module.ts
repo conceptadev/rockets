@@ -1,10 +1,10 @@
-import { Module, DynamicModule, Logger, Global } from '@nestjs/common';
+import { Module, DynamicModule, Logger } from '@nestjs/common';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { EmailService } from './email.service';
 import { EmailConfigOptions } from './interfaces/email-config-options.interface';
 import { EmailConfigAsyncOptions } from './interfaces/email-config-async-options.interface';
-// import { APP_EMAIL_MODULE_OPTIONS_TOKEN } from './email-constants';
 import { emailConfig, EMAIL_MODULE_OPTIONS_TOKEN } from './config/email.config';
+import { EmailCoreModule } from './email-core.module';
 
 @Module({})
 export class EmailModule {
@@ -16,13 +16,15 @@ export class EmailModule {
    * @returns {DynamicModule} Dynamic module.
    */
   public static forRoot(options?: EmailConfigOptions): DynamicModule {
+    const defaultConfig = emailConfig();
+
     return {
       module: EmailModule,
-      imports: [MailerModule.forRoot(options.nodeMailer)],
+      imports: [MailerModule.forRoot(defaultConfig.nodeMailer)],
       providers: [
         {
           provide: EMAIL_MODULE_OPTIONS_TOKEN,
-          useValue: options ?? emailConfig(),
+          useValue: options ?? defaultConfig,
         },
         Logger,
         EmailService,
@@ -35,9 +37,9 @@ export class EmailModule {
     return {
       module: EmailModule,
       imports: [
-        EmailConfigModule.forRootAsync(options),
+        EmailCoreModule.forRootAsync(options),
         MailerModule.forRootAsync({
-          imports: [EmailConfigModule],
+          imports: [EmailCoreModule],
           inject: [EMAIL_MODULE_OPTIONS_TOKEN],
           useFactory: async (config: EmailConfigOptions) => {
             return config.nodeMailer;
@@ -46,37 +48,6 @@ export class EmailModule {
       ],
       providers: [Logger, EmailService],
       exports: [EmailService],
-    };
-  }
-}
-
-@Global()
-@Module({})
-export class EmailConfigModule {
-  static forRoot(options: EmailConfigOptions): DynamicModule {
-    return {
-      module: EmailConfigModule,
-      providers: [
-        {
-          provide: EMAIL_MODULE_OPTIONS_TOKEN,
-          useValue: options,
-        },
-      ],
-      exports: [EMAIL_MODULE_OPTIONS_TOKEN],
-    };
-  }
-
-  static forRootAsync(options: EmailConfigAsyncOptions): DynamicModule {
-    return {
-      module: EmailConfigModule,
-      providers: [
-        {
-          provide: EMAIL_MODULE_OPTIONS_TOKEN,
-          inject: options.inject,
-          useFactory: options.useFactory,
-        },
-      ],
-      exports: [EMAIL_MODULE_OPTIONS_TOKEN],
     };
   }
 }
