@@ -1,4 +1,5 @@
-import { Test } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
+import { emailConfig } from './config/email.config';
 import { EmailModule } from './email.module';
 import { EmailService } from './email.service';
 import { EmailConfigOptions } from './interfaces/email-config-options.interface';
@@ -22,14 +23,20 @@ describe('EmailModule', () => {
   });
 
   describe('forRoot', () => {
-    it('should import the dynamic module', async () => {
-      const moduleRef = await Test.createTestingModule({
-        imports: [EmailModule.forRoot(plainEmailConfig)],
+    let moduleRef: TestingModule;
+
+    beforeEach(async () => {
+      jest.clearAllMocks();
+
+      const config = await emailConfig();
+
+      moduleRef = await Test.createTestingModule({
+        imports: [EmailModule.forRoot({ ...config })],
       }).compile();
+    });
 
-      const emailService = moduleRef.get<EmailService>(EmailService);
-
-      expect(emailService).toBeInstanceOf(EmailService);
+    it('module should be defined', async () => {
+      expect(moduleRef).toBeInstanceOf(TestingModule);
     });
   });
 
