@@ -2,8 +2,6 @@ import { ConfigModule, ConfigType } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { emailConfig } from './config/email.config';
 import { EmailCoreModule } from './email-core.module';
-import { EmailModule } from './email.module';
-import { EmailService } from './email.service';
 import { EmailConfigOptions } from './interfaces/email-config-options.interface';
 
 describe('EmailModule', () => {

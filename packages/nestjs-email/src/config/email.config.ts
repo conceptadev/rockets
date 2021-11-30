@@ -1,8 +1,4 @@
-import {
-  registerAs,
-  ConfigFactory,
-  ConfigFactoryKeyHost,
-} from '@nestjs/config';
+import { registerAs } from '@nestjs/config';
 import { EmailConfigOptions } from '../interfaces/email-config-options.interface';
 
 /**

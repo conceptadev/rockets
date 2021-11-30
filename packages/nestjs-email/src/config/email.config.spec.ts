@@ -1,5 +1,4 @@
 import { ConfigModule } from '@nestjs/config';
-// import { LoggerOptionsInterface } from '../interfaces/logger-options.interface';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EmailConfigOptions } from '..';
 import { emailConfig, EMAIL_MODULE_OPTIONS_TOKEN } from './email.config';
