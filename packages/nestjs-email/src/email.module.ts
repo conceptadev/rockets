@@ -3,7 +3,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { EmailService } from './email.service';
 import { EmailConfigOptions } from './interfaces/email-config-options.interface';
 import { EmailConfigAsyncOptions } from './interfaces/email-config-async-options.interface';
-import { EMAIL_MODULE_OPTIONS_TOKEN } from './email-constants';
+// import { APP_EMAIL_MODULE_OPTIONS_TOKEN } from './email-constants';
+import { emailConfig, EMAIL_MODULE_OPTIONS_TOKEN } from './config/email.config';
 
 @Module({})
 export class EmailModule {
@@ -14,14 +15,18 @@ export class EmailModule {
    * definitions. See the structure of this object in the examples.
    * @returns {DynamicModule} Dynamic module.
    */
-  public static forRoot(options: EmailConfigOptions): DynamicModule {
+  public static forRoot(options?: EmailConfigOptions): DynamicModule {
     return {
       module: EmailModule,
-      imports: [
-        EmailConfigModule.forRoot(options),
-        MailerModule.forRoot(options.nodeMailer),
+      imports: [MailerModule.forRoot(options.nodeMailer)],
+      providers: [
+        {
+          provide: EMAIL_MODULE_OPTIONS_TOKEN,
+          useValue: options ?? emailConfig(),
+        },
+        Logger,
+        EmailService,
       ],
-      providers: [Logger, EmailService],
       exports: [EmailService],
     };
   }

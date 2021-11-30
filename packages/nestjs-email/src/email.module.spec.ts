@@ -1,13 +1,15 @@
 import { Test } from '@nestjs/testing';
 import { EmailModule } from './email.module';
+import { ConfigModule, ConfigType } from '@nestjs/config';
 import { EmailService } from './email.service';
+import { emailConfig } from './config/email.config';
 import { EmailConfigOptions } from './interfaces/email-config-options.interface';
 
 describe('EmailModule', () => {
-  let emailConfig: EmailConfigOptions;
+  let plainEmailConfig: EmailConfigOptions;
 
   beforeEach(async () => {
-    emailConfig = {
+    plainEmailConfig = {
       nodeMailer: {
         transport: {
           host: 'smtp.foo.org',
@@ -24,7 +26,7 @@ describe('EmailModule', () => {
   describe('forRoot', () => {
     it('should import the dynamic module', async () => {
       const moduleRef = await Test.createTestingModule({
-        imports: [EmailModule.forRoot(emailConfig)],
+        imports: [EmailModule.forRoot(plainEmailConfig)],
       }).compile();
 
       const emailService = moduleRef.get<EmailService>(EmailService);
@@ -39,7 +41,7 @@ describe('EmailModule', () => {
         imports: [
           EmailModule.forRootAsync({
             useFactory: async () => {
-              return emailConfig;
+              return plainEmailConfig;
             },
           }),
         ],
