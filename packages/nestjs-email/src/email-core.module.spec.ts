@@ -1,8 +1,7 @@
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { emailConfig } from './config/email.config';
-import { EmailModule } from './email.module';
-import { EmailService } from './email.service';
+import { EmailCoreModule } from './email-core.module';
 import { EmailConfigOptions } from './interfaces/email-config-options.interface';
 
 describe('EmailModule', () => {
@@ -19,50 +18,43 @@ describe('EmailModule', () => {
     },
   };
 
-  describe('default', () => {
+  describe('forRoot (plain config)', () => {
     it('should import the dynamic module synchronously', async () => {
-      const moduleRef = await Test.createTestingModule({
-        imports: [EmailModule],
+      await Test.createTestingModule({
+        imports: [EmailCoreModule.forRoot(plainEmailConfig)],
       }).compile();
-
-      const emailService = moduleRef.get<EmailService>(EmailService);
-      expect(emailService).toBeInstanceOf(EmailService);
     });
   });
 
-  describe('forRoot', () => {
+  describe('forRoot (default config)', () => {
     it('should import the dynamic module synchronously', async () => {
-      const moduleRef = await Test.createTestingModule({
-        imports: [EmailModule.forRoot(plainEmailConfig)],
-      }).compile();
+      const config = await emailConfig();
 
-      const emailService = moduleRef.get<EmailService>(EmailService);
-      expect(emailService).toBeInstanceOf(EmailService);
+      await Test.createTestingModule({
+        imports: [EmailCoreModule.forRoot(config)],
+      }).compile();
     });
   });
 
-  describe('forRootAsync (no injection)', () => {
+  describe('forRootAsync (plain)', () => {
     it('should import the dynamic module asynchronously', async () => {
-      const moduleRef = await Test.createTestingModule({
+      await Test.createTestingModule({
         imports: [
-          EmailModule.forRootAsync({
+          EmailCoreModule.forRootAsync({
             useFactory: async () => {
               return plainEmailConfig;
             },
           }),
         ],
       }).compile();
-
-      const emailService = moduleRef.get<EmailService>(EmailService);
-      expect(emailService).toBeInstanceOf(EmailService);
     });
   });
 
-  describe('forRootAsync (with injection)', () => {
+  describe('forRootAsync (default)', () => {
     it('should import the dynamic module asynchronously', async () => {
-      const moduleRef = await Test.createTestingModule({
+      await Test.createTestingModule({
         imports: [
-          EmailModule.forRootAsync({
+          EmailCoreModule.forRootAsync({
             imports: [ConfigModule.forFeature(emailConfig)],
             inject: [emailConfig.KEY],
             useFactory: async (config: ConfigType<typeof emailConfig>) => {
@@ -71,9 +63,6 @@ describe('EmailModule', () => {
           }),
         ],
       }).compile();
-
-      const emailService = moduleRef.get<EmailService>(EmailService);
-      expect(emailService).toBeInstanceOf(EmailService);
     });
   });
 });
