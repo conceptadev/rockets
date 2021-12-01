@@ -27,3 +27,8 @@ export const emailConfig = registerAs(
     },
   }),
 );
+
+/**
+ * The default email config
+ */
+export const defaultEmailConfig = emailConfig();

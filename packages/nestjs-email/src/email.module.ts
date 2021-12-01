@@ -3,10 +3,20 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { EmailService } from './email.service';
 import { EmailConfigOptions } from './interfaces/email-config-options.interface';
 import { EmailConfigAsyncOptions } from './interfaces/email-config-async-options.interface';
-import { emailConfig, EMAIL_MODULE_OPTIONS_TOKEN } from './config/email.config';
+import {
+  defaultEmailConfig,
+  EMAIL_MODULE_OPTIONS_TOKEN,
+} from './config/email.config';
 import { EmailCoreModule } from './email-core.module';
 
-@Module({})
+@Module({
+  imports: [
+    EmailCoreModule.forRoot(defaultEmailConfig),
+    MailerModule.forRoot(defaultEmailConfig.nodeMailer),
+  ],
+  providers: [Logger, EmailService],
+  exports: [EmailService],
+})
 export class EmailModule {
   /**
    * Register a pre-defined email transport
@@ -15,20 +25,14 @@ export class EmailModule {
    * definitions. See the structure of this object in the examples.
    * @returns {DynamicModule} Dynamic module.
    */
-  public static forRoot(options?: EmailConfigOptions): DynamicModule {
-    const defaultConfig = emailConfig();
-
+  public static forRoot(options: EmailConfigOptions): DynamicModule {
     return {
       module: EmailModule,
-      imports: [MailerModule.forRoot(defaultConfig.nodeMailer)],
-      providers: [
-        {
-          provide: EMAIL_MODULE_OPTIONS_TOKEN,
-          useValue: options ?? defaultConfig,
-        },
-        Logger,
-        EmailService,
+      imports: [
+        EmailCoreModule.forRoot(options),
+        MailerModule.forRoot(options?.nodeMailer),
       ],
+      providers: [Logger, EmailService],
       exports: [EmailService],
     };
   }
@@ -39,7 +43,6 @@ export class EmailModule {
       imports: [
         EmailCoreModule.forRootAsync(options),
         MailerModule.forRootAsync({
-          imports: [EmailCoreModule],
           inject: [EMAIL_MODULE_OPTIONS_TOKEN],
           useFactory: async (config: EmailConfigOptions) => {
             return config.nodeMailer;

@@ -19,7 +19,18 @@ describe('EmailModule', () => {
     },
   };
 
-  describe('forRoot (plain config)', () => {
+  describe('default', () => {
+    it('should import the dynamic module synchronously', async () => {
+      const moduleRef = await Test.createTestingModule({
+        imports: [EmailModule],
+      }).compile();
+
+      const emailService = moduleRef.get<EmailService>(EmailService);
+      expect(emailService).toBeInstanceOf(EmailService);
+    });
+  });
+
+  describe('forRoot', () => {
     it('should import the dynamic module synchronously', async () => {
       const moduleRef = await Test.createTestingModule({
         imports: [EmailModule.forRoot(plainEmailConfig)],
@@ -30,18 +41,7 @@ describe('EmailModule', () => {
     });
   });
 
-  describe('forRoot (default config)', () => {
-    it('should import the dynamic module synchronously', async () => {
-      const moduleRef = await Test.createTestingModule({
-        imports: [EmailModule.forRoot()],
-      }).compile();
-
-      const emailService = moduleRef.get<EmailService>(EmailService);
-      expect(emailService).toBeInstanceOf(EmailService);
-    });
-  });
-
-  describe('forRootAsync (plain)', () => {
+  describe('forRootAsync (no injection)', () => {
     it('should import the dynamic module asynchronously', async () => {
       const moduleRef = await Test.createTestingModule({
         imports: [
@@ -58,7 +58,7 @@ describe('EmailModule', () => {
     });
   });
 
-  describe('forRootAsync (default)', () => {
+  describe('forRootAsync (with injection)', () => {
     it('should import the dynamic module asynchronously', async () => {
       const moduleRef = await Test.createTestingModule({
         imports: [
