@@ -30,7 +30,7 @@ export class EmailModule {
       module: EmailModule,
       imports: [
         EmailCoreModule.forRoot(options),
-        MailerModule.forRoot(options?.nodeMailer),
+        MailerModule.forRoot(options.nodeMailer),
       ],
       providers: [Logger, EmailService],
       exports: [EmailService],
