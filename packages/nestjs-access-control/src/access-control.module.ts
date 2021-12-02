@@ -1,6 +1,8 @@
 import { Module, DynamicModule, Global } from '@nestjs/common';
 import { AccessControlCoreModule } from './access-control-core-module';
 import { ACCESS_CONTROL_OPTIONS_KEY } from './constants';
+import { AccessControlDefaultService } from './access-control-default.service';
+import { AccessControlAsyncModuleOptions } from './interfaces/access-control-async-module-options';
 import { AccessControlModuleOptions } from './interfaces/access-control-module-options.interface';
 
 @Global()
@@ -42,19 +44,29 @@ export class AccessControlModule {
     return {
       module: AccessControlModule,
       imports: [AccessControlCoreModule.forRoot(options)],
-      providers: [options.service],
-      exports: [options.service],
+      providers: [options.service, AccessControlDefaultService],
+      exports: [options.service, AccessControlDefaultService],
     };
   }
 
   public static forRootAsync(
-    options: AccessControlModuleOptions,
+    options: AccessControlAsyncModuleOptions,
   ): DynamicModule {
     return {
       module: AccessControlModule,
-      imports: [AccessControlCoreModule.forRootAsync(options)],
-      providers: [options.service],
-      exports: [options.service],
+      imports: [
+        AccessControlCoreModule.forRootAsync(options),
+        AccessControlCoreModule.forRootAsync({
+          inject: [ACCESS_CONTROL_OPTIONS_KEY],
+          useFactory: async (options: AccessControlModuleOptions) => {
+            return {
+              ...options,
+            };
+          },
+        }),
+      ],
+      providers: [AccessControlDefaultService],
+      exports: [AccessControlDefaultService],
     };
   }
 }
