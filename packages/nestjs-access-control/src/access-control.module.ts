@@ -54,17 +54,7 @@ export class AccessControlModule {
   ): DynamicModule {
     return {
       module: AccessControlModule,
-      imports: [
-        AccessControlCoreModule.forRootAsync(options),
-        AccessControlCoreModule.forRootAsync({
-          inject: [ACCESS_CONTROL_OPTIONS_KEY],
-          useFactory: async (options: AccessControlModuleOptions) => {
-            return {
-              ...options,
-            };
-          },
-        }),
-      ],
+      imports: [AccessControlCoreModule.forRootAsync(options)],
       providers: [AccessControlDefaultService],
       exports: [AccessControlDefaultService],
     };
