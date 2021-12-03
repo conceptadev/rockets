@@ -1,11 +1,11 @@
 import { DynamicModule, Module } from '@nestjs/common';
-import { AccessControlModuleOptions } from './interfaces/access-control-module-options.interface';
 import { ACCESS_CONTROL_OPTIONS_KEY } from './constants';
-import { AccessControlAsyncModuleOptions } from './interfaces/access-control-async-module-options';
+import { AccessControlAsyncOptions } from './interfaces/access-control-async-options';
+import { AccessControlOptions } from '.';
 
 @Module({})
 export class AccessControlCoreModule {
-  static forRoot(options: AccessControlModuleOptions): DynamicModule {
+  static forRoot(options: AccessControlOptions): DynamicModule {
     return {
       module: AccessControlCoreModule,
       providers: [
@@ -19,9 +19,10 @@ export class AccessControlCoreModule {
     };
   }
 
-  static forRootAsync(options: AccessControlAsyncModuleOptions): DynamicModule {
+  static forRootAsync(options: AccessControlAsyncOptions): DynamicModule {
     return {
       module: AccessControlCoreModule,
+      imports: options.imports,
       providers: [
         {
           provide: ACCESS_CONTROL_OPTIONS_KEY,
