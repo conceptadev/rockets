@@ -7,9 +7,9 @@ import { AccessControlModuleOptions } from './interfaces/access-control-module-o
 
 @Global()
 @Module({
-  imports: [AccessControlCoreModule], //TODO: forRoot()
-  providers: [], //TODO: check
-  exports: [], //TODO: check
+  imports: [AccessControlCoreModule],
+  providers: [AccessControlDefaultService],
+  exports: [AccessControlDefaultService],
 })
 export class AccessControlModule {
   /**

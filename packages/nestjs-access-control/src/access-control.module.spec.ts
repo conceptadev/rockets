@@ -39,19 +39,6 @@ describe('AccessControlModule', () => {
     });
   });
 
-  describe('default', () => {
-    it('should import the dynamic module synchronously', async () => {
-      const moduleRef = await Test.createTestingModule({
-        imports: [AccessControlModule],
-      }).compile();
-
-      const accessModuleService = moduleRef.get<AccessControlDefaultService>(
-        AccessControlDefaultService,
-      );
-      expect(accessModuleService).toBeInstanceOf(AccessControlDefaultService);
-    });
-  });
-
   describe('forRoot', () => {
     it('should import the dynamic module synchronously', async () => {
       const moduleRef = await Test.createTestingModule({
@@ -65,7 +52,7 @@ describe('AccessControlModule', () => {
     });
   });
 
-  describe('forRootAsync (no injection)', () => {
+  describe('forRootAsync', () => {
     it('should import the dynamic module asynchronously', async () => {
       const moduleRef = await Test.createTestingModule({
         imports: [
@@ -81,15 +68,6 @@ describe('AccessControlModule', () => {
         AccessControlDefaultService,
       );
       expect(accessModuleService).toBeInstanceOf(AccessControlDefaultService);
-    });
-  });
-
-  //TODO: check
-  describe('forRootAsync (with injection)', () => {
-    it('should import the dynamic module asynchronously', async () => {
-      const moduleRef = await Test.createTestingModule({
-        imports: [],
-      }).compile();
     });
   });
 });
