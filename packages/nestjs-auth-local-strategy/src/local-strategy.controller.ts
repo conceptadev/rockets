@@ -1,18 +1,23 @@
-import { Controller, Post, Request, UseGuards } from '@nestjs/common';
+import { Controller, Inject, Post, Request, UseGuards } from '@nestjs/common';
 import {
   AuthenticationResponseInterface,
+  AuthUser,
+  CredentialLookupInterface,
+  IssueTokenServiceInterface,
   StrategyController,
 } from '@rockts-org/nestjs-authentication';
+import { ISSUE_TOKEN_SERVICE_TOKEN } from './config/local.config';
 import { LocalAuthGuard } from './local-auth.guard';
 
 /**
  * Sign controller
  */
 @Controller('auth')
-export class LocalStrategyController extends StrategyController {
-  constructor() {
-    super();
-  }
+export class LocalStrategyController  {
+  
+  constructor(
+    @Inject(ISSUE_TOKEN_SERVICE_TOKEN) private issueTokenService: IssueTokenServiceInterface
+  ) { }
 
   /**
    * Authenticate using guard
@@ -22,8 +27,14 @@ export class LocalStrategyController extends StrategyController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async authenticateWithGuard(
-    @Request() req: Request,
+    @AuthUser() user: CredentialLookupInterface,
   ): Promise<AuthenticationResponseInterface> {
-    return req['user'];
+    
+    const token = this.issueTokenService.issueAccessToken(user.username);
+    
+    return {
+      ...user,
+      ...token,
+    } as AuthenticationResponseInterface;
   }
 }
