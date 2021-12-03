@@ -1,14 +1,22 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { AccessControlService } from './interfaces/access-control-service.interface';
 
-@Injectable()
+interface RoleDefaultInterface {
+  name: string;
+}
+
+interface UserDefaultInterface {
+  userRoles: { role: RoleDefaultInterface }[];
+}
+
 export class AccessControlDefaultService implements AccessControlService {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getUser<T>(context: ExecutionContext): Promise<T> {
-    throw new Error('Method not implemented.');
+  async getUser<T>(context: ExecutionContext): Promise<T> {
+    const request = context.switchToHttp().getRequest();
+    return request.user as T;
   }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getUserRoles(context: ExecutionContext): Promise<string | string[]> {
-    throw new Error('Method not implemented.');
+  async getUserRoles(context: ExecutionContext): Promise<string | string[]> {
+    const user = await this.getUser<UserDefaultInterface>(context);
+    if (!user || !user.userRoles) throw new UnauthorizedException();
+    return user.userRoles.map((userRole) => userRole.role.name);
   }
 }
