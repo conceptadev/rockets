@@ -1,4 +1,4 @@
-import { Strategy } from 'passport-local';
+
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import {  
   CredentialLookupInterface,
@@ -15,8 +15,8 @@ import GenericPassportStrategy from '@rockts-org/nestjs-authentication/dist/gene
  * This implementation should be used to use @AuthGuard('local')
  */
 @Injectable()
-export class LocalStrategy extends GenericPassportStrategy(Strategy, 'local') {
-  constructor(
+export class LocalStrategy extends GenericPassportStrategy('local') {
+  constructor (
     @Inject(GET_USER_SERVICE_TOKEN)
     private userService: GetUserServiceInterface<CredentialLookupInterface>,
     private passwordService: PasswordStorageService,
