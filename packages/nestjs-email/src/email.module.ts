@@ -32,8 +32,6 @@ export class EmailModule {
         EmailCoreModule.forRoot(options),
         MailerModule.forRoot(options.nodeMailer),
       ],
-      providers: [Logger, EmailService],
-      exports: [EmailService],
     };
   }
 
@@ -49,8 +47,6 @@ export class EmailModule {
           },
         }),
       ],
-      providers: [Logger, EmailService],
-      exports: [EmailService],
     };
   }
 }
