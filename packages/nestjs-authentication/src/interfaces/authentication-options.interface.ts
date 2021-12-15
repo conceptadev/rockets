@@ -6,8 +6,8 @@ import {
   ModuleMetadata,
   Type,
 } from '@nestjs/common';
+import { PasswordStrengthEnum } from '../enum/password-strength.enum';
 
-import { AuthenticationConfigOptionsInterface } from './authentication-config-options.interface';
 import { CredentialLookupServiceInterface } from './credential-lookup-service.interface';
 
 /**
@@ -34,27 +34,30 @@ export interface CredentialLookupProvider {
   inject?: Array<Type<unknown> | string | symbol | Abstract<unknown>>;
 }
 
-export interface AuthenticationConfigAsyncOptionsInterface
-  extends Pick<
-    FactoryProvider<
-      | AuthenticationConfigOptionsInterface
-      | Promise<AuthenticationConfigOptionsInterface>
-    >,
-    'useFactory' | 'inject'
-  > {}
-
 /**
  * Authentication module configuration options interface
  */
 export interface AuthenticationOptionsInterface
   extends Pick<ModuleMetadata, 'imports'> {
-  config?: AuthenticationConfigOptionsInterface;
+  /**
+   * Min level of password strength allowed
+   */
+  minPasswordStrength?: PasswordStrengthEnum;
+
+  /**
+   * Max number of password attempts allowed
+   */
+  maxPasswordAttempts?: number;
 }
 
 /**
  * Authentication async module configuration options interface
  */
-export interface AuthenticationOptionsAsyncInterface
-  extends Pick<ModuleMetadata, 'imports'> {
-  config?: AuthenticationConfigAsyncOptionsInterface;
-}
+export interface AuthenticationAsyncOptionsInterface
+  extends AuthenticationOptionsInterface,
+    Pick<
+      FactoryProvider<
+        AuthenticationOptionsInterface | Promise<AuthenticationOptionsInterface>
+      >,
+      'useFactory' | 'inject'
+    > {}

@@ -3,8 +3,7 @@ import {
   ConfigFactoryKeyHost,
   registerAs,
 } from '@nestjs/config';
-
-import { AuthenticationConfigOptionsInterface } from '../interfaces/authentication-config-options.interface';
+import { AuthenticationOptionsInterface } from '../interfaces/authentication-options.interface';
 
 /**
  * The token to which all Authentication module options are set.
@@ -19,7 +18,7 @@ export const PASSWORD_STORAGE_SERVICE_TOKEN = 'PASSWORD_STORAGE_SERVICE_TOKEN';
  * Authentication config factory type.
  */
 export type AuthenticationConfigFactory =
-  ConfigFactory<AuthenticationConfigOptionsInterface> & ConfigFactoryKeyHost;
+  ConfigFactory<AuthenticationOptionsInterface> & ConfigFactoryKeyHost;
 
 /**
  * Configuration for Authentication.
@@ -36,7 +35,7 @@ export type AuthenticationConfigFactory =
  */
 export const authenticationConfig: AuthenticationConfigFactory = registerAs(
   AUTHENTICATION_MODULE_CONFIG_TOKEN,
-  (): AuthenticationConfigOptionsInterface => ({
+  (): AuthenticationOptionsInterface => ({
     /**
      * Get log levels from environment variables
      */

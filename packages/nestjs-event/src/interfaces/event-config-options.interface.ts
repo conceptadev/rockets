@@ -4,6 +4,8 @@ import { EventEmitterModuleOptions } from '@nestjs/event-emitter/dist/interfaces
  * Event module configuration options interface
  */
 export interface EventConfigOptionsInterface {
+  global?: boolean;
+
   /**
    * Event Emitter module options
    *

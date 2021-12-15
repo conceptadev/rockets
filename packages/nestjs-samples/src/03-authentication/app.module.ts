@@ -1,29 +1,20 @@
-import { Module } from '@nestjs/common';
-import { UserModule } from './user/user.module';
-import { UserLookupService } from './user/user-lookup.service';
-import {
-  AuthenticationModule,
-  PasswordStrengthEnum,
-} from '@rockts-org/nestjs-authentication';
+import { AuthenticationModule } from '@rockts-org/nestjs-authentication';
 
-import { LocalStrategyModule } from '@rockts-org/nestjs-auth-local-strategy/dist/local-strategy.module';
+import { EventModule } from '@rockts-org/nestjs-event';
 import { IssueTokenService } from './user/issue-token.service';
+import { LocalStrategyModule } from '@rockts-org/nestjs-auth-local-strategy/dist/local-strategy.module';
+import { Module } from '@nestjs/common';
+import { UserLookupService } from './user/user-lookup.service';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
-    UserModule,
-    AuthenticationModule.forRoot({
-      config: {
-        maxPasswordAttempts: 3,
-        minPasswordStrength: PasswordStrengthEnum.VeryStrong,
-      },
-      imports: [
-        LocalStrategyModule.forRoot({
-          imports: [UserModule],
-          getUserService: UserLookupService,
-          issueTokenService: IssueTokenService,
-        }),
-      ],
+    EventModule,
+    AuthenticationModule,
+    LocalStrategyModule.forRoot({
+      imports: [UserModule],
+      getUserService: UserLookupService,
+      issueTokenService: IssueTokenService,
     }),
   ],
 })

@@ -4,8 +4,8 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { AUTHENTICATION_MODULE_CONFIG_TOKEN } from '../config/authentication.config';
 import { PasswordStrengthEnum } from '../enum/password-strength.enum';
-import { AuthenticationConfigOptionsInterface } from '../interfaces/authentication-config-options.interface';
 import { PasswordStrengthServiceInterface } from '../interfaces/password-strength-service.interface';
+import { AuthenticationOptionsInterface } from '../interfaces/authentication-options.interface';
 
 /**
  * Service to validate password strength
@@ -20,7 +20,7 @@ export class PasswordStrengthService
    */
   constructor(
     @Inject(AUTHENTICATION_MODULE_CONFIG_TOKEN)
-    private config: AuthenticationConfigOptionsInterface,
+    private config: AuthenticationOptionsInterface,
   ) {}
 
   /**

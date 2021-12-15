@@ -1,18 +1,17 @@
-import { DynamicModule, Module } from '@nestjs/common';
-
 import {
   AUTHENTICATION_MODULE_CONFIG_TOKEN,
   authenticationConfig,
 } from './config/authentication.config';
+import {
+  AuthenticationAsyncOptionsInterface,
+  AuthenticationOptionsInterface,
+} from './interfaces/authentication-options.interface';
+import { DynamicModule, Module } from '@nestjs/common';
 
+import { AuthenticationService } from './services/authentication.service';
 import { PasswordCreationService } from './services/password-creation.service';
 import { PasswordStorageService } from './services/password-storage.service';
 import { PasswordStrengthService } from './services/password-strength.service';
-import { AuthenticationService } from './services/authentication.service';
-import {
-  AuthenticationOptionsAsyncInterface,
-  AuthenticationOptionsInterface,
-} from './interfaces/authentication-options.interface';
 
 /**
  * Authentication Module to handle authentication and password encryption.
@@ -104,48 +103,27 @@ export class AuthenticationModule {
   ): DynamicModule {
     return {
       module: AuthenticationModule,
-      imports: options?.imports,
       providers: [
-        PasswordStrengthService,
-        PasswordStorageService,
-        PasswordCreationService,
-        AuthenticationService,
         {
           provide: AUTHENTICATION_MODULE_CONFIG_TOKEN,
-          useValue: options.config || authenticationConfig(),
+          useValue: options || authenticationConfig(),
         },
-      ],
-      exports: [
-        PasswordStrengthService,
-        PasswordStorageService,
-        PasswordCreationService,
-        AuthenticationService,
       ],
     };
   }
 
   public static forRootAsync(
-    options: AuthenticationOptionsAsyncInterface,
+    options: AuthenticationAsyncOptionsInterface,
   ): DynamicModule {
     return {
       module: AuthenticationModule,
       imports: options?.imports,
       providers: [
-        PasswordStrengthService,
-        PasswordStorageService,
-        PasswordCreationService,
-        AuthenticationService,
         {
           provide: AUTHENTICATION_MODULE_CONFIG_TOKEN,
-          inject: options.config?.inject,
-          useFactory: options.config.useFactory,
+          inject: options?.inject,
+          useFactory: options.useFactory,
         },
-      ],
-      exports: [
-        PasswordStrengthService,
-        PasswordStorageService,
-        PasswordCreationService,
-        AuthenticationService,
       ],
     };
   }

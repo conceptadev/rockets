@@ -53,10 +53,8 @@ describe('LocalStrategyModuleTest', () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
         AuthenticationModule.forRoot({
-          config: {
-            maxPasswordAttempts: 3,
-            minPasswordStrength: PasswordStrengthEnum.VeryStrong,
-          },
+          maxPasswordAttempts: 3,
+          minPasswordStrength: PasswordStrengthEnum.VeryStrong,
         }),
         LocalStrategyModule.forRoot({
           getUserService: UserLookup,

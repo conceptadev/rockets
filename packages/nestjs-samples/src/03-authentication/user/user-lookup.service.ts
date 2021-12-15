@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
-
-import { UserService } from './user.service';
 import {
   CredentialLookupInterface,
   GetUserServiceInterface,
 } from '@rockts-org/nestjs-authentication';
+
+import { Injectable } from '@nestjs/common';
+import { UserService } from './user.service';
 
 @Injectable()
 export class UserLookupService

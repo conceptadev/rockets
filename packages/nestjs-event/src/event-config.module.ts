@@ -1,9 +1,18 @@
-import { Global, Module, DynamicModule } from '@nestjs/common';
+import { DynamicModule, Global, Module } from '@nestjs/common';
+
 import { EVENT_MODULE_OPTIONS_TOKEN } from './event-constants';
 import { EventConfigOptionsInterface } from './interfaces/event-config-options.interface';
 
 @Global()
-@Module({})
+@Module({
+  providers: [
+    {
+      provide: EVENT_MODULE_OPTIONS_TOKEN,
+      useValue: { why: true },
+    },
+  ],
+  exports: [EVENT_MODULE_OPTIONS_TOKEN],
+})
 export class EventConfigModule {
   /**
    * Register the event config module.
@@ -13,11 +22,12 @@ export class EventConfigModule {
    */
   static forRoot(options: EventConfigOptionsInterface): DynamicModule {
     return {
+      global: options?.global ? options.global : true,
       module: EventConfigModule,
       providers: [
         {
           provide: EVENT_MODULE_OPTIONS_TOKEN,
-          useValue: options,
+          useValue: options ?? { why: true },
         },
       ],
       exports: [EVENT_MODULE_OPTIONS_TOKEN],

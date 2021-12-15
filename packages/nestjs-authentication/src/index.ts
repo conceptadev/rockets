@@ -13,7 +13,6 @@ export * from './services/password-storage.service';
 export * from './services/password-strength.service';
 
 export * from './interfaces/authentication-strategy-local.interface';
-export * from './interfaces/authentication-config-options.interface';
 export * from './interfaces/authentication-options.interface';
 export * from './interfaces/credential-lookup.interface';
 export * from './interfaces/authentication-response.interface';

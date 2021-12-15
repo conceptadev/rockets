@@ -7,8 +7,8 @@ import { PasswordStrengthEnum } from './enum/password-strength.enum';
 import { AccessTokenInterface } from './interfaces/access-token.interface';
 import { CredentialLookupInterface } from './interfaces/credential-lookup.interface';
 import { CredentialLookupServiceInterface } from './interfaces/credential-lookup-service.interface';
-import { AuthenticationConfigOptionsInterface } from './interfaces/authentication-config-options.interface';
-import { AuthenticationConfigAsyncOptionsInterface } from './interfaces/authentication-options.interface';
+import { AuthenticationOptionsInterface } from './interfaces/authentication-options.interface';
+import { AuthenticationAsyncOptionsInterface } from './interfaces/authentication-options.interface';
 
 const USERNAME = 'TestLookupUsername';
 const ACCESS_TOKEN = 'TestLookup_AccessToken';
@@ -73,8 +73,8 @@ export class TestModule {}
 
 describe('AuthenticationModule', () => {
   let testLookupInjected: TestLookupInjected;
-  let config: AuthenticationConfigOptionsInterface;
-  let configAsync: AuthenticationConfigAsyncOptionsInterface;
+  let config: AuthenticationOptionsInterface;
+  let configAsync: AuthenticationAsyncOptionsInterface;
 
   beforeEach(async () => {
     config = await authenticationConfig();
@@ -82,8 +82,8 @@ describe('AuthenticationModule', () => {
     configAsync = {
       inject: [authenticationConfig.KEY],
       useFactory: async (
-        config: AuthenticationConfigOptionsInterface,
-      ): Promise<AuthenticationConfigOptionsInterface> => {
+        config: AuthenticationAsyncOptionsInterface,
+      ): Promise<AuthenticationOptionsInterface> => {
         // overwrite config
         return {
           ...config,
@@ -115,11 +115,7 @@ describe('AuthenticationModule', () => {
     let failed = false;
     try {
       await Test.createTestingModule({
-        imports: [
-          AuthenticationModule.forRoot({
-            config,
-          }),
-        ],
+        imports: [AuthenticationModule.forRoot(config)],
       }).compile();
     } catch (err) {
       failed = true;
@@ -132,11 +128,7 @@ describe('AuthenticationModule', () => {
     let failed = false;
     try {
       await Test.createTestingModule({
-        imports: [
-          AuthenticationModule.forRootAsync({
-            config: configAsync,
-          }),
-        ],
+        imports: [AuthenticationModule.forRootAsync(configAsync)],
       }).compile();
     } catch (err) {
       failed = true;
@@ -149,11 +141,7 @@ describe('AuthenticationModule', () => {
     let failed = false;
     try {
       await Test.createTestingModule({
-        imports: [
-          AuthenticationModule.forRoot({
-            config,
-          }),
-        ],
+        imports: [AuthenticationModule.forRoot(config)],
       }).compile();
     } catch (err) {
       failed = true;
@@ -166,11 +154,7 @@ describe('AuthenticationModule', () => {
     let failed = false;
     try {
       await Test.createTestingModule({
-        imports: [
-          AuthenticationModule.forRootAsync({
-            config: configAsync,
-          }),
-        ],
+        imports: [AuthenticationModule.forRootAsync(configAsync)],
       }).compile();
     } catch (err) {
       failed = true;

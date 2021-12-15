@@ -1,18 +1,13 @@
 import { mock } from 'jest-mock-extended';
 
-import { AuthenticationException } from '../exceptions/authentication.exception';
 import { AccessTokenInterface } from '../interfaces/access-token.interface';
 import { CredentialLookupInterface } from '../interfaces/credential-lookup.interface';
-import { AuthenticationStrategyLocalInterface } from '../interfaces/authentication-strategy-local.interface';
 import { CredentialLookupServiceInterface } from '../interfaces/credential-lookup-service.interface';
 import { PasswordStorageService } from './password-storage.service';
 
 describe('SignServiceService', () => {
-  
   let passwordStorageService: PasswordStorageService;
   let credentialLookupServiceInterface: CredentialLookupServiceInterface;
-
-  let spyRetrieveToken: jest.SpyInstance;
 
   const ACCESS_TOKEN = 'accessToken';
 
@@ -28,15 +23,9 @@ describe('SignServiceService', () => {
     salt: 'salt',
   };
 
-  const localStrategyDto: AuthenticationStrategyLocalInterface = {
-    username: 'username',
-    password: 'password',
-  };
-
   beforeEach(async () => {
     passwordStorageService = mock<PasswordStorageService>();
     credentialLookupServiceInterface = mock<CredentialLookupServiceInterface>();
- 
   });
 
   it('should be defined', () => {
@@ -56,8 +45,6 @@ describe('SignServiceService', () => {
       .spyOn(passwordStorageService, 'validatePassword')
       .mockResolvedValueOnce(true);
 
-    
-
     expect(true).toBe(false);
   });
 
@@ -69,7 +56,6 @@ describe('SignServiceService', () => {
       .spyOn(credentialLookupServiceInterface, 'issueAccessToken')
       .mockResolvedValueOnce(null);
 
-    
     expect(true).toBe(false);
     // try {
     //   await service.authenticate(localStrategyDto);
@@ -84,8 +70,8 @@ describe('SignServiceService', () => {
     jest
       .spyOn(credentialLookupServiceInterface, 'getUser')
       .mockResolvedValueOnce(null);
-    
-      expect(true).toBe(false);
+
+    expect(true).toBe(false);
     // try {
     //   await service.authenticate(localStrategyDto);
     // } catch (err) {
@@ -94,7 +80,6 @@ describe('SignServiceService', () => {
     // }
     // fail();
   });
- 
 
   it('PasswordCreationService.issueAccessToken', async () => {
     jest
@@ -106,9 +91,8 @@ describe('SignServiceService', () => {
         accessToken: ACCESS_TOKEN,
       } as AccessTokenInterface);
 
-    
     expect(true).toBe(false);
-    
+
     // await service['issueAccessToken'](credentialsLookup);
 
     // expect(spyIssueAccessToken).toBeCalledWith(credentialsLookup.username);
@@ -121,8 +105,7 @@ describe('SignServiceService', () => {
         accessToken: ACCESS_TOKEN,
       } as AccessTokenInterface);
 
-    
-      expect(true).toBe(false);
+    expect(true).toBe(false);
     // await service.refreshAccessToken(ACCESS_TOKEN);
 
     // expect(spyRetrieveToken).toBeCalledWith(ACCESS_TOKEN);
