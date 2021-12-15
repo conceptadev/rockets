@@ -3,6 +3,8 @@ export * from './strategy.controller.abstract';
 
 export * from './config/authentication.config';
 
+export * from './decorators/auth-user.decorator';
+
 export * from './enum/password-strength.enum';
 
 export * from './services/authentication.service';
@@ -22,3 +24,4 @@ export * from './interfaces/credential-lookup-service.interface';
 export * from './interfaces/get-user-service.interface';
 export * from './interfaces/issue-token-service.interface';
 export * from './interfaces/refresh-token-service.interface';
+export * from './generic-passport.strategy';

@@ -1,30 +1,25 @@
-import { Strategy } from 'passport-local';
-import { PassportStrategy } from '@nestjs/passport';
+
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import {
-  AuthenticationResponseInterface,
+import {  
   CredentialLookupInterface,
-  GetUserServiceInterface,
-  IssueTokenServiceInterface,
+  GetUserServiceInterface, 
   PasswordStorageService,
 } from '@rockts-org/nestjs-authentication';
 import {
-  GET_USER_SERVICE_TOKEN,
-  ISSUE_TOKEN_SERVICE_TOKEN,
+  GET_USER_SERVICE_TOKEN, 
 } from './config/local.config';
+import GenericPassportStrategy from '@rockts-org/nestjs-authentication/dist/generic-passport.strategy';
+
 
 /**
  * This implementation should be used to use @AuthGuard('local')
  */
 @Injectable()
-export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
-  constructor(
+export class LocalStrategy extends GenericPassportStrategy('local') {
+  constructor (
     @Inject(GET_USER_SERVICE_TOKEN)
     private userService: GetUserServiceInterface<CredentialLookupInterface>,
-    //TODO: Move Service to inside Local?
     private passwordService: PasswordStorageService,
-    @Inject(ISSUE_TOKEN_SERVICE_TOKEN)
-    private issueTokenService: IssueTokenServiceInterface,
   ) {
     super();
   }
@@ -32,8 +27,10 @@ export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
   async validate(
     username: string,
     pass: string,
-  ): Promise<AuthenticationResponseInterface> {
+  ): Promise<CredentialLookupInterface> {
+    
     const user = await this.userService.getUser(username);
+    
     if (!user) {
       throw new UnauthorizedException();
     }
@@ -44,15 +41,9 @@ export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
       user.password,
       user.salt,
     );
+    
     if (!isValid) throw new UnauthorizedException();
-
-    // generate token
-    const token = await this.issueTokenService.issueAccessToken(username);
-
-    return {
-      id: user.id,
-      username: user.username,
-      ...token,
-    } as AuthenticationResponseInterface;
+    
+    return user;
   }
 }
