@@ -8,7 +8,6 @@ import {
 } from './interfaces/authentication-options.interface';
 import { DynamicModule, Module } from '@nestjs/common';
 
-import { AuthenticationService } from './services/authentication.service';
 import { PasswordCreationService } from './services/password-creation.service';
 import { PasswordStorageService } from './services/password-storage.service';
 import { PasswordStrengthService } from './services/password-strength.service';
@@ -88,13 +87,11 @@ import { PasswordStrengthService } from './services/password-strength.service';
     PasswordCreationService,
     PasswordStrengthService,
     PasswordStorageService,
-    AuthenticationService,
   ],
   exports: [
     PasswordCreationService,
     PasswordStorageService,
     PasswordStrengthService,
-    AuthenticationService,
   ],
 })
 export class AuthenticationModule {

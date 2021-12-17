@@ -4,12 +4,13 @@ import {
   GetUserServiceInterface,
   IssueTokenServiceInterface,
 } from '@rockts-org/nestjs-authentication';
+import {
+  LocalStrategyConfigAsyncOptionsInterface,
+  LocalStrategyConfigOptionsInterface,
+} from './local-auth-config-options.interface';
 
-/**
- * Local Authentication configuration options interface
- */
-export interface LocalAuthOptionsInterface
-  extends Pick<ModuleMetadata, 'imports'> {
+
+export interface LocalStrategyServicesOptionsInterface {
   /**
    * Implementation of a class that returns CredentialLookupInterface
    */
@@ -19,3 +20,16 @@ export interface LocalAuthOptionsInterface
    */
   issueTokenService: Type<IssueTokenServiceInterface>;
 }
+
+/**
+ * Local Authentication configuration options interface
+ */
+export interface LocalStrategyOptionsInterface
+  extends LocalStrategyServicesOptionsInterface, LocalStrategyConfigOptionsInterface,
+    Pick<ModuleMetadata, 'imports'> {
+  
+}
+
+export interface LocalStrategyOptionsAsyncInterface
+  extends LocalStrategyServicesOptionsInterface, LocalStrategyConfigAsyncOptionsInterface,
+    Pick<ModuleMetadata, 'imports'> {}

@@ -5,8 +5,9 @@ import {
   CredentialLookupInterface,
   IssueTokenServiceInterface,
 } from '@rockts-org/nestjs-authentication';
-import { ISSUE_TOKEN_SERVICE_TOKEN } from './config/local.config';
-import { LocalAuthGuard } from './local-auth.guard';
+import GenericAuthGuard from '@rockts-org/nestjs-authentication/dist/guards/generic-auth.decorator';
+import { ISSUE_TOKEN_SERVICE_TOKEN } from './config/local-strategy.config';
+import { LOCAL_STRATEGY_NAME } from './constants';
 
 /**
  * Sign controller
@@ -23,11 +24,12 @@ export class LocalStrategyController {
    * @param dto Body
    * @returns
    */
-  @UseGuards(LocalAuthGuard)
+  @UseGuards(GenericAuthGuard(LOCAL_STRATEGY_NAME))
   @Post('login')
   async authenticateWithGuard(
     @AuthUser() user: CredentialLookupInterface,
   ): Promise<AuthenticationResponseInterface> {
+    // issue a access token to sign in
     const token = this.issueTokenService.issueAccessToken(user.username);
 
     return {

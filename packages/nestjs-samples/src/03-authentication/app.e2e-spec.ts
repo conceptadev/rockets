@@ -6,7 +6,6 @@ import { AppModule } from './app.module';
 import { INestApplication } from '@nestjs/common';
 
 import { AuthenticationStrategyLocalInterface } from '@rockts-org/nestjs-authentication';
-jest.setTimeout(10000);
 
 describe('AppController (e2e)', () => {
   describe('Authentication', () => {

@@ -6,7 +6,7 @@ import { authenticationConfig } from './config/authentication.config';
 import { PasswordStrengthEnum } from './enum/password-strength.enum';
 import { AccessTokenInterface } from './interfaces/access-token.interface';
 import { CredentialLookupInterface } from './interfaces/credential-lookup.interface';
-import { CredentialLookupServiceInterface } from './interfaces/credential-lookup-service.interface';
+
 import { AuthenticationOptionsInterface } from './interfaces/authentication-options.interface';
 import { AuthenticationAsyncOptionsInterface } from './interfaces/authentication-options.interface';
 
@@ -21,7 +21,7 @@ class InjectTest {
 }
 
 @Injectable()
-class UserLookup implements CredentialLookupServiceInterface {
+class UserLookup {
   async getUser(): Promise<CredentialLookupInterface> {
     const user: CredentialLookupInterface = {
       id: '1',
