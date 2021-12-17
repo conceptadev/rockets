@@ -17,4 +17,4 @@ export interface LocalStrategyConfigAsyncOptionsInterface
       | Promise<LocalStrategyConfigOptionsInterface>
     >,
     'useFactory' | 'inject'
-  > { }
+  > {}

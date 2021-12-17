@@ -18,17 +18,16 @@ import { LocalStrategyConfigOptionsInterface } from './interfaces/local-auth-con
  * Local strategy is used to authenticate a user using a username and password.
  * The field username and password can be configured using the `usernameField` and `passwordField` properties.
  * after register LocalStrategy in the module, use GenericAuthGuard(LOCAL_STRATEGY_NAME) in the controller endpoint to authenticate the user.
- * 
- * 
+ *
+ *
  */
 @Injectable()
 export class LocalStrategy extends GenericPassportStrategy(
   Strategy,
   LOCAL_STRATEGY_NAME,
-  ) {
-  
+) {
   /**
-   * 
+   *
    * @param userService The service used to get the user
    * @param config The configuration for the local strategy
    * @param passwordService The service used to hash and validate passwords
@@ -47,12 +46,12 @@ export class LocalStrategy extends GenericPassportStrategy(
   }
 
   /**
-   * Validate the user based on the username and password 
+   * Validate the user based on the username and password
    * from the request body
-   * 
+   *
    * @param username The username to authenticate
-   * @param pass 
-   * @returns 
+   * @param pass
+   * @returns
    */
   async validate(
     username: string,
