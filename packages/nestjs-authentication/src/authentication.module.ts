@@ -1,12 +1,15 @@
+import { Module } from '@nestjs/common';
+
 import {
-  AUTHENTICATION_MODULE_CONFIG_TOKEN,
-  authenticationConfig,
-} from './config/authentication.config';
+  RootAsyncDynamicModuleInterface,
+  RootDynamicModuleInterface,
+} from '@rockts-org/nestjs-common';
+import { AuthenticationCoreModule } from './authentication-core.module';
+
 import {
   AuthenticationAsyncOptionsInterface,
   AuthenticationOptionsInterface,
 } from './interfaces/authentication-options.interface';
-import { DynamicModule, Module } from '@nestjs/common';
 
 import { PasswordCreationService } from './services/password-creation.service';
 import { PasswordStorageService } from './services/password-storage.service';
@@ -79,11 +82,8 @@ import { PasswordStrengthService } from './services/password-strength.service';
  * ```
  */
 @Module({
+  imports: [AuthenticationCoreModule],
   providers: [
-    {
-      provide: AUTHENTICATION_MODULE_CONFIG_TOKEN,
-      useValue: authenticationConfig(),
-    },
     PasswordCreationService,
     PasswordStrengthService,
     PasswordStorageService,
@@ -95,33 +95,21 @@ import { PasswordStrengthService } from './services/password-strength.service';
   ],
 })
 export class AuthenticationModule {
-  public static forRoot(
+  static forRoot(
     options: AuthenticationOptionsInterface,
-  ): DynamicModule {
+  ): RootDynamicModuleInterface {
     return {
       module: AuthenticationModule,
-      providers: [
-        {
-          provide: AUTHENTICATION_MODULE_CONFIG_TOKEN,
-          useValue: options || authenticationConfig(),
-        },
-      ],
+      imports: [AuthenticationCoreModule.forRoot(options)],
     };
   }
 
   public static forRootAsync(
     options: AuthenticationAsyncOptionsInterface,
-  ): DynamicModule {
+  ): RootAsyncDynamicModuleInterface {
     return {
       module: AuthenticationModule,
-      imports: options?.imports,
-      providers: [
-        {
-          provide: AUTHENTICATION_MODULE_CONFIG_TOKEN,
-          inject: options?.inject,
-          useFactory: options.useFactory,
-        },
-      ],
+      imports: [AuthenticationCoreModule.forRootAsync(options)],
     };
   }
 }

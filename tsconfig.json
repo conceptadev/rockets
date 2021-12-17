@@ -21,6 +21,9 @@
       "path": "packages/nestjs-access-control"
     },
     {
+      "path": "packages/nestjs-common"
+    },
+    {
       "path": "packages/nestjs-email"
     },
     {
