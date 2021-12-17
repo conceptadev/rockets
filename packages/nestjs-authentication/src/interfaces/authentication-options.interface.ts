@@ -10,7 +10,7 @@ import {
 } from '@rockts-org/nestjs-common';
 import { PasswordStrengthEnum } from '../enum/password-strength.enum';
 
-import { CredentialLookupServiceInterface } from './credential-lookup-service.interface';
+import { CredentialLookupInterface } from './credential-lookup.interface';
 
 /**
  * Interface to be iim
@@ -27,9 +27,7 @@ export interface CredentialLookupProvider {
    */
   useFactory: (
     ...args: unknown[]
-  ) =>
-    | Promise<CredentialLookupServiceInterface>
-    | CredentialLookupServiceInterface;
+  ) => Promise<CredentialLookupInterface> | CredentialLookupInterface;
   /**
    * Optional list of providers to be injected into the context of the Factory function.
    */

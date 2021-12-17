@@ -1,15 +1,7 @@
 import { Module } from '@nestjs/common';
 
-import {
-  RootAsyncDynamicModuleInterface,
-  RootDynamicModuleInterface,
-} from '@rockts-org/nestjs-common';
 import { AuthenticationCoreModule } from './authentication-core.module';
-
-import {
-  AuthenticationAsyncOptionsInterface,
-  AuthenticationOptionsInterface,
-} from './interfaces/authentication-options.interface';
+import { AuthenticationModuleFactory } from './factories/authentication-module.factory';
 
 import { PasswordCreationService } from './services/password-creation.service';
 import { PasswordStorageService } from './services/password-storage.service';
@@ -95,21 +87,7 @@ import { PasswordStrengthService } from './services/password-strength.service';
   ],
 })
 export class AuthenticationModule {
-  static forRoot(
-    options: AuthenticationOptionsInterface,
-  ): RootDynamicModuleInterface {
-    return {
-      module: AuthenticationModule,
-      imports: [AuthenticationCoreModule.forRoot(options)],
-    };
-  }
-
-  public static forRootAsync(
-    options: AuthenticationAsyncOptionsInterface,
-  ): RootAsyncDynamicModuleInterface {
-    return {
-      module: AuthenticationModule,
-      imports: [AuthenticationCoreModule.forRootAsync(options)],
-    };
-  }
+  static factory = () => new AuthenticationModuleFactory();
+  static forRoot = AuthenticationModule.factory().forRoot;
+  static forRootAsync = AuthenticationModule.factory().forRootAsync;
 }

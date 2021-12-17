@@ -1,9 +1,4 @@
-import { FactoryProvider, Type } from '@nestjs/common';
-import {
-  CredentialLookupInterface,
-  GetUserServiceInterface,
-  IssueTokenServiceInterface,
-} from '@rockts-org/nestjs-authentication';
+import { FactoryProvider } from '@nestjs/common';
 
 export interface LocalStrategyConfigOptionsInterface {
   usernameField?: string;

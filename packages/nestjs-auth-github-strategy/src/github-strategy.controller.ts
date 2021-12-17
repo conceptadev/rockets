@@ -1,19 +1,12 @@
 import { Controller, Post, Request, UseGuards } from '@nestjs/common';
-import {
-  AuthenticationResponseInterface,
-  StrategyController,
-} from '@rockts-org/nestjs-authentication';
+import { AuthenticationResponseInterface } from '@rockts-org/nestjs-authentication';
 import { GithubAuthGuard } from './github-auth.guard';
 
 /**
  * Sign controller
  */
 @Controller('auth/github')
-export class GithubStrategyController extends StrategyController {
-  constructor() {
-    super();
-  }
-
+export class GithubStrategyController {
   /**
    * Authenticate using guard
    * User is added to Req.user
