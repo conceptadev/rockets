@@ -48,3 +48,5 @@ export const authenticationConfig: AuthenticationConfigFactory = registerAs(
       : 8,
   }),
 );
+
+export const authenticationDefaultConfig = authenticationConfig();

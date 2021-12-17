@@ -1,11 +1,13 @@
 import {
   Abstract,
   DynamicModule,
-  FactoryProvider,
   ForwardReference,
-  ModuleMetadata,
   Type,
 } from '@nestjs/common';
+import {
+  OptionsAsyncInterface,
+  OptionsInterface,
+} from '@rockts-org/nestjs-common';
 import { PasswordStrengthEnum } from '../enum/password-strength.enum';
 
 import { CredentialLookupServiceInterface } from './credential-lookup-service.interface';
@@ -37,8 +39,7 @@ export interface CredentialLookupProvider {
 /**
  * Authentication module configuration options interface
  */
-export interface AuthenticationOptionsInterface
-  extends Pick<ModuleMetadata, 'imports'> {
+export interface AuthenticationOptionsInterface extends OptionsInterface {
   /**
    * Min level of password strength allowed
    */
@@ -55,9 +56,4 @@ export interface AuthenticationOptionsInterface
  */
 export interface AuthenticationAsyncOptionsInterface
   extends AuthenticationOptionsInterface,
-    Pick<
-      FactoryProvider<
-        AuthenticationOptionsInterface | Promise<AuthenticationOptionsInterface>
-      >,
-      'useFactory' | 'inject'
-    > {}
+    OptionsAsyncInterface<AuthenticationOptionsInterface> {}
