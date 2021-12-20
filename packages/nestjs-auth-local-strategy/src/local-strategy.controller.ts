@@ -5,7 +5,7 @@ import {
   CredentialLookupInterface,
   IssueTokenServiceInterface,
 } from '@rockts-org/nestjs-authentication';
-import GenericAuthGuard from '@rockts-org/nestjs-authentication/dist/guards/generic-auth.decorator';
+import { AuthGuard } from '@rockts-org/nestjs-authentication';
 import { ISSUE_TOKEN_SERVICE_TOKEN } from './config/local-strategy.config';
 import { LOCAL_STRATEGY_NAME } from './constants';
 
@@ -24,7 +24,7 @@ export class LocalStrategyController {
    * @param dto Body
    * @returns
    */
-  @UseGuards(GenericAuthGuard(LOCAL_STRATEGY_NAME))
+  @UseGuards(AuthGuard(LOCAL_STRATEGY_NAME))
   @Post('login')
   async authenticateWithGuard(
     @AuthUser() user: CredentialLookupInterface,

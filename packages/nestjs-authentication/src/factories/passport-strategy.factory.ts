@@ -2,7 +2,7 @@ import { NotImplementedException, Type } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-strategy';
 
-const GenericPassportStrategy = (
+export const PassportStrategyFactory = (
   strategy: Type<Strategy>,
   strategyName: string,
 ) => {
@@ -15,5 +15,3 @@ const GenericPassportStrategy = (
     throw new NotImplementedException();
   }
 };
-
-export default GenericPassportStrategy;

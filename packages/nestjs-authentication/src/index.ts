@@ -20,6 +20,6 @@ export * from './interfaces/authentication-strategy-local.interface';
 export * from './interfaces/get-user-service.interface';
 export * from './interfaces/issue-token-service.interface';
 export * from './interfaces/refresh-token-service.interface';
-export * from './generic-passport.strategy';
+export * from './factories/passport-strategy.factory';
 
-export * from './guards/generic-auth.decorator';
+export * from './guards/auth.guard';

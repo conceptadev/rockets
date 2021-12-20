@@ -1,5 +1,5 @@
-import { AuthGuard } from '@nestjs/passport';
-import { FastifyAuthGuard } from './fastify-auth.decorator';
+import { AuthGuard as PassportAuthGuard } from '@nestjs/passport';
+import { FastifyAuthGuard } from './fastify-auth.guard';
 
 /**
  * A Guard to use passport for express or fastify
@@ -20,15 +20,13 @@ import { FastifyAuthGuard } from './fastify-auth.decorator';
  * }
  * ```
  */
-const GenericAuthGuard = (strategyName: string) => {
+export const AuthGuard = (strategyName: string) => {
   const isExpress = true;
 
   if (isExpress) {
-    return AuthGuard(strategyName);
+    return PassportAuthGuard(strategyName);
   } else {
     // TODO: change to get from fastify
     return FastifyAuthGuard(strategyName);
   }
 };
-
-export default GenericAuthGuard;

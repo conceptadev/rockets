@@ -9,9 +9,9 @@ import {
   GET_USER_SERVICE_TOKEN,
   LOCAL_STRATEGY_MODULE_CONFIG_TOKEN,
 } from './config/local-strategy.config';
-import GenericPassportStrategy from '@rockts-org/nestjs-authentication/dist/generic-passport.strategy';
 import { LOCAL_STRATEGY_NAME } from './constants';
 import { LocalStrategyConfigOptionsInterface } from './interfaces/local-auth-config-options.interface';
+import { PassportStrategyFactory } from '@rockts-org/nestjs-authentication';
 
 /**
  * Define the Local strategy using passport
@@ -22,7 +22,7 @@ import { LocalStrategyConfigOptionsInterface } from './interfaces/local-auth-con
  *
  */
 @Injectable()
-export class LocalStrategy extends GenericPassportStrategy(
+export class LocalStrategy extends PassportStrategyFactory(
   Strategy,
   LOCAL_STRATEGY_NAME,
 ) {
