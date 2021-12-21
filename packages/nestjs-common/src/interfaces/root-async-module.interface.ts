@@ -1,6 +1,3 @@
-import { DynamicModule, FactoryProvider } from '@nestjs/common';
-import { OptionsInterface } from './options.interface';
+import { DynamicModule } from '@nestjs/common';
 
-export interface RootAsyncModuleInterface extends DynamicModule {
-  providers?: FactoryProvider<OptionsInterface | Promise<OptionsInterface>>[];
-}
+export interface RootAsyncModuleInterface extends DynamicModule {}

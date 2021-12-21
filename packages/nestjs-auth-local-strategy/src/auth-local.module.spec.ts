@@ -7,8 +7,8 @@ import {
   GetUserServiceInterface,
   IssueTokenServiceInterface,
 } from '@rockts-org/nestjs-authentication';
-import { LocalStrategyController } from '.';
-import { LocalStrategyModule } from './local-strategy.module';
+import { AuthLocalController } from '.';
+import { AuthLocalModule } from './auth-local.module';
 
 const USERNAME = 'TestLookupUsername';
 
@@ -40,31 +40,27 @@ class IssueToken implements IssueTokenServiceInterface {
   }
 }
 
-describe('LocalStrategyModuleTest', () => {
+describe('AuthLocalModuleTest', () => {
   afterEach(async () => {
     jest.clearAllMocks();
   });
 
-  /**
-   * Check if localStrategyService was injected and works fine
-   */
-  it('Is localStrategyService Defined', async () => {
+  it('is controller defined', async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
         AuthenticationModule.forRoot({
+          global: true,
           //maxPasswordAttempts: 3,
           //minPasswordStrength: PasswordStrengthEnum.VeryStrong,
         }),
-        LocalStrategyModule.forRoot({
+        AuthLocalModule.forRoot({
           getUserService: UserLookup,
           issueTokenService: IssueToken,
         }),
       ],
     }).compile();
 
-    const controller = module.get<LocalStrategyController>(
-      LocalStrategyController,
-    );
+    const controller = module.get<AuthLocalController>(AuthLocalController);
 
     expect(controller).toBeDefined();
   });

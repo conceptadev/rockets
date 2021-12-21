@@ -22,6 +22,7 @@ export class AuthenticationCoreModuleFactory
           useValue: options || authenticationConfig(),
         },
       ],
+      exports: [AUTHENTICATION_MODULE_CONFIG_TOKEN],
     };
   }
 
@@ -36,6 +37,7 @@ export class AuthenticationCoreModuleFactory
           useFactory: options.useFactory,
         },
       ],
+      exports: [AUTHENTICATION_MODULE_CONFIG_TOKEN],
     };
   }
 }

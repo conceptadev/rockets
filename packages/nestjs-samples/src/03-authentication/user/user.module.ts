@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Module } from '@nestjs/common';
 import { UserLookupService } from './user-lookup.service';
 import { UserService } from './user.service';
+
 @Module({
   providers: [
     {

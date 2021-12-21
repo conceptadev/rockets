@@ -6,15 +6,21 @@ import {
   IssueTokenServiceInterface,
 } from '@rockts-org/nestjs-authentication';
 import { AuthGuard } from '@rockts-org/nestjs-authentication';
-import { ISSUE_TOKEN_SERVICE_TOKEN } from './config/local-strategy.config';
-import { LOCAL_STRATEGY_NAME } from './constants';
+import {
+  AUTH_LOCAL_MODULE_CONFIG_TOKEN,
+  ISSUE_TOKEN_SERVICE_TOKEN,
+} from './config/auth-local.config';
+import { AUTH_LOCAL_STRATEGY_NAME } from './auth-local.constants';
+import { AuthLocalOptionsInterface } from './interfaces/auth-local-options.interface';
 
 /**
  * Sign controller
  */
 @Controller('auth')
-export class LocalStrategyController {
+export class AuthLocalController {
   constructor(
+    @Inject(AUTH_LOCAL_MODULE_CONFIG_TOKEN)
+    private config: AuthLocalOptionsInterface,
     @Inject(ISSUE_TOKEN_SERVICE_TOKEN)
     private issueTokenService: IssueTokenServiceInterface,
   ) {}
@@ -24,7 +30,7 @@ export class LocalStrategyController {
    * @param dto Body
    * @returns
    */
-  @UseGuards(AuthGuard(LOCAL_STRATEGY_NAME))
+  @UseGuards(AuthGuard(AUTH_LOCAL_STRATEGY_NAME))
   @Post('login')
   async authenticateWithGuard(
     @AuthUser() user: CredentialLookupInterface,

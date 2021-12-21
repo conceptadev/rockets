@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AppModule } from './app.module';
-import { LocalStrategyController } from '@rockts-org/nestjs-auth-local-strategy';
+import { AuthLocalController } from '@rockts-org/nestjs-auth-local-strategy';
 import { UserLookupService } from './user/user-lookup.service';
 
 describe('AppModule', () => {
@@ -12,12 +12,10 @@ describe('AppModule', () => {
 
     const userLookupService = module.get<UserLookupService>(UserLookupService);
 
-    const controller = module.get<LocalStrategyController>(
-      LocalStrategyController,
-    );
+    const controller = module.get<AuthLocalController>(AuthLocalController);
 
     expect(module).toBeInstanceOf(TestingModule);
     expect(userLookupService).toBeInstanceOf(UserLookupService);
-    expect(controller).toBeInstanceOf(LocalStrategyController);
+    expect(controller).toBeInstanceOf(AuthLocalController);
   });
 });

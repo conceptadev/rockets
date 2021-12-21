@@ -1,11 +1,6 @@
 import { Module } from '@nestjs/common';
 
-import { AuthenticationCoreModule } from './authentication-core.module';
 import { AuthenticationModuleFactory } from './factories/authentication-module.factory';
-
-import { PasswordCreationService } from './services/password-creation.service';
-import { PasswordStorageService } from './services/password-storage.service';
-import { PasswordStrengthService } from './services/password-strength.service';
 
 /**
  * Authentication Module to handle authentication and password encryption.
@@ -73,19 +68,7 @@ import { PasswordStrengthService } from './services/password-strength.service';
  *   ],
  * ```
  */
-@Module({
-  imports: [AuthenticationCoreModule],
-  providers: [
-    PasswordCreationService,
-    PasswordStrengthService,
-    PasswordStorageService,
-  ],
-  exports: [
-    PasswordCreationService,
-    PasswordStorageService,
-    PasswordStrengthService,
-  ],
-})
+@Module({})
 export class AuthenticationModule {
   static factory = () => new AuthenticationModuleFactory();
   static forRoot = AuthenticationModule.factory().forRoot;

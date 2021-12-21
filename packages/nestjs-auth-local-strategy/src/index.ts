@@ -1,2 +1,2 @@
-export * from './local-strategy.module';
-export * from './local-strategy.controller';
+export * from './auth-local.module';
+export * from './auth-local.controller';

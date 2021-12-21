@@ -1,5 +1,5 @@
-import { ModuleMetadata } from '@nestjs/common';
+import { DynamicModule } from '@nestjs/common';
 
 export interface OptionsInterface
   extends Record<string, unknown>,
-    Pick<ModuleMetadata, 'imports'> {}
+    Pick<DynamicModule, 'global' | 'imports'> {}

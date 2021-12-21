@@ -7,24 +7,23 @@ import {
 } from '@rockts-org/nestjs-authentication';
 import {
   GET_USER_SERVICE_TOKEN,
-  LOCAL_STRATEGY_MODULE_CONFIG_TOKEN,
-} from './config/local-strategy.config';
-import { LOCAL_STRATEGY_NAME } from './constants';
-import { LocalStrategyConfigOptionsInterface } from './interfaces/local-auth-config-options.interface';
+  AUTH_LOCAL_MODULE_CONFIG_TOKEN,
+} from './config/auth-local.config';
+import { AUTH_LOCAL_STRATEGY_NAME } from './auth-local.constants';
+import { AuthLocalOptionsInterface } from './interfaces/auth-local-options.interface';
 import { PassportStrategyFactory } from '@rockts-org/nestjs-authentication';
 
 /**
- * Define the Local strategy using passport
+ * Define the Local strategy using passport.
+ *
  * Local strategy is used to authenticate a user using a username and password.
  * The field username and password can be configured using the `usernameField` and `passwordField` properties.
  * after register LocalStrategy in the module, use GenericAuthGuard(LOCAL_STRATEGY_NAME) in the controller endpoint to authenticate the user.
- *
- *
  */
 @Injectable()
 export class LocalStrategy extends PassportStrategyFactory(
   Strategy,
-  LOCAL_STRATEGY_NAME,
+  AUTH_LOCAL_STRATEGY_NAME,
 ) {
   /**
    *
@@ -35,8 +34,8 @@ export class LocalStrategy extends PassportStrategyFactory(
   constructor(
     @Inject(GET_USER_SERVICE_TOKEN)
     private userService: GetUserServiceInterface<CredentialLookupInterface>,
-    @Inject(LOCAL_STRATEGY_MODULE_CONFIG_TOKEN)
-    private config: LocalStrategyConfigOptionsInterface,
+    @Inject(AUTH_LOCAL_MODULE_CONFIG_TOKEN)
+    private config: AuthLocalOptionsInterface,
     private passwordService: PasswordStorageService,
   ) {
     super({
