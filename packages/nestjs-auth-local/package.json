@@ -1,5 +1,5 @@
 {
-  "name": "@rockts-org/nestjs-auth-local-strategy",
+  "name": "@rockts-org/nestjs-auth-local",
   "version": "3.0.2",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

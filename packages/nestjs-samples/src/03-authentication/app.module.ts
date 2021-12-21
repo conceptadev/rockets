@@ -5,7 +5,7 @@ import { IssueTokenService } from './user/issue-token.service';
 import { Module } from '@nestjs/common';
 import { UserLookupService } from './user/user-lookup.service';
 import { UserModule } from './user/user.module';
-import { AuthLocalModule } from '@rockts-org/nestjs-auth-local-strategy';
+import { AuthLocalModule } from '@rockts-org/nestjs-auth-local';
 
 export class DummyClass {}
 @Module({

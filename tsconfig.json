@@ -36,10 +36,10 @@
       "path": "packages/nestjs-authentication"
     },
     {
-      "path": "packages/nestjs-auth-local-strategy"
+      "path": "packages/nestjs-auth-local"
     },
     {
-      "path": "packages/nestjs-auth-github-strategy"
+      "path": "packages/nestjs-auth-github"
     },
     {
       "path": "packages/nestjs-samples"
