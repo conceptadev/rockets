@@ -1,43 +1,45 @@
-import { ModuleFactoryInterface } from '@rockts-org/nestjs-common';
-import { PasswordCoreModule } from '../password-core.module';
 import {
-  passwordConfig,
-  PASSWORD_MODULE_CONFIG_TOKEN,
+  ConfigAsyncInterface,
+  ConfigInterface,
+  ModuleFactoryInterface,
+} from '@rockts-org/nestjs-common';
+import {
+  PASSWORD_MODULE_OPTIONS_TOKEN,
+  passwordOptions,
 } from '../config/password.config';
-import {
-  PasswordAsyncOptionsInterface,
-  PasswordOptionsInterface,
-} from '../interfaces/password-options.interface';
+
+import { PasswordCoreModule } from '../password-core.module';
+import { PasswordOptionsInterface } from '../interfaces/password-options.interface';
 
 export class PasswordCoreModuleFactory
-  implements ModuleFactoryInterface<PasswordAsyncOptionsInterface>
+  implements ModuleFactoryInterface<PasswordOptionsInterface>
 {
-  forRoot(options: PasswordOptionsInterface) {
+  forRoot(config: ConfigInterface<PasswordOptionsInterface>) {
     return {
       module: PasswordCoreModule,
-      imports: options?.imports,
+      imports: config?.imports,
       providers: [
         {
-          provide: PASSWORD_MODULE_CONFIG_TOKEN,
-          useValue: options || passwordConfig(),
+          provide: PASSWORD_MODULE_OPTIONS_TOKEN,
+          useValue: config?.options || passwordOptions(),
         },
       ],
-      exports: [PASSWORD_MODULE_CONFIG_TOKEN],
+      exports: [PASSWORD_MODULE_OPTIONS_TOKEN],
     };
   }
 
-  forRootAsync(options: PasswordAsyncOptionsInterface) {
+  forRootAsync(options: ConfigAsyncInterface<PasswordOptionsInterface>) {
     return {
       module: PasswordCoreModule,
       imports: options?.imports,
       providers: [
         {
-          provide: PASSWORD_MODULE_CONFIG_TOKEN,
+          provide: PASSWORD_MODULE_OPTIONS_TOKEN,
           inject: options?.inject,
           useFactory: options.useFactory,
         },
       ],
-      exports: [PASSWORD_MODULE_CONFIG_TOKEN],
+      exports: [PASSWORD_MODULE_OPTIONS_TOKEN],
     };
   }
 }

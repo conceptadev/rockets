@@ -1,11 +1,12 @@
-import { ConfigModule } from '@nestjs/config';
-import { Test, TestingModule } from '@nestjs/testing';
 import {
-  authenticationConfig,
-  AuthenticationConfigFactory,
-  AUTHENTICATION_MODULE_CONFIG_TOKEN,
+  AUTHENTICATION_MODULE_OPTIONS_TOKEN,
   CREDENTIAL_LOOKUP_SERVICE_TOKEN,
+  authenticationOptions,
 } from './authentication.config';
+import { Test, TestingModule } from '@nestjs/testing';
+
+import { AuthenticationOptionsInterface } from '../interfaces/authentication-options.interface';
+import { ConfigModule } from '@nestjs/config';
 
 describe('authentication configuration', () => {
   let envOriginal: NodeJS.ProcessEnv;
@@ -21,8 +22,8 @@ describe('authentication configuration', () => {
 
   describe('options token', () => {
     it('should be defined', async () => {
-      expect(AUTHENTICATION_MODULE_CONFIG_TOKEN).toEqual(
-        'AUTHENTICATION_MODULE_CONFIG',
+      expect(AUTHENTICATION_MODULE_OPTIONS_TOKEN).toEqual(
+        'AUTHENTICATION_MODULE_OPTIONS',
       );
       expect(CREDENTIAL_LOOKUP_SERVICE_TOKEN).toEqual(
         'CREDENTIAL_LOOKUP_SERVICE',
@@ -35,12 +36,14 @@ describe('authentication configuration', () => {
 
     it('should use fallbacks', async () => {
       moduleRef = await Test.createTestingModule({
-        imports: [ConfigModule.forFeature(authenticationConfig)],
+        imports: [ConfigModule.forFeature(authenticationOptions)],
         providers: [],
       }).compile();
 
-      const config: AuthenticationConfigFactory =
-        moduleRef.get<AuthenticationConfigFactory>(authenticationConfig.KEY);
+      const config: AuthenticationOptionsInterface =
+        moduleRef.get<AuthenticationOptionsInterface>(
+          authenticationOptions.KEY,
+        );
 
       expect(config).toMatchObject({
         maxPasswordAttempts: 3,
@@ -50,23 +53,25 @@ describe('authentication configuration', () => {
 
     describe('authenticationConfig', () => {
       it('config', async () => {
-        const config = await authenticationConfig();
+        const config = await authenticationOptions();
 
         expect(config.maxPasswordAttempts).toBe(3);
         expect(config.minPasswordStrength).toBe(8);
       });
 
       it('configProcessNotNull', async () => {
-        process.env.AUTHENTICATION_MAX_PASSWORD_ATTEMPTS = '1';
-        process.env.AUTHENTICATION_MIN_PASSWORD_STRENGTH = '2';
+        process.env.PASSWORD_MAX_PASSWORD_ATTEMPTS = '1';
+        process.env.PASSWORD_MIN_PASSWORD_STRENGTH = '2';
 
         moduleRef = await Test.createTestingModule({
-          imports: [ConfigModule.forFeature(authenticationConfig)],
+          imports: [ConfigModule.forFeature(authenticationOptions)],
           providers: [],
         }).compile();
 
-        const config: AuthenticationConfigFactory =
-          moduleRef.get<AuthenticationConfigFactory>(authenticationConfig.KEY);
+        const config: AuthenticationOptionsInterface =
+          moduleRef.get<AuthenticationOptionsInterface>(
+            authenticationOptions.KEY,
+          );
 
         expect(config).toMatchObject({
           maxPasswordAttempts: 1,
@@ -75,16 +80,18 @@ describe('authentication configuration', () => {
       });
 
       it('configProcessNull', async () => {
-        process.env.AUTHENTICATION_MAX_PASSWORD_ATTEMPTS = 'test';
-        process.env.AUTHENTICATION_MIN_PASSWORD_STRENGTH = 'test';
+        process.env.PASSWORD_MAX_PASSWORD_ATTEMPTS = 'test';
+        process.env.PASSWORD_MIN_PASSWORD_STRENGTH = 'test';
 
         moduleRef = await Test.createTestingModule({
-          imports: [ConfigModule.forFeature(authenticationConfig)],
+          imports: [ConfigModule.forFeature(authenticationOptions)],
           providers: [],
         }).compile();
 
-        const config: AuthenticationConfigFactory =
-          moduleRef.get<AuthenticationConfigFactory>(authenticationConfig.KEY);
+        const config: AuthenticationOptionsInterface =
+          moduleRef.get<AuthenticationOptionsInterface>(
+            authenticationOptions.KEY,
+          );
 
         expect(config).toMatchObject({
           maxPasswordAttempts: NaN,
@@ -93,16 +100,18 @@ describe('authentication configuration', () => {
       });
 
       it('configProcessNull', async () => {
-        delete process.env.AUTHENTICATION_MAX_PASSWORD_ATTEMPTS;
-        delete process.env.AUTHENTICATION_MIN_PASSWORD_STRENGTH;
+        delete process.env.PASSWORD_MAX_PASSWORD_ATTEMPTS;
+        delete process.env.PASSWORD_MIN_PASSWORD_STRENGTH;
 
         moduleRef = await Test.createTestingModule({
-          imports: [ConfigModule.forFeature(authenticationConfig)],
+          imports: [ConfigModule.forFeature(authenticationOptions)],
           providers: [],
         }).compile();
 
-        const config: AuthenticationConfigFactory =
-          moduleRef.get<AuthenticationConfigFactory>(authenticationConfig.KEY);
+        const config: AuthenticationOptionsInterface =
+          moduleRef.get<AuthenticationOptionsInterface>(
+            authenticationOptions.KEY,
+          );
 
         expect(config).toMatchObject({
           maxPasswordAttempts: 3,

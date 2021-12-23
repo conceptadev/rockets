@@ -1,25 +1,24 @@
-import { ModuleFactoryInterface } from '@rockts-org/nestjs-common';
-import { PasswordCoreModule } from '../password-core.module';
-import { PasswordModule } from '../password.module';
 import {
-  PasswordAsyncOptionsInterface,
-  PasswordOptionsInterface,
-} from '../interfaces/password-options.interface';
+  ConfigAsyncInterface,
+  ConfigInterface,
+  ModuleFactoryInterface,
+} from '@rockts-org/nestjs-common';
+
+import { PasswordCoreModule } from '../password-core.module';
 import { PasswordCreationService } from '../services/password-creation.service';
+import { PasswordModule } from '../password.module';
+import { PasswordOptionsInterface } from '../interfaces/password-options.interface';
 import { PasswordStorageService } from '../services/password-storage.service';
 import { PasswordStrengthService } from '../services/password-strength.service';
 
 export class PasswordModuleFactory
   implements ModuleFactoryInterface<PasswordOptionsInterface>
 {
-  forRoot(options: PasswordOptionsInterface) {
+  forRoot(config: ConfigInterface<PasswordOptionsInterface>) {
     return {
       module: PasswordModule,
-      global: options?.global ?? false,
-      imports: [
-        ...(options?.imports ?? []),
-        PasswordCoreModule.forRoot(options),
-      ],
+      global: config?.global ?? false,
+      imports: [...(config?.imports ?? []), PasswordCoreModule.forRoot(config)],
       providers: [
         PasswordCreationService,
         PasswordStrengthService,
@@ -33,7 +32,7 @@ export class PasswordModuleFactory
     };
   }
 
-  forRootAsync(options: PasswordAsyncOptionsInterface) {
+  forRootAsync(options: ConfigAsyncInterface<PasswordOptionsInterface>) {
     return {
       module: PasswordModule,
       global: options?.global ?? false,

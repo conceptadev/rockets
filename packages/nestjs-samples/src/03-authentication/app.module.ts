@@ -1,10 +1,10 @@
-import { AuthenticationModule } from '@rockts-org/nestjs-authentication';
+import { IssueTokenService, JwtModule } from '@rockts-org/nestjs-jwt';
+import { UserLookupService, UserModule } from '@rockts-org/nestjs-user';
 
+import { AuthLocalModule } from '@rockts-org/nestjs-auth-local';
+import { AuthenticationModule } from '@rockts-org/nestjs-authentication';
 import { EventModule } from '@rockts-org/nestjs-event';
 import { Module } from '@nestjs/common';
-import { UserModule, UserLookupService } from '@rockts-org/nestjs-user';
-import { JwtModule, IssueTokenService } from '@rockts-org/nestjs-jwt';
-import { AuthLocalModule } from '@rockts-org/nestjs-auth-local';
 import { PasswordModule } from '@rockts-org/nestjs-password';
 
 export class DummyClass {}
@@ -14,17 +14,23 @@ export class DummyClass {}
     AuthenticationModule.forRoot({
       global: true,
     }),
-    JwtModule.forRoot({ global: true, secret: 'secret' }),
+    JwtModule.forRoot({
+      global: true,
+    }),
     AuthLocalModule.forRoot({
       imports: [
         PasswordModule.forRoot({
-          minPasswordStrength: 5,
-          maxPasswordAttempts: 5,
+          options: {
+            minPasswordStrength: 5,
+            maxPasswordAttempts: 5,
+          },
         }),
         UserModule.forRoot({}),
       ],
-      getUserService: UserLookupService,
-      issueTokenService: IssueTokenService,
+      options: {
+        getUserService: UserLookupService,
+        issueTokenService: IssueTokenService,
+      },
     }),
   ],
 })

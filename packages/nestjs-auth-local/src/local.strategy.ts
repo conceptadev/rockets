@@ -7,7 +7,7 @@ import {
 import { PasswordStorageService } from '@rockts-org/nestjs-password';
 import {
   GET_USER_SERVICE_TOKEN,
-  AUTH_LOCAL_MODULE_CONFIG_TOKEN,
+  AUTH_LOCAL_MODULE_OPTIONS_TOKEN,
 } from './config/auth-local.config';
 import { AUTH_LOCAL_STRATEGY_NAME } from './auth-local.constants';
 import { AuthLocalOptionsInterface } from './interfaces/auth-local-options.interface';
@@ -34,7 +34,7 @@ export class LocalStrategy extends PassportStrategyFactory(
   constructor(
     @Inject(GET_USER_SERVICE_TOKEN)
     private userService: GetUserServiceInterface<CredentialLookupInterface>,
-    @Inject(AUTH_LOCAL_MODULE_CONFIG_TOKEN)
+    @Inject(AUTH_LOCAL_MODULE_OPTIONS_TOKEN)
     private config: AuthLocalOptionsInterface,
     private passwordService: PasswordStorageService,
   ) {

@@ -2,7 +2,7 @@ import zxcvbn from 'zxcvbn';
 
 import { Inject, Injectable } from '@nestjs/common';
 
-import { PASSWORD_MODULE_CONFIG_TOKEN } from '../config/password.config';
+import { PASSWORD_MODULE_OPTIONS_TOKEN } from '../config/password.config';
 import { PasswordStrengthEnum } from '../enum/password-strength.enum';
 import { PasswordStrengthServiceInterface } from '../interfaces/password-strength-service.interface';
 import { PasswordOptionsInterface } from '../interfaces/password-options.interface';
@@ -19,7 +19,7 @@ export class PasswordStrengthService
    * @param config
    */
   constructor(
-    @Inject(PASSWORD_MODULE_CONFIG_TOKEN)
+    @Inject(PASSWORD_MODULE_OPTIONS_TOKEN)
     private config: PasswordOptionsInterface,
   ) {}
 

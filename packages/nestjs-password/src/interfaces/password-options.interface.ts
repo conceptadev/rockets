@@ -1,7 +1,4 @@
-import {
-  OptionsAsyncInterface,
-  OptionsInterface,
-} from '@rockts-org/nestjs-common';
+import { OptionsInterface } from '@rockts-org/nestjs-common';
 import { PasswordStrengthEnum } from '../enum/password-strength.enum';
 
 /**
@@ -18,10 +15,3 @@ export interface PasswordOptionsInterface extends OptionsInterface {
    */
   maxPasswordAttempts?: number;
 }
-
-/**
- * Password async module configuration options interface
- */
-export interface PasswordAsyncOptionsInterface
-  extends PasswordOptionsInterface,
-    OptionsAsyncInterface<PasswordOptionsInterface> {}

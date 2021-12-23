@@ -1,13 +1,11 @@
-import { Type } from '@nestjs/common';
 import {
   CredentialLookupInterface,
   GetUserServiceInterface,
   IssueTokenServiceInterface,
 } from '@rockts-org/nestjs-authentication';
-import {
-  OptionsAsyncInterface,
-  OptionsInterface,
-} from '@rockts-org/nestjs-common';
+
+import { OptionsInterface } from '@rockts-org/nestjs-common';
+import { Type } from '@nestjs/common';
 
 export interface AuthLocalOptionsInterface extends OptionsInterface {
   usernameField?: string;
@@ -21,7 +19,3 @@ export interface AuthLocalOptionsInterface extends OptionsInterface {
    */
   issueTokenService?: Type<IssueTokenServiceInterface>;
 }
-
-export interface AuthLocalAsyncOptionsInterface
-  extends AuthLocalOptionsInterface,
-    OptionsAsyncInterface<AuthLocalOptionsInterface> {}

@@ -1,5 +1,3 @@
-import { DynamicModule } from '@nestjs/common';
-
-export interface OptionsInterface
-  extends Record<string, unknown>,
-    Pick<DynamicModule, 'global' | 'imports'> {}
+export interface OptionsInterface extends Record<string, unknown> {
+  [key: string]: unknown;
+}

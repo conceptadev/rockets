@@ -1,14 +1,19 @@
+import {
+  ConfigAsyncInterface,
+  ConfigInterface,
+} from '@rockts-org/nestjs-common';
 import { Injectable, Module } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { AuthenticationModule } from './authentication.module';
-import { authenticationConfig } from './config/authentication.config';
-import { PasswordStrengthEnum } from '@rockts-org/nestjs-password';
 import { AccessTokenInterface } from './interfaces/access-token.interface';
-import { CredentialLookupInterface } from './interfaces/credential-lookup.interface';
-
+import { AuthenticationModule } from './authentication.module';
 import { AuthenticationOptionsInterface } from './interfaces/authentication-options.interface';
-import { AuthenticationAsyncOptionsInterface } from './interfaces/authentication-options.interface';
+import { CredentialLookupInterface } from './interfaces/credential-lookup.interface';
+import {
+  PasswordModule,
+  PasswordStrengthEnum,
+} from '@rockts-org/nestjs-password';
+import { authenticationOptions } from './config/authentication.config';
 
 const USERNAME = 'TestLookupUsername';
 const ACCESS_TOKEN = 'TestLookup_AccessToken';
@@ -73,16 +78,16 @@ export class TestModule {}
 
 describe('AuthenticationModule', () => {
   let testLookupInjected: TestLookupInjected;
-  let config: AuthenticationOptionsInterface;
-  let configAsync: AuthenticationAsyncOptionsInterface;
+  let config: ConfigInterface<AuthenticationOptionsInterface>;
+  let configAsync: ConfigAsyncInterface<AuthenticationOptionsInterface>;
 
   beforeEach(async () => {
-    config = await authenticationConfig();
+    config = { options: await authenticationOptions() };
 
     configAsync = {
-      inject: [authenticationConfig.KEY],
+      inject: [authenticationOptions.KEY],
       useFactory: async (
-        config: AuthenticationAsyncOptionsInterface,
+        config: ConfigAsyncInterface<AuthenticationOptionsInterface>,
       ): Promise<AuthenticationOptionsInterface> => {
         // overwrite config
         return {
@@ -193,7 +198,7 @@ describe('AuthenticationModule', () => {
     let failed = false;
     try {
       await Test.createTestingModule({
-        imports: [AuthenticationModule],
+        imports: [AuthenticationModule.forRoot({}), PasswordModule.forRoot({})],
       }).compile();
     } catch (err) {
       failed = true;

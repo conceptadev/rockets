@@ -1,40 +1,42 @@
-import { ModuleFactoryInterface } from '@rockts-org/nestjs-common';
-import { JwtCoreModule } from '../jwt-core.module';
-import { jwtConfig, JWT_MODULE_CONFIG_TOKEN } from '../config/jwt.config';
 import {
-  JwtAsyncOptionsInterface,
-  JwtOptionsInterface,
-} from '../interfaces/jwt-options.interface';
+  ConfigAsyncInterface,
+  ConfigInterface,
+  ModuleFactoryInterface,
+} from '@rockts-org/nestjs-common';
+import { JWT_MODULE_OPTIONS_TOKEN, jwtOptions } from '../config/jwt.config';
+
+import { JwtCoreModule } from '../jwt-core.module';
+import { JwtOptionsInterface } from '../interfaces/jwt-options.interface';
 
 export class JwtCoreModuleFactory
-  implements ModuleFactoryInterface<JwtAsyncOptionsInterface>
+  implements ModuleFactoryInterface<JwtOptionsInterface>
 {
-  forRoot(options: JwtOptionsInterface) {
+  forRoot(config: ConfigInterface<JwtOptionsInterface>) {
     return {
       module: JwtCoreModule,
-      imports: options?.imports,
+      imports: config?.imports,
       providers: [
         {
-          provide: JWT_MODULE_CONFIG_TOKEN,
-          useValue: options || jwtConfig(),
+          provide: JWT_MODULE_OPTIONS_TOKEN,
+          useValue: config?.options || jwtOptions(),
         },
       ],
-      exports: [JWT_MODULE_CONFIG_TOKEN],
+      exports: [JWT_MODULE_OPTIONS_TOKEN],
     };
   }
 
-  forRootAsync(options: JwtAsyncOptionsInterface) {
+  forRootAsync(config: ConfigAsyncInterface<JwtOptionsInterface>) {
     return {
       module: JwtCoreModule,
-      imports: options?.imports,
+      imports: config?.imports,
       providers: [
         {
-          provide: JWT_MODULE_CONFIG_TOKEN,
-          inject: options?.inject,
-          useFactory: options.useFactory,
+          provide: JWT_MODULE_OPTIONS_TOKEN,
+          inject: config?.inject,
+          useFactory: config?.useFactory,
         },
       ],
-      exports: [JWT_MODULE_CONFIG_TOKEN],
+      exports: [JWT_MODULE_OPTIONS_TOKEN],
     };
   }
 }

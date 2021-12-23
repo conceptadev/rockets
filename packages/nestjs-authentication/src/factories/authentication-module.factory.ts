@@ -1,26 +1,28 @@
-import { ModuleFactoryInterface } from '@rockts-org/nestjs-common';
+import {
+  ConfigAsyncInterface,
+  ConfigInterface,
+  ModuleFactoryInterface,
+} from '@rockts-org/nestjs-common';
+
 import { AuthenticationCoreModule } from '../authentication-core.module';
 import { AuthenticationModule } from '../authentication.module';
-import {
-  AuthenticationAsyncOptionsInterface,
-  AuthenticationOptionsInterface,
-} from '../interfaces/authentication-options.interface';
+import { AuthenticationOptionsInterface } from '../interfaces/authentication-options.interface';
 
 export class AuthenticationModuleFactory
   implements ModuleFactoryInterface<AuthenticationOptionsInterface>
 {
-  forRoot(options: AuthenticationOptionsInterface) {
+  forRoot(config: ConfigInterface<AuthenticationOptionsInterface>) {
     return {
       module: AuthenticationModule,
-      global: options?.global ?? false,
+      global: config?.global ?? false,
       imports: [
-        ...(options?.imports ?? []),
-        AuthenticationCoreModule.forRoot(options),
+        ...(config?.imports ?? []),
+        AuthenticationCoreModule.forRoot(config),
       ],
     };
   }
 
-  forRootAsync(options: AuthenticationAsyncOptionsInterface) {
+  forRootAsync(options: ConfigAsyncInterface<AuthenticationOptionsInterface>) {
     return {
       module: AuthenticationModule,
       global: options?.global ?? false,

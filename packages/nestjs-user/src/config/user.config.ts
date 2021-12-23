@@ -1,10 +1,10 @@
-import { registerAs } from '@nestjs/config';
 import { UserOptionsInterface } from '../interfaces/user-options.interface';
+import { registerAs } from '@nestjs/config';
 
 /**
  * The token to which all User module options are set.
  */
-export const USER_MODULE_CONFIG_TOKEN = 'USER_MODULE_CONFIG';
+export const USER_MODULE_OPTIONS_TOKEN = 'USER_MODULE_OPTIONS';
 
 /**
  * Configuration for User.
@@ -19,7 +19,7 @@ export const USER_MODULE_CONFIG_TOKEN = 'USER_MODULE_CONFIG';
  *
  * ```
  */
-export const userConfig = registerAs(
-  USER_MODULE_CONFIG_TOKEN,
+export const userOptions = registerAs(
+  USER_MODULE_OPTIONS_TOKEN,
   (): UserOptionsInterface => ({}),
 );

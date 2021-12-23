@@ -4,12 +4,10 @@ import {
   ForwardReference,
   Type,
 } from '@nestjs/common';
-import {
-  OptionsAsyncInterface,
-  OptionsInterface,
-} from '@rockts-org/nestjs-common';
 
 import { CredentialLookupInterface } from './credential-lookup.interface';
+import { OptionsInterface } from '@rockts-org/nestjs-common';
+
 /**
  * Interface to be iim
  */
@@ -36,10 +34,3 @@ export interface CredentialLookupProvider {
  * Authentication module configuration options interface
  */
 export interface AuthenticationOptionsInterface extends OptionsInterface {}
-
-/**
- * Authentication async module configuration options interface
- */
-export interface AuthenticationAsyncOptionsInterface
-  extends AuthenticationOptionsInterface,
-    OptionsAsyncInterface<AuthenticationOptionsInterface> {}

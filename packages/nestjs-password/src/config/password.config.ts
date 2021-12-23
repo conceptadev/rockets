@@ -1,22 +1,12 @@
-import {
-  ConfigFactory,
-  ConfigFactoryKeyHost,
-  registerAs,
-} from '@nestjs/config';
 import { PasswordOptionsInterface } from '../interfaces/password-options.interface';
+import { registerAs } from '@nestjs/config';
 
 /**
  * The token to which all Password module options are set.
  */
-export const PASSWORD_MODULE_CONFIG_TOKEN = 'PASSWORD_MODULE_CONFIG_TOKEN';
+export const PASSWORD_MODULE_OPTIONS_TOKEN = 'PASSWORD_MODULE_OPTIONS';
 
-export const PASSWORD_STORAGE_SERVICE_TOKEN = 'PASSWORD_STORAGE_SERVICE_TOKEN';
-
-/**
- * Password config factory type.
- */
-export type PasswordConfigFactory = ConfigFactory<PasswordOptionsInterface> &
-  ConfigFactoryKeyHost;
+export const PASSWORD_STORAGE_SERVICE_TOKEN = 'PASSWORD_STORAGE_SERVICE';
 
 /**
  * Configuration for Password.
@@ -31,8 +21,8 @@ export type PasswordConfigFactory = ConfigFactory<PasswordOptionsInterface> &
  *
  * ```
  */
-export const passwordConfig: PasswordConfigFactory = registerAs(
-  PASSWORD_MODULE_CONFIG_TOKEN,
+export const passwordOptions = registerAs(
+  PASSWORD_MODULE_OPTIONS_TOKEN,
   (): PasswordOptionsInterface => ({
     /**
      * Get log levels from environment variables

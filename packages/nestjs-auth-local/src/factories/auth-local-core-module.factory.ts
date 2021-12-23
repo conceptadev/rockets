@@ -1,43 +1,45 @@
-import { ModuleFactoryInterface } from '@rockts-org/nestjs-common';
-import { AuthLocalCoreModule } from '../auth-local-core.module';
 import {
-  authLocalConfig,
-  AUTH_LOCAL_MODULE_CONFIG_TOKEN,
+  AUTH_LOCAL_MODULE_OPTIONS_TOKEN,
+  authLocalOptions,
 } from '../config/auth-local.config';
 import {
-  AuthLocalAsyncOptionsInterface,
-  AuthLocalOptionsInterface,
-} from '../interfaces/auth-local-options.interface';
+  ConfigAsyncInterface,
+  ConfigInterface,
+  ModuleFactoryInterface,
+} from '@rockts-org/nestjs-common';
+
+import { AuthLocalCoreModule } from '../auth-local-core.module';
+import { AuthLocalOptionsInterface } from '../interfaces/auth-local-options.interface';
 
 export class AuthLocalCoreModuleFactory
-  implements ModuleFactoryInterface<AuthLocalAsyncOptionsInterface>
+  implements ModuleFactoryInterface<AuthLocalOptionsInterface>
 {
-  forRoot(options: AuthLocalOptionsInterface) {
+  forRoot(config: ConfigInterface<AuthLocalOptionsInterface>) {
     return {
       module: AuthLocalCoreModule,
       providers: [
         {
-          provide: AUTH_LOCAL_MODULE_CONFIG_TOKEN,
-          useValue: options || authLocalConfig(),
+          provide: AUTH_LOCAL_MODULE_OPTIONS_TOKEN,
+          useValue: config?.options || authLocalOptions(),
         },
       ],
-      exports: [AUTH_LOCAL_MODULE_CONFIG_TOKEN],
+      exports: [AUTH_LOCAL_MODULE_OPTIONS_TOKEN],
     };
   }
 
-  forRootAsync(options: AuthLocalAsyncOptionsInterface) {
+  forRootAsync(config: ConfigAsyncInterface<AuthLocalOptionsInterface>) {
     return {
       module: AuthLocalCoreModule,
-      imports: options?.imports,
+      imports: config?.imports,
       providers: [
         {
-          provide: AUTH_LOCAL_MODULE_CONFIG_TOKEN,
-          imports: options?.imports,
-          inject: options?.inject,
-          useFactory: options.useFactory,
+          provide: AUTH_LOCAL_MODULE_OPTIONS_TOKEN,
+          imports: config?.imports,
+          inject: config?.inject,
+          useFactory: config.useFactory,
         },
       ],
-      exports: [AUTH_LOCAL_MODULE_CONFIG_TOKEN],
+      exports: [AUTH_LOCAL_MODULE_OPTIONS_TOKEN],
     };
   }
 }

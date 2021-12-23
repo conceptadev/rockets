@@ -1,5 +1,3 @@
-import { Injectable } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
 import {
   AccessTokenInterface,
   AuthenticationModule,
@@ -7,10 +5,16 @@ import {
   GetUserServiceInterface,
   IssueTokenServiceInterface,
 } from '@rockts-org/nestjs-authentication';
+import { Test, TestingModule } from '@nestjs/testing';
+
 import { AuthLocalController } from '.';
 import { AuthLocalModule } from './auth-local.module';
+import { Injectable } from '@nestjs/common';
+import { PasswordModule } from '@rockts-org/nestjs-password';
 
 const USERNAME = 'TestLookupUsername';
+
+class DummyUserModule {}
 
 @Injectable()
 class UserLookup implements GetUserServiceInterface<CredentialLookupInterface> {
@@ -50,12 +54,20 @@ describe('AuthLocalModuleTest', () => {
       imports: [
         AuthenticationModule.forRoot({
           global: true,
-          //maxPasswordAttempts: 3,
-          //minPasswordStrength: PasswordStrengthEnum.VeryStrong,
         }),
         AuthLocalModule.forRoot({
-          getUserService: UserLookup,
-          issueTokenService: IssueToken,
+          imports: [
+            PasswordModule.forRoot({}),
+            {
+              module: DummyUserModule,
+              providers: [UserLookup, IssueToken],
+              exports: [UserLookup, IssueToken],
+            },
+          ],
+          options: {
+            getUserService: UserLookup,
+            issueTokenService: IssueToken,
+          },
         }),
       ],
     }).compile();

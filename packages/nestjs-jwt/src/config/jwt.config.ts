@@ -1,10 +1,10 @@
-import { registerAs } from '@nestjs/config';
 import { JwtOptionsInterface } from '../interfaces/jwt-options.interface';
+import { registerAs } from '@nestjs/config';
 
 /**
  * The token to which all JWT module options are set.
  */
-export const JWT_MODULE_CONFIG_TOKEN = 'JWT_MODULE_CONFIG';
+export const JWT_MODULE_OPTIONS_TOKEN = 'JWT_MODULE_OPTIONS';
 
 /**
  * Configuration for JWT.
@@ -19,9 +19,9 @@ export const JWT_MODULE_CONFIG_TOKEN = 'JWT_MODULE_CONFIG';
  *
  * ```
  */
-export const jwtConfig = registerAs(
-  JWT_MODULE_CONFIG_TOKEN,
+export const jwtOptions = registerAs(
+  JWT_MODULE_OPTIONS_TOKEN,
   (): JwtOptionsInterface => ({
-    secret: 'THERE IS NO SECRET',
+    secretOrPrivateKey: 'THERE IS NO SECRET',
   }),
 );
