@@ -14,7 +14,7 @@ export class DummyClass {}
     AuthenticationModule.forRoot({
       global: true,
     }),
-    JwtModule.forRoot({ global: true }),
+    JwtModule.forRoot({ global: true, secret: 'secret' }),
     AuthLocalModule.forRoot({
       imports: [
         PasswordModule.forRoot({
