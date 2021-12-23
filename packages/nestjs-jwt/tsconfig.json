@@ -17,7 +17,7 @@
       "path": "../nestjs-authentication"
     },
     {
-      "path": "../nestjs-user"
+      "path": "../nestjs-common"
     }
   ]
 }

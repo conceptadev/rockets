@@ -30,6 +30,9 @@
       "path": "packages/nestjs-event"
     },
     {
+      "path": "packages/nestjs-jwt"
+    },
+    {
       "path": "packages/nestjs-logger"
     },
     {
@@ -46,6 +49,9 @@
     },
     {
       "path": "packages/nestjs-samples"
+    },
+    {
+      "path": "packages/nestjs-user"
     },
   ]
 }

@@ -29,11 +29,11 @@ export class AuthLocalModuleFactory
         LocalStrategy,
         {
           provide: GET_USER_SERVICE_TOKEN,
-          useClass: options.getUserService,
+          useExisting: options.getUserService,
         },
         {
           provide: ISSUE_TOKEN_SERVICE_TOKEN,
-          useClass: options.issueTokenService,
+          useExisting: options.issueTokenService,
         },
       ],
       exports: [

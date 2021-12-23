@@ -17,9 +17,7 @@ export class IssueTokenService implements IssueTokenServiceInterface {
   async issueAccessToken(username: string): Promise<AccessTokenInterface> {
     const payload = { sub: username };
 
-    const accessToken = await this.jwtService.signAsync(payload, {
-      secret: 'secret',
-    });
+    const accessToken = await this.jwtService.signAsync(payload);
 
     return new Promise<AccessTokenInterface>((resolve) => {
       resolve({
