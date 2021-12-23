@@ -35,9 +35,7 @@ export interface CredentialLookupProvider {
 /**
  * Authentication module configuration options interface
  */
-export interface AuthenticationOptionsInterface extends OptionsInterface {
-  
-}
+export interface AuthenticationOptionsInterface extends OptionsInterface {}
 
 /**
  * Authentication async module configuration options interface

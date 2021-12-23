@@ -18,7 +18,8 @@
     "@rockts-org/nestjs-event": "3.0.2",
     "@rockts-org/nestjs-logger": "3.0.2",
     "@rockts-org/nestjs-auth-local": "3.0.2",
-    "@rockts-org/nestjs-email": "3.0.2"
+    "@rockts-org/nestjs-email": "3.0.2",
+    "@rockts-org/nestjs-password": "3.0.2"
   },
   "devDependencies": {
     "@nestjs/testing": "^8.0.8",

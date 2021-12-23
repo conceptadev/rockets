@@ -35,7 +35,5 @@ export type AuthenticationConfigFactory =
  */
 export const authenticationConfig: AuthenticationConfigFactory = registerAs(
   AUTHENTICATION_MODULE_CONFIG_TOKEN,
-  (): AuthenticationOptionsInterface => ({
-   
-  })
+  (): AuthenticationOptionsInterface => ({}),
 );

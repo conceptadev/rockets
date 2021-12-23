@@ -18,10 +18,10 @@ export class DummyClass {}
     AuthLocalModule.forRoot({
       imports: [
         PasswordModule.forRoot({
-            minPasswordStrength: 5,
-            maxPasswordAttempts: 5
+          minPasswordStrength: 5,
+          maxPasswordAttempts: 5,
         }),
-        UserModule
+        UserModule,
       ],
       getUserService: UserLookupService,
       issueTokenService: IssueTokenService,

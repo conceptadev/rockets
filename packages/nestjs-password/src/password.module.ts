@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 import { PasswordModuleFactory } from './factories/password-module.factory';
 
 /**
- * 
+ *
  */
 @Module({})
 export class PasswordModule {

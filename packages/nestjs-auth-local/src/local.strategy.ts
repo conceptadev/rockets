@@ -4,9 +4,7 @@ import {
   CredentialLookupInterface,
   GetUserServiceInterface,
 } from '@rockts-org/nestjs-authentication';
-import {
-  PasswordStorageService,
-} from '@rockts-org/nestjs-password';
+import { PasswordStorageService } from '@rockts-org/nestjs-password';
 import {
   GET_USER_SERVICE_TOKEN,
   AUTH_LOCAL_MODULE_CONFIG_TOKEN,

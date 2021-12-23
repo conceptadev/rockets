@@ -8,16 +8,15 @@ import { PasswordOptionsInterface } from '../interfaces/password-options.interfa
 /**
  * The token to which all Password module options are set.
  */
-export const PASSWORD_MODULE_CONFIG_TOKEN =
-  'PASSWORD_MODULE_CONFIG_TOKEN';
+export const PASSWORD_MODULE_CONFIG_TOKEN = 'PASSWORD_MODULE_CONFIG_TOKEN';
 
 export const PASSWORD_STORAGE_SERVICE_TOKEN = 'PASSWORD_STORAGE_SERVICE_TOKEN';
 
 /**
  * Password config factory type.
  */
-export type PasswordConfigFactory =
-  ConfigFactory<PasswordOptionsInterface> & ConfigFactoryKeyHost;
+export type PasswordConfigFactory = ConfigFactory<PasswordOptionsInterface> &
+  ConfigFactoryKeyHost;
 
 /**
  * Configuration for Password.

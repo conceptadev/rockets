@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import {
   passwordConfig,
   PasswordConfigFactory,
-  PASSWORD_MODULE_CONFIG_TOKEN, 
+  PASSWORD_MODULE_CONFIG_TOKEN,
 } from './password.config';
 
 describe('password configuration', () => {
@@ -23,7 +23,6 @@ describe('password configuration', () => {
       expect(PASSWORD_MODULE_CONFIG_TOKEN).toEqual(
         'PASSWORD_MODULE_CONFIG_TOKEN',
       );
-    
     });
   });
 

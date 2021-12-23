@@ -1,5 +1,4 @@
 import { ModuleFactoryInterface } from '@rockts-org/nestjs-common';
-import { PasswordModule } from '@rockts-org/nestjs-password';
 import { AuthenticationCoreModule } from '../authentication-core.module';
 import { AuthenticationModule } from '../authentication.module';
 import {

@@ -20,7 +20,6 @@ export interface AuthLocalOptionsInterface extends OptionsInterface {
    * Implementation of a class to issue tokens
    */
   issueTokenService?: Type<IssueTokenServiceInterface>;
-  
 }
 
 export interface AuthLocalAsyncOptionsInterface

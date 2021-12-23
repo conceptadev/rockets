@@ -14,6 +14,7 @@
     "@nestjs/passport": "^8.0.1",
     "@nestjs/platform-fastify": "^8.0.6",
     "@rockts-org/nestjs-authentication": "3.0.2",
+    "@rockts-org/nestjs-password": "3.0.2",
     "@rockts-org/nestjs-common": "3.0.2",
     "@sentry/node": "^6.11.0",
     "class-validator": "^0.11.1",
