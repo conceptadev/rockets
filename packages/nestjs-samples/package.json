@@ -9,16 +9,18 @@
   ],
   "dependencies": {
     "@nestjs/common": "^8.0.8",
-    "@nestjs/core": "^8.0.8",
     "@nestjs/config": "^1.0.0",
+    "@nestjs/core": "^8.0.8",
     "@nestjs/jwt": "^8.0.0",
     "@nestjs/platform-express": "^8.0.8",
     "@nestjs/platform-fastify": "^8.0.8",
-    "@rockts-org/nestjs-authentication": "3.0.2",
-    "@rockts-org/nestjs-event": "3.0.2",
-    "@rockts-org/nestjs-logger": "3.0.2",
     "@rockts-org/nestjs-auth-local": "3.0.2",
-    "@rockts-org/nestjs-email": "3.0.2"
+    "@rockts-org/nestjs-authentication": "3.0.2",
+    "@rockts-org/nestjs-email": "3.0.2",
+    "@rockts-org/nestjs-event": "3.0.2",
+    "@rockts-org/nestjs-jwt": "3.0.2",
+    "@rockts-org/nestjs-logger": "3.0.2",
+    "@rockts-org/nestjs-user": "3.0.2"
   },
   "devDependencies": {
     "@nestjs/testing": "^8.0.8",

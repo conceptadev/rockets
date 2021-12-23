@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { AppModule } from './app.module';
 import { AuthLocalController } from '@rockts-org/nestjs-auth-local';
-import { UserLookupService } from './user/user-lookup.service';
+import { UserLookupService } from '@rockts-org/nestjs-user';
 
 describe('AppModule', () => {
   it('should be imported', async () => {

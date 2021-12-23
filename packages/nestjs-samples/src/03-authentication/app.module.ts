@@ -1,10 +1,9 @@
 import { AuthenticationModule } from '@rockts-org/nestjs-authentication';
 
 import { EventModule } from '@rockts-org/nestjs-event';
-import { IssueTokenService } from './user/issue-token.service';
 import { Module } from '@nestjs/common';
-import { UserLookupService } from './user/user-lookup.service';
-import { UserModule } from './user/user.module';
+import { UserModule, UserLookupService } from '@rockts-org/nestjs-user';
+import { JwtModule, IssueTokenService } from '@rockts-org/nestjs-jwt';
 import { AuthLocalModule } from '@rockts-org/nestjs-auth-local';
 
 export class DummyClass {}
@@ -14,8 +13,9 @@ export class DummyClass {}
     AuthenticationModule.forRoot({
       global: true,
     }),
+    JwtModule.forRoot({ global: true }),
     AuthLocalModule.forRoot({
-      imports: [UserModule],
+      imports: [UserModule.forRoot({})],
       getUserService: UserLookupService,
       issueTokenService: IssueTokenService,
     }),
