@@ -36,6 +36,9 @@
       "path": "packages/nestjs-authentication"
     },
     {
+      "path": "packages/nestjs-password"
+    },
+    {
       "path": "packages/nestjs-auth-local"
     },
     {

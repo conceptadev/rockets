@@ -36,15 +36,6 @@ export type AuthenticationConfigFactory =
 export const authenticationConfig: AuthenticationConfigFactory = registerAs(
   AUTHENTICATION_MODULE_CONFIG_TOKEN,
   (): AuthenticationOptionsInterface => ({
-    /**
-     * Get log levels from environment variables
-     */
-    maxPasswordAttempts: process.env.AUTHENTICATION_MAX_PASSWORD_ATTEMPTS
-      ? Number.parseInt(process.env.AUTHENTICATION_MAX_PASSWORD_ATTEMPTS)
-      : 3,
-
-    minPasswordStrength: process.env.AUTHENTICATION_MIN_PASSWORD_STRENGTH
-      ? Number.parseInt(process.env.AUTHENTICATION_MIN_PASSWORD_STRENGTH)
-      : 8,
-  }),
+   
+  })
 );

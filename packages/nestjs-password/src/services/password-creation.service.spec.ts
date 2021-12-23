@@ -1,7 +1,7 @@
 import { mock } from 'jest-mock-extended';
 
 import { PasswordStrengthEnum } from '../enum/password-strength.enum';
-import { AuthenticationOptionsInterface } from '../interfaces/authentication-options.interface';
+import { PasswordOptionsInterface } from '../interfaces/password-options.interface';
 import { PasswordCreationService } from './password-creation.service';
 import { PasswordStrengthService } from './password-strength.service';
 
@@ -15,7 +15,7 @@ describe('PasswordCreationService', () => {
   const config = {
     maxPasswordAttempts: 5,
     minPasswordStrength: PasswordStrengthEnum.Strong,
-  } as AuthenticationOptionsInterface;
+  } as PasswordOptionsInterface;
 
   beforeEach(async () => {
     passwordStrengthService = mock<PasswordStrengthService>();

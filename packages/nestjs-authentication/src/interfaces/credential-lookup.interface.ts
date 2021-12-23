@@ -1,4 +1,4 @@
-import { PasswordStorageInterface } from './password-storage.interface';
+import { PasswordStorageInterface } from '@rockts-org/nestjs-password';
 import { AuthenticationStrategyLocalInterface } from './authentication-strategy-local.interface';
 
 /**

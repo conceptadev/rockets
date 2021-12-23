@@ -8,10 +8,8 @@ import {
   OptionsAsyncInterface,
   OptionsInterface,
 } from '@rockts-org/nestjs-common';
-import { PasswordStrengthEnum } from '../enum/password-strength.enum';
 
 import { CredentialLookupInterface } from './credential-lookup.interface';
-
 /**
  * Interface to be iim
  */
@@ -38,15 +36,7 @@ export interface CredentialLookupProvider {
  * Authentication module configuration options interface
  */
 export interface AuthenticationOptionsInterface extends OptionsInterface {
-  /**
-   * Min level of password strength allowed
-   */
-  minPasswordStrength?: PasswordStrengthEnum;
-
-  /**
-   * Max number of password attempts allowed
-   */
-  maxPasswordAttempts?: number;
+  
 }
 
 /**

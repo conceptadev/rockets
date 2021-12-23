@@ -2,10 +2,10 @@ import zxcvbn from 'zxcvbn';
 
 import { Inject, Injectable } from '@nestjs/common';
 
-import { AUTHENTICATION_MODULE_CONFIG_TOKEN } from '../config/authentication.config';
+import { PASSWORD_MODULE_CONFIG_TOKEN } from '../config/password.config';
 import { PasswordStrengthEnum } from '../enum/password-strength.enum';
 import { PasswordStrengthServiceInterface } from '../interfaces/password-strength-service.interface';
-import { AuthenticationOptionsInterface } from '../interfaces/authentication-options.interface';
+import { PasswordOptionsInterface } from '../interfaces/password-options.interface';
 
 /**
  * Service to validate password strength
@@ -19,8 +19,8 @@ export class PasswordStrengthService
    * @param config
    */
   constructor(
-    @Inject(AUTHENTICATION_MODULE_CONFIG_TOKEN)
-    private config: AuthenticationOptionsInterface,
+    @Inject(PASSWORD_MODULE_CONFIG_TOKEN)
+    private config: PasswordOptionsInterface,
   ) {}
 
   /**

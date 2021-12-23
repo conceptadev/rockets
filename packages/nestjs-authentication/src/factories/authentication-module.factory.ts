@@ -1,13 +1,11 @@
 import { ModuleFactoryInterface } from '@rockts-org/nestjs-common';
+import { PasswordModule } from '@rockts-org/nestjs-password';
 import { AuthenticationCoreModule } from '../authentication-core.module';
 import { AuthenticationModule } from '../authentication.module';
 import {
   AuthenticationAsyncOptionsInterface,
   AuthenticationOptionsInterface,
 } from '../interfaces/authentication-options.interface';
-import { PasswordCreationService } from '../services/password-creation.service';
-import { PasswordStorageService } from '../services/password-storage.service';
-import { PasswordStrengthService } from '../services/password-strength.service';
 
 export class AuthenticationModuleFactory
   implements ModuleFactoryInterface<AuthenticationOptionsInterface>
@@ -20,16 +18,6 @@ export class AuthenticationModuleFactory
         ...(options?.imports ?? []),
         AuthenticationCoreModule.forRoot(options),
       ],
-      providers: [
-        PasswordCreationService,
-        PasswordStrengthService,
-        PasswordStorageService,
-      ],
-      exports: [
-        PasswordCreationService,
-        PasswordStrengthService,
-        PasswordStorageService,
-      ],
     };
   }
 
@@ -40,16 +28,6 @@ export class AuthenticationModuleFactory
       imports: [
         ...(options?.imports ?? []),
         AuthenticationCoreModule.forRootAsync(options),
-      ],
-      providers: [
-        PasswordCreationService,
-        PasswordStrengthService,
-        PasswordStorageService,
-      ],
-      exports: [
-        PasswordCreationService,
-        PasswordStrengthService,
-        PasswordStorageService,
       ],
     };
   }

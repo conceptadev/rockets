@@ -1,4 +1,4 @@
-import { PasswordStorageInterface } from './password-storage.interface';
+import { PasswordStorageInterface } from '@rockts-org/nestjs-password';
 
 /**
  * Sign DTO Interface

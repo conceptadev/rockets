@@ -6,6 +6,7 @@ import { Module } from '@nestjs/common';
 import { UserLookupService } from './user/user-lookup.service';
 import { UserModule } from './user/user.module';
 import { AuthLocalModule } from '@rockts-org/nestjs-auth-local';
+import { PasswordModule } from '@rockts-org/nestjs-password';
 
 export class DummyClass {}
 @Module({
@@ -15,29 +16,16 @@ export class DummyClass {}
       global: true,
     }),
     AuthLocalModule.forRoot({
-      imports: [UserModule],
+      imports: [
+        PasswordModule.forRoot({
+            minPasswordStrength: 5,
+            maxPasswordAttempts: 5
+        }),
+        UserModule
+      ],
       getUserService: UserLookupService,
       issueTokenService: IssueTokenService,
     }),
-    // AuthenticationModule.forRootAsync({
-    //   global: true,
-    //   useFactory: () => ({
-    //     maxPasswordAttempts: 1,
-    //   }),
-    // }),
-    // AuthLocalModule.forRootAsync({
-    //   imports: [UserModule],
-    //   inject: [UserLookupService, IssueTokenService],
-    //   useFactory: async (
-    //     a: Type<UserLookupService>,
-    //     b: Type<IssueTokenService>,
-    //   ) => {
-    //     return {
-    //       getUserService: a,
-    //       issueTokenService: b,
-    //     };
-    //   },
-    // }),
   ],
 })
 export class AppModule {}

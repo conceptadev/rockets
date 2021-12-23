@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { AuthenticationModule } from './authentication.module';
 import { authenticationConfig } from './config/authentication.config';
-import { PasswordStrengthEnum } from './enum/password-strength.enum';
+import { PasswordStrengthEnum } from '@rockts-org/nestjs-password';
 import { AccessTokenInterface } from './interfaces/access-token.interface';
 import { CredentialLookupInterface } from './interfaces/credential-lookup.interface';
 
