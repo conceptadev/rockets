@@ -8,6 +8,7 @@
     "dist"
   ],
   "dependencies": {
+    "@golevelup/nestjs-modules": "^0.4.3",
     "@nestjs/common": "^8.0.8"
   },
   "devDependencies": {

@@ -1,14 +1,5 @@
-import { ISendMailOptions } from '@nestjs-modules/mailer';
+import { EmailMailerServiceInterface } from './email-mailer-service.interface';
 
-export interface EmailOptions
-  extends Pick<
-    ISendMailOptions,
-    | 'to'
-    | 'cc'
-    | 'bcc'
-    | 'from'
-    | 'context'
-    | 'subject'
-    | 'template'
-    | 'icalEvent'
-  > {}
+export interface EmailOptionsInterface {
+  mailerService?: EmailMailerServiceInterface;
+}
