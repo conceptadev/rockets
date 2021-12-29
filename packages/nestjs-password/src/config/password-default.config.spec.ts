@@ -1,11 +1,9 @@
-import {
-  PASSWORD_MODULE_OPTIONS_TOKEN,
-  passwordOptions,
-} from './password.config';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { ConfigModule } from '@nestjs/config';
 import { PasswordOptionsInterface } from '..';
+import { PASSWORD_MODULE_OPTIONS_TOKEN } from '../password.constants';
+import { passwordDefaultConfig } from './password-default.config';
 
 describe('password configuration', () => {
   let envOriginal: NodeJS.ProcessEnv;
@@ -21,7 +19,9 @@ describe('password configuration', () => {
 
   describe('options token', () => {
     it('should be defined', async () => {
-      expect(PASSWORD_MODULE_OPTIONS_TOKEN).toEqual('PASSWORD_MODULE_OPTIONS');
+      expect(PASSWORD_MODULE_OPTIONS_TOKEN).toEqual(
+        'PASSWORD_MODULE_OPTIONS_TOKEN',
+      );
     });
   });
 
@@ -30,12 +30,12 @@ describe('password configuration', () => {
 
     it('should use fallbacks', async () => {
       moduleRef = await Test.createTestingModule({
-        imports: [ConfigModule.forFeature(passwordOptions)],
+        imports: [ConfigModule.forFeature(passwordDefaultConfig)],
         providers: [],
       }).compile();
 
       const config: PasswordOptionsInterface =
-        moduleRef.get<PasswordOptionsInterface>(passwordOptions.KEY);
+        moduleRef.get<PasswordOptionsInterface>(passwordDefaultConfig.KEY);
 
       expect(config).toMatchObject({
         maxPasswordAttempts: 3,
@@ -45,7 +45,7 @@ describe('password configuration', () => {
 
     describe('passwordConfig', () => {
       it('config', async () => {
-        const config = await passwordOptions();
+        const config = await passwordDefaultConfig();
 
         expect(config.maxPasswordAttempts).toBe(3);
         expect(config.minPasswordStrength).toBe(8);
@@ -56,12 +56,12 @@ describe('password configuration', () => {
         process.env.PASSWORD_MIN_PASSWORD_STRENGTH = '2';
 
         moduleRef = await Test.createTestingModule({
-          imports: [ConfigModule.forFeature(passwordOptions)],
+          imports: [ConfigModule.forFeature(passwordDefaultConfig)],
           providers: [],
         }).compile();
 
         const config: PasswordOptionsInterface =
-          moduleRef.get<PasswordOptionsInterface>(passwordOptions.KEY);
+          moduleRef.get<PasswordOptionsInterface>(passwordDefaultConfig.KEY);
 
         expect(config).toMatchObject({
           maxPasswordAttempts: 1,
@@ -74,12 +74,12 @@ describe('password configuration', () => {
         process.env.PASSWORD_MIN_PASSWORD_STRENGTH = 'test';
 
         moduleRef = await Test.createTestingModule({
-          imports: [ConfigModule.forFeature(passwordOptions)],
+          imports: [ConfigModule.forFeature(passwordDefaultConfig)],
           providers: [],
         }).compile();
 
         const config: PasswordOptionsInterface =
-          moduleRef.get<PasswordOptionsInterface>(passwordOptions.KEY);
+          moduleRef.get<PasswordOptionsInterface>(passwordDefaultConfig.KEY);
 
         expect(config).toMatchObject({
           maxPasswordAttempts: NaN,
@@ -92,12 +92,12 @@ describe('password configuration', () => {
         delete process.env.PASSWORD_MIN_PASSWORD_STRENGTH;
 
         moduleRef = await Test.createTestingModule({
-          imports: [ConfigModule.forFeature(passwordOptions)],
+          imports: [ConfigModule.forFeature(passwordDefaultConfig)],
           providers: [],
         }).compile();
 
         const config: PasswordOptionsInterface =
-          moduleRef.get<PasswordOptionsInterface>(passwordOptions.KEY);
+          moduleRef.get<PasswordOptionsInterface>(passwordDefaultConfig.KEY);
 
         expect(config).toMatchObject({
           maxPasswordAttempts: 3,

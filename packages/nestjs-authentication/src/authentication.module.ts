@@ -1,6 +1,15 @@
 import { Module } from '@nestjs/common';
-
-import { AuthenticationModuleFactory } from './factories/authentication-module.factory';
+import { ConfigModule, ConfigType } from '@nestjs/config';
+import {
+  AsyncModuleConfig,
+  createConfigurableDynamicRootModule,
+} from '@rockts-org/nestjs-common';
+import { authenticationDefaultConfig } from './config/authentication-default.config';
+import {
+  AUTHENTICATION_MODULE_OPTIONS_TOKEN,
+  AUTHENTICATION_MODULE_SETTINGS_TOKEN,
+} from './authentication.constants';
+import { AuthenticationOptionsInterface } from './interfaces/authentication-options.interface';
 
 /**
  * Authentication Module to handle authentication and password encryption.
@@ -69,8 +78,31 @@ import { AuthenticationModuleFactory } from './factories/authentication-module.f
  * ```
  */
 @Module({})
-export class AuthenticationModule {
-  static factory = () => new AuthenticationModuleFactory();
-  static forRoot = AuthenticationModule.factory().forRoot;
-  static forRootAsync = AuthenticationModule.factory().forRootAsync;
+export class AuthenticationModule extends createConfigurableDynamicRootModule<
+  AuthenticationModule,
+  AuthenticationOptionsInterface
+>(AUTHENTICATION_MODULE_OPTIONS_TOKEN, {
+  imports: [ConfigModule.forFeature(authenticationDefaultConfig)],
+  providers: [
+    {
+      provide: AUTHENTICATION_MODULE_SETTINGS_TOKEN,
+      inject: [
+        AUTHENTICATION_MODULE_OPTIONS_TOKEN,
+        authenticationDefaultConfig.KEY,
+      ],
+      useFactory: async (
+        options: AuthenticationOptionsInterface,
+        defaultSettings: ConfigType<typeof authenticationDefaultConfig>,
+      ) => options.settings ?? defaultSettings,
+    },
+  ],
+}) {
+  static register(options: AuthenticationOptionsInterface = {}) {
+    return AuthenticationModule.forRoot(AuthenticationModule, options);
+  }
+  static registerAsync(
+    options: AsyncModuleConfig<AuthenticationOptionsInterface>,
+  ) {
+    return AuthenticationModule.forRootAsync(AuthenticationModule, options);
+  }
 }

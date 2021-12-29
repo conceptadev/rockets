@@ -5,7 +5,7 @@ import { NotificationController } from './notification/notification.controller';
 
 describe('AppModule', () => {
   let notificationController: NotificationController;
-  let logService: jest.SpyInstance;
+  let spyService: jest.SpyInstance;
 
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
@@ -16,17 +16,17 @@ describe('AppModule', () => {
       NotificationController,
     );
 
-    const emailService: EmailService = app.get(EmailService);
-
-    logService = jest
-      .spyOn(emailService, 'sendEmail')
-      .mockImplementation(() => null);
+    spyService = jest
+      .spyOn(EmailService.prototype, 'sendEmail')
+      .mockImplementation(() => {
+        return null;
+      });
   });
 
   describe('Notification Controller', () => {
     it('Create notification', () => {
       notificationController.create({ emailAddress: 'email@email.com' });
-      expect(logService).toBeCalledTimes(1);
+      expect(spyService).toBeCalledTimes(1);
     });
   });
 });

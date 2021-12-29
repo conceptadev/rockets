@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { PASSWORD_MODULE_OPTIONS_TOKEN } from '../config/password.config';
-import { PasswordOptionsInterface } from '../interfaces/password-options.interface';
+import { PASSWORD_MODULE_SETTINGS_TOKEN } from '../password.constants';
+import { PasswordSettingsInterface } from '../interfaces/password-settings.interface';
 import { PasswordCreationServiceInterface } from '../interfaces/password-creation-service.interface';
 import { PasswordStrengthService } from './password-strength.service';
 
@@ -19,8 +19,8 @@ export class PasswordCreationService
    */
   constructor(
     private passwordStrengthService: PasswordStrengthService,
-    @Inject(PASSWORD_MODULE_OPTIONS_TOKEN)
-    private config: PasswordOptionsInterface,
+    @Inject(PASSWORD_MODULE_SETTINGS_TOKEN)
+    private settings: PasswordSettingsInterface,
   ) {}
 
   /**
@@ -48,7 +48,7 @@ export class PasswordCreationService
    */
   checkAttemptLeft(numOfAttempts = 0): number {
     // Get number of max attempts allowed
-    const attemptsAllowed = this.config.maxPasswordAttempts;
+    const attemptsAllowed = this.settings.maxPasswordAttempts;
 
     // did it reached max
     const canAttemptMore = numOfAttempts <= attemptsAllowed;

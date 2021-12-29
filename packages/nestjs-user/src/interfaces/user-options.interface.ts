@@ -1,6 +1,6 @@
 import { OptionsInterface } from '@rockts-org/nestjs-common';
+import { UserSettingsInterface } from './user-settings.interface';
 
-/**
- * User module configuration options interface
- */
-export interface UserOptionsInterface extends OptionsInterface {}
+export interface UserOptionsInterface extends OptionsInterface {
+  settings?: UserSettingsInterface;
+}

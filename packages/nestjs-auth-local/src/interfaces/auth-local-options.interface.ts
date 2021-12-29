@@ -1,21 +1,22 @@
 import {
   CredentialLookupInterface,
-  GetUserServiceInterface,
+  UserLookupServiceInterface,
   IssueTokenServiceInterface,
 } from '@rockts-org/nestjs-authentication';
 
 import { OptionsInterface } from '@rockts-org/nestjs-common';
-import { Type } from '@nestjs/common';
+import { AuthLocalSettingsInterface } from './auth-local-settings.interface';
 
 export interface AuthLocalOptionsInterface extends OptionsInterface {
-  usernameField?: string;
-  passwordField?: string;
   /**
    * Implementation of a class that returns CredentialLookupInterface
    */
-  getUserService?: Type<GetUserServiceInterface<CredentialLookupInterface>>;
+  userLookupService?: UserLookupServiceInterface<CredentialLookupInterface>;
+
   /**
    * Implementation of a class to issue tokens
    */
-  issueTokenService?: Type<IssueTokenServiceInterface>;
+  issueTokenService?: IssueTokenServiceInterface;
+
+  settings?: AuthLocalSettingsInterface;
 }

@@ -2,16 +2,16 @@ import { Strategy } from 'passport-local';
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import {
   CredentialLookupInterface,
-  GetUserServiceInterface,
+  UserLookupServiceInterface,
 } from '@rockts-org/nestjs-authentication';
 import { PasswordStorageService } from '@rockts-org/nestjs-password';
 import {
-  GET_USER_SERVICE_TOKEN,
-  AUTH_LOCAL_MODULE_OPTIONS_TOKEN,
-} from './config/auth-local.config';
-import { AUTH_LOCAL_STRATEGY_NAME } from './auth-local.constants';
-import { AuthLocalOptionsInterface } from './interfaces/auth-local-options.interface';
+  AUTH_LOCAL_MODULE_SETTINGS_TOKEN,
+  AUTH_LOCAL_STRATEGY_NAME,
+  AUTH_LOCAL_USER_LOOKUP_SERVICE_TOKEN,
+} from './auth-local.constants';
 import { PassportStrategyFactory } from '@rockts-org/nestjs-authentication';
+import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.interface';
 
 /**
  * Define the Local strategy using passport.
@@ -28,19 +28,19 @@ export class LocalStrategy extends PassportStrategyFactory(
   /**
    *
    * @param userService The service used to get the user
-   * @param config The configuration for the local strategy
+   * @param settings The settings for the local strategy
    * @param passwordService The service used to hash and validate passwords
    */
   constructor(
-    @Inject(GET_USER_SERVICE_TOKEN)
-    private userService: GetUserServiceInterface<CredentialLookupInterface>,
-    @Inject(AUTH_LOCAL_MODULE_OPTIONS_TOKEN)
-    private config: AuthLocalOptionsInterface,
+    @Inject(AUTH_LOCAL_USER_LOOKUP_SERVICE_TOKEN)
+    private userService: UserLookupServiceInterface<CredentialLookupInterface>,
+    @Inject(AUTH_LOCAL_MODULE_SETTINGS_TOKEN)
+    settings: AuthLocalSettingsInterface,
     private passwordService: PasswordStorageService,
   ) {
     super({
-      usernameField: config?.usernameField,
-      passwordField: config?.passwordField,
+      usernameField: settings?.usernameField,
+      passwordField: settings?.passwordField,
     });
   }
 

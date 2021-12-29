@@ -1,7 +1,5 @@
 export * from './password.module';
 
-export * from './config/password.config';
-
 export * from './enum/password-strength.enum';
 
 export * from './services/password-creation.service';

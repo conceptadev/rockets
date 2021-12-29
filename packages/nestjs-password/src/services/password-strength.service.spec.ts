@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { PASSWORD_MODULE_OPTIONS_TOKEN } from '../config/password.config';
 import { PasswordStrengthEnum } from '../enum/password-strength.enum';
+import { PASSWORD_MODULE_SETTINGS_TOKEN } from '../password.constants';
 import { PasswordStrengthService } from './password-strength.service';
 
 describe('PasswordStrengthService', () => {
@@ -12,11 +12,11 @@ describe('PasswordStrengthService', () => {
   const PASSWORD_STRONG = 'P@S645R78';
   const PASSWORD_VERY_STRONG = 'P@5_0d645s9';
 
-  beforeEach(async () => {
+  it('should be defined', async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         {
-          provide: PASSWORD_MODULE_OPTIONS_TOKEN,
+          provide: PASSWORD_MODULE_SETTINGS_TOKEN,
           useValue: {
             maxPasswordAttempts: 5,
             minPasswordStrength: PasswordStrengthEnum.Medium,
@@ -27,9 +27,6 @@ describe('PasswordStrengthService', () => {
     }).compile();
 
     service = module.get<PasswordStrengthService>(PasswordStrengthService);
-  });
-
-  it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
@@ -37,7 +34,7 @@ describe('PasswordStrengthService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         {
-          provide: PASSWORD_MODULE_OPTIONS_TOKEN,
+          provide: PASSWORD_MODULE_SETTINGS_TOKEN,
           useValue: {
             maxPasswordAttempts: 5,
             minPasswordStrength: PasswordStrengthEnum.None,
@@ -58,7 +55,7 @@ describe('PasswordStrengthService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         {
-          provide: PASSWORD_MODULE_OPTIONS_TOKEN,
+          provide: PASSWORD_MODULE_SETTINGS_TOKEN,
           useValue: {
             maxPasswordAttempts: 5,
             minPasswordStrength: PasswordStrengthEnum.Weak,
@@ -79,7 +76,7 @@ describe('PasswordStrengthService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         {
-          provide: PASSWORD_MODULE_OPTIONS_TOKEN,
+          provide: PASSWORD_MODULE_SETTINGS_TOKEN,
           useValue: {
             minPasswordStrength: PasswordStrengthEnum.Medium,
           },
@@ -99,7 +96,7 @@ describe('PasswordStrengthService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         {
-          provide: PASSWORD_MODULE_OPTIONS_TOKEN,
+          provide: PASSWORD_MODULE_SETTINGS_TOKEN,
           useValue: {
             minPasswordStrength: PasswordStrengthEnum.Strong,
           },
@@ -119,7 +116,7 @@ describe('PasswordStrengthService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         {
-          provide: PASSWORD_MODULE_OPTIONS_TOKEN,
+          provide: PASSWORD_MODULE_SETTINGS_TOKEN,
           useValue: {
             minPasswordStrength: PasswordStrengthEnum.Strong,
           },
@@ -139,7 +136,7 @@ describe('PasswordStrengthService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         {
-          provide: PASSWORD_MODULE_OPTIONS_TOKEN,
+          provide: PASSWORD_MODULE_SETTINGS_TOKEN,
           useValue: {
             minPasswordStrength: PasswordStrengthEnum.Strong,
           },
@@ -159,26 +156,8 @@ describe('PasswordStrengthService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         {
-          provide: PASSWORD_MODULE_OPTIONS_TOKEN,
+          provide: PASSWORD_MODULE_SETTINGS_TOKEN,
           useValue: {},
-        },
-        PasswordStrengthService,
-      ],
-    }).compile();
-
-    service = module.get<PasswordStrengthService>(PasswordStrengthService);
-
-    const isStrong = service.isStrong(PASSWORD_NONE);
-
-    expect(isStrong).toBe(true);
-  });
-
-  it('PasswordStrengthService.isStrong-Strong_None', async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        {
-          provide: PASSWORD_MODULE_OPTIONS_TOKEN,
-          useValue: null,
         },
         PasswordStrengthService,
       ],

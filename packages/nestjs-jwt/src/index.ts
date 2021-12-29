@@ -1,3 +1,3 @@
 export * from './jwt.module';
-export * from './config/jwt.config';
-export * from './services/issue.service';
+export * from './config/default-service.config';
+export * from './services/issue-token.service';

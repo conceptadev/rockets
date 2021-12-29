@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import {
   AuthenticationResponseInterface,
-  GetUserServiceInterface,
+  UserLookupServiceInterface,
 } from '@rockts-org/nestjs-authentication';
 import { GITHUB_MODULE_OPTIONS_TOKEN } from './config/github.config';
 import { GithubOptionsInterface } from './interfaces/github-options.interface';
@@ -16,7 +16,7 @@ export class GithubStrategy extends PassportStrategy(
   constructor(
     @Inject(GITHUB_MODULE_OPTIONS_TOKEN)
     private config: GithubOptionsInterface,
-    private userService: GetUserServiceInterface<AuthenticationResponseInterface>,
+    private userService: UserLookupServiceInterface<AuthenticationResponseInterface>,
   ) {
     super({
       clientID: config.clientId,

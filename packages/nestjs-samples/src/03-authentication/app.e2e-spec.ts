@@ -5,8 +5,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from './app.module';
 import { INestApplication } from '@nestjs/common';
 
-import { AuthenticationStrategyLocalInterface } from '@rockts-org/nestjs-authentication';
-
 describe('AppController (e2e)', () => {
   describe('Authentication', () => {
     let app: INestApplication;
@@ -35,7 +33,7 @@ describe('AppController (e2e)', () => {
         .post('/auth/login')
         .send(sign)
         .expect(201)
-        .expect((response: AuthenticationStrategyLocalInterface) => {
+        .expect((response: { username: string }) => {
           return response.username == sign.username;
         });
 

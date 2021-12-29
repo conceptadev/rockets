@@ -7,9 +7,9 @@ import {
 } from '@rockts-org/nestjs-authentication';
 import { AuthGuard } from '@rockts-org/nestjs-authentication';
 import {
+  AUTH_LOCAL_ISSUE_TOKEN_SERVICE_TOKEN,
   AUTH_LOCAL_MODULE_OPTIONS_TOKEN,
-  ISSUE_TOKEN_SERVICE_TOKEN,
-} from './config/auth-local.config';
+} from './auth-local.constants';
 import { AUTH_LOCAL_STRATEGY_NAME } from './auth-local.constants';
 import { AuthLocalOptionsInterface } from './interfaces/auth-local-options.interface';
 
@@ -21,7 +21,7 @@ export class AuthLocalController {
   constructor(
     @Inject(AUTH_LOCAL_MODULE_OPTIONS_TOKEN)
     private config: AuthLocalOptionsInterface,
-    @Inject(ISSUE_TOKEN_SERVICE_TOKEN)
+    @Inject(AUTH_LOCAL_ISSUE_TOKEN_SERVICE_TOKEN)
     private issueTokenService: IssueTokenServiceInterface,
   ) {}
 

@@ -1,6 +1,6 @@
 import {
   CredentialLookupInterface,
-  GetUserServiceInterface,
+  UserLookupServiceInterface,
 } from '@rockts-org/nestjs-authentication';
 
 import { Injectable } from '@nestjs/common';
@@ -8,7 +8,7 @@ import { UserService } from '../services/user.service';
 
 @Injectable()
 export class UserLookupService
-  implements GetUserServiceInterface<CredentialLookupInterface>
+  implements UserLookupServiceInterface<CredentialLookupInterface>
 {
   constructor(private userService: UserService) {}
 

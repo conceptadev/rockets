@@ -2,10 +2,10 @@ import zxcvbn from 'zxcvbn';
 
 import { Inject, Injectable } from '@nestjs/common';
 
-import { PASSWORD_MODULE_OPTIONS_TOKEN } from '../config/password.config';
+import { PASSWORD_MODULE_SETTINGS_TOKEN } from '../password.constants';
 import { PasswordStrengthEnum } from '../enum/password-strength.enum';
 import { PasswordStrengthServiceInterface } from '../interfaces/password-strength-service.interface';
-import { PasswordOptionsInterface } from '../interfaces/password-options.interface';
+import { PasswordSettingsInterface } from '../interfaces/password-settings.interface';
 
 /**
  * Service to validate password strength
@@ -16,11 +16,11 @@ export class PasswordStrengthService
 {
   /**
    * constructor
-   * @param config
+   * @param settings
    */
   constructor(
-    @Inject(PASSWORD_MODULE_OPTIONS_TOKEN)
-    private config: PasswordOptionsInterface,
+    @Inject(PASSWORD_MODULE_SETTINGS_TOKEN)
+    private settings: PasswordSettingsInterface,
   ) {}
 
   /**
@@ -31,7 +31,7 @@ export class PasswordStrengthService
   isStrong(password: string): boolean {
     // Get min password Strength
     const minStrength =
-      this.config?.minPasswordStrength || PasswordStrengthEnum.None;
+      this.settings?.minPasswordStrength || PasswordStrengthEnum.None;
 
     // check strength of the password
     const result = zxcvbn(password);

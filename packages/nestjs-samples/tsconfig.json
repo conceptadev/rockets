@@ -17,6 +17,9 @@
       "path": "../nestjs-authentication"
     },
     {
+      "path": "../nestjs-auth-local"
+    },
+    {
       "path": "../nestjs-user"
     }
   ]
