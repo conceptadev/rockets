@@ -45,7 +45,15 @@ export class EmailModule extends createConfigurableDynamicRootModule<
   static register(options: EmailOptionsInterface) {
     return EmailModule.forRoot(EmailModule, options);
   }
+
   static registerAsync(options: AsyncModuleConfig<EmailOptionsInterface>) {
-    return EmailModule.forRootAsync(EmailModule, options);
+    return EmailModule.forRootAsync(EmailModule, {
+      useFactory: () => ({}),
+      ...options,
+    });
+  }
+
+  static deferred(timeout = 2000) {
+    return EmailModule.externallyConfigured(EmailModule, timeout);
   }
 }

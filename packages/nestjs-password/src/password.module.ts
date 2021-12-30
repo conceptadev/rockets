@@ -46,7 +46,15 @@ export class PasswordModule extends createConfigurableDynamicRootModule<
   static register(options: PasswordOptionsInterface = {}) {
     return PasswordModule.forRoot(PasswordModule, options);
   }
+
   static registerAsync(options: AsyncModuleConfig<PasswordOptionsInterface>) {
-    return PasswordModule.forRootAsync(PasswordModule, options);
+    return PasswordModule.forRootAsync(PasswordModule, {
+      useFactory: () => ({}),
+      ...options,
+    });
+  }
+
+  static deferred(timeout = 2000) {
+    return PasswordModule.externallyConfigured(PasswordModule, timeout);
   }
 }

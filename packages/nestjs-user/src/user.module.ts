@@ -36,7 +36,15 @@ export class UserModule extends createConfigurableDynamicRootModule<
   static register(options: UserOptionsInterface = {}) {
     return UserModule.forRoot(UserModule, options);
   }
+
   static registerAsync(options: AsyncModuleConfig<UserOptionsInterface>) {
-    return UserModule.forRootAsync(UserModule, options);
+    return UserModule.forRootAsync(UserModule, {
+      useFactory: () => ({}),
+      ...options,
+    });
+  }
+
+  static deferred(timeout = 2000) {
+    return UserModule.externallyConfigured(UserModule, timeout);
   }
 }

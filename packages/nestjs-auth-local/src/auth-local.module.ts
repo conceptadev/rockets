@@ -71,7 +71,15 @@ export class AuthLocalModule extends createConfigurableDynamicRootModule<
   static register(options: AuthLocalOptionsInterface = {}) {
     return AuthLocalModule.forRoot(AuthLocalModule, options);
   }
+
   static registerAsync(options: AsyncModuleConfig<AuthLocalOptionsInterface>) {
-    return AuthLocalModule.forRootAsync(AuthLocalModule, options);
+    return AuthLocalModule.forRootAsync(AuthLocalModule, {
+      useFactory: () => ({}),
+      ...options,
+    });
+  }
+
+  static deferred(timeout = 2000) {
+    return JwtModule.externallyConfigured(JwtModule, timeout);
   }
 }

@@ -100,9 +100,20 @@ export class AuthenticationModule extends createConfigurableDynamicRootModule<
   static register(options: AuthenticationOptionsInterface = {}) {
     return AuthenticationModule.forRoot(AuthenticationModule, options);
   }
+
   static registerAsync(
     options: AsyncModuleConfig<AuthenticationOptionsInterface>,
   ) {
-    return AuthenticationModule.forRootAsync(AuthenticationModule, options);
+    return AuthenticationModule.forRootAsync(AuthenticationModule, {
+      useFactory: () => ({}),
+      ...options,
+    });
+  }
+
+  static deferred(timeout = 2000) {
+    return AuthenticationModule.externallyConfigured(
+      AuthenticationModule,
+      timeout,
+    );
   }
 }

@@ -45,7 +45,15 @@ export class JwtModule extends createConfigurableDynamicRootModule<
   static register(options: JwtOptionsInterface = {}) {
     return JwtModule.forRoot(JwtModule, options);
   }
+
   static registerAsync(options: AsyncModuleConfig<JwtOptionsInterface>) {
-    return JwtModule.forRootAsync(JwtModule, options);
+    return JwtModule.forRootAsync(JwtModule, {
+      useFactory: () => ({}),
+      ...options,
+    });
+  }
+
+  static deferred(timeout = 2000) {
+    return JwtModule.externallyConfigured(JwtModule, timeout);
   }
 }
