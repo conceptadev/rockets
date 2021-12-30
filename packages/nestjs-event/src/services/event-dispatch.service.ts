@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Inject, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from 'eventemitter2';
 import { EventDispatchException } from '../exceptions/event-dispatch.exception';
 import { EventAsyncInterface } from '../events/interfaces/event-async.interface';
 import { EventSyncInterface } from '../events/interfaces/event-sync.interface';
 import { EventValues } from '../event-types';
+import { EVENT_MODULE_EMITTER_SERVICE_TOKEN } from '../event-constants';
 
 /**
  * Event Dispatch Service
@@ -17,7 +18,10 @@ export class EventDispatchService {
    *
    * @param {EventEmitter2} eventEmitter Injected event emitter instance
    */
-  constructor(private eventEmitter: EventEmitter2) {}
+  constructor(
+    @Inject(EVENT_MODULE_EMITTER_SERVICE_TOKEN)
+    private eventEmitter: EventEmitter2,
+  ) {}
 
   /**
    * Dispatch an event synchronously.
