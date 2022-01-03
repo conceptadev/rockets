@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@nestjs/testing": "^8.0.2",
+    "@rockts-org/nestjs-event": "3.0.2",
     "@sentry/types": "^6.13.3",
     "jest-mock-extended": "^2.0.4"
   },

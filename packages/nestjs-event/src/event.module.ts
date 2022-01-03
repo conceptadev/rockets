@@ -38,7 +38,7 @@ export class EventModule extends createConfigurableDynamicRootModule<
   ],
   exports: [EVENT_MODULE_EMITTER_SERVICE_TOKEN],
 }) {
-  static register(options: EventOptionsInterface) {
+  static register(options: EventOptionsInterface = {}) {
     const module = EventModule.forRoot(EventModule, options);
 
     module.global = true;
