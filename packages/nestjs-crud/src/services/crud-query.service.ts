@@ -12,10 +12,20 @@ export class CrudQueryService {
   addOptions(
     req: CrudRequest,
     options: Omit<CrudQueryOptionsInterface, 'search'>,
-  ) {}
+  ) {
+    req.options = {
+      ...req.options,
+      ...options,
+    };
+  }
 
   addSearch(
     req: CrudRequest,
     options: Pick<CrudQueryOptionsInterface, 'search'>,
-  ) {}
+  ) {
+    req.parsed = {
+      ...req.parsed,
+      search: options.search,
+    };
+  }
 }
