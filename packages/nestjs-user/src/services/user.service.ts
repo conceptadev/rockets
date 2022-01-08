@@ -1,8 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
+import { USER_MODULE_ORM_REPO_TOKEN } from '../user.constants';
 
 @Injectable()
 export class UserService {
+  constructor(
+    @Inject(USER_MODULE_ORM_REPO_TOKEN)
+    public userRepo: Repository<User>,
+  ) {}
+
   public users: User[] = [
     {
       id: '1',

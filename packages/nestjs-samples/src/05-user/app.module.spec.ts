@@ -1,21 +1,23 @@
+import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from './app.module';
-// import { TypeOrmConfigService } from '@rockts-org/nestjs-typeorm-config';
 import { UserModule } from '@rockts-org/nestjs-user';
+import { UserService } from '@rockts-org/nestjs-user';
+import { UserController } from '@rockts-org/nestjs-user';
+import { AppModule } from './app.module';
 
 describe('AppModule', () => {
   let userModule: UserModule;
-  // let typeOrmConfigService: TypeOrmConfigService;
+  let userService: UserService;
+  let userController: UserController;
 
   beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
+    const testModule: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
-    userModule = app.get<UserModule>(UserModule);
-    userModule.onModuleInit();
-
-    // typeOrmConfigService = app.get<TypeOrmConfigService>(TypeOrmConfigService);
+    userModule = testModule.get<UserModule>(UserModule);
+    userService = testModule.get<UserService>(UserService);
+    userController = testModule.get<UserController>(UserController);
   });
 
   afterEach(() => {
@@ -25,7 +27,11 @@ describe('AppModule', () => {
   describe('module', () => {
     it('should be loaded', async () => {
       expect(userModule).toBeInstanceOf(UserModule);
-      // expect(typeOrmConfigService).toBeInstanceOf(TypeOrmConfigService);
+      expect(userService).toBeInstanceOf(UserService);
+      expect(userService.userRepo).toBeInstanceOf(Repository);
+      expect(userController).toBeInstanceOf(UserController);
+
+      console.error(await userService.userRepo.find());
     });
   });
 });

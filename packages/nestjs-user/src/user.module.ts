@@ -1,54 +1,68 @@
-import { Injectable, Module, OnModuleInit } from '@nestjs/common';
+import { Injectable, Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import {
   AsyncModuleConfig,
   createConfigurableDynamicRootModule,
 } from '@rockts-org/nestjs-common';
-import { EventListenService } from '@rockts-org/nestjs-event';
-import { TypeOrmConfigEntitiesEvent } from '@rockts-org/nestjs-typeorm-config';
+import {
+  createTypeOrmEntityProvider,
+  createTypeOrmRepositoryProvider,
+  TypeOrmConfigModule,
+} from '@rockts-org/nestjs-typeorm-config';
+import { UserRepository } from './user.repository';
 import { userDefaultConfig } from './config/user-default.config';
-import { UserOptionsInterface } from './interfaces/user-options.interface';
-import { UserTypeOrmConfigEntitiesListener } from './listeners/user-typeorm-config-entities.listener';
+import { User } from './entities/user.entity';
+import {
+  UserOrmConfigInterface,
+  UserOptionsInterface,
+  UserOrmFeatureOptionsInterface,
+} from './interfaces/user-options.interface';
 import { UserLookupService } from './services/user-lookup.service';
 import { UserService } from './services/user.service';
 import {
   USER_MODULE_OPTIONS_TOKEN,
+  USER_MODULE_ORM_ENTITY_TOKEN,
+  USER_MODULE_ORM_REPO_TOKEN,
   USER_MODULE_SETTINGS_TOKEN,
 } from './user.constants';
+import { UserController } from './user.controller';
 
 @Module({
-  providers: [UserService, UserLookupService],
-  exports: [UserService, UserLookupService],
+  providers: [UserService, UserLookupService, UserController],
+  exports: [UserService, UserLookupService, UserController],
+  controllers: [UserController],
 })
 @Injectable()
-export class UserModule
-  extends createConfigurableDynamicRootModule<UserModule, UserOptionsInterface>(
-    USER_MODULE_OPTIONS_TOKEN,
+export class UserModule extends createConfigurableDynamicRootModule<
+  UserModule,
+  UserOptionsInterface
+>(USER_MODULE_OPTIONS_TOKEN, {
+  imports: [ConfigModule.forFeature(userDefaultConfig)],
+  providers: [
     {
-      imports: [ConfigModule.forFeature(userDefaultConfig)],
-      providers: [
-        {
-          provide: USER_MODULE_SETTINGS_TOKEN,
-          inject: [USER_MODULE_OPTIONS_TOKEN, userDefaultConfig.KEY],
-          useFactory: async (
-            options: UserOptionsInterface,
-            defaultSettings: ConfigType<typeof userDefaultConfig>,
-          ) => options.settings ?? defaultSettings,
-        },
-      ],
+      provide: USER_MODULE_SETTINGS_TOKEN,
+      inject: [USER_MODULE_OPTIONS_TOKEN, userDefaultConfig.KEY],
+      useFactory: async (
+        options: UserOptionsInterface,
+        defaultSettings: ConfigType<typeof userDefaultConfig>,
+      ) => options.settings ?? defaultSettings,
     },
-  )
-  implements OnModuleInit
-{
-  constructor(private eventListenerService: EventListenService) {
-    super();
-  }
-
-  static register(options: UserOptionsInterface = {}) {
+    createTypeOrmEntityProvider(USER_MODULE_ORM_ENTITY_TOKEN, 'user'),
+    createTypeOrmRepositoryProvider(
+      USER_MODULE_ORM_REPO_TOKEN,
+      'userRepository',
+    ),
+  ],
+}) {
+  static register(options: UserOptionsInterface & UserOrmConfigInterface = {}) {
+    this.ormFeature(options);
     return UserModule.forRoot(UserModule, options);
   }
 
-  static registerAsync(options: AsyncModuleConfig<UserOptionsInterface>) {
+  static registerAsync(
+    options: AsyncModuleConfig<UserOptionsInterface> & UserOrmConfigInterface,
+  ) {
+    this.ormFeature(options);
     return UserModule.forRootAsync(UserModule, {
       useFactory: () => ({}),
       ...options,
@@ -59,10 +73,16 @@ export class UserModule
     return UserModule.externallyConfigured(UserModule, timeout);
   }
 
-  async onModuleInit() {
-    await this.eventListenerService.on(
-      TypeOrmConfigEntitiesEvent,
-      new UserTypeOrmConfigEntitiesListener(),
-    );
+  private static ormFeature(options: UserOrmConfigInterface) {
+    const featureOptions: UserOrmFeatureOptionsInterface = {
+      entities: {
+        user: { useClass: User },
+      },
+      repositories: {
+        userRepository: { useClass: UserRepository },
+      },
+    };
+
+    TypeOrmConfigModule.registerFeature(featureOptions, options.orm);
   }
 }

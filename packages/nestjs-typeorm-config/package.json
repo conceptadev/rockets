@@ -10,12 +10,15 @@
   "dependencies": {
     "@nestjs/common": "^8.0.8",
     "@nestjs/config": "^1.0.0",
-    "@rockts-org/nestjs-common": "3.0.2",
-    "@rockts-org/nestjs-event": "3.0.2"
+    "@nestjs/typeorm": "^8.0.2",
+    "@rockts-org/nestjs-common": "3.0.2"
   },
   "devDependencies": {
     "@nestjs/testing": "^8.0.8",
-    "@nestjs/typeorm": "^8.0.2",
-    "jest-mock-extended": "^2.0.4"
+    "jest-mock-extended": "^2.0.4",
+    "typeorm": "^0.2.41"
+  },
+  "peerDependencies": {
+    "typeorm": "^0.2.41"
   }
 }
