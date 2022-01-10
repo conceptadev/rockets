@@ -1,7 +1,11 @@
-import { Controller } from '@nestjs/common';
-import { UserService } from './services/user.service';
+import { Controller, Inject } from '@nestjs/common';
+import { UserServiceInterface } from './interfaces/user-service.interface';
+import { USER_MODULE_SERVICE_TOKEN } from './user.constants';
 
 @Controller()
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(
+    @Inject(USER_MODULE_SERVICE_TOKEN)
+    private userService: UserServiceInterface,
+  ) {}
 }

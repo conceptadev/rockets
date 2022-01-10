@@ -4,6 +4,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { AppModule } from './app.module';
 import { INestApplication } from '@nestjs/common';
+import { TestUserRepository } from './user/user.repository';
+import { mock } from 'jest-mock-extended';
+import { User } from '@rockts-org/nestjs-user';
 
 describe('AppController (e2e)', () => {
   describe('Authentication', () => {
@@ -12,7 +15,12 @@ describe('AppController (e2e)', () => {
     beforeEach(async () => {
       const moduleFixture: TestingModule = await Test.createTestingModule({
         imports: [AppModule],
-      }).compile();
+      })
+        .overrideProvider('USER_MODULE_USER_ENTITY_REPO_TOKEN')
+        .useValue(mock<User>())
+        .overrideProvider('USER_MODULE_USER_CUSTOM_REPO_TOKEN')
+        .useValue(new TestUserRepository())
+        .compile();
 
       app = moduleFixture.createNestApplication();
       await app.init();

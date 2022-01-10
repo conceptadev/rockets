@@ -23,8 +23,10 @@ import {
   USER_MODULE_USER_ENTITY_REPO_TOKEN,
   USER_MODULE_USER_CUSTOM_REPO_TOKEN,
   USER_MODULE_SETTINGS_TOKEN,
+  USER_MODULE_SERVICE_TOKEN,
 } from './user.constants';
 import { UserController } from './user.controller';
+import { UserServiceInterface } from './interfaces/user-service.interface';
 
 @Module({
   providers: [UserService, UserLookupService, UserController],
@@ -45,6 +47,14 @@ export class UserModule extends createConfigurableDynamicRootModule<
         options: UserOptionsInterface,
         defaultSettings: ConfigType<typeof userDefaultConfig>,
       ) => options.settings ?? defaultSettings,
+    },
+    {
+      provide: USER_MODULE_SERVICE_TOKEN,
+      inject: [USER_MODULE_OPTIONS_TOKEN, UserService],
+      useFactory: async (
+        options: UserOptionsInterface,
+        defaultService: UserServiceInterface,
+      ) => options.issueTokenService ?? defaultService,
     },
     createEntityRepositoryProvider(USER_MODULE_USER_ENTITY_REPO_TOKEN, 'user'),
     createCustomRepositoryProvider(

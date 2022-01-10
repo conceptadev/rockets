@@ -3,7 +3,7 @@ import { mock } from 'jest-mock-extended';
 import { AppModule } from './app.module';
 import { AuthLocalController } from '@rockts-org/nestjs-auth-local';
 import { User, UserLookupService } from '@rockts-org/nestjs-user';
-import { Repository } from 'typeorm';
+import { TestUserRepository } from './user/user.repository';
 
 describe('AppModule', () => {
   it('should be imported', async () => {
@@ -13,7 +13,7 @@ describe('AppModule', () => {
       .overrideProvider('USER_MODULE_USER_ENTITY_REPO_TOKEN')
       .useValue(mock<User>())
       .overrideProvider('USER_MODULE_USER_CUSTOM_REPO_TOKEN')
-      .useValue(mock<Repository<User>>())
+      .useValue(new TestUserRepository())
       .compile();
 
     const userLookupService = module.get<UserLookupService>(UserLookupService);
