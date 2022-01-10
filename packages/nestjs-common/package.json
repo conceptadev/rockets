@@ -1,0 +1,17 @@
+{
+  "name": "@rockts-org/nestjs-common",
+  "version": "3.0.2",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@golevelup/nestjs-modules": "^0.4.3",
+    "@nestjs/common": "^8.0.8"
+  },
+  "devDependencies": {
+    "@nestjs/testing": "^8.0.8"
+  }
+}

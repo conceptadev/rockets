@@ -9,11 +9,10 @@
   ],
   "dependencies": {
     "@nestjs/common": "^8.0.8",
+    "@nestjs/config": "^1.1.5",
     "@nestjs/core": "^8.0.8",
-    "@nestjs/event-emitter": "^1.0.0"
-  },
-  "peerDependencies": {
-    "eventemitter2": "*"
+    "@rockts-org/nestjs-common": "3.0.2",
+    "eventemitter2": "^6.4.5"
   },
   "devDependencies": {
     "@nestjs/testing": "^8.0.8"

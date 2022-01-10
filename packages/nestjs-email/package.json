@@ -12,10 +12,12 @@
     "@nestjs/common": "^8.0.8",
     "@nestjs/config": "^1.0.0",
     "@nestjs/core": "^8.0.8",
-    "class-validator": "^0.11.1",
-    "nodemailer": "^6.4.10"
+    "@rockts-org/nestjs-common": "3.0.2",
+    "class-validator": "^0.11.1"
+    
   },
   "devDependencies": {
-    "@nestjs/testing": "^8.0.8"
+    "@nestjs/testing": "^8.0.8",
+    "jest-mock-extended": "^2.0.4"
   }
 }

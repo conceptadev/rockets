@@ -1,4 +1,4 @@
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EventEmitter2 } from 'eventemitter2';
 import { EVENT_MODULE_EVENT_KEY_PREFIX } from '../event-constants';
 import { EventSync } from './event-sync';
 

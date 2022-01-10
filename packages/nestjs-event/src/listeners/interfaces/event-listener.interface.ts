@@ -10,7 +10,7 @@ export interface EventListenerInterface<
   /**
    * Listener handler.
    */
-  listen(event: E): E['expectsReturnOf'];
+  listen(event?: E): E['expectsReturnOf'];
 
   /**
    * Called after successful subscription.

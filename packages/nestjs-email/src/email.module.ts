@@ -1,56 +1,59 @@
-import { Module, DynamicModule, Logger } from '@nestjs/common';
-import { MailerModule } from '@nestjs-modules/mailer';
+import { Module, Logger } from '@nestjs/common';
 import { EmailService } from './email.service';
-import { EmailConfigOptions } from './interfaces/email-config-options.interface';
-import { EmailConfigAsyncOptions } from './interfaces/email-config-async-options.interface';
+import { EmailOptionsInterface } from './interfaces/email-options.interface';
+
 import {
-  defaultEmailConfig,
+  AsyncModuleConfig,
+  createConfigurableDynamicRootModule,
+} from '@rockts-org/nestjs-common';
+import {
+  EMAIL_MODULE_MAILER_SERVICE_TOKEN,
   EMAIL_MODULE_OPTIONS_TOKEN,
-} from './config/email.config';
-import { EmailCoreModule } from './email-core.module';
+} from './email.constants';
+import { MailerModule, MailerService } from '@nestjs-modules/mailer';
+import { ConfigModule, ConfigType } from '@nestjs/config';
+import { defaultMailerConfig } from './config/default-mailer.config';
 
 @Module({
-  imports: [
-    EmailCoreModule.forRoot(defaultEmailConfig),
-    MailerModule.forRoot(defaultEmailConfig.nodeMailer),
-  ],
   providers: [Logger, EmailService],
   exports: [EmailService],
 })
-export class EmailModule {
-  /**
-   * Register a pre-defined email transport
-   *
-   * @param {EmailConfigOptions} options A configurable options
-   * definitions. See the structure of this object in the examples.
-   * @returns {DynamicModule} Dynamic module.
-   */
-  public static forRoot(options: EmailConfigOptions): DynamicModule {
-    return {
-      module: EmailModule,
-      imports: [
-        EmailCoreModule.forRoot(options),
-        MailerModule.forRoot(options.nodeMailer),
-      ],
-      providers: [Logger, EmailService],
-      exports: [EmailService],
-    };
+export class EmailModule extends createConfigurableDynamicRootModule<
+  EmailModule,
+  EmailOptionsInterface
+>(EMAIL_MODULE_OPTIONS_TOKEN, {
+  imports: [
+    MailerModule.forRootAsync({
+      imports: [ConfigModule.forFeature(defaultMailerConfig)],
+      inject: [defaultMailerConfig.KEY],
+      useFactory: async (config: ConfigType<typeof defaultMailerConfig>) =>
+        config,
+    }),
+  ],
+  providers: [
+    {
+      provide: EMAIL_MODULE_MAILER_SERVICE_TOKEN,
+      inject: [EMAIL_MODULE_OPTIONS_TOKEN, MailerService],
+      useFactory: async (
+        options: EmailOptionsInterface,
+        defaultService: MailerService,
+      ) => options.mailerService ?? defaultService,
+    },
+  ],
+  exports: [EMAIL_MODULE_MAILER_SERVICE_TOKEN],
+}) {
+  static register(options: EmailOptionsInterface) {
+    return EmailModule.forRoot(EmailModule, options);
   }
 
-  public static forRootAsync(options: EmailConfigAsyncOptions): DynamicModule {
-    return {
-      module: EmailModule,
-      imports: [
-        EmailCoreModule.forRootAsync(options),
-        MailerModule.forRootAsync({
-          inject: [EMAIL_MODULE_OPTIONS_TOKEN],
-          useFactory: async (config: EmailConfigOptions) => {
-            return config.nodeMailer;
-          },
-        }),
-      ],
-      providers: [Logger, EmailService],
-      exports: [EmailService],
-    };
+  static registerAsync(options: AsyncModuleConfig<EmailOptionsInterface>) {
+    return EmailModule.forRootAsync(EmailModule, {
+      useFactory: () => ({}),
+      ...options,
+    });
+  }
+
+  static deferred(timeout = 2000) {
+    return EmailModule.externallyConfigured(EmailModule, timeout);
   }
 }

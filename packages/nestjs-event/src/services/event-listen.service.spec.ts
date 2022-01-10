@@ -1,6 +1,9 @@
-import { EVENT_MODULE_OPTIONS_TOKEN } from '../event-constants';
-import { EventConfigOptionsInterface } from '../interfaces/event-config-options.interface';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EventEmitter2 } from 'eventemitter2';
+import {
+  EVENT_MODULE_EMITTER_SERVICE_TOKEN,
+  EVENT_MODULE_OPTIONS_TOKEN,
+} from '../event-constants';
+import { EventOptionsInterface } from '../interfaces/event-options.interface';
 import { Test } from '@nestjs/testing';
 import { EventSync } from '../events/event-sync';
 import { EventListenerOn } from '../listeners/event-listener-on';
@@ -9,20 +12,25 @@ import { EventAsync } from '../events/event-async';
 import { EventListenerException } from '../exceptions/event-listener.exception';
 
 describe('EventListenService', () => {
-  const config: EventConfigOptionsInterface = {};
+  const config: EventOptionsInterface = {};
   let eventEmitter: EventEmitter2;
   let eventListenService: EventListenService;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
-        EventEmitter2,
+        {
+          provide: EVENT_MODULE_EMITTER_SERVICE_TOKEN,
+          useClass: EventEmitter2,
+        },
         EventListenService,
         { provide: EVENT_MODULE_OPTIONS_TOKEN, useValue: config },
       ],
     }).compile();
 
-    eventEmitter = moduleRef.get<EventEmitter2>(EventEmitter2);
+    eventEmitter = moduleRef.get<EventEmitter2>(
+      EVENT_MODULE_EMITTER_SERVICE_TOKEN,
+    );
     eventListenService = moduleRef.get<EventListenService>(EventListenService);
     jest.clearAllMocks();
   });
