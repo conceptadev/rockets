@@ -1,6 +1,6 @@
 {
   "name": "@rockts-org/nestjs-authentication",
-  "version": "3.0.2",
+  "version": "4.0.0-alpha.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "MIT",
@@ -12,8 +12,8 @@
     "@nestjs/config": "^1.1.6",
     "@nestjs/core": "^8.0.8",
     "@nestjs/passport": "^8.0.1",
-    "@rockts-org/nestjs-common": "3.0.2",
-    "@rockts-org/nestjs-password": "3.0.2",
+    "@rockts-org/nestjs-common": "^4.0.0-alpha.0",
+    "@rockts-org/nestjs-password": "^4.0.0-alpha.0",
     "@types/zxcvbn": "^4.4.1",
     "bcrypt": "^5.0.1",
     "passport": "^0.5.0",

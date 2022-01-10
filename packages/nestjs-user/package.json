@@ -1,6 +1,6 @@
 {
   "name": "@rockts-org/nestjs-user",
-  "version": "3.0.2",
+  "version": "4.0.0-alpha.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "MIT",
@@ -10,9 +10,9 @@
   "dependencies": {
     "@nestjs/common": "^8.0.8",
     "@nestjs/config": "^1.1.6",
-    "@rockts-org/nestjs-authentication": "3.0.2",
-    "@rockts-org/nestjs-common": "3.0.2",
-    "@rockts-org/nestjs-typeorm-ext": "3.0.2"
+    "@rockts-org/nestjs-authentication": "^4.0.0-alpha.0",
+    "@rockts-org/nestjs-common": "^4.0.0-alpha.0",
+    "@rockts-org/nestjs-typeorm-ext": "^4.0.0-alpha.0"
   },
   "devDependencies": {
     "@nestjs/testing": "^8.0.8",
