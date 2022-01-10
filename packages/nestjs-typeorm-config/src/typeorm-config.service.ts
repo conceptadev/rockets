@@ -1,20 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
-import {
-  TypeOrmConfigConnectionToken,
-  TypeOrmConfigOptions,
-} from './typeorm-config.types';
-import {
-  TYPEORM_CONFIG_MODULE_CONNECTION,
-  TYPEORM_CONFIG_MODULE_OPTIONS_TOKEN,
-} from './typeorm-config.constants';
+import { TYPEORM_CONFIG_MODULE_CONNECTION } from './typeorm-config.constants';
 import { TypeOrmConfigStorage } from './typeorm-config.storage';
 import { AbstractRepository, Connection, Repository } from 'typeorm';
 
 @Injectable()
 export class TypeOrmConfigService {
   constructor(
-    @Inject(TYPEORM_CONFIG_MODULE_OPTIONS_TOKEN)
-    private options: TypeOrmConfigOptions,
     @Inject(TYPEORM_CONFIG_MODULE_CONNECTION)
     private connection: Connection,
   ) {}
@@ -44,19 +35,5 @@ export class TypeOrmConfigService {
       // yep, add it
       return this.connection.getCustomRepository(repository.useClass);
     }
-  }
-
-  public async connectionOptions(): Promise<TypeOrmConfigOptions> {
-    const connectionToken: TypeOrmConfigConnectionToken =
-      this.options?.name ?? 'default';
-
-    const entities =
-      TypeOrmConfigStorage.getEntitiesByConnection(connectionToken);
-
-    return {
-      ...this.options,
-      entities: entities.map((entity) => entity.useClass),
-      subscribers: [],
-    };
   }
 }

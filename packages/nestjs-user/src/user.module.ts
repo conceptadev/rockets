@@ -15,7 +15,6 @@ import { User } from './entities/user.entity';
 import {
   UserOrmConfigInterface,
   UserOptionsInterface,
-  UserOrmFeatureOptionsInterface,
 } from './interfaces/user-options.interface';
 import { UserLookupService } from './services/user-lookup.service';
 import { UserService } from './services/user.service';
@@ -55,14 +54,14 @@ export class UserModule extends createConfigurableDynamicRootModule<
   ],
 }) {
   static register(options: UserOptionsInterface & UserOrmConfigInterface = {}) {
-    this.ormFeature(options);
+    this.configureOrm(options);
     return UserModule.forRoot(UserModule, options);
   }
 
   static registerAsync(
     options: AsyncModuleConfig<UserOptionsInterface> & UserOrmConfigInterface,
   ) {
-    this.ormFeature(options);
+    this.configureOrm(options);
     return UserModule.forRootAsync(UserModule, {
       useFactory: () => ({}),
       ...options,
@@ -73,16 +72,14 @@ export class UserModule extends createConfigurableDynamicRootModule<
     return UserModule.externallyConfigured(UserModule, timeout);
   }
 
-  private static ormFeature(options: UserOrmConfigInterface) {
-    const featureOptions: UserOrmFeatureOptionsInterface = {
+  private static configureOrm(options: UserOrmConfigInterface) {
+    TypeOrmConfigModule.configure(options.orm, {
       entities: {
         user: { useClass: User },
       },
       repositories: {
         userRepository: { useClass: UserRepository },
       },
-    };
-
-    TypeOrmConfigModule.registerFeature(featureOptions, options.orm);
+    });
   }
 }

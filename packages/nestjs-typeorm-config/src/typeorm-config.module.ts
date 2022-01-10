@@ -1,4 +1,12 @@
+import { Connection, ConnectionOptions } from 'typeorm';
 import { Global, Module } from '@nestjs/common';
+import {
+  getConnectionName,
+  getConnectionToken,
+  TypeOrmModule,
+  TypeOrmModuleAsyncOptions,
+  TypeOrmModuleOptions,
+} from '@nestjs/typeorm';
 import {
   AsyncModuleConfig,
   createConfigurableDynamicRootModule,
@@ -8,19 +16,9 @@ import {
   TYPEORM_CONFIG_MODULE_CONNECTION,
   TYPEORM_CONFIG_MODULE_OPTIONS_TOKEN,
 } from './typeorm-config.constants';
-import {
-  TypeOrmConfigMetaDataOptions,
-  TypeOrmConfigOptions,
-} from './typeorm-config.types';
+import { TypeOrmConfigOptions } from './typeorm-config.types';
 import { TypeOrmConfigStorage } from './typeorm-config.storage';
-import {
-  getConnectionName,
-  getConnectionToken,
-  TypeOrmModule,
-  TypeOrmModuleAsyncOptions,
-  TypeOrmModuleOptions,
-} from '@nestjs/typeorm';
-import { Connection, ConnectionOptions } from 'typeorm';
+import { TypeOrmConfigMetaDataInterface } from './interfaces/typeorm-config-metadata.interface';
 
 @Global()
 @Module({
@@ -87,18 +85,18 @@ export class TypeOrmConfigModule extends createConfigurableDynamicRootModule<
     return module;
   }
 
-  static registerFeature(
-    config: TypeOrmConfigMetaDataOptions,
-    defaultConfig: TypeOrmConfigMetaDataOptions = {},
-  ) {
-    TypeOrmConfigStorage.addConfig(defaultConfig, config);
-  }
-
   static deferred(timeout = 2000) {
     return TypeOrmConfigModule.externallyConfigured(
       TypeOrmConfigModule,
       timeout,
     );
+  }
+
+  static configure(
+    metaData: TypeOrmConfigMetaDataInterface,
+    defaultMetaData: TypeOrmConfigMetaDataInterface = {},
+  ) {
+    TypeOrmConfigStorage.addConfig(metaData, defaultMetaData);
   }
 
   private static createConnectionProvider(
@@ -111,7 +109,7 @@ export class TypeOrmConfigModule extends createConfigurableDynamicRootModule<
     };
   }
 
-  static mergeTypeOrmOptions(
+  private static mergeTypeOrmOptions(
     connectionName: string,
     options: ConnectionOptions,
   ) {

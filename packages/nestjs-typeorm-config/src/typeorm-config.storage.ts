@@ -30,7 +30,7 @@ export class TypeOrmConfigStorage {
     config?: TypeOrmConfigMetaDataInterface,
     defaultConfig?: TypeOrmConfigMetaDataInterface,
   ) {
-    // defaults to set first/
+    // defaults to set first?
     if (defaultConfig) {
       // yes, recurse
       this.addConfig(defaultConfig);
