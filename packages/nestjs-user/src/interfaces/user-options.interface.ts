@@ -1,6 +1,6 @@
 import { Type } from '@nestjs/common';
 import { OptionsInterface } from '@rockts-org/nestjs-common';
-import { TypeOrmConfigMetaDataOptions } from '@rockts-org/nestjs-typeorm-config/src/typeorm-config.types';
+import { TypeOrmExtMetadataOptions } from '@rockts-org/nestjs-typeorm-ext';
 import { Repository } from 'typeorm';
 import { UserSettingsInterface } from './user-settings.interface';
 import { UserInterface } from './user.interface';
@@ -10,7 +10,7 @@ export interface UserOptionsInterface extends OptionsInterface {
 }
 
 export interface UserOrmFeatureOptionsInterface
-  extends TypeOrmConfigMetaDataOptions {
+  extends TypeOrmExtMetadataOptions {
   entities?: {
     user?: { useClass?: Type<UserInterface> };
   };

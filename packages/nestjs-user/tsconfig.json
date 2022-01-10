@@ -17,7 +17,7 @@
       "path": "../nestjs-common"
     },
     {
-      "path": "../nestjs-typeorm-config"
+      "path": "../nestjs-typeorm-ext"
     }
   ]
 }

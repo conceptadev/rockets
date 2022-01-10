@@ -20,6 +20,12 @@
       "path": "../nestjs-auth-local"
     },
     {
+      "path": "../nestjs-event"
+    },
+    {
+      "path": "../nestjs-typeorm-ext"
+    },
+    {
       "path": "../nestjs-user"
     }
   ]

@@ -1,34 +1,32 @@
+import { TypeOrmExtMetadataItemInterface } from './interfaces/typeorm-ext-metadata-item.interface';
+import { TypeOrmExtMetadataItemsInterface } from './interfaces/typeorm-ext-metadata-items.interface';
+import { TypeOrmExtMetadataInterface } from './interfaces/typeorm-ext-metadata.interface';
+import { TYPEORM_EXT_MODULE_DEFAULT_CONNECTION_NAME } from './typeorm-ext.constants';
 import {
-  TypeOrmConfigMetaDataInterface,
-  TypeOrmConfigMetaDataStorageInterface,
-  TypeOrmConfigMetaDataStorageItemInterface,
-} from './interfaces/typeorm-config-metadata.interface';
-import { TYPEORM_CONFIG_MODULE_DEFAULT_CONNECTION_NAME } from './typeorm-config.constants';
-import {
-  TypeOrmConfigConnectionToken,
-  TypeOrmConfigStorableEntity,
-  TypeOrmConfigStorableRepo,
-  TypeOrmConfigStorableSubscriber,
-} from './typeorm-config.types';
+  TypeOrmExtConnectionToken,
+  TypeOrmExtStorableEntity,
+  TypeOrmExtStorableRepository,
+  TypeOrmExtStorableSubscriber,
+} from './typeorm-ext.types';
 
 class ConfigurationMap<T = unknown> extends Map<
   string,
-  TypeOrmConfigMetaDataStorageItemInterface<T>
+  TypeOrmExtMetadataItemInterface<T>
 > {}
 
-export class TypeOrmConfigStorage {
+export class TypeOrmExtStorage {
   private static readonly entities =
-    new ConfigurationMap<TypeOrmConfigStorableEntity>();
+    new ConfigurationMap<TypeOrmExtStorableEntity>();
 
   private static readonly repositories =
-    new ConfigurationMap<TypeOrmConfigStorableRepo>();
+    new ConfigurationMap<TypeOrmExtStorableRepository>();
 
   private static readonly subscribers =
-    new ConfigurationMap<TypeOrmConfigStorableSubscriber>();
+    new ConfigurationMap<TypeOrmExtStorableSubscriber>();
 
   static addConfig(
-    config?: TypeOrmConfigMetaDataInterface,
-    defaultConfig?: TypeOrmConfigMetaDataInterface,
+    config?: TypeOrmExtMetadataInterface,
+    defaultConfig?: TypeOrmExtMetadataInterface,
   ) {
     // defaults to set first?
     if (defaultConfig) {
@@ -46,17 +44,17 @@ export class TypeOrmConfigStorage {
   }
 
   private static resolveConnectionToken(
-    connection: TypeOrmConfigConnectionToken,
+    connection: TypeOrmExtConnectionToken,
   ): string {
     return !connection
-      ? TYPEORM_CONFIG_MODULE_DEFAULT_CONNECTION_NAME
+      ? TYPEORM_EXT_MODULE_DEFAULT_CONNECTION_NAME
       : typeof connection === 'string'
       ? connection
       : connection.name;
   }
 
   private static mergeStorage(
-    storageItems: TypeOrmConfigMetaDataStorageInterface,
+    storageItems: TypeOrmExtMetadataItemsInterface,
     target: ConfigurationMap,
   ) {
     // loop all keys
@@ -75,19 +73,19 @@ export class TypeOrmConfigStorage {
 
   static getEntityByKey(
     key: string,
-  ): TypeOrmConfigMetaDataStorageItemInterface<TypeOrmConfigStorableEntity> {
+  ): TypeOrmExtMetadataItemInterface<TypeOrmExtStorableEntity> {
     return this.entities.get(key);
   }
 
   static getRepositoryByKey(
     key: string,
-  ): TypeOrmConfigMetaDataStorageItemInterface<TypeOrmConfigStorableRepo> {
+  ): TypeOrmExtMetadataItemInterface<TypeOrmExtStorableRepository> {
     return this.repositories.get(key);
   }
 
   static getEntitiesByConnection(
     connection: string,
-  ): TypeOrmConfigMetaDataStorageItemInterface<TypeOrmConfigStorableEntity>[] {
+  ): TypeOrmExtMetadataItemInterface<TypeOrmExtStorableEntity>[] {
     const entities = [];
 
     this.entities.forEach((entity) => {
@@ -101,7 +99,7 @@ export class TypeOrmConfigStorage {
 
   static getSubscribersByConnection(
     connection: string,
-  ): TypeOrmConfigMetaDataStorageItemInterface<TypeOrmConfigStorableSubscriber>[] {
+  ): TypeOrmExtMetadataItemInterface<TypeOrmExtStorableSubscriber>[] {
     const subscribers = [];
 
     this.subscribers.forEach((subscriber) => {

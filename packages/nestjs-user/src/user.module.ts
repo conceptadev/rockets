@@ -5,10 +5,10 @@ import {
   createConfigurableDynamicRootModule,
 } from '@rockts-org/nestjs-common';
 import {
-  createTypeOrmEntityProvider,
-  createTypeOrmRepositoryProvider,
-  TypeOrmConfigModule,
-} from '@rockts-org/nestjs-typeorm-config';
+  createCustomRepositoryProvider,
+  createEntityRepositoryProvider,
+  TypeOrmExtModule,
+} from '@rockts-org/nestjs-typeorm-ext';
 import { UserRepository } from './user.repository';
 import { userDefaultConfig } from './config/user-default.config';
 import { User } from './entities/user.entity';
@@ -20,8 +20,8 @@ import { UserLookupService } from './services/user-lookup.service';
 import { UserService } from './services/user.service';
 import {
   USER_MODULE_OPTIONS_TOKEN,
-  USER_MODULE_ORM_ENTITY_TOKEN,
-  USER_MODULE_ORM_REPO_TOKEN,
+  USER_MODULE_USER_ENTITY_REPO_TOKEN,
+  USER_MODULE_USER_CUSTOM_REPO_TOKEN,
   USER_MODULE_SETTINGS_TOKEN,
 } from './user.constants';
 import { UserController } from './user.controller';
@@ -46,9 +46,9 @@ export class UserModule extends createConfigurableDynamicRootModule<
         defaultSettings: ConfigType<typeof userDefaultConfig>,
       ) => options.settings ?? defaultSettings,
     },
-    createTypeOrmEntityProvider(USER_MODULE_ORM_ENTITY_TOKEN, 'user'),
-    createTypeOrmRepositoryProvider(
-      USER_MODULE_ORM_REPO_TOKEN,
+    createEntityRepositoryProvider(USER_MODULE_USER_ENTITY_REPO_TOKEN, 'user'),
+    createCustomRepositoryProvider(
+      USER_MODULE_USER_CUSTOM_REPO_TOKEN,
       'userRepository',
     ),
   ],
@@ -73,7 +73,7 @@ export class UserModule extends createConfigurableDynamicRootModule<
   }
 
   private static configureOrm(options: UserOrmConfigInterface) {
-    TypeOrmConfigModule.configure(options.orm, {
+    TypeOrmExtModule.configure(options.orm, {
       entities: {
         user: { useClass: User },
       },

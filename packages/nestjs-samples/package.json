@@ -21,7 +21,7 @@
     "@rockts-org/nestjs-jwt": "3.0.2",
     "@rockts-org/nestjs-logger": "3.0.2",
     "@rockts-org/nestjs-password": "3.0.2",
-    "@rockts-org/nestjs-typeorm-config": "3.0.2",
+    "@rockts-org/nestjs-typeorm-ext": "3.0.2",
     "@rockts-org/nestjs-user": "3.0.2",
     "rxjs": "^7.5.1"
   },

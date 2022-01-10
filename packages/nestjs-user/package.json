@@ -12,7 +12,7 @@
     "@nestjs/config": "^1.0.0",
     "@rockts-org/nestjs-authentication": "3.0.2",
     "@rockts-org/nestjs-common": "3.0.2",
-    "@rockts-org/nestjs-typeorm-config": "3.0.2"
+    "@rockts-org/nestjs-typeorm-ext": "3.0.2"
   },
   "devDependencies": {
     "@nestjs/testing": "^8.0.8",

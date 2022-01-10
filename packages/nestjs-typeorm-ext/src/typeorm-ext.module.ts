@@ -11,38 +11,35 @@ import {
   AsyncModuleConfig,
   createConfigurableDynamicRootModule,
 } from '@rockts-org/nestjs-common';
-import { TypeOrmConfigService } from './typeorm-config.service';
+import { TypeOrmExtService } from './typeorm-ext.service';
 import {
-  TYPEORM_CONFIG_MODULE_CONNECTION,
-  TYPEORM_CONFIG_MODULE_OPTIONS_TOKEN,
-} from './typeorm-config.constants';
-import { TypeOrmConfigOptions } from './typeorm-config.types';
-import { TypeOrmConfigStorage } from './typeorm-config.storage';
-import { TypeOrmConfigMetaDataInterface } from './interfaces/typeorm-config-metadata.interface';
+  TYPEORM_EXT_MODULE_CONNECTION,
+  TYPEORM_EXT_MODULE_OPTIONS_TOKEN,
+} from './typeorm-ext.constants';
+import { TypeOrmExtOptions } from './typeorm-ext.types';
+import { TypeOrmExtStorage } from './typeorm-ext.storage';
+import { TypeOrmExtMetadataInterface } from './interfaces/typeorm-ext-metadata.interface';
 
 @Global()
 @Module({
-  providers: [TypeOrmConfigService],
-  exports: [TypeOrmConfigService],
+  providers: [TypeOrmExtService],
+  exports: [TypeOrmExtService],
 })
-export class TypeOrmConfigModule extends createConfigurableDynamicRootModule<
-  TypeOrmConfigModule,
-  TypeOrmConfigOptions
->(TYPEORM_CONFIG_MODULE_OPTIONS_TOKEN, {
-  exports: [
-    TYPEORM_CONFIG_MODULE_CONNECTION,
-    TYPEORM_CONFIG_MODULE_OPTIONS_TOKEN,
-  ],
+export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
+  TypeOrmExtModule,
+  TypeOrmExtOptions
+>(TYPEORM_EXT_MODULE_OPTIONS_TOKEN, {
+  exports: [TYPEORM_EXT_MODULE_CONNECTION, TYPEORM_EXT_MODULE_OPTIONS_TOKEN],
 }) {
-  static register(options: TypeOrmConfigOptions) {
-    const module = TypeOrmConfigModule.forRoot(TypeOrmConfigModule, options);
+  static register(options: TypeOrmExtOptions) {
+    const module = TypeOrmExtModule.forRoot(TypeOrmExtModule, options);
 
     module.imports.push(
       TypeOrmModule.forRootAsync({
-        inject: [TYPEORM_CONFIG_MODULE_OPTIONS_TOKEN],
+        inject: [TYPEORM_EXT_MODULE_OPTIONS_TOKEN],
         useFactory: async (options: TypeOrmModuleOptions) => {
           // return the merged options
-          return TypeOrmConfigModule.mergeTypeOrmOptions(
+          return TypeOrmExtModule.mergeTypeOrmOptions(
             getConnectionName(options as ConnectionOptions),
             options as ConnectionOptions,
           );
@@ -58,20 +55,16 @@ export class TypeOrmConfigModule extends createConfigurableDynamicRootModule<
   }
 
   static registerAsync(
-    options: TypeOrmModuleAsyncOptions &
-      AsyncModuleConfig<TypeOrmConfigOptions>,
+    options: TypeOrmModuleAsyncOptions & AsyncModuleConfig<TypeOrmExtOptions>,
   ) {
-    const module = TypeOrmConfigModule.forRootAsync(
-      TypeOrmConfigModule,
-      options,
-    );
+    const module = TypeOrmExtModule.forRootAsync(TypeOrmExtModule, options);
 
     module.imports.push(
       TypeOrmModule.forRootAsync({
-        inject: [TYPEORM_CONFIG_MODULE_OPTIONS_TOKEN],
+        inject: [TYPEORM_EXT_MODULE_OPTIONS_TOKEN],
         useFactory: async (options: TypeOrmModuleOptions) => {
           // return the merged options
-          return TypeOrmConfigModule.mergeTypeOrmOptions(
+          return TypeOrmExtModule.mergeTypeOrmOptions(
             getConnectionName(options as ConnectionOptions),
             options as ConnectionOptions,
           );
@@ -86,24 +79,21 @@ export class TypeOrmConfigModule extends createConfigurableDynamicRootModule<
   }
 
   static deferred(timeout = 2000) {
-    return TypeOrmConfigModule.externallyConfigured(
-      TypeOrmConfigModule,
-      timeout,
-    );
+    return TypeOrmExtModule.externallyConfigured(TypeOrmExtModule, timeout);
   }
 
   static configure(
-    metaData: TypeOrmConfigMetaDataInterface,
-    defaultMetaData: TypeOrmConfigMetaDataInterface = {},
+    metadata: TypeOrmExtMetadataInterface,
+    defaultMetadata: TypeOrmExtMetadataInterface = {},
   ) {
-    TypeOrmConfigStorage.addConfig(metaData, defaultMetaData);
+    TypeOrmExtStorage.addConfig(metadata, defaultMetadata);
   }
 
   private static createConnectionProvider(
     connection?: string | ConnectionOptions,
   ) {
     return {
-      provide: TYPEORM_CONFIG_MODULE_CONNECTION,
+      provide: TYPEORM_EXT_MODULE_CONNECTION,
       inject: [getConnectionToken(connection)],
       useFactory: async (connection: Connection) => connection,
     };
@@ -113,11 +103,10 @@ export class TypeOrmConfigModule extends createConfigurableDynamicRootModule<
     connectionName: string,
     options: ConnectionOptions,
   ) {
-    const entities =
-      TypeOrmConfigStorage.getEntitiesByConnection(connectionName);
+    const entities = TypeOrmExtStorage.getEntitiesByConnection(connectionName);
 
     const subscribers =
-      TypeOrmConfigStorage.getSubscribersByConnection(connectionName);
+      TypeOrmExtStorage.getSubscribersByConnection(connectionName);
 
     return {
       ...options,

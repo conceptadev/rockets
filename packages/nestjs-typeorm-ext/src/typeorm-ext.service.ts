@@ -1,18 +1,18 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { TYPEORM_CONFIG_MODULE_CONNECTION } from './typeorm-config.constants';
-import { TypeOrmConfigStorage } from './typeorm-config.storage';
+import { TYPEORM_EXT_MODULE_CONNECTION } from './typeorm-ext.constants';
+import { TypeOrmExtStorage } from './typeorm-ext.storage';
 import { AbstractRepository, Connection, Repository } from 'typeorm';
 
 @Injectable()
-export class TypeOrmConfigService {
+export class TypeOrmExtService {
   constructor(
-    @Inject(TYPEORM_CONFIG_MODULE_CONNECTION)
+    @Inject(TYPEORM_EXT_MODULE_CONNECTION)
     private connection: Connection,
   ) {}
 
   async getEntityRepository(entityKey: string) {
     // look up the entity
-    const entity = TypeOrmConfigStorage.getEntityByKey(entityKey);
+    const entity = TypeOrmExtStorage.getEntityByKey(entityKey);
     // entity configured for this connection?
     if (entity.connection === this.connection.name) {
       // yep, add it
@@ -24,7 +24,7 @@ export class TypeOrmConfigService {
 
   async getCustomRepository(repoKey: string) {
     // look up the repo
-    const repository = TypeOrmConfigStorage.getRepositoryByKey(repoKey);
+    const repository = TypeOrmExtStorage.getRepositoryByKey(repoKey);
     // repo configured for this connection?
     if (
       repository.connection === this.connection.name &&

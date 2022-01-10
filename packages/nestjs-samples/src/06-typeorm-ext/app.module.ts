@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { TypeOrmExtModule } from '@rockts-org/nestjs-typeorm-ext';
 import { UserModule } from '@rockts-org/nestjs-user';
 import { ConnectionOptions, getConnectionManager } from 'typeorm';
+import { CustomUserRepository } from './custom-repository';
+import { CustomUser } from './custom-user.entity';
 
 @Module({
   imports: [
@@ -17,7 +19,16 @@ import { ConnectionOptions, getConnectionManager } from 'typeorm';
         return c;
       },
     }),
-    UserModule.register(),
+    UserModule.register({
+      orm: {
+        entities: {
+          user: { useClass: CustomUser },
+        },
+        repositories: {
+          userRepository: { useClass: CustomUserRepository },
+        },
+      },
+    }),
   ],
 })
 export class AppModule {}

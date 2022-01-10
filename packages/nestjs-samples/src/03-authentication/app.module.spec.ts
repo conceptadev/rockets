@@ -10,9 +10,9 @@ describe('AppModule', () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     })
-      .overrideProvider('USER_MODULE_ORM_ENTITY_TOKEN')
+      .overrideProvider('USER_MODULE_USER_ENTITY_REPO_TOKEN')
       .useValue(mock<User>())
-      .overrideProvider('USER_MODULE_ORM_REPO_TOKEN')
+      .overrideProvider('USER_MODULE_USER_CUSTOM_REPO_TOKEN')
       .useValue(mock<Repository<User>>())
       .compile();
 
