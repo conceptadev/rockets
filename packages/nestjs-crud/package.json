@@ -13,7 +13,8 @@
     "@nestjsx/crud": "5.0.0-alpha.3",
     "@nestjsx/crud-request": "^4.6.2",
     "@nestjsx/crud-typeorm": "^4.6.2",
-    "@nestjsx/util": "^5.0.0-alpha.3"
+    "@nestjsx/util": "^5.0.0-alpha.3",
+    "jest-mock-extended": "^2.0.4"
   },
   "devDependencies": {
     "@nestjs/testing": "^8.0.8",
