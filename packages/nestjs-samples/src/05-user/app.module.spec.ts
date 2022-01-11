@@ -1,13 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { User, UserModule, UserRepository } from '@rockts-org/nestjs-user';
-import { UserService } from '@rockts-org/nestjs-user';
-import { UserController } from '@rockts-org/nestjs-user';
+import {
+  User,
+  UserModule,
+  UserRepository,
+  UserService,
+  UserController,
+  DefaultUserService,
+} from '@rockts-org/nestjs-user';
 import { Repository } from 'typeorm';
 import { AppModule } from './app.module';
 
 describe('AppModule', () => {
   let userModule: UserModule;
-  let userService: UserService;
+  let userService: DefaultUserService;
   let userController: UserController;
   let userEntityRepo: Repository<User>;
   let userCustomRepo: UserRepository;
@@ -24,7 +29,7 @@ describe('AppModule', () => {
     userCustomRepo = testModule.get<UserRepository>(
       'USER_MODULE_USER_CUSTOM_REPO_TOKEN',
     );
-    userService = testModule.get<UserService>(UserService);
+    userService = testModule.get<DefaultUserService>(UserService);
     userController = testModule.get<UserController>(UserController);
   });
 
@@ -37,7 +42,7 @@ describe('AppModule', () => {
       expect(userModule).toBeInstanceOf(UserModule);
       expect(userEntityRepo).toBeInstanceOf(Repository);
       expect(userCustomRepo).toBeInstanceOf(UserRepository);
-      expect(userService).toBeInstanceOf(UserService);
+      expect(userService).toBeInstanceOf(DefaultUserService);
       expect(userService.userRepo).toBeInstanceOf(UserRepository);
       expect(userService.userRepo.find).toBeInstanceOf(Function);
       expect(userController).toBeInstanceOf(UserController);

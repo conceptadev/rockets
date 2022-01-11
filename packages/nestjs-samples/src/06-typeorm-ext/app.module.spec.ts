@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserModule } from '@rockts-org/nestjs-user';
-import { UserService } from '@rockts-org/nestjs-user';
+import { UserModule, UserService } from '@rockts-org/nestjs-user';
 import { UserController } from '@rockts-org/nestjs-user';
 import { Repository } from 'typeorm';
 import { AppModule } from './app.module';

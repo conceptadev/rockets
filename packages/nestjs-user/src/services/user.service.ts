@@ -5,7 +5,7 @@ import { UserServiceInterface } from '../interfaces/user-service.interface';
 import { USER_MODULE_USER_CUSTOM_REPO_TOKEN } from '../user.constants';
 
 @Injectable()
-export class UserService implements UserServiceInterface {
+export abstract class UserService implements UserServiceInterface {
   constructor(
     @Inject(USER_MODULE_USER_CUSTOM_REPO_TOKEN)
     public userRepo: Repository<User>,

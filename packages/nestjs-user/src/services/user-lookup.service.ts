@@ -3,18 +3,14 @@ import {
   UserLookupServiceInterface,
 } from '@rockts-org/nestjs-authentication';
 
-import { Inject, Injectable } from '@nestjs/common';
-import { USER_MODULE_SERVICE_TOKEN } from '../user.constants';
-import { UserServiceInterface } from '../interfaces/user-service.interface';
+import { Injectable } from '@nestjs/common';
+import { UserService } from '../services/user.service';
 
 @Injectable()
 export class UserLookupService
   implements UserLookupServiceInterface<CredentialLookupInterface>
 {
-  constructor(
-    @Inject(USER_MODULE_SERVICE_TOKEN)
-    private userService: UserServiceInterface,
-  ) {}
+  constructor(private userService: UserService) {}
 
   async getUser(username: string): Promise<CredentialLookupInterface> {
     const user = await this.userService.getUserByUsername(username);
