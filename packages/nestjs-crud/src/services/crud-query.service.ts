@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { CrudRequest } from '@nestjsx/crud';
+import { SCondition } from '@nestjsx/crud-request';
 import { CrudQueryOptionsInterface } from '../interfaces/crud-query-options.interface';
 
 @Injectable()
 export class CrudQueryService {
   modifyRequest(req: CrudRequest, options: CrudQueryOptionsInterface) {
     this.addOptions(req, options);
-    this.addSearch(req, options);
+    this.addSearch(req, options.search);
   }
 
   addOptions(
@@ -19,13 +20,9 @@ export class CrudQueryService {
     };
   }
 
-  addSearch(
-    req: CrudRequest,
-    options: Pick<CrudQueryOptionsInterface, 'search'>,
-  ) {
-    req.parsed = {
-      ...req.parsed,
-      search: options.search,
+  addSearch(req: CrudRequest, options: SCondition) {
+    req.parsed.search = {
+      $and: [req.parsed.search, options],
     };
   }
 }

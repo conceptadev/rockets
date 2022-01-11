@@ -1,6 +1,9 @@
 import { Test } from '@nestjs/testing';
+import { CrudRequest } from '@nestjsx/crud';
 import { CrudQueryService } from './crud-query.service';
-// import { mock } from 'jest-mock-extended';
+import { mock } from 'jest-mock-extended';
+import { CrudQueryOptionsInterface } from '../interfaces/crud-query-options.interface';
+import { SCondition } from '@nestjsx/crud-request';
 
 describe('TypeOrmService', () => {
   let crudQueryService: CrudQueryService;
@@ -20,34 +23,33 @@ describe('TypeOrmService', () => {
   });
 
   describe('modifyRequest', () => {
-    describe('when adding options', () => {
-      // it('should add options', async () => {
-      //   const req = {
-      //     options: {},
-      //   };
-      //   const options = {
-      //     search: '',
-      //   };
-      //   crudQueryService.modifyRequest(req, options);
-      //   expect(req.options).toEqual(options);
-      // });
-      const addOption = jest.fn().mockReturnValue({
-        addOptions: jest.fn().mockReturnValue({
-          query: { join: { company: { eager: false } } },
-        }),
-      });
-
-      // crudQueryService.modifyRequest(req, options);
-    });
-
     describe('when adding search', () => {
-      it('should add search', () => {
-        const addSearch = jest.fn().mockReturnValue({
-          addSearch: jest.fn().mockReturnValue({
-            name: {
-              $eq: 'apple',
+      it('should add search', async () => {
+        // the fake request
+        const req: CrudRequest = mock<CrudRequest>();
+
+        // mock some filters on the request
+        req.parsed.search = {
+          name: 'apple',
+        };
+
+        const options: CrudQueryOptionsInterface = {
+          search: {
+            name: 'pear',
+          },
+        };
+
+        crudQueryService.modifyRequest(req, options);
+
+        expect(req.parsed.search).toEqual<SCondition>({
+          $and: [
+            {
+              name: 'apple',
             },
-          }),
+            {
+              name: 'pear',
+            },
+          ],
         });
       });
     });
