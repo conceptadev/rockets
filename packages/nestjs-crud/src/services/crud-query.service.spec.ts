@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing';
-import { CrudRequest } from '@nestjsx/crud';
+import { CrudOptions, CrudRequest } from '@nestjsx/crud';
 import { CrudQueryService } from './crud-query.service';
 import { mock } from 'jest-mock-extended';
 import { CrudQueryOptionsInterface } from '../interfaces/crud-query-options.interface';
@@ -50,6 +50,28 @@ describe('TypeOrmService', () => {
               name: 'pear',
             },
           ],
+        });
+      });
+    });
+
+    describe('when adding options', () => {
+      it('should add option', async () => {
+        // the fake request
+        const req: CrudRequest = mock<CrudRequest>();
+
+        // mock some options on the request
+        req.options.query.alwaysPaginate = true;
+
+        const customOptions: CrudQueryOptionsInterface = {
+          query: { alwaysPaginate: true },
+        };
+
+        crudQueryService.modifyRequest(req, customOptions);
+
+        expect(req.options.query.alwaysPaginate).toEqual({
+          query: {
+            alwaysPaginate: true,
+          },
         });
       });
     });

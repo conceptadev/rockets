@@ -14,15 +14,15 @@ export class CrudQueryService {
     req: CrudRequest,
     options: Omit<CrudQueryOptionsInterface, 'search'>,
   ) {
-    req.options = {
-      ...req.options,
+    req.options.query = {
+      ...req.options.query,
       ...options,
     };
   }
 
-  addSearch(req: CrudRequest, options: SCondition) {
+  addSearch(req: CrudRequest, search: SCondition) {
     req.parsed.search = {
-      $and: [req.parsed.search, options],
+      $and: [req.parsed.search, search],
     };
   }
 }
