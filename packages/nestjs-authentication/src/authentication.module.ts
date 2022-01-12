@@ -3,6 +3,8 @@ import { ConfigModule, ConfigType } from '@nestjs/config';
 import {
   AsyncModuleConfig,
   createConfigurableDynamicRootModule,
+  deferExternal,
+  DeferExternalOptionsInterface,
 } from '@rockts-org/nestjs-common';
 import { authenticationDefaultConfig } from './config/authentication-default.config';
 import {
@@ -110,10 +112,10 @@ export class AuthenticationModule extends createConfigurableDynamicRootModule<
     });
   }
 
-  static deferred(timeout = 2000) {
-    return AuthenticationModule.externallyConfigured(
+  static deferred(options: DeferExternalOptionsInterface = {}) {
+    return deferExternal<AuthenticationModule, AuthenticationOptionsInterface>(
       AuthenticationModule,
-      timeout,
+      options,
     );
   }
 }

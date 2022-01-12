@@ -5,6 +5,8 @@ import { EmailOptionsInterface } from './interfaces/email-options.interface';
 import {
   AsyncModuleConfig,
   createConfigurableDynamicRootModule,
+  deferExternal,
+  DeferExternalOptionsInterface,
 } from '@rockts-org/nestjs-common';
 import {
   EMAIL_MODULE_MAILER_SERVICE_TOKEN,
@@ -53,7 +55,10 @@ export class EmailModule extends createConfigurableDynamicRootModule<
     });
   }
 
-  static deferred(timeout = 2000) {
-    return EmailModule.externallyConfigured(EmailModule, timeout);
+  static deferred(options: DeferExternalOptionsInterface = {}) {
+    return deferExternal<EmailModule, EmailOptionsInterface>(
+      EmailModule,
+      options,
+    );
   }
 }

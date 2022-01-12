@@ -3,12 +3,13 @@ import { ConfigModule, ConfigType } from '@nestjs/config';
 import {
   AsyncModuleConfig,
   createConfigurableDynamicRootModule,
+  deferExternal,
+  DeferExternalOptionsInterface,
 } from '@rockts-org/nestjs-common';
 import { IssueTokenService, JwtModule } from '@rockts-org/nestjs-jwt';
-import { UserLookupService, UserModule } from '@rockts-org/nestjs-user';
+import { UserModule, UserService } from '@rockts-org/nestjs-user';
 import { PasswordModule } from '@rockts-org/nestjs-password';
 import {
-  AUTH_LOCAL_USER_LOOKUP_SERVICE_TOKEN,
   AUTH_LOCAL_ISSUE_TOKEN_SERVICE_TOKEN,
   AUTH_LOCAL_MODULE_OPTIONS_TOKEN,
   AUTH_LOCAL_MODULE_SETTINGS_TOKEN,
@@ -18,13 +19,25 @@ import { authLocalDefaultConfig } from './config/auth-local-default.config';
 
 import { AuthLocalOptionsInterface } from './interfaces/auth-local-options.interface';
 import { LocalStrategy } from './local.strategy';
+import {
+  AuthenticationModule,
+  CredentialLookupInterface,
+  UserLookupServiceInterface,
+} from '@rockts-org/nestjs-authentication';
+import { UserLookupService } from './services/user-lookup.service';
+import { DefaultUserLookupService } from './services/default-user-lookup.service';
 
 /**
  * Auth local module
  */
 @Module({
-  providers: [AuthLocalController, LocalStrategy],
-  exports: [AuthLocalController],
+  providers: [
+    DefaultUserLookupService,
+    AuthLocalController,
+    LocalStrategy,
+    UserService,
+  ],
+  exports: [UserLookupService, DefaultUserLookupService, AuthLocalController],
   controllers: [AuthLocalController],
 })
 export class AuthLocalModule extends createConfigurableDynamicRootModule<
@@ -33,9 +46,22 @@ export class AuthLocalModule extends createConfigurableDynamicRootModule<
 >(AUTH_LOCAL_MODULE_OPTIONS_TOKEN, {
   imports: [
     ConfigModule.forFeature(authLocalDefaultConfig),
-    JwtModule.register(),
-    UserModule.register(),
-    PasswordModule.register(),
+    AuthenticationModule.deferred({
+      timeoutMessage:
+        'AuthLocalModule requires AuthenticationModule to be registered in your application.',
+    }),
+    JwtModule.deferred({
+      timeoutMessage:
+        'AuthLocalModule requires JwtModule to be registered in your application.',
+    }),
+    PasswordModule.deferred({
+      timeoutMessage:
+        'AuthLocalModule requires PasswordModule to be registered in your application.',
+    }),
+    UserModule.deferred({
+      timeoutMessage:
+        'AuthLocalModule requires UserModule to be registered in your application.',
+    }),
   ],
   providers: [
     {
@@ -47,11 +73,11 @@ export class AuthLocalModule extends createConfigurableDynamicRootModule<
       ) => options?.settings ?? defaultSettings,
     },
     {
-      provide: AUTH_LOCAL_USER_LOOKUP_SERVICE_TOKEN,
-      inject: [AUTH_LOCAL_MODULE_OPTIONS_TOKEN, UserLookupService],
+      provide: UserLookupService,
+      inject: [AUTH_LOCAL_MODULE_OPTIONS_TOKEN, DefaultUserLookupService],
       useFactory: async (
         options: AuthLocalOptionsInterface,
-        defaultService: UserLookupService,
+        defaultService: UserLookupServiceInterface<CredentialLookupInterface>,
       ) => options.userLookupService ?? defaultService,
     },
     {
@@ -63,10 +89,7 @@ export class AuthLocalModule extends createConfigurableDynamicRootModule<
       ) => options.issueTokenService ?? defaultService,
     },
   ],
-  exports: [
-    AUTH_LOCAL_USER_LOOKUP_SERVICE_TOKEN,
-    AUTH_LOCAL_ISSUE_TOKEN_SERVICE_TOKEN,
-  ],
+  exports: [AUTH_LOCAL_ISSUE_TOKEN_SERVICE_TOKEN],
 }) {
   static register(options: AuthLocalOptionsInterface = {}) {
     return AuthLocalModule.forRoot(AuthLocalModule, options);
@@ -79,7 +102,10 @@ export class AuthLocalModule extends createConfigurableDynamicRootModule<
     });
   }
 
-  static deferred(timeout = 2000) {
-    return JwtModule.externallyConfigured(JwtModule, timeout);
+  static deferred(options: DeferExternalOptionsInterface = {}) {
+    return deferExternal<AuthLocalModule, AuthLocalOptionsInterface>(
+      AuthLocalModule,
+      options,
+    );
   }
 }

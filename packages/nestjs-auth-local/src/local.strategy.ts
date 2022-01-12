@@ -1,17 +1,14 @@
 import { Strategy } from 'passport-local';
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import {
-  CredentialLookupInterface,
-  UserLookupServiceInterface,
-} from '@rockts-org/nestjs-authentication';
+import { CredentialLookupInterface } from '@rockts-org/nestjs-authentication';
 import { PasswordStorageService } from '@rockts-org/nestjs-password';
 import {
   AUTH_LOCAL_MODULE_SETTINGS_TOKEN,
   AUTH_LOCAL_STRATEGY_NAME,
-  AUTH_LOCAL_USER_LOOKUP_SERVICE_TOKEN,
 } from './auth-local.constants';
 import { PassportStrategyFactory } from '@rockts-org/nestjs-authentication';
 import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.interface';
+import { UserLookupService } from './services/user-lookup.service';
 
 /**
  * Define the Local strategy using passport.
@@ -27,15 +24,14 @@ export class LocalStrategy extends PassportStrategyFactory(
 ) {
   /**
    *
-   * @param userService The service used to get the user
+   * @param userLookupService The service used to get the user
    * @param settings The settings for the local strategy
    * @param passwordService The service used to hash and validate passwords
    */
   constructor(
-    @Inject(AUTH_LOCAL_USER_LOOKUP_SERVICE_TOKEN)
-    private userService: UserLookupServiceInterface<CredentialLookupInterface>,
     @Inject(AUTH_LOCAL_MODULE_SETTINGS_TOKEN)
     settings: AuthLocalSettingsInterface,
+    private userLookupService: UserLookupService,
     private passwordService: PasswordStorageService,
   ) {
     super({
@@ -56,7 +52,7 @@ export class LocalStrategy extends PassportStrategyFactory(
     username: string,
     pass: string,
   ): Promise<CredentialLookupInterface> {
-    const user = await this.userService.getUser(username);
+    const user = await this.userLookupService.getUser(username);
 
     if (!user) {
       throw new UnauthorizedException();

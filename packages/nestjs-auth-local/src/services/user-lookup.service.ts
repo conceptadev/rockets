@@ -4,7 +4,7 @@ import {
 } from '@rockts-org/nestjs-authentication';
 
 import { Injectable } from '@nestjs/common';
-import { UserService } from '../services/user.service';
+import { UserService } from '@rockts-org/nestjs-user';
 
 @Injectable()
 export class UserLookupService

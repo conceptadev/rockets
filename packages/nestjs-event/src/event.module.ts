@@ -4,6 +4,8 @@ import { ConfigModule } from '@nestjs/config';
 import {
   AsyncModuleConfig,
   createConfigurableDynamicRootModule,
+  deferExternal,
+  DeferExternalOptionsInterface,
 } from '@rockts-org/nestjs-common';
 import { EventOptionsInterface } from './interfaces/event-options.interface';
 import { EventDispatchService } from './services/event-dispatch.service';
@@ -57,7 +59,10 @@ export class EventModule extends createConfigurableDynamicRootModule<
     return module;
   }
 
-  static deferred(timeout = 2000) {
-    return EventModule.externallyConfigured(EventModule, timeout);
+  static deferred(options: DeferExternalOptionsInterface = {}) {
+    return deferExternal<EventModule, EventOptionsInterface>(
+      EventModule,
+      options,
+    );
   }
 }

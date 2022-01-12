@@ -3,6 +3,8 @@ import { ConfigModule, ConfigType } from '@nestjs/config';
 import {
   AsyncModuleConfig,
   createConfigurableDynamicRootModule,
+  deferExternal,
+  DeferExternalOptionsInterface,
 } from '@rockts-org/nestjs-common';
 import {
   createCustomRepositoryProvider,
@@ -16,7 +18,6 @@ import {
   UserOrmConfigInterface,
   UserOptionsInterface,
 } from './interfaces/user-options.interface';
-import { UserLookupService } from './services/user-lookup.service';
 import { UserService } from './services/user.service';
 import {
   USER_MODULE_OPTIONS_TOKEN,
@@ -29,8 +30,8 @@ import { UserServiceInterface } from './interfaces/user-service.interface';
 import { DefaultUserService } from './services/default-user.service';
 
 @Module({
-  providers: [DefaultUserService, UserLookupService, UserController],
-  exports: [UserService, DefaultUserService, UserLookupService, UserController],
+  providers: [DefaultUserService, UserController],
+  exports: [UserService, DefaultUserService, UserController],
   controllers: [UserController],
 })
 @Injectable()
@@ -62,6 +63,10 @@ export class UserModule extends createConfigurableDynamicRootModule<
       'userRepository',
     ),
   ],
+  exports: [
+    USER_MODULE_USER_ENTITY_REPO_TOKEN,
+    USER_MODULE_USER_CUSTOM_REPO_TOKEN,
+  ],
 }) {
   static register(options: UserOptionsInterface & UserOrmConfigInterface = {}) {
     this.configureOrm(options);
@@ -78,8 +83,8 @@ export class UserModule extends createConfigurableDynamicRootModule<
     });
   }
 
-  static deferred(timeout = 2000) {
-    return UserModule.externallyConfigured(UserModule, timeout);
+  static deferred(options: DeferExternalOptionsInterface = {}) {
+    return deferExternal<UserModule, UserOptionsInterface>(UserModule, options);
   }
 
   private static configureOrm(options: UserOrmConfigInterface) {

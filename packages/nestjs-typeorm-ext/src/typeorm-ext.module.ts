@@ -10,6 +10,8 @@ import {
 import {
   AsyncModuleConfig,
   createConfigurableDynamicRootModule,
+  deferExternal,
+  DeferExternalOptionsInterface,
 } from '@rockts-org/nestjs-common';
 import { TypeOrmExtService } from './typeorm-ext.service';
 import {
@@ -78,8 +80,11 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
     return module;
   }
 
-  static deferred(timeout = 2000) {
-    return TypeOrmExtModule.externallyConfigured(TypeOrmExtModule, timeout);
+  static deferred(options: DeferExternalOptionsInterface = {}) {
+    return deferExternal<TypeOrmExtModule, TypeOrmExtOptions>(
+      TypeOrmExtModule,
+      options,
+    );
   }
 
   static configure(

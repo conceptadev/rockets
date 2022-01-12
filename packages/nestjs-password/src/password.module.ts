@@ -3,6 +3,8 @@ import { ConfigModule, ConfigType } from '@nestjs/config';
 import {
   AsyncModuleConfig,
   createConfigurableDynamicRootModule,
+  deferExternal,
+  DeferExternalOptionsInterface,
 } from '@rockts-org/nestjs-common';
 import { passwordDefaultConfig } from './config/password-default.config';
 import { PasswordOptionsInterface } from './interfaces/password-options.interface';
@@ -54,7 +56,10 @@ export class PasswordModule extends createConfigurableDynamicRootModule<
     });
   }
 
-  static deferred(timeout = 2000) {
-    return PasswordModule.externallyConfigured(PasswordModule, timeout);
+  static deferred(options: DeferExternalOptionsInterface = {}) {
+    return deferExternal<PasswordModule, PasswordOptionsInterface>(
+      PasswordModule,
+      options,
+    );
   }
 }

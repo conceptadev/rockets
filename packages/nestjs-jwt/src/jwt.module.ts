@@ -4,6 +4,8 @@ import { JwtModule as NestJwtModule, JwtService } from '@nestjs/jwt';
 import {
   AsyncModuleConfig,
   createConfigurableDynamicRootModule,
+  deferExternal,
+  DeferExternalOptionsInterface,
 } from '@rockts-org/nestjs-common';
 import { defaultServiceConfig } from './config/default-service.config';
 import { JwtOptionsInterface } from './interfaces/jwt-options.interface';
@@ -53,7 +55,7 @@ export class JwtModule extends createConfigurableDynamicRootModule<
     });
   }
 
-  static deferred(timeout = 2000) {
-    return JwtModule.externallyConfigured(JwtModule, timeout);
+  static deferred(options: DeferExternalOptionsInterface = {}) {
+    return deferExternal<JwtModule, JwtOptionsInterface>(JwtModule, options);
   }
 }
