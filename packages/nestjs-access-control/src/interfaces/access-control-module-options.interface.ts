@@ -3,6 +3,6 @@ import { AccessControl } from 'accesscontrol';
 import { Type } from '@nestjs/common';
 
 export interface AccessControlModuleOptions {
-  service: Type<AccessControlService>;
-  rules: AccessControl;
+  service?: Type<AccessControlService>;
+  rules?: AccessControl;
 }

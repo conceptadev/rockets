@@ -1,52 +1,62 @@
+import { mock } from 'jest-mock-extended';
+import { MailerModule, MailerService } from '@nestjs-modules/mailer';
 import { Test } from '@nestjs/testing';
+import { EmailMailerServiceInterface } from './interfaces/email-mailer-service.interface';
 import { EmailModule } from './email.module';
 import { EmailService } from './email.service';
-import { EmailConfigOptions } from './interfaces/email-config-options.interface';
 
 describe('EmailModule', () => {
-  let emailConfig: EmailConfigOptions;
-
-  beforeEach(async () => {
-    emailConfig = {
-      nodeMailer: {
-        transport: {
-          host: 'smtp.foo.org',
-          port: 587,
-          auth: {
-            user: '',
-            pass: '',
-          },
-        },
+  const mailerOptions = {
+    transport: {
+      host: 'smtp.foo.org',
+      port: 587,
+      auth: {
+        user: '',
+        pass: '',
       },
-    };
-  });
+    },
+  };
 
-  describe('forRoot', () => {
-    it('should import the dynamic module', async () => {
+  const mailerService: EmailMailerServiceInterface =
+    mock<EmailMailerServiceInterface>();
+
+  describe('forRoot (using default mailer)', () => {
+    it('should import the dynamic module synchronously', async () => {
       const moduleRef = await Test.createTestingModule({
-        imports: [EmailModule.forRoot(emailConfig)],
+        imports: [EmailModule.register({})],
       }).compile();
 
       const emailService = moduleRef.get<EmailService>(EmailService);
-
       expect(emailService).toBeInstanceOf(EmailService);
     });
   });
 
-  describe('forRootAsync', () => {
+  describe('forRoot (using external mailer)', () => {
+    it('should import the dynamic module synchronously', async () => {
+      const moduleRef = await Test.createTestingModule({
+        imports: [EmailModule.register({ mailerService })],
+      }).compile();
+
+      const emailService = moduleRef.get<EmailService>(EmailService);
+      expect(emailService).toBeInstanceOf(EmailService);
+    });
+  });
+
+  describe('forRootAsync (using imported mailer)', () => {
     it('should import the dynamic module asynchronously', async () => {
       const moduleRef = await Test.createTestingModule({
         imports: [
-          EmailModule.forRootAsync({
-            useFactory: async () => {
-              return emailConfig;
+          EmailModule.registerAsync({
+            imports: [MailerModule.forRoot(mailerOptions)],
+            inject: [MailerService],
+            useFactory: async (mailerService: EmailMailerServiceInterface) => {
+              return { mailerService: mailerService };
             },
           }),
         ],
       }).compile();
 
       const emailService = moduleRef.get<EmailService>(EmailService);
-
       expect(emailService).toBeInstanceOf(EmailService);
     });
   });

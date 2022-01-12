@@ -5,11 +5,16 @@ module.exports = {
     tsconfigRootDir: __dirname,
     project: ['./packages/*/tsconfig.json'],
   },
-  plugins: ['@typescript-eslint/eslint-plugin'],
+  plugins: [
+    'import',
+    'jsdoc',
+    '@typescript-eslint/eslint-plugin'
+  ],
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
+    // 'plugin:jsdoc/recommended',
   ],
   root: true,
   env: {
@@ -19,6 +24,7 @@ module.exports = {
   ignorePatterns: ['.eslintrc.js', 'packages/*/dist'],
   rules: {
     'no-unused-vars': 'off',
+    'import/no-extraneous-dependencies': 'error',
     '@typescript-eslint/no-unused-vars': 'error',
     '@typescript-eslint/interface-name-prefix': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
@@ -26,5 +32,10 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'error',
     '@typescript-eslint/no-empty-interface': 'off',
     'no-console': ['error', { allow: ['warn', 'error'] }],
+  },
+  settings: {
+    jsdoc: {
+      mode: 'typescript',
+    },
   },
 };
