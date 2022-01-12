@@ -11,5 +11,22 @@
   },
   "include": [
     "src/**/*.ts"
+  ],
+  "references": [
+    {
+      "path": "../nestjs-authentication"
+    },
+    {
+      "path": "../nestjs-auth-local"
+    },
+    {
+      "path": "../nestjs-event"
+    },
+    {
+      "path": "../nestjs-typeorm-ext"
+    },
+    {
+      "path": "../nestjs-user"
+    }
   ]
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   EventEmitter2,
   OnOptions,
@@ -9,6 +9,7 @@ import { EventListenOnOptionsInterface } from './interfaces/event-listen-on-opti
 import { EventListenOnInterface } from '../services/interfaces/event-listen-on.interface';
 import { EventStaticInterface } from '../events/interfaces/event-static.interface';
 import { EventInterface } from '../events/interfaces/event.interface';
+import { EVENT_MODULE_EMITTER_SERVICE_TOKEN } from '../event-constants';
 
 /**
  * Event Listen Service
@@ -22,7 +23,10 @@ export class EventListenService {
    *
    * @param {EventEmitter2} eventEmitter Injected event emitter instance
    */
-  constructor(private eventEmitter: EventEmitter2) {}
+  constructor(
+    @Inject(EVENT_MODULE_EMITTER_SERVICE_TOKEN)
+    private eventEmitter: EventEmitter2,
+  ) {}
 
   /**
    * Adds a listener to the end of the listeners list for the specified event.

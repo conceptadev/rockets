@@ -1,19 +1,21 @@
 import {
+  Inject,
   Injectable,
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { MailerService } from '@nestjs-modules/mailer';
-import { EmailOptions } from './interfaces/email-options.interface';
+import { EmailSendOptionsInterface } from './interfaces/email-send-options.interface';
+import { EmailMailerServiceInterface } from './interfaces/email-mailer-service.interface';
 
 @Injectable()
 export class EmailService {
   constructor(
     private logger: Logger,
-    private readonly mailerService: MailerService,
+    @Inject('EMAIL_MODULE_MAILER_SERVICE_TOKEN')
+    private readonly mailerService: EmailMailerServiceInterface,
   ) {}
 
-  public async sendEmail(dto: EmailOptions): Promise<void> {
+  public async sendEmail(dto: EmailSendOptionsInterface): Promise<void> {
     try {
       await this.mailerService.sendMail(dto);
     } catch (e) {
