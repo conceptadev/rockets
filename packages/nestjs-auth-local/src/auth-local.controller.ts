@@ -19,8 +19,6 @@ import { AuthLocalOptionsInterface } from './interfaces/auth-local-options.inter
 @Controller('auth')
 export class AuthLocalController {
   constructor(
-    @Inject(AUTH_LOCAL_MODULE_OPTIONS_TOKEN)
-    private config: AuthLocalOptionsInterface,
     @Inject(AUTH_LOCAL_ISSUE_TOKEN_SERVICE_TOKEN)
     private issueTokenService: IssueTokenServiceInterface,
   ) {}

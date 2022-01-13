@@ -42,7 +42,7 @@ describe('loggerSentryTransport', () => {
     spyInit = jest.spyOn(Sentry, 'init');
     spyCaptureException = jest.spyOn(Sentry, 'captureException');
     spyCaptureMessage = jest.spyOn(Sentry, 'captureMessage');
-    spyLogLevelMap = jest.spyOn(config.transportSentryConfig, 'logLevelMap');
+    spyLogLevelMap = jest.spyOn(config.settings.transportSentryConfig, 'logLevelMap');
 
     errorMessage = 'Jest Error Message';
   });
@@ -113,7 +113,7 @@ describe('loggerSentryTransport', () => {
     const error = new Error();
 
     const spyLogLevelMap = jest
-      .spyOn(config.transportSentryConfig, 'logLevelMap')
+      .spyOn(config.settings.transportSentryConfig, 'logLevelMap')
       .mockReturnValue(null);
 
     loggerSentryTransport.log(errorMessage, logLevel, error);
@@ -148,7 +148,7 @@ describe('loggerSentryTransport', () => {
     const logLevel = 'log' as LogLevel;
 
     const spyLogLevelMap = jest
-      .spyOn(config.transportSentryConfig, 'logLevelMap')
+      .spyOn(config.settings.transportSentryConfig, 'logLevelMap')
       .mockReturnValue(null);
 
     loggerSentryTransport.log(errorMessage, logLevel);
