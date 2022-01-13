@@ -6,7 +6,7 @@ import {
   deferExternal,
   DeferExternalOptionsInterface,
 } from '@rockts-org/nestjs-common';
-import { IssueTokenService, JwtModule } from '@rockts-org/nestjs-jwt';
+import { JwtModule, JwtIssueService } from '@rockts-org/nestjs-jwt';
 import { UserModule, UserService } from '@rockts-org/nestjs-user';
 import { PasswordModule } from '@rockts-org/nestjs-password';
 import {
@@ -22,6 +22,7 @@ import { LocalStrategy } from './local.strategy';
 import {
   AuthenticationModule,
   CredentialLookupInterface,
+  IssueTokenServiceInterface,
   UserLookupServiceInterface,
 } from '@rockts-org/nestjs-authentication';
 import { UserLookupService } from './services/user-lookup.service';
@@ -37,7 +38,7 @@ import { DefaultUserLookupService } from './services/default-user-lookup.service
     LocalStrategy,
     UserService,
   ],
-  exports: [UserLookupService, DefaultUserLookupService, AuthLocalController],
+  exports: [UserLookupService, AuthLocalController],
   controllers: [AuthLocalController],
 })
 export class AuthLocalModule extends createConfigurableDynamicRootModule<
@@ -82,10 +83,10 @@ export class AuthLocalModule extends createConfigurableDynamicRootModule<
     },
     {
       provide: AUTH_LOCAL_ISSUE_TOKEN_SERVICE_TOKEN,
-      inject: [AUTH_LOCAL_MODULE_OPTIONS_TOKEN, IssueTokenService],
+      inject: [AUTH_LOCAL_MODULE_OPTIONS_TOKEN, JwtIssueService],
       useFactory: async (
         options: AuthLocalOptionsInterface,
-        defaultService: IssueTokenService,
+        defaultService: IssueTokenServiceInterface,
       ) => options.issueTokenService ?? defaultService,
     },
   ],

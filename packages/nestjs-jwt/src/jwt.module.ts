@@ -7,18 +7,21 @@ import {
   deferExternal,
   DeferExternalOptionsInterface,
 } from '@rockts-org/nestjs-common';
-import { defaultServiceConfig } from './config/default-service.config';
+import { defaultSignServiceConfig } from './config/default-sign-service.config';
 import { JwtOptionsInterface } from './interfaces/jwt-options.interface';
+import { JwtSignServiceInterface } from './interfaces/jwt-sign-service.interface';
 import {
   JWT_MODULE_JWT_SERVICE_TOKEN,
   JWT_MODULE_OPTIONS_TOKEN,
 } from './jwt.constants';
+import { DefaultJwtSignService } from './services/default-jwt-sign.service';
 
-import { IssueTokenService } from './services/issue-token.service';
+import { JwtIssueService } from './services/jwt-issue.service';
+import { JwtSignService } from './services/jwt-sign.service';
 
 @Module({
-  providers: [IssueTokenService],
-  exports: [IssueTokenService],
+  providers: [DefaultJwtSignService, JwtIssueService],
+  exports: [JwtSignService, JwtIssueService],
 })
 export class JwtModule extends createConfigurableDynamicRootModule<
   JwtModule,
@@ -26,20 +29,25 @@ export class JwtModule extends createConfigurableDynamicRootModule<
 >(JWT_MODULE_OPTIONS_TOKEN, {
   imports: [
     NestJwtModule.registerAsync({
-      imports: [ConfigModule.forFeature(defaultServiceConfig)],
-      inject: [defaultServiceConfig.KEY],
-      useFactory: async (config: ConfigType<typeof defaultServiceConfig>) =>
+      imports: [ConfigModule.forFeature(defaultSignServiceConfig)],
+      inject: [defaultSignServiceConfig.KEY],
+      useFactory: async (config: ConfigType<typeof defaultSignServiceConfig>) =>
         config,
     }),
   ],
   providers: [
     {
       provide: JWT_MODULE_JWT_SERVICE_TOKEN,
-      inject: [JWT_MODULE_OPTIONS_TOKEN, JwtService],
+      inject: [JwtService],
+      useFactory: async (service: JwtService) => service,
+    },
+    {
+      provide: JwtSignService,
+      inject: [JWT_MODULE_OPTIONS_TOKEN, DefaultJwtSignService],
       useFactory: async (
         options: JwtOptionsInterface,
-        defaultService: JwtService,
-      ) => options.jwtService ?? defaultService,
+        defaultService: JwtSignServiceInterface,
+      ) => options.jwtSignService ?? defaultService,
     },
   ],
   exports: [JWT_MODULE_JWT_SERVICE_TOKEN],

@@ -31,7 +31,7 @@ import { DefaultUserService } from './services/default-user.service';
 
 @Module({
   providers: [DefaultUserService, UserController],
-  exports: [UserService, DefaultUserService, UserController],
+  exports: [UserService, UserController],
   controllers: [UserController],
 })
 @Injectable()

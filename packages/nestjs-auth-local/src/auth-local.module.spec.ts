@@ -4,7 +4,7 @@ import { JwtModule } from '@rockts-org/nestjs-jwt';
 import { PasswordModule } from '@rockts-org/nestjs-password';
 import { User, UserModule } from '@rockts-org/nestjs-user';
 import { mock } from 'jest-mock-extended';
-import { AuthLocalController } from '.';
+import { AuthLocalController } from './auth-local.controller';
 import { AuthLocalModule } from './auth-local.module';
 
 describe('AuthLocalModuleTest', () => {
