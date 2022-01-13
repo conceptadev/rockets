@@ -1,7 +1,7 @@
-import { AccessTokenInterface } from './access-token.interface';
+import { AuthenticationResponseInterface } from '../interfaces/authentication-response.interface';
 
-export interface IssueTokenServiceInterface<
-  T extends Record<string, unknown> = AccessTokenInterface,
-> {
-  accessToken(username: string): Promise<T>;
+export interface IssueTokenServiceInterface {
+  accessToken(id: string): Promise<string>;
+  refreshToken(id: string): Promise<string>;
+  responsePayload(id: string): Promise<AuthenticationResponseInterface>;
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { JwtSignService } from '@rockts-org/nestjs-jwt';
-import { AccessTokenInterface } from '../interfaces/access-token.interface';
+import { AuthenticationResponseInterface } from '../interfaces/authentication-response.interface';
 import { IssueTokenServiceInterface } from '../interfaces/issue-token-service.interface';
 
 @Injectable()
@@ -10,19 +10,34 @@ export class IssueTokenService implements IssueTokenServiceInterface {
   /**
    * Generate access token for a payload.
    *
-   * @param username user name to generate payload
-   * @returns
+   * @param id user id or name for `sub` claim
    */
-  async accessToken(username: string): Promise<AccessTokenInterface> {
-    const payload = { sub: username };
+  async accessToken(id: string): Promise<string> {
+    const payload = { sub: id };
 
-    const accessToken = await this.jwtSignService.signAsync(payload);
+    return this.jwtSignService.signAsync(payload);
+  }
 
-    return new Promise<AccessTokenInterface>((resolve) => {
-      resolve({
-        accessToken: accessToken,
-        expireIn: new Date(),
-      });
-    });
+  /**
+   * Generate refresh token for a payload.
+   *
+   * @param username user id or name for `sub` claim
+   */
+  async refreshToken(id: string): Promise<string> {
+    const payload = { sub: id };
+
+    return this.jwtSignService.signAsync(payload);
+  }
+
+  /**
+   * Generate the response payload.
+   *
+   * @param username user id or name for `sub` claim
+   */
+  async responsePayload(id: string): Promise<AuthenticationResponseInterface> {
+    return {
+      accessToken: await this.accessToken(id),
+      refreshToken: await this.refreshToken(id),
+    };
   }
 }

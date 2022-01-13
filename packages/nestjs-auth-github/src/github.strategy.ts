@@ -37,10 +37,8 @@ export class GithubStrategy extends PassportStrategy(
     }
 
     return {
-      id: user.id,
-      username: user.username,
       accessToken,
       refreshToken,
-    } as AuthenticationResponseInterface;
+    };
   }
 }
