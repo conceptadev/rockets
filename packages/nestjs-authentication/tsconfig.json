@@ -17,6 +17,9 @@
       "path": "../nestjs-common"
     },
     {
+      "path": "../nestjs-jwt"
+    },
+    {
       "path": "../nestjs-password"
     }
   ]

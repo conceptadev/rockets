@@ -36,7 +36,7 @@ export class AuthLocalController {
     @AuthUser() user: CredentialLookupInterface,
   ): Promise<AuthenticationResponseInterface> {
     // issue a access token to sign in
-    const token = this.issueTokenService.issueAccessToken(user.username);
+    const token = this.issueTokenService.accessToken(user.username);
 
     return {
       ...user,

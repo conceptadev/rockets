@@ -15,3 +15,5 @@ export * from './interfaces/refresh-token-service.interface';
 export * from './factories/passport-strategy.factory';
 
 export * from './guards/auth.guard';
+
+export { IssueTokenService } from './services/issue-token.service';
