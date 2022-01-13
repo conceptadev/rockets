@@ -3,14 +3,14 @@ import {
   AccessTokenInterface,
   IssueTokenServiceInterface,
 } from '@rockts-org/nestjs-authentication';
-import { JwtServiceInterface } from '../interfaces/jwt-service.interface';
-import { JWT_MODULE_JWT_SERVICE_TOKEN } from '../jwt.constants';
+import { JwtSignServiceInterface } from '../interfaces/jwt-sign-service.interface';
+import { JwtSignService } from './jwt-sign.service';
 
 @Injectable()
-export class IssueTokenService implements IssueTokenServiceInterface {
+export class JwtIssueService implements IssueTokenServiceInterface {
   constructor(
-    @Inject(JWT_MODULE_JWT_SERVICE_TOKEN)
-    private jwtService: JwtServiceInterface,
+    @Inject(JwtSignService)
+    private jwtSignService: JwtSignServiceInterface,
   ) {}
 
   /**
@@ -21,7 +21,7 @@ export class IssueTokenService implements IssueTokenServiceInterface {
   async issueAccessToken(username: string): Promise<AccessTokenInterface> {
     const payload = { sub: username };
 
-    const accessToken = await this.jwtService.signAsync(payload);
+    const accessToken = await this.jwtSignService.signAsync(payload);
 
     return new Promise<AccessTokenInterface>((resolve) => {
       resolve({
