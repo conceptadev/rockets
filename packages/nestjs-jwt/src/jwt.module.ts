@@ -38,8 +38,7 @@ export class JwtModule extends createConfigurableDynamicRootModule<
   providers: [
     {
       provide: JWT_MODULE_JWT_SERVICE_TOKEN,
-      inject: [JwtService],
-      useFactory: async (service: JwtService) => service,
+      useExisting: JwtService,
     },
     {
       provide: JwtSignService,
