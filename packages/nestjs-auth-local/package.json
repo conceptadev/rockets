@@ -15,7 +15,6 @@
     "@nestjs/platform-fastify": "^8.0.6",
     "@rockts-org/nestjs-authentication": "^4.0.0-alpha.0",
     "@rockts-org/nestjs-common": "^4.0.0-alpha.0",
-    "@rockts-org/nestjs-jwt": "^4.0.0-alpha.0",
     "@rockts-org/nestjs-password": "^4.0.0-alpha.0",
     "@rockts-org/nestjs-user": "^4.0.0-alpha.0",
     "@sentry/node": "^6.11.0",
@@ -26,6 +25,7 @@
   },
   "devDependencies": {
     "@nestjs/testing": "^8.0.2",
+    "@rockts-org/nestjs-jwt": "^4.0.0-alpha.0",
     "@sentry/types": "^6.13.3",
     "jest-mock-extended": "^2.0.4"
   },

@@ -7,6 +7,7 @@ import { INestApplication } from '@nestjs/common';
 import { TestUserRepository } from './user/user.repository';
 import { mock } from 'jest-mock-extended';
 import { User } from '@rockts-org/nestjs-user';
+import { AuthenticationResponseInterface } from '@rockts-org/nestjs-authentication';
 
 describe('AppController (e2e)', () => {
   describe('Authentication', () => {
@@ -28,7 +29,7 @@ describe('AppController (e2e)', () => {
 
     afterEach(async () => {
       jest.clearAllMocks();
-      //await app.close();
+      await app.close();
     });
 
     it('POST /sign', async () => {
@@ -37,15 +38,14 @@ describe('AppController (e2e)', () => {
         password: 'AS12378',
       };
 
-      await supertest(app.getHttpServer())
-        .post('/auth/login')
-        .send(sign)
-        .expect(201)
-        .expect((response: { username: string }) => {
-          return response.username == sign.username;
-        });
+      const response: { body: AuthenticationResponseInterface } =
+        await supertest(app.getHttpServer())
+          .post('/auth/login')
+          .send(sign)
+          .expect(201);
 
-      return;
+      expect(response.body.accessToken).toBeDefined();
+      expect(response.body.refreshToken).toBeDefined();
     });
 
     it('POST /sign wrong', async () => {

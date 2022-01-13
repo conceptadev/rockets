@@ -1,9 +1,14 @@
-import { AccessTokenInterface } from './access-token.interface';
-import { CredentialLookupInterface } from './credential-lookup.interface';
-
 /**
- * Credential Lookup Interface
+ * Authentication response interface
  */
-export interface AuthenticationResponseInterface
-  extends Partial<Pick<CredentialLookupInterface, 'id' | 'username'>>,
-    Partial<Pick<AccessTokenInterface, 'accessToken' | 'expireIn'>> {}
+export interface AuthenticationResponseInterface {
+  /**
+   * The access token.
+   */
+  accessToken: string;
+
+  /**
+   * The refresh token.
+   */
+  refreshToken: string;
+}

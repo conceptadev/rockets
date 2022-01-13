@@ -1,5 +1,7 @@
-import { AccessTokenInterface } from './access-token.interface';
+import { AuthenticationResponseInterface } from '../interfaces/authentication-response.interface';
 
 export interface IssueTokenServiceInterface {
-  issueAccessToken(username: string): Promise<AccessTokenInterface>;
+  accessToken(id: string): Promise<string>;
+  refreshToken(id: string): Promise<string>;
+  responsePayload(id: string): Promise<AuthenticationResponseInterface>;
 }
