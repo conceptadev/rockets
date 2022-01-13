@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import { JwtModule as NestJwtModule, JwtService } from '@nestjs/jwt';
+import { IssueTokenServiceInterface } from '@rockts-org/nestjs-authentication';
 import {
   AsyncModuleConfig,
   createConfigurableDynamicRootModule,
@@ -14,13 +15,14 @@ import {
   JWT_MODULE_JWT_SERVICE_TOKEN,
   JWT_MODULE_OPTIONS_TOKEN,
 } from './jwt.constants';
+import { DefaultJwtIssueService } from './services/default-jwt-issue.service';
 import { DefaultJwtSignService } from './services/default-jwt-sign.service';
 
 import { JwtIssueService } from './services/jwt-issue.service';
 import { JwtSignService } from './services/jwt-sign.service';
 
 @Module({
-  providers: [DefaultJwtSignService, JwtIssueService],
+  providers: [DefaultJwtSignService, DefaultJwtIssueService],
   exports: [JwtSignService, JwtIssueService],
 })
 export class JwtModule extends createConfigurableDynamicRootModule<
@@ -47,6 +49,14 @@ export class JwtModule extends createConfigurableDynamicRootModule<
         options: JwtOptionsInterface,
         defaultService: JwtSignServiceInterface,
       ) => options.jwtSignService ?? defaultService,
+    },
+    {
+      provide: JwtIssueService,
+      inject: [JWT_MODULE_OPTIONS_TOKEN, DefaultJwtIssueService],
+      useFactory: async (
+        options: JwtOptionsInterface,
+        defaultService: IssueTokenServiceInterface,
+      ) => options.jwtIssueService ?? defaultService,
     },
   ],
   exports: [JWT_MODULE_JWT_SERVICE_TOKEN],
