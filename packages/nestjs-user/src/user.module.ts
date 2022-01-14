@@ -14,10 +14,8 @@ import {
 import { UserRepository } from './user.repository';
 import { userDefaultConfig } from './config/user-default.config';
 import { User } from './entities/user.entity';
-import {
-  UserOrmConfigInterface,
-  UserOptionsInterface,
-} from './interfaces/user-options.interface';
+import { UserOptionsInterface } from './interfaces/user-options.interface';
+import { UserOrmOptionsInterface } from './interfaces/user-orm-options.interface';
 import { UserService } from './services/user.service';
 import {
   USER_MODULE_OPTIONS_TOKEN,
@@ -68,13 +66,15 @@ export class UserModule extends createConfigurableDynamicRootModule<
     USER_MODULE_USER_CUSTOM_REPO_TOKEN,
   ],
 }) {
-  static register(options: UserOptionsInterface & UserOrmConfigInterface = {}) {
+  static register(
+    options: UserOptionsInterface & UserOrmOptionsInterface = {},
+  ) {
     this.configureOrm(options);
     return UserModule.forRoot(UserModule, options);
   }
 
   static registerAsync(
-    options: AsyncModuleConfig<UserOptionsInterface> & UserOrmConfigInterface,
+    options: AsyncModuleConfig<UserOptionsInterface> & UserOrmOptionsInterface,
   ) {
     this.configureOrm(options);
     return UserModule.forRootAsync(UserModule, {
@@ -87,7 +87,7 @@ export class UserModule extends createConfigurableDynamicRootModule<
     return deferExternal<UserModule, UserOptionsInterface>(UserModule, options);
   }
 
-  private static configureOrm(options: UserOrmConfigInterface) {
+  private static configureOrm(options: UserOrmOptionsInterface) {
     TypeOrmExtModule.configure(options.orm, {
       entities: {
         user: { useClass: User },
