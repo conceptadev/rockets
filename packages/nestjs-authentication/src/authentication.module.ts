@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
+import { JwtModule } from '@rockts-org/nestjs-jwt';
 import {
   AsyncModuleConfig,
   createConfigurableDynamicRootModule,
@@ -12,6 +13,8 @@ import {
   AUTHENTICATION_MODULE_SETTINGS_TOKEN,
 } from './authentication.constants';
 import { AuthenticationOptionsInterface } from './interfaces/authentication-options.interface';
+import { IssueTokenService } from './services/issue-token.service';
+import { DefaultIssueTokenService } from './services/default-issue-token.service';
 
 /**
  * Authentication Module to handle authentication and password encryption.
@@ -79,12 +82,21 @@ import { AuthenticationOptionsInterface } from './interfaces/authentication-opti
  *   ],
  * ```
  */
-@Module({})
+@Module({
+  providers: [DefaultIssueTokenService, IssueTokenService],
+  exports: [IssueTokenService],
+})
 export class AuthenticationModule extends createConfigurableDynamicRootModule<
   AuthenticationModule,
   AuthenticationOptionsInterface
 >(AUTHENTICATION_MODULE_OPTIONS_TOKEN, {
-  imports: [ConfigModule.forFeature(authenticationDefaultConfig)],
+  imports: [
+    ConfigModule.forFeature(authenticationDefaultConfig),
+    JwtModule.deferred({
+      timeoutMessage:
+        'AuthenticationModule requires JwtModule to be registered in your application.',
+    }),
+  ],
   providers: [
     {
       provide: AUTHENTICATION_MODULE_SETTINGS_TOKEN,
@@ -96,6 +108,14 @@ export class AuthenticationModule extends createConfigurableDynamicRootModule<
         options: AuthenticationOptionsInterface,
         defaultSettings: ConfigType<typeof authenticationDefaultConfig>,
       ) => options.settings ?? defaultSettings,
+    },
+    {
+      provide: IssueTokenService,
+      inject: [AUTHENTICATION_MODULE_OPTIONS_TOKEN, DefaultIssueTokenService],
+      useFactory: async (
+        options: AuthenticationOptionsInterface,
+        defaultService: DefaultIssueTokenService,
+      ) => options.issueTokenService ?? defaultService,
     },
   ],
 }) {

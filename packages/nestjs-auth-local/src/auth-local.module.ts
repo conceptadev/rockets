@@ -6,7 +6,6 @@ import {
   deferExternal,
   DeferExternalOptionsInterface,
 } from '@rockts-org/nestjs-common';
-import { JwtModule, JwtIssueService } from '@rockts-org/nestjs-jwt';
 import { UserModule, UserService } from '@rockts-org/nestjs-user';
 import { PasswordModule } from '@rockts-org/nestjs-password';
 import {
@@ -22,6 +21,7 @@ import { LocalStrategy } from './local.strategy';
 import {
   AuthenticationModule,
   CredentialLookupInterface,
+  IssueTokenService,
   IssueTokenServiceInterface,
   UserLookupServiceInterface,
 } from '@rockts-org/nestjs-authentication';
@@ -51,10 +51,6 @@ export class AuthLocalModule extends createConfigurableDynamicRootModule<
       timeoutMessage:
         'AuthLocalModule requires AuthenticationModule to be registered in your application.',
     }),
-    JwtModule.deferred({
-      timeoutMessage:
-        'AuthLocalModule requires JwtModule to be registered in your application.',
-    }),
     PasswordModule.deferred({
       timeoutMessage:
         'AuthLocalModule requires PasswordModule to be registered in your application.',
@@ -83,7 +79,7 @@ export class AuthLocalModule extends createConfigurableDynamicRootModule<
     },
     {
       provide: AUTH_LOCAL_ISSUE_TOKEN_SERVICE_TOKEN,
-      inject: [AUTH_LOCAL_MODULE_OPTIONS_TOKEN, JwtIssueService],
+      inject: [AUTH_LOCAL_MODULE_OPTIONS_TOKEN, IssueTokenService],
       useFactory: async (
         options: AuthLocalOptionsInterface,
         defaultService: IssueTokenServiceInterface,

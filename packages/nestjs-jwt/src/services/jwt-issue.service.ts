@@ -1,33 +1,20 @@
-import { Inject, Injectable } from '@nestjs/common';
-import {
-  AccessTokenInterface,
-  IssueTokenServiceInterface,
-} from '@rockts-org/nestjs-authentication';
-import { JwtSignServiceInterface } from '../interfaces/jwt-sign-service.interface';
+import { Injectable } from '@nestjs/common';
+import { JwtIssueServiceInterface } from '../interfaces/jwt-issue-service.interface';
 import { JwtSignService } from './jwt-sign.service';
 
 @Injectable()
-export class JwtIssueService implements IssueTokenServiceInterface {
-  constructor(
-    @Inject(JwtSignService)
-    private jwtSignService: JwtSignServiceInterface,
-  ) {}
+export class JwtIssueService implements JwtIssueServiceInterface {
+  constructor(private jwtSignService: JwtSignService) {}
 
-  /**
-   * Generate access token for a payload
-   * @param username user name to generate payload
-   * @returns
-   */
-  async issueAccessToken(username: string): Promise<AccessTokenInterface> {
-    const payload = { sub: username };
+  async accessToken<T extends JwtSignService['signAsync']>(
+    payload: T,
+  ): Promise<string> {
+    return this.jwtSignService.signAsync(payload);
+  }
 
-    const accessToken = await this.jwtSignService.signAsync(payload);
-
-    return new Promise<AccessTokenInterface>((resolve) => {
-      resolve({
-        accessToken: accessToken,
-        expireIn: new Date(),
-      });
-    });
+  async refreshToken<T extends JwtSignService['signAsync']>(
+    payload: T,
+  ): Promise<string> {
+    return this.jwtSignService.signAsync(payload);
   }
 }
