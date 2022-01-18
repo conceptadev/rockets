@@ -3,8 +3,9 @@ import { mock } from 'jest-mock-extended';
 import { AppModule } from './app.module';
 import { IssueTokenService } from '@rockts-org/nestjs-authentication';
 import {
-  UserLookupService,
   AuthLocalController,
+  UserLookupService,
+  // AuthLocalController,
 } from '@rockts-org/nestjs-auth-local';
 import { User, UserService } from '@rockts-org/nestjs-user';
 import { TestUserRepository } from './user/user.repository';
@@ -23,8 +24,7 @@ describe('AppModule', () => {
     const userService = module.get<UserService>(UserService);
     const issueTokenService = module.get<IssueTokenService>(IssueTokenService);
     const userLookupService = module.get<UserLookupService>(UserLookupService);
-    const authLocalcontroller =
-      module.get<AuthLocalController>(AuthLocalController);
+    const authLocalcontroller = module.get(AuthLocalController);
 
     expect(module).toBeInstanceOf(TestingModule);
     expect(userService).toBeInstanceOf(UserService);

@@ -23,7 +23,7 @@
     "@rockts-org/nestjs-password": "^4.0.0-alpha.0",
     "@rockts-org/nestjs-typeorm-ext": "^4.0.0-alpha.0",
     "@rockts-org/nestjs-user": "^4.0.0-alpha.0",
-    "rxjs": "^7.5.1"
+    "rxjs": "^7.5.2"
   },
   "devDependencies": {
     "@nestjs/testing": "^8.0.8",
