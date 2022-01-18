@@ -32,7 +32,7 @@ describe('AppController (e2e)', () => {
       await app.close();
     });
 
-    it('POST /sign', async () => {
+    it('POST /auth/local', async () => {
       const sign = {
         username: 'first_user',
         password: 'AS12378',
@@ -40,7 +40,7 @@ describe('AppController (e2e)', () => {
 
       const response: { body: AuthenticationResponseInterface } =
         await supertest(app.getHttpServer())
-          .post('/auth/login')
+          .post('/auth/local')
           .send(sign)
           .expect(201);
 
@@ -48,14 +48,14 @@ describe('AppController (e2e)', () => {
       expect(response.body.refreshToken).toBeDefined();
     });
 
-    it('POST /sign wrong', async () => {
+    it('POST /auth/local no-auth', async () => {
       const sign = {
         username: 'first_user_2',
         password: 'AS12378',
       };
 
       await supertest(app.getHttpServer())
-        .post('/auth/login')
+        .post('/auth/local')
         .send(sign)
         .expect(401);
 

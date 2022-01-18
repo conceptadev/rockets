@@ -28,8 +28,7 @@ describe('AuthLocalModuleTest', () => {
       .useValue({})
       .compile();
 
-    const controller = module.get<AuthLocalController>(AuthLocalController);
-
+    const controller = module.get(AuthLocalController);
     expect(controller).toBeDefined();
   });
 });

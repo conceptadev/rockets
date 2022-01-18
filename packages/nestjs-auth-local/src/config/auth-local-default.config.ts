@@ -1,6 +1,7 @@
 import { registerAs } from '@nestjs/config';
 import { AUTH_LOCAL_MODULE_DEFAULT_SETTINGS_TOKEN } from '../auth-local.constants';
 import { AuthLocalSettingsInterface } from '../interfaces/auth-local-settings.interface';
+import { AuthLocalLoginDto } from '../dto/auth-local-login.dto';
 
 /**
  * Default configuration for auth local.
@@ -8,6 +9,10 @@ import { AuthLocalSettingsInterface } from '../interfaces/auth-local-settings.in
 export const authLocalDefaultConfig = registerAs(
   AUTH_LOCAL_MODULE_DEFAULT_SETTINGS_TOKEN,
   (): AuthLocalSettingsInterface => ({
+    /**
+     * The login dto
+     */
+    loginDto: AuthLocalLoginDto,
     /**
      * The field name to use for the username.
      */

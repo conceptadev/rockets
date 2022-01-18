@@ -10,9 +10,9 @@ import { AUTH_LOCAL_ISSUE_TOKEN_SERVICE_TOKEN } from './auth-local.constants';
 import { AUTH_LOCAL_STRATEGY_NAME } from './auth-local.constants';
 
 /**
- * Sign controller
+ * Auth Local controller
  */
-@Controller('auth')
+@Controller('auth/local')
 export class AuthLocalController {
   constructor(
     @Inject(AUTH_LOCAL_ISSUE_TOKEN_SERVICE_TOKEN)
@@ -20,13 +20,11 @@ export class AuthLocalController {
   ) {}
 
   /**
-   * Authenticate using guard
-   * @param dto Body
-   * @returns
+   * Login
    */
   @UseGuards(AuthGuard(AUTH_LOCAL_STRATEGY_NAME))
-  @Post('login')
-  async authenticateWithGuard(
+  @Post()
+  async login(
     @AuthUser() user: CredentialLookupInterface,
   ): Promise<AuthenticationResponseInterface> {
     return this.issueTokenService.responsePayload(user.id);

@@ -1,8 +1,9 @@
-import { Module } from '@nestjs/common';
+import { DynamicModule, Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import {
   AsyncModuleConfig,
   createConfigurableDynamicRootModule,
+  decorateController,
   deferExternal,
   DeferExternalOptionsInterface,
 } from '@rockts-org/nestjs-common';
@@ -13,7 +14,6 @@ import {
   AUTH_LOCAL_MODULE_OPTIONS_TOKEN,
   AUTH_LOCAL_MODULE_SETTINGS_TOKEN,
 } from './auth-local.constants';
-import { AuthLocalController } from './auth-local.controller';
 import { authLocalDefaultConfig } from './config/auth-local-default.config';
 
 import { AuthLocalOptionsInterface } from './interfaces/auth-local-options.interface';
@@ -27,18 +27,16 @@ import {
 } from '@rockts-org/nestjs-authentication';
 import { UserLookupService } from './services/user-lookup.service';
 import { DefaultUserLookupService } from './services/default-user-lookup.service';
+import { AuthLocalCtrlOptionsInterface } from './interfaces/auth-local-ctrl-options.interface';
+import { AuthLocalController } from './auth-local.controller';
+import { AuthLocalLoginDto } from './dto/auth-local-login.dto';
 
 /**
  * Auth local module
  */
 @Module({
-  providers: [
-    DefaultUserLookupService,
-    AuthLocalController,
-    LocalStrategy,
-    UserService,
-  ],
-  exports: [UserLookupService, AuthLocalController],
+  providers: [DefaultUserLookupService, LocalStrategy, UserService],
+  exports: [UserLookupService],
   controllers: [AuthLocalController],
 })
 export class AuthLocalModule extends createConfigurableDynamicRootModule<
@@ -88,15 +86,28 @@ export class AuthLocalModule extends createConfigurableDynamicRootModule<
   ],
   exports: [AUTH_LOCAL_ISSUE_TOKEN_SERVICE_TOKEN],
 }) {
-  static register(options: AuthLocalOptionsInterface = {}) {
-    return AuthLocalModule.forRoot(AuthLocalModule, options);
+  static register(
+    options: AuthLocalOptionsInterface & AuthLocalCtrlOptionsInterface = {},
+  ) {
+    const module = AuthLocalModule.forRoot(AuthLocalModule, options);
+
+    this.negotiateController(module, options.controller);
+
+    return module;
   }
 
-  static registerAsync(options: AsyncModuleConfig<AuthLocalOptionsInterface>) {
-    return AuthLocalModule.forRootAsync(AuthLocalModule, {
+  static registerAsync(
+    options: AsyncModuleConfig<AuthLocalOptionsInterface> &
+      AuthLocalCtrlOptionsInterface,
+  ) {
+    const module = AuthLocalModule.forRootAsync(AuthLocalModule, {
       useFactory: () => ({}),
       ...options,
     });
+
+    this.negotiateController(module, options.controller);
+
+    return module;
   }
 
   static deferred(options: DeferExternalOptionsInterface = {}) {
@@ -104,5 +115,24 @@ export class AuthLocalModule extends createConfigurableDynamicRootModule<
       AuthLocalModule,
       options,
     );
+  }
+
+  private static negotiateController(
+    module: DynamicModule,
+    options: AuthLocalCtrlOptionsInterface['controller'],
+  ) {
+    if (options === false) {
+      module.controllers = [];
+    } else if (options) {
+      decorateController(AuthLocalController, options, {
+        route: { path: 'auth/local' },
+        request: {
+          login: {
+            route: '',
+            dto: AuthLocalLoginDto,
+          },
+        },
+      });
+    }
   }
 }
