@@ -17,7 +17,7 @@ import {
 import { authLocalDefaultConfig } from './config/auth-local-default.config';
 
 import { AuthLocalOptionsInterface } from './interfaces/auth-local-options.interface';
-import { LocalStrategy } from './local.strategy';
+import { AuthLocalStrategy } from './auth-local.strategy';
 import {
   AuthenticationModule,
   CredentialLookupInterface,
@@ -35,7 +35,7 @@ import { AuthLocalLoginDto } from './dto/auth-local-login.dto';
  * Auth local module
  */
 @Module({
-  providers: [DefaultUserLookupService, LocalStrategy, UserService],
+  providers: [DefaultUserLookupService, AuthLocalStrategy, UserService],
   exports: [UserLookupService],
   controllers: [AuthLocalController],
 })

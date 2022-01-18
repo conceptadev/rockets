@@ -24,7 +24,7 @@ import { validateOrReject } from 'class-validator';
  * after register LocalStrategy in the module, use GenericAuthGuard(LOCAL_STRATEGY_NAME) in the controller endpoint to authenticate the user.
  */
 @Injectable()
-export class LocalStrategy extends PassportStrategyFactory(
+export class AuthLocalStrategy extends PassportStrategyFactory(
   Strategy,
   AUTH_LOCAL_STRATEGY_NAME,
 ) {
