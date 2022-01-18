@@ -18,6 +18,9 @@
   "files": [],
   "references": [
     {
+      "path": "packages/nestjs-common"
+    },
+    {
       "path": "packages/nestjs-access-control"
     },
     {
@@ -27,10 +30,31 @@
       "path": "packages/nestjs-event"
     },
     {
+      "path": "packages/nestjs-jwt"
+    },
+    {
       "path": "packages/nestjs-logger"
     },
     {
+      "path": "packages/nestjs-authentication"
+    },
+    {
+      "path": "packages/nestjs-password"
+    },
+    {
+      "path": "packages/nestjs-auth-local"
+    },
+    {
+      "path": "packages/nestjs-auth-github"
+    },
+    {
       "path": "packages/nestjs-samples"
-    }
+    },
+    {
+      "path": "packages/nestjs-typeorm-ext"
+    },
+    {
+      "path": "packages/nestjs-user"
+    },
   ]
 }

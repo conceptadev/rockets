@@ -1,16 +1,13 @@
 import { Module } from '@nestjs/common';
 import { OrderController } from './order.controller';
 import { OrderService } from './order.service';
-import {
-  EventConfigOptionsInterface,
-  EventModule,
-} from '@rockts-org/nestjs-event';
+import { EventModule, EventOptionsInterface } from '@rockts-org/nestjs-event';
 
-const eventConfig: EventConfigOptionsInterface = {
+const eventConfig: EventOptionsInterface = {
   emitter: {},
 };
 @Module({
-  imports: [EventModule.forRoot(eventConfig)],
+  imports: [EventModule.register(eventConfig)],
   controllers: [OrderController],
   providers: [OrderController, OrderService],
   exports: [OrderController, OrderService],

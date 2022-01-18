@@ -59,7 +59,7 @@ export abstract class EventListener<E extends EventInterface = EventInterface>
   /**
    * Listen to an event.
    */
-  abstract listen(event: E): E['expectsReturnOf'];
+  abstract listen(event?: E): E['expectsReturnOf'];
 
   /**
    * Called after successful subscription.

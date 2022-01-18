@@ -1,27 +1,35 @@
-import { EVENT_MODULE_OPTIONS_TOKEN } from '../event-constants';
+import {
+  EVENT_MODULE_EMITTER_SERVICE_TOKEN,
+  EVENT_MODULE_OPTIONS_TOKEN,
+} from '../event-constants';
 import { EventAsync } from '../events/event-async';
-import { EventConfigOptionsInterface } from '../interfaces/event-config-options.interface';
+import { EventOptionsInterface } from '../interfaces/event-options.interface';
 import { EventDispatchService } from './event-dispatch.service';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EventEmitter2 } from 'eventemitter2';
 import { Test } from '@nestjs/testing';
 import { EventSync } from '../events/event-sync';
 import { EventDispatchException } from '../exceptions/event-dispatch.exception';
 
 describe('EventDispatchService', () => {
-  const config: EventConfigOptionsInterface = {};
+  const config: EventOptionsInterface = {};
   let eventEmitter: EventEmitter2;
   let eventDispatchService: EventDispatchService;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
-        EventEmitter2,
+        {
+          provide: EVENT_MODULE_EMITTER_SERVICE_TOKEN,
+          useClass: EventEmitter2,
+        },
         EventDispatchService,
         { provide: EVENT_MODULE_OPTIONS_TOKEN, useValue: config },
       ],
     }).compile();
 
-    eventEmitter = moduleRef.get<EventEmitter2>(EventEmitter2);
+    eventEmitter = moduleRef.get<EventEmitter2>(
+      EVENT_MODULE_EMITTER_SERVICE_TOKEN,
+    );
     eventDispatchService =
       moduleRef.get<EventDispatchService>(EventDispatchService);
   });

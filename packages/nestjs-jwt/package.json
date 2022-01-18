@@ -1,0 +1,20 @@
+{
+  "name": "@rockts-org/nestjs-jwt",
+  "version": "4.0.0-alpha.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@nestjs/common": "^8.0.8",
+    "@nestjs/config": "^1.1.6",
+    "@nestjs/jwt": "^8.0.0",
+    "@rockts-org/nestjs-common": "^4.0.0-alpha.0"
+  },
+  "devDependencies": {
+    "@nestjs/testing": "^8.0.8",
+    "jest-mock-extended": "^2.0.4"
+  }
+}
