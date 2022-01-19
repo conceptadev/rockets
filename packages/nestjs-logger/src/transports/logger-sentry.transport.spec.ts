@@ -4,6 +4,7 @@ import * as Sentry from '@sentry/node';
 import { Severity as SentryLogSeverity } from '@sentry/types';
 import { LOGGER_MODULE_OPTIONS_TOKEN } from '../config/logger.config';
 import { LoggerOptionsInterface } from '../interfaces/logger-options.interface';
+import { LoggerSentryConfigInterface } from '../interfaces/logger-sentry-config.interface';
 
 import { LoggerSentryTransport } from './logger-sentry.transport';
 jest.mock('@sentry/node');
@@ -18,25 +19,26 @@ describe('loggerSentryTransport', () => {
   let errorMessage: string;
 
   beforeEach(async () => {
+    const transportSentryConfig : LoggerSentryConfigInterface = {
+      dsn: '',
+      logLevel: 1,
+      logLevelMap: jest.fn().mockReturnValue(SentryLogSeverity.Error),
+    };
     const moduleRef = await Test.createTestingModule({
       providers: [
-        LoggerSentryTransport,
         {
           provide: LOGGER_MODULE_OPTIONS_TOKEN,
           useValue: {
-            transportSentryConfig: {
-              dsn: '',
-              logLevel: 'error',
-              logLevelMap: jest.fn().mockReturnValue(SentryLogSeverity.Error),
+            settings: {
+              transportSentryConfig
             },
           },
         },
       ],
     }).compile();
 
-    loggerSentryTransport = moduleRef.get<LoggerSentryTransport>(
-      LoggerSentryTransport,
-    );
+    loggerSentryTransport = new LoggerSentryTransport(transportSentryConfig);
+
     config = moduleRef.get<LoggerOptionsInterface>(LOGGER_MODULE_OPTIONS_TOKEN);
 
     spyInit = jest.spyOn(Sentry, 'init');
