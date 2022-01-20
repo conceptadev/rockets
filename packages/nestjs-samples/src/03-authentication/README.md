@@ -16,7 +16,7 @@ A sample implementation of the [Nest.js](https://nestjs.com) Rockets API Authent
 
 ## Libraries Documentation
 
-A list of all the necessary Rockets libraries that the Authentication Module relies on.
+A list of all the necessary Rockets libraries that the Authentication Module Sample relies on.
 
 - [@rockts-org/nestjs-authentication](https://www.google.com)
 - [@rockts-org/nestjs-user](https://www.google.com)
