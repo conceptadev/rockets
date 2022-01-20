@@ -1,5 +1,5 @@
 <div align="center">
-  <h1 align="center">Rockets Nest.js Authentication Module</h1>
+  <h1 align="center">Rockets Nest.js Authentication</h1>
 
   <p align="center">
     <a href="https://travis-ci.org"><img src="https://img.shields.io/travis" alt="Build Status" /></a>
@@ -19,6 +19,16 @@
 ## Description
 
 Authentication module for Nest.js.
+
+<table>
+  <thead>
+    <tr>
+      <th><a href="#installation">Install</a></th>
+      <th><a href="#guide">Examples</a></th>
+      <th><a href="#changelog">Changelog</a></th>
+    </tr>
+  </thead>
+</table>
 
 ## Core Features
 
@@ -59,7 +69,7 @@ yarn test:e2e
 
 ```
 
-## Change-Log
+## Changelog
 
 See [CHANGELOG](https://github.com).
 
