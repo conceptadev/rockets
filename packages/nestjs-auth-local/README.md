@@ -32,6 +32,7 @@ A Nest.js local strategy for authentication.
 
 ## Core Features
 
+- Local stategy for setting up a Database
 - Follow best practices for password storage, encryption and salting.
 - Sign in using email and password.
 - Follow NIST password guidelines, and storage
@@ -52,7 +53,11 @@ with [**yarn**](https://yarn.pm): `yarn add @rockts-org/nestjs-auth-local`
 
 ### Basic Example
 
-You can find a basic usage of the Rockets Auth Local Module in this [Sample](https://github.com)
+- You can find a basic usage of the Rockets Auth Local Module in this [Sample](https://github.com)
+
+### Default Configuration
+
+- You can find the default configuration of the Rockets Auth Local Module [HERE](https://gitlab.com/concepta/rockets/rockets/blob/48b9b2758fe2916a03b5e7fd1414d70f15d1237e/packages/nestjs-auth-local/src/config/auth-local-default.config.ts)
 
 ### Unit Tests
 
