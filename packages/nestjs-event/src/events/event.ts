@@ -29,13 +29,15 @@ import { EventInterface } from './interfaces/event.interface';
  * const myEvent = new MyEvent({id: 1234, active: true});
  * ```
  *
- * @template {EventValues} V - Event Values\
- * @param {V} values - Event values
+ * @template {EventValues} V - Event Values
  */
 export abstract class Event<V extends EventValues = EventValues>
   implements EventInterface<V>
 {
   /**
+   * Expects return of values
+   *
+   * @type {void | Promise<V>}
    * @private
    */
   expectsReturnOf: void | Promise<V>;

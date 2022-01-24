@@ -32,6 +32,10 @@ export abstract class EventAsync<V extends EventValues = EventValues>
   implements EventAsyncInterface<V>
 {
   /**
+   *  Expects return of values
+   *
+   * @template V - Event values
+   * @type {Promise<V>}
    * @private
    */
   expectsReturnOf: Promise<V>;
