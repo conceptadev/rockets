@@ -29,7 +29,8 @@ import { EventInterface } from './interfaces/event.interface';
  * const myEvent = new MyEvent({id: 1234, active: true});
  * ```
  *
- * @template {EventValues} V - Event Values
+ * @template {EventValues} V - Event Values\
+ * @param {V} values - Event values
  */
 export abstract class Event<V extends EventValues = EventValues>
   implements EventInterface<V>
