@@ -13,7 +13,7 @@ export interface EventAsyncInterface<V extends EventValues = EventValues>
    *
    * @template V - Event values
    * @private
-   * @type {void | Promise<V>}
+   * @type {Promise<V>}
    */
   expectsReturnOf: Promise<V>;
 }
