@@ -35,6 +35,9 @@ export abstract class Event<V extends EventValues = EventValues>
   implements EventInterface<V>
 {
   /**
+   * Expects return of values
+   *
+   * @type {void | Promise<V>}
    * @private
    */
   expectsReturnOf: void | Promise<V>;

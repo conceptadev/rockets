@@ -59,9 +59,9 @@ export class EventListenService {
    * }
    * ```
    *
-   * @param eventClass The event class to subscribe to. This is the class, NOT an instance.
-   * @param listener Instance of the event listener class to attach to the event.
-   * @param options Overriding options.
+   * @param {EventStaticInterface} eventClass  The event class to subscribe to. This is the class, NOT an instance.
+   * @param {EventListenOnInterface} listener Instance of the event listener class to attach to the event.
+   * @param {EventListenOnOptionsInterface} options Overriding options.
    */
   on<E extends EventInterface = EventInterface>(
     eventClass: EventStaticInterface<E>,

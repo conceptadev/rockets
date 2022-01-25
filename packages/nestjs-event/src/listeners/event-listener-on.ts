@@ -43,7 +43,7 @@ export abstract class EventListenerOn<E extends EventInterface = EventInterface>
   /**
    * Constructor
    *
-   * @param _options
+   * @param {EventListenOnOptionsInterface} _options - Listener options
    */
   constructor(private _options: EventListenOnOptionsInterface = {}) {
     super();
@@ -51,6 +51,8 @@ export abstract class EventListenerOn<E extends EventInterface = EventInterface>
 
   /**
    * Default listener options.
+   *
+   * @returns {EventListenOnOptionsInterface} The default listener options.
    */
   get options(): EventListenOnOptionsInterface {
     return this._options;
