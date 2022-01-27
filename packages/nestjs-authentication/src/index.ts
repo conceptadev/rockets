@@ -14,4 +14,6 @@ export * from './factories/passport-strategy.factory';
 
 export * from './guards/auth.guard';
 
+export * from './services/decode-token.service';
+
 export { IssueTokenService } from './services/issue-token.service';

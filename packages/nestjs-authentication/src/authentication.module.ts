@@ -15,6 +15,8 @@ import {
 import { AuthenticationOptionsInterface } from './interfaces/authentication-options.interface';
 import { IssueTokenService } from './services/issue-token.service';
 import { DefaultIssueTokenService } from './services/default-issue-token.service';
+import { DecodeTokenService } from './services/decode-token.service';
+import { DefaultDecodeTokenService } from './services/default-decode-token.service';
 
 /**
  * Authentication Module to handle authentication and password encryption.
@@ -83,8 +85,13 @@ import { DefaultIssueTokenService } from './services/default-issue-token.service
  * ```
  */
 @Module({
-  providers: [DefaultIssueTokenService, IssueTokenService],
-  exports: [IssueTokenService],
+  providers: [
+    DefaultIssueTokenService,
+    IssueTokenService,
+    DecodeTokenService,
+    DefaultDecodeTokenService,
+  ],
+  exports: [IssueTokenService, DecodeTokenService],
 })
 export class AuthenticationModule extends createConfigurableDynamicRootModule<
   AuthenticationModule,
@@ -116,6 +123,14 @@ export class AuthenticationModule extends createConfigurableDynamicRootModule<
         options: AuthenticationOptionsInterface,
         defaultService: DefaultIssueTokenService,
       ) => options.issueTokenService ?? defaultService,
+    },
+    {
+      provide: DecodeTokenService,
+      inject: [AUTHENTICATION_MODULE_OPTIONS_TOKEN, DefaultDecodeTokenService],
+      useFactory: async (
+        options: AuthenticationOptionsInterface,
+        defaultService: DefaultDecodeTokenService,
+      ) => options.decodeTokenService ?? defaultService,
     },
   ],
 }) {
