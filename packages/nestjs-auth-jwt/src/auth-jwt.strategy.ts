@@ -34,13 +34,6 @@ export class AuthJwtStrategy extends PassportStrategyFactory(
         //done(error, secret_key);
         done(null, key);
       },
-      verify: async (jwt_payload, done) => {
-        // TODO: this was never called
-        const test = await decodeTokenService.verifyToken(jwt_payload);
-
-        // done(error, user, info)
-        done(null, test);
-      },
     });
   }
   /**
@@ -59,64 +52,3 @@ export class AuthJwtStrategy extends PassportStrategyFactory(
     } as AuthJwtResponseDto;
   }
 }
-
-// import { ExtractJwt, Strategy } from 'passport-jwt';
-// import {
-//   Inject,
-//   Injectable,
-// } from '@nestjs/common';
-// import {
-//   AUTH_JWT_MODULE_SETTINGS_TOKEN,
-//   AUTH_JWT_STRATEGY_NAME,
-// } from './auth-jwt.constants';
-// import { DecodeTokenService, PassportStrategyFactory } from '@rockts-org/nestjs-authentication';
-// import { AuthJwtSettingsInterface } from './interfaces/auth-jwt-settings.interface';
-// import { AuthJwtPayloadDto } from './dto/auth-jwt-payload.dto';
-// import { AuthJwtResponseDto } from './dto/auth-jwt-response.dto';
-
-// @Injectable()
-// export class AuthJwtStrategy extends PassportStrategyFactory(
-//   Strategy,
-//   AUTH_JWT_STRATEGY_NAME,
-// ) {
-
-//   constructor(
-//     @Inject(AUTH_JWT_MODULE_SETTINGS_TOKEN)
-//     settings: AuthJwtSettingsInterface,
-//     decodeTokenService: DecodeTokenService,
-
-//   ) {
-//     super({
-//       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-//       ignoreExpiration: settings.ignoreExpiration,
-
-//       secretOrKey: 'secret',
-//       verify: async (jwt_payload, done) => {
-
-//         console.log('jwt_payload', jwt_payload);
-//         const test = await decodeTokenService.verifyToken(jwt_payload);
-
-//         // done(error, user, info)
-//         done();
-//       }
-//     });
-
-//   }
-
-//   /**
-//    * Validate the user based on the username and password
-//    * from the request body
-//    *
-//    * @param username The username to authenticate
-//    * @param password
-//    * @returns
-//    */
-
-//   async validate(payload: AuthJwtPayloadDto): Promise<AuthJwtResponseDto> {
-
-//     return {
-//       userId: payload.sub,
-//       username: payload.username
-//     } as AuthJwtResponseDto;
-//   }
-// }
