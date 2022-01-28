@@ -59,5 +59,8 @@
     {
       "path": "packages/nestjs-user"
     },
+    {
+      "path": "packages/nestjs-refresh-token"
+    },
   ]
 }

@@ -23,6 +23,7 @@ export class IssueTokenService implements IssueTokenServiceInterface {
    *
    * @param username user id or name for `sub` claim
    */
+  //TODO: should i point this to the new refresh token? or remove?
   async refreshToken(id: string): Promise<string> {
     const payload = { sub: id };
 
