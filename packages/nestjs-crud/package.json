@@ -1,6 +1,6 @@
 {
   "name": "@rockts-org/nestjs-crud",
-  "version": "3.0.2",
+  "version": "4.0.0-alpha.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "MIT",
@@ -10,17 +10,20 @@
   "dependencies": {
     "@nestjs/common": "^8.0.8",
     "@nestjs/config": "^1.0.0",
-    "@nestjsx/crud": "5.0.0-alpha.3",
-    "@nestjsx/crud-request": "^4.6.2",
-    "@nestjsx/crud-typeorm": "^4.6.2",
-    "@nestjsx/util": "^5.0.0-alpha.3",
-    "jest-mock-extended": "^2.0.4"
+    "@nestjs/core": "^8.0.8",
+    "@nestjsx/crud": "^5.0.0-alpha.3",
+    "@nestjsx/crud-request": "^5.0.0-alpha.3",
+    "@nestjsx/crud-typeorm": "^5.0.0-alpha.3",
+    "@rockts-org/nestjs-common": "4.0.0-alpha.0"
   },
   "devDependencies": {
     "@nestjs/testing": "^8.0.8",
+    "class-transformer": "^0.5.1",
+    "jest-mock-extended": "^2.0.4",
     "typeorm": "^0.2.41"
   },
   "peerDependencies": {
+    "class-transformer": "^0.5.1",
     "typeorm": "^0.2.41"
   }
 }

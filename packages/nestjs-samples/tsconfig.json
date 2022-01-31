@@ -20,6 +20,9 @@
       "path": "../nestjs-auth-local"
     },
     {
+      "path": "../nestjs-crud"
+    },
+    {
       "path": "../nestjs-event"
     },
     {

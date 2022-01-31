@@ -1,19 +1,18 @@
 import { Test } from '@nestjs/testing';
-import { CrudRequest } from '@nestjsx/crud';
-import { CrudQueryService } from './crud-query.service';
-import { mock } from 'jest-mock-extended';
+import { CrudRequest, QueryOptions } from '@nestjsx/crud';
+import { CrudQueryHelper } from './crud-query.helper';
 import { CrudQueryOptionsInterface } from '../interfaces/crud-query-options.interface';
 import { SCondition } from '@nestjsx/crud-request';
 
 describe('TypeOrmService', () => {
-  let crudQueryService: CrudQueryService;
+  let crudQueryService: CrudQueryHelper;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-      providers: [CrudQueryService],
+      providers: [CrudQueryHelper],
     }).compile();
 
-    crudQueryService = moduleRef.get<CrudQueryService>(CrudQueryService);
+    crudQueryService = moduleRef.get<CrudQueryHelper>(CrudQueryHelper);
   });
 
   describe('IsDefined', () => {
@@ -26,7 +25,7 @@ describe('TypeOrmService', () => {
     describe('when adding search', () => {
       it('should add search', async () => {
         // the fake request
-        const req: CrudRequest = mock<CrudRequest>();
+        const req = { parsed: {} } as CrudRequest;
 
         // mock some filters on the request
         req.parsed.search = {
@@ -34,7 +33,7 @@ describe('TypeOrmService', () => {
         };
 
         const options: CrudQueryOptionsInterface = {
-          search: {
+          filter: {
             name: 'pear',
           },
         };
@@ -50,6 +49,26 @@ describe('TypeOrmService', () => {
               name: 'pear',
             },
           ],
+        });
+      });
+    });
+
+    describe('when adding options', () => {
+      it('should add options', async () => {
+        // the fake request
+        const req = {
+          options: { query: { alwaysPaginate: true } },
+        } as CrudRequest;
+
+        const options: CrudQueryOptionsInterface = {
+          cache: false,
+        };
+
+        crudQueryService.modifyRequest(req, options);
+
+        expect(req.options.query).toEqual<QueryOptions>({
+          alwaysPaginate: true,
+          cache: false,
         });
       });
     });

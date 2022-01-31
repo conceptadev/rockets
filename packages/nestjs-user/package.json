@@ -11,6 +11,7 @@
     "@nestjs/common": "^8.0.8",
     "@nestjs/config": "^1.1.6",
     "@rockts-org/nestjs-common": "^4.0.0-alpha.0",
+    "@rockts-org/nestjs-crud": "4.0.0-alpha.0",
     "@rockts-org/nestjs-typeorm-ext": "^4.0.0-alpha.0"
   },
   "devDependencies": {
@@ -21,6 +22,7 @@
   },
   "peerDependencies": {
     "@nestjs/typeorm": "^8.0.2",
+    "class-validator": "*",
     "typeorm": "^0.2.41"
   }
 }

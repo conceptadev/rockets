@@ -26,10 +26,12 @@ import {
 import { UserController } from './user.controller';
 import { UserServiceInterface } from './interfaces/user-service.interface';
 import { DefaultUserService } from './services/default-user.service';
+import { UserCrudService } from './services/user-crud.service';
+import { CrudModule } from '@rockts-org/nestjs-crud';
 
 @Module({
-  providers: [DefaultUserService, UserController],
-  exports: [UserService, UserController],
+  providers: [DefaultUserService, UserCrudService],
+  exports: [UserService, UserCrudService],
   controllers: [UserController],
 })
 @Injectable()
@@ -37,7 +39,13 @@ export class UserModule extends createConfigurableDynamicRootModule<
   UserModule,
   UserOptionsInterface
 >(USER_MODULE_OPTIONS_TOKEN, {
-  imports: [ConfigModule.forFeature(userDefaultConfig)],
+  imports: [
+    ConfigModule.forFeature(userDefaultConfig),
+    CrudModule.deferred({
+      timeoutMessage:
+        'UserModule requires CrudModule to be registered in your application.',
+    }),
+  ],
   providers: [
     {
       provide: USER_MODULE_SETTINGS_TOKEN,
