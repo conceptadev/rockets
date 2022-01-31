@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CrudModule } from '@rockts-org/nestjs-crud';
 import { TypeOrmExtModule } from '@rockts-org/nestjs-typeorm-ext';
 import { UserModule } from '@rockts-org/nestjs-user';
 import { ConnectionOptions, getConnectionManager } from 'typeorm';
@@ -19,6 +20,7 @@ import { CustomUserService } from './custom-user/custom-user.service';
         return c;
       },
     }),
+    CrudModule.register(),
     UserModule.registerAsync({
       imports: [CustomUserModule],
       inject: [CustomUserService],

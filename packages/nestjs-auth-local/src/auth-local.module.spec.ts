@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthenticationModule } from '@rockts-org/nestjs-authentication';
+import { CrudModule } from '@rockts-org/nestjs-crud';
 import { JwtModule } from '@rockts-org/nestjs-jwt';
 import { PasswordModule } from '@rockts-org/nestjs-password';
 import { User, UserModule } from '@rockts-org/nestjs-user';
@@ -19,6 +20,7 @@ describe('AuthLocalModuleTest', () => {
         AuthenticationModule.register(),
         JwtModule.register(),
         PasswordModule.register(),
+        CrudModule.register(),
         UserModule.register(),
       ],
     })

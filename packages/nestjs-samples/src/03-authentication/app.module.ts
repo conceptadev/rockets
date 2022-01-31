@@ -4,6 +4,7 @@ import { AuthenticationModule } from '@rockts-org/nestjs-authentication';
 import { UserModule } from '@rockts-org/nestjs-user';
 import { JwtModule } from '@rockts-org/nestjs-jwt';
 import { PasswordModule } from '@rockts-org/nestjs-password';
+import { CrudModule } from '@rockts-org/nestjs-crud';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { PasswordModule } from '@rockts-org/nestjs-password';
     AuthenticationModule.register(),
     JwtModule.register(),
     PasswordModule.register(),
+    CrudModule.register(),
     UserModule.register(),
   ],
 })
