@@ -27,7 +27,6 @@ describe('TypeOrmService', () => {
         // the fake request
         const req = { parsed: {} } as CrudRequest;
 
-        // mock some filters on the request
         req.parsed.search = {
           name: 'apple',
         };
