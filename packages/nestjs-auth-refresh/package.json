@@ -1,5 +1,5 @@
 {
-  "name": "@rockts-org/nestjs-refresh-token",
+  "name": "@rockts-org/nestjs-auth-refresh",
   "version": "4.0.0-alpha.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -15,6 +15,7 @@
     "@nestjs/platform-fastify": "^8.0.6",
     "@rockts-org/nestjs-authentication": "^4.0.0-alpha.0",
     "@rockts-org/nestjs-common": "^4.0.0-alpha.0",
+    "@rockts-org/nestjs-user": "^4.0.0-alpha.0",
     "class-validator": "^0.13.2",
     "express": "^4.17.1",
     "fastify": "^3.25.3",

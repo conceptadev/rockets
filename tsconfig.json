@@ -60,7 +60,7 @@
       "path": "packages/nestjs-user"
     },
     {
-      "path": "packages/nestjs-refresh-token"
+      "path": "packages/nestjs-auth-refresh"
     },
   ]
 }

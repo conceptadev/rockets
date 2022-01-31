@@ -13,8 +13,9 @@ export class DecodeTokenService implements DecodeTokenServiceInterface {
    */
   async verifyToken(token: string): Promise<string> {
     // TODO: need to review this
-    const isVerified = this.jwtSignService.verifyAsync(token);
-    if (isVerified) return 'THERE IS NO SECRET';
+    const payload = await this.jwtSignService.verifyAsync(token);
+
+    if (payload) return 'THERE IS NO SECRET';
     else return '';
   }
 }

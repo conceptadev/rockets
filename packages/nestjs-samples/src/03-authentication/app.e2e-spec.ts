@@ -43,9 +43,7 @@ describe('AppController (e2e)', () => {
         await supertest(app.getHttpServer())
           .post('/auth/local')
           .send(sign)
-          .expect(201)
-        ;
-
+          .expect(201);
       expect(response.body.accessToken).toBeDefined();
       expect(response.body.refreshToken).toBeDefined();
     });
@@ -88,11 +86,15 @@ describe('AppController (e2e)', () => {
     });
 
     it('GET /user Not Authorized', async () => {
-      
-      await supertest(app.getHttpServer())
-        .get('/custom/user/all')
-        .expect(401);
-      
+      await supertest(app.getHttpServer()).get('/custom/user/all').expect(401);
+    });
+
+    it('GET /user Authorized with JWT', async () => {
+      // const response: { body: AuthenticationResponseInterface } =
+      //   await supertest(app.getHttpServer())
+      //     .post(('/token/refresh')
+      //     .send({})
+      //     .expect(201);
     });
   });
 });
