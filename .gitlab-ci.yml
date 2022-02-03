@@ -47,3 +47,13 @@ code_quality:
     - if: '$CODE_QUALITY_DISABLED'
       when: never
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"' # Run code quality job in merge request pipelines
+
+pages:
+  script:
+    - npx compodoc -p tsconfig.doc.json
+    - mv documentation public
+  artifacts:
+    paths:
+      - public
+  only:
+    - develop

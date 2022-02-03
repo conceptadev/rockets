@@ -1,5 +1,5 @@
 import { Controller, Post, Request, UseGuards } from '@nestjs/common';
-import { AuthenticationResponseInterface } from '@rockts-org/nestjs-authentication';
+import { AuthenticationJwtResponseInterface } from '@rockts-org/nestjs-authentication';
 import { GithubAuthGuard } from './github-auth.guard';
 
 /**
@@ -17,7 +17,7 @@ export class GithubStrategyController {
   @Post('login')
   async authenticateWithGuard(
     @Request() req: Request,
-  ): Promise<AuthenticationResponseInterface> {
-    return req['user'] as AuthenticationResponseInterface;
+  ): Promise<AuthenticationJwtResponseInterface> {
+    return req['user'] as AuthenticationJwtResponseInterface;
   }
 }

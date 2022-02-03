@@ -1,5 +1,6 @@
 {
   "name": "root",
+  "version": "2.0.0",
   "private": true,
   "workspaces": {
     "packages": [
@@ -7,6 +8,8 @@
     ]
   },
   "devDependencies": {
+    "@commitlint/cli": "^16.1.0",
+    "@commitlint/config-conventional": "^16.0.0",
     "@compodoc/compodoc": "^1.1.18",
     "@nestjs/cli": "^8.1.8",
     "@nestjs/schematics": "^8.0.0",
@@ -24,6 +27,7 @@
     "eslint-plugin-jsdoc": "^37.6.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^4.0.0",
+    "husky": "^7.0.4",
     "jest": "27.4.7",
     "jest-junit": "^13.0.0",
     "jest-mock-extended": "^2.0.4",
@@ -31,6 +35,7 @@
     "prettier": "^2.3.2",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
+    "standard-version": "^9.3.2",
     "supertest": "^6.1.3",
     "ts-jest": "^27.0.3",
     "ts-loader": "^9.2.3",
@@ -42,9 +47,9 @@
     "clean": "./node_modules/.bin/tsc --build --clean",
     "build": "./node_modules/.bin/tsc --build",
     "watch": "yarn build && ./node_modules/.bin/tsc --build --watch",
-    "prepare": "yarn clean && yarn build",
     "lint": "eslint \"packages/**/{src,test}/**/*.{ts,js,json}\" --fix",
     "test": "jest",
+    "prepare": "husky install && yarn clean && yarn build",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage --coverageReporters=text --coverageReporters=json --coverageReporters=cobertura --coverageReporters=json-summary --coverageReporters=lcov",
     "test:ci": "yarn test:cov --ci --reporters=default --reporters=jest-junit",
@@ -56,6 +61,10 @@
     "doc:watch": "yarn doc:serve -w",
     "doc:cov": "yarn doc --coverageMinimumPerFile 90 --coverageTestThresholdFail false",
     "doc:cov:ut": "yarn doc:cov --unitTestCoverage ./coverage/coverage-summary.json",
-    "doc:ci": "yarn doc:cov:ut --coverageTestThresholdFail true"
+    "doc:ci": "yarn doc:cov:ut --coverageTestThresholdFail true",
+    "changelog": "standard-version",
+    "changelog:minor": "standard-version --release-as minor",
+    "changelog:patch": "standard-version --release-as patch",
+    "changelog:major": "standard-version --release-as major"
   }
 }

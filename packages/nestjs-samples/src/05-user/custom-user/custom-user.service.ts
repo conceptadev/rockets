@@ -8,7 +8,7 @@ export class CustomUserService implements UserServiceInterface {
    */
   hello? = 'world';
 
-  async getUserByUsername(username: string): Promise<UserInterface> {
+  async getUser(username: string): Promise<UserInterface> {
     throw new Error(`Method not implemented, cant get ${username}.`);
   }
 }

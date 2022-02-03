@@ -4,7 +4,7 @@ import { AppModule } from './app.module';
 import { IssueTokenService } from '@rockts-org/nestjs-authentication';
 import {
   AuthLocalController,
-  UserLookupService,
+  AuthLocalUserLookupService,
   // AuthLocalController,
 } from '@rockts-org/nestjs-auth-local';
 import { User, UserService } from '@rockts-org/nestjs-user';
@@ -23,13 +23,15 @@ describe('AppModule', () => {
 
     const userService = module.get<UserService>(UserService);
     const issueTokenService = module.get<IssueTokenService>(IssueTokenService);
-    const userLookupService = module.get<UserLookupService>(UserLookupService);
+    const userLookupService = module.get<AuthLocalUserLookupService>(
+      AuthLocalUserLookupService,
+    );
     const authLocalcontroller = module.get(AuthLocalController);
 
     expect(module).toBeInstanceOf(TestingModule);
     expect(userService).toBeInstanceOf(UserService);
     expect(issueTokenService).toBeInstanceOf(IssueTokenService);
-    expect(userLookupService).toBeInstanceOf(UserLookupService);
+    expect(userLookupService).toBeInstanceOf(AuthLocalUserLookupService);
     expect(authLocalcontroller).toBeInstanceOf(AuthLocalController);
     expect(authLocalcontroller['issueTokenService']).toBeInstanceOf(
       IssueTokenService,
