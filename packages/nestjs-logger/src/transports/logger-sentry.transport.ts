@@ -1,9 +1,6 @@
-import { Inject, Injectable, LogLevel } from '@nestjs/common';
+import { Injectable, LogLevel } from '@nestjs/common';
 import * as Sentry from '@sentry/node';
-
-import { LOGGER_MODULE_SETTINGS_TOKEN } from '../config/logger.config';
 import { LoggerSentryConfigInterface } from '../interfaces/logger-sentry-config.interface';
-import { LoggerSettingsInterface } from '../interfaces/logger-settings.interface';
 import { LoggerTransportInterface } from '../interfaces/logger-transport.interface';
 
 /**
@@ -26,11 +23,8 @@ export class LoggerSentryTransport implements LoggerTransportInterface {
    *
    * @param config configuration file injected
    */
-  constructor(
-    private config: LoggerSentryConfigInterface,
-  ) {
-    if (!this.config)
-      throw new Error('Sentry Config is required');
+  constructor(private config: LoggerSentryConfigInterface) {
+    if (!this.config) throw new Error('Sentry Config is required');
 
     // Initialize Sentry
     Sentry.init({

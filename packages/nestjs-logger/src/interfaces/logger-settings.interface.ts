@@ -19,5 +19,4 @@ export interface LoggerSettingsInterface {
    * Configuration for Sentry
    */
   transportSentryConfig?: LoggerSentryConfigInterface;
-  
 }

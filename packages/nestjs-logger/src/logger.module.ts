@@ -1,5 +1,5 @@
 import { APP_FILTER, APP_INTERCEPTOR, BaseExceptionFilter } from '@nestjs/core';
-import { DynamicModule, Module, NestInterceptor, Type } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import {
   loggerConfig,
   LOGGER_MODULE_OPTIONS_TOKEN,
@@ -17,9 +17,7 @@ import { LoggerSentryTransport } from './transports/logger-sentry.transport';
 import { LoggerService } from './logger.service';
 import { LoggerTransportService } from './logger-transport.service';
 import { LoggerOptionsInterface } from './interfaces/logger-options.interface';
-import { LoggerAsyncOptionsInterface } from './interfaces/logger-async-options.interface';
 import { ConfigModule, ConfigType } from '@nestjs/config';
-import { LoggerTransportInterface } from './interfaces/logger-transport.interface';
 import { LoggerSettingsInterface } from './interfaces/logger-settings.interface';
 
 /**
@@ -77,58 +75,59 @@ import { LoggerSettingsInterface } from './interfaces/logger-settings.interface'
   exports: [LoggerService],
 })
 export class LoggerModule extends createConfigurableDynamicRootModule<
-LoggerModule,
-LoggerOptionsInterface
-    >(LOGGER_MODULE_OPTIONS_TOKEN, {
-      imports: [
-        ConfigModule.forFeature(loggerConfig),
+  LoggerModule,
+  LoggerOptionsInterface
+>(LOGGER_MODULE_OPTIONS_TOKEN, {
+  imports: [ConfigModule.forFeature(loggerConfig)],
+  providers: [
+    {
+      provide: LOGGER_MODULE_SETTINGS_TOKEN,
+      inject: [LOGGER_MODULE_OPTIONS_TOKEN, loggerConfig.KEY],
+      useFactory: async (
+        options: LoggerOptionsInterface,
+        defaultSettings: ConfigType<typeof loggerConfig>,
+      ) => options?.settings ?? defaultSettings,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggerRequestInterceptor,
+    },
+    {
+      provide: APP_FILTER,
+      inject: [LOGGER_MODULE_OPTIONS_TOKEN, LoggerExceptionFilter],
+      useFactory: async (
+        options: LoggerOptionsInterface,
+        defaultService: BaseExceptionFilter,
+      ) => options.exceptionFilter ?? defaultService,
+    },
+    {
+      provide: LoggerService,
+      inject: [
+        LOGGER_MODULE_OPTIONS_TOKEN,
+        LOGGER_MODULE_SETTINGS_TOKEN,
+        LoggerTransportService,
       ],
-      providers: [
-        {
-          provide: LOGGER_MODULE_SETTINGS_TOKEN,
-          inject: [LOGGER_MODULE_OPTIONS_TOKEN, loggerConfig.KEY],
-          useFactory: async (
-            options: LoggerOptionsInterface,
-            defaultSettings: ConfigType<typeof loggerConfig>,
-          ) => options?.settings ?? defaultSettings,
-        },
-        {
-          provide: APP_INTERCEPTOR,
-          useClass: LoggerRequestInterceptor,
-        },
-        {
-          provide: APP_FILTER,
-          inject: [LOGGER_MODULE_OPTIONS_TOKEN, LoggerExceptionFilter],
-          useFactory: async (
-            options: LoggerOptionsInterface,
-            defaultService: BaseExceptionFilter,
-          ) => options.exceptionFilter ?? defaultService,
-        },
-        {
-          provide: LoggerService,
-          inject: [LOGGER_MODULE_OPTIONS_TOKEN, LOGGER_MODULE_SETTINGS_TOKEN, LoggerTransportService],
-          useFactory: async (
-            options: LoggerOptionsInterface,
-            settings: LoggerSettingsInterface,
-            loggerTransportService: LoggerTransportService,
-          ) => {
-            
-            if (settings?.transportSentryConfig) {
-              const sentry = new LoggerSentryTransport(settings.transportSentryConfig);
-              loggerTransportService.addTransport(sentry);
-            }
-
-            options?.transports?.forEach(transport => {  
-              loggerTransportService.addTransport(transport);
-            });
-            
-            return new LoggerService(loggerTransportService);
-          },
+      useFactory: async (
+        options: LoggerOptionsInterface,
+        settings: LoggerSettingsInterface,
+        loggerTransportService: LoggerTransportService,
+      ) => {
+        if (settings?.transportSentryConfig) {
+          const sentry = new LoggerSentryTransport(
+            settings.transportSentryConfig,
+          );
+          loggerTransportService.addTransport(sentry);
         }
-      ]
-    })
-{ 
 
+        options?.transports?.forEach((transport) => {
+          loggerTransportService.addTransport(transport);
+        });
+
+        return new LoggerService(loggerTransportService);
+      },
+    },
+  ],
+}) {
   static register(options: LoggerOptionsInterface = {}) {
     return LoggerModule.forRoot(LoggerModule, options);
   }
@@ -146,7 +145,6 @@ LoggerOptionsInterface
       options,
     );
   }
-
 
   // public static forRoot(options?: LoggerOptionsInterface): DynamicModule {
   //   return {

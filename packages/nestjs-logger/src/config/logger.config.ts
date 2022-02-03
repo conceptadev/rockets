@@ -5,7 +5,6 @@ import {
 } from '@nestjs/config';
 
 import { LogLevel } from '@nestjs/common';
-import { LoggerOptionsInterface } from '../interfaces/logger-options.interface';
 import { Severity as SentryLogSeverity } from '@sentry/types';
 import { splitLogLevel } from '../utils/config-parser.util';
 import { LoggerSettingsInterface } from '../interfaces/logger-settings.interface';

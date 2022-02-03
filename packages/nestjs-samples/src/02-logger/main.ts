@@ -1,21 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import {
-  LoggerSentryTransport,
-  LoggerService,
-} from '@rockts-org/nestjs-logger';
+import { LoggerService } from '@rockts-org/nestjs-logger';
 
 /**
  *
  */
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
-  //TODO: validate
-  //useSentryTransport(app);
-
-  // Get the Transport to be used with new Logger
-  const loggerSentryTransport = app.get(LoggerSentryTransport);
 
   // Get reference of LoggerService From LoggerModule
   const customLoggerService = app.get(LoggerService);

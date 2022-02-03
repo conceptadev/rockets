@@ -8,7 +8,6 @@ import { LoggerExceptionFilter } from './logger-exception.filter';
 
 import { LoggerModule } from './logger.module';
 import { LoggerService } from './logger.service';
-import { LoggerSentryTransport } from './transports/logger-sentry.transport';
 
 describe('LoggerModule', () => {
   describe('forRoot with defaults', () => {
@@ -24,7 +23,7 @@ describe('LoggerModule', () => {
 
     it('module should be defined', async () => {
       const loggerService = moduleRef.get(LoggerService);
-      
+
       const loggerTransportService = moduleRef.get<LoggerTransportService>(
         LoggerTransportService,
       );
@@ -38,7 +37,7 @@ describe('LoggerModule', () => {
       moduleRef.useLogger(loggerService);
 
       expect(loggerService).toBeInstanceOf(LoggerService);
-      
+
       expect(loggerTransportService).toBeInstanceOf(LoggerTransportService);
       expect(loggerExceptionFilter).toBeInstanceOf(LoggerExceptionFilter);
       expect(loggerTransportService['loggerTransports'].length).toBe(1);
@@ -54,12 +53,14 @@ describe('LoggerModule', () => {
       const config = await loggerConfig();
 
       moduleRef = await Test.createTestingModule({
-        imports: [LoggerModule.register({
-          settings: {
-            ...config,
-            logLevel: ['debug']
-          }
-        })],
+        imports: [
+          LoggerModule.register({
+            settings: {
+              ...config,
+              logLevel: ['debug'],
+            },
+          }),
+        ],
       }).compile();
     });
 
@@ -86,7 +87,7 @@ describe('LoggerModule', () => {
                   ...config,
                   logLevel: ['debug'],
                   transportLogLevel: ['debug'],
-                }
+                },
               };
             },
           }),
@@ -97,7 +98,7 @@ describe('LoggerModule', () => {
 
     it('module should be defined', async () => {
       const loggerService = moduleRef.get(LoggerService);
-      
+
       const loggerTransportService = moduleRef.get<LoggerTransportService>(
         LoggerTransportService,
       );
@@ -107,7 +108,7 @@ describe('LoggerModule', () => {
       moduleRef.useLogger(loggerService);
 
       expect(loggerService).toBeInstanceOf(LoggerService);
-      
+
       expect(loggerTransportService).toBeInstanceOf(LoggerTransportService);
       expect(loggerTransportService['loggerTransports'].length).toBe(1);
     });

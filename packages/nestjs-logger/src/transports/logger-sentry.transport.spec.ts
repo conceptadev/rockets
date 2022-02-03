@@ -19,7 +19,7 @@ describe('loggerSentryTransport', () => {
   let errorMessage: string;
 
   beforeEach(async () => {
-    const transportSentryConfig : LoggerSentryConfigInterface = {
+    const transportSentryConfig: LoggerSentryConfigInterface = {
       dsn: '',
       logLevel: 1,
       logLevelMap: jest.fn().mockReturnValue(SentryLogSeverity.Error),
@@ -30,7 +30,7 @@ describe('loggerSentryTransport', () => {
           provide: LOGGER_MODULE_OPTIONS_TOKEN,
           useValue: {
             settings: {
-              transportSentryConfig
+              transportSentryConfig,
             },
           },
         },
@@ -44,7 +44,10 @@ describe('loggerSentryTransport', () => {
     spyInit = jest.spyOn(Sentry, 'init');
     spyCaptureException = jest.spyOn(Sentry, 'captureException');
     spyCaptureMessage = jest.spyOn(Sentry, 'captureMessage');
-    spyLogLevelMap = jest.spyOn(config.settings.transportSentryConfig, 'logLevelMap');
+    spyLogLevelMap = jest.spyOn(
+      config.settings.transportSentryConfig,
+      'logLevelMap',
+    );
 
     errorMessage = 'Jest Error Message';
   });

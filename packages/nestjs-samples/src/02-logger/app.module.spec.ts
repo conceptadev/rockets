@@ -1,18 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from './app.module';
-import {
-  LoggerSentryTransport,
-  LoggerService,
-} from '@rockts-org/nestjs-logger';
+import { LoggerService } from '@rockts-org/nestjs-logger';
 import { OrderController } from './order/order.controller';
-import { LoggerSentryConfigInterface } from '@rockts-org/nestjs-logger/dist/interfaces/logger-sentry-config.interface';
 
 describe('AppModule', () => {
   let orderController: OrderController;
   let logService: jest.SpyInstance;
 
   beforeEach(async () => {
-    
     const app: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
