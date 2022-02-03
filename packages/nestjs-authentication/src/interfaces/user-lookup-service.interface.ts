@@ -1,3 +1,7 @@
-export interface UserLookupServiceInterface<T> {
-  getUser(...args: string[]): Promise<T>;
+import { UserIdentityInterface } from './user-identity.interface';
+
+export interface UserLookupServiceInterface<
+  T extends UserIdentityInterface = UserIdentityInterface,
+> {
+  getUser(id: T['id']): Promise<T>;
 }

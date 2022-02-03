@@ -1,7 +1,7 @@
 /**
- * Authentication response interface
+ * Authentication JWT response interface
  */
-export interface AuthenticationResponseInterface {
+export interface AuthenticationJwtResponseInterface {
   /**
    * The access token.
    */

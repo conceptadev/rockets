@@ -49,7 +49,7 @@
     "watch": "yarn build && ./node_modules/.bin/tsc --build --watch",
     "lint": "eslint \"packages/**/{src,test}/**/*.{ts,js,json}\" --fix",
     "test": "jest",
-    "prepare": "husky install",
+    "prepare": "husky install && yarn clean && yarn build",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage --coverageReporters=text --coverageReporters=json --coverageReporters=cobertura --coverageReporters=json-summary --coverageReporters=lcov",
     "test:ci": "yarn test:cov --ci --reporters=default --reporters=jest-junit",
