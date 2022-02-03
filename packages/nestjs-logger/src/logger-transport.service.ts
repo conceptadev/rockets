@@ -1,6 +1,6 @@
 import { Inject, Injectable, LogLevel } from '@nestjs/common';
-import { LOGGER_MODULE_OPTIONS_TOKEN } from './config/logger.config';
-import { LoggerOptionsInterface } from './interfaces/logger-options.interface';
+import { LOGGER_MODULE_SETTINGS_TOKEN } from './config/logger.config';
+import { LoggerSettingsInterface } from './interfaces/logger-settings.interface';
 import { LoggerTransportInterface } from './interfaces/logger-transport.interface';
 
 /**
@@ -45,8 +45,8 @@ export class LoggerTransportService {
    * @param config
    */
   constructor(
-    @Inject(LOGGER_MODULE_OPTIONS_TOKEN)
-    private config: LoggerOptionsInterface,
+    @Inject(LOGGER_MODULE_SETTINGS_TOKEN)
+    private config: LoggerSettingsInterface,
   ) {
     if (this.config?.transportLogLevel) {
       this.logLevels = this.config.transportLogLevel;

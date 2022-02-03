@@ -1,22 +1,17 @@
-import { LogLevel } from '@nestjs/common';
-import { LoggerSentryConfigInterface } from './logger-sentry-config.interface';
+import { NestInterceptor } from '@nestjs/common';
+import { BaseExceptionFilter } from '@nestjs/core';
+import { LoggerSettingsInterface } from './logger-settings.interface';
+import { LoggerTransportInterface } from './logger-transport.interface';
 
 /**
  * Logger options interface.
  */
 export interface LoggerOptionsInterface {
-  /**
-   * list of log levels allowed
-   */
-  logLevel?: LogLevel[];
+  transports?: LoggerTransportInterface[];
 
-  /**
-   * List of transport log level allowed
-   */
-  transportLogLevel?: LogLevel[];
+  exceptionFilter?: BaseExceptionFilter;
 
-  /**
-   * Configuration for Sentry
-   */
-  transportSentryConfig?: LoggerSentryConfigInterface;
+  requestInterceptor?: NestInterceptor<Response>;
+
+  settings?: LoggerSettingsInterface;
 }
