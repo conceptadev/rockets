@@ -5,6 +5,8 @@ import {
   createConfigurableDynamicRootModule,
   deferExternal,
   DeferExternalOptionsInterface,
+  ModuleOptionsControllerInterface,
+  negotiateController,
 } from '@rockts-org/nestjs-common';
 import {
   createCustomRepositoryProvider,
@@ -74,20 +76,34 @@ export class UserModule extends createConfigurableDynamicRootModule<
   ],
 }) {
   static register(
-    options: UserOptionsInterface & UserOrmOptionsInterface = {},
+    options: UserOptionsInterface &
+      UserOrmOptionsInterface &
+      ModuleOptionsControllerInterface = {},
   ) {
     this.configureOrm(options);
-    return UserModule.forRoot(UserModule, options);
+
+    const module = UserModule.forRoot(UserModule, options);
+
+    negotiateController(module, options);
+
+    return module;
   }
 
   static registerAsync(
-    options: AsyncModuleConfig<UserOptionsInterface> & UserOrmOptionsInterface,
+    options: AsyncModuleConfig<UserOptionsInterface> &
+      UserOrmOptionsInterface &
+      ModuleOptionsControllerInterface,
   ) {
     this.configureOrm(options);
-    return UserModule.forRootAsync(UserModule, {
+
+    const module = UserModule.forRootAsync(UserModule, {
       useFactory: () => ({}),
       ...options,
     });
+
+    negotiateController(module, options);
+
+    return module;
   }
 
   static deferred(options: DeferExternalOptionsInterface = {}) {
