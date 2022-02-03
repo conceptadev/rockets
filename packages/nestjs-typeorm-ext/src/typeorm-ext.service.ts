@@ -3,13 +3,27 @@ import { TYPEORM_EXT_MODULE_CONNECTION } from './typeorm-ext.constants';
 import { TypeOrmExtStorage } from './typeorm-ext.storage';
 import { AbstractRepository, Connection, Repository } from 'typeorm';
 
+/**
+ * TypeOrmExt Service
+ */
 @Injectable()
 export class TypeOrmExtService {
+  /**
+   * Class Constructor
+   *
+   * @param {Connection} connection connection injection
+   */
   constructor(
     @Inject(TYPEORM_EXT_MODULE_CONNECTION)
     private connection: Connection,
   ) {}
 
+  /**
+   * Get Entity Repository
+   *
+   * @param {string} entityKey the entity key
+   * @returns {Repository<any>} the getEntityRepository return
+   */
   async getEntityRepository(entityKey: string) {
     // look up the entity
     const entity = TypeOrmExtStorage.getEntityByKey(entityKey);
@@ -22,6 +36,12 @@ export class TypeOrmExtService {
     }
   }
 
+  /**
+   * Get custom repository
+   *
+   * @param {string} repoKey The repository key
+   * @returns {Repository<any>} The getCustomRepository return
+   */
   async getCustomRepository(repoKey: string) {
     // look up the repo
     const repository = TypeOrmExtStorage.getRepositoryByKey(repoKey);

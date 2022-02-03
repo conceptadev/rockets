@@ -9,21 +9,42 @@ import {
   TypeOrmExtStorableSubscriber,
 } from './typeorm-ext.types';
 
+/**
+ * Configuration Mapper
+ */
 class ConfigurationMap<T = unknown> extends Map<
   string,
   TypeOrmExtMetadataItemInterface<T>
 > {}
 
+/**
+ * Typeorm storage extension
+ */
 export class TypeOrmExtStorage {
+  /**
+   * Entities
+   */
   private static readonly entities =
     new ConfigurationMap<TypeOrmExtStorableEntity>();
 
+  /**
+   * Repositories
+   */
   private static readonly repositories =
     new ConfigurationMap<TypeOrmExtStorableRepository>();
 
+  /**
+   * Subscribers
+   */
   private static readonly subscribers =
     new ConfigurationMap<TypeOrmExtStorableSubscriber>();
 
+  /**
+   * Add configuration
+   *
+   * @param {TypeOrmExtMetadataInterface} config Configuration
+   * @param {TypeOrmExtMetadataInterface} defaultConfig Default Configuration
+   */
   static addConfig(
     config?: TypeOrmExtMetadataInterface,
     defaultConfig?: TypeOrmExtMetadataInterface,
@@ -43,6 +64,12 @@ export class TypeOrmExtStorage {
     }
   }
 
+  /**
+   * Resolve connection token
+   *
+   * @param {TypeOrmExtConnectionToken} connection Connection Token
+   * @returns {string} Connection String
+   */
   private static resolveConnectionToken(
     connection: TypeOrmExtConnectionToken,
   ): string {
@@ -53,6 +80,12 @@ export class TypeOrmExtStorage {
       : connection.name;
   }
 
+  /**
+   * Merge storage
+   *
+   * @param {TypeOrmExtMetadataItemsInterface} storageItems Storage Items
+   * @param {ConfigurationMap} target Storage target
+   */
   private static mergeStorage(
     storageItems: TypeOrmExtMetadataItemsInterface,
     target: ConfigurationMap,
@@ -71,18 +104,36 @@ export class TypeOrmExtStorage {
     }
   }
 
+  /**
+   * Get entities by the key
+   *
+   * @param {string} key Entity key
+   * @returns {TypeOrmExtMetadataItemInterface<TypeOrmExtStorableEntity>} Entity
+   */
   static getEntityByKey(
     key: string,
   ): TypeOrmExtMetadataItemInterface<TypeOrmExtStorableEntity> {
     return this.entities.get(key);
   }
 
+  /**
+   * Get repositories by the key
+   *
+   * @param {string} key Repository Key
+   * @returns {TypeOrmExtMetadataItemInterface<TypeOrmExtStorableRepository>} Repository
+   */
   static getRepositoryByKey(
     key: string,
   ): TypeOrmExtMetadataItemInterface<TypeOrmExtStorableRepository> {
     return this.repositories.get(key);
   }
 
+  /**
+   * Get all entities by the connection
+   *
+   * @param {string} connection Connection
+   * @returns {TypeOrmExtMetadataItemInterface<TypeOrmExtStorableEntity>[]} Entities
+   */
   static getEntitiesByConnection(
     connection: string,
   ): TypeOrmExtMetadataItemInterface<TypeOrmExtStorableEntity>[] {
@@ -97,6 +148,12 @@ export class TypeOrmExtStorage {
     return entities;
   }
 
+  /**
+   * Get all subscribers by the connection
+   *
+   * @param {string} connection Connection
+   * @returns {TypeOrmExtMetadataItemInterface<TypeOrmExtStorableRepository>[]} Subscribers
+   */
   static getSubscribersByConnection(
     connection: string,
   ): TypeOrmExtMetadataItemInterface<TypeOrmExtStorableSubscriber>[] {

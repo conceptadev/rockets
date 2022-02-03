@@ -1,4 +1,4 @@
-import { Injectable, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import {
   AsyncModuleConfig,
@@ -34,7 +34,6 @@ import { CrudModule } from '@rockts-org/nestjs-crud';
   exports: [UserService, UserCrudService],
   controllers: [UserController],
 })
-@Injectable()
 export class UserModule extends createConfigurableDynamicRootModule<
   UserModule,
   UserOptionsInterface

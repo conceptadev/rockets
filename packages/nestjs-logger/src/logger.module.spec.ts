@@ -2,10 +2,12 @@ import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { loggerConfig } from './config/logger.config';
 import { LoggerOptionsInterface } from './interfaces/logger-options.interface';
+import { LoggerSettingsInterface } from './interfaces/logger-settings.interface';
 import { LoggerTransportService } from './logger-transport.service';
+import { LoggerExceptionFilter } from './logger-exception.filter';
+
 import { LoggerModule } from './logger.module';
 import { LoggerService } from './logger.service';
-import { LoggerSentryTransport } from './transports/logger-sentry.transport';
 
 describe('LoggerModule', () => {
   describe('forRoot with defaults', () => {
@@ -15,28 +17,29 @@ describe('LoggerModule', () => {
       jest.clearAllMocks();
 
       moduleRef = await Test.createTestingModule({
-        imports: [LoggerModule.forRoot()],
+        imports: [LoggerModule.register()],
       }).compile();
     });
 
     it('module should be defined', async () => {
       const loggerService = moduleRef.get(LoggerService);
-      const loggerSentryTransport = moduleRef.get<LoggerSentryTransport>(
-        LoggerSentryTransport,
-      );
+
       const loggerTransportService = moduleRef.get<LoggerTransportService>(
         LoggerTransportService,
       );
 
-      loggerService.addTransport(loggerSentryTransport);
+      const loggerExceptionFilter = moduleRef.get<LoggerExceptionFilter>(
+        LoggerExceptionFilter,
+      );
 
       // This is to inform that this logger will new used internally
       // or it will be used once yuo do a new Logger()
       moduleRef.useLogger(loggerService);
 
       expect(loggerService).toBeInstanceOf(LoggerService);
-      expect(loggerSentryTransport).toBeInstanceOf(LoggerSentryTransport);
+
       expect(loggerTransportService).toBeInstanceOf(LoggerTransportService);
+      expect(loggerExceptionFilter).toBeInstanceOf(LoggerExceptionFilter);
       expect(loggerTransportService['loggerTransports'].length).toBe(1);
     });
   });
@@ -50,7 +53,14 @@ describe('LoggerModule', () => {
       const config = await loggerConfig();
 
       moduleRef = await Test.createTestingModule({
-        imports: [LoggerModule.forRoot({ ...config, logLevel: ['debug'] })],
+        imports: [
+          LoggerModule.register({
+            settings: {
+              ...config,
+              logLevel: ['debug'],
+            },
+          }),
+        ],
       }).compile();
     });
 
@@ -63,18 +73,21 @@ describe('LoggerModule', () => {
     let moduleRef: TestingModule;
 
     beforeEach(async () => {
+      jest.clearAllMocks();
       moduleRef = await Test.createTestingModule({
         imports: [
-          LoggerModule.forRootAsync({
+          LoggerModule.registerAsync({
             imports: [ConfigModule.forFeature(loggerConfig)],
             inject: [loggerConfig.KEY],
             useFactory: async (
-              config: LoggerOptionsInterface,
+              config: LoggerSettingsInterface,
             ): Promise<LoggerOptionsInterface> => {
               return {
-                ...config,
-                logLevel: ['debug'],
-                transportLogLevel: ['debug'],
+                settings: {
+                  ...config,
+                  logLevel: ['debug'],
+                  transportLogLevel: ['debug'],
+                },
               };
             },
           }),
@@ -85,21 +98,17 @@ describe('LoggerModule', () => {
 
     it('module should be defined', async () => {
       const loggerService = moduleRef.get(LoggerService);
-      const loggerSentryTransport = moduleRef.get<LoggerSentryTransport>(
-        LoggerSentryTransport,
-      );
+
       const loggerTransportService = moduleRef.get<LoggerTransportService>(
         LoggerTransportService,
       );
-
-      loggerService.addTransport(loggerSentryTransport);
 
       // This is to inform that this logger will new used internally
       // or it will be used once yuo do a new Logger()
       moduleRef.useLogger(loggerService);
 
       expect(loggerService).toBeInstanceOf(LoggerService);
-      expect(loggerSentryTransport).toBeInstanceOf(LoggerSentryTransport);
+
       expect(loggerTransportService).toBeInstanceOf(LoggerTransportService);
       expect(loggerTransportService['loggerTransports'].length).toBe(1);
     });

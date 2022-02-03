@@ -5,14 +5,16 @@ import {
 } from '@nestjs/config';
 
 import { LogLevel } from '@nestjs/common';
-import { LoggerOptionsInterface } from '../interfaces/logger-options.interface';
 import { Severity as SentryLogSeverity } from '@sentry/types';
 import { splitLogLevel } from '../utils/config-parser.util';
+import { LoggerSettingsInterface } from '../interfaces/logger-settings.interface';
 
 /**
  * The token to which all logger module options are set.
  */
 export const LOGGER_MODULE_OPTIONS_TOKEN = 'LOGGER_MODULE_OPTIONS';
+
+export const LOGGER_MODULE_SETTINGS_TOKEN = 'LOGGER_MODULE_SETTINGS_TOKEN';
 
 /**
  * Valid log levels.
@@ -28,7 +30,7 @@ export const LOGGER_VALID_LOG_LEVELS: LogLevel[] = [
 /**
  * Logger config factory type.
  */
-export type LoggerConfigFactory = ConfigFactory<LoggerOptionsInterface> &
+export type LoggerConfigFactory = ConfigFactory<LoggerSettingsInterface> &
   ConfigFactoryKeyHost;
 
 /**
@@ -45,8 +47,8 @@ export type LoggerConfigFactory = ConfigFactory<LoggerOptionsInterface> &
  * ```
  */
 export const loggerConfig: LoggerConfigFactory = registerAs(
-  'LOGGER_MODULE_CONFIG',
-  (): LoggerOptionsInterface => ({
+  'LOGGER_MODULE_DEFAULT_CONFIG',
+  (): LoggerSettingsInterface => ({
     /**
      * Get log levels from environment variables
      */

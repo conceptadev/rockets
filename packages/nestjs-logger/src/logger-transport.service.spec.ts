@@ -1,7 +1,7 @@
 import { Logger, LogLevel } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 
-import { LOGGER_MODULE_OPTIONS_TOKEN } from './config/logger.config';
+import { LOGGER_MODULE_SETTINGS_TOKEN } from './config/logger.config';
 import { LoggerTransportInterface } from './interfaces/logger-transport.interface';
 import { LoggerTransportService } from './logger-transport.service';
 
@@ -20,7 +20,7 @@ describe('LoggerTransportService', () => {
       providers: [
         LoggerTransportService,
         {
-          provide: LOGGER_MODULE_OPTIONS_TOKEN,
+          provide: LOGGER_MODULE_SETTINGS_TOKEN,
           useValue: {
             logLevel: ['error', 'warn'],
             transportLogLevel: ['error', 'warn'],

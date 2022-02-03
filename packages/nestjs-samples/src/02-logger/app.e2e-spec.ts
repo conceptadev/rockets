@@ -10,6 +10,7 @@ import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
+import { LoggerService } from '@rockts-org/nestjs-logger';
 
 describe('AppController (e2e)', () => {
   describe('Express', () => {
@@ -36,13 +37,15 @@ describe('AppController (e2e)', () => {
         description: 'My First Order',
       };
 
+      spySync = jest.spyOn(LoggerService.prototype, 'log');
+
       await supertest(app.getHttpServer())
         .post('/orders/sync')
         .send(order)
         .expect(201)
         .expect({ id: 3, ...order });
 
-      expect(spySync).toHaveBeenCalledTimes(1);
+      expect(spySync).toHaveBeenCalledWith('A order was created.');
 
       return;
     });
@@ -75,6 +78,8 @@ describe('AppController (e2e)', () => {
         description: 'My First Order',
       };
 
+      spySync = jest.spyOn(LoggerService.prototype, 'log');
+
       return app
         .inject({
           method: 'POST',
@@ -84,7 +89,7 @@ describe('AppController (e2e)', () => {
         .then(({ statusCode, payload }) => {
           expect(statusCode).toEqual(201);
           expect(JSON.parse(payload)).toEqual({ id: 3, ...order });
-          expect(spySync).toHaveBeenCalledTimes(1);
+          expect(spySync).toHaveBeenCalledWith('A order was created.');
         });
     });
   });
