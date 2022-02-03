@@ -1,4 +1,4 @@
-import { Injectable, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import {
   AsyncModuleConfig,
@@ -32,7 +32,6 @@ import { DefaultUserService } from './services/default-user.service';
   exports: [UserService, UserController],
   controllers: [UserController],
 })
-@Injectable()
 export class UserModule extends createConfigurableDynamicRootModule<
   UserModule,
   UserOptionsInterface
