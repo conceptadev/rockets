@@ -9,6 +9,8 @@ import {
 
 import {
   AUTH_REFRESH_ISSUE_TOKEN_SERVICE_TOKEN,
+  AUTH_REFRESH_USER_LOOKUP_SERVICE_TOKEN,
+  AUTH_REFRESH_VERIFY_TOKEN_SERVICE_TOKEN,
   REFRESH_TOKEN_MODULE_OPTIONS_TOKEN,
   REFRESH_TOKEN_MODULE_SETTINGS_TOKEN,
 } from './auth-refresh.constants';
@@ -18,26 +20,23 @@ import { AuthRefreshOptionsInterface } from './interfaces/auth-refresh-options.i
 
 import {
   AuthenticationModule,
-  CredentialLookupInterface,
   IssueTokenService,
   IssueTokenServiceInterface,
-  UserLookupServiceInterface,
+  UserLookupService,
+  VerifyTokenService,
+  VerifyTokenServiceInterface,
 } from '@rockts-org/nestjs-authentication';
 
 import { AuthRefreshController } from './auth-refresh.controller';
 import { JwtModule } from '@rockts-org/nestjs-jwt';
 
 import { AuthRefreshStrategy } from './auth-refresh.strategy';
-import { RefreshUserLookupService } from './services/refresh-user-lookup.service';
-import { DefaultRefreshUserLookupService } from './services/default-refresh-user-lookup.service';
-import { UserModule } from '@rockts-org/nestjs-user';
 
 /**
  * Auth local module
  */
 @Module({
-  providers: [DefaultRefreshUserLookupService, AuthRefreshStrategy],
-  exports: [RefreshUserLookupService],
+  providers: [UserLookupService, AuthRefreshStrategy],
   controllers: [AuthRefreshController],
 })
 export class AuthRefreshModule extends createConfigurableDynamicRootModule<
@@ -54,13 +53,8 @@ export class AuthRefreshModule extends createConfigurableDynamicRootModule<
       timeoutMessage:
         'AuthRefreshModule requires JwtModule to be registered in your application.',
     }),
-    UserModule.deferred({
-      timeoutMessage:
-        'AuthRefreshModule requires UserModule to be registered in your application.',
-    }),
   ],
   providers: [
-    //TODO: remove this? settings should come from jwt module
     {
       provide: REFRESH_TOKEN_MODULE_SETTINGS_TOKEN,
       inject: [
@@ -73,15 +67,12 @@ export class AuthRefreshModule extends createConfigurableDynamicRootModule<
       ) => options?.settings ?? defaultSettings,
     },
     {
-      provide: RefreshUserLookupService,
-      inject: [
-        REFRESH_TOKEN_MODULE_OPTIONS_TOKEN,
-        DefaultRefreshUserLookupService,
-      ],
+      provide: AUTH_REFRESH_VERIFY_TOKEN_SERVICE_TOKEN,
+      inject: [REFRESH_TOKEN_MODULE_OPTIONS_TOKEN, VerifyTokenService],
       useFactory: async (
         options: AuthRefreshOptionsInterface,
-        defaultService: UserLookupServiceInterface<CredentialLookupInterface>,
-      ) => options.userLookupService ?? defaultService,
+        defaultService: VerifyTokenServiceInterface,
+      ) => options.issueTokenService ?? defaultService,
     },
     {
       provide: AUTH_REFRESH_ISSUE_TOKEN_SERVICE_TOKEN,
@@ -90,6 +81,14 @@ export class AuthRefreshModule extends createConfigurableDynamicRootModule<
         options: AuthRefreshOptionsInterface,
         defaultService: IssueTokenServiceInterface,
       ) => options.issueTokenService ?? defaultService,
+    },
+    {
+      provide: AUTH_REFRESH_USER_LOOKUP_SERVICE_TOKEN,
+      inject: [REFRESH_TOKEN_MODULE_OPTIONS_TOKEN, UserLookupService],
+      useFactory: async (
+        options: AuthRefreshOptionsInterface,
+        defaultService: UserLookupService,
+      ) => options?.userLookupService ?? defaultService,
     },
   ],
   exports: [AUTH_REFRESH_ISSUE_TOKEN_SERVICE_TOKEN],

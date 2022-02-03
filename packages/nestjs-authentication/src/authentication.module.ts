@@ -1,6 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
-import { JwtModule } from '@rockts-org/nestjs-jwt';
+import {
+  JwtIssueService,
+  JwtModule,
+  JwtVerifyService,
+} from '@rockts-org/nestjs-jwt';
 import {
   AsyncModuleConfig,
   createConfigurableDynamicRootModule,
@@ -11,12 +15,15 @@ import { authenticationDefaultConfig } from './config/authentication-default.con
 import {
   AUTHENTICATION_MODULE_OPTIONS_TOKEN,
   AUTHENTICATION_MODULE_SETTINGS_TOKEN,
+  AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN,
 } from './authentication.constants';
 import { AuthenticationOptionsInterface } from './interfaces/authentication-options.interface';
+import { UserLookupService } from './services/user-lookup.service';
 import { IssueTokenService } from './services/issue-token.service';
 import { DefaultIssueTokenService } from './services/default-issue-token.service';
-import { DecodeTokenService } from './services/decode-token.service';
-import { DefaultDecodeTokenService } from './services/default-decode-token.service';
+import { VerifyTokenService } from './services/verify-token.service';
+import { DefaultVerifyTokenService } from './services/default-verify-token.service';
+import { DefaultUserLookupService } from './services/default-user-lookup.service';
 
 /**
  * Authentication Module to handle authentication and password encryption.
@@ -86,12 +93,19 @@ import { DefaultDecodeTokenService } from './services/default-decode-token.servi
  */
 @Module({
   providers: [
+    DefaultUserLookupService,
     DefaultIssueTokenService,
-    IssueTokenService,
-    DecodeTokenService,
-    DefaultDecodeTokenService,
+    DefaultVerifyTokenService,
+    JwtIssueService,
+    JwtVerifyService,
   ],
-  exports: [IssueTokenService, DecodeTokenService],
+  exports: [
+    UserLookupService,
+    IssueTokenService,
+    VerifyTokenService,
+    JwtIssueService,
+    JwtVerifyService,
+  ],
 })
 export class AuthenticationModule extends createConfigurableDynamicRootModule<
   AuthenticationModule,
@@ -117,6 +131,14 @@ export class AuthenticationModule extends createConfigurableDynamicRootModule<
       ) => options.settings ?? defaultSettings,
     },
     {
+      provide: UserLookupService,
+      inject: [AUTHENTICATION_MODULE_OPTIONS_TOKEN, DefaultUserLookupService],
+      useFactory: async (
+        options: AuthenticationOptionsInterface,
+        defaultService: DefaultUserLookupService,
+      ) => options.userLookupService ?? defaultService,
+    },
+    {
       provide: IssueTokenService,
       inject: [AUTHENTICATION_MODULE_OPTIONS_TOKEN, DefaultIssueTokenService],
       useFactory: async (
@@ -125,12 +147,18 @@ export class AuthenticationModule extends createConfigurableDynamicRootModule<
       ) => options.issueTokenService ?? defaultService,
     },
     {
-      provide: DecodeTokenService,
-      inject: [AUTHENTICATION_MODULE_OPTIONS_TOKEN, DefaultDecodeTokenService],
+      provide: VerifyTokenService,
+      inject: [AUTHENTICATION_MODULE_OPTIONS_TOKEN, DefaultVerifyTokenService],
       useFactory: async (
         options: AuthenticationOptionsInterface,
-        defaultService: DefaultDecodeTokenService,
-      ) => options.decodeTokenService ?? defaultService,
+        defaultService: DefaultVerifyTokenService,
+      ) => options.verifyTokenService ?? defaultService,
+    },
+    {
+      provide: AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN,
+      inject: [AUTHENTICATION_MODULE_OPTIONS_TOKEN],
+      useFactory: async (options: AuthenticationOptionsInterface) =>
+        options.validateTokenService,
     },
   ],
 }) {

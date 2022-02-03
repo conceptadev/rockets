@@ -1,48 +1,49 @@
-import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 
 import {
-  CredentialLookupInterface,
-  DecodeTokenService,
   PassportStrategyFactory,
+  UserIdentityInterface,
+  UserLookupServiceInterface,
+  VerifyTokenServiceInterface,
 } from '@rockts-org/nestjs-authentication';
 import {
   AUTH_JWT_REFRESH_STRATEGY_NAME,
+  AUTH_REFRESH_USER_LOOKUP_SERVICE_TOKEN,
+  AUTH_REFRESH_VERIFY_TOKEN_SERVICE_TOKEN,
   REFRESH_TOKEN_MODULE_SETTINGS_TOKEN,
 } from './auth-refresh.constants';
 import { AuthRefreshSettingsInterface } from './interfaces/auth-refresh-settings.interface';
 import { AuthRefreshPayloadInterface } from './interfaces/auth-refresh-payload.interface';
-import { RefreshUserLookupService } from './services/refresh-user-lookup.service';
+import {
+  JwtStrategy,
+  JwtStrategyOptionsInterface,
+} from '@rockts-org/nestjs-jwt';
+import { createVerifyTokenCallback } from './utils/create-verify-token-callback.util';
 
 @Injectable()
-export class AuthRefreshStrategy extends PassportStrategyFactory(
-  Strategy,
+export class AuthRefreshStrategy extends PassportStrategyFactory<JwtStrategy>(
+  JwtStrategy,
   AUTH_JWT_REFRESH_STRATEGY_NAME,
 ) {
+  @Inject(AUTH_REFRESH_USER_LOOKUP_SERVICE_TOKEN)
+  private userLookupService: UserLookupServiceInterface;
+
   constructor(
     @Inject(REFRESH_TOKEN_MODULE_SETTINGS_TOKEN)
     settings: AuthRefreshSettingsInterface,
-    private refreshUserLookupService: RefreshUserLookupService,
-    decodeTokenService: DecodeTokenService,
+    @Inject(AUTH_REFRESH_VERIFY_TOKEN_SERVICE_TOKEN)
+    verifyTokenService: VerifyTokenServiceInterface,
   ) {
-    // TODO: this settings should be the same of the jwt one?
-    super({
-      //TODO: Ho to define the property to get information?
-      jwtFromRequest: ExtractJwt.fromBodyField('authRefresh'),
-      ignoreExpiration: settings.ignoreExpiration,
-      secretOrKeyProvider: async (request, rawJwtToken, done) => {
-        const key = await decodeTokenService.verifyToken(rawJwtToken);
+    const options: JwtStrategyOptionsInterface = {
+      verifyToken: createVerifyTokenCallback(verifyTokenService),
+      ...settings,
+    };
 
-        //TODO: Maybe check if the token belongs to the user here?
-
-        //done(error, secret_key);
-        done(null, key);
-      },
-    });
+    super(options);
   }
+
   /**
-   * Validate the user based on the username and password
-   * from the request body
+   * Validate the user id from the verified token
    *
    * @param username The username to authenticate
    * @param password
@@ -51,11 +52,10 @@ export class AuthRefreshStrategy extends PassportStrategyFactory(
 
   async validate(
     payload: AuthRefreshPayloadInterface,
-  ): Promise<CredentialLookupInterface> {
-    // break out the fields
+  ): Promise<UserIdentityInterface> {
     const { sub } = payload;
 
-    const user = await this.refreshUserLookupService.getUser(sub);
+    const user = await this.userLookupService.getUser(sub);
 
     if (!user) {
       throw new UnauthorizedException();

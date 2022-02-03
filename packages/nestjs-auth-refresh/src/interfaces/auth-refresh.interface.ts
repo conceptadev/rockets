@@ -1,3 +1,3 @@
 export interface AuthRefreshInterface {
-  verifyToken?: string;
+  refreshToken?: string;
 }

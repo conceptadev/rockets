@@ -7,7 +7,7 @@ import { INestApplication } from '@nestjs/common';
 import { TestUserRepository } from './user/user.repository';
 import { mock } from 'jest-mock-extended';
 import { User } from '@rockts-org/nestjs-user';
-import { AuthenticationResponseInterface } from '@rockts-org/nestjs-authentication';
+import { AuthenticationJwtResponseInterface } from '@rockts-org/nestjs-authentication';
 import { UserDto } from './user/user.controller';
 
 describe('AppController (e2e)', () => {
@@ -39,11 +39,12 @@ describe('AppController (e2e)', () => {
         password: 'AS12378',
       };
 
-      const response: { body: AuthenticationResponseInterface } =
+      const response: { body: AuthenticationJwtResponseInterface } =
         await supertest(app.getHttpServer())
           .post('/auth/local')
           .send(sign)
           .expect(201);
+
       expect(response.body.accessToken).toBeDefined();
       expect(response.body.refreshToken).toBeDefined();
     });
@@ -68,19 +69,17 @@ describe('AppController (e2e)', () => {
         password: 'AS12378',
       };
 
-      const response: { body: AuthenticationResponseInterface } =
+      const response: { body: AuthenticationJwtResponseInterface } =
         await supertest(app.getHttpServer())
           .post('/auth/local')
           .send(sign)
           .expect(201);
-      const commonHeaders = {
-        authorization: `bearer ${response.body.accessToken}`,
-      };
 
       const getUsers: { body: UserDto[] } = await supertest(app.getHttpServer())
         .get('/custom/user/all')
-        .set(commonHeaders)
+        .set('Authorization', `bearer ${response.body.accessToken}`)
         .expect(200);
+
       expect(getUsers.body).toBeDefined();
       expect(getUsers.body[0].username).toBe('user1');
     });
@@ -95,6 +94,7 @@ describe('AppController (e2e)', () => {
       //     .post(('/token/refresh')
       //     .send({})
       //     .expect(201);
+      return;
     });
   });
 });

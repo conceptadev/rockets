@@ -1,3 +1,4 @@
-import { OptionsInterface } from '@rockts-org/nestjs-common';
+import { JwtStrategyOptionsInterface } from '@rockts-org/nestjs-jwt';
 
-export interface AuthRefreshSettingsInterface extends OptionsInterface {}
+export interface AuthRefreshSettingsInterface
+  extends JwtStrategyOptionsInterface {}

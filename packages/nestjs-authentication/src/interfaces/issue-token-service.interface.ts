@@ -1,9 +1,6 @@
-import { AuthenticationResponseInterface } from '../interfaces/authentication-response.interface';
+import { JwtIssueServiceInterface } from '@rockts-org/nestjs-jwt';
+import { AuthenticationJwtResponseInterface } from './authentication-jwt-response.interface';
 
-export interface IssueTokenServiceInterface {
-  accessToken(payload: string | { [key: string]: unknown }): Promise<string>;
-  refreshToken(payload: string | { [key: string]: unknown }): Promise<string>;
-  responsePayload(
-    payload: string | { [key: string]: unknown },
-  ): Promise<AuthenticationResponseInterface>;
+export interface IssueTokenServiceInterface extends JwtIssueServiceInterface {
+  responsePayload(id: string): Promise<AuthenticationJwtResponseInterface>;
 }

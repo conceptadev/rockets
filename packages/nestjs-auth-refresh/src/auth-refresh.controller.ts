@@ -2,10 +2,10 @@ import { Controller, Inject, Post, UseGuards } from '@nestjs/common';
 import {
   IssueTokenServiceInterface,
   IssueTokenService,
-  AuthenticationResponseInterface,
+  AuthenticationJwtResponseInterface,
   AuthGuard,
   AuthUser,
-  CredentialLookupInterface,
+  UserIdentityDto,
 } from '@rockts-org/nestjs-authentication';
 import { AUTH_JWT_REFRESH_STRATEGY_NAME } from './auth-refresh.constants';
 
@@ -25,8 +25,8 @@ export class AuthRefreshController {
   @UseGuards(AuthGuard(AUTH_JWT_REFRESH_STRATEGY_NAME))
   @Post()
   async refresh(
-    @AuthUser() user: CredentialLookupInterface,
-  ): Promise<AuthenticationResponseInterface> {
-    return this.issueTokenService.responsePayload({ sub: user.id });
+    @AuthUser() user: UserIdentityDto,
+  ): Promise<AuthenticationJwtResponseInterface> {
+    return this.issueTokenService.responsePayload(user.id);
   }
 }

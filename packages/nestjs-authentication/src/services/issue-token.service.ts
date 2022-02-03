@@ -1,62 +1,41 @@
 import { Injectable } from '@nestjs/common';
-import { JwtSignService } from '@rockts-org/nestjs-jwt';
-//import { RefreshTokenService } from '@rockts-org/nestjs-refresh-token';
-import { AuthenticationResponseInterface } from '../interfaces/authentication-response.interface';
+import { JwtIssueService } from '@rockts-org/nestjs-jwt';
+import { AuthenticationJwtResponseInterface } from '../interfaces/authentication-jwt-response.interface';
 import { IssueTokenServiceInterface } from '../interfaces/issue-token-service.interface';
 
 @Injectable()
 export class IssueTokenService implements IssueTokenServiceInterface {
-  constructor(private jwtSignService: JwtSignService) {}
+  constructor(private jwtIssueService: JwtIssueService) {}
 
   /**
    * Generate access token for a payload.
-   *
-   * @param id user id or name for `sub` claim
    */
-  async accessToken(
-    payload: string | { [key: string]: unknown },
-  ): Promise<string> {
-    return this.signAsync(payload, { expiresIn: '15m' });
+  async accessToken(...args: Parameters<JwtIssueService['accessToken']>) {
+    return this.jwtIssueService.accessToken(...args);
   }
 
   /**
    * Generate refresh token for a payload.
-   *
-   * @param username user id or name for `sub` claim
    */
-  //TODO: should i point this to the new refresh token? or remove?
-  async refreshToken(
-    payload: string | { [key: string]: unknown },
-  ): Promise<string> {
-    return this.signAsync(payload, { expiresIn: '1w' });
+  async refreshToken(...args: Parameters<JwtIssueService['refreshToken']>) {
+    return this.jwtIssueService.refreshToken(...args);
   }
 
   /**
    * Generate the response payload.
    *
-   * @param username user id or name for `sub` claim
+   * @param identifier user id or name for `sub` claim
    */
-  async responsePayload(id: string): Promise<AuthenticationResponseInterface> {
+  async responsePayload(
+    id: string,
+  ): Promise<AuthenticationJwtResponseInterface> {
+    // TODO: need pattern for events and/or callbacks to mutate this object before signing
     const payload = { sub: id };
+
+    // return the payload
     return {
       accessToken: await this.accessToken(payload),
       refreshToken: await this.refreshToken(payload),
     };
-  }
-
-  async responsePayloadObj(payload: {
-    [key: string]: unknown;
-  }): Promise<AuthenticationResponseInterface> {
-    return {
-      accessToken: await this.accessToken(payload),
-      refreshToken: await this.refreshToken(payload),
-    };
-  }
-
-  async signAsync(
-    payload: string | { [key: string]: unknown },
-    options?: { [key: string]: unknown },
-  ): Promise<string> {
-    return this.jwtSignService.signAsync(payload, options);
   }
 }

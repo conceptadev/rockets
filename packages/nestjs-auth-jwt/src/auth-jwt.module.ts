@@ -10,20 +10,26 @@ import {
 import {
   AUTH_JWT_MODULE_OPTIONS_TOKEN,
   AUTH_JWT_MODULE_SETTINGS_TOKEN,
+  AUTH_JWT_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+  AUTH_JWT_MODULE_VERIFY_TOKEN_SERVICE_TOKEN,
 } from './auth-jwt.constants';
 import { authJwtDefaultConfig } from './config/auth-jwt-default.config';
 
 import { AuthJwtOptionsInterface } from './interfaces/auth-jwt-options.interface';
 import { AuthJwtStrategy } from './auth-jwt.strategy';
-import { AuthenticationModule } from '@rockts-org/nestjs-authentication';
+import {
+  AuthenticationModule,
+  UserLookupService,
+  VerifyTokenService,
+} from '@rockts-org/nestjs-authentication';
+import { VerifyTokenServiceInterface } from '@rockts-org/nestjs-authentication/src/interfaces/verify-token-service.interface';
 
 /**
  * Auth local module
  */
 @Module({
-  providers: [AuthJwtStrategy],
+  providers: [AuthJwtStrategy, VerifyTokenService],
   exports: [AuthJwtStrategy],
-  controllers: [],
 })
 export class AuthJwtModule extends createConfigurableDynamicRootModule<
   AuthJwtModule,
@@ -37,7 +43,6 @@ export class AuthJwtModule extends createConfigurableDynamicRootModule<
     }),
   ],
   providers: [
-    //TODO: remove this? settings should come from jwt module
     {
       provide: AUTH_JWT_MODULE_SETTINGS_TOKEN,
       inject: [AUTH_JWT_MODULE_OPTIONS_TOKEN, authJwtDefaultConfig.KEY],
@@ -46,8 +51,28 @@ export class AuthJwtModule extends createConfigurableDynamicRootModule<
         defaultSettings: ConfigType<typeof authJwtDefaultConfig>,
       ) => options?.settings ?? defaultSettings,
     },
+    {
+      provide: AUTH_JWT_MODULE_VERIFY_TOKEN_SERVICE_TOKEN,
+      inject: [AUTH_JWT_MODULE_OPTIONS_TOKEN, VerifyTokenService],
+      useFactory: async (
+        options: AuthJwtOptionsInterface,
+        defaultService: VerifyTokenServiceInterface,
+      ) => options.issueTokenService ?? defaultService,
+    },
+    {
+      provide: AUTH_JWT_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+      inject: [AUTH_JWT_MODULE_OPTIONS_TOKEN, UserLookupService],
+      useFactory: async (
+        options: AuthJwtOptionsInterface,
+        defaultService: UserLookupService,
+      ) => options?.userLookupService ?? defaultService,
+    },
   ],
-  exports: [],
+  exports: [
+    AUTH_JWT_MODULE_SETTINGS_TOKEN,
+    AUTH_JWT_MODULE_VERIFY_TOKEN_SERVICE_TOKEN,
+    AUTH_JWT_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+  ],
 }) {
   static register(options: AuthJwtOptionsInterface = {}) {
     const module = AuthJwtModule.forRoot(AuthJwtModule, options);

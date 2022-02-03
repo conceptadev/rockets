@@ -1,6 +1,3 @@
-import { OptionsInterface } from '@rockts-org/nestjs-common';
+import { JwtStrategyOptionsInterface } from '@rockts-org/nestjs-jwt';
 
-export interface AuthJwtSettingsInterface extends OptionsInterface {
-  ignoreExpiration?: boolean;
-  secretOrKey?: string;
-}
+export interface AuthJwtSettingsInterface extends JwtStrategyOptionsInterface {}
