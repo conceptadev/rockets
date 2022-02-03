@@ -1,5 +1,10 @@
 import { Strategy } from 'passport-local';
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CredentialLookupInterface } from '@rockts-org/nestjs-authentication';
 import { PasswordStorageService } from '@rockts-org/nestjs-password';
 import {
@@ -8,7 +13,8 @@ import {
 } from './auth-local.constants';
 import { PassportStrategyFactory } from '@rockts-org/nestjs-authentication';
 import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.interface';
-import { UserLookupService } from './services/user-lookup.service';
+import { AuthLocalUserLookupService } from './services/auth-local-user-lookup.service';
+import { validateOrReject } from 'class-validator';
 
 /**
  * Define the Local strategy using passport.
@@ -18,7 +24,7 @@ import { UserLookupService } from './services/user-lookup.service';
  * after register LocalStrategy in the module, use GenericAuthGuard(LOCAL_STRATEGY_NAME) in the controller endpoint to authenticate the user.
  */
 @Injectable()
-export class LocalStrategy extends PassportStrategyFactory(
+export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
   Strategy,
   AUTH_LOCAL_STRATEGY_NAME,
 ) {
@@ -30,8 +36,8 @@ export class LocalStrategy extends PassportStrategyFactory(
    */
   constructor(
     @Inject(AUTH_LOCAL_MODULE_SETTINGS_TOKEN)
-    settings: AuthLocalSettingsInterface,
-    private userLookupService: UserLookupService,
+    private settings: AuthLocalSettingsInterface,
+    private userLookupService: AuthLocalUserLookupService,
     private passwordService: PasswordStorageService,
   ) {
     super({
@@ -45,14 +51,28 @@ export class LocalStrategy extends PassportStrategyFactory(
    * from the request body
    *
    * @param username The username to authenticate
-   * @param pass
+   * @param password
    * @returns
    */
   async validate(
     username: string,
-    pass: string,
+    password: string,
   ): Promise<CredentialLookupInterface> {
-    const user = await this.userLookupService.getUser(username);
+    // break out the fields
+    const { usernameField, passwordField } = this.settings;
+
+    // validate the dto
+    const dto = new this.settings.loginDto();
+    dto[usernameField] = username;
+    dto[passwordField] = password;
+
+    try {
+      await validateOrReject(dto);
+    } catch (e) {
+      throw new BadRequestException(e);
+    }
+
+    const user = await this.userLookupService.getUser(dto[usernameField]);
 
     if (!user) {
       throw new UnauthorizedException();
@@ -60,7 +80,7 @@ export class LocalStrategy extends PassportStrategyFactory(
 
     // validate password
     const isValid = await this.passwordService.validatePassword(
-      pass,
+      dto[passwordField],
       user.password,
       user.salt,
     );

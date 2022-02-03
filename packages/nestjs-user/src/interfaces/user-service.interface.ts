@@ -1,5 +1,7 @@
 import { UserInterface } from './user.interface';
 
 export interface UserServiceInterface {
-  getUserByUsername(username: string): Promise<UserInterface>;
+  getUser(...args: string[]): Promise<UserInterface>;
+  // getUserByUsername?(username: string): Promise<UserInterface>;
+  // getUserByUserId?(id: string): Promise<UserInterface>;
 }
