@@ -1,9 +1,9 @@
 import { Controller, Inject, Post, UseGuards } from '@nestjs/common';
 import {
-  AuthenticationResponseInterface,
+  AuthenticationJwtResponseInterface,
   AuthUser,
-  CredentialLookupInterface,
   IssueTokenServiceInterface,
+  UserIdentityDto,
 } from '@rockts-org/nestjs-authentication';
 import { AuthGuard } from '@rockts-org/nestjs-authentication';
 import { AUTH_LOCAL_ISSUE_TOKEN_SERVICE_TOKEN } from './auth-local.constants';
@@ -25,8 +25,8 @@ export class AuthLocalController {
   @UseGuards(AuthGuard(AUTH_LOCAL_STRATEGY_NAME))
   @Post()
   async login(
-    @AuthUser() user: CredentialLookupInterface,
-  ): Promise<AuthenticationResponseInterface> {
+    @AuthUser() user: UserIdentityDto,
+  ): Promise<AuthenticationJwtResponseInterface> {
     return this.issueTokenService.responsePayload(user.id);
   }
 }
