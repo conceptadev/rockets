@@ -6,8 +6,22 @@ import {
 } from '../typeorm-ext.types';
 import { TypeOrmExtMetadataItemsInterface } from './typeorm-ext-metadata-items.interface';
 
+/**
+ * TypeOrmExt Metadata Interface
+ */
 export interface TypeOrmExtMetadataInterface extends OptionsInterface {
+  /**
+   * TypeOrmExt Metadata Entities
+   */
   entities?: TypeOrmExtMetadataItemsInterface<TypeOrmExtStorableEntity>;
+
+  /**
+   * TypeOrmExt Metadata Repositories
+   */
   repositories?: TypeOrmExtMetadataItemsInterface<TypeOrmExtStorableRepository>;
+
+  /**
+   * TypeOrmExt Metadata Subscribers
+   */
   subscribers?: TypeOrmExtMetadataItemsInterface<TypeOrmExtStorableSubscriber>;
 }
