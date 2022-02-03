@@ -2,10 +2,10 @@ import { Provider } from '@nestjs/common';
 import { TypeOrmExtService } from '../typeorm-ext.service';
 
 /**
- * Create repository provider function
+ * Create an entity repository provider function
  *
- * @param {string} token repository token
- * @param {string} entityKey entity key
+ * @param {string} token Repository token
+ * @param {string} entityKey Entity key
  * @returns {Provider} Repository provider
  */
 export function createEntityRepositoryProvider(

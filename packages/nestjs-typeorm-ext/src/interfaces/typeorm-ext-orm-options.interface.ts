@@ -6,7 +6,7 @@ import { TypeOrmExtMetadataInterface } from './typeorm-ext-metadata.interface';
  */
 export interface TypeOrmExtOrmOptionsInterface extends OptionsInterface {
   /**
-   * TypeOrmExt Metadata
+   * TypeOrmExt ORM Metadata
    */
   orm?: TypeOrmExtMetadataInterface;
 }

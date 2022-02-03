@@ -152,7 +152,7 @@ export class TypeOrmExtStorage {
    * Get all subscribers by the connection
    *
    * @param {string} connection Connection
-   * @returns {TypeOrmExtMetadataItemInterface<TypeOrmExtStorableRepository>[]} Repositories
+   * @returns {TypeOrmExtMetadataItemInterface<TypeOrmExtStorableRepository>[]} Subscribers
    */
   static getSubscribersByConnection(
     connection: string,
