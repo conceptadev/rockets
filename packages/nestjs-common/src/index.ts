@@ -4,8 +4,9 @@ export {
 } from '@golevelup/nestjs-modules';
 
 export { OptionsInterface } from './interfaces/options.interface';
+export { ModuleOptionsControllerInterface } from './interfaces/module-options-controller.interface';
+export { ModuleOptionsSettingsInterface } from './interfaces/module-options-settings.interface';
 export { DeferExternalOptionsInterface } from './interfaces/defer-external-options.interface';
-export { DecorateControllerOptionsInterface } from './interfaces/decorate-controller-options.interface';
 
 export { deferExternal } from './modules/defer-external';
-export { decorateController } from './controllers/decorate-controller.helper';
+export { negotiateController } from './modules/negotiate-controller';
