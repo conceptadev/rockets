@@ -29,7 +29,6 @@ export class LoggerSentryTransport implements LoggerTransportInterface {
     // Initialize Sentry
     Sentry.init({
       dsn: this.config.dsn,
-      logLevel: this.config.logLevel,
     });
   }
 

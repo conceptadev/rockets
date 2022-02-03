@@ -21,7 +21,6 @@ describe('loggerSentryTransport', () => {
   beforeEach(async () => {
     const transportSentryConfig: LoggerSentryConfigInterface = {
       dsn: '',
-      logLevel: 1,
       logLevelMap: jest.fn().mockReturnValue(SentryLogSeverity.Error),
     };
     const moduleRef = await Test.createTestingModule({
