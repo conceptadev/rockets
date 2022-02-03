@@ -6,15 +6,15 @@ import { JwtSignService } from './jwt-sign.service';
 export class JwtIssueService implements JwtIssueServiceInterface {
   constructor(private jwtSignService: JwtSignService) {}
 
-  async accessToken<T extends JwtSignService['signAsync']>(
-    payload: T,
-  ): Promise<string> {
-    return this.jwtSignService.signAsync(payload);
+  async accessToken(
+    ...args: Parameters<JwtIssueServiceInterface['accessToken']>
+  ) {
+    return this.jwtSignService.signAsync('access', ...args);
   }
 
-  async refreshToken<T extends JwtSignService['signAsync']>(
-    payload: T,
-  ): Promise<string> {
-    return this.jwtSignService.signAsync(payload);
+  async refreshToken(
+    ...args: Parameters<JwtIssueServiceInterface['refreshToken']>
+  ) {
+    return this.jwtSignService.signAsync('refresh', ...args);
   }
 }

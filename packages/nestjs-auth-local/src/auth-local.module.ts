@@ -20,14 +20,13 @@ import { AuthLocalOptionsInterface } from './interfaces/auth-local-options.inter
 import { AuthLocalStrategy } from './auth-local.strategy';
 import {
   AuthenticationModule,
-  CredentialLookupInterface,
   IssueTokenService,
   IssueTokenServiceInterface,
-  UserLookupServiceInterface,
 } from '@rockts-org/nestjs-authentication';
-import { UserLookupService } from './services/user-lookup.service';
-import { DefaultUserLookupService } from './services/default-user-lookup.service';
+import { AuthLocalUserLookupServiceInterface } from './interfaces/auth-local-user-lookup-service.interface';
 import { AuthLocalCtrlOptionsInterface } from './interfaces/auth-local-ctrl-options.interface';
+import { AuthLocalUserLookupService } from './services/auth-local-user-lookup.service';
+import { DefaultAuthLocalUserLookupService } from './services/default-auth-local-user-lookup.service';
 import { AuthLocalController } from './auth-local.controller';
 import { AuthLocalLoginDto } from './dto/auth-local-login.dto';
 
@@ -35,8 +34,12 @@ import { AuthLocalLoginDto } from './dto/auth-local-login.dto';
  * Auth local module
  */
 @Module({
-  providers: [DefaultUserLookupService, AuthLocalStrategy, UserService],
-  exports: [UserLookupService],
+  providers: [
+    DefaultAuthLocalUserLookupService,
+    AuthLocalStrategy,
+    UserService,
+  ],
+  exports: [AuthLocalUserLookupService],
   controllers: [AuthLocalController],
 })
 export class AuthLocalModule extends createConfigurableDynamicRootModule<
@@ -68,11 +71,14 @@ export class AuthLocalModule extends createConfigurableDynamicRootModule<
       ) => options?.settings ?? defaultSettings,
     },
     {
-      provide: UserLookupService,
-      inject: [AUTH_LOCAL_MODULE_OPTIONS_TOKEN, DefaultUserLookupService],
+      provide: AuthLocalUserLookupService,
+      inject: [
+        AUTH_LOCAL_MODULE_OPTIONS_TOKEN,
+        DefaultAuthLocalUserLookupService,
+      ],
       useFactory: async (
         options: AuthLocalOptionsInterface,
-        defaultService: UserLookupServiceInterface<CredentialLookupInterface>,
+        defaultService: AuthLocalUserLookupServiceInterface,
       ) => options.userLookupService ?? defaultService,
     },
     {

@@ -1,11 +1,11 @@
-import { JwtSignServiceInterface } from './jwt-sign-service.interface';
+import { JwtService } from '@nestjs/jwt';
 
 export interface JwtIssueServiceInterface {
-  accessToken<T extends JwtSignServiceInterface['signAsync']>(
-    payload: T,
-  ): Promise<string>;
+  accessToken(
+    ...args: Parameters<JwtService['signAsync']>
+  ): ReturnType<JwtService['signAsync']>;
 
-  refreshToken<T extends JwtSignServiceInterface['signAsync']>(
-    payload: T,
-  ): Promise<string>;
+  refreshToken(
+    ...args: Parameters<JwtService['signAsync']>
+  ): ReturnType<JwtService['signAsync']>;
 }

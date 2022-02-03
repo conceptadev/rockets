@@ -11,7 +11,11 @@ export class UserService implements UserServiceInterface {
     public userRepo: Repository<User>,
   ) {}
 
-  async getUserByUsername(username: string): Promise<User> {
+  async getUser(username: string): Promise<User> {
     return this.userRepo.findOne({ username });
   }
+
+  // async getUserByUserId(id: string): Promise<User> {
+  //   return this.userRepo.findOne({ id });
+  // }
 }

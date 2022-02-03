@@ -13,7 +13,7 @@ import {
 } from './auth-local.constants';
 import { PassportStrategyFactory } from '@rockts-org/nestjs-authentication';
 import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.interface';
-import { UserLookupService } from './services/user-lookup.service';
+import { AuthLocalUserLookupService } from './services/auth-local-user-lookup.service';
 import { validateOrReject } from 'class-validator';
 
 /**
@@ -24,7 +24,7 @@ import { validateOrReject } from 'class-validator';
  * after register LocalStrategy in the module, use GenericAuthGuard(LOCAL_STRATEGY_NAME) in the controller endpoint to authenticate the user.
  */
 @Injectable()
-export class AuthLocalStrategy extends PassportStrategyFactory(
+export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
   Strategy,
   AUTH_LOCAL_STRATEGY_NAME,
 ) {
@@ -37,7 +37,7 @@ export class AuthLocalStrategy extends PassportStrategyFactory(
   constructor(
     @Inject(AUTH_LOCAL_MODULE_SETTINGS_TOKEN)
     private settings: AuthLocalSettingsInterface,
-    private userLookupService: UserLookupService,
+    private userLookupService: AuthLocalUserLookupService,
     private passwordService: PasswordStorageService,
   ) {
     super({

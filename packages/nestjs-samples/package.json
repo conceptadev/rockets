@@ -15,6 +15,7 @@
     "@nestjs/platform-express": "^8.0.8",
     "@nestjs/platform-fastify": "^8.0.8",
     "@rockts-org/nestjs-auth-local": "^4.0.0-alpha.0",
+    "@rockts-org/nestjs-auth-jwt": "^4.0.0-alpha.0",
     "@rockts-org/nestjs-authentication": "^4.0.0-alpha.0",
     "@rockts-org/nestjs-crud": "4.0.0-alpha.0",
     "@rockts-org/nestjs-email": "^4.0.0-alpha.0",
