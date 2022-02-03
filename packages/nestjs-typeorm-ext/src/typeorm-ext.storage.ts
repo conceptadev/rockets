@@ -67,7 +67,7 @@ export class TypeOrmExtStorage {
   /**
    * Resolve connection token
    *
-   * @param {TypeOrmExtConnectionToken}connection Connection Token
+   * @param {TypeOrmExtConnectionToken} connection Connection Token
    * @returns {string} Connection String
    */
   private static resolveConnectionToken(
@@ -83,7 +83,7 @@ export class TypeOrmExtStorage {
   /**
    * Merge storage
    *
-   * @param {TypeOrmExtMetadataItemsInterface}storageItems Storage Items
+   * @param {TypeOrmExtMetadataItemsInterface} storageItems Storage Items
    * @param {ConfigurationMap} target Storage target
    */
   private static mergeStorage(
@@ -119,7 +119,7 @@ export class TypeOrmExtStorage {
   /**
    * Get repositories by the key
    *
-   * @param {string}key Repository Key
+   * @param {string} key Repository Key
    * @returns {TypeOrmExtMetadataItemInterface<TypeOrmExtStorableRepository>} Repository
    */
   static getRepositoryByKey(

@@ -7,21 +7,21 @@ import {
 import { TypeOrmExtMetadataItemsInterface } from './typeorm-ext-metadata-items.interface';
 
 /**
- * TypeOrmExt Metadata Interface
+ * Metadata Interface
  */
 export interface TypeOrmExtMetadataInterface extends OptionsInterface {
   /**
-   * TypeOrmExt Metadata Entities
+   * Metadata Entities
    */
   entities?: TypeOrmExtMetadataItemsInterface<TypeOrmExtStorableEntity>;
 
   /**
-   * TypeOrmExt Metadata Repositories
+   * Metadata Repositories
    */
   repositories?: TypeOrmExtMetadataItemsInterface<TypeOrmExtStorableRepository>;
 
   /**
-   * TypeOrmExt Metadata Subscribers
+   * Metadata Subscribers
    */
   subscribers?: TypeOrmExtMetadataItemsInterface<TypeOrmExtStorableSubscriber>;
 }

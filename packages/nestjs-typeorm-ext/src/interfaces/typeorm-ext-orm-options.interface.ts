@@ -2,11 +2,11 @@ import { OptionsInterface } from '@rockts-org/nestjs-common';
 import { TypeOrmExtMetadataInterface } from './typeorm-ext-metadata.interface';
 
 /**
- * TypeOrmExt Options Interface
+ * Module Options Interface
  */
 export interface TypeOrmExtOrmOptionsInterface extends OptionsInterface {
   /**
-   * TypeOrmExt ORM Metadata
+   * ORM Metadata
    */
   orm?: TypeOrmExtMetadataInterface;
 }

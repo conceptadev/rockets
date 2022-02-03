@@ -1,7 +1,3 @@
-/**
- * TypeOrmExt Service
- */
-
 import { Inject, Injectable } from '@nestjs/common';
 import { TYPEORM_EXT_MODULE_CONNECTION } from './typeorm-ext.constants';
 import { TypeOrmExtStorage } from './typeorm-ext.storage';
