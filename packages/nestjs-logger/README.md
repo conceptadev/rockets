@@ -1,7 +1,6 @@
-# nestjs-logging
+# Rockets NestJS Logger
 
-A nestjs Logger Module 
-
+A nestjs Logger Module
 
 ## Installation
 
@@ -13,7 +12,7 @@ yarn install nestjs-logging
 
 ## Usage
 
-To start using the Logger Module, all you will need to do, is import the LoggerModule. We can do that using `LoggerModule.forRoot()` for default configuration, `ConfigModule.forRoot(loggerConfig)`  passing a configuration to overwrite the default one (where `loggerConfig` is a object that implements `LoggerOptionsInterface`) or you can overwrite the configuration file with an async call `LoggerModule.forRootAsync()`.
+To start using the Logger Module, all you will need to do, is import the LoggerModule. We can do that using `LoggerModule.forRoot()` for default configuration, `ConfigModule.forRoot(loggerConfig)` passing a configuration to overwrite the default one (where `loggerConfig` is a object that implements `LoggerOptionsInterface`) or you can overwrite the configuration file with an async call `LoggerModule.forRootAsync()`.
 
 To use the default configuration you need to make sure to define the environments variables, one of the ways you can do that is using `.env` file
 
@@ -26,6 +25,7 @@ SENTRY_DSN="{your_sentry_dsn}"
 ```
 
 ## Importing module default configuration
+
 ```ts
 
 import { LoggerModule } from '@rockts-org/nestjs-logging';
@@ -73,31 +73,32 @@ LoggerModule.forRootAsync({
 ```
 
 ## Using LoggerService
+
 After importing the module with the proper configurations, you are all set to start using the `LoggerService` as injected service.
 
-Is a good practice to also inform nest to use the new Logger internally overwrite the default Logger by calling `app.useLogger(customLoggerService)` passing the `LoggerService` from rockets-logger. 
+Is a good practice to also inform nest to use the new Logger internally overwrite the default Logger by calling `app.useLogger(customLoggerService)` passing the `LoggerService` from rockets-logger.
 
 ```ts
-  const app = await NestFactory.create(AppModule);
-  
-  // Get the Transport to be used with new Logger 
-  const loggerSentryTransport = app.get(LoggerSentryTransport);
+const app = await NestFactory.create(AppModule);
 
-  // Get reference of LoggerService From LoggerModule
-  const customLoggerService = app.get(LoggerService);
+// Get the Transport to be used with new Logger
+const loggerSentryTransport = app.get(LoggerSentryTransport);
 
-  // Inform that sentry transport will also be used
-  customLoggerService.addTransport(loggerSentryTransport);
+// Get reference of LoggerService From LoggerModule
+const customLoggerService = app.get(LoggerService);
 
-  // This is to inform that this logger will new used internally
-  // or it will be used once yuo do a new Logger()
-  app.useLogger(customLoggerService);
-  
+// Inform that sentry transport will also be used
+customLoggerService.addTransport(loggerSentryTransport);
+
+// This is to inform that this logger will new used internally
+// or it will be used once yuo do a new Logger()
+app.useLogger(customLoggerService);
 ```
 
 by doing that any time you call a method from `Logger` class from `@nestjs/common` will be calling the method from `LoggerService` from `@rockts-org/nestjs-logger`.
 
 ### Transports
+
 If you define the transport to be used, it means that any method that you call from `LoggerService` will also send the details of the log to the transport defined (at the moment we are only working with Sentry as external transport)
 `customLoggerService.addTransport(loggerSentryTransport);`
 
@@ -117,7 +118,6 @@ class MyService {
     this.loggerService.log('Doing something...');
   }
 }
-
 ```
 
 or
@@ -133,11 +133,10 @@ class MyService {
     this.logger.log('Doing something...');
   }
 }
-
 ```
 
 Check out Nestjs [Logger](https://docs.nestjs.com/techniques/logger#using-the-logger-for-application-logging) if you need more details.
 
-
 ## License
+
 [MIT](https://choosealicense.com/licenses/mit/)
