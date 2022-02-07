@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthenticationModule } from '@rockts-org/nestjs-authentication';
+import { CrudModule } from '@rockts-org/nestjs-crud';
 import { JwtModule } from '@rockts-org/nestjs-jwt';
 import { PasswordModule } from '@rockts-org/nestjs-password';
-import { User, UserModule } from '@rockts-org/nestjs-user';
+import { User, UserCrudService, UserModule } from '@rockts-org/nestjs-user';
 import { mock } from 'jest-mock-extended';
 import { AuthLocalController } from './auth-local.controller';
 import { AuthLocalModule } from './auth-local.module';
@@ -19,12 +20,15 @@ describe('AuthLocalModuleTest', () => {
         AuthenticationModule.register(),
         JwtModule.register(),
         PasswordModule.register(),
+        CrudModule.register(),
         UserModule.register(),
       ],
     })
       .overrideProvider('USER_MODULE_USER_ENTITY_REPO_TOKEN')
       .useValue(mock<User>())
       .overrideProvider('USER_MODULE_USER_CUSTOM_REPO_TOKEN')
+      .useValue({})
+      .overrideProvider(UserCrudService)
       .useValue({})
       .compile();
 

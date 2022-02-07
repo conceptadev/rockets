@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CrudModule } from '@rockts-org/nestjs-crud';
 import { TypeOrmExtModule } from '@rockts-org/nestjs-typeorm-ext';
 import { UserModule } from '@rockts-org/nestjs-user';
 import { ConnectionOptions, getConnectionManager } from 'typeorm';
@@ -19,6 +20,7 @@ import { CustomUser } from './custom-user.entity';
         return c;
       },
     }),
+    CrudModule.register(),
     UserModule.register({
       orm: {
         entities: {

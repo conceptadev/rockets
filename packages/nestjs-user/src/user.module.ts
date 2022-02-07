@@ -5,6 +5,8 @@ import {
   createConfigurableDynamicRootModule,
   deferExternal,
   DeferExternalOptionsInterface,
+  ModuleOptionsControllerInterface,
+  negotiateController,
 } from '@rockts-org/nestjs-common';
 import {
   createCustomRepositoryProvider,
@@ -26,17 +28,25 @@ import {
 import { UserController } from './user.controller';
 import { UserServiceInterface } from './interfaces/user-service.interface';
 import { DefaultUserService } from './services/default-user.service';
+import { UserCrudService } from './services/user-crud.service';
+import { CrudModule } from '@rockts-org/nestjs-crud';
 
 @Module({
-  providers: [DefaultUserService, UserController],
-  exports: [UserService, UserController],
+  providers: [DefaultUserService, UserCrudService],
+  exports: [UserService, UserCrudService],
   controllers: [UserController],
 })
 export class UserModule extends createConfigurableDynamicRootModule<
   UserModule,
   UserOptionsInterface
 >(USER_MODULE_OPTIONS_TOKEN, {
-  imports: [ConfigModule.forFeature(userDefaultConfig)],
+  imports: [
+    ConfigModule.forFeature(userDefaultConfig),
+    CrudModule.deferred({
+      timeoutMessage:
+        'UserModule requires CrudModule to be registered in your application.',
+    }),
+  ],
   providers: [
     {
       provide: USER_MODULE_SETTINGS_TOKEN,
@@ -66,20 +76,34 @@ export class UserModule extends createConfigurableDynamicRootModule<
   ],
 }) {
   static register(
-    options: UserOptionsInterface & UserOrmOptionsInterface = {},
+    options: UserOptionsInterface &
+      UserOrmOptionsInterface &
+      ModuleOptionsControllerInterface = {},
   ) {
     this.configureOrm(options);
-    return UserModule.forRoot(UserModule, options);
+
+    const module = UserModule.forRoot(UserModule, options);
+
+    negotiateController(module, options);
+
+    return module;
   }
 
   static registerAsync(
-    options: AsyncModuleConfig<UserOptionsInterface> & UserOrmOptionsInterface,
+    options: AsyncModuleConfig<UserOptionsInterface> &
+      UserOrmOptionsInterface &
+      ModuleOptionsControllerInterface,
   ) {
     this.configureOrm(options);
-    return UserModule.forRootAsync(UserModule, {
+
+    const module = UserModule.forRootAsync(UserModule, {
       useFactory: () => ({}),
       ...options,
     });
+
+    negotiateController(module, options);
+
+    return module;
   }
 
   static deferred(options: DeferExternalOptionsInterface = {}) {

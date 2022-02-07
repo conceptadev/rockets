@@ -7,7 +7,7 @@ import {
   AuthLocalUserLookupService,
   // AuthLocalController,
 } from '@rockts-org/nestjs-auth-local';
-import { User, UserService } from '@rockts-org/nestjs-user';
+import { User, UserCrudService, UserService } from '@rockts-org/nestjs-user';
 import { TestUserRepository } from './user/user.repository';
 
 describe('AppModule', () => {
@@ -19,6 +19,8 @@ describe('AppModule', () => {
       .useValue(mock<User>())
       .overrideProvider('USER_MODULE_USER_CUSTOM_REPO_TOKEN')
       .useValue(new TestUserRepository())
+      .overrideProvider(UserCrudService)
+      .useValue({})
       .compile();
 
     const userService = module.get<UserService>(UserService);

@@ -22,7 +22,6 @@
   },
   "devDependencies": {
     "@nestjs/testing": "^8.0.2",
-    "@rockts-org/nestjs-user": "^4.0.0-alpha.0",
     "jest-mock-extended": "^2.0.4"
   },
   "peerDependencies": {

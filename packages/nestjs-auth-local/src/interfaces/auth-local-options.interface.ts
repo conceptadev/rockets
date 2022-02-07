@@ -1,10 +1,14 @@
 import { IssueTokenServiceInterface } from '@rockts-org/nestjs-authentication';
-
-import { OptionsInterface } from '@rockts-org/nestjs-common';
+import {
+  ModuleOptionsSettingsInterface,
+  OptionsInterface,
+} from '@rockts-org/nestjs-common';
 import { AuthLocalSettingsInterface } from './auth-local-settings.interface';
 import { AuthLocalUserLookupServiceInterface } from './auth-local-user-lookup-service.interface';
 
-export interface AuthLocalOptionsInterface extends OptionsInterface {
+export interface AuthLocalOptionsInterface
+  extends OptionsInterface,
+    ModuleOptionsSettingsInterface {
   /**
    * Implementation of a class to lookup users
    */
@@ -15,5 +19,8 @@ export interface AuthLocalOptionsInterface extends OptionsInterface {
    */
   issueTokenService?: IssueTokenServiceInterface;
 
+  /**
+   * Settings
+   */
   settings?: AuthLocalSettingsInterface;
 }
