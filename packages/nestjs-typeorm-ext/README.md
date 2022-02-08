@@ -1,12 +1,4 @@
-<div align="center">
-  <h1 align="center">TypeOrmExt Module</h1>
-  <p align="center">
-    <a href="https://travis-ci.org"><img src="https://img.shields.io/travis" alt="Build Status" /></a>
-    <a href="https://coveralls.io/github/onury/accesscontrol?branch=master"><img src="https://img.shields.io/coveralls" alt="Coverage Status" /></a>
-    <a href="https://www.npmjs.com/package/accesscontrol"><img src="http://img.shields.io/npm/v" alt="npm" /></a>
-    <a href="https://github.com/"><img src="http://img.shields.io/npm/l/" alt="License" /></a>
-</p>
-<br />
+# Rockets NestJS TypeOrm Extended
 
 <p align="center">
     <a href="https://github.com"><strong>Explore the docs »</strong></a>
