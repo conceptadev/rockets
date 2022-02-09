@@ -32,10 +32,11 @@ export class IssueTokenService implements IssueTokenServiceInterface {
     // TODO: need pattern for events and/or callbacks to mutate this object before signing
     const payload = { sub: id };
 
-    // return the payload
-    return {
+    const response: AuthenticationJwtResponseInterface = {
       accessToken: await this.accessToken(payload),
       refreshToken: await this.refreshToken(payload),
     };
+    // return the payload
+    return response;
   }
 }

@@ -3,12 +3,18 @@ import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AppModule } from './app.module';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, Logger } from '@nestjs/common';
 import { TestUserRepository } from './user/user.repository';
 import { mock } from 'jest-mock-extended';
-import { User } from '@rockts-org/nestjs-user';
+import { User, UserCrudService } from '@rockts-org/nestjs-user';
 import { AuthenticationJwtResponseInterface } from '@rockts-org/nestjs-authentication';
 import { UserDto } from './user/user.controller';
+
+const sleep = (ms) => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+};
 
 describe('AppController (e2e)', () => {
   describe('Authentication', () => {
@@ -22,6 +28,8 @@ describe('AppController (e2e)', () => {
         .useValue(mock<User>())
         .overrideProvider('USER_MODULE_USER_CUSTOM_REPO_TOKEN')
         .useValue(new TestUserRepository())
+        .overrideProvider(UserCrudService)
+        .useValue({})
         .compile();
 
       app = moduleFixture.createNestApplication();
@@ -87,14 +95,130 @@ describe('AppController (e2e)', () => {
     it('GET /user Not Authorized', async () => {
       await supertest(app.getHttpServer()).get('/custom/user/all').expect(401);
     });
+  });
 
-    it('GET /user Authorized with JWT', async () => {
-      // const response: { body: AuthenticationResponseInterface } =
-      //   await supertest(app.getHttpServer())
-      //     .post(('/token/refresh')
-      //     .send({})
-      //     .expect(201);
-      return;
+  describe('Authentication Refresh', () => {
+    let app: INestApplication;
+    let globalAccessToken: string;
+    let globalRefreshToken: string;
+
+    beforeEach(async () => {
+      const moduleFixture: TestingModule = await Test.createTestingModule({
+        imports: [AppModule],
+      })
+        .overrideProvider('USER_MODULE_USER_ENTITY_REPO_TOKEN')
+        .useValue(mock<User>())
+        .overrideProvider('USER_MODULE_USER_CUSTOM_REPO_TOKEN')
+        .useValue(new TestUserRepository())
+        .overrideProvider(UserCrudService)
+        .useValue({})
+        .compile();
+
+      app = moduleFixture.createNestApplication();
+      await app.init();
+
+      const sign = {
+        username: 'first_user',
+        password: 'AS12378',
+      };
+
+      const response: { body: AuthenticationJwtResponseInterface } =
+        await supertest(app.getHttpServer())
+          .post('/auth/local')
+          .send(sign)
+          .expect(201);
+
+      jest.spyOn(Logger.prototype, 'log').mockImplementation(() => null);
+      jest.spyOn(Logger.prototype, 'error').mockImplementation(() => null);
+
+      globalAccessToken = response.body.accessToken;
+      globalRefreshToken = response.body.refreshToken;
+    });
+
+    afterEach(async () => {
+      jest.clearAllMocks();
+      await app.close();
+    });
+
+    it('GET /refresh correct token', async () => {
+      await sleep(1000);
+
+      // call to refresh token
+      const responseTokenRefresh: { body: AuthenticationJwtResponseInterface } =
+        await supertest(app.getHttpServer())
+          .post('/token/refresh')
+          .send({
+            refreshToken: globalRefreshToken,
+          })
+          .expect(201);
+
+      expect(responseTokenRefresh.body.accessToken).toBeDefined();
+
+      // tokens needs to be different
+      expect(
+        responseTokenRefresh.body.accessToken != globalAccessToken,
+      ).toBeTruthy();
+    });
+
+    it('GET /refresh with invalid token', async () => {
+      await sleep(1000);
+
+      await supertest(app.getHttpServer())
+        .post('/token/refresh')
+        .send({
+          refreshToken: 'invalid-token',
+        })
+        .expect(500);
+    });
+
+    it('GET /refresh with token as null', async () => {
+      await sleep(1000);
+
+      await supertest(app.getHttpServer())
+        .post('/token/refresh')
+        .send({
+          refreshToken: null,
+        })
+        .expect(401);
+    });
+
+    it('GET /refresh without token', async () => {
+      await sleep(1000);
+
+      // call to refresh token
+      await supertest(app.getHttpServer())
+        .post('/token/refresh')
+        .send()
+        .expect(401);
+    });
+
+    it('GET /refresh token Expired', async () => {
+      const expiredToken =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiaWF0IjoxNjQ0NDQ0NDEwLCJleHAiOjE2NDQ0NDQ0MTF9.ST7bECqz6CDFrgJTPyXGBjMv3wUOJj7swHM12xAfSWU';
+      await sleep(1000);
+
+      // call to refresh token
+      await supertest(app.getHttpServer())
+        .post('/token/refresh')
+        .send({
+          refreshToken: expiredToken,
+        })
+        .expect(500);
+    });
+
+    it('GET /refresh token with wrong secret', async () => {
+      const tokenForWrongSecret =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiaWF0IjoxNjQ0NDQ0NTM4LCJleHAiOjE2NDQ0NDgxMzh9.wNJJGie8pn3nvtBJ7Jk5EThb0hwcArMVLExjEct6alo';
+
+      await sleep(1000);
+
+      // call to refresh token
+      await supertest(app.getHttpServer())
+        .post('/token/refresh')
+        .send({
+          refreshToken: tokenForWrongSecret,
+        })
+        .expect(500);
     });
   });
 });

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthLocalModule } from '@rockts-org/nestjs-auth-local';
+import { AuthRefreshModule } from '@rockts-org/nestjs-auth-refresh';
 import { AuthJwtModule } from '@rockts-org/nestjs-auth-jwt';
 import { AuthenticationModule } from '@rockts-org/nestjs-authentication';
 import { UserModule } from '@rockts-org/nestjs-user';
@@ -12,6 +13,7 @@ import { CustomUserController } from './user/user.controller';
   imports: [
     AuthLocalModule.register(),
     AuthJwtModule.register(),
+    AuthRefreshModule.register(),
     AuthenticationModule.register(),
     JwtModule.register(),
     PasswordModule.register(),
