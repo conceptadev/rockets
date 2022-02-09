@@ -1,6 +1,6 @@
 {
   "name": "@rockts-org/nestjs-event",
-  "version": "4.0.0-alpha.1",
+  "version": "4.0.0-alpha.2",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "MIT",
@@ -14,7 +14,7 @@
     "@nestjs/common": "^8.0.8",
     "@nestjs/config": "^1.1.6",
     "@nestjs/core": "^8.0.8",
-    "@rockts-org/nestjs-common": "^4.0.0-alpha.1",
+    "@rockts-org/nestjs-common": "^4.0.0-alpha.2",
     "eventemitter2": "^6.4.5"
   },
   "devDependencies": {
