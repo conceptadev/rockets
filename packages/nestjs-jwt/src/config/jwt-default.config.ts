@@ -4,18 +4,20 @@ import { JWT_MODULE_DEFAULT_SETTINGS_TOKEN } from '../jwt.constants';
 
 /**
  * Settings defaults.
+ *
+ * @todo need to also get defaults from ENV
  */
 export const jwtDefaultConfig = registerAs(
   JWT_MODULE_DEFAULT_SETTINGS_TOKEN,
   (): JwtSettingsInterface => ({
     access: {
-      secretOrPrivateKey: 'THERE IS NO SECRET',
+      secret: 'THERE IS NO SECRET',
       signOptions: {
         expiresIn: '1h',
       },
     },
     refresh: {
-      secretOrPrivateKey: 'THERE IS NO SECRET',
+      secret: 'THERE IS NO SECRET',
       signOptions: {
         expiresIn: '1y',
       },
