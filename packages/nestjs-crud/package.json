@@ -1,6 +1,6 @@
 {
   "name": "@rockts-org/nestjs-crud",
-  "version": "4.0.0-alpha.2",
+  "version": "4.0.0-alpha.3",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "MIT",
@@ -17,7 +17,7 @@
     "@nestjsx/crud": "^5.0.0-alpha.3",
     "@nestjsx/crud-request": "^5.0.0-alpha.3",
     "@nestjsx/crud-typeorm": "^5.0.0-alpha.3",
-    "@rockts-org/nestjs-common": "^4.0.0-alpha.2"
+    "@rockts-org/nestjs-common": "^4.0.0-alpha.3"
   },
   "devDependencies": {
     "@nestjs/testing": "^8.0.8",
