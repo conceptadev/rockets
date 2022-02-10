@@ -7,3 +7,7 @@ export { DefaultUserService } from './services/default-user.service';
 export { UserController } from './user.controller';
 export { UserInterface } from './interfaces/user.interface';
 export { UserServiceInterface } from './interfaces/user-service.interface';
+
+// seeding tools
+export { UserFactory } from './user.factory';
+export { UserSeeder } from './user.seeder';
