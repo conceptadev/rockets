@@ -31,6 +31,9 @@ import { DefaultUserService } from './services/default-user.service';
 import { UserCrudService } from './services/user-crud.service';
 import { CrudModule } from '@rockts-org/nestjs-crud';
 
+/**
+ * User Module
+ */
 @Module({
   providers: [DefaultUserService, UserCrudService],
   exports: [UserService, UserCrudService],
@@ -75,6 +78,11 @@ export class UserModule extends createConfigurableDynamicRootModule<
     USER_MODULE_USER_CUSTOM_REPO_TOKEN,
   ],
 }) {
+  /**
+   * Register the User module synchronously.
+   *
+   * @param options module options
+   */
   static register(
     options: UserOptionsInterface &
       UserOrmOptionsInterface &
@@ -89,6 +97,11 @@ export class UserModule extends createConfigurableDynamicRootModule<
     return module;
   }
 
+  /**
+   * Register the User module asynchronously.
+   *
+   * @param options module options
+   */
   static registerAsync(
     options: AsyncModuleConfig<UserOptionsInterface> &
       UserOrmOptionsInterface &
@@ -106,10 +119,20 @@ export class UserModule extends createConfigurableDynamicRootModule<
     return module;
   }
 
+  /**
+   * Expect another module to have registered the User module.
+   *
+   * @param options module defer options
+   */
   static deferred(options: DeferExternalOptionsInterface = {}) {
     return deferExternal<UserModule, UserOptionsInterface>(UserModule, options);
   }
 
+  /**
+   * Statically configure the ORM options.
+   *
+   * @param options ORM options
+   */
   private static configureOrm(options: UserOrmOptionsInterface) {
     TypeOrmExtModule.configure(options.orm, {
       entities: {

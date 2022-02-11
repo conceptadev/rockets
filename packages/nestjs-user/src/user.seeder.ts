@@ -5,11 +5,13 @@ import { User } from './entities/user.entity';
 import { UserInterface } from './interfaces/user.interface';
 
 /**
- * User seeder.
+ * User seeder
  */
 export class UserSeeder implements Seeder {
   /**
-   * @type {Type<UserInterface>}
+   * The entity class.
+   *
+   * Override this in a subclass to use a custom entity.
    */
   protected entity: Type<UserInterface> = User;
 
@@ -20,6 +22,8 @@ export class UserSeeder implements Seeder {
 
   /**
    * Runner
+   *
+   * @param factory Seeder factory
    */
   public async run(factory: Factory): Promise<void> {
     // number of users to create
@@ -51,9 +55,8 @@ export class UserSeeder implements Seeder {
   /**
    * Set a password for the given user.
    *
-   * @param {UserInterface} user
-   * @param {string} password
-   * @returns {Promise<Type<T>>}
+   * @param user Object implementing the required interface.
+   * @param password The password to set.
    */
   protected async setPassword(
     user: UserInterface,

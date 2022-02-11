@@ -4,35 +4,43 @@ import { define } from 'typeorm-seeding';
 import { UserInterface } from './interfaces/user.interface';
 
 /**
- * User factory.
+ * User factory
  *
- * @template T
+ * ```ts
+ * // new factory instance
+ * const userFactory = new UserFactory(User);
+ *
+ * // register it
+ * userFactory.define();
+ * ```
  */
 export class UserFactory<T extends UserInterface = UserInterface> {
   /**
    * Constructor.
    *
-   * @param {Type<T>} entityType
+   * @param entity The entity class.
    */
-  constructor(private entityType: Type<T>) {}
+  constructor(private entity: Type<T>) {}
 
   /**
    * Define the user factory.
    */
   public define() {
-    define(this.entityType, this.factoryFn(this.entityType));
+    define(this.entity, this.factoryFn(this.entity));
   }
 
   /**
    * Factory callback function.
+   *
+   * @param entity The entity class.
    */
-  protected factoryFn(entityType: Type<T>) {
+  protected factoryFn(entity: Type<T>) {
     // unique usernames that have already been used.
     const uniqueUsernames: Record<string, boolean> = {};
 
     return (faker: typeof Faker): T => {
       // the user we will return
-      const user = new entityType();
+      const user = new entity();
 
       // keep trying to get a unique username
       do {
