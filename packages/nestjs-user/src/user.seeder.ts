@@ -43,8 +43,8 @@ export class UserSeeder implements Seeder {
       });
 
     // create a bunch more
-    await factory(User)()
-      .map(async (user: User) => this.setPassword(user))
+    await userFactory
+      .map(async (user) => this.setPassword(user))
       .createMany(createAmount);
   }
 
