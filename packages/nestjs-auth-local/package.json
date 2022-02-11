@@ -1,6 +1,6 @@
 {
   "name": "@rockts-org/nestjs-auth-local",
-  "version": "4.0.0-alpha.4",
+  "version": "4.0.0-alpha.5",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "MIT",
@@ -16,10 +16,10 @@
     "@nestjs/core": "^8.0.2",
     "@nestjs/passport": "^8.0.1",
     "@nestjs/platform-fastify": "^8.0.6",
-    "@rockts-org/nestjs-authentication": "^4.0.0-alpha.4",
-    "@rockts-org/nestjs-common": "^4.0.0-alpha.4",
-    "@rockts-org/nestjs-password": "^4.0.0-alpha.4",
-    "@rockts-org/nestjs-user": "^4.0.0-alpha.4",
+    "@rockts-org/nestjs-authentication": "^4.0.0-alpha.5",
+    "@rockts-org/nestjs-common": "^4.0.0-alpha.5",
+    "@rockts-org/nestjs-password": "^4.0.0-alpha.5",
+    "@rockts-org/nestjs-user": "^4.0.0-alpha.5",
     "@sentry/node": "^6.11.0",
     "class-validator": "^0.13.2",
     "express": "^4.17.1",
@@ -28,8 +28,8 @@
   },
   "devDependencies": {
     "@nestjs/testing": "^8.0.2",
-    "@rockts-org/nestjs-crud": "^4.0.0-alpha.4",
-    "@rockts-org/nestjs-jwt": "^4.0.0-alpha.4",
+    "@rockts-org/nestjs-crud": "^4.0.0-alpha.5",
+    "@rockts-org/nestjs-jwt": "^4.0.0-alpha.5",
     "@sentry/types": "^6.13.3",
     "jest-mock-extended": "^2.0.4"
   },
