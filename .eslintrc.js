@@ -7,8 +7,8 @@ module.exports = {
   },
   plugins: [
     'import',
-    'jsdoc',
-    '@typescript-eslint/eslint-plugin'
+    // 'jsdoc',
+    '@typescript-eslint/eslint-plugin',
   ],
   extends: [
     'eslint:recommended',
@@ -31,6 +31,23 @@ module.exports = {
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-explicit-any': 'error',
     '@typescript-eslint/no-empty-interface': 'off',
+    // 'jsdoc/require-jsdoc': [
+    //   'warn',
+    //   {
+    //     contexts: ['any', 'PropertyDefinition'],
+    //     require: {
+    //       ClassDeclaration: true,
+    //       ClassExpression: true,
+    //       MethodDefinition: true,
+    //       FunctionDeclaration: true,
+    //       FunctionExpression: true,
+    //     },
+    //   },
+    // ],
+    // 'jsdoc/require-description': ['warn', { contexts: ['any'] }],
+    // 'jsdoc/require-property-description': ['warn', { contexts: ['any'] }],
+    // 'jsdoc/require-param-type': 'off',
+    // 'jsdoc/require-returns': 'off',
     'no-console': ['error', { allow: ['warn', 'error'] }],
   },
   settings: {
