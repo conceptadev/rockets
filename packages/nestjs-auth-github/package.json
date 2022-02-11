@@ -1,6 +1,6 @@
 {
   "name": "@rockts-org/nestjs-auth-github",
-  "version": "4.0.0-alpha.3",
+  "version": "4.0.0-alpha.4",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "MIT",
@@ -17,7 +17,7 @@
     "@nestjs/core": "^8.0.2",
     "@nestjs/passport": "^8.0.1",
     "@nestjs/platform-fastify": "^8.0.6",
-    "@rockts-org/nestjs-authentication": "^4.0.0-alpha.3",
+    "@rockts-org/nestjs-authentication": "^4.0.0-alpha.4",
     "@sentry/node": "^6.11.0",
     "class-validator": "^0.13.2",
     "fastify": "^3.25.3",
