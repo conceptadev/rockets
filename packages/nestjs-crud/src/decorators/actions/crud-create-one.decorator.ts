@@ -1,18 +1,15 @@
-import { applyDecorators, SetMetadata, UseInterceptors } from '@nestjs/common';
-import {
-  CRUD_MODULE_ROUTE_ACTION_METADATA,
-  CRUD_MODULE_ROUTE_CREATE_ONE_METADATA,
-} from '../../crud.constants';
-import { CrudActions } from '../../crud.enums';
-import { CrudRequestInterceptor } from '../../interceptors/crud-request.interceptor';
+import { applyDecorators, Post, SetMetadata } from '@nestjs/common';
 import { CrudCreateOneOptionsInterface } from '../../interfaces/crud-route-options.interface';
+import { CrudActions } from '../../crud.enums';
+import { CrudAction } from '../routes/crud-action.decorator';
+import { CRUD_MODULE_ROUTE_CREATE_ONE_METADATA } from '../../crud.constants';
 
 /**
  * CRUD Create One route decorator
  */
 export const CrudCreateOne = (options: CrudCreateOneOptionsInterface = {}) =>
   applyDecorators(
-    SetMetadata(CRUD_MODULE_ROUTE_ACTION_METADATA, CrudActions.CreateOne),
+    Post(options?.path),
+    CrudAction(CrudActions.CreateOne),
     SetMetadata(CRUD_MODULE_ROUTE_CREATE_ONE_METADATA, options),
-    UseInterceptors(CrudRequestInterceptor),
   );

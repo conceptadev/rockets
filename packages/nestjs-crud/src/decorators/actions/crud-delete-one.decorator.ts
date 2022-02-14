@@ -1,18 +1,18 @@
-import { applyDecorators, SetMetadata, UseInterceptors } from '@nestjs/common';
+import { applyDecorators, Delete, SetMetadata } from '@nestjs/common';
+import { CrudDeleteOneOptionsInterface } from '../../interfaces/crud-route-options.interface';
+import { CrudActions } from '../../crud.enums';
+import { CrudAction } from '../routes/crud-action.decorator';
 import {
-  CRUD_MODULE_ROUTE_ACTION_METADATA,
+  CRUD_MODULE_ROUTE_ID_DEFAULT_PATH,
   CRUD_MODULE_ROUTE_DELETE_ONE_METADATA,
 } from '../../crud.constants';
-import { CrudActions } from '../../crud.enums';
-import { CrudRequestInterceptor } from '../../interceptors/crud-request.interceptor';
-import { CrudDeleteOneOptionsInterface } from '../../interfaces/crud-route-options.interface';
 
 /**
  * CRUD Delete One route decorator
  */
 export const CrudDeleteOne = (options: CrudDeleteOneOptionsInterface = {}) =>
   applyDecorators(
-    SetMetadata(CRUD_MODULE_ROUTE_ACTION_METADATA, CrudActions.DeleteOne),
+    Delete(options?.path ?? CRUD_MODULE_ROUTE_ID_DEFAULT_PATH),
+    CrudAction(CrudActions.DeleteOne),
     SetMetadata(CRUD_MODULE_ROUTE_DELETE_ONE_METADATA, options),
-    UseInterceptors(CrudRequestInterceptor),
   );

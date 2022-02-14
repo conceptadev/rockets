@@ -43,7 +43,9 @@ export class CrudRequestInterceptor extends xCrudRequestInterceptor {
 
         parser.parseQuery(req.query);
 
-        parser.search = { $and: this.getSearch(parser, options, action) };
+        parser.search = {
+          $and: this.getSearch(parser, options, action, req?.params),
+        };
 
         req[CRUD_MODULE_CRUD_REQUEST_KEY] = this.getCrudRequest(
           parser,

@@ -1,4 +1,4 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import {
   CrudBody,
   CrudController,
@@ -32,12 +32,11 @@ export class UserController {
   /**
    * Get one
    *
-   * @param req the CRUD request object
+   * @param crudRequest the CRUD request object
    */
-  @Get()
   @CrudReadOne()
-  async getOne(@CrudRequest() req: CrudRequestInterface) {
-    return this.userCrudService.getOne(req, {});
+  async getOne(@CrudRequest() crudRequest: CrudRequestInterface) {
+    return this.userCrudService.getOne(crudRequest);
   }
 
   /**
@@ -46,7 +45,6 @@ export class UserController {
    * @param crudRequest the CRUD request object
    * @param userDto user dto
    */
-  @Post()
   @CrudCreateOne()
   async createOne(
     @CrudRequest() crudRequest: CrudRequestInterface,

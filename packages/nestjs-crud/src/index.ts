@@ -18,7 +18,19 @@ export { CrudDeleteOne } from './decorators/actions/crud-delete-one.decorator';
 export { CrudRecoverOne } from './decorators/actions/crud-recover-one.decorator';
 
 // route option decorators
+export { CrudAction } from './decorators/routes/crud-action.decorator';
+export { CrudAllow } from './decorators/routes/crud-allow.decorator';
+export { CrudAlwaysPaginate } from './decorators/routes/crud-always-paginate.decorator';
+export { CrudCache } from './decorators/routes/crud-cache.decorator';
+export { CrudExclude } from './decorators/routes/crud-exclude.decorator';
+export { CrudFilter } from './decorators/routes/crud-filter.decorator';
+export { CrudJoin } from './decorators/routes/crud-join.decorator';
+export { CrudLimit } from './decorators/routes/crud-limit.decorator';
+export { CrudMaxLimit } from './decorators/routes/crud-max-limit.decorator';
 export { CrudModel } from './decorators/routes/crud-model.decorator';
+export { CrudParams } from './decorators/routes/crud-params.decorator';
+export { CrudSoftDelete } from './decorators/routes/crud-soft-delete.decorator';
+export { CrudSort } from './decorators/routes/crud-sort.decorator';
 export { CrudValidation } from './decorators/routes/crud-validation.decorator';
 
 // param decorators
