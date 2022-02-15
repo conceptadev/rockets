@@ -13,6 +13,7 @@
   "dependencies": {
     "@nestjs/common": "^8.0.8",
     "@nestjs/config": "^1.1.6",
+    "@nestjs/mapped-types": "^1.0.1",
     "@rockts-org/nestjs-common": "^4.0.0-alpha.5",
     "@rockts-org/nestjs-crud": "^4.0.0-alpha.5",
     "@rockts-org/nestjs-password": "^4.0.0-alpha.5",

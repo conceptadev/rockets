@@ -1,4 +1,4 @@
-import { UserReadableInterface } from './user-readable.interface';
+import { UserInterface } from './user.interface';
 
 export interface UserUpdatableInterface
-  extends Omit<UserReadableInterface, 'id'> {}
+  extends Pick<UserInterface, 'password'> {}

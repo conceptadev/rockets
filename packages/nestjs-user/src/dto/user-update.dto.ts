@@ -1,9 +1,10 @@
+import { PickType } from '@nestjs/mapped-types';
 import { UserUpdatableInterface } from '../interfaces/user-updatable.interface';
-import { UserCreateDto } from './user-create.dto';
+import { UserDto } from './user.dto';
 
 /**
  * User Update DTO
  */
 export class UserUpdateDto
-  extends UserCreateDto
+  extends PickType(UserDto, ['password'])
   implements UserUpdatableInterface {}

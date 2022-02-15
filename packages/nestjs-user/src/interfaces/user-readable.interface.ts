@@ -1,4 +1,4 @@
-export interface UserReadableInterface {
-  id: string;
-  username: string;
-}
+import { UserInterface } from './user.interface';
+
+export interface UserReadableInterface
+  extends Pick<UserInterface, 'id' | 'username'> {}

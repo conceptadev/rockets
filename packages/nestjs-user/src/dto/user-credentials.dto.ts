@@ -1,23 +1,10 @@
+import { PickType } from '@nestjs/mapped-types';
 import { UserCredentialsInterface } from '../interfaces/user-credentials.interface';
-import { UserReadDto } from './user-read.dto';
-import { Exclude } from 'class-transformer';
+import { UserDto } from './user.dto';
 
 /**
  * User Credentials DTO
  */
 export class UserCredentialsDto
-  extends UserReadDto
-  implements UserCredentialsInterface
-{
-  /**
-   * Password
-   */
-  @Exclude()
-  password: string;
-
-  /**
-   * Salt
-   */
-  @Exclude()
-  salt: string;
-}
+  extends PickType(UserDto, ['id', 'username', 'password', 'salt'])
+  implements UserCredentialsInterface {}
