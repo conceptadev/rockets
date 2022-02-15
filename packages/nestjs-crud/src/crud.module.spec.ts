@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CrudModule } from './crud.module';
 
-describe('AuthLocalModuleTest', () => {
+describe('CrudModule', () => {
   afterEach(async () => {
     jest.clearAllMocks();
   });

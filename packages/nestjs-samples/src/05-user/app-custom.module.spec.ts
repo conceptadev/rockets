@@ -35,7 +35,6 @@ describe('AppModule', () => {
       expect(userService).toBeInstanceOf(CustomUserService);
       expect(userCrudService).toBeInstanceOf(UserCrudService);
       expect(userController).toBeInstanceOf(UserController);
-      expect(userController['userService']).toBeInstanceOf(CustomUserService);
     });
   });
 });

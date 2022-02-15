@@ -1,18 +1,18 @@
-import { applyDecorators, SetMetadata, UseInterceptors } from '@nestjs/common';
+import { applyDecorators, Patch, SetMetadata } from '@nestjs/common';
+import { CrudRecoverOneOptionsInterface } from '../../interfaces/crud-route-options.interface';
+import { CrudActions } from '../../crud.enums';
+import { CrudAction } from '../routes/crud-action.decorator';
 import {
-  CRUD_MODULE_ROUTE_ACTION_METADATA,
+  CRUD_MODULE_ROUTE_RECOVER_ONE_DEFAULT_PATH,
   CRUD_MODULE_ROUTE_RECOVER_ONE_METADATA,
 } from '../../crud.constants';
-import { CrudActions } from '../../crud.enums';
-import { CrudRequestInterceptor } from '../../interceptors/crud-request.interceptor';
-import { CrudReplaceOneOptionsInterface } from '../../interfaces/crud-route-options.interface';
 
 /**
  * CRUD Recover One route decorator
  */
-export const CrudRecoverOne = (options: CrudReplaceOneOptionsInterface = {}) =>
+export const CrudRecoverOne = (options: CrudRecoverOneOptionsInterface = {}) =>
   applyDecorators(
-    SetMetadata(CRUD_MODULE_ROUTE_ACTION_METADATA, CrudActions.RecoverOne),
+    Patch(options?.path ?? CRUD_MODULE_ROUTE_RECOVER_ONE_DEFAULT_PATH),
+    CrudAction(CrudActions.RecoverOne),
     SetMetadata(CRUD_MODULE_ROUTE_RECOVER_ONE_METADATA, options),
-    UseInterceptors(CrudRequestInterceptor),
   );

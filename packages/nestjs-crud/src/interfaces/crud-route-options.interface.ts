@@ -6,17 +6,35 @@ import {
   UpdateOneRouteOptions,
 } from '@nestjsx/crud';
 
+export interface CrudRouteOptionsInterface {
+  path?: string | string[];
+}
+
+export interface CrudCreateManyOptionsInterface
+  extends CrudRouteOptionsInterface {}
+
 export interface CrudCreateOneOptionsInterface
-  extends Pick<CreateOneRouteOptions, 'returnShallow'> {}
+  extends CrudRouteOptionsInterface,
+    Pick<CreateOneRouteOptions, 'returnShallow'> {}
+
+export interface CrudReadAllOptionsInterface
+  extends CrudRouteOptionsInterface {}
+
+export interface CrudReadOneOptionsInterface
+  extends CrudRouteOptionsInterface {}
 
 export interface CrudUpdateOneOptionsInterface
-  extends Pick<UpdateOneRouteOptions, 'returnShallow'> {}
+  extends CrudRouteOptionsInterface,
+    Pick<UpdateOneRouteOptions, 'returnShallow'> {}
 
 export interface CrudReplaceOneOptionsInterface
-  extends Pick<ReplaceOneRouteOptions, 'returnShallow'> {}
+  extends CrudRouteOptionsInterface,
+    Pick<ReplaceOneRouteOptions, 'returnShallow'> {}
 
 export interface CrudDeleteOneOptionsInterface
-  extends Pick<DeleteOneRouteOptions, 'returnDeleted'> {}
+  extends CrudRouteOptionsInterface,
+    Pick<DeleteOneRouteOptions, 'returnDeleted'> {}
 
 export interface CrudRecoverOneOptionsInterface
-  extends Pick<RecoverOneRouteOptions, 'returnRecovered'> {}
+  extends CrudRouteOptionsInterface,
+    Pick<RecoverOneRouteOptions, 'returnRecovered'> {}

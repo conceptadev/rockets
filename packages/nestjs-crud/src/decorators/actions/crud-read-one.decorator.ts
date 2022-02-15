@@ -1,13 +1,14 @@
-import { applyDecorators, SetMetadata, UseInterceptors } from '@nestjs/common';
-import { CRUD_MODULE_ROUTE_ACTION_METADATA } from '../../crud.constants';
+import { applyDecorators, Get } from '@nestjs/common';
+import { CRUD_MODULE_ROUTE_ID_DEFAULT_PATH } from '../../crud.constants';
 import { CrudActions } from '../../crud.enums';
-import { CrudRequestInterceptor } from '../../interceptors/crud-request.interceptor';
+import { CrudReadOneOptionsInterface } from '../../interfaces/crud-route-options.interface';
+import { CrudAction } from '../routes/crud-action.decorator';
 
 /**
  * CRUD Read One route decorator
  */
-export const CrudReadOne = () =>
+export const CrudReadOne = (options: CrudReadOneOptionsInterface = {}) =>
   applyDecorators(
-    SetMetadata(CRUD_MODULE_ROUTE_ACTION_METADATA, CrudActions.ReadOne),
-    UseInterceptors(CrudRequestInterceptor),
+    Get(options?.path ?? CRUD_MODULE_ROUTE_ID_DEFAULT_PATH),
+    CrudAction(CrudActions.ReadOne),
   );
