@@ -3,31 +3,40 @@ import {
   CrudBody,
   CrudController,
   CrudCreateOne,
+  CrudDeleteOne,
+  CrudReadAll,
   CrudReadOne,
   CrudRequest,
   CrudRequestInterface,
+  CrudUpdateOne,
 } from '@rockts-org/nestjs-crud';
-import { UserDto } from './dto/user.dto';
-import { User } from './entities/user.entity';
+import { UserCreateDto } from './dto/user-create.dto';
+import { UserReadDto } from './dto/user-read.dto';
+import { UserUpdateDto } from './dto/user-update.dto';
 import { UserCrudService } from './services/user-crud.service';
-import { UserService } from './services/user.service';
 
 /**
  * User controller.
  */
 @Controller('user')
-@CrudController({ model: { type: User } })
+@CrudController({ model: { type: UserReadDto } })
 export class UserController {
   /**
    * Constructor.
    *
-   * @param userService instance of the user service
    * @param userCrudService instance of the user crud service
    */
-  constructor(
-    private userService: UserService,
-    private userCrudService: UserCrudService,
-  ) {}
+  constructor(private userCrudService: UserCrudService) {}
+
+  /**
+   * Get many
+   *
+   * @param crudRequest the CRUD request object
+   */
+  @CrudReadAll()
+  async getMany(@CrudRequest() crudRequest: CrudRequestInterface) {
+    return this.userCrudService.getMany(crudRequest);
+  }
 
   /**
    * Get one
@@ -43,13 +52,37 @@ export class UserController {
    * Create one
    *
    * @param crudRequest the CRUD request object
-   * @param userDto user dto
+   * @param userCreateDto user create dto
    */
   @CrudCreateOne()
   async createOne(
     @CrudRequest() crudRequest: CrudRequestInterface,
-    @CrudBody() userDto: UserDto,
+    @CrudBody() userCreateDto: UserCreateDto,
   ) {
-    return this.userCrudService.createOne(crudRequest, userDto);
+    return this.userCrudService.createOne(crudRequest, userCreateDto);
+  }
+
+  /**
+   * Update one
+   *
+   * @param crudRequest the CRUD request object
+   * @param userUpdateDto user update dto
+   */
+  @CrudUpdateOne()
+  async updateOne(
+    @CrudRequest() crudRequest: CrudRequestInterface,
+    @CrudBody() userUpdateDto: UserUpdateDto,
+  ) {
+    return this.userCrudService.updateOne(crudRequest, userUpdateDto);
+  }
+
+  /**
+   * Delete one
+   *
+   * @param crudRequest the CRUD request object
+   */
+  @CrudDeleteOne()
+  async deleteOne(@CrudRequest() crudRequest: CrudRequestInterface) {
+    return this.userCrudService.deleteOne(crudRequest);
   }
 }

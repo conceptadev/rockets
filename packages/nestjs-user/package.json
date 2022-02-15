@@ -27,6 +27,7 @@
   },
   "peerDependencies": {
     "@nestjs/typeorm": "^8.0.2",
+    "class-transformer": "*",
     "class-validator": "*",
     "typeorm": "^0.2.41"
   }

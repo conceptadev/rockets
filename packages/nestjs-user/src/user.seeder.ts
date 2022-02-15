@@ -2,7 +2,7 @@ import { Type } from '@nestjs/common';
 import { Factory, Seeder } from 'typeorm-seeding';
 import { PasswordStorageService } from '@rockts-org/nestjs-password';
 import { User } from './entities/user.entity';
-import { UserInterface } from './interfaces/user.interface';
+import { UserCreatableInterface } from './interfaces/user-creatable.interface';
 
 /**
  * User seeder
@@ -13,7 +13,7 @@ export class UserSeeder implements Seeder {
    *
    * Override this in a subclass to use a custom entity.
    */
-  protected entity: Type<UserInterface> = User;
+  protected entity: Type<UserCreatableInterface> = User;
 
   /**
    * Reusable password storage service
@@ -59,9 +59,9 @@ export class UserSeeder implements Seeder {
    * @param password The password to set.
    */
   protected async setPassword(
-    user: UserInterface,
+    user: UserCreatableInterface,
     password = 'Test1234',
-  ): Promise<UserInterface> {
+  ): Promise<UserCreatableInterface> {
     // encrypt it
     const encrypted = await this.passwordStorageService.encrypt(password);
 
