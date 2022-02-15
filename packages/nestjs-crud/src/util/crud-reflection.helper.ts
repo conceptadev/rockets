@@ -1,8 +1,6 @@
-import { Type } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { CrudOptions, ModelOptions, ParamsOptions } from '@nestjsx/crud';
 import {
-  CRUD_MODULE_CTRL_OPTIONS_METADATA,
   CRUD_MODULE_ROUTE_ACTION_METADATA,
   CRUD_MODULE_ROUTE_CREATE_ONE_METADATA,
   CRUD_MODULE_ROUTE_DELETE_ONE_METADATA,
@@ -26,7 +24,6 @@ import {
 } from '../crud.constants';
 import { CrudActions } from '../crud.enums';
 import { CrudValidationOptions } from '../crud.types';
-import { CrudCtrlOptionsInterface } from '../interfaces/crud-ctrl-options.interface';
 import { CrudQueryOptionsInterface } from '../interfaces/crud-query-options.interface';
 import {
   CrudCreateOneOptionsInterface,
@@ -37,27 +34,22 @@ import {
 } from '../interfaces/crud-route-options.interface';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-type ReflectionHandler = Function;
+type ReflectionTargetOrHandler = Function;
 
 export class CrudReflectionHelper {
   private reflector = new Reflector();
 
   public getRequestOptions(
-    target: Type,
-    handler: ReflectionHandler,
+    target: ReflectionTargetOrHandler,
+    handler: ReflectionTargetOrHandler,
   ): CrudOptions {
-    const ctrlOptions = this.getControllerOptions(target);
-
     return {
       model: this.reflector.getAllAndOverride<ModelOptions>(
         CRUD_MODULE_ROUTE_MODEL_METADATA,
         [handler, target],
       ),
 
-      validation: this.getMergedValidationOptions(
-        this.getValidationOptions,
-        ctrlOptions.validation,
-      ),
+      validation: this.getValidationOptions(target, handler),
 
       params: this.reflector.getAllAndOverride<ParamsOptions>(
         CRUD_MODULE_ROUTE_PARAMS_METADATA,
@@ -158,26 +150,36 @@ export class CrudReflectionHelper {
     };
   }
 
-  public getAction(handler: ReflectionHandler): CrudActions {
+  public getAction(handler: ReflectionTargetOrHandler): CrudActions {
     return this.reflector.get<CrudActions>(
       CRUD_MODULE_ROUTE_ACTION_METADATA,
       handler,
     );
   }
 
-  public getMergedValidationOptions(
-    handler: ReflectionHandler,
-    defaultOptions: CrudValidationOptions,
+  public getValidationOptions(
+    target: ReflectionTargetOrHandler,
+    handler: ReflectionTargetOrHandler,
   ): CrudValidationOptions {
-    const routeOptions = this.getValidationOptions(handler);
-    return this.mergeValidationOptions(routeOptions, defaultOptions);
+    // route options
+    const routeOptions = this.reflector.get(
+      CRUD_MODULE_ROUTE_VALIDATION_METADATA,
+      handler,
+    );
+    // controller options
+    const ctrlOptions = this.reflector.get(
+      CRUD_MODULE_ROUTE_VALIDATION_METADATA,
+      target,
+    );
+    // merge them
+    return this.mergeValidationOptions(routeOptions, ctrlOptions);
   }
 
   public mergeValidationOptions(
     options: CrudValidationOptions,
     defaultOptions: CrudValidationOptions,
   ): CrudValidationOptions {
-    let mergedOptions;
+    let mergedOptions: CrudValidationOptions;
 
     if (options === false) {
       mergedOptions = false;
@@ -192,21 +194,5 @@ export class CrudReflectionHelper {
     }
 
     return mergedOptions;
-  }
-
-  protected getControllerOptions(target: Type): CrudCtrlOptionsInterface {
-    return this.reflector.get<CrudCtrlOptionsInterface>(
-      CRUD_MODULE_CTRL_OPTIONS_METADATA,
-      target,
-    );
-  }
-
-  protected getValidationOptions(
-    handler: ReflectionHandler,
-  ): CrudValidationOptions {
-    return this.reflector.get<CrudValidationOptions>(
-      CRUD_MODULE_ROUTE_VALIDATION_METADATA,
-      handler,
-    );
   }
 }

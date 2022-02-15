@@ -4,9 +4,6 @@ export { CrudModule } from './crud.module';
 // interfaces
 export { CrudRequestInterface } from './interfaces/crud-request.interface';
 
-// class decorators
-export { CrudController } from './decorators/crud-controller.decorator';
-
 // route decorators
 export { CrudReadAll } from './decorators/actions/crud-read-all.decorator';
 export { CrudReadOne } from './decorators/actions/crud-read-one.decorator';
