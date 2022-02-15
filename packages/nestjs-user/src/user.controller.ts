@@ -10,7 +10,6 @@ import {
   CrudRequestInterface,
   CrudUpdateOne,
   CrudValidation,
-  CrudJoin,
 } from '@rockts-org/nestjs-crud';
 import { UserCreateDto } from './dto/user-create.dto';
 import { UserReadDto } from './dto/user-read.dto';
@@ -22,7 +21,7 @@ import { UserCrudService } from './services/user-crud.service';
  */
 @Controller('user')
 @CrudModel({ type: UserReadDto })
-@CrudValidation({ transform: false })
+@CrudValidation()
 export class UserController {
   /**
    * Constructor.
@@ -47,8 +46,6 @@ export class UserController {
    * @param crudRequest the CRUD request object
    */
   @CrudReadOne()
-  @CrudValidation({ enableDebugMessages: true })
-  @CrudJoin({ foo: {} })
   async getOne(@CrudRequest() crudRequest: CrudRequestInterface) {
     return this.userCrudService.getOne(crudRequest);
   }
