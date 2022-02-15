@@ -2,6 +2,7 @@
 export { CrudModule } from './crud.module';
 
 // interfaces
+export { CrudControllerInterface } from './interfaces/crud-controller.interface';
 export { CrudRequestInterface } from './interfaces/crud-request.interface';
 
 // route decorators

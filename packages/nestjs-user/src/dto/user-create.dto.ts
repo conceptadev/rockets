@@ -1,9 +1,10 @@
-import { UserCredentialsDto } from './user-credentials.dto';
+import { PickType } from '@nestjs/mapped-types';
 import { UserCreatableInterface } from '../interfaces/user-creatable.interface';
+import { UserDto } from './user.dto';
 
 /**
  * User Create DTO
  */
 export class UserCreateDto
-  extends UserCredentialsDto
+  extends PickType(UserDto, ['username', 'password'])
   implements UserCreatableInterface {}

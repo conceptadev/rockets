@@ -1,19 +1,10 @@
-import { IsNumber, IsString } from 'class-validator';
+import { PickType } from '@nestjs/mapped-types';
 import { UserReadableInterface } from '../interfaces/user-readable.interface';
+import { UserDto } from './user.dto';
 
 /**
  * User Read DTO
  */
-export class UserReadDto implements UserReadableInterface {
-  /**
-   * Unique id
-   */
-  @IsNumber()
-  id: string;
-
-  /**
-   * Username
-   */
-  @IsString()
-  username: string;
-}
+export class UserReadDto
+  extends PickType(UserDto, ['id', 'username'])
+  implements UserReadableInterface {}

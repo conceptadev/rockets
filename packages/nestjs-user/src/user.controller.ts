@@ -10,9 +10,11 @@ import {
   CrudRequestInterface,
   CrudUpdateOne,
   CrudValidation,
+  CrudControllerInterface,
 } from '@rockts-org/nestjs-crud';
+import { UserInterface } from './interfaces/user.interface';
+import { UserDto } from './dto/user.dto';
 import { UserCreateDto } from './dto/user-create.dto';
-import { UserReadDto } from './dto/user-read.dto';
 import { UserUpdateDto } from './dto/user-update.dto';
 import { UserCrudService } from './services/user-crud.service';
 
@@ -20,9 +22,9 @@ import { UserCrudService } from './services/user-crud.service';
  * User controller.
  */
 @Controller('user')
-@CrudModel({ type: UserReadDto })
+@CrudModel({ type: UserDto })
 @CrudValidation()
-export class UserController {
+export class UserController implements CrudControllerInterface<UserInterface> {
   /**
    * Constructor.
    *

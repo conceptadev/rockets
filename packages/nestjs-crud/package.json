@@ -14,6 +14,7 @@
     "@nestjs/common": "^8.0.8",
     "@nestjs/config": "^1.0.0",
     "@nestjs/core": "^8.0.8",
+    "@nestjs/swagger": "^5.2.0",
     "@nestjsx/crud": "^5.0.0-alpha.3",
     "@nestjsx/crud-request": "^5.0.0-alpha.3",
     "@nestjsx/crud-typeorm": "^5.0.0-alpha.3",

@@ -1,4 +1,4 @@
-export interface UserCredentialsInterface {
-  password: string;
-  salt: string;
-}
+import { UserInterface } from './user.interface';
+
+export interface UserCredentialsInterface
+  extends Pick<UserInterface, 'id' | 'username' | 'password' | 'salt'> {}
