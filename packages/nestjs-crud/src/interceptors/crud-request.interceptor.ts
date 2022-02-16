@@ -13,7 +13,6 @@ import {
 import { CrudReflectionHelper } from '../util/crud-reflection.helper';
 import {
   CRUD_MODULE_CRUD_REQUEST_KEY,
-  CRUD_MODULE_CRUD_VALIDATION_KEY,
   CRUD_MODULE_SETTINGS_TOKEN,
 } from '../crud.constants';
 import { CrudSettingsInterface } from '../interfaces/crud-settings.interface';
@@ -51,12 +50,6 @@ export class CrudRequestInterceptor extends xCrudRequestInterceptor {
           parser,
           options,
         );
-
-        req[CRUD_MODULE_CRUD_VALIDATION_KEY] =
-          this.reflectionHelper.mergeValidationOptions(
-            options?.validation,
-            this.settings.validation,
-          );
       }
 
       return next.handle();

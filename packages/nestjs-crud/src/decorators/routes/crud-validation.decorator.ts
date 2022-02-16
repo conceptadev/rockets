@@ -1,10 +1,8 @@
-import { SetMetadata, UsePipes } from '@nestjs/common';
+import { SetMetadata, UsePipes, ValidationPipe } from '@nestjs/common';
 import { Controller } from '@nestjs/common/interfaces';
-import { isObject } from '@nestjs/common/utils/shared.utils';
 import { MetadataScanner } from '@nestjs/core';
 import { CRUD_MODULE_ROUTE_VALIDATION_METADATA } from '../../crud.constants';
 import { CrudValidationOptions } from '../../crud.types';
-import { CrudValidationPipe } from '../../pipes/crud-validation.pipe';
 import { CrudReflectionHelper } from '../../util/crud-reflection.helper';
 
 export const CrudValidation = (
@@ -42,13 +40,13 @@ export const CrudValidation = (
             classTarget,
             classTarget.prototype[methodName],
           );
-          // did we get any options for this method?
-          if (
-            isObject(validationOptions) &&
-            Object.keys(validationOptions).length
-          ) {
-            // yes, add the pipe (options will be injected into pipe later)
-            UsePipes(CrudValidationPipe)(classTarget.prototype[methodName]);
+
+          // validation was not explicitly disabled?
+          if (validationOptions !== false) {
+            // yes, add the pipe
+            UsePipes(new ValidationPipe(validationOptions))(
+              classTarget.prototype[methodName],
+            );
           }
         },
       );
