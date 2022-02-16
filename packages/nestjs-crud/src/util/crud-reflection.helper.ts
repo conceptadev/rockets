@@ -49,8 +49,6 @@ export class CrudReflectionHelper {
         [handler, target],
       ),
 
-      validation: this.getValidationOptions(target, handler),
-
       params: this.reflector.getAllAndOverride<ParamsOptions>(
         CRUD_MODULE_ROUTE_PARAMS_METADATA,
         [handler, target],
@@ -159,40 +157,7 @@ export class CrudReflectionHelper {
 
   public getValidationOptions(
     target: ReflectionTargetOrHandler,
-    handler: ReflectionTargetOrHandler,
   ): CrudValidationOptions {
-    // route options
-    const routeOptions = this.reflector.get(
-      CRUD_MODULE_ROUTE_VALIDATION_METADATA,
-      handler,
-    );
-    // controller options
-    const ctrlOptions = this.reflector.get(
-      CRUD_MODULE_ROUTE_VALIDATION_METADATA,
-      target,
-    );
-    // merge them
-    return this.mergeValidationOptions(routeOptions, ctrlOptions);
-  }
-
-  public mergeValidationOptions(
-    options: CrudValidationOptions,
-    defaultOptions: CrudValidationOptions,
-  ): CrudValidationOptions {
-    let mergedOptions: CrudValidationOptions;
-
-    if (options === false) {
-      mergedOptions = false;
-    } else if (options) {
-      if (defaultOptions) {
-        mergedOptions = { ...defaultOptions, ...options };
-      } else {
-        mergedOptions = options;
-      }
-    } else {
-      mergedOptions = defaultOptions;
-    }
-
-    return mergedOptions;
+    return this.reflector.get(CRUD_MODULE_ROUTE_VALIDATION_METADATA, target);
   }
 }

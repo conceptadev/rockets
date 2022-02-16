@@ -36,6 +36,7 @@ export class CrudRequestInterceptor extends xCrudRequestInterceptor {
           context.getClass(),
           context.getHandler(),
         );
+
         const action = this.reflectionHelper.getAction(context.getHandler());
 
         const parser = RequestQueryParser.create();
