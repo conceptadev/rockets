@@ -18,6 +18,7 @@
     "@nestjs/jwt": "^8.0.0",
     "@nestjs/platform-express": "^8.0.8",
     "@nestjs/platform-fastify": "^8.0.8",
+    "@nestjs/mapped-types": "^1.0.1",
     "@rockts-org/nestjs-auth-jwt": "^4.0.0-alpha.5",
     "@rockts-org/nestjs-auth-local": "^4.0.0-alpha.5",
     "@rockts-org/nestjs-auth-refresh": "^4.0.0-alpha.5",

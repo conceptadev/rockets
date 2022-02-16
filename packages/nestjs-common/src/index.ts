@@ -10,3 +10,10 @@ export { DeferExternalOptionsInterface } from './interfaces/defer-external-optio
 
 export { deferExternal } from './modules/defer-external';
 export { negotiateController } from './modules/negotiate-controller';
+export { HttpExceptionFilter } from './filter/http-exception.filter';
+export { RocketsException } from './exception/rockets.exception';
+export { RocketsCodeEnum } from './exception/enum/rockets-code.enum';
+
+
+
+
