@@ -5,6 +5,7 @@ import { UserDto } from './user.dto';
 /**
  * User Create DTO
  */
+
 export class UserCreateDto
   extends PickType(UserDto, ['username', 'password'])
   implements UserCreatableInterface {}

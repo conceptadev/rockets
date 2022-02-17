@@ -2,7 +2,6 @@ import {
   BadRequestException,
   CallHandler,
   ExecutionContext,
-  Inject,
   Injectable,
 } from '@nestjs/common';
 import { CrudRequestInterceptor as xCrudRequestInterceptor } from '@nestjsx/crud';
@@ -10,20 +9,12 @@ import {
   RequestQueryParser,
   RequestQueryException,
 } from '@nestjsx/crud-request';
-import { CrudReflectionHelper } from '../util/crud-reflection.helper';
-import {
-  CRUD_MODULE_CRUD_REQUEST_KEY,
-  CRUD_MODULE_SETTINGS_TOKEN,
-} from '../crud.constants';
-import { CrudSettingsInterface } from '../interfaces/crud-settings.interface';
+import { CrudReflectionService } from '../services/crud-reflection.service';
+import { CRUD_MODULE_CRUD_REQUEST_KEY } from '../crud.constants';
 
 @Injectable()
 export class CrudRequestInterceptor extends xCrudRequestInterceptor {
-  private reflectionHelper = new CrudReflectionHelper();
-
-  constructor(
-    @Inject(CRUD_MODULE_SETTINGS_TOKEN) private settings: CrudSettingsInterface,
-  ) {
+  constructor(private reflectionService: CrudReflectionService) {
     super();
   }
 
@@ -32,12 +23,12 @@ export class CrudRequestInterceptor extends xCrudRequestInterceptor {
 
     try {
       if (!req[CRUD_MODULE_CRUD_REQUEST_KEY]) {
-        const options = this.reflectionHelper.getRequestOptions(
+        const options = this.reflectionService.getRequestOptions(
           context.getClass(),
           context.getHandler(),
         );
 
-        const action = this.reflectionHelper.getAction(context.getHandler());
+        const action = this.reflectionService.getAction(context.getHandler());
 
         const parser = RequestQueryParser.create();
 

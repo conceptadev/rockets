@@ -17,7 +17,6 @@
     "@nestjs/platform-fastify": "^8.0.6",
     "@rockts-org/nestjs-common": "^4.0.0-alpha.5",
     "@sentry/node": "^6.11.0",
-    "class-validator": "^0.13.2",
     "fastify": "^3.25.3"
   },
   "devDependencies": {
@@ -26,6 +25,7 @@
     "jest-mock-extended": "^2.0.4"
   },
   "peerDependencies": {
+    "class-validator": "*",
     "rxjs": "^7.1.0"
   }
 }

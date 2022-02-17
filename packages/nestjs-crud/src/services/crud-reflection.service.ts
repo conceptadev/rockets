@@ -1,3 +1,4 @@
+import { Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { CrudOptions, ModelOptions, ParamsOptions } from '@nestjsx/crud';
 import {
@@ -21,6 +22,7 @@ import {
   CRUD_MODULE_ROUTE_QUERY_CACHE_METADATA,
   CRUD_MODULE_ROUTE_QUERY_ALWAYS_PAGINATE_METADATA,
   CRUD_MODULE_ROUTE_QUERY_SOFT_DELETE_METADATA,
+  CRUD_MODULE_ROUTE_SERIALIZE_METADATA,
 } from '../crud.constants';
 import { CrudActions } from '../crud.enums';
 import { CrudValidationOptions } from '../crud.types';
@@ -32,11 +34,13 @@ import {
   CrudReplaceOneOptionsInterface,
   CrudUpdateOneOptionsInterface,
 } from '../interfaces/crud-route-options.interface';
+import { CrudSerializeOptionsInterface } from '../interfaces/crud-serialize-options.interface';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 type ReflectionTargetOrHandler = Function;
 
-export class CrudReflectionHelper {
+@Injectable()
+export class CrudReflectionService {
   private reflector = new Reflector();
 
   public getRequestOptions(
@@ -44,10 +48,7 @@ export class CrudReflectionHelper {
     handler: ReflectionTargetOrHandler,
   ): CrudOptions {
     return {
-      model: this.reflector.getAllAndOverride<ModelOptions>(
-        CRUD_MODULE_ROUTE_MODEL_METADATA,
-        [handler, target],
-      ),
+      model: this.getAllModelOptions(target, handler),
 
       params: this.reflector.getAllAndOverride<ParamsOptions>(
         CRUD_MODULE_ROUTE_PARAMS_METADATA,
@@ -155,9 +156,29 @@ export class CrudReflectionHelper {
     );
   }
 
+  public getAllModelOptions(
+    target: ReflectionTargetOrHandler,
+    handler: ReflectionTargetOrHandler,
+  ): ModelOptions {
+    return this.reflector.getAllAndOverride<ModelOptions>(
+      CRUD_MODULE_ROUTE_MODEL_METADATA,
+      [handler, target],
+    );
+  }
+
   public getValidationOptions(
     target: ReflectionTargetOrHandler,
   ): CrudValidationOptions {
     return this.reflector.get(CRUD_MODULE_ROUTE_VALIDATION_METADATA, target);
+  }
+
+  public getAllSerializeOptions(
+    target: ReflectionTargetOrHandler,
+    handler: ReflectionTargetOrHandler,
+  ): CrudSerializeOptionsInterface {
+    return this.reflector.getAllAndOverride<CrudSerializeOptionsInterface>(
+      CRUD_MODULE_ROUTE_SERIALIZE_METADATA,
+      [handler, target],
+    );
   }
 }

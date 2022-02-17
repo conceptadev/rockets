@@ -11,6 +11,7 @@ import {
   CrudUpdateOne,
   CrudValidation,
   CrudControllerInterface,
+  CrudSerialize,
 } from '@rockts-org/nestjs-crud';
 import { UserInterface } from './interfaces/user.interface';
 import { UserDto } from './dto/user.dto';
@@ -24,6 +25,7 @@ import { UserCrudService } from './services/user-crud.service';
 @Controller('user')
 @CrudModel({ type: UserDto })
 @CrudValidation()
+@CrudSerialize()
 export class UserController implements CrudControllerInterface<UserInterface> {
   /**
    * Constructor.
@@ -49,6 +51,13 @@ export class UserController implements CrudControllerInterface<UserInterface> {
    */
   @CrudReadOne()
   async getOne(@CrudRequest() crudRequest: CrudRequestInterface) {
+    const foo: UserInterface = {
+      id: 'abc',
+      username: 'marshall',
+      password: 'lskslk',
+      salt: 'all',
+    };
+    return foo;
     return this.userCrudService.getOne(crudRequest);
   }
 

@@ -7,5 +7,13 @@ import { CRUD_MODULE_DEFAULT_SETTINGS_TOKEN } from '../crud.constants';
  */
 export const crudDefaultConfig = registerAs(
   CRUD_MODULE_DEFAULT_SETTINGS_TOKEN,
-  (): CrudSettingsInterface => ({}),
+  (): CrudSettingsInterface => ({
+    serialize: {
+      toInstanceOptions: {
+        strategy: 'excludeAll',
+        excludeExtraneousValues: true,
+      },
+      toPlainOptions: { strategy: 'excludeAll', excludeExtraneousValues: true },
+    },
+  }),
 );

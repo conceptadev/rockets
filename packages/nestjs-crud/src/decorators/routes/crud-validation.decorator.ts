@@ -3,7 +3,7 @@ import { Controller } from '@nestjs/common/interfaces';
 import { MetadataScanner } from '@nestjs/core';
 import { CRUD_MODULE_ROUTE_VALIDATION_METADATA } from '../../crud.constants';
 import { CrudValidationOptions } from '../../crud.types';
-import { CrudReflectionHelper } from '../../util/crud-reflection.helper';
+import { CrudReflectionService } from '../../services/crud-reflection.service';
 
 /**
  * Crud validation decorator.
@@ -31,13 +31,13 @@ export const CrudValidation = (
       descriptor,
     );
 
-    // reflection helper
-    const reflectionHelper = new CrudReflectionHelper();
+    // reflection service
+    const reflectionService = new CrudReflectionService();
 
     // does it look like a method decorator call?
     if (classTarget instanceof Object && propertyKey && descriptor) {
       // yes, get options
-      const methodValidationOptions = reflectionHelper.getValidationOptions(
+      const methodValidationOptions = reflectionService.getValidationOptions(
         classTarget[propertyKey],
       );
 
@@ -54,7 +54,7 @@ export const CrudValidation = (
 
       // get the class validation options
       const classValidationOptions =
-        reflectionHelper.getValidationOptions(classTarget);
+        reflectionService.getValidationOptions(classTarget);
 
       // do we have class validation options?
       if (classValidationOptions !== false) {
@@ -65,7 +65,7 @@ export const CrudValidation = (
           (methodName) => {
             // get the method validation options
             const methodValidationOptions =
-              reflectionHelper.getValidationOptions(
+              reflectionService.getValidationOptions(
                 classTarget.prototype[methodName],
               );
 

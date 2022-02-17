@@ -67,5 +67,8 @@
     "changelog:minor": "standard-version --release-as minor",
     "changelog:patch": "standard-version --release-as patch",
     "changelog:major": "standard-version --release-as major"
+  },
+  "dependencies": {
+    "class-transformer": "^0.5.1"
   }
 }
