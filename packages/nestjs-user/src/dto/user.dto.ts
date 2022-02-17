@@ -20,14 +20,4 @@ export class UserDto implements UserInterface {
   @Expose()
   @IsString()
   username: string;
-
-  /**
-   * Password
-   */
-  password: string;
-
-  /**
-   * Salt
-   */
-  salt: string;
 }

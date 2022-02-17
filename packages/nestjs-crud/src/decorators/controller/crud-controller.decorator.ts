@@ -1,7 +1,8 @@
 import { applyDecorators, Controller } from '@nestjs/common';
 import { CrudModel } from '../routes/crud-model.decorator';
 import { CrudControllerOptionsInterface } from '../../interfaces/crud-controller-options.interface';
-import { CrudSerialize, CrudValidation } from '../..';
+import { CrudValidation } from '../routes/crud-validation.decorator';
+import { CrudSerialize } from '../routes/crud-serialize.decorator';
 
 /**
  * CRUD controller decorator
