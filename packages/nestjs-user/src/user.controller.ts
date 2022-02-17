@@ -1,7 +1,5 @@
-import { Controller } from '@nestjs/common';
 import {
   CrudBody,
-  CrudModel,
   CrudCreateOne,
   CrudDeleteOne,
   CrudReadAll,
@@ -9,9 +7,8 @@ import {
   CrudRequest,
   CrudRequestInterface,
   CrudUpdateOne,
-  CrudValidation,
   CrudControllerInterface,
-  CrudSerialize,
+  CrudController,
 } from '@rockts-org/nestjs-crud';
 import { UserInterface } from './interfaces/user.interface';
 import { UserDto } from './dto/user.dto';
@@ -22,10 +19,7 @@ import { UserCrudService } from './services/user-crud.service';
 /**
  * User controller.
  */
-@Controller('user')
-@CrudModel({ type: UserDto })
-@CrudValidation()
-@CrudSerialize()
+@CrudController({ path: 'user', model: { type: UserDto } })
 export class UserController implements CrudControllerInterface<UserInterface> {
   /**
    * Constructor.
