@@ -12,8 +12,12 @@ import {
 } from './crud.constants';
 import { CrudOptionsInterface } from './interfaces/crud-options.interface';
 import { crudDefaultConfig } from './config/crud-default.config';
+import { CrudReflectionService } from './services/crud-reflection.service';
 
-@Module({})
+@Module({
+  providers: [CrudReflectionService],
+  exports: [CrudReflectionService],
+})
 export class CrudModule extends createConfigurableDynamicRootModule<
   CrudModule,
   CrudOptionsInterface

@@ -1,12 +1,20 @@
-import { SetMetadata, UsePipes } from '@nestjs/common';
+import { SetMetadata, UsePipes, ValidationPipe } from '@nestjs/common';
 import { Controller } from '@nestjs/common/interfaces';
-import { isObject } from '@nestjs/common/utils/shared.utils';
 import { MetadataScanner } from '@nestjs/core';
 import { CRUD_MODULE_ROUTE_VALIDATION_METADATA } from '../../crud.constants';
 import { CrudValidationOptions } from '../../crud.types';
-import { CrudValidationPipe } from '../../pipes/crud-validation.pipe';
-import { CrudReflectionHelper } from '../../util/crud-reflection.helper';
+import { CrudReflectionService } from '../../services/crud-reflection.service';
 
+/**
+ * Crud validation decorator.
+ *
+ * Add a ValidationPipe to a route (or entire controller).
+ *
+ * If this decorator is used on a controller, it will use the given options for
+ * every route on the controller that does NOT have validations explicitly set.
+ *
+ * @param options crud validation options
+ */
 export const CrudValidation = (
   options?: CrudValidationOptions,
 ): ClassDecorator & MethodDecorator => {
@@ -16,42 +24,61 @@ export const CrudValidation = (
     // get the args
     const [classTarget, propertyKey, descriptor] = args;
 
+    // set the meta data
     SetMetadata(CRUD_MODULE_ROUTE_VALIDATION_METADATA, options)(
       classTarget,
       propertyKey,
       descriptor,
     );
 
+    // reflection service
+    const reflectionService = new CrudReflectionService();
+
     // does it look like a method decorator call?
-    if (propertyKey && descriptor) {
-      // yes, we are done
-      return;
-    } else if (classTarget instanceof Function) {
-      const metadataScanner = new MetadataScanner();
-      const reflectionHelper = new CrudReflectionHelper();
-
-      // TODO: if no methods have an override, use one pipe at the controller level
-
-      // scan all controller methods and add a validation pipe if applicable
-      metadataScanner.scanFromPrototype<Controller, void>(
-        classTarget,
-        classTarget.prototype,
-        (methodName) => {
-          // get the validation options
-          const validationOptions = reflectionHelper.getValidationOptions(
-            classTarget,
-            classTarget.prototype[methodName],
-          );
-          // did we get any options for this method?
-          if (
-            isObject(validationOptions) &&
-            Object.keys(validationOptions).length
-          ) {
-            // yes, add the pipe (options will be injected into pipe later)
-            UsePipes(CrudValidationPipe)(classTarget.prototype[methodName]);
-          }
-        },
+    if (classTarget instanceof Object && propertyKey && descriptor) {
+      // yes, get options
+      const methodValidationOptions = reflectionService.getValidationOptions(
+        classTarget[propertyKey],
       );
+
+      // validation was not explicitly disabled?
+      if (methodValidationOptions !== false) {
+        // yes, add the pipe
+        UsePipes(new ValidationPipe(methodValidationOptions))(
+          classTarget[propertyKey],
+        );
+      }
+    } else if (classTarget instanceof Function) {
+      // will need a scanner
+      const metadataScanner = new MetadataScanner();
+
+      // get the class validation options
+      const classValidationOptions =
+        reflectionService.getValidationOptions(classTarget);
+
+      // do we have class validation options?
+      if (classValidationOptions !== false) {
+        // yes, scan all controller methods and add a validation pipe if one is not already set
+        metadataScanner.scanFromPrototype<Controller, void>(
+          classTarget,
+          classTarget.prototype,
+          (methodName) => {
+            // get the method validation options
+            const methodValidationOptions =
+              reflectionService.getValidationOptions(
+                classTarget.prototype[methodName],
+              );
+
+            // validation not explicitly false and no validation was set at all?
+            if (methodValidationOptions !== false && !methodValidationOptions) {
+              // yes, add the pipe
+              UsePipes(new ValidationPipe(classValidationOptions))(
+                classTarget.prototype[methodName],
+              );
+            }
+          },
+        );
+      }
     }
   };
 };

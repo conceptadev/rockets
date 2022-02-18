@@ -5,6 +5,9 @@ export { CrudModule } from './crud.module';
 export { CrudControllerInterface } from './interfaces/crud-controller.interface';
 export { CrudRequestInterface } from './interfaces/crud-request.interface';
 
+// controller decorators
+export { CrudController } from './decorators/controller/crud-controller.decorator';
+
 // route decorators
 export { CrudReadAll } from './decorators/actions/crud-read-all.decorator';
 export { CrudReadOne } from './decorators/actions/crud-read-one.decorator';
@@ -27,6 +30,7 @@ export { CrudLimit } from './decorators/routes/crud-limit.decorator';
 export { CrudMaxLimit } from './decorators/routes/crud-max-limit.decorator';
 export { CrudModel } from './decorators/routes/crud-model.decorator';
 export { CrudParams } from './decorators/routes/crud-params.decorator';
+export { CrudSerialize } from './decorators/routes/crud-serialize.decorator';
 export { CrudSoftDelete } from './decorators/routes/crud-soft-delete.decorator';
 export { CrudSort } from './decorators/routes/crud-sort.decorator';
 export { CrudValidation } from './decorators/routes/crud-validation.decorator';
