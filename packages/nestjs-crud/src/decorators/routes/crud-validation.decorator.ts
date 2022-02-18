@@ -63,6 +63,17 @@ export const CrudValidation = (
           classTarget,
           classTarget.prototype,
           (methodName) => {
+            // get the method action
+            const methodAction = reflectionService.getAction(
+              classTarget.prototype[methodName],
+            );
+
+            // is there a crud action set?
+            if (!methodAction) {
+              // not a crud method, do not add validation
+              return;
+            }
+
             // get the method validation options
             const methodValidationOptions =
               reflectionService.getValidationOptions(
