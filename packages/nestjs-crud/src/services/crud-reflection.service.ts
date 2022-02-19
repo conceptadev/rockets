@@ -23,6 +23,7 @@ import {
   CRUD_MODULE_ROUTE_QUERY_ALWAYS_PAGINATE_METADATA,
   CRUD_MODULE_ROUTE_QUERY_SOFT_DELETE_METADATA,
   CRUD_MODULE_ROUTE_SERIALIZE_METADATA,
+  CRUD_MODULE_PARAM_BODY_METADATA,
 } from '../crud.constants';
 import { CrudActions } from '../crud.enums';
 import { CrudValidationOptions } from '../crud.types';
@@ -35,6 +36,7 @@ import {
   CrudUpdateOneOptionsInterface,
 } from '../interfaces/crud-route-options.interface';
 import { CrudSerializeOptionsInterface } from '../interfaces/crud-serialize-options.interface';
+import { CrudValidationMetadataInterface } from '../interfaces/crud-validation-metadata.interface';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 type ReflectionTargetOrHandler = Function;
@@ -170,6 +172,13 @@ export class CrudReflectionService {
     target: ReflectionTargetOrHandler,
   ): CrudValidationOptions {
     return this.reflector.get(CRUD_MODULE_ROUTE_VALIDATION_METADATA, target);
+  }
+
+  public getBodyParamOptions(target: ReflectionTargetOrHandler) {
+    return this.reflector.get<CrudValidationMetadataInterface[]>(
+      CRUD_MODULE_PARAM_BODY_METADATA,
+      target,
+    );
   }
 
   public getAllSerializeOptions(

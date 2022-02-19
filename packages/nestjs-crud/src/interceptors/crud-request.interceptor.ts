@@ -2,6 +2,7 @@ import {
   BadRequestException,
   CallHandler,
   ExecutionContext,
+  Injectable,
 } from '@nestjs/common';
 import { CrudRequestInterceptor as xCrudRequestInterceptor } from '@nestjsx/crud';
 import {
@@ -11,6 +12,7 @@ import {
 import { CrudReflectionService } from '../services/crud-reflection.service';
 import { CRUD_MODULE_CRUD_REQUEST_KEY } from '../crud.constants';
 
+@Injectable()
 export class CrudRequestInterceptor extends xCrudRequestInterceptor {
   constructor(private reflectionService: CrudReflectionService) {
     super();

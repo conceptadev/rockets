@@ -3,6 +3,7 @@ import { CrudModel } from '../routes/crud-model.decorator';
 import { CrudControllerOptionsInterface } from '../../interfaces/crud-controller-options.interface';
 import { CrudValidation } from '../routes/crud-validation.decorator';
 import { CrudSerialize } from '../routes/crud-serialize.decorator';
+import { CrudInitValidation } from './crud-init-validation.decorator';
 
 /**
  * CRUD controller decorator
@@ -18,6 +19,7 @@ export function CrudController(options: CrudControllerOptionsInterface) {
     Controller({ path, host }),
     CrudModel(moreOptions.model),
     CrudValidation(moreOptions.validation),
+    CrudInitValidation(),
     CrudSerialize(moreOptions.serialize),
   );
 }
