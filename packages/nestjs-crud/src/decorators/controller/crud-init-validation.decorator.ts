@@ -5,8 +5,6 @@ import { CrudReflectionService } from '../../services/crud-reflection.service';
  * Crud initialize validation decorator.
  *
  * Add a ValidationPipe to every parameter called with the `CrudBody` decorator.
- *
- * @param options crud validation options
  */
 export const CrudInitValidation =
   (): ClassDecorator =>
