@@ -1,31 +1,33 @@
-import { Body, Type } from '@nestjs/common';
+import { SetMetadata, Type } from '@nestjs/common';
+import { CRUD_MODULE_PARAM_BODY_METADATA } from '../../crud.constants';
+import { CrudBodyOptionsInterface } from '../../interfaces/crud-body-options.interface';
+import { CrudValidationMetadataInterface } from '../../interfaces/crud-validation-metadata.interface';
+import { CrudReflectionService } from '../../services/crud-reflection.service';
 
 /**
  * @CrudBody() parameter decorator
  */
-export function CrudBody(): ParameterDecorator;
-
 export function CrudBody(
-  ...pipes: Parameters<typeof Body>[1][]
-): ParameterDecorator;
-
-export function CrudBody(
-  property: Parameters<typeof Body>[0],
-  ...pipes: Parameters<typeof Body>[1][]
-): ParameterDecorator;
-
-export function CrudBody(
-  property?: Parameters<typeof Body>[0] | Parameters<typeof Body>[1],
-  ...pipes: Parameters<typeof Body>[1][]
+  options?: CrudBodyOptionsInterface,
 ): ParameterDecorator {
   return (
     target: Type,
     propertyKey: string | symbol,
     parameterIndex: number,
   ) => {
-    const bodyDecorator =
-      typeof property === 'string' ? Body(property, ...pipes) : Body(...pipes);
+    const reflectionService = new CrudReflectionService();
 
-    return bodyDecorator(target, propertyKey, parameterIndex);
+    const previousValues = reflectionService.getBodyParamOptions(target) || [];
+
+    const value: CrudValidationMetadataInterface = {
+      propertyKey,
+      parameterIndex,
+      validation: options?.validation,
+      pipes: options?.pipes,
+    };
+
+    const values = [...previousValues, value];
+
+    SetMetadata(CRUD_MODULE_PARAM_BODY_METADATA, values)(target);
   };
 }
