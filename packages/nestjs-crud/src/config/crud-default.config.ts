@@ -12,8 +12,13 @@ export const crudDefaultConfig = registerAs(
       toInstanceOptions: {
         strategy: 'excludeAll',
         excludeExtraneousValues: true,
+        excludePrefixes: ['_', '__'],
       },
-      toPlainOptions: { strategy: 'excludeAll', excludeExtraneousValues: true },
+      toPlainOptions: {
+        strategy: 'excludeAll',
+        excludeExtraneousValues: true,
+        excludePrefixes: ['_', '__'],
+      },
     },
   }),
 );

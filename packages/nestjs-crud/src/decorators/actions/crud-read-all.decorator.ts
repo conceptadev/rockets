@@ -9,7 +9,10 @@ import { CrudValidation } from '../routes/crud-validation.decorator';
  * CRUD Read All route decorator
  */
 export const CrudReadAll = (options: CrudReadAllOptionsInterface = {}) => {
-  const { path, validation, serialize } = { ...options };
+  const { path, validation, serialize } = {
+    serialize: { isMany: true },
+    ...options,
+  };
 
   return applyDecorators(
     Get(path),

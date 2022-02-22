@@ -17,6 +17,8 @@ import {
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CRUD_MODULE_SETTINGS_TOKEN } from '../crud.constants';
+import { CrudResponseDto } from '../dto/crud-response.dto';
+import { CrudResponseManyDto } from '../dto/crud-response-many.dto';
 import { CrudSerializeOptionsInterface } from '../interfaces/crud-serialize-options.interface';
 import { CrudSettingsInterface } from '../interfaces/crud-settings.interface';
 import { CrudReflectionService } from '../services/crud-reflection.service';
@@ -51,6 +53,8 @@ export class CrudSerializeInterceptor implements NestInterceptor {
   ) {
     // must have a dto type
     if (!isFunction(options.type)) {
+      // this should never happen, but needed just in
+      // case somebody removes the defaults
       throw new InternalServerErrorException(
         'Impossible to serialize data without a DTO type.',
       );
@@ -62,18 +66,14 @@ export class CrudSerializeInterceptor implements NestInterceptor {
       return response;
     }
 
+    // determine the type to use
+    const type = options.isMany === true ? options.manyType : options.type;
+
     // convert each object to DTO type, then convert back to plain object
-    return Array.isArray(response)
-      ? response.map((response) =>
-          this.toPlain(
-            this.toInstance(options.type, response, options?.toInstanceOptions),
-            options?.toPlainOptions,
-          ),
-        )
-      : this.toPlain(
-          this.toInstance(options.type, response, options?.toInstanceOptions),
-          options?.toPlainOptions,
-        );
+    return this.toPlain(
+      this.toInstance(type, response, options?.toInstanceOptions),
+      options?.toPlainOptions,
+    );
   }
 
   protected toInstance(
@@ -98,15 +98,22 @@ export class CrudSerializeInterceptor implements NestInterceptor {
         context.getHandler(),
       ) ?? {};
 
+    // get model options
+    const modelOptions = this.reflectionService.getAllModelOptions(
+      context.getClass(),
+      context.getHandler(),
+    );
+
     // is the type missing?
     if (!options?.type) {
-      // yes... get the model options
-      const modelOptions = this.reflectionService.getAllModelOptions(
-        context.getClass(),
-        context.getHandler(),
-      );
-      // set it
-      options.type = modelOptions.type;
+      // yes, set it
+      options.type = modelOptions.type ?? CrudResponseDto;
+    }
+
+    // is the many type missing?
+    if (!options?.manyType) {
+      // yes, set it
+      options.manyType = modelOptions.manyType ?? CrudResponseManyDto;
     }
 
     return {
