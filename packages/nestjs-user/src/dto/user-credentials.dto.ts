@@ -1,5 +1,6 @@
 import { PickType } from '@nestjs/mapped-types';
 import { Exclude, Expose } from 'class-transformer';
+import { IsString } from 'class-validator';
 import { UserCredentialsInterface } from '../interfaces/user-credentials.interface';
 import { UserDto } from './user.dto';
 
@@ -12,8 +13,10 @@ export class UserCredentialsDto
   implements UserCredentialsInterface
 {
   @Expose()
+  @IsString()
   password: string;
 
   @Expose()
+  @IsString()
   salt: string;
 }

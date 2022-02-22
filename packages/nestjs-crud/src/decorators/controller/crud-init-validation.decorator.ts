@@ -1,4 +1,5 @@
 import { Body, ValidationPipe } from '@nestjs/common';
+import { CRUD_MODULE_DEFAULT_VALIDATION_PIPE_OPTIONS } from '../../crud.constants';
 import { CrudReflectionService } from '../../services/crud-reflection.service';
 
 /**
@@ -32,12 +33,15 @@ export const CrudInitValidation =
         const { validation = fallbackOptions } = metadata;
 
         // are we injecting validation?
-        if (
-          validation !== false &&
-          (typeof validation === 'object' || typeof validation === 'undefined')
-        ) {
-          // yes, put our validation pipe first
-          pipes = [new ValidationPipe(validation), ...pipes];
+        if (validation !== false) {
+          // yes, create new pipe
+          const paramPipe = new ValidationPipe({
+            ...CRUD_MODULE_DEFAULT_VALIDATION_PIPE_OPTIONS,
+            ...validation,
+          });
+
+          // put our validation pipe first
+          pipes = [paramPipe, ...pipes];
         }
 
         // create the body decorator
