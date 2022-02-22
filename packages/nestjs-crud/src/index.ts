@@ -46,3 +46,4 @@ export { TypeOrmCrudService } from './services/typeorm-crud.service';
 // dto
 export { CrudResponseDto } from './dto/crud-response.dto';
 export { CrudResponseManyDto } from './dto/crud-response-many.dto';
+export { CrudCreateManyDto } from './dto/crud-create-many.dto';
