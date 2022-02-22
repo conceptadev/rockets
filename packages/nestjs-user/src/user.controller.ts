@@ -43,7 +43,7 @@ export class UserController
    * @param crudRequest the CRUD request object
    */
   @CrudReadAll()
-  async getMany(@CrudRequest() crudRequest: CrudRequestInterface) {
+  async readAll(@CrudRequest() crudRequest: CrudRequestInterface) {
     return this.userCrudService.getMany(crudRequest);
   }
 
@@ -53,7 +53,7 @@ export class UserController
    * @param crudRequest the CRUD request object
    */
   @CrudReadOne()
-  async getOne(@CrudRequest() crudRequest: CrudRequestInterface) {
+  async readOne(@CrudRequest() crudRequest: CrudRequestInterface) {
     return this.userCrudService.getOne(crudRequest);
   }
 

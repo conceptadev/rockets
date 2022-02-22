@@ -4,11 +4,11 @@ import { CrudRequestInterface } from '../interfaces/crud-request.interface';
 import { CrudResponseManyInterface } from './crud-response-many.interface';
 
 export interface CrudControllerInterface<T extends IdentityInterface> {
-  getMany?: (
+  readAll?: (
     crudRequest: CrudRequestInterface,
   ) => Promise<CrudResponseManyInterface<T> | T[]>;
 
-  getOne?: (crudRequest: CrudRequestInterface) => Promise<T>;
+  readOne?: (crudRequest: CrudRequestInterface) => Promise<T>;
 
   createOne?: (
     crudRequest: CrudRequestInterface,
