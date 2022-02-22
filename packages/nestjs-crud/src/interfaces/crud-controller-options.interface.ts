@@ -1,10 +1,10 @@
 import { ControllerOptions } from '@nestjs/common';
-import { ModelOptions } from '@nestjsx/crud';
 import { CrudValidationOptions } from '../crud.types';
+import { CrudModelOptionsInterface } from './crud-model-options.interface';
 import { CrudSerializeOptionsInterface } from './crud-serialize-options.interface';
 
 export interface CrudControllerOptionsInterface extends ControllerOptions {
-  model: ModelOptions;
+  model: CrudModelOptionsInterface;
   validation?: CrudValidationOptions;
   serialize?: CrudSerializeOptionsInterface;
 }

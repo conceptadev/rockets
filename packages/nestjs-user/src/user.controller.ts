@@ -15,11 +15,18 @@ import { UserCreateDto } from './dto/user-create.dto';
 import { UserUpdateDto } from './dto/user-update.dto';
 import { UserCrudService } from './services/user-crud.service';
 import { UserEntityInterface } from './interfaces/user-entity.interface';
+import { UserManyDto } from './dto/user-many.dto';
 
 /**
  * User controller.
  */
-@CrudController({ path: 'user', model: { type: UserDto } })
+@CrudController({
+  path: 'user',
+  model: {
+    type: UserDto,
+    manyType: UserManyDto,
+  },
+})
 export class UserController
   implements CrudControllerInterface<UserEntityInterface>
 {

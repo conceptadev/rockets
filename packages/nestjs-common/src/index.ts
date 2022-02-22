@@ -3,6 +3,7 @@ export {
   createConfigurableDynamicRootModule,
 } from '@golevelup/nestjs-modules';
 
+export { IdentityInterface } from './interfaces/identity.interface';
 export { OptionsInterface } from './interfaces/options.interface';
 export { ModuleOptionsControllerInterface } from './interfaces/module-options-controller.interface';
 export { ModuleOptionsSettingsInterface } from './interfaces/module-options-settings.interface';

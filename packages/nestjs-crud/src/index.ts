@@ -42,3 +42,7 @@ export { CrudBody } from './decorators/params/crud-body.decorator';
 // classes
 export { CrudQueryHelper } from './util/crud-query.helper';
 export { TypeOrmCrudService } from './services/typeorm-crud.service';
+
+// dto
+export { CrudResponseDto } from './dto/crud-response.dto';
+export { CrudResponseManyDto } from './dto/crud-response-many.dto';

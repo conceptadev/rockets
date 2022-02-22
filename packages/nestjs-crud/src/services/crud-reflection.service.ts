@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { CrudOptions, ModelOptions, ParamsOptions } from '@nestjsx/crud';
+import { CrudOptions, ParamsOptions } from '@nestjsx/crud';
 import {
   CRUD_MODULE_ROUTE_ACTION_METADATA,
   CRUD_MODULE_ROUTE_CREATE_ONE_METADATA,
@@ -27,6 +27,7 @@ import {
 } from '../crud.constants';
 import { CrudActions } from '../crud.enums';
 import { CrudValidationOptions } from '../crud.types';
+import { CrudModelOptionsInterface } from '../interfaces/crud-model-options.interface';
 import { CrudQueryOptionsInterface } from '../interfaces/crud-query-options.interface';
 import {
   CrudCreateOneOptionsInterface,
@@ -161,8 +162,8 @@ export class CrudReflectionService {
   public getAllModelOptions(
     target: ReflectionTargetOrHandler,
     handler: ReflectionTargetOrHandler,
-  ): ModelOptions {
-    return this.reflector.getAllAndOverride<ModelOptions>(
+  ) {
+    return this.reflector.getAllAndOverride<CrudModelOptionsInterface>(
       CRUD_MODULE_ROUTE_MODEL_METADATA,
       [handler, target],
     );
