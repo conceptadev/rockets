@@ -21,7 +21,6 @@
     "@rockts-org/nestjs-password": "^4.0.0-alpha.5",
     "@rockts-org/nestjs-user": "^4.0.0-alpha.5",
     "@sentry/node": "^6.11.0",
-    "class-validator": "^0.13.2",
     "express": "^4.17.1",
     "fastify": "^3.25.3",
     "passport-local": "^1.0.0"
@@ -34,6 +33,7 @@
     "jest-mock-extended": "^2.0.4"
   },
   "peerDependencies": {
+    "class-validator": "*",
     "rxjs": "^7.1.0"
   }
 }

@@ -1,4 +1,4 @@
-import { UserInterface } from './user.interface';
+import { UserCredentialsInterface } from './user-credentials.interface';
 
 export interface UserCreatableInterface
-  extends Pick<UserInterface, 'username' | 'password'> {}
+  extends Pick<UserCredentialsInterface, 'username' | 'password'> {}

@@ -1,7 +1,5 @@
-import { Controller } from '@nestjs/common';
 import {
   CrudBody,
-  CrudModel,
   CrudCreateOne,
   CrudDeleteOne,
   CrudReadAll,
@@ -9,22 +7,31 @@ import {
   CrudRequest,
   CrudRequestInterface,
   CrudUpdateOne,
-  CrudValidation,
   CrudControllerInterface,
+  CrudController,
+  CrudCreateMany,
 } from '@rockts-org/nestjs-crud';
-import { UserInterface } from './interfaces/user.interface';
+import { UserCrudService } from './services/user-crud.service';
+import { UserEntityInterface } from './interfaces/user-entity.interface';
 import { UserDto } from './dto/user.dto';
 import { UserCreateDto } from './dto/user-create.dto';
+import { UserCreateManyDto } from './dto/user-create-many.dto';
 import { UserUpdateDto } from './dto/user-update.dto';
-import { UserCrudService } from './services/user-crud.service';
+import { UserManyDto } from './dto/user-many.dto';
 
 /**
  * User controller.
  */
-@Controller('user')
-@CrudModel({ type: UserDto })
-@CrudValidation()
-export class UserController implements CrudControllerInterface<UserInterface> {
+@CrudController({
+  path: 'user',
+  model: {
+    type: UserDto,
+    manyType: UserManyDto,
+  },
+})
+export class UserController
+  implements CrudControllerInterface<UserEntityInterface>
+{
   /**
    * Constructor.
    *
@@ -50,6 +57,20 @@ export class UserController implements CrudControllerInterface<UserInterface> {
   @CrudReadOne()
   async getOne(@CrudRequest() crudRequest: CrudRequestInterface) {
     return this.userCrudService.getOne(crudRequest);
+  }
+
+  /**
+   * Create many
+   *
+   * @param crudRequest the CRUD request object
+   * @param userCreateManyDto user create many dto
+   */
+  @CrudCreateMany()
+  async createMany(
+    @CrudRequest() crudRequest: CrudRequestInterface,
+    @CrudBody() userCreateManyDto: UserCreateManyDto,
+  ) {
+    return this.userCrudService.createMany(crudRequest, userCreateManyDto);
   }
 
   /**

@@ -1,29 +1,27 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
+import { Exclude, Expose } from 'class-transformer';
+import { CrudResponseDto } from '@rockts-org/nestjs-crud';
 import { UserInterface } from '../interfaces/user.interface';
 
 /**
  * User DTO
  */
-export class UserDto implements UserInterface {
+@Exclude()
+export class UserDto
+  extends CrudResponseDto<UserInterface>
+  implements UserInterface
+{
   /**
    * Unique id
    */
-  @IsNumber()
+  @Expose()
+  @IsString()
   id: string;
 
   /**
    * Username
    */
+  @Expose()
   @IsString()
   username: string;
-
-  /**
-   * Password
-   */
-  password: string;
-
-  /**
-   * Salt
-   */
-  salt: string;
 }

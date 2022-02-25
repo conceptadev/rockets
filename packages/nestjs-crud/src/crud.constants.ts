@@ -1,3 +1,6 @@
+import { ValidationPipeOptions } from '@nestjs/common';
+import { ClassTransformOptions } from 'class-transformer';
+
 export const CRUD_MODULE_OPTIONS_TOKEN = 'CRUD_MODULE_OPTIONS_TOKEN';
 
 export const CRUD_MODULE_SETTINGS_TOKEN = 'CRUD_MODULE_SETTINGS_TOKEN';
@@ -7,14 +10,14 @@ export const CRUD_MODULE_DEFAULT_SETTINGS_TOKEN =
 
 export const CRUD_MODULE_CRUD_REQUEST_KEY = 'CRUD_MODULE_CRUD_REQUEST_KEY';
 
-export const CRUD_MODULE_CRUD_VALIDATION_KEY =
-  'CRUD_MODULE_CRUD_VALIDATION_KEY';
-
 export const CRUD_MODULE_ROUTE_MODEL_METADATA =
   'CRUD_MODULE_ROUTE_MODEL_METADATA';
 
 export const CRUD_MODULE_ROUTE_VALIDATION_METADATA =
   'CRUD_MODULE_ROUTE_VALIDATION_METADATA';
+
+export const CRUD_MODULE_ROUTE_SERIALIZE_METADATA =
+  'CRUD_MODULE_ROUTE_SERIALIZE_METADATA';
 
 export const CRUD_MODULE_ROUTE_ACTION_METADATA =
   'CRUD_MODULE_ROUTE_ACTION_METADATA';
@@ -76,3 +79,18 @@ export const CRUD_MODULE_ROUTE_CREATE_MANY_DEFAULT_PATH = '/bulk';
 
 export const CRUD_MODULE_ROUTE_RECOVER_ONE_DEFAULT_PATH =
   '/recover/' + CRUD_MODULE_ROUTE_ID_DEFAULT_PATH;
+
+export const CRUD_MODULE_PARAM_BODY_METADATA =
+  'CRUD_MODULE_PARAM_BODY_METADATA';
+
+export const CRUD_MODULE_DEFAULT_TRANSFORM_OPTIONS: ClassTransformOptions = {
+  strategy: 'excludeAll',
+  excludeExtraneousValues: true,
+  excludePrefixes: ['_', '__'],
+};
+
+export const CRUD_MODULE_DEFAULT_VALIDATION_PIPE_OPTIONS: ValidationPipeOptions =
+  {
+    transform: true,
+    transformOptions: CRUD_MODULE_DEFAULT_TRANSFORM_OPTIONS,
+  };

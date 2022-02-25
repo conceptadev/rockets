@@ -19,7 +19,6 @@
     "@rockts-org/nestjs-authentication": "^4.0.0-alpha.5",
     "@rockts-org/nestjs-common": "^4.0.0-alpha.5",
     "@rockts-org/nestjs-jwt": "^4.0.0-alpha.5",
-    "class-validator": "^0.13.2",
     "express": "^4.17.1",
     "fastify": "^3.25.3"
   },
@@ -28,6 +27,7 @@
     "jest-mock-extended": "^2.0.4"
   },
   "peerDependencies": {
+    "class-validator": "*",
     "rxjs": "^7.1.0"
   }
 }

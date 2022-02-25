@@ -1,10 +1,11 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { UserEntityInterface } from '../interfaces/user-entity.interface';
 
 /**
  * User Entity
  */
 @Entity()
-export class User {
+export class User implements UserEntityInterface {
   /**
    * Unique Id
    */

@@ -22,12 +22,13 @@
   },
   "devDependencies": {
     "@nestjs/testing": "^8.0.8",
-    "class-transformer": "^0.5.1",
     "jest-mock-extended": "^2.0.4",
     "typeorm": "^0.2.41"
   },
   "peerDependencies": {
-    "class-transformer": "^0.5.1",
+    "rxjs": "^7.1.0",
+    "class-transformer": "*",
+    "class-validator": "*",
     "typeorm": "^0.2.41"
   }
 }
