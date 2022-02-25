@@ -7,14 +7,7 @@ import { INestApplication } from '@nestjs/common';
 import { TestUserRepository } from './user/user.repository';
 import { mock } from 'jest-mock-extended';
 import { User, UserCrudService } from '@rockts-org/nestjs-user';
-import { HttpExceptionFilter } from '@rockts-org/nestjs-common';
-
-
-const sleep = (ms) => {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-};
+import { HttpExceptionFilter, RocketsCode } from '@rockts-org/nestjs-common';
 
 describe('AppController (e2e)', () => {
   describe('Authentication', () => {
@@ -33,9 +26,9 @@ describe('AppController (e2e)', () => {
         .compile();
 
       app = moduleFixture.createNestApplication();
-      
+
       app.useGlobalFilters(new HttpExceptionFilter());
-      
+
       await app.init();
     });
 
@@ -43,18 +36,29 @@ describe('AppController (e2e)', () => {
       jest.clearAllMocks();
       await app.close();
     });
- 
-    it('GET /error', async () => {
-      await supertest(app.getHttpServer()).get('/custom/user/error')
-        .then((response) => { 
-          console.log('response', response.body);
 
+    it('GET /error Default', async () => {
+      await supertest(app.getHttpServer())
+        .get('/custom/user/error')
+        .then((response) => {
+          //console.log('response', response.body);
+          expect(response.body.rocketsCode).toBe(RocketsCode.DEFAULT);
         })
-        .catch((error) => { 
-          console.log('>>>>>>>>>>>>');
-          console.log(error);
-      });
+        .catch(() => {
+          //console.log(error);
+        });
+    });
+
+    it('GET /error Not Found', async () => {
+      await supertest(app.getHttpServer())
+        .get('/custom/user/error/not-found')
+        .then((response) => {
+          //console.log('response', response.body);
+          expect(response.body.rocketsCode).toBe(RocketsCode.NOT_FOUND);
+        })
+        .catch(() => {
+          //console.log(error);
+        });
     });
   });
-
 });
