@@ -4,6 +4,7 @@ export { CrudModule } from './crud.module';
 // interfaces
 export { CrudControllerInterface } from './interfaces/crud-controller.interface';
 export { CrudRequestInterface } from './interfaces/crud-request.interface';
+export { CrudPlainResponseInterface } from './interfaces/crud-plain-response.interface';
 
 // controller decorators
 export { CrudController } from './decorators/controller/crud-controller.decorator';

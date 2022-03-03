@@ -20,10 +20,13 @@ import { CRUD_MODULE_SETTINGS_TOKEN } from '../crud.constants';
 import { CrudResponseDto } from '../dto/crud-response.dto';
 import { CrudResponseManyDto } from '../dto/crud-response-many.dto';
 import { CrudSerializeOptionsInterface } from '../interfaces/crud-serialize-options.interface';
+import { CrudPlainResponseInterface } from '../interfaces/crud-plain-response.interface';
 import { CrudSettingsInterface } from '../interfaces/crud-settings.interface';
 import { CrudReflectionService } from '../services/crud-reflection.service';
 
-type ResponseType = PlainLiteralObject | Array<PlainLiteralObject>;
+type ResponseType =
+  | (PlainLiteralObject & CrudPlainResponseInterface)
+  | Array<PlainLiteralObject>;
 
 export class CrudSerializeInterceptor implements NestInterceptor {
   constructor(
@@ -67,7 +70,10 @@ export class CrudSerializeInterceptor implements NestInterceptor {
     }
 
     // determine the type to use
-    const type = options.isMany === true ? options.manyType : options.type;
+    const type =
+      !Array.isArray(response) && response?.__isPaginated === true
+        ? options.manyType
+        : options.type;
 
     // convert each object to DTO type, then convert back to plain object
     return this.toPlain(
