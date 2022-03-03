@@ -1,4 +1,5 @@
 import { ValidationPipeOptions } from '@nestjs/common';
+import { ParamsOptions } from '@nestjsx/crud-request';
 import { ClassTransformOptions } from 'class-transformer';
 
 export const CRUD_MODULE_OPTIONS_TOKEN = 'CRUD_MODULE_OPTIONS_TOKEN';
@@ -82,6 +83,10 @@ export const CRUD_MODULE_ROUTE_RECOVER_ONE_DEFAULT_PATH =
 
 export const CRUD_MODULE_PARAM_BODY_METADATA =
   'CRUD_MODULE_PARAM_BODY_METADATA';
+
+export const CRUD_MODULE_DEFAULT_PARAMS_OPTIONS: ParamsOptions = {
+  id: { field: 'id', type: 'string', primary: true },
+};
 
 export const CRUD_MODULE_DEFAULT_TRANSFORM_OPTIONS: ClassTransformOptions = {
   strategy: 'excludeAll',
