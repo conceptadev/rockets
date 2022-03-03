@@ -1,15 +1,15 @@
 import { Repository } from 'typeorm';
 import { Type } from '@nestjs/common';
 import { TypeOrmExtOrmOptionsInterface } from '@rockts-org/nestjs-typeorm-ext';
-import { UserInterface } from './user.interface';
+import { UserEntityInterface } from './user-entity.interface';
 
 export interface UserOrmOptionsInterface extends TypeOrmExtOrmOptionsInterface {
   orm?: {
     entities?: {
-      user?: { useClass?: Type<UserInterface> };
+      user?: { useClass?: Type<UserEntityInterface> };
     };
     repositories?: {
-      userRepository?: { useClass?: Type<Repository<UserInterface>> };
+      userRepository?: { useClass?: Type<Repository<UserEntityInterface>> };
     };
   };
 }
