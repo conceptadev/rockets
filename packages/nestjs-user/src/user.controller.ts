@@ -18,6 +18,8 @@ import { UserCreateDto } from './dto/user-create.dto';
 import { UserCreateManyDto } from './dto/user-create-many.dto';
 import { UserUpdateDto } from './dto/user-update.dto';
 import { UserManyDto } from './dto/user-many.dto';
+import { UserService } from './services/user.service';
+import { UserCreateEncryptedDto } from './dto/user-create-encrypted.dto';
 
 /**
  * User controller.
@@ -37,7 +39,10 @@ export class UserController
    *
    * @param userCrudService instance of the user crud service
    */
-  constructor(private userCrudService: UserCrudService) {}
+  constructor(
+    private userService: UserService,
+    private userCrudService: UserCrudService,
+  ) {}
 
   /**
    * Get many
@@ -70,6 +75,23 @@ export class UserController
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() userCreateManyDto: UserCreateManyDto,
   ) {
+    // encrypted dtos
+    const userCreateEncryptedDtos: UserCreateEncryptedDto[] = [];
+
+    // loop all dtos
+    for (const userCreateDto of userCreateManyDto.bulk) {
+      // encrypt it
+      const userCredentialsDto = await this.userService.encryptPassword(
+        userCreateDto,
+        UserCreateEncryptedDto,
+      );
+
+      // push on array
+      userCreateEncryptedDtos.push(userCredentialsDto);
+    }
+    // overwrite
+    userCreateManyDto.bulk = userCreateEncryptedDtos;
+    // call crud service to create
     return this.userCrudService.createMany(crudRequest, userCreateManyDto);
   }
 
@@ -84,7 +106,13 @@ export class UserController
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() userCreateDto: UserCreateDto,
   ) {
-    return this.userCrudService.createOne(crudRequest, userCreateDto);
+    // encrypt the password
+    const userCreateEncryptedDto = await this.userService.encryptPassword(
+      userCreateDto,
+      UserCreateEncryptedDto,
+    );
+    // call crud service to create
+    return this.userCrudService.createOne(crudRequest, userCreateEncryptedDto);
   }
 
   /**
