@@ -24,13 +24,17 @@ export class TypeOrmCrudService<T> extends xTypeOrmCrudService<T> {
     // get parent result
     const result = await super.getMany(req);
 
-    // maybe add pagination hint
-    if (!Array.isArray(result)) {
-      result['__isPaginated'] = this.decidePagination(req.parsed, req.options);
+    // is an array?
+    if (Array.isArray(result)) {
+      // yes, just return
+      return result;
+    } else {
+      // not an array, add pagination hint
+      return {
+        ...result,
+        __isPaginated: this.decidePagination(req.parsed, req.options),
+      };
     }
-
-    // all done
-    return result;
   }
 
   async getOne(
