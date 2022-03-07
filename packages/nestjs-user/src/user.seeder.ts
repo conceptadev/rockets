@@ -1,13 +1,14 @@
 import { Type } from '@nestjs/common';
-import { Factory, Seeder } from 'typeorm-seeding';
+import { Seeder } from '@jorgebodega/typeorm-seeding';
 import { PasswordStorageService } from '@rockts-org/nestjs-password';
 import { User } from './entities/user.entity';
 import { UserEntityInterface } from './interfaces/user-entity.interface';
+import { UserFactory } from './user.factory';
 
 /**
  * User seeder
  */
-export class UserSeeder implements Seeder {
+export class UserSeeder extends Seeder {
   /**
    * The entity class.
    *
@@ -25,7 +26,7 @@ export class UserSeeder implements Seeder {
    *
    * @param factory Seeder factory
    */
-  public async run(factory: Factory): Promise<void> {
+  public async run(): Promise<void> {
     // number of users to create
     const createAmount = process.env?.USER_MODULE_SEEDER_AMOUNT
       ? Number(process.env.USER_MODULE_SEEDER_AMOUNT)
@@ -37,7 +38,7 @@ export class UserSeeder implements Seeder {
       : 'superadmin';
 
     // the factory
-    const userFactory = factory(this.entity)();
+    const userFactory = new UserFactory(this.entity);
 
     // create a super admin user
     await userFactory
@@ -61,15 +62,12 @@ export class UserSeeder implements Seeder {
   protected async setPassword(
     user: UserEntityInterface,
     password = 'Test1234',
-  ): Promise<UserEntityInterface> {
+  ) {
     // encrypt it
     const encrypted = await this.passwordStorageService.encrypt(password);
 
     // set password and salt
     user.password = encrypted.password;
     user.salt = encrypted.salt;
-
-    // all done
-    return user;
   }
 }

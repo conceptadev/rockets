@@ -1,7 +1,7 @@
 import Faker from '@faker-js/faker';
 import { Type } from '@nestjs/common';
-import { define } from 'typeorm-seeding';
-import { UserInterface } from './interfaces/user.interface';
+import { Factory } from '@jorgebodega/typeorm-seeding';
+import { UserEntityInterface } from './interfaces/user-entity.interface';
 
 /**
  * User factory
@@ -9,24 +9,18 @@ import { UserInterface } from './interfaces/user.interface';
  * ```ts
  * // new factory instance
  * const userFactory = new UserFactory(User);
- *
- * // register it
- * userFactory.define();
  * ```
  */
-export class UserFactory<T extends UserInterface = UserInterface> {
+export class UserFactory<
+  T extends UserEntityInterface = UserEntityInterface,
+> extends Factory<T> {
   /**
    * Constructor.
    *
    * @param entity The entity class.
    */
-  constructor(private entity: Type<T>) {}
-
-  /**
-   * Define the user factory.
-   */
-  public define() {
-    define(this.entity, this.factoryFn(this.entity));
+  constructor(private entity: Type<T>) {
+    super();
   }
 
   /**
@@ -34,24 +28,22 @@ export class UserFactory<T extends UserInterface = UserInterface> {
    *
    * @param entity The entity class.
    */
-  protected factoryFn(entity: Type<T>) {
+  protected async definition(): Promise<T> {
     // unique usernames that have already been used.
     const uniqueUsernames: Record<string, boolean> = {};
 
-    return (faker: typeof Faker): T => {
-      // the user we will return
-      const user = new entity();
+    // the user we will return
+    const user = new this.entity();
 
-      // keep trying to get a unique username
-      do {
-        user.username = faker.internet.userName().toLowerCase();
-      } while (uniqueUsernames[user.username]);
+    // keep trying to get a unique username
+    do {
+      user.username = Faker.internet.userName().toLowerCase();
+    } while (uniqueUsernames[user.username]);
 
-      // add to used usernames
-      uniqueUsernames[user.username] = true;
+    // add to used usernames
+    uniqueUsernames[user.username] = true;
 
-      // return the new user
-      return user;
-    };
+    // return the new user
+    return user;
   }
 }

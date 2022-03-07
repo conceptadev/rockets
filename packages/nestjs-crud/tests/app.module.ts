@@ -1,18 +1,16 @@
 import { Module } from '@nestjs/common';
-import { CrudModule } from '@rockts-org/nestjs-crud';
 import { TypeOrmExtModule } from '@rockts-org/nestjs-typeorm-ext';
-import { UserModule } from '@rockts-org/nestjs-user';
-import { default as dbConfig } from './ormconfig';
+import { PhotoModule } from './photo/photo.module';
+import { default as ormConfig } from './ormconfig';
 
 @Module({
   imports: [
     TypeOrmExtModule.registerAsync({
       useFactory: async () => {
-        return dbConfig;
+        return ormConfig;
       },
     }),
-    CrudModule.register(),
-    UserModule.register(),
+    PhotoModule.register(),
   ],
 })
 export class AppModule {}
