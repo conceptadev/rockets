@@ -6,7 +6,7 @@ import {
   CRUD_MODULE_ROUTE_ID_DEFAULT_PATH,
   CRUD_MODULE_ROUTE_REPLACE_ONE_METADATA,
 } from '../../crud.constants';
-import { CrudValidation } from '../routes/crud-validation.decorator';
+import { CrudValidate } from '../routes/crud-validate.decorator';
 import { CrudSerialize } from '../routes/crud-serialize.decorator';
 
 /**
@@ -18,7 +18,7 @@ export const CrudReplaceOne = (
   const {
     path = CRUD_MODULE_ROUTE_ID_DEFAULT_PATH,
     validation,
-    serialize,
+    serialization,
     ...rest
   } = { ...options };
 
@@ -26,7 +26,7 @@ export const CrudReplaceOne = (
     Put(path),
     CrudAction(CrudActions.ReplaceOne),
     SetMetadata(CRUD_MODULE_ROUTE_REPLACE_ONE_METADATA, rest),
-    CrudValidation(validation),
-    CrudSerialize(serialize),
+    CrudValidate(validation),
+    CrudSerialize(serialization),
   );
 };

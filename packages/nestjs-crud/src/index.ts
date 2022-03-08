@@ -34,7 +34,7 @@ export { CrudParams } from './decorators/routes/crud-params.decorator';
 export { CrudSerialize } from './decorators/routes/crud-serialize.decorator';
 export { CrudSoftDelete } from './decorators/routes/crud-soft-delete.decorator';
 export { CrudSort } from './decorators/routes/crud-sort.decorator';
-export { CrudValidation } from './decorators/routes/crud-validation.decorator';
+export { CrudValidate } from './decorators/routes/crud-validate.decorator';
 
 // param decorators
 export { CrudRequest } from './decorators/params/crud-request.decorator';

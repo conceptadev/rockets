@@ -6,7 +6,7 @@ import {
   CRUD_MODULE_ROUTE_ID_DEFAULT_PATH,
   CRUD_MODULE_ROUTE_DELETE_ONE_METADATA,
 } from '../../crud.constants';
-import { CrudValidation } from '../routes/crud-validation.decorator';
+import { CrudValidate } from '../routes/crud-validate.decorator';
 import { CrudSerialize } from '../routes/crud-serialize.decorator';
 
 /**
@@ -16,7 +16,7 @@ export const CrudDeleteOne = (options: CrudDeleteOneOptionsInterface = {}) => {
   const {
     path = CRUD_MODULE_ROUTE_ID_DEFAULT_PATH,
     validation,
-    serialize,
+    serialization,
     ...rest
   } = { ...options };
 
@@ -24,7 +24,7 @@ export const CrudDeleteOne = (options: CrudDeleteOneOptionsInterface = {}) => {
     Delete(path),
     CrudAction(CrudActions.DeleteOne),
     SetMetadata(CRUD_MODULE_ROUTE_DELETE_ONE_METADATA, rest),
-    CrudValidation(validation),
-    CrudSerialize(serialize),
+    CrudValidate(validation),
+    CrudSerialize(serialization),
   );
 };

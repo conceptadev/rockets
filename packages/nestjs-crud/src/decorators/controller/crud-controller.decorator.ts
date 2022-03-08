@@ -2,10 +2,10 @@ import { applyDecorators, Controller } from '@nestjs/common';
 import { CrudControllerOptionsInterface } from '../../interfaces/crud-controller-options.interface';
 import { CrudModel } from '../routes/crud-model.decorator';
 import { CrudParams } from '../routes/crud-params.decorator';
-import { CrudValidation } from '../routes/crud-validation.decorator';
+import { CrudValidate } from '../routes/crud-validate.decorator';
 import { CrudSerialize } from '../routes/crud-serialize.decorator';
 import { CrudInitValidation } from './crud-init-validation.decorator';
-import { CrudInitSerialize } from './crud-init-serialize.decorator';
+import { CrudInitSerialization } from './crud-init-serialization.decorator';
 import { CRUD_MODULE_DEFAULT_PARAMS_OPTIONS } from '../../crud.constants';
 
 /**
@@ -22,9 +22,9 @@ export function CrudController(options: CrudControllerOptionsInterface) {
     Controller({ path, host }),
     CrudModel(moreOptions.model),
     CrudParams(moreOptions.params ?? CRUD_MODULE_DEFAULT_PARAMS_OPTIONS),
-    CrudValidation(moreOptions.validation),
-    CrudSerialize(moreOptions.serialize),
+    CrudValidate(moreOptions.validation),
+    CrudSerialize(moreOptions.serialization),
     CrudInitValidation(),
-    CrudInitSerialize(),
+    CrudInitSerialization(),
   );
 }

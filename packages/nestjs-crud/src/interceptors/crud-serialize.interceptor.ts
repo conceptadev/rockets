@@ -19,7 +19,7 @@ import { map } from 'rxjs/operators';
 import { CRUD_MODULE_SETTINGS_TOKEN } from '../crud.constants';
 import { CrudResponseDto } from '../dto/crud-response.dto';
 import { CrudResponseManyDto } from '../dto/crud-response-many.dto';
-import { CrudSerializeOptionsInterface } from '../interfaces/crud-serialize-options.interface';
+import { CrudSerializationOptionsInterface } from '../interfaces/crud-serialization-options.interface';
 import { CrudPlainResponseInterface } from '../interfaces/crud-plain-response.interface';
 import { CrudSettingsInterface } from '../interfaces/crud-settings.interface';
 import { CrudReflectionService } from '../services/crud-reflection.service';
@@ -52,7 +52,7 @@ export class CrudSerializeInterceptor implements NestInterceptor {
    */
   protected serialize(
     response: ResponseType,
-    options: CrudSerializeOptionsInterface,
+    options: CrudSerializationOptionsInterface,
   ) {
     // must have a dto type
     if (!isFunction(options.type)) {
@@ -96,10 +96,10 @@ export class CrudSerializeInterceptor implements NestInterceptor {
 
   protected getOptions(
     context: ExecutionContext,
-  ): CrudSerializeOptionsInterface {
-    // get serialize options
+  ): CrudSerializationOptionsInterface {
+    // get serialization options
     const options =
-      this.reflectionService.getAllSerializeOptions(
+      this.reflectionService.getAllSerializationOptions(
         context.getClass(),
         context.getHandler(),
       ) ?? {};
@@ -125,11 +125,11 @@ export class CrudSerializeInterceptor implements NestInterceptor {
     return {
       ...options,
       toInstanceOptions: {
-        ...(this.settings?.serialize?.toInstanceOptions ?? {}),
+        ...(this.settings?.serialization?.toInstanceOptions ?? {}),
         ...(options.toInstanceOptions ?? {}),
       },
       toPlainOptions: {
-        ...(this.settings?.serialize?.toPlainOptions ?? {}),
+        ...(this.settings?.serialization?.toPlainOptions ?? {}),
         ...(options.toPlainOptions ?? {}),
       },
     };
