@@ -4,6 +4,7 @@ import { CrudRequest } from '@nestjsx/crud';
 import { TypeOrmCrudService as xTypeOrmCrudService } from '@nestjsx/crud-typeorm';
 import { CrudQueryHelper } from '../util/crud-query.helper';
 import { CrudQueryOptionsInterface } from '../interfaces/crud-query-options.interface';
+import { CrudResultPaginatedInterface } from '../interfaces/crud-result-paginated.interface';
 
 @Injectable()
 export class TypeOrmCrudService<T> extends xTypeOrmCrudService<T> {
@@ -16,11 +17,24 @@ export class TypeOrmCrudService<T> extends xTypeOrmCrudService<T> {
   async getMany(
     req: CrudRequest,
     queryOptions?: CrudQueryOptionsInterface,
-  ): ReturnType<xTypeOrmCrudService<T>['getMany']> {
+  ): Promise<T[] | CrudResultPaginatedInterface<T>> {
     // apply options
     this.crudQueryHelper.modifyRequest(req, queryOptions);
-    // return parent result
-    return super.getMany(req);
+
+    // get parent result
+    const result = await super.getMany(req);
+
+    // is an array?
+    if (Array.isArray(result)) {
+      // yes, just return
+      return result;
+    } else {
+      // not an array, add pagination hint
+      return {
+        ...result,
+        __isPaginated: this.decidePagination(req.parsed, req.options),
+      };
+    }
   }
 
   async getOne(

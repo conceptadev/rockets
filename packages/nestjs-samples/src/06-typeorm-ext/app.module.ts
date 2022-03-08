@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { CrudModule } from '@rockts-org/nestjs-crud';
 import { TypeOrmExtModule } from '@rockts-org/nestjs-typeorm-ext';
 import { UserModule } from '@rockts-org/nestjs-user';
-import { ConnectionOptions, getConnectionManager } from 'typeorm';
 import { CustomUserRepository } from './custom-repository';
 import { CustomUser } from './custom-user.entity';
 
@@ -14,11 +13,7 @@ import { CustomUser } from './custom-user.entity';
           type: 'postgres',
         };
       },
-      connectionFactory: async (options: ConnectionOptions) => {
-        const c = getConnectionManager().create(options);
-        c['buildMetadatas']();
-        return c;
-      },
+      testMode: true,
     }),
     CrudModule.register(),
     UserModule.register({

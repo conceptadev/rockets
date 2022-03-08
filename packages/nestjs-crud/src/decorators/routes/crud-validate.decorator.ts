@@ -3,7 +3,7 @@ import { CRUD_MODULE_ROUTE_VALIDATION_METADATA } from '../../crud.constants';
 import { CrudValidationOptions } from '../../crud.types';
 
 /**
- * Crud validation options decorator.
+ * Crud validate options decorator.
  *
  * Set the fallback ValidationPipe options for all method
  * parameters called with the `CrudBody` decorator.
@@ -16,5 +16,5 @@ import { CrudValidationOptions } from '../../crud.types';
  *
  * @param options crud validation options
  */
-export const CrudValidation = (options?: CrudValidationOptions) =>
+export const CrudValidate = (options?: CrudValidationOptions) =>
   SetMetadata(CRUD_MODULE_ROUTE_VALIDATION_METADATA, options);

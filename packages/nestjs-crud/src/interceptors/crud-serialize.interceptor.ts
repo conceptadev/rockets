@@ -18,12 +18,16 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CRUD_MODULE_SETTINGS_TOKEN } from '../crud.constants';
 import { CrudResponseDto } from '../dto/crud-response.dto';
-import { CrudResponseManyDto } from '../dto/crud-response-many.dto';
-import { CrudSerializeOptionsInterface } from '../interfaces/crud-serialize-options.interface';
+import { CrudResponsePaginatedDto } from '../dto/crud-response-paginated.dto';
+import { CrudSerializationOptionsInterface } from '../interfaces/crud-serialization-options.interface';
+import { CrudResultPaginatedInterface } from '../interfaces/crud-result-paginated.interface';
 import { CrudSettingsInterface } from '../interfaces/crud-settings.interface';
 import { CrudReflectionService } from '../services/crud-reflection.service';
+import { IdentityInterface } from '@rockts-org/nestjs-common';
 
-type ResponseType = PlainLiteralObject | Array<PlainLiteralObject>;
+type ResponseType =
+  | (PlainLiteralObject & CrudResultPaginatedInterface<IdentityInterface>)
+  | Array<PlainLiteralObject>;
 
 export class CrudSerializeInterceptor implements NestInterceptor {
   constructor(
@@ -49,7 +53,7 @@ export class CrudSerializeInterceptor implements NestInterceptor {
    */
   protected serialize(
     response: ResponseType,
-    options: CrudSerializeOptionsInterface,
+    options: CrudSerializationOptionsInterface,
   ) {
     // must have a dto type
     if (!isFunction(options.type)) {
@@ -67,7 +71,10 @@ export class CrudSerializeInterceptor implements NestInterceptor {
     }
 
     // determine the type to use
-    const type = options.isMany === true ? options.manyType : options.type;
+    const type =
+      !Array.isArray(response) && response?.__isPaginated === true
+        ? options.paginatedType
+        : options.type;
 
     // convert each object to DTO type, then convert back to plain object
     return this.toPlain(
@@ -90,10 +97,10 @@ export class CrudSerializeInterceptor implements NestInterceptor {
 
   protected getOptions(
     context: ExecutionContext,
-  ): CrudSerializeOptionsInterface {
-    // get serialize options
+  ): CrudSerializationOptionsInterface {
+    // get serialization options
     const options =
-      this.reflectionService.getAllSerializeOptions(
+      this.reflectionService.getAllSerializationOptions(
         context.getClass(),
         context.getHandler(),
       ) ?? {};
@@ -111,19 +118,20 @@ export class CrudSerializeInterceptor implements NestInterceptor {
     }
 
     // is the many type missing?
-    if (!options?.manyType) {
+    if (!options?.paginatedType) {
       // yes, set it
-      options.manyType = modelOptions.manyType ?? CrudResponseManyDto;
+      options.paginatedType =
+        modelOptions.paginatedType ?? CrudResponsePaginatedDto;
     }
 
     return {
       ...options,
       toInstanceOptions: {
-        ...(this.settings?.serialize?.toInstanceOptions ?? {}),
+        ...(this.settings?.serialization?.toInstanceOptions ?? {}),
         ...(options.toInstanceOptions ?? {}),
       },
       toPlainOptions: {
-        ...(this.settings?.serialize?.toPlainOptions ?? {}),
+        ...(this.settings?.serialization?.toPlainOptions ?? {}),
         ...(options.toPlainOptions ?? {}),
       },
     };

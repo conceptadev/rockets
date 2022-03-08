@@ -3,21 +3,18 @@ import { CrudActions } from '../../crud.enums';
 import { CrudReadAllOptionsInterface } from '../../interfaces/crud-route-options.interface';
 import { CrudAction } from '../routes/crud-action.decorator';
 import { CrudSerialize } from '../routes/crud-serialize.decorator';
-import { CrudValidation } from '../routes/crud-validation.decorator';
+import { CrudValidate } from '../routes/crud-validate.decorator';
 
 /**
  * CRUD Read All route decorator
  */
 export const CrudReadAll = (options: CrudReadAllOptionsInterface = {}) => {
-  const { path, validation, serialize } = {
-    serialize: { isMany: true },
-    ...options,
-  };
+  const { path, validation, serialization } = options;
 
   return applyDecorators(
     Get(path),
     CrudAction(CrudActions.ReadAll),
-    CrudValidation(validation),
-    CrudSerialize(serialize),
+    CrudValidate(validation),
+    CrudSerialize(serialization),
   );
 };

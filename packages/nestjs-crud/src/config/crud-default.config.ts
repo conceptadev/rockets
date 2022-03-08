@@ -11,7 +11,7 @@ import {
 export const crudDefaultConfig = registerAs(
   CRUD_MODULE_DEFAULT_SETTINGS_TOKEN,
   (): CrudSettingsInterface => ({
-    serialize: {
+    serialization: {
       toInstanceOptions: CRUD_MODULE_DEFAULT_TRANSFORM_OPTIONS,
       toPlainOptions: CRUD_MODULE_DEFAULT_TRANSFORM_OPTIONS,
     },
