@@ -15,7 +15,7 @@ import { CrudSoftDelete } from '../../src/decorators/routes/crud-soft-delete.dec
 import { CrudRequest } from '../../src/decorators/params/crud-request.decorator';
 import { CrudBody } from '../../src/decorators/params/crud-body.decorator';
 import { PhotoDto } from './dto/photo.dto';
-import { PhotoManyDto } from './dto/photo-many.dto';
+import { PhotoPaginatedDto } from './dto/photo-paginated.dto';
 import { PhotoCreateDto } from './dto/photo-create.dto';
 import { PhotoCreateManyDto } from './dto/photo-create-many.dto';
 import { PhotoUpdateDto } from './dto/photo-update.dto';
@@ -27,7 +27,7 @@ import { PhotoUpdateDto } from './dto/photo-update.dto';
   path: 'photo',
   model: {
     type: PhotoDto,
-    manyType: PhotoManyDto,
+    paginatedType: PhotoPaginatedDto,
   },
   params: { id: { field: 'id', primary: true, type: 'number' } },
 })

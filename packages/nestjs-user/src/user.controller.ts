@@ -17,7 +17,7 @@ import { UserDto } from './dto/user.dto';
 import { UserCreateDto } from './dto/user-create.dto';
 import { UserCreateManyDto } from './dto/user-create-many.dto';
 import { UserUpdateDto } from './dto/user-update.dto';
-import { UserManyDto } from './dto/user-many.dto';
+import { UserPaginatedDto } from './dto/user-paginated.dto';
 import { UserService } from './services/user.service';
 import { UserCreateEncryptedDto } from './dto/user-create-encrypted.dto';
 
@@ -28,7 +28,7 @@ import { UserCreateEncryptedDto } from './dto/user-create-encrypted.dto';
   path: 'user',
   model: {
     type: UserDto,
-    manyType: UserManyDto,
+    paginatedType: UserPaginatedDto,
   },
 })
 export class UserController

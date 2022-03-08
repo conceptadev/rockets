@@ -1,12 +1,12 @@
 import { CreateManyDto } from '@nestjsx/crud';
 import { IdentityInterface } from '@rockts-org/nestjs-common';
 import { CrudRequestInterface } from '../interfaces/crud-request.interface';
-import { CrudResponseManyInterface } from './crud-response-many.interface';
+import { CrudResponsePaginatedInterface } from './crud-response-paginated.interface';
 
 export interface CrudControllerInterface<T extends IdentityInterface> {
   getMany?: (
     crudRequest: CrudRequestInterface,
-  ) => Promise<CrudResponseManyInterface<T> | T[]>;
+  ) => Promise<CrudResponsePaginatedInterface<T> | T[]>;
 
   getOne?: (crudRequest: CrudRequestInterface) => Promise<T>;
 

@@ -4,7 +4,8 @@ export { CrudModule } from './crud.module';
 // interfaces
 export { CrudControllerInterface } from './interfaces/crud-controller.interface';
 export { CrudRequestInterface } from './interfaces/crud-request.interface';
-export { CrudPlainResponseInterface } from './interfaces/crud-plain-response.interface';
+export { CrudResponseInterface } from './interfaces/crud-response.interface';
+export { CrudResponsePaginatedInterface } from './interfaces/crud-response-paginated.interface';
 
 // controller decorators
 export { CrudController } from './decorators/controller/crud-controller.decorator';
@@ -46,5 +47,5 @@ export { TypeOrmCrudService } from './services/typeorm-crud.service';
 
 // dto
 export { CrudResponseDto } from './dto/crud-response.dto';
-export { CrudResponseManyDto } from './dto/crud-response-many.dto';
+export { CrudResponsePaginatedDto } from './dto/crud-response-paginated.dto';
 export { CrudCreateManyDto } from './dto/crud-create-many.dto';

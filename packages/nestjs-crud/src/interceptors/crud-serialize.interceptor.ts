@@ -18,14 +18,15 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CRUD_MODULE_SETTINGS_TOKEN } from '../crud.constants';
 import { CrudResponseDto } from '../dto/crud-response.dto';
-import { CrudResponseManyDto } from '../dto/crud-response-many.dto';
+import { CrudResponsePaginatedDto } from '../dto/crud-response-paginated.dto';
 import { CrudSerializationOptionsInterface } from '../interfaces/crud-serialization-options.interface';
-import { CrudPlainResponseInterface } from '../interfaces/crud-plain-response.interface';
+import { CrudResultPaginatedInterface } from '../interfaces/crud-result-paginated.interface';
 import { CrudSettingsInterface } from '../interfaces/crud-settings.interface';
 import { CrudReflectionService } from '../services/crud-reflection.service';
+import { IdentityInterface } from '@rockts-org/nestjs-common';
 
 type ResponseType =
-  | (PlainLiteralObject & CrudPlainResponseInterface)
+  | (PlainLiteralObject & CrudResultPaginatedInterface<IdentityInterface>)
   | Array<PlainLiteralObject>;
 
 export class CrudSerializeInterceptor implements NestInterceptor {
@@ -72,7 +73,7 @@ export class CrudSerializeInterceptor implements NestInterceptor {
     // determine the type to use
     const type =
       !Array.isArray(response) && response?.__isPaginated === true
-        ? options.manyType
+        ? options.paginatedType
         : options.type;
 
     // convert each object to DTO type, then convert back to plain object
@@ -117,9 +118,10 @@ export class CrudSerializeInterceptor implements NestInterceptor {
     }
 
     // is the many type missing?
-    if (!options?.manyType) {
+    if (!options?.paginatedType) {
       // yes, set it
-      options.manyType = modelOptions.manyType ?? CrudResponseManyDto;
+      options.paginatedType =
+        modelOptions.paginatedType ?? CrudResponsePaginatedDto;
     }
 
     return {

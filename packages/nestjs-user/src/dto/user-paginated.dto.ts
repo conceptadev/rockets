@@ -1,13 +1,13 @@
 import { Exclude, Expose, Type } from 'class-transformer';
-import { CrudResponseManyDto } from '@rockts-org/nestjs-crud';
+import { CrudResponsePaginatedDto } from '@rockts-org/nestjs-crud';
 import { UserInterface } from '../interfaces/user.interface';
 import { UserDto } from './user.dto';
 
 /**
- * User DTO
+ * User paginated DTO
  */
 @Exclude()
-export class UserManyDto extends CrudResponseManyDto<UserInterface> {
+export class UserPaginatedDto extends CrudResponsePaginatedDto<UserInterface> {
   @Expose()
   @Type(() => UserDto)
   data: UserDto[];

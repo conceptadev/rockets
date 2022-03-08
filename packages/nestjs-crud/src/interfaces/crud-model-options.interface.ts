@@ -3,5 +3,5 @@ import { ModelOptions } from '@nestjsx/crud';
 
 export interface CrudModelOptionsInterface extends ModelOptions {
   type: Type;
-  manyType?: Type;
+  paginatedType?: Type;
 }

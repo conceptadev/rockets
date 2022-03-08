@@ -1,9 +1,9 @@
 import { Exclude, Expose, Type } from 'class-transformer';
-import { CrudResponseManyDto } from '../../../src/dto/crud-response-many.dto';
+import { CrudResponsePaginatedDto } from '../../../src/dto/crud-response-paginated.dto';
 import { PhotoDto } from './photo.dto';
 
 @Exclude()
-export class PhotoManyDto extends CrudResponseManyDto<PhotoDto> {
+export class PhotoPaginatedDto extends CrudResponsePaginatedDto<PhotoDto> {
   @Expose()
   @Type(() => PhotoDto)
   data: PhotoDto[];

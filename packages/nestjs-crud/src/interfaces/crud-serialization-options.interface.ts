@@ -4,7 +4,7 @@ import { ClassTransformOptions } from 'class-transformer';
 
 export interface CrudSerializationOptionsInterface extends OptionsInterface {
   type?: Type;
-  manyType?: Type;
+  paginatedType?: Type;
   toInstanceOptions?: ClassTransformOptions;
   toPlainOptions?: ClassTransformOptions;
 }

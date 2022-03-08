@@ -1,10 +1,10 @@
 import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { CrudRequest, GetManyDefaultResponse } from '@nestjsx/crud';
+import { CrudRequest } from '@nestjsx/crud';
 import { TypeOrmCrudService as xTypeOrmCrudService } from '@nestjsx/crud-typeorm';
 import { CrudQueryHelper } from '../util/crud-query.helper';
 import { CrudQueryOptionsInterface } from '../interfaces/crud-query-options.interface';
-import { CrudPlainResponseInterface } from '../interfaces/crud-plain-response.interface';
+import { CrudResultPaginatedInterface } from '../interfaces/crud-result-paginated.interface';
 
 @Injectable()
 export class TypeOrmCrudService<T> extends xTypeOrmCrudService<T> {
@@ -17,7 +17,7 @@ export class TypeOrmCrudService<T> extends xTypeOrmCrudService<T> {
   async getMany(
     req: CrudRequest,
     queryOptions?: CrudQueryOptionsInterface,
-  ): Promise<T[] | (GetManyDefaultResponse<T> & CrudPlainResponseInterface)> {
+  ): Promise<T[] | CrudResultPaginatedInterface<T>> {
     // apply options
     this.crudQueryHelper.modifyRequest(req, queryOptions);
 
