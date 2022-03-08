@@ -2,15 +2,15 @@
   "extends": "../../tsconfig",
   "compilerOptions": {
     "composite": true,
-    "outDir": "./dist",
+    "rootDir": "src",
+    "outDir": "dist",
     "typeRoots": [
       "./node_modules/@types",
       "../../node_modules/@types"
     ]
   },
   "include": [
-    "src/**/*.ts",
-    "tests/**/*.ts"
+    "src/**/*.ts"
   ],
   "references": [
     {
