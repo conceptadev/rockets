@@ -30,12 +30,13 @@ import { UserServiceInterface } from './interfaces/user-service.interface';
 import { DefaultUserService } from './services/default-user.service';
 import { UserCrudService } from './services/user-crud.service';
 import { CrudModule } from '@rockts-org/nestjs-crud';
+import { PasswordStorageService } from '@rockts-org/nestjs-password';
 
 /**
  * User Module
  */
 @Module({
-  providers: [DefaultUserService, UserCrudService],
+  providers: [DefaultUserService, UserCrudService, PasswordStorageService],
   exports: [UserService, UserCrudService],
   controllers: [UserController],
 })

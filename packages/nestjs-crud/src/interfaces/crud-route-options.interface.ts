@@ -6,12 +6,12 @@ import {
   UpdateOneRouteOptions,
 } from '@nestjsx/crud';
 import { CrudValidationOptions } from '../crud.types';
-import { CrudSerializeOptionsInterface } from './crud-serialize-options.interface';
+import { CrudSerializationOptionsInterface } from './crud-serialization-options.interface';
 
 export interface CrudRouteOptionsInterface {
   path?: string | string[];
   validation?: CrudValidationOptions;
-  serialize?: CrudSerializeOptionsInterface;
+  serialization?: CrudSerializationOptionsInterface;
 }
 
 export interface CrudCreateManyOptionsInterface

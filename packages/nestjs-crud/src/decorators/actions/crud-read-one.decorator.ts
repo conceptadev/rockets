@@ -4,7 +4,7 @@ import { CrudActions } from '../../crud.enums';
 import { CrudReadOneOptionsInterface } from '../../interfaces/crud-route-options.interface';
 import { CrudAction } from '../routes/crud-action.decorator';
 import { CrudSerialize } from '../routes/crud-serialize.decorator';
-import { CrudValidation } from '../routes/crud-validation.decorator';
+import { CrudValidate } from '../routes/crud-validate.decorator';
 
 /**
  * CRUD Read One route decorator
@@ -13,13 +13,13 @@ export const CrudReadOne = (options: CrudReadOneOptionsInterface = {}) => {
   const {
     path = CRUD_MODULE_ROUTE_ID_DEFAULT_PATH,
     validation,
-    serialize,
+    serialization,
   } = { ...options };
 
   return applyDecorators(
     Get(path),
     CrudAction(CrudActions.ReadOne),
-    CrudValidation(validation),
-    CrudSerialize(serialize),
+    CrudValidate(validation),
+    CrudSerialize(serialization),
   );
 };

@@ -1,5 +1,6 @@
-export interface UserCredentialsInterface {
+import { UserPasswordEncryptedInterface } from './user-password-encrypted.interface';
+
+export interface UserCredentialsInterface
+  extends UserPasswordEncryptedInterface {
   username: string;
-  password: string;
-  salt: string;
 }

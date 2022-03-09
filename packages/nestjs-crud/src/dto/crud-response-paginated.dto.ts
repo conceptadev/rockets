@@ -1,12 +1,12 @@
 import { Exclude, Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { IdentityInterface } from '@rockts-org/nestjs-common';
-import { CrudResponseManyInterface } from '../interfaces/crud-response-many.interface';
+import { CrudResponsePaginatedInterface } from '../interfaces/crud-response-paginated.interface';
 import { CrudResponseDto } from './crud-response.dto';
 
 @Exclude()
-export class CrudResponseManyDto<T extends IdentityInterface>
-  implements CrudResponseManyInterface<T>
+export class CrudResponsePaginatedDto<T extends IdentityInterface>
+  implements CrudResponsePaginatedInterface<T>
 {
   @Expose()
   @ApiProperty({

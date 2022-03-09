@@ -3,7 +3,7 @@ import { CrudCreateManyOptionsInterface } from '../../interfaces/crud-route-opti
 import { CrudActions } from '../../crud.enums';
 import { CrudAction } from '../routes/crud-action.decorator';
 import { CRUD_MODULE_ROUTE_CREATE_MANY_DEFAULT_PATH } from '../../crud.constants';
-import { CrudValidation } from '../routes/crud-validation.decorator';
+import { CrudValidate } from '../routes/crud-validate.decorator';
 import { CrudSerialize } from '../routes/crud-serialize.decorator';
 
 /**
@@ -15,13 +15,13 @@ export const CrudCreateMany = (
   const {
     path = CRUD_MODULE_ROUTE_CREATE_MANY_DEFAULT_PATH,
     validation,
-    serialize,
+    serialization,
   } = { ...options };
 
   return applyDecorators(
     Post(path),
     CrudAction(CrudActions.CreateMany),
-    CrudValidation(validation),
-    CrudSerialize(serialize),
+    CrudValidate(validation),
+    CrudSerialize(serialization),
   );
 };
