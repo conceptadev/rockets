@@ -1,5 +1,4 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
-
 import { JwtAuthGuard } from '@rockts-org/nestjs-auth-jwt';
 
 export class UserDto {
@@ -9,7 +8,7 @@ export class UserDto {
   username: string;
 }
 /**
- * Auth Local controller
+ * Custom User controller
  */
 @Controller('custom/user')
 export class CustomUserController {
