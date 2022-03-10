@@ -1,12 +1,5 @@
-import {
-  BadRequestException,
-  Controller,
-  Get,
-  UseGuards,
-} from '@nestjs/common';
-
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '@rockts-org/nestjs-auth-jwt';
-import { NotFoundRocketsException } from '@rockts-org/nestjs-common';
 
 export class UserDto {
   constructor(username: string) {
@@ -15,7 +8,7 @@ export class UserDto {
   username: string;
 }
 /**
- * Auth Local controller
+ * Custom User controller
  */
 @Controller('custom/user')
 export class CustomUserController {
@@ -26,15 +19,5 @@ export class CustomUserController {
   @Get('all')
   get(): UserDto[] {
     return [new UserDto('user1'), new UserDto('user2')];
-  }
-
-  @Get('error')
-  getError(): void {
-    throw new BadRequestException('Bad Request');
-  }
-
-  @Get('error/not-found')
-  getErrorNotFound(): void {
-    throw new NotFoundRocketsException();
   }
 }

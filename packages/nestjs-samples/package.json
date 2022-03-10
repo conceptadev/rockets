@@ -16,13 +16,14 @@
     "@nestjs/config": "^1.1.6",
     "@nestjs/core": "^8.0.8",
     "@nestjs/jwt": "^8.0.0",
+    "@nestjs/mapped-types": "^1.0.1",
     "@nestjs/platform-express": "^8.0.8",
     "@nestjs/platform-fastify": "^8.0.8",
-    "@nestjs/mapped-types": "^1.0.1",
     "@rockts-org/nestjs-auth-jwt": "^4.0.0-alpha.5",
     "@rockts-org/nestjs-auth-local": "^4.0.0-alpha.5",
     "@rockts-org/nestjs-auth-refresh": "^4.0.0-alpha.5",
     "@rockts-org/nestjs-authentication": "^4.0.0-alpha.5",
+    "@rockts-org/nestjs-common": "^4.0.0-alpha.5",
     "@rockts-org/nestjs-crud": "^4.0.0-alpha.5",
     "@rockts-org/nestjs-email": "^4.0.0-alpha.5",
     "@rockts-org/nestjs-event": "^4.0.0-alpha.5",
@@ -31,7 +32,6 @@
     "@rockts-org/nestjs-password": "^4.0.0-alpha.5",
     "@rockts-org/nestjs-typeorm-ext": "^4.0.0-alpha.5",
     "@rockts-org/nestjs-user": "^4.0.0-alpha.5",
-    "@rockts-org/nestjs-common": "^4.0.0-alpha.5",
     "rxjs": "^7.1.0"
   },
   "devDependencies": {

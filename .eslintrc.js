@@ -3,7 +3,7 @@ module.exports = {
   parserOptions: {
     sourceType: 'module',
     tsconfigRootDir: __dirname,
-    project: ['./packages/*/tsconfig.json'],
+    project: ['./packages/*/tsconfig.json', './packages/*/tests/tsconfig.json'],
   },
   plugins: [
     'import',
@@ -21,7 +21,12 @@ module.exports = {
     node: true,
     jest: true,
   },
-  ignorePatterns: ['.eslintrc.js', 'packages/*/dist'],
+  ignorePatterns: [
+    '**/node_modules/**',
+    '**/.eslintrc.js',
+    '**/tsconfig.json',
+    'packages/*/dist',
+  ],
   rules: {
     'no-unused-vars': 'off',
     'import/no-extraneous-dependencies': 'error',
