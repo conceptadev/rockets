@@ -4,7 +4,7 @@ import {
   createEntityRepositoryProvider,
   TypeOrmExtModule,
 } from '@rockts-org/nestjs-typeorm-ext';
-import { CrudModule } from '../../src/crud.module';
+import { CrudModule } from '../../crud.module';
 import {
   PHOTO_MODULE_CUSTOM_REPO_TOKEN,
   PHOTO_MODULE_ENTITY_REPO_TOKEN,

@@ -48,7 +48,7 @@
     "clean": "./node_modules/.bin/rimraf packages/*/dist packages/*/tsconfig.tsbuildinfo",
     "build": "./node_modules/.bin/tsc --build",
     "watch": "yarn build && ./node_modules/.bin/tsc --build --watch",
-    "lint": "eslint \"packages/**/{src,tests}/**/*.{ts,js,json}\" --fix",
+    "lint": "eslint \"packages/*/src/**/*.{ts,js,json}\" --fix",
     "test": "jest",
     "prepare": "husky install && yarn clean && yarn build",
     "test:watch": "jest --watch",

@@ -8,7 +8,7 @@
     "access": "public"
   },
   "files": [
-    "dist"
+    "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
     "@nestjs/common": "^8.0.8",

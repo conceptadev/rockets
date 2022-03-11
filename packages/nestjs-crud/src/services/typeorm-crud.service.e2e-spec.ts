@@ -3,10 +3,10 @@ import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { useSeeders } from '@jorgebodega/typeorm-seeding';
-import { AppModule } from './app.module';
-import { Photo } from './photo/photo.entity';
-import { PhotoSeeder } from './photo/photo.seeder';
-import { PhotoFactory } from './photo/photo.factory';
+import { AppModule } from '../__fixtures__/app.module';
+import { Photo } from '../__fixtures__/photo/photo.entity';
+import { PhotoSeeder } from '../__fixtures__/photo/photo.seeder';
+import { PhotoFactory } from '../__fixtures__/photo/photo.factory';
 
 describe('AppController (e2e)', () => {
   describe('Authentication', () => {

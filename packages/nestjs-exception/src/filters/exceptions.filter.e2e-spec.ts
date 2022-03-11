@@ -2,8 +2,8 @@ import supertest from 'supertest';
 import { HttpAdapterHost } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { AppModule } from './app.module';
-import { ExceptionsFilter } from '../../src/filters/exceptions.filter';
+import { AppModule } from '../__fixtures__/app.module.fixture';
+import { ExceptionsFilter } from './exceptions.filter';
 
 describe('Exception (e2e)', () => {
   let app: INestApplication;

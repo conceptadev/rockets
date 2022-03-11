@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { TypeOrmCrudService } from '../../src/services/typeorm-crud.service';
+import { TypeOrmCrudService } from '../../services/typeorm-crud.service';
 import { PHOTO_MODULE_CUSTOM_REPO_TOKEN } from './photo.constants';
 import { Photo } from './photo.entity';
 import { PhotoRepository } from './photo.repository';
