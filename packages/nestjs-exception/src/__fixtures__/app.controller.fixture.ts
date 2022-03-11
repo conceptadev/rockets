@@ -5,7 +5,7 @@ import {
   Param,
   ParseIntPipe,
 } from '@nestjs/common';
-import { CustomNotFoundException } from '../exceptions/custom-not-found.exception';
+import { CustomNotFoundException } from './exceptions/custom-not-found.fixture';
 
 /**
  * Controller.

@@ -3,7 +3,7 @@ module.exports = {
   parserOptions: {
     sourceType: 'module',
     tsconfigRootDir: __dirname,
-    project: ['./packages/*/tsconfig.json', './packages/*/tests/tsconfig.json'],
+    project: ['./tsconfig.eslint.json'],
   },
   plugins: [
     'import',
@@ -16,16 +16,17 @@ module.exports = {
     'plugin:prettier/recommended',
     // 'plugin:jsdoc/recommended',
   ],
-  root: true,
   env: {
     node: true,
     jest: true,
   },
   ignorePatterns: [
+    'packages/*/dist/**',
     '**/node_modules/**',
     '**/.eslintrc.js',
+    '**/.eslintrc.spec.js',
     '**/tsconfig.json',
-    'packages/*/dist',
+    '**/tsconfig.eslint.json',
   ],
   rules: {
     'no-unused-vars': 'off',

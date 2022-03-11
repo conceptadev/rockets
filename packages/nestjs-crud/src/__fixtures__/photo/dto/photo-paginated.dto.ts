@@ -1,5 +1,5 @@
 import { Exclude, Expose, Type } from 'class-transformer';
-import { CrudResponsePaginatedDto } from '../../../src/dto/crud-response-paginated.dto';
+import { CrudResponsePaginatedDto } from '../../../dto/crud-response-paginated.dto';
 import { PhotoDto } from './photo.dto';
 
 @Exclude()

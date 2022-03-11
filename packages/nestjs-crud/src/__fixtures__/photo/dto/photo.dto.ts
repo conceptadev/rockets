@@ -1,6 +1,6 @@
 import { IsBoolean, IsNumber, IsString } from 'class-validator';
 import { Exclude, Expose } from 'class-transformer';
-import { CrudResponseDto } from '../../../src/dto/crud-response.dto';
+import { CrudResponseDto } from '../../../dto/crud-response.dto';
 import { PhotoEntityInterface } from '../interfaces/photo-entity.interface';
 
 @Exclude()

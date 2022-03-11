@@ -8,7 +8,7 @@
     "access": "public"
   },
   "files": [
-    "dist"
+    "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
     "@golevelup/nestjs-modules": "^0.4.3",
