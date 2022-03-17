@@ -8,6 +8,9 @@ import {
 } from '../../crud.constants';
 import { CrudValidate } from '../routes/crud-validate.decorator';
 import { CrudSerialize } from '../routes/crud-serialize.decorator';
+import { CrudApiOperation } from '../openapi/crud-api-operation.decorator';
+import { CrudApiParam } from '../openapi/crud-api-param.decorator';
+import { CrudApiResponse } from '../openapi/crud-api-response.decorator';
 
 /**
  * CRUD Recover One route decorator
@@ -19,6 +22,7 @@ export const CrudRecoverOne = (
     path = CRUD_MODULE_ROUTE_RECOVER_ONE_DEFAULT_PATH,
     validation,
     serialization,
+    api,
     ...rest
   } = { ...options };
 
@@ -28,5 +32,8 @@ export const CrudRecoverOne = (
     SetMetadata(CRUD_MODULE_ROUTE_RECOVER_ONE_METADATA, rest),
     CrudValidate(validation),
     CrudSerialize(serialization),
+    CrudApiOperation(api?.operation),
+    CrudApiParam(api?.params),
+    CrudApiResponse(CrudActions.RecoverOne, api?.response),
   );
 };

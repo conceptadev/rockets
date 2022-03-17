@@ -5,12 +5,14 @@ import { CrudAction } from '../routes/crud-action.decorator';
 import { CRUD_MODULE_ROUTE_CREATE_ONE_METADATA } from '../../crud.constants';
 import { CrudValidate } from '../routes/crud-validate.decorator';
 import { CrudSerialize } from '../routes/crud-serialize.decorator';
+import { CrudApiOperation } from '../openapi/crud-api-operation.decorator';
+import { CrudApiResponse } from '../openapi/crud-api-response.decorator';
 
 /**
  * CRUD Create One route decorator
  */
 export const CrudCreateOne = (options: CrudCreateOneOptionsInterface = {}) => {
-  const { path, validation, serialization, ...rest } = { ...options };
+  const { path, validation, serialization, api, ...rest } = { ...options };
 
   return applyDecorators(
     Post(path),
@@ -18,5 +20,7 @@ export const CrudCreateOne = (options: CrudCreateOneOptionsInterface = {}) => {
     SetMetadata(CRUD_MODULE_ROUTE_CREATE_ONE_METADATA, rest),
     CrudValidate(validation),
     CrudSerialize(serialization),
+    CrudApiOperation(api?.operation),
+    CrudApiResponse(CrudActions.CreateOne, api?.response),
   );
 };
