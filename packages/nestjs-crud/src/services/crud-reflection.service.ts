@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Type } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { CrudOptions, ParamsOptions } from '@nestjsx/crud';
 import {
@@ -24,9 +24,15 @@ import {
   CRUD_MODULE_ROUTE_QUERY_SOFT_DELETE_METADATA,
   CRUD_MODULE_ROUTE_SERIALIZATION_METADATA,
   CRUD_MODULE_PARAM_BODY_METADATA,
+  CRUD_MODULE_API_PARAMS_METADATA,
+  CRUD_MODULE_API_RESPONSE_METADATA,
+  CRUD_MODULE_API_QUERY_METADATA,
 } from '../crud.constants';
 import { CrudActions } from '../crud.enums';
 import { CrudValidationOptions } from '../crud.types';
+import { CrudApiParamMetadataInterface } from '../interfaces/crud-api-param-metadata.interface';
+import { CrudApiQueryMetadataInterface } from '../interfaces/crud-api-query-metadata.interface';
+import { CrudApiResponseMetadataInterface } from '../interfaces/crud-api-response-metadata.interface';
 import { CrudModelOptionsInterface } from '../interfaces/crud-model-options.interface';
 import { CrudQueryOptionsInterface } from '../interfaces/crud-query-options.interface';
 import {
@@ -40,7 +46,7 @@ import { CrudSerializationOptionsInterface } from '../interfaces/crud-serializat
 import { CrudValidationMetadataInterface } from '../interfaces/crud-validation-metadata.interface';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-type ReflectionTargetOrHandler = Function;
+type ReflectionTargetOrHandler = Function | Type | Type<Object>;
 
 @Injectable()
 export class CrudReflectionService {
@@ -49,14 +55,11 @@ export class CrudReflectionService {
   public getRequestOptions(
     target: ReflectionTargetOrHandler,
     handler: ReflectionTargetOrHandler,
-  ): CrudOptions {
+  ): CrudOptions & { model: CrudModelOptionsInterface } {
     return {
       model: this.getAllModelOptions(target, handler),
 
-      params: this.reflector.getAllAndOverride<ParamsOptions>(
-        CRUD_MODULE_ROUTE_PARAMS_METADATA,
-        [handler, target],
-      ) ?? {
+      params: this.getAllParamOptions(handler, target) ?? {
         id: {
           field: 'id',
           type: 'number',
@@ -169,6 +172,16 @@ export class CrudReflectionService {
     );
   }
 
+  public getAllParamOptions(
+    target: ReflectionTargetOrHandler,
+    handler: ReflectionTargetOrHandler,
+  ) {
+    return this.reflector.getAllAndOverride<ParamsOptions>(
+      CRUD_MODULE_ROUTE_PARAMS_METADATA,
+      [handler, target],
+    );
+  }
+
   public getValidationOptions(
     target: ReflectionTargetOrHandler,
   ): CrudValidationOptions {
@@ -189,6 +202,27 @@ export class CrudReflectionService {
     return this.reflector.getAllAndOverride<CrudSerializationOptionsInterface>(
       CRUD_MODULE_ROUTE_SERIALIZATION_METADATA,
       [handler, target],
+    );
+  }
+
+  public getApiQueryOptions(target: ReflectionTargetOrHandler) {
+    return this.reflector.get<CrudApiQueryMetadataInterface[]>(
+      CRUD_MODULE_API_QUERY_METADATA,
+      target,
+    );
+  }
+
+  public getApiParamsOptions(target: ReflectionTargetOrHandler) {
+    return this.reflector.get<CrudApiParamMetadataInterface[]>(
+      CRUD_MODULE_API_PARAMS_METADATA,
+      target,
+    );
+  }
+
+  public getApiResponseOptions(target: ReflectionTargetOrHandler) {
+    return this.reflector.get<CrudApiResponseMetadataInterface[]>(
+      CRUD_MODULE_API_RESPONSE_METADATA,
+      target,
     );
   }
 }

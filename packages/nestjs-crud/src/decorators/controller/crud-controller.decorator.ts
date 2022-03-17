@@ -6,6 +6,9 @@ import { CrudValidate } from '../routes/crud-validate.decorator';
 import { CrudSerialize } from '../routes/crud-serialize.decorator';
 import { CrudInitValidation } from './crud-init-validation.decorator';
 import { CrudInitSerialization } from './crud-init-serialization.decorator';
+import { CrudInitApiQuery } from './crud-init-api-query.decorator';
+import { CrudInitApiParams } from './crud-init-api-params.decorator';
+import { CrudInitApiResponse } from './crud-init-api-response.decorator';
 import { CRUD_MODULE_DEFAULT_PARAMS_OPTIONS } from '../../crud.constants';
 
 /**
@@ -26,5 +29,8 @@ export function CrudController(options: CrudControllerOptionsInterface) {
     CrudSerialize(moreOptions.serialization),
     CrudInitValidation(),
     CrudInitSerialization(),
+    CrudInitApiQuery(),
+    CrudInitApiParams(),
+    CrudInitApiResponse(),
   );
 }

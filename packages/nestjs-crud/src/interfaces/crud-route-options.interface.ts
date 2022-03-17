@@ -1,4 +1,10 @@
 import {
+  ApiOperationOptions,
+  ApiParamOptions,
+  ApiQueryOptions,
+  ApiResponseOptions,
+} from '@nestjs/swagger';
+import {
   CreateOneRouteOptions,
   DeleteOneRouteOptions,
   RecoverOneRouteOptions,
@@ -12,6 +18,12 @@ export interface CrudRouteOptionsInterface {
   path?: string | string[];
   validation?: CrudValidationOptions;
   serialization?: CrudSerializationOptionsInterface;
+  api?: {
+    operation?: ApiOperationOptions;
+    query?: ApiQueryOptions[];
+    params?: ApiParamOptions;
+    response?: ApiResponseOptions;
+  };
 }
 
 export interface CrudCreateManyOptionsInterface

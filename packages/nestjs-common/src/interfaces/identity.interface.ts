@@ -1,3 +1,3 @@
 export interface IdentityInterface {
-  id: unknown;
+  id: number | string;
 }

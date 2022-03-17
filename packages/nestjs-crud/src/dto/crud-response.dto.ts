@@ -8,6 +8,9 @@ export class CrudResponseDto<T extends IdentityInterface>
   implements CrudResponseInterface<T>
 {
   @Expose()
-  @ApiProperty({ description: 'Unique ID' })
+  @ApiProperty({
+    type: 'number',
+    description: 'Unique identifier',
+  })
   id: T['id'];
 }

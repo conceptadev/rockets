@@ -5,6 +5,8 @@ import { CrudAction } from '../routes/crud-action.decorator';
 import { CRUD_MODULE_ROUTE_CREATE_MANY_DEFAULT_PATH } from '../../crud.constants';
 import { CrudValidate } from '../routes/crud-validate.decorator';
 import { CrudSerialize } from '../routes/crud-serialize.decorator';
+import { CrudApiOperation } from '../openapi/crud-api-operation.decorator';
+import { CrudApiResponse } from '../openapi/crud-api-response.decorator';
 
 /**
  * CRUD Create Many route decorator
@@ -16,6 +18,7 @@ export const CrudCreateMany = (
     path = CRUD_MODULE_ROUTE_CREATE_MANY_DEFAULT_PATH,
     validation,
     serialization,
+    api,
   } = { ...options };
 
   return applyDecorators(
@@ -23,5 +26,7 @@ export const CrudCreateMany = (
     CrudAction(CrudActions.CreateMany),
     CrudValidate(validation),
     CrudSerialize(serialization),
+    CrudApiOperation(api?.operation),
+    CrudApiResponse(CrudActions.CreateMany, api?.response),
   );
 };
