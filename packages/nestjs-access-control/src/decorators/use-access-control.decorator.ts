@@ -1,6 +1,6 @@
 import { SetMetadata } from '@nestjs/common';
 import { AccessControlOptions } from '../interfaces/access-control-options.interface';
-import { ACCESS_CONTROL_CTLR_CONFIG_KEY } from '../constants';
+import { ACCESS_CONTROL_MODULE_CTLR_METADATA } from '../constants';
 
 /**
  * Define access control filters required for this route.
@@ -11,5 +11,5 @@ import { ACCESS_CONTROL_CTLR_CONFIG_KEY } from '../constants';
 export const UseAccessControl = (
   options: AccessControlOptions = {},
 ): ReturnType<typeof SetMetadata> => {
-  return SetMetadata(ACCESS_CONTROL_CTLR_CONFIG_KEY, options);
+  return SetMetadata(ACCESS_CONTROL_MODULE_CTLR_METADATA, options);
 };

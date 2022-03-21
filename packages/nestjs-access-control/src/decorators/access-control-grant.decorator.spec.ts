@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { ACCESS_CONTROL_GRANT_CONFIG_KEY } from '../constants';
+import { ACCESS_CONTROL_MODULE_GRANT_METADATA } from '../constants';
 import { AccessControlAction } from '../enums/access-control-action.enum';
 import { AccessControlGrant } from './access-control-grant.decorator';
 
@@ -43,7 +43,7 @@ describe('@AccessControlGrant', () => {
   describe('enhance controller methods with access control grants', () => {
     it('createOne should have create grants metadata', () => {
       const grants = Reflect.getMetadata(
-        ACCESS_CONTROL_GRANT_CONFIG_KEY,
+        ACCESS_CONTROL_MODULE_GRANT_METADATA,
         controller.createOne,
       );
 
@@ -57,7 +57,7 @@ describe('@AccessControlGrant', () => {
 
     it('getOne should have read grants metadata', () => {
       const grants = Reflect.getMetadata(
-        ACCESS_CONTROL_GRANT_CONFIG_KEY,
+        ACCESS_CONTROL_MODULE_GRANT_METADATA,
         controller.getOne,
       );
 
@@ -71,7 +71,7 @@ describe('@AccessControlGrant', () => {
 
     it('updateOne should have update grants metadata', () => {
       const grants = Reflect.getMetadata(
-        ACCESS_CONTROL_GRANT_CONFIG_KEY,
+        ACCESS_CONTROL_MODULE_GRANT_METADATA,
         controller.updateOne,
       );
 
@@ -85,7 +85,7 @@ describe('@AccessControlGrant', () => {
 
     it('deleteOne should have delete grants metadata', () => {
       const grants = Reflect.getMetadata(
-        ACCESS_CONTROL_GRANT_CONFIG_KEY,
+        ACCESS_CONTROL_MODULE_GRANT_METADATA,
         controller.deleteOne,
       );
 

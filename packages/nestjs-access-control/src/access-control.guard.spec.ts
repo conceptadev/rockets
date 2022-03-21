@@ -1,8 +1,8 @@
 import {
-  ACCESS_CONTROL_CTLR_CONFIG_KEY,
-  ACCESS_CONTROL_FILTERS_CONFIG_KEY,
-  ACCESS_CONTROL_GRANT_CONFIG_KEY,
-  ACCESS_CONTROL_OPTIONS_KEY,
+  ACCESS_CONTROL_MODULE_CTLR_METADATA,
+  ACCESS_CONTROL_MODULE_FILTERS_METADATA,
+  ACCESS_CONTROL_MODULE_GRANT_METADATA,
+  ACCESS_CONTROL_MODULE_OPTIONS_TOKEN,
 } from './constants';
 import {
   AccessControlFilterCallback,
@@ -18,11 +18,11 @@ import { AccessControlFilterService } from './interfaces/access-control-filter-s
 import { AccessControlFilterType } from './enums/access-control-filter-type.enum';
 import { AccessControlGrantOption } from './interfaces/access-control-grant-option.interface';
 import { AccessControlGuard } from './access-control.guard';
-import { AccessControlModuleOptions } from './interfaces/access-control-module-options.interface';
+import { AccessControlModuleOptionsInterface } from './interfaces/access-control-module-options.interface';
 import { AccessControlOptions } from './interfaces/access-control-options.interface';
 import { AccessControlReadMany } from './decorators/access-control-read-many.decorator';
 import { AccessControlReadOne } from './decorators/access-control-read-one.decorator';
-import { AccessControlService } from './interfaces/access-control-service.interface';
+import { AccessControlServiceInterface } from './interfaces/access-control-service.interface';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces';
 import { Reflector } from '@nestjs/core';
 import { UseAccessControl } from './decorators/use-access-control.decorator';
@@ -53,7 +53,7 @@ describe('AccessControlModule', () => {
     }
   }
 
-  class TestAccessService implements AccessControlService {
+  class TestAccessService implements AccessControlServiceInterface {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async getUser<T>(context: ExecutionContext): Promise<T> {
       return new TestUser(1234) as unknown as T;
@@ -122,8 +122,8 @@ describe('AccessControlModule', () => {
   let moduleRef: TestingModule;
   let guard: AccessControlGuard;
   const reflector: Reflector = new Reflector();
-  const moduleConfig: AccessControlModuleOptions = {
-    rules: rules,
+  const moduleConfig: AccessControlModuleOptionsInterface = {
+    settings: { rules: rules },
     service: TestAccessService,
   };
 
@@ -133,7 +133,10 @@ describe('AccessControlModule', () => {
         AccessControlGuard,
         TestAccessService,
         TestFilterService,
-        { provide: ACCESS_CONTROL_OPTIONS_KEY, useValue: moduleConfig },
+        {
+          provide: ACCESS_CONTROL_MODULE_OPTIONS_TOKEN,
+          useValue: moduleConfig,
+        },
         { provide: Reflector, useValue: reflector },
       ],
     }).compile();
@@ -150,7 +153,7 @@ describe('AccessControlModule', () => {
   describe('access filter service', () => {
     it('should be configured', async () => {
       const config: AccessControlOptions = reflector.get(
-        ACCESS_CONTROL_CTLR_CONFIG_KEY,
+        ACCESS_CONTROL_MODULE_CTLR_METADATA,
         TestControllerWithService,
       );
 
@@ -161,7 +164,7 @@ describe('AccessControlModule', () => {
   describe('access grants', () => {
     it('should not have any grants set for getOpen', async () => {
       const grants = reflector.get(
-        ACCESS_CONTROL_GRANT_CONFIG_KEY,
+        ACCESS_CONTROL_MODULE_GRANT_METADATA,
         controller.getOpen,
       );
 
@@ -170,7 +173,7 @@ describe('AccessControlModule', () => {
 
     it('should have grants set for getNoAccess', async () => {
       const grants = reflector.get(
-        ACCESS_CONTROL_GRANT_CONFIG_KEY,
+        ACCESS_CONTROL_MODULE_GRANT_METADATA,
         controller.getNoAccess,
       );
 
@@ -184,7 +187,7 @@ describe('AccessControlModule', () => {
 
     it('should have grants set for getAny', async () => {
       const grants = reflector.get(
-        ACCESS_CONTROL_GRANT_CONFIG_KEY,
+        ACCESS_CONTROL_MODULE_GRANT_METADATA,
         controller.getAny,
       );
 
@@ -198,7 +201,7 @@ describe('AccessControlModule', () => {
 
     it('should have grants set for getOwn', async () => {
       const grants = reflector.get(
-        ACCESS_CONTROL_GRANT_CONFIG_KEY,
+        ACCESS_CONTROL_MODULE_GRANT_METADATA,
         controller.getOwn,
       );
 
@@ -214,7 +217,7 @@ describe('AccessControlModule', () => {
   describe('access filters', () => {
     it('should have filters set for getOwnFilterFail', async () => {
       const filters = reflector.get(
-        ACCESS_CONTROL_FILTERS_CONFIG_KEY,
+        ACCESS_CONTROL_MODULE_FILTERS_METADATA,
         controller.getOwnFilterFail,
       );
 
@@ -228,7 +231,7 @@ describe('AccessControlModule', () => {
 
     it('should have filters set for getOwnFilterPass', async () => {
       const filters = reflector.get(
-        ACCESS_CONTROL_FILTERS_CONFIG_KEY,
+        ACCESS_CONTROL_MODULE_FILTERS_METADATA,
         controller.getOwnFilterPass,
       );
 
