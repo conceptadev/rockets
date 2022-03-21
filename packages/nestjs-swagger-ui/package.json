@@ -1,0 +1,26 @@
+{
+  "name": "@rockts-org/nestjs-swagger-ui",
+  "version": "4.0.0-alpha.5",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
+  ],
+  "dependencies": {
+    "@nestjs/common": "^8.0.8",
+    "@nestjs/config": "^1.0.0",
+    "@nestjs/swagger": "^5.2.0",
+    "@rockts-org/nestjs-common": "4.0.0-alpha.5",
+    "swagger-ui-express": "^4.3.0"
+  },
+  "devDependencies": {
+    "@nestjs/core": "^8.0.8",
+    "@nestjs/testing": "^8.0.8",
+    "@types/supertest": "^2.0.11",
+    "supertest": "^6.1.6"
+  }
+}
