@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import {
-  ACCESS_CONTROL_FILTERS_CONFIG_KEY,
-  ACCESS_CONTROL_GRANT_CONFIG_KEY,
+  ACCESS_CONTROL_MODULE_FILTERS_METADATA,
+  ACCESS_CONTROL_MODULE_GRANT_METADATA,
 } from '../constants';
 import { AccessControlAction } from '../enums/access-control-action.enum';
 import { AccessControlFilterType } from '../enums/access-control-filter-type.enum';
@@ -33,7 +33,7 @@ describe('@AccessControlReadOne', () => {
   describe('enhance controller method with access control', () => {
     it('should have grants metadata', () => {
       const grants = Reflect.getMetadata(
-        ACCESS_CONTROL_GRANT_CONFIG_KEY,
+        ACCESS_CONTROL_MODULE_GRANT_METADATA,
         controller.getOne,
       );
 
@@ -47,7 +47,7 @@ describe('@AccessControlReadOne', () => {
 
     it('should NOT have filters metadata', () => {
       const filters = Reflect.getMetadata(
-        ACCESS_CONTROL_FILTERS_CONFIG_KEY,
+        ACCESS_CONTROL_MODULE_FILTERS_METADATA,
         controller.getOne,
       );
 
@@ -58,7 +58,7 @@ describe('@AccessControlReadOne', () => {
   describe('enhance controller method with access control and filter', () => {
     it('should have grants metadata', () => {
       const grants = Reflect.getMetadata(
-        ACCESS_CONTROL_GRANT_CONFIG_KEY,
+        ACCESS_CONTROL_MODULE_GRANT_METADATA,
         controller.getOneFiltered,
       );
 
@@ -72,7 +72,7 @@ describe('@AccessControlReadOne', () => {
 
     it('should have filters metadata', () => {
       const filters = Reflect.getMetadata(
-        ACCESS_CONTROL_FILTERS_CONFIG_KEY,
+        ACCESS_CONTROL_MODULE_FILTERS_METADATA,
         controller.getOneFiltered,
       );
 

@@ -1,5 +1,9 @@
-import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
-import { AccessControlService } from './interfaces/access-control-service.interface';
+import {
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { AccessControlServiceInterface } from '../interfaces/access-control-service.interface';
 
 interface RoleDefaultInterface {
   name: string;
@@ -9,7 +13,8 @@ interface UserDefaultInterface {
   userRoles: { role: RoleDefaultInterface }[];
 }
 
-export class AccessControlDefaultService implements AccessControlService {
+@Injectable()
+export class AccessControlService implements AccessControlServiceInterface {
   async getUser<T>(context: ExecutionContext): Promise<T> {
     const request = context.switchToHttp().getRequest();
     return request.user as T;

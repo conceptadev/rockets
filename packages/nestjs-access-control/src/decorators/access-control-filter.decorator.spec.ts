@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { ACCESS_CONTROL_FILTERS_CONFIG_KEY } from '../constants';
+import { ACCESS_CONTROL_MODULE_FILTERS_METADATA } from '../constants';
 import { AccessControlFilterType } from '../enums/access-control-filter-type.enum';
 import { AccessControlFilterCallback } from '../interfaces/access-control-filter-option.interface';
 import { AccessControlFilter } from './access-control-filter.decorator';
@@ -40,7 +40,7 @@ describe('@AccessControlFilter', () => {
   describe('enhance controller methods with access control filters', () => {
     it('createOne should have filter on BODY metadata', () => {
       const grants = Reflect.getMetadata(
-        ACCESS_CONTROL_FILTERS_CONFIG_KEY,
+        ACCESS_CONTROL_MODULE_FILTERS_METADATA,
         controller.createOne,
       );
 
@@ -54,7 +54,7 @@ describe('@AccessControlFilter', () => {
 
     it('getList should have filter on QUERY metadata', () => {
       const grants = Reflect.getMetadata(
-        ACCESS_CONTROL_FILTERS_CONFIG_KEY,
+        ACCESS_CONTROL_MODULE_FILTERS_METADATA,
         controller.getList,
       );
 
@@ -68,7 +68,7 @@ describe('@AccessControlFilter', () => {
 
     it('getList should have filter on PATH metadata', () => {
       const grants = Reflect.getMetadata(
-        ACCESS_CONTROL_FILTERS_CONFIG_KEY,
+        ACCESS_CONTROL_MODULE_FILTERS_METADATA,
         controller.getOne,
       );
 

@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { UseAccessControl } from './use-access-control.decorator';
-import { ACCESS_CONTROL_CTLR_CONFIG_KEY } from '../constants';
+import { ACCESS_CONTROL_MODULE_CTLR_METADATA } from '../constants';
 import { AccessControlFilterService } from '../interfaces/access-control-filter-service.interface';
 
 describe('@UseAccessControl', () => {
@@ -12,7 +12,7 @@ describe('@UseAccessControl', () => {
 
   it('should enhance class with expected use access control metadata', () => {
     const metadata = Reflect.getOwnMetadata(
-      ACCESS_CONTROL_CTLR_CONFIG_KEY,
+      ACCESS_CONTROL_MODULE_CTLR_METADATA,
       TestController,
     );
     expect(metadata).toEqual(

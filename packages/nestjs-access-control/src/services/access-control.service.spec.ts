@@ -2,23 +2,21 @@
 // import { HttpArgumentsHost } from '@nestjs/common/interfaces';
 // import { mock } from 'jest-mock-extended';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AccessControlDefaultService } from './access-control-default.service';
+import { AccessControlService } from './access-control.service';
 
 describe('AccessControlDefaultService', () => {
-  let service: AccessControlDefaultService;
+  let service: AccessControlService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AccessControlDefaultService],
+      providers: [AccessControlService],
     }).compile();
-    service = module.get<AccessControlDefaultService>(
-      AccessControlDefaultService,
-    );
+    service = module.get<AccessControlService>(AccessControlService);
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
-    expect(service).toBeInstanceOf(AccessControlDefaultService);
+    expect(service).toBeInstanceOf(AccessControlService);
   });
 
   // it('should define getUser', () => {
