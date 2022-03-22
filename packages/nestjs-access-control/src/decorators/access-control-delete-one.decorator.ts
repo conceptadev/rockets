@@ -8,10 +8,14 @@ import { AccessControlFilterType } from '../enums/access-control-filter-type.enu
 
 /**
  * Delete one resource filter shortcut
+ *
+ * @param {AccessControlGrantResource} resource The grant resource.
+ * @param {AccessControlFilterCallback} paramFilter An optional param filter.
+ * @returns {ReturnType<typeof applyDecorators>} Decorator function
  */
 export const AccessControlDeleteOne = (
   resource: AccessControlGrantResource,
-  paramFilter?: AccessControlFilterCallback
+  paramFilter?: AccessControlFilterCallback,
 ): ReturnType<typeof applyDecorators> => {
   const acFilter = AccessControlGrant({
     resource: resource,
@@ -24,7 +28,7 @@ export const AccessControlDeleteOne = (
       AccessControlFilter({
         type: AccessControlFilterType.PATH,
         filter: paramFilter,
-      })
+      }),
     );
   } else {
     return acFilter;

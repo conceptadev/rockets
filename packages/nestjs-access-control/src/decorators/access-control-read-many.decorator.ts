@@ -7,11 +7,15 @@ import { AccessControlAction } from '../enums/access-control-action.enum';
 import { AccessControlFilterType } from '../enums/access-control-filter-type.enum';
 
 /**
- * Read many resource filter shortcut
+ * Read many resource filter shortcut.
+ *
+ * @param {AccessControlGrantResource} resource The grant resource.
+ * @param {AccessControlFilterCallback} paramFilter An optional param filter.
+ * @returns {ReturnType<typeof applyDecorators>} Decorator function
  */
 export const AccessControlReadMany = (
   resource: AccessControlGrantResource,
-  paramFilter?: AccessControlFilterCallback
+  paramFilter?: AccessControlFilterCallback,
 ): ReturnType<typeof applyDecorators> => {
   const acFilter = AccessControlGrant({
     resource: resource,
@@ -24,7 +28,7 @@ export const AccessControlReadMany = (
       AccessControlFilter({
         type: AccessControlFilterType.QUERY,
         filter: paramFilter,
-      })
+      }),
     );
   } else {
     return acFilter;

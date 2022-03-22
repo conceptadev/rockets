@@ -1,4 +1,4 @@
-# nestjs-access-control
+# Rockets NestJS Access Control
 
 Advanced access control guard for NestJS
 
@@ -7,14 +7,14 @@ Advanced access control guard for NestJS
 When building your ACL, you need to remember these!
 
 > This module only helps you apply a pattern. There is no magic, you are ultimately responsible for
-checking that your ACL works in all contexts.
+> checking that your ACL works in all contexts.
 
 Here is the pattern:
 
-* Giving `any` access implies that the role IS NOT restricted by ownership, or other rules, to that action/resource combination.
-* Giving `own` access implies that the role IS restricted by ownership to that action/resource combination
-(it is often required to enforce this rule with a filter to check the data layer when not all information required to
-check ownership exists in the parameters or query string.) 
+- Giving `any` access implies that the role IS NOT restricted by ownership, or other rules, to that action/resource combination.
+- Giving `own` access implies that the role IS restricted by ownership to that action/resource combination
+  (it is often required to enforce this rule with a filter to check the data layer when not all information required to
+  check ownership exists in the parameters or query string.)
 
 !!! Important !!!
 
@@ -27,12 +27,7 @@ These are very rough examples. We intend to improve them ASAP.
 ### Simple User Entity
 
 ```typescript
-import {
-  Entity,
-  Column,
-  ManyToMany,
-  Unique,
-} from 'typeorm';
+import { Entity, Column, ManyToMany, Unique } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { Role } from '../auth/role.entity';
 
@@ -50,7 +45,7 @@ export class User {
   @Exclude()
   salt!: string;
 
-  @ManyToMany(() => Role, role => role.users, {
+  @ManyToMany(() => Role, (role) => role.users, {
     eager: true,
     onDelete: 'CASCADE',
   })
@@ -73,7 +68,7 @@ export class ACService implements AccessControlService {
   async getUserRoles(context: ExecutionContext): Promise<string | string[]> {
     const user = await this.getUser<User>(context);
     if (!user || !user.roles) throw new UnauthorizedException();
-    return user.roles.map(role => role.name);
+    return user.roles.map((role) => role.name);
   }
 }
 ```
@@ -158,7 +153,7 @@ import {
   AccessControlReadOne,
   AccessControlUpdateOne,
   UseAccessControl,
-} from '@rockts-org/nestjs-access-control';
+} from '@concepta/nestjs-access-control';
 import { UserDto, CreateUserDto, UpdateUserDto } from './dto';
 import { UserAccessControlFilterService } from './user-access-control-filter.service';
 
@@ -195,9 +190,15 @@ import { UserAccessControlFilterService } from './user-access-control-filter.ser
         }),
         AccessControlReadOne(
           AppResource.User,
-          async (params: {id: string}, user: User, service: UserAccessControlFilterService): Promise<boolean> => {
-            return params.id === user.id && true === service.userCanRead(id, user);
-          }
+          async (
+            params: { id: string },
+            user: User,
+            service: UserAccessControlFilterService,
+          ): Promise<boolean> => {
+            return (
+              params.id === user.id && true === service.userCanRead(id, user)
+            );
+          },
         ),
       ],
     },

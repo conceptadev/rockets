@@ -1,25 +1,27 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { ModuleRef, Reflector } from '@nestjs/core';
+import { IQueryInfo } from 'accesscontrol';
 import { Possession } from 'accesscontrol/lib/enums';
+import {
+  ACCESS_CONTROL_MODULE_CTLR_METADATA,
+  ACCESS_CONTROL_MODULE_FILTERS_METADATA,
+  ACCESS_CONTROL_MODULE_GRANT_METADATA,
+} from './constants';
+import { AccessControlOptions } from './interfaces/access-control-options.interface';
+import { AccessControlModuleOptionsInterface } from './interfaces/access-control-module-options.interface';
 import { AccessControlFilterOption } from './interfaces/access-control-filter-option.interface';
 import { AccessControlGrantOption } from './interfaces/access-control-grant-option.interface';
+import { AccessControlServiceInterface } from './interfaces/access-control-service.interface';
 import { AccessControlFilterService } from './interfaces/access-control-filter-service.interface';
-import {
-  ACCESS_CONTROL_CTLR_CONFIG_KEY,
-  ACCESS_CONTROL_FILTERS_CONFIG_KEY,
-  ACCESS_CONTROL_GRANT_CONFIG_KEY,
-} from './constants';
 import { InjectAccessControl } from './decorators/inject-access-control.decorator';
-import { AccessControlModuleOptions, AccessControlService } from './interfaces';
-import { IQueryInfo } from 'accesscontrol';
 
 @Injectable()
 export class AccessControlGuard implements CanActivate {
   constructor(
     @InjectAccessControl()
-    private readonly accessControl: AccessControlModuleOptions,
+    private readonly accessControl: AccessControlModuleOptionsInterface,
     private readonly reflector: Reflector,
-    private moduleRef: ModuleRef
+    private moduleRef: ModuleRef,
   ) {}
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -28,11 +30,11 @@ export class AccessControlGuard implements CanActivate {
   }
 
   protected async checkAccessGrants(
-    context: ExecutionContext
+    context: ExecutionContext,
   ): Promise<boolean> {
     const acGrants = this.reflector.get<AccessControlGrantOption[]>(
-      ACCESS_CONTROL_GRANT_CONFIG_KEY,
-      context.getHandler()
+      ACCESS_CONTROL_MODULE_GRANT_METADATA,
+      context.getHandler(),
     );
 
     // get anything?
@@ -44,13 +46,13 @@ export class AccessControlGuard implements CanActivate {
     const userRoles = await this.getUserRoles(context);
 
     // do they have at least one ANY permission?
-    const hasAnyPermission = acGrants.some(acGrant => {
+    const hasAnyPermission = acGrants.some((acGrant) => {
       const query: IQueryInfo = {
         role: userRoles,
         possession: Possession.ANY,
         ...acGrant,
       };
-      const permission = this.accessControl.rules.permission(query);
+      const permission = this.accessControl.settings.rules.permission(query);
       return permission.granted;
     });
 
@@ -60,13 +62,13 @@ export class AccessControlGuard implements CanActivate {
       return true;
     }
 
-    const hasOwnPermission = acGrants.some(acGrant => {
+    const hasOwnPermission = acGrants.some((acGrant) => {
       const query: IQueryInfo = {
         role: userRoles,
         possession: Possession.OWN,
         ...acGrant,
       };
-      const permission = this.accessControl.rules.permission(query);
+      const permission = this.accessControl.settings.rules.permission(query);
       return permission.granted;
     });
 
@@ -81,12 +83,12 @@ export class AccessControlGuard implements CanActivate {
   }
 
   protected async checkAccessFilters(
-    context: ExecutionContext
+    context: ExecutionContext,
   ): Promise<boolean> {
     // get access filters configuration for handler
     const acFilters = this.reflector.get<AccessControlFilterOption[]>(
-      ACCESS_CONTROL_FILTERS_CONFIG_KEY,
-      context.getHandler()
+      ACCESS_CONTROL_MODULE_FILTERS_METADATA,
+      context.getHandler(),
     );
 
     // get anything?
@@ -120,19 +122,26 @@ export class AccessControlGuard implements CanActivate {
     return authorized;
   }
 
-  private getModuleService(): AccessControlService {
+  private getModuleService(): AccessControlServiceInterface {
     return this.moduleRef.get(this.accessControl.service, { strict: false });
   }
 
   private getFilterService(
-    context: ExecutionContext
-  ): AccessControlFilterService {
+    context: ExecutionContext,
+  ): AccessControlFilterService | undefined {
     const controllerClass = context.getClass();
-    const config = this.reflector.get(
-      ACCESS_CONTROL_CTLR_CONFIG_KEY,
-      controllerClass
+    const config: AccessControlOptions = this.reflector.get(
+      ACCESS_CONTROL_MODULE_CTLR_METADATA,
+      controllerClass,
     );
-    return this.moduleRef.get(config.service);
+
+    const finalConfig = { ...config };
+
+    if (finalConfig.service) {
+      return this.moduleRef.get(config.service);
+    } else {
+      return;
+    }
   }
 
   private async getUser<T>(context: ExecutionContext): Promise<T> {
@@ -140,7 +149,7 @@ export class AccessControlGuard implements CanActivate {
   }
 
   private async getUserRoles(
-    context: ExecutionContext
+    context: ExecutionContext,
   ): Promise<string | string[]> {
     return this.getModuleService().getUserRoles(context);
   }

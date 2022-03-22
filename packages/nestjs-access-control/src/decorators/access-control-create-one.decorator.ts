@@ -7,11 +7,15 @@ import { AccessControlGrantResource } from '../interfaces/access-control-grant-o
 import { AccessControlFilterType } from '../enums/access-control-filter-type.enum';
 
 /**
- * Create one resource filter shortcut
+ * Create one resource filter shortcut.
+ *
+ * @param {AccessControlGrantResource} resource The grant resource.
+ * @param {AccessControlFilterCallback} paramFilter An optional param filter.
+ * @returns {ReturnType<typeof applyDecorators>} Decorator function
  */
 export const AccessControlCreateOne = (
   resource: AccessControlGrantResource,
-  paramFilter?: AccessControlFilterCallback
+  paramFilter?: AccessControlFilterCallback,
 ): ReturnType<typeof applyDecorators> => {
   const acFilter = AccessControlGrant({
     resource: resource,
@@ -24,7 +28,7 @@ export const AccessControlCreateOne = (
       AccessControlFilter({
         type: AccessControlFilterType.BODY,
         filter: paramFilter,
-      })
+      }),
     );
   } else {
     return acFilter;

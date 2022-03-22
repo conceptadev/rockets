@@ -1,0 +1,4 @@
+Copyright (c) 2020-2022 Concepta Technologies, LLC <https://www.conceptatech.com>
+
+Redistribution and use in source and binary forms, with or without
+modification, are not permitted at this time.

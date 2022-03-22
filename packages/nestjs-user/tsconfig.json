@@ -1,0 +1,26 @@
+{
+  "extends": "../../tsconfig",
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "typeRoots": [
+      "./node_modules/@types",
+      "../../node_modules/@types"
+    ]
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "references": [
+    {
+      "path": "../nestjs-common"
+    },
+    {
+      "path": "../nestjs-crud"
+    },
+    {
+      "path": "../nestjs-typeorm-ext"
+    }
+  ]
+}

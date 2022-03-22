@@ -1,0 +1,102 @@
+import { EventInterface } from '../events/interfaces/event.interface';
+import { EventListenerInterface } from './interfaces/event-listener.interface';
+import { Listener as EmitterListener } from 'eventemitter2';
+import { EventListenerException } from '../exceptions/event-listener.exception';
+
+/**
+ * Abstract event listener class.
+ *
+ * To create a custom event listener, extend the {@link EventListener} class and implement the
+ * [listen]{@link EventListener#listen} method. The [listen]{@link EventListener#listen}
+ * method will receive the values dispatched by {@link EventDispatchService}.
+ *
+ * You will also need to implement one of the interfaces that is enforced by the
+ * {@link EventListenService} method you intend to use. For example
+ * [EventListenService.on]{@link (EventListenService#on)} requires the {@link EventListenOnInterface} interface.
+ *
+ * There are additional abstract classes available which have implemented the basic types
+ * for you. So far we have {@link EventListenerOn}... more to come!
+ *
+ * ### Example
+ * ```ts
+ * // event values type
+ * type MyEventValues = [{id: number, active: boolean}];
+ *
+ * // example event class
+ * class MyEvent extends EventSync<MyEventValues> {}
+ *
+ * // example listener class
+ * class MyListenOn extends EventListener<MyEvent>
+ *   implements EventListenOnInterface
+ * {
+ *   // default options
+ *   options = {};
+ *
+ *   // custom handler
+ *   listen(event: MyEvent): void {
+ *     console.log(event.values);
+ *   }
+ * }
+ *
+ * // new listener
+ * const myListener = new MyListener();
+ *
+ * // subscribe to the event
+ * EventListenService.on(MyEvent, myListener);
+ *
+ * // and you can remove the listener easily
+ * listener.remove();
+ * ```
+ */
+export abstract class EventListener<E extends EventInterface = EventInterface>
+  implements EventListenerInterface<E>
+{
+  /**
+   * An instance of the Listener object from EventEmitter2
+   */
+  private emitterListener: EmitterListener | null = null;
+
+  /**
+   * Listen to an event.
+   */
+  abstract listen(event?: E): E['expectsReturnOf'];
+
+  /**
+   * Called after successful subscription.
+   *
+   * @private
+   * @param {EmitterListener} emitterListener The Listener object returned by EventEmitter2
+   */
+  subscription(emitterListener: EmitterListener): void {
+    // has the emitter listener already been set?
+    if (this.emitterListener) {
+      // yes, override not allowed
+      throw new EventListenerException(
+        'Emitter listener can not be overridden once set.',
+      );
+    }
+
+    // set it
+    this.emitterListener = emitterListener;
+  }
+
+  /**
+   * Remove the subscription.
+   */
+  remove(): void {
+    // has the emitter listener been set?
+    if (!this.emitterListener) {
+      // no, never subscribed... can't remove
+      throw new EventListenerException(
+        `Can't remove listener, it has not been subscribed.`,
+      );
+    }
+
+    try {
+      // remove the listener
+      this.emitterListener.off();
+    } catch (e) {
+      throw new EventListenerException(e.message);
+    }
+  }
+}

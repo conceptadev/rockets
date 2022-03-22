@@ -1,0 +1,23 @@
+{
+  "name": "@concepta/nestjs-event",
+  "version": "4.0.0-alpha.5",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "license": "UNLICENSED",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
+  ],
+  "dependencies": {
+    "@nestjs/common": "^8.0.8",
+    "@nestjs/config": "^1.1.6",
+    "@nestjs/core": "^8.0.8",
+    "@concepta/nestjs-common": "^4.0.0-alpha.5",
+    "eventemitter2": "^6.4.5"
+  },
+  "devDependencies": {
+    "@nestjs/testing": "^8.0.8"
+  }
+}
