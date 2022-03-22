@@ -16,16 +16,16 @@
 
 A list of all the necessary Rockets libraries that the TypeOrmExt Module Sample needs.
 
-- [@rockts-org/nestjs-common](https://www.google.com)
-- [@rockts-org/nestjs-auth-local](https://github.com)
-- [@rockts-org/nestjs-authentication](https://github.com)
-- [@rockts-org/nestjs-email](https://github.com)
-- [@rockts-org/nestjs-event](https://github.com)
-- [@rockts-org/nestjs-jwt](https://github.com)
-- [@rockts-org/nestjs-logger](https://github.com)
-- [@rockts-org/nestjs-password](https://github.com)
-- [@rockts-org/nestjs-typeorm-ext](https://github.com)
-- [@rockts-org/nestjs-user](https://github.com)
+- [@concepta/nestjs-common](https://www.google.com)
+- [@concepta/nestjs-auth-local](https://github.com)
+- [@concepta/nestjs-authentication](https://github.com)
+- [@concepta/nestjs-email](https://github.com)
+- [@concepta/nestjs-event](https://github.com)
+- [@concepta/nestjs-jwt](https://github.com)
+- [@concepta/nestjs-logger](https://github.com)
+- [@concepta/nestjs-password](https://github.com)
+- [@concepta/nestjs-typeorm-ext](https://github.com)
+- [@concepta/nestjs-user](https://github.com)
 
 </br>
 
@@ -42,7 +42,7 @@ These libraries are necessary for the TypeOrm Module to run:
 
 ```bash
 # install necessary 3rd party libraries
-yarn add @rockts-org/nestjs-common @rockts-org/nestjs-common @rockts-org/nestjs-auth-local @rockts-org/nestjs-authentication @rockts-org/nestjs-email @rockts-org/nestjs-event @rockts-org/nestjs-jwt @rockts-org/nestjs-logger @rockts-org/nestjs-password @rockts-org/nestjs-typeorm-ext @rockts-org/nestjs-user
+yarn add @concepta/nestjs-common @concepta/nestjs-common @concepta/nestjs-auth-local @concepta/nestjs-authentication @concepta/nestjs-email @concepta/nestjs-event @concepta/nestjs-jwt @concepta/nestjs-logger @concepta/nestjs-password @concepta/nestjs-typeorm-ext @concepta/nestjs-user
 ```
 
 ### Basic Sample Implementation

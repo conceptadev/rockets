@@ -1,5 +1,5 @@
 {
-  "name": "@rockts-org/nestjs-exception",
+  "name": "@concepta/nestjs-exception",
   "version": "4.0.0-alpha.5",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -11,8 +11,8 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
-    "@nestjs/common": "^8.0.8",
-    "@rockts-org/nestjs-common": "4.0.0-alpha.5"
+    "@concepta/nestjs-common": "4.0.0-alpha.5",
+    "@nestjs/common": "^8.0.8"
   },
   "devDependencies": {
     "@nestjs/core": "^8.0.8",

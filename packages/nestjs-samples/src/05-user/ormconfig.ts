@@ -1,4 +1,4 @@
-import { User } from '@rockts-org/nestjs-user';
+import { User } from '@concepta/nestjs-user';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConnectionOptions } from '@jorgebodega/typeorm-seeding';
 

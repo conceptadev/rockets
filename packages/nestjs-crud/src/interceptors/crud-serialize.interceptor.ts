@@ -23,7 +23,7 @@ import { CrudSerializationOptionsInterface } from '../interfaces/crud-serializat
 import { CrudResultPaginatedInterface } from '../interfaces/crud-result-paginated.interface';
 import { CrudSettingsInterface } from '../interfaces/crud-settings.interface';
 import { CrudReflectionService } from '../services/crud-reflection.service';
-import { IdentityInterface } from '@rockts-org/nestjs-common';
+import { IdentityInterface } from '@concepta/nestjs-common';
 
 type ResponseType =
   | (PlainLiteralObject & CrudResultPaginatedInterface<IdentityInterface>)

@@ -7,7 +7,7 @@ import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
-import { EmailService } from '@rockts-org/nestjs-email';
+import { EmailService } from '@concepta/nestjs-email';
 
 describe('AppController (e2e)', () => {
   describe('Express', () => {

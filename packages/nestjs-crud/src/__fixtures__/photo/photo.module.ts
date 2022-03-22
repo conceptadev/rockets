@@ -3,7 +3,7 @@ import {
   createCustomRepositoryProvider,
   createEntityRepositoryProvider,
   TypeOrmExtModule,
-} from '@rockts-org/nestjs-typeorm-ext';
+} from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '../../crud.module';
 import {
   PHOTO_MODULE_CUSTOM_REPO_TOKEN,

@@ -5,7 +5,7 @@ import {
   createConfigurableDynamicRootModule,
   deferExternal,
   DeferExternalOptionsInterface,
-} from '@rockts-org/nestjs-common';
+} from '@concepta/nestjs-common';
 
 import {
   AUTH_REFRESH_ISSUE_TOKEN_SERVICE_TOKEN,
@@ -25,10 +25,10 @@ import {
   UserLookupService,
   VerifyTokenService,
   VerifyTokenServiceInterface,
-} from '@rockts-org/nestjs-authentication';
+} from '@concepta/nestjs-authentication';
 
 import { AuthRefreshController } from './auth-refresh.controller';
-import { JwtModule } from '@rockts-org/nestjs-jwt';
+import { JwtModule } from '@concepta/nestjs-jwt';
 
 import { AuthRefreshStrategy } from './auth-refresh.strategy';
 

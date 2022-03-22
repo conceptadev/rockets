@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
 import { Inject, Injectable, Type } from '@nestjs/common';
-import { PasswordStorageService } from '@rockts-org/nestjs-password';
+import { PasswordStorageService } from '@concepta/nestjs-password';
 import { plainToInstance } from 'class-transformer';
 import { USER_MODULE_USER_CUSTOM_REPO_TOKEN } from '../user.constants';
 import { User } from '../entities/user.entity';

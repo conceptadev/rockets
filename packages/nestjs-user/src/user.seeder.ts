@@ -1,6 +1,6 @@
 import { Type } from '@nestjs/common';
 import { Seeder } from '@jorgebodega/typeorm-seeding';
-import { PasswordStorageService } from '@rockts-org/nestjs-password';
+import { PasswordStorageService } from '@concepta/nestjs-password';
 import { User } from './entities/user.entity';
 import { UserEntityInterface } from './interfaces/user-entity.interface';
 import { UserFactory } from './user.factory';

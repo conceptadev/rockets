@@ -7,12 +7,12 @@ import {
   DeferExternalOptionsInterface,
   ModuleOptionsControllerInterface,
   negotiateController,
-} from '@rockts-org/nestjs-common';
+} from '@concepta/nestjs-common';
 import {
   createCustomRepositoryProvider,
   createEntityRepositoryProvider,
   TypeOrmExtModule,
-} from '@rockts-org/nestjs-typeorm-ext';
+} from '@concepta/nestjs-typeorm-ext';
 import { UserRepository } from './user.repository';
 import { userDefaultConfig } from './config/user-default.config';
 import { User } from './entities/user.entity';
@@ -29,8 +29,8 @@ import { UserController } from './user.controller';
 import { UserServiceInterface } from './interfaces/user-service.interface';
 import { DefaultUserService } from './services/default-user.service';
 import { UserCrudService } from './services/user-crud.service';
-import { CrudModule } from '@rockts-org/nestjs-crud';
-import { PasswordStorageService } from '@rockts-org/nestjs-password';
+import { CrudModule } from '@concepta/nestjs-crud';
+import { PasswordStorageService } from '@concepta/nestjs-password';
 
 /**
  * User Module

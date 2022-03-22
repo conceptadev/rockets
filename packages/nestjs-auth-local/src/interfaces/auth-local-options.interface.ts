@@ -1,8 +1,8 @@
-import { IssueTokenServiceInterface } from '@rockts-org/nestjs-authentication';
+import { IssueTokenServiceInterface } from '@concepta/nestjs-authentication';
 import {
   ModuleOptionsSettingsInterface,
   OptionsInterface,
-} from '@rockts-org/nestjs-common';
+} from '@concepta/nestjs-common';
 import { AuthLocalSettingsInterface } from './auth-local-settings.interface';
 import { AuthLocalUserLookupServiceInterface } from './auth-local-user-lookup-service.interface';
 

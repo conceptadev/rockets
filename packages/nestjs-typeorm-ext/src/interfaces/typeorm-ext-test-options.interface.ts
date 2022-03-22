@@ -1,4 +1,4 @@
-import { OptionsInterface } from '@rockts-org/nestjs-common';
+import { OptionsInterface } from '@concepta/nestjs-common';
 
 /**
  * Module Test Options Interface

@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EventDispatchService } from '@rockts-org/nestjs-event';
+import { EventDispatchService } from '@concepta/nestjs-event';
 import { AppModule } from './app.module';
 import {
   OrderCreatedListener,

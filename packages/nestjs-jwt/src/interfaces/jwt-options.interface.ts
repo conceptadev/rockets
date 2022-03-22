@@ -1,4 +1,4 @@
-import { OptionsInterface } from '@rockts-org/nestjs-common';
+import { OptionsInterface } from '@concepta/nestjs-common';
 import { JwtSignServiceInterface } from './jwt-sign-service.interface';
 import { JwtIssueServiceInterface } from './jwt-issue-service.interface';
 import { JwtSettingsInterface } from './jwt-settings.interface';

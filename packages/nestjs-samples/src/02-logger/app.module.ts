@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { OrderModule } from './order/order.module';
-import { LoggerModule } from '@rockts-org/nestjs-logger';
+import { LoggerModule } from '@concepta/nestjs-logger';
 @Module({
   imports: [LoggerModule.register(), OrderModule],
 })

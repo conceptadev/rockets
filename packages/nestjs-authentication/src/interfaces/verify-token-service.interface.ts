@@ -1,4 +1,4 @@
-import { JwtVerifyServiceInterface } from '@rockts-org/nestjs-jwt';
+import { JwtVerifyServiceInterface } from '@concepta/nestjs-jwt';
 
 export interface VerifyTokenServiceInterface
   extends JwtVerifyServiceInterface {}

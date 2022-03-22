@@ -8,7 +8,7 @@ import {
   UserController,
   UserCrudService,
   DefaultUserService,
-} from '@rockts-org/nestjs-user';
+} from '@concepta/nestjs-user';
 import { AppModule } from './app.module';
 
 describe('AppModule', () => {

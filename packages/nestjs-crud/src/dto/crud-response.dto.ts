@@ -1,6 +1,6 @@
 import { Exclude, Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { IdentityInterface } from '@rockts-org/nestjs-common';
+import { IdentityInterface } from '@concepta/nestjs-common';
 import { CrudResponseInterface } from '../interfaces/crud-response.interface';
 
 @Exclude()

@@ -1,5 +1,5 @@
 import { Controller, Post, Request, UseGuards } from '@nestjs/common';
-import { AuthenticationJwtResponseInterface } from '@rockts-org/nestjs-authentication';
+import { AuthenticationJwtResponseInterface } from '@concepta/nestjs-authentication';
 import { GithubAuthGuard } from './github-auth.guard';
 
 /**

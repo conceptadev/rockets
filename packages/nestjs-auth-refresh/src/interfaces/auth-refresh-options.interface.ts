@@ -2,8 +2,8 @@ import {
   IssueTokenServiceInterface,
   UserLookupServiceInterface,
   VerifyTokenService,
-} from '@rockts-org/nestjs-authentication';
-import { OptionsInterface } from '@rockts-org/nestjs-common';
+} from '@concepta/nestjs-authentication';
+import { OptionsInterface } from '@concepta/nestjs-common';
 import { AuthRefreshSettingsInterface } from './auth-refresh-settings.interface';
 
 export interface AuthRefreshOptionsInterface extends OptionsInterface {

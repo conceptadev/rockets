@@ -1,4 +1,4 @@
-import { UserLookupServiceInterface } from '@rockts-org/nestjs-authentication';
+import { UserLookupServiceInterface } from '@concepta/nestjs-authentication';
 
 export interface AuthJwtUserLookupServiceInterface
   extends UserLookupServiceInterface {}

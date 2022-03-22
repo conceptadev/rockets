@@ -153,7 +153,7 @@ import {
   AccessControlReadOne,
   AccessControlUpdateOne,
   UseAccessControl,
-} from '@rockts-org/nestjs-access-control';
+} from '@concepta/nestjs-access-control';
 import { UserDto, CreateUserDto, UpdateUserDto } from './dto';
 import { UserAccessControlFilterService } from './user-access-control-filter.service';
 

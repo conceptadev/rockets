@@ -5,13 +5,13 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { CredentialLookupInterface } from '@rockts-org/nestjs-authentication';
-import { PasswordStorageService } from '@rockts-org/nestjs-password';
+import { CredentialLookupInterface } from '@concepta/nestjs-authentication';
+import { PasswordStorageService } from '@concepta/nestjs-password';
 import {
   AUTH_LOCAL_MODULE_SETTINGS_TOKEN,
   AUTH_LOCAL_STRATEGY_NAME,
 } from './auth-local.constants';
-import { PassportStrategyFactory } from '@rockts-org/nestjs-authentication';
+import { PassportStrategyFactory } from '@concepta/nestjs-authentication';
 import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.interface';
 import { AuthLocalUserLookupService } from './services/auth-local-user-lookup.service';
 import { validateOrReject } from 'class-validator';

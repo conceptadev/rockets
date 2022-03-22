@@ -1,5 +1,5 @@
 import { Exclude, Expose, Type } from 'class-transformer';
-import { CrudCreateManyDto } from '@rockts-org/nestjs-crud';
+import { CrudCreateManyDto } from '@concepta/nestjs-crud';
 import { UserCreatableInterface } from '../interfaces/user-creatable.interface';
 import { UserCreateDto } from './user-create.dto';
 

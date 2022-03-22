@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-import { AuthLocalModule } from '@rockts-org/nestjs-auth-local';
-import { AuthRefreshModule } from '@rockts-org/nestjs-auth-refresh';
-import { AuthJwtModule } from '@rockts-org/nestjs-auth-jwt';
-import { AuthenticationModule } from '@rockts-org/nestjs-authentication';
-import { UserModule } from '@rockts-org/nestjs-user';
-import { JwtModule } from '@rockts-org/nestjs-jwt';
-import { PasswordModule } from '@rockts-org/nestjs-password';
-import { CrudModule } from '@rockts-org/nestjs-crud';
+import { AuthLocalModule } from '@concepta/nestjs-auth-local';
+import { AuthRefreshModule } from '@concepta/nestjs-auth-refresh';
+import { AuthJwtModule } from '@concepta/nestjs-auth-jwt';
+import { AuthenticationModule } from '@concepta/nestjs-authentication';
+import { UserModule } from '@concepta/nestjs-user';
+import { JwtModule } from '@concepta/nestjs-jwt';
+import { PasswordModule } from '@concepta/nestjs-password';
+import { CrudModule } from '@concepta/nestjs-crud';
 import { CustomUserController } from './user/user.controller';
 
 @Module({

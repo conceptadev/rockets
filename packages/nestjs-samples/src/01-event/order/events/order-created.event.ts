@@ -3,7 +3,7 @@ import {
   EventAsyncInterface,
   EventSync,
   EventSyncInterface,
-} from '@rockts-org/nestjs-event';
+} from '@concepta/nestjs-event';
 
 export type OrderCreatedEventDto = {
   name: string;

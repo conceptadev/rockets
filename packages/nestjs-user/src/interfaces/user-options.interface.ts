@@ -1,4 +1,4 @@
-import { OptionsInterface } from '@rockts-org/nestjs-common';
+import { OptionsInterface } from '@concepta/nestjs-common';
 import { UserServiceInterface } from './user-service.interface';
 import { UserSettingsInterface } from './user-settings.interface';
 

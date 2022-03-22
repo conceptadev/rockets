@@ -1,5 +1,5 @@
 {
-  "name": "@rockts-org/nestjs-common",
+  "name": "@concepta/nestjs-common",
   "version": "4.0.0-alpha.5",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

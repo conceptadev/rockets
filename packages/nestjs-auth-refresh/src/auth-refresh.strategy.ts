@@ -5,7 +5,7 @@ import {
   UserIdentityInterface,
   UserLookupServiceInterface,
   VerifyTokenServiceInterface,
-} from '@rockts-org/nestjs-authentication';
+} from '@concepta/nestjs-authentication';
 import {
   AUTH_JWT_REFRESH_STRATEGY_NAME,
   AUTH_REFRESH_USER_LOOKUP_SERVICE_TOKEN,
@@ -14,10 +14,7 @@ import {
 } from './auth-refresh.constants';
 import { AuthRefreshSettingsInterface } from './interfaces/auth-refresh-settings.interface';
 import { AuthRefreshPayloadInterface } from './interfaces/auth-refresh-payload.interface';
-import {
-  JwtStrategy,
-  JwtStrategyOptionsInterface,
-} from '@rockts-org/nestjs-jwt';
+import { JwtStrategy, JwtStrategyOptionsInterface } from '@concepta/nestjs-jwt';
 import { createVerifyTokenCallback } from './utils/create-verify-token-callback.util';
 
 @Injectable()

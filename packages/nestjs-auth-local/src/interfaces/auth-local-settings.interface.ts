@@ -1,5 +1,5 @@
 import { Type } from '@nestjs/common';
-import { OptionsInterface } from '@rockts-org/nestjs-common';
+import { OptionsInterface } from '@concepta/nestjs-common';
 
 export interface AuthLocalSettingsInterface extends OptionsInterface {
   loginDto?: Type;

@@ -1,5 +1,5 @@
 import { registerAs } from '@nestjs/config';
-import { ExtractJwt } from '@rockts-org/nestjs-jwt';
+import { ExtractJwt } from '@concepta/nestjs-jwt';
 import { REFRESH_TOKEN_MODULE_DEFAULT_SETTINGS_TOKEN } from '../auth-refresh.constants';
 import { AuthRefreshSettingsInterface } from '../interfaces/auth-refresh-settings.interface';
 

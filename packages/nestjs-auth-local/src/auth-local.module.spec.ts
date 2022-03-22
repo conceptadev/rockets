@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthenticationModule } from '@rockts-org/nestjs-authentication';
-import { CrudModule } from '@rockts-org/nestjs-crud';
-import { JwtModule } from '@rockts-org/nestjs-jwt';
-import { PasswordModule } from '@rockts-org/nestjs-password';
-import { User, UserCrudService, UserModule } from '@rockts-org/nestjs-user';
+import { AuthenticationModule } from '@concepta/nestjs-authentication';
+import { CrudModule } from '@concepta/nestjs-crud';
+import { JwtModule } from '@concepta/nestjs-jwt';
+import { PasswordModule } from '@concepta/nestjs-password';
+import { User, UserCrudService, UserModule } from '@concepta/nestjs-user';
 import { mock } from 'jest-mock-extended';
 import { AuthLocalController } from './auth-local.controller';
 import { AuthLocalModule } from './auth-local.module';

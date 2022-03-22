@@ -1,4 +1,4 @@
-import { IdentityInterface } from '@rockts-org/nestjs-common';
+import { IdentityInterface } from '@concepta/nestjs-common';
 export interface CrudResponseInterface<
   T extends IdentityInterface = IdentityInterface,
 > {

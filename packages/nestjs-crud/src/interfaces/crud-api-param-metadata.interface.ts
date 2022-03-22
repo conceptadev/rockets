@@ -1,5 +1,5 @@
 import { ApiParamOptions } from '@nestjs/swagger';
-import { OptionsInterface } from '@rockts-org/nestjs-common';
+import { OptionsInterface } from '@concepta/nestjs-common';
 
 export interface CrudApiParamMetadataInterface extends OptionsInterface {
   propertyKey: string | symbol;

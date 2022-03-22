@@ -1,6 +1,6 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { CreateNotificationDto } from './dto/create-notification.dto';
-import { EmailService } from '@rockts-org/nestjs-email';
+import { EmailService } from '@concepta/nestjs-email';
 
 @Controller('notification')
 export class NotificationController {
