@@ -1,4 +1,4 @@
-import { PasswordStorageInterface } from '@rockts-org/nestjs-password';
+import { PasswordStorageInterface } from '@concepta/nestjs-password';
 
 /**
  * Credential Lookup Interface

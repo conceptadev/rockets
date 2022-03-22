@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { LoggerService } from '@rockts-org/nestjs-logger';
+import { LoggerService } from '@concepta/nestjs-logger';
 
 /**
  *

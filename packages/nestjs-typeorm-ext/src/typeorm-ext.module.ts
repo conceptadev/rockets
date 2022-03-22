@@ -13,7 +13,7 @@ import {
   createConfigurableDynamicRootModule,
   deferExternal,
   DeferExternalOptionsInterface,
-} from '@rockts-org/nestjs-common';
+} from '@concepta/nestjs-common';
 import { TypeOrmExtService } from './typeorm-ext.service';
 import {
   TYPEORM_EXT_MODULE_CONNECTION,

@@ -1,4 +1,4 @@
-import { OptionsInterface } from '@rockts-org/nestjs-common';
+import { OptionsInterface } from '@concepta/nestjs-common';
 import { IssueTokenServiceInterface } from './issue-token-service.interface';
 import { AuthenticationSettingsInterface } from './authentication-settings.interface';
 import { VerifyTokenServiceInterface } from './verify-token-service.interface';

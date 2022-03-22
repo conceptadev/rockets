@@ -8,7 +8,7 @@ import {
 import {
   EventDispatchService,
   EventListenService,
-} from '@rockts-org/nestjs-event';
+} from '@concepta/nestjs-event';
 import { OnModuleInit } from '@nestjs/common';
 import {
   OrderCreatedListener,

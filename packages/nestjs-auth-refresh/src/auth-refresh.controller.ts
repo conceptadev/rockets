@@ -6,7 +6,7 @@ import {
   AuthGuard,
   AuthUser,
   UserIdentityDto,
-} from '@rockts-org/nestjs-authentication';
+} from '@concepta/nestjs-authentication';
 import { AUTH_JWT_REFRESH_STRATEGY_NAME } from './auth-refresh.constants';
 
 /**

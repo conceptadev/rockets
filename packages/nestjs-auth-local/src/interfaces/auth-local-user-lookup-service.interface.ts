@@ -1,7 +1,7 @@
 import {
   CredentialLookupInterface,
   UserLookupServiceInterface,
-} from '@rockts-org/nestjs-authentication';
+} from '@concepta/nestjs-authentication';
 
 export interface AuthLocalUserLookupServiceInterface
   extends UserLookupServiceInterface<CredentialLookupInterface> {}

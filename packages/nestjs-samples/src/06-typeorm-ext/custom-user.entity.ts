@@ -1,5 +1,5 @@
 import { Column, Entity } from 'typeorm';
-import { User } from '@rockts-org/nestjs-user';
+import { User } from '@concepta/nestjs-user';
 
 @Entity()
 export class CustomUser extends User {

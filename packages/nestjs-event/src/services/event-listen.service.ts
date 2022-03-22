@@ -37,7 +37,7 @@ export class EventListenService {
    * ### Example
    * ```ts
    * import { Injectable, OnModuleInit } from '@nestjs/common';
-   * import { EventListenService, EventListenerOn } from '@rockts-org/nestjs-events';
+   * import { EventListenService, EventListenerOn } from '@concepta/nestjs-events';
    * import { TargetEvent, TargetEventValues } from 'target-module';
    *
    * class MyListener extends EventListenerOn<TargetEvent> {

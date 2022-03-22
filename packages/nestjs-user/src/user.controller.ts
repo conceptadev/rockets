@@ -10,7 +10,7 @@ import {
   CrudControllerInterface,
   CrudController,
   CrudCreateMany,
-} from '@rockts-org/nestjs-crud';
+} from '@concepta/nestjs-crud';
 import { UserCrudService } from './services/user-crud.service';
 import { UserEntityInterface } from './interfaces/user-entity.interface';
 import { UserDto } from './dto/user.dto';

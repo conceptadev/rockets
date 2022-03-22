@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Order } from './entities/order.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { Inject } from '@nestjs/common';
-import { LoggerService } from '@rockts-org/nestjs-logger';
+import { LoggerService } from '@concepta/nestjs-logger';
 
 @Injectable()
 export class OrderService {

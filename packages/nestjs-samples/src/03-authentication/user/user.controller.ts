@@ -1,5 +1,5 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '@rockts-org/nestjs-auth-jwt';
+import { JwtAuthGuard } from '@concepta/nestjs-auth-jwt';
 
 export class UserDto {
   constructor(username: string) {

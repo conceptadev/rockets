@@ -4,7 +4,7 @@ import {
   Injectable,
   Optional,
 } from '@nestjs/common';
-import { JwtVerifyService } from '@rockts-org/nestjs-jwt';
+import { JwtVerifyService } from '@concepta/nestjs-jwt';
 import { AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN } from '../authentication.constants';
 import { ValidateTokenServiceInterface } from '../interfaces/validate-token-service.interface';
 import { VerifyTokenServiceInterface } from '../interfaces/verify-token-service.interface';

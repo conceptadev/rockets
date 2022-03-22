@@ -1,4 +1,4 @@
-import { EventListenerOn } from '@rockts-org/nestjs-event';
+import { EventListenerOn } from '@concepta/nestjs-event';
 import {
   OrderCreatedEvent,
   OrderCreatedEventAsync,

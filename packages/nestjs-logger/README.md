@@ -28,7 +28,7 @@ SENTRY_DSN="{your_sentry_dsn}"
 
 ```ts
 
-import { LoggerModule } from '@rockts-org/nestjs-logging';
+import { LoggerModule } from '@concepta/nestjs-logging';
 
 // To import default configuration
 @Module({
@@ -43,7 +43,7 @@ export class AppModule {}
 
 ```ts
 
-import { LoggerModule } from '@rockts-org/nestjs-logging';
+import { LoggerModule } from '@concepta/nestjs-logging';
 
 // To import overwriting configuration
 @Module({
@@ -95,7 +95,7 @@ customLoggerService.addTransport(loggerSentryTransport);
 app.useLogger(customLoggerService);
 ```
 
-by doing that any time you call a method from `Logger` class from `@nestjs/common` will be calling the method from `LoggerService` from `@rockts-org/nestjs-logger`.
+by doing that any time you call a method from `Logger` class from `@nestjs/common` will be calling the method from `LoggerService` from `@concepta/nestjs-logger`.
 
 ### Transports
 
@@ -106,7 +106,7 @@ You should be able to use the `LoggerService` by injecting the class, or creatin
 
 ```ts
 import { Logger, Injectable, Inject } from '@nestjs/common';
-import { LoggerService } from '@rockts-org/nestjs-logger';
+import { LoggerService } from '@concepta/nestjs-logger';
 
 @Injectable()
 class MyService {

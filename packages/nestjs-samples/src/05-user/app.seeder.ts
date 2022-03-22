@@ -1,1 +1,1 @@
-export { UserSeeder } from '@rockts-org/nestjs-user';
+export { UserSeeder } from '@concepta/nestjs-user';

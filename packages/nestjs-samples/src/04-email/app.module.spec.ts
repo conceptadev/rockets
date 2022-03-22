@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from './app.module';
-import { EmailService } from '@rockts-org/nestjs-email';
+import { EmailService } from '@concepta/nestjs-email';
 import { NotificationController } from './notification/notification.controller';
 
 describe('AppModule', () => {

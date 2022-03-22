@@ -1,5 +1,5 @@
-import { VerifyTokenServiceInterface } from '@rockts-org/nestjs-authentication';
-import { OptionsInterface } from '@rockts-org/nestjs-common';
+import { VerifyTokenServiceInterface } from '@concepta/nestjs-authentication';
+import { OptionsInterface } from '@concepta/nestjs-common';
 import { AuthJwtSettingsInterface } from './auth-jwt-settings.interface';
 import { AuthJwtUserLookupServiceInterface } from './auth-jwt-user-lookup.interface';
 

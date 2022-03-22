@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { mock } from 'jest-mock-extended';
 import { AppModule } from './app.module';
-import { IssueTokenService } from '@rockts-org/nestjs-authentication';
+import { IssueTokenService } from '@concepta/nestjs-authentication';
 import {
   AuthLocalController,
   AuthLocalUserLookupService,
   // AuthLocalController,
-} from '@rockts-org/nestjs-auth-local';
-import { User, UserCrudService, UserService } from '@rockts-org/nestjs-user';
+} from '@concepta/nestjs-auth-local';
+import { User, UserCrudService, UserService } from '@concepta/nestjs-user';
 import { TestUserRepository } from './user/user.repository';
 
 describe('AppModule', () => {

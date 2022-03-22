@@ -5,7 +5,7 @@ import {
   createConfigurableDynamicRootModule,
   deferExternal,
   DeferExternalOptionsInterface,
-} from '@rockts-org/nestjs-common';
+} from '@concepta/nestjs-common';
 
 import {
   AUTH_JWT_MODULE_OPTIONS_TOKEN,
@@ -21,8 +21,8 @@ import {
   AuthenticationModule,
   UserLookupService,
   VerifyTokenService,
-} from '@rockts-org/nestjs-authentication';
-import { VerifyTokenServiceInterface } from '@rockts-org/nestjs-authentication/src/interfaces/verify-token-service.interface';
+} from '@concepta/nestjs-authentication';
+import { VerifyTokenServiceInterface } from '@concepta/nestjs-authentication/src/interfaces/verify-token-service.interface';
 
 /**
  * Auth local module

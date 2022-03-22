@@ -4,7 +4,7 @@ import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import {
   AuthenticationJwtResponseInterface,
   UserLookupServiceInterface,
-} from '@rockts-org/nestjs-authentication';
+} from '@concepta/nestjs-authentication';
 import { GITHUB_MODULE_OPTIONS_TOKEN } from './config/github.config';
 import { GithubOptionsInterface } from './interfaces/github-options.interface';
 

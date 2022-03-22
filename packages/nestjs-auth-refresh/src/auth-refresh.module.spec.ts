@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthenticationModule } from '@rockts-org/nestjs-authentication';
-import { JwtModule } from '@rockts-org/nestjs-jwt';
+import { AuthenticationModule } from '@concepta/nestjs-authentication';
+import { JwtModule } from '@concepta/nestjs-jwt';
 import { AuthRefreshModule } from './auth-refresh.module';
 import { AuthRefreshStrategy } from './auth-refresh.strategy';
 

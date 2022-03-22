@@ -10,7 +10,7 @@ import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
-import { LoggerService } from '@rockts-org/nestjs-logger';
+import { LoggerService } from '@concepta/nestjs-logger';
 
 describe('AppController (e2e)', () => {
   describe('Express', () => {

@@ -4,7 +4,7 @@ import {
   createConfigurableDynamicRootModule,
   deferExternal,
   DeferExternalOptionsInterface,
-} from '@rockts-org/nestjs-common';
+} from '@concepta/nestjs-common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import {
   CRUD_MODULE_OPTIONS_TOKEN,

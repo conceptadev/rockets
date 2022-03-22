@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { UserInterface, UserServiceInterface } from '@rockts-org/nestjs-user';
+import { UserInterface, UserServiceInterface } from '@concepta/nestjs-user';
 
 @Injectable()
 export class CustomUserService implements UserServiceInterface {

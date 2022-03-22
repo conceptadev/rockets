@@ -1,6 +1,6 @@
 import { Exclude, Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { IdentityInterface } from '@rockts-org/nestjs-common';
+import { IdentityInterface } from '@concepta/nestjs-common';
 import { CrudResponsePaginatedInterface } from '../interfaces/crud-response-paginated.interface';
 import { CrudResponseDto } from './crud-response.dto';
 

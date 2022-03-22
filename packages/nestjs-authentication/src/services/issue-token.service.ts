@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { JwtIssueService } from '@rockts-org/nestjs-jwt';
+import { JwtIssueService } from '@concepta/nestjs-jwt';
 import { AuthenticationJwtResponseInterface } from '../interfaces/authentication-jwt-response.interface';
 import { IssueTokenServiceInterface } from '../interfaces/issue-token-service.interface';
 

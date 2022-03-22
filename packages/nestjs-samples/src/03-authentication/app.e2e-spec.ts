@@ -6,8 +6,8 @@ import { AppModule } from './app.module';
 import { INestApplication, Logger } from '@nestjs/common';
 import { TestUserRepository } from './user/user.repository';
 import { mock } from 'jest-mock-extended';
-import { User, UserCrudService } from '@rockts-org/nestjs-user';
-import { AuthenticationJwtResponseInterface } from '@rockts-org/nestjs-authentication';
+import { User, UserCrudService } from '@concepta/nestjs-user';
+import { AuthenticationJwtResponseInterface } from '@concepta/nestjs-authentication';
 import { UserDto } from './user/user.controller';
 
 const sleep = (ms) => {

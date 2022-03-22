@@ -4,13 +4,13 @@ import {
   JwtIssueService,
   JwtModule,
   JwtVerifyService,
-} from '@rockts-org/nestjs-jwt';
+} from '@concepta/nestjs-jwt';
 import {
   AsyncModuleConfig,
   createConfigurableDynamicRootModule,
   deferExternal,
   DeferExternalOptionsInterface,
-} from '@rockts-org/nestjs-common';
+} from '@concepta/nestjs-common';
 import { authenticationDefaultConfig } from './config/authentication-default.config';
 import {
   AUTHENTICATION_MODULE_OPTIONS_TOKEN,

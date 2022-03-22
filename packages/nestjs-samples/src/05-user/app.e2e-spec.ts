@@ -2,7 +2,7 @@ import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { useSeeders } from '@jorgebodega/typeorm-seeding';
-import { UserSeeder } from '@rockts-org/nestjs-user';
+import { UserSeeder } from '@concepta/nestjs-user';
 import { AppModule } from './app.module';
 
 describe('AppController (e2e)', () => {

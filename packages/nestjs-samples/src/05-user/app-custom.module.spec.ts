@@ -3,7 +3,7 @@ import {
   UserService,
   UserController,
   UserCrudService,
-} from '@rockts-org/nestjs-user';
+} from '@concepta/nestjs-user';
 import { CustomAppModule } from './app-custom.module';
 import { CustomUserModule } from './custom-user/custom-user.module';
 import { CustomUserService } from './custom-user/custom-user.service';

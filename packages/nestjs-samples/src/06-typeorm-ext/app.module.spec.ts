@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserModule, UserService } from '@rockts-org/nestjs-user';
-import { UserController } from '@rockts-org/nestjs-user';
+import { UserModule, UserService } from '@concepta/nestjs-user';
+import { UserController } from '@concepta/nestjs-user';
 import { Repository } from 'typeorm';
 import { AppModule } from './app.module';
 import { CustomUserRepository } from './custom-repository';

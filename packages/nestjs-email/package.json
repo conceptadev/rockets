@@ -1,9 +1,9 @@
 {
-  "name": "@rockts-org/nestjs-email",
+  "name": "@concepta/nestjs-email",
   "version": "4.0.0-alpha.5",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "license": "MIT",
+  "license": "BSD-3-Clause",
   "publishConfig": {
     "access": "public"
   },
@@ -11,11 +11,11 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
+    "@concepta/nestjs-common": "^4.0.0-alpha.5",
     "@nestjs-modules/mailer": "^1.6.1",
     "@nestjs/common": "^8.0.8",
     "@nestjs/config": "^1.1.6",
-    "@nestjs/core": "^8.0.8",
-    "@rockts-org/nestjs-common": "^4.0.0-alpha.5"
+    "@nestjs/core": "^8.0.8"
   },
   "devDependencies": {
     "@nestjs/testing": "^8.0.8",

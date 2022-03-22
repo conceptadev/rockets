@@ -1,9 +1,9 @@
 {
-  "name": "@rockts-org/nestjs-auth-refresh",
+  "name": "@concepta/nestjs-auth-refresh",
   "version": "4.0.0-alpha.5",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "license": "MIT",
+  "license": "BSD-3-Clause",
   "publishConfig": {
     "access": "public"
   },
@@ -11,14 +11,14 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
+    "@concepta/nestjs-authentication": "^4.0.0-alpha.5",
+    "@concepta/nestjs-common": "^4.0.0-alpha.5",
+    "@concepta/nestjs-jwt": "^4.0.0-alpha.5",
     "@nestjs/common": "^8.0.2",
     "@nestjs/config": "^1.1.6",
     "@nestjs/core": "^8.0.2",
     "@nestjs/passport": "^8.0.1",
     "@nestjs/platform-fastify": "^8.0.6",
-    "@rockts-org/nestjs-authentication": "^4.0.0-alpha.5",
-    "@rockts-org/nestjs-common": "^4.0.0-alpha.5",
-    "@rockts-org/nestjs-jwt": "^4.0.0-alpha.5",
     "express": "^4.17.1",
     "fastify": "^3.25.3"
   },

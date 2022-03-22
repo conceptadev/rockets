@@ -1,6 +1,6 @@
 import { IsString } from 'class-validator';
 import { Exclude, Expose } from 'class-transformer';
-import { CrudResponseDto } from '@rockts-org/nestjs-crud';
+import { CrudResponseDto } from '@concepta/nestjs-crud';
 import { UserInterface } from '../interfaces/user.interface';
 
 /**

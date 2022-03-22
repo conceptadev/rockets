@@ -7,9 +7,9 @@ import {
   DeferExternalOptionsInterface,
   ModuleOptionsControllerInterface,
   negotiateController,
-} from '@rockts-org/nestjs-common';
-import { UserModule, UserService } from '@rockts-org/nestjs-user';
-import { PasswordModule } from '@rockts-org/nestjs-password';
+} from '@concepta/nestjs-common';
+import { UserModule, UserService } from '@concepta/nestjs-user';
+import { PasswordModule } from '@concepta/nestjs-password';
 import {
   AUTH_LOCAL_ISSUE_TOKEN_SERVICE_TOKEN,
   AUTH_LOCAL_MODULE_OPTIONS_TOKEN,
@@ -23,7 +23,7 @@ import {
   AuthenticationModule,
   IssueTokenService,
   IssueTokenServiceInterface,
-} from '@rockts-org/nestjs-authentication';
+} from '@concepta/nestjs-authentication';
 import { AuthLocalUserLookupServiceInterface } from './interfaces/auth-local-user-lookup-service.interface';
 import { AuthLocalUserLookupService } from './services/auth-local-user-lookup.service';
 import { DefaultAuthLocalUserLookupService } from './services/default-auth-local-user-lookup.service';

@@ -1,4 +1,4 @@
-import { VerifyTokenServiceInterface } from '@rockts-org/nestjs-authentication';
+import { VerifyTokenServiceInterface } from '@concepta/nestjs-authentication';
 
 export function createVerifyTokenCallback(
   verifyTokenService: VerifyTokenServiceInterface,

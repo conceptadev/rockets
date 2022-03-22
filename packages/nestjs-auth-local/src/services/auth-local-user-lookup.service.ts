@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { UserService } from '@rockts-org/nestjs-user';
-import { CredentialLookupInterface } from '@rockts-org/nestjs-authentication';
+import { UserService } from '@concepta/nestjs-user';
+import { CredentialLookupInterface } from '@concepta/nestjs-authentication';
 import { AuthLocalUserLookupServiceInterface } from '../interfaces/auth-local-user-lookup-service.interface';
 
 @Injectable()

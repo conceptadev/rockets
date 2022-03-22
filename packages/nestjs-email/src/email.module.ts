@@ -7,7 +7,7 @@ import {
   createConfigurableDynamicRootModule,
   deferExternal,
   DeferExternalOptionsInterface,
-} from '@rockts-org/nestjs-common';
+} from '@concepta/nestjs-common';
 import {
   EMAIL_MODULE_MAILER_SERVICE_TOKEN,
   EMAIL_MODULE_OPTIONS_TOKEN,

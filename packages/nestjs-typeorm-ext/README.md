@@ -28,14 +28,14 @@ An extension for TypeOrm.
 
 ## Installation
 
-with [**npm**](https://www.npmjs.com/package): `npm i @rockts-org/nestjs-typeorm-ext --save`  
-with [**yarn**](https://yarn.pm): `yarn add @rockts-org/nestjs-typeorm-ext`
+with [**npm**](https://www.npmjs.com/package): `npm i @concepta/nestjs-typeorm-ext --save`  
+with [**yarn**](https://yarn.pm): `yarn add @concepta/nestjs-typeorm-ext`
 
 ## Guide
 
 ### Prerequisites
 
-- [@rockts-org/nestjs-common](https://www.npmjs.com/package)
+- [@concepta/nestjs-common](https://www.npmjs.com/package)
 
 ### Basic Example
 

@@ -32,7 +32,7 @@ export class EventDispatchService {
    * ### Example
    * ```ts
    * import { Injectable } from '@nestjs/common';
-   * import { EventDispatchService, EventSync } from '@rockts-org/nestjs-events';
+   * import { EventDispatchService, EventSync } from '@concepta/nestjs-events';
    *
    * // event values type
    * export type MyEventValues = [{id: number}];
@@ -75,7 +75,7 @@ export class EventDispatchService {
    *
    * ```ts
    * import { Injectable } from '@nestjs/common';
-   * import { EventDispatchService, EventAsync } from '@rockts-org/nestjs-events';
+   * import { EventDispatchService, EventAsync } from '@concepta/nestjs-events';
    *
    * // expected object
    * export type MyObject = {id: number, active: boolean};

@@ -1,4 +1,4 @@
-import { JwtStrategyOptionsInterface } from '@rockts-org/nestjs-jwt';
+import { JwtStrategyOptionsInterface } from '@concepta/nestjs-jwt';
 
 export interface AuthRefreshSettingsInterface
   extends JwtStrategyOptionsInterface {}

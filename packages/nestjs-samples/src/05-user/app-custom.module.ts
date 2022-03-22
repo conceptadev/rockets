@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { CrudModule } from '@rockts-org/nestjs-crud';
-import { TypeOrmExtModule } from '@rockts-org/nestjs-typeorm-ext';
-import { UserModule } from '@rockts-org/nestjs-user';
+import { CrudModule } from '@concepta/nestjs-crud';
+import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
+import { UserModule } from '@concepta/nestjs-user';
 import { ConnectionOptions, getConnectionManager } from 'typeorm';
 import { CustomUserModule } from './custom-user/custom-user.module';
 import { CustomUserService } from './custom-user/custom-user.service';
