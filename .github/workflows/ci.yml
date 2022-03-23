@@ -1,10 +1,9 @@
 name: ci
 
 on:
-  push:
-    branches: [$default-branch, feature/workflow-trigger]
   pull_request:
-    branches: [$default-branch, feature/workflows]
+    types: [opened, synchronize, reopened]
+    branches: [$default-branch]
 
 jobs:
   build:
