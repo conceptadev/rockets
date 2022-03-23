@@ -2,8 +2,7 @@ name: ci
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
-    branches: [$default-branch]
+    branches: ['main']
 
 jobs:
   build:

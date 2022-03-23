@@ -53,7 +53,7 @@
     "test": "jest",
     "prepare": "husky install && yarn clean && yarn build",
     "test:watch": "jest --watch",
-    "test:cov": "jest --coverage --coverageReporters=text --coverageReporters=json --coverageReporters=cobertura --coverageReporters=json-summary --coverageReporters=lcov",
+    "test:cov": "jest --coverage --coverageReporters=text --coverageReporters=json --coverageReporters=json-summary --coverageReporters=lcov",
     "test:ci": "yarn test:cov --ci --reporters=default --reporters=jest-junit",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./jest.config-e2e.json",
