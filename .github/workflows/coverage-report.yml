@@ -12,12 +12,13 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: test-results
+      - name: Display structure of downloaded files
+        run: ls -R
       - name: Upload to Codecov
         uses: codecov/codecov-action@v2
         with:
-          directory: ./coverage
           fail_ci_if_error: true
-          files: ./cobertura-coverage.xml
+          files: ./coverage/cobertura-coverage.xml
           flags: unittests
           name: cobertura-coverage
           path_to_write_report: ./coverage/codecov_report.txt
