@@ -1,0 +1,24 @@
+name: coverage-report
+on:
+  workflow_run:
+    workflows: ['test-report']
+    types:
+      - completed
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: test-results
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          directory: ./coverage
+          fail_ci_if_error: true
+          files: ./cobertura-coverage.xml
+          flags: unittests
+          name: cobertura-coverage
+          path_to_write_report: ./coverage/codecov_report.txt
+          verbose: true
