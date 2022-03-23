@@ -14,7 +14,9 @@ jobs:
           name: JEST Tests
           path: 'junit.xml'
           reporter: jest-junit
-      - name: Display structure of downloaded files
+      - name: Unzip the artifact
+        run: unzip test-results.zip
+      - name: List structure of artifacts
         run: ls -R
       - name: Upload to Codecov
         uses: codecov/codecov-action@v2
