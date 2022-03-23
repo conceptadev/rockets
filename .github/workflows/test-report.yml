@@ -14,3 +14,13 @@ jobs:
           name: JEST Tests
           path: 'junit.xml'
           reporter: jest-junit
+      - name: Display structure of downloaded files
+        run: ls -R
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          fail_ci_if_error: true
+          files: ./coverage/cobertura-coverage.xml
+          flags: unittests
+          name: cobertura-coverage
+          verbose: true
