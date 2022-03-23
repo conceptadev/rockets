@@ -37,9 +37,4 @@ describe('Index', () => {
     expect(AccessControlAction).toEqual(expect.any(Object));
     expect(AccessControlFilterType).toEqual(expect.any(Object));
   });
-
-  // bad test check
-  it('Should fail', () => {
-    expect(1).toEqual(2);
-  });
 });
