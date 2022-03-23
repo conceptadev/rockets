@@ -8,6 +8,7 @@ jobs:
   report:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - uses: dorny/test-reporter@v1
         with:
           artifact: test-results
