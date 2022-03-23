@@ -14,11 +14,10 @@ jobs:
           name: JEST Tests
           path: 'junit.xml'
           reporter: jest-junit
-      - name: Unzip the artifact
-        run: unzip test-results.zip
-      - name: List structure of artifacts
-        run: ls -R
-      - name: Upload to Coveralls
-        uses: coverallsapp/github-action@master
+      - run: unzip test-results.zip
+      - uses: ArtiomTr/jest-coverage-report-action@v2
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          skip-step: all
+          annotations: coverage
+          coverage-file: ./coverage/coverage-final.json
+          base-coverage-file: ./coverage/coverage-final.json
