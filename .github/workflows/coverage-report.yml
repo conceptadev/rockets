@@ -15,8 +15,6 @@ jobs:
         with:
           workflow: ci.yml
           name: test-results
-      - name: Unzip the artifacts
-        run: unzip test-results.zip
       - name: Upload to Codecov
         uses: codecov/codecov-action@v2
         with:
