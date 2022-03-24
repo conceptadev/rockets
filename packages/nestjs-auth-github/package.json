@@ -1,6 +1,6 @@
 {
   "name": "@concepta/nestjs-auth-github",
-  "version": "4.0.0-alpha.5",
+  "version": "4.0.0-alpha.6",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "UNLICENSED",
@@ -12,7 +12,7 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
-    "@concepta/nestjs-authentication": "^4.0.0-alpha.5",
+    "@concepta/nestjs-authentication": "^4.0.0-alpha.6",
     "@nestjs/common": "^8.0.2",
     "@nestjs/config": "^1.1.6",
     "@nestjs/core": "^8.0.2",
