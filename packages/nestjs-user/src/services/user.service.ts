@@ -7,6 +7,8 @@ import { User } from '../entities/user.entity';
 import { UserServiceInterface } from '../interfaces/user-service.interface';
 import { UserPasswordInterface } from '../interfaces/user-password.interface';
 import { UserPasswordEncryptedInterface } from '../interfaces/user-password-encrypted.interface';
+import { UserCreatableInterface } from '../interfaces/user-creatable.interface';
+import { UserEntityInterface } from '../interfaces/user-entity.interface';
 
 /**
  * User service
@@ -59,6 +61,19 @@ export class UserService implements UserServiceInterface {
 
     // all done
     return encryptedDto;
+  }
+
+  /**
+   * Create user
+   * @param user 
+   * @returns 
+   */
+  async create(user: UserCreatableInterface): Promise<UserEntityInterface> {
+    const userEntity = await this.userRepo.create(user);
+    
+    if (!userEntity) return null;
+
+    return userEntity;
   }
 
   // async getUserByUserId(id: string): Promise<User> {

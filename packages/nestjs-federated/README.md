@@ -1,0 +1,1 @@
+# Rockets NestJS federated credentials
