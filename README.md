@@ -1,6 +1,6 @@
-[![NodeJS](https://img.shields.io/badge/Node-100%-green?style=for-the-badge&logo=nodedotjs)](https://nestjs.org)
-[![NestJS](https://img.shields.io/badge/NestJS-100%-red?style=for-the-badge&logo=nestjs)](https://nodejs.com)
-[![Typescript](https://img.shields.io/badge/Typescript-100%-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org)
+[![NodeJS](https://img.shields.io/badge/Node-100%25-green?style=for-the-badge&logo=nodedotjs)](https://nestjs.org)
+[![NestJS](https://img.shields.io/badge/NestJS-100%25-red?style=for-the-badge&logo=nestjs)](https://nodejs.com)
+[![Typescript](https://img.shields.io/badge/Typescript-100%25-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org)
 
 [![GitHub Build](https://img.shields.io/github/workflow/status/conceptadev/rockets/ci-pr-test?logo=github)](https://github.com/conceptadev/rockets/actions/workflows/ci-pr-test.yml)
 [![Codecov](https://codecov.io/gh/conceptadev/rockets/branch/main/graph/badge.svg?token=QXUHV1RP5N)](https://codecov.io/gh/conceptadev/rockets)
