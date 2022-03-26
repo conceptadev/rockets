@@ -28,4 +28,6 @@ jobs:
         if: success() || failure()
         with:
           name: test-results
-          path: ./
+          path: |
+            junit.xml
+            coverage
