@@ -71,5 +71,8 @@
   },
   "dependencies": {
     "class-transformer": "^0.5.1"
+  },
+  "resolutions": {
+    "**/@angular-devkit/schematics-cli/minimist": "^1.2.6"
   }
 }

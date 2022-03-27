@@ -20,7 +20,7 @@
     "@devniel/nestjs-typeorm-testing": "^0.1.5-alpha",
     "@nestjs/testing": "^8.0.8",
     "jest-mock-extended": "^2.0.4",
-    "sqlite3": "^5.0.2",
+    "sqlite3": "npm:@vscode/sqlite3@^5.0.7",
     "typeorm": "^0.2.41"
   },
   "peerDependencies": {
