@@ -22,9 +22,6 @@ jobs:
   coverage-report:
     runs-on: ubuntu-latest
     steps:
-      - name: Get PR Number
-        id: vars
-        run: echo ::set-output name=pr_num::$(cat pr_num.txt)
       - name: Checkout
         uses: actions/checkout@v2
         with:
@@ -34,6 +31,9 @@ jobs:
         with:
           workflow: ci-pr-test.yml
           name: test-results
+      - name: Get PR Number
+        id: vars
+        run: echo ::set-output name=pr_num::$(cat pr_num.txt)
       - name: Upload to Codecov
         uses: codecov/codecov-action@v2
         with:
