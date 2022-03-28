@@ -35,4 +35,4 @@ jobs:
         uses: codecov/codecov-action@v2
         with:
           files: ./coverage/coverage-final.json
-          override_commit: ${{ github.event.workflow_run.head_sha }}
+          verbose: true
