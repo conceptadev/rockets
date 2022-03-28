@@ -61,4 +61,13 @@ module.exports = {
       mode: 'typescript',
     },
   },
+  overrides: [
+    {
+      files: ['*.json'],
+      parser: 'jsonc-eslint-parser',
+      parserOptions: {
+        jsonSyntax: 'JSON',
+      },
+    },
+  ],
 };
