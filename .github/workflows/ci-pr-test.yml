@@ -14,12 +14,6 @@ jobs:
         node-version: [16.x]
 
     steps:
-      - name: Save the PR number in an artifact
-        shell: bash
-        env:
-          PR_NUM: ${{ github.event.number }}
-        run: |
-          echo $PR_NUM > ./pr_num.txt
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
@@ -29,6 +23,12 @@ jobs:
         run: yarn --frozen-lockfile
       - name: Unit tests
         run: yarn test:ci
+      - name: Save the PR number in an artifact
+        shell: bash
+        env:
+          PR_NUM: ${{ github.event.number }}
+        run: |
+          echo $PR_NUM > ./pr_num.txt
       - name: Upload test-results artifact
         uses: actions/upload-artifact@v2
         if: success() || failure()
