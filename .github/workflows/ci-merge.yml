@@ -1,6 +1,6 @@
 name: ci-merge
 on:
-  merge:
+  push:
   workflow_dispatch:
     branches: ['main']
 jobs:
