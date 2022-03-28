@@ -22,6 +22,9 @@ jobs:
   coverage-report:
     runs-on: ubuntu-latest
     steps:
+      - name: Get PR Number
+        id: vars
+        run: echo ::set-output name=pr_num::$(cat pr_num.txt)
       - name: Checkout
         uses: actions/checkout@v2
         with:
@@ -35,4 +38,5 @@ jobs:
         uses: codecov/codecov-action@v2
         with:
           files: ./coverage/coverage-final.json
+          override_pr: ${{ steps.vars.outputs.pr_num }}
           verbose: true
