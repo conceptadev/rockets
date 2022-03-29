@@ -1,16 +1,16 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import {
-  JwtIssueService,
-  JwtModule,
-  JwtVerifyService,
-} from '@concepta/nestjs-jwt';
-import {
   AsyncModuleConfig,
   createConfigurableDynamicRootModule,
   deferExternal,
   DeferExternalOptionsInterface,
 } from '@concepta/nestjs-common';
+import {
+  JwtIssueService,
+  JwtModule,
+  JwtVerifyService,
+} from '@concepta/nestjs-jwt';
 import { authenticationDefaultConfig } from './config/authentication-default.config';
 import {
   AUTHENTICATION_MODULE_OPTIONS_TOKEN,
@@ -18,12 +18,10 @@ import {
   AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN,
 } from './authentication.constants';
 import { AuthenticationOptionsInterface } from './interfaces/authentication-options.interface';
-import { UserLookupService } from './services/user-lookup.service';
 import { IssueTokenService } from './services/issue-token.service';
 import { DefaultIssueTokenService } from './services/default-issue-token.service';
 import { VerifyTokenService } from './services/verify-token.service';
 import { DefaultVerifyTokenService } from './services/default-verify-token.service';
-import { DefaultUserLookupService } from './services/default-user-lookup.service';
 
 /**
  * Authentication Module to handle authentication and password encryption.
@@ -93,14 +91,12 @@ import { DefaultUserLookupService } from './services/default-user-lookup.service
  */
 @Module({
   providers: [
-    DefaultUserLookupService,
     DefaultIssueTokenService,
     DefaultVerifyTokenService,
     JwtIssueService,
     JwtVerifyService,
   ],
   exports: [
-    UserLookupService,
     IssueTokenService,
     VerifyTokenService,
     JwtIssueService,
@@ -129,14 +125,6 @@ export class AuthenticationModule extends createConfigurableDynamicRootModule<
         options: AuthenticationOptionsInterface,
         defaultSettings: ConfigType<typeof authenticationDefaultConfig>,
       ) => options.settings ?? defaultSettings,
-    },
-    {
-      provide: UserLookupService,
-      inject: [AUTHENTICATION_MODULE_OPTIONS_TOKEN, DefaultUserLookupService],
-      useFactory: async (
-        options: AuthenticationOptionsInterface,
-        defaultService: DefaultUserLookupService,
-      ) => options.userLookupService ?? defaultService,
     },
     {
       provide: IssueTokenService,

@@ -15,6 +15,7 @@ export class TestUserRepository extends Repository<User> {
   private users: User[] = [
     {
       id: '1',
+      email: 'first_user@dispostable.com',
       username: 'first_user',
       // Encrypted for AS12378
       password: '$2b$10$9y97gOLiusyKnzu7LRdMmOCVpp/xwddaa8M6KtgenvUDao5I.8mJS',
@@ -22,6 +23,7 @@ export class TestUserRepository extends Repository<User> {
     },
     {
       id: '2',
+      email: 'second_user@dispostable.com',
       username: 'second_user',
       // Encrypted for AS12378
       password: '$2b$10$9y97gOLiusyKnzu7LRdMmOCVpp/xwddaa8M6KtgenvUDao5I.8mJS',
@@ -39,7 +41,9 @@ export class TestUserRepository extends Repository<User> {
       | FindConditions<User>,
   ): Promise<User | undefined> {
     return this.users.find(
-      (user) => user.username === optionsOrConditions['username'],
+      (user) =>
+        user?.id === optionsOrConditions['id'] ||
+        user?.username === optionsOrConditions['username'],
     );
   }
 }

@@ -11,7 +11,6 @@ import { PhotoFactory } from '../__fixtures__/photo/photo.factory';
 describe('AppController (e2e)', () => {
   describe('Authentication', () => {
     let app: INestApplication;
-    let photoId: number;
 
     const photoFactory = new PhotoFactory();
 
@@ -33,11 +32,7 @@ describe('AppController (e2e)', () => {
     it('GET /photo?limit=10', async () => {
       const response = await supertest(app.getHttpServer())
         .get('/photo?limit=10')
-        .expect(200)
-        .then((data) => {
-          photoId = data.body[0].id;
-          return data;
-        });
+        .expect(200);
 
       expect(response.body).toBeInstanceOf(Array);
       expect(response.body.length).toEqual(10);
@@ -57,12 +52,15 @@ describe('AppController (e2e)', () => {
       expect(response.body.pageCount).toEqual(2);
       expect(response.body.count).toEqual(10);
       expect(response.body.total).toEqual(15);
-      expect(typeof response.body.data[0].id).toEqual('number');
+      expect(typeof response.body.data[0].id).toEqual('string');
     });
 
-    it('GET /photo/1', async () => {
+    it('GET /photo/:id', async () => {
+      const photo = await photoFactory.create();
+      expect(photo).toBeInstanceOf(Photo);
+
       const response = await supertest(app.getHttpServer())
-        .get(`/photo/${photoId}`)
+        .get(`/photo/${photo.id}`)
         .expect(200);
 
       expect(response.body).toBeInstanceOf(Object);
@@ -78,7 +76,7 @@ describe('AppController (e2e)', () => {
         .expect(201);
 
       expect(response.body).toBeInstanceOf(Object);
-      expect(typeof response.body.id).toEqual('number');
+      expect(typeof response.body.id).toEqual('string');
     });
 
     it('POST /photo/bulk', async () => {
@@ -95,60 +93,81 @@ describe('AppController (e2e)', () => {
       expect(response.body.length).toEqual(5);
     });
 
-    it('PATCH /photo/1', async () => {
+    it('PATCH /photo/:id', async () => {
       const photo = await photoFactory.create();
       expect(photo).toBeInstanceOf(Photo);
-      delete photo.id;
       photo.views = 37;
 
-      const response = await supertest(app.getHttpServer())
-        .patch('/photo/1')
-        .send(photo)
-        .expect(200);
+      const { id, ...rest } = { ...photo };
 
-      delete response.body.id;
+      const response = await supertest(app.getHttpServer())
+        .patch(`/photo/${id}`)
+        .send(rest)
+        .expect(200);
 
       expect(response.body).toMatchObject(photo);
       expect(response.body.views).toEqual(37);
     });
 
-    it('PUT /photo/1', async () => {
+    it('PUT /photo/:id', async () => {
       const photo = await photoFactory.create();
       expect(photo).toBeInstanceOf(Photo);
-      delete photo.id;
+
+      const { id, ...rest } = { ...photo };
 
       const response = await supertest(app.getHttpServer())
-        .put('/photo/1')
-        .send(photo)
+        .put(`/photo/${id}`)
+        .send(rest)
         .expect(200);
-
-      delete response.body.id;
 
       expect(response.body).toMatchObject(photo);
     });
 
     it('DELETE /photo/1', async () => {
-      await supertest(app.getHttpServer()).delete('/photo/1').expect(200);
+      const photo = await photoFactory.create();
+      expect(photo).toBeInstanceOf(Photo);
 
-      await supertest(app.getHttpServer()).get('/photo/1').expect(404);
+      await supertest(app.getHttpServer())
+        .delete(`/photo/${photo.id}`)
+        .expect(200);
+
+      await supertest(app.getHttpServer())
+        .get(`/photo/${photo.id}`)
+        .expect(404);
     });
 
     it('DELETE /photo/soft/1', async () => {
-      await supertest(app.getHttpServer()).delete('/photo/soft/1').expect(200);
+      const photo = await photoFactory.create();
+      expect(photo).toBeInstanceOf(Photo);
 
-      await supertest(app.getHttpServer()).get('/photo/1').expect(404);
+      await supertest(app.getHttpServer())
+        .delete(`/photo/soft/${photo.id}`)
+        .expect(200);
+
+      await supertest(app.getHttpServer())
+        .get(`/photo/${photo.id}`)
+        .expect(404);
     });
 
     it('PATCH /photo/recover/1', async () => {
-      await supertest(app.getHttpServer()).delete('/photo/soft/1').expect(200);
-
-      await supertest(app.getHttpServer()).get('/photo/1').expect(404);
+      const photo = await photoFactory.create();
+      expect(photo).toBeInstanceOf(Photo);
 
       await supertest(app.getHttpServer())
-        .patch('/photo/recover/1')
+        .delete(`/photo/soft/${photo.id}`)
         .expect(200);
 
-      await supertest(app.getHttpServer()).get('/photo/1').expect(200);
+      await supertest(app.getHttpServer())
+        .get(`/photo/${photo.id}`)
+        .expect(404);
+
+      await supertest(app.getHttpServer())
+        .patch(`/photo/recover/${photo.id}`)
+        .expect(200);
+
+      await supertest(app.getHttpServer())
+        .get(`/photo/${photo.id}`)
+        .expect(200);
     });
   });
 });

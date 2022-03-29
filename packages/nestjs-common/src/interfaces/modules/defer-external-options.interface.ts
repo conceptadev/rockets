@@ -1,4 +1,4 @@
-import { OptionsInterface } from './options.interface';
+import { OptionsInterface } from '../options/options.interface';
 
 export interface DeferExternalOptionsInterface extends OptionsInterface {
   timeout?: number;

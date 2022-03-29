@@ -1,9 +1,6 @@
-import { Repository } from 'typeorm';
-import { Inject, Injectable, Type } from '@nestjs/common';
+import { Injectable, Type } from '@nestjs/common';
 import { PasswordStorageService } from '@concepta/nestjs-password';
 import { plainToInstance } from 'class-transformer';
-import { USER_MODULE_USER_CUSTOM_REPO_TOKEN } from '../user.constants';
-import { User } from '../entities/user.entity';
 import { UserServiceInterface } from '../interfaces/user-service.interface';
 import { UserPasswordInterface } from '../interfaces/user-password.interface';
 import { UserPasswordEncryptedInterface } from '../interfaces/user-password-encrypted.interface';
@@ -18,20 +15,7 @@ export class UserService implements UserServiceInterface {
    *
    * @param userRepo instance of the user repo
    */
-  constructor(
-    @Inject(USER_MODULE_USER_CUSTOM_REPO_TOKEN)
-    public userRepo: Repository<User>,
-    private passwordStorageService: PasswordStorageService,
-  ) {}
-
-  /**
-   * Get user for the given username.
-   *
-   * @param username the username
-   */
-  async getUser(username: string): Promise<User> {
-    return this.userRepo.findOne({ username });
-  }
+  constructor(private passwordStorageService: PasswordStorageService) {}
 
   /**
    * Encrypt the user's credentials.
@@ -60,8 +44,4 @@ export class UserService implements UserServiceInterface {
     // all done
     return encryptedDto;
   }
-
-  // async getUserByUserId(id: string): Promise<User> {
-  //   return this.userRepo.findOne({ id });
-  // }
 }

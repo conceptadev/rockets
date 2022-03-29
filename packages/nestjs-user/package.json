@@ -17,7 +17,7 @@
     "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.7",
     "@nestjs/common": "^8.0.8",
     "@nestjs/config": "^1.1.6",
-    "@nestjs/mapped-types": "^1.0.1"
+    "@nestjs/swagger": "^5.2.0"
   },
   "devDependencies": {
     "@faker-js/faker": "^6.0.0-alpha.6",

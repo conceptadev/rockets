@@ -13,6 +13,12 @@ export class User implements UserEntityInterface {
   id: string;
 
   /**
+   * Email
+   */
+  @Column()
+  email: string;
+
+  /**
    * Username
    */
   @Column()

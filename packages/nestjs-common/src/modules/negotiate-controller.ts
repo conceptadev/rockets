@@ -1,5 +1,5 @@
 import { DynamicModule } from '@nestjs/common';
-import { ModuleOptionsControllerInterface } from '../interfaces/module-options-controller.interface';
+import { ModuleOptionsControllerInterface } from '../interfaces/modules/module-options-controller.interface';
 
 /**
  * Negotiate the addition of controllers to a dynamic module.
