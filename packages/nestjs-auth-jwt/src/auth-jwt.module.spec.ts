@@ -3,7 +3,7 @@ import { AuthenticationModule } from '@concepta/nestjs-authentication';
 import { JwtModule } from '@concepta/nestjs-jwt';
 import { AuthJwtModule } from './auth-jwt.module';
 import { AuthJwtStrategy } from './auth-jwt.strategy';
-import { UserService } from './__fixtures__/user/user.service';
+import { UserLookupService } from './__fixtures__/user/user-lookup.service';
 
 describe('AuthLocalModuleTest', () => {
   //const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiaWF0IjoxNjQzMjk5MTk2fQ.1MDIk4b427f-Ju4jtxCg_Jd1NqE5OOzYKK90qnZEkik";
@@ -15,7 +15,7 @@ describe('AuthLocalModuleTest', () => {
   it('is controller defined', async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
-        AuthJwtModule.register({ userLookupService: new UserService() }),
+        AuthJwtModule.register({ userLookupService: new UserLookupService() }),
         JwtModule.register(),
         AuthenticationModule.register(),
       ],

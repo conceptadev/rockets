@@ -6,7 +6,7 @@ export class PhotoFactory extends Factory<Photo> {
   protected async definition(): Promise<Photo> {
     const photo = new Photo();
 
-    photo.id = Faker.datatype.number();
+    photo.id = Faker.datatype.uuid();
     photo.filename = Faker.random.word() + '.jpg';
     photo.name = Faker.random.word();
     photo.description = Faker.random.words();

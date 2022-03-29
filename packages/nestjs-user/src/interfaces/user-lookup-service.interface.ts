@@ -2,9 +2,11 @@ import {
   LookupEmailInterface,
   LookupReferenceInterface,
   LookupSubjectInterface,
+  LookupUsernameInterface,
 } from '@concepta/nestjs-common';
 
-export interface AuthGithubUserLookupServiceInterface
+export interface UserLookupServiceInterface
   extends LookupReferenceInterface,
     LookupEmailInterface,
-    LookupSubjectInterface {}
+    LookupSubjectInterface,
+    LookupUsernameInterface {}

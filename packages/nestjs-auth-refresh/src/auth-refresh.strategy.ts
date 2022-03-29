@@ -1,5 +1,4 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { IdentityInterface } from '@concepta/nestjs-common';
 import {
   PassportStrategyFactory,
   VerifyTokenServiceInterface,
@@ -12,9 +11,9 @@ import {
   REFRESH_TOKEN_MODULE_SETTINGS_TOKEN,
 } from './auth-refresh.constants';
 import { AuthRefreshSettingsInterface } from './interfaces/auth-refresh-settings.interface';
+import { AuthRefreshUserLookupServiceInterface } from './interfaces/auth-refresh-user-lookup-service.interface';
 import { AuthRefreshPayloadInterface } from './interfaces/auth-refresh-payload.interface';
 import { createVerifyTokenCallback } from './utils/create-verify-token-callback.util';
-import { AuthRefreshUserLookupServiceInterface } from './interfaces/auth-refresh-user-lookup-service.interface';
 
 @Injectable()
 export class AuthRefreshStrategy extends PassportStrategyFactory<JwtStrategy>(
@@ -39,19 +38,12 @@ export class AuthRefreshStrategy extends PassportStrategyFactory<JwtStrategy>(
   }
 
   /**
-   * Validate the user id from the verified token
+   * Validate the user sub from the verified token
    *
-   * @param username The username to authenticate
-   * @param password
-   * @returns
+   * @param payload
    */
-
-  async validate(
-    payload: AuthRefreshPayloadInterface,
-  ): Promise<IdentityInterface> {
-    const { sub } = payload;
-
-    const user = await this.userLookupService.getById(sub);
+  async validate(payload: AuthRefreshPayloadInterface) {
+    const user = await this.userLookupService.bySubject(payload.sub);
 
     if (!user) {
       throw new UnauthorizedException();

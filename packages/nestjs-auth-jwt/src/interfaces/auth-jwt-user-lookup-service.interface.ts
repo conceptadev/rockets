@@ -1,5 +1,4 @@
-import { IdentityInterface } from '@concepta/nestjs-common';
+import { LookupSubjectInterface } from '@concepta/nestjs-common';
 
-export interface AuthJwtUserLookupServiceInterface {
-  getById(username: IdentityInterface['id']): Promise<IdentityInterface>;
-}
+export interface AuthJwtUserLookupServiceInterface
+  extends LookupSubjectInterface {}

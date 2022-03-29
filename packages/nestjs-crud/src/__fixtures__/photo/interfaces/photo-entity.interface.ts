@@ -1,5 +1,5 @@
 export interface PhotoEntityInterface {
-  id: number;
+  id: string;
   name: string;
   description: string;
   filename: string;

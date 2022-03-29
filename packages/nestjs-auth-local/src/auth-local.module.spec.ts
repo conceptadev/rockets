@@ -1,12 +1,12 @@
+import { mock } from 'jest-mock-extended';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthenticationModule } from '@concepta/nestjs-authentication';
 import { JwtModule } from '@concepta/nestjs-jwt';
 import { PasswordModule } from '@concepta/nestjs-password';
-import { mock } from 'jest-mock-extended';
 import { AuthLocalController } from './auth-local.controller';
 import { AuthLocalModule } from './auth-local.module';
-import { UserService } from './__fixtures__/user/user.service';
 import { AuthLocalCredentialsInterface } from './interfaces/auth-local-credentials.interface';
+import { UserLookupService } from './__fixtures__/user/user-lookup.service';
 
 describe('AuthLocalModuleTest', () => {
   afterEach(async () => {
@@ -15,9 +15,11 @@ describe('AuthLocalModuleTest', () => {
 
   it('is controller defined', async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [UserService],
+      providers: [UserLookupService],
       imports: [
-        AuthLocalModule.register({ userLookupService: new UserService() }),
+        AuthLocalModule.register({
+          userLookupService: new UserLookupService(),
+        }),
         AuthenticationModule.register(),
         JwtModule.register(),
         PasswordModule.register(),
