@@ -1,5 +1,5 @@
 import { IdentityInterface } from '@concepta/nestjs-common';
 
 export interface AuthGithubUserLookupServiceInterface {
-  getById(username: IdentityInterface['id']): Promise<IdentityInterface>;
+  getById(id: IdentityInterface['id']): Promise<IdentityInterface>;
 }
