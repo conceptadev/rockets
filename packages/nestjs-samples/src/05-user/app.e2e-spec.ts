@@ -43,7 +43,11 @@ describe('AppController (e2e)', () => {
     it('POST /user', async () => {
       await supertest(app.getHttpServer())
         .post('/user')
-        .send({ username: 'user1', password: 'pass1' })
+        .send({
+          username: 'user1',
+          email: 'user1@dispostable.com',
+          password: 'pass1',
+        })
         .expect(201);
     });
 

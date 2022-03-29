@@ -13,6 +13,7 @@
   ],
   "dependencies": {
     "@concepta/nestjs-authentication": "^4.0.0-alpha.7",
+    "@concepta/nestjs-common": "^4.0.0-alpha.7",
     "@nestjs/common": "^8.0.2",
     "@nestjs/config": "^1.1.6",
     "@nestjs/core": "^8.0.2",

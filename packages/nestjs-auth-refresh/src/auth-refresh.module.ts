@@ -6,7 +6,14 @@ import {
   deferExternal,
   DeferExternalOptionsInterface,
 } from '@concepta/nestjs-common';
-
+import {
+  AuthenticationModule,
+  IssueTokenService,
+  IssueTokenServiceInterface,
+  VerifyTokenService,
+  VerifyTokenServiceInterface,
+} from '@concepta/nestjs-authentication';
+import { JwtModule } from '@concepta/nestjs-jwt';
 import {
   AUTH_REFRESH_ISSUE_TOKEN_SERVICE_TOKEN,
   AUTH_REFRESH_USER_LOOKUP_SERVICE_TOKEN,
@@ -15,28 +22,16 @@ import {
   REFRESH_TOKEN_MODULE_SETTINGS_TOKEN,
 } from './auth-refresh.constants';
 import { authRefreshDefaultConfig } from './config/auth-refresh-default.config';
-
 import { AuthRefreshOptionsInterface } from './interfaces/auth-refresh-options.interface';
 
-import {
-  AuthenticationModule,
-  IssueTokenService,
-  IssueTokenServiceInterface,
-  UserLookupService,
-  VerifyTokenService,
-  VerifyTokenServiceInterface,
-} from '@concepta/nestjs-authentication';
-
 import { AuthRefreshController } from './auth-refresh.controller';
-import { JwtModule } from '@concepta/nestjs-jwt';
-
 import { AuthRefreshStrategy } from './auth-refresh.strategy';
 
 /**
  * Auth local module
  */
 @Module({
-  providers: [UserLookupService, AuthRefreshStrategy],
+  providers: [AuthRefreshStrategy],
   controllers: [AuthRefreshController],
 })
 export class AuthRefreshModule extends createConfigurableDynamicRootModule<
@@ -84,16 +79,14 @@ export class AuthRefreshModule extends createConfigurableDynamicRootModule<
     },
     {
       provide: AUTH_REFRESH_USER_LOOKUP_SERVICE_TOKEN,
-      inject: [REFRESH_TOKEN_MODULE_OPTIONS_TOKEN, UserLookupService],
-      useFactory: async (
-        options: AuthRefreshOptionsInterface,
-        defaultService: UserLookupService,
-      ) => options?.userLookupService ?? defaultService,
+      inject: [REFRESH_TOKEN_MODULE_OPTIONS_TOKEN],
+      useFactory: async (options: AuthRefreshOptionsInterface) =>
+        options?.userLookupService,
     },
   ],
   exports: [AUTH_REFRESH_ISSUE_TOKEN_SERVICE_TOKEN],
 }) {
-  static register(options: AuthRefreshOptionsInterface = {}) {
+  static register(options: AuthRefreshOptionsInterface) {
     const module = AuthRefreshModule.forRoot(AuthRefreshModule, options);
 
     return module;
@@ -102,10 +95,7 @@ export class AuthRefreshModule extends createConfigurableDynamicRootModule<
   static registerAsync(
     options: AsyncModuleConfig<AuthRefreshOptionsInterface> = {},
   ) {
-    const module = AuthRefreshModule.forRootAsync(AuthRefreshModule, {
-      useFactory: () => ({}),
-      ...options,
-    });
+    const module = AuthRefreshModule.forRootAsync(AuthRefreshModule, options);
 
     return module;
   }

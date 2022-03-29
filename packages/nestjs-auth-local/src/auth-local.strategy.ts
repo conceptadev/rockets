@@ -1,27 +1,27 @@
 import { Strategy } from 'passport-local';
+import { validateOrReject } from 'class-validator';
 import {
   BadRequestException,
   Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { CredentialLookupInterface } from '@concepta/nestjs-authentication';
+import { IdentityInterface } from '@concepta/nestjs-common';
+import { PassportStrategyFactory } from '@concepta/nestjs-authentication';
 import { PasswordStorageService } from '@concepta/nestjs-password';
 import {
   AUTH_LOCAL_MODULE_SETTINGS_TOKEN,
+  AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN,
   AUTH_LOCAL_STRATEGY_NAME,
 } from './auth-local.constants';
-import { PassportStrategyFactory } from '@concepta/nestjs-authentication';
 import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.interface';
-import { AuthLocalUserLookupService } from './services/auth-local-user-lookup.service';
-import { validateOrReject } from 'class-validator';
+import { AuthLocalUserLookupServiceInterface } from './interfaces/auth-local-user-lookup-service.interface';
 
 /**
  * Define the Local strategy using passport.
  *
  * Local strategy is used to authenticate a user using a username and password.
  * The field username and password can be configured using the `usernameField` and `passwordField` properties.
- * after register LocalStrategy in the module, use GenericAuthGuard(LOCAL_STRATEGY_NAME) in the controller endpoint to authenticate the user.
  */
 @Injectable()
 export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
@@ -37,7 +37,8 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
   constructor(
     @Inject(AUTH_LOCAL_MODULE_SETTINGS_TOKEN)
     private settings: AuthLocalSettingsInterface,
-    private userLookupService: AuthLocalUserLookupService,
+    @Inject(AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN)
+    private userLookupService: AuthLocalUserLookupServiceInterface,
     private passwordService: PasswordStorageService,
   ) {
     super({
@@ -51,13 +52,12 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
    * from the request body
    *
    * @param username The username to authenticate
-   * @param password
-   * @returns
+   * @param password The plain text password
    */
   async validate(
     username: string,
     password: string,
-  ): Promise<CredentialLookupInterface> {
+  ): Promise<IdentityInterface> {
     // break out the fields
     const { usernameField, passwordField } = this.settings;
 
@@ -72,7 +72,7 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
       throw new BadRequestException(e);
     }
 
-    const user = await this.userLookupService.getUser(dto[usernameField]);
+    const user = await this.userLookupService.getByUsername(dto[usernameField]);
 
     if (!user) {
       throw new UnauthorizedException();

@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthenticationModule } from '@concepta/nestjs-authentication';
-import { CrudModule } from '@concepta/nestjs-crud';
 import { JwtModule } from '@concepta/nestjs-jwt';
 import { PasswordModule } from '@concepta/nestjs-password';
-import { User, UserCrudService, UserModule } from '@concepta/nestjs-user';
 import { mock } from 'jest-mock-extended';
 import { AuthLocalController } from './auth-local.controller';
 import { AuthLocalModule } from './auth-local.module';
+import { UserService } from './__fixtures__/user/user.service';
+import { AuthLocalCredentialsInterface } from './interfaces/auth-local-credentials.interface';
 
 describe('AuthLocalModuleTest', () => {
   afterEach(async () => {
@@ -15,20 +15,17 @@ describe('AuthLocalModuleTest', () => {
 
   it('is controller defined', async () => {
     const module: TestingModule = await Test.createTestingModule({
+      providers: [UserService],
       imports: [
-        AuthLocalModule.register(),
+        AuthLocalModule.register({ userLookupService: new UserService() }),
         AuthenticationModule.register(),
         JwtModule.register(),
         PasswordModule.register(),
-        CrudModule.register(),
-        UserModule.register(),
       ],
     })
       .overrideProvider('USER_MODULE_USER_ENTITY_REPO_TOKEN')
-      .useValue(mock<User>())
+      .useValue(mock<AuthLocalCredentialsInterface>())
       .overrideProvider('USER_MODULE_USER_CUSTOM_REPO_TOKEN')
-      .useValue({})
-      .overrideProvider(UserCrudService)
       .useValue({})
       .compile();
 

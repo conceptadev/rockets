@@ -43,6 +43,9 @@ export class UserFactory<
     // add to used usernames
     uniqueUsernames[user.username] = true;
 
+    // fake email address
+    user.email = Faker.internet.email();
+
     // return the new user
     return user;
   }

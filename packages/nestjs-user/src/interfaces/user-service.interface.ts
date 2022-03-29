@@ -1,7 +1,14 @@
+import {
+  IdentityInterface,
+  IdentityEmailInterface,
+  IdentityUsernameInterface,
+} from '@concepta/nestjs-common';
 import { UserInterface } from './user.interface';
 
 export interface UserServiceInterface {
-  getUser(...args: string[]): Promise<UserInterface>;
-  // getUserByUsername?(username: string): Promise<UserInterface>;
-  // getUserByUserId?(id: string): Promise<UserInterface>;
+  getById(id: IdentityInterface['id']): Promise<UserInterface>;
+  getByEmail(email: IdentityEmailInterface['email']): Promise<UserInterface>;
+  getByUsername(
+    username: IdentityUsernameInterface['username'],
+  ): Promise<UserInterface>;
 }
