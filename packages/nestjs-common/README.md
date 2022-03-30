@@ -33,13 +33,13 @@ milliseconds that each module should timeout at.
 
 Your .env file:
 
-```bash
+```zsh
 # global deferred timeout
 ROCKETS_MODULE_DEFERRED_TIMEOUT=5000
 ```
 
 Your shell:
 
-```bash
+```zsh
 $ export ROCKETS_MODULE_DEFERRED_TIMEOUT=5000;
 ```

@@ -86,13 +86,16 @@ export class CrudSerializeInterceptor implements NestInterceptor {
 
   protected toInstance(
     type: Type,
-    targetObject: object,
+    targetObject: ResponseType,
     options?: ClassTransformOptions,
-  ): object {
+  ): Type {
     return plainToInstance(type, targetObject, options);
   }
 
-  protected toPlain(instance: object, options?: ClassTransformOptions): object {
+  protected toPlain(
+    instance: Type,
+    options?: ClassTransformOptions,
+  ): Record<string, unknown> {
     return instanceToPlain(instance, options);
   }
 
