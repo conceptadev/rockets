@@ -27,6 +27,7 @@ module.exports = {
     '**/.eslintrc.spec.js',
     '**/tsconfig.json',
     '**/tsconfig.eslint.json',
+    '**/commitlint.config.js',
   ],
   rules: {
     'no-unused-vars': 'off',
