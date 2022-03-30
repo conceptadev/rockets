@@ -32,8 +32,8 @@ A list of all the necessary Rockets libraries that the TypeOrmExt Module Sample 
 ### Setup a new Nest.js project
 
 ```zsh
-$ npm i -g @nestjs/cli
-$ nest new project-name
+npm i -g @nestjs/cli
+nest new project-name
 ```
 
 ### Prerequisites
