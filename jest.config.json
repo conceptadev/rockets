@@ -1,19 +1,20 @@
 {
-  "moduleFileExtensions": [
-    "js",
-    "json",
-    "ts"
-  ],
+  "moduleFileExtensions": ["js", "json", "ts"],
   "globals": {
     "ts-jest": {
       "tsconfig": "tsconfig.jest.json"
     }
   },
+  "coverageThreshold": {
+    "global": {
+      "branches": 0,
+      "functions": 0,
+      "lines": 0,
+      "statements": 0
+    }
+  },
   "testRegex": ".*\\.spec\\.ts$",
-  "testPathIgnorePatterns": [
-    "/node_modules/",
-    "/dist/"
-  ],
+  "testPathIgnorePatterns": ["/node_modules/", "/dist/"],
   "transform": {
     "^.+\\.ts$": "ts-jest"
   },
@@ -24,15 +25,11 @@
     "!packages/**/*.e2e-spec.ts",
     "!packages/nestjs-samples/src/**/main.ts",
     "!**/node_modules/**",
+    "!**/__mocks__/**",
     "!**/__stubs__/**",
-    "!**/__fixture__/**"
+    "!**/__fixtures__/**"
   ],
   "coverageDirectory": "coverage",
-  "coverageReporters": [
-    "html",
-    "text",
-    "text-summary",
-    "cobertura"
-  ],
+  "coverageReporters": ["html", "text", "text-summary", "cobertura"],
   "testEnvironment": "node"
 }

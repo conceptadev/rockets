@@ -5,7 +5,7 @@ import {
   AuthenticationJwtResponseInterface,
   AuthGuard,
   AuthUser,
-  UserIdentityDto,
+  AuthenticatedUserInterface,
 } from '@concepta/nestjs-authentication';
 import { AUTH_JWT_REFRESH_STRATEGY_NAME } from './auth-refresh.constants';
 
@@ -25,7 +25,7 @@ export class AuthRefreshController {
   @UseGuards(AuthGuard(AUTH_JWT_REFRESH_STRATEGY_NAME))
   @Post()
   async refresh(
-    @AuthUser() user: UserIdentityDto,
+    @AuthUser() user: AuthenticatedUserInterface,
   ): Promise<AuthenticationJwtResponseInterface> {
     return this.issueTokenService.responsePayload(user.id);
   }

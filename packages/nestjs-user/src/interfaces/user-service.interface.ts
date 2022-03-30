@@ -1,7 +1,10 @@
-import { UserInterface } from './user.interface';
+import { Type } from '@nestjs/common';
+import { UserPasswordEncryptedInterface } from './user-password-encrypted.interface';
+import { UserPasswordInterface } from './user-password.interface';
 
 export interface UserServiceInterface {
-  getUser(...args: string[]): Promise<UserInterface>;
-  // getUserByUsername?(username: string): Promise<UserInterface>;
-  // getUserByUserId?(id: string): Promise<UserInterface>;
+  encryptPassword<T extends UserPasswordInterface>(
+    dto: T,
+    storableDto: Type<T & UserPasswordEncryptedInterface>,
+  ): Promise<T & UserPasswordEncryptedInterface>;
 }

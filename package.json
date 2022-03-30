@@ -1,6 +1,6 @@
 {
   "name": "root",
-  "version": "4.0.0-alpha.5",
+  "version": "4.0.0-alpha.7",
   "license": "UNLICENSED",
   "private": true,
   "workspaces": {
@@ -32,6 +32,7 @@
     "jest": "27.4.7",
     "jest-junit": "^13.0.0",
     "jest-mock-extended": "^2.0.4",
+    "jsonc-eslint-parser": "^2.1.0",
     "lerna": "^3.22.1",
     "prettier": "^2.3.2",
     "reflect-metadata": "^0.1.13",
@@ -49,11 +50,11 @@
     "clean": "./node_modules/.bin/rimraf packages/*/dist packages/*/tsconfig.tsbuildinfo",
     "build": "./node_modules/.bin/tsc --build",
     "watch": "yarn build && ./node_modules/.bin/tsc --build --watch",
-    "lint": "eslint \"packages/*/src/**/*.{ts,js,json}\" --fix",
+    "lint": "eslint \"./*.json\" \"packages/*/src/**/*.{ts,js,json}\" --fix",
     "test": "jest",
     "prepare": "husky install && yarn clean && yarn build",
     "test:watch": "jest --watch",
-    "test:cov": "jest --coverage --coverageReporters=text --coverageReporters=json --coverageReporters=cobertura --coverageReporters=json-summary --coverageReporters=lcov",
+    "test:cov": "jest --coverage --coverageReporters=text --coverageReporters=json --coverageReporters=json-summary --coverageReporters=lcov",
     "test:ci": "yarn test:cov --ci --reporters=default --reporters=jest-junit",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./jest.config-e2e.json",
@@ -71,5 +72,8 @@
   },
   "dependencies": {
     "class-transformer": "^0.5.1"
+  },
+  "resolutions": {
+    "**/@angular-devkit/schematics-cli/minimist": "^1.2.6"
   }
 }

@@ -1,72 +1,91 @@
+[![NPM Latest](https://img.shields.io/npm/v/@concepta/nestjs-typeorm-ext)](https://www.npmjs.com/package/@concepta/nestjs-typeorm-ext)
+[![NPM Alpha](https://img.shields.io/npm/v/@concepta/nestjs-typeorm-ext/alpha)](https://www.npmjs.com/package/@concepta/nestjs-nestjscontrol)
+[![NPM Downloads](https://img.shields.io/npm/dw/@conceptadev/nestjs-typeorm-ext)](https://www.npmjs.com/package/@concepta/nestjs-typeorm-ext)
+
+[![GitHub Open Issues](https://img.shields.io/github/issues/conceptadev/rockets/nestjs-typeorm-ext)](https://github.com/conceptadev/rockets/labels/nestjs-typeorm-ext)
+[![GitHub Closed Issues](https://img.shields.io/github/issues-closed/conceptadev/rockets/nestjs-typeorm-ext)](https://github.com/conceptadev/rockets/labels/nestjs-typeorm-ext)
+[![GitHub Open PRs](https://img.shields.io/github/issues-pr/conceptadev/rockets/nestjs-typeorm-ext)](https://github.com/conceptadev/rockets/labels/nestjs-typeorm-ext)
+[![GitHub Closed PRs](https://img.shields.io/github/issues-pr-closed/conceptadev/rockets/nestjs-typeorm-ext)](https://github.com/conceptadev/rockets/labels/nestjs-typeorm-ext)
+
 # Rockets NestJS TypeOrm Extended
 
-<p align="center">
-    <a href="https://github.com"><strong>Explore the docs »</strong></a>
-    <br />
-    <br />
-  </p>
-</div>
+Extremely powerful extension of the NestJS TypeOrm module that allows your
+dynamic modules to accept drop-in replacements of custom entities
+and repositories at registration time.
 
-## Description
+## Overview
 
-An extension for TypeOrm.
+The TypeOrm Ext module provides a powerful wrapper around the
+[@nestjs/typeorm](https://www.npmjs.com/package/@nestjs/typeorm) module.
 
-<table>
-  <thead>
-    <tr>
-      <th><a href="#installation">Install</a></th>
-      <th><a href="#guide">Examples</a></th>
-      <th><a href="#changelog">Changelog</a></th>
-    </tr>
-  </thead>
-</table>
+While still using the identical configuration options of the TypeOrm module,
+you can increase the extensibility of your custom module by designing it
+to accept custom entity and repository overrides.
 
-## Core Features
-
-- TypeOrm Wrapper
-- Create custom connections
+This pattern allows you to publish modules that are loosely coupled to their
+own entity and repository definitions. This enables implementations of your
+module to define their own concrete data storage.
 
 ## Installation
 
-with [**npm**](https://www.npmjs.com/package): `npm i @concepta/nestjs-typeorm-ext --save`  
-with [**yarn**](https://yarn.pm): `yarn add @concepta/nestjs-typeorm-ext`
+`yarn add @concepta/nestjs-typeorm-ext`
 
-## Guide
+## Module Design
 
-### Prerequisites
+Designing your module to use this extension is fairly straight forward, but a bit too verbose
+for this readme.
 
-- [@concepta/nestjs-common](https://www.npmjs.com/package)
+To see how this was implemented in our
+[UserModule](https://github.com/conceptadev/rockets/blob/main/packages/nestjs-user)
+please refer to that module's
+[user.module.ts](https://github.com/conceptadev/rockets/blob/main/packages/nestjs-user/src/user.module.ts)
 
-### Basic Example
+## Usage
 
-You can find a basic usage of the TypeormExt Module in this [Sample](https://github.com)
+app.module.ts
 
-### Unit Tests
+```ts
+// ...
+import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
+import { UserModule } from '@concepta/nestjs-user';
+import { CustomUserRepository } from 'path/to/custom-user.repository';
+import { CustomUser } from 'path/to/custom-user.entity';
 
-```bash
-
-yarn test
-
+@Module({
+  imports: [
+    TypeOrmExtModule.register({
+      type: 'postgres',
+      url: 'postgres://user:pass@localhost:5432/postgres',
+    }),
+    UserModule.register({
+      orm: {
+        entities: {
+          user: { useClass: CustomUser },
+        },
+        repositories: {
+          userRepository: { useClass: CustomUserRepository },
+        },
+      },
+    }),
+  ],
+})
+export class AppModule {}
 ```
 
-### E2E Tests
+## Configuration
 
-```bash
+### Connection Options
 
-yarn test:e2e
+The module options are identical the the NestJS TypeOrm module.
 
-```
+### Test Mode
 
-## Changelog
+> Currently test mode is only known to work for `postgres`.
 
-See [CHANGELOG](https://github.com).
+If you register the module using `registerAsync()` you can pass the `testMode: true` option.
+This magically replaces the connection with a fake connection factory that overrides
+the database driver and query runner to mock a database connection and effectively
+"do nothing" whenever the query runner is called.
 
-## Documentation
-
-You can read the full [**API reference**](https://github.com)
-
-And you can see an implementation sample at [Event Module Sample](https://github.com)
-
-📝 License
-
-Copyright © 2022 Rockets.
+Test mode disables all queries, so you cannot test results, but you can test that methods
+are being called with the expected arguments without TypeOrm complaining about no connection.

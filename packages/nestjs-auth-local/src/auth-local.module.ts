@@ -8,37 +8,28 @@ import {
   ModuleOptionsControllerInterface,
   negotiateController,
 } from '@concepta/nestjs-common';
-import { UserModule, UserService } from '@concepta/nestjs-user';
-import { PasswordModule } from '@concepta/nestjs-password';
-import {
-  AUTH_LOCAL_ISSUE_TOKEN_SERVICE_TOKEN,
-  AUTH_LOCAL_MODULE_OPTIONS_TOKEN,
-  AUTH_LOCAL_MODULE_SETTINGS_TOKEN,
-} from './auth-local.constants';
-import { authLocalDefaultConfig } from './config/auth-local-default.config';
-
-import { AuthLocalOptionsInterface } from './interfaces/auth-local-options.interface';
-import { AuthLocalStrategy } from './auth-local.strategy';
 import {
   AuthenticationModule,
   IssueTokenService,
   IssueTokenServiceInterface,
 } from '@concepta/nestjs-authentication';
-import { AuthLocalUserLookupServiceInterface } from './interfaces/auth-local-user-lookup-service.interface';
-import { AuthLocalUserLookupService } from './services/auth-local-user-lookup.service';
-import { DefaultAuthLocalUserLookupService } from './services/default-auth-local-user-lookup.service';
+import { PasswordModule } from '@concepta/nestjs-password';
+import {
+  AUTH_LOCAL_ISSUE_TOKEN_SERVICE_TOKEN,
+  AUTH_LOCAL_MODULE_OPTIONS_TOKEN,
+  AUTH_LOCAL_MODULE_SETTINGS_TOKEN,
+  AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+} from './auth-local.constants';
+import { authLocalDefaultConfig } from './config/auth-local-default.config';
+import { AuthLocalOptionsInterface } from './interfaces/auth-local-options.interface';
+import { AuthLocalStrategy } from './auth-local.strategy';
 import { AuthLocalController } from './auth-local.controller';
 
 /**
  * Auth local module
  */
 @Module({
-  providers: [
-    DefaultAuthLocalUserLookupService,
-    AuthLocalStrategy,
-    UserService,
-  ],
-  exports: [AuthLocalUserLookupService],
+  providers: [AuthLocalStrategy],
   controllers: [AuthLocalController],
 })
 export class AuthLocalModule extends createConfigurableDynamicRootModule<
@@ -55,10 +46,6 @@ export class AuthLocalModule extends createConfigurableDynamicRootModule<
       timeoutMessage:
         'AuthLocalModule requires PasswordModule to be registered in your application.',
     }),
-    UserModule.deferred({
-      timeoutMessage:
-        'AuthLocalModule requires UserModule to be registered in your application.',
-    }),
   ],
   providers: [
     {
@@ -70,15 +57,10 @@ export class AuthLocalModule extends createConfigurableDynamicRootModule<
       ) => options?.settings ?? defaultSettings,
     },
     {
-      provide: AuthLocalUserLookupService,
-      inject: [
-        AUTH_LOCAL_MODULE_OPTIONS_TOKEN,
-        DefaultAuthLocalUserLookupService,
-      ],
-      useFactory: async (
-        options: AuthLocalOptionsInterface,
-        defaultService: AuthLocalUserLookupServiceInterface,
-      ) => options.userLookupService ?? defaultService,
+      provide: AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+      inject: [AUTH_LOCAL_MODULE_OPTIONS_TOKEN],
+      useFactory: async (options: AuthLocalOptionsInterface) =>
+        options.userLookupService,
     },
     {
       provide: AUTH_LOCAL_ISSUE_TOKEN_SERVICE_TOKEN,
@@ -91,7 +73,7 @@ export class AuthLocalModule extends createConfigurableDynamicRootModule<
   ],
   exports: [AUTH_LOCAL_ISSUE_TOKEN_SERVICE_TOKEN],
 }) {
-  static register(options: AuthLocalOptionsInterface = {}) {
+  static register(options: AuthLocalOptionsInterface) {
     const module = AuthLocalModule.forRoot(AuthLocalModule, options);
 
     negotiateController(module, options);
@@ -103,10 +85,7 @@ export class AuthLocalModule extends createConfigurableDynamicRootModule<
     options: AsyncModuleConfig<AuthLocalOptionsInterface> &
       ModuleOptionsControllerInterface,
   ) {
-    const module = AuthLocalModule.forRootAsync(AuthLocalModule, {
-      useFactory: () => ({}),
-      ...options,
-    });
+    const module = AuthLocalModule.forRootAsync(AuthLocalModule, options);
 
     negotiateController(module, options);
 

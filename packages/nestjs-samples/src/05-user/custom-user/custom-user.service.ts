@@ -1,5 +1,7 @@
-import { Injectable } from '@nestjs/common';
-import { UserInterface, UserServiceInterface } from '@concepta/nestjs-user';
+import { Injectable, Type } from '@nestjs/common';
+import { UserServiceInterface } from '@concepta/nestjs-user';
+import { UserPasswordEncryptedInterface } from '@concepta/nestjs-user/src/interfaces/user-password-encrypted.interface';
+import { UserPasswordInterface } from '@concepta/nestjs-user/src/interfaces/user-password.interface';
 
 @Injectable()
 export class CustomUserService implements UserServiceInterface {
@@ -8,7 +10,12 @@ export class CustomUserService implements UserServiceInterface {
    */
   hello? = 'world';
 
-  async getUser(username: string): Promise<UserInterface> {
-    throw new Error(`Method not implemented, cant get ${username}.`);
+  encryptPassword<T extends UserPasswordInterface>(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    dto: T,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    storableDto: Type<T & UserPasswordEncryptedInterface>,
+  ): Promise<T & UserPasswordEncryptedInterface> {
+    throw new Error('Method not implemented.');
   }
 }

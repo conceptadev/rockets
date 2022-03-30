@@ -1,4 +1,4 @@
-import { IsBoolean, IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsString, IsUUID } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
 import { CrudResponseDto } from '../../../dto/crud-response.dto';
@@ -11,8 +11,8 @@ export class PhotoDto
 {
   @ApiProperty()
   @Expose()
-  @IsNumber()
-  id: number;
+  @IsUUID()
+  id: string;
 
   @ApiProperty()
   @Expose()

@@ -31,16 +31,16 @@ A list of all the necessary Rockets libraries that the TypeOrmExt Module Sample 
 
 ### Setup a new Nest.js project
 
-```bash
-$ npm i -g @nestjs/cli
-$ nest new project-name
+```zsh
+npm i -g @nestjs/cli
+nest new project-name
 ```
 
 ### Prerequisites
 
 These libraries are necessary for the TypeOrm Module to run:
 
-```bash
+```zsh
 # install necessary 3rd party libraries
 yarn add @concepta/nestjs-common @concepta/nestjs-common @concepta/nestjs-auth-local @concepta/nestjs-authentication @concepta/nestjs-email @concepta/nestjs-event @concepta/nestjs-jwt @concepta/nestjs-logger @concepta/nestjs-password @concepta/nestjs-typeorm-ext @concepta/nestjs-user
 ```

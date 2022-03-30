@@ -13,6 +13,8 @@ import {
   createEntityRepositoryProvider,
   TypeOrmExtModule,
 } from '@concepta/nestjs-typeorm-ext';
+import { CrudModule } from '@concepta/nestjs-crud';
+import { PasswordStorageService } from '@concepta/nestjs-password';
 import { UserRepository } from './user.repository';
 import { userDefaultConfig } from './config/user-default.config';
 import { User } from './entities/user.entity';
@@ -28,16 +30,22 @@ import {
 import { UserController } from './user.controller';
 import { UserServiceInterface } from './interfaces/user-service.interface';
 import { DefaultUserService } from './services/default-user.service';
+import { UserLookupService } from './services/user-lookup.service';
 import { UserCrudService } from './services/user-crud.service';
-import { CrudModule } from '@concepta/nestjs-crud';
-import { PasswordStorageService } from '@concepta/nestjs-password';
+import { UserLookupServiceInterface } from './interfaces/user-lookup-service.interface';
+import { DefaultUserLookupService } from './services/default-user-lookup.service';
 
 /**
  * User Module
  */
 @Module({
-  providers: [DefaultUserService, UserCrudService, PasswordStorageService],
-  exports: [UserService, UserCrudService],
+  providers: [
+    DefaultUserService,
+    DefaultUserLookupService,
+    UserCrudService,
+    PasswordStorageService,
+  ],
+  exports: [UserService, UserLookupService, UserCrudService],
   controllers: [UserController],
 })
 export class UserModule extends createConfigurableDynamicRootModule<
@@ -67,6 +75,14 @@ export class UserModule extends createConfigurableDynamicRootModule<
         options: UserOptionsInterface,
         defaultService: UserServiceInterface,
       ) => options.userService ?? defaultService,
+    },
+    {
+      provide: UserLookupService,
+      inject: [USER_MODULE_OPTIONS_TOKEN, DefaultUserLookupService],
+      useFactory: async (
+        options: UserOptionsInterface,
+        defaultService: UserLookupServiceInterface,
+      ) => options.userLookupService ?? defaultService,
     },
     createEntityRepositoryProvider(USER_MODULE_USER_ENTITY_REPO_TOKEN, 'user'),
     createCustomRepositoryProvider(

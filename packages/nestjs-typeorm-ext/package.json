@@ -1,6 +1,6 @@
 {
   "name": "@concepta/nestjs-typeorm-ext",
-  "version": "4.0.0-alpha.5",
+  "version": "4.0.0-alpha.7",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "UNLICENSED",
@@ -11,7 +11,7 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
-    "@concepta/nestjs-common": "^4.0.0-alpha.5",
+    "@concepta/nestjs-common": "^4.0.0-alpha.7",
     "@nestjs/common": "^8.0.8",
     "@nestjs/config": "^1.1.6",
     "@nestjs/typeorm": "^8.0.2"
@@ -20,7 +20,7 @@
     "@devniel/nestjs-typeorm-testing": "^0.1.5-alpha",
     "@nestjs/testing": "^8.0.8",
     "jest-mock-extended": "^2.0.4",
-    "sqlite3": "^5.0.2",
+    "sqlite3": "npm:@vscode/sqlite3@^5.0.7",
     "typeorm": "^0.2.41"
   },
   "peerDependencies": {

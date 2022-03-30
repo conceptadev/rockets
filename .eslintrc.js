@@ -27,6 +27,7 @@ module.exports = {
     '**/.eslintrc.spec.js',
     '**/tsconfig.json',
     '**/tsconfig.eslint.json',
+    '**/commitlint.config.js',
   ],
   rules: {
     'no-unused-vars': 'off',
@@ -61,4 +62,13 @@ module.exports = {
       mode: 'typescript',
     },
   },
+  overrides: [
+    {
+      files: ['*.json'],
+      parser: 'jsonc-eslint-parser',
+      parserOptions: {
+        jsonSyntax: 'JSON',
+      },
+    },
+  ],
 };

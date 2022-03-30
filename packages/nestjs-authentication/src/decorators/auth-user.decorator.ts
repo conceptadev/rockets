@@ -1,4 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { AuthenticatedUserInterface } from '../interfaces/authenticated-user.interface';
 
 /**
  * Decorator that takes a property name as key, and returns the
@@ -13,7 +14,7 @@ import { createParamDecorator, ExecutionContext } from '@nestjs/common';
  * ```
  */
 export const AuthUser = createParamDecorator(
-  (data: string, ctx: ExecutionContext) => {
+  (data: string, ctx: ExecutionContext): AuthenticatedUserInterface => {
     const request = ctx.switchToHttp().getRequest();
     const user = request.user;
 

@@ -1,12 +1,11 @@
 import { Strategy } from 'passport-github';
 import { PassportStrategy } from '@nestjs/passport';
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import {
-  AuthenticationJwtResponseInterface,
-  UserLookupServiceInterface,
-} from '@concepta/nestjs-authentication';
+import { IdentityReferenceInterface } from '@concepta/nestjs-common';
+import { AuthenticationJwtResponseInterface } from '@concepta/nestjs-authentication';
 import { GITHUB_MODULE_OPTIONS_TOKEN } from './config/github.config';
 import { GithubOptionsInterface } from './interfaces/github-options.interface';
+import { AuthGithubUserLookupServiceInterface } from './interfaces/auth-github-user-lookup-service.interface';
 
 @Injectable()
 export class GithubStrategy extends PassportStrategy(
@@ -16,7 +15,7 @@ export class GithubStrategy extends PassportStrategy(
   constructor(
     @Inject(GITHUB_MODULE_OPTIONS_TOKEN)
     private config: GithubOptionsInterface,
-    private userService: UserLookupServiceInterface,
+    private userLookupService: AuthGithubUserLookupServiceInterface,
   ) {
     super({
       clientID: config.clientId,
@@ -28,9 +27,9 @@ export class GithubStrategy extends PassportStrategy(
   async validate(
     accessToken,
     refreshToken,
-    profile,
+    profile: IdentityReferenceInterface,
   ): Promise<AuthenticationJwtResponseInterface> {
-    const user = await this.userService.getUser(profile);
+    const user = await this.userLookupService.byRef(profile.id);
 
     if (!user || !refreshToken) {
       throw new UnauthorizedException();

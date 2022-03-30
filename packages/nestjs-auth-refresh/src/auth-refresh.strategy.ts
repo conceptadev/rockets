@@ -1,11 +1,9 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-
 import {
   PassportStrategyFactory,
-  UserIdentityInterface,
-  UserLookupServiceInterface,
   VerifyTokenServiceInterface,
 } from '@concepta/nestjs-authentication';
+import { JwtStrategy, JwtStrategyOptionsInterface } from '@concepta/nestjs-jwt';
 import {
   AUTH_JWT_REFRESH_STRATEGY_NAME,
   AUTH_REFRESH_USER_LOOKUP_SERVICE_TOKEN,
@@ -13,8 +11,8 @@ import {
   REFRESH_TOKEN_MODULE_SETTINGS_TOKEN,
 } from './auth-refresh.constants';
 import { AuthRefreshSettingsInterface } from './interfaces/auth-refresh-settings.interface';
+import { AuthRefreshUserLookupServiceInterface } from './interfaces/auth-refresh-user-lookup-service.interface';
 import { AuthRefreshPayloadInterface } from './interfaces/auth-refresh-payload.interface';
-import { JwtStrategy, JwtStrategyOptionsInterface } from '@concepta/nestjs-jwt';
 import { createVerifyTokenCallback } from './utils/create-verify-token-callback.util';
 
 @Injectable()
@@ -23,7 +21,7 @@ export class AuthRefreshStrategy extends PassportStrategyFactory<JwtStrategy>(
   AUTH_JWT_REFRESH_STRATEGY_NAME,
 ) {
   @Inject(AUTH_REFRESH_USER_LOOKUP_SERVICE_TOKEN)
-  private userLookupService: UserLookupServiceInterface;
+  private userLookupService: AuthRefreshUserLookupServiceInterface;
 
   constructor(
     @Inject(REFRESH_TOKEN_MODULE_SETTINGS_TOKEN)
@@ -40,19 +38,12 @@ export class AuthRefreshStrategy extends PassportStrategyFactory<JwtStrategy>(
   }
 
   /**
-   * Validate the user id from the verified token
+   * Validate the user sub from the verified token
    *
-   * @param username The username to authenticate
-   * @param password
-   * @returns
+   * @param payload
    */
-
-  async validate(
-    payload: AuthRefreshPayloadInterface,
-  ): Promise<UserIdentityInterface> {
-    const { sub } = payload;
-
-    const user = await this.userLookupService.getUser(sub);
+  async validate(payload: AuthRefreshPayloadInterface) {
+    const user = await this.userLookupService.bySubject(payload.sub);
 
     if (!user) {
       throw new UnauthorizedException();
