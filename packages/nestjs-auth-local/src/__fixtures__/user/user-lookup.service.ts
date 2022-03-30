@@ -1,4 +1,4 @@
-import { IdentityUsername } from '@concepta/nestjs-common';
+import { ReferenceUsername } from '@concepta/nestjs-common';
 import { Injectable } from '@nestjs/common';
 import { AuthLocalCredentialsInterface } from '../../interfaces/auth-local-credentials.interface';
 import { AuthLocalUserLookupServiceInterface } from '../../interfaces/auth-local-user-lookup-service.interface';
@@ -6,7 +6,7 @@ import { AuthLocalUserLookupServiceInterface } from '../../interfaces/auth-local
 @Injectable()
 export class UserLookupService implements AuthLocalUserLookupServiceInterface {
   async byUsername(
-    username: IdentityUsername,
+    username: ReferenceUsername,
   ): Promise<AuthLocalCredentialsInterface> {
     throw new Error(`Method not implemented, cant get ${username}.`);
   }

@@ -6,21 +6,21 @@ export {
 export { OptionsInterface } from './interfaces/options/options.interface';
 
 export {
-  IdentityEmail,
-  IdentityReference,
-  IdentitySubject,
-  IdentityUsername,
-} from './identity/identity.types';
+  ReferenceId,
+  ReferenceEmail,
+  ReferenceSubject,
+  ReferenceUsername,
+} from './references/reference.types';
 
-export { IdentityEmailInterface } from './interfaces/identity/identity-email.interface';
-export { IdentityReferenceInterface } from './interfaces/identity/identity-reference.interface';
-export { IdentityUsernameInterface } from './interfaces/identity/identity-username.interface';
-export { IdentitySubjectInterface } from './interfaces/identity/identity-subject.interface';
+export { ReferenceIdInterface } from './interfaces/references/reference-id.interface';
+export { ReferenceEmailInterface } from './interfaces/references/reference-email.interface';
+export { ReferenceUsernameInterface } from './interfaces/references/reference-username.interface';
+export { ReferenceSubjectInterface } from './interfaces/references/reference-subject.interface';
 
-export { LookupEmailInterface } from './interfaces/lookup/lookup-email.interface';
-export { LookupReferenceInterface } from './interfaces/lookup/lookup-reference.interface';
-export { LookupSubjectInterface } from './interfaces/lookup/lookup-subject.interface';
-export { LookupUsernameInterface } from './interfaces/lookup/lookup-username.interface';
+export { LookupIdInterface } from './interfaces/references/lookup/lookup-id.interface';
+export { LookupEmailInterface } from './interfaces/references/lookup/lookup-email.interface';
+export { LookupSubjectInterface } from './interfaces/references/lookup/lookup-subject.interface';
+export { LookupUsernameInterface } from './interfaces/references/lookup/lookup-username.interface';
 
 export { ModuleOptionsControllerInterface } from './interfaces/modules/module-options-controller.interface';
 export { ModuleOptionsSettingsInterface } from './interfaces/modules/module-options-settings.interface';

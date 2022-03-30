@@ -13,7 +13,7 @@ export class UserService implements UserServiceInterface {
   /**
    * Constructor
    *
-   * @param userRepo instance of the user repo
+   * @param passwordStorageService instance of the password storage service
    */
   constructor(private passwordStorageService: PasswordStorageService) {}
 

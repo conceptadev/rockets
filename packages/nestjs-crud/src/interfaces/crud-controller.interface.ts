@@ -1,9 +1,9 @@
 import { CreateManyDto } from '@nestjsx/crud';
-import { IdentityReferenceInterface } from '@concepta/nestjs-common';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import { CrudRequestInterface } from '../interfaces/crud-request.interface';
 import { CrudResponsePaginatedInterface } from './crud-response-paginated.interface';
 
-export interface CrudControllerInterface<T extends IdentityReferenceInterface> {
+export interface CrudControllerInterface<T extends ReferenceIdInterface> {
   getMany?: (
     crudRequest: CrudRequestInterface,
   ) => Promise<CrudResponsePaginatedInterface<T> | T[]>;

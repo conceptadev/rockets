@@ -1,12 +1,12 @@
 import {
   LookupEmailInterface,
-  LookupReferenceInterface,
+  LookupIdInterface,
   LookupSubjectInterface,
   LookupUsernameInterface,
 } from '@concepta/nestjs-common';
 
 export interface UserLookupServiceInterface
-  extends LookupReferenceInterface,
+  extends LookupIdInterface,
     LookupEmailInterface,
     LookupSubjectInterface,
     LookupUsernameInterface {}

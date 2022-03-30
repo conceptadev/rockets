@@ -24,7 +24,7 @@ export class UserLookupService implements UserLookupServiceInterface {
    *
    * @param id the id
    */
-  async byRef(id: string): Promise<UserEntityInterface> {
+  async byId(id: string): Promise<UserEntityInterface> {
     return this.userRepo.findOne({ id });
   }
 

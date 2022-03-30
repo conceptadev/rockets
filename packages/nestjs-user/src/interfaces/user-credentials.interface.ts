@@ -1,8 +1,8 @@
-import { IdentityUsernameInterface } from '@concepta/nestjs-common';
+import { ReferenceUsernameInterface } from '@concepta/nestjs-common';
 import { UserPasswordEncryptedInterface } from './user-password-encrypted.interface';
 
 export interface UserCredentialsInterface
-  extends IdentityUsernameInterface,
+  extends ReferenceUsernameInterface,
     UserPasswordEncryptedInterface {
   username: string;
 }
