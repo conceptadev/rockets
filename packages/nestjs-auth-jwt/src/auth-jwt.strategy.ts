@@ -1,5 +1,5 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { IdentityReferenceInterface } from '@concepta/nestjs-common';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import {
   PassportStrategyFactory,
   VerifyTokenServiceInterface,
@@ -45,7 +45,7 @@ export class AuthJwtStrategy extends PassportStrategyFactory<JwtStrategy>(
    */
   async validate(
     payload: AuthJwtPayloadInterface,
-  ): Promise<IdentityReferenceInterface> {
+  ): Promise<ReferenceIdInterface> {
     const user = this.userLookupService.bySubject(payload.sub);
 
     if (user) {

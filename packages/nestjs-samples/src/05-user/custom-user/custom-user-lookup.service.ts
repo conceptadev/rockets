@@ -9,7 +9,7 @@ export class CustomUserLookupService implements UserLookupServiceInterface {
    */
   hello? = 'world';
 
-  async byRef(id: string): Promise<UserInterface> {
+  async byId(id: string): Promise<UserInterface> {
     throw new Error(`Method not implemented, cant get ${id}.`);
   }
 

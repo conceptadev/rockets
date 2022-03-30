@@ -16,7 +16,7 @@ import {
 } from 'class-transformer';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { IdentityReferenceInterface } from '@concepta/nestjs-common';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import { CrudResponseDto } from '../dto/crud-response.dto';
 import { CrudResponsePaginatedDto } from '../dto/crud-response-paginated.dto';
 import { CrudSerializationOptionsInterface } from '../interfaces/crud-serialization-options.interface';
@@ -26,8 +26,7 @@ import { CrudReflectionService } from '../services/crud-reflection.service';
 import { CRUD_MODULE_SETTINGS_TOKEN } from '../crud.constants';
 
 type ResponseType =
-  | (PlainLiteralObject &
-      CrudResultPaginatedInterface<IdentityReferenceInterface>)
+  | (PlainLiteralObject & CrudResultPaginatedInterface<ReferenceIdInterface>)
   | Array<PlainLiteralObject>;
 
 export class CrudSerializeInterceptor implements NestInterceptor {

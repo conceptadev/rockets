@@ -1,7 +1,7 @@
 import { Strategy } from 'passport-github';
 import { PassportStrategy } from '@nestjs/passport';
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { IdentityReferenceInterface } from '@concepta/nestjs-common';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import { AuthenticationJwtResponseInterface } from '@concepta/nestjs-authentication';
 import { GITHUB_MODULE_OPTIONS_TOKEN } from './config/github.config';
 import { GithubOptionsInterface } from './interfaces/github-options.interface';
@@ -27,9 +27,9 @@ export class GithubStrategy extends PassportStrategy(
   async validate(
     accessToken,
     refreshToken,
-    profile: IdentityReferenceInterface,
+    profile: ReferenceIdInterface,
   ): Promise<AuthenticationJwtResponseInterface> {
-    const user = await this.userLookupService.byRef(profile.id);
+    const user = await this.userLookupService.byId(profile.id);
 
     if (!user || !refreshToken) {
       throw new UnauthorizedException();

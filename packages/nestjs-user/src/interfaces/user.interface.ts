@@ -1,12 +1,12 @@
 import {
-  IdentityEmailInterface,
-  IdentityReferenceInterface,
+  ReferenceEmailInterface,
+  ReferenceIdInterface,
 } from '@concepta/nestjs-common';
 import { UserCredentialsInterface } from './user-credentials.interface';
 
 export interface UserInterface
-  extends IdentityReferenceInterface,
-    IdentityEmailInterface,
+  extends ReferenceIdInterface,
+    ReferenceEmailInterface,
     Pick<UserCredentialsInterface, 'username'> {
   id: string;
 }

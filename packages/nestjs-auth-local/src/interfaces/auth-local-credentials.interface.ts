@@ -1,6 +1,6 @@
 import {
-  IdentityReferenceInterface,
-  IdentityUsernameInterface,
+  ReferenceIdInterface,
+  ReferenceUsernameInterface,
 } from '@concepta/nestjs-common';
 import { PasswordStorageInterface } from '@concepta/nestjs-password';
 
@@ -8,6 +8,6 @@ import { PasswordStorageInterface } from '@concepta/nestjs-password';
  * Credentials Interface
  */
 export interface AuthLocalCredentialsInterface
-  extends IdentityReferenceInterface,
-    IdentityUsernameInterface,
+  extends ReferenceIdInterface,
+    ReferenceUsernameInterface,
     Pick<PasswordStorageInterface, 'password' | 'salt'> {}

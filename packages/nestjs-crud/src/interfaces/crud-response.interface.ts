@@ -1,6 +1,6 @@
-import { IdentityReferenceInterface } from '@concepta/nestjs-common';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 export interface CrudResponseInterface<
-  T extends IdentityReferenceInterface = IdentityReferenceInterface,
+  T extends ReferenceIdInterface = ReferenceIdInterface,
 > {
   id: T['id'];
 }
