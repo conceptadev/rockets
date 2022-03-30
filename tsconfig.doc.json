@@ -1,4 +1,11 @@
 {
   "include": ["./packages/*/src/**/*.ts"],
-  "exclude": ["./packages/*/src/**/*.spec.ts", "./packages/nestjs-samples/**"]
+  "exclude": [
+    "**/__mocks__/**",
+    "**/__stubs__/**",
+    "**/__fixtures__/**",
+    "./packages/*/src/**/*.spec.ts",
+    "./packages/*/src/**/*.e2e-spec.ts",
+    "./packages/nestjs-samples/**"
+  ]
 }
