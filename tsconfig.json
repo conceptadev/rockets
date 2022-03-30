@@ -67,6 +67,6 @@
     },
     {
       "path": "packages/nestjs-swagger-ui"
-    },
+    }
   ]
 }
