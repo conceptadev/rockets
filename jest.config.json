@@ -30,6 +30,6 @@
     "!**/__fixtures__/**"
   ],
   "coverageDirectory": "coverage",
-  "coverageReporters": ["html", "text", "text-summary", "cobertura"],
+  "coverageReporters": ["text", "text-summary", "json", "json-summary", "lcovonly"],
   "testEnvironment": "node"
 }
