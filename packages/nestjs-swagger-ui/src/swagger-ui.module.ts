@@ -7,12 +7,15 @@ import {
 } from '@concepta/nestjs-common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import { SwaggerUiOptionsInterface } from './interfaces/swagger-ui-options.interface';
+import { SwaggerUiSettingsInterface } from './interfaces/swagger-ui-settings.interface';
+import { SwaggerUiService } from './swagger-ui.service';
 import {
+  SWAGGER_UI_MODULE_DOCUMENT_BUILDER_TOKEN,
   SWAGGER_UI_MODULE_OPTIONS_TOKEN,
   SWAGGER_UI_MODULE_SETTINGS_TOKEN,
 } from './swagger-ui.constants';
 import { swaggerUiDefaultConfig } from './config/swagger-ui-default.config';
-import { SwaggerUiService } from './swagger-ui.service';
+import { createDefaultDocumentBuilder } from './utils/create-default-document-builder';
 
 @Module({
   providers: [SwaggerUiService],
@@ -32,6 +35,26 @@ export class SwaggerUiModule extends createConfigurableDynamicRootModule<
         defaultSettings: ConfigType<typeof swaggerUiDefaultConfig>,
       ) => options?.settings ?? defaultSettings,
     },
+    {
+      provide: SWAGGER_UI_MODULE_DOCUMENT_BUILDER_TOKEN,
+      inject: [
+        SWAGGER_UI_MODULE_OPTIONS_TOKEN,
+        SWAGGER_UI_MODULE_SETTINGS_TOKEN,
+      ],
+      useFactory: async (
+        options: SwaggerUiOptionsInterface,
+        settings: SwaggerUiSettingsInterface,
+      ) => {
+        // did they set a document builder?
+        if (options.documentBuilder) {
+          // yes, return it
+          return options.documentBuilder;
+        } else {
+          // no, create one from defaults
+          return createDefaultDocumentBuilder(settings);
+        }
+      },
+    },
   ],
   exports: [SWAGGER_UI_MODULE_SETTINGS_TOKEN],
 }) {
@@ -40,10 +63,7 @@ export class SwaggerUiModule extends createConfigurableDynamicRootModule<
   }
 
   static registerAsync(options: AsyncModuleConfig<SwaggerUiOptionsInterface>) {
-    return SwaggerUiModule.forRootAsync(SwaggerUiModule, {
-      useFactory: () => ({}),
-      ...options,
-    });
+    return SwaggerUiModule.forRootAsync(SwaggerUiModule, options);
   }
 
   static deferred(options: DeferExternalOptionsInterface = {}) {
