@@ -1,12 +1,14 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '@concepta/nestjs-auth-jwt';
+import { ReferenceUsername } from '@concepta/nestjs-common';
 
 export class UserDto {
-  constructor(username: string) {
+  constructor(username: ReferenceUsername) {
     this.username = username;
   }
-  username: string;
+  username: ReferenceUsername;
 }
+
 /**
  * Custom User controller
  */

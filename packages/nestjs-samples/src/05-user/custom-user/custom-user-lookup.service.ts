@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { UserInterface } from '@concepta/nestjs-user';
 import { UserLookupServiceInterface } from '@concepta/nestjs-user/src/interfaces/user-lookup-service.interface';
+import {
+  ReferenceEmail,
+  ReferenceId,
+  ReferenceSubject,
+  ReferenceUsername,
+} from '@concepta/nestjs-common';
 
 @Injectable()
 export class CustomUserLookupService implements UserLookupServiceInterface {
@@ -9,19 +15,19 @@ export class CustomUserLookupService implements UserLookupServiceInterface {
    */
   hello? = 'world';
 
-  async byId(id: string): Promise<UserInterface> {
+  async byId(id: ReferenceId): Promise<UserInterface> {
     throw new Error(`Method not implemented, cant get ${id}.`);
   }
 
-  async byEmail(email: string): Promise<UserInterface> {
+  async byEmail(email: ReferenceEmail): Promise<UserInterface> {
     throw new Error(`Method not implemented, cant get ${email}.`);
   }
 
-  async bySubject(subject: string): Promise<UserInterface> {
+  async bySubject(subject: ReferenceSubject): Promise<UserInterface> {
     throw new Error(`Method not implemented, cant get ${subject}.`);
   }
 
-  async byUsername(username: string): Promise<UserInterface> {
+  async byUsername(username: ReferenceUsername): Promise<UserInterface> {
     throw new Error(`Method not implemented, cant get ${username}.`);
   }
 }

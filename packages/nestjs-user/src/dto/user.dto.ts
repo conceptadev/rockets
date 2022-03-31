@@ -1,5 +1,10 @@
 import { IsEmail, IsString } from 'class-validator';
 import { Exclude, Expose } from 'class-transformer';
+import {
+  ReferenceEmail,
+  ReferenceId,
+  ReferenceUsername,
+} from '@concepta/nestjs-common';
 import { CrudResponseDto } from '@concepta/nestjs-crud';
 import { UserInterface } from '../interfaces/user.interface';
 
@@ -16,19 +21,19 @@ export class UserDto
    */
   @Expose()
   @IsString()
-  id: string;
+  id: ReferenceId;
 
   /**
    * Email
    */
   @Expose()
   @IsEmail()
-  email: string;
+  email: ReferenceEmail;
 
   /**
    * Username
    */
   @Expose()
   @IsString()
-  username: string;
+  username: ReferenceUsername;
 }

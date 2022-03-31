@@ -3,6 +3,4 @@ import { UserPasswordEncryptedInterface } from './user-password-encrypted.interf
 
 export interface UserCredentialsInterface
   extends ReferenceUsernameInterface,
-    UserPasswordEncryptedInterface {
-  username: string;
-}
+    UserPasswordEncryptedInterface {}

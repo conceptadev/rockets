@@ -1,4 +1,6 @@
+import { ReferenceUsername } from '@concepta/nestjs-common';
+
 export interface AuthLocalLoginInterface {
-  username: string;
+  username: ReferenceUsername;
   password: string;
 }

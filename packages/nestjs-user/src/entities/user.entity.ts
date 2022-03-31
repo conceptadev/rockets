@@ -1,3 +1,8 @@
+import {
+  ReferenceEmail,
+  ReferenceId,
+  ReferenceUsername,
+} from '@concepta/nestjs-common';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { UserEntityInterface } from '../interfaces/user-entity.interface';
 
@@ -10,19 +15,19 @@ export class User implements UserEntityInterface {
    * Unique Id
    */
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id: ReferenceId;
 
   /**
    * Email
    */
   @Column()
-  email: string;
+  email: ReferenceEmail;
 
   /**
    * Username
    */
   @Column()
-  username: string;
+  username: ReferenceUsername;
 
   /**
    * Password

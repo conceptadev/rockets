@@ -6,6 +6,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ReferenceUsername } from '@concepta/nestjs-common';
 import { PassportStrategyFactory } from '@concepta/nestjs-authentication';
 import { PasswordStorageService } from '@concepta/nestjs-password';
 import {
@@ -53,7 +54,7 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
    * @param username The username to authenticate
    * @param password The plain text password
    */
-  async validate(username: string, password: string) {
+  async validate(username: ReferenceUsername, password: string) {
     // break out the fields
     const { usernameField, passwordField } = this.settings;
 
