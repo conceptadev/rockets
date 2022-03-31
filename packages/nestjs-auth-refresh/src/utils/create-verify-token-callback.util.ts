@@ -5,7 +5,7 @@ export function createVerifyTokenCallback(
 ) {
   return (
     token: string,
-    done: (error?: Error, decodedToken?: object) => void,
+    done: (error?: Error, decodedToken?: unknown) => void,
   ): void => {
     verifyTokenService
       .accessToken(token)
