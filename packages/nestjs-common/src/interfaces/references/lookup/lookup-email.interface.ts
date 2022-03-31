@@ -1,9 +1,9 @@
 import { ReferenceEmail } from '../../../references/reference.types';
-import { ReferenceEmailInterface } from '../reference-email.interface';
+import { ReferenceIdInterface } from '../reference-id.interface';
 
 export interface LookupEmailInterface<
   T = ReferenceEmail,
-  U = ReferenceEmailInterface,
+  U = ReferenceIdInterface,
 > {
   byEmail: (email: T) => Promise<U>;
 }
