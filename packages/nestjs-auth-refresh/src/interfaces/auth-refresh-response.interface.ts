@@ -1,4 +1,4 @@
-export interface AuthRefreshResponseInterface {
-  userId: string;
-  username: string;
-}
+import { AuthenticationJwtResponseInterface } from '@concepta/nestjs-authentication';
+
+export interface AuthRefreshResponseInterface
+  extends AuthenticationJwtResponseInterface {}

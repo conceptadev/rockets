@@ -1,9 +1,9 @@
 import { ReferenceUsername } from '../../../references/reference.types';
-import { ReferenceUsernameInterface } from '../reference-username.interface';
+import { ReferenceIdInterface } from '../reference-id.interface';
 
 export interface LookupUsernameInterface<
   T = ReferenceUsername,
-  U = ReferenceUsernameInterface,
+  U = ReferenceIdInterface,
 > {
   byUsername: (username: T) => Promise<U>;
 }

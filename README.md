@@ -3,11 +3,10 @@
 [![Typescript](https://img.shields.io/badge/Typescript-100%25-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org)
 
 [![Codacy](https://app.codacy.com/project/badge/Grade/6b92bb0756ee4664a1403c4688a0d172)](https://www.codacy.com/gh/conceptadev/rockets/dashboard?utm_source=github.com&utm_medium=referral&utm_content=conceptadev/rockets&utm_campaign=Badge_Grade)
-[![Codecov](https://codecov.io/gh/conceptadev/rockets/branch/main/graph/badge.svg?token=QXUHV1RP5N)](https://codecov.io/gh/conceptadev/rockets)
-[![Code Climate Maint](https://img.shields.io/codeclimate/maintainability-percentage/conceptadev/rockets?logo=codeclimate)](https://codeclimate.com/github/conceptadev/rockets)
+[![Code Climate Maint](https://img.shields.io/codeclimate/maintainability/conceptadev/rockets?logo=codeclimate)](https://codeclimate.com/github/conceptadev/rockets)
 [![Code Climate Debt](https://img.shields.io/codeclimate/tech-debt/conceptadev/rockets?logo=codeclimate)](https://codeclimate.com/github/conceptadev/rockets)
-[![Code Climate Issues](https://img.shields.io/codeclimate/issues/conceptadev/rockets?logo=codeclimate)](https://codeclimate.com/github/conceptadev/rockets)
 [![Snyk](https://img.shields.io/snyk/vulnerabilities/github/conceptadev/rockets?logo=snyk)](https://app.snyk.io/org/conceptadev/project/68236780-68d2-40d3-bee2-e94046c4c1f3)
+[![Codecov](https://codecov.io/gh/conceptadev/rockets/branch/main/graph/badge.svg?token=QXUHV1RP5N)](https://codecov.io/gh/conceptadev/rockets)
 
 [![GitHub Build](https://img.shields.io/github/workflow/status/conceptadev/rockets/ci-pr-test?logo=github)](https://github.com/conceptadev/rockets/actions/workflows/ci-pr-test.yml)
 [![GH Forks](https://img.shields.io/github/forks/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets)

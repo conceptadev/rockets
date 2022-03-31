@@ -1,5 +1,11 @@
 import { Repository } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
+import {
+  ReferenceEmail,
+  ReferenceId,
+  ReferenceSubject,
+  ReferenceUsername,
+} from '@concepta/nestjs-common';
 import { USER_MODULE_USER_CUSTOM_REPO_TOKEN } from '../user.constants';
 import { UserEntityInterface } from '../interfaces/user-entity.interface';
 import { UserLookupServiceInterface } from '../interfaces/user-lookup-service.interface';
@@ -24,7 +30,7 @@ export class UserLookupService implements UserLookupServiceInterface {
    *
    * @param id the id
    */
-  async byId(id: string): Promise<UserEntityInterface> {
+  async byId(id: ReferenceId): Promise<UserEntityInterface> {
     return this.userRepo.findOne({ id });
   }
 
@@ -33,7 +39,7 @@ export class UserLookupService implements UserLookupServiceInterface {
    *
    * @param email the email
    */
-  async byEmail(email: string): Promise<UserEntityInterface> {
+  async byEmail(email: ReferenceEmail): Promise<UserEntityInterface> {
     return this.userRepo.findOne({ email });
   }
 
@@ -42,7 +48,7 @@ export class UserLookupService implements UserLookupServiceInterface {
    *
    * @param username the username
    */
-  async bySubject(subject: string): Promise<UserEntityInterface> {
+  async bySubject(subject: ReferenceSubject): Promise<UserEntityInterface> {
     return this.userRepo.findOne({ id: subject });
   }
 
@@ -51,7 +57,7 @@ export class UserLookupService implements UserLookupServiceInterface {
    *
    * @param username the username
    */
-  async byUsername(username: string): Promise<UserEntityInterface> {
+  async byUsername(username: ReferenceUsername): Promise<UserEntityInterface> {
     return this.userRepo.findOne({ username });
   }
 }

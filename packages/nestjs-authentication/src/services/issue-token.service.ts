@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ReferenceId } from '@concepta/nestjs-common';
 import { JwtIssueService } from '@concepta/nestjs-jwt';
 import { AuthenticationJwtResponseInterface } from '../interfaces/authentication-jwt-response.interface';
 import { IssueTokenServiceInterface } from '../interfaces/issue-token-service.interface';
@@ -27,7 +28,7 @@ export class IssueTokenService implements IssueTokenServiceInterface {
    * @param identifier user id or name for `sub` claim
    */
   async responsePayload(
-    id: string,
+    id: ReferenceId,
   ): Promise<AuthenticationJwtResponseInterface> {
     // TODO: need pattern for events and/or callbacks to mutate this object before signing
     const payload = { sub: id };
