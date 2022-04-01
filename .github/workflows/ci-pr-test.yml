@@ -2,7 +2,7 @@ name: ci-pr-test
 
 on:
   pull_request:
-    branches: ["main"]
+    branches: ['main']
 
 jobs:
   build:
@@ -21,7 +21,7 @@ jobs:
 
       - uses: actions/cache@v2
         with:
-          path: "**/node_modules"
+          path: '**/node_modules'
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
 
       - name: Install and build
@@ -42,4 +42,5 @@ jobs:
           path: |
             pr_num.txt
             junit.xml
+            coverage/lcov.info
             coverage/coverage-final.json
