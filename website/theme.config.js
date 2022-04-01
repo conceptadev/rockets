@@ -1,4 +1,3 @@
-import Image from 'next/image';
 const themeConfig = {
   github: 'https://github.com/conceptadev/rockets',
   docsRepositoryBase: 'https://github.com/conceptadev/rockets/blob/main',
@@ -8,7 +7,7 @@ const themeConfig = {
   floatTOC: true,
   logo: (
     <>
-      <Image
+      <img
         className="md:inline object-contain hidden"
         height={16}
         width={16}

@@ -4,7 +4,7 @@
     "type": "nav",
     "hidden": true
   },
-  "docs": {
+  "documentation": {
     "title": "Docs",
     "type": "nav"
   }

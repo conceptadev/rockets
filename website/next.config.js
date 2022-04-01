@@ -4,11 +4,8 @@ const withNextra = require('nextra')({
   themeConfig: './theme.config.js',
 });
 
-const isProd = process.env.NODE_ENV === 'production';
-
 module.exports = withNextra({
   reactStrictMode: true,
-  distDir: 'build',
   experiments: {
     swcLoader: true,
     swcMinify: true,

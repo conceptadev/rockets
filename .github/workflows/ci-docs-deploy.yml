@@ -2,9 +2,9 @@ name: Docs Deploy
 
 on:
   push:
-    branches: ["main"]
+    branches: ["feature/website-deployment"]
   workflow_dispatch:
-    branches: ["main"]
+    branches: ["feature/website-deployment"]
 
 jobs:
   deploy:
@@ -17,17 +17,19 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: "lts/*"
-          cache: "npm"
+          cache: "yarn"
+
+      - uses: actions/cache@v2
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
 
       - name: Build
         working-directory: ./website
-        run: |
-          npm i
-          npm run build
-          npm run export
+        run: yarn && yarn run build && yarn run export
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
-          deploy_key: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./website/build
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./website/out
