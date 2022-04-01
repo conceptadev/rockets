@@ -32,7 +32,7 @@ jobs:
 
       - name: Build
         working-directory: ./website
-        run: yarn && yarn run build && yarn run export
+        run: yarn && yarn run build:readme && yarn run build && yarn run export
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
