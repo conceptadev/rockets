@@ -1,10 +1,9 @@
 import Image from 'next/image';
-import CustomSearch from './components/Search';
 const themeConfig = {
   github: 'https://github.com/conceptadev/rockets',
   docsRepositoryBase: 'https://github.com/conceptadev/rockets/blob/main',
   search: true,
-  customSearch: <CustomSearch />,
+  // customSearch: <CustomSearch />,
   titleSuffix: ' – Rockets',
   floatTOC: true,
   logo: (
