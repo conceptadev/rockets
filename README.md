@@ -54,10 +54,4 @@ once we have finalized our Contributor License Agreement.
 | [nestjs-typeorm-ext](https://github.com/conceptadev/rockets/tree/main/packages/nestjs-typeorm-ext 'nestjs-typeorm-ext')          | Extension of the NestJS TypeOrm module that allows your dynamic modules to accept drop-in replacements of custom entities and repositories. |
 | [nestjs-user](https://github.com/conceptadev/rockets/tree/main/packages/nestjs-user 'nestjs-user')                               | A module for managing a basic User entity, including controller with full CRUD, DTOs, sample data factory and seeder.                       |
 
-## License
 
-Version 3.X.X and prior were licensed under MIT, and continue to be so.
-
-Versions 4.X.X of the project is currently UNLICENSED while we make a final
-determination about the open source license. Currently we are leaning in the
-direction of BSD-3-Clause.
