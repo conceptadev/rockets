@@ -20,14 +20,19 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: "lts/*"
-          cache: "npm"
+          cache: "yarn"
+
+      - uses: actions/cache@v2
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
 
       - name: Build
         working-directory: ./website
         run: |
-          npm i
-          npm run build
-          npm run export
+          yarn
+          yarn run build
+          yarn run export
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
