@@ -6,9 +6,9 @@ const withNextra = require('nextra')({
 
 const isProd = process.env.NODE_ENV === 'production';
 
-const nextraConfig = withNextra({
+module.exports = withNextra({
   reactStrictMode: true,
-
+  assetPrefix: isProd ? '/rockets/' : '',
   experiments: {
     swcLoader: true,
     swcMinify: true,
@@ -23,5 +23,3 @@ const nextraConfig = withNextra({
     ];
   },
 });
-
-module.exports = { ...nextraConfig, assetPrefix: isProd ? '/rockets/' : '' };

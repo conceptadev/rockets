@@ -8,6 +8,7 @@ on:
 
 env:
   BACKEND_URL: rockets
+  NODE_ENV: production
 
 jobs:
   deploy:
