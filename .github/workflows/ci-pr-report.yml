@@ -37,20 +37,19 @@ jobs:
       - name: Upload to Codecov
         uses: codecov/codecov-action@v2
         with:
-          files: ./coverage/coverage-final.json
+          files: ${{ github.workspace }}/coverage/coverage-final.json
           override_pr: ${{ steps.vars.outputs.pr_num }}
           verbose: true
       - name: Upload coverage to Codacy
         uses: codacy/codacy-coverage-reporter-action@v1.3.0
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: ./coverage/lcov.info
+          coverage-reports: ${{ github.workspace }}/coverage/lcov.info
       - name: Upload coverage to Code Climate
         uses: paambaati/codeclimate-action@v3.0.0
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         with:
           debug: true
-          prefix: ${{ github.workspace }}
           coverageLocations: |
-            ./coverage/lcov.info:lcov
+            ${{ github.workspace }}/coverage/lcov.info:lcov
