@@ -1,30 +1,27 @@
-[![NodeJS](https://img.shields.io/badge/Node-100%25-green?style=for-the-badge&logo=nodedotjs)](https://nestjs.org)
-[![NestJS](https://img.shields.io/badge/NestJS-100%25-red?style=for-the-badge&logo=nestjs)](https://nodejs.com)
-[![Typescript](https://img.shields.io/badge/Typescript-100%25-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org)
 
+<p align="center">
+  <img width="150" src="https://raw.githubusercontent.com/conceptadev/rockets/main/assets/rockets-icon.svg">
+</p>
+
+
+
+# Rockets
 [![Codacy](https://app.codacy.com/project/badge/Grade/6b92bb0756ee4664a1403c4688a0d172)](https://www.codacy.com/gh/conceptadev/rockets/dashboard?utm_source=github.com&utm_medium=referral&utm_content=conceptadev/rockets&utm_campaign=Badge_Grade)
 [![Code Climate Maint](https://img.shields.io/codeclimate/maintainability/conceptadev/rockets?logo=codeclimate)](https://codeclimate.com/github/conceptadev/rockets)
 [![Code Climate Debt](https://img.shields.io/codeclimate/tech-debt/conceptadev/rockets?logo=codeclimate)](https://codeclimate.com/github/conceptadev/rockets)
-[![Snyk](https://img.shields.io/snyk/vulnerabilities/github/conceptadev/rockets?logo=snyk)](https://app.snyk.io/org/conceptadev/project/68236780-68d2-40d3-bee2-e94046c4c1f3)
 [![Codecov](https://codecov.io/gh/conceptadev/rockets/branch/main/graph/badge.svg?token=QXUHV1RP5N)](https://codecov.io/gh/conceptadev/rockets)
-
 [![GitHub Build](https://img.shields.io/github/workflow/status/conceptadev/rockets/ci-pr-test?logo=github)](https://github.com/conceptadev/rockets/actions/workflows/ci-pr-test.yml)
-[![GH Forks](https://img.shields.io/github/forks/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets)
-[![GH Stars](https://img.shields.io/github/stars/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets)
 [![GH Commits](https://img.shields.io/github/commit-activity/m/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets)
 [![GH Last Commit](https://img.shields.io/github/last-commit/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets)
 [![GH Contrib](https://img.shields.io/github/contributors/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets/graphs/contributors)
 
-[![GitHub Open Issues](https://img.shields.io/github/issues-raw/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets/issues)
-[![GitHub Closed Issues](https://img.shields.io/github/issues-closed-raw/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets/issues)
-[![GitHub Open PRs](https://img.shields.io/github/issues-pr-raw/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets/pulls)
-[![GitHub Closed PRs](https://img.shields.io/github/issues-pr-closed-raw/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets/pulls)
 
-# Rockets
+```text
+Rapid Enterprise Development Toolkit
+```
 
-## Rapid Enterprise Development Toolkit
 
-The Rockets API library is a collection of NestJS modules
+A collection of NestJS modules
 that were created for the rapid development of enterpise level APIs.
 
 All reasonable efforts have been made to provide loosely coupled interfaces,
