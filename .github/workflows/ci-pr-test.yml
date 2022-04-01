@@ -2,7 +2,7 @@ name: ci-pr-test
 
 on:
   pull_request:
-    branches: ['main']
+    branches: ["main"]
 
 jobs:
   build:
@@ -18,6 +18,12 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
+
+      - uses: actions/cache@v2
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+
       - name: Install and build
         run: yarn --frozen-lockfile
       - name: Unit tests

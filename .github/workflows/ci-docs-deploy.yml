@@ -1,14 +1,13 @@
-name: Deploy Website to Github Pages
+name: Docs Deploy
 
 on:
   push:
-    branches:
-      - main
-
+    branches: ["main"]
   workflow_dispatch:
+    branches: ["main"]
 
 jobs:
-  deployment:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
