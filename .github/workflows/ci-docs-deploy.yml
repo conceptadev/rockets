@@ -6,6 +6,9 @@ on:
   workflow_dispatch:
     branches: ["feature/website-deployment"]
 
+env:
+  process.env.BACKEND_URL: rockets
+
 jobs:
   deploy:
     runs-on: ubuntu-latest

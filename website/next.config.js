@@ -8,6 +8,7 @@ const isProd = process.env.NODE_ENV === 'production';
 
 module.exports = withNextra({
   reactStrictMode: true,
+  assetPrefix: isProd ? '/Next-gh-page-example/' : '',
   distDir: 'build',
   experiments: {
     swcLoader: true,
