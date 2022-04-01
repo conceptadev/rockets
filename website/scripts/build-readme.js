@@ -13,19 +13,20 @@ try {
 
   const readmeName = 'README.md';
 
+  const modulePath = path.join('./pages/documentation/modules');
+
+  if (!fs.existsSync(modulePath)) {
+    fs.mkdirSync(modulePath, { recursive: true });
+  }
+
   packages.forEach((packageName) => {
     const readmePath = path.join(packagesDir, packageName, readmeName);
 
-    const modulePath = path.join('./pages/documentation/modules', packageName);
-    const outputPath = path.join(modulePath + '.md');
+    const outputPath = path.join(modulePath, packageName + '.md');
 
     if (!fs.existsSync(readmePath)) {
       return;
     }
-
-    // if (!fs.existsSync(modulePath)) {
-    //   fs.mkdirSync(modulePath, { recursive: true });
-    // }
 
     const moduleReadme = fs.readFileSync(path.join(readmePath));
 
