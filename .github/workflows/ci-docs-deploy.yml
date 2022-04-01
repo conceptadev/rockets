@@ -2,9 +2,9 @@ name: Docs Deploy
 
 on:
   push:
-    branches: ["main"]
+    branches: ["website-deployment"]
   workflow_dispatch:
-    branches: ["main"]
+    branches: ["website-deployment"]
 
 jobs:
   deploy:
