@@ -22,7 +22,7 @@
 
 # Rockets NestJS Library
 
-The Rockets API (or Server) library is a collection of NestJS modules
+The Rockets API library is a collection of NestJS modules
 that were created for the rapid development of enterpise level APIs.
 
 All reasonable efforts have been made to provide loosely coupled interfaces,

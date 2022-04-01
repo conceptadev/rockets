@@ -109,3 +109,4 @@ dist
 
 # JetBrainz
 .idea
+.DS_Store
