@@ -35,14 +35,14 @@ const themeConfig = {
         content="Rockets: Rapid Enterprise Development Toolkit"
       />
       <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:image" content="https://rockets.tools/og.png" />
+      <meta name="twitter:image" content="https://www.rockets.tools/og.png" />
       <meta name="twitter:site:domain" content="rockets.tools" />
-      <meta name="twitter:url" content="https://rockets.tools" />
+      <meta name="twitter:url" content="https://www.rockets.tools" />
       <meta
         name="og:title"
         content="Rockets: Rapid Enterprise Development Toolkit"
       />
-      <meta name="og:image" content="https://rockets.tools/og.png" />
+      <meta name="og:image" content="https://www.rockets.tools/og.png" />
       <meta name="apple-mobile-web-app-title" content="Rockets" />
       <link
         rel="apple-touch-icon"
