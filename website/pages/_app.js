@@ -1,10 +1,10 @@
-(typeof global !== "undefined" ? global : window).Prism = Prism;
+(typeof global !== 'undefined' ? global : window).Prism = Prism;
 
-import Prism from "prism-react-renderer/prism";
-import React from "react";
-import "../global.css";
+import Prism from 'prism-react-renderer/prism';
+import React from 'react';
+import '../global.css';
 
-require("prismjs/components/prism-dart");
+require('prismjs/components/prism-typescript');
 
 // const addClassToDesignTokens = () => {
 //   // Style design token in code snippets

@@ -17,9 +17,9 @@ const themeConfig = {
         src={'/assets/rockets-icon.svg'}
       />
       <span className="mr-2 font-extrabold mx-2 hidden md:inline">Rockets</span>
-      <span className="text-gray-600 font-normal text-sm hidden md:inline">
+      {/* <span className="text-gray-600 font-normal text-sm hidden md:inline">
         Rapid Enterprise Development Toolkit
-      </span>
+      </span> */}
     </>
   ),
   head: (
@@ -78,6 +78,16 @@ const themeConfig = {
   nextLinks: true,
   footer: true,
   footerEditLink: 'Edit this page on GitHub',
+  footerText: (
+    <>
+      <span>
+        {'2022 © '}
+        <a href="https://conceptatech.com" target="_blank" rel="noreferrer">
+          {' Concepta'}
+        </a>
+      </span>
+    </>
+  ),
   unstable_faviconGlyph: '👋',
 };
 
