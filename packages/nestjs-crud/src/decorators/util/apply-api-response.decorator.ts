@@ -61,42 +61,24 @@ export function applyApiResponse(
     const dtoMetaOptions: ApiResponseMetadata = {};
 
     // dto schema options
-    const dtoSchemaOptions: ApiResponseSchemaHost = { schema: undefined };
+    let dtoSchemaOptions: ApiResponseSchemaHost = { schema: undefined };
 
     // action is the discriminator
     switch (action) {
       // read all
       case CrudActions.ReadAll:
-        // is pagination forced?
-        if (requestOptions.query.alwaysPaginate) {
-          // yes, use paginated type
-          dtoMetaOptions.description = `${CrudActions.ReadAll} ${requestOptions.model.type.name} as paginated response`;
-          dtoMetaOptions.type = serializeOptions.paginatedType;
-        } else {
-          // no, could be pagination OR array
-          dtoSchemaOptions.description = `${CrudActions.ReadAll} ${requestOptions.model.type.name} as array or paginated response.`;
-          dtoSchemaOptions.schema = {
-            oneOf: [
-              {
-                $ref: getSchemaPath(paginatedDto),
-              },
-              {
-                type: 'array',
-                items: {
-                  $ref: getSchemaPath(dto),
-                },
-              },
-            ],
-          };
-        }
+        dtoSchemaOptions = createReadAllResponse({
+          action: CrudActions.ReadAll,
+          modelName: requestOptions.model.type.name,
+          dto,
+          paginatedDto,
+          alwaysPaginate: requestOptions.query.alwaysPaginate,
+        });
         break;
 
       // create many
       case CrudActions.CreateMany:
-        dtoSchemaOptions.schema = {
-          type: 'array',
-          items: { $ref: getSchemaPath(dto) },
-        };
+        dtoSchemaOptions.schema = createArraySchema(dto);
         break;
 
       // returns deleted item or empty
@@ -137,4 +119,70 @@ export function applyApiResponse(
     ApiExtraModels(paginatedDto)(...args);
     ApiResponse(mergedOptions)(...args);
   };
+}
+
+//
+// private routines
+//
+
+function createArraySchema(dto: Type): ApiResponseSchemaHost['schema'] {
+  return {
+    type: 'array',
+    items: {
+      $ref: getSchemaPath(dto),
+    },
+  };
+}
+
+function createPaginatedSchema(
+  paginatedDto: Type,
+): ApiResponseSchemaHost['schema'] {
+  return {
+    $ref: getSchemaPath(paginatedDto),
+  };
+}
+
+function createPaginatedResponse(options: {
+  action: CrudActions;
+  modelName: string;
+  paginatedDto: Type;
+}): ApiResponseSchemaHost {
+  return {
+    description: `${options.action} ${options.modelName} as paginated response.`,
+    schema: createPaginatedSchema(options.paginatedDto),
+  };
+}
+
+function createArrayOrPaginatedResponse(options: {
+  action: CrudActions;
+  modelName: string;
+  dto: Type;
+  paginatedDto: Type;
+}): ApiResponseSchemaHost {
+  return {
+    description: `${options.action} ${options.modelName} as array or paginated response.`,
+    schema: {
+      oneOf: [
+        createPaginatedSchema(options.paginatedDto),
+        createArraySchema(options.dto),
+      ],
+    },
+  };
+}
+
+function createReadAllResponse(options: {
+  action: CrudActions;
+  modelName: string;
+  dto: Type;
+  paginatedDto: Type;
+  alwaysPaginate: boolean;
+}): ApiResponseSchemaHost {
+  // is pagination forced?
+  if (options.alwaysPaginate) {
+    // yes, use paginated type
+    return createPaginatedResponse(options);
+  } else {
+    // no, could be pagination OR array
+    return createArrayOrPaginatedResponse(options);
+  }
 }
