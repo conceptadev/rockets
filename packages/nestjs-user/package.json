@@ -1,6 +1,6 @@
 {
   "name": "@concepta/nestjs-user",
-  "version": "4.0.0-alpha.7",
+  "version": "4.0.0-alpha.8",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "BSD-3-Clause",
@@ -11,10 +11,10 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
-    "@concepta/nestjs-common": "^4.0.0-alpha.7",
-    "@concepta/nestjs-crud": "^4.0.0-alpha.7",
-    "@concepta/nestjs-password": "^4.0.0-alpha.7",
-    "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.7",
+    "@concepta/nestjs-common": "^4.0.0-alpha.8",
+    "@concepta/nestjs-crud": "^4.0.0-alpha.8",
+    "@concepta/nestjs-password": "^4.0.0-alpha.8",
+    "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.8",
     "@nestjs/common": "^8.0.8",
     "@nestjs/config": "^1.1.6",
     "@nestjs/swagger": "^5.2.0"
