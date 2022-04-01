@@ -21,8 +21,8 @@
 [![GitHub Closed PRs](https://img.shields.io/github/issues-pr-closed-raw/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets/pulls)
 
 # Rockets
-### Rapid Enterprise Development Toolkit
 
+## Rapid Enterprise Development Toolkit
 
 The Rockets API library is a collection of NestJS modules
 that were created for the rapid development of enterpise level APIs.
