@@ -7,7 +7,7 @@ on:
     branches: ["feature/website-deployment"]
 
 env:
-  process.env.BACKEND_URL: rockets
+  BACKEND_URL: rockets
 
 jobs:
   deploy:
