@@ -8,6 +8,7 @@ const isProd = process.env.NODE_ENV === 'production';
 
 module.exports = withNextra({
   reactStrictMode: true,
+  distDir: 'build',
   experiments: {
     swcLoader: true,
     swcMinify: true,
@@ -15,18 +16,8 @@ module.exports = withNextra({
   async redirects() {
     return [
       {
-        source: '/docs/variant',
-        destination: '/docs/getting-started/variant',
-        permanent: true,
-      },
-      {
-        source: '/docs/getting-started',
-        destination: '/docs/getting-started/basic-usage',
-        permanent: true,
-      },
-      {
         source: '/docs/changelog',
-        destination: 'https://github.com/leoafarias/mix/releases',
+        destination: 'https://github.com/conceptadev/rockets/releases',
         permanent: true,
       },
     ];
