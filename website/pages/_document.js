@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/google-font-display */
 
-import Document, { Head, Html, Main, NextScript } from "next/document";
+import Document, { Head, Html, Main, NextScript } from 'next/document';
 
 class MyDocument extends Document {
   render() {

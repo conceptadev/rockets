@@ -1,6 +1,7 @@
 {
   "name": "@concepta/nestjs-exception",
   "version": "4.0.0-alpha.8",
+  "description": "Rockets NestJS Exceptions",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "BSD-3-Clause",
