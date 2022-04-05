@@ -1,3 +1,2 @@
 */**/*.md
-*/**/*.mdx
-*/**/meta.json
+*/meta.json

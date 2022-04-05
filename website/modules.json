@@ -1,0 +1,70 @@
+{
+  "nestjs-access-control": {
+    "title": "Access Control",
+    "category": "authorization"
+  },
+  "nestjs-auth-github": {
+    "title": "GitHub Login",
+    "category": "authentication"
+  },
+  "nestjs-auth-jwt": {
+    "title": "Access Token",
+    "category": "authorization"
+  },
+  "nestjs-auth-local": {
+    "title": "Local Login",
+    "category": "authentication"
+  },
+  "nestjs-auth-refresh": {
+    "title": "Refresh Token",
+    "category": "authentication"
+  },
+  "nestjs-authentication": {
+    "title": "Authentication",
+    "category": "authentication"
+  },
+  "nestjs-common": {
+    "title": "Common",
+    "category": "core"
+  },
+  "nestjs-crud": {
+    "title": "CRUD",
+    "category": "controller"
+  },
+  "nestjs-email": {
+    "title": "Email",
+    "category": "notification"
+  },
+  "nestjs-event": {
+    "title": "Events",
+    "category": "core"
+  },
+  "nestjs-exception": {
+    "title": "Exceptions",
+    "category": "core"
+  },
+  "nestjs-jwt": {
+    "title": "JWT",
+    "category": "util"
+  },
+  "nestjs-logger": {
+    "title": "Logger",
+    "category": "util"
+  },
+  "nestjs-password": {
+    "title": "Password",
+    "category": "util"
+  },
+  "nestjs-swagger-ui": {
+    "title": "Swagger UI",
+    "category": "controller"
+  },
+  "nestjs-typeorm-ext": {
+    "title": "TypeORM Ext",
+    "category": "core"
+  },
+  "nestjs-user": {
+    "title": "User",
+    "category": "model"
+  }
+}

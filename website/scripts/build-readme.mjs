@@ -5,89 +5,101 @@
 
 import path from 'path';
 import * as fs from 'fs';
-import fsExtra from 'fs-extra';
 import { remark } from 'remark';
 import remarkStripBadges from 'remark-strip-badges';
 import remarkSqueezeParagraphs from 'remark-squeeze-paragraphs';
 
-const packagesDir = '../packages';
-
 async function main() {
+  // location of packages
+  const packagesDir = '../packages';
+
   try {
+    // read all packages
     const packages = fs.readdirSync(packagesDir);
 
-    const readmeName = 'README.md';
+    // path to module docs
+    const modulePath = './pages/documentation/modules';
 
-    const modulePath = path.join('./pages/documentation/modules');
+    // read in the modules config
+    const modulesConfig = JSON.parse(fs.readFileSync('modules.json'));
 
-    if (!fs.existsSync(modulePath)) {
-      fs.mkdirSync(modulePath, { recursive: true });
-    }
-
-    const categories = {};
+    // packages by category
+    const pkgsByCategory = {};
 
     for (const packageName of packages) {
-      const websiteConfigPath = path.join(
-        packagesDir,
-        packageName,
-        'website.json',
-      );
-
-      let websiteConfig;
-
-      if (fs.existsSync(websiteConfigPath)) {
-        const rawdata = fs.readFileSync(websiteConfigPath);
-        websiteConfig = JSON.parse(rawdata);
-      } else {
+      // package has module config?
+      if (!modulesConfig[packageName]) {
         continue;
       }
 
-      const { meta, category } = websiteConfig;
+      // break out our vars
+      const { title, category } = modulesConfig[packageName];
 
-      if (!categories[category]) {
-        categories[category] = {};
+      // init category property if not exists
+      if (!pkgsByCategory[category]) {
+        pkgsByCategory[category] = {};
       }
 
-      categories[category][packageName] = meta;
+      // set the meta data for the pacakge
+      pkgsByCategory[category][packageName] = { title };
     }
 
-    for (const category in categories) {
-      const categoryPackages = categories[category];
+    // loop all package categories
+    for (const pkgCategory in pkgsByCategory) {
+      const categoryDir = path.join(modulePath, pkgCategory);
+      const categoryPackages = pkgsByCategory[pkgCategory];
       const categoryMeta = {};
 
+      // create category dir if necessary
+      fs.mkdirSync(categoryDir, { recursive: true });
+
+      // loop all category packages
       for (const packageName in categoryPackages) {
+        // add to category meta
         categoryMeta[packageName] = categoryPackages[packageName];
 
-        const docDir = path.join(modulePath, category, packageName);
-        const srcDocDir = path.join(packagesDir, packageName, 'doc');
-        const readmePath = path.join(packagesDir, packageName, readmeName);
+        // path to doc dir
+        const docDir = path.join(categoryDir, packageName);
 
-        if (fs.existsSync(srcDocDir)) {
-          await fsExtra.copySync(srcDocDir, docDir);
-        } else if (fs.existsSync(readmePath)) {
-          const outputPath = path.join(
-            modulePath,
-            category,
-            packageName + '.md',
-          );
-          const moduleReadme = fs.readFileSync(path.join(readmePath));
-          const processed = await remark()
+        // path to doc file
+        const docFile = fs.existsSync(docDir)
+          ? path.join(docDir, 'index.mdx')
+          : path.join(categoryDir, packageName + '.mdx');
+
+        // does a doc file exist?
+        if (fs.existsSync(docFile)) {
+          // yes, custom documentation has already been created
+          continue;
+        }
+
+        // path to readme file (in package)
+        const readmePath = path.join(packagesDir, packageName, 'README.md');
+
+        // does a readme exist in the package?
+        if (fs.existsSync(readmePath)) {
+          // read source readme
+          const moduleReadme = fs.readFileSync(readmePath);
+
+          // strip badges and clean it up a bit
+          const cleaned = await remark()
             .use(remarkStripBadges)
             .use(remarkSqueezeParagraphs)
             .process(moduleReadme);
-          fs.writeFileSync(outputPath, String(processed), { recursive: true });
-        } else {
-          continue;
+
+          // path to generated doc file
+          const docFileMagic = fs.existsSync(docDir)
+            ? path.join(docDir, 'index.md')
+            : path.join(categoryDir, packageName + '.md');
+
+          // write it
+          fs.writeFileSync(docFileMagic, String(cleaned));
         }
       }
 
       // write the category meta json
       fs.writeFileSync(
-        path.join(modulePath, category, 'meta.json'),
+        path.join(categoryDir, 'meta.json'),
         JSON.stringify(categoryMeta, null, 2),
-        {
-          recursive: true,
-        },
       );
     }
   } catch (error) {
