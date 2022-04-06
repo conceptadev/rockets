@@ -1,6 +1,7 @@
 {
   "name": "@concepta/nestjs-logger",
   "version": "4.0.0-alpha.8",
+  "description": "Rockets NestJS Logger",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "BSD-3-Clause",

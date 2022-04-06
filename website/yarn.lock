@@ -2229,6 +2229,11 @@ is-arrayish@^0.2.1:
   resolved "https://registry.yarnpkg.com/is-arrayish/-/is-arrayish-0.2.1.tgz#77c99840527aa8ecb1a8ba697b80645a7a926a9d"
   integrity sha1-d8mYQFJ6qOyxqLppe4BkWnqSap0=
 
+is-badge@^2.0.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/is-badge/-/is-badge-2.1.0.tgz#c587c0a9b2c16dc07761994580c86d17c1ad068a"
+  integrity sha512-xxrflJCQISyWNAEFlZeoeRNsjAD+93TdXiQly5h4smoZ1X9+4dHbIGwhfnpz8Tg1gXgWZtO/R1yDE8/V/XMdzg==
+
 is-bigint@^1.0.1:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/is-bigint/-/is-bigint-1.0.4.tgz#08147a1875bc2b32005d41ccd8291dffc6691df3"
@@ -2633,6 +2638,14 @@ match-sorter@^4.2.0:
   dependencies:
     "@babel/runtime" "^7.10.5"
     remove-accents "0.4.2"
+
+mdast-squeeze-paragraphs@^5.0.0:
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/mdast-squeeze-paragraphs/-/mdast-squeeze-paragraphs-5.2.0.tgz#23440cea3586a1cb70771f98971d4f8bf1dbb36b"
+  integrity sha512-uqPZ2smyXe0gNjweQaDkm7eK/KgvcS0u9X9yu28Yj/UOmK6CN6JRs/puzAGQw72vZcxWxs05LxkUTwZIsQZvrw==
+  dependencies:
+    "@types/mdast" "^3.0.0"
+    unist-util-remove "^3.0.0"
 
 mdast-util-definitions@^5.0.0:
   version "5.1.0"
@@ -3850,6 +3863,45 @@ remark-rehype@^10.0.0:
     mdast-util-to-hast "^12.1.0"
     unified "^10.0.0"
 
+remark-squeeze-paragraphs@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/remark-squeeze-paragraphs/-/remark-squeeze-paragraphs-5.0.1.tgz#c15aae559c43cc6e1fe85e24d6ec3cca7ecc4fa9"
+  integrity sha512-VWPAoa1bAAtU/aQfSLRZ7vOrwH9I02RhZTSo+e0LT3fVO9RKNCq/bwobIEBhxvNCt00JoQ7GwR3sYGhmD2/y6Q==
+  dependencies:
+    "@types/mdast" "^3.0.0"
+    mdast-squeeze-paragraphs "^5.0.0"
+    unified "^10.0.0"
+
+remark-stringify@^10.0.0:
+  version "10.0.2"
+  resolved "https://registry.yarnpkg.com/remark-stringify/-/remark-stringify-10.0.2.tgz#50414a6983f5008eb9e72eed05f980582d1f69d7"
+  integrity sha512-6wV3pvbPvHkbNnWB0wdDvVFHOe1hBRAx1Q/5g/EpH4RppAII6J8Gnwe7VbHuXaoKIF6LAg6ExTel/+kNqSQ7lw==
+  dependencies:
+    "@types/mdast" "^3.0.0"
+    mdast-util-to-markdown "^1.0.0"
+    unified "^10.0.0"
+
+remark-strip-badges@^6.0.1:
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/remark-strip-badges/-/remark-strip-badges-6.0.1.tgz#f5742fd0ad61c2b3880aadd82367f0487306b100"
+  integrity sha512-53jUQDtMa0Vfn+FfAFuqFnymTMrvCmBxy9cTSwlalfgRna+fn3lRy4TO4XHc0iX4ZfcrTMkXOLb7MdHdsWS/Gw==
+  dependencies:
+    "@types/mdast" "^3.0.0"
+    is-badge "^2.0.0"
+    mdast-util-definitions "^5.0.0"
+    unified "^10.0.0"
+    unist-util-visit "^4.0.0"
+
+remark@^14.0.2:
+  version "14.0.2"
+  resolved "https://registry.yarnpkg.com/remark/-/remark-14.0.2.tgz#4a1833f7441a5c29e44b37bb1843fb820797b40f"
+  integrity sha512-A3ARm2V4BgiRXaUo5K0dRvJ1lbogrbXnhkJRmD0yw092/Yl0kOCZt1k9ZeElEwkZsWGsMumz6qL5MfNJH9nOBA==
+  dependencies:
+    "@types/mdast" "^3.0.0"
+    remark-parse "^10.0.0"
+    remark-stringify "^10.0.0"
+    unified "^10.0.0"
+
 remove-accents@0.4.2:
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/remove-accents/-/remove-accents-0.4.2.tgz#0a43d3aaae1e80db919e07ae254b285d9e1c7bb5"
@@ -4395,6 +4447,15 @@ unist-util-remove-position@^4.0.0:
   dependencies:
     "@types/unist" "^2.0.0"
     unist-util-visit "^4.0.0"
+
+unist-util-remove@^3.0.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/unist-util-remove/-/unist-util-remove-3.1.0.tgz#8042577e151dac989b7517976bfe4bac58f76ccd"
+  integrity sha512-rO/sIghl13eN8irs5OBN2a4RC10MsJdiePCfwrvnzGtgIbHcDXr2REr0qi9F2r/CIb1r9FyyFmcMRIGs+EyUFw==
+  dependencies:
+    "@types/unist" "^2.0.0"
+    unist-util-is "^5.0.0"
+    unist-util-visit-parents "^5.0.0"
 
 unist-util-stringify-position@^3.0.0:
   version "3.0.2"

@@ -1,0 +1,9 @@
+{
+  "core": "Core",
+  "authentication": "Authentication",
+  "authorization": "Authorization",
+  "model": "Model",
+  "controller": "Controller",
+  "notification": "Notification",
+  "util": "Utilities"
+}

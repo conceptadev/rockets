@@ -28,6 +28,7 @@ module.exports = {
     '**/tsconfig.json',
     '**/tsconfig.eslint.json',
     '**/commitlint.config.js',
+    'website/*',
   ],
   rules: {
     'no-unused-vars': 'off',
