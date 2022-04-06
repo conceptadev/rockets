@@ -21,6 +21,22 @@ class MyDocument extends Document {
             rel="stylesheet"
             href="https://cdn.jsdelivr.net/npm/@docsearch/js@alpha/dist/cdn/docsearch.min.css"
           />
+          <script
+            async
+            src={`https://www.googletagmanager.com/gtag/js?id=G-E2EF28D6TS`}
+          />
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-E2EF28D6TS', {
+              page_path: window.location.pathname,
+            });
+          `,
+            }}
+          />
         </Head>
         <body>
           <Main />
