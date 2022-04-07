@@ -1,10 +1,10 @@
 const themeConfig = {
   github: 'https://github.com/conceptadev/rockets',
+  // projectChatLink: '',
   docsRepositoryBase: 'https://github.com/conceptadev/rockets/blob/main',
   search: true,
   // customSearch: <CustomSearch />,
   titleSuffix: ' – Rockets',
-  floatTOC: true,
   logo: (
     <>
       <img
@@ -69,11 +69,28 @@ const themeConfig = {
       />
       <link rel="manifest" href="/site.webmanifest" />
       <meta name="msapplication-TileImage" content="/ms-icon-150x150.png" />
+      <script
+        async
+        src={`https://www.googletagmanager.com/gtag/js?id=G-E2EF28D6TS`}
+      />
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-E2EF28D6TS', {
+              page_path: window.location.pathname,
+            });
+          `,
+        }}
+      />
     </>
   ),
 
   prevLinks: true,
   nextLinks: true,
+  floatTOC: true,
   footer: true,
   footerEditLink: 'Edit this page on GitHub',
   footerText: (
@@ -86,7 +103,7 @@ const themeConfig = {
       </span>
     </>
   ),
-  unstable_faviconGlyph: '👋',
+  unstable_faviconGlyph: '✦',
 };
 
 export default themeConfig;

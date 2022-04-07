@@ -1,10 +1,13 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const withNextra = require('nextra')({
+import nextra from 'nextra';
+
+const withNextra = nextra({
   theme: 'nextra-theme-docs',
   themeConfig: './theme.config.js',
+  mdxOptions: { remarkPlugins: [] },
 });
 
-module.exports = withNextra({
+export default withNextra({
   reactStrictMode: true,
   experiments: {
     swcLoader: true,

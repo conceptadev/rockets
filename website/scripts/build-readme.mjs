@@ -20,15 +20,32 @@ async function main() {
     // path to module docs
     const modulePath = './pages/documentation/modules';
 
+    // path to module toc list
+    const moduleTocListOut = path.join(modulePath, '_toc_list.md');
+
+    // read in the modules meta
+    const modulesMeta = JSON.parse(
+      fs.readFileSync(path.join(modulePath, 'meta.json')),
+    );
+
     // read in the modules config
     const modulesConfig = JSON.parse(fs.readFileSync('modules.json'));
 
     // packages by category
     const pkgsByCategory = {};
 
-    for (const packageName of packages) {
-      // package has module config?
-      if (!modulesConfig[packageName]) {
+    // packages toc
+    const tocList = {
+      type: 'list',
+      ordered: false,
+      start: 1,
+      spread: false,
+      children: [],
+    };
+
+    for (const packageName in modulesConfig) {
+      // package was found?
+      if (!packages.includes(packageName)) {
         continue;
       }
 
@@ -49,6 +66,16 @@ async function main() {
       const categoryDir = path.join(modulePath, pkgCategory);
       const categoryPackages = pkgsByCategory[pkgCategory];
       const categoryMeta = {};
+      const categoryTocListOut = path.join(categoryDir, '_toc_list.md');
+
+      // package toc by category
+      const tocCategoryList = {
+        type: 'list',
+        ordered: false,
+        start: 1,
+        spread: false,
+        children: [],
+      };
 
       // create category dir if necessary
       fs.mkdirSync(categoryDir, { recursive: true });
@@ -81,10 +108,37 @@ async function main() {
           const moduleReadme = fs.readFileSync(readmePath);
 
           // strip badges and clean it up a bit
-          const cleaned = await remark()
+          const processor = remark()
             .use(remarkStripBadges)
-            .use(remarkSqueezeParagraphs)
-            .process(moduleReadme);
+            .use(remarkSqueezeParagraphs);
+          const parsed = await processor.parse(moduleReadme);
+          const cleaned = await processor.run(parsed);
+
+          // update the toc
+          tocCategoryList.children.push({
+            type: 'listItem',
+            spread: false,
+            children: [
+              {
+                type: 'paragraph',
+                children: [
+                  {
+                    type: 'link',
+                    url: `/documentation/modules/${pkgCategory}/${packageName}`,
+                    title: packageName,
+                    children: [{ type: 'text', value: packageName }],
+                  },
+                  {
+                    type: 'text',
+                    value: `- ${cleaned.children[1].children[0].value}`,
+                  },
+                ],
+              },
+            ],
+          });
+
+          // final processing
+          const vfile = await processor.stringify(cleaned);
 
           // path to generated doc file
           const docFileMagic = fs.existsSync(docDir)
@@ -92,16 +146,36 @@ async function main() {
             : path.join(categoryDir, packageName + '.md');
 
           // write it
-          fs.writeFileSync(docFileMagic, String(cleaned));
+          fs.writeFileSync(docFileMagic, String(vfile));
         }
       }
+
+      tocList.children.push({
+        type: 'listItem',
+        spread: false,
+        children: [
+          {
+            type: 'text',
+            value: modulesMeta[pkgCategory],
+          },
+          tocCategoryList,
+        ],
+      });
 
       // write the category meta json
       fs.writeFileSync(
         path.join(categoryDir, 'meta.json'),
         JSON.stringify(categoryMeta, null, 2),
       );
+
+      // write the category toc markdown
+      const tocCategoryMarkdown = remark().stringify(tocCategoryList);
+      fs.writeFileSync(categoryTocListOut, tocCategoryMarkdown);
     }
+
+    // write the toc markdown
+    const tocMarkdown = remark().stringify(tocList);
+    fs.writeFileSync(moduleTocListOut, tocMarkdown);
   } catch (error) {
     console.error('Error occurred:', error);
   }
