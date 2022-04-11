@@ -28,6 +28,8 @@
     "jest-mock-extended": "^2.0.4"
   },
   "peerDependencies": {
+    "@faker-js/faker": "^6.0.0-alpha.6",
+    "@jorgebodega/typeorm-seeding": "^3.2.0",
     "@nestjs/typeorm": "^8.0.2",
     "class-transformer": "*",
     "class-validator": "*",
