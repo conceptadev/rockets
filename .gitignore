@@ -22,9 +22,6 @@ lib-cov
 coverage
 *.lcov
 
-# Documentation
-documentation
-
 # nyc test coverage
 .nyc_output
 
@@ -108,3 +105,5 @@ dist
 
 # JetBrainz
 .idea
+.DS_Store
+website/.yarn

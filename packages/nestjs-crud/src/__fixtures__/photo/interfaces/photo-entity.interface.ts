@@ -1,5 +1,6 @@
-export interface PhotoEntityInterface {
-  id: number;
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
+
+export interface PhotoEntityInterface extends ReferenceIdInterface {
   name: string;
   description: string;
   filename: string;

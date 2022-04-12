@@ -16,17 +16,17 @@ import {
 } from 'class-transformer';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { CRUD_MODULE_SETTINGS_TOKEN } from '../crud.constants';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import { CrudResponseDto } from '../dto/crud-response.dto';
 import { CrudResponsePaginatedDto } from '../dto/crud-response-paginated.dto';
 import { CrudSerializationOptionsInterface } from '../interfaces/crud-serialization-options.interface';
 import { CrudResultPaginatedInterface } from '../interfaces/crud-result-paginated.interface';
 import { CrudSettingsInterface } from '../interfaces/crud-settings.interface';
 import { CrudReflectionService } from '../services/crud-reflection.service';
-import { IdentityInterface } from '@concepta/nestjs-common';
+import { CRUD_MODULE_SETTINGS_TOKEN } from '../crud.constants';
 
 type ResponseType =
-  | (PlainLiteralObject & CrudResultPaginatedInterface<IdentityInterface>)
+  | (PlainLiteralObject & CrudResultPaginatedInterface<ReferenceIdInterface>)
   | Array<PlainLiteralObject>;
 
 export class CrudSerializeInterceptor implements NestInterceptor {
@@ -85,13 +85,16 @@ export class CrudSerializeInterceptor implements NestInterceptor {
 
   protected toInstance(
     type: Type,
-    targetObject: object,
+    targetObject: ResponseType,
     options?: ClassTransformOptions,
-  ): object {
+  ): Type {
     return plainToInstance(type, targetObject, options);
   }
 
-  protected toPlain(instance: object, options?: ClassTransformOptions): object {
+  protected toPlain(
+    instance: Type,
+    options?: ClassTransformOptions,
+  ): Record<string, unknown> {
     return instanceToPlain(instance, options);
   }
 

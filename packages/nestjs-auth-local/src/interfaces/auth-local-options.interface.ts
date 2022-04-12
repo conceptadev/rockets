@@ -12,7 +12,7 @@ export interface AuthLocalOptionsInterface
   /**
    * Implementation of a class to lookup users
    */
-  userLookupService?: AuthLocalUserLookupServiceInterface;
+  userLookupService: AuthLocalUserLookupServiceInterface;
 
   /**
    * Implementation of a class to issue tokens

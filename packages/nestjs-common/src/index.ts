@@ -3,11 +3,28 @@ export {
   createConfigurableDynamicRootModule,
 } from '@golevelup/nestjs-modules';
 
-export { IdentityInterface } from './interfaces/identity.interface';
-export { OptionsInterface } from './interfaces/options.interface';
-export { ModuleOptionsControllerInterface } from './interfaces/module-options-controller.interface';
-export { ModuleOptionsSettingsInterface } from './interfaces/module-options-settings.interface';
-export { DeferExternalOptionsInterface } from './interfaces/defer-external-options.interface';
+export { OptionsInterface } from './interfaces/options/options.interface';
+
+export {
+  ReferenceId,
+  ReferenceEmail,
+  ReferenceSubject,
+  ReferenceUsername,
+} from './references/reference.types';
+
+export { ReferenceIdInterface } from './interfaces/references/reference-id.interface';
+export { ReferenceEmailInterface } from './interfaces/references/reference-email.interface';
+export { ReferenceUsernameInterface } from './interfaces/references/reference-username.interface';
+export { ReferenceSubjectInterface } from './interfaces/references/reference-subject.interface';
+
+export { LookupIdInterface } from './interfaces/references/lookup/lookup-id.interface';
+export { LookupEmailInterface } from './interfaces/references/lookup/lookup-email.interface';
+export { LookupSubjectInterface } from './interfaces/references/lookup/lookup-subject.interface';
+export { LookupUsernameInterface } from './interfaces/references/lookup/lookup-username.interface';
+
+export { ModuleOptionsControllerInterface } from './interfaces/modules/module-options-controller.interface';
+export { ModuleOptionsSettingsInterface } from './interfaces/modules/module-options-settings.interface';
+export { DeferExternalOptionsInterface } from './interfaces/modules/defer-external-options.interface';
 
 export { deferExternal } from './modules/defer-external';
 export { negotiateController } from './modules/negotiate-controller';

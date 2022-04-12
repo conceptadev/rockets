@@ -1,7 +1,11 @@
 import {
-  CredentialLookupInterface,
-  UserLookupServiceInterface,
-} from '@concepta/nestjs-authentication';
+  ReferenceUsername,
+  LookupUsernameInterface,
+} from '@concepta/nestjs-common';
+import { AuthLocalCredentialsInterface } from './auth-local-credentials.interface';
 
 export interface AuthLocalUserLookupServiceInterface
-  extends UserLookupServiceInterface<CredentialLookupInterface> {}
+  extends LookupUsernameInterface<
+    ReferenceUsername,
+    AuthLocalCredentialsInterface
+  > {}

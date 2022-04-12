@@ -5,12 +5,6 @@ export class PhotoSeeder extends Seeder {
   public async run(): Promise<void> {
     const photoFactory = new PhotoFactory();
 
-    let nextId = 1;
-
-    await photoFactory
-      .map((photo) => {
-        photo.id = nextId++;
-      })
-      .createMany(15);
+    await photoFactory.createMany(15);
   }
 }

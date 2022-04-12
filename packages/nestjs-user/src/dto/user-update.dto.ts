@@ -1,6 +1,7 @@
-import { PickType } from '@nestjs/mapped-types';
 import { Exclude } from 'class-transformer';
+import { IntersectionType, PickType } from '@nestjs/swagger';
 import { UserUpdatableInterface } from '../interfaces/user-updatable.interface';
+import { UserDto } from './user.dto';
 import { UserCredentialsDto } from './user-credentials.dto';
 
 /**
@@ -8,5 +9,8 @@ import { UserCredentialsDto } from './user-credentials.dto';
  */
 @Exclude()
 export class UserUpdateDto
-  extends PickType(UserCredentialsDto, ['password'])
+  extends IntersectionType(
+    PickType(UserDto, ['email']),
+    PickType(UserCredentialsDto, ['password']),
+  )
   implements UserUpdatableInterface {}

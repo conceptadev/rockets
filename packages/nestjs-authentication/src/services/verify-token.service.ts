@@ -60,7 +60,9 @@ export class VerifyTokenService implements VerifyTokenServiceInterface {
    * @param {object} payload
    * @returns {boolean}
    */
-  private async validateToken(payload: object): Promise<boolean> {
+  private async validateToken(
+    payload: Record<string, unknown>,
+  ): Promise<boolean> {
     if (this.validateTokenService) {
       return this.validateTokenService.validateToken(payload);
     } else {

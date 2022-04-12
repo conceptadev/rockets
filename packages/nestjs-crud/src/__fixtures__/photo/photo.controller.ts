@@ -29,7 +29,6 @@ import { PhotoUpdateDto } from './dto/photo-update.dto';
     type: PhotoDto,
     paginatedType: PhotoPaginatedDto,
   },
-  params: { id: { field: 'id', primary: true, type: 'number' } },
 })
 export class PhotoController
   implements CrudControllerInterface<PhotoEntityInterface>

@@ -1,6 +1,6 @@
-import { PickType } from '@nestjs/mapped-types';
 import { Exclude, Expose } from 'class-transformer';
 import { IsString } from 'class-validator';
+import { PickType } from '@nestjs/swagger';
 import { UserCredentialsInterface } from '../interfaces/user-credentials.interface';
 import { UserDto } from './user.dto';
 

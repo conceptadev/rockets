@@ -2,7 +2,7 @@
 [![NPM Alpha](https://img.shields.io/npm/v/@concepta/nestjs-common/alpha)](https://www.npmjs.com/package/@concepta/nestjs-nestjscontrol)
 [![NPM Downloads](https://img.shields.io/npm/dw/@conceptadev/nestjs-common)](https://www.npmjs.com/package/@concepta/nestjs-common)
 
-[![GitHub Open Issues]](https://img.shields.io/github/issues/conceptadev/rockets/nestjs-common)](https://github.com/conceptadev/rockets/labels/nestjs-common)
+[![GitHub Open Issues](https://img.shields.io/github/issues/conceptadev/rockets/nestjs-common)](https://github.com/conceptadev/rockets/labels/nestjs-common)
 [![GitHub Closed Issues](https://img.shields.io/github/issues-closed/conceptadev/rockets/nestjs-common)](https://github.com/conceptadev/rockets/labels/nestjs-common)
 [![GitHub Open PRs](https://img.shields.io/github/issues-pr/conceptadev/rockets/nestjs-common)](https://github.com/conceptadev/rockets/labels/nestjs-common)
 [![GitHub Closed PRs](https://img.shields.io/github/issues-pr-closed/conceptadev/rockets/nestjs-common)](https://github.com/conceptadev/rockets/labels/nestjs-common)
@@ -33,13 +33,13 @@ milliseconds that each module should timeout at.
 
 Your .env file:
 
-```bash
+```zsh
 # global deferred timeout
 ROCKETS_MODULE_DEFERRED_TIMEOUT=5000
 ```
 
 Your shell:
 
-```bash
-$ export ROCKETS_MODULE_DEFERRED_TIMEOUT=5000;
+```zsh
+export ROCKETS_MODULE_DEFERRED_TIMEOUT=5000;
 ```

@@ -1,4 +1,3 @@
-export interface AuthJwtPayloadInterface {
-  sub: string;
-  username: string;
-}
+import { ReferenceSubjectInterface } from '@concepta/nestjs-common';
+
+export interface AuthJwtPayloadInterface extends ReferenceSubjectInterface {}

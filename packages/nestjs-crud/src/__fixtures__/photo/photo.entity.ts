@@ -1,3 +1,4 @@
+import { ReferenceId } from '@concepta/nestjs-common';
 import {
   Column,
   DeleteDateColumn,
@@ -8,8 +9,8 @@ import { PhotoEntityInterface } from './interfaces/photo-entity.interface';
 
 @Entity()
 export class Photo implements PhotoEntityInterface {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: ReferenceId;
 
   @Column({ length: 500 })
   name: string;

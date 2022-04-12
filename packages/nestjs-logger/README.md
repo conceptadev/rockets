@@ -43,7 +43,7 @@ export class App {}
 To use the default configuration, you need todefine the environments variables.
 One of the ways you can do that is using `.env` file
 
-```bash
+```zsh
 // .env file
 
 LOG_LEVEL="log,error"

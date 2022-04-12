@@ -5,6 +5,7 @@ import { UserModule } from '@concepta/nestjs-user';
 import { ConnectionOptions, getConnectionManager } from 'typeorm';
 import { CustomUserModule } from './custom-user/custom-user.module';
 import { CustomUserService } from './custom-user/custom-user.service';
+import { CustomUserLookupService } from './custom-user/custom-user-lookup.service';
 
 @Module({
   imports: [
@@ -23,9 +24,13 @@ import { CustomUserService } from './custom-user/custom-user.service';
     CrudModule.register(),
     UserModule.registerAsync({
       imports: [CustomUserModule],
-      inject: [CustomUserService],
-      useFactory: async (userService: CustomUserService) => ({
+      inject: [CustomUserService, CustomUserLookupService],
+      useFactory: async (
+        userService: CustomUserService,
+        userLookupService: CustomUserLookupService,
+      ) => ({
         userService,
+        userLookupService,
       }),
     }),
   ],

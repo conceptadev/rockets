@@ -19,7 +19,6 @@ import { AuthJwtOptionsInterface } from './interfaces/auth-jwt-options.interface
 import { AuthJwtStrategy } from './auth-jwt.strategy';
 import {
   AuthenticationModule,
-  UserLookupService,
   VerifyTokenService,
 } from '@concepta/nestjs-authentication';
 import { VerifyTokenServiceInterface } from '@concepta/nestjs-authentication/src/interfaces/verify-token-service.interface';
@@ -61,11 +60,9 @@ export class AuthJwtModule extends createConfigurableDynamicRootModule<
     },
     {
       provide: AUTH_JWT_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-      inject: [AUTH_JWT_MODULE_OPTIONS_TOKEN, UserLookupService],
-      useFactory: async (
-        options: AuthJwtOptionsInterface,
-        defaultService: UserLookupService,
-      ) => options?.userLookupService ?? defaultService,
+      inject: [AUTH_JWT_MODULE_OPTIONS_TOKEN],
+      useFactory: async (options: AuthJwtOptionsInterface) =>
+        options?.userLookupService,
     },
   ],
   exports: [
@@ -74,21 +71,14 @@ export class AuthJwtModule extends createConfigurableDynamicRootModule<
     AUTH_JWT_MODULE_USER_LOOKUP_SERVICE_TOKEN,
   ],
 }) {
-  static register(options: AuthJwtOptionsInterface = {}) {
-    const module = AuthJwtModule.forRoot(AuthJwtModule, options);
-
-    return module;
+  static register(options: AuthJwtOptionsInterface) {
+    return AuthJwtModule.forRoot(AuthJwtModule, options);
   }
 
   static registerAsync(
     options: AsyncModuleConfig<AuthJwtOptionsInterface> = {},
   ) {
-    const module = AuthJwtModule.forRootAsync(AuthJwtModule, {
-      useFactory: () => ({}),
-      ...options,
-    });
-
-    return module;
+    return AuthJwtModule.forRootAsync(AuthJwtModule, options);
   }
 
   static deferred(options: DeferExternalOptionsInterface = {}) {
