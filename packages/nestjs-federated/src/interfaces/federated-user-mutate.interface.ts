@@ -7,4 +7,5 @@ import {
  * Credentials Interface
  */
 export interface FederatedUserMutateInterface
-  extends ReferenceEmailInterface, ReferenceUsernameInterface { }
+  extends ReferenceEmailInterface,
+    ReferenceUsernameInterface {}

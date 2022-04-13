@@ -7,7 +7,5 @@ import { FederatedSettingsInterface } from '../interfaces/federated-settings.int
  */
 export const federatedDefaultConfig = registerAs(
   FEDERATED_MODULE_DEFAULT_SETTINGS_TOKEN,
-  (): FederatedSettingsInterface => ({
-    
-  }),
+  (): FederatedSettingsInterface => ({}),
 );

@@ -1,15 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthenticationModule } from '@concepta/nestjs-authentication';
-import { User, UserCrudService, UserModule } from '@concepta/nestjs-user';
+
 import { mock } from 'jest-mock-extended';
 
 import { FederatedModule } from './federated.module';
 import { FederatedService } from './services/federated.service';
 import { FederatedOAuthService } from './services/federated-oauth.service';
 import { JwtModule } from '@concepta/nestjs-jwt';
-import { CrudModule } from '@concepta/nestjs-crud';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
-import { PasswordModule } from '@concepta/nestjs-password';
+
 import { ConnectionOptions, getConnectionManager } from 'typeorm';
 import { Federated } from './entities/federated.entity';
 
@@ -24,9 +23,6 @@ describe('FederatedModuleTest', () => {
         FederatedModule.register(),
         JwtModule.register(),
         AuthenticationModule.register(),
-        PasswordModule.register(),
-        UserModule.register(),
-        CrudModule.register(),
         TypeOrmExtModule.registerAsync({
           useFactory: async () => {
             return {
@@ -50,13 +46,12 @@ describe('FederatedModuleTest', () => {
       .useValue({})
       .overrideProvider('FEDERATED_MODULE_USER_MUTATE_SERVICE_TOKEN')
       .useValue({})
-      .overrideProvider(UserCrudService)
-      .useValue({})
+
       .compile();
 
     const controller = module.get(FederatedService);
     const oauthService = module.get(FederatedOAuthService);
-    
+
     expect(controller).toBeDefined();
     expect(oauthService).toBeDefined();
   });

@@ -7,14 +7,16 @@ import { FederatedEntityInterface } from '../interfaces/federated-entity.interfa
 import { FederatedCreatableInterface } from '../interfaces/federated-creatable.interface';
 
 @Injectable()
-export class FederatedService implements FederatedServiceInterface
-{
+export class FederatedService implements FederatedServiceInterface {
   constructor(
     @Inject(FEDERATED_MODULE_FEDERATED_CUSTOM_REPO_TOKEN)
     public federatedRepo: Repository<Federated>,
   ) {}
 
-  async exists(provider: string, subject: string): Promise<FederatedEntityInterface> {
+  async exists(
+    provider: string,
+    subject: string,
+  ): Promise<FederatedEntityInterface> {
     const federated = await this.federatedRepo.findOne({
       where: {
         provider,
@@ -27,12 +29,13 @@ export class FederatedService implements FederatedServiceInterface
     return federated;
   }
 
-  async create(federatedDto: FederatedCreatableInterface): Promise<FederatedEntityInterface> {
+  async create(
+    federatedDto: FederatedCreatableInterface,
+  ): Promise<FederatedEntityInterface> {
     const federated = await this.federatedRepo.create(federatedDto);
 
     if (!federated) return null;
 
     return federated;
   }
-  
 }

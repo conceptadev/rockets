@@ -22,7 +22,6 @@ export { LookupEmailInterface } from './interfaces/references/lookup/lookup-emai
 export { LookupSubjectInterface } from './interfaces/references/lookup/lookup-subject.interface';
 export { LookupUsernameInterface } from './interfaces/references/lookup/lookup-username.interface';
 
-
 export { CreateOneInterface } from './interfaces/references/mutate/create-one.interface';
 export { DeleteOneInterface } from './interfaces/references/mutate/delete-one.interface';
 export { ReplaceOneInterface } from './interfaces/references/mutate/replace-one.interface';

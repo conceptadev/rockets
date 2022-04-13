@@ -1,19 +1,26 @@
 import {
-    AsyncModuleConfig, createConfigurableDynamicRootModule, deferExternal,
-    DeferExternalOptionsInterface, ModuleOptionsControllerInterface, negotiateController
+  AsyncModuleConfig,
+  createConfigurableDynamicRootModule,
+  deferExternal,
+  DeferExternalOptionsInterface,
+  ModuleOptionsControllerInterface,
+  negotiateController,
 } from '@concepta/nestjs-common';
 import {
-    createCustomRepositoryProvider, createEntityRepositoryProvider
+  createCustomRepositoryProvider,
+  createEntityRepositoryProvider,
 } from '@concepta/nestjs-typeorm-ext';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 
 import { federatedDefaultConfig } from './config/federated-default.config';
 import {
-    FEDERATED_MODULE_FEDERATED_CUSTOM_REPO_TOKEN, FEDERATED_MODULE_FEDERATED_ENTITY_REPO_TOKEN,
-    FEDERATED_MODULE_OPTIONS_TOKEN, FEDERATED_MODULE_SETTINGS_TOKEN,
-    FEDERATED_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-    FEDERATED_MODULE_USER_MUTATE_SERVICE_TOKEN
+  FEDERATED_MODULE_FEDERATED_CUSTOM_REPO_TOKEN,
+  FEDERATED_MODULE_FEDERATED_ENTITY_REPO_TOKEN,
+  FEDERATED_MODULE_OPTIONS_TOKEN,
+  FEDERATED_MODULE_SETTINGS_TOKEN,
+  FEDERATED_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+  FEDERATED_MODULE_USER_MUTATE_SERVICE_TOKEN,
 } from './federated.constants';
 import { FederatedOptionsInterface } from './interfaces/federated-options.interface';
 import { FederatedOAuthService } from './services/federated-oauth.service';
@@ -23,23 +30,15 @@ import { FederatedService } from './services/federated.service';
  * Auth local module
  */
 @Module({
-  providers: [
-    FederatedService,
-    FederatedOAuthService,
-  ],
-  exports: [
-    FederatedService,
-    FederatedOAuthService,
-  ],
+  providers: [FederatedService, FederatedOAuthService],
+  exports: [FederatedService, FederatedOAuthService],
   controllers: [],
 })
 export class FederatedModule extends createConfigurableDynamicRootModule<
   FederatedModule,
   FederatedOptionsInterface
 >(FEDERATED_MODULE_OPTIONS_TOKEN, {
-  imports: [
-    ConfigModule.forFeature(federatedDefaultConfig),
-  ],
+  imports: [ConfigModule.forFeature(federatedDefaultConfig)],
   providers: [
     {
       provide: FEDERATED_MODULE_SETTINGS_TOKEN,
@@ -61,7 +60,10 @@ export class FederatedModule extends createConfigurableDynamicRootModule<
       useFactory: async (options: FederatedOptionsInterface) =>
         options.userCreateService,
     },
-    createEntityRepositoryProvider(FEDERATED_MODULE_FEDERATED_ENTITY_REPO_TOKEN, 'federated'),
+    createEntityRepositoryProvider(
+      FEDERATED_MODULE_FEDERATED_ENTITY_REPO_TOKEN,
+      'federated',
+    ),
     createCustomRepositoryProvider(
       FEDERATED_MODULE_FEDERATED_CUSTOM_REPO_TOKEN,
       'federatedRepository',

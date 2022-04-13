@@ -4,7 +4,7 @@ import { FederatedEntityInterface } from '../interfaces/federated-entity.interfa
  * Federated Entity
  */
 @Entity()
-  // TODO: should we call it FederatedEntity instead?
+// TODO: should we call it FederatedEntity instead?
 export class Federated implements FederatedEntityInterface {
   /**
    * Unique Id

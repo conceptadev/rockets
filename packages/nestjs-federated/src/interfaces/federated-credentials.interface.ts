@@ -9,5 +9,5 @@ import {
  */
 export interface FederatedCredentialsInterface
   extends ReferenceIdInterface,
-  ReferenceUsernameInterface,
-  ReferenceEmailInterface { }
+    ReferenceUsernameInterface,
+    ReferenceEmailInterface {}
