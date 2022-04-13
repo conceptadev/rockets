@@ -7,7 +7,6 @@ import {
   TypeOrmModuleAsyncOptions,
   TypeOrmModuleOptions,
 } from '@nestjs/typeorm';
-import { createFakeConnection } from '@devniel/nestjs-typeorm-testing';
 import {
   AsyncModuleConfig,
   createConfigurableDynamicRootModule,
@@ -23,7 +22,7 @@ import { TypeOrmExtOptions } from './typeorm-ext.types';
 import { TypeOrmExtStorage } from './typeorm-ext.storage';
 import { TypeOrmExtMetadataInterface } from './interfaces/typeorm-ext-metadata.interface';
 import { TypeOrmExtTestOptionsInterface } from './interfaces/typeorm-ext-test-options.interface';
-import { FakeConnectionOptions } from '@devniel/nestjs-typeorm-testing/dist/lib/createFakeConnection';
+import { createTestConnectionFactory } from './utils/create-test-connection-factory';
 
 @Global()
 @Module({
@@ -78,7 +77,7 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
         },
         connectionFactory:
           options.testMode === true
-            ? this.testModeConnectionFactory
+            ? createTestConnectionFactory
             : options.connectionFactory,
       }),
     );
@@ -134,11 +133,5 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
           : []),
       ],
     };
-  }
-
-  private static async testModeConnectionFactory(
-    options: FakeConnectionOptions,
-  ) {
-    return createFakeConnection(options);
   }
 }
