@@ -1,6 +1,6 @@
 export interface FederatedEntityInterface {
   id: string;
   provider: string;
-  federatedRef: string;
+  subject: string;
   userId: string;
 }

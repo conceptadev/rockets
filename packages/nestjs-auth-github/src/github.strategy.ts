@@ -29,6 +29,7 @@ export class GithubStrategy extends PassportStrategy(
     refreshToken,
     profile: ReferenceIdInterface,
   ): Promise<AuthenticationJwtResponseInterface> {
+    
     const user = await this.userLookupService.byId(profile.id);
 
     if (!user || !refreshToken) {

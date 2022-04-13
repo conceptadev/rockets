@@ -1,10 +1,12 @@
-import {
-  CredentialLookupInterface,
-  UserLookupServiceInterface,
-} from '@concepta/nestjs-authentication';
+import { LookupEmailInterface, LookupIdInterface, ReferenceEmail } from '@concepta/nestjs-common';
+import { FederatedCredentialsInterface } from './federated-credentials.interface';
 
-//TODO: should we use UserLookupServiceInterface instead of FederatedUserLookupServiceInterface?
 export interface FederatedUserLookupServiceInterface
-  extends UserLookupServiceInterface<CredentialLookupInterface> {
-    getUserByEmail(email: string): Promise<CredentialLookupInterface>;
-  }
+  extends LookupIdInterface<
+    ReferenceEmail,
+    FederatedCredentialsInterface
+  >,
+  LookupEmailInterface<
+    ReferenceEmail,
+    FederatedCredentialsInterface
+  > { }

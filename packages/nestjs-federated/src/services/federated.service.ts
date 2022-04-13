@@ -14,11 +14,11 @@ export class FederatedService implements FederatedServiceInterface
     public federatedRepo: Repository<Federated>,
   ) {}
 
-  async exists(provider: string, federatedRef: string): Promise<FederatedEntityInterface> {
+  async exists(provider: string, subject: string): Promise<FederatedEntityInterface> {
     const federated = await this.federatedRepo.findOne({
       where: {
         provider,
-        federatedRef,
+        subject,
       },
     });
 

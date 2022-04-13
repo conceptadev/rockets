@@ -5,6 +5,7 @@ import { mock } from 'jest-mock-extended';
 
 import { FederatedModule } from './federated.module';
 import { FederatedService } from './services/federated.service';
+import { FederatedOAuthService } from './services/federated-oauth.service';
 import { JwtModule } from '@concepta/nestjs-jwt';
 import { CrudModule } from '@concepta/nestjs-crud';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
@@ -45,11 +46,18 @@ describe('FederatedModuleTest', () => {
       .useValue(mock<Federated>())
       .overrideProvider('FEDERATED_MODULE_FEDERATED_CUSTOM_REPO_TOKEN')
       .useValue({})
+      .overrideProvider('FEDERATED_MODULE_USER_LOOKUP_SERVICE_TOKEN')
+      .useValue({})
+      .overrideProvider('FEDERATED_MODULE_USER_MUTATE_SERVICE_TOKEN')
+      .useValue({})
       .overrideProvider(UserCrudService)
       .useValue({})
       .compile();
 
     const controller = module.get(FederatedService);
+    const oauthService = module.get(FederatedOAuthService);
+    
     expect(controller).toBeDefined();
+    expect(oauthService).toBeDefined();
   });
 });

@@ -19,10 +19,10 @@ export class Federated implements FederatedEntityInterface {
   provider: string;
 
   /**
-   * Password
+   * subject
    */
   @Column()
-  federatedRef: string;
+  subject: string;
 
   /**
    * userId
