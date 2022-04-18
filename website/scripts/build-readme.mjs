@@ -13,12 +13,15 @@ async function main() {
   // location of packages
   const packagesDir = '../packages';
 
+  // name of destination folder
+  const modulesDest = 'api';
+
   try {
     // read all packages
     const packages = fs.readdirSync(packagesDir);
 
     // path to module docs
-    const modulePath = './pages/documentation/modules';
+    const modulePath = `./pages/documentation/${modulesDest}`;
 
     // path to module toc list
     const moduleTocListOut = path.join(modulePath, '_toc_list.md');
@@ -124,7 +127,7 @@ async function main() {
                 children: [
                   {
                     type: 'link',
-                    url: `/documentation/modules/${pkgCategory}/${packageName}`,
+                    url: `/documentation/${modulesDest}/${pkgCategory}/${packageName}`,
                     title: packageName,
                     children: [{ type: 'text', value: packageName }],
                   },
