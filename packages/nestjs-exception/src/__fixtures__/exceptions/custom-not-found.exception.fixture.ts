@@ -2,7 +2,7 @@ import { NotFoundException } from '@nestjs/common';
 import { ExceptionInterface } from '../../interfaces/exception.interface';
 import { formatMessage } from '../../utils/format-message.util';
 
-export class CustomNotFoundException
+export class CustomNotFoundExceptionFixture
   extends NotFoundException
   implements ExceptionInterface
 {

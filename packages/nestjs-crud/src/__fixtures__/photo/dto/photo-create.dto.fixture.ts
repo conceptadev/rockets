@@ -1,9 +1,9 @@
 import { PickType } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import { PhotoDto } from './photo.dto';
+import { PhotoDtoFixture } from './photo.dto.fixture';
 
 @Exclude()
-export class PhotoCreateDto extends PickType(PhotoDto, [
+export class PhotoCreateDtoFixture extends PickType(PhotoDtoFixture, [
   'name',
   'description',
   'filename',

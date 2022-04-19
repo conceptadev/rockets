@@ -1,13 +1,19 @@
 import { Controller, Inject, Post, UseGuards } from '@nestjs/common';
 import {
+  ApiBody,
+  ApiOkResponse,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
+import {
   IssueTokenServiceInterface,
   IssueTokenService,
-  AuthenticationJwtResponseInterface,
   AuthGuard,
   AuthUser,
   AuthenticatedUserInterface,
+  AuthenticationJwtResponseDto,
 } from '@concepta/nestjs-authentication';
 import { AUTH_JWT_REFRESH_STRATEGY_NAME } from './auth-refresh.constants';
+import { AuthRefreshDto } from './dto/auth-refresh.dto';
 
 /**
  * Auth Local controller
@@ -22,11 +28,20 @@ export class AuthRefreshController {
   /**
    * Login
    */
+  @ApiBody({
+    type: AuthRefreshDto,
+    description: 'DTO containing a refresh token.',
+  })
+  @ApiOkResponse({
+    type: AuthenticationJwtResponseDto,
+    description: 'DTO containing an access token and a refresh token.',
+  })
+  @ApiUnauthorizedResponse()
   @UseGuards(AuthGuard(AUTH_JWT_REFRESH_STRATEGY_NAME))
   @Post()
   async refresh(
     @AuthUser() user: AuthenticatedUserInterface,
-  ): Promise<AuthenticationJwtResponseInterface> {
+  ): Promise<AuthenticationJwtResponseDto> {
     return this.issueTokenService.responsePayload(user.id);
   }
 }

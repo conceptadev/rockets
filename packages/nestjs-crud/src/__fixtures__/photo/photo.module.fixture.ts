@@ -8,32 +8,32 @@ import { CrudModule } from '../../crud.module';
 import {
   PHOTO_MODULE_CUSTOM_REPO_TOKEN,
   PHOTO_MODULE_ENTITY_REPO_TOKEN,
-} from './photo.constants';
-import { PhotoController } from './photo.controller';
-import { Photo } from './photo.entity';
-import { PhotoRepository } from './photo.repository';
-import { PhotoService } from './photo.service';
+} from './photo.constants.fixture';
+import { PhotoControllerFixture } from './photo.controller.fixture';
+import { PhotoFixture } from './photo.entity.fixture';
+import { PhotoRepositoryFixture } from './photo.repository.fixture';
+import { PhotoServiceFixture } from './photo.service.fixture';
 
 @Module({
-  providers: [PhotoService],
-  controllers: [PhotoController],
+  providers: [PhotoServiceFixture],
+  controllers: [PhotoControllerFixture],
 })
-export class PhotoModule {
+export class PhotoModuleFixture {
   static register(): DynamicModule {
     TypeOrmExtModule.configure(
       {},
       {
         entities: {
-          photo: { useClass: Photo },
+          photo: { useClass: PhotoFixture },
         },
         repositories: {
-          photoRepository: { useClass: PhotoRepository },
+          photoRepository: { useClass: PhotoRepositoryFixture },
         },
       },
     );
 
     return {
-      module: PhotoModule,
+      module: PhotoModuleFixture,
       imports: [CrudModule.register()],
       providers: [
         createEntityRepositoryProvider(PHOTO_MODULE_ENTITY_REPO_TOKEN, 'photo'),

@@ -5,10 +5,10 @@ import {
   Entity,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { PhotoEntityInterface } from './interfaces/photo-entity.interface';
+import { PhotoEntityInterfaceFixture } from './interfaces/photo-entity.interface.fixture';
 
 @Entity()
-export class Photo implements PhotoEntityInterface {
+export class PhotoFixture implements PhotoEntityInterfaceFixture {
   @PrimaryGeneratedColumn('uuid')
   id: ReferenceId;
 

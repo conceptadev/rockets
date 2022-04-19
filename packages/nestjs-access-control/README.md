@@ -1,15 +1,14 @@
-[![NPM Latest](https://img.shields.io/npm/v/@concepta/nestjs-access-control)](https://www.npmjs.com/package/@concepta/nestjs-access-control)
-[![NPM Alpha](https://img.shields.io/npm/v/@concepta/nestjs-access-control/alpha)](https://www.npmjs.com/package/@concepta/nestjs-nestjscontrol)
-[![NPM Downloads](https://img.shields.io/npm/dw/@conceptadev/nestjs-access-control)](https://www.npmjs.com/package/@concepta/nestjs-access-control)
-
-[![GitHub Open Issues](https://img.shields.io/github/issues/conceptadev/rockets/nestjs-access-control)](https://github.com/conceptadev/rockets/labels/nestjs-access-control)
-[![GitHub Closed Issues](https://img.shields.io/github/issues-closed/conceptadev/rockets/nestjs-access-control)](https://github.com/conceptadev/rockets/labels/nestjs-access-control)
-[![GitHub Open PRs](https://img.shields.io/github/issues-pr/conceptadev/rockets/nestjs-access-control)](https://github.com/conceptadev/rockets/labels/nestjs-access-control)
-[![GitHub Closed PRs](https://img.shields.io/github/issues-pr-closed/conceptadev/rockets/nestjs-access-control)](https://github.com/conceptadev/rockets/labels/nestjs-access-control)
-
 # Rockets NestJS Access Control
 
 Advanced access control guard for NestJS with optional per-request filtering.
+
+## Project
+
+[![NPM Latest](https://img.shields.io/npm/v/@concepta/nestjs-access-control)](https://www.npmjs.com/package/@concepta/nestjs-access-control)
+[![NPM Downloads](https://img.shields.io/npm/dw/@conceptadev/nestjs-access-control)](https://www.npmjs.com/package/@concepta/nestjs-access-control)
+[![GH Last Commit](https://img.shields.io/github/last-commit/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets)
+[![GH Contrib](https://img.shields.io/github/contributors/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets/graphs/contributors)
+[![NestJS Dep](https://img.shields.io/github/package-json/dependency-version/conceptadev/rockets/@nestjs/common?label=NestJS&logo=nestjs&filename=packages%2Fnestjs-common%2Fpackage.json)](https://www.npmjs.com/package/@nestjs/common)
 
 ## Installation
 

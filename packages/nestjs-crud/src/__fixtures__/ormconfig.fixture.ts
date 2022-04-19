@@ -1,12 +1,12 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConnectionOptions } from '@jorgebodega/typeorm-seeding';
-import { Photo } from './photo/photo.entity';
+import { PhotoFixture } from './photo/photo.entity.fixture';
 
 const config: TypeOrmModuleOptions & Partial<ConnectionOptions> = {
   type: 'sqlite',
   database: ':memory:',
   synchronize: true,
-  entities: [Photo],
+  entities: [PhotoFixture],
   defaultSeeder: './photo/photo-seeder',
 };
 

@@ -4,7 +4,9 @@ import { AuthLocalCredentialsInterface } from '../../interfaces/auth-local-crede
 import { AuthLocalUserLookupServiceInterface } from '../../interfaces/auth-local-user-lookup-service.interface';
 
 @Injectable()
-export class UserLookupService implements AuthLocalUserLookupServiceInterface {
+export class UserLookupServiceFixture
+  implements AuthLocalUserLookupServiceInterface
+{
   async byUsername(
     username: ReferenceUsername,
   ): Promise<AuthLocalCredentialsInterface> {
