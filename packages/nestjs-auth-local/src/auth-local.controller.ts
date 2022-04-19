@@ -18,7 +18,7 @@ import { AuthLocalLoginDto } from './dto/auth-local-login.dto';
 /**
  * Auth Local controller
  */
-@Controller('auth/local')
+@Controller('auth/login')
 export class AuthLocalController {
   constructor(
     @Inject(AUTH_LOCAL_ISSUE_TOKEN_SERVICE_TOKEN)
