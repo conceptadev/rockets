@@ -1,8 +1,8 @@
-import { PhotoEntityInterface } from './interfaces/photo-entity.interface';
+import { PhotoEntityInterfaceFixture } from './interfaces/photo-entity.interface.fixture';
 import { CrudControllerInterface } from '../../interfaces/crud-controller.interface';
 import { CrudRequestInterface } from '../../interfaces/crud-request.interface';
 import { CrudController } from '../../decorators/controller/crud-controller.decorator';
-import { PhotoService } from './photo.service';
+import { PhotoServiceFixture } from './photo.service.fixture';
 import { CrudReadAll } from '../../decorators/actions/crud-read-all.decorator';
 import { CrudReadOne } from '../../decorators/actions/crud-read-one.decorator';
 import { CrudCreateMany } from '../../decorators/actions/crud-create-many.decorator';
@@ -14,11 +14,11 @@ import { CrudReplaceOne } from '../../decorators/actions/crud-replace-one.decora
 import { CrudSoftDelete } from '../../decorators/routes/crud-soft-delete.decorator';
 import { CrudRequest } from '../../decorators/params/crud-request.decorator';
 import { CrudBody } from '../../decorators/params/crud-body.decorator';
-import { PhotoDto } from './dto/photo.dto';
-import { PhotoPaginatedDto } from './dto/photo-paginated.dto';
-import { PhotoCreateDto } from './dto/photo-create.dto';
-import { PhotoCreateManyDto } from './dto/photo-create-many.dto';
-import { PhotoUpdateDto } from './dto/photo-update.dto';
+import { PhotoDtoFixture } from './dto/photo.dto.fixture';
+import { PhotoPaginatedDtoFixture } from './dto/photo-paginated.dto.fixture';
+import { PhotoCreateDtoFixture } from './dto/photo-create.dto.fixture';
+import { PhotoCreateManyDtoFixture } from './dto/photo-create-many.dto.fixture';
+import { PhotoUpdateDtoFixture } from './dto/photo-update.dto.fixture';
 
 /**
  * Photo controller.
@@ -26,19 +26,19 @@ import { PhotoUpdateDto } from './dto/photo-update.dto';
 @CrudController({
   path: 'photo',
   model: {
-    type: PhotoDto,
-    paginatedType: PhotoPaginatedDto,
+    type: PhotoDtoFixture,
+    paginatedType: PhotoPaginatedDtoFixture,
   },
 })
-export class PhotoController
-  implements CrudControllerInterface<PhotoEntityInterface>
+export class PhotoControllerFixture
+  implements CrudControllerInterface<PhotoEntityInterfaceFixture>
 {
   /**
    * Constructor.
    *
    * @param photoService instance of the photo crud service
    */
-  constructor(private photoService: PhotoService) {}
+  constructor(private photoService: PhotoServiceFixture) {}
 
   /**
    * Get many
@@ -69,7 +69,7 @@ export class PhotoController
   @CrudCreateMany()
   async createMany(
     @CrudRequest() crudRequest: CrudRequestInterface,
-    @CrudBody() photoCreateManyDto: PhotoCreateManyDto,
+    @CrudBody() photoCreateManyDto: PhotoCreateManyDtoFixture,
   ) {
     return this.photoService.createMany(crudRequest, photoCreateManyDto);
   }
@@ -83,7 +83,7 @@ export class PhotoController
   @CrudCreateOne()
   async createOne(
     @CrudRequest() crudRequest: CrudRequestInterface,
-    @CrudBody() photoCreateDto: PhotoCreateDto,
+    @CrudBody() photoCreateDto: PhotoCreateDtoFixture,
   ) {
     return this.photoService.createOne(crudRequest, photoCreateDto);
   }
@@ -97,7 +97,7 @@ export class PhotoController
   @CrudUpdateOne()
   async updateOne(
     @CrudRequest() crudRequest: CrudRequestInterface,
-    @CrudBody() photoUpdateDto: PhotoUpdateDto,
+    @CrudBody() photoUpdateDto: PhotoUpdateDtoFixture,
   ) {
     return this.photoService.updateOne(crudRequest, photoUpdateDto);
   }
@@ -110,7 +110,7 @@ export class PhotoController
   @CrudReplaceOne()
   async replaceOne(
     @CrudRequest() crudRequest: CrudRequestInterface,
-    @CrudBody() photoCreateDto: PhotoCreateDto,
+    @CrudBody() photoCreateDto: PhotoCreateDtoFixture,
   ) {
     return this.photoService.replaceOne(crudRequest, photoCreateDto);
   }

@@ -1,10 +1,10 @@
 import Faker from '@faker-js/faker';
 import { Factory } from '@jorgebodega/typeorm-seeding';
-import { Photo } from './photo.entity';
+import { PhotoFixture } from './photo.entity.fixture';
 
-export class PhotoFactory extends Factory<Photo> {
-  protected async definition(): Promise<Photo> {
-    const photo = new Photo();
+export class PhotoFactoryFixture extends Factory<PhotoFixture> {
+  protected async definition(): Promise<PhotoFixture> {
+    const photo = new PhotoFixture();
 
     photo.id = Faker.datatype.uuid();
     photo.filename = Faker.random.word() + '.jpg';

@@ -3,12 +3,12 @@ import { IsBoolean, IsNumber, IsString, IsUUID } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { ReferenceId } from '@concepta/nestjs-common';
 import { CrudResponseDto } from '../../../dto/crud-response.dto';
-import { PhotoEntityInterface } from '../interfaces/photo-entity.interface';
+import { PhotoEntityInterfaceFixture } from '../interfaces/photo-entity.interface.fixture';
 
 @Exclude()
-export class PhotoDto
-  extends CrudResponseDto<PhotoEntityInterface>
-  implements PhotoEntityInterface
+export class PhotoDtoFixture
+  extends CrudResponseDto<PhotoEntityInterfaceFixture>
+  implements PhotoEntityInterfaceFixture
 {
   @ApiProperty()
   @Expose()

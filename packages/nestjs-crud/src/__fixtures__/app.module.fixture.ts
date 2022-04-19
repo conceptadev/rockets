@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
-import { PhotoModule } from './photo/photo.module';
-import { default as ormConfig } from './ormconfig';
+import { PhotoModuleFixture } from './photo/photo.module.fixture';
+import { default as ormConfig } from './ormconfig.fixture';
 
 @Module({
   imports: [
@@ -10,7 +10,7 @@ import { default as ormConfig } from './ormconfig';
         return ormConfig;
       },
     }),
-    PhotoModule.register(),
+    PhotoModuleFixture.register(),
   ],
 })
-export class AppModule {}
+export class AppModuleFixture {}
