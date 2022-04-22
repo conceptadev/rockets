@@ -27,12 +27,13 @@
     "passport-strategy": "^1.0.0",
     "zxcvbn": "^4.4.2"
   },
-  "peerDependencies": {
-    "eventemitter2": "*"
-  },
   "devDependencies": {
     "@nestjs/testing": "^8.0.8",
     "@types/passport-local": "^1.0.34",
     "jest-mock-extended": "^2.0.4"
+  },
+  "peerDependencies": {
+    "class-transformer": "*",
+    "class-validator": "*"
   }
 }

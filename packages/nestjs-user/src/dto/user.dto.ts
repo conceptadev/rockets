@@ -1,5 +1,6 @@
 import { IsEmail, IsString } from 'class-validator';
 import { Exclude, Expose } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger';
 import {
   ReferenceEmail,
   ReferenceId,
@@ -20,6 +21,10 @@ export class UserDto
    * Unique id
    */
   @Expose()
+  @ApiProperty({
+    type: 'string',
+    description: 'Unique identifier',
+  })
   @IsString()
   id: ReferenceId;
 
@@ -27,6 +32,10 @@ export class UserDto
    * Email
    */
   @Expose()
+  @ApiProperty({
+    type: 'string',
+    description: 'Email',
+  })
   @IsEmail()
   email: ReferenceEmail;
 
@@ -34,6 +43,10 @@ export class UserDto
    * Username
    */
   @Expose()
+  @ApiProperty({
+    type: 'string',
+    description: 'Username',
+  })
   @IsString()
   username: ReferenceUsername;
 }
