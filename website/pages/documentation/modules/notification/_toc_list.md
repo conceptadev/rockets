@@ -1,1 +1,0 @@
-*   [nestjs-email](/documentation/modules/notification/nestjs-email "nestjs-email")- Email deliver module that supports most popular transports, as well as template based email bodies using handlebars syntax.
