@@ -1,6 +1,6 @@
 {
   "name": "@concepta/nestjs-swagger-ui",
-  "version": "4.0.0-alpha.9",
+  "version": "4.0.0-alpha.10",
   "description": "Rockets NestJS Swagger UI",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,10 +12,10 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
-    "@concepta/nestjs-common": "^4.0.0-alpha.9",
+    "@concepta/nestjs-common": "^4.0.0-alpha.10",
     "@nestjs/common": "^8.0.8",
     "@nestjs/config": "^1.0.0",
-    "@nestjs/swagger": "^5.2.0",
+    "@nestjs/swagger": "^5.2.1",
     "swagger-ui-express": "^4.3.0"
   },
   "devDependencies": {

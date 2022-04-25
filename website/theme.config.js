@@ -47,6 +47,14 @@ const themeConfig = {
       />
       <meta name="og:image" content="https://www.rockets.tools/og.png" />
       <meta name="apple-mobile-web-app-title" content="Rockets" />
+      <style>
+        @import
+        url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto&display=swap');
+      </style>
+      <link
+        href="https://fonts.googleapis.com/css?family=Inter"
+        rel="stylesheet"
+      />
       <link
         rel="apple-touch-icon"
         sizes="180x180"
@@ -106,7 +114,6 @@ const themeConfig = {
       </span>
     </>
   ),
-  unstable_faviconGlyph: '✦',
 };
 
 export default themeConfig;

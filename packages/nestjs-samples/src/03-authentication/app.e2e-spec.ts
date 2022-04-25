@@ -41,7 +41,7 @@ describe('AppController (e2e)', () => {
       await app.close();
     });
 
-    it('POST /auth/local', async () => {
+    it('POST /auth/login', async () => {
       const sign = {
         username: 'first_user',
         password: 'AS12378',
@@ -49,7 +49,7 @@ describe('AppController (e2e)', () => {
 
       const response: { body: AuthenticationJwtResponseInterface } =
         await supertest(app.getHttpServer())
-          .post('/auth/local')
+          .post('/auth/login')
           .send(sign)
           .expect(201);
 
@@ -57,14 +57,14 @@ describe('AppController (e2e)', () => {
       expect(response.body.refreshToken).toBeDefined();
     });
 
-    it('POST /auth/local no-auth', async () => {
+    it('POST /auth/login no-auth', async () => {
       const sign = {
         username: 'first_user_2',
         password: 'AS12378',
       };
 
       await supertest(app.getHttpServer())
-        .post('/auth/local')
+        .post('/auth/login')
         .send(sign)
         .expect(401);
 
@@ -79,7 +79,7 @@ describe('AppController (e2e)', () => {
 
       const response: { body: AuthenticationJwtResponseInterface } =
         await supertest(app.getHttpServer())
-          .post('/auth/local')
+          .post('/auth/login')
           .send(sign)
           .expect(201);
 
@@ -124,7 +124,7 @@ describe('AppController (e2e)', () => {
 
       const response: { body: AuthenticationJwtResponseInterface } =
         await supertest(app.getHttpServer())
-          .post('/auth/local')
+          .post('/auth/login')
           .send(sign)
           .expect(201);
 

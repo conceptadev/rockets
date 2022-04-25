@@ -1,0 +1,14 @@
+{
+  "nestjs-common": {
+    "title": "Common"
+  },
+  "nestjs-exception": {
+    "title": "Exceptions"
+  },
+  "nestjs-event": {
+    "title": "Events"
+  },
+  "nestjs-typeorm-ext": {
+    "title": "TypeORM Ext"
+  }
+}

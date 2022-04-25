@@ -7,5 +7,5 @@ export {
 
 export { TypeOrmExtOrmOptionsInterface } from './interfaces/typeorm-ext-orm-options.interface';
 
-export { createEntityRepositoryProvider } from './utils/typeorm-ext-entity.provider';
-export { createCustomRepositoryProvider } from './utils/typeorm-ext-custom.provider';
+export { createEntityRepositoryProvider } from './utils/create-custom-entity-provider';
+export { createCustomRepositoryProvider } from './utils/create-custom-repository-provider';

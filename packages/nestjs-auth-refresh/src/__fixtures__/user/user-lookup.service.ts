@@ -6,7 +6,7 @@ import {
 import { AuthRefreshUserLookupServiceInterface } from '../../interfaces/auth-refresh-user-lookup-service.interface';
 
 @Injectable()
-export class UserLookupService
+export class UserLookupServiceFixture
   implements AuthRefreshUserLookupServiceInterface
 {
   async bySubject(subject: ReferenceSubject): Promise<ReferenceIdInterface> {

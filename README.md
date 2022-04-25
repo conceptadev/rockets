@@ -1,4 +1,3 @@
-
 <p align="center">
   <img width="150" src="https://raw.githubusercontent.com/conceptadev/rockets/main/assets/rockets-icon.svg">
 </p>
@@ -53,5 +52,3 @@ once we have finalized our Contributor License Agreement.
 | [nestjs-swagger-ui](https://github.com/conceptadev/rockets/tree/main/packages/nestjs-swagger-ui 'nestjs-swagger-ui')             | Expose your OpenApi spec on your API using the powerful Swagger UI interface.                                                               |
 | [nestjs-typeorm-ext](https://github.com/conceptadev/rockets/tree/main/packages/nestjs-typeorm-ext 'nestjs-typeorm-ext')          | Extension of the NestJS TypeOrm module that allows your dynamic modules to accept drop-in replacements of custom entities and repositories. |
 | [nestjs-user](https://github.com/conceptadev/rockets/tree/main/packages/nestjs-user 'nestjs-user')                               | A module for managing a basic User entity, including controller with full CRUD, DTOs, sample data factory and seeder.                       |
-
-

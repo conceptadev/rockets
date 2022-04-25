@@ -14,5 +14,7 @@ export * from './factories/passport-strategy.factory';
 
 export * from './guards/auth.guard';
 
+export { AuthenticationJwtResponseDto } from './dto/authentication-jwt-response.dto';
+
 export { IssueTokenService } from './services/issue-token.service';
 export { VerifyTokenService } from './services/verify-token.service';

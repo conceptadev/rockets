@@ -1,0 +1,8 @@
+{
+  "nestjs-crud": {
+    "title": "CRUD"
+  },
+  "nestjs-swagger-ui": {
+    "title": "Swagger UI"
+  }
+}
