@@ -1,15 +1,22 @@
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-weight: 400;
 }
 
-h1,h2,h3,h4,h5,h6 {
-  font-family: 'Inter', sans-serif;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Inter", sans-serif;
   font-weight: 700;
 }
 
-i,b,em {
-  font-family: 'Inter', sans-serif;
+i,
+b,
+em {
+  font-family: "Inter", sans-serif;
   font-weight: 600;
 }
 
@@ -41,20 +48,76 @@ i,b,em {
   color: #fff !important;
 }
 
-/* body {
-  background: linear-gradient(-45deg, #000000, #1b1329, #000000, #1c3827);
-  background-size: 400% 400%;
-  animation: gradient 15s ease infinite;
-} */
+pre {
+  background-color: #070509 !important;
+}
 
-/* @keyframes gradient {
-  0% {
-    background-position: 0% 50%;
+pre code {
+  @apply text-sm;
+  background-color: #070509 !important;
+  font-family: "Fira Code", monospace;
+  font-weight: 300;
+  color: #ffffff;
+}
+pre {
+  background-color: #070509 !important;
+}
+
+pre code {
+  @apply text-sm;
+  background-color: #070509 !important;
+  font-family: "Fira Code", monospace;
+  font-weight: 300;
+  color: #ffffff;
+}
+
+code.prism-code {
+  --c-highlight: rgb(115, 34, 203, 0.1) !important;
+}
+
+code.prism-code[class*="language-"],
+.dark code.prism-code[class*="language-"] {
+  & span.token {
+    &.plain,
+    &.script,
+    &.number {
+      color: #f78c6c !important;
+    }
+
+    &.string,
+    &.class-name {
+      color: #73e7d3 !important;
+    }
+
+    &.keyword {
+      color: #f776b6 !important;
+    }
+
+    &.function {
+      color: #ffae32 !important;
+    }
+
+    &.punctuation,
+    &.operator {
+      color: #777 !important;
+    }
+
+    &.tag,
+    &.tag:not(.script) {
+      color: #f776b6 !important;
+
+      &.punctuation {
+        color: #777 !important;
+      }
+
+      &.atrule,
+      &.attr-value,
+      &.keyword {
+        color: #73e7d3 !important;
+        &.punctuation {
+          color: #777 !important;
+        }
+      }
+    }
   }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-} */
+}
