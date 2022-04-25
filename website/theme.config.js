@@ -3,7 +3,7 @@ import CustomSearch from './components/Search';
 const themeConfig = {
   github: 'https://github.com/conceptadev/rockets',
   projectLink: 'https://github.com/conceptadev/rockets',
-  // projectChatLink: '',
+
   docsRepositoryBase: 'https://github.com/conceptadev/rockets/blob/main',
   search: true,
   customSearch: <CustomSearch />,
