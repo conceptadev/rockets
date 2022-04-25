@@ -1,0 +1,14 @@
+{
+  "nestjs-authentication": {
+    "title": "Authentication"
+  },
+  "nestjs-auth-local": {
+    "title": "Local Login"
+  },
+  "nestjs-auth-refresh": {
+    "title": "Refresh Token"
+  },
+  "nestjs-auth-github": {
+    "title": "GitHub Login"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "nestjs-jwt": {
+    "title": "JWT"
+  },
+  "nestjs-logger": {
+    "title": "Logger"
+  },
+  "nestjs-password": {
+    "title": "Password"
+  }
+}

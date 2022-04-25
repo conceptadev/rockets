@@ -1,0 +1,8 @@
+{
+  "nestjs-auth-jwt": {
+    "title": "Access Token"
+  },
+  "nestjs-access-control": {
+    "title": "Access Control"
+  }
+}
