@@ -6,7 +6,7 @@ import { PasswordModule } from '@concepta/nestjs-password';
 import { AuthLocalController } from './auth-local.controller';
 import { AuthLocalModule } from './auth-local.module';
 import { AuthLocalCredentialsInterface } from './interfaces/auth-local-credentials.interface';
-import { UserLookupService } from './__fixtures__/user/user-lookup.service';
+import { UserLookupServiceFixture } from './__fixtures__/user/user-lookup.service.fixture';
 
 describe('AuthLocalModuleTest', () => {
   afterEach(async () => {
@@ -15,10 +15,10 @@ describe('AuthLocalModuleTest', () => {
 
   it('is controller defined', async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [UserLookupService],
+      providers: [UserLookupServiceFixture],
       imports: [
         AuthLocalModule.register({
-          userLookupService: new UserLookupService(),
+          userLookupService: new UserLookupServiceFixture(),
         }),
         AuthenticationModule.register(),
         JwtModule.register(),

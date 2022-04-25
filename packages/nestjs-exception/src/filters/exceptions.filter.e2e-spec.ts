@@ -2,7 +2,7 @@ import supertest from 'supertest';
 import { HttpAdapterHost } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { AppModule } from '../__fixtures__/app.module.fixture';
+import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
 import { ExceptionsFilter } from './exceptions.filter';
 
 describe('Exception (e2e)', () => {
@@ -10,7 +10,7 @@ describe('Exception (e2e)', () => {
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [AppModuleFixture],
     }).compile();
     app = moduleFixture.createNestApplication();
 

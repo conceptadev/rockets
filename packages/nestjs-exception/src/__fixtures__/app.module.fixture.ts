@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller.fixture';
+import { AppControllerFixture } from './app.controller.fixture';
 
 @Module({
-  controllers: [AppController],
+  controllers: [AppControllerFixture],
 })
-export class AppModule {}
+export class AppModuleFixture {}

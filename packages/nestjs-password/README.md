@@ -1,15 +1,14 @@
-[![NPM Latest](https://img.shields.io/npm/v/@concepta/nestjs-password)](https://www.npmjs.com/package/@concepta/nestjs-password)
-[![NPM Alpha](https://img.shields.io/npm/v/@concepta/nestjs-password/alpha)](https://www.npmjs.com/package/@concepta/nestjs-nestjscontrol)
-[![NPM Downloads](https://img.shields.io/npm/dw/@conceptadev/nestjs-password)](https://www.npmjs.com/package/@concepta/nestjs-password)
-
-[![GitHub Open Issues](https://img.shields.io/github/issues/conceptadev/rockets/nestjs-password)](https://github.com/conceptadev/rockets/labels/nestjs-password)
-[![GitHub Closed Issues](https://img.shields.io/github/issues-closed/conceptadev/rockets/nestjs-password)](https://github.com/conceptadev/rockets/labels/nestjs-password)
-[![GitHub Open PRs](https://img.shields.io/github/issues-pr/conceptadev/rockets/nestjs-password)](https://github.com/conceptadev/rockets/labels/nestjs-password)
-[![GitHub Closed PRs](https://img.shields.io/github/issues-pr-closed/conceptadev/rockets/nestjs-password)](https://github.com/conceptadev/rockets/labels/nestjs-password)
-
 # Rockets NestJS Password
 
 A flexible Password utilities module that provides services for password strength, creation and storage.
+
+## Project
+
+[![NPM Latest](https://img.shields.io/npm/v/@concepta/nestjs-password)](https://www.npmjs.com/package/@concepta/nestjs-password)
+[![NPM Downloads](https://img.shields.io/npm/dw/@conceptadev/nestjs-password)](https://www.npmjs.com/package/@concepta/nestjs-password)
+[![GH Last Commit](https://img.shields.io/github/last-commit/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets)
+[![GH Contrib](https://img.shields.io/github/contributors/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets/graphs/contributors)
+[![NestJS Dep](https://img.shields.io/github/package-json/dependency-version/conceptadev/rockets/@nestjs/common?label=NestJS&logo=nestjs&filename=packages%2Fnestjs-common%2Fpackage.json)](https://www.npmjs.com/package/@nestjs/common)
 
 ## Overview
 
