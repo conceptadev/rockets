@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
-import { useTheme } from 'next-themes';
 import mermaid from 'mermaid';
+import { useTheme } from 'next-themes';
+import React, { useEffect, useRef } from 'react';
 
 //
 // https://github.com/mermaid-js/mermaid/blob/develop/src/defaultConfig.js
@@ -42,9 +42,6 @@ const Mermaid: React.FC<Props> = ({ chart, config }: Props) => {
 
   // get theme data from hook
   const { theme, systemTheme } = useTheme();
-
-  // mermaid init (first load)
-  useEffect(() => initMermaid(theme, systemTheme, config), []);
 
   // render the content depending on theme
   useEffect(() => {
