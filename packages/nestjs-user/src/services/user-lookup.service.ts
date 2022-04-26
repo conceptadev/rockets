@@ -22,7 +22,7 @@ export class UserLookupService implements UserLookupServiceInterface {
    */
   constructor(
     @Inject(USER_MODULE_USER_CUSTOM_REPO_TOKEN)
-    public userRepo: Repository<UserEntityInterface>,
+    private userRepo: Repository<UserEntityInterface>,
   ) {}
 
   /**
@@ -46,7 +46,7 @@ export class UserLookupService implements UserLookupServiceInterface {
   /**
    * Get user for the given subject.
    *
-   * @param username the username
+   * @param subject the subject
    */
   async bySubject(subject: ReferenceSubject): Promise<UserEntityInterface> {
     return this.userRepo.findOne({ id: subject });

@@ -14,6 +14,7 @@
   "dependencies": {
     "@concepta/nestjs-common": "^4.0.0-alpha.10",
     "@concepta/nestjs-crud": "^4.0.0-alpha.10",
+    "@concepta/nestjs-exception": "^4.0.0-alpha.10",
     "@concepta/nestjs-password": "^4.0.0-alpha.10",
     "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.10",
     "@nestjs/common": "^8.0.8",

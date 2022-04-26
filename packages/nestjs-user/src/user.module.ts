@@ -34,6 +34,8 @@ import { UserLookupService } from './services/user-lookup.service';
 import { UserCrudService } from './services/user-crud.service';
 import { UserLookupServiceInterface } from './interfaces/user-lookup-service.interface';
 import { DefaultUserLookupService } from './services/default-user-lookup.service';
+import { UserMutateService } from './services/user-mutate.service';
+import { DefaultUserMutateService } from './services/default-user-mutate.service';
 
 /**
  * User Module
@@ -42,10 +44,11 @@ import { DefaultUserLookupService } from './services/default-user-lookup.service
   providers: [
     DefaultUserService,
     DefaultUserLookupService,
+    DefaultUserMutateService,
     UserCrudService,
     PasswordStorageService,
   ],
-  exports: [UserService, UserLookupService, UserCrudService],
+  exports: [UserService, UserLookupService, UserMutateService, UserCrudService],
   controllers: [UserController],
 })
 export class UserModule extends createConfigurableDynamicRootModule<
@@ -83,6 +86,14 @@ export class UserModule extends createConfigurableDynamicRootModule<
         options: UserOptionsInterface,
         defaultService: UserLookupServiceInterface,
       ) => options.userLookupService ?? defaultService,
+    },
+    {
+      provide: UserMutateService,
+      inject: [USER_MODULE_OPTIONS_TOKEN, DefaultUserMutateService],
+      useFactory: async (
+        options: UserOptionsInterface,
+        defaultService: DefaultUserMutateService,
+      ) => options.userMutateService ?? defaultService,
     },
     createEntityRepositoryProvider(USER_MODULE_USER_ENTITY_REPO_TOKEN, 'user'),
     createCustomRepositoryProvider(

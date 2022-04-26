@@ -22,6 +22,11 @@ export { LookupEmailInterface } from './interfaces/references/lookup/lookup-emai
 export { LookupSubjectInterface } from './interfaces/references/lookup/lookup-subject.interface';
 export { LookupUsernameInterface } from './interfaces/references/lookup/lookup-username.interface';
 
+export { CreateOneInterface } from './interfaces/references/mutate/create-one.interface';
+export { UpdateOneInterface } from './interfaces/references/mutate/update-one.interface';
+export { ReplaceOneInterface } from './interfaces/references/mutate/replace-one.interface';
+export { RemoveOneInterface } from './interfaces/references/mutate/remove-one.interface';
+
 export { ModuleOptionsControllerInterface } from './interfaces/modules/module-options-controller.interface';
 export { ModuleOptionsSettingsInterface } from './interfaces/modules/module-options-settings.interface';
 export { DeferExternalOptionsInterface } from './interfaces/modules/defer-external-options.interface';
