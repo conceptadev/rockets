@@ -17,7 +17,7 @@ export interface CrudControllerInterface<T extends ReferenceIdInterface> {
 
   createMany?: (
     crudRequest: CrudRequestInterface,
-    dto: CreateManyDto<T>,
+    dto: CreateManyDto<Partial<T>>,
   ) => Promise<T[]>;
 
   updateOne?: (

@@ -20,7 +20,6 @@ import { userDefaultConfig } from './config/user-default.config';
 import { User } from './entities/user.entity';
 import { UserOptionsInterface } from './interfaces/user-options.interface';
 import { UserOrmOptionsInterface } from './interfaces/user-orm-options.interface';
-import { UserService } from './services/user.service';
 import {
   USER_MODULE_OPTIONS_TOKEN,
   USER_MODULE_USER_ENTITY_REPO_TOKEN,
@@ -28,8 +27,6 @@ import {
   USER_MODULE_SETTINGS_TOKEN,
 } from './user.constants';
 import { UserController } from './user.controller';
-import { UserServiceInterface } from './interfaces/user-service.interface';
-import { DefaultUserService } from './services/default-user.service';
 import { UserLookupService } from './services/user-lookup.service';
 import { UserCrudService } from './services/user-crud.service';
 import { UserLookupServiceInterface } from './interfaces/user-lookup-service.interface';
@@ -42,13 +39,12 @@ import { DefaultUserMutateService } from './services/default-user-mutate.service
  */
 @Module({
   providers: [
-    DefaultUserService,
     DefaultUserLookupService,
     DefaultUserMutateService,
     UserCrudService,
     PasswordStorageService,
   ],
-  exports: [UserService, UserLookupService, UserMutateService, UserCrudService],
+  exports: [UserLookupService, UserMutateService, UserCrudService],
   controllers: [UserController],
 })
 export class UserModule extends createConfigurableDynamicRootModule<
@@ -70,14 +66,6 @@ export class UserModule extends createConfigurableDynamicRootModule<
         options: UserOptionsInterface,
         defaultSettings: ConfigType<typeof userDefaultConfig>,
       ) => options.settings ?? defaultSettings,
-    },
-    {
-      provide: UserService,
-      inject: [USER_MODULE_OPTIONS_TOKEN, DefaultUserService],
-      useFactory: async (
-        options: UserOptionsInterface,
-        defaultService: UserServiceInterface,
-      ) => options.userService ?? defaultService,
     },
     {
       provide: UserLookupService,

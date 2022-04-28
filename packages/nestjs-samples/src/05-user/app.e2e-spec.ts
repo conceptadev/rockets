@@ -46,7 +46,7 @@ describe('AppController (e2e)', () => {
         .send({
           username: 'user1',
           email: 'user1@dispostable.com',
-          password: 'pass1',
+          newPassword: 'pass1',
         })
         .expect(201);
     });

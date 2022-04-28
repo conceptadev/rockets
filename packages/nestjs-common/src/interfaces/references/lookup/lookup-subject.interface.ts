@@ -5,5 +5,5 @@ export interface LookupSubjectInterface<
   T = ReferenceSubject,
   U = ReferenceIdInterface,
 > {
-  bySubject: (subject: T) => Promise<U>;
+  bySubject: (subject: T) => Promise<U | undefined>;
 }

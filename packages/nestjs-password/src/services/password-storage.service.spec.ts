@@ -27,7 +27,7 @@ describe('PasswordStorageService', () => {
       await service.encrypt(PASSWORD_MEDIUM, PASSWORD_SALT);
 
     // check if password encrypt can be decrypted
-    const isValid = await service.validatePassword(
+    const isValid = await service.validate(
       PASSWORD_MEDIUM,
       passwordStorageInterface.password,
       passwordStorageInterface.salt,
@@ -42,7 +42,7 @@ describe('PasswordStorageService', () => {
       await service.encrypt(PASSWORD_MEDIUM);
 
     // check if password encrypt can be decrypted
-    const isValid = await service.validatePassword(
+    const isValid = await service.validate(
       PASSWORD_MEDIUM,
       passwordStorageInterface.password,
       passwordStorageInterface.salt,

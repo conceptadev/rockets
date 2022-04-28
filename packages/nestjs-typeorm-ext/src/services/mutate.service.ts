@@ -21,18 +21,16 @@ import { ReferenceLookupException } from '../exceptions/reference-lookup.excepti
 export abstract class MutateService<
   Entity extends ReferenceIdInterface & ObjectLiteral,
   Creatable extends DeepPartial<Entity>,
-  Readable extends ReferenceIdInterface & DeepPartial<Entity>,
   Updatable extends ReferenceIdInterface & DeepPartial<Entity>,
   Replaceable extends ReferenceIdInterface & Creatable = ReferenceIdInterface &
     Creatable,
   Removable extends ReferenceIdInterface = ReferenceIdInterface,
 > implements
-    CreateOneInterface<Creatable, Readable>,
-    UpdateOneInterface<Updatable, Readable>,
-    ReplaceOneInterface<Replaceable, Readable>,
-    RemoveOneInterface<Removable, Readable>
+    CreateOneInterface<Creatable, Entity>,
+    UpdateOneInterface<Updatable, Entity>,
+    ReplaceOneInterface<Replaceable, Entity>,
+    RemoveOneInterface<Removable, Entity>
 {
-  protected abstract readDto: Type<Readable>;
   protected abstract createDto: Type<Creatable>;
   protected abstract updateDto: Type<Updatable>;
 
@@ -49,13 +47,11 @@ export abstract class MutateService<
    * @param data the reference to create
    * @returns the created reference
    */
-  async create(data: Creatable): Promise<Readable> {
+  async create(data: Creatable): Promise<Entity> {
     // validate the data
     const dto = await this.validate<Creatable>(this.createDto, data);
     // try to save the item
-    const item = await this.save(dto);
-    // transform it
-    return this.transform(item);
+    return this.save(dto);
   }
 
   /**
@@ -64,7 +60,7 @@ export abstract class MutateService<
    * @param data the reference data to update
    * @returns the updated reference
    */
-  async update(data: Updatable): Promise<Readable> {
+  async update(data: Updatable): Promise<Entity> {
     // the item we will update
     const item = await this.findById(data.id);
     // yes, validate the data
@@ -72,9 +68,7 @@ export abstract class MutateService<
     // set the id from the found item
     dto.id = item.id;
     // try to save it
-    const itemSaved = await this.save(dto);
-    // return it
-    return this.transform(itemSaved);
+    return this.save(dto);
   }
 
   /**
@@ -83,7 +77,7 @@ export abstract class MutateService<
    * @param data the reference data to replace
    * @returns the replaced reference
    */
-  async replace(data: Replaceable): Promise<Readable> {
+  async replace(data: Replaceable): Promise<Entity> {
     // the item we will update
     const item = await this.findById(data.id);
     // yes, remove the item
@@ -93,9 +87,7 @@ export abstract class MutateService<
     // add the id from the removed item
     dto.id = removed.id;
     // try to save it
-    const itemReplaced = await this.save(dto);
-    // return it
-    return this.transform(itemReplaced);
+    return this.save(dto);
   }
 
   /**
@@ -104,7 +96,7 @@ export abstract class MutateService<
    * @param data the reference data to remove
    * @returns the removed reference
    */
-  async remove(data: Removable): Promise<Readable> {
+  async remove(data: Removable): Promise<Entity> {
     // try to find it
     const item = await this.findById(data.id);
     // yes, try to remove it
@@ -112,7 +104,7 @@ export abstract class MutateService<
     // was one removed?
     if (removed) {
       // yes, return it
-      return this.transform(removed);
+      return removed;
     } else {
       // not removed
       throw new ReferenceIdNoMatchException(this.repo.metadata.name, item.id);
@@ -140,13 +132,10 @@ export abstract class MutateService<
   /**
    * @private
    */
-  protected async save(
-    item: DeepPartial<Entity>,
-    options = { reload: true },
-  ): Promise<Entity> {
+  protected async save(item: DeepPartial<Entity>): Promise<Entity> {
     // try to save it
     try {
-      return this.repo.save(item, options);
+      return this.repo.save(item);
     } catch (e) {
       throw new ReferenceMutateException(this.repo.metadata.name, e);
     }
@@ -175,12 +164,5 @@ export abstract class MutateService<
     }
 
     return dto;
-  }
-
-  /**
-   * @private
-   */
-  protected transform(item: Entity): Readable {
-    return plainToInstance(this.readDto, item);
   }
 }

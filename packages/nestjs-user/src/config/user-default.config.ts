@@ -3,17 +3,7 @@ import { registerAs } from '@nestjs/config';
 import { USER_MODULE_DEFAULT_SETTINGS_TOKEN } from '../user.constants';
 
 /**
- * Configuration for User.
- *
- * ### example
- * ```ts
- *
- *
- *
- *
- *
- *
- * ```
+ * Default configuration for User module.
  */
 export const userDefaultConfig = registerAs(
   USER_MODULE_DEFAULT_SETTINGS_TOKEN,

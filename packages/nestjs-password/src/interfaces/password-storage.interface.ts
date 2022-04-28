@@ -1,14 +1,11 @@
-/**
- * Authentication module configuration options interface
- */
-export interface PasswordStorageInterface {
-  /**
-   * Password
-   */
-  password?: string;
+import { PasswordInterface } from './password.interface';
 
+/**
+ * Password storage interface
+ */
+export interface PasswordStorageInterface extends PasswordInterface {
   /**
-   * salt to encrypt password
+   * Salt to encrypt password
    */
-  salt?: string;
+  salt: string;
 }

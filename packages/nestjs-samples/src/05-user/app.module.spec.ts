@@ -5,19 +5,16 @@ import {
   User,
   UserModule,
   UserRepository,
-  UserService,
   UserController,
   UserLookupService,
   UserCrudService,
   UserMutateService,
 } from '@concepta/nestjs-user';
-import { DefaultUserService } from '@concepta/nestjs-user/dist/services/default-user.service';
 import { DefaultUserLookupService } from '@concepta/nestjs-user/dist/services/default-user-lookup.service';
 import { DefaultUserMutateService } from '@concepta/nestjs-user/dist/services/default-user-mutate.service';
 
 describe('AppModule', () => {
   let userModule: UserModule;
-  let userService: DefaultUserService;
   let userLookupService: DefaultUserLookupService;
   let userMutateService: DefaultUserMutateService;
   let userCrudService: UserCrudService;
@@ -37,7 +34,6 @@ describe('AppModule', () => {
     userCustomRepo = testModule.get<UserRepository>(
       'USER_MODULE_USER_CUSTOM_REPO_TOKEN',
     );
-    userService = testModule.get<DefaultUserService>(UserService);
     userLookupService =
       testModule.get<DefaultUserLookupService>(UserLookupService);
     userMutateService =
@@ -55,7 +51,6 @@ describe('AppModule', () => {
       expect(userModule).toBeInstanceOf(UserModule);
       expect(userEntityRepo).toBeInstanceOf(Repository);
       expect(userCustomRepo).toBeInstanceOf(UserRepository);
-      expect(userService).toBeInstanceOf(DefaultUserService);
       expect(userCrudService).toBeInstanceOf(UserCrudService);
       expect(userLookupService).toBeInstanceOf(DefaultUserLookupService);
       expect(userLookupService['userRepo']).toBeInstanceOf(UserRepository);

@@ -5,5 +5,5 @@ export interface LookupDomainInterface<
   T = ReferenceDomain,
   U = ReferenceIdInterface,
 > {
-  byDomain: (domain: T) => Promise<U>;
+  byDomain: (domain: T) => Promise<U | undefined>;
 }

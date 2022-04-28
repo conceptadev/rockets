@@ -1,4 +1,3 @@
-import { UserCredentialsInterface } from './user-credentials.interface';
+import { PasswordNewInterface } from '@concepta/nestjs-password';
 
-export interface UserUpdatableInterface
-  extends Partial<Pick<UserCredentialsInterface, 'password'>> {}
+export interface UserUpdatableInterface extends PasswordNewInterface {}
