@@ -11,15 +11,14 @@ import {
   CrudController,
   CrudCreateMany,
 } from '@concepta/nestjs-crud';
+import { PasswordStorageService } from '@concepta/nestjs-password';
 import { UserCrudService } from './services/user-crud.service';
-import { UserEntityInterface } from './interfaces/user-entity.interface';
 import { UserDto } from './dto/user.dto';
 import { UserCreateDto } from './dto/user-create.dto';
 import { UserCreateManyDto } from './dto/user-create-many.dto';
 import { UserUpdateDto } from './dto/user-update.dto';
 import { UserPaginatedDto } from './dto/user-paginated.dto';
-import { UserService } from './services/user.service';
-import { UserCreateEncryptedDto } from './dto/user-create-encrypted.dto';
+import { UserEntityInterface } from './interfaces/user-entity.interface';
 
 /**
  * User controller.
@@ -40,8 +39,8 @@ export class UserController
    * @param userCrudService instance of the user crud service
    */
   constructor(
-    private userService: UserService,
     private userCrudService: UserCrudService,
+    private passwordStorageService: PasswordStorageService,
   ) {}
 
   /**
@@ -75,24 +74,19 @@ export class UserController
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() userCreateManyDto: UserCreateManyDto,
   ) {
-    // encrypted dtos
-    const userCreateEncryptedDtos: UserCreateEncryptedDto[] = [];
+    // the final data
+    const encrypted = [];
 
     // loop all dtos
     for (const userCreateDto of userCreateManyDto.bulk) {
       // encrypt it
-      const userCredentialsDto = await this.userService.encryptPassword(
-        userCreateDto,
-        UserCreateEncryptedDto,
+      encrypted.push(
+        await this.passwordStorageService.encryptObject(userCreateDto),
       );
-
-      // push on array
-      userCreateEncryptedDtos.push(userCredentialsDto);
     }
-    // overwrite
-    userCreateManyDto.bulk = userCreateEncryptedDtos;
+
     // call crud service to create
-    return this.userCrudService.createMany(crudRequest, userCreateManyDto);
+    return this.userCrudService.createMany(crudRequest, { bulk: encrypted });
   }
 
   /**
@@ -106,13 +100,11 @@ export class UserController
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() userCreateDto: UserCreateDto,
   ) {
-    // encrypt the password
-    const userCreateEncryptedDto = await this.userService.encryptPassword(
-      userCreateDto,
-      UserCreateEncryptedDto,
-    );
     // call crud service to create
-    return this.userCrudService.createOne(crudRequest, userCreateEncryptedDto);
+    return this.userCrudService.createOne(
+      crudRequest,
+      await this.passwordStorageService.encryptObject(userCreateDto),
+    );
   }
 
   /**
@@ -126,7 +118,10 @@ export class UserController
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() userUpdateDto: UserUpdateDto,
   ) {
-    return this.userCrudService.updateOne(crudRequest, userUpdateDto);
+    return this.userCrudService.updateOne(
+      crudRequest,
+      await this.passwordStorageService.encryptObject(userUpdateDto),
+    );
   }
 
   /**

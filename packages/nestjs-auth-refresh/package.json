@@ -29,6 +29,7 @@
     "jest-mock-extended": "^2.0.4"
   },
   "peerDependencies": {
+    "class-transformer": "*",
     "class-validator": "*",
     "rxjs": "^7.1.0"
   }

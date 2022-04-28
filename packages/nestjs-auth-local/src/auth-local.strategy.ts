@@ -76,7 +76,7 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
     }
 
     // validate password
-    const isValid = await this.passwordService.validatePassword(
+    const isValid = await this.passwordService.validate(
       dto[passwordField],
       user.password,
       user.salt,

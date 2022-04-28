@@ -5,5 +5,5 @@ export interface LookupUsernameInterface<
   T = ReferenceUsername,
   U = ReferenceIdInterface,
 > {
-  byUsername: (username: T) => Promise<U>;
+  byUsername: (username: T) => Promise<U | undefined>;
 }

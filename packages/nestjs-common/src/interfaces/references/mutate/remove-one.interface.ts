@@ -1,8 +1,8 @@
 import { ReferenceIdInterface } from '../reference-id.interface';
 
-export interface ReplaceOneInterface<
+export interface RemoveOneInterface<
   T extends ReferenceIdInterface,
   U extends ReferenceIdInterface = T,
 > {
-  replace: (object: T) => Promise<U>;
+  remove: (object: T) => Promise<U>;
 }

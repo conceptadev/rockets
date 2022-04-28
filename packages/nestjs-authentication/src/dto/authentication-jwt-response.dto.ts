@@ -1,19 +1,21 @@
+import { Exclude, Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { AuthenticationJwtResponseInterface } from '../interfaces/authentication-jwt-response.interface';
 
+@Exclude()
 export class AuthenticationJwtResponseDto
   implements AuthenticationJwtResponseInterface
 {
+  @Expose()
   @ApiProperty({
     type: 'string',
-    name: 'Access Token',
     description: 'JWT access token to use for request authorization.',
   })
   accessToken: string;
 
+  @Expose()
   @ApiProperty({
     type: 'string',
-    name: 'Refresh Token',
     description: 'JWT refresh token to use for obtaining a new access token.',
   })
   refreshToken: string;
