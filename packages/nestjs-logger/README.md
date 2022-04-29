@@ -1,16 +1,15 @@
-[![NPM Latest](https://img.shields.io/npm/v/@concepta/nestjs-logger)](https://www.npmjs.com/package/@concepta/nestjs-logger)
-[![NPM Alpha](https://img.shields.io/npm/v/@concepta/nestjs-logger/alpha)](https://www.npmjs.com/package/@concepta/nestjs-nestjscontrol)
-[![NPM Downloads](https://img.shields.io/npm/dw/@conceptadev/nestjs-logger)](https://www.npmjs.com/package/@concepta/nestjs-logger)
-
-[![GitHub Open Issues](https://img.shields.io/github/issues/conceptadev/rockets/nestjs-logger)](https://github.com/conceptadev/rockets/labels/nestjs-logger)
-[![GitHub Closed Issues](https://img.shields.io/github/issues-closed/conceptadev/rockets/nestjs-logger)](https://github.com/conceptadev/rockets/labels/nestjs-logger)
-[![GitHub Open PRs](https://img.shields.io/github/issues-pr/conceptadev/rockets/nestjs-logger)](https://github.com/conceptadev/rockets/labels/nestjs-logger)
-[![GitHub Closed PRs](https://img.shields.io/github/issues-pr-closed/conceptadev/rockets/nestjs-logger)](https://github.com/conceptadev/rockets/labels/nestjs-logger)
-
 # Rockets NestJS Logger
 
 This module is a drop-in replacement for the core NestJS logger that provides additonal support for pushing log data
 to one or multiple external log consumption providers.
+
+## Project
+
+[![NPM Latest](https://img.shields.io/npm/v/@concepta/nestjs-logger)](https://www.npmjs.com/package/@concepta/nestjs-logger)
+[![NPM Downloads](https://img.shields.io/npm/dw/@conceptadev/nestjs-logger)](https://www.npmjs.com/package/@concepta/nestjs-logger)
+[![GH Last Commit](https://img.shields.io/github/last-commit/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets)
+[![GH Contrib](https://img.shields.io/github/contributors/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets/graphs/contributors)
+[![NestJS Dep](https://img.shields.io/github/package-json/dependency-version/conceptadev/rockets/@nestjs/common?label=NestJS&logo=nestjs&filename=packages%2Fnestjs-common%2Fpackage.json)](https://www.npmjs.com/package/@nestjs/common)
 
 ## Overview
 

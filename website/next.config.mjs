@@ -5,6 +5,15 @@ const withNextra = nextra({
   theme: 'nextra-theme-docs',
   themeConfig: './theme.config.js',
   mdxOptions: { remarkPlugins: [] },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        fs: false,
+        path: false,
+      };
+    }
+    return config;
+  },
 });
 
 export default withNextra({

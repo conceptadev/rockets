@@ -3,11 +3,9 @@ import { UserController, UserCrudService } from '@concepta/nestjs-user';
 import { CustomAppModule } from './app-custom.module';
 import { CustomUserModule } from './custom-user/custom-user.module';
 import { CustomUserLookupService } from './custom-user/custom-user-lookup.service';
-import { CustomUserService } from './custom-user/custom-user.service';
 
 describe('AppModule', () => {
   let userModule: CustomUserModule;
-  let userService: CustomUserService;
   let userLookupService: CustomUserLookupService;
   let userCrudService: UserCrudService;
   let userController: UserController;
@@ -18,7 +16,6 @@ describe('AppModule', () => {
     }).compile();
 
     userModule = testModule.get<CustomUserModule>(CustomUserModule);
-    userService = testModule.get<CustomUserService>(CustomUserService);
     userLookupService = testModule.get<CustomUserLookupService>(
       CustomUserLookupService,
     );
@@ -33,7 +30,6 @@ describe('AppModule', () => {
   describe('module', () => {
     it('should be loaded', async () => {
       expect(userModule).toBeInstanceOf(CustomUserModule);
-      expect(userService).toBeInstanceOf(CustomUserService);
       expect(userLookupService).toBeInstanceOf(CustomUserLookupService);
       expect(userCrudService).toBeInstanceOf(UserCrudService);
       expect(userController).toBeInstanceOf(UserController);

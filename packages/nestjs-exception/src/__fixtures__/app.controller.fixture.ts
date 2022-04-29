@@ -5,13 +5,13 @@ import {
   Param,
   ParseIntPipe,
 } from '@nestjs/common';
-import { CustomNotFoundException } from './exceptions/custom-not-found.fixture';
+import { CustomNotFoundExceptionFixture } from './exceptions/custom-not-found.exception.fixture';
 
 /**
  * Controller.
  */
 @Controller('test')
-export class AppController {
+export class AppControllerFixture {
   @Get('unknown')
   getError(): void {
     throw new Error();
@@ -24,6 +24,6 @@ export class AppController {
 
   @Get(':id')
   getErrorNotFound(@Param('id', ParseIntPipe) id: number): void {
-    throw new CustomNotFoundException(id);
+    throw new CustomNotFoundExceptionFixture(id);
   }
 }

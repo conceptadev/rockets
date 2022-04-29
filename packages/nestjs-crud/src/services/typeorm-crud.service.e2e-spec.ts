@@ -3,25 +3,25 @@ import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { useSeeders } from '@jorgebodega/typeorm-seeding';
-import { AppModule } from '../__fixtures__/app.module';
-import { Photo } from '../__fixtures__/photo/photo.entity';
-import { PhotoSeeder } from '../__fixtures__/photo/photo.seeder';
-import { PhotoFactory } from '../__fixtures__/photo/photo.factory';
+import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
+import { PhotoFixture } from '../__fixtures__/photo/photo.entity.fixture';
+import { PhotoSeederFixture } from '../__fixtures__/photo/photo.seeder.fixture';
+import { PhotoFactoryFixture } from '../__fixtures__/photo/photo.factory.fixture';
 
 describe('AppController (e2e)', () => {
   describe('Authentication', () => {
     let app: INestApplication;
 
-    const photoFactory = new PhotoFactory();
+    const photoFactory = new PhotoFactoryFixture();
 
     beforeEach(async () => {
       const moduleFixture: TestingModule = await Test.createTestingModule({
-        imports: [AppModule],
+        imports: [AppModuleFixture],
       }).compile();
       app = moduleFixture.createNestApplication();
       await app.init();
 
-      await useSeeders(PhotoSeeder, { connection: 'default' });
+      await useSeeders(PhotoSeederFixture, { connection: 'default' });
     });
 
     afterEach(async () => {
@@ -57,7 +57,7 @@ describe('AppController (e2e)', () => {
 
     it('GET /photo/:id', async () => {
       const photo = await photoFactory.create();
-      expect(photo).toBeInstanceOf(Photo);
+      expect(photo).toBeInstanceOf(PhotoFixture);
 
       const response = await supertest(app.getHttpServer())
         .get(`/photo/${photo.id}`)
@@ -95,7 +95,7 @@ describe('AppController (e2e)', () => {
 
     it('PATCH /photo/:id', async () => {
       const photo = await photoFactory.create();
-      expect(photo).toBeInstanceOf(Photo);
+      expect(photo).toBeInstanceOf(PhotoFixture);
       photo.views = 37;
 
       const { id, ...rest } = { ...photo };
@@ -111,7 +111,7 @@ describe('AppController (e2e)', () => {
 
     it('PUT /photo/:id', async () => {
       const photo = await photoFactory.create();
-      expect(photo).toBeInstanceOf(Photo);
+      expect(photo).toBeInstanceOf(PhotoFixture);
 
       const { id, ...rest } = { ...photo };
 
@@ -125,7 +125,7 @@ describe('AppController (e2e)', () => {
 
     it('DELETE /photo/1', async () => {
       const photo = await photoFactory.create();
-      expect(photo).toBeInstanceOf(Photo);
+      expect(photo).toBeInstanceOf(PhotoFixture);
 
       await supertest(app.getHttpServer())
         .delete(`/photo/${photo.id}`)
@@ -138,7 +138,7 @@ describe('AppController (e2e)', () => {
 
     it('DELETE /photo/soft/1', async () => {
       const photo = await photoFactory.create();
-      expect(photo).toBeInstanceOf(Photo);
+      expect(photo).toBeInstanceOf(PhotoFixture);
 
       await supertest(app.getHttpServer())
         .delete(`/photo/soft/${photo.id}`)
@@ -151,7 +151,7 @@ describe('AppController (e2e)', () => {
 
     it('PATCH /photo/recover/1', async () => {
       const photo = await photoFactory.create();
-      expect(photo).toBeInstanceOf(Photo);
+      expect(photo).toBeInstanceOf(PhotoFixture);
 
       await supertest(app.getHttpServer())
         .delete(`/photo/soft/${photo.id}`)

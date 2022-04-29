@@ -1,9 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  UserModule,
-  UserService,
-  UserLookupService,
-} from '@concepta/nestjs-user';
+import { UserModule, UserLookupService } from '@concepta/nestjs-user';
 import { UserController } from '@concepta/nestjs-user';
 import { Repository } from 'typeorm';
 import { AppModule } from './app.module';
@@ -12,7 +8,6 @@ import { CustomUser } from './custom-user.entity';
 
 describe('AppModule', () => {
   let userModule: UserModule;
-  let userService: UserService;
   let userLookupService: UserLookupService;
   let userController: UserController;
   let userEntityRepo: Repository<CustomUser>;
@@ -30,7 +25,6 @@ describe('AppModule', () => {
     userCustomRepo = testModule.get<CustomUserRepository>(
       'USER_MODULE_USER_CUSTOM_REPO_TOKEN',
     );
-    userService = testModule.get<UserService>(UserService);
     userLookupService = testModule.get<UserLookupService>(UserLookupService);
     userController = testModule.get<UserController>(UserController);
   });
@@ -44,10 +38,11 @@ describe('AppModule', () => {
       expect(userModule).toBeInstanceOf(UserModule);
       expect(userEntityRepo).toBeInstanceOf(Repository);
       expect(userCustomRepo).toBeInstanceOf(CustomUserRepository);
-      expect(userService).toBeInstanceOf(UserService);
       expect(userLookupService).toBeInstanceOf(UserLookupService);
-      expect(userLookupService.userRepo).toBeInstanceOf(CustomUserRepository);
-      expect(userLookupService.userRepo.find).toBeInstanceOf(Function);
+      expect(userLookupService['userRepo']).toBeInstanceOf(
+        CustomUserRepository,
+      );
+      expect(userLookupService['userRepo'].find).toBeInstanceOf(Function);
       expect(userController).toBeInstanceOf(UserController);
     });
   });

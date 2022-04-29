@@ -1,15 +1,14 @@
-[![NPM Latest](https://img.shields.io/npm/v/@concepta/nestjs-swagger-ui)](https://www.npmjs.com/package/@concepta/nestjs-swagger-ui)
-[![NPM Alpha](https://img.shields.io/npm/v/@concepta/nestjs-swagger-ui/alpha)](https://www.npmjs.com/package/@concepta/nestjs-nestjscontrol)
-[![NPM Downloads](https://img.shields.io/npm/dw/@conceptadev/nestjs-swagger-ui)](https://www.npmjs.com/package/@concepta/nestjs-swagger-ui)
-
-[![GitHub Open Issues](https://img.shields.io/github/issues/conceptadev/rockets/nestjs-swagger-ui)](https://github.com/conceptadev/rockets/labels/nestjs-swagger-ui)
-[![GitHub Closed Issues](https://img.shields.io/github/issues-closed/conceptadev/rockets/nestjs-swagger-ui)](https://github.com/conceptadev/rockets/labels/nestjs-swagger-ui)
-[![GitHub Open PRs](https://img.shields.io/github/issues-pr/conceptadev/rockets/nestjs-swagger-ui)](https://github.com/conceptadev/rockets/labels/nestjs-swagger-ui)
-[![GitHub Closed PRs](https://img.shields.io/github/issues-pr-closed/conceptadev/rockets/nestjs-swagger-ui)](https://github.com/conceptadev/rockets/labels/nestjs-swagger-ui)
-
 # Rockets NestJS Swagger UI
 
 Expose your OpenApi spec on your API using the powerful Swagger UI interface.
+
+## Project
+
+[![NPM Latest](https://img.shields.io/npm/v/@concepta/nestjs-swagger-ui)](https://www.npmjs.com/package/@concepta/nestjs-swagger-ui)
+[![NPM Downloads](https://img.shields.io/npm/dw/@conceptadev/nestjs-swagger-ui)](https://www.npmjs.com/package/@concepta/nestjs-swagger-ui)
+[![GH Last Commit](https://img.shields.io/github/last-commit/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets)
+[![GH Contrib](https://img.shields.io/github/contributors/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets/graphs/contributors)
+[![NestJS Dep](https://img.shields.io/github/package-json/dependency-version/conceptadev/rockets/@nestjs/common?label=NestJS&logo=nestjs&filename=packages%2Fnestjs-common%2Fpackage.json)](https://www.npmjs.com/package/@nestjs/common)
 
 ## Overview
 

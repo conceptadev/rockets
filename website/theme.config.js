@@ -1,10 +1,12 @@
+import CustomSearch from './components/Search';
+
 const themeConfig = {
   github: 'https://github.com/conceptadev/rockets',
   projectLink: 'https://github.com/conceptadev/rockets',
-  // projectChatLink: '',
+
   docsRepositoryBase: 'https://github.com/conceptadev/rockets/blob/main',
   search: true,
-  // customSearch: <CustomSearch />,
+  customSearch: <CustomSearch />,
   titleSuffix: ' – Rockets',
   logo: (
     <>
@@ -45,6 +47,13 @@ const themeConfig = {
       />
       <meta name="og:image" content="https://www.rockets.tools/og.png" />
       <meta name="apple-mobile-web-app-title" content="Rockets" />
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+      <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto&display=swap"
+        rel="stylesheet"
+      />
       <link
         rel="apple-touch-icon"
         sizes="180x180"
@@ -104,7 +113,6 @@ const themeConfig = {
       </span>
     </>
   ),
-  unstable_faviconGlyph: '✦',
 };
 
 export default themeConfig;

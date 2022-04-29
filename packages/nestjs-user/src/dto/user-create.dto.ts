@@ -2,7 +2,7 @@ import { Exclude } from 'class-transformer';
 import { IntersectionType, PickType } from '@nestjs/swagger';
 import { UserCreatableInterface } from '../interfaces/user-creatable.interface';
 import { UserDto } from './user.dto';
-import { UserCredentialsDto } from './user-credentials.dto';
+import { UserNewPasswordDto } from './user-new-password.dto';
 
 /**
  * User Create DTO
@@ -10,7 +10,7 @@ import { UserCredentialsDto } from './user-credentials.dto';
 @Exclude()
 export class UserCreateDto
   extends IntersectionType(
-    PickType(UserDto, ['email']),
-    PickType(UserCredentialsDto, ['username', 'password']),
+    PickType(UserDto, ['username', 'email'] as const),
+    PickType(UserNewPasswordDto, ['newPassword'] as const),
   )
   implements UserCreatableInterface {}

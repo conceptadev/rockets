@@ -1,6 +1,6 @@
 {
   "name": "@concepta/nestjs-authentication",
-  "version": "4.0.0-alpha.9",
+  "version": "4.0.0-alpha.10",
   "description": "Rockets NestJS Authentication",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,12 +12,13 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
-    "@concepta/nestjs-common": "^4.0.0-alpha.9",
-    "@concepta/nestjs-jwt": "^4.0.0-alpha.9",
+    "@concepta/nestjs-common": "^4.0.0-alpha.10",
+    "@concepta/nestjs-jwt": "^4.0.0-alpha.10",
     "@nestjs/common": "^8.0.8",
     "@nestjs/config": "^1.1.6",
     "@nestjs/core": "^8.0.8",
     "@nestjs/passport": "^8.0.1",
+    "@nestjs/swagger": "^5.2.1",
     "@types/zxcvbn": "^4.4.1",
     "bcrypt": "^5.0.1",
     "passport": "^0.5.0",
@@ -26,12 +27,13 @@
     "passport-strategy": "^1.0.0",
     "zxcvbn": "^4.4.2"
   },
-  "peerDependencies": {
-    "eventemitter2": "*"
-  },
   "devDependencies": {
     "@nestjs/testing": "^8.0.8",
     "@types/passport-local": "^1.0.34",
     "jest-mock-extended": "^2.0.4"
+  },
+  "peerDependencies": {
+    "class-transformer": "*",
+    "class-validator": "*"
   }
 }

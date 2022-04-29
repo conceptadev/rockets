@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ReferenceId } from '@concepta/nestjs-common';
 import { JwtIssueService } from '@concepta/nestjs-jwt';
-import { AuthenticationJwtResponseInterface } from '../interfaces/authentication-jwt-response.interface';
 import { IssueTokenServiceInterface } from '../interfaces/issue-token-service.interface';
+import { AuthenticationJwtResponseDto } from '../dto/authentication-jwt-response.dto';
 
 @Injectable()
 export class IssueTokenService implements IssueTokenServiceInterface {
@@ -29,14 +29,18 @@ export class IssueTokenService implements IssueTokenServiceInterface {
    */
   async responsePayload(
     id: ReferenceId,
-  ): Promise<AuthenticationJwtResponseInterface> {
+  ): Promise<AuthenticationJwtResponseDto> {
     // TODO: need pattern for events and/or callbacks to mutate this object before signing
     const payload = { sub: id };
 
+    // create the dto
+    const dto = new AuthenticationJwtResponseDto();
+
+    // set access and refresh tokens
+    dto.accessToken = await this.accessToken(payload);
+    dto.refreshToken = await this.refreshToken(payload);
+
     // return the payload
-    return {
-      accessToken: await this.accessToken(payload),
-      refreshToken: await this.refreshToken(payload),
-    };
+    return dto;
   }
 }

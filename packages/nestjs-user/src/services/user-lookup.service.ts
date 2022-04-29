@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { FindConditions, Repository } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
 import {
   ReferenceEmail,
@@ -6,6 +6,7 @@ import {
   ReferenceSubject,
   ReferenceUsername,
 } from '@concepta/nestjs-common';
+import { ReferenceLookupException } from '@concepta/nestjs-typeorm-ext';
 import { USER_MODULE_USER_CUSTOM_REPO_TOKEN } from '../user.constants';
 import { UserEntityInterface } from '../interfaces/user-entity.interface';
 import { UserLookupServiceInterface } from '../interfaces/user-lookup-service.interface';
@@ -22,7 +23,7 @@ export class UserLookupService implements UserLookupServiceInterface {
    */
   constructor(
     @Inject(USER_MODULE_USER_CUSTOM_REPO_TOKEN)
-    public userRepo: Repository<UserEntityInterface>,
+    private userRepo: Repository<UserEntityInterface>,
   ) {}
 
   /**
@@ -30,8 +31,8 @@ export class UserLookupService implements UserLookupServiceInterface {
    *
    * @param id the id
    */
-  async byId(id: ReferenceId): Promise<UserEntityInterface> {
-    return this.userRepo.findOne({ id });
+  async byId(id: ReferenceId): Promise<UserEntityInterface | undefined> {
+    return this.findOne({ id });
   }
 
   /**
@@ -39,17 +40,21 @@ export class UserLookupService implements UserLookupServiceInterface {
    *
    * @param email the email
    */
-  async byEmail(email: ReferenceEmail): Promise<UserEntityInterface> {
-    return this.userRepo.findOne({ email });
+  async byEmail(
+    email: ReferenceEmail,
+  ): Promise<UserEntityInterface | undefined> {
+    return this.findOne({ email });
   }
 
   /**
    * Get user for the given subject.
    *
-   * @param username the username
+   * @param subject the subject
    */
-  async bySubject(subject: ReferenceSubject): Promise<UserEntityInterface> {
-    return this.userRepo.findOne({ id: subject });
+  async bySubject(
+    subject: ReferenceSubject,
+  ): Promise<UserEntityInterface | undefined> {
+    return this.findOne({ id: subject });
   }
 
   /**
@@ -57,7 +62,27 @@ export class UserLookupService implements UserLookupServiceInterface {
    *
    * @param username the username
    */
-  async byUsername(username: ReferenceUsername): Promise<UserEntityInterface> {
-    return this.userRepo.findOne({ username });
+  async byUsername(
+    username: ReferenceUsername,
+  ): Promise<UserEntityInterface | undefined> {
+    return this.findOne({ username });
+  }
+
+  /**
+   * Find One wrapper.
+   *
+   * @private
+   * @param conditions Find conditions
+   */
+  protected async findOne(
+    conditions?: FindConditions<UserEntityInterface | undefined>,
+  ): Promise<UserEntityInterface | undefined> {
+    try {
+      // try to find the user
+      return this.userRepo.findOne(conditions);
+    } catch (e) {
+      // fatal orm error
+      throw new ReferenceLookupException(this.userRepo.metadata.name, e);
+    }
   }
 }
