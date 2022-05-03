@@ -27,7 +27,25 @@ and validating tokens.
 
 `yarn add @concepta/nestjs-jwt`
 
-## Advanced Configuration
+## Configuration
+
+- [ENV](#env)
+- [Advanced](#advanced)
+
+### ENV
+
+Configurations available via environment.
+
+| Variable                        | Type                 | Default                    |                                 |
+| ------------------------------- | -------------------- | -------------------------- | ------------------------------- |
+| `JWT_MODULE_ACCESS_SECRET`      | `<string \| Buffer>` | `randomUUID()` \* see note | Access token secret             |
+| `JWT_MODULE_ACCESS_EXPIRES_IN`  | `<string \| number>` | `'1h'`                     | Access token expiration length  |
+| `JWT_MODULE_REFRESH_SECRET`     | `<string \| Buffer>` | copied from access secret  | Refresh token secret            |
+| `JWT_MODULE_REFRESH_EXPIRES_IN` | `<string \| number>` | `'1y'`                     | Refresh token expiration length |
+
+> \* For security reasons, a random UUID will only be generated for the default secret when `NODE_ENV !== 'production'`.
+
+### Advanced
 
 It is possible to override all services at registration time with a custom service that
 meets their respective interfaces.
