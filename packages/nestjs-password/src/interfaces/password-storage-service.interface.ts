@@ -1,4 +1,4 @@
-import { PasswordNewInterface } from './password-new.interface';
+import { PasswordPlainInterface } from './password-plain.interface';
 import { PasswordStorageInterface } from './password-storage.interface';
 
 /**
@@ -6,27 +6,27 @@ import { PasswordStorageInterface } from './password-storage.interface';
  */
 export interface PasswordStorageServiceInterface {
   /**
-   * Generate salt to be used to encrypt password.
+   * Generate salt to be used to hash a password.
    */
   generateSalt(): Promise<string>;
 
   /**
-   * Encrypt a password using a salt, if not salt
-   * was passed, then generate a new one before encrypt.
+   * Hash a password using a salt, if no
+   * was passed, then generate one automatically.
    *
-   * @param password Password to be encrypted
-   * @param salt Use salts to safeguard passwords in storage
+   * @param password Password to be hashed
+   * @param salt  Optional salt. If not provided, one will be generated.
    */
-  encrypt(password: string, salt?: string): Promise<PasswordStorageInterface>;
+  hash(password: string, salt?: string): Promise<PasswordStorageInterface>;
 
   /**
-   * Encrypt password for an object.
+   * Hash password for an object.
    *
-   * @param object An object containing the new password to encrypt.
+   * @param object An object containing the new password to hash.
    * @param salt Optional salt. If not provided, one will be generated.
-   * @returns A new object with the password encrypted, with salt added.
+   * @returns A new object with the password hashed, with salt added.
    */
-  encryptObject<T extends PasswordNewInterface>(
+  hashObject<T extends PasswordPlainInterface>(
     object: T,
     salt?: string,
   ): Promise<PasswordStorageInterface>;
@@ -34,20 +34,20 @@ export interface PasswordStorageServiceInterface {
   /**
    * Validate if password matches and its valid.
    *
-   * @param passwordPlain Plain Password not encrypted
-   * @param passwordCrypt Password encrypted
+   * @param passwordPlain Plain text password
+   * @param passwordHash Password hashed
    * @param salt salt to be used on plain  password to see it match
    */
   validate(
     passwordPlain: string,
-    passwordCrypt: string,
+    passwordHash: string,
     salt: string,
   ): Promise<boolean>;
 
   /**
    * Validate password on an object.
    *
-   * @param passwordPlain Plain password not encrypted
+   * @param passwordPlain Plain text password
    * @param object The object on which the password and salt are stored
    */
   validateObject<T extends PasswordStorageInterface>(

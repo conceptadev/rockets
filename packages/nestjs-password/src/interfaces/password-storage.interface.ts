@@ -1,11 +1,14 @@
-import { PasswordInterface } from './password.interface';
-
 /**
  * Password storage interface
  */
-export interface PasswordStorageInterface extends PasswordInterface {
+export interface PasswordStorageInterface {
   /**
-   * Salt to encrypt password
+   * Hashed password
    */
-  salt: string;
+  passwordHash: string;
+
+  /**
+   * Salt used to hash password
+   */
+  passwordSalt: string;
 }

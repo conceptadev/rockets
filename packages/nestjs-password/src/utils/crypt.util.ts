@@ -1,7 +1,7 @@
 import * as bcrypt from 'bcrypt';
 
 /**
- * Abstract class with functions to encapsulate encrypt methods
+ * Abstract class with functions to encapsulate hash methods
  */
 export abstract class CryptUtil {
   /**

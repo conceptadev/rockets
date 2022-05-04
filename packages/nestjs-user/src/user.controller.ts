@@ -75,18 +75,16 @@ export class UserController
     @CrudBody() userCreateManyDto: UserCreateManyDto,
   ) {
     // the final data
-    const encrypted = [];
+    const hashed = [];
 
     // loop all dtos
     for (const userCreateDto of userCreateManyDto.bulk) {
-      // encrypt it
-      encrypted.push(
-        await this.passwordStorageService.encryptObject(userCreateDto),
-      );
+      // hash it
+      hashed.push(await this.passwordStorageService.hashObject(userCreateDto));
     }
 
     // call crud service to create
-    return this.userCrudService.createMany(crudRequest, { bulk: encrypted });
+    return this.userCrudService.createMany(crudRequest, { bulk: hashed });
   }
 
   /**
@@ -103,7 +101,7 @@ export class UserController
     // call crud service to create
     return this.userCrudService.createOne(
       crudRequest,
-      await this.passwordStorageService.encryptObject(userCreateDto),
+      await this.passwordStorageService.hashObject(userCreateDto),
     );
   }
 
@@ -120,7 +118,7 @@ export class UserController
   ) {
     return this.userCrudService.updateOne(
       crudRequest,
-      await this.passwordStorageService.encryptObject(userUpdateDto),
+      await this.passwordStorageService.hashObject(userUpdateDto),
     );
   }
 

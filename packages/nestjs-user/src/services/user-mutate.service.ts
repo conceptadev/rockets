@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import { MutateService } from '@concepta/nestjs-typeorm-ext';
 import {
-  PasswordNewInterface,
+  PasswordPlainInterface,
   PasswordStorageService,
 } from '@concepta/nestjs-password';
 import { UserEntityInterface } from '../interfaces/user-entity.interface';
@@ -43,12 +43,12 @@ export class UserMutateService
   }
 
   protected async save<T extends DeepPartial<UserEntityInterface>>(
-    user: T | (T & PasswordNewInterface),
+    user: T | (T & PasswordPlainInterface),
   ): Promise<UserEntityInterface> {
-    // do we need to encrypt the password?
-    if ('newPassword' in user && user.newPassword.length) {
-      // yes, encrypt it
-      user = await this.passwordStorageService.encryptObject(user);
+    // do we need to hash the password?
+    if ('password' in user && user.password.length) {
+      // yes, hash it
+      user = await this.passwordStorageService.hashObject(user);
     }
     // save it
     return super.save(user);

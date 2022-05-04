@@ -17,17 +17,19 @@ export class TestUserRepository extends Repository<User> {
       id: '1',
       email: 'first_user@dispostable.com',
       username: 'first_user',
-      // Encrypted for AS12378
-      password: '$2b$10$9y97gOLiusyKnzu7LRdMmOCVpp/xwddaa8M6KtgenvUDao5I.8mJS',
-      salt: '$2b$10$9y97gOLiusyKnzu7LRdMmO',
+      // hashed for AS12378
+      passwordHash:
+        '$2b$10$9y97gOLiusyKnzu7LRdMmOCVpp/xwddaa8M6KtgenvUDao5I.8mJS',
+      passwordSalt: '$2b$10$9y97gOLiusyKnzu7LRdMmO',
     },
     {
       id: '2',
       email: 'second_user@dispostable.com',
       username: 'second_user',
-      // Encrypted for AS12378
-      password: '$2b$10$9y97gOLiusyKnzu7LRdMmOCVpp/xwddaa8M6KtgenvUDao5I.8mJS',
-      salt: '$2b$10$9y97gOLiusyKnzu7LRdMmO',
+      // hashed for AS12378
+      passwordHash:
+        '$2b$10$9y97gOLiusyKnzu7LRdMmOCVpp/xwddaa8M6KtgenvUDao5I.8mJS',
+      passwordSalt: '$2b$10$9y97gOLiusyKnzu7LRdMmO',
     },
   ];
 
