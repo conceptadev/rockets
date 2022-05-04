@@ -70,11 +70,11 @@ export class UserSeeder extends Seeder {
     user: UserEntityInterface,
     password = 'Test1234',
   ) {
-    // encrypt it
-    const encrypted = await this.passwordStorageService.encrypt(password);
+    // hash it
+    const hashed = await this.passwordStorageService.hash(password);
 
     // set password and salt
-    user.password = encrypted.password;
-    user.salt = encrypted.salt;
+    user.passwordHash = hashed.passwordHash;
+    user.passwordSalt = hashed.passwordSalt;
   }
 }

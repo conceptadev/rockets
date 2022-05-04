@@ -11,7 +11,10 @@ import {
   CrudController,
   CrudCreateMany,
 } from '@concepta/nestjs-crud';
-import { PasswordStorageService } from '@concepta/nestjs-password';
+import {
+  PasswordPlainInterface,
+  PasswordStorageService,
+} from '@concepta/nestjs-password';
 import { UserCrudService } from './services/user-crud.service';
 import { UserDto } from './dto/user.dto';
 import { UserCreateDto } from './dto/user-create.dto';
@@ -75,18 +78,16 @@ export class UserController
     @CrudBody() userCreateManyDto: UserCreateManyDto,
   ) {
     // the final data
-    const encrypted = [];
+    const hashed = [];
 
     // loop all dtos
     for (const userCreateDto of userCreateManyDto.bulk) {
-      // encrypt it
-      encrypted.push(
-        await this.passwordStorageService.encryptObject(userCreateDto),
-      );
+      // hash it
+      hashed.push(await this.maybeHashPassword(userCreateDto));
     }
 
     // call crud service to create
-    return this.userCrudService.createMany(crudRequest, { bulk: encrypted });
+    return this.userCrudService.createMany(crudRequest, { bulk: hashed });
   }
 
   /**
@@ -103,7 +104,7 @@ export class UserController
     // call crud service to create
     return this.userCrudService.createOne(
       crudRequest,
-      await this.passwordStorageService.encryptObject(userCreateDto),
+      await this.maybeHashPassword(userCreateDto),
     );
   }
 
@@ -120,7 +121,7 @@ export class UserController
   ) {
     return this.userCrudService.updateOne(
       crudRequest,
-      await this.passwordStorageService.encryptObject(userUpdateDto),
+      await this.maybeHashPassword(userUpdateDto),
     );
   }
 
@@ -132,5 +133,21 @@ export class UserController
   @CrudDeleteOne()
   async deleteOne(@CrudRequest() crudRequest: CrudRequestInterface) {
     return this.userCrudService.deleteOne(crudRequest);
+  }
+
+  /**
+   * Maybe hash passwords on a dto.
+   *
+   * @param dto The object on which to hash password.
+   */
+  protected async maybeHashPassword<T>(dto: T & PasswordPlainInterface) {
+    // get a password?
+    if (dto.password.length) {
+      // yes, hash it
+      return this.passwordStorageService.hashObject(dto);
+    } else {
+      // return untouched
+      return dto;
+    }
   }
 }

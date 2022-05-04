@@ -24,13 +24,13 @@ describe('PasswordStorageService', () => {
   it('PasswordStorageService.encrypt_salt', async () => {
     // Encrypt password
     const passwordStorageInterface: PasswordStorageInterface =
-      await service.encrypt(PASSWORD_MEDIUM, PASSWORD_SALT);
+      await service.hash(PASSWORD_MEDIUM, PASSWORD_SALT);
 
     // check if password encrypt can be decrypted
     const isValid = await service.validate(
       PASSWORD_MEDIUM,
-      passwordStorageInterface.password,
-      passwordStorageInterface.salt,
+      passwordStorageInterface.passwordHash,
+      passwordStorageInterface.passwordSalt,
     );
 
     expect(isValid).toBeTruthy();
@@ -39,13 +39,13 @@ describe('PasswordStorageService', () => {
   it('PasswordStorageService.encrypt', async () => {
     // Encrypt password
     const passwordStorageInterface: PasswordStorageInterface =
-      await service.encrypt(PASSWORD_MEDIUM);
+      await service.hash(PASSWORD_MEDIUM);
 
     // check if password encrypt can be decrypted
     const isValid = await service.validate(
       PASSWORD_MEDIUM,
-      passwordStorageInterface.password,
-      passwordStorageInterface.salt,
+      passwordStorageInterface.passwordHash,
+      passwordStorageInterface.passwordSalt,
     );
 
     expect(isValid).toBeTruthy();
