@@ -72,23 +72,11 @@ export class PasswordStorageService implements PasswordStorageServiceInterface {
     passwordHash: string,
     passwordSalt: string,
   ): Promise<boolean> {
-    // get a hash and a salt?
-    if (
-      typeof passwordHash === 'string' &&
-      passwordHash.length &&
-      typeof passwordSalt === 'string' &&
-      passwordSalt.length
-    ) {
-      // yes, try to validate it
-      return CryptUtil.validatePassword(
-        passwordPlain,
-        passwordHash,
-        passwordSalt,
-      );
-    }
-
-    // fallback to invalid
-    return false;
+    return CryptUtil.validatePassword(
+      passwordPlain,
+      passwordHash,
+      passwordSalt,
+    );
   }
 
   /**
@@ -101,7 +89,6 @@ export class PasswordStorageService implements PasswordStorageServiceInterface {
     passwordPlain: string,
     object: T,
   ): Promise<boolean> {
-    // validate it
     return this.validate(
       passwordPlain,
       object.passwordHash,

@@ -19,22 +19,29 @@ export abstract class CryptUtil {
    * @returns
    */
   static async hashPassword(password: string, salt: string): Promise<string> {
-    return bcrypt.hash(password, salt);
+    // must have a password
+    if (password.length && salt.length) {
+      return bcrypt.hash(password, salt);
+    } else {
+      throw new Error(
+        'Must have non-zero length password and salt in order to hash.',
+      );
+    }
   }
 
   /**
    * Validate password with the hash password
    * @param passwordPlain
    * @param passwordCrypt
-   * @param salt
+   * @param passwordSalt
    * @returns
    */
   static async validatePassword(
     passwordPlain: string,
-    passwordCrypt: string,
-    salt: string,
+    passwordHash: string,
+    passwordSalt: string,
   ): Promise<boolean> {
-    const hash = await this.hashPassword(passwordPlain, salt);
-    return hash === passwordCrypt;
+    const hash = await this.hashPassword(passwordPlain, passwordSalt);
+    return hash === passwordHash;
   }
 }
