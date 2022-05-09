@@ -5,7 +5,7 @@ import { OrgInterface } from '../interfaces/org.interface';
 import { OrgDto } from './org.dto';
 
 /**
- * User paginated DTO
+ * Org paginated DTO
  */
 @Exclude()
 export class OrgPaginatedDto extends CrudResponsePaginatedDto<OrgInterface> {

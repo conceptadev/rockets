@@ -4,11 +4,11 @@ import { Factory } from '@jorgebodega/typeorm-seeding';
 import { OrgEntityInterface } from './interfaces/org-entity.interface';
 
 /**
- * User factory
+ * Org factory
  *
  * ```ts
  * // new factory instance
- * const userFactory = new OrgFactory(User);
+ * const orgFactory = new OrgFactory(Org);
  * ```
  */
 export class OrgFactory<
@@ -24,9 +24,9 @@ export class OrgFactory<
   }
 
   /**
-   * List of used usernames.
+   * List of used names.
    */
-  usedUsernames: Record<string, boolean> = {};
+  usedNames: Record<string, boolean> = {};
 
   /**
    * Factory callback function.
@@ -35,7 +35,7 @@ export class OrgFactory<
     // the org we will return
     const org = new this.entity();
 
-    // set the username
+    // set the name
     org.name = this.generateName();
 
     // return the new org
@@ -43,7 +43,7 @@ export class OrgFactory<
   }
 
   /**
-   * Generate a unique username.
+   * Generate a unique name.
    */
   protected generateName(): string {
     // the name
@@ -52,10 +52,10 @@ export class OrgFactory<
     // keep trying to get a unique name
     do {
       name = Faker.name.firstName();
-    } while (this.usedUsernames[name]);
+    } while (this.usedNames[name]);
 
-    // add to used usernames
-    this.usedUsernames[name] = true;
+    // add to used names
+    this.usedNames[name] = true;
 
     // return it
     return name;

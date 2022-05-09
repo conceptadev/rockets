@@ -10,7 +10,7 @@ import {
 import { OrgEntityInterface } from '../interfaces/org-entity.interface';
 
 /**
- * User Entity
+ * Org Entity
  */
 //TODO use some basic entity here that already has createdAt, updatedAt, deletedAt, Active
 @Entity()

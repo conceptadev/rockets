@@ -5,14 +5,14 @@ import { OrgRepository } from '../org.repository';
 import { OrgEntityInterface } from '../interfaces/org-entity.interface';
 
 /**
- * User CRUD service
+ * Org CRUD service
  */
 @Injectable()
 export class OrgCrudService extends TypeOrmCrudService<OrgEntityInterface> {
   /**
    * Constructor
    *
-   * @param orgRepo instance of the user repository.
+   * @param orgRepo instance of the org repository.
    */
   constructor(
     @Inject(ORG_MODULE_ORG_CUSTOM_REPO_TOKEN)

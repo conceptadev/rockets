@@ -4,7 +4,7 @@ import { OrgCreatableInterface } from '../interfaces/org-creatable.interface';
 import { OrgDto } from './org.dto';
 
 /**
- * User Create DTO
+ * Org Create DTO
  */
 @Exclude()
 export class OrgCreateDto

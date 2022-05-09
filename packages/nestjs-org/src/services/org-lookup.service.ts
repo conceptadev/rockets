@@ -7,14 +7,14 @@ import { OrgEntityInterface } from '../interfaces/org-entity.interface';
 import { OrgLookupServiceInterface } from '../interfaces/org-lookup-service.interface';
 
 /**
- * User lookup service
+ * Org lookup service
  */
 @Injectable()
 export class OrgLookupService implements OrgLookupServiceInterface {
   /**
    * Constructor
    *
-   * @param orgRepo instance of the user repo
+   * @param orgRepo instance of the org repo
    */
   constructor(
     @Inject(ORG_MODULE_ORG_CUSTOM_REPO_TOKEN)
@@ -22,7 +22,7 @@ export class OrgLookupService implements OrgLookupServiceInterface {
   ) {}
 
   /**
-   * Get user for the given id.
+   * Get org for the given id.
    *
    * @param id the id
    */
@@ -40,7 +40,7 @@ export class OrgLookupService implements OrgLookupServiceInterface {
     conditions?: FindConditions<OrgEntityInterface | undefined>,
   ): Promise<OrgEntityInterface | undefined> {
     try {
-      // try to find the user
+      // try to find the org
       return this.orgRepo.findOne(conditions);
     } catch (e) {
       // fatal orm error

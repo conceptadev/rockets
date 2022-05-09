@@ -4,7 +4,7 @@ import { OrgUpdatableInterface } from '../interfaces/org-updatable.interface';
 import { OrgDto } from './org.dto';
 
 /**
- * User Update DTO
+ * Org Update DTO
  */
 @Exclude()
 export class OrgUpdateDto

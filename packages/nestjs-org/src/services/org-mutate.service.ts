@@ -11,7 +11,7 @@ import { OrgUpdateDto } from '../dto/org-update.dto';
 import { ORG_MODULE_ORG_CUSTOM_REPO_TOKEN } from '../org.constants';
 
 /**
- * User mutate service
+ * Org mutate service
  */
 @Injectable()
 export class OrgMutateService
@@ -28,7 +28,7 @@ export class OrgMutateService
   /**
    * Constructor
    *
-   * @param repo instance of the user repo
+   * @param repo instance of the org repo
    */
   constructor(
     @Inject(ORG_MODULE_ORG_CUSTOM_REPO_TOKEN)

@@ -26,7 +26,7 @@ export class OrgSeeder extends Seeder {
    * Runner   *
    */
   public async run(): Promise<void> {
-    // number of users to create
+    // number of orgs to create
     const createAmount = process.env?.ORG_MODULE_SEEDER_AMOUNT
       ? Number(process.env.ORG_MODULE_SEEDER_AMOUNT)
       : 50;
