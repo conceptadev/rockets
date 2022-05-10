@@ -24,29 +24,43 @@ export class UserFactory<
   }
 
   /**
+   * List of used usernames.
+   */
+  usedUsernames: Record<string, boolean> = {};
+
+  /**
    * Factory callback function.
-   *
-   * @param entity The entity class.
    */
   protected async definition(): Promise<T> {
-    // unique usernames that have already been used.
-    const uniqueUsernames: Record<string, boolean> = {};
-
     // the user we will return
     const user = new this.entity();
 
-    // keep trying to get a unique username
-    do {
-      user.username = Faker.internet.userName().toLowerCase();
-    } while (uniqueUsernames[user.username]);
-
-    // add to used usernames
-    uniqueUsernames[user.username] = true;
+    // set the username
+    user.username = this.generateUniqueUsername();
 
     // fake email address
     user.email = Faker.internet.email();
 
     // return the new user
     return user;
+  }
+
+  /**
+   * Generate a unique username.
+   */
+  protected generateUniqueUsername(): string {
+    // the username
+    let username: string;
+
+    // keep trying to get a unique username
+    do {
+      username = Faker.internet.userName().toLowerCase();
+    } while (this.usedUsernames[username]);
+
+    // add to used usernames
+    this.usedUsernames[username] = true;
+
+    // return it
+    return username;
   }
 }
