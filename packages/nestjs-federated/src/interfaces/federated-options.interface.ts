@@ -17,7 +17,7 @@ export interface FederatedOptionsInterface
   /**
    * Implementation of a class to issue tokens
    */
-  userCreateService?: FederatedUserMutateServiceInterface;
+  userMutateService?: FederatedUserMutateServiceInterface;
 
   /**
    * Settings

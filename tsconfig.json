@@ -67,6 +67,9 @@
     },
     {
       "path": "packages/nestjs-swagger-ui"
+    },
+    {
+      "path": "packages/nestjs-federated"
     }
   ]
 }

@@ -13,8 +13,17 @@
     "src/**/*.ts"
   ],
   "references": [
-      {
+    {
       "path": "../nestjs-authentication"
+    },
+    {
+      "path": "../nestjs-crud"
+    },
+    {
+      "path": "../nestjs-password"
+    },
+    {
+      "path": "../nestjs-user"
     }
   ]
 }

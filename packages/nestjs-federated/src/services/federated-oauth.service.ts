@@ -21,6 +21,14 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
     public federatedService: FederatedService,
   ) {}
 
+  /**
+   * Sign in with federated creating a user if it doesn't exist
+   * @param provider - provider name (github, facebook, google)
+   * @param subject - subject (user id/ profile id from provider)
+   * @returns email - email of user
+   *
+   * @return FederatedCredentialsInterface - user information
+   */
   async sign(
     provider: string,
     email: string,

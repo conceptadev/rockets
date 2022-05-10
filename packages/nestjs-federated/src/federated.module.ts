@@ -58,7 +58,7 @@ export class FederatedModule extends createConfigurableDynamicRootModule<
       provide: FEDERATED_MODULE_USER_MUTATE_SERVICE_TOKEN,
       inject: [FEDERATED_MODULE_OPTIONS_TOKEN],
       useFactory: async (options: FederatedOptionsInterface) =>
-        options.userCreateService,
+        options.userMutateService,
     },
     createEntityRepositoryProvider(
       FEDERATED_MODULE_FEDERATED_ENTITY_REPO_TOKEN,
