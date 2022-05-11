@@ -1,21 +1,33 @@
 import { Strategy } from 'passport-github';
-import { PassportStrategy } from '@nestjs/passport';
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { ReferenceIdInterface } from '@concepta/nestjs-common';
-import { AuthenticationJwtResponseInterface } from '@concepta/nestjs-authentication';
-import { GITHUB_MODULE_OPTIONS_TOKEN } from './config/github.config';
-import { GithubOptionsInterface } from './interfaces/github-options.interface';
-import { AuthGithubUserLookupServiceInterface } from './interfaces/auth-github-user-lookup-service.interface';
+import { PassportStrategy } from '@nestjs/passport';
+
+import {
+  ReferenceEmailInterface,
+  ReferenceIdInterface,
+} from '@concepta/nestjs-common';
+
+import {
+  FederatedOAuthService,
+  FederatedCredentialsInterface,
+} from '@concepta/nestjs-federated';
+
+import {
+  GITHUB_MODULE_SETTINGS_TOKEN,
+  GITHUB_STRATEGY_NAME,
+} from './github.constants';
+
+import { GithubSettingsInterface } from './interfaces/github-settings.interface';
 
 @Injectable()
 export class GithubStrategy extends PassportStrategy(
   Strategy,
-  GITHUB_MODULE_OPTIONS_TOKEN,
+  GITHUB_STRATEGY_NAME,
 ) {
   constructor(
-    @Inject(GITHUB_MODULE_OPTIONS_TOKEN)
-    private config: GithubOptionsInterface,
-    private userLookupService: AuthGithubUserLookupServiceInterface,
+    @Inject(GITHUB_MODULE_SETTINGS_TOKEN)
+    config: GithubSettingsInterface,
+    private federatedOAuthService: FederatedOAuthService,
   ) {
     super({
       clientID: config.clientId,
@@ -25,19 +37,23 @@ export class GithubStrategy extends PassportStrategy(
   }
 
   async validate(
-    accessToken,
-    refreshToken,
-    profile: ReferenceIdInterface,
-  ): Promise<AuthenticationJwtResponseInterface> {
-    const user = await this.userLookupService.byId(profile.id);
+    accessToken: string,
+    refreshToken: string,
+    profile: ReferenceIdInterface & ReferenceEmailInterface,
+  ): Promise<FederatedCredentialsInterface> {
+    //TODO: should we save accessToken and refreshToken?
 
-    if (!user || !refreshToken) {
+    // Create a new user if it doesn't exist or just return based on federated
+    const user = await this.federatedOAuthService.sign(
+      GITHUB_STRATEGY_NAME,
+      profile.email,
+      profile.id,
+    );
+
+    if (!user) {
       throw new UnauthorizedException();
     }
 
-    return {
-      accessToken,
-      refreshToken,
-    };
+    return user;
   }
 }
