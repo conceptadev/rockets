@@ -17,7 +17,9 @@ export class ReferenceLookupException
     message = 'Error while trying to lookup a %s reference',
   ) {
     super(formatMessage(message, entityName));
-    this.context.entityName = entityName;
-    this.context.originalError = originalError;
+    this.context = {
+      entityName,
+      originalError,
+    };
   }
 }
