@@ -4,7 +4,7 @@ import { GithubSettingsInterface } from '../interfaces/github-settings.interface
 import { GithubLoginDto } from '../dto/github-login.dto';
 
 /**
- * Default configuration for auth local.
+ * Default configuration for auth github.
  */
 export const githubDefaultConfig = registerAs(
   GITHUB_MODULE_DEFAULT_SETTINGS_TOKEN,
@@ -13,8 +13,8 @@ export const githubDefaultConfig = registerAs(
      * The login dto
      */
     loginDto: GithubLoginDto,
-    clientId: process.env.GITHUB_CLIENT_ID || 'client_id',
-    clientSecret: process.env.GITHUB_CLIENT_SECRET || 'secret',
-    callbackURL: process.env.GITHUB_CALLBACK_URL || 'callback_url',
+    clientId: process.env.GITHUB_CLIENT_ID ?? 'client_id',
+    clientSecret: process.env.GITHUB_CLIENT_SECRET ?? 'secret',
+    callbackURL: process.env.GITHUB_CALLBACK_URL ?? 'callback_url',
   }),
 );

@@ -2,7 +2,7 @@ import { Repository } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
 import { FederatedServiceInterface } from '../interfaces/federated-service.interface';
 import { FEDERATED_MODULE_FEDERATED_CUSTOM_REPO_TOKEN } from '../federated.constants';
-import { Federated } from '../entities/federated.entity';
+import { FederatedEntity } from '../entities/federated.entity';
 import { FederatedEntityInterface } from '../interfaces/federated-entity.interface';
 import { FederatedCreatableInterface } from '../interfaces/federated-creatable.interface';
 
@@ -10,7 +10,7 @@ import { FederatedCreatableInterface } from '../interfaces/federated-creatable.i
 export class FederatedService implements FederatedServiceInterface {
   constructor(
     @Inject(FEDERATED_MODULE_FEDERATED_CUSTOM_REPO_TOKEN)
-    public federatedRepo: Repository<Federated>,
+    public federatedRepo: Repository<FederatedEntity>,
   ) {}
 
   async exists(
@@ -32,7 +32,8 @@ export class FederatedService implements FederatedServiceInterface {
   async create(
     federatedDto: FederatedCreatableInterface,
   ): Promise<FederatedEntityInterface> {
-    const federated = await this.federatedRepo.create(federatedDto);
+    // TODO: need to validate the DTO and throw an exception before trying to save
+    const federated = await this.federatedRepo.save(federatedDto);
 
     if (!federated) return null;
 

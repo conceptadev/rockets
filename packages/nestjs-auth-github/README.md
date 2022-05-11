@@ -1,6 +1,6 @@
-# Rockets NestJS Local Authentication
+# Rockets NestJS GitHub Federated Authentication
 
-Authenticate requests using username/email and password against a local or remote data source.
+Authenticate requests using GitHub OAuth2
 
 ## Project
 

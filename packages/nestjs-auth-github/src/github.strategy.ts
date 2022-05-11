@@ -1,18 +1,22 @@
 import { Strategy } from 'passport-github';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
 
 import {
   ReferenceEmailInterface,
   ReferenceIdInterface,
 } from '@concepta/nestjs-common';
-import { FederatedOAuthService } from '@concepta/nestjs-federated';
-import { FederatedCredentialsInterface } from '@concepta/nestjs-federated/dist/interfaces/federated-credentials.interface';
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { PassportStrategy } from '@nestjs/passport';
+
+import {
+  FederatedOAuthService,
+  FederatedCredentialsInterface,
+} from '@concepta/nestjs-federated';
 
 import {
   GITHUB_MODULE_SETTINGS_TOKEN,
   GITHUB_STRATEGY_NAME,
 } from './github.constants';
+
 import { GithubSettingsInterface } from './interfaces/github-settings.interface';
 
 @Injectable()
@@ -22,7 +26,7 @@ export class GithubStrategy extends PassportStrategy(
 ) {
   constructor(
     @Inject(GITHUB_MODULE_SETTINGS_TOKEN)
-    private config: GithubSettingsInterface,
+    config: GithubSettingsInterface,
     private federatedOAuthService: FederatedOAuthService,
   ) {
     super({
@@ -33,8 +37,8 @@ export class GithubStrategy extends PassportStrategy(
   }
 
   async validate(
-    accessToken,
-    refreshToken,
+    accessToken: string,
+    refreshToken: string,
     profile: ReferenceIdInterface & ReferenceEmailInterface,
   ): Promise<FederatedCredentialsInterface> {
     //TODO: should we save accessToken and refreshToken?

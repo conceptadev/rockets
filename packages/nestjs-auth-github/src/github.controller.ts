@@ -10,7 +10,7 @@ import {
 import { GITHUB_ISSUE_TOKEN_SERVICE_TOKEN } from './github.constants';
 import { GITHUB_STRATEGY_NAME } from './github.constants';
 
-//TODO: improve documentation
+// TODO: improve documentation
 /**
  * Github controller
  *
@@ -42,11 +42,11 @@ export class GithubController {
   @UseGuards(AuthGuard(GITHUB_STRATEGY_NAME))
   @Get('login')
   login(): void {
-    //TODO: no code needed, Decorator will redirect to github
+    // TODO: no code needed, Decorator will redirect to github
     return;
   }
 
-  //TODO: Check  why post does not work for a callback
+  // TODO: Check  why post does not work for a callback
   @ApiOkResponse({
     type: AuthenticationJwtResponseDto,
     description: 'DTO containing an access token and a refresh token.',
@@ -56,7 +56,6 @@ export class GithubController {
   async get(
     @AuthUser() user: AuthenticatedUserInterface,
   ): Promise<AuthenticationJwtResponseDto> {
-    const response = await this.issueTokenService.responsePayload(user.id);
-    return response;
+    return this.issueTokenService.responsePayload(user.id);
   }
 }

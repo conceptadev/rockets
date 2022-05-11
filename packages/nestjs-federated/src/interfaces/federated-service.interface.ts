@@ -6,5 +6,6 @@ export interface FederatedServiceInterface {
     provider: string,
     federatedRef: string,
   ): Promise<FederatedEntityInterface>;
+
   create(user: FederatedCreatableInterface): Promise<FederatedEntityInterface>;
 }

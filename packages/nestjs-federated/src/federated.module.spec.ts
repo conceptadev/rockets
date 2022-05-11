@@ -10,7 +10,7 @@ import { JwtModule } from '@concepta/nestjs-jwt';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 
 import { ConnectionOptions, getConnectionManager } from 'typeorm';
-import { Federated } from './entities/federated.entity';
+import { FederatedEntity } from './entities/federated.entity';
 
 describe('FederatedModuleTest', () => {
   afterEach(async () => {
@@ -39,7 +39,7 @@ describe('FederatedModuleTest', () => {
       ],
     })
       .overrideProvider('FEDERATED_MODULE_FEDERATED_ENTITY_REPO_TOKEN')
-      .useValue(mock<Federated>())
+      .useValue(mock<FederatedEntity>())
       .overrideProvider('FEDERATED_MODULE_FEDERATED_CUSTOM_REPO_TOKEN')
       .useValue({})
       .overrideProvider('FEDERATED_MODULE_USER_LOOKUP_SERVICE_TOKEN')

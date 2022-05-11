@@ -20,6 +20,9 @@
       "path": "../nestjs-crud"
     },
     {
+      "path": "../nestjs-federated"
+    },
+    {
       "path": "../nestjs-password"
     },
     {

@@ -27,7 +27,7 @@ import { FederatedOAuthService } from './services/federated-oauth.service';
 import { FederatedService } from './services/federated.service';
 
 /**
- * Auth local module
+ * Federated Module
  */
 @Module({
   providers: [FederatedService, FederatedOAuthService],

@@ -1,4 +1,2 @@
-export { GithubUserLookupServiceInterface } from './interfaces/github-user-lookup-service.interface';
-
-export * from './github.module';
-export * from './github.controller';
+export { GithubModule } from './github.module';
+export { GithubController } from './github.controller';

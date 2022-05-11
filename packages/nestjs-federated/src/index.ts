@@ -1,7 +1,8 @@
-export * from './federated.module';
+export { FederatedModule } from './federated.module';
 
-export * from './services/federated.service';
-export * from './services/federated-oauth.service';
+export { FederatedService } from './services/federated.service';
+export { FederatedOAuthService } from './services/federated-oauth.service';
 
-export * from './interfaces/federated-user-lookup-service.interface';
-export * from './interfaces/federated-user-mutate-service.interface';
+export { FederatedCredentialsInterface } from './interfaces/federated-credentials.interface';
+export { FederatedUserLookupServiceInterface } from './interfaces/federated-user-lookup-service.interface';
+export { FederatedUserMutateServiceInterface } from './interfaces/federated-user-mutate-service.interface';

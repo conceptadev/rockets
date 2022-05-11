@@ -46,6 +46,8 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
       return newUser;
     } else {
       const user = await this.userLookupService.byId(federated.userId);
+
+      // TODO: need to throw a custom exception
       if (!user) throw new Error('Failed to get user');
 
       return user;
@@ -53,12 +55,11 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
   }
 
   /**
-   * logic to create user and federated
+   * Logic to create user and federated
    *
-   * @param
-   * @return
+   * @private
    */
-  private async createUserWithFederated(
+  protected async createUserWithFederated(
     provider: string,
     email: string,
     subject: string,
@@ -77,12 +78,11 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
   }
 
   /**
-   * create a user
+   * Create a user
    *
-   * @param
-   * @return
+   * @private
    */
-  private async createUser(
+  protected async createUser(
     email: string,
     username: string,
   ): Promise<FederatedCredentialsInterface> {
@@ -91,6 +91,7 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
       username,
     });
 
+    // TODO: need to throw a custom exception
     if (!newUser) throw new Error('Failed to create user');
 
     return newUser;
@@ -99,8 +100,7 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
   /**
    * Create federated credentials
    *
-   * @param
-   * @return
+   * @private
    */
   private async createFederated(
     provider: string,
@@ -113,6 +113,7 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
       userId,
     });
 
+    // TODO: need to throw a custom exception
     if (!federated) throw new Error('Failed to create federated');
 
     return federated;
