@@ -1,4 +1,4 @@
-import { PasswordPlainInterface } from '@concepta/nestjs-password';
+import { UserCreatableInterface } from './user-creatable.interface';
 
 export interface UserUpdatableInterface
-  extends Partial<PasswordPlainInterface> {}
+  extends Pick<UserCreatableInterface, 'password'> {}

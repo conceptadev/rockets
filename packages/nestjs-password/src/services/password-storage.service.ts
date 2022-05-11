@@ -32,7 +32,7 @@ export class PasswordStorageService implements PasswordStorageServiceInterface {
     return {
       passwordHash: await CryptUtil.hashPassword(password, salt),
       passwordSalt: salt,
-    } as PasswordStorageInterface;
+    };
   }
 
   /**
@@ -45,7 +45,7 @@ export class PasswordStorageService implements PasswordStorageServiceInterface {
   async hashObject<T extends PasswordPlainInterface>(
     object: T,
     salt?: string,
-  ): Promise<T & PasswordStorageInterface> {
+  ): Promise<Omit<T, 'password'> & PasswordStorageInterface> {
     // hash the password
     const hashed = await this.hash(object.password, salt);
 

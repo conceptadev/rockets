@@ -9,5 +9,8 @@ import { UserPasswordDto } from './user-password.dto';
  */
 @Exclude()
 export class UserUpdateDto
-  extends IntersectionType(PickType(UserDto, ['email']), UserPasswordDto)
+  extends IntersectionType(
+    PickType(UserDto, ['email'] as const),
+    UserPasswordDto,
+  )
   implements UserUpdatableInterface {}

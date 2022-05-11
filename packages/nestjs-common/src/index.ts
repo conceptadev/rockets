@@ -3,6 +3,8 @@ export {
   createConfigurableDynamicRootModule,
 } from '@golevelup/nestjs-modules';
 
+export { LiteralObject } from './interfaces/literal-object.interface';
+
 export { OptionsInterface } from './interfaces/options/options.interface';
 
 export {

@@ -17,7 +17,9 @@ export class ReferenceMutateException
     message = 'Error while trying to mutate a %s reference',
   ) {
     super(formatMessage(message, entityName));
-    this.context.entityName = entityName;
-    this.context.originalError = originalError;
+    this.context = {
+      entityName,
+      originalError,
+    };
   }
 }

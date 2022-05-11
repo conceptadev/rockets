@@ -5,18 +5,18 @@ import {
   ReplaceOneInterface,
   UpdateOneInterface,
 } from '@concepta/nestjs-common';
-import { UserInterface } from './user.interface';
 import { UserCreatableInterface } from './user-creatable.interface';
 import { UserUpdatableInterface } from './user-updatable.interface';
+import { UserEntityInterface } from './user-entity.interface';
 
 export interface UserMutateServiceInterface
-  extends CreateOneInterface<UserCreatableInterface, UserInterface>,
+  extends CreateOneInterface<UserCreatableInterface, UserEntityInterface>,
     UpdateOneInterface<
-      ReferenceIdInterface & UserUpdatableInterface,
-      UserInterface
+      UserUpdatableInterface & ReferenceIdInterface,
+      UserEntityInterface
     >,
     ReplaceOneInterface<
-      ReferenceIdInterface & UserCreatableInterface,
-      UserInterface
+      UserCreatableInterface & ReferenceIdInterface,
+      UserEntityInterface
     >,
-    RemoveOneInterface<ReferenceIdInterface, UserInterface> {}
+    RemoveOneInterface<UserEntityInterface> {}

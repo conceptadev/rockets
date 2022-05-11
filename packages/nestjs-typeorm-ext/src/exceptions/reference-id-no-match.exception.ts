@@ -18,7 +18,9 @@ export class ReferenceIdNoMatchException
     message = 'No match for %s reference id %s.',
   ) {
     super(formatMessage(message, entityName, id));
-    this.context.entityName = entityName;
-    this.context.id = id;
+    this.context = {
+      entityName,
+      id,
+    };
   }
 }

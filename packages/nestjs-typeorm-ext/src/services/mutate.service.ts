@@ -1,6 +1,6 @@
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
-import { DeepPartial, ObjectLiteral, Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 import { Injectable, Type } from '@nestjs/common';
 import {
   CreateOneInterface,
@@ -8,6 +8,7 @@ import {
   ReferenceIdInterface,
   ReplaceOneInterface,
   UpdateOneInterface,
+  LiteralObject,
 } from '@concepta/nestjs-common';
 import { ReferenceValidationException } from '../exceptions/reference-validation.exception';
 import { ReferenceMutateException } from '../exceptions/reference-mutate.exception';
@@ -19,17 +20,16 @@ import { ReferenceLookupException } from '../exceptions/reference-lookup.excepti
  */
 @Injectable()
 export abstract class MutateService<
-  Entity extends ReferenceIdInterface & ObjectLiteral,
+  Entity extends ReferenceIdInterface & LiteralObject,
   Creatable extends DeepPartial<Entity>,
-  Updatable extends ReferenceIdInterface & DeepPartial<Entity>,
-  Replaceable extends ReferenceIdInterface & Creatable = ReferenceIdInterface &
-    Creatable,
-  Removable extends ReferenceIdInterface = ReferenceIdInterface,
+  Updatable extends DeepPartial<Entity>,
+  Replaceable extends Creatable = Creatable,
+  Removable extends DeepPartial<Entity> = DeepPartial<Entity>,
 > implements
     CreateOneInterface<Creatable, Entity>,
-    UpdateOneInterface<Updatable, Entity>,
-    ReplaceOneInterface<Replaceable, Entity>,
-    RemoveOneInterface<Removable, Entity>
+    UpdateOneInterface<Updatable & ReferenceIdInterface, Entity>,
+    ReplaceOneInterface<Replaceable & ReferenceIdInterface, Entity>,
+    RemoveOneInterface<Removable & ReferenceIdInterface, Entity>
 {
   protected abstract createDto: Type<Creatable>;
   protected abstract updateDto: Type<Updatable>;
@@ -57,10 +57,11 @@ export abstract class MutateService<
   /**
    * Update one
    *
+   * @param id the id of the reference data to update
    * @param data the reference data to update
    * @returns the updated reference
    */
-  async update(data: Updatable): Promise<Entity> {
+  async update(data: Updatable & ReferenceIdInterface): Promise<Entity> {
     // the item we will update
     const item = await this.findById(data.id);
     // yes, validate the data
@@ -74,10 +75,11 @@ export abstract class MutateService<
   /**
    * Replace one
    *
+   * @param id the id of the reference data to replace
    * @param data the reference data to replace
    * @returns the replaced reference
    */
-  async replace(data: Replaceable): Promise<Entity> {
+  async replace(data: Replaceable & ReferenceIdInterface): Promise<Entity> {
     // the item we will update
     const item = await this.findById(data.id);
     // yes, remove the item
@@ -93,10 +95,10 @@ export abstract class MutateService<
   /**
    * Remove one
    *
-   * @param data the reference data to remove
+   * @param id the id of the reference data to remove
    * @returns the removed reference
    */
-  async remove(data: Removable): Promise<Entity> {
+  async remove(data: Removable & ReferenceIdInterface): Promise<Entity> {
     // try to find it
     const item = await this.findById(data.id);
     // yes, try to remove it
@@ -114,7 +116,7 @@ export abstract class MutateService<
   /**
    * @private
    */
-  protected async findById(id: ReferenceIdInterface['id']): Promise<Entity> {
+  protected async findById(id: string): Promise<Entity> {
     try {
       // try to find the ref
       const item = await this.repo.findOne(id);

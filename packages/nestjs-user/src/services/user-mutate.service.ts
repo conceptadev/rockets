@@ -1,6 +1,5 @@
 import { DeepPartial, Repository } from 'typeorm';
-import { Inject, Injectable } from '@nestjs/common';
-import { ReferenceIdInterface } from '@concepta/nestjs-common';
+import { Inject, Injectable, LiteralObject } from '@nestjs/common';
 import { MutateService } from '@concepta/nestjs-typeorm-ext';
 import {
   PasswordPlainInterface,
@@ -20,9 +19,9 @@ import { USER_MODULE_USER_CUSTOM_REPO_TOKEN } from '../user.constants';
 @Injectable()
 export class UserMutateService
   extends MutateService<
-    UserEntityInterface,
+    UserEntityInterface & LiteralObject,
     UserCreatableInterface,
-    ReferenceIdInterface & UserUpdatableInterface
+    UserUpdatableInterface
   >
   implements UserMutateServiceInterface
 {
@@ -48,9 +47,12 @@ export class UserMutateService
     // do we need to hash the password?
     if ('password' in user && user.password.length) {
       // yes, hash it
-      user = await this.passwordStorageService.hashObject(user);
+      const hashedUser = await this.passwordStorageService.hashObject(user);
+      // save it
+      return super.save(hashedUser);
+    } else {
+      // save it
+      return super.save(user);
     }
-    // save it
-    return super.save(user);
   }
 }

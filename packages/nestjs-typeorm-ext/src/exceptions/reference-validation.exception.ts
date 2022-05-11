@@ -18,7 +18,9 @@ export class ReferenceValidationException
     message = 'Data for the %s reference is not valid',
   ) {
     super(formatMessage(message, entityName));
-    this.context.entityName = entityName;
-    this.context.validationErrors = validationErrors;
+    this.context = {
+      entityName,
+      validationErrors,
+    };
   }
 }
