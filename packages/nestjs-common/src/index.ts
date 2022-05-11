@@ -18,6 +18,7 @@ export { ReferenceIdInterface } from './interfaces/references/reference-id.inter
 export { ReferenceEmailInterface } from './interfaces/references/reference-email.interface';
 export { ReferenceUsernameInterface } from './interfaces/references/reference-username.interface';
 export { ReferenceSubjectInterface } from './interfaces/references/reference-subject.interface';
+export { ReferenceAuditInterface } from './interfaces/references/reference-audit.interface';
 
 export { LookupIdInterface } from './interfaces/references/lookup/lookup-id.interface';
 export { LookupEmailInterface } from './interfaces/references/lookup/lookup-email.interface';
@@ -28,6 +29,19 @@ export { CreateOneInterface } from './interfaces/references/mutate/create-one.in
 export { UpdateOneInterface } from './interfaces/references/mutate/update-one.interface';
 export { ReplaceOneInterface } from './interfaces/references/mutate/replace-one.interface';
 export { RemoveOneInterface } from './interfaces/references/mutate/remove-one.interface';
+
+export {
+  AuditDateCreated,
+  AuditDateUpdated,
+  AuditDateDeleted,
+  AuditVersion,
+} from './audit/audit.types';
+
+export { AuditDateCreatedInterface } from './interfaces/audit/audit-date-created.interface';
+export { AuditDateUpdatedInterface } from './interfaces/audit/audit-date-updated.interface';
+export { AuditDateDeletedInterface } from './interfaces/audit/audit-date-deleted.interface';
+export { AuditVersionInterface } from './interfaces/audit/audit-version.interface';
+export { AuditInterface } from './interfaces/audit/audit.interface';
 
 export { ModuleOptionsControllerInterface } from './interfaces/modules/module-options-controller.interface';
 export { ModuleOptionsSettingsInterface } from './interfaces/modules/module-options-settings.interface';

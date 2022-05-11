@@ -9,9 +9,7 @@
       "../../node_modules/@types"
     ]
   },
-  "include": [
-    "src/**/*.ts"
-  ],
+  "include": ["src/**/*.ts"],
   "references": [
     {
       "path": "../nestjs-common"
