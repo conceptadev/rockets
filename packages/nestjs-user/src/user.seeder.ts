@@ -14,14 +14,14 @@ export class UserSeeder extends Seeder {
    *
    * Override this in a subclass to use a custom entity.
    */
-  protected entity: Type<UserEntityInterface> = User;
+  public static entity: Type<UserEntityInterface> = User;
 
   /**
    * The factory class.
    *
    * Override this in a subclass to use a custom factory.
    */
-  protected factory: Type<Factory<UserEntityInterface>> = UserFactory;
+  public static factory: Type<Factory<UserEntityInterface>> = UserFactory;
 
   /**
    * Reusable password storage service
@@ -45,7 +45,7 @@ export class UserSeeder extends Seeder {
       : 'superadmin';
 
     // the factory
-    const userFactory = new this.factory(this.entity);
+    const userFactory = new UserSeeder.factory(UserSeeder.entity);
 
     // create a super admin user
     await userFactory

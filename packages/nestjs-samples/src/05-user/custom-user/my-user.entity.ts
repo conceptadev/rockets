@@ -1,13 +1,9 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { AuditInterface } from '@concepta/nestjs-common';
-import { AuditPostgresEmbed } from '@concepta/nestjs-typeorm-ext';
-import { UserEntityInterface } from '../interfaces/user-entity.interface';
+import { AuditSqlLiteEmbed } from '@concepta/nestjs-typeorm-ext';
 
-/**
- * User Entity
- */
 @Entity()
-export class User implements UserEntityInterface {
+export class MyUser {
   /**
    * Unique Id
    */
@@ -41,6 +37,6 @@ export class User implements UserEntityInterface {
   /**
    * Audit embed
    */
-  @Column(() => AuditPostgresEmbed)
-  audit: AuditInterface;
+  @Column(() => AuditSqlLiteEmbed)
+  audit?: AuditInterface;
 }

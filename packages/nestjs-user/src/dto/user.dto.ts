@@ -1,22 +1,20 @@
 import { IsEmail, IsString } from 'class-validator';
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude, Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  AuditInterface,
   ReferenceEmail,
   ReferenceId,
   ReferenceUsername,
 } from '@concepta/nestjs-common';
-import { CrudResponseDto } from '@concepta/nestjs-crud';
 import { UserInterface } from '../interfaces/user.interface';
+import { AuditDto } from './audit.dto';
 
 /**
  * User DTO
  */
 @Exclude()
-export class UserDto
-  extends CrudResponseDto<UserInterface>
-  implements UserInterface
-{
+export class UserDto implements UserInterface {
   /**
    * Unique id
    */
@@ -49,4 +47,15 @@ export class UserDto
   })
   @IsString()
   username: ReferenceUsername;
+
+  /**
+   * Audit
+   */
+  @Expose({ toPlainOnly: true })
+  @ApiProperty({
+    type: AuditDto,
+    description: 'Audit data',
+  })
+  @Type(() => AuditDto)
+  audit?: AuditInterface;
 }

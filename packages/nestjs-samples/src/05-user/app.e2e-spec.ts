@@ -4,6 +4,7 @@ import { INestApplication } from '@nestjs/common';
 import { useSeeders } from '@jorgebodega/typeorm-seeding';
 import { UserSeeder } from '@concepta/nestjs-user';
 import { AppModule } from './app.module';
+import { MyUser } from './custom-user/my-user.entity';
 
 describe('AppController (e2e)', () => {
   describe('Authentication', () => {
@@ -15,6 +16,8 @@ describe('AppController (e2e)', () => {
       }).compile();
       app = moduleFixture.createNestApplication();
       await app.init();
+
+      UserSeeder.entity = MyUser;
 
       await useSeeders(UserSeeder, { root: __dirname, connection: 'default' });
     });
