@@ -63,6 +63,9 @@
       "path": "packages/nestjs-user"
     },
     {
+      "path": "packages/nestjs-org"
+    },
+    {
       "path": "packages/nestjs-auth-refresh"
     },
     {

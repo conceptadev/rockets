@@ -1,0 +1,40 @@
+{
+  "name": "@concepta/nestjs-org",
+  "version": "1.0.0-alpha.1",
+  "description": "Rockets NestJS User",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "license": "BSD-3-Clause",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
+  ],
+  "dependencies": {
+    "@concepta/nestjs-common": "^4.0.0-alpha.10",
+    "@concepta/nestjs-crud": "^4.0.0-alpha.10",
+    "@concepta/nestjs-exception": "^4.0.0-alpha.10",
+    "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.10",
+    "@concepta/nestjs-user": "^4.0.0-alpha.11",
+    "@nestjs/common": "^8.0.8",
+    "@nestjs/config": "^1.1.6",
+    "@nestjs/swagger": "^5.2.1"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^6.0.0-alpha.6",
+    "@jorgebodega/typeorm-seeding": "^3.2.0",
+    "@nestjs/testing": "^8.0.8",
+    "@nestjs/typeorm": "^8.0.2",
+    "jest-mock-extended": "^2.0.4",
+    "supertest": "^6.2.3"
+  },
+  "peerDependencies": {
+    "@faker-js/faker": "^6.0.0-alpha.6",
+    "@jorgebodega/typeorm-seeding": "^3.2.0",
+    "@nestjs/typeorm": "^8.0.2",
+    "class-transformer": "*",
+    "class-validator": "*",
+    "typeorm": "^0.2.41"
+  }
+}

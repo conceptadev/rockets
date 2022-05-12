@@ -20,10 +20,10 @@
       "path": "../nestjs-crud"
     },
     {
-      "path": "../nestjs-password"
+      "path": "../nestjs-typeorm-ext"
     },
     {
-      "path": "../nestjs-typeorm-ext"
+      "path": "../nestjs-user"
     }
   ]
 }
