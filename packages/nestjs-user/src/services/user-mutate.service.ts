@@ -1,5 +1,5 @@
 import { DeepPartial, Repository } from 'typeorm';
-import { Inject, Injectable, LiteralObject } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { MutateService } from '@concepta/nestjs-typeorm-ext';
 import {
   PasswordPlainInterface,
@@ -19,7 +19,7 @@ import { USER_MODULE_USER_CUSTOM_REPO_TOKEN } from '../user.constants';
 @Injectable()
 export class UserMutateService
   extends MutateService<
-    UserEntityInterface & LiteralObject,
+    UserEntityInterface,
     UserCreatableInterface,
     UserUpdatableInterface
   >

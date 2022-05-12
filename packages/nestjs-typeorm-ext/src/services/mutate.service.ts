@@ -8,7 +8,6 @@ import {
   ReferenceIdInterface,
   ReplaceOneInterface,
   UpdateOneInterface,
-  LiteralObject,
 } from '@concepta/nestjs-common';
 import { ReferenceValidationException } from '../exceptions/reference-validation.exception';
 import { ReferenceMutateException } from '../exceptions/reference-mutate.exception';
@@ -20,7 +19,7 @@ import { ReferenceLookupException } from '../exceptions/reference-lookup.excepti
  */
 @Injectable()
 export abstract class MutateService<
-  Entity extends ReferenceIdInterface & LiteralObject,
+  Entity extends ReferenceIdInterface,
   Creatable extends DeepPartial<Entity>,
   Updatable extends DeepPartial<Entity>,
   Replaceable extends Creatable = Creatable,
