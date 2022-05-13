@@ -3,7 +3,7 @@ import {
   LookupIdInterface,
   LookupSubjectInterface,
   LookupUsernameInterface,
-} from '@concepta/nestjs-common';
+} from '@concepta/ts-core';
 
 export interface UserLookupServiceInterface
   extends LookupIdInterface,

@@ -6,7 +6,7 @@ import {
   ReferenceEmail,
   ReferenceId,
   ReferenceUsername,
-} from '@concepta/nestjs-common';
+} from '@concepta/ts-core';
 import { UserInterface } from '../interfaces/user.interface';
 import { AuditDto } from './audit.dto';
 

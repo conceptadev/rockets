@@ -1,4 +1,4 @@
-import { AuditDateCreated } from '../../audit/audit.types';
+import { AuditDateCreated } from '../audit.types';
 
 /**
  * Date data was created.

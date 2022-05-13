@@ -4,7 +4,7 @@ import {
   RemoveOneInterface,
   ReplaceOneInterface,
   UpdateOneInterface,
-} from '@concepta/nestjs-common';
+} from '@concepta/ts-core';
 import { OrgEntityInterface } from './org-entity.interface';
 import { OrgCreatableInterface } from './org-creatable.interface';
 import { OrgUpdatableInterface } from './org-updatable.interface';

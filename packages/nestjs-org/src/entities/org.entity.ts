@@ -1,4 +1,4 @@
-import { ReferenceId } from '@concepta/nestjs-common';
+import { ReferenceId } from '@concepta/ts-core';
 import {
   Column,
   CreateDateColumn,

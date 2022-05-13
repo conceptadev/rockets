@@ -1,5 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { AuditInterface } from '@concepta/nestjs-common';
+import { AuditInterface } from '@concepta/ts-core';
 import { AuditSqlLiteEmbed } from '@concepta/nestjs-typeorm-ext';
 
 @Entity()

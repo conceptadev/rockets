@@ -1,4 +1,4 @@
-import { ReferenceUsername } from '../../references/reference.types';
+import { ReferenceUsername } from '../reference.types';
 
 /**
  * Identifiable by username.

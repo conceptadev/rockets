@@ -1,4 +1,4 @@
-import { AuditInterface } from '../audit/audit.interface';
+import { AuditInterface } from '../../audit/interfaces/audit.interface';
 
 /**
  * The audit data.

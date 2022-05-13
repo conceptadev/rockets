@@ -1,10 +1,10 @@
-import { ReferenceId } from '@concepta/nestjs-common';
 import {
   Column,
   DeleteDateColumn,
   Entity,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { ReferenceId } from '@concepta/ts-core';
 import { PhotoEntityInterfaceFixture } from './interfaces/photo-entity.interface.fixture';
 
 @Entity()

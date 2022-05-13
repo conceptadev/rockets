@@ -1,4 +1,4 @@
-import { ReferenceDomain } from '../../references/reference.types';
+import { ReferenceDomain } from '../reference.types';
 
 /**
  * Identifiable by domain.

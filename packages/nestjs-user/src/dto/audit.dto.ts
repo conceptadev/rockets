@@ -7,7 +7,7 @@ import {
   AuditDateUpdated,
   AuditInterface,
   AuditVersion,
-} from '@concepta/nestjs-common';
+} from '@concepta/ts-core';
 
 /**
  * Audit DTO

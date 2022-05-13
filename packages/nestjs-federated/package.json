@@ -14,6 +14,7 @@
     "@concepta/nestjs-authentication": "^4.0.0-alpha.11",
     "@concepta/nestjs-common": "^4.0.0-alpha.11",
     "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.11",
+    "@concepta/ts-core": "^4.0.0-alpha.11",
     "@nestjs/common": "^8.0.0",
     "@nestjs/config": "^1.1.6",
     "@nestjs/passport": "^8.0.0"

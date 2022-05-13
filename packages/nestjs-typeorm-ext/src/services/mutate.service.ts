@@ -8,7 +8,7 @@ import {
   ReferenceIdInterface,
   ReplaceOneInterface,
   UpdateOneInterface,
-} from '@concepta/nestjs-common';
+} from '@concepta/ts-core';
 import { ReferenceValidationException } from '../exceptions/reference-validation.exception';
 import { ReferenceMutateException } from '../exceptions/reference-mutate.exception';
 import { ReferenceIdNoMatchException } from '../exceptions/reference-id-no-match.exception';

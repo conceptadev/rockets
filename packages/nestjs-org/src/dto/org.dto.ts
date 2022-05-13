@@ -1,7 +1,7 @@
 import { IsOptional, IsString } from 'class-validator';
 import { Exclude, Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { ReferenceId } from '@concepta/nestjs-common';
+import { ReferenceId } from '@concepta/ts-core';
 import { CrudResponseDto } from '@concepta/nestjs-crud';
 import { OrgInterface } from '../interfaces/org.interface';
 

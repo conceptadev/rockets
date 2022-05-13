@@ -1,6 +1,6 @@
 import { ApiResponseOptions } from '@nestjs/swagger';
 import { CrudActions } from '@nestjsx/crud';
-import { OptionsInterface } from '@concepta/nestjs-common';
+import { OptionsInterface } from '@concepta/ts-core';
 
 export interface CrudApiResponseMetadataInterface extends OptionsInterface {
   propertyKey: string | symbol;

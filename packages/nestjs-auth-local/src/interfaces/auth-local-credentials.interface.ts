@@ -1,7 +1,7 @@
 import {
   ReferenceIdInterface,
   ReferenceUsernameInterface,
-} from '@concepta/nestjs-common';
+} from '@concepta/ts-core';
 import { PasswordStorageInterface } from '@concepta/nestjs-password';
 
 /**

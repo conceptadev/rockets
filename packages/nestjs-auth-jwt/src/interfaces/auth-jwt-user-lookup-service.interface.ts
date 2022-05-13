@@ -1,4 +1,4 @@
-import { LookupSubjectInterface } from '@concepta/nestjs-common';
+import { LookupSubjectInterface } from '@concepta/ts-core';
 
 export interface AuthJwtUserLookupServiceInterface
   extends LookupSubjectInterface {}

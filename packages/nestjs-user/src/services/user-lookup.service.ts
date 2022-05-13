@@ -5,7 +5,7 @@ import {
   ReferenceId,
   ReferenceSubject,
   ReferenceUsername,
-} from '@concepta/nestjs-common';
+} from '@concepta/ts-core';
 import { ReferenceLookupException } from '@concepta/nestjs-typeorm-ext';
 import { USER_MODULE_USER_CUSTOM_REPO_TOKEN } from '../user.constants';
 import { UserEntityInterface } from '../interfaces/user-entity.interface';
