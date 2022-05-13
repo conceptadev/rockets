@@ -1,7 +1,7 @@
 import { IsString } from 'class-validator';
 import { Exclude, Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { ReferenceUsername } from '@concepta/nestjs-common';
+import { ReferenceUsername } from '@concepta/ts-core';
 import { AuthLocalLoginInterface } from '../interfaces/auth-local-login.interface';
 
 @Exclude()

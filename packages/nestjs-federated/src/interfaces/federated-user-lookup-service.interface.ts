@@ -3,7 +3,7 @@ import {
   LookupIdInterface,
   ReferenceEmail,
   ReferenceId,
-} from '@concepta/nestjs-common';
+} from '@concepta/ts-core';
 import { FederatedCredentialsInterface } from './federated-credentials.interface';
 
 export interface FederatedUserLookupServiceInterface

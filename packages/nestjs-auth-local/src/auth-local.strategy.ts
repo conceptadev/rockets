@@ -6,7 +6,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ReferenceUsername } from '@concepta/nestjs-common';
+import { ReferenceUsername } from '@concepta/ts-core';
 import { PassportStrategyFactory } from '@concepta/nestjs-authentication';
 import { PasswordStorageService } from '@concepta/nestjs-password';
 import {

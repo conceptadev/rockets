@@ -1,4 +1,4 @@
-import { ReferenceId } from '../../references/reference.types';
+import { ReferenceId } from '../reference.types';
 
 /**
  * Identifiable by id.

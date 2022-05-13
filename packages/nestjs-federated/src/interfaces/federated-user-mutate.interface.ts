@@ -1,7 +1,7 @@
 import {
   ReferenceEmailInterface,
   ReferenceUsernameInterface,
-} from '@concepta/nestjs-common';
+} from '@concepta/ts-core';
 
 /**
  * Credentials Interface

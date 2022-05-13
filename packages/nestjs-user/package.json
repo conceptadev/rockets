@@ -14,9 +14,9 @@
   "dependencies": {
     "@concepta/nestjs-common": "^4.0.0-alpha.11",
     "@concepta/nestjs-crud": "^4.0.0-alpha.11",
-    "@concepta/nestjs-exception": "^4.0.0-alpha.11",
     "@concepta/nestjs-password": "^4.0.0-alpha.11",
     "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.11",
+    "@concepta/ts-core": "^4.0.0-alpha.11",
     "@nestjs/common": "^8.0.8",
     "@nestjs/config": "^1.1.6",
     "@nestjs/swagger": "^5.2.1"

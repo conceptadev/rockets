@@ -3,7 +3,7 @@ import {
   ReferenceEmailInterface,
   ReferenceIdInterface,
   ReferenceUsernameInterface,
-} from '@concepta/nestjs-common';
+} from '@concepta/ts-core';
 
 export interface UserInterface
   extends ReferenceIdInterface,

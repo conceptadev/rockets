@@ -18,6 +18,9 @@
   "files": [],
   "references": [
     {
+      "path": "packages/ts-core"
+    },
+    {
       "path": "packages/nestjs-common"
     },
     {

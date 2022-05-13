@@ -1,6 +1,6 @@
 import { Exclude, Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { ReferenceIdInterface } from '@concepta/nestjs-common';
+import { ReferenceIdInterface } from '@concepta/ts-core';
 import { CrudResponsePaginatedInterface } from '../interfaces/crud-response-paginated.interface';
 import { CrudResponseDto } from './crud-response.dto';
 

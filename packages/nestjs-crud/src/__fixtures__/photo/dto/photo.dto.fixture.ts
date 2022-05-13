@@ -1,7 +1,7 @@
 import { Exclude, Expose } from 'class-transformer';
 import { IsBoolean, IsNumber, IsString, IsUUID } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ReferenceId } from '@concepta/nestjs-common';
+import { ReferenceId } from '@concepta/ts-core';
 import { CrudResponseDto } from '../../../dto/crud-response.dto';
 import { PhotoEntityInterfaceFixture } from '../interfaces/photo-entity.interface.fixture';
 

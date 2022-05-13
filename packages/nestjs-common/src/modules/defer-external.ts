@@ -1,6 +1,6 @@
 import { IConfigurableDynamicRootModule } from '@golevelup/nestjs-modules';
 import { DynamicModule, Type } from '@nestjs/common';
-import { DeferExternalOptionsInterface } from '../interfaces/modules/defer-external-options.interface';
+import { DeferExternalOptionsInterface } from './interfaces/defer-external-options.interface';
 
 export function deferExternal<T, U>(
   moduleCtor: IConfigurableDynamicRootModule<T, U> & Type<T>,

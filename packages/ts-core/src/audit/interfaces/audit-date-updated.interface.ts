@@ -1,4 +1,4 @@
-import { AuditDateUpdated } from '../../audit/audit.types';
+import { AuditDateUpdated } from '../audit.types';
 
 /**
  * Date data was last updated.

@@ -5,7 +5,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import {
   ReferenceEmailInterface,
   ReferenceIdInterface,
-} from '@concepta/nestjs-common';
+} from '@concepta/ts-core';
 
 import {
   FederatedOAuthService,

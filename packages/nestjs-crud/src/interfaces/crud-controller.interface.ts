@@ -1,5 +1,5 @@
 import { CreateManyDto } from '@nestjsx/crud';
-import { ReferenceIdInterface } from '@concepta/nestjs-common';
+import { ReferenceIdInterface } from '@concepta/ts-core';
 import { CrudRequestInterface } from '../interfaces/crud-request.interface';
 import { CrudResponsePaginatedInterface } from './crud-response-paginated.interface';
 

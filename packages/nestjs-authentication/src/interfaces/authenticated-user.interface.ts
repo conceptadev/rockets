@@ -1,3 +1,3 @@
-import { ReferenceIdInterface } from '@concepta/nestjs-common';
+import { ReferenceIdInterface } from '@concepta/ts-core';
 
 export interface AuthenticatedUserInterface extends ReferenceIdInterface {}

@@ -1,3 +1,3 @@
-import { LookupIdInterface } from '@concepta/nestjs-common';
+import { LookupIdInterface } from '@concepta/ts-core';
 
 export interface OrgLookupServiceInterface extends LookupIdInterface {}

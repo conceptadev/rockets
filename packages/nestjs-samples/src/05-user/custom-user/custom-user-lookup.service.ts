@@ -6,7 +6,7 @@ import {
   ReferenceId,
   ReferenceSubject,
   ReferenceUsername,
-} from '@concepta/nestjs-common';
+} from '@concepta/ts-core';
 
 @Injectable()
 export class CustomUserLookupService implements UserLookupServiceInterface {
