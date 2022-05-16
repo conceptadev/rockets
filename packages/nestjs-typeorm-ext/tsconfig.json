@@ -15,7 +15,7 @@
       "path": "../ts-core"
     },
     {
-      "path": "../nestjs-common"
+      "path": "../nestjs-core"
     },
     {
       "path": "../nestjs-event"

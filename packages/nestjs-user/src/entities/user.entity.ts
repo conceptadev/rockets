@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { AuditInterface } from '@concepta/ts-core';
-import { AuditPostgresEmbed } from '@concepta/nestjs-typeorm-ext';
+import { AuditPostgresEmbed } from '@concepta/typeorm-common';
 import { UserEntityInterface } from '../interfaces/user-entity.interface';
 
 /**

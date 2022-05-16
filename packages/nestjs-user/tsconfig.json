@@ -17,7 +17,10 @@
       "path": "../ts-core"
     },
     {
-      "path": "../nestjs-common"
+      "path": "../nestjs-core"
+    },
+    {
+      "path": "../typeorm-common"
     },
     {
       "path": "../nestjs-crud"

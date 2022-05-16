@@ -8,7 +8,7 @@ A module for managing a basic Org entity, including controller with full CRUD, D
 [![NPM Downloads](https://img.shields.io/npm/dw/@conceptadev/nestjs-user)](https://www.npmjs.com/package/@concepta/nestjs-user)
 [![GH Last Commit](https://img.shields.io/github/last-commit/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets)
 [![GH Contrib](https://img.shields.io/github/contributors/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets/graphs/contributors)
-[![NestJS Dep](https://img.shields.io/github/package-json/dependency-version/conceptadev/rockets/@nestjs/common?label=NestJS&logo=nestjs&filename=packages%2Fnestjs-common%2Fpackage.json)](https://www.npmjs.com/package/@nestjs/common)
+[![NestJS Dep](https://img.shields.io/github/package-json/dependency-version/conceptadev/rockets/@nestjs/common?label=NestJS&logo=nestjs&filename=packages%2Fnestjs-core%2Fpackage.json)](https://www.npmjs.com/package/@nestjs/common)
 
 ## Installation
 
@@ -48,6 +48,6 @@ Configurations specific to (optional) database seeding.
 
 Configurations available via environment.
 
-| Variable                                | Type       | Default        |                                      |
-|-----------------------------------------| ---------- | -------------- | ------------------------------------ |
-| `ORG_MODULE_SEEDER_AMOUNT`              | `<number>` | `50`           | number of additional users to create |
+| Variable                   | Type       | Default |                                      |
+| -------------------------- | ---------- | ------- | ------------------------------------ |
+| `ORG_MODULE_SEEDER_AMOUNT` | `<number>` | `50`    | number of additional users to create |

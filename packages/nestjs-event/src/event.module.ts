@@ -6,7 +6,7 @@ import {
   createConfigurableDynamicRootModule,
   deferExternal,
   DeferExternalOptionsInterface,
-} from '@concepta/nestjs-common';
+} from '@concepta/nestjs-core';
 import { EventOptionsInterface } from './interfaces/event-options.interface';
 import { EventDispatchService } from './services/event-dispatch.service';
 import { EventListenService } from './services/event-listen.service';

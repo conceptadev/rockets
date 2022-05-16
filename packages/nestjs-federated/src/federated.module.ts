@@ -5,7 +5,7 @@ import {
   DeferExternalOptionsInterface,
   ModuleOptionsControllerInterface,
   negotiateController,
-} from '@concepta/nestjs-common';
+} from '@concepta/nestjs-core';
 import {
   createCustomRepositoryProvider,
   createEntityRepositoryProvider,

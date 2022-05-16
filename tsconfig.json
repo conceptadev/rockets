@@ -21,6 +21,9 @@
       "path": "packages/ts-core"
     },
     {
+      "path": "packages/nestjs-core"
+    },
+    {
       "path": "packages/nestjs-common"
     },
     {
@@ -76,6 +79,9 @@
     },
     {
       "path": "packages/nestjs-federated"
+    },
+    {
+      "path": "packages/typeorm-common"
     }
   ]
 }

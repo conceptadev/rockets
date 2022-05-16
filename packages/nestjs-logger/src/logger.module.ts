@@ -10,7 +10,7 @@ import {
   createConfigurableDynamicRootModule,
   deferExternal,
   DeferExternalOptionsInterface,
-} from '@concepta/nestjs-common';
+} from '@concepta/nestjs-core';
 import { LoggerExceptionFilter } from './logger-exception.filter';
 import { LoggerRequestInterceptor } from './logger-request.interceptor';
 import { LoggerSentryTransport } from './transports/logger-sentry.transport';

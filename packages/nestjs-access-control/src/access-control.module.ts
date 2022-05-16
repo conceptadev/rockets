@@ -4,7 +4,7 @@ import {
   createConfigurableDynamicRootModule,
   deferExternal,
   DeferExternalOptionsInterface,
-} from '@concepta/nestjs-common';
+} from '@concepta/nestjs-core';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import { AccessControlModuleOptionsInterface } from './interfaces/access-control-module-options.interface';
 import { accessControlDefaultConfig } from './config/acess-control-default.config';

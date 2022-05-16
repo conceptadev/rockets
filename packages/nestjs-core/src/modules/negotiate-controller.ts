@@ -4,10 +4,8 @@ import { ModuleOptionsControllerInterface } from './interfaces/module-options-co
 /**
  * Negotiate the addition of controllers to a dynamic module.
  *
- * @param {DynamicModule} module A dynamic module
- * @param {ModuleOptionsControllerInterface} options Options containing controller setting.
- * @param {Type[]} defaultImports Array of modules to import if the controller is NOT overridden.
- * @returns {void}
+ * @param module A dynamic module
+ * @param options Options containing controller setting.
  */
 export function negotiateController(
   module: DynamicModule,

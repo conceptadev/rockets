@@ -1,5 +1,5 @@
-import { ReferenceId } from '@concepta/ts-core';
-import { ExceptionInterface, formatMessage } from '@concepta/nestjs-exception';
+import { format } from 'util';
+import { ReferenceId, ExceptionInterface } from '@concepta/ts-core';
 
 export class ReferenceIdNoMatchException
   extends Error
@@ -17,7 +17,7 @@ export class ReferenceIdNoMatchException
     id: ReferenceId,
     message = 'No match for %s reference id %s.',
   ) {
-    super(formatMessage(message, entityName, id));
+    super(format(message, entityName, id));
     this.context = {
       entityName,
       id,

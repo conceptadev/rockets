@@ -17,6 +17,9 @@
       "path": "../ts-core"
     },
     {
+      "path": "../nestjs-core"
+    },
+    {
       "path": "../nestjs-authentication"
     },
     {
@@ -36,9 +39,6 @@
     },
     {
       "path": "../nestjs-user"
-    },
-    {
-      "path": "../nestjs-common"
     }
   ]
 }

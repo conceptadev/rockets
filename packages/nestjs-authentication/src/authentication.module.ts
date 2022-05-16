@@ -5,7 +5,7 @@ import {
   createConfigurableDynamicRootModule,
   deferExternal,
   DeferExternalOptionsInterface,
-} from '@concepta/nestjs-common';
+} from '@concepta/nestjs-core';
 import {
   JwtIssueService,
   JwtModule,

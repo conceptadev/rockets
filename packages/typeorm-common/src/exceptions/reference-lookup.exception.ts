@@ -1,4 +1,5 @@
-import { ExceptionInterface, formatMessage } from '@concepta/nestjs-exception';
+import { format } from 'util';
+import { ExceptionInterface } from '@concepta/ts-core';
 
 export class ReferenceLookupException
   extends Error
@@ -16,7 +17,7 @@ export class ReferenceLookupException
     originalError: Error,
     message = 'Error while trying to lookup a %s reference',
   ) {
-    super(formatMessage(message, entityName));
+    super(format(message, entityName));
     this.context = {
       entityName,
       originalError,

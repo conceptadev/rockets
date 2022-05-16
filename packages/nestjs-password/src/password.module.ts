@@ -5,7 +5,7 @@ import {
   createConfigurableDynamicRootModule,
   deferExternal,
   DeferExternalOptionsInterface,
-} from '@concepta/nestjs-common';
+} from '@concepta/nestjs-core';
 import { passwordDefaultConfig } from './config/password-default.config';
 import { PasswordOptionsInterface } from './interfaces/password-options.interface';
 import {

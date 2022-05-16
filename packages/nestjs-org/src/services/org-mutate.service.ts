@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
-import { MutateService } from '@concepta/nestjs-typeorm-ext';
+import { MutateService } from '@concepta/typeorm-common';
 import { OrgEntityInterface } from '../interfaces/org-entity.interface';
 import { OrgMutateServiceInterface } from '../interfaces/org-mutate-service.interface';
 import { OrgCreatableInterface } from '../interfaces/org-creatable.interface';

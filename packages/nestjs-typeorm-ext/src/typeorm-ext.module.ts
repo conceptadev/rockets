@@ -12,7 +12,7 @@ import {
   createConfigurableDynamicRootModule,
   deferExternal,
   DeferExternalOptionsInterface,
-} from '@concepta/nestjs-common';
+} from '@concepta/nestjs-core';
 import { TypeOrmExtService } from './typeorm-ext.service';
 import {
   TYPEORM_EXT_MODULE_CONNECTION,
