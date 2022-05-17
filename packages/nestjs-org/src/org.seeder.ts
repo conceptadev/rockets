@@ -11,19 +11,19 @@ export class OrgSeeder extends Seeder {
   /**
    * The entity class.
    *
-   * Override this in a subclass to use a custom entity.
+   * Override this to use a custom entity.
    */
-  protected entity: Type<OrgEntityInterface> = OrgEntity;
+  public static entity: Type<OrgEntityInterface> = OrgEntity;
 
   /**
    * The factory class.
    *
-   * Override this in a subclass to use a custom factory.
+   * Override this to use a custom factory.
    */
-  protected factory: Type<Factory<OrgEntityInterface>> = OrgFactory;
+  public static factory: Type<Factory<OrgEntityInterface>> = OrgFactory;
 
   /**
-   * Runner   *
+   * Runner
    */
   public async run(): Promise<void> {
     // number of orgs to create
@@ -32,7 +32,7 @@ export class OrgSeeder extends Seeder {
       : 50;
 
     // the factory
-    const orgFactory = new this.factory(this.entity);
+    const orgFactory = new OrgSeeder.factory(OrgSeeder.entity);
 
     // create a bunch
     await orgFactory.createMany(createAmount);

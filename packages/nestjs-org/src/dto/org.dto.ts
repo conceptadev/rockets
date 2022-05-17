@@ -1,7 +1,8 @@
 import { IsOptional, IsString } from 'class-validator';
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude, Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { ReferenceId } from '@concepta/ts-core';
+import { AuditInterface, ReferenceId } from '@concepta/ts-core';
+import { AuditDto } from '@concepta/nestjs-common';
 import { CrudResponseDto } from '@concepta/nestjs-crud';
 import { OrgInterface } from '../interfaces/org.interface';
 
@@ -36,38 +37,18 @@ export class OrgDto
   name: string;
 
   /**
-   * createdAt
+   * Audit
    */
-  @Expose()
+  @Expose({ toPlainOnly: true })
   @ApiProperty({
-    type: 'date',
-    description: 'org created at date',
+    type: AuditDto,
+    description: 'Audit data',
   })
-  @IsString()
-  createdAt: Date;
+  @Type(() => AuditDto)
+  audit?: AuditInterface;
 
   /**
-   * updatedAt
-   */
-  @Expose()
-  @ApiProperty({
-    type: 'date',
-    description: 'org updated at date',
-  })
-  @IsString()
-  updatedAt: Date;
-
-  /**
-   * deletedAt
-   */
-  @Expose()
-  @ApiProperty({
-    type: 'date',
-    description: 'org updated at date',
-  })
-  deletedAt: Date;
-  /**
-   * deletedAt
+   * Active
    */
   @Expose()
   @ApiProperty({
