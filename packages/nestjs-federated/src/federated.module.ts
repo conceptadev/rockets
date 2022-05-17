@@ -9,6 +9,7 @@ import {
 import {
   createCustomRepositoryProvider,
   createEntityRepositoryProvider,
+  TypeOrmExtModule,
 } from '@concepta/nestjs-typeorm-ext';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
@@ -23,6 +24,7 @@ import {
   FEDERATED_MODULE_USER_MUTATE_SERVICE_TOKEN,
 } from './federated.constants';
 import { FederatedOptionsInterface } from './interfaces/federated-options.interface';
+import { FederatedOrmOptionsInterface } from './interfaces/federated-orm-options.interface';
 import { FederatedOAuthService } from './services/federated-oauth.service';
 import { FederatedService } from './services/federated.service';
 
@@ -74,7 +76,11 @@ export class FederatedModule extends createConfigurableDynamicRootModule<
     FEDERATED_MODULE_FEDERATED_CUSTOM_REPO_TOKEN,
   ],
 }) {
-  static register(options: FederatedOptionsInterface = {}) {
+  static register(
+    options: FederatedOptionsInterface & FederatedOrmOptionsInterface,
+  ) {
+    this.configureOrm(options);
+
     const module = FederatedModule.forRoot(FederatedModule, options);
 
     negotiateController(module, options);
@@ -84,12 +90,12 @@ export class FederatedModule extends createConfigurableDynamicRootModule<
 
   static registerAsync(
     options: AsyncModuleConfig<FederatedOptionsInterface> &
-      ModuleOptionsControllerInterface,
+      ModuleOptionsControllerInterface &
+      FederatedOrmOptionsInterface,
   ) {
-    const module = FederatedModule.forRootAsync(FederatedModule, {
-      useFactory: () => ({}),
-      ...options,
-    });
+    this.configureOrm(options);
+
+    const module = FederatedModule.forRootAsync(FederatedModule, options);
 
     negotiateController(module, options);
 
@@ -101,5 +107,14 @@ export class FederatedModule extends createConfigurableDynamicRootModule<
       FederatedModule,
       options,
     );
+  }
+
+  /**
+   * Statically configure the ORM options.
+   *
+   * @param options ORM options
+   */
+  private static configureOrm(options: FederatedOrmOptionsInterface) {
+    TypeOrmExtModule.configure(options.orm);
   }
 }
