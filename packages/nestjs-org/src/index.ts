@@ -1,6 +1,7 @@
 export { OrgModule } from './org.module';
-export { OrgEntity } from './entities/org.entity';
-export { OrgRepository } from './org.repository';
+
+export { OrgPostgresEntity } from './entities/org-postgres.entity';
+export { OrgSqliteEntity } from './entities/org-sqlite.entity';
 
 export { OrgLookupService } from './services/org-lookup.service';
 export { OrgMutateService } from './services/org-mutate.service';

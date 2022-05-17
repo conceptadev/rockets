@@ -1,13 +1,13 @@
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { AuditInterface, ReferenceId } from '@concepta/ts-core';
 import { AuditPostgresEmbed } from '@concepta/typeorm-common';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { OrgEntityInterface } from '../interfaces/org-entity.interface';
 
 /**
- * Org Entity
+ * Org Postgres Entity
  */
 @Entity()
-export class OrgEntity implements OrgEntityInterface {
+export class OrgPostgresEntity implements OrgEntityInterface {
   /**
    * Unique Id
    */
