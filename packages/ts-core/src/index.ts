@@ -1,3 +1,6 @@
+export { ExceptionInterface } from './exceptions/interfaces/exception.interface';
+
+export { Type } from './utils/interfaces/type.interface';
 export { LiteralObject } from './utils/interfaces/literal-object.interface';
 
 export { OptionsInterface } from './options/interfaces/options.interface';

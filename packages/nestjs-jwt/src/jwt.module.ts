@@ -6,7 +6,7 @@ import {
   createConfigurableDynamicRootModule,
   deferExternal,
   DeferExternalOptionsInterface,
-} from '@concepta/nestjs-common';
+} from '@concepta/nestjs-core';
 import { JwtOptionsInterface } from './interfaces/jwt-options.interface';
 import {
   JWT_MODULE_JWT_SERVICE_ACCESS_TOKEN,

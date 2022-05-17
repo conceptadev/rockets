@@ -1,13 +1,13 @@
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 import { DeepPartial, Repository } from 'typeorm';
-import { Injectable, Type } from '@nestjs/common';
 import {
   CreateOneInterface,
   RemoveOneInterface,
   ReferenceIdInterface,
   ReplaceOneInterface,
   UpdateOneInterface,
+  Type,
 } from '@concepta/ts-core';
 import { ReferenceValidationException } from '../exceptions/reference-validation.exception';
 import { ReferenceMutateException } from '../exceptions/reference-mutate.exception';
@@ -17,7 +17,6 @@ import { ReferenceLookupException } from '../exceptions/reference-lookup.excepti
 /**
  * Abstract mutate service
  */
-@Injectable()
 export abstract class MutateService<
   Entity extends ReferenceIdInterface,
   Creatable extends DeepPartial<Entity>,

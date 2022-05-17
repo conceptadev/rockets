@@ -1,5 +1,6 @@
+import { format } from 'util';
 import { ValidationError } from 'class-validator';
-import { ExceptionInterface, formatMessage } from '@concepta/nestjs-exception';
+import { ExceptionInterface } from '@concepta/ts-core';
 
 export class ReferenceValidationException
   extends Error
@@ -17,7 +18,7 @@ export class ReferenceValidationException
     validationErrors: ValidationError[],
     message = 'Data for the %s reference is not valid',
   ) {
-    super(formatMessage(message, entityName));
+    super(format(message, entityName));
     this.context = {
       entityName,
       validationErrors,

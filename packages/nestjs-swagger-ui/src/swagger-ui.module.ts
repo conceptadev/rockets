@@ -4,7 +4,7 @@ import {
   createConfigurableDynamicRootModule,
   deferExternal,
   DeferExternalOptionsInterface,
-} from '@concepta/nestjs-common';
+} from '@concepta/nestjs-core';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import { SwaggerUiOptionsInterface } from './interfaces/swagger-ui-options.interface';
 import { SwaggerUiSettingsInterface } from './interfaces/swagger-ui-settings.interface';

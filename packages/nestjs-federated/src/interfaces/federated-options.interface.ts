@@ -1,5 +1,5 @@
 import { OptionsInterface } from '@concepta/ts-core';
-import { ModuleOptionsSettingsInterface } from '@concepta/nestjs-common';
+import { ModuleOptionsSettingsInterface } from '@concepta/nestjs-core';
 import { FederatedSettingsInterface } from './federated-settings.interface';
 import { FederatedUserMutateServiceInterface } from './federated-user-mutate-service.interface';
 import { FederatedUserLookupServiceInterface } from './federated-user-lookup-service.interface';

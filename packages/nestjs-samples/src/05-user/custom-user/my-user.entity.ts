@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { AuditInterface } from '@concepta/ts-core';
-import { AuditSqlLiteEmbed } from '@concepta/nestjs-typeorm-ext';
+import { AuditSqlLiteEmbed } from '@concepta/typeorm-common';
 
 @Entity()
 export class MyUser {

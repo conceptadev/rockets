@@ -14,7 +14,7 @@
   ],
   "dependencies": {
     "@concepta/nestjs-authentication": "^4.0.0-alpha.11",
-    "@concepta/nestjs-common": "^4.0.0-alpha.11",
+    "@concepta/nestjs-core": "^4.0.0-alpha.11",
     "@concepta/nestjs-federated": "^4.0.0-alpha.11",
     "@concepta/ts-core": "^4.0.0-alpha.11",
     "@nestjs/common": "^8.0.2",
@@ -25,7 +25,7 @@
     "passport-github": "^1.1.0"
   },
   "devDependencies": {
-    "@concepta/nestjs-jwt": "^4.0.0-alpha.10",
+    "@concepta/nestjs-jwt": "^4.0.0-alpha.11",
     "@nestjs/testing": "^8.0.2",
     "@sentry/types": "^6.13.3",
     "jest-mock-extended": "^2.0.4"

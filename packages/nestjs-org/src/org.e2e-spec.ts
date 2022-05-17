@@ -5,8 +5,10 @@ import { useSeeders } from '@jorgebodega/typeorm-seeding';
 import { OrgSeeder } from './org.seeder';
 import { OrgModule } from './org.module';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
-import { OrgEntity } from './entities/org.entity';
 import { CrudModule } from '@concepta/nestjs-crud';
+
+import { OrgEntityFixture } from './__fixtures__/org-entity.fixture';
+import { OrgRepositoryFixture } from './__fixtures__/org-repository.fixture';
 
 describe('OrgController (e2e)', () => {
   describe('Rest', () => {
@@ -20,15 +22,23 @@ describe('OrgController (e2e)', () => {
               type: 'sqlite',
               database: ':memory:',
               synchronize: true,
-              entities: [OrgEntity],
             }),
           }),
-          OrgModule.register(),
+          OrgModule.register({
+            orm: {
+              entities: { org: { useClass: OrgEntityFixture } },
+              repositories: {
+                orgRepository: { useClass: OrgRepositoryFixture },
+              },
+            },
+          }),
           CrudModule.register(),
         ],
       }).compile();
       app = moduleFixture.createNestApplication();
       await app.init();
+
+      OrgSeeder.entity = OrgEntityFixture;
 
       await useSeeders(OrgSeeder, { root: __dirname, connection: 'default' });
     });

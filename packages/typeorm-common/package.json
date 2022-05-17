@@ -1,0 +1,22 @@
+{
+  "name": "@concepta/typeorm-common",
+  "version": "4.0.0-alpha.11",
+  "description": "Rockets TypeORM Common",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "license": "BSD-3-Clause",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
+  ],
+  "dependencies": {
+    "@concepta/ts-core": "^4.0.0-alpha.11"
+  },
+  "peerDependencies": {
+    "class-transformer": "*",
+    "class-validator": "*",
+    "typeorm": "^0.2.41"
+  }
+}

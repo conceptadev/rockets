@@ -1,4 +1,8 @@
 {
+  "nestjs-core": {
+    "title": "Core",
+    "category": "core"
+  },
   "nestjs-common": {
     "title": "Common",
     "category": "core"

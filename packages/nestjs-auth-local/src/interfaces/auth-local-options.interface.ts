@@ -1,6 +1,6 @@
 import { OptionsInterface } from '@concepta/ts-core';
 import { IssueTokenServiceInterface } from '@concepta/nestjs-authentication';
-import { ModuleOptionsSettingsInterface } from '@concepta/nestjs-common';
+import { ModuleOptionsSettingsInterface } from '@concepta/nestjs-core';
 import { AuthLocalSettingsInterface } from './auth-local-settings.interface';
 import { AuthLocalUserLookupServiceInterface } from './auth-local-user-lookup-service.interface';
 

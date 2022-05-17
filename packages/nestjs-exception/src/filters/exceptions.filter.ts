@@ -5,8 +5,8 @@ import {
   HttpException,
   HttpAdapterHost,
 } from '@nestjs/common';
+import { ExceptionInterface } from '@concepta/ts-core';
 import { ERROR_CODE_UNKNOWN } from '../constants/error-codes.constants';
-import { ExceptionInterface } from '../interfaces/exception.interface';
 import { mapHttpStatus } from '../utils/map-http-status.util';
 
 @Catch()
