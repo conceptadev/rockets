@@ -17,6 +17,9 @@
       "path": "../ts-core"
     },
     {
+      "path": "../typeorm-common"
+    },
+    {
       "path": "../nestjs-authentication"
     },
     {
