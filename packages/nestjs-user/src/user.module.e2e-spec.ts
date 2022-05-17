@@ -2,9 +2,10 @@ import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { useSeeders } from '@jorgebodega/typeorm-seeding';
-import { UserSeeder } from '@concepta/nestjs-user';
-import { AppModule } from './app.module';
-import { MyUser } from './custom-user/my-user.entity';
+import { UserSeeder } from './user.seeder';
+
+import { AppModuleFixture } from './__fixtures__/app.module.fixture';
+import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
 
 describe('AppController (e2e)', () => {
   describe('Authentication', () => {
@@ -12,12 +13,12 @@ describe('AppController (e2e)', () => {
 
     beforeEach(async () => {
       const moduleFixture: TestingModule = await Test.createTestingModule({
-        imports: [AppModule],
+        imports: [AppModuleFixture],
       }).compile();
       app = moduleFixture.createNestApplication();
       await app.init();
 
-      UserSeeder.entity = MyUser;
+      UserSeeder.entity = UserEntityFixture;
 
       await useSeeders(UserSeeder, { root: __dirname, connection: 'default' });
     });

@@ -2,7 +2,7 @@ import { Repository } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
 import { FederatedServiceInterface } from '../interfaces/federated-service.interface';
 import { FEDERATED_MODULE_FEDERATED_CUSTOM_REPO_TOKEN } from '../federated.constants';
-import { FederatedEntity } from '../entities/federated.entity';
+import { FederatedPostgresEntity } from '../entities/federated-postgres.entity';
 import { FederatedEntityInterface } from '../interfaces/federated-entity.interface';
 import { FederatedCreatableInterface } from '../interfaces/federated-creatable.interface';
 
@@ -10,7 +10,7 @@ import { FederatedCreatableInterface } from '../interfaces/federated-creatable.i
 export class FederatedService implements FederatedServiceInterface {
   constructor(
     @Inject(FEDERATED_MODULE_FEDERATED_CUSTOM_REPO_TOKEN)
-    public federatedRepo: Repository<FederatedEntity>,
+    private federatedRepo: Repository<FederatedPostgresEntity>,
   ) {}
 
   async exists(

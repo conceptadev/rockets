@@ -10,12 +10,12 @@ export interface FederatedOptionsInterface
   /**
    * Implementation of a class to lookup users
    */
-  userLookupService?: FederatedUserLookupServiceInterface;
+  userLookupService: FederatedUserLookupServiceInterface;
 
   /**
    * Implementation of a class to issue tokens
    */
-  userMutateService?: FederatedUserMutateServiceInterface;
+  userMutateService: FederatedUserMutateServiceInterface;
 
   /**
    * Settings

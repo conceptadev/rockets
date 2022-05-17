@@ -1,13 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, PrimaryGeneratedColumn } from 'typeorm';
 import { AuditInterface } from '@concepta/ts-core';
-import { AuditPostgresEmbed } from '@concepta/typeorm-common';
-import { UserEntityInterface } from '../interfaces/user-entity.interface';
+import { AuditSqlLiteEmbed } from '@concepta/typeorm-common';
 
-/**
- * User Entity
- */
-@Entity()
-export class User implements UserEntityInterface {
+export abstract class UserSqliteEntity {
   /**
    * Unique Id
    */
@@ -41,6 +36,6 @@ export class User implements UserEntityInterface {
   /**
    * Audit embed
    */
-  @Column(() => AuditPostgresEmbed)
-  audit: AuditInterface;
+  @Column(() => AuditSqlLiteEmbed)
+  audit?: AuditInterface;
 }

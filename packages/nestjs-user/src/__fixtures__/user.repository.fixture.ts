@@ -5,15 +5,15 @@ import {
   ObjectID,
   Repository,
 } from 'typeorm';
-import { UserEntityInterface } from '@concepta/nestjs-user';
-import { UserEntity } from './user.entity';
+import { UserEntityInterface } from '../interfaces/user-entity.interface';
+import { UserEntityFixture } from './user.entity.fixture';
 
-@EntityRepository(UserEntity)
-export class UserRepository extends Repository<UserEntityInterface> {
+@EntityRepository(UserEntityFixture)
+export class UserRepositoryFixture extends Repository<UserEntityInterface> {
   /**
    * Fake user "database"
    */
-  private users: UserEntity[] = [
+  private users: UserEntityFixture[] = [
     {
       id: '1',
       email: 'first_user@dispostable.com',

@@ -3,15 +3,15 @@ import { UserModule, UserLookupService } from '@concepta/nestjs-user';
 import { UserController } from '@concepta/nestjs-user';
 import { Repository } from 'typeorm';
 import { AppModule } from './app.module';
-import { CustomUserRepository } from './custom-repository';
-import { CustomUser } from './custom-user.entity';
+import { UserRepository } from './user/user.repository';
+import { UserEntity } from './user/user.entity';
 
 describe('AppModule', () => {
   let userModule: UserModule;
   let userLookupService: UserLookupService;
   let userController: UserController;
-  let userEntityRepo: Repository<CustomUser>;
-  let userCustomRepo: CustomUserRepository;
+  let userEntityRepo: Repository<UserEntity>;
+  let userCustomRepo: UserRepository;
 
   beforeEach(async () => {
     const testModule: TestingModule = await Test.createTestingModule({
@@ -19,10 +19,10 @@ describe('AppModule', () => {
     }).compile();
 
     userModule = testModule.get<UserModule>(UserModule);
-    userEntityRepo = testModule.get<Repository<CustomUser>>(
+    userEntityRepo = testModule.get<Repository<UserEntity>>(
       'USER_MODULE_USER_ENTITY_REPO_TOKEN',
     );
-    userCustomRepo = testModule.get<CustomUserRepository>(
+    userCustomRepo = testModule.get<UserRepository>(
       'USER_MODULE_USER_CUSTOM_REPO_TOKEN',
     );
     userLookupService = testModule.get<UserLookupService>(UserLookupService);
@@ -37,11 +37,9 @@ describe('AppModule', () => {
     it('should be loaded', async () => {
       expect(userModule).toBeInstanceOf(UserModule);
       expect(userEntityRepo).toBeInstanceOf(Repository);
-      expect(userCustomRepo).toBeInstanceOf(CustomUserRepository);
+      expect(userCustomRepo).toBeInstanceOf(UserRepository);
       expect(userLookupService).toBeInstanceOf(UserLookupService);
-      expect(userLookupService['userRepo']).toBeInstanceOf(
-        CustomUserRepository,
-      );
+      expect(userLookupService['userRepo']).toBeInstanceOf(UserRepository);
       expect(userLookupService['userRepo'].find).toBeInstanceOf(Function);
       expect(userController).toBeInstanceOf(UserController);
     });

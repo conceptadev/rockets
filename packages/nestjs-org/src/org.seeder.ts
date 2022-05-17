@@ -1,6 +1,5 @@
 import { Type } from '@nestjs/common';
 import { Factory, Seeder } from '@jorgebodega/typeorm-seeding';
-import { OrgEntity } from './entities/org.entity';
 import { OrgEntityInterface } from './interfaces/org-entity.interface';
 import { OrgFactory } from './org.factory';
 
@@ -11,9 +10,9 @@ export class OrgSeeder extends Seeder {
   /**
    * The entity class.
    *
-   * Override this to use a custom entity.
+   * Set this to your concrete entity.
    */
-  public static entity: Type<OrgEntityInterface> = OrgEntity;
+  public static entity: Type<OrgEntityInterface>;
 
   /**
    * The factory class.

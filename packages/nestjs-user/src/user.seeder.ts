@@ -1,7 +1,6 @@
 import { Type } from '@nestjs/common';
 import { Factory, Seeder } from '@jorgebodega/typeorm-seeding';
 import { PasswordStorageService } from '@concepta/nestjs-password';
-import { User } from './entities/user.entity';
 import { UserEntityInterface } from './interfaces/user-entity.interface';
 import { UserFactory } from './user.factory';
 
@@ -12,9 +11,9 @@ export class UserSeeder extends Seeder {
   /**
    * The entity class.
    *
-   * Override this in a subclass to use a custom entity.
+   * Set this to your concrete entity.
    */
-  public static entity: Type<UserEntityInterface> = User;
+  public static entity: Type<UserEntityInterface>;
 
   /**
    * The factory class.

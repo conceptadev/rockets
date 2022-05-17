@@ -14,9 +14,7 @@ import {
   TypeOrmExtModule,
 } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
-import { OrgRepository } from './org.repository';
 import { orgDefaultConfig } from './config/org-default.config';
-import { OrgEntity } from './entities/org.entity';
 import { OrgOptionsInterface } from './interfaces/org-options.interface';
 import { OrgOrmOptionsInterface } from './interfaces/org-orm-options.interface';
 import {
@@ -93,7 +91,7 @@ export class OrgModule extends createConfigurableDynamicRootModule<
   static register(
     options: OrgOptionsInterface &
       OrgOrmOptionsInterface &
-      ModuleOptionsControllerInterface = {},
+      ModuleOptionsControllerInterface,
   ) {
     this.configureOrm(options);
 
@@ -141,13 +139,6 @@ export class OrgModule extends createConfigurableDynamicRootModule<
    * @param options ORM options
    */
   private static configureOrm(options: OrgOrmOptionsInterface) {
-    TypeOrmExtModule.configure(options.orm, {
-      entities: {
-        org: { useClass: OrgEntity },
-      },
-      repositories: {
-        orgRepository: { useClass: OrgRepository },
-      },
-    });
+    TypeOrmExtModule.configure(options.orm);
   }
 }

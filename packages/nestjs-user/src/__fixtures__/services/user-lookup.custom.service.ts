@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { UserInterface } from '@concepta/nestjs-user';
-import { UserLookupServiceInterface } from '@concepta/nestjs-user/src/interfaces/user-lookup-service.interface';
+import { UserInterface } from '../../interfaces/user.interface';
+import { UserLookupServiceInterface } from '../../interfaces/user-lookup-service.interface';
 import {
   ReferenceEmail,
   ReferenceId,
@@ -9,7 +9,7 @@ import {
 } from '@concepta/ts-core';
 
 @Injectable()
-export class CustomUserLookupService implements UserLookupServiceInterface {
+export class UserLookupCustomService implements UserLookupServiceInterface {
   /**
    * Dummy property for easily identifying service override.
    */

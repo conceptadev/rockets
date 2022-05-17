@@ -1,13 +1,13 @@
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { AuditInterface } from '@concepta/ts-core';
 import { AuditPostgresEmbed } from '@concepta/typeorm-common';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { FederatedEntityInterface } from '../interfaces/federated-entity.interface';
 
 /**
- * Federated Entity
+ * Federated Postgres Entity
  */
 @Entity()
-export class FederatedEntity implements FederatedEntityInterface {
+export class FederatedPostgresEntity implements FederatedEntityInterface {
   /**
    * Unique Id
    */

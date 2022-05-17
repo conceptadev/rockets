@@ -1,1 +1,1 @@
-export { UserSeeder } from '@concepta/nestjs-user';
+export { UserSeeder } from '@concepta/nestjs-user/dist/seeding';
