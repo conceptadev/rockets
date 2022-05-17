@@ -4,10 +4,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { AppModule } from './app.module';
 import { INestApplication, Logger } from '@nestjs/common';
-import { TestUserRepository } from './user/user.repository';
 import { mock } from 'jest-mock-extended';
-import { User, UserCrudService } from '@concepta/nestjs-user';
+import { UserCrudService } from '@concepta/nestjs-user';
 import { AuthenticationJwtResponseInterface } from '@concepta/nestjs-authentication';
+import { UserEntity } from './user/user.entity';
+import { UserRepository } from './user/user.repository';
 import { UserDto } from './user/user.controller';
 
 const sleep = (ms) => {
@@ -25,9 +26,9 @@ describe('AppController (e2e)', () => {
         imports: [AppModule],
       })
         .overrideProvider('USER_MODULE_USER_ENTITY_REPO_TOKEN')
-        .useValue(mock<User>())
+        .useValue(mock<UserEntity>())
         .overrideProvider('USER_MODULE_USER_CUSTOM_REPO_TOKEN')
-        .useValue(new TestUserRepository())
+        .useValue(new UserRepository())
         .overrideProvider(UserCrudService)
         .useValue({})
         .compile();
@@ -107,9 +108,9 @@ describe('AppController (e2e)', () => {
         imports: [AppModule],
       })
         .overrideProvider('USER_MODULE_USER_ENTITY_REPO_TOKEN')
-        .useValue(mock<User>())
+        .useValue(mock<UserEntity>())
         .overrideProvider('USER_MODULE_USER_CUSTOM_REPO_TOKEN')
-        .useValue(new TestUserRepository())
+        .useValue(new UserRepository())
         .overrideProvider(UserCrudService)
         .useValue({})
         .compile();

@@ -6,8 +6,9 @@ import {
   AuthLocalController,
   AuthLocalUserLookupServiceInterface,
 } from '@concepta/nestjs-auth-local';
-import { User, UserCrudService } from '@concepta/nestjs-user';
-import { TestUserRepository } from './user/user.repository';
+import { UserCrudService } from '@concepta/nestjs-user';
+import { UserEntity } from './user/user.entity';
+import { UserRepository } from './user/user.repository';
 
 describe('AppModule', () => {
   it('should be imported', async () => {
@@ -15,9 +16,9 @@ describe('AppModule', () => {
       imports: [AppModule],
     })
       .overrideProvider('USER_MODULE_USER_ENTITY_REPO_TOKEN')
-      .useValue(mock<User>())
+      .useValue(mock<UserEntity>())
       .overrideProvider('USER_MODULE_USER_CUSTOM_REPO_TOKEN')
-      .useValue(new TestUserRepository())
+      .useValue(new UserRepository())
       .overrideProvider(UserCrudService)
       .useValue({})
       .compile();

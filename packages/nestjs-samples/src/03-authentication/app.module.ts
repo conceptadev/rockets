@@ -8,6 +8,8 @@ import { JwtModule } from '@concepta/nestjs-jwt';
 import { PasswordModule } from '@concepta/nestjs-password';
 import { CrudModule } from '@concepta/nestjs-crud';
 import { CustomUserController } from './user/user.controller';
+import { UserEntity } from './user/user.entity';
+import { UserRepository } from '../05-user/user/user.repository';
 
 @Module({
   imports: [
@@ -18,7 +20,12 @@ import { CustomUserController } from './user/user.controller';
     JwtModule.register(),
     PasswordModule.register(),
     CrudModule.register(),
-    UserModule.register(),
+    UserModule.register({
+      orm: {
+        entities: { user: { useClass: UserEntity } },
+        repositories: { userRepository: { useClass: UserRepository } },
+      },
+    }),
   ],
   controllers: [CustomUserController],
 })

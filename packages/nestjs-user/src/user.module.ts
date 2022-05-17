@@ -15,9 +15,7 @@ import {
 } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
 import { PasswordStorageService } from '@concepta/nestjs-password';
-import { UserRepository } from './user.repository';
 import { userDefaultConfig } from './config/user-default.config';
-import { User } from './entities/user.entity';
 import { UserOptionsInterface } from './interfaces/user-options.interface';
 import { UserOrmOptionsInterface } from './interfaces/user-orm-options.interface';
 import {
@@ -102,7 +100,7 @@ export class UserModule extends createConfigurableDynamicRootModule<
   static register(
     options: UserOptionsInterface &
       UserOrmOptionsInterface &
-      ModuleOptionsControllerInterface = {},
+      ModuleOptionsControllerInterface,
   ) {
     this.configureOrm(options);
 
@@ -150,13 +148,6 @@ export class UserModule extends createConfigurableDynamicRootModule<
    * @param options ORM options
    */
   private static configureOrm(options: UserOrmOptionsInterface) {
-    TypeOrmExtModule.configure(options.orm, {
-      entities: {
-        user: { useClass: User },
-      },
-      repositories: {
-        userRepository: { useClass: UserRepository },
-      },
-    });
+    TypeOrmExtModule.configure(options.orm);
   }
 }

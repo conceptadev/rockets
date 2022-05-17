@@ -3,8 +3,8 @@ import { CrudModule } from '@concepta/nestjs-crud';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { UserModule } from '@concepta/nestjs-user';
 import { default as dbConfig } from './ormconfig';
-import { MyUser } from './custom-user/my-user.entity';
-import { MyUserRepository } from './custom-user/my-user.repository';
+import { UserEntity } from './user/user.entity';
+import { UserRepository } from './user/user.repository';
 
 @Module({
   imports: [
@@ -16,8 +16,8 @@ import { MyUserRepository } from './custom-user/my-user.repository';
     CrudModule.register(),
     UserModule.register({
       orm: {
-        entities: { user: { useClass: MyUser } },
-        repositories: { userRepository: { useClass: MyUserRepository } },
+        entities: { user: { useClass: UserEntity } },
+        repositories: { userRepository: { useClass: UserRepository } },
       },
     }),
   ],
