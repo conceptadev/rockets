@@ -36,6 +36,7 @@ describe('FederatedModuleTest', () => {
           type: 'sqlite',
           database: ':memory:',
           synchronize: true,
+          entities: [UserEntityFixture, FederatedEntityFixture],
         }),
         AuthenticationModule.register(),
         JwtModule.register(),

@@ -18,9 +18,14 @@ import {
   TYPEORM_EXT_MODULE_CONNECTION,
   TYPEORM_EXT_MODULE_OPTIONS_TOKEN,
 } from './typeorm-ext.constants';
-import { TypeOrmExtOptions } from './typeorm-ext.types';
+import {
+  TypeOrmExtOptions,
+  TypeOrmExtStorableEntity,
+  TypeOrmExtStorableSubscriber,
+} from './typeorm-ext.types';
 import { TypeOrmExtStorage } from './typeorm-ext.storage';
 import { TypeOrmExtMetadataInterface } from './interfaces/typeorm-ext-metadata.interface';
+import { TypeOrmExtMetadataItemInterface } from './interfaces/typeorm-ext-metadata-item.interface';
 import { TypeOrmExtTestOptionsInterface } from './interfaces/typeorm-ext-test-options.interface';
 import { createTestConnectionFactory } from './utils/create-test-connection-factory';
 
@@ -41,11 +46,13 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
     module.imports.push(
       TypeOrmModule.forRootAsync({
         inject: [TYPEORM_EXT_MODULE_OPTIONS_TOKEN],
-        useFactory: async (options: TypeOrmModuleOptions) => {
+        useFactory: async (
+          options: TypeOrmModuleOptions & ConnectionOptions,
+        ) => {
           // return the merged options
           return TypeOrmExtModule.mergeTypeOrmOptions(
-            getConnectionName(options as ConnectionOptions),
-            options as ConnectionOptions,
+            getConnectionName(options),
+            options,
           );
         },
       }),
@@ -124,14 +131,38 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
       ...options,
       entities: [
         ...(options.entities ?? []),
-        ...(entities ? entities.map((entity) => entity.useClass) : []),
+        ...(entities
+          ? mapClassToUse<TypeOrmExtStorableEntity>(
+              filterByAutoConfig(entities),
+            )
+          : []),
       ],
       subscribers: [
         ...(options.subscribers ?? []),
         ...(subscribers
-          ? subscribers.map((subscriber) => subscriber.useClass)
+          ? mapClassToUse<TypeOrmExtStorableSubscriber>(
+              filterByAutoConfig(subscribers),
+            )
           : []),
       ],
     };
   }
+}
+
+/**
+ * @param metadataItems metadata items to filter
+ * @private
+ */
+function filterByAutoConfig<T>(
+  metadataItems: TypeOrmExtMetadataItemInterface<T>[],
+) {
+  return metadataItems.filter((item) => item?.autoConfig === true);
+}
+
+/**
+ * @param metadataItems metadata items to map
+ * @private
+ */
+function mapClassToUse<T>(metadataItems: TypeOrmExtMetadataItemInterface<T>[]) {
+  return metadataItems.map((item) => item.useClass);
 }

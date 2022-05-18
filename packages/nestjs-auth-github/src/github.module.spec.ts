@@ -28,6 +28,7 @@ describe('GithubModuleTest', () => {
         TypeOrmExtModule.register({
           type: 'sqlite',
           database: ':memory:',
+          entities: [UserEntityFixture, FederatedEntityFixture],
         }),
         AuthenticationModule.register(),
         JwtModule.register(),

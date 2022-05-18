@@ -22,6 +22,7 @@ describe('OrgController (e2e)', () => {
               type: 'sqlite',
               database: ':memory:',
               synchronize: true,
+              entities: [OrgEntityFixture],
             }),
           }),
           OrgModule.register({

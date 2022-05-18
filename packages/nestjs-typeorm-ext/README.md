@@ -55,6 +55,7 @@ import { CustomUser } from 'path/to/custom-user.entity';
     TypeOrmExtModule.register({
       type: 'postgres',
       url: 'postgres://user:pass@localhost:5432/postgres',
+      entities: [CustomUser],
     }),
     UserModule.register({
       orm: {
