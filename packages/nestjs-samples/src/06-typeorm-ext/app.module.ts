@@ -11,6 +11,7 @@ import { UserEntity } from './user/user.entity';
       useFactory: async () => {
         return {
           type: 'postgres',
+          entities: [UserEntity],
         };
       },
       testMode: true,

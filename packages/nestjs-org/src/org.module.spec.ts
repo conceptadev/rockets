@@ -29,6 +29,7 @@ describe('OrgModule', () => {
           useFactory: async () => ({
             type: 'sqlite',
             database: ':memory:',
+            entities: [OrgEntityFixture],
           }),
         }),
         OrgModule.register({

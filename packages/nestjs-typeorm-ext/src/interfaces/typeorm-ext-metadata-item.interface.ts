@@ -12,6 +12,13 @@ export interface TypeOrmExtMetadataItemInterface<T = unknown>
   useClass?: T;
 
   /**
+   * Automatically add to TypoORM config.
+   *
+   * Applies only to entities and subscribers.
+   */
+  autoConfig?: boolean;
+
+  /**
    * Connection token
    */
   connection?: TypeOrmExtConnectionToken;
