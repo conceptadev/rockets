@@ -1,10 +1,11 @@
 import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { AppModuleFixture } from './__fixtures__/app.module.fixture';
 import { PhotoModuleFixture } from './__fixtures__/photo/photo.module.fixture';
 import { PhotoEntityInterfaceFixture } from './__fixtures__/photo/interfaces/photo-entity.interface.fixture';
 import { PhotoRepositoryFixture } from './__fixtures__/photo/photo.repository.fixture';
+import { TypeOrmExtModule } from './typeorm-ext.module';
+import { PhotoEntityFixture } from './__fixtures__/photo/photo.entity.fixture';
 
 describe('AppModule', () => {
   let photoModule: PhotoModuleFixture;
@@ -13,7 +14,14 @@ describe('AppModule', () => {
 
   beforeEach(async () => {
     const testModule: TestingModule = await Test.createTestingModule({
-      imports: [AppModuleFixture],
+      imports: [
+        TypeOrmExtModule.register({
+          type: 'sqlite',
+          database: ':memory:',
+          entities: [PhotoEntityFixture],
+        }),
+        PhotoModuleFixture.register(),
+      ],
     }).compile();
 
     photoModule = testModule.get<PhotoModuleFixture>(PhotoModuleFixture);
