@@ -9,15 +9,15 @@ import {
   UserMutateService,
 } from '@concepta/nestjs-user';
 import { FederatedModule } from '@concepta/nestjs-federated';
-import { GithubController } from './github.controller';
-import { GithubModule } from './github.module';
+import { AuthGithubController } from './auth-github.controller';
+import { AuthGithubModule } from './auth-github.module';
 
 import { FederatedEntityFixture } from './__fixtures__/federated-entity.fixture';
 import { FederatedRepositoryFixture } from './__fixtures__/federated-repository.fixture';
 import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
 import { UserRepositoryFixture } from './__fixtures__/user.repository.fixture';
 
-describe('GithubModuleTest', () => {
+describe('AuthGithubModuleTest', () => {
   afterEach(async () => {
     jest.clearAllMocks();
   });
@@ -32,7 +32,7 @@ describe('GithubModuleTest', () => {
         }),
         AuthenticationModule.register(),
         JwtModule.register(),
-        GithubModule.register(),
+        AuthGithubModule.register(),
         FederatedModule.registerAsync({
           imports: [UserModule.deferred()],
           inject: [UserLookupService, UserMutateService],
@@ -59,7 +59,7 @@ describe('GithubModuleTest', () => {
       ],
     }).compile();
 
-    const controller = module.get(GithubController);
+    const controller = module.get(AuthGithubController);
     expect(controller).toBeDefined();
   });
 });

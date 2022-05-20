@@ -1,10 +1,10 @@
 import { IsString } from 'class-validator';
 import { Exclude, Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { GithubLoginInterface } from '../interfaces/github-login.interface';
+import { AuthGithubLoginInterface } from '../interfaces/auth-github-login.interface';
 
 @Exclude()
-export class GithubLoginDto implements GithubLoginInterface {
+export class AuthGithubLoginDto implements AuthGithubLoginInterface {
   @Expose()
   @ApiProperty({
     type: 'string',
