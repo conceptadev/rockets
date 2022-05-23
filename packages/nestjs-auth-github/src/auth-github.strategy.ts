@@ -13,20 +13,20 @@ import {
 } from '@concepta/nestjs-federated';
 
 import {
-  GITHUB_MODULE_SETTINGS_TOKEN,
-  GITHUB_STRATEGY_NAME,
-} from './github.constants';
+  AUTH_GITHUB_MODULE_SETTINGS_TOKEN,
+  AUTH_GITHUB_STRATEGY_NAME,
+} from './auth-github.constants';
 
-import { GithubSettingsInterface } from './interfaces/github-settings.interface';
+import { AuthGithubSettingsInterface } from './interfaces/auth-github-settings.interface';
 
 @Injectable()
-export class GithubStrategy extends PassportStrategy(
+export class AuthGithubStrategy extends PassportStrategy(
   Strategy,
-  GITHUB_STRATEGY_NAME,
+  AUTH_GITHUB_STRATEGY_NAME,
 ) {
   constructor(
-    @Inject(GITHUB_MODULE_SETTINGS_TOKEN)
-    config: GithubSettingsInterface,
+    @Inject(AUTH_GITHUB_MODULE_SETTINGS_TOKEN)
+    config: AuthGithubSettingsInterface,
     private federatedOAuthService: FederatedOAuthService,
   ) {
     super({
@@ -45,7 +45,7 @@ export class GithubStrategy extends PassportStrategy(
 
     // Create a new user if it doesn't exist or just return based on federated
     const user = await this.federatedOAuthService.sign(
-      GITHUB_STRATEGY_NAME,
+      AUTH_GITHUB_STRATEGY_NAME,
       profile.email,
       profile.id,
     );

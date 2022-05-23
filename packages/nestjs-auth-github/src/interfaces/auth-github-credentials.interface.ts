@@ -6,6 +6,6 @@ import {
 /**
  * Credentials Interface
  */
-export interface GithubCredentialsInterface
+export interface AuthGithubCredentialsInterface
   extends ReferenceIdInterface,
     ReferenceUsernameInterface {}

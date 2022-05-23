@@ -1,2 +1,2 @@
-export { GithubModule } from './github.module';
-export { GithubController } from './github.controller';
+export * from './auth-github.module';
+export * from './auth-github.controller';
