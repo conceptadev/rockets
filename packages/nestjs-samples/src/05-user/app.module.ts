@@ -15,9 +15,11 @@ import { UserRepository } from './user/user.repository';
     }),
     CrudModule.register(),
     UserModule.register({
-      orm: {
-        entities: { user: { useClass: UserEntity } },
-        repositories: { userRepository: { useClass: UserRepository } },
+      entities: {
+        user: {
+          entity: UserEntity,
+          repository: UserRepository,
+        },
       },
     }),
   ],

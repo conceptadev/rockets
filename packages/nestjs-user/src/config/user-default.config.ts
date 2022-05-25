@@ -1,5 +1,5 @@
-import { UserOptionsInterface } from '../interfaces/user-options.interface';
 import { registerAs } from '@nestjs/config';
+import { UserOptionsInterface } from '../interfaces/user-options.interface';
 import { USER_MODULE_DEFAULT_SETTINGS_TOKEN } from '../user.constants';
 
 /**

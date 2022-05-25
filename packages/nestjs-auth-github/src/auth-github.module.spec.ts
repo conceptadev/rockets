@@ -49,10 +49,10 @@ describe('AuthGithubModuleTest', () => {
         }),
         CrudModule.register(),
         UserModule.register({
-          orm: {
-            entities: { user: { useClass: UserEntityFixture } },
-            repositories: {
-              userRepository: { useClass: UserRepositoryFixture },
+          entities: {
+            user: {
+              entity: UserEntityFixture,
+              repository: UserRepositoryFixture,
             },
           },
         }),
