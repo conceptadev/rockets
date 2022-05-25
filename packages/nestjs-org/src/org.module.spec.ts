@@ -8,10 +8,15 @@ import { OrgController } from './org.controller';
 import { OrgLookupService } from './services/org-lookup.service';
 import { OrgMutateService } from './services/org-mutate.service';
 import { CrudModule } from '@concepta/nestjs-crud';
-import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
+import {
+  getDynamicRepositoryToken,
+  getEntityRepositoryToken,
+  TypeOrmExtModule,
+} from '@concepta/nestjs-typeorm-ext';
 
 import { OrgEntityFixture } from './__fixtures__/org-entity.fixture';
 import { OrgRepositoryFixture } from './__fixtures__/org-repository.fixture';
+import { ORG_MODULE_ORG_ENTITY_KEY } from './org.constants';
 
 describe('OrgModule', () => {
   let orgModule: OrgModule;
@@ -20,7 +25,7 @@ describe('OrgModule', () => {
   let orgCrudService: OrgCrudService;
   let orgController: OrgController;
   let orgEntityRepo: Repository<OrgEntityFixture>;
-  let orgCustomRepo: OrgRepositoryFixture;
+  let orgDynamicRepo: OrgRepositoryFixture;
 
   beforeEach(async () => {
     const testModule: TestingModule = await Test.createTestingModule({
@@ -33,9 +38,11 @@ describe('OrgModule', () => {
           }),
         }),
         OrgModule.register({
-          orm: {
-            entities: { org: { useClass: OrgEntityFixture } },
-            repositories: { orgRepository: { useClass: OrgRepositoryFixture } },
+          entities: {
+            org: {
+              entity: OrgEntityFixture,
+              repository: OrgRepositoryFixture,
+            },
           },
         }),
         CrudModule.register(),
@@ -44,10 +51,10 @@ describe('OrgModule', () => {
 
     orgModule = testModule.get<OrgModule>(OrgModule);
     orgEntityRepo = testModule.get<Repository<OrgEntityFixture>>(
-      'ORG_MODULE_ORG_ENTITY_REPO_TOKEN',
+      getEntityRepositoryToken(ORG_MODULE_ORG_ENTITY_KEY),
     );
-    orgCustomRepo = testModule.get<OrgRepositoryFixture>(
-      'ORG_MODULE_ORG_CUSTOM_REPO_TOKEN',
+    orgDynamicRepo = testModule.get<OrgRepositoryFixture>(
+      getDynamicRepositoryToken(ORG_MODULE_ORG_ENTITY_KEY),
     );
     orgLookupService =
       testModule.get<DefaultOrgLookupService>(OrgLookupService);
@@ -65,7 +72,7 @@ describe('OrgModule', () => {
     it('should be loaded', async () => {
       expect(orgModule).toBeInstanceOf(OrgModule);
       expect(orgEntityRepo).toBeInstanceOf(Repository);
-      expect(orgCustomRepo).toBeInstanceOf(OrgRepositoryFixture);
+      expect(orgDynamicRepo).toBeInstanceOf(OrgRepositoryFixture);
       expect(orgCrudService).toBeInstanceOf(OrgCrudService);
       expect(orgLookupService).toBeInstanceOf(DefaultOrgLookupService);
       expect(orgLookupService['orgRepo']).toBeInstanceOf(OrgRepositoryFixture);

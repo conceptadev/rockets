@@ -1,13 +1,14 @@
 import { Repository } from 'typeorm';
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { MutateService } from '@concepta/typeorm-common';
+import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import { OrgEntityInterface } from '../interfaces/org-entity.interface';
 import { OrgMutateServiceInterface } from '../interfaces/org-mutate-service.interface';
 import { OrgCreatableInterface } from '../interfaces/org-creatable.interface';
 import { OrgUpdatableInterface } from '../interfaces/org-updatable.interface';
 import { OrgCreateDto } from '../dto/org-create.dto';
 import { OrgUpdateDto } from '../dto/org-update.dto';
-import { ORG_MODULE_ORG_CUSTOM_REPO_TOKEN } from '../org.constants';
+import { ORG_MODULE_ORG_ENTITY_KEY } from '../org.constants';
 
 /**
  * Org mutate service
@@ -30,7 +31,7 @@ export class OrgMutateService
    * @param repo instance of the org repo
    */
   constructor(
-    @Inject(ORG_MODULE_ORG_CUSTOM_REPO_TOKEN)
+    @InjectDynamicRepository(ORG_MODULE_ORG_ENTITY_KEY)
     protected repo: Repository<OrgEntityInterface>,
   ) {
     super(repo);
