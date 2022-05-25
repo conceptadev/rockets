@@ -40,10 +40,10 @@ describe('AuthGithubModuleTest', () => {
             userLookupService,
             userMutateService,
           }),
-          orm: {
-            entities: { federated: { useClass: FederatedEntityFixture } },
-            repositories: {
-              federatedRepository: { useClass: FederatedRepositoryFixture },
+          entities: {
+            federated: {
+              entity: FederatedEntityFixture,
+              repository: FederatedRepositoryFixture,
             },
           },
         }),

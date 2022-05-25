@@ -1,7 +1,8 @@
 import { Repository } from 'typeorm';
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import { FederatedServiceInterface } from '../interfaces/federated-service.interface';
-import { FEDERATED_MODULE_FEDERATED_CUSTOM_REPO_TOKEN } from '../federated.constants';
+import { FEDERATED_MODULE_FEDERATED_ENTITY_KEY } from '../federated.constants';
 import { FederatedPostgresEntity } from '../entities/federated-postgres.entity';
 import { FederatedEntityInterface } from '../interfaces/federated-entity.interface';
 import { FederatedCreatableInterface } from '../interfaces/federated-creatable.interface';
@@ -9,7 +10,7 @@ import { FederatedCreatableInterface } from '../interfaces/federated-creatable.i
 @Injectable()
 export class FederatedService implements FederatedServiceInterface {
   constructor(
-    @Inject(FEDERATED_MODULE_FEDERATED_CUSTOM_REPO_TOKEN)
+    @InjectDynamicRepository(FEDERATED_MODULE_FEDERATED_ENTITY_KEY)
     private federatedRepo: Repository<FederatedPostgresEntity>,
   ) {}
 
