@@ -26,10 +26,10 @@ describe('OrgController (e2e)', () => {
             }),
           }),
           OrgModule.register({
-            orm: {
-              entities: { org: { useClass: OrgEntityFixture } },
-              repositories: {
-                orgRepository: { useClass: OrgRepositoryFixture },
+            entities: {
+              org: {
+                entity: OrgEntityFixture,
+                repository: OrgRepositoryFixture,
               },
             },
           }),

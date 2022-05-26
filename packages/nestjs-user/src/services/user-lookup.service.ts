@@ -1,5 +1,5 @@
 import { FindConditions, Repository } from 'typeorm';
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
   ReferenceEmail,
   ReferenceId,
@@ -7,7 +7,8 @@ import {
   ReferenceUsername,
 } from '@concepta/ts-core';
 import { ReferenceLookupException } from '@concepta/typeorm-common';
-import { USER_MODULE_USER_CUSTOM_REPO_TOKEN } from '../user.constants';
+import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
+import { USER_MODULE_USER_ENTITY_KEY } from '../user.constants';
 import { UserEntityInterface } from '../interfaces/user-entity.interface';
 import { UserLookupServiceInterface } from '../interfaces/user-lookup-service.interface';
 
@@ -22,7 +23,7 @@ export class UserLookupService implements UserLookupServiceInterface {
    * @param userRepo instance of the user repo
    */
   constructor(
-    @Inject(USER_MODULE_USER_CUSTOM_REPO_TOKEN)
+    @InjectDynamicRepository(USER_MODULE_USER_ENTITY_KEY)
     private userRepo: Repository<UserEntityInterface>,
   ) {}
 

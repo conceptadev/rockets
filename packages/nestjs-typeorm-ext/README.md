@@ -58,13 +58,8 @@ import { CustomUser } from 'path/to/custom-user.entity';
       entities: [CustomUser],
     }),
     UserModule.register({
-      orm: {
-        entities: {
-          user: { useClass: CustomUser },
-        },
-        repositories: {
-          userRepository: { useClass: CustomUserRepository },
-        },
+      entities: {
+        user: { entity: CustomUser, repository: CustomUserRepository },
       },
     }),
   ],

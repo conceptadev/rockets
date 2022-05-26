@@ -1,7 +1,8 @@
 import { Repository } from 'typeorm';
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import { TypeOrmCrudService } from '@concepta/nestjs-crud';
-import { ORG_MODULE_ORG_CUSTOM_REPO_TOKEN } from '../org.constants';
+import { ORG_MODULE_ORG_ENTITY_KEY } from '../org.constants';
 import { OrgEntityInterface } from '../interfaces/org-entity.interface';
 
 /**
@@ -15,7 +16,7 @@ export class OrgCrudService extends TypeOrmCrudService<OrgEntityInterface> {
    * @param orgRepo instance of the org repository.
    */
   constructor(
-    @Inject(ORG_MODULE_ORG_CUSTOM_REPO_TOKEN)
+    @InjectDynamicRepository(ORG_MODULE_ORG_ENTITY_KEY)
     orgRepo: Repository<OrgEntityInterface>,
   ) {
     super(orgRepo);

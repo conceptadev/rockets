@@ -8,20 +8,13 @@ import {
   ModuleOptionsControllerInterface,
   negotiateController,
 } from '@concepta/nestjs-core';
-import {
-  createCustomRepositoryProvider,
-  createEntityRepositoryProvider,
-  TypeOrmExtModule,
-} from '@concepta/nestjs-typeorm-ext';
+import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
 import { PasswordStorageService } from '@concepta/nestjs-password';
 import { userDefaultConfig } from './config/user-default.config';
 import { UserOptionsInterface } from './interfaces/user-options.interface';
-import { UserOrmOptionsInterface } from './interfaces/user-orm-options.interface';
 import {
   USER_MODULE_OPTIONS_TOKEN,
-  USER_MODULE_USER_ENTITY_REPO_TOKEN,
-  USER_MODULE_USER_CUSTOM_REPO_TOKEN,
   USER_MODULE_SETTINGS_TOKEN,
 } from './user.constants';
 import { UserController } from './user.controller';
@@ -31,6 +24,7 @@ import { UserLookupServiceInterface } from './interfaces/user-lookup-service.int
 import { DefaultUserLookupService } from './services/default-user-lookup.service';
 import { UserMutateService } from './services/user-mutate.service';
 import { DefaultUserMutateService } from './services/default-user-mutate.service';
+import { UserEntitiesOptionsInterface } from './interfaces/user-entities-options.interface';
 
 /**
  * User Module
@@ -81,15 +75,6 @@ export class UserModule extends createConfigurableDynamicRootModule<
         defaultService: DefaultUserMutateService,
       ) => options.userMutateService ?? defaultService,
     },
-    createEntityRepositoryProvider(USER_MODULE_USER_ENTITY_REPO_TOKEN, 'user'),
-    createCustomRepositoryProvider(
-      USER_MODULE_USER_CUSTOM_REPO_TOKEN,
-      'userRepository',
-    ),
-  ],
-  exports: [
-    USER_MODULE_USER_ENTITY_REPO_TOKEN,
-    USER_MODULE_USER_CUSTOM_REPO_TOKEN,
   ],
 }) {
   /**
@@ -99,12 +84,12 @@ export class UserModule extends createConfigurableDynamicRootModule<
    */
   static register(
     options: UserOptionsInterface &
-      UserOrmOptionsInterface &
+      UserEntitiesOptionsInterface &
       ModuleOptionsControllerInterface,
   ) {
-    this.configureOrm(options);
-
     const module = UserModule.forRoot(UserModule, options);
+
+    module.imports.push(TypeOrmExtModule.forFeature(options.entities));
 
     negotiateController(module, options);
 
@@ -118,15 +103,15 @@ export class UserModule extends createConfigurableDynamicRootModule<
    */
   static registerAsync(
     options: AsyncModuleConfig<UserOptionsInterface> &
-      UserOrmOptionsInterface &
+      UserEntitiesOptionsInterface &
       ModuleOptionsControllerInterface,
   ) {
-    this.configureOrm(options);
-
     const module = UserModule.forRootAsync(UserModule, {
       useFactory: () => ({}),
       ...options,
     });
+
+    module.imports.push(TypeOrmExtModule.forFeature(options.entities));
 
     negotiateController(module, options);
 
@@ -140,14 +125,5 @@ export class UserModule extends createConfigurableDynamicRootModule<
    */
   static deferred(options: DeferExternalOptionsInterface = {}) {
     return deferExternal<UserModule, UserOptionsInterface>(UserModule, options);
-  }
-
-  /**
-   * Statically configure the ORM options.
-   *
-   * @param options ORM options
-   */
-  private static configureOrm(options: UserOrmOptionsInterface) {
-    TypeOrmExtModule.configure(options.orm);
   }
 }

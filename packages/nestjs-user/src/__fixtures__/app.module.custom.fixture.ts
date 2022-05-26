@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
-import { CrudModule } from '@concepta/nestjs-crud';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
+import { CrudModule } from '@concepta/nestjs-crud';
 import { UserModule } from '../user.module';
 import { UserModuleCustomFixture } from './user.module.custom.fixture';
-import { default as dbConfig } from './ormconfig.fixture';
 import { UserLookupCustomService } from './services/user-lookup.custom.service';
+
+import { default as dbConfig } from './ormconfig.fixture';
 import { UserEntityFixture } from './user.entity.fixture';
 import { UserRepositoryFixture } from './user.repository.fixture';
 
@@ -22,9 +23,8 @@ import { UserRepositoryFixture } from './user.repository.fixture';
       useFactory: async (userLookupService: UserLookupCustomService) => ({
         userLookupService,
       }),
-      orm: {
-        entities: { user: { useClass: UserEntityFixture } },
-        repositories: { userRepository: { useClass: UserRepositoryFixture } },
+      entities: {
+        user: { entity: UserEntityFixture, repository: UserRepositoryFixture },
       },
     }),
   ],
