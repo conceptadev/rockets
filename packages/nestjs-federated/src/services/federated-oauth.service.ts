@@ -10,6 +10,9 @@ import { FederatedUserMutateServiceInterface } from '../interfaces/federated-use
 import { FederatedService } from './federated.service';
 import { FederatedCredentialsInterface } from '../interfaces/federated-credentials.interface';
 import { FederatedOAuthServiceInterface } from '../interfaces/federated-oauth-service.interface';
+import { FederatedCreateException } from '../exceptions/federated-create.exception';
+import { FederatedMutateCreateUserException } from '../exceptions/federated-mutate-create.exception';
+import { FederatedUserLookupNotFoundException } from '../exceptions/federated-lookup-not-found.exception';
 
 @Injectable()
 export class FederatedOAuthService implements FederatedOAuthServiceInterface {
@@ -47,8 +50,11 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
     } else {
       const user = await this.userLookupService.byId(federated.userId);
 
-      // TODO: need to throw a custom exception
-      if (!user) throw new Error('Failed to get user');
+      if (!user)
+        throw new FederatedUserLookupNotFoundException(
+          this.constructor.name,
+          federated.userId,
+        );
 
       return user;
     }
@@ -86,15 +92,22 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
     email: string,
     username: string,
   ): Promise<FederatedCredentialsInterface> {
-    const newUser = await this.userMutateService.create({
-      email,
-      username,
-    });
+    try {
+      const newUser = await this.userMutateService.create({
+        email,
+        username,
+      });
 
-    // TODO: need to throw a custom exception
-    if (!newUser) throw new Error('Failed to create user');
+      if (!newUser)
+        throw new FederatedMutateCreateUserException(
+          this.constructor.name,
+          new Error('Failed to create user'),
+        );
 
-    return newUser;
+      return newUser;
+    } catch (e) {
+      throw new FederatedMutateCreateUserException(this.constructor.name, e);
+    }
   }
 
   /**
@@ -107,15 +120,22 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
     subject: string,
     userId: string,
   ): Promise<FederatedEntityInterface> {
-    const federated = await this.federatedService.create({
-      provider,
-      subject,
-      userId,
-    });
+    try {
+      const federated = await this.federatedService.create({
+        provider,
+        subject,
+        userId,
+      });
 
-    // TODO: need to throw a custom exception
-    if (!federated) throw new Error('Failed to create federated');
+      if (!federated)
+        throw new FederatedCreateException(
+          this.constructor.name,
+          new Error('Failed to create federated'),
+        );
 
-    return federated;
+      return federated;
+    } catch (e) {
+      throw new FederatedCreateException(this.constructor.name, e);
+    }
   }
 }
