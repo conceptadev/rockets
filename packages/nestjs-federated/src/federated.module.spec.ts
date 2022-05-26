@@ -1,6 +1,10 @@
 import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
-import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
+import {
+  getDynamicRepositoryToken,
+  getEntityRepositoryToken,
+  TypeOrmExtModule,
+} from '@concepta/nestjs-typeorm-ext';
 import { AuthenticationModule } from '@concepta/nestjs-authentication';
 import { JwtModule } from '@concepta/nestjs-jwt';
 import { CrudModule } from '@concepta/nestjs-crud';
@@ -13,6 +17,7 @@ import {
 import { FederatedModule } from './federated.module';
 import { FederatedService } from './services/federated.service';
 import { FederatedOAuthService } from './services/federated-oauth.service';
+import { FEDERATED_MODULE_FEDERATED_ENTITY_KEY } from './federated.constants';
 
 import { FederatedEntityFixture } from './__fixtures__/federated-entity.fixture';
 import { FederatedRepositoryFixture } from './__fixtures__/federated-repository.fixture';
@@ -48,18 +53,18 @@ describe('FederatedModuleTest', () => {
             userLookupService,
             userMutateService,
           }),
-          orm: {
-            entities: { federated: { useClass: FederatedEntityFixture } },
-            repositories: {
-              federatedRepository: { useClass: FederatedRepositoryFixture },
+          entities: {
+            federated: {
+              entity: FederatedEntityFixture,
+              repository: FederatedRepositoryFixture,
             },
           },
         }),
         UserModule.register({
-          orm: {
-            entities: { user: { useClass: UserEntityFixture } },
-            repositories: {
-              userRepository: { useClass: UserRepositoryFixture },
+          entities: {
+            user: {
+              entity: UserEntityFixture,
+              repository: UserRepositoryFixture,
             },
           },
         }),
@@ -72,10 +77,10 @@ describe('FederatedModuleTest', () => {
       FederatedOAuthService,
     );
     federatedEntityRepo = testModule.get<Repository<FederatedEntityFixture>>(
-      'FEDERATED_MODULE_FEDERATED_ENTITY_REPO_TOKEN',
+      getEntityRepositoryToken(FEDERATED_MODULE_FEDERATED_ENTITY_KEY),
     );
     federatedCustomRepo = testModule.get<FederatedRepositoryFixture>(
-      'FEDERATED_MODULE_FEDERATED_CUSTOM_REPO_TOKEN',
+      getDynamicRepositoryToken(FEDERATED_MODULE_FEDERATED_ENTITY_KEY),
     );
     userLookupService = testModule.get<UserLookupService>(UserLookupService);
     userMutateService = testModule.get<UserMutateService>(UserMutateService);

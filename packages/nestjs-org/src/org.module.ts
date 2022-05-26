@@ -8,19 +8,13 @@ import {
   ModuleOptionsControllerInterface,
   negotiateController,
 } from '@concepta/nestjs-core';
-import {
-  createCustomRepositoryProvider,
-  createEntityRepositoryProvider,
-  TypeOrmExtModule,
-} from '@concepta/nestjs-typeorm-ext';
+import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
 import { orgDefaultConfig } from './config/org-default.config';
 import { OrgOptionsInterface } from './interfaces/org-options.interface';
-import { OrgOrmOptionsInterface } from './interfaces/org-orm-options.interface';
+import { OrgOrmOptionsInterface } from './interfaces/org-entities-options.interface';
 import {
   ORG_MODULE_OPTIONS_TOKEN,
-  ORG_MODULE_ORG_ENTITY_REPO_TOKEN,
-  ORG_MODULE_ORG_CUSTOM_REPO_TOKEN,
   ORG_MODULE_SETTINGS_TOKEN,
 } from './org.constants';
 import { OrgController } from './org.controller';
@@ -75,13 +69,7 @@ export class OrgModule extends createConfigurableDynamicRootModule<
         defaultService: DefaultOrgMutateService,
       ) => options.orgMutateService ?? defaultService,
     },
-    createEntityRepositoryProvider(ORG_MODULE_ORG_ENTITY_REPO_TOKEN, 'org'),
-    createCustomRepositoryProvider(
-      ORG_MODULE_ORG_CUSTOM_REPO_TOKEN,
-      'orgRepository',
-    ),
   ],
-  exports: [ORG_MODULE_ORG_ENTITY_REPO_TOKEN, ORG_MODULE_ORG_CUSTOM_REPO_TOKEN],
 }) {
   /**
    * Register the Org module synchronously.
@@ -93,9 +81,9 @@ export class OrgModule extends createConfigurableDynamicRootModule<
       OrgOrmOptionsInterface &
       ModuleOptionsControllerInterface,
   ) {
-    this.configureOrm(options);
-
     const module = OrgModule.forRoot(OrgModule, options);
+
+    module.imports.push(TypeOrmExtModule.forFeature(options.entities));
 
     negotiateController(module, options);
 
@@ -112,12 +100,12 @@ export class OrgModule extends createConfigurableDynamicRootModule<
       OrgOrmOptionsInterface &
       ModuleOptionsControllerInterface,
   ) {
-    this.configureOrm(options);
-
     const module = OrgModule.forRootAsync(OrgModule, {
       useFactory: () => ({}),
       ...options,
     });
+
+    module.imports.push(TypeOrmExtModule.forFeature(options.entities));
 
     negotiateController(module, options);
 
@@ -131,14 +119,5 @@ export class OrgModule extends createConfigurableDynamicRootModule<
    */
   static deferred(options: DeferExternalOptionsInterface = {}) {
     return deferExternal<OrgModule, OrgOptionsInterface>(OrgModule, options);
-  }
-
-  /**
-   * Statically configure the ORM options.
-   *
-   * @param options ORM options
-   */
-  private static configureOrm(options: OrgOrmOptionsInterface) {
-    TypeOrmExtModule.configure(options.orm);
   }
 }

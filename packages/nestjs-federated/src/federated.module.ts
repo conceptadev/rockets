@@ -6,25 +6,19 @@ import {
   ModuleOptionsControllerInterface,
   negotiateController,
 } from '@concepta/nestjs-core';
-import {
-  createCustomRepositoryProvider,
-  createEntityRepositoryProvider,
-  TypeOrmExtModule,
-} from '@concepta/nestjs-typeorm-ext';
+import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 
 import { federatedDefaultConfig } from './config/federated-default.config';
 import {
-  FEDERATED_MODULE_FEDERATED_CUSTOM_REPO_TOKEN,
-  FEDERATED_MODULE_FEDERATED_ENTITY_REPO_TOKEN,
   FEDERATED_MODULE_OPTIONS_TOKEN,
   FEDERATED_MODULE_SETTINGS_TOKEN,
   FEDERATED_MODULE_USER_LOOKUP_SERVICE_TOKEN,
   FEDERATED_MODULE_USER_MUTATE_SERVICE_TOKEN,
 } from './federated.constants';
 import { FederatedOptionsInterface } from './interfaces/federated-options.interface';
-import { FederatedOrmOptionsInterface } from './interfaces/federated-orm-options.interface';
+import { FederatedEntitiesOptionsInterface } from './interfaces/federated-entities-options.interface';
 import { FederatedOAuthService } from './services/federated-oauth.service';
 import { FederatedService } from './services/federated.service';
 
@@ -62,26 +56,14 @@ export class FederatedModule extends createConfigurableDynamicRootModule<
       useFactory: async (options: FederatedOptionsInterface) =>
         options.userMutateService,
     },
-    createEntityRepositoryProvider(
-      FEDERATED_MODULE_FEDERATED_ENTITY_REPO_TOKEN,
-      'federated',
-    ),
-    createCustomRepositoryProvider(
-      FEDERATED_MODULE_FEDERATED_CUSTOM_REPO_TOKEN,
-      'federatedRepository',
-    ),
-  ],
-  exports: [
-    FEDERATED_MODULE_FEDERATED_ENTITY_REPO_TOKEN,
-    FEDERATED_MODULE_FEDERATED_CUSTOM_REPO_TOKEN,
   ],
 }) {
   static register(
-    options: FederatedOptionsInterface & FederatedOrmOptionsInterface,
+    options: FederatedOptionsInterface & FederatedEntitiesOptionsInterface,
   ) {
-    this.configureOrm(options);
-
     const module = FederatedModule.forRoot(FederatedModule, options);
+
+    module.imports.push(TypeOrmExtModule.forFeature(options.entities));
 
     negotiateController(module, options);
 
@@ -91,11 +73,11 @@ export class FederatedModule extends createConfigurableDynamicRootModule<
   static registerAsync(
     options: AsyncModuleConfig<FederatedOptionsInterface> &
       ModuleOptionsControllerInterface &
-      FederatedOrmOptionsInterface,
+      FederatedEntitiesOptionsInterface,
   ) {
-    this.configureOrm(options);
-
     const module = FederatedModule.forRootAsync(FederatedModule, options);
+
+    module.imports.push(TypeOrmExtModule.forFeature(options.entities));
 
     negotiateController(module, options);
 
@@ -107,14 +89,5 @@ export class FederatedModule extends createConfigurableDynamicRootModule<
       FederatedModule,
       options,
     );
-  }
-
-  /**
-   * Statically configure the ORM options.
-   *
-   * @param options ORM options
-   */
-  private static configureOrm(options: FederatedOrmOptionsInterface) {
-    TypeOrmExtModule.configure(options.orm);
   }
 }

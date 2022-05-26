@@ -1,8 +1,6 @@
-import { Connection, ConnectionOptions } from 'typeorm';
-import { Global, Module } from '@nestjs/common';
+import { EntitySchema, Repository } from 'typeorm';
+import { DynamicModule, Global, Module, Provider, Type } from '@nestjs/common';
 import {
-  getConnectionName,
-  getConnectionToken,
   TypeOrmModule,
   TypeOrmModuleAsyncOptions,
   TypeOrmModuleOptions,
@@ -13,32 +11,28 @@ import {
   deferExternal,
   DeferExternalOptionsInterface,
 } from '@concepta/nestjs-core';
-import { TypeOrmExtService } from './typeorm-ext.service';
 import {
-  TYPEORM_EXT_MODULE_CONNECTION,
+  TYPEORM_EXT_MODULE_DEFAULT_CONNECTION_NAME,
   TYPEORM_EXT_MODULE_OPTIONS_TOKEN,
 } from './typeorm-ext.constants';
 import {
+  TypeOrmExtConnectionToken,
   TypeOrmExtOptions,
-  TypeOrmExtStorableEntity,
-  TypeOrmExtStorableSubscriber,
 } from './typeorm-ext.types';
-import { TypeOrmExtStorage } from './typeorm-ext.storage';
-import { TypeOrmExtMetadataInterface } from './interfaces/typeorm-ext-metadata.interface';
-import { TypeOrmExtMetadataItemInterface } from './interfaces/typeorm-ext-metadata-item.interface';
+import { TypeOrmExtEntityOptionInterface } from './interfaces/typeorm-ext-entity-options.interface';
 import { TypeOrmExtTestOptionsInterface } from './interfaces/typeorm-ext-test-options.interface';
 import { createTestConnectionFactory } from './utils/create-test-connection-factory';
+import { resolveConnectionName } from './utils/resolve-connection-name';
+import { createEntityRepositoryProvider } from './utils/create-entity-repository-provider';
+import { createDynamicRepositoryProvider } from './utils/create-dynamic-repository-provider';
 
 @Global()
-@Module({
-  providers: [TypeOrmExtService],
-  exports: [TypeOrmExtService],
-})
+@Module({})
 export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
   TypeOrmExtModule,
   TypeOrmExtOptions
 >(TYPEORM_EXT_MODULE_OPTIONS_TOKEN, {
-  exports: [TYPEORM_EXT_MODULE_CONNECTION, TYPEORM_EXT_MODULE_OPTIONS_TOKEN],
+  exports: [TYPEORM_EXT_MODULE_OPTIONS_TOKEN],
 }) {
   static register(options: TypeOrmExtOptions) {
     const module = TypeOrmExtModule.forRoot(TypeOrmExtModule, options);
@@ -46,21 +40,10 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
     module.imports.push(
       TypeOrmModule.forRootAsync({
         inject: [TYPEORM_EXT_MODULE_OPTIONS_TOKEN],
-        useFactory: async (
-          options: TypeOrmModuleOptions & ConnectionOptions,
-        ) => {
-          // return the merged options
-          return TypeOrmExtModule.mergeTypeOrmOptions(
-            getConnectionName(options),
-            options,
-          );
-        },
+        useFactory: async (options: TypeOrmModuleOptions) => options,
       }),
     );
 
-    module.providers.push(
-      this.createConnectionProvider(options as ConnectionOptions),
-    );
     module.global = true;
     return module;
   }
@@ -75,13 +58,7 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
     module.imports.push(
       TypeOrmModule.forRootAsync({
         inject: [TYPEORM_EXT_MODULE_OPTIONS_TOKEN],
-        useFactory: async (options: TypeOrmModuleOptions) => {
-          // return the merged options
-          return TypeOrmExtModule.mergeTypeOrmOptions(
-            getConnectionName(options as ConnectionOptions),
-            options as ConnectionOptions,
-          );
-        },
+        useFactory: async (options: TypeOrmModuleOptions) => options,
         connectionFactory:
           options.testMode === true
             ? createTestConnectionFactory
@@ -89,9 +66,68 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
       }),
     );
 
-    module.providers.push(this.createConnectionProvider(options.name));
     module.global = true;
     return module;
+  }
+
+  static forFeature<T>(
+    entityOptions: Record<string, TypeOrmExtEntityOptionInterface<T>>,
+  ): DynamicModule {
+    const connections: Record<string, TypeOrmExtConnectionToken> = {};
+
+    const entitiesToRegister: Record<
+      string,
+      (Type<T> | Type<Repository<T>> | EntitySchema<T>)[]
+    > = {};
+
+    const imports: DynamicModule[] = [];
+
+    const providers: Provider[] = [];
+
+    for (const entityKey in entityOptions) {
+      const {
+        entity,
+        repository,
+        connection = TYPEORM_EXT_MODULE_DEFAULT_CONNECTION_NAME,
+      } = entityOptions[entityKey];
+
+      const connectionName = resolveConnectionName(connection);
+
+      if (connectionName in connections === false) {
+        connections[connectionName] = connection;
+      }
+
+      if (connectionName in entitiesToRegister === false) {
+        entitiesToRegister[connectionName] = [];
+      }
+
+      entitiesToRegister[connectionName].push(entity);
+
+      if (repository) {
+        entitiesToRegister[connectionName].push(repository);
+      }
+
+      providers.push(
+        createEntityRepositoryProvider(entityKey, entity),
+        createDynamicRepositoryProvider(entityKey, entity, repository),
+      );
+    }
+
+    for (const connectionName in entitiesToRegister) {
+      imports.push(
+        TypeOrmModule.forFeature(
+          entitiesToRegister[connectionName],
+          connections[connectionName],
+        ),
+      );
+    }
+
+    return {
+      module: TypeOrmExtModule,
+      imports,
+      providers,
+      exports: providers,
+    };
   }
 
   static deferred(options: DeferExternalOptionsInterface = {}) {
@@ -100,69 +136,4 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
       options,
     );
   }
-
-  static configure(
-    metadata: TypeOrmExtMetadataInterface,
-    defaultMetadata: TypeOrmExtMetadataInterface = {},
-  ) {
-    TypeOrmExtStorage.addConfig(metadata, defaultMetadata);
-  }
-
-  private static createConnectionProvider(
-    connection?: string | ConnectionOptions,
-  ) {
-    return {
-      provide: TYPEORM_EXT_MODULE_CONNECTION,
-      inject: [getConnectionToken(connection)],
-      useFactory: async (connection: Connection) => connection,
-    };
-  }
-
-  private static mergeTypeOrmOptions(
-    connectionName: string,
-    options: ConnectionOptions,
-  ) {
-    const entities = TypeOrmExtStorage.getEntitiesByConnection(connectionName);
-
-    const subscribers =
-      TypeOrmExtStorage.getSubscribersByConnection(connectionName);
-
-    return {
-      ...options,
-      entities: [
-        ...(options.entities ?? []),
-        ...(entities
-          ? mapClassToUse<TypeOrmExtStorableEntity>(
-              filterByAutoConfig(entities),
-            )
-          : []),
-      ],
-      subscribers: [
-        ...(options.subscribers ?? []),
-        ...(subscribers
-          ? mapClassToUse<TypeOrmExtStorableSubscriber>(
-              filterByAutoConfig(subscribers),
-            )
-          : []),
-      ],
-    };
-  }
-}
-
-/**
- * @param metadataItems metadata items to filter
- * @private
- */
-function filterByAutoConfig<T>(
-  metadataItems: TypeOrmExtMetadataItemInterface<T>[],
-) {
-  return metadataItems.filter((item) => item?.autoConfig === true);
-}
-
-/**
- * @param metadataItems metadata items to map
- * @private
- */
-function mapClassToUse<T>(metadataItems: TypeOrmExtMetadataItemInterface<T>[]) {
-  return metadataItems.map((item) => item.useClass);
 }

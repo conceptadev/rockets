@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { AuthLocalModule } from '@concepta/nestjs-auth-local';
 import { AuthRefreshModule } from '@concepta/nestjs-auth-refresh';
 import { AuthJwtModule } from '@concepta/nestjs-auth-jwt';
@@ -9,10 +10,17 @@ import { PasswordModule } from '@concepta/nestjs-password';
 import { CrudModule } from '@concepta/nestjs-crud';
 import { CustomUserController } from './user/user.controller';
 import { UserEntity } from './user/user.entity';
-import { UserRepository } from '../05-user/user/user.repository';
+import { UserRepository } from './user/user.repository';
 
 @Module({
   imports: [
+    TypeOrmExtModule.registerAsync({
+      useFactory: async () => ({
+        type: 'postgres',
+        entities: [UserEntity],
+      }),
+      testMode: true,
+    }),
     AuthLocalModule.registerAsync({ ...createUserOpts() }),
     AuthJwtModule.registerAsync({ ...createUserOpts() }),
     AuthRefreshModule.registerAsync({ ...createUserOpts() }),
@@ -21,9 +29,11 @@ import { UserRepository } from '../05-user/user/user.repository';
     PasswordModule.register(),
     CrudModule.register(),
     UserModule.register({
-      orm: {
-        entities: { user: { useClass: UserEntity } },
-        repositories: { userRepository: { useClass: UserRepository } },
+      entities: {
+        user: {
+          entity: UserEntity,
+          repository: UserRepository,
+        },
       },
     }),
   ],

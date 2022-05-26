@@ -1,8 +1,9 @@
 import { Column, PrimaryGeneratedColumn } from 'typeorm';
 import { AuditInterface } from '@concepta/ts-core';
 import { AuditSqlLiteEmbed } from '@concepta/typeorm-common';
+import { UserEntityInterface } from '../interfaces/user-entity.interface';
 
-export abstract class UserSqliteEntity {
+export abstract class UserSqliteEntity implements UserEntityInterface {
   /**
    * Unique Id
    */

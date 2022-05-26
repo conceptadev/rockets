@@ -1,5 +1,5 @@
-import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
+import { getDynamicRepositoryToken } from '@concepta/nestjs-typeorm-ext';
 import { UserModule } from './user.module';
 import { UserCrudService } from './services/user-crud.service';
 import { UserController } from './user.controller';
@@ -7,9 +7,9 @@ import { DefaultUserLookupService } from './services/default-user-lookup.service
 import { DefaultUserMutateService } from './services/default-user-mutate.service';
 import { UserLookupService } from './services/user-lookup.service';
 import { UserMutateService } from './services/user-mutate.service';
+import { USER_MODULE_USER_ENTITY_KEY } from './user.constants';
 
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
-import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
 import { UserRepositoryFixture } from './__fixtures__/user.repository.fixture';
 
 describe('AppModule', () => {
@@ -18,8 +18,7 @@ describe('AppModule', () => {
   let userMutateService: DefaultUserMutateService;
   let userCrudService: UserCrudService;
   let userController: UserController;
-  let userEntityRepo: Repository<UserEntityFixture>;
-  let userCustomRepo: UserRepositoryFixture;
+  let userRepo: UserRepositoryFixture;
 
   beforeEach(async () => {
     const testModule: TestingModule = await Test.createTestingModule({
@@ -27,11 +26,8 @@ describe('AppModule', () => {
     }).compile();
 
     userModule = testModule.get<UserModule>(UserModule);
-    userEntityRepo = testModule.get<Repository<UserEntityFixture>>(
-      'USER_MODULE_USER_ENTITY_REPO_TOKEN',
-    );
-    userCustomRepo = testModule.get<UserRepositoryFixture>(
-      'USER_MODULE_USER_CUSTOM_REPO_TOKEN',
+    userRepo = testModule.get<UserRepositoryFixture>(
+      getDynamicRepositoryToken(USER_MODULE_USER_ENTITY_KEY),
     );
     userLookupService =
       testModule.get<DefaultUserLookupService>(UserLookupService);
@@ -48,8 +44,7 @@ describe('AppModule', () => {
   describe('module', () => {
     it('should be loaded', async () => {
       expect(userModule).toBeInstanceOf(UserModule);
-      expect(userEntityRepo).toBeInstanceOf(Repository);
-      expect(userCustomRepo).toBeInstanceOf(UserRepositoryFixture);
+      expect(userRepo).toBeInstanceOf(UserRepositoryFixture);
       expect(userCrudService).toBeInstanceOf(UserCrudService);
       expect(userLookupService).toBeInstanceOf(DefaultUserLookupService);
       expect(userLookupService['userRepo']).toBeInstanceOf(
