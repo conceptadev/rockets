@@ -1,6 +1,8 @@
 import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmExtModule } from './typeorm-ext.module';
+import { getDynamicRepositoryToken } from './utils/get-dynamic-repository-token';
+import { getEntityRepositoryToken } from './utils/get-entity-repository-token';
 
 import { PhotoModuleFixture } from './__fixtures__/photo/photo.module.fixture';
 import { PhotoEntityInterfaceFixture } from './__fixtures__/photo/interfaces/photo-entity.interface.fixture';
@@ -28,10 +30,10 @@ describe('AppModule', () => {
 
     photoModule = testModule.get<PhotoModuleFixture>(PhotoModuleFixture);
     photoEntityRepo = testModule.get<Repository<PhotoEntityInterfaceFixture>>(
-      'PHOTO_MODULE_ENTITY_REPO_TOKEN',
+      getEntityRepositoryToken('photo'),
     );
     photoCustomRepo = testModule.get<PhotoRepositoryFixture>(
-      'PHOTO_MODULE_CUSTOM_REPO_TOKEN',
+      getDynamicRepositoryToken('photo'),
     );
   });
 
