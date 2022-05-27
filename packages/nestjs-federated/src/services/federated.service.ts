@@ -5,9 +5,7 @@ import { FederatedServiceInterface } from '../interfaces/federated-service.inter
 import { FEDERATED_MODULE_FEDERATED_ENTITY_KEY } from '../federated.constants';
 import { FederatedPostgresEntity } from '../entities/federated-postgres.entity';
 import { FederatedEntityInterface } from '../interfaces/federated-entity.interface';
-import { FederatedCreatableInterface } from '../interfaces/federated-creatable.interface';
-import { FederatedCreateException } from '../exceptions/federated-create.exception';
-import { FederatedNotFoundException } from '../exceptions/federated-not-found.exception';
+import { FederatedQueryException } from '../exceptions/federated-query.exception';
 @Injectable()
 export class FederatedService implements FederatedServiceInterface {
   constructor(
@@ -31,22 +29,8 @@ export class FederatedService implements FederatedServiceInterface {
 
       return federated;
     } catch (e) {
-      throw new FederatedNotFoundException(this.federatedRepo.metadata.name, e);
-    }
-  }
-
-  async create(
-    federatedDto: FederatedCreatableInterface,
-  ): Promise<FederatedEntityInterface> {
-    try {
-      // TODO: need to validate the DTO and throw an exception before trying to save
-      const federated = await this.federatedRepo.save(federatedDto);
-
-      if (!federated) return null;
-
-      return federated;
-    } catch (e) {
-      throw new FederatedCreateException(this.federatedRepo.metadata.name, e);
+      //TODO: change to query exception
+      throw new FederatedQueryException(this.federatedRepo.metadata.name, e);
     }
   }
 }

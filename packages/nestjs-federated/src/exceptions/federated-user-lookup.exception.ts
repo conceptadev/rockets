@@ -1,11 +1,11 @@
 import { format } from 'util';
 import { ExceptionInterface } from '@concepta/ts-core';
 
-export class FederatedUserLookupNotFoundException
+export class FederatedUserLookupException
   extends Error
   implements ExceptionInterface
 {
-  errorCode = 'FEDERATED_USER_LOOKUP_NOT_FOUND_ERROR';
+  errorCode = 'FEDERATED_USER_LOOKUP_ERROR';
 
   context: {
     entityName: string;

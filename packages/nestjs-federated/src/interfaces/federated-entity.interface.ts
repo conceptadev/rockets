@@ -1,13 +1,3 @@
-import {
-  ReferenceAuditInterface,
-  ReferenceIdInterface,
-} from '@concepta/ts-core';
+import { FederatedInterface } from './federated.interface';
 
-export interface FederatedEntityInterface
-  extends ReferenceIdInterface,
-    Partial<ReferenceAuditInterface> {
-  provider: string;
-  // TODO: rename to `sub` via ReferenceSubjectInterface
-  subject: string;
-  userId: string;
-}
+export interface FederatedEntityInterface extends FederatedInterface {}

@@ -12,7 +12,9 @@ import { FederatedCredentialsInterface } from '../interfaces/federated-credentia
 import { FederatedOAuthServiceInterface } from '../interfaces/federated-oauth-service.interface';
 import { FederatedCreateException } from '../exceptions/federated-create.exception';
 import { FederatedMutateCreateUserException } from '../exceptions/federated-mutate-create.exception';
-import { FederatedUserLookupNotFoundException } from '../exceptions/federated-lookup-not-found.exception';
+import { FederatedUserLookupException } from '../exceptions/federated-user-lookup.exception';
+import { FederatedMutateService } from './federated-mutate.service';
+import { ReferenceMutateException } from '@concepta/typeorm-common';
 
 @Injectable()
 export class FederatedOAuthService implements FederatedOAuthServiceInterface {
@@ -22,6 +24,7 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
     @Inject(FEDERATED_MODULE_USER_MUTATE_SERVICE_TOKEN)
     public userMutateService: FederatedUserMutateServiceInterface,
     public federatedService: FederatedService,
+    public federatedMutateService: FederatedMutateService,
   ) {}
 
   /**
@@ -51,7 +54,7 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
       const user = await this.userLookupService.byId(federated.userId);
 
       if (!user)
-        throw new FederatedUserLookupNotFoundException(
+        throw new FederatedUserLookupException(
           this.constructor.name,
           federated.userId,
         );
@@ -121,7 +124,7 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
     userId: string,
   ): Promise<FederatedEntityInterface> {
     try {
-      const federated = await this.federatedService.create({
+      const federated = await this.federatedMutateService.create({
         provider,
         subject,
         userId,
@@ -135,7 +138,7 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
 
       return federated;
     } catch (e) {
-      throw new FederatedCreateException(this.constructor.name, e);
+      throw new ReferenceMutateException(this.constructor.name, e);
     }
   }
 }

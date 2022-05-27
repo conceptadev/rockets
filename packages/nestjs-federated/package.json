@@ -11,6 +11,7 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
+    "@concepta/nestjs-common": "^4.0.0-alpha.11",
     "@concepta/nestjs-authentication": "^4.0.0-alpha.11",
     "@concepta/nestjs-core": "^4.0.0-alpha.11",
     "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.11",
@@ -18,7 +19,8 @@
     "@concepta/typeorm-common": "^4.0.0-alpha.11",
     "@nestjs/common": "^8.0.0",
     "@nestjs/config": "^1.1.6",
-    "@nestjs/passport": "^8.0.0"
+    "@nestjs/passport": "^8.0.0",
+    "@nestjs/swagger": "^5.2.1"
     
   },
   "devDependencies": {
@@ -27,6 +29,8 @@
     "@concepta/nestjs-user": "^4.0.0-alpha.11",
     "@nestjs/testing": "^8.0.0",
     "@sentry/types": "^6.13.3",
+    "class-transformer": "*",
+    "class-validator": "*",
     "jest-mock-extended": "^2.0.4"
   },
   "peerDependencies": {
