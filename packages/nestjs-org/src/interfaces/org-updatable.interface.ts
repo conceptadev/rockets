@@ -1,4 +1,4 @@
 import { OrgInterface } from './org.interface';
 
 export interface OrgUpdatableInterface
-  extends Pick<OrgInterface, 'name' | 'ownerUserId'> {}
+  extends Pick<OrgInterface, 'name' | 'active' | 'owner'> {}

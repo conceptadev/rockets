@@ -1,25 +1,17 @@
 import {
+  ReferenceActiveInterface,
   ReferenceAuditInterface,
   ReferenceIdInterface,
 } from '@concepta/ts-core';
+import { OrgOwnerInterface } from './org-owner.interface';
 
 export interface OrgInterface
   extends ReferenceIdInterface,
-    Partial<ReferenceAuditInterface> {
+    ReferenceActiveInterface,
+    Partial<ReferenceAuditInterface>,
+    OrgOwnerInterface {
   /**
    * Name
    */
   name: string;
-
-  /**
-   * Flag to determine if the org is active or not
-   */
-  active: boolean;
-
-  /**
-   * ownerUserId
-   *
-   * @todo maybe change this later to be required
-   */
-  ownerUserId?: string | null;
 }

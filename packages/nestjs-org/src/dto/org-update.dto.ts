@@ -8,5 +8,5 @@ import { OrgDto } from './org.dto';
  */
 @Exclude()
 export class OrgUpdateDto
-  extends PickType(OrgDto, ['name', 'ownerUserId'] as const)
+  extends PickType(OrgDto, ['name', 'active', 'owner'] as const)
   implements OrgUpdatableInterface {}

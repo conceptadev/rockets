@@ -1,8 +1,12 @@
-import { IsOptional, IsString } from 'class-validator';
 import { Exclude, Expose, Type } from 'class-transformer';
+import { IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { AuditInterface, ReferenceId } from '@concepta/ts-core';
-import { AuditDto } from '@concepta/nestjs-common';
+import {
+  AuditInterface,
+  ReferenceId,
+  ReferenceIdInterface,
+} from '@concepta/ts-core';
+import { AuditDto, ReferenceIdDto } from '@concepta/nestjs-common';
 import { CrudResponseDto } from '@concepta/nestjs-crud';
 import { OrgInterface } from '../interfaces/org.interface';
 
@@ -58,14 +62,13 @@ export class OrgDto
   active: boolean;
 
   /**
-   * ownerUserId
+   * Owner
    */
   @Expose()
   @ApiProperty({
-    type: 'string',
-    description: 'userId of owner of the org',
+    type: ReferenceIdDto,
+    description: 'The owner of the org',
   })
-  @IsString()
-  @IsOptional()
-  ownerUserId?: string;
+  @Type(() => ReferenceIdDto)
+  owner: ReferenceIdInterface;
 }
