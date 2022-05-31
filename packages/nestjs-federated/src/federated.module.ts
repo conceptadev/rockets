@@ -21,12 +21,13 @@ import { FederatedOptionsInterface } from './interfaces/federated-options.interf
 import { FederatedEntitiesOptionsInterface } from './interfaces/federated-entities-options.interface';
 import { FederatedOAuthService } from './services/federated-oauth.service';
 import { FederatedService } from './services/federated.service';
+import { FederatedMutateService } from './services/federated-mutate.service';
 
 /**
  * Federated Module
  */
 @Module({
-  providers: [FederatedService, FederatedOAuthService],
+  providers: [FederatedService, FederatedOAuthService, FederatedMutateService],
   exports: [FederatedService, FederatedOAuthService],
   controllers: [],
 })

@@ -1,4 +1,3 @@
-import { FederatedCreatableInterface } from './federated-creatable.interface';
 import { FederatedEntityInterface } from './federated-entity.interface';
 
 export interface FederatedServiceInterface {
@@ -6,6 +5,4 @@ export interface FederatedServiceInterface {
     provider: string,
     federatedRef: string,
   ): Promise<FederatedEntityInterface>;
-
-  create(user: FederatedCreatableInterface): Promise<FederatedEntityInterface>;
 }

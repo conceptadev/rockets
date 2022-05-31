@@ -24,6 +24,7 @@ import { FederatedRepositoryFixture } from './__fixtures__/federated-repository.
 import { FederatedEntityInterface } from './interfaces/federated-entity.interface';
 import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
 import { UserRepositoryFixture } from './__fixtures__/user.repository.fixture';
+import { FederatedMutateService } from './services/federated-mutate.service';
 
 describe('FederatedModuleTest', () => {
   let federatedModule: FederatedModule;
@@ -33,6 +34,7 @@ describe('FederatedModuleTest', () => {
   let userMutateService: UserMutateService;
   let federatedEntityRepo: Repository<FederatedEntityInterface>;
   let federatedCustomRepo: FederatedRepositoryFixture;
+  let federatedMutateService: FederatedMutateService;
 
   beforeEach(async () => {
     const testModule: TestingModule = await Test.createTestingModule({
@@ -84,6 +86,9 @@ describe('FederatedModuleTest', () => {
     );
     userLookupService = testModule.get<UserLookupService>(UserLookupService);
     userMutateService = testModule.get<UserMutateService>(UserMutateService);
+    federatedMutateService = testModule.get<FederatedMutateService>(
+      FederatedMutateService,
+    );
   });
 
   afterEach(async () => {
@@ -99,6 +104,7 @@ describe('FederatedModuleTest', () => {
       expect(federatedOauthService).toBeDefined();
       expect(userLookupService).toBeInstanceOf(UserLookupService);
       expect(userMutateService).toBeInstanceOf(UserMutateService);
+      expect(federatedMutateService).toBeInstanceOf(FederatedMutateService);
     });
   });
 });
