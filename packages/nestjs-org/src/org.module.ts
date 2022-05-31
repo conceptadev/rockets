@@ -12,9 +12,10 @@ import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
 import { orgDefaultConfig } from './config/org-default.config';
 import { OrgOptionsInterface } from './interfaces/org-options.interface';
-import { OrgOrmOptionsInterface } from './interfaces/org-entities-options.interface';
+import { OrgEntitiesOptionsInterface } from './interfaces/org-entities-options.interface';
 import {
   ORG_MODULE_OPTIONS_TOKEN,
+  ORG_MODULE_OWNER_LOOKUP_SERVICE,
   ORG_MODULE_SETTINGS_TOKEN,
 } from './org.constants';
 import { OrgController } from './org.controller';
@@ -69,6 +70,12 @@ export class OrgModule extends createConfigurableDynamicRootModule<
         defaultService: DefaultOrgMutateService,
       ) => options.orgMutateService ?? defaultService,
     },
+    {
+      provide: ORG_MODULE_OWNER_LOOKUP_SERVICE,
+      inject: [ORG_MODULE_OPTIONS_TOKEN],
+      useFactory: async (options: OrgOptionsInterface) =>
+        options.ownerLookupService,
+    },
   ],
 }) {
   /**
@@ -78,7 +85,7 @@ export class OrgModule extends createConfigurableDynamicRootModule<
    */
   static register(
     options: OrgOptionsInterface &
-      OrgOrmOptionsInterface &
+      OrgEntitiesOptionsInterface &
       ModuleOptionsControllerInterface,
   ) {
     const module = OrgModule.forRoot(OrgModule, options);
@@ -97,13 +104,10 @@ export class OrgModule extends createConfigurableDynamicRootModule<
    */
   static registerAsync(
     options: AsyncModuleConfig<OrgOptionsInterface> &
-      OrgOrmOptionsInterface &
+      OrgEntitiesOptionsInterface &
       ModuleOptionsControllerInterface,
   ) {
-    const module = OrgModule.forRootAsync(OrgModule, {
-      useFactory: () => ({}),
-      ...options,
-    });
+    const module = OrgModule.forRootAsync(OrgModule, options);
 
     module.imports.push(TypeOrmExtModule.forFeature(options.entities));
 

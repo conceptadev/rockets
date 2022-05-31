@@ -1,13 +1,16 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { AuditInterface, ReferenceId } from '@concepta/ts-core';
+import { Column, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  AuditInterface,
+  ReferenceId,
+  ReferenceIdInterface,
+} from '@concepta/ts-core';
 import { AuditPostgresEmbed } from '@concepta/typeorm-common';
 import { OrgEntityInterface } from '../interfaces/org-entity.interface';
 
 /**
  * Org Postgres Entity
  */
-@Entity()
-export class OrgPostgresEntity implements OrgEntityInterface {
+export abstract class OrgPostgresEntity implements OrgEntityInterface {
   /**
    * Unique Id
    */
@@ -33,10 +36,7 @@ export class OrgPostgresEntity implements OrgEntityInterface {
   active = true;
 
   /**
-   * ownerUserId
-   *
-   * @todo change this later to be required and { nullable: false } and add a relationship with User
+   * Owner
    */
-  @Column({ nullable: true })
-  ownerUserId?: string;
+  owner: ReferenceIdInterface;
 }

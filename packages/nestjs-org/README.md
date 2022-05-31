@@ -4,8 +4,8 @@ A module for managing a basic Org entity, including controller with full CRUD, D
 
 ## Project
 
-[![NPM Latest](https://img.shields.io/npm/v/@concepta/nestjs-user)](https://www.npmjs.com/package/@concepta/nestjs-user)
-[![NPM Downloads](https://img.shields.io/npm/dw/@conceptadev/nestjs-user)](https://www.npmjs.com/package/@concepta/nestjs-user)
+[![NPM Latest](https://img.shields.io/npm/v/@concepta/nestjs-org)](https://www.npmjs.com/package/@concepta/nestjs-org)
+[![NPM Downloads](https://img.shields.io/npm/dw/@conceptadev/nestjs-org)](https://www.npmjs.com/package/@concepta/nestjs-org)
 [![GH Last Commit](https://img.shields.io/github/last-commit/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets)
 [![GH Contrib](https://img.shields.io/github/contributors/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets/graphs/contributors)
 [![NestJS Dep](https://img.shields.io/github/package-json/dependency-version/conceptadev/rockets/@nestjs/common?label=NestJS&logo=nestjs&filename=packages%2Fnestjs-core%2Fpackage.json)](https://www.npmjs.com/package/@nestjs/common)
@@ -19,8 +19,8 @@ A module for managing a basic Org entity, including controller with full CRUD, D
 ```ts
 // ...
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
-import { OrgModule } from '@concepta/nestjs-user';
 import { CrudModule } from '@concepta/nestjs-crud';
+import { OrgModule } from '@concepta/nestjs-org';
 
 @Module({
   imports: [
