@@ -70,17 +70,8 @@ export class OrgController
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() orgCreateManyDto: OrgCreateManyDto,
   ) {
-    // the final data
-    const orgs = [];
-
-    // loop all dtos
-    for (const orgCreateDto of orgCreateManyDto.bulk) {
-      // encrypt it
-      orgs.push(orgCreateDto);
-    }
-
     // call crud service to create
-    return this.orgCrudService.createMany(crudRequest, { bulk: orgs });
+    return this.orgCrudService.createMany(crudRequest, orgCreateManyDto);
   }
 
   /**

@@ -1,5 +1,4 @@
-import { EntitySchema, Repository } from 'typeorm';
-import { DynamicModule, Global, Module, Provider, Type } from '@nestjs/common';
+import { DynamicModule, Global, Module, Provider } from '@nestjs/common';
 import {
   TypeOrmModule,
   TypeOrmModuleAsyncOptions,
@@ -70,14 +69,17 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
     return module;
   }
 
-  static forFeature<T>(
-    entityOptions: Record<string, TypeOrmExtEntityOptionInterface<T>>,
+  static forFeature(
+    entityOptions: Record<string, TypeOrmExtEntityOptionInterface>,
   ): DynamicModule {
     const connections: Record<string, TypeOrmExtConnectionToken> = {};
 
-    const entitiesToRegister: Record<
+    const entitiesByConn: Record<
       string,
-      (Type<T> | Type<Repository<T>> | EntitySchema<T>)[]
+      (
+        | TypeOrmExtEntityOptionInterface['entity']
+        | TypeOrmExtEntityOptionInterface['repository']
+      )[]
     > = {};
 
     const imports: DynamicModule[] = [];
@@ -97,14 +99,14 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
         connections[connectionName] = connection;
       }
 
-      if (connectionName in entitiesToRegister === false) {
-        entitiesToRegister[connectionName] = [];
+      if (connectionName in entitiesByConn === false) {
+        entitiesByConn[connectionName] = [];
       }
 
-      entitiesToRegister[connectionName].push(entity);
+      entitiesByConn[connectionName].push(entity);
 
       if (repository) {
-        entitiesToRegister[connectionName].push(repository);
+        entitiesByConn[connectionName].push(repository);
       }
 
       providers.push(
@@ -113,10 +115,10 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
       );
     }
 
-    for (const connectionName in entitiesToRegister) {
+    for (const connectionName in entitiesByConn) {
       imports.push(
         TypeOrmModule.forFeature(
-          entitiesToRegister[connectionName],
+          entitiesByConn[connectionName],
           connections[connectionName],
         ),
       );
