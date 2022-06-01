@@ -1,4 +1,4 @@
-import { FederatedEntityInterface } from './federated-entity.interface';
+import { FederatedInterface } from './federated.interface';
 
 export interface FederatedCreatableInterface
-  extends Pick<FederatedEntityInterface, 'provider' | 'subject' | 'userId'> {}
+  extends Pick<FederatedInterface, 'provider' | 'subject' | 'userId'> {}

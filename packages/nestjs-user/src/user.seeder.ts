@@ -29,8 +29,6 @@ export class UserSeeder extends Seeder {
 
   /**
    * Runner
-   *
-   * @param factory Seeder factory
    */
   public async run(): Promise<void> {
     // number of users to create

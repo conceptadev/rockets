@@ -1,11 +1,16 @@
 import { FindConditions, Repository } from 'typeorm';
-import { Injectable } from '@nestjs/common';
-import { ReferenceId } from '@concepta/ts-core';
+import { Inject, Injectable } from '@nestjs/common';
+import { ReferenceId, ReferenceIdInterface } from '@concepta/ts-core';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import { ReferenceLookupException } from '@concepta/typeorm-common';
-import { ORG_MODULE_ORG_ENTITY_KEY } from '../org.constants';
+import {
+  ORG_MODULE_ORG_ENTITY_KEY,
+  ORG_MODULE_OWNER_LOOKUP_SERVICE,
+} from '../org.constants';
 import { OrgEntityInterface } from '../interfaces/org-entity.interface';
 import { OrgLookupServiceInterface } from '../interfaces/org-lookup-service.interface';
+import { OrgOwnerInterface } from '../interfaces/org-owner.interface';
+import { OrgOwnerLookupServiceInterface } from '../interfaces/org-owner-lookup-service.interface';
 
 /**
  * Org lookup service
@@ -20,6 +25,8 @@ export class OrgLookupService implements OrgLookupServiceInterface {
   constructor(
     @InjectDynamicRepository(ORG_MODULE_ORG_ENTITY_KEY)
     private orgRepo: Repository<OrgEntityInterface>,
+    @Inject(ORG_MODULE_OWNER_LOOKUP_SERVICE)
+    private ownerLookupService: OrgOwnerLookupServiceInterface,
   ) {}
 
   /**
@@ -29,6 +36,15 @@ export class OrgLookupService implements OrgLookupServiceInterface {
    */
   async byId(id: ReferenceId): Promise<OrgEntityInterface | undefined> {
     return this.findOne({ id });
+  }
+
+  /**
+   * Get owner for the given org.
+   *
+   * @param org The org of which owner to retrieve.
+   */
+  async getOwner(org: OrgOwnerInterface): Promise<ReferenceIdInterface> {
+    return this.ownerLookupService.byId(org.owner.id);
   }
 
   /**

@@ -1,6 +1,6 @@
 {
   "name": "@concepta/ts-core",
-  "version": "4.0.0-alpha.11",
+  "version": "4.0.0-alpha.12",
   "description": "Rockets Typescript Core",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,8 +10,5 @@
   },
   "files": [
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
-  ],
-  "dependencies": {},
-  "devDependencies": {},
-  "peerDependencies": {}
+  ]
 }

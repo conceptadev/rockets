@@ -2,13 +2,17 @@ import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { useSeeders } from '@jorgebodega/typeorm-seeding';
-import { OrgSeeder } from './org.seeder';
-import { OrgModule } from './org.module';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
+import { OrgSeeder } from './org.seeder';
+import { OrgModule } from './org.module';
 
 import { OrgEntityFixture } from './__fixtures__/org-entity.fixture';
 import { OrgRepositoryFixture } from './__fixtures__/org-repository.fixture';
+import { OwnerEntityFixture } from './__fixtures__/owner-entity.fixture';
+import { OwnerLookupServiceFixture } from './__fixtures__/owner-lookup-service.fixture';
+import { OwnerModuleFixture } from './__fixtures__/owner.module.fixture';
+import { OwnerFactoryFixture } from './__fixtures__/owner-factory.fixture';
 
 describe('OrgController (e2e)', () => {
   describe('Rest', () => {
@@ -22,10 +26,15 @@ describe('OrgController (e2e)', () => {
               type: 'sqlite',
               database: ':memory:',
               synchronize: true,
-              entities: [OrgEntityFixture],
+              entities: [OrgEntityFixture, OwnerEntityFixture],
             }),
           }),
-          OrgModule.register({
+          OrgModule.registerAsync({
+            imports: [OwnerModuleFixture.register()],
+            inject: [OwnerLookupServiceFixture],
+            useFactory: (ownerLookupService: OwnerLookupServiceFixture) => ({
+              ownerLookupService,
+            }),
             entities: {
               org: {
                 entity: OrgEntityFixture,
@@ -35,13 +44,18 @@ describe('OrgController (e2e)', () => {
           }),
           CrudModule.register(),
         ],
+        providers: [OwnerLookupServiceFixture],
       }).compile();
       app = moduleFixture.createNestApplication();
       await app.init();
 
       OrgSeeder.entity = OrgEntityFixture;
+      OrgSeeder.ownerFactory = OwnerFactoryFixture;
 
-      await useSeeders(OrgSeeder, { root: __dirname, connection: 'default' });
+      await useSeeders(OrgSeeder, {
+        root: __dirname,
+        connection: 'default',
+      });
     });
 
     afterEach(async () => {
@@ -70,10 +84,14 @@ describe('OrgController (e2e)', () => {
     });
 
     it('POST /org', async () => {
+      const ownerFactory = new OwnerFactoryFixture();
+      const owner = await ownerFactory.create();
+
       await supertest(app.getHttpServer())
         .post('/org')
         .send({
           name: 'company 1',
+          owner,
         })
         .expect(201);
     });
