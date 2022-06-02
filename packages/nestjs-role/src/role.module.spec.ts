@@ -17,6 +17,12 @@ import {
 import { RoleEntityFixture } from './__fixtures__/role-entity.fixture';
 import { RoleRepositoryFixture } from './__fixtures__/role-repository.fixture';
 import { ROLE_MODULE_ORG_ENTITY_KEY } from './role.constants';
+import { UserRoleRepositoryFixture } from './__fixtures__/user-role-repository.fixture';
+import { UserRoleEntityFixture } from './__fixtures__/user-role-entity.fixture';
+import { ApiKeyRoleEntityFixture } from './__fixtures__/api-key-role-entity.fixture';
+import { ApiKeyRoleRepositoryFixture } from './__fixtures__/api-key-role-repository.fixture';
+import { OrgMemberRoleEntityFixture } from './__fixtures__/org-member-role-entity.fixture';
+import { OrgMemberRoleRepositoryFixture } from './__fixtures__/org-member-role-repository.fixture';
 
 describe('RoleModule', () => {
   let roleModule: RoleModule;
@@ -34,7 +40,12 @@ describe('RoleModule', () => {
           useFactory: async () => ({
             type: 'sqlite',
             database: ':memory:',
-            entities: [RoleEntityFixture],
+            entities: [
+              RoleEntityFixture,
+              UserRoleEntityFixture,
+              ApiKeyRoleEntityFixture,
+              OrgMemberRoleEntityFixture,
+            ],
           }),
         }),
         RoleModule.register({
@@ -42,6 +53,18 @@ describe('RoleModule', () => {
             role: {
               entity: RoleEntityFixture,
               repository: RoleRepositoryFixture,
+            },
+            userRole: {
+              entity: UserRoleEntityFixture,
+              repository: UserRoleRepositoryFixture,
+            },
+            apiKeyRole: {
+              entity: ApiKeyRoleEntityFixture,
+              repository: ApiKeyRoleRepositoryFixture,
+            },
+            orgMemberRole: {
+              entity: OrgMemberRoleEntityFixture,
+              repository: OrgMemberRoleRepositoryFixture,
             },
           },
         }),
