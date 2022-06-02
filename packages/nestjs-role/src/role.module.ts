@@ -13,15 +13,16 @@ import {
   TypeOrmExtModule,
 } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
-import { roleDefaultConfig } from './config/role-default.config';
-import { RoleOptionsInterface } from './interfaces/role-options.interface';
-import { RoleOrmOptionsInterface } from './interfaces/role-entities-options.interface';
 import {
   ALL_ROLES_REPOSITORIES_TOKEN,
   ROLE_MODULE_OPTIONS_TOKEN,
   ROLE_MODULE_SETTINGS_TOKEN,
 } from './role.constants';
+import { roleDefaultConfig } from './config/role-default.config';
+import { RoleOptionsInterface } from './interfaces/role-options.interface';
+import { RoleEntitiesOptionsInterface } from './interfaces/role-entities-options.interface';
 import { RoleController } from './role.controller';
+import { RoleService } from './services/role.service';
 import { RoleLookupService } from './services/role-lookup.service';
 import { RoleCrudService } from './services/role-crud.service';
 import { RoleLookupServiceInterface } from './interfaces/role-lookup-service.interface';
@@ -36,9 +37,10 @@ import { DefaultRoleMutateService } from './services/default-role-mutate.service
   providers: [
     DefaultRoleLookupService,
     DefaultRoleMutateService,
+    RoleService,
     RoleCrudService,
   ],
-  exports: [RoleLookupService, RoleMutateService, RoleCrudService],
+  exports: [RoleService, RoleLookupService, RoleMutateService, RoleCrudService],
   controllers: [RoleController],
 })
 export class RoleModule extends createConfigurableDynamicRootModule<
@@ -86,7 +88,7 @@ export class RoleModule extends createConfigurableDynamicRootModule<
    */
   static register(
     options: RoleOptionsInterface &
-      RoleOrmOptionsInterface &
+      RoleEntitiesOptionsInterface &
       ModuleOptionsControllerInterface,
   ) {
     const module = RoleModule.forRoot(RoleModule, options);
@@ -107,7 +109,7 @@ export class RoleModule extends createConfigurableDynamicRootModule<
    */
   static registerAsync(
     options: AsyncModuleConfig<RoleOptionsInterface> &
-      RoleOrmOptionsInterface &
+      RoleEntitiesOptionsInterface &
       ModuleOptionsControllerInterface,
   ) {
     const module = RoleModule.forRootAsync(RoleModule, {
@@ -134,7 +136,7 @@ export class RoleModule extends createConfigurableDynamicRootModule<
   }
 
   private static getAllProviders(
-    entities: RoleOrmOptionsInterface['entities'],
+    entities: RoleEntitiesOptionsInterface['entities'],
   ) {
     const reposToInject = [];
     const keyTracker = {};

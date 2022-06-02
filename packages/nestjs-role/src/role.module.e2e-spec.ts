@@ -9,6 +9,12 @@ import { CrudModule } from '@concepta/nestjs-crud';
 
 import { RoleEntityFixture } from './__fixtures__/role-entity.fixture';
 import { RoleRepositoryFixture } from './__fixtures__/role-repository.fixture';
+import { UserEntityFixture } from './__fixtures__/user-entity.fixture';
+import { UserRoleEntityFixture } from './__fixtures__/user-role-entity.fixture';
+import { UserRoleRepositoryFixture } from './__fixtures__/user-role-repository.fixture';
+import { ApiKeyEntityFixture } from './__fixtures__/api-key-entity.fixture';
+import { ApiKeyRoleEntityFixture } from './__fixtures__/api-key-role-entity.fixture';
+import { ApiKeyRoleRepositoryFixture } from './__fixtures__/api-key-role-repository.fixture';
 
 describe('RoleController (e2e)', () => {
   describe('Rest', () => {
@@ -22,7 +28,13 @@ describe('RoleController (e2e)', () => {
               type: 'sqlite',
               database: ':memory:',
               synchronize: true,
-              entities: [RoleEntityFixture],
+              entities: [
+                RoleEntityFixture,
+                UserEntityFixture,
+                UserRoleEntityFixture,
+                ApiKeyEntityFixture,
+                ApiKeyRoleEntityFixture,
+              ],
             }),
           }),
           RoleModule.register({
@@ -30,6 +42,20 @@ describe('RoleController (e2e)', () => {
               role: {
                 entity: RoleEntityFixture,
                 repository: RoleRepositoryFixture,
+              },
+              user: {
+                entity: UserRoleEntityFixture,
+              },
+              userRole: {
+                entity: UserRoleEntityFixture,
+                repository: UserRoleRepositoryFixture,
+              },
+              apiKey: {
+                entity: ApiKeyEntityFixture,
+              },
+              apiKeyRole: {
+                entity: ApiKeyRoleEntityFixture,
+                repository: ApiKeyRoleRepositoryFixture,
               },
             },
           }),

@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { ReferenceId } from '@concepta/ts-core';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import { ReferenceLookupException } from '@concepta/typeorm-common';
-import { ROLE_MODULE_ORG_ENTITY_KEY } from '../role.constants';
+import { ROLE_MODULE_ROLE_ENTITY_KEY } from '../role.constants';
 import { RoleEntityInterface } from '../interfaces/role-entity.interface';
 import { RoleLookupServiceInterface } from '../interfaces/role-lookup-service.interface';
 
@@ -18,7 +18,7 @@ export class RoleLookupService implements RoleLookupServiceInterface {
    * @param roleRepo instance of the role repo
    */
   constructor(
-    @InjectDynamicRepository(ROLE_MODULE_ORG_ENTITY_KEY)
+    @InjectDynamicRepository(ROLE_MODULE_ROLE_ENTITY_KEY)
     private roleRepo: Repository<RoleEntityInterface>,
   ) {}
 

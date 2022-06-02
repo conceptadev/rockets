@@ -66,6 +66,9 @@
       "path": "packages/nestjs-typeorm-ext"
     },
     {
+      "path": "packages/nestjs-role"
+    },
+    {
       "path": "packages/nestjs-user"
     },
     {

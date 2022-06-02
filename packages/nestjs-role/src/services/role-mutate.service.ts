@@ -8,7 +8,7 @@ import { RoleCreatableInterface } from '../interfaces/role-creatable.interface';
 import { RoleUpdatableInterface } from '../interfaces/role-updatable.interface';
 import { RoleCreateDto } from '../dto/role-create.dto';
 import { RoleUpdateDto } from '../dto/role-update.dto';
-import { ROLE_MODULE_ORG_ENTITY_KEY } from '../role.constants';
+import { ROLE_MODULE_ROLE_ENTITY_KEY } from '../role.constants';
 
 /**
  * Role mutate service
@@ -31,7 +31,7 @@ export class RoleMutateService
    * @param repo instance of the role repo
    */
   constructor(
-    @InjectDynamicRepository(ROLE_MODULE_ORG_ENTITY_KEY)
+    @InjectDynamicRepository(ROLE_MODULE_ROLE_ENTITY_KEY)
     protected repo: Repository<RoleEntityInterface>,
   ) {
     super(repo);

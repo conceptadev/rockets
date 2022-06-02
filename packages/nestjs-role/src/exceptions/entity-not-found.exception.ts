@@ -13,7 +13,7 @@ export class EntityNotFoundException
 
   constructor(
     entityName: string,
-    message = 'Entity $s was not registered to be used.',
+    message = 'Entity %s was not registered to be used.',
   ) {
     super(format(message, entityName));
     this.context = {
