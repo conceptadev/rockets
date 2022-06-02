@@ -1,6 +1,7 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '@concepta/nestjs-auth-jwt';
 import { ReferenceUsername } from '@concepta/ts-core';
+import { ApiTags } from '@nestjs/swagger';
 
 export class UserDto {
   constructor(username: ReferenceUsername) {
@@ -13,6 +14,7 @@ export class UserDto {
  * Custom User controller
  */
 @Controller('custom/user')
+@ApiTags('user')
 export class CustomUserController {
   /**
    * Login

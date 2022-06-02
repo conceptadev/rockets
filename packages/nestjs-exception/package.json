@@ -13,7 +13,8 @@
   ],
   "dependencies": {
     "@concepta/ts-core": "^4.0.0-alpha.12",
-    "@nestjs/common": "^8.0.8"
+    "@nestjs/common": "^8.0.8",
+    "@nestjs/swagger": "^5.2.1"
   },
   "devDependencies": {
     "@nestjs/core": "^8.0.8",

@@ -2,6 +2,7 @@ import { Controller, Inject, Post, UseGuards } from '@nestjs/common';
 import {
   ApiBody,
   ApiOkResponse,
+  ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import {
@@ -19,6 +20,7 @@ import { AuthRefreshDto } from './dto/auth-refresh.dto';
  * Auth Local controller
  */
 @Controller('token/refresh')
+@ApiTags('auth')
 export class AuthRefreshController {
   constructor(
     @Inject(IssueTokenService)
