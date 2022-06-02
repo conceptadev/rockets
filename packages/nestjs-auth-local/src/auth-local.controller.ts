@@ -2,6 +2,7 @@ import { Controller, Inject, Post, UseGuards } from '@nestjs/common';
 import {
   ApiBody,
   ApiOkResponse,
+  ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import {
@@ -19,6 +20,7 @@ import { AuthLocalLoginDto } from './dto/auth-local-login.dto';
  * Auth Local controller
  */
 @Controller('auth/login')
+@ApiTags('auth')
 export class AuthLocalController {
   constructor(
     @Inject(AUTH_LOCAL_ISSUE_TOKEN_SERVICE_TOKEN)

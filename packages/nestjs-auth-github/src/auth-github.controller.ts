@@ -1,5 +1,5 @@
 import { Controller, Inject, Get, UseGuards } from '@nestjs/common';
-import { ApiOkResponse } from '@nestjs/swagger';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import {
   AuthGuard,
   AuthUser,
@@ -27,6 +27,7 @@ import { AUTH_GITHUB_STRATEGY_NAME } from './auth-github.constants';
  *
  */
 @Controller('auth/github')
+@ApiTags('auth')
 export class AuthGithubController {
   constructor(
     @Inject(AUTH_GITHUB_ISSUE_TOKEN_SERVICE_TOKEN)

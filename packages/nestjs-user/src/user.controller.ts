@@ -15,6 +15,7 @@ import {
   PasswordPlainInterface,
   PasswordStorageService,
 } from '@concepta/nestjs-password';
+import { ApiTags } from '@nestjs/swagger';
 import { UserCrudService } from './services/user-crud.service';
 import { UserDto } from './dto/user.dto';
 import { UserCreateDto } from './dto/user-create.dto';
@@ -33,6 +34,7 @@ import { UserEntityInterface } from './interfaces/user-entity.interface';
     paginatedType: UserPaginatedDto,
   },
 })
+@ApiTags('user')
 export class UserController
   implements CrudControllerInterface<UserEntityInterface>
 {

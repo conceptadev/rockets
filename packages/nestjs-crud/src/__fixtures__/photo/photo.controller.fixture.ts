@@ -1,3 +1,4 @@
+import { ApiTags } from '@nestjs/swagger';
 import { PhotoEntityInterfaceFixture } from './interfaces/photo-entity.interface.fixture';
 import { CrudControllerInterface } from '../../interfaces/crud-controller.interface';
 import { CrudRequestInterface } from '../../interfaces/crud-request.interface';
@@ -30,6 +31,7 @@ import { PhotoUpdateDtoFixture } from './dto/photo-update.dto.fixture';
     paginatedType: PhotoPaginatedDtoFixture,
   },
 })
+@ApiTags('photo')
 export class PhotoControllerFixture
   implements CrudControllerInterface<PhotoEntityInterfaceFixture>
 {
