@@ -5,12 +5,14 @@ import {
   Param,
   ParseIntPipe,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { CustomNotFoundExceptionFixture } from './exceptions/custom-not-found.exception.fixture';
 
 /**
  * Controller.
  */
 @Controller('test')
+@ApiTags('test')
 export class AppControllerFixture {
   @Get('unknown')
   getError(): void {

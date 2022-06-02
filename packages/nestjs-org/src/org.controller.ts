@@ -11,6 +11,7 @@ import {
   CrudController,
   CrudCreateMany,
 } from '@concepta/nestjs-crud';
+import { ApiTags } from '@nestjs/swagger';
 import { OrgCrudService } from './services/org-crud.service';
 import { OrgDto } from './dto/org.dto';
 import { OrgCreateDto } from './dto/org-create.dto';
@@ -29,6 +30,7 @@ import { OrgEntityInterface } from './interfaces/org-entity.interface';
     paginatedType: OrgPaginatedDto,
   },
 })
+@ApiTags('org')
 export class OrgController
   implements CrudControllerInterface<OrgEntityInterface>
 {
