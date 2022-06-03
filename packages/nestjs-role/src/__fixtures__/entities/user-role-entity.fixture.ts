@@ -1,7 +1,7 @@
 import { Entity, ManyToOne } from 'typeorm';
-import { RoleAssignmentSqliteEntity } from '../entities/role-assignment-sqlite.entity';
-import { RoleAssigneeInterface } from '../interfaces/role-assignee.interface';
-import { RoleEntityInterface } from '../interfaces/role-entity.interface';
+import { RoleAssignmentSqliteEntity } from '../../entities/role-assignment-sqlite.entity';
+import { RoleAssigneeInterface } from '../../interfaces/role-assignee.interface';
+import { RoleEntityInterface } from '../../interfaces/role-entity.interface';
 import { RoleEntityFixture } from './role-entity.fixture';
 import { UserEntityFixture } from './user-entity.fixture';
 

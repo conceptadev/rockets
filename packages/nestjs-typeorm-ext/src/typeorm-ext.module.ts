@@ -38,6 +38,9 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
 
     module.imports.push(
       TypeOrmModule.forRootAsync({
+        name: options?.name
+          ? options.name
+          : TYPEORM_EXT_MODULE_DEFAULT_CONNECTION_NAME,
         inject: [TYPEORM_EXT_MODULE_OPTIONS_TOKEN],
         useFactory: async (options: TypeOrmModuleOptions) => options,
       }),
@@ -110,8 +113,13 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
       }
 
       providers.push(
-        createEntityRepositoryProvider(entityKey, entity),
-        createDynamicRepositoryProvider(entityKey, entity, repository),
+        createEntityRepositoryProvider(entityKey, entity, connection),
+        createDynamicRepositoryProvider(
+          entityKey,
+          entity,
+          repository,
+          connection,
+        ),
       );
     }
 
