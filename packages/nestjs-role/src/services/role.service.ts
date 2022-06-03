@@ -6,6 +6,7 @@ import { RoleAssigneeInterface } from '../interfaces/role-assignee.interface';
 import { RoleAssignmentInterface } from '../interfaces/role-assignment.interface';
 import { RoleInterface } from '../interfaces/role.interface';
 import { ALL_ROLES_REPOSITORIES_TOKEN } from '../role.constants';
+import { RoleEntityInterface } from '../interfaces/role-entity.interface';
 
 @Injectable()
 export class RoleService {
@@ -15,35 +16,32 @@ export class RoleService {
   ) {}
 
   /**
-   * Check all roles that match assignment.
+   * Get all roles for assignee.
    *
    * @param context The context of the check (same as entity key)
    * @param assignee The assignee to check
    */
-  async getRoles<T extends RoleAssignmentInterface = RoleAssignmentInterface>(
+  async getAssignedRoles(
     context: string,
     assignee: Partial<RoleAssigneeInterface>,
-  ): Promise<T[] | RoleAssignmentInterface[]> {
-    // get the role repo
-    const roleRepo = this.getRoleRepo(context);
+  ): Promise<RoleEntityInterface[]> {
+    // get the assignment repo
+    const assignmentRepo = this.getAssignmentRepo(context);
 
     // try to find the relationships
     try {
       // make the query
-      return roleRepo.find({
+      const assignments = await assignmentRepo.find({
         where: {
           assignee,
         },
+        relations: [context],
       });
+
+      // return the roles
+      return assignments.map((assignment) => assignment.role);
     } catch (e) {
-      // is an Error?
-      if (e instanceof Error) {
-        // yes, throw custom exception
-        throw new ReferenceLookupException(roleRepo.metadata.targetName, e);
-      } else {
-        // throw original error
-        throw e;
-      }
+      this.throwLookupException(e, assignmentRepo.metadata.targetName);
     }
   }
 
@@ -51,21 +49,21 @@ export class RoleService {
    * Check if the assignee is a member of one role.
    *
    * @param context The context of the check (same as entity key)
-   * @param role The role, or roles to check
+   * @param role The role to check
    * @param assignee The assignee to check
    */
-  async hasRole<T extends RoleAssigneeInterface>(
+  async isAssignedRole<T extends RoleAssigneeInterface>(
     context: string,
     role: Partial<RoleInterface>,
     assignee: Partial<T>,
   ): Promise<boolean> {
-    // get the role repo
-    const roleRepo = this.getRoleRepo(context);
+    // get the assignment repo
+    const assignmentRepo = this.getAssignmentRepo(context);
 
     // try to find the relationship
     try {
       // make the query
-      const assignment = await roleRepo.findOne({
+      const assignment = await assignmentRepo.findOne({
         where: {
           role,
           assignee,
@@ -74,23 +72,50 @@ export class RoleService {
       // return true if we found an assignment
       return assignment ? true : false;
     } catch (e) {
-      // is an Error?
-      if (e instanceof Error) {
-        // yes, throw custom exception
-        throw new ReferenceLookupException(roleRepo.metadata.targetName, e);
-      } else {
-        // throw original error
-        throw e;
-      }
+      this.throwLookupException(e, assignmentRepo.metadata.targetName);
     }
   }
 
   /**
-   * Get the role repo for the given context.
+   * Check if the assignee is a member of every role.
    *
+   * @param context The context of the check (same as entity key)
+   * @param roles The roles to check
+   * @param assignee The assignee to check
+   */
+  async isAssignedRoles<T extends RoleAssigneeInterface>(
+    context: string,
+    roles: Partial<RoleInterface>[],
+    assignee: Partial<T>,
+  ): Promise<boolean> {
+    // get all assigned roles
+    const assignedRoles = await this.getAssignedRoles(context, assignee);
+
+    // get any roles to check?
+    if (roles.length) {
+      // create an array of all ids
+      const assignedRoleIds = assignedRoles.map(
+        (assignedRole) => assignedRole.id,
+      );
+      // is in every role?
+      return roles.every((role) => {
+        return assignedRoleIds.includes(role.id);
+      });
+    } else {
+      // no roles to check!
+      return false;
+    }
+  }
+
+  /**
+   * Get the assignment repo for the given context.
+   *
+   * @private
    * @param context The role context (same as entity key)
    */
-  protected getRoleRepo(context: string): Repository<RoleAssignmentInterface> {
+  protected getAssignmentRepo(
+    context: string,
+  ): Repository<RoleAssignmentInterface> {
     // repo matching context was injected?
     if (this.allRoleRepos[context]) {
       // yes, return it
@@ -98,6 +123,22 @@ export class RoleService {
     } else {
       // bad context
       throw new EntityNotFoundException(context);
+    }
+  }
+
+  /**
+   * @private
+   * @param e Possibly an error
+   * @param entityName Entity name
+   */
+  protected throwLookupException(e: unknown, entityName: string) {
+    // is an Error?
+    if (e instanceof Error) {
+      // yes, throw custom exception
+      throw new ReferenceLookupException(entityName, e);
+    } else {
+      // throw original error
+      throw e;
     }
   }
 }

@@ -3,18 +3,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { useSeeders } from '@jorgebodega/typeorm-seeding';
 import { RoleSeeder } from './role.seeder';
-import { RoleModule } from './role.module';
-import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
-import { CrudModule } from '@concepta/nestjs-crud';
 
-import { RoleEntityFixture } from './__fixtures__/role-entity.fixture';
-import { RoleRepositoryFixture } from './__fixtures__/role-repository.fixture';
-import { UserEntityFixture } from './__fixtures__/user-entity.fixture';
-import { UserRoleEntityFixture } from './__fixtures__/user-role-entity.fixture';
-import { UserRoleRepositoryFixture } from './__fixtures__/user-role-repository.fixture';
-import { ApiKeyEntityFixture } from './__fixtures__/api-key-entity.fixture';
-import { ApiKeyRoleEntityFixture } from './__fixtures__/api-key-role-entity.fixture';
-import { ApiKeyRoleRepositoryFixture } from './__fixtures__/api-key-role-repository.fixture';
+import { AppModuleFixture } from './__fixtures__/app.module.fixture';
+import { RoleEntityFixture } from './__fixtures__/entities/role-entity.fixture';
 
 describe('RoleController (e2e)', () => {
   describe('Rest', () => {
@@ -22,45 +13,7 @@ describe('RoleController (e2e)', () => {
 
     beforeEach(async () => {
       const moduleFixture: TestingModule = await Test.createTestingModule({
-        imports: [
-          TypeOrmExtModule.registerAsync({
-            useFactory: async () => ({
-              type: 'sqlite',
-              database: ':memory:',
-              synchronize: true,
-              entities: [
-                RoleEntityFixture,
-                UserEntityFixture,
-                UserRoleEntityFixture,
-                ApiKeyEntityFixture,
-                ApiKeyRoleEntityFixture,
-              ],
-            }),
-          }),
-          RoleModule.register({
-            entities: {
-              role: {
-                entity: RoleEntityFixture,
-                repository: RoleRepositoryFixture,
-              },
-              user: {
-                entity: UserRoleEntityFixture,
-              },
-              userRole: {
-                entity: UserRoleEntityFixture,
-                repository: UserRoleRepositoryFixture,
-              },
-              apiKey: {
-                entity: ApiKeyEntityFixture,
-              },
-              apiKeyRole: {
-                entity: ApiKeyRoleEntityFixture,
-                repository: ApiKeyRoleRepositoryFixture,
-              },
-            },
-          }),
-          CrudModule.register(),
-        ],
+        imports: [AppModuleFixture],
       }).compile();
       app = moduleFixture.createNestApplication();
       await app.init();
