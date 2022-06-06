@@ -57,8 +57,8 @@ export class UserRepository extends Repository<UserEntityInterface> {
   ): Promise<UserEntityInterface | undefined> {
     return this.users.find(
       (user) =>
-        user?.id === optionsOrConditions['id'] ||
-        user?.username === optionsOrConditions['username'],
+        user?.id === optionsOrConditions['where']['id'] ||
+        user?.username === optionsOrConditions['where']['username'],
     );
   }
 }
