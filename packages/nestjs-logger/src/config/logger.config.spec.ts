@@ -3,6 +3,7 @@ import { LoggerOptionsInterface } from '../interfaces/logger-options.interface';
 import { Severity as SentryLogSeverity } from '@sentry/types';
 import { Test, TestingModule } from '@nestjs/testing';
 import { loggerConfig, LOGGER_MODULE_OPTIONS_TOKEN } from './logger.config';
+import { LogLevel } from '@nestjs/common';
 
 jest.mock('@sentry/node');
 
@@ -70,22 +71,30 @@ describe('logger configuration', () => {
       it('loggerSentryConfig.logLevelMap', async () => {
         const config = await loggerConfig();
 
-        expect(config.transportSentryConfig.logLevelMap('error')).toBe(
-          SentryLogSeverity.Error,
-        );
-        expect(config.transportSentryConfig.logLevelMap('debug')).toBe(
-          SentryLogSeverity.Debug,
-        );
-        expect(config.transportSentryConfig.logLevelMap('log')).toBe(
-          SentryLogSeverity.Log,
-        );
-        expect(config.transportSentryConfig.logLevelMap('warn')).toBe(
-          SentryLogSeverity.Warning,
-        );
-        expect(config.transportSentryConfig.logLevelMap('verbose')).toBe(
-          SentryLogSeverity.Info,
-        );
-        expect(config.transportSentryConfig.logLevelMap(null)).toBe(undefined);
+        if (config && config.transportSentryConfig) {
+          expect(config.transportSentryConfig.logLevelMap('error')).toBe(
+            SentryLogSeverity.Error,
+          );
+          expect(config.transportSentryConfig.logLevelMap('debug')).toBe(
+            SentryLogSeverity.Debug,
+          );
+          expect(config.transportSentryConfig.logLevelMap('log')).toBe(
+            SentryLogSeverity.Log,
+          );
+          expect(config.transportSentryConfig.logLevelMap('warn')).toBe(
+            SentryLogSeverity.Warning,
+          );
+          expect(config.transportSentryConfig.logLevelMap('verbose')).toBe(
+            SentryLogSeverity.Info,
+          );
+          expect(
+            config.transportSentryConfig.logLevelMap(
+              null as unknown as LogLevel,
+            ),
+          ).toBe(undefined);
+        } else {
+          throw new Error('loggerConfig is not defined');
+        }
       });
     });
   });
