@@ -9,5 +9,5 @@ export class ReferenceIdDto implements ReferenceIdInterface {
     type: 'string',
     description: 'Unique identifier',
   })
-  id: string;
+  id!: string;
 }

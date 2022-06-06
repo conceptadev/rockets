@@ -39,5 +39,5 @@ export abstract class EventSync<V extends EventValues = EventValues>
    * @type {void}
    * @private
    */
-  expectsReturnOf: void;
+  expectsReturnOf!: void;
 }
