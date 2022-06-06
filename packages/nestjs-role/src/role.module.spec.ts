@@ -61,10 +61,8 @@ describe('RoleModule', () => {
       expect(roleService).toBeInstanceOf(RoleService);
       expect(roleCrudService).toBeInstanceOf(RoleCrudService);
       expect(roleLookupService).toBeInstanceOf(DefaultRoleLookupService);
-      expect(roleLookupService['roleRepo']).toBeInstanceOf(
-        RoleRepositoryFixture,
-      );
-      expect(roleLookupService['roleRepo'].find).toBeInstanceOf(Function);
+      expect(roleLookupService['repo']).toBeInstanceOf(RoleRepositoryFixture);
+      expect(roleLookupService['repo'].find).toBeInstanceOf(Function);
       expect(roleMutateService).toBeInstanceOf(DefaultRoleMutateService);
       expect(roleMutateService['repo']).toBeInstanceOf(RoleRepositoryFixture);
       expect(roleMutateService['repo'].find).toBeInstanceOf(Function);

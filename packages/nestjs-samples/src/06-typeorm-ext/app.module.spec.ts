@@ -33,8 +33,8 @@ describe('AppModule', () => {
       expect(userModule).toBeInstanceOf(UserModule);
       expect(userRepo).toBeInstanceOf(UserRepository);
       expect(userLookupService).toBeInstanceOf(UserLookupService);
-      expect(userLookupService['userRepo']).toBeInstanceOf(UserRepository);
-      expect(userLookupService['userRepo'].find).toBeInstanceOf(Function);
+      expect(userLookupService['repo']).toBeInstanceOf(UserRepository);
+      expect(userLookupService['repo'].find).toBeInstanceOf(Function);
       expect(userController).toBeInstanceOf(UserController);
     });
   });

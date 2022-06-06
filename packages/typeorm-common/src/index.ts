@@ -1,4 +1,5 @@
-// service
+// services
+export { LookupService } from './services/lookup.service';
 export { MutateService } from './services/mutate.service';
 
 // exceptions

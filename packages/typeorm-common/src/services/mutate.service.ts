@@ -55,7 +55,6 @@ export abstract class MutateService<
   /**
    * Update one
    *
-   * @param id the id of the reference data to update
    * @param data the reference data to update
    * @returns the updated reference
    */
@@ -73,7 +72,6 @@ export abstract class MutateService<
   /**
    * Replace one
    *
-   * @param id the id of the reference data to replace
    * @param data the reference data to replace
    * @returns the replaced reference
    */
@@ -93,7 +91,7 @@ export abstract class MutateService<
   /**
    * Remove one
    *
-   * @param id the id of the reference data to remove
+   * @param data the reference data to remove
    * @returns the removed reference
    */
   async remove(data: Removable & ReferenceIdInterface): Promise<Entity> {
