@@ -47,10 +47,8 @@ describe('AppModule', () => {
       expect(userRepo).toBeInstanceOf(UserRepositoryFixture);
       expect(userCrudService).toBeInstanceOf(UserCrudService);
       expect(userLookupService).toBeInstanceOf(DefaultUserLookupService);
-      expect(userLookupService['userRepo']).toBeInstanceOf(
-        UserRepositoryFixture,
-      );
-      expect(userLookupService['userRepo'].find).toBeInstanceOf(Function);
+      expect(userLookupService['repo']).toBeInstanceOf(UserRepositoryFixture);
+      expect(userLookupService['repo'].find).toBeInstanceOf(Function);
       expect(userMutateService).toBeInstanceOf(DefaultUserMutateService);
       expect(userMutateService['repo']).toBeInstanceOf(UserRepositoryFixture);
       expect(userMutateService['repo'].find).toBeInstanceOf(Function);

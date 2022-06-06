@@ -91,8 +91,8 @@ describe('OrgModule', () => {
       expect(orgDynamicRepo).toBeInstanceOf(OrgRepositoryFixture);
       expect(orgCrudService).toBeInstanceOf(OrgCrudService);
       expect(orgLookupService).toBeInstanceOf(DefaultOrgLookupService);
-      expect(orgLookupService['orgRepo']).toBeInstanceOf(OrgRepositoryFixture);
-      expect(orgLookupService['orgRepo'].find).toBeInstanceOf(Function);
+      expect(orgLookupService['repo']).toBeInstanceOf(OrgRepositoryFixture);
+      expect(orgLookupService['repo'].find).toBeInstanceOf(Function);
       expect(orgMutateService).toBeInstanceOf(DefaultOrgMutateService);
       expect(orgMutateService['repo']).toBeInstanceOf(OrgRepositoryFixture);
       expect(ownerLookupService).toBeInstanceOf(OwnerLookupServiceFixture);
