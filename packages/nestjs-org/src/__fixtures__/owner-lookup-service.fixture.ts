@@ -13,7 +13,7 @@ export class OwnerLookupServiceFixture
     private ownerRepo: OwnerRepositoryFixture,
   ) {}
 
-  byId(id: string): Promise<OwnerEntityFixture> {
+  byId(id: string): Promise<OwnerEntityFixture | undefined> {
     return this.ownerRepo.findOne({ id });
   }
 }

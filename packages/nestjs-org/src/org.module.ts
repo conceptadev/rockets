@@ -108,8 +108,17 @@ export class OrgModule extends createConfigurableDynamicRootModule<
       ModuleOptionsControllerInterface,
   ) {
     const module = OrgModule.forRootAsync(OrgModule, options);
+    if (!options?.entities) {
+      throw new Error('option entities not defined');
+    }
+    if (!options?.imports) {
+      throw new Error('option imports not defined');
+    }
 
-    module.imports.push(TypeOrmExtModule.forFeature(options.entities));
+    const imports = options.imports;
+    const entities = options.entities;
+
+    imports.push(TypeOrmExtModule.forFeature(entities));
 
     negotiateController(module, options);
 
