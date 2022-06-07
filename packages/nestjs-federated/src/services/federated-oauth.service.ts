@@ -30,6 +30,7 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
   /**
    * Sign in with federated creating a user if it doesn't exist
    * @param provider - provider name (github, facebook, google)
+   * @param email email account
    * @param subject - subject (user id/ profile id from provider)
    * @returns email - email of user
    *
@@ -44,12 +45,7 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
 
     // if there is no federated user, create one
     if (!federated) {
-      const newUser = await this.createUserWithFederated(
-        provider,
-        email,
-        subject,
-      );
-      return newUser;
+      return await this.createUserWithFederated(provider, email, subject);
     } else {
       const user = await this.userLookupService.byId(federated.userId);
 
@@ -75,7 +71,7 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
   ): Promise<FederatedCredentialsInterface> {
     // Check if user exists by email
     const user = await this.userLookupService.byEmail(email);
-    let userResult: FederatedCredentialsInterface = null;
+    let userResult: FederatedCredentialsInterface;
 
     // If user does not exists create a new one
     userResult = user ? user : await this.createUser(email, email);
@@ -109,6 +105,9 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
 
       return newUser;
     } catch (e) {
+      if (!(e instanceof Error)) {
+        throw new Error('Caught an exception that is not an Error object');
+      }
       throw new FederatedMutateCreateUserException(this.constructor.name, e);
     }
   }
@@ -138,6 +137,9 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
 
       return federated;
     } catch (e) {
+      if (!(e instanceof Error)) {
+        throw new Error('Caught an exception that is not an Error object');
+      }
       throw new ReferenceMutateException(this.constructor.name, e);
     }
   }

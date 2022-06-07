@@ -15,19 +15,19 @@ export abstract class OrgPostgresEntity implements OrgEntityInterface {
    * Unique Id
    */
   @PrimaryGeneratedColumn('uuid')
-  id: ReferenceId;
+  id!: ReferenceId;
 
   /**
    * Name
    */
   @Column()
-  name: string;
+  name!: string;
 
   /**
    * Audit embed
    */
   @Column(() => AuditPostgresEmbed, {})
-  audit: AuditInterface;
+  audit!: AuditInterface;
 
   /**
    * Flag to determine if the org is active or not
@@ -38,5 +38,5 @@ export abstract class OrgPostgresEntity implements OrgEntityInterface {
   /**
    * Owner
    */
-  owner: ReferenceIdInterface;
+  owner!: ReferenceIdInterface;
 }

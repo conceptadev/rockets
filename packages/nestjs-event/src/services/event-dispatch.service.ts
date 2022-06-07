@@ -63,6 +63,9 @@ export class EventDispatchService {
       // call event dispatcher
       return this.eventEmitter.emit(event.key, event);
     } catch (e) {
+      if (!(e instanceof Error)) {
+        throw new Error('Caught an exception that is not an Error object');
+      }
       throw new EventDispatchException(e.message);
     }
   }
@@ -126,6 +129,9 @@ export class EventDispatchService {
       // we await the result here in order to catch any exception thrown
       result = await this.eventEmitter.emitAsync(event.key, event);
     } catch (e) {
+      if (!(e instanceof Error)) {
+        throw new Error('Caught an exception that is not an Error object');
+      }
       throw new EventDispatchException(e.message);
     }
 

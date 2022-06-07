@@ -28,6 +28,9 @@ export class JwtStrategy extends PassportStrategy {
         this.verifyTokenCallback.bind(this),
       );
     } catch (e) {
+      if (!(e instanceof Error)) {
+        throw new Error('Caught an exception that is not an Error object');
+      }
       return this.error(e);
     }
   }
@@ -40,6 +43,9 @@ export class JwtStrategy extends PassportStrategy {
     try {
       return this.verify(decodedToken, this.isVerifiedCallback.bind(this));
     } catch (e) {
+      if (!(e instanceof Error)) {
+        throw new Error('Caught an exception that is not an Error object');
+      }
       return this.error(e);
     }
   }

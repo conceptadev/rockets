@@ -11,19 +11,19 @@ export abstract class UserPostgresEntity implements UserEntityInterface {
    * Unique Id
    */
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   /**
    * Email
    */
   @Column()
-  email: string;
+  email!: string;
 
   /**
    * Username
    */
   @Column()
-  username: string;
+  username!: string;
 
   /**
    * Password hash
@@ -41,5 +41,5 @@ export abstract class UserPostgresEntity implements UserEntityInterface {
    * Audit embed
    */
   @Column(() => AuditPostgresEmbed)
-  audit: AuditInterface;
+  audit!: AuditInterface;
 }

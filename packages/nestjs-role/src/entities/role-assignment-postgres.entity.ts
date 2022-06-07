@@ -12,22 +12,22 @@ export abstract class RoleAssignmentPostgresEntity
   implements RoleAssignmentInterface
 {
   @PrimaryGeneratedColumn('uuid')
-  id: ReferenceId;
+  id!: ReferenceId;
 
   @Column(() => AuditPostgresEmbed, {})
-  audit: AuditInterface;
+  audit!: AuditInterface;
 
   /**
    * Role
    *
    * You will need to decorate this in your concrete entity class
    */
-  role: RoleEntityInterface;
+  role!: RoleEntityInterface;
 
   /**
    * Assignee
    *
    * You will need to decorate this in your concrete entity class
    */
-  assignee: RoleAssigneeInterface;
+  assignee!: RoleAssigneeInterface;
 }

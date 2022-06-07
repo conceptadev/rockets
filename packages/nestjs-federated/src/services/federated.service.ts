@@ -29,6 +29,9 @@ export class FederatedService implements FederatedServiceInterface {
 
       return federated;
     } catch (e) {
+      if (!(e instanceof Error)) {
+        throw new Error('Caught an exception that is not an Error object');
+      }
       //TODO: change to query exception
       throw new FederatedQueryException(this.federatedRepo.metadata.name, e);
     }

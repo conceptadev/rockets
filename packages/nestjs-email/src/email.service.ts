@@ -19,6 +19,9 @@ export class EmailService {
     try {
       await this.mailerService.sendMail(dto);
     } catch (e) {
+      if (!(e instanceof Error)) {
+        throw new Error('Caught an exception that is not an Error object');
+      }
       // log the original error
       this.logger.error(e.message, e.stack, EmailService.name);
       // throw a more friendly error

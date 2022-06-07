@@ -96,6 +96,9 @@ export abstract class EventListener<E extends EventInterface = EventInterface>
       // remove the listener
       this.emitterListener.off();
     } catch (e) {
+      if (!(e instanceof Error)) {
+        throw new Error('Caught an exception that is not an Error object');
+      }
       throw new EventListenerException(e.message);
     }
   }

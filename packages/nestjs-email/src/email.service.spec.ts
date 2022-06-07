@@ -55,6 +55,9 @@ describe('EmailService', () => {
       try {
         await emailService.sendEmail({});
       } catch (e) {
+        if (!(e instanceof Error)) {
+          throw new Error('Caught an exception that is not an Error object');
+        }
         expect(e).toBeInstanceOf(InternalServerErrorException);
         expect(e.message).toEqual('Fatal error while trying to send email.');
       }

@@ -50,7 +50,7 @@ export class PasswordStorageService implements PasswordStorageServiceInterface {
     const hashed = await this.hash(object.password, salt);
 
     // remove the password property
-    delete object.password;
+    delete (object as Partial<T>).password;
 
     // return the object with password hashed
     return {

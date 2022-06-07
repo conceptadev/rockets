@@ -6,7 +6,7 @@ import {
 } from 'eventemitter2';
 import { EventListenerException } from '../exceptions/event-listener.exception';
 import { EventListenOnOptionsInterface } from './interfaces/event-listen-on-options.interface';
-import { EventListenOnInterface } from '../services/interfaces/event-listen-on.interface';
+import { EventListenOnInterface } from './interfaces/event-listen-on.interface';
 import { EventStaticInterface } from '../events/interfaces/event-static.interface';
 import { EventInterface } from '../events/interfaces/event.interface';
 import { EVENT_MODULE_EMITTER_SERVICE_TOKEN } from '../event-constants';
@@ -86,6 +86,9 @@ export class EventListenService {
         finalOptions,
       ) as EmitterListener;
     } catch (e) {
+      if (!(e instanceof Error)) {
+        throw new Error('Caught an exception that is not an Error object');
+      }
       // rethrow wrapped
       throw new EventListenerException(e.message);
     }
@@ -94,6 +97,9 @@ export class EventListenService {
       // inform listener of the subscription
       listener.subscription(emitterListener);
     } catch (e) {
+      if (!(e instanceof Error)) {
+        throw new Error('Caught an exception that is not an Error object');
+      }
       // rethrow wrapped
       throw new EventListenerException(e.message);
     }

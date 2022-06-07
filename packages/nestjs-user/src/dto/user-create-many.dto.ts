@@ -19,5 +19,5 @@ export class UserCreateManyDto extends CrudCreateManyDto<UserCreatableInterface>
   @Type(() => UserCreateDto)
   @IsArray()
   @ArrayNotEmpty()
-  bulk: UserCreateDto[];
+  bulk!: UserCreateDto[];
 }
