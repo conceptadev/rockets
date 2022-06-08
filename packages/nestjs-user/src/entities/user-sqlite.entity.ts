@@ -25,14 +25,14 @@ export abstract class UserSqliteEntity implements UserEntityInterface {
   /**
    * Password hash
    */
-  @Column({ nullable: true, default: null })
-  passwordHash: string = null;
+  @Column({ type: 'text', nullable: true, default: null })
+  passwordHash: string | null = null;
 
   /**
    * Password salt
    */
-  @Column({ nullable: true, default: null })
-  passwordSalt: string = null;
+  @Column({ type: 'text', nullable: true, default: null })
+  passwordSalt: string | null = null;
 
   /**
    * Audit embed
