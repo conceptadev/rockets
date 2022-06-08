@@ -16,5 +16,5 @@ export class UserPaginatedDto extends CrudResponsePaginatedDto<UserInterface> {
     description: 'Array of Users',
   })
   @Type(() => UserDto)
-  data!: UserDto[];
+  data: UserDto[] = [];
 }

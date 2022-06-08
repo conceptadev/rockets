@@ -123,9 +123,6 @@ export abstract class MutateService<
         throw new ReferenceIdNoMatchException(this.repo.metadata.name, id);
       }
     } catch (e) {
-      if (!(e instanceof Error)) {
-        throw new Error('Caught an exception that is not an Error object');
-      }
       throw new ReferenceLookupException(this.repo.metadata.name, e);
     }
   }
@@ -138,9 +135,6 @@ export abstract class MutateService<
     try {
       return this.repo.save(item);
     } catch (e) {
-      if (!(e instanceof Error)) {
-        throw new Error('Caught an exception that is not an Error object');
-      }
       throw new ReferenceMutateException(this.repo.metadata.name, e);
     }
   }

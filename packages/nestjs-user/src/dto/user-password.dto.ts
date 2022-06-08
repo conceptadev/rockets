@@ -15,5 +15,5 @@ export class UserPasswordDto implements PasswordPlainInterface {
   })
   @IsOptional()
   @IsString()
-  password!: string;
+  password = '';
 }

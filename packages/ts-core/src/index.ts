@@ -5,6 +5,8 @@ export { LiteralObject } from './utils/interfaces/literal-object.interface';
 
 export { OptionsInterface } from './options/interfaces/options.interface';
 
+export { NotAnErrorException } from './exceptions/not-an-error.exception';
+
 export {
   ReferenceId,
   ReferenceActive,

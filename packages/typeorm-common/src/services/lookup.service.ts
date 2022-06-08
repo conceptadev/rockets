@@ -62,9 +62,6 @@ export abstract class LookupService<Entity extends ReferenceIdInterface>
       // call the repo find one
       return this.repo.findOne(options);
     } catch (e) {
-      if (!(e instanceof Error)) {
-        throw new Error('Caught an exception that is not an Error object');
-      }
       // fatal orm error
       throw new ReferenceLookupException(this.repo.metadata.name, e);
     }

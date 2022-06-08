@@ -24,7 +24,7 @@ export class UserDto implements UserInterface {
     description: 'Unique identifier',
   })
   @IsString()
-  id!: ReferenceId;
+  id: ReferenceId = '';
 
   /**
    * Email
@@ -35,7 +35,7 @@ export class UserDto implements UserInterface {
     description: 'Email',
   })
   @IsEmail()
-  email!: ReferenceEmail;
+  email: ReferenceEmail = '';
 
   /**
    * Username
@@ -46,7 +46,7 @@ export class UserDto implements UserInterface {
     description: 'Username',
   })
   @IsString()
-  username!: ReferenceUsername;
+  username: ReferenceUsername = '';
 
   /**
    * Audit
