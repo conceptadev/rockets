@@ -5,10 +5,10 @@ export interface PasswordStorageInterface {
   /**
    * Hashed password
    */
-  passwordHash: string;
+  passwordHash: string | null;
 
   /**
    * Salt used to hash password
    */
-  passwordSalt: string;
+  passwordSalt: string | null;
 }
