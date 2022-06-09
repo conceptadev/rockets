@@ -1,5 +1,6 @@
 import { Strategy as PassportStrategy } from 'passport-strategy';
 import { Strategy, VerifyCallback } from 'passport-jwt';
+import { NotAnErrorException } from '@concepta/ts-core';
 import { JwtStrategyOptionsInterface } from './interfaces/jwt-strategy-options.interface';
 
 export class JwtStrategy extends PassportStrategy {
@@ -28,10 +29,8 @@ export class JwtStrategy extends PassportStrategy {
         this.verifyTokenCallback.bind(this),
       );
     } catch (e) {
-      if (!(e instanceof Error)) {
-        throw new Error('Caught an exception that is not an Error object');
-      }
-      return this.error(e);
+      const exception = e instanceof Error ? e : new NotAnErrorException(e);
+      return this.error(exception);
     }
   }
 
@@ -43,10 +42,8 @@ export class JwtStrategy extends PassportStrategy {
     try {
       return this.verify(decodedToken, this.isVerifiedCallback.bind(this));
     } catch (e) {
-      if (!(e instanceof Error)) {
-        throw new Error('Caught an exception that is not an Error object');
-      }
-      return this.error(e);
+      const exception = e instanceof Error ? e : new NotAnErrorException(e);
+      return this.error(exception);
     }
   }
 

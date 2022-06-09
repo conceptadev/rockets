@@ -3,7 +3,6 @@ import { LoggerOptionsInterface } from '../interfaces/logger-options.interface';
 import { Severity as SentryLogSeverity } from '@sentry/types';
 import { Test, TestingModule } from '@nestjs/testing';
 import { loggerConfig, LOGGER_MODULE_OPTIONS_TOKEN } from './logger.config';
-import { LogLevel } from '@nestjs/common';
 
 jest.mock('@sentry/node');
 
@@ -87,11 +86,6 @@ describe('logger configuration', () => {
           expect(config.transportSentryConfig.logLevelMap('verbose')).toBe(
             SentryLogSeverity.Info,
           );
-          expect(
-            config.transportSentryConfig.logLevelMap(
-              null as unknown as LogLevel,
-            ),
-          ).toBe(undefined);
         } else {
           throw new Error('loggerConfig is not defined');
         }

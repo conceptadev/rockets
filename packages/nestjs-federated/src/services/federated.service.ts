@@ -1,6 +1,7 @@
 import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
+import { NotAnErrorException } from '@concepta/ts-core';
 import { FederatedServiceInterface } from '../interfaces/federated-service.interface';
 import { FEDERATED_MODULE_FEDERATED_ENTITY_KEY } from '../federated.constants';
 import { FederatedPostgresEntity } from '../entities/federated-postgres.entity';
@@ -29,11 +30,12 @@ export class FederatedService implements FederatedServiceInterface {
 
       return federated;
     } catch (e) {
-      if (!(e instanceof Error)) {
-        throw new Error('Caught an exception that is not an Error object');
-      }
+      const exception = e instanceof Error ? e : new NotAnErrorException(e);
       //TODO: change to query exception
-      throw new FederatedQueryException(this.federatedRepo.metadata.name, e);
+      throw new FederatedQueryException(
+        this.federatedRepo.metadata.name,
+        exception,
+      );
     }
   }
 }

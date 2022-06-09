@@ -1,10 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { ReferenceMutateException } from '@concepta/typeorm-common';
+import { NotAnErrorException } from '@concepta/ts-core';
 import {
   FEDERATED_MODULE_USER_LOOKUP_SERVICE_TOKEN,
   FEDERATED_MODULE_USER_MUTATE_SERVICE_TOKEN,
 } from '../federated.constants';
 import { FederatedEntityInterface } from '../interfaces/federated-entity.interface';
-
 import { FederatedUserLookupServiceInterface } from '../interfaces/federated-user-lookup-service.interface';
 import { FederatedUserMutateServiceInterface } from '../interfaces/federated-user-mutate-service.interface';
 import { FederatedService } from './federated.service';
@@ -14,7 +15,6 @@ import { FederatedCreateException } from '../exceptions/federated-create.excepti
 import { FederatedMutateCreateUserException } from '../exceptions/federated-mutate-create.exception';
 import { FederatedUserLookupException } from '../exceptions/federated-user-lookup.exception';
 import { FederatedMutateService } from './federated-mutate.service';
-import { ReferenceMutateException } from '@concepta/typeorm-common';
 
 @Injectable()
 export class FederatedOAuthService implements FederatedOAuthServiceInterface {
@@ -71,10 +71,9 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
   ): Promise<FederatedCredentialsInterface> {
     // Check if user exists by email
     const user = await this.userLookupService.byEmail(email);
-    let userResult: FederatedCredentialsInterface;
-
-    // If user does not exists create a new one
-    userResult = user ? user : await this.createUser(email, email);
+    const userResult: FederatedCredentialsInterface = user
+      ? user
+      : await this.createUser(email, email);
 
     // Create federated
     await this.createFederated(provider, subject, userResult.id);
@@ -105,10 +104,11 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
 
       return newUser;
     } catch (e) {
-      if (!(e instanceof Error)) {
-        throw new Error('Caught an exception that is not an Error object');
-      }
-      throw new FederatedMutateCreateUserException(this.constructor.name, e);
+      const exception = e instanceof Error ? e : new NotAnErrorException(e);
+      throw new FederatedMutateCreateUserException(
+        this.constructor.name,
+        exception,
+      );
     }
   }
 
@@ -137,10 +137,8 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
 
       return federated;
     } catch (e) {
-      if (!(e instanceof Error)) {
-        throw new Error('Caught an exception that is not an Error object');
-      }
-      throw new ReferenceMutateException(this.constructor.name, e);
+      const exception = e instanceof Error ? e : new NotAnErrorException(e);
+      throw new ReferenceMutateException(this.constructor.name, exception);
     }
   }
 }

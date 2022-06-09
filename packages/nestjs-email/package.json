@@ -13,6 +13,7 @@
   ],
   "dependencies": {
     "@concepta/nestjs-core": "^4.0.0-alpha.13",
+    "@concepta/ts-core": "^4.0.0-alpha.13",
     "@nestjs-modules/mailer": "^1.6.1",
     "@nestjs/common": "^8.0.8",
     "@nestjs/config": "^1.1.6",

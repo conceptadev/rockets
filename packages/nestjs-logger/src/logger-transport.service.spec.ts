@@ -4,7 +4,6 @@ import { Test } from '@nestjs/testing';
 import { LOGGER_MODULE_SETTINGS_TOKEN } from './config/logger.config';
 import { LoggerTransportInterface } from './interfaces/logger-transport.interface';
 import { LoggerTransportService } from './logger-transport.service';
-import { LoggerSettingsInterface } from './interfaces/logger-settings.interface';
 
 class TestTransport implements LoggerTransportInterface {
   log(): void {
@@ -135,18 +134,6 @@ describe('LoggerTransportService', () => {
     loggerTransportService.log('Log Message', 'log' as LogLevel);
 
     expect(logLevels.length).toBe(0);
-    expect(transports.length).toBe(0);
-  });
-
-  it('loggerService.logLevel_null', () => {
-    const loggerTransportService = new LoggerTransportService(
-      null as unknown as LoggerSettingsInterface,
-    );
-
-    const logLevels = loggerTransportService['logLevels'];
-    const transports = loggerTransportService['loggerTransports'];
-
-    expect(logLevels.length).toBe(1);
     expect(transports.length).toBe(0);
   });
 });
