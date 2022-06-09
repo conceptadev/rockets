@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { EmailSendOptionsInterface } from './interfaces/email-send-options.interface';
 import { EmailMailerServiceInterface } from './interfaces/email-mailer-service.interface';
+import { NotAnErrorException } from '@concepta/ts-core';
 
 @Injectable()
 export class EmailService {
@@ -19,8 +20,8 @@ export class EmailService {
     try {
       await this.mailerService.sendMail(dto);
     } catch (e) {
-      if (!(e instanceof Error)) {
-        throw new Error('Caught an exception that is not an Error object');
+      if (e instanceof Error === false) {
+        e = new NotAnErrorException(e);
       }
       // log the original error
       this.logger.error(e.message, e.stack, EmailService.name);
