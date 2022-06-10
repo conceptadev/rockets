@@ -5,7 +5,7 @@ import {
 
 export interface FederatedInterface
   extends ReferenceIdInterface,
-    Partial<ReferenceAuditInterface> {
+    ReferenceAuditInterface {
   /**
    * Provider name (github, facebook, etc)
    */

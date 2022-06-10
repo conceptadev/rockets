@@ -23,7 +23,7 @@ export class FederatedDto
     description: 'Unique identifier',
   })
   @IsString()
-  id!: ReferenceId;
+  id: ReferenceId = '';
 
   /**
    * provider
@@ -34,7 +34,7 @@ export class FederatedDto
     description: 'provider of the federated',
   })
   @IsString()
-  provider!: string;
+  provider = '';
 
   /**
    * subject
@@ -45,7 +45,7 @@ export class FederatedDto
     description: 'subject of the federated',
   })
   @IsString()
-  subject!: string;
+  subject = '';
 
   /**
    * userId
@@ -56,7 +56,7 @@ export class FederatedDto
     description: 'userId of the federated',
   })
   @IsString()
-  userId!: string;
+  userId = '';
 
   /**
    * Audit
@@ -67,5 +67,5 @@ export class FederatedDto
     description: 'Audit data',
   })
   @Type(() => AuditDto)
-  audit?: AuditInterface;
+  audit: AuditInterface = new AuditDto();
 }

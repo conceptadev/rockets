@@ -38,5 +38,5 @@ export abstract class UserSqliteEntity implements UserEntityInterface {
    * Audit embed
    */
   @Column(() => AuditSqlLiteEmbed)
-  audit?: AuditInterface;
+  audit!: AuditInterface;
 }

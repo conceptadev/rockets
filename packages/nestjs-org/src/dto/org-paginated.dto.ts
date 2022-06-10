@@ -16,5 +16,5 @@ export class OrgPaginatedDto extends CrudResponsePaginatedDto<OrgInterface> {
     description: 'Array of Orgs',
   })
   @Type(() => OrgDto)
-  data!: OrgDto[];
+  data: OrgDto[] = [];
 }

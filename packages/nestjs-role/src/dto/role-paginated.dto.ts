@@ -16,5 +16,5 @@ export class RolePaginatedDto extends CrudResponsePaginatedDto<RoleInterface> {
     description: 'Array of Roles',
   })
   @Type(() => RoleDto)
-  data!: RoleDto[];
+  data: RoleDto[] = [];
 }

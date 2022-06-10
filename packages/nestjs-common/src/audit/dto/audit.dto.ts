@@ -23,7 +23,7 @@ export class AuditDto implements AuditInterface {
     description: 'Date created',
   })
   @IsString()
-  dateCreated!: AuditDateCreated;
+  dateCreated: AuditDateCreated = new Date();
 
   /**
    * Date updated
@@ -34,7 +34,7 @@ export class AuditDto implements AuditInterface {
     description: 'Date updated',
   })
   @IsString()
-  dateUpdated!: AuditDateUpdated;
+  dateUpdated: AuditDateUpdated = new Date();
 
   /**
    * Date deleted
@@ -45,7 +45,7 @@ export class AuditDto implements AuditInterface {
     description: 'Date deleted',
   })
   @IsString()
-  dateDeleted!: AuditDateDeleted;
+  dateDeleted: AuditDateDeleted | null = null;
 
   /**
    * Version
@@ -56,5 +56,5 @@ export class AuditDto implements AuditInterface {
     description: 'Version of the data',
   })
   @IsNumber()
-  version!: AuditVersion;
+  version: AuditVersion = 0;
 }

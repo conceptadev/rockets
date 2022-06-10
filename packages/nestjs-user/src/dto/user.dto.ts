@@ -57,5 +57,5 @@ export class UserDto implements UserInterface {
     description: 'Audit data',
   })
   @Type(() => AuditDto)
-  audit?: AuditInterface;
+  audit: AuditInterface = new AuditDto();
 }

@@ -24,7 +24,7 @@ export class RoleDto
     description: 'Unique identifier',
   })
   @IsString()
-  id!: ReferenceId;
+  id: ReferenceId = '';
 
   /**
    * Name
@@ -35,7 +35,7 @@ export class RoleDto
     description: 'Name of the role',
   })
   @IsString()
-  name!: string;
+  name = '';
 
   /**
    * Name
@@ -47,7 +47,7 @@ export class RoleDto
   })
   @IsString()
   @IsOptional()
-  description!: string;
+  description = '';
 
   /**
    * Assignee
@@ -59,7 +59,7 @@ export class RoleDto
     description: 'Assignee',
   })
   @Type(() => ReferenceIdDto)
-  assignees!: RoleAssigneeInterface[];
+  assignees: RoleAssigneeInterface[] = [];
 
   /**
    * Audit
@@ -70,5 +70,5 @@ export class RoleDto
     description: 'Audit data',
   })
   @Type(() => AuditDto)
-  audit?: AuditInterface;
+  audit: AuditInterface = new AuditDto();
 }
