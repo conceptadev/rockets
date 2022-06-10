@@ -50,17 +50,14 @@ export class AccessControlModule extends createConfigurableDynamicRootModule<
   ],
   exports: [ACCESS_CONTROL_MODULE_SETTINGS_TOKEN],
 }) {
-  static register(options: AccessControlModuleOptionsInterface = {}) {
+  static register(options: AccessControlModuleOptionsInterface) {
     return AccessControlModule.forRoot(AccessControlModule, options);
   }
 
   static registerAsync(
     options: AsyncModuleConfig<AccessControlModuleOptionsInterface>,
   ) {
-    return AccessControlModule.forRootAsync(AccessControlModule, {
-      useFactory: () => ({}),
-      ...options,
-    });
+    return AccessControlModule.forRootAsync(AccessControlModule, options);
   }
 
   static deferred(options: DeferExternalOptionsInterface = {}) {

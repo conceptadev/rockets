@@ -32,9 +32,6 @@ export class AccessControlGuard implements CanActivate {
   protected async checkAccessGrants(
     context: ExecutionContext,
   ): Promise<boolean> {
-    if (!this.accessControl.settings) {
-      throw new Error('access control settings is not defined');
-    }
     const rules = this.accessControl.settings.rules;
     const acGrants = this.reflector.get<AccessControlGrantOption[]>(
       ACCESS_CONTROL_MODULE_GRANT_METADATA,
