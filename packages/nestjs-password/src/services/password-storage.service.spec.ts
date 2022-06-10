@@ -29,8 +29,8 @@ describe('PasswordStorageService', () => {
     // check if password encrypt can be decrypted
     const isValid = await service.validate(
       PASSWORD_MEDIUM,
-      passwordStorageInterface.passwordHash,
-      passwordStorageInterface.passwordSalt,
+      passwordStorageInterface.passwordHash ?? '',
+      passwordStorageInterface.passwordSalt ?? '',
     );
 
     expect(isValid).toBeTruthy();
@@ -44,8 +44,8 @@ describe('PasswordStorageService', () => {
     // check if password encrypt can be decrypted
     const isValid = await service.validate(
       PASSWORD_MEDIUM,
-      passwordStorageInterface.passwordHash,
-      passwordStorageInterface.passwordSalt,
+      passwordStorageInterface.passwordHash ?? '',
+      passwordStorageInterface.passwordSalt ?? '',
     );
 
     expect(isValid).toBeTruthy();

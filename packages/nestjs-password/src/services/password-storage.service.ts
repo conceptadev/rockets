@@ -91,8 +91,8 @@ export class PasswordStorageService implements PasswordStorageServiceInterface {
   ): Promise<boolean> {
     return this.validate(
       passwordPlain,
-      object.passwordHash,
-      object.passwordSalt,
+      object.passwordHash ?? '',
+      object.passwordSalt ?? '',
     );
   }
 }
