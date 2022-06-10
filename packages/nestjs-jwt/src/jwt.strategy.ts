@@ -34,7 +34,7 @@ export class JwtStrategy extends PassportStrategy {
     }
   }
 
-  private verifyTokenCallback(e: Error, decodedToken: Record<string, unknown>) {
+  private verifyTokenCallback(e?: Error, decodedToken?: unknown) {
     if (e) {
       return this.error(e);
     }
