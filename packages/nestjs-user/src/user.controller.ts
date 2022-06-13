@@ -23,6 +23,8 @@ import { UserCreateManyDto } from './dto/user-create-many.dto';
 import { UserUpdateDto } from './dto/user-update.dto';
 import { UserPaginatedDto } from './dto/user-paginated.dto';
 import { UserEntityInterface } from './interfaces/user-entity.interface';
+import { UserCreatableInterface } from './interfaces/user-creatable.interface';
+import { UserUpdatableInterface } from './interfaces/user-updatable.interface';
 
 /**
  * User controller.
@@ -36,7 +38,12 @@ import { UserEntityInterface } from './interfaces/user-entity.interface';
 })
 @ApiTags('user')
 export class UserController
-  implements CrudControllerInterface<UserEntityInterface>
+  implements
+    CrudControllerInterface<
+      UserEntityInterface,
+      UserCreatableInterface,
+      UserUpdatableInterface
+    >
 {
   /**
    * Constructor.
@@ -142,9 +149,9 @@ export class UserController
    *
    * @param dto The object on which to hash password.
    */
-  protected async maybeHashPassword<T>(dto: T & PasswordPlainInterface) {
+  protected async maybeHashPassword<T>(dto: T | (T & PasswordPlainInterface)) {
     // get a password?
-    if (dto.password.length) {
+    if ('password' in dto && dto.password.length) {
       // yes, hash it
       return this.passwordStorageService.hashObject(dto);
     } else {

@@ -55,13 +55,13 @@ export class JwtModule extends createConfigurableDynamicRootModule<
       provide: JWT_MODULE_JWT_SERVICE_ACCESS_TOKEN,
       inject: [JWT_MODULE_SETTINGS_TOKEN],
       useFactory: async (options: JwtSettingsInterface) =>
-        new JwtService(options.access),
+        new JwtService(options.access ?? {}),
     },
     {
       provide: JWT_MODULE_JWT_SERVICE_REFRESH_TOKEN,
       inject: [JWT_MODULE_SETTINGS_TOKEN],
       useFactory: async (options: JwtSettingsInterface) =>
-        new JwtService(options.refresh),
+        new JwtService(options.refresh ?? {}),
     },
     {
       provide: JwtSignService,

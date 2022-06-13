@@ -10,23 +10,23 @@ import { PhotoEntityInterfaceFixture } from './interfaces/photo-entity.interface
 @Entity()
 export class PhotoFixture implements PhotoEntityInterfaceFixture {
   @PrimaryGeneratedColumn('uuid')
-  id: ReferenceId;
+  id!: ReferenceId;
 
   @Column({ length: 500 })
-  name: string;
+  name!: string;
 
   @Column('text')
-  description: string;
+  description!: string;
 
-  @Column()
-  filename: string;
+  @Column('text')
+  filename!: string;
 
   @Column('int', { default: 0 })
-  views: number;
+  views = 0;
 
-  @Column()
-  isPublished: boolean;
+  @Column('boolean')
+  isPublished = true;
 
   @DeleteDateColumn({ nullable: true })
-  deletedAt: Date | null;
+  deletedAt: Date | null = null;
 }

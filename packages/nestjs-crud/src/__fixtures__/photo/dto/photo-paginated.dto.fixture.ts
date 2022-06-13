@@ -8,5 +8,5 @@ export class PhotoPaginatedDtoFixture extends CrudResponsePaginatedDto<PhotoDtoF
   @ApiProperty({ type: [PhotoDtoFixture] })
   @Expose()
   @Type(() => PhotoDtoFixture)
-  data: PhotoDtoFixture[];
+  data: PhotoDtoFixture[] = [];
 }

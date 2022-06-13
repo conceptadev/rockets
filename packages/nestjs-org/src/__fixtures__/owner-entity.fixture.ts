@@ -7,8 +7,8 @@ import { OrgEntityFixture } from './org-entity.fixture';
 @Entity()
 export class OwnerEntityFixture {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @OneToMany(() => OrgEntityFixture, (org) => org.owner)
-  orgs: OrgEntityFixture[];
+  orgs!: OrgEntityFixture[];
 }

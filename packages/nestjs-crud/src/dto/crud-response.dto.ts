@@ -12,5 +12,5 @@ export class CrudResponseDto<T extends ReferenceIdInterface>
     type: 'number',
     description: 'Unique identifier',
   })
-  id: T['id'];
+  id: T['id'] = '';
 }

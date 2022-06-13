@@ -89,6 +89,10 @@ export class UserModule extends createConfigurableDynamicRootModule<
   ) {
     const module = UserModule.forRoot(UserModule, options);
 
+    if (!module.imports) {
+      module.imports = [];
+    }
+
     module.imports.push(TypeOrmExtModule.forFeature(options.entities));
 
     negotiateController(module, options);
@@ -110,6 +114,10 @@ export class UserModule extends createConfigurableDynamicRootModule<
       useFactory: () => ({}),
       ...options,
     });
+
+    if (!module.imports) {
+      module.imports = [];
+    }
 
     module.imports.push(TypeOrmExtModule.forFeature(options.entities));
 

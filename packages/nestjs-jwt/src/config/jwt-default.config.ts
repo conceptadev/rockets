@@ -37,6 +37,9 @@ export const jwtDefaultConfig = registerAs(
  * @private
  */
 function configureAccessSecret(options: JwtSettingsInterface['access']) {
+  if (!options) {
+    throw new Error('config options is not defined');
+  }
   // was an access secret provided?
   if (process.env?.JWT_MODULE_ACCESS_SECRET) {
     // yes, use it
@@ -65,6 +68,12 @@ function configureRefreshSecret(
   options: JwtSettingsInterface['refresh'],
   fallbackOptions: JwtSettingsInterface['access'],
 ) {
+  if (!options) {
+    throw new Error('config options is not defined');
+  }
+  if (!fallbackOptions) {
+    throw new Error('fallbackOptions options is not defined');
+  }
   // was a refresh secret provided?
   if (process.env?.JWT_MODULE_REFRESH_SECRET) {
     // yes, use it

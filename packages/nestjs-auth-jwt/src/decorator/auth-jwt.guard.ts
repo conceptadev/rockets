@@ -1,3 +1,4 @@
+import { ReferenceIdInterface } from '@concepta/ts-core';
 import {
   ExecutionContext,
   Injectable,
@@ -15,7 +16,7 @@ export class JwtAuthGuard extends AuthGuard(AUTH_JWT_STRATEGY_NAME) {
   }
 
   //handleRequest(err, user, info) {
-  handleRequest(err, user) {
+  handleRequest<T = ReferenceIdInterface>(err: Error | undefined, user: T) {
     // You can throw an exception based on either "info" or "err" arguments
     if (err || !user) {
       throw err || new UnauthorizedException();

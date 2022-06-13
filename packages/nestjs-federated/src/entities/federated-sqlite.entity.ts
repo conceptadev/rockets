@@ -12,29 +12,29 @@ export class FederatedSqliteEntity implements FederatedEntityInterface {
    * Unique Id
    */
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   /**
    * provider
    */
   @Column()
-  provider: string;
+  provider!: string;
 
   /**
    * subject
    */
   @Column()
-  subject: string;
+  subject!: string;
 
   /**
    * userId
    */
   @Column()
-  userId: string;
+  userId!: string;
 
   /**
    * Audit embed
    */
   @Column(() => AuditSqlLiteEmbed)
-  audit: AuditInterface;
+  audit!: AuditInterface;
 }

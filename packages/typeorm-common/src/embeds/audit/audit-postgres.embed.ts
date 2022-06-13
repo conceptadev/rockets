@@ -20,23 +20,23 @@ export abstract class AuditPostgresEmbed implements AuditInterface {
    * Date created.
    */
   @CreateDateColumn({ type: 'timestamptz' })
-  dateCreated: AuditDateCreated;
+  dateCreated!: AuditDateCreated;
 
   /**
    * Date updated.
    */
   @UpdateDateColumn({ type: 'timestamptz' })
-  dateUpdated: AuditDateUpdated;
+  dateUpdated!: AuditDateUpdated;
 
   /**
    * Date deleted.
    */
   @DeleteDateColumn({ type: 'timestamptz' })
-  dateDeleted: AuditDateDeleted;
+  dateDeleted!: AuditDateDeleted;
 
   /**
    * Version
    */
   @VersionColumn({ type: 'integer' })
-  version: AuditVersion;
+  version!: AuditVersion;
 }

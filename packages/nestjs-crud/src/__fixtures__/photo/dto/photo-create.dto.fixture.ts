@@ -8,4 +8,4 @@ export class PhotoCreateDtoFixture extends PickType(PhotoDtoFixture, [
   'description',
   'filename',
   'isPublished',
-]) {}
+] as const) {}

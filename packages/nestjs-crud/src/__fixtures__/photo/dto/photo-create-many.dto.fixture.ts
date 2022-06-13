@@ -6,8 +6,8 @@ import { PhotoDtoFixture } from './photo.dto.fixture';
 
 @Exclude()
 export class PhotoCreateManyDtoFixture extends CrudCreateManyDto<PhotoCreateDtoFixture> {
-  @ApiProperty({ type: [PhotoDtoFixture] })
   @Expose()
+  @ApiProperty({ type: [PhotoDtoFixture], isArray: true })
   @Type(() => PhotoCreateDtoFixture)
-  bulk: PhotoCreateDtoFixture[];
+  bulk: PhotoCreateDtoFixture[] = [];
 }

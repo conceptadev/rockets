@@ -12,22 +12,22 @@ export abstract class RoleAssignmentSqliteEntity
   implements RoleAssignmentInterface
 {
   @PrimaryGeneratedColumn('uuid')
-  id: ReferenceId;
+  id!: ReferenceId;
 
   @Column(() => AuditSqlLiteEmbed, {})
-  audit: AuditInterface;
+  audit!: AuditInterface;
 
   /**
    * Role
    *
    * You will need to decorate this in your concrete entity class
    */
-  role: RoleEntityInterface;
+  role!: RoleEntityInterface;
 
   /**
    * Assignee
    *
    * You will need to decorate this in your concrete entity class
    */
-  assignee: RoleAssigneeInterface;
+  assignee!: RoleAssigneeInterface;
 }

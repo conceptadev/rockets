@@ -36,7 +36,7 @@ export class CrudQueryHelper {
     }
   }
 
-  addSearch(req: CrudRequest, search: SCondition) {
+  addSearch(req: CrudRequest, search?: SCondition) {
     if (search) {
       req.parsed.search = {
         $and: [req.parsed.search, search],

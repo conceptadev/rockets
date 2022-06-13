@@ -20,23 +20,23 @@ export abstract class AuditSqlLiteEmbed implements AuditInterface {
    * Date created.
    */
   @CreateDateColumn({ type: 'datetime' })
-  dateCreated: AuditDateCreated;
+  dateCreated!: AuditDateCreated;
 
   /**
    * Date updated.
    */
   @UpdateDateColumn({ type: 'datetime' })
-  dateUpdated: AuditDateUpdated;
+  dateUpdated!: AuditDateUpdated;
 
   /**
    * Date deleted.
    */
   @DeleteDateColumn({ type: 'datetime' })
-  dateDeleted: AuditDateDeleted;
+  dateDeleted!: AuditDateDeleted;
 
   /**
    * Version
    */
   @VersionColumn({ type: 'integer' })
-  version: AuditVersion;
+  version!: AuditVersion;
 }

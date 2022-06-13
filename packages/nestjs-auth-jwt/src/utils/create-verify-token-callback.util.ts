@@ -1,15 +1,15 @@
-import { VerifyTokenServiceInterface } from '@concepta/nestjs-authentication/src/interfaces/verify-token-service.interface';
+import { VerifyTokenServiceInterface } from '@concepta/nestjs-authentication';
 
-export function createVerifyTokenCallback<T extends Record<string, unknown>>(
+export function createVerifyTokenCallback(
   verifyTokenService: VerifyTokenServiceInterface,
 ) {
   return (
     token: string,
-    done: (error?: Error, decodedToken?: T) => void,
+    done: (error?: Error, decodedToken?: unknown) => void,
   ): void => {
     verifyTokenService
       .accessToken(token)
-      .then((decodedToken: T) => done(null, decodedToken))
+      .then((decodedToken: unknown) => done(undefined, decodedToken))
       .catch((error) => done(error));
   };
 }

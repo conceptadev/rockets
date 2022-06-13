@@ -55,10 +55,16 @@ export class UserRepositoryFixture extends Repository<UserEntityInterface> {
       | FindOneOptions<UserEntityInterface>
       | FindConditions<UserEntityInterface>,
   ): Promise<UserEntityInterface | undefined> {
-    return this.users.find(
-      (user) =>
-        user?.id === optionsOrConditions['id'] ||
-        user?.username === optionsOrConditions['username'],
-    );
+    return this.users.find((user) => {
+      if (
+        typeof optionsOrConditions === 'object' &&
+        'id' in optionsOrConditions &&
+        'username' in optionsOrConditions
+      )
+        return (
+          user?.id === optionsOrConditions['id'] ||
+          user?.username === optionsOrConditions['username']
+        );
+    });
   }
 }

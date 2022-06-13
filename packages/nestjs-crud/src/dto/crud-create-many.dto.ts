@@ -12,5 +12,5 @@ export class CrudCreateManyDto<T> implements CrudCreateManyInterface<T> {
   @ArrayNotEmpty()
   @ValidateNested({ each: true })
   @Type(() => CrudInvalidMutationDto)
-  bulk: T[];
+  bulk: T[] = [];
 }

@@ -9,16 +9,16 @@ import { RoleAssigneeInterface } from '../interfaces/role-assignee.interface';
  */
 export abstract class RoleSqliteEntity implements RoleEntityInterface {
   @PrimaryGeneratedColumn('uuid')
-  id: ReferenceId;
+  id!: ReferenceId;
 
   @Column()
-  name: string;
+  name!: string;
 
   @Column({ nullable: true })
-  description: string;
+  description!: string;
 
   @Column(() => AuditSqlLiteEmbed, {})
-  audit: AuditInterface;
+  audit!: AuditInterface;
 
-  assignees: RoleAssigneeInterface[];
+  assignees!: RoleAssigneeInterface[];
 }

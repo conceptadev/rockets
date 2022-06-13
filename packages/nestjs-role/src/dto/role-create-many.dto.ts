@@ -19,5 +19,5 @@ export class RoleCreateManyDto extends CrudCreateManyDto<RoleCreatableInterface>
   @Type(() => RoleCreateDto)
   @IsArray()
   @ArrayNotEmpty()
-  bulk: RoleCreateDto[];
+  bulk: RoleCreateDto[] = [];
 }

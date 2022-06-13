@@ -9,4 +9,4 @@ export interface UserInterface
   extends ReferenceIdInterface,
     ReferenceEmailInterface,
     ReferenceUsernameInterface,
-    Partial<ReferenceAuditInterface> {}
+    ReferenceAuditInterface {}

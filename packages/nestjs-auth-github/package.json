@@ -30,6 +30,7 @@
     "@concepta/nestjs-user": "^4.0.0-alpha.13",
     "@nestjs/testing": "^8.0.2",
     "@sentry/types": "^6.13.3",
+    "@types/passport-github": "^1.1.7",
     "jest-mock-extended": "^2.0.4"
   },
   "peerDependencies": {

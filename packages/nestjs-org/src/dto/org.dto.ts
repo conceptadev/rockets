@@ -27,7 +27,7 @@ export class OrgDto
     description: 'Unique identifier',
   })
   @IsString()
-  id: ReferenceId;
+  id: ReferenceId = '';
 
   /**
    * Name
@@ -38,7 +38,7 @@ export class OrgDto
     description: 'Name of the org',
   })
   @IsString()
-  name: string;
+  name = '';
 
   /**
    * Audit
@@ -49,7 +49,7 @@ export class OrgDto
     description: 'Audit data',
   })
   @Type(() => AuditDto)
-  audit?: AuditInterface;
+  audit: AuditInterface = new AuditDto();
 
   /**
    * Active
@@ -59,7 +59,7 @@ export class OrgDto
     type: 'boolean',
     description: 'True if Org is active',
   })
-  active: boolean;
+  active = true;
 
   /**
    * Owner
@@ -70,5 +70,5 @@ export class OrgDto
     description: 'The owner of the org',
   })
   @Type(() => ReferenceIdDto)
-  owner: ReferenceIdInterface;
+  owner: ReferenceIdInterface = { id: '' };
 }

@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@nestjs/testing": "^8.0.8",
+    "@types/bcrypt": "^5.0.0",
     "@types/passport-local": "^1.0.34",
     "jest-mock-extended": "^2.0.4"
   }

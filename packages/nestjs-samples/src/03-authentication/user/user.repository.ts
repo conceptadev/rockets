@@ -55,10 +55,19 @@ export class UserRepository extends Repository<UserEntityInterface> {
       | FindOneOptions<UserEntityInterface>
       | FindConditions<UserEntityInterface>,
   ): Promise<UserEntityInterface | undefined> {
-    return this.users.find(
-      (user) =>
-        user?.id === optionsOrConditions['where']['id'] ||
-        user?.username === optionsOrConditions['where']['username'],
-    );
+    return this.users.find((user) => {
+      if (
+        typeof optionsOrConditions === 'object' &&
+        'where' in optionsOrConditions &&
+        typeof optionsOrConditions.where === 'object' &&
+        ('id' in optionsOrConditions.where ||
+          'username' in optionsOrConditions.where)
+      ) {
+        return (
+          user.id === optionsOrConditions.where.id ||
+          user.username === optionsOrConditions.where.username
+        );
+      }
+    });
   }
 }

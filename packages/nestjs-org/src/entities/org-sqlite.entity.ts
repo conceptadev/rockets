@@ -12,16 +12,16 @@ import { OrgEntityInterface } from '../interfaces/org-entity.interface';
  */
 export abstract class OrgSqliteEntity implements OrgEntityInterface {
   @PrimaryGeneratedColumn('uuid')
-  id: ReferenceId;
+  id!: ReferenceId;
 
   @Column()
-  name: string;
+  name!: string;
 
   @Column('boolean', { default: true })
   active = true;
 
   @Column(() => AuditSqlLiteEmbed, {})
-  audit: AuditInterface;
+  audit!: AuditInterface;
 
-  owner: ReferenceIdInterface;
+  owner!: ReferenceIdInterface;
 }

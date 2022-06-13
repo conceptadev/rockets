@@ -90,6 +90,10 @@ export class OrgModule extends createConfigurableDynamicRootModule<
   ) {
     const module = OrgModule.forRoot(OrgModule, options);
 
+    if (!module?.imports) {
+      module.imports = [];
+    }
+
     module.imports.push(TypeOrmExtModule.forFeature(options.entities));
 
     negotiateController(module, options);
@@ -108,6 +112,10 @@ export class OrgModule extends createConfigurableDynamicRootModule<
       ModuleOptionsControllerInterface,
   ) {
     const module = OrgModule.forRootAsync(OrgModule, options);
+
+    if (!module?.imports) {
+      module.imports = [];
+    }
 
     module.imports.push(TypeOrmExtModule.forFeature(options.entities));
 

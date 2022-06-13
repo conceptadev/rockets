@@ -11,8 +11,8 @@ import { UserEntityFixture } from './user-entity.fixture';
 @Entity()
 export class UserRoleEntityFixture extends RoleAssignmentSqliteEntity {
   @ManyToOne(() => RoleEntityFixture, (role) => role.assignees)
-  role: RoleEntityInterface;
+  role!: RoleEntityInterface;
 
   @ManyToOne(() => UserEntityFixture, (user) => user.userRoles)
-  assignee: RoleAssigneeInterface;
+  assignee!: RoleAssigneeInterface;
 }

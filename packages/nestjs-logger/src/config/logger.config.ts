@@ -46,7 +46,8 @@ export type LoggerConfigFactory = ConfigFactory<LoggerSettingsInterface> &
  * })
  * ```
  */
-export const loggerConfig: LoggerConfigFactory = registerAs(
+export const loggerConfig: (() => LoggerSettingsInterface) &
+  ConfigFactoryKeyHost<ReturnType<() => LoggerSettingsInterface>> = registerAs(
   'LOGGER_MODULE_DEFAULT_CONFIG',
   (): LoggerSettingsInterface => ({
     /**

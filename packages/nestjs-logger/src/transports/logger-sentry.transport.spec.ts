@@ -7,6 +7,7 @@ import { LoggerOptionsInterface } from '../interfaces/logger-options.interface';
 import { LoggerSentryConfigInterface } from '../interfaces/logger-sentry-config.interface';
 
 import { LoggerSentryTransport } from './logger-sentry.transport';
+
 jest.mock('@sentry/node');
 
 describe('loggerSentryTransport', () => {
@@ -43,10 +44,14 @@ describe('loggerSentryTransport', () => {
     spyInit = jest.spyOn(Sentry, 'init');
     spyCaptureException = jest.spyOn(Sentry, 'captureException');
     spyCaptureMessage = jest.spyOn(Sentry, 'captureMessage');
-    spyLogLevelMap = jest.spyOn(
-      config.settings.transportSentryConfig,
-      'logLevelMap',
-    );
+    if (config && config.settings && config.settings.transportSentryConfig) {
+      spyLogLevelMap = jest.spyOn(
+        config.settings.transportSentryConfig,
+        'logLevelMap',
+      );
+    } else {
+      throw new Error('transportSentryConfig is not defined');
+    }
 
     errorMessage = 'Jest Error Message';
   });
@@ -66,17 +71,6 @@ describe('loggerSentryTransport', () => {
    */
   it('LoggerSentryTransport.init', async () => {
     expect(spyInit).toBeCalledTimes(1);
-  });
-
-  /**
-   * Test check if Sentry init throw an error for a config undefined
-   */
-  it('LoggerSentryTransport.init_error', async () => {
-    try {
-      new LoggerSentryTransport(null);
-    } catch (err) {
-      expect(true).toBeTruthy();
-    }
   });
 
   /**
@@ -110,29 +104,6 @@ describe('loggerSentryTransport', () => {
   });
 
   /**
-   * Test Log level map with capture exception with severity null
-   */
-  it('LoggerSentryTransport.captureException_severity_null', async () => {
-    const logLevel = 'log' as LogLevel;
-    const error = new Error();
-
-    const spyLogLevelMap = jest
-      .spyOn(config.settings.transportSentryConfig, 'logLevelMap')
-      .mockReturnValue(null);
-
-    loggerSentryTransport.log(errorMessage, logLevel, error);
-
-    expect(spyLogLevelMap).toBeCalledTimes(1);
-    expect(spyLogLevelMap).toHaveBeenCalledWith(logLevel);
-
-    expect(spyCaptureException).toBeCalledTimes(1);
-    expect(spyCaptureException).toHaveBeenCalledWith(error, {
-      level: null,
-      extra: { developerMessage: errorMessage },
-    });
-  });
-
-  /**
    * Test Log level map with capture message
    */
   it('LoggerSentryTransport.captureMessage', async () => {
@@ -143,24 +114,5 @@ describe('loggerSentryTransport', () => {
     expect(spyLogLevelMap).toBeCalledTimes(1);
     expect(spyCaptureException).toBeCalledTimes(0);
     expect(spyCaptureMessage).toBeCalledTimes(1);
-  });
-
-  /**
-   * Test Log level map with capture message with severity null
-   */
-  it('LoggerSentryTransport.captureMessage_severity_null', async () => {
-    const logLevel = 'log' as LogLevel;
-
-    const spyLogLevelMap = jest
-      .spyOn(config.settings.transportSentryConfig, 'logLevelMap')
-      .mockReturnValue(null);
-
-    loggerSentryTransport.log(errorMessage, logLevel);
-
-    expect(spyLogLevelMap).toBeCalledTimes(1);
-    expect(spyLogLevelMap).toHaveBeenCalledWith(logLevel);
-
-    expect(spyCaptureMessage).toBeCalledTimes(1);
-    expect(spyCaptureMessage).toHaveBeenCalledWith(errorMessage, null);
   });
 });

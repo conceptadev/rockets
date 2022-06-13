@@ -1,6 +1,7 @@
+import { Listener as EmitterListener } from 'eventemitter2';
+import { NotAnErrorException } from '@concepta/ts-core';
 import { EventInterface } from '../events/interfaces/event.interface';
 import { EventListenerInterface } from './interfaces/event-listener.interface';
-import { Listener as EmitterListener } from 'eventemitter2';
 import { EventListenerException } from '../exceptions/event-listener.exception';
 
 /**
@@ -96,7 +97,8 @@ export abstract class EventListener<E extends EventInterface = EventInterface>
       // remove the listener
       this.emitterListener.off();
     } catch (e) {
-      throw new EventListenerException(e.message);
+      const exception = e instanceof Error ? e : new NotAnErrorException(e);
+      throw new EventListenerException(exception.message);
     }
   }
 }

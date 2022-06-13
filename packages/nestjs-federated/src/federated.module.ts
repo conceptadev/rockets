@@ -64,6 +64,10 @@ export class FederatedModule extends createConfigurableDynamicRootModule<
   ) {
     const module = FederatedModule.forRoot(FederatedModule, options);
 
+    if (!module.imports) {
+      module.imports = [];
+    }
+
     module.imports.push(TypeOrmExtModule.forFeature(options.entities));
 
     negotiateController(module, options);
@@ -77,6 +81,10 @@ export class FederatedModule extends createConfigurableDynamicRootModule<
       FederatedEntitiesOptionsInterface,
   ) {
     const module = FederatedModule.forRootAsync(FederatedModule, options);
+
+    if (!module.imports) {
+      module.imports = [];
+    }
 
     module.imports.push(TypeOrmExtModule.forFeature(options.entities));
 

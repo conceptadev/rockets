@@ -136,14 +136,4 @@ describe('LoggerTransportService', () => {
     expect(logLevels.length).toBe(0);
     expect(transports.length).toBe(0);
   });
-
-  it('loggerService.logLevel_null', () => {
-    const loggerTransportService = new LoggerTransportService(null);
-
-    const logLevels = loggerTransportService['logLevels'];
-    const transports = loggerTransportService['loggerTransports'];
-
-    expect(logLevels.length).toBe(1);
-    expect(transports.length).toBe(0);
-  });
 });

@@ -32,6 +32,7 @@ export class AccessControlGuard implements CanActivate {
   protected async checkAccessGrants(
     context: ExecutionContext,
   ): Promise<boolean> {
+    const rules = this.accessControl.settings.rules;
     const acGrants = this.reflector.get<AccessControlGrantOption[]>(
       ACCESS_CONTROL_MODULE_GRANT_METADATA,
       context.getHandler(),
@@ -52,12 +53,12 @@ export class AccessControlGuard implements CanActivate {
         possession: Possession.ANY,
         ...acGrant,
       };
-      const permission = this.accessControl.settings.rules.permission(query);
+      const permission = rules.permission(query);
       return permission.granted;
     });
 
     // have a match?
-    if (true === hasAnyPermission) {
+    if (hasAnyPermission) {
       // yes, skip remaining checks (even filters)
       return true;
     }
@@ -68,7 +69,7 @@ export class AccessControlGuard implements CanActivate {
         possession: Possession.OWN,
         ...acGrant,
       };
-      const permission = this.accessControl.settings.rules.permission(query);
+      const permission = rules.permission(query);
       return permission.granted;
     });
 
@@ -113,7 +114,7 @@ export class AccessControlGuard implements CanActivate {
       }
 
       // lost access?
-      if (authorized !== true) {
+      if (!authorized) {
         // yes, don't bother checking anything else
         break;
       }
@@ -123,6 +124,10 @@ export class AccessControlGuard implements CanActivate {
   }
 
   private getModuleService(): AccessControlServiceInterface {
+    if (!this.accessControl.service) {
+      throw new Error('access control service is not defined');
+    }
+
     return this.moduleRef.get(this.accessControl.service, { strict: false });
   }
 
@@ -138,6 +143,10 @@ export class AccessControlGuard implements CanActivate {
     const finalConfig = { ...config };
 
     if (finalConfig.service) {
+      if (!config.service) {
+        throw new Error('access control service is not defined');
+      }
+
       return this.moduleRef.get(config.service);
     } else {
       return;

@@ -67,12 +67,16 @@ describe('AppController (e2e)', () => {
     });
 
     it('POST /photo', async () => {
-      const photo = await photoFactory.create();
-      delete photo.id;
+      const photo = await photoFactory.make();
+
+      const newPhoto: Partial<Pick<PhotoFixture, 'id'>> &
+        Omit<PhotoFixture, 'id'> = photo;
+
+      delete newPhoto.id;
 
       const response = await supertest(app.getHttpServer())
         .post('/photo')
-        .send(photo)
+        .send(newPhoto)
         .expect(201);
 
       expect(response.body).toBeInstanceOf(Object);
