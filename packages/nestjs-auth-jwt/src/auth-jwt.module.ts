@@ -6,6 +6,11 @@ import {
   deferExternal,
   DeferExternalOptionsInterface,
 } from '@concepta/nestjs-core';
+import {
+  AuthenticationModule,
+  VerifyTokenService,
+  VerifyTokenServiceInterface,
+} from '@concepta/nestjs-authentication';
 
 import {
   AUTH_JWT_MODULE_OPTIONS_TOKEN,
@@ -17,11 +22,6 @@ import { authJwtDefaultConfig } from './config/auth-jwt-default.config';
 
 import { AuthJwtOptionsInterface } from './interfaces/auth-jwt-options.interface';
 import { AuthJwtStrategy } from './auth-jwt.strategy';
-import {
-  AuthenticationModule,
-  VerifyTokenService,
-} from '@concepta/nestjs-authentication';
-import { VerifyTokenServiceInterface } from '@concepta/nestjs-authentication/src/interfaces/verify-token-service.interface';
 
 /**
  * Auth local module

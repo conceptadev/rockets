@@ -1,6 +1,5 @@
 import { format } from 'util';
-import { ExceptionInterface } from '@concepta/ts-core';
-import { NotAnErrorException } from '@concepta/ts-core/src/exceptions/not-an-error.exception';
+import { ExceptionInterface, NotAnErrorException } from '@concepta/ts-core';
 
 export class ReferenceLookupException
   extends Error

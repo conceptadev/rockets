@@ -14,24 +14,24 @@ export class CrudResponsePaginatedDto<T extends ReferenceIdInterface>
     description: 'The list of records for current page',
   })
   @Type(() => CrudResponseDto)
-  data: T[];
+  data: T[] = [];
 
   @Expose()
   @ApiProperty({ type: 'number', description: 'Count of all records' })
-  count: number;
+  count = 0;
 
   @Expose()
   @ApiProperty({
     type: 'number',
     description: 'Count of records on current page',
   })
-  total: number;
+  total = 0;
 
   @Expose()
   @ApiProperty({ type: 'number', description: 'Current page number' })
-  page: number;
+  page = 0;
 
   @Expose()
   @ApiProperty({ type: 'number', description: 'Total number of pages' })
-  pageCount: number;
+  pageCount = 0;
 }

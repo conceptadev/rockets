@@ -19,6 +19,8 @@ import { OrgCreateManyDto } from './dto/org-create-many.dto';
 import { OrgUpdateDto } from './dto/org-update.dto';
 import { OrgPaginatedDto } from './dto/org-paginated.dto';
 import { OrgEntityInterface } from './interfaces/org-entity.interface';
+import { OrgCreatableInterface } from './interfaces/org-creatable.interface';
+import { OrgUpdatableInterface } from './interfaces/org-updatable.interface';
 
 /**
  * Org controller.
@@ -32,7 +34,12 @@ import { OrgEntityInterface } from './interfaces/org-entity.interface';
 })
 @ApiTags('org')
 export class OrgController
-  implements CrudControllerInterface<OrgEntityInterface>
+  implements
+    CrudControllerInterface<
+      OrgEntityInterface,
+      OrgCreatableInterface,
+      OrgUpdatableInterface
+    >
 {
   /**
    * Constructor.

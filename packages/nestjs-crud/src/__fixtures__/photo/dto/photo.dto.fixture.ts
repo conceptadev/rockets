@@ -13,32 +13,32 @@ export class PhotoDtoFixture
   @ApiProperty()
   @Expose()
   @IsUUID()
-  id: ReferenceId;
+  id: ReferenceId = '';
 
   @ApiProperty()
   @Expose()
   @IsString()
-  name: string;
+  name = '';
 
   @ApiProperty()
   @Expose()
   @IsString()
-  description: string;
+  description = '';
 
   @ApiProperty()
   @Expose()
   @IsString()
-  filename: string;
+  filename = '';
 
   @ApiProperty()
   @Expose()
   @IsNumber()
-  views: number;
+  views = 0;
 
   @ApiProperty()
   @Expose()
   @IsBoolean()
-  isPublished: boolean;
+  isPublished = true;
 
   @ApiProperty()
   @Expose()

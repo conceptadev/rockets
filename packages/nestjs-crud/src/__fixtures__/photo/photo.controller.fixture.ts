@@ -33,7 +33,12 @@ import { PhotoUpdateDtoFixture } from './dto/photo-update.dto.fixture';
 })
 @ApiTags('photo')
 export class PhotoControllerFixture
-  implements CrudControllerInterface<PhotoEntityInterfaceFixture>
+  implements
+    CrudControllerInterface<
+      PhotoEntityInterfaceFixture,
+      PhotoCreateDtoFixture,
+      PhotoUpdateDtoFixture
+    >
 {
   /**
    * Constructor.

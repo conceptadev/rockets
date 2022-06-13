@@ -93,7 +93,15 @@ export class RoleModule extends createConfigurableDynamicRootModule<
   ) {
     const module = RoleModule.forRoot(RoleModule, options);
 
+    if (!module.providers) {
+      module.providers = [];
+    }
+
     module.providers.push(this.getAllProviders(options.entities));
+
+    if (!module.imports) {
+      module.imports = [];
+    }
 
     module.imports.push(TypeOrmExtModule.forFeature(options.entities));
 
@@ -117,7 +125,15 @@ export class RoleModule extends createConfigurableDynamicRootModule<
       ...options,
     });
 
+    if (!module.providers) {
+      module.providers = [];
+    }
+
     module.providers.push(this.getAllProviders(options.entities));
+
+    if (!module.imports) {
+      module.imports = [];
+    }
 
     module.imports.push(TypeOrmExtModule.forFeature(options.entities));
 
@@ -139,7 +155,7 @@ export class RoleModule extends createConfigurableDynamicRootModule<
     entities: RoleEntitiesOptionsInterface['entities'],
   ) {
     const reposToInject = [];
-    const keyTracker = {};
+    const keyTracker: Record<string, number> = {};
 
     for (const entityKey in entities) {
       let idx = 0;
@@ -149,8 +165,8 @@ export class RoleModule extends createConfigurableDynamicRootModule<
 
     return {
       provide: ALL_ROLES_REPOSITORIES_TOKEN,
-      useFactory: (...args) => {
-        const repoInstances = {};
+      useFactory: (...args: string[]) => {
+        const repoInstances: Record<string, string> = {};
 
         for (const entityKey in entities) {
           repoInstances[entityKey] = args[keyTracker[entityKey]];

@@ -12,7 +12,7 @@ export class AuthLocalLoginDto implements AuthLocalLoginInterface {
     description: 'Username',
   })
   @IsString()
-  username: ReferenceUsername;
+  username: ReferenceUsername = '';
 
   @Expose()
   @ApiProperty({
@@ -20,5 +20,5 @@ export class AuthLocalLoginDto implements AuthLocalLoginInterface {
     description: 'Password',
   })
   @IsString()
-  password: string;
+  password = '';
 }

@@ -55,15 +55,6 @@ export class CrudSerializeInterceptor implements NestInterceptor {
     response: ResponseType,
     options: CrudSerializationOptionsInterface,
   ) {
-    // must have a dto type
-    if (!isFunction(options.type)) {
-      // this should never happen, but needed just in
-      // case somebody removes the defaults
-      throw new InternalServerErrorException(
-        'Impossible to serialize data without a DTO type.',
-      );
-    }
-
     // reasons to bail
     if (!isObject(response) || response instanceof StreamableFile) {
       // return response untouched
@@ -73,14 +64,23 @@ export class CrudSerializeInterceptor implements NestInterceptor {
     // determine the type to use
     const type =
       !Array.isArray(response) && response?.__isPaginated === true
-        ? options.paginatedType
-        : options.type;
+        ? options?.paginatedType
+        : options?.type;
 
-    // convert each object to DTO type, then convert back to plain object
-    return this.toPlain(
-      this.toInstance(type, response, options?.toInstanceOptions),
-      options?.toPlainOptions,
-    );
+    // must have a dto type
+    if (type !== undefined && isFunction(type)) {
+      // convert each object to DTO type, then convert back to plain object
+      return this.toPlain(
+        this.toInstance(type, response, options?.toInstanceOptions),
+        options?.toPlainOptions,
+      );
+    } else {
+      // this should never happen, but needed just in
+      // case somebody removes the defaults
+      throw new InternalServerErrorException(
+        'Impossible to serialize data without a DTO type.',
+      );
+    }
   }
 
   protected toInstance(

@@ -26,7 +26,7 @@ type ResponseDecoratorParameters = [
  */
 export function applyApiResponse(
   action: CrudActions,
-  options: ApiResponseOptions,
+  options: ApiResponseOptions = {},
 ): MethodDecorator {
   return (...args: ResponseDecoratorParameters) => {
     // break out args
@@ -61,7 +61,7 @@ export function applyApiResponse(
     const dtoMetaOptions: ApiResponseMetadata = {};
 
     // dto schema options
-    let dtoSchemaOptions: ApiResponseSchemaHost = { schema: undefined };
+    let dtoSchemaOptions: ApiResponseSchemaHost = { schema: {} };
 
     // action is the discriminator
     switch (action) {
