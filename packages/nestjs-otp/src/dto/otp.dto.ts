@@ -24,7 +24,7 @@ export class OtpDto
     description: 'category of the otp',
   })
   @IsString()
-  category: string;
+  category = '';
 
   /**
    * type
@@ -35,7 +35,7 @@ export class OtpDto
     description: 'type of the otp',
   })
   @IsString()
-  type: string;
+  type = '';
 
   /**
    * passCode
@@ -46,7 +46,7 @@ export class OtpDto
     description: 'passCode of the otp',
   })
   @IsString()
-  passCode: string;
+  passCode = '';
 
   /**
    * Assignee
@@ -57,7 +57,7 @@ export class OtpDto
     description: 'assignee data',
   })
   @Type(() => ReferenceIdDto)
-  assignee: OtpAssigneeInterface;
+  assignee: OtpAssigneeInterface = new ReferenceIdDto();
 
   /**
    * Audit
@@ -68,5 +68,5 @@ export class OtpDto
     description: 'Audit data',
   })
   @Type(() => AuditDto)
-  audit?: AuditInterface;
+  audit?: AuditInterface = new AuditDto();
 }

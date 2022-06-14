@@ -47,7 +47,7 @@ export class OtpService {
       // try to save the item
       return assignmentRepo.save({ ...dto, passCode });
     } catch (e) {
-      this.throwMutateException(e, assignmentRepo.metadata.targetName);
+      throw new ReferenceMutateException(assignmentRepo.metadata.targetName, e);
     }
   }
 
@@ -155,7 +155,7 @@ export class OtpService {
     try {
       await repo.delete(id);
     } catch (e) {
-      this.throwMutateException(e, repo.metadata.targetName);
+      throw new ReferenceMutateException(repo.metadata.targetName, e);
     }
   }
 
@@ -187,7 +187,7 @@ export class OtpService {
       // return the otps from assignee
       return assignments;
     } catch (e) {
-      this.throwLookupException(e, assignmentRepo.metadata.targetName);
+      throw new ReferenceLookupException(assignmentRepo.metadata.targetName, e);
     }
   }
 
@@ -207,33 +207,6 @@ export class OtpService {
     } else {
       // bad context
       throw new EntityNotFoundException(context);
-    }
-  }
-
-  /**
-   * @private
-   * @param e Possibly an error
-   * @param entityName Entity name
-   */
-  protected throwLookupException(e: unknown, entityName: string) {
-    // is an Error?
-    if (e instanceof Error) {
-      // yes, throw custom exception
-      throw new ReferenceLookupException(entityName, e);
-    } else {
-      // throw original error
-      throw e;
-    }
-  }
-
-  protected throwMutateException(e: unknown, entityName: string) {
-    // is an Error?
-    if (e instanceof Error) {
-      // yes, throw custom exception
-      throw new ReferenceMutateException(entityName, e);
-    } else {
-      // throw original error
-      throw e;
     }
   }
 

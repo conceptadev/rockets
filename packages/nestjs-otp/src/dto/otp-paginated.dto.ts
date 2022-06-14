@@ -16,5 +16,5 @@ export class OtpPaginatedDto extends CrudResponsePaginatedDto<OtpInterface> {
     description: 'Array of Otps',
   })
   @Type(() => OtpDto)
-  data: OtpDto[];
+  data: OtpDto[] = [];
 }

@@ -9,5 +9,5 @@ import { UserEntityFixture } from './user-entity.fixture';
 @Entity()
 export class UserOtpEntityFixture extends OtpAssignmentSqliteEntity {
   @ManyToOne(() => UserEntityFixture, (user) => user.userOtps)
-  assignee: OtpAssigneeInterface;
+  assignee!: OtpAssigneeInterface;
 }

@@ -74,24 +74,4 @@ describe('OtpModule', () => {
       expect(otpService).toBeInstanceOf(OtpService);
     });
   });
-
-  describe('throwLookupException', () => {
-    it('should throw reference lookup exception', async () => {
-      const e = new Error('Fake error');
-
-      const t = () => {
-        otpService['throwLookupException'](e, 'MyEntityName');
-      };
-
-      expect(t).toThrow(ReferenceLookupException);
-    });
-
-    it('should re-throw unknown error', async () => {
-      const t = () => {
-        otpService['throwLookupException']('wut', 'MyEntityName');
-      };
-
-      expect(t).toThrow('wut');
-    });
-  });
 });

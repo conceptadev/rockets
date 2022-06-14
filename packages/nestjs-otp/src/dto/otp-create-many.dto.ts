@@ -19,5 +19,5 @@ export class OtpCreateManyDto extends CrudCreateManyDto<OtpCreatableInterface> {
   @Type(() => OtpCreateDto)
   @IsArray()
   @ArrayNotEmpty()
-  bulk: OtpCreateDto[];
+  bulk: OtpCreateDto[] = [];
 }

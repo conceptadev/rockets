@@ -11,22 +11,22 @@ export abstract class OtpAssignmentPostgresEntity
   implements OtpAssignmentInterface
 {
   @PrimaryGeneratedColumn('uuid')
-  id: ReferenceId;
+  id!: ReferenceId;
 
   @Column()
-  category: string;
+  category!: string;
 
   @Column({ nullable: true })
-  type: string;
+  type!: string;
 
   @Column()
-  passCode: string;
+  passCode!: string;
 
   @Column(() => AuditPostgresEmbed, {})
-  audit: AuditInterface;
+  audit!: AuditInterface;
 
   /**
    * Should be overwrite by the table it will be assigned to
    */
-  assignee: OtpAssigneeInterface;
+  assignee!: OtpAssigneeInterface;
 }

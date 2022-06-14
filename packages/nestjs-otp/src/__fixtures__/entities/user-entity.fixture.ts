@@ -8,8 +8,8 @@ import { UserOtpEntityFixture } from './user-otp-entity.fixture';
 @Entity()
 export class UserEntityFixture implements ReferenceIdInterface {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @OneToMany(() => UserOtpEntityFixture, (userOtp) => userOtp.assignee)
-  userOtps: UserOtpEntityFixture[];
+  userOtps!: UserOtpEntityFixture[];
 }
