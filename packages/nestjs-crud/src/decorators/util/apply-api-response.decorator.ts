@@ -8,6 +8,7 @@ import {
   getSchemaPath,
 } from '@nestjs/swagger';
 import { CrudActions } from '@nestjsx/crud';
+import { DecoratorTargetObject } from '../../crud.types';
 import { CrudResponsePaginatedDto } from '../../dto/crud-response-paginated.dto';
 import { CrudResponseDto } from '../../dto/crud-response.dto';
 import { CrudReflectionService } from '../../services/crud-reflection.service';
@@ -22,7 +23,7 @@ export function applyApiResponse(
   action: CrudActions,
   options: ApiResponseOptions = {},
 ): MethodDecorator {
-  return (target: Type<Object> | Object, ...rest) => {
+  return (target: DecoratorTargetObject, ...rest) => {
     // break out args
     const [propertyKey] = rest;
 

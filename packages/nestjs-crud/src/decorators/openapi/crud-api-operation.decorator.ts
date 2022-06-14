@@ -1,5 +1,5 @@
-import { Type } from '@nestjs/common';
 import { ApiOperation, ApiOperationOptions } from '@nestjs/swagger';
+import { DecoratorTargetObject } from '../../crud.types';
 
 /**
  * @CrudApiOperation() open api decorator
@@ -7,7 +7,7 @@ import { ApiOperation, ApiOperationOptions } from '@nestjs/swagger';
 export function CrudApiOperation(
   options?: ApiOperationOptions,
 ): MethodDecorator {
-  return (target: Type<Object> | Object, ...rest) => {
+  return (target: DecoratorTargetObject, ...rest) => {
     const [propertyKey] = rest;
 
     if (!('__proto__' in target || 'name' in target)) {

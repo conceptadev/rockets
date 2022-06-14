@@ -1,5 +1,6 @@
-import { SetMetadata, Type } from '@nestjs/common';
+import { SetMetadata } from '@nestjs/common';
 import { CRUD_MODULE_PARAM_BODY_METADATA } from '../../crud.constants';
+import { DecoratorTargetObject } from '../../crud.types';
 import { CrudBodyOptionsInterface } from '../../interfaces/crud-body-options.interface';
 import { CrudValidationMetadataInterface } from '../../interfaces/crud-validation-metadata.interface';
 import { CrudReflectionService } from '../../services/crud-reflection.service';
@@ -10,7 +11,7 @@ import { CrudReflectionService } from '../../services/crud-reflection.service';
 export function CrudBody(
   options?: CrudBodyOptionsInterface,
 ): ParameterDecorator {
-  return (target: Type<Object> | Object, ...rest) => {
+  return (target: DecoratorTargetObject, ...rest) => {
     const [propertyKey, parameterIndex] = rest;
 
     if (!('__proto__' in target)) {
