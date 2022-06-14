@@ -8,8 +8,8 @@ import { UserRoleEntityFixture } from './user-role-entity.fixture';
 @Entity()
 export class UserEntityFixture implements ReferenceIdInterface {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @OneToMany(() => UserRoleEntityFixture, (userRole) => userRole.assignee)
-  userRoles: UserRoleEntityFixture[];
+  userRoles!: UserRoleEntityFixture[];
 }

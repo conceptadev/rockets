@@ -1,6 +1,5 @@
 import { Repository } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
-import { ReferenceIdInterface } from '@concepta/ts-core';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import { LookupService } from '@concepta/typeorm-common';
 import {
@@ -39,7 +38,7 @@ export class OrgLookupService
    *
    * @param org The org of which owner to retrieve.
    */
-  async getOwner(org: OrgOwnerInterface): Promise<ReferenceIdInterface> {
+  async getOwner(org: OrgOwnerInterface) {
     return this.ownerLookupService.byId(org.owner.id);
   }
 }

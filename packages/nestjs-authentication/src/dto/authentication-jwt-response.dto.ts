@@ -11,12 +11,12 @@ export class AuthenticationJwtResponseDto
     type: 'string',
     description: 'JWT access token to use for request authorization.',
   })
-  accessToken: string;
+  accessToken = '';
 
   @Expose()
   @ApiProperty({
     type: 'string',
     description: 'JWT refresh token to use for obtaining a new access token.',
   })
-  refreshToken: string;
+  refreshToken = '';
 }

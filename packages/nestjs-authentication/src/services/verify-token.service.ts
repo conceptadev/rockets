@@ -26,7 +26,7 @@ export class VerifyTokenService implements VerifyTokenServiceInterface {
     const token = await this.jwtVerifyService.accessToken(...args);
 
     // try to validate the token
-    if (this.validateToken(token)) {
+    if (await this.validateToken(token)) {
       return token;
     } else {
       throw new BadRequestException(
@@ -43,7 +43,7 @@ export class VerifyTokenService implements VerifyTokenServiceInterface {
     const token = await this.jwtVerifyService.refreshToken(...args);
 
     // try to validate the token
-    if (this.validateToken(token)) {
+    if (await this.validateToken(token)) {
       return token;
     } else {
       throw new BadRequestException(

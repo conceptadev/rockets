@@ -27,16 +27,14 @@ describe('EventListener', () => {
     /**
      *
      */
-    function MockEmitterListener() {
-      this.emitter = emitter;
-      this.event = TestEvent.key;
-      this.listener = listener.listen;
+    class MockEmitterListener implements Omit<EmitterListener, 'off'> {
+      emitter = emitter;
+      event = TestEvent.key;
+      listener = listener.listen;
     }
 
-    MockEmitterListener.prototype.off = () => this;
-
     it('should be a valid emitter', () => {
-      expect(emitterListener).toMatchObject<EmitterListener>(
+      expect(emitterListener).toMatchObject<Omit<EmitterListener, 'off'>>(
         new MockEmitterListener(),
       );
     });

@@ -8,7 +8,7 @@ describe('@InjectAccessControl', () => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       @InjectAccessControl() accessControl: AccessControlModuleOptionsInterface,
     ) {
-      return null;
+      return Promise.resolve(false);
     }
   }
 

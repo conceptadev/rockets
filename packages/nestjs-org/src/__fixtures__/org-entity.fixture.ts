@@ -8,5 +8,5 @@ import { OwnerEntityFixture } from './owner-entity.fixture';
 @Entity()
 export class OrgEntityFixture extends OrgSqliteEntity {
   @ManyToOne(() => OwnerEntityFixture, (user) => user.orgs, { nullable: false })
-  owner: OwnerEntityFixture;
+  owner!: OwnerEntityFixture;
 }

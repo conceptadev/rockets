@@ -3,6 +3,6 @@ import { AccessControlServiceInterface } from './access-control-service.interfac
 import { AccessControlSettingsInterface } from './access-control-settings.interface';
 
 export interface AccessControlModuleOptionsInterface {
-  settings?: AccessControlSettingsInterface;
+  settings: AccessControlSettingsInterface;
   service?: Type<AccessControlServiceInterface>;
 }

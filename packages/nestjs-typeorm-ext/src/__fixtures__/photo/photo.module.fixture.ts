@@ -15,6 +15,10 @@ export class PhotoModuleFixture extends createConfigurableDynamicRootModule<
   static register() {
     const module = PhotoModuleFixture.forRoot(PhotoModuleFixture, {});
 
+    if (!module?.imports) {
+      module.imports = [];
+    }
+
     module.imports.push(
       TypeOrmExtModule.forFeature({
         photo: {

@@ -11,5 +11,5 @@ export class AuthRefreshDto implements AuthRefreshInterface {
     description: 'JWT access token to use for request authorization.',
   })
   @IsJWT()
-  refreshToken: string;
+  refreshToken = '';
 }

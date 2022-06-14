@@ -4,5 +4,5 @@ export interface FederatedServiceInterface {
   exists(
     provider: string,
     federatedRef: string,
-  ): Promise<FederatedEntityInterface>;
+  ): Promise<FederatedEntityInterface | undefined>;
 }

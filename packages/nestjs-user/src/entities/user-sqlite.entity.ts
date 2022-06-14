@@ -8,19 +8,19 @@ export abstract class UserSqliteEntity implements UserEntityInterface {
    * Unique Id
    */
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   /**
    * Email
    */
   @Column()
-  email: string;
+  email!: string;
 
   /**
    * Username
    */
   @Column()
-  username: string;
+  username!: string;
 
   /**
    * Password hash
@@ -38,5 +38,5 @@ export abstract class UserSqliteEntity implements UserEntityInterface {
    * Audit embed
    */
   @Column(() => AuditSqlLiteEmbed)
-  audit?: AuditInterface;
+  audit!: AuditInterface;
 }

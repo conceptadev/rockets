@@ -9,7 +9,7 @@ export function createVerifyTokenCallback(
   ): void => {
     verifyTokenService
       .accessToken(token)
-      .then((decodedToken) => done(null, decodedToken))
+      .then((decodedToken) => done(undefined, decodedToken))
       .catch((error) => done(error));
   };
 }

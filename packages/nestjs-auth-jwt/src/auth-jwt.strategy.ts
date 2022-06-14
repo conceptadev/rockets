@@ -21,16 +21,15 @@ export class AuthJwtStrategy extends PassportStrategyFactory<JwtStrategy>(
   JwtStrategy,
   AUTH_JWT_STRATEGY_NAME,
 ) {
-  @Inject(AUTH_JWT_MODULE_USER_LOOKUP_SERVICE_TOKEN)
-  private userLookupService: AuthJwtUserLookupServiceInterface;
-
   constructor(
     @Inject(AUTH_JWT_MODULE_SETTINGS_TOKEN)
-    settings: AuthJwtSettingsInterface,
+    settings: Partial<AuthJwtSettingsInterface>,
     @Inject(AUTH_JWT_MODULE_VERIFY_TOKEN_SERVICE_TOKEN)
     verifyTokenService: VerifyTokenServiceInterface,
+    @Inject(AUTH_JWT_MODULE_USER_LOOKUP_SERVICE_TOKEN)
+    private userLookupService: AuthJwtUserLookupServiceInterface,
   ) {
-    const options: JwtStrategyOptionsInterface = {
+    const options: Partial<JwtStrategyOptionsInterface> = {
       verifyToken: createVerifyTokenCallback(verifyTokenService),
       ...settings,
     };
@@ -46,7 +45,7 @@ export class AuthJwtStrategy extends PassportStrategyFactory<JwtStrategy>(
   async validate(
     payload: AuthJwtPayloadInterface,
   ): Promise<ReferenceIdInterface> {
-    const user = this.userLookupService.bySubject(payload.sub);
+    const user = await this.userLookupService.bySubject(payload.sub);
 
     if (user) {
       return user;

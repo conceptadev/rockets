@@ -1,5 +1,6 @@
 import { Repository } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
+import { ReferenceIdInterface } from '@concepta/ts-core';
 import { ReferenceLookupException } from '@concepta/typeorm-common';
 import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
 import { RoleAssigneeInterface } from '../interfaces/role-assignee.interface';
@@ -41,7 +42,7 @@ export class RoleService {
       // return the roles
       return assignments.map((assignment) => assignment.role);
     } catch (e) {
-      this.throwLookupException(e, assignmentRepo.metadata.targetName);
+      throw new ReferenceLookupException(assignmentRepo.metadata.targetName, e);
     }
   }
 
@@ -72,7 +73,7 @@ export class RoleService {
       // return true if we found an assignment
       return assignment ? true : false;
     } catch (e) {
-      this.throwLookupException(e, assignmentRepo.metadata.targetName);
+      throw new ReferenceLookupException(assignmentRepo.metadata.targetName, e);
     }
   }
 
@@ -85,7 +86,7 @@ export class RoleService {
    */
   async isAssignedRoles<T extends RoleAssigneeInterface>(
     context: string,
-    roles: Partial<RoleInterface>[],
+    roles: ReferenceIdInterface[],
     assignee: Partial<T>,
   ): Promise<boolean> {
     // get all assigned roles
@@ -123,22 +124,6 @@ export class RoleService {
     } else {
       // bad context
       throw new EntityNotFoundException(context);
-    }
-  }
-
-  /**
-   * @private
-   * @param e Possibly an error
-   * @param entityName Entity name
-   */
-  protected throwLookupException(e: unknown, entityName: string) {
-    // is an Error?
-    if (e instanceof Error) {
-      // yes, throw custom exception
-      throw new ReferenceLookupException(entityName, e);
-    } else {
-      // throw original error
-      throw e;
     }
   }
 }

@@ -7,7 +7,7 @@ import { AccessControlFilter } from './access-control-filter.decorator';
 describe('@AccessControlFilter', () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const filterCallback: AccessControlFilterCallback = (data, user, service) => {
-    return null;
+    return Promise.resolve(false);
   };
 
   @Controller()

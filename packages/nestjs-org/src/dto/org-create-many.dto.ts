@@ -19,5 +19,5 @@ export class OrgCreateManyDto extends CrudCreateManyDto<OrgCreatableInterface> {
   @Type(() => OrgCreateDto)
   @IsArray()
   @ArrayNotEmpty()
-  bulk: OrgCreateDto[];
+  bulk: OrgCreateDto[] = [];
 }

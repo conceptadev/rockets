@@ -8,7 +8,7 @@ import { OrgOwnerInterface } from './org-owner.interface';
 export interface OrgInterface
   extends ReferenceIdInterface,
     ReferenceActiveInterface,
-    Partial<ReferenceAuditInterface>,
+    ReferenceAuditInterface,
     OrgOwnerInterface {
   /**
    * Name

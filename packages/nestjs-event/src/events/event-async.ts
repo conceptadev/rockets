@@ -38,5 +38,5 @@ export abstract class EventAsync<V extends EventValues = EventValues>
    * @type {Promise<V>}
    * @private
    */
-  expectsReturnOf: Promise<V>;
+  expectsReturnOf!: Promise<V>;
 }

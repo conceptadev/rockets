@@ -4,6 +4,6 @@ export interface JwtStrategyOptionsInterface
   extends Pick<StrategyOptions, 'jwtFromRequest'> {
   verifyToken: (
     token: string,
-    done: (err?: Error | undefined, decodedToken?: unknown) => void,
+    done: (err?: Error, decodedToken?: unknown) => void,
   ) => void;
 }

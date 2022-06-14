@@ -1,5 +1,5 @@
 import { format } from 'util';
-import { ExceptionInterface } from '@concepta/ts-core';
+import { ExceptionInterface, NotAnErrorException } from '@concepta/ts-core';
 
 export class ReferenceMutateException
   extends Error
@@ -14,13 +14,16 @@ export class ReferenceMutateException
 
   constructor(
     entityName: string,
-    originalError: Error,
+    originalError: unknown,
     message = 'Error while trying to mutate a %s reference',
   ) {
     super(format(message, entityName));
     this.context = {
       entityName,
-      originalError,
+      originalError:
+        originalError instanceof Error
+          ? originalError
+          : new NotAnErrorException(originalError),
     };
   }
 }

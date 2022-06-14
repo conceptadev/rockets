@@ -48,7 +48,7 @@ export class PasswordCreationService
    */
   checkAttemptLeft(numOfAttempts = 0): number {
     // Get number of max attempts allowed
-    const attemptsAllowed = this.settings.maxPasswordAttempts;
+    const attemptsAllowed = this.settings.maxPasswordAttempts ?? 0;
 
     // did it reached max
     const canAttemptMore = numOfAttempts <= attemptsAllowed;

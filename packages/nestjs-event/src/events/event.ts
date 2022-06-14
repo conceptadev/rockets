@@ -40,7 +40,7 @@ export abstract class Event<V extends EventValues = EventValues>
    * @type {void | Promise<V>}
    * @private
    */
-  expectsReturnOf: void | Promise<V>;
+  expectsReturnOf!: void | Promise<V>;
 
   /**
    * Event key.

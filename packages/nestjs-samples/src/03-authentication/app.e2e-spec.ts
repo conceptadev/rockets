@@ -11,7 +11,7 @@ import { UserEntity } from './user/user.entity';
 import { UserRepository } from './user/user.repository';
 import { UserDto } from './user/user.controller';
 
-const sleep = (ms) => {
+const sleep = (ms: number) => {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });

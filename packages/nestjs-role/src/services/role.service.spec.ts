@@ -19,7 +19,6 @@ import { ApiKeyRoleEntityFixture } from '../__fixtures__/entities/api-key-role-e
 import { UserFactoryFixture } from '../__fixtures__/factories/user.factory.fixture';
 import { UserRoleFactoryFixture } from '../__fixtures__/factories/user-role.factory.fixture';
 import { RoleFactory } from '../role.factory';
-import { ReferenceLookupException } from '@concepta/typeorm-common';
 
 describe('RoleModule', () => {
   let testModule: TestingModule;
@@ -161,26 +160,6 @@ describe('RoleModule', () => {
       expect(await roleService.isAssignedRoles('role', [], testUser)).toEqual(
         false,
       );
-    });
-  });
-
-  describe('throwLookupException', () => {
-    it('should throw reference lookup exception', async () => {
-      const e = new Error('Fake error');
-
-      const t = () => {
-        roleService['throwLookupException'](e, 'MyEntityName');
-      };
-
-      expect(t).toThrow(ReferenceLookupException);
-    });
-
-    it('should re-throw unknown error', async () => {
-      const t = () => {
-        roleService['throwLookupException']('wut', 'MyEntityName');
-      };
-
-      expect(t).toThrow('wut');
     });
   });
 });

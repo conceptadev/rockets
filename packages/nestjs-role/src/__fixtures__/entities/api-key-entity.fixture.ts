@@ -8,8 +8,8 @@ import { ApiKeyRoleEntityFixture } from './api-key-role-entity.fixture';
 @Entity()
 export class ApiKeyEntityFixture implements ReferenceIdInterface {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @OneToMany(() => ApiKeyRoleEntityFixture, (apiKeyRole) => apiKeyRole.assignee)
-  apiKeyRoles: string;
+  apiKeyRoles!: string;
 }

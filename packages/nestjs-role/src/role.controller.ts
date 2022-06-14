@@ -18,6 +18,8 @@ import { RoleCreateManyDto } from './dto/role-create-many.dto';
 import { RoleUpdateDto } from './dto/role-update.dto';
 import { RolePaginatedDto } from './dto/role-paginated.dto';
 import { RoleEntityInterface } from './interfaces/role-entity.interface';
+import { RoleCreatableInterface } from './interfaces/role-creatable.interface';
+import { RoleUpdatableInterface } from './interfaces/role-updatable.interface';
 
 /**
  * Role controller.
@@ -30,7 +32,12 @@ import { RoleEntityInterface } from './interfaces/role-entity.interface';
   },
 })
 export class RoleController
-  implements CrudControllerInterface<RoleEntityInterface>
+  implements
+    CrudControllerInterface<
+      RoleEntityInterface,
+      RoleCreatableInterface,
+      RoleUpdatableInterface
+    >
 {
   /**
    * Constructor.

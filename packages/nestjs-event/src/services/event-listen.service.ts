@@ -4,9 +4,10 @@ import {
   OnOptions,
   Listener as EmitterListener,
 } from 'eventemitter2';
+import { NotAnErrorException } from '@concepta/ts-core';
 import { EventListenerException } from '../exceptions/event-listener.exception';
 import { EventListenOnOptionsInterface } from './interfaces/event-listen-on-options.interface';
-import { EventListenOnInterface } from '../services/interfaces/event-listen-on.interface';
+import { EventListenOnInterface } from './interfaces/event-listen-on.interface';
 import { EventStaticInterface } from '../events/interfaces/event-static.interface';
 import { EventInterface } from '../events/interfaces/event.interface';
 import { EVENT_MODULE_EMITTER_SERVICE_TOKEN } from '../event-constants';
@@ -86,16 +87,18 @@ export class EventListenService {
         finalOptions,
       ) as EmitterListener;
     } catch (e) {
+      const exception = e instanceof Error ? e : new NotAnErrorException(e);
       // rethrow wrapped
-      throw new EventListenerException(e.message);
+      throw new EventListenerException(exception.message);
     }
 
     try {
       // inform listener of the subscription
       listener.subscription(emitterListener);
     } catch (e) {
+      const exception = e instanceof Error ? e : new NotAnErrorException(e);
       // rethrow wrapped
-      throw new EventListenerException(e.message);
+      throw new EventListenerException(exception.message);
     }
   }
 }

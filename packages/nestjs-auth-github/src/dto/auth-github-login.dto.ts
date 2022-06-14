@@ -11,5 +11,5 @@ export class AuthGithubLoginDto implements AuthGithubLoginInterface {
     description: 'Code returned from github',
   })
   @IsString()
-  code: string;
+  code = '';
 }

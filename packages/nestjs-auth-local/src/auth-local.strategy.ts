@@ -55,11 +55,11 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
    * @param password The plain text password
    */
   async validate(username: ReferenceUsername, password: string) {
-    // break out the fields
-    const { usernameField, passwordField } = this.settings;
+    // break out the settings
+    const { loginDto, usernameField, passwordField } = this.assertSettings();
 
     // validate the dto
-    const dto = new this.settings.loginDto();
+    const dto = new loginDto();
     dto[usernameField] = username;
     dto[passwordField] = password;
 
@@ -84,5 +84,33 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
     if (!isValid) throw new UnauthorizedException();
 
     return user;
+  }
+
+  /**
+   * Return settings asserted as definitely defined.
+   */
+  protected assertSettings(): Required<AuthLocalSettingsInterface> {
+    const { loginDto, usernameField, passwordField } = this.settings;
+
+    // is the login dto missing?
+    if (!loginDto) {
+      throw new Error('Login DTO is required, did someone remove the default?');
+    }
+
+    // is the username field missing?
+    if (!usernameField) {
+      throw new Error(
+        'Login username field is required, did someone remove the default?',
+      );
+    }
+
+    // is the password field missing?
+    if (!passwordField) {
+      throw new Error(
+        'Login password field is required, did someone remove the default?',
+      );
+    }
+
+    return { loginDto, usernameField, passwordField };
   }
 }

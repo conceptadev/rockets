@@ -4,6 +4,7 @@ import {
   TypeOrmModuleAsyncOptions,
   TypeOrmModuleOptions,
 } from '@nestjs/typeorm';
+import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
 import {
   AsyncModuleConfig,
   createConfigurableDynamicRootModule,
@@ -36,6 +37,10 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
   static register(options: TypeOrmExtOptions) {
     const module = TypeOrmExtModule.forRoot(TypeOrmExtModule, options);
 
+    if (!module.imports) {
+      module.imports = [];
+    }
+
     module.imports.push(
       TypeOrmModule.forRootAsync({
         name: options?.name
@@ -57,6 +62,10 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
   ) {
     const module = TypeOrmExtModule.forRootAsync(TypeOrmExtModule, options);
 
+    if (!module.imports) {
+      module.imports = [];
+    }
+
     module.imports.push(
       TypeOrmModule.forRootAsync({
         inject: [TYPEORM_EXT_MODULE_OPTIONS_TOKEN],
@@ -77,13 +86,7 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
   ): DynamicModule {
     const connections: Record<string, TypeOrmExtConnectionToken> = {};
 
-    const entitiesByConn: Record<
-      string,
-      (
-        | TypeOrmExtEntityOptionInterface['entity']
-        | TypeOrmExtEntityOptionInterface['repository']
-      )[]
-    > = {};
+    const entitiesByConn: Record<string, EntityClassOrSchema[]> = {};
 
     const imports: DynamicModule[] = [];
 
