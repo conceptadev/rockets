@@ -12,7 +12,15 @@ export function CrudApiResponse(
   action: CrudActions,
   options?: ApiResponseOptions,
 ): MethodDecorator {
-  return (target: Type, propertyKey: string | symbol) => {
+  return (target: Type<Object> | Object, ...rest) => {
+    const [propertyKey] = rest;
+
+    if (!('__proto__' in target)) {
+      throw new Error(
+        'Cannot decorate with api response, target must be a class',
+      );
+    }
+
     const reflectionService = new CrudReflectionService();
 
     const previousValues =

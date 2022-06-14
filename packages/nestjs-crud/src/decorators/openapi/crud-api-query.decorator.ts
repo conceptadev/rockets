@@ -8,7 +8,13 @@ import { CrudReflectionService } from '../../services/crud-reflection.service';
  * @CrudApiQuery() open api decorator
  */
 export function CrudApiQuery(options?: ApiQueryOptions[]): MethodDecorator {
-  return (target: Type, propertyKey: string | symbol) => {
+  return (target: Type<Object> | Object, ...rest) => {
+    const [propertyKey] = rest;
+
+    if (!('__proto__' in target)) {
+      throw new Error('Cannot decorate with api query, target must be a class');
+    }
+
     const reflectionService = new CrudReflectionService();
 
     const previousValues = reflectionService.getApiQueryOptions(target) || [];

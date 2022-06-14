@@ -8,7 +8,13 @@ import { CrudReflectionService } from '../../services/crud-reflection.service';
  * @CrudApiParam() open api decorator
  */
 export function CrudApiParam(options?: ApiParamOptions): MethodDecorator {
-  return (target: Type, propertyKey: string | symbol) => {
+  return (target: Type<Object> | Object, ...rest) => {
+    const [propertyKey] = rest;
+
+    if (!('__proto__' in target)) {
+      throw new Error('Cannot decorate with api param, target must be a class');
+    }
+
     const reflectionService = new CrudReflectionService();
 
     const previousValues = reflectionService.getApiParamsOptions(target) || [];

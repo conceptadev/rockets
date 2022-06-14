@@ -12,12 +12,6 @@ import { CrudResponsePaginatedDto } from '../../dto/crud-response-paginated.dto'
 import { CrudResponseDto } from '../../dto/crud-response.dto';
 import { CrudReflectionService } from '../../services/crud-reflection.service';
 
-type ResponseDecoratorParameters = [
-  Type,
-  Parameters<MethodDecorator>[1],
-  Parameters<MethodDecorator>[2],
-];
-
 /**
  * Utility decorator used to apply response
  * options *from the controller context*.
@@ -28,12 +22,18 @@ export function applyApiResponse(
   action: CrudActions,
   options: ApiResponseOptions = {},
 ): MethodDecorator {
-  return (...args: ResponseDecoratorParameters) => {
+  return (target: Type<Object> | Object, ...rest) => {
     // break out args
-    const [target, propertyKey] = args;
+    const [propertyKey] = rest;
 
     // reflection service
     const reflectionService = new CrudReflectionService();
+
+    if (!('prototype' in target)) {
+      throw new Error(
+        'Cannot decorate with apply api response, target must be a class',
+      );
+    }
 
     // get the serialize options
     const serializeOptions = reflectionService.getAllSerializationOptions(
@@ -72,7 +72,7 @@ export function applyApiResponse(
           modelName: requestOptions.model.type.name,
           dto,
           paginatedDto,
-          alwaysPaginate: requestOptions.query.alwaysPaginate,
+          alwaysPaginate: requestOptions.query?.alwaysPaginate ?? false,
         });
         break;
 
@@ -84,7 +84,7 @@ export function applyApiResponse(
       // returns deleted item or empty
       case CrudActions.DeleteOne:
         dtoMetaOptions.type =
-          requestOptions.routes.deleteOneBase.returnDeleted === true
+          requestOptions.routes?.deleteOneBase?.returnDeleted === true
             ? dto
             : undefined;
         break;
@@ -92,7 +92,7 @@ export function applyApiResponse(
       // returns recovered item or empty
       case CrudActions.RecoverOne:
         dtoMetaOptions.type =
-          requestOptions.routes.recoverOneBase.returnRecovered === true
+          requestOptions.routes?.recoverOneBase?.returnRecovered === true
             ? dto
             : undefined;
         break;
@@ -116,8 +116,8 @@ export function applyApiResponse(
       ...options,
     };
 
-    ApiExtraModels(paginatedDto)(...args);
-    ApiResponse(mergedOptions)(...args);
+    ApiExtraModels(paginatedDto)(target, ...rest);
+    ApiResponse(mergedOptions)(target, ...rest);
   };
 }
 

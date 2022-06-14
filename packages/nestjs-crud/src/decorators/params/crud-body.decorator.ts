@@ -10,11 +10,13 @@ import { CrudReflectionService } from '../../services/crud-reflection.service';
 export function CrudBody(
   options?: CrudBodyOptionsInterface,
 ): ParameterDecorator {
-  return (
-    target: Type,
-    propertyKey: string | symbol,
-    parameterIndex: number,
-  ) => {
+  return (target: Type<Object> | Object, ...rest) => {
+    const [propertyKey, parameterIndex] = rest;
+
+    if (!('__proto__' in target)) {
+      throw new Error('Cannot decorate with body, target must be a class');
+    }
+
     const reflectionService = new CrudReflectionService();
 
     const previousValues = reflectionService.getBodyParamOptions(target) || [];
@@ -23,7 +25,7 @@ export function CrudBody(
       propertyKey,
       parameterIndex,
       validation: options?.validation,
-      pipes: options?.pipes,
+      pipes: options?.pipes ?? [],
     };
 
     const values = [...previousValues, value];
