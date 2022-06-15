@@ -9,18 +9,22 @@ import { EntityNotFoundException } from '../exceptions/entity-not-found.exceptio
 import { OtpAssigneeInterface } from '../interfaces/otp-assignee.interface';
 import { OtpAssignmentInterface } from '../interfaces/otp-assignment.interface';
 import { OtpInterface } from '../interfaces/otp.interface';
-import { ALL_OTPS_REPOSITORIES_TOKEN } from '../otp.constants';
+import { ALL_OTPS_REPOSITORIES_TOKEN, OTP_MODULE_SETTINGS_TOKEN } from '../otp.constants';
 import { OtpCreateDto } from '../dto/otp-create.dto';
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 import { OtpCreatableInterface } from '../interfaces/otp-creatable.interface';
 import { randomUUID } from 'crypto';
+import { OtpSettingsInterface } from '../interfaces/otp-settings.interface';
+import { getPackedSettings } from 'http2';
 
 @Injectable()
 export class OtpService {
   constructor(
     @Inject(ALL_OTPS_REPOSITORIES_TOKEN)
     private allOtpRepos: Record<string, Repository<OtpAssignmentInterface>>,
+    @Inject(OTP_MODULE_SETTINGS_TOKEN)
+    private settings: OtpSettingsInterface,
   ) {}
 
   /**
@@ -41,11 +45,12 @@ export class OtpService {
       // validate the data
       const dto = await this.validateDto<OtpCreateDto>(OtpCreateDto, data);
       const passCode = randomUUID();
+      const expirationDate = this.getExpirationDate(this.settings.expiresIn);
 
-      //TODO: should we validate if passCode already exists?
+      //TODO: should we validate if passCode already exists before create?
 
       // try to save the item
-      return assignmentRepo.save({ ...dto, passCode });
+      return assignmentRepo.save({ ...dto, passCode, expirationDate });
     } catch (e) {
       throw new ReferenceMutateException(assignmentRepo.metadata.targetName, e);
     }
@@ -75,6 +80,10 @@ export class OtpService {
       passCode,
       assignee,
     );
+
+    // check if otp is expired
+    const now = new Date();
+    if (!assignedOtp || now > assignedOtp.expirationDate) return false;
 
     // if is valid and deleteIfValid is true, delete the otp
     const isValid = !!assignedOtp;
@@ -253,5 +262,13 @@ export class OtpService {
     }
 
     return dto;
+  }
+
+  // TODO: move this to a help function
+  private getExpirationDate(expiresIn: number) {
+    const now = new Date();
+
+    // add time in seconds to now as string format
+    return new Date(now.getTime() + expiresIn * 1000);
   }
 }

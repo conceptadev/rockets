@@ -22,6 +22,9 @@ export abstract class OtpAssignmentSqliteEntity
   @Column()
   passCode!: string;
 
+  @Column({ type: 'datetime' })
+  expirationDate!: Date;
+
   @Column(() => AuditSqlLiteEmbed, {})
   audit!: AuditInterface;
 

@@ -22,6 +22,9 @@ export abstract class OtpAssignmentPostgresEntity
   @Column()
   passCode!: string;
 
+  @Column({ type: 'timestamptz' })
+  expirationDate!: Date;
+
   @Column(() => AuditPostgresEmbed, {})
   audit!: AuditInterface;
 

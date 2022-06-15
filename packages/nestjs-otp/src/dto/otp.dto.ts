@@ -49,6 +49,17 @@ export class OtpDto
   passCode = '';
 
   /**
+   * expirationDate
+   */
+  @Expose()
+  @ApiProperty({
+    type: 'string',
+    description: 'expirationDate of the otp',
+  })
+  @IsString()
+  expirationDate = new Date();
+
+  /**
    * Assignee
    */
   @Expose({ toPlainOnly: true })
