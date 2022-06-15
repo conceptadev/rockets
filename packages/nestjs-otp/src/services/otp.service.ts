@@ -9,14 +9,16 @@ import { EntityNotFoundException } from '../exceptions/entity-not-found.exceptio
 import { OtpAssigneeInterface } from '../interfaces/otp-assignee.interface';
 import { OtpAssignmentInterface } from '../interfaces/otp-assignment.interface';
 import { OtpInterface } from '../interfaces/otp.interface';
-import { ALL_OTPS_REPOSITORIES_TOKEN, OTP_MODULE_SETTINGS_TOKEN } from '../otp.constants';
+import {
+  ALL_OTPS_REPOSITORIES_TOKEN,
+  OTP_MODULE_SETTINGS_TOKEN,
+} from '../otp.constants';
 import { OtpCreateDto } from '../dto/otp-create.dto';
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 import { OtpCreatableInterface } from '../interfaces/otp-creatable.interface';
 import { randomUUID } from 'crypto';
 import { OtpSettingsInterface } from '../interfaces/otp-settings.interface';
-import { getPackedSettings } from 'http2';
 
 @Injectable()
 export class OtpService {
@@ -119,7 +121,7 @@ export class OtpService {
   }
 
   /**
-   * 
+   *
    * @param context The context of the repository (same as entity key)
    * @param assignee The assignee to delete
    * @param category The category to delete

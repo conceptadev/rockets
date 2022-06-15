@@ -9,8 +9,6 @@ import { UserEntityFixture } from '../__fixtures__/entities/user-entity.fixture'
 import { UserOtpEntityFixture } from '../__fixtures__/entities/user-otp-entity.fixture';
 import { UserOtpRepositoryFixture } from '../__fixtures__/repositories/user-otp-repository.fixture';
 
-import { ReferenceLookupException } from '@concepta/typeorm-common';
-
 describe('OtpModule', () => {
   let testModule: TestingModule;
   let otpModule: OtpModule;
