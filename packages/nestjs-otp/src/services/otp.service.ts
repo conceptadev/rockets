@@ -68,31 +68,21 @@ export class OtpService {
     passCode: string,
     deleteIfValid: boolean,
   ): Promise<boolean> {
-    // get all otps from an assigned user for a category
-    const assignedOtps = await this.getAssignedOtps(
+    // get otp from an assigned user for a category
+    const assignedOtp = await this.getByPassCode(
       context,
       category,
+      passCode,
       assignee,
     );
 
-    // get any otps to check?
-    if (passCode) {
-      // check if there is a otp with a passCode
-      const assignedOtp = assignedOtps.find(
-        (value) => value.passCode === passCode,
-      );
-
-      // if is valid and deleteIfValid is true, delete the otp
-      const isValid = !!assignedOtp;
-      if (deleteIfValid && isValid) {
-        await this.deleteOtp(context, assignedOtp.id);
-      }
-
-      return isValid;
-    } else {
-      // No otps to check!
-      return false;
+    // if is valid and deleteIfValid is true, delete the otp
+    const isValid = !!assignedOtp;
+    if (deleteIfValid && isValid) {
+      await this.deleteOtp(context, assignedOtp.id);
     }
+
+    return isValid;
   }
 
   /**
@@ -108,21 +98,24 @@ export class OtpService {
     category: string,
     passCode: string,
   ): Promise<void> {
-    // get all otps from an assigned user for a category
-    const assignedOtps = await this.getAssignedOtps(
+    // get otp from an assigned user for a category
+    const assignedOtp = await this.getByPassCode(
       context,
       category,
+      passCode,
       assignee,
-    );
-
-    // check if there is a otp with a passCode
-    const assignedOtp = assignedOtps.find(
-      (value) => value.passCode === passCode,
     );
 
     if (assignedOtp) this.deleteOtp(context, assignedOtp.id);
   }
 
+  /**
+   * 
+   * @param context The context of the repository (same as entity key)
+   * @param assignee The assignee to delete
+   * @param category The category to delete
+   */
+  //TODO: should i clear only based on one of the options?
   async clear<T extends OtpAssigneeInterface>(
     context: string,
     assignee: Partial<T>,
@@ -135,6 +128,7 @@ export class OtpService {
       assignee,
     );
 
+    // Map to get ids
     const assignedOtpIds = assignedOtps.map((assignedOtp) => assignedOtp.id);
 
     if (assignedOtpIds.length > 0)
@@ -180,6 +174,34 @@ export class OtpService {
         where: {
           assignee,
           category,
+        },
+        relations: [context],
+      });
+
+      // return the otps from assignee
+      return assignments;
+    } catch (e) {
+      throw new ReferenceLookupException(assignmentRepo.metadata.targetName, e);
+    }
+  }
+
+  protected async getByPassCode(
+    context: string,
+    category: string,
+    passCode: string,
+    assignee: Partial<OtpAssigneeInterface>,
+  ): Promise<OtpInterface | undefined> {
+    // get the assignment repo
+    const assignmentRepo = this.getAssignmentRepo(context);
+
+    // try to find the relationships
+    try {
+      // make the query
+      const assignments = await assignmentRepo.findOne({
+        where: {
+          assignee,
+          category,
+          passCode,
         },
         relations: [context],
       });
