@@ -3,6 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ReferenceIdInterface } from '@concepta/ts-core';
 import { ReferenceLookupException } from '@concepta/typeorm-common';
 import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
+import { AssignmentNotFoundException } from '../exceptions/assignment-not-found.exception';
 import { RoleAssignmentEntityInterface } from '../interfaces/role-assignment-entity.interface';
 import { RoleAssigneeInterface } from '../interfaces/role-assignee.interface';
 import { RoleInterface } from '../interfaces/role.interface';
@@ -140,7 +141,7 @@ export class RoleService {
       }
     } else {
       // bad assignment
-      throw new EntityNotFoundException(assignment);
+      throw new AssignmentNotFoundException(assignment);
     }
   }
 }

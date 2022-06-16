@@ -18,6 +18,7 @@ import {
 } from './role.constants';
 import { RoleAssignmentInterface } from './interfaces/role-assignment.interface';
 import { EntityNotFoundException } from './exceptions/entity-not-found.exception';
+import { AssignmentNotFoundException } from './exceptions/assignment-not-found.exception';
 import { RoleAssignmentCreatableInterface } from './interfaces/role-assignment-creatable.interface';
 import { RoleAssignmentCrudService } from './services/role-assignment-crud.service';
 import { RoleAssignmentDto } from './dto/role-assignment.dto';
@@ -178,7 +179,7 @@ export class RoleAssignmentController
       }
     } else {
       // bad assignment
-      throw new EntityNotFoundException(assignment);
+      throw new AssignmentNotFoundException(assignment);
     }
   }
 }
