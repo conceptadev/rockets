@@ -5,3 +5,7 @@ export type CrudValidationOptions = xCrudOptions['validation'];
 
 /* eslint-disable-next-line @typescript-eslint/ban-types */
 export type DecoratorTargetObject<T extends Object = Object> = Type<T> | T;
+
+/* eslint-disable-next-line @typescript-eslint/ban-types */
+export type ReflectionTargetOrHandler = Function | Type<Object>;
+
