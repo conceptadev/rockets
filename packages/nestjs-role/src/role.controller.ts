@@ -1,3 +1,4 @@
+import { ApiTags } from '@nestjs/swagger';
 import {
   CrudBody,
   CrudCreateOne,
@@ -24,6 +25,7 @@ import { RoleUpdatableInterface } from './interfaces/role-updatable.interface';
 /**
  * Role controller.
  */
+@ApiTags('role')
 @CrudController({
   path: 'role',
   model: {

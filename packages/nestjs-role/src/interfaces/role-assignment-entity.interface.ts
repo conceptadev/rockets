@@ -3,13 +3,20 @@ import {
   ReferenceIdInterface,
 } from '@concepta/ts-core';
 import { RoleAssignableInterface } from './role-assignable.interface';
+import { RoleInterface } from './role.interface';
+import { RoleAssigneeInterface } from './role-assignee.interface';
 
-export interface RoleAssignmentInterface
+export interface RoleAssignmentEntityInterface
   extends ReferenceIdInterface,
     ReferenceAuditInterface,
     RoleAssignableInterface {
   /**
    * Role
    */
-  role: ReferenceIdInterface;
+  role: RoleInterface;
+
+  /**
+   * Assignee
+   */
+  assignee: RoleAssigneeInterface;
 }

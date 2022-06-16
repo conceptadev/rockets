@@ -51,7 +51,7 @@ export class RoleFactory<
 
     // keep trying to get a unique name
     do {
-      name = Faker.name.firstName();
+      name = Faker.lorem.word();
     } while (this.usedNames[name]);
 
     // add to used names

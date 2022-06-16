@@ -3,31 +3,40 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ReferenceIdInterface } from '@concepta/ts-core';
 import { ReferenceLookupException } from '@concepta/typeorm-common';
 import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
+import { RoleAssignmentEntityInterface } from '../interfaces/role-assignment-entity.interface';
 import { RoleAssigneeInterface } from '../interfaces/role-assignee.interface';
-import { RoleAssignmentInterface } from '../interfaces/role-assignment.interface';
 import { RoleInterface } from '../interfaces/role.interface';
-import { ALL_ROLES_REPOSITORIES_TOKEN } from '../role.constants';
+import {
+  ROLE_MODULE_REPOSITORIES_TOKEN,
+  ROLE_MODULE_SETTINGS_TOKEN,
+} from '../role.constants';
 import { RoleEntityInterface } from '../interfaces/role-entity.interface';
+import { RoleSettingsInterface } from '../interfaces/role-settings.interface';
 
 @Injectable()
 export class RoleService {
   constructor(
-    @Inject(ALL_ROLES_REPOSITORIES_TOKEN)
-    private allRoleRepos: Record<string, Repository<RoleAssignmentInterface>>,
+    @Inject(ROLE_MODULE_SETTINGS_TOKEN)
+    private settings: RoleSettingsInterface,
+    @Inject(ROLE_MODULE_REPOSITORIES_TOKEN)
+    private allRoleRepos: Record<
+      string,
+      Repository<RoleAssignmentEntityInterface>
+    >,
   ) {}
 
   /**
    * Get all roles for assignee.
    *
-   * @param context The context of the check (same as entity key)
+   * @param assignment The assignment of the check (same as entity key)
    * @param assignee The assignee to check
    */
   async getAssignedRoles(
-    context: string,
+    assignment: string,
     assignee: Partial<RoleAssigneeInterface>,
   ): Promise<RoleEntityInterface[]> {
     // get the assignment repo
-    const assignmentRepo = this.getAssignmentRepo(context);
+    const assignmentRepo = this.getAssignmentRepo(assignment);
 
     // try to find the relationships
     try {
@@ -36,7 +45,7 @@ export class RoleService {
         where: {
           assignee,
         },
-        relations: [context],
+        relations: ['role', 'assignee'],
       });
 
       // return the roles
@@ -49,17 +58,17 @@ export class RoleService {
   /**
    * Check if the assignee is a member of one role.
    *
-   * @param context The context of the check (same as entity key)
+   * @param assignment The assignment of the check
    * @param role The role to check
    * @param assignee The assignee to check
    */
   async isAssignedRole<T extends RoleAssigneeInterface>(
-    context: string,
+    assignment: string,
     role: Partial<RoleInterface>,
     assignee: Partial<T>,
   ): Promise<boolean> {
     // get the assignment repo
-    const assignmentRepo = this.getAssignmentRepo(context);
+    const assignmentRepo = this.getAssignmentRepo(assignment);
 
     // try to find the relationship
     try {
@@ -80,17 +89,17 @@ export class RoleService {
   /**
    * Check if the assignee is a member of every role.
    *
-   * @param context The context of the check (same as entity key)
+   * @param assignment The assignment of the check
    * @param roles The roles to check
    * @param assignee The assignee to check
    */
   async isAssignedRoles<T extends RoleAssigneeInterface>(
-    context: string,
+    assignment: string,
     roles: ReferenceIdInterface[],
     assignee: Partial<T>,
   ): Promise<boolean> {
     // get all assigned roles
-    const assignedRoles = await this.getAssignedRoles(context, assignee);
+    const assignedRoles = await this.getAssignedRoles(assignment, assignee);
 
     // get any roles to check?
     if (roles.length) {
@@ -109,21 +118,29 @@ export class RoleService {
   }
 
   /**
-   * Get the assignment repo for the given context.
+   * Get the assignment repo for the given assignment.
    *
    * @private
-   * @param context The role context (same as entity key)
+   * @param assignment The role assignment
    */
   protected getAssignmentRepo(
-    context: string,
-  ): Repository<RoleAssignmentInterface> {
-    // repo matching context was injected?
-    if (this.allRoleRepos[context]) {
-      // yes, return it
-      return this.allRoleRepos[context];
+    assignment: string,
+  ): Repository<RoleAssignmentEntityInterface> {
+    // have entity key for given assignment?
+    if (this.settings.assignments[assignment]) {
+      // yes, set it
+      const entityKey = this.settings.assignments[assignment].entityKey;
+      // repo matching assignment was injected?
+      if (this.allRoleRepos[entityKey]) {
+        // yes, return it
+        return this.allRoleRepos[entityKey];
+      } else {
+        // bad entity key
+        throw new EntityNotFoundException(entityKey);
+      }
     } else {
-      // bad context
-      throw new EntityNotFoundException(context);
+      // bad assignment
+      throw new EntityNotFoundException(assignment);
     }
   }
 }

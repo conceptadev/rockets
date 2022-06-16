@@ -4,7 +4,7 @@ import { RoleMutateServiceInterface } from './role-mutate-service.interface';
 import { RoleSettingsInterface } from './role-settings.interface';
 
 export interface RoleOptionsInterface extends OptionsInterface {
-  settings?: RoleSettingsInterface;
+  settings: RoleSettingsInterface;
   roleLookupService?: RoleLookupServiceInterface;
   roleMutateService?: RoleMutateServiceInterface;
 }

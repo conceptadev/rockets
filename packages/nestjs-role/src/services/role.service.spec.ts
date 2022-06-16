@@ -51,14 +51,15 @@ describe('RoleModule', () => {
           ],
         }),
         RoleModule.register({
+          settings: {
+            assignments: {
+              user: { entityKey: 'userRole' },
+            },
+          },
           entities: {
             role: {
               entity: RoleEntityFixture,
               repository: RoleRepositoryFixture,
-              connection: connectionName,
-            },
-            user: {
-              entity: UserRoleEntityFixture,
               connection: connectionName,
             },
             userRole: {
@@ -118,7 +119,7 @@ describe('RoleModule', () => {
   describe('getAssignedRoles', () => {
     it('should return assigned roles', async () => {
       const assignedRoles: Partial<RoleEntityFixture>[] =
-        await roleService.getAssignedRoles('role', testUser);
+        await roleService.getAssignedRoles('user', testUser);
 
       expect(assignedRoles).toBeInstanceOf(Array);
       expect(assignedRoles.length).toEqual(1);
@@ -128,13 +129,13 @@ describe('RoleModule', () => {
   describe('isAssignedRole', () => {
     it('should be assigned to one', async () => {
       expect(
-        await roleService.isAssignedRole('role', testRole1, testUser),
+        await roleService.isAssignedRole('user', testRole1, testUser),
       ).toEqual(true);
     });
 
     it('should not be assigned to one', async () => {
       expect(
-        await roleService.isAssignedRole('role', testRole2, testUser),
+        await roleService.isAssignedRole('user', testRole2, testUser),
       ).toEqual(false);
     });
   });
@@ -142,14 +143,14 @@ describe('RoleModule', () => {
   describe('isAssignedRoles', () => {
     it('should be assigned to all', async () => {
       expect(
-        await roleService.isAssignedRoles('role', [testRole1], testUser),
+        await roleService.isAssignedRoles('user', [testRole1], testUser),
       ).toEqual(true);
     });
 
     it('should not be assigned to all', async () => {
       expect(
         await roleService.isAssignedRoles(
-          'role',
+          'user',
           [testRole1, testRole2],
           testUser,
         ),
@@ -157,7 +158,7 @@ describe('RoleModule', () => {
     });
 
     it('impossible to be assigned to none', async () => {
-      expect(await roleService.isAssignedRoles('role', [], testUser)).toEqual(
+      expect(await roleService.isAssignedRoles('user', [], testUser)).toEqual(
         false,
       );
     });
