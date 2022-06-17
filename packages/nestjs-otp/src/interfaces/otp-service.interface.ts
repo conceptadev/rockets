@@ -54,5 +54,5 @@ export interface OtpServiceInterface {
     context: string,
     assignee: Partial<T>,
     category: string,
-  ): Promise<void>
+  ): Promise<void>;
 }
