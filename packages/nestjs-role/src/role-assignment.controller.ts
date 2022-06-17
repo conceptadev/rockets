@@ -25,7 +25,6 @@ import { RoleAssignmentDto } from './dto/role-assignment.dto';
 import { RoleAssignmentCreateDto } from './dto/role-assignment-create.dto';
 import { RoleAssignmentPaginatedDto } from './dto/role-assignment-paginated.dto';
 import { RoleAssignmentCreateManyDto } from './dto/role-assignment-create-many.dto';
-import { CRUD_MODULE_DEFAULT_PARAMS_OPTIONS } from '@concepta/nestjs-crud/src/crud.constants';
 import { RoleSettingsInterface } from './interfaces/role-settings.interface';
 
 /**
@@ -39,7 +38,7 @@ import { RoleSettingsInterface } from './interfaces/role-settings.interface';
     paginatedType: RoleAssignmentPaginatedDto,
   },
   params: {
-    ...CRUD_MODULE_DEFAULT_PARAMS_OPTIONS,
+    id: { field: 'id', type: 'string', primary: true },
     assignment: {
       field: 'assignment',
       disabled: true,
