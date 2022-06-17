@@ -29,6 +29,11 @@ export const CrudInitApiParams =
         propertyKey,
       );
 
+      // sanity check
+      if (!descriptor) {
+        throw new Error('Did not find property descriptor');
+      }
+
       // get the route params options
       const paramsOptions = reflectionService.getAllParamOptions(
         classTarget,
@@ -44,7 +49,7 @@ export const CrudInitApiParams =
 
           // merge the options
           const apiOptions: ApiParamOptions = {
-            name: propOpts.field,
+            name: propOpts.field ?? '',
             required: true,
             type: propOpts.type === 'number' ? Number : String,
             enum: propOpts?.enum ? Object.values(propOpts.enum) : undefined,

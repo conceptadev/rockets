@@ -1,4 +1,4 @@
-import { Injectable, Type } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { CrudOptions, ParamsOptions } from '@nestjsx/crud';
 import {
@@ -29,7 +29,10 @@ import {
   CRUD_MODULE_API_QUERY_METADATA,
 } from '../crud.constants';
 import { CrudActions } from '../crud.enums';
-import { CrudValidationOptions } from '../crud.types';
+import {
+  CrudValidationOptions,
+  ReflectionTargetOrHandler,
+} from '../crud.types';
 import { CrudApiParamMetadataInterface } from '../interfaces/crud-api-param-metadata.interface';
 import { CrudApiQueryMetadataInterface } from '../interfaces/crud-api-query-metadata.interface';
 import { CrudApiResponseMetadataInterface } from '../interfaces/crud-api-response-metadata.interface';
@@ -44,9 +47,6 @@ import {
 } from '../interfaces/crud-route-options.interface';
 import { CrudSerializationOptionsInterface } from '../interfaces/crud-serialization-options.interface';
 import { CrudValidationMetadataInterface } from '../interfaces/crud-validation-metadata.interface';
-
-// eslint-disable-next-line @typescript-eslint/ban-types
-type ReflectionTargetOrHandler = Function | Type | Type<Object>;
 
 @Injectable()
 export class CrudReflectionService {

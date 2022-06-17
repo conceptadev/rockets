@@ -27,6 +27,10 @@ export const CrudInitApiResponse =
         propertyKey,
       );
 
+      if (!descriptor) {
+        throw new Error('Failed to get property descriptor');
+      }
+
       applyApiResponse(action, options)(classTarget, propertyKey, descriptor);
     });
   };

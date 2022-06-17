@@ -31,20 +31,20 @@ import { UserRoleRepositoryFixture } from './repositories/user-role-repository.f
       }),
     }),
     RoleModule.register({
+      settings: {
+        assignments: {
+          user: { entityKey: 'userRole' },
+          'api-key': { entityKey: 'apiKeyRole' },
+        },
+      },
       entities: {
         role: {
           entity: RoleEntityFixture,
           repository: RoleRepositoryFixture,
         },
-        user: {
-          entity: UserRoleEntityFixture,
-        },
         userRole: {
           entity: UserRoleEntityFixture,
           repository: UserRoleRepositoryFixture,
-        },
-        apiKey: {
-          entity: ApiKeyEntityFixture,
         },
         apiKeyRole: {
           entity: ApiKeyRoleEntityFixture,

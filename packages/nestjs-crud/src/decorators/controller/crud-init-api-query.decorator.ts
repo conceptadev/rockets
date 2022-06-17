@@ -29,6 +29,11 @@ export const CrudInitApiQuery =
         propertyKey,
       );
 
+      // sanity check
+      if (!descriptor) {
+        throw new Error('Did not find property descriptor');
+      }
+
       // get the action
       const action = reflectionService.getAction(
         classTarget.prototype[propertyKey],
