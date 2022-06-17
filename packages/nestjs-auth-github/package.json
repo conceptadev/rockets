@@ -1,6 +1,6 @@
 {
   "name": "@concepta/nestjs-auth-github",
-  "version": "4.0.0-alpha.15",
+  "version": "4.0.0-alpha.16",
   "description": "Rockets NestJS GitHub Authentication",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,10 +12,10 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
-    "@concepta/nestjs-authentication": "^4.0.0-alpha.15",
-    "@concepta/nestjs-core": "^4.0.0-alpha.15",
-    "@concepta/nestjs-federated": "^4.0.0-alpha.15",
-    "@concepta/ts-core": "^4.0.0-alpha.15",
+    "@concepta/nestjs-authentication": "^4.0.0-alpha.16",
+    "@concepta/nestjs-core": "^4.0.0-alpha.16",
+    "@concepta/nestjs-federated": "^4.0.0-alpha.16",
+    "@concepta/ts-core": "^4.0.0-alpha.16",
     "@nestjs/common": "^8.0.2",
     "@nestjs/config": "^1.1.6",
     "@nestjs/core": "^8.0.2",
@@ -24,10 +24,10 @@
     "passport-github": "^1.1.0"
   },
   "devDependencies": {
-    "@concepta/nestjs-crud": "^4.0.0-alpha.15",
-    "@concepta/nestjs-jwt": "^4.0.0-alpha.15",
-    "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.15",
-    "@concepta/nestjs-user": "^4.0.0-alpha.15",
+    "@concepta/nestjs-crud": "^4.0.0-alpha.16",
+    "@concepta/nestjs-jwt": "^4.0.0-alpha.16",
+    "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.16",
+    "@concepta/nestjs-user": "^4.0.0-alpha.16",
     "@nestjs/testing": "^8.0.2",
     "@sentry/types": "^6.13.3",
     "@types/passport-github": "^1.1.7",
