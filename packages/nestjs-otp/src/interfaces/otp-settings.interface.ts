@@ -1,6 +1,10 @@
 import { OptionsInterface } from '@concepta/ts-core';
+import { OtpTypeServiceInterface } from './otp-types-service.interface';
 
 export interface OtpSettingsInterface extends OptionsInterface {
-  //TODO: Change to string to use time span '1h' '2 days' like jwt
-  expiresIn: number; // in seconds
+  /** expressed in seconds or a string describing a time span [zeit/ms](https://github.com/zeit/ms.js).  Eg: 60, "2 days", "10h", "7d" */
+  expiresIn: string;
+  types: {
+    [idx: string]: OtpTypeServiceInterface;
+  };
 }

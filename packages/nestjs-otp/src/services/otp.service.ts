@@ -17,8 +17,8 @@ import { OtpCreateDto } from '../dto/otp-create.dto';
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 import { OtpCreatableInterface } from '../interfaces/otp-creatable.interface';
-import { randomUUID } from 'crypto';
 import { OtpSettingsInterface } from '../interfaces/otp-settings.interface';
+import ms from 'ms';
 
 @Injectable()
 export class OtpService {
@@ -46,7 +46,9 @@ export class OtpService {
     try {
       // validate the data
       const dto = await this.validateDto<OtpCreateDto>(OtpCreateDto, data);
-      const passCode = randomUUID();
+
+      const passCode = this.settings.types[data.type].generator();
+
       const expirationDate = this.getExpirationDate(this.settings.expiresIn);
 
       //TODO: should we validate if passCode already exists before create?
@@ -267,10 +269,10 @@ export class OtpService {
   }
 
   // TODO: move this to a help function
-  private getExpirationDate(expiresIn: number) {
+  private getExpirationDate(expiresIn: string) {
     const now = new Date();
 
     // add time in seconds to now as string format
-    return new Date(now.getTime() + expiresIn * 1000);
+    return new Date(now.getTime() + ms(expiresIn) * 1000);
   }
 }

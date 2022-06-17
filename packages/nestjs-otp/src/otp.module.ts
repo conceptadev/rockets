@@ -130,8 +130,8 @@ export class OtpModule extends createConfigurableDynamicRootModule<
     const reposToInject = [];
     const keyTracker: Record<string, number> = {};
 
+    let idx = 0;
     for (const entityKey in entities) {
-      let idx = 0;
       reposToInject[idx] = getDynamicRepositoryToken(entityKey);
       keyTracker[entityKey] = idx++;
     }
