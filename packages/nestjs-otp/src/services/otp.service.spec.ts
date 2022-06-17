@@ -58,13 +58,13 @@ describe('OtpModule', () => {
     testUser = await userFactory.create();
     const now = new Date();
     const expirationDate = new Date(now.getTime() + ms('1d'));
-    console.log('expirationDate ', expirationDate);
+
     // Create passcode otp for a user
     const userOtpFactory = new UserOtpFactoryFixture();
     await userOtpFactory.create({
       category: CATEGORY_RESTE_PASSWORD,
       type: 'uuid',
-      passCode: RANDOM_UUID_PASSCODE,
+      passcode: RANDOM_UUID_PASSCODE,
       expirationDate: expirationDate,
       assignee: testUser,
     });
@@ -139,7 +139,7 @@ describe('OtpModule', () => {
       await userOtpFactory.create({
         category: CATEGORY_RESTE_PASSWORD,
         type: 'uuid',
-        passCode: RANDOM_UUID_PASSCODE_EXPIRED,
+        passcode: RANDOM_UUID_PASSCODE_EXPIRED,
         expirationDate: expirationDate,
         assignee: testUser,
       });

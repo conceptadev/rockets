@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Repository } from 'typeorm';
 import { OtpAssignmentInterface } from './interfaces/otp-assignment.interface';
-import { ALL_OTPS_REPOSITORIES_TOKEN } from './otp.constants';
+import { OTP_MODULE_REPOSITORIES_TOKEN } from './otp.constants';
 import { OtpModule } from './otp.module';
 import { OtpService } from './services/otp.service';
 
@@ -20,7 +20,7 @@ describe('OtpModule', () => {
     otpService = testModule.get<OtpService>(OtpService);
     otpDynamicRepo = testModule.get<
       Record<string, Repository<OtpAssignmentInterface>>
-    >(ALL_OTPS_REPOSITORIES_TOKEN);
+    >(OTP_MODULE_REPOSITORIES_TOKEN);
   });
 
   afterEach(() => {

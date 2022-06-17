@@ -14,14 +14,13 @@ import {
 } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
 import {
-  ALL_OTPS_REPOSITORIES_TOKEN,
+  OTP_MODULE_REPOSITORIES_TOKEN,
   OTP_MODULE_OPTIONS_TOKEN,
   OTP_MODULE_SETTINGS_TOKEN,
 } from './otp.constants';
 import { otpDefaultConfig } from './config/otp-default.config';
 import { OtpOptionsInterface } from './interfaces/otp-options.interface';
 import { OtpEntitiesOptionsInterface } from './interfaces/otp-entities-options.interface';
-
 import { OtpService } from './services/otp.service';
 
 /**
@@ -30,7 +29,6 @@ import { OtpService } from './services/otp.service';
 @Module({
   providers: [OtpService],
   exports: [OtpService],
-  controllers: [],
 })
 export class OtpModule extends createConfigurableDynamicRootModule<
   OtpModule,
@@ -130,14 +128,15 @@ export class OtpModule extends createConfigurableDynamicRootModule<
     const reposToInject = [];
     const keyTracker: Record<string, number> = {};
 
-    let idx = 0;
+    let entityIdx = 0;
+
     for (const entityKey in entities) {
-      reposToInject[idx] = getDynamicRepositoryToken(entityKey);
-      keyTracker[entityKey] = idx++;
+      reposToInject[entityIdx] = getDynamicRepositoryToken(entityKey);
+      keyTracker[entityKey] = entityIdx++;
     }
 
     return {
-      provide: ALL_OTPS_REPOSITORIES_TOKEN,
+      provide: OTP_MODULE_REPOSITORIES_TOKEN,
       useFactory: (...args: string[]) => {
         const repoInstances: Record<string, string> = {};
 

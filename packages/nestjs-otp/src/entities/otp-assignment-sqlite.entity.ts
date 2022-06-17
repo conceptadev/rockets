@@ -20,7 +20,7 @@ export abstract class OtpAssignmentSqliteEntity
   type!: string;
 
   @Column()
-  passCode!: string;
+  passcode!: string;
 
   @Column({ type: 'datetime' })
   expirationDate!: Date;

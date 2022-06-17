@@ -1,4 +1,3 @@
-import Faker from '@faker-js/faker';
 import { Type } from '@nestjs/common';
 import { Factory } from '@jorgebodega/typeorm-seeding';
 import { randomUUID } from 'crypto';
@@ -27,7 +26,7 @@ export class OtpFactory<
   /**
    * List of used names.
    */
-  usedNames: Record<string, boolean> = {};
+  categories: string[] = ['one', 'two', 'three'];
 
   /**
    * Factory callback function.
@@ -37,30 +36,22 @@ export class OtpFactory<
     const otp = new this.entity();
 
     // set the name
-    otp.category = this.generateName();
-    otp.type = 'uuId';
-    otp.passCode = randomUUID();
+    otp.category = this.randomCategory();
+    otp.type = 'uuid';
+    otp.passcode = randomUUID();
 
     // return the new otp
     return otp;
   }
 
   /**
-   * Generate a unique name.
+   * Get a random category.
    */
-  protected generateName(): string {
-    // the name
-    let name: string;
-
-    // keep trying to get a unique name
-    do {
-      name = Faker.name.firstName();
-    } while (this.usedNames[name]);
-
-    // add to used names
-    this.usedNames[name] = true;
+  protected randomCategory(): string {
+    // random index
+    const randomIdx = Math.floor(Math.random() * this.categories.length);
 
     // return it
-    return name;
+    return this.categories[randomIdx];
   }
 }

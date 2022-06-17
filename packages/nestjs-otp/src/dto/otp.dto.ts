@@ -38,15 +38,15 @@ export class OtpDto
   type = '';
 
   /**
-   * passCode
+   * Passcode
    */
   @Expose()
   @ApiProperty({
     type: 'string',
-    description: 'passCode of the otp',
+    description: 'passcode of the otp',
   })
   @IsString()
-  passCode = '';
+  passcode = '';
 
   /**
    * expirationDate
@@ -62,7 +62,7 @@ export class OtpDto
   /**
    * Assignee
    */
-  @Expose({ toPlainOnly: true })
+  @Expose()
   @ApiProperty({
     type: ReferenceIdDto,
     description: 'assignee data',

@@ -1,3 +1,6 @@
+import ms from 'ms';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
 import { DeepPartial, Repository } from 'typeorm';
 import { Inject, Injectable, Type } from '@nestjs/common';
 import {
@@ -10,21 +13,19 @@ import { OtpAssigneeInterface } from '../interfaces/otp-assignee.interface';
 import { OtpAssignmentInterface } from '../interfaces/otp-assignment.interface';
 import { OtpInterface } from '../interfaces/otp.interface';
 import {
-  ALL_OTPS_REPOSITORIES_TOKEN,
+  OTP_MODULE_REPOSITORIES_TOKEN,
   OTP_MODULE_SETTINGS_TOKEN,
 } from '../otp.constants';
 import { OtpCreateDto } from '../dto/otp-create.dto';
-import { validate } from 'class-validator';
-import { plainToInstance } from 'class-transformer';
 import { OtpCreatableInterface } from '../interfaces/otp-creatable.interface';
 import { OtpSettingsInterface } from '../interfaces/otp-settings.interface';
-import ms from 'ms';
-import { EntityNotFoundException } from '../exceptions/entity-not-found.exception copy';
+import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
+import { ReferenceIdInterface } from '@concepta/ts-core';
 
 @Injectable()
 export class OtpService {
   constructor(
-    @Inject(ALL_OTPS_REPOSITORIES_TOKEN)
+    @Inject(OTP_MODULE_REPOSITORIES_TOKEN)
     private allOtpRepos: Record<string, Repository<OtpAssignmentInterface>>,
     @Inject(OTP_MODULE_SETTINGS_TOKEN)
     private settings: OtpSettingsInterface,
@@ -32,16 +33,16 @@ export class OtpService {
 
   /**
    * Create a otp with a for the given assignee.
-   * @param context The otp context (same as entity key)
+   *
+   * @param assignment The otp assignment
    * @param data The data to create
-   * @returns The object created
    */
   async create(
-    context: string,
+    assignment: string,
     data: OtpCreatableInterface,
   ): Promise<OtpCreateDto> {
     // get the assignment repo
-    const assignmentRepo = this.getAssignmentRepo(context);
+    const assignmentRepo = this.getAssignmentRepo(assignment);
 
     // try to find the relationship
     try {
@@ -51,14 +52,16 @@ export class OtpService {
       if (!this.settings.types[data.type])
         throw new OtpTypeNotDefinedException(data.type);
 
-      const passCode = this.settings.types[data.type].generator();
+      const passcode = this.settings.types[data.type].generator();
 
       const expirationDate = this.getExpirationDate(this.settings.expiresIn);
 
-      //TODO: should we validate if passCode already exists before create?
-
       // try to save the item
-      return assignmentRepo.save({ ...dto, passCode, expirationDate });
+      return assignmentRepo.save({
+        ...dto,
+        passcode,
+        expirationDate,
+      });
     } catch (e) {
       throw new ReferenceMutateException(assignmentRepo.metadata.targetName, e);
     }
@@ -67,25 +70,24 @@ export class OtpService {
   /**
    * Check if otp is valid
    *
-   * @param context The otp context (same as entity key)
+   * @param assignment The otp assignment
    * @param assignee  The assignee to check
    * @param category  The category to check
-   * @param passCode The passCode to check
+   * @param passcode The passcode to check
    * @param deleteIfValid If true, delete the otp if it is valid
-   * @returns boolean
    */
-  async isValid<T extends OtpAssigneeInterface>(
-    context: string,
-    assignee: Partial<T>,
+  async isValid(
+    assignment: string,
+    assignee: ReferenceIdInterface,
     category: string,
-    passCode: string,
-    deleteIfValid?: boolean,
+    passcode: string,
+    deleteIfValid = false,
   ): Promise<boolean> {
     // get otp from an assigned user for a category
-    const assignedOtp = await this.getByPassCode(
-      context,
+    const assignedOtp = await this.getByPasscode(
+      assignment,
       category,
-      passCode,
+      passcode,
       assignee,
     );
 
@@ -93,10 +95,12 @@ export class OtpService {
     const now = new Date();
     if (!assignedOtp || now > assignedOtp.expirationDate) return false;
 
-    // if is valid and deleteIfValid is true, delete the otp
+    // determine if valid
     const isValid = !!assignedOtp;
-    if (deleteIfValid && isValid) {
-      await this.deleteOtp(context, assignedOtp.id);
+
+    // if is valid and deleteIfValid is true, delete the otp
+    if (isValid && deleteIfValid) {
+      await this.deleteOtp(assignment, assignedOtp.id);
     }
 
     return isValid;
@@ -104,43 +108,43 @@ export class OtpService {
 
   /**
    * Delete a otp based on params
-   * @param context The otp context (same as entity key)
+   * @param assignment The otp assignment
    * @param assignee The assignee to check
    * @param category The category to check
-   * @param passCode The passCode to check
+   * @param passcode The passcode to check
    */
-  async delete<T extends OtpAssigneeInterface>(
-    context: string,
-    assignee: Partial<T>,
+  async delete(
+    assignment: string,
+    assignee: ReferenceIdInterface,
     category: string,
-    passCode: string,
+    passcode: string,
   ): Promise<void> {
     // get otp from an assigned user for a category
-    const assignedOtp = await this.getByPassCode(
-      context,
+    const assignedOtp = await this.getByPasscode(
+      assignment,
       category,
-      passCode,
+      passcode,
       assignee,
     );
 
-    if (assignedOtp) this.deleteOtp(context, assignedOtp.id);
+    if (assignedOtp) this.deleteOtp(assignment, assignedOtp.id);
   }
 
   /**
+   * Clear all otps for assign in given category.
    *
-   * @param context The context of the repository (same as entity key)
+   * @param assignment The assignment of the repository
    * @param assignee The assignee to delete
    * @param category The category to delete
    */
-  //TODO: should i clear only based on one of the options?
-  async clear<T extends OtpAssigneeInterface>(
-    context: string,
-    assignee: Partial<T>,
+  async clear(
+    assignment: string,
+    assignee: ReferenceIdInterface,
     category: string,
   ): Promise<void> {
     // get all otps from an assigned user for a category
     const assignedOtps = await this.getAssignedOtps(
-      context,
+      assignment,
       category,
       assignee,
     );
@@ -149,20 +153,23 @@ export class OtpService {
     const assignedOtpIds = assignedOtps.map((assignedOtp) => assignedOtp.id);
 
     if (assignedOtpIds.length > 0)
-      await this.deleteOtp(context, assignedOtpIds);
+      await this.deleteOtp(assignment, assignedOtpIds);
   }
 
   /**
-   * Delete OTP based on context
+   * Delete OTP based on assignment
+   *
    * @private
-   * @param context The context to delete id from
+   * @param assignment The assignment to delete id from
    * @param id The id to delete
    */
   protected async deleteOtp(
-    context: string,
+    assignment: string,
     id: string | string[],
   ): Promise<void> {
-    const repo = this.getAssignmentRepo(context);
+    // get the assignment repo
+    const repo = this.getAssignmentRepo(assignment);
+
     try {
       await repo.delete(id);
     } catch (e) {
@@ -173,16 +180,16 @@ export class OtpService {
   /**
    * Get all roles for assignee.
    *
-   * @param context The context of the check (same as entity key)
+   * @param assignment The assignment of the check
    * @param assignee The assignee to check
    */
   protected async getAssignedOtps(
-    context: string,
+    assignment: string,
     category: string,
-    assignee: Partial<OtpAssigneeInterface>,
+    assignee: ReferenceIdInterface,
   ): Promise<OtpInterface[]> {
     // get the assignment repo
-    const assignmentRepo = this.getAssignmentRepo(context);
+    const assignmentRepo = this.getAssignmentRepo(assignment);
 
     // try to find the relationships
     try {
@@ -192,7 +199,7 @@ export class OtpService {
           assignee,
           category,
         },
-        relations: [context],
+        relations: ['assignee'],
       });
 
       // return the otps from assignee
@@ -202,14 +209,14 @@ export class OtpService {
     }
   }
 
-  protected async getByPassCode(
-    context: string,
+  protected async getByPasscode(
+    assignment: string,
     category: string,
-    passCode: string,
-    assignee: Partial<OtpAssigneeInterface>,
+    passcode: string,
+    assignee: ReferenceIdInterface,
   ): Promise<OtpInterface | undefined> {
     // get the assignment repo
-    const assignmentRepo = this.getAssignmentRepo(context);
+    const assignmentRepo = this.getAssignmentRepo(assignment);
 
     // try to find the relationships
     try {
@@ -218,10 +225,9 @@ export class OtpService {
         where: {
           assignee,
           category,
-          passCode,
+          passcode,
         },
-        // TODO: Validate if we gonna need relations here
-        //relations: ['assignee'],
+        relations: ['assignee'],
       });
 
       // return the otps from assignee
@@ -232,21 +238,21 @@ export class OtpService {
   }
 
   /**
-   * Get the assignment repo for the given context.
+   * Get the assignment repo for the given assignment.
    *
    * @private
-   * @param context The otp context (same as entity key)
+   * @param assignment The otp assignment
    */
   protected getAssignmentRepo(
-    context: string,
+    assignment: string,
   ): Repository<OtpAssignmentInterface> {
-    // repo matching context was injected?
-    if (this.allOtpRepos[context]) {
+    // repo matching assignment was injected?
+    if (this.allOtpRepos[assignment]) {
       // yes, return it
-      return this.allOtpRepos[context];
+      return this.allOtpRepos[assignment];
     } else {
-      // bad context
-      throw new EntityNotFoundException(context);
+      // bad assignment
+      throw new EntityNotFoundException(assignment);
     }
   }
 

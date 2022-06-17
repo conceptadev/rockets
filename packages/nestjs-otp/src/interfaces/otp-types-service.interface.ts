@@ -1,4 +1,4 @@
 export interface OtpTypeServiceInterface {
-  generator(...args?: unknown[]): string;
+  generator(): string;
   validator(a: unknown, b: unknown): boolean;
 }

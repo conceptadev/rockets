@@ -14,14 +14,14 @@ export interface OtpInterface
   category: string;
 
   /**
-   * Type of the passCode
+   * Type of the passcode
    */
   type: string;
 
   /**
-   * passCode
+   * Passcode
    */
-  passCode: string;
+  passcode: string;
 
   /**
    * Date it will expire
