@@ -5,7 +5,7 @@ import {
   ReferenceMutateException,
   ReferenceValidationException,
 } from '@concepta/typeorm-common';
-import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
+import { OtpTypeNotDefinedException } from '../exceptions/otp-type-not-defined.exception';
 import { OtpAssigneeInterface } from '../interfaces/otp-assignee.interface';
 import { OtpAssignmentInterface } from '../interfaces/otp-assignment.interface';
 import { OtpInterface } from '../interfaces/otp.interface';
@@ -19,6 +19,7 @@ import { plainToInstance } from 'class-transformer';
 import { OtpCreatableInterface } from '../interfaces/otp-creatable.interface';
 import { OtpSettingsInterface } from '../interfaces/otp-settings.interface';
 import ms from 'ms';
+import { EntityNotFoundException } from '../exceptions/entity-not-found.exception copy';
 
 @Injectable()
 export class OtpService {
@@ -46,6 +47,9 @@ export class OtpService {
     try {
       // validate the data
       const dto = await this.validateDto<OtpCreateDto>(OtpCreateDto, data);
+
+      if (!this.settings.types[data.type])
+        throw new OtpTypeNotDefinedException(data.type);
 
       const passCode = this.settings.types[data.type].generator();
 
@@ -75,7 +79,7 @@ export class OtpService {
     assignee: Partial<T>,
     category: string,
     passCode: string,
-    deleteIfValid: boolean,
+    deleteIfValid?: boolean,
   ): Promise<boolean> {
     // get otp from an assigned user for a category
     const assignedOtp = await this.getByPassCode(
@@ -216,7 +220,8 @@ export class OtpService {
           category,
           passCode,
         },
-        relations: [context],
+        // TODO: Validate if we gonna need relations here
+        //relations: ['assignee'],
       });
 
       // return the otps from assignee
@@ -273,6 +278,6 @@ export class OtpService {
     const now = new Date();
 
     // add time in seconds to now as string format
-    return new Date(now.getTime() + ms(expiresIn) * 1000);
+    return new Date(now.getTime() + ms(expiresIn));
   }
 }
