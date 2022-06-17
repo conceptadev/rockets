@@ -86,6 +86,9 @@
     },
     {
       "path": "packages/typeorm-common"
+    },
+    {
+      "path": "packages/nestjs-otp"
     }
   ]
 }
