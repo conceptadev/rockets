@@ -5,6 +5,7 @@ import { TypeOrmCrudService as xTypeOrmCrudService } from '@nestjsx/crud-typeorm
 import { CrudQueryHelper } from '../util/crud-query.helper';
 import { CrudQueryOptionsInterface } from '../interfaces/crud-query-options.interface';
 import { CrudResultPaginatedInterface } from '../interfaces/crud-result-paginated.interface';
+import { CrudQueryException } from '../exceptions/crud-query.exception';
 
 @Injectable()
 export class TypeOrmCrudService<T> extends xTypeOrmCrudService<T> {
@@ -21,8 +22,15 @@ export class TypeOrmCrudService<T> extends xTypeOrmCrudService<T> {
     // apply options
     this.crudQueryHelper.modifyRequest(req, queryOptions);
 
+    // the result
+    let result;
+
     // get parent result
-    const result = await super.getMany(req);
+    try {
+      result = await super.getMany(req);
+    } catch (e) {
+      throw new CrudQueryException(this.repo.metadata.name, e);
+    }
 
     // is an array?
     if (Array.isArray(result)) {
@@ -44,7 +52,11 @@ export class TypeOrmCrudService<T> extends xTypeOrmCrudService<T> {
     // apply options
     this.crudQueryHelper.modifyRequest(req, queryOptions);
     // return parent result
-    return super.getOne(req);
+    try {
+      return super.getOne(req);
+    } catch (e) {
+      throw new CrudQueryException(this.repo.metadata.name, e);
+    }
   }
 
   async createMany(
@@ -55,7 +67,11 @@ export class TypeOrmCrudService<T> extends xTypeOrmCrudService<T> {
     // apply options
     this.crudQueryHelper.modifyRequest(req, queryOptions);
     // return parent result
-    return super.createMany(req, dto);
+    try {
+      return super.createMany(req, dto);
+    } catch (e) {
+      throw new CrudQueryException(this.repo.metadata.name, e);
+    }
   }
 
   async createOne(
@@ -66,7 +82,11 @@ export class TypeOrmCrudService<T> extends xTypeOrmCrudService<T> {
     // apply options
     this.crudQueryHelper.modifyRequest(req, queryOptions);
     // return parent result
-    return super.createOne(req, dto);
+    try {
+      return super.createOne(req, dto);
+    } catch (e) {
+      throw new CrudQueryException(this.repo.metadata.name, e);
+    }
   }
 
   async updateOne(
@@ -77,7 +97,11 @@ export class TypeOrmCrudService<T> extends xTypeOrmCrudService<T> {
     // apply options
     this.crudQueryHelper.modifyRequest(req, queryOptions);
     // return parent result
-    return super.updateOne(req, dto);
+    try {
+      return super.updateOne(req, dto);
+    } catch (e) {
+      throw new CrudQueryException(this.repo.metadata.name, e);
+    }
   }
 
   async replaceOne(
@@ -88,7 +112,11 @@ export class TypeOrmCrudService<T> extends xTypeOrmCrudService<T> {
     // apply options
     this.crudQueryHelper.modifyRequest(req, queryOptions);
     // return parent result
-    return super.replaceOne(req, dto);
+    try {
+      return super.replaceOne(req, dto);
+    } catch (e) {
+      throw new CrudQueryException(this.repo.metadata.name, e);
+    }
   }
 
   async deleteOne(
@@ -98,7 +126,11 @@ export class TypeOrmCrudService<T> extends xTypeOrmCrudService<T> {
     // apply options
     this.crudQueryHelper.modifyRequest(req, queryOptions);
     // return parent result
-    return super.deleteOne(req);
+    try {
+      return super.deleteOne(req);
+    } catch (e) {
+      throw new CrudQueryException(this.repo.metadata.name, e);
+    }
   }
 
   async recoverOne(
@@ -108,6 +140,10 @@ export class TypeOrmCrudService<T> extends xTypeOrmCrudService<T> {
     // apply options
     this.crudQueryHelper.modifyRequest(req, queryOptions);
     // return parent result
-    return super.recoverOne(req);
+    try {
+      return super.recoverOne(req);
+    } catch (e) {
+      throw new CrudQueryException(this.repo.metadata.name, e);
+    }
   }
 }
