@@ -38,6 +38,9 @@ export class RoleFactory<
     // set the name
     role.name = this.generateName();
 
+    // set the description
+    role.description = Faker.lorem.sentence();
+
     // return the new role
     return role;
   }
