@@ -9,7 +9,6 @@ import {
   ReferenceValidationException,
 } from '@concepta/typeorm-common';
 import { OtpTypeNotDefinedException } from '../exceptions/otp-type-not-defined.exception';
-import { OtpAssigneeInterface } from '../interfaces/otp-assignee.interface';
 import { OtpAssignmentInterface } from '../interfaces/otp-assignment.interface';
 import { OtpInterface } from '../interfaces/otp.interface';
 import {
