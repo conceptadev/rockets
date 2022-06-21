@@ -2,7 +2,7 @@ import {
   ACCESS_CONTROL_MODULE_CTLR_METADATA,
   ACCESS_CONTROL_MODULE_FILTERS_METADATA,
   ACCESS_CONTROL_MODULE_GRANT_METADATA,
-  ACCESS_CONTROL_MODULE_OPTIONS_TOKEN,
+  ACCESS_CONTROL_MODULE_SETTINGS_TOKEN,
 } from './constants';
 import {
   AccessControlFilterCallback,
@@ -18,6 +18,7 @@ import { AccessControlFilterService } from './interfaces/access-control-filter-s
 import { AccessControlFilterType } from './enums/access-control-filter-type.enum';
 import { AccessControlGrantOption } from './interfaces/access-control-grant-option.interface';
 import { AccessControlGuard } from './access-control.guard';
+import { AccessControlService } from './services/access-control.service';
 import { AccessControlModuleOptionsInterface } from './interfaces/access-control-module-options.interface';
 import { AccessControlOptions } from './interfaces/access-control-options.interface';
 import { AccessControlReadMany } from './decorators/access-control-read-many.decorator';
@@ -55,8 +56,8 @@ describe('AccessControlModule', () => {
 
   class TestAccessService implements AccessControlServiceInterface {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async getUser<T>(context: ExecutionContext): Promise<T> {
-      return new TestUser(1234) as unknown as T;
+    async getUser(context: ExecutionContext): Promise<unknown> {
+      return new TestUser(1234);
     }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async getUserRoles(context: ExecutionContext): Promise<string | string[]> {
@@ -134,8 +135,12 @@ describe('AccessControlModule', () => {
         TestAccessService,
         TestFilterService,
         {
-          provide: ACCESS_CONTROL_MODULE_OPTIONS_TOKEN,
-          useValue: moduleConfig,
+          provide: AccessControlService,
+          useClass: TestAccessService,
+        },
+        {
+          provide: ACCESS_CONTROL_MODULE_SETTINGS_TOKEN,
+          useValue: moduleConfig.settings,
         },
         { provide: Reflector, useValue: reflector },
       ],

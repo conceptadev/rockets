@@ -1,16 +1,19 @@
-import { AccessControlGuard } from './index';
-import { AccessControlModule } from './index';
-import { AccessControlCreateOne } from './index';
-import { AccessControlDeleteOne } from './index';
-import { AccessControlFilter } from './index';
-import { AccessControlGrant } from './index';
-import { AccessControlReadMany } from './index';
-import { AccessControlReadOne } from './index';
-import { AccessControlUpdateOne } from './index';
-import { InjectAccessControl } from './index';
-import { UseAccessControl } from './index';
-import { AccessControlAction } from './index';
-import { AccessControlFilterType } from './index';
+import {
+  AccessControlAction,
+  AccessControlCreateMany,
+  AccessControlCreateOne,
+  AccessControlDeleteOne,
+  AccessControlFilter,
+  AccessControlFilterType,
+  AccessControlGrant,
+  AccessControlGuard,
+  AccessControlModule,
+  AccessControlReadMany,
+  AccessControlReadOne,
+  AccessControlReplaceOne,
+  AccessControlUpdateOne,
+  UseAccessControl,
+} from './index';
 
 describe('Index', () => {
   // modules
@@ -21,6 +24,7 @@ describe('Index', () => {
 
   // decorators
   it('All exported decorators should be imported', () => {
+    expect(AccessControlCreateMany).toEqual(expect.any(Function));
     expect(AccessControlCreateOne).toEqual(expect.any(Function));
     expect(AccessControlDeleteOne).toEqual(expect.any(Function));
     expect(AccessControlFilter).toEqual(expect.any(Function));
@@ -28,7 +32,7 @@ describe('Index', () => {
     expect(AccessControlReadMany).toEqual(expect.any(Function));
     expect(AccessControlReadOne).toEqual(expect.any(Function));
     expect(AccessControlUpdateOne).toEqual(expect.any(Function));
-    expect(InjectAccessControl).toEqual(expect.any(Function));
+    expect(AccessControlReplaceOne).toEqual(expect.any(Function));
     expect(UseAccessControl).toEqual(expect.any(Function));
   });
 

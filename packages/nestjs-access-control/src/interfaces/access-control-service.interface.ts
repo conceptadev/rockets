@@ -1,6 +1,6 @@
 import { ExecutionContext } from '@nestjs/common';
 
 export interface AccessControlServiceInterface {
-  getUser<T>(context: ExecutionContext): Promise<T>;
+  getUser(context: ExecutionContext): Promise<unknown>;
   getUserRoles(context: ExecutionContext): Promise<string | string[]>;
 }

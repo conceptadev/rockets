@@ -1,6 +1,6 @@
-// import { ExecutionContext } from '@nestjs/common';
-// import { HttpArgumentsHost } from '@nestjs/common/interfaces';
-// import { mock } from 'jest-mock-extended';
+import { mock } from 'jest-mock-extended';
+import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { HttpArgumentsHost } from '@nestjs/common/interfaces';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AccessControlService } from './access-control.service';
 
@@ -19,19 +19,47 @@ describe('AccessControlDefaultService', () => {
     expect(service).toBeInstanceOf(AccessControlService);
   });
 
-  // it('should define getUser', () => {
-  //   const context = mock<ExecutionContext>();
-  //   const argsHost = mock<HttpArgumentsHost>();
-  //   context.getHandler.mockReturnValue(service.getUser);
-  //   context.switchToHttp.mockReturnValue(argsHost);
-  //   const getUser = service.getUser(context);
-  //   expect(getUser).toBeDefined();
-  // });
+  it('getUser should return user', async () => {
+    const argsHost = mock<HttpArgumentsHost>();
+    argsHost.getRequest.mockReturnValue({ user: { id: 'abc123' } });
 
-  // it('should define getUserRoles', () => {
-  //   const context = mock<ExecutionContext>();
-  //   context.getHandler.mockReturnValue(service.getUserRoles);
-  //   const getUserRoles = service.getUserRoles(context);
-  //   expect(getUserRoles).toBeDefined();
-  // });
+    const context = mock<ExecutionContext>();
+    context.switchToHttp.mockReturnValue(argsHost);
+
+    const user = await service.getUser(context);
+    expect(user).toEqual({ id: 'abc123' });
+  });
+
+  it('getUserRoles should return roles', async () => {
+    const argsHost = mock<HttpArgumentsHost>();
+    argsHost.getRequest.mockReturnValue({
+      user: {
+        id: 'abc123',
+        userRoles: [
+          { role: { name: 'admin' } },
+          { role: { name: 'readonly' } },
+        ],
+      },
+    });
+
+    const context = mock<ExecutionContext>();
+    context.switchToHttp.mockReturnValue(argsHost);
+
+    const userRoles = await service.getUserRoles(context);
+    expect(userRoles).toEqual(['admin', 'readonly']);
+  });
+
+  it('getUserRoles should throw exception', async () => {
+    const t = async () => {
+      const argsHost = mock<HttpArgumentsHost>();
+      argsHost.getRequest.mockReturnValue({});
+
+      const context = mock<ExecutionContext>();
+      context.switchToHttp.mockReturnValue(argsHost);
+
+      await service.getUserRoles(context);
+    };
+
+    await expect(t()).rejects.toThrow(UnauthorizedException);
+  });
 });
