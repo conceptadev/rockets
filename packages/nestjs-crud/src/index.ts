@@ -12,6 +12,7 @@ export { CrudController } from './decorators/controller/crud-controller.decorato
 
 // route decorators
 export { CrudReadAll } from './decorators/actions/crud-read-all.decorator';
+export { CrudReadMany } from './decorators/actions/crud-read-many.decorator';
 export { CrudReadOne } from './decorators/actions/crud-read-one.decorator';
 export { CrudCreateOne } from './decorators/actions/crud-create-one.decorator';
 export { CrudCreateMany } from './decorators/actions/crud-create-many.decorator';
