@@ -8,20 +8,15 @@ import { RoleEntityInterface } from './interfaces/role-entity.interface';
  *
  * ```ts
  * // new factory instance
- * const roleFactory = new RoleFactory(Role);
+ * RoleFactory.entity = RoleEntity;
+ * const roleFactory = new RoleFactory();
  * ```
  */
-export class RoleFactory<
-  T extends RoleEntityInterface = RoleEntityInterface,
-> extends Factory<T> {
+export class RoleFactory extends Factory<RoleEntityInterface> {
   /**
-   * Constructor.
-   *
-   * @param entity The entity class.
+   * The entity class.
    */
-  constructor(private entity: Type<T>) {
-    super();
-  }
+  public static entity: Type<RoleEntityInterface>;
 
   /**
    * List of used names.
@@ -31,9 +26,9 @@ export class RoleFactory<
   /**
    * Factory callback function.
    */
-  protected async definition(): Promise<T> {
+  protected async definition(): Promise<RoleEntityInterface> {
     // the role we will return
-    const role = new this.entity();
+    const role = new RoleFactory.entity();
 
     // set the name
     role.name = this.generateName();

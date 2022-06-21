@@ -2,6 +2,7 @@ import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { useSeeders } from '@jorgebodega/typeorm-seeding';
+import { RoleFactory } from './role.factory';
 import { RoleSeeder } from './role.seeder';
 
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
@@ -18,7 +19,7 @@ describe('RoleController (e2e)', () => {
       app = moduleFixture.createNestApplication();
       await app.init();
 
-      RoleSeeder.entity = RoleEntityFixture;
+      RoleFactory.entity = RoleEntityFixture;
 
       await useSeeders(RoleSeeder, { root: __dirname, connection: 'default' });
     });

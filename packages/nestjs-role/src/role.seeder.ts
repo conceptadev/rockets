@@ -8,13 +8,6 @@ import { RoleFactory } from './role.factory';
  */
 export class RoleSeeder extends Seeder {
   /**
-   * The entity class.
-   *
-   * Set this to your concrete entity.
-   */
-  public static entity: Type<RoleEntityInterface>;
-
-  /**
    * The factory class.
    *
    * Override this to use a custom factory.
@@ -31,7 +24,7 @@ export class RoleSeeder extends Seeder {
       : 50;
 
     // the factory
-    const roleFactory = new RoleSeeder.factory(RoleSeeder.entity);
+    const roleFactory = new RoleSeeder.factory();
 
     // create a bunch
     await roleFactory.createMany(createAmount);

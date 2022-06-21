@@ -7,6 +7,7 @@ import { useSeeders } from '@jorgebodega/typeorm-seeding';
 import { getDynamicRepositoryToken } from '@concepta/nestjs-typeorm-ext';
 
 import { RoleAssignmentCreatableInterface } from './interfaces/role-assignment-creatable.interface';
+import { RoleFactory } from './role.factory';
 import { RoleSeeder } from './role.seeder';
 
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
@@ -27,7 +28,7 @@ describe('RoleAssignmentController (e2e)', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    RoleSeeder.entity = RoleEntityFixture;
+    RoleFactory.entity = RoleEntityFixture;
 
     await useSeeders(RoleSeeder, { root: __dirname, connection: 'default' });
 

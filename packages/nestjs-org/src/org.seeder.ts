@@ -9,13 +9,6 @@ import { OrgFactory } from './org.factory';
  */
 export class OrgSeeder extends Seeder {
   /**
-   * The entity class.
-   *
-   * Set this to your concrete entity.
-   */
-  public static entity: Type<OrgEntityInterface>;
-
-  /**
    * The factory class.
    *
    * Override this to use a custom factory.
@@ -41,7 +34,7 @@ export class OrgSeeder extends Seeder {
     const owner = await ownerFactory.create();
 
     // the factory
-    const orgFactory = new OrgSeeder.factory(OrgSeeder.entity);
+    const orgFactory = new OrgSeeder.factory();
 
     // create a bunch
     await orgFactory

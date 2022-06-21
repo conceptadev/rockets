@@ -73,14 +73,15 @@ describe('RoleModule', () => {
       ],
     }).compile();
 
-    RoleSeeder.entity = RoleEntityFixture;
+    RoleFactory.entity = RoleEntityFixture;
 
     await useSeeders([], {
       root: __dirname,
       connection: connectionName,
     });
 
-    const roleFactory = new RoleFactory(RoleEntityFixture);
+    RoleFactory.entity = RoleEntityFixture;
+    const roleFactory = new RoleFactory();
     [testRole1, testRole2] = await roleFactory.createMany(2);
 
     const userFactory = new UserFactoryFixture();

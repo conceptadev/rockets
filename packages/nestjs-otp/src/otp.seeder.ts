@@ -8,13 +8,6 @@ import { OtpInterface } from './interfaces/otp.interface';
  */
 export class OtpSeeder extends Seeder {
   /**
-   * The entity class.
-   *
-   * Set this to your concrete entity.
-   */
-  public static entity: Type<OtpInterface>;
-
-  /**
    * The factory class.
    *
    * Override this to use a custom factory.
@@ -31,7 +24,7 @@ export class OtpSeeder extends Seeder {
       : 50;
 
     // the factory
-    const otpFactory = new OtpSeeder.factory(OtpSeeder.entity);
+    const otpFactory = new OtpSeeder.factory();
 
     // create a bunch
     await otpFactory.createMany(createAmount);

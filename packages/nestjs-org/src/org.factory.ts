@@ -8,20 +8,15 @@ import { OrgEntityInterface } from './interfaces/org-entity.interface';
  *
  * ```ts
  * // new factory instance
- * const orgFactory = new OrgFactory(Org);
+ * OrgFactory.entity = OrgEntity();
+ * const orgFactory = new OrgFactory();
  * ```
  */
-export class OrgFactory<
-  T extends OrgEntityInterface = OrgEntityInterface,
-> extends Factory<T> {
+export class OrgFactory extends Factory<OrgEntityInterface> {
   /**
-   * Constructor.
-   *
-   * @param entity The entity class.
+   * The entity class.
    */
-  constructor(private entity: Type<T>) {
-    super();
-  }
+  public static entity: Type<OrgEntityInterface>;
 
   /**
    * List of used names.
@@ -31,9 +26,9 @@ export class OrgFactory<
   /**
    * Factory callback function.
    */
-  protected async definition(): Promise<T> {
+  protected async definition(): Promise<OrgEntityInterface> {
     // the org we will return
-    const org = new this.entity();
+    const org = new OrgFactory.entity();
 
     // set the name
     org.name = this.generateName();

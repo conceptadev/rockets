@@ -24,7 +24,8 @@ describe('RoleModule', () => {
     it('should create a role', async () => {
       expect(roleModule).toBeInstanceOf(RoleModule);
 
-      const factory = new RoleFactory(RoleEntityFixture);
+      RoleFactory.entity = RoleEntityFixture;
+      const factory = new RoleFactory();
       const role = await factory.create();
 
       expect(role).toBeInstanceOf(RoleEntityFixture);

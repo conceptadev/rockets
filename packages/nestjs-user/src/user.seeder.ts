@@ -9,13 +9,6 @@ import { UserFactory } from './user.factory';
  */
 export class UserSeeder extends Seeder {
   /**
-   * The entity class.
-   *
-   * Set this to your concrete entity.
-   */
-  public static entity: Type<UserEntityInterface>;
-
-  /**
    * The factory class.
    *
    * Override this in a subclass to use a custom factory.
@@ -42,7 +35,7 @@ export class UserSeeder extends Seeder {
       : 'superadmin';
 
     // the factory
-    const userFactory = new UserSeeder.factory(UserSeeder.entity);
+    const userFactory = new UserSeeder.factory();
 
     // create a super admin user
     await userFactory

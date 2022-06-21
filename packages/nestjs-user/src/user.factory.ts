@@ -8,20 +8,15 @@ import { UserEntityInterface } from './interfaces/user-entity.interface';
  *
  * ```ts
  * // new factory instance
- * const userFactory = new UserFactory(User);
+ * UserFactory.entity = UserEntity;
+ * const userFactory = new UserFactory();
  * ```
  */
-export class UserFactory<
-  T extends UserEntityInterface = UserEntityInterface,
-> extends Factory<T> {
+export class UserFactory extends Factory<UserEntityInterface> {
   /**
-   * Constructor.
-   *
-   * @param entity The entity class.
+   * entity The entity class.
    */
-  constructor(private entity: Type<T>) {
-    super();
-  }
+  public static entity: Type<UserEntityInterface>;
 
   /**
    * List of used usernames.
@@ -31,9 +26,9 @@ export class UserFactory<
   /**
    * Factory callback function.
    */
-  protected async definition(): Promise<T> {
+  protected async definition(): Promise<UserEntityInterface> {
     // the user we will return
-    const user = new this.entity();
+    const user = new UserFactory.entity();
 
     // set the username
     user.username = this.generateUniqueUsername();

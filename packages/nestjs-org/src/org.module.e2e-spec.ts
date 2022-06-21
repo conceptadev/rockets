@@ -4,6 +4,7 @@ import { INestApplication } from '@nestjs/common';
 import { useSeeders } from '@jorgebodega/typeorm-seeding';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
+import { OrgFactory } from './org.factory';
 import { OrgSeeder } from './org.seeder';
 import { OrgModule } from './org.module';
 
@@ -49,7 +50,7 @@ describe('OrgController (e2e)', () => {
       app = moduleFixture.createNestApplication();
       await app.init();
 
-      OrgSeeder.entity = OrgEntityFixture;
+      OrgFactory.entity = OrgEntityFixture;
       OrgSeeder.ownerFactory = OwnerFactoryFixture;
 
       await useSeeders(OrgSeeder, {

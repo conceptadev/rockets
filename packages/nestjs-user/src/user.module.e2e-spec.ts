@@ -2,6 +2,7 @@ import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { useSeeders } from '@jorgebodega/typeorm-seeding';
+import { UserFactory } from './user.factory';
 import { UserSeeder } from './user.seeder';
 
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
@@ -18,7 +19,7 @@ describe('AppController (e2e)', () => {
       app = moduleFixture.createNestApplication();
       await app.init();
 
-      UserSeeder.entity = UserEntityFixture;
+      UserFactory.entity = UserEntityFixture;
 
       await useSeeders(UserSeeder, { root: __dirname, connection: 'default' });
     });
