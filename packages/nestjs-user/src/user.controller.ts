@@ -2,7 +2,6 @@ import {
   CrudBody,
   CrudCreateOne,
   CrudDeleteOne,
-  CrudReadAll,
   CrudReadOne,
   CrudRequest,
   CrudRequestInterface,
@@ -10,6 +9,8 @@ import {
   CrudControllerInterface,
   CrudController,
   CrudCreateMany,
+  CrudReadMany,
+  CrudRecoverOne,
 } from '@concepta/nestjs-crud';
 import {
   PasswordPlainInterface,
@@ -25,6 +26,15 @@ import { UserPaginatedDto } from './dto/user-paginated.dto';
 import { UserEntityInterface } from './interfaces/user-entity.interface';
 import { UserCreatableInterface } from './interfaces/user-creatable.interface';
 import { UserUpdatableInterface } from './interfaces/user-updatable.interface';
+import {
+  AccessControlCreateMany,
+  AccessControlCreateOne,
+  AccessControlDeleteOne,
+  AccessControlReadMany,
+  AccessControlReadOne,
+  AccessControlUpdateOne,
+} from '@concepta/nestjs-access-control';
+import { UserResource } from './user.types';
 
 /**
  * User controller.
@@ -60,7 +70,8 @@ export class UserController
    *
    * @param crudRequest the CRUD request object
    */
-  @CrudReadAll()
+  @CrudReadMany()
+  @AccessControlReadMany(UserResource.Many)
   async getMany(@CrudRequest() crudRequest: CrudRequestInterface) {
     return this.userCrudService.getMany(crudRequest);
   }
@@ -71,6 +82,7 @@ export class UserController
    * @param crudRequest the CRUD request object
    */
   @CrudReadOne()
+  @AccessControlReadOne(UserResource.One)
   async getOne(@CrudRequest() crudRequest: CrudRequestInterface) {
     return this.userCrudService.getOne(crudRequest);
   }
@@ -82,6 +94,7 @@ export class UserController
    * @param userCreateManyDto user create many dto
    */
   @CrudCreateMany()
+  @AccessControlCreateMany(UserResource.Many)
   async createMany(
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() userCreateManyDto: UserCreateManyDto,
@@ -106,6 +119,7 @@ export class UserController
    * @param userCreateDto user create dto
    */
   @CrudCreateOne()
+  @AccessControlCreateOne(UserResource.One)
   async createOne(
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() userCreateDto: UserCreateDto,
@@ -124,6 +138,7 @@ export class UserController
    * @param userUpdateDto user update dto
    */
   @CrudUpdateOne()
+  @AccessControlUpdateOne(UserResource.One)
   async updateOne(
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() userUpdateDto: UserUpdateDto,
@@ -140,8 +155,20 @@ export class UserController
    * @param crudRequest the CRUD request object
    */
   @CrudDeleteOne()
+  @AccessControlDeleteOne(UserResource.One)
   async deleteOne(@CrudRequest() crudRequest: CrudRequestInterface) {
     return this.userCrudService.deleteOne(crudRequest);
+  }
+
+  /**
+   * Recover one
+   *
+   * @param crudRequest the CRUD request object
+   */
+  @CrudRecoverOne()
+  @AccessControlCreateOne(UserResource.One)
+  async recoverOne(@CrudRequest() crudRequest: CrudRequestInterface) {
+    return this.userCrudService.recoverOne(crudRequest);
   }
 
   /**

@@ -12,3 +12,5 @@ export { UserInterface } from './interfaces/user.interface';
 export { UserEntityInterface } from './interfaces/user-entity.interface';
 export { UserLookupServiceInterface } from './interfaces/user-lookup-service.interface';
 export { UserMutateServiceInterface } from './interfaces/user-mutate-service.interface';
+
+export { UserResource } from './user.types';
