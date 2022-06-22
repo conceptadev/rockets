@@ -140,13 +140,7 @@ export class AccessControlGuard implements CanActivate {
       controllerClass,
     );
 
-    const finalConfig = { ...config };
-
-    if (finalConfig.service) {
-      if (!config.service) {
-        throw new Error('access control service is not defined');
-      }
-
+    if (config.service) {
       return this.moduleRef.get(config.service);
     } else {
       return;
