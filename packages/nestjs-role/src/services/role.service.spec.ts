@@ -6,7 +6,6 @@ import {
 import { useSeeders } from '@jorgebodega/typeorm-seeding';
 import { Test, TestingModule } from '@nestjs/testing';
 import { RoleModule } from '../role.module';
-import { RoleSeeder } from '../role.seeder';
 import { RoleService } from '../services/role.service';
 
 import { RoleEntityFixture } from '../__fixtures__/entities/role-entity.fixture';
