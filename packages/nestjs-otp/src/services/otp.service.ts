@@ -20,6 +20,7 @@ import { OtpCreatableInterface } from '../interfaces/otp-creatable.interface';
 import { OtpSettingsInterface } from '../interfaces/otp-settings.interface';
 import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
 import { ReferenceIdInterface } from '@concepta/ts-core';
+import { OtpDto } from '../dto/otp.dto';
 
 @Injectable()
 export class OtpService {
@@ -39,7 +40,10 @@ export class OtpService {
   async create(
     assignment: string,
     data: OtpCreatableInterface,
-  ): Promise<OtpCreateDto> {
+  ): Promise<OtpDto> {
+    if (!this.settings.types[data.type])
+      throw new OtpTypeNotDefinedException(data.type);
+
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
@@ -48,17 +52,14 @@ export class OtpService {
       // validate the data
       const dto = await this.validateDto<OtpCreateDto>(OtpCreateDto, data);
 
-      if (!this.settings.types[data.type])
-        throw new OtpTypeNotDefinedException(data.type);
-
-      const passcode = this.settings.types[data.type].generator();
+      const passCode = this.settings.types[data.type].generator();
 
       const expirationDate = this.getExpirationDate(this.settings.expiresIn);
 
       // try to save the item
       return assignmentRepo.save({
         ...dto,
-        passcode,
+        passCode,
         expirationDate,
       });
     } catch (e) {
@@ -72,21 +73,21 @@ export class OtpService {
    * @param assignment The otp assignment
    * @param assignee  The assignee to check
    * @param category  The category to check
-   * @param passcode The passcode to check
+   * @param passCode The passcode to check
    * @param deleteIfValid If true, delete the otp if it is valid
    */
   async isValid(
     assignment: string,
     assignee: ReferenceIdInterface,
     category: string,
-    passcode: string,
+    passCode: string,
     deleteIfValid = false,
   ): Promise<boolean> {
     // get otp from an assigned user for a category
     const assignedOtp = await this.getByPasscode(
       assignment,
       category,
-      passcode,
+      passCode,
       assignee,
     );
 
@@ -110,19 +111,19 @@ export class OtpService {
    * @param assignment The otp assignment
    * @param assignee The assignee to check
    * @param category The category to check
-   * @param passcode The passcode to check
+   * @param passCode The passcode to check
    */
   async delete(
     assignment: string,
     assignee: ReferenceIdInterface,
     category: string,
-    passcode: string,
+    passCode: string,
   ): Promise<void> {
     // get otp from an assigned user for a category
     const assignedOtp = await this.getByPasscode(
       assignment,
       category,
-      passcode,
+      passCode,
       assignee,
     );
 
@@ -211,7 +212,7 @@ export class OtpService {
   protected async getByPasscode(
     assignment: string,
     category: string,
-    passcode: string,
+    passCode: string,
     assignee: ReferenceIdInterface,
   ): Promise<OtpInterface | undefined> {
     // get the assignment repo
@@ -224,7 +225,7 @@ export class OtpService {
         where: {
           assignee,
           category,
-          passcode,
+          passCode,
         },
         relations: ['assignee'],
       });

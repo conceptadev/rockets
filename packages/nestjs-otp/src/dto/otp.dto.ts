@@ -46,7 +46,7 @@ export class OtpDto
     description: 'passcode of the otp',
   })
   @IsString()
-  passcode = '';
+  passCode = '';
 
   /**
    * expirationDate

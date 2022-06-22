@@ -33,7 +33,7 @@ export class OtpFactory extends Factory<OtpInterface> {
     // set the name
     otp.category = this.randomCategory();
     otp.type = 'uuid';
-    otp.passcode = randomUUID();
+    otp.passCode = randomUUID();
 
     // return the new otp
     return otp;

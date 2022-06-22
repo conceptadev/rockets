@@ -11,17 +11,39 @@ import { UserOtpRepositoryFixture } from '../__fixtures__/repositories/user-otp-
 import { UserFactoryFixture } from '../__fixtures__/factories/user.factory.fixture';
 import { UserOtpFactoryFixture } from '../__fixtures__/factories/user-otp.factory.fixture';
 import ms from 'ms';
+import { OtpDto } from '../dto/otp.dto';
+import { OtpTypeNotDefinedException } from '../exceptions/otp-type-not-defined.exception';
 
 describe('OtpModule', () => {
   const RANDOM_UUID_PASSCODE = 'RANDOM_UUID_PASSCODE';
   const RANDOM_UUID_PASSCODE_EXPIRED = 'RANDOM_UUID_PASSCODE_EXPIRED';
-  const CATEGORY_RESTE_PASSWORD = 'reset-password';
+  const CATEGORY_DEFAULT = 'CATEGORY_DEFAULT';
 
   let testModule: TestingModule;
   let otpModule: OtpModule;
   let otpService: OtpService;
   let testUser: UserEntityFixture;
   let connectionNumber = 1;
+
+  const defaultCreateOtp = async () =>
+    await otpService.create('userOtp', {
+      assignee: testUser,
+      type: 'uuid',
+      category: CATEGORY_DEFAULT,
+    });
+
+  // try to delete
+  const defaultDeleteOtp = async (passCode = '') =>
+    await otpService.delete('userOtp', testUser, CATEGORY_DEFAULT, passCode);
+
+  const defaultIsValidOtp = async (passCode = '', deleteAfterValid = false) =>
+    await otpService.isValid(
+      'userOtp',
+      testUser,
+      CATEGORY_DEFAULT,
+      passCode,
+      deleteAfterValid,
+    );
 
   beforeEach(async () => {
     const connectionName = `test_${connectionNumber++}`;
@@ -62,9 +84,9 @@ describe('OtpModule', () => {
     // Create passcode otp for a user
     const userOtpFactory = new UserOtpFactoryFixture();
     await userOtpFactory.create({
-      category: CATEGORY_RESTE_PASSWORD,
+      category: CATEGORY_DEFAULT,
       type: 'uuid',
-      passcode: RANDOM_UUID_PASSCODE,
+      passCode: RANDOM_UUID_PASSCODE,
       expirationDate: expirationDate,
       assignee: testUser,
     });
@@ -89,45 +111,28 @@ describe('OtpModule', () => {
 
   describe('otpService isValid', () => {
     it('check if is valid true', async () => {
-      const isValid: Partial<boolean> = await otpService.isValid(
-        'userOtp',
-        testUser,
-        CATEGORY_RESTE_PASSWORD,
+      const isValid: Partial<boolean> = await defaultIsValidOtp(
         RANDOM_UUID_PASSCODE,
       );
 
-      expect(isValid).toBeTruthy();
+      expect(isValid).toBe(true);
     });
 
     it('check if is valid after delete', async () => {
-      let isValid: boolean = await otpService.isValid(
-        'userOtp',
-        testUser,
-        CATEGORY_RESTE_PASSWORD,
+      let isValid: Partial<boolean> = await defaultIsValidOtp(
         RANDOM_UUID_PASSCODE,
         true,
       );
 
       expect(isValid).toBeTruthy();
 
-      isValid = await otpService.isValid(
-        'userOtp',
-        testUser,
-        CATEGORY_RESTE_PASSWORD,
-        RANDOM_UUID_PASSCODE,
-      );
+      isValid = await await defaultIsValidOtp(RANDOM_UUID_PASSCODE);
 
-      expect(isValid).toBeFalsy();
+      expect(isValid).toBe(false);
 
-      isValid = await otpService.isValid(
-        'userOtp',
-        testUser,
-        CATEGORY_RESTE_PASSWORD,
-        RANDOM_UUID_PASSCODE,
-        true,
-      );
+      isValid = await defaultIsValidOtp(RANDOM_UUID_PASSCODE, true);
 
-      expect(isValid).toBeFalsy();
+      expect(isValid).toBe(false);
     });
 
     it('check if is expired', async () => {
@@ -137,21 +142,88 @@ describe('OtpModule', () => {
       // Create passcode otp for a user
       const userOtpFactory = new UserOtpFactoryFixture();
       await userOtpFactory.create({
-        category: CATEGORY_RESTE_PASSWORD,
+        category: CATEGORY_DEFAULT,
         type: 'uuid',
-        passcode: RANDOM_UUID_PASSCODE_EXPIRED,
+        passCode: RANDOM_UUID_PASSCODE_EXPIRED,
         expirationDate: expirationDate,
         assignee: testUser,
       });
 
-      const isValid: boolean = await otpService.isValid(
-        'userOtp',
-        testUser,
-        CATEGORY_RESTE_PASSWORD,
+      const isValid: boolean = await defaultIsValidOtp(
         RANDOM_UUID_PASSCODE_EXPIRED,
+        true,
       );
 
-      expect(isValid).toBeFalsy();
+      expect(isValid).toBe(false);
+    });
+  });
+
+  describe('otpService create', () => {
+    it('create with success', async () => {
+      const otpDto: Partial<OtpDto> = await defaultCreateOtp();
+
+      const isValid: boolean = await defaultIsValidOtp(otpDto.passCode);
+
+      expect(isValid).toBe(true);
+    });
+
+    it('create with fail', async () => {
+      const otpDto: Partial<OtpDto> = await defaultCreateOtp();
+
+      expect(otpDto).toBeTruthy();
+
+      const isValid: boolean = await defaultIsValidOtp('fail');
+
+      expect(isValid).toBe(false);
+    });
+
+    it('create with fail 2', async () => {
+      try {
+        await otpService.create('userOtp', {
+          assignee: testUser,
+          type: 'wrongType',
+          category: CATEGORY_DEFAULT,
+        });
+      } catch (e) {
+        expect(e).toBeInstanceOf(OtpTypeNotDefinedException);
+      }
+    });
+  });
+
+  describe('otpService delete', () => {
+    it('create with success', async () => {
+      const otpDto: Partial<OtpDto> = await defaultCreateOtp();
+
+      // was it created?
+      expect(otpDto).toBeTruthy();
+
+      // try to delete
+      await defaultDeleteOtp(otpDto.passCode);
+
+      // check if deleted is valid
+      const isValid: boolean = await defaultIsValidOtp(otpDto.passCode);
+
+      expect(isValid).toBe(false);
+    });
+  });
+
+  describe('otpService clear', () => {
+    it('create with success', async () => {
+      const otpDto: Partial<OtpDto> = await defaultCreateOtp();
+
+      expect(otpDto).toBeTruthy();
+
+      const otpDto2: Partial<OtpDto> = await defaultCreateOtp();
+
+      expect(otpDto2).toBeTruthy();
+
+      // try to delete
+      await defaultDeleteOtp(otpDto.passCode);
+
+      // check if deleted is valid
+      const isValid: boolean = await defaultIsValidOtp(otpDto.passCode);
+
+      expect(isValid).toBe(false);
     });
   });
 });
