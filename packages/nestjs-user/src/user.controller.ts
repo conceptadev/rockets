@@ -32,6 +32,7 @@ import {
   AccessControlDeleteOne,
   AccessControlReadMany,
   AccessControlReadOne,
+  AccessControlRecoverOne,
   AccessControlUpdateOne,
 } from '@concepta/nestjs-access-control';
 import { UserResource } from './user.types';
@@ -166,7 +167,7 @@ export class UserController
    * @param crudRequest the CRUD request object
    */
   @CrudRecoverOne()
-  @AccessControlCreateOne(UserResource.One)
+  @AccessControlRecoverOne(UserResource.One)
   async recoverOne(@CrudRequest() crudRequest: CrudRequestInterface) {
     return this.userCrudService.recoverOne(crudRequest);
   }
