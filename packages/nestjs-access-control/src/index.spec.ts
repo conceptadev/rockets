@@ -10,6 +10,7 @@ import {
   AccessControlModule,
   AccessControlReadMany,
   AccessControlReadOne,
+  AccessControlRecoverOne,
   AccessControlReplaceOne,
   AccessControlUpdateOne,
   UseAccessControl,
@@ -32,6 +33,7 @@ describe('Index', () => {
     expect(AccessControlReadMany).toEqual(expect.any(Function));
     expect(AccessControlReadOne).toEqual(expect.any(Function));
     expect(AccessControlUpdateOne).toEqual(expect.any(Function));
+    expect(AccessControlRecoverOne).toEqual(expect.any(Function));
     expect(AccessControlReplaceOne).toEqual(expect.any(Function));
     expect(UseAccessControl).toEqual(expect.any(Function));
   });

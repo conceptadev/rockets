@@ -8,6 +8,7 @@ export * from './decorators/access-control-filter.decorator';
 export * from './decorators/access-control-grant.decorator';
 export * from './decorators/access-control-read-many.decorator';
 export * from './decorators/access-control-read-one.decorator';
+export * from './decorators/access-control-recover-one.decorator';
 export * from './decorators/access-control-replace-one.decorator';
 export * from './decorators/access-control-update-one.decorator';
 export * from './enums/access-control-action.enum';
