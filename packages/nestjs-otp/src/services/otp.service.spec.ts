@@ -208,21 +208,26 @@ describe('OtpModule', () => {
   });
 
   describe('otpService clear', () => {
-    it('create with success', async () => {
+    it('clear with success', async () => {
       const otpDto: Partial<OtpDto> = await defaultCreateOtp();
 
+      let isValid: boolean = await defaultIsValidOtp(otpDto.passCode);
       expect(otpDto).toBeTruthy();
+      expect(isValid).toBe(true);
 
       const otpDto2: Partial<OtpDto> = await defaultCreateOtp();
 
+      isValid = await defaultIsValidOtp(otpDto2.passCode);
       expect(otpDto2).toBeTruthy();
 
       // try to delete
-      await defaultDeleteOtp(otpDto.passCode);
+      await otpService.clear('userOtp', testUser, CATEGORY_DEFAULT);
 
       // check if deleted is valid
-      const isValid: boolean = await defaultIsValidOtp(otpDto.passCode);
+      isValid = await defaultIsValidOtp(otpDto.passCode);
+      expect(isValid).toBe(false);
 
+      isValid = await defaultIsValidOtp(otpDto2.passCode);
       expect(isValid).toBe(false);
     });
   });
