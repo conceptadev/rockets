@@ -1,8 +1,8 @@
+import { ApiTags } from '@nestjs/swagger';
 import {
   CrudBody,
   CrudCreateOne,
   CrudDeleteOne,
-  CrudReadAll,
   CrudReadOne,
   CrudRequest,
   CrudRequestInterface,
@@ -10,8 +10,18 @@ import {
   CrudControllerInterface,
   CrudController,
   CrudCreateMany,
+  CrudReadMany,
+  CrudRecoverOne,
 } from '@concepta/nestjs-crud';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  AccessControlCreateMany,
+  AccessControlCreateOne,
+  AccessControlDeleteOne,
+  AccessControlReadMany,
+  AccessControlReadOne,
+  AccessControlRecoverOne,
+  AccessControlUpdateOne,
+} from '@concepta/nestjs-access-control';
 import { OrgCrudService } from './services/org-crud.service';
 import { OrgDto } from './dto/org.dto';
 import { OrgCreateDto } from './dto/org-create.dto';
@@ -21,6 +31,7 @@ import { OrgPaginatedDto } from './dto/org-paginated.dto';
 import { OrgEntityInterface } from './interfaces/org-entity.interface';
 import { OrgCreatableInterface } from './interfaces/org-creatable.interface';
 import { OrgUpdatableInterface } from './interfaces/org-updatable.interface';
+import { OrgResource } from './org.types';
 
 /**
  * Org controller.
@@ -53,7 +64,8 @@ export class OrgController
    *
    * @param crudRequest the CRUD request object
    */
-  @CrudReadAll()
+  @CrudReadMany()
+  @AccessControlReadMany(OrgResource.Many)
   async getMany(@CrudRequest() crudRequest: CrudRequestInterface) {
     return this.orgCrudService.getMany(crudRequest);
   }
@@ -64,6 +76,7 @@ export class OrgController
    * @param crudRequest the CRUD request object
    */
   @CrudReadOne()
+  @AccessControlReadOne(OrgResource.One)
   async getOne(@CrudRequest() crudRequest: CrudRequestInterface) {
     return this.orgCrudService.getOne(crudRequest);
   }
@@ -75,6 +88,7 @@ export class OrgController
    * @param orgCreateManyDto org create many dto
    */
   @CrudCreateMany()
+  @AccessControlCreateMany(OrgResource.Many)
   async createMany(
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() orgCreateManyDto: OrgCreateManyDto,
@@ -90,6 +104,7 @@ export class OrgController
    * @param orgCreateDto org create dto
    */
   @CrudCreateOne()
+  @AccessControlCreateOne(OrgResource.One)
   async createOne(
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() orgCreateDto: OrgCreateDto,
@@ -105,6 +120,7 @@ export class OrgController
    * @param orgUpdateDto org update dto
    */
   @CrudUpdateOne()
+  @AccessControlUpdateOne(OrgResource.One)
   async updateOne(
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() orgUpdateDto: OrgUpdateDto,
@@ -118,7 +134,19 @@ export class OrgController
    * @param crudRequest the CRUD request object
    */
   @CrudDeleteOne()
+  @AccessControlDeleteOne(OrgResource.One)
   async deleteOne(@CrudRequest() crudRequest: CrudRequestInterface) {
     return this.orgCrudService.deleteOne(crudRequest);
+  }
+
+  /**
+   * Recover one
+   *
+   * @param crudRequest the CRUD request object
+   */
+  @CrudRecoverOne()
+  @AccessControlRecoverOne(OrgResource.One)
+  async recoverOne(@CrudRequest() crudRequest: CrudRequestInterface) {
+    return this.orgCrudService.recoverOne(crudRequest);
   }
 }

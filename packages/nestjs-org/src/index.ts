@@ -12,6 +12,4 @@ export { OrgInterface } from './interfaces/org.interface';
 export { OrgLookupServiceInterface } from './interfaces/org-lookup-service.interface';
 export { OrgMutateServiceInterface } from './interfaces/org-mutate-service.interface';
 
-// seeding tools
-export { OrgFactory } from './org.factory';
-export { OrgSeeder } from './org.seeder';
+export { OrgResource } from './org.types';

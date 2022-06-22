@@ -4,13 +4,13 @@ import {
   CrudBody,
   CrudCreateOne,
   CrudDeleteOne,
-  CrudReadAll,
   CrudReadOne,
   CrudRequest,
   CrudRequestInterface,
   CrudControllerInterface,
   CrudController,
   CrudCreateMany,
+  CrudReadMany,
 } from '@concepta/nestjs-crud';
 import {
   ROLE_MODULE_CRUD_SERVICES_TOKEN,
@@ -26,6 +26,14 @@ import { RoleAssignmentCreateDto } from './dto/role-assignment-create.dto';
 import { RoleAssignmentPaginatedDto } from './dto/role-assignment-paginated.dto';
 import { RoleAssignmentCreateManyDto } from './dto/role-assignment-create-many.dto';
 import { RoleSettingsInterface } from './interfaces/role-settings.interface';
+import {
+  AccessControlCreateMany,
+  AccessControlCreateOne,
+  AccessControlDeleteOne,
+  AccessControlReadMany,
+  AccessControlReadOne,
+} from '@concepta/nestjs-access-control';
+import { RoleAssignmentResource } from './role.types';
 
 /**
  * Role assignment controller.
@@ -73,7 +81,8 @@ export class RoleAssignmentController
    * @param crudRequest the CRUD request object
    * @param assignment the assignment
    */
-  @CrudReadAll()
+  @CrudReadMany()
+  @AccessControlReadMany(RoleAssignmentResource.Many)
   async getMany(
     @CrudRequest() crudRequest: CrudRequestInterface,
     @Param('assignment') assignment: string,
@@ -88,6 +97,7 @@ export class RoleAssignmentController
    * @param assignment The role assignment
    */
   @CrudReadOne()
+  @AccessControlReadOne(RoleAssignmentResource.One)
   async getOne(
     @CrudRequest() crudRequest: CrudRequestInterface,
     @Param('assignment') assignment: string,
@@ -103,6 +113,7 @@ export class RoleAssignmentController
    * @param assignment The role assignment
    */
   @CrudCreateMany()
+  @AccessControlCreateMany(RoleAssignmentResource.Many)
   async createMany(
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() roleAssignmentCreateDto: RoleAssignmentCreateManyDto,
@@ -131,6 +142,7 @@ export class RoleAssignmentController
    * @param assignment The role assignment
    */
   @CrudCreateOne()
+  @AccessControlCreateOne(RoleAssignmentResource.One)
   async createOne(
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() roleAssignmentCreateDto: RoleAssignmentCreateDto,
@@ -150,6 +162,7 @@ export class RoleAssignmentController
    * @param assignment The role assignment
    */
   @CrudDeleteOne()
+  @AccessControlDeleteOne(RoleAssignmentResource.One)
   async deleteOne(
     @CrudRequest() crudRequest: CrudRequestInterface,
     @Param('assignment') assignment: string,

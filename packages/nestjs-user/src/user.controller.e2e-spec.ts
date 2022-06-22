@@ -7,7 +7,6 @@ import { UserSeeder } from './user.seeder';
 
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
 import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
-import assert from 'assert';
 
 describe('AppController (e2e)', () => {
   describe('Authentication', () => {

@@ -16,6 +16,4 @@ export { RoleAssignmentInterface } from './interfaces/role-assignment.interface'
 export { RoleLookupServiceInterface } from './interfaces/role-lookup-service.interface';
 export { RoleMutateServiceInterface } from './interfaces/role-mutate-service.interface';
 
-// seeding tools
-export { RoleFactory } from './role.factory';
-export { RoleSeeder } from './role.seeder';
+export { RoleResource, RoleAssignmentResource } from './role.types';
