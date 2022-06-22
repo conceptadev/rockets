@@ -3,7 +3,6 @@ import {
   CrudBody,
   CrudCreateOne,
   CrudDeleteOne,
-  CrudReadAll,
   CrudReadOne,
   CrudRequest,
   CrudRequestInterface,
@@ -11,7 +10,16 @@ import {
   CrudControllerInterface,
   CrudController,
   CrudCreateMany,
+  CrudReadMany,
 } from '@concepta/nestjs-crud';
+import {
+  AccessControlCreateMany,
+  AccessControlCreateOne,
+  AccessControlDeleteOne,
+  AccessControlReadMany,
+  AccessControlReadOne,
+  AccessControlUpdateOne,
+} from '@concepta/nestjs-access-control';
 import { RoleCrudService } from './services/role-crud.service';
 import { RoleDto } from './dto/role.dto';
 import { RoleCreateDto } from './dto/role-create.dto';
@@ -21,6 +29,7 @@ import { RolePaginatedDto } from './dto/role-paginated.dto';
 import { RoleEntityInterface } from './interfaces/role-entity.interface';
 import { RoleCreatableInterface } from './interfaces/role-creatable.interface';
 import { RoleUpdatableInterface } from './interfaces/role-updatable.interface';
+import { RoleResource } from './role.types';
 
 /**
  * Role controller.
@@ -53,7 +62,8 @@ export class RoleController
    *
    * @param crudRequest the CRUD request object
    */
-  @CrudReadAll()
+  @CrudReadMany()
+  @AccessControlReadMany(RoleResource.Many)
   async getMany(@CrudRequest() crudRequest: CrudRequestInterface) {
     return this.roleCrudService.getMany(crudRequest);
   }
@@ -64,6 +74,7 @@ export class RoleController
    * @param crudRequest the CRUD request object
    */
   @CrudReadOne()
+  @AccessControlReadOne(RoleResource.One)
   async getOne(@CrudRequest() crudRequest: CrudRequestInterface) {
     return this.roleCrudService.getOne(crudRequest);
   }
@@ -75,6 +86,7 @@ export class RoleController
    * @param roleCreateManyDto role create many dto
    */
   @CrudCreateMany()
+  @AccessControlCreateMany(RoleResource.Many)
   async createMany(
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() roleCreateManyDto: RoleCreateManyDto,
@@ -99,6 +111,7 @@ export class RoleController
    * @param roleCreateDto role create dto
    */
   @CrudCreateOne()
+  @AccessControlCreateOne(RoleResource.One)
   async createOne(
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() roleCreateDto: RoleCreateDto,
@@ -114,6 +127,7 @@ export class RoleController
    * @param roleUpdateDto role update dto
    */
   @CrudUpdateOne()
+  @AccessControlUpdateOne(RoleResource.One)
   async updateOne(
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() roleUpdateDto: RoleUpdateDto,
@@ -127,6 +141,7 @@ export class RoleController
    * @param crudRequest the CRUD request object
    */
   @CrudDeleteOne()
+  @AccessControlDeleteOne(RoleResource.One)
   async deleteOne(@CrudRequest() crudRequest: CrudRequestInterface) {
     return this.roleCrudService.deleteOne(crudRequest);
   }
