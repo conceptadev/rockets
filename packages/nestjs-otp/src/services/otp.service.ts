@@ -21,9 +21,10 @@ import { OtpSettingsInterface } from '../interfaces/otp-settings.interface';
 import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
 import { ReferenceIdInterface } from '@concepta/ts-core';
 import { OtpDto } from '../dto/otp.dto';
+import { OtpServiceInterface } from '../interfaces/otp-service.interface';
 
 @Injectable()
-export class OtpService {
+export class OtpService implements OtpServiceInterface {
   constructor(
     @Inject(OTP_MODULE_REPOSITORIES_TOKEN)
     private allOtpRepos: Record<string, Repository<OtpAssignmentInterface>>,
