@@ -34,7 +34,7 @@ export class RoleService implements RoleServiceInterface {
    */
   async getAssignedRoles(
     assignment: ReferenceAssignment,
-    assignee: Partial<ReferenceIdInterface>,
+    assignee: ReferenceIdInterface,
   ): Promise<RoleEntityInterface[]> {
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
@@ -66,7 +66,7 @@ export class RoleService implements RoleServiceInterface {
   async isAssignedRole<T extends ReferenceIdInterface>(
     assignment: ReferenceAssignment,
     role: Partial<RoleInterface>,
-    assignee: Partial<T>,
+    assignee: T,
   ): Promise<boolean> {
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
@@ -97,7 +97,7 @@ export class RoleService implements RoleServiceInterface {
   async isAssignedRoles<T extends ReferenceIdInterface>(
     assignment: ReferenceAssignment,
     roles: ReferenceIdInterface[],
-    assignee: Partial<T>,
+    assignee: T,
   ): Promise<boolean> {
     // get all assigned roles
     const assignedRoles = await this.getAssignedRoles(assignment, assignee);

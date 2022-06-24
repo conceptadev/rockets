@@ -11,7 +11,7 @@ export interface RoleServiceInterface {
    */
   getAssignedRoles(
     assignment: ReferenceAssignment,
-    assignee: Partial<ReferenceIdInterface>,
+    assignee: ReferenceIdInterface,
   ): Promise<RoleEntityInterface[]>;
 
   /**
@@ -24,7 +24,7 @@ export interface RoleServiceInterface {
   isAssignedRole<T extends ReferenceIdInterface>(
     assignment: ReferenceAssignment,
     role: Partial<RoleInterface>,
-    assignee: Partial<T>,
+    assignee: T,
   ): Promise<boolean>;
 
   /**
@@ -37,6 +37,6 @@ export interface RoleServiceInterface {
   isAssignedRoles<T extends ReferenceIdInterface>(
     assignment: ReferenceAssignment,
     roles: ReferenceIdInterface[],
-    assignee: Partial<T>,
+    assignee: T,
   ): Promise<boolean>;
 }
