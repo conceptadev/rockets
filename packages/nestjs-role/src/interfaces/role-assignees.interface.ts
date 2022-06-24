@@ -1,5 +1,5 @@
-import { RoleAssigneeInterface } from './role-assignee.interface';
+import { ReferenceAssigneeInterface } from '@concepta/ts-core';
 
 export interface RoleAssigneesInterface {
-  assignees: RoleAssigneeInterface[];
+  assignees: ReferenceAssigneeInterface[];
 }

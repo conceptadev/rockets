@@ -10,6 +10,7 @@ export { NotAnErrorException } from './exceptions/not-an-error.exception';
 export {
   ReferenceId,
   ReferenceActive,
+  ReferenceAssignment,
   ReferenceEmail,
   ReferenceSubject,
   ReferenceUsername,
@@ -17,6 +18,7 @@ export {
 
 export { ReferenceIdInterface } from './references/interfaces/reference-id.interface';
 export { ReferenceActiveInterface } from './references/interfaces/reference-active.interface';
+export { ReferenceAssigneeInterface } from './references/interfaces/reference-assignee.interface';
 export { ReferenceEmailInterface } from './references/interfaces/reference-email.interface';
 export { ReferenceUsernameInterface } from './references/interfaces/reference-username.interface';
 export { ReferenceSubjectInterface } from './references/interfaces/reference-subject.interface';

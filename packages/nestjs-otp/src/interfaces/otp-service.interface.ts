@@ -1,4 +1,4 @@
-import { ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceAssignment, ReferenceIdInterface } from '@concepta/ts-core';
 import { OtpCreatableInterface } from './otp-creatable.interface';
 import { OtpInterface } from './otp.interface';
 
@@ -10,7 +10,7 @@ export interface OtpServiceInterface {
    * @param data The data to create
    */
   create(
-    assignment: string,
+    assignment: ReferenceAssignment,
     data: OtpCreatableInterface,
   ): Promise<OtpInterface>;
 
@@ -24,7 +24,7 @@ export interface OtpServiceInterface {
    * @param deleteIfValid If true, delete the otp if it is valid
    */
   isValid(
-    assignment: string,
+    assignment: ReferenceAssignment,
     assignee: ReferenceIdInterface,
     category: string,
     passcode: string,
@@ -39,7 +39,7 @@ export interface OtpServiceInterface {
    * @param passcode The passcode to check
    */
   delete(
-    assignment: string,
+    assignment: ReferenceAssignment,
     assignee: ReferenceIdInterface,
     category: string,
     passcode: string,
@@ -53,7 +53,7 @@ export interface OtpServiceInterface {
    * @param category The category to delete
    */
   clear(
-    assignment: string,
+    assignment: ReferenceAssignment,
     assignee: ReferenceIdInterface,
     category: string,
   ): Promise<void>;

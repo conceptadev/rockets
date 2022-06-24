@@ -3,30 +3,29 @@ import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { DeepPartial, Repository } from 'typeorm';
 import { Inject, Injectable, Type } from '@nestjs/common';
+import { ReferenceAssignment, ReferenceIdInterface } from '@concepta/ts-core';
 import {
   ReferenceLookupException,
   ReferenceMutateException,
   ReferenceValidationException,
 } from '@concepta/typeorm-common';
-import { OtpTypeNotDefinedException } from '../exceptions/otp-type-not-defined.exception';
-import { OtpAssignmentInterface } from '../interfaces/otp-assignment.interface';
-import { OtpInterface } from '../interfaces/otp.interface';
 import {
   OTP_MODULE_REPOSITORIES_TOKEN,
   OTP_MODULE_SETTINGS_TOKEN,
 } from '../otp.constants';
-import { OtpCreateDto } from '../dto/otp-create.dto';
+import { OtpInterface } from '../interfaces/otp.interface';
 import { OtpCreatableInterface } from '../interfaces/otp-creatable.interface';
-import { OtpSettingsInterface } from '../interfaces/otp-settings.interface';
-import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
-import { ReferenceIdInterface } from '@concepta/ts-core';
 import { OtpServiceInterface } from '../interfaces/otp-service.interface';
+import { OtpSettingsInterface } from '../interfaces/otp-settings.interface';
+import { OtpCreateDto } from '../dto/otp-create.dto';
+import { OtpTypeNotDefinedException } from '../exceptions/otp-type-not-defined.exception';
+import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
 
 @Injectable()
 export class OtpService implements OtpServiceInterface {
   constructor(
     @Inject(OTP_MODULE_REPOSITORIES_TOKEN)
-    private allOtpRepos: Record<string, Repository<OtpAssignmentInterface>>,
+    private allOtpRepos: Record<string, Repository<OtpInterface>>,
     @Inject(OTP_MODULE_SETTINGS_TOKEN)
     private settings: OtpSettingsInterface,
   ) {}
@@ -38,7 +37,7 @@ export class OtpService implements OtpServiceInterface {
    * @param data The data to create
    */
   async create(
-    assignment: string,
+    assignment: ReferenceAssignment,
     data: OtpCreatableInterface,
   ): Promise<OtpInterface> {
     if (!this.settings.types[data.type])
@@ -77,7 +76,7 @@ export class OtpService implements OtpServiceInterface {
    * @param deleteIfValid If true, delete the otp if it is valid
    */
   async isValid(
-    assignment: string,
+    assignment: ReferenceAssignment,
     assignee: ReferenceIdInterface,
     category: string,
     passcode: string,
@@ -114,7 +113,7 @@ export class OtpService implements OtpServiceInterface {
    * @param passcode The passcode to check
    */
   async delete(
-    assignment: string,
+    assignment: ReferenceAssignment,
     assignee: ReferenceIdInterface,
     category: string,
     passcode: string,
@@ -138,7 +137,7 @@ export class OtpService implements OtpServiceInterface {
    * @param category The category to delete
    */
   async clear(
-    assignment: string,
+    assignment: ReferenceAssignment,
     assignee: ReferenceIdInterface,
     category: string,
   ): Promise<void> {
@@ -164,7 +163,7 @@ export class OtpService implements OtpServiceInterface {
    * @param id The id to delete
    */
   protected async deleteOtp(
-    assignment: string,
+    assignment: ReferenceAssignment,
     id: string | string[],
   ): Promise<void> {
     // get the assignment repo
@@ -184,7 +183,7 @@ export class OtpService implements OtpServiceInterface {
    * @param assignee The assignee to check
    */
   protected async getAssignedOtps(
-    assignment: string,
+    assignment: ReferenceAssignment,
     category: string,
     assignee: ReferenceIdInterface,
   ): Promise<OtpInterface[]> {
@@ -210,7 +209,7 @@ export class OtpService implements OtpServiceInterface {
   }
 
   protected async getByPasscode(
-    assignment: string,
+    assignment: ReferenceAssignment,
     category: string,
     passcode: string,
     assignee: ReferenceIdInterface,
@@ -244,8 +243,8 @@ export class OtpService implements OtpServiceInterface {
    * @param assignment The otp assignment
    */
   protected getAssignmentRepo(
-    assignment: string,
-  ): Repository<OtpAssignmentInterface> {
+    assignment: ReferenceAssignment,
+  ): Repository<OtpInterface> {
     // repo matching assignment was injected?
     if (this.allOtpRepos[assignment]) {
       // yes, return it
