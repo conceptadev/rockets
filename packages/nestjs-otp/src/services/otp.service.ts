@@ -20,7 +20,6 @@ import { OtpCreatableInterface } from '../interfaces/otp-creatable.interface';
 import { OtpSettingsInterface } from '../interfaces/otp-settings.interface';
 import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
 import { ReferenceIdInterface } from '@concepta/ts-core';
-import { OtpDto } from '../dto/otp.dto';
 import { OtpServiceInterface } from '../interfaces/otp-service.interface';
 
 @Injectable()
@@ -41,7 +40,7 @@ export class OtpService implements OtpServiceInterface {
   async create(
     assignment: string,
     data: OtpCreatableInterface,
-  ): Promise<OtpDto> {
+  ): Promise<OtpInterface> {
     if (!this.settings.types[data.type])
       throw new OtpTypeNotDefinedException(data.type);
 

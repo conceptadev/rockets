@@ -1,6 +1,6 @@
 import { ReferenceIdInterface } from '@concepta/ts-core';
-import { OtpDto } from '../dto/otp.dto';
 import { OtpCreatableInterface } from './otp-creatable.interface';
+import { OtpInterface } from './otp.interface';
 
 export interface OtpServiceInterface {
   /**
@@ -9,7 +9,10 @@ export interface OtpServiceInterface {
    * @param assignment The otp assignment
    * @param data The data to create
    */
-  create(assignment: string, data: OtpCreatableInterface): Promise<OtpDto>;
+  create(
+    assignment: string,
+    data: OtpCreatableInterface,
+  ): Promise<OtpInterface>;
 
   /**
    * Check if otp is valid
