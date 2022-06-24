@@ -20,9 +20,10 @@ import { OtpCreatableInterface } from '../interfaces/otp-creatable.interface';
 import { OtpSettingsInterface } from '../interfaces/otp-settings.interface';
 import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
 import { ReferenceIdInterface } from '@concepta/ts-core';
+import { OtpServiceInterface } from '../interfaces/otp-service.interface';
 
 @Injectable()
-export class OtpService {
+export class OtpService implements OtpServiceInterface {
   constructor(
     @Inject(OTP_MODULE_REPOSITORIES_TOKEN)
     private allOtpRepos: Record<string, Repository<OtpAssignmentInterface>>,
@@ -39,7 +40,10 @@ export class OtpService {
   async create(
     assignment: string,
     data: OtpCreatableInterface,
-  ): Promise<OtpCreateDto> {
+  ): Promise<OtpInterface> {
+    if (!this.settings.types[data.type])
+      throw new OtpTypeNotDefinedException(data.type);
+
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
@@ -47,9 +51,6 @@ export class OtpService {
     try {
       // validate the data
       const dto = await this.validateDto<OtpCreateDto>(OtpCreateDto, data);
-
-      if (!this.settings.types[data.type])
-        throw new OtpTypeNotDefinedException(data.type);
 
       const passcode = this.settings.types[data.type].generator();
 
@@ -224,7 +225,7 @@ export class OtpService {
         where: {
           assignee,
           category,
-          passcode,
+          passcode: passcode,
         },
         relations: ['assignee'],
       });

@@ -1,6 +1,6 @@
-import { OtpCreateDto } from '../dto/otp-create.dto';
-import { OtpAssigneeInterface } from './otp-assignee.interface';
+import { ReferenceIdInterface } from '@concepta/ts-core';
 import { OtpCreatableInterface } from './otp-creatable.interface';
+import { OtpInterface } from './otp.interface';
 
 export interface OtpServiceInterface {
   /**
@@ -8,12 +8,11 @@ export interface OtpServiceInterface {
    *
    * @param assignment The otp assignment
    * @param data The data to create
-   * @returns The object created
    */
   create(
     assignment: string,
     data: OtpCreatableInterface,
-  ): Promise<OtpCreateDto>;
+  ): Promise<OtpInterface>;
 
   /**
    * Check if otp is valid
@@ -23,42 +22,39 @@ export interface OtpServiceInterface {
    * @param category  The category to check
    * @param passcode The passcode to check
    * @param deleteIfValid If true, delete the otp if it is valid
-   * @returns boolean
    */
-  iisValid<T extends OtpAssigneeInterface>(
+  isValid(
     assignment: string,
-    assignee: Partial<T>,
+    assignee: ReferenceIdInterface,
     category: string,
     passcode: string,
     deleteIfValid: boolean,
   ): Promise<boolean>;
 
   /**
-   * Delete a otp based on params.
-   *
+   * Delete a otp based on params
    * @param assignment The otp assignment
    * @param assignee The assignee to check
    * @param category The category to check
    * @param passcode The passcode to check
    */
-  delete<T extends OtpAssigneeInterface>(
+  delete(
     assignment: string,
-    assignee: Partial<T>,
+    assignee: ReferenceIdInterface,
     category: string,
     passcode: string,
   ): Promise<void>;
 
   /**
-   * Clear all assignee otps based for given category.
+   * Clear all otps for assign in given category.
    *
    * @param assignment The assignment of the repository
    * @param assignee The assignee to delete
    * @param category The category to delete
    */
-  //TODO: should i clear only based on one of the options?
-  clear<T extends OtpAssigneeInterface>(
+  clear(
     assignment: string,
-    assignee: Partial<T>,
+    assignee: ReferenceIdInterface,
     category: string,
   ): Promise<void>;
 }

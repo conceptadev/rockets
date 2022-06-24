@@ -13,9 +13,10 @@ import {
 } from '../role.constants';
 import { RoleEntityInterface } from '../interfaces/role-entity.interface';
 import { RoleSettingsInterface } from '../interfaces/role-settings.interface';
+import { RoleServiceInterface } from '../interfaces/role-service.interface';
 
 @Injectable()
-export class RoleService {
+export class RoleService implements RoleServiceInterface {
   constructor(
     @Inject(ROLE_MODULE_SETTINGS_TOKEN)
     private settings: RoleSettingsInterface,
