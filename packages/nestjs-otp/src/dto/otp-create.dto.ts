@@ -1,8 +1,8 @@
 import { Exclude, Expose, Type } from 'class-transformer';
 import { IsString } from 'class-validator';
+import { ReferenceIdInterface } from '@concepta/ts-core';
 import { ReferenceIdDto } from '@concepta/nestjs-common';
 import { OtpCreatableInterface } from '../interfaces/otp-creatable.interface';
-import { OtpAssigneeInterface } from '../interfaces/otp-assignee.interface';
 
 /**
  * Otp Create DTO
@@ -28,5 +28,5 @@ export class OtpCreateDto implements OtpCreatableInterface {
    */
   @Expose()
   @Type(() => ReferenceIdDto)
-  assignee: OtpAssigneeInterface = new ReferenceIdDto();
+  assignee: ReferenceIdInterface = new ReferenceIdDto();
 }

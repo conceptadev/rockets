@@ -1,11 +1,14 @@
 import { IsOptional, IsString } from 'class-validator';
 import { Exclude, Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { AuditInterface, ReferenceId } from '@concepta/ts-core';
+import {
+  AuditInterface,
+  ReferenceAssigneeInterface,
+  ReferenceId,
+} from '@concepta/ts-core';
 import { AuditDto, ReferenceIdDto } from '@concepta/nestjs-common';
 import { CrudResponseDto } from '@concepta/nestjs-crud';
 import { RoleInterface } from '../interfaces/role.interface';
-import { RoleAssigneeInterface } from '../interfaces/role-assignee.interface';
 
 /**
  * Role DTO
@@ -59,7 +62,7 @@ export class RoleDto
     description: 'Assignee',
   })
   @Type(() => ReferenceIdDto)
-  assignees: RoleAssigneeInterface[] = [];
+  assignees: ReferenceAssigneeInterface[] = [];
 
   /**
    * Audit

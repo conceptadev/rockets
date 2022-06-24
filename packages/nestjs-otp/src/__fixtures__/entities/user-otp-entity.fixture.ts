@@ -1,7 +1,7 @@
 import { Entity, ManyToOne } from 'typeorm';
-import { OtpAssignmentSqliteEntity } from '../../entities/otp-assignment-sqlite.entity';
-import { OtpAssigneeInterface } from '../../interfaces/otp-assignee.interface';
+import { ReferenceIdInterface } from '@concepta/ts-core';
 import { UserEntityFixture } from './user-entity.fixture';
+import { OtpAssignmentSqliteEntity } from '../../entities/otp-assignment-sqlite.entity';
 
 /**
  * Otp Entity Fixture
@@ -9,5 +9,5 @@ import { UserEntityFixture } from './user-entity.fixture';
 @Entity()
 export class UserOtpEntityFixture extends OtpAssignmentSqliteEntity {
   @ManyToOne(() => UserEntityFixture, (user) => user.userOtps)
-  assignee!: OtpAssigneeInterface;
+  assignee!: ReferenceIdInterface;
 }

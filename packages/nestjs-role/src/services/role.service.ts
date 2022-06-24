@@ -1,11 +1,10 @@
 import { FindOneOptions, Repository } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
-import { ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceAssignment, ReferenceIdInterface } from '@concepta/ts-core';
 import { ReferenceLookupException } from '@concepta/typeorm-common';
 import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
 import { AssignmentNotFoundException } from '../exceptions/assignment-not-found.exception';
 import { RoleAssignmentEntityInterface } from '../interfaces/role-assignment-entity.interface';
-import { RoleAssigneeInterface } from '../interfaces/role-assignee.interface';
 import { RoleInterface } from '../interfaces/role.interface';
 import {
   ROLE_MODULE_REPOSITORIES_TOKEN,
@@ -34,8 +33,8 @@ export class RoleService implements RoleServiceInterface {
    * @param assignee The assignee to check
    */
   async getAssignedRoles(
-    assignment: string,
-    assignee: Partial<RoleAssigneeInterface>,
+    assignment: ReferenceAssignment,
+    assignee: ReferenceIdInterface,
   ): Promise<RoleEntityInterface[]> {
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
@@ -64,10 +63,10 @@ export class RoleService implements RoleServiceInterface {
    * @param role The role to check
    * @param assignee The assignee to check
    */
-  async isAssignedRole<T extends RoleAssigneeInterface>(
-    assignment: string,
+  async isAssignedRole<T extends ReferenceIdInterface>(
+    assignment: ReferenceAssignment,
     role: Partial<RoleInterface>,
-    assignee: Partial<T>,
+    assignee: T,
   ): Promise<boolean> {
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
@@ -95,10 +94,10 @@ export class RoleService implements RoleServiceInterface {
    * @param roles The roles to check
    * @param assignee The assignee to check
    */
-  async isAssignedRoles<T extends RoleAssigneeInterface>(
-    assignment: string,
+  async isAssignedRoles<T extends ReferenceIdInterface>(
+    assignment: ReferenceAssignment,
     roles: ReferenceIdInterface[],
-    assignee: Partial<T>,
+    assignee: T,
   ): Promise<boolean> {
     // get all assigned roles
     const assignedRoles = await this.getAssignedRoles(assignment, assignee);
@@ -126,7 +125,7 @@ export class RoleService implements RoleServiceInterface {
    * @param assignment The role assignment
    */
   protected getAssignmentRepo(
-    assignment: string,
+    assignment: ReferenceAssignment,
   ): Repository<RoleAssignmentEntityInterface> {
     // have entity key for given assignment?
     if (this.settings.assignments[assignment]) {

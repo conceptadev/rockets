@@ -1,5 +1,4 @@
-import { ReferenceIdInterface } from '@concepta/ts-core';
-import { RoleAssigneeInterface } from './role-assignee.interface';
+import { ReferenceAssignment, ReferenceIdInterface } from '@concepta/ts-core';
 import { RoleEntityInterface } from './role-entity.interface';
 import { RoleInterface } from './role.interface';
 
@@ -11,8 +10,8 @@ export interface RoleServiceInterface {
    * @param assignee The assignee to check
    */
   getAssignedRoles(
-    assignment: string,
-    assignee: Partial<RoleAssigneeInterface>,
+    assignment: ReferenceAssignment,
+    assignee: ReferenceIdInterface,
   ): Promise<RoleEntityInterface[]>;
 
   /**
@@ -22,10 +21,10 @@ export interface RoleServiceInterface {
    * @param role The role to check
    * @param assignee The assignee to check
    */
-  isAssignedRole<T extends RoleAssigneeInterface>(
-    assignment: string,
+  isAssignedRole<T extends ReferenceIdInterface>(
+    assignment: ReferenceAssignment,
     role: Partial<RoleInterface>,
-    assignee: Partial<T>,
+    assignee: T,
   ): Promise<boolean>;
 
   /**
@@ -35,9 +34,9 @@ export interface RoleServiceInterface {
    * @param roles The roles to check
    * @param assignee The assignee to check
    */
-  isAssignedRoles<T extends RoleAssigneeInterface>(
-    assignment: string,
+  isAssignedRoles<T extends ReferenceIdInterface>(
+    assignment: ReferenceAssignment,
     roles: ReferenceIdInterface[],
-    assignee: Partial<T>,
+    assignee: T,
   ): Promise<boolean>;
 }

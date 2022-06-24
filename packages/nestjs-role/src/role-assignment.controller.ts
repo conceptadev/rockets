@@ -1,5 +1,6 @@
 import { Inject, Param } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { ReferenceAssignment } from '@concepta/ts-core';
 import {
   CrudBody,
   CrudCreateOne,
@@ -85,7 +86,7 @@ export class RoleAssignmentController
   @AccessControlReadMany(RoleAssignmentResource.Many)
   async getMany(
     @CrudRequest() crudRequest: CrudRequestInterface,
-    @Param('assignment') assignment: string,
+    @Param('assignment') assignment: ReferenceAssignment,
   ) {
     return this.getCrudService(assignment).getMany(crudRequest);
   }
@@ -100,7 +101,7 @@ export class RoleAssignmentController
   @AccessControlReadOne(RoleAssignmentResource.One)
   async getOne(
     @CrudRequest() crudRequest: CrudRequestInterface,
-    @Param('assignment') assignment: string,
+    @Param('assignment') assignment: ReferenceAssignment,
   ) {
     return this.getCrudService(assignment).getOne(crudRequest);
   }
@@ -117,7 +118,7 @@ export class RoleAssignmentController
   async createMany(
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() roleAssignmentCreateDto: RoleAssignmentCreateManyDto,
-    @Param('assignment') assignment: string,
+    @Param('assignment') assignment: ReferenceAssignment,
   ) {
     // the final data
     const roles = [];
@@ -146,7 +147,7 @@ export class RoleAssignmentController
   async createOne(
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() roleAssignmentCreateDto: RoleAssignmentCreateDto,
-    @Param('assignment') assignment: string,
+    @Param('assignment') assignment: ReferenceAssignment,
   ) {
     // call crud service to create
     return this.getCrudService(assignment).createOne(
@@ -165,7 +166,7 @@ export class RoleAssignmentController
   @AccessControlDeleteOne(RoleAssignmentResource.One)
   async deleteOne(
     @CrudRequest() crudRequest: CrudRequestInterface,
-    @Param('assignment') assignment: string,
+    @Param('assignment') assignment: ReferenceAssignment,
   ) {
     return this.getCrudService(assignment).deleteOne(crudRequest);
   }
@@ -176,7 +177,9 @@ export class RoleAssignmentController
    * @private
    * @param assignment The role assignment
    */
-  protected getCrudService(assignment: string): RoleAssignmentCrudService {
+  protected getCrudService(
+    assignment: ReferenceAssignment,
+  ): RoleAssignmentCrudService {
     // have entity key for given assignment?
     if (this.settings.assignments[assignment]) {
       // yes, set it
