@@ -3,7 +3,7 @@ import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { DeepPartial, Repository } from 'typeorm';
 import { Inject, Injectable, Type } from '@nestjs/common';
-import { ReferenceAssignment, ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceAssignment, ReferenceId } from '@concepta/ts-core';
 import {
   ReferenceLookupException,
   ReferenceMutateException,
@@ -34,14 +34,14 @@ export class OtpService implements OtpServiceInterface {
    * Create a otp with a for the given assignee.
    *
    * @param assignment The otp assignment
-   * @param data The data to create
+   * @param otp The data to create
    */
   async create(
     assignment: ReferenceAssignment,
-    data: OtpCreatableInterface,
+    otp: OtpCreatableInterface,
   ): Promise<OtpInterface> {
-    if (!this.settings.types[data.type])
-      throw new OtpTypeNotDefinedException(data.type);
+    if (!this.settings.types[otp.type])
+      throw new OtpTypeNotDefinedException(otp.type);
 
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
@@ -49,10 +49,12 @@ export class OtpService implements OtpServiceInterface {
     // try to find the relationship
     try {
       // validate the data
-      const dto = await this.validateDto<OtpCreateDto>(OtpCreateDto, data);
+      const dto = await this.validateDto<OtpCreateDto>(OtpCreateDto, otp);
 
-      const passcode = this.settings.types[data.type].generator();
+      // generate a passcode
+      const passcode = this.settings.types[otp.type].generator();
 
+      // generate the expiration date
       const expirationDate = this.getExpirationDate(this.settings.expiresIn);
 
       // try to save the item
@@ -70,25 +72,16 @@ export class OtpService implements OtpServiceInterface {
    * Check if otp is valid
    *
    * @param assignment The otp assignment
-   * @param assignee  The assignee to check
-   * @param category  The category to check
-   * @param passcode The passcode to check
+   * @param otp The otp to validate
    * @param deleteIfValid If true, delete the otp if it is valid
    */
   async isValid(
     assignment: ReferenceAssignment,
-    assignee: ReferenceIdInterface,
-    category: string,
-    passcode: string,
+    otp: Pick<OtpInterface, 'assignee' | 'category' | 'passcode'>,
     deleteIfValid = false,
   ): Promise<boolean> {
     // get otp from an assigned user for a category
-    const assignedOtp = await this.getByPasscode(
-      assignment,
-      category,
-      passcode,
-      assignee,
-    );
+    const assignedOtp = await this.getByPasscode(assignment, otp);
 
     // check if otp is expired
     const now = new Date();
@@ -107,46 +100,34 @@ export class OtpService implements OtpServiceInterface {
 
   /**
    * Delete a otp based on params
+   *
    * @param assignment The otp assignment
-   * @param assignee The assignee to check
-   * @param category The category to check
-   * @param passcode The passcode to check
+   * @param otp The otp to delete
    */
   async delete(
     assignment: ReferenceAssignment,
-    assignee: ReferenceIdInterface,
-    category: string,
-    passcode: string,
+    otp: Pick<OtpInterface, 'assignee' | 'category' | 'passcode'>,
   ): Promise<void> {
     // get otp from an assigned user for a category
-    const assignedOtp = await this.getByPasscode(
-      assignment,
-      category,
-      passcode,
-      assignee,
-    );
+    const assignedOtp = await this.getByPasscode(assignment, otp);
 
-    if (assignedOtp) this.deleteOtp(assignment, assignedOtp.id);
+    if (assignedOtp) {
+      this.deleteOtp(assignment, assignedOtp.id);
+    }
   }
 
   /**
    * Clear all otps for assign in given category.
    *
    * @param assignment The assignment of the repository
-   * @param assignee The assignee to delete
-   * @param category The category to delete
+   * @param otp The otp to clear
    */
   async clear(
     assignment: ReferenceAssignment,
-    assignee: ReferenceIdInterface,
-    category: string,
+    otp: Pick<OtpInterface, 'assignee' | 'category'>,
   ): Promise<void> {
     // get all otps from an assigned user for a category
-    const assignedOtps = await this.getAssignedOtps(
-      assignment,
-      category,
-      assignee,
-    );
+    const assignedOtps = await this.getAssignedOtps(assignment, otp);
 
     // Map to get ids
     const assignedOtpIds = assignedOtps.map((assignedOtp) => assignedOtp.id);
@@ -160,11 +141,11 @@ export class OtpService implements OtpServiceInterface {
    *
    * @private
    * @param assignment The assignment to delete id from
-   * @param id The id to delete
+   * @param id The id or ids to delete
    */
   protected async deleteOtp(
     assignment: ReferenceAssignment,
-    id: string | string[],
+    id: ReferenceId | ReferenceId[],
   ): Promise<void> {
     // get the assignment repo
     const repo = this.getAssignmentRepo(assignment);
@@ -177,18 +158,20 @@ export class OtpService implements OtpServiceInterface {
   }
 
   /**
-   * Get all roles for assignee.
+   * Get all OTPs for assignee.
    *
    * @param assignment The assignment of the check
-   * @param assignee The assignee to check
+   * @param otp The otp to get assignments
    */
   protected async getAssignedOtps(
     assignment: ReferenceAssignment,
-    category: string,
-    assignee: ReferenceIdInterface,
+    otp: Pick<OtpInterface, 'assignee' | 'category'>,
   ): Promise<OtpInterface[]> {
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
+
+    // break out the args
+    const { assignee, category } = otp;
 
     // try to find the relationships
     try {
@@ -210,12 +193,13 @@ export class OtpService implements OtpServiceInterface {
 
   protected async getByPasscode(
     assignment: ReferenceAssignment,
-    category: string,
-    passcode: string,
-    assignee: ReferenceIdInterface,
+    otp: Pick<OtpInterface, 'assignee' | 'category' | 'passcode'>,
   ): Promise<OtpInterface | undefined> {
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
+
+    // break out properties
+    const { assignee, category, passcode } = otp;
 
     // try to find the relationships
     try {
@@ -224,7 +208,7 @@ export class OtpService implements OtpServiceInterface {
         where: {
           assignee,
           category,
-          passcode: passcode,
+          passcode,
         },
         relations: ['assignee'],
       });

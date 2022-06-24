@@ -53,26 +53,13 @@ describe('OtpModule', () => {
 
   // try to delete
   const defaultDeleteOtp = async (
-    options: Pick<OtpInterface, 'assignee' | 'passcode'>,
-  ) =>
-    await otpService.delete(
-      'userOtp',
-      options.assignee,
-      CATEGORY_DEFAULT,
-      options.passcode,
-    );
+    otp: Pick<OtpInterface, 'assignee' | 'passcode' | 'category'>,
+  ) => await otpService.delete('userOtp', otp);
 
   const defaultIsValidOtp = async (
-    options: Pick<OtpInterface, 'assignee' | 'passcode'>,
+    otp: Pick<OtpInterface, 'assignee' | 'passcode' | 'category'>,
     deleteIfValid?: boolean,
-  ) =>
-    await otpService.isValid(
-      'userOtp',
-      options.assignee,
-      CATEGORY_DEFAULT,
-      options.passcode,
-      deleteIfValid,
-    );
+  ) => await otpService.isValid('userOtp', otp, deleteIfValid);
 
   beforeEach(async () => {
     const connectionName = `test_${connectionNumber++}`;
@@ -170,12 +157,9 @@ describe('OtpModule', () => {
       const otp = await defaultCreateOtp({ assignee });
 
       expect(otp).toBeTruthy();
-      expect(
-        await defaultIsValidOtp({
-          assignee,
-          passcode: 'INVALID',
-        }),
-      ).toBe(false);
+      expect(await defaultIsValidOtp({ ...otp, passcode: 'INVALID' })).toBe(
+        false,
+      );
     });
 
     it('create with fail 2', async () => {
@@ -215,9 +199,7 @@ describe('OtpModule', () => {
       expect(await defaultIsValidOtp(otp2)).toBe(true);
 
       // try to clear
-      expect(
-        await otpService.clear('userOtp', assignee, CATEGORY_DEFAULT),
-      ).toBeUndefined();
+      expect(await otpService.clear('userOtp', otp)).toBeUndefined();
 
       // cleared passcodes should be invalid
       // TODO: check that they were actually removed from database
