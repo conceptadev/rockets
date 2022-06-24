@@ -21,7 +21,11 @@ describe('AppController (e2e)', () => {
 
       UserFactory.entity = UserEntityFixture;
 
-      await useSeeders(UserSeeder, { root: __dirname, connection: 'default' });
+      await useSeeders(UserSeeder, {
+        root: __dirname + '/__fixtures__',
+        configName: 'ormconfig.fixture',
+        connection: 'default',
+      });
     });
 
     afterEach(async () => {
@@ -33,7 +37,7 @@ describe('AppController (e2e)', () => {
       await supertest(app.getHttpServer()).get('/user?limit=10').expect(200);
     });
 
-    it('GET /user/:id', async () => {
+    it.only('GET /user/:id', async () => {
       // get a user so we have an id
       const response = await supertest(app.getHttpServer())
         .get('/user?limit=1')

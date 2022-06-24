@@ -7,6 +7,7 @@ const config: TypeOrmModuleOptions & Partial<ConnectionOptions> = {
   database: ':memory:',
   synchronize: true,
   entities: [UserEntityFixture],
+  defaultSeeder: 'NONE',
 };
 
 export default config;

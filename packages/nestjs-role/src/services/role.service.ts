@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { FindOneOptions, Repository } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
 import { ReferenceIdInterface } from '@concepta/ts-core';
 import { ReferenceLookupException } from '@concepta/typeorm-common';
@@ -80,7 +80,7 @@ export class RoleService implements RoleServiceInterface {
           role,
           assignee,
         },
-      });
+      } as FindOneOptions<RoleAssignmentEntityInterface>);
       // return true if we found an assignment
       return assignment ? true : false;
     } catch (e) {

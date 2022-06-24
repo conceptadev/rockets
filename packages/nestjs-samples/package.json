@@ -43,6 +43,6 @@
     "jest-mock-extended": "^2.0.4",
     "pg": "^8.7.1",
     "supertest": "^6.1.6",
-    "typeorm": "^0.2.41"
+    "typeorm": "^0.3.0"
   }
 }

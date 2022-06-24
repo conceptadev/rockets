@@ -6,8 +6,6 @@ import { OtpModule } from '../otp.module';
 import { UserEntityFixture } from './entities/user-entity.fixture';
 import { UserOtpEntityFixture } from './entities/user-otp-entity.fixture';
 
-import { UserOtpRepositoryFixture } from './repositories/user-otp-repository.fixture';
-
 @Module({
   imports: [
     TypeOrmExtModule.registerAsync({
@@ -22,7 +20,6 @@ import { UserOtpRepositoryFixture } from './repositories/user-otp-repository.fix
       entities: {
         userOtp: {
           entity: UserOtpEntityFixture,
-          repository: UserOtpRepositoryFixture,
         },
       },
     }),

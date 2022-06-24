@@ -10,7 +10,8 @@ import { UserMutateService } from './services/user-mutate.service';
 import { USER_MODULE_USER_ENTITY_KEY } from './user.constants';
 
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
-import { UserRepositoryFixture } from './__fixtures__/user.repository.fixture';
+import { Repository } from 'typeorm';
+import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
 
 describe('AppModule', () => {
   let userModule: UserModule;
@@ -18,7 +19,7 @@ describe('AppModule', () => {
   let userMutateService: DefaultUserMutateService;
   let userCrudService: UserCrudService;
   let userController: UserController;
-  let userRepo: UserRepositoryFixture;
+  let userRepo: Repository<UserEntityFixture>;
 
   beforeEach(async () => {
     const testModule: TestingModule = await Test.createTestingModule({
@@ -26,7 +27,7 @@ describe('AppModule', () => {
     }).compile();
 
     userModule = testModule.get<UserModule>(UserModule);
-    userRepo = testModule.get<UserRepositoryFixture>(
+    userRepo = testModule.get(
       getDynamicRepositoryToken(USER_MODULE_USER_ENTITY_KEY),
     );
     userLookupService =
@@ -44,13 +45,13 @@ describe('AppModule', () => {
   describe('module', () => {
     it('should be loaded', async () => {
       expect(userModule).toBeInstanceOf(UserModule);
-      expect(userRepo).toBeInstanceOf(UserRepositoryFixture);
+      expect(userRepo).toBeInstanceOf(Repository);
       expect(userCrudService).toBeInstanceOf(UserCrudService);
       expect(userLookupService).toBeInstanceOf(DefaultUserLookupService);
-      expect(userLookupService['repo']).toBeInstanceOf(UserRepositoryFixture);
+      expect(userLookupService['repo']).toBeInstanceOf(Repository);
       expect(userLookupService['repo'].find).toBeInstanceOf(Function);
       expect(userMutateService).toBeInstanceOf(DefaultUserMutateService);
-      expect(userMutateService['repo']).toBeInstanceOf(UserRepositoryFixture);
+      expect(userMutateService['repo']).toBeInstanceOf(Repository);
       expect(userMutateService['repo'].find).toBeInstanceOf(Function);
       expect(userController).toBeInstanceOf(UserController);
     });

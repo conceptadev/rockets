@@ -7,7 +7,7 @@ import { UserLookupCustomService } from './services/user-lookup.custom.service';
 
 import { default as dbConfig } from './ormconfig.fixture';
 import { UserEntityFixture } from './user.entity.fixture';
-import { UserRepositoryFixture } from './user.repository.fixture';
+import { createUserRepositoryFixture } from './create-user-repository.fixture';
 
 @Module({
   imports: [
@@ -24,7 +24,10 @@ import { UserRepositoryFixture } from './user.repository.fixture';
         userLookupService,
       }),
       entities: {
-        user: { entity: UserEntityFixture, repository: UserRepositoryFixture },
+        user: {
+          entity: UserEntityFixture,
+          repositoryFactory: createUserRepositoryFixture,
+        },
       },
     }),
   ],

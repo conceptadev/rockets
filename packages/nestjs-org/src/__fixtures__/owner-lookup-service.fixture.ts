@@ -3,6 +3,7 @@ import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import { OrgOwnerLookupServiceInterface } from '../interfaces/org-owner-lookup-service.interface';
 import { OwnerEntityFixture } from './owner-entity.fixture';
 import { OwnerRepositoryFixture } from './owner-repository.fixture';
+import { FindOneOptions } from 'typeorm';
 
 @Injectable()
 export class OwnerLookupServiceFixture
@@ -13,7 +14,7 @@ export class OwnerLookupServiceFixture
     private ownerRepo: OwnerRepositoryFixture,
   ) {}
 
-  byId(id: string): Promise<OwnerEntityFixture | undefined> {
-    return this.ownerRepo.findOne({ id });
+  byId(id: string): Promise<OwnerEntityFixture | null> {
+    return this.ownerRepo.findOne({ id } as FindOneOptions<OwnerEntityFixture>);
   }
 }

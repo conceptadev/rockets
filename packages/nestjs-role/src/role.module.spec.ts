@@ -16,7 +16,6 @@ import { ROLE_MODULE_ROLE_ENTITY_KEY } from './role.constants';
 
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
 import { RoleEntityFixture } from './__fixtures__/entities/role-entity.fixture';
-import { RoleRepositoryFixture } from './__fixtures__/repositories/role-repository.fixture';
 
 describe('RoleModule', () => {
   let roleModule: RoleModule;
@@ -26,7 +25,7 @@ describe('RoleModule', () => {
   let roleCrudService: RoleCrudService;
   let roleController: RoleController;
   let roleEntityRepo: Repository<RoleEntityFixture>;
-  let roleDynamicRepo: RoleRepositoryFixture;
+  let roleDynamicRepo: Repository<RoleEntityFixture>;
 
   beforeEach(async () => {
     const testModule: TestingModule = await Test.createTestingModule({
@@ -37,7 +36,7 @@ describe('RoleModule', () => {
     roleEntityRepo = testModule.get<Repository<RoleEntityFixture>>(
       getEntityRepositoryToken(ROLE_MODULE_ROLE_ENTITY_KEY),
     );
-    roleDynamicRepo = testModule.get<RoleRepositoryFixture>(
+    roleDynamicRepo = testModule.get(
       getDynamicRepositoryToken(ROLE_MODULE_ROLE_ENTITY_KEY),
     );
     roleService = testModule.get<RoleService>(RoleService);
@@ -57,14 +56,14 @@ describe('RoleModule', () => {
     it('should be loaded', async () => {
       expect(roleModule).toBeInstanceOf(RoleModule);
       expect(roleEntityRepo).toBeInstanceOf(Repository);
-      expect(roleDynamicRepo).toBeInstanceOf(RoleRepositoryFixture);
+      expect(roleDynamicRepo).toBeInstanceOf(Repository);
       expect(roleService).toBeInstanceOf(RoleService);
       expect(roleCrudService).toBeInstanceOf(RoleCrudService);
       expect(roleLookupService).toBeInstanceOf(DefaultRoleLookupService);
-      expect(roleLookupService['repo']).toBeInstanceOf(RoleRepositoryFixture);
+      expect(roleLookupService['repo']).toBeInstanceOf(Repository);
       expect(roleLookupService['repo'].find).toBeInstanceOf(Function);
       expect(roleMutateService).toBeInstanceOf(DefaultRoleMutateService);
-      expect(roleMutateService['repo']).toBeInstanceOf(RoleRepositoryFixture);
+      expect(roleMutateService['repo']).toBeInstanceOf(Repository);
       expect(roleMutateService['repo'].find).toBeInstanceOf(Function);
       expect(roleController).toBeInstanceOf(RoleController);
     });

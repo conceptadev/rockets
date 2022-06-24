@@ -1,6 +1,6 @@
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
-import { DeepPartial, Repository } from 'typeorm';
+import { DeepPartial, FindOneOptions, Repository } from 'typeorm';
 import {
   CreateOneInterface,
   RemoveOneInterface,
@@ -115,7 +115,9 @@ export abstract class MutateService<
   protected async findById(id: string): Promise<Entity> {
     try {
       // try to find the ref
-      const item = await this.repo.findOne(id);
+      const item = await this.repo.findOne({
+        where: { id },
+      } as FindOneOptions<Entity>);
       // did we get one?
       if (item) {
         return item;

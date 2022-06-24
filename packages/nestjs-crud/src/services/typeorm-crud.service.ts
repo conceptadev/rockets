@@ -9,7 +9,7 @@ import { CrudQueryException } from '../exceptions/crud-query.exception';
 
 @Injectable()
 export class TypeOrmCrudService<T> extends xTypeOrmCrudService<T> {
-  constructor(repo: Repository<T>) {
+  constructor(protected repo: Repository<T>) {
     super(repo);
   }
 

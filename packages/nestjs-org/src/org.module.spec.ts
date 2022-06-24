@@ -19,7 +19,6 @@ import {
 } from './org.constants';
 
 import { OrgEntityFixture } from './__fixtures__/org-entity.fixture';
-import { OrgRepositoryFixture } from './__fixtures__/org-repository.fixture';
 import { OwnerEntityFixture } from './__fixtures__/owner-entity.fixture';
 import { OwnerRepositoryFixture } from './__fixtures__/owner-repository.fixture';
 import { OwnerLookupServiceFixture } from './__fixtures__/owner-lookup-service.fixture';
@@ -33,7 +32,7 @@ describe('OrgModule', () => {
   let orgCrudService: OrgCrudService;
   let orgController: OrgController;
   let orgEntityRepo: Repository<OrgEntityFixture>;
-  let orgDynamicRepo: OrgRepositoryFixture;
+  let orgDynamicRepo: Repository<OrgEntityFixture>;
 
   beforeEach(async () => {
     const testModule: TestingModule = await Test.createTestingModule({
@@ -54,7 +53,6 @@ describe('OrgModule', () => {
           entities: {
             org: {
               entity: OrgEntityFixture,
-              repository: OrgRepositoryFixture,
             },
           },
         }),
@@ -66,7 +64,7 @@ describe('OrgModule', () => {
     orgEntityRepo = testModule.get<Repository<OrgEntityFixture>>(
       getEntityRepositoryToken(ORG_MODULE_ORG_ENTITY_KEY),
     );
-    orgDynamicRepo = testModule.get<OrgRepositoryFixture>(
+    orgDynamicRepo = testModule.get(
       getDynamicRepositoryToken(ORG_MODULE_ORG_ENTITY_KEY),
     );
     orgLookupService =
@@ -88,13 +86,13 @@ describe('OrgModule', () => {
     it('should be loaded', async () => {
       expect(orgModule).toBeInstanceOf(OrgModule);
       expect(orgEntityRepo).toBeInstanceOf(Repository);
-      expect(orgDynamicRepo).toBeInstanceOf(OrgRepositoryFixture);
+      expect(orgDynamicRepo).toBeInstanceOf(Repository);
       expect(orgCrudService).toBeInstanceOf(OrgCrudService);
       expect(orgLookupService).toBeInstanceOf(DefaultOrgLookupService);
-      expect(orgLookupService['repo']).toBeInstanceOf(OrgRepositoryFixture);
+      expect(orgLookupService['repo']).toBeInstanceOf(Repository);
       expect(orgLookupService['repo'].find).toBeInstanceOf(Function);
       expect(orgMutateService).toBeInstanceOf(DefaultOrgMutateService);
-      expect(orgMutateService['repo']).toBeInstanceOf(OrgRepositoryFixture);
+      expect(orgMutateService['repo']).toBeInstanceOf(Repository);
       expect(ownerLookupService).toBeInstanceOf(OwnerLookupServiceFixture);
       expect(ownerLookupService['ownerRepo']).toBeInstanceOf(
         OwnerRepositoryFixture,

@@ -11,19 +11,18 @@ import { RoleService } from '../services/role.service';
 import { RoleEntityFixture } from '../__fixtures__/entities/role-entity.fixture';
 import { UserEntityFixture } from '../__fixtures__/entities/user-entity.fixture';
 import { UserRoleEntityFixture } from '../__fixtures__/entities/user-role-entity.fixture';
-import { RoleRepositoryFixture } from '../__fixtures__/repositories/role-repository.fixture';
-import { UserRoleRepositoryFixture } from '../__fixtures__/repositories/user-role-repository.fixture';
 import { ApiKeyEntityFixture } from '../__fixtures__/entities/api-key-entity.fixture';
 import { ApiKeyRoleEntityFixture } from '../__fixtures__/entities/api-key-role-entity.fixture';
 import { UserFactoryFixture } from '../__fixtures__/factories/user.factory.fixture';
 import { UserRoleFactoryFixture } from '../__fixtures__/factories/user-role.factory.fixture';
 import { RoleFactory } from '../role.factory';
+import { Repository } from 'typeorm';
 
 describe('RoleModule', () => {
   let testModule: TestingModule;
   let roleModule: RoleModule;
   let roleService: RoleService;
-  let roleRepo: RoleRepositoryFixture;
+  let roleRepo: Repository<RoleEntityFixture>;
 
   let testRole1: RoleEntityFixture;
   let testRole2: RoleEntityFixture;
@@ -58,12 +57,10 @@ describe('RoleModule', () => {
           entities: {
             role: {
               entity: RoleEntityFixture,
-              repository: RoleRepositoryFixture,
               connection: connectionName,
             },
             userRole: {
               entity: UserRoleEntityFixture,
-              repository: UserRoleRepositoryFixture,
               connection: connectionName,
             },
           },
@@ -94,9 +91,7 @@ describe('RoleModule', () => {
 
     roleModule = testModule.get<RoleModule>(RoleModule);
     roleService = testModule.get<RoleService>(RoleService);
-    roleRepo = testModule.get<RoleRepositoryFixture>(
-      getDynamicRepositoryToken('role'),
-    );
+    roleRepo = testModule.get(getDynamicRepositoryToken('role'));
   });
 
   afterEach(() => {
@@ -112,7 +107,7 @@ describe('RoleModule', () => {
       expect(roleService).toBeInstanceOf(RoleService);
     });
     it('should be have expected repos', async () => {
-      expect(roleRepo).toBeInstanceOf(RoleRepositoryFixture);
+      expect(roleRepo).toBeInstanceOf(Repository);
     });
   });
 

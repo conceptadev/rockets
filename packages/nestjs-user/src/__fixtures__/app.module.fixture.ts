@@ -4,7 +4,6 @@ import { CrudModule } from '@concepta/nestjs-crud';
 import { UserModule } from '../user.module';
 import { default as ormConfig } from './ormconfig.fixture';
 import { UserEntityFixture } from './user.entity.fixture';
-import { UserRepositoryFixture } from './user.repository.fixture';
 
 @Module({
   imports: [
@@ -16,7 +15,9 @@ import { UserRepositoryFixture } from './user.repository.fixture';
     CrudModule.register(),
     UserModule.register({
       entities: {
-        user: { entity: UserEntityFixture, repository: UserRepositoryFixture },
+        user: {
+          entity: UserEntityFixture,
+        },
       },
     }),
   ],

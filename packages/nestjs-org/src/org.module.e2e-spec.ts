@@ -9,7 +9,6 @@ import { OrgSeeder } from './org.seeder';
 import { OrgModule } from './org.module';
 
 import { OrgEntityFixture } from './__fixtures__/org-entity.fixture';
-import { OrgRepositoryFixture } from './__fixtures__/org-repository.fixture';
 import { OwnerEntityFixture } from './__fixtures__/owner-entity.fixture';
 import { OwnerLookupServiceFixture } from './__fixtures__/owner-lookup-service.fixture';
 import { OwnerModuleFixture } from './__fixtures__/owner.module.fixture';
@@ -39,7 +38,6 @@ describe('OrgController (e2e)', () => {
             entities: {
               org: {
                 entity: OrgEntityFixture,
-                repository: OrgRepositoryFixture,
               },
             },
           }),

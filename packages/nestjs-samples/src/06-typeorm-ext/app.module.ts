@@ -3,7 +3,7 @@ import { CrudModule } from '@concepta/nestjs-crud';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { UserModule } from '@concepta/nestjs-user';
 import { UserEntity } from './user/user.entity';
-import { UserRepository } from './user/user.repository';
+import { DataSource } from 'typeorm';
 
 @Module({
   imports: [
@@ -21,7 +21,8 @@ import { UserRepository } from './user/user.repository';
       entities: {
         user: {
           entity: UserEntity,
-          repository: UserRepository,
+          repositoryFactory: (dataSource: DataSource) =>
+            dataSource.getRepository(UserEntity).extend<unknown>({}),
         },
       },
     }),

@@ -4,7 +4,6 @@ import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { UserModule } from '@concepta/nestjs-user';
 import { default as dbConfig } from './ormconfig';
 import { UserEntity } from './user/user.entity';
-import { UserRepository } from './user/user.repository';
 
 @Module({
   imports: [
@@ -18,7 +17,6 @@ import { UserRepository } from './user/user.repository';
       entities: {
         user: {
           entity: UserEntity,
-          repository: UserRepository,
         },
       },
     }),

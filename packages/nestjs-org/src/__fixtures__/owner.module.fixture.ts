@@ -3,7 +3,6 @@ import { DynamicModule, Module } from '@nestjs/common';
 
 import { OwnerEntityFixture } from './owner-entity.fixture';
 import { OwnerLookupServiceFixture } from './owner-lookup-service.fixture';
-import { OwnerRepositoryFixture } from './owner-repository.fixture';
 
 @Module({
   providers: [OwnerLookupServiceFixture],
@@ -17,7 +16,6 @@ export class OwnerModuleFixture {
         TypeOrmExtModule.forFeature({
           owner: {
             entity: OwnerEntityFixture,
-            repository: OwnerRepositoryFixture,
           },
         }),
       ],

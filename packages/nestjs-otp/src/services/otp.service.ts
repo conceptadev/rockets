@@ -214,7 +214,7 @@ export class OtpService implements OtpServiceInterface {
     category: string,
     passcode: string,
     assignee: ReferenceIdInterface,
-  ): Promise<OtpInterface | undefined> {
+  ): Promise<OtpInterface | null> {
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
 

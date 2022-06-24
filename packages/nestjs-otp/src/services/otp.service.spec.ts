@@ -10,7 +10,6 @@ import { OtpTypeNotDefinedException } from '../exceptions/otp-type-not-defined.e
 
 import { UserEntityFixture } from '../__fixtures__/entities/user-entity.fixture';
 import { UserOtpEntityFixture } from '../__fixtures__/entities/user-otp-entity.fixture';
-import { UserOtpRepositoryFixture } from '../__fixtures__/repositories/user-otp-repository.fixture';
 import { UserFactoryFixture } from '../__fixtures__/factories/user.factory.fixture';
 import { UserOtpFactoryFixture } from '../__fixtures__/factories/user-otp.factory.fixture';
 
@@ -90,7 +89,6 @@ describe('OtpModule', () => {
           entities: {
             userOtp: {
               entity: UserOtpEntityFixture,
-              repository: UserOtpRepositoryFixture,
               connection: connectionName,
             },
           },
