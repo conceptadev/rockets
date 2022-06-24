@@ -1,10 +1,9 @@
-import { ReferenceIdInterface } from "@concepta/ts-core";
-import { RoleAssigneeInterface } from "./role-assignee.interface";
-import { RoleEntityInterface } from "./role-entity.interface";
-import { RoleInterface } from "./role.interface";
+import { ReferenceIdInterface } from '@concepta/ts-core';
+import { RoleAssigneeInterface } from './role-assignee.interface';
+import { RoleEntityInterface } from './role-entity.interface';
+import { RoleInterface } from './role.interface';
 
 export interface RoleServiceInterface {
-
   /**
    * Get all roles for assignee.
    *

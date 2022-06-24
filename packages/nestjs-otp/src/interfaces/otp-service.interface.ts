@@ -17,14 +17,14 @@ export interface OtpServiceInterface {
    * @param assignment The otp assignment
    * @param assignee  The assignee to check
    * @param category  The category to check
-   * @param passCode The passcode to check
+   * @param passcode The passcode to check
    * @param deleteIfValid If true, delete the otp if it is valid
    */
   isValid(
     assignment: string,
     assignee: ReferenceIdInterface,
     category: string,
-    passCode: string,
+    passcode: string,
     deleteIfValid: boolean,
   ): Promise<boolean>;
 
@@ -33,13 +33,13 @@ export interface OtpServiceInterface {
    * @param assignment The otp assignment
    * @param assignee The assignee to check
    * @param category The category to check
-   * @param passCode The passcode to check
+   * @param passcode The passcode to check
    */
   delete(
     assignment: string,
     assignee: ReferenceIdInterface,
     category: string,
-    passCode: string,
+    passcode: string,
   ): Promise<void>;
 
   /**

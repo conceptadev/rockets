@@ -43,10 +43,10 @@ export class OtpDto
   @Expose()
   @ApiProperty({
     type: 'string',
-    description: 'passCode of the otp',
+    description: 'passcode of the otp',
   })
   @IsString()
-  passCode = '';
+  passcode = '';
 
   /**
    * expirationDate

@@ -20,7 +20,7 @@ export abstract class OtpAssignmentPostgresEntity
   type!: string;
 
   @Column()
-  passCode!: string;
+  passcode!: string;
 
   @Column({ type: 'timestamptz' })
   expirationDate!: Date;

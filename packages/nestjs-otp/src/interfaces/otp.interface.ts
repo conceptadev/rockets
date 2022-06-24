@@ -21,7 +21,7 @@ export interface OtpInterface
   /**
    * Passcode
    */
-  passCode: string;
+  passcode: string;
 
   /**
    * Date it will expire
