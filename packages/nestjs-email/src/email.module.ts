@@ -44,7 +44,7 @@ export class EmailModule extends createConfigurableDynamicRootModule<
   ],
   exports: [EMAIL_MODULE_MAILER_SERVICE_TOKEN],
 }) {
-  static register(options: EmailOptionsInterface) {
+  static register(options: EmailOptionsInterface = {}) {
     return EmailModule.forRoot(EmailModule, options);
   }
 

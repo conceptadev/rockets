@@ -12,6 +12,7 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
+    "@concepta/nestjs-common": "^4.0.0-alpha.16",
     "@concepta/nestjs-core": "^4.0.0-alpha.16",
     "@concepta/ts-core": "^4.0.0-alpha.16",
     "@nestjs/common": "^8.0.2",
@@ -23,13 +24,15 @@
   },
   "devDependencies": {
     "@concepta/nestjs-crud": "^4.0.0-alpha.16",
-    "@concepta/nestjs-otp": "^4.0.0-alpha.16",
     "@concepta/nestjs-email": "^4.0.0-alpha.16",
+    "@concepta/nestjs-otp": "^4.0.0-alpha.16",
     "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.16",
     "@concepta/nestjs-user": "^4.0.0-alpha.16",
-    "@jorgebodega/typeorm-seeding": "^4.0.0",
+    "@jorgebodega/typeorm-seeding": "^3.2.0",
     "@nestjs/testing": "^8.0.2",
-    "@nestjs/typeorm": "^8.1.4"
+    "@nestjs/typeorm": "^8.1.4",
+    "jest-mock-extended": "^2.0.6",
+    "supertest": "^6.2.3"
   },
   "peerDependencies": {
     "class-transformer": "*",

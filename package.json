@@ -59,6 +59,8 @@
     "test:ci": "yarn test:cov --ci --reporters=default --reporters=jest-junit",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./jest.config-e2e.json",
+    "test:e2e:one": "jest --config ./jest.config-e2e.json /packages/nestjs-auth-recovery/src/auth-recovery.controller.e2e-spec.ts",
+    "test:e2e:one2": "jest /packages/nestjs-email/src/email.module.spec.ts",
     "test:all": "yarn test && yarn test:e2e",
     "doc": "rimraf ./documentation && compodoc -p ./tsconfig.doc.json --disablePrivate --disableProtected",
     "doc:serve": "yarn doc -s",

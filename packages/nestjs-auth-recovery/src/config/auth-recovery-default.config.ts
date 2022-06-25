@@ -8,8 +8,20 @@ import { AuthRecoverySettingsInterface } from '../interfaces/auth-recovery-setti
 export const authRecoveryDefaultConfig = registerAs(
   AUTH_RECOVERY_MODULE_DEFAULT_SETTINGS_TOKEN,
   (): AuthRecoverySettingsInterface => ({
-    loginTemplate: 'login-template.hbs',
-    passwordTemplate: 'password-reset-template.hbs',
-    successTemplate: 'password-reset-success-template.hbs',
+    email: {
+      from: 'from',
+      baseUrl: 'baseUrl',
+      recoverPasswordTemplate: 'password-reset-template.hbs',
+      recoverPasswordEmailSubject: 'Password Recovery',
+    },
+    otp: {
+      assignment: 'userOtp',
+      type: 'uuid',
+      assignee: {
+        id: 'id',
+      },
+      category: 'auth-recovery',
+      resetTokenExp: new Date(),
+    },
   }),
 );
