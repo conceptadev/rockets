@@ -59,7 +59,7 @@ describe('OtpModule', () => {
   const defaultIsValidOtp = async (
     otp: Pick<OtpInterface, 'assignee' | 'passcode' | 'category'>,
     deleteIfValid?: boolean,
-  ) => await otpService.isValid('userOtp', otp, deleteIfValid);
+  ) => await otpService.validate('userOtp', otp, deleteIfValid);
 
   beforeEach(async () => {
     const connectionName = `test_${connectionNumber++}`;

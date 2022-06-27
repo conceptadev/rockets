@@ -75,7 +75,7 @@ export class OtpService implements OtpServiceInterface {
    * @param otp The otp to validate
    * @param deleteIfValid If true, delete the otp if it is valid
    */
-  async isValid(
+  async validate(
     assignment: ReferenceAssignment,
     otp: Pick<OtpInterface, 'assignee' | 'category' | 'passcode'>,
     deleteIfValid = false,

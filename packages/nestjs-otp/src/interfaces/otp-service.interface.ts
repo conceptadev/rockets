@@ -21,7 +21,7 @@ export interface OtpServiceInterface {
    * @param otp The otp to validate
    * @param deleteIfValid If true, delete the otp if it is valid
    */
-  isValid(
+  validate(
     assignment: ReferenceAssignment,
     otp: Pick<OtpInterface, 'assignee' | 'category' | 'passcode'>,
     deleteIfValid: boolean,
