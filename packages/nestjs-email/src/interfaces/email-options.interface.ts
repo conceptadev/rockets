@@ -1,5 +1,5 @@
-import { EmailMailerServiceInterface } from './email-mailer-service.interface';
+import { EmailServiceInterface } from '@concepta/ts-common';
 
 export interface EmailOptionsInterface {
-  mailerService?: EmailMailerServiceInterface;
+  mailerService?: EmailServiceInterface;
 }

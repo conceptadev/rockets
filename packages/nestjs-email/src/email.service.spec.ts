@@ -2,17 +2,17 @@ import { InternalServerErrorException, Logger } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { mock } from 'jest-mock-extended';
 import { NotAnErrorException } from '@concepta/ts-core';
+import { EmailServiceInterface } from '@concepta/ts-common';
 import { EmailService } from './email.service';
 import { EMAIL_MODULE_MAILER_SERVICE_TOKEN } from './email.constants';
-import { EmailMailerServiceInterface } from './interfaces/email-mailer-service.interface';
 
 describe('EmailService', () => {
   let logger: Logger;
   let emailService: EmailService;
-  let mailerService: EmailMailerServiceInterface;
+  let mailerService: EmailServiceInterface;
 
   beforeEach(async () => {
-    mailerService = mock<EmailMailerServiceInterface>();
+    mailerService = mock<EmailServiceInterface>();
 
     const moduleRef = await Test.createTestingModule({
       providers: [

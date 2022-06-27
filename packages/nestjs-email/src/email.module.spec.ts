@@ -1,7 +1,7 @@
 import { mock } from 'jest-mock-extended';
 import { MailerModule, MailerService } from '@nestjs-modules/mailer';
 import { Test } from '@nestjs/testing';
-import { EmailMailerServiceInterface } from './interfaces/email-mailer-service.interface';
+import { EmailServiceInterface } from '@concepta/ts-common';
 import { EmailModule } from './email.module';
 import { EmailService } from './email.service';
 
@@ -17,8 +17,7 @@ describe('EmailModule', () => {
     },
   };
 
-  const mailerService: EmailMailerServiceInterface =
-    mock<EmailMailerServiceInterface>();
+  const mailerService: EmailServiceInterface = mock<EmailServiceInterface>();
 
   describe('forRoot (using default mailer)', () => {
     it('should import the dynamic module synchronously', async () => {
@@ -49,7 +48,7 @@ describe('EmailModule', () => {
           EmailModule.registerAsync({
             imports: [MailerModule.forRoot(mailerOptions)],
             inject: [MailerService],
-            useFactory: async (mailerService: EmailMailerServiceInterface) => {
+            useFactory: async (mailerService: EmailServiceInterface) => {
               return { mailerService: mailerService };
             },
           }),

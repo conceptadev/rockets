@@ -5,15 +5,17 @@ import {
   Logger,
 } from '@nestjs/common';
 import { NotAnErrorException } from '@concepta/ts-core';
-import { EmailSendOptionsInterface } from './interfaces/email-send-options.interface';
-import { EmailMailerServiceInterface } from './interfaces/email-mailer-service.interface';
+import {
+  EmailSendOptionsInterface,
+  EmailServiceInterface,
+} from '@concepta/ts-common';
 
 @Injectable()
 export class EmailService {
   constructor(
     private logger: Logger,
     @Inject('EMAIL_MODULE_MAILER_SERVICE_TOKEN')
-    private readonly mailerService: EmailMailerServiceInterface,
+    private readonly mailerService: EmailServiceInterface,
   ) {}
 
   public async sendEmail(dto: EmailSendOptionsInterface): Promise<void> {

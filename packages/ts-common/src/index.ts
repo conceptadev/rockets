@@ -1,3 +1,6 @@
+export { EmailServiceInterface } from './email/interfaces/email-service.interface';
+export { EmailSendOptionsInterface } from './email/interfaces/email-send-options.interface';
+
 export { OtpInterface } from './otp/interfaces/otp.interface';
 export { OtpCreatableInterface } from './otp/interfaces/otp-creatable.interface';
 export { OtpUpdatableInterface } from './otp/interfaces/otp-updatable.interface';
