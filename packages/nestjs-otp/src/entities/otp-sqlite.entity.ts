@@ -5,12 +5,12 @@ import {
   ReferenceId,
   ReferenceIdInterface,
 } from '@concepta/ts-core';
-import { OtpInterface } from '../interfaces/otp.interface';
+import { OtpInterface } from '@concepta/ts-common';
 
 /**
- * Otp Assignment Sqlite Entity
+ * Otp Sqlite Entity
  */
-export abstract class OtpAssignmentSqliteEntity implements OtpInterface {
+export abstract class OtpSqliteEntity implements OtpInterface {
   @PrimaryGeneratedColumn('uuid')
   id!: ReferenceId;
 

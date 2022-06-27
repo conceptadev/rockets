@@ -22,6 +22,9 @@
       "path": "packages/ts-core"
     },
     {
+      "path": "packages/ts-common"
+    },
+    {
       "path": "packages/nestjs-core"
     },
     {

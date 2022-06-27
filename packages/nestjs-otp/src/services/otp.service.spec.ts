@@ -1,11 +1,11 @@
 import ms from 'ms';
 import { CrudModule } from '@concepta/nestjs-crud';
+import { OtpInterface } from '@concepta/ts-common';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { useSeeders } from '@jorgebodega/typeorm-seeding';
 import { Test, TestingModule } from '@nestjs/testing';
 import { OtpModule } from '../otp.module';
 import { OtpService } from './otp.service';
-import { OtpInterface } from '../interfaces/otp.interface';
 import { OtpTypeNotDefinedException } from '../exceptions/otp-type-not-defined.exception';
 
 import { UserEntityFixture } from '../__fixtures__/entities/user-entity.fixture';
