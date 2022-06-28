@@ -12,6 +12,10 @@ export { UserInterface } from './user/interfaces/user.interface';
 export { UserCreatableInterface } from './user/interfaces/user-creatable.interface';
 export { UserUpdatableInterface } from './user/interfaces/user-updatable.interface';
 
+export { FederatedInterface } from './federated/interfaces/federated.interface';
+export { FederatedCreatableInterface } from './federated/interfaces/federated-creatable.interface';
+export { FederatedUpdatableInterface } from './federated/interfaces/federated-updatable.interface';
+
 export { OtpInterface } from './otp/interfaces/otp.interface';
 export { OtpCreatableInterface } from './otp/interfaces/otp-creatable.interface';
 export { OtpUpdatableInterface } from './otp/interfaces/otp-updatable.interface';

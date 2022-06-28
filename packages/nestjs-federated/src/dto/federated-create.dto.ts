@@ -1,7 +1,7 @@
 import { Exclude } from 'class-transformer';
 import { PickType } from '@nestjs/swagger';
+import { FederatedCreatableInterface } from '@concepta/ts-common';
 import { FederatedDto } from './federated.dto';
-import { FederatedCreatableInterface } from '../interfaces/federated-creatable.interface';
 
 /**
  * Federated Create DTO

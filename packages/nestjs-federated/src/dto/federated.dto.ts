@@ -6,9 +6,9 @@ import {
   ReferenceId,
   ReferenceIdInterface,
 } from '@concepta/ts-core';
+import { FederatedInterface } from '@concepta/ts-common';
 import { AuditDto, ReferenceIdDto } from '@concepta/nestjs-common';
 import { CrudResponseDto } from '@concepta/nestjs-crud';
-import { FederatedInterface } from '../interfaces/federated.interface';
 
 /**
  * Federated DTO
