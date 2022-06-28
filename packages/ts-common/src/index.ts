@@ -16,6 +16,13 @@ export { FederatedInterface } from './federated/interfaces/federated.interface';
 export { FederatedCreatableInterface } from './federated/interfaces/federated-creatable.interface';
 export { FederatedUpdatableInterface } from './federated/interfaces/federated-updatable.interface';
 
+export { RoleInterface } from './role/interfaces/role.interface';
+export { RoleCreatableInterface } from './role/interfaces/role-creatable.interface';
+export { RoleUpdatableInterface } from './role/interfaces/role-updatable.interface';
+export { RoleAssigneesInterface } from './role/interfaces/role-assignees.interface';
+export { RoleAssignmentInterface } from './role/interfaces/role-assignment.interface';
+export { RoleAssignmentCreatableInterface } from './role/interfaces/role-assignment-creatable.interface';
+
 export { OtpInterface } from './otp/interfaces/otp.interface';
 export { OtpCreatableInterface } from './otp/interfaces/otp-creatable.interface';
 export { OtpUpdatableInterface } from './otp/interfaces/otp-updatable.interface';

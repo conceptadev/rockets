@@ -1,6 +1,6 @@
 import { ReferenceAssignment, ReferenceIdInterface } from '@concepta/ts-core';
+import { RoleInterface } from '@concepta/ts-common';
 import { RoleEntityInterface } from './role-entity.interface';
-import { RoleInterface } from './role.interface';
 
 export interface RoleServiceInterface {
   /**

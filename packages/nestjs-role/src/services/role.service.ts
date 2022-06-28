@@ -1,11 +1,11 @@
 import { Repository } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
 import { ReferenceAssignment, ReferenceIdInterface } from '@concepta/ts-core';
+import { RoleInterface } from '@concepta/ts-common';
 import { ReferenceLookupException } from '@concepta/typeorm-common';
 import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
 import { AssignmentNotFoundException } from '../exceptions/assignment-not-found.exception';
 import { RoleAssignmentEntityInterface } from '../interfaces/role-assignment-entity.interface';
-import { RoleInterface } from '../interfaces/role.interface';
 import {
   ROLE_MODULE_REPOSITORIES_TOKEN,
   ROLE_MODULE_SETTINGS_TOKEN,
