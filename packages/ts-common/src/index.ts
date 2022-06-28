@@ -1,4 +1,4 @@
-export { EmailServiceInterface } from './email/interfaces/email-service.interface';
+export { EmailSendInterface } from './email/interfaces/email-send.interface';
 export { EmailSendOptionsInterface } from './email/interfaces/email-send-options.interface';
 
 export { OtpInterface } from './otp/interfaces/otp.interface';

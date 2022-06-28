@@ -17,7 +17,7 @@ describe('AppModule', () => {
     );
 
     spyService = jest
-      .spyOn(EmailService.prototype, 'sendEmail')
+      .spyOn(EmailService.prototype, 'sendMail')
       .mockImplementation(() => Promise.resolve());
   });
 

@@ -2,7 +2,7 @@ import { InternalServerErrorException, Logger } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { mock } from 'jest-mock-extended';
 import { NotAnErrorException } from '@concepta/ts-core';
-import { EmailServiceInterface } from '@concepta/ts-common';
+import { EmailServiceInterface } from './interfaces/email-service.interface';
 import { EmailService } from './email.service';
 import { EMAIL_MODULE_MAILER_SERVICE_TOKEN } from './email.constants';
 
@@ -40,7 +40,7 @@ describe('EmailService', () => {
           return undefined;
         });
 
-        const result = await emailService.sendEmail({});
+        const result = await emailService.sendMail({});
         expect(result).toBeUndefined();
         expect(mailerService.sendMail).toBeCalledTimes(1);
       });
@@ -54,7 +54,7 @@ describe('EmailService', () => {
       });
 
       try {
-        await emailService.sendEmail({});
+        await emailService.sendMail({});
       } catch (e) {
         const exception = e instanceof Error ? e : new NotAnErrorException(e);
         expect(exception).toBeInstanceOf(InternalServerErrorException);

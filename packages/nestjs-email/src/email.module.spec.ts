@@ -1,7 +1,7 @@
 import { mock } from 'jest-mock-extended';
 import { MailerModule, MailerService } from '@nestjs-modules/mailer';
 import { Test } from '@nestjs/testing';
-import { EmailServiceInterface } from '@concepta/ts-common';
+import { EmailServiceInterface } from './interfaces/email-service.interface';
 import { EmailModule } from './email.module';
 import { EmailService } from './email.service';
 

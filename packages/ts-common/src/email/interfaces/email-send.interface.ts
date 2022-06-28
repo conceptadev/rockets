@@ -1,5 +1,5 @@
 import { EmailSendOptionsInterface } from './email-send-options.interface';
 
-export interface EmailServiceInterface {
+export interface EmailSendInterface {
   sendMail(sendMailOptions: EmailSendOptionsInterface): Promise<void>;
 }

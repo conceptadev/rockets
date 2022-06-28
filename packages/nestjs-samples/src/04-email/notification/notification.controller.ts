@@ -10,7 +10,7 @@ export class NotificationController {
 
   @Post('/')
   async create(@Body() createNotificationDto: CreateNotificationDto) {
-    await this.emailService.sendEmail({
+    await this.emailService.sendMail({
       to: createNotificationDto.emailAddress,
       from: 'Rockets Email <rockets@email.com>',
       subject: 'Sample Email',
