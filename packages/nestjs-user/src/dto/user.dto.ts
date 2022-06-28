@@ -8,7 +8,7 @@ import {
   ReferenceUsername,
 } from '@concepta/ts-core';
 import { AuditDto } from '@concepta/nestjs-common';
-import { UserInterface } from '../interfaces/user.interface';
+import { UserInterface } from '@concepta/ts-common';
 
 /**
  * User DTO

@@ -1,4 +1,4 @@
-import { PasswordPlainInterface } from './password-plain.interface';
+import { PasswordPlainInterface } from '@concepta/ts-common';
 import { PasswordStorageInterface } from './password-storage.interface';
 
 /**

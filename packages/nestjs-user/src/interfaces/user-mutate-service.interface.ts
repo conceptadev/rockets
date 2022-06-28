@@ -5,8 +5,10 @@ import {
   ReplaceOneInterface,
   UpdateOneInterface,
 } from '@concepta/ts-core';
-import { UserCreatableInterface } from './user-creatable.interface';
-import { UserUpdatableInterface } from './user-updatable.interface';
+import {
+  UserCreatableInterface,
+  UserUpdatableInterface,
+} from '@concepta/ts-common';
 import { UserEntityInterface } from './user-entity.interface';
 
 export interface UserMutateServiceInterface

@@ -1,7 +1,7 @@
 import { Exclude, Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { UserInterface } from '@concepta/ts-common';
 import { CrudResponsePaginatedDto } from '@concepta/nestjs-crud';
-import { UserInterface } from '../interfaces/user.interface';
 import { UserDto } from './user.dto';
 
 /**
