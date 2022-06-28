@@ -2,10 +2,10 @@ import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { useSeeders } from '@jorgebodega/typeorm-seeding';
-import { UserFactory, UserSeeder } from '@concepta/nestjs-user/dist/seeding';
+import { UserFactory, UserSeeder } from '@concepta/nestjs-user/src/seeding';
 
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
-import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
+import { UserEntityFixture } from './__fixtures__/user-entity.fixture';
 import { RecoverPasswordDto } from './dto/recover-password.dto';
 
 describe('AuthRecoveryController (e2e)', () => {
@@ -37,7 +37,7 @@ describe('AuthRecoveryController (e2e)', () => {
       await supertest(app.getHttpServer())
         .post('/auth/recover-password')
         .send({ email: response?.body[0]?.email } as RecoverPasswordDto)
-        .expect(200);
+        .expect(201);
     });
   });
 });

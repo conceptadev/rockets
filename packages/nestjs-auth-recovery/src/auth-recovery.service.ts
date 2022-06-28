@@ -34,6 +34,7 @@ export class AuthRecoveryService implements AuthRecoveryInterface {
     // await this.userLookupService.byEmail(email);
     // await this.emailService.send() // recover login template
   }
+
   async recoverPassword(email: string): Promise<void> {
     const user = await this.userLookupService.byEmail(email);
     if (!user) {
@@ -49,7 +50,7 @@ export class AuthRecoveryService implements AuthRecoveryInterface {
         },
       },
     );
-    await this.emailService.sendEmail({
+    await this.emailService.sendMail({
       to: email,
       from: this.config.email.from, // duplicated? It is already in email module already has that
       subject: this.config.email.recoverPasswordEmailSubject,
@@ -60,10 +61,12 @@ export class AuthRecoveryService implements AuthRecoveryInterface {
       },
     });
   }
+
   async validatePasscode(passcode: string): Promise<boolean> {
     throw new Error(`Method not implemented, cant get ${passcode}.`);
     // await this.otpService.validate(a, b, c, passcode);
   }
+
   async updatePassword(
     passcode: string,
     newPassword: string,

@@ -1,5 +1,5 @@
 import { OptionsInterface } from '@concepta/ts-core';
-import { OtpCreatableInterface } from './otp-creatable.interface';
+import { OtpCreatableInterface } from '@concepta/ts-common';
 
 export interface AuthRecoveryOtpSettingsInterface
   extends OtpCreatableInterface {

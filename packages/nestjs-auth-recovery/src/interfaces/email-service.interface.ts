@@ -1,5 +1,3 @@
-import { EmailSendOptionsInterface } from './email-send-options.interface';
+import { EmailSendInterface } from '@concepta/ts-common';
 
-export interface EmailServiceInterface {
-  sendEmail(sendMailOptions: EmailSendOptionsInterface): Promise<void>;
-}
+export interface EmailServiceInterface extends EmailSendInterface {}

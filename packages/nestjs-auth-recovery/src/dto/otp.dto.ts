@@ -1,11 +1,10 @@
 import { IsString } from 'class-validator';
 import { Exclude, Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { AuditInterface } from '@concepta/ts-core';
+import { AuditInterface, ReferenceIdInterface } from '@concepta/ts-core';
 import { AuditDto, ReferenceIdDto } from '@concepta/nestjs-common';
 import { CrudResponseDto } from '@concepta/nestjs-crud';
-import { OtpInterface } from '../interfaces/otp.interface';
-import { OtpAssigneeInterface } from '../interfaces/otp-assignee.interface';
+import { OtpInterface } from '@concepta/ts-common';
 
 /**
  * Otp DTO
@@ -68,7 +67,7 @@ export class OtpDto
     description: 'assignee data',
   })
   @Type(() => ReferenceIdDto)
-  assignee: OtpAssigneeInterface = new ReferenceIdDto();
+  assignee: ReferenceIdInterface = new ReferenceIdDto();
 
   /**
    * Audit
