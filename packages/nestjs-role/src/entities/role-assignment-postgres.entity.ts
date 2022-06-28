@@ -1,8 +1,11 @@
 import { Column, PrimaryGeneratedColumn, Unique } from 'typeorm';
-import { AuditInterface, ReferenceId } from '@concepta/ts-core';
+import {
+  AuditInterface,
+  ReferenceId,
+  ReferenceIdInterface,
+} from '@concepta/ts-core';
 import { AuditPostgresEmbed } from '@concepta/typeorm-common';
 import { RoleAssignmentEntityInterface } from '../interfaces/role-assignment-entity.interface';
-import { RoleAssigneeInterface } from '../interfaces/role-assignee.interface';
 import { RoleEntityInterface } from '../interfaces/role-entity.interface';
 
 /**
@@ -30,5 +33,5 @@ export abstract class RoleAssignmentPostgresEntity
    *
    * You will need to decorate this in your concrete entity class
    */
-  assignee!: RoleAssigneeInterface;
+  assignee!: ReferenceIdInterface;
 }

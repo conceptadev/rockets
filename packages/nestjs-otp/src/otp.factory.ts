@@ -1,7 +1,7 @@
-import { Type } from '@nestjs/common';
-import { Factory } from '@jorgebodega/typeorm-seeding';
 import { randomUUID } from 'crypto';
-import { OtpInterface } from './interfaces/otp.interface';
+import { Factory } from '@jorgebodega/typeorm-seeding';
+import { Type } from '@nestjs/common';
+import { OtpInterface } from '@concepta/ts-common';
 
 /**
  * Otp factory

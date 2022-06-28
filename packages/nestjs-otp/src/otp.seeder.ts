@@ -1,7 +1,7 @@
 import { Type } from '@nestjs/common';
 import { Factory, Seeder } from '@jorgebodega/typeorm-seeding';
+import { OtpInterface } from '@concepta/ts-common';
 import { OtpFactory } from './otp.factory';
-import { OtpInterface } from './interfaces/otp.interface';
 
 /**
  * Otp seeder

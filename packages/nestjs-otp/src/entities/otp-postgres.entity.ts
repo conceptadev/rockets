@@ -1,15 +1,16 @@
 import { Column, PrimaryGeneratedColumn } from 'typeorm';
-import { AuditInterface, ReferenceId } from '@concepta/ts-core';
+import {
+  AuditInterface,
+  ReferenceId,
+  ReferenceIdInterface,
+} from '@concepta/ts-core';
+import { OtpInterface } from '@concepta/ts-common';
 import { AuditPostgresEmbed } from '@concepta/typeorm-common';
-import { OtpAssignmentInterface } from '../interfaces/otp-assignment.interface';
-import { OtpAssigneeInterface } from '../interfaces/otp-assignee.interface';
 
 /**
- * Otp Assignment Postgres Entity
+ * Otp Postgres Entity
  */
-export abstract class OtpAssignmentPostgresEntity
-  implements OtpAssignmentInterface
-{
+export abstract class OtpPostgresEntity implements OtpInterface {
   @PrimaryGeneratedColumn('uuid')
   id!: ReferenceId;
 
@@ -31,5 +32,5 @@ export abstract class OtpAssignmentPostgresEntity
   /**
    * Should be overwrite by the table it will be assigned to
    */
-  assignee!: OtpAssigneeInterface;
+  assignee!: ReferenceIdInterface;
 }

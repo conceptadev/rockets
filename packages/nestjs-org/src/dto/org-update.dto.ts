@@ -1,6 +1,6 @@
 import { Exclude } from 'class-transformer';
 import { PickType } from '@nestjs/swagger';
-import { OrgUpdatableInterface } from '../interfaces/org-updatable.interface';
+import { OrgUpdatableInterface } from '@concepta/ts-common';
 import { OrgDto } from './org.dto';
 
 /**

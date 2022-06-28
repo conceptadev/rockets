@@ -12,20 +12,13 @@ import {
   CrudReadMany,
   CrudRecoverOne,
 } from '@concepta/nestjs-crud';
+import { ApiTags } from '@nestjs/swagger';
 import {
   PasswordPlainInterface,
-  PasswordStorageService,
-} from '@concepta/nestjs-password';
-import { ApiTags } from '@nestjs/swagger';
-import { UserCrudService } from './services/user-crud.service';
-import { UserDto } from './dto/user.dto';
-import { UserCreateDto } from './dto/user-create.dto';
-import { UserCreateManyDto } from './dto/user-create-many.dto';
-import { UserUpdateDto } from './dto/user-update.dto';
-import { UserPaginatedDto } from './dto/user-paginated.dto';
-import { UserEntityInterface } from './interfaces/user-entity.interface';
-import { UserCreatableInterface } from './interfaces/user-creatable.interface';
-import { UserUpdatableInterface } from './interfaces/user-updatable.interface';
+  UserCreatableInterface,
+  UserUpdatableInterface,
+} from '@concepta/ts-common';
+import { PasswordStorageService } from '@concepta/nestjs-password';
 import {
   AccessControlCreateMany,
   AccessControlCreateOne,
@@ -35,6 +28,13 @@ import {
   AccessControlRecoverOne,
   AccessControlUpdateOne,
 } from '@concepta/nestjs-access-control';
+import { UserCrudService } from './services/user-crud.service';
+import { UserDto } from './dto/user.dto';
+import { UserCreateDto } from './dto/user-create.dto';
+import { UserCreateManyDto } from './dto/user-create-many.dto';
+import { UserUpdateDto } from './dto/user-update.dto';
+import { UserPaginatedDto } from './dto/user-paginated.dto';
+import { UserEntityInterface } from './interfaces/user-entity.interface';
 import { UserResource } from './user.types';
 
 /**

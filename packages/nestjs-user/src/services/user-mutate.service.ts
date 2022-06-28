@@ -3,13 +3,13 @@ import { Injectable } from '@nestjs/common';
 import { MutateService } from '@concepta/typeorm-common';
 import {
   PasswordPlainInterface,
-  PasswordStorageService,
-} from '@concepta/nestjs-password';
+  UserCreatableInterface,
+  UserUpdatableInterface,
+} from '@concepta/ts-common';
+import { PasswordStorageService } from '@concepta/nestjs-password';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import { UserEntityInterface } from '../interfaces/user-entity.interface';
 import { UserMutateServiceInterface } from '../interfaces/user-mutate-service.interface';
-import { UserCreatableInterface } from '../interfaces/user-creatable.interface';
-import { UserUpdatableInterface } from '../interfaces/user-updatable.interface';
 import { UserCreateDto } from '../dto/user-create.dto';
 import { UserUpdateDto } from '../dto/user-update.dto';
 import { USER_MODULE_USER_ENTITY_KEY } from '../user.constants';

@@ -20,5 +20,5 @@ export interface FederatedInterface
   /**
    * The user federated will be associated to
    */
-  userId: string;
+  user: ReferenceIdInterface;
 }

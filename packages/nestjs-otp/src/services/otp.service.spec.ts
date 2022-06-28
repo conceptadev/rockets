@@ -1,27 +1,65 @@
+import ms from 'ms';
 import { CrudModule } from '@concepta/nestjs-crud';
+import { OtpInterface } from '@concepta/ts-common';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { useSeeders } from '@jorgebodega/typeorm-seeding';
 import { Test, TestingModule } from '@nestjs/testing';
 import { OtpModule } from '../otp.module';
 import { OtpService } from './otp.service';
+import { OtpTypeNotDefinedException } from '../exceptions/otp-type-not-defined.exception';
 
 import { UserEntityFixture } from '../__fixtures__/entities/user-entity.fixture';
 import { UserOtpEntityFixture } from '../__fixtures__/entities/user-otp-entity.fixture';
 import { UserOtpRepositoryFixture } from '../__fixtures__/repositories/user-otp-repository.fixture';
 import { UserFactoryFixture } from '../__fixtures__/factories/user.factory.fixture';
 import { UserOtpFactoryFixture } from '../__fixtures__/factories/user-otp.factory.fixture';
-import ms from 'ms';
 
 describe('OtpModule', () => {
-  const RANDOM_UUID_PASSCODE = 'RANDOM_UUID_PASSCODE';
-  const RANDOM_UUID_PASSCODE_EXPIRED = 'RANDOM_UUID_PASSCODE_EXPIRED';
-  const CATEGORY_RESTE_PASSWORD = 'reset-password';
+  const CATEGORY_DEFAULT = 'CATEGORY_DEFAULT';
 
   let testModule: TestingModule;
   let otpModule: OtpModule;
   let otpService: OtpService;
-  let testUser: UserEntityFixture;
   let connectionNumber = 1;
+  const userFactory = new UserFactoryFixture();
+  const userOtpFactory = new UserOtpFactoryFixture();
+
+  const factoryCreateUser = async () => {
+    return userFactory.create();
+  };
+
+  const factoryCreateOtp = async (
+    overrides: Partial<OtpInterface> & Pick<OtpInterface, 'assignee'>,
+  ) => {
+    const now = new Date();
+    const expirationDate = new Date(now.getTime() + ms('1d'));
+
+    return userOtpFactory.create({
+      category: CATEGORY_DEFAULT,
+      expirationDate: expirationDate,
+      ...overrides,
+    });
+  };
+
+  const defaultCreateOtp = async (
+    options: Pick<OtpInterface, 'assignee'> &
+      Partial<Pick<OtpInterface, 'type'>>,
+  ) =>
+    await otpService.create('userOtp', {
+      type: 'uuid',
+      category: CATEGORY_DEFAULT,
+      ...options,
+    });
+
+  // try to delete
+  const defaultDeleteOtp = async (
+    otp: Pick<OtpInterface, 'assignee' | 'passcode' | 'category'>,
+  ) => await otpService.delete('userOtp', otp);
+
+  const defaultIsValidOtp = async (
+    otp: Pick<OtpInterface, 'assignee' | 'passcode' | 'category'>,
+    deleteIfValid?: boolean,
+  ) => await otpService.validate('userOtp', otp, deleteIfValid);
 
   beforeEach(async () => {
     const connectionName = `test_${connectionNumber++}`;
@@ -53,22 +91,6 @@ describe('OtpModule', () => {
       connection: connectionName,
     });
 
-    // Create user
-    const userFactory = new UserFactoryFixture();
-    testUser = await userFactory.create();
-    const now = new Date();
-    const expirationDate = new Date(now.getTime() + ms('1d'));
-
-    // Create passcode otp for a user
-    const userOtpFactory = new UserOtpFactoryFixture();
-    await userOtpFactory.create({
-      category: CATEGORY_RESTE_PASSWORD,
-      type: 'uuid',
-      passcode: RANDOM_UUID_PASSCODE,
-      expirationDate: expirationDate,
-      assignee: testUser,
-    });
-
     otpModule = testModule.get<OtpModule>(OtpModule);
     otpService = testModule.get<OtpService>(OtpService);
   });
@@ -89,69 +111,100 @@ describe('OtpModule', () => {
 
   describe('otpService isValid', () => {
     it('check if is valid true', async () => {
-      const isValid: Partial<boolean> = await otpService.isValid(
-        'userOtp',
-        testUser,
-        CATEGORY_RESTE_PASSWORD,
-        RANDOM_UUID_PASSCODE,
-      );
-
-      expect(isValid).toBeTruthy();
+      const assignee = await factoryCreateUser();
+      const otp = await factoryCreateOtp({ assignee });
+      expect(await defaultIsValidOtp(otp)).toBe(true);
     });
 
     it('check if is valid after delete', async () => {
-      let isValid: boolean = await otpService.isValid(
-        'userOtp',
-        testUser,
-        CATEGORY_RESTE_PASSWORD,
-        RANDOM_UUID_PASSCODE,
-        true,
-      );
-
-      expect(isValid).toBeTruthy();
-
-      isValid = await otpService.isValid(
-        'userOtp',
-        testUser,
-        CATEGORY_RESTE_PASSWORD,
-        RANDOM_UUID_PASSCODE,
-      );
-
-      expect(isValid).toBeFalsy();
-
-      isValid = await otpService.isValid(
-        'userOtp',
-        testUser,
-        CATEGORY_RESTE_PASSWORD,
-        RANDOM_UUID_PASSCODE,
-        true,
-      );
-
-      expect(isValid).toBeFalsy();
+      const assignee = await factoryCreateUser();
+      const otp = await factoryCreateOtp({ assignee });
+      expect(await defaultIsValidOtp(otp, true)).toBe(true);
+      expect(await defaultIsValidOtp(otp)).toBe(false);
+      expect(await defaultIsValidOtp(otp, true)).toBe(false);
     });
 
     it('check if is expired', async () => {
       const now = new Date();
       const expirationDate = new Date(now.getTime() - ms('1d'));
 
-      // Create passcode otp for a user
-      const userOtpFactory = new UserOtpFactoryFixture();
-      await userOtpFactory.create({
-        category: CATEGORY_RESTE_PASSWORD,
-        type: 'uuid',
-        passcode: RANDOM_UUID_PASSCODE_EXPIRED,
+      const assignee = await factoryCreateUser();
+
+      const otp = await factoryCreateOtp({
         expirationDate: expirationDate,
-        assignee: testUser,
+        assignee,
       });
 
-      const isValid: boolean = await otpService.isValid(
-        'userOtp',
-        testUser,
-        CATEGORY_RESTE_PASSWORD,
-        RANDOM_UUID_PASSCODE_EXPIRED,
-      );
+      expect(await defaultIsValidOtp(otp)).toBe(false);
+    });
+  });
 
-      expect(isValid).toBeFalsy();
+  describe('otpService create', () => {
+    it('create with success', async () => {
+      const assignee = await factoryCreateUser();
+      const otp = await defaultCreateOtp({ assignee });
+
+      expect(otp.category).toBe(CATEGORY_DEFAULT);
+      expect(otp.type).toBe('uuid');
+      expect(typeof otp.passcode).toBe('string');
+      expect(otp.passcode.length).toBeGreaterThan(0);
+      expect(otp.expirationDate).toBeInstanceOf(Date);
+      expect(otp.assignee.id).toBeTruthy();
+    });
+
+    it('create with fail', async () => {
+      const assignee = await factoryCreateUser();
+      const otp = await defaultCreateOtp({ assignee });
+
+      expect(otp).toBeTruthy();
+      expect(await defaultIsValidOtp({ ...otp, passcode: 'INVALID' })).toBe(
+        false,
+      );
+    });
+
+    it('create with fail 2', async () => {
+      try {
+        const assignee = await factoryCreateUser();
+        await defaultCreateOtp({ assignee, type: 'wrongType' });
+      } catch (e) {
+        expect(e).toBeInstanceOf(OtpTypeNotDefinedException);
+      }
+    });
+  });
+
+  describe('otpService delete', () => {
+    it('delete with success', async () => {
+      const assignee = await factoryCreateUser();
+      const otp = await defaultCreateOtp({ assignee });
+      expect(otp).toBeTruthy();
+
+      // try to delete
+      expect(await defaultDeleteOtp(otp)).toBeUndefined();
+
+      // check if deleted is valid
+      expect(await defaultIsValidOtp(otp)).toBe(false);
+    });
+  });
+
+  describe('otpService clear', () => {
+    it('clear with success', async () => {
+      const assignee = await factoryCreateUser();
+      const otp = await defaultCreateOtp({ assignee });
+
+      expect(otp).toBeTruthy();
+      expect(await defaultIsValidOtp(otp)).toBe(true);
+
+      const otp2 = await defaultCreateOtp({ assignee });
+      expect(otp2).toBeTruthy();
+      expect(await defaultIsValidOtp(otp2)).toBe(true);
+
+      // try to clear
+      expect(await otpService.clear('userOtp', otp)).toBeUndefined();
+
+      // cleared passcodes should be invalid
+      // TODO: check that they were actually removed from database
+      expect(await defaultIsValidOtp(otp)).toBe(false);
+      expect(await defaultIsValidOtp(otp2)).toBe(false);
     });
   });
 });

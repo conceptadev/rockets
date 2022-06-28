@@ -1,6 +1,6 @@
+import { ReferenceIdInterface } from '@concepta/ts-core';
 import { Entity, ManyToOne } from 'typeorm';
 import { RoleAssignmentSqliteEntity } from '../../entities/role-assignment-sqlite.entity';
-import { RoleAssigneeInterface } from '../../interfaces/role-assignee.interface';
 import { RoleEntityInterface } from '../../interfaces/role-entity.interface';
 import { ApiKeyEntityFixture } from './api-key-entity.fixture';
 import { RoleEntityFixture } from './role-entity.fixture';
@@ -14,5 +14,5 @@ export class ApiKeyRoleEntityFixture extends RoleAssignmentSqliteEntity {
   role!: RoleEntityInterface;
 
   @ManyToOne(() => ApiKeyEntityFixture, (apiKey) => apiKey.apiKeyRoles)
-  assignee!: RoleAssigneeInterface;
+  assignee!: ReferenceIdInterface;
 }

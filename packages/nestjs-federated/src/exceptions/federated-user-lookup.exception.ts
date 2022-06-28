@@ -1,5 +1,5 @@
 import { format } from 'util';
-import { ExceptionInterface } from '@concepta/ts-core';
+import { ExceptionInterface, ReferenceIdInterface } from '@concepta/ts-core';
 
 export class FederatedUserLookupException
   extends Error
@@ -9,18 +9,18 @@ export class FederatedUserLookupException
 
   context: {
     entityName: string;
-    id: string;
+    user: ReferenceIdInterface;
   };
 
   constructor(
     entityName: string,
-    id: string,
+    user: ReferenceIdInterface,
     message = 'Error while trying find user $s',
   ) {
-    super(format(message, id));
+    super(format(message, user));
     this.context = {
       entityName,
-      id,
+      user,
     };
   }
 }

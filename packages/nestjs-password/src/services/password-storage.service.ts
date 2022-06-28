@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { PasswordPlainInterface } from '@concepta/ts-common';
 import { CryptUtil } from '../utils/crypt.util';
 import { PasswordStorageInterface } from '../interfaces/password-storage.interface';
 import { PasswordStorageServiceInterface } from '../interfaces/password-storage-service.interface';
-import { PasswordPlainInterface } from '../interfaces/password-plain.interface';
 
 /**
  * Service with functions related to password security

@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Repository } from 'typeorm';
-import { OtpAssignmentInterface } from './interfaces/otp-assignment.interface';
+import { OtpInterface } from '@concepta/ts-common';
 import { OTP_MODULE_REPOSITORIES_TOKEN } from './otp.constants';
 import { OtpModule } from './otp.module';
 import { OtpService } from './services/otp.service';
@@ -10,7 +10,7 @@ import { AppModuleFixture } from './__fixtures__/app.module.fixture';
 describe('OtpModule', () => {
   let otpModule: OtpModule;
   let otpService: OtpService;
-  let otpDynamicRepo: Record<string, Repository<OtpAssignmentInterface>>;
+  let otpDynamicRepo: Record<string, Repository<OtpInterface>>;
   beforeEach(async () => {
     const testModule: TestingModule = await Test.createTestingModule({
       imports: [AppModuleFixture],
@@ -18,9 +18,9 @@ describe('OtpModule', () => {
 
     otpModule = testModule.get<OtpModule>(OtpModule);
     otpService = testModule.get<OtpService>(OtpService);
-    otpDynamicRepo = testModule.get<
-      Record<string, Repository<OtpAssignmentInterface>>
-    >(OTP_MODULE_REPOSITORIES_TOKEN);
+    otpDynamicRepo = testModule.get<Record<string, Repository<OtpInterface>>>(
+      OTP_MODULE_REPOSITORIES_TOKEN,
+    );
   });
 
   afterEach(() => {

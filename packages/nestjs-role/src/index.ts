@@ -10,7 +10,6 @@ export { RoleCrudService } from './services/role-crud.service';
 export { RoleController } from './role.controller';
 
 export { RoleInterface } from './interfaces/role.interface';
-export { RoleAssigneeInterface } from './interfaces/role-assignee.interface';
 export { RoleAssigneesInterface } from './interfaces/role-assignees.interface';
 export { RoleAssignmentInterface } from './interfaces/role-assignment.interface';
 export { RoleLookupServiceInterface } from './interfaces/role-lookup-service.interface';

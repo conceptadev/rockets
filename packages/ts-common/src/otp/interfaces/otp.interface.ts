@@ -1,12 +1,12 @@
 import {
+  ReferenceAssigneeInterface,
   ReferenceAuditInterface,
   ReferenceIdInterface,
 } from '@concepta/ts-core';
-import { OtpAssignableInterface } from './otp-assignable.interface';
 
 export interface OtpInterface
   extends ReferenceIdInterface,
-    OtpAssignableInterface,
+    ReferenceAssigneeInterface,
     Partial<ReferenceAuditInterface> {
   /**
    * Name
