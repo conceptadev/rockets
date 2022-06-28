@@ -1,5 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { AuditInterface } from '@concepta/ts-core';
+import { AuditInterface, ReferenceIdInterface } from '@concepta/ts-core';
 import { AuditPostgresEmbed } from '@concepta/typeorm-common';
 import { FederatedEntityInterface } from '../interfaces/federated-entity.interface';
 
@@ -27,14 +27,13 @@ export class FederatedPostgresEntity implements FederatedEntityInterface {
   subject!: string;
 
   /**
-   * userId
-   */
-  @Column()
-  userId!: string;
-
-  /**
    * Audit embed
    */
   @Column(() => AuditPostgresEmbed)
   audit!: AuditInterface;
+
+  /**
+   * User
+   */
+  user!: ReferenceIdInterface;
 }
