@@ -6,9 +6,9 @@ import {
   ReferenceId,
   ReferenceIdInterface,
 } from '@concepta/ts-core';
+import { RoleAssignmentInterface } from '@concepta/ts-common';
 import { AuditDto, ReferenceIdDto } from '@concepta/nestjs-common';
 import { CrudResponseDto } from '@concepta/nestjs-crud';
-import { RoleAssignmentInterface } from '../interfaces/role-assignment.interface';
 
 /**
  * Role assignment DTO

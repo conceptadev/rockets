@@ -5,8 +5,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { useSeeders } from '@jorgebodega/typeorm-seeding';
 import { getDynamicRepositoryToken } from '@concepta/nestjs-typeorm-ext';
+import { RoleAssignmentCreatableInterface } from '@concepta/ts-common';
 
-import { RoleAssignmentCreatableInterface } from './interfaces/role-assignment-creatable.interface';
 import { RoleFactory } from './role.factory';
 import { RoleSeeder } from './role.seeder';
 

@@ -1,10 +1,10 @@
 import { Exclude, Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { AuthenticationJwtResponseInterface } from '../interfaces/authentication-jwt-response.interface';
+import { AuthenticationResponseInterface } from '@concepta/ts-common';
 
 @Exclude()
 export class AuthenticationJwtResponseDto
-  implements AuthenticationJwtResponseInterface
+  implements AuthenticationResponseInterface
 {
   @Expose()
   @ApiProperty({

@@ -20,6 +20,10 @@ import {
   AccessControlReadOne,
   AccessControlUpdateOne,
 } from '@concepta/nestjs-access-control';
+import {
+  RoleCreatableInterface,
+  RoleUpdatableInterface,
+} from '@concepta/ts-common';
 import { RoleCrudService } from './services/role-crud.service';
 import { RoleDto } from './dto/role.dto';
 import { RoleCreateDto } from './dto/role-create.dto';
@@ -27,8 +31,6 @@ import { RoleCreateManyDto } from './dto/role-create-many.dto';
 import { RoleUpdateDto } from './dto/role-update.dto';
 import { RolePaginatedDto } from './dto/role-paginated.dto';
 import { RoleEntityInterface } from './interfaces/role-entity.interface';
-import { RoleCreatableInterface } from './interfaces/role-creatable.interface';
-import { RoleUpdatableInterface } from './interfaces/role-updatable.interface';
 import { RoleResource } from './role.types';
 
 /**

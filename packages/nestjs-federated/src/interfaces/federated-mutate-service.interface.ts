@@ -5,9 +5,11 @@ import {
   ReplaceOneInterface,
   UpdateOneInterface,
 } from '@concepta/ts-core';
+import {
+  FederatedCreatableInterface,
+  FederatedUpdatableInterface,
+} from '@concepta/ts-common';
 import { FederatedEntityInterface } from './federated-entity.interface';
-import { FederatedCreatableInterface } from './federated-creatable.interface';
-import { FederatedUpdatableInterface } from './federated-updatable.interface';
 
 export interface FederatedMutateServiceInterface
   extends CreateOneInterface<

@@ -6,11 +6,14 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import {
+  AuthenticatedUserInterface,
+  AuthenticationResponseInterface,
+} from '@concepta/ts-common';
+import {
   IssueTokenServiceInterface,
   IssueTokenService,
   AuthGuard,
   AuthUser,
-  AuthenticatedUserInterface,
   AuthenticationJwtResponseDto,
 } from '@concepta/nestjs-authentication';
 import { AUTH_JWT_REFRESH_STRATEGY_NAME } from './auth-refresh.constants';
@@ -43,7 +46,7 @@ export class AuthRefreshController {
   @Post()
   async refresh(
     @AuthUser() user: AuthenticatedUserInterface,
-  ): Promise<AuthenticationJwtResponseDto> {
+  ): Promise<AuthenticationResponseInterface> {
     return this.issueTokenService.responsePayload(user.id);
   }
 }

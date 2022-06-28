@@ -1,12 +1,12 @@
 import supertest from 'supertest';
+import { mock } from 'jest-mock-extended';
 
+import { INestApplication, Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { AuthenticationResponseInterface } from '@concepta/ts-common';
+import { UserCrudService } from '@concepta/nestjs-user';
 
 import { AppModule } from './app.module';
-import { INestApplication, Logger } from '@nestjs/common';
-import { mock } from 'jest-mock-extended';
-import { UserCrudService } from '@concepta/nestjs-user';
-import { AuthenticationJwtResponseInterface } from '@concepta/nestjs-authentication';
 import { UserEntity } from './user/user.entity';
 import { UserDto } from './user/user.controller';
 import { Repository } from 'typeorm';
@@ -48,7 +48,7 @@ describe('AppController (e2e)', () => {
         password: 'AS12378',
       };
 
-      const response: { body: AuthenticationJwtResponseInterface } =
+      const response: { body: AuthenticationResponseInterface } =
         await supertest(app.getHttpServer())
           .post('/auth/login')
           .send(sign)
@@ -78,7 +78,7 @@ describe('AppController (e2e)', () => {
         password: 'AS12378',
       };
 
-      const response: { body: AuthenticationJwtResponseInterface } =
+      const response: { body: AuthenticationResponseInterface } =
         await supertest(app.getHttpServer())
           .post('/auth/login')
           .send(sign)
@@ -119,7 +119,7 @@ describe('AppController (e2e)', () => {
         password: 'AS12378',
       };
 
-      const response: { body: AuthenticationJwtResponseInterface } =
+      const response: { body: AuthenticationResponseInterface } =
         await supertest(app.getHttpServer())
           .post('/auth/login')
           .send(sign)
@@ -141,7 +141,7 @@ describe('AppController (e2e)', () => {
       await sleep(1000);
 
       // call to refresh token
-      const responseTokenRefresh: { body: AuthenticationJwtResponseInterface } =
+      const responseTokenRefresh: { body: AuthenticationResponseInterface } =
         await supertest(app.getHttpServer())
           .post('/token/refresh')
           .send({

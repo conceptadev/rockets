@@ -1,10 +1,13 @@
 import { Controller, Inject, Get, UseGuards } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import {
+  AuthenticatedUserInterface,
+  AuthenticationResponseInterface,
+} from '@concepta/ts-common';
+import {
   AuthGuard,
   AuthUser,
   IssueTokenServiceInterface,
-  AuthenticatedUserInterface,
   AuthenticationJwtResponseDto,
 } from '@concepta/nestjs-authentication';
 import { AUTH_GITHUB_ISSUE_TOKEN_SERVICE_TOKEN } from './auth-github.constants';
@@ -56,7 +59,7 @@ export class AuthGithubController {
   @Get('callback')
   async get(
     @AuthUser() user: AuthenticatedUserInterface,
-  ): Promise<AuthenticationJwtResponseDto> {
+  ): Promise<AuthenticationResponseInterface> {
     return this.issueTokenService.responsePayload(user.id);
   }
 }
