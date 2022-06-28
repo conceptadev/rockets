@@ -22,6 +22,10 @@ import {
   AccessControlRecoverOne,
   AccessControlUpdateOne,
 } from '@concepta/nestjs-access-control';
+import {
+  OrgCreatableInterface,
+  OrgUpdatableInterface,
+} from '@concepta/ts-common';
 import { OrgCrudService } from './services/org-crud.service';
 import { OrgDto } from './dto/org.dto';
 import { OrgCreateDto } from './dto/org-create.dto';
@@ -29,8 +33,6 @@ import { OrgCreateManyDto } from './dto/org-create-many.dto';
 import { OrgUpdateDto } from './dto/org-update.dto';
 import { OrgPaginatedDto } from './dto/org-paginated.dto';
 import { OrgEntityInterface } from './interfaces/org-entity.interface';
-import { OrgCreatableInterface } from './interfaces/org-creatable.interface';
-import { OrgUpdatableInterface } from './interfaces/org-updatable.interface';
 import { OrgResource } from './org.types';
 
 /**

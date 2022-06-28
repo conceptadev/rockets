@@ -8,7 +8,6 @@ export { OrgMutateService } from './services/org-mutate.service';
 export { OrgCrudService } from './services/org-crud.service';
 export { OrgController } from './org.controller';
 
-export { OrgInterface } from './interfaces/org.interface';
 export { OrgLookupServiceInterface } from './interfaces/org-lookup-service.interface';
 export { OrgMutateServiceInterface } from './interfaces/org-mutate-service.interface';
 

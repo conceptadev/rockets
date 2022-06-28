@@ -5,9 +5,11 @@ import {
   ReplaceOneInterface,
   UpdateOneInterface,
 } from '@concepta/ts-core';
+import {
+  OrgCreatableInterface,
+  OrgUpdatableInterface,
+} from '@concepta/ts-common';
 import { OrgEntityInterface } from './org-entity.interface';
-import { OrgCreatableInterface } from './org-creatable.interface';
-import { OrgUpdatableInterface } from './org-updatable.interface';
 
 export interface OrgMutateServiceInterface
   extends CreateOneInterface<OrgCreatableInterface, OrgEntityInterface>,

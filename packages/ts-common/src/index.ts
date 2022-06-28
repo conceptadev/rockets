@@ -3,6 +3,11 @@ export { EmailSendOptionsInterface } from './email/interfaces/email-send-options
 
 export { PasswordPlainInterface } from './password/interfaces/password-plain.interface';
 
+export { OrgInterface } from './org/interfaces/org.interface';
+export { OrgOwnerInterface } from './org/interfaces/org-owner.interface';
+export { OrgCreatableInterface } from './org/interfaces/org-creatable.interface';
+export { OrgUpdatableInterface } from './org/interfaces/org-updatable.interface';
+
 export { UserInterface } from './user/interfaces/user.interface';
 export { UserCreatableInterface } from './user/interfaces/user-creatable.interface';
 export { UserUpdatableInterface } from './user/interfaces/user-updatable.interface';
