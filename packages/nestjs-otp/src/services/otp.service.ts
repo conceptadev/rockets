@@ -4,11 +4,7 @@ import { validate } from 'class-validator';
 import { DeepPartial, Repository } from 'typeorm';
 import { Inject, Injectable, Type } from '@nestjs/common';
 import { ReferenceAssignment, ReferenceId } from '@concepta/ts-core';
-import {
-  OtpCreatableInterface,
-  OtpInterface,
-  OtpServiceInterface,
-} from '@concepta/ts-common';
+import { OtpCreatableInterface, OtpInterface } from '@concepta/ts-common';
 import {
   ReferenceLookupException,
   ReferenceMutateException,
@@ -19,6 +15,7 @@ import {
   OTP_MODULE_SETTINGS_TOKEN,
 } from '../otp.constants';
 import { OtpSettingsInterface } from '../interfaces/otp-settings.interface';
+import { OtpServiceInterface } from '../interfaces/otp-service.interface';
 import { OtpCreateDto } from '../dto/otp-create.dto';
 import { OtpTypeNotDefinedException } from '../exceptions/otp-type-not-defined.exception';
 import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
