@@ -6,10 +6,13 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import {
+  AuthenticatedUserInterface,
+  AuthenticationResponseInterface,
+} from '@concepta/ts-common';
+import {
   AuthGuard,
   AuthUser,
   IssueTokenServiceInterface,
-  AuthenticatedUserInterface,
   AuthenticationJwtResponseDto,
 } from '@concepta/nestjs-authentication';
 import { AUTH_LOCAL_ISSUE_TOKEN_SERVICE_TOKEN } from './auth-local.constants';
@@ -43,7 +46,7 @@ export class AuthLocalController {
   @Post()
   async login(
     @AuthUser() user: AuthenticatedUserInterface,
-  ): Promise<AuthenticationJwtResponseDto> {
+  ): Promise<AuthenticationResponseInterface> {
     return this.issueTokenService.responsePayload(user.id);
   }
 }

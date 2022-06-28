@@ -1,5 +1,6 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ReferenceIdInterface } from '@concepta/ts-core';
+import { AuthorizationPayloadInterface } from '@concepta/ts-common';
 import {
   PassportStrategyFactory,
   VerifyTokenServiceInterface,
@@ -13,7 +14,6 @@ import {
 } from './auth-jwt.constants';
 import { AuthJwtSettingsInterface } from './interfaces/auth-jwt-settings.interface';
 import { AuthJwtUserLookupServiceInterface } from './interfaces/auth-jwt-user-lookup-service.interface';
-import { AuthJwtPayloadInterface } from './interfaces/auth-jwt-payload.interface';
 import { createVerifyTokenCallback } from './utils/create-verify-token-callback.util';
 
 @Injectable()
@@ -43,7 +43,7 @@ export class AuthJwtStrategy extends PassportStrategyFactory<JwtStrategy>(
    * @param payload The payload to validate
    */
   async validate(
-    payload: AuthJwtPayloadInterface,
+    payload: AuthorizationPayloadInterface,
   ): Promise<ReferenceIdInterface> {
     const user = await this.userLookupService.bySubject(payload.sub);
 

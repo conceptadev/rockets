@@ -4,6 +4,7 @@ import {
   VerifyTokenServiceInterface,
 } from '@concepta/nestjs-authentication';
 import { JwtStrategy } from '@concepta/nestjs-jwt';
+import { AuthorizationPayloadInterface } from '@concepta/ts-common';
 import {
   AUTH_JWT_REFRESH_STRATEGY_NAME,
   AUTH_REFRESH_USER_LOOKUP_SERVICE_TOKEN,
@@ -12,7 +13,6 @@ import {
 } from './auth-refresh.constants';
 import { AuthRefreshSettingsInterface } from './interfaces/auth-refresh-settings.interface';
 import { AuthRefreshUserLookupServiceInterface } from './interfaces/auth-refresh-user-lookup-service.interface';
-import { AuthRefreshPayloadInterface } from './interfaces/auth-refresh-payload.interface';
 import { createVerifyTokenCallback } from './utils/create-verify-token-callback.util';
 
 @Injectable()
@@ -41,7 +41,7 @@ export class AuthRefreshStrategy extends PassportStrategyFactory<JwtStrategy>(
    *
    * @param payload
    */
-  async validate(payload: AuthRefreshPayloadInterface) {
+  async validate(payload: AuthorizationPayloadInterface) {
     const user = await this.userLookupService.bySubject(payload.sub);
 
     if (!user) {

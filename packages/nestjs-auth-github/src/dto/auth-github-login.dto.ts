@@ -1,10 +1,10 @@
 import { IsString } from 'class-validator';
 import { Exclude, Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { AuthGithubLoginInterface } from '../interfaces/auth-github-login.interface';
+import { AuthenticationCodeInterface } from '@concepta/ts-common';
 
 @Exclude()
-export class AuthGithubLoginDto implements AuthGithubLoginInterface {
+export class AuthGithubLoginDto implements AuthenticationCodeInterface {
   @Expose()
   @ApiProperty({
     type: 'string',

@@ -1,6 +1,15 @@
 export { EmailSendInterface } from './email/interfaces/email-send.interface';
 export { EmailSendOptionsInterface } from './email/interfaces/email-send-options.interface';
 
+export { AuthenticationLoginInterface } from './authentication/interfaces/authentication-login.interface';
+export { AuthenticationAccessInterface } from './authentication/interfaces/authentication-access.interface';
+export { AuthenticationRefreshInterface } from './authentication/interfaces/authentication-refresh.interface';
+export { AuthenticationResponseInterface } from './authentication/interfaces/authentication-response.interface';
+export { AuthenticationCodeInterface } from './authentication/interfaces/authentication-code.interface';
+export { AuthenticatedUserInterface } from './authentication/interfaces/authenticated-user.interface';
+
+export { AuthorizationPayloadInterface } from './authorization/interfaces/authorization-payload.interface';
+
 export { PasswordPlainInterface } from './password/interfaces/password-plain.interface';
 
 export { OrgInterface } from './org/interfaces/org.interface';

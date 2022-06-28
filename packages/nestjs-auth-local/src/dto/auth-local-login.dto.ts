@@ -1,18 +1,17 @@
 import { IsString } from 'class-validator';
 import { Exclude, Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { ReferenceUsername } from '@concepta/ts-core';
-import { AuthLocalLoginInterface } from '../interfaces/auth-local-login.interface';
+import { AuthenticationLoginInterface } from '@concepta/ts-common';
 
 @Exclude()
-export class AuthLocalLoginDto implements AuthLocalLoginInterface {
+export class AuthLocalLoginDto implements AuthenticationLoginInterface {
   @Expose()
   @ApiProperty({
     type: 'string',
     description: 'Username',
   })
   @IsString()
-  username: ReferenceUsername = '';
+  username = '';
 
   @Expose()
   @ApiProperty({

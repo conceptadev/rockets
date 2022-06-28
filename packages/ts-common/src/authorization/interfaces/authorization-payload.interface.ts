@@ -1,4 +1,4 @@
 import { ReferenceSubjectInterface } from '@concepta/ts-core';
 
-export interface AuthRefreshPayloadInterface
+export interface AuthorizationPayloadInterface
   extends ReferenceSubjectInterface {}

@@ -1,10 +1,10 @@
 import { Exclude, Expose } from 'class-transformer';
 import { IsJWT } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { AuthRefreshInterface } from '../interfaces/auth-refresh.interface';
+import { AuthenticationRefreshInterface } from '@concepta/ts-common';
 
 @Exclude()
-export class AuthRefreshDto implements AuthRefreshInterface {
+export class AuthRefreshDto implements AuthenticationRefreshInterface {
   @Expose()
   @ApiProperty({
     type: 'string',
