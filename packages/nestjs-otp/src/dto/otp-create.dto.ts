@@ -1,8 +1,8 @@
 import { Exclude, Expose, Type } from 'class-transformer';
 import { IsString } from 'class-validator';
 import { ReferenceIdInterface } from '@concepta/ts-core';
+import { OtpCreatableInterface } from '@concepta/ts-common';
 import { ReferenceIdDto } from '@concepta/nestjs-common';
-import { OtpCreatableInterface } from '../interfaces/otp-creatable.interface';
 
 /**
  * Otp Create DTO

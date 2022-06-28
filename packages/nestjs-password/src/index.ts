@@ -7,6 +7,5 @@ export * from './services/password-storage.service';
 export * from './services/password-strength.service';
 
 export * from './interfaces/password-options.interface';
-export * from './interfaces/password-plain.interface';
 export * from './interfaces/password-storage.interface';
 export * from './interfaces/password-creation-service.interface';

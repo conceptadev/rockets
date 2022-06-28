@@ -1,6 +1,6 @@
 import { Exclude } from 'class-transformer';
 import { IntersectionType, PartialType, PickType } from '@nestjs/swagger';
-import { UserCreatableInterface } from '../interfaces/user-creatable.interface';
+import { UserCreatableInterface } from '@concepta/ts-common';
 import { UserDto } from './user.dto';
 import { UserPasswordDto } from './user-password.dto';
 

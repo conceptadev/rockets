@@ -1,8 +1,12 @@
 import { IsString } from 'class-validator';
 import { Exclude, Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { AuditInterface, ReferenceId } from '@concepta/ts-core';
-import { AuditDto } from '@concepta/nestjs-common';
+import {
+  AuditInterface,
+  ReferenceId,
+  ReferenceIdInterface,
+} from '@concepta/ts-core';
+import { AuditDto, ReferenceIdDto } from '@concepta/nestjs-common';
 import { CrudResponseDto } from '@concepta/nestjs-crud';
 import { FederatedInterface } from '../interfaces/federated.interface';
 
@@ -52,11 +56,11 @@ export class FederatedDto
    */
   @Expose()
   @ApiProperty({
-    type: 'string',
-    description: 'userId of the federated',
+    type: ReferenceIdDto,
+    description: 'User data',
   })
-  @IsString()
-  userId = '';
+  @Type(() => ReferenceIdDto)
+  user: ReferenceIdInterface = new ReferenceIdDto();
 
   /**
    * Audit

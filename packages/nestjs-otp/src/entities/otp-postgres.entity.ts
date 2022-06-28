@@ -4,13 +4,13 @@ import {
   ReferenceId,
   ReferenceIdInterface,
 } from '@concepta/ts-core';
+import { OtpInterface } from '@concepta/ts-common';
 import { AuditPostgresEmbed } from '@concepta/typeorm-common';
-import { OtpInterface } from '../interfaces/otp.interface';
 
 /**
- * Otp Assignment Postgres Entity
+ * Otp Postgres Entity
  */
-export abstract class OtpAssignmentPostgresEntity implements OtpInterface {
+export abstract class OtpPostgresEntity implements OtpInterface {
   @PrimaryGeneratedColumn('uuid')
   id!: ReferenceId;
 

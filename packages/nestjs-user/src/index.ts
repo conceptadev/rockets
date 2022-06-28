@@ -8,7 +8,6 @@ export { UserMutateService } from './services/user-mutate.service';
 export { UserCrudService } from './services/user-crud.service';
 export { UserController } from './user.controller';
 
-export { UserInterface } from './interfaces/user.interface';
 export { UserEntityInterface } from './interfaces/user-entity.interface';
 export { UserLookupServiceInterface } from './interfaces/user-lookup-service.interface';
 export { UserMutateServiceInterface } from './interfaces/user-mutate-service.interface';

@@ -1,5 +1,5 @@
-import { EmailMailerServiceInterface } from './email-mailer-service.interface';
+import { EmailServiceInterface } from './email-service.interface';
 
 export interface EmailOptionsInterface {
-  mailerService?: EmailMailerServiceInterface;
+  mailerService?: EmailServiceInterface;
 }

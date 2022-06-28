@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { UserInterface } from '../../interfaces/user.interface';
-import { UserLookupServiceInterface } from '../../interfaces/user-lookup-service.interface';
+import { UserInterface } from '@concepta/ts-common';
 import {
   ReferenceEmail,
   ReferenceId,
   ReferenceSubject,
   ReferenceUsername,
 } from '@concepta/ts-core';
+import { UserLookupServiceInterface } from '../../interfaces/user-lookup-service.interface';
 
 @Injectable()
 export class UserLookupCustomService implements UserLookupServiceInterface {

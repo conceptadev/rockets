@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ReferenceMutateException } from '@concepta/typeorm-common';
-import { NotAnErrorException } from '@concepta/ts-core';
+import { NotAnErrorException, ReferenceIdInterface } from '@concepta/ts-core';
 import {
   FEDERATED_MODULE_USER_LOOKUP_SERVICE_TOKEN,
   FEDERATED_MODULE_USER_MUTATE_SERVICE_TOKEN,
@@ -47,12 +47,12 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
     if (!federated) {
       return await this.createUserWithFederated(provider, email, subject);
     } else {
-      const user = await this.userLookupService.byId(federated.userId);
+      const user = await this.userLookupService.byId(federated.user.id);
 
       if (!user)
         throw new FederatedUserLookupException(
           this.constructor.name,
-          federated.userId,
+          federated.user,
         );
 
       return user;
@@ -76,7 +76,7 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
       : await this.createUser(email, email);
 
     // Create federated
-    await this.createFederated(provider, subject, userResult.id);
+    await this.createFederated(provider, subject, userResult);
 
     return userResult;
   }
@@ -120,13 +120,13 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
   private async createFederated(
     provider: string,
     subject: string,
-    userId: string,
+    user: ReferenceIdInterface,
   ): Promise<FederatedEntityInterface> {
     try {
       const federated = await this.federatedMutateService.create({
         provider,
         subject,
-        userId,
+        user,
       });
 
       if (!federated)

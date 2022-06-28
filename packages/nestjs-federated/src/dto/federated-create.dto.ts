@@ -8,5 +8,5 @@ import { FederatedCreatableInterface } from '../interfaces/federated-creatable.i
  */
 @Exclude()
 export class FederatedCreateDto
-  extends PickType(FederatedDto, ['provider', 'subject', 'userId'] as const)
+  extends PickType(FederatedDto, ['provider', 'subject', 'user'] as const)
   implements FederatedCreatableInterface {}

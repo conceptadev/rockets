@@ -2,13 +2,13 @@ import { Repository } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import { LookupService } from '@concepta/typeorm-common';
+import { OrgOwnerInterface } from '@concepta/ts-common';
 import {
   ORG_MODULE_ORG_ENTITY_KEY,
   ORG_MODULE_OWNER_LOOKUP_SERVICE,
 } from '../org.constants';
 import { OrgEntityInterface } from '../interfaces/org-entity.interface';
 import { OrgLookupServiceInterface } from '../interfaces/org-lookup-service.interface';
-import { OrgOwnerInterface } from '../interfaces/org-owner.interface';
 import { OrgOwnerLookupServiceInterface } from '../interfaces/org-owner-lookup-service.interface';
 
 /**

@@ -19,6 +19,7 @@
     "@concepta/nestjs-password": "^4.0.0-alpha.16",
     "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.16",
     "@concepta/ts-core": "^4.0.0-alpha.16",
+    "@concepta/ts-common": "^4.0.0-alpha.16",
     "@concepta/typeorm-common": "^4.0.0-alpha.16",
     "@nestjs/common": "^8.0.8",
     "@nestjs/config": "^1.1.6",
