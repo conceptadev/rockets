@@ -11,7 +11,7 @@ import {
 
 import { authRecoveryDefaultConfig } from './config/auth-recovery-default.config';
 import { AuthRecoveryOptionsInterface } from './interfaces/auth-recovery-options.interface';
-import { AuthRecoveryService } from './auth-recovery.service';
+import { AuthRecoveryService } from './services/auth-recovery.service';
 import { AuthRecoveryController } from './auth-recovery.controller';
 import {
   AUTH_RECOVERY_EMAIL_SERVICE_TOKEN,
@@ -21,9 +21,10 @@ import {
   AUTH_RECOVERY_USER_LOOKUP_SERVICE_TOKEN,
   AUTH_RECOVERY_USER_MUTATED_SERVICE_TOKEN,
 } from './auth-recovery.constants';
+import { AuthRecoveryNotificationService } from './services/auth-recovery-notification.service';
 
 @Module({
-  providers: [AuthRecoveryService],
+  providers: [AuthRecoveryService, AuthRecoveryNotificationService],
   controllers: [AuthRecoveryController],
   exports: [AuthRecoveryService],
 })

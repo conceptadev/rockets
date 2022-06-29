@@ -11,8 +11,16 @@ export const authRecoveryDefaultConfig = registerAs(
     email: {
       from: 'from',
       baseUrl: 'baseUrl',
-      recoverPasswordTemplate: 'password-reset-template.hbs',
-      recoverPasswordEmailSubject: 'Password Recovery',
+      templates: {
+        recoverLogin: {
+          fileName: 'recover-login.template.hbs',
+          subject: 'Login Recovery',
+        },
+        recoverPassword: {
+          fileName: 'recover-password.template.hbs',
+          subject: 'Password Recovery',
+        },
+      },
     },
     otp: {
       assignment: 'userOtp',

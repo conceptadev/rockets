@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { AuthRecoveryService } from './auth-recovery.service';
+import { AuthRecoveryService } from './services/auth-recovery.service';
 import { RecoverPasswordDto } from './dto/recover-password.dto';
 
 @Controller('auth')

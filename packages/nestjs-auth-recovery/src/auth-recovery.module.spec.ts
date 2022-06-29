@@ -5,7 +5,7 @@ import { OtpService } from '@concepta/nestjs-otp';
 import { EmailService } from '@concepta/nestjs-email';
 import { AuthRecoveryModule } from './auth-recovery.module';
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
-import { AuthRecoveryService } from './auth-recovery.service';
+import { AuthRecoveryService } from './services/auth-recovery.service';
 import { AuthRecoveryController } from './auth-recovery.controller';
 import { UserRepositoryFixture } from './__fixtures__/user.repository.fixture';
 

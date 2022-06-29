@@ -11,8 +11,16 @@ export interface AuthRecoverySettingsInterface extends OptionsInterface {
   email: {
     from: string;
     baseUrl: string;
-    recoverPasswordTemplate: string;
-    recoverPasswordEmailSubject: string;
+    templates: {
+      recoverLogin: {
+        fileName: string;
+        subject: string;
+      };
+      recoverPassword: {
+        fileName: string;
+        subject: string;
+      };
+    };
   };
   otp: AuthRecoveryOtpSettingsInterface;
 }
