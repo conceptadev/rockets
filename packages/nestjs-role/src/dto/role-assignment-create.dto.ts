@@ -1,7 +1,7 @@
 import { Exclude } from 'class-transformer';
 import { PickType } from '@nestjs/swagger';
+import { RoleAssignmentCreatableInterface } from '@concepta/ts-common';
 import { RoleAssignmentDto } from './role-assignment.dto';
-import { RoleAssignmentCreatableInterface } from '../interfaces/role-assignment-creatable.interface';
 
 /**
  * Role Assignment Create DTO

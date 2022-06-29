@@ -14,6 +14,7 @@ import {
   TypeOrmExtModule,
 } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
+import { RoleAssignmentInterface } from '@concepta/ts-common';
 import {
   ROLE_MODULE_CRUD_SERVICES_TOKEN,
   ROLE_MODULE_REPOSITORIES_TOKEN,
@@ -31,7 +32,6 @@ import { RoleLookupServiceInterface } from './interfaces/role-lookup-service.int
 import { DefaultRoleLookupService } from './services/default-role-lookup.service';
 import { RoleMutateService } from './services/role-mutate.service';
 import { DefaultRoleMutateService } from './services/default-role-mutate.service';
-import { RoleAssignmentInterface } from './interfaces/role-assignment.interface';
 import { RoleAssignmentCrudService } from './services/role-assignment-crud.service';
 import { RoleAssignmentController } from './role-assignment.controller';
 

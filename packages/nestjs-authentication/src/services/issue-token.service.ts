@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ReferenceId } from '@concepta/ts-core';
 import { JwtIssueService } from '@concepta/nestjs-jwt';
+import { AuthenticationResponseInterface } from '@concepta/ts-common';
 import { IssueTokenServiceInterface } from '../interfaces/issue-token-service.interface';
 import { AuthenticationJwtResponseDto } from '../dto/authentication-jwt-response.dto';
 
@@ -29,7 +30,7 @@ export class IssueTokenService implements IssueTokenServiceInterface {
    */
   async responsePayload(
     id: ReferenceId,
-  ): Promise<AuthenticationJwtResponseDto> {
+  ): Promise<AuthenticationResponseInterface> {
     // TODO: need pattern for events and/or callbacks to mutate this object before signing
     const payload = { sub: id };
 

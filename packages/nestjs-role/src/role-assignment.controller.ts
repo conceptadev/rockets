@@ -2,6 +2,10 @@ import { Inject, Param } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ReferenceAssignment } from '@concepta/ts-core';
 import {
+  RoleAssignmentCreatableInterface,
+  RoleAssignmentInterface,
+} from '@concepta/ts-common';
+import {
   CrudBody,
   CrudCreateOne,
   CrudDeleteOne,
@@ -17,10 +21,8 @@ import {
   ROLE_MODULE_CRUD_SERVICES_TOKEN,
   ROLE_MODULE_SETTINGS_TOKEN,
 } from './role.constants';
-import { RoleAssignmentInterface } from './interfaces/role-assignment.interface';
 import { EntityNotFoundException } from './exceptions/entity-not-found.exception';
 import { AssignmentNotFoundException } from './exceptions/assignment-not-found.exception';
-import { RoleAssignmentCreatableInterface } from './interfaces/role-assignment-creatable.interface';
 import { RoleAssignmentCrudService } from './services/role-assignment-crud.service';
 import { RoleAssignmentDto } from './dto/role-assignment.dto';
 import { RoleAssignmentCreateDto } from './dto/role-assignment-create.dto';

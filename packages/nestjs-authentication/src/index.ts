@@ -4,9 +4,7 @@ export * from './config/authentication-default.config';
 
 export * from './decorators/auth-user.decorator';
 
-export { AuthenticatedUserInterface } from './interfaces/authenticated-user.interface';
 export * from './interfaces/authentication-options.interface';
-export * from './interfaces/authentication-jwt-response.interface';
 
 export { VerifyTokenServiceInterface } from './interfaces/verify-token-service.interface';
 export * from './interfaces/issue-token-service.interface';

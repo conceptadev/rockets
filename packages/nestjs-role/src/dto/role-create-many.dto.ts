@@ -2,7 +2,7 @@ import { Exclude, Expose, Type } from 'class-transformer';
 import { ArrayNotEmpty, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { CrudCreateManyDto } from '@concepta/nestjs-crud';
-import { RoleCreatableInterface } from '../interfaces/role-creatable.interface';
+import { RoleCreatableInterface } from '@concepta/ts-common';
 import { RoleCreateDto } from './role-create.dto';
 
 /**

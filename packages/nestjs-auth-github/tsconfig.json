@@ -11,10 +11,13 @@
   },
   "include": [
     "src/**/*.ts"
-  ],
+, "../ts-common/src/authentication/interfaces/auth-github-login.interface.ts"  ],
   "references": [
     {
       "path": "../ts-core"
+    },
+    {
+      "path": "../ts-common"
     },
     {
       "path": "../nestjs-authentication"
