@@ -1,4 +1,7 @@
-import { ReferenceAssignment } from '@concepta/ts-core';
+import {
+  ReferenceAssigneeInterface,
+  ReferenceAssignment,
+} from '@concepta/ts-core';
 import { OtpInterface } from './otp.interface';
 
 export interface OtpValidateInterface {
@@ -11,7 +14,7 @@ export interface OtpValidateInterface {
    */
   validate(
     assignment: ReferenceAssignment,
-    otp: Pick<OtpInterface, 'assignee' | 'category' | 'passcode'>,
+    otp: Pick<OtpInterface, 'category' | 'passcode'>,
     deleteIfValid: boolean,
-  ): Promise<boolean>;
+  ): Promise<ReferenceAssigneeInterface | null>;
 }
