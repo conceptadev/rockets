@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail } from 'class-validator';
 
-export class RecoverLoginDto {
+export class AuthRecoveryRecoverLoginDto {
   @ApiProperty({
     title: 'user email',
     description:

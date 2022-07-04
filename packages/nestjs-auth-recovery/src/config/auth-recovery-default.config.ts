@@ -29,7 +29,6 @@ export const authRecoveryDefaultConfig = registerAs(
         id: 'id',
       },
       category: 'auth-recovery',
-      resetTokenExp: new Date(),
     },
   }),
 );

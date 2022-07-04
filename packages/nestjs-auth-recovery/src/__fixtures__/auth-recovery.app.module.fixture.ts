@@ -9,11 +9,11 @@ import {
   UserMutateService,
 } from '@concepta/nestjs-user';
 
-import { default as ormConfig } from './ormconfig.fixture';
-import { UserRepositoryFixture } from './user.repository.fixture';
-import { UserOtpEntityFixture } from './user-otp-entity.fixture';
-import { UserOtpRepositoryFixture } from './user-otp-repository.fixture';
-import { UserEntityFixture } from './user-entity.fixture';
+import { default as ormConfig } from './auth-recovery.ormconfig.fixture';
+import { AuthRecoveryUserRepositoryFixture } from './auth-recovery.user.repository.fixture';
+import { AuthRecoveryUserOtpEntityFixture } from './auth-recovery-user-otp-entity.fixture';
+import { AuthRecoveryUserOtpRepositoryFixture } from './auth-recovery-user-otp-repository.fixture';
+import { AuthRecoveryUserEntityFixture } from './auth-recovery-user-entity.fixture';
 import { AuthRecoveryModule } from '../auth-recovery.module';
 
 @Module({
@@ -47,16 +47,16 @@ import { AuthRecoveryModule } from '../auth-recovery.module';
     OtpModule.register({
       entities: {
         userOtp: {
-          entity: UserOtpEntityFixture,
-          repository: UserOtpRepositoryFixture,
+          entity: AuthRecoveryUserOtpEntityFixture,
+          repository: AuthRecoveryUserOtpRepositoryFixture,
         },
       },
     }),
     UserModule.register({
       entities: {
         user: {
-          entity: UserEntityFixture,
-          repository: UserRepositoryFixture,
+          entity: AuthRecoveryUserEntityFixture,
+          repository: AuthRecoveryUserRepositoryFixture,
         },
       },
     }),
@@ -69,4 +69,4 @@ import { AuthRecoveryModule } from '../auth-recovery.module';
     }),
   ],
 })
-export class AppModuleFixture {}
+export class AuthRecoveryAppModuleFixture {}

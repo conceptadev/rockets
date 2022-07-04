@@ -4,12 +4,12 @@ import { INestApplication } from '@nestjs/common';
 import { useSeeders } from '@jorgebodega/typeorm-seeding';
 import { UserFactory, UserSeeder } from '@concepta/nestjs-user/src/seeding';
 
-import { AppModuleFixture } from './__fixtures__/app.module.fixture';
-import { UserEntityFixture } from './__fixtures__/user-entity.fixture';
-import { RecoverPasswordDto } from './dto/recover-password.dto';
+import { AuthRecoveryAppModuleFixture } from './__fixtures__/auth-recovery.app.module.fixture';
+import { AuthRecoveryUserEntityFixture } from './__fixtures__/auth-recovery-user-entity.fixture';
+import { AuthRecoveryRecoverPasswordDto } from './dto/auth-recovery-recover-password.dto';
 import { UserDto } from '@concepta/nestjs-user/dist/dto/user.dto';
-import { RecoverLoginDto } from './dto/recover-login.dto';
-import { UpdatePasswordDto } from './dto/update-password.dto';
+import { AuthRecoveryRecoverLoginDto } from './dto/auth-recovery-recover-login.dto';
+import { AuthRecoveryUpdatePasswordDto } from './dto/auth-recovery-update-password.dto';
 import { OtpService } from '@concepta/nestjs-otp';
 import { authRecoveryDefaultConfig } from './config/auth-recovery-default.config';
 import { ConfigService, ConfigType } from '@nestjs/config';
@@ -26,7 +26,7 @@ describe('AuthRecoveryController (e2e)', () => {
 
     beforeEach(async () => {
       const moduleFixture: TestingModule = await Test.createTestingModule({
-        imports: [AppModuleFixture],
+        imports: [AuthRecoveryAppModuleFixture],
       }).compile();
       app = moduleFixture.createNestApplication();
       await app.init();
@@ -38,7 +38,7 @@ describe('AuthRecoveryController (e2e)', () => {
         AUTH_RECOVERY_MODULE_DEFAULT_SETTINGS_TOKEN,
       ) as AuthRecoverySettingsInterface;
 
-      UserFactory.entity = UserEntityFixture;
+      UserFactory.entity = AuthRecoveryUserEntityFixture;
 
       await useSeeders(UserSeeder, { root: __dirname, connection: 'default' });
     });
@@ -53,7 +53,7 @@ describe('AuthRecoveryController (e2e)', () => {
 
       await supertest(app.getHttpServer())
         .post('/auth/recover-login')
-        .send({ email: user.email } as RecoverLoginDto)
+        .send({ email: user.email } as AuthRecoveryRecoverLoginDto)
         .expect(201);
     });
 
@@ -83,7 +83,7 @@ describe('AuthRecoveryController (e2e)', () => {
         .send({
           passcode: otpCreateDto.passcode,
           newPassword: '$!Abc123bsksl6764579',
-        } as UpdatePasswordDto)
+        } as AuthRecoveryUpdatePasswordDto)
         .expect(201);
     });
   });
@@ -103,6 +103,6 @@ const validateRecoverPassword = async (
 ): Promise<void> => {
   await supertest(app.getHttpServer())
     .post('/auth/recover-password')
-    .send({ email: user.email } as RecoverPasswordDto)
+    .send({ email: user.email } as AuthRecoveryRecoverPasswordDto)
     .expect(201);
 };

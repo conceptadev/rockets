@@ -1,11 +1,19 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthRecoveryService } from './services/auth-recovery.service';
-import { RecoverPasswordDto } from './dto/recover-password.dto';
-import { RecoverLoginDto } from './dto/recover-login.dto';
-import { UpdatePasswordDto } from './dto/update-password.dto';
+import { AuthRecoveryRecoverPasswordDto } from './dto/auth-recovery-recover-password.dto';
+import { AuthRecoveryRecoverLoginDto } from './dto/auth-recovery-recover-login.dto';
+import { AuthRecoveryUpdatePasswordDto } from './dto/auth-recovery-update-password.dto';
 
-@Controller('auth')
+@Controller('auth/recovery')
 @ApiTags('auth')
 export class AuthRecoveryController {
   constructor(private readonly authRecoveryService: AuthRecoveryService) {}
@@ -15,12 +23,22 @@ export class AuthRecoveryController {
       'Recover account username password by providing an email that will receive an username.',
   })
   @ApiBody({
-    type: RecoverLoginDto,
+    type: AuthRecoveryRecoverLoginDto,
     description: 'DTO of login recover.',
   })
-  @Post('/recover-login')
-  async recoverLogin(@Body() recoverLoginDto: RecoverLoginDto): Promise<void> {
+  @Post('/login')
+  async recoverLogin(
+    @Body() recoverLoginDto: AuthRecoveryRecoverLoginDto,
+  ): Promise<void> {
     await this.authRecoveryService.recoverLogin(recoverLoginDto.email);
+  }
+
+  @Get('/passcode/{passcode}')
+  async validatePasscode(@Query('passcode') passcode: string): Promise<void> {
+    const otp = await this.authRecoveryService.validatePasscode(passcode);
+    if (!otp) {
+      throw new NotFoundException('OTP not found');
+    }
   }
 
   @ApiOperation({
@@ -28,12 +46,12 @@ export class AuthRecoveryController {
       'Recover account email password by providing an email that will receive a password reset link.',
   })
   @ApiBody({
-    type: RecoverPasswordDto,
+    type: AuthRecoveryRecoverPasswordDto,
     description: 'DTO of email recover.',
   })
-  @Post('/recover-password')
+  @Post('/password')
   async recoverPassword(
-    @Body() recoverPasswordDto: RecoverPasswordDto,
+    @Body() recoverPasswordDto: AuthRecoveryRecoverPasswordDto,
   ): Promise<void> {
     await this.authRecoveryService.recoverPassword(recoverPasswordDto.email);
   }
@@ -42,12 +60,12 @@ export class AuthRecoveryController {
     summary: 'Update lost password by providing passcode and new password.',
   })
   @ApiBody({
-    type: UpdatePasswordDto,
+    type: AuthRecoveryUpdatePasswordDto,
     description: 'DTO of update password.',
   })
-  @Post('/update-password')
+  @Patch('/password')
   async updatePassword(
-    @Body() updatePasswordDto: UpdatePasswordDto,
+    @Body() updatePasswordDto: AuthRecoveryUpdatePasswordDto,
   ): Promise<void> {
     const { passcode, newPassword } = updatePasswordDto;
     await this.authRecoveryService.updatePassword(passcode, newPassword);

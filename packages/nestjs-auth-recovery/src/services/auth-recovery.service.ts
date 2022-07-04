@@ -2,14 +2,14 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 
 import { AuthRecoveryInterface } from '../interfaces/auth-recovery.interface';
 import { AuthRecoverySettingsInterface } from '../interfaces/auth-recovery-settings.interface';
-import { OtpServiceInterface } from '../interfaces/otp-service.interface';
-import { AuthRecoveryUserLookupServiceInterface } from '../interfaces/auth-recovery-user-lookup-service.interface';
-import { AuthRecoveryUserMutateServiceInterface } from '../interfaces/auth-recovery-user-mutate-service.interface';
+import { AuthRecoveryOtpServiceInterface } from '../interfaces/auth-recovery-otp.service.interface';
+import { AuthRecoveryUserLookupServiceInterface } from '../interfaces/auth-recovery-user-lookup.service.interface';
+import { AuthRecoveryUserMutateServiceInterface } from '../interfaces/auth-recovery-user-mutate.service.interface';
 import {
   AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
   AUTH_RECOVERY_OTP_SERVICE_TOKEN,
   AUTH_RECOVERY_USER_LOOKUP_SERVICE_TOKEN,
-  AUTH_RECOVERY_USER_MUTATED_SERVICE_TOKEN,
+  AUTH_RECOVERY_USER_MUTATE_SERVICE_TOKEN,
 } from '../auth-recovery.constants';
 import { AuthRecoveryNotificationService } from './auth-recovery-notification.service';
 import { ReferenceAssigneeInterface } from '@concepta/ts-core';
@@ -20,47 +20,32 @@ export class AuthRecoveryService implements AuthRecoveryInterface {
     @Inject(AUTH_RECOVERY_MODULE_SETTINGS_TOKEN)
     private readonly config: AuthRecoverySettingsInterface,
     @Inject(AUTH_RECOVERY_OTP_SERVICE_TOKEN)
-    private readonly otpService: OtpServiceInterface,
+    private readonly otpService: AuthRecoveryOtpServiceInterface,
     private readonly notificationService: AuthRecoveryNotificationService,
     @Inject(AUTH_RECOVERY_USER_LOOKUP_SERVICE_TOKEN)
     private readonly userLookupService: AuthRecoveryUserLookupServiceInterface,
-    @Inject(AUTH_RECOVERY_USER_MUTATED_SERVICE_TOKEN)
+    @Inject(AUTH_RECOVERY_USER_MUTATE_SERVICE_TOKEN)
     private readonly userMutateService: AuthRecoveryUserMutateServiceInterface,
   ) {}
 
   /**
    * Recover lost username providing an email and send the username by email
    * @param email user email
-   * @return {Promise<boolean>} if the recover email was successfully sent
    */
-  async recoverLogin(email: string): Promise<boolean> {
+  async recoverLogin(email: string): Promise<void> {
     // recover the user by providing an email
     const user = await this.userLookupService.byEmail(email);
     if (!user) {
       // thrown an error if the user is not found
       throw new NotFoundException(`email: ${email} not found`);
     }
-    // extract required properties
-    const { from } = this.config.email;
-    const { subject, fileName } = this.config.email.templates.recoverLogin;
-    await this.notificationService.sendMail({
-      from,
-      subject,
-      to: email,
-      template: fileName,
-      context: {
-        login: user.username,
-      },
-    });
-
-    // email successfully sent
-    return true;
+    // send en email with the recovered login
+    await this.notificationService.sendRecoverLoginEmail(email, user.username);
   }
 
   /**
    * Recover lost password providing an email and send the passcode token by email
    * @param email user email
-   * @return {Promise<boolean>} if the recover email was successfully sent
    */
   async recoverPassword(email: string): Promise<void> {
     // recover the user by providing an email
@@ -71,9 +56,7 @@ export class AuthRecoveryService implements AuthRecoveryInterface {
     }
     // extract required properties
     const { id } = user;
-    const { category, resetTokenExp, assignment, type } = this.config.otp;
-    const { from, baseUrl } = this.config.email;
-    const { subject, fileName } = this.config.email.templates.recoverPassword;
+    const { category, assignment, type, resetTokenExp } = this.config.otp;
     // create an OTP save it in the database
     const otpCreateDto = await this.otpService.create(assignment, {
       category,
@@ -83,17 +66,12 @@ export class AuthRecoveryService implements AuthRecoveryInterface {
       },
     });
     const { passcode } = otpCreateDto;
-    // email successfully sent or not
-    await this.notificationService.sendMail({
-      from,
-      subject,
-      to: email,
-      template: fileName,
-      context: {
-        tokenUrl: `${baseUrl}/${passcode}`,
-        tokenExp: resetTokenExp,
-      },
-    });
+    // send en email with a recover OTP
+    await this.notificationService.sendRecoverPasswordEmail(
+      email,
+      passcode,
+      resetTokenExp,
+    );
   }
 
   /**
@@ -107,7 +85,7 @@ export class AuthRecoveryService implements AuthRecoveryInterface {
     // extract required properties
     const { category, assignment } = this.config.otp;
 
-    // validate passcode return passcode's user if was found
+    // validate passcode return passcode's user was found
     return await this.otpService.validate(
       assignment,
       { category, passcode },
@@ -119,12 +97,8 @@ export class AuthRecoveryService implements AuthRecoveryInterface {
    * Change use's password by providing it's OTP passcode and the new password
    * @param passcode OTP user's passcode
    * @param newPassword new user password
-   * @return {Promise<boolean>} if the recover email was successfully sent
    */
-  async updatePassword(
-    passcode: string,
-    newPassword: string,
-  ): Promise<boolean> {
+  async updatePassword(passcode: string, newPassword: string): Promise<void> {
     // get otp by passcode
     const otp = await this.validatePasscode(passcode);
     if (!otp) {
@@ -136,8 +110,5 @@ export class AuthRecoveryService implements AuthRecoveryInterface {
       id: otp.assignee.id,
       password: newPassword,
     });
-
-    // email successfully sent
-    return true;
   }
 }

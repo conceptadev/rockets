@@ -4,10 +4,10 @@ import { OtpService } from '@concepta/nestjs-otp';
 
 import { EmailService } from '@concepta/nestjs-email';
 import { AuthRecoveryModule } from './auth-recovery.module';
-import { AppModuleFixture } from './__fixtures__/app.module.fixture';
+import { AuthRecoveryAppModuleFixture } from './__fixtures__/auth-recovery.app.module.fixture';
 import { AuthRecoveryService } from './services/auth-recovery.service';
 import { AuthRecoveryController } from './auth-recovery.controller';
-import { UserRepositoryFixture } from './__fixtures__/user.repository.fixture';
+import { AuthRecoveryUserRepositoryFixture } from './__fixtures__/auth-recovery.user.repository.fixture';
 
 describe('AuthRecoveryModuleTest', () => {
   let authRecoveryModule: AuthRecoveryModule;
@@ -20,7 +20,7 @@ describe('AuthRecoveryModuleTest', () => {
 
   beforeEach(async () => {
     const testModule: TestingModule = await Test.createTestingModule({
-      imports: [AppModuleFixture],
+      imports: [AuthRecoveryAppModuleFixture],
     }).compile();
 
     authRecoveryModule = testModule.get<AuthRecoveryModule>(AuthRecoveryModule);
@@ -52,8 +52,12 @@ describe('AuthRecoveryModuleTest', () => {
       expect(userLookupService['repo'].find).toBeInstanceOf(Function);
       expect(userMutateService['repo'].find).toBeInstanceOf(Function);
 
-      expect(userMutateService['repo']).toBeInstanceOf(UserRepositoryFixture);
-      expect(userLookupService['repo']).toBeInstanceOf(UserRepositoryFixture);
+      expect(userMutateService['repo']).toBeInstanceOf(
+        AuthRecoveryUserRepositoryFixture,
+      );
+      expect(userLookupService['repo']).toBeInstanceOf(
+        AuthRecoveryUserRepositoryFixture,
+      );
     });
   });
 });

@@ -5,7 +5,7 @@ import {
   OtpClearInterface,
 } from '@concepta/ts-common';
 
-export interface OtpServiceInterface
+export interface AuthRecoveryOtpServiceInterface
   extends OtpCreateInterface,
     OtpValidateInterface,
     OtpDeleteInterface,

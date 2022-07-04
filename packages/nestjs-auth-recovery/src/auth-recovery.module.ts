@@ -19,7 +19,7 @@ import {
   AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
   AUTH_RECOVERY_OTP_SERVICE_TOKEN,
   AUTH_RECOVERY_USER_LOOKUP_SERVICE_TOKEN,
-  AUTH_RECOVERY_USER_MUTATED_SERVICE_TOKEN,
+  AUTH_RECOVERY_USER_MUTATE_SERVICE_TOKEN,
 } from './auth-recovery.constants';
 import { AuthRecoveryNotificationService } from './services/auth-recovery-notification.service';
 
@@ -49,25 +49,25 @@ export class AuthRecoveryModule extends createConfigurableDynamicRootModule<
       provide: AUTH_RECOVERY_OTP_SERVICE_TOKEN,
       inject: [AUTH_RECOVERY_MODULE_OPTIONS_TOKEN],
       useFactory: async (options: AuthRecoveryOptionsInterface) =>
-        options.otpService,
+        options.authRecoveryOtpService,
     },
     {
       provide: AUTH_RECOVERY_EMAIL_SERVICE_TOKEN,
       inject: [AUTH_RECOVERY_MODULE_OPTIONS_TOKEN],
       useFactory: async (options: AuthRecoveryOptionsInterface) =>
-        options.emailService,
+        options.authRecoveryEmailService,
     },
     {
       provide: AUTH_RECOVERY_USER_LOOKUP_SERVICE_TOKEN,
       inject: [AUTH_RECOVERY_MODULE_OPTIONS_TOKEN],
       useFactory: async (options: AuthRecoveryOptionsInterface) =>
-        options.userLookupService,
+        options.authRecoveryUserLookupService,
     },
     {
-      provide: AUTH_RECOVERY_USER_MUTATED_SERVICE_TOKEN,
+      provide: AUTH_RECOVERY_USER_MUTATE_SERVICE_TOKEN,
       inject: [AUTH_RECOVERY_MODULE_OPTIONS_TOKEN],
       useFactory: async (options: AuthRecoveryOptionsInterface) =>
-        options.userMutateService,
+        options.authRecoveryUserMutateService,
     },
   ],
 }) {

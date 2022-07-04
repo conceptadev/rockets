@@ -4,7 +4,6 @@ import { OtpCreatableInterface } from '@concepta/ts-common';
 export interface AuthRecoveryOtpSettingsInterface
   extends OtpCreatableInterface {
   assignment: string;
-  resetTokenExp: Date;
 }
 
 export interface AuthRecoverySettingsInterface extends OptionsInterface {

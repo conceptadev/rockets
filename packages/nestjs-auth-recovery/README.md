@@ -1,4 +1,4 @@
-# Rockets NestJS GitHub Federated Authentication
+# Rockets NestJS Auth recovery Authentication
 
 Recover user password using email
 
