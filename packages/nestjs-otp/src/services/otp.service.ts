@@ -3,7 +3,11 @@ import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { DeepPartial, Repository } from 'typeorm';
 import { Inject, Injectable, Type } from '@nestjs/common';
-import { ReferenceAssignment, ReferenceId } from '@concepta/ts-core';
+import {
+  ReferenceAssigneeInterface,
+  ReferenceAssignment,
+  ReferenceId,
+} from '@concepta/ts-core';
 import { OtpCreatableInterface, OtpInterface } from '@concepta/ts-common';
 import {
   ReferenceLookupException,
@@ -76,15 +80,15 @@ export class OtpService implements OtpServiceInterface {
    */
   async validate(
     assignment: ReferenceAssignment,
-    otp: Pick<OtpInterface, 'assignee' | 'category' | 'passcode'>,
+    otp: Pick<OtpInterface, 'category' | 'passcode'>,
     deleteIfValid = false,
-  ): Promise<boolean> {
+  ): Promise<ReferenceAssigneeInterface | null> {
     // get otp from an assigned user for a category
     const assignedOtp = await this.getByPasscode(assignment, otp);
 
     // check if otp is expired
     const now = new Date();
-    if (!assignedOtp || now > assignedOtp.expirationDate) return false;
+    if (!assignedOtp || now > assignedOtp.expirationDate) return null;
 
     // determine if valid
     const isValid = !!assignedOtp;
@@ -94,7 +98,7 @@ export class OtpService implements OtpServiceInterface {
       await this.deleteOtp(assignment, assignedOtp.id);
     }
 
-    return isValid;
+    return assignedOtp;
   }
 
   /**
@@ -192,20 +196,19 @@ export class OtpService implements OtpServiceInterface {
 
   protected async getByPasscode(
     assignment: ReferenceAssignment,
-    otp: Pick<OtpInterface, 'assignee' | 'category' | 'passcode'>,
+    otp: Pick<OtpInterface, 'category' | 'passcode'>,
   ): Promise<OtpInterface | null> {
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
     // break out properties
-    const { assignee, category, passcode } = otp;
+    const { category, passcode } = otp;
 
-    // try to find the relationships
+    // try to find the assignment
     try {
       // make the query
-      const assignments = await assignmentRepo.findOne({
+      const assignment = await assignmentRepo.findOne({
         where: {
-          assignee,
           category,
           passcode,
         },
@@ -213,7 +216,7 @@ export class OtpService implements OtpServiceInterface {
       });
 
       // return the otps from assignee
-      return assignments;
+      return assignment;
     } catch (e) {
       throw new ReferenceLookupException(assignmentRepo.metadata.targetName, e);
     }

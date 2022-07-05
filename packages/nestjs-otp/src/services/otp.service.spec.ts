@@ -56,7 +56,7 @@ describe('OtpModule', () => {
   ) => await otpService.delete('userOtp', otp);
 
   const defaultIsValidOtp = async (
-    otp: Pick<OtpInterface, 'assignee' | 'passcode' | 'category'>,
+    otp: Pick<OtpInterface, 'passcode' | 'category'>,
     deleteIfValid?: boolean,
   ) => await otpService.validate('userOtp', otp, deleteIfValid);
 
@@ -111,15 +111,17 @@ describe('OtpModule', () => {
     it('check if is valid true', async () => {
       const assignee = await factoryCreateUser();
       const otp = await factoryCreateOtp({ assignee });
-      expect(await defaultIsValidOtp(otp)).toBe(true);
+      expect((await defaultIsValidOtp(otp))?.assignee.id).toBe(otp.assignee.id);
     });
 
     it('check if is valid after delete', async () => {
       const assignee = await factoryCreateUser();
       const otp = await factoryCreateOtp({ assignee });
-      expect(await defaultIsValidOtp(otp, true)).toBe(true);
-      expect(await defaultIsValidOtp(otp)).toBe(false);
-      expect(await defaultIsValidOtp(otp, true)).toBe(false);
+      expect((await defaultIsValidOtp(otp, true))?.assignee.id).toBe(
+        otp.assignee.id,
+      );
+      expect(await defaultIsValidOtp(otp)).toBeNull();
+      expect(await defaultIsValidOtp(otp, true)).toBeNull();
     });
 
     it('check if is expired', async () => {
@@ -133,7 +135,7 @@ describe('OtpModule', () => {
         assignee,
       });
 
-      expect(await defaultIsValidOtp(otp)).toBe(false);
+      expect(await defaultIsValidOtp(otp)).toBeNull();
     });
   });
 
@@ -155,9 +157,9 @@ describe('OtpModule', () => {
       const otp = await defaultCreateOtp({ assignee });
 
       expect(otp).toBeTruthy();
-      expect(await defaultIsValidOtp({ ...otp, passcode: 'INVALID' })).toBe(
-        false,
-      );
+      expect(
+        await defaultIsValidOtp({ ...otp, passcode: 'INVALID' }),
+      ).toBeNull();
     });
 
     it('create with fail 2', async () => {
@@ -180,7 +182,7 @@ describe('OtpModule', () => {
       expect(await defaultDeleteOtp(otp)).toBeUndefined();
 
       // check if deleted is valid
-      expect(await defaultIsValidOtp(otp)).toBe(false);
+      expect(await defaultIsValidOtp(otp)).toBeNull();
     });
   });
 
@@ -190,19 +192,21 @@ describe('OtpModule', () => {
       const otp = await defaultCreateOtp({ assignee });
 
       expect(otp).toBeTruthy();
-      expect(await defaultIsValidOtp(otp)).toBe(true);
+      expect((await defaultIsValidOtp(otp))?.assignee.id).toBe(otp.assignee.id);
 
       const otp2 = await defaultCreateOtp({ assignee });
       expect(otp2).toBeTruthy();
-      expect(await defaultIsValidOtp(otp2)).toBe(true);
+      expect((await defaultIsValidOtp(otp2))?.assignee.id).toBe(
+        otp2.assignee.id,
+      );
 
       // try to clear
       expect(await otpService.clear('userOtp', otp)).toBeUndefined();
 
       // cleared passcodes should be invalid
       // TODO: check that they were actually removed from database
-      expect(await defaultIsValidOtp(otp)).toBe(false);
-      expect(await defaultIsValidOtp(otp2)).toBe(false);
+      expect(await defaultIsValidOtp(otp)).toBeNull;
+      expect(await defaultIsValidOtp(otp2)).toBeNull();
     });
   });
 });
