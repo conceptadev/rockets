@@ -33,15 +33,15 @@ import { AuthRecoveryModule } from '../auth-recovery.module';
       ],
       inject: [UserLookupService, UserMutateService, OtpService, EmailService],
       useFactory: (
-        userLookupService,
-        userMutateService,
-        otpService,
-        emailService,
+        authRecoveryUserLookupService,
+        authRecoveryUserMutateService,
+        authRecoveryOtpService,
+        authRecoveryEmailService,
       ) => ({
-        userLookupService,
-        userMutateService,
-        otpService,
-        emailService,
+        authRecoveryUserLookupService,
+        authRecoveryUserMutateService,
+        authRecoveryOtpService,
+        authRecoveryEmailService,
       }),
     }),
     OtpModule.register({

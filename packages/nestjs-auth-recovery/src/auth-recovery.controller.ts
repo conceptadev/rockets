@@ -3,9 +3,9 @@ import {
   Controller,
   Get,
   NotFoundException,
+  Param,
   Patch,
   Post,
-  Query,
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthRecoveryService } from './services/auth-recovery.service';
@@ -31,14 +31,6 @@ export class AuthRecoveryController {
     @Body() recoverLoginDto: AuthRecoveryRecoverLoginDto,
   ): Promise<void> {
     await this.authRecoveryService.recoverLogin(recoverLoginDto.email);
-  }
-
-  @Get('/passcode/{passcode}')
-  async validatePasscode(@Query('passcode') passcode: string): Promise<void> {
-    const otp = await this.authRecoveryService.validatePasscode(passcode);
-    if (!otp) {
-      throw new NotFoundException('OTP not found');
-    }
   }
 
   @ApiOperation({
@@ -69,5 +61,13 @@ export class AuthRecoveryController {
   ): Promise<void> {
     const { passcode, newPassword } = updatePasswordDto;
     await this.authRecoveryService.updatePassword(passcode, newPassword);
+  }
+
+  @Get('/passcode/:passcode')
+  async validatePasscode(@Param('passcode') passcode: string): Promise<void> {
+    const otp = await this.authRecoveryService.validatePasscode(passcode);
+    if (!otp) {
+      throw new NotFoundException('OTP not found');
+    }
   }
 }

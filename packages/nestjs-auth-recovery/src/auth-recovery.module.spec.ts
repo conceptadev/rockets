@@ -1,8 +1,9 @@
+import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserLookupService, UserMutateService } from '@concepta/nestjs-user';
 import { OtpService } from '@concepta/nestjs-otp';
-
 import { EmailService } from '@concepta/nestjs-email';
+
 import { AuthRecoveryModule } from './auth-recovery.module';
 import { AuthRecoveryAppModuleFixture } from './__fixtures__/auth-recovery.app.module.fixture';
 import { AuthRecoveryService } from './services/auth-recovery.service';
@@ -49,8 +50,8 @@ describe('AuthRecoveryModuleTest', () => {
       expect(authRecoveryService).toBeInstanceOf(AuthRecoveryService);
       expect(authRecoveryController).toBeInstanceOf(AuthRecoveryController);
 
-      expect(userLookupService['repo'].find).toBeInstanceOf(Function);
-      expect(userMutateService['repo'].find).toBeInstanceOf(Function);
+      expect(userLookupService['repo']).toBeInstanceOf(Repository);
+      expect(userMutateService['repo']).toBeInstanceOf(Repository);
 
       expect(userMutateService['repo']).toBeInstanceOf(
         AuthRecoveryUserRepositoryFixture,

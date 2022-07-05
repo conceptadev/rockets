@@ -15,7 +15,7 @@ import { authRecoveryDefaultConfig } from './config/auth-recovery-default.config
 import { ConfigService, ConfigType } from '@nestjs/config';
 import { AUTH_RECOVERY_MODULE_DEFAULT_SETTINGS_TOKEN } from './auth-recovery.constants';
 import { AuthRecoverySettingsInterface } from './interfaces/auth-recovery-settings.interface';
-import { UserInterface } from '@concepta/ts-common';
+import { OtpInterface, UserInterface } from '@concepta/ts-common';
 
 describe('AuthRecoveryController (e2e)', () => {
   describe('AuthRecovery', () => {
@@ -52,39 +52,45 @@ describe('AuthRecoveryController (e2e)', () => {
       const user = await getFirstUser(app);
 
       await supertest(app.getHttpServer())
-        .post('/auth/recover-login')
+        .post('/auth/recovery/login')
         .send({ email: user.email } as AuthRecoveryRecoverLoginDto)
         .expect(201);
     });
 
-    it('POST auth/recover-password', async () => {
+    it('GET auth/recovery/passcode/{passcode}', async () => {
+      const user = await getFirstUser(app);
+
+      const otpCreateDto = await createOtp(config, otpService, user.id);
+
+      const { passcode } = otpCreateDto;
+
+      await supertest(app.getHttpServer())
+        .get(`/auth/recovery/passcode/${passcode}`)
+        .expect(200);
+
+      await validateRecoverPassword(app, user);
+    });
+
+    it('POST auth/recovery/password', async () => {
       const user = await getFirstUser(app);
 
       await validateRecoverPassword(app, user);
     });
 
-    it('POST auth/update-password', async () => {
+    it('PATCH auth/recovery/password', async () => {
       const user = await getFirstUser(app);
 
       await validateRecoverPassword(app, user);
 
-      const { id } = user;
-      const { category, assignment, type } = config.otp;
-      const otpCreateDto = await otpService.create(assignment, {
-        category,
-        type,
-        assignee: {
-          id,
-        },
-      });
+      const otpCreateDto = await createOtp(config, otpService, user.id);
 
       await supertest(app.getHttpServer())
-        .post('/auth/update-password')
+        .patch('/auth/recovery/password')
         .send({
           passcode: otpCreateDto.passcode,
           newPassword: '$!Abc123bsksl6764579',
         } as AuthRecoveryUpdatePasswordDto)
-        .expect(201);
+        .expect(200);
     });
   });
 });
@@ -102,7 +108,23 @@ const validateRecoverPassword = async (
   user: UserInterface,
 ): Promise<void> => {
   await supertest(app.getHttpServer())
-    .post('/auth/recover-password')
+    .post('/auth/recovery/password')
     .send({ email: user.email } as AuthRecoveryRecoverPasswordDto)
     .expect(201);
+};
+
+const createOtp = async (
+  config: ConfigType<typeof authRecoveryDefaultConfig>,
+  otpService: OtpService,
+  userId: string,
+): Promise<OtpInterface> => {
+  const { category, assignment, type } = config.otp;
+
+  return await otpService.create(assignment, {
+    category,
+    type,
+    assignee: {
+      id: userId,
+    },
+  });
 };
