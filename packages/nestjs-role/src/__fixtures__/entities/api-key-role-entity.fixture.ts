@@ -1,5 +1,5 @@
-import { ReferenceIdInterface } from '@concepta/ts-core';
 import { Entity, ManyToOne } from 'typeorm';
+import { ReferenceIdInterface } from '@concepta/ts-core';
 import { RoleAssignmentSqliteEntity } from '../../entities/role-assignment-sqlite.entity';
 import { RoleEntityInterface } from '../../interfaces/role-entity.interface';
 import { ApiKeyEntityFixture } from './api-key-entity.fixture';

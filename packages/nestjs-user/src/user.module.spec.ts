@@ -1,3 +1,4 @@
+import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getDynamicRepositoryToken } from '@concepta/nestjs-typeorm-ext';
 import { UserModule } from './user.module';
@@ -10,7 +11,6 @@ import { UserMutateService } from './services/user-mutate.service';
 import { USER_MODULE_USER_ENTITY_KEY } from './user.constants';
 
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
-import { Repository } from 'typeorm';
 import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
 
 describe('AppModule', () => {

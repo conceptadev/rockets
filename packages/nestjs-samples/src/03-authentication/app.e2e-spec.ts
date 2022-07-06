@@ -1,5 +1,6 @@
 import supertest from 'supertest';
 import { mock } from 'jest-mock-extended';
+import { Repository } from 'typeorm';
 
 import { INestApplication, Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -9,7 +10,6 @@ import { UserCrudService } from '@concepta/nestjs-user';
 import { AppModule } from './app.module';
 import { UserEntity } from './user/user.entity';
 import { UserDto } from './user/user.controller';
-import { Repository } from 'typeorm';
 
 const sleep = (ms: number) => {
   return new Promise((resolve) => {
