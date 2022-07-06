@@ -1,6 +1,6 @@
 import Faker from '@faker-js/faker';
 import { Type } from '@nestjs/common';
-import { Factory } from '@jorgebodega/typeorm-seeding';
+import { Factory } from '@concepta/typeorm-seeding';
 import { UserEntityInterface } from './interfaces/user-entity.interface';
 
 /**
@@ -8,15 +8,14 @@ import { UserEntityInterface } from './interfaces/user-entity.interface';
  *
  * ```ts
  * // new factory instance
- * UserFactory.entity = UserEntity;
  * const userFactory = new UserFactory();
  * ```
  */
 export class UserFactory extends Factory<UserEntityInterface> {
   /**
-   * entity The entity class.
+   * Options
    */
-  public static entity: Type<UserEntityInterface>;
+  options: { entity?: Type<UserEntityInterface> } = {};
 
   /**
    * List of used usernames.
@@ -26,10 +25,9 @@ export class UserFactory extends Factory<UserEntityInterface> {
   /**
    * Factory callback function.
    */
-  protected async definition(): Promise<UserEntityInterface> {
-    // the user we will return
-    const user = new UserFactory.entity();
-
+  protected async entity(
+    user: UserEntityInterface,
+  ): Promise<UserEntityInterface> {
     // set the username
     user.username = this.generateUniqueUsername();
 

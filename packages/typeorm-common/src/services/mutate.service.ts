@@ -115,6 +115,8 @@ export abstract class MutateService<
   protected async findById(id: string): Promise<Entity> {
     try {
       // try to find the ref
+      // TODO: remove this type assertion when fix is released
+      // https://github.com/typeorm/typeorm/issues/8939
       const item = await this.repo.findOne({
         where: { id },
       } as FindOneOptions<Entity>);

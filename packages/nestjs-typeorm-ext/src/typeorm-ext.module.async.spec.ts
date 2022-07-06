@@ -19,10 +19,10 @@ describe('AppModule', () => {
       imports: [
         TypeOrmExtModule.registerAsync({
           useFactory: async () => ({
-            type: 'postgres',
+            type: 'sqlite',
+            database: ':memory:',
             entities: [PhotoEntityFixture],
           }),
-          testMode: true,
         }),
         PhotoModuleFixture.register(),
       ],

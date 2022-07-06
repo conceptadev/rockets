@@ -14,12 +14,10 @@ import { createUserRepository } from './user/create-user-repository';
 
 @Module({
   imports: [
-    TypeOrmExtModule.registerAsync({
-      useFactory: async () => ({
-        type: 'postgres',
-        entities: [UserEntity],
-      }),
-      testMode: true,
+    TypeOrmExtModule.register({
+      type: 'sqlite',
+      database: ':memory:',
+      entities: [UserEntity],
     }),
     AuthLocalModule.registerAsync({ ...createUserOpts() }),
     AuthJwtModule.registerAsync({ ...createUserOpts() }),

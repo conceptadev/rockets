@@ -5,17 +5,13 @@ import { UserModule } from '../user.module';
 import { UserModuleCustomFixture } from './user.module.custom.fixture';
 import { UserLookupCustomService } from './services/user-lookup.custom.service';
 
-import { default as dbConfig } from './ormconfig.fixture';
+import { ormConfig } from './ormconfig.fixture';
 import { UserEntityFixture } from './user.entity.fixture';
 import { createUserRepositoryFixture } from './create-user-repository.fixture';
 
 @Module({
   imports: [
-    TypeOrmExtModule.registerAsync({
-      useFactory: async () => {
-        return dbConfig;
-      },
-    }),
+    TypeOrmExtModule.register(ormConfig),
     CrudModule.register(),
     UserModule.registerAsync({
       imports: [UserModuleCustomFixture],

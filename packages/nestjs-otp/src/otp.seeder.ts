@@ -1,19 +1,14 @@
-import { Type } from '@nestjs/common';
-import { Factory, Seeder } from '@jorgebodega/typeorm-seeding';
+import { Seeder } from '@concepta/typeorm-seeding';
 import { OtpInterface } from '@concepta/ts-common';
-import { OtpFactory } from './otp.factory';
+
+interface OtpSeederEntities {
+  otp: OtpInterface;
+}
 
 /**
  * Otp seeder
  */
-export class OtpSeeder extends Seeder {
-  /**
-   * The factory class.
-   *
-   * Override this to use a custom factory.
-   */
-  public static factory: Type<Factory<OtpInterface>> = OtpFactory;
-
+export class OtpSeeder extends Seeder<OtpSeederEntities> {
   /**
    * Runner
    */
@@ -24,7 +19,7 @@ export class OtpSeeder extends Seeder {
       : 50;
 
     // the factory
-    const otpFactory = new OtpSeeder.factory();
+    const otpFactory = this.factory('otp');
 
     // create a bunch
     await otpFactory.createMany(createAmount);

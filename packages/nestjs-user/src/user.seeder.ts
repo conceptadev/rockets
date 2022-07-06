@@ -1,20 +1,15 @@
-import { Type } from '@nestjs/common';
-import { Factory, Seeder } from '@jorgebodega/typeorm-seeding';
+import { Seeder } from '@concepta/typeorm-seeding';
 import { PasswordStorageService } from '@concepta/nestjs-password';
 import { UserEntityInterface } from './interfaces/user-entity.interface';
-import { UserFactory } from './user.factory';
+
+interface UserSeederEntities {
+  user: UserEntityInterface;
+}
 
 /**
  * User seeder
  */
-export class UserSeeder extends Seeder {
-  /**
-   * The factory class.
-   *
-   * Override this in a subclass to use a custom factory.
-   */
-  public static factory: Type<Factory<UserEntityInterface>> = UserFactory;
-
+export class UserSeeder extends Seeder<UserSeederEntities> {
   /**
    * Reusable password storage service
    */
@@ -35,7 +30,7 @@ export class UserSeeder extends Seeder {
       : 'superadmin';
 
     // the factory
-    const userFactory = new UserSeeder.factory();
+    const userFactory = this.factory('user');
 
     // create a super admin user
     await userFactory

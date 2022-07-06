@@ -1245,6 +1245,17 @@
     dot "^1.1.3"
     fs-extra "^9.0.1"
 
+"@concepta/typeorm-seeding@^4.0.0-alpha.2":
+  version "4.0.0-alpha.2"
+  resolved "https://registry.yarnpkg.com/@concepta/typeorm-seeding/-/typeorm-seeding-4.0.0-alpha.2.tgz#7462b19971a3aa63b9364d155fba420e55c8855f"
+  integrity sha512-k1Y0yTp9ZLwZp7MU+WmcDsw0sndj1wvguMGZmJ6nfxlX+5TmKXsuxunYekL6PLLUEeOAHK4VUY9CGySyvo2t5Q==
+  dependencies:
+    chalk "^4"
+    glob "^7.2.0"
+    ora "^5"
+    reflect-metadata "^0.1.13"
+    yargs "^17.3.0"
+
 "@cspotcode/source-map-support@^0.8.0":
   version "0.8.1"
   resolved "https://registry.yarnpkg.com/@cspotcode/source-map-support/-/source-map-support-0.8.1.tgz#00629c35a688e05a88b1cda684fb9d5e73f000a1"
@@ -1622,17 +1633,6 @@
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/@jonkemp/package-utils/-/package-utils-1.0.8.tgz#4bce132a18f34407a88bb15c28bd3ed3030c4776"
   integrity sha512-bIcKnH5YmtTYr7S6J3J86dn/rFiklwRpOqbTOQ9C0WMmR9FKHVb3bxs2UYfqEmNb93O4nbA97sb6rtz33i9SyA==
-
-"@jorgebodega/typeorm-seeding@^3.2.0":
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/@jorgebodega/typeorm-seeding/-/typeorm-seeding-3.2.0.tgz#6b0970ad54fc0998005f0453ef0efcd3c5934f02"
-  integrity sha512-Zs4C/fUay9o8Pqo22wroy1Km8jQsNWuHy72SEP/bQy+xOW5crRSmcQs1uIiI4Zher8SBSuvvhEBCJBJ4TPF9+A==
-  dependencies:
-    chalk "^4"
-    glob "^7.2.0"
-    ora "^5"
-    reflect-metadata "^0.1.13"
-    yargs "^17.3.0"
 
 "@jridgewell/gen-mapping@^0.1.0":
   version "0.1.1"

@@ -2,7 +2,9 @@ import supertest from 'supertest';
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { useSeeders } from '@jorgebodega/typeorm-seeding';
+import { getDataSourceToken } from '@nestjs/typeorm';
+import { Seeding } from '@concepta/typeorm-seeding';
+
 import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
 import { PhotoFixture } from '../__fixtures__/photo/photo.entity.fixture';
 import { PhotoSeederFixture } from '../__fixtures__/photo/photo.seeder.fixture';
@@ -21,7 +23,9 @@ describe('AppController (e2e)', () => {
       app = moduleFixture.createNestApplication();
       await app.init();
 
-      await useSeeders(PhotoSeederFixture, { connection: 'default' });
+      await Seeding.run(PhotoSeederFixture, {
+        dataSource: app.get(getDataSourceToken()),
+      });
     });
 
     afterEach(async () => {

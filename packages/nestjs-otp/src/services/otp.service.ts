@@ -181,7 +181,7 @@ export class OtpService implements OtpServiceInterface {
       // make the query
       const assignments = await assignmentRepo.find({
         where: {
-          assignee,
+          assignee: { id: assignee.id },
           category,
         },
         relations: ['assignee'],

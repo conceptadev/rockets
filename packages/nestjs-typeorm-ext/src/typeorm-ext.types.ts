@@ -1,10 +1,6 @@
 import { Connection, ConnectionOptions } from 'typeorm';
-import {
-  TypeOrmModuleAsyncOptions,
-  TypeOrmModuleOptions,
-} from '@nestjs/typeorm';
+import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
-export type TypeOrmExtOptions = TypeOrmModuleOptions &
-  Pick<TypeOrmModuleAsyncOptions, 'name'>;
+export type TypeOrmExtOptions = TypeOrmModuleOptions;
 
 export type TypeOrmExtConnectionToken = Connection | ConnectionOptions | string;

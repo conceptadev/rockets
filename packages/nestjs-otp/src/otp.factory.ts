@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
-import { Factory } from '@jorgebodega/typeorm-seeding';
 import { Type } from '@nestjs/common';
+import { Factory } from '@concepta/typeorm-seeding';
 import { OtpInterface } from '@concepta/ts-common';
 
 /**
@@ -8,15 +8,14 @@ import { OtpInterface } from '@concepta/ts-common';
  *
  * ```ts
  * // new factory instance
- * OtpFactory.entity = OtpEntity;
  * const otpFactory = new OtpFactory();
  * ```
  */
 export class OtpFactory extends Factory<OtpInterface> {
   /**
-   * The entity class.
+   * Options
    */
-  public static entity: Type<OtpInterface>;
+  options: { entity?: Type<OtpInterface> } = {};
 
   /**
    * List of used names.
@@ -26,10 +25,7 @@ export class OtpFactory extends Factory<OtpInterface> {
   /**
    * Factory callback function.
    */
-  protected async definition(): Promise<OtpInterface> {
-    // the otp we will return
-    const otp = new OtpFactory.entity();
-
+  protected async entity(otp: OtpInterface): Promise<OtpInterface> {
     // set the name
     otp.category = this.randomCategory();
     otp.type = 'uuid';

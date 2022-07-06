@@ -7,14 +7,10 @@ import { DataSource } from 'typeorm';
 
 @Module({
   imports: [
-    TypeOrmExtModule.registerAsync({
-      useFactory: async () => {
-        return {
-          type: 'postgres',
-          entities: [UserEntity],
-        };
-      },
-      testMode: true,
+    TypeOrmExtModule.register({
+      type: 'sqlite',
+      database: ':memory:',
+      entities: [UserEntity],
     }),
     CrudModule.register(),
     UserModule.register({

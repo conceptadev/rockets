@@ -26,6 +26,8 @@ export abstract class LookupService<Entity extends ReferenceIdInterface>
    * @param id the id
    */
   async byId(id: ReferenceId): Promise<Entity | null> {
+    // TODO: remove this type assertion when fix is released
+    // https://github.com/typeorm/typeorm/issues/8939
     return this.findOne({ where: { id } } as FindOneOptions<Entity>);
   }
 

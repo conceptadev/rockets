@@ -8,13 +8,11 @@ import { UserOtpEntityFixture } from './entities/user-otp-entity.fixture';
 
 @Module({
   imports: [
-    TypeOrmExtModule.registerAsync({
-      useFactory: async () => ({
-        type: 'sqlite',
-        database: ':memory:',
-        synchronize: true,
-        entities: [UserEntityFixture, UserOtpEntityFixture],
-      }),
+    TypeOrmExtModule.register({
+      type: 'sqlite',
+      database: ':memory:',
+      synchronize: true,
+      entities: [UserEntityFixture, UserOtpEntityFixture],
     }),
     OtpModule.register({
       entities: {

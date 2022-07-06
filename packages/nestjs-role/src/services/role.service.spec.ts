@@ -1,10 +1,12 @@
-import { CrudModule } from '@concepta/nestjs-crud';
+import { Repository } from 'typeorm';
+import { Test, TestingModule } from '@nestjs/testing';
+import { getDataSourceToken } from '@nestjs/typeorm';
+import { Seeding } from '@concepta/typeorm-seeding';
 import {
   getDynamicRepositoryToken,
   TypeOrmExtModule,
 } from '@concepta/nestjs-typeorm-ext';
-import { useSeeders } from '@jorgebodega/typeorm-seeding';
-import { Test, TestingModule } from '@nestjs/testing';
+import { CrudModule } from '@concepta/nestjs-crud';
 import { RoleModule } from '../role.module';
 import { RoleService } from '../services/role.service';
 
@@ -16,7 +18,6 @@ import { ApiKeyRoleEntityFixture } from '../__fixtures__/entities/api-key-role-e
 import { UserFactoryFixture } from '../__fixtures__/factories/user.factory.fixture';
 import { UserRoleFactoryFixture } from '../__fixtures__/factories/user-role.factory.fixture';
 import { RoleFactory } from '../role.factory';
-import { Repository } from 'typeorm';
 
 describe('RoleModule', () => {
   let testModule: TestingModule;
@@ -69,15 +70,11 @@ describe('RoleModule', () => {
       ],
     }).compile();
 
-    RoleFactory.entity = RoleEntityFixture;
-
-    await useSeeders([], {
-      root: __dirname,
-      connection: connectionName,
+    Seeding.configure({
+      dataSource: testModule.get(getDataSourceToken(connectionName)),
     });
 
-    RoleFactory.entity = RoleEntityFixture;
-    const roleFactory = new RoleFactory();
+    const roleFactory = new RoleFactory({ entity: RoleEntityFixture });
     [testRole1, testRole2] = await roleFactory.createMany(2);
 
     const userFactory = new UserFactoryFixture();
@@ -123,9 +120,12 @@ describe('RoleModule', () => {
 
   describe('isAssignedRole', () => {
     it('should be assigned to one', async () => {
-      expect(
-        await roleService.isAssignedRole('user', testRole1, testUser),
-      ).toEqual(true);
+      const result = await roleService.isAssignedRole(
+        'user',
+        testRole1,
+        testUser,
+      );
+      expect(result).toEqual(true);
     });
 
     it('should not be assigned to one', async () => {

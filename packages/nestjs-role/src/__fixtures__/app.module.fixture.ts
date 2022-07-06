@@ -12,19 +12,17 @@ import { UserRoleEntityFixture } from './entities/user-role-entity.fixture';
 
 @Module({
   imports: [
-    TypeOrmExtModule.registerAsync({
-      useFactory: async () => ({
-        type: 'sqlite',
-        database: ':memory:',
-        synchronize: true,
-        entities: [
-          RoleEntityFixture,
-          UserEntityFixture,
-          UserRoleEntityFixture,
-          ApiKeyEntityFixture,
-          ApiKeyRoleEntityFixture,
-        ],
-      }),
+    TypeOrmExtModule.register({
+      type: 'sqlite',
+      database: ':memory:',
+      synchronize: true,
+      entities: [
+        RoleEntityFixture,
+        UserEntityFixture,
+        UserRoleEntityFixture,
+        ApiKeyEntityFixture,
+        ApiKeyRoleEntityFixture,
+      ],
     }),
     RoleModule.register({
       settings: {

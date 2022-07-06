@@ -1,9 +1,10 @@
 import ms from 'ms';
+import { Test, TestingModule } from '@nestjs/testing';
+import { getDataSourceToken } from '@nestjs/typeorm';
 import { CrudModule } from '@concepta/nestjs-crud';
 import { OtpInterface } from '@concepta/ts-common';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
-import { useSeeders } from '@jorgebodega/typeorm-seeding';
-import { Test, TestingModule } from '@nestjs/testing';
+import { Seeding } from '@concepta/typeorm-seeding';
 import { OtpModule } from '../otp.module';
 import { OtpService } from './otp.service';
 import { OtpTypeNotDefinedException } from '../exceptions/otp-type-not-defined.exception';
@@ -84,9 +85,8 @@ describe('OtpModule', () => {
       ],
     }).compile();
 
-    await useSeeders([], {
-      root: __dirname,
-      connection: connectionName,
+    Seeding.configure({
+      dataSource: testModule.get(getDataSourceToken(connectionName)),
     });
 
     otpModule = testModule.get<OtpModule>(OtpModule);

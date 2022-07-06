@@ -20,7 +20,6 @@ import {
 
 import { OrgEntityFixture } from './__fixtures__/org-entity.fixture';
 import { OwnerEntityFixture } from './__fixtures__/owner-entity.fixture';
-import { OwnerRepositoryFixture } from './__fixtures__/owner-repository.fixture';
 import { OwnerLookupServiceFixture } from './__fixtures__/owner-lookup-service.fixture';
 import { OwnerModuleFixture } from './__fixtures__/owner.module.fixture';
 
@@ -37,12 +36,10 @@ describe('OrgModule', () => {
   beforeEach(async () => {
     const testModule: TestingModule = await Test.createTestingModule({
       imports: [
-        TypeOrmExtModule.registerAsync({
-          useFactory: async () => ({
-            type: 'sqlite',
-            database: ':memory:',
-            entities: [OrgEntityFixture, OwnerEntityFixture],
-          }),
+        TypeOrmExtModule.register({
+          type: 'sqlite',
+          database: ':memory:',
+          entities: [OrgEntityFixture, OwnerEntityFixture],
         }),
         OrgModule.registerAsync({
           imports: [OwnerModuleFixture.register()],
@@ -94,9 +91,7 @@ describe('OrgModule', () => {
       expect(orgMutateService).toBeInstanceOf(DefaultOrgMutateService);
       expect(orgMutateService['repo']).toBeInstanceOf(Repository);
       expect(ownerLookupService).toBeInstanceOf(OwnerLookupServiceFixture);
-      expect(ownerLookupService['ownerRepo']).toBeInstanceOf(
-        OwnerRepositoryFixture,
-      );
+      expect(ownerLookupService['repo']).toBeInstanceOf(Repository);
       expect(orgMutateService['repo'].find).toBeInstanceOf(Function);
       expect(orgController).toBeInstanceOf(OrgController);
     });

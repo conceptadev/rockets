@@ -1,5 +1,5 @@
 import { Entity } from 'typeorm';
-import { UserPostgresEntity } from '@concepta/nestjs-user';
+import { UserSqliteEntity } from '@concepta/nestjs-user';
 
 @Entity()
-export class UserEntity extends UserPostgresEntity {}
+export class UserEntity extends UserSqliteEntity {}

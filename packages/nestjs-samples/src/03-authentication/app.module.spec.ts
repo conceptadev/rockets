@@ -29,5 +29,7 @@ describe('AppModule', () => {
     expect(authLocalcontroller['issueTokenService']).toBeInstanceOf(
       IssueTokenService,
     );
+
+    await module.close();
   });
 });

@@ -20,7 +20,6 @@ import {
   TypeOrmExtOptions,
 } from './typeorm-ext.types';
 import { TypeOrmExtEntityOptionInterface } from './interfaces/typeorm-ext-entity-options.interface';
-import { TypeOrmExtTestOptionsInterface } from './interfaces/typeorm-ext-test-options.interface';
 import { resolveConnectionName } from './utils/resolve-connection-name';
 import { createEntityRepositoryProvider } from './utils/create-entity-repository-provider';
 import { createDynamicRepositoryProvider } from './utils/create-dynamic-repository-provider';
@@ -55,9 +54,7 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
   }
 
   static registerAsync(
-    options: TypeOrmModuleAsyncOptions &
-      AsyncModuleConfig<TypeOrmExtOptions> &
-      TypeOrmExtTestOptionsInterface,
+    options: TypeOrmModuleAsyncOptions & AsyncModuleConfig<TypeOrmExtOptions>,
   ) {
     const module = TypeOrmExtModule.forRootAsync(TypeOrmExtModule, options);
 
