@@ -1,10 +1,11 @@
-import { Test } from '@nestjs/testing';
 import { Repository } from 'typeorm';
+import { mock } from 'jest-mock-extended';
+import { Type } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
 import { CreateManyDto, CrudRequest } from '@nestjsx/crud';
 import { TypeOrmCrudService as JsxTypeOrmCrudService } from '@nestjsx/crud-typeorm/lib/typeorm-crud.service';
 import { TypeOrmCrudService } from './typeorm-crud.service';
 import { CrudQueryHelper } from '../util/crud-query.helper';
-import { Type } from '@nestjs/common';
 import { CrudQueryOptionsInterface } from '../interfaces/crud-query-options.interface';
 
 jest.mock('@nestjsx/crud-typeorm/lib/typeorm-crud.service');
@@ -26,7 +27,7 @@ describe('TypeOrmService', () => {
       providers: [
         TestOrmService,
         CrudQueryHelper,
-        { provide: Repository, useValue: new ThingRepository() },
+        { provide: Repository, useValue: mock(ThingRepository) },
       ],
     }).compile();
 

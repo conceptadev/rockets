@@ -72,15 +72,3 @@ export class AppModule {}
 ### Connection Options
 
 The module options are identical the the NestJS TypeOrm module.
-
-### Test Mode
-
-> Currently test mode is only known to work for `postgres`.
-
-If you register the module using `registerAsync()` you can pass the `testMode: true` option.
-This magically replaces the connection with a fake connection factory that overrides
-the database driver and query runner to mock a database connection and effectively
-"do nothing" whenever the query runner is called.
-
-Test mode disables all queries, so you cannot test results, but you can test that methods
-are being called with the expected arguments without TypeOrm complaining about no connection.

@@ -1,7 +1,8 @@
 import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { useSeeders } from '@jorgebodega/typeorm-seeding';
+import { getDataSourceToken } from '@nestjs/typeorm';
+import { Seeding } from '@concepta/typeorm-seeding';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
 import { OrgFactory } from './org.factory';
@@ -9,7 +10,6 @@ import { OrgSeeder } from './org.seeder';
 import { OrgModule } from './org.module';
 
 import { OrgEntityFixture } from './__fixtures__/org-entity.fixture';
-import { OrgRepositoryFixture } from './__fixtures__/org-repository.fixture';
 import { OwnerEntityFixture } from './__fixtures__/owner-entity.fixture';
 import { OwnerLookupServiceFixture } from './__fixtures__/owner-lookup-service.fixture';
 import { OwnerModuleFixture } from './__fixtures__/owner.module.fixture';
@@ -22,13 +22,11 @@ describe('OrgController (e2e)', () => {
     beforeEach(async () => {
       const moduleFixture: TestingModule = await Test.createTestingModule({
         imports: [
-          TypeOrmExtModule.registerAsync({
-            useFactory: async () => ({
-              type: 'sqlite',
-              database: ':memory:',
-              synchronize: true,
-              entities: [OrgEntityFixture, OwnerEntityFixture],
-            }),
+          TypeOrmExtModule.register({
+            type: 'sqlite',
+            database: ':memory:',
+            synchronize: true,
+            entities: [OrgEntityFixture, OwnerEntityFixture],
           }),
           OrgModule.registerAsync({
             imports: [OwnerModuleFixture.register()],
@@ -39,7 +37,6 @@ describe('OrgController (e2e)', () => {
             entities: {
               org: {
                 entity: OrgEntityFixture,
-                repository: OrgRepositoryFixture,
               },
             },
           }),
@@ -50,12 +47,15 @@ describe('OrgController (e2e)', () => {
       app = moduleFixture.createNestApplication();
       await app.init();
 
-      OrgFactory.entity = OrgEntityFixture;
-      OrgSeeder.ownerFactory = OwnerFactoryFixture;
+      const orgSeeder = new OrgSeeder({
+        factories: {
+          org: new OrgFactory({ entity: OrgEntityFixture }),
+          owner: new OwnerFactoryFixture(),
+        },
+      });
 
-      await useSeeders(OrgSeeder, {
-        root: __dirname,
-        connection: 'default',
+      await Seeding.run(orgSeeder, {
+        dataSource: app.get(getDataSourceToken()),
       });
     });
 

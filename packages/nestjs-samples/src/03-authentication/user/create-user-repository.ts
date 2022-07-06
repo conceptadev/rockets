@@ -1,19 +1,12 @@
-import {
-  EntityRepository,
-  FindConditions,
-  FindOneOptions,
-  ObjectID,
-  Repository,
-} from 'typeorm';
+import { DataSource, FindOneOptions, ObjectID } from 'typeorm';
 import { UserEntityInterface } from '@concepta/nestjs-user';
 import { UserEntity } from './user.entity';
 
-@EntityRepository(UserEntity)
-export class UserRepository extends Repository<UserEntityInterface> {
+export function createUserRepository(dataSource: DataSource) {
   /**
    * Fake user "database"
    */
-  private users: UserEntity[] = [
+  const users: UserEntity[] = [
     {
       id: '1',
       email: 'first_user@dispostable.com',
@@ -46,28 +39,31 @@ export class UserRepository extends Repository<UserEntityInterface> {
     },
   ];
 
-  async findOne(
-    optionsOrConditions?:
-      | string
-      | number
-      | Date
-      | ObjectID
-      | FindOneOptions<UserEntityInterface>
-      | FindConditions<UserEntityInterface>,
-  ): Promise<UserEntityInterface | undefined> {
-    return this.users.find((user) => {
-      if (
-        typeof optionsOrConditions === 'object' &&
-        'where' in optionsOrConditions &&
-        typeof optionsOrConditions.where === 'object' &&
-        ('id' in optionsOrConditions.where ||
-          'username' in optionsOrConditions.where)
-      ) {
-        return (
-          user.id === optionsOrConditions.where.id ||
-          user.username === optionsOrConditions.where.username
-        );
-      }
-    });
-  }
+  return dataSource.getRepository(UserEntity).extend({
+    async findOne(
+      optionsOrConditions?:
+        | string
+        | number
+        | Date
+        | ObjectID
+        | FindOneOptions<UserEntityInterface>,
+    ): Promise<UserEntityInterface | null> {
+      const user = users.find((user) => {
+        if (
+          typeof optionsOrConditions === 'object' &&
+          'where' in optionsOrConditions &&
+          typeof optionsOrConditions.where === 'object' &&
+          ('id' in optionsOrConditions.where ||
+            'username' in optionsOrConditions.where)
+        ) {
+          return (
+            user.id === optionsOrConditions.where.id ||
+            user.username === optionsOrConditions.where.username
+          );
+        }
+      });
+
+      return user ? user : null;
+    },
+  });
 }

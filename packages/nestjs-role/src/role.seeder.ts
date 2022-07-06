@@ -1,19 +1,14 @@
-import { Type } from '@nestjs/common';
-import { Factory, Seeder } from '@jorgebodega/typeorm-seeding';
+import { Seeder } from '@concepta/typeorm-seeding';
 import { RoleEntityInterface } from './interfaces/role-entity.interface';
-import { RoleFactory } from './role.factory';
+
+interface RoleSeederEntities {
+  role: RoleEntityInterface;
+}
 
 /**
  * Role seeder
  */
-export class RoleSeeder extends Seeder {
-  /**
-   * The factory class.
-   *
-   * Override this to use a custom factory.
-   */
-  public static factory: Type<Factory<RoleEntityInterface>> = RoleFactory;
-
+export class RoleSeeder extends Seeder<RoleSeederEntities> {
   /**
    * Runner
    */
@@ -24,7 +19,7 @@ export class RoleSeeder extends Seeder {
       : 50;
 
     // the factory
-    const roleFactory = new RoleSeeder.factory();
+    const roleFactory = this.factory('role');
 
     // create a bunch
     await roleFactory.createMany(createAmount);

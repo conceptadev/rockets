@@ -25,8 +25,10 @@ export abstract class LookupService<Entity extends ReferenceIdInterface>
    *
    * @param id the id
    */
-  async byId(id: ReferenceId): Promise<Entity | undefined> {
-    return this.findOne({ where: { id } });
+  async byId(id: ReferenceId): Promise<Entity | null> {
+    // TODO: remove this type assertion when fix is released
+    // https://github.com/typeorm/typeorm/issues/8939
+    return this.findOne({ where: { id } } as FindOneOptions<Entity>);
   }
 
   /**
@@ -55,8 +57,8 @@ export abstract class LookupService<Entity extends ReferenceIdInterface>
    * @param options Find options
    */
   protected async findOne(
-    options?: FindOneOptions<Entity>,
-  ): Promise<Entity | undefined> {
+    options: FindOneOptions<Entity>,
+  ): Promise<Entity | null> {
     try {
       // call the repo find one
       return this.repo.findOne(options);

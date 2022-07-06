@@ -37,13 +37,13 @@
     "rxjs": "^7.1.0"
   },
   "devDependencies": {
-    "@jorgebodega/typeorm-seeding": "^3.2.0",
+    "@concepta/typeorm-seeding": "^4.0.0-alpha.2",
     "@nestjs/testing": "^8.0.8",
     "@nestjs/typeorm": "^8.0.2",
     "@types/supertest": "^2.0.11",
     "jest-mock-extended": "^2.0.4",
     "pg": "^8.7.1",
     "supertest": "^6.1.6",
-    "typeorm": "^0.2.41"
+    "typeorm": "^0.3.0"
   }
 }

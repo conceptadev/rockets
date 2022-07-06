@@ -36,9 +36,7 @@ export class UserLookupService
    *
    * @param email the email
    */
-  async byEmail(
-    email: ReferenceEmail,
-  ): Promise<UserEntityInterface | undefined> {
+  async byEmail(email: ReferenceEmail): Promise<UserEntityInterface | null> {
     return this.findOne({ where: { email } });
   }
 
@@ -49,7 +47,7 @@ export class UserLookupService
    */
   async bySubject(
     subject: ReferenceSubject,
-  ): Promise<UserEntityInterface | undefined> {
+  ): Promise<UserEntityInterface | null> {
     return this.findOne({ where: { id: subject } });
   }
 
@@ -60,7 +58,7 @@ export class UserLookupService
    */
   async byUsername(
     username: ReferenceUsername,
-  ): Promise<UserEntityInterface | undefined> {
+  ): Promise<UserEntityInterface | null> {
     return this.findOne({ where: { username } });
   }
 }

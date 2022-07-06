@@ -38,6 +38,6 @@
     "class-transformer": "*",
     "class-validator": "*",
     "rxjs": "^7.1.0",
-    "typeorm": "^0.2.41"
+    "typeorm": "^0.3.0"
   }
 }

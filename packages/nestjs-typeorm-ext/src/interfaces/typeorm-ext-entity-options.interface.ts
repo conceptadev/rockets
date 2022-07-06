@@ -1,12 +1,12 @@
-import { EntitySchema, Repository } from 'typeorm';
-import { Type } from '@nestjs/common';
+import { DataSource, Repository } from 'typeorm';
 import { TypeOrmExtConnectionToken } from '../typeorm-ext.types';
 import { ReferenceIdInterface } from '@concepta/ts-core';
+import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
 
 export interface TypeOrmExtEntityOptionInterface<
   T extends ReferenceIdInterface = ReferenceIdInterface,
 > {
-  entity: Type<T> | EntitySchema<T>;
-  repository?: Type<Repository<T>>;
+  entity: EntityClassOrSchema;
+  repositoryFactory?: (dataSource: DataSource) => Repository<T>;
   connection?: TypeOrmExtConnectionToken;
 }

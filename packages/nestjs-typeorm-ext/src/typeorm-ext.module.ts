@@ -20,8 +20,6 @@ import {
   TypeOrmExtOptions,
 } from './typeorm-ext.types';
 import { TypeOrmExtEntityOptionInterface } from './interfaces/typeorm-ext-entity-options.interface';
-import { TypeOrmExtTestOptionsInterface } from './interfaces/typeorm-ext-test-options.interface';
-import { createTestConnectionFactory } from './utils/create-test-connection-factory';
 import { resolveConnectionName } from './utils/resolve-connection-name';
 import { createEntityRepositoryProvider } from './utils/create-entity-repository-provider';
 import { createDynamicRepositoryProvider } from './utils/create-dynamic-repository-provider';
@@ -56,9 +54,7 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
   }
 
   static registerAsync(
-    options: TypeOrmModuleAsyncOptions &
-      AsyncModuleConfig<TypeOrmExtOptions> &
-      TypeOrmExtTestOptionsInterface,
+    options: TypeOrmModuleAsyncOptions & AsyncModuleConfig<TypeOrmExtOptions>,
   ) {
     const module = TypeOrmExtModule.forRootAsync(TypeOrmExtModule, options);
 
@@ -70,10 +66,6 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
       TypeOrmModule.forRootAsync({
         inject: [TYPEORM_EXT_MODULE_OPTIONS_TOKEN],
         useFactory: async (options: TypeOrmModuleOptions) => options,
-        connectionFactory:
-          options.testMode === true
-            ? createTestConnectionFactory
-            : options.connectionFactory,
       }),
     );
 
@@ -95,7 +87,7 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
     for (const entityKey in entityOptions) {
       const {
         entity,
-        repository,
+        repositoryFactory,
         connection = TYPEORM_EXT_MODULE_DEFAULT_CONNECTION_NAME,
       } = entityOptions[entityKey];
 
@@ -111,16 +103,12 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
 
       entitiesByConn[connectionName].push(entity);
 
-      if (repository) {
-        entitiesByConn[connectionName].push(repository);
-      }
-
       providers.push(
         createEntityRepositoryProvider(entityKey, entity, connection),
         createDynamicRepositoryProvider(
           entityKey,
           entity,
-          repository,
+          repositoryFactory,
           connection,
         ),
       );

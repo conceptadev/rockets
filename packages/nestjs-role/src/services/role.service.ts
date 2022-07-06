@@ -1,7 +1,6 @@
 import { Repository } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
 import { ReferenceAssignment, ReferenceIdInterface } from '@concepta/ts-core';
-import { RoleInterface } from '@concepta/ts-common';
 import { ReferenceLookupException } from '@concepta/typeorm-common';
 import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
 import { AssignmentNotFoundException } from '../exceptions/assignment-not-found.exception';
@@ -44,7 +43,7 @@ export class RoleService implements RoleServiceInterface {
       // make the query
       const assignments = await assignmentRepo.find({
         where: {
-          assignee,
+          assignee: { id: assignee.id },
         },
         relations: ['role', 'assignee'],
       });
@@ -65,7 +64,7 @@ export class RoleService implements RoleServiceInterface {
    */
   async isAssignedRole<T extends ReferenceIdInterface>(
     assignment: ReferenceAssignment,
-    role: Partial<RoleInterface>,
+    role: ReferenceIdInterface,
     assignee: T,
   ): Promise<boolean> {
     // get the assignment repo
@@ -76,8 +75,8 @@ export class RoleService implements RoleServiceInterface {
       // make the query
       const assignment = await assignmentRepo.findOne({
         where: {
-          role,
-          assignee,
+          role: { id: role.id },
+          assignee: { id: assignee.id },
         },
       });
       // return true if we found an assignment

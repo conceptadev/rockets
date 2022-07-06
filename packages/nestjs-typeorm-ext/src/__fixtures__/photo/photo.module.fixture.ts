@@ -3,7 +3,7 @@ import { createConfigurableDynamicRootModule } from '@concepta/nestjs-core';
 import { TypeOrmExtModule } from '../../typeorm-ext.module';
 import { PHOTO_MODULE_OPTIONS_TOKEN } from './photo.constants.fixture';
 import { PhotoEntityFixture } from './photo.entity.fixture';
-import { PhotoRepositoryFixture } from './photo.repository.fixture';
+import { createPhotoRepositoryFixture } from './photo.repository.fixture';
 
 @Module({})
 export class PhotoModuleFixture extends createConfigurableDynamicRootModule<
@@ -23,7 +23,7 @@ export class PhotoModuleFixture extends createConfigurableDynamicRootModule<
       TypeOrmExtModule.forFeature({
         photo: {
           entity: PhotoEntityFixture,
-          repository: PhotoRepositoryFixture,
+          repositoryFactory: createPhotoRepositoryFixture,
         },
       }),
     );
