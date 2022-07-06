@@ -52,6 +52,7 @@
     "watch": "yarn build && ./node_modules/.bin/tsc --build --watch",
     "lint": "eslint \"./*.json\" \"packages/*/src/**/*.{ts,js,json}\" --fix",
     "test": "jest",
+    "test:one": "jest packages/nestjs-auth-recovery/src/services/auth-recovery.service.spec.ts",
     "prepare": "husky install && yarn clean && yarn build",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",

@@ -18,80 +18,78 @@ import { AuthRecoverySettingsInterface } from './interfaces/auth-recovery-settin
 import { OtpInterface, UserInterface } from '@concepta/ts-common';
 
 describe('AuthRecoveryController (e2e)', () => {
-  describe('AuthRecovery', () => {
-    let app: INestApplication;
-    let otpService: OtpService;
-    let configService: ConfigService;
-    let config: ConfigType<typeof authRecoveryDefaultConfig>;
+  let app: INestApplication;
+  let otpService: OtpService;
+  let configService: ConfigService;
+  let config: ConfigType<typeof authRecoveryDefaultConfig>;
 
-    beforeEach(async () => {
-      const moduleFixture: TestingModule = await Test.createTestingModule({
-        imports: [AuthRecoveryAppModuleFixture],
-      }).compile();
-      app = moduleFixture.createNestApplication();
-      await app.init();
+  beforeEach(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AuthRecoveryAppModuleFixture],
+    }).compile();
+    app = moduleFixture.createNestApplication();
+    await app.init();
 
-      otpService = moduleFixture.get<OtpService>(OtpService);
-      configService = moduleFixture.get<ConfigService>(ConfigService);
+    otpService = moduleFixture.get<OtpService>(OtpService);
+    configService = moduleFixture.get<ConfigService>(ConfigService);
 
-      config = configService.get<AuthRecoverySettingsInterface>(
-        AUTH_RECOVERY_MODULE_DEFAULT_SETTINGS_TOKEN,
-      ) as AuthRecoverySettingsInterface;
+    config = configService.get<AuthRecoverySettingsInterface>(
+      AUTH_RECOVERY_MODULE_DEFAULT_SETTINGS_TOKEN,
+    ) as AuthRecoverySettingsInterface;
 
-      UserFactory.entity = AuthRecoveryUserEntityFixture;
+    UserFactory.entity = AuthRecoveryUserEntityFixture;
 
-      await useSeeders(UserSeeder, { root: __dirname, connection: 'default' });
-    });
+    await useSeeders(UserSeeder, { root: __dirname, connection: 'default' });
+  });
 
-    afterEach(async () => {
-      jest.clearAllMocks();
-      return app ? await app.close() : undefined;
-    });
+  afterEach(async () => {
+    jest.clearAllMocks();
+    return app ? await app.close() : undefined;
+  });
 
-    it('POST auth/recover-login', async () => {
-      const user = await getFirstUser(app);
+  it('POST auth/recover-login', async () => {
+    const user = await getFirstUser(app);
 
-      await supertest(app.getHttpServer())
-        .post('/auth/recovery/login')
-        .send({ email: user.email } as AuthRecoveryRecoverLoginDto)
-        .expect(201);
-    });
+    await supertest(app.getHttpServer())
+      .post('/auth/recovery/login')
+      .send({ email: user.email } as AuthRecoveryRecoverLoginDto)
+      .expect(201);
+  });
 
-    it('GET auth/recovery/passcode/{passcode}', async () => {
-      const user = await getFirstUser(app);
+  it('GET auth/recovery/passcode/{passcode}', async () => {
+    const user = await getFirstUser(app);
 
-      const otpCreateDto = await createOtp(config, otpService, user.id);
+    const otpCreateDto = await createOtp(config, otpService, user.id);
 
-      const { passcode } = otpCreateDto;
+    const { passcode } = otpCreateDto;
 
-      await supertest(app.getHttpServer())
-        .get(`/auth/recovery/passcode/${passcode}`)
-        .expect(200);
+    await supertest(app.getHttpServer())
+      .get(`/auth/recovery/passcode/${passcode}`)
+      .expect(200);
 
-      await validateRecoverPassword(app, user);
-    });
+    await validateRecoverPassword(app, user);
+  });
 
-    it('POST auth/recovery/password', async () => {
-      const user = await getFirstUser(app);
+  it('POST auth/recovery/password', async () => {
+    const user = await getFirstUser(app);
 
-      await validateRecoverPassword(app, user);
-    });
+    await validateRecoverPassword(app, user);
+  });
 
-    it('PATCH auth/recovery/password', async () => {
-      const user = await getFirstUser(app);
+  it('PATCH auth/recovery/password', async () => {
+    const user = await getFirstUser(app);
 
-      await validateRecoverPassword(app, user);
+    await validateRecoverPassword(app, user);
 
-      const otpCreateDto = await createOtp(config, otpService, user.id);
+    const otpCreateDto = await createOtp(config, otpService, user.id);
 
-      await supertest(app.getHttpServer())
-        .patch('/auth/recovery/password')
-        .send({
-          passcode: otpCreateDto.passcode,
-          newPassword: '$!Abc123bsksl6764579',
-        } as AuthRecoveryUpdatePasswordDto)
-        .expect(200);
-    });
+    await supertest(app.getHttpServer())
+      .patch('/auth/recovery/password')
+      .send({
+        passcode: otpCreateDto.passcode,
+        newPassword: '$!Abc123bsksl6764579',
+      } as AuthRecoveryUpdatePasswordDto)
+      .expect(200);
   });
 });
 

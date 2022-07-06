@@ -10,8 +10,8 @@ export interface AuthRecoveryOptionsInterface
   extends OptionsInterface,
     ModuleOptionsSettingsInterface {
   settings?: AuthRecoverySettingsInterface;
-  authRecoveryOtpService: AuthRecoveryOtpServiceInterface;
-  authRecoveryEmailService: AuthRecoveryEmailServiceInterface;
-  authRecoveryUserLookupService: AuthRecoveryUserLookupServiceInterface;
-  authRecoveryUserMutateService: AuthRecoveryUserMutateServiceInterface;
+  otpService: AuthRecoveryOtpServiceInterface;
+  emailService: AuthRecoveryEmailServiceInterface;
+  userLookupService: AuthRecoveryUserLookupServiceInterface;
+  userMutateService: AuthRecoveryUserMutateServiceInterface;
 }
