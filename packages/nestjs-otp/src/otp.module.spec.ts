@@ -1,5 +1,5 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { Repository } from 'typeorm';
+import { Test, TestingModule } from '@nestjs/testing';
 import { OtpInterface } from '@concepta/ts-common';
 import { OTP_MODULE_REPOSITORIES_TOKEN } from './otp.constants';
 import { OtpModule } from './otp.module';

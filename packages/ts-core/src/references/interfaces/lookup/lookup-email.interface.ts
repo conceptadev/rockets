@@ -5,5 +5,5 @@ export interface LookupEmailInterface<
   T = ReferenceEmail,
   U = ReferenceIdInterface,
 > {
-  byEmail: (email: T) => Promise<U | undefined>;
+  byEmail: (email: T) => Promise<U | null>;
 }

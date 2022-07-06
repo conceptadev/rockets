@@ -1,25 +1,16 @@
-import { Type } from '@nestjs/common';
-import { Factory, Seeder } from '@jorgebodega/typeorm-seeding';
+import { Seeder } from '@concepta/typeorm-seeding';
 import { ReferenceIdInterface } from '@concepta/ts-core';
 import { OrgEntityInterface } from './interfaces/org-entity.interface';
-import { OrgFactory } from './org.factory';
+
+interface OrgSeederEntities {
+  org: OrgEntityInterface;
+  owner: ReferenceIdInterface;
+}
 
 /**
  * Org seeder
  */
-export class OrgSeeder extends Seeder {
-  /**
-   * The factory class.
-   *
-   * Override this to use a custom factory.
-   */
-  public static factory: Type<Factory<OrgEntityInterface>> = OrgFactory;
-
-  /**
-   * The owner factory class (required).
-   */
-  public static ownerFactory: Type<Factory<ReferenceIdInterface>>;
-
+export class OrgSeeder extends Seeder<OrgSeederEntities> {
   /**
    * Runner
    */
@@ -30,11 +21,11 @@ export class OrgSeeder extends Seeder {
       : 50;
 
     // create one owner
-    const ownerFactory = new OrgSeeder.ownerFactory();
+    const ownerFactory = this.factory('owner');
     const owner = await ownerFactory.create();
 
     // the factory
-    const orgFactory = new OrgSeeder.factory();
+    const orgFactory = this.factory('org');
 
     // create a bunch
     await orgFactory

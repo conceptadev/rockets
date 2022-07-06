@@ -1,6 +1,6 @@
 import Faker from '@faker-js/faker';
 import { Type } from '@nestjs/common';
-import { Factory } from '@jorgebodega/typeorm-seeding';
+import { Factory } from '@concepta/typeorm-seeding';
 import { RoleEntityInterface } from './interfaces/role-entity.interface';
 
 /**
@@ -8,15 +8,14 @@ import { RoleEntityInterface } from './interfaces/role-entity.interface';
  *
  * ```ts
  * // new factory instance
- * RoleFactory.entity = RoleEntity;
  * const roleFactory = new RoleFactory();
  * ```
  */
 export class RoleFactory extends Factory<RoleEntityInterface> {
   /**
-   * The entity class.
+   * Options
    */
-  public static entity: Type<RoleEntityInterface>;
+  options: { entity?: Type<RoleEntityInterface> } = {};
 
   /**
    * List of used names.
@@ -26,10 +25,9 @@ export class RoleFactory extends Factory<RoleEntityInterface> {
   /**
    * Factory callback function.
    */
-  protected async definition(): Promise<RoleEntityInterface> {
-    // the role we will return
-    const role = new RoleFactory.entity();
-
+  protected async entity(
+    role: RoleEntityInterface,
+  ): Promise<RoleEntityInterface> {
     // set the name
     role.name = this.generateName();
 

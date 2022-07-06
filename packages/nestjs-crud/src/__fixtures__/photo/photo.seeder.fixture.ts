@@ -1,10 +1,11 @@
-import { Seeder } from '@jorgebodega/typeorm-seeding';
+import { Seeder } from '@concepta/typeorm-seeding';
+import { PhotoFixture } from './photo.entity.fixture';
 import { PhotoFactoryFixture } from './photo.factory.fixture';
 
-export class PhotoSeederFixture extends Seeder {
-  public async run(): Promise<void> {
-    const photoFactory = new PhotoFactoryFixture();
+export class PhotoSeederFixture extends Seeder<{ photo: PhotoFixture }> {
+  protected options = { factories: { photo: PhotoFactoryFixture } };
 
-    await photoFactory.createMany(15);
+  public async run(): Promise<void> {
+    await this.factory('photo').createMany(15);
   }
 }

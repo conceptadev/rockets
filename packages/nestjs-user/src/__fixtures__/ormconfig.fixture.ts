@@ -1,12 +1,9 @@
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { ConnectionOptions } from '@jorgebodega/typeorm-seeding';
+import { DataSourceOptions } from 'typeorm';
 import { UserEntityFixture } from './user.entity.fixture';
 
-const config: TypeOrmModuleOptions & Partial<ConnectionOptions> = {
+export const ormConfig: DataSourceOptions = {
   type: 'sqlite',
   database: ':memory:',
   synchronize: true,
   entities: [UserEntityFixture],
 };
-
-export default config;

@@ -20,10 +20,8 @@ import { FederatedOAuthService } from './services/federated-oauth.service';
 import { FEDERATED_MODULE_FEDERATED_ENTITY_KEY } from './federated.constants';
 
 import { FederatedEntityFixture } from './__fixtures__/federated-entity.fixture';
-import { FederatedRepositoryFixture } from './__fixtures__/federated-repository.fixture';
 import { FederatedEntityInterface } from './interfaces/federated-entity.interface';
 import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
-import { UserRepositoryFixture } from './__fixtures__/user.repository.fixture';
 import { FederatedMutateService } from './services/federated-mutate.service';
 
 describe('FederatedModuleTest', () => {
@@ -33,7 +31,7 @@ describe('FederatedModuleTest', () => {
   let userLookupService: UserLookupService;
   let userMutateService: UserMutateService;
   let federatedEntityRepo: Repository<FederatedEntityInterface>;
-  let federatedCustomRepo: FederatedRepositoryFixture;
+  let federatedDynamicRepo: Repository<FederatedEntityInterface>;
   let federatedMutateService: FederatedMutateService;
 
   beforeEach(async () => {
@@ -58,7 +56,6 @@ describe('FederatedModuleTest', () => {
           entities: {
             federated: {
               entity: FederatedEntityFixture,
-              repository: FederatedRepositoryFixture,
             },
           },
         }),
@@ -66,7 +63,6 @@ describe('FederatedModuleTest', () => {
           entities: {
             user: {
               entity: UserEntityFixture,
-              repository: UserRepositoryFixture,
             },
           },
         }),
@@ -81,7 +77,7 @@ describe('FederatedModuleTest', () => {
     federatedEntityRepo = testModule.get<Repository<FederatedEntityFixture>>(
       getEntityRepositoryToken(FEDERATED_MODULE_FEDERATED_ENTITY_KEY),
     );
-    federatedCustomRepo = testModule.get<FederatedRepositoryFixture>(
+    federatedDynamicRepo = testModule.get(
       getDynamicRepositoryToken(FEDERATED_MODULE_FEDERATED_ENTITY_KEY),
     );
     userLookupService = testModule.get<UserLookupService>(UserLookupService);
@@ -99,7 +95,7 @@ describe('FederatedModuleTest', () => {
     it('should be loaded', async () => {
       expect(federatedModule).toBeInstanceOf(FederatedModule);
       expect(federatedEntityRepo).toBeInstanceOf(Repository);
-      expect(federatedCustomRepo).toBeInstanceOf(FederatedRepositoryFixture);
+      expect(federatedDynamicRepo).toBeInstanceOf(Repository);
       expect(federatedService).toBeDefined();
       expect(federatedOauthService).toBeDefined();
       expect(userLookupService).toBeInstanceOf(UserLookupService);

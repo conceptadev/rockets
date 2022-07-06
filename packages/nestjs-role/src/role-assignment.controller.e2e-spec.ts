@@ -3,7 +3,8 @@ import supertest from 'supertest';
 import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { useSeeders } from '@jorgebodega/typeorm-seeding';
+import { getDataSourceToken } from '@nestjs/typeorm';
+import { Seeding } from '@concepta/typeorm-seeding';
 import { getDynamicRepositoryToken } from '@concepta/nestjs-typeorm-ext';
 import { RoleAssignmentCreatableInterface } from '@concepta/ts-common';
 
@@ -28,9 +29,13 @@ describe('RoleAssignmentController (e2e)', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    RoleFactory.entity = RoleEntityFixture;
+    const roleSeeder = new RoleSeeder({
+      factories: { role: new RoleFactory({ entity: RoleEntityFixture }) },
+    });
 
-    await useSeeders(RoleSeeder, { root: __dirname, connection: 'default' });
+    await Seeding.run(roleSeeder, {
+      dataSource: app.get(getDataSourceToken()),
+    });
 
     roleRepo = app.get(getDynamicRepositoryToken('role'));
   });

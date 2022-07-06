@@ -181,7 +181,7 @@ export class OtpService implements OtpServiceInterface {
       // make the query
       const assignments = await assignmentRepo.find({
         where: {
-          assignee,
+          assignee: { id: assignee.id },
           category,
         },
         relations: ['assignee'],
@@ -197,7 +197,7 @@ export class OtpService implements OtpServiceInterface {
   protected async getByPasscode(
     assignment: ReferenceAssignment,
     otp: Pick<OtpInterface, 'category' | 'passcode'>,
-  ): Promise<OtpInterface | undefined> {
+  ): Promise<OtpInterface | null> {
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
 

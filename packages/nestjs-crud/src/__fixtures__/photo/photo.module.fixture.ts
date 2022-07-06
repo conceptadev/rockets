@@ -1,9 +1,9 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '../../crud.module';
+
 import { PhotoControllerFixture } from './photo.controller.fixture';
 import { PhotoFixture } from './photo.entity.fixture';
-import { PhotoRepositoryFixture } from './photo.repository.fixture';
 import { PhotoServiceFixture } from './photo.service.fixture';
 
 @Module({
@@ -17,7 +17,9 @@ export class PhotoModuleFixture {
       imports: [
         CrudModule.register(),
         TypeOrmExtModule.forFeature({
-          photo: { entity: PhotoFixture, repository: PhotoRepositoryFixture },
+          photo: {
+            entity: PhotoFixture,
+          },
         }),
       ],
     };

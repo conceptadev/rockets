@@ -1,9 +1,9 @@
-import { Provider, Type } from '@nestjs/common';
+import { Provider } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { EntitySchema } from 'typeorm';
 import { TypeOrmExtConnectionToken } from '../typeorm-ext.types';
 import { getEntityRepositoryToken } from './get-entity-repository-token';
 import { TYPEORM_EXT_MODULE_DEFAULT_CONNECTION_NAME } from '../typeorm-ext.constants';
+import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
 
 /**
  * Create an entity repository provider function
@@ -13,9 +13,9 @@ import { TYPEORM_EXT_MODULE_DEFAULT_CONNECTION_NAME } from '../typeorm-ext.const
  * @param connection The connection
  * @returns {Provider} Repository provider
  */
-export function createEntityRepositoryProvider<T>(
+export function createEntityRepositoryProvider(
   key: string,
-  entity: Type<T> | EntitySchema,
+  entity: EntityClassOrSchema,
   connection: TypeOrmExtConnectionToken = TYPEORM_EXT_MODULE_DEFAULT_CONNECTION_NAME,
 ): Provider {
   return {

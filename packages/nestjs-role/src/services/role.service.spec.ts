@@ -1,18 +1,18 @@
-import { CrudModule } from '@concepta/nestjs-crud';
+import { Repository } from 'typeorm';
+import { Test, TestingModule } from '@nestjs/testing';
+import { getDataSourceToken } from '@nestjs/typeorm';
+import { Seeding } from '@concepta/typeorm-seeding';
 import {
   getDynamicRepositoryToken,
   TypeOrmExtModule,
 } from '@concepta/nestjs-typeorm-ext';
-import { useSeeders } from '@jorgebodega/typeorm-seeding';
-import { Test, TestingModule } from '@nestjs/testing';
+import { CrudModule } from '@concepta/nestjs-crud';
 import { RoleModule } from '../role.module';
 import { RoleService } from '../services/role.service';
 
 import { RoleEntityFixture } from '../__fixtures__/entities/role-entity.fixture';
 import { UserEntityFixture } from '../__fixtures__/entities/user-entity.fixture';
 import { UserRoleEntityFixture } from '../__fixtures__/entities/user-role-entity.fixture';
-import { RoleRepositoryFixture } from '../__fixtures__/repositories/role-repository.fixture';
-import { UserRoleRepositoryFixture } from '../__fixtures__/repositories/user-role-repository.fixture';
 import { ApiKeyEntityFixture } from '../__fixtures__/entities/api-key-entity.fixture';
 import { ApiKeyRoleEntityFixture } from '../__fixtures__/entities/api-key-role-entity.fixture';
 import { UserFactoryFixture } from '../__fixtures__/factories/user.factory.fixture';
@@ -23,7 +23,7 @@ describe('RoleModule', () => {
   let testModule: TestingModule;
   let roleModule: RoleModule;
   let roleService: RoleService;
-  let roleRepo: RoleRepositoryFixture;
+  let roleRepo: Repository<RoleEntityFixture>;
 
   let testRole1: RoleEntityFixture;
   let testRole2: RoleEntityFixture;
@@ -58,12 +58,10 @@ describe('RoleModule', () => {
           entities: {
             role: {
               entity: RoleEntityFixture,
-              repository: RoleRepositoryFixture,
               connection: connectionName,
             },
             userRole: {
               entity: UserRoleEntityFixture,
-              repository: UserRoleRepositoryFixture,
               connection: connectionName,
             },
           },
@@ -72,15 +70,11 @@ describe('RoleModule', () => {
       ],
     }).compile();
 
-    RoleFactory.entity = RoleEntityFixture;
-
-    await useSeeders([], {
-      root: __dirname,
-      connection: connectionName,
+    Seeding.configure({
+      dataSource: testModule.get(getDataSourceToken(connectionName)),
     });
 
-    RoleFactory.entity = RoleEntityFixture;
-    const roleFactory = new RoleFactory();
+    const roleFactory = new RoleFactory({ entity: RoleEntityFixture });
     [testRole1, testRole2] = await roleFactory.createMany(2);
 
     const userFactory = new UserFactoryFixture();
@@ -94,9 +88,7 @@ describe('RoleModule', () => {
 
     roleModule = testModule.get<RoleModule>(RoleModule);
     roleService = testModule.get<RoleService>(RoleService);
-    roleRepo = testModule.get<RoleRepositoryFixture>(
-      getDynamicRepositoryToken('role'),
-    );
+    roleRepo = testModule.get(getDynamicRepositoryToken('role'));
   });
 
   afterEach(() => {
@@ -112,7 +104,7 @@ describe('RoleModule', () => {
       expect(roleService).toBeInstanceOf(RoleService);
     });
     it('should be have expected repos', async () => {
-      expect(roleRepo).toBeInstanceOf(RoleRepositoryFixture);
+      expect(roleRepo).toBeInstanceOf(Repository);
     });
   });
 
@@ -128,9 +120,12 @@ describe('RoleModule', () => {
 
   describe('isAssignedRole', () => {
     it('should be assigned to one', async () => {
-      expect(
-        await roleService.isAssignedRole('user', testRole1, testUser),
-      ).toEqual(true);
+      const result = await roleService.isAssignedRole(
+        'user',
+        testRole1,
+        testUser,
+      );
+      expect(result).toEqual(true);
     });
 
     it('should not be assigned to one', async () => {
