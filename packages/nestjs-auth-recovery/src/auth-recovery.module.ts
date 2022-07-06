@@ -49,25 +49,25 @@ export class AuthRecoveryModule extends createConfigurableDynamicRootModule<
       provide: AUTH_RECOVERY_OTP_SERVICE_TOKEN,
       inject: [AUTH_RECOVERY_MODULE_OPTIONS_TOKEN],
       useFactory: async (options: AuthRecoveryOptionsInterface) =>
-        options.authRecoveryOtpService,
+        options.otpService,
     },
     {
       provide: AUTH_RECOVERY_EMAIL_SERVICE_TOKEN,
       inject: [AUTH_RECOVERY_MODULE_OPTIONS_TOKEN],
       useFactory: async (options: AuthRecoveryOptionsInterface) =>
-        options.authRecoveryEmailService,
+        options.emailService,
     },
     {
       provide: AUTH_RECOVERY_USER_LOOKUP_SERVICE_TOKEN,
       inject: [AUTH_RECOVERY_MODULE_OPTIONS_TOKEN],
       useFactory: async (options: AuthRecoveryOptionsInterface) =>
-        options.authRecoveryUserLookupService,
+        options.userLookupService,
     },
     {
       provide: AUTH_RECOVERY_USER_MUTATE_SERVICE_TOKEN,
       inject: [AUTH_RECOVERY_MODULE_OPTIONS_TOKEN],
       useFactory: async (options: AuthRecoveryOptionsInterface) =>
-        options.authRecoveryUserMutateService,
+        options.userMutateService,
     },
   ],
 }) {

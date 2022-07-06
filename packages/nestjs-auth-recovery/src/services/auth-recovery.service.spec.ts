@@ -7,16 +7,20 @@ import { AuthRecoveryService } from './auth-recovery.service';
 import { AuthRecoveryAppModuleFixture } from '../__fixtures__/auth-recovery.app.module.fixture';
 import { AuthRecoveryUserEntityFixture } from '../__fixtures__/auth-recovery-user-entity.fixture';
 import { UserFactoryFixture } from '../__fixtures__/factories/user.factory.fixture';
-import { ConfigType } from '@nestjs/config';
+import { ConfigService, ConfigType } from '@nestjs/config';
 import { authRecoveryDefaultConfig } from '../config/auth-recovery-default.config';
 import { OtpService } from '@concepta/nestjs-otp';
 import { OtpInterface } from '@concepta/ts-common';
+import { UserEntityInterface } from '@concepta/nestjs-user';
+import { AuthRecoverySettingsInterface } from '../interfaces/auth-recovery-settings.interface';
+import { AUTH_RECOVERY_MODULE_DEFAULT_SETTINGS_TOKEN } from '../auth-recovery.constants';
 
 describe('AuthRecoveryService', () => {
   let app: INestApplication;
   let authRecoveryService: AuthRecoveryService;
-  let testUser: AuthRecoveryUserEntityFixture;
+  let testUser: UserEntityInterface;
   let otpService: OtpService;
+  let configService: ConfigService;
   let config: ConfigType<typeof authRecoveryDefaultConfig>;
 
   beforeEach(async () => {
@@ -29,6 +33,10 @@ describe('AuthRecoveryService', () => {
     authRecoveryService =
       moduleFixture.get<AuthRecoveryService>(AuthRecoveryService);
     otpService = moduleFixture.get<OtpService>(OtpService);
+    configService = moduleFixture.get<ConfigService>(ConfigService);
+    config = configService.get<AuthRecoverySettingsInterface>(
+      AUTH_RECOVERY_MODULE_DEFAULT_SETTINGS_TOKEN,
+    ) as AuthRecoverySettingsInterface;
 
     UserFactory.entity = AuthRecoveryUserEntityFixture;
 
@@ -43,7 +51,7 @@ describe('AuthRecoveryService', () => {
     return app ? await app.close() : undefined;
   });
 
-  it.only('Recover login', async () => {
+  it('Recover login', async () => {
     await authRecoveryService.recoverLogin(testUser.email);
   });
 
