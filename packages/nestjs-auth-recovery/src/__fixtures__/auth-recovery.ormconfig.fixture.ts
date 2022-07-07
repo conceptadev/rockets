@@ -1,9 +1,8 @@
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { ConnectionOptions } from '@jorgebodega/typeorm-seeding';
+import { DataSourceOptions } from 'typeorm';
 import { AuthRecoveryUserOtpEntityFixture } from './auth-recovery-user-otp-entity.fixture';
 import { AuthRecoveryUserEntityFixture } from './auth-recovery-user-entity.fixture';
 
-const config: TypeOrmModuleOptions & Partial<ConnectionOptions> = {
+const config: DataSourceOptions = {
   type: 'sqlite',
   database: ':memory:',
   synchronize: true,

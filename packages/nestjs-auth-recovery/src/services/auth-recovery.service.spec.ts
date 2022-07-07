@@ -1,19 +1,20 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { UserFactory } from '@concepta/nestjs-user/src/seeding';
 import { ConfigService, ConfigType } from '@nestjs/config';
-import { AuthRecoveryService } from './auth-recovery.service';
-import { OtpService } from '@concepta/nestjs-otp';
+import { getDataSourceToken } from '@nestjs/typeorm';
+import { Seeding } from '@concepta/typeorm-seeding';
 import { OtpInterface } from '@concepta/ts-common';
 import { UserEntityInterface } from '@concepta/nestjs-user';
-import { Seeding } from '@concepta/typeorm-seeding';
-import { getDataSourceToken } from '@nestjs/typeorm';
+import { OtpService } from '@concepta/nestjs-otp';
+import { UserFactory } from '@concepta/nestjs-user/src/seeding';
 
-import { AuthRecoveryAppModuleFixture } from '../__fixtures__/auth-recovery.app.module.fixture';
-import { AuthRecoveryUserEntityFixture } from '../__fixtures__/auth-recovery-user-entity.fixture';
+import { AuthRecoveryService } from './auth-recovery.service';
 import { authRecoveryDefaultConfig } from '../config/auth-recovery-default.config';
 import { AuthRecoverySettingsInterface } from '../interfaces/auth-recovery-settings.interface';
 import { AUTH_RECOVERY_MODULE_DEFAULT_SETTINGS_TOKEN } from '../auth-recovery.constants';
+
+import { AuthRecoveryAppModuleFixture } from '../__fixtures__/auth-recovery.app.module.fixture';
+import { AuthRecoveryUserEntityFixture } from '../__fixtures__/auth-recovery-user-entity.fixture';
 
 describe('AuthRecoveryService', () => {
   let app: INestApplication;

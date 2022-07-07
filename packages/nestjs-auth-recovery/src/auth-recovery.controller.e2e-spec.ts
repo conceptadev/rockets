@@ -1,22 +1,22 @@
 import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { UserFactory } from '@concepta/nestjs-user/src/seeding';
-
-import { AuthRecoveryAppModuleFixture } from './__fixtures__/auth-recovery.app.module.fixture';
-import { AuthRecoveryRecoverPasswordDto } from './dto/auth-recovery-recover-password.dto';
-import { UserDto } from '@concepta/nestjs-user/dist/dto/user.dto';
-import { AuthRecoveryRecoverLoginDto } from './dto/auth-recovery-recover-login.dto';
-import { AuthRecoveryUpdatePasswordDto } from './dto/auth-recovery-update-password.dto';
-import { OtpService } from '@concepta/nestjs-otp';
-import { authRecoveryDefaultConfig } from './config/auth-recovery-default.config';
 import { ConfigService, ConfigType } from '@nestjs/config';
-import { AUTH_RECOVERY_MODULE_DEFAULT_SETTINGS_TOKEN } from './auth-recovery.constants';
-import { AuthRecoverySettingsInterface } from './interfaces/auth-recovery-settings.interface';
+import { getDataSourceToken } from '@nestjs/typeorm';
 import { OtpInterface, UserInterface } from '@concepta/ts-common';
 import { Seeding } from '@concepta/typeorm-seeding';
-import { getDataSourceToken } from '@nestjs/typeorm';
+import { OtpService } from '@concepta/nestjs-otp';
+import { UserFactory } from '@concepta/nestjs-user/src/seeding';
+
+import { AuthRecoveryRecoverPasswordDto } from './dto/auth-recovery-recover-password.dto';
+import { AuthRecoveryRecoverLoginDto } from './dto/auth-recovery-recover-login.dto';
+import { AuthRecoveryUpdatePasswordDto } from './dto/auth-recovery-update-password.dto';
+import { authRecoveryDefaultConfig } from './config/auth-recovery-default.config';
+import { AUTH_RECOVERY_MODULE_DEFAULT_SETTINGS_TOKEN } from './auth-recovery.constants';
+import { AuthRecoverySettingsInterface } from './interfaces/auth-recovery-settings.interface';
+
 import { AuthRecoveryUserEntityFixture } from './__fixtures__/auth-recovery-user-entity.fixture';
+import { AuthRecoveryAppModuleFixture } from './__fixtures__/auth-recovery.app.module.fixture';
 
 describe('AuthRecoveryController (e2e)', () => {
   let app: INestApplication;
@@ -101,7 +101,7 @@ describe('AuthRecoveryController (e2e)', () => {
   });
 });
 
-const getFirstUser = async (app: INestApplication): Promise<UserDto> => {
+const getFirstUser = async (app: INestApplication): Promise<UserInterface> => {
   const response = await supertest(app.getHttpServer())
     .get('/user?limit=1')
     .expect(200);
