@@ -1,6 +1,6 @@
 {
   "name": "@concepta/nestjs-jwt",
-  "version": "4.0.0-alpha.16",
+  "version": "4.0.0-alpha.17",
   "description": "Rockets NestJS JWT Utility",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,8 +12,8 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
-    "@concepta/nestjs-core": "^4.0.0-alpha.16",
-    "@concepta/ts-core": "^4.0.0-alpha.16",
+    "@concepta/nestjs-core": "^4.0.0-alpha.17",
+    "@concepta/ts-core": "^4.0.0-alpha.17",
     "@nestjs/common": "^8.0.8",
     "@nestjs/config": "^1.1.6",
     "@nestjs/jwt": "^8.0.0",
