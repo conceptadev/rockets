@@ -33,12 +33,7 @@ export class AuthRecoveryController {
   async recoverLogin(
     @Body() recoverLoginDto: AuthRecoveryRecoverLoginDto,
   ): Promise<void> {
-    try {
-      await this.authRecoveryService.recoverLogin(recoverLoginDto.email);
-    } catch (e: unknown) {
-      Logger.error(e instanceof Error ? e.message : e);
-      throw new InternalServerErrorException();
-    }
+    await this.authRecoveryService.recoverLogin(recoverLoginDto.email);
   }
 
   @ApiOperation({
@@ -53,12 +48,7 @@ export class AuthRecoveryController {
   async recoverPassword(
     @Body() recoverPasswordDto: AuthRecoveryRecoverPasswordDto,
   ): Promise<void> {
-    try {
-      await this.authRecoveryService.recoverPassword(recoverPasswordDto.email);
-    } catch (e) {
-      Logger.error(e instanceof Error ? e.message : e);
-      throw new InternalServerErrorException();
-    }
+    await this.authRecoveryService.recoverPassword(recoverPasswordDto.email);
   }
 
   @ApiOperation({
@@ -66,14 +56,7 @@ export class AuthRecoveryController {
   })
   @Get('/passcode/:passcode')
   async validatePasscode(@Param('passcode') passcode: string): Promise<void> {
-    let otp;
-
-    try {
-      otp = await this.authRecoveryService.validatePasscode(passcode);
-    } catch (e) {
-      Logger.error(e instanceof Error ? e.message : e);
-      throw new InternalServerErrorException();
-    }
+    const otp = await this.authRecoveryService.validatePasscode(passcode);
 
     if (!otp) {
       throw new NotFoundException();
@@ -91,20 +74,15 @@ export class AuthRecoveryController {
   async updatePassword(
     @Body() updatePasswordDto: AuthRecoveryUpdatePasswordDto,
   ): Promise<void> {
-    let user;
     const { passcode, newPassword } = updatePasswordDto;
 
-    try {
-      user = await this.authRecoveryService.updatePassword(
-        passcode,
-        newPassword,
-      );
-    } catch (e) {
-      Logger.error(e instanceof Error ? e.message : e);
-      throw new InternalServerErrorException();
-    }
+    const user = await this.authRecoveryService.updatePassword(
+      passcode,
+      newPassword,
+    );
 
     if (!user) {
+      // the client should have checked using validate passcode first
       throw new BadRequestException();
     }
   }
