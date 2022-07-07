@@ -8,6 +8,7 @@ export class AuthRecoveryUpdatePasswordDto {
   })
   @IsString()
   passcode = '';
+
   @ApiProperty({
     title: 'account new password',
     description: 'New password account',

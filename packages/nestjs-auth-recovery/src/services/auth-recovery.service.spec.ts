@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import { ConfigService, ConfigType } from '@nestjs/config';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { Seeding } from '@concepta/typeorm-seeding';
-import { OtpInterface } from '@concepta/ts-common';
+import { OtpInterface, UserInterface } from '@concepta/ts-common';
 import { UserEntityInterface } from '@concepta/nestjs-user';
 import { OtpService } from '@concepta/nestjs-otp';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
@@ -56,32 +56,57 @@ describe('AuthRecoveryService', () => {
   });
 
   it('Recover login', async () => {
-    await authRecoveryService.recoverLogin(testUser.email);
+    expect(
+      await authRecoveryService.recoverLogin(testUser.email),
+    ).toBeUndefined();
   });
 
   it('Recover password', async () => {
-    await authRecoveryService.recoverPassword(testUser.email);
+    expect(
+      await authRecoveryService.recoverPassword(testUser.email),
+    ).toBeUndefined();
   });
 
   it('Validate passcode', async () => {
-    const otpCreateDto = await createOtp(config, otpService, testUser.id);
+    const otp = await createOtp(config, otpService, testUser);
 
-    const { passcode } = otpCreateDto;
-    await authRecoveryService.validatePasscode(passcode);
+    const validOtp = await authRecoveryService.validatePasscode(otp.passcode);
+    expect(validOtp?.assignee).toEqual(testUser);
+  });
+
+  it('Validate passcode (invalid)', async () => {
+    const invalidOtp = await authRecoveryService.validatePasscode(
+      'FAKE_PASSCODE',
+    );
+
+    expect(invalidOtp).toBeNull();
   });
 
   it('Update password', async () => {
-    const otpCreateDto = await createOtp(config, otpService, testUser.id);
+    const otp = await createOtp(config, otpService, testUser);
 
-    const { passcode } = otpCreateDto;
-    await authRecoveryService.updatePassword(passcode, '$!Abc123bsksl6764579');
+    const user = await authRecoveryService.updatePassword(
+      otp.passcode,
+      '$!Abc123bsksl6764579',
+    );
+
+    expect(user?.id).toEqual(testUser.id);
+  });
+
+  it('Update password (fail)', async () => {
+    const user = await authRecoveryService.updatePassword(
+      'FAKE_PASSCODE',
+      '$!Abc123bsksl6764579',
+    );
+
+    expect(user).toBeNull();
   });
 });
 
 const createOtp = async (
   config: ConfigType<typeof authRecoveryDefaultConfig>,
   otpService: OtpService,
-  userId: string,
+  user: UserInterface,
 ): Promise<OtpInterface> => {
   const { category, assignment, type } = config.otp;
 
@@ -89,7 +114,7 @@ const createOtp = async (
     category,
     type,
     assignee: {
-      id: userId,
+      id: user.id,
     },
   });
 };

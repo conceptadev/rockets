@@ -24,11 +24,8 @@ export const authRecoveryDefaultConfig = registerAs(
     },
     otp: {
       assignment: 'userOtp',
-      type: 'uuid',
-      assignee: {
-        id: 'id',
-      },
       category: 'auth-recovery',
+      type: 'uuid',
     },
   }),
 );
