@@ -17,6 +17,6 @@
   "peerDependencies": {
     "class-transformer": "*",
     "class-validator": "*",
-    "typeorm": "^0.2.41"
+    "typeorm": "^0.3.0"
   }
 }

@@ -10,9 +10,7 @@ import {
 } from '@concepta/nestjs-user';
 
 import { default as ormConfig } from './auth-recovery.ormconfig.fixture';
-import { AuthRecoveryUserRepositoryFixture } from './auth-recovery.user.repository.fixture';
 import { AuthRecoveryUserOtpEntityFixture } from './auth-recovery-user-otp-entity.fixture';
-import { AuthRecoveryUserOtpRepositoryFixture } from './auth-recovery-user-otp-repository.fixture';
 import { AuthRecoveryUserEntityFixture } from './auth-recovery-user-entity.fixture';
 import { AuthRecoveryModule } from '../auth-recovery.module';
 
@@ -48,7 +46,6 @@ import { AuthRecoveryModule } from '../auth-recovery.module';
       entities: {
         userOtp: {
           entity: AuthRecoveryUserOtpEntityFixture,
-          repository: AuthRecoveryUserOtpRepositoryFixture,
         },
       },
     }),
@@ -56,7 +53,6 @@ import { AuthRecoveryModule } from '../auth-recovery.module';
       entities: {
         user: {
           entity: AuthRecoveryUserEntityFixture,
-          repository: AuthRecoveryUserRepositoryFixture,
         },
       },
     }),

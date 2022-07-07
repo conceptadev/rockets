@@ -1,19 +1,12 @@
-import {
-  EntityRepository,
-  FindConditions,
-  FindOneOptions,
-  ObjectID,
-  Repository,
-} from 'typeorm';
+import { DataSource, FindOneOptions, ObjectID } from 'typeorm';
 import { UserEntityInterface } from '../interfaces/user-entity.interface';
 import { UserEntityFixture } from './user.entity.fixture';
 
-@EntityRepository(UserEntityFixture)
-export class UserRepositoryFixture extends Repository<UserEntityInterface> {
+export function createUserRepositoryFixture(dataSource: DataSource) {
   /**
    * Fake user "database"
    */
-  private users: UserEntityFixture[] = [
+  const users: UserEntityFixture[] = [
     {
       id: '1',
       email: 'first_user@dispostable.com',
@@ -46,25 +39,28 @@ export class UserRepositoryFixture extends Repository<UserEntityInterface> {
     },
   ];
 
-  async findOne(
-    optionsOrConditions?:
-      | string
-      | number
-      | Date
-      | ObjectID
-      | FindOneOptions<UserEntityInterface>
-      | FindConditions<UserEntityInterface>,
-  ): Promise<UserEntityInterface | undefined> {
-    return this.users.find((user) => {
-      if (
-        typeof optionsOrConditions === 'object' &&
-        'id' in optionsOrConditions &&
-        'username' in optionsOrConditions
-      )
-        return (
-          user?.id === optionsOrConditions['id'] ||
-          user?.username === optionsOrConditions['username']
-        );
-    });
-  }
+  return dataSource.getRepository(UserEntityFixture).extend({
+    async findOne(
+      optionsOrConditions?:
+        | string
+        | number
+        | Date
+        | ObjectID
+        | FindOneOptions<UserEntityInterface>,
+    ): Promise<UserEntityInterface | null> {
+      return (
+        users.find((user) => {
+          if (
+            typeof optionsOrConditions === 'object' &&
+            'id' in optionsOrConditions &&
+            'username' in optionsOrConditions
+          )
+            return (
+              user?.id === optionsOrConditions['id'] ||
+              user?.username === optionsOrConditions['username']
+            );
+        }) ?? null
+      );
+    },
+  });
 }

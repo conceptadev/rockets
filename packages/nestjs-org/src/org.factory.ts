@@ -1,6 +1,6 @@
 import Faker from '@faker-js/faker';
 import { Type } from '@nestjs/common';
-import { Factory } from '@jorgebodega/typeorm-seeding';
+import { Factory } from '@concepta/typeorm-seeding';
 import { OrgEntityInterface } from './interfaces/org-entity.interface';
 
 /**
@@ -8,15 +8,14 @@ import { OrgEntityInterface } from './interfaces/org-entity.interface';
  *
  * ```ts
  * // new factory instance
- * OrgFactory.entity = OrgEntity();
  * const orgFactory = new OrgFactory();
  * ```
  */
 export class OrgFactory extends Factory<OrgEntityInterface> {
   /**
-   * The entity class.
+   * Options
    */
-  public static entity: Type<OrgEntityInterface>;
+  options: { entity?: Type<OrgEntityInterface> } = {};
 
   /**
    * List of used names.
@@ -26,10 +25,7 @@ export class OrgFactory extends Factory<OrgEntityInterface> {
   /**
    * Factory callback function.
    */
-  protected async definition(): Promise<OrgEntityInterface> {
-    // the org we will return
-    const org = new OrgFactory.entity();
-
+  protected async entity(org: OrgEntityInterface): Promise<OrgEntityInterface> {
     // set the name
     org.name = this.generateName();
 

@@ -1,7 +1,8 @@
 import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { useSeeders } from '@jorgebodega/typeorm-seeding';
+import { getDataSourceToken } from '@nestjs/typeorm';
+import { Seeding } from '@concepta/typeorm-seeding';
 import { UserFactory } from './user.factory';
 import { UserSeeder } from './user.seeder';
 
@@ -19,9 +20,13 @@ describe('AppController (e2e)', () => {
       app = moduleFixture.createNestApplication();
       await app.init();
 
-      UserFactory.entity = UserEntityFixture;
+      const userSeeder = new UserSeeder({
+        factories: { user: new UserFactory({ entity: UserEntityFixture }) },
+      });
 
-      await useSeeders(UserSeeder, { root: __dirname, connection: 'default' });
+      await Seeding.run(userSeeder, {
+        dataSource: app.get(getDataSourceToken()),
+      });
     });
 
     afterEach(async () => {

@@ -1,11 +1,9 @@
 import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { useSeeders } from '@jorgebodega/typeorm-seeding';
 import { UserFactory, UserSeeder } from '@concepta/nestjs-user/src/seeding';
 
 import { AuthRecoveryAppModuleFixture } from './__fixtures__/auth-recovery.app.module.fixture';
-import { AuthRecoveryUserEntityFixture } from './__fixtures__/auth-recovery-user-entity.fixture';
 import { AuthRecoveryRecoverPasswordDto } from './dto/auth-recovery-recover-password.dto';
 import { UserDto } from '@concepta/nestjs-user/dist/dto/user.dto';
 import { AuthRecoveryRecoverLoginDto } from './dto/auth-recovery-recover-login.dto';
@@ -16,12 +14,16 @@ import { ConfigService, ConfigType } from '@nestjs/config';
 import { AUTH_RECOVERY_MODULE_DEFAULT_SETTINGS_TOKEN } from './auth-recovery.constants';
 import { AuthRecoverySettingsInterface } from './interfaces/auth-recovery-settings.interface';
 import { OtpInterface, UserInterface } from '@concepta/ts-common';
+import { Seeding } from '@concepta/typeorm-seeding';
+import { getDataSourceToken } from '@nestjs/typeorm';
+import { AuthRecoveryUserEntityFixture } from './__fixtures__/auth-recovery-user-entity.fixture';
 
 describe('AuthRecoveryController (e2e)', () => {
   let app: INestApplication;
   let otpService: OtpService;
   let configService: ConfigService;
   let config: ConfigType<typeof authRecoveryDefaultConfig>;
+  let user: AuthRecoveryUserEntityFixture;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -37,9 +39,15 @@ describe('AuthRecoveryController (e2e)', () => {
       AUTH_RECOVERY_MODULE_DEFAULT_SETTINGS_TOKEN,
     ) as AuthRecoverySettingsInterface;
 
-    UserFactory.entity = AuthRecoveryUserEntityFixture;
+    Seeding.configure({
+      dataSource: moduleFixture.get(getDataSourceToken()),
+    });
 
-    await useSeeders(UserSeeder, { root: __dirname, connection: 'default' });
+    const userFactory = new UserFactory({
+      entity: AuthRecoveryUserEntityFixture,
+    });
+
+    user = await userFactory.create();
   });
 
   afterEach(async () => {
@@ -48,7 +56,7 @@ describe('AuthRecoveryController (e2e)', () => {
   });
 
   it('POST auth/recover-login', async () => {
-    const user = await getFirstUser(app);
+    // const user = await getFirstUser(app);
 
     await supertest(app.getHttpServer())
       .post('/auth/recovery/login')

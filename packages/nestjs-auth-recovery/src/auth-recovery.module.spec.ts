@@ -8,7 +8,6 @@ import { AuthRecoveryModule } from './auth-recovery.module';
 import { AuthRecoveryAppModuleFixture } from './__fixtures__/auth-recovery.app.module.fixture';
 import { AuthRecoveryService } from './services/auth-recovery.service';
 import { AuthRecoveryController } from './auth-recovery.controller';
-import { AuthRecoveryUserRepositoryFixture } from './__fixtures__/auth-recovery.user.repository.fixture';
 
 describe('AuthRecoveryModuleTest', () => {
   let authRecoveryModule: AuthRecoveryModule;
@@ -52,13 +51,6 @@ describe('AuthRecoveryModuleTest', () => {
 
       expect(userLookupService['repo']).toBeInstanceOf(Repository);
       expect(userMutateService['repo']).toBeInstanceOf(Repository);
-
-      expect(userMutateService['repo']).toBeInstanceOf(
-        AuthRecoveryUserRepositoryFixture,
-      );
-      expect(userLookupService['repo']).toBeInstanceOf(
-        AuthRecoveryUserRepositoryFixture,
-      );
     });
   });
 });

@@ -11,5 +11,5 @@ export class AuthRecoveryUserEntityFixture extends UserSqliteEntity {
     () => AuthRecoveryUserOtpEntityFixture,
     (userOtp) => userOtp.assignee,
   )
-  userOtps!: AuthRecoveryUserOtpEntityFixture[];
+  userOtps?: AuthRecoveryUserOtpEntityFixture[];
 }

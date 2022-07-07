@@ -13,9 +13,7 @@ import { AuthGithubController } from './auth-github.controller';
 import { AuthGithubModule } from './auth-github.module';
 
 import { FederatedEntityFixture } from './__fixtures__/federated-entity.fixture';
-import { FederatedRepositoryFixture } from './__fixtures__/federated-repository.fixture';
 import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
-import { UserRepositoryFixture } from './__fixtures__/user.repository.fixture';
 
 describe('AuthGithubModuleTest', () => {
   afterEach(async () => {
@@ -43,7 +41,6 @@ describe('AuthGithubModuleTest', () => {
           entities: {
             federated: {
               entity: FederatedEntityFixture,
-              repository: FederatedRepositoryFixture,
             },
           },
         }),
@@ -52,7 +49,6 @@ describe('AuthGithubModuleTest', () => {
           entities: {
             user: {
               entity: UserEntityFixture,
-              repository: UserRepositoryFixture,
             },
           },
         }),

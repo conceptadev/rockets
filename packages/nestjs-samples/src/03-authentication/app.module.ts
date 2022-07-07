@@ -10,16 +10,14 @@ import { PasswordModule } from '@concepta/nestjs-password';
 import { CrudModule } from '@concepta/nestjs-crud';
 import { CustomUserController } from './user/user.controller';
 import { UserEntity } from './user/user.entity';
-import { UserRepository } from './user/user.repository';
+import { createUserRepository } from './user/create-user-repository';
 
 @Module({
   imports: [
-    TypeOrmExtModule.registerAsync({
-      useFactory: async () => ({
-        type: 'postgres',
-        entities: [UserEntity],
-      }),
-      testMode: true,
+    TypeOrmExtModule.register({
+      type: 'sqlite',
+      database: ':memory:',
+      entities: [UserEntity],
     }),
     AuthLocalModule.registerAsync({ ...createUserOpts() }),
     AuthJwtModule.registerAsync({ ...createUserOpts() }),
@@ -32,7 +30,7 @@ import { UserRepository } from './user/user.repository';
       entities: {
         user: {
           entity: UserEntity,
-          repository: UserRepository,
+          repositoryFactory: createUserRepository,
         },
       },
     }),

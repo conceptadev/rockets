@@ -1,5 +1,6 @@
 import supertest from 'supertest';
 import { mock } from 'jest-mock-extended';
+import { Repository } from 'typeorm';
 
 import { INestApplication, Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -8,7 +9,6 @@ import { UserCrudService } from '@concepta/nestjs-user';
 
 import { AppModule } from './app.module';
 import { UserEntity } from './user/user.entity';
-import { UserRepository } from './user/user.repository';
 import { UserDto } from './user/user.controller';
 
 const sleep = (ms: number) => {
@@ -28,7 +28,7 @@ describe('AppController (e2e)', () => {
         .overrideProvider('USER_MODULE_USER_ENTITY_REPO_TOKEN')
         .useValue(mock<UserEntity>())
         .overrideProvider('USER_MODULE_USER_CUSTOM_REPO_TOKEN')
-        .useValue(new UserRepository())
+        .useValue(mock<Repository<UserEntity>>())
         .overrideProvider(UserCrudService)
         .useValue({})
         .compile();
@@ -107,10 +107,6 @@ describe('AppController (e2e)', () => {
       const moduleFixture: TestingModule = await Test.createTestingModule({
         imports: [AppModule],
       })
-        .overrideProvider('USER_MODULE_USER_ENTITY_REPO_TOKEN')
-        .useValue(mock<UserEntity>())
-        .overrideProvider('USER_MODULE_USER_CUSTOM_REPO_TOKEN')
-        .useValue(new UserRepository())
         .overrideProvider(UserCrudService)
         .useValue({})
         .compile();
