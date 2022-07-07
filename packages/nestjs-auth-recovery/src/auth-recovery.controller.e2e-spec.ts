@@ -1,7 +1,7 @@
 import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { UserFactory, UserSeeder } from '@concepta/nestjs-user/src/seeding';
+import { UserFactory } from '@concepta/nestjs-user/src/seeding';
 
 import { AuthRecoveryAppModuleFixture } from './__fixtures__/auth-recovery.app.module.fixture';
 import { AuthRecoveryRecoverPasswordDto } from './dto/auth-recovery-recover-password.dto';
