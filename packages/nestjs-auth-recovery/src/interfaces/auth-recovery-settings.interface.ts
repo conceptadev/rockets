@@ -1,9 +1,9 @@
-import { OptionsInterface } from '@concepta/ts-core';
-import { OtpCreatableInterface } from '@concepta/ts-common';
+import { OptionsInterface, ReferenceAssignment } from '@concepta/ts-core';
+import { OtpInterface } from '@concepta/ts-common';
 
 export interface AuthRecoveryOtpSettingsInterface
-  extends OtpCreatableInterface {
-  assignment: string;
+  extends Pick<OtpInterface, 'category' | 'type'> {
+  assignment: ReferenceAssignment;
 }
 
 export interface AuthRecoverySettingsInterface extends OptionsInterface {

@@ -56,8 +56,6 @@ describe('AuthRecoveryController (e2e)', () => {
   });
 
   it('POST auth/recover-login', async () => {
-    // const user = await getFirstUser(app);
-
     await supertest(app.getHttpServer())
       .post('/auth/recovery/login')
       .send({ email: user.email } as AuthRecoveryRecoverLoginDto)
