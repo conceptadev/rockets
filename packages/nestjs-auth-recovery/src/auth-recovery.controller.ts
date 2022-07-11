@@ -3,8 +3,6 @@ import {
   Body,
   Controller,
   Get,
-  InternalServerErrorException,
-  Logger,
   NotFoundException,
   Param,
   Patch,
