@@ -1,5 +1,6 @@
 import { Readable } from 'stream';
 import { Url } from 'url';
+import { LiteralObject } from '@concepta/ts-core';
 
 interface Address {
   name: string;
@@ -21,9 +22,7 @@ export interface EmailSendOptionsInterface {
   bcc?: string | Address | Array<string | Address>;
   from?: string | Address;
   replyTo?: string | Address;
-  context?: {
-    [name: string]: unknown;
-  };
+  context?: LiteralObject;
   subject?: string;
   template?: string;
   icalEvent?: string | Buffer | Readable | IcalAttachment;

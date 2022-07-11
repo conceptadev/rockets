@@ -1,3 +1,4 @@
+import { LiteralObject } from '@concepta/ts-core';
 import { OtpTypeServiceInterface } from './otp-types-service.interface';
 
 export interface OtpSettingsInterface {
@@ -8,7 +9,5 @@ export interface OtpSettingsInterface {
    */
   expiresIn: string;
 
-  types: {
-    [idx: string]: OtpTypeServiceInterface;
-  };
+  types: LiteralObject<OtpTypeServiceInterface>;
 }

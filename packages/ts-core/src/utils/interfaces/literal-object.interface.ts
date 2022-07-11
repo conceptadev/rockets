@@ -1,3 +1,1 @@
-export interface LiteralObject extends Record<string, unknown> {
-  [index: string]: unknown;
-}
+export interface LiteralObject<T = unknown> extends Record<string, T> {}

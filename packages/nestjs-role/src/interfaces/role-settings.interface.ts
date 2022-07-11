@@ -1,3 +1,5 @@
+import { LiteralObject } from '@concepta/ts-core';
+
 export interface RoleSettingsInterface {
-  assignments: { [idx: string]: { entityKey: string } };
+  assignments: LiteralObject<{ entityKey: string }>;
 }

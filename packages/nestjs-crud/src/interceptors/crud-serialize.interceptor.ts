@@ -4,7 +4,6 @@ import {
   Inject,
   InternalServerErrorException,
   NestInterceptor,
-  PlainLiteralObject,
   StreamableFile,
   Type,
 } from '@nestjs/common';
@@ -16,7 +15,7 @@ import {
 } from 'class-transformer';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ReferenceIdInterface } from '@concepta/ts-core';
+import { LiteralObject, ReferenceIdInterface } from '@concepta/ts-core';
 import { CrudResponseDto } from '../dto/crud-response.dto';
 import { CrudResponsePaginatedDto } from '../dto/crud-response-paginated.dto';
 import { CrudSerializationOptionsInterface } from '../interfaces/crud-serialization-options.interface';
@@ -26,8 +25,8 @@ import { CrudReflectionService } from '../services/crud-reflection.service';
 import { CRUD_MODULE_SETTINGS_TOKEN } from '../crud.constants';
 
 type ResponseType =
-  | (PlainLiteralObject & CrudResultPaginatedInterface<ReferenceIdInterface>)
-  | Array<PlainLiteralObject>;
+  | (LiteralObject & CrudResultPaginatedInterface<ReferenceIdInterface>)
+  | Array<LiteralObject>;
 
 export class CrudSerializeInterceptor implements NestInterceptor {
   constructor(
