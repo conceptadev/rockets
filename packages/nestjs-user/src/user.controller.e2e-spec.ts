@@ -24,7 +24,7 @@ describe('AppController (e2e)', () => {
         factories: { user: new UserFactory({ entity: UserEntityFixture }) },
       });
 
-      await Seeding.run(userSeeder, {
+      await Seeding.run([userSeeder], {
         dataSource: app.get(getDataSourceToken()),
       });
     });
