@@ -23,7 +23,7 @@ describe('AppController (e2e)', () => {
       app = moduleFixture.createNestApplication();
       await app.init();
 
-      await Seeding.run(PhotoSeederFixture, {
+      await Seeding.run([PhotoSeederFixture], {
         dataSource: app.get(getDataSourceToken()),
       });
     });

@@ -24,7 +24,7 @@ describe('RoleController (e2e)', () => {
         factories: { role: new RoleFactory({ entity: RoleEntityFixture }) },
       });
 
-      await Seeding.run(roleSeeder, {
+      await Seeding.run([roleSeeder], {
         dataSource: app.get(getDataSourceToken()),
       });
     });
