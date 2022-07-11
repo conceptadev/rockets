@@ -14,12 +14,12 @@
   "dependencies": {
     "@concepta/nestjs-core": "^4.0.0-alpha.17",
     "@concepta/ts-core": "^4.0.0-alpha.17",
-    "@nestjs/common": "^8.0.8",
+    "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^1.1.6",
-    "@nestjs/typeorm": "^8.0.2"
+    "@nestjs/typeorm": "^9.0.0"
   },
   "devDependencies": {
-    "@nestjs/testing": "^8.0.8",
+    "@nestjs/testing": "^9.0.0",
     "jest-mock-extended": "^2.0.4",
     "sqlite3": "npm:@vscode/sqlite3@^5.0.7"
   },

@@ -13,15 +13,15 @@
   ],
   "dependencies": {
     "@concepta/nestjs-core": "^4.0.0-alpha.17",
-    "@nestjs/common": "^8.0.2",
+    "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^1.1.6",
-    "@nestjs/core": "^8.0.2",
-    "@nestjs/platform-fastify": "^8.0.6",
+    "@nestjs/core": "^9.0.0",
+    "@nestjs/platform-fastify": "^9.0.0",
     "@sentry/node": "^6.11.0",
     "fastify": "^3.25.3"
   },
   "devDependencies": {
-    "@nestjs/testing": "^8.0.2",
+    "@nestjs/testing": "^9.0.0",
     "@sentry/types": "^6.13.3",
     "jest-mock-extended": "^2.0.4"
   },

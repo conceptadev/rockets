@@ -14,20 +14,20 @@
   "dependencies": {
     "@concepta/nestjs-core": "^4.0.0-alpha.17",
     "@concepta/ts-core": "^4.0.0-alpha.17",
-    "@nestjs/common": "^8.0.8",
+    "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^1.0.0",
-    "@nestjs/core": "^8.0.8",
-    "@nestjs/swagger": "^5.2.1",
+    "@nestjs/core": "^9.0.0",
+    "@nestjs/swagger": "^6.0.0",
     "@nestjsx/crud": "^5.0.0-alpha.3",
     "@nestjsx/crud-request": "^5.0.0-alpha.3",
     "@nestjsx/crud-typeorm": "^5.0.0-alpha.3"
   },
   "devDependencies": {
     "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.17",
-    "@concepta/typeorm-seeding": "^4.0.0-alpha.2",
+    "@concepta/typeorm-seeding": "^4.0.0-alpha.3",
     "@faker-js/faker": "^6.0.0-alpha.7",
-    "@nestjs/testing": "^8.0.8",
-    "@nestjs/typeorm": "^8.0.2",
+    "@nestjs/testing": "^9.0.0",
+    "@nestjs/typeorm": "^9.0.0",
     "jest-mock-extended": "^2.0.4",
     "supertest": "^6.1.6",
     "swagger-ui-express": "^4.3.0"

@@ -54,7 +54,7 @@ describe('OrgController (e2e)', () => {
         },
       });
 
-      await Seeding.run(orgSeeder, {
+      await Seeding.run([orgSeeder], {
         dataSource: app.get(getDataSourceToken()),
       });
     });
