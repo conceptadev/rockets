@@ -4,6 +4,7 @@ import { IsEmail } from 'class-validator';
 export class AuthRecoveryRecoverPasswordDto {
   @ApiProperty({
     title: 'user email',
+    type: 'string',
     description:
       'Recover email password by providing an email that will receive a password reset link',
   })
