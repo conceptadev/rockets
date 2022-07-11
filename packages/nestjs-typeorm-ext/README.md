@@ -69,6 +69,6 @@ export class AppModule {}
 
 ## Configuration
 
-### Connection Options
+### Data Source Options
 
 The module options are identical the the NestJS TypeOrm module.

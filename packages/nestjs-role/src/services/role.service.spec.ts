@@ -58,11 +58,11 @@ describe('RoleModule', () => {
           entities: {
             role: {
               entity: RoleEntityFixture,
-              connection: connectionName,
+              dataSource: connectionName,
             },
             userRole: {
               entity: UserRoleEntityFixture,
-              connection: connectionName,
+              dataSource: connectionName,
             },
           },
         }),

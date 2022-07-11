@@ -1,8 +1,8 @@
 import { Provider } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { TypeOrmExtConnectionToken } from '../typeorm-ext.types';
+import { TypeOrmExtDataSourceToken } from '../typeorm-ext.types';
 import { getEntityRepositoryToken } from './get-entity-repository-token';
-import { TYPEORM_EXT_MODULE_DEFAULT_CONNECTION_NAME } from '../typeorm-ext.constants';
+import { TYPEORM_EXT_MODULE_DEFAULT_DATA_SOURCE_NAME } from '../typeorm-ext.constants';
 import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
 
 /**
@@ -10,16 +10,16 @@ import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-clas
  *
  * @param key Entity key
  * @param entity The entity
- * @param connection The connection
+ * @param dataSource The data source
  * @returns {Provider} Repository provider
  */
 export function createEntityRepositoryProvider(
   key: string,
   entity: EntityClassOrSchema,
-  connection: TypeOrmExtConnectionToken = TYPEORM_EXT_MODULE_DEFAULT_CONNECTION_NAME,
+  dataSource: TypeOrmExtDataSourceToken = TYPEORM_EXT_MODULE_DEFAULT_DATA_SOURCE_NAME,
 ): Provider {
   return {
     provide: getEntityRepositoryToken(key),
-    useExisting: getRepositoryToken(entity, connection),
+    useExisting: getRepositoryToken(entity, dataSource),
   };
 }

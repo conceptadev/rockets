@@ -5,6 +5,6 @@ export const TYPEORM_EXT_MODULE_OPTIONS_TOKEN =
   'TYPEORM_EXT_MODULE_OPTIONS_TOKEN';
 
 /**
- * The TypeOrm default connection name
+ * The TypeOrm default data source name
  */
-export const TYPEORM_EXT_MODULE_DEFAULT_CONNECTION_NAME = 'default';
+export const TYPEORM_EXT_MODULE_DEFAULT_DATA_SOURCE_NAME = 'default';

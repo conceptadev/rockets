@@ -3,4 +3,4 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 export type TypeOrmExtOptions = TypeOrmModuleOptions;
 
-export type TypeOrmExtConnectionToken = DataSource | DataSourceOptions | string;
+export type TypeOrmExtDataSourceToken = DataSource | DataSourceOptions | string;

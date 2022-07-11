@@ -77,7 +77,7 @@ describe('OtpModule', () => {
           entities: {
             userOtp: {
               entity: UserOtpEntityFixture,
-              connection: connectionName,
+              dataSource: connectionName,
             },
           },
         }),

@@ -12,15 +12,15 @@ import {
   DeferExternalOptionsInterface,
 } from '@concepta/nestjs-core';
 import {
-  TYPEORM_EXT_MODULE_DEFAULT_CONNECTION_NAME,
+  TYPEORM_EXT_MODULE_DEFAULT_DATA_SOURCE_NAME,
   TYPEORM_EXT_MODULE_OPTIONS_TOKEN,
 } from './typeorm-ext.constants';
 import {
-  TypeOrmExtConnectionToken,
+  TypeOrmExtDataSourceToken,
   TypeOrmExtOptions,
 } from './typeorm-ext.types';
 import { TypeOrmExtEntityOptionInterface } from './interfaces/typeorm-ext-entity-options.interface';
-import { resolveConnectionName } from './utils/resolve-connection-name';
+import { resolveDataSourceName } from './utils/resolve-data-source-name';
 import { createEntityRepositoryProvider } from './utils/create-entity-repository-provider';
 import { createDynamicRepositoryProvider } from './utils/create-dynamic-repository-provider';
 
@@ -43,7 +43,7 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
       TypeOrmModule.forRootAsync({
         name: options?.name
           ? options.name
-          : TYPEORM_EXT_MODULE_DEFAULT_CONNECTION_NAME,
+          : TYPEORM_EXT_MODULE_DEFAULT_DATA_SOURCE_NAME,
         inject: [TYPEORM_EXT_MODULE_OPTIONS_TOKEN],
         useFactory: async (options: TypeOrmModuleOptions) => options,
       }),
@@ -76,9 +76,9 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
   static forFeature(
     entityOptions: Record<string, TypeOrmExtEntityOptionInterface>,
   ): DynamicModule {
-    const connections: Record<string, TypeOrmExtConnectionToken> = {};
+    const dataSources: Record<string, TypeOrmExtDataSourceToken> = {};
 
-    const entitiesByConn: Record<string, EntityClassOrSchema[]> = {};
+    const entitiesByDS: Record<string, EntityClassOrSchema[]> = {};
 
     const imports: DynamicModule[] = [];
 
@@ -88,38 +88,35 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
       const {
         entity,
         repositoryFactory,
-        connection = TYPEORM_EXT_MODULE_DEFAULT_CONNECTION_NAME,
+        dataSource = TYPEORM_EXT_MODULE_DEFAULT_DATA_SOURCE_NAME,
       } = entityOptions[entityKey];
 
-      const connectionName = resolveConnectionName(connection);
+      const dsName = resolveDataSourceName(dataSource);
 
-      if (connectionName in connections === false) {
-        connections[connectionName] = connection;
+      if (dsName in dataSources === false) {
+        dataSources[dsName] = dataSource;
       }
 
-      if (connectionName in entitiesByConn === false) {
-        entitiesByConn[connectionName] = [];
+      if (dsName in entitiesByDS === false) {
+        entitiesByDS[dsName] = [];
       }
 
-      entitiesByConn[connectionName].push(entity);
+      entitiesByDS[dsName].push(entity);
 
       providers.push(
-        createEntityRepositoryProvider(entityKey, entity, connection),
+        createEntityRepositoryProvider(entityKey, entity, dataSource),
         createDynamicRepositoryProvider(
           entityKey,
           entity,
           repositoryFactory,
-          connection,
+          dataSource,
         ),
       );
     }
 
-    for (const connectionName in entitiesByConn) {
+    for (const dsName in entitiesByDS) {
       imports.push(
-        TypeOrmModule.forFeature(
-          entitiesByConn[connectionName],
-          connections[connectionName],
-        ),
+        TypeOrmModule.forFeature(entitiesByDS[dsName], dataSources[dsName]),
       );
     }
 
