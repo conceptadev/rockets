@@ -1,8 +1,7 @@
 import { Type } from '@nestjs/common';
-import { OptionsInterface } from '@concepta/ts-core';
 import { ClassTransformOptions } from 'class-transformer';
 
-export interface CrudSerializationOptionsInterface extends OptionsInterface {
+export interface CrudSerializationOptionsInterface {
   type?: Type;
   paginatedType?: Type;
   toInstanceOptions?: ClassTransformOptions;

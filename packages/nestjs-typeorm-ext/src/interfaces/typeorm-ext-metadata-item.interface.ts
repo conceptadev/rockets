@@ -1,11 +1,9 @@
-import { OptionsInterface } from '@concepta/ts-core';
 import { TypeOrmExtConnectionToken } from '../typeorm-ext.types';
 
 /**
  * Metadata Single Item Interface
  */
-export interface TypeOrmExtMetadataItemInterface<T = unknown>
-  extends OptionsInterface {
+export interface TypeOrmExtMetadataItemInterface<T = unknown> {
   /**
    * useClass option
    */

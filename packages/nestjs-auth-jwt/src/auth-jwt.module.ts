@@ -56,7 +56,7 @@ export class AuthJwtModule extends createConfigurableDynamicRootModule<
       useFactory: async (
         options: AuthJwtOptionsInterface,
         defaultService: VerifyTokenServiceInterface,
-      ) => options.issueTokenService ?? defaultService,
+      ) => options.verifyTokenService ?? defaultService,
     },
     {
       provide: AUTH_JWT_MODULE_USER_LOOKUP_SERVICE_TOKEN,

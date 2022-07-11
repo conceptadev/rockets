@@ -1,7 +1,6 @@
 import { ApiParamOptions } from '@nestjs/swagger';
-import { OptionsInterface } from '@concepta/ts-core';
 
-export interface CrudApiParamMetadataInterface extends OptionsInterface {
+export interface CrudApiParamMetadataInterface {
   propertyKey: string | symbol;
   options: ApiParamOptions | undefined;
 }

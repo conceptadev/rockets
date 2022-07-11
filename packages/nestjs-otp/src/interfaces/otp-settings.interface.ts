@@ -1,7 +1,6 @@
-import { OptionsInterface } from '@concepta/ts-core';
 import { OtpTypeServiceInterface } from './otp-types-service.interface';
 
-export interface OtpSettingsInterface extends OptionsInterface {
+export interface OtpSettingsInterface {
   /**
    * Expressed in seconds or a string describing a time span [zeit/ms](https://github.com/zeit/ms.js).
    *

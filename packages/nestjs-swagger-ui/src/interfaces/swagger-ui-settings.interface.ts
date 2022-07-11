@@ -1,8 +1,6 @@
-import { OptionsInterface } from '@concepta/ts-core';
-
 import { SwaggerCustomOptions, SwaggerDocumentOptions } from '@nestjs/swagger';
 
-export interface SwaggerUiSettingsInterface extends OptionsInterface {
+export interface SwaggerUiSettingsInterface {
   // ui
   path: string;
   documentOptions?: SwaggerDocumentOptions;

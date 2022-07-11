@@ -1,7 +1,6 @@
 import { ApiQueryOptions } from '@nestjs/swagger';
-import { OptionsInterface } from '@concepta/ts-core';
 
-export interface CrudApiQueryMetadataInterface extends OptionsInterface {
+export interface CrudApiQueryMetadataInterface {
   propertyKey: string | symbol;
   options: ApiQueryOptions[] | undefined;
 }

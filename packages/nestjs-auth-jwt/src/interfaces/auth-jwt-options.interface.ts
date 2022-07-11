@@ -1,9 +1,8 @@
 import { VerifyTokenServiceInterface } from '@concepta/nestjs-authentication';
-import { OptionsInterface } from '@concepta/ts-core';
 import { AuthJwtSettingsInterface } from './auth-jwt-settings.interface';
 import { AuthJwtUserLookupServiceInterface } from './auth-jwt-user-lookup-service.interface';
 
-export interface AuthJwtOptionsInterface extends OptionsInterface {
+export interface AuthJwtOptionsInterface {
   settings?: AuthJwtSettingsInterface;
   userLookupService: AuthJwtUserLookupServiceInterface;
   verifyTokenService?: VerifyTokenServiceInterface;

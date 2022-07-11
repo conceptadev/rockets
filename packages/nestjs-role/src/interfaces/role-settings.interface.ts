@@ -1,5 +1,3 @@
-import { OptionsInterface } from '@concepta/ts-core';
-
-export interface RoleSettingsInterface extends OptionsInterface {
+export interface RoleSettingsInterface {
   assignments: { [idx: string]: { entityKey: string } };
 }

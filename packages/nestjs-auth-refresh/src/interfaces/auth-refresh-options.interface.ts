@@ -1,4 +1,3 @@
-import { OptionsInterface } from '@concepta/ts-core';
 import {
   IssueTokenServiceInterface,
   VerifyTokenService,
@@ -6,7 +5,7 @@ import {
 import { AuthRefreshUserLookupServiceInterface } from './auth-refresh-user-lookup-service.interface';
 import { AuthRefreshSettingsInterface } from './auth-refresh-settings.interface';
 
-export interface AuthRefreshOptionsInterface extends OptionsInterface {
+export interface AuthRefreshOptionsInterface {
   /**
    * Implementation of a class that returns user identity
    */

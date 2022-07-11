@@ -1,4 +1,4 @@
-import { OptionsInterface, ReferenceAssignment } from '@concepta/ts-core';
+import { ReferenceAssignment } from '@concepta/ts-core';
 import { OtpInterface } from '@concepta/ts-common';
 
 export interface AuthRecoveryOtpSettingsInterface
@@ -6,7 +6,7 @@ export interface AuthRecoveryOtpSettingsInterface
   assignment: ReferenceAssignment;
 }
 
-export interface AuthRecoverySettingsInterface extends OptionsInterface {
+export interface AuthRecoverySettingsInterface {
   email: {
     from: string;
     baseUrl: string;

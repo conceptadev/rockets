@@ -1,7 +1,6 @@
 import { Type } from '@nestjs/common';
-import { OptionsInterface } from '@concepta/ts-core';
 
-export interface AuthLocalSettingsInterface extends OptionsInterface {
+export interface AuthLocalSettingsInterface {
   loginDto?: Type;
   usernameField?: string;
   passwordField?: string;

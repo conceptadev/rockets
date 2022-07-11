@@ -1,8 +1,7 @@
 import { Body } from '@nestjs/common';
-import { OptionsInterface } from '@concepta/ts-core';
 import { CrudValidationOptions } from '../crud.types';
 
-export interface CrudValidationMetadataInterface extends OptionsInterface {
+export interface CrudValidationMetadataInterface {
   propertyKey: string | symbol;
   parameterIndex: number;
   validation: CrudValidationOptions | undefined;

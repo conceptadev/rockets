@@ -1,6 +1,5 @@
-import { OptionsInterface } from '@concepta/ts-core';
 import { OtpSettingsInterface } from './otp-settings.interface';
 
-export interface OtpOptionsInterface extends OptionsInterface {
+export interface OtpOptionsInterface {
   settings?: OtpSettingsInterface;
 }
