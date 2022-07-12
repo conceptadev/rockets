@@ -34,13 +34,7 @@ export class OtpModule extends createConfigurableDynamicRootModule<
   OtpModule,
   OtpOptionsInterface
 >(OTP_MODULE_OPTIONS_TOKEN, {
-  imports: [
-    ConfigModule.forFeature(otpDefaultConfig),
-    CrudModule.deferred({
-      timeoutMessage:
-        'OtpModule requires CrudModule to be registered in your application.',
-    }),
-  ],
+  imports: [ConfigModule.forFeature(otpDefaultConfig)],
   providers: [
     {
       provide: OTP_MODULE_SETTINGS_TOKEN,
