@@ -27,10 +27,7 @@
     "@concepta/ts-common": "^4.0.0-alpha.17",
     "@concepta/ts-core": "^4.0.0-alpha.17",
     "@nestjs/common": "^9.0.0",
-    "@nestjs/config": "^2.2.0",
     "@nestjs/core": "^9.0.0",
-    "@nestjs/jwt": "^9.0.0",
-    "@nestjs/mapped-types": "^1.0.1",
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/platform-fastify": "^9.0.0",
     "@nestjs/swagger": "^6.0.0",
@@ -42,8 +39,9 @@
     "@nestjs/typeorm": "^9.0.0",
     "@types/supertest": "^2.0.11",
     "jest-mock-extended": "^2.0.4",
-    "pg": "^8.7.1",
-    "supertest": "^6.1.6",
+    "supertest": "^6.1.6"
+  },
+  "peerDependencies": {
     "typeorm": "^0.3.0"
   }
 }

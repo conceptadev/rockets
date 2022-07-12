@@ -20,15 +20,10 @@
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.2.0",
     "@nestjs/core": "^9.0.0",
-    "@nestjs/passport": "^9.0.0",
-    "@nestjs/platform-fastify": "^9.0.0",
-    "@nestjs/swagger": "^6.0.0",
-    "express": "^4.17.1",
-    "fastify": "^3.25.3"
+    "@nestjs/swagger": "^6.0.0"
   },
   "devDependencies": {
-    "@nestjs/testing": "^9.0.0",
-    "jest-mock-extended": "^2.0.4"
+    "@nestjs/testing": "^9.0.0"
   },
   "peerDependencies": {
     "class-transformer": "*",

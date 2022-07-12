@@ -15,9 +15,6 @@
     "@concepta/ts-core": "^4.0.0-alpha.17",
     "@nestjs/swagger": "^6.0.0"
   },
-  "devDependencies": {
-    "@nestjs/testing": "^9.0.0"
-  },
   "peerDependencies": {
     "class-transformer": "*",
     "class-validator": "*"

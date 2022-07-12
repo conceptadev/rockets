@@ -34,9 +34,6 @@
     "supertest": "^6.1.6"
   },
   "peerDependencies": {
-    "@concepta/typeorm-seeding": "^4.0.0-alpha.3",
-    "@faker-js/faker": "^6.0.0-alpha.6",
-    "@nestjs/typeorm": "^9.0.0",
     "class-transformer": "*",
     "class-validator": "*",
     "typeorm": "^0.3.0"

@@ -22,6 +22,8 @@
     "@types/supertest": "^2.0.11",
     "@typescript-eslint/eslint-plugin": "^5.9.1",
     "@typescript-eslint/parser": "^5.9.1",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.13.0",
     "eslint": "^8.6.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.25.4",
@@ -70,9 +72,6 @@
     "changelog:minor": "standard-version --release-as minor",
     "changelog:patch": "standard-version --release-as patch",
     "changelog:major": "standard-version --release-as major"
-  },
-  "dependencies": {
-    "class-transformer": "^0.5.1"
   },
   "resolutions": {
     "**/@angular-devkit/schematics-cli/minimist": "^1.2.6"

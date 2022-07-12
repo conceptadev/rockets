@@ -16,7 +16,6 @@
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.2.0",
     "@nestjs/core": "^9.0.0",
-    "@nestjs/platform-fastify": "^9.0.0",
     "@sentry/node": "^6.11.0",
     "fastify": "^3.25.3"
   },

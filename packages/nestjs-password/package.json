@@ -14,7 +14,6 @@
   "dependencies": {
     "@concepta/nestjs-core": "^4.0.0-alpha.17",
     "@concepta/ts-common": "^4.0.0-alpha.17",
-    "@concepta/ts-core": "^4.0.0-alpha.17",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.2.0",
     "@nestjs/core": "^9.0.0",
@@ -22,13 +21,9 @@
     "bcrypt": "^5.0.1",
     "zxcvbn": "^4.4.2"
   },
-  "peerDependencies": {
-    "eventemitter2": "*"
-  },
   "devDependencies": {
     "@nestjs/testing": "^9.0.0",
     "@types/bcrypt": "^5.0.0",
-    "@types/passport-local": "^1.0.34",
     "jest-mock-extended": "^2.0.4"
   }
 }

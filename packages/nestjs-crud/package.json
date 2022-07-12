@@ -29,13 +29,11 @@
     "@nestjs/testing": "^9.0.0",
     "@nestjs/typeorm": "^9.0.0",
     "jest-mock-extended": "^2.0.4",
-    "supertest": "^6.1.6",
-    "swagger-ui-express": "^4.3.0"
+    "supertest": "^6.1.6"
   },
   "peerDependencies": {
     "class-transformer": "*",
     "class-validator": "*",
-    "jest-mock-extended": "^2.0.4",
     "rxjs": "^7.1.0",
     "typeorm": "^0.3.0"
   }

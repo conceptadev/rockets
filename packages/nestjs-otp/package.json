@@ -15,7 +15,6 @@
     "@concepta/nestjs-common": "^4.0.0-alpha.17",
     "@concepta/nestjs-core": "^4.0.0-alpha.17",
     "@concepta/nestjs-crud": "^4.0.0-alpha.17",
-    "@concepta/nestjs-exception": "^4.0.0-alpha.17",
     "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.17",
     "@concepta/ts-common": "^4.0.0-alpha.17",
     "@concepta/ts-core": "^4.0.0-alpha.17",
@@ -30,13 +29,9 @@
     "@nestjs/testing": "^9.0.0",
     "@nestjs/typeorm": "^9.0.0",
     "@types/ms": "^0.7.31",
-    "jest-mock-extended": "^2.0.4",
-    "supertest": "^6.2.3"
+    "jest-mock-extended": "^2.0.4"
   },
   "peerDependencies": {
-    "@concepta/typeorm-seeding": "^4.0.0-alpha.3",
-    "@faker-js/faker": "^6.0.0-alpha.6",
-    "@nestjs/typeorm": "^9.0.0",
     "class-transformer": "*",
     "class-validator": "*",
     "typeorm": "^0.3.0"

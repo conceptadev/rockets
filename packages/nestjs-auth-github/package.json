@@ -30,7 +30,6 @@
     "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.17",
     "@concepta/nestjs-user": "^4.0.0-alpha.17",
     "@nestjs/testing": "^9.0.0",
-    "@sentry/types": "^6.13.3",
     "@types/passport-github": "^1.1.7",
     "jest-mock-extended": "^2.0.4"
   },
