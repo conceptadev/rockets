@@ -13,11 +13,11 @@ export const authRecoveryDefaultConfig = registerAs(
       baseUrl: 'baseUrl',
       templates: {
         recoverLogin: {
-          fileName: 'recover-login.template.hbs',
+          fileName: __dirname + '/../assets/recover-login.template.hbs',
           subject: 'Login Recovery',
         },
         recoverPassword: {
-          fileName: 'recover-password.template.hbs',
+          fileName: __dirname + '/../assets/recover-password.template.hbs',
           subject: 'Password Recovery',
         },
       },
