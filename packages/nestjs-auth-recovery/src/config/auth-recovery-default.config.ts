@@ -26,6 +26,7 @@ export const authRecoveryDefaultConfig = registerAs(
       assignment: 'userOtp',
       category: 'auth-recovery',
       type: 'uuid',
+      expiresIn: '1h',
     },
   }),
 );

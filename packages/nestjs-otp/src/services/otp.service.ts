@@ -57,12 +57,17 @@ export class OtpService implements OtpServiceInterface {
       // generate a passcode
       const passcode = this.settings.types[otp.type].generator();
 
+      // break out the vars
+      const { category, type, assignee, expiresIn } = dto;
+
       // generate the expiration date
-      const expirationDate = this.getExpirationDate(this.settings.expiresIn);
+      const expirationDate = this.getExpirationDate(expiresIn);
 
       // try to save the item
       return assignmentRepo.save({
-        ...dto,
+        category,
+        type,
+        assignee,
         passcode,
         expirationDate,
       });

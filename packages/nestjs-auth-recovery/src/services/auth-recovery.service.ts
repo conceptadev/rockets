@@ -65,11 +65,12 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
     // did we find a user?
     if (user) {
       // extract required otp properties
-      const { category, assignment, type } = this.config.otp;
+      const { category, assignment, type, expiresIn } = this.config.otp;
       // create an OTP save it in the database
       const otp = await this.otpService.create(assignment, {
         category,
         type,
+        expiresIn,
         assignee: {
           id: user.id,
         },

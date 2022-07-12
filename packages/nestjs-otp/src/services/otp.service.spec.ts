@@ -1,7 +1,6 @@
 import ms from 'ms';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getDataSourceToken } from '@nestjs/typeorm';
-import { CrudModule } from '@concepta/nestjs-crud';
 import { OtpInterface } from '@concepta/ts-common';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { Seeding } from '@concepta/typeorm-seeding';
@@ -47,6 +46,7 @@ describe('OtpModule', () => {
   ) =>
     await otpService.create('userOtp', {
       type: 'uuid',
+      expiresIn: '1h',
       category: CATEGORY_DEFAULT,
       ...options,
     });
@@ -81,7 +81,6 @@ describe('OtpModule', () => {
             },
           },
         }),
-        CrudModule.register(),
       ],
     }).compile();
 

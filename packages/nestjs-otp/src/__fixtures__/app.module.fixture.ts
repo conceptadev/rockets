@@ -1,4 +1,3 @@
-import { CrudModule } from '@concepta/nestjs-crud';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { Module } from '@nestjs/common';
 
@@ -21,7 +20,6 @@ import { UserOtpEntityFixture } from './entities/user-otp-entity.fixture';
         },
       },
     }),
-    CrudModule.register(),
   ],
 })
 export class AppModuleFixture {}

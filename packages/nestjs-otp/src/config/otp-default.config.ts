@@ -10,7 +10,6 @@ import { uuidValidatorUtil } from '../utils/uuid-validator.util';
 export const otpDefaultConfig = registerAs(
   OTP_MODULE_DEFAULT_SETTINGS_TOKEN,
   (): OtpSettingsInterface => ({
-    expiresIn: '1h',
     types: {
       uuid: {
         generator: uuidGeneratorUtil,

@@ -122,11 +122,12 @@ const createOtp = async (
   otpService: OtpService,
   userId: string,
 ): Promise<OtpInterface> => {
-  const { category, assignment, type } = config.otp;
+  const { category, assignment, type, expiresIn } = config.otp;
 
   return await otpService.create(assignment, {
     category,
     type,
+    expiresIn,
     assignee: {
       id: userId,
     },

@@ -12,7 +12,6 @@ import {
   getDynamicRepositoryToken,
   TypeOrmExtModule,
 } from '@concepta/nestjs-typeorm-ext';
-import { CrudModule } from '@concepta/nestjs-crud';
 import {
   OTP_MODULE_REPOSITORIES_TOKEN,
   OTP_MODULE_OPTIONS_TOKEN,

@@ -1,8 +1,8 @@
 import { ReferenceAssignment } from '@concepta/ts-core';
-import { OtpInterface } from '@concepta/ts-common';
+import { OtpCreatableInterface } from '@concepta/ts-common';
 
 export interface AuthRecoveryOtpSettingsInterface
-  extends Pick<OtpInterface, 'category' | 'type'> {
+  extends Pick<OtpCreatableInterface, 'category' | 'type' | 'expiresIn'> {
   assignment: ReferenceAssignment;
 }
 
