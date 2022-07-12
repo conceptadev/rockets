@@ -9,9 +9,11 @@ import { AuthRecoveryUserLookupServiceInterface } from './auth-recovery-user-loo
 import { AuthRecoveryUserMutateServiceInterface } from './auth-recovery-user-mutate.service.interface';
 
 export interface AuthRecoveryOptionsInterface
-  extends ModuleOptionsSettingsInterface<AuthRecoverySettingsInterface>,
+  extends ModuleOptionsSettingsInterface<
+      Partial<AuthRecoverySettingsInterface>
+    >,
     ModuleOptionsControllerInterface {
-  settings?: AuthRecoverySettingsInterface;
+  settings?: Partial<AuthRecoverySettingsInterface>;
   otpService: AuthRecoveryOtpServiceInterface;
   emailService: AuthRecoveryEmailServiceInterface;
   userLookupService: AuthRecoveryUserLookupServiceInterface;
