@@ -95,6 +95,9 @@
     },
     {
       "path": "packages/nestjs-auth-recovery"
+    },
+    {
+      "path": "packages/nestjs-invitation"
     }
   ]
 }
