@@ -15,6 +15,10 @@ export interface InvitationSettingsInterface {
         fileName: string;
         subject: string;
       };
+      invitationAccepted: {
+        fileName: string;
+        subject: string;
+      };
     };
   };
   otp: InvitationOtpSettingsInterface;

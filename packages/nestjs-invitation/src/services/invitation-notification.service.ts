@@ -41,4 +41,16 @@ export class InvitationNotificationService
       },
     });
   }
+
+  async sendInviteAcceptedEmail(email: string): Promise<void> {
+    const { from } = this.config.email;
+    const { subject, fileName } =
+      this.config.email.templates.invitationAccepted;
+    await this.sendEmail({
+      from,
+      subject,
+      to: email,
+      template: fileName,
+    });
+  }
 }

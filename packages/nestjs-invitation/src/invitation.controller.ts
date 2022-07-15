@@ -12,7 +12,7 @@ import {
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { InvitationService } from './services/invitation.service';
 import { InvitationDto } from './dto/invitation.dto';
-import { InvitationUpdatePasswordDto } from './dto/invitation-update-password.dto';
+import { InvitationAcceptInviteDto } from './dto/invitation-accept-invite.dto';
 
 @Controller('invitation')
 @ApiTags('invitation')
@@ -47,14 +47,14 @@ export class InvitationController {
     summary: 'Accept invitation token to activate the user.',
   })
   @ApiBody({
-    type: InvitationUpdatePasswordDto,
+    type: InvitationAcceptInviteDto,
     description: 'DTO to accept invitation token.',
   })
   @Patch('/invite')
   async acceptInvite(
-    @Body() updatePasswordDto: InvitationUpdatePasswordDto,
+    @Body() invitationAcceptInviteDto: InvitationAcceptInviteDto,
   ): Promise<void> {
-    const { passcode, newPassword } = updatePasswordDto;
+    const { passcode, newPassword } = invitationAcceptInviteDto;
 
     const user = await this.invitationService.acceptInvite(
       passcode,
@@ -71,7 +71,7 @@ export class InvitationController {
     summary: 'Revoke all invitation user token.',
   })
   @ApiBody({
-    type: InvitationUpdatePasswordDto,
+    type: InvitationDto,
     description: 'DTO to revoke all invitation user token.',
   })
   @Delete('/invite')

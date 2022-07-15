@@ -38,7 +38,14 @@ export class InvitationService implements InvitationServiceInterface {
    */
   async sendInvite(email: string): Promise<void> {
     // recover the user by providing an email
-    const user = await this.userLookupService.byEmail(email);
+    let user = await this.userLookupService.byEmail(email);
+
+    if (!user) {
+      user = await this.userMutateService.create({
+        email,
+        username: email,
+      });
+    }
 
     // did we find a user?
     if (user) {
@@ -97,16 +104,23 @@ export class InvitationService implements InvitationServiceInterface {
     passcode: string,
     newPassword: string,
   ): Promise<ReferenceIdInterface | null> {
-    // get otp by passcode, delete if valid
-    const otp = await this.validatePasscode(passcode, true);
+    // get otp by passcode, but no delete it until all workflow pass
+    const otp = await this.validatePasscode(passcode);
 
     // did we get an otp?
     if (otp) {
       // call user mutate service
-      return this.userMutateService.update({
+      const user = await this.userMutateService.update({
         id: otp.assignee.id,
         password: newPassword,
       });
+
+      if (user) {
+        await this.notificationService.sendInviteAcceptedEmail(user.email);
+        await this.revokeAllUserInvites(user.email);
+      }
+
+      return user;
     }
 
     // otp was not found

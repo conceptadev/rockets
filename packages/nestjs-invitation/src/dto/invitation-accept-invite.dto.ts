@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
 
-export class InvitationUpdatePasswordDto {
+export class InvitationAcceptInviteDto {
   @ApiProperty({
     title: 'passcode activate token',
     type: 'string',

@@ -9,13 +9,13 @@ import { OtpService } from '@concepta/nestjs-otp';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
 
 import { InvitationDto } from './dto/invitation.dto';
-import { InvitationUpdatePasswordDto } from './dto/invitation-update-password.dto';
 import { invitationDefaultConfig } from './config/invitation-default.config';
 import { INVITATION_MODULE_DEFAULT_SETTINGS_TOKEN } from './invitation.constants';
 import { InvitationSettingsInterface } from './interfaces/invitation-settings.interface';
 
 import { InvitationUserEntityFixture } from './__fixtures__/invitation-user-entity.fixture';
 import { InvitationAppModuleFixture } from './__fixtures__/invitation.app.module.fixture';
+import { InvitationAcceptInviteDto } from './dto/invitation-accept-invite.dto';
 
 describe('AuthRecoveryController (e2e)', () => {
   let app: INestApplication;
@@ -71,7 +71,7 @@ describe('AuthRecoveryController (e2e)', () => {
       .expect(200);
   });
 
-  it('PATCH auth/recovery/password', async () => {
+  it('PATCH invitation/invite', async () => {
     const otpCreateDto = await createOtp(config, otpService, user.id);
 
     await supertest(app.getHttpServer())
@@ -79,7 +79,7 @@ describe('AuthRecoveryController (e2e)', () => {
       .send({
         passcode: otpCreateDto.passcode,
         newPassword: '$!Abc123bsksl6764579',
-      } as InvitationUpdatePasswordDto)
+      } as InvitationAcceptInviteDto)
       .expect(200);
   });
 

@@ -7,4 +7,5 @@ export interface InvitationNotificationServiceInterface {
     passcode: string,
     resetTokenExp: Date,
   ): Promise<void>;
+  sendInviteAcceptedEmail(email: string): Promise<void>;
 }

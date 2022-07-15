@@ -16,6 +16,10 @@ export const invitationDefaultConfig = registerAs(
           fileName: __dirname + '/../assets/invitation.template.hbs',
           subject: 'Access Invitation',
         },
+        invitationAccepted: {
+          fileName: __dirname + '/../assets/invitation-accepted.template.hbs',
+          subject: 'Invitation Accepted',
+        },
       },
     },
     otp: {
