@@ -1,5 +1,10 @@
-import { OtpCreateInterface, OtpValidateInterface } from '@concepta/ts-common';
+import {
+  OtpClearInterface,
+  OtpCreateInterface,
+  OtpValidateInterface,
+} from '@concepta/ts-common';
 
 export interface AuthRecoveryOtpServiceInterface
   extends OtpCreateInterface,
-    OtpValidateInterface {}
+    OtpValidateInterface,
+    OtpClearInterface {}

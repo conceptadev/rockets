@@ -19,6 +19,10 @@ export interface AuthRecoverySettingsInterface {
         fileName: string;
         subject: string;
       };
+      passwordUpdatedSuccefullyEmail: {
+        fileName: string;
+        subject: string;
+      };
     };
   };
   otp: AuthRecoveryOtpSettingsInterface;

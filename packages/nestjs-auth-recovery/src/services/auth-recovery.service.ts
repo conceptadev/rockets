@@ -92,6 +92,7 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
    * Validate passcode and return it's user.
    *
    * @param passcode user's passcode
+   * @param deleteIfValid flag to delete if valid or not
    */
   async validatePasscode(
     passcode: string,
@@ -118,19 +119,54 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
     passcode: string,
     newPassword: string,
   ): Promise<ReferenceIdInterface | null> {
-    // get otp by passcode, delete if valid
-    const otp = await this.validatePasscode(passcode, true);
+    // get otp by passcode, but no delete it until all workflow pass
+    const otp = await this.validatePasscode(passcode);
 
     // did we get an otp?
     if (otp) {
       // call user mutate service
-      return this.userMutateService.update({
+      const user = await this.userMutateService.update({
         id: otp.assignee.id,
         password: newPassword,
       });
+
+      if (user) {
+        await this.notificationService.sendPasswordUpdatedSuccefullyEmail(
+          user.email,
+        );
+        await this.revokeAllUserPasswordRecoveries(user.email);
+      }
+
+      return user;
     }
 
     // otp was not found
     return null;
+  }
+
+  /**
+   * Recover lost password providing an email and send the passcode token by email.
+   *
+   * @param email user email
+   */
+  async revokeAllUserPasswordRecoveries(email: string): Promise<void> {
+    // recover users password by providing an email
+    const user = await this.userLookupService.byEmail(email);
+
+    // did we find a user?
+    if (user) {
+      // extract required otp properties
+      const { category, assignment } = this.config.otp;
+      // clear all user's otps in DB
+      await this.otpService.clear(assignment, {
+        category,
+        assignee: {
+          id: user.id,
+        },
+      });
+    }
+
+    // !!! Falling through to void is intentional              !!!!
+    // !!! Do NOT give any indication if e-mail does not exist !!!!
   }
 }
