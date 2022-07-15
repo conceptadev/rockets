@@ -140,7 +140,7 @@ export class InvitationService implements InvitationServiceInterface {
     if (user) {
       // extract required otp properties
       const { category, assignment } = this.config.otp;
-      // create an OTP save it in the database
+      // clear all user's otps in DB
       await this.otpService.clear(assignment, {
         category,
         assignee: {
