@@ -65,7 +65,7 @@ describe('AuthRecoveryService', () => {
     expect(validOtp?.assignee).toEqual(testUser);
   });
 
-  it.only('Validate passcode (invalid)', async () => {
+  it('Validate passcode (invalid)', async () => {
     const invalidOtp = await invitationService.validatePasscode(
       'FAKE_PASSCODE',
     );
