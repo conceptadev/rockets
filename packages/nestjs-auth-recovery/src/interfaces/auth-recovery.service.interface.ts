@@ -14,4 +14,5 @@ export interface AuthRecoveryServiceInterface {
     passcode: string,
     newPassword: string,
   ): Promise<ReferenceIdInterface | null>;
+  revokeAllUserPasswordRecoveries(email: string): Promise<void>;
 }

@@ -20,6 +20,11 @@ export const authRecoveryDefaultConfig = registerAs(
           fileName: __dirname + '/../assets/recover-password.template.hbs',
           subject: 'Password Recovery',
         },
+        passwordUpdated: {
+          fileName:
+            __dirname + '/../assets/password-updated-successfully.template',
+          subject: 'Password Updated Successfully',
+        },
       },
     },
     otp: {

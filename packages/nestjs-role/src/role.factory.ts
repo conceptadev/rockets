@@ -1,5 +1,4 @@
 import Faker from '@faker-js/faker';
-import { Type } from '@nestjs/common';
 import { Factory } from '@concepta/typeorm-seeding';
 import { RoleEntityInterface } from './interfaces/role-entity.interface';
 

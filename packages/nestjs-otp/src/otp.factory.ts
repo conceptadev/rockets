@@ -1,5 +1,4 @@
 import { randomUUID } from 'crypto';
-import { Type } from '@nestjs/common';
 import { Factory } from '@concepta/typeorm-seeding';
 import { OtpInterface } from '@concepta/ts-common';
 
