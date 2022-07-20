@@ -2,16 +2,17 @@ import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
-import { Seeding } from '@concepta/typeorm-seeding';
 import { UserFactory } from './user.factory';
 import { UserSeeder } from './user.seeder';
 
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
 import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
+import { SeedingSource } from '@concepta/typeorm-seeding';
 
 describe('AppController (e2e)', () => {
   describe('Authentication', () => {
     let app: INestApplication;
+    let seedingSource: SeedingSource;
 
     beforeEach(async () => {
       const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -20,13 +21,15 @@ describe('AppController (e2e)', () => {
       app = moduleFixture.createNestApplication();
       await app.init();
 
-      const userSeeder = new UserSeeder({
-        factories: { user: new UserFactory({ entity: UserEntityFixture }) },
-      });
-
-      await Seeding.run([userSeeder], {
+      seedingSource = new SeedingSource({
         dataSource: app.get(getDataSourceToken()),
       });
+
+      const userSeeder = new UserSeeder({
+        factories: [new UserFactory({ entity: UserEntityFixture })],
+      });
+
+      await seedingSource.run.one(userSeeder);
     });
 
     afterEach(async () => {

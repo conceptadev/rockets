@@ -1,14 +1,10 @@
 import { Seeder } from '@concepta/typeorm-seeding';
-import { RoleEntityInterface } from './interfaces/role-entity.interface';
-
-interface RoleSeederEntities {
-  role: RoleEntityInterface;
-}
+import { RoleFactory } from './role.factory';
 
 /**
  * Role seeder
  */
-export class RoleSeeder extends Seeder<RoleSeederEntities> {
+export class RoleSeeder extends Seeder {
   /**
    * Runner
    */
@@ -19,7 +15,7 @@ export class RoleSeeder extends Seeder<RoleSeederEntities> {
       : 50;
 
     // the factory
-    const roleFactory = this.factory('role');
+    const roleFactory = this.factory(RoleFactory);
 
     // create a bunch
     await roleFactory.createMany(createAmount);

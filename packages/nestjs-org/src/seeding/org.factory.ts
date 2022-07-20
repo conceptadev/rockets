@@ -1,22 +1,12 @@
 import Faker from '@faker-js/faker';
 import { Type } from '@nestjs/common';
 import { Factory } from '@concepta/typeorm-seeding';
-import { OrgEntityInterface } from './interfaces/org-entity.interface';
+import { OrgEntityInterface } from '../interfaces/org-entity.interface';
 
 /**
  * Org factory
- *
- * ```ts
- * // new factory instance
- * const orgFactory = new OrgFactory();
- * ```
  */
 export class OrgFactory extends Factory<OrgEntityInterface> {
-  /**
-   * Options
-   */
-  options: { entity?: Type<OrgEntityInterface> } = {};
-
   /**
    * List of used names.
    */

@@ -3,18 +3,19 @@ import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
-import { Seeding } from '@concepta/typeorm-seeding';
 
 import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
 import { PhotoFixture } from '../__fixtures__/photo/photo.entity.fixture';
 import { PhotoSeederFixture } from '../__fixtures__/photo/photo.seeder.fixture';
 import { PhotoFactoryFixture } from '../__fixtures__/photo/photo.factory.fixture';
+import { SeedingSource } from '@concepta/typeorm-seeding';
 
 describe('AppController (e2e)', () => {
   describe('Authentication', () => {
     let app: INestApplication;
+    let seedingSource: SeedingSource;
 
-    const photoFactory = new PhotoFactoryFixture();
+    let photoFactory: PhotoFactoryFixture;
 
     beforeEach(async () => {
       const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -23,9 +24,10 @@ describe('AppController (e2e)', () => {
       app = moduleFixture.createNestApplication();
       await app.init();
 
-      await Seeding.run([PhotoSeederFixture], {
-        dataSource: app.get(getDataSourceToken()),
-      });
+      const dataSource = app.get(getDataSourceToken());
+      seedingSource = new SeedingSource({ dataSource });
+      photoFactory = new PhotoFactoryFixture({ seedingSource });
+      await seedingSource.run.one(PhotoSeederFixture);
     });
 
     afterEach(async () => {

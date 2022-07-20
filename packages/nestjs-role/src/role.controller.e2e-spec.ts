@@ -2,7 +2,7 @@ import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
-import { Seeding } from '@concepta/typeorm-seeding';
+import { SeedingSource } from '@concepta/typeorm-seeding';
 import { RoleFactory } from './role.factory';
 import { RoleSeeder } from './role.seeder';
 
@@ -12,6 +12,7 @@ import { RoleEntityFixture } from './__fixtures__/entities/role-entity.fixture';
 describe('RoleController (e2e)', () => {
   describe('Rest', () => {
     let app: INestApplication;
+    let seedingSource: SeedingSource;
 
     beforeEach(async () => {
       const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -20,13 +21,17 @@ describe('RoleController (e2e)', () => {
       app = moduleFixture.createNestApplication();
       await app.init();
 
-      const roleSeeder = new RoleSeeder({
-        factories: { role: new RoleFactory({ entity: RoleEntityFixture }) },
-      });
-
-      await Seeding.run([roleSeeder], {
+      seedingSource = new SeedingSource({
         dataSource: app.get(getDataSourceToken()),
       });
+
+      const roleFactory = new RoleFactory({ entity: RoleEntityFixture });
+
+      const roleSeeder = new RoleSeeder({
+        factories: [roleFactory],
+      });
+
+      await seedingSource.run.one(roleSeeder);
     });
 
     afterEach(async () => {

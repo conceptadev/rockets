@@ -1,22 +1,11 @@
 import Faker from '@faker-js/faker';
-import { Type } from '@nestjs/common';
 import { Factory } from '@concepta/typeorm-seeding';
 import { UserEntityInterface } from './interfaces/user-entity.interface';
 
 /**
  * User factory
- *
- * ```ts
- * // new factory instance
- * const userFactory = new UserFactory();
- * ```
  */
 export class UserFactory extends Factory<UserEntityInterface> {
-  /**
-   * Options
-   */
-  options: { entity?: Type<UserEntityInterface> } = {};
-
   /**
    * List of used usernames.
    */

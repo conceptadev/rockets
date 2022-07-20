@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { ConfigService, ConfigType } from '@nestjs/config';
 import { getDataSourceToken } from '@nestjs/typeorm';
-import { Seeding } from '@concepta/typeorm-seeding';
+import { SeedingSource } from '@concepta/typeorm-seeding';
 import { OtpInterface, UserInterface } from '@concepta/ts-common';
 import { UserEntityInterface } from '@concepta/nestjs-user';
 import { OtpService } from '@concepta/nestjs-otp';
@@ -39,12 +39,13 @@ describe('AuthRecoveryService', () => {
       AUTH_RECOVERY_MODULE_DEFAULT_SETTINGS_TOKEN,
     ) as AuthRecoverySettingsInterface;
 
-    Seeding.configure({
+    const seedingSource = new SeedingSource({
       dataSource: moduleFixture.get(getDataSourceToken()),
     });
 
     const userFactory = new UserFactory({
       entity: AuthRecoveryUserEntityFixture,
+      seedingSource,
     });
 
     testUser = await userFactory.create();

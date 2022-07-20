@@ -5,18 +5,8 @@ import { OtpInterface } from '@concepta/ts-common';
 
 /**
  * Otp factory
- *
- * ```ts
- * // new factory instance
- * const otpFactory = new OtpFactory();
- * ```
  */
 export class OtpFactory extends Factory<OtpInterface> {
-  /**
-   * Options
-   */
-  options: { entity?: Type<OtpInterface> } = {};
-
   /**
    * List of used names.
    */

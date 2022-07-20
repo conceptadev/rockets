@@ -5,18 +5,8 @@ import { RoleEntityInterface } from './interfaces/role-entity.interface';
 
 /**
  * Role factory
- *
- * ```ts
- * // new factory instance
- * const roleFactory = new RoleFactory();
- * ```
  */
 export class RoleFactory extends Factory<RoleEntityInterface> {
-  /**
-   * Options
-   */
-  options: { entity?: Type<RoleEntityInterface> } = {};
-
   /**
    * List of used names.
    */

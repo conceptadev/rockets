@@ -1,15 +1,12 @@
 import { Seeder } from '@concepta/typeorm-seeding';
 import { PasswordStorageService } from '@concepta/nestjs-password';
 import { UserEntityInterface } from './interfaces/user-entity.interface';
-
-interface UserSeederEntities {
-  user: UserEntityInterface;
-}
+import { UserFactory } from './user.factory';
 
 /**
  * User seeder
  */
-export class UserSeeder extends Seeder<UserSeederEntities> {
+export class UserSeeder extends Seeder {
   /**
    * Reusable password storage service
    */
@@ -30,7 +27,7 @@ export class UserSeeder extends Seeder<UserSeederEntities> {
       : 'superadmin';
 
     // the factory
-    const userFactory = this.factory('user');
+    const userFactory = this.factory(UserFactory);
 
     // create a super admin user
     await userFactory

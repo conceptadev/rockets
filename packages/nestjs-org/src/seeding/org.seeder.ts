@@ -1,16 +1,11 @@
 import { Seeder } from '@concepta/typeorm-seeding';
-import { ReferenceIdInterface } from '@concepta/ts-core';
-import { OrgEntityInterface } from './interfaces/org-entity.interface';
-
-interface OrgSeederEntities {
-  org: OrgEntityInterface;
-  owner: ReferenceIdInterface;
-}
+import { OrgOwnerFactory } from './org-owner.factory';
+import { OrgFactory } from './org.factory';
 
 /**
  * Org seeder
  */
-export class OrgSeeder extends Seeder<OrgSeederEntities> {
+export class OrgSeeder extends Seeder {
   /**
    * Runner
    */
@@ -21,11 +16,11 @@ export class OrgSeeder extends Seeder<OrgSeederEntities> {
       : 50;
 
     // create one owner
-    const ownerFactory = this.factory('owner');
+    const ownerFactory = this.factory(OrgOwnerFactory);
     const owner = await ownerFactory.create();
 
     // the factory
-    const orgFactory = this.factory('org');
+    const orgFactory = this.factory(OrgFactory);
 
     // create a bunch
     await orgFactory
