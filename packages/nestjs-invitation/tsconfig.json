@@ -1,0 +1,38 @@
+{
+  "extends": "../../tsconfig",
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "typeRoots": [
+      "./node_modules/@types",
+      "../../node_modules/@types"
+    ]
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "references": [
+    {
+      "path": "../nestjs-core"
+    },
+    {
+      "path": "../ts-core"
+    },
+    {
+      "path": "../ts-common"
+    },
+    {
+      "path": "../nestjs-crud"
+    },
+    {
+      "path": "../nestjs-user"
+    },
+    {
+      "path": "../nestjs-email"
+    },
+    {
+      "path": "../nestjs-otp"
+    }
+  ]
+}
