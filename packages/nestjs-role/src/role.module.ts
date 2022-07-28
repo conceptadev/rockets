@@ -52,13 +52,7 @@ export class RoleModule extends createConfigurableDynamicRootModule<
   RoleModule,
   RoleOptionsInterface
 >(ROLE_MODULE_OPTIONS_TOKEN, {
-  imports: [
-    ConfigModule.forFeature(roleDefaultConfig),
-    CrudModule.deferred({
-      timeoutMessage:
-        'RoleModule requires CrudModule to be registered in your application.',
-    }),
-  ],
+  imports: [ConfigModule.forFeature(roleDefaultConfig), CrudModule],
   providers: [
     {
       provide: ROLE_MODULE_SETTINGS_TOKEN,

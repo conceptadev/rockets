@@ -21,7 +21,7 @@ import { AuthRecoveryModule } from '../auth-recovery.module';
         return ormConfig;
       },
     }),
-    CrudModule.register(),
+    CrudModule.forRoot({}),
     EmailModule.register({}),
     AuthRecoveryModule.registerAsync({
       imports: [

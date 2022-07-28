@@ -67,7 +67,7 @@ describe('RoleModule', () => {
             },
           },
         }),
-        CrudModule.register(),
+        CrudModule.forRoot({}),
       ],
     }).compile();
 

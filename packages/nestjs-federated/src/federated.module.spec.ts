@@ -45,7 +45,7 @@ describe('FederatedModuleTest', () => {
         }),
         AuthenticationModule.register(),
         JwtModule.forRoot({}),
-        CrudModule.register(),
+        CrudModule.forRoot({}),
         FederatedModule.registerAsync({
           imports: [UserModule.deferred()],
           inject: [UserLookupService, UserMutateService],

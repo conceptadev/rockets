@@ -44,7 +44,7 @@ describe('AuthGithubModuleTest', () => {
             },
           },
         }),
-        CrudModule.register(),
+        CrudModule.forRoot({}),
         UserModule.register({
           entities: {
             user: {

@@ -41,7 +41,7 @@ describe('OrgController (e2e)', () => {
               },
             },
           }),
-          CrudModule.register(),
+          CrudModule.forRoot({}),
         ],
         providers: [OwnerLookupServiceFixture],
       }).compile();

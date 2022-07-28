@@ -43,13 +43,7 @@ export class UserModule extends createConfigurableDynamicRootModule<
   UserModule,
   UserOptionsInterface
 >(USER_MODULE_OPTIONS_TOKEN, {
-  imports: [
-    ConfigModule.forFeature(userDefaultConfig),
-    CrudModule.deferred({
-      timeoutMessage:
-        'UserModule requires CrudModule to be registered in your application.',
-    }),
-  ],
+  imports: [ConfigModule.forFeature(userDefaultConfig), CrudModule],
   providers: [
     {
       provide: USER_MODULE_SETTINGS_TOKEN,
