@@ -4,35 +4,84 @@ import { SWAGGER_UI_MODULE_SETTINGS_TOKEN } from './swagger-ui.constants';
 import { SwaggerUiModule } from './swagger-ui.module';
 import { SwaggerUiService } from './swagger-ui.service';
 
-describe('SwaggerModule', () => {
+describe(SwaggerUiModule, () => {
   let module: TestingModule;
+  let swaggerUiModule: SwaggerUiModule;
+  let swaggerUiService: SwaggerUiService;
+  let settings: SwaggerUiSettingsInterface;
 
-  beforeEach(async () => {
-    module = await Test.createTestingModule({
-      imports: [
-        SwaggerUiModule.register({
-          settings: { path: 'api', basePath: '/v1' },
-        }),
-      ],
-    }).compile();
+  const moduleOptions = { settings: { path: 'api', basePath: '/v1' } };
+
+  describe(SwaggerUiModule.register, () => {
+    beforeAll(async () => {
+      module = await Test.createTestingModule({
+        imports: [SwaggerUiModule.register(moduleOptions)],
+      }).compile();
+
+      setVars();
+    });
+
+    commonTests();
   });
 
-  afterEach(async () => {
-    jest.clearAllMocks();
+  describe(SwaggerUiModule.registerAsync, () => {
+    beforeEach(async () => {
+      module = await Test.createTestingModule({
+        imports: [
+          SwaggerUiModule.registerAsync({
+            useFactory: () => moduleOptions,
+          }),
+        ],
+      }).compile();
+
+      setVars();
+    });
+
+    commonTests();
   });
 
-  it('is module defined', async () => {
-    const swaggerUiModule = module.get(SwaggerUiModule);
-    expect(swaggerUiModule).toBeInstanceOf(SwaggerUiModule);
+  describe(SwaggerUiModule.forRoot, () => {
+    beforeEach(async () => {
+      module = await Test.createTestingModule({
+        imports: [SwaggerUiModule.forRoot(moduleOptions)],
+      }).compile();
 
-    const swaggerUiService = module.get(SwaggerUiService);
-    expect(swaggerUiService).toBeInstanceOf(SwaggerUiService);
+      setVars();
+    });
+
+    commonTests();
   });
 
-  it('settings were registered', async () => {
-    const settings = module.get<SwaggerUiSettingsInterface>(
+  describe(SwaggerUiModule.forRootAsync, () => {
+    beforeEach(async () => {
+      module = await Test.createTestingModule({
+        imports: [
+          SwaggerUiModule.forRootAsync({
+            useFactory: () => moduleOptions,
+          }),
+        ],
+      }).compile();
+
+      setVars();
+    });
+
+    commonTests();
+  });
+
+  function setVars() {
+    swaggerUiModule = module.get(SwaggerUiModule);
+    swaggerUiService = module.get(SwaggerUiService);
+    settings = module.get<SwaggerUiSettingsInterface>(
       SWAGGER_UI_MODULE_SETTINGS_TOKEN,
     );
-    expect(settings.basePath).toEqual('/v1');
-  });
+  }
+
+  function commonTests() {
+    it('providers should be loaded', async () => {
+      expect(swaggerUiModule).toBeInstanceOf(SwaggerUiModule);
+      expect(swaggerUiService).toBeInstanceOf(SwaggerUiService);
+      expect(settings.path).toEqual('api');
+      expect(settings.basePath).toEqual('/v1');
+    });
+  }
 });
