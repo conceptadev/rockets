@@ -4,9 +4,11 @@ import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
-import { Seeding } from '@concepta/typeorm-seeding';
+import { SeedingSource } from '@concepta/typeorm-seeding';
 import { getDynamicRepositoryToken } from '@concepta/nestjs-typeorm-ext';
 import { RoleAssignmentCreatableInterface } from '@concepta/ts-common';
+
+import { ROLE_MODULE_ROLE_ENTITY_KEY } from './role.constants';
 
 import { RoleFactory } from './role.factory';
 import { RoleSeeder } from './role.seeder';
@@ -18,9 +20,10 @@ import { UserRoleFactoryFixture } from './__fixtures__/factories/user-role.facto
 
 describe('RoleAssignmentController (e2e)', () => {
   let app: INestApplication;
+  let seedingSource: SeedingSource;
   let roleRepo: Repository<RoleEntityFixture>;
-  const userFactory = new UserFactoryFixture();
-  const userRoleFactory = new UserRoleFactoryFixture();
+  let userFactory: UserFactoryFixture;
+  let userRoleFactory: UserRoleFactoryFixture;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -29,15 +32,20 @@ describe('RoleAssignmentController (e2e)', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    const roleSeeder = new RoleSeeder({
-      factories: { role: new RoleFactory({ entity: RoleEntityFixture }) },
-    });
-
-    await Seeding.run([roleSeeder], {
+    seedingSource = new SeedingSource({
       dataSource: app.get(getDataSourceToken()),
     });
 
-    roleRepo = app.get(getDynamicRepositoryToken('role'));
+    userFactory = new UserFactoryFixture({ seedingSource });
+    userRoleFactory = new UserRoleFactoryFixture({ seedingSource });
+
+    const roleSeeder = new RoleSeeder({
+      factories: [new RoleFactory({ entity: RoleEntityFixture })],
+    });
+
+    await seedingSource.run.one(roleSeeder);
+
+    roleRepo = app.get(getDynamicRepositoryToken(ROLE_MODULE_ROLE_ENTITY_KEY));
   });
 
   afterEach(async () => {

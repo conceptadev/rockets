@@ -1,6 +1,6 @@
 {
   "name": "@concepta/nestjs-federated",
-  "version": "4.0.0-alpha.17",
+  "version": "4.0.0-alpha.18",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "BSD-3-Clause",
@@ -11,21 +11,21 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
-    "@concepta/nestjs-authentication": "^4.0.0-alpha.17",
-    "@concepta/nestjs-common": "^4.0.0-alpha.17",
-    "@concepta/nestjs-core": "^4.0.0-alpha.17",
-    "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.17",
-    "@concepta/ts-common": "^4.0.0-alpha.17",
-    "@concepta/ts-core": "^4.0.0-alpha.17",
-    "@concepta/typeorm-common": "^4.0.0-alpha.17",
+    "@concepta/nestjs-authentication": "^4.0.0-alpha.18",
+    "@concepta/nestjs-common": "^4.0.0-alpha.18",
+    "@concepta/nestjs-core": "^4.0.0-alpha.18",
+    "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.18",
+    "@concepta/ts-common": "^4.0.0-alpha.18",
+    "@concepta/ts-core": "^4.0.0-alpha.18",
+    "@concepta/typeorm-common": "^4.0.0-alpha.18",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.2.0",
     "@nestjs/swagger": "^6.0.0"
   },
   "devDependencies": {
-    "@concepta/nestjs-crud": "^4.0.0-alpha.17",
-    "@concepta/nestjs-jwt": "^4.0.0-alpha.17",
-    "@concepta/nestjs-user": "^4.0.0-alpha.17",
+    "@concepta/nestjs-crud": "^4.0.0-alpha.18",
+    "@concepta/nestjs-jwt": "^4.0.0-alpha.18",
+    "@concepta/nestjs-user": "^4.0.0-alpha.18",
     "@nestjs/testing": "^9.0.0",
     "jest-mock-extended": "^2.0.4"
   },

@@ -42,6 +42,17 @@ export class AuthRecoveryNotificationService
     });
   }
 
+  async sendPasswordUpdatedSuccefullyEmail(email: string): Promise<void> {
+    const { from } = this.config.email;
+    const { subject, fileName } = this.config.email.templates.passwordUpdated;
+    await this.sendEmail({
+      from,
+      subject,
+      to: email,
+      template: fileName,
+    });
+  }
+
   async sendRecoverLoginEmail(email: string, username: string): Promise<void> {
     const { from } = this.config.email;
     const { subject, fileName } = this.config.email.templates.recoverLogin;

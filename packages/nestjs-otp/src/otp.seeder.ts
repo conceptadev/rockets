@@ -1,14 +1,10 @@
 import { Seeder } from '@concepta/typeorm-seeding';
-import { OtpInterface } from '@concepta/ts-common';
-
-interface OtpSeederEntities {
-  otp: OtpInterface;
-}
+import { OtpFactory } from './otp.factory';
 
 /**
  * Otp seeder
  */
-export class OtpSeeder extends Seeder<OtpSeederEntities> {
+export class OtpSeeder extends Seeder {
   /**
    * Runner
    */
@@ -19,7 +15,7 @@ export class OtpSeeder extends Seeder<OtpSeederEntities> {
       : 50;
 
     // the factory
-    const otpFactory = this.factory('otp');
+    const otpFactory = this.factory(OtpFactory);
 
     // create a bunch
     await otpFactory.createMany(createAmount);

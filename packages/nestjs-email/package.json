@@ -1,6 +1,6 @@
 {
   "name": "@concepta/nestjs-email",
-  "version": "4.0.0-alpha.17",
+  "version": "4.0.0-alpha.18",
   "description": "Rockets NodeJS Email",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,9 +12,9 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
-    "@concepta/nestjs-core": "^4.0.0-alpha.17",
-    "@concepta/ts-common": "^4.0.0-alpha.17",
-    "@concepta/ts-core": "^4.0.0-alpha.17",
+    "@concepta/nestjs-core": "^4.0.0-alpha.18",
+    "@concepta/ts-common": "^4.0.0-alpha.18",
+    "@concepta/ts-core": "^4.0.0-alpha.18",
     "@nestjs-modules/mailer": "^1.6.1",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.2.0",

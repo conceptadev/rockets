@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getDataSourceToken } from '@nestjs/typeorm';
-import { Seeding } from '@concepta/typeorm-seeding';
+import { SeedingSource } from '@concepta/typeorm-seeding';
 import { RoleModule } from './role.module';
 import { RoleFactory } from './role.factory';
 
@@ -9,15 +9,19 @@ import { RoleEntityFixture } from './__fixtures__/entities/role-entity.fixture';
 
 describe('RoleModule', () => {
   let roleModule: RoleModule;
+  let seedingSource: SeedingSource;
+  let roleFactory: RoleFactory;
 
   beforeEach(async () => {
     const testModule: TestingModule = await Test.createTestingModule({
       imports: [AppModuleFixture],
     }).compile();
 
-    Seeding.configure({
+    seedingSource = new SeedingSource({
       dataSource: testModule.get(getDataSourceToken()),
     });
+
+    roleFactory = new RoleFactory({ entity: RoleEntityFixture, seedingSource });
 
     roleModule = testModule.get<RoleModule>(RoleModule);
   });
@@ -30,8 +34,7 @@ describe('RoleModule', () => {
     it('should create a role', async () => {
       expect(roleModule).toBeInstanceOf(RoleModule);
 
-      const factory = new RoleFactory({ entity: RoleEntityFixture });
-      const role = await factory.create();
+      const role = await roleFactory.create();
 
       expect(role).toBeInstanceOf(RoleEntityFixture);
       expect(typeof role.name).toEqual('string');

@@ -1,7 +1,7 @@
 import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getDataSourceToken } from '@nestjs/typeorm';
-import { Seeding } from '@concepta/typeorm-seeding';
+import { SeedingSource } from '@concepta/typeorm-seeding';
 import {
   getDynamicRepositoryToken,
   TypeOrmExtModule,
@@ -21,6 +21,7 @@ import { RoleFactory } from '../role.factory';
 
 describe('RoleModule', () => {
   let testModule: TestingModule;
+  let seedingSource: SeedingSource;
   let roleModule: RoleModule;
   let roleService: RoleService;
   let roleRepo: Repository<RoleEntityFixture>;
@@ -70,17 +71,22 @@ describe('RoleModule', () => {
       ],
     }).compile();
 
-    Seeding.configure({
+    seedingSource = new SeedingSource({
       dataSource: testModule.get(getDataSourceToken(connectionName)),
     });
 
-    const roleFactory = new RoleFactory({ entity: RoleEntityFixture });
+    const roleFactory = new RoleFactory({
+      entity: RoleEntityFixture,
+      seedingSource,
+    });
+
     [testRole1, testRole2] = await roleFactory.createMany(2);
 
-    const userFactory = new UserFactoryFixture();
+    const userFactory = new UserFactoryFixture({ seedingSource });
     testUser = await userFactory.create();
 
-    const userRoleFactory = new UserRoleFactoryFixture();
+    const userRoleFactory = new UserRoleFactoryFixture({ seedingSource });
+
     await userRoleFactory.create({
       role: testRole1,
       assignee: testUser,

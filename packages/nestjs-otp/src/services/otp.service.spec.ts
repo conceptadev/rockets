@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { OtpInterface } from '@concepta/ts-common';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
-import { Seeding } from '@concepta/typeorm-seeding';
+import { SeedingSource } from '@concepta/typeorm-seeding';
 import { OtpModule } from '../otp.module';
 import { OtpService } from './otp.service';
 import { OtpTypeNotDefinedException } from '../exceptions/otp-type-not-defined.exception';
@@ -17,11 +17,12 @@ describe('OtpModule', () => {
   const CATEGORY_DEFAULT = 'CATEGORY_DEFAULT';
 
   let testModule: TestingModule;
+  let seedingSource: SeedingSource;
   let otpModule: OtpModule;
   let otpService: OtpService;
   let connectionNumber = 1;
-  const userFactory = new UserFactoryFixture();
-  const userOtpFactory = new UserOtpFactoryFixture();
+  let userFactory: UserFactoryFixture;
+  let userOtpFactory: UserOtpFactoryFixture;
 
   const factoryCreateUser = async () => {
     return userFactory.create();
@@ -84,9 +85,12 @@ describe('OtpModule', () => {
       ],
     }).compile();
 
-    Seeding.configure({
+    seedingSource = new SeedingSource({
       dataSource: testModule.get(getDataSourceToken(connectionName)),
     });
+
+    userFactory = new UserFactoryFixture({ seedingSource });
+    userOtpFactory = new UserOtpFactoryFixture({ seedingSource });
 
     otpModule = testModule.get<OtpModule>(OtpModule);
     otpService = testModule.get<OtpService>(OtpService);

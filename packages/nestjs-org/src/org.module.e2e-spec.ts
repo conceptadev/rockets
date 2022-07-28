@@ -2,11 +2,11 @@ import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
-import { Seeding } from '@concepta/typeorm-seeding';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
-import { OrgFactory } from './org.factory';
-import { OrgSeeder } from './org.seeder';
+import { SeedingSource } from '@concepta/typeorm-seeding';
+import { OrgFactory } from './seeding/org.factory';
+import { OrgSeeder } from './seeding/org.seeder';
 import { OrgModule } from './org.module';
 
 import { OrgEntityFixture } from './__fixtures__/org-entity.fixture';
@@ -18,6 +18,7 @@ import { OwnerFactoryFixture } from './__fixtures__/owner-factory.fixture';
 describe('OrgController (e2e)', () => {
   describe('Rest', () => {
     let app: INestApplication;
+    let seedingSource: SeedingSource;
 
     beforeEach(async () => {
       const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -47,16 +48,18 @@ describe('OrgController (e2e)', () => {
       app = moduleFixture.createNestApplication();
       await app.init();
 
-      const orgSeeder = new OrgSeeder({
-        factories: {
-          org: new OrgFactory({ entity: OrgEntityFixture }),
-          owner: new OwnerFactoryFixture(),
-        },
-      });
-
-      await Seeding.run([orgSeeder], {
+      seedingSource = new SeedingSource({
         dataSource: app.get(getDataSourceToken()),
       });
+
+      const orgSeeder = new OrgSeeder({
+        factories: [
+          new OrgFactory({ entity: OrgEntityFixture }),
+          new OwnerFactoryFixture(),
+        ],
+      });
+
+      await seedingSource.run.one(orgSeeder);
     });
 
     afterEach(async () => {
@@ -85,7 +88,7 @@ describe('OrgController (e2e)', () => {
     });
 
     it('POST /org', async () => {
-      const ownerFactory = new OwnerFactoryFixture();
+      const ownerFactory = new OwnerFactoryFixture({ seedingSource });
       const owner = await ownerFactory.create();
 
       await supertest(app.getHttpServer())

@@ -3,7 +3,7 @@ import { AUTH_RECOVERY_MODULE_DEFAULT_SETTINGS_TOKEN } from '../auth-recovery.co
 import { AuthRecoverySettingsInterface } from '../interfaces/auth-recovery-settings.interface';
 
 /**
- * Default configuration for auth github.
+ * Default configuration for auth recovery.
  */
 export const authRecoveryDefaultConfig = registerAs(
   AUTH_RECOVERY_MODULE_DEFAULT_SETTINGS_TOKEN,
@@ -19,6 +19,11 @@ export const authRecoveryDefaultConfig = registerAs(
         recoverPassword: {
           fileName: __dirname + '/../assets/recover-password.template.hbs',
           subject: 'Password Recovery',
+        },
+        passwordUpdated: {
+          fileName:
+            __dirname + '/../assets/password-updated-successfully.template',
+          subject: 'Password Updated Successfully',
         },
       },
     },
