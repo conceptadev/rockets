@@ -29,7 +29,7 @@ describe('AuthGithubModuleTest', () => {
           entities: [UserEntityFixture, FederatedEntityFixture],
         }),
         AuthenticationModule.register(),
-        JwtModule.register(),
+        JwtModule.forRoot({}),
         AuthGithubModule.register(),
         FederatedModule.registerAsync({
           imports: [UserModule.deferred()],

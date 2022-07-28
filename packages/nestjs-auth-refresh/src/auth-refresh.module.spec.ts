@@ -20,7 +20,7 @@ describe('AuthRefreshModuleTest', () => {
         AuthRefreshModule.register({
           userLookupService: new UserLookupServiceFixture(),
         }),
-        JwtModule.register(),
+        JwtModule.forRoot({}),
       ],
     }).compile();
 

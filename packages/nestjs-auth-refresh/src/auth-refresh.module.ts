@@ -44,10 +44,7 @@ export class AuthRefreshModule extends createConfigurableDynamicRootModule<
       timeoutMessage:
         'AuthRefreshModule requires AuthenticationModule to be registered in your application.',
     }),
-    JwtModule.deferred({
-      timeoutMessage:
-        'AuthRefreshModule requires JwtModule to be registered in your application.',
-    }),
+    JwtModule,
   ],
   providers: [
     {

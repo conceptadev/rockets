@@ -21,7 +21,7 @@ describe('AuthLocalModuleTest', () => {
           userLookupService: new UserLookupServiceFixture(),
         }),
         AuthenticationModule.register(),
-        JwtModule.register(),
+        JwtModule.forRoot({}),
         PasswordModule.register(),
       ],
     })
