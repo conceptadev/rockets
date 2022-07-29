@@ -19,13 +19,15 @@ export const {
   ConfigurableModuleClass: CrudModuleClass,
   OPTIONS_TYPE: CRUD_OPTIONS_TYPE,
   ASYNC_OPTIONS_TYPE: CRUD_ASYNC_OPTIONS_TYPE,
-  MODULE_OPTIONS_TOKEN,
 } = new ConfigurableModuleBuilder<CrudOptionsInterface>({
   moduleName: 'Crud',
   optionsInjectionToken: CRUD_MODULE_OPTIONS_TOKEN,
 })
   .setExtras<CrudOptionsExtrasInterface>({ global: false }, definitionTransform)
   .build();
+
+export type CrudOptions = Omit<typeof CRUD_OPTIONS_TYPE, 'global'>;
+export type CrudAsyncOptions = Omit<typeof CRUD_ASYNC_OPTIONS_TYPE, 'global'>;
 
 function definitionTransform(
   definition: DynamicModule,
@@ -48,7 +50,7 @@ function definitionTransform(
 }
 
 export function createCrudImports(
-  overrides?: CrudOptionsInterface & CrudOptionsExtrasInterface,
+  overrides?: CrudOptions,
 ): DynamicModule['imports'] {
   const imports = [ConfigModule.forFeature(crudDefaultConfig)];
 
@@ -60,7 +62,7 @@ export function createCrudImports(
 }
 
 export function createCrudProviders(options: {
-  overrides?: CrudOptionsInterface;
+  overrides?: CrudOptions;
   providers?: Provider[];
 }): Provider[] {
   return [
@@ -70,7 +72,7 @@ export function createCrudProviders(options: {
 }
 
 export function createCrudSettingsProvider(
-  optionsOverrides?: CrudOptionsInterface,
+  optionsOverrides?: CrudOptions,
 ): Provider {
   return createSettingsProvider<CrudSettingsInterface, CrudOptionsInterface>({
     settingsToken: CRUD_MODULE_SETTINGS_TOKEN,

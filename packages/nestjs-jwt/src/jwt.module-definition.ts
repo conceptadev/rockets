@@ -6,8 +6,7 @@ import {
 import { ConfigModule } from '@nestjs/config';
 import {
   JwtModule as NestJwtModule,
-  JwtService,
-  JwtModuleOptions,
+  JwtService as NestJwtService,
 } from '@nestjs/jwt';
 import { createSettingsProvider } from '@concepta/nestjs-common';
 
@@ -31,12 +30,15 @@ export const {
   OPTIONS_TYPE: JWT_OPTIONS_TYPE,
   ASYNC_OPTIONS_TYPE: JWT_ASYNC_OPTIONS_TYPE,
   MODULE_OPTIONS_TOKEN,
-} = new ConfigurableModuleBuilder<JwtModuleOptions>({
+} = new ConfigurableModuleBuilder<JwtOptionsInterface>({
   moduleName: 'Jwt',
   optionsInjectionToken: JWT_MODULE_OPTIONS_TOKEN,
 })
   .setExtras<JwtOptionsExtrasInterface>({ global: false }, definitionTransform)
   .build();
+
+export type JwtOptions = Omit<typeof JWT_OPTIONS_TYPE, 'global'>;
+export type JwtAsyncOptions = Omit<typeof JWT_ASYNC_OPTIONS_TYPE, 'global'>;
 
 function definitionTransform(
   definition: DynamicModule,
@@ -61,7 +63,7 @@ function definitionTransform(
 }
 
 export function createJwtImports(
-  overrides?: JwtModuleOptions & JwtOptionsExtrasInterface,
+  overrides?: JwtOptions,
 ): DynamicModule['imports'] {
   const imports = [ConfigModule.forFeature(jwtDefaultConfig)];
 
@@ -73,7 +75,7 @@ export function createJwtImports(
 }
 
 export function createJwtProviders(options: {
-  overrides?: JwtOptionsInterface;
+  overrides?: JwtOptions;
   providers?: Provider[];
 }): Provider[] {
   return [
@@ -88,7 +90,7 @@ export function createJwtProviders(options: {
 }
 
 export function createJwtSettingsProvider(
-  optionsOverrides?: JwtOptionsInterface,
+  optionsOverrides?: JwtOptions,
 ): Provider {
   return createSettingsProvider<JwtSettingsInterface, JwtOptionsInterface>({
     settingsToken: JWT_MODULE_SETTINGS_TOKEN,
@@ -99,7 +101,7 @@ export function createJwtSettingsProvider(
 }
 
 export function createJwtServiceAccessTokenProvider(
-  optionsOverrides?: JwtOptionsInterface,
+  optionsOverrides?: JwtOptions,
 ): Provider {
   return {
     provide: JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
@@ -110,12 +112,12 @@ export function createJwtServiceAccessTokenProvider(
     ) =>
       optionsOverrides?.jwtAccessService ??
       options.jwtAccessService ??
-      new JwtService(settings.access ?? {}),
+      new NestJwtService(settings.access ?? {}),
   };
 }
 
 export function createJwtServiceRefreshTokenProvider(
-  optionsOverrides?: JwtOptionsInterface,
+  optionsOverrides?: JwtOptions,
 ): Provider {
   return {
     provide: JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
@@ -126,12 +128,12 @@ export function createJwtServiceRefreshTokenProvider(
     ) =>
       optionsOverrides?.jwtRefreshService ??
       options.jwtRefreshService ??
-      new JwtService(settings.refresh ?? {}),
+      new NestJwtService(settings.refresh ?? {}),
   };
 }
 
 export function createJwtSignServiceProvider(
-  optionsOverrides?: JwtOptionsInterface,
+  optionsOverrides?: JwtOptions,
 ): Provider {
   return {
     provide: JwtSignService,
@@ -142,8 +144,8 @@ export function createJwtSignServiceProvider(
     ],
     useFactory: async (
       options: JwtOptionsInterface,
-      accessService: JwtService,
-      refreshService: JwtService,
+      accessService: NestJwtService,
+      refreshService: NestJwtService,
     ) =>
       optionsOverrides?.jwtSignService ??
       options.jwtSignService ??
@@ -152,7 +154,7 @@ export function createJwtSignServiceProvider(
 }
 
 export function createJwtIssueServiceProvider(
-  optionsOverrides?: JwtOptionsInterface,
+  optionsOverrides?: JwtOptions,
 ): Provider {
   return {
     provide: JwtIssueService,
@@ -168,7 +170,7 @@ export function createJwtIssueServiceProvider(
 }
 
 export function createJwtVerifyServiceProvider(
-  optionsOverrides?: JwtOptionsInterface,
+  optionsOverrides?: JwtOptions,
 ): Provider {
   return {
     provide: JwtVerifyService,

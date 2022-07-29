@@ -33,6 +33,12 @@ export const {
   )
   .build();
 
+export type SwaggerUiOptions = Omit<typeof SWAGGER_UI_OPTIONS_TYPE, 'global'>;
+export type SwaggerUiAsyncOptions = Omit<
+  typeof SWAGGER_UI_ASYNC_OPTIONS_TYPE,
+  'global'
+>;
+
 function definitionTransform(
   definition: DynamicModule,
   extras: SwaggerUiOptionsExtrasInterface,

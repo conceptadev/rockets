@@ -1,9 +1,9 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import { SwaggerUiService } from './swagger-ui.service';
 import {
+  SwaggerUiAsyncOptions,
   SwaggerUiModuleClass,
-  SWAGGER_UI_ASYNC_OPTIONS_TYPE,
-  SWAGGER_UI_OPTIONS_TYPE,
+  SwaggerUiOptions,
 } from './swagger-ui.module-definition';
 
 @Module({
@@ -11,27 +11,19 @@ import {
   exports: [SwaggerUiService],
 })
 export class SwaggerUiModule extends SwaggerUiModuleClass {
-  static register(
-    options: Omit<typeof SWAGGER_UI_OPTIONS_TYPE, 'global'>,
-  ): DynamicModule {
+  static register(options: SwaggerUiOptions): DynamicModule {
     return super.register(options);
   }
 
-  static registerAsync(
-    options: Omit<typeof SWAGGER_UI_ASYNC_OPTIONS_TYPE, 'global'>,
-  ): DynamicModule {
+  static registerAsync(options: SwaggerUiAsyncOptions): DynamicModule {
     return super.registerAsync(options);
   }
 
-  static forRoot(
-    options: Omit<typeof SWAGGER_UI_OPTIONS_TYPE, 'global'>,
-  ): DynamicModule {
+  static forRoot(options: SwaggerUiOptions): DynamicModule {
     return super.register({ ...options, global: true });
   }
 
-  static forRootAsync(
-    options: Omit<typeof SWAGGER_UI_ASYNC_OPTIONS_TYPE, 'global'>,
-  ): DynamicModule {
+  static forRootAsync(options: SwaggerUiAsyncOptions): DynamicModule {
     return super.registerAsync({ ...options, global: true });
   }
 }
