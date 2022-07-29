@@ -125,7 +125,7 @@ describe('AccessControlModule', () => {
   const reflector: Reflector = new Reflector();
   const moduleConfig: AccessControlModuleOptionsInterface = {
     settings: { rules: rules },
-    service: TestAccessService,
+    service: new TestAccessService(),
   };
 
   beforeAll(async () => {
