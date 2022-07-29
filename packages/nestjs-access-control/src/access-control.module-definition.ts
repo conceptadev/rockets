@@ -6,7 +6,7 @@ import {
 import { ConfigModule } from '@nestjs/config';
 import { createSettingsProvider } from '@concepta/nestjs-common';
 
-import { AccessControlModuleOptionsInterface } from './interfaces/access-control-module-options.interface';
+import { AccessControlOptionsInterface } from './interfaces/access-control-options.interface';
 import {
   ACCESS_CONTROL_MODULE_OPTIONS_TOKEN,
   ACCESS_CONTROL_MODULE_SETTINGS_TOKEN,
@@ -20,7 +20,7 @@ export const {
   ConfigurableModuleClass: AccessControlModuleClass,
   OPTIONS_TYPE: ACCESS_CONTROL_OPTIONS_TYPE,
   ASYNC_OPTIONS_TYPE: ACCESS_CONTROL_ASYNC_OPTIONS_TYPE,
-} = new ConfigurableModuleBuilder<AccessControlModuleOptionsInterface>({
+} = new ConfigurableModuleBuilder<AccessControlOptionsInterface>({
   moduleName: 'AccessControl',
   optionsInjectionToken: ACCESS_CONTROL_MODULE_OPTIONS_TOKEN,
 })
@@ -87,7 +87,7 @@ export function createAccessControlSettingsProvider(
 ): Provider {
   return createSettingsProvider<
     AccessControlSettingsInterface,
-    AccessControlModuleOptionsInterface
+    AccessControlOptionsInterface
   >({
     settingsToken: ACCESS_CONTROL_MODULE_SETTINGS_TOKEN,
     optionsToken: ACCESS_CONTROL_MODULE_OPTIONS_TOKEN,
@@ -102,7 +102,7 @@ export function createAccessControlServiceProvider(
   return {
     provide: AccessControlService,
     inject: [ACCESS_CONTROL_MODULE_OPTIONS_TOKEN],
-    useFactory: async (options: AccessControlModuleOptionsInterface) =>
+    useFactory: async (options: AccessControlOptionsInterface) =>
       optionsOverrides?.service ??
       options.service ??
       new AccessControlService(),

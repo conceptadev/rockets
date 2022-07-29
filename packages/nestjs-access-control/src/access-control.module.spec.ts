@@ -4,7 +4,7 @@ import { AccessControl } from 'accesscontrol';
 import { AccessControlService } from './services/access-control.service';
 import { AccessControlModule } from './access-control.module';
 import { AccessControlServiceInterface } from './interfaces/access-control-service.interface';
-import { AccessControlModuleOptionsInterface } from './interfaces/access-control-module-options.interface';
+import { AccessControlOptionsInterface } from './interfaces/access-control-options.interface';
 import { AccessControlSettingsInterface } from './interfaces/access-control-settings.interface';
 import {
   ACCESS_CONTROL_MODULE_OPTIONS_TOKEN,
@@ -13,7 +13,7 @@ import {
 
 describe('AccessControlModule', () => {
   let accessControlModule: AccessControlModule;
-  let accessControlOptions: AccessControlModuleOptionsInterface;
+  let accessControlOptions: AccessControlOptionsInterface;
   let accessControlSettings: AccessControlSettingsInterface;
   let accessControlService: AccessControlServiceInterface;
 
@@ -148,7 +148,7 @@ describe('AccessControlModule', () => {
   function setVars(testModule: TestingModule) {
     accessControlModule =
       testModule.get<AccessControlModule>(AccessControlModule);
-    accessControlOptions = testModule.get<AccessControlModuleOptionsInterface>(
+    accessControlOptions = testModule.get<AccessControlOptionsInterface>(
       ACCESS_CONTROL_MODULE_OPTIONS_TOKEN,
     );
     accessControlSettings = testModule.get<AccessControlSettingsInterface>(
