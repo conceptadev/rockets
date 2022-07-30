@@ -1,3 +1,4 @@
+import { LiteralObject, ReferenceAssigneeInterface } from '@concepta/ts-core';
 import { Inject, Injectable } from '@nestjs/common';
 
 import { InvitationServiceInterface } from '../interfaces/invitation.service.interface';
@@ -12,10 +13,8 @@ import {
   INVITATION_USER_MUTATE_SERVICE_TOKEN,
 } from '../invitation.constants';
 import { InvitationNotificationService } from './invitation-notification.service';
-import {
-  ReferenceAssigneeInterface,
-  ReferenceIdInterface,
-} from '@concepta/ts-core';
+import { InvitationDto } from '../dto/invitation.dto';
+import { InvitationEventService } from './invitation-event.service';
 
 @Injectable()
 export class InvitationService implements InvitationServiceInterface {
@@ -29,62 +28,49 @@ export class InvitationService implements InvitationServiceInterface {
     @Inject(INVITATION_USER_MUTATE_SERVICE_TOKEN)
     private readonly userMutateService: InvitationUserMutateServiceInterface,
     private readonly notificationService: InvitationNotificationService,
+    private readonly invitationEventService: InvitationEventService,
   ) {}
 
-  /**
-   * Send app email invite to the new user.
-   *
-   * @param email user email
-   */
-  async sendInvite(email: string): Promise<void> {
-    // recover the user by providing an email
-    let user = await this.userLookupService.byEmail(email);
+  async sendInvite(
+    userId: string,
+    email: string,
+    code: string,
+    category: string,
+  ): Promise<void> {
+    const { assignment, type, expiresIn } = this.config.otp;
+    // create an OTP save it in the database
+    const otp = await this.otpService.create(assignment, {
+      category,
+      type,
+      expiresIn,
+      assignee: {
+        id: userId,
+      },
+    });
 
-    if (!user) {
-      user = await this.userMutateService.create({
-        email,
-        username: email,
-      });
-    }
-
-    // did we find a user?
-    if (user) {
-      // extract required otp properties
-      const { category, assignment, type, expiresIn } = this.config.otp;
-      // create an OTP save it in the database
-      const otp = await this.otpService.create(assignment, {
-        category,
-        type,
-        expiresIn,
-        assignee: {
-          id: user.id,
-        },
-      });
-
-      // send en email with a recover OTP
-      await this.notificationService.sendInviteEmail(
-        email,
-        otp.passcode,
-        otp.expirationDate,
-      );
-    }
-
-    // !!! Falling through to void is intentional              !!!!
-    // !!! Do NOT give any indication if e-mail does not exist !!!!
+    // send en email with a recover OTP
+    await this.notificationService.sendInviteEmail(
+      email,
+      code,
+      otp.passcode,
+      otp.expirationDate,
+    );
   }
 
   /**
    * Validate passcode and return it's user.
    *
    * @param passcode user's passcode
+   * @param category
    * @param deleteIfValid flag to delete if valid or not
    */
   async validatePasscode(
     passcode: string,
+    category: string,
     deleteIfValid = false,
   ): Promise<ReferenceAssigneeInterface | null> {
     // extract required properties
-    const { category, assignment } = this.config.otp;
+    const { assignment } = this.config.otp;
 
     // validate passcode return passcode's user was found
     return this.otpService.validate(
@@ -97,49 +83,51 @@ export class InvitationService implements InvitationServiceInterface {
   /**
    * Activate user's account by providing its OTP passcode and the new password.
    *
-   * @param passcode OTP user's passcode
-   * @param newPassword new user password
    */
   async acceptInvite(
+    invitationDto: InvitationDto,
     passcode: string,
-    newPassword: string,
-  ): Promise<ReferenceIdInterface | null> {
+    payload?: LiteralObject,
+  ): Promise<boolean> {
+    const { category, email } = invitationDto;
     // get otp by passcode, but no delete it until all workflow pass
-    const otp = await this.validatePasscode(passcode);
+    const otp = await this.validatePasscode(passcode, category, true);
 
     // did we get an otp?
     if (otp) {
-      // call user mutate service
-      const user = await this.userMutateService.update({
-        id: otp.assignee.id,
-        password: newPassword,
-      });
+      const success = await this.invitationEventService.sendEvent(
+        'acceptInvite',
+        invitationDto,
+        payload,
+      );
 
-      if (user) {
-        await this.notificationService.sendInviteAcceptedEmail(user.email);
-        await this.revokeAllUserInvites(user.email);
+      if (!success) {
+        return false;
       }
 
-      return user;
+      await this.notificationService.sendInviteAcceptedEmail(email);
+      await this.revokeAllUserInvites(email, category);
+
+      return true;
     }
 
-    // otp was not found
-    return null;
+    return false;
   }
 
   /**
    * Recover lost password providing an email and send the passcode token by email.
    *
    * @param email user email
+   * @param category
    */
-  async revokeAllUserInvites(email: string): Promise<void> {
+  async revokeAllUserInvites(email: string, category: string): Promise<void> {
     // recover the user by providing an email
     const user = await this.userLookupService.byEmail(email);
 
     // did we find a user?
     if (user) {
       // extract required otp properties
-      const { category, assignment } = this.config.otp;
+      const { assignment } = this.config.otp;
       // clear all user's otps in DB
       await this.otpService.clear(assignment, {
         category,

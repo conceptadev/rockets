@@ -7,7 +7,7 @@ import { EmailService } from '@concepta/nestjs-email';
 import { InvitationModule } from './invitation.module';
 import { InvitationAppModuleFixture } from './__fixtures__/invitation.app.module.fixture';
 import { InvitationService } from './services/invitation.service';
-import { InvitationController } from './invitation.controller';
+import { InvitationController } from './controllers/invitation.controller';
 import { InvitationNotificationService } from './services/invitation-notification.service';
 
 describe('InvitationModuleTest', () => {

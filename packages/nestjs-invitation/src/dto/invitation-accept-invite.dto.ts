@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsObject, IsOptional, IsString } from 'class-validator';
+import { LiteralObject } from '@concepta/ts-core';
 
 export class InvitationAcceptInviteDto {
   @ApiProperty({
@@ -11,10 +12,11 @@ export class InvitationAcceptInviteDto {
   passcode = '';
 
   @ApiProperty({
-    title: 'account new password',
-    type: 'string',
+    title: 'Payload',
+    type: 'object',
     description: 'New password account',
   })
-  @IsString()
-  newPassword = '';
+  @IsObject()
+  @IsOptional()
+  payload?: LiteralObject;
 }

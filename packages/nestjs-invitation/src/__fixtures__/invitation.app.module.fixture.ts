@@ -14,6 +14,7 @@ import { InvitationModule } from '../invitation.module';
 import { default as ormConfig } from './invitation.ormconfig.fixture';
 import { InvitationUserOtpEntityFixture } from './invitation-user-otp-entity.fixture';
 import { InvitationUserEntityFixture } from './invitation-user-entity.fixture';
+import { InvitationEntityFixture } from './invitation.entity.fixture';
 
 @Module({
   imports: [
@@ -42,6 +43,11 @@ import { InvitationUserEntityFixture } from './invitation-user-entity.fixture';
         otpService,
         emailService,
       }),
+      entities: {
+        invitation: {
+          entity: InvitationEntityFixture,
+        },
+      },
     }),
     OtpModule.register({
       entities: {
@@ -66,6 +72,17 @@ import { InvitationUserEntityFixture } from './invitation-user-entity.fixture';
         },
       },
     }),
+  ],
+  providers: [
+    {
+      provide: Logger,
+      useValue: {
+        log: jest.fn(),
+        debug: jest.fn(async (arg1, arg2) => {
+          return { arg1, arg2 };
+        }),
+      },
+    },
   ],
 })
 export class InvitationAppModuleFixture {}

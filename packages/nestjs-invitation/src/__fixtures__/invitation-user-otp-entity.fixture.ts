@@ -8,9 +8,6 @@ import { InvitationUserEntityFixture } from './invitation-user-entity.fixture';
 import { OtpInterface } from '@concepta/ts-common';
 import { AuditSqlLiteEmbed } from '@concepta/typeorm-common';
 
-/**
- * Otp Entity Fixture
- */
 @Entity()
 export class InvitationUserOtpEntityFixture implements OtpInterface {
   @PrimaryGeneratedColumn('uuid')

@@ -1,10 +1,8 @@
 import { Entity, OneToMany } from 'typeorm';
 import { UserSqliteEntity } from '@concepta/nestjs-user';
 import { InvitationUserOtpEntityFixture } from './invitation-user-otp-entity.fixture';
+import { InvitationEntityFixture } from './invitation.entity.fixture';
 
-/**
- * User Entity Fixture
- */
 @Entity()
 export class InvitationUserEntityFixture extends UserSqliteEntity {
   @OneToMany(
@@ -12,4 +10,10 @@ export class InvitationUserEntityFixture extends UserSqliteEntity {
     (userOtp) => userOtp.assignee,
   )
   userOtps?: InvitationUserOtpEntityFixture[];
+
+  @OneToMany(
+    () => InvitationEntityFixture,
+    (userInvitation) => userInvitation.user,
+  )
+  invitations?: InvitationEntityFixture[];
 }

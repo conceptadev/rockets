@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 
@@ -33,7 +34,8 @@ describe('AuthRecoveryNotificationService', () => {
   it('Send recover email login', async () => {
     await authRecoveryNotificationService.sendInviteEmail(
       'me@mail.com',
-      'me',
+      randomUUID(),
+      'passcode',
       new Date(),
     );
   });

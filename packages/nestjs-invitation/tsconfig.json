@@ -33,6 +33,12 @@
     },
     {
       "path": "../nestjs-otp"
+    },
+    {
+      "path": "../nestjs-common"
+    },
+    {
+      "path": "../nestjs-access-control"
     }
   ]
 }

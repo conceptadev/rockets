@@ -24,7 +24,6 @@ export const invitationDefaultConfig = registerAs(
     },
     otp: {
       assignment: 'userOtp',
-      category: 'invitation',
       type: 'uuid',
       expiresIn: '1h',
     },

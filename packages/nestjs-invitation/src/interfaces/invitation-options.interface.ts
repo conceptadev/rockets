@@ -2,6 +2,7 @@ import {
   ModuleOptionsControllerInterface,
   ModuleOptionsSettingsInterface,
 } from '@concepta/nestjs-core';
+
 import { InvitationSettingsInterface } from './invitation-settings.interface';
 import { InvitationOtpServiceInterface } from './invitation-otp.service.interface';
 import { InvitationEmailServiceInterface } from './invitation-email.service.interface';

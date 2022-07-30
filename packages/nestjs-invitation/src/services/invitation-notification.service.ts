@@ -25,6 +25,7 @@ export class InvitationNotificationService
 
   async sendInviteEmail(
     email: string,
+    code: string,
     passcode: string,
     resetTokenExp: Date,
   ): Promise<void> {
@@ -36,7 +37,7 @@ export class InvitationNotificationService
       to: email,
       template: fileName,
       context: {
-        tokenUrl: `${baseUrl}/${passcode}`,
+        tokenUrl: `${baseUrl}/?code=${code}&passcode=${passcode}`,
         tokenExp: resetTokenExp,
       },
     });
