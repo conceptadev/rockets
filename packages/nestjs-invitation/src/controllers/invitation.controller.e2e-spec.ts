@@ -8,17 +8,17 @@ import { OtpInterface, UserInterface } from '@concepta/ts-common';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { getDataSourceToken } from '@nestjs/typeorm';
 
-import { InvitationCreateDto } from './dto/invitation-create.dto';
-import { InvitationUserEntityFixture } from './__fixtures__/invitation-user-entity.fixture';
-import { InvitationAppModuleFixture } from './__fixtures__/invitation.app.module.fixture';
-import { InvitationDto } from './dto/invitation.dto';
-import { InvitationAcceptInviteDto } from './dto/invitation-accept-invite.dto';
-import { invitationDefaultConfig } from './config/invitation-default.config';
-import { InvitationFactory } from './invitation.factory';
-import { InvitationEntityFixture } from './__fixtures__/invitation.entity.fixture';
-import { InvitationEntityInterface } from './interfaces/invitation.entity.interface';
-import { InvitationSettingsInterface } from './interfaces/invitation-settings.interface';
-import { INVITATION_MODULE_DEFAULT_SETTINGS_TOKEN } from './invitation.constants';
+import { InvitationCreateDto } from '../dto/invitation-create.dto';
+import { InvitationUserEntityFixture } from '../__fixtures__/invitation-user-entity.fixture';
+import { InvitationAppModuleFixture } from '../__fixtures__/invitation.app.module.fixture';
+import { InvitationDto } from '../dto/invitation.dto';
+import { InvitationAcceptInviteDto } from '../dto/invitation-accept-invite.dto';
+import { invitationDefaultConfig } from '../config/invitation-default.config';
+import { InvitationFactory } from '../invitation.factory';
+import { InvitationEntityFixture } from '../__fixtures__/invitation.entity.fixture';
+import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
+import { InvitationSettingsInterface } from '../interfaces/invitation-settings.interface';
+import { INVITATION_MODULE_DEFAULT_SETTINGS_TOKEN } from '../invitation.constants';
 
 describe('InvitationController (e2e)', () => {
   const category = 'invitation';

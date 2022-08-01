@@ -30,14 +30,14 @@ export class InvitationDto implements InvitationInterface {
   @Expose()
   @ApiProperty({
     type: 'boolean',
-    description: 'True if Org is active',
+    description: 'True if Invitation is active',
   })
   active = true;
 
   @Expose()
   @ApiProperty({
     type: 'string',
-    description: 'Code claim invitation',
+    description: 'recipient email',
   })
   @IsEmail()
   email = '';

@@ -1,4 +1,4 @@
-import { Body, Get, Inject, NotFoundException, Param } from '@nestjs/common';
+import { Inject } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   CrudBody,
@@ -15,7 +15,6 @@ import {
 import { INVITATION_USER_LOOKUP_SERVICE_TOKEN } from '../invitation.constants';
 import { InvitationService } from '../services/invitation.service';
 import { InvitationCreateDto } from '../dto/invitation-create.dto';
-import { InvitationAcceptInviteDto } from '../dto/invitation-accept-invite.dto';
 import { InvitationDto } from '../dto/invitation.dto';
 import { InvitationPaginatedDto } from '../dto/invitation-paginated.dto';
 import { InvitationInterface } from '../interfaces/invitation.interface';
@@ -56,18 +55,27 @@ export class InvitationController
 
   @CrudReadMany()
   @AccessControlReadMany(InvitationResource.Many)
+  @ApiOperation({
+    summary: 'Get many invitation using given criteria.',
+  })
   async getMany(@CrudRequest() crudRequest: CrudRequestInterface) {
     return this.invitationCrudService.getMany(crudRequest);
   }
 
   @CrudReadOne()
   @AccessControlReadOne(InvitationResource.One)
+  @ApiOperation({
+    summary: 'Get one invitation by id.',
+  })
   async getOne(@CrudRequest() crudRequest: CrudRequestInterface) {
     return this.invitationCrudService.getOne(crudRequest);
   }
 
   @CrudCreateOne()
   @AccessControlCreateOne(InvitationResource.One)
+  @ApiOperation({
+    summary: 'Create one invitation.',
+  })
   async createOneCustom(
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() invitationCreateDto: InvitationCreateDto,
@@ -91,35 +99,11 @@ export class InvitationController
     return invite;
   }
 
-  @ApiOperation({
-    summary: 'Check if passcode is valid.',
-  })
-  @Get('/:code?passcode=')
-  async validatePasscode(
-    @Param('code') code: string,
-    @Body() invitationAcceptInviteDto: InvitationAcceptInviteDto,
-  ): Promise<void> {
-    const { passcode } = invitationAcceptInviteDto;
-    const invitation = await this.invitationCrudService.getOneByCode(code);
-
-    if (!invitation) {
-      throw new NotFoundException();
-    }
-
-    const { category } = invitation;
-    const otp = await this.invitationService.validatePasscode(
-      passcode,
-      category,
-      false,
-    );
-
-    if (!otp) {
-      throw new NotFoundException();
-    }
-  }
-
   @CrudDeleteOne()
   @AccessControlDeleteOne(InvitationResource.One)
+  @ApiOperation({
+    summary: 'Delete one invitation.',
+  })
   async deleteOne(@CrudRequest() crudRequest: CrudRequestInterface) {
     return this.invitationCrudService.deleteOne(crudRequest);
   }

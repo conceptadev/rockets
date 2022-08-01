@@ -22,12 +22,12 @@ export class InvitationValidationController {
     private readonly invitationCrudService: InvitationCrudService,
   ) {}
 
-  @ApiOperation({
-    summary: 'Accept invitation token to activate the user.',
-  })
   @ApiBody({
     type: InvitationAcceptInviteDto,
     description: 'DTO to accept invitation token.',
+  })
+  @ApiOperation({
+    summary: 'Accept one invitation by code, passcode and payload.',
   })
   @Patch('/:code')
   async acceptInvite(
