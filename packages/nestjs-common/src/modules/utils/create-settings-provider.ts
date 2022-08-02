@@ -22,9 +22,21 @@ export function createSettingsProvider<
       moduleOptions: ModuleOptionsType,
       defaultSettings: ModuleSettingsType,
     ) => {
-      return (
-        optionsOverrides?.settings ?? moduleOptions.settings ?? defaultSettings
-      );
+      // get effective settings, overrides completely replace module settings
+      const effectiveSettings =
+        optionsOverrides?.settings ?? moduleOptions?.settings;
+
+      // was a transformer provided?
+      if (optionsOverrides?.settingsTransform) {
+        // yes, call it
+        return optionsOverrides.settingsTransform(
+          effectiveSettings,
+          defaultSettings,
+        );
+      } else {
+        // no, return defaults if there are NO effective settings
+        return effectiveSettings ?? defaultSettings;
+      }
     },
   };
 }

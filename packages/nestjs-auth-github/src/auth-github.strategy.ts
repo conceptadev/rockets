@@ -26,13 +26,13 @@ export class AuthGithubStrategy extends PassportStrategy(
 ) {
   constructor(
     @Inject(AUTH_GITHUB_MODULE_SETTINGS_TOKEN)
-    config: AuthGithubSettingsInterface,
+    settings: AuthGithubSettingsInterface,
     private federatedOAuthService: FederatedOAuthService,
   ) {
     super({
-      clientID: config.clientId,
-      clientSecret: config.clientSecret,
-      callbackURL: config.callbackURL,
+      clientID: settings?.clientId,
+      clientSecret: settings?.clientSecret,
+      callbackURL: settings?.callbackURL,
     });
   }
 
