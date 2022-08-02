@@ -7,13 +7,12 @@ import { ConfigModule } from '@nestjs/config';
 import { createSettingsProvider } from '@concepta/nestjs-common';
 
 import { CrudOptionsInterface } from './interfaces/crud-options.interface';
-import {
-  CRUD_MODULE_OPTIONS_TOKEN,
-  CRUD_MODULE_SETTINGS_TOKEN,
-} from './crud.constants';
+import { CRUD_MODULE_SETTINGS_TOKEN } from './crud.constants';
 import { CrudOptionsExtrasInterface } from './interfaces/crud-options-extras.interface';
 import { CrudSettingsInterface } from './interfaces/crud-settings.interface';
 import { crudDefaultConfig } from './config/crud-default.config';
+
+const RAW_OPTIONS_TOKEN = Symbol('__CRUD_MODULE_RAW_OPTIONS_TOKEN__');
 
 export const {
   ConfigurableModuleClass: CrudModuleClass,
@@ -21,7 +20,7 @@ export const {
   ASYNC_OPTIONS_TYPE: CRUD_ASYNC_OPTIONS_TYPE,
 } = new ConfigurableModuleBuilder<CrudOptionsInterface>({
   moduleName: 'Crud',
-  optionsInjectionToken: CRUD_MODULE_OPTIONS_TOKEN,
+  optionsInjectionToken: RAW_OPTIONS_TOKEN,
 })
   .setExtras<CrudOptionsExtrasInterface>({ global: false }, definitionTransform)
   .build();
@@ -41,11 +40,7 @@ function definitionTransform(
     global,
     imports: createCrudImports({ imports }),
     providers: createCrudProviders({ providers }),
-    exports: [
-      ConfigModule,
-      CRUD_MODULE_OPTIONS_TOKEN,
-      CRUD_MODULE_SETTINGS_TOKEN,
-    ],
+    exports: [ConfigModule, RAW_OPTIONS_TOKEN, CRUD_MODULE_SETTINGS_TOKEN],
   };
 }
 
@@ -76,7 +71,7 @@ export function createCrudSettingsProvider(
 ): Provider {
   return createSettingsProvider<CrudSettingsInterface, CrudOptionsInterface>({
     settingsToken: CRUD_MODULE_SETTINGS_TOKEN,
-    optionsToken: CRUD_MODULE_OPTIONS_TOKEN,
+    optionsToken: RAW_OPTIONS_TOKEN,
     settingsKey: crudDefaultConfig.KEY,
     optionsOverrides,
   });

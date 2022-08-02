@@ -13,7 +13,6 @@ import { createSettingsProvider } from '@concepta/nestjs-common';
 import {
   JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
   JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
-  JWT_MODULE_OPTIONS_TOKEN,
   JWT_MODULE_SETTINGS_TOKEN,
 } from './jwt.constants';
 
@@ -25,6 +24,8 @@ import { JwtSignService } from './services/jwt-sign.service';
 import { JwtIssueService } from './services/jwt-issue.service';
 import { JwtVerifyService } from './services/jwt-verify.service';
 
+const RAW_OPTIONS_TOKEN = Symbol('__JWT_MODULE_RAW_OPTIONS_TOKEN__');
+
 export const {
   ConfigurableModuleClass: JwtModuleClass,
   OPTIONS_TYPE: JWT_OPTIONS_TYPE,
@@ -32,7 +33,7 @@ export const {
   MODULE_OPTIONS_TOKEN,
 } = new ConfigurableModuleBuilder<JwtOptionsInterface>({
   moduleName: 'Jwt',
-  optionsInjectionToken: JWT_MODULE_OPTIONS_TOKEN,
+  optionsInjectionToken: RAW_OPTIONS_TOKEN,
 })
   .setExtras<JwtOptionsExtrasInterface>({ global: false }, definitionTransform)
   .build();
@@ -54,7 +55,7 @@ function definitionTransform(
     providers: createJwtProviders({ providers }),
     exports: [
       ConfigModule,
-      JWT_MODULE_OPTIONS_TOKEN,
+      RAW_OPTIONS_TOKEN,
       JWT_MODULE_SETTINGS_TOKEN,
       JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
       JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
@@ -94,7 +95,7 @@ export function createJwtSettingsProvider(
 ): Provider {
   return createSettingsProvider<JwtSettingsInterface, JwtOptionsInterface>({
     settingsToken: JWT_MODULE_SETTINGS_TOKEN,
-    optionsToken: JWT_MODULE_OPTIONS_TOKEN,
+    optionsToken: RAW_OPTIONS_TOKEN,
     settingsKey: jwtDefaultConfig.KEY,
     optionsOverrides,
   });
@@ -105,7 +106,7 @@ export function createJwtServiceAccessTokenProvider(
 ): Provider {
   return {
     provide: JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
-    inject: [JWT_MODULE_OPTIONS_TOKEN, JWT_MODULE_SETTINGS_TOKEN],
+    inject: [RAW_OPTIONS_TOKEN, JWT_MODULE_SETTINGS_TOKEN],
     useFactory: async (
       options: JwtOptionsInterface,
       settings: JwtSettingsInterface,
@@ -121,7 +122,7 @@ export function createJwtServiceRefreshTokenProvider(
 ): Provider {
   return {
     provide: JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
-    inject: [JWT_MODULE_OPTIONS_TOKEN, JWT_MODULE_SETTINGS_TOKEN],
+    inject: [RAW_OPTIONS_TOKEN, JWT_MODULE_SETTINGS_TOKEN],
     useFactory: async (
       options: JwtOptionsInterface,
       settings: JwtSettingsInterface,
@@ -138,7 +139,7 @@ export function createJwtSignServiceProvider(
   return {
     provide: JwtSignService,
     inject: [
-      JWT_MODULE_OPTIONS_TOKEN,
+      RAW_OPTIONS_TOKEN,
       JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
       JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
     ],
@@ -158,7 +159,7 @@ export function createJwtIssueServiceProvider(
 ): Provider {
   return {
     provide: JwtIssueService,
-    inject: [JWT_MODULE_OPTIONS_TOKEN, JwtSignService],
+    inject: [RAW_OPTIONS_TOKEN, JwtSignService],
     useFactory: async (
       options: JwtOptionsInterface,
       signService: JwtSignService,
@@ -174,7 +175,7 @@ export function createJwtVerifyServiceProvider(
 ): Provider {
   return {
     provide: JwtVerifyService,
-    inject: [JWT_MODULE_OPTIONS_TOKEN, JwtSignService],
+    inject: [RAW_OPTIONS_TOKEN, JwtSignService],
     useFactory: async (
       options: JwtOptionsInterface,
       signService: JwtSignService,

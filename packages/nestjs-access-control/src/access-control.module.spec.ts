@@ -4,16 +4,11 @@ import { AccessControl } from 'accesscontrol';
 import { AccessControlService } from './services/access-control.service';
 import { AccessControlModule } from './access-control.module';
 import { AccessControlServiceInterface } from './interfaces/access-control-service.interface';
-import { AccessControlOptionsInterface } from './interfaces/access-control-options.interface';
 import { AccessControlSettingsInterface } from './interfaces/access-control-settings.interface';
-import {
-  ACCESS_CONTROL_MODULE_OPTIONS_TOKEN,
-  ACCESS_CONTROL_MODULE_SETTINGS_TOKEN,
-} from './constants';
+import { ACCESS_CONTROL_MODULE_SETTINGS_TOKEN } from './constants';
 
 describe('AccessControlModule', () => {
   let accessControlModule: AccessControlModule;
-  let accessControlOptions: AccessControlOptionsInterface;
   let accessControlSettings: AccessControlSettingsInterface;
   let accessControlService: AccessControlServiceInterface;
 
@@ -35,7 +30,7 @@ describe('AccessControlModule', () => {
     commonTests();
 
     it('settings should be correct', async () => {
-      expect(accessControlOptions.settings).toEqual({
+      expect(accessControlSettings).toEqual({
         rules,
       });
     });
@@ -53,7 +48,7 @@ describe('AccessControlModule', () => {
     commonTests();
 
     it('settings should be correct', async () => {
-      expect(accessControlOptions.settings).toEqual({
+      expect(accessControlSettings).toEqual({
         rules,
       });
     });
@@ -75,7 +70,7 @@ describe('AccessControlModule', () => {
     commonTests();
 
     it('settings should be correct', async () => {
-      expect(accessControlOptions.settings).toEqual({
+      expect(accessControlSettings).toEqual({
         rules,
       });
     });
@@ -97,7 +92,7 @@ describe('AccessControlModule', () => {
     commonTests();
 
     it('settings should be correct', async () => {
-      expect(accessControlOptions.settings).toEqual({
+      expect(accessControlSettings).toEqual({
         rules,
       });
     });
@@ -148,9 +143,6 @@ describe('AccessControlModule', () => {
   function setVars(testModule: TestingModule) {
     accessControlModule =
       testModule.get<AccessControlModule>(AccessControlModule);
-    accessControlOptions = testModule.get<AccessControlOptionsInterface>(
-      ACCESS_CONTROL_MODULE_OPTIONS_TOKEN,
-    );
     accessControlSettings = testModule.get<AccessControlSettingsInterface>(
       ACCESS_CONTROL_MODULE_SETTINGS_TOKEN,
     );
@@ -161,7 +153,6 @@ describe('AccessControlModule', () => {
   function commonTests() {
     it('providers should be loaded', async () => {
       expect(accessControlModule).toBeInstanceOf(AccessControlModule);
-      expect(accessControlOptions).toBeInstanceOf(Object);
       expect(accessControlSettings).toBeInstanceOf(Object);
       expect(accessControlService).toBeInstanceOf(AccessControlService);
     });

@@ -11,11 +11,12 @@ import { SwaggerUiOptionsInterface } from './interfaces/swagger-ui-options.inter
 import { SwaggerUiSettingsInterface } from './interfaces/swagger-ui-settings.interface';
 import {
   SWAGGER_UI_MODULE_DOCUMENT_BUILDER_TOKEN,
-  SWAGGER_UI_MODULE_OPTIONS_TOKEN,
   SWAGGER_UI_MODULE_SETTINGS_TOKEN,
 } from './swagger-ui.constants';
 import { createDefaultDocumentBuilder } from './utils/create-default-document-builder';
 import { SwaggerUiOptionsExtrasInterface } from './interfaces/swagger-ui-options-extras.interface';
+
+const RAW_OPTIONS_TOKEN = Symbol('__SWAGGER_UI_MODULE_RAW_OPTIONS_TOKEN__');
 
 export const {
   ConfigurableModuleClass: SwaggerUiModuleClass,
@@ -23,7 +24,7 @@ export const {
   ASYNC_OPTIONS_TYPE: SWAGGER_UI_ASYNC_OPTIONS_TYPE,
 } = new ConfigurableModuleBuilder<SwaggerUiOptionsInterface>({
   moduleName: 'SwaggerUi',
-  optionsInjectionToken: SWAGGER_UI_MODULE_OPTIONS_TOKEN,
+  optionsInjectionToken: RAW_OPTIONS_TOKEN,
 })
   .setExtras<SwaggerUiOptionsExtrasInterface>(
     {
@@ -56,7 +57,7 @@ function definitionTransform(
     ],
     exports: [
       ConfigModule,
-      SWAGGER_UI_MODULE_OPTIONS_TOKEN,
+      RAW_OPTIONS_TOKEN,
       SWAGGER_UI_MODULE_SETTINGS_TOKEN,
     ],
   };
@@ -68,7 +69,7 @@ export function createSwaggerUiSettingsProvider(): Provider {
     SwaggerUiOptionsInterface
   >({
     settingsToken: SWAGGER_UI_MODULE_SETTINGS_TOKEN,
-    optionsToken: SWAGGER_UI_MODULE_OPTIONS_TOKEN,
+    optionsToken: RAW_OPTIONS_TOKEN,
     settingsKey: swaggerUiDefaultConfig.KEY,
   });
 }
@@ -76,7 +77,7 @@ export function createSwaggerUiSettingsProvider(): Provider {
 export function createSwaggerUiDocumentBuilderProvider(): Provider {
   return {
     provide: SWAGGER_UI_MODULE_DOCUMENT_BUILDER_TOKEN,
-    inject: [SWAGGER_UI_MODULE_OPTIONS_TOKEN, SWAGGER_UI_MODULE_SETTINGS_TOKEN],
+    inject: [RAW_OPTIONS_TOKEN, SWAGGER_UI_MODULE_SETTINGS_TOKEN],
     useFactory: async (
       options: SwaggerUiOptionsInterface,
       settings: SwaggerUiSettingsInterface,

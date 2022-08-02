@@ -4,11 +4,9 @@ import { JwtModule } from './jwt.module';
 import { JwtSignService } from './services/jwt-sign.service';
 import { JwtVerifyService } from './services/jwt-verify.service';
 import { JwtIssueService } from './services/jwt-issue.service';
-import { JwtOptionsInterface } from './interfaces/jwt-options.interface';
 import {
   JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
   JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
-  JWT_MODULE_OPTIONS_TOKEN,
   JWT_MODULE_SETTINGS_TOKEN,
 } from './jwt.constants';
 import { JwtSettingsInterface } from './interfaces/jwt-settings.interface';
@@ -17,7 +15,6 @@ import { JwtService } from '@nestjs/jwt';
 
 describe(JwtModule, () => {
   let jwtModule: JwtModule;
-  let jwtOptions: JwtOptionsInterface;
   let jwtSettings: JwtSettingsInterface;
   let jwtAccessService: JwtService;
   let jwtRefreshService: JwtService;
@@ -194,7 +191,6 @@ describe(JwtModule, () => {
 
   function setProviderVars(testModule: TestingModule) {
     jwtModule = testModule.get<JwtModule>(JwtModule);
-    jwtOptions = testModule.get<JwtOptionsInterface>(JWT_MODULE_OPTIONS_TOKEN);
     jwtSettings = testModule.get<JwtSettingsInterface>(
       JWT_MODULE_SETTINGS_TOKEN,
     );
@@ -212,7 +208,6 @@ describe(JwtModule, () => {
   function commonProviderTests() {
     it('providers should be loaded', async () => {
       expect(jwtModule).toBeInstanceOf(JwtModule);
-      expect(jwtOptions).toBeInstanceOf(Object);
       expect(jwtSettings).toBeInstanceOf(Object);
       expect(jwtAccessService).toBeInstanceOf(JwtService);
       expect(jwtRefreshService).toBeInstanceOf(JwtService);

@@ -2,16 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { Module } from '@nestjs/common';
 import { CrudModule } from './crud.module';
-import { CrudOptionsInterface } from './interfaces/crud-options.interface';
 import { CrudSettingsInterface } from './interfaces/crud-settings.interface';
-import {
-  CRUD_MODULE_OPTIONS_TOKEN,
-  CRUD_MODULE_SETTINGS_TOKEN,
-} from './crud.constants';
+import { CRUD_MODULE_SETTINGS_TOKEN } from './crud.constants';
 
 describe(CrudModule, () => {
   let crudModule: CrudModule;
-  let crudOptions: CrudOptionsInterface;
   let crudSettings: CrudSettingsInterface;
 
   describe(CrudModule.register, () => {
@@ -121,9 +116,6 @@ describe(CrudModule, () => {
 
   function setProviderVars(testModule: TestingModule) {
     crudModule = testModule.get<CrudModule>(CrudModule);
-    crudOptions = testModule.get<CrudOptionsInterface>(
-      CRUD_MODULE_OPTIONS_TOKEN,
-    );
     crudSettings = testModule.get<CrudSettingsInterface>(
       CRUD_MODULE_SETTINGS_TOKEN,
     );
@@ -132,7 +124,6 @@ describe(CrudModule, () => {
   function commonProviderTests() {
     it('providers should be loaded', async () => {
       expect(crudModule).toBeInstanceOf(CrudModule);
-      expect(crudOptions).toBeInstanceOf(Object);
       expect(crudSettings).toBeInstanceOf(Object);
     });
   }

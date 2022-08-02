@@ -7,14 +7,13 @@ import { ConfigModule } from '@nestjs/config';
 import { createSettingsProvider } from '@concepta/nestjs-common';
 
 import { AccessControlOptionsInterface } from './interfaces/access-control-options.interface';
-import {
-  ACCESS_CONTROL_MODULE_OPTIONS_TOKEN,
-  ACCESS_CONTROL_MODULE_SETTINGS_TOKEN,
-} from './constants';
+import { ACCESS_CONTROL_MODULE_SETTINGS_TOKEN } from './constants';
 import { AccessControlOptionsExtrasInterface } from './interfaces/access-control-options-extras.interface';
 import { accessControlDefaultConfig } from './config/acess-control-default.config';
 import { AccessControlSettingsInterface } from './interfaces/access-control-settings.interface';
 import { AccessControlService } from './services/access-control.service';
+
+const RAW_OPTIONS_TOKEN = Symbol('__ACCESS_CONTROL_MODULE_RAW_OPTIONS_TOKEN__');
 
 export const {
   ConfigurableModuleClass: AccessControlModuleClass,
@@ -22,7 +21,7 @@ export const {
   ASYNC_OPTIONS_TYPE: ACCESS_CONTROL_ASYNC_OPTIONS_TYPE,
 } = new ConfigurableModuleBuilder<AccessControlOptionsInterface>({
   moduleName: 'AccessControl',
-  optionsInjectionToken: ACCESS_CONTROL_MODULE_OPTIONS_TOKEN,
+  optionsInjectionToken: RAW_OPTIONS_TOKEN,
 })
   .setExtras<AccessControlOptionsExtrasInterface>(
     { global: false },
@@ -53,7 +52,7 @@ function definitionTransform(
     providers: createAccessControlProviders({ providers }),
     exports: [
       ConfigModule,
-      ACCESS_CONTROL_MODULE_OPTIONS_TOKEN,
+      RAW_OPTIONS_TOKEN,
       ACCESS_CONTROL_MODULE_SETTINGS_TOKEN,
     ],
   };
@@ -90,7 +89,7 @@ export function createAccessControlSettingsProvider(
     AccessControlOptionsInterface
   >({
     settingsToken: ACCESS_CONTROL_MODULE_SETTINGS_TOKEN,
-    optionsToken: ACCESS_CONTROL_MODULE_OPTIONS_TOKEN,
+    optionsToken: RAW_OPTIONS_TOKEN,
     settingsKey: accessControlDefaultConfig.KEY,
     optionsOverrides,
   });
@@ -101,7 +100,7 @@ export function createAccessControlServiceProvider(
 ): Provider {
   return {
     provide: AccessControlService,
-    inject: [ACCESS_CONTROL_MODULE_OPTIONS_TOKEN],
+    inject: [RAW_OPTIONS_TOKEN],
     useFactory: async (options: AccessControlOptionsInterface) =>
       optionsOverrides?.service ??
       options.service ??

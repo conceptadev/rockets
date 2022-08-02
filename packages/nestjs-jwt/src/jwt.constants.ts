@@ -1,9 +1,4 @@
 /**
- * The token to which all JWT module options are set.
- */
-export const JWT_MODULE_OPTIONS_TOKEN = 'ROCKTS_JWT_MODULE_OPTIONS_TOKEN';
-
-/**
  * The token to which all JWT module settings are set.
  */
 export const JWT_MODULE_SETTINGS_TOKEN = 'ROCKTS_JWT_MODULE_SETTINGS_TOKEN';
