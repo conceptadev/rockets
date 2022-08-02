@@ -39,6 +39,9 @@
     },
     {
       "path": "../nestjs-access-control"
+    },
+    {
+      "path": "../nestjs-event"
     }
   ]
 }

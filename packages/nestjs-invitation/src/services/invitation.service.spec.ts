@@ -7,6 +7,8 @@ import { OtpInterface, UserInterface } from '@concepta/ts-common';
 import { UserEntityInterface } from '@concepta/nestjs-user';
 import { OtpService } from '@concepta/nestjs-otp';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
+import { SeedingSource } from '@concepta/typeorm-seeding';
+import { EventDispatchService } from '@concepta/nestjs-event';
 
 import { InvitationService } from './invitation.service';
 import { invitationDefaultConfig } from '../config/invitation-default.config';
@@ -17,7 +19,6 @@ import { InvitationUserEntityFixture } from '../__fixtures__/invitation-user-ent
 import { InvitationFactory } from '../invitation.factory';
 import { InvitationEntityFixture } from '../__fixtures__/invitation.entity.fixture';
 import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
-import { SeedingSource } from '@concepta/typeorm-seeding';
 
 describe('AuthRecoveryService', () => {
   const category = 'invitation';
@@ -44,6 +45,21 @@ describe('AuthRecoveryService', () => {
     config = configService.get<InvitationSettingsInterface>(
       INVITATION_MODULE_DEFAULT_SETTINGS_TOKEN,
     ) as InvitationSettingsInterface;
+
+    jest
+      .spyOn(EventDispatchService.prototype, 'async')
+      .mockImplementation(async (event) => {
+        return Promise.resolve([
+          [
+            {
+              ...(event?.values[0] as object),
+              processed: true,
+              successfully: true,
+              error: null,
+            },
+          ],
+        ]);
+      });
 
     seedingSource = new SeedingSource({
       dataSource: moduleFixture.get(getDataSourceToken()),

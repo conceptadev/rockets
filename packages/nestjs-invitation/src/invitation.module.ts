@@ -28,6 +28,11 @@ import { InvitationCrudService } from './services/invitation-crud.service';
 import { InvitationEntitiesOptionsInterface } from './interfaces/invitation-entities-options.interface';
 import { InvitationEventService } from './services/invitation-event.service';
 import { InvitationValidationController } from './controllers/invitation-validation.controller';
+import { EventModule, EventOptionsInterface } from '@concepta/nestjs-event';
+
+const eventConfig: EventOptionsInterface = {
+  emitter: {},
+};
 
 @Module({
   providers: [
@@ -49,6 +54,7 @@ export class InvitationModule extends createConfigurableDynamicRootModule<
       timeoutMessage:
         'UserModule requires CrudModule to be registered in your application.',
     }),
+    EventModule.register(eventConfig),
   ],
   providers: [
     {
