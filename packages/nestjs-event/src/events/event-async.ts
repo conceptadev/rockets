@@ -27,16 +27,6 @@ import { EventValues } from '../event-types';
  * const myEvent = new MyEvent({id: 1234, active: true});
  * ```
  */
-export abstract class EventAsync<V extends EventValues = EventValues>
-  extends Event<V>
-  implements EventAsyncInterface<V>
-{
-  /**
-   *  Expects return of values
-   *
-   * @template V - Event values
-   * @type {Promise<V>}
-   * @private
-   */
-  expectsReturnOf!: Promise<V>;
-}
+export abstract class EventAsync<V extends EventValues = EventValues, R = V>
+  extends Event<V, Promise<R>>
+  implements EventAsyncInterface<V, R> {}
