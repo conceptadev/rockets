@@ -30,6 +30,7 @@ import { EventInterface } from './interfaces/event.interface';
  * ```
  *
  * @template {EventValues} V - Event Values
+ * @template {unknown} R - Event return value, defaults to Event Values
  */
 export abstract class Event<V extends EventValues = EventValues, R = V>
   implements EventInterface<V, R>
@@ -37,7 +38,7 @@ export abstract class Event<V extends EventValues = EventValues, R = V>
   /**
    * Expects return of values
    *
-   * @type {void | Promise<V>}
+   * @type {void | Promise<R>}
    * @private
    */
   readonly expectsReturnOf!: R;
