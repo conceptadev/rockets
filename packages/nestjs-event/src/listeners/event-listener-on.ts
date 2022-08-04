@@ -1,4 +1,3 @@
-import { EventInterface } from '../events/interfaces/event.interface';
 import { EventListener } from './event-listener';
 import { EventListenOnInterface } from '../services/interfaces/event-listen-on.interface';
 import { EventListenOnOptionsInterface } from '../services/interfaces/event-listen-on-options.interface';
@@ -36,7 +35,7 @@ import { EventListenOnOptionsInterface } from '../services/interfaces/event-list
  * listener.remove();
  * ```
  */
-export abstract class EventListenerOn<E extends EventInterface = EventInterface>
+export abstract class EventListenerOn<E>
   extends EventListener<E>
   implements EventListenOnInterface<E>
 {

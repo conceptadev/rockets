@@ -8,8 +8,7 @@ import { NotAnErrorException } from '@concepta/ts-core';
 import { EventListenerException } from '../exceptions/event-listener.exception';
 import { EventListenOnOptionsInterface } from './interfaces/event-listen-on-options.interface';
 import { EventListenOnInterface } from './interfaces/event-listen-on.interface';
-import { EventStaticInterface } from '../events/interfaces/event-static.interface';
-import { EventInterface } from '../events/interfaces/event.interface';
+import { EventClassInterface } from '../events/interfaces/event-class.interface';
 import { EVENT_MODULE_EMITTER_SERVICE_TOKEN } from '../event-constants';
 
 /**
@@ -60,12 +59,12 @@ export class EventListenService {
    * }
    * ```
    *
-   * @param {EventStaticInterface} eventClass  The event class to subscribe to. This is the class, NOT an instance.
+   * @param {EventClassInterface} eventClass  The event class to subscribe to. This is the class, NOT an instance.
    * @param {EventListenOnInterface} listener Instance of the event listener class to attach to the event.
    * @param {EventListenOnOptionsInterface} options Overriding options.
    */
-  on<E extends EventInterface = EventInterface>(
-    eventClass: EventStaticInterface<E>,
+  on<E>(
+    eventClass: EventClassInterface<E>,
     listener: EventListenOnInterface<E>,
     options: EventListenOnOptionsInterface = {},
   ): void {

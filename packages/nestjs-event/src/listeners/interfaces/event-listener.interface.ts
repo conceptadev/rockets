@@ -1,16 +1,14 @@
-import { EventInterface } from '../../events/interfaces/event.interface';
 import { Listener as EmitterListener } from 'eventemitter2';
+import { EventInstance, EventReturnType } from '../../event-types';
 
 /**
  * The interface that defines Event Listener signature.
  */
-export interface EventListenerInterface<
-  E extends EventInterface = EventInterface,
-> {
+export interface EventListenerInterface<E> {
   /**
    * Listener handler.
    */
-  listen(event?: E): E['expectsReturnOf'];
+  listen(event?: EventInstance<E>): EventReturnType<E>;
 
   /**
    * Called after successful subscription.

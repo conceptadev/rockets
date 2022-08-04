@@ -2,11 +2,11 @@
 export * from './events/interfaces/event.interface';
 export * from './events/interfaces/event-sync.interface';
 export * from './events/interfaces/event-async.interface';
+export * from './events/interfaces/event-class.interface';
 export * from './interfaces/event-options.interface';
 export * from './listeners/interfaces/event-listener.interface';
 export * from './services/interfaces/event-listen-on.interface';
 export * from './services/interfaces/event-listen-on-options.interface';
-export * from './event-types';
 
 // classes
 export * from './event.module';

@@ -1,8 +1,8 @@
 import { Listener as EmitterListener } from 'eventemitter2';
 import { NotAnErrorException } from '@concepta/ts-core';
-import { EventInterface } from '../events/interfaces/event.interface';
 import { EventListenerInterface } from './interfaces/event-listener.interface';
 import { EventListenerException } from '../exceptions/event-listener.exception';
+import { EventInstance, EventReturnType } from '../event-types';
 
 /**
  * Abstract event listener class.
@@ -49,9 +49,7 @@ import { EventListenerException } from '../exceptions/event-listener.exception';
  * listener.remove();
  * ```
  */
-export abstract class EventListener<E extends EventInterface = EventInterface>
-  implements EventListenerInterface<E>
-{
+export abstract class EventListener<E> implements EventListenerInterface<E> {
   /**
    * An instance of the Listener object from EventEmitter2
    */
@@ -60,7 +58,7 @@ export abstract class EventListener<E extends EventInterface = EventInterface>
   /**
    * Listen to an event.
    */
-  abstract listen(event?: E): E['expectsReturnOf'];
+  abstract listen(event?: EventInstance<E>): EventReturnType<E>;
 
   /**
    * Called after successful subscription.
