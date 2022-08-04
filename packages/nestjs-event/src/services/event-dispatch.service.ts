@@ -2,9 +2,12 @@ import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
 import { NotAnErrorException } from '@concepta/ts-core';
 import { EventDispatchException } from '../exceptions/event-dispatch.exception';
-import { EventAsyncInterface } from '../events/interfaces/event-async.interface';
 import { EventSyncInterface } from '../events/interfaces/event-sync.interface';
-import { EventValues } from '../event-types';
+import {
+  EventValues,
+  EventAsyncInstance,
+  EventReturnValueType,
+} from '../event-types';
 import { EVENT_MODULE_EMITTER_SERVICE_TOKEN } from '../event-constants';
 
 /**
@@ -117,11 +120,11 @@ export class EventDispatchService {
    * @template V The type of the event values.
    * @returns {Promise<V[]>} An array of values, one for each listener that subscribed to the event.
    */
-  async async<V extends EventValues = EventValues>(
-    event: EventAsyncInterface<V>,
-  ): Promise<V[]> {
+  async async<E>(
+    event: E & EventAsyncInstance<E>,
+  ): Promise<EventReturnValueType<E>[]> {
     // our result
-    let result: V[];
+    let result: EventReturnValueType<E>[];
 
     try {
       // call async event dispatcher

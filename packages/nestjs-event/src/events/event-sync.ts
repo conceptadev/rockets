@@ -29,15 +29,5 @@ import { EventValues } from '../event-types';
  *
  */
 export abstract class EventSync<V extends EventValues = EventValues>
-  extends Event<V>
-  implements EventSyncInterface<V>
-{
-  /**
-   *
-   *   Expects return of values
-   *
-   * @type {void}
-   * @private
-   */
-  expectsReturnOf!: void;
-}
+  extends Event<V, void>
+  implements EventSyncInterface<V> {}
