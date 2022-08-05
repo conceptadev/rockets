@@ -3,3 +3,4 @@ export { InvitationModule } from './invitation.module';
 export { InvitationController } from './controllers/invitation.controller';
 export { InvitationService } from './services/invitation.service';
 export { InvitationNotificationService } from './services/invitation-notification.service';
+export { InvitationSignupEventAsync } from './events/invitation-created.event';

@@ -39,3 +39,5 @@ export { OtpCreateInterface } from './otp/interfaces/otp-create.interface';
 export { OtpValidateInterface } from './otp/interfaces/otp-validate.interface';
 export { OtpDeleteInterface } from './otp/interfaces/otp-delete.interface';
 export { OtpClearInterface } from './otp/interfaces/otp-clear.interface';
+
+export { InvitationSignupEventPayloadInterface } from './invitation/invitation-signup-event-interface';

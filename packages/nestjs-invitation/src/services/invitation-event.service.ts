@@ -11,7 +11,6 @@ export class InvitationEventService {
     private eventDispatchService: EventDispatchService,
   ) {}
 
-  // TODO implement eventService
   async sendEvent(
     eventName: string,
     invitationDto: InvitationDto,

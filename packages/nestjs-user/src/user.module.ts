@@ -75,6 +75,7 @@ export class UserModule extends createConfigurableDynamicRootModule<
         defaultService: DefaultUserMutateService,
       ) => options.userMutateService ?? defaultService,
     },
+    // EventListenService,
   ],
 }) {
   /**

@@ -9,21 +9,24 @@ import {
   UserMutateService,
 } from '@concepta/nestjs-user';
 import { EmailSendOptionsInterface } from '@concepta/ts-common';
+import { EventModule } from '@concepta/nestjs-event';
 
 import { InvitationModule } from '../invitation.module';
 import { default as ormConfig } from './invitation.ormconfig.fixture';
 import { InvitationUserOtpEntityFixture } from './invitation-user-otp-entity.fixture';
 import { InvitationUserEntityFixture } from './invitation-user-entity.fixture';
 import { InvitationEntityFixture } from './invitation.entity.fixture';
+import { InvitationSignupEventAsync } from '@concepta/nestjs-user/dist/__fixtures__/events/invitation-created.event';
 
 @Module({
   imports: [
+    EventModule.register(),
     TypeOrmExtModule.registerAsync({
       useFactory: async () => {
         return ormConfig;
       },
     }),
-    CrudModule.register(),
+    CrudModule.register({}),
     EmailModule.register({}),
     InvitationModule.registerAsync({
       imports: [
@@ -57,6 +60,9 @@ import { InvitationEntityFixture } from './invitation.entity.fixture';
       },
     }),
     UserModule.register({
+      settings: {
+        invitationSignupEvent: InvitationSignupEventAsync,
+      },
       entities: {
         user: {
           entity: InvitationUserEntityFixture,

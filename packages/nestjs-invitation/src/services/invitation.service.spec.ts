@@ -8,7 +8,6 @@ import { UserEntityInterface } from '@concepta/nestjs-user';
 import { OtpService } from '@concepta/nestjs-otp';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
 import { SeedingSource } from '@concepta/typeorm-seeding';
-import { EventDispatchService } from '@concepta/nestjs-event';
 
 import { InvitationService } from './invitation.service';
 import { invitationDefaultConfig } from '../config/invitation-default.config';
@@ -45,21 +44,6 @@ describe('AuthRecoveryService', () => {
     config = configService.get<InvitationSettingsInterface>(
       INVITATION_MODULE_DEFAULT_SETTINGS_TOKEN,
     ) as InvitationSettingsInterface;
-
-    jest
-      .spyOn(EventDispatchService.prototype, 'async')
-      .mockImplementation(async (event) => {
-        return Promise.resolve([
-          [
-            {
-              ...(event?.values[0] as object),
-              processed: true,
-              successfully: true,
-              error: null,
-            },
-          ],
-        ]);
-      });
 
     seedingSource = new SeedingSource({
       dataSource: moduleFixture.get(getDataSourceToken()),
@@ -122,13 +106,13 @@ describe('AuthRecoveryService', () => {
     ).toBeUndefined();
   });
 
-  it('Accept invite and update password', async () => {
+  it.only('Accept invite and update password', async () => {
     const otp = await createOtp(config, otpService, testUser, category);
 
     const inviteAccepted = await invitationService.acceptInvite(
       testInvitation,
       otp.passcode,
-      {},
+      { userId: otp.assignee.id, newPassword: 'hOdv2A2h%' },
     );
 
     expect(inviteAccepted).toBeTruthy();

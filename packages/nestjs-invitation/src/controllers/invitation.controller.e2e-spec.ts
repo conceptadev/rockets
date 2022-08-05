@@ -4,10 +4,17 @@ import { INestApplication, Logger } from '@nestjs/common';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
 import { ConfigService, ConfigType } from '@nestjs/config';
 import { OtpService } from '@concepta/nestjs-otp';
-import { OtpInterface, UserInterface } from '@concepta/ts-common';
+import {
+  InvitationSignupEventPayloadInterface,
+  OtpInterface,
+  UserInterface,
+} from '@concepta/ts-common';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { getDataSourceToken } from '@nestjs/typeorm';
-import { EventDispatchService } from '@concepta/nestjs-event';
+import {
+  EventAsyncInterface,
+  EventDispatchService,
+} from '@concepta/nestjs-event';
 
 import { InvitationCreateDto } from '../dto/invitation-create.dto';
 import { InvitationUserEntityFixture } from '../__fixtures__/invitation-user-entity.fixture';
@@ -58,18 +65,22 @@ describe('InvitationController (e2e)', () => {
 
     jest
       .spyOn(EventDispatchService.prototype, 'async')
-      .mockImplementation(async (event) => {
-        return Promise.resolve([
-          [
-            {
-              ...(event?.values[0] as object),
-              processed: true,
-              successfully: true,
-              error: null,
-            },
-          ],
-        ]);
-      });
+      .mockImplementation(
+        async (
+          event: EventAsyncInterface<[InvitationSignupEventPayloadInterface]>,
+        ) => {
+          return Promise.resolve([
+            [
+              {
+                ...(event?.values[0] as object),
+                processed: true,
+                successfully: true,
+                error: null,
+              },
+            ],
+          ]);
+        },
+      );
 
     seedingSource = new SeedingSource({
       dataSource: moduleFixture.get(getDataSourceToken()),

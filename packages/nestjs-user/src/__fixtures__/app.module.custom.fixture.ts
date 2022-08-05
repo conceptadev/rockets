@@ -8,11 +8,13 @@ import { UserLookupCustomService } from './services/user-lookup.custom.service';
 import { ormConfig } from './ormconfig.fixture';
 import { UserEntityFixture } from './user.entity.fixture';
 import { createUserRepositoryFixture } from './create-user-repository.fixture';
+import { EventModule } from '@concepta/nestjs-event/dist/event.module';
 
 @Module({
   imports: [
     TypeOrmExtModule.register(ormConfig),
     CrudModule.register(),
+    EventModule.register(),
     UserModule.registerAsync({
       imports: [UserModuleCustomFixture],
       inject: [UserLookupCustomService],
