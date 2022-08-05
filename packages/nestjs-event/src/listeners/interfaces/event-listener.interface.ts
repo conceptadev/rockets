@@ -8,7 +8,7 @@ export interface EventListenerInterface<E> {
   /**
    * Listener handler.
    */
-  listen(event?: EventInstance<E>): EventReturnType<E>;
+  listen(event: EventInstance<E>): EventReturnType<E>;
 
   /**
    * Called after successful subscription.

@@ -25,15 +25,24 @@ describe('Event', () => {
         const test = new TestEvent();
         expect(test.values).toEqual([]);
       });
+    });
+  });
 
+  describe('With single parameter typing', () => {
+    type TestEventValue = { z: string };
+
+    class TestEvent extends Event<TestEventValue> {}
+
+    describe('values', () => {
       it('should equal values passed to constructor', async () => {
-        const test = new TestEvent(true, 1, 'a');
-        expect(test.values).toEqual([true, 1, 'a']);
+        const test = new TestEvent({ z: 'foo' });
+        const testValues: TestEventValue[] = test.values;
+        expect(testValues).toEqual([{ z: 'foo' }]);
       });
     });
   });
 
-  describe('With value typing', () => {
+  describe('With multiple parameter typing', () => {
     type TestEventValues = [boolean, number, string, { z: string }];
 
     class TestEvent extends Event<TestEventValues> {}

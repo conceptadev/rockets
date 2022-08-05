@@ -1,6 +1,5 @@
 import { EventSyncInterface } from './interfaces/event-sync.interface';
 import { Event } from './event';
-import { EventValues } from '../event-types';
 
 /**
  * Abstract synchronous event class.
@@ -28,6 +27,6 @@ import { EventValues } from '../event-types';
  * ```
  *
  */
-export abstract class EventSync<V extends EventValues = EventValues>
+export abstract class EventSync<V = undefined>
   extends Event<V, void>
   implements EventSyncInterface<V> {}

@@ -1,6 +1,5 @@
 import { EventAsyncInterface } from './interfaces/event-async.interface';
 import { Event } from './event';
-import { EventValues } from '../event-types';
 
 /**
  * Abstract async event class.
@@ -27,6 +26,6 @@ import { EventValues } from '../event-types';
  * const myEvent = new MyEvent({id: 1234, active: true});
  * ```
  */
-export abstract class EventAsync<V extends EventValues = EventValues, R = V>
+export abstract class EventAsync<V = undefined, R = V>
   extends Event<V, Promise<R>>
   implements EventAsyncInterface<V, R> {}

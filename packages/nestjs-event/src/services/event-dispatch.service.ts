@@ -3,11 +3,7 @@ import { EventEmitter2 } from 'eventemitter2';
 import { NotAnErrorException } from '@concepta/ts-core';
 import { EventDispatchException } from '../exceptions/event-dispatch.exception';
 import { EventSyncInterface } from '../events/interfaces/event-sync.interface';
-import {
-  EventValues,
-  EventAsyncInstance,
-  EventReturnValueType,
-} from '../event-types';
+import { EventAsyncInstance, EventReturnValueType } from '../event-types';
 import { EVENT_MODULE_EMITTER_SERVICE_TOKEN } from '../event-constants';
 
 /**
@@ -60,9 +56,7 @@ export class EventDispatchService {
    * @param {EventSyncInterface} event The event being dispatched.
    * @returns {boolean} boolean Returns true if the event had listeners, false otherwise.
    */
-  sync<V extends EventValues = EventValues>(
-    event: EventSyncInterface<V>,
-  ): boolean {
+  sync<V>(event: EventSyncInterface<V>): boolean {
     try {
       // call event dispatcher
       return this.eventEmitter.emit(event.key, event);

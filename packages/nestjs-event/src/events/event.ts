@@ -29,10 +29,10 @@ import { EventInterface } from './interfaces/event.interface';
  * const myEvent = new MyEvent({id: 1234, active: true});
  * ```
  *
- * @template {EventValues} V - Event Values
- * @template {unknown} R - Event return value, defaults to Event Values
+ * @template V - Event Values
+ * @template R - Event return value, defaults to Event Values
  */
-export abstract class Event<V extends EventValues = EventValues, R = V>
+export abstract class Event<V = undefined, R = V>
   implements EventInterface<V, R>
 {
   /**
@@ -64,14 +64,26 @@ export abstract class Event<V extends EventValues = EventValues, R = V>
   /**
    * All values that were passed to the constructor.
    */
-  private _values: V;
+  private _values: EventValues<V>;
+
+  /**
+   * Constructor
+   */
+  constructor();
 
   /**
    * Constructor
    *
    * @param {V} values Array of values to emit when the event is dispatched.
    */
-  constructor(...values: V) {
+  constructor(...values: EventValues<V>);
+
+  /**
+   * Constructor
+   *
+   * @param {V} values Array of values to emit when the event is dispatched.
+   */
+  constructor(...values: EventValues<V>) {
     this._values = values;
   }
 
@@ -80,7 +92,7 @@ export abstract class Event<V extends EventValues = EventValues, R = V>
    *
    * @returns {V} The values.
    */
-  get values(): V {
+  get values(): EventValues<V> {
     return this._values;
   }
 }

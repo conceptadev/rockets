@@ -58,7 +58,7 @@ export abstract class EventListener<E> implements EventListenerInterface<E> {
   /**
    * Listen to an event.
    */
-  abstract listen(event?: EventInstance<E>): EventReturnType<E>;
+  abstract listen(event: EventInstance<E>): EventReturnType<E>;
 
   /**
    * Called after successful subscription.

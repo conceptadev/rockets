@@ -2,10 +2,11 @@ import { EventInterface } from './events/interfaces/event.interface';
 import { EventAsyncInterface } from './events/interfaces/event-async.interface';
 import { EventExpectsReturnOfInterface } from './events/interfaces/event-expects-return-of.interface';
 
-/**
- * Type that all event values must adhere to.
- */
-export type EventValues = Array<unknown>;
+export type EventValues<V> = V extends Array<unknown>
+  ? V
+  : V extends undefined
+  ? undefined[]
+  : [V];
 
 export type EventInstance<E> = E extends EventInterface<infer V, infer R>
   ? EventInterface<V, R>
