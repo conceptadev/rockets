@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
-import { NotAnErrorException } from '@concepta/ts-core';
 import { EventDispatchException } from '../exceptions/event-dispatch.exception';
 import { EventSyncInterface } from '../events/interfaces/event-sync.interface';
 import { EventAsyncInstance, EventReturnPayload } from '../event-types';
@@ -61,8 +60,7 @@ export class EventDispatchService {
       // call event dispatcher
       return this.eventEmitter.emit(event.key, event);
     } catch (e) {
-      const exception = e instanceof Error ? e : new NotAnErrorException(e);
-      throw new EventDispatchException(exception.message);
+      throw new EventDispatchException(event, e);
     }
   }
 
@@ -120,8 +118,7 @@ export class EventDispatchService {
       // we await the result here in order to catch any exception thrown
       result = await this.eventEmitter.emitAsync(event.key, event);
     } catch (e) {
-      const exception = e instanceof Error ? e : new NotAnErrorException(e);
-      throw new EventDispatchException(exception.message);
+      throw new EventDispatchException(event, e);
     }
 
     // final array of results

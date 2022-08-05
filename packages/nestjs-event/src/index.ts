@@ -14,6 +14,7 @@ export * from './events/event';
 export * from './events/event-sync';
 export * from './events/event-async';
 export * from './exceptions/event-dispatch.exception';
+export * from './exceptions/event-listen.exception';
 export * from './exceptions/event-listener.exception';
 export * from './listeners/event-listener';
 export * from './listeners/event-listener-on';

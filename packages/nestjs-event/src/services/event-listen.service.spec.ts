@@ -1,15 +1,15 @@
 import { EventEmitter2 } from 'eventemitter2';
+import { Test } from '@nestjs/testing';
 import {
   EVENT_MODULE_EMITTER_SERVICE_TOKEN,
   EVENT_MODULE_OPTIONS_TOKEN,
 } from '../event-constants';
 import { EventOptionsInterface } from '../interfaces/event-options.interface';
-import { Test } from '@nestjs/testing';
 import { EventSync } from '../events/event-sync';
 import { EventListenerOn } from '../listeners/event-listener-on';
 import { EventListenService } from './event-listen.service';
 import { EventAsync } from '../events/event-async';
-import { EventListenerException } from '../exceptions/event-listener.exception';
+import { EventListenException } from '../exceptions/event-listen.exception';
 
 describe(EventListenService, () => {
   const config: EventOptionsInterface = {};
@@ -76,7 +76,7 @@ describe(EventListenService, () => {
           eventListenService.on(TestEvent, listener);
         };
 
-        expect(t).toThrow(EventListenerException);
+        expect(t).toThrow(EventListenException);
         expect(spyEmitter).toHaveBeenCalledTimes(1);
       });
 
@@ -92,7 +92,7 @@ describe(EventListenService, () => {
           eventListenService.on(TestEvent, listener);
         };
 
-        expect(t).toThrow(EventListenerException);
+        expect(t).toThrow(EventListenException);
         expect(spySubsc).toHaveBeenCalledTimes(1);
       });
     });

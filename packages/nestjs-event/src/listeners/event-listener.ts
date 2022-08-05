@@ -1,5 +1,4 @@
 import { Listener as EmitterListener } from 'eventemitter2';
-import { NotAnErrorException } from '@concepta/ts-core';
 import { EventListenerInterface } from './interfaces/event-listener.interface';
 import { EventListenerException } from '../exceptions/event-listener.exception';
 import { EventInstance, EventReturnType } from '../event-types';
@@ -71,6 +70,7 @@ export abstract class EventListener<E> implements EventListenerInterface<E> {
     if (this.emitterListener) {
       // yes, override not allowed
       throw new EventListenerException(
+        undefined,
         'Emitter listener can not be overridden once set.',
       );
     }
@@ -87,6 +87,7 @@ export abstract class EventListener<E> implements EventListenerInterface<E> {
     if (!this.emitterListener) {
       // no, never subscribed... can't remove
       throw new EventListenerException(
+        undefined,
         `Can't remove listener, it has not been subscribed.`,
       );
     }
@@ -95,8 +96,10 @@ export abstract class EventListener<E> implements EventListenerInterface<E> {
       // remove the listener
       this.emitterListener.off();
     } catch (e) {
-      const exception = e instanceof Error ? e : new NotAnErrorException(e);
-      throw new EventListenerException(exception.message);
+      throw new EventListenerException(
+        e,
+        'Error occurred while trying to turn listener off()',
+      );
     }
   }
 }
