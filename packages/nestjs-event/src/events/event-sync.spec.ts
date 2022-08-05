@@ -2,14 +2,13 @@ import { EventEmitter2 } from 'eventemitter2';
 import { EVENT_MODULE_EVENT_KEY_PREFIX } from '../event-constants';
 import { EventSync } from './event-sync';
 
-describe('Event', () => {
-  type TestEventValues = [boolean, number, string];
-  class TestEvent extends EventSync<TestEventValues> {}
+describe(Event, () => {
+  class TestEvent extends EventSync<boolean> {}
 
   it('should emit an event', () => {
     const ee2 = new EventEmitter2();
     const spy = jest.spyOn(ee2, 'emit');
-    const testEvent = new TestEvent(true, 1, 'a');
+    const testEvent = new TestEvent(true);
 
     const listener = jest.fn((v) => v);
     ee2.on(testEvent.key, listener);

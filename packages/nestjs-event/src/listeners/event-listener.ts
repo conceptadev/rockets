@@ -1,5 +1,4 @@
 import { Listener as EmitterListener } from 'eventemitter2';
-import { NotAnErrorException } from '@concepta/ts-core';
 import { EventListenerInterface } from './interfaces/event-listener.interface';
 import { EventListenerException } from '../exceptions/event-listener.exception';
 import { EventInstance, EventReturnType } from '../event-types';
@@ -9,7 +8,7 @@ import { EventInstance, EventReturnType } from '../event-types';
  *
  * To create a custom event listener, extend the {@link EventListener} class and implement the
  * [listen]{@link EventListener#listen} method. The [listen]{@link EventListener#listen}
- * method will receive the values dispatched by {@link EventDispatchService}.
+ * method will receive the payload dispatched by {@link EventDispatchService}.
  *
  * You will also need to implement one of the interfaces that is enforced by the
  * {@link EventListenService} method you intend to use. For example
@@ -20,11 +19,11 @@ import { EventInstance, EventReturnType } from '../event-types';
  *
  * ### Example
  * ```ts
- * // event values type
- * type MyEventValues = [{id: number, active: boolean}];
+ * // event payload type
+ * type MyEventPayload = {id: number, active: boolean};
  *
  * // example event class
- * class MyEvent extends EventSync<MyEventValues> {}
+ * class MyEvent extends EventSync<MyEventPayload> {}
  *
  * // example listener class
  * class MyListenOn extends EventListener<MyEvent>
@@ -35,7 +34,7 @@ import { EventInstance, EventReturnType } from '../event-types';
  *
  *   // custom handler
  *   listen(event: MyEvent): void {
- *     console.log(event.values);
+ *     console.log(event.payload);
  *   }
  * }
  *
@@ -58,19 +57,20 @@ export abstract class EventListener<E> implements EventListenerInterface<E> {
   /**
    * Listen to an event.
    */
-  abstract listen(event?: EventInstance<E>): EventReturnType<E>;
+  abstract listen(event: EventInstance<E>): EventReturnType<E>;
 
   /**
    * Called after successful subscription.
    *
    * @private
-   * @param {EmitterListener} emitterListener The Listener object returned by EventEmitter2
+   * @param emitterListener The Listener object returned by EventEmitter2
    */
   subscription(emitterListener: EmitterListener): void {
     // has the emitter listener already been set?
     if (this.emitterListener) {
       // yes, override not allowed
       throw new EventListenerException(
+        undefined,
         'Emitter listener can not be overridden once set.',
       );
     }
@@ -87,6 +87,7 @@ export abstract class EventListener<E> implements EventListenerInterface<E> {
     if (!this.emitterListener) {
       // no, never subscribed... can't remove
       throw new EventListenerException(
+        undefined,
         `Can't remove listener, it has not been subscribed.`,
       );
     }
@@ -95,8 +96,10 @@ export abstract class EventListener<E> implements EventListenerInterface<E> {
       // remove the listener
       this.emitterListener.off();
     } catch (e) {
-      const exception = e instanceof Error ? e : new NotAnErrorException(e);
-      throw new EventListenerException(exception.message);
+      throw new EventListenerException(
+        e,
+        'Error occurred while trying to turn listener off()',
+      );
     }
   }
 }

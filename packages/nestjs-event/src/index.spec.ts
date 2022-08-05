@@ -8,6 +8,7 @@ import {
   EventDispatchService,
   EventDispatchException,
   EventListenService,
+  EventListenException,
   EventListenerException,
 } from './index';
 
@@ -32,6 +33,9 @@ describe('Index', () => {
   });
   it('EventDispatchException should be exported', () => {
     expect(EventDispatchException).toBeInstanceOf(Function);
+  });
+  it('EventListenException should be exported', () => {
+    expect(EventListenException).toBeInstanceOf(Function);
   });
   it('EventListenerException should be exported', () => {
     expect(EventListenerException).toBeInstanceOf(Function);

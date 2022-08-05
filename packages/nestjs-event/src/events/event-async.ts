@@ -1,6 +1,5 @@
 import { EventAsyncInterface } from './interfaces/event-async.interface';
 import { Event } from './event';
-import { EventValues } from '../event-types';
 
 /**
  * Abstract async event class.
@@ -8,7 +7,7 @@ import { EventValues } from '../event-types';
  * To create a custom **async** event, extend the
  * {@link EventAsync} class.
  *
- * You can override and customize the [values]{@link Event#values} getter
+ * You can override and customize the [payload]{@link Event#payload} getter
  * if desired. Please read the documentation for the abstract {@link Event} class
  * for the complete documentation.
  *
@@ -16,17 +15,16 @@ import { EventValues } from '../event-types';
  *
  * ### Example
  * ```ts
- * // event values type
- * type MyObject = {id: number, active: boolean};
- * type MyEventValues = [MyObject];
+ * // event payload type
+ * type MyPayloadType = {id: number, active: boolean};
  *
  * // event class
- * class MyEvent extends EventAsync<MyEventValues> {}
+ * class MyEvent extends EventAsync<MyPayloadType> {}
  *
  * // create an event
  * const myEvent = new MyEvent({id: 1234, active: true});
  * ```
  */
-export abstract class EventAsync<V extends EventValues = EventValues, R = V>
-  extends Event<V, Promise<R>>
-  implements EventAsyncInterface<V, R> {}
+export abstract class EventAsync<P = undefined, R = P>
+  extends Event<P, Promise<R>>
+  implements EventAsyncInterface<P, R> {}

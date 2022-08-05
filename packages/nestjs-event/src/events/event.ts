@@ -1,5 +1,5 @@
 import { EVENT_MODULE_EVENT_KEY_PREFIX } from '../event-constants';
-import { EventValues } from '../event-types';
+import { EventPayload } from '../event-types';
 import { EventInterface } from './interfaces/event.interface';
 
 /**
@@ -16,28 +16,28 @@ import { EventInterface } from './interfaces/event.interface';
  *
  * ### Example
  * ```ts
- * // event values type
- * type MyObject = {id: number, active: boolean};
- * type MyEventValues = [MyObject];
+ * // event payload type
+ * type MyPayloadType = {id: number, active: boolean};
  *
  * // event class
- * class MyEvent extends Event<MyEventValues>
- *   implements EventSyncInterface<MyEventValues>
+ * class MyEvent extends Event<MyPayloadType>
+ *   implements EventSyncInterface<MyPayloadType>
  * {}
  *
  * // create an event
  * const myEvent = new MyEvent({id: 1234, active: true});
  * ```
  *
- * @template {EventValues} V - Event Values
+ * @template P - Event Payload
+ * @template R - Event return payload, defaults to Event Payload
  */
-export abstract class Event<V extends EventValues = EventValues, R = V>
-  implements EventInterface<V, R>
+export abstract class Event<P = undefined, R = P>
+  implements EventInterface<P, R>
 {
   /**
-   * Expects return of values
+   * Expects return of payload
    *
-   * @type {void | Promise<V>}
+   * @type {R}
    * @private
    */
   readonly expectsReturnOf!: R;
@@ -61,25 +61,32 @@ export abstract class Event<V extends EventValues = EventValues, R = V>
   }
 
   /**
-   * All values that were passed to the constructor.
+   * The payload that was passed to the constructor.
    */
-  private _values: V;
+  private _payload: EventPayload<P>;
 
   /**
    * Constructor
    *
-   * @param {V} values Array of values to emit when the event is dispatched.
+   * @param {EventPayload<P>} payload Payload to emit when the event is dispatched.
    */
-  constructor(...values: V) {
-    this._values = values;
+  constructor(payload?: EventPayload<P>);
+
+  /**
+   * Constructor
+   *
+   * @param {EventPayload<P>} payload Payload to emit when the event is dispatched.
+   */
+  constructor(payload: EventPayload<P>) {
+    this._payload = payload;
   }
 
   /**
-   * Returns all values that were passed to the constructor.
+   * Returns payload that was passed to the Event constructor.
    *
-   * @returns {V} The values.
+   * @returns {EventPayload<P>} The payload.
    */
-  get values(): V {
-    return this._values;
+  get payload(): EventPayload<P> {
+    return this._payload;
   }
 }
