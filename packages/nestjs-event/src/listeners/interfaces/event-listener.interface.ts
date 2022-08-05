@@ -13,7 +13,7 @@ export interface EventListenerInterface<E> {
   /**
    * Called after successful subscription.
    *
-   * @param {EmitterListener} emitterListener The Listener object returned by EventEmitter2
+   * @param emitterListener The Listener object returned by EventEmitter2
    */
   subscription(emitterListener: EmitterListener): void;
 

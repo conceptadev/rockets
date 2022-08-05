@@ -3,7 +3,7 @@ import { EventEmitter2 } from 'eventemitter2';
 import { NotAnErrorException } from '@concepta/ts-core';
 import { EventDispatchException } from '../exceptions/event-dispatch.exception';
 import { EventSyncInterface } from '../events/interfaces/event-sync.interface';
-import { EventAsyncInstance, EventReturnValueType } from '../event-types';
+import { EventAsyncInstance, EventReturnPayload } from '../event-types';
 import { EVENT_MODULE_EMITTER_SERVICE_TOKEN } from '../event-constants';
 
 /**
@@ -16,7 +16,7 @@ export class EventDispatchService {
   /**
    * Constructor
    *
-   * @param {EventEmitter2} eventEmitter Injected event emitter instance
+   * @param eventEmitter Injected event emitter instance
    */
   constructor(
     @Inject(EVENT_MODULE_EMITTER_SERVICE_TOKEN)
@@ -34,11 +34,11 @@ export class EventDispatchService {
    * import { Injectable } from '@nestjs/common';
    * import { EventDispatchService, EventSync } from '@concepta/nestjs-events';
    *
-   * // event values type
-   * export type MyEventValues = [{id: number}];
+   * // event payload type
+   * export type MyPayloadType = {id: number};
    *
    * // event class
-   * export class MyEvent extends EventSync<MyEventValues> {}
+   * export class MyEvent extends EventSync<MyPayloadType> {}
    *
    * @Injectable()
    * class MyClass {
@@ -53,10 +53,10 @@ export class EventDispatchService {
    * }
    * ```
    *
-   * @param {EventSyncInterface} event The event being dispatched.
-   * @returns {boolean} boolean Returns true if the event had listeners, false otherwise.
+   * @param {EventSyncInterface<P>} event The event being dispatched.
+   * @returns boolean Returns true if the event had listeners, false otherwise.
    */
-  sync<V>(event: EventSyncInterface<V>): boolean {
+  sync<P>(event: EventSyncInterface<P>): boolean {
     try {
       // call event dispatcher
       return this.eventEmitter.emit(event.key, event);
@@ -77,48 +77,43 @@ export class EventDispatchService {
    * import { EventDispatchService, EventAsync } from '@concepta/nestjs-events';
    *
    * // expected object
-   * export type MyObject = {id: number, active: boolean};
-   *
-   * // event args (object is first argument)
-   * export type MyEventValues = [MyObject];
+   * export type MyPayloadType = {id: number, active: boolean};
    *
    * // event class
-   * export class MyEvent extends EventAsync<MyEventValues> {}
+   * export class MyEvent extends EventAsync<MyPayloadType> {}
    *
    * @Injectable()
    * class MyClass {
    *   constructor(private eventDispatchService: EventDispatchService) {}
    *
    *   // allow any listener to activate object
-   *   async maybeActivate(myObject: MyObject): MyObject {
+   *   async maybeActivate(myPayloadType: MyPayloadType): MyPayloadType {
    *     // event instance
-   *     const myEvent = new MyEvent({...myObject, active: false});
+   *     const myEvent = new MyEvent({...myPayloadType, active: false});
    *     // dispatch the event
-   *     const allValues: MyEventValues[] =
+   *     const allPayloads: MyPayloadType[] =
    *       await this.eventDispatchService.async(myEvent);
    *     // merge it
-   *     allValues.forEach((values) => {
-   *       const [eachObject: MyObject] = values;
+   *     allPayloads.forEach((payload) => {
    *       // did any listener set it to true?
-   *       if (eachObject.active) {
-   *         myObject.active = true;
+   *       if (payload.active) {
+   *         myPayloadType.active = true;
    *       }
    *     });
    *     // return possibly modified object
-   *     return myObject;
+   *     return myPayloadType;
    *   }
    * }
    * ```
    *
-   * @param {EventAsyncInterface} event The event being dispatched.
-   * @template V The type of the event values.
-   * @returns {Promise<V[]>} An array of values, one for each listener that subscribed to the event.
+   * @param {EventAsyncInterface<P>} event The event being dispatched.
+   * @returns {Promise<EventReturnPayload<E>[]>} An array of return payloads, one for each listener that subscribed to the event.
    */
   async async<E>(
     event: E & EventAsyncInstance<E>,
-  ): Promise<EventReturnValueType<E>[]> {
+  ): Promise<EventReturnPayload<E>[]> {
     // our result
-    let result: EventReturnValueType<E>[];
+    let result: EventReturnPayload<E>[];
 
     try {
       // call async event dispatcher

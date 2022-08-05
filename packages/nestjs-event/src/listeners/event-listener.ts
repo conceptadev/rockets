@@ -9,7 +9,7 @@ import { EventInstance, EventReturnType } from '../event-types';
  *
  * To create a custom event listener, extend the {@link EventListener} class and implement the
  * [listen]{@link EventListener#listen} method. The [listen]{@link EventListener#listen}
- * method will receive the values dispatched by {@link EventDispatchService}.
+ * method will receive the payload dispatched by {@link EventDispatchService}.
  *
  * You will also need to implement one of the interfaces that is enforced by the
  * {@link EventListenService} method you intend to use. For example
@@ -20,11 +20,11 @@ import { EventInstance, EventReturnType } from '../event-types';
  *
  * ### Example
  * ```ts
- * // event values type
- * type MyEventValues = [{id: number, active: boolean}];
+ * // event payload type
+ * type MyEventPayload = {id: number, active: boolean};
  *
  * // example event class
- * class MyEvent extends EventSync<MyEventValues> {}
+ * class MyEvent extends EventSync<MyEventPayload> {}
  *
  * // example listener class
  * class MyListenOn extends EventListener<MyEvent>
@@ -35,7 +35,7 @@ import { EventInstance, EventReturnType } from '../event-types';
  *
  *   // custom handler
  *   listen(event: MyEvent): void {
- *     console.log(event.values);
+ *     console.log(event.payload);
  *   }
  * }
  *
@@ -64,7 +64,7 @@ export abstract class EventListener<E> implements EventListenerInterface<E> {
    * Called after successful subscription.
    *
    * @private
-   * @param {EmitterListener} emitterListener The Listener object returned by EventEmitter2
+   * @param emitterListener The Listener object returned by EventEmitter2
    */
   subscription(emitterListener: EmitterListener): void {
     // has the emitter listener already been set?

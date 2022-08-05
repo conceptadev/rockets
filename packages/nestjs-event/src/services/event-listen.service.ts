@@ -21,7 +21,7 @@ export class EventListenService {
   /**
    * Constructor
    *
-   * @param {EventEmitter2} eventEmitter Injected event emitter instance
+   * @param eventEmitter Injected event emitter instance
    */
   constructor(
     @Inject(EVENT_MODULE_EMITTER_SERVICE_TOKEN)
@@ -38,11 +38,11 @@ export class EventListenService {
    * ```ts
    * import { Injectable, OnModuleInit } from '@nestjs/common';
    * import { EventListenService, EventListenerOn } from '@concepta/nestjs-events';
-   * import { TargetEvent, TargetEventValues } from 'target-module';
+   * import { TargetEvent } from 'target-module';
    *
    * class MyListener extends EventListenerOn<TargetEvent> {
    *   listen(event: TargetEvent) {
-   *     console.log(event.values);
+   *     console.log(event.payload);
    *   }
    * }
    *
@@ -59,9 +59,9 @@ export class EventListenService {
    * }
    * ```
    *
-   * @param {EventClassInterface} eventClass  The event class to subscribe to. This is the class, NOT an instance.
-   * @param {EventListenOnInterface} listener Instance of the event listener class to attach to the event.
-   * @param {EventListenOnOptionsInterface} options Overriding options.
+   * @param {EventClassInterface<E>} eventClass  The event class to subscribe to. This is the class, NOT an instance.
+   * @param {EventListenOnInterface<E>} listener Instance of the event listener class to attach to the event.
+   * @param {EventListenOnOptionsInterface<E>} options Overriding options.
    */
   on<E>(
     eventClass: EventClassInterface<E>,

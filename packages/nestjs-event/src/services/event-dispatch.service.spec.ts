@@ -11,7 +11,7 @@ import { EventSync } from '../events/event-sync';
 import { EventDispatchException } from '../exceptions/event-dispatch.exception';
 import { EventReturnType } from '../event-types';
 
-describe('EventDispatchService', () => {
+describe(EventDispatchService, () => {
   const config: EventOptionsInterface = {};
   let eventEmitter: EventEmitter2;
   let eventDispatchService: EventDispatchService;
@@ -40,12 +40,11 @@ describe('EventDispatchService', () => {
     expect(eventDispatchService).toBeInstanceOf(EventDispatchService);
   });
 
-  describe('sync()', () => {
-    type TestEventValues = [boolean, number, string];
-    class TestEvent extends EventSync<TestEventValues> {}
+  describe(EventDispatchService.prototype.sync, () => {
+    class TestEvent extends EventSync<number> {}
 
     it('should emit event with no listener', async () => {
-      const testEvent = new TestEvent(true, 1, 'a');
+      const testEvent = new TestEvent(123);
       const spy = jest.spyOn(eventEmitter, 'emit');
 
       const result: boolean = eventDispatchService.sync(testEvent);
@@ -56,16 +55,20 @@ describe('EventDispatchService', () => {
     });
 
     it('should emit event with one listener', async () => {
-      const testEvent = new TestEvent(true, 1, 'a');
+      const testEvent = new TestEvent(456);
       const spy = jest.spyOn(eventEmitter, 'emit');
+      let eventPayload: number | undefined;
 
       const listener = jest.fn((e: TestEvent) => {
-        return e.values;
+        eventPayload = e.payload;
+        return 789;
       });
+
       eventEmitter.on(testEvent.key, listener);
 
       const result: boolean = eventDispatchService.sync(testEvent);
 
+      expect(eventPayload).toEqual(456);
       expect(result).toEqual(true);
       expect(spy).toHaveBeenCalledTimes(1);
       expect(spy).toHaveBeenCalledWith(testEvent.key, testEvent);
@@ -75,11 +78,12 @@ describe('EventDispatchService', () => {
     });
 
     it('should catch exception', async () => {
-      const testEvent = new TestEvent(true, 1, 'a');
+      const testEvent = new TestEvent(123);
 
       const listener = jest.fn(() => {
         throw new Error();
       });
+
       eventEmitter.on(testEvent.key, listener);
 
       const t = () => {
@@ -90,7 +94,7 @@ describe('EventDispatchService', () => {
     });
   });
 
-  describe('async() with no parameters', () => {
+  describe(EventDispatchService.prototype.async, () => {
     class TestEvent extends EventAsync {}
 
     it('should emit an async event with no listener', async () => {
@@ -107,10 +111,11 @@ describe('EventDispatchService', () => {
     it('should emit an async event with one listener', async () => {
       const testEvent = new TestEvent();
       const spy = jest.spyOn(eventEmitter, 'emitAsync');
+      let eventPayload: undefined;
 
       const listener = jest.fn(
         async (e: TestEvent): EventReturnType<TestEvent> => {
-          expect(e.values).toEqual([]);
+          eventPayload = e.payload;
           return;
         },
       );
@@ -119,6 +124,7 @@ describe('EventDispatchService', () => {
 
       const result: undefined[] = await eventDispatchService.async(testEvent);
 
+      expect(eventPayload).toBeUndefined();
       expect(result).toEqual([undefined]);
       expect(spy).toHaveBeenCalledTimes(1);
       expect(spy).toHaveBeenCalledWith(testEvent.key, testEvent);
@@ -140,108 +146,109 @@ describe('EventDispatchService', () => {
         EventDispatchException,
       );
     });
-  });
 
-  describe('async() with single parameter', () => {
-    class TestEvent extends EventAsync<boolean> {}
+    describe('with boolean payload', () => {
+      class TestEvent extends EventAsync<boolean> {}
 
-    it('should emit an async event with no listener', async () => {
-      const testEvent = new TestEvent(true);
-      const spy = jest.spyOn(eventEmitter, 'emitAsync');
+      it('should emit an async event with no listener', async () => {
+        const testEvent = new TestEvent(true);
+        const spy = jest.spyOn(eventEmitter, 'emitAsync');
 
-      const result: boolean[] = await eventDispatchService.async(testEvent);
+        const result: boolean[] = await eventDispatchService.async(testEvent);
 
-      expect(result).toEqual([]);
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith(testEvent.key, testEvent);
-    });
-
-    it('should emit an async event with one listener', async () => {
-      const testEvent = new TestEvent(true);
-      const spy = jest.spyOn(eventEmitter, 'emitAsync');
-
-      const listener = jest.fn(
-        async (e: TestEvent): EventReturnType<TestEvent> => {
-          expect(e.values).toEqual([true]);
-          return true;
-        },
-      );
-      eventEmitter.on(testEvent.key, listener);
-
-      const result: boolean[] = await eventDispatchService.async(testEvent);
-
-      expect(result).toEqual([true]);
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith(testEvent.key, testEvent);
-
-      expect(listener).toHaveBeenCalledTimes(1);
-      expect(listener).toHaveBeenCalledWith(testEvent);
-    });
-  });
-
-  describe('async() with multiple parameters', () => {
-    type TestEventValues = [boolean, number, string];
-    class TestEvent extends EventAsync<TestEventValues> {}
-
-    it('should emit an async event with no listener', async () => {
-      const testEvent = new TestEvent(true, 1, 'a');
-      const spy = jest.spyOn(eventEmitter, 'emitAsync');
-
-      const result: TestEventValues[] = await eventDispatchService.async(
-        testEvent,
-      );
-
-      expect(result).toEqual([]);
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith(testEvent.key, testEvent);
-    });
-
-    it('should emit an async event with one listener', async () => {
-      const testEvent = new TestEvent(true, 1, 'a');
-      const spy = jest.spyOn(eventEmitter, 'emitAsync');
-
-      const listener = jest.fn(
-        async (e: TestEvent): EventReturnType<TestEvent> => {
-          return e.values;
-        },
-      );
-      eventEmitter.on(testEvent.key, listener);
-
-      const result: TestEventValues[] = await eventDispatchService.async(
-        testEvent,
-      );
-
-      expect(result).toEqual([[true, 1, 'a']]);
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith(testEvent.key, testEvent);
-
-      expect(listener).toHaveBeenCalledTimes(1);
-      expect(listener).toHaveBeenCalledWith(testEvent);
-    });
-  });
-
-  describe('async() with alternate return', () => {
-    type TestEventValues = [boolean, number, string];
-    class TestEvent extends EventAsync<TestEventValues, boolean> {}
-
-    it('should emit an async event with alternate return type', async () => {
-      const testEvent = new TestEvent(true, 1, 'a');
-      const spy = jest.spyOn(eventEmitter, 'emitAsync');
-
-      const listener = jest.fn(async (): EventReturnType<TestEvent> => {
-        return true;
+        expect(result).toEqual([]);
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith(testEvent.key, testEvent);
       });
 
-      eventEmitter.on(testEvent.key, listener);
+      it('should emit an async event with one listener', async () => {
+        const testEvent = new TestEvent(true);
+        const spy = jest.spyOn(eventEmitter, 'emitAsync');
+        let eventPayload: boolean | undefined;
 
-      const result: boolean[] = await eventDispatchService.async(testEvent);
+        const listener = jest.fn(
+          async (e: TestEvent): EventReturnType<TestEvent> => {
+            eventPayload = e.payload;
+            return true;
+          },
+        );
+        eventEmitter.on(testEvent.key, listener);
 
-      expect(result).toEqual([true]);
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith(testEvent.key, testEvent);
+        const result: boolean[] = await eventDispatchService.async(testEvent);
 
-      expect(listener).toHaveBeenCalledTimes(1);
-      expect(listener).toHaveBeenCalledWith(testEvent);
+        expect(eventPayload).toEqual(true);
+        expect(result).toEqual([true]);
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith(testEvent.key, testEvent);
+
+        expect(listener).toHaveBeenCalledTimes(1);
+        expect(listener).toHaveBeenCalledWith(testEvent);
+      });
+    });
+
+    describe('with array payload', () => {
+      type TestEventType = [boolean, number, string];
+      class TestEvent extends EventAsync<TestEventType> {}
+
+      it('should emit an async event with no listener', async () => {
+        const testEvent = new TestEvent([true, 1, 'a']);
+        const spy = jest.spyOn(eventEmitter, 'emitAsync');
+
+        const result: TestEventType[] = await eventDispatchService.async(
+          testEvent,
+        );
+
+        expect(result).toEqual([]);
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith(testEvent.key, testEvent);
+      });
+
+      it('should emit an async event with one listener', async () => {
+        const testEvent = new TestEvent([true, 1, 'a']);
+        const spy = jest.spyOn(eventEmitter, 'emitAsync');
+
+        const listener = jest.fn(
+          async (e: TestEvent): EventReturnType<TestEvent> => {
+            return e.payload;
+          },
+        );
+        eventEmitter.on(testEvent.key, listener);
+
+        const result: TestEventType[] = await eventDispatchService.async(
+          testEvent,
+        );
+
+        expect(result).toEqual([[true, 1, 'a']]);
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith(testEvent.key, testEvent);
+
+        expect(listener).toHaveBeenCalledTimes(1);
+        expect(listener).toHaveBeenCalledWith(testEvent);
+      });
+    });
+
+    describe('with alternate return', () => {
+      class TestEvent extends EventAsync<number, boolean> {}
+
+      it('should emit an async event with alternate return type', async () => {
+        const testEvent = new TestEvent(456);
+        const spy = jest.spyOn(eventEmitter, 'emitAsync');
+
+        const listener = jest.fn(async (): EventReturnType<TestEvent> => {
+          return true;
+        });
+
+        eventEmitter.on(testEvent.key, listener);
+
+        const result: boolean[] = await eventDispatchService.async(testEvent);
+
+        expect(result).toEqual([true]);
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith(testEvent.key, testEvent);
+
+        expect(listener).toHaveBeenCalledTimes(1);
+        expect(listener).toHaveBeenCalledWith(testEvent);
+      });
     });
   });
 });

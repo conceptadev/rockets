@@ -1,15 +1,15 @@
 import { EventKeyInterface } from './event-key.interface';
 import { EventExpectsReturnOfInterface } from './event-expects-return-of.interface';
-import { EventValues } from '../../event-types';
+import { EventPayload } from '../../event-types';
 
 /**
- * The interface that defines Event key and values signatures.
+ * The interface that defines Event key and payload signatures.
  */
-export interface EventInterface<V = undefined, R = V>
+export interface EventInterface<P = undefined, R = P>
   extends EventKeyInterface,
     EventExpectsReturnOfInterface<R> {
   /**
-   * Return the values that should be emitted.
+   * Return the payload that should be emitted.
    */
-  values: EventValues<V> | [];
+  payload: EventPayload<P>;
 }

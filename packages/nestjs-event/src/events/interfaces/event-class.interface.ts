@@ -8,10 +8,5 @@ export interface EventClassInterface<E> extends EventKeyInterface {
   /**
    * @private
    */
-  new (): E & EventInstance<E>;
-
-  /**
-   * @private
-   */
-  new (...values: (E & EventInstance<E>)['values']): E & EventInstance<E>;
+  new (payload?: (E & EventInstance<E>)['payload']): E & EventInstance<E>;
 }
