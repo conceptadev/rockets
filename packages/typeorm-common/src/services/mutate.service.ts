@@ -79,7 +79,7 @@ export abstract class MutateService<
     // the item we will update
     const item = await this.findById(data.id);
     // yes, remove the item
-    const removed = await this.repo.remove(item);
+    const removed = await this.delete(item);
     // yes, validate the data
     const dto = await this.validate<Creatable>(this.createDto, data);
     // add the id from the removed item
@@ -98,36 +98,31 @@ export abstract class MutateService<
     // try to find it
     const item = await this.findById(data.id);
     // yes, try to remove it
-    const removed = await this.repo.remove(item);
-    // was one removed?
-    if (removed) {
-      // yes, return it
-      return removed;
-    } else {
-      // not removed
-      throw new ReferenceIdNoMatchException(this.repo.metadata.name, item.id);
-    }
+    const removed = await this.delete(item);
+
+    return removed;
   }
 
   /**
    * @private
    */
   protected async findById(id: string): Promise<Entity> {
+    let item: Entity | null;
     try {
       // try to find the ref
       // TODO: remove this type assertion when fix is released
       // https://github.com/typeorm/typeorm/issues/8939
-      const item = await this.repo.findOne({
+      item = await this.repo.findOne({
         where: { id },
       } as FindOneOptions<Entity>);
-      // did we get one?
-      if (item) {
-        return item;
-      } else {
-        throw new ReferenceIdNoMatchException(this.repo.metadata.name, id);
-      }
     } catch (e) {
       throw new ReferenceLookupException(this.repo.metadata.name, e);
+    }
+    // did we get one?
+    if (item) {
+      return item;
+    } else {
+      throw new ReferenceIdNoMatchException(this.repo.metadata.name, id);
     }
   }
 
@@ -143,6 +138,17 @@ export abstract class MutateService<
     }
   }
 
+  /**
+   * @private
+   */
+  protected async delete(item: Entity): Promise<Entity> {
+    // try to save it
+    try {
+      return this.repo.remove(item);
+    } catch (e) {
+      throw new ReferenceMutateException(this.repo.metadata.name, e);
+    }
+  }
   /**
    * @private
    */
