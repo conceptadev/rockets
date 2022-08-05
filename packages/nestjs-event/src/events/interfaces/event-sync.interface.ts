@@ -6,13 +6,4 @@ import { EventInterface } from './event.interface';
  *
  */
 export interface EventSyncInterface<V extends EventValues = EventValues>
-  extends EventInterface<V> {
-  /**
-   *
-   *  Expects return of values
-   *
-   * @type {void}
-   * @private
-   */
-  expectsReturnOf: void;
-}
+  extends EventInterface<V, void> {}

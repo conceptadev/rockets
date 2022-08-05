@@ -9,6 +9,7 @@ import { EventEmitter2 } from 'eventemitter2';
 import { Test } from '@nestjs/testing';
 import { EventSync } from '../events/event-sync';
 import { EventDispatchException } from '../exceptions/event-dispatch.exception';
+import { EventReturnType } from '../event-types';
 
 describe('EventDispatchService', () => {
   const config: EventOptionsInterface = {};
@@ -110,9 +111,11 @@ describe('EventDispatchService', () => {
       const testEvent = new TestEvent(true, 1, 'a');
       const spy = jest.spyOn(eventEmitter, 'emitAsync');
 
-      const listener = jest.fn(async (e: TestEvent) => {
-        return e.values;
-      });
+      const listener = jest.fn(
+        async (e: TestEvent): EventReturnType<TestEvent> => {
+          return e.values;
+        },
+      );
       eventEmitter.on(testEvent.key, listener);
 
       const result: TestEventValues[] = await eventDispatchService.async(
@@ -138,6 +141,31 @@ describe('EventDispatchService', () => {
       expect(eventDispatchService.async(testEvent)).rejects.toThrowError(
         EventDispatchException,
       );
+    });
+  });
+
+  describe('async() with alternate return', () => {
+    type TestEventValues = [boolean, number, string];
+    class TestEvent extends EventAsync<TestEventValues, boolean> {}
+
+    it('should emit an async event with alternate return type', async () => {
+      const testEvent = new TestEvent(true, 1, 'a');
+      const spy = jest.spyOn(eventEmitter, 'emitAsync');
+
+      const listener = jest.fn(async (): EventReturnType<TestEvent> => {
+        return true;
+      });
+
+      eventEmitter.on(testEvent.key, listener);
+
+      const result: boolean[] = await eventDispatchService.async(testEvent);
+
+      expect(result).toEqual([true]);
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledWith(testEvent.key, testEvent);
+
+      expect(listener).toHaveBeenCalledTimes(1);
+      expect(listener).toHaveBeenCalledWith(testEvent);
     });
   });
 });
