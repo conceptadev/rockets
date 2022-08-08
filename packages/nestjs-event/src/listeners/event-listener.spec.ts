@@ -2,18 +2,17 @@ import { EventEmitter2, Listener as EmitterListener } from 'eventemitter2';
 import { EventSync } from '../events/event-sync';
 import { EventListenerException } from '../exceptions/event-listener.exception';
 import { EventListener } from './event-listener';
+import { EventListenerOn } from './event-listener-on';
 
-describe('EventListener', () => {
-  type TestValues = [1, 'two', true];
-  class TestEvent extends EventSync<TestValues> {}
+describe(EventListener, () => {
+  class TestEvent extends EventSync<number> {}
   class TestListenOn extends EventListener<TestEvent> {
-    listen(e: TestEvent): void {
-      e.values; // no-op
+    listen(): void {
       return;
     }
   }
 
-  describe('subscription', () => {
+  describe(EventListenerOn.prototype.subscription, () => {
     const emitter = new EventEmitter2();
     const listener = new TestListenOn();
     const emitterListener: EmitterListener = emitter.on(
@@ -51,7 +50,7 @@ describe('EventListener', () => {
     });
   });
 
-  describe('remove', () => {
+  describe(EventListener.prototype.remove, () => {
     const emitter = new EventEmitter2();
     const listener = new TestListenOn();
     const emitterListener: EmitterListener = emitter.on(

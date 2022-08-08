@@ -1,6 +1,5 @@
 import { EventSyncInterface } from './interfaces/event-sync.interface';
 import { Event } from './event';
-import { EventValues } from '../event-types';
 
 /**
  * Abstract synchronous event class.
@@ -8,7 +7,7 @@ import { EventValues } from '../event-types';
  * To create a custom event, extend the
  * {@link EventSync} class.
  *
- * You can override and customize the [values]{@link Event#values} getter
+ * You can override and customize the [payload]{@link Event#payload} getter
  * if desired. Please read the documentation for the abstract {@link Event} class
  * for the complete documentation.
  *
@@ -16,18 +15,17 @@ import { EventValues } from '../event-types';
  *
  * ### Example
  * ```ts
- * // event values type
- * type MyObject = {id: number, active: boolean};
- * type MyEventValues = [MyObject];
+ * // event payload type
+ * type MyPayloadType = {id: number, active: boolean};
  *
  * // event class
- * class MyEvent extends Event<MyEventValues> {}
+ * class MyEvent extends Event<MyPayloadType> {}
  *
  * // create an event
  * const myEvent = new MyEvent({id: 1234, active: true});
  * ```
  *
  */
-export abstract class EventSync<V extends EventValues = EventValues>
-  extends Event<V, void>
-  implements EventSyncInterface<V> {}
+export abstract class EventSync<P = undefined>
+  extends Event<P, void>
+  implements EventSyncInterface<P> {}

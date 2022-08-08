@@ -4,8 +4,7 @@ import {
   OnOptions,
   Listener as EmitterListener,
 } from 'eventemitter2';
-import { NotAnErrorException } from '@concepta/ts-core';
-import { EventListenerException } from '../exceptions/event-listener.exception';
+import { EventListenException } from '../exceptions/event-listen.exception';
 import { EventListenOnOptionsInterface } from './interfaces/event-listen-on-options.interface';
 import { EventListenOnInterface } from './interfaces/event-listen-on.interface';
 import { EventClassInterface } from '../events/interfaces/event-class.interface';
@@ -21,7 +20,7 @@ export class EventListenService {
   /**
    * Constructor
    *
-   * @param {EventEmitter2} eventEmitter Injected event emitter instance
+   * @param eventEmitter Injected event emitter instance
    */
   constructor(
     @Inject(EVENT_MODULE_EMITTER_SERVICE_TOKEN)
@@ -38,11 +37,11 @@ export class EventListenService {
    * ```ts
    * import { Injectable, OnModuleInit } from '@nestjs/common';
    * import { EventListenService, EventListenerOn } from '@concepta/nestjs-events';
-   * import { TargetEvent, TargetEventValues } from 'target-module';
+   * import { TargetEvent } from 'target-module';
    *
    * class MyListener extends EventListenerOn<TargetEvent> {
    *   listen(event: TargetEvent) {
-   *     console.log(event.values);
+   *     console.log(event.payload);
    *   }
    * }
    *
@@ -59,9 +58,9 @@ export class EventListenService {
    * }
    * ```
    *
-   * @param {EventClassInterface} eventClass  The event class to subscribe to. This is the class, NOT an instance.
-   * @param {EventListenOnInterface} listener Instance of the event listener class to attach to the event.
-   * @param {EventListenOnOptionsInterface} options Overriding options.
+   * @param {EventClassInterface<E>} eventClass  The event class to subscribe to. This is the class, NOT an instance.
+   * @param {EventListenOnInterface<E>} listener Instance of the event listener class to attach to the event.
+   * @param {EventListenOnOptionsInterface<E>} options Overriding options.
    */
   on<E>(
     eventClass: EventClassInterface<E>,
@@ -86,18 +85,15 @@ export class EventListenService {
         finalOptions,
       ) as EmitterListener;
     } catch (e) {
-      const exception = e instanceof Error ? e : new NotAnErrorException(e);
-      // rethrow wrapped
-      throw new EventListenerException(exception.message);
+      throw new EventListenException(listener, e);
     }
 
     try {
       // inform listener of the subscription
       listener.subscription(emitterListener);
     } catch (e) {
-      const exception = e instanceof Error ? e : new NotAnErrorException(e);
       // rethrow wrapped
-      throw new EventListenerException(exception.message);
+      throw new EventListenException(listener, e);
     }
   }
 }

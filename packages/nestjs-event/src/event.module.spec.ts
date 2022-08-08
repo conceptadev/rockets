@@ -4,7 +4,7 @@ import { EventOptionsInterface } from './interfaces/event-options.interface';
 import { EventDispatchService } from './services/event-dispatch.service';
 import { EventListenService } from './services/event-listen.service';
 
-describe('EventModule', () => {
+describe(EventModule, () => {
   let eventConfig: EventOptionsInterface;
 
   beforeEach(async () => {
@@ -13,7 +13,7 @@ describe('EventModule', () => {
     };
   });
 
-  describe('forRoot', () => {
+  describe(EventModule.forRoot, () => {
     it('should always return a global module', async () => {
       const module = EventModule.register(eventConfig);
 
@@ -35,7 +35,7 @@ describe('EventModule', () => {
     });
   });
 
-  describe('forRootAsync', () => {
+  describe(EventModule.forRootAsync, () => {
     it('should always return a global module', async () => {
       const module = EventModule.registerAsync({
         useFactory: () => eventConfig,
@@ -73,7 +73,7 @@ describe('EventModule', () => {
     });
   });
 
-  describe('deferred', () => {
+  describe(EventModule.deferred, () => {
     it('should return the dynamic module (deferred)', async () => {
       const moduleRef = await Test.createTestingModule({
         imports: [EventModule.deferred(), EventModule.register(eventConfig)],

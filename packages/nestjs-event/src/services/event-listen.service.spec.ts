@@ -1,19 +1,17 @@
 import { EventEmitter2 } from 'eventemitter2';
+import { Test } from '@nestjs/testing';
 import {
   EVENT_MODULE_EMITTER_SERVICE_TOKEN,
   EVENT_MODULE_OPTIONS_TOKEN,
 } from '../event-constants';
 import { EventOptionsInterface } from '../interfaces/event-options.interface';
-import { Test } from '@nestjs/testing';
 import { EventSync } from '../events/event-sync';
 import { EventListenerOn } from '../listeners/event-listener-on';
 import { EventListenService } from './event-listen.service';
 import { EventAsync } from '../events/event-async';
-import { EventListenerException } from '../exceptions/event-listener.exception';
-import { EventAsyncInterface } from '../events/interfaces/event-async.interface';
-import { EventClassInterface } from '../events/interfaces/event-class.interface';
+import { EventListenException } from '../exceptions/event-listen.exception';
 
-describe('EventListenService', () => {
+describe(EventListenService, () => {
   const config: EventOptionsInterface = {};
   let eventEmitter: EventEmitter2;
   let eventListenService: EventListenService;
@@ -46,85 +44,77 @@ describe('EventListenService', () => {
     expect(eventListenService).toBeInstanceOf(EventListenService);
   });
 
-  describe('on() sync', () => {
-    type TestEventValues = [boolean, number, string];
-    class TestEvent extends EventSync<TestEventValues> {}
-    class TestListenOn extends EventListenerOn<TestEvent> {
-      listen(e: TestEvent) {
-        e.values; //no-op
+  describe(EventListenService.prototype.on, () => {
+    describe('sync', () => {
+      class TestEvent extends EventSync<number> {}
+      class TestListenOn extends EventListenerOn<TestEvent> {
+        listen(e: TestEvent) {
+          e.payload; // no-op
+        }
       }
-    }
 
-    it('should listen to event with sync listener', () => {
-      const listener = new TestListenOn();
-      const spy = jest.spyOn(eventEmitter, 'on');
-      const result = eventListenService.on(TestEvent, listener);
-      expect(result).toEqual(undefined);
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith(TestEvent.key, listener.listen, {
-        objectify: true,
+      it('should listen to event with sync listener', () => {
+        const listener = new TestListenOn();
+        const spy = jest.spyOn(eventEmitter, 'on');
+        const result = eventListenService.on(TestEvent, listener);
+        expect(result).toEqual(undefined);
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith(TestEvent.key, listener.listen, {
+          objectify: true,
+        });
+      });
+
+      it('should catch emitter exception and wrap it', () => {
+        const listener = new TestListenOn();
+        const spyEmitter = jest
+          .spyOn(eventEmitter, 'on')
+          .mockImplementation(() => {
+            throw new Error();
+          });
+
+        const t = () => {
+          eventListenService.on(TestEvent, listener);
+        };
+
+        expect(t).toThrow(EventListenException);
+        expect(spyEmitter).toHaveBeenCalledTimes(1);
+      });
+
+      it('should catch listener subcription exception and wrap it', () => {
+        const listener = new TestListenOn();
+        const spySubsc = jest
+          .spyOn(listener, 'subscription')
+          .mockImplementation(() => {
+            throw new Error();
+          });
+
+        const t = () => {
+          eventListenService.on(TestEvent, listener);
+        };
+
+        expect(t).toThrow(EventListenException);
+        expect(spySubsc).toHaveBeenCalledTimes(1);
       });
     });
 
-    it('should catch emitter exception and wrap it', () => {
-      const listener = new TestListenOn();
-      const spyEmitter = jest
-        .spyOn(eventEmitter, 'on')
-        .mockImplementation(() => {
-          throw new Error();
-        });
+    describe('async', () => {
+      class TestEvent extends EventAsync<string> {}
 
-      const t = () => {
-        eventListenService.on(TestEvent, listener);
-      };
-
-      expect(t).toThrow(EventListenerException);
-      expect(spyEmitter).toHaveBeenCalledTimes(1);
-    });
-
-    it('should catch listener subcription exception and wrap it', () => {
-      const listener = new TestListenOn();
-      const spySubsc = jest
-        .spyOn(listener, 'subscription')
-        .mockImplementation(() => {
-          throw new Error();
-        });
-
-      const t = () => {
-        eventListenService.on(TestEvent, listener);
-      };
-
-      expect(t).toThrow(EventListenerException);
-      expect(spySubsc).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('on() async', () => {
-    type TestEventValues = [boolean, number, string];
-    class TestEvent extends EventAsync<TestEventValues> {}
-
-    // const test: Type<EventAsyncInterface<TestEventValues>> = TestEvent;
-
-    const test: EventClassInterface<EventAsyncInterface<TestEventValues>> =
-      TestEvent;
-
-    // const test = TestEvent;
-
-    class TestListenOn extends EventListenerOn<TestEvent> {
-      async listen(e: TestEvent) {
-        return e.values;
+      class TestListenOn extends EventListenerOn<TestEvent> {
+        async listen(e: TestEvent) {
+          return e.payload;
+        }
       }
-    }
 
-    it('should listen to event with async listener', () => {
-      const listener = new TestListenOn();
-      const spy = jest.spyOn(eventEmitter, 'on');
-      // const result = eventListenService.on(TestEvent, listener);
-      const result = eventListenService.on(test, listener);
-      expect(result).toEqual(undefined);
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith(TestEvent.key, listener.listen, {
-        objectify: true,
+      it('should listen to event with async listener', () => {
+        const listener = new TestListenOn();
+        const spy = jest.spyOn(eventEmitter, 'on');
+        const result = eventListenService.on(TestEvent, listener);
+        expect(result).toEqual(undefined);
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith(TestEvent.key, listener.listen, {
+          objectify: true,
+        });
       });
     });
   });
