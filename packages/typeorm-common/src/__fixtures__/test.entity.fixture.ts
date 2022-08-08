@@ -1,10 +1,10 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { AuditInterface } from '@concepta/ts-core';
 import { AuditSqlLiteEmbed } from '../embeds/audit/audit-sqlite.embed';
-import { AuditEntityFixtureInterface } from './interface/audit.entity.fixture.interface';
+import { TestInterfaceFixture } from './interface/test-entity.interface.fixture';
 
 @Entity()
-export class AuditEntityFixture implements AuditEntityFixtureInterface {
+export class TestEntityFixture implements TestInterfaceFixture {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 

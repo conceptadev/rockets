@@ -1,44 +1,42 @@
-//import { Repository } from 'typeorm';
+import { getDataSourceToken } from '@nestjs/typeorm';
 import { BadRequestException, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SeedingSource } from '@concepta/typeorm-seeding';
-import { getDataSourceToken } from '@nestjs/typeorm';
-import { AppModuleCustomFixture } from '../__fixtures__/app.module.custom.fixture';
-
-import { AuditModuleCustomFixture } from '../__fixtures__/audit.module.custom.fixture';
-import { AuditFactory } from '../audit.factory';
-import { AuditEntityFixture } from '../__fixtures__/audit.entity.fixture';
 import { ReferenceLookupException } from '../exceptions/reference-lookup.exception';
-import { AuditLookupCustomService } from '../__fixtures__/services/audit-lookup.custom.service';
+
+import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
+import { TestModuleFixture } from '../__fixtures__/test.module.fixture';
+import { TestEntityFixture } from '../__fixtures__/test.entity.fixture';
+import { TestLookupServiceFixture } from '../__fixtures__/services/test-lookup.service.fixture';
+import { TestFactoryFixture } from '../__fixtures__/test.factory.fixture';
 
 describe('LookupService', () => {
   const RANDOM_UUID = '3bfd065e-0c30-11ed-861d-0242ac120002';
   let app: INestApplication;
-  let auditModuleCustomFixture: AuditModuleCustomFixture;
-  let auditLookupCustomService: AuditLookupCustomService;
+  let auditModuleCustomFixture: TestModuleFixture;
+  let auditLookupCustomService: TestLookupServiceFixture;
   let seedingSource: SeedingSource;
-  let testObject: AuditEntityFixture;
+  let testObject: TestEntityFixture;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModuleCustomFixture],
+      imports: [AppModuleFixture],
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    auditModuleCustomFixture = moduleFixture.get<AuditModuleCustomFixture>(
-      AuditModuleCustomFixture,
-    );
+    auditModuleCustomFixture =
+      moduleFixture.get<TestModuleFixture>(TestModuleFixture);
 
-    auditLookupCustomService = moduleFixture.get<AuditLookupCustomService>(
-      AuditLookupCustomService,
+    auditLookupCustomService = moduleFixture.get<TestLookupServiceFixture>(
+      TestLookupServiceFixture,
     );
 
     seedingSource = new SeedingSource({
       dataSource: app.get(getDataSourceToken()),
     });
 
-    const userFactory = new AuditFactory({
-      entity: AuditEntityFixture,
+    const userFactory = new TestFactoryFixture({
+      entity: TestEntityFixture,
       seedingSource,
     });
 
@@ -51,8 +49,8 @@ describe('LookupService', () => {
 
   describe('lookupService', () => {
     it('should be loaded', async () => {
-      expect(auditModuleCustomFixture).toBeInstanceOf(AuditModuleCustomFixture);
-      expect(auditLookupCustomService).toBeInstanceOf(AuditLookupCustomService);
+      expect(auditModuleCustomFixture).toBeInstanceOf(TestModuleFixture);
+      expect(auditLookupCustomService).toBeInstanceOf(TestLookupServiceFixture);
     });
 
     describe('lookupService.byId', () => {

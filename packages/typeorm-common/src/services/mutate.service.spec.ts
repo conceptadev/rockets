@@ -1,45 +1,45 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { getDataSourceToken } from '@nestjs/typeorm';
-import { AppModuleCustomFixture } from '../__fixtures__/app.module.custom.fixture';
-import { AuditMutateCustomService } from '../__fixtures__/services/audit-mutate.custom.service';
-import { AuditModuleCustomFixture } from '../__fixtures__/audit.module.custom.fixture';
 import { INestApplication } from '@nestjs/common';
-import { AuditFactory } from '../audit.factory';
-import { AuditEntityFixture } from '../__fixtures__/audit.entity.fixture';
 import { ReferenceMutateException } from '../exceptions/reference-mutate.exception';
 import { ReferenceValidationException } from '../exceptions/reference-validation.exception';
 import { ReferenceIdNoMatchException } from '../exceptions/reference-id-no-match.exception';
 import { ReferenceLookupException } from '../exceptions/reference-lookup.exception';
 
+import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
+import { TestMutateServiceFixture } from '../__fixtures__/services/test-mutate.service.fixture';
+import { TestModuleFixture } from '../__fixtures__/test.module.fixture';
+import { TestEntityFixture } from '../__fixtures__/test.entity.fixture';
+import { TestFactoryFixture } from '../__fixtures__/test.factory.fixture';
+
 describe('MutateService', () => {
   const WRONG_UUID = '3bfd065e-0c30-11ed-861d-0242ac120002';
   let app: INestApplication;
-  let auditModuleCustomFixture: AuditModuleCustomFixture;
-  let auditMutateCustomService: AuditMutateCustomService;
+  let auditModuleCustomFixture: TestModuleFixture;
+  let auditMutateCustomService: TestMutateServiceFixture;
   let seedingSource: SeedingSource;
-  let auditFactory: AuditFactory;
+  let auditFactory: TestFactoryFixture;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModuleCustomFixture],
+      imports: [AppModuleFixture],
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    auditModuleCustomFixture = moduleFixture.get<AuditModuleCustomFixture>(
-      AuditModuleCustomFixture,
-    );
+    auditModuleCustomFixture =
+      moduleFixture.get<TestModuleFixture>(TestModuleFixture);
 
-    auditMutateCustomService = moduleFixture.get<AuditMutateCustomService>(
-      AuditMutateCustomService,
+    auditMutateCustomService = moduleFixture.get<TestMutateServiceFixture>(
+      TestMutateServiceFixture,
     );
 
     seedingSource = new SeedingSource({
       dataSource: app.get(getDataSourceToken()),
     });
 
-    auditFactory = new AuditFactory({
-      entity: AuditEntityFixture,
+    auditFactory = new TestFactoryFixture({
+      entity: TestEntityFixture,
       seedingSource,
     });
   });
@@ -49,7 +49,7 @@ describe('MutateService', () => {
   });
 
   it('should be loaded', async () => {
-    expect(auditModuleCustomFixture).toBeInstanceOf(AuditModuleCustomFixture);
+    expect(auditModuleCustomFixture).toBeInstanceOf(TestModuleFixture);
   });
 
   describe('MutateService Create', () => {

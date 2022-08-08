@@ -1,9 +1,7 @@
 import { IsOptional, IsString, MinLength } from 'class-validator';
-import { AuditEntityUpdatableFixtureInterface } from '../interface/audit.entity.updatable.fixture.interface';
+import { TestUpdatableInterfaceFixture } from '../interface/test-updatable.interface.fixture';
 
-export class AuditEntityUpdateFixtureDto
-  implements AuditEntityUpdatableFixtureInterface
-{
+export class TestUpdateDtoFixture implements TestUpdatableInterfaceFixture {
   @IsOptional()
   @IsString()
   @MinLength(2)

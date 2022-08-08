@@ -2,9 +2,9 @@ import { Type } from 'class-transformer';
 import { AuditInterface, ReferenceId } from '@concepta/ts-core';
 import { AuditDto } from '@concepta/nestjs-common';
 
-import { AuditEntityFixtureInterface } from '../interface/audit.entity.fixture.interface';
+import { TestInterfaceFixture } from '../interface/test-entity.interface.fixture';
 
-export class AuditEntityFixtureDto implements AuditEntityFixtureInterface {
+export class TestDtoFixture implements TestInterfaceFixture {
   id: ReferenceId = '';
 
   firstName = '';
