@@ -1,18 +1,16 @@
-import {
-  AuditDateCreated,
-  AuditDateDeleted,
-  AuditDateUpdated,
-  AuditVersion,
-  ReferenceId,
-} from '@concepta/ts-core';
-import { Min } from 'class-validator';
+import { Type } from 'class-transformer';
+import { AuditInterface, ReferenceId } from '@concepta/ts-core';
+import { AuditDto } from '@concepta/nestjs-common';
+
 import { AuditEntityFixtureInterface } from '../interface/audit.entity.fixture.interface';
 
 export class AuditEntityFixtureDto implements AuditEntityFixtureInterface {
   id: ReferenceId = '';
-  dateCreated: AuditDateCreated = new Date();
-  dateUpdated: AuditDateUpdated = new Date();
-  dateDeleted: AuditDateDeleted = new Date();
-  @Min(1)
-  version: AuditVersion = 1;
+
+  firstName = '';
+
+  lastName = '';
+
+  @Type(() => AuditDto)
+  audit!: AuditInterface;
 }

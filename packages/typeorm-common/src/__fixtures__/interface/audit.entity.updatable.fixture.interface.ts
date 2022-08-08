@@ -1,3 +1,6 @@
-import { AuditInterface } from '@concepta/ts-core';
+import { AuditEntityFixtureInterface } from './audit.entity.fixture.interface';
 
-export interface AuditEntityUpdatableFixtureInterface extends AuditInterface {}
+export interface AuditEntityUpdatableFixtureInterface
+  extends Partial<
+    Pick<AuditEntityFixtureInterface, 'firstName' | 'lastName'>
+  > {}

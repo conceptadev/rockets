@@ -1,5 +1,11 @@
-import { AuditInterface, ReferenceIdInterface } from '@concepta/ts-core';
+import {
+  ReferenceAuditInterface,
+  ReferenceIdInterface,
+} from '@concepta/ts-core';
 
 export interface AuditEntityFixtureInterface
-  extends AuditInterface,
-    ReferenceIdInterface {}
+  extends ReferenceIdInterface,
+    ReferenceAuditInterface {
+  firstName: string;
+  lastName?: string;
+}

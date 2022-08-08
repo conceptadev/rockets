@@ -1,6 +1,16 @@
+import { IsOptional, IsString, MinLength } from 'class-validator';
 import { AuditEntityUpdatableFixtureInterface } from '../interface/audit.entity.updatable.fixture.interface';
-import { AuditEntityFixtureDto } from './audit-entity-fixture.dto';
 
 export class AuditEntityUpdateFixtureDto
-  extends AuditEntityFixtureDto
-  implements AuditEntityUpdatableFixtureInterface {}
+  implements AuditEntityUpdatableFixtureInterface
+{
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  firstName?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  lastName?: string;
+}

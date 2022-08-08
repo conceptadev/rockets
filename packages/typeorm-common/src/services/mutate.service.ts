@@ -98,9 +98,7 @@ export abstract class MutateService<
     // try to find it
     const item = await this.findById(data.id);
     // yes, try to remove it
-    const removed = await this.delete(item);
-
-    return removed;
+    return this.delete(item);
   }
 
   /**

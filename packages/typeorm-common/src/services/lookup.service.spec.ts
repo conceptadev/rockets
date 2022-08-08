@@ -17,7 +17,7 @@ describe('LookupService', () => {
   let auditModuleCustomFixture: AuditModuleCustomFixture;
   let auditLookupCustomService: AuditLookupCustomService;
   let seedingSource: SeedingSource;
-  let testAudit: AuditEntityFixture;
+  let testObject: AuditEntityFixture;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -42,7 +42,7 @@ describe('LookupService', () => {
       seedingSource,
     });
 
-    testAudit = await userFactory.create();
+    testObject = await userFactory.create();
   });
 
   afterEach(() => {
@@ -57,13 +57,13 @@ describe('LookupService', () => {
 
     describe('lookupService.byId', () => {
       it('lookupService.byId Success', async () => {
-        const result = await auditLookupCustomService.byId(testAudit?.id);
-        expect(result?.version).toBe(testAudit.version);
+        const result = await auditLookupCustomService.byId(testObject?.id);
+        expect(result?.audit.version).toBe(testObject.audit.version);
       });
 
       it('lookupService.byId wrong id', async () => {
         const result = await auditLookupCustomService.byId(RANDOM_UUID);
-        expect(result?.version).toBe(undefined);
+        expect(result?.audit.version).toBe(undefined);
       });
     });
 
@@ -96,9 +96,11 @@ describe('LookupService', () => {
     describe('lookupService.find', () => {
       it('lookupService.find', async () => {
         const result = await auditLookupCustomService['find']({
-          where: { id: testAudit.id },
+          where: { id: testObject.id },
         });
-        expect(result ? result[0]?.version : null).toBe(testAudit.version);
+        expect(result ? result[0]?.audit.version : null).toBe(
+          testObject.audit.version,
+        );
       });
 
       it('lookupService.find wrong id', async () => {

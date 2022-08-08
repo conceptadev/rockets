@@ -1,4 +1,5 @@
 import { Factory } from '@concepta/typeorm-seeding';
+import { faker } from '@faker-js/faker';
 import { AuditEntityFixture } from './__fixtures__/audit.entity.fixture';
 
 /**
@@ -16,10 +17,8 @@ export class AuditFactory extends Factory<AuditEntityFixture> {
   protected async entity(
     user: AuditEntityFixture,
   ): Promise<AuditEntityFixture> {
-    // set the username
-    user.version = 99;
-
-    // return the new user
+    user.firstName = faker.name.firstName();
+    user.lastName = faker.name.lastName();
     return user;
   }
 }
