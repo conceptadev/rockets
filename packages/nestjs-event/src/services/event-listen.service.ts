@@ -9,6 +9,7 @@ import { EventListenOnOptionsInterface } from './interfaces/event-listen-on-opti
 import { EventListenOnInterface } from './interfaces/event-listen-on.interface';
 import { EventClassInterface } from '../events/interfaces/event-class.interface';
 import { EVENT_MODULE_EMITTER_SERVICE_TOKEN } from '../event-constants';
+import { EventInstance } from '../event-types';
 
 /**
  * Event Listen Service
@@ -77,11 +78,14 @@ export class EventListenService {
     // the emitter listener
     let emitterListener: EmitterListener;
 
+    // get our wrapper
+    const listenWrapper = this.createListenWrapper(listener);
+
     try {
       // emit the event
       emitterListener = this.eventEmitter.on(
         eventClass.key,
-        listener.listen,
+        listenWrapper,
         finalOptions,
       ) as EmitterListener;
     } catch (e) {
@@ -95,5 +99,14 @@ export class EventListenService {
       // rethrow wrapped
       throw new EventListenException(listener, e);
     }
+  }
+
+  /**
+   * @private
+   */
+  protected createListenWrapper<E>(listener: EventListenOnInterface<E>) {
+    return (e: EventInstance<E>) => {
+      return listener.listen(e);
+    };
   }
 }
