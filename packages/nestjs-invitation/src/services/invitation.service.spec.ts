@@ -106,7 +106,7 @@ describe('AuthRecoveryService', () => {
     ).toBeUndefined();
   });
 
-  it.only('Accept invite and update password', async () => {
+  it('Accept invite and update password', async () => {
     const otp = await createOtp(config, otpService, testUser, category);
 
     const inviteAccepted = await invitationService.acceptInvite(

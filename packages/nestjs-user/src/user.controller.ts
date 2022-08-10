@@ -60,6 +60,7 @@ export class UserController
    * Constructor.
    *
    * @param userCrudService instance of the user crud service
+   * @param passwordStorageService instance of password service
    */
   constructor(
     private userCrudService: UserCrudService,

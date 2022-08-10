@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
+import { EventModule } from '@concepta/nestjs-event';
+
 import { UserModule } from '../user.module';
 import { ormConfig } from './ormconfig.fixture';
 import { UserEntityFixture } from './user.entity.fixture';
-import { InvitationSignupEventAsync } from './events/invitation-created.event';
-import { EventModule } from '@concepta/nestjs-event';
+import { InvitationAcceptedEventAsync } from './events/invitation-accepted.event';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { EventModule } from '@concepta/nestjs-event';
     EventModule.register(),
     UserModule.register({
       settings: {
-        invitationSignupEvent: InvitationSignupEventAsync,
+        invitationRequestEvent: InvitationAcceptedEventAsync,
       },
       entities: {
         user: {

@@ -16,7 +16,7 @@ import { default as ormConfig } from './invitation.ormconfig.fixture';
 import { InvitationUserOtpEntityFixture } from './invitation-user-otp-entity.fixture';
 import { InvitationUserEntityFixture } from './invitation-user-entity.fixture';
 import { InvitationEntityFixture } from './invitation.entity.fixture';
-import { InvitationSignupEventAsync } from '@concepta/nestjs-user/dist/__fixtures__/events/invitation-created.event';
+import { InvitationAcceptedEventAsync } from '../events/invitation-accepted.event';
 
 @Module({
   imports: [
@@ -61,7 +61,7 @@ import { InvitationSignupEventAsync } from '@concepta/nestjs-user/dist/__fixture
     }),
     UserModule.register({
       settings: {
-        invitationSignupEvent: InvitationSignupEventAsync,
+        invitationRequestEvent: InvitationAcceptedEventAsync,
       },
       entities: {
         user: {

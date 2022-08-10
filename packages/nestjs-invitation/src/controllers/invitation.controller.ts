@@ -17,7 +17,7 @@ import { InvitationService } from '../services/invitation.service';
 import { InvitationCreateDto } from '../dto/invitation-create.dto';
 import { InvitationDto } from '../dto/invitation.dto';
 import { InvitationPaginatedDto } from '../dto/invitation-paginated.dto';
-import { InvitationInterface } from '../interfaces/invitation.interface';
+import { InvitationInterface } from '../../../ts-common/src/invitation/interfaces/invitation.interface';
 import { InvitationCreatableInterface } from '../interfaces/invitation-creatable.interface';
 import {
   AccessControlCreateOne,

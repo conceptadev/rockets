@@ -1,21 +1,14 @@
 import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, Logger } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
 import { ConfigService, ConfigType } from '@nestjs/config';
 import { OtpService } from '@concepta/nestjs-otp';
-import {
-  InvitationSignupEventPayloadInterface,
-  OtpInterface,
-  UserInterface,
-} from '@concepta/ts-common';
+import { OtpInterface, UserInterface } from '@concepta/ts-common';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { getDataSourceToken } from '@nestjs/typeorm';
-import {
-  EventAsyncInterface,
-  EventDispatchService,
-} from '@concepta/nestjs-event';
 
+import { INVITATION_MODULE_DEFAULT_SETTINGS_TOKEN } from '../invitation.constants';
 import { InvitationCreateDto } from '../dto/invitation-create.dto';
 import { InvitationUserEntityFixture } from '../__fixtures__/invitation-user-entity.fixture';
 import { InvitationAppModuleFixture } from '../__fixtures__/invitation.app.module.fixture';
@@ -26,7 +19,6 @@ import { InvitationFactory } from '../invitation.factory';
 import { InvitationEntityFixture } from '../__fixtures__/invitation.entity.fixture';
 import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
 import { InvitationSettingsInterface } from '../interfaces/invitation-settings.interface';
-import { INVITATION_MODULE_DEFAULT_SETTINGS_TOKEN } from '../invitation.constants';
 
 describe('InvitationController (e2e)', () => {
   const category = 'invitation';
@@ -42,17 +34,6 @@ describe('InvitationController (e2e)', () => {
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [InvitationAppModuleFixture],
-      providers: [
-        {
-          provide: Logger,
-          useValue: {
-            log: jest.fn(),
-            debug: jest.fn(async (arg1, arg2) => {
-              return { arg1, arg2 };
-            }),
-          },
-        },
-      ],
     }).compile();
     app = moduleFixture.createNestApplication();
     await app.init();
@@ -62,25 +43,6 @@ describe('InvitationController (e2e)', () => {
     config = configService.get<InvitationSettingsInterface>(
       INVITATION_MODULE_DEFAULT_SETTINGS_TOKEN,
     ) as InvitationSettingsInterface;
-
-    jest
-      .spyOn(EventDispatchService.prototype, 'async')
-      .mockImplementation(
-        async (
-          event: EventAsyncInterface<[InvitationSignupEventPayloadInterface]>,
-        ) => {
-          return Promise.resolve([
-            [
-              {
-                ...(event?.values[0] as object),
-                processed: true,
-                successfully: true,
-                error: null,
-              },
-            ],
-          ]);
-        },
-      );
 
     seedingSource = new SeedingSource({
       dataSource: moduleFixture.get(getDataSourceToken()),
@@ -105,7 +67,7 @@ describe('InvitationController (e2e)', () => {
     return app ? await app.close() : undefined;
   });
 
-  describe('Category: user', () => {
+  describe('Type: user', () => {
     it('POST invitation', async () => {
       await createInvite({ email: user.email, category });
     });
@@ -121,7 +83,7 @@ describe('InvitationController (e2e)', () => {
         .patch(`/invitation-acceptance/${code}`)
         .send({
           passcode,
-          payload: { dummyData: {} },
+          payload: { userId: otp.assignee.id, newPassword: 'hOdv2A2h%' },
         } as InvitationAcceptInviteDto)
         .expect(200);
     });

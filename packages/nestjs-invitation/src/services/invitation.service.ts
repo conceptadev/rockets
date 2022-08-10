@@ -96,7 +96,6 @@ export class InvitationService implements InvitationServiceInterface {
     // did we get an otp?
     if (otp) {
       const success = await this.invitationEventService.sendEvent(
-        'acceptInvite',
         invitationDto,
         payload,
       );

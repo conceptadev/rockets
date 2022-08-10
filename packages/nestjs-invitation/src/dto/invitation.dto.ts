@@ -1,13 +1,14 @@
-import { InvitationInterface } from '../interfaces/invitation.interface';
+import { Exclude, Expose, Type } from 'class-transformer';
+import { IsEmail, IsString } from 'class-validator';
 import {
   AuditInterface,
   ReferenceId,
   ReferenceIdInterface,
 } from '@concepta/ts-core';
-import { Exclude, Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString } from 'class-validator';
 import { AuditDto, ReferenceIdDto } from '@concepta/nestjs-common';
+
+import { InvitationInterface } from '../../../ts-common/src/invitation/interfaces/invitation.interface';
 
 @Exclude()
 export class InvitationDto implements InvitationInterface {
