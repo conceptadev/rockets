@@ -55,13 +55,24 @@ describe(EventListenService, () => {
 
       it('should listen to event with sync listener', () => {
         const listener = new TestListenOn();
-        const spy = jest.spyOn(eventEmitter, 'on');
+        const testEvent = new TestEvent(123);
+
+        const spyEmitOn = jest.spyOn(eventEmitter, 'on');
+        const spyListen = jest.spyOn(listener, 'listen');
+
         const result = eventListenService.on(TestEvent, listener);
+        eventEmitter.emit(TestEvent.key, testEvent);
+
         expect(result).toEqual(undefined);
-        expect(spy).toHaveBeenCalledTimes(1);
-        expect(spy).toHaveBeenCalledWith(TestEvent.key, listener.listen, {
-          objectify: true,
-        });
+        expect(spyEmitOn).toHaveBeenCalledTimes(1);
+        expect(spyEmitOn).toHaveBeenCalledWith(
+          TestEvent.key,
+          expect.any(Function),
+          {
+            objectify: true,
+          },
+        );
+        expect(spyListen).toHaveBeenCalledWith(testEvent);
       });
 
       it('should catch emitter exception and wrap it', () => {
@@ -106,15 +117,26 @@ describe(EventListenService, () => {
         }
       }
 
-      it('should listen to event with async listener', () => {
+      it('should listen to event with async listener', async () => {
         const listener = new TestListenOn();
-        const spy = jest.spyOn(eventEmitter, 'on');
+        const testEvent = new TestEvent('def');
+
+        const spyEmitOn = jest.spyOn(eventEmitter, 'on');
+        const spyListen = jest.spyOn(listener, 'listen');
+
         const result = eventListenService.on(TestEvent, listener);
+        await eventEmitter.emitAsync(TestEvent.key, testEvent);
+
         expect(result).toEqual(undefined);
-        expect(spy).toHaveBeenCalledTimes(1);
-        expect(spy).toHaveBeenCalledWith(TestEvent.key, listener.listen, {
-          objectify: true,
-        });
+        expect(spyEmitOn).toHaveBeenCalledTimes(1);
+        expect(spyEmitOn).toHaveBeenCalledWith(
+          TestEvent.key,
+          expect.any(Function),
+          {
+            objectify: true,
+          },
+        );
+        expect(spyListen).toHaveBeenCalledWith(testEvent);
       });
     });
   });

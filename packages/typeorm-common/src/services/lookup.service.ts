@@ -1,7 +1,6 @@
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import {
   LookupIdInterface,
-  NotAnErrorException,
   ReferenceId,
   ReferenceIdInterface,
 } from '@concepta/ts-core';
@@ -44,9 +43,8 @@ export abstract class LookupService<Entity extends ReferenceIdInterface>
       // call the repo find
       return this.repo.find(options);
     } catch (e) {
-      const exception = e instanceof Error ? e : new NotAnErrorException(e);
       // fatal orm error
-      throw new ReferenceLookupException(this.repo.metadata.name, exception);
+      throw new ReferenceLookupException(this.repo.metadata.name, e);
     }
   }
 
