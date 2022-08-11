@@ -1,17 +1,13 @@
 import { DataSourceOptions } from 'typeorm';
-import { InvitationUserOtpEntityFixture } from './invitation-user-otp-entity.fixture';
-import { InvitationUserEntityFixture } from './invitation-user-entity.fixture';
-import { InvitationEntityFixture } from './invitation.entity.fixture';
+import { UserOtpEntityFixture } from './entities/user-otp.entity.fixture';
+import { UserEntityFixture } from './entities/user.entity.fixture';
+import { InvitationEntityFixture } from './entities/invitation.entity.fixture';
 
 const config: DataSourceOptions = {
   type: 'sqlite',
   database: ':memory:',
   synchronize: true,
-  entities: [
-    InvitationEntityFixture,
-    InvitationUserEntityFixture,
-    InvitationUserOtpEntityFixture,
-  ],
+  entities: [InvitationEntityFixture, UserEntityFixture, UserOtpEntityFixture],
 };
 
 export default config;

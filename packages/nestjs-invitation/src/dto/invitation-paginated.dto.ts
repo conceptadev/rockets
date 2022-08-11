@@ -1,9 +1,9 @@
 import { Exclude, Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { InvitationInterface } from '@concepta/ts-common';
 import { CrudResponsePaginatedDto } from '@concepta/nestjs-crud';
 
 import { InvitationDto } from './invitation.dto';
-import { InvitationInterface } from '../../../ts-common/src/invitation/interfaces/invitation.interface';
 
 /**
  * User paginated DTO

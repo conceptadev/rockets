@@ -1,4 +1,3 @@
-import { Inject } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   CrudBody,
@@ -11,13 +10,11 @@ import {
   CrudRequest,
   CrudRequestInterface,
 } from '@concepta/nestjs-crud';
+import { InvitationInterface } from '@concepta/ts-common';
 
-import { INVITATION_USER_LOOKUP_SERVICE_TOKEN } from '../invitation.constants';
-import { InvitationService } from '../services/invitation.service';
 import { InvitationCreateDto } from '../dto/invitation-create.dto';
 import { InvitationDto } from '../dto/invitation.dto';
 import { InvitationPaginatedDto } from '../dto/invitation-paginated.dto';
-import { InvitationInterface } from '../../../ts-common/src/invitation/interfaces/invitation.interface';
 import { InvitationCreatableInterface } from '../interfaces/invitation-creatable.interface';
 import {
   AccessControlCreateOne,
@@ -25,10 +22,10 @@ import {
   AccessControlReadMany,
   AccessControlReadOne,
 } from '@concepta/nestjs-access-control';
-import { InvitationUserLookupServiceInterface } from '../interfaces/invitation-user-lookup.service.interface';
-import { InvitationResource } from '../ivitation.types';
+import { InvitationResource } from '../invitation.types';
 import { InvitationCrudService } from '../services/invitation-crud.service';
 import { randomUUID } from 'crypto';
+import { InvitationSendService } from '../services/invitation-send.service';
 
 @CrudController({
   path: 'invitation',
@@ -47,10 +44,8 @@ export class InvitationController
     >
 {
   constructor(
-    private readonly invitationService: InvitationService,
+    private readonly invitationSendService: InvitationSendService,
     private readonly invitationCrudService: InvitationCrudService,
-    @Inject(INVITATION_USER_LOOKUP_SERVICE_TOKEN)
-    private readonly userLookupService: InvitationUserLookupServiceInterface,
   ) {}
 
   @CrudReadMany()
@@ -81,15 +76,16 @@ export class InvitationController
     @CrudBody() invitationCreateDto: InvitationCreateDto,
   ) {
     const { email, category } = invitationCreateDto;
-    const user = await this.invitationCrudService.getOrCreateOneUser(email);
+    const user = await this.invitationSendService.getOrCreateOneUser(email);
 
     const invite = await this.invitationCrudService.createOne(crudRequest, {
+      user,
       email,
       category,
       code: randomUUID(),
     });
 
-    await this.invitationService.sendInvite(
+    await this.invitationSendService.send(
       user.id,
       email,
       invite.code,

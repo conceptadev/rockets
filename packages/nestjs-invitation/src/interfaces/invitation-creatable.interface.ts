@@ -1,4 +1,4 @@
-import { InvitationInterface } from '../../../ts-common/src/invitation/interfaces/invitation.interface';
+import { InvitationInterface } from '@concepta/ts-common';
 
 export interface InvitationCreatableInterface
   extends Pick<InvitationInterface, 'category'> {

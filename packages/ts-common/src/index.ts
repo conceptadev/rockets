@@ -40,4 +40,5 @@ export { OtpValidateInterface } from './otp/interfaces/otp-validate.interface';
 export { OtpDeleteInterface } from './otp/interfaces/otp-delete.interface';
 export { OtpClearInterface } from './otp/interfaces/otp-clear.interface';
 
-export { InvitationAcceptedRequestEventPayloadInterface } from './invitation/interfaces/invitation-accepted-request-event-interface';
+export { InvitationInterface } from './invitation/interfaces/invitation.interface';
+export { InvitationAcceptedEventPayloadInterface } from './invitation/interfaces/invitation-accepted-event-payload.interface';

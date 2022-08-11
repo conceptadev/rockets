@@ -10,16 +10,14 @@ import {
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { InvitationService } from '../services/invitation.service';
-import { InvitationCrudService } from '../services/invitation-crud.service';
+import { InvitationAcceptanceService } from '../services/invitation-acceptance.service';
 import { InvitationAcceptInviteDto } from '../dto/invitation-accept-invite.dto';
 
 @Controller('invitation-acceptance')
 @ApiTags('invitation-acceptance')
-export class InvitationValidationController {
+export class InvitationAcceptanceController {
   constructor(
-    private readonly invitationService: InvitationService,
-    private readonly invitationCrudService: InvitationCrudService,
+    private readonly invitationAcceptanceService: InvitationAcceptanceService,
   ) {}
 
   @ApiBody({
@@ -36,13 +34,15 @@ export class InvitationValidationController {
   ): Promise<void> {
     const { passcode, payload } = invitationAcceptInviteDto;
 
-    const invitation = await this.invitationCrudService.getOneByCode(code);
+    const invitation = await this.invitationAcceptanceService.getOneByCode(
+      code,
+    );
 
     if (!invitation) {
       throw new NotFoundException();
     }
 
-    const success = await this.invitationService.acceptInvite(
+    const success = await this.invitationAcceptanceService.accept(
       invitation,
       passcode,
       payload,
@@ -62,14 +62,16 @@ export class InvitationValidationController {
     @Param('code') code: string,
     @Query('passcode') passcode: string,
   ): Promise<void> {
-    const invitation = await this.invitationCrudService.getOneByCode(code);
+    const invitation = await this.invitationAcceptanceService.getOneByCode(
+      code,
+    );
 
     if (!invitation) {
       throw new NotFoundException();
     }
 
     const { category } = invitation;
-    const otp = await this.invitationService.validatePasscode(
+    const otp = await this.invitationAcceptanceService.validatePasscode(
       passcode,
       category,
       false,

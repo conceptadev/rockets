@@ -1,22 +1,19 @@
-import { LiteralObject, ReferenceAssigneeInterface } from '@concepta/ts-core';
+import { LiteralObject } from '@concepta/ts-core';
 import { InvitationDto } from '../dto/invitation.dto';
 
 export interface InvitationServiceInterface {
-  sendInvite(
+  send(
     userId: string,
     email: string,
     code: string,
     category: string,
   ): Promise<void>;
-  validatePasscode(
-    passcode: string,
-    category: string,
-    deleteIfValid: boolean,
-  ): Promise<ReferenceAssigneeInterface | null>;
-  acceptInvite(
+
+  accept(
     invitationDto: InvitationDto,
     passcode: string,
     payload?: LiteralObject,
   ): Promise<boolean>;
-  revokeAllUserInvites(email: string, category: string): Promise<void>;
+
+  revokeAll(email: string, category: string): Promise<void>;
 }

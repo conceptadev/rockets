@@ -15,15 +15,21 @@ export abstract class InvitationSqliteEntity
 {
   @PrimaryGeneratedColumn('uuid')
   id!: ReferenceId;
+
   @Column(() => AuditSqlLiteEmbed, {})
   audit!: AuditInterface;
+
   @Column('boolean', { default: true })
   active!: ReferenceActive;
+
   @Column()
   email!: string;
+
   @Column()
   code!: string;
+
   @Column()
   category!: string;
+
   user!: ReferenceIdInterface;
 }

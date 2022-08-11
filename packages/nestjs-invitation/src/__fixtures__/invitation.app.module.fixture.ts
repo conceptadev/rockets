@@ -13,9 +13,9 @@ import { EventModule } from '@concepta/nestjs-event';
 
 import { InvitationModule } from '../invitation.module';
 import { default as ormConfig } from './invitation.ormconfig.fixture';
-import { InvitationUserOtpEntityFixture } from './invitation-user-otp-entity.fixture';
-import { InvitationUserEntityFixture } from './invitation-user-entity.fixture';
-import { InvitationEntityFixture } from './invitation.entity.fixture';
+import { UserOtpEntityFixture } from './entities/user-otp.entity.fixture';
+import { UserEntityFixture } from './entities/user.entity.fixture';
+import { InvitationEntityFixture } from './entities/invitation.entity.fixture';
 import { InvitationAcceptedEventAsync } from '../events/invitation-accepted.event';
 
 @Module({
@@ -55,7 +55,7 @@ import { InvitationAcceptedEventAsync } from '../events/invitation-accepted.even
     OtpModule.register({
       entities: {
         userOtp: {
-          entity: InvitationUserOtpEntityFixture,
+          entity: UserOtpEntityFixture,
         },
       },
     }),
@@ -65,7 +65,7 @@ import { InvitationAcceptedEventAsync } from '../events/invitation-accepted.even
       },
       entities: {
         user: {
-          entity: InvitationUserEntityFixture,
+          entity: UserEntityFixture,
         },
       },
     }),
