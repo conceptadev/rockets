@@ -54,7 +54,7 @@ import { InvitationAcceptedEventAsync } from '../events/invitation-accepted.even
     }),
     OtpModule.register({
       entities: {
-        userOtp: {
+        'user-otp': {
           entity: UserOtpEntityFixture,
         },
       },

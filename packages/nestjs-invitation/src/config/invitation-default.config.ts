@@ -3,14 +3,14 @@ import { INVITATION_MODULE_DEFAULT_SETTINGS_TOKEN } from '../invitation.constant
 import { InvitationSettingsInterface } from '../interfaces/invitation-settings.interface';
 
 /**
- * Default configuration for auth github.
+ * Default configuration for invitation.
  */
 export const invitationDefaultConfig = registerAs(
   INVITATION_MODULE_DEFAULT_SETTINGS_TOKEN,
   (): InvitationSettingsInterface => ({
     email: {
-      from: 'from',
-      baseUrl: 'baseUrl',
+      from: 'no-reply@dispostable.com',
+      baseUrl: 'http://localhost:3000',
       templates: {
         invitation: {
           fileName: __dirname + '/../assets/invitation.template.hbs',
@@ -23,9 +23,9 @@ export const invitationDefaultConfig = registerAs(
       },
     },
     otp: {
-      assignment: 'userOtp',
+      assignment: 'user-otp',
       type: 'uuid',
-      expiresIn: '1h',
+      expiresIn: '7d',
     },
   }),
 );
