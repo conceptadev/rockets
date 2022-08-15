@@ -46,7 +46,12 @@ export class PasswordModule extends createConfigurableDynamicRootModule<
   ],
 }) {
   static register(options: PasswordOptionsInterface = {}) {
-    return PasswordModule.forRoot(PasswordModule, options);
+    const module = PasswordModule.forRoot(PasswordModule, options);
+
+    // TODO: this is temporary until configurable module builder migration is done
+    module.global = true;
+
+    return module;
   }
 
   static registerAsync(options: AsyncModuleConfig<PasswordOptionsInterface>) {

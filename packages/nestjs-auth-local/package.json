@@ -13,6 +13,7 @@
   ],
   "dependencies": {
     "@concepta/nestjs-authentication": "^4.0.0-alpha.18",
+    "@concepta/nestjs-common": "^4.0.0-alpha.18",
     "@concepta/nestjs-core": "^4.0.0-alpha.18",
     "@concepta/nestjs-password": "^4.0.0-alpha.18",
     "@concepta/ts-common": "^4.0.0-alpha.18",
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "@concepta/nestjs-jwt": "^4.0.0-alpha.18",
+    "@nestjs/jwt": "^9.0.0",
     "@nestjs/testing": "^9.0.0",
     "@types/passport-local": "^1.0.34",
     "jest-mock-extended": "^2.0.4"
