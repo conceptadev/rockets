@@ -59,7 +59,7 @@ describe('InvitationController (e2e)', () => {
     });
 
     user = await userFactory.create();
-    invitation = await invitationFactory.create({ category });
+    invitation = await invitationFactory.create({ category, user });
   });
 
   afterEach(async () => {

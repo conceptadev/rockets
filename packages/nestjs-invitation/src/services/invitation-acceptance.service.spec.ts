@@ -6,6 +6,8 @@ import { UserEntityInterface } from '@concepta/nestjs-user';
 import { OtpService } from '@concepta/nestjs-otp';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
 import { SeedingSource } from '@concepta/typeorm-seeding';
+import { EmailService } from '@concepta/nestjs-email';
+import { EventDispatchService } from '@concepta/nestjs-event';
 
 import { InvitationSettingsInterface } from '../interfaces/invitation-settings.interface';
 import { INVITATION_MODULE_SETTINGS_TOKEN } from '../invitation.constants';
@@ -18,6 +20,9 @@ import { InvitationAcceptanceService } from './invitation-acceptance.service';
 
 describe(InvitationAcceptanceService, () => {
   const category = 'invitation';
+
+  let spyEmailService: jest.SpyInstance;
+  let spyEventDispatchService: jest.SpyInstance;
 
   let app: INestApplication;
   let seedingSource: SeedingSource;
@@ -44,6 +49,12 @@ describe(InvitationAcceptanceService, () => {
 
     settings = testingModule.get<InvitationSettingsInterface>(
       INVITATION_MODULE_SETTINGS_TOKEN,
+    );
+
+    spyEmailService = jest.spyOn(EmailService.prototype, 'sendMail');
+    spyEventDispatchService = jest.spyOn(
+      EventDispatchService.prototype,
+      'async',
     );
 
     seedingSource = new SeedingSource({
@@ -100,6 +111,8 @@ describe(InvitationAcceptanceService, () => {
       { userId: otp.assignee.id, newPassword: 'hOdv2A2h%' },
     );
 
+    expect(spyEmailService).toHaveBeenCalledTimes(1);
+    expect(spyEventDispatchService).toHaveBeenCalledTimes(1);
     expect(inviteAccepted).toEqual(true);
   });
 
@@ -109,6 +122,8 @@ describe(InvitationAcceptanceService, () => {
       'FAKE_PASSCODE',
     );
 
+    expect(spyEmailService).toHaveBeenCalledTimes(0);
+    expect(spyEventDispatchService).toHaveBeenCalledTimes(0);
     expect(inviteAccepted).toEqual(false);
   });
 });
@@ -121,7 +136,7 @@ const createOtp = async (
 ): Promise<OtpInterface> => {
   const { assignment, type, expiresIn } = settings.otp;
 
-  return await otpService.create(assignment, {
+  const otp = await otpService.create(assignment, {
     category,
     type,
     expiresIn,
@@ -129,4 +144,13 @@ const createOtp = async (
       id: user.id,
     },
   });
+
+  expect(otp).toBeTruthy();
+  expect(otp.passcode).toBeTruthy();
+  expect(otp.expirationDate).toBeTruthy();
+  expect(otp.category).toEqual(category);
+  expect(otp.type).toEqual(type);
+  expect(otp.assignee.id).toEqual(user.id);
+
+  return otp;
 };
