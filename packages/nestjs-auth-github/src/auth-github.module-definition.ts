@@ -57,16 +57,19 @@ function definitionTransform(
     imports: createAuthGithubImports(),
     providers: createAuthGithubProviders({ providers }),
     controllers: createAuthGithubControllers({ controllers }),
-    exports: [
-      ConfigModule,
-      RAW_OPTIONS_TOKEN,
-      AUTH_GITHUB_ISSUE_TOKEN_SERVICE_TOKEN,
-    ],
+    exports: [ConfigModule, RAW_OPTIONS_TOKEN, ...createAuthGithubExports()],
   };
 }
 
 export function createAuthGithubImports(): DynamicModule['imports'] {
   return [ConfigModule.forFeature(authGithubDefaultConfig)];
+}
+
+export function createAuthGithubExports(): string[] {
+  return [
+    AUTH_GITHUB_MODULE_SETTINGS_TOKEN,
+    AUTH_GITHUB_ISSUE_TOKEN_SERVICE_TOKEN,
+  ];
 }
 
 export function createAuthGithubControllers(

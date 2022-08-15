@@ -53,13 +53,7 @@ function definitionTransform(
     global,
     imports: createJwtImports({ imports }),
     providers: createJwtProviders({ providers }),
-    exports: [
-      ConfigModule,
-      RAW_OPTIONS_TOKEN,
-      JWT_MODULE_SETTINGS_TOKEN,
-      JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
-      JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
-    ],
+    exports: [ConfigModule, RAW_OPTIONS_TOKEN, ...createJwtExports()],
   };
 }
 
@@ -73,6 +67,14 @@ export function createJwtImports(
   } else {
     return [...imports, NestJwtModule.register({})];
   }
+}
+
+export function createJwtExports(): string[] {
+  return [
+    JWT_MODULE_SETTINGS_TOKEN,
+    JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
+    JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
+  ];
 }
 
 export function createJwtProviders(options: {

@@ -6,6 +6,7 @@ import {
   AuthGithubModuleClass,
   AuthGithubOptions,
   createAuthGithubControllers,
+  createAuthGithubExports,
   createAuthGithubImports,
   createAuthGithubProviders,
 } from './auth-github.module-definition';
@@ -40,6 +41,7 @@ export class AuthGithubModule extends AuthGithubModuleClass {
       imports: createAuthGithubImports(),
       providers: createAuthGithubProviders({ overrides: options }),
       controllers: createAuthGithubControllers(options),
+      exports: createAuthGithubExports(),
     };
   }
 }

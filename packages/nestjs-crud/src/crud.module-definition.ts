@@ -40,7 +40,7 @@ function definitionTransform(
     global,
     imports: createCrudImports({ imports }),
     providers: createCrudProviders({ providers }),
-    exports: [ConfigModule, RAW_OPTIONS_TOKEN, CRUD_MODULE_SETTINGS_TOKEN],
+    exports: [ConfigModule, RAW_OPTIONS_TOKEN, ...createCrudExports()],
   };
 }
 
@@ -54,6 +54,10 @@ export function createCrudImports(
   } else {
     return imports;
   }
+}
+
+export function createCrudExports(): string[] {
+  return [CRUD_MODULE_SETTINGS_TOKEN];
 }
 
 export function createCrudProviders(options: {

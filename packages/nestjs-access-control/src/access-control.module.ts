@@ -4,6 +4,7 @@ import {
   AccessControlAsyncOptions,
   AccessControlModuleClass,
   AccessControlOptions,
+  createAccessControlExports,
   createAccessControlImports,
   createAccessControlProviders,
 } from './access-control.module-definition';
@@ -34,6 +35,7 @@ export class AccessControlModule extends AccessControlModuleClass {
       module: AccessControlModule,
       imports: createAccessControlImports(options),
       providers: createAccessControlProviders({ options }),
+      exports: createAccessControlExports(),
     };
   }
 }

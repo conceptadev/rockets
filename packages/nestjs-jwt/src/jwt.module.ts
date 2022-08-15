@@ -9,6 +9,7 @@ import {
   JwtAsyncOptions,
   createJwtImports,
   createJwtProviders,
+  createJwtExports,
 } from './jwt.module-definition';
 
 @Module({
@@ -37,6 +38,7 @@ export class JwtModule extends JwtModuleClass {
       module: JwtModule,
       imports: createJwtImports(options),
       providers: createJwtProviders({ overrides: options }),
+      exports: createJwtExports(),
     };
   }
 }

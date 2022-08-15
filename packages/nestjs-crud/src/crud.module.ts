@@ -1,6 +1,7 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import { CrudReflectionService } from './services/crud-reflection.service';
 import {
+  createCrudExports,
   createCrudImports,
   createCrudProviders,
   CrudAsyncOptions,
@@ -34,6 +35,7 @@ export class CrudModule extends CrudModuleClass {
       module: CrudModule,
       imports: createCrudImports(options),
       providers: createCrudProviders({ overrides: options }),
+      exports: createCrudExports(),
     };
   }
 }

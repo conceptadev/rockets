@@ -50,11 +50,7 @@ function definitionTransform(
     global,
     imports: createAccessControlImports({ imports }),
     providers: createAccessControlProviders({ providers }),
-    exports: [
-      ConfigModule,
-      RAW_OPTIONS_TOKEN,
-      ACCESS_CONTROL_MODULE_SETTINGS_TOKEN,
-    ],
+    exports: [ConfigModule, RAW_OPTIONS_TOKEN, ...createAccessControlExports()],
   };
 }
 
@@ -68,6 +64,10 @@ export function createAccessControlImports(
   } else {
     return imports;
   }
+}
+
+export function createAccessControlExports(): string[] {
+  return [ACCESS_CONTROL_MODULE_SETTINGS_TOKEN];
 }
 
 export function createAccessControlProviders(overrides: {
