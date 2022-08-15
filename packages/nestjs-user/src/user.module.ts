@@ -91,6 +91,9 @@ export class UserModule extends createConfigurableDynamicRootModule<
 
     negotiateController(module, options);
 
+    // TODO: this is temporary until we migrate to configurable module
+    module.global = true;
+
     return module;
   }
 

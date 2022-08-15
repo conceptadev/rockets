@@ -13,6 +13,7 @@
   ],
   "dependencies": {
     "@concepta/nestjs-authentication": "^4.0.0-alpha.18",
+    "@concepta/nestjs-common": "^4.0.0-alpha.18",
     "@concepta/nestjs-core": "^4.0.0-alpha.18",
     "@concepta/nestjs-jwt": "^4.0.0-alpha.18",
     "@concepta/ts-common": "^4.0.0-alpha.18",
@@ -23,10 +24,16 @@
     "@nestjs/passport": "^9.0.0"
   },
   "devDependencies": {
+    "@concepta/nestjs-crud": "^4.0.0-alpha.18",
+    "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.18",
+    "@concepta/nestjs-user": "^4.0.0-alpha.18",
+    "jest-mock-extended": "^2.0.4",
+    "@nestjs/jwt": "^9.0.0",
     "@nestjs/testing": "^9.0.0"
   },
   "peerDependencies": {
     "class-validator": "*",
-    "rxjs": "^7.1.0"
+    "rxjs": "^7.1.0",
+    "typeorm": "^0.3.0"
   }
 }

@@ -15,7 +15,7 @@ export class VerifyTokenService implements VerifyTokenServiceInterface {
     private jwtVerifyService: JwtVerifyService,
     @Optional()
     @Inject(AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN)
-    private validateTokenService: ValidateTokenServiceInterface,
+    private validateTokenService?: ValidateTokenServiceInterface,
   ) {}
 
   /**
