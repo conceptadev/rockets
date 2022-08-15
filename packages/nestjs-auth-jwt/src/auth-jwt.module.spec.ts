@@ -1,4 +1,3 @@
-import { DataSource, EntityManager, Repository } from 'typeorm';
 import { mock } from 'jest-mock-extended';
 import {
   DynamicModule,
@@ -8,58 +7,33 @@ import {
   ModuleMetadata,
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { JwtService as NestJwtService } from '@nestjs/jwt';
-import {
-  JwtModule,
-  JwtSignService,
-  JwtVerifyService,
-} from '@concepta/nestjs-jwt';
 
-import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
-import { CrudModule } from '@concepta/nestjs-crud';
-import {
-  UserModule,
-  UserLookupService,
-  UserLookupServiceInterface,
-} from '@concepta/nestjs-user';
+import { JwtModule, JwtVerifyService } from '@concepta/nestjs-jwt';
 import {
   AuthenticationModule,
   VerifyTokenService,
   VerifyTokenServiceInterface,
 } from '@concepta/nestjs-authentication';
 
-import { AuthJwtModule } from './auth-jwt.module';
-
-import { UserEntityFixture } from './__fixtures__/user/user.entity.fixture';
 import {
   AUTH_JWT_MODULE_SETTINGS_TOKEN,
   AUTH_JWT_MODULE_USER_LOOKUP_SERVICE_TOKEN,
   AUTH_JWT_MODULE_VERIFY_TOKEN_SERVICE_TOKEN,
 } from './auth-jwt.constants';
+
+import { AuthJwtModule } from './auth-jwt.module';
 import { AuthJwtSettingsInterface } from './interfaces/auth-jwt-settings.interface';
+import { AuthJwtUserLookupServiceInterface } from './interfaces/auth-jwt-user-lookup-service.interface';
+
+import { UserModuleFixture } from './__fixtures__/user/user.module.fixture';
+import { UserLookupServiceFixture } from './__fixtures__/user/user-lookup.service.fixture';
 
 describe(AuthJwtModule, () => {
-  const UserRepo = mock(Repository<UserEntityFixture>);
-  const Manager = mock(EntityManager);
-
-  const datasource = new DataSource({
-    type: 'sqlite',
-    database: ':memory:',
-  });
-  const entityManager = new Manager(datasource);
-  const userRepo = new UserRepo(UserEntityFixture, entityManager);
-
-  const jwtAccessService = new NestJwtService();
-  const jwtRefreshService = new NestJwtService();
-  const jwtSignService = new JwtSignService(
-    jwtAccessService,
-    jwtRefreshService,
-  );
-  const jwtVerifyService = new JwtVerifyService(jwtSignService);
+  const jwtVerifyService = mock<JwtVerifyService>();
 
   let testModule: TestingModule;
   let authJwtModule: AuthJwtModule;
-  let userLookupService: UserLookupService;
+  let userLookupService: AuthJwtUserLookupServiceInterface;
   let verifyTokenService: VerifyTokenService;
 
   describe(AuthJwtModule.forRoot, () => {
@@ -68,7 +42,7 @@ describe(AuthJwtModule, () => {
         testModuleFactory([
           AuthJwtModule.forRoot({
             verifyTokenService: new VerifyTokenService(jwtVerifyService),
-            userLookupService: new UserLookupService(userRepo),
+            userLookupService: new UserLookupServiceFixture(),
           }),
         ]),
       ).compile();
@@ -86,7 +60,7 @@ describe(AuthJwtModule, () => {
         testModuleFactory([
           AuthJwtModule.register({
             verifyTokenService: new VerifyTokenService(jwtVerifyService),
-            userLookupService: new UserLookupService(userRepo),
+            userLookupService: new UserLookupServiceFixture(),
           }),
         ]),
       ).compile();
@@ -103,10 +77,10 @@ describe(AuthJwtModule, () => {
       testModule = await Test.createTestingModule(
         testModuleFactory([
           AuthJwtModule.forRootAsync({
-            inject: [VerifyTokenService, UserLookupService],
+            inject: [VerifyTokenService, UserLookupServiceFixture],
             useFactory: (
               verifyTokenService: VerifyTokenService,
-              userLookupService: UserLookupService,
+              userLookupService: AuthJwtUserLookupServiceInterface,
             ) => ({ verifyTokenService, userLookupService }),
           }),
         ]),
@@ -124,10 +98,10 @@ describe(AuthJwtModule, () => {
       testModule = await Test.createTestingModule(
         testModuleFactory([
           AuthJwtModule.registerAsync({
-            inject: [VerifyTokenService, UserLookupService],
+            inject: [VerifyTokenService, UserLookupServiceFixture],
             useFactory: (
               verifyTokenService: VerifyTokenService,
-              userLookupService: UserLookupService,
+              userLookupService: UserLookupServiceFixture,
             ) => ({ verifyTokenService, userLookupService }),
           }),
         ]),
@@ -153,7 +127,7 @@ describe(AuthJwtModule, () => {
         @Inject(AUTH_JWT_MODULE_SETTINGS_TOKEN)
         public settings: AuthJwtSettingsInterface,
         @Inject(AUTH_JWT_MODULE_USER_LOOKUP_SERVICE_TOKEN)
-        public userLookupService: UserLookupServiceInterface,
+        public userLookupService: AuthJwtUserLookupServiceInterface,
         @Inject(AUTH_JWT_MODULE_VERIFY_TOKEN_SERVICE_TOKEN)
         public verifyTokenService: VerifyTokenServiceInterface,
       ) {}
@@ -169,16 +143,16 @@ describe(AuthJwtModule, () => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       done: (err?: Error, decodedToken?: unknown) => void,
     ) => undefined;
-    const ffUserLookupService = new UserLookupService(userRepo);
+    const ffUserLookupService = new UserLookupServiceFixture();
     const ffVerifyTokenService = new VerifyTokenService(jwtVerifyService);
 
     beforeEach(async () => {
       const globalModule = testModuleFactory([
         AuthJwtModule.forRootAsync({
-          inject: [VerifyTokenService, UserLookupService],
+          inject: [VerifyTokenService, UserLookupServiceFixture],
           useFactory: (
             verifyTokenService: VerifyTokenService,
-            userLookupService: UserLookupService,
+            userLookupService: AuthJwtUserLookupServiceInterface,
           ) => ({ verifyTokenService, userLookupService }),
         }),
       ]);
@@ -224,13 +198,13 @@ describe(AuthJwtModule, () => {
 
   function commonVars(module: TestingModule) {
     authJwtModule = module.get(AuthJwtModule);
-    userLookupService = module.get(UserLookupService);
+    userLookupService = module.get(UserLookupServiceFixture);
     verifyTokenService = module.get(VerifyTokenService);
   }
 
   function commonTests() {
     expect(authJwtModule).toBeInstanceOf(AuthJwtModule);
-    expect(userLookupService).toBeInstanceOf(UserLookupService);
+    expect(userLookupService).toBeInstanceOf(UserLookupServiceFixture);
     expect(verifyTokenService).toBeInstanceOf(VerifyTokenService);
   }
 });
@@ -240,21 +214,9 @@ function testModuleFactory(
 ): ModuleMetadata {
   return {
     imports: [
-      TypeOrmExtModule.register({
-        type: 'sqlite',
-        database: ':memory:',
-        entities: [UserEntityFixture],
-      }),
       AuthenticationModule.register({ global: true }),
       JwtModule.forRoot({}),
-      CrudModule.forRoot({}),
-      UserModule.register({
-        entities: {
-          user: {
-            entity: UserEntityFixture,
-          },
-        },
-      }),
+      UserModuleFixture,
       ...extraImports,
     ],
   };
