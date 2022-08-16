@@ -6,23 +6,31 @@ import { SeedingSource } from '@concepta/typeorm-seeding';
 import { OtpInterface, UserInterface } from '@concepta/ts-common';
 import { UserEntityInterface } from '@concepta/nestjs-user';
 import { OtpService } from '@concepta/nestjs-otp';
+import { EmailService } from '@concepta/nestjs-email';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
+
+import {
+  AUTH_RECOVERY_MODULE_DEFAULT_SETTINGS_TOKEN,
+  AUTH_RECOVERY_MODULE_EMAIL_SERVICE_TOKEN,
+} from '../auth-recovery.constants';
 
 import { AuthRecoveryService } from './auth-recovery.service';
 import { authRecoveryDefaultConfig } from '../config/auth-recovery-default.config';
 import { AuthRecoverySettingsInterface } from '../interfaces/auth-recovery-settings.interface';
-import { AUTH_RECOVERY_MODULE_DEFAULT_SETTINGS_TOKEN } from '../auth-recovery.constants';
 
 import { AuthRecoveryAppModuleFixture } from '../__fixtures__/auth-recovery.app.module.fixture';
 import { AuthRecoveryUserEntityFixture } from '../__fixtures__/auth-recovery-user-entity.fixture';
 
 describe('AuthRecoveryService', () => {
   let app: INestApplication;
+  let emailService: EmailService;
   let authRecoveryService: AuthRecoveryService;
   let testUser: UserEntityInterface;
   let otpService: OtpService;
   let configService: ConfigService;
   let config: ConfigType<typeof authRecoveryDefaultConfig>;
+
+  let spyEmailService: jest.SpyInstance;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -49,6 +57,14 @@ describe('AuthRecoveryService', () => {
     });
 
     testUser = await userFactory.create();
+
+    emailService = moduleFixture.get<EmailService>(
+      AUTH_RECOVERY_MODULE_EMAIL_SERVICE_TOKEN,
+    );
+
+    spyEmailService = jest
+      .spyOn(emailService, 'sendMail')
+      .mockResolvedValue(undefined);
   });
 
   afterEach(async () => {
@@ -60,12 +76,14 @@ describe('AuthRecoveryService', () => {
     expect(
       await authRecoveryService.recoverLogin(testUser.email),
     ).toBeUndefined();
+    expect(spyEmailService).toHaveBeenCalledTimes(1);
   });
 
   it('Recover password', async () => {
     expect(
       await authRecoveryService.recoverPassword(testUser.email),
     ).toBeUndefined();
+    expect(spyEmailService).toHaveBeenCalledTimes(1);
   });
 
   it('Validate passcode', async () => {

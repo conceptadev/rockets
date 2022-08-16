@@ -9,10 +9,11 @@ import {
   UserMutateService,
 } from '@concepta/nestjs-user';
 
-import { default as ormConfig } from './auth-recovery.ormconfig.fixture';
+import { AuthRecoveryModule } from '../auth-recovery.module';
 import { AuthRecoveryUserOtpEntityFixture } from './auth-recovery-user-otp-entity.fixture';
 import { AuthRecoveryUserEntityFixture } from './auth-recovery-user-entity.fixture';
-import { AuthRecoveryModule } from '../auth-recovery.module';
+
+import { default as ormConfig } from './auth-recovery.ormconfig.fixture';
 
 @Module({
   imports: [
@@ -22,13 +23,7 @@ import { AuthRecoveryModule } from '../auth-recovery.module';
       },
     }),
     CrudModule.forRoot({}),
-    EmailModule.register({}),
-    AuthRecoveryModule.registerAsync({
-      imports: [
-        UserModule.deferred(),
-        OtpModule.deferred(),
-        EmailModule.deferred(),
-      ],
+    AuthRecoveryModule.forRootAsync({
       inject: [UserLookupService, UserMutateService, OtpService, EmailService],
       useFactory: (
         userLookupService,
@@ -56,13 +51,7 @@ import { AuthRecoveryModule } from '../auth-recovery.module';
         },
       },
     }),
-    EmailModule.register({
-      mailerService: {
-        sendMail(): Promise<void> {
-          return Promise.resolve();
-        },
-      },
-    }),
+    EmailModule.register({}),
   ],
 })
 export class AuthRecoveryAppModuleFixture {}

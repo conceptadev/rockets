@@ -5,20 +5,23 @@ import { ConfigService, ConfigType } from '@nestjs/config';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { OtpInterface, UserInterface } from '@concepta/ts-common';
 import { SeedingSource } from '@concepta/typeorm-seeding';
+import { EmailService } from '@concepta/nestjs-email';
 import { OtpService } from '@concepta/nestjs-otp';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
 
+import { AUTH_RECOVERY_MODULE_DEFAULT_SETTINGS_TOKEN } from './auth-recovery.constants';
+
+import { AuthRecoveryController } from './auth-recovery.controller';
+import { authRecoveryDefaultConfig } from './config/auth-recovery-default.config';
+import { AuthRecoverySettingsInterface } from './interfaces/auth-recovery-settings.interface';
 import { AuthRecoveryRecoverPasswordDto } from './dto/auth-recovery-recover-password.dto';
 import { AuthRecoveryRecoverLoginDto } from './dto/auth-recovery-recover-login.dto';
 import { AuthRecoveryUpdatePasswordDto } from './dto/auth-recovery-update-password.dto';
-import { authRecoveryDefaultConfig } from './config/auth-recovery-default.config';
-import { AUTH_RECOVERY_MODULE_DEFAULT_SETTINGS_TOKEN } from './auth-recovery.constants';
-import { AuthRecoverySettingsInterface } from './interfaces/auth-recovery-settings.interface';
 
 import { AuthRecoveryUserEntityFixture } from './__fixtures__/auth-recovery-user-entity.fixture';
 import { AuthRecoveryAppModuleFixture } from './__fixtures__/auth-recovery.app.module.fixture';
 
-describe('AuthRecoveryController (e2e)', () => {
+describe(AuthRecoveryController, () => {
   let app: INestApplication;
   let otpService: OtpService;
   let configService: ConfigService;
@@ -34,8 +37,9 @@ describe('AuthRecoveryController (e2e)', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    otpService = moduleFixture.get<OtpService>(OtpService);
     configService = moduleFixture.get<ConfigService>(ConfigService);
+
+    otpService = moduleFixture.get<OtpService>(OtpService);
 
     config = configService.get<AuthRecoverySettingsInterface>(
       AUTH_RECOVERY_MODULE_DEFAULT_SETTINGS_TOKEN,
@@ -51,6 +55,8 @@ describe('AuthRecoveryController (e2e)', () => {
     });
 
     user = await userFactory.create();
+
+    jest.spyOn(EmailService.prototype, 'sendMail').mockResolvedValue(undefined);
   });
 
   afterEach(async () => {

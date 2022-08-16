@@ -1,12 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
+import { EmailService } from '@concepta/nestjs-email';
+
+import { AUTH_RECOVERY_MODULE_EMAIL_SERVICE_TOKEN } from '../auth-recovery.constants';
+import { AuthRecoveryNotificationService } from './auth-recovery-notification.service';
 
 import { AuthRecoveryAppModuleFixture } from '../__fixtures__/auth-recovery.app.module.fixture';
-import { AuthRecoveryNotificationService } from './auth-recovery-notification.service';
 
 describe('AuthRecoveryNotificationService', () => {
   let app: INestApplication;
+  let emailService: EmailService;
   let authRecoveryNotificationService: AuthRecoveryNotificationService;
+
+  let spyEmailService: jest.SpyInstance;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -14,6 +20,14 @@ describe('AuthRecoveryNotificationService', () => {
     }).compile();
     app = moduleFixture.createNestApplication();
     await app.init();
+
+    emailService = moduleFixture.get<EmailService>(
+      AUTH_RECOVERY_MODULE_EMAIL_SERVICE_TOKEN,
+    );
+
+    spyEmailService = jest
+      .spyOn(emailService, 'sendMail')
+      .mockResolvedValue(undefined);
 
     authRecoveryNotificationService =
       moduleFixture.get<AuthRecoveryNotificationService>(
@@ -28,6 +42,7 @@ describe('AuthRecoveryNotificationService', () => {
 
   it('Send email', async () => {
     await authRecoveryNotificationService.sendEmail({});
+    expect(spyEmailService).toHaveBeenCalledTimes(1);
   });
 
   it('Send recover email login', async () => {
@@ -35,6 +50,7 @@ describe('AuthRecoveryNotificationService', () => {
       'me@mail.com',
       'me',
     );
+    expect(spyEmailService).toHaveBeenCalledTimes(1);
   });
 
   it('Send recover email password', async () => {
@@ -43,5 +59,6 @@ describe('AuthRecoveryNotificationService', () => {
       'me',
       new Date(),
     );
+    expect(spyEmailService).toHaveBeenCalledTimes(1);
   });
 });
