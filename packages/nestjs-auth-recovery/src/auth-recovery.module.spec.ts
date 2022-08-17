@@ -28,10 +28,10 @@ import { AuthRecoveryController } from './auth-recovery.controller';
 import { AuthRecoveryModule } from './auth-recovery.module';
 import { AuthRecoveryService } from './services/auth-recovery.service';
 
-import { UserLookupServiceFixture } from './__fixtures__/user/user-lookup.service.fixture';
+import { UserLookupServiceFixture } from './__fixtures__/user/services/user-lookup.service.fixture';
 import { UserModuleFixture } from './__fixtures__/user/user.module.fixture';
 import { OtpModuleFixture } from './__fixtures__/otp/otp.module.fixture';
-import { UserMutateServiceFixture } from './__fixtures__/user/user-mutate.service.fixture';
+import { UserMutateServiceFixture } from './__fixtures__/user/services/user-mutate.service.fixture';
 import { OtpServiceFixture } from './__fixtures__/otp/otp.service.fixture';
 
 describe(AuthRecoveryModule, () => {

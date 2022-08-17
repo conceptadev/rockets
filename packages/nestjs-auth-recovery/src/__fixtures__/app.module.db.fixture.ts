@@ -10,10 +10,10 @@ import {
 } from '@concepta/nestjs-user';
 
 import { AuthRecoveryModule } from '../auth-recovery.module';
-import { AuthRecoveryUserOtpEntityFixture } from './auth-recovery-user-otp-entity.fixture';
-import { AuthRecoveryUserEntityFixture } from './auth-recovery-user-entity.fixture';
+import { UserOtpEntityFixture } from './user/entities/user-otp-entity.fixture';
+import { UserEntityFixture } from './user/entities/user-entity.fixture';
 
-import { default as ormConfig } from './auth-recovery.ormconfig.fixture';
+import { default as ormConfig } from './ormconfig.fixture';
 
 @Module({
   imports: [
@@ -40,18 +40,18 @@ import { default as ormConfig } from './auth-recovery.ormconfig.fixture';
     OtpModule.register({
       entities: {
         userOtp: {
-          entity: AuthRecoveryUserOtpEntityFixture,
+          entity: UserOtpEntityFixture,
         },
       },
     }),
     UserModule.register({
       entities: {
         user: {
-          entity: AuthRecoveryUserEntityFixture,
+          entity: UserEntityFixture,
         },
       },
     }),
     EmailModule.register({}),
   ],
 })
-export class AuthRecoveryAppModuleFixture {}
+export class AppModuleDbFixture {}

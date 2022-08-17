@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ReferenceEmail } from '@concepta/ts-core';
 
-import { AuthRecoveryUserLookupServiceInterface } from '../../interfaces/auth-recovery-user-lookup.service.interface';
+import { AuthRecoveryUserLookupServiceInterface } from '../../../interfaces/auth-recovery-user-lookup.service.interface';
 
-import { UserFixture } from './user.fixture';
+import { UserFixture } from '../user.fixture';
 
 @Injectable()
 export class UserLookupServiceFixture

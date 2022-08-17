@@ -16,20 +16,20 @@ import { AuthRecoveryRecoverPasswordDto } from './dto/auth-recovery-recover-pass
 import { AuthRecoveryRecoverLoginDto } from './dto/auth-recovery-recover-login.dto';
 import { AuthRecoveryUpdatePasswordDto } from './dto/auth-recovery-update-password.dto';
 
-import { AuthRecoveryUserEntityFixture } from './__fixtures__/auth-recovery-user-entity.fixture';
-import { AuthRecoveryAppModuleFixture } from './__fixtures__/auth-recovery.app.module.fixture';
+import { UserEntityFixture } from './__fixtures__/user/entities/user-entity.fixture';
+import { AppModuleDbFixture } from './__fixtures__/app.module.db.fixture';
 
 describe(AuthRecoveryController, () => {
   let app: INestApplication;
   let otpService: OtpService;
   let settings: AuthRecoverySettingsInterface;
-  let user: AuthRecoveryUserEntityFixture;
+  let user: UserEntityFixture;
   let seedingSource: SeedingSource;
   let userFactory: UserFactory;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AuthRecoveryAppModuleFixture],
+      imports: [AppModuleDbFixture],
     }).compile();
     app = moduleFixture.createNestApplication();
     await app.init();
@@ -45,7 +45,7 @@ describe(AuthRecoveryController, () => {
     });
 
     userFactory = new UserFactory({
-      entity: AuthRecoveryUserEntityFixture,
+      entity: UserEntityFixture,
       seedingSource,
     });
 

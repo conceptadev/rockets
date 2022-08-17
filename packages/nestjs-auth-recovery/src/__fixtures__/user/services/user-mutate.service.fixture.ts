@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { ReferenceIdInterface } from '@concepta/ts-core';
 import { PasswordPlainInterface } from '@concepta/ts-common';
 
-import { AuthRecoveryUserMutateServiceInterface } from '../../interfaces/auth-recovery-user-mutate.service.interface';
+import { AuthRecoveryUserMutateServiceInterface } from '../../../interfaces/auth-recovery-user-mutate.service.interface';
 
-import { UserFixture } from './user.fixture';
+import { UserFixture } from '../user.fixture';
 
 @Injectable()
 export class UserMutateServiceFixture
