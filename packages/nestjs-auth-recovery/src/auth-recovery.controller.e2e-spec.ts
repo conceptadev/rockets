@@ -1,7 +1,6 @@
 import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { ConfigService, ConfigType } from '@nestjs/config';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { OtpInterface, UserInterface } from '@concepta/ts-common';
 import { SeedingSource } from '@concepta/typeorm-seeding';
@@ -9,10 +8,9 @@ import { EmailService } from '@concepta/nestjs-email';
 import { OtpService } from '@concepta/nestjs-otp';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
 
-import { AUTH_RECOVERY_MODULE_DEFAULT_SETTINGS_TOKEN } from './auth-recovery.constants';
+import { AUTH_RECOVERY_MODULE_SETTINGS_TOKEN } from './auth-recovery.constants';
 
 import { AuthRecoveryController } from './auth-recovery.controller';
-import { authRecoveryDefaultConfig } from './config/auth-recovery-default.config';
 import { AuthRecoverySettingsInterface } from './interfaces/auth-recovery-settings.interface';
 import { AuthRecoveryRecoverPasswordDto } from './dto/auth-recovery-recover-password.dto';
 import { AuthRecoveryRecoverLoginDto } from './dto/auth-recovery-recover-login.dto';
@@ -24,8 +22,7 @@ import { AuthRecoveryAppModuleFixture } from './__fixtures__/auth-recovery.app.m
 describe(AuthRecoveryController, () => {
   let app: INestApplication;
   let otpService: OtpService;
-  let configService: ConfigService;
-  let config: ConfigType<typeof authRecoveryDefaultConfig>;
+  let settings: AuthRecoverySettingsInterface;
   let user: AuthRecoveryUserEntityFixture;
   let seedingSource: SeedingSource;
   let userFactory: UserFactory;
@@ -37,12 +34,10 @@ describe(AuthRecoveryController, () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    configService = moduleFixture.get<ConfigService>(ConfigService);
-
     otpService = moduleFixture.get<OtpService>(OtpService);
 
-    config = configService.get<AuthRecoverySettingsInterface>(
-      AUTH_RECOVERY_MODULE_DEFAULT_SETTINGS_TOKEN,
+    settings = moduleFixture.get<AuthRecoverySettingsInterface>(
+      AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
     ) as AuthRecoverySettingsInterface;
 
     seedingSource = new SeedingSource({
@@ -74,7 +69,7 @@ describe(AuthRecoveryController, () => {
   it('GET auth/recovery/passcode/{passcode}', async () => {
     const user = await getFirstUser(app);
 
-    const otpCreateDto = await createOtp(config, otpService, user.id);
+    const otpCreateDto = await createOtp(settings, otpService, user.id);
 
     const { passcode } = otpCreateDto;
 
@@ -96,7 +91,7 @@ describe(AuthRecoveryController, () => {
 
     await validateRecoverPassword(app, user);
 
-    const otpCreateDto = await createOtp(config, otpService, user.id);
+    const otpCreateDto = await createOtp(settings, otpService, user.id);
 
     await supertest(app.getHttpServer())
       .patch('/auth/recovery/password')
@@ -127,7 +122,7 @@ const validateRecoverPassword = async (
 };
 
 const createOtp = async (
-  config: ConfigType<typeof authRecoveryDefaultConfig>,
+  config: AuthRecoverySettingsInterface,
   otpService: OtpService,
   userId: string,
 ): Promise<OtpInterface> => {
