@@ -5,7 +5,7 @@ import { EmailService } from '@concepta/nestjs-email';
 import { AUTH_RECOVERY_MODULE_EMAIL_SERVICE_TOKEN } from '../auth-recovery.constants';
 import { AuthRecoveryNotificationService } from './auth-recovery-notification.service';
 
-import { AuthRecoveryAppModuleFixture } from '../__fixtures__/auth-recovery.app.module.fixture';
+import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
 
 describe('AuthRecoveryNotificationService', () => {
   let app: INestApplication;
@@ -16,7 +16,7 @@ describe('AuthRecoveryNotificationService', () => {
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AuthRecoveryAppModuleFixture],
+      imports: [AppModuleFixture],
     }).compile();
     app = moduleFixture.createNestApplication();
     await app.init();

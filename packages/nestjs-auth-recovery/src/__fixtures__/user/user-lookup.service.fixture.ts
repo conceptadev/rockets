@@ -1,20 +1,27 @@
 import { Injectable } from '@nestjs/common';
+import { ReferenceEmail } from '@concepta/ts-core';
 
 import { AuthRecoveryUserLookupServiceInterface } from '../../interfaces/auth-recovery-user-lookup.service.interface';
+
+import { UserFixture } from './user.fixture';
 
 @Injectable()
 export class UserLookupServiceFixture
   implements AuthRecoveryUserLookupServiceInterface
 {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  byId(id: string): ReturnType<AuthRecoveryUserLookupServiceInterface['byId']> {
-    throw new Error('Method not implemented');
+  async byId(
+    id: string,
+  ): ReturnType<AuthRecoveryUserLookupServiceInterface['byId']> {
+    if (id === UserFixture.id) {
+      return UserFixture;
+    } else {
+      throw new Error();
+    }
   }
 
-  byEmail(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    email: string,
+  async byEmail(
+    email: ReferenceEmail,
   ): ReturnType<AuthRecoveryUserLookupServiceInterface['byEmail']> {
-    throw new Error('Method not implemented');
+    return email === UserFixture.email ? UserFixture : null;
   }
 }

@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { Injectable } from '@nestjs/common';
 import {
   ReferenceAssigneeInterface,
@@ -6,33 +7,39 @@ import {
 import { OtpCreatableInterface, OtpInterface } from '@concepta/ts-common';
 
 import { AuthRecoveryOtpServiceInterface } from '../../interfaces/auth-recovery-otp.service.interface';
+import { UserFixture } from '../user/user.fixture';
 
 @Injectable()
 export class OtpServiceFixture implements AuthRecoveryOtpServiceInterface {
-  create(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    assignment: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async create(
+    assignment: string, // eslint-disable-line @typescript-eslint/no-unused-vars
     otp: OtpCreatableInterface,
   ): Promise<OtpInterface> {
-    throw new Error('Method not implemented.');
+    const { assignee, category, type } = otp;
+    return {
+      id: randomUUID(),
+      category,
+      type,
+      assignee,
+      passcode: 'GOOD_PASSCODE',
+      expirationDate: new Date(),
+    };
   }
-  validate(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    assignment: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
+  async validate(
+    assignment: string, // eslint-disable-line @typescript-eslint/no-unused-vars
     otp: Pick<OtpInterface, 'category' | 'passcode'>,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    deleteIfValid: boolean,
+    deleteIfValid: boolean, // eslint-disable-line @typescript-eslint/no-unused-vars
   ): Promise<ReferenceAssigneeInterface<ReferenceIdInterface<string>> | null> {
-    throw new Error('Method not implemented.');
+    return otp.passcode === 'GOOD_PASSCODE' ? { assignee: UserFixture } : null;
   }
-  clear(
+
+  async clear(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     assignment: string,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     otp: Pick<OtpInterface, 'category' | 'assignee'>,
   ): Promise<void> {
-    throw new Error('Method not implemented.');
+    return;
   }
 }

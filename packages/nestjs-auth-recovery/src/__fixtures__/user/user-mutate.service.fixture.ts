@@ -4,14 +4,19 @@ import { PasswordPlainInterface } from '@concepta/ts-common';
 
 import { AuthRecoveryUserMutateServiceInterface } from '../../interfaces/auth-recovery-user-mutate.service.interface';
 
+import { UserFixture } from './user.fixture';
+
 @Injectable()
 export class UserMutateServiceFixture
   implements AuthRecoveryUserMutateServiceInterface
 {
-  update(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async update(
     object: ReferenceIdInterface<string> & PasswordPlainInterface,
   ): ReturnType<AuthRecoveryUserMutateServiceInterface['update']> {
-    throw new Error('Method not implemented');
+    if (object.id === UserFixture.id) {
+      return UserFixture;
+    } else {
+      throw new Error();
+    }
   }
 }
