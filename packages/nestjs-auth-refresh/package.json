@@ -13,7 +13,7 @@
   ],
   "dependencies": {
     "@concepta/nestjs-authentication": "^4.0.0-alpha.18",
-    "@concepta/nestjs-core": "^4.0.0-alpha.18",
+    "@concepta/nestjs-common": "^4.0.0-alpha.18",
     "@concepta/nestjs-jwt": "^4.0.0-alpha.18",
     "@concepta/ts-common": "^4.0.0-alpha.18",
     "@concepta/ts-core": "^4.0.0-alpha.18",
@@ -23,6 +23,7 @@
     "@nestjs/swagger": "^6.0.0"
   },
   "devDependencies": {
+    "@nestjs/jwt": "^9.0.0",
     "@nestjs/testing": "^9.0.0"
   },
   "peerDependencies": {
