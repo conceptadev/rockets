@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
+
 import {
   AsyncModuleConfig,
   createConfigurableDynamicRootModule,
@@ -11,25 +12,22 @@ import {
   JwtModule,
   JwtVerifyService,
 } from '@concepta/nestjs-jwt';
-import { authenticationDefaultConfig } from './config/authentication-default.config';
+
 import {
   AUTHENTICATION_MODULE_OPTIONS_TOKEN,
   AUTHENTICATION_MODULE_SETTINGS_TOKEN,
   AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN,
 } from './authentication.constants';
+
 import { AuthenticationOptionsInterface } from './interfaces/authentication-options.interface';
+import { ValidateTokenServiceInterface } from './interfaces/validate-token-service.interface';
 import { IssueTokenService } from './services/issue-token.service';
-import { DefaultIssueTokenService } from './services/default-issue-token.service';
 import { VerifyTokenService } from './services/verify-token.service';
-import { DefaultVerifyTokenService } from './services/default-verify-token.service';
+
+import { authenticationDefaultConfig } from './config/authentication-default.config';
 
 @Module({
-  providers: [
-    DefaultIssueTokenService,
-    DefaultVerifyTokenService,
-    JwtIssueService,
-    JwtVerifyService,
-  ],
+  providers: [JwtIssueService, JwtVerifyService],
   exports: [
     IssueTokenService,
     VerifyTokenService,
@@ -56,19 +54,26 @@ export class AuthenticationModule extends createConfigurableDynamicRootModule<
     },
     {
       provide: IssueTokenService,
-      inject: [AUTHENTICATION_MODULE_OPTIONS_TOKEN, DefaultIssueTokenService],
+      inject: [AUTHENTICATION_MODULE_OPTIONS_TOKEN, JwtIssueService],
       useFactory: async (
         options: AuthenticationOptionsInterface,
-        defaultService: DefaultIssueTokenService,
-      ) => options.issueTokenService ?? defaultService,
+        jwtIssueService: JwtIssueService,
+      ) => options.issueTokenService ?? new IssueTokenService(jwtIssueService),
     },
     {
       provide: VerifyTokenService,
-      inject: [AUTHENTICATION_MODULE_OPTIONS_TOKEN, DefaultVerifyTokenService],
+      inject: [
+        AUTHENTICATION_MODULE_OPTIONS_TOKEN,
+        JwtVerifyService,
+        AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN,
+      ],
       useFactory: async (
         options: AuthenticationOptionsInterface,
-        defaultService: DefaultVerifyTokenService,
-      ) => options.verifyTokenService ?? defaultService,
+        jwtVerifyService: JwtVerifyService,
+        validateTokenService: ValidateTokenServiceInterface,
+      ) =>
+        options.verifyTokenService ??
+        new VerifyTokenService(jwtVerifyService, validateTokenService),
     },
     {
       provide: AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN,
