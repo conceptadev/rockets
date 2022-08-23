@@ -90,6 +90,9 @@ export class FederatedModule extends createConfigurableDynamicRootModule<
 
     negotiateController(module, options);
 
+    // TODO: this global is temporary
+    module.global = true;
+
     return module;
   }
 

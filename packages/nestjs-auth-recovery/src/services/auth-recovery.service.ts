@@ -7,9 +7,9 @@ import { AuthRecoveryUserLookupServiceInterface } from '../interfaces/auth-recov
 import { AuthRecoveryUserMutateServiceInterface } from '../interfaces/auth-recovery-user-mutate.service.interface';
 import {
   AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
-  AUTH_RECOVERY_OTP_SERVICE_TOKEN,
-  AUTH_RECOVERY_USER_LOOKUP_SERVICE_TOKEN,
-  AUTH_RECOVERY_USER_MUTATE_SERVICE_TOKEN,
+  AUTH_RECOVERY_MODULE_OTP_SERVICE_TOKEN,
+  AUTH_RECOVERY_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+  AUTH_RECOVERY_MODULE_USER_MUTATE_SERVICE_TOKEN,
 } from '../auth-recovery.constants';
 import { AuthRecoveryNotificationService } from './auth-recovery-notification.service';
 import {
@@ -22,11 +22,11 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
   constructor(
     @Inject(AUTH_RECOVERY_MODULE_SETTINGS_TOKEN)
     private readonly config: AuthRecoverySettingsInterface,
-    @Inject(AUTH_RECOVERY_OTP_SERVICE_TOKEN)
+    @Inject(AUTH_RECOVERY_MODULE_OTP_SERVICE_TOKEN)
     private readonly otpService: AuthRecoveryOtpServiceInterface,
-    @Inject(AUTH_RECOVERY_USER_LOOKUP_SERVICE_TOKEN)
+    @Inject(AUTH_RECOVERY_MODULE_USER_LOOKUP_SERVICE_TOKEN)
     private readonly userLookupService: AuthRecoveryUserLookupServiceInterface,
-    @Inject(AUTH_RECOVERY_USER_MUTATE_SERVICE_TOKEN)
+    @Inject(AUTH_RECOVERY_MODULE_USER_MUTATE_SERVICE_TOKEN)
     private readonly userMutateService: AuthRecoveryUserMutateServiceInterface,
     private readonly notificationService: AuthRecoveryNotificationService,
   ) {}

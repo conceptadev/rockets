@@ -7,6 +7,8 @@ import { ValidateTokenServiceInterface } from './validate-token-service.interfac
  * Authentication module configuration options interface
  */
 export interface AuthenticationOptionsInterface {
+  // TODO: move global to extras
+  global?: boolean;
   settings?: AuthenticationSettingsInterface;
   issueTokenService?: IssueTokenServiceInterface;
   verifyTokenService?: VerifyTokenServiceInterface;

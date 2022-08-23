@@ -1,54 +1,88 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { ConfigService, ConfigType } from '@nestjs/config';
-import { getDataSourceToken } from '@nestjs/typeorm';
-import { SeedingSource } from '@concepta/typeorm-seeding';
-import { OtpInterface, UserInterface } from '@concepta/ts-common';
-import { UserEntityInterface } from '@concepta/nestjs-user';
-import { OtpService } from '@concepta/nestjs-otp';
-import { UserFactory } from '@concepta/nestjs-user/src/seeding';
+
+import {
+  AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
+  AUTH_RECOVERY_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+  AUTH_RECOVERY_MODULE_USER_MUTATE_SERVICE_TOKEN,
+} from '../auth-recovery.constants';
 
 import { AuthRecoveryService } from './auth-recovery.service';
-import { authRecoveryDefaultConfig } from '../config/auth-recovery-default.config';
+import { AuthRecoveryNotificationService } from './auth-recovery-notification.service';
+
 import { AuthRecoverySettingsInterface } from '../interfaces/auth-recovery-settings.interface';
-import { AUTH_RECOVERY_MODULE_DEFAULT_SETTINGS_TOKEN } from '../auth-recovery.constants';
+import { AuthRecoveryOtpServiceInterface } from '../interfaces/auth-recovery-otp.service.interface';
+import { AuthRecoveryUserLookupServiceInterface } from '../interfaces/auth-recovery-user-lookup.service.interface';
+import { AuthRecoveryNotificationServiceInterface } from '../interfaces/auth-recovery-notification.service.interface';
+import { AuthRecoveryUserMutateServiceInterface } from '../interfaces/auth-recovery-user-mutate.service.interface';
 
-import { AuthRecoveryAppModuleFixture } from '../__fixtures__/auth-recovery.app.module.fixture';
-import { AuthRecoveryUserEntityFixture } from '../__fixtures__/auth-recovery-user-entity.fixture';
+import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
+import { OtpServiceFixture } from '../__fixtures__/otp/otp.service.fixture';
+import { UserFixture } from '../__fixtures__/user/user.fixture';
 
-describe('AuthRecoveryService', () => {
+describe(AuthRecoveryService, () => {
   let app: INestApplication;
   let authRecoveryService: AuthRecoveryService;
-  let testUser: UserEntityInterface;
-  let otpService: OtpService;
-  let configService: ConfigService;
-  let config: ConfigType<typeof authRecoveryDefaultConfig>;
+  let notificationService: AuthRecoveryNotificationServiceInterface;
+  let otpService: AuthRecoveryOtpServiceInterface;
+  let userLookupService: AuthRecoveryUserLookupServiceInterface;
+  let userMutateService: AuthRecoveryUserMutateServiceInterface;
+  let settings: AuthRecoverySettingsInterface;
+
+  let spySendRecoverLoginEmail: jest.SpyInstance;
+  let spySendRecoverPasswordEmail: jest.SpyInstance;
+  let spySendRecoverPasswordSuccessEmail: jest.SpyInstance;
+  let spyOtpServiceValidate: jest.SpyInstance;
+  let spyUserLookupServiceByEmail: jest.SpyInstance;
+  let spyUserMutateServiceUpdate: jest.SpyInstance;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AuthRecoveryAppModuleFixture],
+      imports: [AppModuleFixture],
     }).compile();
     app = moduleFixture.createNestApplication();
     await app.init();
 
     authRecoveryService =
       moduleFixture.get<AuthRecoveryService>(AuthRecoveryService);
-    otpService = moduleFixture.get<OtpService>(OtpService);
-    configService = moduleFixture.get<ConfigService>(ConfigService);
-    config = configService.get<AuthRecoverySettingsInterface>(
-      AUTH_RECOVERY_MODULE_DEFAULT_SETTINGS_TOKEN,
+
+    otpService =
+      moduleFixture.get<AuthRecoveryOtpServiceInterface>(OtpServiceFixture);
+
+    settings = moduleFixture.get<AuthRecoverySettingsInterface>(
+      AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
     ) as AuthRecoverySettingsInterface;
 
-    const seedingSource = new SeedingSource({
-      dataSource: moduleFixture.get(getDataSourceToken()),
-    });
+    notificationService =
+      moduleFixture.get<AuthRecoveryNotificationServiceInterface>(
+        AuthRecoveryNotificationService,
+      );
 
-    const userFactory = new UserFactory({
-      entity: AuthRecoveryUserEntityFixture,
-      seedingSource,
-    });
+    userLookupService =
+      moduleFixture.get<AuthRecoveryUserLookupServiceInterface>(
+        AUTH_RECOVERY_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+      );
 
-    testUser = await userFactory.create();
+    userMutateService =
+      moduleFixture.get<AuthRecoveryUserMutateServiceInterface>(
+        AUTH_RECOVERY_MODULE_USER_MUTATE_SERVICE_TOKEN,
+      );
+
+    spySendRecoverLoginEmail = jest
+      .spyOn(notificationService, 'sendRecoverLoginEmail')
+      .mockResolvedValue(undefined);
+
+    spySendRecoverPasswordEmail = jest
+      .spyOn(notificationService, 'sendRecoverPasswordEmail')
+      .mockResolvedValue(undefined);
+
+    spySendRecoverPasswordSuccessEmail = jest
+      .spyOn(notificationService, 'sendPasswordUpdatedSuccefullyEmail')
+      .mockResolvedValue(undefined);
+
+    spyOtpServiceValidate = jest.spyOn(otpService, 'validate');
+    spyUserLookupServiceByEmail = jest.spyOn(userLookupService, 'byEmail');
+    spyUserMutateServiceUpdate = jest.spyOn(userMutateService, 'update');
   });
 
   afterEach(async () => {
@@ -56,67 +90,109 @@ describe('AuthRecoveryService', () => {
     return app ? await app.close() : undefined;
   });
 
-  it('Recover login', async () => {
-    expect(
-      await authRecoveryService.recoverLogin(testUser.email),
-    ).toBeUndefined();
+  describe(AuthRecoveryService.prototype.recoverLogin, () => {
+    it('should send login recovery', async () => {
+      const result = await authRecoveryService.recoverLogin(UserFixture.email);
+
+      expect(result).toBeUndefined();
+      expect(spyUserLookupServiceByEmail).toHaveBeenCalledTimes(1);
+      expect(spyUserLookupServiceByEmail).toHaveBeenCalledWith(
+        UserFixture.email,
+      );
+
+      expect(spySendRecoverLoginEmail).toHaveBeenCalledTimes(1);
+      expect(spySendRecoverLoginEmail).toHaveBeenCalledWith(
+        UserFixture.email,
+        UserFixture.username,
+      );
+    });
   });
 
-  it('Recover password', async () => {
-    expect(
-      await authRecoveryService.recoverPassword(testUser.email),
-    ).toBeUndefined();
+  describe(AuthRecoveryService.prototype.recoverPassword, () => {
+    it('should send password recovery', async () => {
+      const result = await authRecoveryService.recoverPassword(
+        UserFixture.email,
+      );
+
+      expect(result).toBeUndefined();
+      expect(spyUserLookupServiceByEmail).toHaveBeenCalledTimes(1);
+      expect(spyUserLookupServiceByEmail).toHaveBeenCalledWith(
+        UserFixture.email,
+      );
+
+      expect(spySendRecoverPasswordEmail).toHaveBeenCalledTimes(1);
+      expect(spySendRecoverPasswordEmail).toHaveBeenCalledWith(
+        UserFixture.email,
+        'GOOD_PASSCODE',
+        expect.any(Date),
+      );
+    });
   });
 
-  it('Validate passcode', async () => {
-    const otp = await createOtp(config, otpService, testUser);
+  describe(AuthRecoveryService.prototype.validatePasscode, () => {
+    it('should call otp validator', async () => {
+      await authRecoveryService.validatePasscode('GOOD_PASSCODE');
 
-    const validOtp = await authRecoveryService.validatePasscode(otp.passcode);
-    expect(validOtp?.assignee).toEqual(testUser);
+      expect(spyOtpServiceValidate).toHaveBeenCalledWith(
+        settings.otp.assignment,
+        { category: settings.otp.category, passcode: 'GOOD_PASSCODE' },
+        false,
+      );
+    });
+
+    it('should validate good passcode', async () => {
+      const otp = await authRecoveryService.validatePasscode('GOOD_PASSCODE');
+      expect(otp).toEqual({ assignee: UserFixture });
+    });
+
+    it('should not validate bad passcode', async () => {
+      const otp = await authRecoveryService.validatePasscode('BAD_PASSCODE');
+      expect(otp).toBeNull();
+    });
   });
 
-  it('Validate passcode (invalid)', async () => {
-    const invalidOtp = await authRecoveryService.validatePasscode(
-      'FAKE_PASSCODE',
-    );
+  describe(AuthRecoveryService.prototype.updatePassword, () => {
+    it('should call user mutate service', async () => {
+      await authRecoveryService.updatePassword(
+        'GOOD_PASSCODE',
+        '$!Abc123bsksl6764579',
+      );
 
-    expect(invalidOtp).toBeNull();
-  });
+      expect(spyUserMutateServiceUpdate).toHaveBeenCalledTimes(1);
+      expect(spyUserMutateServiceUpdate).toHaveBeenCalledWith({
+        id: UserFixture.id,
+        password: '$!Abc123bsksl6764579',
+      });
+    });
 
-  it('Update password', async () => {
-    const otp = await createOtp(config, otpService, testUser);
+    it('should send success email', async () => {
+      await authRecoveryService.updatePassword(
+        'GOOD_PASSCODE',
+        'any_string_will_do',
+      );
 
-    const user = await authRecoveryService.updatePassword(
-      otp.passcode,
-      '$!Abc123bsksl6764579',
-    );
+      expect(spySendRecoverPasswordSuccessEmail).toHaveBeenCalledTimes(1);
+      expect(spySendRecoverPasswordSuccessEmail).toHaveBeenCalledWith(
+        UserFixture.email,
+      );
+    });
 
-    expect(user?.id).toEqual(testUser.id);
-  });
+    it('should update password', async () => {
+      const user = await authRecoveryService.updatePassword(
+        'GOOD_PASSCODE',
+        '$!Abc123bsksl6764579',
+      );
 
-  it('Update password (fail)', async () => {
-    const user = await authRecoveryService.updatePassword(
-      'FAKE_PASSCODE',
-      '$!Abc123bsksl6764579',
-    );
+      expect(user).toEqual(UserFixture);
+    });
 
-    expect(user).toBeNull();
+    it('should fail to update password', async () => {
+      const user = await authRecoveryService.updatePassword(
+        'FAKE_PASSCODE',
+        '$!Abc123bsksl6764579',
+      );
+
+      expect(user).toBeNull();
+    });
   });
 });
-
-const createOtp = async (
-  config: ConfigType<typeof authRecoveryDefaultConfig>,
-  otpService: OtpService,
-  user: UserInterface,
-): Promise<OtpInterface> => {
-  const { category, assignment, type, expiresIn } = config.otp;
-
-  return await otpService.create(assignment, {
-    category,
-    type,
-    expiresIn,
-    assignee: {
-      id: user.id,
-    },
-  });
-};

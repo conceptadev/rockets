@@ -41,13 +41,7 @@ export class AuthenticationModule extends createConfigurableDynamicRootModule<
   AuthenticationModule,
   AuthenticationOptionsInterface
 >(AUTHENTICATION_MODULE_OPTIONS_TOKEN, {
-  imports: [
-    ConfigModule.forFeature(authenticationDefaultConfig),
-    JwtModule.deferred({
-      timeoutMessage:
-        'AuthenticationModule requires JwtModule to be registered in your application.',
-    }),
-  ],
+  imports: [ConfigModule.forFeature(authenticationDefaultConfig), JwtModule],
   providers: [
     {
       provide: AUTHENTICATION_MODULE_SETTINGS_TOKEN,

@@ -6,10 +6,10 @@ import {
 import { JwtStrategy } from '@concepta/nestjs-jwt';
 import { AuthorizationPayloadInterface } from '@concepta/ts-common';
 import {
-  AUTH_JWT_REFRESH_STRATEGY_NAME,
-  AUTH_REFRESH_USER_LOOKUP_SERVICE_TOKEN,
-  AUTH_REFRESH_VERIFY_TOKEN_SERVICE_TOKEN,
-  REFRESH_TOKEN_MODULE_SETTINGS_TOKEN,
+  AUTH_REFRESH_MODULE_STRATEGY_NAME,
+  AUTH_REFRESH_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+  AUTH_REFRESH_MODULE_VERIFY_SERVICE_TOKEN,
+  AUTH_REFRESH_MODULE_SETTINGS_TOKEN,
 } from './auth-refresh.constants';
 import { AuthRefreshSettingsInterface } from './interfaces/auth-refresh-settings.interface';
 import { AuthRefreshUserLookupServiceInterface } from './interfaces/auth-refresh-user-lookup-service.interface';
@@ -18,14 +18,14 @@ import { createVerifyTokenCallback } from './utils/create-verify-token-callback.
 @Injectable()
 export class AuthRefreshStrategy extends PassportStrategyFactory<JwtStrategy>(
   JwtStrategy,
-  AUTH_JWT_REFRESH_STRATEGY_NAME,
+  AUTH_REFRESH_MODULE_STRATEGY_NAME,
 ) {
   constructor(
-    @Inject(REFRESH_TOKEN_MODULE_SETTINGS_TOKEN)
+    @Inject(AUTH_REFRESH_MODULE_SETTINGS_TOKEN)
     settings: Partial<AuthRefreshSettingsInterface>,
-    @Inject(AUTH_REFRESH_VERIFY_TOKEN_SERVICE_TOKEN)
+    @Inject(AUTH_REFRESH_MODULE_VERIFY_SERVICE_TOKEN)
     verifyTokenService: VerifyTokenServiceInterface,
-    @Inject(AUTH_REFRESH_USER_LOOKUP_SERVICE_TOKEN)
+    @Inject(AUTH_REFRESH_MODULE_USER_LOOKUP_SERVICE_TOKEN)
     private userLookupService: AuthRefreshUserLookupServiceInterface,
   ) {
     const options: Partial<AuthRefreshSettingsInterface> = {

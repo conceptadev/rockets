@@ -16,7 +16,7 @@ import {
   AuthUser,
   AuthenticationJwtResponseDto,
 } from '@concepta/nestjs-authentication';
-import { AUTH_JWT_REFRESH_STRATEGY_NAME } from './auth-refresh.constants';
+import { AUTH_REFRESH_MODULE_STRATEGY_NAME } from './auth-refresh.constants';
 import { AuthRefreshDto } from './dto/auth-refresh.dto';
 
 /**
@@ -42,7 +42,7 @@ export class AuthRefreshController {
     description: 'DTO containing an access token and a refresh token.',
   })
   @ApiUnauthorizedResponse()
-  @UseGuards(AuthGuard(AUTH_JWT_REFRESH_STRATEGY_NAME))
+  @UseGuards(AuthGuard(AUTH_REFRESH_MODULE_STRATEGY_NAME))
   @Post()
   async refresh(
     @AuthUser() user: AuthenticatedUserInterface,

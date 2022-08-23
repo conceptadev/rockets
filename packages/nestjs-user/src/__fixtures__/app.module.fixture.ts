@@ -8,7 +8,7 @@ import { UserEntityFixture } from './user.entity.fixture';
 @Module({
   imports: [
     TypeOrmExtModule.register(ormConfig),
-    CrudModule.register(),
+    CrudModule.forRoot({}),
     UserModule.register({
       entities: {
         user: {

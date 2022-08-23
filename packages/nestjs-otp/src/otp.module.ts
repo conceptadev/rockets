@@ -71,6 +71,9 @@ export class OtpModule extends createConfigurableDynamicRootModule<
 
     negotiateController(module, options);
 
+    // TODO: this is temporary for module builder migration
+    module.global = true;
+
     return module;
   }
 

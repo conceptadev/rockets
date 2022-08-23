@@ -45,7 +45,12 @@ export class EmailModule extends createConfigurableDynamicRootModule<
   exports: [EMAIL_MODULE_MAILER_SERVICE_TOKEN],
 }) {
   static register(options: EmailOptionsInterface = {}) {
-    return EmailModule.forRoot(EmailModule, options);
+    const module = EmailModule.forRoot(EmailModule, options);
+
+    // TODO: this is temporary for module builder migration
+    module.global = true;
+
+    return module;
   }
 
   static registerAsync(options: AsyncModuleConfig<EmailOptionsInterface>) {

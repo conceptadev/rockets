@@ -12,7 +12,7 @@ import { createUserRepositoryFixture } from './create-user-repository.fixture';
 @Module({
   imports: [
     TypeOrmExtModule.register(ormConfig),
-    CrudModule.register(),
+    CrudModule.forRoot({}),
     UserModule.registerAsync({
       imports: [UserModuleCustomFixture],
       inject: [UserLookupCustomService],

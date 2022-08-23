@@ -12,7 +12,7 @@ import { UserEntity } from './user/user.entity';
         return dbConfig;
       },
     }),
-    CrudModule.register(),
+    CrudModule.forRoot({}),
     UserModule.register({
       entities: {
         user: {
