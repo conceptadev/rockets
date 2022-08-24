@@ -22,7 +22,7 @@ import { createUserRepository } from './user/create-user-repository';
     AuthLocalModule.registerAsync({ ...createUserOpts() }),
     AuthJwtModule.registerAsync({ ...createUserOpts() }),
     AuthRefreshModule.registerAsync({ ...createUserOpts() }),
-    AuthenticationModule.register(),
+    AuthenticationModule.forRoot({}),
     JwtModule.forRoot({}),
     PasswordModule.register(),
     CrudModule.forRoot({}),

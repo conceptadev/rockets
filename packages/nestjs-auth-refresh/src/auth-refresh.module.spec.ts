@@ -75,6 +75,7 @@ describe(AuthRefreshModule, () => {
       testModule = await Test.createTestingModule(
         testModuleFactory([
           AuthRefreshModule.register({
+            verifyTokenService: new VerifyTokenService(jwtVerifyService),
             issueTokenService: new IssueTokenService(jwtIssueService),
             userLookupService: new UserLookupServiceFixture(),
           }),
@@ -93,11 +94,16 @@ describe(AuthRefreshModule, () => {
       testModule = await Test.createTestingModule(
         testModuleFactory([
           AuthRefreshModule.forRootAsync({
-            inject: [IssueTokenService, UserLookupServiceFixture],
+            inject: [
+              VerifyTokenService,
+              IssueTokenService,
+              UserLookupServiceFixture,
+            ],
             useFactory: (
+              verifyTokenService: VerifyTokenService,
               issueTokenService: IssueTokenServiceInterface,
               userLookupService: AuthRefreshUserLookupServiceInterface,
-            ) => ({ issueTokenService, userLookupService }),
+            ) => ({ verifyTokenService, issueTokenService, userLookupService }),
           }),
         ]),
       ).compile();
@@ -114,11 +120,16 @@ describe(AuthRefreshModule, () => {
       testModule = await Test.createTestingModule(
         testModuleFactory([
           AuthRefreshModule.registerAsync({
-            inject: [IssueTokenService, UserLookupServiceFixture],
+            inject: [
+              VerifyTokenService,
+              IssueTokenService,
+              UserLookupServiceFixture,
+            ],
             useFactory: (
+              verifyTokenService: VerifyTokenService,
               issueTokenService: IssueTokenService,
               userLookupService: AuthRefreshUserLookupServiceInterface,
-            ) => ({ issueTokenService, userLookupService }),
+            ) => ({ verifyTokenService, issueTokenService, userLookupService }),
           }),
         ]),
       ).compile();
@@ -202,7 +213,7 @@ describe(AuthRefreshModule, () => {
       expect(testService.userLookupService).toBe(ffUserLookupService);
       expect(testService.userLookupService).not.toBe(userLookupService);
       expect(testService.verifyTokenService).toBe(ffVerifyTokenService);
-      expect(testService.verifyTokenService).not.toBe(issueTokenService);
+      expect(testService.verifyTokenService).not.toBe(verifyTokenService);
       expect(testService.issueTokenService).toBe(ffIssueTokenService);
       expect(testService.issueTokenService).not.toBe(issueTokenService);
     });
@@ -229,7 +240,7 @@ function testModuleFactory(
   return {
     imports: [
       UserModuleFixture,
-      AuthenticationModule.register({ global: true }),
+      AuthenticationModule.forRoot({}),
       JwtModule.forRoot({}),
       ...extraImports,
     ],

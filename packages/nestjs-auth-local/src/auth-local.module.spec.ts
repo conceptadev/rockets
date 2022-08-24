@@ -210,7 +210,7 @@ function testModuleFactory(
   return {
     imports: [
       UserModuleFixture,
-      AuthenticationModule.register({ global: true }),
+      AuthenticationModule.forRoot({}),
       JwtModule.forRoot({}),
       ...extraImports,
     ],
