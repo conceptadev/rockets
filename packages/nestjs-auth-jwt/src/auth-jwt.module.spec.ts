@@ -214,7 +214,7 @@ function testModuleFactory(
 ): ModuleMetadata {
   return {
     imports: [
-      AuthenticationModule.register({ global: true }),
+      AuthenticationModule.forRoot({}),
       JwtModule.forRoot({}),
       UserModuleFixture,
       ...extraImports,

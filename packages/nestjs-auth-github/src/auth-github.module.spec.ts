@@ -30,7 +30,7 @@ describe(AuthGithubModule, () => {
           }),
           JwtModule.forRoot({}),
           AuthGithubModule.forRoot({}),
-          AuthenticationModule.register({ global: true }),
+          AuthenticationModule.forRoot({}),
           FederatedModule.registerAsync({
             imports: [UserModule.deferred()],
             inject: [UserLookupService, UserMutateService],

@@ -43,7 +43,7 @@ describe('FederatedModuleTest', () => {
           synchronize: true,
           entities: [UserEntityFixture, FederatedEntityFixture],
         }),
-        AuthenticationModule.register(),
+        AuthenticationModule.forRoot({}),
         JwtModule.forRoot({}),
         CrudModule.forRoot({}),
         FederatedModule.registerAsync({
