@@ -30,7 +30,6 @@ export const {
   ConfigurableModuleClass: JwtModuleClass,
   OPTIONS_TYPE: JWT_OPTIONS_TYPE,
   ASYNC_OPTIONS_TYPE: JWT_ASYNC_OPTIONS_TYPE,
-  MODULE_OPTIONS_TOKEN,
 } = new ConfigurableModuleBuilder<JwtOptionsInterface>({
   moduleName: 'Jwt',
   optionsInjectionToken: RAW_OPTIONS_TOKEN,
