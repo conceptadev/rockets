@@ -14,6 +14,7 @@ import { InvitationOtpServiceInterface } from '../interfaces/invitation-otp.serv
 import { InvitationUserLookupServiceInterface } from '../interfaces/invitation-user-lookup.service.interface';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
+import { InvitationSettingsOtpNotFoundException } from '../exceptions/invitation-settings-otp-not-found-exception';
 
 export class InvitationRevocationService {
   constructor(
@@ -53,10 +54,12 @@ export class InvitationRevocationService {
    * @param category
    */
   protected async clearAllOtps(user: ReferenceIdInterface, category: string) {
-    // TODO: try catch with custom exception
-
     // extract required otp properties
     const { assignment } = this.settings.otp;
+
+    if (!assignment) {
+      throw new InvitationSettingsOtpNotFoundException();
+    }
 
     // clear all user's otps in DB
     return this.otpService.clear(assignment, {
@@ -77,8 +80,6 @@ export class InvitationRevocationService {
     user: ReferenceIdInterface,
     category: string,
   ) {
-    // TODO: try catch with custom exception
-
     const invitations = await this.invitationRepo.find({
       where: {
         user: { id: user.id },

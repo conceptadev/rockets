@@ -10,6 +10,8 @@ import { USER_MODULE_SETTINGS_TOKEN } from '../user.constants';
 import { UserMutateService } from '../services/user-mutate.service';
 import { UserSettingsInterface } from '../interfaces/user-settings.interface';
 import { UserLookupService } from '../services/user-lookup.service';
+import { UserNotFoundException } from '../exceptions/user-not-found-exception';
+import { CreateUserEventInvalidPayloadException } from '../exceptions/create-user-event-invalid-payload-exception';
 
 @Injectable()
 export class CreateUserListener
@@ -47,13 +49,13 @@ export class CreateUserListener
       const { userId, newPassword } = event?.payload.data ?? {};
 
       if (!userId || !newPassword) {
-        throw new Error('Invalid payload');
+        throw new CreateUserEventInvalidPayloadException();
       }
 
       const user = await this.userLookupService.byId(userId as string);
 
       if (!user) {
-        throw new Error('User not found');
+        throw new UserNotFoundException();
       }
 
       await this.userMutateService.save({ ...user, password: newPassword });

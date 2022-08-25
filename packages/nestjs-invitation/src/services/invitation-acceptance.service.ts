@@ -99,7 +99,6 @@ export class InvitationAcceptanceService {
    * @param code
    */
   async getOneByCode(code: string): Promise<InvitationDto | null> {
-    // TODO: try catch with custom exception
     return this.invitationRepo.findOneBy({ code });
   }
 
