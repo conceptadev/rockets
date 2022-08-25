@@ -1,7 +1,7 @@
 /**
- * The token to which all email module options are set.
+ * The token to which all email module settings are assigned.
  */
-export const EMAIL_MODULE_OPTIONS_TOKEN = 'EMAIL_MODULE_OPTIONS_TOKEN';
+export const EMAIL_MODULE_SETTINGS_TOKEN = 'EMAIL_MODULE_SETTINGS_TOKEN';
 
 /**
  * The token to which the mailer service is set.

@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
 import { OtpModule, OtpService } from '@concepta/nestjs-otp';
@@ -14,6 +15,7 @@ import { UserOtpEntityFixture } from './user/entities/user-otp-entity.fixture';
 import { UserEntityFixture } from './user/entities/user-entity.fixture';
 
 import { default as ormConfig } from './ormconfig.fixture';
+import { MailerServiceFixture } from './email/mailer.service.fixture';
 
 @Module({
   imports: [
@@ -51,7 +53,9 @@ import { default as ormConfig } from './ormconfig.fixture';
         },
       },
     }),
-    EmailModule.register({}),
+    EmailModule.forRoot({
+      mailerService: new MailerServiceFixture(),
+    }),
   ],
 })
 export class AppModuleDbFixture {}

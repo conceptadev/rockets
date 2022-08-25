@@ -8,6 +8,7 @@ import { UserLookupServiceFixture } from './user/services/user-lookup.service.fi
 import { UserMutateServiceFixture } from './user/services/user-mutate.service.fixture';
 import { UserModuleFixture } from './user/user.module.fixture';
 import { OtpModuleFixture } from './otp/otp.module.fixture';
+import { MailerServiceFixture } from './email/mailer.service.fixture';
 
 @Module({
   imports: [
@@ -30,7 +31,7 @@ import { OtpModuleFixture } from './otp/otp.module.fixture';
         userMutateService,
       }),
     }),
-    EmailModule.register({}),
+    EmailModule.forRoot({ mailerService: new MailerServiceFixture() }),
     OtpModuleFixture,
     UserModuleFixture,
   ],

@@ -6,7 +6,7 @@ import { EmailServiceInterface } from './interfaces/email-service.interface';
 import { EmailService } from './email.service';
 import { EMAIL_MODULE_MAILER_SERVICE_TOKEN } from './email.constants';
 
-describe('EmailService', () => {
+describe(EmailService, () => {
   let logger: Logger;
   let emailService: EmailService;
   let mailerService: EmailServiceInterface;
@@ -33,7 +33,7 @@ describe('EmailService', () => {
     jest.clearAllMocks();
   });
 
-  describe('sendMail', () => {
+  describe(EmailService.prototype.sendMail, () => {
     describe('when sending an email', () => {
       it('should send email without any errors', async () => {
         jest.spyOn(mailerService, 'sendMail').mockImplementation(async () => {
