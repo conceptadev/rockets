@@ -1,5 +1,7 @@
 import { EmailServiceInterface } from './email-service.interface';
+import { EmailSettingsInterface } from './email-settings.interface';
 
 export interface EmailOptionsInterface {
-  mailerService?: EmailServiceInterface;
+  settings?: EmailSettingsInterface;
+  mailerService: EmailServiceInterface;
 }

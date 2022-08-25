@@ -33,6 +33,7 @@ import { UserModuleFixture } from './__fixtures__/user/user.module.fixture';
 import { OtpModuleFixture } from './__fixtures__/otp/otp.module.fixture';
 import { UserMutateServiceFixture } from './__fixtures__/user/services/user-mutate.service.fixture';
 import { OtpServiceFixture } from './__fixtures__/otp/otp.service.fixture';
+import { MailerServiceFixture } from './__fixtures__/email/mailer.service.fixture';
 
 describe(AuthRecoveryModule, () => {
   let testModule: TestingModule;
@@ -279,7 +280,7 @@ function testModuleFactory(
     imports: [
       UserModuleFixture,
       OtpModuleFixture,
-      EmailModule.register({}),
+      EmailModule.forRoot({ mailerService: new MailerServiceFixture() }),
       ...extraImports,
     ],
   };

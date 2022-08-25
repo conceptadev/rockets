@@ -14,7 +14,6 @@
   "dependencies": {
     "@concepta/nestjs-authentication": "^4.0.0-alpha.18",
     "@concepta/nestjs-common": "^4.0.0-alpha.18",
-    "@concepta/nestjs-core": "^4.0.0-alpha.18",
     "@concepta/nestjs-password": "^4.0.0-alpha.18",
     "@concepta/ts-common": "^4.0.0-alpha.18",
     "@concepta/ts-core": "^4.0.0-alpha.18",
