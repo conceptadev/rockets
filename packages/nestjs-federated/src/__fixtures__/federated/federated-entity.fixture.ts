@@ -1,6 +1,6 @@
 import { Entity, ManyToOne } from 'typeorm';
-import { FederatedSqliteEntity } from '../entities/federated-sqlite.entity';
-import { UserEntityFixture } from './user.entity.fixture';
+import { FederatedSqliteEntity } from '../../entities/federated-sqlite.entity';
+import { UserEntityFixture } from '../user/entities/user.entity.fixture';
 
 @Entity()
 export class FederatedEntityFixture extends FederatedSqliteEntity {
