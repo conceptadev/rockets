@@ -1,13 +1,11 @@
 import { Module } from '@nestjs/common';
+import { EventModule } from '@concepta/nestjs-event';
+
 import { OrderController } from './order.controller';
 import { OrderService } from './order.service';
-import { EventModule, EventOptionsInterface } from '@concepta/nestjs-event';
 
-const eventConfig: EventOptionsInterface = {
-  emitter: {},
-};
 @Module({
-  imports: [EventModule.register(eventConfig)],
+  imports: [EventModule.forRoot({})],
   controllers: [OrderController],
   providers: [OrderController, OrderService],
   exports: [OrderController, OrderService],

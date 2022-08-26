@@ -1,68 +1,26 @@
-import { EventEmitter2 } from 'eventemitter2';
-import { Logger, Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { DynamicModule, Logger, Module } from '@nestjs/common';
+
 import {
-  AsyncModuleConfig,
-  createConfigurableDynamicRootModule,
-  deferExternal,
-  DeferExternalOptionsInterface,
-} from '@concepta/nestjs-core';
-import { EventOptionsInterface } from './interfaces/event-options.interface';
+  EventAsyncOptions,
+  EventModuleClass,
+  EventOptions,
+} from './event.module-definition';
 import { EventDispatchService } from './services/event-dispatch.service';
 import { EventListenService } from './services/event-listen.service';
-import { EventEmitter2OptionsInterface } from './interfaces/event-emitter2-options.interface';
-import {
-  EVENT_MODULE_OPTIONS_TOKEN,
-  EVENT_MODULE_EMITTER_SERVICE_TOKEN,
-} from './event-constants';
-import { defaultEmitterConfig } from './config/default-emitter.config';
 
+/**
+ * Event module
+ */
 @Module({
   providers: [Logger, EventListenService, EventDispatchService],
   exports: [EventListenService, EventDispatchService],
 })
-export class EventModule extends createConfigurableDynamicRootModule<
-  EventModule,
-  EventOptionsInterface
->(EVENT_MODULE_OPTIONS_TOKEN, {
-  imports: [ConfigModule.forFeature(defaultEmitterConfig)],
-  providers: [
-    {
-      provide: EVENT_MODULE_EMITTER_SERVICE_TOKEN,
-      inject: [EVENT_MODULE_OPTIONS_TOKEN, defaultEmitterConfig.KEY],
-      useFactory: async (
-        options: EventOptionsInterface,
-        defaultEmitterOptions: EventEmitter2OptionsInterface,
-      ) => {
-        return new EventEmitter2(options?.emitter ?? defaultEmitterOptions);
-      },
-    },
-  ],
-  exports: [EVENT_MODULE_EMITTER_SERVICE_TOKEN],
-}) {
-  static register(options: EventOptionsInterface = {}) {
-    const module = EventModule.forRoot(EventModule, options);
-
-    module.global = true;
-
-    return module;
+export class EventModule extends EventModuleClass {
+  static forRoot(options: EventOptions): DynamicModule {
+    return super.forRoot({ ...options, global: true });
   }
 
-  static registerAsync(options: AsyncModuleConfig<EventOptionsInterface>) {
-    const module = EventModule.forRootAsync(EventModule, {
-      useFactory: () => ({}),
-      ...options,
-    });
-
-    module.global = true;
-
-    return module;
-  }
-
-  static deferred(options: DeferExternalOptionsInterface = {}) {
-    return deferExternal<EventModule, EventOptionsInterface>(
-      EventModule,
-      options,
-    );
+  static forRootAsync(options: EventAsyncOptions): DynamicModule {
+    return super.forRootAsync({ ...options, global: true });
   }
 }

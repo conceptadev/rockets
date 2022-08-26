@@ -1,18 +1,18 @@
 import {
   EVENT_MODULE_EMITTER_SERVICE_TOKEN,
-  EVENT_MODULE_OPTIONS_TOKEN,
+  EVENT_MODULE_SETTINGS_TOKEN,
 } from '../event-constants';
 import { EventAsync } from '../events/event-async';
-import { EventOptionsInterface } from '../interfaces/event-options.interface';
 import { EventDispatchService } from './event-dispatch.service';
 import { EventEmitter2 } from 'eventemitter2';
 import { Test } from '@nestjs/testing';
 import { EventSync } from '../events/event-sync';
 import { EventDispatchException } from '../exceptions/event-dispatch.exception';
 import { EventReturnType } from '../event-types';
+import { EventSettingsInterface } from '../interfaces/event-settings.interface';
 
 describe(EventDispatchService, () => {
-  const config: EventOptionsInterface = {};
+  const config: EventSettingsInterface = {};
   let eventEmitter: EventEmitter2;
   let eventDispatchService: EventDispatchService;
 
@@ -24,7 +24,7 @@ describe(EventDispatchService, () => {
           useClass: EventEmitter2,
         },
         EventDispatchService,
-        { provide: EVENT_MODULE_OPTIONS_TOKEN, useValue: config },
+        { provide: EVENT_MODULE_SETTINGS_TOKEN, useValue: config },
       ],
     }).compile();
 
