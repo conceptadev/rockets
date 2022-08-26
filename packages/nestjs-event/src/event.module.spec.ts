@@ -1,91 +1,56 @@
-import { Test } from '@nestjs/testing';
+import EventEmitter2 from 'eventemitter2';
+import { Test, TestingModule } from '@nestjs/testing';
+
+import { EVENT_MODULE_EMITTER_SERVICE_TOKEN } from './event-constants';
+
 import { EventModule } from './event.module';
-import { EventOptionsInterface } from './interfaces/event-options.interface';
 import { EventDispatchService } from './services/event-dispatch.service';
 import { EventListenService } from './services/event-listen.service';
 
 describe(EventModule, () => {
-  let eventConfig: EventOptionsInterface;
-
-  beforeEach(async () => {
-    eventConfig = {
-      emitter: {},
-    };
-  });
+  let testModule: TestingModule;
+  let eventModule: EventModule;
+  let emitterInstance: EventEmitter2;
+  let listenService: EventListenService;
+  let dispatchService: EventDispatchService;
 
   describe(EventModule.forRoot, () => {
-    it('should always return a global module', async () => {
-      const module = EventModule.register(eventConfig);
-
-      expect(module.global).toStrictEqual(true);
+    beforeEach(async () => {
+      testModule = await Test.createTestingModule({
+        imports: [EventModule.forRoot({})],
+      }).compile();
     });
 
-    it('should import the dynamic module', async () => {
-      const moduleRef = await Test.createTestingModule({
-        imports: [EventModule.register(eventConfig)],
-      }).compile();
-
-      const eventDispatchService =
-        moduleRef.get<EventDispatchService>(EventDispatchService);
-      const eventListenService =
-        moduleRef.get<EventListenService>(EventListenService);
-
-      expect(eventDispatchService).toBeInstanceOf(EventDispatchService);
-      expect(eventListenService).toBeInstanceOf(EventListenService);
+    it('module should be loaded', async () => {
+      commonVars();
+      commonTests();
     });
   });
 
   describe(EventModule.forRootAsync, () => {
-    it('should always return a global module', async () => {
-      const module = EventModule.registerAsync({
-        useFactory: () => eventConfig,
-      });
-
-      expect(module.global).toStrictEqual(true);
+    beforeEach(async () => {
+      testModule = await Test.createTestingModule({
+        imports: [EventModule.forRootAsync({ useFactory: () => ({}) })],
+      }).compile();
     });
 
-    it('should import the dynamic module', async () => {
-      const moduleRef = await Test.createTestingModule({
-        imports: [EventModule.registerAsync({ useFactory: () => eventConfig })],
-      }).compile();
-
-      const eventDispatchService =
-        moduleRef.get<EventDispatchService>(EventDispatchService);
-      const eventListenService =
-        moduleRef.get<EventListenService>(EventListenService);
-
-      expect(eventDispatchService).toBeInstanceOf(EventDispatchService);
-      expect(eventListenService).toBeInstanceOf(EventListenService);
-    });
-
-    it('should import the dynamic module (empty cnfig)', async () => {
-      const moduleRef = await Test.createTestingModule({
-        imports: [EventModule.registerAsync({})],
-      }).compile();
-
-      const eventDispatchService =
-        moduleRef.get<EventDispatchService>(EventDispatchService);
-      const eventListenService =
-        moduleRef.get<EventListenService>(EventListenService);
-
-      expect(eventDispatchService).toBeInstanceOf(EventDispatchService);
-      expect(eventListenService).toBeInstanceOf(EventListenService);
+    it('module should be loaded', async () => {
+      commonVars();
+      commonTests();
     });
   });
 
-  describe(EventModule.deferred, () => {
-    it('should return the dynamic module (deferred)', async () => {
-      const moduleRef = await Test.createTestingModule({
-        imports: [EventModule.deferred(), EventModule.register(eventConfig)],
-      }).compile();
+  function commonVars() {
+    eventModule = testModule.get(EventModule);
+    emitterInstance = testModule.get(EVENT_MODULE_EMITTER_SERVICE_TOKEN);
+    listenService = testModule.get(EventListenService);
+    dispatchService = testModule.get(EventDispatchService);
+  }
 
-      const eventDispatchService =
-        moduleRef.get<EventDispatchService>(EventDispatchService);
-      const eventListenService =
-        moduleRef.get<EventListenService>(EventListenService);
-
-      expect(eventDispatchService).toBeInstanceOf(EventDispatchService);
-      expect(eventListenService).toBeInstanceOf(EventListenService);
-    });
-  });
+  function commonTests() {
+    expect(eventModule).toBeInstanceOf(EventModule);
+    expect(emitterInstance).toBeInstanceOf(EventEmitter2);
+    expect(listenService).toBeInstanceOf(EventListenService);
+    expect(dispatchService).toBeInstanceOf(EventDispatchService);
+  }
 });
