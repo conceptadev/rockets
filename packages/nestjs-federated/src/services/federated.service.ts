@@ -6,6 +6,7 @@ import { FederatedServiceInterface } from '../interfaces/federated-service.inter
 import { FEDERATED_MODULE_FEDERATED_ENTITY_KEY } from '../federated.constants';
 import { FederatedPostgresEntity } from '../entities/federated-postgres.entity';
 import { FederatedQueryException } from '../exceptions/federated-query.exception';
+
 @Injectable()
 export class FederatedService implements FederatedServiceInterface {
   constructor(

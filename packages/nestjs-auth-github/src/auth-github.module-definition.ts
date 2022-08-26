@@ -5,6 +5,8 @@ import {
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
+import { createSettingsProvider } from '@concepta/nestjs-common';
+import { FederatedOAuthService } from '@concepta/nestjs-federated';
 import {
   IssueTokenService,
   IssueTokenServiceInterface,
@@ -20,7 +22,6 @@ import { AuthGithubOptionsExtrasInterface } from './interfaces/auth-github-optio
 import { authGithubDefaultConfig } from './config/auth-github-default.config';
 import { AuthGithubSettingsInterface } from './interfaces/auth-github-settings.interface';
 import { AuthGithubController } from './auth-github.controller';
-import { createSettingsProvider } from '@concepta/nestjs-common';
 
 const RAW_OPTIONS_TOKEN = Symbol('__AUTH_GITHUB_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -87,6 +88,7 @@ export function createAuthGithubProviders(options: {
   return [
     ...(options.providers ?? []),
     IssueTokenService,
+    FederatedOAuthService,
     createAuthGithubOptionsProvider(options.overrides),
     createAuthGithubIssueTokenServiceProvider(options.overrides),
   ];
