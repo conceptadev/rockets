@@ -9,9 +9,14 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ReferenceAssigneeInterface,
+  ReferenceIdInterface,
+} from '@concepta/ts-core';
 
 import { InvitationAcceptanceService } from '../services/invitation-acceptance.service';
 import { InvitationAcceptInviteDto } from '../dto/invitation-accept-invite.dto';
+import { InvitationDto } from '../dto/invitation.dto';
 
 @Controller('invitation-acceptance')
 @ApiTags('invitation-acceptance')
@@ -33,20 +38,27 @@ export class InvitationAcceptanceController {
     @Body() invitationAcceptInviteDto: InvitationAcceptInviteDto,
   ): Promise<void> {
     const { passcode, payload } = invitationAcceptInviteDto;
-
-    const invitation = await this.invitationAcceptanceService.getOneByCode(
-      code,
-    );
+    let invitation: InvitationDto | null | undefined;
+    try {
+      invitation = await this.invitationAcceptanceService.getOneByCode(code);
+    } catch (e) {
+      console.error(e);
+    }
 
     if (!invitation) {
       throw new NotFoundException();
     }
 
-    const success = await this.invitationAcceptanceService.accept(
-      invitation,
-      passcode,
-      payload,
-    );
+    let success: boolean | null | undefined;
+    try {
+      success = await this.invitationAcceptanceService.accept(
+        invitation,
+        passcode,
+        payload,
+      );
+    } catch (e) {
+      console.error(e);
+    }
 
     if (!success) {
       // the client should have checked using validate passcode first
@@ -62,20 +74,31 @@ export class InvitationAcceptanceController {
     @Param('code') code: string,
     @Query('passcode') passcode: string,
   ): Promise<void> {
-    const invitation = await this.invitationAcceptanceService.getOneByCode(
-      code,
-    );
+    let invitation: InvitationDto | null | undefined;
+    try {
+      invitation = await this.invitationAcceptanceService.getOneByCode(code);
+    } catch (e) {
+      console.error(e);
+    }
 
     if (!invitation) {
       throw new NotFoundException();
     }
 
     const { category } = invitation;
-    const otp = await this.invitationAcceptanceService.validatePasscode(
-      passcode,
-      category,
-      false,
-    );
+    let otp:
+      | ReferenceAssigneeInterface<ReferenceIdInterface<string>>
+      | null
+      | undefined;
+    try {
+      otp = await this.invitationAcceptanceService.validatePasscode(
+        passcode,
+        category,
+        false,
+      );
+    } catch (e) {
+      console.error(e);
+    }
 
     if (!otp) {
       throw new NotFoundException();
