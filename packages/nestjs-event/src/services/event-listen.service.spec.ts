@@ -2,17 +2,17 @@ import { EventEmitter2 } from 'eventemitter2';
 import { Test } from '@nestjs/testing';
 import {
   EVENT_MODULE_EMITTER_SERVICE_TOKEN,
-  EVENT_MODULE_OPTIONS_TOKEN,
+  EVENT_MODULE_SETTINGS_TOKEN,
 } from '../event-constants';
-import { EventOptionsInterface } from '../interfaces/event-options.interface';
 import { EventSync } from '../events/event-sync';
 import { EventListenerOn } from '../listeners/event-listener-on';
 import { EventListenService } from './event-listen.service';
 import { EventAsync } from '../events/event-async';
 import { EventListenException } from '../exceptions/event-listen.exception';
+import { EventSettingsInterface } from '../interfaces/event-settings.interface';
 
 describe(EventListenService, () => {
-  const config: EventOptionsInterface = {};
+  const settings: EventSettingsInterface = {};
   let eventEmitter: EventEmitter2;
   let eventListenService: EventListenService;
 
@@ -24,7 +24,7 @@ describe(EventListenService, () => {
           useClass: EventEmitter2,
         },
         EventListenService,
-        { provide: EVENT_MODULE_OPTIONS_TOKEN, useValue: config },
+        { provide: EVENT_MODULE_SETTINGS_TOKEN, useValue: settings },
       ],
     }).compile();
 

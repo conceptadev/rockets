@@ -1,10 +1,16 @@
 import { Logger, Module } from '@nestjs/common';
-import { EmailService } from '@concepta/nestjs-email';
+import { MailerModule, MailerService } from '@nestjs-modules/mailer';
+import { EmailModule, EmailService } from '@concepta/nestjs-email';
 import { NotificationController } from './notification.controller';
-import { EmailModule } from '@concepta/nestjs-email';
 
 @Module({
-  imports: [EmailModule.register({})],
+  imports: [
+    MailerModule.forRoot({ transport: { host: '' } }),
+    EmailModule.forRootAsync({
+      inject: [MailerService],
+      useFactory: (mailerService: MailerService) => ({ mailerService }),
+    }),
+  ],
   controllers: [NotificationController],
   providers: [Logger, EmailService],
 })

@@ -8,9 +8,7 @@ import {
   ModuleOptionsControllerInterface,
   negotiateController,
 } from '@concepta/nestjs-core';
-import { CrudModule } from '@concepta/nestjs-crud';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
-import { EventModule } from '@concepta/nestjs-event';
 
 import {
   INVITATION_MODULE_EMAIL_SERVICE_TOKEN,
@@ -47,14 +45,7 @@ export class InvitationModule extends createConfigurableDynamicRootModule<
   InvitationModule,
   InvitationOptionsInterface
 >(INVITATION_MODULE_OPTIONS_TOKEN, {
-  imports: [
-    ConfigModule.forFeature(invitationDefaultConfig),
-    CrudModule.deferred({
-      timeoutMessage:
-        'UserModule requires CrudModule to be registered in your application.',
-    }),
-    EventModule.register(),
-  ],
+  imports: [ConfigModule.forFeature(invitationDefaultConfig)],
   providers: [
     {
       provide: INVITATION_MODULE_SETTINGS_TOKEN,

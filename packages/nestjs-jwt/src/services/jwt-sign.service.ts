@@ -2,17 +2,17 @@ import { Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { JwtSignServiceInterface } from '../interfaces/jwt-sign-service.interface';
 import {
-  JWT_MODULE_JWT_SERVICE_ACCESS_TOKEN,
-  JWT_MODULE_JWT_SERVICE_REFRESH_TOKEN,
+  JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
+  JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
 } from '../jwt.constants';
 import { JwtTokenType } from '../jwt.types';
 
 @Injectable()
 export class JwtSignService implements JwtSignServiceInterface {
   constructor(
-    @Inject(JWT_MODULE_JWT_SERVICE_ACCESS_TOKEN)
+    @Inject(JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN)
     private jwtAccessService: JwtService,
-    @Inject(JWT_MODULE_JWT_SERVICE_REFRESH_TOKEN)
+    @Inject(JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN)
     private jwtRefreshService: JwtService,
   ) {}
 

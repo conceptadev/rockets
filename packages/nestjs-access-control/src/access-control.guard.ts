@@ -13,7 +13,7 @@ import {
   ACCESS_CONTROL_MODULE_GRANT_METADATA,
   ACCESS_CONTROL_MODULE_SETTINGS_TOKEN,
 } from './constants';
-import { AccessControlOptions } from './interfaces/access-control-options.interface';
+import { AccessControlMetadataInterface } from './interfaces/access-control-metadata.interface';
 import { AccessControlFilterOption } from './interfaces/access-control-filter-option.interface';
 import { AccessControlGrantOption } from './interfaces/access-control-grant-option.interface';
 import { AccessControlServiceInterface } from './interfaces/access-control-service.interface';
@@ -135,7 +135,7 @@ export class AccessControlGuard implements CanActivate {
     context: ExecutionContext,
   ): AccessControlFilterService | undefined {
     const controllerClass = context.getClass();
-    const config: AccessControlOptions = this.reflector.get(
+    const config: AccessControlMetadataInterface = this.reflector.get(
       ACCESS_CONTROL_MODULE_CTLR_METADATA,
       controllerClass,
     );

@@ -1,0 +1,61 @@
+import { Module } from '@nestjs/common';
+
+import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
+import { CrudModule } from '@concepta/nestjs-crud';
+import { OtpModule, OtpService } from '@concepta/nestjs-otp';
+import { EmailModule, EmailService } from '@concepta/nestjs-email';
+import {
+  UserLookupService,
+  UserModule,
+  UserMutateService,
+} from '@concepta/nestjs-user';
+
+import { AuthRecoveryModule } from '../auth-recovery.module';
+import { UserOtpEntityFixture } from './user/entities/user-otp-entity.fixture';
+import { UserEntityFixture } from './user/entities/user-entity.fixture';
+
+import { default as ormConfig } from './ormconfig.fixture';
+import { MailerServiceFixture } from './email/mailer.service.fixture';
+
+@Module({
+  imports: [
+    TypeOrmExtModule.registerAsync({
+      useFactory: async () => {
+        return ormConfig;
+      },
+    }),
+    CrudModule.forRoot({}),
+    AuthRecoveryModule.forRootAsync({
+      inject: [UserLookupService, UserMutateService, OtpService, EmailService],
+      useFactory: (
+        userLookupService,
+        userMutateService,
+        otpService,
+        emailService,
+      ) => ({
+        userLookupService,
+        userMutateService,
+        otpService,
+        emailService,
+      }),
+    }),
+    OtpModule.register({
+      entities: {
+        userOtp: {
+          entity: UserOtpEntityFixture,
+        },
+      },
+    }),
+    UserModule.register({
+      entities: {
+        user: {
+          entity: UserEntityFixture,
+        },
+      },
+    }),
+    EmailModule.forRoot({
+      mailerService: new MailerServiceFixture(),
+    }),
+  ],
+})
+export class AppModuleDbFixture {}

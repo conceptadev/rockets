@@ -38,13 +38,7 @@ export class OrgModule extends createConfigurableDynamicRootModule<
   OrgModule,
   OrgOptionsInterface
 >(ORG_MODULE_OPTIONS_TOKEN, {
-  imports: [
-    ConfigModule.forFeature(orgDefaultConfig),
-    CrudModule.deferred({
-      timeoutMessage:
-        'OrgModule requires CrudModule to be registered in your application.',
-    }),
-  ],
+  imports: [ConfigModule.forFeature(orgDefaultConfig), CrudModule],
   providers: [
     {
       provide: ORG_MODULE_SETTINGS_TOKEN,

@@ -64,7 +64,7 @@ describe(InvitationSendService, () => {
   });
 
   describe(InvitationSendService.prototype.send, () => {
-    it('Should send invitation email', async () => {
+    it.only('Should send invitation email', async () => {
       const inviteCode = randomUUID();
       const spyEmail = jest.spyOn(EmailService.prototype, 'sendMail');
 

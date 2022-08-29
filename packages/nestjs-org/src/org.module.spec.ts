@@ -53,7 +53,7 @@ describe('OrgModule', () => {
             },
           },
         }),
-        CrudModule.register(),
+        CrudModule.forRoot({}),
       ],
     }).compile();
 

@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@concepta/nestjs-email": "^4.0.0-alpha.18",
+    "@nestjs-modules/mailer": "^1.6.1",
     "@concepta/nestjs-otp": "^4.0.0-alpha.18",
     "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.18",
     "@concepta/nestjs-user": "^4.0.0-alpha.18",

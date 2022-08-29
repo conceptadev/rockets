@@ -12,7 +12,7 @@ import { UserEntity } from './user/user.entity';
       database: ':memory:',
       entities: [UserEntity],
     }),
-    CrudModule.register(),
+    CrudModule.forRoot({}),
     UserModule.register({
       entities: {
         user: {

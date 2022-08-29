@@ -1,9 +1,11 @@
 import { FactoryProvider, ModuleMetadata } from '@nestjs/common/interfaces';
-import { AccessControlOptions } from '..';
+import { AccessControlMetadataInterface } from './access-control-metadata.interface';
 
 export interface AccessControlAsyncOptions
   extends Pick<ModuleMetadata, 'imports'>,
     Pick<
-      FactoryProvider<AccessControlOptions | Promise<AccessControlOptions>>,
+      FactoryProvider<
+        AccessControlMetadataInterface | Promise<AccessControlMetadataInterface>
+      >,
       'useFactory' | 'inject'
     > {}

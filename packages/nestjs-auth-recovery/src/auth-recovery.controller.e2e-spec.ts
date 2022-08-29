@@ -1,44 +1,43 @@
 import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { ConfigService, ConfigType } from '@nestjs/config';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { OtpInterface, UserInterface } from '@concepta/ts-common';
 import { SeedingSource } from '@concepta/typeorm-seeding';
+import { EmailService } from '@concepta/nestjs-email';
 import { OtpService } from '@concepta/nestjs-otp';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
 
+import { AUTH_RECOVERY_MODULE_SETTINGS_TOKEN } from './auth-recovery.constants';
+
+import { AuthRecoveryController } from './auth-recovery.controller';
+import { AuthRecoverySettingsInterface } from './interfaces/auth-recovery-settings.interface';
 import { AuthRecoveryRecoverPasswordDto } from './dto/auth-recovery-recover-password.dto';
 import { AuthRecoveryRecoverLoginDto } from './dto/auth-recovery-recover-login.dto';
 import { AuthRecoveryUpdatePasswordDto } from './dto/auth-recovery-update-password.dto';
-import { authRecoveryDefaultConfig } from './config/auth-recovery-default.config';
-import { AUTH_RECOVERY_MODULE_DEFAULT_SETTINGS_TOKEN } from './auth-recovery.constants';
-import { AuthRecoverySettingsInterface } from './interfaces/auth-recovery-settings.interface';
 
-import { AuthRecoveryUserEntityFixture } from './__fixtures__/auth-recovery-user-entity.fixture';
-import { AuthRecoveryAppModuleFixture } from './__fixtures__/auth-recovery.app.module.fixture';
+import { UserEntityFixture } from './__fixtures__/user/entities/user-entity.fixture';
+import { AppModuleDbFixture } from './__fixtures__/app.module.db.fixture';
 
-describe('AuthRecoveryController (e2e)', () => {
+describe(AuthRecoveryController, () => {
   let app: INestApplication;
   let otpService: OtpService;
-  let configService: ConfigService;
-  let config: ConfigType<typeof authRecoveryDefaultConfig>;
-  let user: AuthRecoveryUserEntityFixture;
+  let settings: AuthRecoverySettingsInterface;
+  let user: UserEntityFixture;
   let seedingSource: SeedingSource;
   let userFactory: UserFactory;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AuthRecoveryAppModuleFixture],
+      imports: [AppModuleDbFixture],
     }).compile();
     app = moduleFixture.createNestApplication();
     await app.init();
 
     otpService = moduleFixture.get<OtpService>(OtpService);
-    configService = moduleFixture.get<ConfigService>(ConfigService);
 
-    config = configService.get<AuthRecoverySettingsInterface>(
-      AUTH_RECOVERY_MODULE_DEFAULT_SETTINGS_TOKEN,
+    settings = moduleFixture.get<AuthRecoverySettingsInterface>(
+      AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
     ) as AuthRecoverySettingsInterface;
 
     seedingSource = new SeedingSource({
@@ -46,11 +45,13 @@ describe('AuthRecoveryController (e2e)', () => {
     });
 
     userFactory = new UserFactory({
-      entity: AuthRecoveryUserEntityFixture,
+      entity: UserEntityFixture,
       seedingSource,
     });
 
     user = await userFactory.create();
+
+    jest.spyOn(EmailService.prototype, 'sendMail').mockResolvedValue(undefined);
   });
 
   afterEach(async () => {
@@ -68,7 +69,7 @@ describe('AuthRecoveryController (e2e)', () => {
   it('GET auth/recovery/passcode/{passcode}', async () => {
     const user = await getFirstUser(app);
 
-    const otpCreateDto = await createOtp(config, otpService, user.id);
+    const otpCreateDto = await createOtp(settings, otpService, user.id);
 
     const { passcode } = otpCreateDto;
 
@@ -90,7 +91,7 @@ describe('AuthRecoveryController (e2e)', () => {
 
     await validateRecoverPassword(app, user);
 
-    const otpCreateDto = await createOtp(config, otpService, user.id);
+    const otpCreateDto = await createOtp(settings, otpService, user.id);
 
     await supertest(app.getHttpServer())
       .patch('/auth/recovery/password')
@@ -121,7 +122,7 @@ const validateRecoverPassword = async (
 };
 
 const createOtp = async (
-  config: ConfigType<typeof authRecoveryDefaultConfig>,
+  config: AuthRecoverySettingsInterface,
   otpService: OtpService,
   userId: string,
 ): Promise<OtpInterface> => {

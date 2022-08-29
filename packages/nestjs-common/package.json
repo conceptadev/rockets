@@ -13,6 +13,8 @@
   ],
   "dependencies": {
     "@concepta/ts-core": "^4.0.0-alpha.18",
+    "@concepta/nestjs-core": "^4.0.0-alpha.18",
+    "@nestjs/common": "^9.0.0",
     "@nestjs/swagger": "^6.0.0"
   },
   "peerDependencies": {

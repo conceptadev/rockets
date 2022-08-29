@@ -16,6 +16,6 @@ export * from './enums/access-control-filter-type.enum';
 export * from './interfaces/access-control-filter-option.interface';
 export * from './interfaces/access-control-filter-service.interface';
 export * from './interfaces/access-control-grant-option.interface';
-export * from './interfaces/access-control-module-options.interface';
 export * from './interfaces/access-control-options.interface';
+export * from './interfaces/access-control-metadata.interface';
 export * from './interfaces/access-control-service.interface';

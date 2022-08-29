@@ -10,6 +10,7 @@ import {
 } from '@concepta/nestjs-user';
 import { EmailSendOptionsInterface } from '@concepta/ts-common';
 import { EventModule } from '@concepta/nestjs-event';
+import { MailerModule, MailerService } from '@nestjs-modules/mailer';
 
 import { InvitationModule } from '../invitation.module';
 import { default as ormConfig } from './invitation.ormconfig.fixture';
@@ -20,20 +21,20 @@ import { InvitationAcceptedEventAsync } from '../events/invitation-accepted.even
 
 @Module({
   imports: [
-    EventModule.register(),
+    EventModule.forRoot({}),
     TypeOrmExtModule.registerAsync({
       useFactory: async () => {
         return ormConfig;
       },
     }),
-    CrudModule.register({}),
-    EmailModule.register({}),
+    CrudModule.forRoot({}),
+    MailerModule.forRoot({ transport: { host: '' } }),
+    EmailModule.forRootAsync({
+      inject: [MailerService],
+      useFactory: (mailerService: MailerService) => ({ mailerService }),
+    }),
     InvitationModule.registerAsync({
-      imports: [
-        UserModule.deferred(),
-        OtpModule.deferred(),
-        EmailModule.deferred(),
-      ],
+      imports: [UserModule.deferred(), OtpModule.deferred()],
       inject: [UserLookupService, UserMutateService, OtpService, EmailService],
       useFactory: (
         userLookupService,

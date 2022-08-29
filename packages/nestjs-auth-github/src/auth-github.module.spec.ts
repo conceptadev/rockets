@@ -15,47 +15,51 @@ import { AuthGithubModule } from './auth-github.module';
 import { FederatedEntityFixture } from './__fixtures__/federated-entity.fixture';
 import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
 
-describe('AuthGithubModuleTest', () => {
-  afterEach(async () => {
-    jest.clearAllMocks();
-  });
+describe(AuthGithubModule, () => {
+  let authGithubModule: AuthGithubModule;
+  let authGithubController: AuthGithubController;
 
-  it('is controller defined', async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        TypeOrmExtModule.register({
-          type: 'sqlite',
-          database: ':memory:',
-          entities: [UserEntityFixture, FederatedEntityFixture],
-        }),
-        AuthenticationModule.register(),
-        JwtModule.register(),
-        AuthGithubModule.register(),
-        FederatedModule.registerAsync({
-          imports: [UserModule.deferred()],
-          inject: [UserLookupService, UserMutateService],
-          useFactory: (userLookupService, userMutateService) => ({
-            userLookupService,
-            userMutateService,
+  describe(AuthGithubModule.forRoot, () => {
+    it('module should be loaded', async () => {
+      const module: TestingModule = await Test.createTestingModule({
+        imports: [
+          TypeOrmExtModule.register({
+            type: 'sqlite',
+            database: ':memory:',
+            entities: [UserEntityFixture, FederatedEntityFixture],
           }),
-          entities: {
-            federated: {
-              entity: FederatedEntityFixture,
+          JwtModule.forRoot({}),
+          AuthGithubModule.forRoot({}),
+          AuthenticationModule.forRoot({}),
+          FederatedModule.forRootAsync({
+            imports: [UserModule.deferred()],
+            inject: [UserLookupService, UserMutateService],
+            useFactory: (userLookupService, userMutateService) => ({
+              userLookupService,
+              userMutateService,
+            }),
+            entities: {
+              federated: {
+                entity: FederatedEntityFixture,
+              },
             },
-          },
-        }),
-        CrudModule.register(),
-        UserModule.register({
-          entities: {
-            user: {
-              entity: UserEntityFixture,
+          }),
+          CrudModule.forRoot({}),
+          UserModule.register({
+            entities: {
+              user: {
+                entity: UserEntityFixture,
+              },
             },
-          },
-        }),
-      ],
-    }).compile();
+          }),
+        ],
+      }).compile();
 
-    const controller = module.get(AuthGithubController);
-    expect(controller).toBeDefined();
+      authGithubModule = module.get(AuthGithubModule);
+      authGithubController = module.get(AuthGithubController);
+
+      expect(authGithubModule).toBeInstanceOf(AuthGithubModule);
+      expect(authGithubController).toBeInstanceOf(AuthGithubController);
+    });
   });
 });

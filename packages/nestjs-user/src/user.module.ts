@@ -45,13 +45,7 @@ export class UserModule extends createConfigurableDynamicRootModule<
   UserModule,
   UserOptionsInterface
 >(USER_MODULE_OPTIONS_TOKEN, {
-  imports: [
-    ConfigModule.forFeature(userDefaultConfig),
-    CrudModule.deferred({
-      timeoutMessage:
-        'UserModule requires CrudModule to be registered in your application.',
-    }),
-  ],
+  imports: [ConfigModule.forFeature(userDefaultConfig), CrudModule],
   providers: [
     {
       provide: USER_MODULE_SETTINGS_TOKEN,
@@ -99,6 +93,9 @@ export class UserModule extends createConfigurableDynamicRootModule<
     module.imports.push(TypeOrmExtModule.forFeature(options.entities));
 
     negotiateController(module, options);
+
+    // TODO: this is temporary until we migrate to configurable module
+    module.global = true;
 
     return module;
   }

@@ -14,7 +14,7 @@
   ],
   "references": [
     {
-      "path": "../nestjs-core"
+      "path": "../nestjs-common"
     }
   ]
 }

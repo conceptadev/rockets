@@ -43,7 +43,7 @@ import { UserRoleEntityFixture } from './entities/user-role-entity.fixture';
         },
       },
     }),
-    CrudModule.register(),
+    CrudModule.forRoot({}),
   ],
 })
 export class AppModuleFixture {}

@@ -15,7 +15,7 @@ export class PhotoModuleFixture {
     return {
       module: PhotoModuleFixture,
       imports: [
-        CrudModule.register(),
+        CrudModule.forRoot({}),
         TypeOrmExtModule.forFeature({
           photo: {
             entity: PhotoFixture,
