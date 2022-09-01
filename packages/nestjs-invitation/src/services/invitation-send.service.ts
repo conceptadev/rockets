@@ -13,6 +13,7 @@ import { InvitationSettingsInterface } from '../interfaces/invitation-settings.i
 import { InvitationUserLookupServiceInterface } from '../interfaces/invitation-user-lookup.service.interface';
 import { InvitationUserMutateServiceInterface } from '../interfaces/invitation-user-mutate.service.interface';
 import {
+  ReferenceEmailInterface,
   ReferenceIdInterface,
   ReferenceUsernameInterface,
 } from '@concepta/ts-core';
@@ -33,8 +34,7 @@ export class InvitationSendService {
   ) {}
 
   async send(
-    userId: string,
-    email: string,
+    user: ReferenceIdInterface & ReferenceEmailInterface,
     code: string,
     category: string,
   ): Promise<void> {
@@ -45,17 +45,19 @@ export class InvitationSendService {
       type,
       expiresIn,
       assignee: {
-        id: userId,
+        id: user.id,
       },
     });
 
     // send the invite email
-    await this.sendEmail(email, code, otp.passcode, otp.expirationDate);
+    await this.sendEmail(user.email, code, otp.passcode, otp.expirationDate);
   }
 
   async getOrCreateOneUser(
     email: string,
-  ): Promise<ReferenceIdInterface & ReferenceUsernameInterface> {
+  ): Promise<
+    ReferenceIdInterface & ReferenceUsernameInterface & ReferenceEmailInterface
+  > {
     let user = await this.userLookupService.byEmail(email);
 
     if (!user) {

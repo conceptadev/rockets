@@ -1,4 +1,8 @@
-import { LiteralObject } from '@concepta/ts-core';
+import {
+  LiteralObject,
+  ReferenceEmailInterface,
+  ReferenceIdInterface,
+} from '@concepta/ts-core';
 import { Injectable } from '@nestjs/common';
 
 import { InvitationServiceInterface } from '../interfaces/invitation.service.interface';
@@ -16,12 +20,11 @@ export class InvitationService implements InvitationServiceInterface {
   ) {}
 
   async send(
-    userId: string,
-    email: string,
+    user: ReferenceIdInterface & ReferenceEmailInterface,
     code: string,
     category: string,
   ): Promise<void> {
-    return this.invitationSendService.send(userId, email, code, category);
+    return this.invitationSendService.send(user, code, category);
   }
 
   /**

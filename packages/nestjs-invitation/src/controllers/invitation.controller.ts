@@ -85,12 +85,7 @@ export class InvitationController
       code: randomUUID(),
     });
 
-    await this.invitationSendService.send(
-      user.id,
-      email,
-      invite.code,
-      category,
-    );
+    await this.invitationSendService.send(user, invite.code, category);
 
     return invite;
   }

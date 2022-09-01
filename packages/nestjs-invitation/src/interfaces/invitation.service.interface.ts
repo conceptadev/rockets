@@ -1,10 +1,13 @@
-import { LiteralObject } from '@concepta/ts-core';
+import {
+  LiteralObject,
+  ReferenceEmailInterface,
+  ReferenceIdInterface,
+} from '@concepta/ts-core';
 import { InvitationDto } from '../dto/invitation.dto';
 
 export interface InvitationServiceInterface {
   send(
-    userId: string,
-    email: string,
+    user: ReferenceIdInterface & ReferenceEmailInterface,
     code: string,
     category: string,
   ): Promise<void>;

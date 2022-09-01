@@ -1,6 +1,7 @@
 import {
   LookupEmailInterface,
   LookupIdInterface,
+  ReferenceEmailInterface,
   ReferenceId,
   ReferenceIdInterface,
   ReferenceUsernameInterface,
@@ -10,5 +11,7 @@ export interface InvitationUserLookupServiceInterface
   extends LookupIdInterface,
     LookupEmailInterface<
       ReferenceId,
-      ReferenceIdInterface & ReferenceUsernameInterface
+      ReferenceIdInterface &
+        ReferenceUsernameInterface &
+        ReferenceEmailInterface
     > {}

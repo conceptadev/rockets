@@ -93,12 +93,7 @@ describe(InvitationRevocationService, () => {
         category,
       });
 
-      await invitationSendService.send(
-        testUser.id,
-        testUser.email,
-        invitation.code,
-        category,
-      );
+      await invitationSendService.send(testUser, invitation.code, category);
 
       const invitations = await invitationRepo.find({
         where: {

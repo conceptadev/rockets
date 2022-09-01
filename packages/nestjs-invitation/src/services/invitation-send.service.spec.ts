@@ -73,12 +73,7 @@ describe(InvitationSendService, () => {
     it.only('Should send invitation email', async () => {
       const inviteCode = randomUUID();
 
-      await invitationSendService.send(
-        testUser.id,
-        testUser.email,
-        inviteCode,
-        'invitation',
-      );
+      await invitationSendService.send(testUser, inviteCode, 'invitation');
 
       const otps = await userOtpRepo.find({
         where: { assignee: { id: testUser.id } },
