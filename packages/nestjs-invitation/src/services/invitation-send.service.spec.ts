@@ -19,6 +19,8 @@ import { UserEntityFixture } from '../__fixtures__/entities/user.entity.fixture'
 import { UserOtpEntityFixture } from '../__fixtures__/entities/user-otp.entity.fixture';
 
 describe(InvitationSendService, () => {
+  let spyEmailService: jest.SpyInstance;
+
   let app: INestApplication;
   let seedingSource: SeedingSource;
   let settings: InvitationSettingsInterface;
@@ -28,6 +30,10 @@ describe(InvitationSendService, () => {
   let testUser: UserEntityInterface;
 
   beforeEach(async () => {
+    spyEmailService = jest
+      .spyOn(EmailService.prototype, 'sendMail')
+      .mockImplementation(async () => undefined);
+
     const testingModule: TestingModule = await Test.createTestingModule({
       imports: [InvitationAppModuleFixture],
     }).compile();
@@ -66,7 +72,6 @@ describe(InvitationSendService, () => {
   describe(InvitationSendService.prototype.send, () => {
     it.only('Should send invitation email', async () => {
       const inviteCode = randomUUID();
-      const spyEmail = jest.spyOn(EmailService.prototype, 'sendMail');
 
       await invitationSendService.send(
         testUser.id,
@@ -81,11 +86,11 @@ describe(InvitationSendService, () => {
 
       expect(otps.length).toEqual(1);
       expect(otps[0].category).toEqual('invitation');
-      expect(spyEmail).toHaveBeenCalledTimes(1);
+      expect(spyEmailService).toHaveBeenCalledTimes(1);
 
       const { passcode, expirationDate } = otps[0];
 
-      expect(spyEmail).toHaveBeenCalledWith({
+      expect(spyEmailService).toHaveBeenCalledWith({
         to: testUser.email,
         from: settings.email.from,
         context: {

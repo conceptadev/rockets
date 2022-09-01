@@ -5,6 +5,7 @@ import { UserFactory } from '@concepta/nestjs-user/src/seeding';
 import { ConfigService, ConfigType } from '@nestjs/config';
 import { OtpService } from '@concepta/nestjs-otp';
 import { OtpInterface, UserInterface } from '@concepta/ts-common';
+import { EmailService } from '@concepta/nestjs-email';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { getDataSourceToken } from '@nestjs/typeorm';
 
@@ -32,6 +33,10 @@ describe('InvitationController (e2e)', () => {
   let config: ConfigType<typeof invitationDefaultConfig>;
 
   beforeEach(async () => {
+    jest
+      .spyOn(EmailService.prototype, 'sendMail')
+      .mockImplementation(async () => undefined);
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [InvitationAppModuleFixture],
     }).compile();

@@ -18,9 +18,12 @@ import { InvitationEntityInterface } from '../interfaces/invitation.entity.inter
 import { InvitationAppModuleFixture } from '../__fixtures__/invitation.app.module.fixture';
 import { UserEntityFixture } from '../__fixtures__/entities/user.entity.fixture';
 import { InvitationEntityFixture } from '../__fixtures__/entities/invitation.entity.fixture';
+import { EmailService } from '@concepta/nestjs-email';
 
 describe(InvitationRevocationService, () => {
   const category = 'invitation';
+
+  let spyEmailService: jest.SpyInstance;
 
   let app: INestApplication;
   let seedingSource: SeedingSource;
@@ -33,6 +36,10 @@ describe(InvitationRevocationService, () => {
   let invitationFactory: InvitationFactory;
 
   beforeEach(async () => {
+    spyEmailService = jest
+      .spyOn(EmailService.prototype, 'sendMail')
+      .mockImplementation(async () => undefined);
+
     const testingModule: TestingModule = await Test.createTestingModule({
       imports: [InvitationAppModuleFixture],
     }).compile();
@@ -109,6 +116,7 @@ describe(InvitationRevocationService, () => {
 
       expect(countAfter).toEqual(0);
       expect(spyOtpClear).toHaveBeenCalledTimes(1);
+      expect(spyEmailService).toHaveBeenCalledTimes(1);
     });
   });
 });

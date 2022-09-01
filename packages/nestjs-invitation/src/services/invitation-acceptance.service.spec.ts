@@ -34,6 +34,10 @@ describe(InvitationAcceptanceService, () => {
   let testInvitation: InvitationEntityInterface;
 
   beforeEach(async () => {
+    spyEmailService = jest
+      .spyOn(EmailService.prototype, 'sendMail')
+      .mockImplementation(async () => undefined);
+
     const testingModule: TestingModule = await Test.createTestingModule({
       imports: [InvitationAppModuleFixture],
     }).compile();
@@ -51,7 +55,6 @@ describe(InvitationAcceptanceService, () => {
       INVITATION_MODULE_SETTINGS_TOKEN,
     );
 
-    spyEmailService = jest.spyOn(EmailService.prototype, 'sendMail');
     spyEventDispatchService = jest.spyOn(
       EventDispatchService.prototype,
       'async',
