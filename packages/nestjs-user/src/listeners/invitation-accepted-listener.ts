@@ -11,10 +11,10 @@ import { UserMutateService } from '../services/user-mutate.service';
 import { UserSettingsInterface } from '../interfaces/user-settings.interface';
 import { UserLookupService } from '../services/user-lookup.service';
 import { UserNotFoundException } from '../exceptions/user-not-found-exception';
-import { CreateUserEventInvalidPayloadException } from '../exceptions/create-user-event-invalid-payload-exception';
+import { UserException } from '../exceptions/user-exception';
 
 @Injectable()
-export class CreateUserListener
+export class InvitationAcceptedListener
   extends EventListenerOn<
     EventAsyncInterface<InvitationAcceptedEventPayloadInterface, boolean>
   >
@@ -49,7 +49,9 @@ export class CreateUserListener
       const { userId, newPassword } = event?.payload.data ?? {};
 
       if (!userId || !newPassword) {
-        throw new CreateUserEventInvalidPayloadException();
+        throw new UserException(
+          'The invitation accepted event payload received has invalid content. The payload must have the "userId" and "newPassword" properties.',
+        );
       }
 
       const user = await this.userLookupService.byId(userId as string);

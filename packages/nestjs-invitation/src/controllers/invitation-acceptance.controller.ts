@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  Logger,
   NotFoundException,
   Param,
   Patch,
@@ -38,18 +39,20 @@ export class InvitationAcceptanceController {
     @Body() invitationAcceptInviteDto: InvitationAcceptInviteDto,
   ): Promise<void> {
     const { passcode, payload } = invitationAcceptInviteDto;
+
     let invitation: InvitationDto | null | undefined;
+    let success: boolean | null | undefined;
+
     try {
       invitation = await this.invitationAcceptanceService.getOneByCode(code);
-    } catch (e) {
-      console.error(e);
+    } catch (e: unknown) {
+      Logger.error(e);
     }
 
     if (!invitation) {
       throw new NotFoundException();
     }
 
-    let success: boolean | null | undefined;
     try {
       success = await this.invitationAcceptanceService.accept(
         invitation,
@@ -57,7 +60,7 @@ export class InvitationAcceptanceController {
         payload,
       );
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     if (!success) {
@@ -75,10 +78,11 @@ export class InvitationAcceptanceController {
     @Query('passcode') passcode: string,
   ): Promise<void> {
     let invitation: InvitationDto | null | undefined;
+
     try {
       invitation = await this.invitationAcceptanceService.getOneByCode(code);
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     if (!invitation) {
@@ -86,6 +90,7 @@ export class InvitationAcceptanceController {
     }
 
     const { category } = invitation;
+
     let otp:
       | ReferenceAssigneeInterface<ReferenceIdInterface<string>>
       | null
@@ -94,10 +99,9 @@ export class InvitationAcceptanceController {
       otp = await this.invitationAcceptanceService.validatePasscode(
         passcode,
         category,
-        false,
       );
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     if (!otp) {

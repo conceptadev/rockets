@@ -18,6 +18,7 @@ import {
   ReferenceUsernameInterface,
 } from '@concepta/ts-core';
 import { InvitationEmailServiceInterface } from '../interfaces/invitation-email.service.interface';
+import { InvitationSendMailException } from '../exceptions/invitation-send-mail.exception';
 
 export class InvitationSendService {
   constructor(
@@ -39,6 +40,7 @@ export class InvitationSendService {
     category: string,
   ): Promise<void> {
     const { assignment, type, expiresIn } = this.settings.otp;
+
     // create an OTP for this invite
     const otp = await this.otpService.create(assignment, {
       category,
@@ -79,15 +81,19 @@ export class InvitationSendService {
     const { from, baseUrl } = this.settings.email;
     const { subject, fileName } = this.settings.email.templates.invitation;
 
-    await this.emailService.sendMail({
-      from,
-      subject,
-      to: email,
-      template: fileName,
-      context: {
-        tokenUrl: `${baseUrl}/?code=${code}&passcode=${passcode}`,
-        tokenExp: resetTokenExp,
-      },
-    });
+    try {
+      await this.emailService.sendMail({
+        from,
+        subject,
+        to: email,
+        template: fileName,
+        context: {
+          tokenUrl: `${baseUrl}/?code=${code}&passcode=${passcode}`,
+          tokenExp: resetTokenExp,
+        },
+      });
+    } catch (e: unknown) {
+      throw new InvitationSendMailException(e, email);
+    }
   }
 }

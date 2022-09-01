@@ -2,6 +2,7 @@ export { ExceptionInterface } from './exceptions/interfaces/exception.interface'
 
 export { Type } from './utils/interfaces/type.interface';
 export { LiteralObject } from './utils/interfaces/literal-object.interface';
+export { mapNonErrorToException } from './utils/map-non-error-to-exception.util';
 
 export { NotAnErrorException } from './exceptions/not-an-error.exception';
 

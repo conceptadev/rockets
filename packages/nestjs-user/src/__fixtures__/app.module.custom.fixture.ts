@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
-import { EventModule } from '@concepta/nestjs-event/dist/event.module';
+import { EventModule } from '@concepta/nestjs-event';
 
 import { createUserRepositoryFixture } from './create-user-repository.fixture';
 import { UserModule } from '../user.module';

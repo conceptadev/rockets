@@ -26,6 +26,8 @@ import { InvitationResource } from '../invitation.types';
 import { InvitationCrudService } from '../services/invitation-crud.service';
 import { randomUUID } from 'crypto';
 import { InvitationSendService } from '../services/invitation-send.service';
+import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
+import { InternalServerErrorException, Logger } from '@nestjs/common';
 
 @CrudController({
   path: 'invitation',
@@ -76,18 +78,25 @@ export class InvitationController
     @CrudBody() invitationCreateDto: InvitationCreateDto,
   ) {
     const { email, category } = invitationCreateDto;
-    const user = await this.invitationSendService.getOrCreateOneUser(email);
+    let invite: InvitationEntityInterface;
 
-    const invite = await this.invitationCrudService.createOne(crudRequest, {
-      user,
-      email,
-      category,
-      code: randomUUID(),
-    });
+    try {
+      const user = await this.invitationSendService.getOrCreateOneUser(email);
 
-    await this.invitationSendService.send(user, invite.code, category);
+      invite = await this.invitationCrudService.createOne(crudRequest, {
+        user,
+        email,
+        category,
+        code: randomUUID(),
+      });
 
-    return invite;
+      await this.invitationSendService.send(user, invite.code, category);
+
+      return invite;
+    } catch (e: unknown) {
+      Logger.error(e);
+      throw new InternalServerErrorException();
+    }
   }
 
   @CrudDeleteOne()
@@ -96,6 +105,11 @@ export class InvitationController
     summary: 'Delete one invitation.',
   })
   async deleteOne(@CrudRequest() crudRequest: CrudRequestInterface) {
-    return this.invitationCrudService.deleteOne(crudRequest);
+    try {
+      return this.invitationCrudService.deleteOne(crudRequest);
+    } catch (e: unknown) {
+      Logger.error(e);
+      throw new InternalServerErrorException();
+    }
   }
 }

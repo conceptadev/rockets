@@ -18,13 +18,14 @@ import { InvitationEntityInterface } from '../interfaces/invitation.entity.inter
 import { InvitationSettingsInterface } from '../interfaces/invitation-settings.interface';
 import { InvitationOtpServiceInterface } from '../interfaces/invitation-otp.service.interface';
 import { InvitationEmailServiceInterface } from '../interfaces/invitation-email.service.interface';
+import { InvitationSendMailException } from '../exceptions/invitation-send-mail.exception';
 
 export class InvitationAcceptanceService {
   constructor(
-    @InjectDynamicRepository(INVITATION_MODULE_INVITATION_ENTITY_KEY)
-    private invitationRepo: Repository<InvitationEntityInterface>,
     @Inject(INVITATION_MODULE_SETTINGS_TOKEN)
     private readonly settings: InvitationSettingsInterface,
+    @InjectDynamicRepository(INVITATION_MODULE_INVITATION_ENTITY_KEY)
+    private invitationRepo: Repository<InvitationEntityInterface>,
     @Inject(INVITATION_MODULE_EMAIL_SERVICE_TOKEN)
     private readonly emailService: InvitationEmailServiceInterface,
     @Inject(INVITATION_MODULE_OTP_SERVICE_TOKEN)
@@ -85,12 +86,16 @@ export class InvitationAcceptanceService {
     const { subject, fileName } =
       this.settings.email.templates.invitationAccepted;
 
-    await this.emailService.sendMail({
-      from,
-      subject,
-      to: email,
-      template: fileName,
-    });
+    try {
+      await this.emailService.sendMail({
+        from,
+        subject,
+        to: email,
+        template: fileName,
+      });
+    } catch (e: unknown) {
+      throw new InvitationSendMailException(e, email);
+    }
   }
 
   /**

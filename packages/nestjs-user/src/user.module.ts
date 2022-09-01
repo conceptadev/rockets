@@ -26,7 +26,7 @@ import { DefaultUserLookupService } from './services/default-user-lookup.service
 import { UserMutateService } from './services/user-mutate.service';
 import { DefaultUserMutateService } from './services/default-user-mutate.service';
 import { UserEntitiesOptionsInterface } from './interfaces/user-entities-options.interface';
-import { CreateUserListener } from './listeners/create-user-listener';
+import { InvitationAcceptedListener } from './listeners/invitation-accepted-listener';
 
 /**
  * User Module
@@ -71,7 +71,7 @@ export class UserModule extends createConfigurableDynamicRootModule<
         defaultService: DefaultUserMutateService,
       ) => options.userMutateService ?? defaultService,
     },
-    CreateUserListener,
+    InvitationAcceptedListener,
   ],
 }) {
   /**
