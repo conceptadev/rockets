@@ -8,11 +8,12 @@ import {
 } from '@concepta/ts-common';
 import { PasswordStorageService } from '@concepta/nestjs-password';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
+
+import { USER_MODULE_USER_ENTITY_KEY } from '../user.constants';
 import { UserEntityInterface } from '../interfaces/user-entity.interface';
 import { UserMutateServiceInterface } from '../interfaces/user-mutate-service.interface';
 import { UserCreateDto } from '../dto/user-create.dto';
 import { UserUpdateDto } from '../dto/user-update.dto';
-import { USER_MODULE_USER_ENTITY_KEY } from '../user.constants';
 
 /**
  * User mutate service
@@ -33,6 +34,7 @@ export class UserMutateService
    * Constructor
    *
    * @param repo instance of the user repo
+   * @param passwordStorageService
    */
   constructor(
     @InjectDynamicRepository(USER_MODULE_USER_ENTITY_KEY)
@@ -42,7 +44,7 @@ export class UserMutateService
     super(repo);
   }
 
-  protected async save<T extends DeepPartial<UserEntityInterface>>(
+  async save<T extends DeepPartial<UserEntityInterface>>(
     user: T | (T & PasswordPlainInterface),
   ): Promise<UserEntityInterface> {
     // do we need to hash the password?

@@ -15,6 +15,9 @@
   "references": [
     {
       "path": "../ts-core"
+    },
+    {
+      "path": "../nestjs-event"
     }
   ]
 }
