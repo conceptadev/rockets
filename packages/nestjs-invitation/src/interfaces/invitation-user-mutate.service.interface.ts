@@ -2,17 +2,19 @@ import {
   CreateOneInterface,
   ReferenceEmailInterface,
   ReferenceIdInterface,
+  ReferenceUsernameInterface,
   UpdateOneInterface,
 } from '@concepta/ts-core';
-import {
-  PasswordPlainInterface,
-  UserCreatableInterface,
-} from '@concepta/ts-common';
-import { UserEntityInterface } from '@concepta/nestjs-user';
+import { UserCreatableInterface } from '@concepta/ts-common';
 
 export interface InvitationUserMutateServiceInterface
-  extends CreateOneInterface<UserCreatableInterface, UserEntityInterface>,
+  extends CreateOneInterface<
+      UserCreatableInterface,
+      ReferenceIdInterface &
+        ReferenceEmailInterface &
+        ReferenceUsernameInterface
+    >,
     UpdateOneInterface<
-      ReferenceIdInterface & PasswordPlainInterface,
+      ReferenceIdInterface,
       ReferenceIdInterface & ReferenceEmailInterface
     > {}
