@@ -8,7 +8,6 @@ import {
 } from '@nestjs/common';
 import { ReferenceUsername } from '@concepta/ts-core';
 import { PassportStrategyFactory } from '@concepta/nestjs-authentication';
-import { PasswordStorageService } from '@concepta/nestjs-password';
 import {
   AUTH_LOCAL_MODULE_SETTINGS_TOKEN,
   AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN,
@@ -16,6 +15,7 @@ import {
 } from './auth-local.constants';
 import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.interface';
 import { AuthLocalUserLookupServiceInterface } from './interfaces/auth-local-user-lookup-service.interface';
+import { PasswordStorageServiceInterface } from '@concepta/nestjs-password/src/interfaces/password-storage-service.interface';
 
 /**
  * Define the Local strategy using passport.
@@ -39,7 +39,7 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
     private settings: AuthLocalSettingsInterface,
     @Inject(AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN)
     private userLookupService: AuthLocalUserLookupServiceInterface,
-    private passwordService: PasswordStorageService,
+    private passwordService: PasswordStorageServiceInterface,
   ) {
     super({
       usernameField: settings?.usernameField,
@@ -94,11 +94,13 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
 
     // is the login dto missing?
     if (!loginDto) {
+      // TODO: Change Error to a Exception
       throw new Error('Login DTO is required, did someone remove the default?');
     }
 
     // is the username field missing?
     if (!usernameField) {
+      // TODO: Change Error to a Exception
       throw new Error(
         'Login username field is required, did someone remove the default?',
       );
@@ -106,6 +108,7 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
 
     // is the password field missing?
     if (!passwordField) {
+      // TODO: Change Error to a Exception
       throw new Error(
         'Login password field is required, did someone remove the default?',
       );
