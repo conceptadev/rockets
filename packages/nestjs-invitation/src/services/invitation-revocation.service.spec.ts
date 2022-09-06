@@ -2,8 +2,10 @@ import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
+
 import { UserEntityInterface } from '@concepta/nestjs-user';
 import { OtpService } from '@concepta/nestjs-otp';
+import { EmailService } from '@concepta/nestjs-email';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { getDynamicRepositoryToken } from '@concepta/nestjs-typeorm-ext';
@@ -15,10 +17,9 @@ import { InvitationSendService } from './invitation-send.service';
 import { InvitationRevocationService } from './invitation-revocation.service';
 import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
 
-import { InvitationAppModuleFixture } from '../__fixtures__/invitation.app.module.fixture';
-import { UserEntityFixture } from '../__fixtures__/entities/user.entity.fixture';
-import { InvitationEntityFixture } from '../__fixtures__/entities/invitation.entity.fixture';
-import { EmailService } from '@concepta/nestjs-email';
+import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
+import { InvitationEntityFixture } from '../__fixtures__/invitation/entities/invitation.entity.fixture';
+import { UserEntityFixture } from '../__fixtures__/user/entities/user-entity.fixture';
 
 describe(InvitationRevocationService, () => {
   const category = 'invitation';
@@ -41,7 +42,7 @@ describe(InvitationRevocationService, () => {
       .mockImplementation(async () => undefined);
 
     const testingModule: TestingModule = await Test.createTestingModule({
-      imports: [InvitationAppModuleFixture],
+      imports: [AppModuleFixture],
     }).compile();
     app = testingModule.createNestApplication();
     await app.init();

@@ -4,10 +4,14 @@ import {
   ReferenceId,
   ReferenceIdInterface,
 } from '@concepta/ts-core';
-import { UserEntityFixture } from './user.entity.fixture';
 import { OtpInterface } from '@concepta/ts-common';
 import { AuditSqlLiteEmbed } from '@concepta/typeorm-common';
 
+import { UserEntityFixture } from './user-entity.fixture';
+
+/**
+ * Otp Entity Fixture
+ */
 @Entity()
 export class UserOtpEntityFixture implements OtpInterface {
   @PrimaryGeneratedColumn('uuid')
@@ -28,8 +32,6 @@ export class UserOtpEntityFixture implements OtpInterface {
   @Column(() => AuditSqlLiteEmbed, {})
   audit!: AuditInterface;
 
-  @ManyToOne(() => UserEntityFixture, (user) => user.userOtps, {
-    nullable: false,
-  })
+  @ManyToOne(() => UserEntityFixture, (user) => user.userOtps)
   assignee!: ReferenceIdInterface;
 }

@@ -9,14 +9,16 @@ import { SeedingSource } from '@concepta/typeorm-seeding';
 import { EmailService } from '@concepta/nestjs-email';
 import { EventDispatchService } from '@concepta/nestjs-event';
 
-import { InvitationSettingsInterface } from '../interfaces/invitation-settings.interface';
 import { INVITATION_MODULE_SETTINGS_TOKEN } from '../invitation.constants';
-import { InvitationAppModuleFixture } from '../__fixtures__/invitation.app.module.fixture';
-import { UserEntityFixture } from '../__fixtures__/entities/user.entity.fixture';
+
 import { InvitationFactory } from '../invitation.factory';
-import { InvitationEntityFixture } from '../__fixtures__/entities/invitation.entity.fixture';
+import { InvitationSettingsInterface } from '../interfaces/invitation-settings.interface';
 import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
 import { InvitationAcceptanceService } from './invitation-acceptance.service';
+
+import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
+import { InvitationEntityFixture } from '../__fixtures__/invitation/entities/invitation.entity.fixture';
+import { UserEntityFixture } from '../__fixtures__/user/entities/user-entity.fixture';
 
 describe(InvitationAcceptanceService, () => {
   const category = 'invitation';
@@ -39,7 +41,7 @@ describe(InvitationAcceptanceService, () => {
       .mockImplementation(async () => undefined);
 
     const testingModule: TestingModule = await Test.createTestingModule({
-      imports: [InvitationAppModuleFixture],
+      imports: [AppModuleFixture],
     }).compile();
     app = testingModule.createNestApplication();
     await app.init();

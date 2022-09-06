@@ -13,11 +13,12 @@ import { EventModule } from '@concepta/nestjs-event';
 import { MailerModule, MailerService } from '@nestjs-modules/mailer';
 
 import { InvitationModule } from '../invitation.module';
-import { default as ormConfig } from './invitation.ormconfig.fixture';
-import { UserOtpEntityFixture } from './entities/user-otp.entity.fixture';
-import { UserEntityFixture } from './entities/user.entity.fixture';
-import { InvitationEntityFixture } from './entities/invitation.entity.fixture';
+
+import { InvitationEntityFixture } from './invitation/entities/invitation.entity.fixture';
 import { InvitationAcceptedEventAsync } from '../events/invitation-accepted.event';
+import { UserOtpEntityFixture } from './user/entities/user-otp-entity.fixture';
+import { UserEntityFixture } from './user/entities/user-entity.fixture';
+import { default as ormConfig } from './ormconfig.fixture';
 
 @Module({
   imports: [
@@ -92,4 +93,4 @@ import { InvitationAcceptedEventAsync } from '../events/invitation-accepted.even
     },
   ],
 })
-export class InvitationAppModuleFixture {}
+export class AppModuleFixture {}

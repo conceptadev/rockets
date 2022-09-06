@@ -1,7 +1,8 @@
 import { DataSourceOptions } from 'typeorm';
-import { UserOtpEntityFixture } from './entities/user-otp.entity.fixture';
-import { UserEntityFixture } from './entities/user.entity.fixture';
-import { InvitationEntityFixture } from './entities/invitation.entity.fixture';
+
+import { InvitationEntityFixture } from './invitation/entities/invitation.entity.fixture';
+import { UserEntityFixture } from './user/entities/user-entity.fixture';
+import { UserOtpEntityFixture } from './user/entities/user-otp-entity.fixture';
 
 const config: DataSourceOptions = {
   type: 'sqlite',

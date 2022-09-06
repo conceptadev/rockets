@@ -11,15 +11,16 @@ import { getDataSourceToken } from '@nestjs/typeorm';
 
 import { INVITATION_MODULE_DEFAULT_SETTINGS_TOKEN } from '../invitation.constants';
 import { InvitationCreateDto } from '../dto/invitation-create.dto';
-import { UserEntityFixture } from '../__fixtures__/entities/user.entity.fixture';
-import { InvitationAppModuleFixture } from '../__fixtures__/invitation.app.module.fixture';
 import { InvitationDto } from '../dto/invitation.dto';
 import { InvitationAcceptInviteDto } from '../dto/invitation-accept-invite.dto';
 import { invitationDefaultConfig } from '../config/invitation-default.config';
 import { InvitationFactory } from '../invitation.factory';
-import { InvitationEntityFixture } from '../__fixtures__/entities/invitation.entity.fixture';
 import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
 import { InvitationSettingsInterface } from '../interfaces/invitation-settings.interface';
+
+import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
+import { InvitationEntityFixture } from '../__fixtures__/invitation/entities/invitation.entity.fixture';
+import { UserEntityFixture } from '../__fixtures__/user/entities/user-entity.fixture';
 
 describe('InvitationController (e2e)', () => {
   const category = 'invitation';
@@ -38,7 +39,7 @@ describe('InvitationController (e2e)', () => {
       .mockImplementation(async () => undefined);
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [InvitationAppModuleFixture],
+      imports: [AppModuleFixture],
     }).compile();
     app = moduleFixture.createNestApplication();
     await app.init();

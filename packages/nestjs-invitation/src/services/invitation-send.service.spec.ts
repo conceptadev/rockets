@@ -14,9 +14,9 @@ import { INVITATION_MODULE_SETTINGS_TOKEN } from '../invitation.constants';
 import { InvitationSendService } from './invitation-send.service';
 import { InvitationSettingsInterface } from '../interfaces/invitation-settings.interface';
 
-import { InvitationAppModuleFixture } from '../__fixtures__/invitation.app.module.fixture';
-import { UserEntityFixture } from '../__fixtures__/entities/user.entity.fixture';
-import { UserOtpEntityFixture } from '../__fixtures__/entities/user-otp.entity.fixture';
+import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
+import { UserEntityFixture } from '../__fixtures__/user/entities/user-entity.fixture';
+import { UserOtpEntityFixture } from '../__fixtures__/user/entities/user-otp-entity.fixture';
 
 describe(InvitationSendService, () => {
   let spyEmailService: jest.SpyInstance;
@@ -35,7 +35,7 @@ describe(InvitationSendService, () => {
       .mockImplementation(async () => undefined);
 
     const testingModule: TestingModule = await Test.createTestingModule({
-      imports: [InvitationAppModuleFixture],
+      imports: [AppModuleFixture],
     }).compile();
     app = testingModule.createNestApplication();
     await app.init();
