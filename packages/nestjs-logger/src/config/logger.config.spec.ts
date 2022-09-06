@@ -2,7 +2,8 @@ import { ConfigModule } from '@nestjs/config';
 import { LoggerOptionsInterface } from '../interfaces/logger-options.interface';
 import { Severity as SentryLogSeverity } from '@sentry/types';
 import { Test, TestingModule } from '@nestjs/testing';
-import { loggerConfig, LOGGER_MODULE_OPTIONS_TOKEN } from './logger.config';
+
+import { loggerConfig, LOGGER_MODULE_SETTINGS_TOKEN } from './logger.config';
 
 jest.mock('@sentry/node');
 
@@ -20,7 +21,9 @@ describe('logger configuration', () => {
 
   describe('options token', () => {
     it('should be defined', async () => {
-      expect(LOGGER_MODULE_OPTIONS_TOKEN).toEqual('LOGGER_MODULE_OPTIONS');
+      expect(LOGGER_MODULE_SETTINGS_TOKEN).toEqual(
+        'LOGGER_MODULE_SETTINGS_TOKEN',
+      );
     });
   });
 

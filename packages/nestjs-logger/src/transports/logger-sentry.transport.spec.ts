@@ -2,17 +2,17 @@ import { LogLevel } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import * as Sentry from '@sentry/node';
 import { Severity as SentryLogSeverity } from '@sentry/types';
-import { LOGGER_MODULE_OPTIONS_TOKEN } from '../config/logger.config';
-import { LoggerOptionsInterface } from '../interfaces/logger-options.interface';
-import { LoggerSentryConfigInterface } from '../interfaces/logger-sentry-config.interface';
 
+import { LOGGER_MODULE_SETTINGS_TOKEN } from '../config/logger.config';
+import { LoggerSentryConfigInterface } from '../interfaces/logger-sentry-config.interface';
+import { LoggerSettingsInterface } from '../interfaces/logger-settings.interface';
 import { LoggerSentryTransport } from './logger-sentry.transport';
 
 jest.mock('@sentry/node');
 
 describe('loggerSentryTransport', () => {
   let loggerSentryTransport: LoggerSentryTransport;
-  let config: LoggerOptionsInterface;
+  let settings: LoggerSettingsInterface;
   let spyInit: jest.SpyInstance;
   let spyCaptureException: jest.SpyInstance;
   let spyCaptureMessage: jest.SpyInstance;
@@ -27,11 +27,9 @@ describe('loggerSentryTransport', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         {
-          provide: LOGGER_MODULE_OPTIONS_TOKEN,
+          provide: LOGGER_MODULE_SETTINGS_TOKEN,
           useValue: {
-            settings: {
-              transportSentryConfig,
-            },
+            transportSentryConfig,
           },
         },
       ],
@@ -39,14 +37,16 @@ describe('loggerSentryTransport', () => {
 
     loggerSentryTransport = new LoggerSentryTransport(transportSentryConfig);
 
-    config = moduleRef.get<LoggerOptionsInterface>(LOGGER_MODULE_OPTIONS_TOKEN);
+    settings = moduleRef.get<LoggerSettingsInterface>(
+      LOGGER_MODULE_SETTINGS_TOKEN,
+    );
 
     spyInit = jest.spyOn(Sentry, 'init');
     spyCaptureException = jest.spyOn(Sentry, 'captureException');
     spyCaptureMessage = jest.spyOn(Sentry, 'captureMessage');
-    if (config && config.settings && config.settings.transportSentryConfig) {
+    if (settings && settings.transportSentryConfig) {
       spyLogLevelMap = jest.spyOn(
-        config.settings.transportSentryConfig,
+        settings.transportSentryConfig,
         'logLevelMap',
       );
     } else {
