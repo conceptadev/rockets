@@ -14,7 +14,6 @@
   "dependencies": {
     "@concepta/nestjs-access-control": "^4.0.0-alpha.19",
     "@concepta/nestjs-common": "^4.0.0-alpha.19",
-    "@concepta/nestjs-core": "^4.0.0-alpha.19",
     "@concepta/nestjs-crud": "^4.0.0-alpha.19",
     "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.19",
     "@concepta/ts-common": "^4.0.0-alpha.19",
