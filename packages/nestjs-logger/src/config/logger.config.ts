@@ -10,10 +10,8 @@ import { splitLogLevel } from '../utils/config-parser.util';
 import { LoggerSettingsInterface } from '../interfaces/logger-settings.interface';
 
 /**
- * The token to which all logger module options are set.
+ * The token to which all logger module settings are set.
  */
-export const LOGGER_MODULE_OPTIONS_TOKEN = 'LOGGER_MODULE_OPTIONS';
-
 export const LOGGER_MODULE_SETTINGS_TOKEN = 'LOGGER_MODULE_SETTINGS_TOKEN';
 
 /**
