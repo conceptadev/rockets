@@ -30,7 +30,6 @@ describe('OrgController (e2e)', () => {
             entities: [OrgEntityFixture, OwnerEntityFixture],
           }),
           OrgModule.registerAsync({
-            imports: [OwnerModuleFixture.register()],
             inject: [OwnerLookupServiceFixture],
             useFactory: (ownerLookupService: OwnerLookupServiceFixture) => ({
               ownerLookupService,
@@ -42,6 +41,7 @@ describe('OrgController (e2e)', () => {
             },
           }),
           CrudModule.forRoot({}),
+          OwnerModuleFixture.register(),
         ],
         providers: [OwnerLookupServiceFixture],
       }).compile();
