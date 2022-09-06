@@ -1,6 +1,6 @@
 {
   "name": "@concepta/nestjs-auth-jwt",
-  "version": "4.0.0-alpha.18",
+  "version": "4.0.0-alpha.19",
   "description": "Rockets NestJS JWT Authorization",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,19 +12,19 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
-    "@concepta/nestjs-authentication": "^4.0.0-alpha.18",
-    "@concepta/nestjs-common": "^4.0.0-alpha.18",
-    "@concepta/nestjs-jwt": "^4.0.0-alpha.18",
-    "@concepta/ts-common": "^4.0.0-alpha.18",
-    "@concepta/ts-core": "^4.0.0-alpha.18",
+    "@concepta/nestjs-authentication": "^4.0.0-alpha.19",
+    "@concepta/nestjs-common": "^4.0.0-alpha.19",
+    "@concepta/nestjs-jwt": "^4.0.0-alpha.19",
+    "@concepta/ts-common": "^4.0.0-alpha.19",
+    "@concepta/ts-core": "^4.0.0-alpha.19",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.2.0",
     "@nestjs/core": "^9.0.0",
     "@nestjs/passport": "^9.0.0"
   },
   "devDependencies": {
-    "jest-mock-extended": "^2.0.4",
-    "@nestjs/testing": "^9.0.0"
+    "@nestjs/testing": "^9.0.0",
+    "jest-mock-extended": "^2.0.4"
   },
   "peerDependencies": {
     "class-validator": "*",
