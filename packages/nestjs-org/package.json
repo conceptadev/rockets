@@ -1,6 +1,6 @@
 {
   "name": "@concepta/nestjs-org",
-  "version": "4.0.0-alpha.19",
+  "version": "4.0.0-alpha.20",
   "description": "Rockets NestJS User",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,13 +12,13 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
-    "@concepta/nestjs-access-control": "^4.0.0-alpha.19",
-    "@concepta/nestjs-common": "^4.0.0-alpha.19",
-    "@concepta/nestjs-crud": "^4.0.0-alpha.19",
-    "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.19",
-    "@concepta/ts-common": "^4.0.0-alpha.19",
-    "@concepta/ts-core": "^4.0.0-alpha.19",
-    "@concepta/typeorm-common": "^4.0.0-alpha.19",
+    "@concepta/nestjs-access-control": "^4.0.0-alpha.20",
+    "@concepta/nestjs-common": "^4.0.0-alpha.20",
+    "@concepta/nestjs-crud": "^4.0.0-alpha.20",
+    "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.20",
+    "@concepta/ts-common": "^4.0.0-alpha.20",
+    "@concepta/ts-core": "^4.0.0-alpha.20",
+    "@concepta/typeorm-common": "^4.0.0-alpha.20",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.2.0",
     "@nestjs/swagger": "^6.0.0"
