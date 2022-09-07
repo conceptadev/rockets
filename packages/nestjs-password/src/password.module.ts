@@ -1,17 +1,13 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigType } from '@nestjs/config';
+import { DynamicModule, Module } from '@nestjs/common';
+
 import {
-  AsyncModuleConfig,
-  createConfigurableDynamicRootModule,
-  deferExternal,
-  DeferExternalOptionsInterface,
-} from '@concepta/nestjs-core';
-import { passwordDefaultConfig } from './config/password-default.config';
-import { PasswordOptionsInterface } from './interfaces/password-options.interface';
-import {
-  PASSWORD_MODULE_OPTIONS_TOKEN,
-  PASSWORD_MODULE_SETTINGS_TOKEN,
-} from './password.constants';
+  PasswordAsyncOptions,
+  PasswordModuleClass,
+  PasswordOptions,
+  createPasswordImports,
+  createPasswordProviders,
+  createPasswordExports,
+} from './password.module-definition';
 
 import { PasswordCreationService } from './services/password-creation.service';
 import { PasswordStorageService } from './services/password-storage.service';
@@ -29,42 +25,29 @@ import { PasswordStrengthService } from './services/password-strength.service';
     PasswordStorageService,
   ],
 })
-export class PasswordModule extends createConfigurableDynamicRootModule<
-  PasswordModule,
-  PasswordOptionsInterface
->(PASSWORD_MODULE_OPTIONS_TOKEN, {
-  imports: [ConfigModule.forFeature(passwordDefaultConfig)],
-  providers: [
-    {
-      provide: PASSWORD_MODULE_SETTINGS_TOKEN,
-      inject: [PASSWORD_MODULE_OPTIONS_TOKEN, passwordDefaultConfig.KEY],
-      useFactory: async (
-        options: PasswordOptionsInterface,
-        defaultSettings: ConfigType<typeof passwordDefaultConfig>,
-      ) => options.settings ?? defaultSettings,
-    },
-  ],
-}) {
-  static register(options: PasswordOptionsInterface = {}) {
-    const module = PasswordModule.forRoot(PasswordModule, options);
-
-    // TODO: this is temporary until configurable module builder migration is done
-    module.global = true;
-
-    return module;
+export class PasswordModule extends PasswordModuleClass {
+  static register(options: PasswordOptions): DynamicModule {
+    return super.register(options);
   }
 
-  static registerAsync(options: AsyncModuleConfig<PasswordOptionsInterface>) {
-    return PasswordModule.forRootAsync(PasswordModule, {
-      useFactory: () => ({}),
-      ...options,
-    });
+  static registerAsync(options: PasswordAsyncOptions): DynamicModule {
+    return super.registerAsync(options);
   }
 
-  static deferred(options: DeferExternalOptionsInterface = {}) {
-    return deferExternal<PasswordModule, PasswordOptionsInterface>(
-      PasswordModule,
-      options,
-    );
+  static forRoot(options: PasswordOptions): DynamicModule {
+    return super.register({ ...options, global: true });
+  }
+
+  static forRootAsync(options: PasswordAsyncOptions): DynamicModule {
+    return super.registerAsync({ ...options, global: true });
+  }
+
+  static forFeature(options: PasswordOptions): DynamicModule {
+    return {
+      module: PasswordModule,
+      imports: createPasswordImports(),
+      providers: createPasswordProviders({ options }),
+      exports: createPasswordExports(),
+    };
   }
 }

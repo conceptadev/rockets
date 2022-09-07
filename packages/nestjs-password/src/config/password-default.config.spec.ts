@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { ConfigModule } from '@nestjs/config';
 import { PasswordOptionsInterface } from '../interfaces/password-options.interface';
-import { PASSWORD_MODULE_OPTIONS_TOKEN } from '../password.constants';
 import { passwordDefaultConfig } from './password-default.config';
 
 describe('password configuration', () => {
@@ -17,15 +16,7 @@ describe('password configuration', () => {
     jest.clearAllMocks();
   });
 
-  describe('options token', () => {
-    it('should be defined', async () => {
-      expect(PASSWORD_MODULE_OPTIONS_TOKEN).toEqual(
-        'PASSWORD_MODULE_OPTIONS_TOKEN',
-      );
-    });
-  });
-
-  describe('passwordConfig()', () => {
+  describe(passwordDefaultConfig, () => {
     let moduleRef: TestingModule;
 
     it('should use fallbacks', async () => {

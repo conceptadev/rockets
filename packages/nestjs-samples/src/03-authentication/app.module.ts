@@ -24,7 +24,7 @@ import { createUserRepository } from './user/create-user-repository';
     AuthRefreshModule.registerAsync({ ...createUserOpts() }),
     AuthenticationModule.forRoot({}),
     JwtModule.forRoot({}),
-    PasswordModule.register(),
+    PasswordModule.forRoot({}),
     CrudModule.forRoot({}),
     UserModule.register({
       entities: {
