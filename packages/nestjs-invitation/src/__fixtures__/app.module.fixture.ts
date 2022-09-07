@@ -35,7 +35,7 @@ import { default as ormConfig } from './ormconfig.fixture';
       useFactory: (mailerService: MailerService) => ({ mailerService }),
     }),
     InvitationModule.registerAsync({
-      imports: [UserModule.deferred(), OtpModule.deferred()],
+      imports: [UserModule.deferred()],
       inject: [UserLookupService, UserMutateService, OtpService, EmailService],
       useFactory: (
         userLookupService,
@@ -54,7 +54,7 @@ import { default as ormConfig } from './ormconfig.fixture';
         },
       },
     }),
-    OtpModule.register({
+    OtpModule.forRoot({
       entities: {
         'user-otp': {
           entity: UserOtpEntityFixture,

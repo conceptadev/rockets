@@ -39,7 +39,7 @@ import { MailerServiceFixture } from './email/mailer.service.fixture';
         emailService,
       }),
     }),
-    OtpModule.register({
+    OtpModule.forRoot({
       entities: {
         userOtp: {
           entity: UserOtpEntityFixture,
