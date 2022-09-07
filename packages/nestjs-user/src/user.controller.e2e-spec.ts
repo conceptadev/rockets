@@ -64,6 +64,16 @@ describe('AppController (e2e)', () => {
         .expect(201);
     });
 
+    it('POST /user (no password)', async () => {
+      await supertest(app.getHttpServer())
+        .post('/user')
+        .send({
+          username: 'user1',
+          email: 'user1@dispostable.com',
+        })
+        .expect(201);
+    });
+
     it('DELETE /user/:id', async () => {
       // get a user so we have an id
       const response = await supertest(app.getHttpServer())

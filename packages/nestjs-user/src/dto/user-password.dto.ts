@@ -7,7 +7,7 @@ import { PasswordPlainInterface } from '@concepta/ts-common';
  * User plain password DTO
  */
 @Exclude()
-export class UserPasswordDto implements PasswordPlainInterface {
+export class UserPasswordDto implements Partial<PasswordPlainInterface> {
   @Expose({ toClassOnly: true })
   @ApiPropertyOptional({
     type: 'string',
@@ -15,5 +15,5 @@ export class UserPasswordDto implements PasswordPlainInterface {
   })
   @IsOptional()
   @IsString()
-  password = '';
+  password?: string;
 }

@@ -48,7 +48,7 @@ export class UserMutateService
     user: T | (T & PasswordPlainInterface),
   ): Promise<UserEntityInterface> {
     // do we need to hash the password?
-    if ('password' in user && user.password.length) {
+    if ('password' in user && typeof user.password === 'string') {
       // yes, hash it
       const hashedUser = await this.passwordStorageService.hashObject(user);
       // save it

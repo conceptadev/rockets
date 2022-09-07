@@ -180,7 +180,7 @@ export class UserController
    */
   protected async maybeHashPassword<T>(dto: T | (T & PasswordPlainInterface)) {
     // get a password?
-    if ('password' in dto && dto.password.length) {
+    if ('password' in dto && typeof dto.password === 'string') {
       // yes, hash it
       return this.passwordStorageService.hashObject(dto);
     } else {
