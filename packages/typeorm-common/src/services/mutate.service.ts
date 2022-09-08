@@ -9,6 +9,7 @@ import {
   UpdateOneInterface,
   Type,
 } from '@concepta/ts-core';
+
 import { ReferenceValidationException } from '../exceptions/reference-validation.exception';
 import { ReferenceMutateException } from '../exceptions/reference-mutate.exception';
 import { ReferenceIdNoMatchException } from '../exceptions/reference-id-no-match.exception';
@@ -48,8 +49,10 @@ export abstract class MutateService<
   async create(data: Creatable): Promise<Entity> {
     // validate the data
     const dto = await this.validate<Creatable>(this.createDto, data);
-    // try to save the item
-    return this.save(dto);
+    // create new entity
+    const entity = this.repo.create(dto);
+    // try to save the entity
+    return this.save(entity);
   }
 
   /**
@@ -59,14 +62,14 @@ export abstract class MutateService<
    * @returns the updated reference
    */
   async update(data: Updatable & ReferenceIdInterface): Promise<Entity> {
-    // the item we will update
-    const item = await this.findById(data.id);
+    // the entity we will update
+    const entity = await this.findById(data.id);
     // yes, validate the data
     const dto = await this.validate<Updatable>(this.updateDto, data);
-    // set the id from the found item
-    dto.id = item.id;
+    // merge changes into the entity
+    const mergedEntity = this.repo.merge(entity, dto);
     // try to save it
-    return this.save(dto);
+    return this.save(mergedEntity);
   }
 
   /**
@@ -76,16 +79,14 @@ export abstract class MutateService<
    * @returns the replaced reference
    */
   async replace(data: Replaceable & ReferenceIdInterface): Promise<Entity> {
-    // the item we will update
-    const item = await this.findById(data.id);
-    // yes, remove the item
-    const removed = await this.delete(item);
+    // the entity we will replace
+    const entity = await this.findById(data.id);
     // yes, validate the data
     const dto = await this.validate<Creatable>(this.createDto, data);
-    // add the id from the removed item
-    dto.id = removed.id;
+    // merge changes into the entity
+    const mergedEntity = this.repo.merge(entity, dto);
     // try to save it
-    return this.save(dto);
+    return this.save(mergedEntity);
   }
 
   /**
@@ -96,29 +97,29 @@ export abstract class MutateService<
    */
   async remove(data: Removable & ReferenceIdInterface): Promise<Entity> {
     // try to find it
-    const item = await this.findById(data.id);
-    // yes, try to remove it
-    return this.delete(item);
+    const entity = await this.findById(data.id);
+    // try to remove it
+    return this.delete(entity);
   }
 
   /**
    * @private
    */
   protected async findById(id: string): Promise<Entity> {
-    let item: Entity | null;
+    let entity: Entity | null;
     try {
       // try to find the ref
       // TODO: remove this type assertion when fix is released
       // https://github.com/typeorm/typeorm/issues/8939
-      item = await this.repo.findOne({
+      entity = await this.repo.findOne({
         where: { id },
       } as FindOneOptions<Entity>);
     } catch (e) {
       throw new ReferenceLookupException(this.repo.metadata.name, e);
     }
     // did we get one?
-    if (item) {
-      return item;
+    if (entity) {
+      return entity;
     } else {
       throw new ReferenceIdNoMatchException(this.repo.metadata.name, id);
     }
@@ -127,10 +128,10 @@ export abstract class MutateService<
   /**
    * @private
    */
-  protected async save(item: DeepPartial<Entity>): Promise<Entity> {
+  protected async save(entity: Entity): Promise<Entity> {
     // try to save it
     try {
-      return this.repo.save(item);
+      return this.repo.save(entity);
     } catch (e) {
       throw new ReferenceMutateException(this.repo.metadata.name, e);
     }
@@ -139,10 +140,10 @@ export abstract class MutateService<
   /**
    * @private
    */
-  protected async delete(item: Entity): Promise<Entity> {
+  protected async delete(entity: Entity): Promise<Entity> {
     // try to save it
     try {
-      return this.repo.remove(item);
+      return this.repo.remove(entity);
     } catch (e) {
       throw new ReferenceMutateException(this.repo.metadata.name, e);
     }

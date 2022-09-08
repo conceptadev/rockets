@@ -78,6 +78,10 @@ describe('InvitationController (e2e)', () => {
       await createInvite({ email: user.email, category });
     });
 
+    it('POST invitation (create new user)', async () => {
+      await createInvite({ email: 'test@mail.com', category });
+    });
+
     it('PATCH invitation-acceptance', async () => {
       const { code } = invitation;
 

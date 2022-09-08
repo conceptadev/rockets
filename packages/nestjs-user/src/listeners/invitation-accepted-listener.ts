@@ -48,7 +48,7 @@ export class InvitationAcceptedListener
     if (event.payload.category === 'invitation') {
       const { userId, newPassword } = event?.payload.data ?? {};
 
-      if (!userId || !newPassword) {
+      if (!userId || typeof newPassword !== 'string') {
         throw new UserException(
           'The invitation accepted event payload received has invalid content. The payload must have the "userId" and "newPassword" properties.',
         );
@@ -60,7 +60,7 @@ export class InvitationAcceptedListener
         throw new UserNotFoundException();
       }
 
-      await this.userMutateService.save({ ...user, password: newPassword });
+      await this.userMutateService.update({ ...user, password: newPassword });
 
       return true;
     }

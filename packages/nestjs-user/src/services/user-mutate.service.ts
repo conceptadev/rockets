@@ -1,4 +1,4 @@
-import { DeepPartial, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { MutateService } from '@concepta/typeorm-common';
 import {
@@ -44,7 +44,7 @@ export class UserMutateService
     super(repo);
   }
 
-  async save<T extends DeepPartial<UserEntityInterface>>(
+  protected async save<T extends UserEntityInterface>(
     user: T | (T & PasswordPlainInterface),
   ): Promise<UserEntityInterface> {
     // do we need to hash the password?
