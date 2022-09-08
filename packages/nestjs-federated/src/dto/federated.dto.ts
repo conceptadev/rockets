@@ -67,5 +67,5 @@ export class FederatedDto implements FederatedInterface {
     description: 'Audit data',
   })
   @Type(() => AuditDto)
-  audit: AuditInterface = new AuditDto();
+  audit!: AuditInterface;
 }

@@ -73,5 +73,5 @@ export class RoleDto
     description: 'Audit data',
   })
   @Type(() => AuditDto)
-  audit: AuditInterface = new AuditDto();
+  audit!: AuditInterface;
 }
