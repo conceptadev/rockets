@@ -14,7 +14,7 @@ import { createUserRepository } from './user/create-user-repository';
 
 @Module({
   imports: [
-    TypeOrmExtModule.register({
+    TypeOrmExtModule.forRoot({
       type: 'sqlite',
       database: ':memory:',
       entities: [UserEntity],
@@ -26,7 +26,7 @@ import { createUserRepository } from './user/create-user-repository';
     JwtModule.forRoot({}),
     PasswordModule.forRoot({}),
     CrudModule.forRoot({}),
-    UserModule.register({
+    UserModule.forRoot({
       entities: {
         user: {
           entity: UserEntity,
@@ -41,7 +41,6 @@ export class AppModule {}
 
 function createUserOpts() {
   return {
-    imports: [UserModule.deferred()],
     inject: [UserLookupService],
     useFactory: (userLookupService: UserLookupService) => ({
       userLookupService,

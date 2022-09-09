@@ -27,6 +27,7 @@
   "devDependencies": {
     "@concepta/nestjs-email": "^4.0.0-alpha.20",
     "@concepta/nestjs-otp": "^4.0.0-alpha.20",
+    "@concepta/nestjs-password": "^4.0.0-alpha.20",
     "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.20",
     "@concepta/nestjs-user": "^4.0.0-alpha.20",
     "@concepta/typeorm-common": "^4.0.0-alpha.20",

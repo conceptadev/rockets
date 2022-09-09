@@ -24,12 +24,12 @@ import { CrudModule } from '@concepta/nestjs-crud';
 
 @Module({
   imports: [
-    TypeOrmExtModule.register({
+    TypeOrmExtModule.forRoot({
       type: 'postgres',
       url: 'postgres://user:pass@localhost:5432/postgres',
     }),
-    CrudModule.register(),
-    OtpModule.register(),
+    CrudModule.forRoot({}),
+    OtpModule.forRoot({}),
   ],
 })
 export class AppModule {}

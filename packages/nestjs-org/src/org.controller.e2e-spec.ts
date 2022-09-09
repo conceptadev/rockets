@@ -23,7 +23,7 @@ describe('OrgController (e2e)', () => {
     beforeEach(async () => {
       const moduleFixture: TestingModule = await Test.createTestingModule({
         imports: [
-          TypeOrmExtModule.register({
+          TypeOrmExtModule.forRoot({
             type: 'sqlite',
             database: ':memory:',
             synchronize: true,

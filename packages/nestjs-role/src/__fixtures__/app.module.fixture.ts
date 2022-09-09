@@ -12,7 +12,7 @@ import { UserRoleEntityFixture } from './entities/user-role-entity.fixture';
 
 @Module({
   imports: [
-    TypeOrmExtModule.register({
+    TypeOrmExtModule.forRoot({
       type: 'sqlite',
       database: ':memory:',
       synchronize: true,

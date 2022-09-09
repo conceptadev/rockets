@@ -258,7 +258,7 @@ function testModuleFactory(
   return {
     imports: [
       UserModuleFixture,
-      TypeOrmExtModule.register({
+      TypeOrmExtModule.forRoot({
         type: 'sqlite',
         database: ':memory:',
         synchronize: true,

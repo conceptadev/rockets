@@ -10,10 +10,10 @@ import { InvitationAcceptedEventAsync } from './events/invitation-accepted.event
 
 @Module({
   imports: [
-    TypeOrmExtModule.register(ormConfig),
+    TypeOrmExtModule.forRoot(ormConfig),
     CrudModule.forRoot({}),
     EventModule.forRoot({}),
-    UserModule.register({
+    UserModule.forRoot({
       settings: {
         invitationRequestEvent: InvitationAcceptedEventAsync,
       },

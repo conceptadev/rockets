@@ -4,13 +4,6 @@ import { PhotoModuleFixture } from './photo/photo.module.fixture';
 import { default as ormConfig } from './ormconfig.fixture';
 
 @Module({
-  imports: [
-    TypeOrmExtModule.registerAsync({
-      useFactory: async () => {
-        return ormConfig;
-      },
-    }),
-    PhotoModuleFixture.register(),
-  ],
+  imports: [TypeOrmExtModule.forRoot(ormConfig), PhotoModuleFixture.register()],
 })
 export class AppModuleFixture {}

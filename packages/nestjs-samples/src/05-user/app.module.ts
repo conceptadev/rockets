@@ -7,13 +7,9 @@ import { UserEntity } from './user/user.entity';
 
 @Module({
   imports: [
-    TypeOrmExtModule.registerAsync({
-      useFactory: async () => {
-        return dbConfig;
-      },
-    }),
+    TypeOrmExtModule.forRoot(dbConfig),
     CrudModule.forRoot({}),
-    UserModule.register({
+    UserModule.forRoot({
       entities: {
         user: {
           entity: UserEntity,

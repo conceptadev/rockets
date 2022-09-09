@@ -23,7 +23,7 @@ describe(AuthGithubModule, () => {
     it('module should be loaded', async () => {
       const module: TestingModule = await Test.createTestingModule({
         imports: [
-          TypeOrmExtModule.register({
+          TypeOrmExtModule.forRoot({
             type: 'sqlite',
             database: ':memory:',
             entities: [UserEntityFixture, FederatedEntityFixture],
@@ -32,7 +32,6 @@ describe(AuthGithubModule, () => {
           AuthGithubModule.forRoot({}),
           AuthenticationModule.forRoot({}),
           FederatedModule.forRootAsync({
-            imports: [UserModule.deferred()],
             inject: [UserLookupService, UserMutateService],
             useFactory: (userLookupService, userMutateService) => ({
               userLookupService,
@@ -45,7 +44,7 @@ describe(AuthGithubModule, () => {
             },
           }),
           CrudModule.forRoot({}),
-          UserModule.register({
+          UserModule.forRoot({
             entities: {
               user: {
                 entity: UserEntityFixture,

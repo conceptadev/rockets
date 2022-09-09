@@ -246,11 +246,7 @@ function testModuleFactory(
 ): ModuleMetadata {
   return {
     imports: [
-      TypeOrmExtModule.registerAsync({
-        useFactory: async () => {
-          return ormConfig;
-        },
-      }),
+      TypeOrmExtModule.forRoot(ormConfig),
       EventModule.forRoot({}),
       CrudModule.forRoot({}),
       UserModuleFixture,
