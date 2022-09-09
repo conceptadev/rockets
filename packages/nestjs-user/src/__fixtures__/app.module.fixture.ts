@@ -13,7 +13,7 @@ import { InvitationAcceptedEventAsync } from './events/invitation-accepted.event
     TypeOrmExtModule.forRoot(ormConfig),
     CrudModule.forRoot({}),
     EventModule.forRoot({}),
-    UserModule.register({
+    UserModule.forRoot({
       settings: {
         invitationRequestEvent: InvitationAcceptedEventAsync,
       },

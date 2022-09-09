@@ -9,7 +9,7 @@ import { UserEntity } from './user/user.entity';
   imports: [
     TypeOrmExtModule.forRoot(dbConfig),
     CrudModule.forRoot({}),
-    UserModule.register({
+    UserModule.forRoot({
       entities: {
         user: {
           entity: UserEntity,

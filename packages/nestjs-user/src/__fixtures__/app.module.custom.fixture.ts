@@ -15,7 +15,7 @@ import { UserEntityFixture } from './user.entity.fixture';
     TypeOrmExtModule.forRoot(ormConfig),
     CrudModule.forRoot({}),
     EventModule.forRoot({}),
-    UserModule.registerAsync({
+    UserModule.forRootAsync({
       imports: [UserModuleCustomFixture],
       inject: [UserLookupCustomService],
       useFactory: async (userLookupService: UserLookupCustomService) => ({

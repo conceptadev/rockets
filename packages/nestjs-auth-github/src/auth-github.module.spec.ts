@@ -32,7 +32,6 @@ describe(AuthGithubModule, () => {
           AuthGithubModule.forRoot({}),
           AuthenticationModule.forRoot({}),
           FederatedModule.forRootAsync({
-            imports: [UserModule.deferred()],
             inject: [UserLookupService, UserMutateService],
             useFactory: (userLookupService, userMutateService) => ({
               userLookupService,
@@ -45,7 +44,7 @@ describe(AuthGithubModule, () => {
             },
           }),
           CrudModule.forRoot({}),
-          UserModule.register({
+          UserModule.forRoot({
             entities: {
               user: {
                 entity: UserEntityFixture,

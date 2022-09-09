@@ -42,7 +42,7 @@ import { MailerServiceFixture } from './email/mailer.service.fixture';
         },
       },
     }),
-    UserModule.register({
+    UserModule.forRoot({
       entities: {
         user: {
           entity: UserEntityFixture,

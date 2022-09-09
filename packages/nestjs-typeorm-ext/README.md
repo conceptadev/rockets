@@ -52,12 +52,12 @@ import { CustomUser } from 'path/to/custom-user.entity';
 
 @Module({
   imports: [
-    TypeOrmExtModule.register({
+    TypeOrmExtModule.forRoot({
       type: 'postgres',
       url: 'postgres://user:pass@localhost:5432/postgres',
       entities: [CustomUser],
     }),
-    UserModule.register({
+    UserModule.forRoot({
       entities: {
         user: { entity: CustomUser, repository: CustomUserRepository },
       },
