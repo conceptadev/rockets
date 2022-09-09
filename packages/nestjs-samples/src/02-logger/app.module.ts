@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
-import { OrderModule } from './order/order.module';
 import { LoggerModule } from '@concepta/nestjs-logger';
+import { OrderModule } from './order/order.module';
+
 @Module({
-  imports: [LoggerModule.register(), OrderModule],
+  imports: [LoggerModule.forRoot({}), OrderModule],
 })
 export class AppModule {}

@@ -4,7 +4,7 @@ import { OrderController } from './order.controller';
 import { OrderService } from './order.service';
 
 @Module({
-  imports: [LoggerModule.deferred()],
+  imports: [LoggerModule.forRoot({})],
   controllers: [OrderController],
   providers: [OrderService],
   exports: [OrderService],

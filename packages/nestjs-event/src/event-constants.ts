@@ -1,7 +1,7 @@
 /**
- *  This is the token into which the event module options are injected.
+ *  This is the token into which the event module settings are injected.
  */
-export const EVENT_MODULE_OPTIONS_TOKEN = 'EVENT_MODULE_OPTIONS_TOKEN';
+export const EVENT_MODULE_SETTINGS_TOKEN = 'EVENT_MODULE_SETTINGS_TOKEN';
 
 /**
  *  This is the token into which the event emitter service is injected.

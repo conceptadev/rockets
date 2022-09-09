@@ -1,24 +1,18 @@
-import { APP_FILTER, APP_INTERCEPTOR, BaseExceptionFilter } from '@nestjs/core';
-import { Module } from '@nestjs/common';
+import { DynamicModule, Module } from '@nestjs/common';
+
 import {
-  loggerConfig,
-  LOGGER_MODULE_OPTIONS_TOKEN,
-  LOGGER_MODULE_SETTINGS_TOKEN,
-} from './config/logger.config';
-import {
-  AsyncModuleConfig,
-  createConfigurableDynamicRootModule,
-  deferExternal,
-  DeferExternalOptionsInterface,
-} from '@concepta/nestjs-core';
-import { LoggerExceptionFilter } from './logger-exception.filter';
-import { LoggerRequestInterceptor } from './logger-request.interceptor';
-import { LoggerSentryTransport } from './transports/logger-sentry.transport';
+  LoggerAsyncOptions,
+  LoggerModuleClass,
+  LoggerOptions,
+  createLoggerImports,
+  createLoggerProviders,
+  createLoggerExports,
+} from './logger.module-definition';
+
 import { LoggerService } from './logger.service';
 import { LoggerTransportService } from './logger-transport.service';
-import { LoggerOptionsInterface } from './interfaces/logger-options.interface';
-import { ConfigModule, ConfigType } from '@nestjs/config';
-import { LoggerSettingsInterface } from './interfaces/logger-settings.interface';
+import { LoggerExceptionFilter } from './logger-exception.filter';
+import { LoggerRequestInterceptor } from './logger-request.interceptor';
 
 /**
  * Logger Module imports all configuration needed for logger and sentry
@@ -74,75 +68,29 @@ import { LoggerSettingsInterface } from './interfaces/logger-settings.interface'
   ],
   exports: [LoggerService],
 })
-export class LoggerModule extends createConfigurableDynamicRootModule<
-  LoggerModule,
-  LoggerOptionsInterface
->(LOGGER_MODULE_OPTIONS_TOKEN, {
-  imports: [ConfigModule.forFeature(loggerConfig)],
-  providers: [
-    {
-      provide: LOGGER_MODULE_SETTINGS_TOKEN,
-      inject: [LOGGER_MODULE_OPTIONS_TOKEN, loggerConfig.KEY],
-      useFactory: async (
-        options: LoggerOptionsInterface,
-        defaultSettings: ConfigType<typeof loggerConfig>,
-      ) => options?.settings ?? defaultSettings,
-    },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: LoggerRequestInterceptor,
-    },
-    {
-      provide: APP_FILTER,
-      inject: [LOGGER_MODULE_OPTIONS_TOKEN, LoggerExceptionFilter],
-      useFactory: async (
-        options: LoggerOptionsInterface,
-        defaultService: BaseExceptionFilter,
-      ) => options.exceptionFilter ?? defaultService,
-    },
-    {
-      provide: LoggerService,
-      inject: [
-        LOGGER_MODULE_OPTIONS_TOKEN,
-        LOGGER_MODULE_SETTINGS_TOKEN,
-        LoggerTransportService,
-      ],
-      useFactory: async (
-        options: LoggerOptionsInterface,
-        settings: LoggerSettingsInterface,
-        loggerTransportService: LoggerTransportService,
-      ) => {
-        if (settings?.transportSentryConfig) {
-          const sentry = new LoggerSentryTransport(
-            settings.transportSentryConfig,
-          );
-          loggerTransportService.addTransport(sentry);
-        }
-
-        options?.transports?.forEach((transport) => {
-          loggerTransportService.addTransport(transport);
-        });
-
-        return new LoggerService(loggerTransportService);
-      },
-    },
-  ],
-}) {
-  static register(options: LoggerOptionsInterface = {}) {
-    return LoggerModule.forRoot(LoggerModule, options);
+export class LoggerModule extends LoggerModuleClass {
+  static register(options: LoggerOptions): DynamicModule {
+    return super.register(options);
   }
 
-  static registerAsync(options: AsyncModuleConfig<LoggerOptionsInterface>) {
-    return LoggerModule.forRootAsync(LoggerModule, {
-      useFactory: () => ({}),
-      ...options,
-    });
+  static registerAsync(options: LoggerAsyncOptions): DynamicModule {
+    return super.registerAsync(options);
   }
 
-  static deferred(options: DeferExternalOptionsInterface = {}) {
-    return deferExternal<LoggerModule, LoggerOptionsInterface>(
-      LoggerModule,
-      options,
-    );
+  static forRoot(options: LoggerOptions): DynamicModule {
+    return super.register({ ...options, global: true });
+  }
+
+  static forRootAsync(options: LoggerAsyncOptions): DynamicModule {
+    return super.registerAsync({ ...options, global: true });
+  }
+
+  static forFeature(options: LoggerOptions): DynamicModule {
+    return {
+      module: LoggerModule,
+      imports: createLoggerImports(),
+      providers: createLoggerProviders({ options }),
+      exports: createLoggerExports(),
+    };
   }
 }

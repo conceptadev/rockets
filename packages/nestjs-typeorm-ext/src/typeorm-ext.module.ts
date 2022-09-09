@@ -1,39 +1,30 @@
 import { DynamicModule, Global, Module, Provider } from '@nestjs/common';
-import {
-  TypeOrmModule,
-  TypeOrmModuleAsyncOptions,
-  TypeOrmModuleOptions,
-} from '@nestjs/typeorm';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
-import {
-  AsyncModuleConfig,
-  createConfigurableDynamicRootModule,
-  deferExternal,
-  DeferExternalOptionsInterface,
-} from '@concepta/nestjs-core';
+
 import {
   TYPEORM_EXT_MODULE_DEFAULT_DATA_SOURCE_NAME,
   TYPEORM_EXT_MODULE_OPTIONS_TOKEN,
 } from './typeorm-ext.constants';
-import {
-  TypeOrmExtDataSourceToken,
-  TypeOrmExtOptions,
-} from './typeorm-ext.types';
+
+import { TypeOrmExtDataSourceToken } from './typeorm-ext.types';
+
 import { TypeOrmExtEntityOptionInterface } from './interfaces/typeorm-ext-entity-options.interface';
 import { resolveDataSourceName } from './utils/resolve-data-source-name';
 import { createEntityRepositoryProvider } from './utils/create-entity-repository-provider';
 import { createDynamicRepositoryProvider } from './utils/create-dynamic-repository-provider';
 
+import {
+  TypeOrmExtModuleClass,
+  TypeOrmExtOptions,
+  TypeOrmExtAsyncOptions,
+} from './typeorm-ext.module-definition';
+
 @Global()
 @Module({})
-export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
-  TypeOrmExtModule,
-  TypeOrmExtOptions
->(TYPEORM_EXT_MODULE_OPTIONS_TOKEN, {
-  exports: [TYPEORM_EXT_MODULE_OPTIONS_TOKEN],
-}) {
-  static register(options: TypeOrmExtOptions) {
-    const module = TypeOrmExtModule.forRoot(TypeOrmExtModule, options);
+export class TypeOrmExtModule extends TypeOrmExtModuleClass {
+  static forRoot(options: TypeOrmExtOptions) {
+    const module = super.forRoot(options);
 
     if (!module.imports) {
       module.imports = [];
@@ -49,14 +40,11 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
       }),
     );
 
-    module.global = true;
     return module;
   }
 
-  static registerAsync(
-    options: TypeOrmModuleAsyncOptions & AsyncModuleConfig<TypeOrmExtOptions>,
-  ) {
-    const module = TypeOrmExtModule.forRootAsync(TypeOrmExtModule, options);
+  static forRootAsync(options: TypeOrmExtAsyncOptions) {
+    const module = super.forRootAsync(options);
 
     if (!module.imports) {
       module.imports = [];
@@ -69,7 +57,6 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
       }),
     );
 
-    module.global = true;
     return module;
   }
 
@@ -126,12 +113,5 @@ export class TypeOrmExtModule extends createConfigurableDynamicRootModule<
       providers,
       exports: providers,
     };
-  }
-
-  static deferred(options: DeferExternalOptionsInterface = {}) {
-    return deferExternal<TypeOrmExtModule, TypeOrmExtOptions>(
-      TypeOrmExtModule,
-      options,
-    );
   }
 }

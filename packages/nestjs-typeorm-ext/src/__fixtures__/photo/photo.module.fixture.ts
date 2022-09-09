@@ -9,9 +9,7 @@ import { createPhotoRepositoryFixture } from './photo.repository.fixture';
 export class PhotoModuleFixture extends createConfigurableDynamicRootModule<
   PhotoModuleFixture,
   Record<string, unknown>
->(PHOTO_MODULE_OPTIONS_TOKEN, {
-  imports: [TypeOrmExtModule.deferred()],
-}) {
+>(PHOTO_MODULE_OPTIONS_TOKEN) {
   static register() {
     const module = PhotoModuleFixture.forRoot(PhotoModuleFixture, {});
 

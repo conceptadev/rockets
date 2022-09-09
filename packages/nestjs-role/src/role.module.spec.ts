@@ -5,8 +5,6 @@ import {
   getEntityRepositoryToken,
 } from '@concepta/nestjs-typeorm-ext';
 import { RoleModule } from './role.module';
-import { DefaultRoleLookupService } from './services/default-role-lookup.service';
-import { DefaultRoleMutateService } from './services/default-role-mutate.service';
 import { RoleService } from './services/role.service';
 import { RoleCrudService } from './services/role-crud.service';
 import { RoleController } from './role.controller';
@@ -20,8 +18,8 @@ import { RoleEntityFixture } from './__fixtures__/entities/role-entity.fixture';
 describe('RoleModule', () => {
   let roleModule: RoleModule;
   let roleService: RoleService;
-  let roleLookupService: DefaultRoleLookupService;
-  let roleMutateService: DefaultRoleMutateService;
+  let roleLookupService: RoleLookupService;
+  let roleMutateService: RoleMutateService;
   let roleCrudService: RoleCrudService;
   let roleController: RoleController;
   let roleEntityRepo: Repository<RoleEntityFixture>;
@@ -40,10 +38,8 @@ describe('RoleModule', () => {
       getDynamicRepositoryToken(ROLE_MODULE_ROLE_ENTITY_KEY),
     );
     roleService = testModule.get<RoleService>(RoleService);
-    roleLookupService =
-      testModule.get<DefaultRoleLookupService>(RoleLookupService);
-    roleMutateService =
-      testModule.get<DefaultRoleMutateService>(RoleMutateService);
+    roleLookupService = testModule.get<RoleLookupService>(RoleLookupService);
+    roleMutateService = testModule.get<RoleMutateService>(RoleMutateService);
     roleCrudService = testModule.get<RoleCrudService>(RoleCrudService);
     roleController = testModule.get<RoleController>(RoleController);
   });
@@ -59,10 +55,10 @@ describe('RoleModule', () => {
       expect(roleDynamicRepo).toBeInstanceOf(Repository);
       expect(roleService).toBeInstanceOf(RoleService);
       expect(roleCrudService).toBeInstanceOf(RoleCrudService);
-      expect(roleLookupService).toBeInstanceOf(DefaultRoleLookupService);
+      expect(roleLookupService).toBeInstanceOf(RoleLookupService);
       expect(roleLookupService['repo']).toBeInstanceOf(Repository);
       expect(roleLookupService['repo'].find).toBeInstanceOf(Function);
-      expect(roleMutateService).toBeInstanceOf(DefaultRoleMutateService);
+      expect(roleMutateService).toBeInstanceOf(RoleMutateService);
       expect(roleMutateService['repo']).toBeInstanceOf(Repository);
       expect(roleMutateService['repo'].find).toBeInstanceOf(Function);
       expect(roleController).toBeInstanceOf(RoleController);

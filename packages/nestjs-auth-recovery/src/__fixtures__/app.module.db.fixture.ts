@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
 import { OtpModule, OtpService } from '@concepta/nestjs-otp';
@@ -14,14 +15,11 @@ import { UserOtpEntityFixture } from './user/entities/user-otp-entity.fixture';
 import { UserEntityFixture } from './user/entities/user-entity.fixture';
 
 import { default as ormConfig } from './ormconfig.fixture';
+import { MailerServiceFixture } from './email/mailer.service.fixture';
 
 @Module({
   imports: [
-    TypeOrmExtModule.registerAsync({
-      useFactory: async () => {
-        return ormConfig;
-      },
-    }),
+    TypeOrmExtModule.forRoot(ormConfig),
     CrudModule.forRoot({}),
     AuthRecoveryModule.forRootAsync({
       inject: [UserLookupService, UserMutateService, OtpService, EmailService],
@@ -37,21 +35,23 @@ import { default as ormConfig } from './ormconfig.fixture';
         emailService,
       }),
     }),
-    OtpModule.register({
+    OtpModule.forRoot({
       entities: {
         userOtp: {
           entity: UserOtpEntityFixture,
         },
       },
     }),
-    UserModule.register({
+    UserModule.forRoot({
       entities: {
         user: {
           entity: UserEntityFixture,
         },
       },
     }),
-    EmailModule.register({}),
+    EmailModule.forRoot({
+      mailerService: new MailerServiceFixture(),
+    }),
   ],
 })
 export class AppModuleDbFixture {}

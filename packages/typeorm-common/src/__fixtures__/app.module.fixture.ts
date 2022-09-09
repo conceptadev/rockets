@@ -5,6 +5,6 @@ import { TestModuleFixture } from './test.module.fixture';
 import { ormConfig } from './ormconfig.fixture';
 
 @Module({
-  imports: [TypeOrmExtModule.register(ormConfig), TestModuleFixture],
+  imports: [TypeOrmExtModule.forRoot(ormConfig), TestModuleFixture],
 })
 export class AppModuleFixture {}

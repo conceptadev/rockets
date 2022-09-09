@@ -8,16 +8,12 @@ import {
 } from '@concepta/ts-core';
 import { FederatedInterface } from '@concepta/ts-common';
 import { AuditDto, ReferenceIdDto } from '@concepta/nestjs-common';
-import { CrudResponseDto } from '@concepta/nestjs-crud';
 
 /**
  * Federated DTO
  */
 @Exclude()
-export class FederatedDto
-  extends CrudResponseDto<FederatedInterface>
-  implements FederatedInterface
-{
+export class FederatedDto implements FederatedInterface {
   /**
    * Unique id
    */
@@ -71,5 +67,5 @@ export class FederatedDto
     description: 'Audit data',
   })
   @Type(() => AuditDto)
-  audit: AuditInterface = new AuditDto();
+  audit!: AuditInterface;
 }

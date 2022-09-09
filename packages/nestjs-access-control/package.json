@@ -1,6 +1,6 @@
 {
   "name": "@concepta/nestjs-access-control",
-  "version": "4.0.0-alpha.18",
+  "version": "4.0.0-alpha.20",
   "description": "Rockets NestJS Access Control",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,7 +12,7 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
-    "@concepta/nestjs-common": "^4.0.0-alpha.18",
+    "@concepta/nestjs-common": "^4.0.0-alpha.20",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.2.0",
     "@nestjs/core": "^9.0.0",

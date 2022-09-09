@@ -1,4 +1,6 @@
 import { DynamicModule, Module } from '@nestjs/common';
+import { FederatedOAuthService } from '@concepta/nestjs-federated';
+
 import { AuthGithubStrategy } from './auth-github.strategy';
 import { AuthGithubController } from './auth-github.controller';
 import {
@@ -15,7 +17,7 @@ import {
  * Auth GitHub module
  */
 @Module({
-  providers: [AuthGithubStrategy],
+  providers: [AuthGithubStrategy, FederatedOAuthService],
   controllers: [AuthGithubController],
 })
 export class AuthGithubModule extends AuthGithubModuleClass {

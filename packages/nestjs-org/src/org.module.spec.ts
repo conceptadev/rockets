@@ -7,15 +7,13 @@ import {
   TypeOrmExtModule,
 } from '@concepta/nestjs-typeorm-ext';
 import { OrgModule } from './org.module';
-import { DefaultOrgLookupService } from './services/default-org-lookup.service';
-import { DefaultOrgMutateService } from './services/default-org-mutate.service';
 import { OrgCrudService } from './services/org-crud.service';
 import { OrgController } from './org.controller';
 import { OrgLookupService } from './services/org-lookup.service';
 import { OrgMutateService } from './services/org-mutate.service';
 import {
   ORG_MODULE_ORG_ENTITY_KEY,
-  ORG_MODULE_OWNER_LOOKUP_SERVICE,
+  ORG_MODULE_OWNER_LOOKUP_SERVICE_TOKEN,
 } from './org.constants';
 
 import { OrgEntityFixture } from './__fixtures__/org-entity.fixture';
@@ -25,8 +23,8 @@ import { OwnerModuleFixture } from './__fixtures__/owner.module.fixture';
 
 describe('OrgModule', () => {
   let orgModule: OrgModule;
-  let orgLookupService: DefaultOrgLookupService;
-  let orgMutateService: DefaultOrgMutateService;
+  let orgLookupService: OrgLookupService;
+  let orgMutateService: OrgMutateService;
   let ownerLookupService: OwnerLookupServiceFixture;
   let orgCrudService: OrgCrudService;
   let orgController: OrgController;
@@ -36,13 +34,12 @@ describe('OrgModule', () => {
   beforeEach(async () => {
     const testModule: TestingModule = await Test.createTestingModule({
       imports: [
-        TypeOrmExtModule.register({
+        TypeOrmExtModule.forRoot({
           type: 'sqlite',
           database: ':memory:',
           entities: [OrgEntityFixture, OwnerEntityFixture],
         }),
-        OrgModule.registerAsync({
-          imports: [OwnerModuleFixture.register()],
+        OrgModule.forRootAsync({
           inject: [OwnerLookupServiceFixture],
           useFactory: (ownerLookupService: OwnerLookupServiceFixture) => ({
             ownerLookupService,
@@ -54,6 +51,7 @@ describe('OrgModule', () => {
           },
         }),
         CrudModule.forRoot({}),
+        OwnerModuleFixture.register(),
       ],
     }).compile();
 
@@ -64,12 +62,10 @@ describe('OrgModule', () => {
     orgDynamicRepo = testModule.get(
       getDynamicRepositoryToken(ORG_MODULE_ORG_ENTITY_KEY),
     );
-    orgLookupService =
-      testModule.get<DefaultOrgLookupService>(OrgLookupService);
-    orgMutateService =
-      testModule.get<DefaultOrgMutateService>(OrgMutateService);
+    orgLookupService = testModule.get<OrgLookupService>(OrgLookupService);
+    orgMutateService = testModule.get<OrgMutateService>(OrgMutateService);
     ownerLookupService = testModule.get<OwnerLookupServiceFixture>(
-      ORG_MODULE_OWNER_LOOKUP_SERVICE,
+      ORG_MODULE_OWNER_LOOKUP_SERVICE_TOKEN,
     );
     orgCrudService = testModule.get<OrgCrudService>(OrgCrudService);
     orgController = testModule.get<OrgController>(OrgController);
@@ -85,10 +81,10 @@ describe('OrgModule', () => {
       expect(orgEntityRepo).toBeInstanceOf(Repository);
       expect(orgDynamicRepo).toBeInstanceOf(Repository);
       expect(orgCrudService).toBeInstanceOf(OrgCrudService);
-      expect(orgLookupService).toBeInstanceOf(DefaultOrgLookupService);
+      expect(orgLookupService).toBeInstanceOf(OrgLookupService);
       expect(orgLookupService['repo']).toBeInstanceOf(Repository);
       expect(orgLookupService['repo'].find).toBeInstanceOf(Function);
-      expect(orgMutateService).toBeInstanceOf(DefaultOrgMutateService);
+      expect(orgMutateService).toBeInstanceOf(OrgMutateService);
       expect(orgMutateService['repo']).toBeInstanceOf(Repository);
       expect(ownerLookupService).toBeInstanceOf(OwnerLookupServiceFixture);
       expect(ownerLookupService['repo']).toBeInstanceOf(Repository);

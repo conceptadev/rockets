@@ -2,12 +2,12 @@ import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
+import { SeedingSource } from '@concepta/typeorm-seeding';
+
 import { UserFactory } from './user.factory';
 import { UserSeeder } from './user.seeder';
-
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
 import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
-import { SeedingSource } from '@concepta/typeorm-seeding';
 
 describe('AppController (e2e)', () => {
   describe('Authentication', () => {
@@ -60,6 +60,16 @@ describe('AppController (e2e)', () => {
           username: 'user1',
           email: 'user1@dispostable.com',
           password: 'pass1',
+        })
+        .expect(201);
+    });
+
+    it('POST /user (no password)', async () => {
+      await supertest(app.getHttpServer())
+        .post('/user')
+        .send({
+          username: 'user1',
+          email: 'user1@dispostable.com',
         })
         .expect(201);
     });

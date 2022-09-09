@@ -1,7 +1,9 @@
 import { getDataSourceToken } from '@nestjs/typeorm';
-import { BadRequestException, INestApplication } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SeedingSource } from '@concepta/typeorm-seeding';
+
+import { LookupService } from './lookup.service';
 import { ReferenceLookupException } from '../exceptions/reference-lookup.exception';
 
 import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
@@ -10,11 +12,11 @@ import { TestEntityFixture } from '../__fixtures__/test.entity.fixture';
 import { TestLookupServiceFixture } from '../__fixtures__/services/test-lookup.service.fixture';
 import { TestFactoryFixture } from '../__fixtures__/test.factory.fixture';
 
-describe('LookupService', () => {
+describe(LookupService, () => {
   const RANDOM_UUID = '3bfd065e-0c30-11ed-861d-0242ac120002';
   let app: INestApplication;
-  let auditModuleCustomFixture: TestModuleFixture;
-  let auditLookupCustomService: TestLookupServiceFixture;
+  let testModuleFixture: TestModuleFixture;
+  let testLookupService: TestLookupServiceFixture;
   let seedingSource: SeedingSource;
   let testObject: TestEntityFixture;
 
@@ -24,10 +26,9 @@ describe('LookupService', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    auditModuleCustomFixture =
-      moduleFixture.get<TestModuleFixture>(TestModuleFixture);
+    testModuleFixture = moduleFixture.get<TestModuleFixture>(TestModuleFixture);
 
-    auditLookupCustomService = moduleFixture.get<TestLookupServiceFixture>(
+    testLookupService = moduleFixture.get<TestLookupServiceFixture>(
       TestLookupServiceFixture,
     );
 
@@ -47,90 +48,73 @@ describe('LookupService', () => {
     jest.clearAllMocks();
   });
 
-  describe('lookupService', () => {
-    it('should be loaded', async () => {
-      expect(auditModuleCustomFixture).toBeInstanceOf(TestModuleFixture);
-      expect(auditLookupCustomService).toBeInstanceOf(TestLookupServiceFixture);
+  it('should be loaded', async () => {
+    expect(testModuleFixture).toBeInstanceOf(TestModuleFixture);
+    expect(testLookupService).toBeInstanceOf(TestLookupServiceFixture);
+  });
+
+  describe(LookupService.prototype.byId, () => {
+    it('success', async () => {
+      const result = await testLookupService.byId(testObject.id);
+
+      expect(result).toBeInstanceOf(TestEntityFixture);
+      expect(result?.audit.version).toBe(testObject.audit.version);
     });
 
-    describe('lookupService.byId', () => {
-      it('lookupService.byId Success', async () => {
-        const result = await auditLookupCustomService.byId(testObject?.id);
-        expect(result?.audit.version).toBe(testObject.audit.version);
-      });
-
-      it('lookupService.byId wrong id', async () => {
-        const result = await auditLookupCustomService.byId(RANDOM_UUID);
-        expect(result?.audit.version).toBe(undefined);
-      });
+    it('wrong id', async () => {
+      const result = await testLookupService.byId(RANDOM_UUID);
+      expect(result?.audit.version).toBe(undefined);
     });
+  });
 
-    describe('lookupService.findOne', () => {
-      it('lookupService.findOne Exception', async () => {
-        jest
-          .spyOn(auditLookupCustomService['repo'], 'findOne')
-          .mockImplementationOnce(() => {
-            throw new Error();
-          });
-
-        expect(auditLookupCustomService['findOne']({})).rejects.toThrow(
-          ReferenceLookupException,
-        );
-      });
-
-      it('lookupService.findOne Exception', async () => {
-        jest
-          .spyOn(auditLookupCustomService['repo'], 'findOne')
-          .mockImplementationOnce(() => {
-            throw new BadRequestException();
-          });
-
-        expect(auditLookupCustomService['findOne']({})).rejects.toThrow(
-          ReferenceLookupException,
-        );
-      });
-    });
-
-    describe('lookupService.find', () => {
-      it('lookupService.find', async () => {
-        const result = await auditLookupCustomService['find']({
-          where: { id: testObject.id },
+  describe(LookupService.prototype['findOne'], () => {
+    it('lookup exception', async () => {
+      jest
+        .spyOn(testLookupService['repo'], 'findOne')
+        .mockImplementationOnce(() => {
+          throw new Error();
         });
-        expect(result ? result[0]?.audit.version : null).toBe(
-          testObject.audit.version,
-        );
+
+      expect(testLookupService['findOne']({})).rejects.toThrow(
+        ReferenceLookupException,
+      );
+    });
+  });
+
+  describe(LookupService.prototype['find'], () => {
+    it('success', async () => {
+      const result: TestEntityFixture[] | undefined = await testLookupService[
+        'find'
+      ]({
+        where: { id: testObject.id },
       });
 
-      it('lookupService.find wrong id', async () => {
-        const result = await auditLookupCustomService['find']({
-          where: { id: RANDOM_UUID },
+      expect(Array.isArray(result) ? result[0] : undefined).toBeInstanceOf(
+        TestEntityFixture,
+      );
+
+      expect(Array.isArray(result) ? result[0]?.audit.version : null).toBe(
+        testObject.audit.version,
+      );
+    });
+
+    it('wrong id', async () => {
+      const result = await testLookupService['find']({
+        where: { id: RANDOM_UUID },
+      });
+      expect(result?.length).toBe(0);
+    });
+
+    it('exception', async () => {
+      jest
+        .spyOn(testLookupService['repo'], 'find')
+        .mockImplementationOnce(() => {
+          throw new Error();
         });
-        expect(result?.length).toBe(0);
-      });
 
-      it('lookupService.find Error', async () => {
-        jest
-          .spyOn(auditLookupCustomService['repo'], 'find')
-          .mockImplementationOnce(() => {
-            throw new Error();
-          });
-
-        expect(auditLookupCustomService['find']({})).rejects.toThrow(
-          ReferenceLookupException,
-        );
-      });
-
-      it('lookupService.find Exception', async () => {
-        jest
-          .spyOn(auditLookupCustomService['repo'], 'find')
-          .mockImplementationOnce(() => {
-            throw new BadRequestException();
-          });
-
-        expect(auditLookupCustomService['find']({})).rejects.toThrow(
-          ReferenceLookupException,
-        );
-      });
+      expect(testLookupService['find']({})).rejects.toThrow(
+        ReferenceLookupException,
+      );
     });
   });
 });

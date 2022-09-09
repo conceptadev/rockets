@@ -30,9 +30,6 @@
     },
     {
       "path": "../nestjs-typeorm-ext"
-    },
-    {
-      "path": "../nestjs-user"
     }
   ]
 }

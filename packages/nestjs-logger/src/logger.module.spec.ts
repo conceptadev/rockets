@@ -1,116 +1,93 @@
-import { ConfigModule } from '@nestjs/config';
+import { DynamicModule, ModuleMetadata } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { loggerConfig } from './config/logger.config';
-import { LoggerOptionsInterface } from './interfaces/logger-options.interface';
-import { LoggerSettingsInterface } from './interfaces/logger-settings.interface';
 import { LoggerTransportService } from './logger-transport.service';
-import { LoggerExceptionFilter } from './logger-exception.filter';
-
 import { LoggerModule } from './logger.module';
 import { LoggerService } from './logger.service';
 
-describe('LoggerModule', () => {
-  describe('forRoot with defaults', () => {
-    let moduleRef: TestingModule;
+describe(LoggerModule, () => {
+  let testModule: TestingModule;
+  let loggerModule: LoggerModule;
+  let loggerService: LoggerService;
+  let loggerTransportService: LoggerTransportService;
 
+  describe(LoggerModule.forRoot, () => {
     beforeEach(async () => {
-      jest.clearAllMocks();
-
-      moduleRef = await Test.createTestingModule({
-        imports: [LoggerModule.register()],
-      }).compile();
+      testModule = await Test.createTestingModule(
+        testModuleFactory([LoggerModule.forRoot({})]),
+      ).compile();
     });
 
-    it('module should be defined', async () => {
-      const loggerService = moduleRef.get(LoggerService);
-
-      const loggerTransportService = moduleRef.get<LoggerTransportService>(
-        LoggerTransportService,
-      );
-
-      const loggerExceptionFilter = moduleRef.get<LoggerExceptionFilter>(
-        LoggerExceptionFilter,
-      );
-
-      // This is to inform that this logger will new used internally
-      // or it will be used once yuo do a new Logger()
-      moduleRef.useLogger(loggerService);
-
-      expect(loggerService).toBeInstanceOf(LoggerService);
-
-      expect(loggerTransportService).toBeInstanceOf(LoggerTransportService);
-      expect(loggerExceptionFilter).toBeInstanceOf(LoggerExceptionFilter);
-      expect(loggerTransportService['loggerTransports'].length).toBe(1);
+    it('module should be loaded', async () => {
+      commonVars();
+      commonTests();
     });
   });
 
-  describe('forRoot with overrides', () => {
-    let moduleRef: TestingModule;
-
+  describe(LoggerModule.register, () => {
     beforeEach(async () => {
-      jest.clearAllMocks();
+      testModule = await Test.createTestingModule(
+        testModuleFactory([LoggerModule.register({})]),
+      ).compile();
+    });
 
-      const config = await loggerConfig();
+    it('module should be loaded', async () => {
+      commonVars();
+      commonTests();
+    });
+  });
 
-      moduleRef = await Test.createTestingModule({
-        imports: [
-          LoggerModule.register({
-            settings: {
-              ...config,
-              logLevel: ['debug'],
-            },
+  describe(LoggerModule.forRootAsync, () => {
+    beforeEach(async () => {
+      testModule = await Test.createTestingModule(
+        testModuleFactory([
+          LoggerModule.forRootAsync({
+            useFactory: () => ({}),
           }),
-        ],
-      }).compile();
+        ]),
+      ).compile();
     });
 
-    it('module should be defined', async () => {
-      expect(moduleRef).toBeInstanceOf(TestingModule);
+    it('module should be loaded', async () => {
+      commonVars();
+      commonTests();
     });
   });
 
-  describe('forRootAsync', () => {
-    let moduleRef: TestingModule;
-
+  describe(LoggerModule.registerAsync, () => {
     beforeEach(async () => {
-      jest.clearAllMocks();
-      moduleRef = await Test.createTestingModule({
-        imports: [
+      testModule = await Test.createTestingModule(
+        testModuleFactory([
           LoggerModule.registerAsync({
-            imports: [ConfigModule.forFeature(loggerConfig)],
-            inject: [loggerConfig.KEY],
-            useFactory: async (
-              config: LoggerSettingsInterface,
-            ): Promise<LoggerOptionsInterface> => {
-              return {
-                settings: {
-                  ...config,
-                  logLevel: ['debug'],
-                  transportLogLevel: ['debug'],
-                },
-              };
-            },
+            useFactory: () => ({}),
           }),
-        ],
-        providers: [],
-      }).compile();
+        ]),
+      ).compile();
     });
 
-    it('module should be defined', async () => {
-      const loggerService = moduleRef.get(LoggerService);
-
-      const loggerTransportService = moduleRef.get<LoggerTransportService>(
-        LoggerTransportService,
-      );
-
-      // This is to inform that this logger will new used internally
-      // or it will be used once yuo do a new Logger()
-      moduleRef.useLogger(loggerService);
-
-      expect(loggerService).toBeInstanceOf(LoggerService);
-
-      expect(loggerTransportService).toBeInstanceOf(LoggerTransportService);
-      expect(loggerTransportService['loggerTransports'].length).toBe(1);
+    it('module should be loaded', async () => {
+      commonVars();
+      commonTests();
     });
   });
+
+  function commonVars() {
+    loggerModule = testModule.get(LoggerModule);
+    loggerService = testModule.get(LoggerService);
+    loggerTransportService = testModule.get(LoggerTransportService);
+  }
+
+  function commonTests() {
+    expect(loggerModule).toBeInstanceOf(LoggerModule);
+    expect(loggerService).toBeInstanceOf(LoggerService);
+    expect(loggerTransportService).toBeInstanceOf(LoggerTransportService);
+    expect(loggerTransportService['loggerTransports'].length).toBe(1);
+  }
 });
+
+function testModuleFactory(
+  extraImports: DynamicModule['imports'] = [],
+): ModuleMetadata {
+  return {
+    imports: [...extraImports],
+  };
+}

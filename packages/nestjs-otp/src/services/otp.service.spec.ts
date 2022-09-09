@@ -67,7 +67,7 @@ describe('OtpModule', () => {
 
     testModule = await Test.createTestingModule({
       imports: [
-        TypeOrmExtModule.register({
+        TypeOrmExtModule.forRoot({
           name: connectionName,
           type: 'sqlite',
           database: ':memory:',
