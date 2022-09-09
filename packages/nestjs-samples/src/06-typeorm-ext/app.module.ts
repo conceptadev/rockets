@@ -7,7 +7,7 @@ import { UserEntity } from './user/user.entity';
 
 @Module({
   imports: [
-    TypeOrmExtModule.register({
+    TypeOrmExtModule.forRoot({
       type: 'sqlite',
       database: ':memory:',
       entities: [UserEntity],

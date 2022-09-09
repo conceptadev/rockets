@@ -23,7 +23,7 @@ describe(AuthGithubModule, () => {
     it('module should be loaded', async () => {
       const module: TestingModule = await Test.createTestingModule({
         imports: [
-          TypeOrmExtModule.register({
+          TypeOrmExtModule.forRoot({
             type: 'sqlite',
             database: ':memory:',
             entities: [UserEntityFixture, FederatedEntityFixture],

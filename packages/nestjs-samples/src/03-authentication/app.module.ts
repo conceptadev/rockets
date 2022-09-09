@@ -14,7 +14,7 @@ import { createUserRepository } from './user/create-user-repository';
 
 @Module({
   imports: [
-    TypeOrmExtModule.register({
+    TypeOrmExtModule.forRoot({
       type: 'sqlite',
       database: ':memory:',
       entities: [UserEntity],

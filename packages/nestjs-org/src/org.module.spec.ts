@@ -34,7 +34,7 @@ describe('OrgModule', () => {
   beforeEach(async () => {
     const testModule: TestingModule = await Test.createTestingModule({
       imports: [
-        TypeOrmExtModule.register({
+        TypeOrmExtModule.forRoot({
           type: 'sqlite',
           database: ':memory:',
           entities: [OrgEntityFixture, OwnerEntityFixture],

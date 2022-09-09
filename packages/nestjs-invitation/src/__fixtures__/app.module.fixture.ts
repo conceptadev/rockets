@@ -23,11 +23,7 @@ import { default as ormConfig } from './ormconfig.fixture';
 @Module({
   imports: [
     EventModule.forRoot({}),
-    TypeOrmExtModule.registerAsync({
-      useFactory: async () => {
-        return ormConfig;
-      },
-    }),
+    TypeOrmExtModule.forRoot(ormConfig),
     CrudModule.forRoot({}),
     MailerModule.forRoot({ transport: { host: '' } }),
     EmailModule.forRootAsync({

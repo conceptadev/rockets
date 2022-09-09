@@ -19,11 +19,7 @@ import { MailerServiceFixture } from './email/mailer.service.fixture';
 
 @Module({
   imports: [
-    TypeOrmExtModule.registerAsync({
-      useFactory: async () => {
-        return ormConfig;
-      },
-    }),
+    TypeOrmExtModule.forRoot(ormConfig),
     CrudModule.forRoot({}),
     AuthRecoveryModule.forRootAsync({
       inject: [UserLookupService, UserMutateService, OtpService, EmailService],

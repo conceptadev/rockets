@@ -17,12 +17,10 @@ describe('AppModule', () => {
   beforeEach(async () => {
     const testModule: TestingModule = await Test.createTestingModule({
       imports: [
-        TypeOrmExtModule.registerAsync({
-          useFactory: async () => ({
-            type: 'sqlite',
-            database: ':memory:',
-            entities: [PhotoEntityFixture],
-          }),
+        TypeOrmExtModule.forRoot({
+          type: 'sqlite',
+          database: ':memory:',
+          entities: [PhotoEntityFixture],
         }),
         PhotoModuleFixture.register(),
       ],
