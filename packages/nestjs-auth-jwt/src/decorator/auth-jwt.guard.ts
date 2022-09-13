@@ -4,6 +4,8 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+
+// TODO: Replace this to use AuthGuard From nest-authentication
 import { AuthGuard } from '@nestjs/passport';
 import { AUTH_JWT_STRATEGY_NAME } from '../auth-jwt.constants';
 

@@ -21,6 +21,7 @@ import { FastifyAuthGuard } from './fastify-auth.guard';
  * ```
  */
 export const AuthGuard = (strategyName: string) => {
+  //TODO: Add logic to get this information dynamically
   const isExpress = true;
 
   if (isExpress) {
