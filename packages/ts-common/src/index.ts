@@ -42,3 +42,5 @@ export { OtpClearInterface } from './otp/interfaces/otp-clear.interface';
 
 export { InvitationInterface } from './invitation/interfaces/invitation.interface';
 export { InvitationAcceptedEventPayloadInterface } from './invitation/interfaces/invitation-accepted-event-payload.interface';
+export { InvitationGetOrCreateUserEventPayloadInterface } from './invitation/interfaces/invitation-get-or-create-user-event-payload.interface';
+export { InvitationGetOrCreateUserEventResponseInterface } from './invitation/interfaces/invitation-get-or-create-user-event-response.interface';

@@ -1,24 +1,23 @@
 import { Inject } from '@nestjs/common';
+import {
+  LiteralObject,
+  ReferenceEmailInterface,
+  ReferenceIdInterface,
+} from '@concepta/ts-core';
+import { EventDispatchService } from '@concepta/nestjs-event';
+import { InvitationGetOrCreateUserEventResponseInterface } from '@concepta/ts-common';
 
 import {
   INVITATION_MODULE_EMAIL_SERVICE_TOKEN,
   INVITATION_MODULE_OTP_SERVICE_TOKEN,
   INVITATION_MODULE_SETTINGS_TOKEN,
-  INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-  INVITATION_MODULE_USER_MUTATE_SERVICE_TOKEN,
 } from '../invitation.constants';
-
 import { InvitationOtpServiceInterface } from '../interfaces/invitation-otp.service.interface';
 import { InvitationSettingsInterface } from '../interfaces/invitation-settings.interface';
-import { InvitationUserLookupServiceInterface } from '../interfaces/invitation-user-lookup.service.interface';
-import { InvitationUserMutateServiceInterface } from '../interfaces/invitation-user-mutate.service.interface';
-import {
-  ReferenceEmailInterface,
-  ReferenceIdInterface,
-  ReferenceUsernameInterface,
-} from '@concepta/ts-core';
 import { InvitationEmailServiceInterface } from '../interfaces/invitation-email.service.interface';
 import { InvitationSendMailException } from '../exceptions/invitation-send-mail.exception';
+import { InvitationGetOrCreateUserRequestEventAsync } from '../events/invitation-get-or-create-user-request.event';
+import { InvitationUserUndefinedException } from '../exceptions/invitation-user-undefined.exception';
 
 export class InvitationSendService {
   constructor(
@@ -28,10 +27,7 @@ export class InvitationSendService {
     private readonly emailService: InvitationEmailServiceInterface,
     @Inject(INVITATION_MODULE_OTP_SERVICE_TOKEN)
     private readonly otpService: InvitationOtpServiceInterface,
-    @Inject(INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN)
-    private readonly userLookupService: InvitationUserLookupServiceInterface,
-    @Inject(INVITATION_MODULE_USER_MUTATE_SERVICE_TOKEN)
-    private readonly userMutateService: InvitationUserMutateServiceInterface,
+    private readonly eventDispatchService: EventDispatchService,
   ) {}
 
   async send(
@@ -57,16 +53,16 @@ export class InvitationSendService {
 
   async getOrCreateOneUser(
     email: string,
-  ): Promise<
-    ReferenceIdInterface & ReferenceUsernameInterface & ReferenceEmailInterface
-  > {
-    let user = await this.userLookupService.byEmail(email);
+    payload?: LiteralObject,
+  ): Promise<InvitationGetOrCreateUserEventResponseInterface> {
+    const eventResult = await this.eventDispatchService.async(
+      new InvitationGetOrCreateUserRequestEventAsync({ email, data: payload }),
+    );
+
+    const user = eventResult?.find((it) => it.id && it.username && it.email);
 
     if (!user) {
-      user = await this.userMutateService.create({
-        email,
-        username: email,
-      });
+      throw new InvitationUserUndefinedException();
     }
 
     return user;

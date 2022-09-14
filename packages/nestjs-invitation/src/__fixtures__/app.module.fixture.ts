@@ -20,6 +20,7 @@ import { InvitationAcceptedEventAsync } from '../events/invitation-accepted.even
 import { UserOtpEntityFixture } from './user/entities/user-otp-entity.fixture';
 import { UserEntityFixture } from './user/entities/user-entity.fixture';
 import { default as ormConfig } from './ormconfig.fixture';
+import { InvitationGetOrCreateUserRequestEventAsync } from '../events/invitation-get-or-create-user-request.event';
 
 @Module({
   imports: [
@@ -61,6 +62,8 @@ import { default as ormConfig } from './ormconfig.fixture';
     UserModule.forRoot({
       settings: {
         invitationRequestEvent: InvitationAcceptedEventAsync,
+        invitationGetOrCreateUserRequestEvent:
+          InvitationGetOrCreateUserRequestEventAsync,
       },
       entities: {
         user: {

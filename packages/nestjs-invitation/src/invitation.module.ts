@@ -5,7 +5,6 @@ import {
   InvitationModuleClass,
   InvitationOptions,
 } from './invitation.module-definition';
-
 import { InvitationService } from './services/invitation.service';
 import { InvitationCrudService } from './services/invitation-crud.service';
 import { InvitationAcceptanceService } from './services/invitation-acceptance.service';

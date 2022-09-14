@@ -8,6 +8,8 @@ import {
   Param,
   Patch,
   Query,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
@@ -26,6 +28,7 @@ export class InvitationAcceptanceController {
     private readonly invitationAcceptanceService: InvitationAcceptanceService,
   ) {}
 
+  @UsePipes(new ValidationPipe({ transform: true }))
   @ApiBody({
     type: InvitationAcceptInviteDto,
     description: 'DTO to accept invitation token.',
