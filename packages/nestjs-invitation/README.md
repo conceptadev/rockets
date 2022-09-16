@@ -27,29 +27,64 @@ For more details check invitation modules [swagger](http://host:port/api/#/invit
 
 ## Installation
 
-$ `yarn add @concepta/nestjs-invitation`
+$ `yarn add @concepta/nestjs-invitation @concepta/nestjs-crud @concepta/nestjs-email @concepta/nestjs-event @concepta/nestjs-otp @concepta/nestjs-typeorm-ext @concepta/nestjs-user @concepta/typeorm-common`
 
 At your `app.module.ts` you should configure OTP, USER, EMAIL modules with it's entities and services. Look at `packages/nestjs-invitation/src/__fixtures__/app.module.fixture.ts` for examples how to use it.
 
 ```typescript
-OtpModule.forRoot({
-      entities: {
-        'user-otp': {
-          entity: UserOtpEntity,
-        },
+EventModule.forRoot({}),
+  ConfigModule.forRoot({
+    isGlobal: true,
+    load: [ormConfig],
+  }),
+  SwaggerUiModule.register({}),
+  TypeOrmExtModule.registerAsync({
+    inject: [ormConfig.KEY],
+    useFactory: async (config: ConfigType<typeof ormConfig>) => config,
+  }),
+  CrudModule.forRoot({}),
+  EmailModule.forRoot({
+    mailerService: {
+      sendMail(sendMailOptions): Promise<void> {
+        Logger.debug('email sent', sendMailOptions);
+
+        return Promise.resolve();
       },
-    }),
-UserModule.forRoot({
-  settings: {
-    invitationRequestEvent: InvitationAcceptedEventAsync,
-  },
-  entities: {
-    user: {
-      entity: UserEntity,
     },
-  },
-}),
-EmailModule.register({
-  mailerService: MailerService,
-})
+  }),
+  InvitationModule.registerAsync({
+    imports: [UserModule.deferred(), OtpModule.deferred()],
+    inject: [UserLookupService, UserMutateService, OtpService, EmailService],
+    useFactory: (
+      userLookupService,
+      userMutateService,
+      otpService,
+      emailService,
+    ) => ({
+      userLookupService,
+      userMutateService,
+      otpService,
+      emailService,
+    }),
+    entities: {
+      invitation: {
+        entity: InvitationEntity,
+      },
+    },
+  }),
+  OtpModule.register({
+    entities: {
+      'user-otp': {
+        entity: UserOtpEntity,
+      },
+    },
+  }),
+  UserModule.register({
+    settings: {
+      invitationRequestEvent: InvitationAcceptedEventAsync,
+    },
+    entities: {
+      user: { entity: UserEntity },
+    },
+  })
 ```
