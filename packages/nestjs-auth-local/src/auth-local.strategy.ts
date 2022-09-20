@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { ReferenceUsername } from '@concepta/ts-core';
 import { PassportStrategyFactory } from '@concepta/nestjs-authentication';
+import { PasswordStorageService } from '@concepta/nestjs-password';
 import {
   AUTH_LOCAL_MODULE_SETTINGS_TOKEN,
   AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN,
@@ -15,7 +16,6 @@ import {
 } from './auth-local.constants';
 import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.interface';
 import { AuthLocalUserLookupServiceInterface } from './interfaces/auth-local-user-lookup-service.interface';
-import { PasswordStorageServiceInterface } from '@concepta/nestjs-password/src/interfaces/password-storage-service.interface';
 
 /**
  * Define the Local strategy using passport.
@@ -39,7 +39,7 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
     private settings: AuthLocalSettingsInterface,
     @Inject(AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN)
     private userLookupService: AuthLocalUserLookupServiceInterface,
-    private passwordService: PasswordStorageServiceInterface,
+    private passwordService: PasswordStorageService,
   ) {
     super({
       usernameField: settings?.usernameField,

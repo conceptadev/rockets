@@ -57,7 +57,7 @@ describe(AuthRefreshStrategy, () => {
       expect(result.id).toBe(user.id);
     });
 
-    it(`should return no user on ${userLookUpService.bySubject}`, async () => {
+    it(`should throw UnauthorizedException`, async () => {
       jest.spyOn(userLookUpService, 'bySubject').mockResolvedValue(null);
 
       const t = () =>
