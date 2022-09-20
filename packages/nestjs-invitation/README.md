@@ -37,7 +37,6 @@ EventModule.forRoot({}),
     isGlobal: true,
     load: [ormConfig],
   }),
-  SwaggerUiModule.register({}),
   TypeOrmExtModule.registerAsync({
     inject: [ormConfig.KEY],
     useFactory: async (config: ConfigType<typeof ormConfig>) => config,
@@ -88,3 +87,29 @@ EventModule.forRoot({}),
     },
   })
 ```
+
+## Required rocket modules
+In order to invitation module work you need to also add the following modules
+
+* ### Rockets NestJS User
+    A module for managing a basic User entity, including controller with full CRUD, DTOs, sample data factory and seeder.
+
+* ### Rockets NestJS CRUD
+    Extremely powerful CRUD module that is an extension/wrapper of the popular [@nestjsx/crud](https://github.com/nestjsx/crud) module.
+
+* ### Rockets NestJS Email
+    Email deliver module that supports the popular [@nestjs-modules/mailer](https://www.npmjs.com/package/@nestjs-modules/mailer) module.
+
+* ### Rockets NestJS Events
+    Advanced class based event dispatch/listener module.
+
+* ### Rockets NestJS Otp
+    A module for managing a basic Otp entity, including controller with full CRUD, DTOs, sample data factory and seeder.
+
+* ### Rockets TypeORM Common
+    The common module contains commonly used TypeORM embeds, utilities.
+
+* ### Rockets NestJS TypeOrm Extended
+    Extremely powerful extension of the NestJS TypeOrm module that allows your
+    dynamic modules to accept drop-in replacements of custom entities
+    and repositories at registration time.
