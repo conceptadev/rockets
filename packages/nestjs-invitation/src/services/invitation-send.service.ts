@@ -6,6 +6,7 @@ import {
 } from '@concepta/ts-core';
 import { EventDispatchService } from '@concepta/nestjs-event';
 import { InvitationGetOrCreateUserEventResponseInterface } from '@concepta/ts-common';
+import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 import {
   INVITATION_MODULE_EMAIL_SERVICE_TOKEN,
@@ -34,18 +35,23 @@ export class InvitationSendService {
     user: ReferenceIdInterface & ReferenceEmailInterface,
     code: string,
     category: string,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<void> {
     const { assignment, type, expiresIn } = this.settings.otp;
 
     // create an OTP for this invite
-    const otp = await this.otpService.create(assignment, {
-      category,
-      type,
-      expiresIn,
-      assignee: {
-        id: user.id,
+    const otp = await this.otpService.create(
+      assignment,
+      {
+        category,
+        type,
+        expiresIn,
+        assignee: {
+          id: user.id,
+        },
       },
-    });
+      queryOptions,
+    );
 
     // send the invite email
     await this.sendEmail(user.email, code, otp.passcode, otp.expirationDate);
@@ -54,9 +60,14 @@ export class InvitationSendService {
   async getOrCreateOneUser(
     email: string,
     payload?: LiteralObject,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<InvitationGetOrCreateUserEventResponseInterface> {
     const eventResult = await this.eventDispatchService.async(
-      new InvitationGetOrCreateUserRequestEventAsync({ email, data: payload }),
+      new InvitationGetOrCreateUserRequestEventAsync({
+        email,
+        data: payload,
+        queryOptions,
+      }),
     );
 
     const user = eventResult?.find((it) => it.id && it.username && it.email);

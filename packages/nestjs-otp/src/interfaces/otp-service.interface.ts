@@ -4,9 +4,10 @@ import {
   OtpDeleteInterface,
   OtpClearInterface,
 } from '@concepta/ts-common';
+import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 export interface OtpServiceInterface
-  extends OtpCreateInterface,
-    OtpValidateInterface,
-    OtpDeleteInterface,
-    OtpClearInterface {}
+  extends OtpCreateInterface<QueryOptionsInterface>,
+    OtpValidateInterface<QueryOptionsInterface>,
+    OtpDeleteInterface<QueryOptionsInterface>,
+    OtpClearInterface<QueryOptionsInterface> {}

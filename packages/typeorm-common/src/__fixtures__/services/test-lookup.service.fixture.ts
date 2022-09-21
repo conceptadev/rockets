@@ -9,7 +9,7 @@ import { TestEntityFixture } from '../test.entity.fixture';
 export class TestLookupServiceFixture extends LookupService<TestEntityFixture> {
   constructor(
     @InjectDynamicRepository(AUDIT_TOKEN)
-    protected repo: Repository<TestEntityFixture>,
+    repo: Repository<TestEntityFixture>,
   ) {
     super(repo);
   }

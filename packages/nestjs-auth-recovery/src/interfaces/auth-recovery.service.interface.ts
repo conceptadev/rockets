@@ -2,17 +2,29 @@ import {
   ReferenceAssigneeInterface,
   ReferenceIdInterface,
 } from '@concepta/ts-core';
+import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 export interface AuthRecoveryServiceInterface {
-  recoverLogin(email: string): Promise<void>;
-  recoverPassword(email: string): Promise<void>;
+  recoverLogin(
+    email: string,
+    queryOptions?: QueryOptionsInterface,
+  ): Promise<void>;
+  recoverPassword(
+    email: string,
+    queryOptions?: QueryOptionsInterface,
+  ): Promise<void>;
   validatePasscode(
     passcode: string,
     deleteIfValid: boolean,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<ReferenceAssigneeInterface | null>;
   updatePassword(
     passcode: string,
     newPassword: string,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<ReferenceIdInterface | null>;
-  revokeAllUserPasswordRecoveries(email: string): Promise<void>;
+  revokeAllUserPasswordRecoveries(
+    email: string,
+    queryOptions?: QueryOptionsInterface,
+  ): Promise<void>;
 }

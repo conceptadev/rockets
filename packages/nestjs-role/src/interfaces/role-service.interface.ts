@@ -1,5 +1,7 @@
 import { ReferenceAssignment, ReferenceIdInterface } from '@concepta/ts-core';
 import { RoleInterface } from '@concepta/ts-common';
+import { QueryOptionsInterface } from '@concepta/typeorm-common';
+
 import { RoleEntityInterface } from './role-entity.interface';
 
 export interface RoleServiceInterface {
@@ -12,6 +14,7 @@ export interface RoleServiceInterface {
   getAssignedRoles(
     assignment: ReferenceAssignment,
     assignee: ReferenceIdInterface,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<RoleEntityInterface[]>;
 
   /**
@@ -25,6 +28,7 @@ export interface RoleServiceInterface {
     assignment: ReferenceAssignment,
     role: Partial<RoleInterface>,
     assignee: T,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<boolean>;
 
   /**
@@ -38,5 +42,6 @@ export interface RoleServiceInterface {
     assignment: ReferenceAssignment,
     roles: ReferenceIdInterface[],
     assignee: T,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<boolean>;
 }

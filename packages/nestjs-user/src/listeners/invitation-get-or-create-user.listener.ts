@@ -17,6 +17,7 @@ import {
   InvitationGetOrCreateUserEventPayloadInterface,
   InvitationGetOrCreateUserEventResponseInterface,
 } from '@concepta/ts-common';
+import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 import { USER_MODULE_SETTINGS_TOKEN } from '../user.constants';
 import { UserMutateService } from '../services/user-mutate.service';
@@ -70,21 +71,25 @@ export class InvitationGetOrCreateUserListener
       InvitationGetOrCreateUserEventResponseInterface
     >
   > {
-    return this.getOrCreateOneUser(event.payload.email);
+    const { email, queryOptions } = event.payload;
+
+    return this.getOrCreateOneUser(email, queryOptions);
   }
 
   async getOrCreateOneUser(
     email: string,
-  ): Promise<
-    ReferenceIdInterface & ReferenceUsernameInterface & ReferenceEmailInterface
-  > {
-    let user = await this.userLookupService.byEmail(email);
+    queryOptions?: QueryOptionsInterface,
+  ): Promise<InvitationGetOrCreateUserEventResponseInterface> {
+    let user = await this.userLookupService.byEmail(email, queryOptions);
 
     if (!user) {
-      user = await this.userMutateService.create({
-        email,
-        username: email,
-      });
+      user = await this.userMutateService.create(
+        {
+          email,
+          username: email,
+        },
+        queryOptions,
+      );
     }
 
     return user;

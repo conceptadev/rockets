@@ -1,4 +1,13 @@
-import { LookupSubjectInterface } from '@concepta/ts-core';
+import {
+  LookupSubjectInterface,
+  ReferenceIdInterface,
+  ReferenceSubject,
+} from '@concepta/ts-core';
+import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 export interface AuthJwtUserLookupServiceInterface
-  extends LookupSubjectInterface {}
+  extends LookupSubjectInterface<
+    ReferenceSubject,
+    ReferenceIdInterface,
+    QueryOptionsInterface
+  > {}

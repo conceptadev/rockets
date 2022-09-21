@@ -16,6 +16,7 @@ import {
   ReferenceAssigneeInterface,
   ReferenceIdInterface,
 } from '@concepta/ts-core';
+import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 @Injectable()
 export class AuthRecoveryService implements AuthRecoveryServiceInterface {
@@ -36,9 +37,12 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
    *
    * @param email user email
    */
-  async recoverLogin(email: string): Promise<void> {
+  async recoverLogin(
+    email: string,
+    queryOptions?: QueryOptionsInterface,
+  ): Promise<void> {
     // recover the user by providing an email
-    const user = await this.userLookupService.byEmail(email);
+    const user = await this.userLookupService.byEmail(email, queryOptions);
 
     // did we find the user?
     if (user) {
@@ -58,23 +62,30 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
    *
    * @param email user email
    */
-  async recoverPassword(email: string): Promise<void> {
+  async recoverPassword(
+    email: string,
+    queryOptions?: QueryOptionsInterface,
+  ): Promise<void> {
     // recover the user by providing an email
-    const user = await this.userLookupService.byEmail(email);
+    const user = await this.userLookupService.byEmail(email, queryOptions);
 
     // did we find a user?
     if (user) {
       // extract required otp properties
       const { category, assignment, type, expiresIn } = this.config.otp;
       // create an OTP save it in the database
-      const otp = await this.otpService.create(assignment, {
-        category,
-        type,
-        expiresIn,
-        assignee: {
-          id: user.id,
+      const otp = await this.otpService.create(
+        assignment,
+        {
+          category,
+          type,
+          expiresIn,
+          assignee: {
+            id: user.id,
+          },
         },
-      });
+        queryOptions,
+      );
 
       // send en email with a recover OTP
       await this.notificationService.sendRecoverPasswordEmail(
@@ -97,6 +108,7 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
   async validatePasscode(
     passcode: string,
     deleteIfValid = false,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<ReferenceAssigneeInterface | null> {
     // extract required properties
     const { category, assignment } = this.config.otp;
@@ -106,6 +118,7 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
       assignment,
       { category, passcode },
       deleteIfValid,
+      queryOptions,
     );
   }
 
@@ -118,23 +131,27 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
   async updatePassword(
     passcode: string,
     newPassword: string,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<ReferenceIdInterface | null> {
     // get otp by passcode, but no delete it until all workflow pass
-    const otp = await this.validatePasscode(passcode);
+    const otp = await this.validatePasscode(passcode, false, queryOptions);
 
     // did we get an otp?
     if (otp) {
       // call user mutate service
-      const user = await this.userMutateService.update({
-        id: otp.assignee.id,
-        password: newPassword,
-      });
+      const user = await this.userMutateService.update(
+        {
+          id: otp.assignee.id,
+          password: newPassword,
+        },
+        queryOptions,
+      );
 
       if (user) {
         await this.notificationService.sendPasswordUpdatedSuccefullyEmail(
           user.email,
         );
-        await this.revokeAllUserPasswordRecoveries(user.email);
+        await this.revokeAllUserPasswordRecoveries(user.email, queryOptions);
       }
 
       return user;
@@ -149,21 +166,28 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
    *
    * @param email user email
    */
-  async revokeAllUserPasswordRecoveries(email: string): Promise<void> {
+  async revokeAllUserPasswordRecoveries(
+    email: string,
+    queryOptions?: QueryOptionsInterface,
+  ): Promise<void> {
     // recover users password by providing an email
-    const user = await this.userLookupService.byEmail(email);
+    const user = await this.userLookupService.byEmail(email, queryOptions);
 
     // did we find a user?
     if (user) {
       // extract required otp properties
       const { category, assignment } = this.config.otp;
       // clear all user's otps in DB
-      await this.otpService.clear(assignment, {
-        category,
-        assignee: {
-          id: user.id,
+      await this.otpService.clear(
+        assignment,
+        {
+          category,
+          assignee: {
+            id: user.id,
+          },
         },
-      });
+        queryOptions,
+      );
     }
 
     // !!! Falling through to void is intentional              !!!!
