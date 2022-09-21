@@ -21,6 +21,9 @@
     },
     {
       "path": "../nestjs-typeorm-ext"
+    },
+    {
+      "path": "../typeorm-common"
     }
   ]
 }

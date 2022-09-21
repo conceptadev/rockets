@@ -5,8 +5,9 @@ import {
   ReferenceSubject,
   ReferenceUsername,
 } from '@concepta/ts-core';
-import { LookupService } from '@concepta/typeorm-common';
+import { LookupService, QueryOptionsInterface } from '@concepta/typeorm-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
+
 import { USER_MODULE_USER_ENTITY_KEY } from '../user.constants';
 import { UserEntityInterface } from '../interfaces/user-entity.interface';
 import { UserLookupServiceInterface } from '../interfaces/user-lookup-service.interface';
@@ -26,7 +27,7 @@ export class UserLookupService
    */
   constructor(
     @InjectDynamicRepository(USER_MODULE_USER_ENTITY_KEY)
-    protected repo: Repository<UserEntityInterface>,
+    repo: Repository<UserEntityInterface>,
   ) {
     super(repo);
   }
@@ -36,8 +37,11 @@ export class UserLookupService
    *
    * @param email the email
    */
-  async byEmail(email: ReferenceEmail): Promise<UserEntityInterface | null> {
-    return this.findOne({ where: { email } });
+  async byEmail(
+    email: ReferenceEmail,
+    queryOptions?: QueryOptionsInterface,
+  ): Promise<UserEntityInterface | null> {
+    return this.findOne({ where: { email } }, queryOptions);
   }
 
   /**
@@ -47,8 +51,9 @@ export class UserLookupService
    */
   async bySubject(
     subject: ReferenceSubject,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<UserEntityInterface | null> {
-    return this.findOne({ where: { id: subject } });
+    return this.findOne({ where: { id: subject } }, queryOptions);
   }
 
   /**
@@ -58,7 +63,8 @@ export class UserLookupService
    */
   async byUsername(
     username: ReferenceUsername,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<UserEntityInterface | null> {
-    return this.findOne({ where: { username } });
+    return this.findOne({ where: { username } }, queryOptions);
   }
 }

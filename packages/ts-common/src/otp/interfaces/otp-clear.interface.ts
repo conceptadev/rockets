@@ -1,7 +1,12 @@
-import { ReferenceAssignment } from '@concepta/ts-core';
+import {
+  ReferenceAssignment,
+  ReferenceQueryOptionsInterface,
+} from '@concepta/ts-core';
 import { OtpInterface } from './otp.interface';
 
-export interface OtpClearInterface {
+export interface OtpClearInterface<
+  O extends ReferenceQueryOptionsInterface = ReferenceQueryOptionsInterface,
+> {
   /**
    * Clear all otps for assign in given category.
    *
@@ -11,5 +16,6 @@ export interface OtpClearInterface {
   clear(
     assignment: ReferenceAssignment,
     otp: Pick<OtpInterface, 'assignee' | 'category'>,
+    options?: O,
   ): Promise<void>;
 }

@@ -6,15 +6,18 @@ import {
   UpdateOneInterface,
 } from '@concepta/ts-core';
 import { UserCreatableInterface } from '@concepta/ts-common';
+import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 export interface InvitationUserMutateServiceInterface
   extends CreateOneInterface<
       UserCreatableInterface,
       ReferenceIdInterface &
         ReferenceEmailInterface &
-        ReferenceUsernameInterface
+        ReferenceUsernameInterface,
+      QueryOptionsInterface
     >,
     UpdateOneInterface<
       ReferenceIdInterface,
-      ReferenceIdInterface & ReferenceEmailInterface
+      ReferenceIdInterface & ReferenceEmailInterface,
+      QueryOptionsInterface
     > {}

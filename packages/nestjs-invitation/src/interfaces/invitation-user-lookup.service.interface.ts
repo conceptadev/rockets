@@ -6,12 +6,18 @@ import {
   ReferenceIdInterface,
   ReferenceUsernameInterface,
 } from '@concepta/ts-core';
+import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 export interface InvitationUserLookupServiceInterface
-  extends LookupIdInterface,
+  extends LookupIdInterface<
+      ReferenceId,
+      ReferenceIdInterface,
+      QueryOptionsInterface
+    >,
     LookupEmailInterface<
       ReferenceId,
       ReferenceIdInterface &
         ReferenceUsernameInterface &
-        ReferenceEmailInterface
+        ReferenceEmailInterface,
+      QueryOptionsInterface
     > {}

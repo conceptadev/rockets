@@ -9,11 +9,13 @@ import {
 import { ReferenceUsername } from '@concepta/ts-core';
 import { PassportStrategyFactory } from '@concepta/nestjs-authentication';
 import { PasswordStorageService } from '@concepta/nestjs-password';
+
 import {
   AUTH_LOCAL_MODULE_SETTINGS_TOKEN,
   AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN,
   AUTH_LOCAL_STRATEGY_NAME,
 } from './auth-local.constants';
+
 import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.interface';
 import { AuthLocalUserLookupServiceInterface } from './interfaces/auth-local-user-lookup-service.interface';
 

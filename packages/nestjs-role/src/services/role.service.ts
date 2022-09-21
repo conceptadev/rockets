@@ -1,7 +1,11 @@
 import { Repository } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
 import { ReferenceAssignment, ReferenceIdInterface } from '@concepta/ts-core';
-import { ReferenceLookupException } from '@concepta/typeorm-common';
+import {
+  QueryOptionsInterface,
+  ReferenceLookupException,
+  RepositoryProxy,
+} from '@concepta/typeorm-common';
 import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
 import { AssignmentNotFoundException } from '../exceptions/assignment-not-found.exception';
 import { RoleAssignmentEntityInterface } from '../interfaces/role-assignment-entity.interface';
@@ -34,14 +38,20 @@ export class RoleService implements RoleServiceInterface {
   async getAssignedRoles(
     assignment: ReferenceAssignment,
     assignee: ReferenceIdInterface,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<RoleEntityInterface[]> {
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
+    // new repo proxy
+    const repoProxy = new RepositoryProxy<RoleAssignmentEntityInterface>(
+      assignmentRepo,
+    );
+
     // try to find the relationships
     try {
       // make the query
-      const assignments = await assignmentRepo.find({
+      const assignments = await repoProxy.repository(queryOptions).find({
         where: {
           assignee: { id: assignee.id },
         },
@@ -66,19 +76,26 @@ export class RoleService implements RoleServiceInterface {
     assignment: ReferenceAssignment,
     role: ReferenceIdInterface,
     assignee: T,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<boolean> {
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
+    // new repo proxy
+    const repoProxy = new RepositoryProxy<RoleAssignmentEntityInterface>(
+      assignmentRepo,
+    );
+
     // try to find the relationship
     try {
       // make the query
-      const assignment = await assignmentRepo.findOne({
+      const assignment = await repoProxy.repository(queryOptions).findOne({
         where: {
           role: { id: role.id },
           assignee: { id: assignee.id },
         },
       });
+
       // return true if we found an assignment
       return assignment ? true : false;
     } catch (e) {
@@ -97,9 +114,14 @@ export class RoleService implements RoleServiceInterface {
     assignment: ReferenceAssignment,
     roles: ReferenceIdInterface[],
     assignee: T,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<boolean> {
     // get all assigned roles
-    const assignedRoles = await this.getAssignedRoles(assignment, assignee);
+    const assignedRoles = await this.getAssignedRoles(
+      assignment,
+      assignee,
+      queryOptions,
+    );
 
     // get any roles to check?
     if (roles.length) {

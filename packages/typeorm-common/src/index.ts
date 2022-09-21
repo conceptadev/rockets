@@ -1,4 +1,12 @@
+// interfaces
+export { QueryOptionsInterface } from './interfaces/query-options.interface';
+export { SafeTransactionOptionsInterface } from './interfaces/safe-transaction-options.interface';
+
+// types
+export { RunInTransactionCallback } from './typeorm-common.types';
+
 // services
+export { BaseService } from './services/base.service';
 export { LookupService } from './services/lookup.service';
 export { MutateService } from './services/mutate.service';
 
@@ -11,3 +19,7 @@ export { ReferenceIdNoMatchException } from './exceptions/reference-id-no-match.
 // base entity
 export { AuditPostgresEmbed } from './embeds/audit/audit-postgres.embed';
 export { AuditSqlLiteEmbed } from './embeds/audit/audit-sqlite.embed';
+
+// proxies
+export { RepositoryProxy } from './proxies/repository.proxy';
+export { TransactionProxy } from './proxies/transaction.proxy';

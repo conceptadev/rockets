@@ -4,6 +4,7 @@ import {
   ReferenceIdInterface,
 } from '@concepta/ts-core';
 import { Injectable } from '@nestjs/common';
+import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 import { InvitationServiceInterface } from '../interfaces/invitation.service.interface';
 import { InvitationAcceptanceService } from './invitation-acceptance.service';
@@ -23,8 +24,9 @@ export class InvitationService implements InvitationServiceInterface {
     user: ReferenceIdInterface & ReferenceEmailInterface,
     code: string,
     category: string,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<void> {
-    return this.invitationSendService.send(user, code, category);
+    return this.invitationSendService.send(user, code, category, queryOptions);
   }
 
   /**
@@ -34,11 +36,13 @@ export class InvitationService implements InvitationServiceInterface {
     invitationDto: InvitationDto,
     passcode: string,
     payload?: LiteralObject,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<boolean> {
     return this.invitationAcceptanceService.accept(
       invitationDto,
       passcode,
       payload,
+      queryOptions,
     );
   }
 
@@ -48,7 +52,15 @@ export class InvitationService implements InvitationServiceInterface {
    * @param email user email
    * @param category
    */
-  async revokeAll(email: string, category: string): Promise<void> {
-    return this.invitationRevocationService.revokeAll(email, category);
+  async revokeAll(
+    email: string,
+    category: string,
+    queryOptions?: QueryOptionsInterface,
+  ): Promise<void> {
+    return this.invitationRevocationService.revokeAll(
+      email,
+      category,
+      queryOptions,
+    );
   }
 }
