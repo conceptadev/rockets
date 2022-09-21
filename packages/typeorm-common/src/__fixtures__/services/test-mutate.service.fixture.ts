@@ -21,7 +21,7 @@ export class TestMutateServiceFixture extends MutateService<
 
   constructor(
     @InjectDynamicRepository(AUDIT_TOKEN)
-    protected repo: Repository<TestEntityFixture>,
+    repo: Repository<TestEntityFixture>,
   ) {
     super(repo);
   }

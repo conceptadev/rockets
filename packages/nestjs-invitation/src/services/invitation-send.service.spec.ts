@@ -70,7 +70,7 @@ describe(InvitationSendService, () => {
   });
 
   describe(InvitationSendService.prototype.send, () => {
-    it.only('Should send invitation email', async () => {
+    it('Should send invitation email', async () => {
       const inviteCode = randomUUID();
 
       await invitationSendService.send(testUser, inviteCode, 'invitation');

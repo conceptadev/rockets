@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { MutateService } from '@concepta/typeorm-common';
 import {
@@ -38,24 +38,22 @@ export class UserMutateService
    */
   constructor(
     @InjectDynamicRepository(USER_MODULE_USER_ENTITY_KEY)
-    protected repo: Repository<UserEntityInterface>,
+    repo: Repository<UserEntityInterface>,
     private passwordStorageService: PasswordStorageService,
   ) {
     super(repo);
   }
 
-  protected async save<T extends UserEntityInterface>(
-    user: T | (T & PasswordPlainInterface),
-  ): Promise<UserEntityInterface> {
+  protected async transform(
+    user: DeepPartial<UserEntityInterface> & PasswordPlainInterface,
+  ): Promise<DeepPartial<UserEntityInterface>> {
     // do we need to hash the password?
     if ('password' in user && typeof user.password === 'string') {
       // yes, hash it
-      const hashedUser = await this.passwordStorageService.hashObject(user);
-      // save it
-      return super.save(hashedUser);
+      return this.passwordStorageService.hashObject(user);
     } else {
-      // save it
-      return super.save(user);
+      // no changes
+      return user;
     }
   }
 }

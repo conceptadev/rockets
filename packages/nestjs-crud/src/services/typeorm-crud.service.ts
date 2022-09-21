@@ -2,6 +2,11 @@ import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { CrudRequest } from '@nestjsx/crud';
 import { TypeOrmCrudService as xTypeOrmCrudService } from '@nestjsx/crud-typeorm';
+import {
+  SafeTransactionOptionsInterface,
+  TransactionProxy,
+} from '@concepta/typeorm-common';
+
 import { CrudQueryHelper } from '../util/crud-query.helper';
 import { CrudQueryOptionsInterface } from '../interfaces/crud-query-options.interface';
 import { CrudResultPaginatedInterface } from '../interfaces/crud-result-paginated.interface';
@@ -145,5 +150,9 @@ export class TypeOrmCrudService<T> extends xTypeOrmCrudService<T> {
     } catch (e) {
       throw new CrudQueryException(this.repo.metadata.name, e);
     }
+  }
+
+  transaction(options?: SafeTransactionOptionsInterface): TransactionProxy {
+    return new TransactionProxy(this.repo.manager, options);
   }
 }

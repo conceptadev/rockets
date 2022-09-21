@@ -10,15 +10,22 @@ import {
   RoleUpdatableInterface,
 } from '@concepta/ts-common';
 import { RoleEntityInterface } from './role-entity.interface';
+import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 export interface RoleMutateServiceInterface
   extends CreateOneInterface<RoleCreatableInterface, RoleEntityInterface>,
     UpdateOneInterface<
       RoleUpdatableInterface & ReferenceIdInterface,
-      RoleEntityInterface
+      RoleEntityInterface,
+      QueryOptionsInterface
     >,
     ReplaceOneInterface<
       RoleCreatableInterface & ReferenceIdInterface,
-      RoleEntityInterface
+      RoleEntityInterface,
+      QueryOptionsInterface
     >,
-    RemoveOneInterface<RoleEntityInterface> {}
+    RemoveOneInterface<
+      RoleEntityInterface,
+      RoleEntityInterface,
+      QueryOptionsInterface
+    > {}

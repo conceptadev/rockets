@@ -80,41 +80,4 @@ describe(LookupService, () => {
       );
     });
   });
-
-  describe(LookupService.prototype['find'], () => {
-    it('success', async () => {
-      const result: TestEntityFixture[] | undefined = await testLookupService[
-        'find'
-      ]({
-        where: { id: testObject.id },
-      });
-
-      expect(Array.isArray(result) ? result[0] : undefined).toBeInstanceOf(
-        TestEntityFixture,
-      );
-
-      expect(Array.isArray(result) ? result[0]?.audit.version : null).toBe(
-        testObject.audit.version,
-      );
-    });
-
-    it('wrong id', async () => {
-      const result = await testLookupService['find']({
-        where: { id: RANDOM_UUID },
-      });
-      expect(result?.length).toBe(0);
-    });
-
-    it('exception', async () => {
-      jest
-        .spyOn(testLookupService['repo'], 'find')
-        .mockImplementationOnce(() => {
-          throw new Error();
-        });
-
-      expect(testLookupService['find']({})).rejects.toThrow(
-        ReferenceLookupException,
-      );
-    });
-  });
 });

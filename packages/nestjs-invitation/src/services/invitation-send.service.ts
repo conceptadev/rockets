@@ -1,4 +1,10 @@
 import { Inject } from '@nestjs/common';
+import {
+  ReferenceEmailInterface,
+  ReferenceIdInterface,
+  ReferenceUsernameInterface,
+} from '@concepta/ts-core';
+import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 import {
   INVITATION_MODULE_EMAIL_SERVICE_TOKEN,
@@ -12,11 +18,6 @@ import { InvitationOtpServiceInterface } from '../interfaces/invitation-otp.serv
 import { InvitationSettingsInterface } from '../interfaces/invitation-settings.interface';
 import { InvitationUserLookupServiceInterface } from '../interfaces/invitation-user-lookup.service.interface';
 import { InvitationUserMutateServiceInterface } from '../interfaces/invitation-user-mutate.service.interface';
-import {
-  ReferenceEmailInterface,
-  ReferenceIdInterface,
-  ReferenceUsernameInterface,
-} from '@concepta/ts-core';
 import { InvitationEmailServiceInterface } from '../interfaces/invitation-email.service.interface';
 import { InvitationSendMailException } from '../exceptions/invitation-send-mail.exception';
 
@@ -38,18 +39,23 @@ export class InvitationSendService {
     user: ReferenceIdInterface & ReferenceEmailInterface,
     code: string,
     category: string,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<void> {
     const { assignment, type, expiresIn } = this.settings.otp;
 
     // create an OTP for this invite
-    const otp = await this.otpService.create(assignment, {
-      category,
-      type,
-      expiresIn,
-      assignee: {
-        id: user.id,
+    const otp = await this.otpService.create(
+      assignment,
+      {
+        category,
+        type,
+        expiresIn,
+        assignee: {
+          id: user.id,
+        },
       },
-    });
+      queryOptions,
+    );
 
     // send the invite email
     await this.sendEmail(user.email, code, otp.passcode, otp.expirationDate);
@@ -57,16 +63,20 @@ export class InvitationSendService {
 
   async getOrCreateOneUser(
     email: string,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<
     ReferenceIdInterface & ReferenceUsernameInterface & ReferenceEmailInterface
   > {
-    let user = await this.userLookupService.byEmail(email);
+    let user = await this.userLookupService.byEmail(email, queryOptions);
 
     if (!user) {
-      user = await this.userMutateService.create({
-        email,
-        username: email,
-      });
+      user = await this.userMutateService.create(
+        {
+          email,
+          username: email,
+        },
+        queryOptions,
+      );
     }
 
     return user;

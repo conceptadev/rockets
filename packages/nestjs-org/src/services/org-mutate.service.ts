@@ -34,7 +34,7 @@ export class OrgMutateService
    */
   constructor(
     @InjectDynamicRepository(ORG_MODULE_ORG_ENTITY_KEY)
-    protected repo: Repository<OrgEntityInterface>,
+    repo: Repository<OrgEntityInterface>,
   ) {
     super(repo);
   }

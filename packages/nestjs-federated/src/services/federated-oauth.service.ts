@@ -1,5 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ReferenceMutateException } from '@concepta/typeorm-common';
+import {
+  QueryOptionsInterface,
+  ReferenceMutateException,
+} from '@concepta/typeorm-common';
 import { NotAnErrorException, ReferenceIdInterface } from '@concepta/ts-core';
 import {
   FEDERATED_MODULE_USER_LOOKUP_SERVICE_TOKEN,
@@ -40,14 +43,27 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
     provider: string,
     email: string,
     subject: string,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<FederatedCredentialsInterface> {
-    const federated = await this.federatedService.exists(provider, subject);
+    const federated = await this.federatedService.exists(
+      provider,
+      subject,
+      queryOptions,
+    );
 
     // if there is no federated user, create one
     if (!federated) {
-      return await this.createUserWithFederated(provider, email, subject);
+      return await this.createUserWithFederated(
+        provider,
+        email,
+        subject,
+        queryOptions,
+      );
     } else {
-      const user = await this.userLookupService.byId(federated.user.id);
+      const user = await this.userLookupService.byId(
+        federated.user.id,
+        queryOptions,
+      );
 
       if (!user)
         throw new FederatedUserLookupException(
@@ -68,15 +84,16 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
     provider: string,
     email: string,
     subject: string,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<FederatedCredentialsInterface> {
     // Check if user exists by email
-    const user = await this.userLookupService.byEmail(email);
+    const user = await this.userLookupService.byEmail(email, queryOptions);
     const userResult: FederatedCredentialsInterface = user
       ? user
-      : await this.createUser(email, email);
+      : await this.createUser(email, email, queryOptions);
 
     // Create federated
-    await this.createFederated(provider, subject, userResult);
+    await this.createFederated(provider, subject, userResult, queryOptions);
 
     return userResult;
   }
@@ -89,12 +106,16 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
   protected async createUser(
     email: string,
     username: string,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<FederatedCredentialsInterface> {
     try {
-      const newUser = await this.userMutateService.create({
-        email,
-        username,
-      });
+      const newUser = await this.userMutateService.create(
+        {
+          email,
+          username,
+        },
+        queryOptions,
+      );
 
       if (!newUser)
         throw new FederatedMutateCreateUserException(
@@ -121,13 +142,17 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
     provider: string,
     subject: string,
     user: ReferenceIdInterface,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<FederatedEntityInterface> {
     try {
-      const federated = await this.federatedMutateService.create({
-        provider,
-        subject,
-        user,
-      });
+      const federated = await this.federatedMutateService.create(
+        {
+          provider,
+          subject,
+          user,
+        },
+        queryOptions,
+      );
 
       if (!federated)
         throw new FederatedCreateException(

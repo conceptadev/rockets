@@ -34,7 +34,7 @@ export class FederatedMutateService
    */
   constructor(
     @InjectDynamicRepository(FEDERATED_MODULE_FEDERATED_ENTITY_KEY)
-    protected repo: Repository<FederatedEntityInterface>,
+    repo: Repository<FederatedEntityInterface>,
   ) {
     super(repo);
   }

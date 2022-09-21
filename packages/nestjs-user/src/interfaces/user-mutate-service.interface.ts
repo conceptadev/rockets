@@ -9,16 +9,24 @@ import {
   UserCreatableInterface,
   UserUpdatableInterface,
 } from '@concepta/ts-common';
+import { QueryOptionsInterface } from '@concepta/typeorm-common';
+
 import { UserEntityInterface } from './user-entity.interface';
 
 export interface UserMutateServiceInterface
   extends CreateOneInterface<UserCreatableInterface, UserEntityInterface>,
     UpdateOneInterface<
       UserUpdatableInterface & ReferenceIdInterface,
-      UserEntityInterface
+      UserEntityInterface,
+      QueryOptionsInterface
     >,
     ReplaceOneInterface<
       UserCreatableInterface & ReferenceIdInterface,
-      UserEntityInterface
+      UserEntityInterface,
+      QueryOptionsInterface
     >,
-    RemoveOneInterface<UserEntityInterface> {}
+    RemoveOneInterface<
+      UserEntityInterface,
+      UserEntityInterface,
+      QueryOptionsInterface
+    > {}
