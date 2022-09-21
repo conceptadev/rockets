@@ -104,13 +104,15 @@ export class InvitationController
             category,
             code: randomUUID(),
           });
-        });
 
-      if (user !== undefined && invite !== undefined) {
-        await this.invitationSendService.send(user, invite.code, category);
-      } else {
-        throw new Error();
-      }
+          if (user !== undefined && invite !== undefined) {
+            await this.invitationSendService.send(user, invite.code, category, {
+              transaction,
+            });
+          } else {
+            throw new Error('User and/or invite not defined');
+          }
+        });
 
       return invite;
     } catch (e: unknown) {
