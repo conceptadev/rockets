@@ -44,11 +44,11 @@ export class UserMutateService
     super(repo);
   }
 
-  protected async transform(
-    user: DeepPartial<UserEntityInterface> & PasswordPlainInterface,
+  protected async transform<T extends DeepPartial<UserEntityInterface>>(
+    user: T | (T & PasswordPlainInterface),
   ): Promise<DeepPartial<UserEntityInterface>> {
     // do we need to hash the password?
-    if ('password' in user && typeof user.password === 'string') {
+    if ('password' in user && user.password.length) {
       // yes, hash it
       return this.passwordStorageService.hashObject(user);
     } else {
