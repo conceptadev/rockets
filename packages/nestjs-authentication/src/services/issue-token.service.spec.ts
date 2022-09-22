@@ -1,4 +1,3 @@
-import { IssueTokenServiceInterface } from '@concepta/nestjs-authentication';
 import { JwtIssueService } from '@concepta/nestjs-jwt';
 import {
   AuthenticatedUserInterface,
@@ -7,7 +6,6 @@ import {
 import { randomUUID } from 'crypto';
 import { mock } from 'jest-mock-extended';
 import { IssueTokenService } from './issue-token.service';
-
 
 describe(IssueTokenService, () => {
   const accessToken = 'accessToken';
