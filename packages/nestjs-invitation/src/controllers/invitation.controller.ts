@@ -1,4 +1,12 @@
+import { randomUUID } from 'crypto';
+import { InternalServerErrorException, Logger } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ReferenceEmailInterface,
+  ReferenceIdInterface,
+  ReferenceUsernameInterface,
+} from '@concepta/ts-core';
+import { InvitationInterface } from '@concepta/ts-common';
 import {
   CrudBody,
   CrudController,
@@ -10,24 +18,21 @@ import {
   CrudRequest,
   CrudRequestInterface,
 } from '@concepta/nestjs-crud';
-import { InvitationInterface } from '@concepta/ts-common';
-
-import { InvitationCreateDto } from '../dto/invitation-create.dto';
-import { InvitationDto } from '../dto/invitation.dto';
-import { InvitationPaginatedDto } from '../dto/invitation-paginated.dto';
-import { InvitationCreatableInterface } from '../interfaces/invitation-creatable.interface';
 import {
   AccessControlCreateOne,
   AccessControlDeleteOne,
   AccessControlReadMany,
   AccessControlReadOne,
 } from '@concepta/nestjs-access-control';
+
+import { InvitationCreateDto } from '../dto/invitation-create.dto';
+import { InvitationDto } from '../dto/invitation.dto';
+import { InvitationPaginatedDto } from '../dto/invitation-paginated.dto';
+import { InvitationCreatableInterface } from '../interfaces/invitation-creatable.interface';
 import { InvitationResource } from '../invitation.types';
 import { InvitationCrudService } from '../services/invitation-crud.service';
-import { randomUUID } from 'crypto';
 import { InvitationSendService } from '../services/invitation-send.service';
 import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
-import { InternalServerErrorException, Logger } from '@nestjs/common';
 
 @CrudController({
   path: 'invitation',
@@ -78,19 +83,36 @@ export class InvitationController
     @CrudBody() invitationCreateDto: InvitationCreateDto,
   ) {
     const { email, category } = invitationCreateDto;
-    let invite: InvitationEntityInterface;
+    let user:
+      | (ReferenceIdInterface &
+          ReferenceUsernameInterface &
+          ReferenceEmailInterface)
+      | undefined = undefined;
+    let invite: InvitationEntityInterface | undefined;
 
     try {
-      const user = await this.invitationSendService.getOrCreateOneUser(email);
+      await this.invitationCrudService
+        .transaction()
+        .commit(async (transaction): Promise<void> => {
+          user = await this.invitationSendService.getOrCreateOneUser(email, {
+            transaction,
+          });
 
-      invite = await this.invitationCrudService.createOne(crudRequest, {
-        user,
-        email,
-        category,
-        code: randomUUID(),
-      });
+          invite = await this.invitationCrudService.createOne(crudRequest, {
+            user,
+            email,
+            category,
+            code: randomUUID(),
+          });
 
-      await this.invitationSendService.send(user, invite.code, category);
+          if (user !== undefined && invite !== undefined) {
+            await this.invitationSendService.send(user, invite.code, category, {
+              transaction,
+            });
+          } else {
+            throw new Error('User and/or invite not defined');
+          }
+        });
 
       return invite;
     } catch (e: unknown) {

@@ -5,12 +5,15 @@ import {
 } from '@concepta/nestjs-authentication';
 import { JwtStrategy } from '@concepta/nestjs-jwt';
 import { AuthorizationPayloadInterface } from '@concepta/ts-common';
+import { QueryOptionsInterface } from '@concepta/typeorm-common';
+
 import {
   AUTH_REFRESH_MODULE_STRATEGY_NAME,
   AUTH_REFRESH_MODULE_USER_LOOKUP_SERVICE_TOKEN,
   AUTH_REFRESH_MODULE_VERIFY_SERVICE_TOKEN,
   AUTH_REFRESH_MODULE_SETTINGS_TOKEN,
 } from './auth-refresh.constants';
+
 import { AuthRefreshSettingsInterface } from './interfaces/auth-refresh-settings.interface';
 import { AuthRefreshUserLookupServiceInterface } from './interfaces/auth-refresh-user-lookup-service.interface';
 import { createVerifyTokenCallback } from './utils/create-verify-token-callback.util';
@@ -41,8 +44,14 @@ export class AuthRefreshStrategy extends PassportStrategyFactory<JwtStrategy>(
    *
    * @param payload
    */
-  async validate(payload: AuthorizationPayloadInterface) {
-    const user = await this.userLookupService.bySubject(payload.sub);
+  async validate(
+    payload: AuthorizationPayloadInterface,
+    queryOptions?: QueryOptionsInterface,
+  ) {
+    const user = await this.userLookupService.bySubject(
+      payload.sub,
+      queryOptions,
+    );
 
     if (!user) {
       throw new UnauthorizedException();

@@ -3,6 +3,7 @@ import { Inject } from '@nestjs/common';
 import { LiteralObject, ReferenceAssigneeInterface } from '@concepta/ts-core';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import { EventDispatchService } from '@concepta/nestjs-event';
+import { BaseService, QueryOptionsInterface } from '@concepta/typeorm-common';
 
 import {
   INVITATION_MODULE_EMAIL_SERVICE_TOKEN,
@@ -20,19 +21,21 @@ import { InvitationOtpServiceInterface } from '../interfaces/invitation-otp.serv
 import { InvitationEmailServiceInterface } from '../interfaces/invitation-email.service.interface';
 import { InvitationSendMailException } from '../exceptions/invitation-send-mail.exception';
 
-export class InvitationAcceptanceService {
+export class InvitationAcceptanceService extends BaseService<InvitationEntityInterface> {
   constructor(
     @Inject(INVITATION_MODULE_SETTINGS_TOKEN)
     private readonly settings: InvitationSettingsInterface,
     @InjectDynamicRepository(INVITATION_MODULE_INVITATION_ENTITY_KEY)
-    private invitationRepo: Repository<InvitationEntityInterface>,
+    invitationRepo: Repository<InvitationEntityInterface>,
     @Inject(INVITATION_MODULE_EMAIL_SERVICE_TOKEN)
     private readonly emailService: InvitationEmailServiceInterface,
     @Inject(INVITATION_MODULE_OTP_SERVICE_TOKEN)
     private readonly otpService: InvitationOtpServiceInterface,
     private readonly eventDispatchService: EventDispatchService,
     private readonly invitationRevocationService: InvitationRevocationService,
-  ) {}
+  ) {
+    super(invitationRepo);
+  }
 
   /**
    * Activate user's account by providing its OTP passcode and the new password.
@@ -42,23 +45,49 @@ export class InvitationAcceptanceService {
     invitationDto: InvitationDto,
     passcode: string,
     payload?: LiteralObject,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<boolean> {
     const { category, email } = invitationDto;
-    // get otp by passcode, but no delete it until all workflow pass
-    const otp = await this.validatePasscode(passcode, category, true);
 
-    // did we get an otp?
-    if (otp) {
-      const success = await this.dispatchEvent(invitationDto, payload);
+    // run in transaction
+    const result = await this.transaction(queryOptions).commit(
+      async (transaction): Promise<boolean> => {
+        // override the query options
+        const nestedQueryOptions = { ...queryOptions, transaction };
 
-      if (!success) {
+        // get otp by passcode, but no delete it until all workflow pass
+        const otp = await this.validatePasscode(
+          passcode,
+          category,
+          true,
+          nestedQueryOptions,
+        );
+
+        // did we get an otp?
+        if (otp) {
+          const success = await this.dispatchEvent(
+            invitationDto,
+            payload,
+            nestedQueryOptions,
+          );
+
+          if (success) {
+            await this.invitationRevocationService.revokeAll(
+              email,
+              category,
+              nestedQueryOptions,
+            );
+
+            return true;
+          }
+        }
+
         return false;
-      }
+      },
+    );
 
+    if (result) {
       await this.sendEmail(email);
-
-      await this.invitationRevocationService.revokeAll(email, category);
-
       return true;
     }
 
@@ -68,10 +97,12 @@ export class InvitationAcceptanceService {
   protected async dispatchEvent(
     invitationDto: InvitationDto,
     payload?: LiteralObject,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<boolean> {
     const invitationAcceptedEventAsync = new InvitationAcceptedEventAsync({
       ...invitationDto,
       data: payload,
+      queryOptions,
     });
 
     const eventResult = await this.eventDispatchService.async(
@@ -103,8 +134,13 @@ export class InvitationAcceptanceService {
    *
    * @param code
    */
-  async getOneByCode(code: string): Promise<InvitationDto | null> {
-    return this.invitationRepo.findOneBy({ code });
+  async getOneByCode(
+    code: string,
+    queryOptions?: QueryOptionsInterface,
+  ): Promise<InvitationDto | null> {
+    return this.repository(queryOptions).findOneBy({
+      code,
+    });
   }
 
   /**
@@ -118,6 +154,7 @@ export class InvitationAcceptanceService {
     passcode: string,
     category: string,
     deleteIfValid = false,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<ReferenceAssigneeInterface | null> {
     // extract required properties
     const { assignment } = this.settings.otp;
@@ -127,6 +164,7 @@ export class InvitationAcceptanceService {
       assignment,
       { category, passcode },
       deleteIfValid,
+      queryOptions,
     );
   }
 }

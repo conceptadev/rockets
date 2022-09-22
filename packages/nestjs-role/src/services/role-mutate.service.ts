@@ -34,7 +34,7 @@ export class RoleMutateService
    */
   constructor(
     @InjectDynamicRepository(ROLE_MODULE_ROLE_ENTITY_KEY)
-    protected repo: Repository<RoleEntityInterface>,
+    repo: Repository<RoleEntityInterface>,
   ) {
     super(repo);
   }

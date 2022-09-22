@@ -48,19 +48,25 @@ export class InvitationAcceptedListener
     if (event.payload.category === 'invitation') {
       const { userId, newPassword } = event?.payload.data ?? {};
 
-      if (!userId || typeof newPassword !== 'string') {
+      if (typeof userId !== 'string' || typeof newPassword !== 'string') {
         throw new UserException(
           'The invitation accepted event payload received has invalid content. The payload must have the "userId" and "newPassword" properties.',
         );
       }
 
-      const user = await this.userLookupService.byId(userId as string);
+      const user = await this.userLookupService.byId(
+        userId,
+        event.payload?.queryOptions,
+      );
 
       if (!user) {
         throw new UserNotFoundException();
       }
 
-      await this.userMutateService.update({ ...user, password: newPassword });
+      await this.userMutateService.update(
+        { ...user, password: newPassword },
+        event.payload?.queryOptions,
+      );
 
       return true;
     }
