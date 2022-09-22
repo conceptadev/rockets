@@ -26,7 +26,8 @@
   },
   "devDependencies": {
     "@nestjs/jwt": "^9.0.0",
-    "@nestjs/testing": "^9.0.0"
+    "@nestjs/testing": "^9.0.0",
+    "jest-mock-extended": "^2.0.4"
   },
   "peerDependencies": {
     "class-transformer": "*",

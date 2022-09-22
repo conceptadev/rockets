@@ -23,6 +23,7 @@
   "devDependencies": {
     "@nestjs/testing": "^9.0.0",
     "@types/passport-jwt": "^3.0.6",
-    "@types/passport-strategy": "^0.2.35"
+    "@types/passport-strategy": "^0.2.35",
+    "jest-mock-extended": "^2.0.4"
   }
 }
