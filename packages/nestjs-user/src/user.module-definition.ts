@@ -29,6 +29,7 @@ import { UserMutateService } from './services/user-mutate.service';
 import { UserController } from './user.controller';
 import { InvitationAcceptedListener } from './listeners/invitation-accepted-listener';
 import { userDefaultConfig } from './config/user-default.config';
+import { InvitationGetOrCreateUserListener } from './listeners/invitation-get-or-create-user.listener';
 
 const RAW_OPTIONS_TOKEN = Symbol('__USER_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -86,6 +87,7 @@ export function createUserProviders(options: {
     UserCrudService,
     PasswordStorageService,
     InvitationAcceptedListener,
+    InvitationGetOrCreateUserListener,
     createUserSettingsProvider(options.overrides),
     createUserLookupServiceProvider(options.overrides),
     createUserMutateServiceProvider(options.overrides),

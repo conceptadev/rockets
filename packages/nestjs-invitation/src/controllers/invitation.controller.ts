@@ -2,11 +2,9 @@ import { randomUUID } from 'crypto';
 import { InternalServerErrorException, Logger } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
-  ReferenceEmailInterface,
-  ReferenceIdInterface,
-  ReferenceUsernameInterface,
-} from '@concepta/ts-core';
-import { InvitationInterface } from '@concepta/ts-common';
+  InvitationGetOrCreateUserEventResponseInterface,
+  InvitationInterface,
+} from '@concepta/ts-common';
 import {
   CrudBody,
   CrudController,
@@ -39,6 +37,12 @@ import { InvitationEntityInterface } from '../interfaces/invitation.entity.inter
   model: {
     type: InvitationDto,
     paginatedType: InvitationPaginatedDto,
+  },
+  validation: {
+    transformOptions: {
+      //TODO temporary fix because this could be unsafe
+      excludeExtraneousValues: false,
+    },
   },
 })
 @ApiTags('invitation')
@@ -82,21 +86,20 @@ export class InvitationController
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() invitationCreateDto: InvitationCreateDto,
   ) {
-    const { email, category } = invitationCreateDto;
-    let user:
-      | (ReferenceIdInterface &
-          ReferenceUsernameInterface &
-          ReferenceEmailInterface)
-      | undefined = undefined;
+    const { email, category, payload } = invitationCreateDto;
     let invite: InvitationEntityInterface | undefined;
 
     try {
       await this.invitationCrudService
         .transaction()
         .commit(async (transaction): Promise<void> => {
-          user = await this.invitationSendService.getOrCreateOneUser(email, {
-            transaction,
-          });
+          const user = await this.invitationSendService.getOrCreateOneUser(
+            email,
+            payload,
+            {
+              transaction,
+            },
+          );
 
           invite = await this.invitationCrudService.createOne(crudRequest, {
             user,

@@ -24,6 +24,7 @@ import { UserEntityFixture } from '../__fixtures__/user/entities/user-entity.fix
 
 describe('InvitationController (e2e)', () => {
   const category = 'invitation';
+  const payload = { moreData: 'foo' };
 
   let app: INestApplication;
   let seedingSource: SeedingSource;
@@ -75,11 +76,11 @@ describe('InvitationController (e2e)', () => {
 
   describe('Type: user', () => {
     it('POST invitation', async () => {
-      await createInvite({ email: user.email, category });
+      await createInvite({ email: user.email, category, payload });
     });
 
     it('POST invitation (create new user)', async () => {
-      await createInvite({ email: 'test@mail.com', category });
+      await createInvite({ email: 'test@mail.com', category, payload });
     });
 
     it('PATCH invitation-acceptance', async () => {
@@ -114,6 +115,7 @@ describe('InvitationController (e2e)', () => {
       const invitationCreateDto = {
         email: user.email,
         category,
+        payload,
       } as InvitationCreateDto;
       const invite1 = await createInvite(invitationCreateDto);
       const invite2 = await createInvite(invitationCreateDto);
@@ -133,7 +135,11 @@ describe('InvitationController (e2e)', () => {
     });
 
     it('GET invitation/:id', async () => {
-      const invitation = await createInvite({ email: user.email, category });
+      const invitation = await createInvite({
+        email: user.email,
+        category,
+        payload,
+      });
 
       const response = await supertest(app.getHttpServer())
         .get(`/invitation/${invitation.id}`)
@@ -145,7 +151,11 @@ describe('InvitationController (e2e)', () => {
     });
 
     it('DELETE invitation/:id', async () => {
-      const invitation = await createInvite({ email: user.email, category });
+      const invitation = await createInvite({
+        email: user.email,
+        category,
+        payload,
+      });
 
       await supertest(app.getHttpServer())
         .delete(`/invitation/${invitation.id}`)

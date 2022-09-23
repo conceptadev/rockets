@@ -1,7 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString } from 'class-validator';
-import { Expose } from 'class-transformer';
+import { IsEmail, IsOptional, IsString } from 'class-validator';
+import { Exclude, Expose } from 'class-transformer';
+import { LiteralObject } from '@concepta/ts-core';
 
+@Expose()
+export class TempClass {
+  @Expose()
+  @IsString()
+  @ApiProperty()
+  name!: string;
+}
+
+@Exclude()
 export class InvitationCreateDto {
   @Expose()
   @ApiProperty({
@@ -20,4 +30,14 @@ export class InvitationCreateDto {
   })
   @IsString()
   category = '';
+
+  @Expose()
+  @ApiProperty({
+    title: 'Payload',
+    type: 'object',
+    description:
+      'payload content that will be passed through another module ir order to complete the invitation. This payload will have necessary info to target module complete the invitation e.g. new password or what ever required info. The object not have any strong type defined on purpose because the target moules will have object different signatures',
+  })
+  @IsOptional()
+  payload?: LiteralObject;
 }
