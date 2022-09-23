@@ -96,11 +96,13 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
 
     // is the login dto missing?
     if (!loginDto) {
+      // TODO: Change Error to a Exception
       throw new Error('Login DTO is required, did someone remove the default?');
     }
 
     // is the username field missing?
     if (!usernameField) {
+      // TODO: Change Error to a Exception
       throw new Error(
         'Login username field is required, did someone remove the default?',
       );
@@ -108,6 +110,7 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
 
     // is the password field missing?
     if (!passwordField) {
+      // TODO: Change Error to a Exception
       throw new Error(
         'Login password field is required, did someone remove the default?',
       );

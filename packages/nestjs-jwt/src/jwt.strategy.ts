@@ -47,7 +47,11 @@ export class JwtStrategy extends PassportStrategy {
     }
   }
 
-  private isVerifiedCallback(error: Error, user: unknown, info: unknown) {
+  private isVerifiedCallback(
+    error: Error | null,
+    user: unknown,
+    info: unknown,
+  ) {
     if (error) {
       return this.error(error);
     } else if (!user) {
