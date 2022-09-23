@@ -5,11 +5,6 @@ import {
 } from '@concepta/nestjs-event';
 import { Inject, Injectable, OnModuleInit, Optional } from '@nestjs/common';
 import {
-  ReferenceEmailInterface,
-  ReferenceIdInterface,
-  ReferenceUsernameInterface,
-} from '@concepta/ts-core';
-import {
   EventInstance,
   EventReturnType,
 } from '@concepta/nestjs-event/dist/event-types';
