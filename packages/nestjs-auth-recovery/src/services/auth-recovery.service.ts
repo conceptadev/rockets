@@ -10,13 +10,17 @@ import {
   AUTH_RECOVERY_MODULE_OTP_SERVICE_TOKEN,
   AUTH_RECOVERY_MODULE_USER_LOOKUP_SERVICE_TOKEN,
   AUTH_RECOVERY_MODULE_USER_MUTATE_SERVICE_TOKEN,
+  AUTH_RECOVERY_MODULE_ENTITY_MANAGER_PROXY_TOKEN,
 } from '../auth-recovery.constants';
 import { AuthRecoveryNotificationService } from './auth-recovery-notification.service';
 import {
   ReferenceAssigneeInterface,
   ReferenceIdInterface,
 } from '@concepta/ts-core';
-import { QueryOptionsInterface } from '@concepta/typeorm-common';
+import {
+  EntityManagerProxy,
+  QueryOptionsInterface,
+} from '@concepta/typeorm-common';
 
 @Injectable()
 export class AuthRecoveryService implements AuthRecoveryServiceInterface {
@@ -30,6 +34,8 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
     @Inject(AUTH_RECOVERY_MODULE_USER_MUTATE_SERVICE_TOKEN)
     private readonly userMutateService: AuthRecoveryUserMutateServiceInterface,
     private readonly notificationService: AuthRecoveryNotificationService,
+    @Inject(AUTH_RECOVERY_MODULE_ENTITY_MANAGER_PROXY_TOKEN)
+    private readonly entityManagerProxy: EntityManagerProxy,
   ) {}
 
   /**
@@ -133,32 +139,47 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
     newPassword: string,
     queryOptions?: QueryOptionsInterface,
   ): Promise<ReferenceIdInterface | null> {
-    // get otp by passcode, but no delete it until all workflow pass
-    const otp = await this.validatePasscode(passcode, false, queryOptions);
+    // run in transaction
+    return this.entityManagerProxy
+      .transaction(queryOptions)
+      .commit(async (transaction): Promise<ReferenceIdInterface | null> => {
+        // nested query options
+        const nestedQueryOptions = { ...queryOptions, transaction };
 
-    // did we get an otp?
-    if (otp) {
-      // call user mutate service
-      const user = await this.userMutateService.update(
-        {
-          id: otp.assignee.id,
-          password: newPassword,
-        },
-        queryOptions,
-      );
-
-      if (user) {
-        await this.notificationService.sendPasswordUpdatedSuccefullyEmail(
-          user.email,
+        // get otp by passcode, but no delete it until all workflow pass
+        const otp = await this.validatePasscode(
+          passcode,
+          false,
+          nestedQueryOptions,
         );
-        await this.revokeAllUserPasswordRecoveries(user.email, queryOptions);
-      }
 
-      return user;
-    }
+        // did we get an otp?
+        if (otp) {
+          // call user mutate service
+          const user = await this.userMutateService.update(
+            {
+              id: otp.assignee.id,
+              password: newPassword,
+            },
+            nestedQueryOptions,
+          );
 
-    // otp was not found
-    return null;
+          if (user) {
+            await this.notificationService.sendPasswordUpdatedSuccefullyEmail(
+              user.email,
+            );
+            await this.revokeAllUserPasswordRecoveries(
+              user.email,
+              nestedQueryOptions,
+            );
+          }
+
+          return user;
+        }
+
+        // otp was not found
+        return null;
+      });
   }
 
   /**

@@ -1,16 +1,20 @@
+import { EntityManager } from 'typeorm';
 import {
   ConfigurableModuleBuilder,
   DynamicModule,
   Provider,
 } from '@nestjs/common';
+import { getEntityManagerToken } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 
 import { createSettingsProvider } from '@concepta/nestjs-common';
+import { EntityManagerProxy } from '@concepta/typeorm-common';
 
 import {
   AUTH_RECOVERY_MODULE_EMAIL_SERVICE_TOKEN,
   AUTH_RECOVERY_MODULE_OTP_SERVICE_TOKEN,
   AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
+  AUTH_RECOVERY_MODULE_ENTITY_MANAGER_PROXY_TOKEN,
   AUTH_RECOVERY_MODULE_USER_LOOKUP_SERVICE_TOKEN,
   AUTH_RECOVERY_MODULE_USER_MUTATE_SERVICE_TOKEN,
 } from './auth-recovery.constants';
@@ -88,6 +92,7 @@ export function createAuthRecoveryProviders(options: {
     createAuthRecoveryEmailServiceProvider(options.overrides),
     createAuthRecoveryUserLookupServiceProvider(options.overrides),
     createAuthRecoveryUserMutateServiceProvider(options.overrides),
+    createAuthRecoveryEntityManagerProxyProvider(options.overrides),
   ];
 }
 
@@ -154,5 +159,21 @@ export function createAuthRecoveryUserMutateServiceProvider(
     inject: [RAW_OPTIONS_TOKEN],
     useFactory: async (options: AuthRecoveryOptionsInterface) =>
       optionsOverrides?.userMutateService ?? options.userMutateService,
+  };
+}
+
+export function createAuthRecoveryEntityManagerProxyProvider(
+  optionsOverrides?: AuthRecoveryOptions,
+): Provider {
+  return {
+    provide: AUTH_RECOVERY_MODULE_ENTITY_MANAGER_PROXY_TOKEN,
+    inject: [RAW_OPTIONS_TOKEN, getEntityManagerToken()],
+    useFactory: async (
+      options: AuthRecoveryOptionsInterface,
+      defaultEntityManager: EntityManager,
+    ) =>
+      optionsOverrides?.entityManagerProxy ??
+      options.entityManagerProxy ??
+      new EntityManagerProxy(defaultEntityManager),
   };
 }

@@ -1,7 +1,7 @@
 import { EntityManager, Repository } from 'typeorm';
+import { EntityManagerProxy } from './entity-manager.proxy';
 import { SafeTransactionOptionsInterface } from '../interfaces/safe-transaction-options.interface';
 import { RunInTransactionCallback } from '../typeorm-common.types';
-import { repositoryToQuery } from '../utils/repository-to-query.util';
 import { safeTransaction } from '../utils/safe-transaction.util';
 
 type TransactionCallback<T> =
@@ -9,13 +9,15 @@ type TransactionCallback<T> =
   | ((transaction: TransactionProxy) => Promise<T>);
 
 export class TransactionProxy {
-  private parentTransaction: TransactionProxy | undefined;
-  private transactionalEntityManager: EntityManager | undefined;
+  private entityManagerProxy: EntityManagerProxy;
+  private parentTransaction?: TransactionProxy;
+  private transactionalEntityManager?: EntityManager;
 
   constructor(
-    private entityManager: EntityManager,
+    entityManager: EntityManager,
     private options?: SafeTransactionOptionsInterface,
   ) {
+    this.entityManagerProxy = new EntityManagerProxy(entityManager);
     this.parentTransaction = this.options?.transaction;
   }
 
@@ -23,7 +25,7 @@ export class TransactionProxy {
     if (this.parentTransaction) {
       return this.parentTransaction.repository<E>(targetRepository);
     } else {
-      return repositoryToQuery(targetRepository, {
+      return this.entityManagerProxy.repository(targetRepository, {
         entityManager: this.transactionalEntityManager,
       });
     }
@@ -34,7 +36,7 @@ export class TransactionProxy {
       return runInTransaction(this);
     } else {
       return safeTransaction<T>(
-        this.entityManager,
+        this.entityManagerProxy.entityManager(),
         this.callback(runInTransaction),
         this.options,
       );

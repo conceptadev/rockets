@@ -34,6 +34,7 @@ import { OtpModuleFixture } from './__fixtures__/otp/otp.module.fixture';
 import { UserMutateServiceFixture } from './__fixtures__/user/services/user-mutate.service.fixture';
 import { OtpServiceFixture } from './__fixtures__/otp/otp.service.fixture';
 import { MailerServiceFixture } from './__fixtures__/email/mailer.service.fixture';
+import { TypeOrmModuleFixture } from './__fixtures__/typeorm.module.fixture';
 
 describe(AuthRecoveryModule, () => {
   let testModule: TestingModule;
@@ -278,6 +279,7 @@ function testModuleFactory(
 ): ModuleMetadata {
   return {
     imports: [
+      TypeOrmModuleFixture,
       UserModuleFixture,
       OtpModuleFixture,
       EmailModule.forRoot({ mailerService: new MailerServiceFixture() }),

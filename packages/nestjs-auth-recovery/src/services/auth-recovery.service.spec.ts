@@ -40,6 +40,7 @@ describe(AuthRecoveryService, () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModuleFixture],
     }).compile();
+
     app = moduleFixture.createNestApplication();
     await app.init();
 
@@ -167,7 +168,7 @@ describe(AuthRecoveryService, () => {
           id: UserFixture.id,
           password: '$!Abc123bsksl6764579',
         },
-        undefined,
+        expect.any(Object),
       );
     });
 

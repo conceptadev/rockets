@@ -21,5 +21,9 @@ export { AuditPostgresEmbed } from './embeds/audit/audit-postgres.embed';
 export { AuditSqlLiteEmbed } from './embeds/audit/audit-sqlite.embed';
 
 // proxies
+export { EntityManagerProxy } from './proxies/entity-manager.proxy';
 export { RepositoryProxy } from './proxies/repository.proxy';
 export { TransactionProxy } from './proxies/transaction.proxy';
+
+// testing
+export { createEntityManagerMock } from './testing/utils/create-entity-manager.mock';

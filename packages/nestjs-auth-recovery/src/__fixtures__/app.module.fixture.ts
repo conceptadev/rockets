@@ -3,6 +3,7 @@ import { EmailModule, EmailService } from '@concepta/nestjs-email';
 
 import { AuthRecoveryModule } from '../auth-recovery.module';
 
+import { TypeOrmModuleFixture } from './typeorm.module.fixture';
 import { OtpServiceFixture } from './otp/otp.service.fixture';
 import { UserLookupServiceFixture } from './user/services/user-lookup.service.fixture';
 import { UserMutateServiceFixture } from './user/services/user-mutate.service.fixture';
@@ -12,6 +13,7 @@ import { MailerServiceFixture } from './email/mailer.service.fixture';
 
 @Module({
   imports: [
+    TypeOrmModuleFixture,
     AuthRecoveryModule.forRootAsync({
       inject: [
         EmailService,
