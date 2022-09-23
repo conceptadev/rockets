@@ -4,18 +4,18 @@ import {
 } from '@concepta/nestjs-event';
 import {
   InvitationAcceptedEventPayloadInterface,
-  InvitationGetOrCreateUserEventPayloadInterface,
-  InvitationGetOrCreateUserEventResponseInterface,
+  InvitationGetUserEventPayloadInterface,
+  InvitationGetUserEventResponseInterface,
 } from '@concepta/ts-common';
 
 export interface UserSettingsInterface {
   invitationRequestEvent?: EventClassInterface<
     EventAsyncInterface<InvitationAcceptedEventPayloadInterface, boolean>
   >;
-  invitationGetOrCreateUserRequestEvent?: EventClassInterface<
+  invitationGetUserEvent?: EventClassInterface<
     EventAsyncInterface<
-      InvitationGetOrCreateUserEventPayloadInterface,
-      InvitationGetOrCreateUserEventResponseInterface
+      InvitationGetUserEventPayloadInterface,
+      InvitationGetUserEventResponseInterface
     >
   >;
 }

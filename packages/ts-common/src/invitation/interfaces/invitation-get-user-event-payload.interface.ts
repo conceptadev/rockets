@@ -3,7 +3,7 @@ import {
   ReferenceQueryOptionsInterface,
 } from '@concepta/ts-core';
 
-export interface InvitationGetOrCreateUserEventPayloadInterface {
+export interface InvitationGetUserEventPayloadInterface {
   email: string;
   data?: LiteralObject;
   queryOptions?: ReferenceQueryOptionsInterface;

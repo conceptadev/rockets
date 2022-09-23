@@ -5,7 +5,7 @@ import {
   ReferenceIdInterface,
 } from '@concepta/ts-core';
 import { EventDispatchService } from '@concepta/nestjs-event';
-import { InvitationGetOrCreateUserEventResponseInterface } from '@concepta/ts-common';
+import { InvitationGetUserEventResponseInterface } from '@concepta/ts-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 import {
@@ -17,7 +17,7 @@ import { InvitationOtpServiceInterface } from '../interfaces/invitation-otp.serv
 import { InvitationSettingsInterface } from '../interfaces/invitation-settings.interface';
 import { InvitationEmailServiceInterface } from '../interfaces/invitation-email.service.interface';
 import { InvitationSendMailException } from '../exceptions/invitation-send-mail.exception';
-import { InvitationGetOrCreateUserRequestEventAsync } from '../events/invitation-get-or-create-user-request.event';
+import { InvitationGetUserEventAsync } from '../events/invitation-get-user.event';
 import { InvitationUserUndefinedException } from '../exceptions/invitation-user-undefined.exception';
 
 export class InvitationSendService {
@@ -57,13 +57,13 @@ export class InvitationSendService {
     await this.sendEmail(user.email, code, otp.passcode, otp.expirationDate);
   }
 
-  async getOrCreateOneUser(
+  async getUser(
     email: string,
     payload?: LiteralObject,
     queryOptions?: QueryOptionsInterface,
-  ): Promise<InvitationGetOrCreateUserEventResponseInterface> {
+  ): Promise<InvitationGetUserEventResponseInterface> {
     const eventResult = await this.eventDispatchService.async(
-      new InvitationGetOrCreateUserRequestEventAsync({
+      new InvitationGetUserEventAsync({
         email,
         data: payload,
         queryOptions,

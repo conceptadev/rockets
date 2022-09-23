@@ -9,8 +9,8 @@ import {
   EventReturnType,
 } from '@concepta/nestjs-event/dist/event-types';
 import {
-  InvitationGetOrCreateUserEventPayloadInterface,
-  InvitationGetOrCreateUserEventResponseInterface,
+  InvitationGetUserEventPayloadInterface,
+  InvitationGetUserEventResponseInterface,
 } from '@concepta/ts-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
@@ -20,11 +20,11 @@ import { UserSettingsInterface } from '../interfaces/user-settings.interface';
 import { UserLookupService } from '../services/user-lookup.service';
 
 @Injectable()
-export class InvitationGetOrCreateUserListener
+export class InvitationGetUserListener
   extends EventListenerOn<
     EventAsyncInterface<
-      InvitationGetOrCreateUserEventPayloadInterface,
-      InvitationGetOrCreateUserEventResponseInterface
+      InvitationGetUserEventPayloadInterface,
+      InvitationGetUserEventResponseInterface
     >
   >
   implements OnModuleInit
@@ -42,39 +42,33 @@ export class InvitationGetOrCreateUserListener
   }
 
   onModuleInit() {
-    if (
-      this.eventListenService &&
-      this.settings.invitationGetOrCreateUserRequestEvent
-    ) {
-      this.eventListenService.on(
-        this.settings.invitationGetOrCreateUserRequestEvent,
-        this,
-      );
+    if (this.eventListenService && this.settings.invitationGetUserEvent) {
+      this.eventListenService.on(this.settings.invitationGetUserEvent, this);
     }
   }
 
   async listen(
     event: EventInstance<
       EventAsyncInterface<
-        InvitationGetOrCreateUserEventPayloadInterface,
-        InvitationGetOrCreateUserEventResponseInterface
+        InvitationGetUserEventPayloadInterface,
+        InvitationGetUserEventResponseInterface
       >
     >,
   ): EventReturnType<
     EventAsyncInterface<
-      InvitationGetOrCreateUserEventPayloadInterface,
-      InvitationGetOrCreateUserEventResponseInterface
+      InvitationGetUserEventPayloadInterface,
+      InvitationGetUserEventResponseInterface
     >
   > {
     const { email, queryOptions } = event.payload;
 
-    return this.getOrCreateOneUser(email, queryOptions);
+    return this.getOrCreateUser(email, queryOptions);
   }
 
-  async getOrCreateOneUser(
+  async getOrCreateUser(
     email: string,
     queryOptions?: QueryOptionsInterface,
-  ): Promise<InvitationGetOrCreateUserEventResponseInterface> {
+  ): Promise<InvitationGetUserEventResponseInterface> {
     let user = await this.userLookupService.byEmail(email, queryOptions);
 
     if (!user) {

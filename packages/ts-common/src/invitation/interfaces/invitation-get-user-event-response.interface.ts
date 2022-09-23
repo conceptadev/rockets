@@ -4,7 +4,7 @@ import {
   ReferenceUsernameInterface,
 } from '@concepta/ts-core';
 
-export interface InvitationGetOrCreateUserEventResponseInterface
+export interface InvitationGetUserEventResponseInterface
   extends ReferenceIdInterface,
     ReferenceUsernameInterface,
     ReferenceEmailInterface {}

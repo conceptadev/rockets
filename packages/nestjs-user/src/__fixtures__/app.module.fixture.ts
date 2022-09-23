@@ -7,7 +7,7 @@ import { UserModule } from '../user.module';
 import { ormConfig } from './ormconfig.fixture';
 import { UserEntityFixture } from './user.entity.fixture';
 import { InvitationAcceptedEventAsync } from './events/invitation-accepted.event';
-import { InvitationGetOrCreateUserRequestEventAsync } from './events/invitation-get-or-create-user-request.event';
+import { InvitationGetUserEventAsync } from './events/invitation-get-user.event';
 
 @Module({
   imports: [
@@ -17,8 +17,7 @@ import { InvitationGetOrCreateUserRequestEventAsync } from './events/invitation-
     UserModule.forRoot({
       settings: {
         invitationRequestEvent: InvitationAcceptedEventAsync,
-        invitationGetOrCreateUserRequestEvent:
-          InvitationGetOrCreateUserRequestEventAsync,
+        invitationGetUserEvent: InvitationGetUserEventAsync,
       },
       entities: {
         user: {

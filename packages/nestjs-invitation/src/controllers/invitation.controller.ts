@@ -90,7 +90,7 @@ export class InvitationController
       await this.invitationCrudService
         .transaction()
         .commit(async (transaction): Promise<void> => {
-          const user = await this.invitationSendService.getOrCreateOneUser(
+          const user = await this.invitationSendService.getUser(
             email,
             payload,
             {

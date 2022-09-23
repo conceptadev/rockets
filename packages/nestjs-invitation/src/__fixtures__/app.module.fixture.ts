@@ -14,13 +14,13 @@ import { PasswordModule } from '@concepta/nestjs-password';
 import { MailerModule, MailerService } from '@nestjs-modules/mailer';
 
 import { InvitationModule } from '../invitation.module';
+import { InvitationGetUserEventAsync } from '../events/invitation-get-user.event';
 
 import { InvitationEntityFixture } from './invitation/entities/invitation.entity.fixture';
 import { InvitationAcceptedEventAsync } from '../events/invitation-accepted.event';
 import { UserOtpEntityFixture } from './user/entities/user-otp-entity.fixture';
 import { UserEntityFixture } from './user/entities/user-entity.fixture';
 import { default as ormConfig } from './ormconfig.fixture';
-import { InvitationGetOrCreateUserRequestEventAsync } from '../events/invitation-get-or-create-user-request.event';
 
 @Module({
   imports: [
@@ -62,8 +62,7 @@ import { InvitationGetOrCreateUserRequestEventAsync } from '../events/invitation
     UserModule.forRoot({
       settings: {
         invitationRequestEvent: InvitationAcceptedEventAsync,
-        invitationGetOrCreateUserRequestEvent:
-          InvitationGetOrCreateUserRequestEventAsync,
+        invitationGetUserEvent: InvitationGetUserEventAsync,
       },
       entities: {
         user: {
