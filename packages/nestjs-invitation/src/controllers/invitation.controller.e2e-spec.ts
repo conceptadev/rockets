@@ -94,7 +94,7 @@ describe('InvitationController (e2e)', () => {
         .patch(`/invitation-acceptance/${code}`)
         .send({
           passcode,
-          payload: { userId: otp.assignee.id, newPassword: 'hOdv2A2h%' },
+          payload: { newPassword: 'hOdv2A2h%' },
         } as InvitationAcceptInviteDto)
         .expect(200);
     });
