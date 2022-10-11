@@ -4,6 +4,7 @@ import {
   ReferenceIdInterface,
 } from '@concepta/ts-core';
 import { OrgOwnerInterface } from './org-owner.interface';
+import { OrgMemberInterface } from './org-member.interface';
 
 export interface OrgInterface
   extends ReferenceIdInterface,
@@ -14,4 +15,5 @@ export interface OrgInterface
    * Name
    */
   name: string;
+  members?: OrgMemberInterface;
 }

@@ -4,7 +4,11 @@ import { INestApplication } from '@nestjs/common';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
 import { ConfigService, ConfigType } from '@nestjs/config';
 import { OtpService } from '@concepta/nestjs-otp';
-import { OtpInterface, UserInterface } from '@concepta/ts-common';
+import {
+  INVITATION_MODULE_CATEGORY_USER_KEY,
+  OtpInterface,
+  UserInterface,
+} from '@concepta/ts-common';
 import { EmailService } from '@concepta/nestjs-email';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { getDataSourceToken } from '@nestjs/typeorm';
@@ -17,13 +21,12 @@ import { invitationDefaultConfig } from '../config/invitation-default.config';
 import { InvitationFactory } from '../invitation.factory';
 import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
 import { InvitationSettingsInterface } from '../interfaces/invitation-settings.interface';
-
 import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
 import { InvitationEntityFixture } from '../__fixtures__/invitation/entities/invitation.entity.fixture';
 import { UserEntityFixture } from '../__fixtures__/user/entities/user-entity.fixture';
 
 describe('InvitationController (e2e)', () => {
-  const category = 'invitation';
+  const category = INVITATION_MODULE_CATEGORY_USER_KEY;
   const payload = { moreData: 'foo' };
 
   let app: INestApplication;

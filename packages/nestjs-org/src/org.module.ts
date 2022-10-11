@@ -1,4 +1,5 @@
 import { DynamicModule, Module } from '@nestjs/common';
+
 import { OrgController } from './org.controller';
 import { OrgLookupService } from './services/org-lookup.service';
 import { OrgCrudService } from './services/org-crud.service';
@@ -12,12 +13,20 @@ import {
   createOrgImports,
   createOrgProviders,
 } from './org.module-definition';
+import { OrgMemberMutateService } from './services/org-member-mutate.service';
+import { OrgMemberLookupService } from './services/org-member-lookup.service';
 
 /**
  * Org Module
  */
 @Module({
-  providers: [OrgLookupService, OrgMutateService, OrgCrudService],
+  providers: [
+    OrgLookupService,
+    OrgMutateService,
+    OrgCrudService,
+    OrgMemberLookupService,
+    OrgMemberMutateService,
+  ],
   exports: [OrgLookupService, OrgMutateService, OrgCrudService],
   controllers: [OrgController],
 })

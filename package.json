@@ -55,7 +55,7 @@
     "watch": "yarn build && ./node_modules/.bin/tsc --build --watch",
     "lint": "eslint \"./*.json\" \"packages/*/src/**/*.{ts,js,json}\" --fix",
     "test": "jest --testTimeout 30000",
-    "test:one": "jest --testTimeout 30000 packages/nestjs-invitation/src/services/invitation.service.spec.ts",
+    "test:one": "jest --testTimeout 30000 packages/nestjs-org/src/org.module.spec.ts",
     "prepare": "husky install && yarn clean && yarn build",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",

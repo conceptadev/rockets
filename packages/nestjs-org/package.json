@@ -15,6 +15,8 @@
     "@concepta/nestjs-access-control": "^4.0.0-alpha.20",
     "@concepta/nestjs-common": "^4.0.0-alpha.20",
     "@concepta/nestjs-crud": "^4.0.0-alpha.20",
+    "@concepta/nestjs-event": "^4.0.0-alpha.20",
+    "@concepta/nestjs-user": "^4.0.0-alpha.20",
     "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.20",
     "@concepta/ts-common": "^4.0.0-alpha.20",
     "@concepta/ts-core": "^4.0.0-alpha.20",
