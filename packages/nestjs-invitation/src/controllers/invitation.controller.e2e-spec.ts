@@ -83,6 +83,18 @@ describe('InvitationController (e2e)', () => {
       await createInvite({ email: 'test@mail.com', category, payload });
     });
 
+    it('POST invitation resend', async () => {
+      const invitationDto = await createInvite({
+        email: 'test@mail.com',
+        category,
+        payload,
+      });
+
+      await supertest(app.getHttpServer())
+        .post(`/invitation-resend/${invitationDto.code}`)
+        .expect(201);
+    });
+
     it('PATCH invitation-acceptance', async () => {
       const { code } = invitation;
 
@@ -94,7 +106,7 @@ describe('InvitationController (e2e)', () => {
         .patch(`/invitation-acceptance/${code}`)
         .send({
           passcode,
-          payload: { userId: otp.assignee.id, newPassword: 'hOdv2A2h%' },
+          payload: { newPassword: 'hOdv2A2h%' },
         } as InvitationAcceptInviteDto)
         .expect(200);
     });

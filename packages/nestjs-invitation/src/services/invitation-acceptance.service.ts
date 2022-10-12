@@ -67,7 +67,7 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
         if (otp) {
           const success = await this.dispatchEvent(
             invitationDto,
-            payload,
+            { ...payload, userId: invitationDto.user.id },
             nestedQueryOptions,
           );
 
@@ -133,14 +133,13 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
    * Get one invitation by code.
    *
    * @param code
+   * @param queryOptions
    */
   async getOneByCode(
     code: string,
     queryOptions?: QueryOptionsInterface,
   ): Promise<InvitationDto | null> {
-    return this.repository(queryOptions).findOneBy({
-      code,
-    });
+    return this.findOne({ where: { code }, relations: ['user'] }, queryOptions);
   }
 
   /**
@@ -149,6 +148,7 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
    * @param passcode user's passcode
    * @param category
    * @param deleteIfValid flag to delete if valid or not
+   * @param queryOptions
    */
   async validatePasscode(
     passcode: string,
