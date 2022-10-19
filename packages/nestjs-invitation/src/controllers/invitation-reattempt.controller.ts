@@ -13,9 +13,9 @@ import { InvitationAcceptanceService } from '../services/invitation-acceptance.s
 import { InvitationDto } from '../dto/invitation.dto';
 import { InvitationSendService } from '../services/invitation-send.service';
 
-@Controller('invitation-resend')
-@ApiTags('invitation-resend')
-export class InvitationResendController {
+@Controller('invitation-reattempt')
+@ApiTags('invitation-reattempt')
+export class InvitationReattemptController {
   constructor(
     private readonly invitationAcceptanceService: InvitationAcceptanceService,
     private readonly invitationSendService: InvitationSendService,
@@ -23,10 +23,10 @@ export class InvitationResendController {
 
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiOperation({
-    summary: 'resend one invitation by code',
+    summary: 'Reattempt one invitation by code',
   })
   @Post('/:code')
-  async resendInvite(@Param('code') code: string): Promise<void> {
+  async reattemptInvite(@Param('code') code: string): Promise<void> {
     let invitation: InvitationDto | null | undefined;
 
     try {

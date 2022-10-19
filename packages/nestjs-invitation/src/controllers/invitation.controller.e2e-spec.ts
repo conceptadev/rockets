@@ -86,7 +86,7 @@ describe('InvitationController (e2e)', () => {
       await createInvite({ email: 'test@mail.com', category, payload });
     });
 
-    it('POST invitation resend', async () => {
+    it('POST invitation reattempt', async () => {
       const invitationDto = await createInvite({
         email: 'test@mail.com',
         category,
@@ -94,7 +94,7 @@ describe('InvitationController (e2e)', () => {
       });
 
       await supertest(app.getHttpServer())
-        .post(`/invitation-resend/${invitationDto.code}`)
+        .post(`/invitation-reattempt/${invitationDto.code}`)
         .expect(201);
     });
 

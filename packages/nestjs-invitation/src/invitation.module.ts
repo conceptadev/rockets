@@ -12,7 +12,7 @@ import { InvitationSendService } from './services/invitation-send.service';
 import { InvitationRevocationService } from './services/invitation-revocation.service';
 import { InvitationController } from './controllers/invitation.controller';
 import { InvitationAcceptanceController } from './controllers/invitation-acceptance.controller';
-import { InvitationResendController } from './controllers/invitation-resend.controller';
+import { InvitationReattemptController } from './controllers/invitation-reattempt.controller';
 
 /**
  * Invitation module
@@ -28,7 +28,7 @@ import { InvitationResendController } from './controllers/invitation-resend.cont
   controllers: [
     InvitationController,
     InvitationAcceptanceController,
-    InvitationResendController,
+    InvitationReattemptController,
   ],
   exports: [InvitationService],
 })
