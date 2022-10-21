@@ -62,7 +62,7 @@
     "test:ci": "yarn test:cov --ci --reporters=default --reporters=jest-junit",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./jest.config-e2e.json --testTimeout 30000",
-    "test:e2e:one": "jest --config ./jest.config-e2e.json --testTimeout 30000 packages/nestjs-invitation/src/controllers/invitation.controller.e2e-spec.ts",
+    "test:e2e:one": "jest --config ./jest.config-e2e.json --testTimeout 30000 packages/nestjs-org/src/org.controller.e2e-spec.ts",
     "test:all": "yarn test && yarn test:e2e",
     "doc": "rimraf ./documentation && compodoc -p ./tsconfig.doc.json --disablePrivate --disableProtected",
     "doc:serve": "yarn doc -s",

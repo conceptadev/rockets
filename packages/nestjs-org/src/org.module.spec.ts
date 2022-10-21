@@ -55,6 +55,9 @@ describe('OrgModule', () => {
             org: {
               entity: OrgEntityFixture,
             },
+            orgMember: {
+              entity: OrgMemberEntityFixture,
+            },
           },
         }),
         CrudModule.forRoot({}),

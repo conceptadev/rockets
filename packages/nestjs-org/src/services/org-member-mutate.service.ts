@@ -6,7 +6,7 @@ import { Type } from '@concepta/ts-core';
 
 import { OrgMemberMutateServiceInterface } from '../interfaces/org-member-mutate-service.interface';
 import { OrgMemberEntityInterface } from '../interfaces/org-member-entity.interface';
-import { MODULE_ORG_MEMBER_ENTITY_KEY } from '../org.constants';
+import { ORG_MODULE_ORG_MEMBER_ENTITY_KEY } from '../org.constants';
 import { OrgMemberCreatableInterface } from '../interfaces/org-member-creatable.interface';
 import { OrgMemberUpdatableInterface } from '../interfaces/org-member-updatable.interface';
 
@@ -23,7 +23,7 @@ export class OrgMemberMutateService
   implements OrgMemberMutateServiceInterface
 {
   constructor(
-    @InjectDynamicRepository(MODULE_ORG_MEMBER_ENTITY_KEY)
+    @InjectDynamicRepository(ORG_MODULE_ORG_MEMBER_ENTITY_KEY)
     repo: Repository<OrgMemberEntityInterface>,
   ) {
     super(repo);
