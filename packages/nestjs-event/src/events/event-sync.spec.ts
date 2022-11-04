@@ -1,5 +1,6 @@
 import { EventEmitter2 } from 'eventemitter2';
 import { EVENT_MODULE_EVENT_KEY_PREFIX } from '../event-constants';
+import { Event } from './event';
 import { EventSync } from './event-sync';
 
 describe(Event, () => {
