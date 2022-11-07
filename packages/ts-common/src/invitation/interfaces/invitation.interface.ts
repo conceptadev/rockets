@@ -1,4 +1,5 @@
 import {
+  LiteralObject,
   ReferenceActiveInterface,
   ReferenceAuditInterface,
   ReferenceIdInterface,
@@ -12,4 +13,5 @@ export interface InvitationInterface
   code: string;
   category: string;
   user: ReferenceIdInterface;
+  constraints?: LiteralObject;
 }

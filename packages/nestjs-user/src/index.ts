@@ -13,3 +13,6 @@ export { UserLookupServiceInterface } from './interfaces/user-lookup-service.int
 export { UserMutateServiceInterface } from './interfaces/user-mutate-service.interface';
 
 export { UserResource } from './user.types';
+
+export { UserException } from './exceptions/user-exception';
+export { UserNotFoundException } from './exceptions/user-not-found-exception';

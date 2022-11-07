@@ -8,6 +8,7 @@ import {
 import { AuditSqlLiteEmbed } from '@concepta/typeorm-common';
 
 import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
+import { LiteralObject } from '@nestjs/common';
 
 //TODO check this entity later
 export abstract class InvitationSqliteEntity
@@ -30,6 +31,9 @@ export abstract class InvitationSqliteEntity
 
   @Column()
   category!: string;
+
+  @Column({ type: 'simple-json', nullable: true })
+  constraints?: LiteralObject;
 
   user!: ReferenceIdInterface;
 }

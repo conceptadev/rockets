@@ -22,6 +22,7 @@ import { OwnerLookupServiceFixture } from './__fixtures__/owner-lookup-service.f
 import { OwnerModuleFixture } from './__fixtures__/owner.module.fixture';
 import { OrgMemberEntityFixture } from './__fixtures__/org-member.entity.fixture';
 import { UserEntityFixture } from './__fixtures__/user-entity.fixture';
+import { InvitationEntityFixture } from './__fixtures__/invitation.entity.fixture';
 
 describe('OrgModule', () => {
   let orgModule: OrgModule;
@@ -44,6 +45,7 @@ describe('OrgModule', () => {
             OwnerEntityFixture,
             OrgMemberEntityFixture,
             UserEntityFixture,
+            InvitationEntityFixture,
           ],
         }),
         OrgModule.forRootAsync({

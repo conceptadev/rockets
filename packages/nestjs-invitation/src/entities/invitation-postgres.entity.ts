@@ -8,8 +8,9 @@ import {
 import { AuditPostgresEmbed } from '@concepta/typeorm-common';
 
 import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
+import { LiteralObject } from '@nestjs/common';
 
-//TODO check this entity later
+// TODO check this entity later
 export abstract class InvitationPostgresEntity
   implements InvitationEntityInterface
 {
@@ -30,6 +31,9 @@ export abstract class InvitationPostgresEntity
 
   @Column()
   category!: string;
+
+  @Column({ type: 'jsonb' })
+  constraints?: LiteralObject;
 
   user!: ReferenceIdInterface;
 }

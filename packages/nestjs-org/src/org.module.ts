@@ -15,19 +15,26 @@ import {
 } from './org.module-definition';
 import { OrgMemberMutateService } from './services/org-member-mutate.service';
 import { OrgMemberLookupService } from './services/org-member-lookup.service';
+import { OrgMemberService } from './services/org-member.service';
 
 /**
  * Org Module
  */
 @Module({
   providers: [
+    OrgMemberService,
     OrgLookupService,
     OrgMutateService,
     OrgCrudService,
     OrgMemberLookupService,
     OrgMemberMutateService,
   ],
-  exports: [OrgLookupService, OrgMutateService, OrgCrudService],
+  exports: [
+    OrgLookupService,
+    OrgMutateService,
+    OrgCrudService,
+    OrgMemberService,
+  ],
   controllers: [OrgController],
 })
 export class OrgModule extends OrgModuleClass {
