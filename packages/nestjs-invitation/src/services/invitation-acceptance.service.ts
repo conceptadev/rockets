@@ -100,7 +100,7 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
     queryOptions?: QueryOptionsInterface,
   ): Promise<boolean> {
     const invitationAcceptedEventAsync = new InvitationAcceptedEventAsync({
-      ...invitationDto,
+      invitation: invitationDto,
       data: payload,
       queryOptions,
     });

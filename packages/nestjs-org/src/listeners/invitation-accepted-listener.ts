@@ -45,9 +45,12 @@ export class InvitationAcceptedListener
     >,
   ) {
     // check only for invitation of type category
-    if (event.payload.category === INVITATION_MODULE_CATEGORY_ORG_KEY) {
+    if (
+      event?.payload?.invitation?.category ===
+      INVITATION_MODULE_CATEGORY_ORG_KEY
+    ) {
       const { userId } = event?.payload?.data ?? {};
-      const { orgId } = event?.payload?.constraints ?? {};
+      const { orgId } = event?.payload?.invitation?.constraints ?? {};
 
       if (typeof userId !== 'string') {
         throw new OrgMemberException(
@@ -55,14 +58,14 @@ export class InvitationAcceptedListener
         );
       }
 
-      if (!orgId) {
+      if (typeof orgId !== 'string') {
         throw new OrgMemberException(
           'The org of invitation does not have orgId in constraints',
         );
       }
 
       await this.orgMemberService.add(
-        { userId, orgId: orgId as string },
+        { userId, orgId },
         event.payload?.queryOptions,
       );
 

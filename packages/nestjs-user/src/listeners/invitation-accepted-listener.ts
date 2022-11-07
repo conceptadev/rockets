@@ -48,8 +48,11 @@ export class InvitationAcceptedListener
     >,
   ) {
     // check only for invitation of type category
-    if (event.payload.category === INVITATION_MODULE_CATEGORY_USER_KEY) {
-      const { userId, newPassword } = event?.payload.data ?? {};
+    if (
+      event?.payload?.invitation?.category ===
+      INVITATION_MODULE_CATEGORY_USER_KEY
+    ) {
+      const { userId, newPassword } = event?.payload?.data ?? {};
 
       if (typeof userId !== 'string' || typeof newPassword !== 'string') {
         throw new UserException(
