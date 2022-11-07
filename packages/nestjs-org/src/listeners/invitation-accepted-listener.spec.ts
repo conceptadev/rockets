@@ -123,7 +123,7 @@ describe(InvitationAcceptedListener, () => {
 
   it('event should be listened', async () => {
     const invitationAcceptedEventAsync = new InvitationAcceptedEventAsync({
-      ...testInvitation,
+      invitation: testInvitation,
       data: {
         userId: testInvitation.user.id,
       },
@@ -133,7 +133,7 @@ describe(InvitationAcceptedListener, () => {
       invitationAcceptedEventAsync,
     );
 
-    const result = eventResult.some((it) => it === true);
+    const result = eventResult.every((it) => it === true);
 
     expect(result);
   });

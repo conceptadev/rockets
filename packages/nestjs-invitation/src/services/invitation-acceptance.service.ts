@@ -109,7 +109,7 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
       invitationAcceptedEventAsync,
     );
 
-    return eventResult.some((it) => it === true);
+    return eventResult.every((it) => it === true);
   }
 
   async sendEmail(email: string): Promise<void> {
