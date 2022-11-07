@@ -21,7 +21,7 @@ export const jwtDefaultConfig = registerAs(
       },
       refresh: {
         signOptions: {
-          expiresIn: process.env?.JWT_MODULE_REFRESH_EXPIRES_IN ?? '1y',
+          expiresIn: process.env?.JWT_MODULE_REFRESH_EXPIRES_IN ?? '99y',
         },
       },
     };
