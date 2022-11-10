@@ -1,10 +1,15 @@
+import fs from 'fs';
+import { Readable } from 'stream';
 import { INestApplication, Inject, Injectable } from '@nestjs/common';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
+import toJsonSchema from '@openapi-contrib/openapi-schema-to-json-schema';
+
 import { SwaggerUiSettingsInterface } from './interfaces/swagger-ui-settings.interface';
 import {
   SWAGGER_UI_MODULE_SETTINGS_TOKEN,
   SWAGGER_UI_MODULE_DOCUMENT_BUILDER_TOKEN,
 } from './swagger-ui.constants';
+import { bufferToStream, writeObjectInAFile } from './utils/file-utils';
 
 @Injectable()
 export class SwaggerUiService {
@@ -12,6 +17,7 @@ export class SwaggerUiService {
    * Constructor.
    *
    * @param settings swagger ui settings
+   * @param documentBuilder
    */
   constructor(
     @Inject(SWAGGER_UI_MODULE_SETTINGS_TOKEN)
@@ -47,5 +53,29 @@ export class SwaggerUiService {
       document,
       this.settings?.customOptions,
     );
+
+    this.saveApiAndJsonSchemas(document);
+  }
+
+  async getJsonSchema(): Promise<Readable> {
+    return await this.readFile(this.settings.jsonSchemaFilePath);
+  }
+
+  async getOpenApi(): Promise<Readable> {
+    return await this.readFile(this.settings.openApiFilePath);
+  }
+
+  async saveApiAndJsonSchemas(document: OpenAPIObject) {
+    const convertedSchema = toJsonSchema(document);
+    const { schemas } = convertedSchema?.components ?? {};
+
+    writeObjectInAFile(this.settings.openApiFilePath, document);
+    writeObjectInAFile(this.settings.jsonSchemaFilePath, schemas);
+  }
+
+  private async readFile(filePath: string): Promise<Readable> {
+    const buffer = await fs.promises.readFile(filePath);
+
+    return bufferToStream(buffer);
   }
 }

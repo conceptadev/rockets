@@ -23,5 +23,11 @@ export const swaggerUiDefaultConfig = registerAs(
       name: process.env.SWAGGER_UI_LICENSE_NAME ?? '',
       url: process.env.SWAGGER_UI_LICENSE_URL ?? '',
     },
+    jsonSchemaFilePath:
+      process.env.SWAGGER_JSON_SCHEMA_FILE_PATH ??
+      `${__dirname}/../jsonSchema-v4.json`,
+    openApiFilePath:
+      process.env.SWAGGER_OPEN_API_FILE_PATH ??
+      `${__dirname}/../open-api-v3.json`,
   }),
 );

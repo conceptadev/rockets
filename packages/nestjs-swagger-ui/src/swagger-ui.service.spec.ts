@@ -1,5 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+
 import { SwaggerUiModule } from './swagger-ui.module';
 import { SwaggerUiService } from './swagger-ui.service';
 
@@ -11,7 +12,12 @@ describe('SwaggerModule (e2e)', () => {
     module = await Test.createTestingModule({
       imports: [
         SwaggerUiModule.register({
-          settings: { path: '/api', basePath: '/v1' },
+          settings: {
+            path: 'api',
+            basePath: '/v1',
+            jsonSchemaFilePath: `${__dirname}/../jsonSchema-v4.json`,
+            openApiFilePath: `${__dirname}/../open-api-v3.json`,
+          },
         }),
       ],
     }).compile();
