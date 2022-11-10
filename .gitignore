@@ -107,3 +107,6 @@ dist
 .idea
 .DS_Store
 website/.yarn
+
+packages/nestjs-swagger-ui/jsonSchema-v4.json
+packages/nestjs-swagger-ui/open-api-v3.json

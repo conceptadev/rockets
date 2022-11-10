@@ -27,7 +27,7 @@ describe('SwaggerModule (e2e)', () => {
     jest.clearAllMocks();
   });
 
-  it('setup', async () => {
+  it.only('setup', async () => {
     app = module.createNestApplication();
     const swaggerUiService = app.get(SwaggerUiService);
     expect(swaggerUiService).toBeInstanceOf(SwaggerUiService);
