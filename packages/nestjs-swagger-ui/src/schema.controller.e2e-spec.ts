@@ -3,10 +3,12 @@ import { Test } from '@nestjs/testing';
 import { UserModule } from '@concepta/nestjs-user';
 import { INestApplication } from '@nestjs/common';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
+import { CrudModule } from '@concepta/nestjs-crud';
 
 import { SwaggerUiModule } from './swagger-ui.module';
 import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
 import { SchemaController } from './schema.controller';
+import { SwaggerUiService } from './swagger-ui.service';
 
 describe(SwaggerUiModule, () => {
   let app: INestApplication;
@@ -30,6 +32,7 @@ describe(SwaggerUiModule, () => {
             synchronize: true,
             entities: [UserEntityFixture],
           }),
+          CrudModule.forRoot({}),
           UserModule.forRoot({
             entities: {
               user: {
@@ -42,6 +45,10 @@ describe(SwaggerUiModule, () => {
       }).compile();
       app = moduleFixture.createNestApplication();
       await app.init();
+
+      const swaggerUiService = app.get(SwaggerUiService);
+      expect(swaggerUiService).toBeInstanceOf(SwaggerUiService);
+      swaggerUiService.setup(app);
     });
 
     it('download open api schema', async () => {
@@ -49,7 +56,21 @@ describe(SwaggerUiModule, () => {
         .get('/schema/open-api-v3')
         .expect(200);
 
-      expect(response.body).toBeTruthy();
+      const { text } = response;
+
+      expect(text).toContain('"openapi": "3.0.0"');
+      expect(text).toContain('"/user/{id}"');
+    });
+
+    it('download json schema', async () => {
+      const response = await supertest(app.getHttpServer())
+        .get('/schema/json-v4')
+        .expect(200);
+
+      const { text } = response;
+
+      expect(text).toContain('UserDto');
+      expect(text).toContain('UserCreateDto');
     });
   });
 });

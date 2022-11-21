@@ -23,6 +23,7 @@
     "express": "^4.18.2"
   },
   "devDependencies": {
+    "@concepta/nestjs-crud": "^4.0.0-alpha.22",
     "@concepta/nestjs-user": "^4.0.0-alpha.22",
     "@nestjs/core": "^9.0.0",
     "@nestjs/testing": "^9.0.0",
