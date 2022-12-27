@@ -1,12 +1,11 @@
 import { DeepPartial } from 'typeorm';
 import { CreateManyDto } from '@nestjsx/crud';
-import { ReferenceIdInterface } from '@concepta/ts-core';
 import { CrudRequestInterface } from '../interfaces/crud-request.interface';
 import { CrudResponsePaginatedInterface } from './crud-response-paginated.interface';
 import { AdditionalCrudMethodArgs } from '../crud.types';
 
 export interface CrudControllerInterface<
-  Entity extends ReferenceIdInterface,
+  Entity,
   Creatable extends DeepPartial<Entity>,
   Updatable extends DeepPartial<Entity>,
   Replaceable extends Creatable = Creatable,

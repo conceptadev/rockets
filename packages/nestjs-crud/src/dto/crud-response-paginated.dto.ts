@@ -1,19 +1,18 @@
 import { Exclude, Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { ReferenceIdInterface } from '@concepta/ts-core';
 import { CrudResponsePaginatedInterface } from '../interfaces/crud-response-paginated.interface';
-import { CrudResponseDto } from './crud-response.dto';
+import { CrudInvalidResponseDto } from './crud-invalid-response.dto';
 
 @Exclude()
-export class CrudResponsePaginatedDto<T extends ReferenceIdInterface>
+export class CrudResponsePaginatedDto<T>
   implements CrudResponsePaginatedInterface<T>
 {
   @Expose()
   @ApiProperty({
-    type: CrudResponseDto,
+    type: CrudInvalidResponseDto,
     description: 'The list of records for current page',
   })
-  @Type(() => CrudResponseDto)
+  @Type(() => CrudInvalidResponseDto)
   data: T[] = [];
 
   @Expose()

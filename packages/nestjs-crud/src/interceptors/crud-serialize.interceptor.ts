@@ -15,8 +15,8 @@ import {
 } from 'class-transformer';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { LiteralObject, ReferenceIdInterface } from '@concepta/ts-core';
-import { CrudResponseDto } from '../dto/crud-response.dto';
+import { LiteralObject } from '@concepta/ts-core';
+import { CrudInvalidResponseDto } from '../dto/crud-invalid-response.dto';
 import { CrudResponsePaginatedDto } from '../dto/crud-response-paginated.dto';
 import { CrudSerializationOptionsInterface } from '../interfaces/crud-serialization-options.interface';
 import { CrudResultPaginatedInterface } from '../interfaces/crud-result-paginated.interface';
@@ -25,7 +25,7 @@ import { CrudReflectionService } from '../services/crud-reflection.service';
 import { CRUD_MODULE_SETTINGS_TOKEN } from '../crud.constants';
 
 type ResponseType =
-  | (LiteralObject & CrudResultPaginatedInterface<ReferenceIdInterface>)
+  | (LiteralObject & CrudResultPaginatedInterface)
   | Array<LiteralObject>;
 
 export class CrudSerializeInterceptor implements NestInterceptor {
@@ -116,7 +116,7 @@ export class CrudSerializeInterceptor implements NestInterceptor {
     // is the type missing?
     if (!options?.type) {
       // yes, set it
-      options.type = modelOptions.type ?? CrudResponseDto;
+      options.type = modelOptions.type ?? CrudInvalidResponseDto;
     }
 
     // is the many type missing?
