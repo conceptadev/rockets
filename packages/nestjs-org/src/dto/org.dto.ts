@@ -8,16 +8,12 @@ import {
 } from '@concepta/ts-core';
 import { OrgInterface } from '@concepta/ts-common';
 import { AuditDto, ReferenceIdDto } from '@concepta/nestjs-common';
-import { CrudResponseDto } from '@concepta/nestjs-crud';
 
 /**
  * Org DTO
  */
 @Exclude()
-export class OrgDto
-  extends CrudResponseDto<OrgInterface>
-  implements OrgInterface
-{
+export class OrgDto implements OrgInterface {
   /**
    * Unique id
    */

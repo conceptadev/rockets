@@ -8,16 +8,12 @@ import {
 } from '@concepta/ts-core';
 import { RoleAssignmentInterface } from '@concepta/ts-common';
 import { AuditDto, ReferenceIdDto } from '@concepta/nestjs-common';
-import { CrudResponseDto } from '@concepta/nestjs-crud';
 
 /**
  * Role assignment DTO
  */
 @Exclude()
-export class RoleAssignmentDto
-  extends CrudResponseDto<RoleAssignmentDto>
-  implements RoleAssignmentInterface
-{
+export class RoleAssignmentDto implements RoleAssignmentInterface {
   /**
    * Unique id
    */
