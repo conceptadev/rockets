@@ -9,8 +9,8 @@ import {
 } from '@nestjs/swagger';
 import { CrudActions } from '@nestjsx/crud';
 import { DecoratorTargetObject } from '../../crud.types';
+import { CrudInvalidResponseDto } from '../../dto/crud-invalid-response.dto';
 import { CrudResponsePaginatedDto } from '../../dto/crud-response-paginated.dto';
-import { CrudResponseDto } from '../../dto/crud-response.dto';
 import { CrudReflectionService } from '../../services/crud-reflection.service';
 
 /**
@@ -50,7 +50,9 @@ export function applyApiResponse(
 
     // determine the dto type
     const dto =
-      serializeOptions?.type ?? requestOptions.model.type ?? CrudResponseDto;
+      serializeOptions?.type ??
+      requestOptions.model.type ??
+      CrudInvalidResponseDto;
 
     // determine pagination dto
     const paginatedDto =
