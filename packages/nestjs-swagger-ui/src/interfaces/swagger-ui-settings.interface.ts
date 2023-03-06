@@ -13,4 +13,6 @@ export interface SwaggerUiSettingsInterface {
   contact?: { name: string; url: string; email: string };
   license?: { name: string; url: string };
   basePath?: string;
+  jsonSchemaFilePath: string;
+  openApiFilePath: string;
 }

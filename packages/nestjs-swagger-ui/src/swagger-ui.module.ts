@@ -1,14 +1,17 @@
 import { DynamicModule, Module } from '@nestjs/common';
+
 import { SwaggerUiService } from './swagger-ui.service';
 import {
   SwaggerUiAsyncOptions,
   SwaggerUiModuleClass,
   SwaggerUiOptions,
 } from './swagger-ui.module-definition';
+import { SchemaController } from './schema.controller';
 
 @Module({
   providers: [SwaggerUiService],
   exports: [SwaggerUiService],
+  controllers: [SchemaController],
 })
 export class SwaggerUiModule extends SwaggerUiModuleClass {
   static register(options: SwaggerUiOptions): DynamicModule {

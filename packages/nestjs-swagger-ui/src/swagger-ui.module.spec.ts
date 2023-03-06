@@ -10,7 +10,14 @@ describe(SwaggerUiModule, () => {
   let swaggerUiService: SwaggerUiService;
   let settings: SwaggerUiSettingsInterface;
 
-  const moduleOptions = { settings: { path: 'api', basePath: '/v1' } };
+  const moduleOptions = {
+    settings: {
+      path: 'api',
+      basePath: '/v1',
+      jsonSchemaFilePath: `${__dirname}/../jsonSchema-v4.json`,
+      openApiFilePath: `${__dirname}/../open-api-v3.json`,
+    },
+  };
 
   describe(SwaggerUiModule.register, () => {
     beforeAll(async () => {

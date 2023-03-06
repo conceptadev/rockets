@@ -13,12 +13,21 @@
   ],
   "dependencies": {
     "@concepta/nestjs-common": "^4.0.0-alpha.23",
+    "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.23",
+    "@concepta/ts-core": "^4.0.0-alpha.23",
+    "@concepta/typeorm-common": "^4.0.0-alpha.23",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.2.0",
-    "@nestjs/swagger": "^6.0.0"
+    "@nestjs/swagger": "^6.0.0",
+    "@openapi-contrib/openapi-schema-to-json-schema": "^3.2.0",
+    "express": "^4.18.2"
   },
   "devDependencies": {
+    "@concepta/nestjs-crud": "^4.0.0-alpha.22",
+    "@concepta/nestjs-user": "^4.0.0-alpha.22",
     "@nestjs/core": "^9.0.0",
-    "@nestjs/testing": "^9.0.0"
+    "@nestjs/testing": "^9.0.0",
+    "supertest": "^6.3.1",
+    "typeorm": "^0.3.10"
   }
 }
