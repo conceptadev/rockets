@@ -1,4 +1,4 @@
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, ObjectLiteral, Repository } from 'typeorm';
 import { EntityManagerProxy } from './entity-manager.proxy';
 import { SafeTransactionOptionsInterface } from '../interfaces/safe-transaction-options.interface';
 import { RunInTransactionCallback } from '../typeorm-common.types';
@@ -21,7 +21,9 @@ export class TransactionProxy {
     this.parentTransaction = this.options?.transaction;
   }
 
-  repository<E>(targetRepository: Repository<E>): Repository<E> {
+  repository<E extends ObjectLiteral>(
+    targetRepository: Repository<E>,
+  ): Repository<E> {
     if (this.parentTransaction) {
       return this.parentTransaction.repository<E>(targetRepository);
     } else {

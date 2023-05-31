@@ -1,4 +1,4 @@
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, ObjectLiteral, Repository } from 'typeorm';
 import { EntityManagerOptionInterface } from '../interfaces/entity-manager-option.interface';
 import { QueryOptionsInterface } from '../interfaces/query-options.interface';
 import { SafeTransactionOptionsInterface } from '../interfaces/safe-transaction-options.interface';
@@ -11,7 +11,7 @@ export class EntityManagerProxy {
     return options?.entityManager ?? this._entityManager;
   }
 
-  repository<T>(
+  repository<T extends ObjectLiteral>(
     repository: Repository<T>,
     options?: QueryOptionsInterface & EntityManagerOptionInterface,
   ): Repository<T> {

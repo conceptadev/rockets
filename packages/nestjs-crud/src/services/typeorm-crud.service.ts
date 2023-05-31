@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { ObjectLiteral, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { CrudRequest } from '@nestjsx/crud';
 import { TypeOrmCrudService as xTypeOrmCrudService } from '@nestjsx/crud-typeorm';
@@ -13,7 +13,9 @@ import { CrudResultPaginatedInterface } from '../interfaces/crud-result-paginate
 import { CrudQueryException } from '../exceptions/crud-query.exception';
 
 @Injectable()
-export class TypeOrmCrudService<T> extends xTypeOrmCrudService<T> {
+export class TypeOrmCrudService<
+  T extends ObjectLiteral,
+> extends xTypeOrmCrudService<T> {
   constructor(protected repo: Repository<T>) {
     super(repo);
   }
