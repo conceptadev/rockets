@@ -74,8 +74,5 @@
     "changelog:minor": "standard-version --release-as minor",
     "changelog:patch": "standard-version --release-as patch",
     "changelog:major": "standard-version --release-as major"
-  },
-  "resolutions": {
-    "**/@angular-devkit/schematics-cli/minimist": "^1.2.6"
   }
 }
