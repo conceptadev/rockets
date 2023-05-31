@@ -89,6 +89,8 @@ describe('OtpModule', () => {
       dataSource: testModule.get(getDataSourceToken(connectionName)),
     });
 
+    await seedingSource.initialize();
+
     userFactory = new UserFactoryFixture({ seedingSource });
     userOtpFactory = new UserOtpFactoryFixture({ seedingSource });
 

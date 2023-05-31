@@ -66,6 +66,8 @@ describe(InvitationRevocationService, () => {
       dataSource: testingModule.get(getDataSourceToken()),
     });
 
+    await seedingSource.initialize();
+
     const userFactory = new UserFactory({
       entity: UserEntityFixture,
       seedingSource,

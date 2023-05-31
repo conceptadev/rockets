@@ -75,6 +75,8 @@ describe('RoleModule', () => {
       dataSource: testModule.get(getDataSourceToken(connectionName)),
     });
 
+    await seedingSource.initialize();
+
     const roleFactory = new RoleFactory({
       entity: RoleEntityFixture,
       seedingSource,
