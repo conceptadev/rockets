@@ -13141,12 +13141,13 @@ sprintf-js@~1.0.2:
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==
 
-"sqlite3@npm:@vscode/sqlite3@^5.0.7":
-  version "5.0.8"
-  resolved "https://registry.yarnpkg.com/@vscode/sqlite3/-/sqlite3-5.0.8.tgz#72b07061c5f90a9dd598a5506f598fcc817fab90"
-  integrity sha512-6wvQdMjpi1kwYI5mfzm98siEQb2mlBKX4xdNtJFj/uNqb6wqd3JOhk+5FL7geR0hduXE5lHjv+q69jtsEtUJDA==
+"sqlite3@npm:@vscode/sqlite3@^5.1.4-vscode":
+  version "5.1.4-vscode"
+  resolved "https://registry.yarnpkg.com/@vscode/sqlite3/-/sqlite3-5.1.4-vscode.tgz#6e7996191b2ad9ff23c870c838e8c2dc05c2e090"
+  integrity sha512-6BZVHqSCW4MAmAB7N0nuq1ro+755MXnIypuRzuaLb2RqlNyRo7aTpVQklNoLyai7byTBPIlPHl77KZZcHJFq8g==
   dependencies:
     node-addon-api "^4.2.0"
+    tar "^6.1.11"
 
 sshpk@^1.7.0:
   version "1.17.0"
