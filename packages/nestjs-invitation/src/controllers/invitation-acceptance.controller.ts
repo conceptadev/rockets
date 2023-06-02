@@ -11,7 +11,7 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   ReferenceAssigneeInterface,
   ReferenceIdInterface,
@@ -28,7 +28,7 @@ export class InvitationAcceptanceController {
     private readonly invitationAcceptanceService: InvitationAcceptanceService,
   ) {}
 
-  @UsePipes(new ValidationPipe({ transform: true }))
+  @UsePipes(new ValidationPipe({ transform: true, forbidUnknownValues: true }))
   @ApiBody({
     type: InvitationAcceptInviteDto,
     description: 'DTO to accept invitation token.',
@@ -36,6 +36,7 @@ export class InvitationAcceptanceController {
   @ApiOperation({
     summary: 'Accept one invitation by code, passcode and payload.',
   })
+  @ApiOkResponse()
   @Patch('/:code')
   async acceptInvite(
     @Param('code') code: string,
@@ -75,6 +76,7 @@ export class InvitationAcceptanceController {
   @ApiOperation({
     summary: 'Check if passcode is valid.',
   })
+  @ApiOkResponse()
   @Get('/:code')
   async validatePasscode(
     @Param('code') code: string,

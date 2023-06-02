@@ -1,5 +1,5 @@
 import { Exclude } from 'class-transformer';
-import { PickType } from '@nestjs/swagger';
+import { IntersectionType, PartialType, PickType } from '@nestjs/swagger';
 import { OrgCreatableInterface } from '@concepta/ts-common';
 import { OrgDto } from './org.dto';
 
@@ -8,5 +8,8 @@ import { OrgDto } from './org.dto';
  */
 @Exclude()
 export class OrgCreateDto
-  extends PickType(OrgDto, ['name', 'active', 'owner'] as const)
+  extends IntersectionType(
+    PickType(OrgDto, ['name', 'owner'] as const),
+    PartialType(PickType(OrgDto, ['active'] as const)),
+  )
   implements OrgCreatableInterface {}

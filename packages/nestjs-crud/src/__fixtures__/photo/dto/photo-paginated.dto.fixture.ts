@@ -5,7 +5,7 @@ import { PhotoDtoFixture } from './photo.dto.fixture';
 
 @Exclude()
 export class PhotoPaginatedDtoFixture extends CrudResponsePaginatedDto<PhotoDtoFixture> {
-  @ApiProperty({ type: [PhotoDtoFixture] })
+  @ApiProperty({ type: [PhotoDtoFixture], isArray: true })
   @Expose()
   @Type(() => PhotoDtoFixture)
   data: PhotoDtoFixture[] = [];

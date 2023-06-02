@@ -37,7 +37,7 @@ import { InvitationEntityInterface } from '../interfaces/invitation.entity.inter
   },
   validation: {
     transformOptions: {
-      //TODO temporary fix because this could be unsafe
+      // TODO temporary fix because this could be unsafe
       excludeExtraneousValues: false,
     },
   },

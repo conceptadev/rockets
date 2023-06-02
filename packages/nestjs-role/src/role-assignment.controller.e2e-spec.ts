@@ -36,6 +36,8 @@ describe('RoleAssignmentController (e2e)', () => {
       dataSource: app.get(getDataSourceToken()),
     });
 
+    await seedingSource.initialize();
+
     userFactory = new UserFactoryFixture({ seedingSource });
     userRoleFactory = new UserRoleFactoryFixture({ seedingSource });
 

@@ -9,7 +9,7 @@ import { AuditSqlLiteEmbed } from '@concepta/typeorm-common';
 
 import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
 
-//TODO check this entity later
+// TODO check this entity later
 export abstract class InvitationSqliteEntity
   implements InvitationEntityInterface
 {

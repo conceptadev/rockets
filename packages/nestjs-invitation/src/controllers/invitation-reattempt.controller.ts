@@ -7,7 +7,7 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { InvitationAcceptanceService } from '../services/invitation-acceptance.service';
 import { InvitationDto } from '../dto/invitation.dto';
@@ -21,10 +21,11 @@ export class InvitationReattemptController {
     private readonly invitationSendService: InvitationSendService,
   ) {}
 
-  @UsePipes(new ValidationPipe({ transform: true }))
+  @UsePipes(new ValidationPipe({ transform: true, forbidUnknownValues: true }))
   @ApiOperation({
     summary: 'Reattempt one invitation by code',
   })
+  @ApiOkResponse()
   @Post('/:code')
   async reattemptInvite(@Param('code') code: string): Promise<void> {
     let invitation: InvitationDto | null | undefined;

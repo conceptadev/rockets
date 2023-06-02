@@ -35,10 +35,6 @@ describe(AuthLocalStrategy, () => {
     user = new UserFixture();
     user.id = randomUUID();
     jest.spyOn(userLookUpService, 'byUsername').mockResolvedValue(user);
-
-    jest
-      .spyOn(passwordStorageService, 'validateObject')
-      .mockResolvedValue(true);
   });
 
   it('constructor', async () => {
@@ -52,8 +48,13 @@ describe(AuthLocalStrategy, () => {
     );
     expect(true).toBeTruthy();
   });
+
   describe(AuthLocalStrategy.prototype.validate, () => {
     it('should return user', async () => {
+      jest
+        .spyOn(passwordStorageService, 'validateObject')
+        .mockResolvedValue(true);
+
       const result = await authLocalStrategy.validate(USERNAME, PASSWORD);
       expect(result.id).toBe(user.id);
     });

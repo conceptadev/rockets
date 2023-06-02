@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsOptional, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEmail, IsObject, IsOptional, IsString } from 'class-validator';
 import { Exclude, Expose } from 'class-transformer';
 import { LiteralObject } from '@concepta/ts-core';
 
@@ -32,12 +32,13 @@ export class InvitationCreateDto {
   category = '';
 
   @Expose()
-  @ApiProperty({
+  @ApiPropertyOptional({
     title: 'Payload',
     type: 'object',
     description:
       'payload content that will be passed through another module ir order to complete the invitation. This payload will have necessary info to target module complete the invitation e.g. new password or what ever required info. The object not have any strong type defined on purpose because the target moules will have object different signatures',
   })
+  @IsObject()
   @IsOptional()
   payload?: LiteralObject;
 }

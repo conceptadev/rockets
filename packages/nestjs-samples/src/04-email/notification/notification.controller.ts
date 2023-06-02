@@ -1,6 +1,6 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { EmailService } from '@concepta/nestjs-email';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 
 @Controller('notification')
@@ -8,6 +8,7 @@ import { CreateNotificationDto } from './dto/create-notification.dto';
 export class NotificationController {
   constructor(private readonly emailService: EmailService) {}
 
+  @ApiOkResponse()
   @Post('/')
   async create(@Body() createNotificationDto: CreateNotificationDto) {
     await this.emailService.sendMail({

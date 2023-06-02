@@ -55,6 +55,8 @@ describe('InvitationController (e2e)', () => {
       dataSource: moduleFixture.get(getDataSourceToken()),
     });
 
+    await seedingSource.initialize();
+
     const userFactory = new UserFactory({
       entity: UserEntityFixture,
       seedingSource,

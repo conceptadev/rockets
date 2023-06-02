@@ -182,7 +182,7 @@ describe('LoggerService', () => {
       await loggerService.log(errorMessage, context);
 
       // This is being called twoices because of a log on module initialized
-      //expect(spyLog).toBeCalledTimes(2);
+      // expect(spyLog).toBeCalledTimes(2);
       expect(spyLog).toHaveBeenCalledWith(errorMessage, context);
       expect(spyTransportLog).toBeCalledTimes(1);
     });

@@ -1,11 +1,11 @@
 import {
   createParamDecorator,
-  //ExecutionContext,
+  // ExecutionContext,
   NotImplementedException,
 } from '@nestjs/common';
 
 export const FastifyAuthGuard = createParamDecorator(() => {
-  //(data: string, ctx: ExecutionContext) => {
+  // (data: string, ctx: ExecutionContext) => {
   // TODO: Add Fastify integration for passport logic
   throw new NotImplementedException();
 });

@@ -8,18 +8,11 @@ module.exports = {
   plugins: [
     'import',
     // 'jsdoc',
-    '@typescript-eslint/eslint-plugin',
   ],
   extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended',
+    '@concepta/eslint-config/nest',
     // 'plugin:jsdoc/recommended',
   ],
-  env: {
-    node: true,
-    jest: true,
-  },
   ignorePatterns: [
     'packages/*/dist/**',
     '**/node_modules/**',
@@ -30,15 +23,14 @@ module.exports = {
     '**/commitlint.config.js',
     'website/*',
   ],
+  settings: {
+    jsdoc: {
+      mode: 'typescript',
+    },
+  },
   rules: {
-    'no-unused-vars': 'off',
     'import/no-extraneous-dependencies': 'error',
-    '@typescript-eslint/no-unused-vars': 'error',
-    '@typescript-eslint/interface-name-prefix': 'off',
-    '@typescript-eslint/explicit-function-return-type': 'off',
-    '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/no-explicit-any': 'error',
-    '@typescript-eslint/no-empty-interface': 'off',
+    '@darraghor/nestjs-typed/param-decorator-name-matches-route-param': 'off',
     // 'jsdoc/require-jsdoc': [
     //   'warn',
     //   {
@@ -56,12 +48,6 @@ module.exports = {
     // 'jsdoc/require-property-description': ['warn', { contexts: ['any'] }],
     // 'jsdoc/require-param-type': 'off',
     // 'jsdoc/require-returns': 'off',
-    'no-console': ['error', { allow: ['warn', 'error'] }],
-  },
-  settings: {
-    jsdoc: {
-      mode: 'typescript',
-    },
   },
   overrides: [
     {
@@ -69,6 +55,13 @@ module.exports = {
       parser: 'jsonc-eslint-parser',
       parserOptions: {
         jsonSyntax: 'JSON',
+      },
+    },
+    {
+      files: ['*.spec.ts', '*.fixture.ts'],
+      rules: {
+        '@darraghor/nestjs-typed/controllers-should-supply-api-tags': 'off',
+        '@darraghor/nestjs-typed/api-method-should-specify-api-response': 'off',
       },
     },
   ],

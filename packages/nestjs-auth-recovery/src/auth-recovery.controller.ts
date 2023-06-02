@@ -8,7 +8,14 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiBadRequestResponse,
+  ApiOkResponse,
+  ApiNotFoundResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthRecoveryService } from './services/auth-recovery.service';
 import { AuthRecoveryRecoverPasswordDto } from './dto/auth-recovery-recover-password.dto';
 import { AuthRecoveryRecoverLoginDto } from './dto/auth-recovery-recover-login.dto';
@@ -27,6 +34,7 @@ export class AuthRecoveryController {
     type: AuthRecoveryRecoverLoginDto,
     description: 'DTO of login recover.',
   })
+  @ApiOkResponse()
   @Post('/login')
   async recoverLogin(
     @Body() recoverLoginDto: AuthRecoveryRecoverLoginDto,
@@ -42,6 +50,7 @@ export class AuthRecoveryController {
     type: AuthRecoveryRecoverPasswordDto,
     description: 'DTO of email recover.',
   })
+  @ApiOkResponse()
   @Post('/password')
   async recoverPassword(
     @Body() recoverPasswordDto: AuthRecoveryRecoverPasswordDto,
@@ -52,6 +61,8 @@ export class AuthRecoveryController {
   @ApiOperation({
     summary: 'Check if passcode is valid.',
   })
+  @ApiOkResponse()
+  @ApiNotFoundResponse()
   @Get('/passcode/:passcode')
   async validatePasscode(@Param('passcode') passcode: string): Promise<void> {
     const otp = await this.authRecoveryService.validatePasscode(passcode);
@@ -68,6 +79,8 @@ export class AuthRecoveryController {
     type: AuthRecoveryUpdatePasswordDto,
     description: 'DTO of update password.',
   })
+  @ApiOkResponse()
+  @ApiBadRequestResponse()
   @Patch('/password')
   async updatePassword(
     @Body() updatePasswordDto: AuthRecoveryUpdatePasswordDto,

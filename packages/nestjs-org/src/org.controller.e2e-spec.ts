@@ -52,6 +52,8 @@ describe('OrgController (e2e)', () => {
         dataSource: app.get(getDataSourceToken()),
       });
 
+      await seedingSource.initialize();
+
       const orgSeeder = new OrgSeeder({
         factories: [
           new OrgFactory({ entity: OrgEntityFixture }),
