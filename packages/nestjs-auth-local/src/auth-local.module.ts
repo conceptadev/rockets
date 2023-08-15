@@ -1,6 +1,4 @@
 import { DynamicModule, Module } from '@nestjs/common';
-import { AuthLocalStrategy } from './auth-local.strategy';
-import { AuthLocalController } from './auth-local.controller';
 import {
   AuthLocalAsyncOptions,
   AuthLocalModuleClass,
@@ -14,10 +12,7 @@ import {
 /**
  * Auth local module
  */
-@Module({
-  providers: [AuthLocalStrategy],
-  controllers: [AuthLocalController],
-})
+@Module({})
 export class AuthLocalModule extends AuthLocalModuleClass {
   static register(options: AuthLocalOptions): DynamicModule {
     return super.register(options);
