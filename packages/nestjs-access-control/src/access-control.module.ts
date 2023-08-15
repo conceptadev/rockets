@@ -1,5 +1,4 @@
 import { DynamicModule, Module } from '@nestjs/common';
-import { AccessControlService } from './services/access-control.service';
 import {
   AccessControlAsyncOptions,
   AccessControlModuleClass,
@@ -9,10 +8,7 @@ import {
   createAccessControlProviders,
 } from './access-control.module-definition';
 
-@Module({
-  providers: [AccessControlService],
-  exports: [AccessControlService],
-})
+@Module({})
 export class AccessControlModule extends AccessControlModuleClass {
   static register(options: AccessControlOptions): DynamicModule {
     return super.register(options);
