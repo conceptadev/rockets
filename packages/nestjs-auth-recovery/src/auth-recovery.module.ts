@@ -10,15 +10,7 @@ import {
   createAuthRecoveryProviders,
 } from './auth-recovery.module-definition';
 
-import { AuthRecoveryService } from './services/auth-recovery.service';
-import { AuthRecoveryNotificationService } from './services/auth-recovery-notification.service';
-import { AuthRecoveryController } from './auth-recovery.controller';
-
-@Module({
-  providers: [AuthRecoveryService, AuthRecoveryNotificationService],
-  controllers: [AuthRecoveryController],
-  exports: [AuthRecoveryService],
-})
+@Module({})
 export class AuthRecoveryModule extends AuthRecoveryModuleClass {
   static register(options: AuthRecoveryOptions): DynamicModule {
     return super.register(options);

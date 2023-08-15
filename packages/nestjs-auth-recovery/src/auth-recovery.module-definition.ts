@@ -24,6 +24,8 @@ import { AuthRecoveryOptionsExtrasInterface } from './interfaces/auth-recovery-o
 import { AuthRecoverySettingsInterface } from './interfaces/auth-recovery-settings.interface';
 import { authRecoveryDefaultConfig } from './config/auth-recovery-default.config';
 import { AuthRecoveryController } from './auth-recovery.controller';
+import { AuthRecoveryService } from './services/auth-recovery.service';
+import { AuthRecoveryNotificationService } from './services/auth-recovery-notification.service';
 
 const RAW_OPTIONS_TOKEN = Symbol('__AUTH_RECOVERY_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -71,13 +73,14 @@ export function createAuthRecoveryImports(): DynamicModule['imports'] {
   return [ConfigModule.forFeature(authRecoveryDefaultConfig)];
 }
 
-export function createAuthRecoveryExports(): string[] {
+export function createAuthRecoveryExports() {
   return [
     AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
     AUTH_RECOVERY_MODULE_OTP_SERVICE_TOKEN,
     AUTH_RECOVERY_MODULE_EMAIL_SERVICE_TOKEN,
     AUTH_RECOVERY_MODULE_USER_LOOKUP_SERVICE_TOKEN,
     AUTH_RECOVERY_MODULE_USER_MUTATE_SERVICE_TOKEN,
+    AuthRecoveryService,
   ];
 }
 
@@ -87,6 +90,8 @@ export function createAuthRecoveryProviders(options: {
 }): Provider[] {
   return [
     ...(options.providers ?? []),
+    AuthRecoveryService,
+    AuthRecoveryNotificationService,
     createAuthRecoverySettingsProvider(options.overrides),
     createAuthRecoveryOtpServiceProvider(options.overrides),
     createAuthRecoveryEmailServiceProvider(options.overrides),
