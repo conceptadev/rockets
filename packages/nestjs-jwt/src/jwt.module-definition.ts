@@ -68,11 +68,14 @@ export function createJwtImports(
   }
 }
 
-export function createJwtExports(): string[] {
+export function createJwtExports() {
   return [
     JWT_MODULE_SETTINGS_TOKEN,
     JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
     JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
+    JwtSignService,
+    JwtIssueService,
+    JwtVerifyService,
   ];
 }
 
@@ -82,6 +85,9 @@ export function createJwtProviders(options: {
 }): Provider[] {
   return [
     ...(options.providers ?? []),
+    JwtSignService,
+    JwtIssueService,
+    JwtVerifyService,
     createJwtSettingsProvider(options.overrides),
     createJwtServiceAccessTokenProvider(options.overrides),
     createJwtServiceRefreshTokenProvider(options.overrides),
