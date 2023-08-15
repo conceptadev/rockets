@@ -22,6 +22,7 @@ import { AuthGithubOptionsExtrasInterface } from './interfaces/auth-github-optio
 import { authGithubDefaultConfig } from './config/auth-github-default.config';
 import { AuthGithubSettingsInterface } from './interfaces/auth-github-settings.interface';
 import { AuthGithubController } from './auth-github.controller';
+import { AuthGithubStrategy } from './auth-github.strategy';
 
 const RAW_OPTIONS_TOKEN = Symbol('__AUTH_GITHUB_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -66,7 +67,7 @@ export function createAuthGithubImports(): DynamicModule['imports'] {
   return [ConfigModule.forFeature(authGithubDefaultConfig)];
 }
 
-export function createAuthGithubExports(): string[] {
+export function createAuthGithubExports() {
   return [
     AUTH_GITHUB_MODULE_SETTINGS_TOKEN,
     AUTH_GITHUB_ISSUE_TOKEN_SERVICE_TOKEN,
@@ -87,6 +88,7 @@ export function createAuthGithubProviders(options: {
 }): Provider[] {
   return [
     ...(options.providers ?? []),
+    AuthGithubStrategy,
     IssueTokenService,
     FederatedOAuthService,
     createAuthGithubOptionsProvider(options.overrides),
