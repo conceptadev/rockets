@@ -1,5 +1,4 @@
 import { DynamicModule, Module } from '@nestjs/common';
-import { VerifyTokenService } from '@concepta/nestjs-authentication';
 
 import {
   AuthJwtAsyncOptions,
@@ -9,8 +8,6 @@ import {
   createAuthJwtImports,
   createAuthJwtProviders,
 } from './auth-jwt.module-definition';
-
-import { AuthJwtStrategy } from './auth-jwt.strategy';
 
 /**
  * Auth local module
