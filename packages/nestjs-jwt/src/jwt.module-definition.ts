@@ -85,9 +85,6 @@ export function createJwtProviders(options: {
 }): Provider[] {
   return [
     ...(options.providers ?? []),
-    JwtSignService,
-    JwtIssueService,
-    JwtVerifyService,
     createJwtSettingsProvider(options.overrides),
     createJwtServiceAccessTokenProvider(options.overrides),
     createJwtServiceRefreshTokenProvider(options.overrides),

@@ -76,7 +76,6 @@ export function createAccessControlProviders(overrides: {
 }): Provider[] {
   return [
     ...(overrides.providers ?? []),
-    AccessControlService,
     createAccessControlSettingsProvider(overrides.options),
     createAccessControlServiceProvider(overrides.options),
   ];
