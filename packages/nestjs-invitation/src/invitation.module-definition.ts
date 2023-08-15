@@ -28,6 +28,7 @@ import { InvitationAcceptanceService } from './services/invitation-acceptance.se
 import { InvitationSendService } from './services/invitation-send.service';
 import { InvitationRevocationService } from './services/invitation-revocation.service';
 import { invitationDefaultConfig } from './config/invitation-default.config';
+import { InvitationReattemptController } from './controllers/invitation-reattempt.controller';
 
 const RAW_OPTIONS_TOKEN = Symbol('__INVITATION_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -120,7 +121,11 @@ export function createInvitationControllers(
 ): DynamicModule['controllers'] {
   return overrides?.controllers !== undefined
     ? overrides.controllers
-    : [InvitationController, InvitationAcceptanceController];
+    : [
+        InvitationController,
+        InvitationAcceptanceController,
+        InvitationReattemptController,
+      ];
 }
 
 export function createInvitationSettingsProvider(
