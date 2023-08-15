@@ -21,6 +21,7 @@ import { InvitationUserMutateServiceInterface } from './interfaces/invitation-us
 import { InvitationServiceInterface } from './interfaces/invitation.service.interface';
 import { InvitationController } from './controllers/invitation.controller';
 import { InvitationAcceptanceController } from './controllers/invitation-acceptance.controller';
+import { InvitationReattemptController } from './controllers/invitation-reattempt.controller';
 import { InvitationService } from './services/invitation.service';
 import { InvitationSendService } from './services/invitation-send.service';
 import { InvitationAcceptanceService } from './services/invitation-acceptance.service';
@@ -49,6 +50,7 @@ describe(InvitationModule, () => {
   let invitationRevocationService: InvitationRevocationService;
   let invitationController: InvitationController;
   let invitationAcceptanceController: InvitationAcceptanceController;
+  let invitationReattemptController: InvitationReattemptController;
 
   const mockEmailService = mock<InvitationEmailServiceInterface>();
 
@@ -217,6 +219,11 @@ describe(InvitationModule, () => {
       testModule.get<InvitationAcceptanceController>(
         InvitationAcceptanceController,
       );
+
+    invitationReattemptController =
+      testModule.get<InvitationReattemptController>(
+        InvitationReattemptController,
+      );
   }
 
   function commonTests() {
@@ -237,6 +244,10 @@ describe(InvitationModule, () => {
     expect(invitationController).toBeInstanceOf(InvitationController);
     expect(invitationAcceptanceController).toBeInstanceOf(
       InvitationAcceptanceController,
+    );
+
+    expect(invitationReattemptController).toBeInstanceOf(
+      InvitationReattemptController,
     );
   }
 });

@@ -1,8 +1,4 @@
 import { DynamicModule, Module } from '@nestjs/common';
-import {
-  IssueTokenService,
-  VerifyTokenService,
-} from '@concepta/nestjs-authentication';
 
 import {
   AuthRefreshAsyncOptions,
@@ -14,17 +10,10 @@ import {
   createAuthRefreshProviders,
 } from './auth-refresh.module-definition';
 
-import { AuthRefreshStrategy } from './auth-refresh.strategy';
-import { AuthRefreshController } from './auth-refresh.controller';
-
 /**
  * Auth Refresh module
  */
-@Module({
-  providers: [AuthRefreshStrategy, VerifyTokenService, IssueTokenService],
-  controllers: [AuthRefreshController],
-  exports: [AuthRefreshStrategy],
-})
+@Module({})
 export class AuthRefreshModule extends AuthRefreshModuleClass {
   static register(options: AuthRefreshOptions): DynamicModule {
     return super.register(options);

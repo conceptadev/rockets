@@ -5,33 +5,11 @@ import {
   InvitationModuleClass,
   InvitationOptions,
 } from './invitation.module-definition';
-import { InvitationService } from './services/invitation.service';
-import { InvitationCrudService } from './services/invitation-crud.service';
-import { InvitationAcceptanceService } from './services/invitation-acceptance.service';
-import { InvitationSendService } from './services/invitation-send.service';
-import { InvitationRevocationService } from './services/invitation-revocation.service';
-import { InvitationController } from './controllers/invitation.controller';
-import { InvitationAcceptanceController } from './controllers/invitation-acceptance.controller';
-import { InvitationReattemptController } from './controllers/invitation-reattempt.controller';
 
 /**
  * Invitation module
  */
-@Module({
-  providers: [
-    InvitationService,
-    InvitationCrudService,
-    InvitationAcceptanceService,
-    InvitationSendService,
-    InvitationRevocationService,
-  ],
-  controllers: [
-    InvitationController,
-    InvitationAcceptanceController,
-    InvitationReattemptController,
-  ],
-  exports: [InvitationService],
-})
+@Module({})
 export class InvitationModule extends InvitationModuleClass {
   static register(options: InvitationOptions): DynamicModule {
     return super.register(options);

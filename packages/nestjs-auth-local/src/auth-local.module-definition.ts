@@ -23,6 +23,7 @@ import { AuthLocalOptionsInterface } from './interfaces/auth-local-options.inter
 import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.interface';
 import { authLocalDefaultConfig } from './config/auth-local-default.config';
 import { AuthLocalController } from './auth-local.controller';
+import { AuthLocalStrategy } from './auth-local.strategy';
 
 const RAW_OPTIONS_TOKEN = Symbol('__AUTH_LOCAL_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -83,6 +84,7 @@ export function createAuthLocalProviders(options: {
     ...(options.providers ?? []),
     IssueTokenService,
     PasswordStorageService,
+    AuthLocalStrategy,
     createAuthLocalOptionsProvider(options.overrides),
     createAuthLocalIssueTokenServiceProvider(options.overrides),
     createAuthLocalUserLookupServiceProvider(options.overrides),

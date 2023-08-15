@@ -1,8 +1,5 @@
 import { DynamicModule, Module } from '@nestjs/common';
 
-import { JwtIssueService } from './services/jwt-issue.service';
-import { JwtSignService } from './services/jwt-sign.service';
-import { JwtVerifyService } from './services/jwt-verify.service';
 import {
   JwtModuleClass,
   JwtOptions,
@@ -12,10 +9,7 @@ import {
   createJwtExports,
 } from './jwt.module-definition';
 
-@Module({
-  providers: [JwtSignService, JwtIssueService, JwtVerifyService],
-  exports: [JwtSignService, JwtIssueService, JwtVerifyService],
-})
+@Module({})
 export class JwtModule extends JwtModuleClass {
   static register(options: JwtOptions): DynamicModule {
     return super.register(options);
