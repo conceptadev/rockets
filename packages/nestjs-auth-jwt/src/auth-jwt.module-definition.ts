@@ -21,6 +21,7 @@ import {
   AUTH_JWT_MODULE_VERIFY_TOKEN_SERVICE_TOKEN,
 } from './auth-jwt.constants';
 import { authJwtDefaultConfig } from './config/auth-jwt-default.config';
+import { AuthJwtStrategy } from './auth-jwt.strategy';
 
 const RAW_OPTIONS_TOKEN = Symbol('__AUTH_JWT_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -64,11 +65,12 @@ export function createAuthJwtImports(): DynamicModule['imports'] {
   return [ConfigModule.forFeature(authJwtDefaultConfig)];
 }
 
-export function createAuthJwtExports(): string[] {
+export function createAuthJwtExports() {
   return [
     AUTH_JWT_MODULE_SETTINGS_TOKEN,
     AUTH_JWT_MODULE_USER_LOOKUP_SERVICE_TOKEN,
     AUTH_JWT_MODULE_VERIFY_TOKEN_SERVICE_TOKEN,
+    AuthJwtStrategy,
   ];
 }
 
@@ -78,6 +80,7 @@ export function createAuthJwtProviders(options: {
 }): Provider[] {
   return [
     ...(options.providers ?? []),
+    AuthJwtStrategy,
     VerifyTokenService,
     createAuthJwtOptionsProvider(options.overrides),
     createAuthJwtVerifyTokenServiceProvider(options.overrides),

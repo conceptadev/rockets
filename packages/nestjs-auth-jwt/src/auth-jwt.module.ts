@@ -15,10 +15,7 @@ import { AuthJwtStrategy } from './auth-jwt.strategy';
 /**
  * Auth local module
  */
-@Module({
-  providers: [AuthJwtStrategy, VerifyTokenService],
-  exports: [AuthJwtStrategy],
-})
+@Module({})
 export class AuthJwtModule extends AuthJwtModuleClass {
   static register(options: AuthJwtOptions): DynamicModule {
     return super.register(options);
