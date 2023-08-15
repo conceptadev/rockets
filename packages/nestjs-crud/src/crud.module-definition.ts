@@ -11,6 +11,7 @@ import { CRUD_MODULE_SETTINGS_TOKEN } from './crud.constants';
 import { CrudOptionsExtrasInterface } from './interfaces/crud-options-extras.interface';
 import { CrudSettingsInterface } from './interfaces/crud-settings.interface';
 import { crudDefaultConfig } from './config/crud-default.config';
+import { CrudReflectionService } from './services/crud-reflection.service';
 
 const RAW_OPTIONS_TOKEN = Symbol('__CRUD_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -56,8 +57,8 @@ export function createCrudImports(
   }
 }
 
-export function createCrudExports(): string[] {
-  return [CRUD_MODULE_SETTINGS_TOKEN];
+export function createCrudExports() {
+  return [CRUD_MODULE_SETTINGS_TOKEN, CrudReflectionService];
 }
 
 export function createCrudProviders(options: {
@@ -66,6 +67,7 @@ export function createCrudProviders(options: {
 }): Provider[] {
   return [
     ...(options.providers ?? []),
+    CrudReflectionService,
     createCrudSettingsProvider(options.overrides),
   ];
 }
