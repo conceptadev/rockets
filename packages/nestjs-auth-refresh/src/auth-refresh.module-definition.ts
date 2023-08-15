@@ -25,6 +25,7 @@ import { AuthRefreshOptionsExtrasInterface } from './interfaces/auth-refresh-opt
 import { AuthRefreshSettingsInterface } from './interfaces/auth-refresh-settings.interface';
 import { AuthRefreshController } from './auth-refresh.controller';
 import { authRefreshDefaultConfig } from './config/auth-refresh-default.config';
+import { AuthRefreshStrategy } from './auth-refresh.strategy';
 
 const RAW_OPTIONS_TOKEN = Symbol('__AUTH_REFRESH_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -72,12 +73,13 @@ export function createAuthRefreshImports(): DynamicModule['imports'] {
   return [ConfigModule.forFeature(authRefreshDefaultConfig)];
 }
 
-export function createAuthRefreshExports(): string[] {
+export function createAuthRefreshExports() {
   return [
     AUTH_REFRESH_MODULE_SETTINGS_TOKEN,
     AUTH_REFRESH_MODULE_USER_LOOKUP_SERVICE_TOKEN,
     AUTH_REFRESH_MODULE_VERIFY_SERVICE_TOKEN,
     AUTH_REFRESH_MODULE_ISSUE_SERVICE_TOKEN,
+    AuthRefreshStrategy,
   ];
 }
 
@@ -87,6 +89,8 @@ export function createAuthRefreshProviders(options: {
 }): Provider[] {
   return [
     ...(options.providers ?? []),
+    AuthRefreshStrategy,
+    VerifyTokenService,
     IssueTokenService,
     createAuthRefreshOptionsProvider(options.overrides),
     createAuthRefreshVerifyTokenServiceProvider(options.overrides),
