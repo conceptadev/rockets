@@ -10,3 +10,7 @@ export { FederatedOAuthService } from './services/federated-oauth.service';
 export { FederatedCredentialsInterface } from './interfaces/federated-credentials.interface';
 export { FederatedUserLookupServiceInterface } from './interfaces/federated-user-lookup-service.interface';
 export { FederatedUserMutateServiceInterface } from './interfaces/federated-user-mutate-service.interface';
+
+export { FederatedDto } from './dto/federated.dto';
+export { FederatedCreateDto } from './dto/federated-create.dto';
+export { FederatedUpdateDto } from './dto/federated-update.dto';
