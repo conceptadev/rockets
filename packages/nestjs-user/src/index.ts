@@ -12,4 +12,11 @@ export { UserEntityInterface } from './interfaces/user-entity.interface';
 export { UserLookupServiceInterface } from './interfaces/user-lookup-service.interface';
 export { UserMutateServiceInterface } from './interfaces/user-mutate-service.interface';
 
+export { UserCreateManyDto } from './dto/user-create-many.dto';
+export { UserCreateDto } from './dto/user-create.dto';
+export { UserPaginatedDto } from './dto/user-paginated.dto';
+export { UserPasswordDto } from './dto/user-password.dto';
+export { UserUpdateDto } from './dto/user-update.dto';
+export { UserDto } from './dto/user.dto';
+
 export { UserResource } from './user.types';
