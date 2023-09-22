@@ -1,4 +1,4 @@
-import { DynamicModule, Logger, Module } from '@nestjs/common';
+import { DynamicModule, Module } from '@nestjs/common';
 
 import {
   EmailAsyncOptions,
@@ -9,15 +9,10 @@ import {
   createEmailExports,
 } from './email.module-definition';
 
-import { EmailService } from './email.service';
-
 /**
  * Email module
  */
-@Module({
-  providers: [Logger, EmailService],
-  exports: [EmailService],
-})
+@Module({})
 export class EmailModule extends EmailModuleClass {
   static register(options: EmailOptions): DynamicModule {
     return super.register(options);

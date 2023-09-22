@@ -1,7 +1,5 @@
 import { DynamicModule, Module } from '@nestjs/common';
 
-import { JwtIssueService, JwtVerifyService } from '@concepta/nestjs-jwt';
-
 import {
   AuthenticationAsyncOptions,
   AuthenticationModuleClass,
@@ -11,16 +9,10 @@ import {
   createAuthenticationExports,
 } from './authentication.module-definition';
 
-import { IssueTokenService } from './services/issue-token.service';
-import { VerifyTokenService } from './services/verify-token.service';
-
 /**
  * Authentication module
  */
-@Module({
-  providers: [JwtIssueService, JwtVerifyService],
-  exports: [IssueTokenService, VerifyTokenService],
-})
+@Module({})
 export class AuthenticationModule extends AuthenticationModuleClass {
   static register(options: AuthenticationOptions): DynamicModule {
     return super.register(options);

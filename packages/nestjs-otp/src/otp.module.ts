@@ -1,6 +1,5 @@
 import { DynamicModule, Module } from '@nestjs/common';
 
-import { OtpService } from './services/otp.service';
 import {
   OtpAsyncOptions,
   OtpModuleClass,
@@ -13,10 +12,7 @@ import {
 /**
  * Otp Module
  */
-@Module({
-  providers: [OtpService],
-  exports: [OtpService],
-})
+@Module({})
 export class OtpModule extends OtpModuleClass {
   static register(options: OtpOptions): DynamicModule {
     return super.register(options);

@@ -96,8 +96,6 @@ export function createRoleProviders(
       entities: options.overrides?.entities ?? options.entities,
     }),
     RoleService,
-    RoleLookupService,
-    RoleMutateService,
     RoleCrudService,
   ];
 }

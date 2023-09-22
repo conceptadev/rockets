@@ -1,8 +1,4 @@
 import { DynamicModule, Module } from '@nestjs/common';
-import { OrgController } from './org.controller';
-import { OrgLookupService } from './services/org-lookup.service';
-import { OrgCrudService } from './services/org-crud.service';
-import { OrgMutateService } from './services/org-mutate.service';
 import {
   OrgAsyncOptions,
   OrgModuleClass,
@@ -16,11 +12,7 @@ import {
 /**
  * Org Module
  */
-@Module({
-  providers: [OrgLookupService, OrgMutateService, OrgCrudService],
-  exports: [OrgLookupService, OrgMutateService, OrgCrudService],
-  controllers: [OrgController],
-})
+@Module({})
 export class OrgModule extends OrgModuleClass {
   static register(options: OrgOptions): DynamicModule {
     return super.register(options);
