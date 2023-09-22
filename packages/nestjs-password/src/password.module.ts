@@ -9,22 +9,7 @@ import {
   createPasswordExports,
 } from './password.module-definition';
 
-import { PasswordCreationService } from './services/password-creation.service';
-import { PasswordStorageService } from './services/password-storage.service';
-import { PasswordStrengthService } from './services/password-strength.service';
-
-@Module({
-  providers: [
-    PasswordCreationService,
-    PasswordStrengthService,
-    PasswordStorageService,
-  ],
-  exports: [
-    PasswordCreationService,
-    PasswordStrengthService,
-    PasswordStorageService,
-  ],
-})
+@Module({})
 export class PasswordModule extends PasswordModuleClass {
   static register(options: PasswordOptions): DynamicModule {
     return super.register(options);

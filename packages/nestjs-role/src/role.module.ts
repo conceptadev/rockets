@@ -10,26 +10,10 @@ import {
   createRoleControllers,
 } from './role.module-definition';
 
-import { RoleService } from './services/role.service';
-import { RoleCrudService } from './services/role-crud.service';
-import { RoleLookupService } from './services/role-lookup.service';
-import { RoleMutateService } from './services/role-mutate.service';
-import { RoleController } from './role.controller';
-import { RoleAssignmentController } from './role-assignment.controller';
-
 /**
  * Role Module
  */
-@Module({
-  providers: [
-    RoleService,
-    RoleLookupService,
-    RoleMutateService,
-    RoleCrudService,
-  ],
-  exports: [RoleService, RoleLookupService, RoleMutateService, RoleCrudService],
-  controllers: [RoleController, RoleAssignmentController],
-})
+@Module({})
 export class RoleModule extends RoleModuleClass {
   static register(options: RoleOptions): DynamicModule {
     return super.register(options);
