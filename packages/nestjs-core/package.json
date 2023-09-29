@@ -1,6 +1,6 @@
 {
   "name": "@concepta/nestjs-core",
-  "version": "4.0.0-alpha.27",
+  "version": "4.0.0-alpha.28",
   "description": "Rockets NestJS Core",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
