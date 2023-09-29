@@ -35,6 +35,8 @@ export class JwtStrategy extends PassportStrategy {
   }
 
   private verifyTokenCallback(e?: Error, decodedToken?: unknown) {
+    // TODO: configure JWT module to use different access and refresh secrets
+
     if (e) {
       return this.error(e);
     }
