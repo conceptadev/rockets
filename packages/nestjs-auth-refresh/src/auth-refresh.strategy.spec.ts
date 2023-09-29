@@ -19,6 +19,8 @@ describe(AuthRefreshStrategy, () => {
   let authorizationPayloadInterface: AuthorizationPayloadInterface;
 
   beforeEach(async () => {
+    // TODO: configure JWT module to use different access and refresh secrets
+
     settings = mock<Partial<AuthRefreshSettingsInterface>>();
 
     userLookUpService = mock<AuthRefreshUserLookupServiceInterface>();

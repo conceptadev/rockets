@@ -3,7 +3,10 @@ import {
   PassportStrategyFactory,
   VerifyTokenServiceInterface,
 } from '@concepta/nestjs-authentication';
-import { JwtStrategy } from '@concepta/nestjs-jwt';
+import {
+  createVerifyRefreshTokenCallback,
+  JwtStrategy,
+} from '@concepta/nestjs-jwt';
 import { AuthorizationPayloadInterface } from '@concepta/ts-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
@@ -16,7 +19,6 @@ import {
 
 import { AuthRefreshSettingsInterface } from './interfaces/auth-refresh-settings.interface';
 import { AuthRefreshUserLookupServiceInterface } from './interfaces/auth-refresh-user-lookup-service.interface';
-import { createVerifyTokenCallback } from './utils/create-verify-token-callback.util';
 
 @Injectable()
 export class AuthRefreshStrategy extends PassportStrategyFactory<JwtStrategy>(
@@ -32,7 +34,7 @@ export class AuthRefreshStrategy extends PassportStrategyFactory<JwtStrategy>(
     private userLookupService: AuthRefreshUserLookupServiceInterface,
   ) {
     const options: Partial<AuthRefreshSettingsInterface> = {
-      verifyToken: createVerifyTokenCallback(verifyTokenService),
+      verifyToken: createVerifyRefreshTokenCallback(verifyTokenService),
       ...settings,
     };
 
