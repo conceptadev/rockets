@@ -20,3 +20,5 @@ export { UserUpdateDto } from './dto/user-update.dto';
 export { UserDto } from './dto/user.dto';
 
 export { UserResource } from './user.types';
+
+export { UserException } from './exceptions/user-exception';
