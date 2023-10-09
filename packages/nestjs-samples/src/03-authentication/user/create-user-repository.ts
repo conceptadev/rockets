@@ -1,4 +1,4 @@
-import { DataSource, FindOneOptions, ObjectID } from 'typeorm';
+import { DataSource, FindOneOptions } from 'typeorm';
 import { UserEntityInterface } from '@concepta/nestjs-user';
 import { UserEntity } from './user.entity';
 
@@ -45,7 +45,6 @@ export function createUserRepository(dataSource: DataSource) {
         | string
         | number
         | Date
-        | ObjectID
         | FindOneOptions<UserEntityInterface>,
     ): Promise<UserEntityInterface | null> {
       const user = users.find((user) => {

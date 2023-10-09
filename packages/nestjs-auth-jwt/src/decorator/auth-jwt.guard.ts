@@ -17,7 +17,7 @@ export class JwtAuthGuard extends AuthGuard(AUTH_JWT_STRATEGY_NAME) {
     return super.canActivate(context);
   }
 
-  //handleRequest(err, user, info) {
+  // handleRequest(err, user, info) {
   handleRequest<T = ReferenceIdInterface>(err: Error | undefined, user: T) {
     // You can throw an exception based on either "info" or "err" arguments
     if (err || !user) {

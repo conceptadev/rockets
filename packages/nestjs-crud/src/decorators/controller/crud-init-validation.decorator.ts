@@ -34,11 +34,14 @@ export const CrudInitValidation =
 
         // are we injecting validation?
         if (validation !== false) {
-          // yes, create new pipe
-          const paramPipe = new ValidationPipe({
+          // yes, merge options
+          const finalOptions = {
             ...CRUD_MODULE_DEFAULT_VALIDATION_PIPE_OPTIONS,
             ...validation,
-          });
+          };
+
+          // create new pipe
+          const paramPipe = new ValidationPipe(finalOptions);
 
           // put our validation pipe first
           pipes = [paramPipe, ...pipes];

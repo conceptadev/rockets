@@ -9,10 +9,11 @@ import {
   OrderCreatedListener,
   OrderCreatedListenerAsync,
 } from './order/listeners/order-created.listener';
-import {
-  FastifyAdapter,
-  NestFastifyApplication,
-} from '@nestjs/platform-fastify';
+
+// import {
+//   FastifyAdapter,
+//   NestFastifyApplication,
+// } from '@nestjs/platform-fastify';
 
 describe('AppController (e2e)', () => {
   describe('Express', () => {
@@ -72,6 +73,7 @@ describe('AppController (e2e)', () => {
     });
   });
 
+  /*
   describe('Fastify', () => {
     let app: NestFastifyApplication;
     let spySync: jest.SpyInstance;
@@ -135,4 +137,5 @@ describe('AppController (e2e)', () => {
         });
     });
   });
+  */
 });

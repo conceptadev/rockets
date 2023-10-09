@@ -1,5 +1,9 @@
 {
-  "moduleFileExtensions": ["js", "json", "ts"],
+  "moduleFileExtensions": [
+    "js",
+    "json",
+    "ts"
+  ],
   "globals": {
     "ts-jest": {
       "tsconfig": "tsconfig.jest.json"
@@ -14,7 +18,10 @@
     }
   },
   "testRegex": ".*\\.spec\\.ts$",
-  "testPathIgnorePatterns": ["/node_modules/", "/dist/"],
+  "testPathIgnorePatterns": [
+    "/node_modules/",
+    "/dist/"
+  ],
   "transform": {
     "^.+\\.ts$": "ts-jest"
   },

@@ -1,5 +1,4 @@
 import { DynamicModule, Module } from '@nestjs/common';
-import { PasswordStorageService } from '@concepta/nestjs-password';
 
 import {
   UserAsyncOptions,
@@ -11,24 +10,10 @@ import {
   createUserControllers,
 } from './user.module-definition';
 
-import { UserController } from './user.controller';
-import { UserLookupService } from './services/user-lookup.service';
-import { UserCrudService } from './services/user-crud.service';
-import { UserMutateService } from './services/user-mutate.service';
-
 /**
  * User Module
  */
-@Module({
-  providers: [
-    UserLookupService,
-    UserMutateService,
-    UserCrudService,
-    PasswordStorageService,
-  ],
-  exports: [UserLookupService, UserMutateService, UserCrudService],
-  controllers: [UserController],
-})
+@Module({})
 export class UserModule extends UserModuleClass {
   static register(options: UserOptions): DynamicModule {
     return super.register(options);

@@ -31,16 +31,16 @@ export class LoggerRequestInterceptor implements NestInterceptor<Response> {
   /**
    * Method to implement a custom intercept
    *
-   * @param _context
-   * @param _next
+   * @param context
+   * @param next
    * @returns
    */
   intercept(
-    _context: ExecutionContext,
-    _next: CallHandler,
+    context: ExecutionContext,
+    next: CallHandler,
   ): Observable<Response> {
-    const req: Request = _context.switchToHttp().getRequest();
-    const res: Response = _context.switchToHttp().getResponse();
+    const req: Request = context.switchToHttp().getRequest();
+    const res: Response = context.switchToHttp().getResponse();
     const startDate = new Date();
 
     // format the request message
@@ -49,7 +49,7 @@ export class LoggerRequestInterceptor implements NestInterceptor<Response> {
     // log the incoming request
     this.loggerService.log(message);
 
-    return _next.handle().pipe(
+    return next.handle().pipe(
       tap(() => this.responseSuccess(req, res, startDate)),
       catchError((error: Error) =>
         this.responseError(req, res, startDate, error),

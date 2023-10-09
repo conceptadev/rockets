@@ -9,11 +9,6 @@ import {
   createLoggerExports,
 } from './logger.module-definition';
 
-import { LoggerService } from './logger.service';
-import { LoggerTransportService } from './logger-transport.service';
-import { LoggerExceptionFilter } from './logger-exception.filter';
-import { LoggerRequestInterceptor } from './logger-request.interceptor';
-
 /**
  * Logger Module imports all configuration needed for logger and sentry
  * With classes for request interceptor and Exceptions filters
@@ -60,14 +55,7 @@ import { LoggerRequestInterceptor } from './logger-request.interceptor';
  * }
  * ```
  */
-@Module({
-  providers: [
-    LoggerTransportService,
-    LoggerRequestInterceptor,
-    LoggerExceptionFilter,
-  ],
-  exports: [LoggerService],
-})
+@Module({})
 export class LoggerModule extends LoggerModuleClass {
   static register(options: LoggerOptions): DynamicModule {
     return super.register(options);

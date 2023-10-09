@@ -39,6 +39,8 @@ describe(MutateService, () => {
       dataSource: app.get(getDataSourceToken()),
     });
 
+    await seedingSource.initialize();
+
     testFactory = new TestFactoryFixture({
       entity: TestEntityFixture,
       seedingSource,

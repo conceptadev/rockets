@@ -1,11 +1,7 @@
-import { IsString } from 'class-validator';
+import { IsString, ValidateNested } from 'class-validator';
 import { Exclude, Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  AuditInterface,
-  ReferenceId,
-  ReferenceIdInterface,
-} from '@concepta/ts-core';
+import { AuditInterface, ReferenceIdInterface } from '@concepta/ts-core';
 import { RoleAssignmentInterface } from '@concepta/ts-common';
 import { AuditDto, ReferenceIdDto } from '@concepta/nestjs-common';
 
@@ -23,7 +19,7 @@ export class RoleAssignmentDto implements RoleAssignmentInterface {
     description: 'Unique identifier',
   })
   @IsString()
-  id: ReferenceId = '';
+  id: string = '';
 
   /**
    * Role
@@ -34,6 +30,7 @@ export class RoleAssignmentDto implements RoleAssignmentInterface {
     description: 'Role',
   })
   @Type(() => ReferenceIdDto)
+  @ValidateNested()
   role: ReferenceIdInterface = new ReferenceIdDto();
 
   /**
@@ -45,6 +42,7 @@ export class RoleAssignmentDto implements RoleAssignmentInterface {
     description: 'Assignee',
   })
   @Type(() => ReferenceIdDto)
+  @ValidateNested()
   assignee: ReferenceIdInterface = new ReferenceIdDto();
 
   /**
@@ -56,5 +54,6 @@ export class RoleAssignmentDto implements RoleAssignmentInterface {
     description: 'Audit data',
   })
   @Type(() => AuditDto)
+  @ValidateNested()
   audit!: AuditInterface;
 }

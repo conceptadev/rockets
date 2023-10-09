@@ -1,11 +1,12 @@
 import { Exclude, Expose, Type } from 'class-transformer';
-import { IsString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
 import {
-  AuditInterface,
-  ReferenceId,
-  ReferenceIdInterface,
-} from '@concepta/ts-core';
+  IsBoolean,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { AuditInterface, ReferenceIdInterface } from '@concepta/ts-core';
 import { OrgInterface } from '@concepta/ts-common';
 import { AuditDto, ReferenceIdDto } from '@concepta/nestjs-common';
 
@@ -23,7 +24,7 @@ export class OrgDto implements OrgInterface {
     description: 'Unique identifier',
   })
   @IsString()
-  id: ReferenceId = '';
+  id: string = '';
 
   /**
    * Name
@@ -45,6 +46,7 @@ export class OrgDto implements OrgInterface {
     description: 'Audit data',
   })
   @Type(() => AuditDto)
+  @ValidateNested()
   audit!: AuditInterface;
 
   /**
@@ -55,6 +57,8 @@ export class OrgDto implements OrgInterface {
     type: 'boolean',
     description: 'True if Org is active',
   })
+  @IsBoolean()
+  @IsOptional()
   active = true;
 
   /**
@@ -66,5 +70,6 @@ export class OrgDto implements OrgInterface {
     description: 'The owner of the org',
   })
   @Type(() => ReferenceIdDto)
+  @ValidateNested()
   owner: ReferenceIdInterface = { id: '' };
 }

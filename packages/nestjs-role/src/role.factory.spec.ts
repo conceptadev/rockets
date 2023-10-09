@@ -21,6 +21,8 @@ describe('RoleModule', () => {
       dataSource: testModule.get(getDataSourceToken()),
     });
 
+    await seedingSource.initialize();
+
     roleFactory = new RoleFactory({ entity: RoleEntityFixture, seedingSource });
 
     roleModule = testModule.get<RoleModule>(RoleModule);

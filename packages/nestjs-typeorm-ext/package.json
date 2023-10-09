@@ -1,6 +1,6 @@
 {
   "name": "@concepta/nestjs-typeorm-ext",
-  "version": "4.0.0-alpha.23",
+  "version": "4.0.0-alpha.29",
   "description": "Rockets NestJS TypeORM Extended",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,14 +12,14 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
-    "@concepta/nestjs-core": "^4.0.0-alpha.23",
-    "@concepta/ts-core": "^4.0.0-alpha.23",
+    "@concepta/nestjs-core": "^4.0.0-alpha.29",
+    "@concepta/ts-core": "^4.0.0-alpha.29",
     "@nestjs/common": "^9.0.0",
     "@nestjs/typeorm": "^9.0.0"
   },
   "devDependencies": {
     "@nestjs/testing": "^9.0.0",
-    "sqlite3": "npm:@vscode/sqlite3@^5.0.7"
+    "sqlite3": "npm:@vscode/sqlite3@^5.1.4-vscode"
   },
   "peerDependencies": {
     "class-transformer": "*",

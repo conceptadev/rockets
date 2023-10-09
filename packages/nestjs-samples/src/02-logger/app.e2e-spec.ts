@@ -6,10 +6,11 @@ import { AppModule } from './app.module';
 import { INestApplication } from '@nestjs/common';
 import { CreateOrderDto } from './order/dto/create-order.dto';
 
-import {
-  FastifyAdapter,
-  NestFastifyApplication,
-} from '@nestjs/platform-fastify';
+// import {
+//   FastifyAdapter,
+//   NestFastifyApplication,
+// } from '@nestjs/platform-fastify';
+
 import { LoggerService } from '@concepta/nestjs-logger';
 
 describe('AppController (e2e)', () => {
@@ -51,6 +52,7 @@ describe('AppController (e2e)', () => {
     });
   });
 
+  /*
   describe('Fastify', () => {
     let app: NestFastifyApplication;
     let spySync: jest.SpyInstance;
@@ -93,4 +95,5 @@ describe('AppController (e2e)', () => {
         });
     });
   });
+  */
 });

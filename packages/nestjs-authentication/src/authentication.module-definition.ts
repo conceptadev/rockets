@@ -86,6 +86,8 @@ export function createAuthenticationProviders(options: {
 }): Provider[] {
   return [
     ...(options.providers ?? []),
+    JwtIssueService,
+    JwtVerifyService,
     createAuthenticationOptionsProvider(options.overrides),
     createAuthenticationVerifyTokenServiceProvider(options.overrides),
     createAuthenticationIssueTokenServiceProvider(options.overrides),

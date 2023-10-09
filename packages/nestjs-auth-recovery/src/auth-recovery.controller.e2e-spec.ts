@@ -44,6 +44,8 @@ describe(AuthRecoveryController, () => {
       dataSource: moduleFixture.get(getDataSourceToken()),
     });
 
+    await seedingSource.initialize();
+
     userFactory = new UserFactory({
       entity: UserEntityFixture,
       seedingSource,

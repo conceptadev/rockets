@@ -1,11 +1,7 @@
 import { Exclude, Expose, Type } from 'class-transformer';
-import { IsEmail, IsString } from 'class-validator';
+import { IsBoolean, IsEmail, IsString, ValidateNested } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  AuditInterface,
-  ReferenceId,
-  ReferenceIdInterface,
-} from '@concepta/ts-core';
+import { AuditInterface, ReferenceIdInterface } from '@concepta/ts-core';
 import { InvitationInterface } from '@concepta/ts-common';
 import { AuditDto, ReferenceIdDto } from '@concepta/nestjs-common';
 
@@ -17,7 +13,7 @@ export class InvitationDto implements InvitationInterface {
     description: 'Unique identifier',
   })
   @IsString()
-  id: ReferenceId = '';
+  id: string = '';
 
   @Expose()
   @ApiProperty({
@@ -25,6 +21,7 @@ export class InvitationDto implements InvitationInterface {
     description: 'Audit data',
   })
   @Type(() => AuditDto)
+  @ValidateNested()
   audit!: AuditInterface;
 
   @Expose()
@@ -32,6 +29,7 @@ export class InvitationDto implements InvitationInterface {
     type: 'boolean',
     description: 'True if Invitation is active',
   })
+  @IsBoolean()
   active = true;
 
   @Expose()
@@ -65,5 +63,6 @@ export class InvitationDto implements InvitationInterface {
     description: 'The owner of the org',
   })
   @Type(() => ReferenceIdDto)
+  @ValidateNested()
   user!: ReferenceIdInterface;
 }

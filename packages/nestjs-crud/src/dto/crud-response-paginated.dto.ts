@@ -10,6 +10,7 @@ export class CrudResponsePaginatedDto<T>
   @Expose()
   @ApiProperty({
     type: CrudInvalidResponseDto,
+    isArray: true,
     description: 'The list of records for current page',
   })
   @Type(() => CrudInvalidResponseDto)

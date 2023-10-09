@@ -66,8 +66,8 @@ export function createAccessControlImports(
   }
 }
 
-export function createAccessControlExports(): string[] {
-  return [ACCESS_CONTROL_MODULE_SETTINGS_TOKEN];
+export function createAccessControlExports() {
+  return [ACCESS_CONTROL_MODULE_SETTINGS_TOKEN, AccessControlService];
 }
 
 export function createAccessControlProviders(overrides: {

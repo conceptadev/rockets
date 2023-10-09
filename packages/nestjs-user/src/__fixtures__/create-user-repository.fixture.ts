@@ -1,4 +1,4 @@
-import { DataSource, FindOneOptions, ObjectID } from 'typeorm';
+import { DataSource, FindOneOptions } from 'typeorm';
 import { UserEntityInterface } from '../interfaces/user-entity.interface';
 import { UserEntityFixture } from './user.entity.fixture';
 
@@ -45,7 +45,7 @@ export function createUserRepositoryFixture(dataSource: DataSource) {
         | string
         | number
         | Date
-        | ObjectID
+        // | ObjectID
         | FindOneOptions<UserEntityInterface>,
     ): Promise<UserEntityInterface | null> {
       return (

@@ -1,12 +1,7 @@
-import { IsEmail, IsString } from 'class-validator';
+import { IsEmail, IsString, ValidateNested } from 'class-validator';
 import { Exclude, Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  AuditInterface,
-  ReferenceEmail,
-  ReferenceId,
-  ReferenceUsername,
-} from '@concepta/ts-core';
+import { AuditInterface } from '@concepta/ts-core';
 import { AuditDto } from '@concepta/nestjs-common';
 import { UserInterface } from '@concepta/ts-common';
 
@@ -24,7 +19,7 @@ export class UserDto implements UserInterface {
     description: 'Unique identifier',
   })
   @IsString()
-  id: ReferenceId = '';
+  id: string = '';
 
   /**
    * Email
@@ -35,7 +30,7 @@ export class UserDto implements UserInterface {
     description: 'Email',
   })
   @IsEmail()
-  email: ReferenceEmail = '';
+  email: string = '';
 
   /**
    * Username
@@ -46,7 +41,7 @@ export class UserDto implements UserInterface {
     description: 'Username',
   })
   @IsString()
-  username: ReferenceUsername = '';
+  username: string = '';
 
   /**
    * Audit
@@ -57,5 +52,6 @@ export class UserDto implements UserInterface {
     description: 'Audit data',
   })
   @Type(() => AuditDto)
+  @ValidateNested()
   audit!: AuditInterface;
 }

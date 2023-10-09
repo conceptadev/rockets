@@ -1,5 +1,5 @@
 import { Exclude, Expose, Type } from 'class-transformer';
-import { IsString } from 'class-validator';
+import { IsString, ValidateNested } from 'class-validator';
 import { ReferenceIdInterface } from '@concepta/ts-core';
 import { OtpCreatableInterface } from '@concepta/ts-common';
 import { ReferenceIdDto } from '@concepta/nestjs-common';
@@ -37,5 +37,6 @@ export class OtpCreateDto implements OtpCreatableInterface {
    */
   @Expose()
   @Type(() => ReferenceIdDto)
+  @ValidateNested()
   assignee: ReferenceIdInterface = new ReferenceIdDto();
 }

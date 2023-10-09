@@ -41,7 +41,7 @@ export class AuthGithubStrategy extends PassportStrategy(
     refreshToken: string,
     profile: ReferenceIdInterface & ReferenceEmailInterface,
   ): Promise<FederatedCredentialsInterface> {
-    //TODO: should we save accessToken and refreshToken?
+    // TODO: should we save accessToken and refreshToken?
 
     // Create a new user if it doesn't exist or just return based on federated
     const user = await this.federatedOAuthService.sign(

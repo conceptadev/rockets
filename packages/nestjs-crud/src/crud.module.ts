@@ -1,5 +1,4 @@
 import { DynamicModule, Module } from '@nestjs/common';
-import { CrudReflectionService } from './services/crud-reflection.service';
 import {
   createCrudExports,
   createCrudImports,
@@ -9,10 +8,7 @@ import {
   CrudOptions,
 } from './crud.module-definition';
 
-@Module({
-  providers: [CrudReflectionService],
-  exports: [CrudReflectionService],
-})
+@Module({})
 export class CrudModule extends CrudModuleClass {
   static register(options: CrudOptions): DynamicModule {
     return super.register(options);

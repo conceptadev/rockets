@@ -26,6 +26,7 @@ describe('AppController (e2e)', () => {
 
       const dataSource = app.get(getDataSourceToken());
       seedingSource = new SeedingSource({ dataSource });
+      await seedingSource.initialize();
       photoFactory = new PhotoFactoryFixture({ seedingSource });
       await seedingSource.run.one(PhotoSeederFixture);
     });

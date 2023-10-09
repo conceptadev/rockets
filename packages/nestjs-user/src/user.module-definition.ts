@@ -135,11 +135,11 @@ export function createUserLookupServiceProvider(
     ],
     useFactory: async (
       options: UserOptionsInterface,
-      UserRepo: Repository<UserEntityInterface>,
+      userRepo: Repository<UserEntityInterface>,
     ) =>
       optionsOverrides?.userLookupService ??
       options.userLookupService ??
-      new UserLookupService(UserRepo),
+      new UserLookupService(userRepo),
   };
 }
 

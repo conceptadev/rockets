@@ -42,7 +42,6 @@ describe(InvitationAcceptedListener, () => {
         TypeOrmExtModule.forRoot({
           type: 'sqlite',
           database: ':memory:',
-          logging: 'all',
           synchronize: true,
           entities: [
             OrgEntityFixture,
@@ -89,6 +88,8 @@ describe(InvitationAcceptedListener, () => {
     seedingSource = new SeedingSource({
       dataSource: testingModule.get(getDataSourceToken()),
     });
+
+    await seedingSource.initialize();
 
     const orgFactory = new OrgFactory({
       entity: OrgEntityFixture,

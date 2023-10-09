@@ -1,7 +1,13 @@
 import { Exclude, Expose } from 'class-transformer';
-import { IsBoolean, IsNumber, IsString, IsUUID } from 'class-validator';
+import {
+  IsBoolean,
+  IsDate,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ReferenceId } from '@concepta/ts-core';
 import { PhotoEntityInterfaceFixture } from '../interfaces/photo-entity.interface.fixture';
 
 @Exclude()
@@ -9,7 +15,7 @@ export class PhotoDtoFixture implements PhotoEntityInterfaceFixture {
   @ApiProperty()
   @Expose()
   @IsUUID()
-  id: ReferenceId = '';
+  id: string = '';
 
   @ApiProperty()
   @Expose()
@@ -36,7 +42,9 @@ export class PhotoDtoFixture implements PhotoEntityInterfaceFixture {
   @IsBoolean()
   isPublished = true;
 
-  @ApiProperty()
+  @ApiProperty({ nullable: true })
   @Expose()
+  @IsDate()
+  @IsOptional()
   deletedAt: Date | null = null;
 }

@@ -36,6 +36,8 @@ describe(LookupService, () => {
       dataSource: app.get(getDataSourceToken()),
     });
 
+    await seedingSource.initialize();
+
     const userFactory = new TestFactoryFixture({
       entity: TestEntityFixture,
       seedingSource,
