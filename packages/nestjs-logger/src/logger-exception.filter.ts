@@ -1,11 +1,5 @@
-import {
-  ArgumentsHost,
-  Catch,
-  HttpServer,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
-import { BaseExceptionFilter, HttpAdapterHost } from '@nestjs/core';
+import { ArgumentsHost, Catch, Inject, Injectable } from '@nestjs/common';
+import { BaseExceptionFilter } from '@nestjs/core';
 
 import { LoggerService } from './logger.service';
 
@@ -29,10 +23,8 @@ export class LoggerExceptionFilter extends BaseExceptionFilter {
   constructor(
     @Inject(LoggerService)
     private loggerService: LoggerService,
-    @Inject(HttpAdapterHost)
-    applicationRef?: HttpServer,
   ) {
-    super(applicationRef);
+    super();
   }
 
   /**

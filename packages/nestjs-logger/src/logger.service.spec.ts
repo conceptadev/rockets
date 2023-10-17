@@ -1,9 +1,15 @@
-import { ConsoleLogger, NotFoundException } from '@nestjs/common';
+import {
+  ConsoleLogger,
+  INestApplication,
+  NotFoundException,
+} from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { LoggerTransportInterface } from './interfaces/logger-transport.interface';
 
 import { LoggerTransportService } from './logger-transport.service';
 import { LoggerService } from './logger.service';
+import { AppModuleFixture } from './__fixture__/app.module.fixture';
+import supertest from 'supertest';
 
 describe('LoggerService', () => {
   let loggerService: LoggerService;
@@ -17,19 +23,11 @@ describe('LoggerService', () => {
   let spyWarn: jest.SpyInstance;
   let errorMessage: string;
   let context: string;
+  let app: INestApplication;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-      providers: [
-        LoggerService,
-        {
-          provide: LoggerTransportService,
-          useValue: {
-            addTransport: jest.fn(),
-            log: jest.fn(),
-          },
-        },
-      ],
+      imports: [AppModuleFixture],
     }).compile();
 
     loggerService = moduleRef.get<LoggerService>(LoggerService);
@@ -58,10 +56,15 @@ describe('LoggerService', () => {
 
     context = 'jest';
     errorMessage = 'Error Message';
+
+    app = moduleRef.createNestApplication();
+
+    await app.init();
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     jest.clearAllMocks();
+    await app.close();
   });
 
   describe('IsDefined', () => {
@@ -185,6 +188,18 @@ describe('LoggerService', () => {
       // expect(spyLog).toBeCalledTimes(2);
       expect(spyLog).toHaveBeenCalledWith(errorMessage, context);
       expect(spyTransportLog).toBeCalledTimes(1);
+    });
+
+    it('LoggerService.log', () => {
+      const spyLoggerService = jest.spyOn(loggerService, 'log');
+
+      return supertest(app.getHttpServer())
+        .get('/throw')
+        .expect(500)
+        .then(() => {
+          expect(spyLoggerService).toHaveBeenCalledTimes(1);
+          expect(spyLoggerService).toThrowError();
+        });
     });
   });
 });
