@@ -26,10 +26,10 @@ export abstract class BaseService<Entity extends ReferenceIdInterface> {
   /**
    * Find One wrapper.
    *
-   * @private
    * @param findOneOptions Find options
+   * @param queryOptions
    */
-  protected async findOne(
+  async findOne(
     findOneOptions: FindOneOptions<Entity>,
     queryOptions?: QueryOptionsInterface,
   ): Promise<Entity | null> {

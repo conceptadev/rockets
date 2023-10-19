@@ -2,27 +2,25 @@ import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
-
 import { UserEntityInterface } from '@concepta/nestjs-user';
 import { OtpService } from '@concepta/nestjs-otp';
 import { EmailService } from '@concepta/nestjs-email';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { getDynamicRepositoryToken } from '@concepta/nestjs-typeorm-ext';
+import { INVITATION_MODULE_CATEGORY_USER_KEY } from '@concepta/ts-common';
 
 import { INVITATION_MODULE_INVITATION_ENTITY_KEY } from '../invitation.constants';
-
 import { InvitationFactory } from '../invitation.factory';
 import { InvitationSendService } from './invitation-send.service';
 import { InvitationRevocationService } from './invitation-revocation.service';
 import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
-
 import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
 import { InvitationEntityFixture } from '../__fixtures__/invitation/entities/invitation.entity.fixture';
 import { UserEntityFixture } from '../__fixtures__/user/entities/user-entity.fixture';
 
 describe(InvitationRevocationService, () => {
-  const category = 'invitation';
+  const category = INVITATION_MODULE_CATEGORY_USER_KEY;
 
   let spyEmailService: jest.SpyInstance;
 

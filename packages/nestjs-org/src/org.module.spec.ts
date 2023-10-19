@@ -20,6 +20,9 @@ import { OrgEntityFixture } from './__fixtures__/org-entity.fixture';
 import { OwnerEntityFixture } from './__fixtures__/owner-entity.fixture';
 import { OwnerLookupServiceFixture } from './__fixtures__/owner-lookup-service.fixture';
 import { OwnerModuleFixture } from './__fixtures__/owner.module.fixture';
+import { OrgMemberEntityFixture } from './__fixtures__/org-member.entity.fixture';
+import { UserEntityFixture } from './__fixtures__/user-entity.fixture';
+import { InvitationEntityFixture } from './__fixtures__/invitation.entity.fixture';
 
 describe('OrgModule', () => {
   let orgModule: OrgModule;
@@ -37,7 +40,13 @@ describe('OrgModule', () => {
         TypeOrmExtModule.forRoot({
           type: 'sqlite',
           database: ':memory:',
-          entities: [OrgEntityFixture, OwnerEntityFixture],
+          entities: [
+            OrgEntityFixture,
+            OwnerEntityFixture,
+            OrgMemberEntityFixture,
+            UserEntityFixture,
+            InvitationEntityFixture,
+          ],
         }),
         OrgModule.forRootAsync({
           inject: [OwnerLookupServiceFixture],
@@ -47,6 +56,9 @@ describe('OrgModule', () => {
           entities: {
             org: {
               entity: OrgEntityFixture,
+            },
+            orgMember: {
+              entity: OrgMemberEntityFixture,
             },
           },
         }),

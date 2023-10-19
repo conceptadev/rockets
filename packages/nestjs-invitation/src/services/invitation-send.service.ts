@@ -70,7 +70,7 @@ export class InvitationSendService {
       }),
     );
 
-    const user = eventResult?.find((it) => it.id && it.username && it.email);
+    const user = eventResult?.find((it) => it.id && it.email);
 
     if (!user) {
       throw new InvitationUserUndefinedException();

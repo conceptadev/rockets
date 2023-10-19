@@ -1270,7 +1270,7 @@
   resolved "https://registry.yarnpkg.com/@concepta/prettier-config/-/prettier-config-1.1.1.tgz#06bd984d4480815ce001c1b9249584b4ca990d7a"
   integrity sha512-4rPTu/C90ZXJhLxi01onSPqSZqH4SkxCOVuyTYjDQCqfVs6L8VjCKtaL6fe/Jr4rDzQZEyxUZ6yqwb9Em8E1Ww==
 
-"@concepta/typeorm-seeding@^4.0.0-alpha.3", "@concepta/typeorm-seeding@^4.0.0-beta.0":
+"@concepta/typeorm-seeding@^4.0.0-beta.0", "@concepta/typeorm-seeding@^4.0.0-beta.1":
   version "4.0.0-beta.1"
   resolved "https://registry.yarnpkg.com/@concepta/typeorm-seeding/-/typeorm-seeding-4.0.0-beta.1.tgz#42d0dafe6f9d3117770a915c2e81dea5c2321481"
   integrity sha512-BNM8KDAk1Jb/v9Rarjdx+Xh60J8Y/xWZnbuePafk+Isd4zZi2/J/SHmTfozNlvOcpwU/FPewed21qq9lhENIcA==

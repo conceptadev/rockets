@@ -15,7 +15,6 @@ import { MailerModule, MailerService } from '@nestjs-modules/mailer';
 
 import { InvitationModule } from '../invitation.module';
 import { InvitationGetUserEventAsync } from '../events/invitation-get-user.event';
-
 import { InvitationEntityFixture } from './invitation/entities/invitation.entity.fixture';
 import { InvitationAcceptedEventAsync } from '../events/invitation-accepted.event';
 import { UserOtpEntityFixture } from './user/entities/user-otp-entity.fixture';

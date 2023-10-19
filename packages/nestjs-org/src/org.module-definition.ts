@@ -17,20 +17,21 @@ import {
   ORG_MODULE_OWNER_LOOKUP_SERVICE_TOKEN,
   ORG_MODULE_ORG_ENTITY_KEY,
 } from './org.constants';
-
 import { OrgOptionsInterface } from './interfaces/org-options.interface';
 import { OrgOptionsExtrasInterface } from './interfaces/org-options-extras.interface';
 import { OrgEntitiesOptionsInterface } from './interfaces/org-entities-options.interface';
 import { OrgSettingsInterface } from './interfaces/org-settings.interface';
 import { OrgEntityInterface } from './interfaces/org-entity.interface';
 import { OrgOwnerLookupServiceInterface } from './interfaces/org-owner-lookup-service.interface';
-
 import { OrgLookupService } from './services/org-lookup.service';
 import { OrgMutateService } from './services/org-mutate.service';
 import { OrgCrudService } from './services/org-crud.service';
+import { OrgMemberService } from './services/org-member.service';
+import { OrgMemberLookupService } from './services/org-member-lookup.service';
+import { OrgMemberMutateService } from './services/org-member-mutate.service';
 import { OrgController } from './org.controller';
-
 import { orgDefaultConfig } from './config/org-default.config';
+import { InvitationAcceptedListener } from './listeners/invitation-accepted-listener';
 
 const RAW_OPTIONS_TOKEN = Symbol('__ORG_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -85,6 +86,10 @@ export function createOrgProviders(options: {
   return [
     ...(options.providers ?? []),
     OrgCrudService,
+    OrgMemberService,
+    OrgMemberLookupService,
+    OrgMemberMutateService,
+    InvitationAcceptedListener,
     createOrgSettingsProvider(options.overrides),
     createOrgOwnerLookupServiceProvider(options.overrides),
     createOrgLookupServiceProvider(options.overrides),
@@ -101,6 +106,9 @@ export function createOrgExports(): Required<
     OrgLookupService,
     OrgMutateService,
     OrgCrudService,
+    OrgMemberService,
+    OrgMemberLookupService,
+    OrgMemberMutateService,
   ];
 }
 

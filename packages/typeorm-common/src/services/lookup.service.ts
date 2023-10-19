@@ -27,6 +27,7 @@ export abstract class LookupService<Entity extends ReferenceIdInterface>
    * Get entity for the given id.
    *
    * @param id the id
+   * @param queryOptions
    */
   async byId(
     id: ReferenceId,

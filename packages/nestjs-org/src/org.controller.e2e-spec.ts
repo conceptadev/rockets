@@ -5,15 +5,18 @@ import { getDataSourceToken } from '@nestjs/typeorm';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
 import { SeedingSource } from '@concepta/typeorm-seeding';
+
 import { OrgFactory } from './seeding/org.factory';
 import { OrgSeeder } from './seeding/org.seeder';
 import { OrgModule } from './org.module';
-
 import { OrgEntityFixture } from './__fixtures__/org-entity.fixture';
 import { OwnerEntityFixture } from './__fixtures__/owner-entity.fixture';
 import { OwnerLookupServiceFixture } from './__fixtures__/owner-lookup-service.fixture';
 import { OwnerModuleFixture } from './__fixtures__/owner.module.fixture';
 import { OwnerFactoryFixture } from './__fixtures__/owner-factory.fixture';
+import { OrgMemberEntityFixture } from './__fixtures__/org-member.entity.fixture';
+import { UserEntityFixture } from './__fixtures__/user-entity.fixture';
+import { InvitationEntityFixture } from './__fixtures__/invitation.entity.fixture';
 
 describe('OrgController (e2e)', () => {
   describe('Rest', () => {
@@ -27,7 +30,13 @@ describe('OrgController (e2e)', () => {
             type: 'sqlite',
             database: ':memory:',
             synchronize: true,
-            entities: [OrgEntityFixture, OwnerEntityFixture],
+            entities: [
+              OrgEntityFixture,
+              OwnerEntityFixture,
+              OrgMemberEntityFixture,
+              UserEntityFixture,
+              InvitationEntityFixture,
+            ],
           }),
           OrgModule.registerAsync({
             inject: [OwnerLookupServiceFixture],
@@ -37,6 +46,9 @@ describe('OrgController (e2e)', () => {
             entities: {
               org: {
                 entity: OrgEntityFixture,
+              },
+              orgMember: {
+                entity: OrgMemberEntityFixture,
               },
             },
           }),
