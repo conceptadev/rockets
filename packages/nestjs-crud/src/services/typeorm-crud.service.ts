@@ -1,6 +1,6 @@
-import { ObjectLiteral, Repository } from 'typeorm';
+import { ObjectLiteral, Repository, SelectQueryBuilder } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { CrudRequest } from '@nestjsx/crud';
+import { CrudRequest, JoinOptions, QueryOptions } from '@nestjsx/crud';
 import { TypeOrmCrudService as xTypeOrmCrudService } from '@nestjsx/crud-typeorm';
 import {
   SafeTransactionOptionsInterface,
@@ -11,6 +11,7 @@ import { CrudQueryHelper } from '../util/crud-query.helper';
 import { CrudQueryOptionsInterface } from '../interfaces/crud-query-options.interface';
 import { CrudResultPaginatedInterface } from '../interfaces/crud-result-paginated.interface';
 import { CrudQueryException } from '../exceptions/crud-query.exception';
+import { ParsedRequestParams, QueryJoin } from '@nestjsx/crud-request';
 
 @Injectable()
 export class TypeOrmCrudService<
@@ -156,5 +157,73 @@ export class TypeOrmCrudService<
 
   transaction(options?: SafeTransactionOptionsInterface): TransactionProxy {
     return new TransactionProxy(this.repo.manager, options);
+  }
+
+  protected setJoin(
+    cond: QueryJoin,
+    joinOptions: JoinOptions,
+    builder: SelectQueryBuilder<T>,
+  ) {
+    const options = joinOptions[cond.field];
+
+    if (!options) {
+      return true;
+    }
+
+    const allowedRelation = this.getRelationMetadata(cond.field, options);
+
+    if (!allowedRelation) {
+      return true;
+    }
+
+    const relationType = options.required ? 'innerJoin' : 'leftJoin';
+    const alias = options.alias ? options.alias : allowedRelation.name;
+
+    builder[relationType](allowedRelation.path, alias);
+
+    if (options.select !== false) {
+      const columns =
+        Array.isArray(cond.select) && cond.select?.length
+          ? cond.select.filter((column) =>
+              allowedRelation.allowedColumns.some(
+                (allowed) => allowed === column,
+              ),
+            )
+          : allowedRelation.allowedColumns;
+
+      const select = new Set(
+        [
+          ...allowedRelation.primaryColumns,
+          ...(Array.isArray(options.persist) && options.persist?.length
+            ? options.persist
+            : []),
+          ...columns,
+        ].map((col) => `${alias}.${col}`),
+      );
+
+      builder.addSelect(Array.from(select));
+    }
+  }
+
+  protected getSelect(
+    query: ParsedRequestParams,
+    options: QueryOptions,
+  ): string[] {
+    const allowed = this.getAllowedColumns(this.entityColumns, options);
+
+    const columns =
+      query.fields && query.fields.length
+        ? query.fields.filter((field) => allowed.some((col) => field === col))
+        : allowed;
+
+    const select = new Set(
+      [
+        ...(options.persist && options.persist.length ? options.persist : []),
+        ...columns,
+        ...this.entityPrimaryColumns,
+      ].map((col) => `${this.alias}.${col}`),
+    );
+
+    return Array.from(select);
   }
 }
