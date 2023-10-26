@@ -1,3 +1,7 @@
+import {
+  ValidateUserService,
+  ValidateUserServiceInterface,
+} from '@concepta/nestjs-authentication';
 import { PasswordStorageService } from '@concepta/nestjs-password';
 import { UnauthorizedException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
@@ -14,6 +18,7 @@ describe(AuthLocalStrategy, () => {
   let user: UserFixture;
   let settings: AuthLocalSettingsInterface;
   let userLookUpService: AuthLocalUserLookupServiceInterface;
+  let validateUserService: ValidateUserServiceInterface;
   let passwordStorageService: PasswordStorageService;
   let authLocalStrategy: AuthLocalStrategy;
 
@@ -25,15 +30,18 @@ describe(AuthLocalStrategy, () => {
     });
 
     userLookUpService = mock<AuthLocalUserLookupServiceInterface>();
+    validateUserService = new ValidateUserService();
     passwordStorageService = mock<PasswordStorageService>();
     authLocalStrategy = new AuthLocalStrategy(
       settings,
       userLookUpService,
+      validateUserService,
       passwordStorageService,
     );
 
     user = new UserFixture();
     user.id = randomUUID();
+    user.active = true;
     jest.spyOn(userLookUpService, 'byUsername').mockResolvedValue(user);
   });
 
@@ -44,6 +52,7 @@ describe(AuthLocalStrategy, () => {
     authLocalStrategy = new AuthLocalStrategy(
       settings,
       userLookUpService,
+      validateUserService,
       passwordStorageService,
     );
     expect(true).toBeTruthy();
@@ -98,6 +107,7 @@ describe(AuthLocalStrategy, () => {
       authLocalStrategy = new AuthLocalStrategy(
         settings,
         userLookUpService,
+        validateUserService,
         passwordStorageService,
       );
       const t = () => authLocalStrategy['assertSettings']();
@@ -113,6 +123,7 @@ describe(AuthLocalStrategy, () => {
       authLocalStrategy = new AuthLocalStrategy(
         settings,
         userLookUpService,
+        validateUserService,
         passwordStorageService,
       );
       const t = () => authLocalStrategy['assertSettings']();
@@ -127,6 +138,7 @@ describe(AuthLocalStrategy, () => {
       authLocalStrategy = new AuthLocalStrategy(
         settings,
         userLookUpService,
+        validateUserService,
         passwordStorageService,
       );
       const t = () => authLocalStrategy['assertSettings']();

@@ -3,6 +3,7 @@ import {
   LookupIdInterface,
   LookupSubjectInterface,
   LookupUsernameInterface,
+  ReferenceActiveInterface,
   ReferenceId,
   ReferenceIdInterface,
   ReferenceSubject,
@@ -14,16 +15,16 @@ export interface UserLookupServiceInterface
   extends LookupIdInterface,
     LookupEmailInterface<
       ReferenceId,
-      ReferenceIdInterface,
+      ReferenceIdInterface & ReferenceActiveInterface,
       QueryOptionsInterface
     >,
     LookupSubjectInterface<
       ReferenceSubject,
-      ReferenceIdInterface,
+      ReferenceIdInterface & ReferenceActiveInterface,
       QueryOptionsInterface
     >,
     LookupUsernameInterface<
       ReferenceUsername,
-      ReferenceIdInterface,
+      ReferenceIdInterface & ReferenceActiveInterface,
       QueryOptionsInterface
     > {}

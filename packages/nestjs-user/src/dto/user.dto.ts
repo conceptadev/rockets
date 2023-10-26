@@ -1,4 +1,4 @@
-import { IsEmail, IsString, ValidateNested } from 'class-validator';
+import { IsBoolean, IsEmail, IsString, ValidateNested } from 'class-validator';
 import { Exclude, Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { AuditInterface } from '@concepta/ts-core';
@@ -42,6 +42,17 @@ export class UserDto implements UserInterface {
   })
   @IsString()
   username: string = '';
+
+  /**
+   * Active
+   */
+  @Expose()
+  @ApiProperty({
+    type: 'string',
+    description: 'Active',
+  })
+  @IsBoolean()
+  active!: boolean;
 
   /**
    * Audit

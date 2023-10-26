@@ -8,6 +8,7 @@ export const LOGIN_SUCCESS = {
 
 export const USER_SUCCESS: AuthLocalCredentialsInterface = {
   id: randomUUID(),
+  active: true,
   passwordHash: LOGIN_SUCCESS.password,
   passwordSalt: LOGIN_SUCCESS.password,
   username: LOGIN_SUCCESS.username,

@@ -6,16 +6,23 @@ import {
 import { ConfigModule } from '@nestjs/config';
 
 import { createSettingsProvider } from '@concepta/nestjs-common';
-import { PasswordStorageService } from '@concepta/nestjs-password';
+import {
+  PasswordStorageService,
+  PasswordStorageServiceInterface,
+} from '@concepta/nestjs-password';
 import {
   IssueTokenService,
   IssueTokenServiceInterface,
+  ValidateUserService,
+  ValidateUserServiceInterface,
 } from '@concepta/nestjs-authentication';
 
 import {
   AUTH_LOCAL_MODULE_ISSUE_TOKEN_SERVICE_TOKEN,
+  AUTH_LOCAL_MODULE_PASSWORD_STORAGE_SERVICE_TOKEN,
   AUTH_LOCAL_MODULE_SETTINGS_TOKEN,
   AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+  AUTH_LOCAL_MODULE_VALIDATE_USER_SERVICE_TOKEN,
 } from './auth-local.constants';
 
 import { AuthLocalOptionsExtrasInterface } from './interfaces/auth-local-options-extras.interface';
@@ -73,6 +80,8 @@ export function createAuthLocalExports(): string[] {
     AUTH_LOCAL_MODULE_SETTINGS_TOKEN,
     AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN,
     AUTH_LOCAL_MODULE_ISSUE_TOKEN_SERVICE_TOKEN,
+    AUTH_LOCAL_MODULE_VALIDATE_USER_SERVICE_TOKEN,
+    AUTH_LOCAL_MODULE_PASSWORD_STORAGE_SERVICE_TOKEN,
   ];
 }
 
@@ -82,12 +91,15 @@ export function createAuthLocalProviders(options: {
 }): Provider[] {
   return [
     ...(options.providers ?? []),
+    ValidateUserService,
     IssueTokenService,
     PasswordStorageService,
     AuthLocalStrategy,
     createAuthLocalOptionsProvider(options.overrides),
+    createAuthLocalValidateUserServiceProvider(options.overrides),
     createAuthLocalIssueTokenServiceProvider(options.overrides),
     createAuthLocalUserLookupServiceProvider(options.overrides),
+    createAuthLocalPasswordStorageServiceProvider(options.overrides),
   ];
 }
 
@@ -113,6 +125,22 @@ export function createAuthLocalOptionsProvider(
   });
 }
 
+export function createAuthLocalValidateUserServiceProvider(
+  optionsOverrides?: AuthLocalOptions,
+): Provider {
+  return {
+    provide: AUTH_LOCAL_MODULE_VALIDATE_USER_SERVICE_TOKEN,
+    inject: [RAW_OPTIONS_TOKEN, ValidateUserService],
+    useFactory: async (
+      options: AuthLocalOptionsInterface,
+      defaultService: ValidateUserServiceInterface,
+    ) =>
+      optionsOverrides?.validateUserService ??
+      options.validateUserService ??
+      defaultService,
+  };
+}
+
 export function createAuthLocalIssueTokenServiceProvider(
   optionsOverrides?: AuthLocalOptions,
 ): Provider {
@@ -125,6 +153,22 @@ export function createAuthLocalIssueTokenServiceProvider(
     ) =>
       optionsOverrides?.issueTokenService ??
       options.issueTokenService ??
+      defaultService,
+  };
+}
+
+export function createAuthLocalPasswordStorageServiceProvider(
+  optionsOverrides?: AuthLocalOptions,
+): Provider {
+  return {
+    provide: AUTH_LOCAL_MODULE_PASSWORD_STORAGE_SERVICE_TOKEN,
+    inject: [RAW_OPTIONS_TOKEN, PasswordStorageService],
+    useFactory: async (
+      options: AuthLocalOptionsInterface,
+      defaultService: PasswordStorageServiceInterface,
+    ) =>
+      optionsOverrides?.passwordStorageService ??
+      options.passwordStorageService ??
       defaultService,
   };
 }
