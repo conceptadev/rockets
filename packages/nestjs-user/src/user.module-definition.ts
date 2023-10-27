@@ -158,8 +158,8 @@ export function createUserMutateServiceProvider(
       userRepo: Repository<UserEntityInterface>,
       passwordStorageService: PasswordStorageService,
     ) =>
-      optionsOverrides?.userLookupService ??
-      options.userLookupService ??
+      optionsOverrides?.userMutateService ??
+      options.userMutateService ??
       new UserMutateService(userRepo, passwordStorageService),
   };
 }
