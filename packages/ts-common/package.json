@@ -1,6 +1,6 @@
 {
   "name": "@concepta/ts-common",
-  "version": "4.0.0-alpha.30",
+  "version": "4.0.0-alpha.31",
   "description": "Rockets Typescript Common",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,6 +12,6 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
-    "@concepta/ts-core": "^4.0.0-alpha.30"
+    "@concepta/ts-core": "^4.0.0-alpha.31"
   }
 }
