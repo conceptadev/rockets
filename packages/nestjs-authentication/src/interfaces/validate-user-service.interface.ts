@@ -1,7 +1,12 @@
-import { ReferenceActiveInterface } from '@concepta/ts-core';
+import {
+  ReferenceActiveInterface,
+  ReferenceIdInterface,
+} from '@concepta/ts-core';
 
-export interface ValidateUserServiceInterface {
-  validateUser: <T extends ReferenceActiveInterface>(
-    user: T,
-  ) => Promise<boolean>;
+export interface ValidateUserServiceInterface<
+  T extends unknown[] = unknown[],
+  R extends ReferenceIdInterface = ReferenceIdInterface,
+> {
+  validateUser: (..._: T) => Promise<R>;
+  isActive: (user: R & ReferenceActiveInterface) => Promise<boolean>;
 }

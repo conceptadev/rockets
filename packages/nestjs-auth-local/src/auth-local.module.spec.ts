@@ -16,8 +16,6 @@ import {
   AuthenticationModule,
   IssueTokenService,
   IssueTokenServiceInterface,
-  ValidateUserService,
-  ValidateUserServiceInterface,
 } from '@concepta/nestjs-authentication';
 import {
   PasswordStorageService,
@@ -36,6 +34,7 @@ import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.int
 
 import { UserLookupServiceFixture } from './__fixtures__/user/user-lookup.service.fixture';
 import { UserModuleFixture } from './__fixtures__/user/user.module.fixture';
+import { AuthLocalValidateUserService } from './services/auth-local-validate-user.service';
 
 describe(AuthLocalModule, () => {
   const jwtAccessService = new NestJwtService();
@@ -49,7 +48,7 @@ describe(AuthLocalModule, () => {
   let testModule: TestingModule;
   let authLocalModule: AuthLocalModule;
   let userLookupService: AuthLocalUserLookupServiceInterface;
-  let validateUserService: ValidateUserServiceInterface;
+  let validateUserService: AuthLocalUserLookupServiceInterface;
   let issueTokenService: IssueTokenServiceInterface;
   let passwordStorageService: PasswordStorageServiceInterface;
 
@@ -202,7 +201,7 @@ describe(AuthLocalModule, () => {
   function commonVars(module: TestingModule) {
     authLocalModule = module.get(AuthLocalModule);
     userLookupService = module.get(UserLookupServiceFixture);
-    validateUserService = module.get(ValidateUserService);
+    validateUserService = module.get(AuthLocalValidateUserService);
     issueTokenService = module.get(IssueTokenService);
     passwordStorageService = module.get(PasswordStorageService);
   }
@@ -211,8 +210,8 @@ describe(AuthLocalModule, () => {
     expect(authLocalModule).toBeInstanceOf(AuthLocalModule);
     expect(userLookupService).toBeInstanceOf(UserLookupServiceFixture);
     expect(issueTokenService).toBeInstanceOf(IssueTokenService);
-    expect(validateUserService).toBeInstanceOf(ValidateUserService);
     expect(passwordStorageService).toBeInstanceOf(PasswordStorageService);
+    expect(validateUserService).toBeInstanceOf(AuthLocalValidateUserService);
   }
 });
 

@@ -18,12 +18,10 @@ import { AuthenticationSettingsInterface } from './interfaces/authentication-set
 import { IssueTokenServiceInterface } from './interfaces/issue-token-service.interface';
 import { VerifyTokenServiceInterface } from './interfaces/verify-token-service.interface';
 import { ValidateTokenServiceInterface } from './interfaces/validate-token-service.interface';
-import { ValidateUserServiceInterface } from './interfaces/validate-user-service.interface';
 
 import { AuthenticationModule } from './authentication.module';
 import { VerifyTokenService } from './services/verify-token.service';
 import { IssueTokenService } from './services/issue-token.service';
-import { ValidateUserService } from './services/validate-user.service';
 
 import { GlobalModuleFixture } from './__fixtures__/global.module.fixture';
 import { ValidateTokenServiceFixture } from './__fixtures__/services/validate-token.service.fixture';
@@ -36,7 +34,6 @@ describe(AuthenticationModule, () => {
   let issueTokenService: IssueTokenServiceInterface;
   let verifyTokenService: VerifyTokenServiceInterface;
   let validateTokenService: ValidateTokenServiceInterface;
-  let validateUserService: ValidateUserServiceInterface;
 
   describe(AuthenticationModule.forRoot, () => {
     beforeEach(async () => {
@@ -257,7 +254,6 @@ describe(AuthenticationModule, () => {
     authenticationModule = testModule.get(AuthenticationModule);
     verifyTokenService = testModule.get(VerifyTokenService);
     issueTokenService = testModule.get(IssueTokenService);
-    validateUserService = testModule.get(ValidateUserService);
     validateTokenService = testModule.get(
       AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN,
     );
@@ -267,7 +263,6 @@ describe(AuthenticationModule, () => {
     expect(authenticationModule).toBeInstanceOf(AuthenticationModule);
     expect(issueTokenService).toBeInstanceOf(IssueTokenServiceFixture);
     expect(verifyTokenService).toBeInstanceOf(VerifyTokenServiceFixture);
-    expect(validateUserService).toBeInstanceOf(ValidateUserService);
     expect(validateTokenService).toBeInstanceOf(ValidateTokenServiceFixture);
   }
 });

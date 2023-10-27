@@ -19,7 +19,6 @@ import { AuthenticationSettingsInterface } from './interfaces/authentication-set
 import { ValidateTokenServiceInterface } from './interfaces/validate-token-service.interface';
 import { VerifyTokenService } from './services/verify-token.service';
 import { IssueTokenService } from './services/issue-token.service';
-import { ValidateUserService } from './services/validate-user.service';
 import { authenticationDefaultConfig } from './config/authentication-default.config';
 
 const RAW_OPTIONS_TOKEN = Symbol('__AUTHENTICATION_MODULE_RAW_OPTIONS_TOKEN__');
@@ -78,7 +77,6 @@ export function createAuthenticationExports(): DynamicModule['exports'] {
     AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN,
     IssueTokenService,
     VerifyTokenService,
-    ValidateUserService,
   ];
 }
 
@@ -94,7 +92,6 @@ export function createAuthenticationProviders(options: {
     createAuthenticationVerifyTokenServiceProvider(options.overrides),
     createAuthenticationIssueTokenServiceProvider(options.overrides),
     createAuthenticationValidateTokenServiceProvider(options.overrides),
-    createAuthenticationValidateUserServiceProvider(options.overrides),
   ];
 }
 
@@ -146,19 +143,6 @@ export function createAuthenticationVerifyTokenServiceProvider(
       optionsOverrides?.verifyTokenService ??
       options.verifyTokenService ??
       new VerifyTokenService(jwtVerifyService, validateTokenService),
-  };
-}
-
-export function createAuthenticationValidateUserServiceProvider(
-  optionsOverrides?: AuthenticationOptions,
-): Provider {
-  return {
-    provide: ValidateUserService,
-    inject: [RAW_OPTIONS_TOKEN],
-    useFactory: async (options: AuthenticationOptionsInterface) =>
-      optionsOverrides?.validateUserService ??
-      options.validateUserService ??
-      new ValidateUserService(),
   };
 }
 

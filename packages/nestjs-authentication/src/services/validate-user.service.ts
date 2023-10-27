@@ -1,15 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import { ReferenceActiveInterface } from '@concepta/ts-core';
+import {
+  ReferenceActiveInterface,
+  ReferenceIdInterface,
+} from '@concepta/ts-core';
 import { ValidateUserServiceInterface } from '../interfaces/validate-user-service.interface';
 
 @Injectable()
-export class ValidateUserService implements ValidateUserServiceInterface {
+export abstract class ValidateUserService<
+  T extends unknown[] = unknown[],
+  R extends ReferenceIdInterface = ReferenceIdInterface,
+> implements ValidateUserServiceInterface<T, R>
+{
+  /**
+   * Returns validated user
+   */
+  abstract validateUser(...rest: T): Promise<R>;
+
   /**
    * Returns true if user is considered valid for authentication purposes.
    */
-  async validateUser<
-    T extends ReferenceActiveInterface = ReferenceActiveInterface,
-  >(user: T): Promise<boolean> {
+  async isActive(
+    user: ReferenceIdInterface & ReferenceActiveInterface,
+  ): Promise<boolean> {
     return user.active === true;
   }
 }

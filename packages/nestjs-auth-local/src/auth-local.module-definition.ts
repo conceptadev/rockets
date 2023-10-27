@@ -13,8 +13,6 @@ import {
 import {
   IssueTokenService,
   IssueTokenServiceInterface,
-  ValidateUserService,
-  ValidateUserServiceInterface,
 } from '@concepta/nestjs-authentication';
 
 import {
@@ -31,6 +29,8 @@ import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.int
 import { authLocalDefaultConfig } from './config/auth-local-default.config';
 import { AuthLocalController } from './auth-local.controller';
 import { AuthLocalStrategy } from './auth-local.strategy';
+import { AuthLocalValidateUserService } from './services/auth-local-validate-user.service';
+import { AuthLocalUserLookupServiceInterface } from './interfaces/auth-local-user-lookup-service.interface';
 
 const RAW_OPTIONS_TOKEN = Symbol('__AUTH_LOCAL_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -91,10 +91,10 @@ export function createAuthLocalProviders(options: {
 }): Provider[] {
   return [
     ...(options.providers ?? []),
-    ValidateUserService,
     IssueTokenService,
     PasswordStorageService,
     AuthLocalStrategy,
+    AuthLocalValidateUserService,
     createAuthLocalOptionsProvider(options.overrides),
     createAuthLocalValidateUserServiceProvider(options.overrides),
     createAuthLocalIssueTokenServiceProvider(options.overrides),
@@ -130,14 +130,22 @@ export function createAuthLocalValidateUserServiceProvider(
 ): Provider {
   return {
     provide: AUTH_LOCAL_MODULE_VALIDATE_USER_SERVICE_TOKEN,
-    inject: [RAW_OPTIONS_TOKEN, ValidateUserService],
+    inject: [
+      RAW_OPTIONS_TOKEN,
+      AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+      AUTH_LOCAL_MODULE_PASSWORD_STORAGE_SERVICE_TOKEN,
+    ],
     useFactory: async (
       options: AuthLocalOptionsInterface,
-      defaultService: ValidateUserServiceInterface,
+      userLookupService: AuthLocalUserLookupServiceInterface,
+      passwordStorageService: PasswordStorageServiceInterface,
     ) =>
       optionsOverrides?.validateUserService ??
       options.validateUserService ??
-      defaultService,
+      new AuthLocalValidateUserService(
+        userLookupService,
+        passwordStorageService,
+      ),
   };
 }
 
