@@ -1,4 +1,5 @@
 import {
+  ReferenceActiveInterface,
   ReferenceIdInterface,
   ReferenceUsernameInterface,
 } from '@concepta/ts-core';
@@ -10,4 +11,5 @@ import { PasswordStorageInterface } from '@concepta/nestjs-password';
 export interface AuthLocalCredentialsInterface
   extends ReferenceIdInterface,
     ReferenceUsernameInterface,
+    ReferenceActiveInterface,
     PasswordStorageInterface {}

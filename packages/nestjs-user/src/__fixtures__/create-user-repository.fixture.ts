@@ -11,6 +11,7 @@ export function createUserRepositoryFixture(dataSource: DataSource) {
       id: '1',
       email: 'first_user@dispostable.com',
       username: 'first_user',
+      active: true,
       // hashed for AS12378
       passwordHash:
         '$2b$10$9y97gOLiusyKnzu7LRdMmOCVpp/xwddaa8M6KtgenvUDao5I.8mJS',
@@ -26,6 +27,7 @@ export function createUserRepositoryFixture(dataSource: DataSource) {
       id: '2',
       email: 'second_user@dispostable.com',
       username: 'second_user',
+      active: true,
       // hashed for AS12378
       passwordHash:
         '$2b$10$9y97gOLiusyKnzu7LRdMmOCVpp/xwddaa8M6KtgenvUDao5I.8mJS',

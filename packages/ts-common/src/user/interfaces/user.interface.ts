@@ -1,4 +1,5 @@
 import {
+  ReferenceActiveInterface,
   ReferenceAuditInterface,
   ReferenceEmailInterface,
   ReferenceIdInterface,
@@ -9,4 +10,5 @@ export interface UserInterface
   extends ReferenceIdInterface,
     ReferenceEmailInterface,
     ReferenceUsernameInterface,
+    ReferenceActiveInterface,
     ReferenceAuditInterface {}
