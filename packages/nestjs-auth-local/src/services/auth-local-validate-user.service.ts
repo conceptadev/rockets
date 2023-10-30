@@ -38,8 +38,10 @@ export class AuthLocalValidateUserService
       throw new Error(`No user found for username: ${dto.username}`);
     }
 
+    const isUserActive = await this.isActive(user);
+
     // is the user active?
-    if (!this.isActive(user)) {
+    if (!isUserActive) {
       throw new Error(`User with username '${dto.username}' is inactive`);
     }
 
