@@ -29,7 +29,21 @@ export interface PasswordStorageServiceInterface {
   hashObject<T extends PasswordPlainInterface>(
     object: T,
     salt?: string,
-  ): Promise<PasswordStorageInterface>;
+  ): Promise<Omit<T, 'password'> & PasswordStorageInterface>;
+
+  /**
+   * Hash password for an object if password property exists.
+   *
+   * @param object An object containing the new password to hash.
+   * @param salt Optional salt. If not provided, one will be generated.
+   * @returns A new object with the password hashed, with salt added.
+   */
+  hashObjectOptional<T extends Partial<PasswordPlainInterface>>(
+    object: T,
+    salt?: string,
+  ): Promise<
+    Omit<T, 'password'> | (Omit<T, 'password'> & PasswordStorageInterface)
+  >;
 
   /**
    * Validate if password matches and its valid.

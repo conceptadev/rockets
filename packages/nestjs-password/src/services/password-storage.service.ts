@@ -46,18 +46,48 @@ export class PasswordStorageService implements PasswordStorageServiceInterface {
     object: T,
     salt?: string,
   ): Promise<Omit<T, 'password'> & PasswordStorageInterface> {
-    // hash the password
-    const hashed = await this.hash(object.password, salt);
+    // extract password property
+    const { password, ...safeObject } = object;
 
-    // remove the password property
-    delete (object as Partial<T>).password;
+    // hash the password
+    const hashed = await this.hash(password, salt);
 
     // return the object with password hashed
     return {
-      ...object,
-      passwordHash: hashed.passwordHash,
-      passwordSalt: hashed.passwordSalt,
+      ...safeObject,
+      ...hashed,
     };
+  }
+
+  /**
+   * Hash password for an object if password property exists.
+   *
+   * @param object An object containing the new password to hash.
+   * @param salt Optional salt. If not provided, one will be generated.
+   * @returns A new object with the password hashed, with salt added.
+   */
+  async hashObjectOptional<T extends Partial<PasswordPlainInterface>>(
+    object: T,
+    salt?: string,
+  ): Promise<
+    Omit<T, 'password'> | (Omit<T, 'password'> & PasswordStorageInterface)
+  > {
+    // extract password property
+    const { password, ...safeObject } = object;
+
+    // is the password in the object?
+    if (typeof password === 'string') {
+      // hash the password
+      const hashed = await this.hash(password, salt);
+
+      // return the object with password hashed
+      return {
+        ...safeObject,
+        ...hashed,
+      };
+    } else {
+      return safeObject;
+    }
   }
 
   /**

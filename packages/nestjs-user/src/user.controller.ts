@@ -14,7 +14,6 @@ import {
 } from '@concepta/nestjs-crud';
 import { ApiTags } from '@nestjs/swagger';
 import {
-  PasswordPlainInterface,
   UserCreatableInterface,
   UserUpdatableInterface,
 } from '@concepta/ts-common';
@@ -107,7 +106,9 @@ export class UserController
     // loop all dtos
     for (const userCreateDto of userCreateManyDto.bulk) {
       // hash it
-      hashed.push(await this.maybeHashPassword(userCreateDto));
+      hashed.push(
+        await this.passwordStorageService.hashObjectOptional(userCreateDto),
+      );
     }
 
     // call crud service to create
@@ -129,7 +130,7 @@ export class UserController
     // call crud service to create
     return this.userCrudService.createOne(
       crudRequest,
-      await this.maybeHashPassword(userCreateDto),
+      await this.passwordStorageService.hashObjectOptional(userCreateDto),
     );
   }
 
@@ -147,7 +148,7 @@ export class UserController
   ) {
     return this.userCrudService.updateOne(
       crudRequest,
-      await this.maybeHashPassword(userUpdateDto),
+      await this.passwordStorageService.hashObjectOptional(userUpdateDto),
     );
   }
 
@@ -171,26 +172,5 @@ export class UserController
   @AccessControlRecoverOne(UserResource.One)
   async recoverOne(@CrudRequest() crudRequest: CrudRequestInterface) {
     return this.userCrudService.recoverOne(crudRequest);
-  }
-
-  /**
-   * Maybe hash passwords on a dto.
-   *
-   * @param dto The object on which to hash password.
-   */
-  protected async maybeHashPassword<T>(dto: T | (T & PasswordPlainInterface)) {
-    // get a password?
-    if (
-      dto &&
-      typeof dto === 'object' &&
-      'password' in dto &&
-      typeof dto.password === 'string'
-    ) {
-      // yes, hash it
-      return this.passwordStorageService.hashObject(dto);
-    } else {
-      // return untouched
-      return dto;
-    }
   }
 }
