@@ -1,6 +1,6 @@
 {
   "name": "@concepta/ts-core",
-  "version": "4.0.0-alpha.32",
+  "version": "4.0.0-alpha.33",
   "description": "Rockets Typescript Core",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
