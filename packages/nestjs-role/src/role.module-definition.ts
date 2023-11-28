@@ -55,7 +55,7 @@ function definitionTransform(
   definition: DynamicModule,
   extras: RoleOptionsExtrasInterface,
 ): DynamicModule {
-  const { providers = [] } = definition;
+  const { providers = [], imports = [] } = definition;
   const { controllers, global = false, entities } = extras;
 
   if (!entities) {
@@ -65,7 +65,7 @@ function definitionTransform(
   return {
     ...definition,
     global,
-    imports: createRoleImports({ entities }),
+    imports: createRoleImports({ imports, entities }),
     providers: createRoleProviders({ entities, providers }),
     exports: [ConfigModule, RAW_OPTIONS_TOKEN, ...createRoleExports()],
     controllers: createRoleControllers({ controllers }),
@@ -73,9 +73,10 @@ function definitionTransform(
 }
 
 export function createRoleImports(
-  options: RoleEntitiesOptionsInterface,
+  options: Pick<DynamicModule, 'imports'> & RoleEntitiesOptionsInterface,
 ): DynamicModule['imports'] {
   return [
+    ...(options.imports ?? []),
     ConfigModule.forFeature(roleDefaultConfig),
     TypeOrmExtModule.forFeature(options.entities),
   ];
