@@ -13,13 +13,13 @@ export abstract class UserSqliteEntity implements UserEntityInterface {
   /**
    * Email
    */
-  @Column()
+  @Column({ unique: true })
   email!: string;
 
   /**
    * Username
    */
-  @Column()
+  @Column({ unique: true })
   username!: string;
 
   /**
