@@ -48,7 +48,7 @@ export class UserDto implements UserInterface {
    */
   @Expose()
   @ApiProperty({
-    type: 'string',
+    type: 'boolean',
     description: 'Active',
   })
   @IsBoolean()
