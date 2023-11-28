@@ -22,7 +22,8 @@
   "devDependencies": {
     "@nestjs/testing": "^9.0.0",
     "@sentry/types": "^6.13.3",
-    "jest-mock-extended": "^2.0.4"
+    "jest-mock-extended": "^2.0.4",
+    "supertest": "^6.3.3"
   },
   "peerDependencies": {
     "class-validator": "*",
