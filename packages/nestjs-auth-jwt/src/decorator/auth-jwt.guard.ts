@@ -18,10 +18,14 @@ export class JwtAuthGuard extends AuthGuard(AUTH_JWT_STRATEGY_NAME) {
   }
 
   // handleRequest(err, user, info) {
-  handleRequest<T = ReferenceIdInterface>(err: Error | undefined, user: T) {
+  handleRequest<T = ReferenceIdInterface>(
+    err: Error | undefined,
+    user: T,
+    info?: Error,
+  ) {
     // You can throw an exception based on either "info" or "err" arguments
     if (err || !user) {
-      throw err || new UnauthorizedException();
+      throw new UnauthorizedException(null, { cause: err ?? info });
     }
     return user;
   }

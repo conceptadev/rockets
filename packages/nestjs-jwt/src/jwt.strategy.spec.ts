@@ -53,13 +53,12 @@ describe(JwtStrategy, () => {
     });
 
     it('should throw exception', async () => {
-      const t = async () => await jwtStrategy['verifyTokenCallback']();
+      const t = async () => jwtStrategy['verifyTokenCallback']();
       expect(t).rejects.toThrow();
     });
 
     it('should throw exception', async () => {
-      const t = async () =>
-        await jwtStrategy['verifyTokenCallback'](new Error());
+      const t = async () => jwtStrategy['verifyTokenCallback'](new Error());
       expect(t).rejects.toThrow();
     });
 

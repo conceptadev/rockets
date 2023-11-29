@@ -5,6 +5,7 @@ export class UserFixture
 {
   id!: string;
   username!: string;
+  active!: boolean;
   password!: string;
   passwordHash!: string | null;
   passwordSalt!: string | null;

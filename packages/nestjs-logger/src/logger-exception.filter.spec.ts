@@ -1,40 +1,65 @@
-import { mock } from 'jest-mock-extended';
-
-import { ArgumentsHost, HttpServer } from '@nestjs/common';
-
+import { ArgumentsHost, INestApplication } from '@nestjs/common';
+import { TestingModule, Test } from '@nestjs/testing';
 import { LoggerExceptionFilter } from './logger-exception.filter';
 import { LoggerService } from './logger.service';
+import { mock } from 'jest-mock-extended';
+import { HttpAdapterHost } from '@nestjs/core';
+import { LoggerTransportService } from './logger-transport.service';
 
 describe('LoggerExceptionFilter', () => {
-  let httpServer: HttpServer;
+  let app: INestApplication;
   let loggerService: LoggerService;
-  let argumentsHost: ArgumentsHost;
   let loggerExceptionFilter: LoggerExceptionFilter;
-  let spyLoggerServiceException: jest.SpyInstance;
 
   beforeEach(async () => {
-    httpServer = mock<HttpServer>();
-    loggerService = mock<LoggerService>();
-    argumentsHost = mock<ArgumentsHost>();
-    spyLoggerServiceException = jest.spyOn(loggerService, 'exception');
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        LoggerService,
+        LoggerExceptionFilter,
+        {
+          provide: LoggerTransportService,
+          useValue: {
+            addTransport: jest.fn(),
+            log: jest.fn(),
+          },
+        },
+        {
+          provide: HttpAdapterHost,
+          useValue: {
+            httpAdapter: {
+              isHeadersSent: jest.fn(),
+              reply: jest.fn(),
+              end: jest.fn(),
+            },
+          },
+        },
+      ],
+    }).compile();
+
+    app = module.createNestApplication();
+    loggerService = module.get<LoggerService>(LoggerService);
+    loggerExceptionFilter = module.get<LoggerExceptionFilter>(
+      LoggerExceptionFilter,
+    );
+
+    await app.init();
   });
 
   describe('IsDefined', () => {
     it('was LoggerExceptionFilter defined', async () => {
-      expect(httpServer).toBeDefined();
       expect(loggerService).toBeDefined();
-      expect(argumentsHost).toBeDefined();
+      expect(loggerExceptionFilter).toBeDefined();
     });
   });
 
   it('LoggerExceptionFilter.catch', async () => {
-    loggerExceptionFilter = new LoggerExceptionFilter(
-      loggerService,
-      httpServer,
-    );
-    loggerExceptionFilter.catch(new Error(), argumentsHost);
+    const spyLoggerServiceException = jest.spyOn(loggerService, 'exception');
+    loggerExceptionFilter.catch(new Error(), mock<ArgumentsHost>());
 
-    expect(loggerExceptionFilter).toBeDefined();
     expect(spyLoggerServiceException).toBeCalledTimes(1);
+  });
+
+  afterEach(async () => {
+    await app.close();
   });
 });

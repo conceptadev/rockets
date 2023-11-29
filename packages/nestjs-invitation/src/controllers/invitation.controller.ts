@@ -103,6 +103,7 @@ export class InvitationController
             email,
             category,
             code: randomUUID(),
+            constraints: payload,
           });
 
           if (user !== undefined && invite !== undefined) {

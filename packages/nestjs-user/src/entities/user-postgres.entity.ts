@@ -16,14 +16,20 @@ export abstract class UserPostgresEntity implements UserEntityInterface {
   /**
    * Email
    */
-  @Column()
+  @Column({ unique: true })
   email!: string;
 
   /**
    * Username
    */
-  @Column()
+  @Column({ unique: true })
   username!: string;
+
+  /**
+   * Active
+   */
+  @Column({ default: true })
+  active!: boolean;
 
   /**
    * Password hash

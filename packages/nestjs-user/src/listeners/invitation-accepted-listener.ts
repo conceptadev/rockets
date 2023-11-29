@@ -3,7 +3,10 @@ import {
   EventListenerOn,
   EventListenService,
 } from '@concepta/nestjs-event';
-import { InvitationAcceptedEventPayloadInterface } from '@concepta/ts-common';
+import {
+  INVITATION_MODULE_CATEGORY_USER_KEY,
+  InvitationAcceptedEventPayloadInterface,
+} from '@concepta/ts-common';
 import { Inject, Injectable, OnModuleInit, Optional } from '@nestjs/common';
 
 import { USER_MODULE_SETTINGS_TOKEN } from '../user.constants';
@@ -45,8 +48,11 @@ export class InvitationAcceptedListener
     >,
   ) {
     // check only for invitation of type category
-    if (event.payload.category === 'invitation') {
-      const { userId, newPassword } = event?.payload.data ?? {};
+    if (
+      event?.payload?.invitation?.category ===
+      INVITATION_MODULE_CATEGORY_USER_KEY
+    ) {
+      const { userId, newPassword } = event?.payload?.data ?? {};
 
       if (typeof userId !== 'string' || typeof newPassword !== 'string') {
         throw new UserException(

@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserCrudService } from './services/user-crud.service';
+import { UserMutateService } from './services/user-mutate.service';
 import { UserController } from './user.controller';
 
 import { AppModuleCustomFixture } from './__fixtures__/app.module.custom.fixture';
@@ -11,6 +12,7 @@ describe('AppModule', () => {
   let userLookupService: UserLookupCustomService;
   let userCrudService: UserCrudService;
   let userController: UserController;
+  let userMutateService: UserMutateService;
 
   beforeEach(async () => {
     const testModule: TestingModule = await Test.createTestingModule({
@@ -23,6 +25,7 @@ describe('AppModule', () => {
     userLookupService = testModule.get<UserLookupCustomService>(
       UserLookupCustomService,
     );
+    userMutateService = testModule.get<UserMutateService>(UserMutateService);
     userCrudService = testModule.get<UserCrudService>(UserCrudService);
     userController = testModule.get<UserController>(UserController);
   });
@@ -35,6 +38,7 @@ describe('AppModule', () => {
     it('should be loaded', async () => {
       expect(userModule).toBeInstanceOf(UserModuleCustomFixture);
       expect(userLookupService).toBeInstanceOf(UserLookupCustomService);
+      expect(userMutateService).toBeInstanceOf(UserMutateService);
       expect(userCrudService).toBeInstanceOf(UserCrudService);
       expect(userController).toBeInstanceOf(UserController);
     });

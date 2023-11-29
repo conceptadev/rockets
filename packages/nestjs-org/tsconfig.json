@@ -27,6 +27,9 @@
     },
     {
       "path": "../nestjs-typeorm-ext"
+    },
+    {
+      "path": "../nestjs-invitation"
     }
   ]
 }

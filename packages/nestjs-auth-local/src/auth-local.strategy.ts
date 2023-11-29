@@ -6,18 +6,17 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ReferenceUsername } from '@concepta/ts-core';
+import { ReferenceIdInterface, ReferenceUsername } from '@concepta/ts-core';
 import { PassportStrategyFactory } from '@concepta/nestjs-authentication';
-import { PasswordStorageService } from '@concepta/nestjs-password';
 
 import {
   AUTH_LOCAL_MODULE_SETTINGS_TOKEN,
-  AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+  AUTH_LOCAL_MODULE_VALIDATE_USER_SERVICE_TOKEN,
   AUTH_LOCAL_STRATEGY_NAME,
 } from './auth-local.constants';
 
 import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.interface';
-import { AuthLocalUserLookupServiceInterface } from './interfaces/auth-local-user-lookup-service.interface';
+import { AuthLocalValidateUserServiceInterface } from './interfaces/auth-local-validate-user-service.interface';
 
 /**
  * Define the Local strategy using passport.
@@ -34,14 +33,13 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
    *
    * @param userLookupService The service used to get the user
    * @param settings The settings for the local strategy
-   * @param passwordService The service used to hash and validate passwords
+   * @param passwordStorageService The service used to hash and validate passwords
    */
   constructor(
     @Inject(AUTH_LOCAL_MODULE_SETTINGS_TOKEN)
     private settings: AuthLocalSettingsInterface,
-    @Inject(AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN)
-    private userLookupService: AuthLocalUserLookupServiceInterface,
-    private passwordService: PasswordStorageService,
+    @Inject(AUTH_LOCAL_MODULE_VALIDATE_USER_SERVICE_TOKEN)
+    private validateUserService: AuthLocalValidateUserServiceInterface,
   ) {
     super({
       usernameField: settings?.usernameField,
@@ -71,21 +69,24 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
       throw new BadRequestException(e);
     }
 
-    const user = await this.userLookupService.byUsername(dto[usernameField]);
+    let validatedUser: ReferenceIdInterface;
 
-    if (!user) {
+    try {
+      // try to get fully validated user
+      validatedUser = await this.validateUserService.validateUser({
+        username,
+        password,
+      });
+      // did we get a valid user?
+      if (!validatedUser) {
+        throw new Error(`No valid user found: ${username}`);
+      }
+    } catch (e) {
+      // TODO: maybe log original?
       throw new UnauthorizedException();
     }
 
-    // validate password
-    const isValid = await this.passwordService.validateObject(
-      dto[passwordField],
-      user,
-    );
-
-    if (!isValid) throw new UnauthorizedException();
-
-    return user;
+    return validatedUser;
   }
 
   /**

@@ -16,6 +16,7 @@ export { OrgInterface } from './org/interfaces/org.interface';
 export { OrgOwnerInterface } from './org/interfaces/org-owner.interface';
 export { OrgCreatableInterface } from './org/interfaces/org-creatable.interface';
 export { OrgUpdatableInterface } from './org/interfaces/org-updatable.interface';
+export { OrgMemberInterface } from './org/interfaces/org-member.interface';
 
 export { UserInterface } from './user/interfaces/user.interface';
 export { UserCreatableInterface } from './user/interfaces/user-creatable.interface';
@@ -43,3 +44,8 @@ export { InvitationInterface } from './invitation/interfaces/invitation.interfac
 export { InvitationAcceptedEventPayloadInterface } from './invitation/interfaces/invitation-accepted-event-payload.interface';
 export { InvitationGetUserEventPayloadInterface } from './invitation/interfaces/invitation-get-user-event-payload.interface';
 export { InvitationGetUserEventResponseInterface } from './invitation/interfaces/invitation-get-user-event-response.interface';
+
+export {
+  INVITATION_MODULE_CATEGORY_USER_KEY,
+  INVITATION_MODULE_CATEGORY_ORG_KEY,
+} from './invitation/invitation.contants';

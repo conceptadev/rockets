@@ -1,4 +1,6 @@
+export { AuthLocalValidateUserInterface } from './interfaces/auth-local-validate-user.interface';
 export { AuthLocalUserLookupServiceInterface } from './interfaces/auth-local-user-lookup-service.interface';
+export { AuthLocalValidateUserServiceInterface } from './interfaces/auth-local-validate-user-service.interface';
 
 export * from './auth-local.module';
 export * from './auth-local.controller';

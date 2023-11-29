@@ -5,6 +5,9 @@ import { mock } from 'jest-mock-extended';
 import { AuthLocalStrategy } from './auth-local.strategy';
 import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.interface';
 import { AuthLocalUserLookupServiceInterface } from './interfaces/auth-local-user-lookup-service.interface';
+import { AuthLocalValidateUserServiceInterface } from './interfaces/auth-local-validate-user-service.interface';
+import { AuthLocalValidateUserService } from './services/auth-local-validate-user.service';
+
 import { UserFixture } from './__fixtures__/user/user.entity.fixture';
 
 describe(AuthLocalStrategy, () => {
@@ -14,6 +17,7 @@ describe(AuthLocalStrategy, () => {
   let user: UserFixture;
   let settings: AuthLocalSettingsInterface;
   let userLookUpService: AuthLocalUserLookupServiceInterface;
+  let validateUserService: AuthLocalValidateUserServiceInterface;
   let passwordStorageService: PasswordStorageService;
   let authLocalStrategy: AuthLocalStrategy;
 
@@ -26,14 +30,15 @@ describe(AuthLocalStrategy, () => {
 
     userLookUpService = mock<AuthLocalUserLookupServiceInterface>();
     passwordStorageService = mock<PasswordStorageService>();
-    authLocalStrategy = new AuthLocalStrategy(
-      settings,
+    validateUserService = new AuthLocalValidateUserService(
       userLookUpService,
       passwordStorageService,
     );
+    authLocalStrategy = new AuthLocalStrategy(settings, validateUserService);
 
     user = new UserFixture();
     user.id = randomUUID();
+    user.active = true;
     jest.spyOn(userLookUpService, 'byUsername').mockResolvedValue(user);
   });
 
@@ -41,11 +46,7 @@ describe(AuthLocalStrategy, () => {
     settings = mock<Partial<AuthLocalSettingsInterface>>({
       loginDto: undefined,
     });
-    authLocalStrategy = new AuthLocalStrategy(
-      settings,
-      userLookUpService,
-      passwordStorageService,
-    );
+    authLocalStrategy = new AuthLocalStrategy(settings, validateUserService);
     expect(true).toBeTruthy();
   });
 
@@ -95,11 +96,7 @@ describe(AuthLocalStrategy, () => {
         usernameField: USERNAME,
         passwordField: PASSWORD,
       });
-      authLocalStrategy = new AuthLocalStrategy(
-        settings,
-        userLookUpService,
-        passwordStorageService,
-      );
+      authLocalStrategy = new AuthLocalStrategy(settings, validateUserService);
       const t = () => authLocalStrategy['assertSettings']();
       expect(t).toThrowError();
     });
@@ -110,25 +107,18 @@ describe(AuthLocalStrategy, () => {
         usernameField: undefined,
         passwordField: PASSWORD,
       });
-      authLocalStrategy = new AuthLocalStrategy(
-        settings,
-        userLookUpService,
-        passwordStorageService,
-      );
+      authLocalStrategy = new AuthLocalStrategy(settings, validateUserService);
       const t = () => authLocalStrategy['assertSettings']();
       expect(t).toThrowError();
     });
+
     it('should throw error for no passwordField', async () => {
       settings = mock<Partial<AuthLocalSettingsInterface>>({
         loginDto: UserFixture,
         usernameField: USERNAME,
         passwordField: undefined,
       });
-      authLocalStrategy = new AuthLocalStrategy(
-        settings,
-        userLookUpService,
-        passwordStorageService,
-      );
+      authLocalStrategy = new AuthLocalStrategy(settings, validateUserService);
       const t = () => authLocalStrategy['assertSettings']();
       expect(t).toThrowError();
     });

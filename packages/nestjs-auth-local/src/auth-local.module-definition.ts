@@ -6,7 +6,10 @@ import {
 import { ConfigModule } from '@nestjs/config';
 
 import { createSettingsProvider } from '@concepta/nestjs-common';
-import { PasswordStorageService } from '@concepta/nestjs-password';
+import {
+  PasswordStorageService,
+  PasswordStorageServiceInterface,
+} from '@concepta/nestjs-password';
 import {
   IssueTokenService,
   IssueTokenServiceInterface,
@@ -14,8 +17,10 @@ import {
 
 import {
   AUTH_LOCAL_MODULE_ISSUE_TOKEN_SERVICE_TOKEN,
+  AUTH_LOCAL_MODULE_PASSWORD_STORAGE_SERVICE_TOKEN,
   AUTH_LOCAL_MODULE_SETTINGS_TOKEN,
   AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+  AUTH_LOCAL_MODULE_VALIDATE_USER_SERVICE_TOKEN,
 } from './auth-local.constants';
 
 import { AuthLocalOptionsExtrasInterface } from './interfaces/auth-local-options-extras.interface';
@@ -24,6 +29,8 @@ import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.int
 import { authLocalDefaultConfig } from './config/auth-local-default.config';
 import { AuthLocalController } from './auth-local.controller';
 import { AuthLocalStrategy } from './auth-local.strategy';
+import { AuthLocalValidateUserService } from './services/auth-local-validate-user.service';
+import { AuthLocalUserLookupServiceInterface } from './interfaces/auth-local-user-lookup-service.interface';
 
 const RAW_OPTIONS_TOKEN = Symbol('__AUTH_LOCAL_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -73,6 +80,8 @@ export function createAuthLocalExports(): string[] {
     AUTH_LOCAL_MODULE_SETTINGS_TOKEN,
     AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN,
     AUTH_LOCAL_MODULE_ISSUE_TOKEN_SERVICE_TOKEN,
+    AUTH_LOCAL_MODULE_VALIDATE_USER_SERVICE_TOKEN,
+    AUTH_LOCAL_MODULE_PASSWORD_STORAGE_SERVICE_TOKEN,
   ];
 }
 
@@ -85,9 +94,12 @@ export function createAuthLocalProviders(options: {
     IssueTokenService,
     PasswordStorageService,
     AuthLocalStrategy,
+    AuthLocalValidateUserService,
     createAuthLocalOptionsProvider(options.overrides),
+    createAuthLocalValidateUserServiceProvider(options.overrides),
     createAuthLocalIssueTokenServiceProvider(options.overrides),
     createAuthLocalUserLookupServiceProvider(options.overrides),
+    createAuthLocalPasswordStorageServiceProvider(options.overrides),
   ];
 }
 
@@ -113,6 +125,30 @@ export function createAuthLocalOptionsProvider(
   });
 }
 
+export function createAuthLocalValidateUserServiceProvider(
+  optionsOverrides?: AuthLocalOptions,
+): Provider {
+  return {
+    provide: AUTH_LOCAL_MODULE_VALIDATE_USER_SERVICE_TOKEN,
+    inject: [
+      RAW_OPTIONS_TOKEN,
+      AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+      AUTH_LOCAL_MODULE_PASSWORD_STORAGE_SERVICE_TOKEN,
+    ],
+    useFactory: async (
+      options: AuthLocalOptionsInterface,
+      userLookupService: AuthLocalUserLookupServiceInterface,
+      passwordStorageService: PasswordStorageServiceInterface,
+    ) =>
+      optionsOverrides?.validateUserService ??
+      options.validateUserService ??
+      new AuthLocalValidateUserService(
+        userLookupService,
+        passwordStorageService,
+      ),
+  };
+}
+
 export function createAuthLocalIssueTokenServiceProvider(
   optionsOverrides?: AuthLocalOptions,
 ): Provider {
@@ -125,6 +161,22 @@ export function createAuthLocalIssueTokenServiceProvider(
     ) =>
       optionsOverrides?.issueTokenService ??
       options.issueTokenService ??
+      defaultService,
+  };
+}
+
+export function createAuthLocalPasswordStorageServiceProvider(
+  optionsOverrides?: AuthLocalOptions,
+): Provider {
+  return {
+    provide: AUTH_LOCAL_MODULE_PASSWORD_STORAGE_SERVICE_TOKEN,
+    inject: [RAW_OPTIONS_TOKEN, PasswordStorageService],
+    useFactory: async (
+      options: AuthLocalOptionsInterface,
+      defaultService: PasswordStorageServiceInterface,
+    ) =>
+      optionsOverrides?.passwordStorageService ??
+      options.passwordStorageService ??
       defaultService,
   };
 }

@@ -11,6 +11,7 @@ import { UserPasswordDto } from './user-password.dto';
 export class UserCreateDto
   extends IntersectionType(
     PickType(UserDto, ['username', 'email'] as const),
+    PartialType(PickType(UserDto, ['active'] as const)),
     PartialType(UserPasswordDto),
   )
   implements UserCreatableInterface {}
