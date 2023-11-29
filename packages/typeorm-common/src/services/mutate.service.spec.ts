@@ -63,7 +63,7 @@ describe(MutateService, () => {
 
       expect(savedData).toBeInstanceOf(TestEntityFixture);
       expect(savedData.id.length).toBeGreaterThan(0);
-      expect(savedData.audit.version).toEqual(1);
+      expect(savedData.version).toEqual(1);
     });
 
     it('exception', async () => {
@@ -94,7 +94,7 @@ describe(MutateService, () => {
       const testObject = await testFactory.create({ firstName: 'Bob' });
 
       expect(testObject.firstName).toBe('Bob');
-      expect(testObject.audit.version).toBe(1);
+      expect(testObject.version).toBe(1);
 
       const entity = await testMutateService.update({
         id: testObject.id,
@@ -103,7 +103,7 @@ describe(MutateService, () => {
 
       expect(entity).toBeInstanceOf(TestEntityFixture);
       expect(entity.firstName).toBe('Bill');
-      expect(entity.audit.version).toBe(2);
+      expect(entity.version).toBe(2);
     });
 
     it('not found', async () => {
@@ -153,17 +153,15 @@ describe(MutateService, () => {
       pastDate.setMilliseconds(pastDate.getMilliseconds() - 100);
       const testObject = await testFactory.create({
         firstName: 'Bob',
-        audit: {
-          dateCreated: pastDate,
-          dateUpdated: pastDate,
-          dateDeleted: null,
-          version: 5,
-        },
+        dateCreated: pastDate,
+        dateUpdated: pastDate,
+        dateDeleted: null,
+        version: 5,
       });
 
       expect(testObject).toBeInstanceOf(TestEntityFixture);
       expect(testObject.firstName).toEqual('Bob');
-      expect(testObject.audit.version).toEqual(5);
+      expect(testObject.version).toEqual(5);
 
       const entity = await testMutateService.replace({
         id: testObject.id,
@@ -172,12 +170,10 @@ describe(MutateService, () => {
 
       expect(entity).toBeInstanceOf(TestEntityFixture);
       expect(entity.firstName).toEqual('Bill');
-      expect(entity.audit.dateCreated).toEqual(testObject.audit.dateCreated);
-      expect(entity.audit.dateUpdated).not.toEqual(
-        testObject.audit.dateUpdated,
-      );
-      expect(entity.audit.dateDeleted).toEqual(null);
-      expect(entity.audit.version).toEqual(6);
+      expect(entity.dateCreated).toEqual(testObject.dateCreated);
+      expect(entity.dateUpdated).not.toEqual(testObject.dateUpdated);
+      expect(entity.dateDeleted).toEqual(null);
+      expect(entity.version).toEqual(6);
     });
 
     it('not found', async () => {

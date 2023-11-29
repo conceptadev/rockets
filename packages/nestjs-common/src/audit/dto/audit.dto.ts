@@ -1,7 +1,12 @@
-import { IsDate, IsNumber } from 'class-validator';
+import { IsDate, IsNumber, IsOptional } from 'class-validator';
 import { Exclude, Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { AuditInterface } from '@concepta/ts-core';
+import {
+  AuditDateCreated,
+  AuditDateDeleted,
+  AuditDateUpdated,
+  AuditInterface,
+} from '@concepta/ts-core';
 
 /**
  * Audit DTO
@@ -11,7 +16,7 @@ export class AuditDto implements AuditInterface {
   /**
    * Date created
    */
-  @Expose({ toPlainOnly: true })
+  @Expose()
   @ApiProperty({
     type: 'string',
     format: 'date-time',
@@ -19,12 +24,12 @@ export class AuditDto implements AuditInterface {
   })
   @Type(() => Date)
   @IsDate()
-  dateCreated!: Date;
+  dateCreated!: AuditDateCreated;
 
   /**
    * Date updated
    */
-  @Expose({ toPlainOnly: true })
+  @Expose()
   @ApiProperty({
     type: 'string',
     format: 'date-time',
@@ -32,25 +37,27 @@ export class AuditDto implements AuditInterface {
   })
   @Type(() => Date)
   @IsDate()
-  dateUpdated!: Date;
+  dateUpdated!: AuditDateUpdated;
 
   /**
    * Date deleted
    */
-  @Expose({ toPlainOnly: true })
+  @Expose()
   @ApiProperty({
     type: 'string',
     format: 'date-time',
     description: 'Date deleted',
+    nullable: true,
   })
   @Type(() => Date)
   @IsDate()
-  dateDeleted!: Date;
+  @IsOptional()
+  dateDeleted!: AuditDateDeleted;
 
   /**
    * Version
    */
-  @Expose({ toPlainOnly: true })
+  @Expose()
   @ApiProperty({
     type: 'number',
     description: 'Version of the data',

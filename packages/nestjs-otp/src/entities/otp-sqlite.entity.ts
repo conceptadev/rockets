@@ -1,19 +1,15 @@
-import { Column, PrimaryGeneratedColumn } from 'typeorm';
-import { AuditSqlLiteEmbed } from '@concepta/typeorm-common';
-import {
-  AuditInterface,
-  ReferenceId,
-  ReferenceIdInterface,
-} from '@concepta/ts-core';
+import { Column } from 'typeorm';
+import { CommonSqliteEntity } from '@concepta/typeorm-common';
+import { ReferenceIdInterface } from '@concepta/ts-core';
 import { OtpInterface } from '@concepta/ts-common';
 
 /**
  * Otp Sqlite Entity
  */
-export abstract class OtpSqliteEntity implements OtpInterface {
-  @PrimaryGeneratedColumn('uuid')
-  id!: ReferenceId;
-
+export abstract class OtpSqliteEntity
+  extends CommonSqliteEntity
+  implements OtpInterface
+{
   @Column()
   category!: string;
 
@@ -25,9 +21,6 @@ export abstract class OtpSqliteEntity implements OtpInterface {
 
   @Column({ type: 'datetime' })
   expirationDate!: Date;
-
-  @Column(() => AuditSqlLiteEmbed, {})
-  audit!: AuditInterface;
 
   /**
    * Should be overwrite by the table it will be assigned to

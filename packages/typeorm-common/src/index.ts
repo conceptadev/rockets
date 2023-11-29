@@ -16,9 +16,11 @@ export { ReferenceMutateException } from './exceptions/reference-mutate.exceptio
 export { ReferenceValidationException } from './exceptions/reference-validation.exception';
 export { ReferenceIdNoMatchException } from './exceptions/reference-id-no-match.exception';
 
-// base entity
-export { AuditPostgresEmbed } from './embeds/audit/audit-postgres.embed';
-export { AuditSqlLiteEmbed } from './embeds/audit/audit-sqlite.embed';
+// base entities
+export { AuditPostgresEntity } from './entities/audit/audit-postgres.entity';
+export { AuditSqlLiteEntity } from './entities/audit/audit-sqlite.entity';
+export { CommonPostgresEntity } from './entities/common/common-postgres.entity';
+export { CommonSqliteEntity } from './entities/common/common-sqlite.entity';
 
 // proxies
 export { EntityManagerProxy } from './proxies/entity-manager.proxy';

@@ -1,14 +1,14 @@
 import {
+  AuditInterface,
   LiteralObject,
   ReferenceActiveInterface,
-  ReferenceAuditInterface,
   ReferenceIdInterface,
 } from '@concepta/ts-core';
 
 export interface InvitationInterface
   extends ReferenceIdInterface,
-    ReferenceAuditInterface,
-    ReferenceActiveInterface {
+    ReferenceActiveInterface,
+    AuditInterface {
   email: string;
   code: string;
   category: string;

@@ -1,12 +1,12 @@
 import {
+  AuditInterface,
   ReferenceAssigneeInterface,
-  ReferenceAuditInterface,
   ReferenceIdInterface,
 } from '@concepta/ts-core';
 
 export interface RoleAssignmentInterface
   extends ReferenceIdInterface,
-    ReferenceAuditInterface,
+    AuditInterface,
     ReferenceAssigneeInterface {
   /**
    * Role

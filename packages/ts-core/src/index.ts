@@ -21,7 +21,6 @@ export { ReferenceAssigneeInterface } from './references/interfaces/reference-as
 export { ReferenceEmailInterface } from './references/interfaces/reference-email.interface';
 export { ReferenceUsernameInterface } from './references/interfaces/reference-username.interface';
 export { ReferenceSubjectInterface } from './references/interfaces/reference-subject.interface';
-export { ReferenceAuditInterface } from './references/interfaces/reference-audit.interface';
 export { ReferenceQueryOptionsInterface } from './references/interfaces/reference-query-options.interface';
 
 export { LookupIdInterface } from './references/interfaces/lookup/lookup-id.interface';

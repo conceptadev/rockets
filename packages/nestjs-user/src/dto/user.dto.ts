@@ -1,26 +1,14 @@
-import { IsBoolean, IsEmail, IsString, ValidateNested } from 'class-validator';
-import { Exclude, Expose, Type } from 'class-transformer';
+import { IsBoolean, IsEmail, IsString } from 'class-validator';
+import { Exclude, Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { AuditInterface } from '@concepta/ts-core';
-import { AuditDto } from '@concepta/nestjs-common';
+import { CommonEntityDto } from '@concepta/nestjs-common';
 import { UserInterface } from '@concepta/ts-common';
 
 /**
  * User DTO
  */
 @Exclude()
-export class UserDto implements UserInterface {
-  /**
-   * Unique id
-   */
-  @Expose()
-  @ApiProperty({
-    type: 'string',
-    description: 'Unique identifier',
-  })
-  @IsString()
-  id: string = '';
-
+export class UserDto extends CommonEntityDto implements UserInterface {
   /**
    * Email
    */
@@ -53,16 +41,4 @@ export class UserDto implements UserInterface {
   })
   @IsBoolean()
   active!: boolean;
-
-  /**
-   * Audit
-   */
-  @Expose({ toPlainOnly: true })
-  @ApiProperty({
-    type: AuditDto,
-    description: 'Audit data',
-  })
-  @Type(() => AuditDto)
-  @ValidateNested()
-  audit!: AuditInterface;
 }

@@ -1,18 +1,14 @@
-import { Column, PrimaryGeneratedColumn } from 'typeorm';
-import { AuditInterface } from '@concepta/ts-core';
-import { AuditPostgresEmbed } from '@concepta/typeorm-common';
+import { Column } from 'typeorm';
+import { CommonPostgresEntity } from '@concepta/typeorm-common';
 import { UserEntityInterface } from '../interfaces/user-entity.interface';
 
 /**
  * User Entity
  */
-export abstract class UserPostgresEntity implements UserEntityInterface {
-  /**
-   * Unique Id
-   */
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export abstract class UserPostgresEntity
+  extends CommonPostgresEntity
+  implements UserEntityInterface
+{
   /**
    * Email
    */
@@ -42,10 +38,4 @@ export abstract class UserPostgresEntity implements UserEntityInterface {
    */
   @Column({ type: 'text', nullable: true, default: null })
   passwordSalt: string | null = null;
-
-  /**
-   * Audit embed
-   */
-  @Column(() => AuditPostgresEmbed)
-  audit!: AuditInterface;
 }

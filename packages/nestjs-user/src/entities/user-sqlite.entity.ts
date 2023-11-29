@@ -1,15 +1,11 @@
-import { Column, PrimaryGeneratedColumn } from 'typeorm';
-import { AuditInterface } from '@concepta/ts-core';
-import { AuditSqlLiteEmbed } from '@concepta/typeorm-common';
+import { Column } from 'typeorm';
+import { CommonSqliteEntity } from '@concepta/typeorm-common';
 import { UserEntityInterface } from '../interfaces/user-entity.interface';
 
-export abstract class UserSqliteEntity implements UserEntityInterface {
-  /**
-   * Unique Id
-   */
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export abstract class UserSqliteEntity
+  extends CommonSqliteEntity
+  implements UserEntityInterface
+{
   /**
    * Email
    */
@@ -39,10 +35,4 @@ export abstract class UserSqliteEntity implements UserEntityInterface {
    */
   @Column({ type: 'text', nullable: true, default: null })
   passwordSalt: string | null = null;
-
-  /**
-   * Audit embed
-   */
-  @Column(() => AuditSqlLiteEmbed)
-  audit!: AuditInterface;
 }

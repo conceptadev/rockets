@@ -1,10 +1,6 @@
-import { Column, PrimaryGeneratedColumn, Unique } from 'typeorm';
-import {
-  AuditInterface,
-  ReferenceId,
-  ReferenceIdInterface,
-} from '@concepta/ts-core';
-import { AuditPostgresEmbed } from '@concepta/typeorm-common';
+import { Unique } from 'typeorm';
+import { ReferenceIdInterface } from '@concepta/ts-core';
+import { CommonPostgresEntity } from '@concepta/typeorm-common';
 import { RoleAssignmentEntityInterface } from '../interfaces/role-assignment-entity.interface';
 import { RoleEntityInterface } from '../interfaces/role-entity.interface';
 
@@ -13,14 +9,9 @@ import { RoleEntityInterface } from '../interfaces/role-entity.interface';
  */
 @Unique(['role', 'assignee'])
 export abstract class RoleAssignmentPostgresEntity
+  extends CommonPostgresEntity
   implements RoleAssignmentEntityInterface
 {
-  @PrimaryGeneratedColumn('uuid')
-  id!: ReferenceId;
-
-  @Column(() => AuditPostgresEmbed, {})
-  audit!: AuditInterface;
-
   /**
    * Role
    *
