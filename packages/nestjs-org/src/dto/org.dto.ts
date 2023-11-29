@@ -6,26 +6,15 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { AuditInterface, ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceIdInterface } from '@concepta/ts-core';
 import { OrgInterface } from '@concepta/ts-common';
-import { AuditDto, ReferenceIdDto } from '@concepta/nestjs-common';
+import { CommonEntityDto, ReferenceIdDto } from '@concepta/nestjs-common';
 
 /**
  * Org DTO
  */
 @Exclude()
-export class OrgDto implements OrgInterface {
-  /**
-   * Unique id
-   */
-  @Expose()
-  @ApiProperty({
-    type: 'string',
-    description: 'Unique identifier',
-  })
-  @IsString()
-  id: string = '';
-
+export class OrgDto extends CommonEntityDto implements OrgInterface {
   /**
    * Name
    */
@@ -36,18 +25,6 @@ export class OrgDto implements OrgInterface {
   })
   @IsString()
   name = '';
-
-  /**
-   * Audit
-   */
-  @Expose({ toPlainOnly: true })
-  @ApiProperty({
-    type: AuditDto,
-    description: 'Audit data',
-  })
-  @Type(() => AuditDto)
-  @ValidateNested()
-  audit!: AuditInterface;
 
   /**
    * Active

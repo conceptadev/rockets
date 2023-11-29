@@ -23,6 +23,10 @@ export class OtpServiceFixture implements AuthRecoveryOtpServiceInterface {
       assignee,
       passcode: 'GOOD_PASSCODE',
       expirationDate: new Date(),
+      dateCreated: new Date(),
+      dateUpdated: new Date(),
+      dateDeleted: null,
+      version: 1,
     };
   }
 

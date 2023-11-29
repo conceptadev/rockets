@@ -1,13 +1,13 @@
 import {
+  AuditInterface,
   ReferenceActiveInterface,
-  ReferenceAuditInterface,
   ReferenceIdInterface,
 } from '@concepta/ts-core';
 
 export interface OrgMemberInterface
   extends ReferenceIdInterface,
     ReferenceActiveInterface,
-    ReferenceAuditInterface {
+    AuditInterface {
   orgId: string;
   userId: string;
 }

@@ -16,12 +16,10 @@ export function createUserRepository(dataSource: DataSource) {
       passwordHash:
         '$2b$10$9y97gOLiusyKnzu7LRdMmOCVpp/xwddaa8M6KtgenvUDao5I.8mJS',
       passwordSalt: '$2b$10$9y97gOLiusyKnzu7LRdMmO',
-      audit: {
-        dateCreated: new Date(),
-        dateUpdated: new Date(),
-        dateDeleted: new Date(),
-        version: 1,
-      },
+      dateCreated: new Date(),
+      dateUpdated: new Date(),
+      dateDeleted: new Date(),
+      version: 1,
     },
     {
       id: '2',
@@ -32,12 +30,10 @@ export function createUserRepository(dataSource: DataSource) {
       passwordHash:
         '$2b$10$9y97gOLiusyKnzu7LRdMmOCVpp/xwddaa8M6KtgenvUDao5I.8mJS',
       passwordSalt: '$2b$10$9y97gOLiusyKnzu7LRdMmO',
-      audit: {
-        dateCreated: new Date(),
-        dateUpdated: new Date(),
-        dateDeleted: new Date(),
-        version: 1,
-      },
+      dateCreated: new Date(),
+      dateUpdated: new Date(),
+      dateDeleted: new Date(),
+      version: 1,
     },
   ];
 

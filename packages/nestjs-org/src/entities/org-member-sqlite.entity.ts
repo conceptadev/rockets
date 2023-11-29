@@ -1,23 +1,14 @@
-import { Column, PrimaryGeneratedColumn, Unique } from 'typeorm';
-import {
-  AuditInterface,
-  ReferenceId,
-  ReferenceIdInterface,
-} from '@concepta/ts-core';
-import { AuditSqlLiteEmbed } from '@concepta/typeorm-common';
+import { Column, Unique } from 'typeorm';
+import { ReferenceId, ReferenceIdInterface } from '@concepta/ts-core';
+import { CommonSqliteEntity } from '@concepta/typeorm-common';
 
 import { OrgMemberEntityInterface } from '../interfaces/org-member-entity.interface';
 
 @Unique(['userId', 'orgId'])
 export abstract class OrgMemberSqliteEntity
+  extends CommonSqliteEntity
   implements OrgMemberEntityInterface
 {
-  @PrimaryGeneratedColumn('uuid')
-  id!: ReferenceId;
-
-  @Column(() => AuditSqlLiteEmbed, {})
-  audit!: AuditInterface;
-
   @Column('boolean', { default: true })
   active = true;
 

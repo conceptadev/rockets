@@ -1,11 +1,7 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import {
-  AuditInterface,
-  ReferenceId,
-  ReferenceIdInterface,
-} from '@concepta/ts-core';
+import { Column, Entity, ManyToOne } from 'typeorm';
+import { ReferenceIdInterface } from '@concepta/ts-core';
 import { OtpInterface } from '@concepta/ts-common';
-import { AuditSqlLiteEmbed } from '@concepta/typeorm-common';
+import { CommonSqliteEntity } from '@concepta/typeorm-common';
 
 import { UserEntityFixture } from './user-entity.fixture';
 
@@ -13,10 +9,10 @@ import { UserEntityFixture } from './user-entity.fixture';
  * Otp Entity Fixture
  */
 @Entity()
-export class UserOtpEntityFixture implements OtpInterface {
-  @PrimaryGeneratedColumn('uuid')
-  id!: ReferenceId;
-
+export class UserOtpEntityFixture
+  extends CommonSqliteEntity
+  implements OtpInterface
+{
   @Column()
   category!: string;
 
@@ -28,9 +24,6 @@ export class UserOtpEntityFixture implements OtpInterface {
 
   @Column({ type: 'datetime' })
   expirationDate!: Date;
-
-  @Column(() => AuditSqlLiteEmbed, {})
-  audit!: AuditInterface;
 
   @ManyToOne(() => UserEntityFixture, (user) => user.userOtps)
   assignee!: ReferenceIdInterface;

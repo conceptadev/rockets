@@ -13,25 +13,25 @@ import {
 } from '@concepta/ts-core';
 
 /**
- * Audit Postgres Embed
+ * Audit SqlLite Embed
  */
-export abstract class AuditPostgresEmbed implements AuditInterface {
+export abstract class AuditSqlLiteEntity implements AuditInterface {
   /**
    * Date created.
    */
-  @CreateDateColumn({ type: 'timestamptz' })
+  @CreateDateColumn({ type: 'datetime' })
   dateCreated!: AuditDateCreated;
 
   /**
    * Date updated.
    */
-  @UpdateDateColumn({ type: 'timestamptz' })
+  @UpdateDateColumn({ type: 'datetime' })
   dateUpdated!: AuditDateUpdated;
 
   /**
    * Date deleted.
    */
-  @DeleteDateColumn({ type: 'timestamptz' })
+  @DeleteDateColumn({ type: 'datetime' })
   dateDeleted!: AuditDateDeleted;
 
   /**

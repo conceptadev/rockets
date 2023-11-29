@@ -1,11 +1,8 @@
-import {
-  ReferenceAuditInterface,
-  ReferenceIdInterface,
-} from '@concepta/ts-core';
+import { AuditInterface, ReferenceIdInterface } from '@concepta/ts-core';
 
 export interface FederatedInterface
   extends ReferenceIdInterface,
-    ReferenceAuditInterface {
+    AuditInterface {
   /**
    * Provider name (github, facebook, etc)
    */
