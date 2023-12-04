@@ -1,4 +1,4 @@
-import { PasswordStorageService } from '@concepta/nestjs-password';
+import { PasswordValidationService } from '@concepta/nestjs-password';
 import { UnauthorizedException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { mock } from 'jest-mock-extended';
@@ -18,7 +18,7 @@ describe(AuthLocalStrategy, () => {
   let settings: AuthLocalSettingsInterface;
   let userLookUpService: AuthLocalUserLookupServiceInterface;
   let validateUserService: AuthLocalValidateUserServiceInterface;
-  let passwordStorageService: PasswordStorageService;
+  let passwordValidationService: PasswordValidationService;
   let authLocalStrategy: AuthLocalStrategy;
 
   beforeEach(async () => {
@@ -29,10 +29,10 @@ describe(AuthLocalStrategy, () => {
     });
 
     userLookUpService = mock<AuthLocalUserLookupServiceInterface>();
-    passwordStorageService = mock<PasswordStorageService>();
+    passwordValidationService = mock<PasswordValidationService>();
     validateUserService = new AuthLocalValidateUserService(
       userLookUpService,
-      passwordStorageService,
+      passwordValidationService,
     );
     authLocalStrategy = new AuthLocalStrategy(settings, validateUserService);
 
@@ -53,7 +53,7 @@ describe(AuthLocalStrategy, () => {
   describe(AuthLocalStrategy.prototype.validate, () => {
     it('should return user', async () => {
       jest
-        .spyOn(passwordStorageService, 'validateObject')
+        .spyOn(passwordValidationService, 'validateObject')
         .mockResolvedValue(true);
 
       const result = await authLocalStrategy.validate(USERNAME, PASSWORD);
@@ -74,7 +74,7 @@ describe(AuthLocalStrategy, () => {
 
     it('should be invalid on passwordService.validateObject', async () => {
       jest
-        .spyOn(passwordStorageService, 'validateObject')
+        .spyOn(passwordValidationService, 'validateObject')
         .mockResolvedValue(false);
 
       const t = () => authLocalStrategy.validate(USERNAME, PASSWORD);

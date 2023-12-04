@@ -89,40 +89,4 @@ export class PasswordStorageService implements PasswordStorageServiceInterface {
       return safeObject;
     }
   }
-
-  /**
-   * Validate if password matches and its valid.
-   *
-   * @param passwordPlain Plain text password
-   * @param passwordHash Password hashed
-   * @param passwordSalt salt to be used on plain password to see it match
-   */
-  async validate(
-    passwordPlain: string,
-    passwordHash: string,
-    passwordSalt: string,
-  ): Promise<boolean> {
-    return CryptUtil.validatePassword(
-      passwordPlain,
-      passwordHash,
-      passwordSalt,
-    );
-  }
-
-  /**
-   * Validate password on an object.
-   *
-   * @param passwordPlain Plain text password
-   * @param object The object on which the password and salt are stored
-   */
-  async validateObject<T extends PasswordStorageInterface>(
-    passwordPlain: string,
-    object: T,
-  ): Promise<boolean> {
-    return this.validate(
-      passwordPlain,
-      object.passwordHash ?? '',
-      object.passwordSalt ?? '',
-    );
-  }
 }

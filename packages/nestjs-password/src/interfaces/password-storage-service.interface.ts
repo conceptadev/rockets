@@ -44,28 +44,4 @@ export interface PasswordStorageServiceInterface {
   ): Promise<
     Omit<T, 'password'> | (Omit<T, 'password'> & PasswordStorageInterface)
   >;
-
-  /**
-   * Validate if password matches and its valid.
-   *
-   * @param passwordPlain Plain text password
-   * @param passwordHash Password hashed
-   * @param salt salt to be used on plain  password to see it match
-   */
-  validate(
-    passwordPlain: string,
-    passwordHash: string,
-    salt: string,
-  ): Promise<boolean>;
-
-  /**
-   * Validate password on an object.
-   *
-   * @param passwordPlain Plain text password
-   * @param object The object on which the password and salt are stored
-   */
-  validateObject<T extends PasswordStorageInterface>(
-    passwordPlain: string,
-    object: T,
-  ): Promise<boolean>;
 }
