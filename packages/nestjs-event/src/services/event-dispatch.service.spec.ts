@@ -142,7 +142,7 @@ describe(EventDispatchService, () => {
 
       eventEmitter.on(testEvent.key, listener);
 
-      expect(eventDispatchService.async(testEvent)).rejects.toThrowError(
+      await expect(eventDispatchService.async(testEvent)).rejects.toThrowError(
         EventDispatchException,
       );
     });

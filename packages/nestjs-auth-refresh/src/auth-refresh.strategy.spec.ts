@@ -64,7 +64,7 @@ describe(AuthRefreshStrategy, () => {
 
       const t = () =>
         authRefreshStrategy.validate(authorizationPayloadInterface);
-      expect(t).rejects.toThrow(UnauthorizedException);
+      await expect(t).rejects.toThrow(UnauthorizedException);
     });
   });
 });

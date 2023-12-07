@@ -178,8 +178,8 @@ describe(PasswordStorageService, () => {
         await storageService.hashObject({}, { required: true });
       };
 
-      expect(t).rejects.toThrow(Error);
-      expect(t).rejects.toThrow(
+      await expect(t).rejects.toThrow(Error);
+      await expect(t).rejects.toThrow(
         'Password is required for hashing, but non was provided.',
       );
     });

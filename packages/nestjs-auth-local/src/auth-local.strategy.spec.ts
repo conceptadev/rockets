@@ -62,14 +62,14 @@ describe(AuthLocalStrategy, () => {
 
     it('should throw error on validateOrReject', async () => {
       const t = () => authLocalStrategy.validate(USERNAME, '');
-      expect(t).rejects.toThrow();
+      await expect(t).rejects.toThrow();
     });
 
     it('should return no user on userLookupService.byUsername', async () => {
       jest.spyOn(userLookUpService, 'byUsername').mockResolvedValue(null);
 
       const t = () => authLocalStrategy.validate(USERNAME, PASSWORD);
-      expect(t).rejects.toThrow(UnauthorizedException);
+      await expect(t).rejects.toThrow(UnauthorizedException);
     });
 
     it('should be invalid on passwordService.validateObject', async () => {
@@ -78,7 +78,7 @@ describe(AuthLocalStrategy, () => {
         .mockResolvedValue(false);
 
       const t = () => authLocalStrategy.validate(USERNAME, PASSWORD);
-      expect(t).rejects.toThrow(UnauthorizedException);
+      await expect(t).rejects.toThrow(UnauthorizedException);
     });
   });
 

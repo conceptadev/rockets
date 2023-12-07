@@ -24,7 +24,7 @@ describe(JwtVerifyService, () => {
         throw new Error();
       });
       const t = async () => await jwtVerifyService.accessToken(token);
-      expect(t).rejects.toThrowError();
+      await expect(t).rejects.toThrowError();
     });
   });
 
@@ -43,7 +43,7 @@ describe(JwtVerifyService, () => {
         throw new Error();
       });
       const t = async () => await jwtVerifyService.refreshToken(token);
-      expect(t).rejects.toThrowError();
+      await expect(t).rejects.toThrowError();
     });
   });
 });

@@ -50,7 +50,7 @@ describe(AuthJwtStrategy, () => {
       const t = async () => {
         await authJwtStrategy.validate(authorizationPayload);
       };
-      expect(t).rejects.toThrow(UnauthorizedException);
+      await expect(t).rejects.toThrow(UnauthorizedException);
     });
   });
 });

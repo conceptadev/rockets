@@ -32,7 +32,7 @@ describe(VerifyTokenService, () => {
       const t = async () => {
         await verifyTokenService.accessToken(token);
       };
-      expect(t).rejects.toThrow(BadRequestException);
+      await expect(t).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -57,7 +57,7 @@ describe(VerifyTokenService, () => {
       const t = async () => {
         await verifyTokenService.refreshToken(token);
       };
-      expect(t).rejects.toThrow(BadRequestException);
+      await expect(t).rejects.toThrow(BadRequestException);
     });
   });
 });
