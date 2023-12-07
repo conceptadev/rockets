@@ -8,6 +8,7 @@ import {
   UserLookupService,
   UserMutateService,
 } from '@concepta/nestjs-user';
+import { PasswordModule } from '@concepta/nestjs-password';
 import { FederatedModule } from '@concepta/nestjs-federated';
 import { AuthGithubController } from './auth-github.controller';
 import { AuthGithubModule } from './auth-github.module';
@@ -44,6 +45,7 @@ describe(AuthGithubModule, () => {
             },
           }),
           CrudModule.forRoot({}),
+          PasswordModule.forRoot({}),
           UserModule.forRoot({
             entities: {
               user: {

@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@concepta/nestjs-invitation": "^4.0.0-alpha.35",
+    "@concepta/nestjs-password": "^4.0.0-alpha.35",
     "@concepta/nestjs-user": "^4.0.0-alpha.35",
     "@concepta/typeorm-seeding": "^4.0.0-beta.0",
     "@faker-js/faker": "^6.0.0-alpha.6",

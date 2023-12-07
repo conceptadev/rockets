@@ -17,7 +17,7 @@ import {
   UserCreatableInterface,
   UserUpdatableInterface,
 } from '@concepta/ts-common';
-import { PasswordStorageService } from '@concepta/nestjs-password';
+import { PasswordCreationService } from '@concepta/nestjs-password';
 import {
   AccessControlCreateMany,
   AccessControlCreateOne,
@@ -59,11 +59,11 @@ export class UserController
    * Constructor.
    *
    * @param userCrudService instance of the user crud service
-   * @param passwordStorageService instance of password service
+   * @param passwordCreationService instance of password creation service
    */
   constructor(
     private userCrudService: UserCrudService,
-    private passwordStorageService: PasswordStorageService,
+    private passwordCreationService: PasswordCreationService,
   ) {}
 
   /**
@@ -107,7 +107,9 @@ export class UserController
     for (const userCreateDto of userCreateManyDto.bulk) {
       // hash it
       hashed.push(
-        await this.passwordStorageService.hashObjectOptional(userCreateDto),
+        await this.passwordCreationService.createObject(userCreateDto, {
+          required: false,
+        }),
       );
     }
 
@@ -130,7 +132,9 @@ export class UserController
     // call crud service to create
     return this.userCrudService.createOne(
       crudRequest,
-      await this.passwordStorageService.hashObjectOptional(userCreateDto),
+      await this.passwordCreationService.createObject(userCreateDto, {
+        required: false,
+      }),
     );
   }
 
@@ -148,7 +152,9 @@ export class UserController
   ) {
     return this.userCrudService.updateOne(
       crudRequest,
-      await this.passwordStorageService.hashObjectOptional(userUpdateDto),
+      await this.passwordCreationService.createObject(userUpdateDto, {
+        required: false,
+      }),
     );
   }
 

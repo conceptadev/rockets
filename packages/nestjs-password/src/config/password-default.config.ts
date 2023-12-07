@@ -17,6 +17,8 @@ export const passwordDefaultConfig = registerAs(
 
     minPasswordStrength: process.env.PASSWORD_MIN_PASSWORD_STRENGTH
       ? Number.parseInt(process.env.PASSWORD_MIN_PASSWORD_STRENGTH)
-      : 8,
+      : process.env?.NODE_ENV === 'production'
+      ? 8
+      : 0,
   }),
 );

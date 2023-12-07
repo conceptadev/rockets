@@ -13,17 +13,17 @@ export class PasswordValidationService
   /**
    * Validate if password matches and its valid.
    *
-   * @param options.passwordPlain Plain text password
+   * @param options.password Plain text password
    * @param options.passwordHash Password hashed
    * @param options.passwordSalt salt to be used on plain password to see it match
    */
   async validate(options: {
-    passwordPlain: string;
+    password: string;
     passwordHash: string;
     passwordSalt: string;
   }): Promise<boolean> {
     return CryptUtil.validatePassword(
-      options.passwordPlain,
+      options.password,
       options.passwordHash,
       options.passwordSalt,
     );
@@ -35,15 +35,22 @@ export class PasswordValidationService
    * @param passwordPlain Plain text password
    * @param object The object on which the password and salt are stored
    */
-  async validateObject<T extends PasswordStorageInterface>(options: {
-    passwordPlain: string;
-    object: T;
-  }): Promise<boolean> {
-    const { passwordPlain, object } = options;
+  async validateObject<T extends PasswordStorageInterface>(
+    password: string,
+    object: T,
+  ): Promise<boolean> {
+    const { passwordHash, passwordSalt } = object;
+
+    // hash or salt is null on object?
+    if (passwordHash === null || passwordSalt === null) {
+      // yep, automatic invalid
+      return false;
+    }
+
     return this.validate({
-      passwordPlain,
-      passwordHash: object.passwordHash ?? '',
-      passwordSalt: object.passwordSalt ?? '',
+      password,
+      passwordHash,
+      passwordSalt,
     });
   }
 }

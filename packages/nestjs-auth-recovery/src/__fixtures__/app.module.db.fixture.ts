@@ -16,6 +16,7 @@ import { UserEntityFixture } from './user/entities/user-entity.fixture';
 
 import { default as ormConfig } from './ormconfig.fixture';
 import { MailerServiceFixture } from './email/mailer.service.fixture';
+import { PasswordModule } from '@concepta/nestjs-password';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { MailerServiceFixture } from './email/mailer.service.fixture';
         },
       },
     }),
+    PasswordModule.forRoot({}),
     UserModule.forRoot({
       entities: {
         user: {

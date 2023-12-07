@@ -24,6 +24,7 @@ import { InvitationEntityFixture } from '../__fixtures__/invitation.entity.fixtu
 import { OrgFactory } from '../seeding/org.factory';
 import { OrgEntityInterface } from '../interfaces/org-entity.interface';
 import { OwnerFactoryFixture } from '../__fixtures__/owner-factory.fixture';
+import { PasswordModule } from '@concepta/nestjs-password';
 
 describe(InvitationAcceptedListener, () => {
   const category = INVITATION_MODULE_CATEGORY_ORG_KEY;
@@ -51,6 +52,7 @@ describe(InvitationAcceptedListener, () => {
             InvitationEntityFixture,
           ],
         }),
+        PasswordModule.forRoot({}),
         UserModule.forRoot({
           entities: {
             user: {

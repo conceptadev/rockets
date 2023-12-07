@@ -25,8 +25,11 @@ export class PasswordStorageService implements PasswordStorageServiceInterface {
    */
   async hash(
     password: string,
-    salt?: string,
+    options?: {
+      salt?: string;
+    },
   ): Promise<PasswordStorageInterface> {
+    let { salt } = options ?? {};
     if (!salt) salt = await this.generateSalt();
 
     return {
@@ -39,54 +42,74 @@ export class PasswordStorageService implements PasswordStorageServiceInterface {
    * Hash password for an object.
    *
    * @param object An object containing the new password to hash.
-   * @param salt Optional salt. If not provided, one will be generated.
+   * @param options.salt Optional salt. If not provided, one will be generated.
+   * @param options.required Set to true if password is required.
    * @returns A new object with the password hashed, with salt added.
    */
   async hashObject<T extends PasswordPlainInterface>(
     object: T,
-    salt?: string,
-  ): Promise<Omit<T, 'password'> & PasswordStorageInterface> {
-    // extract password property
-    const { password, ...safeObject } = object;
-
-    // hash the password
-    const hashed = await this.hash(password, salt);
-
-    // return the object with password hashed
-    return {
-      ...safeObject,
-      ...hashed,
-    };
-  }
+    options?: {
+      salt?: string;
+      required?: boolean;
+    },
+  ): Promise<Omit<T, 'password'> & PasswordStorageInterface>;
 
   /**
-   * Hash password for an object if password property exists.
+   * Hash password for an object if the password property exists.
    *
    * @param object An object containing the new password to hash.
-   * @param salt Optional salt. If not provided, one will be generated.
+   * @param options.salt Optional salt. If not provided, one will be generated.
+   * @param options.required Set to true if password is required.
    * @returns A new object with the password hashed, with salt added.
    */
-  async hashObjectOptional<T extends Partial<PasswordPlainInterface>>(
+  async hashObject<T extends PasswordPlainInterface>(
+    object: Partial<T>,
+    options?: {
+      salt?: string;
+      required?: boolean;
+    },
+  ): Promise<
+    Omit<T, 'password'> | (Omit<T, 'password'> & PasswordStorageInterface)
+  >;
+
+  /**
+   * Hash password for an object.
+   *
+   * @param object An object containing the new password to hash.
+   * @param options.salt Optional salt. If not provided, one will be generated.
+   * @param options.required Set to true if password is required.
+   * @returns A new object with the password hashed, with salt added.
+   */
+  async hashObject<T extends PasswordPlainInterface>(
     object: T,
-    salt?: string,
+    options?: {
+      salt?: string;
+      required?: boolean;
+    },
   ): Promise<
     Omit<T, 'password'> | (Omit<T, 'password'> & PasswordStorageInterface)
   > {
     // extract password property
+    const { salt, required = true } = options ?? {};
     const { password, ...safeObject } = object;
 
     // is the password in the object?
     if (typeof password === 'string') {
       // hash the password
-      const hashed = await this.hash(password, salt);
+      const hashed = await this.hash(password, { salt });
 
       // return the object with password hashed
       return {
         ...safeObject,
         ...hashed,
       };
-    } else {
-      return safeObject;
+    } else if (required === true) {
+      // password is required, not good
+      throw new Error(
+        'Password is required for hashing, but non was provided.',
+      );
     }
+
+    return safeObject;
   }
 }

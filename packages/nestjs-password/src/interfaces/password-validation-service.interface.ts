@@ -7,12 +7,12 @@ export interface PasswordValidationServiceInterface {
   /**
    * Validate if password matches and its valid.
    *
-   * @param options.passwordPlain Plain text password
+   * @param options.password Plain text password
    * @param options.passwordHash Password hashed
    * @param options.passwordSalt salt to be used on plain  password to see it match
    */
   validate(options: {
-    passwordPlain: string;
+    password: string;
     passwordHash: string;
     passwordSalt: string;
   }): Promise<boolean>;
@@ -23,8 +23,9 @@ export interface PasswordValidationServiceInterface {
    * @param options.passwordPlain Plain text password
    * @param options.object The object on which the password and salt are stored
    */
-  validateObject<T extends PasswordStorageInterface>(options: {
-    passwordPlain: string;
-    object: T;
-  }): Promise<boolean>;
+  validateObject<T extends PasswordStorageInterface>(
+    passwordPlain: string,
+
+    object: T,
+  ): Promise<boolean>;
 }
