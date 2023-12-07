@@ -77,7 +77,7 @@ describe(LookupService, () => {
           throw new Error();
         });
 
-      expect(testLookupService['findOne']({})).rejects.toThrow(
+      await expect(testLookupService['findOne']({})).rejects.toThrow(
         ReferenceLookupException,
       );
     });

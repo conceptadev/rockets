@@ -32,7 +32,7 @@ describe(JwtSignService, () => {
         throw new Error();
       });
       const t = async () => await jwtSignService.signAsync(access, token);
-      expect(t).rejects.toThrowError();
+      await expect(t).rejects.toThrowError();
     });
   });
 
@@ -51,7 +51,7 @@ describe(JwtSignService, () => {
         throw new Error();
       });
       const t = async () => await jwtSignService.verifyAsync(access, token);
-      expect(t).rejects.toThrowError();
+      await expect(t).rejects.toThrowError();
     });
   });
 
@@ -67,7 +67,7 @@ describe(JwtSignService, () => {
         throw new Error();
       });
       const t = async () => await jwtSignService.decode(access, token);
-      expect(t).rejects.toThrowError();
+      await expect(t).rejects.toThrowError();
     });
   });
 

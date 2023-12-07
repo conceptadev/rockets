@@ -77,7 +77,7 @@ describe(MutateService, () => {
         return testMutateService.create({ firstName: 'Bob' });
       };
 
-      expect(t).rejects.toThrow(ReferenceMutateException);
+      await expect(t).rejects.toThrow(ReferenceMutateException);
     });
 
     it('invalid', async () => {
@@ -85,7 +85,7 @@ describe(MutateService, () => {
         return testMutateService.create({ firstName: 'B' });
       };
 
-      expect(t).rejects.toThrow(ReferenceValidationException);
+      await expect(t).rejects.toThrow(ReferenceValidationException);
     });
   });
 
@@ -113,7 +113,7 @@ describe(MutateService, () => {
         });
       };
 
-      expect(t()).rejects.toThrow(ReferenceIdNoMatchException);
+      await expect(t()).rejects.toThrow(ReferenceIdNoMatchException);
     });
 
     it('found but not valid', async () => {
@@ -125,7 +125,7 @@ describe(MutateService, () => {
         });
       };
 
-      expect(t).rejects.toThrow(ReferenceValidationException);
+      await expect(t).rejects.toThrow(ReferenceValidationException);
     });
 
     it('found, valid, but exception on save', async () => {
@@ -143,7 +143,7 @@ describe(MutateService, () => {
         });
       };
 
-      expect(t).rejects.toThrow(ReferenceMutateException);
+      await expect(t).rejects.toThrow(ReferenceMutateException);
     });
   });
 
@@ -184,7 +184,7 @@ describe(MutateService, () => {
         });
       };
 
-      expect(t).rejects.toThrow(ReferenceIdNoMatchException);
+      await expect(t).rejects.toThrow(ReferenceIdNoMatchException);
     });
 
     it('found but not valid', async () => {
@@ -197,7 +197,7 @@ describe(MutateService, () => {
         });
       };
 
-      expect(t).rejects.toThrow(ReferenceValidationException);
+      await expect(t).rejects.toThrow(ReferenceValidationException);
     });
 
     it('found, valid, but exception on save', async () => {
@@ -216,7 +216,7 @@ describe(MutateService, () => {
         });
       };
 
-      expect(t).rejects.toThrow(ReferenceMutateException);
+      await expect(t).rejects.toThrow(ReferenceMutateException);
     });
   });
 
@@ -234,7 +234,7 @@ describe(MutateService, () => {
         return testMutateService['findById'](testObject.id);
       };
 
-      expect(t).rejects.toThrow(ReferenceIdNoMatchException);
+      await expect(t).rejects.toThrow(ReferenceIdNoMatchException);
     });
 
     it('id does not match', async () => {
@@ -244,7 +244,7 @@ describe(MutateService, () => {
         });
       };
 
-      expect(t).rejects.toThrow(ReferenceIdNoMatchException);
+      await expect(t).rejects.toThrow(ReferenceIdNoMatchException);
     });
 
     it('exception', async () => {
@@ -260,7 +260,7 @@ describe(MutateService, () => {
           throw new Error();
         });
 
-      expect(t).rejects.toThrow(ReferenceMutateException);
+      await expect(t).rejects.toThrow(ReferenceMutateException);
     });
   });
 
@@ -278,7 +278,7 @@ describe(MutateService, () => {
           throw new Error();
         });
 
-      expect(t).rejects.toThrow(ReferenceLookupException);
+      await expect(t).rejects.toThrow(ReferenceLookupException);
     });
   });
 });
