@@ -6,7 +6,12 @@ import {
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { createSettingsProvider } from '@concepta/nestjs-common';
-import { PasswordStorageService } from '@concepta/nestjs-password';
+import {
+  PasswordCreationService,
+  PasswordStorageService,
+  PasswordStrengthService,
+  PasswordValidationService,
+} from '@concepta/nestjs-password';
 import {
   getDynamicRepositoryToken,
   TypeOrmExtModule,
@@ -85,7 +90,10 @@ export function createUserProviders(options: {
   return [
     ...(options.providers ?? []),
     UserCrudService,
+    PasswordCreationService,
+    PasswordValidationService,
     PasswordStorageService,
+    PasswordStrengthService,
     InvitationAcceptedListener,
     InvitationGetUserListener,
     createUserSettingsProvider(options.overrides),
@@ -151,15 +159,15 @@ export function createUserMutateServiceProvider(
     inject: [
       RAW_OPTIONS_TOKEN,
       getDynamicRepositoryToken(USER_MODULE_USER_ENTITY_KEY),
-      PasswordStorageService,
+      PasswordCreationService,
     ],
     useFactory: async (
       options: UserOptionsInterface,
       userRepo: Repository<UserEntityInterface>,
-      passwordStorageService: PasswordStorageService,
+      passwordCreationService: PasswordCreationService,
     ) =>
       optionsOverrides?.userMutateService ??
       options.userMutateService ??
-      new UserMutateService(userRepo, passwordStorageService),
+      new UserMutateService(userRepo, passwordCreationService),
   };
 }

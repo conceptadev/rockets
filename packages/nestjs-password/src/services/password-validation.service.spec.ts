@@ -25,7 +25,7 @@ describe('PasswordValidationService', () => {
 
       // check if password encrypt can be decrypted
       const isValid = await validationService.validate({
-        passwordPlain: PASSWORD_MEDIUM,
+        password: PASSWORD_MEDIUM,
         passwordHash: passwordStorageObject.passwordHash ?? '',
         passwordSalt: passwordStorageObject.passwordSalt ?? '',
       });
@@ -39,7 +39,7 @@ describe('PasswordValidationService', () => {
 
       // check if password encrypt can be decrypted
       const isValid = await validationService.validate({
-        passwordPlain: PASSWORD_MEDIUM,
+        password: PASSWORD_MEDIUM,
         passwordHash: 'foo',
         passwordSalt: fakeSalt,
       });
@@ -55,10 +55,10 @@ describe('PasswordValidationService', () => {
         await storageService.hash(PASSWORD_MEDIUM);
 
       // check if password encrypt can be decrypted
-      const isValid = await validationService.validateObject({
-        passwordPlain: PASSWORD_MEDIUM,
-        object: passwordStorageObject,
-      });
+      const isValid = await validationService.validateObject(
+        PASSWORD_MEDIUM,
+        passwordStorageObject,
+      );
 
       expect(isValid).toEqual(true);
     });
@@ -67,10 +67,20 @@ describe('PasswordValidationService', () => {
       // fake salt
       const fakeSalt = await storageService.generateSalt();
 
-      // check if password encrypt can be decrypted
-      const isValid = await validationService.validateObject({
-        passwordPlain: PASSWORD_MEDIUM,
-        object: { passwordHash: 'foo', passwordSalt: fakeSalt },
+      // try to validate fake
+      const isValid = await validationService.validateObject(PASSWORD_MEDIUM, {
+        passwordHash: 'foo',
+        passwordSalt: fakeSalt,
+      });
+
+      expect(isValid).toEqual(false);
+    });
+
+    it('should NOT validate a null hash/salt combination on an object', async () => {
+      // null hash and/or salt should return false
+      const isValid = await validationService.validateObject(PASSWORD_MEDIUM, {
+        passwordHash: null,
+        passwordSalt: null,
       });
 
       expect(isValid).toEqual(false);

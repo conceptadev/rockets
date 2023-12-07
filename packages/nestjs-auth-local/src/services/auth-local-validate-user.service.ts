@@ -46,10 +46,10 @@ export class AuthLocalValidateUserService
     }
 
     // validate password
-    const isValid = await this.passwordValidationService.validateObject({
-      passwordPlain: dto.password,
-      object: user,
-    });
+    const isValid = await this.passwordValidationService.validateObject(
+      dto.password,
+      user,
+    );
 
     // password is valid?
     if (!isValid) {

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
 import { EventModule } from '@concepta/nestjs-event';
+import { PasswordModule } from '@concepta/nestjs-password';
 
 import { createUserRepositoryFixture } from './create-user-repository.fixture';
 import { UserModule } from '../user.module';
@@ -15,6 +16,7 @@ import { UserEntityFixture } from './user.entity.fixture';
     TypeOrmExtModule.forRoot(ormConfig),
     CrudModule.forRoot({}),
     EventModule.forRoot({}),
+    PasswordModule.forRoot({}),
     UserModule.forRootAsync({
       imports: [UserModuleCustomFixture],
       inject: [UserLookupCustomService],

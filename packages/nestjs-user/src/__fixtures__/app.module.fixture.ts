@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
+import { PasswordModule } from '@concepta/nestjs-password';
 import { EventModule } from '@concepta/nestjs-event';
 
 import { UserModule } from '../user.module';
@@ -14,6 +15,7 @@ import { InvitationGetUserEventAsync } from './events/invitation-get-user.event'
     TypeOrmExtModule.forRoot(ormConfig),
     CrudModule.forRoot({}),
     EventModule.forRoot({}),
+    PasswordModule.forRoot({}),
     UserModule.forRoot({
       settings: {
         invitationRequestEvent: InvitationAcceptedEventAsync,

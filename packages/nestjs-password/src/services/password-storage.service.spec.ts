@@ -3,7 +3,7 @@ import { PasswordStorageInterface } from '../interfaces/password-storage.interfa
 import { PasswordStorageService } from './password-storage.service';
 import { PasswordValidationService } from './password-validation.service';
 
-describe('PasswordStorageService', () => {
+describe(PasswordStorageService, () => {
   let storageService: PasswordStorageService;
   let validationService: PasswordValidationService;
 
@@ -39,7 +39,7 @@ describe('PasswordStorageService', () => {
 
       // check if password encrypt can be decrypted
       const isValid = await validationService.validate({
-        passwordPlain: PASSWORD_MEDIUM,
+        password: PASSWORD_MEDIUM,
         passwordHash: passwordStorageObject.passwordHash ?? '',
         passwordSalt: passwordStorageObject.passwordSalt ?? '',
       });
@@ -50,13 +50,15 @@ describe('PasswordStorageService', () => {
     it('should generate a password hash from provided salt', async () => {
       // encrypt password
       const passwordStorageObject: PasswordStorageInterface =
-        await storageService.hash(PASSWORD_MEDIUM, PASSWORD_SALT);
+        await storageService.hash(PASSWORD_MEDIUM, {
+          salt: PASSWORD_SALT,
+        });
 
       expect(passwordStorageObject.passwordSalt).toEqual(PASSWORD_SALT);
 
       // check if password encrypt can be decrypted
       const isValid = await validationService.validate({
-        passwordPlain: PASSWORD_MEDIUM,
+        password: PASSWORD_MEDIUM,
         passwordHash: passwordStorageObject.passwordHash ?? '',
         passwordSalt: passwordStorageObject.passwordSalt ?? '',
       });
@@ -69,15 +71,20 @@ describe('PasswordStorageService', () => {
     it('should generate a password on object without providing a salt', async () => {
       // encrypt password
       const passwordStorageObject: PasswordStorageInterface =
-        await storageService.hashObject({ password: PASSWORD_MEDIUM });
+        await storageService.hashObject(
+          { password: PASSWORD_MEDIUM },
+          {
+            required: true,
+          },
+        );
 
       expect(typeof passwordStorageObject.passwordSalt).toEqual('string');
 
       // check if password encrypt can be decrypted
-      const isValid = await validationService.validateObject({
-        passwordPlain: PASSWORD_MEDIUM,
-        object: passwordStorageObject,
-      });
+      const isValid = await validationService.validateObject(
+        PASSWORD_MEDIUM,
+        passwordStorageObject,
+      );
 
       expect(isValid).toEqual(true);
     });
@@ -89,26 +96,26 @@ describe('PasswordStorageService', () => {
           {
             password: PASSWORD_MEDIUM,
           },
-          PASSWORD_SALT,
+          {
+            salt: PASSWORD_SALT,
+          },
         );
 
       expect(passwordStorageObject.passwordSalt).toEqual(PASSWORD_SALT);
 
       // check if password encrypt can be decrypted
-      const isValid = await validationService.validateObject({
-        passwordPlain: PASSWORD_MEDIUM,
-        object: passwordStorageObject,
-      });
+      const isValid = await validationService.validateObject(
+        PASSWORD_MEDIUM,
+        passwordStorageObject,
+      );
 
       expect(isValid).toEqual(true);
     });
-  });
 
-  describe(PasswordStorageService.prototype.hashObjectOptional, () => {
     it('should generate a password on object without providing a salt', async () => {
       // encrypt password
       const passwordStorageObject: Partial<PasswordStorageInterface> =
-        await storageService.hashObjectOptional({ password: PASSWORD_MEDIUM });
+        await storageService.hashObject({ password: PASSWORD_MEDIUM });
 
       expect(typeof passwordStorageObject.passwordSalt).toEqual('string');
 
@@ -117,10 +124,10 @@ describe('PasswordStorageService', () => {
         typeof passwordStorageObject.passwordSalt === 'string'
       ) {
         // check if password encrypt can be decrypted
-        const isValid = await validationService.validateObject({
-          passwordPlain: PASSWORD_MEDIUM,
-          object: passwordStorageObject as PasswordStorageInterface,
-        });
+        const isValid = await validationService.validateObject(
+          PASSWORD_MEDIUM,
+          passwordStorageObject as PasswordStorageInterface,
+        );
 
         expect(isValid).toEqual(true);
       } else {
@@ -131,9 +138,11 @@ describe('PasswordStorageService', () => {
     it('should generate a password on object with provided salt', async () => {
       // encrypt password
       const passwordStorageObject: Partial<PasswordStorageInterface> =
-        await storageService.hashObjectOptional(
+        await storageService.hashObject(
           { password: PASSWORD_MEDIUM },
-          PASSWORD_SALT,
+          {
+            salt: PASSWORD_SALT,
+          },
         );
 
       expect(passwordStorageObject.passwordSalt).toEqual(PASSWORD_SALT);
@@ -143,10 +152,10 @@ describe('PasswordStorageService', () => {
         typeof passwordStorageObject.passwordSalt === 'string'
       ) {
         // check if password encrypt can be decrypted
-        const isValid = await validationService.validateObject({
-          passwordPlain: PASSWORD_MEDIUM,
-          object: passwordStorageObject as PasswordStorageInterface,
-        });
+        const isValid = await validationService.validateObject(
+          PASSWORD_MEDIUM,
+          passwordStorageObject as PasswordStorageInterface,
+        );
 
         expect(isValid).toEqual(true);
       } else {
@@ -157,10 +166,22 @@ describe('PasswordStorageService', () => {
     it('should NOT generate a password on object (non provided)', async () => {
       // encrypt password
       const passwordStorageObject: Partial<PasswordStorageInterface> =
-        await storageService.hashObjectOptional({});
+        await storageService.hashObject({}, { required: false });
 
       expect(typeof passwordStorageObject.passwordHash).toEqual('undefined');
       expect(typeof passwordStorageObject.passwordSalt).toEqual('undefined');
+    });
+
+    it('should FAIL to generate a password on object (non provided, but required)', async () => {
+      const t = async () => {
+        // encrypt password
+        await storageService.hashObject({}, { required: true });
+      };
+
+      expect(t).rejects.toThrow(Error);
+      expect(t).rejects.toThrow(
+        'Password is required for hashing, but non was provided.',
+      );
     });
   });
 });
