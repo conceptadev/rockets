@@ -5,9 +5,7 @@ export class ValidateTokenServiceFixture
 {
   public discriminator = 'default';
 
-  async validateToken(
-    payload: Record<string, unknown>, // eslint-disable-line @typescript-eslint/no-unused-vars
-  ): Promise<boolean> {
+  async validateToken(_payload: Record<string, unknown>): Promise<boolean> {
     throw new Error('Method not implemented.');
   }
 }

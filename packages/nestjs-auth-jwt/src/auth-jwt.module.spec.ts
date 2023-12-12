@@ -138,10 +138,8 @@ describe(AuthJwtModule, () => {
       return 'hi';
     };
     const verifyTokenFunc = (
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      token: string,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      done: (err?: Error, decodedToken?: unknown) => void,
+      _token: string,
+      _done: (err?: Error, decodedToken?: unknown) => void,
     ) => undefined;
     const ffUserLookupService = new UserLookupServiceFixture();
     const ffVerifyTokenService = new VerifyTokenService(jwtVerifyService);

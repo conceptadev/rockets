@@ -12,7 +12,7 @@ import { UserFixture } from '../user/user.fixture';
 @Injectable()
 export class OtpServiceFixture implements AuthRecoveryOtpServiceInterface {
   async create(
-    assignment: string, // eslint-disable-line @typescript-eslint/no-unused-vars
+    _assignment: string,
     otp: OtpCreatableInterface,
   ): Promise<OtpInterface> {
     const { assignee, category, type } = otp;
@@ -31,18 +31,16 @@ export class OtpServiceFixture implements AuthRecoveryOtpServiceInterface {
   }
 
   async validate(
-    assignment: string, // eslint-disable-line @typescript-eslint/no-unused-vars
+    _assignment: string,
     otp: Pick<OtpInterface, 'category' | 'passcode'>,
-    deleteIfValid: boolean, // eslint-disable-line @typescript-eslint/no-unused-vars
+    _deleteIfValid: boolean,
   ): Promise<ReferenceAssigneeInterface<ReferenceIdInterface<string>> | null> {
     return otp.passcode === 'GOOD_PASSCODE' ? { assignee: UserFixture } : null;
   }
 
   async clear(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    assignment: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    otp: Pick<OtpInterface, 'category' | 'assignee'>,
+    _assignment: string,
+    _otp: Pick<OtpInterface, 'category' | 'assignee'>,
   ): Promise<void> {
     return;
   }

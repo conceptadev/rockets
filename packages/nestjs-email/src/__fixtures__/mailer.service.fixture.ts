@@ -8,9 +8,7 @@ import {
 export class MailerServiceFixture implements EmailSendInterface {
   discriminator = 'default';
 
-  sendMail(
-    sendMailOptions: EmailSendOptionsInterface, // eslint-disable-line @typescript-eslint/no-unused-vars
-  ): Promise<void> {
+  sendMail(_sendMailOptions: EmailSendOptionsInterface): Promise<void> {
     throw new Error('Method not implemented.');
   }
 }
