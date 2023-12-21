@@ -4,12 +4,12 @@ import {
   Provider,
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 
 import {
   VerifyTokenService,
   VerifyTokenServiceInterface,
 } from '@concepta/nestjs-authentication';
-
 import { createSettingsProvider } from '@concepta/nestjs-common';
 
 import { AuthJwtOptionsInterface } from './interfaces/auth-jwt-options.interface';
@@ -22,6 +22,7 @@ import {
 } from './auth-jwt.constants';
 import { authJwtDefaultConfig } from './config/auth-jwt-default.config';
 import { AuthJwtStrategy } from './auth-jwt.strategy';
+import { AuthJwtGuard } from './auth-jwt.guard';
 
 const RAW_OPTIONS_TOKEN = Symbol('__AUTH_JWT_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -71,6 +72,7 @@ export function createAuthJwtExports() {
     AUTH_JWT_MODULE_USER_LOOKUP_SERVICE_TOKEN,
     AUTH_JWT_MODULE_VERIFY_TOKEN_SERVICE_TOKEN,
     AuthJwtStrategy,
+    AuthJwtGuard,
   ];
 }
 
@@ -81,10 +83,12 @@ export function createAuthJwtProviders(options: {
   return [
     ...(options.providers ?? []),
     AuthJwtStrategy,
+    AuthJwtGuard,
     VerifyTokenService,
     createAuthJwtOptionsProvider(options.overrides),
     createAuthJwtVerifyTokenServiceProvider(options.overrides),
     createAuthJwtUserLookupServiceProvider(options.overrides),
+    createAuthJwtAppGuardProvider(options.overrides),
   ];
 }
 
@@ -126,5 +130,30 @@ export function createAuthJwtUserLookupServiceProvider(
     inject: [RAW_OPTIONS_TOKEN],
     useFactory: async (options: AuthJwtOptionsInterface) =>
       optionsOverrides?.userLookupService ?? options.userLookupService,
+  };
+}
+
+export function createAuthJwtAppGuardProvider(
+  optionsOverrides?: AuthJwtOptions,
+): Provider {
+  return {
+    provide: APP_GUARD,
+    inject: [RAW_OPTIONS_TOKEN, AuthJwtGuard],
+    useFactory: async (
+      options: AuthJwtOptionsInterface,
+      defaultGuard: AuthJwtGuard,
+    ) => {
+      // get app guard from the options
+      const appGuard = optionsOverrides?.appGuard ?? options?.appGuard;
+
+      // is app guard explicitly false?
+      if (appGuard === false) {
+        // yes, don't set a guard
+        return null;
+      } else {
+        // return app guard if set, or fall back to default
+        return appGuard ?? defaultGuard;
+      }
+    },
   };
 }

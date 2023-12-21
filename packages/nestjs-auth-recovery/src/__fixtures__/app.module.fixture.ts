@@ -1,5 +1,8 @@
 import { Module } from '@nestjs/common';
 import { EmailModule, EmailService } from '@concepta/nestjs-email';
+import { AuthenticationModule } from '@concepta/nestjs-authentication';
+import { AuthJwtModule } from '@concepta/nestjs-auth-jwt';
+import { JwtModule } from '@concepta/nestjs-jwt';
 
 import { AuthRecoveryModule } from '../auth-recovery.module';
 
@@ -14,6 +17,14 @@ import { MailerServiceFixture } from './email/mailer.service.fixture';
 @Module({
   imports: [
     TypeOrmModuleFixture,
+    JwtModule.forRoot({}),
+    AuthenticationModule.forRoot({}),
+    AuthJwtModule.forRootAsync({
+      inject: [UserLookupServiceFixture],
+      useFactory: (userLookupService: UserLookupServiceFixture) => ({
+        userLookupService,
+      }),
+    }),
     AuthRecoveryModule.forRootAsync({
       inject: [
         EmailService,

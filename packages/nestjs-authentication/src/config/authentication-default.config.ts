@@ -4,5 +4,7 @@ import { AuthenticationSettingsInterface } from '../interfaces/authentication-se
 
 export const authenticationDefaultConfig = registerAs(
   AUTHENTICATION_MODULE_SETTINGS_TOKEN,
-  (): AuthenticationSettingsInterface => ({}),
+  (): AuthenticationSettingsInterface => ({
+    enableGuards: true,
+  }),
 );
