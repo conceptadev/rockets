@@ -7,6 +7,7 @@ import {
 } from '../auth-recovery.constants';
 import { AuthRecoveryEmailServiceInterface } from '../interfaces/auth-recovery-email.service.interface';
 import { AuthRecoverySettingsInterface } from '../interfaces/auth-recovery-settings.interface';
+import { formatTokenUrl } from '../auth-recovery.utils';
 
 @Injectable()
 export class AuthRecoveryNotificationService
@@ -28,7 +29,11 @@ export class AuthRecoveryNotificationService
     passcode: string,
     resetTokenExp: Date,
   ): Promise<void> {
-    const { from, baseUrl } = this.config.email;
+    const {
+      from,
+      baseUrl,
+      tokenUrlFormatter = formatTokenUrl,
+    } = this.config.email;
     const { subject, fileName } = this.config.email.templates.recoverPassword;
     await this.sendEmail({
       from,
@@ -36,7 +41,7 @@ export class AuthRecoveryNotificationService
       to: email,
       template: fileName,
       context: {
-        tokenUrl: `${baseUrl}/${passcode}`,
+        tokenUrl: formatTokenUrl(baseUrl, passcode),
         tokenExp: resetTokenExp,
       },
     });
