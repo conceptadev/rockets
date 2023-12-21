@@ -22,7 +22,7 @@ export const authRecoveryDefaultConfig = registerAs(
         },
         passwordUpdated: {
           fileName:
-            __dirname + '/../assets/password-updated-successfully.template',
+            __dirname + '/../assets/password-updated-successfully.template.hbs',
           subject: 'Password Updated Successfully',
         },
       },

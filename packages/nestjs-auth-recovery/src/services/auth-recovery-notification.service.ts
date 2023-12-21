@@ -36,7 +36,7 @@ export class AuthRecoveryNotificationService
       to: email,
       template: fileName,
       context: {
-        tokenUrl: `${baseUrl}/${passcode}`,
+        tokenUrl: `${baseUrl}${passcode}`,
         tokenExp: resetTokenExp,
       },
     });
