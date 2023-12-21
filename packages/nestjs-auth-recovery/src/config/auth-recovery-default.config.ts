@@ -1,6 +1,7 @@
 import { registerAs } from '@nestjs/config';
 import { AUTH_RECOVERY_MODULE_DEFAULT_SETTINGS_TOKEN } from '../auth-recovery.constants';
 import { AuthRecoverySettingsInterface } from '../interfaces/auth-recovery-settings.interface';
+import { formatTokenUrl } from '../auth-recovery.utils';
 
 /**
  * Default configuration for auth recovery.
@@ -11,6 +12,7 @@ export const authRecoveryDefaultConfig = registerAs(
     email: {
       from: 'from',
       baseUrl: 'baseUrl',
+      tokenUrlFormatter: formatTokenUrl,
       templates: {
         recoverLogin: {
           fileName: __dirname + '/../assets/recover-login.template.hbs',

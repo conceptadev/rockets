@@ -10,6 +10,7 @@ export interface AuthRecoverySettingsInterface {
   email: {
     from: string;
     baseUrl: string;
+    tokenUrlFormatter?: (baseUrl: string, passcode: string) => string;
     templates: {
       recoverLogin: {
         fileName: string;
