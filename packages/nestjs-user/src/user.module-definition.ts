@@ -6,12 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { createSettingsProvider } from '@concepta/nestjs-common';
-import {
-  PasswordCreationService,
-  PasswordStorageService,
-  PasswordStrengthService,
-  PasswordValidationService,
-} from '@concepta/nestjs-password';
+import { PasswordCreationService } from '@concepta/nestjs-password';
 import {
   getDynamicRepositoryToken,
   TypeOrmExtModule,
@@ -91,9 +86,6 @@ export function createUserProviders(options: {
     ...(options.providers ?? []),
     UserCrudService,
     PasswordCreationService,
-    PasswordValidationService,
-    PasswordStorageService,
-    PasswordStrengthService,
     InvitationAcceptedListener,
     InvitationGetUserListener,
     createUserSettingsProvider(options.overrides),
