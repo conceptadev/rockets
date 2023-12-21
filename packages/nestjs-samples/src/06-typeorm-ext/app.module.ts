@@ -2,6 +2,7 @@ import { DataSource } from 'typeorm';
 import { Module } from '@nestjs/common';
 import { CrudModule } from '@concepta/nestjs-crud';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
+import { PasswordModule } from '@concepta/nestjs-password';
 import { UserModule } from '@concepta/nestjs-user';
 import { UserEntity } from './user/user.entity';
 
@@ -13,6 +14,7 @@ import { UserEntity } from './user/user.entity';
       entities: [UserEntity],
     }),
     CrudModule.forRoot({}),
+    PasswordModule.forRoot({}),
     UserModule.forRoot({
       entities: {
         user: {

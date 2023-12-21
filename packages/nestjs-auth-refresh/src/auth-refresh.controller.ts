@@ -12,17 +12,19 @@ import {
 import {
   IssueTokenServiceInterface,
   IssueTokenService,
-  AuthGuard,
   AuthUser,
   AuthenticationJwtResponseDto,
+  AuthPublic,
 } from '@concepta/nestjs-authentication';
-import { AUTH_REFRESH_MODULE_STRATEGY_NAME } from './auth-refresh.constants';
 import { AuthRefreshDto } from './dto/auth-refresh.dto';
+import { AuthRefreshGuard } from './auth-refresh.guard';
 
 /**
  * Auth Local controller
  */
 @Controller('token/refresh')
+@UseGuards(AuthRefreshGuard)
+@AuthPublic()
 @ApiTags('auth')
 export class AuthRefreshController {
   constructor(
@@ -42,7 +44,6 @@ export class AuthRefreshController {
     description: 'DTO containing an access token and a refresh token.',
   })
   @ApiUnauthorizedResponse()
-  @UseGuards(AuthGuard(AUTH_REFRESH_MODULE_STRATEGY_NAME))
   @Post()
   async refresh(
     @AuthUser() user: AuthenticatedUserInterface,

@@ -11,8 +11,11 @@ import { AccessControlReadOne } from './access-control-read-one.decorator';
 describe('@AccessControlReadOne', () => {
   const resource = 'a_protected_resource';
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const filterCallback: AccessControlFilterCallback = (data, user, service) => {
+  const filterCallback: AccessControlFilterCallback = (
+    _data,
+    _user,
+    _service,
+  ) => {
     return Promise.resolve(false);
   };
 

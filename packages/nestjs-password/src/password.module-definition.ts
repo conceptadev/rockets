@@ -14,6 +14,7 @@ import { PasswordSettingsInterface } from './interfaces/password-settings.interf
 import { PasswordCreationService } from './services/password-creation.service';
 import { PasswordStorageService } from './services/password-storage.service';
 import { PasswordStrengthService } from './services/password-strength.service';
+import { PasswordValidationService } from './services/password-validation.service';
 import { passwordDefaultConfig } from './config/password-default.config';
 
 const RAW_OPTIONS_TOKEN = Symbol('__PASSWORD_MODULE_RAW_OPTIONS_TOKEN__');
@@ -68,6 +69,7 @@ export function createPasswordProviders(overrides: {
     PasswordCreationService,
     PasswordStrengthService,
     PasswordStorageService,
+    PasswordValidationService,
   ];
 }
 
@@ -79,6 +81,7 @@ export function createPasswordExports(): Required<
     PasswordCreationService,
     PasswordStrengthService,
     PasswordStorageService,
+    PasswordValidationService,
   ];
 }
 

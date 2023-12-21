@@ -24,7 +24,6 @@ import { default as ormConfig } from './ormconfig.fixture';
 @Module({
   imports: [
     EventModule.forRoot({}),
-    PasswordModule.forRoot({}),
     TypeOrmExtModule.forRoot(ormConfig),
     CrudModule.forRoot({}),
     MailerModule.forRoot({ transport: { host: '' } }),
@@ -58,6 +57,7 @@ import { default as ormConfig } from './ormconfig.fixture';
         },
       },
     }),
+    PasswordModule.forRoot({}),
     UserModule.forRoot({
       settings: {
         invitationRequestEvent: InvitationAcceptedEventAsync,

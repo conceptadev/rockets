@@ -55,12 +55,10 @@ describe('AccessControlModule', () => {
   }
 
   class TestAccessService implements AccessControlServiceInterface {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async getUser(context: ExecutionContext): Promise<unknown> {
+    async getUser(_context: ExecutionContext): Promise<unknown> {
       return new TestUser(1234);
     }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async getUserRoles(context: ExecutionContext): Promise<string | string[]> {
+    async getUserRoles(_context: ExecutionContext): Promise<string | string[]> {
       return ['role1'];
     }
   }

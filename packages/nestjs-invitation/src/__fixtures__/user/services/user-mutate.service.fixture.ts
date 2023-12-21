@@ -10,7 +10,7 @@ export class UserMutateServiceFixture
   implements InvitationUserMutateServiceInterface
 {
   async create(
-    object: UserCreatableInterface, // eslint-disable-line @typescript-eslint/no-unused-vars
+    _object: UserCreatableInterface,
   ): ReturnType<InvitationUserMutateServiceInterface['create']> {
     return UserFixture;
   }

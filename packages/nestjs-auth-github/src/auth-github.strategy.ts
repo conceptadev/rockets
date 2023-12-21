@@ -37,8 +37,8 @@ export class AuthGithubStrategy extends PassportStrategy(
   }
 
   async validate(
-    accessToken: string,
-    refreshToken: string,
+    _accessToken: string,
+    _refreshToken: string,
     profile: ReferenceIdInterface & ReferenceEmailInterface,
   ): Promise<FederatedCredentialsInterface> {
     // TODO: should we save accessToken and refreshToken?

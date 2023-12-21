@@ -1,19 +1,15 @@
-import { Column, PrimaryGeneratedColumn } from 'typeorm';
-import {
-  AuditInterface,
-  ReferenceId,
-  ReferenceIdInterface,
-} from '@concepta/ts-core';
+import { Column } from 'typeorm';
+import { ReferenceIdInterface } from '@concepta/ts-core';
 import { OtpInterface } from '@concepta/ts-common';
-import { AuditPostgresEmbed } from '@concepta/typeorm-common';
+import { CommonPostgresEntity } from '@concepta/typeorm-common';
 
 /**
  * Otp Postgres Entity
  */
-export abstract class OtpPostgresEntity implements OtpInterface {
-  @PrimaryGeneratedColumn('uuid')
-  id!: ReferenceId;
-
+export abstract class OtpPostgresEntity
+  extends CommonPostgresEntity
+  implements OtpInterface
+{
   @Column()
   category!: string;
 
@@ -25,9 +21,6 @@ export abstract class OtpPostgresEntity implements OtpInterface {
 
   @Column({ type: 'timestamptz' })
   expirationDate!: Date;
-
-  @Column(() => AuditPostgresEmbed, {})
-  audit!: AuditInterface;
 
   /**
    * Should be overwrite by the table it will be assigned to

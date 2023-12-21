@@ -10,7 +10,7 @@ export class UserMutateServiceFixture
   implements FederatedUserMutateServiceInterface
 {
   async create(
-    object: FederatedUserMutateInterface, // eslint-disable-line @typescript-eslint/no-unused-vars
+    _object: FederatedUserMutateInterface,
   ): Promise<FederatedCredentialsInterface> {
     return UserFixture;
   }

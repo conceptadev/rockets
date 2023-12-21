@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
+import { AuthPublic } from '@concepta/nestjs-authentication';
 import {
   ApiBody,
   ApiBadRequestResponse,
@@ -22,6 +23,7 @@ import { AuthRecoveryRecoverLoginDto } from './dto/auth-recovery-recover-login.d
 import { AuthRecoveryUpdatePasswordDto } from './dto/auth-recovery-update-password.dto';
 
 @Controller('auth/recovery')
+@AuthPublic()
 @ApiTags('auth')
 export class AuthRecoveryController {
   constructor(private readonly authRecoveryService: AuthRecoveryService) {}

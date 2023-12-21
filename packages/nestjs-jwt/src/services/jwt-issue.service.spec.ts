@@ -24,7 +24,7 @@ describe(JwtIssueService, () => {
         throw new Error();
       });
       const t = async () => await jwtIssueService.accessToken(token);
-      expect(t).rejects.toThrowError();
+      await expect(t).rejects.toThrowError();
     });
   });
 
@@ -43,7 +43,7 @@ describe(JwtIssueService, () => {
         throw new Error();
       });
       const t = async () => await jwtIssueService.refreshToken(token);
-      expect(t).rejects.toThrowError();
+      await expect(t).rejects.toThrowError();
     });
   });
 });

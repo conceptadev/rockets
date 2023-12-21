@@ -60,12 +60,12 @@ describe(LookupService, () => {
       const result = await testLookupService.byId(testObject.id);
 
       expect(result).toBeInstanceOf(TestEntityFixture);
-      expect(result?.audit.version).toBe(testObject.audit.version);
+      expect(result?.version).toBe(testObject.version);
     });
 
     it('wrong id', async () => {
       const result = await testLookupService.byId(RANDOM_UUID);
-      expect(result?.audit.version).toBe(undefined);
+      expect(result?.version).toBe(undefined);
     });
   });
 
@@ -77,7 +77,7 @@ describe(LookupService, () => {
           throw new Error();
         });
 
-      expect(testLookupService['findOne']({})).rejects.toThrow(
+      await expect(testLookupService['findOne']({})).rejects.toThrow(
         ReferenceLookupException,
       );
     });

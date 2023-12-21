@@ -1,25 +1,15 @@
-import { Column, PrimaryGeneratedColumn } from 'typeorm';
-import {
-  AuditInterface,
-  ReferenceActive,
-  ReferenceId,
-  ReferenceIdInterface,
-} from '@concepta/ts-core';
-import { AuditSqlLiteEmbed } from '@concepta/typeorm-common';
+import { Column } from 'typeorm';
+import { ReferenceActive, ReferenceIdInterface } from '@concepta/ts-core';
+import { CommonSqliteEntity } from '@concepta/typeorm-common';
 
 import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
 import { LiteralObject } from '@nestjs/common';
 
 // TODO check this entity later
 export abstract class InvitationSqliteEntity
+  extends CommonSqliteEntity
   implements InvitationEntityInterface
 {
-  @PrimaryGeneratedColumn('uuid')
-  id!: ReferenceId;
-
-  @Column(() => AuditSqlLiteEmbed, {})
-  audit!: AuditInterface;
-
   @Column('boolean', { default: true })
   active!: ReferenceActive;
 

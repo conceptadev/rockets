@@ -18,8 +18,8 @@ import {
   IssueTokenServiceInterface,
 } from '@concepta/nestjs-authentication';
 import {
-  PasswordStorageService,
-  PasswordStorageServiceInterface,
+  PasswordValidationService,
+  PasswordValidationServiceInterface,
 } from '@concepta/nestjs-password';
 
 import {
@@ -50,7 +50,7 @@ describe(AuthLocalModule, () => {
   let userLookupService: AuthLocalUserLookupServiceInterface;
   let validateUserService: AuthLocalUserLookupServiceInterface;
   let issueTokenService: IssueTokenServiceInterface;
-  let passwordStorageService: PasswordStorageServiceInterface;
+  let passwordValidationService: PasswordValidationServiceInterface;
 
   describe(AuthLocalModule.forRoot, () => {
     beforeEach(async () => {
@@ -203,14 +203,14 @@ describe(AuthLocalModule, () => {
     userLookupService = module.get(UserLookupServiceFixture);
     validateUserService = module.get(AuthLocalValidateUserService);
     issueTokenService = module.get(IssueTokenService);
-    passwordStorageService = module.get(PasswordStorageService);
+    passwordValidationService = module.get(PasswordValidationService);
   }
 
   function commonTests() {
     expect(authLocalModule).toBeInstanceOf(AuthLocalModule);
     expect(userLookupService).toBeInstanceOf(UserLookupServiceFixture);
     expect(issueTokenService).toBeInstanceOf(IssueTokenService);
-    expect(passwordStorageService).toBeInstanceOf(PasswordStorageService);
+    expect(passwordValidationService).toBeInstanceOf(PasswordValidationService);
     expect(validateUserService).toBeInstanceOf(AuthLocalValidateUserService);
   }
 });

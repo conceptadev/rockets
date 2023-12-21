@@ -189,8 +189,7 @@ export abstract class MutateService<
 
   protected async transform(
     data: DeepPartial<Entity>,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    queryOptions?: QueryOptionsInterface,
+    _queryOptions?: QueryOptionsInterface,
   ): Promise<DeepPartial<Entity>> {
     return data;
   }

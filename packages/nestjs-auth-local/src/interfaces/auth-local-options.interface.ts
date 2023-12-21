@@ -1,5 +1,5 @@
 import { IssueTokenServiceInterface } from '@concepta/nestjs-authentication';
-import { PasswordStorageServiceInterface } from '@concepta/nestjs-password';
+import { PasswordValidationServiceInterface } from '@concepta/nestjs-password';
 import { AuthLocalSettingsInterface } from './auth-local-settings.interface';
 import { AuthLocalUserLookupServiceInterface } from './auth-local-user-lookup-service.interface';
 import { AuthLocalValidateUserServiceInterface } from './auth-local-validate-user-service.interface';
@@ -21,9 +21,9 @@ export interface AuthLocalOptionsInterface {
   validateUserService?: AuthLocalValidateUserServiceInterface;
 
   /**
-   * Implementation of a class to handle password storage
+   * Implementation of a class to handle password validation
    */
-  passwordStorageService?: PasswordStorageServiceInterface;
+  passwordValidationService?: PasswordValidationServiceInterface;
 
   /**
    * Settings

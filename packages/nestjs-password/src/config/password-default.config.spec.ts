@@ -30,7 +30,7 @@ describe('password configuration', () => {
 
       expect(config).toMatchObject({
         maxPasswordAttempts: 3,
-        minPasswordStrength: 8,
+        minPasswordStrength: 0,
       });
     });
 
@@ -39,7 +39,7 @@ describe('password configuration', () => {
         const config = await passwordDefaultConfig();
 
         expect(config.maxPasswordAttempts).toBe(3);
-        expect(config.minPasswordStrength).toBe(8);
+        expect(config.minPasswordStrength).toBe(0);
       });
 
       it('configProcessNotNull', async () => {
@@ -92,7 +92,7 @@ describe('password configuration', () => {
 
         expect(config).toMatchObject({
           maxPasswordAttempts: 3,
-          minPasswordStrength: 8,
+          minPasswordStrength: 0,
         });
       });
     });

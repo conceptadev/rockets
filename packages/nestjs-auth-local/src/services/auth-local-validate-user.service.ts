@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ReferenceIdInterface } from '@concepta/ts-core';
 import { ValidateUserService } from '@concepta/nestjs-authentication';
-import { PasswordStorageServiceInterface } from '@concepta/nestjs-password';
+import { PasswordValidationServiceInterface } from '@concepta/nestjs-password';
 import {
-  AUTH_LOCAL_MODULE_PASSWORD_STORAGE_SERVICE_TOKEN,
+  AUTH_LOCAL_MODULE_PASSWORD_VALIDATION_SERVICE_TOKEN,
   AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN,
 } from '../auth-local.constants';
 import { AuthLocalValidateUserInterface } from '../interfaces/auth-local-validate-user.interface';
@@ -18,8 +18,8 @@ export class AuthLocalValidateUserService
   constructor(
     @Inject(AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN)
     private userLookupService: AuthLocalUserLookupServiceInterface,
-    @Inject(AUTH_LOCAL_MODULE_PASSWORD_STORAGE_SERVICE_TOKEN)
-    private passwordStorageService: PasswordStorageServiceInterface,
+    @Inject(AUTH_LOCAL_MODULE_PASSWORD_VALIDATION_SERVICE_TOKEN)
+    private passwordValidationService: PasswordValidationServiceInterface,
   ) {
     super();
   }
@@ -46,7 +46,7 @@ export class AuthLocalValidateUserService
     }
 
     // validate password
-    const isValid = await this.passwordStorageService.validateObject(
+    const isValid = await this.passwordValidationService.validateObject(
       dto.password,
       user,
     );

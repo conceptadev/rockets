@@ -1,6 +1,6 @@
 import {
+  AuditInterface,
   ReferenceActiveInterface,
-  ReferenceAuditInterface,
   ReferenceEmailInterface,
   ReferenceIdInterface,
   ReferenceUsernameInterface,
@@ -11,4 +11,4 @@ export interface UserInterface
     ReferenceEmailInterface,
     ReferenceUsernameInterface,
     ReferenceActiveInterface,
-    ReferenceAuditInterface {}
+    AuditInterface {}

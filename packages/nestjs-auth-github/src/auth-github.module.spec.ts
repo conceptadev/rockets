@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { AuthenticationModule } from '@concepta/nestjs-authentication';
+import { AuthJwtModule } from '@concepta/nestjs-auth-jwt';
 import { JwtModule } from '@concepta/nestjs-jwt';
 import { CrudModule } from '@concepta/nestjs-crud';
 import {
@@ -8,6 +9,7 @@ import {
   UserLookupService,
   UserMutateService,
 } from '@concepta/nestjs-user';
+import { PasswordModule } from '@concepta/nestjs-password';
 import { FederatedModule } from '@concepta/nestjs-federated';
 import { AuthGithubController } from './auth-github.controller';
 import { AuthGithubModule } from './auth-github.module';
@@ -31,6 +33,12 @@ describe(AuthGithubModule, () => {
           JwtModule.forRoot({}),
           AuthGithubModule.forRoot({}),
           AuthenticationModule.forRoot({}),
+          AuthJwtModule.forRootAsync({
+            inject: [UserLookupService],
+            useFactory: (userLookupService) => ({
+              userLookupService,
+            }),
+          }),
           FederatedModule.forRootAsync({
             inject: [UserLookupService, UserMutateService],
             useFactory: (userLookupService, userMutateService) => ({
@@ -44,6 +52,7 @@ describe(AuthGithubModule, () => {
             },
           }),
           CrudModule.forRoot({}),
+          PasswordModule.forRoot({}),
           UserModule.forRoot({
             entities: {
               user: {

@@ -5,13 +5,13 @@ import {
   AuthenticationResponseInterface,
 } from '@concepta/ts-common';
 import {
-  AuthGuard,
   AuthUser,
   IssueTokenServiceInterface,
   AuthenticationJwtResponseDto,
+  AuthPublic,
 } from '@concepta/nestjs-authentication';
 import { AUTH_GITHUB_ISSUE_TOKEN_SERVICE_TOKEN } from './auth-github.constants';
-import { AUTH_GITHUB_STRATEGY_NAME } from './auth-github.constants';
+import { AuthGithubGuard } from './auth-github.guard';
 
 // TODO: improve documentation
 /**
@@ -30,6 +30,8 @@ import { AUTH_GITHUB_STRATEGY_NAME } from './auth-github.constants';
  *
  */
 @Controller('auth/github')
+@UseGuards(AuthGithubGuard)
+@AuthPublic()
 @ApiTags('auth')
 export class AuthGithubController {
   constructor(
@@ -43,7 +45,6 @@ export class AuthGithubController {
   @ApiOkResponse({
     description: 'Users are redirected to request their GitHub identity.',
   })
-  @UseGuards(AuthGuard(AUTH_GITHUB_STRATEGY_NAME))
   @Get('login')
   login(): void {
     // TODO: no code needed, Decorator will redirect to github
@@ -55,7 +56,6 @@ export class AuthGithubController {
     type: AuthenticationJwtResponseDto,
     description: 'DTO containing an access token and a refresh token.',
   })
-  @UseGuards(AuthGuard(AUTH_GITHUB_STRATEGY_NAME))
   @Get('callback')
   async get(
     @AuthUser() user: AuthenticatedUserInterface,

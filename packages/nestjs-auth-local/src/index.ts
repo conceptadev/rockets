@@ -5,3 +5,7 @@ export { AuthLocalValidateUserServiceInterface } from './interfaces/auth-local-v
 export * from './auth-local.module';
 export * from './auth-local.controller';
 export * from './dto/auth-local-login.dto';
+export {
+  AuthLocalGuard,
+  AuthLocalGuard as LocalAuthGuard,
+} from './auth-local.guard';

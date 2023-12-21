@@ -63,7 +63,7 @@ describe(MutateService, () => {
 
       expect(savedData).toBeInstanceOf(TestEntityFixture);
       expect(savedData.id.length).toBeGreaterThan(0);
-      expect(savedData.audit.version).toEqual(1);
+      expect(savedData.version).toEqual(1);
     });
 
     it('exception', async () => {
@@ -77,7 +77,7 @@ describe(MutateService, () => {
         return testMutateService.create({ firstName: 'Bob' });
       };
 
-      expect(t).rejects.toThrow(ReferenceMutateException);
+      await expect(t).rejects.toThrow(ReferenceMutateException);
     });
 
     it('invalid', async () => {
@@ -85,7 +85,7 @@ describe(MutateService, () => {
         return testMutateService.create({ firstName: 'B' });
       };
 
-      expect(t).rejects.toThrow(ReferenceValidationException);
+      await expect(t).rejects.toThrow(ReferenceValidationException);
     });
   });
 
@@ -94,7 +94,7 @@ describe(MutateService, () => {
       const testObject = await testFactory.create({ firstName: 'Bob' });
 
       expect(testObject.firstName).toBe('Bob');
-      expect(testObject.audit.version).toBe(1);
+      expect(testObject.version).toBe(1);
 
       const entity = await testMutateService.update({
         id: testObject.id,
@@ -103,7 +103,7 @@ describe(MutateService, () => {
 
       expect(entity).toBeInstanceOf(TestEntityFixture);
       expect(entity.firstName).toBe('Bill');
-      expect(entity.audit.version).toBe(2);
+      expect(entity.version).toBe(2);
     });
 
     it('not found', async () => {
@@ -113,7 +113,7 @@ describe(MutateService, () => {
         });
       };
 
-      expect(t()).rejects.toThrow(ReferenceIdNoMatchException);
+      await expect(t()).rejects.toThrow(ReferenceIdNoMatchException);
     });
 
     it('found but not valid', async () => {
@@ -125,7 +125,7 @@ describe(MutateService, () => {
         });
       };
 
-      expect(t).rejects.toThrow(ReferenceValidationException);
+      await expect(t).rejects.toThrow(ReferenceValidationException);
     });
 
     it('found, valid, but exception on save', async () => {
@@ -143,7 +143,7 @@ describe(MutateService, () => {
         });
       };
 
-      expect(t).rejects.toThrow(ReferenceMutateException);
+      await expect(t).rejects.toThrow(ReferenceMutateException);
     });
   });
 
@@ -153,17 +153,15 @@ describe(MutateService, () => {
       pastDate.setMilliseconds(pastDate.getMilliseconds() - 100);
       const testObject = await testFactory.create({
         firstName: 'Bob',
-        audit: {
-          dateCreated: pastDate,
-          dateUpdated: pastDate,
-          dateDeleted: null,
-          version: 5,
-        },
+        dateCreated: pastDate,
+        dateUpdated: pastDate,
+        dateDeleted: null,
+        version: 5,
       });
 
       expect(testObject).toBeInstanceOf(TestEntityFixture);
       expect(testObject.firstName).toEqual('Bob');
-      expect(testObject.audit.version).toEqual(5);
+      expect(testObject.version).toEqual(5);
 
       const entity = await testMutateService.replace({
         id: testObject.id,
@@ -172,12 +170,10 @@ describe(MutateService, () => {
 
       expect(entity).toBeInstanceOf(TestEntityFixture);
       expect(entity.firstName).toEqual('Bill');
-      expect(entity.audit.dateCreated).toEqual(testObject.audit.dateCreated);
-      expect(entity.audit.dateUpdated).not.toEqual(
-        testObject.audit.dateUpdated,
-      );
-      expect(entity.audit.dateDeleted).toEqual(null);
-      expect(entity.audit.version).toEqual(6);
+      expect(entity.dateCreated).toEqual(testObject.dateCreated);
+      expect(entity.dateUpdated).not.toEqual(testObject.dateUpdated);
+      expect(entity.dateDeleted).toEqual(null);
+      expect(entity.version).toEqual(6);
     });
 
     it('not found', async () => {
@@ -188,7 +184,7 @@ describe(MutateService, () => {
         });
       };
 
-      expect(t).rejects.toThrow(ReferenceIdNoMatchException);
+      await expect(t).rejects.toThrow(ReferenceIdNoMatchException);
     });
 
     it('found but not valid', async () => {
@@ -201,7 +197,7 @@ describe(MutateService, () => {
         });
       };
 
-      expect(t).rejects.toThrow(ReferenceValidationException);
+      await expect(t).rejects.toThrow(ReferenceValidationException);
     });
 
     it('found, valid, but exception on save', async () => {
@@ -220,7 +216,7 @@ describe(MutateService, () => {
         });
       };
 
-      expect(t).rejects.toThrow(ReferenceMutateException);
+      await expect(t).rejects.toThrow(ReferenceMutateException);
     });
   });
 
@@ -238,7 +234,7 @@ describe(MutateService, () => {
         return testMutateService['findById'](testObject.id);
       };
 
-      expect(t).rejects.toThrow(ReferenceIdNoMatchException);
+      await expect(t).rejects.toThrow(ReferenceIdNoMatchException);
     });
 
     it('id does not match', async () => {
@@ -248,7 +244,7 @@ describe(MutateService, () => {
         });
       };
 
-      expect(t).rejects.toThrow(ReferenceIdNoMatchException);
+      await expect(t).rejects.toThrow(ReferenceIdNoMatchException);
     });
 
     it('exception', async () => {
@@ -264,7 +260,7 @@ describe(MutateService, () => {
           throw new Error();
         });
 
-      expect(t).rejects.toThrow(ReferenceMutateException);
+      await expect(t).rejects.toThrow(ReferenceMutateException);
     });
   });
 
@@ -282,7 +278,7 @@ describe(MutateService, () => {
           throw new Error();
         });
 
-      expect(t).rejects.toThrow(ReferenceLookupException);
+      await expect(t).rejects.toThrow(ReferenceLookupException);
     });
   });
 });

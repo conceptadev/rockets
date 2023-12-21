@@ -29,7 +29,7 @@ describe(JwtStrategy, () => {
     it('should throw exception', async () => {
       jest.spyOn(jwtStrategyOptions, 'jwtFromRequest').mockReturnValue('');
       const t = async () => await jwtStrategy.authenticate(req);
-      expect(t).rejects.toThrow();
+      await expect(t).rejects.toThrow();
     });
 
     it('should throw exception', async () => {
@@ -39,7 +39,7 @@ describe(JwtStrategy, () => {
           throw new Error();
         });
       const t = async () => await jwtStrategy.authenticate(req);
-      expect(t).rejects.toThrow();
+      await expect(t).rejects.toThrow();
     });
 
     it('should throw exception', async () => {
@@ -49,17 +49,17 @@ describe(JwtStrategy, () => {
           throw new NotAnErrorException(new Error());
         });
       const t = async () => await jwtStrategy.authenticate(req);
-      expect(t).rejects.toThrow();
+      await expect(t).rejects.toThrow();
     });
 
     it('should throw exception', async () => {
       const t = async () => jwtStrategy['verifyTokenCallback']();
-      expect(t).rejects.toThrow();
+      await expect(t).rejects.toThrow();
     });
 
     it('should throw exception', async () => {
       const t = async () => jwtStrategy['verifyTokenCallback'](new Error());
-      expect(t).rejects.toThrow();
+      await expect(t).rejects.toThrow();
     });
 
     // it('should throw exception', async () => {

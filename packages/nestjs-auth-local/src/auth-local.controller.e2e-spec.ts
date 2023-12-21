@@ -4,7 +4,7 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AppModuleDbFixture } from './__fixtures__/app.module.fixture';
-import { PasswordStorageService } from '@concepta/nestjs-password';
+import { PasswordValidationService } from '@concepta/nestjs-password';
 import { LOGIN_SUCCESS } from './__fixtures__/user/constants';
 
 describe('AuthLocalController (e2e)', () => {
@@ -13,7 +13,7 @@ describe('AuthLocalController (e2e)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModuleDbFixture],
     })
-      .overrideProvider(PasswordStorageService)
+      .overrideProvider(PasswordValidationService)
       .useValue({
         validateObject: () => {
           return true;
