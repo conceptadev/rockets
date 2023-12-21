@@ -2,13 +2,13 @@ import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { randomUUID } from 'crypto';
 import { mock } from 'jest-mock-extended';
-import { UserFixture } from '../__fixtures__/user/user.entity.fixture';
-import { UserModuleFixture } from '../__fixtures__/user/user.module.fixture';
-import { JwtAuthGuard } from './auth-jwt.guard';
+import { UserFixture } from './__fixtures__/user/user.entity.fixture';
+import { UserModuleFixture } from './__fixtures__/user/user.module.fixture';
+import { AuthJwtGuard } from './auth-jwt.guard';
 
-describe(JwtAuthGuard, () => {
+describe(AuthJwtGuard, () => {
   let context: ExecutionContext;
-  let jwtAuthGuard: JwtAuthGuard;
+  let authJwtGuard: AuthJwtGuard;
   let spyCanActivate: jest.SpyInstance;
   let user: UserFixture;
 
@@ -18,37 +18,37 @@ describe(JwtAuthGuard, () => {
     const moduleRef = await Test.createTestingModule({
       imports: [UserModuleFixture],
     }).compile();
-    jwtAuthGuard = moduleRef.get<JwtAuthGuard>(JwtAuthGuard);
+    authJwtGuard = moduleRef.get<AuthJwtGuard>(AuthJwtGuard);
     spyCanActivate = jest
-      .spyOn(JwtAuthGuard.prototype, 'canActivate')
+      .spyOn(AuthJwtGuard.prototype, 'canActivate')
       .mockImplementation(() => true);
     user = new UserFixture();
     user.id = randomUUID();
   });
 
-  describe(JwtAuthGuard.prototype.canActivate, () => {
+  describe(AuthJwtGuard.prototype.canActivate, () => {
     it('should be success', async () => {
-      await jwtAuthGuard.canActivate(context);
+      await authJwtGuard.canActivate(context);
       expect(spyCanActivate).toBeCalled();
       expect(spyCanActivate).toBeCalledWith(context);
     });
   });
 
-  describe(JwtAuthGuard.prototype.handleRequest, () => {
+  describe(AuthJwtGuard.prototype.handleRequest, () => {
     it('should return user', () => {
-      const response = jwtAuthGuard.handleRequest<UserFixture>(undefined, user);
+      const response = authJwtGuard.handleRequest<UserFixture>(undefined, user);
       expect(response?.id).toBe(user.id);
     });
     it('should throw error', () => {
       const error = new Error();
       const t = () => {
-        jwtAuthGuard.handleRequest<UserFixture>(error, user);
+        authJwtGuard.handleRequest<UserFixture>(error, user);
       };
       expect(t).toThrow();
     });
     it('should throw error unauthorized', () => {
       const t = () => {
-        jwtAuthGuard.handleRequest(undefined, undefined);
+        authJwtGuard.handleRequest(undefined, undefined);
       };
       expect(t).toThrow(UnauthorizedException);
     });

@@ -2,7 +2,8 @@ export * from './authentication.module';
 
 export * from './config/authentication-default.config';
 
-export * from './decorators/auth-user.decorator';
+export { AuthUser } from './decorators/auth-user.decorator';
+export { AuthPublic } from './decorators/auth-public.decorator';
 
 export * from './interfaces/authentication-options.interface';
 
@@ -18,3 +19,5 @@ export { AuthenticationJwtResponseDto } from './dto/authentication-jwt-response.
 export { IssueTokenService } from './services/issue-token.service';
 export { VerifyTokenService } from './services/verify-token.service';
 export { ValidateUserService } from './services/validate-user.service';
+
+export { AuthGuardOptions, AuthGuardCtr } from './authentication.types';

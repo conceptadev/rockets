@@ -10,19 +10,21 @@ import {
   AuthenticationResponseInterface,
 } from '@concepta/ts-common';
 import {
-  AuthGuard,
   AuthUser,
   IssueTokenServiceInterface,
   AuthenticationJwtResponseDto,
+  AuthPublic,
 } from '@concepta/nestjs-authentication';
 import { AUTH_LOCAL_MODULE_ISSUE_TOKEN_SERVICE_TOKEN } from './auth-local.constants';
-import { AUTH_LOCAL_STRATEGY_NAME } from './auth-local.constants';
 import { AuthLocalLoginDto } from './dto/auth-local-login.dto';
+import { AuthLocalGuard } from './auth-local.guard';
 
 /**
  * Auth Local controller
  */
 @Controller('auth/login')
+@UseGuards(AuthLocalGuard)
+@AuthPublic()
 @ApiTags('auth')
 export class AuthLocalController {
   constructor(
@@ -42,7 +44,6 @@ export class AuthLocalController {
     description: 'DTO containing an access token and a refresh token.',
   })
   @ApiUnauthorizedResponse()
-  @UseGuards(AuthGuard(AUTH_LOCAL_STRATEGY_NAME))
   @Post()
   async login(
     @AuthUser() user: AuthenticatedUserInterface,

@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { ReferenceEmail } from '@concepta/ts-core';
+import {
+  ReferenceEmail,
+  ReferenceIdInterface,
+  ReferenceSubject,
+} from '@concepta/ts-core';
 
 import { AuthRecoveryUserLookupServiceInterface } from '../../../interfaces/auth-recovery-user-lookup.service.interface';
 
@@ -23,5 +27,9 @@ export class UserLookupServiceFixture
     email: ReferenceEmail,
   ): ReturnType<AuthRecoveryUserLookupServiceInterface['byEmail']> {
     return email === UserFixture.email ? UserFixture : null;
+  }
+
+  async bySubject(subject: ReferenceSubject): Promise<ReferenceIdInterface> {
+    throw new Error(`Method not implemented, can't get ${subject}.`);
   }
 }

@@ -1,11 +1,18 @@
 import {
-  createParamDecorator,
-  // ExecutionContext,
+  CanActivate,
+  ExecutionContext,
   NotImplementedException,
 } from '@nestjs/common';
+import { AuthGuardCtr } from '../authentication.types';
 
-export const FastifyAuthGuard = createParamDecorator(() => {
-  // (data: string, ctx: ExecutionContext) => {
-  // TODO: Add Fastify integration for passport logic
-  throw new NotImplementedException();
-});
+export const FastifyAuthGuard = (_strategyName: string): AuthGuardCtr => {
+  class FastifyAuthGuard implements CanActivate {
+    canActivate(
+      _context: ExecutionContext,
+    ): ReturnType<CanActivate['canActivate']> {
+      throw new NotImplementedException();
+    }
+  }
+
+  return FastifyAuthGuard;
+};
