@@ -12,3 +12,4 @@ export * from './interfaces/password-storage.interface';
 export * from './interfaces/password-storage-service.interface';
 export * from './interfaces/password-validation-service.interface';
 export * from './interfaces/password-creation-service.interface';
+export { PasswordCreateObjectOptionsInterface } from './interfaces/password-create-object-options.interface';

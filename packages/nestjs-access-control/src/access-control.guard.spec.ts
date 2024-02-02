@@ -1,33 +1,33 @@
+import { AccessControl } from 'accesscontrol';
+import { mock } from 'jest-mock-extended';
+import { Reflector } from '@nestjs/core';
+import { Controller, ExecutionContext, Injectable } from '@nestjs/common';
+import { HttpArgumentsHost } from '@nestjs/common/interfaces';
+import { Test, TestingModule } from '@nestjs/testing';
 import {
-  ACCESS_CONTROL_MODULE_CTLR_METADATA,
-  ACCESS_CONTROL_MODULE_FILTERS_METADATA,
+  ACCESS_CONTROL_MODULE_QUERY_METADATA,
   ACCESS_CONTROL_MODULE_GRANT_METADATA,
   ACCESS_CONTROL_MODULE_SETTINGS_TOKEN,
 } from './constants';
-import {
-  AccessControlFilterCallback,
-  AccessControlFilterOption,
-} from './interfaces/access-control-filter-option.interface';
-import { Controller, ExecutionContext } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
 
-import { AccessControl } from 'accesscontrol';
-import { AccessControlAction } from './enums/access-control-action.enum';
-import { AccessControlCreateOne } from './decorators/access-control-create-one.decorator';
-import { AccessControlFilterService } from './interfaces/access-control-filter-service.interface';
-import { AccessControlFilterType } from './enums/access-control-filter-type.enum';
-import { AccessControlGrantOption } from './interfaces/access-control-grant-option.interface';
-import { AccessControlGuard } from './access-control.guard';
-import { AccessControlService } from './services/access-control.service';
+import { ActionEnum } from './enums/action.enum';
+import { PossessionEnum } from './enums/possession.enum';
+
+import { AccessControlServiceInterface } from './interfaces/access-control-service.interface';
+import { AccessControlContextInterface } from './interfaces/access-control-context.interface';
 import { AccessControlOptionsInterface } from './interfaces/access-control-options.interface';
-import { AccessControlMetadataInterface } from './interfaces/access-control-metadata.interface';
+import { AccessControlQueryOptionInterface } from './interfaces/access-control-query-option.interface';
+import { AccessControlGrantOptionInterface } from './interfaces/access-control-grant-option.interface';
+import { CanAccess } from './interfaces/can-access.interface';
+
+import { AccessControlCreateOne } from './decorators/access-control-create-one.decorator';
+import { AccessControlQuery } from './decorators/access-control-query.decorator';
 import { AccessControlReadMany } from './decorators/access-control-read-many.decorator';
 import { AccessControlReadOne } from './decorators/access-control-read-one.decorator';
-import { AccessControlServiceInterface } from './interfaces/access-control-service.interface';
-import { HttpArgumentsHost } from '@nestjs/common/interfaces';
-import { Reflector } from '@nestjs/core';
-import { UseAccessControl } from './decorators/use-access-control.decorator';
-import { mock } from 'jest-mock-extended';
+
+import { AccessControlGuard } from './access-control.guard';
+import { AccessControlService } from './services/access-control.service';
+import { AccessControlContext } from './access-control.context';
 
 describe('AccessControlModule', () => {
   const resourceNoAccess = 'protected_resource_no_access';
@@ -36,26 +36,26 @@ describe('AccessControlModule', () => {
   const resourceGetOneOwn = 'resource_get_one_own';
   const resourceCreateOwn = 'resource_create_own';
 
-  const filterFail: AccessControlFilterCallback = jest
-    .fn()
-    .mockResolvedValue(false);
-
-  const filterPass: AccessControlFilterCallback = jest
-    .fn()
-    .mockResolvedValue(true);
-
   class TestUser {
     constructor(public id: number) {}
   }
 
-  class TestFilterService implements AccessControlFilterService {
-    async anyMethodName() {
+  @Injectable()
+  class TestQueryServicePass implements CanAccess {
+    async canAccess(_context: AccessControlContextInterface) {
       return true;
     }
   }
 
+  @Injectable()
+  class TestQueryServiceFail implements CanAccess {
+    async canAccess(_context: AccessControlContextInterface) {
+      return false;
+    }
+  }
+
   class TestAccessService implements AccessControlServiceInterface {
-    async getUser(_context: ExecutionContext): Promise<unknown> {
+    async getUser(_context: ExecutionContext): Promise<TestUser> {
       return new TestUser(1234);
     }
     async getUserRoles(_context: ExecutionContext): Promise<string | string[]> {
@@ -64,7 +64,6 @@ describe('AccessControlModule', () => {
   }
 
   @Controller()
-  @UseAccessControl()
   class TestController {
     getOpen() {
       return undefined;
@@ -81,35 +80,29 @@ describe('AccessControlModule', () => {
     getOwn() {
       return undefined;
     }
-    @AccessControlReadMany(resourceGetOwn, filterFail)
-    getOwnFilterFail() {
+    @AccessControlReadMany(resourceGetOwn)
+    @AccessControlQuery({ service: TestQueryServiceFail })
+    getOwnQueryFail() {
       return undefined;
     }
-    @AccessControlReadMany(resourceGetOwn, filterPass)
-    getOwnFilterPass() {
+    @AccessControlReadMany(resourceGetOwn)
+    @AccessControlQuery({ service: TestQueryServicePass })
+    getOwnQueryPass() {
       return undefined;
     }
-    @AccessControlCreateOne(resourceCreateOwn, filterPass)
-    createOwnFilterPass() {
+    @AccessControlCreateOne(resourceCreateOwn)
+    @AccessControlQuery({ service: TestQueryServicePass })
+    createOwnQueryPass() {
       return undefined;
     }
-    @AccessControlReadOne(resourceGetOneOwn, filterPass)
-    getOneOwnFilterPass() {
-      return undefined;
-    }
-  }
-
-  @Controller()
-  @UseAccessControl({ service: TestFilterService })
-  class TestControllerWithService {
-    @AccessControlReadMany(resourceGetOwn, filterPass)
-    getOwnFilterPass() {
+    @AccessControlReadOne(resourceGetOneOwn)
+    @AccessControlQuery({ service: TestQueryServicePass })
+    getOneOwnQueryPass() {
       return undefined;
     }
   }
 
-  const controller = new TestController();
-  const controllerWithService = new TestControllerWithService();
+  let controller: TestController;
 
   const rules = new AccessControl();
   rules.grant('role1').readAny(resourceGetAny);
@@ -120,18 +113,24 @@ describe('AccessControlModule', () => {
 
   let moduleRef: TestingModule;
   let guard: AccessControlGuard;
-  const reflector: Reflector = new Reflector();
-  const moduleConfig: AccessControlOptionsInterface = {
-    settings: { rules: rules },
-    service: new TestAccessService(),
-  };
+  let testQueryServicePass: TestQueryServicePass;
+  let testQueryServiceFail: TestQueryServiceFail;
+  let reflector: Reflector;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
+    const moduleConfig: AccessControlOptionsInterface = {
+      settings: { rules: rules },
+      service: new TestAccessService(),
+    };
+
+    reflector = new Reflector();
+
     moduleRef = await Test.createTestingModule({
       providers: [
         AccessControlGuard,
         TestAccessService,
-        TestFilterService,
+        TestQueryServicePass,
+        TestQueryServiceFail,
         {
           provide: AccessControlService,
           useClass: TestAccessService,
@@ -144,23 +143,21 @@ describe('AccessControlModule', () => {
       ],
     }).compile();
 
+    controller = new TestController();
     guard = moduleRef.get<AccessControlGuard>(AccessControlGuard);
+    testQueryServicePass =
+      moduleRef.get<TestQueryServicePass>(TestQueryServicePass);
+    testQueryServiceFail =
+      moduleRef.get<TestQueryServiceFail>(TestQueryServiceFail);
+  });
+
+  afterEach(async () => {
+    jest.clearAllMocks();
   });
 
   describe('guard provider', () => {
     it('should be of correct type', async () => {
       expect(guard).toBeInstanceOf(AccessControlGuard);
-    });
-  });
-
-  describe('access filter service', () => {
-    it('should be configured', async () => {
-      const config: AccessControlMetadataInterface = reflector.get(
-        ACCESS_CONTROL_MODULE_CTLR_METADATA,
-        TestControllerWithService,
-      );
-
-      expect(config.service).toEqual(TestFilterService);
     });
   });
 
@@ -180,9 +177,9 @@ describe('AccessControlModule', () => {
         controller.getNoAccess,
       );
 
-      expect(grants).toEqual<AccessControlGrantOption[]>([
+      expect(grants).toEqual<AccessControlGrantOptionInterface[]>([
         {
-          action: AccessControlAction.READ,
+          action: ActionEnum.READ,
           resource: resourceNoAccess,
         },
       ]);
@@ -194,9 +191,9 @@ describe('AccessControlModule', () => {
         controller.getAny,
       );
 
-      expect(grants).toEqual<AccessControlGrantOption[]>([
+      expect(grants).toEqual<AccessControlGrantOptionInterface[]>([
         {
-          action: AccessControlAction.READ,
+          action: ActionEnum.READ,
           resource: resourceGetAny,
         },
       ]);
@@ -208,40 +205,38 @@ describe('AccessControlModule', () => {
         controller.getOwn,
       );
 
-      expect(grants).toEqual<AccessControlGrantOption[]>([
+      expect(grants).toEqual<AccessControlGrantOptionInterface[]>([
         {
-          action: AccessControlAction.READ,
+          action: ActionEnum.READ,
           resource: resourceGetOwn,
         },
       ]);
     });
   });
 
-  describe('access filters', () => {
-    it('should have filters set for getOwnFilterFail', async () => {
-      const filters = reflector.get(
-        ACCESS_CONTROL_MODULE_FILTERS_METADATA,
-        controller.getOwnFilterFail,
+  describe('access queries', () => {
+    it('should have queries set for getOwnQueryFail', async () => {
+      const queries = reflector.get(
+        ACCESS_CONTROL_MODULE_QUERY_METADATA,
+        controller.getOwnQueryFail,
       );
 
-      expect(filters).toEqual<AccessControlFilterOption[]>([
+      expect(queries).toEqual<AccessControlQueryOptionInterface[]>([
         {
-          type: AccessControlFilterType.QUERY,
-          filter: filterFail,
+          service: TestQueryServiceFail,
         },
       ]);
     });
 
-    it('should have filters set for getOwnFilterPass', async () => {
-      const filters = reflector.get(
-        ACCESS_CONTROL_MODULE_FILTERS_METADATA,
-        controller.getOwnFilterPass,
+    it('should have query set for getOwnQueryPass', async () => {
+      const queries = reflector.get(
+        ACCESS_CONTROL_MODULE_QUERY_METADATA,
+        controller.getOwnQueryPass,
       );
 
-      expect(filters).toEqual<AccessControlFilterOption[]>([
+      expect(queries).toEqual<AccessControlQueryOptionInterface[]>([
         {
-          type: AccessControlFilterType.QUERY,
-          filter: filterPass,
+          service: TestQueryServicePass,
         },
       ]);
     });
@@ -280,109 +275,134 @@ describe('AccessControlModule', () => {
       expect(canActivate).toEqual(true);
     });
 
-    it('should NOT allow activation, filter type not found on request', async () => {
+    it('should NOT allow activation, request not found on args host', async () => {
       const argsHost = mock<HttpArgumentsHost>();
-      argsHost.getRequest.mockReturnValue({ not_a_valide_type: {} });
+      argsHost.getRequest.mockReturnValue(null);
 
       const context = mock<ExecutionContext>();
       context.getClass.mockReturnValue(TestController);
-      context.getHandler.mockReturnValue(controller.getOwnFilterPass);
+      context.getHandler.mockReturnValue(controller.getOwnQueryPass);
       context.switchToHttp.mockReturnValue(argsHost);
 
+      const querySpy = jest.spyOn(testQueryServicePass, 'canAccess');
+
       const canActivate: boolean = await guard.canActivate(context);
-      expect(filterPass).not.toHaveBeenCalled();
+      expect(querySpy).not.toHaveBeenCalled();
       expect(canActivate).toEqual(false);
     });
 
-    it('should NOT allow activation, query filtered', async () => {
+    it('should NOT allow activation, query string data', async () => {
       const argsHost = mock<HttpArgumentsHost>();
       argsHost.getRequest.mockReturnValue({ query: { foo: 'bar' } });
 
       const context = mock<ExecutionContext>();
       context.getClass.mockReturnValue(TestController);
-      context.getHandler.mockReturnValue(controller.getOwnFilterFail);
+      context.getHandler.mockReturnValue(controller.getOwnQueryFail);
       context.switchToHttp.mockReturnValue(argsHost);
 
+      const querySpy = jest.spyOn(testQueryServiceFail, 'canAccess');
+
       const canActivate: boolean = await guard.canActivate(context);
-      expect(filterFail).toHaveBeenCalledTimes(1);
+      expect(querySpy).toHaveBeenCalledTimes(1);
       expect(canActivate).toEqual(false);
     });
 
-    it('should allow activation, query filtered', async () => {
+    it('should allow activation, query string data', async () => {
       const argsHost = mock<HttpArgumentsHost>();
+
       argsHost.getRequest.mockReturnValue({ query: { q1: 'abc' } });
 
       const context = mock<ExecutionContext>();
       context.getClass.mockReturnValue(TestController);
-      context.getHandler.mockReturnValue(controller.getOwnFilterPass);
+      context.getHandler.mockReturnValue(controller.getOwnQueryPass);
       context.switchToHttp.mockReturnValue(argsHost);
 
+      const expectedAccessControlContext = new AccessControlContext({
+        request: {
+          query: {
+            q1: 'abc',
+          },
+        },
+        user: { id: 1234 },
+        query: {
+          possession: PossessionEnum.OWN,
+          resource: 'resource_get_own',
+          action: ActionEnum.READ,
+          role: ['role1'],
+        },
+        accessControl: rules,
+        executionContext: context,
+      });
+
+      const querySpy = jest.spyOn(testQueryServicePass, 'canAccess');
+
       const canActivate: boolean = await guard.canActivate(context);
-      expect(filterPass).toHaveBeenCalledTimes(1);
-      expect(filterPass).toHaveBeenCalledWith(
-        { q1: 'abc' },
-        { id: 1234 },
-        undefined,
-      );
+      expect(querySpy).toHaveBeenCalledTimes(1);
+      expect(querySpy).toHaveBeenCalledWith(expectedAccessControlContext);
       expect(canActivate).toEqual(true);
     });
 
-    it('should allow activation, body filtered', async () => {
+    it('should allow activation, body data', async () => {
       const argsHost = mock<HttpArgumentsHost>();
       argsHost.getRequest.mockReturnValue({ body: { b1: 'xyz' } });
 
       const context = mock<ExecutionContext>();
       context.getClass.mockReturnValue(TestController);
-      context.getHandler.mockReturnValue(controller.createOwnFilterPass);
+      context.getHandler.mockReturnValue(controller.createOwnQueryPass);
       context.switchToHttp.mockReturnValue(argsHost);
 
+      const expectedAccessControlContext = new AccessControlContext({
+        request: {
+          body: { b1: 'xyz' },
+        },
+        user: { id: 1234 },
+        query: {
+          possession: PossessionEnum.OWN,
+          resource: 'resource_create_own',
+          action: ActionEnum.CREATE,
+          role: ['role1'],
+        },
+        accessControl: rules,
+        executionContext: context,
+      });
+
+      const querySpy = jest.spyOn(testQueryServicePass, 'canAccess');
+
       const canActivate: boolean = await guard.canActivate(context);
-      expect(filterPass).toHaveBeenCalledTimes(1);
-      expect(filterPass).toHaveBeenCalledWith(
-        { b1: 'xyz' },
-        { id: 1234 },
-        undefined,
-      );
+      expect(querySpy).toHaveBeenCalledTimes(1);
+      expect(querySpy).toHaveBeenCalledWith(expectedAccessControlContext);
       expect(canActivate).toEqual(true);
     });
 
-    it('should allow activation, path filtered', async () => {
+    it('should allow activation, path data', async () => {
       const argsHost = mock<HttpArgumentsHost>();
       argsHost.getRequest.mockReturnValue({ params: { id: 7890 } });
 
       const context = mock<ExecutionContext>();
       context.getClass.mockReturnValue(TestController);
-      context.getHandler.mockReturnValue(controller.getOneOwnFilterPass);
+      context.getHandler.mockReturnValue(controller.getOneOwnQueryPass);
       context.switchToHttp.mockReturnValue(argsHost);
 
-      const canActivate: boolean = await guard.canActivate(context);
-      expect(filterPass).toHaveBeenCalledTimes(1);
-      expect(filterPass).toHaveBeenCalledWith(
-        { id: 7890 },
-        { id: 1234 },
-        undefined,
-      );
-      expect(canActivate).toEqual(true);
-    });
+      const querySpy = jest.spyOn(testQueryServicePass, 'canAccess');
 
-    it('should allow activation, query filtered, with configured filter service', async () => {
-      const argsHost = mock<HttpArgumentsHost>();
-      argsHost.getRequest.mockReturnValue({ query: { foo: 'bar' } });
-
-      const context = mock<ExecutionContext>();
-      context.getClass.mockReturnValue(TestControllerWithService);
-      context.getHandler.mockReturnValue(
-        controllerWithService.getOwnFilterPass,
-      );
-      context.switchToHttp.mockReturnValue(argsHost);
+      const expectedAccessControlContext = new AccessControlContext({
+        request: {
+          params: { id: 7890 },
+        },
+        user: { id: 1234 },
+        query: {
+          possession: PossessionEnum.OWN,
+          resource: 'resource_get_one_own',
+          action: ActionEnum.READ,
+          role: ['role1'],
+        },
+        accessControl: rules,
+        executionContext: context,
+      });
 
       const canActivate: boolean = await guard.canActivate(context);
-      expect(filterPass).toHaveBeenCalledTimes(1);
-      expect(filterPass).toHaveBeenCalledWith(
-        { foo: 'bar' },
-        { id: 1234 },
-        moduleRef.get(TestFilterService),
-      );
+      expect(querySpy).toHaveBeenCalledTimes(1);
+      expect(querySpy).toHaveBeenCalledWith(expectedAccessControlContext);
       expect(canActivate).toEqual(true);
     });
   });

@@ -30,7 +30,7 @@ export class AccessControlModule extends AccessControlModuleClass {
     return {
       module: AccessControlModule,
       imports: createAccessControlImports(options),
-      providers: createAccessControlProviders({ options }),
+      providers: createAccessControlProviders({ overrides: options }),
       exports: createAccessControlExports(),
     };
   }

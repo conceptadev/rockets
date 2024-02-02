@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { ACCESS_CONTROL_MODULE_GRANT_METADATA } from '../constants';
-import { AccessControlAction } from '../enums/access-control-action.enum';
+import { ActionEnum } from '../enums/action.enum';
 import { AccessControlGrant } from './access-control-grant.decorator';
 
 describe('@AccessControlGrant', () => {
@@ -10,28 +10,28 @@ describe('@AccessControlGrant', () => {
   class TestController {
     @AccessControlGrant({
       resource: resource,
-      action: AccessControlAction.CREATE,
+      action: ActionEnum.CREATE,
     })
     createOne() {
       return null;
     }
     @AccessControlGrant({
       resource: resource,
-      action: AccessControlAction.READ,
+      action: ActionEnum.READ,
     })
     getOne() {
       return null;
     }
     @AccessControlGrant({
       resource: resource,
-      action: AccessControlAction.UPDATE,
+      action: ActionEnum.UPDATE,
     })
     updateOne() {
       return null;
     }
     @AccessControlGrant({
       resource: resource,
-      action: AccessControlAction.DELETE,
+      action: ActionEnum.DELETE,
     })
     deleteOne() {
       return null;
@@ -50,7 +50,7 @@ describe('@AccessControlGrant', () => {
       expect(grants).toEqual([
         {
           resource: resource,
-          action: AccessControlAction.CREATE,
+          action: ActionEnum.CREATE,
         },
       ]);
     });
@@ -64,7 +64,7 @@ describe('@AccessControlGrant', () => {
       expect(grants).toEqual([
         {
           resource: resource,
-          action: AccessControlAction.READ,
+          action: ActionEnum.READ,
         },
       ]);
     });
@@ -78,7 +78,7 @@ describe('@AccessControlGrant', () => {
       expect(grants).toEqual([
         {
           resource: resource,
-          action: AccessControlAction.UPDATE,
+          action: ActionEnum.UPDATE,
         },
       ]);
     });
@@ -92,7 +92,7 @@ describe('@AccessControlGrant', () => {
       expect(grants).toEqual([
         {
           resource: resource,
-          action: AccessControlAction.DELETE,
+          action: ActionEnum.DELETE,
         },
       ]);
     });

@@ -11,6 +11,7 @@ export { AuthenticatedUserInterface } from './authentication/interfaces/authenti
 export { AuthorizationPayloadInterface } from './authorization/interfaces/authorization-payload.interface';
 
 export { PasswordPlainInterface } from './password/interfaces/password-plain.interface';
+export { PasswordPlainCurrentInterface } from './password/interfaces/password-plain-current.interface';
 
 export { OrgInterface } from './org/interfaces/org.interface';
 export { OrgOwnerInterface } from './org/interfaces/org-owner.interface';

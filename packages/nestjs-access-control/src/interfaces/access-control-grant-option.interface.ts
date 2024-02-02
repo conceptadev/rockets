@@ -1,8 +1,6 @@
-import { AccessControlAction } from '../enums/access-control-action.enum';
+import { ActionEnum } from '../enums/action.enum';
 
-export interface AccessControlGrantOption {
-  resource: AccessControlGrantResource;
-  action: AccessControlAction;
+export interface AccessControlGrantOptionInterface {
+  resource: string;
+  action: ActionEnum;
 }
-
-export type AccessControlGrantResource = string;
