@@ -6,9 +6,9 @@ import {
   UserCreatableInterface,
   UserUpdatableInterface,
 } from '@concepta/ts-common';
-import { PasswordCreationService } from '@concepta/nestjs-password';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 
+import { UserPasswordService } from './user-password.service';
 import { USER_MODULE_USER_ENTITY_KEY } from '../user.constants';
 import { UserEntityInterface } from '../interfaces/user-entity.interface';
 import { UserMutateServiceInterface } from '../interfaces/user-mutate-service.interface';
@@ -39,7 +39,7 @@ export class UserMutateService
   constructor(
     @InjectDynamicRepository(USER_MODULE_USER_ENTITY_KEY)
     repo: Repository<UserEntityInterface>,
-    private passwordCreationService: PasswordCreationService,
+    private userPasswordService: UserPasswordService,
   ) {
     super(repo);
   }
@@ -50,9 +50,7 @@ export class UserMutateService
     // do we need to hash the password?
     if ('password' in user && typeof user.password === 'string') {
       // yes, hash it
-      return this.passwordCreationService.createObject(user, {
-        required: false,
-      });
+      return this.userPasswordService.setPassword(user);
     } else {
       // no changes
       return user;

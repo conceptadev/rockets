@@ -147,103 +147,89 @@ import { acRules } from './app.acl';
 export class AppModule {}
 ```
 
-### Implement on your controller (nestjsx CRUD module with Passport guard example)
+### Implement on your controller (Passport guard example)
 
 ```typescript
-import { Controller, UseGuards } from '@nestjs/common';
-import { Crud, CrudController } from '@nestjsx/crud';
-import { User } from './user.entity';
-import { UserService } from './user.service';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
-import { AppResource } from '../../app.acl';
+import { ApiTags } from '@nestjs/swagger';
+import { Controller, Body, Query, Param } from '@nestjs/common';
 import {
+  AccessControlCreateMany,
   AccessControlCreateOne,
   AccessControlDeleteOne,
-  AccessControlGuard,
   AccessControlReadMany,
   AccessControlReadOne,
+  AccessControlRecoverOne,
   AccessControlUpdateOne,
-  UseAccessControl,
 } from '@concepta/nestjs-access-control';
-import { UserDto, CreateUserDto, UpdateUserDto } from './dto';
-import { UserAccessControlFilterService } from './user-access-control-filter.service';
 
-@ApiTags(AppResource.User)
-@ApiBearerAuth()
-@Crud({
-  model: {
-    type: UserDto,
-  },
-  dto: {
-    create: CreateUserDto,
-    update: UpdateUserDto,
-  },
-  routes: {
-    only: [
-      'getManyBase',
-      'getOneBase',
-      'createOneBase',
-      'updateOneBase',
-      'deleteOneBase',
-    ],
-    getManyBase: {
-      decorators: [
-        ApiOperation({
-          operationId: 'user_getMany',
-        }),
-        AccessControlReadMany(AppResource.UserList),
-      ],
-    },
-    getOneBase: {
-      decorators: [
-        ApiOperation({
-          operationId: 'user_getOne',
-        }),
-        AccessControlReadOne(
-          AppResource.User,
-          async (
-            params: { id: string },
-            user: User,
-            service: UserAccessControlFilterService,
-          ): Promise<boolean> => {
-            return (
-              params.id === user.id && true === service.userCanRead(id, user)
-            );
-          },
-        ),
-      ],
-    },
-    createOneBase: {
-      decorators: [
-        ApiOperation({
-          operationId: 'user_createOne',
-        }),
-        AccessControlCreateOne(AppResource.User),
-      ],
-    },
-    updateOneBase: {
-      decorators: [
-        ApiOperation({
-          operationId: 'user_updateOne',
-        }),
-        AccessControlUpdateOne(AppResource.User),
-      ],
-    },
-    deleteOneBase: {
-      decorators: [
-        ApiOperation({
-          operationId: 'user_deleteOne',
-        }),
-        AccessControlDeleteOne(AppResource.User),
-      ],
-    },
-  },
-})
-@Controller(AppResource.User)
-@UseGuards(AuthGuard(), AccessControlGuard)
-@UseAccessControl({ service: UserAccessControlFilterService })
-export class UserController implements CrudController<User> {
-  constructor(public service: UserService) {}
+import { UserResource } from './user.types';
+import { UserCreateDto } from './dto/user-create.dto';
+import { UserCreateManyDto } from './dto/user-create-many.dto';
+import { UserUpdateDto } from './dto/user-update.dto';
+
+/**
+ * User controller.
+ */
+@Controller('user')
+@ApiTags('user')
+export class UserController {
+  /**
+   * Get many
+   */
+  @AccessControlReadMany(UserResource.Many)
+  async getMany(@Query() query: unknown) {
+    // ...
+  }
+
+  /**
+   * Get one
+   */
+  @AccessControlReadOne(UserResource.One)
+  async getOne(@Param('id') id: string) {
+    // ...
+  }
+
+  /**
+   * Create many
+   */
+  @AccessControlCreateMany(UserResource.Many)
+  async createMany(@Body() userCreateManyDto: UserCreateManyDto) {
+    // ...
+  }
+
+  /**
+   * Create one
+   */
+  @AccessControlCreateOne(UserResource.One)
+  async createOne(@Body() userCreateDto: UserCreateDto) {
+    // ...
+  }
+
+  /**
+   * Update one
+   */
+  @AccessControlUpdateOne(UserResource.One)
+  async updateOne(
+    @Param('id') userId: string,
+    @Body() userUpdateDto: UserUpdateDto,
+  ) {
+    // ...
+  }
+
+  /**
+   * Delete one
+   */
+  @AccessControlDeleteOne(UserResource.One)
+  async deleteOne(@Param('id') id: string) {
+    // ...
+  }
+
+  /**
+   * Recover one
+   */
+  @AccessControlRecoverOne(UserResource.One)
+  async recoverOne(@Param('id') id: string) {
+    // ...
+  }
 }
 ```

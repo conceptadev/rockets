@@ -27,10 +27,14 @@
     "@nestjs/swagger": "^6.0.0"
   },
   "devDependencies": {
+    "@concepta/nestjs-authentication": "^4.0.0-alpha.37",
+    "@concepta/nestjs-auth-jwt": "^4.0.0-alpha.37",
+    "@concepta/nestjs-jwt": "^4.0.0-alpha.37",
     "@concepta/typeorm-seeding": "^4.0.0-beta.0",
     "@faker-js/faker": "^6.0.0-alpha.6",
     "@nestjs/testing": "^9.0.0",
     "@nestjs/typeorm": "^9.0.0",
+    "accesscontrol": "^2.2.1",
     "jest-mock-extended": "^2.0.4",
     "supertest": "^6.1.6"
   },

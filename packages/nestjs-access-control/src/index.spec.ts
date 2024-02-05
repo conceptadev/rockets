@@ -1,19 +1,20 @@
 import {
-  AccessControlAction,
+  ActionEnum,
+  PossessionEnum,
   AccessControlCreateMany,
   AccessControlCreateOne,
   AccessControlDeleteOne,
-  AccessControlFilter,
-  AccessControlFilterType,
+  AccessControlQuery,
   AccessControlGrant,
   AccessControlGuard,
   AccessControlModule,
+  AccessControlContext,
   AccessControlReadMany,
   AccessControlReadOne,
   AccessControlRecoverOne,
   AccessControlReplaceOne,
   AccessControlUpdateOne,
-  UseAccessControl,
+  AccessControlService,
 } from './index';
 
 describe('Index', () => {
@@ -21,6 +22,11 @@ describe('Index', () => {
   it('All exported modules should be imported', () => {
     expect(AccessControlGuard).toEqual(expect.any(Function));
     expect(AccessControlModule).toEqual(expect.any(Function));
+    expect(AccessControlContext).toEqual(expect.any(Function));
+  });
+
+  it('All exported services should be imported', () => {
+    expect(AccessControlService).toEqual(expect.any(Function));
   });
 
   // decorators
@@ -28,19 +34,18 @@ describe('Index', () => {
     expect(AccessControlCreateMany).toEqual(expect.any(Function));
     expect(AccessControlCreateOne).toEqual(expect.any(Function));
     expect(AccessControlDeleteOne).toEqual(expect.any(Function));
-    expect(AccessControlFilter).toEqual(expect.any(Function));
+    expect(AccessControlQuery).toEqual(expect.any(Function));
     expect(AccessControlGrant).toEqual(expect.any(Function));
     expect(AccessControlReadMany).toEqual(expect.any(Function));
     expect(AccessControlReadOne).toEqual(expect.any(Function));
     expect(AccessControlUpdateOne).toEqual(expect.any(Function));
     expect(AccessControlRecoverOne).toEqual(expect.any(Function));
     expect(AccessControlReplaceOne).toEqual(expect.any(Function));
-    expect(UseAccessControl).toEqual(expect.any(Function));
   });
 
   // enums
   it('All exported enums should be imported', () => {
-    expect(AccessControlAction).toEqual(expect.any(Object));
-    expect(AccessControlFilterType).toEqual(expect.any(Object));
+    expect(ActionEnum).toEqual(expect.any(Object));
+    expect(PossessionEnum).toEqual(expect.any(Object));
   });
 });
