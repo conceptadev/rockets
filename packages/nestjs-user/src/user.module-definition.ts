@@ -194,12 +194,9 @@ export function createUserAccessQueryServiceProvider(
   return {
     provide: UserAccessQueryService,
     inject: [RAW_OPTIONS_TOKEN, UserPasswordService],
-    useFactory: async (
-      options: UserOptionsInterface,
-      userPasswordService: UserPasswordService,
-    ) =>
+    useFactory: async (options: UserOptionsInterface) =>
       optionsOverrides?.userAccessQueryService ??
       options.userAccessQueryService ??
-      new UserAccessQueryService(userPasswordService),
+      new UserAccessQueryService(),
   };
 }

@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ReferenceId, ReferenceIdInterface } from '@concepta/ts-core';
 import {
+  AuthenticatedUserInterface,
   PasswordPlainCurrentInterface,
   PasswordPlainInterface,
 } from '@concepta/ts-common';
@@ -38,25 +39,25 @@ export class UserPasswordService implements UserPasswordServiceInterface {
     passwordDto: Partial<
       PasswordPlainInterface & PasswordPlainCurrentInterface
     >,
-    userId?: ReferenceId,
+    userToUpdateId?: ReferenceId,
+    authorizedUser?: AuthenticatedUserInterface,
   ): ReturnType<PasswordCreationService['createObject']> {
-    // are we updating?
-    if (userId) {
-      // yes, get the user
-      const userToUpdate = await this.getUserById(userId);
-
-      // is the user updating their own password?
-      if (userToUpdate.id === userId) {
-        // call current password validation helper
-        await this.validateCurrent(userToUpdate, passwordDto?.passwordCurrent);
-      }
-    }
-
     // break out the password
     const { password } = passwordDto ?? {};
 
-    // is current valid (this will be true if not required)
+    // did we receive a password to set?
     if (typeof password === 'string') {
+      // are we updating?
+      if (userToUpdateId) {
+        // yes, get the user
+        const userToUpdate = await this.getUserById(userToUpdateId);
+        // call current password validation helper
+        await this.validateCurrent(
+          userToUpdate,
+          passwordDto?.passwordCurrent,
+          authorizedUser,
+        );
+      }
       // create safe object
       const targetSafe = { ...passwordDto, password };
       // call the password creation service
@@ -67,14 +68,6 @@ export class UserPasswordService implements UserPasswordServiceInterface {
 
     // return the object untouched
     return passwordDto;
-  }
-
-  async canUpdate(
-    userToUpdate: ReferenceIdInterface,
-    authenticatedUser: ReferenceIdInterface,
-  ): Promise<boolean> {
-    // by default, only authenticated user can update their own password
-    return userToUpdate.id === authenticatedUser.id;
   }
 
   async getUserById(
@@ -118,19 +111,27 @@ export class UserPasswordService implements UserPasswordServiceInterface {
   }
 
   protected async validateCurrent(
-    target: PasswordStorageInterface,
+    target: ReferenceIdInterface & PasswordStorageInterface,
     password?: string,
+    authorizedUser?: AuthenticatedUserInterface,
   ): Promise<boolean> {
-    // call current password validation helper
-    const currentIsValid = await this.passwordCreationService.validateCurrent({
-      password,
-      target,
-    });
+    // is the user updating their own password?
+    if (target.id === authorizedUser?.id) {
+      // call current password validation helper
+      const currentIsValid = await this.passwordCreationService.validateCurrent(
+        {
+          password,
+          target,
+        },
+      );
 
-    if (currentIsValid) {
-      return true;
-    } else {
-      throw new UserException(`Current password is not valid`);
+      if (currentIsValid) {
+        return true;
+      } else {
+        throw new UserException(`Current password is not valid`);
+      }
     }
+
+    return true;
   }
 }
