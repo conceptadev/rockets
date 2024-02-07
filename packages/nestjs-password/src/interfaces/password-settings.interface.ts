@@ -13,4 +13,9 @@ export interface PasswordSettingsInterface {
    * Max number of password attempts allowed
    */
   maxPasswordAttempts?: number;
+
+  /**
+   * Require current password to update
+   */
+  requireCurrentToUpdate?: boolean;
 }

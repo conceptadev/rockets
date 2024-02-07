@@ -1,15 +1,15 @@
 import { SetMetadata } from '@nestjs/common';
-import { AccessControlGrantOption } from '../interfaces/access-control-grant-option.interface';
+import { AccessControlGrantOptionInterface } from '../interfaces/access-control-grant-option.interface';
 import { ACCESS_CONTROL_MODULE_GRANT_METADATA } from '../constants';
 
 /**
- * Define access control filters required for this route.
+ * Define access control grants required for this route.
  *
- * @param {AccessControlGrantOption[]} acFilters Array of access control filters.
+ * @param {AccessControlGrantOptionInterface[]} acGrants Array of access control grants.
  * @returns {ReturnType<typeof SetMetadata>} Decorator function.
  */
 export const AccessControlGrant = (
-  ...acFilters: AccessControlGrantOption[]
+  ...acGrants: AccessControlGrantOptionInterface[]
 ): ReturnType<typeof SetMetadata> => {
-  return SetMetadata(ACCESS_CONTROL_MODULE_GRANT_METADATA, acFilters);
+  return SetMetadata(ACCESS_CONTROL_MODULE_GRANT_METADATA, acGrants);
 };

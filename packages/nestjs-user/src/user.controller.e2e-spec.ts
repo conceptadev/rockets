@@ -3,16 +3,21 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { SeedingSource } from '@concepta/typeorm-seeding';
+import { AccessControlGuard } from '@concepta/nestjs-access-control';
+import { AuthJwtGuard } from '@concepta/nestjs-auth-jwt';
 
 import { UserFactory } from './user.factory';
 import { UserSeeder } from './user.seeder';
+
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
 import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
 
-describe('AppController (e2e)', () => {
-  describe('Authentication', () => {
+describe('UserController (e2e)', () => {
+  describe('Normal CRUD flow', () => {
     let app: INestApplication;
     let seedingSource: SeedingSource;
+    let authJwtGuard: AuthJwtGuard;
+    let accessControlGuard: AccessControlGuard;
 
     beforeEach(async () => {
       const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -20,6 +25,12 @@ describe('AppController (e2e)', () => {
       }).compile();
       app = moduleFixture.createNestApplication();
       await app.init();
+
+      authJwtGuard = app.get(AuthJwtGuard);
+      jest.spyOn(authJwtGuard, 'canActivate').mockResolvedValue(true);
+
+      accessControlGuard = app.get(AccessControlGuard);
+      jest.spyOn(accessControlGuard, 'canActivate').mockResolvedValue(true);
 
       seedingSource = new SeedingSource({
         dataSource: app.get(getDataSourceToken()),

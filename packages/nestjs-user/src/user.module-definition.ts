@@ -26,10 +26,13 @@ import { UserEntityInterface } from './interfaces/user-entity.interface';
 import { UserCrudService } from './services/user-crud.service';
 import { UserLookupService } from './services/user-lookup.service';
 import { UserMutateService } from './services/user-mutate.service';
+import { UserPasswordService } from './services/user-password.service';
 import { UserController } from './user.controller';
 import { InvitationAcceptedListener } from './listeners/invitation-accepted-listener';
 import { InvitationGetUserListener } from './listeners/invitation-get-user.listener';
 import { userDefaultConfig } from './config/user-default.config';
+import { UserLookupServiceInterface } from './interfaces/user-lookup-service.interface';
+import { UserAccessQueryService } from './services/user-access-query.service';
 
 const RAW_OPTIONS_TOKEN = Symbol('__USER_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -91,6 +94,8 @@ export function createUserProviders(options: {
     createUserSettingsProvider(options.overrides),
     createUserLookupServiceProvider(options.overrides),
     createUserMutateServiceProvider(options.overrides),
+    createUserPasswordServiceProvider(options.overrides),
+    createUserAccessQueryServiceProvider(options.overrides),
   ];
 }
 
@@ -102,6 +107,8 @@ export function createUserExports(): Required<
     UserLookupService,
     UserMutateService,
     UserCrudService,
+    UserPasswordService,
+    UserAccessQueryService,
   ];
 }
 
@@ -151,15 +158,48 @@ export function createUserMutateServiceProvider(
     inject: [
       RAW_OPTIONS_TOKEN,
       getDynamicRepositoryToken(USER_MODULE_USER_ENTITY_KEY),
-      PasswordCreationService,
+      UserPasswordService,
     ],
     useFactory: async (
       options: UserOptionsInterface,
       userRepo: Repository<UserEntityInterface>,
-      passwordCreationService: PasswordCreationService,
+      userPasswordService: UserPasswordService,
     ) =>
       optionsOverrides?.userMutateService ??
       options.userMutateService ??
-      new UserMutateService(userRepo, passwordCreationService),
+      new UserMutateService(userRepo, userPasswordService),
+  };
+}
+
+export function createUserPasswordServiceProvider(
+  optionsOverrides?: UserOptions,
+): Provider {
+  return {
+    provide: UserPasswordService,
+    inject: [RAW_OPTIONS_TOKEN, UserLookupService, PasswordCreationService],
+    useFactory: async (
+      options: UserOptionsInterface,
+      userLookUpService: UserLookupServiceInterface,
+      passwordCreationService: PasswordCreationService,
+    ) =>
+      optionsOverrides?.userPasswordService ??
+      options.userPasswordService ??
+      new UserPasswordService(userLookUpService, passwordCreationService),
+  };
+}
+
+export function createUserAccessQueryServiceProvider(
+  optionsOverrides?: UserOptions,
+): Provider {
+  return {
+    provide: UserAccessQueryService,
+    inject: [RAW_OPTIONS_TOKEN, UserPasswordService],
+    useFactory: async (
+      options: UserOptionsInterface,
+      userPasswordService: UserPasswordService,
+    ) =>
+      optionsOverrides?.userAccessQueryService ??
+      options.userAccessQueryService ??
+      new UserAccessQueryService(userPasswordService),
   };
 }

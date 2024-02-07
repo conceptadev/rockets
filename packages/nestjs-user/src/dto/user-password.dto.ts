@@ -1,19 +1,18 @@
 import { Exclude, Expose } from 'class-transformer';
-import { IsOptional, IsString } from 'class-validator';
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 import { PasswordPlainInterface } from '@concepta/ts-common';
 
 /**
  * User plain password DTO
  */
 @Exclude()
-export class UserPasswordDto implements Partial<PasswordPlainInterface> {
+export class UserPasswordDto implements PasswordPlainInterface {
   @Expose({ toClassOnly: true })
-  @ApiPropertyOptional({
+  @ApiProperty({
     type: 'string',
     description: 'Plain text password to set',
   })
-  @IsOptional()
   @IsString()
-  password?: string;
+  password!: string;
 }

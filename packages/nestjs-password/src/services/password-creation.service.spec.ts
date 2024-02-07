@@ -9,20 +9,22 @@ import { PasswordStrengthService } from './password-strength.service';
 import { PasswordValidationService } from './password-validation.service';
 
 describe(PasswordCreationService, () => {
+  let config: PasswordSettingsInterface;
   let passwordCreationService: PasswordCreationService;
   let passwordStorageService: PasswordStorageService;
   let passwordValidationService: PasswordValidationService;
   let passwordStrengthService: PasswordStrengthService;
 
-  const config: PasswordSettingsInterface = {
-    maxPasswordAttempts: 5,
-    minPasswordStrength: PasswordStrengthEnum.Medium,
-  };
-
   const PASSWORD_WEAK = 'secret';
   const PASSWORD_MEDIUM = 'F*h#1d*fQ@XB';
 
   beforeEach(async () => {
+    config = {
+      maxPasswordAttempts: 5,
+      minPasswordStrength: PasswordStrengthEnum.Medium,
+      requireCurrentToUpdate: false,
+    };
+
     passwordStorageService = new PasswordStorageService();
     passwordValidationService = new PasswordValidationService();
     passwordStrengthService = new PasswordStrengthService(config);
@@ -46,7 +48,10 @@ describe(PasswordCreationService, () => {
 
       // encrypt password
       const passwordStorageObject: TestOut =
-        await passwordCreationService.createObject<TestIn>({ foo: 'bar' });
+        await passwordCreationService.createObject<TestIn>(
+          { foo: 'bar' },
+          { required: false },
+        );
 
       expect(passwordStorageObject).toEqual({ foo: 'bar' });
     });
@@ -62,57 +67,6 @@ describe(PasswordCreationService, () => {
       expect(typeof passwordStorageObject.passwordSalt).toEqual('string');
     });
 
-    it('should create a password on object WITH a VALID current password requirement', async () => {
-      // encrypt "current" password
-      const passwordStorageObjectCurrent: PasswordStorageInterface =
-        await passwordStorageService.hashObject({
-          password: 'current-password-string',
-        });
-
-      const passwordStorageObject: PasswordStorageInterface =
-        await passwordCreationService.createObject(
-          {
-            password: PASSWORD_MEDIUM,
-          },
-          {
-            currentPassword: {
-              password: 'current-password-string',
-              object: passwordStorageObjectCurrent,
-            },
-          },
-        );
-
-      expect(typeof passwordStorageObject.passwordHash).toEqual('string');
-      expect(typeof passwordStorageObject.passwordSalt).toEqual('string');
-    });
-
-    it('should NOT create a password on object WITH an INVALID current password requirement', async () => {
-      const t = async () => {
-        // encrypt "current" password
-        const passwordStorageObjectCurrent: PasswordStorageInterface =
-          await passwordStorageService.hashObject({
-            password: 'current-password-string',
-          });
-
-        await passwordCreationService.createObject(
-          {
-            password: PASSWORD_MEDIUM,
-          },
-          {
-            currentPassword: {
-              password: 'bad-current-password-string',
-              object: passwordStorageObjectCurrent,
-            },
-          },
-        );
-      };
-
-      await expect(t).rejects.toThrow(Error);
-      await expect(t).rejects.toThrow(
-        'Current password that was supplied is not valid',
-      );
-    });
-
     it('should NOT create a password on object WITH a WEAK password', async () => {
       const t = async () => {
         // try to create on object with a weak password
@@ -123,6 +77,54 @@ describe(PasswordCreationService, () => {
 
       await expect(t).rejects.toThrow(Error);
       await expect(t).rejects.toThrow('Password is not strong enough');
+    });
+  });
+
+  describe(PasswordCreationService.prototype.validateCurrent, () => {
+    it('should be validated', async () => {
+      // encrypt "current" password
+      const passwordStorageObjectCurrent: PasswordStorageInterface =
+        await passwordStorageService.hashObject({
+          password: 'current-password-string',
+        });
+
+      const isValid = await passwordCreationService.validateCurrent({
+        password: 'current-password-string',
+        target: passwordStorageObjectCurrent,
+      });
+
+      expect(isValid).toEqual<boolean>(true);
+    });
+
+    it('should NOT be validated', async () => {
+      // encrypt "current" password
+      const passwordStorageObjectCurrent: PasswordStorageInterface =
+        await passwordStorageService.hashObject({
+          password: 'current-password-string',
+        });
+
+      const isValid = await passwordCreationService.validateCurrent({
+        password: 'bad-current-password-string',
+        target: passwordStorageObjectCurrent,
+      });
+
+      expect(isValid).toEqual<boolean>(false);
+    });
+
+    it('should NOT throw an error due to required current password setting', async () => {
+      const isValid = await passwordCreationService.validateCurrent({});
+      expect(isValid).toEqual<boolean>(true);
+    });
+
+    it('should throw an error due to required current password setting', async () => {
+      passwordCreationService['settings'].requireCurrentToUpdate = true;
+
+      const t = async () => {
+        await passwordCreationService.validateCurrent({});
+      };
+
+      await expect(t).rejects.toThrow(Error);
+      await expect(t).rejects.toThrow('Current password is required');
     });
   });
 

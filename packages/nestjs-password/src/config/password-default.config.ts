@@ -8,9 +8,6 @@ import { PASSWORD_MODULE_DEFAULT_SETTINGS_TOKEN } from '../password.constants';
 export const passwordDefaultConfig = registerAs(
   PASSWORD_MODULE_DEFAULT_SETTINGS_TOKEN,
   (): PasswordSettingsInterface => ({
-    /**
-     * Get log levels from environment variables
-     */
     maxPasswordAttempts: process.env.PASSWORD_MAX_PASSWORD_ATTEMPTS
       ? Number.parseInt(process.env.PASSWORD_MAX_PASSWORD_ATTEMPTS)
       : 3,
@@ -20,5 +17,8 @@ export const passwordDefaultConfig = registerAs(
       : process.env?.NODE_ENV === 'production'
       ? 8
       : 0,
+
+    requireCurrentToUpdate:
+      process.env?.PASSWORD_REQUIRE_CURRENT_TO_UPDATE === 'true' ? true : false,
   }),
 );

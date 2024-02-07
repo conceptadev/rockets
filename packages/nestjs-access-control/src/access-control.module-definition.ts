@@ -1,3 +1,4 @@
+import { APP_GUARD } from '@nestjs/core';
 import {
   ConfigurableModuleBuilder,
   DynamicModule,
@@ -6,12 +7,15 @@ import {
 import { ConfigModule } from '@nestjs/config';
 import { createSettingsProvider } from '@concepta/nestjs-common';
 
-import { AccessControlOptionsInterface } from './interfaces/access-control-options.interface';
 import { ACCESS_CONTROL_MODULE_SETTINGS_TOKEN } from './constants';
+
+import { AccessControlOptionsInterface } from './interfaces/access-control-options.interface';
 import { AccessControlOptionsExtrasInterface } from './interfaces/access-control-options-extras.interface';
-import { accessControlDefaultConfig } from './config/acess-control-default.config';
 import { AccessControlSettingsInterface } from './interfaces/access-control-settings.interface';
+
+import { AccessControlGuard } from './access-control.guard';
 import { AccessControlService } from './services/access-control.service';
+import { accessControlDefaultConfig } from './config/acess-control-default.config';
 
 const RAW_OPTIONS_TOKEN = Symbol('__ACCESS_CONTROL_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -33,6 +37,7 @@ export type AccessControlOptions = Omit<
   typeof ACCESS_CONTROL_OPTIONS_TYPE,
   'global'
 >;
+
 export type AccessControlAsyncOptions = Omit<
   typeof ACCESS_CONTROL_ASYNC_OPTIONS_TYPE,
   'global'
@@ -43,13 +48,15 @@ function definitionTransform(
   extras: AccessControlOptionsExtrasInterface,
 ): DynamicModule {
   const { providers = [] } = definition;
-  const { global = false, imports } = extras;
+  const { global = false, imports, queryServices = [] } = extras;
 
   return {
     ...definition,
     global,
     imports: createAccessControlImports({ imports }),
-    providers: createAccessControlProviders({ providers }),
+    providers: createAccessControlProviders({
+      providers: [...providers, ...queryServices],
+    }),
     exports: [ConfigModule, RAW_OPTIONS_TOKEN, ...createAccessControlExports()],
   };
 }
@@ -67,17 +74,23 @@ export function createAccessControlImports(
 }
 
 export function createAccessControlExports() {
-  return [ACCESS_CONTROL_MODULE_SETTINGS_TOKEN, AccessControlService];
+  return [
+    ACCESS_CONTROL_MODULE_SETTINGS_TOKEN,
+    AccessControlService,
+    AccessControlGuard,
+  ];
 }
 
-export function createAccessControlProviders(overrides: {
-  options?: AccessControlOptions;
+export function createAccessControlProviders(options: {
+  overrides?: AccessControlOptions;
   providers?: Provider[];
 }): Provider[] {
   return [
-    ...(overrides.providers ?? []),
-    createAccessControlSettingsProvider(overrides.options),
-    createAccessControlServiceProvider(overrides.options),
+    ...(options.providers ?? []),
+    createAccessControlSettingsProvider(options.overrides),
+    createAccessControlServiceProvider(options.overrides),
+    createAccessControlAppGuardProvider(options.overrides),
+    AccessControlGuard,
   ];
 }
 
@@ -105,5 +118,30 @@ export function createAccessControlServiceProvider(
       optionsOverrides?.service ??
       options.service ??
       new AccessControlService(),
+  };
+}
+
+export function createAccessControlAppGuardProvider(
+  optionsOverrides?: AccessControlOptions,
+): Provider {
+  return {
+    provide: APP_GUARD,
+    inject: [RAW_OPTIONS_TOKEN, AccessControlGuard],
+    useFactory: async (
+      options: AccessControlOptionsInterface,
+      defaultGuard: AccessControlGuard,
+    ) => {
+      // get app guard from the options
+      const appGuard = optionsOverrides?.appGuard ?? options?.appGuard;
+
+      // is app guard explicitly false?
+      if (appGuard === false) {
+        // yes, don't set a guard
+        return null;
+      } else {
+        // return app guard if set, or fall back to default
+        return appGuard ?? defaultGuard;
+      }
+    },
   };
 }

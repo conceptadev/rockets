@@ -1,14 +1,9 @@
-import { AccessControlFilterCallback } from '../interfaces/access-control-filter-option.interface';
-import { AccessControlGrantResource } from '../interfaces/access-control-grant-option.interface';
 import { AccessControlUpdateOne } from './access-control-update-one.decorator';
 
 /**
- * Update one resource filter shortcut
+ * Update one resource grant shortcut
  *
- * @param {AccessControlGrantResource} resource The grant resource.
- * @param {AccessControlFilterCallback} paramFilter An optional param filter.
+ * @param string resource The grant resource.
  */
-export const AccessControlReplaceOne = (
-  resource: AccessControlGrantResource,
-  paramFilter?: AccessControlFilterCallback,
-) => AccessControlUpdateOne(resource, paramFilter);
+export const AccessControlReplaceOne = (resource: string) =>
+  AccessControlUpdateOne(resource);

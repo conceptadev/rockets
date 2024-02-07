@@ -1,3 +1,4 @@
+import { BadRequestException, Param } from '@nestjs/common';
 import {
   CrudBody,
   CrudCreateOne,
@@ -12,29 +13,33 @@ import {
   CrudReadMany,
   CrudRecoverOne,
 } from '@concepta/nestjs-crud';
+import { PasswordStorageInterface } from '@concepta/nestjs-password';
 import { ApiTags } from '@nestjs/swagger';
 import {
   UserCreatableInterface,
   UserUpdatableInterface,
 } from '@concepta/ts-common';
-import { PasswordCreationService } from '@concepta/nestjs-password';
 import {
   AccessControlCreateMany,
   AccessControlCreateOne,
   AccessControlDeleteOne,
+  AccessControlQuery,
   AccessControlReadMany,
   AccessControlReadOne,
   AccessControlRecoverOne,
   AccessControlUpdateOne,
 } from '@concepta/nestjs-access-control';
+
+import { UserResource } from './user.types';
 import { UserCrudService } from './services/user-crud.service';
+import { UserEntityInterface } from './interfaces/user-entity.interface';
 import { UserDto } from './dto/user.dto';
 import { UserCreateDto } from './dto/user-create.dto';
 import { UserCreateManyDto } from './dto/user-create-many.dto';
 import { UserUpdateDto } from './dto/user-update.dto';
 import { UserPaginatedDto } from './dto/user-paginated.dto';
-import { UserEntityInterface } from './interfaces/user-entity.interface';
-import { UserResource } from './user.types';
+import { UserAccessQueryService } from './services/user-access-query.service';
+import { UserPasswordService } from './services/user-password.service';
 
 /**
  * User controller.
@@ -45,6 +50,9 @@ import { UserResource } from './user.types';
     type: UserDto,
     paginatedType: UserPaginatedDto,
   },
+})
+@AccessControlQuery({
+  service: UserAccessQueryService,
 })
 @ApiTags('user')
 export class UserController
@@ -59,11 +67,11 @@ export class UserController
    * Constructor.
    *
    * @param userCrudService instance of the user crud service
-   * @param passwordCreationService instance of password creation service
+   * @param userPasswordService instance of user password service
    */
   constructor(
     private userCrudService: UserCrudService,
-    private passwordCreationService: PasswordCreationService,
+    private userPasswordService: UserPasswordService,
   ) {}
 
   /**
@@ -106,11 +114,7 @@ export class UserController
     // loop all dtos
     for (const userCreateDto of userCreateManyDto.bulk) {
       // hash it
-      hashed.push(
-        await this.passwordCreationService.createObject(userCreateDto, {
-          required: false,
-        }),
-      );
+      hashed.push(await this.userPasswordService.setPassword(userCreateDto));
     }
 
     // call crud service to create
@@ -132,9 +136,7 @@ export class UserController
     // call crud service to create
     return this.userCrudService.createOne(
       crudRequest,
-      await this.passwordCreationService.createObject(userCreateDto, {
-        required: false,
-      }),
+      await this.userPasswordService.setPassword(userCreateDto),
     );
   }
 
@@ -149,13 +151,20 @@ export class UserController
   async updateOne(
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() userUpdateDto: UserUpdateDto,
+    @Param('id') userId?: string,
   ) {
-    return this.userCrudService.updateOne(
-      crudRequest,
-      await this.passwordCreationService.createObject(userUpdateDto, {
-        required: false,
-      }),
-    );
+    let hashedObject: Partial<PasswordStorageInterface>;
+
+    try {
+      hashedObject = await this.userPasswordService.setPassword(
+        userUpdateDto,
+        userId,
+      );
+    } catch (e) {
+      throw new BadRequestException(e);
+    }
+
+    return this.userCrudService.updateOne(crudRequest, hashedObject);
   }
 
   /**
