@@ -1,6 +1,6 @@
 {
   "name": "@concepta/nestjs-typeorm-ext",
-  "version": "4.0.0-alpha.38",
+  "version": "4.0.0-alpha.39",
   "description": "Rockets NestJS TypeORM Extended",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,8 +12,8 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
-    "@concepta/nestjs-core": "^4.0.0-alpha.38",
-    "@concepta/ts-core": "^4.0.0-alpha.38",
+    "@concepta/nestjs-core": "^4.0.0-alpha.39",
+    "@concepta/ts-core": "^4.0.0-alpha.39",
     "@nestjs/common": "^9.0.0",
     "@nestjs/typeorm": "^9.0.0"
   },
