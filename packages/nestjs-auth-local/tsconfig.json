@@ -14,25 +14,10 @@
   ],
   "references": [
     {
-      "path": "../ts-core"
-    },
-    {
-      "path": "../ts-common"
-    },
-    {
-      "path": "../nestjs-authentication"
-    },
-    {
-      "path": "../nestjs-crud"
-    },
-    {
-      "path": "../nestjs-password"
+      "path": "../typeorm-common"
     },
     {
       "path": "../nestjs-auth-jwt"
-    },
-    {
-      "path": "../nestjs-user"
     }
   ]
 }

@@ -10,17 +10,6 @@
     ]
   },
   "include": [
-    "src/**/*.ts"
-, "../ts-common/src/authentication/interfaces/auth-refresh.interface.ts"  ],
-  "references": [
-    {
-      "path": "../ts-core"
-    },
-    {
-      "path": "../ts-common"
-    },
-    {
-      "path": "../nestjs-authentication"
-    }
+    "src/**/*.ts" 
   ]
 }

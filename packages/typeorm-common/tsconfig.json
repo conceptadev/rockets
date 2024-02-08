@@ -14,7 +14,7 @@
   ],
   "references": [
     {
-      "path": "../ts-core"
+      "path": "../nestjs-typeorm-ext"
     }
   ]
 }

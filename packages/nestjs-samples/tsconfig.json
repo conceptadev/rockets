@@ -14,34 +14,7 @@
   ],
   "references": [
     {
-      "path": "../ts-core"
-    },
-    {
-      "path": "../ts-common"
-    },
-    {
-      "path": "../nestjs-core"
-    },
-    {
-      "path": "../nestjs-authentication"
-    },
-    {
-      "path": "../nestjs-auth-local"
-    },
-    {
       "path": "../nestjs-auth-refresh"
-    },
-    {
-      "path": "../nestjs-crud"
-    },
-    {
-      "path": "../nestjs-event"
-    },
-    {
-      "path": "../nestjs-typeorm-ext"
-    },
-    {
-      "path": "../nestjs-user"
     }
   ]
 }
