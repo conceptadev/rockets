@@ -11,28 +11,5 @@
   },
   "include": [
     "src/**/*.ts"
-  ],
-  "references": [
-    {
-      "path": "../ts-core"
-    },
-    {
-      "path": "../ts-common"
-    },
-    {
-      "path": "../typeorm-common"
-    },
-    {
-      "path": "../nestjs-core"
-    },
-    {
-      "path": "../nestjs-crud"
-    },
-    {
-      "path": "../nestjs-typeorm-ext"
-    },
-    {
-      "path": "../nestjs-user"
-    }
   ]
 }

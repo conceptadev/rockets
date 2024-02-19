@@ -16,6 +16,7 @@ import {
 import { PasswordStorageInterface } from '@concepta/nestjs-password';
 import { ApiTags } from '@nestjs/swagger';
 import {
+  AuthenticatedUserInterface,
   UserCreatableInterface,
   UserUpdatableInterface,
 } from '@concepta/ts-common';
@@ -40,6 +41,7 @@ import { UserUpdateDto } from './dto/user-update.dto';
 import { UserPaginatedDto } from './dto/user-paginated.dto';
 import { UserAccessQueryService } from './services/user-access-query.service';
 import { UserPasswordService } from './services/user-password.service';
+import { AuthUser } from '@concepta/nestjs-common';
 
 /**
  * User controller.
@@ -152,6 +154,7 @@ export class UserController
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() userUpdateDto: UserUpdateDto,
     @Param('id') userId?: string,
+    @AuthUser() authorizededUser?: AuthenticatedUserInterface,
   ) {
     let hashedObject: Partial<PasswordStorageInterface>;
 
@@ -159,6 +162,7 @@ export class UserController
       hashedObject = await this.userPasswordService.setPassword(
         userUpdateDto,
         userId,
+        authorizededUser,
       );
     } catch (e) {
       throw new BadRequestException(e);

@@ -1,5 +1,6 @@
 import { ReferenceId, ReferenceIdInterface } from '@concepta/ts-core';
 import {
+  AuthenticatedUserInterface,
   PasswordPlainCurrentInterface,
   PasswordPlainInterface,
 } from '@concepta/ts-common';
@@ -9,18 +10,6 @@ import {
 } from '@concepta/nestjs-password';
 
 export interface UserPasswordServiceInterface {
-  /**
-   * Should return true if the user can update their password.
-   *
-   * @param {ReferenceIdInterface} userToUpdate The user that is being updated
-   * @param {ReferenceIdInterface} authenticatedUser The user that is currently authenticated
-   * @returns {Promise<boolean>} true if user can update password
-   */
-  canUpdate: (
-    userToUpdate: ReferenceIdInterface,
-    authenticatedUser: ReferenceIdInterface,
-  ) => Promise<boolean>;
-
   /**
    * Get the user being updated by id.
    *
@@ -37,13 +26,15 @@ export interface UserPasswordServiceInterface {
    * Set the password (hash) on the user object.
    *
    * @param passwordDto The object containing the password, and optionally the current password.
-   * @param userId The id of the user being updated.
+   * @param userToUpdateId The id of the user being updated.
+   * @param authorizedUser The authorized user
    * @returns {ReturnType<PasswordCreationService['createObject']>}
    */
   setPassword: (
     passwordDto: Partial<
       PasswordPlainInterface & PasswordPlainCurrentInterface
     >,
-    userId?: ReferenceId,
+    userToUpdateId?: ReferenceId,
+    authorizedUser?: AuthenticatedUserInterface,
   ) => ReturnType<PasswordCreationService['createObject']>;
 }

@@ -71,9 +71,6 @@ describe('AppModule', () => {
         PasswordCreationService,
       );
       expect(userAccessQueryService).toBeInstanceOf(UserAccessQueryService);
-      expect(userAccessQueryService['userPasswordService']).toBeInstanceOf(
-        UserPasswordService,
-      );
       expect(userController).toBeInstanceOf(UserController);
     });
   });
