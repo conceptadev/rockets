@@ -2,6 +2,7 @@ import { EntityManagerProxy } from '@concepta/typeorm-common';
 import { AuthRecoverySettingsInterface } from './auth-recovery-settings.interface';
 import { AuthRecoveryOtpServiceInterface } from './auth-recovery-otp.service.interface';
 import { AuthRecoveryEmailServiceInterface } from './auth-recovery-email.service.interface';
+import { AuthRecoveryNotificationServiceInterface } from './auth-recovery-notification.service.interface';
 import { AuthRecoveryUserLookupServiceInterface } from './auth-recovery-user-lookup.service.interface';
 import { AuthRecoveryUserMutateServiceInterface } from './auth-recovery-user-mutate.service.interface';
 
@@ -11,5 +12,6 @@ export interface AuthRecoveryOptionsInterface {
   emailService: AuthRecoveryEmailServiceInterface;
   userLookupService: AuthRecoveryUserLookupServiceInterface;
   userMutateService: AuthRecoveryUserMutateServiceInterface;
+  notificationService?: AuthRecoveryNotificationServiceInterface;
   entityManagerProxy?: EntityManagerProxy;
 }

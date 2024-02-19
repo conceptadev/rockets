@@ -26,6 +26,7 @@ import { authRecoveryDefaultConfig } from './config/auth-recovery-default.config
 import { AuthRecoveryController } from './auth-recovery.controller';
 import { AuthRecoveryService } from './services/auth-recovery.service';
 import { AuthRecoveryNotificationService } from './services/auth-recovery-notification.service';
+import { AuthRecoveryEmailServiceInterface } from './interfaces/auth-recovery-email.service.interface';
 
 const RAW_OPTIONS_TOKEN = Symbol('__AUTH_RECOVERY_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -91,12 +92,12 @@ export function createAuthRecoveryProviders(options: {
   return [
     ...(options.providers ?? []),
     AuthRecoveryService,
-    AuthRecoveryNotificationService,
     createAuthRecoverySettingsProvider(options.overrides),
     createAuthRecoveryOtpServiceProvider(options.overrides),
     createAuthRecoveryEmailServiceProvider(options.overrides),
     createAuthRecoveryUserLookupServiceProvider(options.overrides),
     createAuthRecoveryUserMutateServiceProvider(options.overrides),
+    createAuthRecoveryNotificationServiceProvider(options.overrides),
     createAuthRecoveryEntityManagerProxyProvider(options.overrides),
   ];
 }
@@ -164,6 +165,27 @@ export function createAuthRecoveryUserMutateServiceProvider(
     inject: [RAW_OPTIONS_TOKEN],
     useFactory: async (options: AuthRecoveryOptionsInterface) =>
       optionsOverrides?.userMutateService ?? options.userMutateService,
+  };
+}
+
+export function createAuthRecoveryNotificationServiceProvider(
+  optionsOverrides?: AuthRecoveryOptions,
+): Provider {
+  return {
+    provide: AuthRecoveryNotificationService,
+    inject: [
+      RAW_OPTIONS_TOKEN,
+      AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
+      AUTH_RECOVERY_MODULE_EMAIL_SERVICE_TOKEN,
+    ],
+    useFactory: async (
+      options: AuthRecoveryOptionsInterface,
+      settings: AuthRecoverySettingsInterface,
+      emailService: AuthRecoveryEmailServiceInterface,
+    ) =>
+      optionsOverrides?.notificationService ??
+      options.notificationService ??
+      new AuthRecoveryNotificationService(settings, emailService),
   };
 }
 

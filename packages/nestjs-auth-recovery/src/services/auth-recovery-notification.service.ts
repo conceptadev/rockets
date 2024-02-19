@@ -14,10 +14,10 @@ export class AuthRecoveryNotificationService
   implements AuthRecoveryNotificationServiceInterface
 {
   constructor(
+    @Inject(AUTH_RECOVERY_MODULE_SETTINGS_TOKEN)
+    private readonly settings: AuthRecoverySettingsInterface,
     @Inject(AUTH_RECOVERY_MODULE_EMAIL_SERVICE_TOKEN)
     private readonly emailService: AuthRecoveryEmailServiceInterface,
-    @Inject(AUTH_RECOVERY_MODULE_SETTINGS_TOKEN)
-    private readonly config: AuthRecoverySettingsInterface,
   ) {}
 
   async sendEmail(sendMailOptions: EmailSendOptionsInterface): Promise<void> {
@@ -33,8 +33,8 @@ export class AuthRecoveryNotificationService
       from,
       baseUrl,
       tokenUrlFormatter = formatTokenUrl,
-    } = this.config.email;
-    const { subject, fileName } = this.config.email.templates.recoverPassword;
+    } = this.settings.email;
+    const { subject, fileName } = this.settings.email.templates.recoverPassword;
     await this.sendEmail({
       from,
       subject,
@@ -48,8 +48,8 @@ export class AuthRecoveryNotificationService
   }
 
   async sendPasswordUpdatedSuccefullyEmail(email: string): Promise<void> {
-    const { from } = this.config.email;
-    const { subject, fileName } = this.config.email.templates.passwordUpdated;
+    const { from } = this.settings.email;
+    const { subject, fileName } = this.settings.email.templates.passwordUpdated;
     await this.sendEmail({
       from,
       subject,
@@ -59,8 +59,8 @@ export class AuthRecoveryNotificationService
   }
 
   async sendRecoverLoginEmail(email: string, username: string): Promise<void> {
-    const { from } = this.config.email;
-    const { subject, fileName } = this.config.email.templates.recoverLogin;
+    const { from } = this.settings.email;
+    const { subject, fileName } = this.settings.email.templates.recoverLogin;
     await this.sendEmail({
       from,
       subject,
