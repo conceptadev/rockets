@@ -20,7 +20,7 @@ export class PasswordStrengthService
    */
   constructor(
     @Inject(PASSWORD_MODULE_SETTINGS_TOKEN)
-    private settings: PasswordSettingsInterface,
+    protected readonly settings: PasswordSettingsInterface,
   ) {}
 
   /**

@@ -30,9 +30,9 @@ export class UserPasswordService implements UserPasswordServiceInterface {
    */
   constructor(
     @Inject(UserLookupService)
-    private userLookupService: UserLookupServiceInterface,
+    protected readonly userLookupService: UserLookupServiceInterface,
     @Inject(PasswordCreationService)
-    private passwordCreationService: PasswordCreationServiceInterface,
+    protected readonly passwordCreationService: PasswordCreationServiceInterface,
   ) {}
 
   async setPassword(

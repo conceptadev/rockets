@@ -4,7 +4,7 @@ import { JwtSignService } from './jwt-sign.service';
 
 @Injectable()
 export class JwtIssueService implements JwtIssueServiceInterface {
-  constructor(private jwtSignService: JwtSignService) {}
+  constructor(protected readonly jwtSignService: JwtSignService) {}
 
   async accessToken(
     ...args: Parameters<JwtIssueServiceInterface['accessToken']>

@@ -46,7 +46,7 @@ export class LoggerTransportService {
    */
   constructor(
     @Inject(LOGGER_MODULE_SETTINGS_TOKEN)
-    private config: LoggerSettingsInterface,
+    protected readonly config: LoggerSettingsInterface,
   ) {
     if (this.config?.transportLogLevel) {
       this.logLevels = this.config.transportLogLevel;

@@ -15,9 +15,9 @@ export class SwaggerUiService {
    */
   constructor(
     @Inject(SWAGGER_UI_MODULE_SETTINGS_TOKEN)
-    private settings: SwaggerUiSettingsInterface,
+    protected readonly settings: SwaggerUiSettingsInterface,
     @Inject(SWAGGER_UI_MODULE_DOCUMENT_BUILDER_TOKEN)
-    private documentBuilder: DocumentBuilder,
+    protected readonly documentBuilder: DocumentBuilder,
   ) {}
 
   /**

@@ -39,7 +39,7 @@ export class UserMutateService
   constructor(
     @InjectDynamicRepository(USER_MODULE_USER_ENTITY_KEY)
     repo: Repository<UserEntityInterface>,
-    private userPasswordService: UserPasswordService,
+    protected readonly userPasswordService: UserPasswordService,
   ) {
     super(repo);
   }

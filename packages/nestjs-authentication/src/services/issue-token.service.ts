@@ -7,7 +7,7 @@ import { AuthenticationJwtResponseDto } from '../dto/authentication-jwt-response
 
 @Injectable()
 export class IssueTokenService implements IssueTokenServiceInterface {
-  constructor(private jwtIssueService: JwtIssueService) {}
+  constructor(protected readonly jwtIssueService: JwtIssueService) {}
 
   /**
    * Generate access token for a payload.

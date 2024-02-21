@@ -17,7 +17,7 @@ export class UserCrudService extends TypeOrmCrudService<UserEntityInterface> {
    */
   constructor(
     @InjectDynamicRepository(USER_MODULE_USER_ENTITY_KEY)
-    private userRepo: Repository<UserEntityInterface>,
+    protected readonly userRepo: Repository<UserEntityInterface>,
   ) {
     super(userRepo);
   }

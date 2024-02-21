@@ -11,9 +11,9 @@ import { EmailServiceInterface } from './interfaces/email-service.interface';
 @Injectable()
 export class EmailService implements EmailServiceInterface {
   constructor(
-    private logger: Logger,
+    protected readonly logger: Logger,
     @Inject('EMAIL_MODULE_MAILER_SERVICE_TOKEN')
-    private readonly mailerService: EmailServiceInterface,
+    protected readonly mailerService: EmailServiceInterface,
   ) {}
 
   public async sendMail(dto: EmailSendOptionsInterface): Promise<void> {

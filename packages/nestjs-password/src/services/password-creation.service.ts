@@ -25,10 +25,10 @@ export class PasswordCreationService
    */
   constructor(
     @Inject(PASSWORD_MODULE_SETTINGS_TOKEN)
-    private settings: PasswordSettingsInterface,
-    private passwordStorageService: PasswordStorageService,
-    private passwordValidationService: PasswordValidationService,
-    private passwordStrengthService: PasswordStrengthService,
+    protected readonly settings: PasswordSettingsInterface,
+    protected readonly passwordStorageService: PasswordStorageService,
+    protected readonly passwordValidationService: PasswordValidationService,
+    protected readonly passwordStrengthService: PasswordStrengthService,
   ) {}
 
   /**

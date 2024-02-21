@@ -17,9 +17,9 @@ export class AuthLocalValidateUserService
 {
   constructor(
     @Inject(AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN)
-    private userLookupService: AuthLocalUserLookupServiceInterface,
+    protected readonly userLookupService: AuthLocalUserLookupServiceInterface,
     @Inject(AUTH_LOCAL_MODULE_PASSWORD_VALIDATION_SERVICE_TOKEN)
-    private passwordValidationService: PasswordValidationServiceInterface,
+    protected readonly passwordValidationService: PasswordValidationServiceInterface,
   ) {
     super();
   }
