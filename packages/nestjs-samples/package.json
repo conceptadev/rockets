@@ -28,7 +28,7 @@
     "@concepta/ts-core": "^4.0.0-alpha.42",
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
-    "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/platform-express": "^10.3.6",
     "@nestjs/platform-fastify": "^9.2.1",
     "@nestjs/swagger": "^6.0.0",
     "rxjs": "^7.1.0"
