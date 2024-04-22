@@ -7,8 +7,8 @@ import { TransactionProxy } from './transaction.proxy';
 export class EntityManagerProxy {
   constructor(private _entityManager: EntityManager) {}
 
-  entityManager(options?: EntityManagerOptionInterface) {
-    return options?.entityManager ?? this._entityManager;
+  entityManager() {
+    return this._entityManager;
   }
 
   repository<T extends ObjectLiteral>(
@@ -17,8 +17,11 @@ export class EntityManagerProxy {
   ): Repository<T> {
     if (options?.transaction) {
       return options.transaction.repository(repository);
-    } else if (this.entityManager(options) !== this._entityManager) {
-      return this._entityManager.withRepository<T, Repository<T>>(repository);
+    } else if (
+      options?.entityManager &&
+      options?.entityManager !== repository.manager
+    ) {
+      return options.entityManager.withRepository<T, Repository<T>>(repository);
     } else {
       return repository;
     }
