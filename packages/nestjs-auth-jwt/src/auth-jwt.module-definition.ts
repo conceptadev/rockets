@@ -50,8 +50,8 @@ function definitionTransform(
   definition: DynamicModule,
   extras: AuthJwtOptionsExtrasInterface,
 ): DynamicModule {
-  const { providers = [] } = definition;
-  const { global = false } = extras;
+  const { providers } = definition;
+  const { global } = extras;
 
   return {
     ...definition,

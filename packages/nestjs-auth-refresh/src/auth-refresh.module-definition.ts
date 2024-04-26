@@ -56,8 +56,8 @@ function definitionTransform(
   definition: DynamicModule,
   extras: AuthRefreshOptionsExtrasInterface,
 ): DynamicModule {
-  const { providers = [] } = definition;
-  const { controllers, global = false } = extras;
+  const { providers } = definition;
+  const { controllers, global } = extras;
 
   return {
     ...definition,
@@ -100,7 +100,7 @@ export function createAuthRefreshProviders(options: {
 }
 
 export function createAuthRefreshControllers(
-  overrides: Pick<AuthRefreshOptions, 'controllers'> = {},
+  overrides: Pick<AuthRefreshOptions, 'controllers'>,
 ): DynamicModule['controllers'] {
   return overrides?.controllers !== undefined
     ? overrides.controllers

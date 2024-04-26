@@ -57,8 +57,8 @@ function definitionTransform(
   definition: DynamicModule,
   extras: AuthRecoveryOptionsExtrasInterface,
 ): DynamicModule {
-  const { providers = [] } = definition;
-  const { controllers, global = false } = extras;
+  const { providers } = definition;
+  const { controllers, global } = extras;
 
   return {
     ...definition,
@@ -125,51 +125,53 @@ export function createAuthRecoverySettingsProvider(
 }
 
 export function createAuthRecoveryOtpServiceProvider(
-  optionsOverrides?: AuthRecoveryOptions,
+  optionsOverrides?: Pick<AuthRecoveryOptions, 'otpService'>,
 ): Provider {
   return {
     provide: AUTH_RECOVERY_MODULE_OTP_SERVICE_TOKEN,
     inject: [RAW_OPTIONS_TOKEN],
-    useFactory: async (options: AuthRecoveryOptionsInterface) =>
+    useFactory: async (options: Pick<AuthRecoveryOptions, 'otpService'>) =>
       optionsOverrides?.otpService ?? options.otpService,
   };
 }
 
 export function createAuthRecoveryEmailServiceProvider(
-  optionsOverrides?: AuthRecoveryOptions,
+  optionsOverrides?: Pick<AuthRecoveryOptions, 'emailService'>,
 ): Provider {
   return {
     provide: AUTH_RECOVERY_MODULE_EMAIL_SERVICE_TOKEN,
     inject: [RAW_OPTIONS_TOKEN],
-    useFactory: async (options: AuthRecoveryOptionsInterface) =>
+    useFactory: async (options: Pick<AuthRecoveryOptions, 'emailService'>) =>
       optionsOverrides?.emailService ?? options.emailService,
   };
 }
 
 export function createAuthRecoveryUserLookupServiceProvider(
-  optionsOverrides?: AuthRecoveryOptions,
+  optionsOverrides?: Pick<AuthRecoveryOptions, 'userLookupService'>,
 ): Provider {
   return {
     provide: AUTH_RECOVERY_MODULE_USER_LOOKUP_SERVICE_TOKEN,
     inject: [RAW_OPTIONS_TOKEN],
-    useFactory: async (options: AuthRecoveryOptionsInterface) =>
-      optionsOverrides?.userLookupService ?? options.userLookupService,
+    useFactory: async (
+      options: Pick<AuthRecoveryOptions, 'userLookupService'>,
+    ) => optionsOverrides?.userLookupService ?? options.userLookupService,
   };
 }
 
 export function createAuthRecoveryUserMutateServiceProvider(
-  optionsOverrides?: AuthRecoveryOptions,
+  optionsOverrides?: Pick<AuthRecoveryOptions, 'userMutateService'>,
 ): Provider {
   return {
     provide: AUTH_RECOVERY_MODULE_USER_MUTATE_SERVICE_TOKEN,
     inject: [RAW_OPTIONS_TOKEN],
-    useFactory: async (options: AuthRecoveryOptionsInterface) =>
-      optionsOverrides?.userMutateService ?? options.userMutateService,
+    useFactory: async (
+      options: Pick<AuthRecoveryOptions, 'userMutateService'>,
+    ) => optionsOverrides?.userMutateService ?? options.userMutateService,
   };
 }
 
 export function createAuthRecoveryNotificationServiceProvider(
-  optionsOverrides?: AuthRecoveryOptions,
+  optionsOverrides?: Pick<AuthRecoveryOptions, 'notificationService'>,
 ): Provider {
   return {
     provide: AuthRecoveryNotificationService,
@@ -179,7 +181,7 @@ export function createAuthRecoveryNotificationServiceProvider(
       AUTH_RECOVERY_MODULE_EMAIL_SERVICE_TOKEN,
     ],
     useFactory: async (
-      options: AuthRecoveryOptionsInterface,
+      options: Pick<AuthRecoveryOptions, 'notificationService'>,
       settings: AuthRecoverySettingsInterface,
       emailService: AuthRecoveryEmailServiceInterface,
     ) =>
@@ -190,13 +192,13 @@ export function createAuthRecoveryNotificationServiceProvider(
 }
 
 export function createAuthRecoveryEntityManagerProxyProvider(
-  optionsOverrides?: AuthRecoveryOptions,
+  optionsOverrides?: Pick<AuthRecoveryOptions, 'entityManagerProxy'>,
 ): Provider {
   return {
     provide: AUTH_RECOVERY_MODULE_ENTITY_MANAGER_PROXY_TOKEN,
     inject: [RAW_OPTIONS_TOKEN, getEntityManagerToken()],
     useFactory: async (
-      options: AuthRecoveryOptionsInterface,
+      options: Pick<AuthRecoveryOptions, 'entityManagerProxy'>,
       defaultEntityManager: EntityManager,
     ) =>
       optionsOverrides?.entityManagerProxy ??

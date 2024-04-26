@@ -58,8 +58,8 @@ function definitionTransform(
   definition: DynamicModule,
   extras: AuthLocalOptionsExtrasInterface,
 ): DynamicModule {
-  const { providers = [] } = definition;
-  const { controllers, global = false } = extras;
+  const { providers } = definition;
+  const { controllers, global } = extras;
 
   return {
     ...definition,
@@ -104,7 +104,7 @@ export function createAuthLocalProviders(options: {
 }
 
 export function createAuthLocalControllers(
-  overrides: Pick<AuthLocalOptions, 'controllers'> = {},
+  overrides?: Pick<AuthLocalOptions, 'controllers'>,
 ): DynamicModule['controllers'] {
   return overrides?.controllers !== undefined
     ? overrides.controllers
@@ -126,7 +126,7 @@ export function createAuthLocalOptionsProvider(
 }
 
 export function createAuthLocalValidateUserServiceProvider(
-  optionsOverrides?: AuthLocalOptions,
+  optionsOverrides?: Pick<AuthLocalOptions, 'validateUserService'>,
 ): Provider {
   return {
     provide: AUTH_LOCAL_MODULE_VALIDATE_USER_SERVICE_TOKEN,
@@ -136,7 +136,7 @@ export function createAuthLocalValidateUserServiceProvider(
       AUTH_LOCAL_MODULE_PASSWORD_VALIDATION_SERVICE_TOKEN,
     ],
     useFactory: async (
-      options: AuthLocalOptionsInterface,
+      options: Pick<AuthLocalOptions, 'validateUserService'>,
       userLookupService: AuthLocalUserLookupServiceInterface,
       passwordValidationService: PasswordValidationServiceInterface,
     ) =>
@@ -150,13 +150,13 @@ export function createAuthLocalValidateUserServiceProvider(
 }
 
 export function createAuthLocalIssueTokenServiceProvider(
-  optionsOverrides?: AuthLocalOptions,
+  optionsOverrides?: Pick<AuthLocalOptions, 'issueTokenService'>,
 ): Provider {
   return {
     provide: AUTH_LOCAL_MODULE_ISSUE_TOKEN_SERVICE_TOKEN,
     inject: [RAW_OPTIONS_TOKEN, IssueTokenService],
     useFactory: async (
-      options: AuthLocalOptionsInterface,
+      options: Pick<AuthLocalOptions, 'issueTokenService'>,
       defaultService: IssueTokenServiceInterface,
     ) =>
       optionsOverrides?.issueTokenService ??
@@ -166,13 +166,13 @@ export function createAuthLocalIssueTokenServiceProvider(
 }
 
 export function createAuthLocalPasswordValidationServiceProvider(
-  optionsOverrides?: AuthLocalOptions,
+  optionsOverrides?: Pick<AuthLocalOptions, 'passwordValidationService'>,
 ): Provider {
   return {
     provide: AUTH_LOCAL_MODULE_PASSWORD_VALIDATION_SERVICE_TOKEN,
     inject: [RAW_OPTIONS_TOKEN, PasswordValidationService],
     useFactory: async (
-      options: AuthLocalOptionsInterface,
+      options: Pick<AuthLocalOptions, 'passwordValidationService'>,
       defaultService: PasswordValidationServiceInterface,
     ) =>
       optionsOverrides?.passwordValidationService ??
@@ -182,7 +182,7 @@ export function createAuthLocalPasswordValidationServiceProvider(
 }
 
 export function createAuthLocalUserLookupServiceProvider(
-  optionsOverrides?: AuthLocalOptions,
+  optionsOverrides?: Pick<AuthLocalOptions, 'userLookupService'>,
 ): Provider {
   return {
     provide: AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN,
