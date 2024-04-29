@@ -1,7 +1,7 @@
-import { PasswordValidationService } from '@concepta/nestjs-password';
-import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { mock } from 'jest-mock-extended';
+import { PasswordValidationService } from '@concepta/nestjs-password';
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { AuthLocalStrategy } from './auth-local.strategy';
 import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.interface';
 import { AuthLocalUserLookupServiceInterface } from './interfaces/auth-local-user-lookup-service.interface';
@@ -12,7 +12,7 @@ import { UserFixture } from './__fixtures__/user/user.entity.fixture';
 import { ReferenceIdInterface } from '@concepta/ts-core';
 import { AuthLocalValidateUserInterface } from './interfaces/auth-local-validate-user.interface';
 
-describe(AuthLocalStrategy, () => {
+describe(AuthLocalStrategy.name, () => {
   const USERNAME = 'username';
   const PASSWORD = 'password';
 

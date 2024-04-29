@@ -1,7 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 import { AuthenticationException } from './authentication.exception';
 
-describe('AuthenticationException', () => {
+describe(AuthenticationException.name, () => {
   it('should extend BadRequestException', () => {
     const exception = new AuthenticationException();
     expect(exception).toBeInstanceOf(BadRequestException);

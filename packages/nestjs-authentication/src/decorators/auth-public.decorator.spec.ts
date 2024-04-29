@@ -8,7 +8,7 @@ jest.mock('@nestjs/common', () => {
   };
 });
 
-describe('AuthPublic', () => {
+describe(AuthPublic.name, () => {
   it('should set metadata to disable guards', () => {
     AuthPublic();
     // Assert that SetMetadata was called with specific arguments

@@ -12,7 +12,7 @@ class ConcreteValidateUserService extends ValidateUserService {
   }
 }
 
-describe('ValidateUserService', () => {
+describe(ValidateUserService.name, () => {
   let service: ConcreteValidateUserService;
 
   beforeEach(async () => {

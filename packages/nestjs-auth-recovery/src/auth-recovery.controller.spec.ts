@@ -5,7 +5,7 @@ import { AuthRecoveryUpdatePasswordDto } from './dto/auth-recovery-update-passwo
 import { mock } from 'jest-mock-extended';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 
-describe('AuthRecoveryController', () => {
+describe(AuthRecoveryController.name, () => {
   let controller: AuthRecoveryController;
   let authRecoveryService: AuthRecoveryService;
   const dto: AuthRecoveryRecoverLoginDto = {

@@ -1,9 +1,9 @@
+import { PasswordValidationServiceInterface } from '@concepta/nestjs-password';
 import { AuthLocalValidateUserService } from './auth-local-validate-user.service';
 import { AuthLocalUserLookupServiceInterface } from '../interfaces/auth-local-user-lookup-service.interface';
-import { PasswordValidationServiceInterface } from '@concepta/nestjs-password';
 import { AuthLocalValidateUserInterface } from '../interfaces/auth-local-validate-user.interface';
 
-describe('AuthLocalValidateUserService', () => {
+describe(AuthLocalValidateUserService.name, () => {
   const USERNAME = 'test';
   const PASSWORD = 'test';
 
@@ -44,7 +44,7 @@ describe('AuthLocalValidateUserService', () => {
           password: PASSWORD,
         } as AuthLocalValidateUserInterface);
       await expect(t).rejects.toThrowError(
-        'No user found for username: ' + USERNAME,
+        `No user found for username: ${USERNAME}`,
       );
     });
 
@@ -58,7 +58,7 @@ describe('AuthLocalValidateUserService', () => {
           password: PASSWORD,
         } as AuthLocalValidateUserInterface);
       await expect(t).rejects.toThrowError(
-        "User with username '" + USERNAME + "' is inactive",
+        `User with username '${USERNAME}' is inactive`,
       );
     });
 
@@ -75,7 +75,7 @@ describe('AuthLocalValidateUserService', () => {
           password: USER.password,
         } as AuthLocalValidateUserInterface);
       await expect(t).rejects.toThrowError(
-        'Invalid password for username: ' + USER.username,
+        `Invalid password for username: ${USER.username}`,
       );
     });
 

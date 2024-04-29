@@ -10,7 +10,7 @@ jest.mock('./fastify-auth.guard', () => ({
   FastifyAuthGuard: jest.fn().mockImplementation(() => jest.fn()),
 }));
 
-describe('AuthGuard', () => {
+describe(AuthGuard.name, () => {
   let reflector: Reflector;
 
   beforeEach(() => {
