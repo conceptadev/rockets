@@ -4,7 +4,7 @@ import { AuthPublic } from './auth-public.decorator';
 
 jest.mock('@nestjs/common', () => {
   return {
-    SetMetadata: jest.fn().mockImplementation(() => 'mocked SetMetadata') // Mock SetMetadata
+    SetMetadata: jest.fn().mockImplementation(() => 'mocked SetMetadata'), // Mock SetMetadata
   };
 });
 

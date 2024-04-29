@@ -1,4 +1,3 @@
-import { NotImplementedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-strategy';
 import { PassportStrategyFactory } from './passport-strategy.factory';

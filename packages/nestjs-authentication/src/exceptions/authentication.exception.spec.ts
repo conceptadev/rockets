@@ -1,4 +1,3 @@
-
 import { BadRequestException } from '@nestjs/common';
 import { AuthenticationException } from './authentication.exception';
 
@@ -16,7 +15,7 @@ describe('AuthenticationException', () => {
 
   it('should pass a string error message to the BadRequestException', () => {
     const errorMessage = 'Specific error message';
-    const exception = new AuthenticationException(errorMessage)
+    const exception = new AuthenticationException(errorMessage);
     const data = exception.getResponse() as { message: string };
     expect(data.message).toContain(errorMessage);
   });

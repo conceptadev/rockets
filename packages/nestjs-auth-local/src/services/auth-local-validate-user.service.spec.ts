@@ -2,9 +2,6 @@ import { AuthLocalValidateUserService } from './auth-local-validate-user.service
 import { AuthLocalUserLookupServiceInterface } from '../interfaces/auth-local-user-lookup-service.interface';
 import { PasswordValidationServiceInterface } from '@concepta/nestjs-password';
 import { AuthLocalValidateUserInterface } from '../interfaces/auth-local-validate-user.interface';
-import { ReferenceIdInterface } from '@concepta/ts-core';
-import { UnauthorizedException } from '@nestjs/common';
-import { AuthLocalCredentialsInterface } from '../interfaces/auth-local-credentials.interface';
 
 describe('AuthLocalValidateUserService', () => {
   const USERNAME = 'test';

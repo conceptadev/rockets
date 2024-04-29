@@ -6,7 +6,7 @@ interface TestUser {
   active: boolean;
 }
 class ConcreteValidateUserService extends ValidateUserService {
-  async validateUser(...args: unknown[]): Promise<TestUser> {
+  async validateUser(..._args: unknown[]): Promise<TestUser> {
     // Implementation of the abstract method for testing purposes
     return { id: 'user1', active: true } as TestUser;
   }

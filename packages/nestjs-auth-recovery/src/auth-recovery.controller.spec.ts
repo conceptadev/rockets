@@ -1,7 +1,6 @@
 import { AuthRecoveryController } from './auth-recovery.controller';
 import { AuthRecoveryService } from './services/auth-recovery.service';
 import { AuthRecoveryRecoverLoginDto } from './dto/auth-recovery-recover-login.dto';
-import { AuthRecoveryRecoverPasswordDto } from './dto/auth-recovery-recover-password.dto';
 import { AuthRecoveryUpdatePasswordDto } from './dto/auth-recovery-update-password.dto';
 import { mock } from 'jest-mock-extended';
 import { BadRequestException, NotFoundException } from '@nestjs/common';

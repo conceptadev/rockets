@@ -1,6 +1,5 @@
 import { ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { FastifyAuthGuard } from './fastify-auth.guard';
 import { AuthGuard } from './auth.guard';
 import { AuthGuard as PassportAuthGuard } from '@nestjs/passport';
 
