@@ -61,4 +61,23 @@ describe('AuthRecoveryNotificationService', () => {
     );
     expect(spyEmailService).toHaveBeenCalledTimes(1);
   });
+
+  it('Send recover email password', async () => {
+    authRecoveryNotificationService['settings'].email.tokenUrlFormatter =
+      undefined;
+
+    await authRecoveryNotificationService.sendRecoverPasswordEmail(
+      'me@mail.com',
+      'me',
+      new Date(),
+    );
+    expect(spyEmailService).toHaveBeenCalledTimes(1);
+  });
+
+  it('Send recover email password', async () => {
+    await authRecoveryNotificationService.sendPasswordUpdatedSuccefullyEmail(
+      'me@mail.com',
+    );
+    expect(emailService.sendMail).toHaveBeenCalled();
+  });
 });
