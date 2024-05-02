@@ -107,13 +107,13 @@ export function createAuthJwtOptionsProvider(
 }
 
 export function createAuthJwtVerifyTokenServiceProvider(
-  optionsOverrides?: AuthJwtOptions,
+  optionsOverrides?: Pick<AuthJwtOptions, 'verifyTokenService'>,
 ): Provider {
   return {
     provide: AUTH_JWT_MODULE_VERIFY_TOKEN_SERVICE_TOKEN,
     inject: [RAW_OPTIONS_TOKEN, VerifyTokenService],
     useFactory: async (
-      options: AuthJwtOptionsInterface,
+      options: Pick<AuthJwtOptions, 'verifyTokenService'>,
       defaultService: VerifyTokenServiceInterface,
     ) =>
       optionsOverrides?.verifyTokenService ??
@@ -123,24 +123,24 @@ export function createAuthJwtVerifyTokenServiceProvider(
 }
 
 export function createAuthJwtUserLookupServiceProvider(
-  optionsOverrides?: AuthJwtOptions,
+  optionsOverrides?: Pick<AuthJwtOptions, 'userLookupService'>,
 ): Provider {
   return {
     provide: AUTH_JWT_MODULE_USER_LOOKUP_SERVICE_TOKEN,
     inject: [RAW_OPTIONS_TOKEN],
-    useFactory: async (options: AuthJwtOptionsInterface) =>
+    useFactory: async (options: Pick<AuthJwtOptions, 'userLookupService'>) =>
       optionsOverrides?.userLookupService ?? options.userLookupService,
   };
 }
 
 export function createAuthJwtAppGuardProvider(
-  optionsOverrides?: AuthJwtOptions,
+  optionsOverrides?: Pick<AuthJwtOptions, 'appGuard'>,
 ): Provider {
   return {
     provide: APP_GUARD,
     inject: [RAW_OPTIONS_TOKEN, AuthJwtGuard],
     useFactory: async (
-      options: AuthJwtOptionsInterface,
+      options: Pick<AuthJwtOptions, 'appGuard'>,
       defaultGuard: AuthJwtGuard,
     ) => {
       // get app guard from the options
