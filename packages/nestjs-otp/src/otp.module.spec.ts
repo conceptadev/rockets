@@ -6,8 +6,9 @@ import { OtpModule } from './otp.module';
 import { OtpService } from './services/otp.service';
 
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
+import { DynamicModule } from '@nestjs/common';
 
-describe('OtpModule', () => {
+describe(OtpModule.name, () => {
   let otpModule: OtpModule;
   let otpService: OtpService;
   let otpDynamicRepo: Record<string, Repository<OtpInterface>>;
@@ -32,6 +33,36 @@ describe('OtpModule', () => {
       expect(otpModule).toBeInstanceOf(OtpModule);
       expect(otpService).toBeInstanceOf(OtpService);
       expect(otpDynamicRepo).toBeDefined();
+    });
+  });
+
+  describe('OtpModule functions', () => {
+    const spyRegister = jest
+      .spyOn(OtpModule, 'register')
+      .mockImplementation(() => {
+        return {} as DynamicModule;
+      });
+
+    const spyRegisterAsync = jest
+      .spyOn(OtpModule, 'registerAsync')
+      .mockImplementation(() => {
+        return {} as DynamicModule;
+      });
+
+    it('should call super.register in register method', () => {
+      OtpModule.register({});
+      expect(spyRegister).toHaveBeenCalled();
+    });
+
+    it('should call super.registerAsync in register method', () => {
+      OtpModule.registerAsync({});
+      expect(spyRegisterAsync).toHaveBeenCalled();
+    });
+
+    it('should throw an error in forFeature method', () => {
+      expect(() => OtpModule.forFeature({})).toThrow(
+        'You must provide the entities option',
+      );
     });
   });
 });
