@@ -1,4 +1,4 @@
-import * as common from '@nestjs/common';
+import { SetMetadata } from '@nestjs/common';
 import { AUTHENTICATION_MODULE_DISABLE_GUARDS_TOKEN } from '../authentication.constants';
 import { AuthPublic } from './auth-public.decorator';
 
@@ -12,7 +12,7 @@ describe(AuthPublic.name, () => {
   it('should set metadata to disable guards', () => {
     AuthPublic();
     // Assert that SetMetadata was called with specific arguments
-    expect(common.SetMetadata).toHaveBeenCalledWith(
+    expect(SetMetadata).toHaveBeenCalledWith(
       AUTHENTICATION_MODULE_DISABLE_GUARDS_TOKEN,
       true,
     );

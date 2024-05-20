@@ -21,5 +21,9 @@
   "peerDependencies": {
     "class-transformer": "*",
     "class-validator": "*"
+  },
+  "devDependencies": {
+    "@nestjs/testing": "^9.0.0",
+    "jest-mock-extended": "^2.0.4"
   }
 }
