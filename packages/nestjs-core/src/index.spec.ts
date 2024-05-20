@@ -1,7 +1,7 @@
-import { 
-  createConfigurableDynamicRootModule, 
-  deferExternal, 
-  negotiateController 
+import {
+  createConfigurableDynamicRootModule,
+  deferExternal,
+  negotiateController,
 } from './index';
 
 describe('index', () => {

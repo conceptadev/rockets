@@ -61,7 +61,7 @@ describe(createSettingsProvider.name, () => {
       defaultSettings,
     );
   });
-  
+
   it('calls settingsTransform function when provided', async () => {
     const provider = createSettingsProvider({
       ...options,

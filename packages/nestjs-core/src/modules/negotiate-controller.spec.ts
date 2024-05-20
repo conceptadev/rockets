@@ -1,6 +1,6 @@
-import { DynamicModule } from "@nestjs/common";
-import { ModuleOptionsControllerInterface } from "./interfaces/module-options-controller.interface";
-import { negotiateController } from "./negotiate-controller";
+import { DynamicModule } from '@nestjs/common';
+import { ModuleOptionsControllerInterface } from './interfaces/module-options-controller.interface';
+import { negotiateController } from './negotiate-controller';
 
 class TestController {} // Example controller class for testing
 

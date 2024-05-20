@@ -32,4 +32,3 @@ describe('Authentication Module Exports', () => {
     expect(ValidateUserService).toBeInstanceOf(Function);
   });
 });
-
