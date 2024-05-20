@@ -1,7 +1,7 @@
 import { PasswordPlainInterface } from '@concepta/ts-common';
 import { PasswordStorageInterface } from './password-storage.interface';
 
-export interface PasswordCurrentPasswordInterface
+export interface PasswordHistoryPasswordInterface
   extends PasswordPlainInterface {
-  target: PasswordStorageInterface;
+  targets: PasswordStorageInterface[];
 }

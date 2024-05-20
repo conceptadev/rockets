@@ -50,7 +50,7 @@ export class UserMutateService
     // do we need to hash the password?
     if ('password' in user && typeof user.password === 'string') {
       // yes, hash it
-      return this.userPasswordService.setPassword(user);
+      return this.userPasswordService.setPassword(user, user?.id);
     } else {
       // no changes
       return user;

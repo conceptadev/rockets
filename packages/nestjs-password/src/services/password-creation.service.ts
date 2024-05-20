@@ -10,6 +10,7 @@ import { PasswordStorageService } from './password-storage.service';
 import { PasswordValidationService } from './password-validation.service';
 import { PasswordCreateObjectOptionsInterface } from '../interfaces/password-create-object-options.interface';
 import { PasswordCurrentPasswordInterface } from '../interfaces/password-current-password.interface';
+import { PasswordHistoryPasswordInterface } from '../interfaces/password-history-password.interface';
 
 /**
  * Service with functions related to password creation
@@ -104,6 +105,41 @@ export class PasswordCreationService
         // TODO: should be a password exception class
         // reqs not met, throw exception
         throw new Error('Current password is required');
+      }
+    }
+
+    // valid by default
+    return true;
+  }
+
+  public async validateHistory(
+    options: Partial<PasswordHistoryPasswordInterface>,
+  ): Promise<boolean> {
+    const { password, targets } = options || {
+      password: undefined,
+      targets: [],
+    };
+
+    // make sure the password is a string with some length
+    if (
+      typeof password === 'string' &&
+      password.length > 0 &&
+      targets?.length
+    ) {
+      // validate each target
+      for (const target of targets) {
+        // check if historic password is valid
+        const isValid = await this.passwordValidationService.validateObject(
+          password,
+          target,
+        );
+
+        // is valid?
+        if (isValid) {
+          throw new Error(
+            'The new password has been used too recently, please use a different password',
+          );
+        }
       }
     }
 
