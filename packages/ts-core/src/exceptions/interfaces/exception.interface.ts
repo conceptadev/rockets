@@ -7,5 +7,5 @@ export interface ExceptionInterface extends Error {
   /**
    * Additional context
    */
-  context?: Record<string, unknown>;
+  context?: Record<string, unknown> & { originalError?: unknown };
 }

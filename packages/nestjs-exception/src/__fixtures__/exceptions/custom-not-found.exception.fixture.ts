@@ -1,18 +1,14 @@
-import { format } from 'util';
-import { NotFoundException } from '@nestjs/common';
-import { ExceptionInterface } from '@concepta/ts-core';
+import { HttpStatus } from '@nestjs/common';
+import { RuntimeException } from '../../exceptions/runtime.exception';
 
-export class CustomNotFoundExceptionFixture
-  extends NotFoundException
-  implements ExceptionInterface
-{
+export class CustomNotFoundExceptionFixture extends RuntimeException {
+  httpStatus = HttpStatus.NOT_FOUND;
   errorCode = 'CUSTOM_NOT_FOUND';
 
   constructor(itemId: number) {
-    super(
-      NotFoundException.createBody(
-        format('Item with id %d was not found.', itemId),
-      ),
-    );
+    super({
+      message: 'Item with id %d was not found.',
+      messageParams: [itemId],
+    });
   }
 }
