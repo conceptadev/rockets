@@ -1,3 +1,6 @@
+// types
+export { RuntimeExceptionContext } from './exception.types';
+
 // filters
 export { ExceptionsFilter } from './filters/exceptions.filter';
 

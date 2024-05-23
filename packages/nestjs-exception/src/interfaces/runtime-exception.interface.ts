@@ -1,5 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
 import { ExceptionInterface } from '@concepta/ts-core/src/exceptions/interfaces/exception.interface';
+import { RuntimeExceptionContext } from '../exception.types';
 
 export interface RuntimeExceptionInterface extends ExceptionInterface {
   /**
@@ -19,5 +20,5 @@ export interface RuntimeExceptionInterface extends ExceptionInterface {
   /**
    * Additional context
    */
-  context?: Record<string, unknown> & { originalError?: Error };
+  context: RuntimeExceptionContext;
 }
