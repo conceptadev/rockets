@@ -73,5 +73,4 @@ describe(AuthGuard.name, () => {
     const guardInstance = new Guard(mockSettings, reflector);
     expect(guardInstance.canActivate(mockContext)).toBeTruthy();
   });
-
 });
