@@ -1,4 +1,3 @@
-import { format } from 'util';
 import { ExceptionInterface } from './interfaces/exception.interface';
 
 export class NotAnErrorException extends Error implements ExceptionInterface {
@@ -12,7 +11,7 @@ export class NotAnErrorException extends Error implements ExceptionInterface {
     originalError: unknown,
     message = 'An error was caught that is not an Error object',
   ) {
-    super(format(message));
+    super(message);
     this.context = {
       originalError,
     };
