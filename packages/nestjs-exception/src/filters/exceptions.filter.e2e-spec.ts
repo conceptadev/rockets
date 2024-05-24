@@ -41,6 +41,18 @@ describe('Exception (e2e)', () => {
     expect(response.body.message).toEqual('Bad Request');
   });
 
+  it('Should return array of validation errors', async () => {
+    const response = await supertest(app.getHttpServer())
+      .post('/test/bad-validation')
+      .send({ id: 'not a number' });
+    expect(response.body.statusCode).toEqual(HttpStatus.BAD_REQUEST);
+    expect(response.body.errorCode).toEqual('HTTP_BAD_REQUEST');
+    expect(typeof response.body.message).toEqual('object');
+    expect(response.body.message).toEqual([
+      'id must be a number conforming to the specified constraints',
+    ]);
+  });
+
   it('Should return not found', async () => {
     const response = await supertest(app.getHttpServer()).get('/test/123');
     expect(response.body.errorCode).toEqual('CUSTOM_NOT_FOUND');
