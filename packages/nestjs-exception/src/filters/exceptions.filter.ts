@@ -1,24 +1,17 @@
-import {
-  ExceptionFilter,
-  Catch,
-  ArgumentsHost,
-  HttpException,
-  HttpAdapterHost,
-} from '@nestjs/common';
+import { HttpAdapterHost } from '@nestjs/core';
+import { Catch, ArgumentsHost, HttpException } from '@nestjs/common';
+import { isObject } from '@nestjs/common/utils/shared.utils';
 import { ExceptionInterface } from '@concepta/ts-core';
 import { ERROR_CODE_UNKNOWN } from '../constants/error-codes.constants';
 import { RuntimeException } from '../exceptions/runtime.exception';
 import { mapHttpStatus } from '../utils/map-http-status.util';
 
 @Catch()
-export class ExceptionsFilter implements ExceptionFilter {
+export class ExceptionsFilter implements ExceptionsFilter {
   constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
 
   catch(exception: ExceptionInterface, host: ArgumentsHost): void {
-    // in certain situations `httpAdapter` might not be available in the
-    // constructor method, thus we should resolve it here.
     const { httpAdapter } = this.httpAdapterHost;
-
     const ctx = host.switchToHttp();
 
     // error code is UNKNOWN unless it gets overridden
@@ -28,7 +21,7 @@ export class ExceptionsFilter implements ExceptionFilter {
     let statusCode = 500;
 
     // what will this message be?
-    let message: string = 'Internal Server Error';
+    let message: unknown = 'Internal Server Error';
 
     // is this an http exception?
     if (exception instanceof HttpException) {
@@ -36,8 +29,14 @@ export class ExceptionsFilter implements ExceptionFilter {
       statusCode = exception.getStatus();
       // map the error code
       errorCode = mapHttpStatus(statusCode);
+      // get res
+      const res = exception.getResponse();
       // set the message
-      message = exception.message;
+      if (isObject(res) && 'message' in res) {
+        message = res.message;
+      } else {
+        message = res;
+      }
     } else if (exception instanceof RuntimeException) {
       // its a runtime exception, set error code
       errorCode = exception.errorCode;
