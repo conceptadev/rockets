@@ -28,17 +28,53 @@ import { CrudModule } from '@concepta/nestjs-crud';
       type: 'postgres',
       url: 'postgres://user:pass@localhost:5432/postgres',
     }),
-    CrudModule.forRoot({}),
+    CacheModule.register({
+      settings: {
+        assignments: {
+          user: { entityKey: 'userCache' },
+        },
+      },
+      entities: {
+        userCache: {
+          entity: UserCacheEntityFixture,
+        },
+      },
+    }),
     CacheModule.forRoot({}),
   ],
 })
 export class AppModule {}
 ```
 
-## Configuration
+## Configuration Details
 
-- [Seeding](#seeding)
-  - [ENV](#env)
+The Cache Module allows for detailed configuration to link your application's data models with caching mechanisms. Here’s a breakdown of the main configuration options:
+
+- **settings**: Manages how entities are assigned for caching.
+- **entities**: Specifies which entities are to be cached.
+
+## Setup
+
+### Step 1: Define Entities
+
+Ensure that you have defined the entities in your project that you wish to cache. For instance, a `UserEntity` might be used for storing user information.
+
+### Step 2: Configure the Cache Module
+
+Incorporate the Cache Module into your application module and configure it for your specific needs:
+
+## Configuration Options Explained:
+
+### entities:
+
+- **userCache**: The key that corresponds to the caching entity.
+- **entity**: The actual entity class (`UserCacheEntity` in this case) used for caching operations.
+
+### settings.assignments:
+
+- **user**: A logical name used within your application to refer to user data, this will be in the route to access the endpoint.
+- **entityKey**: Specifies the key under which the entity's data is cached. Here, 'userCache' is linked to the `UserCacheEntity`.
+
 
 ### Seeding
 

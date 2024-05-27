@@ -15,14 +15,14 @@ import { CrudModule } from '@concepta/nestjs-crud';
       entities: [UserEntityFixture, UserCacheEntityFixture],
     }),
     CacheModule.register({
-      settings: {
-        assignments: {
-          user: { entityKey: 'userCache' },
-        },
-      },
       entities: {
         userCache: {
           entity: UserCacheEntityFixture,
+        },
+      },
+      settings: {
+        assignments: {
+          user: { entityKey: 'userCache' },
         },
       },
     }),
