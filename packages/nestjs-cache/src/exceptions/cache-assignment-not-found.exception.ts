@@ -1,7 +1,7 @@
 import { format } from 'util';
 import { ExceptionInterface } from '@concepta/ts-core';
 
-export class AssignmentNotFoundException
+export class CacheAssignmentNotFoundException
   extends Error
   implements ExceptionInterface
 {

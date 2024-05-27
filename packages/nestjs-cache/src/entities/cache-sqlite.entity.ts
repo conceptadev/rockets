@@ -21,8 +21,8 @@ export abstract class CacheSqliteEntity
   @Column({ type: 'text', nullable: true })
   data!: string;
 
-  @Column({ type: 'datetime' })
-  expirationDate!: Date;
+  @Column({ type: 'datetime', nullable: true })
+  expirationDate!: Date | null;
 
   /**
    * Should be overwrite by the table it will be assigned to

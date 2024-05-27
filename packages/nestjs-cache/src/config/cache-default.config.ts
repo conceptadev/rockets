@@ -8,6 +8,6 @@ import { CacheSettingsInterface } from '../interfaces/cache-settings.interface';
 export const cacheDefaultConfig = registerAs(
   CACHE_MODULE_DEFAULT_SETTINGS_TOKEN,
   (): Partial<CacheSettingsInterface> => ({
-    expiresIn: process.env.CACHE_EXPIRE_IN ? process.env.CACHE_EXPIRE_IN : '1d',
+    expiresIn: process.env.CACHE_EXPIRE_IN ? process.env.CACHE_EXPIRE_IN : null,
   }),
 );

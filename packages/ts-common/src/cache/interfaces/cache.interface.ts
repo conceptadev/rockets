@@ -21,10 +21,10 @@ export interface CacheInterface
   /**
    * data of the cache
    */
-  data: string;
+  data: string | null;
 
   /**
    * Date it will expire
    */
-  expirationDate: Date;
+  expirationDate: Date | null;
 }

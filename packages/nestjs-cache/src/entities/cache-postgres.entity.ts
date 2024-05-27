@@ -18,10 +18,10 @@ export abstract class CachePostgresEntity
   key!: string;
 
   @Column({ type: 'jsonb', nullable: true })
-  data!: string;
+  data!: string | null;
 
-  @Column({ type: 'timestamptz' })
-  expirationDate!: Date;
+  @Column({ type: 'timestamptz', nullable: true })
+  expirationDate!: Date | null;
 
   /**
    * Should be overwrite by the table it will be assigned to

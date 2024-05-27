@@ -25,6 +25,7 @@ import { CacheUpdateDto } from '../dto/cache-update.dto';
 import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
 import { CacheServiceInterface } from '../interfaces/cache-service.interface';
 import { CacheSettingsInterface } from '../interfaces/cache-settings.interface';
+import getExpirationDate from '../utils/get-expiration-date.util';
 
 @Injectable()
 export class CacheService implements CacheServiceInterface {
@@ -58,7 +59,7 @@ export class CacheService implements CacheServiceInterface {
     // try to find the relationship
     try {
       // generate the expiration date
-      const expirationDate = this.getExpirationDate(
+      const expirationDate = getExpirationDate(
         expiresIn ?? this.settings.expiresIn,
       );
 
@@ -89,6 +90,10 @@ export class CacheService implements CacheServiceInterface {
     // validate the data
     const dto = await this.validateDto<CacheUpdateDto>(CacheUpdateDto, cache);
 
+    // generate the expiration date
+    const expirationDate = getExpirationDate(
+      dto.expiresIn ?? this.settings.expiresIn,
+    );
     // new repo proxy
     const repoProxy = new RepositoryProxy<CacheInterface>(assignmentRepo);
 
@@ -103,7 +108,10 @@ export class CacheService implements CacheServiceInterface {
         queryOptions,
       );
 
-      return repoProxy.repository(queryOptions).save(mergedEntity);
+      return repoProxy.repository(queryOptions).save({
+        ...mergedEntity,
+        expirationDate,
+      });
     } catch (e) {
       throw new ReferenceMutateException(assignmentRepo.metadata.targetName, e);
     }
@@ -305,13 +313,5 @@ export class CacheService implements CacheServiceInterface {
     queryOptions?: QueryOptionsInterface,
   ): Promise<CacheInterface> {
     return repoProxy.repository(queryOptions).merge(assignedCache, dto);
-  }
-
-  // TODO: move this to a help function
-  private getExpirationDate(expiresIn: string) {
-    const now = new Date();
-
-    // add time in seconds to now as string format
-    return new Date(now.getTime() + ms(expiresIn));
   }
 }

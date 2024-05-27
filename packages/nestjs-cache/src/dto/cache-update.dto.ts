@@ -7,5 +7,11 @@ import { CacheDto } from './cache.dto';
  */
 @Exclude()
 export class CacheUpdateDto
-  extends PickType(CacheDto, ['key', 'type', 'assignee', 'data'] as const)
+  extends PickType(CacheDto, [
+    'key',
+    'type',
+    'assignee',
+    'data',
+    'expiresIn',
+  ] as const)
   implements CacheUpdatableInterface {}

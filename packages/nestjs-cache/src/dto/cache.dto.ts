@@ -1,5 +1,5 @@
 import { Exclude, Expose, Type } from 'class-transformer';
-import { Allow, IsString, ValidateNested } from 'class-validator';
+import { Allow, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { ReferenceIdInterface } from '@concepta/ts-core';
 import { CacheInterface } from '@concepta/ts-common';
 import { CommonEntityDto, ReferenceIdDto } from '@concepta/nestjs-common';
@@ -21,7 +21,8 @@ export class CacheDto extends CommonEntityDto implements CacheInterface {
    */
   @Expose()
   @IsString()
-  data = '';
+  @IsOptional()
+  data!: string | null;
 
   /**
    * type
@@ -37,7 +38,8 @@ export class CacheDto extends CommonEntityDto implements CacheInterface {
    */
   @Expose()
   @IsString()
-  expiresIn = '';
+  @IsOptional()
+  expiresIn!: string | null;
 
   /**
    * Assignee
@@ -52,5 +54,6 @@ export class CacheDto extends CommonEntityDto implements CacheInterface {
    */
   @Allow()
   @Type(() => Date)
-  expirationDate!: Date;
+  @IsOptional()
+  expirationDate!: Date | null;
 }

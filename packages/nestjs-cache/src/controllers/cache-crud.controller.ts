@@ -13,7 +13,8 @@ import {
   CrudReadMany,
   CrudReadOne,
   CrudRequest,
-  CrudRequestInterface
+  CrudRequestInterface,
+  CrudUpdateOne,
 } from '@concepta/nestjs-crud';
 import {
   CacheCreatableInterface,
@@ -32,10 +33,11 @@ import { CacheResource } from '../cache.types';
 import { CachePaginatedDto } from '../dto/cache-paginated.dto';
 import { CacheUpdateDto } from '../dto/cache-update.dto';
 import { CacheDto } from '../dto/cache.dto';
-import { AssignmentNotFoundException } from '../exceptions/assignment-not-found.exception';
+import { CacheAssignmentNotFoundException } from '../exceptions/cache-assignment-not-found.exception';
 import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
 import { CacheSettingsInterface } from '../interfaces/cache-settings.interface';
 import { CacheCrudService } from '../services/cache-crud.service';
+import getExpirationDate from '../utils/get-expiration-date.util';
 
 /**
  * Cache assignment controller.
@@ -121,8 +123,7 @@ export class CacheCrudController
     @CrudBody() cacheCreateDto: CacheCreatableInterface,
     @Param('assignment') assignment: ReferenceAssignment,
   ) {
-    // TODO: how to set expiration date
-    const expirationDate = this.getExpirationDate(
+    const expirationDate = getExpirationDate(
       cacheCreateDto.expiresIn ?? this.settings.expiresIn,
     );
 
@@ -140,18 +141,22 @@ export class CacheCrudController
    * @param cacheUpdateDto cache create dto
    * @param assignment The cache assignment
    */
-  @CrudCreateOne()
+  @CrudUpdateOne()
   @AccessControlCreateOne(CacheResource.One)
   async updateOne(
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() cacheUpdateDto: CacheUpdateDto,
     @Param('assignment') assignment: ReferenceAssignment,
   ) {
-    // call crud service to create
-    return this.getCrudService(assignment).updateOne(
-      crudRequest,
-      cacheUpdateDto,
+    const expirationDate = getExpirationDate(
+      cacheUpdateDto.expiresIn ?? this.settings.expiresIn,
     );
+
+    // call crud service to create
+    return this.getCrudService(assignment).updateOne(crudRequest, {
+      ...cacheUpdateDto,
+      expirationDate,
+    });
   }
 
   /**
@@ -190,14 +195,7 @@ export class CacheCrudController
       }
     } else {
       // bad assignment
-      throw new AssignmentNotFoundException(assignment);
+      throw new CacheAssignmentNotFoundException(assignment);
     }
-  }
-
-  private getExpirationDate(expiresIn: string) {
-    const now = new Date();
-
-    // add time in seconds to now as string format
-    return new Date(now.getTime() + ms(expiresIn));
   }
 }

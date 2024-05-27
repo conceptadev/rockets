@@ -12,56 +12,69 @@ import { CacheSettingsInterface } from '../interfaces/cache-settings.interface';
 
 import { CacheCreateDto } from '../dto/cache-create.dto';
 import { ReferenceAssignment } from '@concepta/ts-core';
+import getExpirationDate from '../utils/get-expiration-date.util';
+
+const expirationDate = new Date();
+expirationDate.setHours(expirationDate.getHours() + 1);
+
+jest.mock('../utils/get-expiration-date.util', () => ({
+  __esModule: true,
+  default: jest.fn(() => expirationDate),
+}));
 
 describe('CacheService', () => {
   let service: CacheService;
   let repo: Repository<CacheInterface>;
   let settings: CacheSettingsInterface;
-  const cache: CacheCreatableInterface = {
+  const cacheDto: CacheCreatableInterface = {
     key: 'testKey',
     type: 'testType',
     data: 'testData',
     assignee: { id: 'testAssignee' },
     expiresIn: '1h',
   };
+
   const queryOptions: QueryOptionsInterface = {};
   const assignment: ReferenceAssignment = 'testAssignment';
   const cacheCreateDto = new CacheCreateDto();
   const repoProxyMock = mock<RepositoryProxy<CacheInterface>>();
-  const expirationDate = new Date();
+  // const expirationDate = new Date();
 
+  const cacheEntity: CacheInterface = {
+    ...cacheDto,
+    expirationDate,
+    id: 'testId',
+    dateCreated: new Date(),
+    dateUpdated: new Date(),
+    dateDeleted: null,
+    version: 1,
+  };
   beforeEach(() => {
     repo = mock<Repository<CacheInterface>>();
     settings = mock<CacheSettingsInterface>();
     settings.expiresIn = '1h';
     service = new CacheService({ testAssignment: repo }, settings);
-    
-    expirationDate.setHours(expirationDate.getHours() + 1);
   });
 
   describe(CacheService.prototype.create, () => {
     it('should create a cache entry', async () => {
-      Object.assign(cacheCreateDto, cache);
+      Object.assign(cacheCreateDto, cacheDto);
 
-      
       repoProxyMock.repository.mockReturnValue(repo);
 
       // Mocking validateDto method
       service['validateDto'] = jest.fn().mockResolvedValue(cacheCreateDto);
 
-      // Mocking getExpirationDate method
-      service['getExpirationDate'] = jest.fn().mockReturnValue(expirationDate);
-
       // Mocking RepositoryProxy class
       jest.spyOn(RepositoryProxy.prototype, 'repository').mockReturnValue(repo);
 
-      await service.create(assignment, cache, queryOptions);
+      await service.create(assignment, cacheDto, queryOptions);
 
       expect(repo.save).toHaveBeenCalledWith({
-        key: cache.key,
-        type: cache.type,
-        data: cache.data,
-        assignee: cache.assignee,
+        key: cacheDto.key,
+        type: cacheDto.type,
+        data: cacheDto.data,
+        assignee: cacheDto.assignee,
         expirationDate,
       });
     });
@@ -73,45 +86,45 @@ describe('CacheService', () => {
       service['validateDto'] = jest.fn().mockRejectedValue(error);
 
       await expect(
-        service.create(assignment, cache, queryOptions),
+        service.create(assignment, cacheDto, queryOptions),
       ).rejects.toThrow(ReferenceValidationException);
     });
 
     it('should throw a ReferenceMutateException on error', async () => {
       const assignment: ReferenceAssignment = 'testAssignment';
 
-      const error = new ReferenceValidationException('error', []);
-
-      service['getExpirationDate'] = () => {
-        throw error;
-      };
+      jest
+        .spyOn(RepositoryProxy.prototype, 'repository')
+        .mockImplementationOnce(() => {
+          throw new Error();
+        });
 
       const t = async () =>
-        await service.create(assignment, cache, queryOptions);
+        await service.create(assignment, cacheDto, queryOptions);
       expect(t).rejects.toThrow(ReferenceMutateException);
     });
   });
 
   describe(CacheService.prototype.update, () => {
-    it('should create a cache entry', async () => {
-      Object.assign(cacheCreateDto, cache);
+    it('should update a cache entry', async () => {
+      Object.assign(cacheCreateDto, cacheDto);
 
       repoProxyMock.repository.mockReturnValue(repo);
 
-      service['validateDto'] = jest.fn();
+      service['validateDto'] = jest.fn().mockResolvedValueOnce(cacheDto);
       service['findCache'] = jest.fn();
       const result = {
-        key: cache.key,
-        type: cache.type,
-        data: cache.data,
-        assignee: cache.assignee,
+        key: cacheDto.key,
+        type: cacheDto.type,
+        data: cacheDto.data,
+        assignee: cacheDto.assignee,
         expirationDate,
       };
       service['mergeEntity'] = jest.fn().mockResolvedValue(result);
 
       jest.spyOn(RepositoryProxy.prototype, 'repository').mockReturnValue(repo);
 
-      await service.update(assignment, cache, queryOptions);
+      await service.update(assignment, cacheDto, queryOptions);
 
       expect(repo.save).toHaveBeenCalledWith(result);
     });
@@ -123,7 +136,7 @@ describe('CacheService', () => {
       service['validateDto'] = jest.fn().mockRejectedValue(error);
 
       await expect(
-        service.update(assignment, cache, queryOptions),
+        service.update(assignment, cacheDto, queryOptions),
       ).rejects.toThrow(ReferenceValidationException);
     });
 
@@ -133,7 +146,7 @@ describe('CacheService', () => {
       const error = new Error('error');
       service['mergeEntity'] = jest.fn().mockResolvedValue(error);
 
-      const t = () => service.update(assignment, cache, queryOptions);
+      const t = () => service.update(assignment, cacheDto, queryOptions);
       await expect(t).rejects.toThrow(ReferenceMutateException);
     });
   });
