@@ -1,6 +1,6 @@
 {
   "name": "@concepta/nestjs-auth-refresh",
-  "version": "4.0.0-alpha.42",
+  "version": "4.0.0-alpha.44",
   "description": "Rockets NestJS Refresh Authentication",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,12 +12,12 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
-    "@concepta/nestjs-authentication": "^4.0.0-alpha.42",
-    "@concepta/nestjs-common": "^4.0.0-alpha.42",
-    "@concepta/nestjs-jwt": "^4.0.0-alpha.42",
-    "@concepta/ts-common": "^4.0.0-alpha.42",
-    "@concepta/ts-core": "^4.0.0-alpha.42",
-    "@concepta/typeorm-common": "^4.0.0-alpha.42",
+    "@concepta/nestjs-authentication": "^4.0.0-alpha.44",
+    "@concepta/nestjs-common": "^4.0.0-alpha.44",
+    "@concepta/nestjs-jwt": "^4.0.0-alpha.44",
+    "@concepta/ts-common": "^4.0.0-alpha.44",
+    "@concepta/ts-core": "^4.0.0-alpha.44",
+    "@concepta/typeorm-common": "^4.0.0-alpha.44",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.2.0",
     "@nestjs/core": "^9.0.0",

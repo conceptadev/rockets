@@ -1,3 +1,5 @@
+export { ExceptionContext } from './core.types';
+
 export { ExceptionInterface } from './exceptions/interfaces/exception.interface';
 
 export { Type } from './utils/interfaces/type.interface';

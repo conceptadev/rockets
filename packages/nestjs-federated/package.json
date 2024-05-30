@@ -1,6 +1,6 @@
 {
   "name": "@concepta/nestjs-federated",
-  "version": "4.0.0-alpha.42",
+  "version": "4.0.0-alpha.44",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "BSD-3-Clause",
@@ -11,17 +11,17 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
-    "@concepta/nestjs-common": "^4.0.0-alpha.42",
-    "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.42",
-    "@concepta/ts-common": "^4.0.0-alpha.42",
-    "@concepta/ts-core": "^4.0.0-alpha.42",
-    "@concepta/typeorm-common": "^4.0.0-alpha.42",
+    "@concepta/nestjs-common": "^4.0.0-alpha.44",
+    "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.44",
+    "@concepta/ts-common": "^4.0.0-alpha.44",
+    "@concepta/ts-core": "^4.0.0-alpha.44",
+    "@concepta/typeorm-common": "^4.0.0-alpha.44",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.2.0",
     "@nestjs/swagger": "^6.0.0"
   },
   "devDependencies": {
-    "@concepta/nestjs-user": "^4.0.0-alpha.42",
+    "@concepta/nestjs-user": "^4.0.0-alpha.44",
     "@nestjs/testing": "^9.0.0",
     "jest-mock-extended": "^2.0.4"
   },
