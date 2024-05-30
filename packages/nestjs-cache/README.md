@@ -10,17 +10,53 @@ A module for managing a basic Cache entity, including controller with full CRUD,
 [![GH Contrib](https://img.shields.io/github/contributors/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets/graphs/contributors)
 [![NestJS Dep](https://img.shields.io/github/package-json/dependency-version/conceptadev/rockets/@nestjs/common?label=NestJS&logo=nestjs&filename=packages%2Fnestjs-core%2Fpackage.json)](https://www.npmjs.com/package/@nestjs/common)
 
-## Installation
+## Table of Contents
 
-`yarn add @concepta/nestjs-cache`
+- [Introduction](#introduction)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Configuration Details](#configuration-details)
+- [Setup](#setup)
+- [Configuration Options Explained](#configuration-options-explained)
+
+## Introduction
+
+This module is a basic implementation of a caching mechanism for your application. It allows you to cache data in a database and retrieve it later, ensuring that your application is not repeatedly fetching the same data from a database.
+
+How does it work? Let's create the entities we will need to cache the information of a User Entity
+
+
+
 
 ## Usage
 
+Inf 
+
+```ts
+@Entity()
+export class UserEntityFixture implements ReferenceIdInterface {
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
+
+  @Column({ default: false })
+  isActive!: boolean;
+
+  @OneToMany(() => UserCacheEntityFixture, (userCache) => userCache.assignee)
+  userCaches!: UserCacheEntityFixture[];
+}
+
+```
+ 
+```typescript
+@Entity()
+export class UserCacheEntityFixture extends CacheSqliteEntity {
+  @ManyToOne(() => UserEntityFixture, (user) => user.userCaches)
+  assignee!: ReferenceIdInterface;
+}
+```
+
 ```ts
 // ...
-import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
-import { CacheModule } from '@concepta/nestjs-user';
-import { CrudModule } from '@concepta/nestjs-crud';
 
 @Module({
   imports: [
@@ -45,6 +81,10 @@ import { CrudModule } from '@concepta/nestjs-crud';
 })
 export class AppModule {}
 ```
+
+## Installation
+
+`yarn add @concepta/nestjs-cache`
 
 ## Configuration Details
 
