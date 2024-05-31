@@ -23,14 +23,28 @@ A module for managing a basic Cache entity, including controller with full CRUD,
 
 This module is a basic implementation of a caching mechanism for your application. It allows you to cache data in a database and retrieve it later, ensuring that your application is not repeatedly fetching the same data from a database.
 
-How does it work? Let's create the entities we will need to cache the information of a User Entity
+Installation
+To install the module, use the following command:
 
+## Installation
 
+`yarn add @concepta/nestjs-cache`
 
+## Configuration
+
+The Cache Module allows for detailed configuration to link your application's data models with caching mechanisms.
+
+### Configuration Options Explained
+
+- **settings**: Manages how entities are assigned for caching.
+- **entities**: Specifies which entities are to be cached.
 
 ## Usage
 
-Inf 
+To utilize the caching module, you need to define the entities and configure the module appropriately.
+
+## Example
+Define your UserEntityFixture and UserCacheEntityFixture entities as follows:
 
 ```ts
 @Entity()
@@ -46,14 +60,21 @@ export class UserEntityFixture implements ReferenceIdInterface {
 }
 
 ```
- 
+
 ```typescript
 @Entity()
 export class UserCacheEntityFixture extends CacheSqliteEntity {
   @ManyToOne(() => UserEntityFixture, (user) => user.userCaches)
   assignee!: ReferenceIdInterface;
 }
-```
+``` 
+## Setup
+
+### Define Entities
+Ensure that you have defined the entities in your project that you wish to cache. For instance, a UserEntityFixture might be used for storing user information.
+
+### Configure the Cache Module
+Incorporate the Cache Module into your application module and configure it for your specific needs:
 
 ```ts
 // ...
@@ -82,43 +103,119 @@ export class UserCacheEntityFixture extends CacheSqliteEntity {
 export class AppModule {}
 ```
 
-## Installation
+### Client-side Interaction with CRUD Endpoints
 
-`yarn add @concepta/nestjs-cache`
+The Cache API provides RESTful endpoints for managing cached data. The endpoint path follows the format `cache/:assignment`, where `:assignment` is defined in your module configuration. For example, if you have the configuration:
 
-## Configuration Details
+```typescript
+CacheModule.register({
+  settings: {
+    assignments: {
+      user: { entityKey: 'userCache' },
+    },
+  },
+  entities: {
+    userCache: {
+      entity: UserCacheEntityFixture,
+    },
+  },
+})
+```
+The endpoint will be cache/user. Below are examples of how to interact with the API using curl.
 
-The Cache Module allows for detailed configuration to link your application's data models with caching mechanisms. Here’s a breakdown of the main configuration options:
+### Create (POST)
+To create a new cache entry, the request body should match the CacheCreatableInterface:
 
-- **settings**: Manages how entities are assigned for caching.
-- **entities**: Specifies which entities are to be cached.
+```ts
+export interface CacheCreatableInterface extends Pick<CacheInterface, 'key' | 'type' | 'data' | 'assignee'> {
+    expiresIn: string | null;
+}
+```
+Example curl command:
 
-## Setup
+```sh
+curl -X POST http://your-api-url/cache/user \
+-H "Content-Type: application/json" \
+-d '{
+  "key": "exampleKey",
+  "type": "exampleType",
+  "data": "{data: 'example'}",
+  "assignee": { id: 'exampleId'},
+  "expiresIn": "1h"
+}'
 
-### Step 1: Define Entities
+```
+### Read (GET)
+To read a cache entry by its ID:
 
-Ensure that you have defined the entities in your project that you wish to cache. For instance, a `UserEntity` might be used for storing user information.
+```sh
+curl -X GET http://your-api-url/cache/user/{id}
+```
 
-### Step 2: Configure the Cache Module
+### Update (PUT)
+To update an existing cache entry, the request body should match the CacheUpdatableInterface:
 
-Incorporate the Cache Module into your application module and configure it for your specific needs:
+```ts
+export interface CacheUpdatableInterface extends Pick<CacheInterface, 'key' | 'type' | 'data' | 'assignee'> {
+    expiresIn: string | null;
+}
 
-## Configuration Options Explained:
+```
+Example curl command:
 
-### entities:
+```sh
+curl -X PUT http://your-api-url/cache/user/{id} \
+-H "Content-Type: application/json" \
+-d '{
+  "key": "updatedKey",
+  "type": "updatedType",
+  "data": "updatedData",
+  "assignee": "updatedAssignee",
+  "expiresIn": "2d"
+}'
 
-- **userCache**: The key that corresponds to the caching entity.
-- **entity**: The actual entity class (`UserCacheEntity` in this case) used for caching operations.
+```
+### Delete (DELETE)
+To delete a cache entry by its ID:
 
-### settings.assignments:
+```sh
+curl -X DELETE http://your-api-url/cache/user/{id}
+```
 
-- **user**: A logical name used within your application to refer to user data, this will be in the route to access the endpoint.
-- **entityKey**: Specifies the key under which the entity's data is cached. Here, 'userCache' is linked to the `UserCacheEntity`.
+Replace http://your-api-url with the actual base URL of your API, and {id} with the actual ID of the cache entry you wish to interact with.
 
+By following these examples, you can perform Create, Read, Update, and Delete operations on your cache data using the provided endpoints.
 
-### Seeding
+## How the Module Works
 
-Configurations specific to (optional) database seeding.
+### Overview
+
+The Rockets NestJS Cache module is designed to provide an easy and efficient way to manage cached data in your application. Here's a simple explanation of how it works:
+
+### Dynamic Controller Generation
+
+The module automatically creates controllers based on the settings you provide. This means you can set up different cache entities and their endpoints without writing extra code. The endpoints are created based on the assignments you define in the module configuration.
+
+### CRUD Operations
+
+The module supports all basic operations: Create, Read, Update, and Delete (CRUD). These operations are managed by a controller that uses special decorators to define and control access. The operations are routed based on the cache assignment specified in the request.
+
+### Service Injection
+
+The module uses a technique called dependency injection to manage its settings and services. It injects configuration settings that define cache assignments and expiration times, as well as a list of CRUD services. This allows the module to dynamically choose the right service for each cache assignment.
+
+### Handling Assignments
+
+In the module configuration, you specify different cache assignments. Each assignment is linked to a specific entity and CRUD service. When a request is made to the cache endpoint, the module uses the assignment in the request to determine which entity and service to use.
+
+### Exception Handling
+
+The module has built-in error handling to manage invalid assignments or entity keys. It throws specific errors when something goes wrong, ensuring that your application can handle these issues gracefully and provide clear error messages to the client.
+
+### Summary
+
+The Rockets NestJS Cache module provides a powerful and flexible way to manage cached data. By automatically generating controllers, using dependency injection, and handling various types of cached data dynamically, it ensures your application can run efficiently without redundant database queries.
+
 
 #### ENV
 
