@@ -24,6 +24,10 @@ import { AccessControlSettingsInterface } from './interfaces/access-control-sett
 import { AccessControlService } from './services/access-control.service';
 import { AccessControlContext } from './access-control.context';
 
+/**
+ * Guard class responsible for access control using the AccessControlService.
+ * It utilizes metadata defined on handlers to determine if the current user has the required permissions.
+ */
 @Injectable()
 export class AccessControlGuard implements CanActivate {
   constructor(
@@ -35,6 +39,14 @@ export class AccessControlGuard implements CanActivate {
     private moduleRef: ModuleRef,
   ) {}
 
+  /**
+   * Determines if the current user has the necessary access rights based on the roles and permissions.
+   * This method retrieves the necessary metadata from the handler, checks the user's roles, and verifies
+   * if any of the roles have the required permissions to access the resource.
+   *
+   * @param {ExecutionContext} context - The execution context from which the handler can be extracted.
+   * @returns {Promise<boolean>} - A promise that resolves to a boolean indicating whether access is granted.
+   */
   public async canActivate(context: ExecutionContext): Promise<boolean> {
     // check permissions
     return this.checkAccessGrants(context);
