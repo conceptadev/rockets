@@ -104,7 +104,7 @@ This section provides a comprehensive explanation of each configuration option a
   This service is responsible for looking up user information based on the JWT payload. It implements the `AuthJwtUserLookupServiceInterface` and must be provided to the module.
 
   ```typescript
-  import { AuthJwtUserLookupServiceInterface } from '@concepta/nestjs-auth-jwt/dist/interfaces/auth-jwt-user-lookup-service.interface';
+  import { AuthJwtUserLookupServiceInterface } from '@concepta/nestjs-auth-jwt';
   import { ReferenceIdInterface, ReferenceSubject } from '@concepta/ts-core';
 
   export class UserLookupService implements AuthJwtUserLookupServiceInterface {
@@ -453,7 +453,7 @@ export class UserService {
   }
 }
 
-import { AuthJwtUserLookupServiceInterface } from '@concepta/nestjs-auth-jwt/dist/interfaces/auth-jwt-user-lookup-service.interface';
+import { AuthJwtUserLookupServiceInterface } from '@concepta/nestjs-auth-jwt';
 import { ReferenceIdInterface, ReferenceSubject } from '@concepta/ts-core';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
