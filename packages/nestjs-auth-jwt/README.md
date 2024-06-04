@@ -25,6 +25,119 @@ The `AuthJWTModule` is a powerful yet easy-to-use NestJS module designed for imp
 - **Global and Feature-Specific Registration**: Use the module globally across your application or tailor it for specific features.
 - **Seamless Integration**: Easily integrates with other NestJS modules like `AuthLocalModule`, `AuthRefreshModule`, and more.
 
+
+## API Reference
+
+Detailed Descriptions of All Classes, Methods, and Properties
+
+### AuthJwtModule
+
+- **register(options: AuthJwtOptions):**
+  - Registers the module with synchronous options.
+
+- **registerAsync(options: AuthJwtAsyncOptions):**
+  - Registers the module with asynchronous options.
+
+- **forRoot(options: AuthJwtOptions):**
+  - Registers the module globally with synchronous options.
+
+- **forRootAsync(options: AuthJwtAsyncOptions):**
+  - Registers the module globally with asynchronous options.
+
+- **forFeature(options: AuthJwtOptions):**
+  - Registers the module for specific features with custom options.
+
+### AuthJwtOptionsInterface
+
+The `AuthJwtOptionsInterface` provides various configuration options to customize the behavior of the `AuthJwtModule`. Below is a summary of the key options:
+
+1. **userLookupService** (required): 
+   - Service for looking up user information based on JWT payload.
+
+2. **verifyTokenService** (optional): 
+   - Service for verifying JWT tokens.
+
+3. **appGuard** (optional): 
+   - Custom guard to protect routes; can be set to a custom guard or `false`.
+
+4. **settings** (optional): 
+   - JWT strategy settings, including token extraction and verification logic.
+
+## Module Configuration
+
+This section provides a comprehensive explanation of each configuration option available in the AuthJwtOptionsInterface, along with examples of how to implement and use them in your NestJS application.
+
+1. **userLookupService (required)**
+
+  This service is responsible for looking up user information based on the JWT payload. It implements the `AuthJwtUserLookupServiceInterface` and must be provided to the module.
+  ```typescript
+  import { AuthJwtUserLookupServiceInterface } from '@concepta/nestjs-auth-jwt';
+
+  export class UserLookupService implements AuthJwtUserLookupServiceInterface {
+    async bySubject(subject: string): Promise<User | null> {
+      // Implement user lookup logic here
+    }
+  }
+  ```
+
+2. **verifyTokenService (optional)**
+
+  This service verifies JWT tokens. If not provided, the default verification logic will be used. It extends the `VerifyTokenServiceInterface`.
+
+     ```typescript
+  @Injectable()
+     export class YourVerifyTokenService implements VerifyTokenServiceInterface {
+       constructor(private readonly jwtService: JwtService) {}
+
+       accessToken(...args: Parameters<JwtService['verifyAsync']>): ReturnType<JwtService['verifyAsync']> {
+         return this.jwtService.verifyAsync(...args);
+       }
+
+       refreshToken(...args: Parameters<JwtService['verifyAsync']>): ReturnType<JwtService['verifyAsync']> {
+         return this.jwtService.verifyAsync(...args);
+       }
+     }
+     ```
+
+3. **appGuard (optional)**
+
+  This is a custom guard that can be used to protect routes. It implements the `CanActivate` interface from NestJS. If set to false, no guard will be applied.
+
+  ```typescript
+  import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+
+  @Injectable()
+  export class YourCustomAppGuard implements CanActivate {
+    canActivate(context: ExecutionContext): boolean {
+      // Implement guard logic here
+      return true;
+    }
+  }
+
+  ```
+4. **settings (optional)**
+
+  This object contains the settings for JWT strategy. It extends the `JwtStrategyOptionsInterface` and allows customization of JWT extraction and verification logic.
+
+  ```typescript
+  import { JwtStrategyOptionsInterface } from '@concepta/nestjs-jwt';
+  import { ExtractJwt } from '@nestjs/jwt';
+  import * as jwt from 'jsonwebtoken';
+
+  const settings: JwtStrategyOptionsInterface = {
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    verifyToken: async (token: string, done: (error: any, payload?: any) => void) => {
+      try {
+        const payload = await jwt.verify(token, 'your-secret-key');
+        done(null, payload);
+      } catch (error) {
+        done(error);
+      }
+    },
+  };
+
+  ```
+
 ## Installation
 
 **Step-by-step Installation Guide**
@@ -140,44 +253,7 @@ export class AppModule {}
 
 ```
 
-### 2. Feature-Specific Registration
-
-```typescript
-import { Module } from '@nestjs/common';
-import { AuthJwtModule } from '@concepta/nestjs-auth-jwt';
-import { JwtModule, ExtractJwt } from '@concepta/nestjs-jwt';
-import { UserLookupService } from './user-lookup.service';
-import * as jwt from 'jsonwebtoken';
-
-// Define the verifyToken function
-const verifyToken = async (token: string, done: (error: any, payload?: any) => void) => {
-  try {
-    const payload = await jwt.verify(token, 'your-secret-key');
-    done(null, payload);
-  } catch (error) {
-    done(error);
-  }
-};
-
-@Module({
-  imports: [
-    JwtModule.forRoot({}), // Required for AuthJwtModule to work
-    AuthJwtModule.forFeature({
-      userLookupService: new UserLookupService(), // Required
-      settings: {
-        jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-        verifyToken,
-      },
-      verifyTokenService: new YourVerifyTokenService(), // Optional custom service
-      appGuard: new YourCustomAppGuard(), // Optional custom guard
-    }),
-  ],
-})
-export class FeatureModule {}
-
-```
-
-### 3. Registering the Module with Synchronous Options
+### 2. Registering the Module with Synchronous Options
 
 ```typescript
 import { Module } from '@nestjs/common';
@@ -263,16 +339,288 @@ export class AppModule {}
 ## Integration with Other NestJS Modules
 
 Integrate AuthJwtModule with other NestJS modules like UserModule, AuthLocalModule, AuthRefreshModule, and more for a comprehensive authentication system.
+## Testing
 
-## API Reference
+### Scenario: Users can have a list of pets
 
-Detailed Descriptions of All Classes, Methods, and Properties
+To test this scenario, we will set up an application where users can have a list of pets. We will create the necessary entities, services, module configurations to simulate the environment.
 
-### AuthJwtModule
+#### Step 1: Create Entities
 
-**register(options: AuthJwtOptions):** Registers the module with synchronous options.
-**registerAsync(options: AuthJwtAsyncOptions):** Registers the module with asynchronous options.
-**forRoot(options: AuthJwtOptions):** Registers the module globally with synchronous options.
-**forRootAsync(options: AuthJwtAsyncOptions):** Registers the module globally with asynchronous options.
-**forFeature(options: AuthJwtOptions):** Registers the module for specific features with custom options.
+First, create the `User` and `Pet` entities.
 
+```typescript
+// user.entity.ts
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Pet } from './pet.entity';
+
+@Entity()
+export class User {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  name: string;
+
+  @OneToMany(() => Pet, pet => pet.user)
+  pets: Pet[];
+}
+
+// pet.entity.ts
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { User } from './user.entity';
+
+@Entity()
+export class Pet {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  name: string;
+
+  @ManyToOne(() => User, user => user.pets)
+  user: User;
+}
+
+```
+
+#### Step 2: Create Services
+
+Next, create services for `User` and `Pet` to handle the business logic.
+
+```typescript
+// user.service.ts
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from './user.entity';
+
+@Injectable()
+export class UserService {
+  constructor(
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+  ) {}
+
+  findAll(): Promise<User[]> {
+    return this.userRepository.find({ relations: ['pets'] });
+  }
+
+  findOne(id: number): Promise<User> {
+    return this.userRepository.findOne(id, { relations: ['pets'] });
+  }
+}
+
+// pet.service.ts
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Pet } from './pet.entity';
+
+@Injectable()
+export class PetService {
+  constructor(
+    @InjectRepository(Pet)
+    private petRepository: Repository<Pet>,
+  ) {}
+
+  findAll(): Promise<Pet[]> {
+    return this.petRepository.find();
+  }
+
+  findByUserId(userId: number): Promise<Pet[]> {
+    return this.petRepository.find({ where: { user: { id: userId } } });
+  }
+}
+```
+
+#### Step 3: Create Controller
+
+Create a controller to handle the HTTP requests.
+
+```typescript
+// user.controller.ts
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { UserService } from './user.service';
+import { PetService } from './pet.service';
+import { AuthJwtGuard } from '@concepta/nestjs-auth-jwt';
+
+@Controller('user')
+export class UserController {
+  constructor(
+    private userService: UserService,
+    private petService: PetService,
+  ) {}
+
+  @UseGuards(AuthJwtGuard)
+  @Get(':id/pets')
+  async getPets(@Param('id') userId: number) {
+    return this.petService.findByUserId(userId);
+  }
+}
+```
+
+#### Step 4: Configure the Module
+
+Configure the module to include the necessary services, controllers, and guards.
+
+```typescript
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthJwtModule } from '@concepta/nestjs-auth-jwt';
+import { UserController } from './user.controller';
+import { UserService } from './user.service';
+import { PetService } from './pet.service';
+import { User } from './user.entity';
+import { Pet } from './pet.entity';
+import { JwtModule, ExtractJwt } from '@concepta/nestjs-jwt';
+import { ConfigService } from '@nestjs/config';
+
+@Module({
+  imports: [
+    TypeOrmModule.forFeature([User, Pet]),
+    JwtModule.forRoot({}), // Required for AuthJwtModule to work
+    AuthJwtModule.registerAsync({
+      inject: [UserService],
+      useFactory: async (userLookupService: UserService) => ({
+        userLookupService,        
+      }),
+    }),
+  ],
+  controllers: [UserController],
+  providers: [UserService, PetService],
+})
+export class UserModule {}
+```
+
+## Validating the Setup
+
+To validate the setup, you can use `curl` commands to simulate frontend requests. Here are the steps to test the `user/:id/pets` endpoint:
+
+### Step 1: Obtain a JWT Token
+
+Assuming you have an authentication endpoint to obtain a JWT token, use `curl` to get the token. Replace `<auth-url>` with your actual authentication URL, and `<username>` and `<password>` with valid credentials.
+
+```bash
+curl -X POST <auth-url> \
+  -H "Content-Type: application/json" \
+  -d '{"username": "<username>", "password": "<password>"}'
+```
+
+This should return a response with a JWT token, which you'll use for authenticated requests.
+
+### Step 2: Make an Authenticated Request
+Use the JWT token obtained in the previous step to make an authenticated request to the user/:id/pets endpoint. Replace `jwt-token` with the actual token and `user-id` with a valid user ID.
+
+```bash
+curl -X GET http://localhost:3000/user/<user-id>/pets \
+  -H "Authorization: Bearer <jwt-token>"
+```
+
+### Example
+Here is an example sequence of curl commands:
+
+## Obtain a JWT token:
+
+```bash
+curl -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "testuser", "password": "testpassword"}'
+
+```
+
+### Example response:
+```json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+### Make an authenticated request using the token:
+
+
+```bash
+curl -X GET http://localhost:3000/user/1/pets \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+```
+
+### Example response:
+```json
+[
+  {
+    "id": 1,
+    "name": "Fluffy",
+    "user": {
+      "id": 1,
+      "name": "John Doe",
+      "pets": []
+    }
+  }
+]
+
+```
+
+## Summary
+  By following these steps, you can validate that the setup is working correctly and that authenticated requests to the user/:id/pets endpoint return the expected list of pets for a given user.
+
+## Custom Guard and Disabling the Guard
+
+The `AuthJwtModule` allows for customization of route protection using custom guards. You can pass a custom guard to handle specific authentication logic, or you can disable the guard entirely for certain routes.
+
+### Using a Custom Guard
+
+To use a custom guard, you need to implement the `CanActivate` interface from NestJS and provide it in the module configuration.
+
+**Step 1: Implement the Custom Guard**
+
+Create a custom guard by implementing the `CanActivate` interface.
+
+```typescript
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Observable } from 'rxjs';
+
+@Injectable()
+export class CustomAppGuard implements CanActivate {
+  canActivate(
+    context: ExecutionContext,
+  ): boolean | Promise<boolean> | Observable<boolean> {
+    // Implement your custom authentication logic here
+    return true; // Replace with actual logic
+  }
+}
+```
+
+### Step 2: Provide the Custom Guard in Module Configuration
+
+Update the module configuration to use the custom guard.
+
+```typescript
+ AuthJwtModule.registerAsync({
+      useFactory: async (userLookupService: UserService) => ({
+        userLookupService,
+        appGuard: CustomAppGuard, // Use the custom guard
+      }),
+      inject: [UserService],
+    }),
+  ],
+```
+## Disabling the Guard
+To disable the guard for specific routes, you can set the appGuard option to false.
+
+### Step 1: Disable the Guard in Module Configuration
+
+Update the module configuration to disable the guard.
+
+```typescript
+  AuthJwtModule.registerAsync({
+      useFactory: async (userLookupService: UserService) => ({
+        userLookupService,
+        appGuard: false, // Disable the guard
+      }),
+      inject: [UserService],
+    }),
+```
+
+## Summary
+By using these configurations, you can customize the guard behavior in your application. You can either provide a custom guard for more specific authentication logic or disable the guard entirely for certain routes.
