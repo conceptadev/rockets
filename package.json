@@ -11,7 +11,7 @@
   "devDependencies": {
     "@commitlint/cli": "^16.1.0",
     "@commitlint/config-conventional": "^16.0.0",
-    "@compodoc/compodoc": "^1.1.18",
+    "@compodoc/compodoc": "^1.1.25",
     "@concepta/eslint-config": "^1.1.4",
     "@concepta/prettier-config": "^1.1.4",
     "@darraghor/eslint-plugin-nestjs-typed": "^3.20.5",
@@ -30,7 +30,7 @@
     "eslint": "^8.6.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.25.4",
-    "eslint-plugin-jsdoc": "^37.6.1",
+    "eslint-plugin-jsdoc": "^48.2.7",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^4.0.0",
     "husky": "^7.0.4",
