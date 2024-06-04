@@ -1,3 +1,6 @@
+import { Repository } from 'typeorm';
+import { mock } from 'jest-mock-extended';
+import { ReferenceAssignment } from '@concepta/ts-core';
 import { CacheCreatableInterface, CacheInterface } from '@concepta/ts-common';
 import {
   QueryOptionsInterface,
@@ -5,14 +8,10 @@ import {
   ReferenceValidationException,
   RepositoryProxy,
 } from '@concepta/typeorm-common';
-import { mock } from 'jest-mock-extended';
-import { CacheService } from './cache.service';
-import { Repository } from 'typeorm';
-import { CacheSettingsInterface } from '../interfaces/cache-settings.interface';
 
+import { CacheService } from './cache.service';
+import { CacheSettingsInterface } from '../interfaces/cache-settings.interface';
 import { CacheCreateDto } from '../dto/cache-create.dto';
-import { ReferenceAssignment } from '@concepta/ts-core';
-import getExpirationDate from '../utils/get-expiration-date.util';
 
 const expirationDate = new Date();
 expirationDate.setHours(expirationDate.getHours() + 1);
@@ -38,17 +37,7 @@ describe('CacheService', () => {
   const assignment: ReferenceAssignment = 'testAssignment';
   const cacheCreateDto = new CacheCreateDto();
   const repoProxyMock = mock<RepositoryProxy<CacheInterface>>();
-  // const expirationDate = new Date();
 
-  const cacheEntity: CacheInterface = {
-    ...cacheDto,
-    expirationDate,
-    id: 'testId',
-    dateCreated: new Date(),
-    dateUpdated: new Date(),
-    dateDeleted: null,
-    version: 1,
-  };
   beforeEach(() => {
     repo = mock<Repository<CacheInterface>>();
     settings = mock<CacheSettingsInterface>();

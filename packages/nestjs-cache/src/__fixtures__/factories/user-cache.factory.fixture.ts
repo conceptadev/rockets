@@ -1,7 +1,6 @@
-
+import Faker from '@faker-js/faker';
 import { Factory } from '@concepta/typeorm-seeding';
 import { UserCacheEntityFixture } from '../entities/user-cache-entity.fixture';
-import Faker from '@faker-js/faker';
 
 export class UserCacheFactoryFixture extends Factory<UserCacheEntityFixture> {
   protected options = {

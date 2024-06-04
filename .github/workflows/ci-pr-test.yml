@@ -26,6 +26,8 @@ jobs:
 
       - name: Install and build
         run: yarn --frozen-lockfile
+      - name: Linting
+        run: yarn lint
       - name: Unit tests
         run: yarn test:ci
       - name: Save the PR number in an artifact

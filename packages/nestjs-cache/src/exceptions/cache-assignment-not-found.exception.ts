@@ -1,13 +1,8 @@
-import { format } from 'util';
-import { ExceptionInterface } from '@concepta/ts-core';
+import { HttpStatus } from '@nestjs/common';
+import { RuntimeException } from '@concepta/nestjs-exception';
 
-export class CacheAssignmentNotFoundException
-  extends Error
-  implements ExceptionInterface
-{
-  errorCode = 'CACHE_ASSIGNMENT_NOT_FOUND_ERROR';
-
-  context: {
+export class CacheAssignmentNotFoundException extends RuntimeException {
+  context: RuntimeException['context'] & {
     assignmentName: string;
   };
 
@@ -15,8 +10,16 @@ export class CacheAssignmentNotFoundException
     assignmentName: string,
     message = 'Assignment %s was not registered to be used.',
   ) {
-    super(format(message, assignmentName));
+    super({
+      message,
+      messageParams: [assignmentName],
+      httpStatus: HttpStatus.NOT_FOUND,
+    });
+
+    this.errorCode = 'CACHE_ASSIGNMENT_NOT_FOUND_ERROR';
+
     this.context = {
+      ...super.context,
       assignmentName,
     };
   }

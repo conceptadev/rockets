@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto';
 import Faker from '@faker-js/faker';
 import { Factory } from '@concepta/typeorm-seeding';
 import { CacheInterface } from '@concepta/ts-common';
+
 /**
  * Cache factory
  */

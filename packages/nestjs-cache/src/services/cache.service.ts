@@ -1,3 +1,7 @@
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
+import { DeepPartial, Repository } from 'typeorm';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   CacheCreatableInterface,
   CacheInterface,
@@ -11,18 +15,13 @@ import {
   ReferenceValidationException,
   RepositoryProxy,
 } from '@concepta/typeorm-common';
-import { Inject, Injectable } from '@nestjs/common';
-import { plainToInstance } from 'class-transformer';
-import { validate } from 'class-validator';
-import ms from 'ms';
-import { DeepPartial, Repository } from 'typeorm';
 import {
   CACHE_MODULE_REPOSITORIES_TOKEN,
   CACHE_MODULE_SETTINGS_TOKEN,
 } from '../cache.constants';
 import { CacheCreateDto } from '../dto/cache-create.dto';
 import { CacheUpdateDto } from '../dto/cache-update.dto';
-import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
+import { CacheEntityNotFoundException } from '../exceptions/cache-entity-not-found.exception';
 import { CacheServiceInterface } from '../interfaces/cache-service.interface';
 import { CacheSettingsInterface } from '../interfaces/cache-settings.interface';
 import getExpirationDate from '../utils/get-expiration-date.util';
@@ -302,7 +301,7 @@ export class CacheService implements CacheServiceInterface {
       return this.allCacheRepos[assignment];
     } else {
       // bad assignment
-      throw new EntityNotFoundException(assignment);
+      throw new CacheEntityNotFoundException(assignment);
     }
   }
 

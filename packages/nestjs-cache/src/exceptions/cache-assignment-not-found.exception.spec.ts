@@ -1,4 +1,4 @@
-import { CacheAssignmentNotFoundException } from "./cache-assignment-not-found.exception";
+import { CacheAssignmentNotFoundException } from './cache-assignment-not-found.exception';
 
 describe('AssignmentNotFoundException', () => {
   it('should create an instance with default message', () => {

@@ -1,3 +1,5 @@
+import { Inject, Param } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import {
   AccessControlCreateOne,
   AccessControlDeleteOne,
@@ -22,9 +24,6 @@ import {
   CacheUpdatableInterface,
 } from '@concepta/ts-common';
 import { ReferenceAssignment } from '@concepta/ts-core';
-import { Inject, Param } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-import ms from 'ms';
 import {
   CACHE_MODULE_CRUD_SERVICES_TOKEN,
   CACHE_MODULE_SETTINGS_TOKEN,
@@ -34,7 +33,7 @@ import { CachePaginatedDto } from '../dto/cache-paginated.dto';
 import { CacheUpdateDto } from '../dto/cache-update.dto';
 import { CacheDto } from '../dto/cache.dto';
 import { CacheAssignmentNotFoundException } from '../exceptions/cache-assignment-not-found.exception';
-import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
+import { CacheEntityNotFoundException } from '../exceptions/cache-entity-not-found.exception';
 import { CacheSettingsInterface } from '../interfaces/cache-settings.interface';
 import { CacheCrudService } from '../services/cache-crud.service';
 import getExpirationDate from '../utils/get-expiration-date.util';
@@ -191,7 +190,7 @@ export class CacheCrudController
         return this.allCrudServices[entityKey];
       } else {
         // bad entity key
-        throw new EntityNotFoundException(entityKey);
+        throw new CacheEntityNotFoundException(entityKey);
       }
     } else {
       // bad assignment

@@ -8,6 +8,7 @@ const getExpirationDate = (
   const now = new Date();
   const expires = ms(expiresIn);
 
+  // TODO: should be a custom exception
   if (!expires) throw new Error(`Invalid expiresIn`);
 
   // add time in seconds to now as string format

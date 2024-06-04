@@ -1,6 +1,6 @@
-import { CacheCreatableInterface } from '@concepta/ts-common';
-import { PickType } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
+import { PickType } from '@nestjs/swagger';
+import { CacheCreatableInterface } from '@concepta/ts-common';
 import { CacheDto } from './cache.dto';
 /**
  * Cache Create DTO
@@ -14,5 +14,4 @@ export class CacheCreateDto
     'expiresIn',
     'assignee',
   ] as const)
-  implements CacheCreatableInterface
-{}
+  implements CacheCreatableInterface {}

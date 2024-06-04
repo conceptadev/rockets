@@ -1,4 +1,4 @@
-import { Column, Index, Unique } from 'typeorm';
+import { Column, Index } from 'typeorm';
 import { ReferenceIdInterface } from '@concepta/ts-core';
 import { CacheInterface } from '@concepta/ts-common';
 import { CommonPostgresEntity } from '@concepta/typeorm-common';

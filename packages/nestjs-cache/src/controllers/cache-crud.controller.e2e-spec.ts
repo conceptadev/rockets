@@ -1,19 +1,15 @@
-import { CacheCreatableInterface } from '@concepta/ts-common';
-import { SeedingSource } from '@concepta/typeorm-seeding';
+import assert from 'assert';
+import supertest from 'supertest';
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getDataSourceToken } from '@nestjs/typeorm';
-import assert from 'assert';
-import supertest from 'supertest';
-import { Repository } from 'typeorm';
-
-import { CACHE_MODULE_REPOSITORIES_TOKEN } from '../cache.constants';
+import { CacheCreatableInterface } from '@concepta/ts-common';
+import { SeedingSource } from '@concepta/typeorm-seeding';
 
 import { CacheFactory } from '../cache.factory';
 import { CacheSeeder } from '../cache.seeder';
 
 import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
-
 import { UserCacheEntityFixture } from '../__fixtures__/entities/user-cache-entity.fixture';
 import { UserEntityFixture } from '../__fixtures__/entities/user-entity.fixture';
 import { UserCacheFactoryFixture } from '../__fixtures__/factories/user-cache.factory.fixture';
@@ -134,7 +130,7 @@ describe('CacheAssignmentController (e2e)', () => {
       });
   });
 
-  it.only('POST /cache/user Duplicated', async () => {
+  it('POST /cache/user Duplicated', async () => {
     const payload: CacheCreatableInterface = {
       key: 'dashboard-1',
       type: 'filter',
