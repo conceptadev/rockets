@@ -63,6 +63,38 @@ The `AuthJwtOptionsInterface` provides various configuration options to customiz
 4. **settings** (optional): 
    - JWT strategy settings, including token extraction and verification logic.
 
+## Installation
+
+**Step-by-step Installation Guide**
+
+1. **Install the AuthJWTModule package:**
+
+   To get started, install the `@concepta/ts-core`, `@concepta/nestjs-jwt` and `@concepta/nestjs-auth-jwt` packages from npm or yarn:
+
+   ```bash
+    npm install class-transformer
+    npm install class-validator
+    npm install @nestjs/jwt
+    npm install @concepta/ts-core
+    npm install @concepta/nestjs-authentication
+    npm install @concepta/nestjs-jwt
+    npm install @concepta/nestjs-auth-jwt
+   ```
+   or
+   ```bash
+    yarn add class-transformer
+    yarn add class-validator
+    yarn add @nestjs/jwt
+    yarn add @concepta/ts-core
+    yarn add @concepta/nestjs-authentication
+    yarn add @concepta/nestjs-jwt
+    yarn add @concepta/nestjs-auth-jwt
+   ```
+
+2. **Add the AuthJWTModule to Your NestJS Application:**
+
+  Import the `AuthJwtModule` and required services in your application module. Ensure to import `JwtModule` and provide the necessary configuration options, including the required `userLookupService`.
+
 ## Module Configuration
 
 This section provides a comprehensive explanation of each configuration option available in the AuthJwtOptionsInterface, along with examples of how to implement and use them in your NestJS application.
@@ -70,11 +102,13 @@ This section provides a comprehensive explanation of each configuration option a
 1. **userLookupService (required)**
 
   This service is responsible for looking up user information based on the JWT payload. It implements the `AuthJwtUserLookupServiceInterface` and must be provided to the module.
+
   ```typescript
-  import { AuthJwtUserLookupServiceInterface } from '@concepta/nestjs-auth-jwt';
+  import { AuthJwtUserLookupServiceInterface } from '@concepta/nestjs-auth-jwt/dist/interfaces/auth-jwt-user-lookup-service.interface';
+  import { ReferenceIdInterface, ReferenceSubject } from '@concepta/ts-core';
 
   export class UserLookupService implements AuthJwtUserLookupServiceInterface {
-    async bySubject(subject: string): Promise<User | null> {
+    async bySubject(subject: ReferenceSubject): Promise<ReferenceIdInterface>  {
       // Implement user lookup logic here
     }
   }
@@ -85,18 +119,36 @@ This section provides a comprehensive explanation of each configuration option a
   This service verifies JWT tokens. If not provided, the default verification logic will be used. It extends the `VerifyTokenServiceInterface`.
 
      ```typescript
-  @Injectable()
-     export class YourVerifyTokenService implements VerifyTokenServiceInterface {
-       constructor(private readonly jwtService: JwtService) {}
 
-       accessToken(...args: Parameters<JwtService['verifyAsync']>): ReturnType<JwtService['verifyAsync']> {
-         return this.jwtService.verifyAsync(...args);
-       }
+      import { JwtService } from '@nestjs/jwt';
+      import { Injectable } from '@nestjs/common';
+      import { VerifyTokenServiceInterface } from '@concepta/nestjs-authentication';
+      @Injectable()
+      export class YourVerifyTokenService implements VerifyTokenServiceInterface {
+        accessToken(): ReturnType<JwtService['verifyAsync']> {
+          return new Promise((resolve, reject) => {
+            try {
+              // your custom logic to sign and validate the the token
+              resolve({ accessToken: 'access-token' });
+            } catch (error) {
+              reject(error);
+            }
+          });
+        }
 
-       refreshToken(...args: Parameters<JwtService['verifyAsync']>): ReturnType<JwtService['verifyAsync']> {
-         return this.jwtService.verifyAsync(...args);
-       }
-     }
+        refreshToken(
+          ...args: Parameters<JwtService['verifyAsync']>
+        ): ReturnType<JwtService['verifyAsync']> {
+          return new Promise((resolve, reject) => {
+            try {
+              // your custom logic to sign and validate the the token
+              resolve({ accessToken: 'refresh-token' });
+            } catch (error) {
+              reject(error);
+            }
+          });
+        }
+      }
      ```
 
 3. **appGuard (optional)**
@@ -120,39 +172,25 @@ This section provides a comprehensive explanation of each configuration option a
   This object contains the settings for JWT strategy. It extends the `JwtStrategyOptionsInterface` and allows customization of JWT extraction and verification logic.
 
   ```typescript
-  import { JwtStrategyOptionsInterface } from '@concepta/nestjs-jwt';
-  import { ExtractJwt } from '@nestjs/jwt';
-  import * as jwt from 'jsonwebtoken';
-
-  const settings: JwtStrategyOptionsInterface = {
-    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-    verifyToken: async (token: string, done: (error: any, payload?: any) => void) => {
-      try {
-        const payload = await jwt.verify(token, 'your-secret-key');
-        done(null, payload);
-      } catch (error) {
-        done(error);
-      }
-    },
-  };
+    import { ExtractJwt, JwtStrategyOptionsInterface } from "@concepta/nestjs-jwt";
+    const settings: JwtStrategyOptionsInterface = {
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      verifyToken: async (
+        token: string,
+        done: (error: any, payload?: any) => void,
+      ) => {
+        try {
+          // add custom logic ot validate token
+          const payload = { id: 'user-id' };
+          done(null, payload);
+        } catch (error) {
+          done(error);
+        }
+      },
+    };
 
   ```
 
-## Installation
-
-**Step-by-step Installation Guide**
-
-1. **Install the AuthJWTModule package:**
-
-   To get started, install the `yarn add @concepta/nestjs-auth-jwt` package from npm:
-
-   ```bash
-   npm install @concepta/nestjs-auth-jwt
-   ```
-
-2. **Add the AuthJWTModule to Your NestJS Application:**
-
-  Import the `AuthJwtModule` and required services in your application module. Ensure to import `JwtModule` and provide the necessary configuration options, including the required `userLookupService`.
 
 ## Basic Usage
 
@@ -338,7 +376,8 @@ export class AppModule {}
 
 ## Integration with Other NestJS Modules
 
-Integrate AuthJwtModule with other NestJS modules like UserModule, AuthLocalModule, AuthRefreshModule, and more for a comprehensive authentication system.
+Integrate `nestjs-auth-jwt` with other NestJS modules like `nestjs-user`, `nestjs-auth-local`, `nestjs-auth-refresh`, and more for a comprehensive authentication system.
+
 ## Testing
 
 ### Scenario: Users can have a list of pets
@@ -356,8 +395,8 @@ import { Pet } from './pet.entity';
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   name: string;
@@ -372,8 +411,8 @@ import { User } from './user.entity';
 
 @Entity()
 export class Pet {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   name: string;
@@ -406,10 +445,29 @@ export class UserService {
     return this.userRepository.find({ relations: ['pets'] });
   }
 
-  findOne(id: number): Promise<User> {
-    return this.userRepository.findOne(id, { relations: ['pets'] });
+  findOne(id: string): Promise<User> {
+    return this.userRepository.findOne({
+      where: { id },
+      relations: ['pets'],
+    });
   }
 }
+
+import { AuthJwtUserLookupServiceInterface } from '@concepta/nestjs-auth-jwt/dist/interfaces/auth-jwt-user-lookup-service.interface';
+import { ReferenceIdInterface, ReferenceSubject } from '@concepta/ts-core';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
+export class UserLookupService implements AuthJwtUserLookupServiceInterface {
+   constructor(
+    private userService: UserService,
+  ) {}
+  async bySubject(subject: ReferenceSubject): Promise<ReferenceIdInterface> {
+    // return authorized user
+    return this.userService.findOne(subject);
+  }
+}
+
 
 // pet.service.ts
 import { Injectable } from '@nestjs/common';
@@ -436,7 +494,7 @@ export class PetService {
 
 #### Step 3: Create Controller
 
-Create a controller to handle the HTTP requests.
+Create a controller to handle the HTTP requests. Use `@AuthPublic` decorator from `@concepta/nestjs-authentication` if you want to make route public.
 
 ```typescript
 // user.controller.ts
