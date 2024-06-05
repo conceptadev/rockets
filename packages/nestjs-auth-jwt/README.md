@@ -33,7 +33,7 @@ The `AuthJWTModule` is a powerful yet easy-to-use NestJS module designed for imp
 
 **Install the AuthJWTModule package:**
 
-   To get started, install the `@concepta/ts-core`, `@concepta/nestjs-jwt` and `@concepta/nestjs-auth-jwt` packages from npm or yarn:
+   To get started, install the `@concepta/nestjs-auth-jwt` packages and some other dependencies from npm or yarn:
 
    ```bash
     npm install class-transformer
