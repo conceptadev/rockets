@@ -42,6 +42,15 @@ export { OtpValidateInterface } from './otp/interfaces/otp-validate.interface';
 export { OtpDeleteInterface } from './otp/interfaces/otp-delete.interface';
 export { OtpClearInterface } from './otp/interfaces/otp-clear.interface';
 
+export { CacheInterface } from './cache/interfaces/cache.interface';
+export { CacheCreatableInterface } from './cache/interfaces/cache-creatable.interface';
+export { CacheCreateInterface } from './cache/interfaces/cache-create.interface';
+export { CacheDeleteInterface } from './cache/interfaces/cache-delete.interface';
+export { CacheClearInterface } from './cache/interfaces/cache-clear.interface';
+export { CacheUpdateInterface } from './cache/interfaces/cache-update.interface';
+export { CacheGetOneInterface } from './cache/interfaces/cache-get-one.interface';
+export { CacheUpdatableInterface } from './cache/interfaces/cache-updatable.interface';
+
 export { InvitationInterface } from './invitation/interfaces/invitation.interface';
 export { InvitationAcceptedEventPayloadInterface } from './invitation/interfaces/invitation-accepted-event-payload.interface';
 export { InvitationGetUserEventPayloadInterface } from './invitation/interfaces/invitation-get-user-event-payload.interface';
