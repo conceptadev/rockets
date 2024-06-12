@@ -6,14 +6,13 @@ remote data source.
 ## Project
 
 [![NPM Latest](https://img.shields.io/npm/v/@concepta/nestjs-auth-local)](https://www.npmjs.com/package/@concepta/nestjs-auth-local)
-[![NPM Downloads](https://img.shields.io/npm/dw/@conceptadev/nestjs-auth-local)](https://www.npmjs.com/package/@concepta/nestjs-auth-local)
+[![NPM Downloads](https://img.shields.io/npm/dw/@concepta/nestjs-auth-local)](https://www.npmjs.com/package/@concepta/nestjs-auth-local)
 [![GH Last Commit](https://img.shields.io/github/last-commit/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets)
 [![GH Contrib](https://img.shields.io/github/contributors/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets/graphs/contributors)
 [![NestJS Dep](https://img.shields.io/github/package-json/dependency-version/conceptadev/rockets/@nestjs/common?label=NestJS&logo=nestjs&filename=packages%2Fnestjs-core%2Fpackage.json)](https://www.npmjs.com/package/@nestjs/common)
 
 ## Table of Contents
 
-- [Project](#project)
 - [Tutorials](#tutorials)
   - [1. Getting Started with AuthLocalModule](#1-getting-started-with-authlocalmodule)
     - [1.1 Introduction](#11-introduction)
@@ -37,7 +36,7 @@ remote data source.
   - [5. Implementing and Using Custom Token Issuance Service](#5-implementing-and-using-custom-token-issuance-service)
   - [6. Implementing and Using Custom User Validation Service](#6-implementing-and-using-custom-user-validation-service)
   - [7. Implementing and Using Custom Password Validation Service](#7-implementing-and-using-custom-password-validation-service)
-  - [8. Overwriting the Settings](#8-overwriting-the-settings)
+  - [8. Overriding the Settings](#8-overriding-the-settings)
   - [9. Integration with Other NestJS Modules](#9-integration-with-other-nestjs-modules)
 - [Reference](#reference)
   - [1. AuthLocalOptionsInterface](#1-authlocaloptionsinterface)
@@ -62,17 +61,20 @@ remote data source.
 
 The `AuthLocalModule` is a robust NestJS module designed for implementing 
 local authentication using username and password. This module leverages the 
-`passport-local` strategy to authenticate users locally within your 
-application.
+[`passport-local`](https://www.passportjs.org/packages/passport-local) strategy
+to authenticate users locally within your application.
 
 ##### Purpose and Key Features
 
 - **Local Authentication**: Provides a straightforward way to implement local 
 authentication using username and password.
+
 - **Synchronous and Asynchronous Registration**: Flexibly register the module 
 either synchronously or asynchronously, depending on your application's needs.
+
 - **Global and Feature-Specific Registration**: Use the module globally across 
 your application or tailor it for specific features.
+
 - **Customizable**: Easily customize various aspects such as user validation, 
 token issuance, and password validation.
 
@@ -108,12 +110,12 @@ Ensure to provide the necessary configuration options at
 
 The `AuthLocalOptionsInterface` defines the configuration options for the 
 local authentication strategy within a NestJS application using the 
-`nestjs-auth-local` package. This interface allows for the customization 
+`@concepta/nestjs-auth-local` package. This interface allows for the customization 
 of `userLookupService`, `issueTokenService`, `validateUserService`, and 
 `passwordValidationService`. Please see [Reference](#reference) for more 
 details. 
 
-optional fields utilize default implementations, enabling straightforward 
+Optional fields utilize default implementations, enabling straightforward 
 integration and flexibility to override with custom implementations as needed. 
 This setup ensures that developers can tailor the authentication process to 
 specific requirements while maintaining a robust and secure authentication 
@@ -126,18 +128,21 @@ framework.
 To test this scenario, we will set up an application where users can log 
 in using a username and password. We will create the necessary entities, services, module configurations.
 
+> Note: The `@concepta/nestjs-user` module can be used in place of our example `User` related prerequisites.
+
 ## Step 1: Create Entities
 
 First, create the `User` entity.
 
-**Code:**
 ```ts
+// user.entity.ts
 export class User {
   id: number;
   username: string;
   password: string;
 }
 ```
+
 ## Step 2: Create Services
 
 Next, you need to create the `UserLookupService`. This 
@@ -146,8 +151,8 @@ retrieving user data. It should implement the
 `AuthLocalUserLookupServiceInterface`. 
 
 Within this service, implement the `byUsername` method to 
-fetch user details by their email. Ensure that the method 
-returns a `User` object containing `passwordHash` and 
+fetch user details by their username (or email). Ensure that
+the method  returns a `User` object containing `passwordHash` and 
 `passwordSalt`. 
 
 These attributes are crucial as they are used by the 
@@ -155,8 +160,8 @@ These attributes are crucial as they are used by the
 to authenticate the user, which is a configurable option 
 in the `AuthLocalModule`.
 
-**Code:**
 ```ts
+// user-lookup.service.ts
 import { Injectable } from '@nestjs/common';
 import { ReferenceUsername } from '@concepta/ts-core';
 import { AuthLocalUserLookupServiceInterface } from '@concepta/nestjs-auth-local';
@@ -181,16 +186,17 @@ export class UserLookupService implements AuthLocalUserLookupServiceInterface {
   }
 }
 ```
+
 ## Step 3: Configure the Module
 
 Configure the module to include the necessary services `userLookupService`.
 
-**Code:**
 ```ts
+// app.module.ts
 import { Module } from '@nestjs/common';
 import { AuthLocalModule } from '@concepta/nestjs-auth-local';
-import { UserLookupService } from './user-lookup.service';
 import { JwtModule } from '@concepta/nestjs-jwt';
+import { UserLookupService } from './user-lookup.service';
 
 @Module({
   imports: [
@@ -204,11 +210,11 @@ import { JwtModule } from '@concepta/nestjs-jwt';
 })
 export class AppModule {}
 ```
+
 ## Validating the Setup
 
 To validate the setup, you can use `curl` commands to simulate frontend 
-requests. Here are the 
-steps to test the login endpoint:
+requests. Here are the  steps to test the login endpoint:
 
 ## Step 1: Obtain a JWT Token
 
@@ -220,6 +226,7 @@ curl -X POST http://localhost:3000/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username": "testuser", "password": "testpassword"}'
 ```
+
 This should return a response with a login message.
 
 ## Example
@@ -227,12 +234,15 @@ This should return a response with a login message.
 Here is an example sequence of `curl` commands to validate the login setup:
 
 1. **Login Request:**
+
+Command:
 ```sh
 curl -X POST http://localhost:3000/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username": "username", "password": "Test1234"}'
 ```
-Example response:
+
+Response (example):
 ```json
 {
     "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0NjZkMTAyNS1iZGNkLTRiNWItYTYxMi0yYThiZTU2MDhlNjIiLCJpYXQiOjE3MTgwNDg1NDQsImV4cCI6MTcxODA1MjE0NH0.Zl2i59w89cgJxfI4lXn6VmOhC5GLEqMm2nWkiVKpEUs",
@@ -241,36 +251,44 @@ Example response:
 ```
 
 2. **Invalid Credentials Request:**
+
+Command:
 ```sh
 curl -X POST http://localhost:3000/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username": "testuser", "password": "wrongpassword"}'
 ```
-Example response:
+
+Response (example):
 ```json
 {
     "statusCode": 401,
     "message": "Unauthorized"
 }
 ```
+
 ## How-To Guides
 
 ### 1. Registering AuthLocalModule Synchronously
 
-**Code:**
 ```ts
+// app.module.ts
+
 //...
   AuthLocalModule.register({
     userLookupService: new MyUserLookupService(), // required
   }),
 //...
 ```
+
 ### 2. Registering AuthLocalModule Asynchronously
 
-**Code:**
 ```ts
+// app.module.ts
+import { MyUserLookupService } from './services/my-user-lookup.service.ts';
+
 //...
-AuthLocalModule.forRootAsync({
+AuthLocalModule.registerAsync({
   useFactory: async (userLookupService: MyUserLookupService) => ({
     userLookupService, // required
   }),
@@ -278,10 +296,12 @@ AuthLocalModule.forRootAsync({
 }),
 //...
 ```
+
 ### 3. Global Registering AuthLocalModule Asynchronously
 
-**Code:**
 ```ts
+// app.module.ts
+
 //...
 AuthLocalModule.forRootAsync({
   useFactory: async (userLookupService: MyUserLookupService) => ({
@@ -291,13 +311,16 @@ AuthLocalModule.forRootAsync({
 }),
 //...
 ```
-### 4. Using Custom User Lookup Service
 
-**Code:**
+### 4. Implementing User Lookup Service
+
 ```ts
-import { AuthLocalUserLookupServiceInterface } from '@concepta/nestjs-auth-local';
-import { AuthLocalCredentialsInterface } from '@concepta/nestjs-auth-local/dist/interfaces/auth-local-credentials.interface';
+// my-user-lookup.service.ts
 import { Injectable } from '@nestjs/common';
+import {
+  AuthLocalUserLookupServiceInterface,
+  AuthLocalCredentialsInterface
+} from '@concepta/nestjs-auth-local';
 
 @Injectable()
 export class MyUserLookupService
@@ -308,18 +331,20 @@ export class MyUserLookupService
   }
 }
 ```
+
 ### 5. Implementing custom token issuance service
  
-There are two ways to implementing the custom token issuer service. You can 
-take advantage of the default service
+There are two ways to implementing the custom token issue service. You can 
+take advantage of the default service, as seen here:
 
 ```ts
-import {
-JwtIssueService,
-JwtIssueServiceInterface,
-JwtSignService,
-} from '@concepta/nestjs-jwt';
+// my-jwt-issue.service.ts
 import { Injectable } from '@nestjs/common';
+import {
+  JwtIssueService,
+  JwtIssueServiceInterface,
+  JwtSignService,
+} from '@concepta/nestjs-jwt';
 
 @Injectable()
 export class MyJwtIssueService extends JwtIssueService {
@@ -331,24 +356,24 @@ export class MyJwtIssueService extends JwtIssueService {
     ...args: Parameters<JwtIssueServiceInterface['accessToken']>
   ) {
     // your custom code
-    return this.accessToken(...args);
+    return super.accessToken(...args);
   }
 
   async refreshToken(
     ...args: Parameters<JwtIssueServiceInterface['refreshToken']>
   ) {
     // your custom code
-    return this.refreshToken(...args);
+    return super.refreshToken(...args);
   }
 }
 ```
 
-Or you can completely overwrite the default implementation.
+Or you can completely replace the default implementation:
 
-**Code:**
 ```ts
-import { JwtIssueServiceInterface } from '@concepta/nestjs-jwt';
+// my-jwt-issue.service.ts
 import { Injectable } from '@nestjs/common';
+import { JwtIssueServiceInterface } from '@concepta/nestjs-jwt';
 
 @Injectable()
 export class MyJwtIssueService implements JwtIssueServiceInterface {
@@ -367,83 +392,98 @@ export class MyJwtIssueService implements JwtIssueServiceInterface {
   }
 }
 ```
+
 ### 6. Implementing a custom user validation service
 
-**Code:**
-
 The same approach can be done for `AuthLocalValidateUserService` you can 
-either completely overwrite the default implementation or you can take 
+either completely override the default implementation or you can take 
 advantage of the default implementation.
 
 ```ts
+// my-auth-local-validate-user.service.ts
+import { Injectable } from '@nestjs/common';
+import { ReferenceActiveInterface, ReferenceIdInterface } from '@concepta/ts-core';
+import {
+  AuthLocalValidateUserInterface,
+  AuthLocalValidateUserService
+} from '@concepta/nestjs-auth-local';
+
 @Injectable()
 export class MyAuthLocalValidateUserService
-  implements AuthLocalValidateUserServiceInterface
+  extends AuthLocalValidateUserService
 {
-
+  
   async validateUser(
     dto: AuthLocalValidateUserInterface,
   ): Promise<ReferenceIdInterface> {
-    return this.validateUser(dto);
+    // customize as needed
+    return super.validateUser(dto);
   }
 
   async isActive(
     user: ReferenceIdInterface<string> & ReferenceActiveInterface<boolean>,
   ): Promise<boolean> {
-    return true;
+    // customize as needed
+    return super.isActive(user);
   }
 }
-
 ```
 
 ```ts
-import { AuthLocalValidateUserInterface, AuthLocalValidateUserServiceInterface } from "@concepta/nestjs-auth-local";
-import { ReferenceActiveInterface, ReferenceIdInterface } from "@concepta/ts-core";
-import { Injectable } from "@nestjs/common";
+// my-auth-local-validate-user.service.ts
+import { Injectable } from '@nestjs/common';
+import { ReferenceActiveInterface, ReferenceIdInterface } from '@concepta/ts-core';
+import {
+  AuthLocalValidateUserInterface,
+  AuthLocalValidateUserServiceInterface
+} from '@concepta/nestjs-auth-local';
 
 @Injectable()
 export class MyAuthLocalValidateUserService
   implements AuthLocalValidateUserServiceInterface
 {
-
   async validateUser(
     dto: AuthLocalValidateUserInterface,
   ): Promise<ReferenceIdInterface> {
-    return this.validateUser(dto);
+    // your custom code
+    return {
+      id: '[userId]',
+      //...
+    }
   }
 
   async isActive(
     user: ReferenceIdInterface<string> & ReferenceActiveInterface<boolean>,
   ): Promise<boolean> {
-    return this.isActive(user);
+    // customize as needed
+    return true;
   }
 }
-
 ```
 
 ### 7. Implementing a Custom Password Validation Service
 
-The `PasswordValidationService` in the `nestjs-auth-local` module provides a 
-default implementation using bcrypt for hashing and verifying passwords. 
+The `PasswordValidationService` in the `@concepta/nestjs-password` module
+provides a default implementation using bcrypt for hashing and verifying passwords.
 However, depending on your application's requirements, you might need to use a 
 different method for password hashing or add additional validation logic.
 
 You can either extend the existing `PasswordValidationService` to leverage its 
 built-in functionalities while adding your enhancements, or completely 
-overwrite it with your custom implementation.
+override it with your custom implementation.
 
-
-**Overwriting the Default Implementation:**
+**Overriding the Default Implementation:**
 
 If your application requires a different hashing algorithm , you can replace 
 the default implementation with one that suits your needs.
 
 ```ts
+// my-password-validation.service.ts
+import { Injectable } from '@nestjs/common';
 import {
   PasswordStorageInterface,
   PasswordValidationServiceInterface,
 } from '@concepta/nestjs-password';
-import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class MyPasswordValidationService
@@ -454,6 +494,7 @@ export class MyPasswordValidationService
     passwordHash: string;
     passwordSalt: string;
   }): Promise<boolean> {
+    // customize as needed
     return true;
   }
 
@@ -461,16 +502,19 @@ export class MyPasswordValidationService
     password: string,
     object: T,
   ): Promise<boolean> {
+    // customize as needed
     return true;
   }
 }
 ```
+
 **Extending the Default Service:**
 
 If you want to add additional validation logic while keeping the current 
 hashing and validation, you can extend the default service:
 
 ```ts
+// my-password-validation.service.ts
 import {
   PasswordStorageInterface,
   PasswordValidationService,
@@ -479,30 +523,27 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class MyPasswordValidationService extends PasswordValidationService {
-  constructor() {
-    super();
-  }
-
   async validate(options: {
     password: string;
     passwordHash: string;
     passwordSalt: string;
   }): Promise<boolean> {
-    return this.validate(options);
+    // customize as neeeded
+    return super.validate(options);
   }
 
   async validateObject<T extends PasswordStorageInterface>(
     password: string,
     object: T,
   ): Promise<boolean> {
-    return this.validateObject(password, object);
+    // customize as neeeded
+    return super.validateObject(password, object);
   }
 }
 ```
 
-### 8. Overwriting the Settings
+### 8. Overriding the Settings
 
-**Code:**
 ```ts
 import { Type } from '@nestjs/common';
 
@@ -516,68 +557,78 @@ export const localSettings = {
   usernameField: 'email',
   passwordField: 'password'
 };
-
 ```
 
 ```ts
 AuthLocalModule.forRoot({
   userLookupService: new UserLookupService(),
+  issueTokenService: new MyIssueTokenService(), // <- optional
+  passwordValidationService: new PasswordValidationService(), // <- optional
   settings: localSettings
 }),
 ```
+
 ### 9. Integration with Other NestJS Modules
 
 Integrate `nestjs-auth-local` with other NestJS modules like, 
-`nestjs-authentication`, `nestjs-auth-jwt`, `nestjs-auth-refresh` for
- a comprehensive authentication system.
+`@concepta/nestjs-authentication`, `@concepta/nestjs-auth-jwt`,
+`@concepta/nestjs-auth-refresh` for a comprehensive authentication system.
 
 ## Reference
 
 ### Explanation of Properties in `AuthLocalOptionsInterface`
 
-#### 1. **userLookupService** (required)
+#### 1. userLookupService (required)
+
 - **Purpose**: Essential for retrieving user details based on the username to 
 initiate the authentication process.
+
 - **Method**:
   - `byUsername(username: string): Promise<AuthLocalCredentialsInterface | null>`: 
   Queries user data storage to find a user by their username. Returns a user 
   object if found, or `null` if no user exists with that username.
 
-#### 2. **issueTokenService** (optional)
+#### 2. issueTokenService (optional)
+
 - **Purpose**: Handles the generation of access and refresh tokens after user 
 authentication.
+
 - **Class**: `IssueTokenService`
   - `accessToken(...)`: Generates an access token using the `JwtIssueService`.
   - `refreshToken(...)`: Generates a refresh token using the `JwtIssueService`.
 
-#### 3. **validateUserService** (optional)
-- **Purpose**: Validates if a user can be authenticated with the provided 
-credentials.
-- **Class**: `AuthLocalValidateUserService`
-  - `validateUser(dto: AuthLocalValidateUserInterface)`: Uses 
-  `userLookupService` to fetch the user, checks user activity, and 
-  validates the password using `passwordValidationService`.
+#### 3. validateUserService (optional)
+
+  - **Purpose**: Validates if a user can be authenticated with the provided 
+  credentials.
+
+  - **Class**: `AuthLocalValidateUserService`
+    - `validateUser(dto: AuthLocalValidateUserInterface)`: Uses 
+    `userLookupService` to fetch the user, checks user activity, and 
+    validates the password using `passwordValidationService`.
 
 #### 4. **passwordValidationService** (optional)
-- **Purpose**: Validates the user's password against the stored hash 
-to ensure the login attempt is legitimate.
-- **Class**: `PasswordValidationService`
-  - `validate(options: { password: string; passwordHash: string; passwordSalt: string; })`: 
-  Compares the provided password with the stored hash and salt using 
-  cryptographic functions.
 
-  - `validateObject<T extends PasswordStorageInterface>(password: string, object: T)`: 
-  Validates the password on an object that includes password hash 
-  and salt.
+  - **Purpose**: Validates the user's password against the stored hash 
+  to ensure the login attempt is legitimate.
+  
+  - **Class**: `PasswordValidationService`
+    - `validate(options: { password: string; passwordHash: string; passwordSalt: string; })`: 
+    Compares the provided password with the stored hash and salt using 
+    cryptographic functions.
+    - `validateObject<T extends PasswordStorageInterface>(password: string, object: T)`: 
+    Validates the password on an object that includes password hash 
+    and salt.
 
 #### 5. **settings** (optional)
-- **Purpose**: Allows customization of the authentication process,
- specifying how the login data should be structured and which fields 
- are used for username and password.
-- **Details**:
-  - `loginDto`: Customizable data transfer object for login requests.
-  - `usernameField` and `passwordField`: Specify the field names in the 
-  `loginDto` that represent the username and password.
+  - **Purpose**: Allows customization of the authentication process,
+  specifying how the login data should be structured and which fields 
+  are used for username and password.
+
+  - **Details**:
+    - `loginDto`: Customizable data transfer object for login requests.
+    - `usernameField` and `passwordField`: Specify the field names in the 
+    `loginDto` that represent the username and password.
 
 ### 2. AuthLocalModule API Reference
 
@@ -622,6 +673,7 @@ identity providers.
 
 - **Synchronous Registration**: Used when configuration options are static and 
 available at startup.
+
 - **Asynchronous Registration**: Used when configuration options need to be 
 retrieved from external sources at runtime.
 
@@ -629,6 +681,7 @@ retrieved from external sources at runtime.
 
 - **Global Registration**: Makes the module available throughout the entire 
 application.
+
 - **Feature-Specific Registration**: Allows the module to be registered only 
 for specific features or modules within the application.
 
