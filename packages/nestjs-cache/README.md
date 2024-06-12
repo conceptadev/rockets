@@ -1,26 +1,57 @@
 # Rockets NestJS Cache Documentation
 
+The Rockets NestJS Cache module offers a robust caching solution for NestJS
+applications, enhancing data management efficiency. It integrates seamlessly
+with the NestJS framework, supporting both synchronous and asynchronous
+registration of cache configurations. This module enables CRUD operations on
+cache entries directly from the database, facilitating data reuse across
+different parts of an application or even different applications. It is
+especially useful for boosting application performance, reducing database load,
+and improving user experience by minimizing data retrieval times.
+
+## Project
+
+[![NPM Latest](https://img.shields.io/npm/v/@concepta/nestjs-auth-local)](https://www.npmjs.com/package/@concepta/nestjs-auth-local)
+[![NPM Downloads](https://img.shields.io/npm/dw/@concepta/nestjs-auth-local)](https://www.npmjs.com/package/@concepta/nestjs-auth-local)
+[![GH Last Commit](https://img.shields.io/github/last-commit/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets)
+[![GH Contrib](https://img.shields.io/github/contributors/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets/graphs/contributors)
+[![NestJS Dep](https://img.shields.io/github/package-json/dependency-version/conceptadev/rockets/@nestjs/common?label=NestJS&logo=nestjs&filename=packages%2Fnestjs-core%2Fpackage.json)](https://www.npmjs.com/package/@nestjs/common)
+
 ## Table of Contents
-- [Rockets NestJS Cache Documentation](#rockets-nestjs-cache-documentation)
-  - [Table of Contents](#table-of-contents)
-  - [Tutorials](#tutorials)
-    - [Getting Started with Rockets NestJS Cache](#getting-started-with-rockets-nestjs-cache)
-      - [Introduction](#introduction)
-      - [Installation](#installation)
-      - [Basic Setup in a NestJS Project](#basic-setup-in-a-nestjs-project)
-  - [Registering CacheModule Asynchronously for multiple entities](#registering-cachemodule-asynchronously-for-multiple-entities)
-  - [Reference](#reference)
-    - [CacheModule API Reference](#cachemodule-api-reference)
-      - [register(options: CacheOptions)](#registeroptions-cacheoptions)
-      - [registerAsync(options: CacheAsyncOptions)](#registerasyncoptions-cacheasyncoptions)
-      - [forRoot(options: CacheOptions)](#forrootoptions-cacheoptions)
-      - [forRootAsync(options: CacheAsyncOptions)](#forrootasyncoptions-cacheasyncoptions)
-      - [forFeature(options: CacheOptions)](#forfeatureoptions-cacheoptions)
-    - [CacheOptionsInterface](#cacheoptionsinterface)
-    - [CacheModule Classes and Interfaces](#cachemodule-classes-and-interfaces)
-      - [CacheEntityInterface](#cacheentityinterface)
-      - [CacheServiceInterface](#cacheserviceinterface)
+
+- [Tutorials](#tutorials)
+  - [Getting Started with Rockets NestJS Cache](#getting-started-with-rockets-nestjs-cache)
+    - [Introduction](#introduction)
+    - [Installation](#installation)
+    - [Basic Setup in a NestJS Project](#basic-setup-in-a-nestjs-project)
+    - [Using the RestFull endpoints to access cache](#using-the-restFull-endpoints-to-access-cache)
+- [How-to Guides](#how-to-guides)
+  - [Registering CacheModule Synchronously](#registering-cachemodule-synchronously)
+  - [Registering CacheModule Asynchronously](#registering-cachemodule-asynchronously)
+  - [Global Registering CacheModule Asynchronously](#global-registering-cachemodule-asynchronously)
+  - [Registering CacheModule Asynchronously for Multiple Entities](#registering-cachemodule-asynchronously-for-multiple-entities)
+  - [Using the CacheService to Access Cache](#using-the-cacheservice-to-access-cache)
+- [Reference](#reference)
+  - [CacheModule API Reference](#cachemodule-api-reference)
+    - [register(options: CacheOptions)](#registeroptions-cacheoptions)
+    - [registerAsync(options: CacheAsyncOptions)](#registerasyncoptions-cacheasyncoptions)
+    - [forRoot(options: CacheOptions)](#forrootoptions-cacheoptions)
+    - [forRootAsync(options: CacheAsyncOptions)](#forrootasyncoptions-cacheasyncoptions)
+    - [forFeature(options: CacheOptions)](#forfeatureoptions-cacheoptions)
+  - [CacheOptionsInterface](#cacheoptionsinterface)
+  - [CacheModule Classes and Interfaces](#cachemodule-classes-and-interfaces)
+    - [CacheEntityInterface](#cacheentityinterface)
+    - [CacheServiceInterface](#cacheserviceinterface)
+- [Explanation](#explanation)
+  - [Conceptual Overview of Caching](#conceptual-overview-of-caching)
+    - [What is Caching?](#what-is-caching)
+    - [Benefits of Using Cache](#benefits-of-using-cache)
+    - [Why Use NestJS Cache?](#why-use-nestjs-cache)
+    - [When to Use NestJS Cache](#when-to-use-nestjs-cache)
     - [How CacheOptionsInterface is Used in the Controller and Endpoints](#how-cacheoptionsinterface-is-used-in-the-controller-and-endpoints)
+  - [Design Choices in CacheModule](#design-choices-in-cachemodule)
+    - [Synchronous vs Asynchronous Registration](#synchronous-vs-asynchronous-registration)
+    - [Global vs Feature-Specific Registration](#global-vs-feature-specific-registration)
 
 ## Tutorials
 
@@ -644,77 +675,13 @@ options for more granular control over the database operations.
 
 # Reference
 
-Detailed Descriptions of All Classes, Methods, and Properties
+For detailed information on the properties, methods, and classes used in the 
+`@concepta/nestjs-cache`, please refer to the API documentation 
+available at [CacheModule API Documentation](). This documentation provides 
+comprehensive details on the interfaces and services that you can utilize to 
+start using cache functionality within your NestJS application.
 
-### CacheModule API Reference
-
-#### register(options: CacheOptions)
-Registers the module with synchronous options.
-
-#### registerAsync(options: CacheAsyncOptions)
-Registers the module with asynchronous options.
-
-#### forRoot(options: CacheOptions)
-Registers the module globally with synchronous options.
-
-#### forRootAsync(options: CacheAsyncOptions)
-Registers the module globally with asynchronous options.
-
-#### forFeature(options: CacheOptions)
-Registers the module for specific features with custom options.
-
-### CacheOptionsInterface
-
-The CacheOptionsInterface provides various configuration options to customize the behavior of the CacheModule. Below is a summary of the key options:
-
-#### settings (required)
-Manages how entities are assigned for caching. It includes properties like:
-- `assignments`: An object mapping assignments to entity keys. the name defined here will be the route for client to access and it should be used on entities as well to match with the entity class
-- `expiresIn`: Optional property defining the default expiration time for cache entries.
-
-#### entities (required)
-Specifies which entities are to be cached. It includes properties like:
-- `entities`: A record of entities and their corresponding configuration options.
-
-### CacheModule Classes and Interfaces
-
-#### CacheEntityInterface
-Defines the structure of a cache entity. This interface includes properties such as:
-- `id`: Unique identifier for the cache entry.
-- `key`: Key used to reference the cache entry.
-- `type`: Type of data being cached.
-- `data`: The actual data being cached.
-- `assignee`: The entity associated with the cache entry.
-- `expiresIn`: The expiration time for the cache entry.
-
-#### CacheServiceInterface
-Provides methods for interacting with the cache service. This interface includes methods such as:
-- `create`: Method to create a new cache entry.
-- `findOne`: Method to find a cache entry by its ID.
-- `update`: Method to update an existing cache entry.
-- `remove`: Method to remove a cache entry.
-
-### How CacheOptionsInterface is Used in the Controller and Endpoints
-
-The `CacheSettingsInterface` and `CacheOptionsInterface` are used to configure
-the caching behavior in the `CacheCrudController`. The `CacheCrudController`
-provides endpoints for CRUD operations on cache entries and uses these
-interfaces to manage the settings and services for each cache assignment.
-
-- `CacheSettingsInterface` manages how entities are assigned for caching and
-  specifies the expiration time for cache entries. It is used to ensure the
-  correct service and configuration are applied to each cache assignment.
-- `CacheOptionsInterface` includes the settings for managing cache assignments
-  and expiration times. It is used to register and configure the CacheModule,
-  determining which entities should be cached and how they should be handled.
-
-By using these interfaces, the `CacheCrudController` can dynamically handle
-different cache assignments and provide a consistent caching strategy across
-the application. The endpoints in the controller allow for creating, reading,
-updating, and deleting cache entries, ensuring that the caching behavior is
-flexible and easily configurable.
-
-## Explanation
+# Explanation
 
 ### Conceptual Overview of Caching
 
@@ -738,7 +705,7 @@ data source.
 - **Scalability**: Caching allows applications to handle higher loads by serving
   frequent requests from the cache instead of the database.
 
-#### Why Use NestJS Cache?
+#### Why Use NestJS Rockets Cache?
 
 NestJS Cache provides a powerful and flexible caching solution that integrates
 seamlessly with the NestJS framework and stores your cache on the database, so
@@ -774,10 +741,33 @@ When a user applies a filter on a dashboard, the filter settings can be cached.
 The next time the user accesses the dashboard, the cached filter can be retrieved
 quickly without recomputing it.
 
+#### How CacheOptionsInterface is Used in the Controller and Endpoints
+
+The `CacheSettingsInterface` and `CacheOptionsInterface` are used to configure
+the caching behavior in the `CacheCrudController`. The `CacheCrudController`
+provides endpoints for CRUD operations on cache entries and uses these
+interfaces to manage the settings and services for each cache assignment.
+
+- `CacheSettingsInterface` manages how entities are assigned for caching and
+  specifies the expiration time for cache entries. It is used to ensure the
+  correct service and configuration are applied to each cache assignment.
+- `CacheOptionsInterface` includes the settings for managing cache assignments
+  and expiration times. It is used to register and configure the CacheModule,
+  determining which entities should be cached and how they should be handled.
+
+By using these interfaces, the `CacheCrudController` can dynamically handle
+different cache assignments and provide a consistent caching strategy across
+the application. The endpoints in the controller allow for creating, reading,
+updating, and deleting cache entries, ensuring that the caching behavior is
+flexible and easily configurable.
+
 #### Design Choices in CacheModule
 
-##### Synchronous vs Asynchronous Registration
+##### Global vs Synchronous vs Asynchronous Registration
 
+- **Global Registration**: Registers the CacheModule at the root level, making it
+  available throughout the entire application. It is useful for shared
+  configurations that need to be applied universally.
 - **Synchronous Registration**: This method is used when all configuration options
   are available at the time of module registration. It is simple and
   straightforward, making it suitable for most use cases.
@@ -785,13 +775,3 @@ quickly without recomputing it.
   need to be fetched or computed asynchronously. It provides greater flexibility
   and is useful for advanced scenarios where configuration depends on runtime
   conditions.
-
-##### Global vs Feature-Specific Registration
-
-- **Global Registration**: Registers the CacheModule at the root level, making it
-  available throughout the entire application. It is useful for shared
-  configurations that need to be applied universally.
-- **Feature-Specific Registration**: Registers the CacheModule for specific
-  features or modules, allowing for fine-grained control over caching behavior.
-  It is useful when different parts of the application have unique caching
-  requirements.
