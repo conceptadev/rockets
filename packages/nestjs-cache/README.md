@@ -194,7 +194,7 @@ export class UserModule {}
    needed. Please note that `CacheSqliteEntity` and `CachePostgresEntity` are
    provided by the Rockets NestJS Cache module, so you can use them to create
    your cache entity. They have a unique index with the following properties:
-   `'key', 'type', 'assignee.id'`:
+   `'key', 'type', 'assignee.id'` and it will throw a `CacheEntityAlreadyExistsException` if duplicated:
 
 ```typescript
 import { Entity, ManyToOne } from 'typeorm';
@@ -291,7 +291,9 @@ entities: {
 This will make the following endpoints available:
 
 1. **Create (POST)**: To create a new cache entry, the request body should 
-match the `CacheCreatableInterface`:
+match the `CacheCreatableInterface`; Properties `key, type and assignee.id` 
+are unique and will throw a `CacheEntityAlreadyExistsException` error on 
+attempt to insert duplicated data:
 
 ```ts
 export interface CacheCreatableInterface extends Pick<CacheInterface, 'key' | 'type' | 'data' | 'assignee'> {

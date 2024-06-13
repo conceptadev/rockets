@@ -25,6 +25,7 @@ import { CacheEntityNotFoundException } from '../exceptions/cache-entity-not-fou
 import { CacheServiceInterface } from '../interfaces/cache-service.interface';
 import { CacheSettingsInterface } from '../interfaces/cache-settings.interface';
 import getExpirationDate from '../utils/get-expiration-date.util';
+import { CacheAssignmentNotFoundException } from '../exceptions/cache-assignment-not-found.exception';
 
 @Injectable()
 export class CacheService implements CacheServiceInterface {
@@ -99,6 +100,10 @@ export class CacheService implements CacheServiceInterface {
     // try to update the item
     try {
       const assignedCache = await this.findCache(repoProxy, dto, queryOptions);
+      if (!assignedCache)
+        throw new CacheEntityNotFoundException(
+          assignmentRepo.metadata.targetName,
+        );
 
       const mergedEntity = await this.mergeEntity(
         repoProxy,
@@ -265,10 +270,11 @@ export class CacheService implements CacheServiceInterface {
     repoProxy: RepositoryProxy<CacheInterface>,
     cache: Pick<CacheInterface, 'key' | 'type' | 'assignee'>,
     queryOptions?: QueryOptionsInterface,
-  ): Promise<CacheInterface> {
+  ): Promise<CacheInterface | null> {
     const { key, type, assignee } = cache;
     try {
-      const cache = await repoProxy.repository(queryOptions).findOne({
+      const repo = repoProxy.repository(queryOptions);
+      const cache = await repo.findOne({
         where: {
           key,
           type,
@@ -276,7 +282,6 @@ export class CacheService implements CacheServiceInterface {
         },
         relations: ['assignee'],
       });
-      if (!cache) throw new Error('Could not find repository');
       return cache;
     } catch (e) {
       throw new ReferenceLookupException(
@@ -295,13 +300,21 @@ export class CacheService implements CacheServiceInterface {
   protected getAssignmentRepo(
     assignment: ReferenceAssignment,
   ): Repository<CacheInterface> {
-    // repo matching assignment was injected?
-    if (this.allCacheRepos[assignment]) {
-      // yes, return it
-      return this.allCacheRepos[assignment];
+    if (this.settings.assignments[assignment]) {
+      // get entity key based on assignment
+      const entityKey = this.settings.assignments[assignment].entityKey;
+
+      // repo matching assignment was injected?
+      if (this.allCacheRepos[entityKey]) {
+        // yes, return it
+        return this.allCacheRepos[entityKey];
+      } else {
+        // bad assignment
+        throw new CacheEntityNotFoundException(entityKey);
+      }
     } else {
       // bad assignment
-      throw new CacheEntityNotFoundException(assignment);
+      throw new CacheAssignmentNotFoundException(assignment);
     }
   }
 

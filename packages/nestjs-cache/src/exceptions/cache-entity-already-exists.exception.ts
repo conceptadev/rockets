@@ -1,0 +1,26 @@
+import { RuntimeException } from '@concepta/nestjs-exception';
+import { HttpStatus } from '@nestjs/common';
+
+export class CacheEntityAlreadyExistsException extends RuntimeException {
+  context: RuntimeException['context'] & {
+    entityName: string;
+  };
+
+  constructor(
+    entityName: string,
+    message = '%s already exists with the given key, type, and assignee ID.',
+  ) {
+    super({
+      httpStatus: HttpStatus.BAD_REQUEST,
+      message,
+      messageParams: [entityName],
+    });
+
+    this.errorCode = 'CACHE_ENTITY_ALREADY_EXISTS_ERROR';
+
+    this.context = {
+      ...super.context,
+      entityName,
+    };
+  }
+}
