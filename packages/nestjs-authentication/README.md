@@ -8,6 +8,42 @@
 [![GH Contrib](https://img.shields.io/github/contributors/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets/graphs/contributors)
 [![NestJS Dep](https://img.shields.io/github/package-json/dependency-version/conceptadev/rockets/@nestjs/common?label=NestJS&logo=nestjs&filename=packages%2Fnestjs-core%2Fpackage.json)](https://www.npmjs.com/package/@nestjs/common)
 
+## Table of Contents
+
+- [Tutorials](#tutorials)
+  - [Introduction](#introduction)
+    - [Overview of the Library](#overview-of-the-library)
+    - [Purpose and Key Features](#purpose-and-key-features)
+    - [Installation](#installation)
+  - [Getting Started](#getting-started)
+    - [Overview](#overview)
+    - [Basic Setup](#basic-setup)
+    - [1.3 Basic Setup in a NestJS Project](#13-basic-setup-in-a-nestjs-project)
+      - [Scenario: Users have a list of pets](#scenario-users-have-a-list-of-pets)
+      - [Step 1: Create Entities](#step-1-create-entities)
+      - [Step 2: Create Services](#step-2-create-services)
+      - [Step 3: Create Controller](#step-3-create-controller)
+      - [Step 4: Configure the Module](#step-4-configure-the-module)
+    - [1.4 First Authentication with JWT](#14-first-authentication-with-jwt)
+      - [Validating the Setup](#validating-the-setup)
+      - [Step 1: Obtain a JWT Token](#step-1-obtain-a-jwt-token)
+      - [Step 2: Make an Authenticated Request](#step-2-make-an-authenticated-request)
+      - [Example Curl Calls](#example-curl-calls)
+- [How to Guides](#how-to-guides)
+  - [1. How to Set Up AuthenticationModule with forRoot and JwtModule from @concepta/nestjs-jwt](#1-how-to-set-up-authenticationmodule-with-forroot-and-jwtmodule-from-conceptanestjs-jwt)
+  - [2. How to Configure AuthenticationModule Settings](#2-how-to-configure-authenticationmodule-settings)
+- [Explanation](#explanation)
+  - [Conceptual Overview](#conceptual-overview)
+    - [What is This Library?](#what-is-this-library)
+    - [Benefits of Using This Library](#benefits-of-using-this-library)
+  - [Design Choices](#design-choices)
+    - [Why Use NestJS Guards?](#why-use-nestjs-guards)
+    - [Global, Synchronous vs Asynchronous Registration](#global-synchronous-vs-asynchronous-registration)
+  - [Integration Details](#integration-details)
+    - [Integrating with Other Modules](#integrating-with-other-modules)
+- [References](#references)
+
+
 # Tutorials
 
 ## Introduction
@@ -685,7 +721,7 @@ authentication and authorization logic. By using guards, developers can apply
 security policies across routes efficiently, ensuring that only authenticated 
 and authorized users can access protected resources.
 
-#### Globla, Synchronous vs Asynchronous Registration
+#### Global, Synchronous vs Asynchronous Registration
 
 The `nestjs-authentication` module supports both synchronous and asynchronous 
 registration:
