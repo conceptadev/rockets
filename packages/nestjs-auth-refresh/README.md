@@ -121,12 +121,13 @@ AuthRefreshModule.forRoot({
 }),
 //... 
 ```
->Additionally, you can take advantage of the `UserLookupService` from the `@concepta/nestjs-user` module to streamline user lookup operations within your authentication flow, check [User Module Documentation](#user-module-documentation) for reference:
+>Additionally, you can take advantage of the `MyUserLookupService` from the `@concepta/nestjs-user` module to streamline user lookup operations within your authentication flow, check [User Module Documentation](#user-module-documentation) for reference:
 
 By default, `AuthRefreshModule` uses services defined in the 
 [AuthenticationModule](#nestjs-auth) to verify refresh tokens. However, you can 
 override this behavior by providing a custom service specifically for the refresh 
 token implementation during the module setup.
+
 
 #### 1.4 First Token Refresh
 
@@ -136,7 +137,7 @@ To validate the setup, let's test the refresh token functionality using CURL com
 
 ##### Step 1: Obtain a Refresh Token
 
-First, obtain a refresh token by sending a request to the `/auth` endpoint with valid credentials:
+First, obtain a refresh token by sending a request to the `/auth/login` endpoint with valid credentials:
 
 ```bash
 curl -X POST \
@@ -186,7 +187,7 @@ curl -X POST \
 curl -X POST \
   http://localhost:3000/auth/refresh \
   -H 'Content-Type: application/json' \
-  -d '{"refreshToken":"<refresh_token_value>"}'
+  -d '{"refreshToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MDg1MjkwMjcsImV4cCI6MTAzMDg1MjkwMjcsImlzcyI6Im5lc3RzLWF1dGgiLCJhdWQiOiJuZXN0cy1hdXRoIiwic3ViIjoiY2xvdW5jYUBleGFtcGxlLmNvbSIsImVtYWlsIjoiY2xvdW5jYUBleGFtcGxlLmNvbSIsIm5hbWUiOiJjbG91bmNAYXV0aC5jb20iLCJpYXQiOjE3MDg1MjkwMjcsImV4cCI6MTAzMDg1MjkwMjcsImVtYWlsIjoiY2xvdW5jYUBleGFtcGxlLmNvbSIsIm5hbWVAIjoiY2xvdW5jYXV0aC5jb20ifQ.UGFzc3dvcmQ="}'
 ```
 
 ###### Response (example):
@@ -204,8 +205,8 @@ curl -X POST \
 ```ts
 //...
 AuthRefreshModule.register({
-  userLookupService: new UserService(),
-  issueTokenService: new TokenService(),
+  userLookupService: new MyUserLookupService(),
+  issueTokenService: new MyIssueTokenService(),
 }),
 //...
 ```
@@ -215,11 +216,11 @@ AuthRefreshModule.register({
 ```ts
 //...
 AuthRefreshModule.registerAsync({
-  useFactory: async (userService: UserService, tokenService: TokenService) => ({
-    userLookupService: userService,
-    issueTokenService: tokenService,
+  useFactory: async (userLookupService: MyUserLookupService, issueTokenService: MyIssueTokenService) => ({
+    userLookupService,
+    issueTokenService,
   }),
-  inject: [UserService, TokenService],
+  inject: [MyUserLookupService, MyIssueTokenService],
 }),
 //...
 ```
@@ -229,11 +230,11 @@ AuthRefreshModule.registerAsync({
 ```ts
 //...
 AuthRefreshModule.forRootAsync({
-  useFactory: async (userService: UserService, tokenService: TokenService) => ({
-    userLookupService: userService,
-    issueTokenService: tokenService,
+  useFactory: async (userLookupService: MyUserLookupService, issueTokenService: MyIssueTokenService) => ({
+    userLookupService,
+    issueTokenService,
   }),
-  inject: [UserService, TokenService],
+  inject: [MyUserLookupService, MyIssueTokenService],
 }),
 //...
 ```
