@@ -107,12 +107,12 @@ where we want to refresh JWT tokens. In this example, we will use
 These modules work together to provide a comprehensive and secure token refresh mechanism.
 
 For more detailed instructions on setting up the authentication modules, please 
-refer to the [Authentication Module Documentation](#authentication-module-documentation).
-We will continue with the tutorial in the [Authentication Module Documentation](#authentication-module-documentation).
+refer to the [Authentication Module Documentation](https://github.com/conceptadev/rockets/tree/main/packages/nestjs-authentication).
+We will continue with the tutorial in the [Authentication Module Documentation](https://github.com/conceptadev/rockets/tree/main/packages/nestjs-authentication).
 
 ###### Adding AuthRefreshModule to your NestJS Application
 
-To add the `AuthRefreshModule` to your NestJS application, import the module in your main application module (usually `app.module.ts`) and register it using the `forRoot` or `forRootAsync` method, let's use the `MyJwtUserLookupService` created at [Authentication Module Documentation](#authentication-module-documentation):
+To add the `AuthRefreshModule` to your NestJS application, import the module in your main application module (usually `app.module.ts`) and register it using the `forRoot` or `forRootAsync` method, let's use the `MyJwtUserLookupService` created at [Authentication Module Documentation](https://github.com/conceptadev/rockets/tree/main/packages/nestjs-authentication):
 
 ```ts
 //...
