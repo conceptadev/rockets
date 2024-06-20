@@ -37,7 +37,8 @@ import { CacheEntityNotFoundException } from '../exceptions/cache-entity-not-fou
 import { CacheSettingsInterface } from '../interfaces/cache-settings.interface';
 import { CacheCrudService } from '../services/cache-crud.service';
 import getExpirationDate from '../utils/get-expiration-date.util';
-
+import { CacheService } from '../services/cache.service';
+import { CacheEntityAlreadyExistsException } from '../exceptions/cache-entity-already-exists.exception';
 /**
  * Cache assignment controller.
  */
@@ -76,6 +77,7 @@ export class CacheCrudController
     private settings: CacheSettingsInterface,
     @Inject(CACHE_MODULE_CRUD_SERVICES_TOKEN)
     private allCrudServices: Record<string, CacheCrudService>,
+    private cacheService: CacheService,
   ) {}
 
   /**
@@ -125,6 +127,17 @@ export class CacheCrudController
     const expirationDate = getExpirationDate(
       cacheCreateDto.expiresIn ?? this.settings.expiresIn,
     );
+
+    const existingCache = await this.cacheService.get(
+      assignment,
+      cacheCreateDto,
+    );
+
+    if (existingCache) {
+      throw new CacheEntityAlreadyExistsException(
+        this.getEntityKey(assignment),
+      );
+    }
 
     // call crud service to create
     return this.getCrudService(assignment).createOne(crudRequest, {
@@ -180,18 +193,27 @@ export class CacheCrudController
    * @param assignment The cache assignment
    */
   protected getCrudService(assignment: ReferenceAssignment): CacheCrudService {
+    const entityKey = this.getEntityKey(assignment);
+    // repo matching assignment was injected?
+    if (this.allCrudServices[entityKey]) {
+      // yes, return it
+      return this.allCrudServices[entityKey];
+    } else {
+      // bad entity key
+      throw new CacheEntityNotFoundException(entityKey);
+    }
+  }
+
+  /**
+   * Get the entity key for the given assignment.
+   *
+   * @param assignment The cache assignment
+   */
+  protected getEntityKey(assignment: ReferenceAssignment): string {
     // have entity key for given assignment?
     if (this.settings.assignments[assignment]) {
       // yes, set it
-      const entityKey = this.settings.assignments[assignment].entityKey;
-      // repo matching assignment was injected?
-      if (this.allCrudServices[entityKey]) {
-        // yes, return it
-        return this.allCrudServices[entityKey];
-      } else {
-        // bad entity key
-        throw new CacheEntityNotFoundException(entityKey);
-      }
+      return this.settings.assignments[assignment].entityKey;
     } else {
       // bad assignment
       throw new CacheAssignmentNotFoundException(assignment);

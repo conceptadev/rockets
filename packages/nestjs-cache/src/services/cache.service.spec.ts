@@ -41,6 +41,9 @@ describe('CacheService', () => {
   beforeEach(() => {
     repo = mock<Repository<CacheInterface>>();
     settings = mock<CacheSettingsInterface>();
+    settings.assignments = {
+      testAssignment: { entityKey: 'testAssignment' },
+    };
     settings.expiresIn = '1h';
     service = new CacheService({ testAssignment: repo }, settings);
   });
@@ -101,7 +104,6 @@ describe('CacheService', () => {
       repoProxyMock.repository.mockReturnValue(repo);
 
       service['validateDto'] = jest.fn().mockResolvedValueOnce(cacheDto);
-      service['findCache'] = jest.fn();
       const result = {
         key: cacheDto.key,
         type: cacheDto.type,
@@ -109,6 +111,15 @@ describe('CacheService', () => {
         assignee: cacheDto.assignee,
         expirationDate,
       };
+      service['findCache'] = jest.fn().mockImplementationOnce(() => {
+        return {
+          ...result,
+          dateCreated: new Date(),
+          dateUpdated: new Date(),
+          id: 'testId',
+          version: 1,
+        } as CacheInterface;
+      });
       service['mergeEntity'] = jest.fn().mockResolvedValue(result);
 
       jest.spyOn(RepositoryProxy.prototype, 'repository').mockReturnValue(repo);

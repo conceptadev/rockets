@@ -151,7 +151,13 @@ describe('CacheAssignmentController (e2e)', () => {
     await supertest(app.getHttpServer())
       .post('/cache/user')
       .send(payload)
-      .expect(500);
+      .then((res) => {
+        // check error message
+        expect(res.body.message).toBe(
+          'userCache already exists with the given key, type, and assignee ID.',
+        );
+        expect(res.status).toBe(400);
+      });
   });
 
   it('DELETE /cache/user/:id', async () => {
