@@ -7,6 +7,7 @@ import { IssueTokenService } from '@concepta/nestjs-authentication';
 import { AccessControlService } from '@concepta/nestjs-access-control';
 import {
   PasswordCreationService,
+  PasswordStorageInterface,
   PasswordStorageService,
   PasswordValidationService,
 } from '@concepta/nestjs-password';
@@ -14,9 +15,13 @@ import { SeedingSource } from '@concepta/typeorm-seeding';
 
 import { UserFactory } from './user.factory';
 import { UserLookupService } from './services/user-lookup.service';
+import { UserPasswordHistoryFactory } from './user-password-history.factory';
+import { UserPasswordService } from './services/user-password.service';
+import { UserPasswordHistoryLookupService } from './services/user-password-history-lookup.service';
 
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
 import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
+import { UserPasswordHistoryEntityFixture } from './__fixtures__/user-password-history.entity.fixture';
 
 describe('User Controller (password e2e)', () => {
   describe('Password Update Flow', () => {
@@ -28,10 +33,13 @@ describe('User Controller (password e2e)', () => {
     let passwordStorageService: PasswordStorageService;
     let passwordCreationService: PasswordCreationService;
     let userLookupService: UserLookupService;
+    let userPasswordService: UserPasswordService;
+    let userPasswordHistoryLookupService: UserPasswordHistoryLookupService;
     let issueTokenService: IssueTokenService;
     let accessControlService: AccessControlService;
 
     const userId = randomUUID();
+    const userOldPassword = 'Test1233';
     const userPassword = 'Test1234';
     const userNewPassword = 'Test6789';
 
@@ -61,6 +69,10 @@ describe('User Controller (password e2e)', () => {
       passwordStorageService = app.get(PasswordStorageService);
       passwordCreationService = app.get(PasswordCreationService);
       userLookupService = app.get(UserLookupService);
+      userPasswordService = app.get(UserPasswordService);
+      userPasswordHistoryLookupService = app.get(
+        UserPasswordHistoryLookupService,
+      );
       issueTokenService = app.get(IssueTokenService);
       accessControlService = app.get(AccessControlService);
       authToken = await issueTokenService.accessToken({ sub: userId });
@@ -77,6 +89,11 @@ describe('User Controller (password e2e)', () => {
         entity: UserEntityFixture,
       });
 
+      const userPasswordHistoryFactory = new UserPasswordHistoryFactory({
+        seedingSource: seedingSource,
+        entity: UserPasswordHistoryEntityFixture,
+      });
+
       fakeUser = await userFactory.create(
         await passwordStorageService.hashObject({
           id: userId,
@@ -84,7 +101,12 @@ describe('User Controller (password e2e)', () => {
         }),
       );
 
-      await userFactory.save(fakeUser);
+      await userPasswordHistoryFactory.create(
+        await passwordStorageService.hashObject({
+          userId: userId,
+          password: userOldPassword,
+        }),
+      );
     }
 
     afterEach(async () => {
@@ -118,6 +140,26 @@ describe('User Controller (password e2e)', () => {
         } else {
           fail('User not found');
         }
+
+        const userPasswordHistory =
+          await userPasswordHistoryLookupService.byUserId(updatedUser.id);
+        expect(userPasswordHistory).toEqual(expect.any(Array));
+        expect(userPasswordHistory.length).toEqual(2);
+        expect(userPasswordHistory).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining<PasswordStorageInterface>({
+              passwordHash: expect.any(String),
+              passwordSalt: expect.any(String),
+            }),
+          ]),
+        );
+        expect(
+          await passwordValidationService.validate({
+            password: userNewPassword,
+            passwordHash: userPasswordHistory[1].passwordHash as string,
+            passwordSalt: userPasswordHistory[1].passwordSalt as string,
+          }),
+        ).toEqual(true);
       });
 
       it('Should fail to update password', async () => {
@@ -143,6 +185,25 @@ describe('User Controller (password e2e)', () => {
         } else {
           fail('User not found');
         }
+      });
+
+      it('Should fail to update password (used too recently)', async () => {
+        await userPasswordService.setPassword(
+          { password: userNewPassword },
+          userId,
+        );
+
+        const test = await supertest(app.getHttpServer())
+          .patch(`/user/${userId}`)
+          .set('Authorization', `bearer ${authToken}`)
+          .send({
+            password: userNewPassword,
+          })
+          .expect(400);
+
+        expect(test.body.message).toEqual(
+          'The new password has been used too recently, please use a different password',
+        );
       });
     });
 

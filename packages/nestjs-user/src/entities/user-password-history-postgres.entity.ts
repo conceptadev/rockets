@@ -1,33 +1,16 @@
 import { Column } from 'typeorm';
+import { ReferenceId } from '@concepta/ts-core';
 import { CommonPostgresEntity } from '@concepta/typeorm-common';
-import { UserEntityInterface } from '../interfaces/user-entity.interface';
 import { UserPasswordHistoryEntityInterface } from '../interfaces/user-password-history-entity.interface';
+import { UserEntityInterface } from '../interfaces/user-entity.interface';
 
 /**
  * User Entity
  */
-export abstract class UserPostgresEntity
+export abstract class UserPasswordHistoryPostgresEntity
   extends CommonPostgresEntity
-  implements UserEntityInterface
+  implements UserPasswordHistoryEntityInterface
 {
-  /**
-   * Email
-   */
-  @Column({ unique: true })
-  email!: string;
-
-  /**
-   * Username
-   */
-  @Column({ unique: true })
-  username!: string;
-
-  /**
-   * Active
-   */
-  @Column({ default: true })
-  active!: boolean;
-
   /**
    * Password hash
    */
@@ -40,5 +23,14 @@ export abstract class UserPostgresEntity
   @Column({ type: 'text', nullable: true, default: null })
   passwordSalt: string | null = null;
 
-  userPasswordHistory?: UserPasswordHistoryEntityInterface;
+  /**
+   * User ID
+   */
+  @Column({ type: 'uuid' })
+  userId!: ReferenceId;
+
+  /**
+   * Should be configured by the implementation
+   */
+  user?: UserEntityInterface;
 }

@@ -165,7 +165,11 @@ export class UserController
         authorizededUser,
       );
     } catch (e) {
-      throw new BadRequestException(e);
+      if (e instanceof Error) {
+        throw new BadRequestException(e.message);
+      } else {
+        throw new BadRequestException();
+      }
     }
 
     return this.userCrudService.updateOne(crudRequest, hashedObject);

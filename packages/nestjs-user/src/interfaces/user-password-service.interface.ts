@@ -11,14 +11,14 @@ import {
 
 export interface UserPasswordServiceInterface {
   /**
-   * Get the user being updated by id.
+   * Get the object containing the password store by user id.
    *
    * Object must have reference id and password storage interface.
    *
    * @param {ReferenceId} userId The id of the user that is being updated
    * @returns {Promise<ReferenceIdInterface & PasswordStorageInterface>} The user being updated
    */
-  getUserById: (
+  getPasswordStore: (
     userId: ReferenceId,
   ) => Promise<ReferenceIdInterface & PasswordStorageInterface>;
 

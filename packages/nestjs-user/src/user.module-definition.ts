@@ -15,6 +15,7 @@ import {
 import {
   USER_MODULE_SETTINGS_TOKEN,
   USER_MODULE_USER_ENTITY_KEY,
+  USER_MODULE_USER_PASSWORD_HISTORY_ENTITY_KEY,
 } from './user.constants';
 
 import { UserOptionsInterface } from './interfaces/user-options.interface';
@@ -22,17 +23,21 @@ import { UserOptionsExtrasInterface } from './interfaces/user-options-extras.int
 import { UserEntitiesOptionsInterface } from './interfaces/user-entities-options.interface';
 import { UserSettingsInterface } from './interfaces/user-settings.interface';
 import { UserEntityInterface } from './interfaces/user-entity.interface';
+import { UserLookupServiceInterface } from './interfaces/user-lookup-service.interface';
+import { UserPasswordHistoryEntityInterface } from './interfaces/user-password-history-entity.interface';
 
 import { UserCrudService } from './services/user-crud.service';
 import { UserLookupService } from './services/user-lookup.service';
 import { UserMutateService } from './services/user-mutate.service';
 import { UserPasswordService } from './services/user-password.service';
+import { UserPasswordHistoryService } from './services/user-password-history.service';
+import { UserPasswordHistoryLookupService } from './services/user-password-history-lookup.service';
+import { UserPasswordHistoryMutateService } from './services/user-password-history-mutate.service';
+import { UserAccessQueryService } from './services/user-access-query.service';
 import { UserController } from './user.controller';
 import { InvitationAcceptedListener } from './listeners/invitation-accepted-listener';
 import { InvitationGetUserListener } from './listeners/invitation-get-user.listener';
 import { userDefaultConfig } from './config/user-default.config';
-import { UserLookupServiceInterface } from './interfaces/user-lookup-service.interface';
-import { UserAccessQueryService } from './services/user-access-query.service';
 
 const RAW_OPTIONS_TOKEN = Symbol('__USER_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -91,10 +96,14 @@ export function createUserProviders(options: {
     PasswordCreationService,
     InvitationAcceptedListener,
     InvitationGetUserListener,
+    UserPasswordHistoryMutateService,
     createUserSettingsProvider(options.overrides),
     createUserLookupServiceProvider(options.overrides),
     createUserMutateServiceProvider(options.overrides),
     createUserPasswordServiceProvider(options.overrides),
+    createUserPasswordHistoryServiceProvider(options.overrides),
+    createUserPasswordHistoryLookupServiceProvider(),
+    createUserPasswordHistoryMutateServiceProvider(),
     createUserAccessQueryServiceProvider(options.overrides),
   ];
 }
@@ -108,6 +117,9 @@ export function createUserExports(): Required<
     UserMutateService,
     UserCrudService,
     UserPasswordService,
+    UserPasswordHistoryService,
+    UserPasswordHistoryLookupService,
+    UserPasswordHistoryMutateService,
     UserAccessQueryService,
   ];
 }
@@ -176,15 +188,140 @@ export function createUserPasswordServiceProvider(
 ): Provider {
   return {
     provide: UserPasswordService,
-    inject: [RAW_OPTIONS_TOKEN, UserLookupService, PasswordCreationService],
+    inject: [
+      RAW_OPTIONS_TOKEN,
+      UserLookupService,
+      PasswordCreationService,
+      {
+        token: UserPasswordHistoryService,
+        optional: true,
+      },
+    ],
     useFactory: async (
       options: UserOptionsInterface,
       userLookUpService: UserLookupServiceInterface,
       passwordCreationService: PasswordCreationService,
+      userPasswordHistoryService?: UserPasswordHistoryService,
     ) =>
       optionsOverrides?.userPasswordService ??
       options.userPasswordService ??
-      new UserPasswordService(userLookUpService, passwordCreationService),
+      new UserPasswordService(
+        userLookUpService,
+        passwordCreationService,
+        userPasswordHistoryService,
+      ),
+  };
+}
+
+export function createUserPasswordHistoryLookupServiceProvider(): Provider {
+  return {
+    provide: UserPasswordHistoryLookupService,
+    inject: [
+      USER_MODULE_SETTINGS_TOKEN,
+      {
+        token: getDynamicRepositoryToken(
+          USER_MODULE_USER_PASSWORD_HISTORY_ENTITY_KEY,
+        ),
+        optional: true,
+      },
+    ],
+    useFactory: async (
+      settings: UserSettingsInterface,
+      userPasswordHistoryRepoToken?: Repository<UserPasswordHistoryEntityInterface>,
+    ) => {
+      if (
+        settings?.passwordHistory?.enabled === true &&
+        userPasswordHistoryRepoToken
+      ) {
+        return new UserPasswordHistoryLookupService(
+          userPasswordHistoryRepoToken,
+        );
+      }
+    },
+  };
+}
+
+export function createUserPasswordHistoryMutateServiceProvider(): Provider {
+  return {
+    provide: UserPasswordHistoryMutateService,
+    inject: [
+      USER_MODULE_SETTINGS_TOKEN,
+      {
+        token: getDynamicRepositoryToken(
+          USER_MODULE_USER_PASSWORD_HISTORY_ENTITY_KEY,
+        ),
+        optional: true,
+      },
+    ],
+    useFactory: async (
+      settings: UserSettingsInterface,
+      userPasswordHistoryRepoToken?: Repository<UserPasswordHistoryEntityInterface>,
+    ) => {
+      if (
+        settings?.passwordHistory?.enabled === true &&
+        userPasswordHistoryRepoToken
+      ) {
+        return new UserPasswordHistoryMutateService(
+          userPasswordHistoryRepoToken,
+        );
+      }
+    },
+  };
+}
+
+export function createUserPasswordHistoryServiceProvider(
+  optionsOverrides?: UserOptions,
+): Provider {
+  return {
+    provide: UserPasswordHistoryService,
+    inject: [
+      RAW_OPTIONS_TOKEN,
+      USER_MODULE_SETTINGS_TOKEN,
+      {
+        token: getDynamicRepositoryToken(
+          USER_MODULE_USER_PASSWORD_HISTORY_ENTITY_KEY,
+        ),
+        optional: true,
+      },
+      {
+        token: UserPasswordHistoryLookupService,
+        optional: true,
+      },
+      {
+        token: UserPasswordHistoryMutateService,
+        optional: true,
+      },
+    ],
+    useFactory: async (
+      options: UserOptionsInterface,
+      settings: UserSettingsInterface,
+      userPasswordHistoryRepoToken?: Repository<UserPasswordHistoryEntityInterface>,
+      userPasswordHistoryLookupService?: UserPasswordHistoryLookupService,
+      userPasswordHistoryMutateService?: UserPasswordHistoryMutateService,
+    ) => {
+      // if password history is enabled?
+      if (settings?.passwordHistory?.enabled === true) {
+        // look for an overriding service
+        const overridingServiceOption =
+          optionsOverrides?.userPasswordHistoryService ??
+          options.userPasswordHistoryService;
+
+        // user overriding service, or create default service
+        if (overridingServiceOption) {
+          return overridingServiceOption;
+        } else if (
+          userPasswordHistoryRepoToken &&
+          userPasswordHistoryLookupService &&
+          userPasswordHistoryMutateService
+        ) {
+          return new UserPasswordHistoryService(
+            settings,
+            userPasswordHistoryLookupService,
+            userPasswordHistoryMutateService,
+          );
+        }
+      }
+    },
   };
 }
 

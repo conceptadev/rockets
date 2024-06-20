@@ -18,6 +18,7 @@ import { UserAccessQueryService } from '../services/user-access-query.service';
 
 import { ormConfig } from './ormconfig.fixture';
 import { UserEntityFixture } from './user.entity.fixture';
+import { UserPasswordHistoryEntityFixture } from './user-password-history.entity.fixture';
 
 const rules = new AccessControl();
 rules
@@ -50,10 +51,17 @@ rules
       settings: {
         invitationRequestEvent: InvitationAcceptedEventAsync,
         invitationGetUserEvent: InvitationGetUserEventAsync,
+        passwordHistory: {
+          enabled: true,
+          limitDays: 99,
+        },
       },
       entities: {
         user: {
           entity: UserEntityFixture,
+        },
+        'user-password-history': {
+          entity: UserPasswordHistoryEntityFixture,
         },
       },
     }),
