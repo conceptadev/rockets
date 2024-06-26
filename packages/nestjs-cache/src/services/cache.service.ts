@@ -2,11 +2,7 @@ import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { DeepPartial, Repository } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
-import {
-  CacheCreatableInterface,
-  CacheInterface,
-  CacheUpdatableInterface,
-} from '@concepta/ts-common';
+import { CacheInterface, CacheUpdatableInterface } from '@concepta/ts-common';
 import { ReferenceAssignment, ReferenceId, Type } from '@concepta/ts-core';
 import {
   QueryOptionsInterface,

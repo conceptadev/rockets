@@ -38,7 +38,6 @@ import { CacheSettingsInterface } from '../interfaces/cache-settings.interface';
 import { CacheCrudService } from '../services/cache-crud.service';
 import getExpirationDate from '../utils/get-expiration-date.util';
 import { CacheService } from '../services/cache.service';
-import { CacheEntityAlreadyExistsException } from '../exceptions/cache-entity-already-exists.exception';
 import { CacheCreateDto } from '../dto/cache-create.dto';
 /**
  * Cache assignment controller.

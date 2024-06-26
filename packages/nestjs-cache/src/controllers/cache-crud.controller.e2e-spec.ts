@@ -14,7 +14,6 @@ import { UserCacheEntityFixture } from '../__fixtures__/entities/user-cache-enti
 import { UserEntityFixture } from '../__fixtures__/entities/user-entity.fixture';
 import { UserCacheFactoryFixture } from '../__fixtures__/factories/user-cache.factory.fixture';
 import { UserFactoryFixture } from '../__fixtures__/factories/user.factory.fixture';
-import { CacheCreateDto } from '../dto/cache-create.dto';
 
 describe('CacheAssignmentController (e2e)', () => {
   let app: INestApplication;
