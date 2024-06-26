@@ -1,0 +1,8 @@
+{
+  "entryPoints": ["packages/*"],
+  "plugin": ["typedoc-plugin-coverage"],
+  "exclude": ["packages/nestjs-samples"],
+  "name": "Rockets Core Documentation",
+  "entryPointStrategy": "packages",
+  "includeVersion": false
+}
