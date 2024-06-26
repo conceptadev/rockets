@@ -14,6 +14,7 @@ import { UserCacheEntityFixture } from '../__fixtures__/entities/user-cache-enti
 import { UserEntityFixture } from '../__fixtures__/entities/user-entity.fixture';
 import { UserCacheFactoryFixture } from '../__fixtures__/factories/user-cache.factory.fixture';
 import { UserFactoryFixture } from '../__fixtures__/factories/user.factory.fixture';
+import { CacheCreateDto } from '../dto/cache-create.dto';
 
 describe('CacheAssignmentController (e2e)', () => {
   let app: INestApplication;
@@ -130,6 +131,36 @@ describe('CacheAssignmentController (e2e)', () => {
       });
   });
 
+  it('POST /cache/user assignee id null', async () => {
+    const payload = {
+      key: 'dashboard-1',
+      type: 'filter',
+      data: '{}',
+      expiresIn: '1d',
+      assignee: { id: null },
+    };
+
+    await supertest(app.getHttpServer())
+      .post('/cache/user')
+      .send(payload)
+      .expect(500);
+  });
+
+  it('POST /cache/user wrong assignee id', async () => {
+    const payload = {
+      key: 'dashboard-1',
+      type: 'filter',
+      data: '{}',
+      expiresIn: '1d',
+      assignee: { id: 'test' },
+    };
+
+    await supertest(app.getHttpServer())
+      .post('/cache/user')
+      .send(payload)
+      .expect(500);
+  });
+
   it('POST /cache/user Duplicated', async () => {
     const payload: CacheCreatableInterface = {
       key: 'dashboard-1',
@@ -148,15 +179,45 @@ describe('CacheAssignmentController (e2e)', () => {
         expect(res.body.assignee.id).toBe(user.id);
       });
 
+    payload.data = '{ "name": "John Doe" }';
+    payload.expiresIn = null;
     await supertest(app.getHttpServer())
       .post('/cache/user')
       .send(payload)
+      .expect(201)
       .then((res) => {
-        // check error message
-        expect(res.body.message).toBe(
-          'userCache already exists with the given key, type, and assignee ID.',
-        );
-        expect(res.status).toBe(400);
+        expect(res.body.key).toBe(payload.key);
+        expect(res.body.data).toBe(payload.data);
+        expect(res.body.assignee.id).toBe(user.id);
+      });
+  });
+
+  it('POST /cache/user Update', async () => {
+    const payload: CacheCreatableInterface = {
+      key: 'dashboard-1',
+      type: 'filter',
+      data: '{}',
+      expiresIn: '1d',
+      assignee: { id: user.id },
+    };
+    await supertest(app.getHttpServer())
+      .post('/cache/user')
+      .send(payload)
+      .expect(201)
+      .then((res) => {
+        expect(res.body.key).toBe(payload.key);
+        expect(res.body.assignee.id).toBe(user.id);
+      });
+    payload.data = '{ "name": "John Doe" }';
+    payload.expiresIn = null;
+    await supertest(app.getHttpServer())
+      .post('/cache/user/')
+      .send(payload)
+      .expect(201)
+      .then((res) => {
+        expect(res.body.key).toBe(payload.key);
+        expect(res.body.data).toBe(payload.data);
+        expect(res.body.assignee.id).toBe(user.id);
       });
   });
 

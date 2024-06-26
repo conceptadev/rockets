@@ -39,6 +39,7 @@ import { CacheCrudService } from '../services/cache-crud.service';
 import getExpirationDate from '../utils/get-expiration-date.util';
 import { CacheService } from '../services/cache.service';
 import { CacheEntityAlreadyExistsException } from '../exceptions/cache-entity-already-exists.exception';
+import { CacheCreateDto } from '../dto/cache-create.dto';
 /**
  * Cache assignment controller.
  */
@@ -121,7 +122,7 @@ export class CacheCrudController
   @AccessControlCreateOne(CacheResource.One)
   async createOne(
     @CrudRequest() crudRequest: CrudRequestInterface,
-    @CrudBody() cacheCreateDto: CacheCreatableInterface,
+    @CrudBody() cacheCreateDto: CacheCreateDto,
     @Param('assignment') assignment: ReferenceAssignment,
   ) {
     const expirationDate = getExpirationDate(
@@ -133,17 +134,30 @@ export class CacheCrudController
       cacheCreateDto,
     );
 
+    // update or create
     if (existingCache) {
-      throw new CacheEntityAlreadyExistsException(
-        this.getEntityKey(assignment),
+      crudRequest.parsed.search.$and?.push({
+        id: {
+          $eq: existingCache.id,
+        },
+      });
+      // call crud service to create
+      const response = await this.getCrudService(assignment).updateOne(
+        crudRequest,
+        {
+          id: existingCache.id,
+          ...cacheCreateDto,
+          expirationDate,
+        },
       );
+      return response;
+    } else {
+      // call crud service to create
+      return this.getCrudService(assignment).createOne(crudRequest, {
+        ...cacheCreateDto,
+        expirationDate,
+      });
     }
-
-    // call crud service to create
-    return this.getCrudService(assignment).createOne(crudRequest, {
-      ...cacheCreateDto,
-      expirationDate,
-    });
   }
 
   /**
