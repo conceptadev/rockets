@@ -1,4 +1,4 @@
-import { Column, Index } from 'typeorm';
+import { Column, Unique } from 'typeorm';
 import { CommonSqliteEntity } from '@concepta/typeorm-common';
 import { ReferenceIdInterface } from '@concepta/ts-core';
 import { CacheInterface } from '@concepta/ts-common';
@@ -7,7 +7,7 @@ import { CacheInterface } from '@concepta/ts-common';
  * Cache Sqlite Entity
  */
 
-@Index('key_unique_index', ['key', 'type', 'assignee.id'], { unique: true })
+@Unique(['key', 'type', 'assignee.id'])
 export abstract class CacheSqliteEntity
   extends CommonSqliteEntity
   implements CacheInterface

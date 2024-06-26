@@ -44,7 +44,7 @@ export class CacheService implements CacheServiceInterface {
    */
   async create(
     assignment: ReferenceAssignment,
-    cache: CacheCreatableInterface,
+    cache: CacheCreateDto,
     queryOptions?: QueryOptionsInterface,
   ): Promise<CacheInterface> {
     // get the assignment repo
