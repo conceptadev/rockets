@@ -107,3 +107,6 @@ dist
 .idea
 .DS_Store
 website/.yarn
+
+# generated docs
+/docs
