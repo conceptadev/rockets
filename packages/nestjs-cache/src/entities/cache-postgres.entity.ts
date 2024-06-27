@@ -1,4 +1,4 @@
-import { Column, Index } from 'typeorm';
+import { Column, Unique } from 'typeorm';
 import { ReferenceIdInterface } from '@concepta/ts-core';
 import { CacheInterface } from '@concepta/ts-common';
 import { CommonPostgresEntity } from '@concepta/typeorm-common';
@@ -6,7 +6,7 @@ import { CommonPostgresEntity } from '@concepta/typeorm-common';
 /**
  * Cache Postgres Entity
  */
-@Index('key_unique_index', ['key', 'type', 'assignee.id'], { unique: true })
+@Unique(['key', 'type', 'assignee.id'])
 export abstract class CachePostgresEntity
   extends CommonPostgresEntity
   implements CacheInterface
