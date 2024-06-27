@@ -13,4 +13,4 @@ import { createPhotoRepositoryFixture } from './photo.repository.fixture';
     }),
   ],
 })
-export class PhotoModuleFixture { }
+export class PhotoModuleFixture {}
