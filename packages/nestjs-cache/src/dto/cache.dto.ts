@@ -3,6 +3,7 @@ import { Allow, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { ReferenceIdInterface } from '@concepta/ts-core';
 import { CacheInterface } from '@concepta/ts-common';
 import { CommonEntityDto, ReferenceIdDto } from '@concepta/nestjs-common';
+import { ApiProperty } from '@nestjs/swagger';
 
 /**
  * Cache Create DTO
@@ -13,6 +14,10 @@ export class CacheDto extends CommonEntityDto implements CacheInterface {
    * key
    */
   @Expose()
+  @ApiProperty({
+    type: 'string',
+    description: 'key'
+  })
   @IsString()
   key = '';
 
@@ -21,6 +26,10 @@ export class CacheDto extends CommonEntityDto implements CacheInterface {
    */
   @Expose()
   @IsString()
+  @ApiProperty({
+    type: 'string',
+    description: 'data'
+  })
   @IsOptional()
   data!: string | null;
 
@@ -28,6 +37,10 @@ export class CacheDto extends CommonEntityDto implements CacheInterface {
    * type
    */
   @Expose()
+  @ApiProperty({
+    type: 'string',
+    description: 'type'
+  })
   @IsString()
   type = '';
 
@@ -38,6 +51,11 @@ export class CacheDto extends CommonEntityDto implements CacheInterface {
    */
   @Expose()
   @IsString()
+  @ApiProperty({
+    type: 'string',
+    description: 'type',
+    examples: ['60','2 days', '10h', '7d'],  
+  })
   @IsOptional()
   expiresIn!: string | null;
 
@@ -46,6 +64,10 @@ export class CacheDto extends CommonEntityDto implements CacheInterface {
    */
   @Expose()
   @Type(() => ReferenceIdDto)
+  @ApiProperty({
+    type: ReferenceIdDto,
+    description: 'assignee'
+  })
   @ValidateNested()
   assignee: ReferenceIdInterface = new ReferenceIdDto();
 
