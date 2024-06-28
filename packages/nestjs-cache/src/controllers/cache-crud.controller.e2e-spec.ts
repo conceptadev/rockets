@@ -217,19 +217,18 @@ describe('CacheAssignmentController (e2e)', () => {
       .post('/cache/user')
       .send(payload)
       .expect(400);
-    
-    payload.assignee = { id: ''};
+
+    payload.assignee = { id: '' };
     await supertest(app.getHttpServer())
       .post('/cache/user')
       .send(payload)
       .expect(500);
-    
+
     payload.assignee = null;
     await supertest(app.getHttpServer())
       .post('/cache/user')
       .send(payload)
       .expect(400);
-      
   });
 
   it('POST /cache/user Update', async () => {
