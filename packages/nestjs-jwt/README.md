@@ -12,27 +12,147 @@ This module extends/wraps the [@nestjs/jwt](https://www.npmjs.com/package/@nestj
 [![GH Contrib](https://img.shields.io/github/contributors/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets/graphs/contributors)
 [![NestJS Dep](https://img.shields.io/github/package-json/dependency-version/conceptadev/rockets/@nestjs/common?label=NestJS&logo=nestjs&filename=packages%2Fnestjs-core%2Fpackage.json)](https://www.npmjs.com/package/@nestjs/common)
 
-## Overview
+# JWT Module Documentation
 
-The module exports three services: `JwtSignService`, `JwtIssueService`, and `JwtVerifyService`.
+## Project
 
-The `JwtSignService` maintains two separate `JwtService` instances from the `@nestjs/jwt` module,
-one for managing _access_ tokens and one for managing _refresh_ tokens.
-Each one can be configured separately at registration time for maximum flexibility.
+[![NPM Latest](https://img.shields.io/npm/v/@concepta/nestjs-jwt)](https://www.npmjs.com/package/@concepta/nestjs-jwt)
+[![NPM Downloads](https://img.shields.io/npm/dw/@conceptadev/nestjs-jwt)](https://www.npmjs.com/package/@concepta/nestjs-jwt)
+[![GH Last Commit](https://img.shields.io/github/last-commit/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets)
+[![GH Contrib](https://img.shields.io/github/contributors/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets/graphs/contributors)
+[![NestJS Dep](https://img.shields.io/github/package-json/dependency-version/conceptadev/rockets/@nestjs/common?label=NestJS&logo=nestjs&filename=packages%2Fnestjs-core%2Fpackage.json)](https://www.npmjs.com/package/@nestjs/common)
 
-The `JwtIssueService` and `JwtVerifyService` use the `JwtSignService` internally for generating
-and validating tokens.
+## Table of Contents
 
-## Installation
+- [Tutorials](#tutorials)
+  - [Introduction](#introduction)
+    - [Overview of the Library](#overview-of-the-library)
+    - [Purpose and Key Features](#purpose-and-key-features)
+    - [Installation](#installation)
+  - [Basic Setup](#basic-setup)
+  - [Creating custom jwtIssueService](#creating-custom-jwtIssueService)
+    - [Environment Variables](#environment-variables)
+- [How to Guides](#how-to-guides)
+  - [1. How to Set Up JwtModule with forRoot](#1-how-to-set-up-jwtmodule-with-forroot)
+  - [2. How to Configure JwtModule Settings](#2-how-to-configure-jwtmodule-settings)
+  - [3. Overriding Defaults](#3-overriding-defaults)
+    - [JwtAccessService](#jwtaccessservice)
+    - [JwtRefreshService](#jwtrefreshservice)
+    - [JwtIssueService](#jwtissueservice)
+    - [JwtVerifyService](#jwtverifyservice)
+    - [JwtSignService](#jwtsignservice)
+- [Explanation](#explanation)
+  - [Conceptual Overview](#conceptual-overview)
+    - [What is This Library?](#what-is-this-library)
+    - [Benefits of Using This Library](#benefits-of-using-this-library)
+  - [Design Choices](#design-choices)
+    - [Global, Synchronous vs Asynchronous Registration](#global-synchronous-vs-asynchronous-registration)
+  - [Integration Details](#integration-details)
+    - [Integrating with Other Modules](#integrating-with-other-modules)
+- [References](#references)
 
-`yarn add @concepta/nestjs-jwt`
+# Tutorials
 
-## Configuration
+## Introduction
 
-- [ENV](#env)
-- [Advanced](#advanced)
+### Overview of the Library
 
-### ENV
+This module is designed to manage JWT authentication processes within a NestJS
+application. It includes services for issuing JWTs, validating user credentials,
+and verifying tokens. The services handle the generation of access and refresh
+tokens, ensure users are active and meet authentication criteria, and perform
+token validity checks, including additional validations if necessary. This
+comprehensive approach ensures secure user authentication and efficient token
+management.
+
+### Purpose and Key Features
+
+- **Secure Token Management**: Provides robust mechanisms for issuing and
+  managing access and refresh tokens, ensuring secure and efficient token
+  lifecycle management.
+- **Abstract User Validation Service**: Offers an abstract service to validate
+  user credentials and check user activity status, ensuring that only eligible
+  users can authenticate. This abstract nature requires implementations to
+  define specific validation logic, allowing flexibility across different user
+  models and authentication requirements.
+- **Token Verification**: Includes capabilities to verify the authenticity and
+  validity of tokens, with support for additional custom validations to meet
+  specific security requirements.
+- **Customizable and Extensible**: Designed to be flexible, allowing
+  customization of token generation, user validation, and token verification
+  processes to suit different application needs.
+- **Integration with NestJS Ecosystem**: Seamlessly integrates with other
+  NestJS modules and services, leveraging the framework's features for enhanced
+  functionality and performance.
+
+### Installation
+
+To get started, install the `JwtModule` package:
+
+**sh-begin**
+yarn add @concepta/nestjs-jwt
+**sh-end**
+
+## Basic Setup
+
+To set up the `JwtModule`, follow the basic setup tutorial in the 
+[nestjs-authentication README](https://github.com/conceptadev/nestjs-authentication).
+
+## Creating custom jwtIssueService
+
+Here we will cover how to override the default services in `JwtModule`.
+For example, to override the `JwtIssueService`, follow the steps below:
+
+1. Create a custom implementation of `JwtIssueService`:
+
+```ts
+import { Injectable } from '@nestjs/common';
+import { JwtIssueServiceInterface } from './interfaces/jwt-issue-service.interface';
+import { JwtSignService } from './jwt-sign.service';
+
+@Injectable()
+export class CustomJwtIssueService implements JwtIssueServiceInterface {
+  constructor(private readonly jwtSignService: JwtSignService) {}
+
+  async accessToken(...args: Parameters<JwtIssueServiceInterface['accessToken']>) {
+    return this.jwtSignService.signAsync('access', ...args);
+  }
+
+  async refreshToken(...args: Parameters<JwtIssueServiceInterface['refreshToken']>) {
+    return this.jwtSignService.signAsync('refresh', ...args);
+  }
+}
+```
+
+2. Provide the custom implementation in your module configuration:
+
+```ts
+import { Module } from '@nestjs/common';
+import { JwtModule } from '@concepta/nestjs-jwt';
+import { CustomJwtIssueService } from './custom-jwt-issue.service';
+
+@Module({
+  imports: [
+    JwtModule.forRoot({
+      jwtIssueService: CustomJwtIssueService,
+      settings: {
+        access: {
+          secret: 'your-secret-key',
+          signOptions: { expiresIn: '60s' },
+        },
+      },
+    }),
+  ],
+  providers: [CustomJwtIssueService],
+})
+export class AppModule {}
+```
+
+This example shows how to customize the `JwtIssueService` with a custom
+implementation. Similar steps can be followed to override other services in
+`JwtModule`.
+
+### environment variables 
 
 Configurations available via environment.
 
@@ -45,7 +165,283 @@ Configurations available via environment.
 
 > \* For security reasons, a random UUID will only be generated for the default secret when `NODE_ENV !== 'production'`.
 
-### Advanced
+# How to Guides
 
-It is possible to override all services at registration time with a custom service that
-meets their respective interfaces.
+### 1. How to Set Up JwtModule with forRoot
+
+To set up the `JwtModule`, follow these steps:
+
+```ts
+import { Module } from '@nestjs/common';
+import { JwtModule } from '@concepta/nestjs-jwt';
+
+@Module({
+  imports: [
+    JwtModule.forRoot({}),
+  ],
+})
+export class AppModule {}
+```
+
+This setup configures the `JwtModule` with global settings and integrates the
+`JwtModule` for JWT-based authentication.
+
+### 2. How to Configure JwtModule Settings
+
+The `JwtModule` provides several configurable settings to customize its
+behavior. Each setting can be defined in the module configuration and will
+create default services to be used in other modules.
+
+#### Settings Example
+
+Here is an example of how to configure each property of the settings:
+
+```ts
+import { Module } from '@nestjs/common';
+import { JwtModule } from '@concepta/nestjs-jwt';
+
+@Module({
+  imports: [
+    JwtModule.forRoot({
+      settings: {
+        access: {
+          secret: 'your-secret-key',
+          signOptions: { expiresIn: '60s' },
+        },
+      },
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+### 3. Overriding Defaults
+
+To override the default services, you can provide custom implementations for
+any of the services. 
+
+#### JwtAccessService
+```ts
+@Injectable()
+import { JwtService, JwtSignOptions } from '@nestjs/jwt';
+class CustomJwtAccessService extends JwtService {
+  sign(_payload: string, _options?: JwtSignOptions): string {
+    return 'foo';
+  }
+}
+```
+
+#### jwtRefreshService
+
+```ts
+@Injectable()
+import { JwtService, JwtSignOptions } from '@nestjs/jwt';
+class CustomRefreshJwtAccessService extends JwtService {
+  sign(_payload: string, _options?: JwtSignOptions): string {
+    return 'foo';
+  }
+}
+```
+
+#### JwtIssueService
+
+```ts
+import { Injectable } from '@nestjs/common';
+import { JwtIssueServiceInterface } from './interfaces/jwt-issue-service.interface';
+import { JwtSignService } from './jwt-sign.service';
+
+@Injectable()
+export class CustomJwtIssueService implements JwtIssueServiceInterface {
+  constructor(private readonly jwtSignService: JwtSignService) {}
+
+  async accessToken(...args: Parameters<JwtIssueServiceInterface['accessToken']>) {
+    // Custom implementation
+    return this.jwtSignService.signAsync('access', ...args);
+  }
+
+  async refreshToken(...args: Parameters<JwtIssueServiceInterface['refreshToken']>)   {
+    // Custom implementation
+    return this.jwtSignService.signAsync('refresh', ...args);
+  }
+}
+```
+
+#### JwtVerifyService.
+
+```ts
+import { Injectable } from '@nestjs/common';
+import { JwtVerifyServiceInterface } from './interfaces/jwt-verify-service.interface';
+import { JwtSignService } from './jwt-sign.service';
+
+@Injectable()
+export class CustomJwtVerifyService implements JwtVerifyServiceInterface {
+  constructor(private readonly jwtSignService: JwtSignService) {}
+
+  async accessToken(...args: Parameters<JwtVerifyServiceInterface['accessToken']>) {
+    // Custom implementation
+    return this.jwtSignService.verifyAsync('access', ...args);
+  }
+
+  async refreshToken(...args: Parameters<JwtVerifyServiceInterface['refreshToken']>) {
+    // Custom implementation
+    return this.jwtSignService.verifyAsync('refresh', ...args);
+  }
+}
+```
+
+#### JwtSignService
+
+```ts
+import { Inject, Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { JwtSignServiceInterface } from '../interfaces/jwt-sign-service.interface';
+import {
+  JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
+  JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
+} from '../jwt.constants';
+import { JwtTokenType } from '../jwt.types';
+
+@Injectable()
+export class CustomJwtSignService implements JwtSignServiceInterface {
+  constructor(
+    @Inject(JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN)
+    protected readonly jwtAccessService: JwtService,
+    @Inject(JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN)
+    protected readonly jwtRefreshService: JwtService,
+  ) {}
+
+  async signAsync(
+    tokenType: JwtTokenType,
+    ...rest: Parameters<JwtService['signAsync']>
+  ) {
+    return this.service(tokenType).signAsync(...rest);
+  }
+
+  async verifyAsync(
+    tokenType: JwtTokenType,
+    ...rest: Parameters<JwtService['verifyAsync']>
+  ) {
+    return this.service(tokenType).verifyAsync(...rest);
+  }
+
+  decode(tokenType: JwtTokenType, ...rest: Parameters<JwtService['decode']>) {
+    return this.service(tokenType).decode(...rest);
+  }
+
+  private service(tokenType: JwtTokenType): JwtService {
+    switch (tokenType) {
+      case 'access':
+        return this.jwtAccessService;
+      case 'refresh':
+        return this.jwtRefreshService;
+    }
+  }
+}
+
+```
+
+2. Provide the custom implementations in your module configuration:
+
+```ts
+import { Module } from '@nestjs/common';
+import { JwtModule } from '@concepta/nestjs-jwt';
+import { CustomJwtIssueService } from './custom-jwt-issue.service';
+import { CustomJwtVerifyService } from './custom-jwt-verify.service';
+
+@Module({
+  imports: [
+    JwtModule.forRoot({
+      jwtIssueService: CustomJwtIssueService,
+      jwtVerifyService: CustomJwtVerifyService,
+      settings: {
+        access: {
+          secret: 'your-secret-key',
+          signOptions: { expiresIn: '60s' },
+        },
+      },
+    }),
+  ],
+  providers: [CustomJwtIssueService, CustomJwtVerifyService],
+})
+export class AppModule {}
+```
+
+This example shows how to customize the `JwtIssueService` and `JwtVerifyService`
+with custom implementations. Similar steps can be followed to override other
+services in `JwtModule`.
+
+
+# Explanation
+
+### Conceptual Overview
+
+#### What is This Library?
+
+The `nestjs-jwt` library is a comprehensive solution for managing authentication
+processes within a NestJS application. It provides services for issuing JWTs,
+validating user credentials, and verifying tokens. The library integrates
+seamlessly with other modules in the `nestjs-auth` suite, making it a versatile
+choice for various authentication needs.
+
+#### Benefits of Using This Library
+
+- **Secure Token Management**: Robust mechanisms for issuing and managing access
+  and refresh tokens.
+- **Abstract User Validation Service**: Flexible user validation service that
+  can be customized to meet specific requirements.
+- **Token Verification**: Capabilities to verify the authenticity and validity
+  of tokens, with support for additional custom validations.
+- **Customizable and Extensible**: Designed to be flexible, allowing
+  customization of token generation, user validation, and token verification
+  processes.
+- **Integration with NestJS Ecosystem**: Seamlessly integrates with other
+  NestJS modules and services, leveraging the framework's features for enhanced
+  functionality and performance.
+
+### Design Choices
+
+#### Global, Synchronous vs Asynchronous Registration
+
+The `nestjs-jwt` module supports both synchronous and asynchronous registration:
+
+- **Global Registration**: Makes the module available throughout the entire
+  application. This approach is useful when JWT authentication is required
+  across all or most routes in the application.
+- **Synchronous Registration**: This method is used when the configuration
+  options are static and available at application startup. It simplifies the
+  setup process and is suitable for most use cases where configuration values do
+  not depend on external services.
+- **Asynchronous Registration**: This method is beneficial when configuration
+  options need to be retrieved from external sources, such as a database or an
+  external API, at runtime. It allows for more flexible and dynamic configuration
+  but requires an asynchronous factory function.
+
+### Integration Details
+
+#### Integrating with Other Modules
+
+The `nestjs-jwt` module integrates smoothly with other modules in the
+`nestjs-auth` suite. Here are some integration details:
+
+- **@concepta/nestjs-auth-jwt**: Use `@concepta/nestjs-auth-jwt` for JWT-based
+  authentication. Configure it to handle the issuance and verification of JWT
+  tokens.
+- **@concepta/nestjs-auth-local**: Use `@concepta/nestjs-auth-local` for local
+  authentication strategies such as username and password.
+- **@concepta/nestjs-auth-recovery**: Use `@concepta/nestjs-auth-recovery` for
+  account recovery processes like password reset.
+- **@concepta/nestjs-auth-refresh**: Use `@concepta/nestjs-auth-refresh` for
+  handling token refresh mechanisms.
+
+By combining these modules, you can create a comprehensive authentication system
+that meets various security requirements and user needs.
+
+## References
+
+For further details and external references, please visit the following link:
+
+[External Authentication References](#)
+
+This link provides additional information and resources related to the
+authentication processes and best practices in NestJS applications.
+
