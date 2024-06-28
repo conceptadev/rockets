@@ -16,7 +16,7 @@ export class CacheDto extends CommonEntityDto implements CacheInterface {
   @Expose()
   @ApiProperty({
     type: 'string',
-    description: 'key'
+    description: 'key',
   })
   @IsString()
   key = '';
@@ -28,7 +28,7 @@ export class CacheDto extends CommonEntityDto implements CacheInterface {
   @IsString()
   @ApiProperty({
     type: 'string',
-    description: 'data'
+    description: 'data',
   })
   @IsOptional()
   data!: string | null;
@@ -39,7 +39,7 @@ export class CacheDto extends CommonEntityDto implements CacheInterface {
   @Expose()
   @ApiProperty({
     type: 'string',
-    description: 'type'
+    description: 'type',
   })
   @IsString()
   type = '';
@@ -54,7 +54,7 @@ export class CacheDto extends CommonEntityDto implements CacheInterface {
   @ApiProperty({
     type: 'string',
     description: 'type',
-    examples: ['60','2 days', '10h', '7d'],  
+    examples: ['60', '2 days', '10h', '7d'],
   })
   @IsOptional()
   expiresIn!: string | null;
@@ -66,7 +66,7 @@ export class CacheDto extends CommonEntityDto implements CacheInterface {
   @Type(() => ReferenceIdDto)
   @ApiProperty({
     type: ReferenceIdDto,
-    description: 'assignee'
+    description: 'assignee',
   })
   @ValidateNested()
   assignee: ReferenceIdInterface = new ReferenceIdDto();
