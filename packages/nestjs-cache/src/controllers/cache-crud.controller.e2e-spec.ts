@@ -191,8 +191,15 @@ describe('CacheAssignmentController (e2e)', () => {
       });
   });
 
-  it.only('POST /cache/user null after create', async () => {
-    const payload: any = {
+  it('POST /cache/user null after create', async () => {
+    interface ExtendedCacheCreatableInterface
+      extends Pick<
+        CacheCreatableInterface,
+        'key' | 'expiresIn' | 'type' | 'data'
+      > {
+      assignee: { id: string | null } | null;
+    }
+    const payload: ExtendedCacheCreatableInterface = {
       key: 'dashboard-1',
       type: 'filter',
       data: '{}',
