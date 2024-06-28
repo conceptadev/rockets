@@ -191,6 +191,53 @@ describe('CacheAssignmentController (e2e)', () => {
       });
   });
 
+  it('POST /cache/user null after create', async () => {
+    interface ExtendedCacheCreatableInterface
+      extends Pick<
+        CacheCreatableInterface,
+        'key' | 'expiresIn' | 'type' | 'data'
+      > {
+      assignee: { id: string | null } | null;
+    }
+    const payload: ExtendedCacheCreatableInterface = {
+      key: 'dashboard-1',
+      type: 'filter',
+      data: '{}',
+      expiresIn: '1d',
+      assignee: { id: user.id },
+    };
+
+    await supertest(app.getHttpServer())
+      .post('/cache/user')
+      .send(payload)
+      .expect(201)
+      .then((res) => {
+        expect(res.body.key).toBe(payload.key);
+        expect(res.body.assignee.id).toBe(user.id);
+      });
+
+    payload.data = '{ "name": "John Doe" }';
+    payload.expiresIn = null;
+    payload.assignee = { id: null };
+
+    await supertest(app.getHttpServer())
+      .post('/cache/user')
+      .send(payload)
+      .expect(400);
+
+    payload.assignee = { id: '' };
+    await supertest(app.getHttpServer())
+      .post('/cache/user')
+      .send(payload)
+      .expect(500);
+
+    payload.assignee = null;
+    await supertest(app.getHttpServer())
+      .post('/cache/user')
+      .send(payload)
+      .expect(400);
+  });
+
   it('POST /cache/user Update', async () => {
     const payload: CacheCreatableInterface = {
       key: 'dashboard-1',

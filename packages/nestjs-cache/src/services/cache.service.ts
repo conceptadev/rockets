@@ -270,6 +270,9 @@ export class CacheService implements CacheServiceInterface {
     const { key, type, assignee } = cache;
     try {
       const repo = repoProxy.repository(queryOptions);
+      if (!key || !type || !assignee || !assignee.id) {
+        return null;
+      }
       const cache = await repo.findOne({
         where: {
           key,
