@@ -11,8 +11,8 @@ export interface PasswordCreationServiceInterface {
   /**
    * Create password for an object (optionally).
    *
-   * @param object An object containing the new password to hash.
-   * @param options Password create options.
+   * @param object - An object containing the new password to hash.
+   * @param options - Password create options.
    * @returns A new object with the password hashed, with salt added.
    */
   createObject<T extends PasswordPlainInterface>(
@@ -25,7 +25,7 @@ export interface PasswordCreationServiceInterface {
   /**
    * Validate the current password for the targeted object.
    *
-   * @param options Validate current options.
+   * @param options - Validate current options.
    * @returns boolean
    */
   validateCurrent: (
@@ -52,7 +52,7 @@ export interface PasswordCreationServiceInterface {
   /**
    * Check number of attempts of using password
    *
-   * @param numOfAttempts number of attempts
+   * @param numOfAttempts - number of attempts
    * @returns number of attempts left
    */
   checkAttemptLeft(numOfAttempts: number): number;

@@ -12,7 +12,7 @@ import { EventInstance, EventReturnType } from '../event-types';
  *
  * You will also need to implement one of the interfaces that is enforced by the
  * {@link EventListenService} method you intend to use. For example
- * [EventListenService.on]{@link (EventListenService#on)} requires the {@link EventListenOnInterface} interface.
+ * [EventListenService.on]{@link EventListenService#on} requires the {@link EventListenOnInterface} interface.
  *
  * There are additional abstract classes available which have implemented the basic types
  * for you. So far we have {@link EventListenerOn}... more to come!
@@ -62,8 +62,8 @@ export abstract class EventListener<E> implements EventListenerInterface<E> {
   /**
    * Called after successful subscription.
    *
-   * @private
-   * @param emitterListener The Listener object returned by EventEmitter2
+   * @internal
+   * @param emitterListener - The Listener object returned by EventEmitter2
    */
   subscription(emitterListener: EmitterListener): void {
     // has the emitter listener already been set?

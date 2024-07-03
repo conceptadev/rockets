@@ -1,4 +1,6 @@
 import { PasswordPlainInterface } from '@concepta/ts-common';
+import { PasswordHashObjectOptionsInterface } from './password-hash-object-options.interface';
+import { PasswordHashOptionsInterface } from './password-hash-options.interface';
 import { PasswordStorageInterface } from './password-storage.interface';
 
 /**
@@ -14,30 +16,24 @@ export interface PasswordStorageServiceInterface {
    * Hash a password using a salt, if no
    * was passed, then generate one automatically.
    *
-   * @param options.password Password to be hashed
-   * @param options.salt  Optional salt. If not provided, one will be generated.
+   * @param password - Password to be hashed
+   * @param options - Hash options
    */
   hash(
     password: string,
-    options?: {
-      salt?: string;
-    },
+    options?: PasswordHashOptionsInterface,
   ): Promise<PasswordStorageInterface>;
 
   /**
    * Hash password for an object.
    *
-   * @param object An object containing the new password to hash.
-   * @param options.salt Optional salt. If not provided, one will be generated.
-   * @param options.required Set to true if password is required.
+   * @param object - An object containing the new password to hash.
+   * @param options - Hash object options
    * @returns A new object with the password hashed, with salt added.
    */
   hashObject<T extends PasswordPlainInterface>(
     object: T,
-    options?: {
-      salt?: string;
-      required?: boolean;
-    },
+    options?: PasswordHashObjectOptionsInterface,
   ): Promise<
     Omit<T, 'password'> | (Omit<T, 'password'> & PasswordStorageInterface)
   >;

@@ -17,7 +17,7 @@ export abstract class BaseService<Entity extends ReferenceIdInterface> {
   /**
    * Constructor
    *
-   * @param repo instance of the repo
+   * @param repo - instance of the repo
    */
   constructor(private repo: Repository<Entity>) {
     this.repositoryProxy = new RepositoryProxy(repo);
@@ -45,8 +45,8 @@ export abstract class BaseService<Entity extends ReferenceIdInterface> {
   /**
    * Find One wrapper.
    *
-   * @param options Find one options
-   * @param queryOptions
+   * @param findOneOptions - Find options
+   * @param queryOptions - Query options
    */
   async findOne(
     options: FindOneOptions<Entity>,
@@ -64,7 +64,7 @@ export abstract class BaseService<Entity extends ReferenceIdInterface> {
   /**
    * Return the correct repository instance.
    *
-   * @param queryOptions Options
+   * @param queryOptions - Options
    */
   public repository(queryOptions?: QueryOptionsInterface): Repository<Entity> {
     return this.repositoryProxy.repository(queryOptions);
@@ -73,7 +73,7 @@ export abstract class BaseService<Entity extends ReferenceIdInterface> {
   /**
    * Return a transaction instance.
    *
-   * @param options Options
+   * @param options - Options
    */
   public transaction(
     options?: SafeTransactionOptionsInterface,
@@ -82,7 +82,7 @@ export abstract class BaseService<Entity extends ReferenceIdInterface> {
   }
 
   /**
-   * @private
+   * @internal
    */
   protected get metadata() {
     return this.repo.metadata;

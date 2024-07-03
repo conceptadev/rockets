@@ -10,9 +10,9 @@ import { TypeOrmExtEntityOptionInterface } from '../interfaces/typeorm-ext-entit
 /**
  *  Create dynamic repository provider function
  *
- * @param key repository key
- * @param entity the entity
- * @param repositoryFactory the repository
+ * @param key - repository key
+ * @param entity - the entity
+ * @param repositoryFactory - the repository
  * @returns Repository provider
  */
 export function createDynamicRepositoryProvider(

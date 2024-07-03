@@ -11,7 +11,7 @@ export class SwaggerUiService {
   /**
    * Constructor.
    *
-   * @param settings swagger ui settings
+   * @param settings - swagger ui settings
    */
   constructor(
     @Inject(SWAGGER_UI_MODULE_SETTINGS_TOKEN)
@@ -30,7 +30,7 @@ export class SwaggerUiService {
   /**
    * Setup.
    *
-   * @param app Nest application instance
+   * @param app - Nest application instance
    */
   setup(app: INestApplication) {
     // create the document

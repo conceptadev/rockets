@@ -10,7 +10,8 @@ export interface FederatedInterface
 
   /**
    * The reference identification for provider
-   * @todo rename to `sub` via ReferenceSubjectInterface
+   *
+   * TODO: rename to `sub` via ReferenceSubjectInterface
    */
   subject: string;
 

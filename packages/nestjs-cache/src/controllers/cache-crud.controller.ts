@@ -38,7 +38,7 @@ import { CacheSettingsInterface } from '../interfaces/cache-settings.interface';
 import { CacheCrudService } from '../services/cache-crud.service';
 import getExpirationDate from '../utils/get-expiration-date.util';
 import { CacheService } from '../services/cache.service';
-import { CacheEntityAlreadyExistsException } from '../exceptions/cache-entity-already-exists.exception';
+import { CacheCreateDto } from '../dto/cache-create.dto';
 /**
  * Cache assignment controller.
  */
@@ -70,7 +70,7 @@ export class CacheCrudController
   /**
    * Constructor.
    *
-   * @param allCrudServices instances of all crud services
+   * @param allCrudServices - instances of all crud services
    */
   constructor(
     @Inject(CACHE_MODULE_SETTINGS_TOKEN)
@@ -83,8 +83,8 @@ export class CacheCrudController
   /**
    * Get many
    *
-   * @param crudRequest the CRUD request object
-   * @param assignment the assignment
+   * @param crudRequest - the CRUD request object
+   * @param assignment - the assignment
    */
   @CrudReadMany()
   @AccessControlReadMany(CacheResource.Many)
@@ -98,8 +98,8 @@ export class CacheCrudController
   /**
    * Get one
    *
-   * @param crudRequest the CRUD request object
-   * @param assignment The cache assignment
+   * @param crudRequest - the CRUD request object
+   * @param assignment - The cache assignment
    */
   @CrudReadOne()
   @AccessControlReadOne(CacheResource.One)
@@ -113,15 +113,15 @@ export class CacheCrudController
   /**
    * Create one
    *
-   * @param crudRequest the CRUD request object
-   * @param cacheCreateDto cache create dto
-   * @param assignment The cache assignment
+   * @param crudRequest - the CRUD request object
+   * @param cacheCreateDto - cache create dto
+   * @param assignment - The cache assignment
    */
   @CrudCreateOne()
   @AccessControlCreateOne(CacheResource.One)
   async createOne(
     @CrudRequest() crudRequest: CrudRequestInterface,
-    @CrudBody() cacheCreateDto: CacheCreatableInterface,
+    @CrudBody() cacheCreateDto: CacheCreateDto,
     @Param('assignment') assignment: ReferenceAssignment,
   ) {
     const expirationDate = getExpirationDate(
@@ -133,25 +133,38 @@ export class CacheCrudController
       cacheCreateDto,
     );
 
+    // update or create
     if (existingCache) {
-      throw new CacheEntityAlreadyExistsException(
-        this.getEntityKey(assignment),
+      crudRequest.parsed.search.$and?.push({
+        id: {
+          $eq: existingCache.id,
+        },
+      });
+      // call crud service to create
+      const response = await this.getCrudService(assignment).updateOne(
+        crudRequest,
+        {
+          id: existingCache.id,
+          ...cacheCreateDto,
+          expirationDate,
+        },
       );
+      return response;
+    } else {
+      // call crud service to create
+      return this.getCrudService(assignment).createOne(crudRequest, {
+        ...cacheCreateDto,
+        expirationDate,
+      });
     }
-
-    // call crud service to create
-    return this.getCrudService(assignment).createOne(crudRequest, {
-      ...cacheCreateDto,
-      expirationDate,
-    });
   }
 
   /**
    * Create one
    *
-   * @param crudRequest the CRUD request object
-   * @param cacheUpdateDto cache create dto
-   * @param assignment The cache assignment
+   * @param crudRequest - the CRUD request object
+   * @param cacheUpdateDto - cache create dto
+   * @param assignment - The cache assignment
    */
   @CrudUpdateOne()
   @AccessControlCreateOne(CacheResource.One)
@@ -174,8 +187,8 @@ export class CacheCrudController
   /**
    * Delete one
    *
-   * @param crudRequest the CRUD request object
-   * @param assignment The cache assignment
+   * @param crudRequest - the CRUD request object
+   * @param assignment - The cache assignment
    */
   @CrudDeleteOne()
   @AccessControlDeleteOne(CacheResource.One)
@@ -189,8 +202,8 @@ export class CacheCrudController
   /**
    * Get the crud service for the given assignment.
    *
-   * @private
-   * @param assignment The cache assignment
+   * @internal
+   * @param assignment - The cache assignment
    */
   protected getCrudService(assignment: ReferenceAssignment): CacheCrudService {
     const entityKey = this.getEntityKey(assignment);
@@ -207,7 +220,7 @@ export class CacheCrudController
   /**
    * Get the entity key for the given assignment.
    *
-   * @param assignment The cache assignment
+   * @param assignment - The cache assignment
    */
   protected getEntityKey(assignment: ReferenceAssignment): string {
     // have entity key for given assignment?

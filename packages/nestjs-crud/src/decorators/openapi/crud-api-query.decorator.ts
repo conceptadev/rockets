@@ -6,7 +6,7 @@ import { CrudApiQueryMetadataInterface } from '../../interfaces/crud-api-query-m
 import { CrudReflectionService } from '../../services/crud-reflection.service';
 
 /**
- * @CrudApiQuery() open api decorator
+ * \@CrudApiQuery() open api decorator
  */
 export function CrudApiQuery(options?: ApiQueryOptions[]): MethodDecorator {
   return (target: DecoratorTargetObject, ...rest) => {
