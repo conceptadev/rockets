@@ -40,7 +40,6 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
 
   /**
    * Activate user's account by providing its OTP passcode and the new password.
-   *
    */
   async accept(
     invitationDto: InvitationDto,
@@ -113,6 +112,11 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
     return eventResult.every((it) => it === true);
   }
 
+  /**
+   * Send the invitation accepted email.
+   *
+   * @param email - Email
+   */
   async sendEmail(email: string): Promise<void> {
     const { from } = this.settings.email;
     const { subject, fileName } =
@@ -133,8 +137,8 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
   /**
    * Get one invitation by code.
    *
-   * @param code
-   * @param queryOptions
+   * @param code - Pass code string
+   * @param queryOptions - Query options
    */
   async getOneByCode(
     code: string,
@@ -146,10 +150,10 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
   /**
    * Validate passcode and return it's user.
    *
-   * @param passcode user's passcode
-   * @param category
-   * @param deleteIfValid flag to delete if valid or not
-   * @param queryOptions
+   * @param passcode - User's passcode
+   * @param category - Category
+   * @param deleteIfValid - Flag to delete if valid or not
+   * @param queryOptions - Query Options
    */
   async validatePasscode(
     passcode: string,

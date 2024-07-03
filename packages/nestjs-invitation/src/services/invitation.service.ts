@@ -49,8 +49,8 @@ export class InvitationService implements InvitationServiceInterface {
   /**
    * Revoke all invitations by email and category.
    *
-   * @param email user email
-   * @param category
+   * @param email - user email
+   * @param category - the category
    */
   async revokeAll(
     email: string,

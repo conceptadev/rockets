@@ -7,7 +7,7 @@ module.exports = {
   },
   plugins: [
     'import',
-    // 'tsdoc',
+    'tsdoc',
   ],
   extends: [
     '@concepta/eslint-config/nest',
@@ -30,7 +30,7 @@ module.exports = {
   rules: {
     'import/no-extraneous-dependencies': 'error',
     '@darraghor/nestjs-typed/param-decorator-name-matches-route-param': 'off',
-    // 'tsdoc/syntax': 'warn',
+    'tsdoc/syntax': 'warn',
   },
   overrides: [
     {
@@ -45,6 +45,7 @@ module.exports = {
       rules: {
         '@darraghor/nestjs-typed/controllers-should-supply-api-tags': 'off',
         '@darraghor/nestjs-typed/api-method-should-specify-api-response': 'off',
+        'tsdoc/syntax': 'off',
       },
     },
   ],

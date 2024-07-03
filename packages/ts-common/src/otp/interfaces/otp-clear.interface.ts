@@ -10,8 +10,8 @@ export interface OtpClearInterface<
   /**
    * Clear all otps for assign in given category.
    *
-   * @param assignment The assignment of the repository
-   * @param otp The otp to clear
+   * @param assignment - The assignment of the repository
+   * @param otp - The otp to clear
    */
   clear(
     assignment: ReferenceAssignment,

@@ -24,7 +24,7 @@ export class OrgLookupService
   /**
    * Constructor
    *
-   * @param repo instance of the org repo
+   * @param repo - instance of the org repo
    */
   constructor(
     @InjectDynamicRepository(ORG_MODULE_ORG_ENTITY_KEY)
@@ -38,7 +38,7 @@ export class OrgLookupService
   /**
    * Get owner for the given org.
    *
-   * @param org The org of which owner to retrieve.
+   * @param org - The org of which owner to retrieve.
    */
   async getOwner(org: OrgOwnerInterface, queryOptions?: QueryOptionsInterface) {
     return this.ownerLookupService.byId(org.owner.id, queryOptions);

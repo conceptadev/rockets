@@ -35,8 +35,8 @@ export class CacheService implements CacheServiceInterface {
   /**
    * Create a cache with a for the given assignee.
    *
-   * @param assignment The cache assignment
-   * @param cache The data to create
+   * @param assignment - The cache assignment
+   * @param cache - The data to create
    */
   async create(
     assignment: ReferenceAssignment,
@@ -120,8 +120,8 @@ export class CacheService implements CacheServiceInterface {
   /**
    * Delete a cache based on params
    *
-   * @param assignment The cache assignment
-   * @param cache The cache to delete
+   * @param assignment - The cache assignment
+   * @param cache - The cache to delete
    */
   async delete(
     assignment: ReferenceAssignment,
@@ -139,8 +139,8 @@ export class CacheService implements CacheServiceInterface {
   /**
    * Get all CACHEs for assignee.
    *
-   * @param assignment The assignment of the check
-   * @param cache The cache to get assignments
+   * @param assignment - The assignment of the check
+   * @param cache - The cache to get assignments
    */
   async getAssignedCaches(
     assignment: ReferenceAssignment,
@@ -190,8 +190,8 @@ export class CacheService implements CacheServiceInterface {
   /**
    * Clear all caches for a given assignee.
    *
-   * @param assignment The assignment of the repository
-   * @param cache The cache to clear
+   * @param assignment - The assignment of the repository
+   * @param cache - The cache to clear
    */
   async clear(
     assignment: ReferenceAssignment,
@@ -217,9 +217,9 @@ export class CacheService implements CacheServiceInterface {
   /**
    * Delete CACHE based on assignment
    *
-   * @private
-   * @param assignment The assignment to delete id from
-   * @param id The id or ids to delete
+   * @internal
+   * @param assignment - The assignment to delete id from
+   * @param id - The id or ids to delete
    */
   protected async deleteCache(
     assignment: ReferenceAssignment,
@@ -293,8 +293,8 @@ export class CacheService implements CacheServiceInterface {
   /**
    * Get the assignment repo for the given assignment.
    *
-   * @private
-   * @param assignment The cache assignment
+   * @internal
+   * @param assignment - The cache assignment
    */
   protected getAssignmentRepo(
     assignment: ReferenceAssignment,

@@ -76,7 +76,7 @@ export const loggerConfig: (() => LoggerSettingsInterface) &
       /**
        * Mapping from log level to sentry severity
        *
-       * @param logLevel
+       * @param logLevel - Log level
        * @returns SentryLogSeverity
        */
       logLevelMap: (logLevel: LogLevel): SentryLogSeverity => {

@@ -15,7 +15,7 @@ export class EventDispatchService {
   /**
    * Constructor
    *
-   * @param eventEmitter Injected event emitter instance
+   * @param eventEmitter - Injected event emitter instance
    */
   constructor(
     @Inject(EVENT_MODULE_EMITTER_SERVICE_TOKEN)
@@ -52,7 +52,7 @@ export class EventDispatchService {
    * }
    * ```
    *
-   * @param {EventSyncInterface<P>} event The event being dispatched.
+   * @param event - The event being dispatched.
    * @returns boolean Returns true if the event had listeners, false otherwise.
    */
   sync<P>(event: EventSyncInterface<P>): boolean {
@@ -104,8 +104,8 @@ export class EventDispatchService {
    * }
    * ```
    *
-   * @param {EventAsyncInterface<P>} event The event being dispatched.
-   * @returns {Promise<EventReturnPayload<E>[]>} An array of return payloads, one for each listener that subscribed to the event.
+   * @param event - The event being dispatched.
+   * @returns An array of return payloads, one for each listener that subscribed to the event.
    */
   async async<E>(
     event: E & EventAsyncInstance<E>,

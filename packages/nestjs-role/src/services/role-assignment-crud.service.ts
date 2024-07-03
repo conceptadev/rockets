@@ -9,7 +9,7 @@ export class RoleAssignmentCrudService extends TypeOrmCrudService<RoleAssignment
   /**
    * Constructor
    *
-   * @param repo instance of a role assignment repository.
+   * @param repo - instance of a role assignment repository.
    */
   constructor(repo: Repository<RoleAssignmentInterface>) {
     super(repo);
