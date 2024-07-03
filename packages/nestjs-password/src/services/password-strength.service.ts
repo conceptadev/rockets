@@ -15,8 +15,7 @@ export class PasswordStrengthService
   implements PasswordStrengthServiceInterface
 {
   /**
-   * constructor
-   * @param settings
+   * @param settings - Password module settings
    */
   constructor(
     @Inject(PASSWORD_MODULE_SETTINGS_TOKEN)
@@ -25,7 +24,8 @@ export class PasswordStrengthService
 
   /**
    * Method to check if password is strong
-   * @param password
+   *
+   * @param password - the plain text password
    * @returns password strength
    */
   isStrong(password: string): boolean {

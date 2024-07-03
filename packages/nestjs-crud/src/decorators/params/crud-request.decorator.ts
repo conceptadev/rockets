@@ -3,7 +3,7 @@ import { CrudRequestInterface } from '../../interfaces/crud-request.interface';
 import { CRUD_MODULE_CRUD_REQUEST_KEY } from '../../crud.constants';
 
 /**
- * @CrudRequest() parameter decorator
+ * \@CrudRequest() parameter decorator
  */
 export const CrudRequest = createParamDecorator<CrudRequestInterface>(
   (_data: unknown, ctx: ExecutionContext) => {

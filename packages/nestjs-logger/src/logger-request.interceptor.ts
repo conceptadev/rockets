@@ -24,16 +24,15 @@ export class LoggerRequestInterceptor implements NestInterceptor<Response> {
   /**
    * Constructor
    *
-   * @param loggerService The logger service that implements ConsoleLogger
+   * @param loggerService - The logger service that implements ConsoleLogger
    */
   constructor(private loggerService: LoggerService) {}
 
   /**
    * Method to implement a custom intercept
    *
-   * @param context
-   * @param next
-   * @returns
+   * @param context - Execution context
+   * @param next - Call handler
    */
   intercept(
     context: ExecutionContext,
@@ -60,9 +59,9 @@ export class LoggerRequestInterceptor implements NestInterceptor<Response> {
   /**
    * Method to log response success
    *
-   * @param req Request
-   * @param res Response
-   * @param startDate the date for the message
+   * @param req - Request
+   * @param res - Response
+   * @param startDate - the date for the message
    */
   responseSuccess(req: Request, res: Response, startDate: Date) {
     // format the response message
@@ -79,10 +78,10 @@ export class LoggerRequestInterceptor implements NestInterceptor<Response> {
   /**
    * Format exception error
    *
-   * @param req
-   * @param res
-   * @param startDate
-   * @param error
+   * @param req - Request
+   * @param res - Response
+   * @param startDate - Start date
+   * @param error - Error instance
    * @returns
    */
   responseError(req: Request, res: Response, startDate: Date, error: Error) {

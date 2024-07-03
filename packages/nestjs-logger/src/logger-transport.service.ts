@@ -42,21 +42,21 @@ export class LoggerTransportService {
   /**
    * Constructor
    *
-   * @param config
+   * @param settings - logger settings
    */
   constructor(
     @Inject(LOGGER_MODULE_SETTINGS_TOKEN)
-    protected readonly config: LoggerSettingsInterface,
+    protected readonly settings: LoggerSettingsInterface,
   ) {
-    if (this.config?.transportLogLevel) {
-      this.logLevels = this.config.transportLogLevel;
+    if (this.settings?.transportLogLevel) {
+      this.logLevels = this.settings.transportLogLevel;
     }
   }
 
   /**
    * Method to add the transport that will be used
    *
-   * @param transport
+   * @param transport - Instance of a logger transport
    */
   public addTransport(transport: LoggerTransportInterface): void {
     this.loggerTransports.push(transport);
@@ -65,9 +65,9 @@ export class LoggerTransportService {
   /**
    * Method to log message to the transport based on the log level
    *
-   * @param message
-   * @param logLevel
-   * @param error
+   * @param message - message
+   * @param logLevel - log level
+   * @param error - error
    */
   public log(message: string, logLevel: LogLevel, error?: Error): void {
     // are we supposed to send this log level?

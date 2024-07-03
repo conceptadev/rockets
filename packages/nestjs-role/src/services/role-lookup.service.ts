@@ -17,7 +17,7 @@ export class RoleLookupService
   /**
    * Constructor
    *
-   * @param repo instance of the role repo
+   * @param repo - instance of the role repo
    */
   constructor(
     @InjectDynamicRepository(ROLE_MODULE_ROLE_ENTITY_KEY)

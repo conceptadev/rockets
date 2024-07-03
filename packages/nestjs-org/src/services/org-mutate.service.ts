@@ -30,7 +30,7 @@ export class OrgMutateService
   /**
    * Constructor
    *
-   * @param repo instance of the org repo
+   * @param repo - instance of the org repo
    */
   constructor(
     @InjectDynamicRepository(ORG_MODULE_ORG_ENTITY_KEY)

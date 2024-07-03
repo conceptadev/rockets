@@ -13,10 +13,9 @@ import { RunInTransactionCallback } from '../typeorm-common.types';
  * In this case, your `runInTransaction` callback will receive `undefined` for the value
  * of `entityManager`.
  *
- * @param entityManager Entity manager instance
- * @param runInTransaction Transaction callback
- * @param options Options
- * @returns
+ * @param entityManager - Entity manager instance
+ * @param runInTransaction - Transaction callback
+ * @param options - Options
  */
 export async function safeTransaction<T>(
   entityManager: EntityManager,

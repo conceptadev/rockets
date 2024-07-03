@@ -34,8 +34,8 @@ export class InvitationRevocationService extends BaseService<InvitationEntityInt
   /**
    * Revoke all invitations for email in category.
    *
-   * @param email user email
-   * @param category
+   * @param email - user email
+   * @param category - the cateogory
    */
   async revokeAll(
     email: string,
@@ -66,8 +66,8 @@ export class InvitationRevocationService extends BaseService<InvitationEntityInt
   /**
    * Clear all user OTPs by category
    *
-   * @param user
-   * @param category
+   * @param user - User object
+   * @param category - Category
    */
   protected async clearAllOtps(
     user: ReferenceIdInterface,
@@ -97,8 +97,8 @@ export class InvitationRevocationService extends BaseService<InvitationEntityInt
   /**
    * Delete all user invitations by category.
    *
-   * @param user
-   * @param category
+   * @param user - User object
+   * @param category - Category
    */
   protected async deleteAllInvitations(
     user: ReferenceIdInterface,

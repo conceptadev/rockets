@@ -30,7 +30,7 @@ export class FederatedMutateService
   /**
    * Constructor
    *
-   * @param repo instance of the federated repo
+   * @param repo - instance of the federated repo
    */
   constructor(
     @InjectDynamicRepository(FEDERATED_MODULE_FEDERATED_ENTITY_KEY)

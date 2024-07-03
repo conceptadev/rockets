@@ -13,7 +13,7 @@ export class UserCrudService extends TypeOrmCrudService<UserEntityInterface> {
   /**
    * Constructor
    *
-   * @param userRepo instance of the user repository.
+   * @param userRepo - instance of the user repository.
    */
   constructor(
     @InjectDynamicRepository(USER_MODULE_USER_ENTITY_KEY)

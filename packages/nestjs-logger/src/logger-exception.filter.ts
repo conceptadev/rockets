@@ -9,7 +9,6 @@ import { LoggerService } from './logger.service';
  *
  * Out of the box, this action is performed by a built-in global exception
  * filter, which handles exceptions of type HttpException
- *
  */
 @Catch()
 @Injectable()
@@ -17,8 +16,7 @@ export class LoggerExceptionFilter extends BaseExceptionFilter {
   /**
    * Constructor
    *
-   * @param loggerService
-   * @param applicationRef
+   * @param loggerService - instance of the Logger Service
    */
   constructor(
     @Inject(LoggerService)
@@ -30,8 +28,8 @@ export class LoggerExceptionFilter extends BaseExceptionFilter {
   /**
    * Override catch to log before returning exception.
    *
-   * @param exception
-   * @param host
+   * @param exception - Error instance
+   * @param host - Arguments Host instance
    */
   catch(exception: Error, host: ArgumentsHost) {
     this.loggerService.exception(
