@@ -82,7 +82,6 @@ export class LoggerRequestInterceptor implements NestInterceptor<Response> {
    * @param res - Response
    * @param startDate - Start date
    * @param error - Error instance
-   * @returns
    */
   responseError(req: Request, res: Response, startDate: Date, error: Error) {
     // format the message

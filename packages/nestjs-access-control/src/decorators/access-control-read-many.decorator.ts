@@ -5,7 +5,7 @@ import { AccessControlGrant } from './access-control-grant.decorator';
 /**
  * Read many resource grant shortcut.
  *
- * @param string - resource The grant resource.
+ * @param resource - The grant resource.
  * @returns Decorator function
  */
 export const AccessControlReadMany = (

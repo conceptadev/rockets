@@ -3,9 +3,9 @@ import { applyDecorators } from '@nestjs/common';
 import { ActionEnum } from '../enums/action.enum';
 
 /**
- * Delete one resource grant shortcut
+ * Delete one resource grant shortcut.
  *
- * @param string - resource The grant resource.
+ * @param resource - The grant resource.
  * @returns Decorator function
  */
 export const AccessControlDeleteOne = (

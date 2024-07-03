@@ -69,6 +69,7 @@ export class RoleAssignmentController
   /**
    * Constructor.
    *
+   * @param settings - role settings
    * @param allCrudServices - instances of all crud services
    */
   constructor(
