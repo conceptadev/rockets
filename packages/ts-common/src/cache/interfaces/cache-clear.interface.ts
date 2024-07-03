@@ -9,7 +9,6 @@ export interface CacheClearInterface<
 > {
   /**
    * Clear all caches for assign in given category.
-   *
    * @param assignment - The assignment of the repository
    * @param cache - The cache to clear
    */

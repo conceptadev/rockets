@@ -29,7 +29,6 @@ export class RoleMutateService
 
   /**
    * Constructor
-   *
    * @param repo - instance of the role repo
    */
   constructor(

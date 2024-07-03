@@ -12,7 +12,6 @@ import { UserEntityInterface } from '../interfaces/user-entity.interface';
 export class UserCrudService extends TypeOrmCrudService<UserEntityInterface> {
   /**
    * Constructor
-   *
    * @param userRepo - instance of the user repository.
    */
   constructor(

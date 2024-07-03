@@ -56,7 +56,6 @@ export class VerifyTokenService implements VerifyTokenServiceInterface {
    * Further validate the authenticity of a token.
    *
    * For example, You may want to check if it's id exists in a database or some other source.
-   *
    * @param payload - Payload object
    */
   private async validateToken(

@@ -12,7 +12,6 @@ import { RoleEntityInterface } from '../interfaces/role-entity.interface';
 export class RoleCrudService extends TypeOrmCrudService<RoleEntityInterface> {
   /**
    * Constructor
-   *
    * @param roleRepo - instance of the role repository.
    */
   constructor(

@@ -16,7 +16,6 @@ export abstract class LookupService<Entity extends ReferenceIdInterface>
 {
   /**
    * Constructor
-   *
    * @param repo - instance of the repo
    */
   constructor(repo: Repository<Entity>) {
@@ -25,7 +24,6 @@ export abstract class LookupService<Entity extends ReferenceIdInterface>
 
   /**
    * Get entity for the given id.
-   *
    * @param id - the id
    * @param queryOptions - query options
    */

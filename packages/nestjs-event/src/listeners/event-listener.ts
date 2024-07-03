@@ -61,7 +61,6 @@ export abstract class EventListener<E> implements EventListenerInterface<E> {
 
   /**
    * Called after successful subscription.
-   *
    * @internal
    * @param emitterListener - The Listener object returned by EventEmitter2
    */

@@ -37,7 +37,6 @@ export class OtpService implements OtpServiceInterface {
 
   /**
    * Create a otp with a for the given assignee.
-   *
    * @param assignment - The otp assignment
    * @param otp - The data to create
    */
@@ -84,7 +83,6 @@ export class OtpService implements OtpServiceInterface {
 
   /**
    * Check if otp is valid
-   *
    * @param assignment - The otp assignment
    * @param otp - The otp to validate
    * @param deleteIfValid - If true, delete the otp if it is valid
@@ -115,7 +113,6 @@ export class OtpService implements OtpServiceInterface {
 
   /**
    * Delete a otp based on params
-   *
    * @param assignment - The otp assignment
    * @param otp - The otp to delete
    */
@@ -134,7 +131,6 @@ export class OtpService implements OtpServiceInterface {
 
   /**
    * Clear all otps for assign in given category.
-   *
    * @param assignment - The assignment of the repository
    * @param otp - The otp to clear
    */
@@ -159,7 +155,6 @@ export class OtpService implements OtpServiceInterface {
 
   /**
    * Delete OTP based on assignment
-   *
    * @internal
    * @param assignment - The assignment to delete id from
    * @param id - The id or ids to delete
@@ -184,7 +179,6 @@ export class OtpService implements OtpServiceInterface {
 
   /**
    * Get all OTPs for assignee.
-   *
    * @param assignment - The assignment of the check
    * @param otp - The otp to get assignments
    */
@@ -254,7 +248,6 @@ export class OtpService implements OtpServiceInterface {
 
   /**
    * Get the assignment repo for the given assignment.
-   *
    * @internal
    * @param assignment - The otp assignment
    */

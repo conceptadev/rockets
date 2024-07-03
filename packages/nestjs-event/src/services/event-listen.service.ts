@@ -20,7 +20,6 @@ import { EventInstance } from '../event-types';
 export class EventListenService {
   /**
    * Constructor
-   *
    * @param eventEmitter - Injected event emitter instance
    */
   constructor(
@@ -41,24 +40,23 @@ export class EventListenService {
    * import { TargetEvent } from 'target-module';
    *
    * class MyListener extends EventListenerOn<TargetEvent> {
-   *   listen(event: TargetEvent) {
-   *     console.log(event.payload);
-   *   }
+   * listen(event: TargetEvent) {
+   * console.log(event.payload);
+   * }
    * }
    *
    * @Injectable()
    * class MyClass implements OnModuleInit {
-   *   constructor(private eventListenService: EventListenService) {}
+   * constructor(private eventListenService: EventListenService) {}
    *
-   *   onModuleInit() {
-   *     // listener instance
-   *     const listener = new MyListener();
-   *     // register the listener
-   *     this.eventListenService.on(TargetEvent, listener);
-   *   }
+   * onModuleInit() {
+   * // listener instance
+   * const listener = new MyListener();
+   * // register the listener
+   * this.eventListenService.on(TargetEvent, listener);
+   * }
    * }
    * ```
-   *
    * @param eventClass - The event class to subscribe to. This is the class, NOT an instance.
    * @param listener - Instance of the event listener class to attach to the event.
    * @param options - Overriding options.

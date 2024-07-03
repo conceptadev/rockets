@@ -15,7 +15,6 @@ export abstract class CryptUtil {
   /**
    * @param password - The plain text password to hash
    * @param salt - The salt to use when hashing the password
-   * @returns
    */
   static async hashPassword(password: string, salt: string): Promise<string> {
     // must have a password
@@ -31,9 +30,8 @@ export abstract class CryptUtil {
   /**
    * Validate password with the hash password
    * @param passwordPlain - The plain password
-   * @param passwordCrypt - The encrypted password
+   * @param passwordHash - The encrypted password
    * @param passwordSalt - The salt
-   * @returns
    */
   static async validatePassword(
     passwordPlain: string,

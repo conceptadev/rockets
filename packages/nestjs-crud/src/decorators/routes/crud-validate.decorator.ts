@@ -13,7 +13,6 @@ import { CrudValidationOptions } from '../../crud.types';
  *
  * If this decorator is used on a method, it will use the given options for
  * every Crud parameter on the method that does NOT have validations explicitly set.
- *
  * @param options - crud validation options
  */
 export const CrudValidate = (options?: CrudValidationOptions) =>

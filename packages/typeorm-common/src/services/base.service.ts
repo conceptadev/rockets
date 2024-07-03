@@ -16,7 +16,6 @@ export abstract class BaseService<Entity extends ReferenceIdInterface> {
 
   /**
    * Constructor
-   *
    * @param repo - instance of the repo
    */
   constructor(private repo: Repository<Entity>) {
@@ -25,7 +24,6 @@ export abstract class BaseService<Entity extends ReferenceIdInterface> {
 
   /**
    * Find One wrapper.
-   *
    * @param findOneOptions - Find options
    * @param queryOptions - Query options
    */
@@ -44,7 +42,6 @@ export abstract class BaseService<Entity extends ReferenceIdInterface> {
 
   /**
    * Return the correct repository instance.
-   *
    * @param queryOptions - Options
    */
   public repository(queryOptions?: QueryOptionsInterface): Repository<Entity> {
@@ -53,7 +50,6 @@ export abstract class BaseService<Entity extends ReferenceIdInterface> {
 
   /**
    * Return a transaction instance.
-   *
    * @param options - Options
    */
   public transaction(

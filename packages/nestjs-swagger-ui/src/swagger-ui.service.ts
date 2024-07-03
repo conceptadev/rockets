@@ -10,7 +10,6 @@ import {
 export class SwaggerUiService {
   /**
    * Constructor.
-   *
    * @param settings - swagger ui settings
    */
   constructor(
@@ -29,7 +28,6 @@ export class SwaggerUiService {
 
   /**
    * Setup.
-   *
    * @param app - Nest application instance
    */
   setup(app: INestApplication) {

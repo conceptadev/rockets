@@ -20,7 +20,6 @@ import { LoggerTransportInterface } from '../interfaces/logger-transport.interfa
 export class LoggerSentryTransport implements LoggerTransportInterface {
   /**
    * Constructor
-   *
    * @param config - configuration file injected
    */
   constructor(protected readonly config: LoggerSentryConfigInterface) {
@@ -34,7 +33,6 @@ export class LoggerSentryTransport implements LoggerTransportInterface {
 
   /**
    * Method to log message to Sentry transport
-   *
    * @param message - message
    * @param logLevel - log level
    * @param error - error
