@@ -5,7 +5,7 @@ import { applyDecorators } from '@nestjs/common';
 /**
  * Create one resource grant shortcut.
  *
- * @param string - resource The grant resource.
+ * @param resource - The grant resource.
  * @returns Decorator function
  */
 export const AccessControlCreateOne = (

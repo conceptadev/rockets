@@ -11,6 +11,7 @@ module.exports = {
   ],
   extends: [
     '@concepta/eslint-config/nest',
+    'plugin:jsdoc/recommended-typescript',
   ],
   ignorePatterns: [
     'packages/*/dist/**',
@@ -30,7 +31,8 @@ module.exports = {
   rules: {
     'import/no-extraneous-dependencies': 'error',
     '@darraghor/nestjs-typed/param-decorator-name-matches-route-param': 'off',
-    'tsdoc/syntax': 'warn',
+    'jsdoc/tag-lines': ['error', 'any', { startLines: 1 }],
+    'tsdoc/syntax': 'error',
   },
   overrides: [
     {
@@ -41,10 +43,20 @@ module.exports = {
       },
     },
     {
+      files: ['*.ts'],
+      rules: {
+        'jsdoc/require-jsdoc': 'off',
+        'jsdoc/require-param': 'off',
+        'jsdoc/require-returns': 'off',
+      },
+    },
+    {
       files: ['*.spec.ts', '*.fixture.ts'],
       rules: {
         '@darraghor/nestjs-typed/controllers-should-supply-api-tags': 'off',
         '@darraghor/nestjs-typed/api-method-should-specify-api-response': 'off',
+        'plugin:jsdoc/recommended-typescript': 'off',
+        'jsdoc/tag-lines': 'off',
         'tsdoc/syntax': 'off',
       },
     },

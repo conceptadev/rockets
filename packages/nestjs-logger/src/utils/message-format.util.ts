@@ -13,7 +13,6 @@ export class MessageFormatUtil {
    * Function to format message from request.
    *
    * @param req - request
-   * @returns
    */
   static formatRequestMessage(req: Request): string {
     const { method, url } = req;
@@ -29,7 +28,6 @@ export class MessageFormatUtil {
    * @param res - response
    * @param startDate - start date
    * @param error - error
-   * @returns
    */
   static formatResponseMessage(
     req: Request,

@@ -41,14 +41,14 @@ export class EventDispatchService {
    *
    * @Injectable()
    * class MyClass {
-   *   constructor(private eventDispatchService: EventDispatchService) {}
+   * constructor(private eventDispatchService: EventDispatchService) {}
    *
-   *   didSomething() {
-   *     // event instance
-   *     const myEvent = new MyEvent({id: 1234});
-   *     // dispatch the event
-   *     this.eventDispatchService.sync(myEvent);
-   *   }
+   * didSomething() {
+   * // event instance
+   * const myEvent = new MyEvent({id: 1234});
+   * // dispatch the event
+   * this.eventDispatchService.sync(myEvent);
+   * }
    * }
    * ```
    *
@@ -82,25 +82,25 @@ export class EventDispatchService {
    *
    * @Injectable()
    * class MyClass {
-   *   constructor(private eventDispatchService: EventDispatchService) {}
+   * constructor(private eventDispatchService: EventDispatchService) {}
    *
-   *   // allow any listener to activate object
-   *   async maybeActivate(myPayloadType: MyPayloadType): MyPayloadType {
-   *     // event instance
-   *     const myEvent = new MyEvent({...myPayloadType, active: false});
-   *     // dispatch the event
-   *     const allPayloads: MyPayloadType[] =
-   *       await this.eventDispatchService.async(myEvent);
-   *     // merge it
-   *     allPayloads.forEach((payload) => {
-   *       // did any listener set it to true?
-   *       if (payload.active) {
-   *         myPayloadType.active = true;
-   *       }
-   *     });
-   *     // return possibly modified object
-   *     return myPayloadType;
-   *   }
+   * // allow any listener to activate object
+   * async maybeActivate(myPayloadType: MyPayloadType): MyPayloadType {
+   * // event instance
+   * const myEvent = new MyEvent({...myPayloadType, active: false});
+   * // dispatch the event
+   * const allPayloads: MyPayloadType[] =
+   * await this.eventDispatchService.async(myEvent);
+   * // merge it
+   * allPayloads.forEach((payload) => {
+   * // did any listener set it to true?
+   * if (payload.active) {
+   * myPayloadType.active = true;
+   * }
+   * });
+   * // return possibly modified object
+   * return myPayloadType;
+   * }
    * }
    * ```
    *

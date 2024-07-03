@@ -113,6 +113,7 @@ export class PasswordCreationService
   /**
    * Check if number of current attempt is allowed based on the amount of attempts left
    * if the number of attempts left is greater then
+   *
    * @returns Number of attempts user has to try
    */
   checkAttempt(numOfAttempts = 0): boolean {
@@ -121,8 +122,8 @@ export class PasswordCreationService
 
   /**
    * Check number of attempts of using password
+   *
    * @param numOfAttempts - number of attempts
-   * @returns
    */
   checkAttemptLeft(numOfAttempts = 0): number {
     // Get number of max attempts allowed

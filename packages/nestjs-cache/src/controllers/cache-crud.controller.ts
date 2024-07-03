@@ -70,7 +70,9 @@ export class CacheCrudController
   /**
    * Constructor.
    *
+   * @param settings - cache settings
    * @param allCrudServices - instances of all crud services
+   * @param cacheService - instance of cache service
    */
   constructor(
     @Inject(CACHE_MODULE_SETTINGS_TOKEN)
