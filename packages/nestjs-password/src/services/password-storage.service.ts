@@ -3,6 +3,8 @@ import { PasswordPlainInterface } from '@concepta/ts-common';
 import { CryptUtil } from '../utils/crypt.util';
 import { PasswordStorageInterface } from '../interfaces/password-storage.interface';
 import { PasswordStorageServiceInterface } from '../interfaces/password-storage-service.interface';
+import { PasswordHashOptionsInterface } from '../interfaces/password-hash-options.interface';
+import { PasswordHashObjectOptionsInterface } from '../interfaces/password-hash-object-options.interface';
 
 /**
  * Service with functions related to password security
@@ -20,14 +22,12 @@ export class PasswordStorageService implements PasswordStorageServiceInterface {
    * Hash a password using a salt, if no
    * was passed, then one will be generated.
    *
-   * @param password Password to be hashed
-   * @param salt Optional salt. If not provided, one will be generated.
+   * @param password - Password to be hashed
+   * @param options - Hash options
    */
   async hash(
     password: string,
-    options?: {
-      salt?: string;
-    },
+    options?: PasswordHashOptionsInterface,
   ): Promise<PasswordStorageInterface> {
     let { salt } = options ?? {};
     if (!salt) salt = await this.generateSalt();
@@ -41,33 +41,25 @@ export class PasswordStorageService implements PasswordStorageServiceInterface {
   /**
    * Hash password for an object.
    *
-   * @param object An object containing the new password to hash.
-   * @param options.salt Optional salt. If not provided, one will be generated.
-   * @param options.required Set to true if password is required.
+   * @param object - An object containing the new password to hash.
+   * @param options - Hash object options
    * @returns A new object with the password hashed, with salt added.
    */
   async hashObject<T extends PasswordPlainInterface>(
     object: T,
-    options?: {
-      salt?: string;
-      required?: boolean;
-    },
+    options?: PasswordHashObjectOptionsInterface,
   ): Promise<Omit<T, 'password'> & PasswordStorageInterface>;
 
   /**
    * Hash password for an object if the password property exists.
    *
-   * @param object An object containing the new password to hash.
-   * @param options.salt Optional salt. If not provided, one will be generated.
-   * @param options.required Set to true if password is required.
+   * @param object - An object containing the new password to hash.
+   * @param options - Hash object options
    * @returns A new object with the password hashed, with salt added.
    */
   async hashObject<T extends PasswordPlainInterface>(
     object: Partial<T>,
-    options?: {
-      salt?: string;
-      required?: boolean;
-    },
+    options?: PasswordHashObjectOptionsInterface,
   ): Promise<
     Omit<T, 'password'> | (Omit<T, 'password'> & PasswordStorageInterface)
   >;
@@ -75,17 +67,13 @@ export class PasswordStorageService implements PasswordStorageServiceInterface {
   /**
    * Hash password for an object.
    *
-   * @param object An object containing the new password to hash.
-   * @param options.salt Optional salt. If not provided, one will be generated.
-   * @param options.required Set to true if password is required.
+   * @param object - An object containing the new password to hash.
+   * @param options - Hash object options
    * @returns A new object with the password hashed, with salt added.
    */
   async hashObject<T extends PasswordPlainInterface>(
     object: T,
-    options?: {
-      salt?: string;
-      required?: boolean;
-    },
+    options?: PasswordHashObjectOptionsInterface,
   ): Promise<
     Omit<T, 'password'> | (Omit<T, 'password'> & PasswordStorageInterface)
   > {

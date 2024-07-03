@@ -6,7 +6,7 @@ import { CrudValidationMetadataInterface } from '../../interfaces/crud-validatio
 import { CrudReflectionService } from '../../services/crud-reflection.service';
 
 /**
- * @CrudBody() parameter decorator
+ * \@CrudBody() parameter decorator
  */
 export function CrudBody(
   options?: CrudBodyOptionsInterface,

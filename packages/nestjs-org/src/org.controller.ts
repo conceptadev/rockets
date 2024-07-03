@@ -57,14 +57,14 @@ export class OrgController
   /**
    * Constructor.
    *
-   * @param orgCrudService instance of the Org crud service
+   * @param orgCrudService - instance of the Org crud service
    */
   constructor(private orgCrudService: OrgCrudService) {}
 
   /**
    * Get many
    *
-   * @param crudRequest the CRUD request object
+   * @param crudRequest - the CRUD request object
    */
   @CrudReadMany()
   @AccessControlReadMany(OrgResource.Many)
@@ -75,7 +75,7 @@ export class OrgController
   /**
    * Get one
    *
-   * @param crudRequest the CRUD request object
+   * @param crudRequest - the CRUD request object
    */
   @CrudReadOne()
   @AccessControlReadOne(OrgResource.One)
@@ -86,8 +86,8 @@ export class OrgController
   /**
    * Create many
    *
-   * @param crudRequest the CRUD request object
-   * @param orgCreateManyDto org create many dto
+   * @param crudRequest - the CRUD request object
+   * @param orgCreateManyDto - org create many dto
    */
   @CrudCreateMany()
   @AccessControlCreateMany(OrgResource.Many)
@@ -102,8 +102,8 @@ export class OrgController
   /**
    * Create one
    *
-   * @param crudRequest the CRUD request object
-   * @param orgCreateDto org create dto
+   * @param crudRequest - the CRUD request object
+   * @param orgCreateDto - org create dto
    */
   @CrudCreateOne()
   @AccessControlCreateOne(OrgResource.One)
@@ -118,8 +118,8 @@ export class OrgController
   /**
    * Update one
    *
-   * @param crudRequest the CRUD request object
-   * @param orgUpdateDto org update dto
+   * @param crudRequest - the CRUD request object
+   * @param orgUpdateDto - org update dto
    */
   @CrudUpdateOne()
   @AccessControlUpdateOne(OrgResource.One)
@@ -133,7 +133,7 @@ export class OrgController
   /**
    * Delete one
    *
-   * @param crudRequest the CRUD request object
+   * @param crudRequest - the CRUD request object
    */
   @CrudDeleteOne()
   @AccessControlDeleteOne(OrgResource.One)
@@ -144,7 +144,7 @@ export class OrgController
   /**
    * Recover one
    *
-   * @param crudRequest the CRUD request object
+   * @param crudRequest - the CRUD request object
    */
   @CrudRecoverOne()
   @AccessControlRecoverOne(OrgResource.One)

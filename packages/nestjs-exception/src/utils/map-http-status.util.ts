@@ -6,7 +6,7 @@ import {
 /**
  * Map http status to error codes.
  *
- * @argument statusCode The HTTP status code to look up.
+ * @param statusCode - The HTTP status code to look up.
  */
 export function mapHttpStatus(statusCode: number) {
   // look it up

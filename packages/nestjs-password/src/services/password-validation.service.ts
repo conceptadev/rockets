@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CryptUtil } from '../utils/crypt.util';
 import { PasswordStorageInterface } from '../interfaces/password-storage.interface';
 import { PasswordValidationServiceInterface } from '../interfaces/password-validation-service.interface';
+import { PasswordValidateOptionsInterface } from '../interfaces/password-validate-options.interface';
 
 /**
  * Service with functions related to password validation
@@ -11,17 +12,9 @@ export class PasswordValidationService
   implements PasswordValidationServiceInterface
 {
   /**
-   * Validate if password matches and its valid.
-   *
-   * @param options.password Plain text password
-   * @param options.passwordHash Password hashed
-   * @param options.passwordSalt salt to be used on plain password to see it match
+   * {@inheritDoc PasswordValidationServiceInterface.validate}
    */
-  async validate(options: {
-    password: string;
-    passwordHash: string;
-    passwordSalt: string;
-  }): Promise<boolean> {
+  async validate(options: PasswordValidateOptionsInterface): Promise<boolean> {
     return CryptUtil.validatePassword(
       options.password,
       options.passwordHash,
@@ -30,10 +23,7 @@ export class PasswordValidationService
   }
 
   /**
-   * Validate password on an object.
-   *
-   * @param passwordPlain Plain text password
-   * @param object The object on which the password and salt are stored
+   * {@inheritDoc PasswordValidationServiceInterface.validateObject}
    */
   async validateObject<T extends PasswordStorageInterface>(
     password: string,

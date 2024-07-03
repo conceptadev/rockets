@@ -35,7 +35,7 @@ export class CrudSerializeInterceptor implements NestInterceptor {
   ) {}
 
   /**
-   * @private
+   * @internal
    */
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     // get the options
@@ -48,7 +48,7 @@ export class CrudSerializeInterceptor implements NestInterceptor {
   }
 
   /**
-   * @private
+   * @internal
    */
   protected serialize(
     response: ResponseType,

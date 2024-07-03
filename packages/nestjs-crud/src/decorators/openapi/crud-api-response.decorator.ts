@@ -7,7 +7,7 @@ import { CrudApiResponseMetadataInterface } from '../../interfaces/crud-api-resp
 import { CrudReflectionService } from '../../services/crud-reflection.service';
 
 /**
- * @CrudApiResponse() open api decorator
+ * \@CrudApiResponse() open api decorator
  */
 export function CrudApiResponse(
   action: CrudActions,

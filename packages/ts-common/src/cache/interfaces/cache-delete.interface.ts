@@ -9,8 +9,8 @@ export interface CacheDeleteInterface<
 > {
   /**
    * Delete a cache based on params
-   * @param assignment The cache assignment
-   * @param cache The dto with unique keys to delete
+   * @param assignment - The cache assignment
+   * @param cache - The dto with unique keys to delete
    */
   delete(
     assignment: ReferenceAssignment,
