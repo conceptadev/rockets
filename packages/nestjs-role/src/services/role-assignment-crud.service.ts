@@ -8,6 +8,7 @@ import { RoleAssignmentInterface } from '@concepta/ts-common';
 export class RoleAssignmentCrudService extends TypeOrmCrudService<RoleAssignmentInterface> {
   /**
    * Constructor
+   *
    * @param repo - instance of a role assignment repository.
    */
   constructor(repo: Repository<RoleAssignmentInterface>) {

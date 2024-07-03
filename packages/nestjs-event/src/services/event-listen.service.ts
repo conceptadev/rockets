@@ -20,6 +20,7 @@ import { EventInstance } from '../event-types';
 export class EventListenService {
   /**
    * Constructor
+   *
    * @param eventEmitter - Injected event emitter instance
    */
   constructor(
@@ -57,6 +58,7 @@ export class EventListenService {
    * }
    * }
    * ```
+   *
    * @param eventClass - The event class to subscribe to. This is the class, NOT an instance.
    * @param listener - Instance of the event listener class to attach to the event.
    * @param options - Overriding options.

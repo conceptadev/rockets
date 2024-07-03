@@ -11,6 +11,7 @@ export interface CacheCreateInterface<
 > {
   /**
    * Create a cache with a for the given assignee.
+   *
    * @param assignment - The cache assignment
    * @param cache - The CACHE to create
    */

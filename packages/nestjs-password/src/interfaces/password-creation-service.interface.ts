@@ -9,6 +9,7 @@ import { PasswordCreateObjectOptionsInterface } from './password-create-object-o
 export interface PasswordCreationServiceInterface {
   /**
    * Create password for an object (optionally).
+   *
    * @param object - An object containing the new password to hash.
    * @param options - Password create options.
    * @returns A new object with the password hashed, with salt added.
@@ -22,6 +23,7 @@ export interface PasswordCreationServiceInterface {
 
   /**
    * Validate the current password for the targeted object.
+   *
    * @param options - Validate current options.
    * @returns boolean
    */
@@ -31,12 +33,14 @@ export interface PasswordCreationServiceInterface {
 
   /**
    * Check if attempt is valid.
+   *
    * @returns Number of attempts user has to try
    */
   checkAttempt(numOfAttempts: number): boolean;
 
   /**
    * Check number of attempts of using password
+   *
    * @param numOfAttempts - number of attempts
    * @returns number of attempts left
    */

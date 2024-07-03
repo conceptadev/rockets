@@ -33,6 +33,7 @@ export class InvitationRevocationService extends BaseService<InvitationEntityInt
 
   /**
    * Revoke all invitations for email in category.
+   *
    * @param email - user email
    * @param category - the cateogory
    */
@@ -64,6 +65,7 @@ export class InvitationRevocationService extends BaseService<InvitationEntityInt
 
   /**
    * Clear all user OTPs by category
+   *
    * @param user - User object
    * @param category - Category
    */
@@ -94,6 +96,7 @@ export class InvitationRevocationService extends BaseService<InvitationEntityInt
 
   /**
    * Delete all user invitations by category.
+   *
    * @param user - User object
    * @param category - Category
    */

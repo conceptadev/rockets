@@ -22,6 +22,7 @@ export class UserLookupService
 {
   /**
    * Constructor
+   *
    * @param repo - instance of the user repo
    */
   constructor(
@@ -33,6 +34,7 @@ export class UserLookupService
 
   /**
    * Get user for the given email.
+   *
    * @param email - the email
    */
   async byEmail(
@@ -44,6 +46,7 @@ export class UserLookupService
 
   /**
    * Get user for the given subject.
+   *
    * @param subject - the subject
    */
   async bySubject(
@@ -55,6 +58,7 @@ export class UserLookupService
 
   /**
    * Get user for the given username.
+   *
    * @param username - the username
    */
   async byUsername(

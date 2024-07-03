@@ -21,6 +21,7 @@ export class PasswordStorageService implements PasswordStorageServiceInterface {
   /**
    * Hash a password using a salt, if no
    * was passed, then one will be generated.
+   *
    * @param password - Password to be hashed
    * @param options - Hash options
    */
@@ -39,6 +40,7 @@ export class PasswordStorageService implements PasswordStorageServiceInterface {
 
   /**
    * Hash password for an object.
+   *
    * @param object - An object containing the new password to hash.
    * @param options - Hash object options
    * @returns A new object with the password hashed, with salt added.
@@ -50,6 +52,7 @@ export class PasswordStorageService implements PasswordStorageServiceInterface {
 
   /**
    * Hash password for an object if the password property exists.
+   *
    * @param object - An object containing the new password to hash.
    * @param options - Hash object options
    * @returns A new object with the password hashed, with salt added.
@@ -63,6 +66,7 @@ export class PasswordStorageService implements PasswordStorageServiceInterface {
 
   /**
    * Hash password for an object.
+   *
    * @param object - An object containing the new password to hash.
    * @param options - Hash object options
    * @returns A new object with the password hashed, with salt added.

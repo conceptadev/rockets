@@ -29,6 +29,7 @@ export class FederatedMutateService
 
   /**
    * Constructor
+   *
    * @param repo - instance of the federated repo
    */
   constructor(

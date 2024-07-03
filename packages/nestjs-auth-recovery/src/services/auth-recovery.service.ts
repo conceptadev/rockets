@@ -40,6 +40,7 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
 
   /**
    * Recover lost username providing an email and send the username by email.
+   *
    * @param email - user email
    */
   async recoverLogin(
@@ -64,6 +65,7 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
 
   /**
    * Recover lost password providing an email and send the passcode token by email.
+   *
    * @param email - user email
    */
   async recoverPassword(
@@ -105,6 +107,7 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
 
   /**
    * Validate passcode and return it's user.
+   *
    * @param passcode - user's passcode
    * @param deleteIfValid - flag to delete if valid or not
    */
@@ -127,6 +130,7 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
 
   /**
    * Change user's password by providing it's OTP passcode and the new password.
+   *
    * @param passcode - OTP user's passcode
    * @param newPassword - new user password
    */
@@ -180,6 +184,7 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
 
   /**
    * Recover lost password providing an email and send the passcode token by email.
+   *
    * @param email - user email
    */
   async revokeAllUserPasswordRecoveries(

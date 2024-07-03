@@ -24,6 +24,7 @@ import { UserNotFoundException } from '../exceptions/user-not-found-exception';
 export class UserPasswordService implements UserPasswordServiceInterface {
   /**
    * Constructor
+   *
    * @param userLookupService - user lookup service
    * @param passwordCreationService - password creation service
    */

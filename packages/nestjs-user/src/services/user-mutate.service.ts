@@ -32,6 +32,7 @@ export class UserMutateService
 
   /**
    * Constructor
+   *
    * @param repo - instance of the user repo
    * @param userPasswordService - instance of a user password service
    */

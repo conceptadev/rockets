@@ -32,6 +32,7 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
 
   /**
    * Sign in with federated creating a user if it doesn't exist
+   *
    * @param provider - provider name (github, facebook, google)
    * @param email - email account
    * @param subject - subject (user id/ profile id from provider)
@@ -75,6 +76,7 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
 
   /**
    * Logic to create user and federated
+   *
    * @internal
    */
   protected async createUserWithFederated(
@@ -97,6 +99,7 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
 
   /**
    * Create a user
+   *
    * @internal
    */
   protected async createUser(
@@ -131,6 +134,7 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
 
   /**
    * Create federated credentials
+   *
    * @internal
    */
   private async createFederated(

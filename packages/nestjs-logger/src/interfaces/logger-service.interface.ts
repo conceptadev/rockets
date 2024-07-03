@@ -9,12 +9,14 @@ import { LoggerTransportInterface } from './logger-transport.interface';
 export interface LoggerServiceInterface {
   /**
    * Add the transport that will be used.
+   *
    * @param transport - Transport
    */
   addTransport(transport: LoggerTransportInterface): void;
 
   /**
    * Method to log an exception.
+   *
    * @param error - The error to be logged
    * @param message - The Error Message to be logged
    * @param context - The Context of the message
@@ -23,6 +25,7 @@ export interface LoggerServiceInterface {
 
   /**
    * Method to log message as a error log level.
+   *
    * @param message - Method to log message as an error
    * @param trace - Stack trace
    * @param context - The Context of the message
@@ -35,6 +38,7 @@ export interface LoggerServiceInterface {
 
   /**
    * Method to log message as a warn log level.
+   *
    * @param message - Method to log message as a warning
    * @param context - The Context of the message
    */
@@ -42,6 +46,7 @@ export interface LoggerServiceInterface {
 
   /**
    * Debug method.
+   *
    * @param message - Method to log message as a debug
    * @param context - The Context of the message
    */
@@ -49,6 +54,7 @@ export interface LoggerServiceInterface {
 
   /**
    * Log method.
+   *
    * @param message - Method to log message as a Log
    * @param context - The Context of the message
    */
@@ -56,6 +62,7 @@ export interface LoggerServiceInterface {
 
   /**
    * Verbose method.
+   *
    * @param message - Method to log message as a Verbose
    * @param context - The Context of the message
    */

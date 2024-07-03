@@ -114,6 +114,7 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
 
   /**
    * Send the invitation accepted email.
+   *
    * @param email - Email
    */
   async sendEmail(email: string): Promise<void> {
@@ -135,6 +136,7 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
 
   /**
    * Get one invitation by code.
+   *
    * @param code - Pass code string
    * @param queryOptions - Query options
    */
@@ -147,6 +149,7 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
 
   /**
    * Validate passcode and return it's user.
+   *
    * @param passcode - User's passcode
    * @param category - Category
    * @param deleteIfValid - Flag to delete if valid or not

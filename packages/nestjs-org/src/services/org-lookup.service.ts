@@ -23,6 +23,7 @@ export class OrgLookupService
 {
   /**
    * Constructor
+   *
    * @param repo - instance of the org repo
    */
   constructor(
@@ -36,6 +37,7 @@ export class OrgLookupService
 
   /**
    * Get owner for the given org.
+   *
    * @param org - The org of which owner to retrieve.
    */
   async getOwner(org: OrgOwnerInterface, queryOptions?: QueryOptionsInterface) {

@@ -4,6 +4,7 @@ import { applyDecorators } from '@nestjs/common';
 
 /**
  * Create one resource grant shortcut.
+ *
  * @param resource - The grant resource.
  * @returns Decorator function
  */

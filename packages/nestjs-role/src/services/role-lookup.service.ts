@@ -16,6 +16,7 @@ export class RoleLookupService
 {
   /**
    * Constructor
+   *
    * @param repo - instance of the role repo
    */
   constructor(

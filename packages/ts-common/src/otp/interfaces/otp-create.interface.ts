@@ -11,6 +11,7 @@ export interface OtpCreateInterface<
 > {
   /**
    * Create a otp with a for the given assignee.
+   *
    * @param assignment - The otp assignment
    * @param otp - The OTP to create
    */

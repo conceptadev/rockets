@@ -7,12 +7,14 @@ import { EventInstance, EventReturnType } from '../../event-types';
 export interface EventListenerInterface<E> {
   /**
    * Listener handler.
+   *
    * @param event - An event instance
    */
   listen(event: EventInstance<E>): EventReturnType<E>;
 
   /**
    * Called after successful subscription.
+   *
    * @param emitterListener - The Listener object returned by EventEmitter2
    */
   subscription(emitterListener: EmitterListener): void;

@@ -33,12 +33,14 @@ export abstract class Event<P = undefined, R = P>
 {
   /**
    * Expects return of payload
+   *
    * @internal
    */
   readonly expectsReturnOf!: R;
 
   /**
    * Event key.
+   *
    * @returns The event key string.
    */
   static get key(): string {
@@ -47,6 +49,7 @@ export abstract class Event<P = undefined, R = P>
 
   /**
    * Event key.
+   *
    * @returns The event key string.
    */
   get key(): string {
@@ -60,12 +63,14 @@ export abstract class Event<P = undefined, R = P>
 
   /**
    * Constructor
+   *
    * @param payload - Payload to emit when the event is dispatched.
    */
   constructor(payload?: EventPayload<P>);
 
   /**
    * Constructor
+   *
    * @param payload - Payload to emit when the event is dispatched.
    */
   constructor(payload: EventPayload<P>) {
@@ -74,6 +79,7 @@ export abstract class Event<P = undefined, R = P>
 
   /**
    * Returns payload that was passed to the Event constructor.
+   *
    * @returns The event payload.
    */
   get payload(): EventPayload<P> {

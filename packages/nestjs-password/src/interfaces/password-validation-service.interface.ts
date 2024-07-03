@@ -7,12 +7,14 @@ import { PasswordValidateOptionsInterface } from './password-validate-options.in
 export interface PasswordValidationServiceInterface {
   /**
    * Validate if password matches and its valid.
+   *
    * @param options - Validation options
    */
   validate(options: PasswordValidateOptionsInterface): Promise<boolean>;
 
   /**
    * Validate password on an object.
+   *
    * @param passwordPlain - Plain text password
    * @param object - The object on which the password and salt are stored
    */
