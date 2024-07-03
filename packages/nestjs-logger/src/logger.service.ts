@@ -43,6 +43,7 @@ export class LoggerService
 {
   /**
    * Constructor
+   *
    * @param transportService - transport service
    */
   constructor(protected readonly transportService: LoggerTransportService) {
@@ -51,6 +52,7 @@ export class LoggerService
 
   /**
    * Add a transport to be used for every log, it can be multiples
+   *
    * @param transport - The transport that will be used beside the system logger
    */
   addTransport(transport: LoggerTransportInterface): void {
@@ -62,6 +64,7 @@ export class LoggerService
    *
    * If the exception is between 400 and 500 status code
    * it will be logged as a debug log level, otherwise it will be logged as an error.
+   *
    * @param error - Error to be registered
    * @param message - Error Message
    * @param context - Context of current error
@@ -97,6 +100,7 @@ export class LoggerService
 
   /**
    * Method to be called when an error should be logged.
+   *
    * @param message - Error Message
    * @param trace - Stack trace error
    * @param context - Context of current Message
@@ -122,6 +126,7 @@ export class LoggerService
 
   /**
    * Method to be used when a warn message should be logged.
+   *
    * @param message - Warn Message
    * @param context - Context of Message
    */
@@ -132,6 +137,7 @@ export class LoggerService
 
   /**
    * Method to be used when a debug message should be logged.
+   *
    * @param message - Debug Message
    * @param context - Context of Message
    */
@@ -142,6 +148,7 @@ export class LoggerService
 
   /**
    * Method to be used when a simple log message should be logged.
+   *
    * @param message - Log message
    * @param context - Context of Message
    */
@@ -152,6 +159,7 @@ export class LoggerService
 
   /**
    * Method to be used when a verbose message should be logged.
+   *
    * @param message - Verbose Message
    * @param context - Context Message
    */

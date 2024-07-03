@@ -9,6 +9,7 @@ export interface OtpDeleteInterface<
 > {
   /**
    * Delete a otp based on params
+   *
    * @param assignment - The otp assignment
    * @param otp - The otp to delete
    */

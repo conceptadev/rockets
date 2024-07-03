@@ -54,12 +54,14 @@ export class RoleController
 {
   /**
    * Constructor.
+   *
    * @param roleCrudService - instance of the Role crud service
    */
   constructor(private roleCrudService: RoleCrudService) {}
 
   /**
    * Get many
+   *
    * @param crudRequest - the CRUD request object
    */
   @CrudReadMany()
@@ -70,6 +72,7 @@ export class RoleController
 
   /**
    * Get one
+   *
    * @param crudRequest - the CRUD request object
    */
   @CrudReadOne()
@@ -80,6 +83,7 @@ export class RoleController
 
   /**
    * Create many
+   *
    * @param crudRequest - the CRUD request object
    * @param roleCreateManyDto - role create many dto
    */
@@ -104,6 +108,7 @@ export class RoleController
 
   /**
    * Create one
+   *
    * @param crudRequest - the CRUD request object
    * @param roleCreateDto - role create dto
    */
@@ -119,6 +124,7 @@ export class RoleController
 
   /**
    * Update one
+   *
    * @param crudRequest - the CRUD request object
    * @param roleUpdateDto - role update dto
    */
@@ -133,6 +139,7 @@ export class RoleController
 
   /**
    * Delete one
+   *
    * @param crudRequest - the CRUD request object
    */
   @CrudDeleteOne()

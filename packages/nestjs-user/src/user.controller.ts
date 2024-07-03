@@ -67,6 +67,7 @@ export class UserController
 {
   /**
    * Constructor.
+   *
    * @param userCrudService - instance of the user crud service
    * @param userPasswordService - instance of user password service
    */
@@ -77,6 +78,7 @@ export class UserController
 
   /**
    * Get many
+   *
    * @param crudRequest - the CRUD request object
    */
   @CrudReadMany()
@@ -87,6 +89,7 @@ export class UserController
 
   /**
    * Get one
+   *
    * @param crudRequest - the CRUD request object
    */
   @CrudReadOne()
@@ -97,6 +100,7 @@ export class UserController
 
   /**
    * Create many
+   *
    * @param crudRequest - the CRUD request object
    * @param userCreateManyDto - user create many dto
    */
@@ -121,6 +125,7 @@ export class UserController
 
   /**
    * Create one
+   *
    * @param crudRequest - the CRUD request object
    * @param userCreateDto - user create dto
    */
@@ -139,6 +144,7 @@ export class UserController
 
   /**
    * Update one
+   *
    * @param crudRequest - the CRUD request object
    * @param userUpdateDto - user update dto
    */
@@ -167,6 +173,7 @@ export class UserController
 
   /**
    * Delete one
+   *
    * @param crudRequest - the CRUD request object
    */
   @CrudDeleteOne()
@@ -177,6 +184,7 @@ export class UserController
 
   /**
    * Recover one
+   *
    * @param crudRequest - the CRUD request object
    */
   @CrudRecoverOne()

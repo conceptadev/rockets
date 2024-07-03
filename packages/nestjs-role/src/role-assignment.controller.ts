@@ -68,6 +68,7 @@ export class RoleAssignmentController
 {
   /**
    * Constructor.
+   *
    * @param settings - role settings
    * @param allCrudServices - instances of all crud services
    */
@@ -80,6 +81,7 @@ export class RoleAssignmentController
 
   /**
    * Get many
+   *
    * @param crudRequest - the CRUD request object
    * @param assignment - the assignment
    */
@@ -94,6 +96,7 @@ export class RoleAssignmentController
 
   /**
    * Get one
+   *
    * @param crudRequest - the CRUD request object
    * @param assignment - The role assignment
    */
@@ -108,6 +111,7 @@ export class RoleAssignmentController
 
   /**
    * Create many
+   *
    * @param crudRequest - the CRUD request object
    * @param roleAssignmentCreateDto - role create many dto
    * @param assignment - The role assignment
@@ -136,6 +140,7 @@ export class RoleAssignmentController
 
   /**
    * Create one
+   *
    * @param crudRequest - the CRUD request object
    * @param roleAssignmentCreateDto - role create dto
    * @param assignment - The role assignment
@@ -156,6 +161,7 @@ export class RoleAssignmentController
 
   /**
    * Delete one
+   *
    * @param crudRequest - the CRUD request object
    * @param assignment - The role assignment
    */
@@ -170,6 +176,7 @@ export class RoleAssignmentController
 
   /**
    * Get the crud service for the given assignment.
+   *
    * @internal
    * @param assignment - The role assignment
    */

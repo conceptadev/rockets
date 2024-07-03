@@ -41,6 +41,7 @@ export class LoggerTransportService {
 
   /**
    * Constructor
+   *
    * @param settings - logger settings
    */
   constructor(
@@ -54,6 +55,7 @@ export class LoggerTransportService {
 
   /**
    * Method to add the transport that will be used
+   *
    * @param transport - Instance of a logger transport
    */
   public addTransport(transport: LoggerTransportInterface): void {
@@ -62,6 +64,7 @@ export class LoggerTransportService {
 
   /**
    * Method to log message to the transport based on the log level
+   *
    * @param message - message
    * @param logLevel - log level
    * @param error - error

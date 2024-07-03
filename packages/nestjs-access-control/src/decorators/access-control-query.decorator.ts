@@ -4,6 +4,7 @@ import { ACCESS_CONTROL_MODULE_QUERY_METADATA } from '../constants';
 
 /**
  * Define access query options for this route.
+ *
  * @param queryOptions - Array of access control query options.
  * @returns Decorator function.
  */

@@ -5,11 +5,13 @@ import {
 
 /**
  * Message formatting utility
+ *
  * @internal
  */
 export class MessageFormatUtil {
   /**
    * Function to format message from request.
+   *
    * @param req - request
    */
   static formatRequestMessage(req: Request): string {
@@ -21,6 +23,7 @@ export class MessageFormatUtil {
 
   /**
    * Function to format message for response.
+   *
    * @param req - request
    * @param res - response
    * @param startDate - start date

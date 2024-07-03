@@ -79,6 +79,7 @@ export const CrudInitApiQuery =
 
 /**
  * Map crud action name to queryable base name.
+ *
  * @param action - The crud action we are mapping.
  */
 function mapActionNameToQueryableBaseName(

@@ -10,6 +10,7 @@ import { CacheInterface } from '@concepta/ts-common';
 export class CacheCrudService extends TypeOrmCrudService<CacheInterface> {
   /**
    * Constructor
+   *
    * @param repo - instance of the cache repository.
    */
   constructor(repo: Repository<CacheInterface>) {

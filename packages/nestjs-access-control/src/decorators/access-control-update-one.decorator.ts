@@ -4,6 +4,7 @@ import { AccessControlGrant } from './access-control-grant.decorator';
 
 /**
  * Update one resource grant shortcut.
+ *
  * @param resource - The grant resource.
  * @returns Decorator function
  */

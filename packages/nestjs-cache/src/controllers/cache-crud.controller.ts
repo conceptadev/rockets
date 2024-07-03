@@ -69,6 +69,7 @@ export class CacheCrudController
 {
   /**
    * Constructor.
+   *
    * @param settings - cache settings
    * @param allCrudServices - instances of all crud services
    * @param cacheService - instance of cache service
@@ -83,6 +84,7 @@ export class CacheCrudController
 
   /**
    * Get many
+   *
    * @param crudRequest - the CRUD request object
    * @param assignment - the assignment
    */
@@ -97,6 +99,7 @@ export class CacheCrudController
 
   /**
    * Get one
+   *
    * @param crudRequest - the CRUD request object
    * @param assignment - The cache assignment
    */
@@ -111,6 +114,7 @@ export class CacheCrudController
 
   /**
    * Create one
+   *
    * @param crudRequest - the CRUD request object
    * @param cacheCreateDto - cache create dto
    * @param assignment - The cache assignment
@@ -159,6 +163,7 @@ export class CacheCrudController
 
   /**
    * Create one
+   *
    * @param crudRequest - the CRUD request object
    * @param cacheUpdateDto - cache create dto
    * @param assignment - The cache assignment
@@ -183,6 +188,7 @@ export class CacheCrudController
 
   /**
    * Delete one
+   *
    * @param crudRequest - the CRUD request object
    * @param assignment - The cache assignment
    */
@@ -197,6 +203,7 @@ export class CacheCrudController
 
   /**
    * Get the crud service for the given assignment.
+   *
    * @internal
    * @param assignment - The cache assignment
    */
@@ -214,6 +221,7 @@ export class CacheCrudController
 
   /**
    * Get the entity key for the given assignment.
+   *
    * @param assignment - The cache assignment
    */
   protected getEntityKey(assignment: ReferenceAssignment): string {

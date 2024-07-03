@@ -25,6 +25,7 @@ export class IssueTokenService implements IssueTokenServiceInterface {
 
   /**
    * Generate the response payload.
+   *
    * @param id - user id or name for `sub` claim
    */
   async responsePayload(

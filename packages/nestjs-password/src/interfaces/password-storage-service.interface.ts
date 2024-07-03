@@ -15,6 +15,7 @@ export interface PasswordStorageServiceInterface {
   /**
    * Hash a password using a salt, if no
    * was passed, then generate one automatically.
+   *
    * @param password - Password to be hashed
    * @param options - Hash options
    */
@@ -25,6 +26,7 @@ export interface PasswordStorageServiceInterface {
 
   /**
    * Hash password for an object.
+   *
    * @param object - An object containing the new password to hash.
    * @param options - Hash object options
    * @returns A new object with the password hashed, with salt added.

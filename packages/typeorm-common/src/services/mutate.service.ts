@@ -38,6 +38,7 @@ export abstract class MutateService<
 
   /**
    * Constructor
+   *
    * @param repo - instance of the repo
    */
   constructor(repo: Repository<Entity>) {
@@ -46,6 +47,7 @@ export abstract class MutateService<
 
   /**
    * Create one
+   *
    * @param data - the reference to create
    * @returns the created reference
    */
@@ -65,6 +67,7 @@ export abstract class MutateService<
 
   /**
    * Update one
+   *
    * @param data - the reference data to update
    * @returns the updated reference
    */
@@ -89,6 +92,7 @@ export abstract class MutateService<
 
   /**
    * Replace one
+   *
    * @param data - the reference data to replace
    * @returns the replaced reference
    */
@@ -113,6 +117,7 @@ export abstract class MutateService<
 
   /**
    * Remove one
+   *
    * @param data - the reference data to remove
    * @param queryOptions - query options
    * @returns the removed reference

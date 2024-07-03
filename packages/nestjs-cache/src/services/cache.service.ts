@@ -34,6 +34,7 @@ export class CacheService implements CacheServiceInterface {
 
   /**
    * Create a cache with a for the given assignee.
+   *
    * @param assignment - The cache assignment
    * @param cache - The data to create
    */
@@ -118,6 +119,7 @@ export class CacheService implements CacheServiceInterface {
 
   /**
    * Delete a cache based on params
+   *
    * @param assignment - The cache assignment
    * @param cache - The cache to delete
    */
@@ -136,6 +138,7 @@ export class CacheService implements CacheServiceInterface {
 
   /**
    * Get all CACHEs for assignee.
+   *
    * @param assignment - The assignment of the check
    * @param cache - The cache to get assignments
    */
@@ -186,6 +189,7 @@ export class CacheService implements CacheServiceInterface {
 
   /**
    * Clear all caches for a given assignee.
+   *
    * @param assignment - The assignment of the repository
    * @param cache - The cache to clear
    */
@@ -212,6 +216,7 @@ export class CacheService implements CacheServiceInterface {
 
   /**
    * Delete CACHE based on assignment
+   *
    * @internal
    * @param assignment - The assignment to delete id from
    * @param id - The id or ids to delete
@@ -287,6 +292,7 @@ export class CacheService implements CacheServiceInterface {
 
   /**
    * Get the assignment repo for the given assignment.
+   *
    * @internal
    * @param assignment - The cache assignment
    */

@@ -14,6 +14,7 @@ import { EVENT_MODULE_EMITTER_SERVICE_TOKEN } from '../event-constants';
 export class EventDispatchService {
   /**
    * Constructor
+   *
    * @param eventEmitter - Injected event emitter instance
    */
   constructor(
@@ -50,6 +51,7 @@ export class EventDispatchService {
    * }
    * }
    * ```
+   *
    * @param event - The event being dispatched.
    * @returns boolean Returns true if the event had listeners, false otherwise.
    */
@@ -101,6 +103,7 @@ export class EventDispatchService {
    * }
    * }
    * ```
+   *
    * @param event - The event being dispatched.
    * @returns An array of return payloads, one for each listener that subscribed to the event.
    */

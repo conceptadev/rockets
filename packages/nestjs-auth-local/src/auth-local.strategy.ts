@@ -48,6 +48,7 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
   /**
    * Validate the user based on the username and password
    * from the request body
+   *
    * @param username - The username to authenticate
    * @param password - The plain text password
    */
