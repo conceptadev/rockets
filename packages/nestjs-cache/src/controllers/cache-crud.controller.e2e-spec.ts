@@ -142,7 +142,7 @@ describe('CacheAssignmentController (e2e)', () => {
     await supertest(app.getHttpServer())
       .post('/cache/user')
       .send(payload)
-      .expect(500);
+      .expect(400);
   });
 
   it('POST /cache/user wrong assignee id', async () => {
