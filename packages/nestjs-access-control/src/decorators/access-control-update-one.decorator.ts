@@ -3,9 +3,8 @@ import { ActionEnum } from '../enums/action.enum';
 import { AccessControlGrant } from './access-control-grant.decorator';
 
 /**
- * Update one resource grant shortcut
- *
- * @param string - resource The grant resource.
+ * Update one resource grant shortcut.
+ * @param resource - The grant resource.
  * @returns Decorator function
  */
 export const AccessControlUpdateOne = (

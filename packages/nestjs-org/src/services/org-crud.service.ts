@@ -12,7 +12,6 @@ import { OrgEntityInterface } from '../interfaces/org-entity.interface';
 export class OrgCrudService extends TypeOrmCrudService<OrgEntityInterface> {
   /**
    * Constructor
-   *
    * @param orgRepo - instance of the org repository.
    */
   constructor(

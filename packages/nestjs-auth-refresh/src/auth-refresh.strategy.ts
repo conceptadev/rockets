@@ -43,7 +43,6 @@ export class AuthRefreshStrategy extends PassportStrategyFactory<JwtStrategy>(
 
   /**
    * Validate the user sub from the verified token
-   *
    * @param payload - Authorization payload
    */
   async validate(

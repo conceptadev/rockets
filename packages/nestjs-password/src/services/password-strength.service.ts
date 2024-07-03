@@ -24,7 +24,6 @@ export class PasswordStrengthService
 
   /**
    * Method to check if password is strong
-   *
    * @param password - the plain text password
    * @returns password strength
    */

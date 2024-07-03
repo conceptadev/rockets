@@ -12,7 +12,6 @@ import { RunInTransactionCallback } from '../typeorm-common.types';
  * To silently ignore drivers that don't support transactions, set strict mode to false.
  * In this case, your `runInTransaction` callback will receive `undefined` for the value
  * of `entityManager`.
- *
  * @param entityManager - Entity manager instance
  * @param runInTransaction - Transaction callback
  * @param options - Options

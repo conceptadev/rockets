@@ -7,7 +7,6 @@ import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-clas
 
 /**
  * Create an entity repository provider function
- *
  * @param key - Entity key
  * @param entity - The entity
  * @param dataSource - The data source

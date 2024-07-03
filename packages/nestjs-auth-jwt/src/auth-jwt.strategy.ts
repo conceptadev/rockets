@@ -45,7 +45,6 @@ export class AuthJwtStrategy extends PassportStrategyFactory<JwtStrategy>(
 
   /**
    * Validate the user based on payload sub
-   *
    * @param payload - The payload to validate
    */
   async validate(

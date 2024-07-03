@@ -44,7 +44,6 @@ export class UserSeeder extends Seeder {
 
   /**
    * Set a password for the given user.
-   *
    * @param user - Object implementing the required interface.
    * @param password - The password to set.
    */

@@ -23,14 +23,12 @@ import { MessageFormatUtil } from './utils/message-format.util';
 export class LoggerRequestInterceptor implements NestInterceptor<Response> {
   /**
    * Constructor
-   *
    * @param loggerService - The logger service that implements ConsoleLogger
    */
   constructor(private loggerService: LoggerService) {}
 
   /**
    * Method to implement a custom intercept
-   *
    * @param context - Execution context
    * @param next - Call handler
    */
@@ -58,7 +56,6 @@ export class LoggerRequestInterceptor implements NestInterceptor<Response> {
 
   /**
    * Method to log response success
-   *
    * @param req - Request
    * @param res - Response
    * @param startDate - the date for the message
@@ -77,12 +74,10 @@ export class LoggerRequestInterceptor implements NestInterceptor<Response> {
 
   /**
    * Format exception error
-   *
    * @param req - Request
    * @param res - Response
    * @param startDate - Start date
    * @param error - Error instance
-   * @returns
    */
   responseError(req: Request, res: Response, startDate: Date, error: Error) {
     // format the message

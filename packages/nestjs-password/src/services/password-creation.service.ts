@@ -32,7 +32,6 @@ export class PasswordCreationService
 
   /**
    * Create password for an object.
-   *
    * @param object - An object containing the new password to hash.
    * @param options - Password create options.
    * @returns A new object with the password hashed, with salt added.
@@ -44,7 +43,6 @@ export class PasswordCreationService
 
   /**
    * Create password for an object.
-   *
    * @param object - An object containing the new password to hash.
    * @param options - Password create options.
    * @returns A new object with the password hashed, with salt added.
@@ -59,7 +57,6 @@ export class PasswordCreationService
 
   /**
    * Create password for an object.
-   *
    * @param object - An object containing the new password to hash.
    * @param options - Password create options.
    * @returns A new object with the password hashed, with salt added.
@@ -122,7 +119,6 @@ export class PasswordCreationService
   /**
    * Check number of attempts of using password
    * @param numOfAttempts - number of attempts
-   * @returns
    */
   checkAttemptLeft(numOfAttempts = 0): number {
     // Get number of max attempts allowed
