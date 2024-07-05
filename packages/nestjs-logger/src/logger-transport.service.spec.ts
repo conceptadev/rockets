@@ -6,6 +6,7 @@ import { LoggerTransportInterface } from './interfaces/logger-transport.interfac
 import { LoggerTransportService } from './logger-transport.service';
 
 class TestTransport implements LoggerTransportInterface {
+  logLevel: LogLevel[] | null = null;
   log(): void {
     const logger = new Logger();
     logger.log('Log to external Transport');
@@ -115,7 +116,6 @@ describe('LoggerTransportService', () => {
   it('loggerService.logLevel_empty', () => {
     const loggerTransportService = new LoggerTransportService({
       logLevel: [],
-      transportLogLevel: [],
     });
 
     const logLevels = loggerTransportService['logLevels'];
@@ -125,7 +125,6 @@ describe('LoggerTransportService', () => {
   it('loggerService.logLevel_empty_log', () => {
     const loggerTransportService = new LoggerTransportService({
       logLevel: [],
-      transportLogLevel: [],
     });
 
     const logLevels = loggerTransportService['logLevels'];

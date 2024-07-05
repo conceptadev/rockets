@@ -19,7 +19,6 @@ import { LoggerService } from './logger.service';
 import { LoggerTransportService } from './logger-transport.service';
 import { LoggerRequestInterceptor } from './logger-request.interceptor';
 import { LoggerExceptionFilter } from './logger-exception.filter';
-import { LoggerSentryTransport } from './transports/logger-sentry.transport';
 
 const RAW_OPTIONS_TOKEN = Symbol('__LOGGER_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -106,20 +105,12 @@ export function createLoggerServiceProvider(
     provide: LoggerService,
     inject: [
       RAW_OPTIONS_TOKEN,
-      LOGGER_MODULE_SETTINGS_TOKEN,
       LoggerTransportService,
     ],
     useFactory: async (
       options: LoggerOptionsInterface,
-      settings: LoggerSettingsInterface,
       loggerTransportService: LoggerTransportService,
     ) => {
-      if (settings?.transportSentryConfig) {
-        const sentry = new LoggerSentryTransport(
-          settings.transportSentryConfig,
-        );
-        loggerTransportService.addTransport(sentry);
-      }
 
       const transports = optionsOverrides?.transports ?? options.transports;
 

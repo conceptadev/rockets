@@ -1,5 +1,5 @@
 import { LogLevel } from '@nestjs/common';
-import { LoggerSentryConfigInterface } from './logger-sentry-config.interface';
+import { LoggerConfigInterface } from './logger-config.interface';
 
 /**
  * Logger options interface.
@@ -8,15 +8,9 @@ export interface LoggerSettingsInterface {
   /**
    * list of log levels allowed
    */
-  logLevel?: LogLevel[];
+  logLevel: LogLevel[];
 
-  /**
-   * List of transport log level allowed
-   */
-  transportLogLevel?: LogLevel[];
+  // TODO: move the methods to uplevel, ins that case should this be a unknown? instead
+  transportConfig?: LoggerConfigInterface;
 
-  /**
-   * Configuration for Sentry
-   */
-  transportSentryConfig?: LoggerSentryConfigInterface;
 }

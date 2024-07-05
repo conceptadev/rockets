@@ -3,16 +3,16 @@ import { Test } from '@nestjs/testing';
 import * as Sentry from '@sentry/node';
 import { Severity as SentryLogSeverity } from '@sentry/types';
 
-import { LOGGER_MODULE_SETTINGS_TOKEN } from '../config/logger.config';
+import { LOGGER_SENTRY_MODULE_SETTINGS_TOKEN } from '../config/logger-sentry.config';
 import { LoggerSentryConfigInterface } from '../interfaces/logger-sentry-config.interface';
-import { LoggerSettingsInterface } from '../interfaces/logger-settings.interface';
+import { LoggerSentrySettingsInterface } from '../interfaces/logger-sentry-settings.interface';
 import { LoggerSentryTransport } from './logger-sentry.transport';
 
 jest.mock('@sentry/node');
 
 describe('loggerSentryTransport', () => {
   let loggerSentryTransport: LoggerSentryTransport;
-  let settings: LoggerSettingsInterface;
+  let settings: LoggerSentrySettingsInterface;
   let spyInit: jest.SpyInstance;
   let spyCaptureException: jest.SpyInstance;
   let spyCaptureMessage: jest.SpyInstance;
@@ -21,32 +21,36 @@ describe('loggerSentryTransport', () => {
 
   beforeEach(async () => {
     const transportSentryConfig: LoggerSentryConfigInterface = {
-      dsn: '',
+      dsn: 'tests-dns',
       logLevelMap: jest.fn().mockReturnValue(SentryLogSeverity.Error),
+    };
+    const transportSentrySettings: LoggerSentrySettingsInterface = {
+      logLevel: ['error'],
+      transportConfig: transportSentryConfig
     };
     const moduleRef = await Test.createTestingModule({
       providers: [
         {
-          provide: LOGGER_MODULE_SETTINGS_TOKEN,
+          provide: LOGGER_SENTRY_MODULE_SETTINGS_TOKEN,
           useValue: {
-            transportSentryConfig,
+            ...transportSentrySettings,
           },
         },
       ],
     }).compile();
 
-    loggerSentryTransport = new LoggerSentryTransport(transportSentryConfig);
+    loggerSentryTransport = new LoggerSentryTransport(transportSentrySettings);
 
-    settings = moduleRef.get<LoggerSettingsInterface>(
-      LOGGER_MODULE_SETTINGS_TOKEN,
+    settings = moduleRef.get<LoggerSentrySettingsInterface>(
+      LOGGER_SENTRY_MODULE_SETTINGS_TOKEN,
     );
 
     spyInit = jest.spyOn(Sentry, 'init');
     spyCaptureException = jest.spyOn(Sentry, 'captureException');
     spyCaptureMessage = jest.spyOn(Sentry, 'captureMessage');
-    if (settings && settings.transportSentryConfig) {
+    if (settings && settings.transportConfig) {
       spyLogLevelMap = jest.spyOn(
-        settings.transportSentryConfig,
+        settings.transportConfig,
         'logLevelMap',
       );
     } else {

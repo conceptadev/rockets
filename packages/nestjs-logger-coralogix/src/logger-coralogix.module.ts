@@ -1,0 +1,39 @@
+import { DynamicModule, Module } from '@nestjs/common';
+
+import {
+  CoralogixAsyncOptions,
+  CoralogixModuleClass,
+  CoralogixOptions,
+  createLoggerCoralogixImports,
+  createLoggerCoralogixProviders,
+  createLoggerCoralogixExports,
+} from './logger-coralogix.module-definition';
+
+
+@Module({})
+export class LoggerCoralogixModule extends CoralogixModuleClass {
+  static register(options: CoralogixOptions): DynamicModule {
+    return super.register(options);
+  }
+
+  static registerAsync(options: CoralogixAsyncOptions): DynamicModule {
+    return super.registerAsync(options);
+  }
+
+  static forRoot(options: CoralogixOptions): DynamicModule {
+    return super.register({ ...options, global: true });
+  }
+
+  static forRootAsync(options: CoralogixAsyncOptions): DynamicModule {
+    return super.registerAsync({ ...options, global: true });
+  }
+
+  static forFeature(options: CoralogixOptions): DynamicModule {
+    return {
+      module: LoggerCoralogixModule,
+      imports: createLoggerCoralogixImports(),
+      providers: createLoggerCoralogixProviders({ options }),
+      exports: createLoggerCoralogixExports(),
+    };
+  }
+}

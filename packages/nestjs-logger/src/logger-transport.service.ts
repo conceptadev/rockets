@@ -48,8 +48,9 @@ export class LoggerTransportService {
     @Inject(LOGGER_MODULE_SETTINGS_TOKEN)
     protected readonly config: LoggerSettingsInterface,
   ) {
-    if (this.config?.transportLogLevel) {
-      this.logLevels = this.config.transportLogLevel;
+    // TODO: this should change to get it from the transport modules
+    if (this.config?.logLevel) {
+      this.logLevels = this.config.logLevel;
     }
   }
 
@@ -70,12 +71,14 @@ export class LoggerTransportService {
    * @param error
    */
   public log(message: string, logLevel: LogLevel, error?: Error): void {
-    // are we supposed to send this log level?
-    if (this.logLevels.includes(logLevel)) {
-      // yes, call all logger transports
-      this.loggerTransports.map((loggerTransport) =>
-        loggerTransport.log(message, logLevel, error),
-      );
-    }
+    this.loggerTransports.map((loggerTransport) => {
+      // get log levels of the transport, or fallback for the logger config
+      const logLevels = loggerTransport.logLevel || this.logLevels
+      
+      // are we supposed to send this log level based on transport
+      if (logLevels.includes(logLevel)) {
+        return loggerTransport.log(message, logLevel, error)
+      }
+    });
   }
 }
