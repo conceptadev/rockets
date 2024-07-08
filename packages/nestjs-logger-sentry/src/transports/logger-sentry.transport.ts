@@ -24,7 +24,7 @@ export class LoggerSentryTransport implements LoggerTransportInterface {
   /**
    * Constructor
    *
-   * @param config configuration file injected
+   * @param settings - configuration file injected
    */
   constructor(
     @Inject(LOGGER_SENTRY_MODULE_SETTINGS_TOKEN)
@@ -44,9 +44,9 @@ export class LoggerSentryTransport implements LoggerTransportInterface {
   /**
    * Method to log message to Sentry transport
    *
-   * @param message
-   * @param logLevel
-   * @param error
+   * @param message - Message to log
+   * @param logLevel - Level of severity
+   * @param error - Error to log
    */
   log(message: string, logLevel: LogLevel, error?: Error | string): void {
     // TODO: check of the logLevel is not on this method, because we would

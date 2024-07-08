@@ -72,7 +72,7 @@ export const coralogixConfig: (() => LoggerCoralogixSettingsInterface) &
         /**
          * Mapping from log level to coralogix severity
          *
-         * @param logLevel
+         * @param logLevel - The log level
          * @returns CoralogixLogSeverity
          */
         // TODO: should this be moved up to settings?

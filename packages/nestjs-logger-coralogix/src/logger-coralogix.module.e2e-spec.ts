@@ -25,12 +25,12 @@ describe('AppController (e2e)', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    loggerCoralogixTransport = moduleFixture.get<LoggerCoralogixTransport>(LoggerCoralogixTransport);
+    loggerCoralogixTransport = moduleFixture.get<LoggerCoralogixTransport>(
+      LoggerCoralogixTransport,
+    );
     jest.spyOn(loggerCoralogixTransport, 'log');
 
-    await supertest(app.getHttpServer())
-      .get('/log')
-      .expect(200);
+    await supertest(app.getHttpServer()).get('/log').expect(200);
 
     expect(loggerCoralogixTransport.log).toHaveBeenCalled();
   });
@@ -43,12 +43,12 @@ describe('AppController (e2e)', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    loggerCoralogixTransport = moduleFixture.get<LoggerCoralogixTransport>(LoggerCoralogixTransport);
+    loggerCoralogixTransport = moduleFixture.get<LoggerCoralogixTransport>(
+      LoggerCoralogixTransport,
+    );
     jest.spyOn(loggerCoralogixTransport, 'log');
 
-    await supertest(app.getHttpServer())
-      .get('/log')
-      .expect(200);
+    await supertest(app.getHttpServer()).get('/log').expect(200);
 
     expect(loggerCoralogixTransport.log).toHaveBeenCalledTimes(0);
   });

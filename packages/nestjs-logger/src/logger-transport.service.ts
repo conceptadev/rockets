@@ -42,7 +42,7 @@ export class LoggerTransportService {
   /**
    * Constructor
    *
-   * @param config
+   * @param config - The configuration
    */
   constructor(
     @Inject(LOGGER_MODULE_SETTINGS_TOKEN)
@@ -57,7 +57,7 @@ export class LoggerTransportService {
   /**
    * Method to add the transport that will be used
    *
-   * @param transport
+   * @param transport - transport to be added
    */
   public addTransport(transport: LoggerTransportInterface): void {
     this.loggerTransports.push(transport);
@@ -66,9 +66,9 @@ export class LoggerTransportService {
   /**
    * Method to log message to the transport based on the log level
    *
-   * @param message
-   * @param logLevel
-   * @param error
+   * @param message - Message to log
+   * @param logLevel - level of severity
+   * @param error - Error
    */
   public log(message: string, logLevel: LogLevel, error?: Error): void {
     this.loggerTransports.map((loggerTransport) => {

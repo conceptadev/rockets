@@ -17,12 +17,12 @@ describe('AppController (e2e)', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    loggerSentryTransport = moduleFixture.get<LoggerSentryTransport>(LoggerSentryTransport);
+    loggerSentryTransport = moduleFixture.get<LoggerSentryTransport>(
+      LoggerSentryTransport,
+    );
     jest.spyOn(loggerSentryTransport, 'log');
 
-    await supertest(app.getHttpServer())
-      .get('/log')
-      .expect(200);
+    await supertest(app.getHttpServer()).get('/log').expect(200);
 
     expect(loggerSentryTransport.log).toHaveBeenCalled();
   });
@@ -35,12 +35,12 @@ describe('AppController (e2e)', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    loggerSentryTransport = moduleFixture.get<LoggerSentryTransport>(LoggerSentryTransport);
+    loggerSentryTransport = moduleFixture.get<LoggerSentryTransport>(
+      LoggerSentryTransport,
+    );
     jest.spyOn(loggerSentryTransport, 'log');
 
-    await supertest(app.getHttpServer())
-      .get('/log')
-      .expect(200);
+    await supertest(app.getHttpServer()).get('/log').expect(200);
 
     expect(loggerSentryTransport.log).toHaveBeenCalledTimes(0);
   });

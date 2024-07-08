@@ -32,9 +32,9 @@ export class LoggerCoralogixTransport implements LoggerTransportInterface {
   /**
    * Method to log message to Coralogix transport
    *
-   * @param message
-   * @param logLevel
-   * @param error
+   * @param message - Message to log
+   * @param logLevel - Log level to log
+   * @param error - Error to log
    */
   log(message: string, logLevel: LogLevel, error?: Error | string): void {
     // map the internal log level to coralogix log severity

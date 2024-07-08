@@ -8,8 +8,7 @@ export interface LoggerCoralogixSettingsInterface
   extends Partial<Pick<LoggerSettingsInterface, 'logLevel'>> {
   /**
    *
-   * @param
-   *
+   * @param transportConfig - The coralogix configuration
    */
   transportConfig: LoggerCoralogixConfigInterface;
 }
