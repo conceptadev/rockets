@@ -39,7 +39,7 @@ export abstract class MutateService<
   /**
    * Constructor
    *
-   * @param repo instance of the repo
+   * @param repo - instance of the repo
    */
   constructor(repo: Repository<Entity>) {
     super(repo);
@@ -48,7 +48,7 @@ export abstract class MutateService<
   /**
    * Create one
    *
-   * @param data the reference to create
+   * @param data - the reference to create
    * @returns the created reference
    */
   async create(
@@ -68,7 +68,7 @@ export abstract class MutateService<
   /**
    * Update one
    *
-   * @param data the reference data to update
+   * @param data - the reference data to update
    * @returns the updated reference
    */
   async update(
@@ -93,7 +93,7 @@ export abstract class MutateService<
   /**
    * Replace one
    *
-   * @param data the reference data to replace
+   * @param data - the reference data to replace
    * @returns the replaced reference
    */
   async replace(
@@ -118,8 +118,8 @@ export abstract class MutateService<
   /**
    * Remove one
    *
-   * @param data the reference data to remove
-   * @param queryOptions query options
+   * @param data - the reference data to remove
+   * @param queryOptions - query options
    * @returns the removed reference
    */
   async remove(
@@ -133,7 +133,7 @@ export abstract class MutateService<
   }
 
   /**
-   * @private
+   * @internal
    */
   private async save(
     entity: Entity,
@@ -148,7 +148,7 @@ export abstract class MutateService<
   }
 
   /**
-   * @private
+   * @internal
    */
   private async delete(
     entity: Entity,
@@ -163,7 +163,7 @@ export abstract class MutateService<
   }
 
   /**
-   * @private
+   * @internal
    */
   protected async validate<T extends DeepPartial<Entity>>(
     type: Type<T>,
@@ -187,6 +187,9 @@ export abstract class MutateService<
     return dto;
   }
 
+  /**
+   * @internal
+   */
   protected async transform(
     data: DeepPartial<Entity>,
     _queryOptions?: QueryOptionsInterface,
@@ -195,7 +198,7 @@ export abstract class MutateService<
   }
 
   /**
-   * @private
+   * @internal
    */
   protected async findById(
     id: string,

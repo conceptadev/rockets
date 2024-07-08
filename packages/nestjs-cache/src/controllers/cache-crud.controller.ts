@@ -70,7 +70,9 @@ export class CacheCrudController
   /**
    * Constructor.
    *
-   * @param allCrudServices instances of all crud services
+   * @param settings - cache settings
+   * @param allCrudServices - instances of all crud services
+   * @param cacheService - instance of cache service
    */
   constructor(
     @Inject(CACHE_MODULE_SETTINGS_TOKEN)
@@ -83,8 +85,8 @@ export class CacheCrudController
   /**
    * Get many
    *
-   * @param crudRequest the CRUD request object
-   * @param assignment the assignment
+   * @param crudRequest - the CRUD request object
+   * @param assignment - the assignment
    */
   @CrudReadMany()
   @AccessControlReadMany(CacheResource.Many)
@@ -98,8 +100,8 @@ export class CacheCrudController
   /**
    * Get one
    *
-   * @param crudRequest the CRUD request object
-   * @param assignment The cache assignment
+   * @param crudRequest - the CRUD request object
+   * @param assignment - The cache assignment
    */
   @CrudReadOne()
   @AccessControlReadOne(CacheResource.One)
@@ -113,9 +115,9 @@ export class CacheCrudController
   /**
    * Create one
    *
-   * @param crudRequest the CRUD request object
-   * @param cacheCreateDto cache create dto
-   * @param assignment The cache assignment
+   * @param crudRequest - the CRUD request object
+   * @param cacheCreateDto - cache create dto
+   * @param assignment - The cache assignment
    */
   @CrudCreateOne()
   @AccessControlCreateOne(CacheResource.One)
@@ -162,9 +164,9 @@ export class CacheCrudController
   /**
    * Create one
    *
-   * @param crudRequest the CRUD request object
-   * @param cacheUpdateDto cache create dto
-   * @param assignment The cache assignment
+   * @param crudRequest - the CRUD request object
+   * @param cacheUpdateDto - cache create dto
+   * @param assignment - The cache assignment
    */
   @CrudUpdateOne()
   @AccessControlCreateOne(CacheResource.One)
@@ -187,8 +189,8 @@ export class CacheCrudController
   /**
    * Delete one
    *
-   * @param crudRequest the CRUD request object
-   * @param assignment The cache assignment
+   * @param crudRequest - the CRUD request object
+   * @param assignment - The cache assignment
    */
   @CrudDeleteOne()
   @AccessControlDeleteOne(CacheResource.One)
@@ -202,8 +204,8 @@ export class CacheCrudController
   /**
    * Get the crud service for the given assignment.
    *
-   * @private
-   * @param assignment The cache assignment
+   * @internal
+   * @param assignment - The cache assignment
    */
   protected getCrudService(assignment: ReferenceAssignment): CacheCrudService {
     const entityKey = this.getEntityKey(assignment);
@@ -220,7 +222,7 @@ export class CacheCrudController
   /**
    * Get the entity key for the given assignment.
    *
-   * @param assignment The cache assignment
+   * @param assignment - The cache assignment
    */
   protected getEntityKey(assignment: ReferenceAssignment): string {
     // have entity key for given assignment?

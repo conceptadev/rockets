@@ -6,14 +6,13 @@ import {
 /**
  * Message formatting utility
  *
- * @private
+ * @internal
  */
 export class MessageFormatUtil {
   /**
    * Function to format message from request.
    *
-   * @param req
-   * @returns
+   * @param req - request
    */
   static formatRequestMessage(req: Request): string {
     const { method, url } = req;
@@ -25,11 +24,10 @@ export class MessageFormatUtil {
   /**
    * Function to format message for response.
    *
-   * @param req
-   * @param res
-   * @param startDate
-   * @param error
-   * @returns
+   * @param req - request
+   * @param res - response
+   * @param startDate - start date
+   * @param error - error
    */
   static formatResponseMessage(
     req: Request,

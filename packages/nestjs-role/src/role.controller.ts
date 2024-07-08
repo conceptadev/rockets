@@ -55,14 +55,14 @@ export class RoleController
   /**
    * Constructor.
    *
-   * @param roleCrudService instance of the Role crud service
+   * @param roleCrudService - instance of the Role crud service
    */
   constructor(private roleCrudService: RoleCrudService) {}
 
   /**
    * Get many
    *
-   * @param crudRequest the CRUD request object
+   * @param crudRequest - the CRUD request object
    */
   @CrudReadMany()
   @AccessControlReadMany(RoleResource.Many)
@@ -73,7 +73,7 @@ export class RoleController
   /**
    * Get one
    *
-   * @param crudRequest the CRUD request object
+   * @param crudRequest - the CRUD request object
    */
   @CrudReadOne()
   @AccessControlReadOne(RoleResource.One)
@@ -84,8 +84,8 @@ export class RoleController
   /**
    * Create many
    *
-   * @param crudRequest the CRUD request object
-   * @param roleCreateManyDto role create many dto
+   * @param crudRequest - the CRUD request object
+   * @param roleCreateManyDto - role create many dto
    */
   @CrudCreateMany()
   @AccessControlCreateMany(RoleResource.Many)
@@ -109,8 +109,8 @@ export class RoleController
   /**
    * Create one
    *
-   * @param crudRequest the CRUD request object
-   * @param roleCreateDto role create dto
+   * @param crudRequest - the CRUD request object
+   * @param roleCreateDto - role create dto
    */
   @CrudCreateOne()
   @AccessControlCreateOne(RoleResource.One)
@@ -125,8 +125,8 @@ export class RoleController
   /**
    * Update one
    *
-   * @param crudRequest the CRUD request object
-   * @param roleUpdateDto role update dto
+   * @param crudRequest - the CRUD request object
+   * @param roleUpdateDto - role update dto
    */
   @CrudUpdateOne()
   @AccessControlUpdateOne(RoleResource.One)
@@ -140,7 +140,7 @@ export class RoleController
   /**
    * Delete one
    *
-   * @param crudRequest the CRUD request object
+   * @param crudRequest - the CRUD request object
    */
   @CrudDeleteOne()
   @AccessControlDeleteOne(RoleResource.One)

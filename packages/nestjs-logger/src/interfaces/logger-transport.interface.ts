@@ -27,9 +27,9 @@ export interface LoggerTransportInterface {
   /**
    * Transport log method
    *
-   * @param message Message to be logged
-   * @param logLevel The log level that logger should consider
-   * @param error an optional error that can be sent
+   * @param message - Message to be logged
+   * @param logLevel - The log level that logger should consider
+   * @param error - an optional error that can be sent
    */
   log(message: string, logLevel: LogLevel, error?: Error): void;
 }

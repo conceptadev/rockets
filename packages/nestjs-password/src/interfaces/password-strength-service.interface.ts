@@ -4,7 +4,8 @@
 export interface PasswordStrengthServiceInterface {
   /**
    * Check if Password is strong
-   * @param password
+   *
+   * @param password - The plain text password
    */
   isStrong(password: string): boolean;
 }

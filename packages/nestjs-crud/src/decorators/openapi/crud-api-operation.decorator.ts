@@ -2,7 +2,7 @@ import { ApiOperation, ApiOperationOptions } from '@nestjs/swagger';
 import { DecoratorTargetObject } from '../../crud.types';
 
 /**
- * @CrudApiOperation() open api decorator
+ * \@CrudApiOperation() open api decorator
  */
 export function CrudApiOperation(
   options?: ApiOperationOptions,

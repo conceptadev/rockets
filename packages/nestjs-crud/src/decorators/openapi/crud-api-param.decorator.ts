@@ -6,7 +6,7 @@ import { CrudApiParamMetadataInterface } from '../../interfaces/crud-api-param-m
 import { CrudReflectionService } from '../../services/crud-reflection.service';
 
 /**
- * @CrudApiParam() open api decorator
+ * \@CrudApiParam() open api decorator
  */
 export function CrudApiParam(options?: ApiParamOptions): MethodDecorator {
   return (target: DecoratorTargetObject, ...rest) => {

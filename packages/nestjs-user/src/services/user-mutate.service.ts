@@ -33,8 +33,8 @@ export class UserMutateService
   /**
    * Constructor
    *
-   * @param repo instance of the user repo
-   * @param passwordCreationService
+   * @param repo - instance of the user repo
+   * @param userPasswordService - instance of a user password service
    */
   constructor(
     @InjectDynamicRepository(USER_MODULE_USER_ENTITY_KEY)

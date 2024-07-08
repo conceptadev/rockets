@@ -30,10 +30,8 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
   AUTH_LOCAL_STRATEGY_NAME,
 ) {
   /**
-   *
-   * @param userLookupService The service used to get the user
-   * @param settings The settings for the local strategy
-   * @param passwordStorageService The service used to hash and validate passwords
+   * @param settings - The settings for the local strategy
+   * @param validateUserService - The service used validate passwords
    */
   constructor(
     @Inject(AUTH_LOCAL_MODULE_SETTINGS_TOKEN)
@@ -51,8 +49,8 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
    * Validate the user based on the username and password
    * from the request body
    *
-   * @param username The username to authenticate
-   * @param password The plain text password
+   * @param username - The username to authenticate
+   * @param password - The plain text password
    */
   async validate(username: ReferenceUsername, password: string) {
     // break out the settings

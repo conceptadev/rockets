@@ -14,7 +14,6 @@ import { PasswordCurrentPasswordInterface } from '../interfaces/password-current
 /**
  * Service with functions related to password creation
  * to check if password is strong, and the number of attempts user can do to update a password
- *
  */
 @Injectable()
 export class PasswordCreationService
@@ -34,8 +33,8 @@ export class PasswordCreationService
   /**
    * Create password for an object.
    *
-   * @param object An object containing the new password to hash.
-   * @param options Password create options.
+   * @param object - An object containing the new password to hash.
+   * @param options - Password create options.
    * @returns A new object with the password hashed, with salt added.
    */
   async createObject<T extends PasswordPlainInterface>(
@@ -46,8 +45,8 @@ export class PasswordCreationService
   /**
    * Create password for an object.
    *
-   * @param object An object containing the new password to hash.
-   * @param options Password create options.
+   * @param object - An object containing the new password to hash.
+   * @param options - Password create options.
    * @returns A new object with the password hashed, with salt added.
    */
   async createObject<T extends Partial<PasswordPlainInterface>>(
@@ -61,8 +60,8 @@ export class PasswordCreationService
   /**
    * Create password for an object.
    *
-   * @param object An object containing the new password to hash.
-   * @param options Password create options.
+   * @param object - An object containing the new password to hash.
+   * @param options - Password create options.
    * @returns A new object with the password hashed, with salt added.
    */
   async createObject<T extends PasswordPlainInterface>(
@@ -114,6 +113,7 @@ export class PasswordCreationService
   /**
    * Check if number of current attempt is allowed based on the amount of attempts left
    * if the number of attempts left is greater then
+   *
    * @returns Number of attempts user has to try
    */
   checkAttempt(numOfAttempts = 0): boolean {
@@ -122,8 +122,8 @@ export class PasswordCreationService
 
   /**
    * Check number of attempts of using password
-   * @param numOfAttempts number of attempts
-   * @returns
+   *
+   * @param numOfAttempts - number of attempts
    */
   checkAttemptLeft(numOfAttempts = 0): number {
     // Get number of max attempts allowed

@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 export abstract class CryptUtil {
   /**
    * Generate Salt
+   *
    * @returns Generate
    */
   static async generateSalt(): Promise<string> {
@@ -13,10 +14,8 @@ export abstract class CryptUtil {
   }
 
   /**
-   *
-   * @param password Hash password
-   * @param salt
-   * @returns
+   * @param password - The plain text password to hash
+   * @param salt - The salt to use when hashing the password
    */
   static async hashPassword(password: string, salt: string): Promise<string> {
     // must have a password
@@ -31,10 +30,10 @@ export abstract class CryptUtil {
 
   /**
    * Validate password with the hash password
-   * @param passwordPlain
-   * @param passwordCrypt
-   * @param passwordSalt
-   * @returns
+   *
+   * @param passwordPlain - The plain password
+   * @param passwordHash - The encrypted password
+   * @param passwordSalt - The salt
    */
   static async validatePassword(
     passwordPlain: string,

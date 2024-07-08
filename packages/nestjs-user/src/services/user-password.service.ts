@@ -25,8 +25,8 @@ export class UserPasswordService implements UserPasswordServiceInterface {
   /**
    * Constructor
    *
-   * @param userLookupService user lookup service
-   * @param passwordCreationService password creation service
+   * @param userLookupService - user lookup service
+   * @param passwordCreationService - password creation service
    */
   constructor(
     @Inject(UserLookupService)
