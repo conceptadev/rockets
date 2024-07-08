@@ -18,13 +18,13 @@
   - [Getting Started](#getting-started)
     - [Overview](#overview)
     - [Basic Setup](#basic-setup)
-    - [1.3 Basic Setup in a NestJS Project](#13-basic-setup-in-a-nestjs-project)
+    - [Basic Setup in a NestJS Project](#basic-setup-in-a-nestjs-project)
       - [Scenario: Users have a list of pets](#scenario-users-have-a-list-of-pets)
       - [Step 1: Create Entities](#step-1-create-entities)
       - [Step 2: Create Services](#step-2-create-services)
       - [Step 3: Create Controller](#step-3-create-controller)
       - [Step 4: Configure the Module](#step-4-configure-the-module)
-    - [1.4 First Authentication with JWT](#14-first-authentication-with-jwt)
+    - [First Authentication with JWT](#first-authentication-with-jwt)
       - [Validating the Setup](#validating-the-setup)
       - [Step 1: Obtain a JWT Token](#step-1-obtain-a-jwt-token)
       - [Step 2: Make an Authenticated Request](#step-2-make-an-authenticated-request)
@@ -41,8 +41,6 @@
     - [Global, Synchronous vs Asynchronous Registration](#global-synchronous-vs-asynchronous-registration)
   - [Integration Details](#integration-details)
     - [Integrating with Other Modules](#integrating-with-other-modules)
-- [References](#references)
-
 
 # Tutorials
 
@@ -50,7 +48,13 @@
 
 ### Overview of the Library
 
-This module is designed to manage JWT authentication processes within a NestJS application. It includes services for issuing JWTs, validating user credentials, and verifying tokens. The services handle the generation of access and refresh tokens, ensure users are active and meet authentication criteria, and perform token validity checks, including additional validations if necessary. This comprehensive approach ensures secure user authentication and efficient token management.
+This module is designed to manage JWT authentication processes within a
+NestJS application. It includes services for issuing JWTs, validating user
+credentials, and verifying tokens. The services handle the generation of
+access and refresh tokens, ensure users are active and meet authentication
+criteria, and perform token validity checks, including additional validations
+if necessary. This comprehensive approach ensures secure user authentication
+and efficient token management.
 
 ### Purpose and Key Features
 
@@ -76,38 +80,45 @@ This module is designed to manage JWT authentication processes within a NestJS a
 
 To get started, install the `AuthenticationModule` package:
 
-`yarn add @concepta/nestjs-auth-local`
+`yarn add @concepta/nestjs-authentication`
 
 ## Getting Started
 
-#### Overview
+### Overview
 
-This section covers the basics of setting up the `AuthenticationModule` in a NestJS application.
+This section covers the basics of setting up the `AuthenticationModule`
+in a NestJS application.
 
-#### Basic Setup
+### Basic Setup
 
-The `nestjs-authentication` module is designed to integrate seamlessly with
-other modules in the `nestjs-auth` suite, such as `nestjs-auth-jwt`,
-`nestjs-auth-local`, `nestjs-auth-recovery`, and `nestjs-auth-refresh`. For
-optimal functionality, it is recommended to use these modules together to
+The `@concepta/nestjs-authentication` module is designed to integrate
+seamlessly with other modules in the authentication suite, such as
+`@concepta/nestjs-auth-jwt`, `@concepta/nestjs-auth-local`,
+`@concepta/nestjs-auth-recovery`, and `@concepta/nestjs-auth-refresh`.
+
+For optimal functionality, it is recommended to use these modules together to
 address various aspects of authentication and token management in your NestJS
 application.
 
-To set up the `nestjs-authentication` module, begin by installing the necessary
-packages using your package manager. Here is a basic example using `yarn`:
+To set up the `@concepta/nestjs-authentication` module, begin by installing
+the necessary packages using your package manager.
+
+Here is a basic example using `yarn`:
 
 ```sh
-yarn add @nestjs-authentication @nestjs-auth-jwt @nestjs-auth-local @nestjs-auth-recovery @nestjs-auth-refresh
+yarn add @concepta/nestjs-authentication @concepta/nestjs-auth-jwt @concepta/nestjs-auth-local @concepta/nestjs-auth-recovery @concepta/nestjs-auth-refresh
 ```
 
-### 1.3 Basic Setup in a NestJS Project
+### Basic Setup in a NestJS Project
 
 #### Scenario: Users have a list of pets
 
-To demonstrate this scenario, we will set up an application where users can have a list of pets.
-We will create the necessary entities, services, module configurations to simulate the environment.
+To demonstrate this scenario, we will set up an application
+where users can have a list of pets. We will create the necessary entities,
+services, module configurations to simulate the environment.
 
-> Note: The `@concepta/nestjs-user` module can be used in place of our example `User` related prerequisites.
+> Note: The `@concepta/nestjs-user` module can be used in place of
+> our example `User` related prerequisites.
 
 #### Step 1: Create Entities
 
@@ -255,7 +266,8 @@ export class MyAuthLocalUserLookupService implements AuthLocalUserLookupServiceI
 }
 ```
 
-Let's create a password validation service and overwrite the validate method, for demo purposes only.
+Let's create a password validation service and overwrite
+the validate method, for demo purposes only.
 
 ```ts
 // my-auth-local-user-password-validation.service.ts
@@ -290,7 +302,10 @@ export class MyAuthLocalPasswordValidationService extends PasswordValidationServ
 
 ```
 
-Let's create a verify service to validate the token that will be received in the request. If we need a custom logic to validate the access token you can overwrite this service.
+Let's create a verify service to validate the token that will be
+received in the request.
+If we need a custom logic to validate the access token you can
+overwrite this service.
 
 ```ts
 // jwt-verify-token.service.ts
@@ -299,39 +314,25 @@ import { Injectable } from '@nestjs/common';
 import { VerifyTokenServiceInterface } from '@concepta/nestjs-authentication';
 @Injectable()
 export class MyJwtVerifyTokenService implements VerifyTokenServiceInterface {
-  accessToken(): ReturnType<JwtService['verifyAsync']> {
-    return new Promise((resolve, reject) => {
-      try {
-        // your custom logic to sign and validate the the token
-        resolve({ accessToken: 'access-token' });
-      } catch (error) {
-        reject(error);
-      }
-    });
+  accessToken() {
+    // your custom logic to sign and validate the the token
+    return { accessToken: 'access-token' };
   }
 
-  refreshToken(
-    ...args: Parameters<JwtService['verifyAsync']>
-  ): ReturnType<JwtService['verifyAsync']> {
-    return new Promise((resolve, reject) => {
-      try {
-        // your custom logic to sign and validate the the token
-        resolve({ accessToken: 'refresh-token' });
-      } catch (error) {
-        reject(error);
-      }
-    });
+  refreshToken(...args) {
+    // your custom logic to sign and validate the the token
+    return { accessToken: 'refresh-token' };
   }
 }
-
 ```
 
 #### Step 3: Create Controller
 
 Create a controller to handle the HTTP requests.
 
-> Use `@AuthPublic` decorator from `@concepta/nestjs-authentication` on the controller or
-individual routes if you want to override the global JWT guard to make the route public.
+> Note: Use the `@AuthPublic` decorator from `@concepta/nestjs-authentication`
+on the controller or individual routes if you want to override the
+global JWT guard to make the route public.
 
 ```typescript
 // user.controller.ts
@@ -383,6 +384,7 @@ import { AuthLocalModule } from '@concepta/nestjs-auth-local';
 import { MyAuthLocalUserLookupService } from './services/my-auth-local-user-lookup.service';
 import { MyAuthLocalPasswordValidationService } from './services/my-auth-local-password-validation.service';
 import { MyJwtVerifyTokenService } from './services/jwt-verify-token.service';
+
 @Module({
   imports: [
     TypeOrmExtModule.forRoot({
@@ -392,13 +394,13 @@ import { MyJwtVerifyTokenService } from './services/jwt-verify-token.service';
       entities: [User, Pet],
     }),
     AuthLocalModule.forRoot({
-      // this lookup contains byUsername method
+      // this service contains the byUsername method
       userLookupService: new MyAuthLocalUserLookupService(),
       // this service contains the validate the password logic
       passwordValidationService: new MyAuthLocalPasswordValidationService(), //
     }),
     AuthJwtModule.forRoot({
-      // this lookup contains bySubject method that will get user based on the token
+      // this contains the bySubject method that will get user based on the token
       userLookupService: new MyJwtUserLookupService(),
       // service to validate the jwt token
       verifyTokenService: new MyJwtVerifyTokenService(),
@@ -410,22 +412,26 @@ import { MyJwtVerifyTokenService } from './services/jwt-verify-token.service';
 export class AppModule {}
 ```
 
-### 1.4 First Authentication with JWT
+### First Authentication with JWT
 
 #### Validating the Setup
 
 To validate the setup, you can use `curl` commands to simulate frontend requests.
 
-By following these steps, you can validate that the setup is working correctly 
-and that authenticated requests to the `user` endpoint return the 
+By following these steps, you can validate that the setup is working correctly
+and that authenticated requests to the `user` endpoint return the
 expected list of pets for a given user.
 
 Here are the steps to test the `user` endpoint:
 
 #### Step 1: Obtain a JWT Token
 
-The `AuthLocalModule` provide a controller with an authentication endpoint to obtain a JWT token, use `curl` to get the token. Replace `[auth-url]` with your 
-actual authentication URL, and `[username]` and `[password]` with valid credentials. For our demo, since we overwrote the `passwordValidationService`, we can use any password.
+The `AuthLocalModule` provide a controller with an authentication
+endpoint to obtain a JWT token, use `curl` to get the token.
+
+Replace `[auth-url]` with your actual authentication URL, and
+`[username]` and `[password]` with valid credentials. For our demo,
+since we overwrote the `passwordValidationService`, we can use any password.
 
 ```bash
 curl -X POST [auth-url] \
@@ -433,12 +439,12 @@ curl -X POST [auth-url] \
   -d '{"username": "[username]", "password": "[password]"}'
 ```
 
-This should return a response with a JWT token, which you'll use for 
+This should return a response with a JWT token, which you'll use for
 authenticated requests.
 
 #### Step 2: Make an Authenticated Request
 
-Use the JWT token obtained in the previous step to make an authenticated request 
+Use the JWT token obtained in the previous step to make an authenticated request
 to the `user` endpoint. Replace `[jwt-token]`.
 
 ```bash
@@ -446,11 +452,11 @@ curl -X GET http://localhost:3000/user \
   -H "Authorization: Bearer [jwt-token]"
 ```
 
-#### Example Curl Calls:
+#### Example Curl Calls
 
 Here is an example sequence of curl commands:
 
-##### Obtain a JWT token:
+##### Obtain a JWT token
 
 ```bash
 curl -X POST http://localhost:3000/auth/login \
@@ -458,7 +464,7 @@ curl -X POST http://localhost:3000/auth/login \
   -d '{"username": "testuser", "password": "testpassword"}'
 ```
 
-##### Example JWT response:
+##### Example JWT response
 
 ```json
 {
@@ -466,7 +472,7 @@ curl -X POST http://localhost:3000/auth/login \
 }
 ```
 
-##### Make an authenticated request using the token:
+##### Make an authenticated request using the token
 
 Assuming that are alerady inserted the user and its pets, let's try to retrieve it.
 
@@ -475,7 +481,8 @@ curl -X GET http://localhost:3000/user/5b3f5fd3-9426-4c4d-a06d-b4d55079034d/pets
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
-##### Example authenticated response:
+##### Example authenticated response
+
 ```json
 [
   {
@@ -490,7 +497,9 @@ curl -X GET http://localhost:3000/user/5b3f5fd3-9426-4c4d-a06d-b4d55079034d/pets
 ]
 ```
 
-To get authenticated user, we can use the decorator `@AuthUser()` this will return whatever was defined at `bySubject` method from `MyJwtUserLookupService`.
+To get authenticated user, we can use the decorator `@AuthUser()`
+this will return whatever was defined at `bySubject` method from
+`MyJwtUserLookupService`.
 
 ```ts
 @Get(':id/pets')
@@ -503,13 +512,23 @@ To get authenticated user, we can use the decorator `@AuthUser()` this will retu
   }
 ```
 
-# How to Guides
+## How to Guides
 
 ### 1. How to Set Up AuthenticationModule with forRoot and JwtModule from @concepta/nestjs-jwt
 
-The `nestjs-authentication` module is designed to integrate seamlessly with other modules in the `nestjs-auth` suite, such as `nestjs-auth-jwt`, `nestjs-auth-local`, `nestjs-auth-recovery`, and `nestjs-auth-refresh`. For optimal functionality, it is recommended to use these modules together to address various aspects of authentication and token management in your NestJS application.
+The `@concepta/nestjs-authentication` module is designed to integrate
+seamlessly with other modules in the authentication suite, such as
+`@concepta/nestjs-auth-jwt`, `@concepta/nestjs-auth-local`,
+`@concepta/nestjs-auth-recovery`, and `@concepta/nestjs-auth-refresh`.
 
-To set up the `nestjs-authentication` module, begin by installing the necessary packages using your package manager. Here is a basic example using `yarn`:
+For optimal functionality, it is recommended to use these modules
+together to address various aspects of authentication and token management
+in your NestJS application.
+
+To set up the `nestjs-authentication` module, begin by installing the
+necessary packages using your package manager.
+
+Here is a basic example using `yarn`:
 
 yarn add @nestjs-authentication @concepta/nestjs-jwt
 
@@ -533,17 +552,20 @@ To set up the `AuthenticationModule` and `JwtModule`, follow these steps:
 //...
 ```
 
-This setup configures the `AuthenticationModule` with global settings and integrates the `JwtModule` for JWT-based authentication.
+This setup configures the `AuthenticationModule` with global
+settings and integrates the `JwtModule` for JWT-based authentication.
 
 ### 2. How to Configure AuthenticationModule Settings
 
-The `AuthenticationModule` provides several configurable settings to customize its behavior. Each setting can be defined in the module configuration and will create default services to be used in other modules.
+The `AuthenticationModule` provides several configurable settings to
+customize its behavior. Each setting can be defined in the module
+configuration and will create default services to be used in other modules.
 
 #### Settings Example
 
 Here is an example of how to configure each property of the settings:
 
-##### 1. enableGuards: Enables or disables guards globally.
+##### 1. enableGuards: Enables or disables guards globally
 
 ```ts
 //...
@@ -554,7 +576,8 @@ AuthenticationModule.forRoot({
 }),
 //...
 ```
-##### 2. issueTokenService: Custom service for issuing tokens.
+
+##### 2. issueTokenService: Custom service for issuing tokens
 
 ```ts
 //...
@@ -563,7 +586,9 @@ AuthenticationModule.forRoot({
   }),
 //...
 ```
+
  **Implementation** :
+
 ```ts
 import { Injectable } from '@nestjs/common';
 import { JwtIssueService } from '@concepta/nestjs-jwt';
@@ -597,7 +622,7 @@ export class MyIssueTokenService implements IssueTokenServiceInterface {
 }
 ```
 
-##### 3. **verifyTokenService**: Custom service for verifying tokens.
+##### 3. **verifyTokenService**: Custom service for verifying tokens
 
 ```ts
 //...
@@ -608,6 +633,7 @@ export class MyIssueTokenService implements IssueTokenServiceInterface {
 ```
 
 **Implementation:**
+
 ```ts
 import { Injectable } from '@nestjs/common';
 import { JwtVerifyService } from '@concepta/nestjs-jwt';
@@ -658,7 +684,7 @@ export class MyVerifyTokenService implements VerifyTokenServiceInterface {
 }
 ```
 
-##### 4. validateTokenService: Custom service for validating tokens.
+##### 4. validateTokenService: Custom service for validating tokens
 
 ```ts
 //...
@@ -667,7 +693,9 @@ AuthenticationModule.forRoot({
 }),
 //...
 ```
+
 **Implementation:**
+
 ```ts
 import { Injectable } from '@nestjs/common';
 import { ValidateTokenServiceInterface } from '../interfaces/validate-token-service.interface';
@@ -687,55 +715,57 @@ export class MyValidateTokenService implements ValidateTokenServiceInterface {
 
 #### What is This Library?
 
-The `nestjs-authentication` library is a comprehensive solution for managing 
-authentication processes within a NestJS application. It provides services for 
-issuing JWTs, validating user credentials, and verifying tokens. The library 
-integrates seamlessly with other modules in the `nestjs-auth` suite, such as 
-`nestjs-auth-jwt`, `nestjs-auth-local`, `nestjs-auth-recovery`, and 
-`nestjs-auth-refresh`, making it a versatile choice for various authentication 
-needs.
+The `@concepta/nestjs-authentication` library is a comprehensive
+solution for managing authentication processes within a NestJS application.
+It provides services for issuing JWTs, validating user credentials, and
+verifying tokens.
+
+The library integrates seamlessly with other modules in the authentication
+suite, such as `@concepta/nestjs-auth-jwt`, `@concepta/nestjs-auth-local`,
+`@concepta/nestjs-auth-recovery`, and `@concepta/nestjs-auth-refresh`, making
+it a versatile choice for various authentication needs.
 
 #### Benefits of Using This Library
 
-- **Secure Token Management**: Robust mechanisms for issuing and managing 
+- **Secure Token Management**: Robust mechanisms for issuing and managing
   access and refresh tokens.
-- **Abstract User Validation Service**: Flexible user validation service that 
+- **Abstract User Validation Service**: Flexible user validation service that
   can be customized to meet specific requirements.
-- **Token Verification**: Capabilities to verify the authenticity and validity 
+- **Token Verification**: Capabilities to verify the authenticity and validity
   of tokens, with support for additional custom validations.
-- **Customizable and Extensible**: Designed to be flexible, allowing 
-  customization of token generation, user validation, and token verification 
+- **Customizable and Extensible**: Designed to be flexible, allowing
+  customization of token generation, user validation, and token verification
   processes.
-- **Integration with NestJS Ecosystem**: Seamlessly integrates with other 
-  NestJS modules and services, leveraging the framework's features for enhanced 
+- **Integration with NestJS Ecosystem**: Seamlessly integrates with other
+  NestJS modules and services, leveraging the framework's features for enhanced
   functionality and performance.
 
 ### Design Choices
 
 #### Why Use NestJS Guards?
 
-NestJS guards provide a way to control access to various parts of the 
-application by checking certain conditions before the route handler is executed. 
-In the `nestjs-authentication` module, guards are used to implement 
-authentication and authorization logic. By using guards, developers can apply 
-security policies across routes efficiently, ensuring that only authenticated 
+NestJS guards provide a way to control access to various parts of the
+application by checking certain conditions before the route handler is executed.
+In the `nestjs-authentication` module, guards are used to implement
+authentication and authorization logic. By using guards, developers can apply
+security policies across routes efficiently, ensuring that only authenticated
 and authorized users can access protected resources.
 
 #### Global, Synchronous vs Asynchronous Registration
 
-The `nestjs-authentication` module supports both synchronous and asynchronous 
+The `nestjs-authentication` module supports both synchronous and asynchronous
 registration:
 
-- **Global Registration**: Makes the module available throughout the entire 
-  application. This approach is useful when JWT authentication is required across 
+- **Global Registration**: Makes the module available throughout the entire
+  application. This approach is useful when JWT authentication is required across
   all or most routes in the application.
-- **Synchronous Registration**: This method is used when the configuration 
-  options are static and available at application startup. It simplifies the 
-  setup process and is suitable for most use cases where configuration values do 
+- **Synchronous Registration**: This method is used when the configuration
+  options are static and available at application startup. It simplifies the
+  setup process and is suitable for most use cases where configuration values do
   not depend on external services.
-- **Asynchronous Registration**: This method is beneficial when configuration 
-  options need to be retrieved from external sources, such as a database or an 
-  external API, at runtime. It allows for more flexible and dynamic 
+- **Asynchronous Registration**: This method is beneficial when configuration
+  options need to be retrieved from external sources, such as a database or an
+  external API, at runtime. It allows for more flexible and dynamic
   configuration but requires an asynchronous factory function.
 
 ### Integration Details
@@ -743,7 +773,7 @@ registration:
 #### Integrating with Other Modules
 
 The `nestjs-authentication` module integrates smoothly with other modules in the
-`nestjs-auth` suite. Here are some integration details:
+authentication suite. Here are some integration details:
 
 - **@concepta/nestjs-auth-jwt**: Use `@concepta/nestjs-auth-jwt` for JWT-based
   authentication. Configure it to handle the issuance and verification of JWT
@@ -757,12 +787,3 @@ The `nestjs-authentication` module integrates smoothly with other modules in the
 
 By combining these modules, you can create a comprehensive authentication system
 that meets various security requirements and user needs.
-
-## References
-
-For further details and external references, please visit the following link:
-
-[External Authentication References]()
-
-This link provides additional information and resources related to the
-authentication processes and best practices in NestJS applications.
