@@ -1,6 +1,4 @@
-import {
-  LoggerSentryModule,
-} from './index';
+import { LoggerSentryModule } from './index';
 
 describe('Index', () => {
   it('LoggerSentryModule should be imported', () => {

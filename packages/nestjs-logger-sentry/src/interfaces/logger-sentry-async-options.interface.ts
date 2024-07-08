@@ -7,6 +7,8 @@ import { LoggerSentryOptionsInterface } from './logger-sentry-options.interface'
 export interface LoggerSentryAsyncOptionsInterface
   extends Pick<ModuleMetadata, 'imports'>,
     Pick<
-      FactoryProvider<LoggerSentryOptionsInterface | Promise<LoggerSentryOptionsInterface>>,
+      FactoryProvider<
+        LoggerSentryOptionsInterface | Promise<LoggerSentryOptionsInterface>
+      >,
       'useFactory' | 'inject'
     > {}

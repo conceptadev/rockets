@@ -1,7 +1,6 @@
 # Rockets NestJS Logger
 
-This module is a drop-in replacement for the core NestJS logger that provides additonal support for pushing log data
-to one or multiple external log consumption providers.
+This module is a drop-in replacement for the core NestJS logger that provides additional support for pushing log data to one or multiple external log consumption providers.
 
 ## Project
 
@@ -11,66 +10,167 @@ to one or multiple external log consumption providers.
 [![GH Contrib](https://img.shields.io/github/contributors/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets/graphs/contributors)
 [![NestJS Dep](https://img.shields.io/github/package-json/dependency-version/conceptadev/rockets/@nestjs/common?label=NestJS&logo=nestjs&filename=packages%2Fnestjs-core%2Fpackage.json)](https://www.npmjs.com/package/@nestjs/common)
 
-## Overview
+## Table of Contents
+
+- [Project](#project)
+- [Table of Contents](#table-of-contents)
+- [Tutorials](#tutorials)
+  - [Introduction](#introduction)
+    - [Overview of the Library](#overview-of-the-library)
+    - [Purpose and Key Features](#purpose-and-key-features)
+    - [Installation](#installation)
+  - [Getting Started](#getting-started)
+    - [Overview](#overview)
+    - [Basic Setup](#basic-setup)
+      - [Scenario: Logging in a NestJS Application](#scenario-logging-in-a-nestjs-application)
+      - [Step 1: Create Logger Service](#step-1-create-logger-service)
+      - [Step 2: Configure Logger Module](#step-2-configure-logger-module)
+      - [Step 3: Use Logger in Application](#step-3-use-logger-in-application)
+    - [Advanced Setup](#advanced-setup)
+      - [Custom Transports](#custom-transports)
+      - [Global Logger Setup](#global-logger-setup)
+- [How to Guides](#how-to-guides)
+  - [1. How to Set Up LoggerModule with forRoot and Custom Transports](#1-how-to-set-up-loggermodule-with-forroot-and-custom-transports)
+  - [2. How to Configure LoggerModule Settings](#2-how-to-configure-loggermodule-settings)
+- [Explanation](#explanation)
+  - [Conceptual Overview](#conceptual-overview)
+    - [What is This Library?](#what-is-this-library)
+    - [Benefits of Using This Library](#benefits-of-using-this-library)
+  - [Design Choices](#design-choices)
+    - [Why Use Custom Logger?](#why-use-custom-logger)
+    - [Global, Synchronous vs Asynchronous Registration](#global-synchronous-vs-asynchronous-registration)
+  - [Integration Details](#integration-details)
+    - [Integrating with Other Modules](#integrating-with-other-modules)
+- [References](#references)
+
+# Tutorials
+
+## Introduction
+
+### Overview of the Library
 
 This module wraps/extends the core NestJS `Logger` and adds a powerful external transports plugin interface.
 
-> See the NestJS [Logger](https://docs.nestjs.com/techniques/logger) documentation
-> for more details on how logging is implemented in NestJS.
+> See the NestJS [Logger](https://docs.nestjs.com/techniques/logger) documentation for more details on how logging is implemented in NestJS.
 
-## Installation
+### Purpose and Key Features
 
-`yarn add @concepta/nestjs-logger`
+- **External Transports**: Provides support for pushing log data to external log consumption providers like Sentry.
+- **Customizable**: Allows for the creation of custom transports to suit different logging needs.
+- **Seamless Integration**: Integrates smoothly with existing NestJS applications.
 
-## Registering
+### Installation
 
-To start using the Logger Module, import the LoggerModule into your app.
+To get started, install the `@concepta/nestjs-logger` package:
 
-### Defaults (.env)
-
-To register using the default configuration:
-
-```ts
-@Module({
-  imports: [
-    LoggerModule.register()
-  ]
-});
-export class App {}
+```sh
+yarn add @concepta/nestjs-logger
 ```
 
-To use the default configuration, you need todefine the environments variables.
+## Getting Started
+
+### Overview
+
+This section covers the basics of setting up the `LoggerModule` in a NestJS application.
+
+### Basic Setup
+
+#### Scenario: Logging in a NestJS Application
+
+To demonstrate this scenario, we will set up an application where the `LoggerModule` is used to log messages.
+
+#### Step 1: Configure Logger Module
+
+Next, configure the `LoggerModule` in your application module.
+
+```typescript
+import { Module } from '@nestjs/common';
+import { LoggerModule } from '@concepta/nestjs-logger';
+
+@Module({
+  imports: [
+    LoggerModule.register({
+      // Custom configuration here
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+#### Step 2: Use Logger in Application
+
+Finally, use the `LoggerService` in your application.
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import { LoggerService } from '@concepta/nestjs-logger';
+
+@Injectable()
+class MyService {
+  constructor(private loggerService: LoggerService) {}
+
+  doSomething() {
+    this.loggerService.log('Doing something...');
+  }
+}
+```
+
+#### Step 3: Setup environment variables
+
+To use the default configuration, you need to define the environments variables.
 One of the ways you can do that is using `.env` file
 
 ```zsh
 // .env file
 
 LOG_LEVEL="log,error"
-TRANSPORT_LOG_LEVEL="error,warn"
-SENTRY_DSN="{your_sentry_dsn}"
 ```
 
-### Synchronous Registration
+#### Step 3: Global Logger Setup
 
-To register by direct configuration:
+To set up the logger globally, configure it in the `bootstrap` function.
 
-```ts
-// ...
-import { LoggerModule } from '@concepta/nestjs-logger';
+```typescript
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { LoggerService } from '@concepta/nestjs-logger';
 
-@Module({
-  imports: [
-    LoggerModule.register({
-      // ...
-    })
-  ]
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  const loggerService = app.get(LoggerService);
+  app.useLogger(loggerService);
+  await app.listen(3000);
+}
+bootstrap();
+```
+
+# How to Guides
+
+### 1. How to Configure LoggerModule Settings
+
+The `LoggerModule` provides several configurable settings to customize its behavior.
+
+#### Settings Example
+
+Here is an example of how to configure each property of the settings:
+
+##### 1. logLevel: Sets the log level for the logger.
+
+```typescript
+LoggerModule.forRoot({
+  logLevel: ['log', 'error'],
 });
-export class App {}
 ```
 
-### Aynchronous Registration
+##### 2. transports: Adds custom transports for logging.
 
-To register by direct configuration:
+```typescript
+LoggerModule.forRoot({
+  transports: [new MyCustomTransport()],
+});
+```
+
+### 2. How to register for asynchronous registration
 
 ```ts
 // ...
@@ -89,87 +189,143 @@ import { LoggerModule } from '@concepta/nestjs-logger';
 export class App {}
 ```
 
-### Transports
+### 3. How to Set Up LoggerModule with forRoot and Custom Transports
 
-If you define the transport to be used, it means that any method that you call from `LoggerService`
-will also send the details of the log to the transport defined
-(at the moment we are only working with Sentry as external transport).
+To set up the `LoggerModule` with custom transports, follow these steps:
 
-You can easily create your own custom transports by developing a class that meets the interface.
-
+**create custom transport** in your application module:
 ```ts
-// ...
-import { LoggerModule, LoggerSentryTransport } from '@concepta/nestjs-logger';
+//...
+@Injectable()
+export class MyCustomTransport implements LoggerTransportInterface {
+  constructor() {}
+  
+  public logLevel?: LogLevel[] | null;
+
+  log(message: string, logLevel: LogLevel, error?: Error | string): void {
+    // custom logic here
+  }
+}
+
+```
+
+**Import the modules** in your application module:
+
+```typescript
+import { Module } from '@nestjs/common';
+import { LoggerModule } from '@concepta/nestjs-logger';
+import { MyCustomTransport } from './my-custom-transport';
 
 @Module({
   imports: [
-    LoggerModule.register({
-      transports: [LoggerSentryTransport],
-    })
+    LoggerModule.forRoot({
+      transports: [new MyCustomTransport()],
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+### 4. Using SentryTransport 
+
+Add `@concepta/nestjs-logger-sentry` for your project and import LoggerSentryModule, make sure to pass the correct confirguations `transportSentrySettings`. Please check [`@concepta/nestjs-logger-sentry`](https://www.npmjs.com/package/@concepta/nestjs-logger-sentry) for more details of how to setup module correctly.
+
+```typescript
+import { Module } from '@nestjs/common';
+import { LoggerModule } from '@concepta/nestjs-logger';
+import { 
+  LoggerSentryModule, 
+  LoggerSentryTransport
+} from '@concepta/nestjs-logger-sentry';
+
+@Module({
+  imports: [
+    LoggerSentryModule.forRoot({
+      settings: transportSentrySettings
+    }),
+    LoggerModule.forRootAsync({
+      inject: [LoggerSentryTransport],
+      useFactory: (loggerSentryTransport: LoggerSentryTransport) => {
+        return {
+          transports:[loggerSentryTransport]
+        }
+      }
+    }),
   ]
-});
-export class App {}
+})
+export class AppModule {}
 ```
 
-## Using LoggerService
 
-After importing the module with the proper configurations, you are all set to start using the `LoggerService` as an injected service.
+### 4. Using CoralogixTransport 
 
-### Setup Globally
+Add `@concepta/nestjs-logger-coralogix` for your project and import `LoggerCoralogixModule`, make sure to pass the correct confirguations `transportSentrySettings`. Please check [`@concepta/nestjs-logger-coralogix`](https://www.npmjs.com/package/@concepta/nestjs-logger-coralogix) for more details of how to setup module correctly.
 
-It is a good practice to also inform nest to use the new Logger internally overwrite the default Logger in your bootstrap.
+```typescript
+import { Module } from '@nestjs/common';
+import { LoggerModule } from '@concepta/nestjs-logger';
+import { 
+  LoggerCoralogixModule, 
+  LoggerCoralogixTransport
+} from '@concepta/nestjs-logger-coralogix';
 
-```ts
-// ...
-import { LoggerService } from '@concepta/nestjs-logger';
-
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-
-  // get reference of LoggerService From LoggerModule
-  const customLoggerService = app.get(LoggerService);
-
-  // this is to inform that this logger will be used globally
-  // and it will be used once you create a new Logger()
-  app.useLogger(customLoggerService);
-
-  await app.listen(3000);
-}
-bootstrap();
+@Module({
+  imports: [
+    LoggerCoralogixModule.forRoot({
+      settings: transportCoralogixSettings
+    }),
+    LoggerModule.forRootAsync({
+      inject: [LoggerCoralogixTransport],
+      useFactory: (loggerCoralogixTransport: LoggerCoralogixTransport) => {
+        return {
+          transports:[loggerCoralogixTransport]
+        }
+      }
+    }),
+  ]
+})
+export class AppModule {}
 ```
 
-Now any time you call a method from `Logger` class from `@nestjs/common` will be calling the same
-method from `LoggerService` from `@concepta/nestjs-logger`
+# Explanation
 
-### Injection
+### Conceptual Overview
 
-You should be able to use the `LoggerService` by injecting the class, or creating a new instance of Logger.
+#### What is This Library?
 
-```ts
-import { Logger, Injectable, Inject } from '@nestjs/common';
-import { LoggerService } from '@concepta/nestjs-logger';
+The `@nestjs-logger` library is a comprehensive solution for managing logging processes within a NestJS application. It provides services for logging messages and supports external log consumption providers.
 
-@Injectable()
-class MyService {
-  constructor(@Inject(LoggerService) private loggerService: LoggerService) {}
+#### Benefits of Using This Library
 
-  doSomething() {
-    this.loggerService.log('Doing something...');
-  }
-}
-```
+- **External Transports**: Supports pushing log data to external providers.
+- **Customizable**: Allows for the creation of custom transports.
+- **Seamless Integration**: Integrates smoothly with existing NestJS applications.
 
-### Manual Instantiation
+### Design Choices
 
-```ts
-import { Logger, Injectable } from '@nestjs/common';
+#### Why Use Custom Logger?
 
-@Injectable()
-class MyService {
-  private readonly logger = new Logger(MyService.name);
+Custom loggers provide more flexibility and control over how log messages are handled and where they are sent.
 
-  doSomething() {
-    this.logger.log('Doing something...');
-  }
-}
-```
+#### Global, Synchronous vs Asynchronous Registration
+
+The `LoggerModule` supports both synchronous and asynchronous registration:
+
+- **Global Registration**: Makes the module available throughout the entire application.
+- **Synchronous Registration**: Used when configuration options are static and available at application startup.
+- **Asynchronous Registration**: Beneficial when configuration options need to be retrieved from external sources at runtime.
+
+### Integration Details
+
+#### Integrating with Other Modules
+
+The `LoggerModule` integrates smoothly with other NestJS modules. Here are some integration details:
+
+- **@nestjs/common**: Use the `LoggerService` from `@concepta/nestjs-logger` to replace the default NestJS logger.
+- **External Transports**: Create custom transports to send log data to external providers like Sentry.
+
+# References
+
+For further details and external references, please visit the following link:
+
+[NestJS Logger Documentation](https://docs.nestjs.com/techniques/logger)

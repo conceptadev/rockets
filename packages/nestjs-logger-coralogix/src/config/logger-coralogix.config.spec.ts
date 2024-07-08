@@ -1,10 +1,19 @@
 import { ConfigModule } from '@nestjs/config';
-import { CoralogixOptionsInterface } from '../interfaces/logger-coralogix-options.interface';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { coralogixConfig, LOGGER_CORALOGIX_MODULE_SETTINGS_TOKEN } from './logger-coralogix.config';
+import {
+  coralogixConfig,
+  LOGGER_CORALOGIX_MODULE_SETTINGS_TOKEN,
+} from './logger-coralogix.config';
+import { LoggerCoralogixSettingsInterface } from '../interfaces/logger-coralogix-settings.interface';
 
-jest.mock('@sentry/node');
+jest.mock('axios', () => {
+  return {
+    post: jest.fn(() => Promise.resolve({ data: {} })),
+  };
+});
+
+jest.mock('coralogix-logger');
 
 describe('coralogix configuration', () => {
   let envOriginal: NodeJS.ProcessEnv;
@@ -35,38 +44,34 @@ describe('coralogix configuration', () => {
         providers: [],
       }).compile();
 
-      const config: CoralogixOptionsInterface =
-        moduleRef.get<CoralogixOptionsInterface>(coralogixConfig.KEY);
+      const config: LoggerCoralogixSettingsInterface =
+        moduleRef.get<LoggerCoralogixSettingsInterface>(coralogixConfig.KEY);
 
-      expect(config).toMatchObject({
-        logLevel: ['error'],
-        transportLogLevel: ['error'],
-        transportSentryConfig: { dsn: '', logLevelMap: expect.any(Function) },
-      });
+      expect(config.logLevel).toEqual(['error']);
+      expect(config.transportConfig.category).toEqual('');
+      expect(config.transportConfig.applicationName).toEqual('');
+      expect(config.transportConfig.privateKey).toEqual('');
     });
 
     it('should use envs', async () => {
-      process.env.LOG_LEVEL = 'debug,warn';
-      process.env.TRANSPORT_LOG_LEVEL = 'debug,warn';
-      process.env.SENTRY_DSN = 'http://fake.url';
+      process.env.CORALOGIX_LOG_LEVEL = 'debug,warn';
+      process.env.CORALOGIX_CATEGORY = 'category-test';
+      process.env.CORALOGIX_APPLICATION_NAME = 'app-test';
+      process.env.CORALOGIX_PRIVATE_KEY = 'private-key-test';
+      process.env.CORALOGIX_SUBSYSTEM_NAME = 'subsystem-test';
 
       moduleRef = await Test.createTestingModule({
         imports: [ConfigModule.forFeature(coralogixConfig)],
         providers: [],
       }).compile();
 
-      const config: CoralogixOptionsInterface =
-        moduleRef.get<CoralogixOptionsInterface>(coralogixConfig.KEY);
+      const config: LoggerCoralogixSettingsInterface =
+        moduleRef.get<LoggerCoralogixSettingsInterface>(coralogixConfig.KEY);
 
-      expect(config).toMatchObject({
-        logLevel: ['debug', 'warn'],
-        transportLogLevel: ['debug', 'warn'],
-        transportSentryConfig: {
-          dsn: 'http://fake.url',
-          logLevelMap: expect.any(Function),
-        },
-      });
+      expect(config.logLevel).toEqual(['debug', 'warn']);
+      expect(config.transportConfig.category).toEqual('category-test');
+      expect(config.transportConfig.applicationName).toEqual('app-test');
+      expect(config.transportConfig.privateKey).toEqual('private-key-test');
     });
-
   });
 });

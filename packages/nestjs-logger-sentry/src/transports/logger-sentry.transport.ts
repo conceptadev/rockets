@@ -19,8 +19,7 @@ import { LOGGER_SENTRY_MODULE_SETTINGS_TOKEN } from '../config/logger-sentry.con
  */
 @Injectable()
 export class LoggerSentryTransport implements LoggerTransportInterface {
-
-  logLevel?: LogLevel[] | null ;
+  logLevel?: LogLevel[] | null;
 
   /**
    * Constructor
@@ -29,12 +28,12 @@ export class LoggerSentryTransport implements LoggerTransportInterface {
    */
   constructor(
     @Inject(LOGGER_SENTRY_MODULE_SETTINGS_TOKEN)
-    protected readonly settings: LoggerSentrySettingsInterface
+    protected readonly settings: LoggerSentrySettingsInterface,
   ) {
     const config = settings.transportConfig;
     if (!config) throw new Error('Sentry Config is required');
-    
-    // TODO: this needs to be set since it will be validated on loggerService 
+
+    // TODO: this needs to be set since it will be validated on loggerService
     // need to review if this should go inside config instead
     this.logLevel = settings.logLevel;
 
@@ -50,7 +49,7 @@ export class LoggerSentryTransport implements LoggerTransportInterface {
    * @param error
    */
   log(message: string, logLevel: LogLevel, error?: Error | string): void {
-    //TODO: check of the logLevel is not on this method, because we would 
+    // TODO: check of the logLevel is not on this method, because we would
     // need to get from the config of logger module for the fallback
 
     // map the internal log level to sentry log severity

@@ -5,8 +5,6 @@ import {
 } from '@nestjs/config';
 
 import { LogLevel } from '@nestjs/common';
-import { Severity as SentryLogSeverity } from '@sentry/types';
-import { Severity as CoralogixLogSeverity } from "coralogix-logger";
 import { splitLogLevel } from '../utils/config-parser.util';
 import { LoggerSettingsInterface } from '../interfaces/logger-settings.interface';
 
@@ -56,6 +54,5 @@ export const loggerConfig: (() => LoggerSettingsInterface) &
       'LOG_LEVEL' in process.env && process.env.LOG_LEVEL
         ? splitLogLevel(process.env.LOG_LEVEL)
         : ['error'],
-
   }),
 );

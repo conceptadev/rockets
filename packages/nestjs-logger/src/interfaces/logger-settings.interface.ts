@@ -12,5 +12,4 @@ export interface LoggerSettingsInterface {
 
   // TODO: move the methods to uplevel, ins that case should this be a unknown? instead
   transportConfig?: LoggerConfigInterface;
-
 }

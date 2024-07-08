@@ -1,6 +1,5 @@
 import { LoggerSentrySettingsInterface } from './logger-sentry-settings.interface';
 
-
 /**
  * LoggerSentry options interface.
  */

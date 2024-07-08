@@ -6,49 +6,50 @@ import { LOGGER_CORALOGIX_MODULE_SETTINGS_TOKEN } from '../config/logger-coralog
 
 @Injectable()
 export class LoggerCoralogixTransport implements LoggerTransportInterface {
-
   private coralogix: CoralogixLogger;
-  
+
   public logLevel?: LogLevel[] | null;
 
   constructor(
     @Inject(LOGGER_CORALOGIX_MODULE_SETTINGS_TOKEN)
-    protected readonly settings: LoggerCoralogixSettingsInterface
+    protected readonly settings: LoggerCoralogixSettingsInterface,
   ) {
     const config = settings.transportConfig;
-    if (!config?.privateKey) throw new Error('Coralogix privateKey is required');
+    if (!config?.privateKey)
+      throw new Error('Coralogix privateKey is required');
     const coralogixConfig = new LoggerConfig(config);
-    
+
     this.logLevel = settings.logLevel;
-    this.coralogix = new CoralogixLogger(config.category)
-   
-    CoralogixLogger.configure(coralogixConfig); 
+    this.coralogix = new CoralogixLogger(config.category);
+
+    CoralogixLogger.configure(coralogixConfig);
   }
 
-  setCategory(category: string) { 
+  setCategory(category: string) {
     this.coralogix.category = category;
   }
 
   /**
-   * Method to log message to Sentry transport
+   * Method to log message to Coralogix transport
    *
    * @param message
    * @param logLevel
    * @param error
    */
   log(message: string, logLevel: LogLevel, error?: Error | string): void {
-
-    // map the internal log level to sentry log severity
+    // map the internal log level to coralogix log severity
     const severity = this.settings.transportConfig.logLevelMap(logLevel);
     const formatMessage = this.settings.transportConfig?.formatMessage;
-    const text = formatMessage ? formatMessage({ message, logLevel, error }) : `${message}`;
-    
+    const text = formatMessage
+      ? formatMessage({ message, logLevel, error })
+      : `${message}`;
+
     // create a log
     const log = new Log({
       severity: severity,
       text,
     });
-    
+
     // send log to coralogix
     this.coralogix.addLog(log);
   }

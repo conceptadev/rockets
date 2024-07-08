@@ -3,9 +3,7 @@ import { LoggerCoralogixTransport } from '../transports/logger-coralogix.transpo
 
 @Controller()
 export class AppControllerFixture {
-  constructor(private loggerCoralogixTransport: LoggerCoralogixTransport) {
-
-  }
+  constructor(private loggerCoralogixTransport: LoggerCoralogixTransport) {}
   @Get('throw')
   throwError() {
     this.loggerCoralogixTransport.log('throwError', 'error');

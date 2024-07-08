@@ -1,9 +1,11 @@
 import { ConfigModule } from '@nestjs/config';
-import { LoggerSentryOptionsInterface } from '../interfaces/logger-sentry-options.interface';
 import { Severity as SentryLogSeverity } from '@sentry/types';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { loggerSentryConfig, LOGGER_SENTRY_MODULE_SETTINGS_TOKEN } from './logger-sentry.config';
+import {
+  loggerSentryConfig,
+  LOGGER_SENTRY_MODULE_SETTINGS_TOKEN,
+} from './logger-sentry.config';
 
 jest.mock('@sentry/node');
 
@@ -36,8 +38,7 @@ describe('logger-sentry configuration', () => {
         providers: [],
       }).compile();
 
-      const config: LoggerSentryOptionsInterface =
-        moduleRef.get<LoggerSentryOptionsInterface>(loggerSentryConfig.KEY);
+      const config = moduleRef.get(loggerSentryConfig.KEY);
 
       expect(config).toMatchObject({
         logLevel: ['error'],
@@ -54,8 +55,7 @@ describe('logger-sentry configuration', () => {
         providers: [],
       }).compile();
 
-      const config: LoggerSentryOptionsInterface =
-        moduleRef.get<LoggerSentryOptionsInterface>(loggerSentryConfig.KEY);
+      const config = moduleRef.get(loggerSentryConfig.KEY);
 
       expect(config).toMatchObject({
         logLevel: ['debug', 'warn'],

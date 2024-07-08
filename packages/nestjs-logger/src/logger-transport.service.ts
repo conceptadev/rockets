@@ -73,11 +73,11 @@ export class LoggerTransportService {
   public log(message: string, logLevel: LogLevel, error?: Error): void {
     this.loggerTransports.map((loggerTransport) => {
       // get log levels of the transport, or fallback for the logger config
-      const logLevels = loggerTransport.logLevel || this.logLevels
-      
+      const logLevels = loggerTransport.logLevel || this.logLevels;
+
       // are we supposed to send this log level based on transport
       if (logLevels.includes(logLevel)) {
-        return loggerTransport.log(message, logLevel, error)
+        return loggerTransport.log(message, logLevel, error);
       }
     });
   }

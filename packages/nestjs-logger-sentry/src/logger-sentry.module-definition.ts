@@ -32,7 +32,10 @@ export const {
   )
   .build();
 
-export type LoggerSentryOptions = Omit<typeof LOGGER_SENTRY_OPTIONS_TYPE, 'global'>;
+export type LoggerSentryOptions = Omit<
+  typeof LOGGER_SENTRY_OPTIONS_TYPE,
+  'global'
+>;
 export type LoggerSentryAsyncOptions = Omit<
   typeof LOGGER_SENTRY_ASYNC_OPTIONS_TYPE,
   'global'
@@ -45,22 +48,19 @@ function definitionTransform(
   const { providers = [] } = definition;
   const { global = false } = extras;
 
-  const reponse =  {
+  return {
     ...definition,
     global,
     imports: createLoggerSentryImports(),
     providers: createLoggerSentryProviders({ providers }),
     exports: [ConfigModule, RAW_OPTIONS_TOKEN, ...createLoggerSentryExports()],
   };
-  return reponse;
 }
 
 export function createLoggerSentryImports(): DynamicModule['imports'] {
   return [ConfigModule.forFeature(loggerSentryConfig)];
 }
 
-// TODO: remove parameters since it is not being used, and review other modules to see 
-// if they need to be updated
 export function createLoggerSentryProviders(overrides: {
   options?: LoggerSentryOptions;
   providers?: Provider[];

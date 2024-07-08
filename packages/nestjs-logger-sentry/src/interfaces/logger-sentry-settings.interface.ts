@@ -6,7 +6,6 @@ import { LoggerSettingsInterface } from '@concepta/nestjs-logger';
  */
 export interface LoggerSentrySettingsInterface
   extends Partial<Pick<LoggerSettingsInterface, 'logLevel'>> {
-  
   // TODO: reavaliate that loglevel should be inside the config instead
-  transportConfig: LoggerSentryConfigInterface,
+  transportConfig: LoggerSentryConfigInterface;
 }

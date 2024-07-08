@@ -103,15 +103,11 @@ export function createLoggerServiceProvider(
 ): Provider {
   return {
     provide: LoggerService,
-    inject: [
-      RAW_OPTIONS_TOKEN,
-      LoggerTransportService,
-    ],
+    inject: [RAW_OPTIONS_TOKEN, LoggerTransportService],
     useFactory: async (
       options: LoggerOptionsInterface,
       loggerTransportService: LoggerTransportService,
     ) => {
-
       const transports = optionsOverrides?.transports ?? options.transports;
 
       transports?.forEach((transport) => {

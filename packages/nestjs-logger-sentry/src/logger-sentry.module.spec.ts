@@ -12,34 +12,32 @@ describe(LoggerSentryModule, () => {
   let loggerModule: LoggerSentryModule;
   let loggerSentryTransport: LoggerSentryTransport;
   const SENTRY_DSN = '';
-  
+
   const transportSentrySettings: LoggerSentrySettingsInterface = {
     logLevel: ['error'],
     transportConfig: {
       dsn: SENTRY_DSN,
       logLevelMap: jest.fn().mockReturnValue(Severity.Error),
-    }
+    },
   };
 
   describe(LoggerSentryModule.forRoot, () => {
     beforeEach(async () => {
-      testModule = await Test.createTestingModule(
-        {
-          imports: [
-            LoggerSentryModule.forRoot({
-              settings: transportSentrySettings
-            }),
-            LoggerModule.forRootAsync({
-              inject: [LoggerSentryTransport],
-              useFactory: (loggerSentryTransport: LoggerSentryTransport) => {
-                return {
-                  transports:[loggerSentryTransport]
-                }
-              }
-            }),
-          ]
-        },
-      ).compile();
+      testModule = await Test.createTestingModule({
+        imports: [
+          LoggerSentryModule.forRoot({
+            settings: transportSentrySettings,
+          }),
+          LoggerModule.forRootAsync({
+            inject: [LoggerSentryTransport],
+            useFactory: (loggerSentryTransport: LoggerSentryTransport) => {
+              return {
+                transports: [loggerSentryTransport],
+              };
+            },
+          }),
+        ],
+      }).compile();
     });
 
     it('module should be loaded', async () => {
@@ -51,9 +49,11 @@ describe(LoggerSentryModule, () => {
   describe(LoggerSentryModule.register, () => {
     beforeEach(async () => {
       testModule = await Test.createTestingModule(
-        testModuleFactory([LoggerSentryModule.register({
-          settings: transportSentrySettings
-        })]),
+        testModuleFactory([
+          LoggerSentryModule.register({
+            settings: transportSentrySettings,
+          }),
+        ]),
       ).compile();
     });
 
@@ -69,7 +69,7 @@ describe(LoggerSentryModule, () => {
         testModuleFactory([
           LoggerSentryModule.forRootAsync({
             useFactory: () => ({
-              settings: transportSentrySettings
+              settings: transportSentrySettings,
             }),
           }),
         ]),
@@ -88,7 +88,7 @@ describe(LoggerSentryModule, () => {
         testModuleFactory([
           LoggerSentryModule.registerAsync({
             useFactory: () => ({
-              settings: transportSentrySettings
+              settings: transportSentrySettings,
             }),
           }),
         ]),

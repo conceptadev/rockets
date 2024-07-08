@@ -26,7 +26,7 @@ describe('loggerSentryTransport', () => {
     };
     const transportSentrySettings: LoggerSentrySettingsInterface = {
       logLevel: ['error'],
-      transportConfig: transportSentryConfig
+      transportConfig: transportSentryConfig,
     };
     const moduleRef = await Test.createTestingModule({
       providers: [
@@ -49,10 +49,7 @@ describe('loggerSentryTransport', () => {
     spyCaptureException = jest.spyOn(Sentry, 'captureException');
     spyCaptureMessage = jest.spyOn(Sentry, 'captureMessage');
     if (settings && settings.transportConfig) {
-      spyLogLevelMap = jest.spyOn(
-        settings.transportConfig,
-        'logLevelMap',
-      );
+      spyLogLevelMap = jest.spyOn(settings.transportConfig, 'logLevelMap');
     } else {
       throw new Error('transportSentryConfig is not defined');
     }

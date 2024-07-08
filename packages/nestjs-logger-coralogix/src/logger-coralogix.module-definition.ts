@@ -16,7 +16,9 @@ import {
 import { LoggerCoralogixSettingsInterface } from './interfaces/logger-coralogix-settings.interface';
 import { LoggerCoralogixTransport } from './transports/logger-coralogix.transport';
 
-const RAW_OPTIONS_TOKEN = Symbol('__LOGGER_CORALOGIX_MODULE_RAW_OPTIONS_TOKEN__');
+const RAW_OPTIONS_TOKEN = Symbol(
+  '__LOGGER_CORALOGIX_MODULE_RAW_OPTIONS_TOKEN__',
+);
 
 export const {
   ConfigurableModuleClass: CoralogixModuleClass,
@@ -32,7 +34,10 @@ export const {
   )
   .build();
 
-export type CoralogixOptions = Omit<typeof LOGGER_CORALOGIX_OPTIONS_TYPE, 'global'>;
+export type CoralogixOptions = Omit<
+  typeof LOGGER_CORALOGIX_OPTIONS_TYPE,
+  'global'
+>;
 export type CoralogixAsyncOptions = Omit<
   typeof LOGGER_CORALOGIX_ASYNC_OPTIONS_TYPE,
   'global'
@@ -50,7 +55,11 @@ function definitionTransform(
     global,
     imports: createLoggerCoralogixImports(),
     providers: createLoggerCoralogixProviders({ providers }),
-    exports: [ConfigModule, RAW_OPTIONS_TOKEN, ...createLoggerCoralogixExports()],
+    exports: [
+      ConfigModule,
+      RAW_OPTIONS_TOKEN,
+      ...createLoggerCoralogixExports(),
+    ],
   };
 }
 
@@ -63,6 +72,8 @@ export function createLoggerCoralogixProviders(overrides: {
   providers?: Provider[];
 }): Provider[] {
   return [
+    // TODO: maybe we do not need this
+    ...(overrides.providers ?? []),
     LoggerCoralogixTransport,
     createLoggerCoralogixSettingsProvider(overrides.options),
   ];

@@ -5,32 +5,41 @@ import { LoggerCoralogixTransport } from './transports/logger-coralogix.transpor
 import { LoggerCoralogixConfigInterface } from './interfaces/logger-coralogix-config.interface';
 import { LoggerCoralogixSettingsInterface } from './interfaces/logger-coralogix-settings.interface';
 
+jest.mock('axios', () => {
+  return {
+    post: jest.fn(() => Promise.resolve({ data: {} })),
+  };
+});
+
+jest.mock('coralogix-logger');
+
 describe(LoggerCoralogixModule, () => {
   const transportConfig: LoggerCoralogixConfigInterface = {
-    privateKey: '',
+    privateKey: 'private-key',
     category: 'testers',
     logLevelMap: jest.fn().mockReturnValue(3),
   };
   const transportSettings: LoggerCoralogixSettingsInterface = {
     transportConfig,
     logLevel: ['error'],
-  }
+  };
 
   let testModule: TestingModule;
   let loggerCoralogixModule: LoggerCoralogixModule;
   let loggerCoralogixTransport: LoggerCoralogixTransport;
-  
+
   describe(LoggerCoralogixModule.forRoot, () => {
-   
     beforeEach(async () => {
-      testModule = await Test.createTestingModule(
-        testModuleFactory([LoggerCoralogixModule.forRoot({
-          settings: transportSettings
-        })]),
-      ).compile();
+      testModule = await Test.createTestingModule({
+        imports: [
+          LoggerCoralogixModule.forRoot({
+            settings: transportSettings,
+          }),
+        ],
+      }).compile();
     });
 
-    it.only('module should be loaded', async () => {
+    it('module should be loaded', async () => {
       commonVars();
       commonTests();
     });
@@ -39,9 +48,11 @@ describe(LoggerCoralogixModule, () => {
   describe(LoggerCoralogixModule.register, () => {
     beforeEach(async () => {
       testModule = await Test.createTestingModule(
-        testModuleFactory([LoggerCoralogixModule.register({
-          settings: transportSettings
-        })]),
+        testModuleFactory([
+          LoggerCoralogixModule.register({
+            settings: transportSettings,
+          }),
+        ]),
       ).compile();
     });
 
@@ -57,7 +68,7 @@ describe(LoggerCoralogixModule, () => {
         testModuleFactory([
           LoggerCoralogixModule.forRootAsync({
             useFactory: () => ({
-              settings: transportSettings
+              settings: transportSettings,
             }),
           }),
         ]),
@@ -76,7 +87,7 @@ describe(LoggerCoralogixModule, () => {
         testModuleFactory([
           LoggerCoralogixModule.registerAsync({
             useFactory: () => ({
-              settings: transportSettings
+              settings: transportSettings,
             }),
           }),
         ]),
@@ -90,7 +101,7 @@ describe(LoggerCoralogixModule, () => {
   });
 
   function commonVars() {
-    loggerCoralogixModule = testModule.get(LoggerCoralogixModule);    
+    loggerCoralogixModule = testModule.get(LoggerCoralogixModule);
     loggerCoralogixTransport = testModule.get(LoggerCoralogixTransport);
   }
 

@@ -58,6 +58,5 @@ describe('logger configuration', () => {
         logLevel: ['debug', 'warn'],
       });
     });
-
   });
 });

@@ -2,25 +2,37 @@ import { Log } from 'coralogix-logger';
 import { LoggerCoralogixConfigInterface } from '../interfaces/logger-coralogix-config.interface';
 import { LoggerCoralogixSettingsInterface } from '../interfaces/logger-coralogix-settings.interface';
 import { LoggerCoralogixTransport } from './logger-coralogix.transport';
+import { LogLevel } from '@nestjs/common';
+import { LoggerMessageInterface } from '@concepta/nestjs-logger/dist/interfaces/logger-message.interface';
+
+jest.mock('axios', () => {
+  return {
+    post: jest.fn(() => Promise.resolve({ data: {} })),
+  };
+});
+
+jest.mock('coralogix-logger');
 
 describe('loggerCoralogixTransport', () => {
   let loggerCoralogixTransport: LoggerCoralogixTransport;
   let settings: LoggerCoralogixSettingsInterface;
-  let spyLogLevelMap: jest.SpyInstance;
-  let errorMessage: string;
-  
 
   beforeEach(async () => {
     const transportConfig: LoggerCoralogixConfigInterface = {
-      privateKey: '',
+      privateKey: 'private-key',
       category: 'testers',
-      logLevelMap: jest.fn().mockReturnValue(3),
+      logLevelMap: (_logLevel: LogLevel) => {
+        return 3;
+      },
+      formatMessage: (_loggerMessage: LoggerMessageInterface): string => {
+        return '';
+      },
     };
-    const transportSettings: LoggerCoralogixSettingsInterface = {
+    settings = {
       transportConfig,
       logLevel: ['error'],
-    }
-    loggerCoralogixTransport = new LoggerCoralogixTransport(transportSettings);
+    };
+    loggerCoralogixTransport = new LoggerCoralogixTransport(settings);
   });
 
   describe('IsDefined', () => {
@@ -34,7 +46,9 @@ describe('loggerCoralogixTransport', () => {
     const expectedCategory = 'testers';
 
     expect(loggerCoralogixTransport.logLevel).toEqual(expectedLogLevels);
-    expect(loggerCoralogixTransport['coralogix'].category).toEqual(expectedCategory);
+    expect(
+      loggerCoralogixTransport['settings'].transportConfig.category,
+    ).toEqual(expectedCategory);
   });
 
   it('should log a message with the correct severity and formatted text', () => {
@@ -42,16 +56,28 @@ describe('loggerCoralogixTransport', () => {
     const logLevel = 'log';
     const error = 'Test error';
 
+    // Spying on the methods before calling the log method
+    const logLevelMap = jest.spyOn(
+      loggerCoralogixTransport['settings'].transportConfig,
+      'logLevelMap',
+    );
+    const formatMessage = jest.spyOn(
+      loggerCoralogixTransport['settings'].transportConfig,
+      'formatMessage',
+    );
+
     loggerCoralogixTransport.log(message, logLevel, error);
 
-    expect(settings.transportConfig.logLevelMap).toHaveBeenCalledWith(logLevel);
-    expect(settings.transportConfig.formatMessage).toHaveBeenCalledWith({ message, logLevel, error });
+    expect(logLevelMap).toHaveBeenCalledWith(logLevel);
+    expect(formatMessage).toHaveBeenCalledWith({ message, logLevel, error });
 
     const expectedLog = new Log({
       severity: 3,
       text: 'Test message',
     });
 
-    expect(loggerCoralogixTransport['coralogix'].addLog).toHaveBeenCalledWith(expectedLog);
+    expect(loggerCoralogixTransport['coralogix'].addLog).toHaveBeenCalledWith(
+      expectedLog,
+    );
   });
 });

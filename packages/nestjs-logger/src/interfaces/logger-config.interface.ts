@@ -8,8 +8,8 @@ export interface LoggerConfigInterface {
   /**
    * method to format a message based on properties of the logger
    * @param loggerMessage object with all properties to create a message
-   * @returns 
+   * @returns
    */
   // TODO: should this ve moved to settings instead?
-  formatMessage?: (loggerMessage: LoggerMessageInterface) => string
+  formatMessage?: (loggerMessage: LoggerMessageInterface) => string;
 }

@@ -1,7 +1,10 @@
-import {
-  LoggerCoralogixModule,
-  LoggerCoralogixTransport
-} from './index';
+import { LoggerCoralogixModule, LoggerCoralogixTransport } from './index';
+
+jest.mock('axios', () => {
+  return {
+    post: jest.fn(() => Promise.resolve({ data: {} })),
+  };
+});
 
 describe('Index', () => {
   it('CoralogixModule should be imported', () => {

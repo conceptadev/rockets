@@ -9,7 +9,6 @@ import {
   createLoggerCoralogixExports,
 } from './logger-coralogix.module-definition';
 
-
 @Module({})
 export class LoggerCoralogixModule extends CoralogixModuleClass {
   static register(options: CoralogixOptions): DynamicModule {

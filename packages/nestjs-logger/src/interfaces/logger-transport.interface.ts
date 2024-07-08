@@ -23,7 +23,7 @@ import { LogLevel } from '@nestjs/common';
  */
 export interface LoggerTransportInterface {
   logLevel?: LogLevel[] | null;
-  
+
   /**
    * Transport log method
    *
