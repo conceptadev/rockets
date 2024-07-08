@@ -2,10 +2,12 @@ import { LogLevel, Module } from '@nestjs/common';
 import { AppControllerFixture } from './app.controller.fixture';
 import { LoggerCoralogixModule } from '../logger-coralogix.module';
 import { Severity } from 'coralogix-logger';
+import { LoggerModule } from '@concepta/nestjs-logger';
+import { LoggerCoralogixTransport } from '../transports/logger-coralogix.transport';
 @Module({
   controllers: [AppControllerFixture],
   imports: [
-    LoggerCoralogixModule.register({
+    LoggerCoralogixModule.forRoot({
       settings: {
         logLevel: ['error'],
         transportConfig: {
@@ -17,6 +19,14 @@ import { Severity } from 'coralogix-logger';
         },
       },
     }),
+    LoggerModule.forRootAsync({
+      inject: [LoggerCoralogixTransport],
+      useFactory: (loggerCoralogixTransport: LoggerCoralogixTransport) => {
+        return {
+          transports: [loggerCoralogixTransport],
+        };
+      },
+    }),
   ],
 })
-export class AppModuleFixture {}
+export class AppErrorModuleFixture {}
