@@ -28,7 +28,7 @@ export class EventDispatchService {
    * Synchronously calls each of the listeners registered for the event,
    * in the order they were registered, passing the event arguments to each.
    *
-   * ### Example
+   * @example
    * ```ts
    * import { Injectable } from '@nestjs/common';
    * import { EventDispatchService, EventSync } from '@concepta/nestjs-events';
@@ -70,6 +70,7 @@ export class EventDispatchService {
    * Asynchronously calls each of the listeners registered for the event,
    * in the order they were registered, passing the event arguments to each.
    *
+   * @example
    * ```ts
    * import { Injectable } from '@nestjs/common';
    * import { EventDispatchService, EventAsync } from '@concepta/nestjs-events';

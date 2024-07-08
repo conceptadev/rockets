@@ -13,7 +13,7 @@ import { Event } from './event';
  *
  * For synchronous events, see the {@link EventSync} abstract class.
  *
- * ### Example
+ * @example
  * ```ts
  * // event payload type
  * type MyPayloadType = {id: number, active: boolean};

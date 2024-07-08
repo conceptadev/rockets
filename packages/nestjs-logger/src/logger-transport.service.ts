@@ -7,7 +7,7 @@ import { LoggerTransportInterface } from './interfaces/logger-transport.interfac
  * A transport service that will load all third party transport
  * that will be used to log messages to external
  *
- * ### Example
+ * @example
  * ```ts
  * class TestTransport implements LoggerTransportInterface {
  *     log(): void {

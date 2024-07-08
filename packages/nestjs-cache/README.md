@@ -324,7 +324,7 @@ curl -X GET http://your-api-url/cache/user/{id}
 3. **Update (PUT)**: To update an existing cache entry, the request body should 
 match the `CacheUpdatableInterface`:
 
-```sh
+```ts
 export interface CacheUpdatableInterface extends Pick<CacheInterface, 'key' | 'type' | 'data' | 'assignee'> {
   expiresIn: string | null;
 }
