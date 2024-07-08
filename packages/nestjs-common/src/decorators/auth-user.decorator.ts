@@ -6,6 +6,7 @@ import { AuthenticatedUserInterface } from '@concepta/ts-common';
  * associated value if it exists (or undefined if it doesn't exist,
  * or if the user object has not been created).
  *
+ * @example
  * ```ts
  * @Get()
  * async findOne(@AuthUser('firstName') firstName: string) {
