@@ -1,7 +1,8 @@
 # Rockets NestJS Coralogix
 
-This module is a drop-in replacement for the core NestJS coralogix that provides additonal support for pushing log data
-to one or multiple external log consumption providers.
+This module is a drop-in replacement for the core NestJS coralogix that provides 
+additional support for pushing log data to one or multiple external log 
+consumption providers.
 
 ## Project
 
@@ -11,74 +12,195 @@ to one or multiple external log consumption providers.
 [![GH Contrib](https://img.shields.io/github/contributors/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets/graphs/contributors)
 [![NestJS Dep](https://img.shields.io/github/package-json/dependency-version/conceptadev/rockets/@nestjs/common?label=NestJS&logo=nestjs&filename=packages%2Fnestjs-core%2Fpackage.json)](https://www.npmjs.com/package/@nestjs/common)
 
-## Overview
+## Table of Contents
 
-This module wraps/extends the core NestJS `Coralogix` and adds a powerful external transports plugin interface.
+- [Tutorials](#tutorials)
+  - [Introduction](#introduction)
+    - [Overview of the Library](#overview-of-the-library)
+    - [Purpose and Key Features](#purpose-and-key-features)
+    - [Installation](#installation)
+  - [Getting Started](#getting-started)
+    - [Overview](#overview)
+    - [Basic Setup](#basic-setup)
+      - [Scenario: Logging in a NestJS Application](#scenario-logging-in-a-nestjs-application)
+      - [Step 1: Use Coralogix in Application](#step-1-use-coralogix-in-application)
+      - [Step 2: Setup environment variables](#step-2-setup-environment-variables)
+- [How to Guides](#how-to-guides)
+  - [1. How to Configure LoggerCoralogixModule Settings](#1-how-to-configure-loggercoralogixmodule-settings)
+  - [2. How to register for asynchronous registration](#2-how-to-register-for-asynchronous-registration)
+- [Explanation](#explanation)
+  - [Conceptual Overview](#conceptual-overview)
+    - [What is This Library?](#what-is-this-library)
+    - [Benefits of Using This Library](#benefits-of-using-this-library)
+  - [Design Choices](#design-choices)
+    - [Why Use Custom Coralogix?](#why-use-custom-coralogix)
+    - [Global, Synchronous vs Asynchronous Registration](#global-synchronous-vs-asynchronous-registration)
+  - [Integration Details](#integration-details)
+    - [Integrating with Other Modules](#integrating-with-other-modules)
+- [References](#references)
 
-> See the NestJS [Coralogix](https://docs.nestjs.com/techniques/coralogix) documentation
-> for more details on how logging is implemented in NestJS.
+# Tutorials
 
-## Installation
+## Introduction
 
-`yarn add @concepta/nestjs-coralogix`
+### Overview of the Library
 
-## Registering
+This module wraps/extends the core NestJS `Coralogix` and adds a powerful 
+external transports plugin interface.
 
-To start using the Coralogix Module, import the CoralogixModule into your app.
+> See the NestJS [Coralogix](https://docs.nestjs.com/techniques/coralogix) 
+> documentation for more details on how logging is implemented in NestJS.
 
-### Defaults (.env)
+### Purpose and Key Features
 
-To register using the default configuration:
+- **External Transports**: Provides support for pushing log data to external 
+  log consumption providers like Sentry.
+- **Customizable**: Allows for the creation of custom transports to suit 
+  different logging needs.
+- **Seamless Integration**: Integrates smoothly with existing NestJS 
+  applications.
 
-```ts
-@Module({
-  imports: [
-    CoralogixModule.register()
-  ]
-});
-export class App {}
+### Installation
+
+To get started, install the `@concepta/nestjs-coralogix` package:
+
+```sh
+yarn add @concepta/nestjs-coralogix
 ```
 
-To use the default configuration, you need todefine the environments variables.
+## Getting Started
+
+### Overview
+
+This section covers the basics of setting up the `LoggerCoralogixModule` in a NestJS 
+application.
+
+### Basic Setup
+
+#### Scenario: Logging in a NestJS Application
+
+To demonstrate this scenario, we will set up an application where the 
+`LoggerCoralogixModule` is used to log messages.
+
+#### Step 1: Use Coralogix in Application
+
+Let's create a controller to call the loggerService
+
+```ts
+import { Controller, Get } from '@nestjs/common';
+import { LoggerService } from '@concepta/nestjs-logger';
+
+@Controller()
+export class AppController {
+  constructor(private loggerService: LoggerService) {}
+  @Get('log')
+  logError() {
+    this.loggerService.error('throwError', 'error');
+  }
+}
+```
+Finally, we import `LoggerCoralogixModule` and `LoggerModule` to use the 
+`LoggerCoralogixTransport` in our application, however `loggerService` will handle that for you. All you need to do is just define the transport on `LoggerModule`.
+
+```typescript
+import { LogLevel, Module } from '@nestjs/common';
+import { Severity } from 'coralogix-logger';
+import { LoggerModule } from '@concepta/nestjs-logger';
+import { AppController } from './app.controller';
+import { LoggerCoralogixModule, LoggerCoralogixTransport } from '@concepta/nestjs-logger-coralogix';
+
+@Module({
+  controllers: [AppController],
+  imports: [
+    LoggerCoralogixModule.forRoot({
+      settings: {
+        logLevel: ['warn'],
+        transportConfig: {
+          privateKey: 'private',
+          category: 'logging',
+          logLevelMap: (_logLevel: LogLevel): Severity => {
+            return Severity.info;
+          },
+        },
+      },
+    }),
+    LoggerModule.forRootAsync({
+      inject: [LoggerCoralogixTransport],
+      useFactory: (loggerCoralogixTransport: LoggerCoralogixTransport) => {
+        return {
+          transports: [loggerCoralogixTransport],
+        };
+      },
+    }),
+  ],
+})
+export class AppModule {}
+
+```
+
+#### Step 2: Setup environment variables
+
+To use the default configuration, you need to define the environments variables.
 One of the ways you can do that is using `.env` file
 
 ```zsh
 // .env file
 
-LOG_LEVEL="log,error"
-TRANSPORT_LOG_LEVEL="error,warn"
-SENTRY_DSN="{your_sentry_dsn}"
+CORALOGIX_LOG_LEVEL="log,error"
+CORALOGIX_CATEGORY='my-category'
+CORALOGIX_APPLICATION_NAME='my-application'
+CORALOGIX_PRIVATE_KEY='my-private-key'
+CORALOGIX_SUBSYSTEM_NAME='my-subsystem-name'
 ```
 
-### Synchronous Registration
+#### Step 3: Global Coralogix Setup
 
-To register by direct configuration:
+To set up the coralogix globally, configure it in the `bootstrap` function.
+
+```typescript
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { LoggerService } from '@concepta/nestjs-logger';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  const loggerService = app.get(LoggerService);
+  app.useLogger(LoggerService);
+  await app.listen(3000);
+}
+bootstrap();
+```
+
+# How to Guides
+
+### 1. How to Configure LoggerCoralogixModule Settings
+
+The `LoggerCoralogixModule` provides several configurable settings to customize its 
+behavior.
+
+#### Settings Example
+
+Here is an example of how to configure each property of the settings:
+
+##### 1. logLevel: Sets the log level for the coralogix.
+
+```typescript
+LoggerCoralogixModule.forRoot({
+  settings: {
+    logLevel: ['warn'],
+  },
+}),
+```
+
+### 2. How to register for asynchronous registration
 
 ```ts
 // ...
-import { CoralogixModule } from '@concepta/nestjs-coralogix';
+import { LoggerCoralogixModule } from '@concepta/nestjs-coralogix';
 
 @Module({
   imports: [
-    CoralogixModule.register({
-      // ...
-    })
-  ]
-});
-export class App {}
-```
-
-### Aynchronous Registration
-
-To register by direct configuration:
-
-```ts
-// ...
-import { CoralogixModule } from '@concepta/nestjs-coralogix';
-
-@Module({
-  imports: [
-    CoralogixModule.registerAsync({
+    LoggerCoralogixModule.registerAsync({
       imports: [ConfigModule.forFeature(myConfig)],
       inject: [myConfig.KEY],
       useFactory: async (
@@ -89,87 +211,46 @@ import { CoralogixModule } from '@concepta/nestjs-coralogix';
 export class App {}
 ```
 
-### Transports
 
-If you define the transport to be used, it means that any method that you call from `CoralogixService`
-will also send the details of the log to the transport defined
-(at the moment we are only working with Sentry as external transport).
+# Explanation
 
-You can easily create your own custom transports by developing a class that meets the interface.
+### Conceptual Overview
 
-```ts
-// ...
-import { CoralogixModule, CoralogixSentryTransport } from '@concepta/nestjs-coralogix';
+#### What is This Library?
 
-@Module({
-  imports: [
-    CoralogixModule.register({
-      transports: [CoralogixSentryTransport],
-    })
-  ]
-});
-export class App {}
-```
+The `@nestjs-coralogix` library is a comprehensive solution for managing logging processes within a NestJS application. It provides services for logging messages and supports external log consumption providers.
 
-## Using CoralogixService
+#### Benefits of Using This Library
 
-After importing the module with the proper configurations, you are all set to start using the `CoralogixService` as an injected service.
+- **External Transports**: Supports pushing log data to external providers.
+- **Customizable**: Allows for the creation of custom transports.
+- **Seamless Integration**: Integrates smoothly with existing NestJS applications.
 
-### Setup Globally
+### Design Choices
 
-It is a good practice to also inform nest to use the new Coralogix internally overwrite the default Coralogix in your bootstrap.
+#### Why Use Custom Coralogix?
 
-```ts
-// ...
-import { CoralogixService } from '@concepta/nestjs-coralogix';
+Custom loggers provide more flexibility and control over how log messages are handled and where they are sent.
 
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+#### Global, Synchronous vs Asynchronous Registration
 
-  // get reference of CoralogixService From CoralogixModule
-  const customCoralogixService = app.get(CoralogixService);
+The `LoggerCoralogixModule` supports both synchronous and asynchronous registration:
 
-  // this is to inform that this coralogix will be used globally
-  // and it will be used once you create a new Coralogix()
-  app.useCoralogix(customCoralogixService);
+- **Global Registration**: Makes the module available throughout the entire application.
+- **Synchronous Registration**: Used when configuration options are static and available at application startup.
+- **Asynchronous Registration**: Beneficial when configuration options need to be retrieved from external sources at runtime.
 
-  await app.listen(3000);
-}
-bootstrap();
-```
+### Integration Details
 
-Now any time you call a method from `Coralogix` class from `@nestjs/common` will be calling the same
-method from `CoralogixService` from `@concepta/nestjs-coralogix`
+#### Integrating with Other Modules
 
-### Injection
+The `LoggerCoralogixModule` integrates smoothly with other NestJS modules. Here are some integration details:
 
-You should be able to use the `CoralogixService` by injecting the class, or creating a new instance of Coralogix.
+- **@nestjs/common**: Use the `LoggerService` from `@concepta/nestjs-logger` to replace the default NestJS logger.
+- **External Transports**: Create custom transports to send log data to external providers like Sentry.
 
-```ts
-import { Coralogix, Injectable, Inject } from '@nestjs/common';
-import { CoralogixService } from '@concepta/nestjs-coralogix';
+# References
 
-@Injectable()
-class MyService {
-  constructor(@Inject(CoralogixService) private coralogixService: CoralogixService) {}
+For further details and external references, please visit the following link:
 
-  doSomething() {
-    this.coralogixService.log('Doing something...');
-  }
-}
-```
-
-### Manual Instantiation
-
-```ts
-import { Coralogix, Injectable } from '@nestjs/common';
-
-@Injectable()
-class MyService {
-  private readonly coralogix = new Coralogix(MyService.name);
-
-  doSomething() {
-    this.coralogix.log('Doing something...');
-  }
-}
-```
+[NestJS Coralogix Documentation](https://docs.nestjs.com/techniques/coralogix)

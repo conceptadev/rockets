@@ -12,8 +12,8 @@ This module is a drop-in replacement for the core NestJS logger that provides ad
 
 ## Table of Contents
 
-- [Project](#project)
-- [Table of Contents](#table-of-contents)
+## Table of Contents
+
 - [Tutorials](#tutorials)
   - [Introduction](#introduction)
     - [Overview of the Library](#overview-of-the-library)
@@ -23,15 +23,15 @@ This module is a drop-in replacement for the core NestJS logger that provides ad
     - [Overview](#overview)
     - [Basic Setup](#basic-setup)
       - [Scenario: Logging in a NestJS Application](#scenario-logging-in-a-nestjs-application)
-      - [Step 1: Create Logger Service](#step-1-create-logger-service)
-      - [Step 2: Configure Logger Module](#step-2-configure-logger-module)
-      - [Step 3: Use Logger in Application](#step-3-use-logger-in-application)
-    - [Advanced Setup](#advanced-setup)
-      - [Custom Transports](#custom-transports)
-      - [Global Logger Setup](#global-logger-setup)
+      - [Step 1: Configure Logger Module](#step-1-configure-logger-module)
+      - [Step 2: Use Logger in Application](#step-2-use-logger-in-application)
+      - [Step 3: Setup environment variables](#step-3-setup-environment-variables)
+      - [Step 3: Global Logger Setup](#step-3-global-logger-setup)
 - [How to Guides](#how-to-guides)
-  - [1. How to Set Up LoggerModule with forRoot and Custom Transports](#1-how-to-set-up-loggermodule-with-forroot-and-custom-transports)
-  - [2. How to Configure LoggerModule Settings](#2-how-to-configure-loggermodule-settings)
+  - [1. How to Configure LoggerModule Settings](#1-how-to-configure-loggermodule-settings)
+  - [2. How to register for asynchronous registration](#2-how-to-register-for-asynchronous-registration)
+  - [3. Using SentryTransport](#3-using-sentrytransport)
+  - [4. Using CoralogixTransport](#4-using-coralogixtransport)
 - [Explanation](#explanation)
   - [Conceptual Overview](#conceptual-overview)
     - [What is This Library?](#what-is-this-library)
@@ -226,7 +226,7 @@ import { MyCustomTransport } from './my-custom-transport';
 export class AppModule {}
 ```
 
-### 4. Using SentryTransport 
+### 3. Using SentryTransport 
 
 Add `@concepta/nestjs-logger-sentry` for your project and import LoggerSentryModule, make sure to pass the correct confirguations `transportSentrySettings`. Please check [`@concepta/nestjs-logger-sentry`](https://www.npmjs.com/package/@concepta/nestjs-logger-sentry) for more details of how to setup module correctly.
 
