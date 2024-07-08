@@ -14,7 +14,7 @@ import { EventInterface } from './interfaces/event.interface';
  * sync and async event types for your convenience. They are {@link EventSync}
  * and {@link EventAsync}.
  *
- * ### Example
+ * @example
  * ```ts
  * // event payload type
  * type MyPayloadType = {id: number, active: boolean};

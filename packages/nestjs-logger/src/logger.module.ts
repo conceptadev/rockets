@@ -14,7 +14,7 @@ import {
  * With classes for request interceptor and Exceptions filters
  * where will automatically log for any request or unhandled exceptions.
  *
- * ### Example
+ * @example
  * ```ts
  * // app.module.ts
  * @Module({

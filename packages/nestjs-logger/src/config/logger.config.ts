@@ -34,7 +34,7 @@ export type LoggerConfigFactory = ConfigFactory<LoggerSettingsInterface> &
 /**
  * Configuration for Logger.
  *
- * ### example
+ * @example
  * ```ts
  * @Module({
  *   imports: [
