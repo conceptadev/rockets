@@ -34,16 +34,16 @@ export class EventListenService {
    * See the [EventEmitter2.on](https://github.com/EventEmitter2/EventEmitter2#emitteronevent-listener-options-objectboolean)
    * documentation for more details about the underlying emitter API.
    *
-   * ### Example
+   * @example
    * ```ts
    * import { Injectable, OnModuleInit } from '@nestjs/common';
    * import { EventListenService, EventListenerOn } from '@concepta/nestjs-events';
    * import { TargetEvent } from 'target-module';
    *
    * class MyListener extends EventListenerOn<TargetEvent> {
-   * listen(event: TargetEvent) {
-   * console.log(event.payload);
-   * }
+   *   listen(event: TargetEvent) {
+   *     console.log(event.payload);
+   *   }
    * }
    *
    * @Injectable()

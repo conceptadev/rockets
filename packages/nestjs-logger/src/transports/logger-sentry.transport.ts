@@ -7,7 +7,7 @@ import { LoggerTransportInterface } from '../interfaces/logger-transport.interfa
  * The transport that implements {@link LoggerTransportInterface}
  * to be used on {@link LoggerService} to log external messages
  *
- * ### Example
+ * @example
  * ```ts
  * // Get the transport instance
  * const sentry = app.get(LoggerSentryTransport);
