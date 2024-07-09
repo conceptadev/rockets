@@ -21,7 +21,6 @@ module.exports = {
     '**/tsconfig.json',
     '**/tsconfig.eslint.json',
     '**/commitlint.config.js',
-    'website/*',
   ],
   settings: {
     jsdoc: {
