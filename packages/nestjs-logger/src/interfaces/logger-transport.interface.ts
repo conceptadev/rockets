@@ -9,7 +9,7 @@ import { LogLevel } from '@nestjs/common';
  * You can create a custom log method to submit the information to any
  * 3rd party transport you want to implement
  *
- * ### Example
+ * @example
  * ```ts
  * @Injectable()
  * export class LoggerSentryTransport implements LoggerTransportInterface {

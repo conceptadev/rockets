@@ -14,7 +14,7 @@ import {
  * With classes for request interceptor and Exceptions filters
  * where will automatically log for any request or unhandled exceptions.
  *
- * ### Example
+ * @example
  * ```ts
  * // app.module.ts
  * @Module({
@@ -71,14 +71,5 @@ export class LoggerSentryModule extends LoggerSentryModuleClass {
 
   static forRootAsync(options: LoggerSentryAsyncOptions): DynamicModule {
     return super.registerAsync({ ...options, global: true });
-  }
-
-  static forFeature(options: LoggerSentryOptions): DynamicModule {
-    return {
-      module: LoggerSentryModule,
-      imports: createLoggerSentryImports(),
-      providers: createLoggerSentryProviders({ options }),
-      exports: createLoggerSentryExports(),
-    };
   }
 }

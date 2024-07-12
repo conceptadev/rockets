@@ -26,13 +26,4 @@ export class LoggerCoralogixModule extends CoralogixModuleClass {
   static forRootAsync(options: CoralogixAsyncOptions): DynamicModule {
     return super.registerAsync({ ...options, global: true });
   }
-
-  static forFeature(options: CoralogixOptions): DynamicModule {
-    return {
-      module: LoggerCoralogixModule,
-      imports: createLoggerCoralogixImports(),
-      providers: createLoggerCoralogixProviders({ options }),
-      exports: createLoggerCoralogixExports(),
-    };
-  }
 }

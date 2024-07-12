@@ -4,18 +4,20 @@ import { LoggerCoralogixModule } from '../logger-coralogix.module';
 import { Severity } from 'coralogix-logger';
 import { LoggerModule } from '@concepta/nestjs-logger';
 import { LoggerCoralogixTransport } from '../transports/logger-coralogix.transport';
+import { formatMessage } from '../utils';
 @Module({
   controllers: [AppControllerFixture],
   imports: [
     LoggerCoralogixModule.forRoot({
       settings: {
         logLevel: ['error'],
+        logLevelMap: (_logLevel: LogLevel): Severity => {
+          return Severity.info;
+        },
+        formatMessage: formatMessage,
         transportConfig: {
           privateKey: 'private',
           category: 'logging',
-          logLevelMap: (_logLevel: LogLevel): Severity => {
-            return Severity.info;
-          },
         },
       },
     }),

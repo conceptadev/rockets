@@ -4,6 +4,7 @@ import { LoggerSentryModule } from '../logger-sentry.module';
 import { LoggerModule } from '@concepta/nestjs-logger';
 import { LoggerSentryTransport } from '../transports/logger-sentry.transport';
 import { Severity } from '@sentry/node';
+import { formatMessage, logLevelMap } from '../utils';
 
 @Module({
   controllers: [AppControllerFixture],
@@ -11,11 +12,10 @@ import { Severity } from '@sentry/node';
     LoggerSentryModule.forRoot({
       settings: {
         logLevel: ['error'],
+        logLevelMap: logLevelMap,
+        formatMessage: formatMessage, 
         transportConfig: {
           dsn: 'https://examplePublicKey@o0.ingest.sentry.io/0',
-          logLevelMap: (_logLevel: LogLevel): Severity => {
-            return Severity.Error;
-          },
         },
       },
     }),

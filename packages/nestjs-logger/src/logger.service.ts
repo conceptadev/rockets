@@ -14,7 +14,7 @@ import { LoggerTransportInterface } from './interfaces/logger-transport.interfac
  * You will need to create a custom logger and we must ensure that at least one application module imports the LoggerService
  * to trigger Nest to instantiate a singleton instance of our LoggerService class.
  *
- * ### Example
+ * @example
  * ```ts
  * // Initialize a module that have the LoggerService imported
  * const app = await NestFactory.create(AppModule);

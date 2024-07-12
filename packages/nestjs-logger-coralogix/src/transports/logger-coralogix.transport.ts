@@ -38,8 +38,8 @@ export class LoggerCoralogixTransport implements LoggerTransportInterface {
    */
   log(message: string, logLevel: LogLevel, error?: Error | string): void {
     // map the internal log level to coralogix log severity
-    const severity = this.settings.transportConfig.logLevelMap(logLevel);
-    const formatMessage = this.settings.transportConfig?.formatMessage;
+    const severity = this.settings.logLevelMap(logLevel);
+    const formatMessage = this.settings.formatMessage;
     const text = formatMessage
       ? formatMessage({ message, logLevel, error })
       : `${message}`;

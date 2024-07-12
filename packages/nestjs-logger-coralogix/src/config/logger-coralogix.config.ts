@@ -5,10 +5,8 @@ import {
 } from '@nestjs/config';
 
 import { splitLogLevel } from '@concepta/nestjs-logger';
-import { LoggerMessageInterface } from '@concepta/nestjs-logger/dist/interfaces/logger-message.interface';
-import { LogLevel } from '@nestjs/common';
-import { Severity } from 'coralogix-logger';
 import { LoggerCoralogixSettingsInterface } from '../interfaces/logger-coralogix-settings.interface';
+import { formatMessage, logLevelMap } from '../utils';
 
 /**
  * The token to which all coralogix module settings are set.
@@ -25,7 +23,7 @@ export type CoralogixConfigFactory =
 /**
  * Configuration for Coralogix.
  *
- * ### example
+ * @example
  * ```ts
  * @Module({
  *   imports: [
@@ -48,6 +46,14 @@ export const coralogixConfig: (() => LoggerCoralogixSettingsInterface) &
           ? splitLogLevel(process.env.CORALOGIX_LOG_LEVEL)
           : ['error'],
 
+      /**
+       * Mapping from log level to coralogix severity
+       *
+       * @param logLevel - The log level
+       * @returns CoralogixLogSeverity
+       */
+      logLevelMap,
+      formatMessage,
       transportConfig: {
         category:
           'CORALOGIX_CATEGORY' in process.env && process.env.CORALOGIX_CATEGORY
@@ -68,32 +74,6 @@ export const coralogixConfig: (() => LoggerCoralogixSettingsInterface) &
           process.env.CORALOGIX_SUBSYSTEM_NAME
             ? process.env.CORALOGIX_SUBSYSTEM_NAME
             : '',
-
-        /**
-         * Mapping from log level to coralogix severity
-         *
-         * @param logLevel - The log level
-         * @returns CoralogixLogSeverity
-         */
-        // TODO: should this be moved up to settings?
-        logLevelMap: (logLevel: LogLevel): Severity => {
-          switch (logLevel) {
-            case 'error':
-              return Severity.error;
-            case 'debug':
-              return Severity.debug;
-            case 'log':
-              return Severity.info;
-            case 'warn':
-              return Severity.warning;
-            case 'verbose':
-              return Severity.verbose;
-          }
-        },
-
-        formatMessage: (loggerMessage: LoggerMessageInterface): string => {
-          return loggerMessage.message || 'error';
-        },
       },
     }),
   );

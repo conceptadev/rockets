@@ -2,8 +2,7 @@ import { Log } from 'coralogix-logger';
 import { LoggerCoralogixConfigInterface } from '../interfaces/logger-coralogix-config.interface';
 import { LoggerCoralogixSettingsInterface } from '../interfaces/logger-coralogix-settings.interface';
 import { LoggerCoralogixTransport } from './logger-coralogix.transport';
-import { LogLevel } from '@nestjs/common';
-import { LoggerMessageInterface } from '@concepta/nestjs-logger/dist/interfaces/logger-message.interface';
+import { formatMessage, logLevelMap } from '../utils';
 
 jest.mock('axios', () => {
   return {
@@ -21,16 +20,12 @@ describe('loggerCoralogixTransport', () => {
     const transportConfig: LoggerCoralogixConfigInterface = {
       privateKey: 'private-key',
       category: 'testers',
-      logLevelMap: (_logLevel: LogLevel) => {
-        return 3;
-      },
-      formatMessage: (_loggerMessage: LoggerMessageInterface): string => {
-        return '';
-      },
     };
     settings = {
       transportConfig,
       logLevel: ['error'],
+      formatMessage,
+      logLevelMap,
     };
     loggerCoralogixTransport = new LoggerCoralogixTransport(settings);
   });
@@ -58,11 +53,11 @@ describe('loggerCoralogixTransport', () => {
 
     // Spying on the methods before calling the log method
     const logLevelMap = jest.spyOn(
-      loggerCoralogixTransport['settings'].transportConfig,
+      loggerCoralogixTransport['settings'],
       'logLevelMap',
     );
     const formatMessage = jest.spyOn(
-      loggerCoralogixTransport['settings'].transportConfig,
+      loggerCoralogixTransport['settings'],
       'formatMessage',
     );
 

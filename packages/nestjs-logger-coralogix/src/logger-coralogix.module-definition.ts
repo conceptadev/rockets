@@ -72,7 +72,6 @@ export function createLoggerCoralogixProviders(overrides: {
   providers?: Provider[];
 }): Provider[] {
   return [
-    // TODO: maybe we do not need this
     ...(overrides.providers ?? []),
     LoggerCoralogixTransport,
     createLoggerCoralogixSettingsProvider(overrides.options),

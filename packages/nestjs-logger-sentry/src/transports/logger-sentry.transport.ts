@@ -8,7 +8,7 @@ import { LOGGER_SENTRY_MODULE_SETTINGS_TOKEN } from '../config/logger-sentry.con
  * The transport that implements {@link LoggerTransportInterface}
  * to be used on {@link LoggerSentryService} to log external messages
  *
- * ### Example
+ * @example
  * ```ts
  * // Get the transport instance
  * const sentry = app.get(LoggerSentryTransport);
@@ -49,11 +49,9 @@ export class LoggerSentryTransport implements LoggerTransportInterface {
    * @param error - Error to log
    */
   log(message: string, logLevel: LogLevel, error?: Error | string): void {
-    // TODO: check of the logLevel is not on this method, because we would
-    // need to get from the config of logger module for the fallback
 
     // map the internal log level to sentry log severity
-    const severity = this.settings.transportConfig.logLevelMap(logLevel);
+    const severity = this.settings.logLevelMap(logLevel);
 
     // call sentry
     if (error) {

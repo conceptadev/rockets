@@ -22,10 +22,12 @@ describe('loggerSentryTransport', () => {
   beforeEach(async () => {
     const transportSentryConfig: LoggerSentryConfigInterface = {
       dsn: 'tests-dns',
-      logLevelMap: jest.fn().mockReturnValue(SentryLogSeverity.Error),
+      
     };
     const transportSentrySettings: LoggerSentrySettingsInterface = {
       logLevel: ['error'],
+      logLevelMap: jest.fn().mockReturnValue(SentryLogSeverity.Error),
+      formatMessage: jest.fn().mockReturnValue('errorMessage'),
       transportConfig: transportSentryConfig,
     };
     const moduleRef = await Test.createTestingModule({
@@ -48,8 +50,8 @@ describe('loggerSentryTransport', () => {
     spyInit = jest.spyOn(Sentry, 'init');
     spyCaptureException = jest.spyOn(Sentry, 'captureException');
     spyCaptureMessage = jest.spyOn(Sentry, 'captureMessage');
-    if (settings && settings.transportConfig) {
-      spyLogLevelMap = jest.spyOn(settings.transportConfig, 'logLevelMap');
+    if (settings) {
+      spyLogLevelMap = jest.spyOn(settings, 'logLevelMap');
     } else {
       throw new Error('transportSentryConfig is not defined');
     }

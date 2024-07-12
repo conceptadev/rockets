@@ -17,11 +17,12 @@ describe(LoggerCoralogixModule, () => {
   const transportConfig: LoggerCoralogixConfigInterface = {
     privateKey: 'private-key',
     category: 'testers',
-    logLevelMap: jest.fn().mockReturnValue(3),
   };
   const transportSettings: LoggerCoralogixSettingsInterface = {
     transportConfig,
     logLevel: ['error'],
+    logLevelMap: jest.fn().mockReturnValue(3),
+    formatMessage: jest.fn().mockReturnValue('error'),
   };
 
   let testModule: TestingModule;

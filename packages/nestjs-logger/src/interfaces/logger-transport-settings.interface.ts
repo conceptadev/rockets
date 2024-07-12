@@ -1,15 +1,16 @@
 import { LogLevel } from '@nestjs/common';
 import { LoggerMessageInterface } from './logger-message.interface';
 
-export interface LoggerConfigInterface {
-  // TODO: should this ve moved to settings instead?
-
+/**
+ * Logger options interface.
+ */
+export interface LoggerTransportSettingsInterface<T> {
   /**
    *
    * @param logLevel - level of severity
    * @returns The logLevel of the transport
    */
-  logLevelMap: (logLevel: LogLevel) => unknown;
+  logLevelMap: (logLevel: LogLevel) => T;
 
   /**
    * method to format a message based on properties of the logger
@@ -17,6 +18,5 @@ export interface LoggerConfigInterface {
    * @param loggerMessage - object with all properties to create a message
    * @returns
    */
-  // TODO: should this ve moved to settings instead?
-  formatMessage?: (loggerMessage: LoggerMessageInterface) => string;
+  formatMessage: (loggerMessage: LoggerMessageInterface) => string;
 }

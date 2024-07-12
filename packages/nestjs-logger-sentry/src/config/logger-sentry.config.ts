@@ -4,12 +4,10 @@ import {
   registerAs,
 } from '@nestjs/config';
 
-import { LogLevel } from '@nestjs/common';
-import { Severity as SentryLogSeverity } from '@sentry/types';
-
 import { LoggerSentrySettingsInterface } from '../interfaces/logger-sentry-settings.interface';
 // TODO: maybe change this to core module?
 import { splitLogLevel } from '@concepta/nestjs-logger';
+import { formatMessage, logLevelMap } from '../utils';
 
 /**
  * The token to which all logger-sentry module settings are set.
@@ -26,7 +24,7 @@ export type LoggerSentryConfigFactory =
 /**
  * Configuration for LoggerSentry.
  *
- * ### example
+ * @example
  * ```ts
  * @Module({
  *   imports: [
@@ -49,6 +47,8 @@ export const loggerSentryConfig: (() => LoggerSentrySettingsInterface) &
           ? splitLogLevel(process.env.SENTRY_LOG_LEVEL)
           : ['error'],
 
+      logLevelMap: logLevelMap,
+      formatMessage: formatMessage, 
       transportConfig: {
         /**
          * Sentry DNS
@@ -58,26 +58,6 @@ export const loggerSentryConfig: (() => LoggerSentrySettingsInterface) &
             ? process.env.SENTRY_DSN
             : '',
 
-        /**
-         * Mapping from log level to sentry severity
-         *
-         * @param logLevel - The log level
-         * @returns SentryLogSeverity
-         */
-        logLevelMap: (logLevel: LogLevel): SentryLogSeverity => {
-          switch (logLevel) {
-            case 'error':
-              return SentryLogSeverity.Error;
-            case 'debug':
-              return SentryLogSeverity.Debug;
-            case 'log':
-              return SentryLogSeverity.Log;
-            case 'warn':
-              return SentryLogSeverity.Warning;
-            case 'verbose':
-              return SentryLogSeverity.Info;
-          }
-        },
       },
     }),
   );

@@ -24,7 +24,6 @@ describe('LoggerTransportService', () => {
           provide: LOGGER_MODULE_SETTINGS_TOKEN,
           useValue: {
             logLevel: ['error', 'warn'],
-            transportLogLevel: ['error', 'warn'],
           },
         },
       ],

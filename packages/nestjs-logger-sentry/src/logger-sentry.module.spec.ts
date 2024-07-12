@@ -6,6 +6,7 @@ import { LoggerModule } from '@concepta/nestjs-logger';
 import { Severity } from '@sentry/types';
 import { LoggerSentrySettingsInterface } from './interfaces/logger-sentry-settings.interface';
 import { LoggerSentryTransport } from './transports/logger-sentry.transport';
+import { formatMessage, logLevelMap } from './utils';
 
 describe(LoggerSentryModule, () => {
   let testModule: TestingModule;
@@ -15,9 +16,10 @@ describe(LoggerSentryModule, () => {
 
   const transportSentrySettings: LoggerSentrySettingsInterface = {
     logLevel: ['error'],
+    logLevelMap: logLevelMap,
+    formatMessage: formatMessage, 
     transportConfig: {
       dsn: SENTRY_DSN,
-      logLevelMap: jest.fn().mockReturnValue(Severity.Error),
     },
   };
 

@@ -6,6 +6,5 @@ export * from './logger-transport.service';
 export * from './utils/config-parser.util';
 export * from './interfaces/logger-message.interface';
 export * from './interfaces/logger-settings.interface';
-export * from './interfaces/logger-sentry-config.interface';
+export * from './interfaces/logger-transport-settings.interface';
 export * from './interfaces/logger-transport.interface';
-export * from './interfaces/logger-config.interface';
