@@ -126,7 +126,10 @@ export class CacheCrudController
     @CrudBody() cacheCreateDto: CacheCreateDto,
     @Param('assignment') assignment: ReferenceAssignment,
   ) {
-    const response = await this.cacheService.updateOrCreate(assignment, cacheCreateDto);
+    const response = await this.cacheService.updateOrCreate(
+      assignment,
+      cacheCreateDto,
+    );
     return response;
   }
 
