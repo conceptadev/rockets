@@ -71,7 +71,9 @@ Advanced access control guard for NestJS with optional per-request filtering.
 ## Getting Started with Access Control
 
 ### Installation
+
 Install the `@concepta/nestjs-access-control` package using yarn or npm:
+
 ```sh
 yarn add @concepta/nestjs-access-control
 ```
@@ -79,6 +81,7 @@ yarn add @concepta/nestjs-access-control
 ```sh
 npm install @concepta/nestjs-access-control
 ```
+
 ## Basic Setup
 
 To set up the `@concepta/nestjs-access-control` module, you need to define your access control rules, create a custom access query service, and import the `AccessControlModule` into your app module. This ensures that your application can enforce access control policies based on the defined rules and services.
@@ -167,6 +170,7 @@ acRules.deny(allRoles).resource(AppResource.User).deleteOwn();
 ```
 
 ### create the Access Query service
+
 ```ts
 import { plainToInstance } from 'class-transformer';
 import { Injectable } from '@nestjs/common';
@@ -309,22 +313,28 @@ export class UserController {
   }
 }
 ```
+
 # How-To Guides
 
 ## Using `@AccessControlCreateOne` Decorator
 
 ### Description
+
 The `@AccessControlCreateOne` decorator is used to grant create permissions for a single resource. This decorator is a shortcut for defining access control grants for creating one resource.
 
 ### Setting Permissions
+
 First, define your access control rules using the AccessControl library. This example shows how to set permissions for different roles.
+
 ```ts
 //...
 ac.grant(AppRole.User)
   .createOwn(AppResource.User);
 //...
 ```
+
 ### Using in a Controller
+
 Next, use the `@AccessControlCreateOne` decorator in your controller to protect the route that handles the creation of a single resource.
 
 ```ts
@@ -335,13 +345,14 @@ Next, use the `@AccessControlCreateOne` decorator in your controller to protect 
   }
 ```
 
-
 ## Using `@AccessControlUpdateOne` Decorator
 
 ### Description
+
 The `@AccessControlUpdateOne` decorator is used to grant update permissions for a single resource. This decorator is a shortcut for defining access control grants for updating one resource.
 
 ### Setting Permissions
+
 First, define your access control rules using the `AccessControl` library. This example shows how to set permissions for different roles.
 
 ```ts
@@ -366,11 +377,12 @@ Next, use the `@AccessControlUpdateOne` decorator in your controller to protect 
 ## Using `@AccessControlReadOne` Decorator
 
 ### Description
+
 The `@AccessControlReadOne` decorator grants read permissions for a single resource. It is a shortcut for defining access control grants for reading one resource.
 
 ### Setting Permissions
 
-First, define your access control rules using the `AccessControl` library. This example shows how to set permissions for different roles. Please refer [Important Notes Section](#IMPORTANT) for better understanding of the permissions.
+First, define your access control rules using the `AccessControl` library. This example shows how to set permissions for different roles. Please refer [Important Notes Section](#important) for better understanding of the permissions.
 
 ```ts
 //...
@@ -416,6 +428,7 @@ User that contains Role `Admin` can get any information of resource `User`.
 ## Using `@AccessControlDeleteOne` Decorator
 
 ### Description
+
 The `@AccessControlDeleteOne` decorator is used to grant delete permissions for a single resource. This decorator is a shortcut for defining access control grants for deleting one resource.
 
 ### Setting Permissions
@@ -446,6 +459,7 @@ Next, use the `@AccessControlDeleteOne` decorator in your controller to protect 
 ## Using `@AccessControlCreateMany` Decorator
 
 ### Description
+
 The `@AccessControlCreateMany` decorator is used to grant create permissions for multiple resources. This decorator is a shortcut for defining access control grants for creating many resources.
 
 ### Setting Permissions
@@ -476,6 +490,7 @@ Next, use the `@AccessControlCreateMany` decorator in your controller to protect
 ## Using `@AccessControlReadMany` Decorator
 
 ### Description
+
 The `@AccessControlReadMany` decorator is used to grant read permissions for multiple resources. This decorator is a shortcut for defining access control grants for reading multiple resources.
 
 ### Setting Permissions
@@ -504,6 +519,7 @@ Next, use the `@AccessControlReadMany` decorator in your controller to protect t
 ```
 
 ## Creating a Custom Service
+
 To create a custom service, follow these steps:
 
 1. **Define the Service**: Create a new service class that implements the required methods. you can take advantage of the service `UserAccessQueryService` from `@concepta/nestjs-user` to create a custom UserAccessQueryService pls reference [`@concepta/nestjs-user`](https://www.npmjs.com/package/@concepta/nestjs-user) for more details. The `canAccess` method will provide you all information you need to manage your access.
@@ -532,6 +548,7 @@ export class YourUserAccessQueryService extends UserAccessQueryService {
   }
 }
 ```
+
 2. **Register the Service**: Register the custom service in your module.
 
 ```ts
@@ -542,7 +559,6 @@ AccessControlModule.forRoot({
     }),
 //...
 ```
-
 
 # Reference
 
@@ -571,9 +587,11 @@ Here is the pattern:
 ### Conceptual Overview of Access Control
 
 #### What is Access Control?
+
 Access control in a software context refers to the selective restriction of access to resources. It ensures that only authorized users can access or modify data within an application.
 
 #### Benefits of Using Access Control
+
 - **Security**: Restrict access to sensitive data and operations to authorized users only.
 - **Flexibility**: Define granular access control rules to suit various application requirements.
 - **Compliance**: Meet regulatory requirements by ensuring proper access controls are in place.
@@ -627,12 +645,15 @@ The `YourUserAccessQueryService` is designed to manage and control user access t
 By using the `YourUserAccessQueryService`, you can create a robust and flexible access control system that enhances the security and integrity of your application.
 
 #### Why Use Access Control?
+
 Implementing access control ensures that your application maintains data integrity and security by allowing only authorized users to perform specific actions.
 
 #### Synchronous vs Asynchronous Registration
+
 - **Synchronous Registration**: Use when configuration options are static and available at startup.
 - **Asynchronous Registration**: Use when configuration options need to be retrieved from external sources at runtime.
 
 #### Global vs Feature-Specific Registration
+
 - **Global Registration**: Makes the module available throughout the entire application.
 - **Feature-Specific Registration**: Allows the module to be registered only for specific features or modules within the application.
