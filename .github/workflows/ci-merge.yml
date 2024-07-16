@@ -12,6 +12,8 @@ jobs:
         node-version: [18.x]
     steps:
       - uses: actions/checkout@v2
+      - name: Enable Corepack
+        run: corepack enable
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
