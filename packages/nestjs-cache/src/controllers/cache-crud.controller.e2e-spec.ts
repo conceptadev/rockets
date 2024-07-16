@@ -111,7 +111,7 @@ describe('CacheAssignmentController (e2e)', () => {
       });
   });
 
-  it('POST /cache/user', async () => {
+  it('POST /cache/user creating user with success', async () => {
     const payload: CacheCreatableInterface = {
       key: 'dashboard-1',
       type: 'filter',
@@ -264,6 +264,23 @@ describe('CacheAssignmentController (e2e)', () => {
         expect(res.body.key).toBe(payload.key);
         expect(res.body.data).toBe(payload.data);
         expect(res.body.assignee.id).toBe(user.id);
+      });
+
+    const url =
+      `/cache/user/` +
+      `?filter[0]=key||$eq||${payload.key}` +
+      `&filter[1]=type||$eq||${payload.type}` +
+      `&filter[2]=assignee.id||$eq||${payload.assignee.id}`;
+    // Assuming your endpoint can filter by key and type
+    await supertest(app.getHttpServer())
+      .get(url)
+      .expect(200)
+      .then((res) => {
+        const response = res.body[0];
+        assert.strictEqual(response.assignee.id, user.id);
+        assert.strictEqual(response.key, payload.key);
+        assert.strictEqual(response.type, payload.type);
+        assert.strictEqual(response.data, payload.data);
       });
   });
 

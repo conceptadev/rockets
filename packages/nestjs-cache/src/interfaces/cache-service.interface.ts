@@ -2,6 +2,7 @@ import { ReferenceAssignment } from '@concepta/ts-core';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 import {
   CacheClearInterface,
+  CacheCreatableInterface,
   CacheCreateInterface,
   CacheDeleteInterface,
   CacheGetOneInterface,
@@ -15,6 +16,14 @@ export interface CacheServiceInterface
     CacheUpdateInterface<QueryOptionsInterface>,
     CacheGetOneInterface<QueryOptionsInterface>,
     CacheClearInterface<QueryOptionsInterface> {
+  
+  // TODO: should i create a unique interface for save?
+  save(
+    assignment: ReferenceAssignment,
+    cache: CacheCreatableInterface,
+    options?: QueryOptionsInterface,
+  ): Promise<CacheInterface>;
+
   getAssignedCaches(
     assignment: ReferenceAssignment,
     cache: Pick<CacheInterface, 'assignee'>,

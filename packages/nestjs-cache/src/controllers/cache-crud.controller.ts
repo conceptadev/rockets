@@ -115,50 +115,20 @@ export class CacheCrudController
   /**
    * Create one
    *
-   * @param crudRequest - the CRUD request object
+   * @param _crudRequest - the CRUD request object
    * @param cacheCreateDto - cache create dto
    * @param assignment - The cache assignment
    */
   @CrudCreateOne()
   @AccessControlCreateOne(CacheResource.One)
   async createOne(
-    @CrudRequest() crudRequest: CrudRequestInterface,
+    // TODO: this is not being used anymore
+    @CrudRequest() _crudRequest: CrudRequestInterface,
     @CrudBody() cacheCreateDto: CacheCreateDto,
     @Param('assignment') assignment: ReferenceAssignment,
   ) {
-    const expirationDate = getExpirationDate(
-      cacheCreateDto.expiresIn ?? this.settings.expiresIn,
-    );
-
-    const existingCache = await this.cacheService.get(
-      assignment,
-      cacheCreateDto,
-    );
-
-    // update or create
-    if (existingCache) {
-      crudRequest.parsed.search.$and?.push({
-        id: {
-          $eq: existingCache.id,
-        },
-      });
-      // call crud service to create
-      const response = await this.getCrudService(assignment).updateOne(
-        crudRequest,
-        {
-          id: existingCache.id,
-          ...cacheCreateDto,
-          expirationDate,
-        },
-      );
-      return response;
-    } else {
-      // call crud service to create
-      return this.getCrudService(assignment).createOne(crudRequest, {
-        ...cacheCreateDto,
-        expirationDate,
-      });
-    }
+    const response = await this.cacheService.save(assignment, cacheCreateDto);
+    return response;
   }
 
   /**
