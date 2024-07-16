@@ -32,19 +32,6 @@ export class CacheService implements CacheServiceInterface {
     protected readonly settings: CacheSettingsInterface,
   ) {}
 
-  async save(
-    assignment: ReferenceAssignment,
-    cache: CacheCreateDto,
-    queryOptions?: QueryOptionsInterface,
-  ): Promise<CacheInterface> {
-    const existingCache = await this.get(assignment, cache, queryOptions);
-    if (existingCache) {
-      return await this.update(assignment, cache, queryOptions);
-    } else {
-      return await this.create(assignment, cache, queryOptions);
-    }
-  }
-
   /**
    * Create a cache with a for the given assignee.
    *
@@ -249,6 +236,19 @@ export class CacheService implements CacheServiceInterface {
       await repoProxy.repository(queryOptions).delete(id);
     } catch (e) {
       throw new ReferenceMutateException(assignmentRepo.metadata.targetName, e);
+    }
+  }
+
+  async updateOrCreate(
+    assignment: ReferenceAssignment,
+    cache: CacheCreateDto,
+    queryOptions?: QueryOptionsInterface,
+  ): Promise<CacheInterface> {
+    const existingCache = await this.get(assignment, cache, queryOptions);
+    if (existingCache) {
+      return await this.update(assignment, cache, queryOptions);
+    } else {
+      return await this.create(assignment, cache, queryOptions);
     }
   }
 

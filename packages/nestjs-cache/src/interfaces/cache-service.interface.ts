@@ -16,8 +16,7 @@ export interface CacheServiceInterface
     CacheUpdateInterface<QueryOptionsInterface>,
     CacheGetOneInterface<QueryOptionsInterface>,
     CacheClearInterface<QueryOptionsInterface> {
-  // TODO: should i create a unique interface for save?
-  save(
+  updateOrCreate(
     assignment: ReferenceAssignment,
     cache: CacheCreatableInterface,
     options?: QueryOptionsInterface,

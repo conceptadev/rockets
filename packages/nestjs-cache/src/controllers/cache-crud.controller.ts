@@ -122,12 +122,11 @@ export class CacheCrudController
   @CrudCreateOne()
   @AccessControlCreateOne(CacheResource.One)
   async createOne(
-    // TODO: this is not being used anymore
     @CrudRequest() _crudRequest: CrudRequestInterface,
     @CrudBody() cacheCreateDto: CacheCreateDto,
     @Param('assignment') assignment: ReferenceAssignment,
   ) {
-    const response = await this.cacheService.save(assignment, cacheCreateDto);
+    const response = await this.cacheService.updateOrCreate(assignment, cacheCreateDto);
     return response;
   }
 
