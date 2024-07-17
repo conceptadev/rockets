@@ -26,8 +26,10 @@ jobs:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
 
-      - name: Install and build
-        run: yarn --frozen-lockfile
+      - name: Install
+        run: yarn --immutable
+      - name: Build
+        run: yarn build
       - name: Linting
         run: yarn lint
       - name: Unit tests
