@@ -12,17 +12,21 @@ Advanced access control guard for NestJS with optional per-request filtering.
 
 # Table of Contents
 
-3. [Tutorials](#tutorials)
+1. [Tutorials](#tutorials)
    - [Getting Started with Access Control](#getting-started-with-access-control)
      - [Installation](#installation)
    - [Basic Setup](#basic-setup)
    - [Example](#example)
      - [Simple User Entity](#simple-user-entity)
      - [Your custom ACL rules](#your-custom-acl-rules)
-     - [Create the Access Query service](#create-the-access-query-service)
-     - [Import the module into your app](#import-the-module-into-your-app)
+     - [Your custom AccessControlService](#your-custom-accesscontrolservice)
      - [Implement on your controller (Passport guard example)](#implement-on-your-controller-passport-guard-example)
-4. [How-To Guides](#how-to-guides)
+     - [Import the module into your app](#import-the-module-into-your-app)
+2. [How-To Guides](#how-to-guides)
+   - [Creating a Custom Access Query Service](#creating-a-custom-access-query-service)
+   - [Create a custom Access Control service](#create-a-custom-access-control-service)
+   - [Disable AccessControlGuard](#disable-accesscontrolguard)
+   - [Create a custom AccessControlGuard](#create-a-custom-accesscontrolguard)
    - [Using `@AccessControlCreateOne` Decorator](#using-accesscontrolcreateone-decorator)
      - [Description](#description)
      - [Setting Permissions](#setting-permissions)
@@ -48,21 +52,19 @@ Advanced access control guard for NestJS with optional per-request filtering.
      - [Description](#description-5)
      - [Setting Permissions](#setting-permissions-5)
      - [Using in a Controller](#using-in-a-controller-5)
-   - [Creating a Custom Service](#creating-a-custom-service)
-5. [Reference](#reference)
-6. [Explanation](#explanation)
+3. [Reference](#reference)
+4. [Explanation](#explanation)
    - [IMPORTANT](#important)
-   - [Conceptual Overview of Access Control](#conceptual-overview-of-access-control)
-     - [What is Access Control?](#what-is-access-control)
-     - [Benefits of Using Access Control](#benefits-of-using-access-control)
-   - [Design Choices in Access Control](#design-choices-in-access-control)
-     - [How Custom Access Query Service Works](#how-custom-access-query-service-works)
-       - [Overview](#overview)
-       - [What Users Can Do](#what-users-can-do)
-       - [Custom Logic in the Service](#custom-logic-in-the-service)
-       - [Practical Examples](#practical-examples)
-       - [Benefits](#benefits)
-     - [Why Use Access Control?](#why-use-access-control)
+   - [What is Access Control?](#what-is-access-control)
+   - [How AccessControlService Works](#how-accesscontrolservice-works)
+     - [Key Responsibilities](#key-responsibilities)
+   - [How Access Query Service Works](#how-access-query-service-works)
+     - [Overview](#overview)
+     - [Custom Logic in the Service](#custom-logic-in-the-service)
+   - [How AccessControlGuard Works](#how-accesscontrolguard-works)
+   - [Practical Examples](#practical-examples)
+   - [Benefits](#benefits)
+   - [Why Use Access Control?](#why-use-access-control)
      - [Synchronous vs Asynchronous Registration](#synchronous-vs-asynchronous-registration)
      - [Global vs Feature-Specific Registration](#global-vs-feature-specific-registration)
 
@@ -123,9 +125,13 @@ export class User {
 
 ### Your custom ACL rules
 
-Define custom ACL rules using the `AccessControl` library.
+Define custom ACL rules using the `AccessControl` library. Here we are defining
+a custom AccessControl to contains the rules of our authorization system. The
+`acRules` will be used o grant specific permissions of a resource, to a defined role.
+Please make sure to review a [Important](#important) section to understand important concepts of Access Control.
 
 ```typescript
+// app.acl.ts
 import { AccessControl } from 'accesscontrol';
 
 /**
@@ -169,65 +175,69 @@ acRules.grant(AppRole.User).resource([AppResource.User]).readOwn();
 acRules.deny(allRoles).resource(AppResource.User).deleteOwn();
 ```
 
-### create the Access Query service
+### Your custom AccessControlService
 
-```ts
-import { plainToInstance } from 'class-transformer';
-import { Injectable } from '@nestjs/common';
-import {
-  CanAccess,
-  AccessControlContext,
-  ActionEnum,
-} from '@concepta/nestjs-access-control';
-import { UserDto } from '../dto/user.dto';
-import { UserPasswordDto } from '../dto/user-password.dto';
-import { UserResource } from '../user.types';
+The access control service is not required in the settings, since we already
+have a default `AccessControlService` in the module. However, let's create a
+new one for the purposes of this tutorial. `AccessControlService` is responsible
+for getting the user and its roles.
 
-@Injectable()
-export class UserAccessQueryService implements CanAccess {
-  async canAccess(context: AccessControlContext): Promise<boolean> {
-    return this.canUpdatePassword(context);
-  }
+In the following example, we are assuming that our request as a user property
+with the roles specified on it, the method `getUserRoles` will be used internally
+on our default `AccessControlGuard` to check if the combination of the resource,
+roles and permissions are valid.
 
-  protected async canUpdatePassword(
-    context: AccessControlContext,
-  ): Promise<boolean> {
-    const { resource, action } = context.getQuery();
-
-    // can only update its own password
-    if (resource === UserResource.One && action === ActionEnum.UPDATE) {
-        return true;
-    }
-
-    // does not apply
-    return true;
-  }
-}
-
-```
-
-### Import the module into your app
-
-Import and register the `AccessControlModule` in your app module.
+The `ACService` is a provider, and you can be inject any other provider you may
+need to get the correct user and its roles.
 
 ```typescript
-//...
-@Module({
-  imports: [
-    // ...
-    AccessControlModule.forRoot({
-      settings: { rules: acRules },
-      queryServices: [UserAccessQueryService],
-    }),
-    // ...
-  ],
-  controllers: [AppController],
-  providers: [AppService],
-})
-export class AppModule {}
+import { AccessControlService } from 'nestjs-access-control';
+import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { User } from '../user/user.entity';
+
+export class ACService implements AccessControlService {
+  async getUser<T>(context: ExecutionContext): Promise<T> {
+    const request = context.switchToHttp().getRequest();
+    
+    // request.user should be something like this
+    // { id: '1', username: 'john', roles: [{ id: '1', name: 'User' }] }
+    return request.user as T;
+  }
+  async getUserRoles(context: ExecutionContext): Promise<string | string[]> {
+    const user = await this.getUser<User>(context);
+    if (!user || !user.roles) throw new UnauthorizedException();
+    return user.roles.map((role) => role.name);
+  }
+}
 ```
 
 ### Implement on your controller (Passport guard example)
+
+The guard decorators, will be used to apply the specified actions for that endpoint.
+for example:
+
+```ts
+ @AccessControlReadMany(AppResource.UserList)
+  async getMany(@Query() query: unknown) {
+    // ...
+  }
+```
+
+For this code, we are applying the `AccessControlReadMany` decorator to the
+`getMany` endpoint. This means that only users with a role that has been
+granted the `read` permission for the `AppResource.UserList` resource can get the list of users.
+
+For example, you need to grant the `read` permission to the `User` role for the `UserList` resource:
+
+```ts
+acRules.grant(AppRole.User).resource([AppResource.User]).readOwn();
+// or
+acRules.grant(AppRole.User).resource([AppResource.User]).readAny();
+```
+
+Check [Important](#important) section to understand the difference between `own` and `any`.
+
+Let's create our controller.
 
 ```typescript
 import { ApiTags } from '@nestjs/swagger';
@@ -314,7 +324,144 @@ export class UserController {
 }
 ```
 
+### Import the module into your app
+
+Import and register the `AccessControlModule` in your app module. settings.rules is the only property mandatory.
+
+```typescript
+//...
+@Module({
+  imports: [
+    // ...
+    AccessControlModule.forRoot({
+      settings: { rules: acRules },
+      service: new ACService(),
+    }),
+    // ...
+  ],
+  controllers: [UserController],
+  providers: [],
+})
+export class AppModule {}
+```
+
 # How-To Guides
+
+## Creating a Custom Access Query Service
+
+AccessQueryService is a service that will be used to check if the user can access the resource.
+any custom validation for a especific endpoint or a controller, should be done by creating a
+custom query service. The query service created, should be added to `queryServices` settings on
+module definition to make sure it will become a provider to be injected in any other service.
+Once this is done, we can go ahead and add the query for any endpoint of controller with
+`@AccessControlQuery` decorator.
+
+To create a custom query service, follow these steps:
+
+1. **Define the Service**: Create a new service class that implements `CanAccess` from
+`@concepta/nestjs-access-control`. The `canAccess` method will provide you all information
+you need to manage your access. On the following example, we check if a password update for
+the User resource is being performed by the user that is trying to update itself.
+
+```typescript
+//...
+export class MyUserAccessQueryService implements CanAccess {
+  async canAccess(context: AccessControlContext): Promise<boolean> {
+     const { resource, action } = context.getQuery();
+
+    if (resource === AppResource.User && action === ActionEnum.UPDATE) {
+      const userAuthorizedDto = plainToInstance(UserDto, context.getUser());
+
+      const params = context.getRequest('params');
+      const userParamDto = plainToInstance(UserDto, params);
+
+      const body = context.getRequest('body');
+      const userPasswordDto = plainToInstance(UserPasswordDto, body);
+
+      if (userParamDto.id && userPasswordDto?.password) {
+        return userParamDto.id === userAuthorizedDto.id;
+      }
+    }
+
+    // does not apply
+    return true;
+  }
+}
+```
+
+2. **Register the Service**: Register the custom service in your module.
+
+```ts
+//...
+AccessControlModule.forRoot({
+  settings: { rules: acRules },
+  queryServices: [MyUserAccessQueryService],
+}),
+//...
+```
+
+3. **Set AccessControlQuery**: Set `AccessControlQuery` to controller
+
+```ts
+@Controller('user')
+@ApiTags('user')
+export class UserController {
+  //...
+  @AccessControlUpdateOne(AppResource.User)
+  @AccessControlQuery({
+    service: MyUserAccessQueryService,
+  })
+  async updateOne(
+    @Param('id') userId: string,
+    @Body() userUpdateDto: UserUpdateDto,
+  ) {
+    // ...
+  }
+  //...
+}
+```
+
+## Create a custom Access Control service
+
+TODO: maybe i should remove the access control service ffrom the tutorial and keep it here?
+Please refer to the tutorial section at [Your custom AccessControlService](###-Your-custom-AccessControlService)
+
+## Disable AccessControlGuard
+
+You can disable all access control guards globally if needed. This can be useful for development or testing purposes. To disable the guards, set the appGuard option to false in the AccessControlModule configuration:
+
+```ts
+AccessControlModule.forRoot({
+  settings: { rules: acRules },
+  appGuard: false
+}),
+```
+
+## Create a custom AccessControlGuard
+
+This module contains a default `AccessControlGuard` that can be used to protect endpoints
+with one of the many `@AccessControl` decorators. This guard will use the logic at
+`AccessControlService` and `AccessQueryService` to check permissions. However, you
+can create a custom guard if you need to. By creating a class that extends `CanActivate` from
+`@nestjs/common`, you can create a custom guard that will be used to protect your endpoints.
+Please keep in mind that the guard will be set globally for all endpoints.
+
+```ts
+@Injectable()
+export class MyAccessControlGuard implements CanActivate {
+  public async canActivate(context: ExecutionContext): Promise<boolean> {
+    // your custom logic here
+    return true;
+  }
+}
+```
+
+```ts
+AccessControlModule.forRoot({
+      settings: { rules: acRules },
+      appGuard: new MyAccessControlGuard()
+    }),
+```
 
 ## Using `@AccessControlCreateOne` Decorator
 
@@ -518,55 +665,13 @@ Next, use the `@AccessControlReadMany` decorator in your controller to protect t
 //...
 ```
 
-## Creating a Custom Service
-
-To create a custom service, follow these steps:
-
-1. **Define the Service**: Create a new service class that implements the required methods. you can take advantage of the service `UserAccessQueryService` from `@concepta/nestjs-user` to create a custom UserAccessQueryService pls reference [`@concepta/nestjs-user`](https://www.npmjs.com/package/@concepta/nestjs-user) for more details. The `canAccess` method will provide you all information you need to manage your access.
-
-```typescript
-//...
-export class YourUserAccessQueryService extends UserAccessQueryService {
-  constructor() {
-    super();
-  }
-
-  async canAccess(context: AccessControlContext): Promise<boolean> {
-    const { action, role } = context.getQuery();
-    //  action === 'read' || action === 'update'
-    // context.getUser() to get authenticated user
-    // your custom logic here
-    return super.canAccess(context);
-  }
-
-  async canUpdatePassword(context: AccessControlContext): Promise<boolean> {
-    const { possession } = context.getQuery();
-    // your custom logic here
-    if (possession === PossessionEnum.OWN) {
-      return super.canUpdatePassword(context);
-    } else return true;
-  }
-}
-```
-
-2. **Register the Service**: Register the custom service in your module.
-
-```ts
-//...
-AccessControlModule.forRoot({
-      settings: { rules: acRules },
-      queryServices: [YourUserAccessQueryService],
-    }),
-//...
-```
-
 # Reference
 
 For more details, check the [official documentation](https://docs.nestjs.com/guards#access-control).
 
 # Explanation
 
-## IMPORTANT
+### IMPORTANT
 
 When building your ACL, you need to remember these!
 
@@ -584,37 +689,38 @@ Here is the pattern:
 
 > All roles that are given `any` access to a resource will NOT be passed through access filters since `any` implies they should have all access.
 
-### Conceptual Overview of Access Control
-
-#### What is Access Control?
+### What is Access Control?
 
 Access control in a software context refers to the selective restriction of access to resources. It ensures that only authorized users can access or modify data within an application.
 
-#### Benefits of Using Access Control
+### How AccessControlService Works
 
-- **Security**: Restrict access to sensitive data and operations to authorized users only.
-- **Flexibility**: Define granular access control rules to suit various application requirements.
-- **Compliance**: Meet regulatory requirements by ensuring proper access controls are in place.
+The `AccessControlService` is a crucial component in the access control system.
+It is responsible for retrieving user information and their associated roles,
+which are then used by the `AccessControlGuard` to enforce access control rules.
+Here’s a detailed breakdown of its functionality:
 
-### Design Choices in Access Control
+#### Key Responsibilities
 
-## How Custom Access Query Service Works
+1. **User Retrieval**:
+   - The `AccessControlService` provides a method to retrieve the current user
+     from the execution context. This is typically done by extracting the user
+     information from the request object.
 
-### Overview
+2. **Role Retrieval**:
+   - It also provides a method to retrieve the roles associated with the current
+     user. This is essential for determining what actions the user is permitted
+     to perform.
 
-The `YourUserAccessQueryService` is designed to manage and control user access to various resources within your application. By extending the base `UserAccessQueryService`, it allows you to implement custom rules and logic to ensure that only authorized users can perform specific actions.
+### How Access Query Service Works
 
-### What Users Can Do
+The Query Services are services that should be used to define authorization logic for a specific endpoint or controller. we can either have a query service that runs for all endpoints, or we can create one for each endpoint or controller that we want to protect.
 
-1. **Access Resources**:
-   - Users can access different resources based on their roles and the actions they are trying to perform (e.g., reading or updating data).
-   - The service checks the user's role and the action they want to perform to determine if access should be granted.
+#### Overview
 
-2. **Update Passwords**:
-   - Users can update their own passwords.
-   - The service ensures that users can only update their own passwords and not those of other users.
+The `MyUserAccessQueryService` is designed to manage and control user access permissions within your application. The service should be added to `@AccessControlQuery` decorator to protect the route that handles the access of a single or multiple resource. Once the service is defined, the `AccessControlGuard` will use this logic internally to check if the user is authorized to access the resource.
 
-### Custom Logic in the Service
+#### Custom Logic in the Service
 
 1. **canAccess Method**:
    - This method is used to determine if a user can access a particular resource.
@@ -626,6 +732,27 @@ The `YourUserAccessQueryService` is designed to manage and control user access t
    - You can add custom logic to ensure that users can only update their own passwords.
    - For example, you might check if the user is trying to update their own password and deny the request if they are trying to update someone else's password.
 
+### How AccessControlGuard Works
+
+The `AccessControlGuard` uses the methods provided by `AccessControlService` and `AccessQueryService` to enforce access control rules. Here’s how it works:
+
+1. **Guard Initialization**:
+   - When a request is made to a protected route, the `AccessControlGuard` is
+     triggered.
+   - The guard gets what permission was granted for what resource.
+
+2. **Role Verification**:
+   - The guard then calls the `getUserRoles` method to get the roles of the
+     user.
+   - Based on the roles, the guard checks if the user has the necessary
+     permissions to access the requested resource.
+
+3. **Access Queries Check**:
+   - The guard then uses the access control queries defined to determine
+     if the user is allowed to perform the requested action on the resource.
+   - If the user has the required permissions, the request is allowed to
+     proceed. Otherwise, it is denied.
+
 ### Practical Examples
 
 - **Role-Based Access**:
@@ -636,15 +763,13 @@ The `YourUserAccessQueryService` is designed to manage and control user access t
   - Users can change their own passwords but cannot change the passwords of other users.
   - Administrators might have the ability to reset passwords for any user.
 
-## Benefits
+### Benefits
 
 - **Enhanced Security**: By implementing custom access control logic, you can ensure that sensitive data is only accessible to authorized users.
 - **Flexibility**: The service allows you to define complex access rules that can be tailored to your application's specific needs.
 - **Compliance**: Proper access control helps in meeting regulatory requirements by ensuring that only authorized users can access or modify data.
 
-By using the `YourUserAccessQueryService`, you can create a robust and flexible access control system that enhances the security and integrity of your application.
-
-#### Why Use Access Control?
+### Why Use Access Control?
 
 Implementing access control ensures that your application maintains data integrity and security by allowing only authorized users to perform specific actions.
 
