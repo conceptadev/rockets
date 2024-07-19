@@ -109,3 +109,6 @@ dist
 
 # generated docs
 /docs
+
+# .yarn meta
+.yarn
