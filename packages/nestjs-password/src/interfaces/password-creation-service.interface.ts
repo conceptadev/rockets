@@ -35,7 +35,7 @@ export interface PasswordCreationServiceInterface {
   /**
    * Validate the array of password stores to check for previous usage.
    *
-   * @param options Validate history options.
+   * @param options - Validate history options.
    * @returns boolean Returns true if password has NOT been used withing configured range.
    */
   validateHistory: (

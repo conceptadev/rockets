@@ -7,8 +7,8 @@ export interface UserPasswordHistoryServiceInterface {
    *
    * Object must have reference id and password storage interface.
    *
-   * @param {ReferenceId} userId The id of the user
-   * @returns {Promise<(ReferenceIdInterface & PasswordStorageInterface)[]>} The password history for the user
+   * @param userId - The id of the user
+   * @returns The password history for the user
    */
   getHistory: (
     userId: ReferenceId,
@@ -19,9 +19,8 @@ export interface UserPasswordHistoryServiceInterface {
    *
    * Object must have reference id and password storage interface.
    *
-   * @param {ReferenceId} userId The id of the user
-   * @param {PasswordStorageInterface} passwordStore One password history for the user
-   * @returns {Promise<void>}
+   * @param userId - The id of the user
+   * @param passwordStore - One password history for the user
    */
   pushHistory: (
     userId: ReferenceId,

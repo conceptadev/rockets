@@ -26,8 +26,8 @@ export abstract class BaseService<Entity extends ReferenceIdInterface> {
   /**
    * Find wrapper.
    *
-   * @param options Find many options
-   * @param queryOptions
+   * @param options - Find many options
+   * @param queryOptions - Query options
    */
   async find(
     options: FindManyOptions<Entity>,
@@ -45,7 +45,7 @@ export abstract class BaseService<Entity extends ReferenceIdInterface> {
   /**
    * Find One wrapper.
    *
-   * @param findOneOptions - Find options
+   * @param options - Find one options
    * @param queryOptions - Query options
    */
   async findOne(
