@@ -62,4 +62,4 @@ All of the options in the official docs for
 [NestJS OpenApi](https://docs.nestjs.com/openapi) are supported.
 
 To see how they are mapped to the registration options `settings` property,
-see the [SwaggerUiSettingsInterface](./src/interfaces/swagger-ui-settings.interface.ts)
+see the [SwaggerUiSettingsInterface](https://github.com/conceptadev/rockets/blob/main/packages/nestjs-swagger-ui/src/interfaces/swagger-ui-settings.interface.ts)
