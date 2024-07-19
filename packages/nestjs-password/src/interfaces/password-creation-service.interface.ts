@@ -2,6 +2,7 @@ import { PasswordPlainInterface } from '@concepta/ts-common';
 import { PasswordStorageInterface } from './password-storage.interface';
 import { PasswordCurrentPasswordInterface } from './password-current-password.interface';
 import { PasswordCreateObjectOptionsInterface } from './password-create-object-options.interface';
+import { PasswordHistoryPasswordInterface } from './password-history-password.interface';
 
 /**
  * Password Creation Service Interface
@@ -29,6 +30,16 @@ export interface PasswordCreationServiceInterface {
    */
   validateCurrent: (
     options: Partial<PasswordCurrentPasswordInterface>,
+  ) => Promise<boolean>;
+
+  /**
+   * Validate the array of password stores to check for previous usage.
+   *
+   * @param options - Validate history options.
+   * @returns boolean Returns true if password has NOT been used withing configured range.
+   */
+  validateHistory: (
+    options: Partial<PasswordHistoryPasswordInterface>,
   ) => Promise<boolean>;
 
   /**
