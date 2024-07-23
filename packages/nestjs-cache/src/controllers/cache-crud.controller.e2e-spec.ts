@@ -284,6 +284,54 @@ describe('CacheAssignmentController (e2e)', () => {
       });
   });
 
+  it.only('PUT /cache/user replace', async () => {
+    const payload: CacheCreatableInterface = {
+      key: 'dashboard-1',
+      type: 'filter',
+      data: '{}',
+      expiresIn: '1d',
+      assignee: { id: user.id },
+    };
+    let cacheId = '';
+    await supertest(app.getHttpServer())
+      .put('/cache/user')
+      .send(payload)
+      .expect(200)
+      .then((res) => {
+        cacheId = res.body.id;
+        expect(res.body.key).toBe(payload.key);
+        expect(res.body.assignee.id).toBe(user.id);
+      });
+    payload.data = '{ "name": "John Doe" }';
+    payload.expiresIn = null;
+    await supertest(app.getHttpServer())
+      .put(`/cache/user/${cacheId}`)
+      .send(payload)
+      .expect(200)
+      .then((res) => {
+        expect(res.body.key).toBe(payload.key);
+        expect(res.body.data).toBe(payload.data);
+        expect(res.body.assignee.id).toBe(user.id);
+      });
+
+    const url =
+      `/cache/user/` +
+      `?filter[0]=key||$eq||${payload.key}` +
+      `&filter[1]=type||$eq||${payload.type}` +
+      `&filter[2]=assignee.id||$eq||${payload.assignee.id}`;
+    // Assuming your endpoint can filter by key and type
+    await supertest(app.getHttpServer())
+      .get(url)
+      .expect(200)
+      .then((res) => {
+        const response = res.body[0];
+        assert.strictEqual(response.assignee.id, user.id);
+        assert.strictEqual(response.key, payload.key);
+        assert.strictEqual(response.type, payload.type);
+        assert.strictEqual(response.data, payload.data);
+      });
+  });
+
   it('DELETE /cache/user/:id', async () => {
     const userCache = await userCacheFactory
       .map((userCache) => {
