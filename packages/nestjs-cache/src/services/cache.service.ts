@@ -239,6 +239,19 @@ export class CacheService implements CacheServiceInterface {
     }
   }
 
+  async updateOrCreate(
+    assignment: ReferenceAssignment,
+    cache: CacheCreateDto,
+    queryOptions?: QueryOptionsInterface,
+  ): Promise<CacheInterface> {
+    const existingCache = await this.get(assignment, cache, queryOptions);
+    if (existingCache) {
+      return await this.update(assignment, cache, queryOptions);
+    } else {
+      return await this.create(assignment, cache, queryOptions);
+    }
+  }
+
   // Should this be on nestjs-common?
   protected async validateDto<T extends DeepPartial<CacheInterface>>(
     type: Type<T>,
