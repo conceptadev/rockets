@@ -1,5 +1,5 @@
-import { Inject, Param } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Inject, NotFoundException, Param } from '@nestjs/common';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import {
   AccessControlCreateOne,
   AccessControlDeleteOne,
@@ -14,6 +14,7 @@ import {
   CrudDeleteOne,
   CrudReadMany,
   CrudReadOne,
+  CrudReplaceOne,
   CrudRequest,
   CrudRequestInterface,
   CrudUpdateOne,
@@ -64,7 +65,7 @@ export class CacheCrudController
       CacheInterface,
       CacheCreatableInterface,
       CacheUpdatableInterface,
-      never
+      CacheCreatableInterface
     >
 {
   /**
@@ -130,42 +131,18 @@ export class CacheCrudController
       cacheCreateDto.expiresIn ?? this.settings.expiresIn,
     );
 
-    const existingCache = await this.cacheService.get(
-      assignment,
-      cacheCreateDto,
-    );
-
-    // update or create
-    if (existingCache) {
-      crudRequest.parsed.search.$and?.push({
-        id: {
-          $eq: existingCache.id,
-        },
-      });
-      // call crud service to create
-      const response = await this.getCrudService(assignment).updateOne(
-        crudRequest,
-        {
-          id: existingCache.id,
-          ...cacheCreateDto,
-          expirationDate,
-        },
-      );
-      return response;
-    } else {
-      // call crud service to create
-      return this.getCrudService(assignment).createOne(crudRequest, {
-        ...cacheCreateDto,
-        expirationDate,
-      });
-    }
+    // call crud service to create
+    return this.getCrudService(assignment).createOne(crudRequest, {
+      ...cacheCreateDto,
+      expirationDate,
+    });
   }
 
   /**
    * Create one
    *
    * @param crudRequest - the CRUD request object
-   * @param cacheUpdateDto - cache create dto
+   * @param cacheUpdateDto - cache update dto
    * @param assignment - The cache assignment
    */
   @CrudUpdateOne()
@@ -216,6 +193,48 @@ export class CacheCrudController
     } else {
       // bad entity key
       throw new CacheEntityNotFoundException(entityKey);
+    }
+  }
+
+  /**
+   * Do a Upsert operation for cache
+   *
+   * @param crudRequest - the CRUD request object
+   * @param cacheUpdateDto - cache update dto
+   * @param assignment - The cache assignment
+   */
+  @ApiOkResponse({
+    type: CacheDto,
+  })
+  @CrudReplaceOne()
+  @AccessControlCreateOne(CacheResource.One)
+  async replaceOne(
+    @CrudRequest() crudRequest: CrudRequestInterface,
+    @CrudBody() cacheUpdateDto: CacheUpdateDto,
+    @Param('assignment') assignment: ReferenceAssignment,
+  ) {
+    let cache;
+    try {
+      cache = await this.getOne(crudRequest, assignment);
+    } catch (error) {
+      // error is NOT a not found exception?
+      if (error instanceof NotFoundException !== true) {
+        // rethrow it
+        throw error;
+      }
+    }
+    if (cache && cache?.id) {
+      const expirationDate = getExpirationDate(
+        cacheUpdateDto.expiresIn ?? this.settings.expiresIn,
+      );
+
+      // call crud service to create
+      return this.getCrudService(assignment).replaceOne(crudRequest, {
+        ...cacheUpdateDto,
+        expirationDate,
+      });
+    } else {
+      return this.createOne(crudRequest, cacheUpdateDto, assignment);
     }
   }
 
