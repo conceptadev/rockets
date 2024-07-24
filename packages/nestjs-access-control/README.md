@@ -24,7 +24,8 @@ Advanced access control guard for NestJS with optional per-request filtering.
      - [Import the module into your app](#import-the-module-into-your-app)
 2. [How-To Guides](#how-to-guides)
    - [Creating a Custom Access Query Service](#creating-a-custom-access-query-service)
-   - [Create a custom Access Control service](#create-a-custom-access-control-service)
+   - [Example of Importing Dependencies in `AccessControlModule`](#example-of-importing-dependencies-in-accesscontrolmodule)
+   - [Using Dependency in Access Query Service](#using-dependency-in-access-query-service)
    - [Disable AccessControlGuard](#disable-accesscontrolguard)
    - [Create a custom AccessControlGuard](#create-a-custom-accesscontrolguard)
    - [Using `@AccessControlCreateOne` Decorator](#using-accesscontrolcreateone-decorator)
@@ -198,7 +199,6 @@ import { User } from '../user/user.entity';
 export class ACService implements AccessControlService {
   async getUser<T>(context: ExecutionContext): Promise<T> {
     const request = context.switchToHttp().getRequest();
-    
     // request.user should be something like this
     // { id: '1', username: 'john', roles: [{ id: '1', name: 'User' }] }
     return request.user as T;
@@ -350,24 +350,24 @@ export class AppModule {}
 ## Creating a Custom Access Query Service
 
 AccessQueryService is a service that will be used to check if the user can access the resource.
-any custom validation for a especific endpoint or a controller, should be done by creating a
-custom query service. The query service created, should be added to `queryServices` settings on
+Any custom validation for a specific endpoint or a controller should be done by creating a
+custom query service. The query service created should be added to the `queryServices` settings on
 module definition to make sure it will become a provider to be injected in any other service.
-Once this is done, we can go ahead and add the query for any endpoint of controller with
+Once this is done, we can go ahead and add the query for any endpoint of the controller with
 `@AccessControlQuery` decorator.
 
 To create a custom query service, follow these steps:
 
 1. **Define the Service**: Create a new service class that implements `CanAccess` from
-`@concepta/nestjs-access-control`. The `canAccess` method will provide you all information
-you need to manage your access. On the following example, we check if a password update for
-the User resource is being performed by the user that is trying to update itself.
+   `@concepta/nestjs-access-control`. The `canAccess` method will provide you all information
+   you need to manage your access. In the following example, we check if a password update for
+   the User resource is being performed by the user that is trying to update it.
 
 ```typescript
 //...
 export class MyUserAccessQueryService implements CanAccess {
   async canAccess(context: AccessControlContext): Promise<boolean> {
-     const { resource, action } = context.getQuery();
+    const { resource, action } = context.getQuery();
 
     if (resource === AppResource.User && action === ActionEnum.UPDATE) {
       const userAuthorizedDto = plainToInstance(UserDto, context.getUser());
@@ -391,7 +391,7 @@ export class MyUserAccessQueryService implements CanAccess {
 
 2. **Register the Service**: Register the custom service in your module.
 
-```ts
+```typescript
 //...
 AccessControlModule.forRoot({
   settings: { rules: acRules },
@@ -400,9 +400,9 @@ AccessControlModule.forRoot({
 //...
 ```
 
-3. **Set AccessControlQuery**: Set `AccessControlQuery` to controller
+3. **Set AccessControlQuery**: Set `AccessControlQuery` to the controller.
 
-```ts
+```typescript
 @Controller('user')
 @ApiTags('user')
 export class UserController {
@@ -421,19 +421,64 @@ export class UserController {
 }
 ```
 
-## Create a custom Access Control service
+### Example of Importing Dependencies in `AccessControlModule`
 
-TODO: maybe i should remove the access control service ffrom the tutorial and keep it here?
-Please refer to the tutorial section at [Your custom AccessControlService](###-Your-custom-AccessControlService)
+When creating access query services that depend on other modules, you need to ensure that these dependencies are imported into the `AccessControlModule`. Here's an example of how to set this up:
+
+```typescript
+import { Module } from '@nestjs/common';
+import { AccessControlModule } from '@concepta/nestjs-access-control';
+import { SomeModule } from './some.module';
+import { AnotherModule } from './another.module';
+import { SomeAccessQueryService } from './some-access-query.service';
+import { AnotherAccessQueryService } from './another-access-query.service';
+
+@Module({
+  imports: [
+    SomeModule,
+    AnotherModule,
+    AccessControlModule.forRoot({
+      settings: { rules: acRules },
+      imports: [SomeModule, AnotherModule],
+      queryServices: [SomeAccessQueryService, AnotherAccessQueryService],
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+### Using Dependency in Access Query Service
+
+Here's an example of how to use a dependency in an access query service:
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import {
+  CanAccess,
+  AccessControlContext,
+} from '@concepta/nestjs-access-control';
+import { SomeService } from './some.service';
+
+@Injectable()
+export class SomeAccessQueryService implements CanAccess {
+  constructor(private readonly someService: SomeService) {}
+
+  async canAccess(context: AccessControlContext): Promise<boolean> {
+    const user = context.getUser();
+    // Use someService to check if the user can access the resource
+    return this.someService.canUserAccessResource(user);
+  }
+}
+```
 
 ## Disable AccessControlGuard
 
-You can disable all access control guards globally if needed. This can be useful for development or testing purposes. To disable the guards, set the appGuard option to false in the AccessControlModule configuration:
+You can disable all access control guards globally if needed. This can be useful for development or testing purposes. To disable the guards, set the `appGuard` option to `false` in the `AccessControlModule` configuration:
 
-```ts
+```typescript
 AccessControlModule.forRoot({
   settings: { rules: acRules },
-  appGuard: false
+  appGuard: false,
 }),
 ```
 
@@ -446,7 +491,7 @@ can create a custom guard if you need to. By creating a class that extends `CanA
 `@nestjs/common`, you can create a custom guard that will be used to protect your endpoints.
 Please keep in mind that the guard will be set globally for all endpoints.
 
-```ts
+```typescript
 @Injectable()
 export class MyAccessControlGuard implements CanActivate {
   public async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -456,10 +501,10 @@ export class MyAccessControlGuard implements CanActivate {
 }
 ```
 
-```ts
+```typescript
 AccessControlModule.forRoot({
       settings: { rules: acRules },
-      appGuard: new MyAccessControlGuard()
+      appGuard: new MyAccessControlGuard(),
     }),
 ```
 
@@ -473,7 +518,7 @@ The `@AccessControlCreateOne` decorator is used to grant create permissions for 
 
 First, define your access control rules using the AccessControl library. This example shows how to set permissions for different roles.
 
-```ts
+```typescript
 //...
 ac.grant(AppRole.User)
   .createOwn(AppResource.User);
@@ -484,7 +529,7 @@ ac.grant(AppRole.User)
 
 Next, use the `@AccessControlCreateOne` decorator in your controller to protect the route that handles the creation of a single resource.
 
-```ts
+```typescript
   @Post()
   @AccessControlCreateOne(AppResource.User)
   create(@Body() createUserDto: CreateUserDto) {
@@ -502,18 +547,17 @@ The `@AccessControlUpdateOne` decorator is used to grant update permissions for 
 
 First, define your access control rules using the `AccessControl` library. This example shows how to set permissions for different roles.
 
-```ts
-
+```typescript
 ac.grant(AppRole.User)
   .updateOwn(AppResource.User)
 //...
 ```
 
-#### Using in a Controller
+### Using in a Controller
 
 Next, use the `@AccessControlUpdateOne` decorator in your controller to protect the route that handles the updating of a single resource.
 
-```ts
+```typescript
   @Put(':id')
   @AccessControlUpdateOne(AppResource.User)
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
@@ -529,9 +573,9 @@ The `@AccessControlReadOne` decorator grants read permissions for a single resou
 
 ### Setting Permissions
 
-First, define your access control rules using the `AccessControl` library. This example shows how to set permissions for different roles. Please refer [Important Notes Section](#important) for better understanding of the permissions.
+First, define your access control rules using the `AccessControl` library. This example shows how to set permissions for different roles. Please refer to the [Important Notes Section](#important) for better understanding of the permissions.
 
-```ts
+```typescript
 //...
 // User can only read their own information
 ac.grant(AppRole.User)
@@ -547,7 +591,7 @@ ac.grant(AppRole.Admin)
 
 Next, use the `@AccessControlReadOne` decorator in your controller to protect the route that handles the reading of a single resource.
 
-```ts
+```typescript
 //...
   @Get(':id')
   @AccessControlReadOne(AppResource.User)
@@ -562,7 +606,7 @@ Next, use the `@AccessControlReadOne` decorator in your controller to protect th
 User that contains Role `User` can only get their own information.
 User that contains Role `Admin` can get any information of resource `User`.
 
-```ts
+```typescript
 //...
   @Get(':id')
   @AccessControlReadOne(AppResource.User)
@@ -582,18 +626,18 @@ The `@AccessControlDeleteOne` decorator is used to grant delete permissions for 
 
 First, define your access control rules using the `AccessControl` library. This example shows how to set permissions for different roles.
 
-```ts
+```typescript
 //...
 ac.grant(AppRole.User)
-  .deleteOwn(AppResource.User);
+  .deleteOwn(AppResource.User)
 //...
 ```
 
-#### Using in a Controller
+### Using in a Controller
 
 Next, use the `@AccessControlDeleteOne` decorator in your controller to protect the route that handles the deletion of a single resource.
 
-```ts
+```typescript
 //...
   @Delete(':id')
   @AccessControlDeleteOne(AppResource.User)
@@ -613,10 +657,10 @@ The `@AccessControlCreateMany` decorator is used to grant create permissions for
 
 First, define your access control rules using the `AccessControl` library. This example shows how to set permissions for different roles.
 
-```ts
+```typescript
 //...
 ac.grant(AppRole.User)
-  .createAny(AppResource.User);
+  .createAny(AppResource.User)
 //...
 ```
 
@@ -624,7 +668,7 @@ ac.grant(AppRole.User)
 
 Next, use the `@AccessControlCreateMany` decorator in your controller to protect the route that handles the creation of multiple resources.
 
-```ts
+```typescript
 //...
   @Post('bulk')
   @AccessControlCreateMany(AppResource.User)
@@ -644,7 +688,7 @@ The `@AccessControlReadMany` decorator is used to grant read permissions for mul
 
 First, define your access control rules using the `AccessControl` library. This example shows how to set permissions for different roles.
 
-```ts
+```typescript
 //...
 ac.grant(AppRole.User)
   .readAny(AppResource.Article)
@@ -655,7 +699,7 @@ ac.grant(AppRole.User)
 
 Next, use the `@AccessControlReadMany` decorator in your controller to protect the route that handles the reading of multiple resources.
 
-```ts
+```typescript
 //...
   @Get(':id')
   @AccessControlReadMany(AppResource.Article)
@@ -675,7 +719,7 @@ For more details, check the [official documentation](https://docs.nestjs.com/gua
 
 When building your ACL, you need to remember these!
 
-> This module only helps you apply a pattern. There is no magic, you are ultimately responsible for
+> This module only helps you apply a pattern. There is no magic; you are ultimately responsible for
 > checking that your ACL works in all contexts.
 
 Here is the pattern:
@@ -718,7 +762,7 @@ The Query Services are services that should be used to define authorization logi
 
 #### Overview
 
-The `MyUserAccessQueryService` is designed to manage and control user access permissions within your application. The service should be added to `@AccessControlQuery` decorator to protect the route that handles the access of a single or multiple resource. Once the service is defined, the `AccessControlGuard` will use this logic internally to check if the user is authorized to access the resource.
+The `MyUserAccessQueryService` is designed to manage and control user access permissions within your application. The service should be added to the `@AccessControlQuery` decorator to protect the route that handles the access of a single or multiple resource. Once the service is defined, the `AccessControlGuard` will use this logic internally to check if the user is authorized to access the resource.
 
 #### Custom Logic in the Service
 
