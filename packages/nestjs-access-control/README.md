@@ -29,31 +29,27 @@ Advanced access control guard for NestJS with optional per-request filtering.
    - [Disable AccessControlGuard](#disable-accesscontrolguard)
    - [Create a custom AccessControlGuard](#create-a-custom-accesscontrolguard)
    - [Using `@AccessControlCreateOne` Decorator](#using-accesscontrolcreateone-decorator)
-     - [Description](#description)
-     - [Setting Permissions](#setting-permissions)
-     - [Using in a Controller](#using-in-a-controller)
+     - [Setting Permissions](#setting-create-one-permissions)
+     - [Using in a Controller](#using-create-one-in-a-controller)
    - [Using `@AccessControlUpdateOne` Decorator](#using-accesscontrolupdateone-decorator)
-     - [Description](#description-1)
-     - [Setting Permissions](#setting-permissions-1)
-     - [Using in a Controller](#using-in-a-controller-1)
+     - [Setting Permissions](#setting-update-one-permissions)
+     - [Using in a Controller](#using-update-one-in-a-controller)
    - [Using `@AccessControlReadOne` Decorator](#using-accesscontrolreadone-decorator)
-     - [Description](#description-2)
-     - [Setting Permissions](#setting-permissions-2)
-     - [Using in a Controller](#using-in-a-controller-2)
+     - [Setting Permissions](#setting-read-one-permissions)
+     - [Using in a Controller](#using-read-one-in-a-controller)
      - [Using in a Controller to get own information only](#using-in-a-controller-to-get-own-information-only)
    - [Using `@AccessControlDeleteOne` Decorator](#using-accesscontroldeleteone-decorator)
-     - [Description](#description-3)
-     - [Setting Permissions](#setting-permissions-3)
-     - [Using in a Controller](#using-in-a-controller-3)
+     - [Setting Permissions](#setting-delete-one-permissions)
+     - [Using in a Controller](#using-delete-one-in-a-controller)
    - [Using `@AccessControlCreateMany` Decorator](#using-accesscontrolcreatemany-decorator)
-     - [Description](#description-4)
-     - [Setting Permissions](#setting-permissions-4)
-     - [Using in a Controller](#using-in-a-controller-4)
+     - [Setting Permissions](#setting-create-many-permissions)
+     - [Using in a Controller](#using-create-many-in-a-controller)
    - [Using `@AccessControlReadMany` Decorator](#using-accesscontrolreadmany-decorator)
-     - [Description](#description-5)
-     - [Setting Permissions](#setting-permissions-5)
-     - [Using in a Controller](#using-in-a-controller-5)
+     - [Setting Permissions](#setting-read-many-permissions)
+     - [Using in a Controller](#using-read-many-in-a-controller)
 3. [Reference](#reference)
+   - [NestJS AuthGuard Pattern](#nestjs-authguard-pattern)
+   - [ACL Module](#acl-module)
 4. [Explanation](#explanation)
    - [IMPORTANT](#important)
    - [What is Access Control?](#what-is-access-control)
@@ -87,7 +83,11 @@ npm install @concepta/nestjs-access-control
 
 ## Basic Setup
 
-To set up the `@concepta/nestjs-access-control` module, you need to define your access control rules, create a custom access query service, and import the `AccessControlModule` into your app module. This ensures that your application can enforce access control policies based on the defined rules and services.
+To set up the `@concepta/nestjs-access-control` module, you need to
+define your access control rules, create a custom access query service,
+and import the `AccessControlModule` into your app module. This ensures
+that your application can enforce access control policies based on the
+defined rules and services.
 
 ## Example
 
@@ -126,10 +126,15 @@ export class User {
 
 ### Your custom ACL rules
 
-Define custom ACL rules using the `AccessControl` library. Here we are defining
-a custom AccessControl to contains the rules of our authorization system. The
-`acRules` will be used o grant specific permissions of a resource, to a defined role.
-Please make sure to review a [Important](#important) section to understand important concepts of Access Control.
+Define custom ACL rules as documented by the
+[accesscontrol](https://www.npmjs.com/package/accesscontrol) library.
+
+Here we are defining a custom `AccessControl` to contains the rules of
+our authorization system. The `acRules` will be used to grant specific
+permissions of a resource, to a defined role.
+
+Please make sure to review a [Important](#important) section to understand
+important concepts of Access Control.
 
 ```typescript
 // app.acl.ts
@@ -223,11 +228,13 @@ for example:
   }
 ```
 
-For this code, we are applying the `AccessControlReadMany` decorator to the
-`getMany` endpoint. This means that only users with a role that has been
-granted the `read` permission for the `AppResource.UserList` resource can get the list of users.
+For this code, we are applying the `AccessControlReadMany`
+decorator to the `getMany` endpoint. This means that only users
+with a role that has been granted the `read` permission for the
+`AppResource.UserList` resource can get the list of users.
 
-For example, you need to grant the `read` permission to the `User` role for the `UserList` resource:
+For example, you need to grant the `read` permission to the
+`User` role for the `UserList` resource:
 
 ```ts
 acRules.grant(AppRole.User).resource([AppResource.User]).readOwn();
@@ -235,7 +242,8 @@ acRules.grant(AppRole.User).resource([AppResource.User]).readOwn();
 acRules.grant(AppRole.User).resource([AppResource.User]).readAny();
 ```
 
-Check [Important](#important) section to understand the difference between `own` and `any`.
+Check [Important](#important) section to understand the
+difference between `own` and `any`.
 
 Let's create our controller.
 
@@ -326,7 +334,8 @@ export class UserController {
 
 ### Import the module into your app
 
-Import and register the `AccessControlModule` in your app module. settings.rules is the only property mandatory.
+Import and register the `AccessControlModule` in your app module.
+`settings.rules` is the only property mandatory.
 
 ```typescript
 //...
@@ -349,19 +358,24 @@ export class AppModule {}
 
 ## Creating a Custom Access Query Service
 
-AccessQueryService is a service that will be used to check if the user can access the resource.
-Any custom validation for a specific endpoint or a controller should be done by creating a
-custom query service. The query service created should be added to the `queryServices` settings on
-module definition to make sure it will become a provider to be injected in any other service.
-Once this is done, we can go ahead and add the query for any endpoint of the controller with
-`@AccessControlQuery` decorator.
+AccessQueryService is a service that will be used to check
+if the user can access the resource. Any custom validation
+for a specific endpoint or a controller should be done by creating a
+custom query service. The query service created should be added to
+the `queryServices` settings on module definition to make sure it will
+become a provider to be injected in any other service. Once this is
+done, we can go ahead and add the query for any endpoint of the
+controller with `@AccessControlQuery` decorator.
 
 To create a custom query service, follow these steps:
 
-1. **Define the Service**: Create a new service class that implements `CanAccess` from
-   `@concepta/nestjs-access-control`. The `canAccess` method will provide you all information
-   you need to manage your access. In the following example, we check if a password update for
-   the User resource is being performed by the user that is trying to update it.
+1. **Define the Service**: Create a new service class that
+   implements `CanAccess` from `@concepta/nestjs-access-control`.
+   The `canAccess` method will provide you all information
+   you need to manage your access.
+   In the following example, we check if a password update for
+   the User resource is being performed by the user that is trying
+   to update it.
 
 ```typescript
 //...
@@ -389,7 +403,7 @@ export class MyUserAccessQueryService implements CanAccess {
 }
 ```
 
-2. **Register the Service**: Register the custom service in your module.
+1. **Register the Service**: Register the custom service in your module.
 
 ```typescript
 //...
@@ -400,7 +414,7 @@ AccessControlModule.forRoot({
 //...
 ```
 
-3. **Set AccessControlQuery**: Set `AccessControlQuery` to the controller.
+1. **Set AccessControlQuery**: Set `AccessControlQuery` to the controller.
 
 ```typescript
 @Controller('user')
@@ -423,7 +437,9 @@ export class UserController {
 
 ### Example of Importing Dependencies in `AccessControlModule`
 
-When creating access query services that depend on other modules, you need to ensure that these dependencies are imported into the `AccessControlModule`. Here's an example of how to set this up:
+When creating access query services that depend on other modules,
+you need to ensure that these dependencies are imported into the
+`AccessControlModule`. Here's an example of how to set this up:
 
 ```typescript
 import { Module } from '@nestjs/common';
@@ -473,7 +489,10 @@ export class SomeAccessQueryService implements CanAccess {
 
 ## Disable AccessControlGuard
 
-You can disable all access control guards globally if needed. This can be useful for development or testing purposes. To disable the guards, set the `appGuard` option to `false` in the `AccessControlModule` configuration:
+You can disable all access control guards globally if needed.
+This can be useful for development or testing purposes.
+To disable the guards, set the `appGuard` option to `false`
+in the `AccessControlModule` configuration:
 
 ```typescript
 AccessControlModule.forRoot({
@@ -484,11 +503,15 @@ AccessControlModule.forRoot({
 
 ## Create a custom AccessControlGuard
 
-This module contains a default `AccessControlGuard` that can be used to protect endpoints
-with one of the many `@AccessControl` decorators. This guard will use the logic at
-`AccessControlService` and `AccessQueryService` to check permissions. However, you
-can create a custom guard if you need to. By creating a class that extends `CanActivate` from
-`@nestjs/common`, you can create a custom guard that will be used to protect your endpoints.
+This module contains a default `AccessControlGuard` that can
+be used to protect endpoints with one of the many `@AccessControl`
+decorators. This guard will use the logic at
+`AccessControlService` and `AccessQueryService` to check permissions.
+
+However, you can create a custom guard if you need to. By creating a
+class that extends `CanActivate` from `@nestjs/common`, you can create
+a custom guard that will be used to protect your endpoints.
+
 Please keep in mind that the guard will be set globally for all endpoints.
 
 ```typescript
@@ -510,13 +533,14 @@ AccessControlModule.forRoot({
 
 ## Using `@AccessControlCreateOne` Decorator
 
-### Description
+The `@AccessControlCreateOne` decorator is used to grant create
+permissions for a single resource. This decorator is a shortcut for
+defining access control grants for creating one resource.
 
-The `@AccessControlCreateOne` decorator is used to grant create permissions for a single resource. This decorator is a shortcut for defining access control grants for creating one resource.
+### Setting Create One Permissions
 
-### Setting Permissions
-
-First, define your access control rules using the AccessControl library. This example shows how to set permissions for different roles.
+First, define your access control rules using the AccessControl
+library. This example shows how to set permissions for different roles.
 
 ```typescript
 //...
@@ -525,9 +549,10 @@ ac.grant(AppRole.User)
 //...
 ```
 
-### Using in a Controller
+### Using Create One in a Controller
 
-Next, use the `@AccessControlCreateOne` decorator in your controller to protect the route that handles the creation of a single resource.
+Next, use the `@AccessControlCreateOne` decorator in your controller
+to protect the route that handles the creation of a single resource.
 
 ```typescript
   @Post()
@@ -539,13 +564,14 @@ Next, use the `@AccessControlCreateOne` decorator in your controller to protect 
 
 ## Using `@AccessControlUpdateOne` Decorator
 
-### Description
+The `@AccessControlUpdateOne` decorator is used to grant update
+permissions for a single resource. This decorator is a shortcut for
+defining access control grants for updating one resource.
 
-The `@AccessControlUpdateOne` decorator is used to grant update permissions for a single resource. This decorator is a shortcut for defining access control grants for updating one resource.
+### Setting Update One Permissions
 
-### Setting Permissions
-
-First, define your access control rules using the `AccessControl` library. This example shows how to set permissions for different roles.
+First, define your access control rules using the `AccessControl`
+library. This example shows how to set permissions for different roles.
 
 ```typescript
 ac.grant(AppRole.User)
@@ -553,9 +579,10 @@ ac.grant(AppRole.User)
 //...
 ```
 
-### Using in a Controller
+### Using Update One in a Controller
 
-Next, use the `@AccessControlUpdateOne` decorator in your controller to protect the route that handles the updating of a single resource.
+Next, use the `@AccessControlUpdateOne` decorator in your controller
+to protect the route that handles the updating of a single resource.
 
 ```typescript
   @Put(':id')
@@ -567,13 +594,16 @@ Next, use the `@AccessControlUpdateOne` decorator in your controller to protect 
 
 ## Using `@AccessControlReadOne` Decorator
 
-### Description
+The `@AccessControlReadOne` decorator grants read permissions for a single
+resource. It is a shortcut for defining access control grants for reading one resource.
 
-The `@AccessControlReadOne` decorator grants read permissions for a single resource. It is a shortcut for defining access control grants for reading one resource.
+### Setting Read One Permissions
 
-### Setting Permissions
+First, define your access control rules using the `AccessControl` library.
+This example shows how to set permissions for different roles.
 
-First, define your access control rules using the `AccessControl` library. This example shows how to set permissions for different roles. Please refer to the [Important Notes Section](#important) for better understanding of the permissions.
+Please refer to the [Important Notes Section](#important) for better
+understanding of the permissions.
 
 ```typescript
 //...
@@ -581,15 +611,17 @@ First, define your access control rules using the `AccessControl` library. This 
 ac.grant(AppRole.User)
   .readOwn(AppResource.User)
 
-// Admin can read any information of resource User (however you still need to specify this authorization on AccessControlReadOne)
+// Admin can read any information of resource User
+// (however you still need to specify this authorization on AccessControlReadOne)
 ac.grant(AppRole.Admin)
   .readAny(AppResource.User)
 // ...
 ```
 
-### Using in a Controller
+### Using Read One in a Controller
 
-Next, use the `@AccessControlReadOne` decorator in your controller to protect the route that handles the reading of a single resource.
+Next, use the `@AccessControlReadOne` decorator in your controller
+to protect the route that handles the reading of a single resource.
 
 ```typescript
 //...
@@ -618,13 +650,14 @@ User that contains Role `Admin` can get any information of resource `User`.
 
 ## Using `@AccessControlDeleteOne` Decorator
 
-### Description
+The `@AccessControlDeleteOne` decorator is used to grant delete
+permissions for a single resource. This decorator is a shortcut
+for defining access control grants for deleting one resource.
 
-The `@AccessControlDeleteOne` decorator is used to grant delete permissions for a single resource. This decorator is a shortcut for defining access control grants for deleting one resource.
+### Setting Delete One Permissions
 
-### Setting Permissions
-
-First, define your access control rules using the `AccessControl` library. This example shows how to set permissions for different roles.
+First, define your access control rules using the `AccessControl`
+library. This example shows how to set permissions for different roles.
 
 ```typescript
 //...
@@ -633,9 +666,10 @@ ac.grant(AppRole.User)
 //...
 ```
 
-### Using in a Controller
+### Using Delete One in a Controller
 
-Next, use the `@AccessControlDeleteOne` decorator in your controller to protect the route that handles the deletion of a single resource.
+Next, use the `@AccessControlDeleteOne` decorator in your controller
+to protect the route that handles the deletion of a single resource.
 
 ```typescript
 //...
@@ -649,13 +683,14 @@ Next, use the `@AccessControlDeleteOne` decorator in your controller to protect 
 
 ## Using `@AccessControlCreateMany` Decorator
 
-### Description
+The `@AccessControlCreateMany` decorator is used to grant creat
+ permissions for multiple resources. This decorator is a shortcut
+ for defining access control grants for creating many resources.
 
-The `@AccessControlCreateMany` decorator is used to grant create permissions for multiple resources. This decorator is a shortcut for defining access control grants for creating many resources.
+### Setting Create Many Permissions
 
-### Setting Permissions
-
-First, define your access control rules using the `AccessControl` library. This example shows how to set permissions for different roles.
+First, define your access control rules using the `AccessControl`
+library. This example shows how to set permissions for different roles.
 
 ```typescript
 //...
@@ -664,9 +699,10 @@ ac.grant(AppRole.User)
 //...
 ```
 
-### Using in a Controller
+### Using Create Many in a Controller
 
-Next, use the `@AccessControlCreateMany` decorator in your controller to protect the route that handles the creation of multiple resources.
+Next, use the `@AccessControlCreateMany` decorator in your controller
+to protect the route that handles the creation of multiple resources.
 
 ```typescript
 //...
@@ -680,13 +716,14 @@ Next, use the `@AccessControlCreateMany` decorator in your controller to protect
 
 ## Using `@AccessControlReadMany` Decorator
 
-### Description
+The `@AccessControlReadMany` decorator is used to grant read
+permissions for multiple resources. This decorator is a shortcut for
+defining access control grants for reading multiple resources.
 
-The `@AccessControlReadMany` decorator is used to grant read permissions for multiple resources. This decorator is a shortcut for defining access control grants for reading multiple resources.
+### Setting Read Many Permissions
 
-### Setting Permissions
-
-First, define your access control rules using the `AccessControl` library. This example shows how to set permissions for different roles.
+First, define your access control rules using the `AccessControl` library.
+This example shows how to set permissions for different roles.
 
 ```typescript
 //...
@@ -695,9 +732,10 @@ ac.grant(AppRole.User)
 // ...
 ```
 
-### Using in a Controller
+### Using Read Many in a Controller
 
-Next, use the `@AccessControlReadMany` decorator in your controller to protect the route that handles the reading of multiple resources.
+Next, use the `@AccessControlReadMany` decorator in your controller to
+protect the route that handles the reading of multiple resources.
 
 ```typescript
 //...
@@ -709,33 +747,47 @@ Next, use the `@AccessControlReadMany` decorator in your controller to protect t
 //...
 ```
 
-# Reference
+## Reference
 
-For more details, check the [official documentation](https://docs.nestjs.com/guards#access-control).
+### NestJS AuthGuard Pattern
 
-# Explanation
+For more details on the AuthGuard pattern,
+check the [official NestJS documentation](https://docs.nestjs.com/guards#access-control).
+
+### ACL Module
+
+For more details on the `accesscontrol` module,
+check the [official accesscontrol documentation](https://www.npmjs.com/package/accesscontrol).
+
+## Explanation
 
 ### IMPORTANT
 
 When building your ACL, you need to remember these!
 
-> This module only helps you apply a pattern. There is no magic; you are ultimately responsible for
+> This module only helps you apply a pattern. There is no magic;
+> you are ultimately responsible for
 > checking that your ACL works in all contexts.
 
 Here is the pattern:
 
-- Giving `any` access implies that the role IS NOT restricted by ownership, or other rules, to that action/resource combination.
-- Giving `own` access implies that the role IS restricted by ownership to that action/resource combination
-  (it is often required to enforce this rule with a filter to check the data layer when not all information required to
-  check ownership exists in the parameters or query string.)
+- Giving `any` access implies that the role IS NOT restricted by ownership,
+  or other rules, to that action/resource combination.
+- Giving `own` access implies that the role IS restricted by ownership to
+  that action/resource combination (it is often required to enforce this
+  rule with a filter to check the data layer when not all information
+  required to check ownership exists in the parameters or query string.)
 
 !!! Important !!!
 
-> All roles that are given `any` access to a resource will NOT be passed through access filters since `any` implies they should have all access.
+> All roles that are given `any` access to a resource will NOT be passed
+through access filters since `any` implies they should have all access.
 
 ### What is Access Control?
 
-Access control in a software context refers to the selective restriction of access to resources. It ensures that only authorized users can access or modify data within an application.
+Access control in a software context refers to the selective restriction
+of access to resources. It ensures that only authorized users can access
+or modify data within an application.
 
 ### How AccessControlService Works
 
@@ -758,71 +810,103 @@ Here’s a detailed breakdown of its functionality:
 
 ### How Access Query Service Works
 
-The Query Services are services that should be used to define authorization logic for a specific endpoint or controller. we can either have a query service that runs for all endpoints, or we can create one for each endpoint or controller that we want to protect.
+The Query Services are services that should be used to define authorization
+logic for a specific endpoint or controller. we can either have a query service
+that runs for all endpoints, or we can create one for each endpoint or
+controller that we want to protect.
 
 #### Overview
 
-The `MyUserAccessQueryService` is designed to manage and control user access permissions within your application. The service should be added to the `@AccessControlQuery` decorator to protect the route that handles the access of a single or multiple resource. Once the service is defined, the `AccessControlGuard` will use this logic internally to check if the user is authorized to access the resource.
+The `MyUserAccessQueryService` is designed to manage and control user access
+permissions within your application. The service should be added to the
+`@AccessControlQuery` decorator to protect the route that handles the access
+of a single or multiple resource. Once the service is defined, the
+`AccessControlGuard` will use this logic internally to check if the user is
+authorized to access the resource.
 
 #### Custom Logic in the Service
 
 1. **canAccess Method**:
-   - This method is used to determine if a user can access a particular resource.
-   - You can add custom logic to check the user's role and the action they want to perform.
-   - For example, you might allow users with a 'manager' role to read and update data, but restrict 'employee' roles to only read data.
 
-2. **canUpdatePassword Method**:
-   - This method is used to control whether a user can update their password.
-   - You can add custom logic to ensure that users can only update their own passwords.
-   - For example, you might check if the user is trying to update their own password and deny the request if they are trying to update someone else's password.
+- This method is used to determine if a user can access a
+  particular resource.
+- You can add custom logic to check the user's role and the action
+  they want to perform.
+- For example, you might allow users with a 'manager' role to read
+  and update data, but restrict 'employee' roles to only read data.
+
+1. **canUpdatePassword Method**:
+
+- This method is used to control whether a user can update their password.
+- You can add custom logic to ensure that users can only update their own
+  passwords.
+- For example, you might check if the user is trying to update their own
+  password and deny the request if they are trying to update someone
+  else's password.
 
 ### How AccessControlGuard Works
 
-The `AccessControlGuard` uses the methods provided by `AccessControlService` and `AccessQueryService` to enforce access control rules. Here’s how it works:
+The `AccessControlGuard` uses the methods provided by
+`AccessControlService` and `AccessQueryService` to enforce access
+control rules. Here’s how it works:
 
 1. **Guard Initialization**:
-   - When a request is made to a protected route, the `AccessControlGuard` is
-     triggered.
-   - The guard gets what permission was granted for what resource.
 
-2. **Role Verification**:
-   - The guard then calls the `getUserRoles` method to get the roles of the
-     user.
-   - Based on the roles, the guard checks if the user has the necessary
-     permissions to access the requested resource.
+- When a request is made to a protected route, the `AccessControlGuard`
+  is triggered.
+- The guard gets what permission was granted for what resource.
 
-3. **Access Queries Check**:
-   - The guard then uses the access control queries defined to determine
-     if the user is allowed to perform the requested action on the resource.
-   - If the user has the required permissions, the request is allowed to
-     proceed. Otherwise, it is denied.
+1. **Role Verification**:
+
+- The guard then calls the `getUserRoles` method to get the roles of the
+  user.
+- Based on the roles, the guard checks if the user has the necessary
+  permissions to access the requested resource.
+
+1. **Access Queries Check**:
+
+- The guard then uses the access control queries defined to determine
+  if the user is allowed to perform the requested action on the resource.
+- If the user has the required permissions, the request is allowed to
+  proceed. Otherwise, it is denied.
 
 ### Practical Examples
 
 - **Role-Based Access**:
-  - Managers can view and edit all employee records.
-  - Employees can only view their own records and cannot edit them.
+- Managers can view and edit all employee records.
+- Employees can only view their own records and cannot edit them.
 
 - **Password Management**:
-  - Users can change their own passwords but cannot change the passwords of other users.
-  - Administrators might have the ability to reset passwords for any user.
+- Users can change their own passwords but cannot change the passwords
+  of other users.
+- Administrators might have the ability to reset passwords for any user.
 
 ### Benefits
 
-- **Enhanced Security**: By implementing custom access control logic, you can ensure that sensitive data is only accessible to authorized users.
-- **Flexibility**: The service allows you to define complex access rules that can be tailored to your application's specific needs.
-- **Compliance**: Proper access control helps in meeting regulatory requirements by ensuring that only authorized users can access or modify data.
+- **Enhanced Security**: By implementing custom access control logic,
+  you can ensure that sensitive data is only accessible to authorized users.
+- **Flexibility**: The service allows you to define complex access rules
+  that can be tailored to your application's specific needs.
+- **Compliance**: Proper access control helps in meeting regulatory
+  requirements by ensuring that only authorized users can access or
+  modify data.
 
 ### Why Use Access Control?
 
-Implementing access control ensures that your application maintains data integrity and security by allowing only authorized users to perform specific actions.
+Implementing access control ensures that your application maintains
+data integrity and security by allowing only authorized users to
+perform specific actions.
 
 #### Synchronous vs Asynchronous Registration
 
-- **Synchronous Registration**: Use when configuration options are static and available at startup.
-- **Asynchronous Registration**: Use when configuration options need to be retrieved from external sources at runtime.
+- **Synchronous Registration**: Use when configuration options are
+  static and available at startup.
+- **Asynchronous Registration**: Use when configuration options need
+  to be retrieved from external sources at runtime.
 
 #### Global vs Feature-Specific Registration
 
-- **Global Registration**: Makes the module available throughout the entire application.
-- **Feature-Specific Registration**: Allows the module to be registered only for specific features or modules within the application.
+- **Global Registration**: Makes the module available throughout the
+  entire application.
+- **Feature-Specific Registration**: Allows the module to be registered
+  only for specific features or modules within the application.
