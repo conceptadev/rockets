@@ -1,9 +1,5 @@
 {
-  "moduleFileExtensions": [
-    "js",
-    "json",
-    "ts"
-  ],
+  "moduleFileExtensions": ["js", "json", "ts"],
   "globals": {
     "ts-jest": {
       "tsconfig": "tsconfig.jest.json"
@@ -18,10 +14,7 @@
     }
   },
   "testRegex": ".*\\.spec\\.ts$",
-  "testPathIgnorePatterns": [
-    "/node_modules/",
-    "/dist/"
-  ],
+  "testPathIgnorePatterns": ["/node_modules/", "/dist/"],
   "transform": {
     "^.+\\.ts$": "ts-jest"
   },
@@ -30,6 +23,9 @@
     "!packages/**/*.d.ts",
     "!packages/**/*.interface.ts",
     "!packages/**/*.e2e-spec.ts",
+    "!packages/**/*.factory.ts",
+    "!packages/**/*.seeder.ts",
+    "!packages/**/*.seeding.ts",
     "!packages/nestjs-samples/src/**/main.ts",
     "!**/node_modules/**",
     "!**/__mocks__/**",

@@ -30,9 +30,9 @@ export class UserPasswordService implements UserPasswordServiceInterface {
    */
   constructor(
     @Inject(UserLookupService)
-    private userLookupService: UserLookupServiceInterface,
+    protected readonly userLookupService: UserLookupServiceInterface,
     @Inject(PasswordCreationService)
-    private passwordCreationService: PasswordCreationServiceInterface,
+    protected readonly passwordCreationService: PasswordCreationServiceInterface,
   ) {}
 
   async setPassword(
@@ -90,18 +90,12 @@ export class UserPasswordService implements UserPasswordServiceInterface {
       // break out the stored password
       const { passwordHash, passwordSalt } = user;
 
-      // type guards
-      if (
-        typeof passwordHash === 'string' &&
-        typeof passwordSalt === 'string'
-      ) {
-        // return the user with asserted storage types
-        return { ...user, passwordHash, passwordSalt };
-      } else {
-        throw new UserException(
-          'User object is missing some or all password storage properties',
-        );
-      }
+      // return the user with asserted storage types
+      return {
+        ...user,
+        passwordHash: typeof passwordHash === 'string' ? passwordHash : '',
+        passwordSalt: typeof passwordSalt === 'string' ? passwordSalt : '',
+      };
     }
 
     // throw an exception by default

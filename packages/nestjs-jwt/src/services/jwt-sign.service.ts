@@ -11,9 +11,9 @@ import { JwtTokenType } from '../jwt.types';
 export class JwtSignService implements JwtSignServiceInterface {
   constructor(
     @Inject(JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN)
-    private jwtAccessService: JwtService,
+    protected readonly jwtAccessService: JwtService,
     @Inject(JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN)
-    private jwtRefreshService: JwtService,
+    protected readonly jwtRefreshService: JwtService,
   ) {}
 
   async signAsync(

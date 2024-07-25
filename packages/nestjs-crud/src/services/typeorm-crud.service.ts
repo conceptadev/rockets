@@ -21,7 +21,7 @@ export class TypeOrmCrudService<
     super(repo);
   }
 
-  private crudQueryHelper: CrudQueryHelper = new CrudQueryHelper();
+  protected readonly crudQueryHelper: CrudQueryHelper = new CrudQueryHelper();
 
   async getMany(
     req: CrudRequest,

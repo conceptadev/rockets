@@ -20,9 +20,9 @@ export class OrgMemberService
   constructor(
     @InjectDynamicRepository(ORG_MODULE_ORG_MEMBER_ENTITY_KEY)
     repo: Repository<OrgMemberEntityInterface>,
-    private orgLookupService: OrgLookupService,
-    private orgMemberLookupService: OrgMemberLookupService,
-    private orgMemberMutateService: OrgMemberMutateService,
+    protected readonly orgLookupService: OrgLookupService,
+    protected readonly orgMemberLookupService: OrgMemberLookupService,
+    protected readonly orgMemberMutateService: OrgMemberMutateService,
   ) {
     super(repo);
   }

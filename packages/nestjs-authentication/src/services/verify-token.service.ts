@@ -12,10 +12,10 @@ import { VerifyTokenServiceInterface } from '../interfaces/verify-token-service.
 @Injectable()
 export class VerifyTokenService implements VerifyTokenServiceInterface {
   constructor(
-    private jwtVerifyService: JwtVerifyService,
+    protected readonly jwtVerifyService: JwtVerifyService,
     @Optional()
     @Inject(AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN)
-    private validateTokenService?: ValidateTokenServiceInterface,
+    protected readonly validateTokenService?: ValidateTokenServiceInterface,
   ) {}
 
   /**

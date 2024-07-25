@@ -1,3 +1,5 @@
+import { ExceptionContext } from '../../core.types';
+
 export interface ExceptionInterface extends Error {
   /**
    * The error code.
@@ -7,5 +9,5 @@ export interface ExceptionInterface extends Error {
   /**
    * Additional context
    */
-  context?: Record<string, unknown>;
+  context?: ExceptionContext;
 }

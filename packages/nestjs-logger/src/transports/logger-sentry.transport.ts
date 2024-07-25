@@ -23,7 +23,7 @@ export class LoggerSentryTransport implements LoggerTransportInterface {
    *
    * @param config configuration file injected
    */
-  constructor(private config: LoggerSentryConfigInterface) {
+  constructor(protected readonly config: LoggerSentryConfigInterface) {
     if (!this.config) throw new Error('Sentry Config is required');
 
     // Initialize Sentry

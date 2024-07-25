@@ -32,7 +32,7 @@ export class OtpService implements OtpServiceInterface {
     @Inject(OTP_MODULE_REPOSITORIES_TOKEN)
     private allOtpRepos: Record<string, Repository<OtpInterface>>,
     @Inject(OTP_MODULE_SETTINGS_TOKEN)
-    private settings: OtpSettingsInterface,
+    protected readonly settings: OtpSettingsInterface,
   ) {}
 
   /**

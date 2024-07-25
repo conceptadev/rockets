@@ -22,7 +22,7 @@ describe('AppModule', () => {
           database: ':memory:',
           entities: [PhotoEntityFixture],
         }),
-        PhotoModuleFixture.register(),
+        PhotoModuleFixture,
       ],
     }).compile();
 

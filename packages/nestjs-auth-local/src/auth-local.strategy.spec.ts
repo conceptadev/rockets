@@ -1,7 +1,7 @@
-import { PasswordValidationService } from '@concepta/nestjs-password';
-import { UnauthorizedException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { mock } from 'jest-mock-extended';
+import { PasswordValidationService } from '@concepta/nestjs-password';
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { AuthLocalStrategy } from './auth-local.strategy';
 import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.interface';
 import { AuthLocalUserLookupServiceInterface } from './interfaces/auth-local-user-lookup-service.interface';
@@ -9,8 +9,10 @@ import { AuthLocalValidateUserServiceInterface } from './interfaces/auth-local-v
 import { AuthLocalValidateUserService } from './services/auth-local-validate-user.service';
 
 import { UserFixture } from './__fixtures__/user/user.entity.fixture';
+import { ReferenceIdInterface } from '@concepta/ts-core';
+import { AuthLocalValidateUserInterface } from './interfaces/auth-local-validate-user.interface';
 
-describe(AuthLocalStrategy, () => {
+describe(AuthLocalStrategy.name, () => {
   const USERNAME = 'username';
   const PASSWORD = 'password';
 
@@ -60,9 +62,30 @@ describe(AuthLocalStrategy, () => {
       expect(result.id).toBe(user.id);
     });
 
+    it('should return user', async () => {
+      jest
+        .spyOn(validateUserService, 'validateUser')
+        .mockImplementationOnce((_dto: AuthLocalValidateUserInterface) => {
+          return null as unknown as Promise<ReferenceIdInterface<string>>;
+        });
+
+      const t = () => authLocalStrategy.validate(USERNAME, PASSWORD);
+      await expect(t).rejects.toThrow(UnauthorizedException);
+    });
+
     it('should throw error on validateOrReject', async () => {
       const t = () => authLocalStrategy.validate(USERNAME, '');
       await expect(t).rejects.toThrow();
+    });
+
+    it('should throw BadRequest on validateOrReject', async () => {
+      const classValidator = require('class-validator');
+      jest
+        .spyOn(classValidator, 'validateOrReject')
+        .mockRejectedValueOnce(BadRequestException);
+
+      const t = () => authLocalStrategy.validate(USERNAME, PASSWORD);
+      await expect(t).rejects.toThrow(BadRequestException);
     });
 
     it('should return no user on userLookupService.byUsername', async () => {

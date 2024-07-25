@@ -46,7 +46,7 @@ export class LoggerService
    *
    * @param transportService transport service
    */
-  constructor(private transportService: LoggerTransportService) {
+  constructor(protected readonly transportService: LoggerTransportService) {
     super();
   }
 

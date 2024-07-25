@@ -21,7 +21,7 @@ import { RoleServiceInterface } from '../interfaces/role-service.interface';
 export class RoleService implements RoleServiceInterface {
   constructor(
     @Inject(ROLE_MODULE_SETTINGS_TOKEN)
-    private settings: RoleSettingsInterface,
+    protected readonly settings: RoleSettingsInterface,
     @Inject(ROLE_MODULE_REPOSITORIES_TOKEN)
     private allRoleRepos: Record<
       string,

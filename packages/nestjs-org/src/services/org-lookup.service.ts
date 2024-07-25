@@ -30,7 +30,7 @@ export class OrgLookupService
     @InjectDynamicRepository(ORG_MODULE_ORG_ENTITY_KEY)
     repo: Repository<OrgEntityInterface>,
     @Inject(ORG_MODULE_OWNER_LOOKUP_SERVICE_TOKEN)
-    private ownerLookupService: OrgOwnerLookupServiceInterface,
+    protected readonly ownerLookupService: OrgOwnerLookupServiceInterface,
   ) {
     super(repo);
   }
