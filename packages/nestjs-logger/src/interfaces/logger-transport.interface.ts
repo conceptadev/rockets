@@ -13,7 +13,7 @@ import { LogLevel } from '@nestjs/common';
  * ```ts
  * @Injectable()
  * export class LoggerSentryTransport implements LoggerTransportInterface {
- *   constructor() { }
+ *   constructor() {}
  *
  *   log(message: string, logLevel: LogLevel, error?: Error | string): void {
  *     // forward message to custom transport

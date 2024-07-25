@@ -46,6 +46,11 @@ rules
       inject: [UserLookupCustomService],
       useFactory: async (userLookupService: UserLookupCustomService) => ({
         userLookupService,
+        settings: {
+          passwordHistory: {
+            enabled: true,
+          },
+        },
       }),
       entities: {
         user: {

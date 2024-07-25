@@ -17,7 +17,7 @@ import { EventInstance, EventReturnType } from '../event-types';
  * There are additional abstract classes available which have implemented the basic types
  * for you. So far we have {@link EventListenerOn}... more to come!
  *
- * ### Example
+ * @example
  * ```ts
  * // event payload type
  * type MyEventPayload = {id: number, active: boolean};

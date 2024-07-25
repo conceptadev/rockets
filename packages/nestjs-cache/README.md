@@ -24,7 +24,7 @@ and improving user experience by minimizing data retrieval times.
     - [Introduction](#introduction)
     - [Installation](#installation)
     - [Basic Setup in a NestJS Project](#basic-setup-in-a-nestjs-project)
-    - [Using the RestFull endpoints to access cache](#using-the-restFull-endpoints-to-access-cache)
+    - [Using the RestFull endpoints to access cache](#using-the-restfull-endpoints-to-access-cache)
 - [How-to Guides](#how-to-guides)
   - [Registering CacheModule Synchronously](#registering-cachemodule-synchronously)
   - [Registering CacheModule Asynchronously](#registering-cachemodule-asynchronously)
@@ -32,16 +32,6 @@ and improving user experience by minimizing data retrieval times.
   - [Registering CacheModule Asynchronously for Multiple Entities](#registering-cachemodule-asynchronously-for-multiple-entities)
   - [Using the CacheService to Access Cache](#using-the-cacheservice-to-access-cache)
 - [Reference](#reference)
-  - [CacheModule API Reference](#cachemodule-api-reference)
-    - [register(options: CacheOptions)](#registeroptions-cacheoptions)
-    - [registerAsync(options: CacheAsyncOptions)](#registerasyncoptions-cacheasyncoptions)
-    - [forRoot(options: CacheOptions)](#forrootoptions-cacheoptions)
-    - [forRootAsync(options: CacheAsyncOptions)](#forrootasyncoptions-cacheasyncoptions)
-    - [forFeature(options: CacheOptions)](#forfeatureoptions-cacheoptions)
-  - [CacheOptionsInterface](#cacheoptionsinterface)
-  - [CacheModule Classes and Interfaces](#cachemodule-classes-and-interfaces)
-    - [CacheEntityInterface](#cacheentityinterface)
-    - [CacheServiceInterface](#cacheserviceinterface)
 - [Explanation](#explanation)
   - [Conceptual Overview of Caching](#conceptual-overview-of-caching)
     - [What is Caching?](#what-is-caching)
@@ -50,8 +40,7 @@ and improving user experience by minimizing data retrieval times.
     - [When to Use NestJS Cache](#when-to-use-nestjs-cache)
     - [How CacheOptionsInterface is Used in the Controller and Endpoints](#how-cacheoptionsinterface-is-used-in-the-controller-and-endpoints)
   - [Design Choices in CacheModule](#design-choices-in-cachemodule)
-    - [Synchronous vs Asynchronous Registration](#synchronous-vs-asynchronous-registration)
-    - [Global vs Feature-Specific Registration](#global-vs-feature-specific-registration)
+    - [Synchronous vs Asynchronous Registration](#global-vs-synchronous-vs-asynchronous-registration)
 
 ## Tutorials
 
@@ -87,7 +76,7 @@ yarn add @concepta/nestjs-typeorm-ext
 yarn add @concepta/nestjs-cache
 ```
 
-On this documentation we will use `sqlite3` as database, but you can use 
+On this documentation we will use `sqlite3` as database, but you can use
 whatever you want
 
 ```sh
@@ -189,12 +178,13 @@ import { User } from './user.entity';
 export class UserModule {}
 ```
 
-2. **User Cache Module**: Let's create the entity `UserCache` and the
+1. **User Cache Module**: Let's create the entity `UserCache` and the
    `UserCacheModule` that imports our `CacheModule` passing all configurations
    needed. Please note that `CacheSqliteEntity` and `CachePostgresEntity` are
    provided by the Rockets NestJS Cache module, so you can use them to create
    your cache entity. They have a unique index with the following properties:
-   `'key', 'type', 'assignee.id'` and it will throw a `CacheEntityAlreadyExistsException` if duplicated:
+   `'key', 'type', 'assignee.id'` and it will throw a
+   `CacheEntityAlreadyExistsException` if duplicated:
 
 ```typescript
 import { Entity, ManyToOne } from 'typeorm';
@@ -238,7 +228,7 @@ import { UserCache } from './user-cache.entity';
 export class UserCacheModule {}
 ```
 
-3. **App Module**:And let's create our app module to connect everything. 
+1. **App Module**:And let's create our app module to connect everything.
 
 ```ts
 import { Module } from '@nestjs/common';
@@ -267,7 +257,7 @@ export class AppModule {}
 
 #### Using the RestFull endpoints to access cache
 
-After setting up the basic configuration, you can start using the caching 
+After setting up the basic configuration, you can start using the caching
 functionality in your application.
 
 ```ts
@@ -280,6 +270,7 @@ The code above will generate a route for the client to have access, the module
 will generate the following endpoint `/cache/user`. This endpoint will be
 referencing whatever entity was associated in the entities section, as you can
 see below.
+
 ```ts
 entities: {
     userCache: {
@@ -290,9 +281,9 @@ entities: {
 
 This will make the following endpoints available:
 
-1. **Create (POST)**: To create a new cache entry, the request body should 
-match the `CacheCreatableInterface`; Properties `key, type and assignee.id` 
-are unique and will throw a `CacheEntityAlreadyExistsException` error on 
+1. **Create (POST)**: To create a new cache entry, the request body should
+match the `CacheCreatableInterface`; Properties `key, type and assignee.id`
+are unique and will throw a `CacheEntityAlreadyExistsException` error on
 attempt to insert duplicated data:
 
 ```ts
@@ -301,7 +292,7 @@ export interface CacheCreatableInterface extends Pick<CacheInterface, 'key' | 't
 }
 ```
 
-    Example curl command:
+Example curl command:
 
 ```sh
 curl -X POST http://your-api-url/cache/user \
@@ -315,16 +306,16 @@ curl -X POST http://your-api-url/cache/user \
 }'
 ```
 
-2. **Read (GET)**: To read a cache entry by its ID:
+1. **Read (GET)**: To read a cache entry by its ID:
 
 ```sh
 curl -X GET http://your-api-url/cache/user/{id}
 ```
 
-3. **Update (PUT)**: To update an existing cache entry, the request body should 
+1. **Update (PUT)**: To update an existing cache entry, the request body should
 match the `CacheUpdatableInterface`:
 
-```sh
+```ts
 export interface CacheUpdatableInterface extends Pick<CacheInterface, 'key' | 'type' | 'data' | 'assignee'> {
   expiresIn: string | null;
 }
@@ -344,17 +335,16 @@ curl -X PUT http://your-api-url/cache/user/{id} \
 }'
 ```
 
-4. **Delete (DELETE)**: To delete a cache entry by its ID:
+1. **Delete (DELETE)**: To delete a cache entry by its ID:
 
 ```sh
 curl -X DELETE http://your-api-url/cache/user/{id}
 ```
 
-Replace `http://your-api-url` with the actual base URL of your API, and `{id}` 
+Replace `http://your-api-url` with the actual base URL of your API, and `{id}`
 with the actual ID of the cache entry you wish to interact with.
 
-
-5. **Testing the cache**: You can test the cache by creating a new user and 
+1. **Testing the cache**: You can test the cache by creating a new user and
 then accessing the cache endpoint:
 
 ```bash
@@ -364,7 +354,9 @@ curl -X POST http://your-api-url/user \
   "name": "John Doe",
 }'
 ```
+
 The response will be something like this:
+
 ```json
 {
     "name": "John Doe",
@@ -404,12 +396,13 @@ It will give you a response similar to this.
 }
 ```
 
-Now, if you access the cache endpoint `/cache/user`, you will see the new user 
+Now, if you access the cache endpoint `/cache/user`, you will see the new user
 cached:
 
 ```bash
   curl -X GET http://your-api-url/cache/user
 ```
+
 ```json
 [
   {
@@ -432,10 +425,9 @@ cached:
 
 ## Registering CacheModule Synchronously
 
-To register the CacheModule synchronously, you can use the `register` method. 
+To register the CacheModule synchronously, you can use the `register` method.
 This method allows you to pass configuration options directly.
 
-### Example:
 ```ts
 @Module({
   imports: [
@@ -455,13 +447,12 @@ This method allows you to pass configuration options directly.
 })
 export class AppModule {}
 ```
+
 ## Registering CacheModule Asynchronously
 
-For more advanced use cases, you can register the CacheModule asynchronously using 
-the `registerAsync` method. This method is useful when you need to perform 
+For more advanced use cases, you can register the CacheModule asynchronously using
+the `registerAsync` method. This method is useful when you need to perform
 asynchronous operations to get the configuration options.
-
-### Example:
 
 ```ts
 @Module({
@@ -484,13 +475,13 @@ asynchronous operations to get the configuration options.
 })
 export class AppModule {}
 ```
+
 ## Global Registering CacheModule Asynchronously
 
-For more advanced use cases, you can register the global CacheModule asynchronously 
-using the `forRootAsync` method. This method is useful when you need to perform 
+For more advanced use cases, you can register the global CacheModule asynchronously
+using the `forRootAsync` method. This method is useful when you need to perform
 asynchronous operations to get the configuration options.
 
-### Example:
 ```ts
 @Module({
   imports: [
@@ -512,12 +503,14 @@ asynchronous operations to get the configuration options.
 })
 export class AppModule {}
 ```
+
 ## Registering CacheModule Asynchronously for multiple entities
 
-This section demonstrates how to register the CacheModule asynchronously when 
-dealing with multiple entities. 
+This section demonstrates how to register the CacheModule asynchronously when
+dealing with multiple entities.
 
-### Example:
+### Example
+
 ```ts
 @Module({
   imports: [
@@ -543,7 +536,8 @@ dealing with multiple entities.
 })
 export class AppModule {}
 ```
- ## Using the CacheService to access cache 
+
+## Using the CacheService to access cache
 
 The `CacheService` provided by the Rockets NestJS Cache module offers a
 comprehensive set of methods to manage cache entries programmatically from the
@@ -551,7 +545,7 @@ API side. This service allows for creating, updating, retrieving, and deleting
 cache entries, as well as managing cache entries for specific assignees. Below
 is an overview of how to use these services in your application.
 
-##### Creating a Cache Entry
+### Creating a Cache Entry
 
 To create a new cache entry, you can use the `create` method of the `CacheService`.
 This method requires specifying the cache assignment, the cache data, and
@@ -559,14 +553,16 @@ optionally, query options.
 
 ### CacheService Methods Documentation
 
-CacheService is exported in the CacheModule, so 
+CacheService is exported in the CacheModule, so
 Below is a simple documentation for each method in the `CacheService` class, including
  examples of how to use them.
 
 #### 1. `create(assignment, cache, queryOptions)`
+
 Creates a new cache entry.
 
 **Parameters:**
+
 - `assignment`: The cache assignment.
 - `cache`: The data to create, implementing `CacheCreatableInterface`.
 - `queryOptions`: Optional. Additional options for the query.
@@ -585,9 +581,11 @@ await cacheService.create('userCache', {
 ```
 
 #### 2. `update(assignment, cache, queryOptions)`
+
 Updates an existing cache entry.
 
 **Parameters:**
+
 - `assignment`: The cache assignment.
 - `cache`: The data to update, implementing `CacheUpdatableInterface`.
 - `queryOptions`: Optional. Additional options for the query.
@@ -604,11 +602,12 @@ await cacheService.update('userCache', {
 });
 ```
 
-
 #### 3. `delete(assignment, cache, queryOptions)`
+
 Deletes a cache entry.
 
 **Parameters:**
+
 - `assignment`: The cache assignment.
 - `cache`: The cache to delete, specifying `key`, `type`, and `assignee`.
 
@@ -623,11 +622,12 @@ await cacheService.delete('userCache', {
 });
 ```
 
-
 #### 4. `getAssignedCaches(assignment, cache, queryOptions)`
+
 Retrieves all cache entries for a given assignee.
 
 **Parameters:**
+
 - `assignment`: The cache assignment.
 - `cache`: The cache to get assignments, specifying `assignee`.
 
@@ -639,9 +639,11 @@ const caches = await cacheService.getAssignedCaches('userCache', { assignee: { i
 ```
 
 #### 5. `get(assignment, cache, queryOptions)`
+
 Retrieves a specific cache entry.
 
 **Parameters:**
+
 - `assignment`: The cache assignment.
 - `cache`: The cache to get, specifying `key`, `type`, and `assignee`.
 
@@ -656,11 +658,12 @@ const cacheEntry = await cacheService.get('userCache', {
 });
 ```
 
-
 #### 6. `clear(assignment, cache, queryOptions)`
+
 Clears all caches for a given assignee.
 
 **Parameters:**
+
 - `assignment`: The cache assignment.
 - `cache`: The cache to clear, specifying `assignee`.
 
@@ -675,15 +678,16 @@ These methods provide a comprehensive interface for managing cache entries in a
 NestJS application using the `CacheService`. Each method supports optional query
 options for more granular control over the database operations.
 
-# Reference
+## Reference
 
-For detailed information on the properties, methods, and classes used in the 
-`@concepta/nestjs-cache`, please refer to the API documentation 
-available at [CacheModule API Documentation](). This documentation provides 
-comprehensive details on the interfaces and services that you can utilize to 
-start using cache functionality within your NestJS application.
+For detailed information on the properties, methods, and classes used in the
+`@concepta/nestjs-cache`, please refer to the API documentation
+available at [CacheModule API Documentation](https://www.rockets.tools/reference/rockets/nestjs-access-control/README).
+This documentation provides comprehensive details on the interfaces and services
+that you can utilize to start using cache functionality within your NestJS
+application.
 
-# Explanation
+## Explanation
 
 ### Conceptual Overview of Caching
 
@@ -707,7 +711,7 @@ data source.
 - **Scalability**: Caching allows applications to handle higher loads by serving
   frequent requests from the cache instead of the database.
 
-#### Why Use NestJS Rockets Cache?
+#### Why Use NestJS Cache?
 
 NestJS Cache provides a powerful and flexible caching solution that integrates
 seamlessly with the NestJS framework and stores your cache on the database, so

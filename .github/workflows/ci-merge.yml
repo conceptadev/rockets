@@ -12,6 +12,8 @@ jobs:
         node-version: [18.x]
     steps:
       - uses: actions/checkout@v2
+      - name: Enable Corepack
+        run: corepack enable
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
@@ -22,8 +24,10 @@ jobs:
           path: "**/node_modules"
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
 
-      - name: Install and build
-        run: yarn --frozen-lockfile
+      - name: Install
+        run: yarn --immutable
+      - name: Build
+        run: yarn build
       - name: Unit tests
         run: yarn test:ci
       - name: Process Test Results

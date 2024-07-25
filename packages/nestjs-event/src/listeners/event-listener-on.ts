@@ -9,7 +9,7 @@ import { EventListenOnOptionsInterface } from '../services/interfaces/event-list
  * [listen]{@link EventListenerOn#listen} method. The [listen]{@link EventListenerOn#listen}
  * method will receive the payload dispatched by {@link EventDispatchService}.
  *
- * ### Example
+ * @example
  * ```ts
  * // event payload type
  * type MyPayloadType = {id: number, active: boolean};

@@ -1,4 +1,4 @@
-import { FindOneOptions, Repository } from 'typeorm';
+import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { ReferenceIdInterface } from '@concepta/ts-core';
 
 import { QueryOptionsInterface } from '../interfaces/query-options.interface';
@@ -24,18 +24,37 @@ export abstract class BaseService<Entity extends ReferenceIdInterface> {
   }
 
   /**
+   * Find wrapper.
+   *
+   * @param options - Find many options
+   * @param queryOptions - Query options
+   */
+  async find(
+    options: FindManyOptions<Entity>,
+    queryOptions?: QueryOptionsInterface,
+  ): Promise<Promise<Entity[]>> {
+    try {
+      // call the repo find
+      return this.repository(queryOptions).find(options);
+    } catch (e) {
+      // fatal orm error
+      throw new ReferenceLookupException(this.metadata.name, e);
+    }
+  }
+
+  /**
    * Find One wrapper.
    *
-   * @param findOneOptions - Find options
+   * @param options - Find one options
    * @param queryOptions - Query options
    */
   async findOne(
-    findOneOptions: FindOneOptions<Entity>,
+    options: FindOneOptions<Entity>,
     queryOptions?: QueryOptionsInterface,
   ): Promise<Entity | null> {
     try {
       // call the repo find one
-      return this.repository(queryOptions).findOne(findOneOptions);
+      return this.repository(queryOptions).findOne(options);
     } catch (e) {
       // fatal orm error
       throw new ReferenceLookupException(this.metadata.name, e);

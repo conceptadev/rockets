@@ -34,7 +34,7 @@ import { LoggerTransportInterface } from './interfaces/logger-transport.interfac
  * app.useLogger(customLogger);
  *
  * await app.listen(3000);
- *```
+ * ```
  */
 @Injectable()
 export class LoggerService

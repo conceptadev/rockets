@@ -106,7 +106,9 @@ dist
 # JetBrainz
 .idea
 .DS_Store
-website/.yarn
 
 # generated docs
 /docs
+
+# .yarn meta
+.yarn
