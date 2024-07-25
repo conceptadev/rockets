@@ -22,7 +22,6 @@ describe('loggerSentryTransport', () => {
   beforeEach(async () => {
     const transportSentryConfig: LoggerSentryConfigInterface = {
       dsn: 'tests-dns',
-      
     };
     const transportSentrySettings: LoggerSentrySettingsInterface = {
       logLevel: ['error'],

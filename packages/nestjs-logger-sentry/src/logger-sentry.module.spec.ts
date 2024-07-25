@@ -3,7 +3,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { LoggerSentryModule } from './logger-sentry.module';
 import { LoggerModule } from '@concepta/nestjs-logger';
-import { Severity } from '@sentry/types';
 import { LoggerSentrySettingsInterface } from './interfaces/logger-sentry-settings.interface';
 import { LoggerSentryTransport } from './transports/logger-sentry.transport';
 import { formatMessage, logLevelMap } from './utils';
@@ -17,7 +16,7 @@ describe(LoggerSentryModule, () => {
   const transportSentrySettings: LoggerSentrySettingsInterface = {
     logLevel: ['error'],
     logLevelMap: logLevelMap,
-    formatMessage: formatMessage, 
+    formatMessage: formatMessage,
     transportConfig: {
       dsn: SENTRY_DSN,
     },

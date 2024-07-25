@@ -1,4 +1,3 @@
-
 import { LoggerConfig } from 'coralogix-logger';
 /**
  * Interface for Coralogix configuration to define the log level

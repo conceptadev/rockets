@@ -15,8 +15,10 @@ export const logLevelMap = (logLevel: LogLevel): Severity => {
     case 'verbose':
       return Severity.verbose;
   }
-}
+};
 
-export const formatMessage = (loggerMessage: LoggerMessageInterface): string => {
+export const formatMessage = (
+  loggerMessage: LoggerMessageInterface,
+): string => {
   return loggerMessage.message || '';
-}
+};

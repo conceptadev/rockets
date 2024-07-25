@@ -4,9 +4,6 @@ import {
   CoralogixAsyncOptions,
   CoralogixModuleClass,
   CoralogixOptions,
-  createLoggerCoralogixImports,
-  createLoggerCoralogixProviders,
-  createLoggerCoralogixExports,
 } from './logger-coralogix.module-definition';
 
 @Module({})

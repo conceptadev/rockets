@@ -1,7 +1,7 @@
 # Rockets NestJS Coralogix
 
-This module is a drop-in replacement for the core NestJS coralogix that provides 
-additional support for pushing log data to one or multiple external log 
+This module is a drop-in replacement for the core NestJS coralogix that provides
+additional support for pushing log data to one or multiple external log
 consumption providers.
 
 ## Project
@@ -45,19 +45,19 @@ consumption providers.
 
 ### Overview of the Library
 
-This module wraps/extends the core NestJS `Coralogix` and adds a powerful 
+This module wraps/extends the core NestJS `Coralogix` and adds a powerful
 external transports plugin interface.
 
-> See the NestJS [Coralogix](https://docs.nestjs.com/techniques/coralogix) 
+> See the NestJS [Coralogix](https://docs.nestjs.com/techniques/coralogix)
 > documentation for more details on how logging is implemented in NestJS.
 
 ### Purpose and Key Features
 
-- **External Transports**: Provides support for pushing log data to external 
+- **External Transports**: Provides support for pushing log data to external
   log consumption providers like Sentry.
-- **Customizable**: Allows for the creation of custom transports to suit 
+- **Customizable**: Allows for the creation of custom transports to suit
   different logging needs.
-- **Seamless Integration**: Integrates smoothly with existing NestJS 
+- **Seamless Integration**: Integrates smoothly with existing NestJS
   applications.
 
 ### Installation
@@ -72,14 +72,14 @@ yarn add @concepta/nestjs-coralogix
 
 ### Overview
 
-This section covers the basics of setting up the `LoggerCoralogixModule` in a NestJS 
+This section covers the basics of setting up the `LoggerCoralogixModule` in a NestJS
 application.
 
 ### Basic Setup
 
 #### Scenario: Logging in a NestJS Application
 
-To demonstrate this scenario, we will set up an application where the 
+To demonstrate this scenario, we will set up an application where the
 `LoggerCoralogixModule` is used to log messages.
 
 #### Step 1: Use Coralogix in Application
@@ -99,7 +99,8 @@ export class AppController {
   }
 }
 ```
-Finally, we import `LoggerCoralogixModule` and `LoggerModule` to use the 
+
+Finally, we import `LoggerCoralogixModule` and `LoggerModule` to use the
 `LoggerCoralogixTransport` in our application, however `loggerService` will handle that for you. All you need to do is just define the transport on `LoggerModule`.
 
 ```typescript
@@ -175,14 +176,14 @@ bootstrap();
 
 ### 1. How to Configure LoggerCoralogixModule Settings
 
-The `LoggerCoralogixModule` provides several configurable settings to customize its 
+The `LoggerCoralogixModule` provides several configurable settings to customize its
 behavior.
 
 #### Settings Example
 
 Here is an example of how to configure each property of the settings:
 
-##### 1. logLevel: Sets the log level for the coralogix.
+##### 1. logLevel: Sets the log level for the coralogix
 
 ```typescript
 LoggerCoralogixModule.forRoot({
@@ -210,7 +211,6 @@ import { LoggerCoralogixModule } from '@concepta/nestjs-coralogix';
 });
 export class App {}
 ```
-
 
 # Explanation
 

@@ -43,8 +43,8 @@ describe('logger-sentry configuration', () => {
       expect(config).toMatchObject({
         logLevel: ['error'],
         logLevelMap: expect.any(Function),
-        formatMessage:expect.any(Function),
-        transportConfig: { dsn: ''},
+        formatMessage: expect.any(Function),
+        transportConfig: { dsn: '' },
       });
     });
 
@@ -62,7 +62,7 @@ describe('logger-sentry configuration', () => {
       expect(config).toMatchObject({
         logLevel: ['debug', 'warn'],
         logLevelMap: expect.any(Function),
-        formatMessage:expect.any(Function),
+        formatMessage: expect.any(Function),
         transportConfig: {
           dsn: 'http://fake.url',
         },
@@ -74,21 +74,11 @@ describe('logger-sentry configuration', () => {
         const settings = await loggerSentryConfig();
 
         if (settings && settings.transportConfig) {
-          expect(settings.logLevelMap('error')).toBe(
-            SentryLogSeverity.Error,
-          );
-          expect(settings.logLevelMap('debug')).toBe(
-            SentryLogSeverity.Debug,
-          );
-          expect(settings.logLevelMap('log')).toBe(
-            SentryLogSeverity.Log,
-          );
-          expect(settings.logLevelMap('warn')).toBe(
-            SentryLogSeverity.Warning,
-          );
-          expect(settings.logLevelMap('verbose')).toBe(
-            SentryLogSeverity.Info,
-          );
+          expect(settings.logLevelMap('error')).toBe(SentryLogSeverity.Error);
+          expect(settings.logLevelMap('debug')).toBe(SentryLogSeverity.Debug);
+          expect(settings.logLevelMap('log')).toBe(SentryLogSeverity.Log);
+          expect(settings.logLevelMap('warn')).toBe(SentryLogSeverity.Warning);
+          expect(settings.logLevelMap('verbose')).toBe(SentryLogSeverity.Info);
         } else {
           throw new Error('loggerConfig is not defined');
         }

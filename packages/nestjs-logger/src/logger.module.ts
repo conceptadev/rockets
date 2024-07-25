@@ -4,9 +4,6 @@ import {
   LoggerAsyncOptions,
   LoggerModuleClass,
   LoggerOptions,
-  createLoggerImports,
-  createLoggerProviders,
-  createLoggerExports,
 } from './logger.module-definition';
 
 /**

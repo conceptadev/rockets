@@ -9,7 +9,6 @@ import { LogLevel } from '@nestjs/common';
  */
 export const logLevelMap = (logLevel: LogLevel): SentryLogSeverity => {
   switch (logLevel) {
-
     case 'error':
       return SentryLogSeverity.Error;
     case 'debug':
@@ -21,8 +20,10 @@ export const logLevelMap = (logLevel: LogLevel): SentryLogSeverity => {
     case 'verbose':
       return SentryLogSeverity.Info;
   }
-}
+};
 
-export const formatMessage = (loggerMessage: LoggerMessageInterface): string => {
+export const formatMessage = (
+  loggerMessage: LoggerMessageInterface,
+): string => {
   return loggerMessage.message || '';
-}
+};

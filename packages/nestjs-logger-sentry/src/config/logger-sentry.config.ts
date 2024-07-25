@@ -48,7 +48,7 @@ export const loggerSentryConfig: (() => LoggerSentrySettingsInterface) &
           : ['error'],
 
       logLevelMap: logLevelMap,
-      formatMessage: formatMessage, 
+      formatMessage: formatMessage,
       transportConfig: {
         /**
          * Sentry DNS
@@ -57,7 +57,6 @@ export const loggerSentryConfig: (() => LoggerSentrySettingsInterface) &
           'SENTRY_DSN' in process.env && process.env.SENTRY_DSN
             ? process.env.SENTRY_DSN
             : '',
-
       },
     }),
   );

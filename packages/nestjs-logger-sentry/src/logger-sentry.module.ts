@@ -4,9 +4,6 @@ import {
   LoggerSentryAsyncOptions,
   LoggerSentryModuleClass,
   LoggerSentryOptions,
-  createLoggerSentryImports,
-  createLoggerSentryProviders,
-  createLoggerSentryExports,
 } from './logger-sentry.module-definition';
 
 /**

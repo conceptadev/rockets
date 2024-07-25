@@ -49,7 +49,6 @@ export class LoggerSentryTransport implements LoggerTransportInterface {
    * @param error - Error to log
    */
   log(message: string, logLevel: LogLevel, error?: Error | string): void {
-
     // map the internal log level to sentry log severity
     const severity = this.settings.logLevelMap(logLevel);
 

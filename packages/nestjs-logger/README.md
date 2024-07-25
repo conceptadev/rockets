@@ -154,7 +154,7 @@ The `LoggerModule` provides several configurable settings to customize its behav
 
 Here is an example of how to configure each property of the settings:
 
-##### 1. logLevel: Sets the log level for the logger.
+##### 1. logLevel: Sets the log level for the logger
 
 ```typescript
 LoggerModule.forRoot({
@@ -162,7 +162,7 @@ LoggerModule.forRoot({
 });
 ```
 
-##### 2. transports: Adds custom transports for logging.
+##### 2. transports: Adds custom transports for logging
 
 ```typescript
 LoggerModule.forRoot({
@@ -194,6 +194,7 @@ export class App {}
 To set up the `LoggerModule` with custom transports, follow these steps:
 
 **create custom transport** in your application module:
+
 ```ts
 //...
 @Injectable()
@@ -226,7 +227,7 @@ import { MyCustomTransport } from './my-custom-transport';
 export class AppModule {}
 ```
 
-### 3. Using SentryTransport 
+### 3. Using SentryTransport
 
 Add `@concepta/nestjs-logger-sentry` for your project and import LoggerSentryModule, make sure to pass the correct confirguations `transportSentrySettings`. Please check [`@concepta/nestjs-logger-sentry`](https://www.npmjs.com/package/@concepta/nestjs-logger-sentry) for more details of how to setup module correctly.
 
@@ -256,8 +257,7 @@ import {
 export class AppModule {}
 ```
 
-
-### 4. Using CoralogixTransport 
+### 4. Using CoralogixTransport
 
 Add `@concepta/nestjs-logger-coralogix` for your project and import `LoggerCoralogixModule`, make sure to pass the correct confirguations `transportSentrySettings`. Please check [`@concepta/nestjs-logger-coralogix`](https://www.npmjs.com/package/@concepta/nestjs-logger-coralogix) for more details of how to setup module correctly.
 
