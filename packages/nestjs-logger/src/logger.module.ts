@@ -4,9 +4,6 @@ import {
   LoggerAsyncOptions,
   LoggerModuleClass,
   LoggerOptions,
-  createLoggerImports,
-  createLoggerProviders,
-  createLoggerExports,
 } from './logger.module-definition';
 
 /**
@@ -71,14 +68,5 @@ export class LoggerModule extends LoggerModuleClass {
 
   static forRootAsync(options: LoggerAsyncOptions): DynamicModule {
     return super.registerAsync({ ...options, global: true });
-  }
-
-  static forFeature(options: LoggerOptions): DynamicModule {
-    return {
-      module: LoggerModule,
-      imports: createLoggerImports(),
-      providers: createLoggerProviders({ options }),
-      exports: createLoggerExports(),
-    };
   }
 }

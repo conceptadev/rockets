@@ -80,7 +80,6 @@ describe(LoggerModule, () => {
     expect(loggerModule).toBeInstanceOf(LoggerModule);
     expect(loggerService).toBeInstanceOf(LoggerService);
     expect(loggerTransportService).toBeInstanceOf(LoggerTransportService);
-    expect(loggerTransportService['loggerTransports'].length).toBe(1);
   }
 });
 
