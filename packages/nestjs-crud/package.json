@@ -1,6 +1,6 @@
 {
   "name": "@concepta/nestjs-crud",
-  "version": "4.0.0-alpha.48",
+  "version": "4.0.0-alpha.49",
   "description": "Rockets NestJS CRUD",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,9 +12,9 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
-    "@concepta/nestjs-common": "^4.0.0-alpha.48",
-    "@concepta/ts-core": "^4.0.0-alpha.48",
-    "@concepta/typeorm-common": "^4.0.0-alpha.48",
+    "@concepta/nestjs-common": "^4.0.0-alpha.49",
+    "@concepta/ts-core": "^4.0.0-alpha.49",
+    "@concepta/typeorm-common": "^4.0.0-alpha.49",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.2.0",
     "@nestjs/core": "^9.0.0",
@@ -24,7 +24,7 @@
     "@nestjsx/crud-typeorm": "^5.0.0-alpha.3"
   },
   "devDependencies": {
-    "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.48",
+    "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.49",
     "@concepta/typeorm-seeding": "^4.0.0-beta.0",
     "@faker-js/faker": "^6.0.0-alpha.7",
     "@nestjs/testing": "^9.0.0",

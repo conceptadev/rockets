@@ -1,6 +1,6 @@
 {
   "name": "@concepta/typeorm-common",
-  "version": "4.0.0-alpha.48",
+  "version": "4.0.0-alpha.49",
   "description": "Rockets TypeORM Common",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,13 +12,13 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
-    "@concepta/ts-core": "^4.0.0-alpha.48",
+    "@concepta/ts-core": "^4.0.0-alpha.49",
     "@faker-js/faker": "^6.0.0-alpha.6",
     "@nestjs/common": "^9.0.0"
   },
   "devDependencies": {
-    "@concepta/nestjs-common": "^4.0.0-alpha.48",
-    "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.48",
+    "@concepta/nestjs-common": "^4.0.0-alpha.49",
+    "@concepta/nestjs-typeorm-ext": "^4.0.0-alpha.49",
     "@concepta/typeorm-seeding": "^4.0.0-beta.0",
     "@faker-js/faker": "6.0.0-alpha.6",
     "@nestjs/typeorm": "^9.0.0",
