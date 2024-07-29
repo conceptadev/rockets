@@ -5,6 +5,7 @@ import {
   ERROR_CODE_HTTP_NOT_FOUND,
   ERROR_CODE_HTTP_INTERNAL_SERVER_ERROR,
   HTTP_ERROR_CODE,
+  ERROR_MESSAGE_FALLBACK,
 } from './error-codes.constants';
 
 describe('Error Codes Constants', () => {
@@ -16,6 +17,10 @@ describe('Error Codes Constants', () => {
     expect(ERROR_CODE_HTTP_INTERNAL_SERVER_ERROR).toBe(
       'HTTP_INTERNAL_SERVER_ERROR',
     );
+  });
+
+  it('should export the correct error strings', () => {
+    expect(ERROR_MESSAGE_FALLBACK).toBe('Internal Server Error');
   });
 
   it('should have the correct HTTP error codes in the map', () => {

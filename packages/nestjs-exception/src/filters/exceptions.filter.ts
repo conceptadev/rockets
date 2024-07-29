@@ -2,7 +2,10 @@ import { HttpAdapterHost } from '@nestjs/core';
 import { Catch, ArgumentsHost, HttpException } from '@nestjs/common';
 import { isObject } from '@nestjs/common/utils/shared.utils';
 import { ExceptionInterface } from '@concepta/ts-core';
-import { ERROR_CODE_UNKNOWN } from '../constants/error-codes.constants';
+import {
+  ERROR_CODE_UNKNOWN,
+  ERROR_MESSAGE_FALLBACK,
+} from '../constants/error-codes.constants';
 import { RuntimeException } from '../exceptions/runtime.exception';
 import { mapHttpStatus } from '../utils/map-http-status.util';
 
@@ -21,7 +24,7 @@ export class ExceptionsFilter implements ExceptionsFilter {
     let statusCode = 500;
 
     // what will this message be?
-    let message: unknown = 'Internal Server Error';
+    let message: unknown = ERROR_MESSAGE_FALLBACK;
 
     // is this an http exception?
     if (exception instanceof HttpException) {
@@ -47,13 +50,14 @@ export class ExceptionsFilter implements ExceptionsFilter {
       // set the message
       if (statusCode >= 500) {
         // use safe message or internal sever error
-        message = exception?.safeMessage ?? 'Internal Server Error';
+        message = exception?.safeMessage ?? ERROR_MESSAGE_FALLBACK;
       } else if (exception?.safeMessage) {
         // use the safe message
         message = exception.safeMessage;
       } else {
-        // use the error message
-        message = exception.message;
+        // use the error message with safe message as fallback
+        message =
+          exception.message ?? exception?.safeMessage ?? ERROR_MESSAGE_FALLBACK;
       }
     }
 
