@@ -41,6 +41,13 @@ describe('Exception (e2e)', () => {
     expect(response.body.message).toEqual('Bad Request');
   });
 
+  it('Should fall back to safe message', async () => {
+    const response = await supertest(app.getHttpServer()).get(
+      '/test/safe-message-fallback',
+    );
+    expect(response.body.message).toEqual('This is a safe message');
+  });
+
   it('Should return array of validation errors', async () => {
     const response = await supertest(app.getHttpServer())
       .post('/test/bad-validation')

@@ -5,6 +5,8 @@ export const ERROR_CODE_HTTP_NOT_FOUND = 'HTTP_NOT_FOUND';
 export const ERROR_CODE_HTTP_INTERNAL_SERVER_ERROR =
   'HTTP_INTERNAL_SERVER_ERROR';
 
+export const ERROR_MESSAGE_FALLBACK = 'Internal Server Error';
+
 // TODO: add remaining error codes
 export const HTTP_ERROR_CODE = new Map<number, string>();
 HTTP_ERROR_CODE.set(400, ERROR_CODE_HTTP_BAD_REQUEST);
