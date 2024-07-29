@@ -4,7 +4,7 @@ import { Swagger } from '@nestjsx/crud/lib/crud';
 import { CrudReflectionService } from '../../services/crud-reflection.service';
 
 /**
- * CRUD init api query decorator.
+ * \@CrudInit() api query decorator.
  */
 export const CrudInitApiQuery =
   (): ClassDecorator =>
@@ -80,7 +80,7 @@ export const CrudInitApiQuery =
 /**
  * Map crud action name to queryable base name.
  *
- * @param action The crud action we are mapping.
+ * @param action - The crud action we are mapping.
  */
 function mapActionNameToQueryableBaseName(
   action: CrudActions,

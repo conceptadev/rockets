@@ -14,7 +14,7 @@ import { LoggerTransportInterface } from './interfaces/logger-transport.interfac
  * You will need to create a custom logger and we must ensure that at least one application module imports the LoggerService
  * to trigger Nest to instantiate a singleton instance of our LoggerService class.
  *
- * ### Example
+ * @example
  * ```ts
  * // Initialize a module that have the LoggerService imported
  * const app = await NestFactory.create(AppModule);
@@ -34,7 +34,7 @@ import { LoggerTransportInterface } from './interfaces/logger-transport.interfac
  * app.useLogger(customLogger);
  *
  * await app.listen(3000);
- *```
+ * ```
  */
 @Injectable()
 export class LoggerService
@@ -44,7 +44,7 @@ export class LoggerService
   /**
    * Constructor
    *
-   * @param transportService transport service
+   * @param transportService - transport service
    */
   constructor(protected readonly transportService: LoggerTransportService) {
     super();
@@ -53,7 +53,7 @@ export class LoggerService
   /**
    * Add a transport to be used for every log, it can be multiples
    *
-   * @param transport The transport that will be used beside the system logger
+   * @param transport - The transport that will be used beside the system logger
    */
   addTransport(transport: LoggerTransportInterface): void {
     this.transportService.addTransport(transport);
@@ -65,9 +65,9 @@ export class LoggerService
    * If the exception is between 400 and 500 status code
    * it will be logged as a debug log level, otherwise it will be logged as an error.
    *
-   * @param error Error to be registered
-   * @param message Error Message
-   * @param context Context of current error
+   * @param error - Error to be registered
+   * @param message - Error Message
+   * @param context - Context of current error
    */
   exception(
     error: Error,
@@ -101,9 +101,9 @@ export class LoggerService
   /**
    * Method to be called when an error should be logged.
    *
-   * @param message Error Message
-   * @param trace Stack trace error
-   * @param context Context of current Message
+   * @param message - Error Message
+   * @param trace - Stack trace error
+   * @param context - Context of current Message
    */
   error(
     message: string,
@@ -127,8 +127,8 @@ export class LoggerService
   /**
    * Method to be used when a warn message should be logged.
    *
-   * @param message Warn Message
-   * @param context Context of Message
+   * @param message - Warn Message
+   * @param context - Context of Message
    */
   warn(message: string, context?: string) {
     super.warn(message, this.getContext(context));
@@ -138,8 +138,8 @@ export class LoggerService
   /**
    * Method to be used when a debug message should be logged.
    *
-   * @param message Debug Message
-   * @param context Context of Message
+   * @param message - Debug Message
+   * @param context - Context of Message
    */
   debug(message: string, context?: string) {
     super.debug(message, this.getContext(context));
@@ -149,8 +149,8 @@ export class LoggerService
   /**
    * Method to be used when a simple log message should be logged.
    *
-   * @param message Log message
-   * @param context Context of Message
+   * @param message - Log message
+   * @param context - Context of Message
    */
   log(message: string, context?: string) {
     super.log(message, this.getContext(context));
@@ -160,8 +160,8 @@ export class LoggerService
   /**
    * Method to be used when a verbose message should be logged.
    *
-   * @param message Verbose Message
-   * @param context Context Message
+   * @param message - Verbose Message
+   * @param context - Context Message
    */
   verbose(message: string, context?: string) {
     super.verbose(message, this.getContext(context));

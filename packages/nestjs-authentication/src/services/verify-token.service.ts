@@ -57,8 +57,7 @@ export class VerifyTokenService implements VerifyTokenServiceInterface {
    *
    * For example, You may want to check if it's id exists in a database or some other source.
    *
-   * @param {object} payload
-   * @returns {boolean}
+   * @param payload - Payload object
    */
   private async validateToken(
     payload: Record<string, unknown>,

@@ -6,7 +6,7 @@ import { EventKeyInterface } from './event-key.interface';
  */
 export interface EventClassInterface<E> extends EventKeyInterface {
   /**
-   * @private
+   * @internal
    */
   new (payload?: (E & EventInstance<E>)['payload']): E & EventInstance<E>;
 }

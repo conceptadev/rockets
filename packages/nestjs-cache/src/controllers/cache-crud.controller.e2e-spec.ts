@@ -1,5 +1,6 @@
 import assert from 'assert';
 import supertest from 'supertest';
+import { randomUUID } from 'crypto';
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getDataSourceToken } from '@nestjs/typeorm';
@@ -111,7 +112,7 @@ describe('CacheAssignmentController (e2e)', () => {
       });
   });
 
-  it('POST /cache/user', async () => {
+  it('POST /cache/user creating user with success', async () => {
     const payload: CacheCreatableInterface = {
       key: 'dashboard-1',
       type: 'filter',
@@ -142,7 +143,7 @@ describe('CacheAssignmentController (e2e)', () => {
     await supertest(app.getHttpServer())
       .post('/cache/user')
       .send(payload)
-      .expect(500);
+      .expect(400);
   });
 
   it('POST /cache/user wrong assignee id', async () => {
@@ -177,21 +178,56 @@ describe('CacheAssignmentController (e2e)', () => {
         expect(res.body.key).toBe(payload.key);
         expect(res.body.assignee.id).toBe(user.id);
       });
+  });
 
-    payload.data = '{ "name": "John Doe" }';
-    payload.expiresIn = null;
+  it('POST /cache/user null after create', async () => {
+    interface ExtendedCacheCreatableInterface
+      extends Pick<
+        CacheCreatableInterface,
+        'key' | 'expiresIn' | 'type' | 'data'
+      > {
+      assignee: { id: string | null } | null;
+    }
+    const payload: ExtendedCacheCreatableInterface = {
+      key: 'dashboard-1',
+      type: 'filter',
+      data: '{}',
+      expiresIn: '1d',
+      assignee: { id: user.id },
+    };
+
     await supertest(app.getHttpServer())
       .post('/cache/user')
       .send(payload)
       .expect(201)
       .then((res) => {
         expect(res.body.key).toBe(payload.key);
-        expect(res.body.data).toBe(payload.data);
         expect(res.body.assignee.id).toBe(user.id);
       });
+
+    payload.data = '{ "name": "John Doe" }';
+    payload.expiresIn = null;
+    payload.assignee = { id: null };
+
+    await supertest(app.getHttpServer())
+      .post('/cache/user')
+      .send(payload)
+      .expect(400);
+
+    payload.assignee = { id: '' };
+    await supertest(app.getHttpServer())
+      .post('/cache/user')
+      .send(payload)
+      .expect(500);
+
+    payload.assignee = null;
+    await supertest(app.getHttpServer())
+      .post('/cache/user')
+      .send(payload)
+      .expect(400);
   });
 
-  it('POST /cache/user Update', async () => {
+  it('PATCH /cache/user Update', async () => {
     const payload: CacheCreatableInterface = {
       key: 'dashboard-1',
       type: 'filter',
@@ -199,24 +235,102 @@ describe('CacheAssignmentController (e2e)', () => {
       expiresIn: '1d',
       assignee: { id: user.id },
     };
+
+    let cacheId = '';
+
     await supertest(app.getHttpServer())
       .post('/cache/user')
       .send(payload)
       .expect(201)
       .then((res) => {
+        cacheId = res.body.id;
+        expect(typeof res.body.id).toEqual('string');
         expect(res.body.key).toBe(payload.key);
         expect(res.body.assignee.id).toBe(user.id);
       });
+
     payload.data = '{ "name": "John Doe" }';
     payload.expiresIn = null;
+
     await supertest(app.getHttpServer())
-      .post('/cache/user/')
+      .patch(`/cache/user/${cacheId}`)
       .send(payload)
-      .expect(201)
+      .expect(200)
       .then((res) => {
         expect(res.body.key).toBe(payload.key);
         expect(res.body.data).toBe(payload.data);
         expect(res.body.assignee.id).toBe(user.id);
+      });
+
+    const url =
+      `/cache/user/` +
+      `?filter[0]=key||$eq||${payload.key}` +
+      `&filter[1]=type||$eq||${payload.type}` +
+      `&filter[2]=assignee.id||$eq||${payload.assignee.id}`;
+
+    // Assuming your endpoint can filter by key and type
+    await supertest(app.getHttpServer())
+      .get(url)
+      .expect(200)
+      .then((res) => {
+        const response = res.body[0];
+        assert.strictEqual(response.assignee.id, user.id);
+        assert.strictEqual(response.key, payload.key);
+        assert.strictEqual(response.type, payload.type);
+        assert.strictEqual(response.data, payload.data);
+      });
+  });
+
+  it('PUT /cache/user', async () => {
+    const payload: CacheCreatableInterface = {
+      key: 'dashboard-1',
+      type: 'filter',
+      data: '{}',
+      expiresIn: '1d',
+      assignee: { id: user.id },
+    };
+
+    const cacheId = randomUUID();
+
+    await supertest(app.getHttpServer())
+      .put(`/cache/user/${cacheId}`)
+      .send(payload)
+      .expect(200)
+      .then((res) => {
+        expect(res.body.id).toBe(cacheId);
+        expect(res.body.key).toBe(payload.key);
+        expect(res.body.assignee.id).toBe(user.id);
+      });
+
+    payload.data = '{ "name": "John Doe" }';
+    payload.expiresIn = null;
+
+    await supertest(app.getHttpServer())
+      .put(`/cache/user/${cacheId}`)
+      .send(payload)
+      .expect(200)
+      .then((res) => {
+        expect(res.body.key).toBe(payload.key);
+        expect(res.body.data).toBe(payload.data);
+        expect(res.body.assignee.id).toBe(user.id);
+      });
+
+    const url =
+      `/cache/user/` +
+      `?filter[0]=key||$eq||${payload.key}` +
+      `&filter[1]=type||$eq||${payload.type}` +
+      `&filter[2]=assignee.id||$eq||${payload.assignee.id}`;
+
+    // Assuming your endpoint can filter by key and type
+    await supertest(app.getHttpServer())
+      .get(url)
+      .expect(200)
+      .then((res) => {
+        const response = res.body[0];
+        assert.strictEqual(response.assignee.id, user.id);
+        assert.strictEqual(response.key, payload.key);
+        assert.strictEqual(response.type, payload.type);
+        assert.strictEqual(response.data, payload.data);
       });
   });
 

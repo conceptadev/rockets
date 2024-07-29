@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { ReferenceId, ReferenceIdInterface } from '@concepta/ts-core';
 import {
   AuthenticatedUserInterface,
@@ -6,6 +6,7 @@ import {
   PasswordPlainInterface,
 } from '@concepta/ts-common';
 import {
+  isPasswordStorage,
   PasswordCreationService,
   PasswordCreationServiceInterface,
   PasswordStorageInterface,
@@ -13,7 +14,9 @@ import {
 
 import { UserPasswordServiceInterface } from '../interfaces/user-password-service.interface';
 import { UserLookupServiceInterface } from '../interfaces/user-lookup-service.interface';
+import { UserPasswordHistoryServiceInterface } from '../interfaces/user-password-history-service.interface';
 import { UserLookupService } from './user-lookup.service';
+import { UserPasswordHistoryService } from './user-password-history.service';
 import { UserException } from '../exceptions/user-exception';
 import { UserNotFoundException } from '../exceptions/user-not-found-exception';
 
@@ -25,14 +28,17 @@ export class UserPasswordService implements UserPasswordServiceInterface {
   /**
    * Constructor
    *
-   * @param userLookupService user lookup service
-   * @param passwordCreationService password creation service
+   * @param userLookupService - user lookup service
+   * @param passwordCreationService - password creation service
    */
   constructor(
     @Inject(UserLookupService)
     protected readonly userLookupService: UserLookupServiceInterface,
     @Inject(PasswordCreationService)
     protected readonly passwordCreationService: PasswordCreationServiceInterface,
+    @Optional()
+    @Inject(UserPasswordHistoryService)
+    private userPasswordHistoryService?: UserPasswordHistoryServiceInterface,
   ) {}
 
   async setPassword(
@@ -45,32 +51,59 @@ export class UserPasswordService implements UserPasswordServiceInterface {
     // break out the password
     const { password } = passwordDto ?? {};
 
+    // user to update
+    let userToUpdate:
+      | (ReferenceIdInterface & PasswordStorageInterface)
+      | undefined = undefined;
+
     // did we receive a password to set?
     if (typeof password === 'string') {
       // are we updating?
       if (userToUpdateId) {
         // yes, get the user
-        const userToUpdate = await this.getUserById(userToUpdateId);
+        userToUpdate = await this.getPasswordStore(userToUpdateId);
+
         // call current password validation helper
         await this.validateCurrent(
           userToUpdate,
           passwordDto?.passwordCurrent,
           authorizedUser,
         );
+
+        // call password history validation helper
+        await this.validateHistory(userToUpdate, password);
       }
+
       // create safe object
       const targetSafe = { ...passwordDto, password };
+
       // call the password creation service
-      return await this.passwordCreationService.createObject(targetSafe, {
-        required: false,
-      });
+      const userWithPasswordHashed =
+        await this.passwordCreationService.createObject(targetSafe, {
+          required: false,
+        });
+
+      // push password history if necessary
+      if (
+        this.userPasswordHistoryService &&
+        userToUpdate &&
+        isPasswordStorage(userWithPasswordHashed)
+      ) {
+        await this.userPasswordHistoryService.pushHistory(
+          userToUpdate.id,
+          userWithPasswordHashed,
+        );
+      }
+
+      // return user
+      return userWithPasswordHashed;
     }
 
     // return the object untouched
     return passwordDto;
   }
 
-  async getUserById(
+  async getPasswordStore(
     userId: ReferenceId,
   ): Promise<ReferenceIdInterface & PasswordStorageInterface> {
     let user: (ReferenceIdInterface & Partial<PasswordStorageInterface>) | null;
@@ -126,6 +159,33 @@ export class UserPasswordService implements UserPasswordServiceInterface {
       }
     }
 
+    // return true by default
+    return true;
+  }
+
+  protected async validateHistory(
+    user: ReferenceIdInterface,
+    password?: string,
+  ): Promise<boolean> {
+    // was a history service injected?
+    if (this.userPasswordHistoryService) {
+      // get password history for user
+      const passwordHistory = await this.userPasswordHistoryService.getHistory(
+        user.id,
+      );
+
+      // call password history validation helper
+      const isValid = await this.passwordCreationService.validateHistory({
+        password,
+        targets: passwordHistory,
+      });
+
+      if (!isValid) {
+        throw new UserException(`Password has been used too recently.`);
+      }
+    }
+
+    // return true by default
     return true;
   }
 }

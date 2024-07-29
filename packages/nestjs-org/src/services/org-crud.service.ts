@@ -13,7 +13,7 @@ export class OrgCrudService extends TypeOrmCrudService<OrgEntityInterface> {
   /**
    * Constructor
    *
-   * @param orgRepo instance of the org repository.
+   * @param orgRepo - instance of the org repository.
    */
   constructor(
     @InjectDynamicRepository(ORG_MODULE_ORG_ENTITY_KEY)

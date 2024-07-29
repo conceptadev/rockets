@@ -13,7 +13,7 @@ export class RoleCrudService extends TypeOrmCrudService<RoleEntityInterface> {
   /**
    * Constructor
    *
-   * @param roleRepo instance of the role repository.
+   * @param roleRepo - instance of the role repository.
    */
   constructor(
     @InjectDynamicRepository(ROLE_MODULE_ROLE_ENTITY_KEY)

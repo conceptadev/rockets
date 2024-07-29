@@ -7,7 +7,7 @@ import { LoggerTransportInterface } from '../interfaces/logger-transport.interfa
  * The transport that implements {@link LoggerTransportInterface}
  * to be used on {@link LoggerService} to log external messages
  *
- * ### Example
+ * @example
  * ```ts
  * // Get the transport instance
  * const sentry = app.get(LoggerSentryTransport);
@@ -21,7 +21,7 @@ export class LoggerSentryTransport implements LoggerTransportInterface {
   /**
    * Constructor
    *
-   * @param config configuration file injected
+   * @param config - configuration file injected
    */
   constructor(protected readonly config: LoggerSentryConfigInterface) {
     if (!this.config) throw new Error('Sentry Config is required');
@@ -35,9 +35,9 @@ export class LoggerSentryTransport implements LoggerTransportInterface {
   /**
    * Method to log message to Sentry transport
    *
-   * @param message
-   * @param logLevel
-   * @param error
+   * @param message - message
+   * @param logLevel - log level
+   * @param error - error
    */
   log(message: string, logLevel: LogLevel, error?: Error | string): void {
     // map the internal log level to sentry log severity

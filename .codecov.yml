@@ -10,4 +10,3 @@ ignore:
   - '.husky'
   - '.vscode'
   - 'docker'
-  - 'website'

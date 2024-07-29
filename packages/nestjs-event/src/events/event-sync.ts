@@ -13,7 +13,7 @@ import { Event } from './event';
  *
  * For asynchronous events, see the {@link EventAsync} abstract class.
  *
- * ### Example
+ * @example
  * ```ts
  * // event payload type
  * type MyPayloadType = {id: number, active: boolean};
@@ -24,7 +24,6 @@ import { Event } from './event';
  * // create an event
  * const myEvent = new MyEvent({id: 1234, active: true});
  * ```
- *
  */
 export abstract class EventSync<P = undefined>
   extends Event<P, void>

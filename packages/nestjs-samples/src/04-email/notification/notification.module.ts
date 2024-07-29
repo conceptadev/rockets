@@ -1,6 +1,6 @@
-import { Logger, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { MailerModule, MailerService } from '@nestjs-modules/mailer';
-import { EmailModule, EmailService } from '@concepta/nestjs-email';
+import { EmailModule } from '@concepta/nestjs-email';
 import { NotificationController } from './notification.controller';
 
 @Module({
@@ -12,6 +12,5 @@ import { NotificationController } from './notification.controller';
     }),
   ],
   controllers: [NotificationController],
-  providers: [Logger, EmailService],
 })
 export class NotificationModule {}

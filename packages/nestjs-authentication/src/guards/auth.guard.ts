@@ -17,6 +17,7 @@ import { FastifyAuthGuard } from './fastify-auth.guard';
 /**
  * A Guard to use passport for express or fastify
  *
+ * @example
  * ```ts
  * @UseGuards(AuthGuard('local'))
  * @Post('login')

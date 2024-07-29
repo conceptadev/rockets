@@ -11,4 +11,3 @@ exclude_paths:
   - '.husky/**'
   - '.vscode/**'
   - 'docker/**'
-  - 'website/**'

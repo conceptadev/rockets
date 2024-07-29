@@ -10,11 +10,11 @@ import { PasswordStorageService } from './password-storage.service';
 import { PasswordValidationService } from './password-validation.service';
 import { PasswordCreateObjectOptionsInterface } from '../interfaces/password-create-object-options.interface';
 import { PasswordCurrentPasswordInterface } from '../interfaces/password-current-password.interface';
+import { PasswordHistoryPasswordInterface } from '../interfaces/password-history-password.interface';
 
 /**
  * Service with functions related to password creation
  * to check if password is strong, and the number of attempts user can do to update a password
- *
  */
 @Injectable()
 export class PasswordCreationService
@@ -34,8 +34,8 @@ export class PasswordCreationService
   /**
    * Create password for an object.
    *
-   * @param object An object containing the new password to hash.
-   * @param options Password create options.
+   * @param object - An object containing the new password to hash.
+   * @param options - Password create options.
    * @returns A new object with the password hashed, with salt added.
    */
   async createObject<T extends PasswordPlainInterface>(
@@ -46,8 +46,8 @@ export class PasswordCreationService
   /**
    * Create password for an object.
    *
-   * @param object An object containing the new password to hash.
-   * @param options Password create options.
+   * @param object - An object containing the new password to hash.
+   * @param options - Password create options.
    * @returns A new object with the password hashed, with salt added.
    */
   async createObject<T extends Partial<PasswordPlainInterface>>(
@@ -61,8 +61,8 @@ export class PasswordCreationService
   /**
    * Create password for an object.
    *
-   * @param object An object containing the new password to hash.
-   * @param options Password create options.
+   * @param object - An object containing the new password to hash.
+   * @param options - Password create options.
    * @returns A new object with the password hashed, with salt added.
    */
   async createObject<T extends PasswordPlainInterface>(
@@ -111,9 +111,45 @@ export class PasswordCreationService
     return true;
   }
 
+  public async validateHistory(
+    options: Partial<PasswordHistoryPasswordInterface>,
+  ): Promise<boolean> {
+    const { password, targets } = options || {
+      password: undefined,
+      targets: [],
+    };
+
+    // make sure the password is a string with some length
+    if (
+      typeof password === 'string' &&
+      password.length > 0 &&
+      targets?.length
+    ) {
+      // validate each target
+      for (const target of targets) {
+        // check if historic password is valid
+        const isValid = await this.passwordValidationService.validateObject(
+          password,
+          target,
+        );
+
+        // is valid?
+        if (isValid) {
+          throw new Error(
+            'The new password has been used too recently, please use a different password',
+          );
+        }
+      }
+    }
+
+    // valid by default
+    return true;
+  }
+
   /**
    * Check if number of current attempt is allowed based on the amount of attempts left
    * if the number of attempts left is greater then
+   *
    * @returns Number of attempts user has to try
    */
   checkAttempt(numOfAttempts = 0): boolean {
@@ -122,8 +158,8 @@ export class PasswordCreationService
 
   /**
    * Check number of attempts of using password
-   * @param numOfAttempts number of attempts
-   * @returns
+   *
+   * @param numOfAttempts - number of attempts
    */
   checkAttemptLeft(numOfAttempts = 0): number {
     // Get number of max attempts allowed

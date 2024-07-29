@@ -23,7 +23,7 @@ export class UserLookupService
   /**
    * Constructor
    *
-   * @param repo instance of the user repo
+   * @param repo - instance of the user repo
    */
   constructor(
     @InjectDynamicRepository(USER_MODULE_USER_ENTITY_KEY)
@@ -35,7 +35,7 @@ export class UserLookupService
   /**
    * Get user for the given email.
    *
-   * @param email the email
+   * @param email - the email
    */
   async byEmail(
     email: ReferenceEmail,
@@ -47,7 +47,7 @@ export class UserLookupService
   /**
    * Get user for the given subject.
    *
-   * @param subject the subject
+   * @param subject - the subject
    */
   async bySubject(
     subject: ReferenceSubject,
@@ -59,7 +59,7 @@ export class UserLookupService
   /**
    * Get user for the given username.
    *
-   * @param username the username
+   * @param username - the username
    */
   async byUsername(
     username: ReferenceUsername,

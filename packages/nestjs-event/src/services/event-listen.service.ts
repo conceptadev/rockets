@@ -21,7 +21,7 @@ export class EventListenService {
   /**
    * Constructor
    *
-   * @param eventEmitter Injected event emitter instance
+   * @param eventEmitter - Injected event emitter instance
    */
   constructor(
     @Inject(EVENT_MODULE_EMITTER_SERVICE_TOKEN)
@@ -34,7 +34,7 @@ export class EventListenService {
    * See the [EventEmitter2.on](https://github.com/EventEmitter2/EventEmitter2#emitteronevent-listener-options-objectboolean)
    * documentation for more details about the underlying emitter API.
    *
-   * ### Example
+   * @example
    * ```ts
    * import { Injectable, OnModuleInit } from '@nestjs/common';
    * import { EventListenService, EventListenerOn } from '@concepta/nestjs-events';
@@ -48,20 +48,20 @@ export class EventListenService {
    *
    * @Injectable()
    * class MyClass implements OnModuleInit {
-   *   constructor(private eventListenService: EventListenService) {}
+   * constructor(private eventListenService: EventListenService) {}
    *
-   *   onModuleInit() {
-   *     // listener instance
-   *     const listener = new MyListener();
-   *     // register the listener
-   *     this.eventListenService.on(TargetEvent, listener);
-   *   }
+   * onModuleInit() {
+   * // listener instance
+   * const listener = new MyListener();
+   * // register the listener
+   * this.eventListenService.on(TargetEvent, listener);
+   * }
    * }
    * ```
    *
-   * @param {EventClassInterface<E>} eventClass  The event class to subscribe to. This is the class, NOT an instance.
-   * @param {EventListenOnInterface<E>} listener Instance of the event listener class to attach to the event.
-   * @param {EventListenOnOptionsInterface<E>} options Overriding options.
+   * @param eventClass - The event class to subscribe to. This is the class, NOT an instance.
+   * @param listener - Instance of the event listener class to attach to the event.
+   * @param options - Overriding options.
    */
   on<E>(
     eventClass: EventClassInterface<E>,
@@ -102,7 +102,7 @@ export class EventListenService {
   }
 
   /**
-   * @private
+   * @internal
    */
   protected createListenWrapper<E>(listener: EventListenOnInterface<E>) {
     return (e: EventInstance<E>) => {

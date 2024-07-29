@@ -14,7 +14,7 @@ import { EventInterface } from './interfaces/event.interface';
  * sync and async event types for your convenience. They are {@link EventSync}
  * and {@link EventAsync}.
  *
- * ### Example
+ * @example
  * ```ts
  * // event payload type
  * type MyPayloadType = {id: number, active: boolean};
@@ -27,9 +27,6 @@ import { EventInterface } from './interfaces/event.interface';
  * // create an event
  * const myEvent = new MyEvent({id: 1234, active: true});
  * ```
- *
- * @template P - Event Payload
- * @template R - Event return payload, defaults to Event Payload
  */
 export abstract class Event<P = undefined, R = P>
   implements EventInterface<P, R>
@@ -37,15 +34,14 @@ export abstract class Event<P = undefined, R = P>
   /**
    * Expects return of payload
    *
-   * @type {R}
-   * @private
+   * @internal
    */
   readonly expectsReturnOf!: R;
 
   /**
    * Event key.
    *
-   * @returns {string} The event key string.
+   * @returns The event key string.
    */
   static get key(): string {
     return `${EVENT_MODULE_EVENT_KEY_PREFIX}${this.name}`;
@@ -54,7 +50,7 @@ export abstract class Event<P = undefined, R = P>
   /**
    * Event key.
    *
-   * @returns {string} The event key string.
+   * @returns The event key string.
    */
   get key(): string {
     return `${EVENT_MODULE_EVENT_KEY_PREFIX}${this.constructor.name}`;
@@ -68,14 +64,14 @@ export abstract class Event<P = undefined, R = P>
   /**
    * Constructor
    *
-   * @param {EventPayload<P>} payload Payload to emit when the event is dispatched.
+   * @param payload - Payload to emit when the event is dispatched.
    */
   constructor(payload?: EventPayload<P>);
 
   /**
    * Constructor
    *
-   * @param {EventPayload<P>} payload Payload to emit when the event is dispatched.
+   * @param payload - Payload to emit when the event is dispatched.
    */
   constructor(payload: EventPayload<P>) {
     this._payload = payload;
@@ -84,7 +80,7 @@ export abstract class Event<P = undefined, R = P>
   /**
    * Returns payload that was passed to the Event constructor.
    *
-   * @returns {EventPayload<P>} The payload.
+   * @returns The event payload.
    */
   get payload(): EventPayload<P> {
     return this._payload;

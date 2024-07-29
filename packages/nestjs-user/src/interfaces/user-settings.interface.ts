@@ -18,4 +18,14 @@ export interface UserSettingsInterface {
       InvitationGetUserEventResponseInterface
     >
   >;
+  passwordHistory?: {
+    /**
+     * password history feature toggle
+     */
+    enabled?: boolean;
+    /**
+     * number of days that password history limitation applies for
+     */
+    limitDays?: number | undefined;
+  };
 }

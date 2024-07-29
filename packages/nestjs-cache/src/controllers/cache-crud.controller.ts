@@ -1,5 +1,5 @@
-import { Inject, Param } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Inject, NotFoundException, Param } from '@nestjs/common';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import {
   AccessControlCreateOne,
   AccessControlDeleteOne,
@@ -14,6 +14,7 @@ import {
   CrudDeleteOne,
   CrudReadMany,
   CrudReadOne,
+  CrudReplaceOne,
   CrudRequest,
   CrudRequestInterface,
   CrudUpdateOne,
@@ -64,13 +65,15 @@ export class CacheCrudController
       CacheInterface,
       CacheCreatableInterface,
       CacheUpdatableInterface,
-      never
+      CacheCreatableInterface
     >
 {
   /**
    * Constructor.
    *
-   * @param allCrudServices instances of all crud services
+   * @param settings - cache settings
+   * @param allCrudServices - instances of all crud services
+   * @param cacheService - instance of cache service
    */
   constructor(
     @Inject(CACHE_MODULE_SETTINGS_TOKEN)
@@ -83,8 +86,8 @@ export class CacheCrudController
   /**
    * Get many
    *
-   * @param crudRequest the CRUD request object
-   * @param assignment the assignment
+   * @param crudRequest - the CRUD request object
+   * @param assignment - the assignment
    */
   @CrudReadMany()
   @AccessControlReadMany(CacheResource.Many)
@@ -98,8 +101,8 @@ export class CacheCrudController
   /**
    * Get one
    *
-   * @param crudRequest the CRUD request object
-   * @param assignment The cache assignment
+   * @param crudRequest - the CRUD request object
+   * @param assignment - The cache assignment
    */
   @CrudReadOne()
   @AccessControlReadOne(CacheResource.One)
@@ -113,9 +116,9 @@ export class CacheCrudController
   /**
    * Create one
    *
-   * @param crudRequest the CRUD request object
-   * @param cacheCreateDto cache create dto
-   * @param assignment The cache assignment
+   * @param crudRequest - the CRUD request object
+   * @param cacheCreateDto - cache create dto
+   * @param assignment - The cache assignment
    */
   @CrudCreateOne()
   @AccessControlCreateOne(CacheResource.One)
@@ -128,43 +131,19 @@ export class CacheCrudController
       cacheCreateDto.expiresIn ?? this.settings.expiresIn,
     );
 
-    const existingCache = await this.cacheService.get(
-      assignment,
-      cacheCreateDto,
-    );
-
-    // update or create
-    if (existingCache) {
-      crudRequest.parsed.search.$and?.push({
-        id: {
-          $eq: existingCache.id,
-        },
-      });
-      // call crud service to create
-      const response = await this.getCrudService(assignment).updateOne(
-        crudRequest,
-        {
-          id: existingCache.id,
-          ...cacheCreateDto,
-          expirationDate,
-        },
-      );
-      return response;
-    } else {
-      // call crud service to create
-      return this.getCrudService(assignment).createOne(crudRequest, {
-        ...cacheCreateDto,
-        expirationDate,
-      });
-    }
+    // call crud service to create
+    return this.getCrudService(assignment).createOne(crudRequest, {
+      ...cacheCreateDto,
+      expirationDate,
+    });
   }
 
   /**
    * Create one
    *
-   * @param crudRequest the CRUD request object
-   * @param cacheUpdateDto cache create dto
-   * @param assignment The cache assignment
+   * @param crudRequest - the CRUD request object
+   * @param cacheUpdateDto - cache update dto
+   * @param assignment - The cache assignment
    */
   @CrudUpdateOne()
   @AccessControlCreateOne(CacheResource.One)
@@ -187,8 +166,8 @@ export class CacheCrudController
   /**
    * Delete one
    *
-   * @param crudRequest the CRUD request object
-   * @param assignment The cache assignment
+   * @param crudRequest - the CRUD request object
+   * @param assignment - The cache assignment
    */
   @CrudDeleteOne()
   @AccessControlDeleteOne(CacheResource.One)
@@ -202,8 +181,8 @@ export class CacheCrudController
   /**
    * Get the crud service for the given assignment.
    *
-   * @private
-   * @param assignment The cache assignment
+   * @internal
+   * @param assignment - The cache assignment
    */
   protected getCrudService(assignment: ReferenceAssignment): CacheCrudService {
     const entityKey = this.getEntityKey(assignment);
@@ -218,9 +197,51 @@ export class CacheCrudController
   }
 
   /**
+   * Do a Upsert operation for cache
+   *
+   * @param crudRequest - the CRUD request object
+   * @param cacheUpdateDto - cache update dto
+   * @param assignment - The cache assignment
+   */
+  @ApiOkResponse({
+    type: CacheDto,
+  })
+  @CrudReplaceOne()
+  @AccessControlCreateOne(CacheResource.One)
+  async replaceOne(
+    @CrudRequest() crudRequest: CrudRequestInterface,
+    @CrudBody() cacheUpdateDto: CacheUpdateDto,
+    @Param('assignment') assignment: ReferenceAssignment,
+  ) {
+    let cache;
+    try {
+      cache = await this.getOne(crudRequest, assignment);
+    } catch (error) {
+      // error is NOT a not found exception?
+      if (error instanceof NotFoundException !== true) {
+        // rethrow it
+        throw error;
+      }
+    }
+    if (cache && cache?.id) {
+      const expirationDate = getExpirationDate(
+        cacheUpdateDto.expiresIn ?? this.settings.expiresIn,
+      );
+
+      // call crud service to create
+      return this.getCrudService(assignment).replaceOne(crudRequest, {
+        ...cacheUpdateDto,
+        expirationDate,
+      });
+    } else {
+      return this.createOne(crudRequest, cacheUpdateDto, assignment);
+    }
+  }
+
+  /**
    * Get the entity key for the given assignment.
    *
-   * @param assignment The cache assignment
+   * @param assignment - The cache assignment
    */
   protected getEntityKey(assignment: ReferenceAssignment): string {
     // have entity key for given assignment?

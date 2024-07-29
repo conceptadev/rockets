@@ -68,8 +68,8 @@ export class UserController
   /**
    * Constructor.
    *
-   * @param userCrudService instance of the user crud service
-   * @param userPasswordService instance of user password service
+   * @param userCrudService - instance of the user crud service
+   * @param userPasswordService - instance of user password service
    */
   constructor(
     private userCrudService: UserCrudService,
@@ -79,7 +79,7 @@ export class UserController
   /**
    * Get many
    *
-   * @param crudRequest the CRUD request object
+   * @param crudRequest - the CRUD request object
    */
   @CrudReadMany()
   @AccessControlReadMany(UserResource.Many)
@@ -90,7 +90,7 @@ export class UserController
   /**
    * Get one
    *
-   * @param crudRequest the CRUD request object
+   * @param crudRequest - the CRUD request object
    */
   @CrudReadOne()
   @AccessControlReadOne(UserResource.One)
@@ -101,8 +101,8 @@ export class UserController
   /**
    * Create many
    *
-   * @param crudRequest the CRUD request object
-   * @param userCreateManyDto user create many dto
+   * @param crudRequest - the CRUD request object
+   * @param userCreateManyDto - user create many dto
    */
   @CrudCreateMany()
   @AccessControlCreateMany(UserResource.Many)
@@ -126,8 +126,8 @@ export class UserController
   /**
    * Create one
    *
-   * @param crudRequest the CRUD request object
-   * @param userCreateDto user create dto
+   * @param crudRequest - the CRUD request object
+   * @param userCreateDto - user create dto
    */
   @CrudCreateOne()
   @AccessControlCreateOne(UserResource.One)
@@ -145,8 +145,8 @@ export class UserController
   /**
    * Update one
    *
-   * @param crudRequest the CRUD request object
-   * @param userUpdateDto user update dto
+   * @param crudRequest - the CRUD request object
+   * @param userUpdateDto - user update dto
    */
   @CrudUpdateOne()
   @AccessControlUpdateOne(UserResource.One)
@@ -165,7 +165,11 @@ export class UserController
         authorizededUser,
       );
     } catch (e) {
-      throw new BadRequestException(e);
+      if (e instanceof Error) {
+        throw new BadRequestException(e.message);
+      } else {
+        throw new BadRequestException();
+      }
     }
 
     return this.userCrudService.updateOne(crudRequest, hashedObject);
@@ -174,7 +178,7 @@ export class UserController
   /**
    * Delete one
    *
-   * @param crudRequest the CRUD request object
+   * @param crudRequest - the CRUD request object
    */
   @CrudDeleteOne()
   @AccessControlDeleteOne(UserResource.One)
@@ -185,7 +189,7 @@ export class UserController
   /**
    * Recover one
    *
-   * @param crudRequest the CRUD request object
+   * @param crudRequest - the CRUD request object
    */
   @CrudRecoverOne()
   @AccessControlRecoverOne(UserResource.One)

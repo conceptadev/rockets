@@ -69,7 +69,8 @@ export class RoleAssignmentController
   /**
    * Constructor.
    *
-   * @param allCrudServices instances of all crud services
+   * @param settings - role settings
+   * @param allCrudServices - instances of all crud services
    */
   constructor(
     @Inject(ROLE_MODULE_SETTINGS_TOKEN)
@@ -81,8 +82,8 @@ export class RoleAssignmentController
   /**
    * Get many
    *
-   * @param crudRequest the CRUD request object
-   * @param assignment the assignment
+   * @param crudRequest - the CRUD request object
+   * @param assignment - the assignment
    */
   @CrudReadMany()
   @AccessControlReadMany(RoleAssignmentResource.Many)
@@ -96,8 +97,8 @@ export class RoleAssignmentController
   /**
    * Get one
    *
-   * @param crudRequest the CRUD request object
-   * @param assignment The role assignment
+   * @param crudRequest - the CRUD request object
+   * @param assignment - The role assignment
    */
   @CrudReadOne()
   @AccessControlReadOne(RoleAssignmentResource.One)
@@ -111,9 +112,9 @@ export class RoleAssignmentController
   /**
    * Create many
    *
-   * @param crudRequest the CRUD request object
-   * @param roleAssignmentCreateDto role create many dto
-   * @param assignment The role assignment
+   * @param crudRequest - the CRUD request object
+   * @param roleAssignmentCreateDto - role create many dto
+   * @param assignment - The role assignment
    */
   @CrudCreateMany()
   @AccessControlCreateMany(RoleAssignmentResource.Many)
@@ -140,9 +141,9 @@ export class RoleAssignmentController
   /**
    * Create one
    *
-   * @param crudRequest the CRUD request object
-   * @param roleAssignmentCreateDto role create dto
-   * @param assignment The role assignment
+   * @param crudRequest - the CRUD request object
+   * @param roleAssignmentCreateDto - role create dto
+   * @param assignment - The role assignment
    */
   @CrudCreateOne()
   @AccessControlCreateOne(RoleAssignmentResource.One)
@@ -161,8 +162,8 @@ export class RoleAssignmentController
   /**
    * Delete one
    *
-   * @param crudRequest the CRUD request object
-   * @param assignment The role assignment
+   * @param crudRequest - the CRUD request object
+   * @param assignment - The role assignment
    */
   @CrudDeleteOne()
   @AccessControlDeleteOne(RoleAssignmentResource.One)
@@ -176,8 +177,8 @@ export class RoleAssignmentController
   /**
    * Get the crud service for the given assignment.
    *
-   * @private
-   * @param assignment The role assignment
+   * @internal
+   * @param assignment - The role assignment
    */
   protected getCrudService(
     assignment: ReferenceAssignment,

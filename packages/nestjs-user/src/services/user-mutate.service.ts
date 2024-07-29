@@ -33,8 +33,8 @@ export class UserMutateService
   /**
    * Constructor
    *
-   * @param repo instance of the user repo
-   * @param passwordCreationService
+   * @param repo - instance of the user repo
+   * @param userPasswordService - instance of a user password service
    */
   constructor(
     @InjectDynamicRepository(USER_MODULE_USER_ENTITY_KEY)
@@ -50,7 +50,7 @@ export class UserMutateService
     // do we need to hash the password?
     if ('password' in user && typeof user.password === 'string') {
       // yes, hash it
-      return this.userPasswordService.setPassword(user);
+      return this.userPasswordService.setPassword(user, user?.id);
     } else {
       // no changes
       return user;

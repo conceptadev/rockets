@@ -7,7 +7,7 @@ import { JWT_MODULE_DEFAULT_SETTINGS_TOKEN } from '../jwt.constants';
 /**
  * Settings defaults.
  *
- * @todo need to also get defaults from ENV
+ * TODO: need to also get defaults from ENV
  */
 export const jwtDefaultConfig = registerAs(
   JWT_MODULE_DEFAULT_SETTINGS_TOKEN,
@@ -34,7 +34,7 @@ export const jwtDefaultConfig = registerAs(
 );
 
 /**
- * @private
+ * @internal
  */
 function configureAccessSecret(options: JwtSettingsInterface['access']) {
   if (!options) {
@@ -62,7 +62,7 @@ function configureAccessSecret(options: JwtSettingsInterface['access']) {
 }
 
 /**
- * @private
+ * @internal
  */
 function configureRefreshSecret(
   options: JwtSettingsInterface['refresh'],
