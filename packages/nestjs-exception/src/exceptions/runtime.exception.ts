@@ -15,16 +15,42 @@ export class RuntimeException
   public context: RuntimeExceptionContext = {};
 
   constructor(
-    options: RuntimeExceptionOptions = { message: 'Runtime Exception' },
+    message?: string,
+    options?: Omit<RuntimeExceptionOptions, 'message'>,
+  );
+  constructor(options?: RuntimeExceptionOptions);
+
+  constructor(
+    messageOrOptions?: string | RuntimeExceptionOptions,
+    options?: Omit<RuntimeExceptionOptions, 'message'>,
   ) {
+    let message: string | undefined;
+
+    let finalOptions:
+      | RuntimeExceptionOptions
+      | Omit<RuntimeExceptionOptions, 'message'> = {};
+
+    if (typeof messageOrOptions === 'object') {
+      message = messageOrOptions?.message;
+      finalOptions = messageOrOptions;
+    } else if (options) {
+      message = messageOrOptions;
+      finalOptions = options;
+    } else {
+      message = messageOrOptions;
+    }
+
+    if (typeof message !== 'string') {
+      message = 'Runtime Exception';
+    }
+
     const {
-      message = '',
       messageParams = [],
       safeMessage,
       safeMessageParams = [],
       originalError,
       httpStatus,
-    } = options;
+    } = finalOptions;
 
     super(format(message, ...messageParams));
 
