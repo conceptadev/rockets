@@ -1,6 +1,6 @@
 {
   "name": "root",
-  "version": "4.0.0-alpha.22",
+  "version": "4.0.0",
   "license": "BSD-3-Clause",
   "private": true,
   "workspaces": {
@@ -59,6 +59,7 @@
     "postinstall": "husky install",
     "clean": "./node_modules/.bin/rimraf packages/*/dist packages/*/tsconfig.tsbuildinfo docs",
     "build": "./node_modules/.bin/tsc --build",
+    "prepublish": "yarn clean && yarn build",
     "watch": "yarn build && ./node_modules/.bin/tsc --build --watch",
     "lint": "eslint \"packages/*/src/**/*.{ts,js,json}\"",
     "lint:fix": "yarn lint --fix",
