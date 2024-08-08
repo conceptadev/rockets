@@ -102,6 +102,9 @@
     },
     {
       "path": "packages/nestjs-cache"
+    },
+    {
+      "path": "packages/i18n"
     }
   ]
 }

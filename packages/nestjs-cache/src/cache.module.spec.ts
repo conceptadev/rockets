@@ -14,6 +14,9 @@ describe(CacheModule.name, () => {
   let cacheDynamicRepo: Record<string, Repository<CacheInterface>>;
 
   beforeEach(async () => {
+    // to avoid error log from i18next not initialized
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    
     const testModule: TestingModule = await Test.createTestingModule({
       imports: [AppModuleFixture],
     }).compile();

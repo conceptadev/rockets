@@ -113,7 +113,10 @@ export class CacheService implements CacheServiceInterface {
         expirationDate,
       });
     } catch (e) {
-      throw new ReferenceMutateException(assignmentRepo.metadata.targetName, e);
+      throw new ReferenceMutateException(
+        assignmentRepo.metadata.targetName,
+        e,
+      );
     }
   }
 

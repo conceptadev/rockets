@@ -7,11 +7,14 @@ import {
   ReferenceMutateException,
   ReferenceValidationException,
   RepositoryProxy,
+  initTypeOrmCommonTranslation,
 } from '@concepta/typeorm-common';
 
 import { CacheService } from './cache.service';
 import { CacheSettingsInterface } from '../interfaces/cache-settings.interface';
 import { CacheCreateDto } from '../dto/cache-create.dto';
+import { I18n } from '@concepta/i18n';
+import LOCALES from '../locales';
 
 const expirationDate = new Date();
 expirationDate.setHours(expirationDate.getHours() + 1);
@@ -47,6 +50,10 @@ describe('CacheService', () => {
     settings.expiresIn = '1h';
     service = new CacheService({ testAssignment: repo }, settings);
   });
+
+  afterEach(() => { 
+    I18n.reset();
+  })
 
   describe(CacheService.prototype.create, () => {
     it('should create a cache entry', async () => {
@@ -140,14 +147,31 @@ describe('CacheService', () => {
       ).rejects.toThrow(ReferenceValidationException);
     });
 
-    it('should throw a ReferenceMutateException on error', async () => {
+    it('should throw a ReferenceMutateException on error with translations in pt', async () => {
+      jest.spyOn(console, 'log').mockImplementation(() => {});
+      jest.spyOn(console, 'warn').mockImplementation(() => {});
+      I18n.init({
+        options: {
+          initImmediate: false,
+          fallbackLng: 'pt',
+        }
+      });
+      // load local translations
+      I18n.addTranslations(LOCALES);
+
+      // load typeorm translations
+      initTypeOrmCommonTranslation();
+      
+      // need to call this to load the translations
       const assignment: ReferenceAssignment = 'testAssignment';
 
       const error = new Error('error');
       service['mergeEntity'] = jest.fn().mockResolvedValue(error);
 
       const t = () => service.update(assignment, cacheDto, queryOptions);
-      await expect(t).rejects.toThrow(ReferenceMutateException);
+      await expect(t).rejects.toThrowError(
+        'Erro ao tentar alterar uma referência de undefined'
+      );
     });
   });
 });

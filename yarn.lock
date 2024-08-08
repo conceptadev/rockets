@@ -401,7 +401,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.23.9":
+"@babel/runtime@npm:^7.23.2, @babel/runtime@npm:^7.23.9":
   version: 7.24.8
   resolution: "@babel/runtime@npm:7.24.8"
   dependencies:
@@ -670,6 +670,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@concepta/i18n@npm:^4.0.0-alpha.48, @concepta/i18n@workspace:packages/i18n":
+  version: 0.0.0-use.local
+  resolution: "@concepta/i18n@workspace:packages/i18n"
+  dependencies:
+    i18next: "npm:^23.12.2"
+    i18next-fs-backend: "npm:^2.3.1"
+    i18next-http-middleware: "npm:^3.6.0"
+  languageName: unknown
+  linkType: soft
+
 "@concepta/nestjs-access-control@npm:^4.0.0-alpha.48, @concepta/nestjs-access-control@workspace:packages/nestjs-access-control":
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-access-control@workspace:packages/nestjs-access-control"
@@ -856,6 +866,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-cache@workspace:packages/nestjs-cache"
   dependencies:
+    "@concepta/i18n": "npm:^4.0.0-alpha.48"
     "@concepta/nestjs-access-control": "npm:^4.0.0-alpha.48"
     "@concepta/nestjs-common": "npm:^4.0.0-alpha.48"
     "@concepta/nestjs-core": "npm:^4.0.0-alpha.48"
@@ -9944,6 +9955,29 @@ __metadata:
   bin:
     husky: lib/bin.js
   checksum: 10c0/aacb2b8fbfed0ec161f94e9b08d422c51fec073def4e165e57da42f47c10f520a5f0a88b42efc667784e314a1af83cf1994b582cd6f4b0333739921a601c6187
+  languageName: node
+  linkType: hard
+
+"i18next-fs-backend@npm:^2.3.1":
+  version: 2.3.1
+  resolution: "i18next-fs-backend@npm:2.3.1"
+  checksum: 10c0/6a4a6318ee13851436e17232afc6833d4e5c937a0fe15cf9454b4b7dd605154580a990716008ee734d582e8db7dd6a39389eb64474d42950093c938e50a80df9
+  languageName: node
+  linkType: hard
+
+"i18next-http-middleware@npm:^3.6.0":
+  version: 3.6.0
+  resolution: "i18next-http-middleware@npm:3.6.0"
+  checksum: 10c0/52fdc7d5f90c6af51300a932e3906910ca30fe0137fb051bec29a83a3e4ca9cd17f79a70ddd20d04f3500617d0e8758d1f482210c197f7229fc03edaa15bf2ef
+  languageName: node
+  linkType: hard
+
+"i18next@npm:^23.12.2":
+  version: 23.12.2
+  resolution: "i18next@npm:23.12.2"
+  dependencies:
+    "@babel/runtime": "npm:^7.23.2"
+  checksum: 10c0/aa7654afefc3f5383513563226401994558675a57eb562f0c4580d573d8410d24954f25112d45f9b6b1ca3f88c7beea1ac802ed50ad4081a06a17d08857e3c5d
   languageName: node
   linkType: hard
 
