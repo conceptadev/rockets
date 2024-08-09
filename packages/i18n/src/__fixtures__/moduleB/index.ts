@@ -7,6 +7,6 @@ export const initModuleBTranslation = () => {
     I18n.addTranslations(LOCALES);
     loaded = true;
   }
-}
+};
 
 export * from './moduleB.module.fixture';

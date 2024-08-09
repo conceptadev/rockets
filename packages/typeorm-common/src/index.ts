@@ -3,7 +3,7 @@ import LOCALES from './locales';
 
 export const initTypeOrmCommonTranslation = () => {
   I18n.addTranslations(LOCALES);
-}
+};
 // interfaces
 export { QueryOptionsInterface } from './interfaces/query-options.interface';
 export { SafeTransactionOptionsInterface } from './interfaces/safe-transaction-options.interface';

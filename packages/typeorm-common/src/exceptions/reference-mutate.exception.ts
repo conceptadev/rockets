@@ -14,17 +14,18 @@ export class ReferenceMutateException
     originalError: Error;
   };
 
-  constructor(
-    entityName: string,
-    originalError: unknown,
-    message?: string,
-  ) {
-    super(format(message
-      ?? t({
-        key: REFERENCE_MUTATE_ERROR,
-        defaultMessage: 'Error Default while trying to mutate a %s reference'
-      })
-    , entityName));
+  constructor(entityName: string, originalError: unknown, message?: string) {
+    super(
+      format(
+        message ??
+          t({
+            key: REFERENCE_MUTATE_ERROR,
+            defaultMessage:
+              'Error Default while trying to mutate a %s reference',
+          }),
+        entityName,
+      ),
+    );
     this.context = {
       entityName,
       originalError:

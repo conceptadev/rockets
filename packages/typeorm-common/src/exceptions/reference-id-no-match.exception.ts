@@ -14,17 +14,18 @@ export class ReferenceIdNoMatchException
     id: ReferenceId;
   };
 
-  constructor(
-    entityName: string,
-    id: ReferenceId,
-    message?: string,
-  ) {
-    super(format(message
-      ?? t({
-        key: REFERENCE_ID_NO_MATCH,
-        defaultMessage: 'No match for %s reference id %s.'
-      })
-    , entityName, id));
+  constructor(entityName: string, id: ReferenceId, message?: string) {
+    super(
+      format(
+        message ??
+          t({
+            key: REFERENCE_ID_NO_MATCH,
+            defaultMessage: 'No match for %s reference id %s.',
+          }),
+        entityName,
+        id,
+      ),
+    );
     this.context = {
       entityName,
       id,

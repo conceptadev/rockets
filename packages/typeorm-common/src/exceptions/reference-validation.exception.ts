@@ -20,12 +20,16 @@ export class ReferenceValidationException
     validationErrors: ValidationError[],
     message?: string,
   ) {
-    super(format(message
-      ?? t({
-        key: REFERENCE_VALIDATION_ERROR,
-        defaultMessage: 'Data for the %s reference is not valid',
-      })
-    , entityName));
+    super(
+      format(
+        message ??
+          t({
+            key: REFERENCE_VALIDATION_ERROR,
+            defaultMessage: 'Data for the %s reference is not valid',
+          }),
+        entityName,
+      ),
+    );
     this.context = {
       entityName,
       validationErrors,

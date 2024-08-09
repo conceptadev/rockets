@@ -51,9 +51,9 @@ describe('CacheService', () => {
     service = new CacheService({ testAssignment: repo }, settings);
   });
 
-  afterEach(() => { 
+  afterEach(() => {
     I18n.reset();
-  })
+  });
 
   describe(CacheService.prototype.create, () => {
     it('should create a cache entry', async () => {
@@ -154,14 +154,14 @@ describe('CacheService', () => {
         options: {
           initImmediate: false,
           fallbackLng: 'pt',
-        }
+        },
       });
       // load local translations
       I18n.addTranslations(LOCALES);
 
       // load typeorm translations
       initTypeOrmCommonTranslation();
-      
+
       // need to call this to load the translations
       const assignment: ReferenceAssignment = 'testAssignment';
 
@@ -170,7 +170,7 @@ describe('CacheService', () => {
 
       const t = () => service.update(assignment, cacheDto, queryOptions);
       await expect(t).rejects.toThrowError(
-        'Erro ao tentar alterar uma referência de undefined'
+        'Erro ao tentar alterar uma referência de undefined',
       );
     });
   });

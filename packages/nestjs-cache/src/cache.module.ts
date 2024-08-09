@@ -1,4 +1,4 @@
-import { DynamicModule, Module, OnModuleInit } from '@nestjs/common';
+import { DynamicModule, Module } from '@nestjs/common';
 
 import {
   CacheAsyncOptions,
@@ -16,12 +16,11 @@ import { I18n } from '@concepta/i18n';
  */
 @Module({})
 export class CacheModule extends CacheModuleClass {
-  
   constructor() {
-    super();    
+    super();
     I18n.addTranslations(LOCALES);
   }
-  
+
   static register(options: CacheOptions): DynamicModule {
     return super.register(options);
   }

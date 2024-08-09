@@ -1,4 +1,4 @@
 const ptCR = {
-  "hello": "Olá do modulo C"
-}
+  hello: 'Olá do modulo C',
+};
 export default ptCR;

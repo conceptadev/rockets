@@ -1,5 +1,5 @@
-import { initModuleCTranslation } from "./";
-import { I18n } from "../../i18n";
+import { initModuleCTranslation } from './';
+import { I18n } from '../../i18n';
 
 // Non-NestJS module
 export class ModuleCFixture {
@@ -7,6 +7,10 @@ export class ModuleCFixture {
     initModuleCTranslation();
   }
   translationC() {
-     return I18n.translate({ namespace: ModuleCFixture.name, key: 'hello', language: 'en' });
+    return I18n.translate({
+      namespace: ModuleCFixture.name,
+      key: 'hello',
+      language: 'en',
+    });
   }
 }

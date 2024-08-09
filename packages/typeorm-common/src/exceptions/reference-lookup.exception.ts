@@ -3,7 +3,6 @@ import { ExceptionInterface, NotAnErrorException } from '@concepta/ts-core';
 import { t } from '@concepta/i18n';
 import { REFERENCE_LOOKUP_ERROR } from '../constants';
 
-
 export class ReferenceLookupException
   extends Error
   implements ExceptionInterface
@@ -15,17 +14,17 @@ export class ReferenceLookupException
     originalError: Error;
   };
 
-  constructor(
-    entityName: string,
-    originalError: unknown,
-    message?: string,
-  ) {
-    super(format(message
-      ?? t({
-        key: REFERENCE_LOOKUP_ERROR,
-        defaultMessage: 'Error while trying to lookup a %s reference'
-      })
-    , entityName));
+  constructor(entityName: string, originalError: unknown, message?: string) {
+    super(
+      format(
+        message ??
+          t({
+            key: REFERENCE_LOOKUP_ERROR,
+            defaultMessage: 'Error while trying to lookup a %s reference',
+          }),
+        entityName,
+      ),
+    );
     this.context = {
       entityName,
       originalError:

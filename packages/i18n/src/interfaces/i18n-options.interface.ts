@@ -1,3 +1,6 @@
-import { InitOptions } from "i18next";
+import { InitOptions } from 'i18next';
 
-export interface I18nextOptions<T = object> extends InitOptions<T> {}
+/**
+ * Interface extending InitOptions from i18next with generic type T.
+ */
+export interface I18nOptions<T = object> extends InitOptions<T> {}

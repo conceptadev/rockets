@@ -1,10 +1,17 @@
-import { I18nextOptions } from "./i18n-options.interface"
-import { I18nObjectModule, i18nextModuleType } from "./i18n.types"
+import { I18nOptions } from './i18n-options.interface';
+import { I18nObjectModule, I18nextModuleType } from './i18n.types';
 
-export interface I18Settings<T = object> {
-  // TODO: validate this how to receive the other possible types
-  // any custom configuration should be under settings
-  newInstance?: boolean;
-  modules?: i18nextModuleType<I18nObjectModule>[]
-  options?: I18nextOptions<T>
+/**
+ * Interface representing the settings for internationalization (i18n).
+ */
+export interface I18nSettings<T = object> {
+  /**
+   * An array of i18n modules.
+   */
+  modules?: I18nextModuleType<I18nObjectModule>[];
+
+  /**
+   * Options for configuring i18n.
+   */
+  options?: I18nOptions<T>;
 }

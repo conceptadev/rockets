@@ -31,8 +31,8 @@ describe(MutateService, () => {
     I18n.init({
       options: {
         initImmediate: false,
-      }
-    })
+      },
+    });
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModuleFixture],
     }).compile();
@@ -254,10 +254,10 @@ describe(MutateService, () => {
       };
 
       await expect(t).rejects.toThrowError(
-        `No match for TestEntityFixture reference id ${WRONG_UUID}.`
+        `No match for TestEntityFixture reference id ${WRONG_UUID}.`,
       );
     });
-    
+
     it('id does not match with translation pt', async () => {
       I18n.changeLanguage('pt');
       initTypeOrmCommonTranslation();
@@ -268,7 +268,7 @@ describe(MutateService, () => {
       };
 
       await expect(t).rejects.toThrowError(
-        `Nenhuma correspondência da referência TestEntityFixture para o id ${WRONG_UUID}.`
+        `Nenhuma correspondência da referência TestEntityFixture para o id ${WRONG_UUID}.`,
       );
     });
 
@@ -282,7 +282,7 @@ describe(MutateService, () => {
       };
 
       await expect(t).rejects.toThrowError(
-        `No match for TestEntityFixture reference id ${WRONG_UUID}.`
+        `No match for TestEntityFixture reference id ${WRONG_UUID}.`,
       );
     });
 

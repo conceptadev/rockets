@@ -1,4 +1,3 @@
-
 import { I18n } from '../../i18n';
 import LOCALES from './locales';
 
@@ -8,6 +7,6 @@ export const initModuleATranslation = () => {
     I18n.addTranslations(LOCALES);
     loaded = true;
   }
-}
+};
 
 export * from './moduleA.module.fixture';

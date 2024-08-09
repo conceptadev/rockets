@@ -1,4 +1,4 @@
 const ptBR = {
-  "hello": "Olá do modulo B"
-}
+  hello: 'Olá do modulo B',
+};
 export default ptBR;

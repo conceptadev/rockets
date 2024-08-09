@@ -5,10 +5,7 @@ module.exports = {
     tsconfigRootDir: __dirname,
     project: ['./tsconfig.eslint.json'],
   },
-  plugins: [
-    'import',
-    'tsdoc',
-  ],
+  plugins: ['import', 'tsdoc'],
   extends: [
     '@concepta/eslint-config/nest',
     'plugin:jsdoc/recommended-typescript',
@@ -21,6 +18,7 @@ module.exports = {
     '**/tsconfig.json',
     '**/tsconfig.eslint.json',
     '**/commitlint.config.js',
+    'packages/i18n/src/__fixtures__/locales/**/*.json',
   ],
   settings: {
     jsdoc: {
