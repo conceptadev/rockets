@@ -17,7 +17,7 @@ An advanced i18n (internationalization) utility for managing multiple languages 
      - [Installation](#installation)
    - [Basic Setup](#basic-setup)
    - [Example](#example)
-     - [Adding a Custom Backend Module](#adding-a-custom-backend-module) 
+     - [Adding a Custom Backend Module](#adding-a-custom-backend-module)
      - [Changing Language Dynamically](#changing-language-dynamically)
      - [Adding Translations](#adding-translations)
 2. [How-To Guides](#how-to-guides)
@@ -29,6 +29,7 @@ An advanced i18n (internationalization) utility for managing multiple languages 
    - [How i18n Module Works](#how-i18n-module-works)
    - [Benefits of Using i18n](#benefits-of-using-i18n)
    - [Common i18n Pitfalls](#common-i18n-pitfalls)
+
 # Tutorials
 
 ## Getting Started with i18n
@@ -73,6 +74,7 @@ export function initI18n() {
 
 export { t };
 ```
+
 ```ts
 import { initI18n, t } from './i18nSetup';
 
@@ -88,6 +90,7 @@ console.log(t({
   language: 'pt' 
 }));
 ```
+
 ## Example
 
 These are basic examples to help you get started with the i18n module.
@@ -95,18 +98,21 @@ These are basic examples to help you get started with the i18n module.
 ### Adding a Custom Backend Module
 
 To add a custom backend module for fetching translations:
+
 ```json
 //./locales/en/translation.json
 {
   "hello": "Hi"
 }
 ```
+
 ```json
 //./locales/pt/translation.json
 {
   "hello": "Olá"
 }
 ```
+
 ```ts
 import I18NexFsBackend, { FsBackendOptions } from 'i18next-fs-backend';
 import { I18n, t } from '@concepta/i18n';
@@ -163,21 +169,22 @@ console.log(t({ key: 'hello' }));
 
 ## Adding Translations
 
-To add translations dynamically, you can initialize the I18n instance first and add 
-translation resources at a later time. This approach is useful in scenarios where 
-translations are fetched from an external source or need to be updated without 
+To add translations dynamically, you can initialize the I18n instance first and add
+translation resources at a later time. This approach is useful in scenarios where
+translations are fetched from an external source or need to be updated without
 reinitializing the entire i18n setup.
 
 This method is particularly beneficial in the following situations:
 
-- **Fetching Translations from an API**: When translations are retrieved from a 
-  remote server, you can initialize i18n once and update translations as they 
+- **Fetching Translations from an API**: When translations are retrieved from a
+  remote server, you can initialize i18n once and update translations as they
   become available.
-- **Modular Applications**: In large applications with multiple modules, 
-  translations can be added as each module is loaded, reducing the initial load 
+- **Modular Applications**: In large applications with multiple modules,
+  translations can be added as each module is loaded, reducing the initial load
   time.
-- **Real-time Updates**: If your application supports real-time updates, you can 
+- **Real-time Updates**: If your application supports real-time updates, you can
   dynamically add new translations without disrupting the user experience.
+
 ```ts
 //...
 I18n.init();
@@ -211,6 +218,7 @@ console.log(t({
   language: 'fr' 
 }));
 ```
+
 ## Creating a Custom Translation Module
 
 You can create custom translation modules to extend the i18n functionality. Here’s how:
@@ -232,6 +240,7 @@ I18n.init({
 ## Handling Missing Translations
 
 To handle missing translations gracefully:
+
 ```ts
 import { I18n, t } from '@concepta/i18n';
 I18n.translate({
