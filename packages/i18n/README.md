@@ -17,22 +17,18 @@ An advanced i18n (internationalization) utility for managing multiple languages 
      - [Installation](#installation)
    - [Basic Setup](#basic-setup)
    - [Example](#example)
-     - [Adding a Custom Backend Module](#adding-a-custom-backend-module)
+     - [Adding a Custom Backend Module](#adding-a-custom-backend-module) 
      - [Changing Language Dynamically](#changing-language-dynamically)
      - [Adding Translations](#adding-translations)
 2. [How-To Guides](#how-to-guides)
    - [Creating a Custom Translation Module](#creating-a-custom-translation-module)
    - [Handling Missing Translations](#handling-missing-translations)
-   - [Using i18n in Tests](#using-i18n-in-tests)
 3. [Reference](#reference)
-   - [i18n API Methods](#i18n-api-methods)
-   - [Supported i18n Modules](#supported-i18n-modules)
 4. [Explanation](#explanation)
    - [What is i18n?](#what-is-i18n)
    - [How i18n Module Works](#how-i18n-module-works)
    - [Benefits of Using i18n](#benefits-of-using-i18n)
    - [Common i18n Pitfalls](#common-i18n-pitfalls)
-
 # Tutorials
 
 ## Getting Started with i18n
@@ -96,7 +92,7 @@ console.log(t({
 
 These are basic examples to help you get started with the i18n module.
 
-### Adding a Custom Backend Module with typescript 
+### Adding a Custom Backend Module
 
 To add a custom backend module for fetching translations:
 ```json
