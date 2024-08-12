@@ -1,4 +1,3 @@
-
 import { I18nLocalesInterface } from '@concepta/i18n';
 import enUS from './en/translation';
 import ptBR from './pt/translation';

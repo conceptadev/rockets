@@ -1,4 +1,3 @@
-
 import { I18nLocalesInterface } from '@concepta/i18n';
 import enUS from './en/CacheModule';
 import ptBR from './pt/CacheModule';
