@@ -1,8 +1,9 @@
-import { LocalesInterface } from '@concepta/i18n/dist/interfaces/i18n.interfaces';
+
+import { I18nLocalesInterface } from '@concepta/i18n';
 import enUS from './en/CacheModule';
 import ptBR from './pt/CacheModule';
 
-const LOCALES: LocalesInterface[] = [
+const LOCALES: I18nLocalesInterface[] = [
   {
     namespace: 'CacheModule',
     language: 'en',
