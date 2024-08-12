@@ -15,6 +15,9 @@
   "references": [
     {
       "path": "../nestjs-typeorm-ext"
+    },
+    {
+      "path": "../i18n"
     }
   ]
 }
