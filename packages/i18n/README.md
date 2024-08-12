@@ -44,7 +44,9 @@ npm install @concepta/i18n
 
 ## Basic Setup
 
-To set up the i18n module, you need to initialize it with your desired settings and add your translations. For more detailed settings documentation, check [i18next](https://www.i18next.com/).
+To set up the i18n module, you need to initialize it with your desired 
+settings and add your translations. For more detailed settings documentation, 
+check [i18next](https://www.i18next.com/).
 
 ```ts
 // i18nSetup.js
@@ -69,7 +71,8 @@ export function initI18n() {
     }
   });
   // initialized and ready to go!
-  // i18n is already initialized, because the translation resources were passed via init function
+  // i18n is already initialized, because the translation resources were 
+  // passed via init function
 }
 
 export { t };
@@ -169,10 +172,10 @@ console.log(t({ key: 'hello' }));
 
 ## Adding Translations
 
-To add translations dynamically, you can initialize the I18n instance first and add
-translation resources at a later time. This approach is useful in scenarios where
-translations are fetched from an external source or need to be updated without
-reinitializing the entire i18n setup.
+To add translations dynamically, you can initialize the I18n instance first 
+and addtranslation resources at a later time. This approach is useful in 
+scenarios where translations are fetched from an external source or need to be 
+updated without reinitializing the entire i18n setup.
 
 This method is particularly beneficial in the following situations:
 
@@ -182,8 +185,8 @@ This method is particularly beneficial in the following situations:
 - **Modular Applications**: In large applications with multiple modules,
   translations can be added as each module is loaded, reducing the initial load
   time.
-- **Real-time Updates**: If your application supports real-time updates, you can
-  dynamically add new translations without disrupting the user experience.
+- **Real-time Updates**: If your application supports real-time updates, you 
+  can dynamically add new translations without disrupting the user experience.
 
 ```ts
 //...
@@ -221,7 +224,8 @@ console.log(t({
 
 ## Creating a Custom Translation Module
 
-You can create custom translation modules to extend the i18n functionality. Here’s how:
+You can create custom translation modules to extend the i18n functionality. 
+Here’s how:
 
 ### **Define the Module**: Add modules on initialization
 
@@ -265,19 +269,25 @@ Please check (API Reference)[] for more information.
 
 ## What is i18n?
 
-i18n, short for internationalization, refers to the process of designing software applications that can be adapted to various languages and regions without engineering changes.
+i18n, short for internationalization, refers to the process of designing 
+software applications that can be adapted to various languages and regions 
+without engineering changes.
 
 ## How i18n Module Works
 
-The i18n module in this package provides a wrapper around i18next, allowing seamless integration of translation modules and dynamic language switching.
+The i18n module in this package provides a wrapper around i18next, allowing 
+seamless integration of translation modules and dynamic language switching.
 
 ### Benefits of Using i18n
 
 - **Flexibility**: Supports multiple languages and dynamic translation updates.
-- **Modularity**: Easily extendable with custom modules for translation management.
+- **Modularity**: Easily extendable with custom modules for translation 
+management.
 - **Ease of Use**: Simple API to manage translations and switch languages.
 
 ### Common i18n Pitfalls
 
-- **Missing Translations**: Ensure all necessary translations are provided for each language.
-- **Performance Overheads**: Avoid loading unnecessary translation files by using modular imports.
+- **Missing Translations**: Ensure all necessary translations are provided for 
+each language.
+- **Performance Overheads**: Avoid loading unnecessary translation files by 
+using modular imports.
