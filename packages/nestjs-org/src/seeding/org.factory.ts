@@ -1,4 +1,4 @@
-import Faker from '@faker-js/faker';
+import { faker } from '@faker-js/faker';
 import { Factory } from '@concepta/typeorm-seeding';
 import { OrgEntityInterface } from '../interfaces/org-entity.interface';
 
@@ -31,7 +31,7 @@ export class OrgFactory extends Factory<OrgEntityInterface> {
 
     // keep trying to get a unique name
     do {
-      name = Faker.name.firstName();
+      name = faker.person.firstName();
     } while (this.usedNames[name]);
 
     // add to used names

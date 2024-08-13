@@ -9,7 +9,7 @@ export class InvitationFactory extends Factory<InvitationEntityInterface> {
   ): Promise<InvitationEntityInterface> {
     invitation.code = randomUUID();
     invitation.email = faker.internet.email();
-    invitation.category = faker.name.title();
+    invitation.category = faker.person.jobType();
 
     return invitation;
   }

@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import Faker from '@faker-js/faker';
+import { faker } from '@faker-js/faker';
 import { Factory } from '@concepta/typeorm-seeding';
 import { CacheInterface } from '@concepta/ts-common';
 
@@ -17,7 +17,7 @@ export class CacheFactory extends Factory<CacheInterface> {
    */
   protected async entity(cache: CacheInterface): Promise<CacheInterface> {
     const fakeFilter = {
-      name: Faker.name.firstName,
+      name: faker.person.firstName(),
       orderBy: 'name',
     };
 

@@ -1,5 +1,5 @@
 import { mock } from 'jest-mock-extended';
-import { JwtService } from '@nestjs/jwt';
+import { NestJwtService } from '../jwt.externals';
 import { JwtTokenType } from '../jwt.types';
 import { JwtSignService } from './jwt-sign.service';
 
@@ -8,12 +8,12 @@ describe(JwtSignService, () => {
   const access: JwtTokenType = 'access';
   const refresh: JwtTokenType = 'refresh';
 
-  let jwtAccessService: JwtService;
-  let jwtRefreshService: JwtService;
+  let jwtAccessService: NestJwtService;
+  let jwtRefreshService: NestJwtService;
   let jwtSignService: JwtSignService;
   beforeEach(() => {
-    jwtAccessService = mock<JwtService>();
-    jwtRefreshService = mock<JwtService>();
+    jwtAccessService = mock<NestJwtService>();
+    jwtRefreshService = mock<NestJwtService>();
     jwtSignService = new JwtSignService(jwtAccessService, jwtRefreshService);
   });
 
@@ -24,7 +24,7 @@ describe(JwtSignService, () => {
         .mockResolvedValue(token);
       const result = await jwtSignService.signAsync(access, token);
       expect(result).toBe(token);
-      expect(spySignAsync).toBeCalledWith(token);
+      expect(spySignAsync).toBeCalledWith(token, undefined);
     });
 
     it('should throw error', async () => {
