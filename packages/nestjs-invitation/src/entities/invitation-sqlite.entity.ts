@@ -1,9 +1,9 @@
 import { Column } from 'typeorm';
+import { PlainLiteralObject } from '@nestjs/common';
 import { ReferenceActive, ReferenceIdInterface } from '@concepta/ts-core';
 import { CommonSqliteEntity } from '@concepta/typeorm-common';
 
 import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
-import { LiteralObject } from '@nestjs/common';
 
 // TODO check this entity later
 export abstract class InvitationSqliteEntity
@@ -23,7 +23,7 @@ export abstract class InvitationSqliteEntity
   category!: string;
 
   @Column({ type: 'simple-json', nullable: true })
-  constraints?: LiteralObject;
+  constraints?: PlainLiteralObject;
 
   user!: ReferenceIdInterface;
 }

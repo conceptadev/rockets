@@ -1,26 +1,65 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ReferenceId } from '@concepta/ts-core';
-import { JwtIssueService } from '@concepta/nestjs-jwt';
+import {
+  JwtIssueService,
+  JwtIssueServiceInterface,
+  JwtSignOptions,
+  JwtSignStringOptions,
+} from '@concepta/nestjs-jwt';
 import { AuthenticationResponseInterface } from '@concepta/ts-common';
 import { IssueTokenServiceInterface } from '../interfaces/issue-token-service.interface';
 import { AuthenticationJwtResponseDto } from '../dto/authentication-jwt-response.dto';
 
 @Injectable()
 export class IssueTokenService implements IssueTokenServiceInterface {
-  constructor(protected readonly jwtIssueService: JwtIssueService) {}
+  constructor(
+    @Inject(JwtIssueService)
+    protected readonly jwtIssueService: JwtIssueServiceInterface,
+  ) {}
 
   /**
    * Generate access token for a payload.
    */
-  async accessToken(...args: Parameters<JwtIssueService['accessToken']>) {
-    return this.jwtIssueService.accessToken(...args);
+  accessToken(payload: string, options?: JwtSignStringOptions): Promise<string>;
+
+  accessToken(
+    payload: Buffer | object,
+    options?: JwtSignOptions,
+  ): Promise<string>;
+
+  async accessToken(
+    payload: string | Buffer | object,
+    options?: JwtSignOptions,
+  ) {
+    if (typeof payload === 'string') {
+      return this.jwtIssueService.accessToken(payload, options);
+    } else {
+      return this.jwtIssueService.accessToken(payload, options);
+    }
   }
 
   /**
    * Generate refresh token for a payload.
    */
-  async refreshToken(...args: Parameters<JwtIssueService['refreshToken']>) {
-    return this.jwtIssueService.refreshToken(...args);
+  refreshToken(
+    payload: string,
+    options?: JwtSignStringOptions,
+  ): Promise<string>;
+
+  refreshToken(
+    payload: Buffer | object,
+    options?: JwtSignOptions,
+  ): Promise<string>;
+
+  async refreshToken(
+    payload: string | Buffer | object,
+    options?: JwtSignOptions,
+  ) {
+    if (typeof payload === 'string') {
+      return this.jwtIssueService.refreshToken(payload, options);
+    } else {
+      return this.jwtIssueService.refreshToken(payload, options);
+    }
   }
 
   /**

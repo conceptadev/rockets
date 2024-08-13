@@ -13,13 +13,13 @@
   ],
   "dependencies": {
     "@concepta/ts-core": "^4.0.0",
-    "@nestjs/common": "^9.0.0",
-    "@nestjs/swagger": "^6.0.0"
+    "@nestjs/common": "^10.3.10",
+    "@nestjs/swagger": "^7.4.0"
   },
   "devDependencies": {
-    "@nestjs/core": "^9.0.0",
-    "@nestjs/testing": "^9.0.0",
-    "@types/supertest": "^2.0.11",
+    "@nestjs/core": "^10.3.10",
+    "@nestjs/testing": "^10.3.10",
+    "@types/supertest": "^2.0.16",
     "class-validator": "^0.13.2",
     "supertest": "^6.1.6"
   }

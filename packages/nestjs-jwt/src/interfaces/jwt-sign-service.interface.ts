@@ -1,11 +1,22 @@
-import { JwtService as NestJwtService } from '@nestjs/jwt';
-import { JwtTokenType } from '../jwt.types';
+import { NestJwtService } from '../jwt.externals';
+import {
+  JwtSignOptions,
+  JwtSignStringOptions,
+  JwtTokenType,
+} from '../jwt.types';
 
 export interface JwtSignServiceInterface {
-  signAsync: (
+  signAsync(
     tokenType: JwtTokenType,
-    ...rest: Parameters<NestJwtService['signAsync']>
-  ) => ReturnType<NestJwtService['signAsync']>;
+    payload: string,
+    options?: JwtSignStringOptions,
+  ): Promise<string>;
+
+  signAsync(
+    tokenType: JwtTokenType,
+    payload: Buffer | object,
+    options?: JwtSignOptions,
+  ): Promise<string>;
 
   verifyAsync: (
     tokenType: JwtTokenType,

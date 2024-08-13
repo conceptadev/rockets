@@ -21,12 +21,12 @@ describe(IssueTokenService, () => {
 
   beforeEach(async () => {
     const jwtIssueService = mock<JwtIssueService>({
-      accessToken: () => {
+      accessToken: (): Promise<string> => {
         return new Promise((resolve) => {
           resolve('accessToken');
         });
       },
-      refreshToken: () => {
+      refreshToken: (): Promise<string> => {
         return new Promise((resolve) => {
           resolve('refreshToken');
         });

@@ -1,3 +1,8 @@
+export {
+  NestJwtSignOptions as JwtSignOptions,
+  NestJwtSignStringOptions as JwtSignStringOptions,
+} from './jwt.externals';
+
 export type JwtTokenType = 'access' | 'refresh';
 
 export type JwtVerifyTokenCallback<

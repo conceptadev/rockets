@@ -1,3 +1,4 @@
+import { Injectable, Module } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { JwtModule } from './jwt.module';
@@ -9,15 +10,14 @@ import {
   JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
   JWT_MODULE_SETTINGS_TOKEN,
 } from './jwt.constants';
+import { NestJwtService } from './jwt.externals';
 import { JwtSettingsInterface } from './interfaces/jwt-settings.interface';
-import { Injectable, Module } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 
 describe(JwtModule, () => {
   let jwtModule: JwtModule;
   let jwtSettings: JwtSettingsInterface;
-  let jwtAccessService: JwtService;
-  let jwtRefreshService: JwtService;
+  let jwtAccessService: NestJwtService;
+  let jwtRefreshService: NestJwtService;
   let jwtSignService: JwtSignService;
   let jwtIssueService: JwtIssueService;
   let jwtVerifyService: JwtVerifyService;
@@ -99,10 +99,10 @@ describe(JwtModule, () => {
     class AppGlobalTest {}
 
     @Injectable()
-    class JwtAccessServiceFixture extends JwtService {}
+    class JwtAccessServiceFixture extends NestJwtService {}
 
     @Injectable()
-    class JwtRefreshServiceFixture extends JwtService {}
+    class JwtRefreshServiceFixture extends NestJwtService {}
 
     @Injectable()
     class JwtSignServiceFixture extends JwtSignService {}
@@ -194,10 +194,10 @@ describe(JwtModule, () => {
     jwtSettings = testModule.get<JwtSettingsInterface>(
       JWT_MODULE_SETTINGS_TOKEN,
     );
-    jwtAccessService = testModule.get<JwtService>(
+    jwtAccessService = testModule.get<NestJwtService>(
       JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
     );
-    jwtRefreshService = testModule.get<JwtService>(
+    jwtRefreshService = testModule.get<NestJwtService>(
       JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
     );
     jwtSignService = testModule.get<JwtSignService>(JwtSignService);
@@ -209,8 +209,8 @@ describe(JwtModule, () => {
     it('providers should be loaded', async () => {
       expect(jwtModule).toBeInstanceOf(JwtModule);
       expect(jwtSettings).toBeInstanceOf(Object);
-      expect(jwtAccessService).toBeInstanceOf(JwtService);
-      expect(jwtRefreshService).toBeInstanceOf(JwtService);
+      expect(jwtAccessService).toBeInstanceOf(NestJwtService);
+      expect(jwtRefreshService).toBeInstanceOf(NestJwtService);
       expect(jwtSignService).toBeInstanceOf(JwtSignService);
       expect(jwtIssueService).toBeInstanceOf(JwtIssueService);
       expect(jwtVerifyService).toBeInstanceOf(JwtVerifyService);

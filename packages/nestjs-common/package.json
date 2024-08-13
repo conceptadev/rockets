@@ -15,15 +15,14 @@
     "@concepta/nestjs-core": "^4.0.0",
     "@concepta/ts-common": "^4.0.0",
     "@concepta/ts-core": "^4.0.0",
-    "@nestjs/common": "^9.0.0",
-    "@nestjs/swagger": "^6.0.0"
+    "@nestjs/common": "^10.3.10",
+    "@nestjs/swagger": "^7.4.0"
   },
   "peerDependencies": {
     "class-transformer": "*",
     "class-validator": "*"
   },
   "devDependencies": {
-    "@nestjs/testing": "^9.0.0",
     "jest-mock-extended": "^2.0.4"
   }
 }
