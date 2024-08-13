@@ -14,13 +14,13 @@
   "dependencies": {
     "@concepta/nestjs-access-control": "^5.0.0-alpha.0",
     "@concepta/nestjs-common": "^5.0.0-alpha.0",
-    "@concepta/nestjs-crud": "^5.0.0-alpha.0",
+    "@concepta/nestjs-crud": "^4.0.0",
     "@concepta/nestjs-event": "^5.0.0-alpha.0",
     "@concepta/nestjs-password": "^5.0.0-alpha.0",
-    "@concepta/nestjs-typeorm-ext": "^5.0.0-alpha.0",
+    "@concepta/nestjs-typeorm-ext": "^4.0.0",
     "@concepta/ts-common": "^5.0.0-alpha.0",
     "@concepta/ts-core": "^5.0.0-alpha.0",
-    "@concepta/typeorm-common": "^5.0.0-alpha.0",
+    "@concepta/typeorm-common": "^4.0.0",
     "@nestjs/common": "^10.4.1",
     "@nestjs/config": "^3.2.3",
     "@nestjs/swagger": "^7.4.0"
