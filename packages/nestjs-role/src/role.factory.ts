@@ -1,4 +1,4 @@
-import Faker from '@faker-js/faker';
+import { faker } from '@faker-js/faker';
 import { Factory } from '@concepta/typeorm-seeding';
 import { RoleEntityInterface } from './interfaces/role-entity.interface';
 
@@ -21,7 +21,7 @@ export class RoleFactory extends Factory<RoleEntityInterface> {
     role.name = this.generateName();
 
     // set the description
-    role.description = Faker.lorem.sentence();
+    role.description = faker.lorem.sentence();
 
     // return the new role
     return role;
@@ -36,7 +36,7 @@ export class RoleFactory extends Factory<RoleEntityInterface> {
 
     // keep trying to get a unique name
     do {
-      name = Faker.lorem.word();
+      name = faker.lorem.word();
     } while (this.usedNames[name]);
 
     // add to used names
