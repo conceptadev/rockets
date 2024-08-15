@@ -1,11 +1,11 @@
-import { JwtService } from '@nestjs/jwt';
+import { NestJwtService } from '../jwt.externals';
 
 export interface JwtVerifyServiceInterface {
   accessToken(
-    ...args: Parameters<JwtService['verifyAsync']>
-  ): ReturnType<JwtService['verifyAsync']>;
+    ...args: Parameters<NestJwtService['verifyAsync']>
+  ): ReturnType<NestJwtService['verifyAsync']>;
 
   refreshToken(
-    ...args: Parameters<JwtService['verifyAsync']>
-  ): ReturnType<JwtService['verifyAsync']>;
+    ...args: Parameters<NestJwtService['verifyAsync']>
+  ): ReturnType<NestJwtService['verifyAsync']>;
 }

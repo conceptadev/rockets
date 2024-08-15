@@ -17,7 +17,7 @@ describe(JwtIssueService, () => {
         .mockResolvedValue(token);
       const result = await jwtIssueService.accessToken(token);
       expect(result).toBe(token);
-      expect(spySignAsync).toBeCalledWith('access', token);
+      expect(spySignAsync).toBeCalledWith('access', token, undefined);
     });
     it('should throw error', async () => {
       jest.spyOn(jwtSignService, 'signAsync').mockImplementationOnce(() => {
@@ -35,7 +35,7 @@ describe(JwtIssueService, () => {
         .mockResolvedValue(token);
       const result = await jwtIssueService.refreshToken(token);
       expect(result).toBe(token);
-      expect(spySignAsync).toBeCalledWith('refresh', token);
+      expect(spySignAsync).toBeCalledWith('refresh', token, undefined);
     });
 
     it('should throw error', async () => {

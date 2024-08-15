@@ -81,6 +81,7 @@ export const loggerConfig: (() => LoggerSettingsInterface) &
        */
       logLevelMap: (logLevel: LogLevel): SentryLogSeverity => {
         switch (logLevel) {
+          default:
           case 'error':
             return SentryLogSeverity.Error;
           case 'debug':

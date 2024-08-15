@@ -1,9 +1,9 @@
-import { JwtModuleOptions } from '@nestjs/jwt';
+import { NestJwtModuleOptions } from '../jwt.externals';
 
 /**
  * JWT module settings interface
  */
 export interface JwtSettingsInterface {
-  access?: Omit<JwtModuleOptions, 'secretOrPrivateKey'>;
-  refresh?: Omit<JwtModuleOptions, 'secretOrPrivateKey'>;
+  access?: Omit<NestJwtModuleOptions, 'secretOrPrivateKey'>;
+  refresh?: Omit<NestJwtModuleOptions, 'secretOrPrivateKey'>;
 }

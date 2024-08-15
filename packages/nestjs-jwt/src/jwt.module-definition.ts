@@ -4,10 +4,7 @@ import {
   Provider,
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import {
-  JwtModule as NestJwtModule,
-  JwtService as NestJwtService,
-} from '@nestjs/jwt';
+import { NestJwtModule, NestJwtService } from './jwt.externals';
 import { createSettingsProvider } from '@concepta/nestjs-common';
 
 import {
