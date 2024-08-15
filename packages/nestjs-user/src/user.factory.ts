@@ -1,4 +1,4 @@
-import Faker from '@faker-js/faker';
+import { faker } from '@faker-js/faker';
 import { Factory } from '@concepta/typeorm-seeding';
 import { UserEntityInterface } from './interfaces/user-entity.interface';
 
@@ -21,7 +21,7 @@ export class UserFactory extends Factory<UserEntityInterface> {
     user.username = this.generateUniqueUsername();
 
     // fake email address
-    user.email = Faker.internet.email();
+    user.email = faker.internet.email();
 
     // return the new user
     return user;
@@ -36,7 +36,7 @@ export class UserFactory extends Factory<UserEntityInterface> {
 
     // keep trying to get a unique username
     do {
-      username = Faker.internet.userName().toLowerCase();
+      username = faker.internet.userName().toLowerCase();
     } while (this.usedUsernames[username]);
 
     // add to used usernames

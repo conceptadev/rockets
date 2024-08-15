@@ -1,5 +1,10 @@
 // types
-export { JwtTokenType, JwtVerifyTokenCallback } from './jwt.types';
+export {
+  JwtTokenType,
+  JwtVerifyTokenCallback,
+  JwtSignOptions,
+  JwtSignStringOptions,
+} from './jwt.types';
 
 // interfaces
 export { JwtStrategyOptionsInterface } from './interfaces/jwt-strategy-options.interface';

@@ -10,6 +10,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { RuntimeException } from '../exceptions/runtime.exception';
 import { DummyDto } from './dummy.dto';
 import { CustomNotFoundExceptionFixture } from './exceptions/custom-not-found.exception.fixture';
 
@@ -27,6 +28,14 @@ export class AppControllerFixture {
   @Get('bad-request')
   getErrorBadRequest(): void {
     throw new BadRequestException();
+  }
+
+  @Get('safe-message-fallback')
+  getOnlySafeMessage(): void {
+    throw new RuntimeException({
+      message: '',
+      safeMessage: 'This is a safe message',
+    });
   }
 
   @UsePipes(new ValidationPipe())
