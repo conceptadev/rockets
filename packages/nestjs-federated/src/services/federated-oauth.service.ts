@@ -18,6 +18,7 @@ import { FederatedCreateException } from '../exceptions/federated-create.excepti
 import { FederatedMutateCreateUserException } from '../exceptions/federated-mutate-create.exception';
 import { FederatedUserLookupException } from '../exceptions/federated-user-lookup.exception';
 import { FederatedMutateService } from './federated-mutate.service';
+import { FederatedUserRelationshipException } from '../exceptions/federated-user-relationship.exception';
 
 @Injectable()
 export class FederatedOAuthService implements FederatedOAuthServiceInterface {
@@ -59,16 +60,24 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
         queryOptions,
       );
     } else {
+      if (!federated.user?.id) {
+        throw new FederatedUserRelationshipException(
+          this.constructor.name,
+          federated.id,
+        );
+      }
+
       const user = await this.userLookupService.byId(
         federated.user.id,
         queryOptions,
       );
 
-      if (!user)
+      if (!user) {
         throw new FederatedUserLookupException(
           this.constructor.name,
           federated.user,
         );
+      }
 
       return user;
     }
