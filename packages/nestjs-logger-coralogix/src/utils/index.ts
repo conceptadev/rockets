@@ -14,6 +14,8 @@ export const logLevelMap = (logLevel: LogLevel): Severity => {
       return Severity.warning;
     case 'verbose':
       return Severity.verbose;
+    default:
+      return Severity.info;
   }
 };
 

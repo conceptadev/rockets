@@ -52,7 +52,7 @@ export const coralogixConfig: (() => LoggerCoralogixSettingsInterface) &
        * @param logLevel - The log level
        * @returns CoralogixLogSeverity
        */
-      logLevelMap,
+      logLevelMap: logLevelMap,
       formatMessage,
       transportConfig: {
         category:
