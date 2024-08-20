@@ -59,6 +59,12 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
         queryOptions,
       );
     } else {
+      if (!federated.user?.id)
+        throw new FederatedUserLookupException(
+          this.constructor.name,
+          federated.user,
+        );
+
       const user = await this.userLookupService.byId(
         federated.user.id,
         queryOptions,
