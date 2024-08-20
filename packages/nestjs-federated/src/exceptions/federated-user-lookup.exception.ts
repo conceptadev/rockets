@@ -1,13 +1,9 @@
-import { format } from 'util';
-import { ExceptionInterface, ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceIdInterface } from '@concepta/ts-core';
+import { RuntimeException } from '@concepta/nestjs-exception';
+import { HttpStatus } from '@nestjs/common';
 
-export class FederatedUserLookupException
-  extends Error
-  implements ExceptionInterface
-{
-  errorCode = 'FEDERATED_USER_LOOKUP_ERROR';
-
-  context: {
+export class FederatedUserLookupException extends RuntimeException {
+  context: RuntimeException['context'] & {
     entityName: string;
     user: ReferenceIdInterface;
   };
@@ -15,10 +11,16 @@ export class FederatedUserLookupException
   constructor(
     entityName: string,
     user: ReferenceIdInterface,
-    message = 'Error while trying find user $s',
+    message = 'Error while trying find user %s',
   ) {
-    super(format(message, user));
+    super({
+      message,
+      messageParams: [user.id],
+      httpStatus: HttpStatus.NOT_FOUND,
+    });
+    this.errorCode = 'FEDERATED_USER_LOOKUP_ERROR';
     this.context = {
+      ...super.context,
       entityName,
       user,
     };
