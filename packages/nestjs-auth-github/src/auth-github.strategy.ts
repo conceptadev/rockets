@@ -16,6 +16,7 @@ import { AuthGithubSettingsInterface } from './interfaces/auth-github-settings.i
 import { AuthGithubProfileInterface } from './interfaces/auth-github-profile.interface';
 import { AuthGithubMissingEmailException } from './exceptions/auth-github-missing-email.exception';
 import { AuthGithubMissingIdException } from './exceptions/auth-github-missing-id.exception';
+import { mapProfile } from './utils/auth-github-map-profile';
 
 @Injectable()
 export class AuthGithubStrategy extends PassportStrategy(
@@ -37,16 +38,19 @@ export class AuthGithubStrategy extends PassportStrategy(
   async validate(
     _accessToken: string,
     _refreshToken: string,
-    profile: AuthGithubProfileInterface & Record<string, string>,
+    profile: AuthGithubProfileInterface,
   ): Promise<FederatedCredentialsInterface> {
-    // TODO: should we save accessToken and refreshToken?
+    const gitProfile = this.settings.mapProfile
+      ? this.settings.mapProfile(profile)
+      : mapProfile(profile);
 
-    const gitProfile =
-      this.settings.profileFormatter && this.settings.profileFormatter(profile);
+    if (!gitProfile?.id) {
+      throw new AuthGithubMissingIdException();
+    }
 
-    if (!gitProfile?.id) throw new AuthGithubMissingIdException();
-
-    if (!gitProfile?.email) throw new AuthGithubMissingEmailException();
+    if (!gitProfile?.email) {
+      throw new AuthGithubMissingEmailException();
+    }
 
     // Create a new user if it doesn't exist or just return based on federated
     const user = await this.federatedOAuthService.sign(

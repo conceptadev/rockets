@@ -1,12 +1,10 @@
-import { ExceptionInterface } from '@concepta/ts-core';
+import { RuntimeException } from '@concepta/nestjs-exception';
 
-export class AuthGithubMissingIdException
-  extends Error
-  implements ExceptionInterface
-{
-  errorCode = 'AUTH_GITHUB_MISSING_PROFILE_ID_ERROR';
-
+export class AuthGithubMissingIdException extends RuntimeException {
   constructor(message = 'GitHub did not return an id for the user.') {
-    super(message);
+    super({
+      message,
+    });
+    this.errorCode = 'AUTH_GITHUB_MISSING_PROFILE_ID_ERROR';
   }
 }

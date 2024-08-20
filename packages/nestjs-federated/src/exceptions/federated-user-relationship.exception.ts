@@ -1,25 +1,24 @@
-import { format } from 'util';
-import { ExceptionInterface } from '@concepta/ts-core';
-
-export class FederatedUserRelationshipException
-  extends Error
-  implements ExceptionInterface
-{
-  errorCode = 'FEDERATED_USER_RELATIONSHIP_ERROR';
-
-  context: {
-    entityName: string;
+import { RuntimeException } from '@concepta/nestjs-exception';
+import { HttpStatus } from '@nestjs/common';
+export class FederatedUserRelationshipException extends RuntimeException {
+  context: RuntimeException['context'] & {
     federatedId: string;
   };
 
   constructor(
-    entityName: string,
     federatedId: string,
     message = 'Error while trying to load user relationship from federated $s',
   ) {
-    super(format(message, federatedId));
+    super({
+      message,
+      messageParams: [federatedId],
+      httpStatus: HttpStatus.NOT_FOUND,
+    });
+
+    this.errorCode = 'FEDERATED_USER_RELATIONSHIP_ERROR';
+
     this.context = {
-      entityName,
+      ...super.context,
       federatedId,
     };
   }

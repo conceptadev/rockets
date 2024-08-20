@@ -1,7 +1,7 @@
 import { AuthGithubProfileInterface } from '../interfaces/auth-github-profile.interface';
 import { AuthGithubSignInterface } from '../interfaces/auth-github-sign.interface';
 
-export const profileFormatter = (
+export const mapProfile = (
   profile: AuthGithubProfileInterface,
 ): AuthGithubSignInterface => {
   let email = '';
