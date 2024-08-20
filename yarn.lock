@@ -652,11 +652,11 @@ __metadata:
   linkType: hard
 
 "@concepta/eslint-config@npm:^1.1.4":
-  version: 1.1.4
-  resolution: "@concepta/eslint-config@npm:1.1.4"
+  version: 1.1.5
+  resolution: "@concepta/eslint-config@npm:1.1.5"
   dependencies:
-    "@typescript-eslint/eslint-plugin": "npm:^6.7.4"
-    "@typescript-eslint/parser": "npm:^5.49.0"
+    "@typescript-eslint/eslint-plugin": "npm:7.17.0"
+    "@typescript-eslint/parser": "npm:^7.18.0"
     eslint-config-prettier: "npm:^8.3.0"
     eslint-plugin-prettier: "npm:^4.2.1"
   peerDependencies:
@@ -665,15 +665,15 @@ __metadata:
   peerDependenciesMeta:
     "@darraghor/eslint-plugin-nestjs-typed":
       optional: true
-  checksum: 10c0/0a7598e966cfa2b18e42ea3c392689a2f1e43a703c810f29327e7c6acf6a1f477107ec79b03b700d7935aa5ad61d57bbc6e92843d639184364c44151a0f946eb
+  checksum: 10c0/2de1f987c0ae266eb17d6bb24725ba751ca17c2daa9c59db5d0b1cc8642bd5624ba24cfce5a7a0fb2b83a074f421b5122935aed472ff990b885c3d681c9764e6
   languageName: node
   linkType: hard
 
-"@concepta/nestjs-access-control@npm:^5.0.0-alpha.0, @concepta/nestjs-access-control@workspace:packages/nestjs-access-control":
+"@concepta/nestjs-access-control@npm:^5.0.0-alpha.1, @concepta/nestjs-access-control@workspace:packages/nestjs-access-control":
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-access-control@workspace:packages/nestjs-access-control"
   dependencies:
-    "@concepta/nestjs-common": "npm:^5.0.0-alpha.0"
+    "@concepta/nestjs-common": "npm:^5.0.0-alpha.1"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/core": "npm:^10.4.1"
@@ -687,18 +687,19 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-auth-github@workspace:packages/nestjs-auth-github"
   dependencies:
-    "@concepta/nestjs-auth-jwt": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-authentication": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-common": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-core": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-crud": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-federated": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-jwt": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-password": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-typeorm-ext": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-user": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-common": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-core": "npm:^5.0.0-alpha.0"
+    "@concepta/nestjs-auth-jwt": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-authentication": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-common": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-core": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-crud": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-exception": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-federated": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-jwt": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-password": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-typeorm-ext": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-user": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-common": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-core": "npm:^5.0.0-alpha.1"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/core": "npm:^10.4.1"
@@ -715,16 +716,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@concepta/nestjs-auth-jwt@npm:^5.0.0-alpha.0, @concepta/nestjs-auth-jwt@workspace:packages/nestjs-auth-jwt":
+"@concepta/nestjs-auth-jwt@npm:^5.0.0-alpha.1, @concepta/nestjs-auth-jwt@workspace:packages/nestjs-auth-jwt":
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-auth-jwt@workspace:packages/nestjs-auth-jwt"
   dependencies:
-    "@concepta/nestjs-authentication": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-common": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-jwt": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-common": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-core": "npm:^5.0.0-alpha.0"
-    "@concepta/typeorm-common": "npm:^5.0.0-alpha.0"
+    "@concepta/nestjs-authentication": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-common": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-jwt": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-common": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-core": "npm:^5.0.0-alpha.1"
+    "@concepta/typeorm-common": "npm:^5.0.0-alpha.1"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/core": "npm:^10.4.1"
@@ -737,18 +738,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@concepta/nestjs-auth-local@npm:^5.0.0-alpha.0, @concepta/nestjs-auth-local@workspace:packages/nestjs-auth-local":
+"@concepta/nestjs-auth-local@npm:^5.0.0-alpha.1, @concepta/nestjs-auth-local@workspace:packages/nestjs-auth-local":
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-auth-local@workspace:packages/nestjs-auth-local"
   dependencies:
-    "@concepta/nestjs-auth-jwt": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-authentication": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-common": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-jwt": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-password": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-common": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-core": "npm:^5.0.0-alpha.0"
-    "@concepta/typeorm-common": "npm:^5.0.0-alpha.0"
+    "@concepta/nestjs-auth-jwt": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-authentication": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-common": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-jwt": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-password": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-common": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-core": "npm:^5.0.0-alpha.1"
+    "@concepta/typeorm-common": "npm:^5.0.0-alpha.1"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/core": "npm:^10.4.1"
@@ -771,19 +772,19 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-auth-recovery@workspace:packages/nestjs-auth-recovery"
   dependencies:
-    "@concepta/nestjs-auth-jwt": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-authentication": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-common": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-crud": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-email": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-jwt": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-otp": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-password": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-typeorm-ext": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-user": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-common": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-core": "npm:^5.0.0-alpha.0"
-    "@concepta/typeorm-common": "npm:^5.0.0-alpha.0"
+    "@concepta/nestjs-auth-jwt": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-authentication": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-common": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-crud": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-email": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-jwt": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-otp": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-password": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-typeorm-ext": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-user": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-common": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-core": "npm:^5.0.0-alpha.1"
+    "@concepta/typeorm-common": "npm:^5.0.0-alpha.1"
     "@concepta/typeorm-seeding": "npm:^4.0.0"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
@@ -801,16 +802,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@concepta/nestjs-auth-refresh@npm:^5.0.0-alpha.0, @concepta/nestjs-auth-refresh@workspace:packages/nestjs-auth-refresh":
+"@concepta/nestjs-auth-refresh@npm:^5.0.0-alpha.1, @concepta/nestjs-auth-refresh@workspace:packages/nestjs-auth-refresh":
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-auth-refresh@workspace:packages/nestjs-auth-refresh"
   dependencies:
-    "@concepta/nestjs-authentication": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-common": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-jwt": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-common": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-core": "npm:^5.0.0-alpha.0"
-    "@concepta/typeorm-common": "npm:^5.0.0-alpha.0"
+    "@concepta/nestjs-authentication": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-common": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-jwt": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-common": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-core": "npm:^5.0.0-alpha.1"
+    "@concepta/typeorm-common": "npm:^5.0.0-alpha.1"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/core": "npm:^10.4.1"
@@ -825,14 +826,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@concepta/nestjs-authentication@npm:^5.0.0-alpha.0, @concepta/nestjs-authentication@workspace:packages/nestjs-authentication":
+"@concepta/nestjs-authentication@npm:^5.0.0-alpha.1, @concepta/nestjs-authentication@workspace:packages/nestjs-authentication":
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-authentication@workspace:packages/nestjs-authentication"
   dependencies:
-    "@concepta/nestjs-common": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-jwt": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-common": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-core": "npm:^5.0.0-alpha.0"
+    "@concepta/nestjs-common": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-jwt": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-common": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-core": "npm:^5.0.0-alpha.1"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/core": "npm:^10.4.1"
@@ -853,14 +854,14 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-cache@workspace:packages/nestjs-cache"
   dependencies:
-    "@concepta/nestjs-access-control": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-common": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-crud": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-exception": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-typeorm-ext": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-common": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-core": "npm:^5.0.0-alpha.0"
-    "@concepta/typeorm-common": "npm:^5.0.0-alpha.0"
+    "@concepta/nestjs-access-control": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-common": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-crud": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-exception": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-typeorm-ext": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-common": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-core": "npm:^5.0.0-alpha.1"
+    "@concepta/typeorm-common": "npm:^5.0.0-alpha.1"
     "@concepta/typeorm-seeding": "npm:^4.0.0"
     "@faker-js/faker": "npm:^8.4.1"
     "@nestjs/common": "npm:^10.4.1"
@@ -881,29 +882,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@concepta/nestjs-common@npm:^4.0.0, @concepta/nestjs-common@npm:^4.0.0-alpha.48":
-  version: 4.0.0
-  resolution: "@concepta/nestjs-common@npm:4.0.0"
-  dependencies:
-    "@concepta/nestjs-core": "npm:^4.0.0"
-    "@concepta/ts-common": "npm:^4.0.0"
-    "@concepta/ts-core": "npm:^4.0.0"
-    "@nestjs/common": "npm:^9.0.0"
-    "@nestjs/swagger": "npm:^6.0.0"
-  peerDependencies:
-    class-transformer: "*"
-    class-validator: "*"
-  checksum: 10c0/4231365bf44ab90b2afc7333ac2ef5cf97243dc34036520797379c775b3a91fb1f2c35a1ef11beaedf6db40fdf5053a9a9392338d768b523de9c5796671f7585
-  languageName: node
-  linkType: hard
-
-"@concepta/nestjs-common@npm:^5.0.0-alpha.0, @concepta/nestjs-common@workspace:packages/nestjs-common":
+"@concepta/nestjs-common@npm:^5.0.0-alpha.1, @concepta/nestjs-common@workspace:packages/nestjs-common":
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-common@workspace:packages/nestjs-common"
   dependencies:
-    "@concepta/nestjs-core": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-common": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-core": "npm:^5.0.0-alpha.0"
+    "@concepta/nestjs-core": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-common": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-core": "npm:^5.0.0-alpha.1"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/swagger": "npm:^7.4.0"
     jest-mock-extended: "npm:^2.0.9"
@@ -913,16 +898,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@concepta/nestjs-core@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "@concepta/nestjs-core@npm:4.0.0"
-  dependencies:
-    "@nestjs/common": "npm:^9.0.0"
-  checksum: 10c0/b0e49c2303ee080663209064c41017e668947d3a0817a1c5f5a8a4631f68e4ef417ff0fb40daf60c6624310a1ba09881485d907e25fd1497ed0e443fa6a8cf6c
-  languageName: node
-  linkType: hard
-
-"@concepta/nestjs-core@npm:^5.0.0-alpha.0, @concepta/nestjs-core@workspace:packages/nestjs-core":
+"@concepta/nestjs-core@npm:^5.0.0-alpha.1, @concepta/nestjs-core@workspace:packages/nestjs-core":
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-core@workspace:packages/nestjs-core"
   dependencies:
@@ -930,14 +906,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@concepta/nestjs-crud@npm:^5.0.0-alpha.0, @concepta/nestjs-crud@workspace:packages/nestjs-crud":
+"@concepta/nestjs-crud@npm:^5.0.0-alpha.1, @concepta/nestjs-crud@workspace:packages/nestjs-crud":
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-crud@workspace:packages/nestjs-crud"
   dependencies:
-    "@concepta/nestjs-common": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-typeorm-ext": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-core": "npm:^5.0.0-alpha.0"
-    "@concepta/typeorm-common": "npm:^5.0.0-alpha.0"
+    "@concepta/nestjs-common": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-typeorm-ext": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-core": "npm:^5.0.0-alpha.1"
+    "@concepta/typeorm-common": "npm:^5.0.0-alpha.1"
     "@concepta/typeorm-seeding": "npm:^4.0.0"
     "@faker-js/faker": "npm:^8.4.1"
     "@nestjs/common": "npm:^10.4.1"
@@ -959,13 +935,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@concepta/nestjs-email@npm:^5.0.0-alpha.0, @concepta/nestjs-email@workspace:packages/nestjs-email":
+"@concepta/nestjs-email@npm:^5.0.0-alpha.1, @concepta/nestjs-email@workspace:packages/nestjs-email":
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-email@workspace:packages/nestjs-email"
   dependencies:
-    "@concepta/nestjs-common": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-common": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-core": "npm:^5.0.0-alpha.0"
+    "@concepta/nestjs-common": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-common": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-core": "npm:^5.0.0-alpha.1"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/core": "npm:^10.4.1"
@@ -975,12 +951,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@concepta/nestjs-event@npm:^5.0.0-alpha.0, @concepta/nestjs-event@workspace:packages/nestjs-event":
+"@concepta/nestjs-event@npm:^5.0.0-alpha.1, @concepta/nestjs-event@workspace:packages/nestjs-event":
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-event@workspace:packages/nestjs-event"
   dependencies:
-    "@concepta/nestjs-common": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-core": "npm:^5.0.0-alpha.0"
+    "@concepta/nestjs-common": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-core": "npm:^5.0.0-alpha.1"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/core": "npm:^10.4.1"
@@ -989,11 +965,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@concepta/nestjs-exception@npm:^5.0.0-alpha.0, @concepta/nestjs-exception@workspace:packages/nestjs-exception":
+"@concepta/nestjs-exception@npm:^5.0.0-alpha.1, @concepta/nestjs-exception@workspace:packages/nestjs-exception":
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-exception@workspace:packages/nestjs-exception"
   dependencies:
-    "@concepta/ts-core": "npm:^5.0.0-alpha.0"
+    "@concepta/ts-core": "npm:^5.0.0-alpha.1"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/core": "npm:^10.4.1"
     "@nestjs/swagger": "npm:^7.4.0"
@@ -1004,16 +980,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@concepta/nestjs-federated@npm:^5.0.0-alpha.0, @concepta/nestjs-federated@workspace:packages/nestjs-federated":
+"@concepta/nestjs-federated@npm:^5.0.0-alpha.1, @concepta/nestjs-federated@workspace:packages/nestjs-federated":
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-federated@workspace:packages/nestjs-federated"
   dependencies:
-    "@concepta/nestjs-common": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-typeorm-ext": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-user": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-common": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-core": "npm:^5.0.0-alpha.0"
-    "@concepta/typeorm-common": "npm:^5.0.0-alpha.0"
+    "@concepta/nestjs-common": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-exception": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-typeorm-ext": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-user": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-common": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-core": "npm:^5.0.0-alpha.1"
+    "@concepta/typeorm-common": "npm:^5.0.0-alpha.1"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/swagger": "npm:^7.4.0"
@@ -1026,23 +1003,23 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@concepta/nestjs-invitation@npm:^5.0.0-alpha.0, @concepta/nestjs-invitation@workspace:packages/nestjs-invitation":
+"@concepta/nestjs-invitation@npm:^5.0.0-alpha.1, @concepta/nestjs-invitation@workspace:packages/nestjs-invitation":
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-invitation@workspace:packages/nestjs-invitation"
   dependencies:
-    "@concepta/nestjs-access-control": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-common": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-core": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-crud": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-email": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-event": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-otp": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-password": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-typeorm-ext": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-user": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-common": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-core": "npm:^5.0.0-alpha.0"
-    "@concepta/typeorm-common": "npm:^5.0.0-alpha.0"
+    "@concepta/nestjs-access-control": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-common": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-core": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-crud": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-email": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-event": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-otp": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-password": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-typeorm-ext": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-user": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-common": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-core": "npm:^5.0.0-alpha.1"
+    "@concepta/typeorm-common": "npm:^5.0.0-alpha.1"
     "@concepta/typeorm-seeding": "npm:^4.0.0"
     "@faker-js/faker": "npm:^8.4.1"
     "@nestjs-modules/mailer": "npm:^1.11.2"
@@ -1062,12 +1039,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@concepta/nestjs-jwt@npm:^5.0.0-alpha.0, @concepta/nestjs-jwt@workspace:packages/nestjs-jwt":
+"@concepta/nestjs-jwt@npm:^5.0.0-alpha.1, @concepta/nestjs-jwt@workspace:packages/nestjs-jwt":
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-jwt@workspace:packages/nestjs-jwt"
   dependencies:
-    "@concepta/nestjs-common": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-core": "npm:^5.0.0-alpha.0"
+    "@concepta/nestjs-common": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-core": "npm:^5.0.0-alpha.1"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/jwt": "npm:^10.2.0"
@@ -1087,8 +1064,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-logger-coralogix@workspace:packages/nestjs-logger-coralogix"
   dependencies:
-    "@concepta/nestjs-common": "npm:^4.0.0-alpha.48"
-    "@concepta/nestjs-logger": "npm:^4.0.0-alpha.48"
+    "@concepta/nestjs-common": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-logger": "npm:^5.0.0-alpha.1"
     "@nestjs/common": "npm:^9.0.0"
     "@nestjs/config": "npm:^2.2.0"
     "@nestjs/core": "npm:^9.0.0"
@@ -1106,8 +1083,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-logger-sentry@workspace:packages/nestjs-logger-sentry"
   dependencies:
-    "@concepta/nestjs-common": "npm:^4.0.0-alpha.48"
-    "@concepta/nestjs-logger": "npm:^4.0.0-alpha.48"
+    "@concepta/nestjs-common": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-logger": "npm:^5.0.0-alpha.1"
     "@nestjs/common": "npm:^9.0.0"
     "@nestjs/config": "npm:^2.2.0"
     "@nestjs/core": "npm:^9.0.0"
@@ -1122,28 +1099,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@concepta/nestjs-logger@npm:^4.0.0-alpha.48":
-  version: 4.0.0
-  resolution: "@concepta/nestjs-logger@npm:4.0.0"
-  dependencies:
-    "@concepta/nestjs-common": "npm:^4.0.0"
-    "@nestjs/common": "npm:^9.0.0"
-    "@nestjs/config": "npm:^2.2.0"
-    "@nestjs/core": "npm:^9.0.0"
-    "@sentry/node": "npm:^6.11.0"
-    fastify: "npm:^3.29.4"
-  peerDependencies:
-    class-validator: "*"
-    rxjs: ^7.1.0
-  checksum: 10c0/ab92be1dd2171d200ab83c1a8b8b361587cdcc5552e4ad6643243e042aeb48d925fcbcd63a4a607d6d129408b7de5937d1ced083249fe67e22d688f3bc22d0cc
-  languageName: node
-  linkType: hard
-
-"@concepta/nestjs-logger@npm:^5.0.0-alpha.0, @concepta/nestjs-logger@workspace:packages/nestjs-logger":
+"@concepta/nestjs-logger@npm:^5.0.0-alpha.1, @concepta/nestjs-logger@workspace:packages/nestjs-logger":
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-logger@workspace:packages/nestjs-logger"
   dependencies:
-    "@concepta/nestjs-common": "npm:^5.0.0-alpha.0"
+    "@concepta/nestjs-common": "npm:^5.0.0-alpha.1"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/core": "npm:^10.4.1"
@@ -1163,17 +1123,18 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-org@workspace:packages/nestjs-org"
   dependencies:
-    "@concepta/nestjs-access-control": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-common": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-crud": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-event": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-invitation": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-password": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-typeorm-ext": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-user": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-common": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-core": "npm:^5.0.0-alpha.0"
-    "@concepta/typeorm-common": "npm:^5.0.0-alpha.0"
+    "@concepta/nestjs-access-control": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-common": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-crud": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-event": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-invitation": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-logger": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-password": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-typeorm-ext": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-user": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-common": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-core": "npm:^5.0.0-alpha.1"
+    "@concepta/typeorm-common": "npm:^5.0.0-alpha.1"
     "@concepta/typeorm-seeding": "npm:^4.0.0"
     "@faker-js/faker": "npm:^8.4.1"
     "@nestjs/common": "npm:^10.4.1"
@@ -1189,15 +1150,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@concepta/nestjs-otp@npm:^5.0.0-alpha.0, @concepta/nestjs-otp@workspace:packages/nestjs-otp":
+"@concepta/nestjs-otp@npm:^5.0.0-alpha.1, @concepta/nestjs-otp@workspace:packages/nestjs-otp":
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-otp@workspace:packages/nestjs-otp"
   dependencies:
-    "@concepta/nestjs-common": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-typeorm-ext": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-common": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-core": "npm:^5.0.0-alpha.0"
-    "@concepta/typeorm-common": "npm:^5.0.0-alpha.0"
+    "@concepta/nestjs-common": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-typeorm-ext": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-common": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-core": "npm:^5.0.0-alpha.1"
+    "@concepta/typeorm-common": "npm:^5.0.0-alpha.1"
     "@concepta/typeorm-seeding": "npm:^4.0.0"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
@@ -1212,12 +1173,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@concepta/nestjs-password@npm:^5.0.0-alpha.0, @concepta/nestjs-password@workspace:packages/nestjs-password":
+"@concepta/nestjs-password@npm:^5.0.0-alpha.1, @concepta/nestjs-password@workspace:packages/nestjs-password":
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-password@workspace:packages/nestjs-password"
   dependencies:
-    "@concepta/nestjs-common": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-common": "npm:^5.0.0-alpha.0"
+    "@concepta/nestjs-common": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-common": "npm:^5.0.0-alpha.1"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/core": "npm:^10.4.1"
@@ -1233,13 +1194,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-role@workspace:packages/nestjs-role"
   dependencies:
-    "@concepta/nestjs-access-control": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-common": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-crud": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-typeorm-ext": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-common": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-core": "npm:^5.0.0-alpha.0"
-    "@concepta/typeorm-common": "npm:^5.0.0-alpha.0"
+    "@concepta/nestjs-access-control": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-common": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-crud": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-typeorm-ext": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-common": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-core": "npm:^5.0.0-alpha.1"
+    "@concepta/typeorm-common": "npm:^5.0.0-alpha.1"
     "@concepta/typeorm-seeding": "npm:^4.0.0"
     "@faker-js/faker": "npm:^8.4.1"
     "@nestjs/common": "npm:^10.4.1"
@@ -1259,20 +1220,20 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-samples@workspace:packages/nestjs-samples"
   dependencies:
-    "@concepta/nestjs-auth-jwt": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-auth-local": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-auth-refresh": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-authentication": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-crud": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-email": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-event": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-jwt": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-logger": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-password": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-typeorm-ext": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-user": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-common": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-core": "npm:^5.0.0-alpha.0"
+    "@concepta/nestjs-auth-jwt": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-auth-local": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-auth-refresh": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-authentication": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-crud": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-email": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-event": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-jwt": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-logger": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-password": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-typeorm-ext": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-user": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-common": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-core": "npm:^5.0.0-alpha.1"
     "@nestjs-modules/mailer": "npm:^1.11.2"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/core": "npm:^10.4.1"
@@ -1293,7 +1254,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-swagger-ui@workspace:packages/nestjs-swagger-ui"
   dependencies:
-    "@concepta/nestjs-common": "npm:^5.0.0-alpha.0"
+    "@concepta/nestjs-common": "npm:^5.0.0-alpha.1"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/core": "npm:^10.4.1"
@@ -1302,15 +1263,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@concepta/nestjs-typeorm-ext@npm:^5.0.0-alpha.0, @concepta/nestjs-typeorm-ext@workspace:packages/nestjs-typeorm-ext":
+"@concepta/nestjs-typeorm-ext@npm:^5.0.0-alpha.1, @concepta/nestjs-typeorm-ext@workspace:packages/nestjs-typeorm-ext":
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-typeorm-ext@workspace:packages/nestjs-typeorm-ext"
   dependencies:
-    "@concepta/ts-core": "npm:^5.0.0-alpha.0"
+    "@concepta/ts-core": "npm:^5.0.0-alpha.1"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/testing": "npm:^10.4.1"
     "@nestjs/typeorm": "npm:^10.0.2"
-    sqlite3: "npm:@vscode/sqlite3@^5.1.4-vscode"
+    sqlite3: "npm:^5.1.4"
   peerDependencies:
     class-transformer: "*"
     class-validator: "*"
@@ -1318,22 +1279,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@concepta/nestjs-user@npm:^5.0.0-alpha.0, @concepta/nestjs-user@workspace:packages/nestjs-user":
+"@concepta/nestjs-user@npm:^5.0.0-alpha.1, @concepta/nestjs-user@workspace:packages/nestjs-user":
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-user@workspace:packages/nestjs-user"
   dependencies:
-    "@concepta/nestjs-access-control": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-auth-jwt": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-authentication": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-common": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-crud": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-event": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-jwt": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-password": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-typeorm-ext": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-common": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-core": "npm:^5.0.0-alpha.0"
-    "@concepta/typeorm-common": "npm:^5.0.0-alpha.0"
+    "@concepta/nestjs-access-control": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-auth-jwt": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-authentication": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-common": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-crud": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-event": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-jwt": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-password": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-typeorm-ext": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-common": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-core": "npm:^5.0.0-alpha.1"
+    "@concepta/typeorm-common": "npm:^5.0.0-alpha.1"
     "@concepta/typeorm-seeding": "npm:^4.0.0"
     "@faker-js/faker": "npm:^8.4.1"
     "@nestjs/common": "npm:^10.4.1"
@@ -1351,58 +1312,42 @@ __metadata:
   linkType: soft
 
 "@concepta/prettier-config@npm:^1.1.4":
-  version: 1.1.4
-  resolution: "@concepta/prettier-config@npm:1.1.4"
+  version: 1.1.5
+  resolution: "@concepta/prettier-config@npm:1.1.5"
   peerDependencies:
     prettier: ^2.3.2
-  checksum: 10c0/bbfe7a4164075cd74ee25c60b73bae1a1054fefea3d807fa1ef64cdac604f3db0475fb71ba8f1432f015730103d0c18165940241e22373f7ad45ea28330a53df
+  checksum: 10c0/d75d3f34b99d7f198ac15bf0b629085c75a17c7632d1ae072daa268505db6827366caceaf62d080e81802c786c5c718b35465665a947291964279ee0efa0a786
   languageName: node
   linkType: hard
 
-"@concepta/ts-common@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "@concepta/ts-common@npm:4.0.0"
-  dependencies:
-    "@concepta/ts-core": "npm:^4.0.0"
-  checksum: 10c0/a3f1082a8393e2b6b64732af0b1480030812c4423ea04499c92bcd28cae7e0a2a4f82e65a355bf9130391af8966b1b12e5e727ab2676a546be2aaed237e83ce9
-  languageName: node
-  linkType: hard
-
-"@concepta/ts-common@npm:^5.0.0-alpha.0, @concepta/ts-common@workspace:packages/ts-common":
+"@concepta/ts-common@npm:^5.0.0-alpha.1, @concepta/ts-common@workspace:packages/ts-common":
   version: 0.0.0-use.local
   resolution: "@concepta/ts-common@workspace:packages/ts-common"
   dependencies:
-    "@concepta/ts-core": "npm:^5.0.0-alpha.0"
+    "@concepta/ts-core": "npm:^5.0.0-alpha.1"
   languageName: unknown
   linkType: soft
 
-"@concepta/ts-core@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "@concepta/ts-core@npm:4.0.0"
-  checksum: 10c0/d0242f722ceb2ba7dd5e4ebfab4ee93d98428f67b98ebece07f64f0c27fa25559ff559ca6807cd554a1181233311ef6d5259a96ced1e6892dea85454329c7bf7
-  languageName: node
-  linkType: hard
-
-"@concepta/ts-core@npm:^5.0.0-alpha.0, @concepta/ts-core@workspace:packages/ts-core":
+"@concepta/ts-core@npm:^5.0.0-alpha.1, @concepta/ts-core@workspace:packages/ts-core":
   version: 0.0.0-use.local
   resolution: "@concepta/ts-core@workspace:packages/ts-core"
   languageName: unknown
   linkType: soft
 
-"@concepta/typeorm-common@npm:^5.0.0-alpha.0, @concepta/typeorm-common@workspace:packages/typeorm-common":
+"@concepta/typeorm-common@npm:^5.0.0-alpha.1, @concepta/typeorm-common@workspace:packages/typeorm-common":
   version: 0.0.0-use.local
   resolution: "@concepta/typeorm-common@workspace:packages/typeorm-common"
   dependencies:
-    "@concepta/nestjs-common": "npm:^5.0.0-alpha.0"
-    "@concepta/nestjs-typeorm-ext": "npm:^5.0.0-alpha.0"
-    "@concepta/ts-core": "npm:^5.0.0-alpha.0"
+    "@concepta/nestjs-common": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-typeorm-ext": "npm:^5.0.0-alpha.1"
+    "@concepta/ts-core": "npm:^5.0.0-alpha.1"
     "@concepta/typeorm-seeding": "npm:^4.0.0"
     "@faker-js/faker": "npm:^8.4.1"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/typeorm": "npm:^10.0.2"
     jest-mock-extended: "npm:^2.0.9"
   peerDependencies:
-    "@nestjs/testing": ^9.0.0
+    "@nestjs/testing": ^10.4.1
     class-transformer: "*"
     class-validator: "*"
     typeorm: ^0.3.0
@@ -1562,7 +1507,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@eslint-community/regexpp@npm:^4.4.0, @eslint-community/regexpp@npm:^4.5.1, @eslint-community/regexpp@npm:^4.6.1":
+"@eslint-community/regexpp@npm:^4.10.0, @eslint-community/regexpp@npm:^4.4.0, @eslint-community/regexpp@npm:^4.6.1":
   version: 4.11.0
   resolution: "@eslint-community/regexpp@npm:4.11.0"
   checksum: 10c0/0f6328869b2741e2794da4ad80beac55cba7de2d3b44f796a60955b0586212ec75e6b0253291fd4aad2100ad471d1480d8895f2b54f1605439ba4c875e05e523
@@ -1695,6 +1640,13 @@ __metadata:
   version: 2.0.0
   resolution: "@fastify/error@npm:2.0.0"
   checksum: 10c0/32b98cb663e462e3d60a31a46306481f7b84657cfdd301dcd7fa9f77389f180e51c641dc4c6900d423daa264e70172bf23493fae031b6af4844b6cc7f17fe77d
+  languageName: node
+  linkType: hard
+
+"@gar/promisify@npm:^1.0.1":
+  version: 1.1.3
+  resolution: "@gar/promisify@npm:1.1.3"
+  checksum: 10c0/0b3c9958d3cd17f4add3574975e3115ae05dc7f1298a60810414b16f6f558c137b5fb3cd3905df380bacfd955ec13f67c1e6710cbb5c246a7e8d65a8289b2bff
   languageName: node
   linkType: hard
 
@@ -3111,23 +3063,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/mapped-types@npm:1.2.2":
-  version: 1.2.2
-  resolution: "@nestjs/mapped-types@npm:1.2.2"
-  peerDependencies:
-    "@nestjs/common": ^7.0.8 || ^8.0.0 || ^9.0.0
-    class-transformer: ^0.2.0 || ^0.3.0 || ^0.4.0 || ^0.5.0
-    class-validator: ^0.11.1 || ^0.12.0 || ^0.13.0 || ^0.14.0
-    reflect-metadata: ^0.1.12
-  peerDependenciesMeta:
-    class-transformer:
-      optional: true
-    class-validator:
-      optional: true
-  checksum: 10c0/e80a08787a6ac2a27199f8d475a338e85a7113a413b6347c700b3ec3e2ee45c59220929c4a79b7a61e05bf9d146fa8c7ba8438a93709542148d7281aae7544e8
-  languageName: node
-  linkType: hard
-
 "@nestjs/mapped-types@npm:2.0.5":
   version: 2.0.5
   resolution: "@nestjs/mapped-types@npm:2.0.5"
@@ -3172,8 +3107,8 @@ __metadata:
   linkType: hard
 
 "@nestjs/schematics@npm:^10.0.1, @nestjs/schematics@npm:^10.1.3":
-  version: 10.1.3
-  resolution: "@nestjs/schematics@npm:10.1.3"
+  version: 10.1.4
+  resolution: "@nestjs/schematics@npm:10.1.4"
   dependencies:
     "@angular-devkit/core": "npm:17.3.8"
     "@angular-devkit/schematics": "npm:17.3.8"
@@ -3182,34 +3117,7 @@ __metadata:
     pluralize: "npm:8.0.0"
   peerDependencies:
     typescript: ">=4.8.2"
-  checksum: 10c0/c35bc8e71cada038fb823730fac9a89cac8cfb9fad0aaf8ff947191b4b866c974c0bd5a17adc0b227dd48a3636265c1d434c90a6125c933ec2ba23ce29876bf9
-  languageName: node
-  linkType: hard
-
-"@nestjs/swagger@npm:^6.0.0":
-  version: 6.3.0
-  resolution: "@nestjs/swagger@npm:6.3.0"
-  dependencies:
-    "@nestjs/mapped-types": "npm:1.2.2"
-    js-yaml: "npm:4.1.0"
-    lodash: "npm:4.17.21"
-    path-to-regexp: "npm:3.2.0"
-    swagger-ui-dist: "npm:4.18.2"
-  peerDependencies:
-    "@fastify/static": ^6.0.0
-    "@nestjs/common": ^9.0.0
-    "@nestjs/core": ^9.0.0
-    class-transformer: "*"
-    class-validator: "*"
-    reflect-metadata: ^0.1.12
-  peerDependenciesMeta:
-    "@fastify/static":
-      optional: true
-    class-transformer:
-      optional: true
-    class-validator:
-      optional: true
-  checksum: 10c0/545a50611249b559ef52cd1219ec4514836c03f9351a8a9e3490b7e56eb2ee4e59cc7bac3fe0a0ebc9c60cc14d0f90942793a277cb1bb44d95d12cede18c7c65
+  checksum: 10c0/4dc7e8d035f4baa38d736f9cbbb28398fe66699aa0cd3711f22aa193e2d582ef4f104a9ab3a4b3ccd8431a05f056fe15672a012da5d9256a521abf1f21703317
   languageName: node
   linkType: hard
 
@@ -3382,12 +3290,32 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@npmcli/fs@npm:^1.0.0":
+  version: 1.1.1
+  resolution: "@npmcli/fs@npm:1.1.1"
+  dependencies:
+    "@gar/promisify": "npm:^1.0.1"
+    semver: "npm:^7.3.5"
+  checksum: 10c0/4143c317a7542af9054018b71601e3c3392e6704e884561229695f099a71336cbd580df9a9ffb965d0024bf0ed593189ab58900fd1714baef1c9ee59c738c3e2
+  languageName: node
+  linkType: hard
+
 "@npmcli/fs@npm:^3.1.0":
   version: 3.1.1
   resolution: "@npmcli/fs@npm:3.1.1"
   dependencies:
     semver: "npm:^7.3.5"
   checksum: 10c0/c37a5b4842bfdece3d14dfdb054f73fe15ed2d3da61b34ff76629fb5b1731647c49166fd2a8bf8b56fcfa51200382385ea8909a3cbecdad612310c114d3f6c99
+  languageName: node
+  linkType: hard
+
+"@npmcli/move-file@npm:^1.0.1":
+  version: 1.1.2
+  resolution: "@npmcli/move-file@npm:1.1.2"
+  dependencies:
+    mkdirp: "npm:^1.0.4"
+    rimraf: "npm:^3.0.2"
+  checksum: 10c0/02e946f3dafcc6743132fe2e0e2b585a96ca7265653a38df5a3e53fcf26c7c7a57fc0f861d7c689a23fdb6d6836c7eea5050c8086abf3c994feb2208d1514ff0
   languageName: node
   linkType: hard
 
@@ -3907,7 +3835,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/json-schema@npm:*, @types/json-schema@npm:^7.0.12, @types/json-schema@npm:^7.0.8, @types/json-schema@npm:^7.0.9":
+"@types/json-schema@npm:*, @types/json-schema@npm:^7.0.8, @types/json-schema@npm:^7.0.9":
   version: 7.0.15
   resolution: "@types/json-schema@npm:7.0.15"
   checksum: 10c0/a996a745e6c5d60292f36731dd41341339d4eeed8180bb09226e5c8d23759067692b1d88e5d91d72ee83dfc00d3aca8e7bd43ea120516c17922cbcb7c3e252db
@@ -3975,20 +3903,20 @@ __metadata:
   linkType: hard
 
 "@types/node@npm:*, @types/node@npm:>= 8":
-  version: 22.3.0
-  resolution: "@types/node@npm:22.3.0"
+  version: 22.4.1
+  resolution: "@types/node@npm:22.4.1"
   dependencies:
-    undici-types: "npm:~6.18.2"
-  checksum: 10c0/855be3b97f4262a84818f889ff898e147dcef4f72b866e3551a8367380cdb63a45cf3929f09d9a0647f62706f8d4772e91a1ecd1bd7c6a80d6744c2b0cbca608
+    undici-types: "npm:~6.19.2"
+  checksum: 10c0/e42607438fcbd3a6aebd09084868fa0b22a4b0daf9eda79ed615df7ff8ae95e35ea56e090e1f3140ebae76b640abe42d4a6d5b60c0819eadf499adca737305b6
   languageName: node
   linkType: hard
 
 "@types/node@npm:^18.19.44":
-  version: 18.19.44
-  resolution: "@types/node@npm:18.19.44"
+  version: 18.19.45
+  resolution: "@types/node@npm:18.19.45"
   dependencies:
     undici-types: "npm:~5.26.4"
-  checksum: 10c0/298915f9097ad4b2749417b159eeb39fcd8c8bb60866759c9c5139c9492b7030ba6c359da510db5f5305c637c3448ac58dfafefe9801549e04ea11ca29c2a046
+  checksum: 10c0/79c324176411dcfa92f76b0ffc0673aa4bd8da82d003b44633e927c9493cdc46c35f04c0873b096b23b12bab090a6bbdea21242b3bbb2ea5dc1d9bf72adaa04f
   languageName: node
   linkType: hard
 
@@ -4108,7 +4036,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/semver@npm:^7.3.12, @types/semver@npm:^7.5.0":
+"@types/semver@npm:^7.3.12":
   version: 7.5.8
   resolution: "@types/semver@npm:7.5.8"
   checksum: 10c0/8663ff927234d1c5fcc04b33062cb2b9fcfbe0f5f351ed26c4d1e1581657deebd506b41ff7fdf89e787e3d33ce05854bc01686379b89e9c49b564c4cfa988efa
@@ -4194,6 +4122,29 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@typescript-eslint/eslint-plugin@npm:7.17.0":
+  version: 7.17.0
+  resolution: "@typescript-eslint/eslint-plugin@npm:7.17.0"
+  dependencies:
+    "@eslint-community/regexpp": "npm:^4.10.0"
+    "@typescript-eslint/scope-manager": "npm:7.17.0"
+    "@typescript-eslint/type-utils": "npm:7.17.0"
+    "@typescript-eslint/utils": "npm:7.17.0"
+    "@typescript-eslint/visitor-keys": "npm:7.17.0"
+    graphemer: "npm:^1.4.0"
+    ignore: "npm:^5.3.1"
+    natural-compare: "npm:^1.4.0"
+    ts-api-utils: "npm:^1.3.0"
+  peerDependencies:
+    "@typescript-eslint/parser": ^7.0.0
+    eslint: ^8.56.0
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 10c0/654d589531ae45b8ca8f3969e785926b2544100a985968d86c828e2a1ff50331250e19c8b4af83a4ba17847a0047479662eb317e4ad94f6279cac03acd5cda5a
+  languageName: node
+  linkType: hard
+
 "@typescript-eslint/eslint-plugin@npm:^5.62.0":
   version: 5.62.0
   resolution: "@typescript-eslint/eslint-plugin@npm:5.62.0"
@@ -4218,32 +4169,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/eslint-plugin@npm:^6.7.4":
-  version: 6.21.0
-  resolution: "@typescript-eslint/eslint-plugin@npm:6.21.0"
-  dependencies:
-    "@eslint-community/regexpp": "npm:^4.5.1"
-    "@typescript-eslint/scope-manager": "npm:6.21.0"
-    "@typescript-eslint/type-utils": "npm:6.21.0"
-    "@typescript-eslint/utils": "npm:6.21.0"
-    "@typescript-eslint/visitor-keys": "npm:6.21.0"
-    debug: "npm:^4.3.4"
-    graphemer: "npm:^1.4.0"
-    ignore: "npm:^5.2.4"
-    natural-compare: "npm:^1.4.0"
-    semver: "npm:^7.5.4"
-    ts-api-utils: "npm:^1.0.1"
-  peerDependencies:
-    "@typescript-eslint/parser": ^6.0.0 || ^6.0.0-alpha
-    eslint: ^7.0.0 || ^8.0.0
-  peerDependenciesMeta:
-    typescript:
-      optional: true
-  checksum: 10c0/f911a79ee64d642f814a3b6cdb0d324b5f45d9ef955c5033e78903f626b7239b4aa773e464a38c3e667519066169d983538f2bf8e5d00228af587c9d438fb344
-  languageName: node
-  linkType: hard
-
-"@typescript-eslint/parser@npm:^5.49.0, @typescript-eslint/parser@npm:^5.62.0":
+"@typescript-eslint/parser@npm:^5.62.0":
   version: 5.62.0
   resolution: "@typescript-eslint/parser@npm:5.62.0"
   dependencies:
@@ -4260,6 +4186,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@typescript-eslint/parser@npm:^7.18.0":
+  version: 7.18.0
+  resolution: "@typescript-eslint/parser@npm:7.18.0"
+  dependencies:
+    "@typescript-eslint/scope-manager": "npm:7.18.0"
+    "@typescript-eslint/types": "npm:7.18.0"
+    "@typescript-eslint/typescript-estree": "npm:7.18.0"
+    "@typescript-eslint/visitor-keys": "npm:7.18.0"
+    debug: "npm:^4.3.4"
+  peerDependencies:
+    eslint: ^8.56.0
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 10c0/370e73fca4278091bc1b657f85e7d74cd52b24257ea20c927a8e17546107ce04fbf313fec99aed0cc2a145ddbae1d3b12e9cc2c1320117636dc1281bcfd08059
+  languageName: node
+  linkType: hard
+
 "@typescript-eslint/scope-manager@npm:5.62.0, @typescript-eslint/scope-manager@npm:^5.59.8":
   version: 5.62.0
   resolution: "@typescript-eslint/scope-manager@npm:5.62.0"
@@ -4270,13 +4214,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/scope-manager@npm:6.21.0":
-  version: 6.21.0
-  resolution: "@typescript-eslint/scope-manager@npm:6.21.0"
+"@typescript-eslint/scope-manager@npm:7.17.0":
+  version: 7.17.0
+  resolution: "@typescript-eslint/scope-manager@npm:7.17.0"
   dependencies:
-    "@typescript-eslint/types": "npm:6.21.0"
-    "@typescript-eslint/visitor-keys": "npm:6.21.0"
-  checksum: 10c0/eaf868938d811cbbea33e97e44ba7050d2b6892202cea6a9622c486b85ab1cf801979edf78036179a8ba4ac26f1dfdf7fcc83a68c1ff66be0b3a8e9a9989b526
+    "@typescript-eslint/types": "npm:7.17.0"
+    "@typescript-eslint/visitor-keys": "npm:7.17.0"
+  checksum: 10c0/e1a693e19dc855fe6d04b46c6c205019bfc937eda5f8b255393f8267ebddd282165568336e37b04aab544b155a807784b9c4a92129dfc7c1eef5a9e9fe052685
+  languageName: node
+  linkType: hard
+
+"@typescript-eslint/scope-manager@npm:7.18.0":
+  version: 7.18.0
+  resolution: "@typescript-eslint/scope-manager@npm:7.18.0"
+  dependencies:
+    "@typescript-eslint/types": "npm:7.18.0"
+    "@typescript-eslint/visitor-keys": "npm:7.18.0"
+  checksum: 10c0/038cd58c2271de146b3a594afe2c99290034033326d57ff1f902976022c8b0138ffd3cb893ae439ae41003b5e4bcc00cabf6b244ce40e8668f9412cc96d97b8e
   languageName: node
   linkType: hard
 
@@ -4297,20 +4251,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/type-utils@npm:6.21.0":
-  version: 6.21.0
-  resolution: "@typescript-eslint/type-utils@npm:6.21.0"
+"@typescript-eslint/type-utils@npm:7.17.0":
+  version: 7.17.0
+  resolution: "@typescript-eslint/type-utils@npm:7.17.0"
   dependencies:
-    "@typescript-eslint/typescript-estree": "npm:6.21.0"
-    "@typescript-eslint/utils": "npm:6.21.0"
+    "@typescript-eslint/typescript-estree": "npm:7.17.0"
+    "@typescript-eslint/utils": "npm:7.17.0"
     debug: "npm:^4.3.4"
-    ts-api-utils: "npm:^1.0.1"
+    ts-api-utils: "npm:^1.3.0"
   peerDependencies:
-    eslint: ^7.0.0 || ^8.0.0
+    eslint: ^8.56.0
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10c0/7409c97d1c4a4386b488962739c4f1b5b04dc60cf51f8cd88e6b12541f84d84c6b8b67e491a147a2c95f9ec486539bf4519fb9d418411aef6537b9c156468117
+  checksum: 10c0/b415cf37c0922cded78735c5049cb5a5b0065e1c0ce4a81ca2a26422763ccacca8945efa45480f40530f2ec414a14d35a88a6798258aa889f7a9cf4ca4a240cd
   languageName: node
   linkType: hard
 
@@ -4321,10 +4275,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/types@npm:6.21.0":
-  version: 6.21.0
-  resolution: "@typescript-eslint/types@npm:6.21.0"
-  checksum: 10c0/020631d3223bbcff8a0da3efbdf058220a8f48a3de221563996ad1dcc30d6c08dadc3f7608cc08830d21c0d565efd2db19b557b9528921c78aabb605eef2d74d
+"@typescript-eslint/types@npm:7.17.0":
+  version: 7.17.0
+  resolution: "@typescript-eslint/types@npm:7.17.0"
+  checksum: 10c0/8f734294d432b37c534f17eb2befdfe43b76874d09118d6adf7e308e5a586e9e11b7021abe4f6692a6e6226de58a15b3cfe1300939556ce1c908d9af627b7400
+  languageName: node
+  linkType: hard
+
+"@typescript-eslint/types@npm:7.18.0":
+  version: 7.18.0
+  resolution: "@typescript-eslint/types@npm:7.18.0"
+  checksum: 10c0/eb7371ac55ca77db8e59ba0310b41a74523f17e06f485a0ef819491bc3dd8909bb930120ff7d30aaf54e888167e0005aa1337011f3663dc90fb19203ce478054
   languageName: node
   linkType: hard
 
@@ -4346,22 +4307,41 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/typescript-estree@npm:6.21.0":
-  version: 6.21.0
-  resolution: "@typescript-eslint/typescript-estree@npm:6.21.0"
+"@typescript-eslint/typescript-estree@npm:7.17.0":
+  version: 7.17.0
+  resolution: "@typescript-eslint/typescript-estree@npm:7.17.0"
   dependencies:
-    "@typescript-eslint/types": "npm:6.21.0"
-    "@typescript-eslint/visitor-keys": "npm:6.21.0"
+    "@typescript-eslint/types": "npm:7.17.0"
+    "@typescript-eslint/visitor-keys": "npm:7.17.0"
     debug: "npm:^4.3.4"
     globby: "npm:^11.1.0"
     is-glob: "npm:^4.0.3"
-    minimatch: "npm:9.0.3"
-    semver: "npm:^7.5.4"
-    ts-api-utils: "npm:^1.0.1"
+    minimatch: "npm:^9.0.4"
+    semver: "npm:^7.6.0"
+    ts-api-utils: "npm:^1.3.0"
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10c0/af1438c60f080045ebb330155a8c9bb90db345d5069cdd5d01b67de502abb7449d6c75500519df829f913a6b3f490ade3e8215279b6bdc63d0fb0ae61034df5f
+  checksum: 10c0/10967823ce00c9f8cd4a8b56bed3524c098e38cc0e27aaa49ffd8fad4e671c00226bf0330ba858948750b88dc55527ebeb62c74be8a30bac18a106d6c033ab59
+  languageName: node
+  linkType: hard
+
+"@typescript-eslint/typescript-estree@npm:7.18.0":
+  version: 7.18.0
+  resolution: "@typescript-eslint/typescript-estree@npm:7.18.0"
+  dependencies:
+    "@typescript-eslint/types": "npm:7.18.0"
+    "@typescript-eslint/visitor-keys": "npm:7.18.0"
+    debug: "npm:^4.3.4"
+    globby: "npm:^11.1.0"
+    is-glob: "npm:^4.0.3"
+    minimatch: "npm:^9.0.4"
+    semver: "npm:^7.6.0"
+    ts-api-utils: "npm:^1.3.0"
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 10c0/0c7f109a2e460ec8a1524339479cf78ff17814d23c83aa5112c77fb345e87b3642616291908dcddea1e671da63686403dfb712e4a4435104f92abdfddf9aba81
   languageName: node
   linkType: hard
 
@@ -4383,20 +4363,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/utils@npm:6.21.0":
-  version: 6.21.0
-  resolution: "@typescript-eslint/utils@npm:6.21.0"
+"@typescript-eslint/utils@npm:7.17.0":
+  version: 7.17.0
+  resolution: "@typescript-eslint/utils@npm:7.17.0"
   dependencies:
     "@eslint-community/eslint-utils": "npm:^4.4.0"
-    "@types/json-schema": "npm:^7.0.12"
-    "@types/semver": "npm:^7.5.0"
-    "@typescript-eslint/scope-manager": "npm:6.21.0"
-    "@typescript-eslint/types": "npm:6.21.0"
-    "@typescript-eslint/typescript-estree": "npm:6.21.0"
-    semver: "npm:^7.5.4"
+    "@typescript-eslint/scope-manager": "npm:7.17.0"
+    "@typescript-eslint/types": "npm:7.17.0"
+    "@typescript-eslint/typescript-estree": "npm:7.17.0"
   peerDependencies:
-    eslint: ^7.0.0 || ^8.0.0
-  checksum: 10c0/ab2df3833b2582d4e5467a484d08942b4f2f7208f8e09d67de510008eb8001a9b7460f2f9ba11c12086fd3cdcac0c626761c7995c2c6b5657d5fa6b82030a32d
+    eslint: ^8.56.0
+  checksum: 10c0/1f3e22820b3ab3e47809c45e576614ad4a965f5c8634856eca5c70981386b9351a77fb172ba32345e7c5667479cf9526c673699dd38dccd0616ad6db21704e72
   languageName: node
   linkType: hard
 
@@ -4410,13 +4387,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/visitor-keys@npm:6.21.0":
-  version: 6.21.0
-  resolution: "@typescript-eslint/visitor-keys@npm:6.21.0"
+"@typescript-eslint/visitor-keys@npm:7.17.0":
+  version: 7.17.0
+  resolution: "@typescript-eslint/visitor-keys@npm:7.17.0"
   dependencies:
-    "@typescript-eslint/types": "npm:6.21.0"
-    eslint-visitor-keys: "npm:^3.4.1"
-  checksum: 10c0/7395f69739cfa1cb83c1fb2fad30afa2a814756367302fb4facd5893eff66abc807e8d8f63eba94ed3b0fe0c1c996ac9a1680bcbf0f83717acedc3f2bb724fbf
+    "@typescript-eslint/types": "npm:7.17.0"
+    eslint-visitor-keys: "npm:^3.4.3"
+  checksum: 10c0/fa6b339d51fc3710288bb2ffaa46d639551d77965cc42c36f96c4f43aed663ff12972e8a28652a280f6ce20b7a92dc2aea14b2b4049012799be2fc2d3cbb2c60
+  languageName: node
+  linkType: hard
+
+"@typescript-eslint/visitor-keys@npm:7.18.0":
+  version: 7.18.0
+  resolution: "@typescript-eslint/visitor-keys@npm:7.18.0"
+  dependencies:
+    "@typescript-eslint/types": "npm:7.18.0"
+    eslint-visitor-keys: "npm:^3.4.3"
+  checksum: 10c0/538b645f8ff1d9debf264865c69a317074eaff0255e63d7407046176b0f6a6beba34a6c51d511f12444bae12a98c69891eb6f403c9f54c6c2e2849d1c1cb73c0
   languageName: node
   linkType: hard
 
@@ -4747,7 +4734,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"agent-base@npm:6":
+"agent-base@npm:6, agent-base@npm:^6.0.2":
   version: 6.0.2
   resolution: "agent-base@npm:6.0.2"
   dependencies:
@@ -4780,6 +4767,15 @@ __metadata:
   dependencies:
     humanize-ms: "npm:^1.2.1"
   checksum: 10c0/6452aa599b49126db9ecf57627e312a078cebb614bcdbc2d890686447be454753bf1fc43fa10cba969ec051683652ce523413d42097f48c8bf90e46c2f99b447
+  languageName: node
+  linkType: hard
+
+"agentkeepalive@npm:^4.1.3":
+  version: 4.5.0
+  resolution: "agentkeepalive@npm:4.5.0"
+  dependencies:
+    humanize-ms: "npm:^1.2.1"
+  checksum: 10c0/394ea19f9710f230722996e156607f48fdf3a345133b0b1823244b7989426c16019a428b56c82d3eabef616e938812981d9009f4792ecc66bd6a59e991c62612
   languageName: node
   linkType: hard
 
@@ -5025,6 +5021,16 @@ __metadata:
     delegates: "npm:^1.0.0"
     readable-stream: "npm:^3.6.0"
   checksum: 10c0/375f753c10329153c8d66dc95e8f8b6c7cc2aa66e05cb0960bd69092b10dae22900cacc7d653ad11d26b3ecbdbfe1e8bfb6ccf0265ba8077a7d979970f16b99c
+  languageName: node
+  linkType: hard
+
+"are-we-there-yet@npm:^3.0.0":
+  version: 3.0.1
+  resolution: "are-we-there-yet@npm:3.0.1"
+  dependencies:
+    delegates: "npm:^1.0.0"
+    readable-stream: "npm:^3.6.0"
+  checksum: 10c0/8373f289ba42e4b5ec713bb585acdac14b5702c75f2a458dc985b9e4fa5762bc5b46b40a21b72418a3ed0cfb5e35bdc317ef1ae132f3035f633d581dd03168c3
   languageName: node
   linkType: hard
 
@@ -5285,9 +5291,9 @@ __metadata:
   linkType: hard
 
 "async@npm:^3.2.3":
-  version: 3.2.5
-  resolution: "async@npm:3.2.5"
-  checksum: 10c0/1408287b26c6db67d45cb346e34892cee555b8b59e6c68e6f8c3e495cad5ca13b4f218180e871f3c2ca30df4ab52693b66f2f6ff43644760cab0b2198bda79c1
+  version: 3.2.6
+  resolution: "async@npm:3.2.6"
+  checksum: 10c0/36484bb15ceddf07078688d95e27076379cc2f87b10c03b6dd8a83e89475a3c8df5848859dd06a4c95af1e4c16fc973de0171a77f18ea00be899aca2a4f85e70
   languageName: node
   linkType: hard
 
@@ -5525,7 +5531,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bl@npm:^4.1.0":
+"bindings@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "bindings@npm:1.5.0"
+  dependencies:
+    file-uri-to-path: "npm:1.0.0"
+  checksum: 10c0/3dab2491b4bb24124252a91e656803eac24292473e56554e35bbfe3cc1875332cfa77600c3bac7564049dc95075bf6fcc63a4609920ff2d64d0fe405fcf0d4ba
+  languageName: node
+  linkType: hard
+
+"bl@npm:^4.0.3, bl@npm:^4.1.0":
   version: 4.1.0
   resolution: "bl@npm:4.1.0"
   dependencies:
@@ -5753,6 +5768,32 @@ __metadata:
     unique-filename: "npm:^1.1.1"
     y18n: "npm:^4.0.0"
   checksum: 10c0/b4b0aa49e3fbd3ca92f71bc62923e4afce31fd687b31d5ba524b2a54b36e96a8b027165599307dda5e4a6f7268cc951b77ca170efa00c1b72761f9daae51fdfb
+  languageName: node
+  linkType: hard
+
+"cacache@npm:^15.2.0":
+  version: 15.3.0
+  resolution: "cacache@npm:15.3.0"
+  dependencies:
+    "@npmcli/fs": "npm:^1.0.0"
+    "@npmcli/move-file": "npm:^1.0.1"
+    chownr: "npm:^2.0.0"
+    fs-minipass: "npm:^2.0.0"
+    glob: "npm:^7.1.4"
+    infer-owner: "npm:^1.0.4"
+    lru-cache: "npm:^6.0.0"
+    minipass: "npm:^3.1.1"
+    minipass-collect: "npm:^1.0.2"
+    minipass-flush: "npm:^1.0.5"
+    minipass-pipeline: "npm:^1.2.2"
+    mkdirp: "npm:^1.0.3"
+    p-map: "npm:^4.0.0"
+    promise-inflight: "npm:^1.0.1"
+    rimraf: "npm:^3.0.2"
+    ssri: "npm:^8.0.1"
+    tar: "npm:^6.0.2"
+    unique-filename: "npm:^1.1.1"
+  checksum: 10c0/886fcc0acc4f6fd5cd142d373d8276267bc6d655d7c4ce60726fbbec10854de3395ee19bbf9e7e73308cdca9fdad0ad55060ff3bd16c6d4165c5b8d21515e1d8
   languageName: node
   linkType: hard
 
@@ -6016,25 +6057,6 @@ __metadata:
     parse5: "npm:^7.0.0"
     parse5-htmlparser2-tree-adapter: "npm:^7.0.0"
   checksum: 10c0/c85d2f2461e3f024345b78e0bb16ad8e41492356210470dd1e7d5a91391da9fcf6c0a7cb48a9ba8820330153f0cedb4d0a60c7af15d96ecdb3092299b9d9c0cc
-  languageName: node
-  linkType: hard
-
-"cheerio@npm:^1.0.0-rc.12":
-  version: 1.0.0
-  resolution: "cheerio@npm:1.0.0"
-  dependencies:
-    cheerio-select: "npm:^2.1.0"
-    dom-serializer: "npm:^2.0.0"
-    domhandler: "npm:^5.0.3"
-    domutils: "npm:^3.1.0"
-    encoding-sniffer: "npm:^0.2.0"
-    htmlparser2: "npm:^9.1.0"
-    parse5: "npm:^7.1.2"
-    parse5-htmlparser2-tree-adapter: "npm:^7.0.0"
-    parse5-parser-stream: "npm:^7.1.2"
-    undici: "npm:^6.19.5"
-    whatwg-mimetype: "npm:^4.0.0"
-  checksum: 10c0/d0e16925d9c36c879edfaef1c0244c866375a4c7b8d6ccd7ae0ad42da7d26263ea1a3c17b9a1aa5965918deeff2d40ac2e7223824f8e6eca972df3b81316a09f
   languageName: node
   linkType: hard
 
@@ -6334,7 +6356,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"color-support@npm:^1.1.2":
+"color-support@npm:^1.1.2, color-support@npm:^1.1.3":
   version: 1.1.3
   resolution: "color-support@npm:1.1.3"
   bin:
@@ -7150,9 +7172,9 @@ __metadata:
   linkType: hard
 
 "dayjs@npm:^1.11.9":
-  version: 1.11.12
-  resolution: "dayjs@npm:1.11.12"
-  checksum: 10c0/9673d37f3f9ad8a91caaeae9b3fea9a0010c81c7f58599fb9d860bc3359b86632fbff8eb7dddc86c2acaab01c5e6860bc672952f17b58c9286140c52b077c8e4
+  version: 1.11.13
+  resolution: "dayjs@npm:1.11.13"
+  checksum: 10c0/a3caf6ac8363c7dade9d1ee797848ddcf25c1ace68d9fe8678ecf8ba0675825430de5d793672ec87b24a69bf04a1544b176547b2539982275d5542a7955f35b7
   languageName: node
   linkType: hard
 
@@ -7174,7 +7196,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"debug@npm:4, debug@npm:^4.0.0, debug@npm:^4.1.0, debug@npm:^4.1.1, debug@npm:^4.3.1, debug@npm:^4.3.2, debug@npm:^4.3.4, debug@npm:^4.3.5":
+"debug@npm:4, debug@npm:^4.0.0, debug@npm:^4.1.0, debug@npm:^4.1.1, debug@npm:^4.3.1, debug@npm:^4.3.2, debug@npm:^4.3.3, debug@npm:^4.3.4, debug@npm:^4.3.5":
   version: 4.3.6
   resolution: "debug@npm:4.3.6"
   dependencies:
@@ -7230,6 +7252,15 @@ __metadata:
   version: 0.2.2
   resolution: "decode-uri-component@npm:0.2.2"
   checksum: 10c0/1f4fa54eb740414a816b3f6c24818fbfcabd74ac478391e9f4e2282c994127db02010ce804f3d08e38255493cfe68608b3f5c8e09fd6efc4ae46c807691f7a31
+  languageName: node
+  linkType: hard
+
+"decompress-response@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "decompress-response@npm:6.0.0"
+  dependencies:
+    mimic-response: "npm:^3.1.0"
+  checksum: 10c0/bd89d23141b96d80577e70c54fb226b2f40e74a6817652b80a116d7befb8758261ad073a8895648a29cc0a5947021ab66705cb542fa9c143c82022b27c5b175e
   languageName: node
   linkType: hard
 
@@ -7688,9 +7719,9 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.5.4":
-  version: 1.5.8
-  resolution: "electron-to-chromium@npm:1.5.8"
-  checksum: 10c0/801de2afa0479ffa0cd0e36b7865241dcd3a66a92fca28457431d2dc2bd9c2d066ab07578b419426c504df196f078c63283ee47140c28039d224ec2631acbcee
+  version: 1.5.12
+  resolution: "electron-to-chromium@npm:1.5.12"
+  checksum: 10c0/16cbb2fe17e138c409ca2f4575a7965987b21e66dcd61df664e7f9a60c7e9ed405fcc352483b2b5569e5e57aa3cc8a259a1a745d541d0b8ffae612724ca2887e
   languageName: node
   linkType: hard
 
@@ -7743,17 +7774,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"encoding-sniffer@npm:^0.2.0":
-  version: 0.2.0
-  resolution: "encoding-sniffer@npm:0.2.0"
-  dependencies:
-    iconv-lite: "npm:^0.6.3"
-    whatwg-encoding: "npm:^3.1.1"
-  checksum: 10c0/b312e0d67f339bec44e021e5210ee8ee90d7b8f9975eb2c79a36fd467eb07709e88dcf62ee20f62ee0d74a13874307d99557852a2de9b448f1e3fb991fc68257
-  languageName: node
-  linkType: hard
-
-"encoding@npm:^0.1.11, encoding@npm:^0.1.13":
+"encoding@npm:^0.1.11, encoding@npm:^0.1.12, encoding@npm:^0.1.13":
   version: 0.1.13
   resolution: "encoding@npm:0.1.13"
   dependencies:
@@ -7762,7 +7783,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"end-of-stream@npm:^1.0.0, end-of-stream@npm:^1.1.0":
+"end-of-stream@npm:^1.0.0, end-of-stream@npm:^1.1.0, end-of-stream@npm:^1.4.1":
   version: 1.4.4
   resolution: "end-of-stream@npm:1.4.4"
   dependencies:
@@ -8488,6 +8509,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expand-template@npm:^2.0.3":
+  version: 2.0.3
+  resolution: "expand-template@npm:2.0.3"
+  checksum: 10c0/1c9e7afe9acadf9d373301d27f6a47b34e89b3391b1ef38b7471d381812537ef2457e620ae7f819d2642ce9c43b189b3583813ec395e2938319abe356a9b2f51
+  languageName: node
+  linkType: hard
+
 "expect@npm:^27.5.1":
   version: 27.5.1
   resolution: "expect@npm:27.5.1"
@@ -8729,7 +8757,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fastify@npm:^3.29.4, fastify@npm:^3.29.5":
+"fastify@npm:^3.29.5":
   version: 3.29.5
   resolution: "fastify@npm:3.29.5"
   dependencies:
@@ -8802,6 +8830,13 @@ __metadata:
   dependencies:
     flat-cache: "npm:^3.0.4"
   checksum: 10c0/58473e8a82794d01b38e5e435f6feaf648e3f36fdb3a56e98f417f4efae71ad1c0d4ebd8a9a7c50c3ad085820a93fc7494ad721e0e4ebc1da3573f4e1c3c7cdd
+  languageName: node
+  linkType: hard
+
+"file-uri-to-path@npm:1.0.0":
+  version: 1.0.0
+  resolution: "file-uri-to-path@npm:1.0.0"
+  checksum: 10c0/3b545e3a341d322d368e880e1c204ef55f1d45cdea65f7efc6c6ce9e0c4d22d802d5629320eb779d006fe59624ac17b0e848d83cc5af7cd101f206cb704f5519
   languageName: node
   linkType: hard
 
@@ -9134,6 +9169,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fs-constants@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "fs-constants@npm:1.0.0"
+  checksum: 10c0/a0cde99085f0872f4d244e83e03a46aa387b74f5a5af750896c6b05e9077fac00e9932fdf5aef84f2f16634cd473c63037d7a512576da7d5c2b9163d1909f3a8
+  languageName: node
+  linkType: hard
+
 "fs-extra@npm:^10.0.0":
   version: 10.1.0
   resolution: "fs-extra@npm:10.1.0"
@@ -9268,6 +9310,22 @@ __metadata:
     strip-ansi: "npm:^6.0.1"
     wide-align: "npm:^1.1.2"
   checksum: 10c0/75230ccaf216471e31025c7d5fcea1629596ca20792de50c596eb18ffb14d8404f927cd55535aab2eeecd18d1e11bd6f23ec3c2e9878d2dda1dc74bccc34b913
+  languageName: node
+  linkType: hard
+
+"gauge@npm:^4.0.3":
+  version: 4.0.4
+  resolution: "gauge@npm:4.0.4"
+  dependencies:
+    aproba: "npm:^1.0.3 || ^2.0.0"
+    color-support: "npm:^1.1.3"
+    console-control-strings: "npm:^1.1.0"
+    has-unicode: "npm:^2.0.1"
+    signal-exit: "npm:^3.0.7"
+    string-width: "npm:^4.2.3"
+    strip-ansi: "npm:^6.0.1"
+    wide-align: "npm:^1.1.5"
+  checksum: 10c0/ef10d7981113d69225135f994c9f8c4369d945e64a8fc721d655a3a38421b738c9fe899951721d1b47b73c41fdb5404ac87cc8903b2ecbed95d2800363e7e58c
   languageName: node
   linkType: hard
 
@@ -9544,6 +9602,13 @@ __metadata:
   dependencies:
     ini: "npm:^1.3.2"
   checksum: 10c0/cfcb16344834113199f209f2758ced778dc30e075ddb49b5dde659b4dd2deadee824db0a1b77e1303cb594d9e8b2240da18c67705f657aa76affb444aa349005
+  languageName: node
+  linkType: hard
+
+"github-from-package@npm:0.0.0":
+  version: 0.0.0
+  resolution: "github-from-package@npm:0.0.0"
+  checksum: 10c0/737ee3f52d0a27e26332cde85b533c21fcdc0b09fb716c3f8e522cfaa9c600d4a631dec9fcde179ec9d47cca89017b7848ed4d6ae6b6b78f936c06825b1fcc12
   languageName: node
   linkType: hard
 
@@ -10023,7 +10088,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"http-cache-semantics@npm:^4.1.1":
+"http-cache-semantics@npm:^4.1.0, http-cache-semantics@npm:^4.1.1":
   version: 4.1.1
   resolution: "http-cache-semantics@npm:4.1.1"
   checksum: 10c0/ce1319b8a382eb3cbb4a37c19f6bfe14e5bb5be3d09079e885e8c513ab2d3cd9214902f8a31c9dc4e37022633ceabfc2d697405deeaf1b8f3552bb4ed996fdfc
@@ -10156,7 +10221,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"iconv-lite@npm:0.6.3, iconv-lite@npm:^0.6.2, iconv-lite@npm:^0.6.3":
+"iconv-lite@npm:0.6.3, iconv-lite@npm:^0.6.2":
   version: 0.6.3
   resolution: "iconv-lite@npm:0.6.3"
   dependencies:
@@ -10195,7 +10260,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ignore@npm:^5.1.1, ignore@npm:^5.2.0, ignore@npm:^5.2.4, ignore@npm:~5.3.1":
+"ignore@npm:^5.1.1, ignore@npm:^5.2.0, ignore@npm:^5.3.1, ignore@npm:~5.3.1":
   version: 5.3.2
   resolution: "ignore@npm:5.3.2"
   checksum: 10c0/f9f652c957983634ded1e7f02da3b559a0d4cc210fca3792cb67f1b153623c9c42efdc1c4121af171e295444459fc4a9201101fb041b1104a3c000bccb188337
@@ -11921,17 +11986,17 @@ __metadata:
   linkType: hard
 
 "juice@npm:^10.0.0":
-  version: 10.0.0
-  resolution: "juice@npm:10.0.0"
+  version: 10.0.1
+  resolution: "juice@npm:10.0.1"
   dependencies:
-    cheerio: "npm:^1.0.0-rc.12"
+    cheerio: "npm:1.0.0-rc.12"
     commander: "npm:^6.1.0"
     mensch: "npm:^0.3.4"
     slick: "npm:^1.12.2"
     web-resource-inliner: "npm:^6.0.1"
   bin:
     juice: bin/juice
-  checksum: 10c0/55461554aa564d945460ed9ba6257813cca95c33202449beb37868d14e2dbb46b31d5e4b2eeaefb7e7390d7d7504d0de32668fcbfdcb7e579a732ee954738631
+  checksum: 10c0/10265610aea6b50a382313f95e2e7e130a8476a727ebbc956ab34dd413b1b8f54a26e81b37e528f4cef248f8d20a776dac0e61fa0f13ce6d853a17ca2b384228
   languageName: node
   linkType: hard
 
@@ -12602,6 +12667,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"make-fetch-happen@npm:^9.1.0":
+  version: 9.1.0
+  resolution: "make-fetch-happen@npm:9.1.0"
+  dependencies:
+    agentkeepalive: "npm:^4.1.3"
+    cacache: "npm:^15.2.0"
+    http-cache-semantics: "npm:^4.1.0"
+    http-proxy-agent: "npm:^4.0.1"
+    https-proxy-agent: "npm:^5.0.0"
+    is-lambda: "npm:^1.0.1"
+    lru-cache: "npm:^6.0.0"
+    minipass: "npm:^3.1.3"
+    minipass-collect: "npm:^1.0.2"
+    minipass-fetch: "npm:^1.3.2"
+    minipass-flush: "npm:^1.0.5"
+    minipass-pipeline: "npm:^1.2.4"
+    negotiator: "npm:^0.6.2"
+    promise-retry: "npm:^2.0.1"
+    socks-proxy-agent: "npm:^6.0.0"
+    ssri: "npm:^8.0.0"
+  checksum: 10c0/2c737faf6a7f67077679da548b5bfeeef890595bf8c4323a1f76eae355d27ebb33dcf9cf1a673f944cf2f2a7cbf4e2b09f0a0a62931737728f210d902c6be966
+  languageName: node
+  linkType: hard
+
 "makeerror@npm:1.0.12":
   version: 1.0.12
   resolution: "makeerror@npm:1.0.12"
@@ -12916,6 +13005,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mimic-response@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "mimic-response@npm:3.1.0"
+  checksum: 10c0/0d6f07ce6e03e9e4445bee655202153bdb8a98d67ee8dc965ac140900d7a2688343e6b4c9a72cfc9ef2f7944dfd76eef4ab2482eb7b293a68b84916bac735362
+  languageName: node
+  linkType: hard
+
 "min-indent@npm:^1.0.0":
   version: 1.0.1
   resolution: "min-indent@npm:1.0.1"
@@ -12929,15 +13025,6 @@ __metadata:
   dependencies:
     brace-expansion: "npm:^2.0.1"
   checksum: 10c0/aa043eb8822210b39888a5d0d28df0017b365af5add9bd522f180d2a6962de1cbbf1bdeacdb1b17f410dc3336bc8d76fb1d3e814cdc65d00c2f68e01f0010096
-  languageName: node
-  linkType: hard
-
-"minimatch@npm:9.0.3":
-  version: 9.0.3
-  resolution: "minimatch@npm:9.0.3"
-  dependencies:
-    brace-expansion: "npm:^2.0.1"
-  checksum: 10c0/85f407dcd38ac3e180f425e86553911d101455ca3ad5544d6a7cec16286657e4f8a9aa6695803025c55e31e35a91a2252b5dc8e7d527211278b8b65b4dbd5eac
   languageName: node
   linkType: hard
 
@@ -12989,10 +13076,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimist@npm:^1.1.3, minimist@npm:^1.2.0, minimist@npm:^1.2.5, minimist@npm:^1.2.6, minimist@npm:^1.2.8":
+"minimist@npm:^1.1.3, minimist@npm:^1.2.0, minimist@npm:^1.2.3, minimist@npm:^1.2.5, minimist@npm:^1.2.6, minimist@npm:^1.2.8":
   version: 1.2.8
   resolution: "minimist@npm:1.2.8"
   checksum: 10c0/19d3fcdca050087b84c2029841a093691a91259a47def2f18222f41e7645a0b7c44ef4b40e88a1e58a40c84d2ef0ee6047c55594d298146d0eb3f6b737c20ce6
+  languageName: node
+  linkType: hard
+
+"minipass-collect@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "minipass-collect@npm:1.0.2"
+  dependencies:
+    minipass: "npm:^3.0.0"
+  checksum: 10c0/8f82bd1f3095b24f53a991b04b67f4c710c894e518b813f0864a31de5570441a509be1ca17e0bb92b047591a8fdbeb886f502764fefb00d2f144f4011791e898
   languageName: node
   linkType: hard
 
@@ -13002,6 +13098,21 @@ __metadata:
   dependencies:
     minipass: "npm:^7.0.3"
   checksum: 10c0/5167e73f62bb74cc5019594709c77e6a742051a647fe9499abf03c71dca75515b7959d67a764bdc4f8b361cf897fbf25e2d9869ee039203ed45240f48b9aa06e
+  languageName: node
+  linkType: hard
+
+"minipass-fetch@npm:^1.3.2":
+  version: 1.4.1
+  resolution: "minipass-fetch@npm:1.4.1"
+  dependencies:
+    encoding: "npm:^0.1.12"
+    minipass: "npm:^3.1.0"
+    minipass-sized: "npm:^1.0.3"
+    minizlib: "npm:^2.0.0"
+  dependenciesMeta:
+    encoding:
+      optional: true
+  checksum: 10c0/a43da7401cd7c4f24b993887d41bd37d097356083b0bb836fd655916467463a1e6e9e553b2da4fcbe8745bf23d40c8b884eab20745562199663b3e9060cd8e7a
   languageName: node
   linkType: hard
 
@@ -13029,7 +13140,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minipass-pipeline@npm:^1.2.4":
+"minipass-pipeline@npm:^1.2.2, minipass-pipeline@npm:^1.2.4":
   version: 1.2.4
   resolution: "minipass-pipeline@npm:1.2.4"
   dependencies:
@@ -13057,7 +13168,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minipass@npm:^3.0.0":
+"minipass@npm:^3.0.0, minipass@npm:^3.1.0, minipass@npm:^3.1.1, minipass@npm:^3.1.3":
   version: 3.3.6
   resolution: "minipass@npm:3.3.6"
   dependencies:
@@ -13089,7 +13200,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minizlib@npm:^2.1.1, minizlib@npm:^2.1.2":
+"minizlib@npm:^2.0.0, minizlib@npm:^2.1.1, minizlib@npm:^2.1.2":
   version: 2.1.2
   resolution: "minizlib@npm:2.1.2"
   dependencies:
@@ -13530,6 +13641,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mkdirp-classic@npm:^0.5.2, mkdirp-classic@npm:^0.5.3":
+  version: 0.5.3
+  resolution: "mkdirp-classic@npm:0.5.3"
+  checksum: 10c0/95371d831d196960ddc3833cc6907e6b8f67ac5501a6582f47dfae5eb0f092e9f8ce88e0d83afcae95d6e2b61a01741ba03714eeafb6f7a6e9dcc158ac85b168
+  languageName: node
+  linkType: hard
+
 "mkdirp-promise@npm:^5.0.1":
   version: 5.0.1
   resolution: "mkdirp-promise@npm:5.0.1"
@@ -13697,6 +13815,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"napi-build-utils@npm:^1.0.1":
+  version: 1.0.2
+  resolution: "napi-build-utils@npm:1.0.2"
+  checksum: 10c0/37fd2cd0ff2ad20073ce78d83fd718a740d568b225924e753ae51cb69d68f330c80544d487e5e5bd18e28702ed2ca469c2424ad948becd1862c1b0209542b2e9
+  languageName: node
+  linkType: hard
+
 "natural-compare-lite@npm:^1.4.0":
   version: 1.4.0
   resolution: "natural-compare-lite@npm:1.4.0"
@@ -13711,7 +13836,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"negotiator@npm:0.6.3, negotiator@npm:^0.6.3":
+"negotiator@npm:0.6.3, negotiator@npm:^0.6.2, negotiator@npm:^0.6.3":
   version: 0.6.3
   resolution: "negotiator@npm:0.6.3"
   checksum: 10c0/3ec9fd413e7bf071c937ae60d572bc67155262068ed522cf4b3be5edbe6ddf67d095ec03a3a14ebf8fc8e95f8e1d61be4869db0dbb0de696f6b837358bd43fc2
@@ -13741,19 +13866,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"node-abi@npm:^3.3.0":
+  version: 3.66.0
+  resolution: "node-abi@npm:3.66.0"
+  dependencies:
+    semver: "npm:^7.3.5"
+  checksum: 10c0/ec9d2f7bcc491b1c1c87e610dcc2fbe64e408019cd4bd8ceff47664cd9a8abe8af585e34101a469eab7fe067cacbcc366eb1aeaddd7e527a3df6afa4045d6855
+  languageName: node
+  linkType: hard
+
 "node-abort-controller@npm:^3.0.1":
   version: 3.1.1
   resolution: "node-abort-controller@npm:3.1.1"
   checksum: 10c0/f7ad0e7a8e33809d4f3a0d1d65036a711c39e9d23e0319d80ebe076b9a3b4432b4d6b86a7fab65521de3f6872ffed36fc35d1327487c48eb88c517803403eda3
-  languageName: node
-  linkType: hard
-
-"node-addon-api@npm:^4.2.0":
-  version: 4.3.0
-  resolution: "node-addon-api@npm:4.3.0"
-  dependencies:
-    node-gyp: "npm:latest"
-  checksum: 10c0/5febe94d58cdef319bc96a357b43d7a13776c93ee3f2edb374000f16454e65cec06035497947d5fdaa50db1cc7ab8e3a30ca8669bb07a1b159f0307dc2c1ccdf
   languageName: node
   linkType: hard
 
@@ -13763,6 +13888,15 @@ __metadata:
   dependencies:
     node-gyp: "npm:latest"
   checksum: 10c0/0eb269786124ba6fad9df8007a149e03c199b3e5a3038125dfb3e747c2d5113d406a4e33f4de1ea600aa2339be1f137d55eba1a73ee34e5fff06c52a5c296d1d
+  languageName: node
+  linkType: hard
+
+"node-addon-api@npm:^7.0.0":
+  version: 7.1.1
+  resolution: "node-addon-api@npm:7.1.1"
+  dependencies:
+    node-gyp: "npm:latest"
+  checksum: 10c0/fb32a206276d608037fa1bcd7e9921e177fe992fc610d098aa3128baca3c0050fc1e014fa007e9b3874cf865ddb4f5bd9f43ccb7cbbbe4efaff6a83e920b17e9
   languageName: node
   linkType: hard
 
@@ -13797,6 +13931,26 @@ __metadata:
     encoding:
       optional: true
   checksum: 10c0/b55786b6028208e6fbe594ccccc213cab67a72899c9234eb59dba51062a299ea853210fcf526998eaa2867b0963ad72338824450905679ff0fa304b8c5093ae8
+  languageName: node
+  linkType: hard
+
+"node-gyp@npm:8.x":
+  version: 8.4.1
+  resolution: "node-gyp@npm:8.4.1"
+  dependencies:
+    env-paths: "npm:^2.2.0"
+    glob: "npm:^7.1.4"
+    graceful-fs: "npm:^4.2.6"
+    make-fetch-happen: "npm:^9.1.0"
+    nopt: "npm:^5.0.0"
+    npmlog: "npm:^6.0.0"
+    rimraf: "npm:^3.0.2"
+    semver: "npm:^7.3.5"
+    tar: "npm:^6.1.2"
+    which: "npm:^2.0.2"
+  bin:
+    node-gyp: bin/node-gyp.js
+  checksum: 10c0/80ef333b3a882eb6a2695a8e08f31d618f4533eff192864e4a3a16b67ff0abc9d8c1d5fac0395550ec699326b9248c5e2b3be178492f7f4d1ccf97d2cf948021
   languageName: node
   linkType: hard
 
@@ -14062,6 +14216,18 @@ __metadata:
     gauge: "npm:^3.0.0"
     set-blocking: "npm:^2.0.0"
   checksum: 10c0/489ba519031013001135c463406f55491a17fc7da295c18a04937fe3a4d523fd65e88dd418a28b967ab743d913fdeba1e29838ce0ad8c75557057c481f7d49fa
+  languageName: node
+  linkType: hard
+
+"npmlog@npm:^6.0.0":
+  version: 6.0.2
+  resolution: "npmlog@npm:6.0.2"
+  dependencies:
+    are-we-there-yet: "npm:^3.0.0"
+    console-control-strings: "npm:^1.1.0"
+    gauge: "npm:^4.0.3"
+    set-blocking: "npm:^2.0.0"
+  checksum: 10c0/0cacedfbc2f6139c746d9cd4a85f62718435ad0ca4a2d6459cd331dd33ae58206e91a0742c1558634efcde3f33f8e8e7fd3adf1bfe7978310cf00bd55cccf890
   languageName: node
   linkType: hard
 
@@ -14660,15 +14826,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"parse5-parser-stream@npm:^7.1.2":
-  version: 7.1.2
-  resolution: "parse5-parser-stream@npm:7.1.2"
-  dependencies:
-    parse5: "npm:^7.0.0"
-  checksum: 10c0/e236c61000d38ecad369e725a48506b051cebad8abb00e6d4e8bff7aa85c183820fcb45db1559cc90955bdbbdbd665ea94c41259594e74566fff411478dc7fcb
-  languageName: node
-  linkType: hard
-
 "parse5@npm:6.0.1, parse5@npm:^6.0.1":
   version: 6.0.1
   resolution: "parse5@npm:6.0.1"
@@ -14683,7 +14840,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"parse5@npm:^7.0.0, parse5@npm:^7.1.2":
+"parse5@npm:^7.0.0":
   version: 7.1.2
   resolution: "parse5@npm:7.1.2"
   dependencies:
@@ -15044,6 +15201,28 @@ __metadata:
   version: 1.0.0
   resolution: "possible-typed-array-names@npm:1.0.0"
   checksum: 10c0/d9aa22d31f4f7680e20269db76791b41c3a32c01a373e25f8a4813b4d45f7456bfc2b6d68f752dc4aab0e0bb0721cb3d76fb678c9101cb7a16316664bc2c73fd
+  languageName: node
+  linkType: hard
+
+"prebuild-install@npm:^7.1.1":
+  version: 7.1.2
+  resolution: "prebuild-install@npm:7.1.2"
+  dependencies:
+    detect-libc: "npm:^2.0.0"
+    expand-template: "npm:^2.0.3"
+    github-from-package: "npm:0.0.0"
+    minimist: "npm:^1.2.3"
+    mkdirp-classic: "npm:^0.5.3"
+    napi-build-utils: "npm:^1.0.1"
+    node-abi: "npm:^3.3.0"
+    pump: "npm:^3.0.0"
+    rc: "npm:^1.2.7"
+    simple-get: "npm:^4.0.0"
+    tar-fs: "npm:^2.0.0"
+    tunnel-agent: "npm:^0.6.0"
+  bin:
+    prebuild-install: bin.js
+  checksum: 10c0/e64868ba9ef2068fd7264f5b03e5298a901e02a450acdb1f56258d88c09dea601eefdb3d1dfdff8513fdd230a92961712be0676192626a3b4d01ba154d48bdd3
   languageName: node
   linkType: hard
 
@@ -15511,7 +15690,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rc@npm:^1.2.8":
+"rc@npm:^1.2.7, rc@npm:^1.2.8":
   version: 1.2.8
   resolution: "rc@npm:1.2.8"
   dependencies:
@@ -15653,7 +15832,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"readable-stream@npm:2 || 3, readable-stream@npm:3, readable-stream@npm:^3.0.0, readable-stream@npm:^3.0.2, readable-stream@npm:^3.4.0, readable-stream@npm:^3.6.0":
+"readable-stream@npm:2 || 3, readable-stream@npm:3, readable-stream@npm:^3.0.0, readable-stream@npm:^3.0.2, readable-stream@npm:^3.1.1, readable-stream@npm:^3.4.0, readable-stream@npm:^3.6.0":
   version: 3.6.2
   resolution: "readable-stream@npm:3.6.2"
   dependencies:
@@ -16456,7 +16635,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"signal-exit@npm:^3.0.0, signal-exit@npm:^3.0.2, signal-exit@npm:^3.0.3":
+"signal-exit@npm:^3.0.0, signal-exit@npm:^3.0.2, signal-exit@npm:^3.0.3, signal-exit@npm:^3.0.7":
   version: 3.0.7
   resolution: "signal-exit@npm:3.0.7"
   checksum: 10c0/25d272fa73e146048565e08f3309d5b942c1979a6f4a58a8c59d5fa299728e9c2fcd1a759ec870863b1fd38653670240cd420dad2ad9330c71f36608a6a1c912
@@ -16467,6 +16646,24 @@ __metadata:
   version: 4.1.0
   resolution: "signal-exit@npm:4.1.0"
   checksum: 10c0/41602dce540e46d599edba9d9860193398d135f7ff72cab629db5171516cfae628d21e7bfccde1bbfdf11c48726bc2a6d1a8fb8701125852fbfda7cf19c6aa83
+  languageName: node
+  linkType: hard
+
+"simple-concat@npm:^1.0.0":
+  version: 1.0.1
+  resolution: "simple-concat@npm:1.0.1"
+  checksum: 10c0/62f7508e674414008910b5397c1811941d457dfa0db4fd5aa7fa0409eb02c3609608dfcd7508cace75b3a0bf67a2a77990711e32cd213d2c76f4fd12ee86d776
+  languageName: node
+  linkType: hard
+
+"simple-get@npm:^4.0.0":
+  version: 4.0.1
+  resolution: "simple-get@npm:4.0.1"
+  dependencies:
+    decompress-response: "npm:^6.0.0"
+    once: "npm:^1.3.1"
+    simple-concat: "npm:^1.0.0"
+  checksum: 10c0/b0649a581dbca741babb960423248899203165769747142033479a7dc5e77d7b0fced0253c731cd57cf21e31e4d77c9157c3069f4448d558ebc96cf9e1eebcf0
   languageName: node
   linkType: hard
 
@@ -16572,6 +16769,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"socks-proxy-agent@npm:^6.0.0":
+  version: 6.2.1
+  resolution: "socks-proxy-agent@npm:6.2.1"
+  dependencies:
+    agent-base: "npm:^6.0.2"
+    debug: "npm:^4.3.3"
+    socks: "npm:^2.6.2"
+  checksum: 10c0/d75c1cf1fdd7f8309a43a77f84409b793fc0f540742ef915154e70ac09a08b0490576fe85d4f8d68bbf80e604a62957a17ab5ef50d312fe1442b0ab6f8f6e6f6
+  languageName: node
+  linkType: hard
+
 "socks-proxy-agent@npm:^8.0.3":
   version: 8.0.4
   resolution: "socks-proxy-agent@npm:8.0.4"
@@ -16583,7 +16791,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"socks@npm:^2.8.3":
+"socks@npm:^2.6.2, socks@npm:^2.8.3":
   version: 2.8.3
   resolution: "socks@npm:2.8.3"
   dependencies:
@@ -16711,9 +16919,9 @@ __metadata:
   linkType: hard
 
 "spdx-license-ids@npm:^3.0.0":
-  version: 3.0.18
-  resolution: "spdx-license-ids@npm:3.0.18"
-  checksum: 10c0/c64ba03d4727191c8fdbd001f137d6ab51386c350d5516be8a4576c2e74044cb27bc8a758f6a04809da986cc0b14213f069b04de72caccecbc9f733753ccde32
+  version: 3.0.20
+  resolution: "spdx-license-ids@npm:3.0.20"
+  checksum: 10c0/bdff7534fad6ef59be49becda1edc3fb7f5b3d6f296a715516ab9d972b8ad59af2c34b2003e01db8970d4c673d185ff696ba74c6b61d3bf327e2b3eac22c297c
   languageName: node
   linkType: hard
 
@@ -16781,14 +16989,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sqlite3@npm:@vscode/sqlite3@^5.1.4-vscode":
-  version: 5.1.4-vscode
-  resolution: "@vscode/sqlite3@npm:5.1.4-vscode"
+"sqlite3@npm:^5.1.4":
+  version: 5.1.7
+  resolution: "sqlite3@npm:5.1.7"
   dependencies:
-    node-addon-api: "npm:^4.2.0"
-    node-gyp: "npm:latest"
+    bindings: "npm:^1.5.0"
+    node-addon-api: "npm:^7.0.0"
+    node-gyp: "npm:8.x"
+    prebuild-install: "npm:^7.1.1"
     tar: "npm:^6.1.11"
-  checksum: 10c0/35c51c67510f844e6685fe51b87ca4c30e7efdf0d7ffe50cfc9a0c50282a7b0ffbd6383cccddd31b612ff0e72deb53487858e431de9e07a8a7e8f3d90cabd69f
+  peerDependencies:
+    node-gyp: 8.x
+  dependenciesMeta:
+    node-gyp:
+      optional: true
+  peerDependenciesMeta:
+    node-gyp:
+      optional: true
+  checksum: 10c0/10daab5d7854bd0ec3c7690c00359cd3444eabc869b68c68dcb61374a8fa5e2f4be06cf0aba78f7a16336d49e83e4631e8af98f8bd33c772fe8d60b45fa60bc1
   languageName: node
   linkType: hard
 
@@ -16828,6 +17046,15 @@ __metadata:
   dependencies:
     figgy-pudding: "npm:^3.5.1"
   checksum: 10c0/e6f18c57dc9fed69343db5c59f95ef334e9664bfbdbad686c190ef2c6ad6b35e9b56cb203f3e4eb7eee6cb7bb602daa26dab6685e3847f0b5c464cdf7d9c2cee
+  languageName: node
+  linkType: hard
+
+"ssri@npm:^8.0.0, ssri@npm:^8.0.1":
+  version: 8.0.1
+  resolution: "ssri@npm:8.0.1"
+  dependencies:
+    minipass: "npm:^3.1.1"
+  checksum: 10c0/5cfae216ae02dcd154d1bbed2d0a60038a4b3a2fcaac3c7e47401ff4e058e551ee74cfdba618871bf168cd583db7b8324f94af6747d4303b73cd4c3f6dc5c9c2
   languageName: node
   linkType: hard
 
@@ -17257,13 +17484,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"swagger-ui-dist@npm:4.18.2":
-  version: 4.18.2
-  resolution: "swagger-ui-dist@npm:4.18.2"
-  checksum: 10c0/63dd5e0af727edc5e10d393c6574bec248b0c812d68bbfbad1681512538a78726c77a71e248a7eb3afa78f8dad97ee00b8ec7a9bc69e13b7064676b7e6032ee6
-  languageName: node
-  linkType: hard
-
 "swagger-ui-dist@npm:5.17.14":
   version: 5.17.14
   resolution: "swagger-ui-dist@npm:5.17.14"
@@ -17302,6 +17522,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tar-fs@npm:^2.0.0":
+  version: 2.1.1
+  resolution: "tar-fs@npm:2.1.1"
+  dependencies:
+    chownr: "npm:^1.1.1"
+    mkdirp-classic: "npm:^0.5.2"
+    pump: "npm:^3.0.0"
+    tar-stream: "npm:^2.1.4"
+  checksum: 10c0/871d26a934bfb7beeae4c4d8a09689f530b565f79bd0cf489823ff0efa3705da01278160da10bb006d1a793fa0425cf316cec029b32a9159eacbeaff4965fb6d
+  languageName: node
+  linkType: hard
+
+"tar-stream@npm:^2.1.4":
+  version: 2.2.0
+  resolution: "tar-stream@npm:2.2.0"
+  dependencies:
+    bl: "npm:^4.0.3"
+    end-of-stream: "npm:^1.4.1"
+    fs-constants: "npm:^1.0.0"
+    inherits: "npm:^2.0.3"
+    readable-stream: "npm:^3.1.1"
+  checksum: 10c0/2f4c910b3ee7196502e1ff015a7ba321ec6ea837667220d7bcb8d0852d51cb04b87f7ae471008a6fb8f5b1a1b5078f62f3a82d30c706f20ada1238ac797e7692
+  languageName: node
+  linkType: hard
+
 "tar@npm:^4.4.10, tar@npm:^4.4.12, tar@npm:^4.4.8":
   version: 4.4.19
   resolution: "tar@npm:4.4.19"
@@ -17317,7 +17562,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tar@npm:^6.1.11, tar@npm:^6.2.1":
+"tar@npm:^6.0.2, tar@npm:^6.1.11, tar@npm:^6.1.2, tar@npm:^6.2.1":
   version: 6.2.1
   resolution: "tar@npm:6.2.1"
   dependencies:
@@ -17661,7 +17906,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-api-utils@npm:^1.0.1":
+"ts-api-utils@npm:^1.3.0":
   version: 1.3.0
   resolution: "ts-api-utils@npm:1.3.0"
   peerDependencies:
@@ -18194,17 +18439,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici-types@npm:~6.18.2":
-  version: 6.18.2
-  resolution: "undici-types@npm:6.18.2"
-  checksum: 10c0/dea28163891a5af7624c120107dc07a74c369ee94c6dd1d0de29af061ee129fac4846f97130589f4436b85f6102c73d30328ca908be02626dd8ab9fec5642aba
-  languageName: node
-  linkType: hard
-
-"undici@npm:^6.19.5":
-  version: 6.19.7
-  resolution: "undici@npm:6.19.7"
-  checksum: 10c0/801d1e66d5bccdd3fcc9ecf1c95b83a593e4867b89e21ed725e35bd4d572b3d3ce1d7feab2a4f2046f65923de70bfafb69ac148c633d1ab30a948d6fec24475a
+"undici-types@npm:~6.19.2":
+  version: 6.19.8
+  resolution: "undici-types@npm:6.19.8"
+  checksum: 10c0/078afa5990fba110f6824823ace86073b4638f1d5112ee26e790155f481f2a868cc3e0615505b6f4282bdf74a3d8caad715fd809e870c2bb0704e3ea6082f344
   languageName: node
   linkType: hard
 
@@ -18675,26 +18913,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"whatwg-encoding@npm:^3.1.1":
-  version: 3.1.1
-  resolution: "whatwg-encoding@npm:3.1.1"
-  dependencies:
-    iconv-lite: "npm:0.6.3"
-  checksum: 10c0/273b5f441c2f7fda3368a496c3009edbaa5e43b71b09728f90425e7f487e5cef9eb2b846a31bd760dd8077739c26faf6b5ca43a5f24033172b003b72cf61a93e
-  languageName: node
-  linkType: hard
-
 "whatwg-mimetype@npm:^2.3.0":
   version: 2.3.0
   resolution: "whatwg-mimetype@npm:2.3.0"
   checksum: 10c0/81c5eaf660b1d1c27575406bcfdf58557b599e302211e13e3c8209020bbac903e73c17f9990f887232b39ce570cc8638331b0c3ff0842ba224a5c2925e830b06
-  languageName: node
-  linkType: hard
-
-"whatwg-mimetype@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "whatwg-mimetype@npm:4.0.0"
-  checksum: 10c0/a773cdc8126b514d790bdae7052e8bf242970cebd84af62fb2f35a33411e78e981f6c0ab9ed1fe6ec5071b09d5340ac9178e05b52d35a9c4bcf558ba1b1551df
   languageName: node
   linkType: hard
 
@@ -18774,7 +18996,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"which@npm:^2.0.1":
+"which@npm:^2.0.1, which@npm:^2.0.2":
   version: 2.0.2
   resolution: "which@npm:2.0.2"
   dependencies:
@@ -18796,7 +19018,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"wide-align@npm:^1.1.0, wide-align@npm:^1.1.2":
+"wide-align@npm:^1.1.0, wide-align@npm:^1.1.2, wide-align@npm:^1.1.5":
   version: 1.1.5
   resolution: "wide-align@npm:1.1.5"
   dependencies:
