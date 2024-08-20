@@ -1311,7 +1311,7 @@ __metadata:
     "@nestjs/typeorm": "npm:^10.0.2"
     jest-mock-extended: "npm:^2.0.9"
   peerDependencies:
-    "@nestjs/testing": ^9.0.0
+    "@nestjs/testing": ^10.4.1
     class-transformer: "*"
     class-validator: "*"
     typeorm: ^0.3.0
