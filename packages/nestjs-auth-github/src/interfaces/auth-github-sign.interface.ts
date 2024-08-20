@@ -1,5 +1,8 @@
-import { ReferenceIdInterface } from '@concepta/ts-core';
+import {
+  ReferenceEmailInterface,
+  ReferenceIdInterface,
+} from '@concepta/ts-core';
 
-export interface AuthGithubSignInterface extends ReferenceIdInterface {
-  email: string;
-}
+export interface AuthGithubSignInterface
+  extends ReferenceIdInterface,
+    ReferenceEmailInterface {}
