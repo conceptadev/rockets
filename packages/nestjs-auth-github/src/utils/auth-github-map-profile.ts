@@ -6,8 +6,9 @@ export const mapProfile = (
 ): AuthGithubSignInterface => {
   let email = '';
 
-  if (profile.email) email = profile.email;
-  else if (profile.emails && profile.emails.length > 0) {
+  if (profile.email) {
+    email = profile.email;
+  } else if (profile.emails && profile.emails.length > 0) {
     email = profile.emails[0].value;
   }
 

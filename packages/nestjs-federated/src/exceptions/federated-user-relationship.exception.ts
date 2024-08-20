@@ -7,7 +7,7 @@ export class FederatedUserRelationshipException extends RuntimeException {
 
   constructor(
     federatedId: string,
-    message = 'Error while trying to load user relationship from federated $s',
+    message = 'Error while trying to load user relationship from federated %s',
   ) {
     super({
       message,

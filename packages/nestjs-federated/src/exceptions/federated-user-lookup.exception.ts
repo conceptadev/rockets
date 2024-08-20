@@ -11,7 +11,7 @@ export class FederatedUserLookupException extends RuntimeException {
   constructor(
     entityName: string,
     user: ReferenceIdInterface,
-    message = 'Error while trying find user $s',
+    message = 'Error while trying find user %s',
   ) {
     super({
       message,
@@ -20,6 +20,7 @@ export class FederatedUserLookupException extends RuntimeException {
     });
     this.errorCode = 'FEDERATED_USER_LOOKUP_ERROR';
     this.context = {
+      ...super.context,
       entityName,
       user,
     };
