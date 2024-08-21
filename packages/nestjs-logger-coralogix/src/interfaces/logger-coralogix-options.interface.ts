@@ -4,5 +4,5 @@ import { LoggerCoralogixSettingsInterface } from './logger-coralogix-settings.in
  * Coralogix options interface.
  */
 export interface CoralogixOptionsInterface {
-  settings: LoggerCoralogixSettingsInterface;
+  settings?: LoggerCoralogixSettingsInterface;
 }
