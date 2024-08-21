@@ -4,5 +4,5 @@ import { LoggerSentrySettingsInterface } from './logger-sentry-settings.interfac
  * LoggerSentry options interface.
  */
 export interface LoggerSentryOptionsInterface {
-  settings: LoggerSentrySettingsInterface;
+  settings?: LoggerSentrySettingsInterface;
 }
