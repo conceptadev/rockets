@@ -18,6 +18,7 @@ import { ApiKeyRoleEntityFixture } from '../__fixtures__/entities/api-key-role-e
 import { UserFactoryFixture } from '../__fixtures__/factories/user.factory.fixture';
 import { UserRoleFactoryFixture } from '../__fixtures__/factories/user-role.factory.fixture';
 import { RoleFactory } from '../role.factory';
+import { RoleAssignmentConflictException } from '../exceptions/role-assignment-conflict.exception';
 
 describe('RoleModule', () => {
   let testModule: TestingModule;
@@ -164,6 +165,50 @@ describe('RoleModule', () => {
       expect(await roleService.isAssignedRoles('user', [], testUser)).toEqual(
         false,
       );
+    });
+  });
+
+  describe('assignRole', () => {
+    it('should assign a role to an assignee', async () => {
+      const assignedRole = await roleService.assignRole(
+        'user',
+        testRole2,
+        testUser,
+      );
+
+      expect(assignedRole).toBeDefined();
+      expect(assignedRole.role.id).toEqual(testRole2.id);
+      expect(assignedRole.assignee.id).toEqual(testUser.id);
+    });
+
+    it('should throw conflict error if the role is already assigned', async () => {
+      await expect(
+        roleService.assignRole('user', testRole1, testUser),
+      ).rejects.toThrow(RoleAssignmentConflictException);
+    });
+  });
+
+  describe('assignRoles', () => {
+    it('should assign multiple roles to an assignee', async () => {
+      const rolesToAssign = [testRole2];
+
+      const assignedRoles = await roleService.assignRoles(
+        'user',
+        rolesToAssign,
+        testUser,
+      );
+
+      expect(assignedRoles).toHaveLength(1);
+      expect(assignedRoles[0].role.id).toEqual(testRole2.id);
+      expect(assignedRoles[0].assignee.id).toEqual(testUser.id);
+    });
+
+    it('should throw conflict error if any role is already assigned', async () => {
+      const rolesToAssign = [testRole1, testRole2];
+
+      await expect(
+        roleService.assignRoles('user', rolesToAssign, testUser),
+      ).rejects.toThrow(RoleAssignmentConflictException);
     });
   });
 });
