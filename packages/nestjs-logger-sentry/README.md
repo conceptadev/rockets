@@ -82,7 +82,7 @@ application.
 To demonstrate this scenario, we will set up an application where the
 `LoggerSentryModule` is used to log messages.
 
-#### Step 2: Use Sentry in Application
+#### Step 1: Use Sentry in Application
 
 Let's create a controller to call the loggerService
 
@@ -116,12 +116,14 @@ import { LoggerSentryModule, LoggerSentryTransport } from '@concepta/nestjs-logg
     LoggerSentryModule.forRoot({
       settings: {
         logLevel: ['warn'],
+        logLevelMap: (_logLevel: LogLevel): Severity => {
+          return Severity.Info;
+        },
+        formatMessage: (loggerMessage: LoggerMessageInterface) => {
+          return loggerMessage.message;
+        },
         transportConfig: {
-          privateKey: 'private',
-          category: 'logging',
-          logLevelMap: (_logLevel: LogLevel): Severity => {
-            return Severity.info;
-          },
+          dsn: 'your-sentry-dsn',
         },
       },
     }),
@@ -148,10 +150,8 @@ One of the ways you can do that is using `.env` file
 // .env file
 
 SENTRY_LOG_LEVEL="log,error"
-SENTRY_CATEGORY='my-category'
-SENTRY_APPLICATION_NAME='my-application'
-SENTRY_PRIVATE_KEY='my-private-key'
-SENTRY_SUBSYSTEM_NAME='my-subsystem-name'
+SENTRY_DSN="your-sentry-dsn"
+
 ```
 
 #### Step 3: Global Sentry Setup
@@ -186,6 +186,7 @@ Here is an example of how to configure each property of the settings:
 ##### 1. logLevel: Sets the log level for the sentry
 
 ```typescript
+//...
 LoggerSentryModule.forRoot({
   settings: {
     logLevel: ['warn'],
@@ -193,6 +194,9 @@ LoggerSentryModule.forRoot({
       dsn: 'https://examplePublicKey@o0.ingest.sentry.io/0',
       logLevelMap: (_logLevel: LogLevel): Severity => {
         return Severity.Error;
+      },
+      formatMessage: (loggerMessage: LoggerMessageInterface) => {
+        return loggerMessage.message;
       },
     },
   },
