@@ -22,16 +22,6 @@ export type CoralogixConfigFactory =
 
 /**
  * Configuration for Coralogix.
- *
- * @example
- * ```ts
- * @Module({
- *   imports: [
- *     ConfigModule.forRoot({logLevel: ['warn', 'error']})
- *   ],
- *  ...
- * })
- * ```
  */
 export const coralogixConfig: (() => LoggerCoralogixSettingsInterface) &
   ConfigFactoryKeyHost<ReturnType<() => LoggerCoralogixSettingsInterface>> =

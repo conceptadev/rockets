@@ -5,7 +5,6 @@ import {
 } from '@nestjs/config';
 
 import { LoggerSentrySettingsInterface } from '../interfaces/logger-sentry-settings.interface';
-// TODO: maybe change this to core module?
 import { splitLogLevel } from '@concepta/nestjs-logger';
 import { formatMessage, logLevelMap } from '../utils';
 
@@ -23,16 +22,6 @@ export type LoggerSentryConfigFactory =
 
 /**
  * Configuration for LoggerSentry.
- *
- * @example
- * ```ts
- * @Module({
- *   imports: [
- *     ConfigModule.forRoot({logLevel: ['warn', 'error']})
- *   ],
- *  ...
- * })
- * ```
  */
 export const loggerSentryConfig: (() => LoggerSentrySettingsInterface) &
   ConfigFactoryKeyHost<ReturnType<() => LoggerSentrySettingsInterface>> =

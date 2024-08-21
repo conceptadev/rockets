@@ -33,8 +33,6 @@ export class LoggerSentryTransport implements LoggerTransportInterface {
     const config = settings.transportConfig;
     if (!config) throw new Error('Sentry Config is required');
 
-    // TODO: this needs to be set since it will be validated on loggerService
-    // need to review if this should go inside config instead
     this.logLevel = settings.logLevel;
 
     // Initialize Sentry

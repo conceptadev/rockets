@@ -48,7 +48,6 @@ export class LoggerTransportService {
     @Inject(LOGGER_MODULE_SETTINGS_TOKEN)
     protected readonly config: LoggerSettingsInterface,
   ) {
-    // TODO: this should change to get it from the transport modules
     if (this.config?.logLevel) {
       this.logLevels = this.config.logLevel;
     }

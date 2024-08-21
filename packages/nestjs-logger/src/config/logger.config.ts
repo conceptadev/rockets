@@ -32,16 +32,6 @@ export type LoggerConfigFactory = ConfigFactory<LoggerSettingsInterface> &
 
 /**
  * Configuration for Logger.
- *
- * @example
- * ```ts
- * @Module({
- *   imports: [
- *     ConfigModule.forRoot({logLevel: ['warn', 'error']})
- *   ],
- *  ...
- * })
- * ```
  */
 export const loggerConfig: (() => LoggerSettingsInterface) &
   ConfigFactoryKeyHost<ReturnType<() => LoggerSettingsInterface>> = registerAs(
