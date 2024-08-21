@@ -1,27 +1,27 @@
 import { LoggerMessageInterface } from '@concepta/nestjs-logger';
 
 import { LogLevel } from '@nestjs/common';
-import { Severity } from '@sentry/types';
+import { SeverityLevel } from '@sentry/types';
 /**
  * Mapping from log level to sentry severity
  *
  * @param logLevel - The log level
  * @returns Severity
  */
-export const logLevelMap = (logLevel: LogLevel): Severity => {
+export const logLevelMap = (logLevel: LogLevel): SeverityLevel => {
   switch (logLevel) {
     case 'error':
-      return Severity.Error;
+      return 'error';
     case 'debug':
-      return Severity.Debug;
+      return 'debug';
     case 'log':
-      return Severity.Log;
+      return 'log';
     case 'warn':
-      return Severity.Warning;
+      return 'warning';
     case 'verbose':
-      return Severity.Info;
+      return 'info';
     default:
-      return Severity.Log;
+      return 'log';
   }
 };
 

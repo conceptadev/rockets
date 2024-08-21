@@ -1,5 +1,4 @@
 import { ConfigModule } from '@nestjs/config';
-import { Severity as SentryLogSeverity } from '@sentry/types';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import {
@@ -74,11 +73,11 @@ describe('logger-sentry configuration', () => {
         const settings = await loggerSentryConfig();
 
         if (settings && settings.transportConfig) {
-          expect(settings.logLevelMap('error')).toBe(SentryLogSeverity.Error);
-          expect(settings.logLevelMap('debug')).toBe(SentryLogSeverity.Debug);
-          expect(settings.logLevelMap('log')).toBe(SentryLogSeverity.Log);
-          expect(settings.logLevelMap('warn')).toBe(SentryLogSeverity.Warning);
-          expect(settings.logLevelMap('verbose')).toBe(SentryLogSeverity.Info);
+          expect(settings.logLevelMap('error')).toBe('error');
+          expect(settings.logLevelMap('debug')).toBe('debug');
+          expect(settings.logLevelMap('log')).toBe('log');
+          expect(settings.logLevelMap('warn')).toBe('warning');
+          expect(settings.logLevelMap('verbose')).toBe('info');
         } else {
           throw new Error('loggerConfig is not defined');
         }

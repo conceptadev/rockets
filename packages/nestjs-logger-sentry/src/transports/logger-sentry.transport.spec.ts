@@ -1,7 +1,6 @@
 import { LogLevel } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import * as Sentry from '@sentry/node';
-import { Severity as SentryLogSeverity } from '@sentry/types';
 
 import { LOGGER_SENTRY_MODULE_SETTINGS_TOKEN } from '../config/logger-sentry.config';
 import { LoggerSentryConfigInterface } from '../interfaces/logger-sentry-config.interface';
@@ -25,7 +24,7 @@ describe('loggerSentryTransport', () => {
     };
     const transportSentrySettings: LoggerSentrySettingsInterface = {
       logLevel: ['error'],
-      logLevelMap: jest.fn().mockReturnValue(SentryLogSeverity.Error),
+      logLevelMap: jest.fn().mockReturnValue('error'),
       formatMessage: jest.fn().mockReturnValue('errorMessage'),
       transportConfig: transportSentryConfig,
     };
@@ -100,7 +99,7 @@ describe('loggerSentryTransport', () => {
     expect(spyLogLevelMap).toHaveBeenCalledWith(logLevel);
     expect(spyCaptureException).toBeCalledTimes(1);
     expect(spyCaptureException).toHaveBeenCalledWith(error, {
-      level: SentryLogSeverity.Error,
+      level: 'error',
       extra: { developerMessage: errorMessage },
     });
   });
