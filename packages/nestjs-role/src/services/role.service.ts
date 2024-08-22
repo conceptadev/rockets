@@ -232,6 +232,50 @@ export class RoleService implements RoleServiceInterface {
   }
 
   /**
+   * Revoke a role from an assignee.
+   *
+   * @param assignment - The assignment type
+   * @param role - The role to revoke
+   * @param assignee - The assignee from whom the role is to be revoked
+   */
+  async revokeRole<T extends ReferenceIdInterface>(
+    assignment: ReferenceAssignment,
+    role: ReferenceIdInterface,
+    assignee: T,
+  ): Promise<void> {
+    const assignmentRepo = this.getAssignmentRepo(assignment);
+
+    // remove the role assignment if it exists
+    await assignmentRepo.delete({
+      role: { id: role.id },
+      assignee: { id: assignee.id },
+    });
+  }
+
+  /**
+   * Revoke multiple roles from an assignee.
+   *
+   * @param assignment - The assignment type
+   * @param roles - The roles to revoke
+   * @param assignee - The assignee from whom the roles are to be revoked
+   */
+  async revokeRoles<T extends ReferenceIdInterface>(
+    assignment: ReferenceAssignment,
+    roles: ReferenceIdInterface[],
+    assignee: T,
+  ): Promise<void> {
+    const assignmentRepo = this.getAssignmentRepo(assignment);
+
+    // loop through each role and delete the corresponding assignment
+    for (const role of roles) {
+      await assignmentRepo.delete({
+        role: { id: role.id },
+        assignee: { id: assignee.id },
+      });
+    }
+  }
+
+  /**
    * Get the assignment repo for the given assignment.
    *
    * @internal

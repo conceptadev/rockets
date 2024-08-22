@@ -29,6 +29,7 @@ describe('RoleModule', () => {
 
   let testRole1: RoleEntityFixture;
   let testRole2: RoleEntityFixture;
+  let testRole3: RoleEntityFixture;
   let testUser: UserEntityFixture;
 
   let connectionNumber = 1;
@@ -83,7 +84,7 @@ describe('RoleModule', () => {
       seedingSource,
     });
 
-    [testRole1, testRole2] = await roleFactory.createMany(2);
+    [testRole1, testRole2, testRole3] = await roleFactory.createMany(3);
 
     const userFactory = new UserFactoryFixture({ seedingSource });
     testUser = await userFactory.create();
@@ -190,7 +191,7 @@ describe('RoleModule', () => {
 
   describe('assignRoles', () => {
     it('should assign multiple roles to an assignee', async () => {
-      const rolesToAssign = [testRole2];
+      const rolesToAssign = [testRole2, testRole3];
 
       const assignedRoles = await roleService.assignRoles(
         'user',
@@ -198,9 +199,11 @@ describe('RoleModule', () => {
         testUser,
       );
 
-      expect(assignedRoles).toHaveLength(1);
+      expect(assignedRoles).toHaveLength(2);
       expect(assignedRoles[0].role.id).toEqual(testRole2.id);
       expect(assignedRoles[0].assignee.id).toEqual(testUser.id);
+      expect(assignedRoles[1].role.id).toEqual(testRole3.id);
+      expect(assignedRoles[1].assignee.id).toEqual(testUser.id);
     });
 
     it('should throw conflict error if any role is already assigned', async () => {
@@ -209,6 +212,80 @@ describe('RoleModule', () => {
       await expect(
         roleService.assignRoles('user', rolesToAssign, testUser),
       ).rejects.toThrow(RoleAssignmentConflictException);
+    });
+  });
+
+  describe('revokeRole', () => {
+    it('should revoke a role from an assignee', async () => {
+      await roleService.revokeRole('user', testRole1, testUser);
+
+      const isAssigned = await roleService.isAssignedRole(
+        'user',
+        testRole1,
+        testUser,
+      );
+
+      expect(isAssigned).toBe(false);
+    });
+
+    it('should not throw an error if the role assignment does not exist', async () => {
+      await expect(
+        roleService.revokeRole('user', testRole2, testUser),
+      ).resolves.toBeUndefined();
+    });
+  });
+
+  describe('revokeRoles', () => {
+    it('should revoke multiple roles from an assignee', async () => {
+      await roleService.assignRoles('user', [testRole2, testRole3], testUser);
+
+      await roleService.revokeRoles('user', [testRole2, testRole3], testUser);
+
+      const isAssigned = await roleService.isAssignedRoles(
+        'user',
+        [testRole1],
+        testUser,
+      );
+      expect(isAssigned).toBe(true);
+
+      const isRole2Assigned = await roleService.isAssignedRole(
+        'user',
+        testRole2,
+        testUser,
+      );
+
+      expect(isRole2Assigned).toBe(false);
+
+      const isRole3Assigned = await roleService.isAssignedRole(
+        'user',
+        testRole2,
+        testUser,
+      );
+
+      expect(isRole3Assigned).toBe(false);
+    });
+
+    it('should revoke all roles from an assignee', async () => {
+      await roleService.assignRoles('user', [testRole2, testRole3], testUser);
+
+      await roleService.revokeRoles(
+        'user',
+        [testRole1, testRole2, testRole3],
+        testUser,
+      );
+
+      const assignedRoles = await roleService.getAssignedRoles(
+        'user',
+        testUser,
+      );
+
+      expect(assignedRoles).toHaveLength(0);
+    });
+
+    it('should not throw an error if none of the role assignments exist', async () => {
+      await expect(
+        roleService.revokeRoles('user', [testRole2], testUser),
+      ).resolves.toBeUndefined();
     });
   });
 });

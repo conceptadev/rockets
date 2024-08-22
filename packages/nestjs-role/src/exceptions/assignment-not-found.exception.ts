@@ -1,21 +1,16 @@
-import { format } from 'util';
-import { ExceptionInterface } from '@concepta/ts-core';
+import { RuntimeException } from '@concepta/nestjs-exception';
+import { HttpStatus } from '@nestjs/common';
 
-export class AssignmentNotFoundException
-  extends Error
-  implements ExceptionInterface
-{
-  errorCode = 'ROLE_ASSIGNMENT_NOT_FOUND_ERROR';
+export class AssignmentNotFoundException extends RuntimeException {
+  constructor(assignmentName: string) {
+    super({
+      message: 'Assignment %s was not registered to be used.',
+      messageParams: [assignmentName],
+      httpStatus: HttpStatus.NOT_FOUND,
+    });
 
-  context: {
-    assignmentName: string;
-  };
+    this.errorCode = 'ROLE_ASSIGNMENT_NOT_FOUND_ERROR';
 
-  constructor(
-    assignmentName: string,
-    message = 'Assignment %s was not registered to be used.',
-  ) {
-    super(format(message, assignmentName));
     this.context = {
       assignmentName,
     };
