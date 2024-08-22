@@ -4,10 +4,6 @@ import {
   AuthGoogleAsyncOptions,
   AuthGoogleModuleClass,
   AuthGoogleOptions,
-  createAuthGoogleControllers,
-  createAuthGoogleExports,
-  createAuthGoogleImports,
-  createAuthGoogleProviders,
 } from './auth-google.module-definition';
 
 /**
