@@ -1,8 +1,8 @@
 import { ReferenceAssignment, ReferenceIdInterface } from '@concepta/ts-core';
 import { RoleInterface } from '@concepta/ts-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
-
 import { RoleEntityInterface } from './role-entity.interface';
+import { RoleAssignmentEntityInterface } from './role-assignment-entity.interface';
 
 export interface RoleServiceInterface {
   /**
@@ -44,4 +44,55 @@ export interface RoleServiceInterface {
     assignee: T,
     queryOptions?: QueryOptionsInterface,
   ): Promise<boolean>;
+  /**
+   * Assign a role to an assignee.
+   *
+   * @param assignment - The assignment type
+   * @param role - The role to assign
+   * @param assignee - The assignee to assign the role
+   */
+  assignRole(
+    assignment: ReferenceAssignment,
+    role: ReferenceIdInterface,
+    assignee: ReferenceIdInterface,
+  ): Promise<RoleAssignmentEntityInterface>;
+
+  /**
+   * Assign multiple roles to an assignee.
+   *
+   * @param assignment - The assignment type
+   * @param roles - The roles to assign
+   * @param assignee - The assignee to assign the roles
+   */
+  assignRoles(
+    assignment: ReferenceAssignment,
+    roles: ReferenceIdInterface[],
+    assignee: ReferenceIdInterface,
+  ): Promise<RoleAssignmentEntityInterface[]>;
+
+  /**
+   * Revoke a role from an assignee.
+   *
+   * @param assignment - The assignment type
+   * @param role - The role to revoke
+   * @param assignee - The assignee from whom the role is to be revoked
+   */
+  revokeRole(
+    assignment: ReferenceAssignment,
+    role: ReferenceIdInterface,
+    assignee: ReferenceIdInterface,
+  ): Promise<void>;
+
+  /**
+   * Revoke multiple roles from an assignee.
+   *
+   * @param assignment - The assignment type
+   * @param roles - The roles to revoke
+   * @param assignee - The assignee from whom the roles are to be revoked
+   */
+  revokeRoles(
+    assignment: ReferenceAssignment,
+    roles: ReferenceIdInterface[],
+    assignee: ReferenceIdInterface,
+  ): Promise<void>;
 }

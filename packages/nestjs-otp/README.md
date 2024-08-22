@@ -1,6 +1,7 @@
 # Rockets NestJS Otp
 
-A module for managing a basic Otp entity, including controller with full CRUD, DTOs, sample data factory and seeder.
+A module for managing a basic Otp entity, including controller
+with full CRUD, DTOs, sample data factory and seeder.
 
 ## Project
 

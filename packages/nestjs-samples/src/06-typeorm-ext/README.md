@@ -1,16 +1,6 @@
-<div align="center">
-  <h1 align="center">Nest.Js TypeOrmExt Sample</h1>
-
-<p align="center">
-    <a href="https://github.com"><strong>Explore the docs »</strong></a>
-    <br />
-    <br />
-  </p>
-</div>
+# Nest.Js TypeOrmExt Sample
 
 ## Description
-
-</br>
 
 ## Libraries Documentation
 
@@ -26,8 +16,6 @@ A list of all the necessary Rockets libraries that the TypeOrmExt Module Sample 
 - [@concepta/nestjs-password](https://github.com)
 - [@concepta/nestjs-typeorm-ext](https://github.com)
 - [@concepta/nestjs-user](https://github.com)
-
-</br>
 
 ### Setup a new Nest.js project
 
@@ -48,9 +36,7 @@ yarn add @concepta/nestjs-core @concepta/nestjs-core @concepta/nestjs-auth-local
 ### Basic Sample Implementation
 
 - [app.module.ts](packages/nestjs-samples/src/06-typeorm-ext/app.module.ts)
-
 - [custom-repository](packages/nestjs-samples/src/06-typeorm-ext/app.module.ts)
-
 - [custom-user](packages/nestjs-samples/src/06-typeorm-ext/app.module.ts)
 
 📝 License

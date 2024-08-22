@@ -141,11 +141,13 @@ AuthRefreshModule.forRoot({
 > Additionally, you can take advantage of the `MyUserLookupService`
 > from the `@concepta/nestjs-user` module to streamline user lookup
 > operations within your authentication flow, check
-> [User Module Documentation](#user-module-documentation) for reference:
+> [User Module Documentation](https://www.rockets.tools/reference/rockets/nestjs-user/README)
+> for reference:
 
 By default, `AuthRefreshModule` uses services defined in the
-[AuthenticationModule](#nestjs-auth) to verify refresh tokens. However, you
-can override this behavior by providing a custom service specifically for the
+[AuthenticationModule](https://www.rockets.tools/reference/rockets/nestjs-authentication/README)
+to verify refresh tokens. However, you can override this behavior by
+providing a custom service specifically for the
 refresh token implementation during the module setup.
 
 #### 1.4 First Token Refresh
@@ -285,13 +287,15 @@ export class MyUserLookupService extends AuthRefreshUserLookupServiceInterface {
 ### 5. Implementing and Using Custom Token Verification Service
 
 By default, `AuthRefreshModule` uses services defined in the
-[AuthenticationModule](#nestjs-auth) to verify refresh tokens. However, you
-can override this behavior by providing a custom service specifically for
-the refresh token implementation during the module setup.
+[AuthenticationModule](https://www.rockets.tools/reference/rockets/nestjs-authentication/README)
+to verify refresh tokens. However, you can override this behavior by providing
+a custom service specifically for the refresh token implementation during
+the module setup.
 
 For more details on implementing a custom token verification service, refer to
 section 5 of the How-To Guide in the
-[@concepta/nestjs-auth-jwt](#nestjs-auth-jwt) documentation.
+[@concepta/nestjs-auth-jwt](https://www.rockets.tools/reference/rockets/nestjs-auth-jwt/README)
+documentation.
 
 ### 6. Overwriting the Settings
 

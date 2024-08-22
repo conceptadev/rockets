@@ -1,6 +1,7 @@
 # Rockets NestJS Password
 
-A flexible Password utilities module that provides services for password strength, creation and storage.
+A flexible Password utilities module that provides services for password
+strength, creation and storage.
 
 ## Project
 
@@ -12,9 +13,11 @@ A flexible Password utilities module that provides services for password strengt
 
 ## Overview
 
-The module exports three services: `PasswordStrengthService`, `PasswordCreationService`, and `PasswordStorageService`.
+The module exports three services: `PasswordStrengthService`,
+`PasswordCreationService`, and `PasswordStorageService`.
 
-The `PasswordCreationService` uses the `PasswordStrengthService` internally for check password strength.
+The `PasswordCreationService` uses the `PasswordStrengthService`
+internally for check password strength.
 
 ## Installation
 

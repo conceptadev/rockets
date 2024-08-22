@@ -1190,6 +1190,7 @@ __metadata:
     "@concepta/nestjs-access-control": "npm:^5.0.0-alpha.1"
     "@concepta/nestjs-common": "npm:^5.0.0-alpha.1"
     "@concepta/nestjs-crud": "npm:^5.0.0-alpha.1"
+    "@concepta/nestjs-exception": "npm:^5.0.0-alpha.1"
     "@concepta/nestjs-typeorm-ext": "npm:^5.0.0-alpha.1"
     "@concepta/ts-common": "npm:^5.0.0-alpha.1"
     "@concepta/ts-core": "npm:^5.0.0-alpha.1"
