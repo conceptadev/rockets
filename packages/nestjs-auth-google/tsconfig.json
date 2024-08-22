@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig",
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "typeRoots": ["./node_modules/@types", "../../node_modules/@types"]
+  },
+  "include": [
+    "src/**/*.ts",
+    "../ts-common/src/authentication/interfaces/auth-google-login.interface.ts"
+  ],
+  "references": [
+    {
+      "path": "../nestjs-federated"
+    },
+    {
+      "path": "../nestjs-exception"
+    }
+  ]
+}
