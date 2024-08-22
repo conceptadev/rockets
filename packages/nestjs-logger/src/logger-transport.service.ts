@@ -42,21 +42,21 @@ export class LoggerTransportService {
   /**
    * Constructor
    *
-   * @param settings - logger settings
+   * @param config - The configuration
    */
   constructor(
     @Inject(LOGGER_MODULE_SETTINGS_TOKEN)
-    protected readonly settings: LoggerSettingsInterface,
+    protected readonly config: LoggerSettingsInterface,
   ) {
-    if (this.settings?.transportLogLevel) {
-      this.logLevels = this.settings.transportLogLevel;
+    if (this.config?.logLevel) {
+      this.logLevels = this.config.logLevel;
     }
   }
 
   /**
    * Method to add the transport that will be used
    *
-   * @param transport - Instance of a logger transport
+   * @param transport - transport to be added
    */
   public addTransport(transport: LoggerTransportInterface): void {
     this.loggerTransports.push(transport);
@@ -65,17 +65,19 @@ export class LoggerTransportService {
   /**
    * Method to log message to the transport based on the log level
    *
-   * @param message - message
-   * @param logLevel - log level
-   * @param error - error
+   * @param message - Message to log
+   * @param logLevel - level of severity
+   * @param error - Error
    */
   public log(message: string, logLevel: LogLevel, error?: Error): void {
-    // are we supposed to send this log level?
-    if (this.logLevels.includes(logLevel)) {
-      // yes, call all logger transports
-      this.loggerTransports.map((loggerTransport) =>
-        loggerTransport.log(message, logLevel, error),
-      );
-    }
+    this.loggerTransports.map((loggerTransport) => {
+      // get log levels of the transport, or fallback for the logger config
+      const logLevels = loggerTransport.logLevel || this.logLevels;
+
+      // are we supposed to send this log level based on transport
+      if (logLevels.includes(logLevel)) {
+        return loggerTransport.log(message, logLevel, error);
+      }
+    });
   }
 }
