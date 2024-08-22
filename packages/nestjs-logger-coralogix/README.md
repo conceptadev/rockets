@@ -1,8 +1,8 @@
 # Rockets NestJS Coralogix
 
-This module is a drop-in replacement for the core NestJS coralogix that provides
-additional support for pushing log data to one or multiple external log
-consumption providers.
+This module is a drop-in replacement for the core NestJS coralogix that 
+provides additional support for pushing log data to one or multiple external 
+log consumption providers.
 
 ## Project
 
@@ -72,8 +72,8 @@ yarn add @concepta/nestjs-coralogix
 
 ### Overview
 
-This section covers the basics of setting up the `LoggerCoralogixModule` in a NestJS
-application.
+This section covers the basics of setting up the `LoggerCoralogixModule` in a 
+NestJS application.
 
 ### Basic Setup
 
@@ -101,7 +101,9 @@ export class AppController {
 ```
 
 Finally, we import `LoggerCoralogixModule` and `LoggerModule` to use the
-`LoggerCoralogixTransport` in our application, however `loggerService` will handle that for you. All you need to do is just define the transport on `LoggerModule`.
+`LoggerCoralogixTransport` in our application, however `loggerService` will
+handle that for you. All you need to do is just define the transport on
+`LoggerModule`.
 
 ```typescript
 import { LogLevel, Module } from '@nestjs/common';
@@ -141,8 +143,8 @@ export class AppModule {}
 
 #### Step 2: Setup environment variables
 
-To use the default configuration, you need to define the environments variables.
-One of the ways you can do that is using `.env` file
+To use the default configuration, you need to define the environments 
+variables. One of the ways you can do that is using `.env` file
 
 ```zsh
 // .env file
@@ -176,8 +178,8 @@ bootstrap();
 
 ### 1. How to Configure LoggerCoralogixModule Settings
 
-The `LoggerCoralogixModule` provides several configurable settings to customize its
-behavior.
+The `LoggerCoralogixModule` provides several configurable settings to 
+customize its behavior.
 
 #### Settings Example
 
@@ -218,36 +220,47 @@ export class App {}
 
 #### What is This Library?
 
-The `@nestjs-coralogix` library is a comprehensive solution for managing logging processes within a NestJS application. It provides services for logging messages and supports external log consumption providers.
+The `@nestjs-coralogix` library is a comprehensive solution for managing
+logging processes within a NestJS application. It provides services for
+logging messages and supports external log consumption providers.
 
 #### Benefits of Using This Library
 
 - **External Transports**: Supports pushing log data to external providers.
 - **Customizable**: Allows for the creation of custom transports.
-- **Seamless Integration**: Integrates smoothly with existing NestJS applications.
+- **Seamless Integration**: Integrates smoothly with existing NestJS 
+applications.
 
 ### Design Choices
 
 #### Why Use Custom Coralogix?
 
-Custom loggers provide more flexibility and control over how log messages are handled and where they are sent.
+Custom loggers provide more flexibility and control over how log messages are 
+handled and where they are sent.
 
 #### Global, Synchronous vs Asynchronous Registration
 
-The `LoggerCoralogixModule` supports both synchronous and asynchronous registration:
+The `LoggerCoralogixModule` supports both synchronous and asynchronous 
+registration:
 
-- **Global Registration**: Makes the module available throughout the entire application.
-- **Synchronous Registration**: Used when configuration options are static and available at application startup.
-- **Asynchronous Registration**: Beneficial when configuration options need to be retrieved from external sources at runtime.
+- **Global Registration**: Makes the module available throughout the entire 
+application.
+- **Synchronous Registration**: Used when configuration options are static and 
+available at application startup.
+- **Asynchronous Registration**: Beneficial when configuration options need to 
+be retrieved from external sources at runtime.
 
 ### Integration Details
 
 #### Integrating with Other Modules
 
-The `LoggerCoralogixModule` integrates smoothly with other NestJS modules. Here are some integration details:
+The `LoggerCoralogixModule` integrates smoothly with other NestJS modules. 
+Here are some integration details:
 
-- **@nestjs/common**: Use the `LoggerService` from `@concepta/nestjs-logger` to replace the default NestJS logger.
-- **External Transports**: Create custom transports to send log data to external providers like Sentry.
+- **@nestjs/common**: Use the `LoggerService` from `@concepta/nestjs-logger` 
+to replace the default NestJS logger.
+- **External Transports**: Create custom transports to send log data to 
+external providers like Sentry.
 
 # References
 
