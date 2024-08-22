@@ -2,17 +2,8 @@
 
 A flexible JWT utilities module for signing and validating tokens.
 
-This module extends/wraps the [@nestjs/jwt](https://www.npmjs.com/package/@nestjs/jwt) module.
-
-## Project
-
-[![NPM Latest](https://img.shields.io/npm/v/@concepta/nestjs-jwt)](https://www.npmjs.com/package/@concepta/nestjs-jwt)
-[![NPM Downloads](https://img.shields.io/npm/dw/@conceptadev/nestjs-jwt)](https://www.npmjs.com/package/@concepta/nestjs-jwt)
-[![GH Last Commit](https://img.shields.io/github/last-commit/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets)
-[![GH Contrib](https://img.shields.io/github/contributors/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets/graphs/contributors)
-[![NestJS Dep](https://img.shields.io/github/package-json/dependency-version/conceptadev/rockets/@nestjs/common?label=NestJS&logo=nestjs&filename=packages%2Fnestjs-core%2Fpackage.json)](https://www.npmjs.com/package/@nestjs/common)
-
-# JWT Module Documentation
+This module extends/wraps the [@nestjs/jwt](https://www.npmjs.com/package/@nestjs/jwt)
+module.
 
 ## Project
 
@@ -30,7 +21,7 @@ This module extends/wraps the [@nestjs/jwt](https://www.npmjs.com/package/@nestj
     - [Purpose and Key Features](#purpose-and-key-features)
     - [Installation](#installation)
   - [Basic Setup](#basic-setup)
-  - [Creating custom jwtIssueService](#creating-custom-jwtIssueService)
+  - [Creating custom jwtIssueService](#creating-custom-jwtissueservice)
     - [Environment Variables](#environment-variables)
 - [How to Guides](#how-to-guides)
   - [1. How to Set Up JwtModule with forRoot](#1-how-to-set-up-jwtmodule-with-forroot)
@@ -49,7 +40,6 @@ This module extends/wraps the [@nestjs/jwt](https://www.npmjs.com/package/@nestj
     - [Global, Synchronous vs Asynchronous Registration](#global-synchronous-vs-asynchronous-registration)
   - [Integration Details](#integration-details)
     - [Integrating with Other Modules](#integrating-with-other-modules)
-- [References](#references)
 
 # Tutorials
 
@@ -95,7 +85,7 @@ yarn add @concepta/nestjs-jwt
 
 ## Basic Setup
 
-To set up the `JwtModule`, follow the basic setup tutorial in the 
+To set up the `JwtModule`, follow the basic setup tutorial in the
 [nestjs-authentication README](https://github.com/conceptadev/nestjs-authentication).
 
 ## Creating custom jwtIssueService
@@ -124,7 +114,7 @@ export class CustomJwtIssueService implements JwtIssueServiceInterface {
 }
 ```
 
-2. Provide the custom implementation in your module configuration:
+1. Provide the custom implementation in your module configuration:
 
 ```ts
 import { Module } from '@nestjs/common';
@@ -152,7 +142,7 @@ This example shows how to customize the `JwtIssueService` with a custom
 implementation. Similar steps can be followed to override other services in
 `JwtModule`.
 
-### environment variables 
+### environment variables
 
 Configurations available via environment.
 
@@ -163,11 +153,12 @@ Configurations available via environment.
 | `JWT_MODULE_REFRESH_SECRET`     | `<string \| Buffer>` | copied from access secret  | Refresh token secret            |
 | `JWT_MODULE_REFRESH_EXPIRES_IN` | `<string \| number>` | `'1y'`                     | Refresh token expiration length |
 
-> \* For security reasons, a random UUID will only be generated for the default secret when `NODE_ENV !== 'production'`.
+> \* For security reasons, a random UUID will only be generated for
+> the default secret when `NODE_ENV !== 'production'`.
 
 # How to Guides
 
-### 1. How to Set Up JwtModule with forRoot
+## 1. How to Set Up JwtModule with forRoot
 
 To set up the `JwtModule`, follow these steps:
 
@@ -186,13 +177,13 @@ export class AppModule {}
 This setup configures the `JwtModule` with global settings and integrates the
 `JwtModule` for JWT-based authentication.
 
-### 2. How to Configure JwtModule Settings
+## 2. How to Configure JwtModule Settings
 
 The `JwtModule` provides several configurable settings to customize its
 behavior. Each setting can be defined in the module configuration and will
 create default services to be used in other modules.
 
-#### Settings Example
+### Settings Example
 
 Here is an example of how to configure each property of the settings:
 
@@ -218,9 +209,10 @@ export class AppModule {}
 ### 3. Overriding Defaults
 
 To override the default services, you can provide custom implementations for
-any of the services. 
+any of the services.
 
 #### JwtAccessService
+
 ```ts
 @Injectable()
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
@@ -266,7 +258,7 @@ export class CustomJwtIssueService implements JwtIssueServiceInterface {
 }
 ```
 
-#### JwtVerifyService.
+#### JwtVerifyService
 
 ```ts
 import { Injectable } from '@nestjs/common';
@@ -340,7 +332,7 @@ export class CustomJwtSignService implements JwtSignServiceInterface {
 
 ```
 
-2. Provide the custom implementations in your module configuration:
+1. Provide the custom implementations in your module configuration:
 
 ```ts
 import { Module } from '@nestjs/common';
@@ -370,12 +362,11 @@ This example shows how to customize the `JwtIssueService` and `JwtVerifyService`
 with custom implementations. Similar steps can be followed to override other
 services in `JwtModule`.
 
-
 # Explanation
 
-### Conceptual Overview
+## Conceptual Overview
 
-#### What is This Library?
+### What is This Library?
 
 The `nestjs-jwt` library is a comprehensive solution for managing authentication
 processes within a NestJS application. It provides services for issuing JWTs,
@@ -383,7 +374,7 @@ validating user credentials, and verifying tokens. The library integrates
 seamlessly with other modules in the `nestjs-auth` suite, making it a versatile
 choice for various authentication needs.
 
-#### Benefits of Using This Library
+### Benefits of Using This Library
 
 - **Secure Token Management**: Robust mechanisms for issuing and managing access
   and refresh tokens.
@@ -435,13 +426,3 @@ The `nestjs-jwt` module integrates smoothly with other modules in the
 
 By combining these modules, you can create a comprehensive authentication system
 that meets various security requirements and user needs.
-
-## References
-
-For further details and external references, please visit the following link:
-
-[External Authentication References](#)
-
-This link provides additional information and resources related to the
-authentication processes and best practices in NestJS applications.
-

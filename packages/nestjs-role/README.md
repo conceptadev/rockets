@@ -1,6 +1,7 @@
 # Rockets NestJS Role
 
-A module for managing a basic Role entity, including controller with full CRUD, DTOs, sample data factory and seeder.
+A module for managing a basic Role entity, including controller with
+full CRUD, DTOs, sample data factory and seeder.
 
 ## Project
 

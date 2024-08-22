@@ -31,8 +31,8 @@ module to define their own concrete data storage.
 
 ## Module Design
 
-Designing your module to use this extension is fairly straight forward, but a bit too verbose
-for this readme.
+Designing your module to use this extension is fairly straight forward,
+but a bit too verbose for this readme.
 
 To see how this was implemented in our
 [UserModule](https://github.com/conceptadev/rockets/blob/main/packages/nestjs-user)
