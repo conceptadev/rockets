@@ -30,14 +30,4 @@ export class AuthGoogleModule extends AuthGoogleModuleClass {
   static forRootAsync(options: AuthGoogleAsyncOptions): DynamicModule {
     return super.registerAsync({ ...options, global: true });
   }
-
-  static forFeature(options: AuthGoogleOptions): DynamicModule {
-    return {
-      module: AuthGoogleModule,
-      imports: createAuthGoogleImports(),
-      providers: createAuthGoogleProviders({ overrides: options }),
-      controllers: createAuthGoogleControllers(options),
-      exports: createAuthGoogleExports(),
-    };
-  }
 }
