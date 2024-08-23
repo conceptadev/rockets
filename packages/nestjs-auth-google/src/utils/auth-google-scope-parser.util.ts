@@ -1,4 +1,3 @@
-
 /**
  * Parses a comma-separated string of Google OAuth scopes into an array of individual scope strings.
  *
