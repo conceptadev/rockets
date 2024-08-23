@@ -1,9 +1,9 @@
 import { AuthGoogleProfileInterface } from '../interfaces/auth-google-profile.interface';
-import { AuthGoogleSignInterface } from '../interfaces/auth-google-sign.interface';
+import { AuthGoogleSignInterface as AuthGoogleCredentialsInterface } from '../interfaces/auth-google-credentials.interface';
 
 export const mapProfile = (
   profile: AuthGoogleProfileInterface,
-): AuthGoogleSignInterface => {
+): AuthGoogleCredentialsInterface => {
   let email = '';
 
   if (profile.email) {
@@ -12,8 +12,8 @@ export const mapProfile = (
     email = profile.emails[0].value;
   }
 
-  const result: AuthGoogleSignInterface = {
-    id: profile?.id || '',
+  const result: AuthGoogleCredentialsInterface = {
+    id: profile?.id ?? '',
     email,
   };
   return result;

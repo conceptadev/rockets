@@ -1,6 +1,6 @@
 import { AuthenticationCodeInterface } from '@concepta/ts-common';
 import { Type } from '@nestjs/common';
-import { MapProfile } from './auth-github-map-profile.type';
+import { MapProfile } from '../auth-github.types';
 
 export interface AuthGithubSettingsInterface {
   clientId: string;

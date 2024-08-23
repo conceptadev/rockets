@@ -13,7 +13,6 @@ import {
 import { AUTH_GOOGLE_ISSUE_TOKEN_SERVICE_TOKEN } from './auth-google.constants';
 import { AuthGoogleGuard } from './auth-google.guard';
 
-// TODO: improve documentation
 /**
  * Google controller
  *
@@ -51,7 +50,6 @@ export class AuthGoogleController {
     return;
   }
 
-  // TODO: Check  why post does not work for a callback
   @ApiOkResponse({
     type: AuthenticationJwtResponseDto,
     description: 'DTO containing an access token and a refresh token.',

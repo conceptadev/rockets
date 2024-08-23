@@ -3,7 +3,7 @@ import { AUTH_GOOGLE_MODULE_DEFAULT_SETTINGS_TOKEN } from '../auth-google.consta
 import { AuthGoogleSettingsInterface } from '../interfaces/auth-google-settings.interface';
 import { AuthGoogleLoginDto } from '../dto/auth-google-login.dto';
 import { mapProfile } from '../utils/auth-google-map-profile';
-import { authGoogleScopeParse } from '../utils/auth-google-scope-parser.util';
+import { authGoogleParseScope } from '../utils/auth-google-scope-parser.util';
 
 /**
  * Default configuration for auth google.
@@ -20,7 +20,7 @@ export const authGoogleDefaultConfig = registerAs(
     callbackURL: process.env.GOOGLE_CALLBACK_URL ?? 'callback_url',
     scope:
       'GOOGLE_SCOPE' in process.env && process.env.GOOGLE_SCOPE
-        ? authGoogleScopeParse(process.env.GOOGLE_SCOPE)
+        ? authGoogleParseScope(process.env.GOOGLE_SCOPE)
         : ['email', 'profile'],
     mapProfile: mapProfile,
   }),

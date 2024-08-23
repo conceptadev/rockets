@@ -1,9 +1,9 @@
 import { AuthGithubProfileInterface } from '../interfaces/auth-github-profile.interface';
-import { AuthGithubSignInterface } from '../interfaces/auth-github-sign.interface';
+import { AuthGithubCredentialsInterface } from '../interfaces/auth-github-credentials.interface';
 
 export const mapProfile = (
   profile: AuthGithubProfileInterface,
-): AuthGithubSignInterface => {
+): AuthGithubCredentialsInterface => {
   let email = '';
 
   if (profile.email) {
@@ -12,8 +12,8 @@ export const mapProfile = (
     email = profile.emails[0].value;
   }
 
-  const result: AuthGithubSignInterface = {
-    id: profile?.id || '',
+  const result: AuthGithubCredentialsInterface = {
+    id: profile?.id ?? '',
     email,
   };
   return result;
