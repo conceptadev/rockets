@@ -1,18 +1,21 @@
-export * from './auth-google.module';
-export * from './auth-google.controller';
+export { AuthGoogleModule } from './auth-google.module';
+export { AuthGoogleController } from './auth-google.controller';
 
 // dto
-export * from './dto/auth-google-login.dto';
+export { AuthGoogleLoginDto } from './dto/auth-google-login.dto';
 
 // types
-export * from './auth-google.types';
+export { MapProfile } from './auth-google.types';
 
 // utils
-export * from './utils/auth-google-map-profile';
+export { mapProfile } from './utils/auth-google-map-profile';
+
+// strategy
+export { AuthGoogleStrategy } from './auth-google.strategy';
 
 // interfaces
-export * from './interfaces/auth-google-profile.interface';
-export * from './interfaces/auth-google-credentials.interface';
+export { AuthGoogleProfileInterface } from './interfaces/auth-google-profile.interface';
+export { AuthGoogleCredentialsInterface } from './interfaces/auth-google-credentials.interface';
 
 export {
   AuthGoogleGuard,

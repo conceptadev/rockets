@@ -1,5 +1,5 @@
 import { AuthGoogleProfileInterface } from '../interfaces/auth-google-profile.interface';
-import { AuthGoogleSignInterface as AuthGoogleCredentialsInterface } from '../interfaces/auth-google-credentials.interface';
+import { AuthGoogleCredentialsInterface as AuthGoogleCredentialsInterface } from '../interfaces/auth-google-credentials.interface';
 
 export const mapProfile = (
   profile: AuthGoogleProfileInterface,

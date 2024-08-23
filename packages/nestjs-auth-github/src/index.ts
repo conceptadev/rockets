@@ -1,19 +1,21 @@
-export * from './auth-github.module';
-export * from './auth-github.controller';
+export { AuthGithubModule } from './auth-github.module';
+export { AuthGithubController } from './auth-github.controller';
 
 // dto
-export * from './dto/auth-github-login.dto';
+export { AuthGithubLoginDto } from './dto/auth-github-login.dto';
 
 // types
-export * from './auth-github.types';
+export { MapProfile } from './auth-github.types';
 
 // utils
-export * from './utils/auth-github-map-profile';
+export { mapProfile } from './utils/auth-github-map-profile';
+
+// strategy
+export { AuthGithubStrategy } from './auth-github.strategy';
 
 // interfaces
-export * from './interfaces/auth-github-profile.interface';
-export * from './interfaces/auth-github-credentials.interface';
-
+export { AuthGithubProfileInterface } from './interfaces/auth-github-profile.interface';
+export { AuthGithubCredentialsInterface } from './interfaces/auth-github-credentials.interface';
 
 export {
   AuthGithubGuard,
