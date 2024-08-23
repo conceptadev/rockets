@@ -716,6 +716,39 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@concepta/nestjs-auth-google@workspace:packages/nestjs-auth-google":
+  version: 0.0.0-use.local
+  resolution: "@concepta/nestjs-auth-google@workspace:packages/nestjs-auth-google"
+  dependencies:
+    "@concepta/nestjs-auth-jwt": "npm:^5.0.0-alpha.2"
+    "@concepta/nestjs-authentication": "npm:^5.0.0-alpha.2"
+    "@concepta/nestjs-common": "npm:^5.0.0-alpha.2"
+    "@concepta/nestjs-core": "npm:^5.0.0-alpha.2"
+    "@concepta/nestjs-crud": "npm:^5.0.0-alpha.2"
+    "@concepta/nestjs-exception": "npm:^5.0.0-alpha.2"
+    "@concepta/nestjs-federated": "npm:^5.0.0-alpha.2"
+    "@concepta/nestjs-jwt": "npm:^5.0.0-alpha.2"
+    "@concepta/nestjs-password": "npm:^5.0.0-alpha.2"
+    "@concepta/nestjs-typeorm-ext": "npm:^5.0.0-alpha.2"
+    "@concepta/nestjs-user": "npm:^5.0.0-alpha.2"
+    "@concepta/ts-common": "npm:^5.0.0-alpha.2"
+    "@concepta/ts-core": "npm:^5.0.0-alpha.2"
+    "@nestjs/common": "npm:^10.4.1"
+    "@nestjs/config": "npm:^3.2.3"
+    "@nestjs/core": "npm:^10.4.1"
+    "@nestjs/passport": "npm:^10.0.3"
+    "@nestjs/swagger": "npm:^7.4.0"
+    "@nestjs/testing": "npm:^10.4.1"
+    "@types/passport-google-oauth20": "npm:^2.0.16"
+    passport-google-oauth20: "npm:^2.0.0"
+  peerDependencies:
+    class-transformer: "*"
+    class-validator: "*"
+    rxjs: ^7.1.0
+    typeorm: ^0.3.0
+  languageName: unknown
+  linkType: soft
+
 "@concepta/nestjs-auth-jwt@npm:^5.0.0-alpha.2, @concepta/nestjs-auth-jwt@workspace:packages/nestjs-auth-jwt":
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-auth-jwt@workspace:packages/nestjs-auth-jwt"
@@ -4248,6 +4281,17 @@ __metadata:
     "@types/passport": "npm:*"
     "@types/passport-oauth2": "npm:*"
   checksum: 10c0/85b3ac776bae991a1e4100fdce08a771d78185d638b575f273d7329477c44fd1e51fa6f1967ef62199ed0e7e2a01a600bf41b85cf1503514aad183d79bd7524c
+  languageName: node
+  linkType: hard
+
+"@types/passport-google-oauth20@npm:^2.0.16":
+  version: 2.0.16
+  resolution: "@types/passport-google-oauth20@npm:2.0.16"
+  dependencies:
+    "@types/express": "npm:*"
+    "@types/passport": "npm:*"
+    "@types/passport-oauth2": "npm:*"
+  checksum: 10c0/59b044d4227e5481972ec8734dd826e1cf88673905e14e09fb21e061764796eb543b070e679a2077f69ae3e35ede265b91ae23f9975cad6085b72ae4272ae928
   languageName: node
   linkType: hard
 
@@ -15250,6 +15294,15 @@ __metadata:
   dependencies:
     passport-oauth2: "npm:1.x.x"
   checksum: 10c0/2d63e28151f6d00a3ca3a2207ef013e407a111326369b1ca89389f6b5ca22db6483bde15d4989734dd9808b1f603e0dd47f3c9bfff854ded308cfb764e89ab01
+  languageName: node
+  linkType: hard
+
+"passport-google-oauth20@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "passport-google-oauth20@npm:2.0.0"
+  dependencies:
+    passport-oauth2: "npm:1.x.x"
+  checksum: 10c0/158930bb97a48431aa0dcff453c3b698742ed51e2d590c362cb5d4ae7715cfb4fb1feae31b007aef0bc8435edc8ff678853c044b139da827756f3b5f3b597c7f
   languageName: node
   linkType: hard
 

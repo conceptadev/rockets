@@ -3,6 +3,6 @@ import {
   ReferenceIdInterface,
 } from '@concepta/ts-core';
 
-export interface AuthGithubSignInterface
+export interface AuthGoogleCredentialsInterface
   extends ReferenceIdInterface,
     ReferenceEmailInterface {}

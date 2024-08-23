@@ -13,9 +13,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "typeRoots": [
-      "./node_modules/@types"
-    ]
+    "typeRoots": ["./node_modules/@types"]
   },
   "files": [],
   "references": [
@@ -102,6 +100,9 @@
     },
     {
       "path": "packages/nestjs-cache"
+    },
+    {
+      "path": "packages/nestjs-auth-google"
     },
     {
       "path": "packages/nestjs-logger-coralogix"
