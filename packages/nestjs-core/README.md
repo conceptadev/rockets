@@ -17,4 +17,3 @@ The core module is a dependency of all Rockets modules.
 ## Configuration
 
 Available configuration options:
-

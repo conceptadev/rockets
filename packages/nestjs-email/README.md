@@ -1,6 +1,7 @@
 # Rockets NestJS Email
 
-Email deliver module that supports the popular [@nestjs-modules/mailer](https://www.npmjs.com/package/@nestjs-modules/mailer) module.
+Email deliver module that supports the popular
+[@nestjs-modules/mailer](https://www.npmjs.com/package/@nestjs-modules/mailer) module.
 
 ## Project
 

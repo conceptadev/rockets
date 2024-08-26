@@ -1,6 +1,6 @@
 {
   "name": "@concepta/nestjs-logger",
-  "version": "5.0.0-alpha.0",
+  "version": "5.0.0-alpha.2",
   "description": "Rockets NestJS Logger",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,16 +12,14 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
-    "@concepta/nestjs-common": "^5.0.0-alpha.0",
+    "@concepta/nestjs-common": "^5.0.0-alpha.2",
     "@nestjs/common": "^10.4.1",
     "@nestjs/config": "^3.2.3",
     "@nestjs/core": "^10.4.1",
-    "@sentry/node": "^6.19.7",
     "fastify": "^3.29.5"
   },
   "devDependencies": {
     "@nestjs/testing": "^10.4.1",
-    "@sentry/types": "^6.19.7",
     "jest-mock-extended": "^2.0.9",
     "supertest": "^6.3.4"
   },
