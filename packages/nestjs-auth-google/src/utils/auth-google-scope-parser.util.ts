@@ -5,9 +5,12 @@
  * @returns An array of trimmed individual scope strings.
  *
  * @example
+ * ```
  * const scopesString = "profile,email, openid";
  * const parsedScopes = authGoogleScopeParse(scopesString);
+ *
  * // Result: ["profile", "email", "openid"]
+ * ```
  */
 export function authGoogleParseScope(scopes: string): string[] {
   // trim the string
