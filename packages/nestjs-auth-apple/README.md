@@ -27,8 +27,10 @@ Before using this package, ensure you have:
 
 For detailed setup instructions, refer to the following resources:
 
-- [What the Heck is Sign In with Apple?](https://developer.okta.com/blog/2019/06/04/what-the-heck-is-sign-in-with-apple) - A comprehensive blog post explaining the feature and setup process.
-- [Apple Auth Setup Guide](https://github.com/ananay/apple-auth/blob/master/SETUP.md) - Step-by-step instructions for configuring Apple Sign In.
+- [What the Heck is Sign In with Apple?](https://developer.okta.com/blog/2019/06/04/what-the-heck-is-sign-in-with-apple)
+  - A comprehensive blog post explaining the feature and setup process.
+- [Apple Auth Setup Guide](https://github.com/ananay/apple-auth/blob/master/SETUP.md)
+  - Step-by-step instructions for configuring Apple Sign In.
 
 ## Environment Variables
 

@@ -1,6 +1,6 @@
 import { AuthAppleProfileInterface } from '../interfaces/auth-apple-profile.interface';
 import { AuthAppleCredentialsInterface as AuthAppleCredentialsInterface } from '../interfaces/auth-apple-credentials.interface';
-// TODO: add it to index export
+// TODO: add NestJwtService to export
 import { NestJwtService } from '@concepta/nestjs-jwt/dist/jwt.externals';
 import { AuthAppleDecodeException } from '../exceptions/auth-apple-decode.exception';
 
