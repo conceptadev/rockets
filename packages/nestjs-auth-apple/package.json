@@ -24,8 +24,7 @@
     "@nestjs/core": "^10.4.1",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/swagger": "^7.4.0",
-    "passport-apple": "^2.0.2",
-    "passport-appleid": "^1.0.5"
+    "passport-apple": "^2.0.2"
   },
   "devDependencies": {
     "@concepta/nestjs-auth-jwt": "^5.0.0-alpha.2",

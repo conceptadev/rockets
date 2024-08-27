@@ -1,19 +1,16 @@
-import {
-  ReferenceEmailInterface,
-  ReferenceIdInterface,
-} from '@concepta/ts-core';
-import { AuthAppleEmailsInterface } from './auth-apple-emails.interface';
+import { ReferenceEmailInterface } from '@concepta/ts-core';
 
 export interface AuthAppleProfileInterface
-  extends ReferenceIdInterface,
-    Partial<ReferenceEmailInterface> {
-  displayName: string;
-  name: {
-    familyName: string;
-    givenName: string;
-    middleName?: string;
-  };
-  emails?: AuthAppleEmailsInterface[];
-  _raw: string;
-  _json: Record<string, unknown>;
+  extends Partial<ReferenceEmailInterface> {
+  iss: string;
+  aud: string;
+  exp: number;
+  iat: number;
+  sub: string;
+  at_hash: string;
+  email: string;
+  email_verified: boolean;
+  is_private_email: boolean;
+  auth_time: number;
+  nonce_supported: boolean;
 }

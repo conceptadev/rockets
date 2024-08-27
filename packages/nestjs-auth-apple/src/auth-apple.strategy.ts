@@ -12,7 +12,6 @@ import {
 } from './auth-apple.constants';
 
 import { AuthAppleSettingsInterface } from './interfaces/auth-apple-settings.interface';
-import { AuthAppleProfileInterface } from './interfaces/auth-apple-profile.interface';
 import { AuthAppleMissingEmailException } from './exceptions/auth-apple-missing-email.exception';
 import { AuthAppleMissingIdException } from './exceptions/auth-apple-missing-id.exception';
 import { mapProfile } from './utils/auth-apple-map-profile';
@@ -22,6 +21,7 @@ import { Strategy } from 'passport-apple';
 export class AuthAppleStrategy extends PassportStrategy(
   Strategy,
   AUTH_APPLE_STRATEGY_NAME,
+  5,
 ) {
   constructor(
     @Inject(AUTH_APPLE_MODULE_SETTINGS_TOKEN)
@@ -30,20 +30,23 @@ export class AuthAppleStrategy extends PassportStrategy(
   ) {
     super({
       clientID: settings?.clientID,
-      clientSecret: settings?.clientSecret,
+      teamID: settings?.teamID,
+      keyID: settings?.keyID,
+      privateKeyLocation: settings?.privateKeyLocation,
+      privateKeyString: settings?.privateKeyString,
       callbackURL: settings?.callbackURL,
       scope: settings?.scope,
+      passReqToCallback: false,
     });
   }
-
   async validate(
     _accessToken: string,
     _refreshToken: string,
-    profile: AuthAppleProfileInterface,
+    idToken: string,
   ): Promise<FederatedCredentialsInterface> {
     const appleProfile = this.settings.mapProfile
-      ? this.settings.mapProfile(profile)
-      : mapProfile(profile);
+      ? this.settings.mapProfile(idToken)
+      : mapProfile(idToken);
 
     if (!appleProfile?.id) {
       throw new AuthAppleMissingIdException();

@@ -1,4 +1,4 @@
-import { Controller, Inject, Get, UseGuards } from '@nestjs/common';
+import { Controller, Inject, Get, UseGuards, Post } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import {
   AuthenticatedUserInterface,
@@ -54,8 +54,8 @@ export class AuthAppleController {
     type: AuthenticationJwtResponseDto,
     description: 'DTO containing an access token and a refresh token.',
   })
-  @Get('callback')
-  async get(
+  @Post('callback')
+  async post(
     @AuthUser() user: AuthenticatedUserInterface,
   ): Promise<AuthenticationResponseInterface> {
     return this.issueTokenService.responsePayload(user.id);
