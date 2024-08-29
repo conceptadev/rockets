@@ -3,11 +3,11 @@ import { Inject, Injectable } from '@nestjs/common';
 import { JwksClient } from 'jwks-rsa';
 import {
   AUTH_APPLE_JWT_KEYS,
+  AUTH_APPLE_JWT_SERVICE_TOKEN,
   AUTH_APPLE_MODULE_SETTINGS_TOKEN,
   AUTH_APPLE_TOKEN_ISSUER,
   AUTH_APPLE_VERIFY_ALGORITHM_RS256,
 } from './auth-apple.constants';
-import { AuthAppleCredentialsInterface } from './interfaces/auth-apple-credentials.interface';
 import { AuthAppleSettingsInterface } from './interfaces/auth-apple-settings.interface';
 import { AuthAppleProfileInterface } from './interfaces/auth-apple-profile.interface';
 import { AuthAppleServiceInterface } from './interfaces/auth-apple-service.interface';
@@ -23,42 +23,28 @@ export class AuthAppleService implements AuthAppleServiceInterface {
   constructor(
     @Inject(AUTH_APPLE_MODULE_SETTINGS_TOKEN)
     private settings: AuthAppleSettingsInterface,
+    @Inject(AUTH_APPLE_JWT_SERVICE_TOKEN)
+    private jwtService: NestJwtService,
   ) {}
 
-  public async mapProfile(
-    idToken: string,
-  ): Promise<AuthAppleCredentialsInterface> {
-    // Step 1: Verify the JWT signature
-    const verifiedToken = await this.verifyIdToken(idToken);
-
-    // Step 2: Perform additional checks like issuer, audience, and expiration
-    this.validateClaims(verifiedToken);
-
-    return {
-      id: verifiedToken?.sub ?? '',
-      email: verifiedToken.email ?? '',
-    };
-  }
-
   // Function to verify JWT token
-  private async verifyIdToken(
+  public async verifyIdToken(
     idToken: string,
   ): Promise<AuthAppleProfileInterface> {
-    const jwt = new NestJwtService();
 
     // Extract key ID from token header
-    const kid = this.extractKeyId(jwt, idToken);
+    const kid = this.extractKeyId(idToken);
 
     // Fetch public key
     const publicKey = await this.fetchPublicKey(kid);
 
     // Verify and return decoded token
-    return this.verifyToken(jwt, idToken, publicKey);
+    return this.verifyToken(idToken, publicKey);
   }
 
-  private extractKeyId(jwt: NestJwtService, idToken: string): string {
+  private extractKeyId(idToken: string): string {
     try {
-      const decodedHeader = jwt.decode(idToken, { complete: true });
+      const decodedHeader = this.jwtService.decode(idToken, { complete: true });
       return decodedHeader.header.kid;
     } catch (e) {
       throw new AuthAppleDecodeException();
@@ -76,18 +62,17 @@ export class AuthAppleService implements AuthAppleServiceInterface {
   }
 
   private verifyToken(
-    jwt: NestJwtService,
     idToken: string,
     publicKey: string,
   ): Promise<AuthAppleProfileInterface> {
-    return jwt.verifyAsync(idToken, {
+    return this.jwtService.verifyAsync(idToken, {
       publicKey,
       algorithms: [AUTH_APPLE_VERIFY_ALGORITHM_RS256],
     });
   }
 
   // Function to validate claims like issuer, audience, and expiration
-  private validateClaims(tokenPayload: AuthAppleProfileInterface) {
+  public validateClaims(tokenPayload: AuthAppleProfileInterface) {
     const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
 
     if (tokenPayload.iss !== AUTH_APPLE_TOKEN_ISSUER) {

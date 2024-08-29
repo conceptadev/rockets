@@ -2,6 +2,7 @@ import { registerAs } from '@nestjs/config';
 import { AUTH_APPLE_MODULE_DEFAULT_SETTINGS_TOKEN } from '../auth-apple.constants';
 import { AuthAppleSettingsInterface } from '../interfaces/auth-apple-settings.interface';
 import { AuthAppleLoginDto } from '../dto/auth-apple-login.dto';
+import { mapProfile } from '../utils/auth-apple-map-profile';
 import { authAppleParseScope } from '../utils/auth-apple-scope-parser.util';
 
 /**
@@ -26,5 +27,6 @@ export const authAppleDefaultConfig = registerAs(
       'APPLE_SCOPE' in process.env && process.env.APPLE_SCOPE
         ? authAppleParseScope(process.env.APPLE_SCOPE)
         : ['email'],
+    mapProfile: mapProfile,
   }),
 );

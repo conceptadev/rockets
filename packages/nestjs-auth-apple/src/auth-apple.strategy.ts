@@ -17,6 +17,8 @@ import { AuthAppleMissingEmailException } from './exceptions/auth-apple-missing-
 import { AuthAppleMissingIdException } from './exceptions/auth-apple-missing-id.exception';
 import { Strategy } from 'passport-apple';
 import { AuthAppleServiceInterface } from './interfaces/auth-apple-service.interface';
+import { mapProfile } from './utils/auth-apple-map-profile';
+import { AuthAppleCredentialsInterface } from './interfaces/auth-apple-credentials.interface';
 
 @Injectable()
 export class AuthAppleStrategy extends PassportStrategy(
@@ -47,15 +49,18 @@ export class AuthAppleStrategy extends PassportStrategy(
     _refreshToken: string,
     idToken: string,
   ): Promise<FederatedCredentialsInterface> {
-    const appleProfile = await this.authAppleService.mapProfile(idToken);
+    // verify and decode token
+    const profile = await this.authAppleService.verifyIdToken(idToken);
 
-    if (!appleProfile?.id) {
-      throw new AuthAppleMissingIdException();
-    }
+    // validate the claims of the token (expired, active email, issuer, etc)
+    await this.authAppleService.validateClaims(profile);
 
-    if (!appleProfile?.email) {
-      throw new AuthAppleMissingEmailException();
-    }
+    const appleProfile = this.settings.mapProfile
+      ? this.settings.mapProfile(profile)
+      : mapProfile(profile);
+
+    // make sure it was mapped correctly
+    this.validateAppleProfile(appleProfile);
 
     // Create a new user if it doesn't exist or just return based on federated
     const user = await this.federatedOAuthService.sign(
@@ -69,5 +74,17 @@ export class AuthAppleStrategy extends PassportStrategy(
     }
 
     return user;
+  }
+
+  private validateAppleProfile(
+    appleProfile: AuthAppleCredentialsInterface,
+  ): void {
+    if (!appleProfile?.id) {
+      throw new AuthAppleMissingIdException();
+    }
+
+    if (!appleProfile?.email) {
+      throw new AuthAppleMissingEmailException();
+    }
   }
 }

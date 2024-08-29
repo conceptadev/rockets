@@ -14,6 +14,7 @@ import {
 
 import {
   AUTH_APPLE_ISSUE_TOKEN_SERVICE_TOKEN,
+  AUTH_APPLE_JWT_SERVICE_TOKEN,
   AUTH_APPLE_MODULE_SETTINGS_TOKEN,
   AUTH_APPLE_SERVICE_TOKEN,
 } from './auth-apple.constants';
@@ -26,6 +27,7 @@ import { AuthAppleController } from './auth-apple.controller';
 import { AuthAppleStrategy } from './auth-apple.strategy';
 import { AuthAppleService } from './auth-apple.service';
 import { AuthAppleServiceInterface } from './interfaces/auth-apple-service.interface';
+import { NestJwtService } from '@concepta/nestjs-jwt/dist/jwt.externals';
 
 const RAW_OPTIONS_TOKEN = Symbol('__AUTH_APPLE_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -98,6 +100,7 @@ export function createAuthAppleProviders(options: {
     createAuthAppleOptionsProvider(options.overrides),
     createAuthAppleIssueTokenServiceProvider(options.overrides),
     createAuthAppleServiceProvider(options.overrides),
+    createAuthJwtServiceProvider(options.overrides),
   ];
 }
 
@@ -144,5 +147,14 @@ export function createAuthAppleServiceProvider(
       optionsOverrides?.authAppleService ??
       options.authAppleService ??
       defaultService,
+  };
+}
+
+export function createAuthJwtServiceProvider(
+  _optionsOverrides?: AuthAppleOptions,
+): Provider {
+  return {
+    provide: AUTH_APPLE_JWT_SERVICE_TOKEN,
+    useClass: NestJwtService,
   };
 }

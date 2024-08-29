@@ -16,6 +16,7 @@
     "@concepta/nestjs-common": "^5.0.0-alpha.2",
     "@concepta/nestjs-core": "^5.0.0-alpha.2",
     "@concepta/nestjs-exception": "^5.0.0-alpha.2",
+    "@concepta/nestjs-jwt": "^5.0.0-alpha.2",
     "@concepta/nestjs-federated": "^5.0.0-alpha.2",
     "@concepta/ts-common": "^5.0.0-alpha.2",
     "@concepta/ts-core": "^5.0.0-alpha.2",
@@ -30,7 +31,6 @@
   "devDependencies": {
     "@concepta/nestjs-auth-jwt": "^5.0.0-alpha.2",
     "@concepta/nestjs-crud": "^5.0.0-alpha.2",
-    "@concepta/nestjs-jwt": "^5.0.0-alpha.2",
     "@concepta/nestjs-password": "^5.0.0-alpha.2",
     "@concepta/nestjs-typeorm-ext": "^5.0.0-alpha.2",
     "@concepta/nestjs-user": "^5.0.0-alpha.2",
