@@ -15,6 +15,7 @@ import {
 import {
   AUTH_APPLE_ISSUE_TOKEN_SERVICE_TOKEN,
   AUTH_APPLE_MODULE_SETTINGS_TOKEN,
+  AUTH_APPLE_SERVICE_TOKEN,
 } from './auth-apple.constants';
 
 import { AuthAppleOptionsInterface } from './interfaces/auth-apple-options.interface';
@@ -23,6 +24,8 @@ import { authAppleDefaultConfig } from './config/auth-apple-default.config';
 import { AuthAppleSettingsInterface } from './interfaces/auth-apple-settings.interface';
 import { AuthAppleController } from './auth-apple.controller';
 import { AuthAppleStrategy } from './auth-apple.strategy';
+import { AuthAppleService } from './auth-apple.service';
+import { AuthAppleServiceInterface } from './interfaces/auth-apple-service.interface';
 
 const RAW_OPTIONS_TOKEN = Symbol('__AUTH_APPLE_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -91,8 +94,10 @@ export function createAuthAppleProviders(options: {
     AuthAppleStrategy,
     IssueTokenService,
     FederatedOAuthService,
+    AuthAppleService,
     createAuthAppleOptionsProvider(options.overrides),
     createAuthAppleIssueTokenServiceProvider(options.overrides),
+    createAuthAppleServiceProvider(options.overrides),
   ];
 }
 
@@ -122,6 +127,22 @@ export function createAuthAppleIssueTokenServiceProvider(
     ) =>
       optionsOverrides?.issueTokenService ??
       options.issueTokenService ??
+      defaultService,
+  };
+}
+
+export function createAuthAppleServiceProvider(
+  optionsOverrides?: AuthAppleOptions,
+): Provider {
+  return {
+    provide: AUTH_APPLE_SERVICE_TOKEN,
+    inject: [RAW_OPTIONS_TOKEN, AuthAppleService],
+    useFactory: async (
+      options: AuthAppleOptionsInterface,
+      defaultService: AuthAppleServiceInterface,
+    ) =>
+      optionsOverrides?.authAppleService ??
+      options.authAppleService ??
       defaultService,
   };
 }

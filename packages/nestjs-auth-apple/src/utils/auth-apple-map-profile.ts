@@ -4,6 +4,7 @@ import { AuthAppleCredentialsInterface as AuthAppleCredentialsInterface } from '
 import { NestJwtService } from '@concepta/nestjs-jwt/dist/jwt.externals';
 import { AuthAppleDecodeException } from '../exceptions/auth-apple-decode.exception';
 
+// TODO: remove this file if we decide to go with AuthAppleService class instead
 export const mapProfile = (idToken: string): AuthAppleCredentialsInterface => {
   const profile = getProfile(idToken);
 

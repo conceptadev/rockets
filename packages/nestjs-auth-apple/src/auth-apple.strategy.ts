@@ -8,14 +8,15 @@ import {
 
 import {
   AUTH_APPLE_MODULE_SETTINGS_TOKEN,
+  AUTH_APPLE_SERVICE_TOKEN,
   AUTH_APPLE_STRATEGY_NAME,
 } from './auth-apple.constants';
 
 import { AuthAppleSettingsInterface } from './interfaces/auth-apple-settings.interface';
 import { AuthAppleMissingEmailException } from './exceptions/auth-apple-missing-email.exception';
 import { AuthAppleMissingIdException } from './exceptions/auth-apple-missing-id.exception';
-import { mapProfile } from './utils/auth-apple-map-profile';
 import { Strategy } from 'passport-apple';
+import { AuthAppleServiceInterface } from './interfaces/auth-apple-service.interface';
 
 @Injectable()
 export class AuthAppleStrategy extends PassportStrategy(
@@ -27,6 +28,8 @@ export class AuthAppleStrategy extends PassportStrategy(
     @Inject(AUTH_APPLE_MODULE_SETTINGS_TOKEN)
     private settings: AuthAppleSettingsInterface,
     private federatedOAuthService: FederatedOAuthService,
+    @Inject(AUTH_APPLE_SERVICE_TOKEN)
+    private authAppleService: AuthAppleServiceInterface,
   ) {
     super({
       clientID: settings?.clientID,
@@ -44,9 +47,7 @@ export class AuthAppleStrategy extends PassportStrategy(
     _refreshToken: string,
     idToken: string,
   ): Promise<FederatedCredentialsInterface> {
-    const appleProfile = this.settings.mapProfile
-      ? this.settings.mapProfile(idToken)
-      : mapProfile(idToken);
+    const appleProfile = await this.authAppleService.mapProfile(idToken);
 
     if (!appleProfile?.id) {
       throw new AuthAppleMissingIdException();
