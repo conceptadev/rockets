@@ -31,7 +31,6 @@ export class AuthAppleService implements AuthAppleServiceInterface {
   public async verifyIdToken(
     idToken: string,
   ): Promise<AuthAppleProfileInterface> {
-
     // Extract key ID from token header
     const kid = this.extractKeyId(idToken);
 
