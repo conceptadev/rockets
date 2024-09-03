@@ -27,7 +27,6 @@
   "devDependencies": {
     "@concepta/nestjs-auth-jwt": "^5.0.0-alpha.2",
     "@concepta/nestjs-jwt": "^5.0.0-alpha.2",
-    "@nestjs/jwt": "^10.2.0",
     "@nestjs/testing": "^10.4.1",
     "@types/passport-local": "^1.0.38",
     "@types/supertest": "^2.0.16",

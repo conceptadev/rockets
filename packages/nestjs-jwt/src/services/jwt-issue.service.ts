@@ -1,14 +1,19 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { JwtIssueServiceInterface } from '../interfaces/jwt-issue-service.interface';
-import { JwtSignService } from './jwt-sign.service';
+import { JwtServiceInterface } from '../interfaces/jwt-service.interface';
+import {
+  JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
+  JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
+} from '../jwt.constants';
 import { JwtSignOptions, JwtSignStringOptions } from '../jwt.types';
-import { JwtSignServiceInterface } from '../interfaces/jwt-sign-service.interface';
 
 @Injectable()
 export class JwtIssueService implements JwtIssueServiceInterface {
   constructor(
-    @Inject(JwtSignService)
-    protected readonly jwtSignService: JwtSignServiceInterface,
+    @Inject(JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN)
+    protected readonly jwtAccessService: JwtServiceInterface,
+    @Inject(JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN)
+    protected readonly jwtRefreshService: JwtServiceInterface,
   ) {}
 
   accessToken(payload: string, options?: JwtSignStringOptions): Promise<string>;
@@ -23,9 +28,9 @@ export class JwtIssueService implements JwtIssueServiceInterface {
     options?: JwtSignOptions,
   ) {
     if (typeof payload === 'string') {
-      return this.jwtSignService.signAsync('access', payload, options);
+      return this.jwtAccessService.signAsync(payload, options);
     } else {
-      return this.jwtSignService.signAsync('access', payload, options);
+      return this.jwtAccessService.signAsync(payload, options);
     }
   }
 
@@ -44,9 +49,9 @@ export class JwtIssueService implements JwtIssueServiceInterface {
     options?: JwtSignOptions,
   ) {
     if (typeof payload === 'string') {
-      return this.jwtSignService.signAsync('refresh', payload, options);
+      return this.jwtRefreshService.signAsync(payload, options);
     } else {
-      return this.jwtSignService.signAsync('refresh', payload, options);
+      return this.jwtRefreshService.signAsync(payload, options);
     }
   }
 }

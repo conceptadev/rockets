@@ -2,23 +2,22 @@ import { Injectable, Module } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { JwtModule } from './jwt.module';
-import { JwtSignService } from './services/jwt-sign.service';
+import { JwtService } from './services/jwt.service';
 import { JwtVerifyService } from './services/jwt-verify.service';
 import { JwtIssueService } from './services/jwt-issue.service';
+import { JwtSettingsInterface } from './interfaces/jwt-settings.interface';
 import {
   JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
   JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
   JWT_MODULE_SETTINGS_TOKEN,
 } from './jwt.constants';
-import { NestJwtService } from './jwt.externals';
-import { JwtSettingsInterface } from './interfaces/jwt-settings.interface';
 
 describe(JwtModule, () => {
   let jwtModule: JwtModule;
   let jwtSettings: JwtSettingsInterface;
-  let jwtAccessService: NestJwtService;
-  let jwtRefreshService: NestJwtService;
-  let jwtSignService: JwtSignService;
+  let jwtService: JwtService;
+  let jwtAccessService: JwtService;
+  let jwtRefreshService: JwtService;
   let jwtIssueService: JwtIssueService;
   let jwtVerifyService: JwtVerifyService;
 
@@ -99,13 +98,13 @@ describe(JwtModule, () => {
     class AppGlobalTest {}
 
     @Injectable()
-    class JwtAccessServiceFixture extends NestJwtService {}
+    class JwtAccessServiceFixture extends JwtService {}
 
     @Injectable()
-    class JwtRefreshServiceFixture extends NestJwtService {}
+    class JwtRefreshServiceFixture extends JwtService {}
 
     @Injectable()
-    class JwtSignServiceFixture extends JwtSignService {}
+    class JwtServiceFixture extends JwtService {}
 
     @Injectable()
     class JwtIssueServiceFixture extends JwtIssueService {}
@@ -121,27 +120,26 @@ describe(JwtModule, () => {
       secret: 'bar2',
     });
 
-    const jwtSignServiceFixture = new JwtSignServiceFixture(
-      jwtAccessServiceFixture,
-      jwtRefreshServiceFixture,
-    );
+    const jwtServiceFixture = new JwtServiceFixture();
 
     const jwtIssueServiceFixture = new JwtIssueServiceFixture(
-      jwtSignServiceFixture,
+      jwtServiceFixture,
+      jwtServiceFixture,
     );
 
     const jwtVerifyServiceFixture = new JwtVerifyServiceFixture(
-      jwtSignServiceFixture,
+      jwtServiceFixture,
+      jwtServiceFixture,
     );
 
     @Module({
       imports: [
         AppGlobalTest,
-        JwtModule.forFeature({
+        JwtModule.register({
           settings: { access: { secret: 'foo1' }, refresh: { secret: 'foo2' } },
           jwtAccessService: jwtAccessServiceFixture,
           jwtRefreshService: jwtRefreshServiceFixture,
-          jwtSignService: jwtSignServiceFixture,
+          jwtService: jwtServiceFixture,
           jwtIssueService: jwtIssueServiceFixture,
           jwtVerifyService: jwtVerifyServiceFixture,
         }),
@@ -159,18 +157,14 @@ describe(JwtModule, () => {
 
     commonProviderTests();
 
-    it('providers should be overridden', async () => {
-      expect(jwtAccessService).toBe(jwtAccessServiceFixture);
-      expect(jwtRefreshService).toBe(jwtRefreshServiceFixture);
-      expect(jwtSignService).toBe(jwtSignServiceFixture);
-      expect(jwtSignService['jwtAccessService']).toBe(jwtAccessServiceFixture);
-      expect(jwtSignService['jwtRefreshService']).toBe(
-        jwtRefreshServiceFixture,
-      );
-      expect(jwtIssueService).toBe(jwtIssueServiceFixture);
-      expect(jwtIssueService['jwtSignService']).toBe(jwtSignService);
+    it('providers should be correct', async () => {
+      expect(jwtService).toEqual(jwtServiceFixture);
+      expect(jwtIssueService).toEqual(jwtIssueServiceFixture);
+      expect(jwtIssueService['jwtAccessService']).toEqual(jwtServiceFixture);
+      expect(jwtIssueService['jwtRefreshService']).toEqual(jwtServiceFixture);
       expect(jwtVerifyService).toBe(jwtVerifyServiceFixture);
-      expect(jwtVerifyService['jwtSignService']).toBe(jwtSignService);
+      expect(jwtVerifyService['jwtAccessService']).toEqual(jwtServiceFixture);
+      expect(jwtVerifyService['jwtRefreshService']).toEqual(jwtServiceFixture);
     });
 
     it('settings should be overriden', async () => {
@@ -180,12 +174,6 @@ describe(JwtModule, () => {
       });
       expect(jwtAccessService['options'].secret).toEqual('bar1');
       expect(jwtRefreshService['options'].secret).toEqual('bar2');
-      expect(jwtSignService['jwtAccessService']['options'].secret).toEqual(
-        'bar1',
-      );
-      expect(jwtSignService['jwtRefreshService']['options'].secret).toEqual(
-        'bar2',
-      );
     });
   });
 
@@ -194,13 +182,13 @@ describe(JwtModule, () => {
     jwtSettings = testModule.get<JwtSettingsInterface>(
       JWT_MODULE_SETTINGS_TOKEN,
     );
-    jwtAccessService = testModule.get<NestJwtService>(
+    jwtService = testModule.get<JwtService>(JwtService);
+    jwtAccessService = testModule.get<JwtService>(
       JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
     );
-    jwtRefreshService = testModule.get<NestJwtService>(
+    jwtRefreshService = testModule.get<JwtService>(
       JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
     );
-    jwtSignService = testModule.get<JwtSignService>(JwtSignService);
     jwtIssueService = testModule.get<JwtIssueService>(JwtIssueService);
     jwtVerifyService = testModule.get<JwtVerifyService>(JwtVerifyService);
   }
@@ -209,9 +197,9 @@ describe(JwtModule, () => {
     it('providers should be loaded', async () => {
       expect(jwtModule).toBeInstanceOf(JwtModule);
       expect(jwtSettings).toBeInstanceOf(Object);
-      expect(jwtAccessService).toBeInstanceOf(NestJwtService);
-      expect(jwtRefreshService).toBeInstanceOf(NestJwtService);
-      expect(jwtSignService).toBeInstanceOf(JwtSignService);
+      expect(jwtService).toBeInstanceOf(JwtService);
+      expect(jwtAccessService).toBeInstanceOf(JwtService);
+      expect(jwtRefreshService).toBeInstanceOf(JwtService);
       expect(jwtIssueService).toBeInstanceOf(JwtIssueService);
       expect(jwtVerifyService).toBeInstanceOf(JwtVerifyService);
     });

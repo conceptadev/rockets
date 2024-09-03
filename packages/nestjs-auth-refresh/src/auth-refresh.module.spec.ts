@@ -6,11 +6,10 @@ import {
   ModuleMetadata,
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { JwtService as NestJwtService } from '@nestjs/jwt';
 import {
   JwtIssueService,
   JwtModule,
-  JwtSignService,
+  JwtService,
   JwtVerifyService,
 } from '@concepta/nestjs-jwt';
 import {
@@ -36,14 +35,9 @@ import { UserLookupServiceFixture } from './__fixtures__/user/user-lookup.servic
 import { UserModuleFixture } from './__fixtures__/user/user.module.fixture';
 
 describe(AuthRefreshModule, () => {
-  const jwtAccessService = new NestJwtService();
-  const jwtRefreshService = new NestJwtService();
-  const jwtSignService = new JwtSignService(
-    jwtAccessService,
-    jwtRefreshService,
-  );
-  const jwtVerifyService = new JwtVerifyService(jwtSignService);
-  const jwtIssueService = new JwtIssueService(jwtSignService);
+  const jwtService = new JwtService();
+  const jwtVerifyService = new JwtVerifyService(jwtService, jwtService);
+  const jwtIssueService = new JwtIssueService(jwtService, jwtService);
 
   let testModule: TestingModule;
   let authRefreshModule: AuthRefreshModule;

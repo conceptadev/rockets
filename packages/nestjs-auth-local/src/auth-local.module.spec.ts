@@ -6,12 +6,7 @@ import {
   ModuleMetadata,
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { JwtService as NestJwtService } from '@nestjs/jwt';
-import {
-  JwtIssueService,
-  JwtModule,
-  JwtSignService,
-} from '@concepta/nestjs-jwt';
+import { JwtIssueService, JwtModule, JwtService } from '@concepta/nestjs-jwt';
 import {
   AuthenticationModule,
   IssueTokenService,
@@ -37,13 +32,8 @@ import { UserModuleFixture } from './__fixtures__/user/user.module.fixture';
 import { AuthLocalValidateUserService } from './services/auth-local-validate-user.service';
 
 describe(AuthLocalModule, () => {
-  const jwtAccessService = new NestJwtService();
-  const jwtRefreshService = new NestJwtService();
-  const jwtSignService = new JwtSignService(
-    jwtAccessService,
-    jwtRefreshService,
-  );
-  const jwtIssueService = new JwtIssueService(jwtSignService);
+  const jwtService = new JwtService();
+  const jwtIssueService = new JwtIssueService(jwtService, jwtService);
 
   let testModule: TestingModule;
   let authLocalModule: AuthLocalModule;

@@ -14,9 +14,9 @@ describe(VerifyTokenService, () => {
   describe(VerifyTokenService.prototype.accessToken, () => {
     it('should success', async () => {
       verifyTokenService = new VerifyTokenService(jwtVerifyService);
-      jest.spyOn(jwtVerifyService, 'accessToken').mockResolvedValue(true);
+      jest.spyOn(jwtVerifyService, 'accessToken').mockResolvedValue({});
       const result = await verifyTokenService.accessToken(token);
-      expect(result).toBe(true);
+      expect(result).toEqual({});
     });
 
     it('should throw exception', async () => {
@@ -24,7 +24,7 @@ describe(VerifyTokenService, () => {
         jwtVerifyService,
         validateTokenService,
       );
-      jest.spyOn(jwtVerifyService, 'accessToken').mockResolvedValue(true);
+      jest.spyOn(jwtVerifyService, 'accessToken').mockResolvedValue({});
       jest
         .spyOn(validateTokenService, 'validateToken')
         .mockResolvedValue(false);
@@ -32,6 +32,7 @@ describe(VerifyTokenService, () => {
       const t = async () => {
         await verifyTokenService.accessToken(token);
       };
+
       await expect(t).rejects.toThrow(BadRequestException);
     });
   });
@@ -39,9 +40,9 @@ describe(VerifyTokenService, () => {
   describe(VerifyTokenService.prototype.refreshToken, () => {
     it('should success', async () => {
       verifyTokenService = new VerifyTokenService(jwtVerifyService);
-      jest.spyOn(jwtVerifyService, 'refreshToken').mockResolvedValue(true);
+      jest.spyOn(jwtVerifyService, 'refreshToken').mockResolvedValue({});
       const result = await verifyTokenService.refreshToken(token);
-      expect(result).toBe(true);
+      expect(result).toEqual({});
     });
 
     it('should throw exception', async () => {
@@ -49,7 +50,7 @@ describe(VerifyTokenService, () => {
         jwtVerifyService,
         validateTokenService,
       );
-      jest.spyOn(jwtVerifyService, 'refreshToken').mockResolvedValue(true);
+      jest.spyOn(jwtVerifyService, 'refreshToken').mockResolvedValue({});
       jest
         .spyOn(validateTokenService, 'validateToken')
         .mockResolvedValue(false);

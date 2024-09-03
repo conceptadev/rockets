@@ -1,26 +1,29 @@
 import { JwtVerifyService } from './jwt-verify.service';
-import { JwtSignService } from './jwt-sign.service';
+import { JwtService } from './jwt.service';
 import { mock } from 'jest-mock-extended';
 
 describe(JwtVerifyService, () => {
-  let jwtSignService: JwtSignService;
+  let jwtService: JwtService;
   let jwtVerifyService: JwtVerifyService;
   const token = 'token';
+
   beforeEach(() => {
-    jwtSignService = mock<JwtSignService>();
-    jwtVerifyService = new JwtVerifyService(jwtSignService);
+    jwtService = mock<JwtService>();
+    jwtVerifyService = new JwtVerifyService(jwtService, jwtService);
   });
+
   describe(JwtVerifyService.prototype.accessToken, () => {
     it('should success', async () => {
-      const spySignAsync = jest
-        .spyOn(jwtSignService, 'verifyAsync')
-        .mockResolvedValue(token);
-      const result = await jwtVerifyService.accessToken(token);
-      expect(result).toBe(token);
-      expect(spySignAsync).toBeCalledWith('access', token);
+      const spyAccessToken = jest
+        .spyOn(jwtService, 'verifyAsync')
+        .mockResolvedValue({ foo: 'bar' });
+      const result = await jwtVerifyService.accessToken('{"foo": "bar"}');
+      expect(result).toEqual({ foo: 'bar' });
+      expect(spyAccessToken).toBeCalledWith('{"foo": "bar"}');
     });
+
     it('should throw error', async () => {
-      jest.spyOn(jwtSignService, 'verifyAsync').mockImplementationOnce(() => {
+      jest.spyOn(jwtService, 'verifyAsync').mockImplementationOnce(() => {
         throw new Error();
       });
       const t = async () => await jwtVerifyService.accessToken(token);
@@ -30,16 +33,16 @@ describe(JwtVerifyService, () => {
 
   describe(JwtVerifyService.prototype.refreshToken, () => {
     it('should success', async () => {
-      const spySignAsync = jest
-        .spyOn(jwtSignService, 'verifyAsync')
-        .mockResolvedValue(token);
-      const result = await jwtVerifyService.refreshToken(token);
-      expect(result).toBe(token);
-      expect(spySignAsync).toBeCalledWith('refresh', token);
+      const spyRefreshToken = jest
+        .spyOn(jwtService, 'verifyAsync')
+        .mockResolvedValue({ man: 'chu' });
+      const result = await jwtVerifyService.refreshToken('{"man": "chu"}');
+      expect(result).toEqual({ man: 'chu' });
+      expect(spyRefreshToken).toBeCalledWith('{"man": "chu"}');
     });
 
     it('should throw error', async () => {
-      jest.spyOn(jwtSignService, 'verifyAsync').mockImplementationOnce(() => {
+      jest.spyOn(jwtService, 'verifyAsync').mockImplementationOnce(() => {
         throw new Error();
       });
       const t = async () => await jwtVerifyService.refreshToken(token);

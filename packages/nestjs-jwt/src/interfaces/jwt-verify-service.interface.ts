@@ -1,11 +1,6 @@
-import { NestJwtService } from '../jwt.externals';
+import { JwtVerifyAccessTokenInterface } from './jwt-verify-access-token.interface';
+import { JwtVerifyRefreshTokenInterface } from './jwt-verify-refresh-token.interface';
 
-export interface JwtVerifyServiceInterface {
-  accessToken(
-    ...args: Parameters<NestJwtService['verifyAsync']>
-  ): ReturnType<NestJwtService['verifyAsync']>;
-
-  refreshToken(
-    ...args: Parameters<NestJwtService['verifyAsync']>
-  ): ReturnType<NestJwtService['verifyAsync']>;
-}
+export interface JwtVerifyServiceInterface
+  extends JwtVerifyAccessTokenInterface,
+    JwtVerifyRefreshTokenInterface {}

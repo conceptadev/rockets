@@ -4,8 +4,8 @@ import {
   Provider,
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { NestJwtModule, NestJwtService } from './jwt.externals';
 import { createSettingsProvider } from '@concepta/nestjs-common';
+import { NestJwtModule } from './jwt.externals';
 
 import {
   JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
@@ -17,7 +17,8 @@ import { JwtOptionsExtrasInterface } from './interfaces/jwt-options-extras.inter
 import { jwtDefaultConfig } from './config/jwt-default.config';
 import { JwtSettingsInterface } from './interfaces/jwt-settings.interface';
 import { JwtOptionsInterface } from './interfaces/jwt-options.interface';
-import { JwtSignService } from './services/jwt-sign.service';
+import { JwtServiceInterface } from './interfaces/jwt-service.interface';
+import { JwtService } from './services/jwt.service';
 import { JwtIssueService } from './services/jwt-issue.service';
 import { JwtVerifyService } from './services/jwt-verify.service';
 
@@ -70,7 +71,7 @@ export function createJwtExports() {
     JWT_MODULE_SETTINGS_TOKEN,
     JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
     JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
-    JwtSignService,
+    JwtService,
     JwtIssueService,
     JwtVerifyService,
   ];
@@ -85,7 +86,7 @@ export function createJwtProviders(options: {
     createJwtSettingsProvider(options.overrides),
     createJwtServiceAccessTokenProvider(options.overrides),
     createJwtServiceRefreshTokenProvider(options.overrides),
-    createJwtSignServiceProvider(options.overrides),
+    createJwtServiceProvider(options.overrides),
     createJwtIssueServiceProvider(options.overrides),
     createJwtVerifyServiceProvider(options.overrides),
   ];
@@ -114,7 +115,7 @@ export function createJwtServiceAccessTokenProvider(
     ) =>
       optionsOverrides?.jwtAccessService ??
       options.jwtAccessService ??
-      new NestJwtService(settings.access ?? {}),
+      new JwtService(settings.access ?? {}),
   };
 }
 
@@ -130,28 +131,23 @@ export function createJwtServiceRefreshTokenProvider(
     ) =>
       optionsOverrides?.jwtRefreshService ??
       options.jwtRefreshService ??
-      new NestJwtService(settings.refresh ?? {}),
+      new JwtService(settings.refresh ?? {}),
   };
 }
 
-export function createJwtSignServiceProvider(
+export function createJwtServiceProvider(
   optionsOverrides?: JwtOptions,
 ): Provider {
   return {
-    provide: JwtSignService,
-    inject: [
-      RAW_OPTIONS_TOKEN,
-      JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
-      JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
-    ],
+    provide: JwtService,
+    inject: [RAW_OPTIONS_TOKEN, JWT_MODULE_SETTINGS_TOKEN],
     useFactory: async (
       options: JwtOptionsInterface,
-      accessService: NestJwtService,
-      refreshService: NestJwtService,
+      settings: JwtSettingsInterface,
     ) =>
-      optionsOverrides?.jwtSignService ??
-      options.jwtSignService ??
-      new JwtSignService(accessService, refreshService),
+      optionsOverrides?.jwtService ??
+      options.jwtService ??
+      new JwtService(settings?.default),
   };
 }
 
@@ -160,14 +156,19 @@ export function createJwtIssueServiceProvider(
 ): Provider {
   return {
     provide: JwtIssueService,
-    inject: [RAW_OPTIONS_TOKEN, JwtSignService],
+    inject: [
+      RAW_OPTIONS_TOKEN,
+      JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
+      JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
+    ],
     useFactory: async (
       options: JwtOptionsInterface,
-      signService: JwtSignService,
+      jwtAccessService: JwtServiceInterface,
+      jwtRefreshService: JwtServiceInterface,
     ) =>
       optionsOverrides?.jwtIssueService ??
       options.jwtIssueService ??
-      new JwtIssueService(signService),
+      new JwtIssueService(jwtAccessService, jwtRefreshService),
   };
 }
 
@@ -176,13 +177,18 @@ export function createJwtVerifyServiceProvider(
 ): Provider {
   return {
     provide: JwtVerifyService,
-    inject: [RAW_OPTIONS_TOKEN, JwtSignService],
+    inject: [
+      RAW_OPTIONS_TOKEN,
+      JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
+      JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
+    ],
     useFactory: async (
       options: JwtOptionsInterface,
-      signService: JwtSignService,
+      jwtAccessService: JwtServiceInterface,
+      jwtRefreshService: JwtServiceInterface,
     ) =>
       optionsOverrides?.jwtVerifyService ??
       options.jwtVerifyService ??
-      new JwtVerifyService(signService),
+      new JwtVerifyService(jwtAccessService, jwtRefreshService),
   };
 }
