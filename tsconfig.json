@@ -109,6 +109,9 @@
     },
     {
       "path": "packages/nestjs-logger-sentry"
+    },
+    {
+      "path": "packages/nestjs-file"
     }
   ]
 }
