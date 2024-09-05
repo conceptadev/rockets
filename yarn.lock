@@ -773,7 +773,6 @@ __metadata:
     "@nestjs/passport": "npm:^10.0.3"
     "@nestjs/swagger": "npm:^7.4.0"
     "@nestjs/testing": "npm:^10.4.1"
-    "@types/passport-apple": "npm:^2.0.3"
     "@types/passport-google-oauth20": "npm:^2.0.16"
     passport-google-oauth20: "npm:^2.0.0"
   peerDependencies:
@@ -821,7 +820,6 @@ __metadata:
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/core": "npm:^10.4.1"
-    "@nestjs/jwt": "npm:^10.2.0"
     "@nestjs/swagger": "npm:^7.4.0"
     "@nestjs/testing": "npm:^10.4.1"
     "@types/passport-local": "npm:^1.0.38"
@@ -883,7 +881,6 @@ __metadata:
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/core": "npm:^10.4.1"
-    "@nestjs/jwt": "npm:^10.2.0"
     "@nestjs/swagger": "npm:^7.4.0"
     "@nestjs/testing": "npm:^10.4.1"
     jest-mock-extended: "npm:^2.0.9"

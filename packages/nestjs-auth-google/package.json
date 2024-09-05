@@ -34,7 +34,6 @@
     "@concepta/nestjs-typeorm-ext": "^5.0.0-alpha.2",
     "@concepta/nestjs-user": "^5.0.0-alpha.2",
     "@nestjs/testing": "^10.4.1",
-    "@types/passport-apple": "^2.0.3",
     "@types/passport-google-oauth20": "^2.0.16"
   },
   "peerDependencies": {
