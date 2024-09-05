@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { JwtVerifyTokenServiceInterface } from '../interfaces/jwt-verify-token-service.interface';
-import { JwtServiceInterface } from '../interfaces/jwt-service.interface';
+import { JwtVerifyServiceInterface } from '../interfaces/jwt-verify-service.interface';
 import {
   JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
   JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
@@ -10,9 +10,9 @@ import {
 export class JwtVerifyTokenService implements JwtVerifyTokenServiceInterface {
   constructor(
     @Inject(JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN)
-    protected readonly jwtAccessService: JwtServiceInterface,
+    protected readonly jwtAccessService: JwtVerifyServiceInterface,
     @Inject(JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN)
-    protected readonly jwtRefreshService: JwtServiceInterface,
+    protected readonly jwtRefreshService: JwtVerifyServiceInterface,
   ) {}
 
   async accessToken(

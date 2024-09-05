@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { JwtIssueTokenServiceInterface } from '../interfaces/jwt-issue-token-service.interface';
-import { JwtServiceInterface } from '../interfaces/jwt-service.interface';
+import { JwtSignServiceInterface } from '../interfaces/jwt-sign-service.interface';
 import {
   JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
   JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
@@ -11,9 +11,9 @@ import { JwtSignOptions, JwtSignStringOptions } from '../jwt.types';
 export class JwtIssueTokenService implements JwtIssueTokenServiceInterface {
   constructor(
     @Inject(JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN)
-    protected readonly jwtAccessService: JwtServiceInterface,
+    protected readonly jwtAccessService: JwtSignServiceInterface,
     @Inject(JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN)
-    protected readonly jwtRefreshService: JwtServiceInterface,
+    protected readonly jwtRefreshService: JwtSignServiceInterface,
   ) {}
 
   accessToken(payload: string, options?: JwtSignStringOptions): Promise<string>;
