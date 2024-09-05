@@ -9,7 +9,7 @@
  * const parsedScopes = authAppleScopeParse(scopesString);
  * // Result: ["profile", "email", "openid"]
  */
-export function authAppleParseScope(scopes: string): string[] {
+export function authAppleScopeParser(scopes: string): string[] {
   // trim the string
   const scopesTrimmed = scopes.trim();
 
