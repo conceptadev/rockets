@@ -8,7 +8,6 @@
   },
   "include": [
     "src/**/*.ts",
-    "../ts-common/src/authentication/interfaces/auth-google-login.interface.ts"
   ],
   "references": [
     {

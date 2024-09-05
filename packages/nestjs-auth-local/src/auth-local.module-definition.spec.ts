@@ -20,7 +20,7 @@ import {
   createAuthLocalValidateUserServiceProvider,
 } from './auth-local.module-definition';
 import { AuthLocalValidateUserService } from './services/auth-local-validate-user.service';
-import { JwtIssueService } from '@concepta/nestjs-jwt';
+import { JwtIssueTokenService } from '@concepta/nestjs-jwt';
 
 describe('Auth-local.module-definition', () => {
   describe(createAuthLocalExports.name, () => {
@@ -128,8 +128,10 @@ describe('Auth-local.module-definition', () => {
   describe(createAuthLocalIssueTokenServiceProvider.name, () => {
     class TestIssueTokenService extends IssueTokenService {}
 
-    const jwtIssuer = mock<JwtIssueService>();
-    const testIssueTokenService = new TestIssueTokenService(jwtIssuer);
+    const jwtIssueTokenService = mock<JwtIssueTokenService>();
+    const testIssueTokenService = new TestIssueTokenService(
+      jwtIssueTokenService,
+    );
 
     it('should return an issueTokenService', async () => {
       const provider =

@@ -13,7 +13,7 @@ export const AUTH_APPLE_MODULE_DEFAULT_SETTINGS_TOKEN =
 
 export const AUTH_APPLE_STRATEGY_NAME = 'apple';
 
-export const AUTH_APPLE_VERIFY_ALGORITHM_RS256 = 'RS256';
+export const AUTH_APPLE_VERIFY_ALGORITHM = 'RS256';
 
 export const AUTH_APPLE_TOKEN_ISSUER = 'https://appleid.apple.com';
 

@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ReferenceId } from '@concepta/ts-core';
 import {
-  JwtIssueService,
-  JwtIssueServiceInterface,
+  JwtIssueTokenService,
+  JwtIssueTokenServiceInterface,
   JwtSignOptions,
   JwtSignStringOptions,
 } from '@concepta/nestjs-jwt';
@@ -13,8 +13,8 @@ import { AuthenticationJwtResponseDto } from '../dto/authentication-jwt-response
 @Injectable()
 export class IssueTokenService implements IssueTokenServiceInterface {
   constructor(
-    @Inject(JwtIssueService)
-    protected readonly jwtIssueService: JwtIssueServiceInterface,
+    @Inject(JwtIssueTokenService)
+    protected readonly jwtIssueTokenService: JwtIssueTokenServiceInterface,
   ) {}
 
   /**
@@ -32,9 +32,9 @@ export class IssueTokenService implements IssueTokenServiceInterface {
     options?: JwtSignOptions,
   ) {
     if (typeof payload === 'string') {
-      return this.jwtIssueService.accessToken(payload, options);
+      return this.jwtIssueTokenService.accessToken(payload, options);
     } else {
-      return this.jwtIssueService.accessToken(payload, options);
+      return this.jwtIssueTokenService.accessToken(payload, options);
     }
   }
 
@@ -56,9 +56,9 @@ export class IssueTokenService implements IssueTokenServiceInterface {
     options?: JwtSignOptions,
   ) {
     if (typeof payload === 'string') {
-      return this.jwtIssueService.refreshToken(payload, options);
+      return this.jwtIssueTokenService.refreshToken(payload, options);
     } else {
-      return this.jwtIssueService.refreshToken(payload, options);
+      return this.jwtIssueTokenService.refreshToken(payload, options);
     }
   }
 

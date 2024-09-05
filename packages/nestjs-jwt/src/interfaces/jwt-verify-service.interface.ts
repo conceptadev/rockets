@@ -1,11 +1,9 @@
 import { NestJwtService } from '../jwt.externals';
 
 export interface JwtVerifyServiceInterface {
-  accessToken(
-    ...args: Parameters<NestJwtService['verifyAsync']>
-  ): ReturnType<NestJwtService['verifyAsync']>;
+  verifyAsync: <T extends object = object>(
+    ...rest: Parameters<NestJwtService['verifyAsync']>
+  ) => Promise<T>;
 
-  refreshToken(
-    ...args: Parameters<NestJwtService['verifyAsync']>
-  ): ReturnType<NestJwtService['verifyAsync']>;
+  decode: <T = unknown>(...rest: Parameters<NestJwtService['decode']>) => T;
 }

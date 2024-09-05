@@ -1,12 +1,12 @@
-import { NestJwtService } from '@concepta/nestjs-jwt/dist/jwt.externals';
-import { Inject, Injectable } from '@nestjs/common';
 import { JwksClient } from 'jwks-rsa';
+import { Inject, Injectable } from '@nestjs/common';
+import { JwtVerifyServiceInterface } from '@concepta/nestjs-jwt';
 import {
   AUTH_APPLE_JWT_KEYS,
   AUTH_APPLE_JWT_SERVICE_TOKEN,
   AUTH_APPLE_MODULE_SETTINGS_TOKEN,
   AUTH_APPLE_TOKEN_ISSUER,
-  AUTH_APPLE_VERIFY_ALGORITHM_RS256,
+  AUTH_APPLE_VERIFY_ALGORITHM,
 } from './auth-apple.constants';
 import { AuthAppleSettingsInterface } from './interfaces/auth-apple-settings.interface';
 import { AuthAppleProfileInterface } from './interfaces/auth-apple-profile.interface';
@@ -24,7 +24,7 @@ export class AuthAppleService implements AuthAppleServiceInterface {
     @Inject(AUTH_APPLE_MODULE_SETTINGS_TOKEN)
     private settings: AuthAppleSettingsInterface,
     @Inject(AUTH_APPLE_JWT_SERVICE_TOKEN)
-    private jwtService: NestJwtService,
+    private jwtService: JwtVerifyServiceInterface,
   ) {}
 
   // Function to verify JWT token
@@ -42,10 +42,29 @@ export class AuthAppleService implements AuthAppleServiceInterface {
   }
 
   private extractKeyId(idToken: string): string {
+    let kid: string | null = null;
+
     try {
       const decodedHeader = this.jwtService.decode(idToken, { complete: true });
-      return decodedHeader.header.kid;
+
+      if (
+        decodedHeader &&
+        typeof decodedHeader === 'object' &&
+        'header' in decodedHeader &&
+        decodedHeader.header &&
+        typeof decodedHeader.header === 'object' &&
+        'kid' in decodedHeader.header &&
+        typeof decodedHeader.header.kid === 'string'
+      ) {
+        kid = decodedHeader.header.kid;
+      }
     } catch (e) {
+      throw new AuthAppleDecodeException();
+    }
+
+    if (kid) {
+      return kid;
+    } else {
       throw new AuthAppleDecodeException();
     }
   }
@@ -66,7 +85,7 @@ export class AuthAppleService implements AuthAppleServiceInterface {
   ): Promise<AuthAppleProfileInterface> {
     return this.jwtService.verifyAsync(idToken, {
       publicKey,
-      algorithms: [AUTH_APPLE_VERIFY_ALGORITHM_RS256],
+      algorithms: [AUTH_APPLE_VERIFY_ALGORITHM],
     });
   }
 

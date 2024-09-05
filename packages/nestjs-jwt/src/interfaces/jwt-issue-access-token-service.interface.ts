@@ -1,9 +1,9 @@
 import { JwtSignOptions, JwtSignStringOptions } from '../jwt.types';
 
-export interface JwtSignServiceInterface {
-  signAsync(payload: string, options?: JwtSignStringOptions): Promise<string>;
+export interface JwtIssueAccessTokenServiceInterface {
+  accessToken(payload: string, options?: JwtSignStringOptions): Promise<string>;
 
-  signAsync(
+  accessToken(
     payload: Buffer | object,
     options?: JwtSignOptions,
   ): Promise<string>;

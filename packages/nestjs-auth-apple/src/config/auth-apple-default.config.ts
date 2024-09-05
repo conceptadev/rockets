@@ -3,7 +3,7 @@ import { AUTH_APPLE_MODULE_DEFAULT_SETTINGS_TOKEN } from '../auth-apple.constant
 import { AuthAppleSettingsInterface } from '../interfaces/auth-apple-settings.interface';
 import { AuthAppleLoginDto } from '../dto/auth-apple-login.dto';
 import { mapProfile } from '../utils/auth-apple-map-profile';
-import { authAppleParseScope } from '../utils/auth-apple-scope-parser.util';
+import { authAppleScopeParser } from '../utils/auth-apple-scope-parser.util';
 
 /**
  * Default configuration for auth apple.
@@ -25,7 +25,7 @@ export const authAppleDefaultConfig = registerAs(
     passReqToCallback: false,
     scope:
       'APPLE_SCOPE' in process.env && process.env.APPLE_SCOPE
-        ? authAppleParseScope(process.env.APPLE_SCOPE)
+        ? authAppleScopeParser(process.env.APPLE_SCOPE)
         : ['email'],
     mapProfile: mapProfile,
   }),
