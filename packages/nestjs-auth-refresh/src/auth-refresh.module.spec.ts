@@ -7,10 +7,10 @@ import {
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
-  JwtIssueService,
+  JwtIssueTokenService,
   JwtModule,
   JwtService,
-  JwtVerifyService,
+  JwtVerifyTokenService,
 } from '@concepta/nestjs-jwt';
 import {
   AuthenticationModule,
@@ -36,8 +36,11 @@ import { UserModuleFixture } from './__fixtures__/user/user.module.fixture';
 
 describe(AuthRefreshModule, () => {
   const jwtService = new JwtService();
-  const jwtVerifyService = new JwtVerifyService(jwtService, jwtService);
-  const jwtIssueService = new JwtIssueService(jwtService, jwtService);
+  const jwtVerifyTokenService = new JwtVerifyTokenService(
+    jwtService,
+    jwtService,
+  );
+  const jwtIssueTokenService = new JwtIssueTokenService(jwtService, jwtService);
 
   let testModule: TestingModule;
   let authRefreshModule: AuthRefreshModule;
@@ -50,8 +53,8 @@ describe(AuthRefreshModule, () => {
       testModule = await Test.createTestingModule(
         testModuleFactory([
           AuthRefreshModule.forRoot({
-            verifyTokenService: new VerifyTokenService(jwtVerifyService),
-            issueTokenService: new IssueTokenService(jwtIssueService),
+            verifyTokenService: new VerifyTokenService(jwtVerifyTokenService),
+            issueTokenService: new IssueTokenService(jwtIssueTokenService),
             userLookupService: new UserLookupServiceFixture(),
           }),
         ]),
@@ -69,8 +72,8 @@ describe(AuthRefreshModule, () => {
       testModule = await Test.createTestingModule(
         testModuleFactory([
           AuthRefreshModule.register({
-            verifyTokenService: new VerifyTokenService(jwtVerifyService),
-            issueTokenService: new IssueTokenService(jwtIssueService),
+            verifyTokenService: new VerifyTokenService(jwtVerifyTokenService),
+            issueTokenService: new IssueTokenService(jwtIssueTokenService),
             userLookupService: new UserLookupServiceFixture(),
           }),
         ]),
@@ -158,8 +161,8 @@ describe(AuthRefreshModule, () => {
 
     let testService: TestService;
     const ffUserLookupService = new UserLookupServiceFixture();
-    const ffVerifyTokenService = new VerifyTokenService(jwtVerifyService);
-    const ffIssueTokenService = new IssueTokenService(jwtIssueService);
+    const ffVerifyTokenService = new VerifyTokenService(jwtVerifyTokenService);
+    const ffIssueTokenService = new IssueTokenService(jwtIssueTokenService);
 
     beforeEach(async () => {
       const globalModule = testModuleFactory([

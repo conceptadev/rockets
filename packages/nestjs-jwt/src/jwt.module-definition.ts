@@ -19,8 +19,8 @@ import { JwtSettingsInterface } from './interfaces/jwt-settings.interface';
 import { JwtOptionsInterface } from './interfaces/jwt-options.interface';
 import { JwtServiceInterface } from './interfaces/jwt-service.interface';
 import { JwtService } from './services/jwt.service';
-import { JwtIssueService } from './services/jwt-issue.service';
-import { JwtVerifyService } from './services/jwt-verify.service';
+import { JwtIssueTokenService } from './services/jwt-issue-token.service';
+import { JwtVerifyTokenService } from './services/jwt-verify-token.service';
 
 const RAW_OPTIONS_TOKEN = Symbol('__JWT_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -72,8 +72,8 @@ export function createJwtExports() {
     JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
     JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
     JwtService,
-    JwtIssueService,
-    JwtVerifyService,
+    JwtIssueTokenService,
+    JwtVerifyTokenService,
   ];
 }
 
@@ -155,7 +155,7 @@ export function createJwtIssueServiceProvider(
   optionsOverrides?: JwtOptions,
 ): Provider {
   return {
-    provide: JwtIssueService,
+    provide: JwtIssueTokenService,
     inject: [
       RAW_OPTIONS_TOKEN,
       JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
@@ -166,9 +166,9 @@ export function createJwtIssueServiceProvider(
       jwtAccessService: JwtServiceInterface,
       jwtRefreshService: JwtServiceInterface,
     ) =>
-      optionsOverrides?.jwtIssueService ??
-      options.jwtIssueService ??
-      new JwtIssueService(jwtAccessService, jwtRefreshService),
+      optionsOverrides?.jwtIssueTokenService ??
+      options.jwtIssueTokenService ??
+      new JwtIssueTokenService(jwtAccessService, jwtRefreshService),
   };
 }
 
@@ -176,7 +176,7 @@ export function createJwtVerifyServiceProvider(
   optionsOverrides?: JwtOptions,
 ): Provider {
   return {
-    provide: JwtVerifyService,
+    provide: JwtVerifyTokenService,
     inject: [
       RAW_OPTIONS_TOKEN,
       JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
@@ -187,8 +187,8 @@ export function createJwtVerifyServiceProvider(
       jwtAccessService: JwtServiceInterface,
       jwtRefreshService: JwtServiceInterface,
     ) =>
-      optionsOverrides?.jwtVerifyService ??
-      options.jwtVerifyService ??
-      new JwtVerifyService(jwtAccessService, jwtRefreshService),
+      optionsOverrides?.jwtVerifyTokenService ??
+      options.jwtVerifyTokenService ??
+      new JwtVerifyTokenService(jwtAccessService, jwtRefreshService),
   };
 }

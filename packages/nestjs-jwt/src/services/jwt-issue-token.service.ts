@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { JwtIssueServiceInterface } from '../interfaces/jwt-issue-service.interface';
+import { JwtIssueTokenServiceInterface } from '../interfaces/jwt-issue-token-service.interface';
 import { JwtServiceInterface } from '../interfaces/jwt-service.interface';
 import {
   JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
@@ -8,7 +8,7 @@ import {
 import { JwtSignOptions, JwtSignStringOptions } from '../jwt.types';
 
 @Injectable()
-export class JwtIssueService implements JwtIssueServiceInterface {
+export class JwtIssueTokenService implements JwtIssueTokenServiceInterface {
   constructor(
     @Inject(JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN)
     protected readonly jwtAccessService: JwtServiceInterface,

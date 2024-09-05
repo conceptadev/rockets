@@ -3,8 +3,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { JwtModule } from './jwt.module';
 import { JwtService } from './services/jwt.service';
-import { JwtVerifyService } from './services/jwt-verify.service';
-import { JwtIssueService } from './services/jwt-issue.service';
+import { JwtVerifyTokenService } from './services/jwt-verify-token.service';
+import { JwtIssueTokenService } from './services/jwt-issue-token.service';
 import { JwtSettingsInterface } from './interfaces/jwt-settings.interface';
 import {
   JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
@@ -18,8 +18,8 @@ describe(JwtModule, () => {
   let jwtService: JwtService;
   let jwtAccessService: JwtService;
   let jwtRefreshService: JwtService;
-  let jwtIssueService: JwtIssueService;
-  let jwtVerifyService: JwtVerifyService;
+  let jwtIssueTokenService: JwtIssueTokenService;
+  let jwtVerifyTokenService: JwtVerifyTokenService;
 
   describe(JwtModule.register, () => {
     beforeAll(async () => {
@@ -107,10 +107,10 @@ describe(JwtModule, () => {
     class JwtServiceFixture extends JwtService {}
 
     @Injectable()
-    class JwtIssueServiceFixture extends JwtIssueService {}
+    class JwtIssueServiceFixture extends JwtIssueTokenService {}
 
     @Injectable()
-    class JwtVerifyServiceFixture extends JwtVerifyService {}
+    class JwtVerifyServiceFixture extends JwtVerifyTokenService {}
 
     const jwtAccessServiceFixture = new JwtAccessServiceFixture({
       secret: 'bar1',
@@ -140,8 +140,8 @@ describe(JwtModule, () => {
           jwtAccessService: jwtAccessServiceFixture,
           jwtRefreshService: jwtRefreshServiceFixture,
           jwtService: jwtServiceFixture,
-          jwtIssueService: jwtIssueServiceFixture,
-          jwtVerifyService: jwtVerifyServiceFixture,
+          jwtIssueTokenService: jwtIssueServiceFixture,
+          jwtVerifyTokenService: jwtVerifyServiceFixture,
         }),
       ],
     })
@@ -159,12 +159,20 @@ describe(JwtModule, () => {
 
     it('providers should be correct', async () => {
       expect(jwtService).toEqual(jwtServiceFixture);
-      expect(jwtIssueService).toEqual(jwtIssueServiceFixture);
-      expect(jwtIssueService['jwtAccessService']).toEqual(jwtServiceFixture);
-      expect(jwtIssueService['jwtRefreshService']).toEqual(jwtServiceFixture);
-      expect(jwtVerifyService).toBe(jwtVerifyServiceFixture);
-      expect(jwtVerifyService['jwtAccessService']).toEqual(jwtServiceFixture);
-      expect(jwtVerifyService['jwtRefreshService']).toEqual(jwtServiceFixture);
+      expect(jwtIssueTokenService).toEqual(jwtIssueServiceFixture);
+      expect(jwtIssueTokenService['jwtAccessService']).toEqual(
+        jwtServiceFixture,
+      );
+      expect(jwtIssueTokenService['jwtRefreshService']).toEqual(
+        jwtServiceFixture,
+      );
+      expect(jwtVerifyTokenService).toBe(jwtVerifyServiceFixture);
+      expect(jwtVerifyTokenService['jwtAccessService']).toEqual(
+        jwtServiceFixture,
+      );
+      expect(jwtVerifyTokenService['jwtRefreshService']).toEqual(
+        jwtServiceFixture,
+      );
     });
 
     it('settings should be overriden', async () => {
@@ -189,8 +197,11 @@ describe(JwtModule, () => {
     jwtRefreshService = testModule.get<JwtService>(
       JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
     );
-    jwtIssueService = testModule.get<JwtIssueService>(JwtIssueService);
-    jwtVerifyService = testModule.get<JwtVerifyService>(JwtVerifyService);
+    jwtIssueTokenService =
+      testModule.get<JwtIssueTokenService>(JwtIssueTokenService);
+    jwtVerifyTokenService = testModule.get<JwtVerifyTokenService>(
+      JwtVerifyTokenService,
+    );
   }
 
   function commonProviderTests() {
@@ -200,8 +211,8 @@ describe(JwtModule, () => {
       expect(jwtService).toBeInstanceOf(JwtService);
       expect(jwtAccessService).toBeInstanceOf(JwtService);
       expect(jwtRefreshService).toBeInstanceOf(JwtService);
-      expect(jwtIssueService).toBeInstanceOf(JwtIssueService);
-      expect(jwtVerifyService).toBeInstanceOf(JwtVerifyService);
+      expect(jwtIssueTokenService).toBeInstanceOf(JwtIssueTokenService);
+      expect(jwtVerifyTokenService).toBeInstanceOf(JwtVerifyTokenService);
     });
   }
 });

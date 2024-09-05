@@ -1,23 +1,23 @@
-import { JwtIssueService } from './jwt-issue.service';
+import { JwtIssueTokenService } from './jwt-issue-token.service';
 import { JwtService } from './jwt.service';
 import { mock } from 'jest-mock-extended';
 
-describe(JwtIssueService, () => {
+describe(JwtIssueTokenService, () => {
   let jwtService: JwtService;
-  let jwtIssueService: JwtIssueService;
+  let jwtIssueTokenService: JwtIssueTokenService;
   const token = 'token';
 
   beforeEach(() => {
     jwtService = mock<JwtService>();
-    jwtIssueService = new JwtIssueService(jwtService, jwtService);
+    jwtIssueTokenService = new JwtIssueTokenService(jwtService, jwtService);
   });
 
-  describe(JwtIssueService.prototype.accessToken, () => {
+  describe(JwtIssueTokenService.prototype.accessToken, () => {
     it('should success', async () => {
       const spySignAsync = jest
         .spyOn(jwtService, 'signAsync')
         .mockResolvedValue(token);
-      const result = await jwtIssueService.accessToken(token);
+      const result = await jwtIssueTokenService.accessToken(token);
       expect(result).toBe(token);
       expect(spySignAsync).toBeCalledWith(token, undefined);
     });
@@ -25,17 +25,17 @@ describe(JwtIssueService, () => {
       jest.spyOn(jwtService, 'signAsync').mockImplementationOnce(() => {
         throw new Error();
       });
-      const t = async () => await jwtIssueService.accessToken(token);
+      const t = async () => await jwtIssueTokenService.accessToken(token);
       await expect(t).rejects.toThrowError();
     });
   });
 
-  describe(JwtIssueService.prototype.refreshToken, () => {
+  describe(JwtIssueTokenService.prototype.refreshToken, () => {
     it('should success', async () => {
       const spySignAsync = jest
         .spyOn(jwtService, 'signAsync')
         .mockResolvedValue(token);
-      const result = await jwtIssueService.refreshToken(token);
+      const result = await jwtIssueTokenService.refreshToken(token);
       expect(result).toBe(token);
       expect(spySignAsync).toBeCalledWith(token, undefined);
     });
@@ -44,7 +44,7 @@ describe(JwtIssueService, () => {
       jest.spyOn(jwtService, 'signAsync').mockImplementationOnce(() => {
         throw new Error();
       });
-      const t = async () => await jwtIssueService.refreshToken(token);
+      const t = async () => await jwtIssueTokenService.refreshToken(token);
       await expect(t).rejects.toThrowError();
     });
   });

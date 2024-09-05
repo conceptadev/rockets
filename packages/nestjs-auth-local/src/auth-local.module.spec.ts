@@ -6,7 +6,11 @@ import {
   ModuleMetadata,
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { JwtIssueService, JwtModule, JwtService } from '@concepta/nestjs-jwt';
+import {
+  JwtIssueTokenService,
+  JwtModule,
+  JwtService,
+} from '@concepta/nestjs-jwt';
 import {
   AuthenticationModule,
   IssueTokenService,
@@ -33,7 +37,7 @@ import { AuthLocalValidateUserService } from './services/auth-local-validate-use
 
 describe(AuthLocalModule, () => {
   const jwtService = new JwtService();
-  const jwtIssueService = new JwtIssueService(jwtService, jwtService);
+  const jwtIssueTokenService = new JwtIssueTokenService(jwtService, jwtService);
 
   let testModule: TestingModule;
   let authLocalModule: AuthLocalModule;
@@ -47,7 +51,7 @@ describe(AuthLocalModule, () => {
       testModule = await Test.createTestingModule(
         testModuleFactory([
           AuthLocalModule.forRoot({
-            issueTokenService: new IssueTokenService(jwtIssueService),
+            issueTokenService: new IssueTokenService(jwtIssueTokenService),
             userLookupService: new UserLookupServiceFixture(),
           }),
         ]),
@@ -65,7 +69,7 @@ describe(AuthLocalModule, () => {
       testModule = await Test.createTestingModule(
         testModuleFactory([
           AuthLocalModule.register({
-            issueTokenService: new IssueTokenService(jwtIssueService),
+            issueTokenService: new IssueTokenService(jwtIssueTokenService),
             userLookupService: new UserLookupServiceFixture(),
           }),
         ]),
@@ -141,7 +145,7 @@ describe(AuthLocalModule, () => {
 
     let testService: TestService;
     const ffUserLookupService = new UserLookupServiceFixture();
-    const ffIssueTokenService = new IssueTokenService(jwtIssueService);
+    const ffIssueTokenService = new IssueTokenService(jwtIssueTokenService);
 
     beforeEach(async () => {
       const globalModule = testModuleFactory([

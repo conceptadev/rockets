@@ -1,23 +1,23 @@
-import { JwtVerifyService } from './jwt-verify.service';
+import { JwtVerifyTokenService } from './jwt-verify-token.service';
 import { JwtService } from './jwt.service';
 import { mock } from 'jest-mock-extended';
 
-describe(JwtVerifyService, () => {
+describe(JwtVerifyTokenService, () => {
   let jwtService: JwtService;
-  let jwtVerifyService: JwtVerifyService;
+  let jwtVerifyTokenService: JwtVerifyTokenService;
   const token = 'token';
 
   beforeEach(() => {
     jwtService = mock<JwtService>();
-    jwtVerifyService = new JwtVerifyService(jwtService, jwtService);
+    jwtVerifyTokenService = new JwtVerifyTokenService(jwtService, jwtService);
   });
 
-  describe(JwtVerifyService.prototype.accessToken, () => {
+  describe(JwtVerifyTokenService.prototype.accessToken, () => {
     it('should success', async () => {
       const spyAccessToken = jest
         .spyOn(jwtService, 'verifyAsync')
         .mockResolvedValue({ foo: 'bar' });
-      const result = await jwtVerifyService.accessToken('{"foo": "bar"}');
+      const result = await jwtVerifyTokenService.accessToken('{"foo": "bar"}');
       expect(result).toEqual({ foo: 'bar' });
       expect(spyAccessToken).toBeCalledWith('{"foo": "bar"}');
     });
@@ -26,17 +26,17 @@ describe(JwtVerifyService, () => {
       jest.spyOn(jwtService, 'verifyAsync').mockImplementationOnce(() => {
         throw new Error();
       });
-      const t = async () => await jwtVerifyService.accessToken(token);
+      const t = async () => await jwtVerifyTokenService.accessToken(token);
       await expect(t).rejects.toThrowError();
     });
   });
 
-  describe(JwtVerifyService.prototype.refreshToken, () => {
+  describe(JwtVerifyTokenService.prototype.refreshToken, () => {
     it('should success', async () => {
       const spyRefreshToken = jest
         .spyOn(jwtService, 'verifyAsync')
         .mockResolvedValue({ man: 'chu' });
-      const result = await jwtVerifyService.refreshToken('{"man": "chu"}');
+      const result = await jwtVerifyTokenService.refreshToken('{"man": "chu"}');
       expect(result).toEqual({ man: 'chu' });
       expect(spyRefreshToken).toBeCalledWith('{"man": "chu"}');
     });
@@ -45,7 +45,7 @@ describe(JwtVerifyService, () => {
       jest.spyOn(jwtService, 'verifyAsync').mockImplementationOnce(() => {
         throw new Error();
       });
-      const t = async () => await jwtVerifyService.refreshToken(token);
+      const t = async () => await jwtVerifyTokenService.refreshToken(token);
       await expect(t).rejects.toThrowError();
     });
   });

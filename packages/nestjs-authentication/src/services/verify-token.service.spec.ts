@@ -1,4 +1,4 @@
-import { JwtVerifyService } from '@concepta/nestjs-jwt';
+import { JwtVerifyTokenService } from '@concepta/nestjs-jwt';
 import { BadRequestException } from '@nestjs/common';
 import { mock } from 'jest-mock-extended';
 import { ValidateTokenServiceInterface } from '../interfaces/validate-token-service.interface';
@@ -8,23 +8,23 @@ describe(VerifyTokenService, () => {
   const token = 'token';
   let verifyTokenService: VerifyTokenService;
 
-  const jwtVerifyService = mock<JwtVerifyService>();
+  const jwtVerifyTokenService = mock<JwtVerifyTokenService>();
   const validateTokenService = mock<ValidateTokenServiceInterface>();
 
   describe(VerifyTokenService.prototype.accessToken, () => {
     it('should success', async () => {
-      verifyTokenService = new VerifyTokenService(jwtVerifyService);
-      jest.spyOn(jwtVerifyService, 'accessToken').mockResolvedValue({});
+      verifyTokenService = new VerifyTokenService(jwtVerifyTokenService);
+      jest.spyOn(jwtVerifyTokenService, 'accessToken').mockResolvedValue({});
       const result = await verifyTokenService.accessToken(token);
       expect(result).toEqual({});
     });
 
     it('should throw exception', async () => {
       verifyTokenService = new VerifyTokenService(
-        jwtVerifyService,
+        jwtVerifyTokenService,
         validateTokenService,
       );
-      jest.spyOn(jwtVerifyService, 'accessToken').mockResolvedValue({});
+      jest.spyOn(jwtVerifyTokenService, 'accessToken').mockResolvedValue({});
       jest
         .spyOn(validateTokenService, 'validateToken')
         .mockResolvedValue(false);
@@ -39,18 +39,18 @@ describe(VerifyTokenService, () => {
 
   describe(VerifyTokenService.prototype.refreshToken, () => {
     it('should success', async () => {
-      verifyTokenService = new VerifyTokenService(jwtVerifyService);
-      jest.spyOn(jwtVerifyService, 'refreshToken').mockResolvedValue({});
+      verifyTokenService = new VerifyTokenService(jwtVerifyTokenService);
+      jest.spyOn(jwtVerifyTokenService, 'refreshToken').mockResolvedValue({});
       const result = await verifyTokenService.refreshToken(token);
       expect(result).toEqual({});
     });
 
     it('should throw exception', async () => {
       verifyTokenService = new VerifyTokenService(
-        jwtVerifyService,
+        jwtVerifyTokenService,
         validateTokenService,
       );
-      jest.spyOn(jwtVerifyService, 'refreshToken').mockResolvedValue({});
+      jest.spyOn(jwtVerifyTokenService, 'refreshToken').mockResolvedValue({});
       jest
         .spyOn(validateTokenService, 'validateToken')
         .mockResolvedValue(false);
