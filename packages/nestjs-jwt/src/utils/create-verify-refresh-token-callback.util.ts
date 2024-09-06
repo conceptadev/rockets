@@ -1,8 +1,8 @@
-import { JwtVerifyServiceInterface } from '../interfaces/jwt-verify-service.interface';
+import { JwtVerifyTokenServiceInterface } from '../interfaces/jwt-verify-token-service.interface';
 import { JwtVerifyTokenCallback } from '../jwt.types';
 
 export const createVerifyRefreshTokenCallback = (
-  verifyTokenService: JwtVerifyServiceInterface,
+  verifyTokenService: JwtVerifyTokenServiceInterface,
 ): JwtVerifyTokenCallback => {
   return (
     token: string,

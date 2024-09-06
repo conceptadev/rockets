@@ -5,7 +5,7 @@ export class ValidateTokenServiceFixture
 {
   public discriminator = 'default';
 
-  async validateToken(_payload: Record<string, unknown>): Promise<boolean> {
+  async validateToken(_payload: object): Promise<boolean> {
     throw new Error('Method not implemented.');
   }
 }

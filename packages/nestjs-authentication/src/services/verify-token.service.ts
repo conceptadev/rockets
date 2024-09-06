@@ -4,7 +4,7 @@ import {
   Injectable,
   Optional,
 } from '@nestjs/common';
-import { JwtVerifyService } from '@concepta/nestjs-jwt';
+import { JwtVerifyTokenService } from '@concepta/nestjs-jwt';
 import { AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN } from '../authentication.constants';
 import { ValidateTokenServiceInterface } from '../interfaces/validate-token-service.interface';
 import { VerifyTokenServiceInterface } from '../interfaces/verify-token-service.interface';
@@ -12,7 +12,7 @@ import { VerifyTokenServiceInterface } from '../interfaces/verify-token-service.
 @Injectable()
 export class VerifyTokenService implements VerifyTokenServiceInterface {
   constructor(
-    protected readonly jwtVerifyService: JwtVerifyService,
+    protected readonly jwtVerifyTokenService: JwtVerifyTokenService,
     @Optional()
     @Inject(AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN)
     protected readonly validateTokenService?: ValidateTokenServiceInterface,
@@ -21,9 +21,9 @@ export class VerifyTokenService implements VerifyTokenServiceInterface {
   /**
    * Verify an access token.
    */
-  async accessToken(...args: Parameters<JwtVerifyService['accessToken']>) {
+  async accessToken(...args: Parameters<JwtVerifyTokenService['accessToken']>) {
     // decode the token
-    const token = await this.jwtVerifyService.accessToken(...args);
+    const token = await this.jwtVerifyTokenService.accessToken(...args);
 
     // try to validate the token
     if (await this.validateToken(token)) {
@@ -38,9 +38,11 @@ export class VerifyTokenService implements VerifyTokenServiceInterface {
   /**
    * Verify a refresh token.
    */
-  async refreshToken(...args: Parameters<JwtVerifyService['refreshToken']>) {
+  async refreshToken(
+    ...args: Parameters<JwtVerifyTokenService['refreshToken']>
+  ) {
     // decode the token
-    const token = await this.jwtVerifyService.refreshToken(...args);
+    const token = await this.jwtVerifyTokenService.refreshToken(...args);
 
     // try to validate the token
     if (await this.validateToken(token)) {
@@ -59,9 +61,7 @@ export class VerifyTokenService implements VerifyTokenServiceInterface {
    *
    * @param payload - Payload object
    */
-  private async validateToken(
-    payload: Record<string, unknown>,
-  ): Promise<boolean> {
+  private async validateToken(payload: object): Promise<boolean> {
     if (this.validateTokenService) {
       return this.validateTokenService.validateToken(payload);
     } else {

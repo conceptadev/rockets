@@ -24,7 +24,6 @@
     "@nestjs/swagger": "^7.4.0"
   },
   "devDependencies": {
-    "@nestjs/jwt": "^10.2.0",
     "@nestjs/testing": "^10.4.1",
     "jest-mock-extended": "^2.0.9"
   },

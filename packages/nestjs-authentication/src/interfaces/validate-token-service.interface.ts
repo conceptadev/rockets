@@ -1,3 +1,3 @@
 export interface ValidateTokenServiceInterface {
-  validateToken: (payload: Record<string, unknown>) => Promise<boolean>;
+  validateToken: (payload: object) => Promise<boolean>;
 }
