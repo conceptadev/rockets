@@ -1,4 +1,4 @@
-import { JwtIssueService } from '@concepta/nestjs-jwt';
+import { JwtIssueTokenService } from '@concepta/nestjs-jwt';
 import {
   AuthenticatedUserInterface,
   AuthenticationResponseInterface,
@@ -20,7 +20,7 @@ describe(IssueTokenService, () => {
   };
 
   beforeEach(async () => {
-    const jwtIssueService = mock<JwtIssueService>({
+    const jwtIssueTokenService = mock<JwtIssueTokenService>({
       accessToken: (): Promise<string> => {
         return new Promise((resolve) => {
           resolve('accessToken');
@@ -32,7 +32,7 @@ describe(IssueTokenService, () => {
         });
       },
     });
-    issueTokenService = new IssueTokenService(jwtIssueService);
+    issueTokenService = new IssueTokenService(jwtIssueTokenService);
   });
 
   describe(IssueTokenService.prototype.accessToken, () => {

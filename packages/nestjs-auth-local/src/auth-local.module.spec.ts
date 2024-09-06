@@ -6,11 +6,10 @@ import {
   ModuleMetadata,
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { JwtService as NestJwtService } from '@nestjs/jwt';
 import {
-  JwtIssueService,
+  JwtIssueTokenService,
   JwtModule,
-  JwtSignService,
+  JwtService,
 } from '@concepta/nestjs-jwt';
 import {
   AuthenticationModule,
@@ -37,13 +36,8 @@ import { UserModuleFixture } from './__fixtures__/user/user.module.fixture';
 import { AuthLocalValidateUserService } from './services/auth-local-validate-user.service';
 
 describe(AuthLocalModule, () => {
-  const jwtAccessService = new NestJwtService();
-  const jwtRefreshService = new NestJwtService();
-  const jwtSignService = new JwtSignService(
-    jwtAccessService,
-    jwtRefreshService,
-  );
-  const jwtIssueService = new JwtIssueService(jwtSignService);
+  const jwtService = new JwtService();
+  const jwtIssueTokenService = new JwtIssueTokenService(jwtService, jwtService);
 
   let testModule: TestingModule;
   let authLocalModule: AuthLocalModule;
@@ -57,7 +51,7 @@ describe(AuthLocalModule, () => {
       testModule = await Test.createTestingModule(
         testModuleFactory([
           AuthLocalModule.forRoot({
-            issueTokenService: new IssueTokenService(jwtIssueService),
+            issueTokenService: new IssueTokenService(jwtIssueTokenService),
             userLookupService: new UserLookupServiceFixture(),
           }),
         ]),
@@ -75,7 +69,7 @@ describe(AuthLocalModule, () => {
       testModule = await Test.createTestingModule(
         testModuleFactory([
           AuthLocalModule.register({
-            issueTokenService: new IssueTokenService(jwtIssueService),
+            issueTokenService: new IssueTokenService(jwtIssueTokenService),
             userLookupService: new UserLookupServiceFixture(),
           }),
         ]),
@@ -151,7 +145,7 @@ describe(AuthLocalModule, () => {
 
     let testService: TestService;
     const ffUserLookupService = new UserLookupServiceFixture();
-    const ffIssueTokenService = new IssueTokenService(jwtIssueService);
+    const ffIssueTokenService = new IssueTokenService(jwtIssueTokenService);
 
     beforeEach(async () => {
       const globalModule = testModuleFactory([

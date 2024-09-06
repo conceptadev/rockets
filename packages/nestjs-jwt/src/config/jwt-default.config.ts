@@ -14,9 +14,17 @@ export const jwtDefaultConfig = registerAs(
   (): JwtSettingsInterface => {
     // the default options
     const options: JwtSettingsInterface = {
+      default: {
+        signOptions: {
+          expiresIn: process.env?.JWT_MODULE_DEFAULT_EXPIRES_IN ?? '1h',
+        },
+      },
       access: {
         signOptions: {
-          expiresIn: process.env?.JWT_MODULE_ACCESS_EXPIRES_IN ?? '1h',
+          expiresIn:
+            process.env?.JWT_MODULE_ACCESS_EXPIRES_IN ??
+            process.env?.JWT_MODULE_DEFAULT_EXPIRES_IN ??
+            '1h',
         },
       },
       refresh: {

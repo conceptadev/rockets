@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { JwtModule, JwtVerifyService } from '@concepta/nestjs-jwt';
+import { JwtModule, JwtVerifyTokenService } from '@concepta/nestjs-jwt';
 import {
   AuthenticationModule,
   VerifyTokenService,
@@ -29,7 +29,7 @@ import { UserModuleFixture } from './__fixtures__/user/user.module.fixture';
 import { UserLookupServiceFixture } from './__fixtures__/user/user-lookup.service.fixture';
 
 describe(AuthJwtModule, () => {
-  const jwtVerifyService = mock<JwtVerifyService>();
+  const jwtVerifyTokenService = mock<JwtVerifyTokenService>();
 
   let testModule: TestingModule;
   let authJwtModule: AuthJwtModule;
@@ -41,7 +41,7 @@ describe(AuthJwtModule, () => {
       testModule = await Test.createTestingModule(
         testModuleFactory([
           AuthJwtModule.forRoot({
-            verifyTokenService: new VerifyTokenService(jwtVerifyService),
+            verifyTokenService: new VerifyTokenService(jwtVerifyTokenService),
             userLookupService: new UserLookupServiceFixture(),
           }),
         ]),
@@ -59,7 +59,7 @@ describe(AuthJwtModule, () => {
       testModule = await Test.createTestingModule(
         testModuleFactory([
           AuthJwtModule.register({
-            verifyTokenService: new VerifyTokenService(jwtVerifyService),
+            verifyTokenService: new VerifyTokenService(jwtVerifyTokenService),
             userLookupService: new UserLookupServiceFixture(),
           }),
         ]),
@@ -142,7 +142,7 @@ describe(AuthJwtModule, () => {
       _done: (err?: Error, decodedToken?: unknown) => void,
     ) => undefined;
     const ffUserLookupService = new UserLookupServiceFixture();
-    const ffVerifyTokenService = new VerifyTokenService(jwtVerifyService);
+    const ffVerifyTokenService = new VerifyTokenService(jwtVerifyTokenService);
 
     beforeEach(async () => {
       const globalModule = testModuleFactory([

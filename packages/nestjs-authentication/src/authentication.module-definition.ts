@@ -6,7 +6,10 @@ import {
 import { ConfigModule } from '@nestjs/config';
 
 import { createSettingsProvider } from '@concepta/nestjs-common';
-import { JwtIssueService, JwtVerifyService } from '@concepta/nestjs-jwt';
+import {
+  JwtIssueTokenService,
+  JwtVerifyTokenService,
+} from '@concepta/nestjs-jwt';
 
 import {
   AUTHENTICATION_MODULE_SETTINGS_TOKEN,
@@ -86,8 +89,8 @@ export function createAuthenticationProviders(options: {
 }): Provider[] {
   return [
     ...(options.providers ?? []),
-    JwtIssueService,
-    JwtVerifyService,
+    JwtIssueTokenService,
+    JwtVerifyTokenService,
     createAuthenticationOptionsProvider(options.overrides),
     createAuthenticationVerifyTokenServiceProvider(options.overrides),
     createAuthenticationIssueTokenServiceProvider(options.overrides),
@@ -114,14 +117,14 @@ export function createAuthenticationIssueTokenServiceProvider(
 ): Provider {
   return {
     provide: IssueTokenService,
-    inject: [RAW_OPTIONS_TOKEN, JwtIssueService],
+    inject: [RAW_OPTIONS_TOKEN, JwtIssueTokenService],
     useFactory: async (
       options: AuthenticationOptionsInterface,
-      jwtIssueService: JwtIssueService,
+      jwtIssueTokenService: JwtIssueTokenService,
     ) =>
       optionsOverrides?.issueTokenService ??
       options.issueTokenService ??
-      new IssueTokenService(jwtIssueService),
+      new IssueTokenService(jwtIssueTokenService),
   };
 }
 
@@ -132,12 +135,12 @@ export function createAuthenticationVerifyTokenServiceProvider(
     provide: VerifyTokenService,
     inject: [
       RAW_OPTIONS_TOKEN,
-      JwtVerifyService,
+      JwtVerifyTokenService,
       AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN,
     ],
     useFactory: async (
       options: AuthenticationOptionsInterface,
-      jwtVerifyService: JwtVerifyService,
+      jwtVerifyService: JwtVerifyTokenService,
       validateTokenService: ValidateTokenServiceInterface,
     ) =>
       optionsOverrides?.verifyTokenService ??

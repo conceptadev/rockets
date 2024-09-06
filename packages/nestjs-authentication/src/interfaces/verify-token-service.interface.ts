@@ -1,4 +1,4 @@
-import { JwtVerifyServiceInterface } from '@concepta/nestjs-jwt';
+import { JwtVerifyTokenServiceInterface } from '@concepta/nestjs-jwt';
 
 export interface VerifyTokenServiceInterface
-  extends JwtVerifyServiceInterface {}
+  extends JwtVerifyTokenServiceInterface {}

@@ -112,6 +112,9 @@
     },
     {
       "path": "packages/nestjs-file"
+    },
+    {
+      "path": "packages/nestjs-auth-apple"
     }
   ]
 }
