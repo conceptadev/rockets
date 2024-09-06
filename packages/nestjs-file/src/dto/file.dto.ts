@@ -10,7 +10,7 @@ import { IsOptional, IsString } from 'class-validator';
 @Exclude()
 export class FileDto extends CommonEntityDto implements FileInterface {
   /**
-   * provider
+   * Storage provider key
    */
   @Expose()
   @ApiProperty({

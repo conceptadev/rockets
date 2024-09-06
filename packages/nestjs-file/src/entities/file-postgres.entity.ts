@@ -18,11 +18,14 @@ export class FilePostgresEntity
   serviceKey!: string;
 
   /**
-   * subject
+   * File name (including path)
    */
   @Column()
   fileName!: string;
 
+  /**
+   * Content type
+   */
   @Column()
   contentType!: string;
 }

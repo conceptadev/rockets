@@ -1045,12 +1045,12 @@ __metadata:
     "@concepta/nestjs-typeorm-ext": "npm:^5.0.0-alpha.2"
     "@concepta/nestjs-user": "npm:^5.0.0-alpha.2"
     "@concepta/ts-common": "npm:^5.0.0-alpha.2"
-    "@concepta/ts-core": "npm:^5.0.0-alpha.2"
     "@concepta/typeorm-common": "npm:^5.0.0-alpha.2"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/swagger": "npm:^7.4.0"
     "@nestjs/testing": "npm:^10.4.1"
+    jest-mock-extended: "npm:^2.0.9"
   peerDependencies:
     class-transformer: "*"
     class-validator: "*"

@@ -1,7 +1,8 @@
 export { FileModule } from './file.module';
-export { FileEntityInterface as FileEntityInterface } from './interfaces/file-entity.interface';
+export { FileEntityInterface } from './interfaces/file-entity.interface';
 
-export { StorageServiceInterface } from './interfaces/storage-service.interface';
+export { FileServiceInterface } from './interfaces/file-service.interface';
+export { FileStorageServiceInterface } from './interfaces/file-storage-service.interface';
 
 export { FilePostgresEntity } from './entities/file-postgres.entity';
 export { FileSqliteEntity } from './entities/file-sqlite.entity';

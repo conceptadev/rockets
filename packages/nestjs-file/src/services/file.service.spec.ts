@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
 import { FileService } from './file.service';
-import { FileStorageService } from './file-storage.service';
+import { FileStrategyService } from './file-strategy.service';
 import { FileCreateDto } from '../dto/file-create.dto';
 import { FileQueryException } from '../exceptions/file-query.exception';
 import { FileEntityInterface } from '../interfaces/file-entity.interface';
@@ -11,7 +11,7 @@ import { randomUUID } from 'crypto';
 describe(FileService.name, () => {
   let fileService: FileService;
   let fileRepo: jest.Mocked<Repository<FileEntityInterface>>;
-  let fileStorageService: jest.Mocked<FileStorageService>;
+  let fileStrategyService: jest.Mocked<FileStrategyService>;
 
   const mockFile: FileEntityInterface = {
     id: randomUUID(),
@@ -34,8 +34,8 @@ describe(FileService.name, () => {
 
   beforeEach(() => {
     fileRepo = createMockRepository();
-    fileStorageService = createMockFileStorageService();
-    fileService = new FileService(fileRepo, fileStorageService);
+    fileStrategyService = createMockFileStrategyService();
+    fileService = new FileService(fileRepo, fileStrategyService);
     fileRepo.create.mockReturnValue(mockFile);
     const mockTransactionalEntityManager = {
       findOne: jest.fn().mockResolvedValue(null),
@@ -50,7 +50,7 @@ describe(FileService.name, () => {
 
   describe('push', () => {
     it('should create a new file and return upload URL', async () => {
-      fileStorageService.getUploadUrl.mockImplementationOnce(
+      fileStrategyService.getUploadUrl.mockImplementationOnce(
         (_file: FileCreatableInterface) => {
           return Promise.resolve(mockFile.uploadUri || '');
         },
@@ -58,7 +58,7 @@ describe(FileService.name, () => {
 
       const result = await fileService.push(mockFileCreateDto);
 
-      expect(fileStorageService.getUploadUrl).toHaveBeenCalledWith(mockFile);
+      expect(fileStrategyService.getUploadUrl).toHaveBeenCalledWith(mockFile);
       expect(result.uploadUri).toBe(mockFile.uploadUri);
     });
   });
@@ -66,7 +66,7 @@ describe(FileService.name, () => {
   describe('fetch', () => {
     it('should return download URL for existing file', async () => {
       fileRepo.findOne.mockResolvedValue(mockFile);
-      fileStorageService.getDownloadUrl.mockImplementationOnce(
+      fileStrategyService.getDownloadUrl.mockImplementationOnce(
         (_file: FileCreatableInterface) => {
           return Promise.resolve(mockFile.downloadUrl || '');
         },
@@ -77,7 +77,7 @@ describe(FileService.name, () => {
       expect(fileRepo.findOne).toHaveBeenCalledWith({
         where: { id: mockFile.id },
       });
-      expect(fileStorageService.getDownloadUrl).toHaveBeenCalledWith(mockFile);
+      expect(fileStrategyService.getDownloadUrl).toHaveBeenCalledWith(mockFile);
       expect(result.downloadUrl).toBe(mockFile.downloadUrl);
     });
 
@@ -98,6 +98,6 @@ function createMockRepository(): jest.Mocked<Repository<FileEntityInterface>> {
   return mock<Repository<FileEntityInterface>>();
 }
 
-function createMockFileStorageService(): jest.Mocked<FileStorageService> {
-  return mock<FileStorageService>();
+function createMockFileStrategyService(): jest.Mocked<FileStrategyService> {
+  return mock<FileStrategyService>();
 }

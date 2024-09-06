@@ -7,7 +7,5 @@ import { FileSettingsInterface } from '../interfaces/file-settings.interface';
  */
 export const fileDefaultConfig = registerAs(
   FILE_MODULE_DEFAULT_SETTINGS_TOKEN,
-  (): FileSettingsInterface => ({
-    uploadTimeout: 5000,
-  }),
+  (): FileSettingsInterface => ({}),
 );

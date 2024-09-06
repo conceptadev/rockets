@@ -1,8 +1,7 @@
-import { FileInterface } from '@concepta/ts-common';
-import { StorageServiceInterface } from './storage-service.interface';
+import { FileCreatableInterface } from '@concepta/ts-common';
 
 export interface FileStorageServiceInterface {
-  getUploadUrl(file: FileInterface): Promise<string>;
-  getDownloadUrl(file: FileInterface): Promise<string>;
-  resolveStorageService(file: FileInterface): StorageServiceInterface;
+  KEY: string;
+  getUploadUrl(file: FileCreatableInterface): Promise<string> | string;
+  getDownloadUrl(file: FileCreatableInterface): Promise<string> | string;
 }

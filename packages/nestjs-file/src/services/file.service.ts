@@ -7,14 +7,14 @@ import { FileInterface } from '@concepta/ts-common';
 
 import {
   FILE_MODULE_FILE_ENTITY_KEY,
-  FILE_STORAGE_SERVICE_KEY,
+  FILE_STRATEGY_SERVICE_KEY,
 } from '../file.constants';
 import { FileEntityInterface } from '../interfaces/file-entity.interface';
 import { FileServiceInterface } from '../interfaces/file-service.interface';
 import { FileQueryException } from '../exceptions/file-query.exception';
 import { FileCreateDto } from '../dto/file-create.dto';
-import { FileStorageService } from './file-storage.service';
-import { FileMutateCreateUserException } from '../exceptions/file-mutate-create.exception';
+import { FileStrategyService } from './file-strategy.service';
+import { FileCreateException } from '../exceptions/file-create.exception';
 import { FileIdMissingException } from '../exceptions/file-id-missing.exception';
 import { FileDuplicateEntryException } from '../exceptions/file-duplicated.exception';
 
@@ -26,8 +26,8 @@ export class FileService
   constructor(
     @InjectDynamicRepository(FILE_MODULE_FILE_ENTITY_KEY)
     private fileRepo: Repository<FileEntityInterface>,
-    @Inject(FILE_STORAGE_SERVICE_KEY)
-    private fileStorageService: FileStorageService,
+    @Inject(FILE_STRATEGY_SERVICE_KEY)
+    private fileStrategyService: FileStrategyService,
   ) {
     super(fileRepo);
   }
@@ -49,7 +49,7 @@ export class FileService
         return this.addFileUrls(newFile);
       });
     } catch (err) {
-      throw new FileMutateCreateUserException(this.metadata.targetName, err);
+      throw new FileCreateException(this.metadata.targetName, err);
     }
   }
 
@@ -65,8 +65,8 @@ export class FileService
   }
 
   private async addFileUrls(file: FileEntityInterface): Promise<FileInterface> {
-    file.uploadUri = await this.fileStorageService.getUploadUrl(file);
-    file.downloadUrl = await this.fileStorageService.getDownloadUrl(file);
+    file.uploadUri = await this.fileStrategyService.getUploadUrl(file);
+    file.downloadUrl = await this.fileStrategyService.getDownloadUrl(file);
     return file;
   }
 }

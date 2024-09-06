@@ -10,7 +10,7 @@ import { createSettingsProvider } from '@concepta/nestjs-common';
 
 import {
   FILE_MODULE_SETTINGS_TOKEN,
-  FILE_STORAGE_SERVICE_KEY,
+  FILE_STRATEGY_SERVICE_KEY,
 } from './file.constants';
 
 import { FileOptionsInterface } from './interfaces/file-options.interface';
@@ -18,8 +18,9 @@ import { FileEntitiesOptionsInterface } from './interfaces/file-entities-options
 import { FileOptionsExtrasInterface } from './interfaces/file-options-extras.interface';
 import { FileSettingsInterface } from './interfaces/file-settings.interface';
 import { FileService } from './services/file.service';
-import { fileDefaultConfig } from './config/federated-default.config';
-import { FileStorageService } from './services/file-storage.service';
+import { FileStrategyService } from './services/file-strategy.service';
+
+import { fileDefaultConfig } from './config/file-default.config';
 
 const RAW_OPTIONS_TOKEN = Symbol('__FILE_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -80,8 +81,8 @@ export function createFileProviders(options: {
   return [
     ...(options.providers ?? []),
     createFileSettingsProvider(options.overrides),
-    createStorageServiceProvider(options.overrides),
-    FileStorageService,
+    createStrategyServiceProvider(options.overrides),
+    FileStrategyService,
     FileService,
   ];
 }
@@ -97,24 +98,24 @@ export function createFileSettingsProvider(
   });
 }
 
-export function createStorageServiceProvider(
+export function createStrategyServiceProvider(
   optionsOverrides?: FileOptions,
 ): Provider {
   return {
-    provide: FILE_STORAGE_SERVICE_KEY,
-    inject: [RAW_OPTIONS_TOKEN, FileStorageService],
+    provide: FILE_STRATEGY_SERVICE_KEY,
+    inject: [RAW_OPTIONS_TOKEN, FileStrategyService],
     useFactory: async (
       options: FileOptionsInterface,
-      fileStorageService: FileStorageService,
+      fileStrategyService: FileStrategyService,
     ) => {
       const storageServices =
         optionsOverrides?.storageServices ?? options.storageServices;
 
       storageServices?.forEach((storageService) => {
-        fileStorageService.addStorageService(storageService);
+        fileStrategyService.addStorageService(storageService);
       });
 
-      return fileStorageService;
+      return fileStrategyService;
     },
   };
 }
