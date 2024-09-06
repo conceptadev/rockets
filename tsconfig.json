@@ -111,6 +111,9 @@
       "path": "packages/nestjs-logger-sentry"
     },
     {
+      "path": "packages/nestjs-file"
+    },
+    {
       "path": "packages/nestjs-auth-apple"
     }
   ]

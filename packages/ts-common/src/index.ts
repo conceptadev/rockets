@@ -56,6 +56,9 @@ export { InvitationAcceptedEventPayloadInterface } from './invitation/interfaces
 export { InvitationGetUserEventPayloadInterface } from './invitation/interfaces/invitation-get-user-event-payload.interface';
 export { InvitationGetUserEventResponseInterface } from './invitation/interfaces/invitation-get-user-event-response.interface';
 
+export { FileInterface } from './file/interfaces/file.interface';
+export { FileCreatableInterface } from './file/interfaces/file-creatable.interface';
+
 export {
   INVITATION_MODULE_CATEGORY_USER_KEY,
   INVITATION_MODULE_CATEGORY_ORG_KEY,
