@@ -50,7 +50,6 @@ export class ReportDto
   @IsEnum(ReportStatusEnum)
   status = ReportStatusEnum.Processing;
 
-  // TODO: maybe we do not need this, since we gonna have the file reference
   @Expose()
   @ApiProperty({
     type: 'string',
