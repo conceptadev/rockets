@@ -107,14 +107,5 @@ describe(ReportStrategyService.name, () => {
 
       expect(result).toBe(mockStorageService);
     });
-
-    // it('should throw ReportStorageServiceNotFoundException if no matching service is found', () => {
-    //   const mockReport = new ReportCreateDto();
-    //   mockReport.serviceKey = 'non-existent-service';
-
-    //   expect(() => reportStrategyService.resolveGeneratorService(mockReport)).toThrow(
-    //     ReportGeneratorServiceNotFoundException,
-    //   );
-    // });
   });
 });

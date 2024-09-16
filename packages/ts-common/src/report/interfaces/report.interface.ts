@@ -6,7 +6,6 @@ import { ReportStatusEnum } from '../enum/report-status.enum';
  * Interface representing a report entity
  */
 export interface ReportInterface extends ReferenceIdInterface, AuditInterface {
-  //  FileOwnableInterface
   /**
    * Service key associated with the report
    */
