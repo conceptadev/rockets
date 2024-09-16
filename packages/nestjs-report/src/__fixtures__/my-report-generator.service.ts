@@ -1,10 +1,9 @@
+import { Inject } from '@nestjs/common';
+import { ReportInterface, ReportStatusEnum } from '@concepta/ts-common';
 import { FileService } from '@concepta/nestjs-file';
-import { ReportStatusEnum } from '@concepta/ts-common';
-import { ReportEntityInterface } from '../interfaces/report-entity.interface';
 import { ReportGeneratorResultInterface } from '../interfaces/report-generator-result.interface';
 import { ReportGeneratorServiceInterface } from '../interfaces/report-generator-service.interface';
 import { AWS_KEY_FIXTURE, REPORT_KEY_FIXTURE } from './constants.fixture';
-import { Inject } from '@nestjs/common';
 
 export class MyReportGeneratorService
   implements ReportGeneratorServiceInterface
@@ -17,14 +16,14 @@ export class MyReportGeneratorService
   KEY: string = REPORT_KEY_FIXTURE;
   generateTimeout: number = 60000;
 
-  async getDownloadUrl(report: ReportEntityInterface): Promise<string> {
+  async getDownloadUrl(report: ReportInterface): Promise<string> {
     if (!report?.file?.id) return '';
     const file = await this.fileService.fetch({ id: report.file.id });
     return file.downloadUrl || '';
   }
 
   async generate(
-    report: ReportEntityInterface,
+    report: ReportInterface,
   ): Promise<ReportGeneratorResultInterface> {
     const file = await this.fileService.push({
       fileName: report.name,

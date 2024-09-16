@@ -1,13 +1,12 @@
+import { Inject } from '@nestjs/common';
+import { ReportInterface, ReportStatusEnum } from '@concepta/ts-common';
 import { FileService } from '@concepta/nestjs-file';
-import { ReportStatusEnum } from '@concepta/ts-common';
-import { ReportEntityInterface } from '../interfaces/report-entity.interface';
 import { ReportGeneratorResultInterface } from '../interfaces/report-generator-result.interface';
 import { ReportGeneratorServiceInterface } from '../interfaces/report-generator-service.interface';
 import {
   AWS_KEY_FIXTURE,
   REPORT_SHORT_DELAY_KEY_FIXTURE,
 } from './constants.fixture';
-import { Inject } from '@nestjs/common';
 import { delay } from '../utils/delay.util';
 
 export class MyReportGeneratorShortDelayService
@@ -22,13 +21,13 @@ export class MyReportGeneratorShortDelayService
 
   generateTimeout: number = 100;
 
-  async getDownloadUrl(report: ReportEntityInterface): Promise<string> {
+  async getDownloadUrl(report: ReportInterface): Promise<string> {
     const file = await this.fileService.fetch({ id: report.id });
     return file.downloadUrl || '';
   }
 
   async generate(
-    report: ReportEntityInterface,
+    report: ReportInterface,
   ): Promise<ReportGeneratorResultInterface> {
     const file = await this.fileService.push({
       fileName: report.name,

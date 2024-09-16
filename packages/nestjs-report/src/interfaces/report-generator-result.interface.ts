@@ -1,5 +1,5 @@
-import { ReportEntityInterface } from './report-entity.interface';
+import { ReportInterface } from '@concepta/ts-common';
 
 export interface ReportGeneratorResultInterface
-  extends Pick<ReportEntityInterface, 'id' | 'status' | 'file'>,
-    Partial<Pick<ReportEntityInterface, 'errorMessage'>> {}
+  extends Pick<ReportInterface, 'id' | 'status' | 'file'>,
+    Partial<Pick<ReportInterface, 'errorMessage'>> {}

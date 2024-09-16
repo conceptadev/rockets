@@ -1,11 +1,11 @@
-import {
-  ReportCreatableInterface,
-  ReportStatusEnum,
-} from '@concepta/ts-common';
 import { randomUUID } from 'crypto';
 import { mock } from 'jest-mock-extended';
+import {
+  ReportCreatableInterface,
+  ReportInterface,
+  ReportStatusEnum,
+} from '@concepta/ts-common';
 import { ReportCreateDto } from '../dto/report-create.dto';
-import { ReportEntityInterface } from '../interfaces/report-entity.interface';
 import { ReportGeneratorServiceInterface } from '../interfaces/report-generator-service.interface';
 import { ReportStrategyService } from './report-strategy.service';
 
@@ -16,8 +16,8 @@ class MockStorageService implements ReportGeneratorServiceInterface {
 
   uploadTimeout = 3600;
 
-  generate(_report: ReportCreatableInterface): Promise<ReportEntityInterface> {
-    const mockReport: ReportEntityInterface = {
+  generate(_report: ReportCreatableInterface): Promise<ReportInterface> {
+    const mockReport: ReportInterface = {
       id: randomUUID(),
       serviceKey: 'test-service',
       name: 'test.txt',
@@ -65,7 +65,7 @@ describe(ReportStrategyService.name, () => {
 
   describe(ReportStrategyService.prototype.generate.name, () => {
     it('should return the upload URL from the correct storage service', async () => {
-      const mockReport: ReportEntityInterface = mock<ReportEntityInterface>({
+      const mockReport: ReportInterface = mock<ReportInterface>({
         serviceKey: 'mock-service',
         name: 'test.jpg',
       });
@@ -95,17 +95,20 @@ describe(ReportStrategyService.name, () => {
     });
   });
 
-  describe(ReportStrategyService.prototype.resolveGeneratorService.name, () => {
-    it('should return the correct storage service for a given report', async () => {
-      const mockReport = new ReportCreateDto();
-      mockReport.serviceKey = 'mock-service';
-      reportStrategyService.addStorageService(mockStorageService);
+  describe(
+    ReportStrategyService.prototype['resolveGeneratorService'].name,
+    () => {
+      it('should return the correct storage service for a given report', async () => {
+        const mockReport = new ReportCreateDto();
+        mockReport.serviceKey = 'mock-service';
+        reportStrategyService.addStorageService(mockStorageService);
 
-      const result = await reportStrategyService.resolveGeneratorService(
-        mockReport,
-      );
+        const result = await reportStrategyService['resolveGeneratorService'](
+          mockReport,
+        );
 
-      expect(result).toBe(mockStorageService);
-    });
-  });
+        expect(result).toBe(mockStorageService);
+      });
+    },
+  );
 });

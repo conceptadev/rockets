@@ -1,11 +1,13 @@
+import { Repository } from 'typeorm';
+import { DynamicModule, ModuleMetadata } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { ReportStatusEnum } from '@concepta/ts-common';
+import { FileModule } from '@concepta/nestjs-file';
 import {
   getDynamicRepositoryToken,
   getEntityRepositoryToken,
   TypeOrmExtModule,
 } from '@concepta/nestjs-typeorm-ext';
-import { DynamicModule, ModuleMetadata } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
-import { Repository } from 'typeorm';
 
 import { ReportService } from './services/report.service';
 
@@ -13,8 +15,6 @@ import { REPORT_MODULE_REPORT_ENTITY_KEY } from './report.constants';
 
 import { ReportEntityInterface } from './interfaces/report-entity.interface';
 
-import { FileModule } from '@concepta/nestjs-file';
-import { ReportStatusEnum } from '@concepta/ts-common';
 import { AwsStorageService } from './__fixtures__/aws-storage.service';
 import {
   REPORT_KEY_FIXTURE,

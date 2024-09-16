@@ -1,6 +1,6 @@
+import { Inject } from '@nestjs/common';
 import { ReportCreatableInterface } from '@concepta/ts-common';
 import { mapNonErrorToException } from '@concepta/ts-core';
-import { Inject } from '@nestjs/common';
 import { ReportGeneratorServiceNotFoundException } from '../exceptions/report-generator-service-not-found.exception';
 import { ReportTimeoutException } from '../exceptions/report-timeout.exception';
 import { ReportEntityInterface } from '../interfaces/report-entity.interface';
@@ -48,7 +48,7 @@ export class ReportStrategyService implements ReportStrategyServiceInterface {
     return this.resolveGeneratorService(report).getDownloadUrl(report);
   }
 
-  resolveGeneratorService(
+  protected resolveGeneratorService(
     report: ReportCreatableInterface,
   ): ReportGeneratorServiceInterface {
     const generatorService = this.reportGeneratorServices.find(
@@ -64,7 +64,7 @@ export class ReportStrategyService implements ReportStrategyServiceInterface {
     throw new ReportGeneratorServiceNotFoundException(report.serviceKey);
   }
 
-  private createTimeout(timeoutMs: number): Promise<never> {
+  protected createTimeout(timeoutMs: number): Promise<never> {
     return new Promise((_, reject) => {
       setTimeout(() => reject(new ReportTimeoutException()), timeoutMs);
     });

@@ -1,11 +1,15 @@
 import { HttpStatus } from '@nestjs/common';
-import { RuntimeException } from '@concepta/nestjs-exception';
+import {
+  RuntimeException,
+  RuntimeExceptionOptions,
+} from '@concepta/nestjs-exception';
 
 export class ReportIdMissingException extends RuntimeException {
-  constructor(message = 'Report id is missing.') {
+  constructor(options?: RuntimeExceptionOptions) {
     super({
-      message,
+      message: 'Report id is missing.',
       httpStatus: HttpStatus.BAD_REQUEST,
+      ...options,
     });
 
     this.errorCode = 'REPORT_ID_MISSING_ERROR';

@@ -1,19 +1,15 @@
-import { CommonEntityDto, ReferenceIdDto } from '@concepta/nestjs-common';
-import { ReportStatusEnum } from '@concepta/ts-common';
-import { ReferenceIdInterface } from '@concepta/ts-core';
-import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose, Type } from 'class-transformer';
 import { IsEnum, IsOptional, IsString, ValidateNested } from 'class-validator';
-import { ReportEntityInterface } from '../interfaces/report-entity.interface';
+import { ApiProperty } from '@nestjs/swagger';
+import { ReferenceIdInterface } from '@concepta/ts-core';
+import { ReportInterface, ReportStatusEnum } from '@concepta/ts-common';
+import { CommonEntityDto, ReferenceIdDto } from '@concepta/nestjs-common';
 
 /**
  * Report DTO
  */
 @Exclude()
-export class ReportDto
-  extends CommonEntityDto
-  implements ReportEntityInterface
-{
+export class ReportDto extends CommonEntityDto implements ReportInterface {
   /**
    * Storage provider key
    */

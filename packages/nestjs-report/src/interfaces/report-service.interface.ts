@@ -1,11 +1,9 @@
-import { ReportEntityInterface } from './report-entity.interface';
 import { DoneCallback } from '../report.types';
 import { ReportCreateDto } from '../dto/report-create.dto';
+import { ReportInterface } from '@concepta/ts-common';
 
 export interface ReportServiceInterface {
-  generate(report: ReportCreateDto): Promise<ReportEntityInterface>;
-  fetch(
-    report: Pick<ReportEntityInterface, 'id'>,
-  ): Promise<ReportEntityInterface>;
+  generate(report: ReportCreateDto): Promise<ReportInterface>;
+  fetch(report: Pick<ReportInterface, 'id'>): Promise<ReportInterface>;
   done: DoneCallback;
 }

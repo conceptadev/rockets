@@ -1,6 +1,5 @@
 import { AuditInterface, ReferenceIdInterface } from '@concepta/ts-core';
 import { ReportStatusEnum } from '../enum/report-status.enum';
-// import { FileOwnableInterface } from '../../file/interfaces/file-ownable.interface';
 
 /**
  * Interface representing a report entity

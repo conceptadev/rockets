@@ -1,5 +1,5 @@
-import { FileSqliteEntity } from '@concepta/nestjs-file';
 import { Entity, OneToOne } from 'typeorm';
+import { FileSqliteEntity } from '@concepta/nestjs-file';
 import { ReportEntityFixture } from '../report/report-entity.fixture';
 import { ReportEntityInterface } from '../../interfaces/report-entity.interface';
 

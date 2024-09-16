@@ -12,3 +12,5 @@ export { ReportService } from './services/report.service';
 
 export { ReportDto } from './dto/report.dto';
 export { ReportCreateDto } from './dto/report-create.dto';
+
+export { DoneCallback } from './report.types';

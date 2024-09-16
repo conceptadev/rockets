@@ -1,9 +1,9 @@
-import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
-import { BaseService } from '@concepta/typeorm-common';
-import { Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
-
-import { ReportStatusEnum } from '@concepta/ts-common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { mapNonErrorToException } from '@concepta/ts-core';
+import { ReportInterface, ReportStatusEnum } from '@concepta/ts-common';
+import { BaseService } from '@concepta/typeorm-common';
+import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 
 import {
   REPORT_MODULE_REPORT_ENTITY_KEY,
@@ -18,7 +18,6 @@ import { ReportCreateException } from '../exceptions/report-create.exception';
 import { ReportIdMissingException } from '../exceptions/report-id-missing.exception';
 import { ReportDuplicateEntryException } from '../exceptions/report-duplicated.exception';
 import { ReportGeneratorResultInterface } from '../interfaces/report-generator-result.interface';
-import { mapNonErrorToException } from '@concepta/ts-core';
 
 /**
  * Service responsible for managing report operations.
@@ -37,7 +36,7 @@ export class ReportService
     super(reportRepo);
   }
 
-  async generate(report: ReportCreateDto): Promise<ReportEntityInterface> {
+  async generate(report: ReportCreateDto): Promise<ReportInterface> {
     await this.checkExistingReport(report);
     try {
       const reportDb = await this.createAndSaveReport(report);
@@ -46,42 +45,71 @@ export class ReportService
       this.generateAndProcessReport(reportDb);
 
       return reportDb;
-    } catch (err) {
-      throw new ReportCreateException(this.metadata.targetName, err);
+    } catch (originalError) {
+      throw new ReportCreateException({ originalError });
     }
   }
 
-  async fetch(
-    report: Pick<ReportEntityInterface, 'id'>,
-  ): Promise<ReportEntityInterface> {
-    if (!report.id) throw new ReportIdMissingException();
-    const dbReport = await this.reportRepo.findOne({
-      where: {
-        id: report.id,
-      },
-      relations: ['file'],
-    });
-    if (!dbReport) throw new ReportQueryException();
+  async fetch(report: Pick<ReportInterface, 'id'>): Promise<ReportInterface> {
+    if (!report.id) {
+      throw new ReportIdMissingException();
+    }
+
+    let dbReport: ReportEntityInterface | null = null;
+
+    try {
+      dbReport = await this.reportRepo.findOne({
+        where: {
+          id: report.id,
+        },
+        relations: ['file'],
+      });
+    } catch (originalError) {
+      throw new ReportQueryException({ originalError });
+    }
+
+    if (!dbReport) {
+      throw new ReportQueryException({
+        message: 'Report with id %s not found',
+        messageParams: [report.id],
+        httpStatus: HttpStatus.NOT_FOUND,
+      });
+    }
+
     return this.addDownloadUrl(dbReport);
   }
 
   async done(report: ReportGeneratorResultInterface): Promise<void> {
-    if (!report.id) throw new ReportIdMissingException();
+    if (!report.id) {
+      throw new ReportIdMissingException();
+    }
 
-    const updatedReport = await this.reportRepo.findOne({
-      where: { id: report.id },
-    });
+    let reportToUpdate: ReportEntityInterface | null = null;
 
-    if (!updatedReport) throw new ReportQueryException();
+    try {
+      reportToUpdate = await this.reportRepo.findOne({
+        where: { id: report.id },
+      });
+    } catch (originalError) {
+      throw new ReportQueryException({ originalError });
+    }
 
-    updatedReport.status = report.status;
-    updatedReport.errorMessage = report.errorMessage || null;
-    updatedReport.file = report.file;
+    if (!reportToUpdate) {
+      throw new ReportQueryException({
+        message: 'Report with id %s not found',
+        messageParams: [report.id],
+        httpStatus: HttpStatus.NOT_FOUND,
+      });
+    }
 
-    await this.reportRepo.save(updatedReport);
+    reportToUpdate.status = report.status;
+    reportToUpdate.errorMessage = report.errorMessage ?? null;
+    reportToUpdate.file = report.file;
+
+    await this.reportRepo.save(reportToUpdate);
   }
 
-  private async generateAndProcessReport(
+  protected async generateAndProcessReport(
     reportDb: ReportEntityInterface,
   ): Promise<void> {
     try {
@@ -97,7 +125,7 @@ export class ReportService
     }
   }
 
-  private async createAndSaveReport(
+  protected async createAndSaveReport(
     report: ReportCreateDto,
   ): Promise<ReportEntityInterface> {
     const newReport = this.reportRepo.create({
@@ -108,7 +136,7 @@ export class ReportService
     return await this.reportRepo.save(newReport);
   }
 
-  private async checkExistingReport(report: ReportCreateDto): Promise<void> {
+  protected async checkExistingReport(report: ReportCreateDto): Promise<void> {
     const existingReport = await this.reportRepo.findOne({
       where: {
         serviceKey: report.serviceKey,
@@ -121,7 +149,7 @@ export class ReportService
     }
   }
 
-  private async addDownloadUrl(
+  protected async addDownloadUrl(
     report: ReportEntityInterface,
   ): Promise<ReportEntityInterface> {
     if (report.file?.id) {

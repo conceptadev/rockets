@@ -1,5 +1,8 @@
 import { HttpStatus } from '@nestjs/common';
-import { RuntimeException } from '@concepta/nestjs-exception';
+import {
+  RuntimeException,
+  RuntimeExceptionOptions,
+} from '@concepta/nestjs-exception';
 
 export class ReportDuplicateEntryException extends RuntimeException {
   context: RuntimeException['context'] & {
@@ -10,14 +13,13 @@ export class ReportDuplicateEntryException extends RuntimeException {
   constructor(
     serviceKey: string,
     reportName: string,
-    originalError?: unknown,
-    message = 'Duplicate entry detected for service %s with report %s',
+    options?: RuntimeExceptionOptions,
   ) {
     super({
-      message,
-      messageParams: [serviceKey, reportName],
+      message: 'Duplicate entry detected for service %s with report %s',
       httpStatus: HttpStatus.CONFLICT,
-      originalError,
+      messageParams: [serviceKey, reportName],
+      ...options,
     });
 
     this.errorCode = 'REPORT_DUPLICATE_ENTRY_ERROR';

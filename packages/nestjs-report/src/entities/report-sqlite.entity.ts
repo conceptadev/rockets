@@ -1,7 +1,7 @@
+import { Column, Entity, Unique } from 'typeorm';
 import { ReportStatusEnum } from '@concepta/ts-common';
 import { ReferenceIdInterface } from '@concepta/ts-core';
 import { CommonSqliteEntity } from '@concepta/typeorm-common';
-import { Column, Entity, Unique } from 'typeorm';
 import { ReportEntityInterface } from '../interfaces/report-entity.interface';
 
 /**
