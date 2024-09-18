@@ -52,7 +52,8 @@ export class ReportLookupService
     queryOptions?: QueryOptionsInterface,
   ) {
     try {
-      return this.findOne({
+      return this.findOne(
+        {
           where: {
             id: report.id,
           },

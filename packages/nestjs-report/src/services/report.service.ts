@@ -1,34 +1,27 @@
-import { Repository } from 'typeorm';
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { mapNonErrorToException } from '@concepta/ts-core';
 import { ReportInterface, ReportStatusEnum } from '@concepta/ts-common';
-import { BaseService } from '@concepta/typeorm-common';
-import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
+import { mapNonErrorToException } from '@concepta/ts-core';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 
-import {
-  REPORT_MODULE_REPORT_ENTITY_KEY,
-  REPORT_STRATEGY_SERVICE_KEY,
-} from '../report.constants';
-import { ReportEntityInterface } from '../interfaces/report-entity.interface';
-import { ReportServiceInterface } from '../interfaces/report-service.interface';
-import { ReportQueryException } from '../exceptions/report-query.exception';
 import { ReportCreateDto } from '../dto/report-create.dto';
-import { ReportStrategyService } from './report-strategy.service';
 import { ReportCreateException } from '../exceptions/report-create.exception';
-import { ReportIdMissingException } from '../exceptions/report-id-missing.exception';
 import { ReportDuplicateEntryException } from '../exceptions/report-duplicated.exception';
+import { ReportIdMissingException } from '../exceptions/report-id-missing.exception';
+import { ReportQueryException } from '../exceptions/report-query.exception';
+import { ReportEntityInterface } from '../interfaces/report-entity.interface';
 import { ReportGeneratorResultInterface } from '../interfaces/report-generator-result.interface';
-import { ReportMutateService } from './report-mutate.service';
-import { ReportMutateServiceInterface } from '../interfaces/report-mutate-service.interface';
-import { ReportLookupService } from './report-lookup.service';
 import { ReportLookupServiceInterface } from '../interfaces/report-lookup-service.interface';
+import { ReportMutateServiceInterface } from '../interfaces/report-mutate-service.interface';
+import { ReportServiceInterface } from '../interfaces/report-service.interface';
+import { REPORT_STRATEGY_SERVICE_KEY } from '../report.constants';
+import { ReportLookupService } from './report-lookup.service';
+import { ReportMutateService } from './report-mutate.service';
+import { ReportStrategyService } from './report-strategy.service';
 
 /**
  * Service responsible for managing report operations.
  */
 @Injectable()
-export class ReportService implements ReportServiceInterface
-{
+export class ReportService implements ReportServiceInterface {
   constructor(
     @Inject(REPORT_STRATEGY_SERVICE_KEY)
     private reportStrategyService: ReportStrategyService,
@@ -58,7 +51,7 @@ export class ReportService implements ReportServiceInterface
     }
 
     const dbReport = await this.reportLookupService.getWithFile(report);
-    
+
     if (!dbReport) {
       throw new ReportQueryException({
         message: 'Report with id %s not found',
@@ -101,7 +94,9 @@ export class ReportService implements ReportServiceInterface
   }
 
   protected async checkExistingReport(report: ReportCreateDto): Promise<void> {
-    const existingReport = await this.reportLookupService.getUniqueReport(report);
+    const existingReport = await this.reportLookupService.getUniqueReport(
+      report,
+    );
 
     if (existingReport) {
       throw new ReportDuplicateEntryException(report.serviceKey, report.name);

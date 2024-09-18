@@ -46,7 +46,11 @@ describe(ReportService.name, () => {
     reportMutateService = new ReportMutateService(reportRepo);
     reportLookupService = new ReportLookupService(reportRepo);
 
-    reportService = new ReportService(reportStrategyService, reportMutateService, reportLookupService);
+    reportService = new ReportService(
+      reportStrategyService,
+      reportMutateService,
+      reportLookupService,
+    );
     reportRepo.create.mockReturnValue(mockReport);
     const mockTransactionalEntityManager = {
       findOne: jest.fn().mockResolvedValue(null),
