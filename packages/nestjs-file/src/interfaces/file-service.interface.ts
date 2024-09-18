@@ -1,6 +1,7 @@
-import { FileInterface } from '@concepta/ts-common';
+import { FileCreatableInterface, FileInterface } from '@concepta/ts-common';
+import { ReferenceIdInterface } from '@concepta/ts-core';
 
 export interface FileServiceInterface {
-  push(file: Omit<FileInterface, 'id'>): Promise<FileInterface>;
-  fetch(file: Omit<FileInterface, 'serviceKey'>): Promise<FileInterface>;
+  push(file: FileCreatableInterface): Promise<FileInterface>;
+  fetch(file: ReferenceIdInterface): Promise<FileInterface>;
 }
