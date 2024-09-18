@@ -1,8 +1,7 @@
-import { ReportInterface, ReportStatusEnum } from '@concepta/ts-common';
+import { ReportCreatableInterface, ReportInterface, ReportStatusEnum } from '@concepta/ts-common';
 import { mapNonErrorToException } from '@concepta/ts-core';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 
-import { ReportCreateDto } from '../dto/report-create.dto';
 import { ReportCreateException } from '../exceptions/report-create.exception';
 import { ReportDuplicateEntryException } from '../exceptions/report-duplicated.exception';
 import { ReportIdMissingException } from '../exceptions/report-id-missing.exception';
@@ -31,7 +30,7 @@ export class ReportService implements ReportServiceInterface {
     private reportLookupService: ReportLookupServiceInterface,
   ) {}
 
-  async generate(report: ReportCreateDto): Promise<ReportInterface> {
+  async generate(report: ReportCreatableInterface): Promise<ReportInterface> {
     await this.checkExistingReport(report);
     try {
       const reportDb = await this.createAndSaveReport(report);
@@ -88,12 +87,12 @@ export class ReportService implements ReportServiceInterface {
   }
 
   protected async createAndSaveReport(
-    report: ReportCreateDto,
+    report: ReportCreatableInterface,
   ): Promise<ReportEntityInterface> {
     return await this.reportMutateService.create(report);
   }
 
-  protected async checkExistingReport(report: ReportCreateDto): Promise<void> {
+  protected async checkExistingReport(report: ReportCreatableInterface): Promise<void> {
     const existingReport = await this.reportLookupService.getUniqueReport(
       report,
     );
