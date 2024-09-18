@@ -1,4 +1,8 @@
-import { ReportCreatableInterface, ReportInterface, ReportStatusEnum } from '@concepta/ts-common';
+import {
+  ReportCreatableInterface,
+  ReportInterface,
+  ReportStatusEnum,
+} from '@concepta/ts-common';
 import { mapNonErrorToException } from '@concepta/ts-core';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 
@@ -92,7 +96,9 @@ export class ReportService implements ReportServiceInterface {
     return await this.reportMutateService.create(report);
   }
 
-  protected async checkExistingReport(report: ReportCreatableInterface): Promise<void> {
+  protected async checkExistingReport(
+    report: ReportCreatableInterface,
+  ): Promise<void> {
     const existingReport = await this.reportLookupService.getUniqueReport(
       report,
     );
