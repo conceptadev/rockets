@@ -1,5 +1,4 @@
-import { ReportInterface } from '@concepta/ts-common';
+import { ReportUpdatableInterface } from '@concepta/ts-common/src/report/interfaces/report-updatable.interface';
+import { ReferenceIdInterface } from '@concepta/ts-core';
 
-export interface ReportGeneratorResultInterface
-  extends Pick<ReportInterface, 'id' | 'status' | 'file'>,
-    Partial<Pick<ReportInterface, 'errorMessage'>> {}
+export interface ReportGeneratorResultInterface extends ReportUpdatableInterface, ReferenceIdInterface {}

@@ -11,6 +11,8 @@ import { ReportQueryException } from '../exceptions/report-query.exception';
 import { ReportEntityInterface } from '../interfaces/report-entity.interface';
 import { ReportStrategyService } from './report-strategy.service';
 import { ReportService } from './report.service';
+import { ReportMutateService } from './report-mutate.service';
+import { ReportLookupService } from './report-lookup.service';
 
 const mockReport: ReportEntityInterface = {
   id: randomUUID(),
@@ -28,17 +30,23 @@ const mockReport: ReportEntityInterface = {
 const mockReportCreateDto: ReportCreateDto = {
   serviceKey: mockReport.serviceKey,
   name: mockReport.name,
+  status: ReportStatusEnum.Processing,
 };
 
 describe(ReportService.name, () => {
   let reportService: ReportService;
   let reportRepo: jest.Mocked<Repository<ReportEntityInterface>>;
   let reportStrategyService: jest.Mocked<ReportStrategyService>;
+  let reportMutateService: ReportMutateService;
+  let reportLookupService: ReportLookupService;
 
   beforeEach(() => {
     reportRepo = createMockRepository();
     reportStrategyService = createMockReportStrategyService();
-    reportService = new ReportService(reportRepo, reportStrategyService);
+    reportMutateService = new ReportMutateService(reportRepo);
+    reportLookupService = new ReportLookupService(reportRepo);
+
+    reportService = new ReportService(reportStrategyService, reportMutateService, reportLookupService);
     reportRepo.create.mockReturnValue(mockReport);
     const mockTransactionalEntityManager = {
       findOne: jest.fn().mockResolvedValue(null),

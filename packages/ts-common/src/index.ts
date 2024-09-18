@@ -61,6 +61,7 @@ export { FileCreatableInterface } from './file/interfaces/file-creatable.interfa
 
 export { ReportInterface } from './report/interfaces/report.interface';
 export { ReportCreatableInterface } from './report/interfaces/report-creatable.interface';
+export { ReportUpdatableInterface } from './report/interfaces/report-updatable.interface';
 export { ReportStatusEnum } from './report/enum/report-status.enum';
 
 export {

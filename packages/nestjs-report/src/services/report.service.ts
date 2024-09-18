@@ -18,23 +18,25 @@ import { ReportCreateException } from '../exceptions/report-create.exception';
 import { ReportIdMissingException } from '../exceptions/report-id-missing.exception';
 import { ReportDuplicateEntryException } from '../exceptions/report-duplicated.exception';
 import { ReportGeneratorResultInterface } from '../interfaces/report-generator-result.interface';
+import { ReportMutateService } from './report-mutate.service';
+import { ReportMutateServiceInterface } from '../interfaces/report-mutate-service.interface';
+import { ReportLookupService } from './report-lookup.service';
+import { ReportLookupServiceInterface } from '../interfaces/report-lookup-service.interface';
 
 /**
  * Service responsible for managing report operations.
  */
 @Injectable()
-export class ReportService
-  extends BaseService<ReportEntityInterface>
-  implements ReportServiceInterface
+export class ReportService implements ReportServiceInterface
 {
   constructor(
-    @InjectDynamicRepository(REPORT_MODULE_REPORT_ENTITY_KEY)
-    private reportRepo: Repository<ReportEntityInterface>,
     @Inject(REPORT_STRATEGY_SERVICE_KEY)
     private reportStrategyService: ReportStrategyService,
-  ) {
-    super(reportRepo);
-  }
+    @Inject(ReportMutateService)
+    private reportMutateService: ReportMutateServiceInterface,
+    @Inject(ReportLookupService)
+    private reportLookupService: ReportLookupServiceInterface,
+  ) {}
 
   async generate(report: ReportCreateDto): Promise<ReportInterface> {
     await this.checkExistingReport(report);
@@ -55,19 +57,8 @@ export class ReportService
       throw new ReportIdMissingException();
     }
 
-    let dbReport: ReportEntityInterface | null = null;
-
-    try {
-      dbReport = await this.reportRepo.findOne({
-        where: {
-          id: report.id,
-        },
-        relations: ['file'],
-      });
-    } catch (originalError) {
-      throw new ReportQueryException({ originalError });
-    }
-
+    const dbReport = await this.reportLookupService.getWithFile(report);
+    
     if (!dbReport) {
       throw new ReportQueryException({
         message: 'Report with id %s not found',
@@ -84,29 +75,7 @@ export class ReportService
       throw new ReportIdMissingException();
     }
 
-    let reportToUpdate: ReportEntityInterface | null = null;
-
-    try {
-      reportToUpdate = await this.reportRepo.findOne({
-        where: { id: report.id },
-      });
-    } catch (originalError) {
-      throw new ReportQueryException({ originalError });
-    }
-
-    if (!reportToUpdate) {
-      throw new ReportQueryException({
-        message: 'Report with id %s not found',
-        messageParams: [report.id],
-        httpStatus: HttpStatus.NOT_FOUND,
-      });
-    }
-
-    reportToUpdate.status = report.status;
-    reportToUpdate.errorMessage = report.errorMessage ?? null;
-    reportToUpdate.file = report.file;
-
-    await this.reportRepo.save(reportToUpdate);
+    this.reportMutateService.update(report);
   }
 
   protected async generateAndProcessReport(
@@ -128,21 +97,11 @@ export class ReportService
   protected async createAndSaveReport(
     report: ReportCreateDto,
   ): Promise<ReportEntityInterface> {
-    const newReport = this.reportRepo.create({
-      ...report,
-      status: ReportStatusEnum.Processing,
-    });
-    newReport.status = ReportStatusEnum.Processing;
-    return await this.reportRepo.save(newReport);
+    return await this.reportMutateService.create(report);
   }
 
   protected async checkExistingReport(report: ReportCreateDto): Promise<void> {
-    const existingReport = await this.reportRepo.findOne({
-      where: {
-        serviceKey: report.serviceKey,
-        name: report.name,
-      },
-    });
+    const existingReport = await this.reportLookupService.getUniqueReport(report);
 
     if (existingReport) {
       throw new ReportDuplicateEntryException(report.serviceKey, report.name);
@@ -153,9 +112,13 @@ export class ReportService
     report: ReportEntityInterface,
   ): Promise<ReportEntityInterface> {
     if (report.file?.id) {
-      report.downloadUrl = await this.reportStrategyService.getDownloadUrl(
-        report,
-      );
+      try {
+        report.downloadUrl = await this.reportStrategyService.getDownloadUrl(
+          report,
+        );
+      } catch (err) {
+        report.downloadUrl = '';
+      }
     }
     return report;
   }

@@ -1,6 +1,6 @@
-import { Exclude } from 'class-transformer';
-import { PickType } from '@nestjs/swagger';
 import { ReportCreatableInterface } from '@concepta/ts-common';
+import { PickType } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 import { ReportDto } from './report.dto';
 
 /**
@@ -8,5 +8,5 @@ import { ReportDto } from './report.dto';
  */
 @Exclude()
 export class ReportCreateDto
-  extends PickType(ReportDto, ['serviceKey', 'name'] as const)
+  extends PickType(ReportDto, ['serviceKey', 'name', 'status'] as const)
   implements ReportCreatableInterface {}

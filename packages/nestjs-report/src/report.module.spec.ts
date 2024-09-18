@@ -82,6 +82,8 @@ describe(ReportModule, () => {
       const result = await reportService.generate({
         name: REPORT_NAME_FIXTURE,
         serviceKey: REPORT_KEY_FIXTURE,
+        // TODO: check if proceesing should be defined here or automatically
+        status: ReportStatusEnum.Processing,
       });
       return result;
     };
@@ -93,6 +95,7 @@ describe(ReportModule, () => {
       const result = await reportService.generate({
         name: REPORT_NAME_FIXTURE,
         serviceKey: REPORT_SHORT_DELAY_KEY_FIXTURE,
+        status: ReportStatusEnum.Processing,
       });
       return result;
     };
@@ -185,6 +188,7 @@ describe(ReportModule, () => {
     const result = await reportService.generate({
       name: REPORT_NAME_FIXTURE,
       serviceKey: REPORT_KEY_FIXTURE,
+      status: ReportStatusEnum.Processing,
     });
     expect(result.serviceKey).toBe(REPORT_KEY_FIXTURE);
     expect(result.name).toBe(REPORT_NAME_FIXTURE);

@@ -21,6 +21,8 @@ import { ReportService } from './services/report.service';
 import { ReportStrategyService } from './services/report-strategy.service';
 
 import { reportDefaultConfig } from './config/report-default.config';
+import { ReportMutateService } from './services/report-mutate.service';
+import { ReportLookupService } from './services/report-lookup.service';
 
 const RAW_OPTIONS_TOKEN = Symbol('__REPORT_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -88,6 +90,8 @@ export function createReportProviders(options: {
     ...(options.providers ?? []),
     createReportSettingsProvider(options.overrides),
     createStrategyServiceProvider(options.overrides),
+    ReportMutateService,
+    ReportLookupService,
     ReportStrategyService,
     ReportService,
   ];
