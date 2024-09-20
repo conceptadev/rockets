@@ -25,7 +25,7 @@ export class ReportPostgresEntity
   })
   status!: ReportStatusEnum;
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true, default: null })
   errorMessage: string | null = null;
 
   file!: ReferenceIdInterface;

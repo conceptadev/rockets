@@ -25,8 +25,8 @@ export class ReportSqliteEntity
   })
   status!: ReportStatusEnum;
 
-  @Column({ nullable: true })
-  errorMessage!: string | null;
+  @Column({ type: 'text', nullable: true, default: null })
+  errorMessage: string | null = null;
 
   file!: ReferenceIdInterface;
 }
