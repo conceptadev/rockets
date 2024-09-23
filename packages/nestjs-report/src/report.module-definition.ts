@@ -51,7 +51,7 @@ function definitionTransform(
   definition: DynamicModule,
   extras: ReportOptionsExtrasInterface,
 ): DynamicModule {
-  const { providers = [] } = definition;
+  const { providers = [], imports = [] } = definition;
   const { global = false, entities } = extras;
 
   if (!entities) {
@@ -61,16 +61,17 @@ function definitionTransform(
   return {
     ...definition,
     global,
-    imports: createReportImports({ entities }),
+    imports: createReportImports({ imports, entities }),
     providers: createReportProviders({ providers }),
     exports: [ConfigModule, RAW_OPTIONS_TOKEN, ...createReportExports()],
   };
 }
 
 export function createReportImports(
-  options: ReportEntitiesOptionsInterface,
+  options: Pick<DynamicModule, 'imports'> & ReportEntitiesOptionsInterface,
 ): DynamicModule['imports'] {
   return [
+    ...(options.imports ?? []),
     ConfigModule.forFeature(reportDefaultConfig),
     TypeOrmExtModule.forFeature(options.entities),
   ];
