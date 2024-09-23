@@ -1,5 +1,8 @@
 import { HttpStatus } from '@nestjs/common';
-import { RuntimeException, RuntimeExceptionOptions } from '@concepta/nestjs-exception';
+import {
+  RuntimeException,
+  RuntimeExceptionOptions,
+} from '@concepta/nestjs-exception';
 
 export class FileQueryException extends RuntimeException {
   constructor(options?: RuntimeExceptionOptions) {
