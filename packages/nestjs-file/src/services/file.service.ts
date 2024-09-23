@@ -27,11 +27,8 @@ export class FileService implements FileServiceInterface {
   ) {}
 
   async push(file: FileCreatableInterface): Promise<FileInterface> {
+    await this.checkExistingFile(file);
     try {
-      const existingFile = await this.fileLookupService.getUniqueFile(file);
-      if (existingFile) {
-        throw new FileDuplicateEntryException(file.serviceKey, file.fileName);
-      }
       const newFile = await this.fileMutateService.create(file);
       return this.addFileUrls(newFile);
     } catch (err) {
@@ -44,6 +41,15 @@ export class FileService implements FileServiceInterface {
     const dbFile = await this.fileLookupService.byId(file.id);
     if (!dbFile) throw new FileQueryException();
     return this.addFileUrls(dbFile);
+  }
+
+  protected async checkExistingFile(
+    file: FileCreatableInterface,
+  ): Promise<void> {
+    const existingFile = await this.fileLookupService.getUniqueFile(file);
+    if (existingFile) {
+      throw new FileDuplicateEntryException(file.serviceKey, file.fileName);
+    }
   }
 
   private async addFileUrls(file: FileInterface): Promise<FileInterface> {
