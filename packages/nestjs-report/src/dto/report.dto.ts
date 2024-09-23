@@ -37,7 +37,7 @@ export class ReportDto extends CommonEntityDto implements ReportInterface {
   @IsString()
   errorMessage = '';
 
-  @Exclude()
+  @Expose()
   @ApiProperty({
     enum: ReportStatusEnum,
     enumName: 'ReportStatusEnum',
