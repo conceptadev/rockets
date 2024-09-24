@@ -1,15 +1,13 @@
-import { HttpStatus } from '@nestjs/common';
-import { RuntimeException } from '@concepta/nestjs-exception';
+import {
+  RuntimeException,
+  RuntimeExceptionOptions,
+} from '@concepta/nestjs-exception';
 
 export class FileCreateException extends RuntimeException {
-  constructor(
-    message = 'Error while trying to create a file',
-    originalError: unknown,
-  ) {
+  constructor(options?: RuntimeExceptionOptions) {
     super({
-      message,
-      originalError,
-      httpStatus: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: 'Error while trying to create a file',
+      ...options,
     });
 
     this.errorCode = 'FILE_CREATE_ERROR';

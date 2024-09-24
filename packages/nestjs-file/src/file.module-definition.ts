@@ -21,6 +21,8 @@ import { FileService } from './services/file.service';
 import { FileStrategyService } from './services/file-strategy.service';
 
 import { fileDefaultConfig } from './config/file-default.config';
+import { FileMutateService } from './services/file-mutate.service';
+import { FileLookupService } from './services/file-lookup.service';
 
 const RAW_OPTIONS_TOKEN = Symbol('__FILE_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -43,7 +45,7 @@ function definitionTransform(
   definition: DynamicModule,
   extras: FileOptionsExtrasInterface,
 ): DynamicModule {
-  const { providers = [] } = definition;
+  const { providers = [], imports = [] } = definition;
   const { global = false, entities } = extras;
 
   if (!entities) {
@@ -53,16 +55,17 @@ function definitionTransform(
   return {
     ...definition,
     global,
-    imports: createFileImports({ entities }),
+    imports: createFileImports({ imports, entities }),
     providers: createFileProviders({ providers }),
     exports: [ConfigModule, RAW_OPTIONS_TOKEN, ...createFileExports()],
   };
 }
 
 export function createFileImports(
-  options: FileEntitiesOptionsInterface,
+  options: Pick<DynamicModule, 'imports'> & FileEntitiesOptionsInterface,
 ): DynamicModule['imports'] {
   return [
+    ...(options.imports ?? []),
     ConfigModule.forFeature(fileDefaultConfig),
     TypeOrmExtModule.forFeature(options.entities),
   ];
@@ -82,6 +85,10 @@ export function createFileProviders(options: {
     ...(options.providers ?? []),
     createFileSettingsProvider(options.overrides),
     createStrategyServiceProvider(options.overrides),
+    // TODO: move to be overwrittable
+    FileMutateService,
+    // TODO: move to be overwrittable
+    FileLookupService,
     FileStrategyService,
     FileService,
   ];

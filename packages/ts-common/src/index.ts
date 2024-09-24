@@ -59,6 +59,11 @@ export { InvitationGetUserEventResponseInterface } from './invitation/interfaces
 export { FileInterface } from './file/interfaces/file.interface';
 export { FileCreatableInterface } from './file/interfaces/file-creatable.interface';
 
+export { ReportInterface } from './report/interfaces/report.interface';
+export { ReportCreatableInterface } from './report/interfaces/report-creatable.interface';
+export { ReportUpdatableInterface } from './report/interfaces/report-updatable.interface';
+export { ReportStatusEnum } from './report/enum/report-status.enum';
+
 export {
   INVITATION_MODULE_CATEGORY_USER_KEY,
   INVITATION_MODULE_CATEGORY_ORG_KEY,

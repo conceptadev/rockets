@@ -1,72 +1,68 @@
-import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
-import { BaseService } from '@concepta/typeorm-common';
 import { Inject, Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
 
-import { FileInterface } from '@concepta/ts-common';
+import { FileCreatableInterface, FileInterface } from '@concepta/ts-common';
 
-import {
-  FILE_MODULE_FILE_ENTITY_KEY,
-  FILE_STRATEGY_SERVICE_KEY,
-} from '../file.constants';
-import { FileEntityInterface } from '../interfaces/file-entity.interface';
-import { FileServiceInterface } from '../interfaces/file-service.interface';
-import { FileQueryException } from '../exceptions/file-query.exception';
-import { FileCreateDto } from '../dto/file-create.dto';
-import { FileStrategyService } from './file-strategy.service';
+import { ReferenceIdInterface } from '@concepta/ts-core';
 import { FileCreateException } from '../exceptions/file-create.exception';
-import { FileIdMissingException } from '../exceptions/file-id-missing.exception';
 import { FileDuplicateEntryException } from '../exceptions/file-duplicated.exception';
+import { FileIdMissingException } from '../exceptions/file-id-missing.exception';
+import { FileQueryException } from '../exceptions/file-query.exception';
+import { FILE_STRATEGY_SERVICE_KEY } from '../file.constants';
+import { FileLookupServiceInterface } from '../interfaces/file-lookup-service.interface';
+import { FileMutateServiceInterface } from '../interfaces/file-mutate-service.interface';
+import { FileServiceInterface } from '../interfaces/file-service.interface';
+import { FileStrategyServiceInterface } from '../interfaces/file-strategy-service.interface';
+import { FileLookupService } from './file-lookup.service';
+import { FileMutateService } from './file-mutate.service';
 
 @Injectable()
-export class FileService
-  extends BaseService<FileEntityInterface>
-  implements FileServiceInterface
-{
+export class FileService implements FileServiceInterface {
   constructor(
-    @InjectDynamicRepository(FILE_MODULE_FILE_ENTITY_KEY)
-    private fileRepo: Repository<FileEntityInterface>,
     @Inject(FILE_STRATEGY_SERVICE_KEY)
-    private fileStrategyService: FileStrategyService,
-  ) {
-    super(fileRepo);
-  }
+    private fileStrategyService: FileStrategyServiceInterface,
+    @Inject(FileMutateService)
+    private fileMutateService: FileMutateServiceInterface,
+    @Inject(FileLookupService)
+    private fileLookupService: FileLookupServiceInterface,
+  ) {}
 
-  async push(file: FileCreateDto): Promise<FileInterface> {
+  async push(file: FileCreatableInterface): Promise<FileInterface> {
+    await this.checkExistingFile(file);
     try {
-      return await this.fileRepo.manager.transaction(async (manager) => {
-        const existingFile = await manager.findOne(this.fileRepo.target, {
-          where: {
-            serviceKey: file.serviceKey,
-            fileName: file.fileName,
-          },
-        });
-        if (existingFile) {
-          throw new FileDuplicateEntryException(file.serviceKey, file.fileName);
-        }
-        const newFile = manager.create(this.fileRepo.target, file);
-        await manager.save(newFile);
-        return this.addFileUrls(newFile);
-      });
+      const newFile = await this.fileMutateService.create(file);
+      return this.addFileUrls(newFile);
     } catch (err) {
-      throw new FileCreateException(this.metadata.targetName, err);
+      throw new FileCreateException({ originalError: err });
     }
   }
 
-  async fetch(file: Pick<FileInterface, 'id'>): Promise<FileInterface> {
+  async fetch(file: ReferenceIdInterface): Promise<FileInterface> {
     if (!file.id) throw new FileIdMissingException();
-    const dbFile = await this.fileRepo.findOne({
-      where: {
-        id: file.id,
-      },
-    });
+    const dbFile = await this.fileLookupService.byId(file.id);
     if (!dbFile) throw new FileQueryException();
     return this.addFileUrls(dbFile);
   }
 
-  private async addFileUrls(file: FileEntityInterface): Promise<FileInterface> {
-    file.uploadUri = await this.fileStrategyService.getUploadUrl(file);
-    file.downloadUrl = await this.fileStrategyService.getDownloadUrl(file);
+  protected async checkExistingFile(
+    file: FileCreatableInterface,
+  ): Promise<void> {
+    const existingFile = await this.fileLookupService.getUniqueFile(file);
+    if (existingFile) {
+      throw new FileDuplicateEntryException(file.serviceKey, file.fileName);
+    }
+  }
+
+  private async addFileUrls(file: FileInterface): Promise<FileInterface> {
+    try {
+      file.uploadUri = await this.fileStrategyService.getUploadUrl(file);
+    } catch (err) {
+      file.uploadUri = '';
+    }
+    try {
+      file.downloadUrl = await this.fileStrategyService.getDownloadUrl(file);
+    } catch (err) {
+      file.downloadUrl = '';
+    }
     return file;
   }
 }

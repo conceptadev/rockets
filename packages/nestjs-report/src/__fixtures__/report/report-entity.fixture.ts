@@ -1,0 +1,11 @@
+import { Entity, JoinColumn, OneToOne } from 'typeorm';
+import { FileEntityInterface } from '@concepta/nestjs-file';
+import { ReportSqliteEntity } from '../../entities/report-sqlite.entity';
+import { FileEntityFixture } from '../file/file-entity.fixture';
+
+@Entity()
+export class ReportEntityFixture extends ReportSqliteEntity {
+  @OneToOne(() => FileEntityFixture, (file) => file.report)
+  @JoinColumn()
+  file!: FileEntityInterface;
+}
