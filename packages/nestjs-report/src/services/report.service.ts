@@ -75,7 +75,7 @@ export class ReportService implements ReportServiceInterface {
   }
 
   protected async generateAndProcessReport(
-    reportDb: ReportEntityInterface,
+    reportDb: ReportInterface,
   ): Promise<void> {
     try {
       const result = await this.reportStrategyService.generate(reportDb);
@@ -109,7 +109,7 @@ export class ReportService implements ReportServiceInterface {
   }
 
   protected async addDownloadUrl(
-    report: ReportEntityInterface,
+    report: ReportInterface,
   ): Promise<ReportEntityInterface> {
     if (report.file?.id) {
       try {

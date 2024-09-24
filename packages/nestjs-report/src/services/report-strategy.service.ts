@@ -3,7 +3,6 @@ import { ReportCreatableInterface } from '@concepta/ts-common';
 import { mapNonErrorToException } from '@concepta/ts-core';
 import { ReportGeneratorServiceNotFoundException } from '../exceptions/report-generator-service-not-found.exception';
 import { ReportTimeoutException } from '../exceptions/report-timeout.exception';
-import { ReportEntityInterface } from '../interfaces/report-entity.interface';
 import { ReportGeneratorResultInterface } from '../interfaces/report-generator-result.interface';
 import { ReportGeneratorServiceInterface } from '../interfaces/report-generator-service.interface';
 import { ReportSettingsInterface } from '../interfaces/report-settings.interface';
@@ -25,7 +24,7 @@ export class ReportStrategyService implements ReportStrategyServiceInterface {
   }
 
   async generate(
-    report: ReportEntityInterface,
+    report: ReportCreatableInterface,
   ): Promise<ReportGeneratorResultInterface> {
     try {
       const generatorService = this.resolveGeneratorService(report);
