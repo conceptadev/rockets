@@ -40,9 +40,9 @@ Authenticate requests using GitHub OAuth2
 
 ## Introduction
 
-Before we begin, you'll need to set up a GitHub OAuth App to obtain the 
-necessary credentials. For a detailed guide on creating a GitHub OAuth App 
-and obtaining your Client ID and Client Secret, please refer to [GitHub's 
+Before we begin, you'll need to set up a GitHub OAuth App to obtain the
+necessary credentials. For a detailed guide on creating a GitHub OAuth App
+and obtaining your Client ID and Client Secret, please refer to [GitHub's
 official documentation](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app).
 
 ## Getting Started with GitHub Authentication
@@ -67,6 +67,7 @@ export class UserEntity {
   federated!: FederatedEntity;
 }
 ```
+
 ### Step 2: Create Federated Entity
 
 Next, create the `FederatedEntity`:
@@ -82,6 +83,7 @@ export class FederatedEntity extends FederatedSqliteEntity {
   user!: UserEntity;
 }
 ```
+
 ### Step 3: Implement FederatedUserLookupServiceInterface
 
 Create a service that implements `FederatedUserLookupServiceInterface`:
@@ -118,6 +120,7 @@ export class UserLookupServiceFixture implements FederatedUserLookupServiceInter
   }
 }
 ```
+
 ### Step 4: Implement FederatedUserMutateServiceInterface
 
 Create a service that implements `FederatedUserMutateServiceInterface`:
@@ -136,6 +139,7 @@ export class UserMutateServiceFixture implements FederatedUserMutateServiceInter
   }
 }
 ```
+
 ### Step 5: Implement IssueTokenServiceInterface
 
 Create a service that implements `IssueTokenServiceInterface`:
@@ -169,14 +173,15 @@ export class GitHubIssueTokenService implements IssueTokenServiceInterface {
   }
 }
 ```
+
 ### Step 6: Environment Variables
 
-`AuthGithubModule` will automatically look for predefined environment 
+`AuthGithubModule` will automatically look for predefined environment
 variables, to keep sensitive information secure, use environment variables for
 configuration. Here’s how to set them up :
 
-*If you need to overwrite variables or settings, check 
-[### Implementing custom settings](#implementing-custom-settings) 
+*If you need to overwrite variables or settings, check
+[### Implementing custom settings](#implementing-custom-settings)
 for more details.*
 
 1. **Create a `.env` file** in the root of your project:
@@ -187,7 +192,7 @@ for more details.*
    GITHUB_CALLBACK_URL=http://localhost:3000/auth/github/callback
    ```
 
-2. **Load environment variables** in your application. For NestJS, you can use 
+2. **Load environment variables** in your application. For NestJS, you can use
 the `@nestjs/config` package:
 
    ```typescript
@@ -252,8 +257,8 @@ import { UserEntity } from './user/user.entity';
 export class AppModule {}
 ```
 
-This configuration uses SQLite for testing, but you can use any database 
-supported by TypeORM. The GitHub module has dependencies and should be used 
+This configuration uses SQLite for testing, but you can use any database
+supported by TypeORM. The GitHub module has dependencies and should be used
 with `nestjs-federated`, `nestjs-jwt`, and `nestjs-authentication`.
 
 ## Testing the GitHub Authentication Flow
@@ -261,17 +266,17 @@ with `nestjs-federated`, `nestjs-jwt`, and `nestjs-authentication`.
 To test the GitHub authentication flow:
 
 1. Start your NestJS application.
-2. Navigate to `/auth/github/login` in your browser. This will redirect you 
+2. Navigate to `/auth/github/login` in your browser. This will redirect you
    to GitHub's login page.
-3. After successful GitHub login, you'll be redirected back to your 
+3. After successful GitHub login, you'll be redirected back to your
    application's callback URL (as specified in your GitHub OAuth App settings).
-4. The callback will trigger the `IssueTokenService` to generate access and 
+4. The callback will trigger the `IssueTokenService` to generate access and
    refresh tokens.
-5. These tokens will be returned in the response, which you can then use for 
+5. These tokens will be returned in the response, which you can then use for
    authenticated requests to your application.
 
-Remember to replace `github_callback`, `github_clientId`, and 
-`github_clientSecret` with your actual GitHub OAuth App credentials in the 
+Remember to replace `github_callback`, `github_clientId`, and
+`github_clientSecret` with your actual GitHub OAuth App credentials in the
 module configuration.
 
 ## How-To Guides
@@ -331,10 +336,14 @@ To override the default controllers:
 
 1. Create custom github controllers.
 2. Make sure to use `@UseGuards(AuthGithubGuard)` to use github strategy flow.
-2. Provide them in the module configuration:
+3. Provide them in the module configuration:
 
-Notes: 
-The default controller injects the default `IssueTokenService` from `@concepta/nestjs-authentication` to generate the response payload. If you decide to override the default controllers, you will need to implement the logic to generate the response payload. It means that if you overwrite the controller you do not need to overwrite the `issueTokenService`.
+Notes:
+The default controller injects the default `IssueTokenService` from
+`@concepta/nestjs-authentication` to generate the response payload. If you
+decide to override the default controllers, you will need to implement the
+logic to generate the response payload. It means that if you overwrite the
+controller you do not need to overwrite the `issueTokenService`.
 
 ```ts
 AuthGithubModule.forRoot({
@@ -382,13 +391,14 @@ export class CustomGithubAuthController {
 }
 
 ```
+
 ### Implementing custom settings
 
-The credentials for github authentication are `clientId`, `clientSecret`, 
+The credentials for github authentication are `clientId`, `clientSecret`,
 `callbackURL` and the property `mapProfile` are defined on settings configuration.
 
 The `mapProfile` function is used to map the GitHub profile to the user entity.
-You can have full control over the mapping process. Make sure to create a 
+You can have full control over the mapping process. Make sure to create a
 function of `MapProfile` type from `@concepta/nestjs-auth-github` and implement
 as you need. `mapProfile` is part of `settings` property. You will need to overwrite
 all settings if you need a custom map profile.
@@ -435,8 +445,9 @@ AuthGithubModule.forRoot({
 
 ### Implementing custom user lookup or custom mutate service
 
-If you need to customize, how to get the user information, or how to create 
-the user, you will need to update the federated options. Please refer for the `nestjs-federated` documentation.
+If you need to customize, how to get the user information, or how to create
+the user, you will need to update the federated options. Please refer for
+the `nestjs-federated` documentation.
 
 ## Reference
 
@@ -448,71 +459,71 @@ This documentation provides comprehensive details on the interfaces and
 services that you can utilize to customize and extend the authentication
 functionality within your NestJS application.
 
-
 ## Explanation
 
 ### Overview of the Flow
 
-The Rockets NestJS GitHub module integrates with the NestJS framework to 
-provide a seamless authentication experience using GitHub OAuth. The flow 
-begins when a user attempts to log in via GitHub, triggering a series of 
+The Rockets NestJS GitHub module integrates with the NestJS framework to
+provide a seamless authentication experience using GitHub OAuth. The flow
+begins when a user attempts to log in via GitHub, triggering a series of
 interactions between the application and GitHub's OAuth service.
 
 ### OAuth Strategy and Token Issuance
 
-The OAuth strategy, utilizing `passport-github`, allows users to authenticate 
+The OAuth strategy, utilizing `passport-github`, allows users to authenticate
 using their GitHub accounts. Here’s how the flow works:
 
-1. **User Authentication**: The user clicks the login button, which 
+1. **User Authentication**: The user clicks the login button, which
    redirects them to GitHub's login page.
-2. **Authorization Grant**: After the user logs in and grants permission, 
+2. **Authorization Grant**: After the user logs in and grants permission,
    GitHub redirects back to the application with an authorization code.
-3. **Token Exchange**: The application exchanges this authorization code 
-   for an access token, which is then used to authenticate API requests 
+3. **Token Exchange**: The application exchanges this authorization code
+   for an access token, which is then used to authenticate API requests
    to GitHub.
 
 ### Mapping the Profile
 
-The `mapProfile` function is crucial for transforming the response 
-returned from GitHub into the format required for signing in with 
-federated services. This function extracts necessary user information 
-from the GitHub profile, such as the user's ID and email, and maps 
+The `mapProfile` function is crucial for transforming the response
+returned from GitHub into the format required for signing in with
+federated services. This function extracts necessary user information
+from the GitHub profile, such as the user's ID and email, and maps
 it to the structure expected by the application.
 
-By implementing a custom `mapProfile`, developers can ensure that 
-the user data is correctly formatted and can be used to either create 
-a new user or associate the user with an existing account in the 
+By implementing a custom `mapProfile`, developers can ensure that
+the user data is correctly formatted and can be used to either create
+a new user or associate the user with an existing account in the
 federated system.
 
 ### Integration with Federated Services
 
-4. **User Creation and Association**: The federated service then takes over:
+1. **User Creation and Association**: The federated service then takes over:
    - It checks if a user associated with the GitHub account already exists.
    - If the user doesn't exist, it creates a new user account.
-   - It associates the GitHub provider with the user account, creating a 
+   - It associates the GitHub provider with the user account, creating a
    link between the user's application account and their GitHub identity.
-5. **Token Issuance**: After successful user creation or retrieval, the 
+
+2. **Token Issuance**: After successful user creation or retrieval, the
 application issues its own access and refresh tokens for the user.
 
-This integration ensures that each GitHub login is correctly mapped to a user 
-in your application, maintaining a consistent identity across sessions and 
-logins. Please refer to the `nestjs-federated` documentation for more 
+This integration ensures that each GitHub login is correctly mapped to a user
+in your application, maintaining a consistent identity across sessions and
+logins. Please refer to the `nestjs-federated` documentation for more
 information.
 
 ### Module Options Responsibilities
 
-- **issueTokenService**: Responsible for generating and managing 
-  access and refresh tokens. It handles the response payload for 
+- **issueTokenService**: Responsible for generating and managing
+  access and refresh tokens. It handles the response payload for
   authentication.
 
-- **AuthGithubController**: Manages the authentication routes, 
-  handling user login and callback processes. It ensures that the 
+- **AuthGithubController**: Manages the authentication routes,
+  handling user login and callback processes. It ensures that the
   user is redirected appropriately during the OAuth flow.
 
-- **Settings**: Contains configuration options for the GitHub 
-  authentication process, including client ID, client secret, and 
+- **Settings**: Contains configuration options for the GitHub
+  authentication process, including client ID, client secret, and
   callback URLs and the mapProfile function.
 
-By structuring the application this way, we ensure a clear separation of 
-concerns, making it easier to manage authentication logic and user 
+By structuring the application this way, we ensure a clear separation of
+concerns, making it easier to manage authentication logic and user
 data across different services.
