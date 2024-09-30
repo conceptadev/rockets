@@ -15,13 +15,13 @@ export const authAppleDefaultConfig = registerAs(
      * The login dto
      */
     loginDto: AuthAppleLoginDto,
-    clientID: process.env.APPLE_CLIENT_ID ?? 'client_id',
-    callbackURL: process.env.APPLE_CALLBACK_URL ?? 'callback_url',
-    teamID: process.env.APPLE_TEAM_ID ?? 'teamID',
-    keyID: process.env.APPLE_KEY_ID ?? 'keyID',
-    privateKeyLocation: process.env.APPLE_PRIVATE_KEY_LOCATION ?? 'p8-location',
+    clientID: process.env.APPLE_CLIENT_ID ?? '',
+    callbackURL: process.env.APPLE_CALLBACK_URL ?? '',
+    teamID: process.env.APPLE_TEAM_ID ?? '',
+    keyID: process.env.APPLE_KEY_ID ?? '',
+    privateKeyLocation: process.env.APPLE_PRIVATE_KEY_LOCATION ?? '',
     privateKeyString:
-      process.env.APPLE_PRIVATE_KEY_STRING ?? 'private key string',
+      process.env.APPLE_PRIVATE_KEY_STRING ?? '',
     passReqToCallback: false,
     scope:
       'APPLE_SCOPE' in process.env && process.env.APPLE_SCOPE
