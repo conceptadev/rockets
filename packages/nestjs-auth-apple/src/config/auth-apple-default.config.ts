@@ -20,8 +20,7 @@ export const authAppleDefaultConfig = registerAs(
     teamID: process.env.APPLE_TEAM_ID ?? '',
     keyID: process.env.APPLE_KEY_ID ?? '',
     privateKeyLocation: process.env.APPLE_PRIVATE_KEY_LOCATION ?? '',
-    privateKeyString:
-      process.env.APPLE_PRIVATE_KEY_STRING ?? '',
+    privateKeyString: process.env.APPLE_PRIVATE_KEY_STRING ?? '',
     passReqToCallback: false,
     scope:
       'APPLE_SCOPE' in process.env && process.env.APPLE_SCOPE
