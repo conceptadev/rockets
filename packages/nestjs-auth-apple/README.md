@@ -68,7 +68,9 @@ To get started, install the `AuthAppleModule` package:
 
 `yarn add @concepta/nestjs-auth-apple`
 
-### Step 1: Associate User Entity to Federated Entity
+### Getting Started with Apple Authentication
+
+#### Step 1: Associate User Entity to Federated Entity
 
 First, let's create the `UserEntity`:
 
@@ -89,7 +91,7 @@ export class UserEntity {
 }
 ```
 
-### Step 2: Associate Federated Entity to User Entity
+#### Step 2: Associate Federated Entity to User Entity
 
 Next, associate the `UserEntity` to the `FederatedEntity`:
 
@@ -105,7 +107,7 @@ export class FederatedEntity extends FederatedSqliteEntity {
 }
 ```
 
-### Step 3: Environment Variables
+#### Step 3: Environment Variables
 
 `AuthAppleModule` will automatically look for predefined environment
 variables, to keep sensitive information secure, use environment variables for
@@ -144,7 +146,7 @@ the `@nestjs/config` package:
    export class AppModule {}
    ```
 
-### Step 4: Configure the Module
+#### Step 4: Configure the Module
 
 Finally, set up the module configuration:
 
@@ -509,58 +511,58 @@ information.
 
 ### Module Options Responsibilities
 
-- **jwtService**: Responsible for verifying Apple tokens. It ensures the 
+- **jwtService**: Responsible for verifying Apple tokens. It ensures the
   validity and integrity of the tokens received from Apple.
 
-- **issueTokenService**: Responsible for generating and managing access and 
+- **issueTokenService**: Responsible for generating and managing access and
   refresh tokens. It handles the response payload for authentication.
 
-- **authAppleService**: Manages the Apple authentication process, handling user 
-  login and callback processes. It ensures that the user is authenticated 
+- **authAppleService**: Manages the Apple authentication process, handling user
+  login and callback processes. It ensures that the user is authenticated
   correctly.
 
-- **Settings**: Contains configuration options for the Apple authentication 
-  process, including client ID, client secret, callback URLs, and the 
+- **Settings**: Contains configuration options for the Apple authentication
+  process, including client ID, client secret, callback URLs, and the
   `mapProfile` function.
 
 #### Settings Configuration Properties
 
-The `authAppleDefaultConfig` provides several configuration properties that can 
-be customized via environment variables. Below is a detailed description of 
+The `authAppleDefaultConfig` provides several configuration properties that can
+be customized via environment variables. Below is a detailed description of
 each property:
 
-- **loginDto**: The Data Transfer Object (DTO) used for login. This is defined 
+- **loginDto**: The Data Transfer Object (DTO) used for login. This is defined
   by the `AuthAppleLoginDto` class.
 
-- **clientID**: The client ID for the Apple application. This can be set via 
+- **clientID**: The client ID for the Apple application. This can be set via
   the `APPLE_CLIENT_ID` environment variable. Defaults to `''`.
 
-- **callbackURL**: The callback URL for the Apple authentication process. This 
-  can be set via the `APPLE_CALLBACK_URL` environment variable. Defaults to 
+- **callbackURL**: The callback URL for the Apple authentication process. This
+  can be set via the `APPLE_CALLBACK_URL` environment variable. Defaults to
   `''`.
 
-- **teamID**: The team ID associated with the Apple developer account. This can 
+- **teamID**: The team ID associated with the Apple developer account. This can
   be set via the `APPLE_TEAM_ID` environment variable. Defaults to `''`.
 
-- **keyID**: The key ID for the Apple private key. This can be set via the 
+- **keyID**: The key ID for the Apple private key. This can be set via the
   `APPLE_KEY_ID` environment variable. Defaults to `''`.
 
-- **privateKeyLocation**: The file location of the Apple private key. This can 
-  be set via the `APPLE_PRIVATE_KEY_LOCATION` environment variable. Defaults to 
+- **privateKeyLocation**: The file location of the Apple private key. This can
+  be set via the `APPLE_PRIVATE_KEY_LOCATION` environment variable. Defaults to
   `''`.
 
-- **privateKeyString**: The string representation of the Apple private key. 
-  This can be set via the `APPLE_PRIVATE_KEY_STRING` environment variable. 
+- **privateKeyString**: The string representation of the Apple private key.
+  This can be set via the `APPLE_PRIVATE_KEY_STRING` environment variable.
   Defaults to `''`.
 
-- **passReqToCallback**: A boolean indicating whether to pass the request to 
+- **passReqToCallback**: A boolean indicating whether to pass the request to
   the callback. Defaults to `false`.
 
-- **scope**: The scope of the Apple authentication. This can be set via the 
-  `APPLE_SCOPE` environment variable. If not set, defaults to `['email']`. The 
+- **scope**: The scope of the Apple authentication. This can be set via the
+  `APPLE_SCOPE` environment variable. If not set, defaults to `['email']`. The
   scope is parsed using the `authAppleScopeParser` utility.
 
-- **mapProfile**: A function to map the Apple profile to the application's user 
+- **mapProfile**: A function to map the Apple profile to the application's user
   profile. This is defined by the `mapProfile` utility function.
 
 By structuring the application this way, we ensure a clear separation of
