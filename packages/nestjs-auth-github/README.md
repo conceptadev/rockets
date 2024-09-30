@@ -10,7 +10,7 @@ Authenticate requests using GitHub OAuth2
 [![GH Contrib](https://img.shields.io/github/contributors/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets/graphs/contributors)
 [![NestJS Dep](https://img.shields.io/github/package-json/dependency-version/conceptadev/rockets/@nestjs/common?label=NestJS&logo=nestjs&filename=packages%2Fnestjs-core%2Fpackage.json)](https://www.npmjs.com/package/@nestjs/common)
 
-# Table of Contents
+## Table of Contents
 
 1. [Tutorials](#tutorials)
    - [Introduction](#introduction)
@@ -33,16 +33,16 @@ Authenticate requests using GitHub OAuth2
    - [Integration with Federated Services](#integration-with-federated-services)
    - [Module Options Responsibilities](#module-options-responsibilities)
 
-# Tutorials
+## Tutorials
 
-## Introduction
+### Introduction
 
 Before we begin, you'll need to set up a GitHub OAuth App to obtain the
 necessary credentials. For a detailed guide on creating a GitHub OAuth App
 and obtaining your Client ID and Client Secret, please refer to [GitHub's
 official documentation](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app).
 
-## Getting Started with GitHub Authentication
+### Getting Started with GitHub Authentication
 
 **Prerequisite:** Github module has a dependency on
 `@concepta/nestjs-federated`. Ensure you have implemented the `FederatedModule`

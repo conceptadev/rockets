@@ -97,7 +97,7 @@ section
 Finally, set up the module configuration:
 
 ```ts
-import { AuthenticationModule, IssueTokenService } from '@concepta/nestjs-authentication';
+import { AuthenticationModule } from '@concepta/nestjs-authentication';
 import { FederatedModule } from '@concepta/nestjs-federated';
 import { JwtModule } from '@concepta/nestjs-jwt';
 import { Module } from '@nestjs/common';
@@ -105,7 +105,6 @@ import { FederatedUserLookupService } from './federated/federated-lookup.service
 import { UserMutateServiceFixture } from './federated/federated-mutate.service';
 import { FederatedEntity } from './federated/federated.entity';
 import { AuthGithubModule } from '@concepta/nestjs-auth-github';
-import { GitHubIssueTokenService } from './github/issue-token.service';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { UserEntity } from './user/user.entity';
 
