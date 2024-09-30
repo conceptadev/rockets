@@ -49,6 +49,12 @@ official documentation](https://docs.github.com/en/apps/oauth-apps/building-oaut
 before proceeding. Refer to the [Federated API Documentation](https://www.rockets.tools/reference/rockets/nestjs-federated/README)
 for more details.
 
+#### Installation
+
+To get started, install the `AuthGithubModule` package:
+
+`yarn add @concepta/nestjs-auth-github`
+
 ### Step 1: Associate User Entity to Federated Entity
 
 First, let's create the `UserEntity`:

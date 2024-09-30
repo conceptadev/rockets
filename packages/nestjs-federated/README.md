@@ -45,6 +45,12 @@ documentation to use our modules.
 
 ### Getting Started with Federated Authentication
 
+#### Installation
+
+To get started, install the `FederatedModule` package:
+
+`yarn add @concepta/nestjs-federated`
+
 ### Step 1: Create User Entity
 
 First, let's create the `UserEntity`:
