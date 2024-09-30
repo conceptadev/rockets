@@ -12,7 +12,6 @@ Authenticate via federated login
 
 # Table of Contents
 
-
 1. [Tutorials](#tutorials)
    - [Introduction](#introduction)
    - [Getting Started with Federated Authentication](#getting-started-with-federated-authentication)
@@ -36,10 +35,13 @@ Authenticate via federated login
 ## Introduction
 
 Before we begin, you'll need to set up OAuth Apps for the social providers you
-wish to use (e.g., GitHub, Google, Facebook) to obtain the necessary
-credentials. For detailed guides on creating OAuth Apps and obtaining your
-Client IDs and Client Secrets, please refer to the official documentation of
-each provider and refer to the (`@concepta/nestjs-auth-github`)[https://www.rockets.tools/reference/rockets/nestjs-auth-github/README] , (`nestjs-auth-apple`)[https://www.rockets.tools/reference/rockets/nestjs-auth-apple/README] and (`@concepta/nestjs-auth-google`)[https://www.rockets.tools/reference/rockets/nestjs-auth-google/README] documentation to use our modules.
+wish to use (e.g., GitHub, Google, Facebook) to obtain the necessary credentials.
+For detailed guides on creating OAuth Apps and obtaining your Client IDs and
+Client Secrets, please refer to the official documentation of each provider and
+refer to the [`@concepta/nestjs-auth-github`](https://www.rockets.tools/reference/rockets/nestjs-auth-github/README),
+[`nestjs-auth-apple`](https://www.rockets.tools/reference/rockets/nestjs-auth-apple/README),
+and [`@concepta/nestjs-auth-google`](https://www.rockets.tools/reference/rockets/nestjs-auth-google/README)
+documentation to use our modules.
 
 ## Getting Started with Federated Authentication
 
@@ -81,10 +83,14 @@ export class FederatedEntity extends FederatedSqliteEntity {
 ```
 
 ### Step 3: Implement FederatedUserLookupServiceInterface
-Refer to [Implement FederatedUserLookupServiceInterface](#implement-federateduserlookupserviceinterface) section
+
+Refer to [Implement FederatedUserLookupServiceInterface](#implement-federateduserlookupserviceinterface)
+section
 
 ### Step 4: Implement FederatedUserMutateServiceInterface
-Refer to [Implement FederatedUserMutateServiceInterface](#implement-federatedusermutateserviceinterface) section
+
+Refer to [Implement FederatedUserMutateServiceInterface](#implement-federatedusermutateserviceinterface)
+section
 
 ### Step 5: Configure the Module
 
@@ -132,28 +138,37 @@ export class AppModule {}
 ```
 
 This configuration uses SQLite for testing, but you can use any database
-supported by TypeORM. 
+supported by TypeORM.
 
 ### Step 6: Integrate with other Oauth Module
 
-To complete the integration with OAuth providers and set up the whole authentication flow, you'll need to implement one of the @concepta social authentication modules. Follow the documentation for the specific module you want to use:
+To complete the integration with OAuth providers and set up the whole
+authentication flow, you'll need to implement one of the @concepta social
+authentication modules. Follow the documentation for the specific module you
+want to use:
 
 1. GitHub Authentication:
-   Refer to the [@concepta/nestjs-auth-github documentation](https://www.rockets.tools/reference/rockets/nestjs-auth-github/README) for detailed instructions on setting up GitHub OAuth authentication.
+   Refer to the [@concepta/nestjs-auth-github documentation](https://www.rockets.tools/reference/rockets/nestjs-auth-github/README)
+   for detailed instructions on setting up GitHub OAuth authentication.
 
 2. Apple Authentication:
-   For Apple Sign-In, follow the [nestjs-auth-apple documentation](https://www.rockets.tools/reference/rockets/nestjs-auth-apple/README) to implement Apple's OAuth flow.
+   For Apple Sign-In, follow the [nestjs-auth-apple documentation](https://www.rockets.tools/reference/rockets/nestjs-auth-apple/README)
+   to implement Apple's OAuth flow.
 
 3. Google Authentication:
-   To set up Google OAuth, consult the [@concepta/nestjs-auth-google documentation](https://www.rockets.tools/reference/rockets/nestjs-auth-google/README) for step-by-step guidance.
+   To set up Google OAuth, consult the [@concepta/nestjs-auth-google documentation](https://www.rockets.tools/reference/rockets/nestjs-auth-google/README)
+   for step-by-step guidance.
 
 These documentation resources will guide you through:
+
 - Obtaining the necessary OAuth credentials from the respective providers
 - Configuring the OAuth module in your NestJS application
 - Setting up the required controllers and routes
 - Implementing the authentication flow
 
-By following these provider-specific guides, you'll be able to complete the federated authentication setup and enable users to log in using their preferred social accounts.
+By following these provider-specific guides, you'll be able to complete the
+federated authentication setup and enable users to log in using their preferred
+social accounts.
 
 ## How-To Guides
 

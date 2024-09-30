@@ -44,8 +44,10 @@ official documentation](https://docs.github.com/en/apps/oauth-apps/building-oaut
 
 ## Getting Started with GitHub Authentication
 
-**Prerequisite:** Github module has a dependency on `@concepta/nestjs-federated`. Ensure you have implemented the `FederatedModule` before proceeding. Refer to 
-the [Federated API Documentation](https://www.rockets.tools/reference/rockets/nestjs-federated/README) for more details.
+**Prerequisite:** Github module has a dependency on
+`@concepta/nestjs-federated`. Ensure you have implemented the `FederatedModule`
+before proceeding. Refer to the [Federated API Documentation](https://www.rockets.tools/reference/rockets/nestjs-federated/README)
+for more details.
 
 ### Step 1: Associate User Entity to Federated Entity
 
