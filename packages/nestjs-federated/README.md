@@ -10,7 +10,7 @@ Authenticate via federated login
 [![GH Contrib](https://img.shields.io/github/contributors/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets/graphs/contributors)
 [![NestJS Dep](https://img.shields.io/github/package-json/dependency-version/conceptadev/rockets/@nestjs/common?label=NestJS&logo=nestjs&filename=packages%2Fnestjs-core%2Fpackage.json)](https://www.npmjs.com/package/@nestjs/common)
 
-# Table of Contents
+## Table of Contents
 
 1. [Tutorials](#tutorials)
    - [Introduction](#introduction)
@@ -30,9 +30,9 @@ Authenticate via federated login
    - [Federated Services](#federated-services)
    - [Module Options Responsibilities](#module-options-responsibilities)
 
-# Tutorials
+## Tutorials
 
-## Introduction
+### Introduction
 
 Before we begin, you'll need to set up OAuth Apps for the social providers you
 wish to use (e.g., GitHub, Google, Facebook) to obtain the necessary credentials.
@@ -43,7 +43,7 @@ refer to the [`@concepta/nestjs-auth-github`](https://www.rockets.tools/referenc
 and [`@concepta/nestjs-auth-google`](https://www.rockets.tools/reference/rockets/nestjs-auth-google/README)
 documentation to use our modules.
 
-## Getting Started with Federated Authentication
+### Getting Started with Federated Authentication
 
 ### Step 1: Create User Entity
 
@@ -189,13 +189,19 @@ export const mockUser = {
 // user-lookup.service.ts
 import { Injectable } from '@nestjs/common';
 import { ReferenceEmail } from '@concepta/ts-core';
-import { FederatedUserLookupServiceInterface } from '@concepta/nestjs-federated';
+import { 
+  FederatedUserLookupServiceInterface 
+} from '@concepta/nestjs-federated';
 import { mockUser } from './user.mock';
 
 
 @Injectable()
-export class UserLookupServiceFixture implements FederatedUserLookupServiceInterface {
-  async byId(id: string): ReturnType<FederatedUserLookupServiceInterface['byId']> {
+export class UserLookupServiceFixture
+  implements FederatedUserLookupServiceInterface
+{
+  async byId(
+    id: string
+  ): ReturnType<FederatedUserLookupServiceInterface['byId']> {
     if (id === mockUser.id) {
       return mockUser;
     } else {
@@ -203,7 +209,9 @@ export class UserLookupServiceFixture implements FederatedUserLookupServiceInter
     }
   }
 
-  async byEmail(email: ReferenceEmail): ReturnType<FederatedUserLookupServiceInterface['byEmail']> {
+  async byEmail(
+    email: ReferenceEmail
+  ): Promise<UserInterface | null> {
     return email === mockUser.email ? mockUser : null;
   }
 }
@@ -215,14 +223,22 @@ Create a service that implements `FederatedUserMutateServiceInterface`:
 
 ```ts
 // user-mutate.service.ts
-import { FederatedCredentialsInterface, FederatedUserMutateServiceInterface } from '@concepta/nestjs-federated';
-import { FederatedUserMutateInterface } from '@concepta/nestjs-federated/dist/interfaces/federated-user-mutate.interface';
+import { 
+  FederatedCredentialsInterface, 
+  FederatedUserMutateServiceInterface 
+} from '@concepta/nestjs-federated';
+import { 
+  FederatedUserMutateInterface 
+} from '@concepta/nestjs-federated';
 import { Injectable } from '@nestjs/common';
 import { mockUser } from './user.mock';
 
 @Injectable()
-export class UserMutateServiceFixture implements FederatedUserMutateServiceInterface {
-  async create(_object: FederatedUserMutateInterface): Promise<FederatedCredentialsInterface> {
+export class UserMutateServiceFixture 
+  implements FederatedUserMutateServiceInterface {
+  async create(
+    _object: FederatedUserMutateInterface
+  ): Promise<FederatedCredentialsInterface> {
     return mockUser;
   }
 }
