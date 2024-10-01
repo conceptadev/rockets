@@ -10,15 +10,33 @@ Manage files for several components using one module.
 [![GH Contrib](https://img.shields.io/github/contributors/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets/graphs/contributors)
 [![NestJS Dep](https://img.shields.io/github/package-json/dependency-version/conceptadev/rockets/@nestjs/common?label=NestJS&logo=nestjs&filename=packages%2Fnestjs-core%2Fpackage.json)](https://www.npmjs.com/package/@nestjs/common)
 
-# Tutorial
+## Table of Contents
 
-## Integrating AWS with FileModule in NestJS
+1. [Tutorial](#tutorial)
+   1.1. [Integrating AWS with FileModule in NestJS](#integrating-aws-with-filemodule-in-nestjs)
+      - [Step 1: Install Required Packages](#step-1-install-required-packages)
+      - [Step 2: Configure AWS](#step-2-configure-aws)
+      - [Step 3: Create AWS Storage Service](#step-3-create-aws-storage-service)
+2. [How to Guide](#how-to-guide)
+   2.1. [How to Create a New Storage Service](#1-how-to-create-a-new-storage-service)
+   2.2. [How to Integrate a New Storage Service](#2-how-to-integrate-a-new-storage-service)
+   2.3. [How to Integrate with Multiple Storage Services](#3-how-to-integrate-with-multiple-storage-services)
+   2.4. [How to create a new File Entity](#4-how-to-create-a-new-file-entity)
+3. [Reference](#reference)
+4. [Explanation](#explanation)
+   4.1. [Advantages of a Generic File Module](#advantages-of-a-generic-file-module)
+   4.2. [Multiple Storage Services](#multiple-storage-services)
+   4.3. [Ease of Creating New File Module Structures](#ease-of-creating-new-file-module-structures)
+
+## Tutorial
+
+### Integrating AWS with FileModule in NestJS
 
 This guide will walk you through the steps to integrate AWS S3 storage with
 the `FileModule` in your NestJS application. This integration allows you to
 upload and download files using AWS S3.
 
-### Step 1: Install Required Packages
+#### Step 1: Install Required Packages
 
 First, ensure you have the necessary packages installed. You will need
 `@aws-sdk/client-s3` and `@nestjs/config`.
@@ -27,7 +45,7 @@ First, ensure you have the necessary packages installed. You will need
 yarn add @concepta/nestjs-file @aws-sdk/client-s3 @nestjs/config
 ```
 
-### Step 2: Configure AWS
+#### Step 2: Configure AWS
 
 Create a configuration file for AWS in your `config` directory.
 
@@ -46,7 +64,7 @@ export const awsConfig = registerAs('aws', (): AwsConfigInterface => ({
 }));
 ```
 
-### Step 3: Create AWS Storage Service
+#### Step 3: Create AWS Storage Service
 
 Implement the AWS storage service that implements the
 `FileStorageServiceInterface` that will handle file uploads and downloads.
@@ -106,7 +124,7 @@ export class AwsStorageService implements FileStorageServiceInterface {
 }
 ```
 
-### Step 4: Create AWS Module
+#### Step 4: Create AWS Module
 
 Create an AWS module to provide the AWS storage service.
 
@@ -124,7 +142,7 @@ import { AwsController } from './aws.controller';
 export class AwsModule {}
 ```
 
-### Step 5: Create entity AWS DTO
+#### Step 5: Create entity AWS DTO
 
 Define Entity and Data Transfer Object (DTO) for AWS file operations.
 
@@ -150,7 +168,7 @@ export class AwsCreateDto extends PickType(FileCreateDto, [
 ] as const) {}
 ```
 
-### Step 6: Create AWS Controller
+#### Step 6: Create AWS Controller
 
 Create a controller to handle AWS file operations.
 
@@ -189,7 +207,7 @@ export class AwsController {
 }
 ```
 
-### Step 7: Integrate AWS with FileModule
+#### Step 7: Integrate AWS with FileModule
 
 Finally, integrate the AWS module with the `FileModule` in your `AppModule`.
 
@@ -209,7 +227,7 @@ Finally, integrate the AWS module with the `FileModule` in your `AppModule`.
     }),
 ```
 
-### Step 8: Environment Variables
+#### Step 8: Environment Variables
 
 Ensure you have the following environment variables set in your `.env` file:
 
@@ -221,7 +239,7 @@ AWS_SECRET_ACCESS_KEY=your-secret-access-key
 AWS_BUCKET_NAME=your-bucket-name
 ```
 
-## Uploading a file using curl
+### Uploading a file using curl
 
 After setting up the AWS integration with the `FileModule`, you can use the
 provided endpoints to upload files. Here's a step-by-step guide on how to
@@ -297,9 +315,9 @@ You have now integrated AWS S3 with the `FileModule` in your NestJS application.
 You can use the endpoints defined in the `AwsController` to upload and download
 files from your S3 bucket.
 
-# How to Guide
+## How to Guide
 
-## 1. How to Create a New Storage Service
+### 1. How to Create a New Storage Service
 
 To create a new storage service, you need to implement the
 `FileStorageServiceInterface`. Here's a step-by-step guide:
@@ -336,7 +354,7 @@ export class MyStorageService implements FileStorageServiceInterface {
 }
 ```
 
-## 2. How to Integrate a New Storage Service
+### 2. How to Integrate a New Storage Service
 
 To integrate a new storage service into the `FileModule`, follow these steps:
 
@@ -355,7 +373,7 @@ FileModule.forRoot({
 //...
 ```
 
-## 3. How to Integrate with Multiple Storage Services
+### 3. How to Integrate with Multiple Storage Services
 
 Repeat the previous step but define a different key for the storage service.
 
@@ -388,7 +406,7 @@ this.fileService.push({
 // ... 
 ```
 
-## 4. How to create a new File Entity
+### 4. How to create a new File Entity
 
 To create a new entity, follow these steps:
 
@@ -420,7 +438,7 @@ FileModule.forRootAsync({
 // ...
 ```
 
-# Reference
+## Reference
 
 For detailed API documentation, please refer to our
 [API Reference](https://www.rockets.tools/reference/rockets/nestjs-file/README).
@@ -428,9 +446,9 @@ This comprehensive guide provides in-depth information about all available
 methods, interfaces, and configurations for the `@concepta/nestjs-file`
 package.
 
-# Explanation
+## Explanation
 
-## Advantages of a Generic File Module
+### Advantages of a Generic File Module
 
 The `@concepta/nestjs-file` module offers a generic, flexible approach to file
 handling in NestJS applications. This design provides several key advantages:
@@ -459,7 +477,7 @@ handling in NestJS applications. This design provides several key advantages:
    operations in unit tests, allowing for more comprehensive and isolated
    testing of your application logic.
 
-## Multiple Storage Services
+### Multiple Storage Services
 
 Supporting multiple storage services within the same module offers several
 benefits:
@@ -480,7 +498,7 @@ benefits:
    models. By supporting multiple services, you can optimize costs by choosing
    the most cost-effective solution for each type of data or usage pattern.
 
-## Ease of Creating New File Module Structures
+### Ease of Creating New File Module Structures
 
 The `@concepta/nestjs-file` module is designed with extensibility in mind,
 making it straightforward to create new file module structures:
