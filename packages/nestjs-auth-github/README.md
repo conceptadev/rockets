@@ -10,18 +10,15 @@ Authenticate requests using GitHub OAuth2
 [![GH Contrib](https://img.shields.io/github/contributors/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets/graphs/contributors)
 [![NestJS Dep](https://img.shields.io/github/package-json/dependency-version/conceptadev/rockets/@nestjs/common?label=NestJS&logo=nestjs&filename=packages%2Fnestjs-core%2Fpackage.json)](https://www.npmjs.com/package/@nestjs/common)
 
-# Table of Contents
+## Table of Contents
 
 1. [Tutorials](#tutorials)
    - [Introduction](#introduction)
    - [Getting Started with GitHub Authentication](#getting-started-with-github-authentication)
-     - [Step 1: Create User Entity](#step-1-create-user-entity)
-     - [Step 2: Create Federated Entity](#step-2-create-federated-entity)
-     - [Step 3: Implement FederatedUserLookupServiceInterface](#step-3-implement-federateduserlookupserviceinterface)
-     - [Step 4: Implement FederatedUserMutateServiceInterface](#step-4-implement-federatedusermutateserviceinterface)
-     - [Step 5: Implement IssueTokenServiceInterface](#step-5-implement-issuetokenserviceinterface)
-     - [Step 6: Environment Variables](#step-6-environment-variables)
-     - [Step 7: Configure the Module](#step-7-configure-the-module)
+     - [Step 1: Associate User Entity to Federated Entity](#step-1-associate-user-entity-to-federated-entity)
+     - [Step 2: Associate Federated Entity to User Entity](#step-2-associate-federated-entity-to-user-entity)
+     - [Step 3: Environment Variables](#step-3-environment-variables)
+     - [Step 4: Configure the Module](#step-4-configure-the-module)
 2. [Testing the GitHub Authentication Flow](#testing-the-github-authentication-flow)
 3. [How-To Guides](#how-to-guides)
    - [Customizing the Issue Token Service](#customizing-the-issue-token-service)
@@ -36,18 +33,29 @@ Authenticate requests using GitHub OAuth2
    - [Integration with Federated Services](#integration-with-federated-services)
    - [Module Options Responsibilities](#module-options-responsibilities)
 
-# Tutorials
+## Tutorials
 
-## Introduction
+### Introduction
 
 Before we begin, you'll need to set up a GitHub OAuth App to obtain the
 necessary credentials. For a detailed guide on creating a GitHub OAuth App
 and obtaining your Client ID and Client Secret, please refer to [GitHub's
 official documentation](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app).
 
-## Getting Started with GitHub Authentication
+### Getting Started with GitHub Authentication
 
-### Step 1: Create User Entity
+**Prerequisite:** Github module has a dependency on
+`@concepta/nestjs-federated`. Ensure you have implemented the `FederatedModule`
+before proceeding. Refer to the [Federated API Documentation](https://www.rockets.tools/reference/rockets/nestjs-federated/README)
+for more details.
+
+#### Installation
+
+To get started, install the `AuthGithubModule` package:
+
+`yarn add @concepta/nestjs-auth-github`
+
+### Step 1: Associate User Entity to Federated Entity
 
 First, let's create the `UserEntity`:
 
@@ -68,9 +76,9 @@ export class UserEntity {
 }
 ```
 
-### Step 2: Create Federated Entity
+### Step 2: Associate Federated Entity to User Entity
 
-Next, create the `FederatedEntity`:
+Next, associate the `UserEntity` to the `FederatedEntity`:
 
 ```ts
 import { Entity, ManyToOne } from 'typeorm';
@@ -84,97 +92,7 @@ export class FederatedEntity extends FederatedSqliteEntity {
 }
 ```
 
-### Step 3: Implement FederatedUserLookupServiceInterface
-
-Create a service that implements `FederatedUserLookupServiceInterface`:
-
-```ts
-// user.mock.ts
-export const mockUser = {
-  id: 'abc',
-  email: 'me@dispostable.com',
-  username: 'me@dispostable.com',
-}
-```
-
-```ts
-// user-lookup.service.ts
-import { Injectable } from '@nestjs/common';
-import { ReferenceEmail } from '@concepta/ts-core';
-import { FederatedUserLookupServiceInterface } from '@concepta/nestjs-federated';
-import { mockUser } from './user.mock';
-
-
-@Injectable()
-export class UserLookupServiceFixture implements FederatedUserLookupServiceInterface {
-  async byId(id: string): ReturnType<FederatedUserLookupServiceInterface['byId']> {
-    if (id === mockUser.id) {
-      return mockUser;
-    } else {
-      throw new Error();
-    }
-  }
-
-  async byEmail(email: ReferenceEmail): ReturnType<FederatedUserLookupServiceInterface['byEmail']> {
-    return email === mockUser.email ? mockUser : null;
-  }
-}
-```
-
-### Step 4: Implement FederatedUserMutateServiceInterface
-
-Create a service that implements `FederatedUserMutateServiceInterface`:
-
-```ts
-// user-mutate.service.ts
-import { FederatedCredentialsInterface, FederatedUserMutateServiceInterface } from '@concepta/nestjs-federated';
-import { FederatedUserMutateInterface } from '@concepta/nestjs-federated/dist/interfaces/federated-user-mutate.interface';
-import { Injectable } from '@nestjs/common';
-import { mockUser } from './user.mock';
-
-@Injectable()
-export class UserMutateServiceFixture implements FederatedUserMutateServiceInterface {
-  async create(_object: FederatedUserMutateInterface): Promise<FederatedCredentialsInterface> {
-    return mockUser;
-  }
-}
-```
-
-### Step 5: Implement IssueTokenServiceInterface
-
-Create a service that implements `IssueTokenServiceInterface`:
-
-```ts
-// issue-token.service.ts
-import { JwtSignOptions } from '@nestjs/jwt';
-import { AuthenticationResponseInterface } from '@concepta/ts-common';
-import { IssueTokenServiceInterface } from '@concepta/nestjs-authentication';
-
-export class GitHubIssueTokenService implements IssueTokenServiceInterface {
-  async responsePayload(_id: string): Promise<AuthenticationResponseInterface> {
-    return {
-      accessToken: 'my_access_token',
-      refreshToken: 'my_refresh_token',
-    };
-  }
-
-  async accessToken(
-    _payload: string | object | Buffer,
-    _options?: JwtSignOptions | undefined,
-  ): Promise<string> {
-    return 'my_access_token';
-  }
-
-  async refreshToken(
-    _payload: string | object | Buffer,
-    _options?: JwtSignOptions | undefined,
-  ): Promise<string> {
-    return 'my_refresh_token';
-  }
-}
-```
-
-### Step 6: Environment Variables
+### Step 3: Environment Variables
 
 `AuthGithubModule` will automatically look for predefined environment
 variables, to keep sensitive information secure, use environment variables for
@@ -209,7 +127,7 @@ the `@nestjs/config` package:
    export class AppModule {}
    ```
 
-### Step 7: Configure the Module
+### Step 4: Configure the Module
 
 Finally, set up the module configuration:
 
@@ -447,7 +365,8 @@ AuthGithubModule.forRoot({
 
 If you need to customize, how to get the user information, or how to create
 the user, you will need to update the federated options. Please refer for
-the `nestjs-federated` documentation.
+the [Federated API Documentation](https://www.rockets.tools/reference/rockets/nestjs-federated/README)
+documentation.
 
 ## Reference
 

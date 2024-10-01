@@ -16,6 +16,7 @@ export { AuthAppleStrategy } from './auth-apple.strategy';
 // interfaces
 export { AuthAppleProfileInterface } from './interfaces/auth-apple-profile.interface';
 export { AuthAppleCredentialsInterface } from './interfaces/auth-apple-credentials.interface';
+export { AuthAppleServiceInterface } from './interfaces/auth-apple-service.interface';
 
 export {
   AuthAppleGuard,
