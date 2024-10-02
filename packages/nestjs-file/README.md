@@ -13,20 +13,20 @@ Manage files for several components using one module.
 ## Table of Contents
 
 1. [Tutorial](#tutorial)
-   1.1. [Integrating AWS with FileModule in NestJS](#integrating-aws-with-filemodule-in-nestjs)
+   1. [Integrating AWS with FileModule in NestJS](#integrating-aws-with-filemodule-in-nestjs)
       - [Step 1: Install Required Packages](#step-1-install-required-packages)
       - [Step 2: Configure AWS](#step-2-configure-aws)
       - [Step 3: Create AWS Storage Service](#step-3-create-aws-storage-service)
-2. [How to Guide](#how-to-guide)
-   2.1. [How to Create a New Storage Service](#1-how-to-create-a-new-storage-service)
-   2.2. [How to Integrate a New Storage Service](#2-how-to-integrate-a-new-storage-service)
-   2.3. [How to Integrate with Multiple Storage Services](#3-how-to-integrate-with-multiple-storage-services)
-   2.4. [How to create a new File Entity](#4-how-to-create-a-new-file-entity)
-3. [Reference](#reference)
-4. [Explanation](#explanation)
-   4.1. [Advantages of a Generic File Module](#advantages-of-a-generic-file-module)
-   4.2. [Multiple Storage Services](#multiple-storage-services)
-   4.3. [Ease of Creating New File Module Structures](#ease-of-creating-new-file-module-structures)
+1. [How to Guide](#how-to-guide)
+   1. [How to Create a New Storage Service](#1-how-to-create-a-new-storage-service)
+   1. [How to Integrate a New Storage Service](#2-how-to-integrate-a-new-storage-service)
+   1. [How to Integrate with Multiple Storage Services](#3-how-to-integrate-with-multiple-storage-services)
+   1. [How to create a new File Entity](#4-how-to-create-a-new-file-entity)
+1. [Reference](#reference)
+1. [Explanation](#explanation)
+   1. [Advantages of a Generic File Module](#advantages-of-a-generic-file-module)
+   1. [Multiple Storage Services](#multiple-storage-services)
+   1. [Ease of Creating New File Module Structures](#ease-of-creating-new-file-module-structures)
 
 ## Tutorial
 
@@ -323,10 +323,10 @@ To create a new storage service, you need to implement the
 `FileStorageServiceInterface`. Here's a step-by-step guide:
 
 1. Create a new file for your storage service (e.g., `my-storage.service.ts`).
-2. Import the necessary interfaces and implement the
+1. Import the necessary interfaces and implement the
 `FileStorageServiceInterface`.
-3. Implement the required methods: `getUploadUrl` and `getDownloadUrl`.
-4. Define the key for the storage service.
+1. Implement the required methods: `getUploadUrl` and `getDownloadUrl`.
+1. Define the key for the storage service.
 
 Here's an example of a custom storage service:
 
@@ -359,7 +359,7 @@ export class MyStorageService implements FileStorageServiceInterface {
 To integrate a new storage service into the `FileModule`, follow these steps:
 
 1. Import the new storage service module into your `AppModule`.
-2. Configure the `FileModule` with the new storage service.
+1. Configure the `FileModule` with the new storage service.
 
 Here's an example of how to integrate the `MyStorageService` into the
 `FileModule`:
@@ -411,9 +411,9 @@ this.fileService.push({
 To create a new entity, follow these steps:
 
 1. Create a new file for your entity (e.g., `my-entity.entity.ts`).
-2. Extend the `FilePostgresEntity` or `FileMongoEntity` class and add your
+1. Extend the `FilePostgresEntity` or `FileMongoEntity` class and add your
 custom fields.
-3. Register the new entity in the `FileModule`.
+1. Register the new entity in the `FileModule`.
 
 Here's an example of a custom entity:
 
@@ -458,22 +458,22 @@ handling in NestJS applications. This design provides several key advantages:
    separation of concerns simplifies application logic and improves
    maintainability.
 
-2. **Flexibility**: The module's design allows for easy integration with
+1. **Flexibility**: The module's design allows for easy integration with
    various storage services. Whether using local storage, cloud services like
    AWS S3, Google Cloud Storage, or any custom solution, the module can
    accommodate your needs.
 
-3. **Consistency**: With a standardized interface for file operations, your
+1. **Consistency**: With a standardized interface for file operations, your
    application maintains consistent behavior across different storage services.
    This consistency simplifies development and reduces errors when switching
    between or combining different storage solutions.
 
-4. **Scalability**: As your application grows, you can easily add new storage
+1. **Scalability**: As your application grows, you can easily add new storage
    services or switch between them without significant changes to your
    application code. This scalability is crucial for applications that may need
    to adapt to changing requirements or infrastructure.
 
-5. **Testability**: The abstraction layer makes it easier to mock file
+1. **Testability**: The abstraction layer makes it easier to mock file
    operations in unit tests, allowing for more comprehensive and isolated
    testing of your application logic.
 
@@ -487,14 +487,14 @@ benefits:
    most appropriate storage solution for each use case within a single
    application.
 
-2. **Migration**: If you need to migrate from one storage service to another,
+1. **Migration**: If you need to migrate from one storage service to another,
    you can do so gradually by running multiple services in parallel during the
    transition period.
 
-3. **Redundancy**: For critical applications, you can implement redundancy by
+1. **Redundancy**: For critical applications, you can implement redundancy by
    storing files across multiple services simultaneously.
 
-4. **Cost Optimization**: Different storage services have different pricing
+1. **Cost Optimization**: Different storage services have different pricing
    models. By supporting multiple services, you can optimize costs by choosing
    the most cost-effective solution for each type of data or usage pattern.
 
@@ -507,20 +507,20 @@ making it straightforward to create new file module structures:
    `FileStorageServiceInterface`, you can easily create new storage services
    that seamlessly integrate with the existing module structure.
 
-2. **Minimal Boilerplate**: The module provides base classes and interfaces
+1. **Minimal Boilerplate**: The module provides base classes and interfaces
    that handle much of the common functionality, allowing you to focus on the
    specific implementation details of your new storage service.
 
-3. **Plug-and-Play**: Once a new storage service is implemented, it can be
+1. **Plug-and-Play**: Once a new storage service is implemented, it can be
    easily plugged into the existing module configuration without requiring
    changes to other parts of your application.
 
-4. **Customizable Entities**: The module allows for easy creation and
+1. **Customizable Entities**: The module allows for easy creation and
    registration of custom file entities, enabling you to tailor the data model
    to your specific needs while still leveraging the module's core
    functionality.
 
-5. **Dependency Injection**: Leveraging NestJS's dependency injection system,
+1. **Dependency Injection**: Leveraging NestJS's dependency injection system,
    new services and entities can be easily integrated and made available
    throughout your application.
 
