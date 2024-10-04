@@ -20,7 +20,7 @@ Manage reports for several components using one module.
    - [Step 5: Create the Controller](#step-5-create-the-controller)
    - [Step 6: Register the Module](#step-6-register-the-module)
    - [Step 7: Setup AppModule](#step-7-setup-appmodule)
-   - [Testing Dashboard Report Generation with cURL](#testing-dashboard-report-generation-with-curl)
+   - [Testing User Report Generation with cURL](#testing-user-report-generation-with-curl)
    - [Conclusion](#conclusion)
 2. [How to Guide for Reports](#how-to-guide-for-reports)
    - [1. How to Create a New Report Generator Service](#1-how-to-create-a-new-report-generator-service)
@@ -41,7 +41,7 @@ Manage reports for several components using one module.
 
 This tutorial will guide you through the steps to implement and use the
 `nestjs-report` module in your NestJS project. We will use the
-`dashboard-report` module as an example.
+`user-report` module as an example.
 
 ### Step 1: Install Dependencies
 
@@ -58,13 +58,13 @@ Create a Data Transfer Object (DTO) for the report. This will define the
 structure of the data that will be sent to and from the API.
 
 ```typescript
-// dto/dashboard.dto.ts
+// dto/user-report.dto.ts
 import { ReportCreateDto } from '@concepta/nestjs-report';
 import { PickType } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 
 @Exclude()
-export class DashboardCreateDto extends PickType(ReportCreateDto, [
+export class UserReportCreateDto extends PickType(ReportCreateDto, [
   'name',
 ] as const) {}
 ```
@@ -75,9 +75,9 @@ Define any constants that will be used throughout the module.
 For example, you might have constants for service keys, URLs, etc.
 
 ```typescript
-// dashboard-report.constants.ts
+// user-report.constants.ts
 export const AWS_KEY_FIXTURE = 'my-aws';
-export const REPORT_KEY_DASHBOARD_REPORT = 'dashboard-report';
+export const REPORT_KEY_USER_REPORT = 'user-report';
 export const REPORT_SHORT_DELAY_KEY_FIXTURE = 'my-report-short-delay';
 export const DOWNLOAD_URL_FIXTURE = 'https://aws-storage.com/downloaded';
 export const UPLOAD_URL_FIXTURE = 'https://aws-storage.com/upload';
@@ -100,13 +100,13 @@ import { Inject, Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { promises as fs } from 'fs';
 import { ReportEntity } from '../entities/report.entity';
-import { REPORT_KEY_DASHBOARD_REPORT } from './dashboard-report.constants';
+import { REPORT_KEY_USER_REPORT } from './user-report.constants';
 
 @Injectable()
-export class DashboardReportGeneratorService
+export class UserReportGeneratorService
   implements ReportGeneratorServiceInterface
 {
-  readonly KEY: string = REPORT_KEY_DASHBOARD_REPORT;
+  readonly KEY: string = REPORT_KEY_USER_REPORT;
   readonly generateTimeout: number = 60000;
 
   constructor(
@@ -193,7 +193,7 @@ export class DashboardReportGeneratorService
 
 ### Step 5: Create the Controller
 
-Create a controller to handle HTTP requests related to the dashboard reports.
+Create a controller to handle HTTP requests related to the user reports.
 This controller will use the `ReportService` to create and fetch reports.
 
 ```typescript
@@ -201,23 +201,23 @@ import { ReportService } from '@concepta/nestjs-report';
 import { ReportInterface, ReportStatusEnum } from '@concepta/ts-common';
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { REPORT_KEY_DASHBOARD_REPORT } from './dashboard-report.constants';
-import { DashboardCreateDto } from './dto/dashboard.dto';
+import { REPORT_KEY_USER_REPORT } from './user-report.constants';
+import { UserReportCreateDto } from './dto/user-report.dto';
 
-@Controller('dashboard-report')
-@ApiTags('dashboard-report')
-export class DashboardController {
+@Controller('user-report')
+@ApiTags('user-report')
+export class UserController {
   constructor(private reportService: ReportService) {}
 
   @Post('')
   @ApiResponse({
     description: 'Create a report and return upload and download url',
   })
-  async create(@Body() dto: DashboardCreateDto): Promise<ReportInterface> {
+  async create(@Body() dto: UserReportCreateDto): Promise<ReportInterface> {
     return this.reportService.generate({
       name: dto.name,
       status: ReportStatusEnum.Processing,
-      serviceKey: REPORT_KEY_DASHBOARD_REPORT,
+      serviceKey: REPORT_KEY_USER_REPORT,
     });
   }
 
@@ -235,26 +235,26 @@ export class DashboardController {
 
 ### Step 6: Register the Module
 
-Finally, register the `dashboard-report` module in your NestJS application.
+Finally, register the `user-report` module in your NestJS application.
 This step typically involves creating a module file and importing necessary
 services and controllers.
 
 ```typescript
 import { Module } from '@nestjs/common';
-import { DashboardController } from './dashboard-report.controller';
-import { DashboardReportGeneratorService } from './dashboard-report-generator.service';
+import { UserController } from './user-report.controller';
+import { UserReportGeneratorService } from './user-report-generator.service';
 import { ReportService } from '@concepta/nestjs-report';
 
 @Module({
-  controllers: [DashboardController],
-  providers: [DashboardReportGeneratorService, ReportService],
+  controllers: [UserController],
+  providers: [UserReportGeneratorService, ReportService],
 })
-export class DashboardReportModule {}
+export class UserReportModule {}
 ```
 
 ### Step 7: Setup `AppModule`
 
-Update your `AppModule` to include the `DashboardReportModule` and configure
+Update your `AppModule` to include the `UserReportModule` and configure
 the `ReportModule` and `FileModule` as dependencies.
 
 ```typescript
@@ -266,8 +266,8 @@ import { ReportModule } from '@concepta/nestjs-report';
 import { awsConfig } from './config/aws.config';
 import { AwsModule } from './aws/aws.module';
 import { AwsStorageService } from './aws/aws-storage.service';
-import { DashboardReportModule } from './dashboard-report/dashboard-report.module';
-import { DashboardReportGeneratorService } from './dashboard-report/dashboard-report-generator.service';
+import { UserReportModule } from './user-report/user-report.module';
+import { UserReportGeneratorService } from './user-report/user-report-generator.service';
 import { FileEntity } from './entities/file.entity';
 import { ReportEntity } from './entities/report.entity';
 
@@ -296,10 +296,10 @@ import { ReportEntity } from './entities/report.entity';
       },
     }),
     ReportModule.forRootAsync({
-      imports: [DashboardReportModule],
-      inject: [DashboardReportGeneratorService],
+      imports: [UserReportModule],
+      inject: [UserReportGeneratorService],
       useFactory: (
-        userReportGeneratorService: DashboardReportGeneratorService,
+        userReportGeneratorService: UserReportGeneratorService,
       ) => ({
         reportGeneratorServices: [userReportGeneratorService],
       }),
@@ -314,17 +314,17 @@ import { ReportEntity } from './entities/report.entity';
 export class AppModule {}
 ```
 
-### Testing Dashboard Report Generation with cURL
+### Testing User Report Generation with cURL
 
-To test the dashboard report generation functionality using cURL,
+To test the user report generation functionality using cURL,
 follow these steps:
 
-- Create a new dashboard report:
+- Create a new user report:
 
    ```bash
-   curl -X POST http://localhost:3000/dashboard-report \
+   curl -X POST http://localhost:3000/user-report \
    -H "Content-Type: application/json" \
-   -d '{"name": "Test Dashboard Report"}'
+   -d '{"name": "Test User Report"}'
    ```
 
    This will return a JSON response with the created report details,
@@ -333,7 +333,7 @@ follow these steps:
 - Check the status of the report using the ID returned from step 1:
 
   ```bash
-  curl -X GET http://localhost:3000/dashboard-report/{reportId}
+  curl -X GET http://localhost:3000/user-report/{reportId}
   ```
 
   Replace `{reportId}` with the actual ID returned from step 1.
@@ -346,7 +346,7 @@ follow these steps:
 Once complete, the response will include the file information with
 download URL.
 
-These steps allow you to test the dashboard report generation process from
+These steps allow you to test the user report generation process from
 creation to retrieval using cURL commands.
 
 ### Conclusion
