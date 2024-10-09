@@ -677,9 +677,13 @@ __metadata:
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/core": "npm:^10.4.1"
+    "@nestjs/swagger": "npm:^7.4.0"
     "@nestjs/testing": "npm:^10.4.1"
+    "@types/supertest": "npm:^2.0.16"
     accesscontrol: "npm:^2.2.1"
     jest-mock-extended: "npm:^2.0.9"
+    rxjs: "npm:^7.8.1"
+    supertest: "npm:^6.3.4"
   languageName: unknown
   linkType: soft
 
