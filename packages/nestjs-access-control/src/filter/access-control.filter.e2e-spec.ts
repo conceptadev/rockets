@@ -3,11 +3,10 @@ import {
   ExecutionContext,
   Get,
   INestApplication,
-  UseInterceptors,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Test, TestingModule } from '@nestjs/testing';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Test, TestingModule } from '@nestjs/testing';
 import { AccessControl } from 'accesscontrol';
 import supertest from 'supertest';
 import { AccessControlModule } from '../access-control.module';
@@ -16,7 +15,6 @@ import { AccessControlReadOne } from '../decorators/access-control-read-one.deco
 import { AccessControlOptionsInterface } from '../interfaces/access-control-options.interface';
 import { AccessControlServiceInterface } from '../interfaces/access-control-service.interface';
 import { AccessControlService } from '../services/access-control.service';
-import { AccessControlFilter } from './access-control.filter';
 
 describe('AccessControlFilter', () => {
   const resourceGetAll = 'resource_get_all';
@@ -208,15 +206,18 @@ describe('AccessControlFilter', () => {
     await supertest(app.getHttpServer())
       .get('/users')
       .expect(200)
-      .expect([{
-        firstName: USER_1.firstName,
-        lastName: USER_1.lastName,
-        dob: USER_1.dob,
-      }, {
-        firstName: USER_2.firstName,
-        lastName: USER_2.lastName,
-        dob: USER_2.dob,
-      }]);
+      .expect([
+        {
+          firstName: USER_1.firstName,
+          lastName: USER_1.lastName,
+          dob: USER_1.dob,
+        },
+        {
+          firstName: USER_2.firstName,
+          lastName: USER_2.lastName,
+          dob: USER_2.dob,
+        },
+      ]);
   });
 
   it('should all objects when second role has permission', async () => {
