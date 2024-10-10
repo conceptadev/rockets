@@ -40,7 +40,6 @@ describe('AccessControlFilter', () => {
 
   @ApiTags('users')
   @Controller('users')
-  @UseInterceptors(AccessControlFilter)
   class UserController {
     @Get('')
     @AccessControlReadOne(resourceGetAll)
@@ -78,7 +77,7 @@ describe('AccessControlFilter', () => {
     reflector = new Reflector();
     const module: TestingModule = await Test.createTestingModule({
       imports: [
-        AccessControlModule.register({
+        AccessControlModule.forRoot({
           service: testService,
           settings: {
             rules: rules,
@@ -87,7 +86,6 @@ describe('AccessControlFilter', () => {
       ],
       controllers: [UserController],
       providers: [
-        AccessControlFilter,
         { provide: Reflector, useValue: reflector },
         {
           provide: ACCESS_CONTROL_MODULE_SETTINGS_TOKEN,
@@ -108,7 +106,7 @@ describe('AccessControlFilter', () => {
     await app.close();
   });
 
-  it('should return filtered data based on roles', async () => {
+  it('should return filtered data combined', async () => {
     const rules = new AccessControl();
     rules.grant('role2').readAny(resourceGetAll, ['phone']);
     rules.grant('role1').readAny(resourceGetAll, ['firstName', 'lastName']);
@@ -131,7 +129,7 @@ describe('AccessControlFilter', () => {
       ]);
   });
 
-  it('should return filtered data based on roles where any takes priority', async () => {
+  it('should return filtered data based any possession as priority', async () => {
     const rules = new AccessControl();
     rules.grant('manager').readAny(resourceGetOne, ['firstName', 'lastName']);
     rules
@@ -145,12 +143,12 @@ describe('AccessControlFilter', () => {
     });
   });
 
-  it('should return filtered data based on roles where combine attributes', async () => {
+  it('should return filtered data based on combine attributes', async () => {
     const rules = new AccessControl();
-    rules.grant('manager').readAny(resourceGetOne, ['firstName', 'lastName']);
+    rules.grant('manager').readOwn(resourceGetOne, ['firstName', 'lastName']);
     rules
       .grant('user')
-      .readAny(resourceGetOne, ['firstName', 'lastName', 'phone']);
+      .readOwn(resourceGetOne, ['firstName', 'lastName', 'phone']);
 
     await createTestModule(rules, ['manager', 'user']);
     await supertest(app.getHttpServer()).get('/users/1').expect(200).expect({
@@ -160,7 +158,7 @@ describe('AccessControlFilter', () => {
     });
   });
 
-  it('should return filtered data based on roles', async () => {
+  it('should return filtered data based on one role', async () => {
     const rules = new AccessControl();
     rules.grant('role1').read(resourceGetOne, ['phone']);
 
@@ -170,7 +168,7 @@ describe('AccessControlFilter', () => {
     });
   });
 
-  it('should return filtered data based on roles where any takes priority', async () => {
+  it('should return filtered data based on one role as Any', async () => {
     const rules = new AccessControl();
     rules.grant('manager').readAny(resourceGetOne);
 
@@ -204,13 +202,21 @@ describe('AccessControlFilter', () => {
   it('should return empty objects when no fields are allowed', async () => {
     const rules = new AccessControl();
     rules.grant('role1').readAny(resourceGetAll, []);
-    rules.grant('role1').readOwn(resourceGetAll, ['*']);
+    rules.grant('role1').readOwn(resourceGetAll, ['*', '!phone']);
 
     await createTestModule(rules, ['role1']);
     await supertest(app.getHttpServer())
       .get('/users')
       .expect(200)
-      .expect([USER_1, USER_2]);
+      .expect([{
+        firstName: USER_1.firstName,
+        lastName: USER_1.lastName,
+        dob: USER_1.dob,
+      }, {
+        firstName: USER_2.firstName,
+        lastName: USER_2.lastName,
+        dob: USER_2.dob,
+      }]);
   });
 
   it('should all objects when second role has permission', async () => {
