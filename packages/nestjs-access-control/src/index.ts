@@ -1,4 +1,5 @@
 export * from './access-control.guard';
+export { AccessControlFilter } from './filter/access-control.filter';
 export * from './access-control.module';
 export { AccessControlContext } from './access-control.context';
 export { AccessControlService } from './services/access-control.service';
