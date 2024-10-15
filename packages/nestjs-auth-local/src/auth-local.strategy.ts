@@ -1,11 +1,6 @@
 import { Strategy } from 'passport-local';
 import { validateOrReject } from 'class-validator';
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ReferenceIdInterface, ReferenceUsername } from '@concepta/ts-core';
 import { PassportStrategyFactory } from '@concepta/nestjs-authentication';
 
@@ -17,6 +12,8 @@ import {
 
 import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.interface';
 import { AuthLocalValidateUserServiceInterface } from './interfaces/auth-local-validate-user-service.interface';
+import { InvalidCredentialsException } from './exceptions/invalid-credentials.exception';
+import { InvalidLoginDataException } from './exceptions/invalid-login-data.exception';
 
 /**
  * Define the Local strategy using passport.
@@ -64,7 +61,9 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
     try {
       await validateOrReject(dto);
     } catch (e) {
-      throw new BadRequestException(e);
+      throw new InvalidLoginDataException({
+        originalError: e,
+      });
     }
 
     let validatedUser: ReferenceIdInterface;
@@ -81,7 +80,9 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
       }
     } catch (e) {
       // TODO: maybe log original?
-      throw new UnauthorizedException();
+      throw new InvalidCredentialsException({
+        originalError: e,
+      });
     }
 
     return validatedUser;
