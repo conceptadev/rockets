@@ -132,9 +132,9 @@ export class UserPasswordService implements UserPasswordServiceInterface {
     }
 
     // throw an exception by default
-    throw new UserNotFoundException(
-      'Impossible to update password if user is not found',
-    );
+    throw new UserNotFoundException({
+      message: 'Impossible to update password if user is not found',
+    });
   }
 
   protected async validateCurrent(

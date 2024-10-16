@@ -1,9 +1,14 @@
-import { ExceptionInterface } from '@concepta/ts-core';
+import {
+  RuntimeException,
+  RuntimeExceptionOptions,
+} from '@concepta/nestjs-exception';
 
-export class OrgNotFoundException extends Error implements ExceptionInterface {
-  errorCode = 'ORG_NOT_FOUND_ERROR';
-
-  constructor(message = 'The org was not found') {
-    super(message);
+export class OrgNotFoundException extends RuntimeException {
+  constructor(options?: RuntimeExceptionOptions) {
+    super({
+      message: 'The org was not found',
+      ...options,
+    });
+    this.errorCode = 'ORG_NOT_FOUND_ERROR';
   }
 }

@@ -1,9 +1,16 @@
-import { ExceptionInterface } from '@concepta/ts-core';
+import {
+  RuntimeException,
+  RuntimeExceptionOptions,
+} from '@concepta/nestjs-exception';
+import { HttpStatus } from '@nestjs/common';
 
-export class UserNotFoundException extends Error implements ExceptionInterface {
-  errorCode = 'USER_NOT_FOUND_ERROR';
-
-  constructor(message = 'The user was not found') {
-    super(message);
+export class UserNotFoundException extends RuntimeException {
+  constructor(options?: RuntimeExceptionOptions) {
+    super({
+      message: 'The user was not found',
+      httpStatus: HttpStatus.NOT_FOUND,
+      ...options,
+    });
+    this.errorCode = 'USER_NOT_FOUND_ERROR';
   }
 }

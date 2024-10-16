@@ -1,9 +1,10 @@
-import { ExceptionInterface } from '@concepta/ts-core';
+import { RuntimeException } from '@concepta/nestjs-exception';
 
-export class OrgMemberException extends Error implements ExceptionInterface {
-  errorCode = 'ORG_MEMBER_ERROR';
-
+export class OrgMemberException extends RuntimeException {
   constructor(message: string) {
-    super(message);
+    super({
+      message,
+    });
+    this.errorCode = 'ORG_MEMBER_ERROR';
   }
 }
