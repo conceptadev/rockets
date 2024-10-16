@@ -816,6 +816,7 @@ __metadata:
     "@concepta/nestjs-auth-jwt": "npm:^5.0.0-alpha.4"
     "@concepta/nestjs-authentication": "npm:^5.0.0-alpha.4"
     "@concepta/nestjs-common": "npm:^5.0.0-alpha.4"
+    "@concepta/nestjs-exception": "npm:^5.0.0-alpha.4"
     "@concepta/nestjs-jwt": "npm:^5.0.0-alpha.4"
     "@concepta/nestjs-password": "npm:^5.0.0-alpha.4"
     "@concepta/ts-common": "npm:^5.0.0-alpha.4"
@@ -1177,6 +1178,7 @@ __metadata:
   resolution: "@concepta/nestjs-logger-sentry@workspace:packages/nestjs-logger-sentry"
   dependencies:
     "@concepta/nestjs-common": "npm:^5.0.0-alpha.4"
+    "@concepta/nestjs-exception": "npm:^5.0.0-alpha.4"
     "@concepta/nestjs-logger": "npm:^5.0.0-alpha.4"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
@@ -1269,6 +1271,7 @@ __metadata:
   resolution: "@concepta/nestjs-password@workspace:packages/nestjs-password"
   dependencies:
     "@concepta/nestjs-common": "npm:^5.0.0-alpha.4"
+    "@concepta/nestjs-exception": "npm:^5.0.0-alpha.4"
     "@concepta/ts-common": "npm:^5.0.0-alpha.4"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
