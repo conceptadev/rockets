@@ -4,8 +4,8 @@ import { LoggerTransportInterface } from '@concepta/nestjs-logger';
 import { LoggerSentrySettingsInterface } from '../interfaces/logger-sentry-settings.interface';
 import { LOGGER_SENTRY_MODULE_SETTINGS_TOKEN } from '../config/logger-sentry.config';
 import { RuntimeException, mapHttpStatus } from '@concepta/nestjs-exception';
-import { Extras } from '@sentry/types';
 import { isObject } from 'class-validator';
+import { LoggerSentryExtrasInterface } from '../interfaces/logger-sentry-extras.interface';
 
 /**
  * The transport that implements {@link LoggerTransportInterface}
@@ -75,8 +75,8 @@ export class LoggerSentryTransport implements LoggerTransportInterface {
 
   private getExtras(
     exception?: Error | string | RuntimeException | HttpException,
-  ): Extras {
-    const extras: Extras = {};
+  ): LoggerSentryExtrasInterface {
+    const extras: LoggerSentryExtrasInterface = {};
     if (exception instanceof HttpException) {
       this.handleHttpException(exception, extras);
     } else if (exception instanceof RuntimeException) {
@@ -90,30 +90,40 @@ export class LoggerSentryTransport implements LoggerTransportInterface {
     return extras;
   }
 
-  private handleHttpException(exception: HttpException, extras: Extras): void {
+  private handleHttpException(
+    exception: HttpException,
+    extras: LoggerSentryExtrasInterface,
+  ): void {
     const res = exception.getResponse();
     extras.statusCode = exception.getStatus();
-    extras.errorCode = mapHttpStatus(extras.statusCode as number);
+    extras.errorCode = mapHttpStatus(extras.statusCode);
     extras.message = isObject(res) && 'message' in res ? res.message : res;
   }
 
   private handleRuntimeException(
     exception: RuntimeException,
-    extras: Extras,
+    extras: LoggerSentryExtrasInterface,
   ): void {
     extras.errorCode = exception?.errorCode;
     extras.statusCode = exception?.httpStatus;
     extras.message = exception?.message;
     extras.safeMessage = exception?.safeMessage;
+    extras.originalError = exception?.context?.originalError;
     extras.context = exception?.context;
   }
 
-  private handleError(exception: Error, extras: Extras): void {
+  private handleError(
+    exception: Error,
+    extras: LoggerSentryExtrasInterface,
+  ): void {
     extras.message = exception?.message;
     extras.originalError = exception?.stack || '';
   }
 
-  private handleStringException(exception: string, extras: Extras): void {
+  private handleStringException(
+    exception: string,
+    extras: LoggerSentryExtrasInterface,
+  ): void {
     extras.message = exception;
   }
 }

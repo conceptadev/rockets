@@ -12,6 +12,6 @@ export class CurrentPasswordRequiredException extends RuntimeException {
       ...options,
     });
 
-    this.errorCode = 'CURRENT_PASSWORD_REQUIRED_ERROR';
+    this.errorCode = 'PASSWORD_CURRENT_REQUIRED_ERROR';
   }
 }

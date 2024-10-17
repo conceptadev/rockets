@@ -187,7 +187,9 @@ describe('loggerSentryTransport', () => {
         statusCode: exception?.httpStatus,
         message: exception?.message,
         safeMessage: exception?.safeMessage,
+        originalError: exception?.context?.originalError,
         context: exception?.context,
+
       },
     });
   });

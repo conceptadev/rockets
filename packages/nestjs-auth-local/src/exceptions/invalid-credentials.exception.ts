@@ -12,6 +12,6 @@ export class InvalidCredentialsException extends RuntimeException {
       ...options,
     });
 
-    this.errorCode = 'INVALID_CREDENTIALS_ERROR';
+    this.errorCode = 'AUTH_LOCAL_INVALID_CREDENTIALS_ERROR';
   }
 }

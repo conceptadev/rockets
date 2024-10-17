@@ -13,6 +13,6 @@ export class InvalidLoginDataException extends RuntimeException {
       ...options,
     });
 
-    this.errorCode = 'INVALID_LOGIN_DATA_ERROR';
+    this.errorCode = 'AUTH_LOCAL_INVALID_LOGIN_DATA_ERROR';
   }
 }
