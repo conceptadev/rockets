@@ -81,10 +81,6 @@ export class LoggerSentryTransport implements LoggerTransportInterface {
       this.handleHttpException(exception, extras);
     } else if (exception instanceof RuntimeException) {
       this.handleRuntimeException(exception, extras);
-    } else if (exception instanceof Error) {
-      this.handleError(exception, extras);
-    } else if (typeof exception === 'string') {
-      this.handleStringException(exception, extras);
     }
 
     return extras;
@@ -108,22 +104,6 @@ export class LoggerSentryTransport implements LoggerTransportInterface {
     extras.statusCode = exception?.httpStatus;
     extras.message = exception?.message;
     extras.safeMessage = exception?.safeMessage;
-    extras.originalError = exception?.context?.originalError;
     extras.context = exception?.context;
-  }
-
-  private handleError(
-    exception: Error,
-    extras: LoggerSentryExtrasInterface,
-  ): void {
-    extras.message = exception?.message;
-    extras.originalError = exception?.stack || '';
-  }
-
-  private handleStringException(
-    exception: string,
-    extras: LoggerSentryExtrasInterface,
-  ): void {
-    extras.message = exception;
   }
 }

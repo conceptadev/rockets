@@ -6,5 +6,4 @@ export interface LoggerSentryExtrasInterface
   > {
   statusCode?: number;
   message?: string | unknown;
-  originalError?: Error | string;
 }
