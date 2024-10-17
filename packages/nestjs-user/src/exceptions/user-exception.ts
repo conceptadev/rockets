@@ -1,21 +1,14 @@
-import { ExceptionInterface, mapNonErrorToException } from '@concepta/ts-core';
-
+import { mapNonErrorToException } from '@concepta/ts-core';
+import { RuntimeException } from '@concepta/nestjs-exception';
 /**
  * Generic user exception.
  */
-export class UserException extends Error implements ExceptionInterface {
-  errorCode = 'USER_ERROR';
-
-  context: {
-    message: string;
-    originalError: Error;
-  };
-
+export class UserException extends RuntimeException {
   constructor(message: string, originalError?: unknown) {
-    super(message);
-    this.context = {
+    super({
       message,
       originalError: mapNonErrorToException(originalError),
-    };
+    });
+    this.errorCode = 'USER_ERROR';
   }
 }

@@ -16,6 +16,7 @@
     "@concepta/nestjs-common": "^5.0.0-alpha.4",
     "@concepta/nestjs-crud": "^5.0.0-alpha.4",
     "@concepta/nestjs-event": "^5.0.0-alpha.4",
+    "@concepta/nestjs-exception": "^5.0.0-alpha.4",
     "@concepta/nestjs-typeorm-ext": "^5.0.0-alpha.4",
     "@concepta/ts-common": "^5.0.0-alpha.4",
     "@concepta/ts-core": "^5.0.0-alpha.4",
