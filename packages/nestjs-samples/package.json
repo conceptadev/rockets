@@ -14,6 +14,7 @@
   "dependencies": {
     "@concepta/nestjs-auth-jwt": "^5.0.0-alpha.5",
     "@concepta/nestjs-auth-local": "^5.0.0-alpha.5",
+    "@concepta/nestjs-exception": "^5.0.0-alpha.5",
     "@concepta/nestjs-auth-refresh": "^5.0.0-alpha.5",
     "@concepta/nestjs-authentication": "^5.0.0-alpha.5",
     "@concepta/nestjs-crud": "^5.0.0-alpha.5",

@@ -80,9 +80,7 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
       }
     } catch (e) {
       // TODO: maybe log original?
-      throw new InvalidCredentialsException({
-        originalError: e,
-      });
+      throw new InvalidCredentialsException();
     }
 
     return validatedUser;

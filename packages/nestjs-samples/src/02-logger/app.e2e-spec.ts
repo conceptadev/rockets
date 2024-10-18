@@ -12,6 +12,8 @@ import { CreateOrderDto } from './order/dto/create-order.dto';
 // } from '@nestjs/platform-fastify';
 
 import { LoggerService } from '@concepta/nestjs-logger';
+import { HttpAdapterHost } from '@nestjs/core';
+import { ExceptionsFilter } from '@concepta/nestjs-exception';
 
 describe('AppController (e2e)', () => {
   describe('Express', () => {
@@ -24,6 +26,9 @@ describe('AppController (e2e)', () => {
       }).compile();
 
       app = moduleFixture.createNestApplication();
+      const exceptionsFilter = app.get(HttpAdapterHost);
+      app.useGlobalFilters(new ExceptionsFilter(exceptionsFilter));
+
       await app.init();
     });
 
