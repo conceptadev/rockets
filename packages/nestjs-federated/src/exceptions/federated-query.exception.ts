@@ -1,26 +1,25 @@
-import { format } from 'util';
-import { ExceptionInterface } from '@concepta/ts-core';
+import {
+  RuntimeException,
+  RuntimeExceptionOptions,
+} from '@concepta/nestjs-exception';
 
-export class FederatedQueryException
-  extends Error
-  implements ExceptionInterface
-{
-  errorCode = 'FEDERATED_QUERY_ERROR';
-
-  context: {
+export class FederatedQueryException extends RuntimeException {
+  context: RuntimeException['context'] & {
     entityName: string;
-    originalError: Error;
   };
 
-  constructor(
-    entityName: string,
-    originalError: Error,
-    message = 'Error while trying to do a query to federated',
-  ) {
-    super(format(message, entityName));
+  constructor(entityName: string, options?: RuntimeExceptionOptions) {
+    super({
+      message: 'Error while trying to do a query to federated',
+      messageParams: [entityName],
+      ...options,
+    });
+
     this.context = {
+      ...super.context,
       entityName,
-      originalError,
     };
+
+    this.errorCode = 'FEDERATED_QUERY_ERROR';
   }
 }

@@ -1,13 +1,11 @@
-import { format } from 'util';
-import { ReferenceId, ExceptionInterface } from '@concepta/ts-core';
+import { ReferenceId } from '@concepta/ts-core';
+import {
+  RuntimeException,
+  RuntimeExceptionOptions,
+} from '@concepta/nestjs-exception';
 
-export class ReferenceIdNoMatchException
-  extends Error
-  implements ExceptionInterface
-{
-  errorCode = 'REFERENCE_ID_NO_MATCH';
-
-  context: {
+export class ReferenceIdNoMatchException extends RuntimeException {
+  context: RuntimeException['context'] & {
     entityName: string;
     id: ReferenceId;
   };
@@ -15,10 +13,18 @@ export class ReferenceIdNoMatchException
   constructor(
     entityName: string,
     id: ReferenceId,
-    message = 'No match for %s reference id %s.',
+    options?: RuntimeExceptionOptions,
   ) {
-    super(format(message, entityName, id));
+    super({
+      message: 'No match for %s reference id %s.',
+      messageParams: [entityName, id],
+      ...options,
+    });
+
+    this.errorCode = 'REFERENCE_ID_NO_MATCH';
+
     this.context = {
+      ...super.context,
       entityName,
       id,
     };

@@ -1,33 +1,29 @@
-import { format } from 'util';
-import { ExceptionInterface, NotAnErrorException } from '@concepta/ts-core';
 import { EventInterface } from '../events/interfaces/event.interface';
+import {
+  RuntimeException,
+  RuntimeExceptionOptions,
+} from '@concepta/nestjs-exception';
 
 /**
  * Thrown when an error is caught when dispatching an {@link Event}.
  */
-export class EventDispatchException<P, R>
-  extends Error
-  implements ExceptionInterface
-{
-  errorCode = 'EVENT_DISPATCH_ERROR';
-
-  context: {
+export class EventDispatchException<P, R> extends RuntimeException {
+  context: RuntimeException['context'] & {
     event: EventInterface<P, R>;
-    originalError: Error;
   };
 
-  constructor(
-    event: EventInterface<P, R>,
-    originalError: unknown,
-    message = 'Error while trying to dispatch the event with key %s',
-  ) {
-    super(format(message, event.key));
+  constructor(event: EventInterface<P, R>, options?: RuntimeExceptionOptions) {
+    super({
+      message: 'Error while trying to dispatch the event with key %s',
+      messageParams: [event.key],
+      ...options,
+    });
+
     this.context = {
+      ...super.context,
       event,
-      originalError:
-        originalError instanceof Error
-          ? originalError
-          : new NotAnErrorException(originalError),
     };
+
+    this.errorCode = 'EVENT_DISPATCH_ERROR';
   }
 }
