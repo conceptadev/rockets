@@ -165,6 +165,7 @@ describe('loggerSentryTransport', () => {
           httpStatus: HttpStatus.BAD_REQUEST,
           ...options,
         });
+
         this.errorCode = 'INVALID_LOGIN_DATA_ERROR';
       }
     }

@@ -1,10 +1,15 @@
-import { RuntimeException } from '@concepta/nestjs-exception';
+import {
+  RuntimeException,
+  RuntimeExceptionOptions,
+} from '@concepta/nestjs-exception';
 
 export class AuthAppleInvalidIssuerException extends RuntimeException {
-  constructor(message = 'Apple token issuer is not valid.') {
+  constructor(options?: RuntimeExceptionOptions) {
     super({
-      safeMessage: message,
+      safeMessage: 'Apple token issuer is not valid.',
+      ...options,
     });
+
     this.errorCode = 'AUTH_APPLE_INVALID_ISSUER';
   }
 }

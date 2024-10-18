@@ -1,11 +1,15 @@
 import { HttpStatus } from '@nestjs/common';
-import { RuntimeException } from '@concepta/nestjs-exception';
+import {
+  RuntimeException,
+  RuntimeExceptionOptions,
+} from '@concepta/nestjs-exception';
 
 export class FileIdMissingException extends RuntimeException {
-  constructor(message = 'File id is missing.') {
+  constructor(options?: RuntimeExceptionOptions) {
     super({
-      message,
+      message: 'File id is missing.',
       httpStatus: HttpStatus.BAD_REQUEST,
+      ...options,
     });
 
     this.errorCode = 'FILE_ID_MISSING_ERROR';

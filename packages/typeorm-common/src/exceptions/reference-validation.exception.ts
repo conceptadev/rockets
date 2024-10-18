@@ -13,19 +13,20 @@ export class ReferenceValidationException extends RuntimeException {
   constructor(
     entityName: string,
     validationErrors: ValidationError[],
-    message = 'Data for the %s reference is not valid',
     options?: RuntimeExceptionOptions,
   ) {
     super({
-      message,
+      message: 'Data for the %s reference is not valid',
       messageParams: [entityName],
       ...options,
     });
+
     this.context = {
       ...super.context,
       entityName,
       validationErrors,
     };
+
     this.errorCode = 'REFERENCE_VALIDATION_ERROR';
   }
 }

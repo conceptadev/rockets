@@ -11,6 +11,7 @@ export class UserNotFoundException extends RuntimeException {
       httpStatus: HttpStatus.NOT_FOUND,
       ...options,
     });
+
     this.errorCode = 'USER_NOT_FOUND_ERROR';
   }
 }

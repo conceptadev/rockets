@@ -9,6 +9,7 @@ export class OrgNotFoundException extends RuntimeException {
       message: 'The org was not found',
       ...options,
     });
+
     this.errorCode = 'ORG_NOT_FOUND_ERROR';
   }
 }
