@@ -49,7 +49,9 @@ describe('AuthLocalController (e2e)', () => {
         username: 'no_user',
       })
       .then((response) => {
-        expect(response.body.message).toBe('The provided credentials are incorrect. Please try again.');
+        expect(response.body.message).toBe(
+          'The provided credentials are incorrect. Please try again.',
+        );
         expect(response.status).toBe(401);
       });
   });

@@ -1,9 +1,16 @@
 import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CallHandler, ExecutionContext, INestApplication } from '@nestjs/common';
+import {
+  CallHandler,
+  ExecutionContext,
+  INestApplication,
+} from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { SeedingSource } from '@concepta/typeorm-seeding';
-import { AccessControlFilter, AccessControlGuard } from '@concepta/nestjs-access-control';
+import {
+  AccessControlFilter,
+  AccessControlGuard,
+} from '@concepta/nestjs-access-control';
 import { AuthJwtGuard } from '@concepta/nestjs-auth-jwt';
 
 import { UserFactory } from './user.factory';
@@ -32,13 +39,13 @@ describe('UserController (e2e)', () => {
 
       accessControlGuard = app.get(AccessControlGuard);
       jest.spyOn(accessControlGuard, 'canActivate').mockResolvedValue(true);
-      
+
       accessControlFilter = app.get(AccessControlFilter);
-      jest.spyOn(accessControlFilter, 'intercept').mockImplementation(
-        (_context: ExecutionContext, next: CallHandler) => {
+      jest
+        .spyOn(accessControlFilter, 'intercept')
+        .mockImplementation((_context: ExecutionContext, next: CallHandler) => {
           return Promise.resolve(next.handle());
-        }
-      );
+        });
 
       seedingSource = new SeedingSource({
         dataSource: app.get(getDataSourceToken()),
