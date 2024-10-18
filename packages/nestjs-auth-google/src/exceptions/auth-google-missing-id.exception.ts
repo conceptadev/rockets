@@ -1,10 +1,15 @@
-import { RuntimeException } from '@concepta/nestjs-exception';
+import {
+  RuntimeException,
+  RuntimeExceptionOptions,
+} from '@concepta/nestjs-exception';
 
 export class AuthGoogleMissingIdException extends RuntimeException {
-  constructor(message = 'Google did not return an id for the user.') {
+  constructor(options?: RuntimeExceptionOptions) {
     super({
-      safeMessage: message,
+      safeMessage: 'Google did not return an id for the user.',
+      ...options,
     });
+
     this.errorCode = 'AUTH_GOOGLE_MISSING_PROFILE_ID_ERROR';
   }
 }

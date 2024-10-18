@@ -71,7 +71,9 @@ export class CacheService implements CacheServiceInterface {
         expirationDate,
       });
     } catch (e) {
-      throw new ReferenceMutateException(assignmentRepo.metadata.targetName, e);
+      throw new ReferenceMutateException(assignmentRepo.metadata.targetName, {
+        originalError: e,
+      });
     }
   }
 
@@ -113,7 +115,9 @@ export class CacheService implements CacheServiceInterface {
         expirationDate,
       });
     } catch (e) {
-      throw new ReferenceMutateException(assignmentRepo.metadata.targetName, e);
+      throw new ReferenceMutateException(assignmentRepo.metadata.targetName, {
+        originalError: e,
+      });
     }
   }
 
@@ -169,7 +173,9 @@ export class CacheService implements CacheServiceInterface {
       // return the caches from assignee
       return assignments;
     } catch (e) {
-      throw new ReferenceLookupException(assignmentRepo.metadata.targetName, e);
+      throw new ReferenceLookupException(assignmentRepo.metadata.targetName, {
+        originalError: e,
+      });
     }
   }
 
@@ -235,7 +241,9 @@ export class CacheService implements CacheServiceInterface {
     try {
       await repoProxy.repository(queryOptions).delete(id);
     } catch (e) {
-      throw new ReferenceMutateException(assignmentRepo.metadata.targetName, e);
+      throw new ReferenceMutateException(assignmentRepo.metadata.targetName, {
+        originalError: e,
+      });
     }
   }
 
@@ -298,7 +306,7 @@ export class CacheService implements CacheServiceInterface {
     } catch (e) {
       throw new ReferenceLookupException(
         repoProxy.repository(queryOptions).metadata.targetName,
-        e,
+        { originalError: e },
       );
     }
   }

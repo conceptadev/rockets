@@ -1,10 +1,15 @@
-import { RuntimeException } from '@concepta/nestjs-exception';
+import {
+  RuntimeException,
+  RuntimeExceptionOptions,
+} from '@concepta/nestjs-exception';
 
 export class AuthAppleTokenExpiredException extends RuntimeException {
-  constructor(message = 'Apple oauth token has expired.') {
+  constructor(options?: RuntimeExceptionOptions) {
     super({
-      safeMessage: message,
+      safeMessage: 'Apple oauth token has expired.',
+      ...options,
     });
+
     this.errorCode = 'AUTH_APPLE_OAUTH_TOKEN_EXPIRED';
   }
 }

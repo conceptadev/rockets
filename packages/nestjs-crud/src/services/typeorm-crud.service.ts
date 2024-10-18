@@ -37,7 +37,9 @@ export class TypeOrmCrudService<
     try {
       result = await super.getMany(req);
     } catch (e) {
-      throw new CrudQueryException(this.repo.metadata.name, e);
+      throw new CrudQueryException(this.repo.metadata.name, {
+        originalError: e,
+      });
     }
 
     // is an array?
@@ -63,7 +65,9 @@ export class TypeOrmCrudService<
     try {
       return super.getOne(req);
     } catch (e) {
-      throw new CrudQueryException(this.repo.metadata.name, e);
+      throw new CrudQueryException(this.repo.metadata.name, {
+        originalError: e,
+      });
     }
   }
 
@@ -78,7 +82,9 @@ export class TypeOrmCrudService<
     try {
       return super.createMany(req, dto);
     } catch (e) {
-      throw new CrudQueryException(this.repo.metadata.name, e);
+      throw new CrudQueryException(this.repo.metadata.name, {
+        originalError: e,
+      });
     }
   }
 
@@ -93,7 +99,9 @@ export class TypeOrmCrudService<
     try {
       return super.createOne(req, dto);
     } catch (e) {
-      throw new CrudQueryException(this.repo.metadata.name, e);
+      throw new CrudQueryException(this.repo.metadata.name, {
+        originalError: e,
+      });
     }
   }
 
@@ -108,7 +116,9 @@ export class TypeOrmCrudService<
     try {
       return super.updateOne(req, dto);
     } catch (e) {
-      throw new CrudQueryException(this.repo.metadata.name, e);
+      throw new CrudQueryException(this.repo.metadata.name, {
+        originalError: e,
+      });
     }
   }
 
@@ -123,7 +133,9 @@ export class TypeOrmCrudService<
     try {
       return super.replaceOne(req, dto);
     } catch (e) {
-      throw new CrudQueryException(this.repo.metadata.name, e);
+      throw new CrudQueryException(this.repo.metadata.name, {
+        originalError: e,
+      });
     }
   }
 
@@ -137,7 +149,9 @@ export class TypeOrmCrudService<
     try {
       return super.deleteOne(req);
     } catch (e) {
-      throw new CrudQueryException(this.repo.metadata.name, e);
+      throw new CrudQueryException(this.repo.metadata.name, {
+        originalError: e,
+      });
     }
   }
 
@@ -151,7 +165,9 @@ export class TypeOrmCrudService<
     try {
       return super.recoverOne(req);
     } catch (e) {
-      throw new CrudQueryException(this.repo.metadata.name, e);
+      throw new CrudQueryException(this.repo.metadata.name, {
+        originalError: e,
+      });
     }
   }
 

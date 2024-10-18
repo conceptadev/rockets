@@ -78,7 +78,9 @@ export class OtpService implements OtpServiceInterface {
         expirationDate,
       });
     } catch (e) {
-      throw new ReferenceMutateException(assignmentRepo.metadata.targetName, e);
+      throw new ReferenceMutateException(assignmentRepo.metadata.targetName, {
+        originalError: e,
+      });
     }
   }
 
@@ -178,7 +180,9 @@ export class OtpService implements OtpServiceInterface {
     try {
       await repoProxy.repository(queryOptions).delete(id);
     } catch (e) {
-      throw new ReferenceMutateException(assignmentRepo.metadata.targetName, e);
+      throw new ReferenceMutateException(assignmentRepo.metadata.targetName, {
+        originalError: e,
+      });
     }
   }
 
@@ -216,7 +220,9 @@ export class OtpService implements OtpServiceInterface {
       // return the otps from assignee
       return assignments;
     } catch (e) {
-      throw new ReferenceLookupException(assignmentRepo.metadata.targetName, e);
+      throw new ReferenceLookupException(assignmentRepo.metadata.targetName, {
+        originalError: e,
+      });
     }
   }
 
@@ -248,7 +254,9 @@ export class OtpService implements OtpServiceInterface {
       // return the otps from assignee
       return assignment;
     } catch (e) {
-      throw new ReferenceLookupException(assignmentRepo.metadata.targetName, e);
+      throw new ReferenceLookupException(assignmentRepo.metadata.targetName, {
+        originalError: e,
+      });
     }
   }
 

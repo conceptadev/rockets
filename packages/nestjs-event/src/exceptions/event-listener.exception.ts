@@ -1,29 +1,19 @@
-import { ExceptionInterface, NotAnErrorException } from '@concepta/ts-core';
+import {
+  RuntimeException,
+  RuntimeExceptionOptions,
+} from '@concepta/nestjs-exception';
 
 /**
  * Thrown when an error is caught when subscribing or
  * managing a {@link EventListener} of an {@link Event}.
  */
-export class EventListenerException
-  extends Error
-  implements ExceptionInterface
-{
-  errorCode = 'EVENT_LISTENER_ERROR';
+export class EventListenerException extends RuntimeException {
+  constructor(options?: RuntimeExceptionOptions) {
+    super({
+      message: 'Error occurred in event listener',
+      ...options,
+    });
 
-  context: {
-    originalError: Error;
-  };
-
-  constructor(
-    originalError?: unknown,
-    message = 'Error occurred in event listener',
-  ) {
-    super(message);
-    this.context = {
-      originalError:
-        originalError instanceof Error
-          ? originalError
-          : new NotAnErrorException(originalError),
-    };
+    this.errorCode = 'EVENT_LISTENER_ERROR';
   }
 }

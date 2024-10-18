@@ -61,10 +61,7 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
       );
     } else {
       if (!federated.user?.id) {
-        throw new FederatedUserRelationshipException(
-          this.constructor.name,
-          federated.id,
-        );
+        throw new FederatedUserRelationshipException(federated.id);
       }
 
       const user = await this.userLookupService.byId(

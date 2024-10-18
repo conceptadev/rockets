@@ -1,10 +1,15 @@
-import { RuntimeException } from '@concepta/nestjs-exception';
+import {
+  RuntimeException,
+  RuntimeExceptionOptions,
+} from '@concepta/nestjs-exception';
 
 export class AuthAppleEmailNotVerifiedException extends RuntimeException {
-  constructor(message = 'Apple email not is verified.') {
+  constructor(options?: RuntimeExceptionOptions) {
     super({
-      safeMessage: message,
+      safeMessage: 'Apple email not is verified.',
+      ...options,
     });
+
     this.errorCode = 'AUTH_APPLE_EMAIL_NOT_VERIFIED';
   }
 }

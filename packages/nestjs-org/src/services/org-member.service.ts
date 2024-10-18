@@ -1,5 +1,5 @@
 import { Repository } from 'typeorm';
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import { BaseService, QueryOptionsInterface } from '@concepta/typeorm-common';
 
@@ -38,9 +38,11 @@ export class OrgMemberService
 
     if (orgMemberFound) {
       const { userId, orgId } = orgMember;
-      throw new OrgMemberException(
-        `Can't create OrgMember, the the combination of userid: ${userId} and orgId: ${orgId} already exists`,
-      );
+      throw new OrgMemberException({
+        message: `Can't create OrgMember, the the combination of userid: %s and orgId: %s already exists`,
+        messageParams: [userId, orgId],
+        httpStatus: HttpStatus.BAD_REQUEST,
+      });
     }
 
     return await this.orgMemberMutateService.create(orgMember, queryOptions);

@@ -1,12 +1,15 @@
-import { RuntimeException } from '@concepta/nestjs-exception';
+import {
+  RuntimeException,
+  RuntimeExceptionOptions,
+} from '@concepta/nestjs-exception';
 
 export class AuthGoogleMissingEmailException extends RuntimeException {
-  constructor(
-    message = 'Google did not return an email address for the user.',
-  ) {
+  constructor(options?: RuntimeExceptionOptions) {
     super({
-      safeMessage: message,
+      safeMessage: 'Google did not return an email address for the user.',
+      ...options,
     });
+
     this.errorCode = 'AUTH_GOOGLE_MISSING_PROFILE_EMAIL_ERROR';
   }
 }

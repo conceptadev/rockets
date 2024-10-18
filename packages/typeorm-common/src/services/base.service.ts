@@ -38,7 +38,9 @@ export abstract class BaseService<Entity extends ReferenceIdInterface> {
       return this.repository(queryOptions).find(options);
     } catch (e) {
       // fatal orm error
-      throw new ReferenceLookupException(this.metadata.name, e);
+      throw new ReferenceLookupException(this.metadata.name, {
+        originalError: e,
+      });
     }
   }
 
@@ -57,7 +59,9 @@ export abstract class BaseService<Entity extends ReferenceIdInterface> {
       return this.repository(queryOptions).findOne(options);
     } catch (e) {
       // fatal orm error
-      throw new ReferenceLookupException(this.metadata.name, e);
+      throw new ReferenceLookupException(this.metadata.name, {
+        originalError: e,
+      });
     }
   }
 

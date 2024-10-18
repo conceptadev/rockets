@@ -39,10 +39,11 @@ export class UserPasswordHistoryService
         queryOptions,
       );
     } catch (e: unknown) {
-      throw new UserException(
-        'Cannot update password, error while getting password history by user id',
-        e,
-      );
+      throw new UserException({
+        message:
+          'Cannot update password, error while getting password history by user id',
+        originalError: e,
+      });
     }
 
     // return history if found or empty array
@@ -63,10 +64,11 @@ export class UserPasswordHistoryService
         queryOptions,
       );
     } catch (e: unknown) {
-      throw new UserException(
-        'Cannot update password, error while pushing password history by user id',
-        e,
-      );
+      throw new UserException({
+        message:
+          'Cannot update password, error while pushing password history by user id',
+        originalError: e,
+      });
     }
   }
 

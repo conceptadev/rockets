@@ -89,7 +89,7 @@ export class EventListenService {
         finalOptions,
       ) as EmitterListener;
     } catch (e) {
-      throw new EventListenException(listener, e);
+      throw new EventListenException(listener, { originalError: e });
     }
 
     try {
@@ -97,7 +97,7 @@ export class EventListenService {
       listener.subscription(emitterListener);
     } catch (e) {
       // rethrow wrapped
-      throw new EventListenException(listener, e);
+      throw new EventListenException(listener, { originalError: e });
     }
   }
 

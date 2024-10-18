@@ -1,10 +1,15 @@
-import { RuntimeException } from '@concepta/nestjs-exception';
+import {
+  RuntimeException,
+  RuntimeExceptionOptions,
+} from '@concepta/nestjs-exception';
 
 export class AuthAppleMissingEmailException extends RuntimeException {
-  constructor(message = 'Apple did not return an email address for the user.') {
+  constructor(options?: RuntimeExceptionOptions) {
     super({
-      safeMessage: message,
+      safeMessage: 'Apple did not return an email address for the user.',
+      ...options,
     });
+
     this.errorCode = 'AUTH_APPLE_MISSING_PROFILE_EMAIL_ERROR';
   }
 }

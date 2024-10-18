@@ -53,15 +53,16 @@ export class InvitationAcceptedListener
       const { orgId } = event?.payload?.invitation?.constraints ?? {};
 
       if (typeof userId !== 'string') {
-        throw new OrgMemberException(
-          'The invitation accepted event payload received has invalid content. The payload must have the "userId" property.',
-        );
+        throw new OrgMemberException({
+          message:
+            'The invitation accepted event payload received has invalid content. The payload must have the "userId" property.',
+        });
       }
 
       if (typeof orgId !== 'string') {
-        throw new OrgMemberException(
-          'The org of invitation does not have orgId in constraints',
-        );
+        throw new OrgMemberException({
+          message: 'The org of invitation does not have orgId in constraints',
+        });
       }
 
       await this.orgMemberService.add(

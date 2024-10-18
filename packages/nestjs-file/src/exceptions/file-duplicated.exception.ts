@@ -1,5 +1,8 @@
 import { HttpStatus } from '@nestjs/common';
-import { RuntimeException } from '@concepta/nestjs-exception';
+import {
+  RuntimeException,
+  RuntimeExceptionOptions,
+} from '@concepta/nestjs-exception';
 
 export class FileDuplicateEntryException extends RuntimeException {
   context: RuntimeException['context'] & {
@@ -10,14 +13,13 @@ export class FileDuplicateEntryException extends RuntimeException {
   constructor(
     serviceKey: string,
     fileName: string,
-    originalError?: unknown,
-    message = 'Duplicate entry detected for service %s with file %s',
+    options?: RuntimeExceptionOptions,
   ) {
     super({
-      message,
+      message: 'Duplicate entry detected for service %s with file %s',
       messageParams: [serviceKey, fileName],
       httpStatus: HttpStatus.CONFLICT,
-      originalError,
+      ...options,
     });
 
     this.errorCode = 'FILE_DUPLICATE_ENTRY_ERROR';
