@@ -1,13 +1,11 @@
-import { format } from 'util';
-import { ExceptionInterface, NotAnErrorException } from '@concepta/ts-core';
+import { NotAnErrorException } from '@concepta/ts-core';
+import {
+  RuntimeException,
+  RuntimeExceptionOptions,
+} from '@concepta/nestjs-exception';
 
-export class ReferenceMutateException
-  extends Error
-  implements ExceptionInterface
-{
-  errorCode = 'REFERENCE_MUTATE_ERROR';
-
-  context: {
+export class ReferenceMutateException extends RuntimeException {
+  context: RuntimeException['context'] & {
     entityName: string;
     originalError: Error;
   };
@@ -16,14 +14,21 @@ export class ReferenceMutateException
     entityName: string,
     originalError: unknown,
     message = 'Error while trying to mutate a %s reference',
+    options?: RuntimeExceptionOptions,
   ) {
-    super(format(message, entityName));
+    super({
+      message,
+      messageParams: [entityName],
+      ...options,
+    });
     this.context = {
+      ...super.context,
       entityName,
       originalError:
         originalError instanceof Error
           ? originalError
           : new NotAnErrorException(originalError),
     };
+    this.errorCode = 'REFERENCE_MUTATE_ERROR';
   }
 }

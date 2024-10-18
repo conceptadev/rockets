@@ -18,6 +18,7 @@
   },
   "devDependencies": {
     "@concepta/nestjs-common": "^5.0.0-alpha.5",
+    "@concepta/nestjs-exception": "^5.0.0-alpha.5",
     "@concepta/nestjs-typeorm-ext": "^5.0.0-alpha.5",
     "@concepta/typeorm-seeding": "^4.0.0",
     "@faker-js/faker": "^8.4.1",

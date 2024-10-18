@@ -1,12 +1,9 @@
-import { format } from 'util';
-import { ExceptionInterface } from '@concepta/ts-core';
+import {
+  RuntimeException,
+  RuntimeExceptionOptions,
+} from '@concepta/nestjs-exception';
 
-export class OtpTypeNotDefinedException
-  extends Error
-  implements ExceptionInterface
-{
-  errorCode = 'OTP_TYPE_NOT_DEFINED_ERROR';
-
+export class OtpTypeNotDefinedException extends RuntimeException {
   context: {
     type: string;
   };
@@ -14,10 +11,17 @@ export class OtpTypeNotDefinedException
   constructor(
     type: string,
     message = 'Type %s was not defined to be used. please check config.',
+    options?: RuntimeExceptionOptions,
   ) {
-    super(format(message, type));
+    super({
+      message,
+      messageParams: [type],
+      ...options,
+    });
     this.context = {
+      ...super.context,
       type,
     };
+    this.errorCode = 'OTP_TYPE_NOT_DEFINED_ERROR';
   }
 }
