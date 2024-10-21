@@ -1,6 +1,6 @@
 import { CommonEntityDto } from '@concepta/nestjs-common';
 import { FileInterface } from '@concepta/ts-common';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
 import { IsOptional, IsString } from 'class-validator';
 
@@ -37,20 +37,20 @@ export class FileDto extends CommonEntityDto implements FileInterface {
   contentType = '';
 
   @Expose()
-  @ApiProperty({
+  @ApiPropertyOptional({
     type: 'string',
     description: 'Dynamic upload URI for the file',
   })
   @IsString()
   @IsOptional()
-  uploadUri = '';
+  uploadUri?: string;
 
   @Expose()
-  @ApiProperty({
+  @ApiPropertyOptional({
     type: 'string',
     description: 'Dynamic download URL for the file',
   })
   @IsString()
   @IsOptional()
-  downloadUrl = '';
+  downloadUrl?: string;
 }
