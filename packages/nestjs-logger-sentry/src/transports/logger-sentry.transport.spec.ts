@@ -1,4 +1,4 @@
-import { LogLevel } from '@nestjs/common';
+import { BadRequestException, HttpStatus, LogLevel } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import * as Sentry from '@sentry/node';
 
@@ -6,6 +6,12 @@ import { LOGGER_SENTRY_MODULE_SETTINGS_TOKEN } from '../config/logger-sentry.con
 import { LoggerSentryConfigInterface } from '../interfaces/logger-sentry-config.interface';
 import { LoggerSentrySettingsInterface } from '../interfaces/logger-sentry-settings.interface';
 import { LoggerSentryTransport } from './logger-sentry.transport';
+import {
+  mapHttpStatus,
+  RuntimeException,
+  RuntimeExceptionOptions,
+} from '@concepta/nestjs-exception';
+import { isObject } from 'class-validator';
 
 jest.mock('@sentry/node');
 
@@ -88,9 +94,8 @@ describe('loggerSentryTransport', () => {
 
   /**
    * Make sure call was made correctly
-   *
    */
-  it('LoggerSentryTransport.correctValues', async () => {
+  it('LoggerSentryTransport.correctValues Error', async () => {
     const logLevel = 'log' as LogLevel;
     const error = new Error();
     loggerSentryTransport.log(errorMessage, logLevel, error);
@@ -100,7 +105,88 @@ describe('loggerSentryTransport', () => {
     expect(spyCaptureException).toBeCalledTimes(1);
     expect(spyCaptureException).toHaveBeenCalledWith(error, {
       level: 'error',
-      extra: { developerMessage: errorMessage },
+      extra: {
+        developerMessage: errorMessage,
+      },
+    });
+  });
+
+  /**
+   * Test Log level map with capture message for string error
+   */
+  it('LoggerSentryTransport.correctValues string error', async () => {
+    const logLevel = 'log' as LogLevel;
+    const error = 'Test error';
+    loggerSentryTransport.log(errorMessage, logLevel, error);
+
+    expect(spyLogLevelMap).toBeCalledTimes(1);
+    expect(spyLogLevelMap).toHaveBeenCalledWith(logLevel);
+    expect(spyCaptureException).toBeCalledTimes(1);
+    expect(spyCaptureException).toHaveBeenCalledWith(error, {
+      level: 'error',
+      extra: {
+        developerMessage: errorMessage,
+      },
+    });
+  });
+
+  /**
+   * Test Log level map with capture message for BadRequestException
+   */
+  it('LoggerSentryTransport.correctValues BadRequestException', async () => {
+    const logLevel = 'log' as LogLevel;
+    const error = new BadRequestException();
+    const res = error.getResponse();
+    loggerSentryTransport.log(errorMessage, logLevel, error);
+
+    expect(spyLogLevelMap).toBeCalledTimes(1);
+    expect(spyLogLevelMap).toHaveBeenCalledWith(logLevel);
+    expect(spyCaptureException).toBeCalledTimes(1);
+    const statusCode = error.getStatus();
+    expect(spyCaptureException).toHaveBeenCalledWith(error, {
+      level: 'error',
+      extra: {
+        developerMessage: errorMessage,
+        statusCode,
+        errorCode: mapHttpStatus(statusCode as number),
+        message: isObject(res) && 'message' in res ? res.message : res,
+      },
+    });
+  });
+
+  /**
+   * Test Log level map with capture exception
+   */
+  it('LoggerSentryTransport.correctValues Exception', async () => {
+    class TestException extends RuntimeException {
+      constructor(options?: RuntimeExceptionOptions) {
+        super({
+          message: 'Test Exception',
+          httpStatus: HttpStatus.BAD_REQUEST,
+          ...options,
+        });
+
+        this.errorCode = 'INVALID_LOGIN_DATA_ERROR';
+      }
+    }
+    const logLevel = 'log' as LogLevel;
+    const exception = new TestException();
+
+    loggerSentryTransport.log(errorMessage, logLevel, exception);
+
+    expect(spyLogLevelMap).toBeCalledTimes(1);
+    expect(spyLogLevelMap).toHaveBeenCalledWith(logLevel);
+    expect(spyCaptureException).toBeCalledTimes(1);
+    expect(spyCaptureException).toHaveBeenCalledWith(exception, {
+      level: 'error',
+      extra: {
+        developerMessage: errorMessage,
+        errorCode: exception?.errorCode,
+        statusCode: exception?.httpStatus,
+        message: exception?.message,
+        safeMessage: exception?.safeMessage,
+        context: exception?.context,
+      },
     });
   });
 

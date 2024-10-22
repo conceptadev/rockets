@@ -7,6 +7,7 @@ import { PasswordCreationService } from './password-creation.service';
 import { PasswordStorageService } from './password-storage.service';
 import { PasswordStrengthService } from './password-strength.service';
 import { PasswordValidationService } from './password-validation.service';
+import { PasswordNotStrongException } from '../exceptions/password-not-strong.exception';
 
 describe(PasswordCreationService, () => {
   let config: PasswordSettingsInterface;
@@ -75,7 +76,7 @@ describe(PasswordCreationService, () => {
         });
       };
 
-      await expect(t).rejects.toThrow(Error);
+      await expect(t).rejects.toThrow(PasswordNotStrongException);
       await expect(t).rejects.toThrow('Password is not strong enough');
     });
   });

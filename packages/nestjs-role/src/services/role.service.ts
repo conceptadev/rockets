@@ -62,7 +62,9 @@ export class RoleService implements RoleServiceInterface {
       // return the roles
       return assignments.map((assignment) => assignment.role);
     } catch (e) {
-      throw new ReferenceLookupException(assignmentRepo.metadata.targetName, e);
+      throw new ReferenceLookupException(assignmentRepo.metadata.targetName, {
+        originalError: e,
+      });
     }
   }
 
@@ -100,7 +102,9 @@ export class RoleService implements RoleServiceInterface {
       // return true if we found an assignment
       return assignment ? true : false;
     } catch (e) {
-      throw new ReferenceLookupException(assignmentRepo.metadata.targetName, e);
+      throw new ReferenceLookupException(assignmentRepo.metadata.targetName, {
+        originalError: e,
+      });
     }
   }
 

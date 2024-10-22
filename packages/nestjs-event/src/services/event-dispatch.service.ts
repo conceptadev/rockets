@@ -60,7 +60,7 @@ export class EventDispatchService {
       // call event dispatcher
       return this.eventEmitter.emit(event.key, event);
     } catch (e) {
-      throw new EventDispatchException(event, e);
+      throw new EventDispatchException(event, { originalError: e });
     }
   }
 
@@ -119,7 +119,7 @@ export class EventDispatchService {
       // we await the result here in order to catch any exception thrown
       result = await this.eventEmitter.emitAsync(event.key, event);
     } catch (e) {
-      throw new EventDispatchException(event, e);
+      throw new EventDispatchException(event, { originalError: e });
     }
 
     // final array of results

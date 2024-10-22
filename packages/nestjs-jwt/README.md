@@ -22,16 +22,16 @@ module.
     - [Installation](#installation)
   - [Basic Setup](#basic-setup)
   - [Creating custom jwtIssueService](#creating-custom-jwtissueservice)
-    - [Environment Variables](#environment-variables)
+  - [Environment Variables](#environment-variables)
 - [How to Guides](#how-to-guides)
   - [1. How to Set Up JwtModule with forRoot](#1-how-to-set-up-jwtmodule-with-forroot)
   - [2. How to Configure JwtModule Settings](#2-how-to-configure-jwtmodule-settings)
   - [3. Overriding Defaults](#3-overriding-defaults)
     - [JwtAccessService](#jwtaccessservice)
     - [JwtRefreshService](#jwtrefreshservice)
-    - [JwtIssueService](#jwtissueservice)
-    - [JwtVerifyService](#jwtverifyservice)
-    - [JwtSignService](#jwtsignservice)
+    - [JwtIssueTokenService](#jwtissuetokenservice)
+    - [JwtVerifyTokenService](#jwtverifytokenservice)
+    - [JwtService](#jwtservice)
 - [Explanation](#explanation)
   - [Conceptual Overview](#conceptual-overview)
     - [What is This Library?](#what-is-this-library)
@@ -79,9 +79,9 @@ management.
 
 To get started, install the `JwtModule` package:
 
-**sh-begin**
+```sh
 yarn add @concepta/nestjs-jwt
-**sh-end**
+```
 
 ## Basic Setup
 
@@ -91,25 +91,31 @@ To set up the `JwtModule`, follow the basic setup tutorial in the
 ## Creating custom jwtIssueService
 
 Here we will cover how to override the default services in `JwtModule`.
-For example, to override the `JwtIssueService`, follow the steps below:
+For example, to override the `JwtIssueTokenService`, follow the steps below:
 
-1. Create a custom implementation of `JwtIssueService`:
+1. Create a custom implementation of `JwtIssueTokenService`:
 
 ```ts
 import { Injectable } from '@nestjs/common';
-import { JwtIssueServiceInterface } from './interfaces/jwt-issue-service.interface';
-import { JwtSignService } from './jwt-sign.service';
+import {
+  JwtService,
+  JwtSignServiceInterface,
+  JwtIssueTokenServiceInterface,
+} from '@concepta/nest-jwt';
 
 @Injectable()
-export class CustomJwtIssueService implements JwtIssueServiceInterface {
-  constructor(private readonly jwtSignService: JwtSignService) {}
+export class CustomJwtIssueTokenService implements JwtIssueTokenServiceInterface {
+  constructor(
+    private readonly jwtAccessService: JwtSignServiceInterface,
+    private readonly jwtRefreshService: JwtSignServiceInterface,
+  ) {}
 
-  async accessToken(...args: Parameters<JwtIssueServiceInterface['accessToken']>) {
-    return this.jwtSignService.signAsync('access', ...args);
+  async accessToken(...args: Parameters<JwtIssueTokenServiceInterface['accessToken']>) {
+    return this.jwtAccessService.signAsync(...args);
   }
 
-  async refreshToken(...args: Parameters<JwtIssueServiceInterface['refreshToken']>) {
-    return this.jwtSignService.signAsync('refresh', ...args);
+  async refreshToken(...args: Parameters<JwtIssueTokenServiceInterface['refreshToken']>) {
+    return this.jwtRefreshService.signAsync(...args);
   }
 }
 ```
@@ -119,12 +125,12 @@ export class CustomJwtIssueService implements JwtIssueServiceInterface {
 ```ts
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@concepta/nestjs-jwt';
-import { CustomJwtIssueService } from './custom-jwt-issue.service';
+import { CustomJwtIssueTokenService } from './custom-jwt-issue-token.service';
 
 @Module({
   imports: [
     JwtModule.forRoot({
-      jwtIssueService: CustomJwtIssueService,
+      jwtIssueService: CustomJwtIssueTokenService,
       settings: {
         access: {
           secret: 'your-secret-key',
@@ -133,16 +139,16 @@ import { CustomJwtIssueService } from './custom-jwt-issue.service';
       },
     }),
   ],
-  providers: [CustomJwtIssueService],
+  providers: [CustomJwtIssueTokenService],
 })
 export class AppModule {}
 ```
 
-This example shows how to customize the `JwtIssueService` with a custom
+This example shows how to customize the `JwtIssueTokenService` with a custom
 implementation. Similar steps can be followed to override other services in
 `JwtModule`.
 
-### environment variables
+### Environment Variables
 
 Configurations available via environment.
 
@@ -215,7 +221,7 @@ any of the services.
 
 ```ts
 @Injectable()
-import { JwtService, JwtSignOptions } from '@nestjs/jwt';
+import { JwtService, JwtSignOptions } from '@concepta/nest-jwt';
 class CustomJwtAccessService extends JwtService {
   sign(_payload: string, _options?: JwtSignOptions): string {
     return 'foo';
@@ -223,11 +229,11 @@ class CustomJwtAccessService extends JwtService {
 }
 ```
 
-#### jwtRefreshService
+#### JwtRefreshService
 
 ```ts
 @Injectable()
-import { JwtService, JwtSignOptions } from '@nestjs/jwt';
+import { JwtService, JwtSignOptions } from '@concepta/nest-jwt';
 class CustomRefreshJwtAccessService extends JwtService {
   sign(_payload: string, _options?: JwtSignOptions): string {
     return 'foo';
@@ -235,98 +241,83 @@ class CustomRefreshJwtAccessService extends JwtService {
 }
 ```
 
-#### JwtIssueService
+#### JwtIssueTokenService
 
 ```ts
 import { Injectable } from '@nestjs/common';
-import { JwtIssueServiceInterface } from './interfaces/jwt-issue-service.interface';
-import { JwtSignService } from './jwt-sign.service';
+import {
+  JwtService,
+  JwtSignServiceInterface,
+  JwtIssueTokenServiceInterface,
+} from '@concepta/nest-jwt';
 
 @Injectable()
-export class CustomJwtIssueService implements JwtIssueServiceInterface {
-  constructor(private readonly jwtSignService: JwtSignService) {}
+export class CustomJwtIssueTokenService implements JwtIssueTokenServiceInterface {
+  constructor(
+    private readonly jwtAccessService: JwtSignServiceInterface,
+    private readonly jwtRefreshService: JwtSignServiceInterface,
+  ) {}
 
-  async accessToken(...args: Parameters<JwtIssueServiceInterface['accessToken']>) {
+  async accessToken(...args: Parameters<JwtIssueTokenServiceInterface['accessToken']>) {
     // Custom implementation
-    return this.jwtSignService.signAsync('access', ...args);
+    return this.jwtAccessService.signAsync(...args);
   }
 
-  async refreshToken(...args: Parameters<JwtIssueServiceInterface['refreshToken']>)   {
+  async refreshToken(...args: Parameters<JwtIssueTokenServiceInterface['refreshToken']>)   {
     // Custom implementation
-    return this.jwtSignService.signAsync('refresh', ...args);
+    return this.jwtRefreshService.signAsync(...args);
   }
 }
 ```
 
-#### JwtVerifyService
+#### JwtVerifyTokenService
 
 ```ts
 import { Injectable } from '@nestjs/common';
-import { JwtVerifyServiceInterface } from './interfaces/jwt-verify-service.interface';
-import { JwtSignService } from './jwt-sign.service';
+import {
+  JwtService,
+  JwtVerifyServiceInterface,
+  JwtVerifyTokenServiceInterface,
+} from '@concepta/nest-jwt';
 
 @Injectable()
-export class CustomJwtVerifyService implements JwtVerifyServiceInterface {
-  constructor(private readonly jwtSignService: JwtSignService) {}
+export class CustomJwtVerifyTokenService implements JwtVerifyTokenServiceInterface {
+  constructor(private readonly jwtVerifyService: JwtVerifyServiceInterface) {}
 
-  async accessToken(...args: Parameters<JwtVerifyServiceInterface['accessToken']>) {
+  async accessToken(...args: Parameters<JwtVerifyTokenServiceInterface['accessToken']>) {
     // Custom implementation
-    return this.jwtSignService.verifyAsync('access', ...args);
+    return this.jwtVerifyService.verifyAsync('access', ...args);
   }
 
-  async refreshToken(...args: Parameters<JwtVerifyServiceInterface['refreshToken']>) {
+  async refreshToken(...args: Parameters<JwtVerifyTokenServiceInterface['refreshToken']>) {
     // Custom implementation
-    return this.jwtSignService.verifyAsync('refresh', ...args);
+    return this.jwtVerifyService.verifyAsync('refresh', ...args);
   }
 }
 ```
 
-#### JwtSignService
+#### JwtService
 
 ```ts
 import { Inject, Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { JwtSignServiceInterface } from '../interfaces/jwt-sign-service.interface';
-import {
-  JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
-  JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
-} from '../jwt.constants';
-import { JwtTokenType } from '../jwt.types';
+import { JwtServiceInterface } from '@concepta/nest-jwt';
 
 @Injectable()
-export class CustomJwtSignService implements JwtSignServiceInterface {
-  constructor(
-    @Inject(JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN)
-    protected readonly jwtAccessService: JwtService,
-    @Inject(JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN)
-    protected readonly jwtRefreshService: JwtService,
-  ) {}
-
+export class CustomJwtService implements JwtServiceInterface {
   async signAsync(
-    tokenType: JwtTokenType,
     ...rest: Parameters<JwtService['signAsync']>
   ) {
-    return this.service(tokenType).signAsync(...rest);
+    // custom logic
   }
 
   async verifyAsync(
-    tokenType: JwtTokenType,
     ...rest: Parameters<JwtService['verifyAsync']>
   ) {
-    return this.service(tokenType).verifyAsync(...rest);
+    // custom logic
   }
 
   decode(tokenType: JwtTokenType, ...rest: Parameters<JwtService['decode']>) {
-    return this.service(tokenType).decode(...rest);
-  }
-
-  private service(tokenType: JwtTokenType): JwtService {
-    switch (tokenType) {
-      case 'access':
-        return this.jwtAccessService;
-      case 'refresh':
-        return this.jwtRefreshService;
-    }
+    // custom logic
   }
 }
 
@@ -337,14 +328,14 @@ export class CustomJwtSignService implements JwtSignServiceInterface {
 ```ts
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@concepta/nestjs-jwt';
-import { CustomJwtIssueService } from './custom-jwt-issue.service';
-import { CustomJwtVerifyService } from './custom-jwt-verify.service';
+import { CustomJwtIssueTokenService } from './custom-jwt-issue-token.service';
+import { CustomJwtVerifyTokenService } from './custom-jwt-verify-token.service';
 
 @Module({
   imports: [
     JwtModule.forRoot({
-      jwtIssueService: CustomJwtIssueService,
-      jwtVerifyService: CustomJwtVerifyService,
+      jwtIssueService: CustomJwtIssueTokenService,
+      jwtVerifyService: CustomJwtVerifyTokenService,
       settings: {
         access: {
           secret: 'your-secret-key',
@@ -353,12 +344,12 @@ import { CustomJwtVerifyService } from './custom-jwt-verify.service';
       },
     }),
   ],
-  providers: [CustomJwtIssueService, CustomJwtVerifyService],
+  providers: [CustomJwtIssueTokenService, CustomJwtVerifyTokenService],
 })
 export class AppModule {}
 ```
 
-This example shows how to customize the `JwtIssueService` and `JwtVerifyService`
+This example shows how to customize the `JwtIssueTokenService` and `JwtVerifyTokenService`
 with custom implementations. Similar steps can be followed to override other
 services in `JwtModule`.
 

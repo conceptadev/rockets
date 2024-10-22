@@ -112,6 +112,15 @@
     },
     {
       "path": "packages/i18n"
+    },
+    {
+      "path": "packages/nestjs-file"
+    },
+    {
+      "path": "packages/nestjs-auth-apple"
+    },
+    {
+      "path": "packages/nestjs-report"
     }
   ]
 }

@@ -69,10 +69,9 @@ export abstract class EventListener<E> implements EventListenerInterface<E> {
     // has the emitter listener already been set?
     if (this.emitterListener) {
       // yes, override not allowed
-      throw new EventListenerException(
-        undefined,
-        'Emitter listener can not be overridden once set.',
-      );
+      throw new EventListenerException({
+        message: 'Emitter listener can not be overridden once set.',
+      });
     }
 
     // set it
@@ -86,20 +85,18 @@ export abstract class EventListener<E> implements EventListenerInterface<E> {
     // has the emitter listener been set?
     if (!this.emitterListener) {
       // no, never subscribed... can't remove
-      throw new EventListenerException(
-        undefined,
-        `Can't remove listener, it has not been subscribed.`,
-      );
+      throw new EventListenerException({
+        message: `Can't remove listener, it has not been subscribed.`,
+      });
     }
 
     try {
       // remove the listener
       this.emitterListener.off();
     } catch (e) {
-      throw new EventListenerException(
-        e,
-        'Error occurred while trying to turn listener off()',
-      );
+      throw new EventListenerException({
+        message: 'Error occurred while trying to turn listener off()',
+      });
     }
   }
 }

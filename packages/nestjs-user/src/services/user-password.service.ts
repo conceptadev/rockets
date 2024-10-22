@@ -1,4 +1,4 @@
-import { Inject, Injectable, Optional } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, Optional } from '@nestjs/common';
 import { ReferenceId, ReferenceIdInterface } from '@concepta/ts-core';
 import {
   AuthenticatedUserInterface,
@@ -112,10 +112,10 @@ export class UserPasswordService implements UserPasswordServiceInterface {
       // try to lookup the user
       user = await this.userLookupService.byId(userId);
     } catch (e: unknown) {
-      throw new UserException(
-        'Cannot update password, error while getting user by id',
-        e,
-      );
+      throw new UserException({
+        message: 'Cannot update password, error while getting user by id',
+        originalError: e,
+      });
     }
 
     // did we get a user?
@@ -132,9 +132,9 @@ export class UserPasswordService implements UserPasswordServiceInterface {
     }
 
     // throw an exception by default
-    throw new UserNotFoundException(
-      'Impossible to update password if user is not found',
-    );
+    throw new UserNotFoundException({
+      message: 'Impossible to update password if user is not found',
+    });
   }
 
   protected async validateCurrent(
@@ -155,7 +155,10 @@ export class UserPasswordService implements UserPasswordServiceInterface {
       if (currentIsValid) {
         return true;
       } else {
-        throw new UserException(`Current password is not valid`);
+        throw new UserException({
+          message: `Current password is not valid`,
+          httpStatus: HttpStatus.BAD_REQUEST,
+        });
       }
     }
 
@@ -181,7 +184,10 @@ export class UserPasswordService implements UserPasswordServiceInterface {
       });
 
       if (!isValid) {
-        throw new UserException(`Password has been used too recently.`);
+        throw new UserException({
+          message: `Password has been used too recently.`,
+          httpStatus: HttpStatus.BAD_REQUEST,
+        });
       }
     }
 

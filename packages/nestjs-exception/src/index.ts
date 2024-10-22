@@ -10,3 +10,5 @@ export { RuntimeExceptionInterface } from './interfaces/runtime-exception.interf
 
 // exceptions
 export { RuntimeException } from './exceptions/runtime.exception';
+// utils
+export { mapHttpStatus } from './utils/map-http-status.util';

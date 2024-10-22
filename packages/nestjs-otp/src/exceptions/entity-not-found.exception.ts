@@ -1,23 +1,25 @@
-import { format } from 'util';
-import { ExceptionInterface } from '@concepta/ts-core';
+import {
+  RuntimeException,
+  RuntimeExceptionOptions,
+} from '@concepta/nestjs-exception';
 
-export class EntityNotFoundException
-  extends Error
-  implements ExceptionInterface
-{
-  errorCode = 'OTP_ENTITY_NOT_FOUND_ERROR';
-
-  context: {
+export class EntityNotFoundException extends RuntimeException {
+  context: RuntimeException['context'] & {
     entityName: string;
   };
 
-  constructor(
-    entityName: string,
-    message = 'Entity %s was not registered to be used.',
-  ) {
-    super(format(message, entityName));
+  constructor(entityName: string, options?: RuntimeExceptionOptions) {
+    super({
+      message: 'Entity %s was not registered to be used.',
+      messageParams: [entityName],
+      ...options,
+    });
+
     this.context = {
+      ...super.context,
       entityName,
     };
+
+    this.errorCode = 'OTP_ENTITY_NOT_FOUND_ERROR';
   }
 }

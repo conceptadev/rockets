@@ -11,6 +11,9 @@ import { PasswordValidationService } from './password-validation.service';
 import { PasswordCreateObjectOptionsInterface } from '../interfaces/password-create-object-options.interface';
 import { PasswordCurrentPasswordInterface } from '../interfaces/password-current-password.interface';
 import { PasswordHistoryPasswordInterface } from '../interfaces/password-history-password.interface';
+import { PasswordNotStrongException } from '../exceptions/password-not-strong.exception';
+import { CurrentPasswordRequiredException } from '../exceptions/current-password-required.exception';
+import { PasswordUsedRecentlyException } from '../exceptions/password-used-recently.exception';
 
 /**
  * Service with functions related to password creation
@@ -78,7 +81,7 @@ export class PasswordCreationService
     if (typeof password === 'string') {
       // check strength
       if (!this.passwordStrengthService.isStrong(password)) {
-        throw new Error('Password is not strong enough');
+        throw new PasswordNotStrongException();
       }
     }
 
@@ -103,7 +106,7 @@ export class PasswordCreationService
       if (this.settings?.requireCurrentToUpdate === true) {
         // TODO: should be a password exception class
         // reqs not met, throw exception
-        throw new Error('Current password is required');
+        throw new CurrentPasswordRequiredException();
       }
     }
 
@@ -135,9 +138,7 @@ export class PasswordCreationService
 
         // is valid?
         if (isValid) {
-          throw new Error(
-            'The new password has been used too recently, please use a different password',
-          );
+          throw new PasswordUsedRecentlyException();
         }
       }
     }

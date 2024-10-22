@@ -143,7 +143,9 @@ export abstract class MutateService<
     try {
       return this.repository(queryOptions).save(entity);
     } catch (e) {
-      throw new ReferenceMutateException(this.metadata.name, e);
+      throw new ReferenceMutateException(this.metadata.name, {
+        originalError: e,
+      });
     }
   }
 
@@ -158,7 +160,9 @@ export abstract class MutateService<
     try {
       return this.repository(queryOptions).remove(entity);
     } catch (e) {
-      throw new ReferenceMutateException(this.metadata.name, e);
+      throw new ReferenceMutateException(this.metadata.name, {
+        originalError: e,
+      });
     }
   }
 

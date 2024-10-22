@@ -6,10 +6,12 @@ import { INestApplication, Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthenticationResponseInterface } from '@concepta/ts-common';
 import { UserCrudService } from '@concepta/nestjs-user';
+import { ExceptionsFilter } from '@concepta/nestjs-exception';
 
 import { AppModule } from './app.module';
 import { UserEntity } from './user/user.entity';
 import { UserDto } from './user/user.controller';
+import { HttpAdapterHost } from '@nestjs/core';
 
 const sleep = (ms: number) => {
   return new Promise((resolve) => {
@@ -34,6 +36,9 @@ describe('AppController (e2e)', () => {
         .compile();
 
       app = moduleFixture.createNestApplication();
+      const exceptionsFilter = app.get(HttpAdapterHost);
+      app.useGlobalFilters(new ExceptionsFilter(exceptionsFilter));
+
       await app.init();
     });
 

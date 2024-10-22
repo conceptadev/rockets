@@ -1,4 +1,4 @@
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import {
   ConfigurableModuleBuilder,
   DynamicModule,
@@ -16,6 +16,7 @@ import { AccessControlSettingsInterface } from './interfaces/access-control-sett
 import { AccessControlGuard } from './access-control.guard';
 import { AccessControlService } from './services/access-control.service';
 import { accessControlDefaultConfig } from './config/acess-control-default.config';
+import { AccessControlFilter } from './filter/access-control.filter';
 
 const RAW_OPTIONS_TOKEN = Symbol('__ACCESS_CONTROL_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -77,6 +78,7 @@ export function createAccessControlExports() {
   return [
     ACCESS_CONTROL_MODULE_SETTINGS_TOKEN,
     AccessControlService,
+    AccessControlFilter,
     AccessControlGuard,
   ];
 }
@@ -90,6 +92,8 @@ export function createAccessControlProviders(options: {
     createAccessControlSettingsProvider(options.overrides),
     createAccessControlServiceProvider(options.overrides),
     createAccessControlAppGuardProvider(options.overrides),
+    createAccessControlAppFilterProvider(options.overrides),
+    AccessControlFilter,
     AccessControlGuard,
   ];
 }
@@ -141,6 +145,31 @@ export function createAccessControlAppGuardProvider(
       } else {
         // return app guard if set, or fall back to default
         return appGuard ?? defaultGuard;
+      }
+    },
+  };
+}
+
+export function createAccessControlAppFilterProvider(
+  optionsOverrides?: AccessControlOptions,
+): Provider {
+  return {
+    provide: APP_INTERCEPTOR,
+    inject: [RAW_OPTIONS_TOKEN, AccessControlFilter],
+    useFactory: async (
+      options: AccessControlOptionsInterface,
+      defaultFilter: AccessControlFilter,
+    ) => {
+      // get app filter from the options
+      const appFilter = optionsOverrides?.appFilter ?? options?.appFilter;
+
+      // is app filter explicitly false?
+      if (appFilter === false) {
+        // yes, don't set a filter
+        return null;
+      } else {
+        // return app filter if set, or fall back to default
+        return appFilter ?? defaultFilter;
       }
     },
   };

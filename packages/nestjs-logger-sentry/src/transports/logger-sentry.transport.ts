@@ -1,8 +1,11 @@
-import { Inject, Injectable, LogLevel } from '@nestjs/common';
+import { HttpException, Inject, Injectable, LogLevel } from '@nestjs/common';
 import * as Sentry from '@sentry/node';
 import { LoggerTransportInterface } from '@concepta/nestjs-logger';
 import { LoggerSentrySettingsInterface } from '../interfaces/logger-sentry-settings.interface';
 import { LOGGER_SENTRY_MODULE_SETTINGS_TOKEN } from '../config/logger-sentry.config';
+import { RuntimeException, mapHttpStatus } from '@concepta/nestjs-exception';
+import { isObject } from 'class-validator';
+import { LoggerSentryExtrasInterface } from '../interfaces/logger-sentry-extras.interface';
 
 /**
  * The transport that implements {@link LoggerTransportInterface}
@@ -46,7 +49,11 @@ export class LoggerSentryTransport implements LoggerTransportInterface {
    * @param logLevel - Level of severity
    * @param error - Error to log
    */
-  log(message: string, logLevel: LogLevel, error?: Error | string): void {
+  log(
+    message: string,
+    logLevel: LogLevel,
+    error?: Error | string | RuntimeException,
+  ): void {
     // map the internal log level to sentry log severity
     const severity = this.settings.logLevelMap(logLevel);
 
@@ -55,12 +62,48 @@ export class LoggerSentryTransport implements LoggerTransportInterface {
       // its an error, use error message
       Sentry.captureException(error, {
         level: severity,
-        // TODO: are we using this extras correctly?
-        extra: { developerMessage: message },
+        extra: {
+          developerMessage: message,
+          ...this.getExtras(error),
+        },
       });
     } else {
       // its a string, just send it
       Sentry.captureMessage(message, severity);
     }
+  }
+
+  private getExtras(
+    exception?: Error | string | RuntimeException | HttpException,
+  ): LoggerSentryExtrasInterface {
+    const extras: LoggerSentryExtrasInterface = {};
+    if (exception instanceof HttpException) {
+      this.handleHttpException(exception, extras);
+    } else if (exception instanceof RuntimeException) {
+      this.handleRuntimeException(exception, extras);
+    }
+
+    return extras;
+  }
+
+  private handleHttpException(
+    exception: HttpException,
+    extras: LoggerSentryExtrasInterface,
+  ): void {
+    const res = exception.getResponse();
+    extras.statusCode = exception.getStatus();
+    extras.errorCode = mapHttpStatus(extras.statusCode);
+    extras.message = isObject(res) && 'message' in res ? res.message : res;
+  }
+
+  private handleRuntimeException(
+    exception: RuntimeException,
+    extras: LoggerSentryExtrasInterface,
+  ): void {
+    extras.errorCode = exception?.errorCode;
+    extras.statusCode = exception?.httpStatus;
+    extras.message = exception?.message;
+    extras.safeMessage = exception?.safeMessage;
+    extras.context = exception?.context;
   }
 }

@@ -55,9 +55,10 @@ export class InvitationAcceptedListener
       const { userId, newPassword } = event?.payload?.data ?? {};
 
       if (typeof userId !== 'string' || typeof newPassword !== 'string') {
-        throw new UserException(
-          'The invitation accepted event payload received has invalid content. The payload must have the "userId" and "newPassword" properties.',
-        );
+        throw new UserException({
+          message:
+            'The invitation accepted event payload received has invalid content. The payload must have the "userId" and "newPassword" properties.',
+        });
       }
 
       const user = await this.userLookupService.byId(

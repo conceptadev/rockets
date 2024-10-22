@@ -144,7 +144,8 @@ export class AppModule {}
 #### Step 2: Setup environment variables
 
 To use the default configuration, you need to define the environments
-variables. One of the ways you can do that is using `.env` file
+variables. One of the ways you can do that is using `.env` file. For
+the private key make sure to use a `Send-Your-Data API` key.
 
 ```zsh
 // .env file
