@@ -1,9 +1,9 @@
 import {
-  RuntimeException,
-  RuntimeExceptionOptions,
+  RuntimeExceptionOptions
 } from '@concepta/nestjs-exception';
+import { AuthAppleException } from './auth-apple-exception';
 
-export class AuthApplePublicKeyException extends RuntimeException {
+export class AuthApplePublicKeyException extends AuthAppleException {
   constructor(options?: RuntimeExceptionOptions) {
     super({
       safeMessage: 'Apple public key was not able to be retrieved.',

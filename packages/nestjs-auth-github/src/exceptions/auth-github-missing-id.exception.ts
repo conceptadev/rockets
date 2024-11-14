@@ -1,9 +1,9 @@
 import {
-  RuntimeException,
-  RuntimeExceptionOptions,
+  RuntimeExceptionOptions
 } from '@concepta/nestjs-exception';
+import { AuthGithubException } from './auth-github.exception';
 
-export class AuthGithubMissingIdException extends RuntimeException {
+export class AuthGithubMissingIdException extends AuthGithubException {
   constructor(options?: RuntimeExceptionOptions) {
     super({
       safeMessage: 'GitHub did not return an id for the user.',

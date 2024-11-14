@@ -12,8 +12,8 @@ import {
 
 import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.interface';
 import { AuthLocalValidateUserServiceInterface } from './interfaces/auth-local-validate-user-service.interface';
-import { InvalidCredentialsException } from './exceptions/invalid-credentials.exception';
-import { InvalidLoginDataException } from './exceptions/invalid-login-data.exception';
+import { AuthLocalInvalidCredentialsException } from './exceptions/auth-local-invalid-credentials.exception';
+import { AuthLocalInvalidLoginDataException } from './exceptions/auth-local-invalid-login-data.exception';
 
 /**
  * Define the Local strategy using passport.
@@ -61,7 +61,7 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
     try {
       await validateOrReject(dto);
     } catch (e) {
-      throw new InvalidLoginDataException({
+      throw new AuthLocalInvalidLoginDataException({
         originalError: e,
       });
     }
@@ -79,7 +79,7 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
         throw new Error(`No valid user found: ${username}`);
       }
     } catch (e) {
-      throw new InvalidCredentialsException({ originalError: e });
+      throw new AuthLocalInvalidCredentialsException({ originalError: e });
     }
 
     return validatedUser;

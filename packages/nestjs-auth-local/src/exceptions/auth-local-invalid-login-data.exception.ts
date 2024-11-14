@@ -4,7 +4,7 @@ import {
   RuntimeExceptionOptions,
 } from '@concepta/nestjs-exception';
 
-export class InvalidLoginDataException extends RuntimeException {
+export class AuthLocalInvalidLoginDataException extends RuntimeException {
   constructor(options?: RuntimeExceptionOptions) {
     super({
       message:

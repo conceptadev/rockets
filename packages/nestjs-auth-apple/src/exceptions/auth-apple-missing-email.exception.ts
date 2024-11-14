@@ -1,9 +1,9 @@
 import {
-  RuntimeException,
-  RuntimeExceptionOptions,
+  RuntimeExceptionOptions
 } from '@concepta/nestjs-exception';
+import { AuthAppleException } from './auth-apple-exception';
 
-export class AuthAppleMissingEmailException extends RuntimeException {
+export class AuthAppleMissingEmailException extends AuthAppleException {
   constructor(options?: RuntimeExceptionOptions) {
     super({
       safeMessage: 'Apple did not return an email address for the user.',

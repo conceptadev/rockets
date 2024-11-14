@@ -1,9 +1,9 @@
 import {
-  RuntimeException,
-  RuntimeExceptionOptions,
+  RuntimeExceptionOptions
 } from '@concepta/nestjs-exception';
+import { AuthAppleException } from './auth-apple-exception';
 
-export class AuthAppleMissingIdException extends RuntimeException {
+export class AuthAppleMissingIdException extends AuthAppleException {
   constructor(options?: RuntimeExceptionOptions) {
     super({
       safeMessage: 'Apple did not return an id for the user.',

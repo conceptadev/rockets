@@ -11,8 +11,8 @@ import { AuthLocalValidateUserService } from './services/auth-local-validate-use
 import { UserFixture } from './__fixtures__/user/user.entity.fixture';
 import { ReferenceIdInterface } from '@concepta/ts-core';
 import { AuthLocalValidateUserInterface } from './interfaces/auth-local-validate-user.interface';
-import { InvalidCredentialsException } from './exceptions/invalid-credentials.exception';
-import { InvalidLoginDataException } from './exceptions/invalid-login-data.exception';
+import { AuthLocalInvalidCredentialsException } from './exceptions/auth-local-invalid-credentials.exception';
+import { AuthLocalInvalidLoginDataException } from './exceptions/auth-local-invalid-login-data.exception';
 
 describe(AuthLocalStrategy.name, () => {
   const USERNAME = 'username';
@@ -72,7 +72,7 @@ describe(AuthLocalStrategy.name, () => {
         });
 
       const t = () => authLocalStrategy.validate(USERNAME, PASSWORD);
-      await expect(t).rejects.toThrow(InvalidCredentialsException);
+      await expect(t).rejects.toThrow(AuthLocalInvalidCredentialsException);
     });
 
     it('should throw error on validateOrReject', async () => {
@@ -87,14 +87,14 @@ describe(AuthLocalStrategy.name, () => {
         .mockRejectedValueOnce(BadRequestException);
 
       const t = () => authLocalStrategy.validate(USERNAME, PASSWORD);
-      await expect(t).rejects.toThrow(InvalidLoginDataException);
+      await expect(t).rejects.toThrow(AuthLocalInvalidLoginDataException);
     });
 
     it('should return no user on userLookupService.byUsername', async () => {
       jest.spyOn(userLookUpService, 'byUsername').mockResolvedValue(null);
 
       const t = () => authLocalStrategy.validate(USERNAME, PASSWORD);
-      await expect(t).rejects.toThrow(InvalidCredentialsException);
+      await expect(t).rejects.toThrow(AuthLocalInvalidCredentialsException);
     });
 
     it('should be invalid on passwordService.validateObject', async () => {
@@ -103,7 +103,7 @@ describe(AuthLocalStrategy.name, () => {
         .mockResolvedValue(false);
 
       const t = () => authLocalStrategy.validate(USERNAME, PASSWORD);
-      await expect(t).rejects.toThrow(InvalidCredentialsException);
+      await expect(t).rejects.toThrow(AuthLocalInvalidCredentialsException);
     });
   });
 
