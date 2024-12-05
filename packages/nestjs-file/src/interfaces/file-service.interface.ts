@@ -1,5 +1,5 @@
-import { FileCreatableInterface, FileInterface } from '@concepta/ts-common';
-import { ReferenceIdInterface } from '@concepta/ts-core';
+import { FileCreatableInterface, FileInterface } from '@concepta/nestjs-common';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 
 export interface FileServiceInterface {
   push(file: FileCreatableInterface): Promise<FileInterface>;

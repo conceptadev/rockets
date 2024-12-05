@@ -1,5 +1,5 @@
 import { Entity, ManyToOne, Unique } from 'typeorm';
-import { ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import { UserEntityFixture } from './user-entity.fixture';
 import { CacheSqliteEntity } from '../../entities/cache-sqlite.entity';
 

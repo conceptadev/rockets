@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
 import { TypeOrmCrudService } from '@concepta/nestjs-crud';
-import { RoleAssignmentInterface } from '@concepta/ts-common';
+import { RoleAssignmentInterface } from '@concepta/nestjs-common';
 
 /**
  * Role assignment CRUD service

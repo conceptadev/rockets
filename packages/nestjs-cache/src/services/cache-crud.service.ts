@@ -1,7 +1,7 @@
 import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { TypeOrmCrudService } from '@concepta/nestjs-crud';
-import { CacheInterface } from '@concepta/ts-common';
+import { CacheInterface } from '@concepta/nestjs-common';
 
 /**
  * Cache CRUD service

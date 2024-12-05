@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { AuthenticatedUserInterface } from '@concepta/ts-common';
+import { AuthenticatedUserInterface } from '../domain/authentication/interfaces/authenticated-user.interface';
 
 /**
  * Decorator that takes a property name as key, and returns the

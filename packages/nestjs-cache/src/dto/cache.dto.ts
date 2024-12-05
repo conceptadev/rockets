@@ -1,7 +1,7 @@
 import { Exclude, Expose, Type } from 'class-transformer';
 import { Allow, IsOptional, IsString, ValidateNested } from 'class-validator';
-import { ReferenceIdInterface } from '@concepta/ts-core';
-import { CacheInterface } from '@concepta/ts-common';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
+import { CacheInterface } from '@concepta/nestjs-common';
 import { CommonEntityDto, ReferenceIdDto } from '@concepta/nestjs-common';
 import { ApiProperty } from '@nestjs/swagger';
 

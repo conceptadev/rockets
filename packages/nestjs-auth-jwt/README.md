@@ -108,7 +108,7 @@ dependencies from npm or yarn:
 npm install class-transformer
 npm install class-validator
 npm install @nestjs/jwt
-npm install @concepta/ts-core
+npm install @concepta/nestjs-common
 npm install @concepta/nestjs-authentication
 npm install @concepta/nestjs-jwt
 npm install @concepta/nestjs-auth-jwt
@@ -120,7 +120,7 @@ or
 yarn add class-transformer
 yarn add class-validator
 yarn add @nestjs/jwt
-yarn add @concepta/ts-core
+yarn add @concepta/nestjs-common
 yarn add @concepta/nestjs-authentication
 yarn add @concepta/nestjs-jwt
 yarn add @concepta/nestjs-auth-jwt
@@ -217,7 +217,7 @@ export class UserService {
 ```ts
 // user-lookup.service.ts
 import { AuthJwtUserLookupServiceInterface } from '@concepta/nestjs-auth-jwt';
-import { ReferenceIdInterface, ReferenceSubject } from '@concepta/ts-core';
+import { ReferenceIdInterface, ReferenceSubject } from '@concepta/nestjs-common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -575,7 +575,7 @@ and must be provided to the module.
 
 ```ts
 import { AuthJwtUserLookupServiceInterface } from '@concepta/nestjs-auth-jwt';
-import { ReferenceIdInterface, ReferenceSubject } from '@concepta/ts-core';
+import { ReferenceIdInterface, ReferenceSubject } from '@concepta/nestjs-common';
 
 export class UserLookupService implements AuthJwtUserLookupServiceInterface {
   async bySubject(subject: ReferenceSubject): Promise<ReferenceIdInterface>  {

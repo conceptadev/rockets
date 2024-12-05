@@ -1,5 +1,5 @@
 import { Column } from 'typeorm';
-import { ReferenceAssigneeInterface } from '@concepta/ts-core';
+import { ReferenceAssigneeInterface } from '@concepta/nestjs-common';
 import { CommonSqliteEntity } from '@concepta/typeorm-common';
 import { RoleEntityInterface } from '../interfaces/role-entity.interface';
 

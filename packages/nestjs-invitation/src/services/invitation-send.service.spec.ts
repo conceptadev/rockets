@@ -8,7 +8,7 @@ import { EmailService } from '@concepta/nestjs-email';
 import { getDynamicRepositoryToken } from '@concepta/nestjs-typeorm-ext';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
-import { INVITATION_MODULE_CATEGORY_USER_KEY } from '@concepta/ts-common';
+import { INVITATION_MODULE_CATEGORY_USER_KEY } from '@concepta/nestjs-common';
 
 import { INVITATION_MODULE_SETTINGS_TOKEN } from '../invitation.constants';
 import { InvitationSendService } from './invitation-send.service';

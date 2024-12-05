@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { FileCreatableInterface, FileInterface } from '@concepta/ts-common';
+import { FileCreatableInterface, FileInterface } from '@concepta/nestjs-common';
 
-import { ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import { FileCreateException } from '../exceptions/file-create.exception';
 import { FileDuplicateEntryException } from '../exceptions/file-duplicated.exception';
 import { FileIdMissingException } from '../exceptions/file-id-missing.exception';

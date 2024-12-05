@@ -6,8 +6,8 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ReferenceIdInterface } from '@concepta/ts-core';
-import { OrgInterface } from '@concepta/ts-common';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
+import { OrgInterface } from '@concepta/nestjs-common';
 import { CommonEntityDto, ReferenceIdDto } from '@concepta/nestjs-common';
 
 /**

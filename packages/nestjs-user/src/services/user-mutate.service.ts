@@ -5,7 +5,7 @@ import {
   PasswordPlainInterface,
   UserCreatableInterface,
   UserUpdatableInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 
 import { UserPasswordService } from './user-password.service';

@@ -15,7 +15,7 @@ import {
 } from 'class-transformer';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { LiteralObject } from '@concepta/ts-core';
+import { LiteralObject } from '@concepta/nestjs-common';
 import { CrudInvalidResponseDto } from '../dto/crud-invalid-response.dto';
 import { CrudResponsePaginatedDto } from '../dto/crud-response-paginated.dto';
 import { CrudSerializationOptionsInterface } from '../interfaces/crud-serialization-options.interface';

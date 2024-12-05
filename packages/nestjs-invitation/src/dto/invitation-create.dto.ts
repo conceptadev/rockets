@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEmail, IsObject, IsOptional, IsString } from 'class-validator';
 import { Exclude, Expose } from 'class-transformer';
-import { LiteralObject } from '@concepta/ts-core';
+import { LiteralObject } from '@concepta/nestjs-common';
 
 @Expose()
 export class TempClass {

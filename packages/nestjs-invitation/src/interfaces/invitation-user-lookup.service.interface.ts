@@ -5,7 +5,7 @@ import {
   ReferenceId,
   ReferenceIdInterface,
   ReferenceUsernameInterface,
-} from '@concepta/ts-core';
+} from '@concepta/nestjs-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 export interface InvitationUserLookupServiceInterface

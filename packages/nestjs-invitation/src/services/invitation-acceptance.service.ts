@@ -1,7 +1,10 @@
 import { Repository } from 'typeorm';
 import { Inject } from '@nestjs/common';
-import { LiteralObject, ReferenceAssigneeInterface } from '@concepta/ts-core';
-import { InvitationInterface } from '@concepta/ts-common';
+import {
+  LiteralObject,
+  ReferenceAssigneeInterface,
+} from '@concepta/nestjs-common';
+import { InvitationInterface } from '@concepta/nestjs-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import { EventDispatchService } from '@concepta/nestjs-event';
 import { BaseService, QueryOptionsInterface } from '@concepta/typeorm-common';

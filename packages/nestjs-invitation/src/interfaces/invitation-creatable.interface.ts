@@ -1,5 +1,5 @@
-import { InvitationInterface } from '@concepta/ts-common';
-import { LiteralObject } from '@concepta/ts-core';
+import { InvitationInterface } from '@concepta/nestjs-common';
+import { LiteralObject } from '@concepta/nestjs-common';
 
 export interface InvitationCreatableInterface
   extends Pick<InvitationInterface, 'category'> {

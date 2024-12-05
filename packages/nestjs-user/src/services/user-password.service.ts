@@ -1,10 +1,10 @@
 import { HttpStatus, Inject, Injectable, Optional } from '@nestjs/common';
-import { ReferenceId, ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceId, ReferenceIdInterface } from '@concepta/nestjs-common';
 import {
   AuthenticatedUserInterface,
   PasswordPlainCurrentInterface,
   PasswordPlainInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 import {
   isPasswordStorage,
   PasswordCreationService,

@@ -1,5 +1,5 @@
 import { Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import { UserRoleEntityFixture } from './user-role-entity.fixture';
 
 /**

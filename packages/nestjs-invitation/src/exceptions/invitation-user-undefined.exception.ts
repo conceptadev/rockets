@@ -1,4 +1,7 @@
-import { ExceptionInterface, mapNonErrorToException } from '@concepta/ts-core';
+import {
+  ExceptionInterface,
+  mapNonErrorToException,
+} from '@concepta/nestjs-common';
 
 /**
  * Generic invitation exception.

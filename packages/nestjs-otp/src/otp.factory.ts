@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 import { Factory } from '@concepta/typeorm-seeding';
-import { OtpInterface } from '@concepta/ts-common';
+import { OtpInterface } from '@concepta/nestjs-common';
 
 /**
  * Otp factory

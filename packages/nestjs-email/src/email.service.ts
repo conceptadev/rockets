@@ -4,8 +4,8 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { NotAnErrorException } from '@concepta/ts-core';
-import { EmailSendOptionsInterface } from '@concepta/ts-common';
+import { NotAnErrorException } from '@concepta/nestjs-common';
+import { EmailSendOptionsInterface } from '@concepta/nestjs-common';
 import { EmailServiceInterface } from './interfaces/email-service.interface';
 
 @Injectable()

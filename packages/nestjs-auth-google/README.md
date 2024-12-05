@@ -219,7 +219,7 @@ For a detailed implementation example, refer to:
 ```ts
 import { Injectable } from '@nestjs/common';
 import { JwtIssueService } from '@concepta/nestjs-jwt';
-import { AuthenticationResponseInterface } from '@concepta/ts-common';
+import { AuthenticationResponseInterface } from '@concepta/nestjs-common';
 import { IssueTokenServiceInterface } from '../interfaces/issue-token-service.interface';
 
 @Injectable()
@@ -281,7 +281,7 @@ import {
 import {
   AuthenticatedUserInterface,
   AuthenticationResponseInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { AuthGoogleGuard } from '@concepta/nestjs-auth-google';
 

@@ -81,7 +81,7 @@ token issuance, and password validation.
 ```sh
 npm install class-transformer
 npm install class-validator
-npm install @concepta/ts-core
+npm install @concepta/nestjs-common
 npm install @concepta/nestjs-authentication
 npm install @concepta/nestjs-password
 npm install @concepta/nestjs-jwt
@@ -91,7 +91,7 @@ or
 
 yarn add class-transformer
 yarn add class-validator
-yarn add @concepta/ts-core
+yarn add @concepta/nestjs-common
 yarn add @concepta/nestjs-authentication
 yarn add @concepta/nestjs-password
 yarn add @concepta/nestjs-jwt
@@ -162,7 +162,7 @@ in the `AuthLocalModule`.
 ```ts
 // user-lookup.service.ts
 import { Injectable } from '@nestjs/common';
-import { ReferenceUsername } from '@concepta/ts-core';
+import { ReferenceUsername } from '@concepta/nestjs-common';
 import { AuthLocalUserLookupServiceInterface } from '@concepta/nestjs-auth-local';
 import { AuthLocalCredentialsInterface } from '@concepta/nestjs-auth-local/dist/interfaces/auth-local-credentials.interface';
 
@@ -406,7 +406,7 @@ advantage of the default implementation.
 ```ts
 // my-auth-local-validate-user.service.ts
 import { Injectable } from '@nestjs/common';
-import { ReferenceActiveInterface, ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceActiveInterface, ReferenceIdInterface } from '@concepta/nestjs-common';
 import {
   AuthLocalValidateUserInterface,
   AuthLocalValidateUserService
@@ -436,7 +436,7 @@ export class MyAuthLocalValidateUserService
 ```ts
 // my-auth-local-validate-user.service.ts
 import { Injectable } from '@nestjs/common';
-import { ReferenceActiveInterface, ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceActiveInterface, ReferenceIdInterface } from '@concepta/nestjs-common';
 import {
   AuthLocalValidateUserInterface,
   AuthLocalValidateUserServiceInterface

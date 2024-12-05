@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
-import { INVITATION_MODULE_CATEGORY_ORG_KEY } from '@concepta/ts-common';
+import { INVITATION_MODULE_CATEGORY_ORG_KEY } from '@concepta/nestjs-common';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { EventDispatchService, EventModule } from '@concepta/nestjs-event';
 import { UserEntityInterface, UserModule } from '@concepta/nestjs-user';
