@@ -12,8 +12,11 @@ import {
 
 import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.interface';
 import { AuthLocalValidateUserServiceInterface } from './interfaces/auth-local-validate-user-service.interface';
-import { InvalidCredentialsException } from './exceptions/invalid-credentials.exception';
-import { InvalidLoginDataException } from './exceptions/invalid-login-data.exception';
+import { AuthLocalInvalidCredentialsException } from './exceptions/auth-local-invalid-credentials.exception';
+import { AuthLocalInvalidLoginDataException } from './exceptions/auth-local-invalid-login-data.exception';
+import { AuthLocalMissingLoginDtoException } from './exceptions/auth-local-missing-login-dto.exception';
+import { AuthLocalMissingUsernameFieldException } from './exceptions/auth-local-missing-username-field.exception';
+import { AuthLocalMissingPasswordFieldException } from './exceptions/auth-local-missing-password-field.exception';
 
 /**
  * Define the Local strategy using passport.
@@ -61,7 +64,7 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
     try {
       await validateOrReject(dto);
     } catch (e) {
-      throw new InvalidLoginDataException({
+      throw new AuthLocalInvalidLoginDataException({
         originalError: e,
       });
     }
@@ -74,12 +77,15 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
         username,
         password,
       });
-      // did we get a valid user?
-      if (!validatedUser) {
-        throw new Error(`No valid user found: ${username}`);
-      }
     } catch (e) {
-      throw new InvalidCredentialsException({ originalError: e });
+      throw new AuthLocalInvalidCredentialsException({ originalError: e });
+    }
+
+    // did we get a valid user?
+    if (!validatedUser) {
+      throw new AuthLocalInvalidCredentialsException({
+        message: `No valid user found: ${username}`,
+      });
     }
 
     return validatedUser;
@@ -94,23 +100,19 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
     // is the login dto missing?
     if (!loginDto) {
       // TODO: Change Error to a Exception
-      throw new Error('Login DTO is required, did someone remove the default?');
+      throw new AuthLocalMissingLoginDtoException();
     }
 
     // is the username field missing?
     if (!usernameField) {
       // TODO: Change Error to a Exception
-      throw new Error(
-        'Login username field is required, did someone remove the default?',
-      );
+      throw new AuthLocalMissingUsernameFieldException();
     }
 
     // is the password field missing?
     if (!passwordField) {
       // TODO: Change Error to a Exception
-      throw new Error(
-        'Login password field is required, did someone remove the default?',
-      );
+      throw new AuthLocalMissingPasswordFieldException();
     }
 
     return { loginDto, usernameField, passwordField };

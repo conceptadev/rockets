@@ -23,3 +23,8 @@ export * from './services/event-listen.service';
 
 // constants
 export * from './event-constants';
+
+export { EventException } from './exceptions/event.exception';
+export { EventDispatchException } from './exceptions/event-dispatch.exception';
+export { EventListenException } from './exceptions/event-listen.exception';
+export { EventListenerException } from './exceptions/event-listener.exception';

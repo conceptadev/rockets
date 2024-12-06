@@ -4,10 +4,10 @@ import {
   RuntimeExceptionOptions,
 } from '@concepta/nestjs-exception';
 
-export class InvalidLoginDataException extends RuntimeException {
+export class AuthLocalInvalidLoginDataException extends RuntimeException {
   constructor(options?: RuntimeExceptionOptions) {
     super({
-      message:
+      safeMessage:
         'The provided username or password is incorrect. Please try again.',
       httpStatus: HttpStatus.BAD_REQUEST,
       ...options,
