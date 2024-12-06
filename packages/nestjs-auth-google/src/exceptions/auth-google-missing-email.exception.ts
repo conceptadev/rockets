@@ -1,6 +1,4 @@
-import {
-  RuntimeExceptionOptions
-} from '@concepta/nestjs-exception';
+import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
 import { AuthGoogleException } from './auth-google.exception';
 
 export class AuthGoogleMissingEmailException extends AuthGoogleException {

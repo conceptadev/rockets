@@ -75,6 +75,19 @@ describe(AuthLocalStrategy.name, () => {
       await expect(t).rejects.toThrow(AuthLocalInvalidCredentialsException);
     });
 
+    it('should return user with custom message', async () => {
+      jest
+        .spyOn(validateUserService, 'validateUser')
+        .mockImplementationOnce((_dto: AuthLocalValidateUserInterface) => {
+          throw new Error('Custom message');
+        });
+
+      const t = () => authLocalStrategy.validate(USERNAME, PASSWORD);
+      await expect(t).rejects.toThrow(
+        'The provided credentials are incorrect. Please try again.',
+      );
+    });
+
     it('should throw error on validateOrReject', async () => {
       const t = () => authLocalStrategy.validate(USERNAME, '');
       await expect(t).rejects.toThrow();

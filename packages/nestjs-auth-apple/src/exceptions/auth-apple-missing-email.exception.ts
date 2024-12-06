@@ -1,6 +1,4 @@
-import {
-  RuntimeExceptionOptions
-} from '@concepta/nestjs-exception';
+import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
 import { AuthAppleException } from './auth-apple-exception';
 
 export class AuthAppleMissingEmailException extends AuthAppleException {

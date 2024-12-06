@@ -1,6 +1,4 @@
-import {
-  RuntimeExceptionOptions
-} from '@concepta/nestjs-exception';
+import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
 import { EventException } from './event.exception';
 
 /**

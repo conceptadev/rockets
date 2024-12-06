@@ -1,4 +1,4 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ReferenceIdInterface } from '@concepta/ts-core';
 import { AuthorizationPayloadInterface } from '@concepta/ts-common';
 import {
@@ -21,6 +21,7 @@ import {
 
 import { AuthJwtSettingsInterface } from './interfaces/auth-jwt-settings.interface';
 import { AuthJwtUserLookupServiceInterface } from './interfaces/auth-jwt-user-lookup-service.interface';
+import { AuthJwtUnauthorizedException } from './exceptions/auth-jwt-unauthorized.exception';
 
 @Injectable()
 export class AuthJwtStrategy extends PassportStrategyFactory<JwtStrategy>(
@@ -60,7 +61,7 @@ export class AuthJwtStrategy extends PassportStrategyFactory<JwtStrategy>(
     if (user) {
       return user;
     } else {
-      throw new UnauthorizedException();
+      throw new AuthJwtUnauthorizedException();
     }
   }
 }
