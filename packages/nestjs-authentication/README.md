@@ -226,7 +226,7 @@ Create the Lookup Service for AuthJwtModule
 ```typescript
 // my-jwt-user-lookup.service.ts
 import { AuthJwtUserLookupServiceInterface } from '@concepta/nestjs-auth-jwt/dist/interfaces/auth-jwt-user-lookup-service.interface';
-import { ReferenceIdInterface, ReferenceSubject } from '@concepta/ts-core';
+import { ReferenceIdInterface, ReferenceSubject } from '@concepta/nestjs-common';
 
 export class MyJwtUserLookupService implements AuthJwtUserLookupServiceInterface {
   async bySubject(subject: ReferenceSubject): Promise<ReferenceIdInterface> {
@@ -243,7 +243,7 @@ Create the Lookup Service for Auth Local
 ```ts
 // my-auth-local-user-lookup.service.ts
 import { Injectable } from '@nestjs/common';
-import { ReferenceUsername } from '@concepta/ts-core';
+import { ReferenceUsername } from '@concepta/nestjs-common';
 import { AuthLocalUserLookupServiceInterface } from '@concepta/nestjs-auth-local';
 import { AuthLocalCredentialsInterface } from '@concepta/nestjs-auth-local/dist/interfaces/auth-local-credentials.interface';
 
@@ -592,7 +592,7 @@ AuthenticationModule.forRoot({
 ```ts
 import { Injectable } from '@nestjs/common';
 import { JwtIssueService } from '@concepta/nestjs-jwt';
-import { AuthenticationResponseInterface } from '@concepta/ts-common';
+import { AuthenticationResponseInterface } from '@concepta/nestjs-common';
 import { IssueTokenServiceInterface } from '../interfaces/issue-token-service.interface';
 
 @Injectable()

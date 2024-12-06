@@ -6,7 +6,7 @@ import {
 import {
   INVITATION_MODULE_CATEGORY_ORG_KEY,
   InvitationAcceptedEventPayloadInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 import { Inject, Injectable, OnModuleInit, Optional } from '@nestjs/common';
 
 import { ORG_MODULE_SETTINGS_TOKEN } from '../org.constants';

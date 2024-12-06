@@ -6,7 +6,7 @@
 
 A list of all the necessary Rockets libraries that the TypeOrmExt Module Sample needs.
 
-- [@concepta/nestjs-core](https://www.google.com)
+- [@concepta/nestjs-common](https://www.google.com)
 - [@concepta/nestjs-auth-local](https://github.com)
 - [@concepta/nestjs-authentication](https://github.com)
 - [@concepta/nestjs-email](https://github.com)
@@ -30,7 +30,7 @@ These libraries are necessary for the TypeOrm Module to run:
 
 ```zsh
 # install necessary 3rd party libraries
-yarn add @concepta/nestjs-core @concepta/nestjs-core @concepta/nestjs-auth-local @concepta/nestjs-authentication @concepta/nestjs-email @concepta/nestjs-event @concepta/nestjs-jwt @concepta/nestjs-logger @concepta/nestjs-password @concepta/nestjs-typeorm-ext @concepta/nestjs-user
+yarn add @concepta/nestjs-common @concepta/nestjs-common @concepta/nestjs-auth-local @concepta/nestjs-authentication @concepta/nestjs-email @concepta/nestjs-event @concepta/nestjs-jwt @concepta/nestjs-logger @concepta/nestjs-password @concepta/nestjs-typeorm-ext @concepta/nestjs-user
 ```
 
 ### Basic Sample Implementation

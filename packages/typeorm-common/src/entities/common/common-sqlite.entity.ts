@@ -1,5 +1,5 @@
 import { PrimaryGeneratedColumn } from 'typeorm';
-import { AuditInterface, ReferenceIdInterface } from '@concepta/ts-core';
+import { AuditInterface, ReferenceIdInterface } from '@concepta/nestjs-common';
 import { AuditSqlLiteEntity } from '../audit/audit-sqlite.entity';
 
 export abstract class CommonSqliteEntity

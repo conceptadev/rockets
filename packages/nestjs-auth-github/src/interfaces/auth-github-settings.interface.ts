@@ -1,4 +1,4 @@
-import { AuthenticationCodeInterface } from '@concepta/ts-common';
+import { AuthenticationCodeInterface } from '@concepta/nestjs-common';
 import { Type } from '@nestjs/common';
 import { MapProfile } from '../auth-github.types';
 

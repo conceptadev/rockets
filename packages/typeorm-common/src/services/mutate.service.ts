@@ -8,7 +8,7 @@ import {
   ReplaceOneInterface,
   UpdateOneInterface,
   Type,
-} from '@concepta/ts-core';
+} from '@concepta/nestjs-common';
 
 import { QueryOptionsInterface } from '../interfaces/query-options.interface';
 import { ReferenceValidationException } from '../exceptions/reference-validation.exception';

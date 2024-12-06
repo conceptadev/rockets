@@ -1,5 +1,5 @@
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
-import { ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 
 import { QueryOptionsInterface } from '../interfaces/query-options.interface';
 import { SafeTransactionOptionsInterface } from '../interfaces/safe-transaction-options.interface';

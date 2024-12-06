@@ -1,7 +1,7 @@
 import { IsString } from 'class-validator';
 import { Exclude, Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { AuthenticationLoginInterface } from '@concepta/ts-common';
+import { AuthenticationLoginInterface } from '@concepta/nestjs-common';
 
 @Exclude()
 export class AuthLocalLoginDto implements AuthenticationLoginInterface {

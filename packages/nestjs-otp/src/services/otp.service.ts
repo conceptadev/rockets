@@ -7,8 +7,8 @@ import {
   ReferenceAssigneeInterface,
   ReferenceAssignment,
   ReferenceId,
-} from '@concepta/ts-core';
-import { OtpCreatableInterface, OtpInterface } from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
+import { OtpCreatableInterface, OtpInterface } from '@concepta/nestjs-common';
 import {
   QueryOptionsInterface,
   ReferenceLookupException,

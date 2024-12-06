@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import { ValidateUserService } from '@concepta/nestjs-authentication';
 import { PasswordValidationServiceInterface } from '@concepta/nestjs-password';
 import {

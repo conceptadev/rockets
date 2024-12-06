@@ -23,8 +23,8 @@ import {
   CacheCreatableInterface,
   CacheInterface,
   CacheUpdatableInterface,
-} from '@concepta/ts-common';
-import { ReferenceAssignment } from '@concepta/ts-core';
+} from '@concepta/nestjs-common';
+import { ReferenceAssignment } from '@concepta/nestjs-common';
 import {
   CACHE_MODULE_CRUD_SERVICES_TOKEN,
   CACHE_MODULE_SETTINGS_TOKEN,

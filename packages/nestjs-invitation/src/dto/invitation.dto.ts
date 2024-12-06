@@ -1,8 +1,8 @@
 import { Exclude, Expose, Type } from 'class-transformer';
 import { IsBoolean, IsEmail, IsString, ValidateNested } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ReferenceIdInterface } from '@concepta/ts-core';
-import { InvitationInterface } from '@concepta/ts-common';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
+import { InvitationInterface } from '@concepta/nestjs-common';
 import { CommonEntityDto, ReferenceIdDto } from '@concepta/nestjs-common';
 
 @Exclude()

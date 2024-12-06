@@ -1,8 +1,8 @@
-import { ModuleOptionsControllerInterface } from '@concepta/nestjs-core';
+import { ModuleOptionsControllerInterface } from '@concepta/nestjs-common';
 
-import { InvitationSettingsInterface } from './invitation-settings.interface';
-import { InvitationOtpServiceInterface } from './invitation-otp.service.interface';
 import { InvitationEmailServiceInterface } from './invitation-email.service.interface';
+import { InvitationOtpServiceInterface } from './invitation-otp.service.interface';
+import { InvitationSettingsInterface } from './invitation-settings.interface';
 import { InvitationUserLookupServiceInterface } from './invitation-user-lookup.service.interface';
 import { InvitationUserMutateServiceInterface } from './invitation-user-mutate.service.interface';
 

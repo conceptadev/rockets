@@ -1,4 +1,4 @@
-import { ReferenceAssignment } from '@concepta/ts-core';
+import { ReferenceAssignment } from '@concepta/nestjs-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 import {
   CacheClearInterface,
@@ -8,7 +8,7 @@ import {
   CacheGetOneInterface,
   CacheInterface,
   CacheUpdateInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 
 export interface CacheServiceInterface
   extends CacheCreateInterface<QueryOptionsInterface>,

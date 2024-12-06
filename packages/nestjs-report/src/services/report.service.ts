@@ -2,8 +2,8 @@ import {
   ReportCreatableInterface,
   ReportInterface,
   ReportStatusEnum,
-} from '@concepta/ts-common';
-import { mapNonErrorToException } from '@concepta/ts-core';
+} from '@concepta/nestjs-common';
+import { mapNonErrorToException } from '@concepta/nestjs-common';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 
 import { ReportCreateException } from '../exceptions/report-create.exception';

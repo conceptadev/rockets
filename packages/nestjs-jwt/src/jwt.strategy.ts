@@ -1,6 +1,6 @@
 import { Strategy as PassportStrategy } from 'passport-strategy';
 import { Strategy, VerifyCallback } from 'passport-jwt';
-import { NotAnErrorException } from '@concepta/ts-core';
+import { NotAnErrorException } from '@concepta/nestjs-common';
 import { JwtStrategyOptionsInterface } from './interfaces/jwt-strategy-options.interface';
 
 export class JwtStrategy extends PassportStrategy {

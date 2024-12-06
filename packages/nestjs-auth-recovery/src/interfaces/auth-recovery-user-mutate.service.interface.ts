@@ -2,8 +2,8 @@ import {
   ReferenceEmailInterface,
   ReferenceIdInterface,
   UpdateOneInterface,
-} from '@concepta/ts-core';
-import { PasswordPlainInterface } from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
+import { PasswordPlainInterface } from '@concepta/nestjs-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 export interface AuthRecoveryUserMutateServiceInterface

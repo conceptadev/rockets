@@ -4,8 +4,8 @@ import {
   ReferenceIdInterface,
   ReferenceUsernameInterface,
   UpdateOneInterface,
-} from '@concepta/ts-core';
-import { UserCreatableInterface } from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
+import { UserCreatableInterface } from '@concepta/nestjs-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 export interface InvitationUserMutateServiceInterface

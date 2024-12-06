@@ -3,9 +3,9 @@ import {
   LiteralObject,
   ReferenceEmailInterface,
   ReferenceIdInterface,
-} from '@concepta/ts-core';
+} from '@concepta/nestjs-common';
 import { EventDispatchService } from '@concepta/nestjs-event';
-import { InvitationGetUserEventResponseInterface } from '@concepta/ts-common';
+import { InvitationGetUserEventResponseInterface } from '@concepta/nestjs-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 import {

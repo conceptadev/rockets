@@ -22,7 +22,7 @@ import { CacheOptionsExtrasInterface } from './interfaces/cache-options-extras.i
 import { CacheOptionsInterface } from './interfaces/cache-options.interface';
 import { CacheSettingsInterface } from './interfaces/cache-settings.interface';
 
-import { CacheInterface } from '@concepta/ts-common';
+import { CacheInterface } from '@concepta/nestjs-common';
 import { Repository } from 'typeorm';
 import { cacheDefaultConfig } from './config/cache-default.config';
 import { CacheCrudController } from './controllers/cache-crud.controller';

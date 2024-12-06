@@ -1,5 +1,5 @@
 import { Inject } from '@nestjs/common';
-import { ReportInterface, ReportStatusEnum } from '@concepta/ts-common';
+import { ReportInterface, ReportStatusEnum } from '@concepta/nestjs-common';
 import { FileService } from '@concepta/nestjs-file';
 import { ReportGeneratorResultInterface } from '../interfaces/report-generator-result.interface';
 import { ReportGeneratorServiceInterface } from '../interfaces/report-generator-service.interface';

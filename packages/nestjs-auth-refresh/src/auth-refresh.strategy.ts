@@ -7,7 +7,7 @@ import {
   createVerifyRefreshTokenCallback,
   JwtStrategy,
 } from '@concepta/nestjs-jwt';
-import { AuthorizationPayloadInterface } from '@concepta/ts-common';
+import { AuthorizationPayloadInterface } from '@concepta/nestjs-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 import {

@@ -11,7 +11,7 @@ import {
 import {
   InvitationGetUserEventPayloadInterface,
   InvitationGetUserEventResponseInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 import { USER_MODULE_SETTINGS_TOKEN } from '../user.constants';

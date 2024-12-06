@@ -3,7 +3,7 @@ import {
   ReferenceEmail,
   ReferenceIdInterface,
   ReferenceSubject,
-} from '@concepta/ts-core';
+} from '@concepta/nestjs-common';
 
 import { AuthRecoveryUserLookupServiceInterface } from '../../../interfaces/auth-recovery-user-lookup.service.interface';
 

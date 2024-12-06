@@ -1,4 +1,4 @@
-import { PasswordPlainInterface } from '@concepta/ts-common';
+import { PasswordPlainInterface } from '@concepta/nestjs-common';
 import { PasswordHashObjectOptionsInterface } from './password-hash-object-options.interface';
 import { PasswordHashOptionsInterface } from './password-hash-options.interface';
 import { PasswordStorageInterface } from './password-storage.interface';

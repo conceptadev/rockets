@@ -1,4 +1,4 @@
-import { FileCreatableInterface } from '@concepta/ts-common';
+import { FileCreatableInterface } from '@concepta/nestjs-common';
 import { TransactionProxy } from '@concepta/typeorm-common';
 import { randomUUID } from 'crypto';
 import { mock } from 'jest-mock-extended';

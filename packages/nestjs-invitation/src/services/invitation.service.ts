@@ -2,7 +2,7 @@ import {
   LiteralObject,
   ReferenceEmailInterface,
   ReferenceIdInterface,
-} from '@concepta/ts-core';
+} from '@concepta/nestjs-common';
 import { Injectable } from '@nestjs/common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 

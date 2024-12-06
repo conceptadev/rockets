@@ -16,7 +16,7 @@ import { AuthRecoveryNotificationService } from './auth-recovery-notification.se
 import {
   ReferenceAssigneeInterface,
   ReferenceIdInterface,
-} from '@concepta/ts-core';
+} from '@concepta/nestjs-common';
 import {
   EntityManagerProxy,
   QueryOptionsInterface,

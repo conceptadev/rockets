@@ -1,6 +1,6 @@
 import { Exclude } from 'class-transformer';
 import { PickType } from '@nestjs/swagger';
-import { RoleCreatableInterface } from '@concepta/ts-common';
+import { RoleCreatableInterface } from '@concepta/nestjs-common';
 import { RoleDto } from './role.dto';
 
 /**

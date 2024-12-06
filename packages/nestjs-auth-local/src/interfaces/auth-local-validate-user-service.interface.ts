@@ -1,4 +1,4 @@
-import { ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import { ValidateUserServiceInterface } from '@concepta/nestjs-authentication';
 import { AuthLocalValidateUserInterface } from './auth-local-validate-user.interface';
 

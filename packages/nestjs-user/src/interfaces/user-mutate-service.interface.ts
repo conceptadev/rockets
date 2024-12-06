@@ -4,11 +4,11 @@ import {
   RemoveOneInterface,
   ReplaceOneInterface,
   UpdateOneInterface,
-} from '@concepta/ts-core';
+} from '@concepta/nestjs-common';
 import {
   UserCreatableInterface,
   UserUpdatableInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 import { UserEntityInterface } from './user-entity.interface';

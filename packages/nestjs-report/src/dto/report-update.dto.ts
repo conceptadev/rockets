@@ -1,4 +1,4 @@
-import { ReportUpdatableInterface } from '@concepta/ts-common/src/report/interfaces/report-updatable.interface';
+import { ReportUpdatableInterface } from '@concepta/nestjs-common';
 import { IntersectionType, PartialType, PickType } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { ReportDto } from './report.dto';

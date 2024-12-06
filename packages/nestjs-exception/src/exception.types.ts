@@ -1,4 +1,4 @@
-import { ExceptionContext } from '@concepta/ts-core';
+import { ExceptionContext } from '@concepta/nestjs-common';
 
 export type RuntimeExceptionContext = ExceptionContext & {
   originalError?: Error;

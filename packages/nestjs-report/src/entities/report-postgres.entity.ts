@@ -1,6 +1,6 @@
 import { Column, Entity, Unique } from 'typeorm';
-import { ReportStatusEnum } from '@concepta/ts-common';
-import { ReferenceIdInterface } from '@concepta/ts-core';
+import { ReportStatusEnum } from '@concepta/nestjs-common';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import { CommonPostgresEntity } from '@concepta/typeorm-common';
 import { ReportEntityInterface } from '../interfaces/report-entity.interface';
 

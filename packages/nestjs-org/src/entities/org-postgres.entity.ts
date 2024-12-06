@@ -1,5 +1,5 @@
 import { Column } from 'typeorm';
-import { ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import { CommonPostgresEntity } from '@concepta/typeorm-common';
 import { OrgEntityInterface } from '../interfaces/org-entity.interface';
 

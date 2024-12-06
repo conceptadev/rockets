@@ -1,4 +1,4 @@
-import { LiteralObject } from '@concepta/ts-core';
+import { LiteralObject } from '@concepta/nestjs-common';
 
 export interface CacheSettingsInterface {
   assignments: LiteralObject<{ entityKey: string }>;

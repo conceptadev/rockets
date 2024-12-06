@@ -1,4 +1,4 @@
-import { ReportCreatableInterface } from '@concepta/ts-common';
+import { ReportCreatableInterface } from '@concepta/nestjs-common';
 import { ReportGeneratorResultInterface } from './report-generator-result.interface';
 
 export interface ReportStrategyServiceInterface {

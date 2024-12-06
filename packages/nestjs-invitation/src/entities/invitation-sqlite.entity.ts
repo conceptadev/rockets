@@ -1,6 +1,6 @@
 import { Column } from 'typeorm';
 import { PlainLiteralObject } from '@nestjs/common';
-import { ReferenceActive, ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceActive, ReferenceIdInterface } from '@concepta/nestjs-common';
 import { CommonSqliteEntity } from '@concepta/typeorm-common';
 
 import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';

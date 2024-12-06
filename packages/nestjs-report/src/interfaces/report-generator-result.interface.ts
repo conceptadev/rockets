@@ -1,5 +1,5 @@
-import { ReportUpdatableInterface } from '@concepta/ts-common';
-import { ReferenceIdInterface } from '@concepta/ts-core';
+import { ReportUpdatableInterface } from '@concepta/nestjs-common';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 
 export interface ReportGeneratorResultInterface
   extends ReportUpdatableInterface,

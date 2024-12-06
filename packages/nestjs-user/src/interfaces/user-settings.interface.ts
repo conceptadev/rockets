@@ -6,7 +6,7 @@ import {
   InvitationAcceptedEventPayloadInterface,
   InvitationGetUserEventPayloadInterface,
   InvitationGetUserEventResponseInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 
 export interface UserSettingsInterface {
   invitationRequestEvent?: EventClassInterface<

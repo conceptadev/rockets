@@ -49,7 +49,7 @@ First, you need to install the necessary dependencies. Run the
 following command:
 
 ```bash
-npm install @concepta/nestjs-report @concepta/ts-common @nestjs/swagger axios
+npm install @concepta/nestjs-report @concepta/nestjs-common @nestjs/swagger axios
 ```
 
 ### Step 2: Create DTOs
@@ -95,7 +95,7 @@ import {
   ReportGeneratorResultInterface,
   ReportGeneratorServiceInterface,
 } from '@concepta/nestjs-report';
-import { ReportStatusEnum } from '@concepta/ts-common';
+import { ReportStatusEnum } from '@concepta/nestjs-common';
 import { Inject, Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { promises as fs } from 'fs';
@@ -198,7 +198,7 @@ This controller will use the `ReportService` to create and fetch reports.
 
 ```typescript
 import { ReportService } from '@concepta/nestjs-report';
-import { ReportInterface, ReportStatusEnum } from '@concepta/ts-common';
+import { ReportInterface, ReportStatusEnum } from '@concepta/nestjs-common';
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { REPORT_KEY_USER_REPORT } from './user-report.constants';

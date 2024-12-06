@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { InternalServerErrorException, Logger } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { InvitationInterface } from '@concepta/ts-common';
+import { InvitationInterface } from '@concepta/nestjs-common';
 import {
   CrudBody,
   CrudController,

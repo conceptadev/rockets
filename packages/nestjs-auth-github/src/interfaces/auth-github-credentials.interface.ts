@@ -1,7 +1,7 @@
 import {
   ReferenceEmailInterface,
   ReferenceIdInterface,
-} from '@concepta/ts-core';
+} from '@concepta/nestjs-common';
 
 export interface AuthGithubCredentialsInterface
   extends ReferenceIdInterface,

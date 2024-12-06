@@ -3,8 +3,8 @@ import { Injectable } from '@nestjs/common';
 import {
   ReferenceAssigneeInterface,
   ReferenceIdInterface,
-} from '@concepta/ts-core';
-import { OtpCreatableInterface, OtpInterface } from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
+import { OtpCreatableInterface, OtpInterface } from '@concepta/nestjs-common';
 
 import { InvitationOtpServiceInterface } from '../../interfaces/invitation-otp.service.interface';
 

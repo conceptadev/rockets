@@ -1,5 +1,5 @@
 import { AuthGuard } from '@concepta/nestjs-authentication';
-import { ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 
 import { AUTH_JWT_STRATEGY_NAME } from './auth-jwt.constants';

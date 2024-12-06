@@ -19,7 +19,7 @@ import {
   AuthenticatedUserInterface,
   UserCreatableInterface,
   UserUpdatableInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 import {
   AccessControlCreateMany,
   AccessControlCreateOne,
