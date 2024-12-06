@@ -14,6 +14,8 @@ import { TestMutateServiceFixture } from '../__fixtures__/services/test-mutate.s
 import { TestModuleFixture } from '../__fixtures__/test.module.fixture';
 import { TestEntityFixture } from '../__fixtures__/test.entity.fixture';
 import { TestFactoryFixture } from '../__fixtures__/test.factory.fixture';
+import { initTypeOrmCommonTranslation } from '..';
+import { I18n } from '@concepta/i18n';
 
 describe(MutateService, () => {
   const WRONG_UUID = '3bfd065e-0c30-11ed-861d-0242ac120002';
@@ -24,6 +26,13 @@ describe(MutateService, () => {
   let testFactory: TestFactoryFixture;
 
   beforeEach(async () => {
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    I18n.init({
+      options: {
+        initImmediate: false,
+      },
+    });
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModuleFixture],
     }).compile();
@@ -244,7 +253,37 @@ describe(MutateService, () => {
         });
       };
 
-      await expect(t).rejects.toThrow(ReferenceIdNoMatchException);
+      await expect(t).rejects.toThrowError(
+        `No match for TestEntityFixture reference id ${WRONG_UUID}.`,
+      );
+    });
+
+    it('id does not match with translation pt', async () => {
+      I18n.changeLanguage('pt');
+      initTypeOrmCommonTranslation();
+      const t = async () => {
+        return testMutateService.remove({
+          id: WRONG_UUID,
+        });
+      };
+
+      await expect(t).rejects.toThrowError(
+        `Nenhuma correspondência da referência TestEntityFixture para o id ${WRONG_UUID}.`,
+      );
+    });
+
+    it('id does not match with translation en', async () => {
+      I18n.changeLanguage('en');
+      initTypeOrmCommonTranslation();
+      const t = async () => {
+        return testMutateService.remove({
+          id: WRONG_UUID,
+        });
+      };
+
+      await expect(t).rejects.toThrowError(
+        `No match for TestEntityFixture reference id ${WRONG_UUID}.`,
+      );
     });
 
     it('exception', async () => {
