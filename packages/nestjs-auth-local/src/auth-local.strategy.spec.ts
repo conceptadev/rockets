@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { mock } from 'jest-mock-extended';
 import { PasswordValidationService } from '@concepta/nestjs-password';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, HttpStatus } from '@nestjs/common';
 import { AuthLocalStrategy } from './auth-local.strategy';
 import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.interface';
 import { AuthLocalUserLookupServiceInterface } from './interfaces/auth-local-user-lookup-service.interface';
@@ -11,6 +11,7 @@ import { AuthLocalValidateUserService } from './services/auth-local-validate-use
 import { UserFixture } from './__fixtures__/user/user.entity.fixture';
 import { ReferenceIdInterface } from '@concepta/ts-core';
 import { AuthLocalValidateUserInterface } from './interfaces/auth-local-validate-user.interface';
+import { AuthLocalException } from './exceptions/auth-local.exception';
 import { AuthLocalInvalidCredentialsException } from './exceptions/auth-local-invalid-credentials.exception';
 import { AuthLocalInvalidLoginDataException } from './exceptions/auth-local-invalid-login-data.exception';
 
@@ -43,6 +44,7 @@ describe(AuthLocalStrategy.name, () => {
     user = new UserFixture();
     user.id = randomUUID();
     user.active = true;
+    jest.resetAllMocks();
     jest.spyOn(userLookUpService, 'byUsername').mockResolvedValue(user);
   });
 
@@ -64,7 +66,7 @@ describe(AuthLocalStrategy.name, () => {
       expect(result.id).toBe(user.id);
     });
 
-    it('should return user', async () => {
+    it('should fail to validate user', async () => {
       jest
         .spyOn(validateUserService, 'validateUser')
         .mockImplementationOnce((_dto: AuthLocalValidateUserInterface) => {
@@ -75,17 +77,52 @@ describe(AuthLocalStrategy.name, () => {
       await expect(t).rejects.toThrow(AuthLocalInvalidCredentialsException);
     });
 
-    it('should return user with custom message', async () => {
+    it('should fail to validate user with custom message', async () => {
       jest
         .spyOn(validateUserService, 'validateUser')
-        .mockImplementationOnce((_dto: AuthLocalValidateUserInterface) => {
-          throw new Error('Custom message');
+        .mockImplementation((_dto: AuthLocalValidateUserInterface) => {
+          throw new AuthLocalInvalidCredentialsException({
+            message: 'Custom message',
+            safeMessage: 'Custom safe message',
+          });
         });
 
       const t = () => authLocalStrategy.validate(USERNAME, PASSWORD);
-      await expect(t).rejects.toThrow(
-        'The provided credentials are incorrect. Please try again.',
-      );
+
+      try {
+        await t();
+      } catch (error: unknown) {
+        if (error instanceof AuthLocalInvalidCredentialsException) {
+          expect(error.httpStatus).toBe(HttpStatus.UNAUTHORIZED);
+          expect(error.message).toBe('Custom message');
+          expect(error.safeMessage).toBe('Custom safe message');
+        } else {
+          throw new Error('Wrong error type');
+        }
+      }
+    });
+
+    it('should fail with internal server error', async () => {
+      jest
+        .spyOn(validateUserService, 'validateUser')
+        .mockImplementation((_dto: AuthLocalValidateUserInterface) => {
+          throw new Error('This is really bad');
+        });
+
+      const t = () => authLocalStrategy.validate(USERNAME, PASSWORD);
+
+      try {
+        await t();
+      } catch (error: unknown) {
+        if (error instanceof AuthLocalException) {
+          expect(error?.httpStatus).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
+          expect(error?.context?.originalError?.message).toBe(
+            'This is really bad',
+          );
+        } else {
+          throw new Error('Wrong error type');
+        }
+      }
     });
 
     it('should throw error on validateOrReject', async () => {

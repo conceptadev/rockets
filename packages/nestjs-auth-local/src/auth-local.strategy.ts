@@ -12,6 +12,7 @@ import {
 
 import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.interface';
 import { AuthLocalValidateUserServiceInterface } from './interfaces/auth-local-validate-user-service.interface';
+import { AuthLocalException } from './exceptions/auth-local.exception';
 import { AuthLocalInvalidCredentialsException } from './exceptions/auth-local-invalid-credentials.exception';
 import { AuthLocalInvalidLoginDataException } from './exceptions/auth-local-invalid-login-data.exception';
 import { AuthLocalMissingLoginDtoException } from './exceptions/auth-local-missing-login-dto.exception';
@@ -78,13 +79,21 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
         password,
       });
     } catch (e) {
-      throw new AuthLocalInvalidCredentialsException({ originalError: e });
+      // did they throw an invalid credentials exception?
+      if (e instanceof AuthLocalInvalidCredentialsException) {
+        // yes, use theirs
+        throw e;
+      } else {
+        // something else went wrong
+        throw new AuthLocalException({ originalError: e });
+      }
     }
 
     // did we get a valid user?
     if (!validatedUser) {
       throw new AuthLocalInvalidCredentialsException({
-        message: `No valid user found: ${username}`,
+        message: `Unable to validate user with username: %s`,
+        messageParams: [username],
       });
     }
 
@@ -99,19 +108,16 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
 
     // is the login dto missing?
     if (!loginDto) {
-      // TODO: Change Error to a Exception
       throw new AuthLocalMissingLoginDtoException();
     }
 
     // is the username field missing?
     if (!usernameField) {
-      // TODO: Change Error to a Exception
       throw new AuthLocalMissingUsernameFieldException();
     }
 
     // is the password field missing?
     if (!passwordField) {
-      // TODO: Change Error to a Exception
       throw new AuthLocalMissingPasswordFieldException();
     }
 

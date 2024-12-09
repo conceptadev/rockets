@@ -1,13 +1,11 @@
 import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
-import { HttpStatus } from '@nestjs/common';
-import { AuthLocalException } from './auth-local.exception';
+import { AuthLocalInvalidCredentialsException } from './auth-local-invalid-credentials.exception';
 
-export class AuthLocalUsernameNotFoundException extends AuthLocalException {
+export class AuthLocalUsernameNotFoundException extends AuthLocalInvalidCredentialsException {
   constructor(userName: string, options?: RuntimeExceptionOptions) {
     super({
       message: `No user found for username: %s`,
       messageParams: [userName],
-      httpStatus: HttpStatus.UNAUTHORIZED,
       ...options,
     });
 

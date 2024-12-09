@@ -11,7 +11,7 @@ import { AuthLocalValidateUserServiceInterface } from '../interfaces/auth-local-
 import { AuthLocalUserLookupServiceInterface } from '../interfaces/auth-local-user-lookup-service.interface';
 import { AuthLocalUsernameNotFoundException } from '../exceptions/auth-local-username-not-found.exception';
 import { AuthLocalUserInactiveException } from '../exceptions/auth-local-user-inactive.exception';
-import { AuthLocalInvalidPasswordException } from '../exceptions/auth-local-invalid-ipassword.exception';
+import { AuthLocalInvalidPasswordException } from '../exceptions/auth-local-invalid-password.exception';
 
 @Injectable()
 export class AuthLocalValidateUserService

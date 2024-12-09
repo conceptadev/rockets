@@ -7,6 +7,7 @@ import {
 export class AuthLocalInvalidLoginDataException extends RuntimeException {
   constructor(options?: RuntimeExceptionOptions) {
     super({
+      message: 'Data validation error occurred before user validation.',
       safeMessage:
         'The provided username or password is incorrect. Please try again.',
       httpStatus: HttpStatus.BAD_REQUEST,

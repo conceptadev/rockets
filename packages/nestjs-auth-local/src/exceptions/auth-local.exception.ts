@@ -2,6 +2,7 @@ import {
   RuntimeException,
   RuntimeExceptionOptions,
 } from '@concepta/nestjs-exception';
+
 /**
  * Generic auth local exception.
  */

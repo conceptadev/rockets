@@ -1,12 +1,11 @@
 import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
-import { HttpStatus } from '@nestjs/common';
-import { AuthLocalException } from './auth-local.exception';
+import { AuthLocalUnauthorizedException } from './auth-local-unauthorized.exception';
 
-export class AuthLocalInvalidCredentialsException extends AuthLocalException {
-  constructor(options?: RuntimeExceptionOptions) {
+export class AuthLocalInvalidCredentialsException extends AuthLocalUnauthorizedException {
+  constructor(options?: Omit<RuntimeExceptionOptions, 'httpStatus'>) {
     super({
-      message: 'The provided credentials are incorrect. Please try again.',
-      httpStatus: HttpStatus.UNAUTHORIZED,
+      safeMessage:
+        'The provided username or password is incorrect. Please try again.',
       ...options,
     });
 
