@@ -5,7 +5,7 @@ import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import {
   FederatedCreatableInterface,
   FederatedUpdatableInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 import { FederatedEntityInterface } from '../interfaces/federated-entity.interface';
 import { FederatedMutateServiceInterface } from '../interfaces/federated-mutate-service.interface';
 import { FederatedCreateDto } from '../dto/federated-create.dto';

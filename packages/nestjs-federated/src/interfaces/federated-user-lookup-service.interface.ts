@@ -3,7 +3,7 @@ import {
   LookupIdInterface,
   ReferenceEmail,
   ReferenceId,
-} from '@concepta/ts-core';
+} from '@concepta/nestjs-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 import { FederatedCredentialsInterface } from './federated-credentials.interface';
 

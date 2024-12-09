@@ -23,7 +23,7 @@ import {
 import {
   RoleCreatableInterface,
   RoleUpdatableInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 import { RoleCrudService } from './services/role-crud.service';
 import { RoleDto } from './dto/role.dto';
 import { RoleCreateDto } from './dto/role-create.dto';

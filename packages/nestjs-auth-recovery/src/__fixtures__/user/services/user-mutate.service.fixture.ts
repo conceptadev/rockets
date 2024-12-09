@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { ReferenceIdInterface } from '@concepta/ts-core';
-import { PasswordPlainInterface } from '@concepta/ts-common';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
+import { PasswordPlainInterface } from '@concepta/nestjs-common';
 
 import { AuthRecoveryUserMutateServiceInterface } from '../../../interfaces/auth-recovery-user-mutate.service.interface';
 

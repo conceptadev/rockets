@@ -2,7 +2,7 @@ import { IssueTokenServiceInterface } from '@concepta/nestjs-authentication';
 import {
   AuthenticatedUserInterface,
   AuthenticationResponseInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 import { randomUUID } from 'crypto';
 import { mock } from 'jest-mock-extended';
 import { AuthRefreshController } from './auth-refresh.controller';

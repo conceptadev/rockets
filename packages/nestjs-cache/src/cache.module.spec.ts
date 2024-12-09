@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CacheInterface } from '@concepta/ts-common';
+import { CacheInterface } from '@concepta/nestjs-common';
 import { CACHE_MODULE_REPOSITORIES_TOKEN } from './cache.constants';
 import { CacheModule } from './cache.module';
 

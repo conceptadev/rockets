@@ -1,24 +1,24 @@
-import { Repository } from 'typeorm';
-import { Test, TestingModule } from '@nestjs/testing';
-import { getDataSourceToken } from '@nestjs/typeorm';
-import { SeedingSource } from '@concepta/typeorm-seeding';
+import { CrudModule } from '@concepta/nestjs-crud';
 import {
   getDynamicRepositoryToken,
   TypeOrmExtModule,
 } from '@concepta/nestjs-typeorm-ext';
-import { CrudModule } from '@concepta/nestjs-crud';
+import { SeedingSource } from '@concepta/typeorm-seeding';
+import { Test, TestingModule } from '@nestjs/testing';
+import { getDataSourceToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { RoleModule } from '../role.module';
 import { RoleService } from '../services/role.service';
 
+import { ApiKeyEntityFixture } from '../__fixtures__/entities/api-key-entity.fixture';
+import { ApiKeyRoleEntityFixture } from '../__fixtures__/entities/api-key-role-entity.fixture';
 import { RoleEntityFixture } from '../__fixtures__/entities/role-entity.fixture';
 import { UserEntityFixture } from '../__fixtures__/entities/user-entity.fixture';
 import { UserRoleEntityFixture } from '../__fixtures__/entities/user-role-entity.fixture';
-import { ApiKeyEntityFixture } from '../__fixtures__/entities/api-key-entity.fixture';
-import { ApiKeyRoleEntityFixture } from '../__fixtures__/entities/api-key-role-entity.fixture';
-import { UserFactoryFixture } from '../__fixtures__/factories/user.factory.fixture';
 import { UserRoleFactoryFixture } from '../__fixtures__/factories/user-role.factory.fixture';
-import { RoleFactory } from '../role.factory';
+import { UserFactoryFixture } from '../__fixtures__/factories/user.factory.fixture';
 import { RoleAssignmentConflictException } from '../exceptions/role-assignment-conflict.exception';
+import { RoleFactory } from '../role.factory';
 
 describe('RoleModule', () => {
   let testModule: TestingModule;

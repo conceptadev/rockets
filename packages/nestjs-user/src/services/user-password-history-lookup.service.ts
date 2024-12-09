@@ -5,7 +5,7 @@ import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 
 import { USER_MODULE_USER_PASSWORD_HISTORY_ENTITY_KEY } from '../user.constants';
 import { UserPasswordHistoryEntityInterface } from '../interfaces/user-password-history-entity.interface';
-import { ReferenceId } from '@concepta/ts-core';
+import { ReferenceId } from '@concepta/nestjs-common';
 
 @Injectable()
 export class UserPasswordHistoryLookupService extends LookupService<UserPasswordHistoryEntityInterface> {

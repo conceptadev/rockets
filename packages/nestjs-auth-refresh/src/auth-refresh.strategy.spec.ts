@@ -5,7 +5,7 @@ import { VerifyTokenServiceInterface } from '@concepta/nestjs-authentication';
 import { AuthRefreshUserLookupServiceInterface } from './interfaces/auth-refresh-user-lookup-service.interface';
 import { randomUUID } from 'crypto';
 import { UserFixture } from './__fixtures__/user/user.entity.fixture';
-import { AuthorizationPayloadInterface } from '@concepta/ts-common';
+import { AuthorizationPayloadInterface } from '@concepta/nestjs-common';
 import { UnauthorizedException } from '@nestjs/common';
 
 describe(AuthRefreshStrategy, () => {

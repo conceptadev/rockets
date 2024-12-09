@@ -1,5 +1,5 @@
 import { AuthRecoveryNotificationServiceInterface } from '../interfaces/auth-recovery-notification.service.interface';
-import { EmailSendOptionsInterface } from '@concepta/ts-common';
+import { EmailSendOptionsInterface } from '@concepta/nestjs-common';
 import { Inject, Injectable } from '@nestjs/common';
 import {
   AUTH_RECOVERY_MODULE_EMAIL_SERVICE_TOKEN,

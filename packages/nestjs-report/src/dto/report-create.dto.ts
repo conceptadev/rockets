@@ -1,4 +1,4 @@
-import { ReportCreatableInterface } from '@concepta/ts-common';
+import { ReportCreatableInterface } from '@concepta/nestjs-common';
 import { PickType } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { ReportDto } from './report.dto';

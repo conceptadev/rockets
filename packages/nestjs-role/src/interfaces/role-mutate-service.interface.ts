@@ -4,11 +4,11 @@ import {
   RemoveOneInterface,
   ReplaceOneInterface,
   UpdateOneInterface,
-} from '@concepta/ts-core';
+} from '@concepta/nestjs-common';
 import {
   RoleCreatableInterface,
   RoleUpdatableInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 import { RoleEntityInterface } from './role-entity.interface';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 

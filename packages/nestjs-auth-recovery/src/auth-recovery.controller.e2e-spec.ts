@@ -2,7 +2,7 @@ import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
-import { OtpInterface, UserInterface } from '@concepta/ts-common';
+import { OtpInterface, UserInterface } from '@concepta/nestjs-common';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { EmailService } from '@concepta/nestjs-email';
 import { OtpService } from '@concepta/nestjs-otp';

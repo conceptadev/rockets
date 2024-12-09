@@ -10,7 +10,7 @@ import {
   AuditDateUpdated,
   AuditInterface,
   AuditVersion,
-} from '@concepta/ts-core';
+} from '@concepta/nestjs-common';
 
 /**
  * Audit Postgres Embed

@@ -1,7 +1,7 @@
 import { HttpAdapterHost } from '@nestjs/core';
 import { Catch, ArgumentsHost, HttpException } from '@nestjs/common';
 import { isObject } from '@nestjs/common/utils/shared.utils';
-import { ExceptionInterface } from '@concepta/ts-core';
+import { ExceptionInterface } from '@concepta/nestjs-common';
 import {
   ERROR_CODE_UNKNOWN,
   ERROR_MESSAGE_FALLBACK,

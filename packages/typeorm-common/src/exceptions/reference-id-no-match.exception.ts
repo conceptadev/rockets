@@ -1,4 +1,4 @@
-import { ReferenceId } from '@concepta/ts-core';
+import { ReferenceId } from '@concepta/nestjs-common';
 import {
   RuntimeException,
   RuntimeExceptionOptions,

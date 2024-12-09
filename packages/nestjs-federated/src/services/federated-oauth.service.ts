@@ -3,7 +3,10 @@ import {
   QueryOptionsInterface,
   ReferenceMutateException,
 } from '@concepta/typeorm-common';
-import { NotAnErrorException, ReferenceIdInterface } from '@concepta/ts-core';
+import {
+  NotAnErrorException,
+  ReferenceIdInterface,
+} from '@concepta/nestjs-common';
 import {
   FEDERATED_MODULE_USER_LOOKUP_SERVICE_TOKEN,
   FEDERATED_MODULE_USER_MUTATE_SERVICE_TOKEN,

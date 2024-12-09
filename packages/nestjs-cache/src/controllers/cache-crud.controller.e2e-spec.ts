@@ -4,7 +4,7 @@ import { randomUUID } from 'crypto';
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getDataSourceToken } from '@nestjs/typeorm';
-import { CacheCreatableInterface } from '@concepta/ts-common';
+import { CacheCreatableInterface } from '@concepta/nestjs-common';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 
 import { CacheFactory } from '../cache.factory';

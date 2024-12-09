@@ -1,4 +1,4 @@
-import { ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import { Entity } from 'typeorm';
 
 @Entity()

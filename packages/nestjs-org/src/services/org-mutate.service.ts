@@ -5,7 +5,7 @@ import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import {
   OrgCreatableInterface,
   OrgUpdatableInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 import { OrgEntityInterface } from '../interfaces/org-entity.interface';
 import { OrgMutateServiceInterface } from '../interfaces/org-mutate-service.interface';
 import { OrgCreateDto } from '../dto/org-create.dto';

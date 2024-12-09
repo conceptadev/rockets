@@ -2,7 +2,7 @@ import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { MutateService } from '@concepta/typeorm-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
-import { FileCreatableInterface } from '@concepta/ts-common';
+import { FileCreatableInterface } from '@concepta/nestjs-common';
 import { FileEntityInterface } from '../interfaces/file-entity.interface';
 
 import { FileCreateDto } from '../dto/file-create.dto';

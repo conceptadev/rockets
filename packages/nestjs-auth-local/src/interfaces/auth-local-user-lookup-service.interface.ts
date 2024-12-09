@@ -1,4 +1,7 @@
-import { ReferenceUsername, LookupUsernameInterface } from '@concepta/ts-core';
+import {
+  ReferenceUsername,
+  LookupUsernameInterface,
+} from '@concepta/nestjs-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 import { AuthLocalCredentialsInterface } from './auth-local-credentials.interface';
 

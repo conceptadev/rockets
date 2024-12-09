@@ -1,4 +1,4 @@
-import { ReferenceEmailInterface } from '@concepta/ts-core';
+import { ReferenceEmailInterface } from '@concepta/nestjs-common';
 
 export interface AuthAppleProfileInterface
   extends Partial<ReferenceEmailInterface> {

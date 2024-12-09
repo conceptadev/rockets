@@ -9,7 +9,7 @@ import {
   INVITATION_MODULE_CATEGORY_USER_KEY,
   OtpInterface,
   UserInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 import { EmailService } from '@concepta/nestjs-email';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { getDataSourceToken } from '@nestjs/typeorm';

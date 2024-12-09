@@ -1,6 +1,9 @@
 import { Repository } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
-import { ReferenceAssignment, ReferenceIdInterface } from '@concepta/ts-core';
+import {
+  ReferenceAssignment,
+  ReferenceIdInterface,
+} from '@concepta/nestjs-common';
 import {
   QueryOptionsInterface,
   ReferenceLookupException,

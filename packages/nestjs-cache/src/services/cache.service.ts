@@ -2,8 +2,15 @@ import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { DeepPartial, Repository } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
-import { CacheInterface, CacheUpdatableInterface } from '@concepta/ts-common';
-import { ReferenceAssignment, ReferenceId, Type } from '@concepta/ts-core';
+import {
+  CacheInterface,
+  CacheUpdatableInterface,
+} from '@concepta/nestjs-common';
+import {
+  ReferenceAssignment,
+  ReferenceId,
+  Type,
+} from '@concepta/nestjs-common';
 import {
   QueryOptionsInterface,
   ReferenceLookupException,

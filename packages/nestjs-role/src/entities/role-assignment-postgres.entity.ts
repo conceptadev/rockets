@@ -1,5 +1,5 @@
 import { Unique } from 'typeorm';
-import { ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import { CommonPostgresEntity } from '@concepta/typeorm-common';
 import { RoleAssignmentEntityInterface } from '../interfaces/role-assignment-entity.interface';
 import { RoleEntityInterface } from '../interfaces/role-entity.interface';

@@ -1,12 +1,12 @@
 import {
   ReportCreatableInterface,
   ReportUpdatableInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 import {
   CreateOneInterface,
   ReferenceIdInterface,
   UpdateOneInterface,
-} from '@concepta/ts-core';
+} from '@concepta/nestjs-common';
 import { ReportEntityInterface } from './report-entity.interface';
 
 export interface ReportMutateServiceInterface

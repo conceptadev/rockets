@@ -1,7 +1,10 @@
 import { Repository } from 'typeorm';
 import { mock } from 'jest-mock-extended';
-import { ReferenceAssignment } from '@concepta/ts-core';
-import { CacheCreatableInterface, CacheInterface } from '@concepta/ts-common';
+import { ReferenceAssignment } from '@concepta/nestjs-common';
+import {
+  CacheCreatableInterface,
+  CacheInterface,
+} from '@concepta/nestjs-common';
 import {
   QueryOptionsInterface,
   ReferenceMutateException,

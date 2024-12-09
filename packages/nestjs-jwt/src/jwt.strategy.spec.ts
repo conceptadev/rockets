@@ -1,4 +1,4 @@
-import { NotAnErrorException } from '@concepta/ts-core';
+import { NotAnErrorException } from '@concepta/nestjs-common';
 import { Request } from 'express-serve-static-core';
 import { mock } from 'jest-mock-extended';
 import { VerifyCallback } from 'passport-jwt';

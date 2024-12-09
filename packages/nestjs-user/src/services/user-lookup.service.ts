@@ -4,7 +4,7 @@ import {
   ReferenceEmail,
   ReferenceSubject,
   ReferenceUsername,
-} from '@concepta/ts-core';
+} from '@concepta/nestjs-common';
 import { LookupService, QueryOptionsInterface } from '@concepta/typeorm-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 

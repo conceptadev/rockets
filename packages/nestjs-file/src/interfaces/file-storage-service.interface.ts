@@ -1,4 +1,4 @@
-import { FileCreatableInterface } from '@concepta/ts-common';
+import { FileCreatableInterface } from '@concepta/nestjs-common';
 
 export interface FileStorageServiceInterface {
   KEY: string;

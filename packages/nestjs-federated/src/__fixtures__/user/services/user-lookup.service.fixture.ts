@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ReferenceEmail } from '@concepta/ts-core';
+import { ReferenceEmail } from '@concepta/nestjs-common';
 
 import { UserFixture } from '../user.fixture';
 import { FederatedUserLookupServiceInterface } from '../../../interfaces/federated-user-lookup-service.interface';

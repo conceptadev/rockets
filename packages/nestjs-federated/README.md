@@ -193,7 +193,7 @@ export const mockUser = {
 ```ts
 // user-lookup.service.ts
 import { Injectable } from '@nestjs/common';
-import { ReferenceEmail } from '@concepta/ts-core';
+import { ReferenceEmail } from '@concepta/nestjs-common';
 import { 
   FederatedUserLookupServiceInterface 
 } from '@concepta/nestjs-federated';

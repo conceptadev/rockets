@@ -4,11 +4,11 @@ import {
   RemoveOneInterface,
   ReplaceOneInterface,
   UpdateOneInterface,
-} from '@concepta/ts-core';
+} from '@concepta/nestjs-common';
 import {
   FederatedCreatableInterface,
   FederatedUpdatableInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 import { FederatedEntityInterface } from './federated-entity.interface';
 
 export interface FederatedMutateServiceInterface

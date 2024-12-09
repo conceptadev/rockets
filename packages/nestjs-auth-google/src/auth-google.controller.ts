@@ -3,7 +3,7 @@ import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import {
   AuthenticatedUserInterface,
   AuthenticationResponseInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 import {
   AuthUser,
   IssueTokenServiceInterface,
