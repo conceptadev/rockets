@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  CallHandler,
-  ExecutionContext,
-  Injectable,
-} from '@nestjs/common';
+import { CallHandler, ExecutionContext, Injectable } from '@nestjs/common';
 import { CrudRequestInterceptor as xCrudRequestInterceptor } from '@nestjsx/crud';
 import {
   RequestQueryParser,
@@ -11,6 +6,7 @@ import {
 } from '@nestjsx/crud-request';
 import { CrudReflectionService } from '../services/crud-reflection.service';
 import { CRUD_MODULE_CRUD_REQUEST_KEY } from '../crud.constants';
+import { CrudBadRequestException } from '../exceptions/crud-bad-request.exception';
 
 @Injectable()
 export class CrudRequestInterceptor extends xCrudRequestInterceptor {
@@ -47,7 +43,9 @@ export class CrudRequestInterceptor extends xCrudRequestInterceptor {
       return next.handle();
     } catch (error) {
       throw error instanceof RequestQueryException
-        ? new BadRequestException(error.message)
+        ? new CrudBadRequestException({
+            message: error.message,
+          })
         : error;
     }
   }

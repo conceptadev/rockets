@@ -3,8 +3,9 @@ import {
   RuntimeExceptionOptions,
 } from '@concepta/nestjs-exception';
 import { HttpStatus } from '@nestjs/common';
+import { RoleException } from './role.exception';
 
-export class AssignmentNotFoundException extends RuntimeException {
+export class AssignmentNotFoundException extends RoleException {
   context: RuntimeException['context'] & { assignmentName: string };
 
   constructor(assignmentName: string, options?: RuntimeExceptionOptions) {

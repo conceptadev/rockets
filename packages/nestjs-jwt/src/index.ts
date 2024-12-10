@@ -30,3 +30,6 @@ export { JwtStrategy } from './jwt.strategy';
 // utils
 export { createVerifyAccessTokenCallback } from './utils/create-verify-access-token-callback.util';
 export { createVerifyRefreshTokenCallback } from './utils/create-verify-refresh-token-callback.util';
+
+// exceptions
+export { JwtException } from './exceptions/jwt.exception';

@@ -100,7 +100,9 @@ export class InvitationSendService {
         },
       });
     } catch (e: unknown) {
-      throw new InvitationSendMailException(e, email);
+      throw new InvitationSendMailException(email, {
+        originalError: e,
+      });
     }
   }
 }

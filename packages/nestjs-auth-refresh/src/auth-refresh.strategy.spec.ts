@@ -6,7 +6,7 @@ import { AuthRefreshUserLookupServiceInterface } from './interfaces/auth-refresh
 import { randomUUID } from 'crypto';
 import { UserFixture } from './__fixtures__/user/user.entity.fixture';
 import { AuthorizationPayloadInterface } from '@concepta/ts-common';
-import { UnauthorizedException } from '@nestjs/common';
+import { AuthRefreshUnauthorizedException } from './exceptions/auth-refresh-unauthorized.exception';
 
 describe(AuthRefreshStrategy, () => {
   const USERNAME = 'username';
@@ -64,7 +64,7 @@ describe(AuthRefreshStrategy, () => {
 
       const t = () =>
         authRefreshStrategy.validate(authorizationPayloadInterface);
-      await expect(t).rejects.toThrow(UnauthorizedException);
+      await expect(t).rejects.toThrow(AuthRefreshUnauthorizedException);
     });
   });
 });

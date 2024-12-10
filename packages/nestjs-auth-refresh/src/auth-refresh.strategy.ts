@@ -1,4 +1,4 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   PassportStrategyFactory,
   VerifyTokenServiceInterface,
@@ -19,6 +19,7 @@ import {
 
 import { AuthRefreshSettingsInterface } from './interfaces/auth-refresh-settings.interface';
 import { AuthRefreshUserLookupServiceInterface } from './interfaces/auth-refresh-user-lookup-service.interface';
+import { AuthRefreshUnauthorizedException } from './exceptions/auth-refresh-unauthorized.exception';
 
 @Injectable()
 export class AuthRefreshStrategy extends PassportStrategyFactory<JwtStrategy>(
@@ -56,7 +57,7 @@ export class AuthRefreshStrategy extends PassportStrategyFactory<JwtStrategy>(
     );
 
     if (!user) {
-      throw new UnauthorizedException();
+      throw new AuthRefreshUnauthorizedException();
     }
 
     return user;

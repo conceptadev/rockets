@@ -3,7 +3,9 @@ import {
   RuntimeExceptionOptions,
 } from '@concepta/nestjs-exception';
 import { HttpStatus } from '@nestjs/common';
-export class FederatedUserRelationshipException extends RuntimeException {
+import { FederatedException } from './federated.exception';
+
+export class FederatedUserRelationshipException extends FederatedException {
   context: RuntimeException['context'] & {
     federatedId: string;
   };

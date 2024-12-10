@@ -2,8 +2,9 @@ import {
   RuntimeException,
   RuntimeExceptionOptions,
 } from '@concepta/nestjs-exception';
+import { FederatedException } from './federated.exception';
 
-export class FederatedCreateException extends RuntimeException {
+export class FederatedCreateException extends FederatedException {
   context: RuntimeException['context'] & {
     entityName: string;
   };

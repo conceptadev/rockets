@@ -1,10 +1,8 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
   Logger,
-  NotFoundException,
   Param,
   Patch,
   Query,
@@ -20,6 +18,8 @@ import {
 import { InvitationAcceptanceService } from '../services/invitation-acceptance.service';
 import { InvitationAcceptInviteDto } from '../dto/invitation-accept-invite.dto';
 import { InvitationDto } from '../dto/invitation.dto';
+import { InvitationNotAcceptedException } from '../exceptions/invitation-not-accepted.exception';
+import { InvitationNotFoundException } from '../exceptions/invitation-not-found.exception';
 
 @Controller('invitation-acceptance')
 @ApiTags('invitation-acceptance')
@@ -54,7 +54,7 @@ export class InvitationAcceptanceController {
     }
 
     if (!invitation) {
-      throw new NotFoundException();
+      throw new InvitationNotFoundException();
     }
 
     try {
@@ -69,7 +69,7 @@ export class InvitationAcceptanceController {
 
     if (!success) {
       // the client should have checked using validate passcode first
-      throw new BadRequestException();
+      throw new InvitationNotAcceptedException();
     }
   }
 
@@ -91,7 +91,7 @@ export class InvitationAcceptanceController {
     }
 
     if (!invitation) {
-      throw new NotFoundException();
+      throw new InvitationNotFoundException();
     }
 
     const { category } = invitation;
@@ -110,7 +110,7 @@ export class InvitationAcceptanceController {
     }
 
     if (!otp) {
-      throw new NotFoundException();
+      throw new InvitationNotFoundException();
     }
   }
 }

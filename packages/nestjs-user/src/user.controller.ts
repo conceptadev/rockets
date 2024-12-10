@@ -1,4 +1,4 @@
-import { BadRequestException, Param } from '@nestjs/common';
+import { Param } from '@nestjs/common';
 import {
   CrudBody,
   CrudCreateOne,
@@ -42,6 +42,7 @@ import { UserPaginatedDto } from './dto/user-paginated.dto';
 import { UserAccessQueryService } from './services/user-access-query.service';
 import { UserPasswordService } from './services/user-password.service';
 import { AuthUser } from '@concepta/nestjs-common';
+import { UserBadRequestException } from './exceptions/user-bad-request-exception';
 
 /**
  * User controller.
@@ -166,9 +167,11 @@ export class UserController
       );
     } catch (e) {
       if (e instanceof Error) {
-        throw new BadRequestException(e.message);
+        throw new UserBadRequestException({
+          message: e.message,
+        });
       } else {
-        throw new BadRequestException();
+        throw new UserBadRequestException();
       }
     }
 

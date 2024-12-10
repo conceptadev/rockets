@@ -2,8 +2,9 @@ import {
   RuntimeException,
   RuntimeExceptionOptions,
 } from '@concepta/nestjs-exception';
+import { CrudException } from './crud.exception';
 
-export class CrudQueryException extends RuntimeException {
+export class CrudQueryException extends CrudException {
   context: RuntimeException['context'] & {
     entityName: string;
   };

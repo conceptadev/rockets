@@ -2,6 +2,7 @@ import { fail } from 'assert';
 import { PasswordStorageInterface } from '../interfaces/password-storage.interface';
 import { PasswordStorageService } from './password-storage.service';
 import { PasswordValidationService } from './password-validation.service';
+import { PasswordRequiredException } from '../exceptions/password-required.exception';
 
 describe(PasswordStorageService, () => {
   let storageService: PasswordStorageService;
@@ -178,7 +179,7 @@ describe(PasswordStorageService, () => {
         await storageService.hashObject({}, { required: true });
       };
 
-      await expect(t).rejects.toThrow(Error);
+      await expect(t).rejects.toThrow(PasswordRequiredException);
       await expect(t).rejects.toThrow(
         'Password is required for hashing, but non was provided.',
       );

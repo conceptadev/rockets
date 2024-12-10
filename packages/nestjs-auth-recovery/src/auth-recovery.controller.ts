@@ -1,26 +1,18 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  NotFoundException,
-  Param,
-  Patch,
-  Post,
-} from '@nestjs/common';
 import { AuthPublic } from '@concepta/nestjs-authentication';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import {
-  ApiBody,
   ApiBadRequestResponse,
-  ApiOkResponse,
+  ApiBody,
   ApiNotFoundResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthRecoveryService } from './services/auth-recovery.service';
-import { AuthRecoveryRecoverPasswordDto } from './dto/auth-recovery-recover-password.dto';
 import { AuthRecoveryRecoverLoginDto } from './dto/auth-recovery-recover-login.dto';
+import { AuthRecoveryRecoverPasswordDto } from './dto/auth-recovery-recover-password.dto';
 import { AuthRecoveryUpdatePasswordDto } from './dto/auth-recovery-update-password.dto';
+import { AuthRecoveryOtpInvalidException } from './exceptions/auth-recovery-otp-invalid.exception';
+import { AuthRecoveryService } from './services/auth-recovery.service';
 
 @Controller('auth/recovery')
 @AuthPublic()
@@ -70,7 +62,7 @@ export class AuthRecoveryController {
     const otp = await this.authRecoveryService.validatePasscode(passcode);
 
     if (!otp) {
-      throw new NotFoundException();
+      throw new AuthRecoveryOtpInvalidException();
     }
   }
 
@@ -96,7 +88,7 @@ export class AuthRecoveryController {
 
     if (!user) {
       // the client should have checked using validate passcode first
-      throw new BadRequestException();
+      throw new AuthRecoveryOtpInvalidException();
     }
   }
 }

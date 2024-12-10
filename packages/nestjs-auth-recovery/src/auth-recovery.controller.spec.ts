@@ -3,7 +3,7 @@ import { AuthRecoveryService } from './services/auth-recovery.service';
 import { AuthRecoveryRecoverLoginDto } from './dto/auth-recovery-recover-login.dto';
 import { AuthRecoveryUpdatePasswordDto } from './dto/auth-recovery-update-password.dto';
 import { mock } from 'jest-mock-extended';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { AuthRecoveryOtpInvalidException } from './exceptions/auth-recovery-otp-invalid.exception';
 
 describe(AuthRecoveryController.name, () => {
   let controller: AuthRecoveryController;
@@ -50,7 +50,7 @@ describe(AuthRecoveryController.name, () => {
         .mockResolvedValue(null);
 
       const t = () => controller.validatePasscode(passwordDto.passcode);
-      await expect(t).rejects.toThrow(NotFoundException);
+      await expect(t).rejects.toThrow(AuthRecoveryOtpInvalidException);
 
       expect(validatePasscodeSpy).toHaveBeenCalledWith(passwordDto.passcode);
     });
@@ -77,7 +77,7 @@ describe(AuthRecoveryController.name, () => {
         .mockResolvedValue(null);
 
       const t = () => controller.updatePassword(passwordDto);
-      await expect(t).rejects.toThrow(BadRequestException);
+      await expect(t).rejects.toThrow(AuthRecoveryOtpInvalidException);
 
       expect(updatePasswordSpy).toHaveBeenCalledWith(
         passwordDto.passcode,

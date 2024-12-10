@@ -1,9 +1,7 @@
-import {
-  RuntimeException,
-  RuntimeExceptionOptions,
-} from '@concepta/nestjs-exception';
+import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
+import { AuthAppleException } from './auth-apple-exception';
 
-export class AuthAppleInvalidAudienceException extends RuntimeException {
+export class AuthAppleInvalidAudienceException extends AuthAppleException {
   constructor(options?: RuntimeExceptionOptions) {
     super({
       safeMessage: 'Apple audience is not valid.',

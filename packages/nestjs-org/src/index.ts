@@ -21,3 +21,8 @@ export { OrgUpdateDto } from './dto/org-update.dto';
 export { OrgDto } from './dto/org.dto';
 
 export { OrgResource } from './org.types';
+
+// exceptions
+export { OrgException } from './exceptions/org.exception';
+export { OrgNotFoundException } from './exceptions/org-not-found.exception';
+export { OrgMemberException } from './exceptions/org-member.exception';

@@ -14,3 +14,9 @@ export * from './interfaces/password-validation-service.interface';
 export * from './interfaces/password-creation-service.interface';
 export { PasswordCreateObjectOptionsInterface } from './interfaces/password-create-object-options.interface';
 export { isPasswordStorage } from './utils/is-password-storage.typeguard';
+
+export { PasswordException } from './exceptions/password.exception';
+export { CurrentPasswordRequiredException } from './exceptions/current-password-required.exception';
+export { PasswordNotStrongException } from './exceptions/password-not-strong.exception';
+export { PasswordRequiredException } from './exceptions/password-required.exception';
+export { PasswordUsedRecentlyException } from './exceptions/password-used-recently.exception';

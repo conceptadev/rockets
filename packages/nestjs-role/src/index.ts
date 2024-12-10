@@ -27,3 +27,7 @@ export { RoleUpdateDto } from './dto/role-update.dto';
 export { RoleDto } from './dto/role.dto';
 
 export { RoleResource, RoleAssignmentResource } from './role.types';
+export { RoleException } from './exceptions/role.exception';
+export { AssignmentNotFoundException } from './exceptions/assignment-not-found.exception';
+export { EntityNotFoundException } from './exceptions/entity-not-found.exception';
+export { RoleAssignmentConflictException } from './exceptions/role-assignment-conflict.exception';

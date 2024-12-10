@@ -2,8 +2,9 @@ import {
   RuntimeException,
   RuntimeExceptionOptions,
 } from '@concepta/nestjs-exception';
+import { OtpException } from './otp.exception';
 
-export class OtpTypeNotDefinedException extends RuntimeException {
+export class OtpTypeNotDefinedException extends OtpException {
   context: RuntimeException['context'] & {
     type: string;
   };

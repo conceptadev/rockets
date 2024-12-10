@@ -1,9 +1,7 @@
-import {
-  RuntimeException,
-  RuntimeExceptionOptions,
-} from '@concepta/nestjs-exception';
+import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
+import { OrgException } from './org.exception';
 
-export class OrgNotFoundException extends RuntimeException {
+export class OrgNotFoundException extends OrgException {
   constructor(options?: RuntimeExceptionOptions) {
     super({
       message: 'The org was not found',

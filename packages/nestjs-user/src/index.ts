@@ -26,3 +26,5 @@ export { UserDto } from './dto/user.dto';
 export { UserResource } from './user.types';
 
 export { UserException } from './exceptions/user-exception';
+export { UserBadRequestException } from './exceptions/user-bad-request-exception';
+export { UserNotFoundException } from './exceptions/user-not-found-exception';
