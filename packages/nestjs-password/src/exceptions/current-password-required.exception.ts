@@ -1,10 +1,8 @@
 import { HttpStatus } from '@nestjs/common';
-import {
-  RuntimeException,
-  RuntimeExceptionOptions,
-} from '@concepta/nestjs-exception';
+import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
+import { PasswordException } from './password.exception';
 
-export class CurrentPasswordRequiredException extends RuntimeException {
+export class CurrentPasswordRequiredException extends PasswordException {
   constructor(options?: RuntimeExceptionOptions) {
     super({
       message: 'Current password is required',

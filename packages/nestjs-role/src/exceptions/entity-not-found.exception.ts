@@ -3,8 +3,9 @@ import {
   RuntimeException,
   RuntimeExceptionOptions,
 } from '@concepta/nestjs-exception';
+import { RoleException } from './role.exception';
 
-export class EntityNotFoundException extends RuntimeException {
+export class EntityNotFoundException extends RoleException {
   context: RuntimeException['context'] & { entityName: string };
 
   constructor(entityName: string, options?: RuntimeExceptionOptions) {

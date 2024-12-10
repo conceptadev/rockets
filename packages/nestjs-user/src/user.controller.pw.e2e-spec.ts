@@ -3,6 +3,7 @@ import { randomUUID } from 'crypto';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
+import { HttpAdapterHost } from '@nestjs/core';
 import { IssueTokenService } from '@concepta/nestjs-authentication';
 import { AccessControlService } from '@concepta/nestjs-access-control';
 import {
@@ -22,6 +23,7 @@ import { UserPasswordHistoryLookupService } from './services/user-password-histo
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
 import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
 import { UserPasswordHistoryEntityFixture } from './__fixtures__/user-password-history.entity.fixture';
+import { ExceptionsFilter } from '@concepta/nestjs-exception';
 
 describe('User Controller (password e2e)', () => {
   describe('Password Update Flow', () => {
@@ -49,8 +51,10 @@ describe('User Controller (password e2e)', () => {
       }).compile();
 
       app = moduleFixture.createNestApplication();
-      await app.init();
+      const exceptionsFilter = app.get(HttpAdapterHost);
+      app.useGlobalFilters(new ExceptionsFilter(exceptionsFilter));
 
+      await app.init();
       await initSeeding();
       await setVariables();
       await createFakeUsers();

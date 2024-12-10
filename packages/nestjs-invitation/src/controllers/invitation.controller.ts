@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import { InternalServerErrorException, Logger } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { InvitationInterface } from '@concepta/ts-common';
 import {
@@ -28,6 +28,7 @@ import { InvitationResource } from '../invitation.types';
 import { InvitationCrudService } from '../services/invitation-crud.service';
 import { InvitationSendService } from '../services/invitation-send.service';
 import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
+import { InvitationException } from '../exceptions/invitation.exception';
 
 @CrudController({
   path: 'invitation',
@@ -118,7 +119,7 @@ export class InvitationController
       return invite;
     } catch (e: unknown) {
       Logger.error(e);
-      throw new InternalServerErrorException();
+      throw new InvitationException();
     }
   }
 
@@ -132,7 +133,7 @@ export class InvitationController
       return this.invitationCrudService.deleteOne(crudRequest);
     } catch (e: unknown) {
       Logger.error(e);
-      throw new InternalServerErrorException();
+      throw new InvitationException();
     }
   }
 }

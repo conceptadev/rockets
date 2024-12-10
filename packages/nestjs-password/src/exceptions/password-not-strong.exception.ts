@@ -1,10 +1,8 @@
 import { HttpStatus } from '@nestjs/common';
-import {
-  RuntimeException,
-  RuntimeExceptionOptions,
-} from '@concepta/nestjs-exception';
+import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
+import { PasswordException } from './password.exception';
 
-export class PasswordNotStrongException extends RuntimeException {
+export class PasswordNotStrongException extends PasswordException {
   constructor(options?: RuntimeExceptionOptions) {
     super({
       message: 'Password is not strong enough',
