@@ -16,3 +16,10 @@ export {
   AuthLocalGuard,
   AuthLocalGuard as LocalAuthGuard,
 } from './auth-local.guard';
+
+export { AuthLocalException } from './exceptions/auth-local.exception';
+export { AuthLocalInvalidLoginDataException } from './exceptions/auth-local-invalid-login-data.exception';
+export { AuthLocalInvalidCredentialsException } from './exceptions/auth-local-invalid-credentials.exception';
+export { AuthLocalInvalidPasswordException } from './exceptions/auth-local-invalid-password.exception';
+export { AuthLocalUserInactiveException } from './exceptions/auth-local-user-inactive.exception';
+export { AuthLocalUsernameNotFoundException } from './exceptions/auth-local-username-not-found.exception';

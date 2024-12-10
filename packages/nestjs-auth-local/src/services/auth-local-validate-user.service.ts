@@ -9,6 +9,9 @@ import {
 import { AuthLocalValidateUserInterface } from '../interfaces/auth-local-validate-user.interface';
 import { AuthLocalValidateUserServiceInterface } from '../interfaces/auth-local-validate-user-service.interface';
 import { AuthLocalUserLookupServiceInterface } from '../interfaces/auth-local-user-lookup-service.interface';
+import { AuthLocalUsernameNotFoundException } from '../exceptions/auth-local-username-not-found.exception';
+import { AuthLocalUserInactiveException } from '../exceptions/auth-local-user-inactive.exception';
+import { AuthLocalInvalidPasswordException } from '../exceptions/auth-local-invalid-password.exception';
 
 @Injectable()
 export class AuthLocalValidateUserService
@@ -35,14 +38,14 @@ export class AuthLocalValidateUserService
 
     // did we get a user?
     if (!user) {
-      throw new Error(`No user found for username: ${dto.username}`);
+      throw new AuthLocalUsernameNotFoundException(dto.username);
     }
 
     const isUserActive = await this.isActive(user);
 
     // is the user active?
     if (!isUserActive) {
-      throw new Error(`User with username '${dto.username}' is inactive`);
+      throw new AuthLocalUserInactiveException(dto.username);
     }
 
     // validate password
@@ -53,7 +56,7 @@ export class AuthLocalValidateUserService
 
     // password is valid?
     if (!isValid) {
-      throw new Error(`Invalid password for username: ${user.username}`);
+      throw new AuthLocalInvalidPasswordException(user.username);
     }
 
     // return the user
