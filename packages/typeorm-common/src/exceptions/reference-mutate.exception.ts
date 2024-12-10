@@ -14,8 +14,7 @@ export class ReferenceMutateException extends RuntimeException {
     super({
       message: t({
         key: REFERENCE_MUTATE_ERROR,
-        defaultMessage:
-          'Error Default while trying to mutate a %s reference',
+        defaultMessage: 'Error Default while trying to mutate a %s reference',
       }),
       messageParams: [entityName],
       ...options,

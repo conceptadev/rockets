@@ -1,4 +1,9 @@
-import { REFERENCE_ID_NO_MATCH, REFERENCE_LOOKUP_ERROR, REFERENCE_MUTATE_ERROR, REFERENCE_VALIDATION_ERROR } from "../../constants";
+import {
+  REFERENCE_ID_NO_MATCH,
+  REFERENCE_LOOKUP_ERROR,
+  REFERENCE_MUTATE_ERROR,
+  REFERENCE_VALIDATION_ERROR,
+} from '../../constants';
 
 const ptBR = {
   [REFERENCE_MUTATE_ERROR]: 'Erro ao tentar alterar uma referência de %s',
