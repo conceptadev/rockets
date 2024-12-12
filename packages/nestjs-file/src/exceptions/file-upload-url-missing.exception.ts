@@ -1,10 +1,8 @@
+import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
 import { HttpStatus } from '@nestjs/common';
-import {
-  RuntimeException,
-  RuntimeExceptionOptions,
-} from '@concepta/nestjs-exception';
+import { FileException } from './file.exception';
 
-export class FileUploadUrlMissingException extends RuntimeException {
+export class FileUploadUrlMissingException extends FileException {
   constructor(options?: RuntimeExceptionOptions) {
     super({
       message: 'Error trying to generate signed upload url',

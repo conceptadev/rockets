@@ -1,15 +1,16 @@
 import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
 import { HttpStatus } from '@nestjs/common';
-import { FileException } from './file.exception';
-
-export class FileDownloadUrlMissingException extends FileException {
+import { CrudException } from './crud.exception';
+/**
+ * Generic crud exception.
+ */
+export class CrudRequestException extends CrudException {
   constructor(options?: RuntimeExceptionOptions) {
     super({
-      message: 'Error trying to generate signed download url',
+      safeMessage: 'Error on crud request',
       httpStatus: HttpStatus.BAD_REQUEST,
       ...options,
     });
-
-    this.errorCode = 'FILE_DOWNLOAD_URL_ERROR';
+    this.errorCode = 'CRUD_REQUEST_ERROR';
   }
 }

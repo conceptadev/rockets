@@ -1,14 +1,13 @@
-import {
-  RuntimeException,
-  RuntimeExceptionOptions,
-} from '@concepta/nestjs-exception';
+import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
 import { HttpStatus } from '@nestjs/common';
+import { CrudException } from './crud.exception';
 /**
  * Generic crud exception.
  */
-export class CrudBadRequestException extends RuntimeException {
+export class CrudBadRequestException extends CrudException {
   constructor(options?: RuntimeExceptionOptions) {
     super({
+      safeMessage: 'Bad Request',
       httpStatus: HttpStatus.BAD_REQUEST,
       ...options,
     });

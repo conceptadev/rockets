@@ -3,8 +3,9 @@ import {
   RuntimeException,
   RuntimeExceptionOptions,
 } from '@concepta/nestjs-exception';
+import { FileException } from './file.exception';
 
-export class FileDuplicateEntryException extends RuntimeException {
+export class FileDuplicateEntryException extends FileException {
   context: RuntimeException['context'] & {
     serviceKey: string;
     fileName: string;

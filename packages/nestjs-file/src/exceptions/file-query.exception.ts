@@ -1,10 +1,8 @@
+import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
 import { HttpStatus } from '@nestjs/common';
-import {
-  RuntimeException,
-  RuntimeExceptionOptions,
-} from '@concepta/nestjs-exception';
+import { FileException } from './file.exception';
 
-export class FileQueryException extends RuntimeException {
+export class FileQueryException extends FileException {
   constructor(options?: RuntimeExceptionOptions) {
     super({
       message: 'Error while trying to do a query to file',

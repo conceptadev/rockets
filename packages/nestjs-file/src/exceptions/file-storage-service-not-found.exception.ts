@@ -1,10 +1,11 @@
-import { HttpStatus } from '@nestjs/common';
 import {
   RuntimeException,
   RuntimeExceptionOptions,
 } from '@concepta/nestjs-exception';
+import { HttpStatus } from '@nestjs/common';
+import { FileException } from './file.exception';
 
-export class FileStorageServiceNotFoundException extends RuntimeException {
+export class FileStorageServiceNotFoundException extends FileException {
   context: RuntimeException['context'] & {
     storageServiceName: string;
   };

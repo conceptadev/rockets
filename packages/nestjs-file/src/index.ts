@@ -12,6 +12,7 @@ export { FileService } from './services/file.service';
 export { FileDto } from './dto/file.dto';
 export { FileCreateDto } from './dto/file-create.dto';
 
+export { FileException } from './exceptions/file.exception';
 export { FileCreateException } from './exceptions/file-create.exception';
 export { FileDownloadUrlMissingException } from './exceptions/file-download-url-missing.exception';
 export { FileDuplicateEntryException } from './exceptions/file-duplicated.exception';
