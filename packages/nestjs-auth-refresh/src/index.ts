@@ -4,3 +4,5 @@ export {
   AuthRefreshGuard,
   AuthRefreshGuard as RefreshAuthGuard,
 } from './auth-refresh.guard';
+export { AuthRefreshException } from './exceptions/auth-refresh.exception';
+export { AuthRefreshUnauthorizedException } from './exceptions/auth-refresh-unauthorized.exception';

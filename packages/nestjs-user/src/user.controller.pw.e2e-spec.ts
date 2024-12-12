@@ -3,6 +3,8 @@ import { randomUUID } from 'crypto';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
+import { HttpAdapterHost } from '@nestjs/core';
+import { ExceptionsFilter } from '@concepta/nestjs-exception';
 import { IssueTokenService } from '@concepta/nestjs-authentication';
 import { AccessControlService } from '@concepta/nestjs-access-control';
 import {
@@ -49,8 +51,10 @@ describe('User Controller (password e2e)', () => {
       }).compile();
 
       app = moduleFixture.createNestApplication();
-      await app.init();
+      const exceptionsFilter = app.get(HttpAdapterHost);
+      app.useGlobalFilters(new ExceptionsFilter(exceptionsFilter));
 
+      await app.init();
       await initSeeding();
       await setVariables();
       await createFakeUsers();

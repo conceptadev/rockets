@@ -1,10 +1,8 @@
+import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
 import { HttpStatus } from '@nestjs/common';
-import {
-  RuntimeException,
-  RuntimeExceptionOptions,
-} from '@concepta/nestjs-exception';
+import { FileException } from './file.exception';
 
-export class FilenameMissingException extends RuntimeException {
+export class FilenameMissingException extends FileException {
   constructor(options?: RuntimeExceptionOptions) {
     super({
       message: 'Filename is missing.',

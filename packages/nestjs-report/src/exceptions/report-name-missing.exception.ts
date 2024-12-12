@@ -1,10 +1,8 @@
+import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
 import { HttpStatus } from '@nestjs/common';
-import {
-  RuntimeException,
-  RuntimeExceptionOptions,
-} from '@concepta/nestjs-exception';
+import { ReportException } from './report.exception';
 
-export class ReportnameMissingException extends RuntimeException {
+export class ReportNameMissingException extends ReportException {
   constructor(options?: RuntimeExceptionOptions) {
     super({
       message: 'Reportname is missing.',

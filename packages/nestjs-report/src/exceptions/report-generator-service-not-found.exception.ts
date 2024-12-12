@@ -1,10 +1,10 @@
-import { HttpStatus } from '@nestjs/common';
 import {
   RuntimeException,
   RuntimeExceptionOptions,
 } from '@concepta/nestjs-exception';
+import { ReportException } from './report.exception';
 
-export class ReportGeneratorServiceNotFoundException extends RuntimeException {
+export class ReportGeneratorServiceNotFoundException extends ReportException {
   context: RuntimeException['context'] & {
     generatorServiceName: string;
   };
@@ -13,7 +13,6 @@ export class ReportGeneratorServiceNotFoundException extends RuntimeException {
     super({
       message: 'Report generator service %s was not registered to be used.',
       messageParams: [generatorServiceName],
-      httpStatus: HttpStatus.NOT_FOUND,
       ...options,
     });
 

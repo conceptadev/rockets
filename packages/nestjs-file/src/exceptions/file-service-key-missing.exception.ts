@@ -1,10 +1,8 @@
+import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
 import { HttpStatus } from '@nestjs/common';
-import {
-  RuntimeException,
-  RuntimeExceptionOptions,
-} from '@concepta/nestjs-exception';
+import { FileException } from './file.exception';
 
-export class FileServiceKeyMissingException extends RuntimeException {
+export class FileServiceKeyMissingException extends FileException {
   constructor(options?: RuntimeExceptionOptions) {
     super({
       message: 'Service key is missing.',

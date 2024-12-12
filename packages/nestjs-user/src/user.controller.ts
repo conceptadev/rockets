@@ -1,4 +1,4 @@
-import { BadRequestException, Param } from '@nestjs/common';
+import { Param } from '@nestjs/common';
 import {
   CrudBody,
   CrudCreateOne,
@@ -13,7 +13,10 @@ import {
   CrudReadMany,
   CrudRecoverOne,
 } from '@concepta/nestjs-crud';
-import { PasswordStorageInterface } from '@concepta/nestjs-password';
+import {
+  PasswordStorageInterface,
+  PasswordUsedRecentlyException,
+} from '@concepta/nestjs-password';
 import { ApiTags } from '@nestjs/swagger';
 import {
   AuthenticatedUserInterface,
@@ -42,6 +45,7 @@ import { UserPaginatedDto } from './dto/user-paginated.dto';
 import { UserAccessQueryService } from './services/user-access-query.service';
 import { UserPasswordService } from './services/user-password.service';
 import { AuthUser } from '@concepta/nestjs-common';
+import { UserBadRequestException } from './exceptions/user-bad-request-exception';
 
 /**
  * User controller.
@@ -165,10 +169,10 @@ export class UserController
         authorizededUser,
       );
     } catch (e) {
-      if (e instanceof Error) {
-        throw new BadRequestException(e.message);
+      if (e instanceof PasswordUsedRecentlyException) {
+        throw e;
       } else {
-        throw new BadRequestException();
+        throw new UserBadRequestException({ originalError: e });
       }
     }
 

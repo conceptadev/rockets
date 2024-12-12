@@ -13,6 +13,7 @@
   ],
   "dependencies": {
     "@concepta/nestjs-common": "^5.1.0",
+    "@concepta/nestjs-exception": "^5.1.0",
     "@concepta/nestjs-jwt": "^5.1.0",
     "@concepta/ts-common": "^5.1.0",
     "@concepta/ts-core": "^5.1.0",
