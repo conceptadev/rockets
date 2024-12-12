@@ -1,7 +1,7 @@
-import { HttpStatus } from '@nestjs/common';
 import { RuntimeException } from '@concepta/nestjs-exception';
+import { CacheException } from './cache.exception';
 
-export class CacheAssignmentNotFoundException extends RuntimeException {
+export class CacheAssignmentNotFoundException extends CacheException {
   context: RuntimeException['context'] & {
     assignmentName: string;
   };
@@ -13,7 +13,6 @@ export class CacheAssignmentNotFoundException extends RuntimeException {
     super({
       message,
       messageParams: [assignmentName],
-      httpStatus: HttpStatus.NOT_FOUND,
     });
 
     this.errorCode = 'CACHE_ASSIGNMENT_NOT_FOUND_ERROR';

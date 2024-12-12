@@ -1,9 +1,7 @@
-import {
-  RuntimeException,
-  RuntimeExceptionOptions,
-} from '@concepta/nestjs-exception';
+import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
+import { AuthAppleException } from './auth-apple-exception';
 
-export class AuthAppleDecodeException extends RuntimeException {
+export class AuthAppleDecodeException extends AuthAppleException {
   constructor(options?: RuntimeExceptionOptions) {
     super({
       safeMessage: 'Apple token was not able to be decoded.',

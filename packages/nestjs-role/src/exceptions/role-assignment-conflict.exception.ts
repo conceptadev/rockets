@@ -1,10 +1,11 @@
-import { HttpStatus } from '@nestjs/common';
 import {
   RuntimeException,
   RuntimeExceptionOptions,
 } from '@concepta/nestjs-exception';
+import { HttpStatus } from '@nestjs/common';
+import { RoleException } from './role.exception';
 
-export class RoleAssignmentConflictException extends RuntimeException {
+export class RoleAssignmentConflictException extends RoleException {
   context: RuntimeException['context'] & {
     assignmentName: string;
     roleId: string;

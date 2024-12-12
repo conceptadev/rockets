@@ -12,7 +12,7 @@ import { PasswordCreateObjectOptionsInterface } from '../interfaces/password-cre
 import { PasswordCurrentPasswordInterface } from '../interfaces/password-current-password.interface';
 import { PasswordHistoryPasswordInterface } from '../interfaces/password-history-password.interface';
 import { PasswordNotStrongException } from '../exceptions/password-not-strong.exception';
-import { CurrentPasswordRequiredException } from '../exceptions/current-password-required.exception';
+import { PasswordCurrentRequiredException } from '../exceptions/password-current-required.exception';
 import { PasswordUsedRecentlyException } from '../exceptions/password-used-recently.exception';
 
 /**
@@ -106,7 +106,7 @@ export class PasswordCreationService
       if (this.settings?.requireCurrentToUpdate === true) {
         // TODO: should be a password exception class
         // reqs not met, throw exception
-        throw new CurrentPasswordRequiredException();
+        throw new PasswordCurrentRequiredException();
       }
     }
 

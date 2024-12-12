@@ -49,3 +49,8 @@ export { TypeOrmCrudService } from './services/typeorm-crud.service';
 // dto
 export { CrudResponsePaginatedDto } from './dto/crud-response-paginated.dto';
 export { CrudCreateManyDto } from './dto/crud-create-many.dto';
+
+// exceptions
+export { CrudException } from './exceptions/crud.exception';
+export { CrudRequestException } from './exceptions/crud-request.exception';
+export { CrudQueryException } from './exceptions/crud-query.exception';

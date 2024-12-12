@@ -1,10 +1,8 @@
 import { HttpStatus } from '@nestjs/common';
-import {
-  RuntimeException,
-  RuntimeExceptionOptions,
-} from '@concepta/nestjs-exception';
+import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
+import { AuthLocalException } from './auth-local.exception';
 
-export class AuthLocalInvalidLoginDataException extends RuntimeException {
+export class AuthLocalInvalidLoginDataException extends AuthLocalException {
   constructor(options?: RuntimeExceptionOptions) {
     super({
       message: 'Data validation error occurred before user validation.',

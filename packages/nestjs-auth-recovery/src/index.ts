@@ -6,3 +6,5 @@ export { AuthRecoveryRecoverLoginDto } from './dto/auth-recovery-recover-login.d
 export { AuthRecoveryRecoverPasswordDto } from './dto/auth-recovery-recover-password.dto';
 export { AuthRecoveryUpdatePasswordDto } from './dto/auth-recovery-update-password.dto';
 export { AuthRecoveryValidatePasscodeDto } from './dto/auth-recovery-validate-passcode.dto';
+export { AuthRecoveryException } from './exceptions/auth-recovery.exception';
+export { AuthRecoveryOtpInvalidException } from './exceptions/auth-recovery-otp-invalid.exception';

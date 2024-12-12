@@ -1,13 +1,10 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  Optional,
-} from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { JwtVerifyTokenService } from '@concepta/nestjs-jwt';
 import { AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN } from '../authentication.constants';
 import { ValidateTokenServiceInterface } from '../interfaces/validate-token-service.interface';
 import { VerifyTokenServiceInterface } from '../interfaces/verify-token-service.interface';
+import { AuthenticationAccessTokenException } from '../exceptions/authentication-access-token.exception';
+import { AuthenticationRefreshTokenException } from '../exceptions/authentication-refresh-token.exception';
 
 @Injectable()
 export class VerifyTokenService implements VerifyTokenServiceInterface {
@@ -29,9 +26,7 @@ export class VerifyTokenService implements VerifyTokenServiceInterface {
     if (await this.validateToken(token)) {
       return token;
     } else {
-      throw new BadRequestException(
-        'Access token was verified, but failed further validation.',
-      );
+      throw new AuthenticationAccessTokenException();
     }
   }
 
@@ -48,9 +43,7 @@ export class VerifyTokenService implements VerifyTokenServiceInterface {
     if (await this.validateToken(token)) {
       return token;
     } else {
-      throw new BadRequestException(
-        'Refresh token was verified, but failed further validation.',
-      );
+      throw new AuthenticationRefreshTokenException();
     }
   }
 

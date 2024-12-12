@@ -6,8 +6,8 @@ import {
   ReferenceLookupException,
   RepositoryProxy,
 } from '@concepta/typeorm-common';
-import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
-import { AssignmentNotFoundException } from '../exceptions/assignment-not-found.exception';
+import { RoleEntityNotFoundException } from '../exceptions/role-entity-not-found.exception';
+import { RoleAssignmentNotFoundException } from '../exceptions/role-assignment-not-found.exception';
 import { RoleAssignmentConflictException } from '../exceptions/role-assignment-conflict.exception';
 import { RoleAssignmentEntityInterface } from '../interfaces/role-assignment-entity.interface';
 import {
@@ -298,11 +298,11 @@ export class RoleService implements RoleServiceInterface {
         return this.allRoleRepos[entityKey];
       } else {
         // bad entity key
-        throw new EntityNotFoundException(entityKey);
+        throw new RoleEntityNotFoundException(entityKey);
       }
     } else {
       // bad assignment
-      throw new AssignmentNotFoundException(assignment);
+      throw new RoleAssignmentNotFoundException(assignment);
     }
   }
 }

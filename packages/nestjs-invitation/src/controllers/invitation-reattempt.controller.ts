@@ -1,7 +1,6 @@
 import {
   Controller,
   Logger,
-  NotFoundException,
   Param,
   Post,
   UsePipes,
@@ -12,6 +11,7 @@ import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { InvitationAcceptanceService } from '../services/invitation-acceptance.service';
 import { InvitationDto } from '../dto/invitation.dto';
 import { InvitationSendService } from '../services/invitation-send.service';
+import { InvitationNotFoundException } from '../exceptions/invitation-not-found.exception';
 
 @Controller('invitation-reattempt')
 @ApiTags('invitation-reattempt')
@@ -37,7 +37,7 @@ export class InvitationReattemptController {
     }
 
     if (!invitation) {
-      throw new NotFoundException();
+      throw new InvitationNotFoundException();
     }
 
     const { category, user, email } = invitation;

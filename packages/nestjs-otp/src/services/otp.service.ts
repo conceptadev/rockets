@@ -24,7 +24,7 @@ import { OtpSettingsInterface } from '../interfaces/otp-settings.interface';
 import { OtpServiceInterface } from '../interfaces/otp-service.interface';
 import { OtpCreateDto } from '../dto/otp-create.dto';
 import { OtpTypeNotDefinedException } from '../exceptions/otp-type-not-defined.exception';
-import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
+import { OtpEntityNotFoundException } from '../exceptions/otp-entity-not-found.exception';
 
 @Injectable()
 export class OtpService implements OtpServiceInterface {
@@ -275,7 +275,7 @@ export class OtpService implements OtpServiceInterface {
       return this.allOtpRepos[assignment];
     } else {
       // bad assignment
-      throw new EntityNotFoundException(assignment);
+      throw new OtpEntityNotFoundException(assignment);
     }
   }
 
