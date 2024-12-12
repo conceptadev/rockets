@@ -13,10 +13,7 @@ import {
   CrudReadMany,
   CrudRecoverOne,
 } from '@concepta/nestjs-crud';
-import {
-  PasswordStorageInterface,
-  PasswordUsedRecentlyException,
-} from '@concepta/nestjs-password';
+import { PasswordStorageInterface } from '@concepta/nestjs-password';
 import { ApiTags } from '@nestjs/swagger';
 import {
   AuthenticatedUserInterface,
@@ -46,6 +43,7 @@ import { UserAccessQueryService } from './services/user-access-query.service';
 import { UserPasswordService } from './services/user-password.service';
 import { AuthUser } from '@concepta/nestjs-common';
 import { UserBadRequestException } from './exceptions/user-bad-request-exception';
+import { RuntimeException } from '@concepta/nestjs-exception';
 
 /**
  * User controller.
@@ -169,7 +167,7 @@ export class UserController
         authorizededUser,
       );
     } catch (e) {
-      if (e instanceof PasswordUsedRecentlyException) {
+      if (e instanceof RuntimeException) {
         throw e;
       } else {
         throw new UserBadRequestException({ originalError: e });
