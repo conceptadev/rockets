@@ -10,8 +10,8 @@ export class RuntimeException
   implements RuntimeExceptionInterface
 {
   private _errorCode = 'RUNTIME_EXCEPTION';
-  private _httpStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-  private _safeMessage?: string;
+  readonly httpStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+  readonly safeMessage?: string;
   public context: RuntimeExceptionContext = {};
 
   constructor(
@@ -52,14 +52,20 @@ export class RuntimeException
       httpStatus,
     } = finalOptions;
 
-    super(format(message, ...messageParams));
+    const formattedMessage = format(message ?? '', ...messageParams);
+    const formattedSafeMessage = format(
+      safeMessage ?? '',
+      ...safeMessageParams,
+    );
+
+    super(formattedMessage.length ? formattedMessage : formattedSafeMessage);
 
     if (httpStatus) {
-      this._httpStatus = httpStatus;
+      this.httpStatus = httpStatus;
     }
 
-    if (safeMessage) {
-      this._safeMessage = format(safeMessage, ...safeMessageParams);
+    if (formattedSafeMessage.length) {
+      this.safeMessage = formattedSafeMessage;
     }
 
     this.context.originalError = mapNonErrorToException(originalError);
@@ -71,13 +77,5 @@ export class RuntimeException
 
   protected set errorCode(v: string) {
     this._errorCode = v;
-  }
-
-  public get httpStatus() {
-    return this._httpStatus;
-  }
-
-  public get safeMessage() {
-    return this._safeMessage;
   }
 }

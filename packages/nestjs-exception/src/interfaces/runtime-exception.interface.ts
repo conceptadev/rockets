@@ -1,5 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
-import { ExceptionInterface } from '@concepta/nestjs-common/src/exceptions/interfaces/exception.interface';
+import { ExceptionInterface } from '@concepta/nestjs-common';
 import { RuntimeExceptionContext } from '../exception.types';
 
 export interface RuntimeExceptionInterface extends ExceptionInterface {

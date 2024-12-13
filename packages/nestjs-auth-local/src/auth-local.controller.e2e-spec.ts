@@ -8,6 +8,8 @@ import { PasswordValidationService } from '@concepta/nestjs-password';
 import { LOGIN_SUCCESS } from './__fixtures__/user/constants';
 import { HttpAdapterHost } from '@nestjs/core';
 import { ExceptionsFilter } from '@concepta/nestjs-exception';
+import { AUTH_LOCAL_MODULE_VALIDATE_USER_SERVICE_TOKEN } from './auth-local.constants';
+import { AuthLocalInvalidCredentialsException } from './exceptions/auth-local-invalid-credentials.exception';
 
 describe('AuthLocalController (e2e)', () => {
   let app: INestApplication;
@@ -50,7 +52,34 @@ describe('AuthLocalController (e2e)', () => {
       })
       .then((response) => {
         expect(response.body.message).toBe(
-          'The provided credentials are incorrect. Please try again.',
+          'The provided username or password is incorrect. Please try again.',
+        );
+        expect(response.status).toBe(401);
+      });
+  });
+
+  it('POST auth/login username not found with custom message', async () => {
+    const validateUserService = app.get(
+      AUTH_LOCAL_MODULE_VALIDATE_USER_SERVICE_TOKEN,
+    );
+
+    jest
+      .spyOn(validateUserService, 'validateUser')
+      .mockImplementationOnce(() => {
+        throw new AuthLocalInvalidCredentialsException({
+          safeMessage: 'Custom invalid credentials message',
+        });
+      });
+
+    await supertest(app.getHttpServer())
+      .post('/auth/login')
+      .send({
+        ...LOGIN_SUCCESS,
+        username: 'no_user',
+      })
+      .then((response) => {
+        expect(response.body.message).toBe(
+          'Custom invalid credentials message',
         );
         expect(response.status).toBe(401);
       });

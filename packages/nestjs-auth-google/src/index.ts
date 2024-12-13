@@ -21,3 +21,7 @@ export {
   AuthGoogleGuard,
   AuthGoogleGuard as GoogleAuthGuard,
 } from './auth-google.guard';
+
+export { AuthGoogleException } from './exceptions/auth-google.exception';
+export { AuthGoogleMissingEmailException } from './exceptions/auth-google-missing-email.exception';
+export { AuthGoogleMissingIdException } from './exceptions/auth-google-missing-id.exception';

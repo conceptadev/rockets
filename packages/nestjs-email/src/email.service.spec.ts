@@ -1,10 +1,11 @@
-import { InternalServerErrorException, Logger } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { mock } from 'jest-mock-extended';
 import { NotAnErrorException } from '@concepta/nestjs-common';
 import { EmailServiceInterface } from './interfaces/email-service.interface';
 import { EmailService } from './email.service';
 import { EMAIL_MODULE_MAILER_SERVICE_TOKEN } from './email.constants';
+import { EmailSendException } from './exceptions/email-send.exception';
 
 describe(EmailService, () => {
   let logger: Logger;
@@ -57,7 +58,7 @@ describe(EmailService, () => {
         await emailService.sendMail({});
       } catch (e) {
         const exception = e instanceof Error ? e : new NotAnErrorException(e);
-        expect(exception).toBeInstanceOf(InternalServerErrorException);
+        expect(exception).toBeInstanceOf(EmailSendException);
         expect(exception.message).toEqual(
           'Fatal error while trying to send email.',
         );

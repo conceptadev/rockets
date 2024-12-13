@@ -1,9 +1,7 @@
-import {
-  RuntimeException,
-  RuntimeExceptionOptions,
-} from '@concepta/nestjs-exception';
+import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
+import { FileException } from './file.exception';
 
-export class FileCreateException extends RuntimeException {
+export class FileCreateException extends FileException {
   constructor(options?: RuntimeExceptionOptions) {
     super({
       message: 'Error while trying to create a file',

@@ -2,7 +2,6 @@ import {
   CallHandler,
   ExecutionContext,
   Inject,
-  InternalServerErrorException,
   NestInterceptor,
   StreamableFile,
   Type,
@@ -23,6 +22,7 @@ import { CrudResultPaginatedInterface } from '../interfaces/crud-result-paginate
 import { CrudSettingsInterface } from '../interfaces/crud-settings.interface';
 import { CrudReflectionService } from '../services/crud-reflection.service';
 import { CRUD_MODULE_SETTINGS_TOKEN } from '../crud.constants';
+import { CrudException } from '../exceptions/crud.exception';
 
 type ResponseType =
   | (LiteralObject & CrudResultPaginatedInterface)
@@ -76,9 +76,9 @@ export class CrudSerializeInterceptor implements NestInterceptor {
     } else {
       // this should never happen, but needed just in
       // case somebody removes the defaults
-      throw new InternalServerErrorException(
-        'Impossible to serialize data without a DTO type.',
-      );
+      throw new CrudException({
+        message: 'Impossible to serialize data without a DTO type.',
+      });
     }
   }
 

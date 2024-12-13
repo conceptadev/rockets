@@ -78,7 +78,9 @@ export class InvitationRevocationService extends BaseService<InvitationEntityInt
     const { assignment } = this.settings.otp;
 
     if (!assignment) {
-      throw new InvitationException('OPT assignment setting was not defined');
+      throw new InvitationException({
+        message: 'OPT assignment setting was not defined',
+      });
     }
 
     // clear all user's otps in DB
@@ -121,20 +123,20 @@ export class InvitationRevocationService extends BaseService<InvitationEntityInt
           },
         });
       } catch (e: unknown) {
-        throw new InvitationException(
-          'Fatal error while looking up invitations to delete.',
-          e,
-        );
+        throw new InvitationException({
+          message: 'Fatal error while looking up invitations to delete.',
+          originalError: e,
+        });
       }
 
       // remove the invitations
       try {
         return repo.remove(invitations);
       } catch (e: unknown) {
-        throw new InvitationException(
-          'Fatal error while removing invitations.',
-          e,
-        );
+        throw new InvitationException({
+          message: 'Fatal error while removing invitations.',
+          originalError: e,
+        });
       }
     });
   }

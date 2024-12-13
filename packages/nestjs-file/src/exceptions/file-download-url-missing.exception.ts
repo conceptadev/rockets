@@ -1,10 +1,8 @@
+import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
 import { HttpStatus } from '@nestjs/common';
-import {
-  RuntimeException,
-  RuntimeExceptionOptions,
-} from '@concepta/nestjs-exception';
+import { FileException } from './file.exception';
 
-export class FileDownloadUrlMissingException extends RuntimeException {
+export class FileDownloadUrlMissingException extends FileException {
   constructor(options?: RuntimeExceptionOptions) {
     super({
       message: 'Error trying to generate signed download url',

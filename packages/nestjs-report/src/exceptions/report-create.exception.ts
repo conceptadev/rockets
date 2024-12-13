@@ -1,9 +1,7 @@
-import {
-  RuntimeException,
-  RuntimeExceptionOptions,
-} from '@concepta/nestjs-exception';
+import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
+import { ReportException } from './report.exception';
 
-export class ReportCreateException extends RuntimeException {
+export class ReportCreateException extends ReportException {
   constructor(options?: RuntimeExceptionOptions) {
     super({
       message: 'Error while trying to create a report',

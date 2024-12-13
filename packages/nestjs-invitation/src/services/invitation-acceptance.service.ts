@@ -133,7 +133,9 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
         template: fileName,
       });
     } catch (e: unknown) {
-      throw new InvitationSendMailException(e, email);
+      throw new InvitationSendMailException(email, {
+        originalError: e,
+      });
     }
   }
 
