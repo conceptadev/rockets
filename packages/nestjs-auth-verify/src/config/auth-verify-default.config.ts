@@ -15,7 +15,7 @@ export const authVerifyDefaultConfig = registerAs(
       tokenUrlFormatter: formatTokenUrl,
       templates: {
         verifyEmail: {
-          fileName: __dirname + '/../assets/verify-password.template.hbs',
+          fileName: __dirname + '/../assets/verify.template.hbs',
           subject: 'Password Verify',
         },
       },
@@ -24,7 +24,7 @@ export const authVerifyDefaultConfig = registerAs(
       assignment: 'userOtp',
       category: 'auth-verify',
       type: 'uuid',
-      expiresIn: '1h',
+      expiresIn: '24h',
     },
   }),
 );
