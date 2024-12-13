@@ -1,5 +1,5 @@
-import { FileCreatableInterface } from '@concepta/ts-common';
-import { CreateOneInterface } from '@concepta/ts-core';
+import { FileCreatableInterface } from '@concepta/nestjs-common';
+import { CreateOneInterface } from '@concepta/nestjs-common';
 import { FileEntityInterface } from './file-entity.interface';
 
 export interface FileMutateServiceInterface

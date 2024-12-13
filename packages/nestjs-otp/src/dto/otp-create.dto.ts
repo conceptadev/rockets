@@ -1,7 +1,7 @@
 import { Exclude, Expose, Type } from 'class-transformer';
 import { IsString, ValidateNested } from 'class-validator';
-import { ReferenceIdInterface } from '@concepta/ts-core';
-import { OtpCreatableInterface } from '@concepta/ts-common';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
+import { OtpCreatableInterface } from '@concepta/nestjs-common';
 import { ReferenceIdDto } from '@concepta/nestjs-common';
 
 /**

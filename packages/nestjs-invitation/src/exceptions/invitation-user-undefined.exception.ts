@@ -1,5 +1,5 @@
-import { InvitationException } from './invitation.exception';
 import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
+import { InvitationException } from './invitation.exception';
 
 /**
  * Generic invitation exception.

@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
 import { Inject } from '@nestjs/common';
-import { ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import { BaseService, QueryOptionsInterface } from '@concepta/typeorm-common';
 

@@ -1,6 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ReferenceIdInterface } from '@concepta/ts-core';
-import { AuthorizationPayloadInterface } from '@concepta/ts-common';
+import {
+  ReferenceIdInterface,
+  AuthorizationPayloadInterface,
+} from '@concepta/nestjs-common';
 import {
   PassportStrategyFactory,
   VerifyTokenServiceInterface,

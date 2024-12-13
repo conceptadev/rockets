@@ -786,7 +786,6 @@ __metadata:
     "@concepta/nestjs-auth-jwt": "npm:^5.1.0"
     "@concepta/nestjs-authentication": "npm:^5.1.0"
     "@concepta/nestjs-common": "npm:^5.1.0"
-    "@concepta/nestjs-core": "npm:^5.1.0"
     "@concepta/nestjs-crud": "npm:^5.1.0"
     "@concepta/nestjs-exception": "npm:^5.1.0"
     "@concepta/nestjs-federated": "npm:^5.1.0"
@@ -794,8 +793,6 @@ __metadata:
     "@concepta/nestjs-password": "npm:^5.1.0"
     "@concepta/nestjs-typeorm-ext": "npm:^5.1.0"
     "@concepta/nestjs-user": "npm:^5.1.0"
-    "@concepta/ts-common": "npm:^5.1.0"
-    "@concepta/ts-core": "npm:^5.1.0"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/core": "npm:^10.4.1"
@@ -820,7 +817,6 @@ __metadata:
     "@concepta/nestjs-auth-jwt": "npm:^5.1.0"
     "@concepta/nestjs-authentication": "npm:^5.1.0"
     "@concepta/nestjs-common": "npm:^5.1.0"
-    "@concepta/nestjs-core": "npm:^5.1.0"
     "@concepta/nestjs-crud": "npm:^5.1.0"
     "@concepta/nestjs-exception": "npm:^5.1.0"
     "@concepta/nestjs-federated": "npm:^5.1.0"
@@ -828,8 +824,6 @@ __metadata:
     "@concepta/nestjs-password": "npm:^5.1.0"
     "@concepta/nestjs-typeorm-ext": "npm:^5.1.0"
     "@concepta/nestjs-user": "npm:^5.1.0"
-    "@concepta/ts-common": "npm:^5.1.0"
-    "@concepta/ts-core": "npm:^5.1.0"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/core": "npm:^10.4.1"
@@ -853,7 +847,6 @@ __metadata:
     "@concepta/nestjs-auth-jwt": "npm:^5.1.0"
     "@concepta/nestjs-authentication": "npm:^5.1.0"
     "@concepta/nestjs-common": "npm:^5.1.0"
-    "@concepta/nestjs-core": "npm:^5.1.0"
     "@concepta/nestjs-crud": "npm:^5.1.0"
     "@concepta/nestjs-exception": "npm:^5.1.0"
     "@concepta/nestjs-federated": "npm:^5.1.0"
@@ -861,8 +854,6 @@ __metadata:
     "@concepta/nestjs-password": "npm:^5.1.0"
     "@concepta/nestjs-typeorm-ext": "npm:^5.1.0"
     "@concepta/nestjs-user": "npm:^5.1.0"
-    "@concepta/ts-common": "npm:^5.1.0"
-    "@concepta/ts-core": "npm:^5.1.0"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/core": "npm:^10.4.1"
@@ -887,8 +878,6 @@ __metadata:
     "@concepta/nestjs-common": "npm:^5.1.0"
     "@concepta/nestjs-exception": "npm:^5.1.0"
     "@concepta/nestjs-jwt": "npm:^5.1.0"
-    "@concepta/ts-common": "npm:^5.1.0"
-    "@concepta/ts-core": "npm:^5.1.0"
     "@concepta/typeorm-common": "npm:^5.1.0"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
@@ -912,8 +901,6 @@ __metadata:
     "@concepta/nestjs-exception": "npm:^5.1.0"
     "@concepta/nestjs-jwt": "npm:^5.1.0"
     "@concepta/nestjs-password": "npm:^5.1.0"
-    "@concepta/ts-common": "npm:^5.1.0"
-    "@concepta/ts-core": "npm:^5.1.0"
     "@concepta/typeorm-common": "npm:^5.1.0"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
@@ -947,8 +934,6 @@ __metadata:
     "@concepta/nestjs-password": "npm:^5.1.0"
     "@concepta/nestjs-typeorm-ext": "npm:^5.1.0"
     "@concepta/nestjs-user": "npm:^5.1.0"
-    "@concepta/ts-common": "npm:^5.1.0"
-    "@concepta/ts-core": "npm:^5.1.0"
     "@concepta/typeorm-common": "npm:^5.1.0"
     "@concepta/typeorm-seeding": "npm:^4.0.0"
     "@nestjs/common": "npm:^10.4.1"
@@ -975,8 +960,6 @@ __metadata:
     "@concepta/nestjs-common": "npm:^5.1.0"
     "@concepta/nestjs-exception": "npm:^5.1.0"
     "@concepta/nestjs-jwt": "npm:^5.1.0"
-    "@concepta/ts-common": "npm:^5.1.0"
-    "@concepta/ts-core": "npm:^5.1.0"
     "@concepta/typeorm-common": "npm:^5.1.0"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
@@ -998,8 +981,6 @@ __metadata:
     "@concepta/nestjs-common": "npm:^5.1.0"
     "@concepta/nestjs-exception": "npm:^5.1.0"
     "@concepta/nestjs-jwt": "npm:^5.1.0"
-    "@concepta/ts-common": "npm:^5.1.0"
-    "@concepta/ts-core": "npm:^5.1.0"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/core": "npm:^10.4.1"
@@ -1025,8 +1006,6 @@ __metadata:
     "@concepta/nestjs-crud": "npm:^5.1.0"
     "@concepta/nestjs-exception": "npm:^5.1.0"
     "@concepta/nestjs-typeorm-ext": "npm:^5.1.0"
-    "@concepta/ts-common": "npm:^5.1.0"
-    "@concepta/ts-core": "npm:^5.1.0"
     "@concepta/typeorm-common": "npm:^5.1.0"
     "@concepta/typeorm-seeding": "npm:^4.0.0"
     "@faker-js/faker": "npm:^8.4.1"
@@ -1052,23 +1031,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-common@workspace:packages/nestjs-common"
   dependencies:
-    "@concepta/nestjs-core": "npm:^5.1.0"
-    "@concepta/ts-common": "npm:^5.1.0"
-    "@concepta/ts-core": "npm:^5.1.0"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/swagger": "npm:^7.4.0"
     jest-mock-extended: "npm:^2.0.9"
   peerDependencies:
     class-transformer: "*"
     class-validator: "*"
-  languageName: unknown
-  linkType: soft
-
-"@concepta/nestjs-core@npm:^5.1.0, @concepta/nestjs-core@workspace:packages/nestjs-core":
-  version: 0.0.0-use.local
-  resolution: "@concepta/nestjs-core@workspace:packages/nestjs-core"
-  dependencies:
-    "@nestjs/common": "npm:^10.4.1"
   languageName: unknown
   linkType: soft
 
@@ -1079,7 +1047,6 @@ __metadata:
     "@concepta/nestjs-common": "npm:^5.1.0"
     "@concepta/nestjs-exception": "npm:^5.1.0"
     "@concepta/nestjs-typeorm-ext": "npm:^5.1.0"
-    "@concepta/ts-core": "npm:^5.1.0"
     "@concepta/typeorm-common": "npm:^5.1.0"
     "@concepta/typeorm-seeding": "npm:^4.0.0"
     "@faker-js/faker": "npm:^8.4.1"
@@ -1108,8 +1075,6 @@ __metadata:
   dependencies:
     "@concepta/nestjs-common": "npm:^5.1.0"
     "@concepta/nestjs-exception": "npm:^5.1.0"
-    "@concepta/ts-common": "npm:^5.1.0"
-    "@concepta/ts-core": "npm:^5.1.0"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/core": "npm:^10.4.1"
@@ -1125,7 +1090,6 @@ __metadata:
   dependencies:
     "@concepta/nestjs-common": "npm:^5.1.0"
     "@concepta/nestjs-exception": "npm:^5.1.0"
-    "@concepta/ts-core": "npm:^5.1.0"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/core": "npm:^10.4.1"
@@ -1138,7 +1102,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-exception@workspace:packages/nestjs-exception"
   dependencies:
-    "@concepta/ts-core": "npm:^5.1.0"
+    "@concepta/nestjs-common": "npm:^5.1.0"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/core": "npm:^10.4.1"
     "@nestjs/swagger": "npm:^7.4.0"
@@ -1157,8 +1121,6 @@ __metadata:
     "@concepta/nestjs-exception": "npm:^5.1.0"
     "@concepta/nestjs-typeorm-ext": "npm:^5.1.0"
     "@concepta/nestjs-user": "npm:^5.1.0"
-    "@concepta/ts-common": "npm:^5.1.0"
-    "@concepta/ts-core": "npm:^5.1.0"
     "@concepta/typeorm-common": "npm:^5.1.0"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
@@ -1180,8 +1142,6 @@ __metadata:
     "@concepta/nestjs-exception": "npm:^5.1.0"
     "@concepta/nestjs-typeorm-ext": "npm:^5.1.0"
     "@concepta/nestjs-user": "npm:^5.1.0"
-    "@concepta/ts-common": "npm:^5.1.0"
-    "@concepta/ts-core": "npm:^5.1.0"
     "@concepta/typeorm-common": "npm:^5.1.0"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
@@ -1202,7 +1162,6 @@ __metadata:
   dependencies:
     "@concepta/nestjs-access-control": "npm:^5.1.0"
     "@concepta/nestjs-common": "npm:^5.1.0"
-    "@concepta/nestjs-core": "npm:^5.1.0"
     "@concepta/nestjs-crud": "npm:^5.1.0"
     "@concepta/nestjs-email": "npm:^5.1.0"
     "@concepta/nestjs-event": "npm:^5.1.0"
@@ -1211,8 +1170,6 @@ __metadata:
     "@concepta/nestjs-password": "npm:^5.1.0"
     "@concepta/nestjs-typeorm-ext": "npm:^5.1.0"
     "@concepta/nestjs-user": "npm:^5.1.0"
-    "@concepta/ts-common": "npm:^5.1.0"
-    "@concepta/ts-core": "npm:^5.1.0"
     "@concepta/typeorm-common": "npm:^5.1.0"
     "@concepta/typeorm-seeding": "npm:^4.0.0"
     "@faker-js/faker": "npm:^8.4.1"
@@ -1239,7 +1196,6 @@ __metadata:
   dependencies:
     "@concepta/nestjs-common": "npm:^5.1.0"
     "@concepta/nestjs-exception": "npm:^5.1.0"
-    "@concepta/ts-core": "npm:^5.1.0"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/jwt": "npm:^10.2.0"
@@ -1323,12 +1279,9 @@ __metadata:
     "@concepta/nestjs-event": "npm:^5.1.0"
     "@concepta/nestjs-exception": "npm:^5.1.0"
     "@concepta/nestjs-invitation": "npm:^5.1.0"
-    "@concepta/nestjs-logger": "npm:^5.1.0"
     "@concepta/nestjs-password": "npm:^5.1.0"
     "@concepta/nestjs-typeorm-ext": "npm:^5.1.0"
     "@concepta/nestjs-user": "npm:^5.1.0"
-    "@concepta/ts-common": "npm:^5.1.0"
-    "@concepta/ts-core": "npm:^5.1.0"
     "@concepta/typeorm-common": "npm:^5.1.0"
     "@concepta/typeorm-seeding": "npm:^4.0.0"
     "@faker-js/faker": "npm:^8.4.1"
@@ -1352,8 +1305,6 @@ __metadata:
     "@concepta/nestjs-common": "npm:^5.1.0"
     "@concepta/nestjs-exception": "npm:^5.1.0"
     "@concepta/nestjs-typeorm-ext": "npm:^5.1.0"
-    "@concepta/ts-common": "npm:^5.1.0"
-    "@concepta/ts-core": "npm:^5.1.0"
     "@concepta/typeorm-common": "npm:^5.1.0"
     "@concepta/typeorm-seeding": "npm:^4.0.0"
     "@nestjs/common": "npm:^10.4.1"
@@ -1375,7 +1326,6 @@ __metadata:
   dependencies:
     "@concepta/nestjs-common": "npm:^5.1.0"
     "@concepta/nestjs-exception": "npm:^5.1.0"
-    "@concepta/ts-common": "npm:^5.1.0"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/core": "npm:^10.4.1"
@@ -1396,8 +1346,6 @@ __metadata:
     "@concepta/nestjs-file": "npm:^5.1.0"
     "@concepta/nestjs-typeorm-ext": "npm:^5.1.0"
     "@concepta/nestjs-user": "npm:^5.1.0"
-    "@concepta/ts-common": "npm:^5.1.0"
-    "@concepta/ts-core": "npm:^5.1.0"
     "@concepta/typeorm-common": "npm:^5.1.0"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
@@ -1421,8 +1369,6 @@ __metadata:
     "@concepta/nestjs-crud": "npm:^5.1.0"
     "@concepta/nestjs-exception": "npm:^5.1.0"
     "@concepta/nestjs-typeorm-ext": "npm:^5.1.0"
-    "@concepta/ts-common": "npm:^5.1.0"
-    "@concepta/ts-core": "npm:^5.1.0"
     "@concepta/typeorm-common": "npm:^5.1.0"
     "@concepta/typeorm-seeding": "npm:^4.0.0"
     "@faker-js/faker": "npm:^8.4.1"
@@ -1447,6 +1393,7 @@ __metadata:
     "@concepta/nestjs-auth-local": "npm:^5.1.0"
     "@concepta/nestjs-auth-refresh": "npm:^5.1.0"
     "@concepta/nestjs-authentication": "npm:^5.1.0"
+    "@concepta/nestjs-common": "npm:^5.1.0"
     "@concepta/nestjs-crud": "npm:^5.1.0"
     "@concepta/nestjs-email": "npm:^5.1.0"
     "@concepta/nestjs-event": "npm:^5.1.0"
@@ -1456,8 +1403,6 @@ __metadata:
     "@concepta/nestjs-password": "npm:^5.1.0"
     "@concepta/nestjs-typeorm-ext": "npm:^5.1.0"
     "@concepta/nestjs-user": "npm:^5.1.0"
-    "@concepta/ts-common": "npm:^5.1.0"
-    "@concepta/ts-core": "npm:^5.1.0"
     "@nestjs-modules/mailer": "npm:^1.11.2"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/core": "npm:^10.4.1"
@@ -1491,7 +1436,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-typeorm-ext@workspace:packages/nestjs-typeorm-ext"
   dependencies:
-    "@concepta/ts-core": "npm:^5.1.0"
+    "@concepta/nestjs-common": "npm:^5.1.0"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/testing": "npm:^10.4.1"
     "@nestjs/typeorm": "npm:^10.0.2"
@@ -1517,8 +1462,6 @@ __metadata:
     "@concepta/nestjs-jwt": "npm:^5.1.0"
     "@concepta/nestjs-password": "npm:^5.1.0"
     "@concepta/nestjs-typeorm-ext": "npm:^5.1.0"
-    "@concepta/ts-common": "npm:^5.1.0"
-    "@concepta/ts-core": "npm:^5.1.0"
     "@concepta/typeorm-common": "npm:^5.1.0"
     "@concepta/typeorm-seeding": "npm:^4.0.0"
     "@faker-js/faker": "npm:^8.4.1"
@@ -1546,20 +1489,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@concepta/ts-common@npm:^5.1.0, @concepta/ts-common@workspace:packages/ts-common":
-  version: 0.0.0-use.local
-  resolution: "@concepta/ts-common@workspace:packages/ts-common"
-  dependencies:
-    "@concepta/ts-core": "npm:^5.1.0"
-  languageName: unknown
-  linkType: soft
-
-"@concepta/ts-core@npm:^5.1.0, @concepta/ts-core@workspace:packages/ts-core":
-  version: 0.0.0-use.local
-  resolution: "@concepta/ts-core@workspace:packages/ts-core"
-  languageName: unknown
-  linkType: soft
-
 "@concepta/typeorm-common@npm:^5.1.0, @concepta/typeorm-common@workspace:packages/typeorm-common":
   version: 0.0.0-use.local
   resolution: "@concepta/typeorm-common@workspace:packages/typeorm-common"
@@ -1567,7 +1496,6 @@ __metadata:
     "@concepta/nestjs-common": "npm:^5.1.0"
     "@concepta/nestjs-exception": "npm:^5.1.0"
     "@concepta/nestjs-typeorm-ext": "npm:^5.1.0"
-    "@concepta/ts-core": "npm:^5.1.0"
     "@concepta/typeorm-seeding": "npm:^4.0.0"
     "@faker-js/faker": "npm:^8.4.1"
     "@nestjs/common": "npm:^10.4.1"

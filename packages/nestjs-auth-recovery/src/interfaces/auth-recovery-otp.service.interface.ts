@@ -2,7 +2,7 @@ import {
   OtpClearInterface,
   OtpCreateInterface,
   OtpValidateInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 
 export interface AuthRecoveryOtpServiceInterface
   extends OtpCreateInterface,

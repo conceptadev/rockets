@@ -1,7 +1,7 @@
 import ms from 'ms';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getDataSourceToken } from '@nestjs/typeorm';
-import { OtpInterface } from '@concepta/ts-common';
+import { OtpInterface } from '@concepta/nestjs-common';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { OtpModule } from '../otp.module';

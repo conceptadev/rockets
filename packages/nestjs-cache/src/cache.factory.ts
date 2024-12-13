@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { faker } from '@faker-js/faker';
 import { Factory } from '@concepta/typeorm-seeding';
-import { CacheInterface } from '@concepta/ts-common';
+import { CacheInterface } from '@concepta/nestjs-common';
 
 /**
  * Cache factory

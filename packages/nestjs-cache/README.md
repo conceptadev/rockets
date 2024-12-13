@@ -190,7 +190,7 @@ export class UserModule {}
 import { Entity, ManyToOne } from 'typeorm';
 import { User } from '../user/user.entity';
 import { CacheSqliteEntity } from '@concepta/nestjs-cache';
-import { ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 
 @Entity()
 export class UserCache extends CacheSqliteEntity {

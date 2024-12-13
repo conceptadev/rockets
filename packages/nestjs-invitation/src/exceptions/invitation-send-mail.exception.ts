@@ -1,8 +1,8 @@
-import { InvitationException } from './invitation.exception';
 import {
   RuntimeException,
   RuntimeExceptionOptions,
 } from '@concepta/nestjs-exception';
+import { InvitationException } from './invitation.exception';
 
 /**
  * Thrown when an error occurs while attempting to deliver email.

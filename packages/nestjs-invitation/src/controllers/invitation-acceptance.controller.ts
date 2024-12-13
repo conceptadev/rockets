@@ -13,7 +13,7 @@ import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   ReferenceAssigneeInterface,
   ReferenceIdInterface,
-} from '@concepta/ts-core';
+} from '@concepta/nestjs-common';
 
 import { InvitationAcceptanceService } from '../services/invitation-acceptance.service';
 import { InvitationAcceptInviteDto } from '../dto/invitation-accept-invite.dto';

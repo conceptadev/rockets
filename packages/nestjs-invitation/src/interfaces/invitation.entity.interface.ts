@@ -1,3 +1,3 @@
-import { InvitationInterface } from '@concepta/ts-common';
+import { InvitationInterface } from '@concepta/nestjs-common';
 
 export interface InvitationEntityInterface extends InvitationInterface {}

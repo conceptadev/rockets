@@ -1,6 +1,6 @@
 import { format } from 'util';
 import { HttpStatus } from '@nestjs/common';
-import { mapNonErrorToException } from '@concepta/ts-core';
+import { mapNonErrorToException } from '@concepta/nestjs-common';
 import { RuntimeExceptionInterface } from '../interfaces/runtime-exception.interface';
 import { RuntimeExceptionOptions } from '../interfaces/runtime-exception-options.interface';
 import { RuntimeExceptionContext } from '../exception.types';

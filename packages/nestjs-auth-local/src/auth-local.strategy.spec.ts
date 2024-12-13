@@ -9,7 +9,7 @@ import { AuthLocalValidateUserServiceInterface } from './interfaces/auth-local-v
 import { AuthLocalValidateUserService } from './services/auth-local-validate-user.service';
 
 import { UserFixture } from './__fixtures__/user/user.entity.fixture';
-import { ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import { AuthLocalValidateUserInterface } from './interfaces/auth-local-validate-user.interface';
 import { AuthLocalException } from './exceptions/auth-local.exception';
 import { AuthLocalInvalidCredentialsException } from './exceptions/auth-local-invalid-credentials.exception';

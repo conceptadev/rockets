@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { UserInterface } from '@concepta/ts-common';
+import { UserInterface } from '@concepta/nestjs-common';
 import {
   ReferenceEmail,
   ReferenceId,
   ReferenceSubject,
   ReferenceUsername,
-} from '@concepta/ts-core';
+} from '@concepta/nestjs-common';
 import { UserLookupServiceInterface } from '../../interfaces/user-lookup-service.interface';
 
 @Injectable()

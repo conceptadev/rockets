@@ -1,5 +1,5 @@
-import { ReferenceId } from '@concepta/ts-core';
-import { AuthenticationResponseInterface } from '@concepta/ts-common';
+import { ReferenceId } from '@concepta/nestjs-common';
+import { AuthenticationResponseInterface } from '@concepta/nestjs-common';
 import { JwtIssueTokenServiceInterface } from '@concepta/nestjs-jwt';
 
 export interface IssueTokenServiceInterface

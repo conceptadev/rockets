@@ -1,3 +1,3 @@
-import { FederatedInterface } from '@concepta/ts-common';
+import { FederatedInterface } from '@concepta/nestjs-common';
 
 export interface FederatedEntityInterface extends FederatedInterface {}

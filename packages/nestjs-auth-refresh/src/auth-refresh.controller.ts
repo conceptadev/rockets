@@ -8,7 +8,7 @@ import {
 import {
   AuthenticatedUserInterface,
   AuthenticationResponseInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 import {
   IssueTokenServiceInterface,
   IssueTokenService,

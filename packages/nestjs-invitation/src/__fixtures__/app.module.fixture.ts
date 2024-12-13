@@ -8,7 +8,7 @@ import {
   UserModule,
   UserMutateService,
 } from '@concepta/nestjs-user';
-import { EmailSendOptionsInterface } from '@concepta/ts-common';
+import { EmailSendOptionsInterface } from '@concepta/nestjs-common';
 import { EventModule } from '@concepta/nestjs-event';
 import { PasswordModule } from '@concepta/nestjs-password';
 import { MailerModule, MailerService } from '@nestjs-modules/mailer';

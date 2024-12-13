@@ -6,10 +6,10 @@ import { Repository } from 'typeorm';
 import { REPORT_MODULE_REPORT_ENTITY_KEY } from '../report.constants';
 import { ReportEntityInterface } from '../interfaces/report-entity.interface';
 import { ReportLookupServiceInterface } from '../interfaces/report-lookup-service.interface';
-import { ReportInterface } from '@concepta/ts-common';
+import { ReportInterface } from '@concepta/nestjs-common';
 import { ReportServiceKeyMissingException } from '../exceptions/report-service-key-missing.exception';
 import { ReportNameMissingException } from '../exceptions/report-name-missing.exception';
-import { ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import { ReportQueryException } from '../exceptions/report-query.exception';
 
 /**

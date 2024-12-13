@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   EmailSendInterface,
   EmailSendOptionsInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 
 @Injectable()
 export class MailerServiceFixture implements EmailSendInterface {

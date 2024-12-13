@@ -2,7 +2,7 @@ import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { MutateService } from '@concepta/typeorm-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
-import { Type } from '@concepta/ts-core';
+import { Type } from '@concepta/nestjs-common';
 
 import { OrgMemberMutateServiceInterface } from '../interfaces/org-member-mutate-service.interface';
 import { OrgMemberEntityInterface } from '../interfaces/org-member-entity.interface';

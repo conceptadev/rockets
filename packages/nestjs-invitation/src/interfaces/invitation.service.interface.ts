@@ -2,7 +2,7 @@ import {
   LiteralObject,
   ReferenceEmailInterface,
   ReferenceIdInterface,
-} from '@concepta/ts-core';
+} from '@concepta/nestjs-common';
 import { InvitationDto } from '../dto/invitation.dto';
 
 export interface InvitationServiceInterface {

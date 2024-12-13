@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import {
   ReportCreatableInterface,
   ReportStatusEnum,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 import { ReportCreateDto } from '../dto/report-create.dto';
 import { ReportDuplicateEntryException } from '../exceptions/report-duplicated.exception';
 import { ReportQueryException } from '../exceptions/report-query.exception';

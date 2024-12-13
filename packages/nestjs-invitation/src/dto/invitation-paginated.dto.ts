@@ -1,6 +1,6 @@
 import { Exclude, Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { InvitationInterface } from '@concepta/ts-common';
+import { InvitationInterface } from '@concepta/nestjs-common';
 import { CrudResponsePaginatedDto } from '@concepta/nestjs-crud';
 
 import { InvitationDto } from './invitation.dto';

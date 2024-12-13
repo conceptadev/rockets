@@ -1,6 +1,6 @@
 import { Exclude } from 'class-transformer';
 import { PickType } from '@nestjs/swagger';
-import { FederatedUpdatableInterface } from '@concepta/ts-common';
+import { FederatedUpdatableInterface } from '@concepta/nestjs-common';
 import { FederatedDto } from './federated.dto';
 
 /**

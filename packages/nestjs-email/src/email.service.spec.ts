@@ -1,7 +1,7 @@
 import { Logger } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { mock } from 'jest-mock-extended';
-import { NotAnErrorException } from '@concepta/ts-core';
+import { NotAnErrorException } from '@concepta/nestjs-common';
 import { EmailServiceInterface } from './interfaces/email-service.interface';
 import { EmailService } from './email.service';
 import { EMAIL_MODULE_MAILER_SERVICE_TOKEN } from './email.constants';

@@ -2,8 +2,8 @@ import {
   LookupIdInterface,
   ReferenceId,
   ReferenceIdInterface,
-} from '@concepta/ts-core';
-import { OrgOwnerInterface } from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
+import { OrgOwnerInterface } from '@concepta/nestjs-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 export interface OrgLookupServiceInterface

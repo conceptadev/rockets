@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { ReferenceIdInterface, ReferenceSubject } from '@concepta/ts-core';
+import {
+  ReferenceIdInterface,
+  ReferenceSubject,
+} from '@concepta/nestjs-common';
 import { AuthJwtUserLookupServiceInterface } from '../../interfaces/auth-jwt-user-lookup-service.interface';
 
 @Injectable()

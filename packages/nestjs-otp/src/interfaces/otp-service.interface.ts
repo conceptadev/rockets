@@ -3,7 +3,7 @@ import {
   OtpValidateInterface,
   OtpDeleteInterface,
   OtpClearInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 export interface OtpServiceInterface

@@ -1,4 +1,4 @@
-import { EmailSendOptionsInterface } from '@concepta/ts-common';
+import { EmailSendOptionsInterface } from '@concepta/nestjs-common';
 
 export interface AuthRecoveryNotificationServiceInterface {
   sendEmail(sendMailOptions: EmailSendOptionsInterface): Promise<void>;

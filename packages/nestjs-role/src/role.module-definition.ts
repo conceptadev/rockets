@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-import { RoleAssignmentInterface } from '@concepta/ts-common';
+import { RoleAssignmentInterface } from '@concepta/nestjs-common';
 import { createSettingsProvider } from '@concepta/nestjs-common';
 import {
   TypeOrmExtModule,

@@ -1,6 +1,6 @@
 import { Exclude } from 'class-transformer';
 import { PickType } from '@nestjs/swagger';
-import { FileCreatableInterface } from '@concepta/ts-common';
+import { FileCreatableInterface } from '@concepta/nestjs-common';
 import { FileDto } from './file.dto';
 
 /**

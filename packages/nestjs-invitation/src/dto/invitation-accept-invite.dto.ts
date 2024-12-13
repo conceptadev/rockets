@@ -1,6 +1,6 @@
 import { IsObject, IsOptional, IsString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { LiteralObject } from '@concepta/ts-core';
+import { LiteralObject } from '@concepta/nestjs-common';
 
 export class InvitationAcceptInviteDto {
   @ApiProperty({

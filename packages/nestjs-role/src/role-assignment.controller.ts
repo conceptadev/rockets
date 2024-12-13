@@ -1,10 +1,10 @@
 import { Inject, Param } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { ReferenceAssignment } from '@concepta/ts-core';
+import { ReferenceAssignment } from '@concepta/nestjs-common';
 import {
   RoleAssignmentCreatableInterface,
   RoleAssignmentInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 import {
   CrudBody,
   CrudCreateOne,

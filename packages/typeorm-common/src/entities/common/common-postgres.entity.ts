@@ -1,5 +1,5 @@
 import { PrimaryGeneratedColumn } from 'typeorm';
-import { AuditInterface, ReferenceIdInterface } from '@concepta/ts-core';
+import { AuditInterface, ReferenceIdInterface } from '@concepta/nestjs-common';
 import { AuditPostgresEntity } from '../audit/audit-postgres.entity';
 
 export abstract class CommonPostgresEntity

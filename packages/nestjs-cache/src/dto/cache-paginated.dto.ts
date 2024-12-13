@@ -1,6 +1,6 @@
 import { Exclude, Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { CacheInterface } from '@concepta/ts-common';
+import { CacheInterface } from '@concepta/nestjs-common';
 import { CrudResponsePaginatedDto } from '@concepta/nestjs-crud';
 import { CacheDto } from './cache.dto';
 

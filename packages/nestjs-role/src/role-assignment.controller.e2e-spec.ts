@@ -6,7 +6,7 @@ import { INestApplication } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { getDynamicRepositoryToken } from '@concepta/nestjs-typeorm-ext';
-import { RoleAssignmentCreatableInterface } from '@concepta/ts-common';
+import { RoleAssignmentCreatableInterface } from '@concepta/nestjs-common';
 
 import { ROLE_MODULE_ROLE_ENTITY_KEY } from './role.constants';
 

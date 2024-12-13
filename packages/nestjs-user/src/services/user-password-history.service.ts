@@ -1,6 +1,6 @@
 import { MoreThan } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
-import { ReferenceId, ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceId, ReferenceIdInterface } from '@concepta/nestjs-common';
 import { PasswordStorageInterface } from '@concepta/nestjs-password';
 
 import { UserPasswordHistoryLookupService } from './user-password-history-lookup.service';

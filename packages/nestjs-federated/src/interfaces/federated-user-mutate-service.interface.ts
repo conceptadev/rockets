@@ -1,4 +1,4 @@
-import { CreateOneInterface } from '@concepta/ts-core';
+import { CreateOneInterface } from '@concepta/nestjs-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 import { FederatedCredentialsInterface } from './federated-credentials.interface';

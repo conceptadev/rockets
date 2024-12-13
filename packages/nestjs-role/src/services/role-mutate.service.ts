@@ -5,7 +5,7 @@ import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import {
   RoleCreatableInterface,
   RoleUpdatableInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 import { RoleEntityInterface } from '../interfaces/role-entity.interface';
 import { RoleMutateServiceInterface } from '../interfaces/role-mutate-service.interface';
 import { RoleCreateDto } from '../dto/role-create.dto';

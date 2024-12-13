@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 
 import { INestApplication, Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthenticationResponseInterface } from '@concepta/ts-common';
+import { AuthenticationResponseInterface } from '@concepta/nestjs-common';
 import { UserCrudService } from '@concepta/nestjs-user';
 import { ExceptionsFilter } from '@concepta/nestjs-exception';
 
