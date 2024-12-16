@@ -1,0 +1,38 @@
+name: 📦 New Package Proposal
+description: Propose a new NestJS package for the monorepo
+body:
+  - type: textarea
+    attributes:
+      label: Problem Statement
+      description: |
+        Please describe the general problem or need that this package would address.
+        
+        What common challenges or patterns have you identified that could benefit from
+        a reusable NestJS package solution?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Package Proposal
+      description: |
+        Describe your vision for this package:
+        - What would be its core functionality?
+        - How would it integrate with NestJS?
+        - What abstract interfaces or patterns would it implement?
+        - How could it be reused across different projects?
+
+        Consider including:
+        * High-level architecture diagrams
+        * Example usage code blocks
+        * Similar existing solutions (and how this would differ)
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Implementation Approach
+      description: |
+        Outline your thoughts on how this package could be implemented:
+        - What dependencies might it require?
+        - How would it maintain abstraction and flexibility?
+    validations:
+      required: true
