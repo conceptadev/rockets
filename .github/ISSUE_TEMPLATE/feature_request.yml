@@ -1,5 +1,5 @@
 name: 🚀 Feature request
-description: Suggest a new feature for Rockets.
+description: Suggest a new feature for an existing package.
 body:
   - type: textarea
     attributes:
@@ -16,7 +16,7 @@ body:
     attributes:
       label: Proposal
       description: |
-        Briefly but precisely describe what you would like Rockets to be able to do.
+        Briefly but precisely describe what you would like this package to be able to do.
 
         Consider attaching something showing what you are imagining:
          * images
