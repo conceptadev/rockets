@@ -13,27 +13,27 @@ Verify user password using email
 ## Table of Contents
 
 - [Tutorials](#tutorials)
-   - [Introduction](#introduction)
-   - [Email Configuration](#email-configuration)
-   - [Setup Auth Verify Module](#setup-auth-verify-module)
+  - [Introduction](#introduction)
+  - [Email Configuration](#email-configuration)
+  - [Setup Auth Verify Module](#setup-auth-verify-module)
 
 - [How-To Guides](#how-to-guides)
-   - [1. How to define the AuthVerifySettings](#1-how-to-define-the-authverifysettings)
-   - [2. How to define the OtpService](#2-how-to-define-the-otpservice)
-   - [3. How to define EmailService](#3-how-to-define-emailservice)
-   - [4. How to define the UserLookupService](#4-how-to-define-the-userlookupservice)
-   - [5. How to define the UserMutateService](#5-how-to-define-the-usermutateservice)
-   - [6. How to define the NotificationService](#6-how-to-define-the-notificationservice)
-   - [7. How to define the EntityManagerProxy](#7-how-to-define-the-entitymanagerproxy)
+  - [1. How to define the AuthVerifySettings](#1-how-to-define-the-authverifysettings)
+  - [2. How to define the OtpService](#2-how-to-define-the-otpservice)
+  - [3. How to define EmailService](#3-how-to-define-the-emailservice)
+  - [4. How to define the UserLookupService](#4-how-to-define-the-userlookupservice)
+  - [5. How to define the UserMutateService](#5-how-to-define-the-usermutateservice)
+  - [6. How to define the NotificationService](#6-how-to-define-the-notificationservice)
+  - [7. How to define the EntityManagerProxy](#7-how-to-define-the-entitymanagerproxy)
 
 - [Engineering Concepts](#engineering-concepts)
-   - [1. Dynamic Configuration Settings](#1-dynamic-configuration-settings)
-   - [2. Dynamic OTP service](#2-dynamic-otp-service)
-   - [3. Dynamic Email Service](#3-dynamic-email-service)
-   - [4. User Lookup Service](#4-user-lookup-service)
-   - [5. User Mutate Service](#5-user-mutate-service)
-   - [6. Notification Service (Optional)](#6-notification-service-optional)
-   - [7. Entity Manager Proxy (Optional)](#7-entity-manager-proxy-optional)
+  - [1. Dynamic Configuration Settings](#1-dynamic-configuration-settings)
+  - [2. Dynamic OTP service](#2-dynamic-otp-service)
+  - [3. Dynamic Email Service](#3-dynamic-email-service)
+  - [4. User Lookup Service](#4-user-lookup-service)
+  - [5. User Mutate Service](#5-user-mutate-service)
+  - [6. Notification Service (Optional)](#6-notification-service-optional)
+  - [7. Entity Manager Proxy (Optional)](#7-entity-manager-proxy-optional)
 
 ## Tutorials
 
@@ -364,17 +364,7 @@ AuthVerifyModule.forRootAsync({
     }),
 ```
 
-### 3. How to define EmailService
-
-The email service is responsible for handling email delivery in the
-verification process. It must implement the
-`AuthVerifyEmailServiceInterface` which extends the `EmailSendInterface`.
-The key method to implement is:
-
-- `sendMail()`: Handles sending the verification email to users
-
-See [3. How to define the EmailService](#3-how-to-define-the-email-service)
-under How-To Guides for more details on implementing the EmailService.
+### 3. How to define the EmailService
 
 ```ts
 import { EmailSendOptionsInterface } from '@concepta/nestjs-common';
@@ -650,7 +640,7 @@ The OTP service implementation requires implementing the
 `AuthVerifyOtpServiceInterface`. Here's an example of leveraging the
 `@concepta/nestjs-otp` module in your OTP service:
 
-See [2. How to Define the OtpService](#2-how-to-define-the-otp-service)
+See [2. How to Define the OtpService](#2-how-to-define-the-otpservice)
 under How-To Guides for more details on implementing the OTP service.
 
 ### 3. Dynamic Email Service
@@ -661,7 +651,7 @@ which extends the `EmailSendInterface`. The key method to implement is:
 
 - `sendMail()`: Handles sending the verification email to users
 
-See [3. How to define the EmailService](#3-how-to-define-the-email-service)
+See [3. How to define the EmailService](#3-how-to-define-the-emailservice)
 under How-To Guides for more details on implementing the EmailService.
 
 ### 4. User Lookup Service
@@ -692,11 +682,12 @@ This service is crucial for persisting verification state changes to your user
 records. For example, when a user successfully verifies their email, the mutate
 service updates their account to reflect the verified status.
 
-The mutate service works in conjunction with the lookup service to provide a complete user
-data management solution. While the lookup service handles retrieving user information, the
-mutate service manages modifications to user data.
+The mutate service works in conjunction with the lookup service to provide
+a complete user data management solution. While the lookup service handles
+retrieving user information, the mutate service manages modifications to
+user data.
 
-See [4. How to Define the UserMutateService](#4-how-to-define-the-user-mutate-service)
+See [5. How to Define the UserMutateService](#5-how-to-define-the-usermutateservice)
 under How-To Guides for more details on implementing the UserMutateService.
 
 ### 6. Notification Service (Optional)
@@ -725,7 +716,7 @@ While optional, implementing a notification service can help standardize your
 verification-related communications and reduce code duplication. The module
 provides a default implementation that you can use or extend.
 
-See [6. How to Define the NotificationService](#6-how-to-define-the-notification-service)
+See [6. How to Define the NotificationService](#6-how-to-define-the-notificationservice)
 under How-To Guides for more details on implementing the NotificationService.
 
 ### 7. Entity Manager Proxy (Optional)
@@ -758,6 +749,6 @@ verification process involves multiple database operations that need to
 maintain consistency. The module's core services are designed to work
 with the proxy when available.
 
-See [7. How to Use the EntityManagerProxy](#7-how-to-use-the-entity-manager-proxy)
+See [7. How to define the EntityManagerProxy](#7-how-to-define-the-entitymanagerproxy)
 under How-To Guides for more details on implementing and using
 the EntityManagerProxy.

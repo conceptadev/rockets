@@ -23,7 +23,8 @@ Email deliver module that supports the popular
 
 ### Configuring Email Settings
 
-First, let's configure the email settings required for the verification system. Create a configuration file to set up the mailer options. Check the [reference](#reference) for more details about the environment variables:
+First, let's configure the email settings required for the verification system.
+Create a configuration file to set up the mailer options.
 
 ```ts
 // config/mailer.config.ts
