@@ -891,6 +891,7 @@ __metadata:
     "@concepta/nestjs-common": "npm:^5.1.0"
     "@concepta/nestjs-crud": "npm:^5.1.0"
     "@concepta/nestjs-email": "npm:^5.1.0"
+    "@concepta/nestjs-exception": "npm:^5.1.0"
     "@concepta/nestjs-jwt": "npm:^5.1.0"
     "@concepta/nestjs-otp": "npm:^5.1.0"
     "@concepta/nestjs-password": "npm:^5.1.0"
