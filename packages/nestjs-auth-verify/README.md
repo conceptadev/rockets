@@ -12,12 +12,12 @@ Verify user password using email
 
 ## Table of Contents
 
-1. [Tutorials](#tutorials)
+- [Tutorials](#tutorials)
    - [Introduction](#introduction)
    - [Email Configuration](#email-configuration)
    - [Setup Auth Verify Module](#setup-auth-verify-module)
 
-2. [How-To Guides](#how-to-guides)
+- [How-To Guides](#how-to-guides)
    - [1. How to define the AuthVerifySettings](#1-how-to-define-the-authverifysettings)
    - [2. How to define the OtpService](#2-how-to-define-the-otpservice)
    - [3. How to define EmailService](#3-how-to-define-emailservice)
@@ -26,7 +26,7 @@ Verify user password using email
    - [6. How to define the NotificationService](#6-how-to-define-the-notificationservice)
    - [7. How to define the EntityManagerProxy](#7-how-to-define-the-entitymanagerproxy)
 
-3. [Engineering Concepts](#engineering-concepts)
+- [Engineering Concepts](#engineering-concepts)
    - [1. Dynamic Configuration Settings](#1-dynamic-configuration-settings)
    - [2. Dynamic OTP service](#2-dynamic-otp-service)
    - [3. Dynamic Email Service](#3-dynamic-email-service)
