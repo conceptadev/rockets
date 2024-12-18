@@ -372,7 +372,8 @@ import { Injectable } from '@nestjs/common';
 import { AuthVerifyEmailServiceInterface } from '@nestjs/nestjs-auth-verify';
 
 @Injectable()
-export class YourAuthVerifyEmailService implements AuthVerifyEmailServiceInterface {
+export class YourAuthVerifyEmailService 
+  implements AuthVerifyEmailServiceInterface {
   constructor() {}
 
   public async sendMail(dto: EmailSendOptionsInterface): Promise<void> {
@@ -478,7 +479,11 @@ export class YourAuthVerifyUserMutateService
   async update(
     user: ReferenceIdInterface & ReferenceActiveInterface,
     options?: QueryOptionsInterface,
-  ): Promise<ReferenceIdInterface & ReferenceEmailInterface & ReferenceActiveInterface> {
+  ): Promise<
+    ReferenceIdInterface & 
+    ReferenceEmailInterface & 
+    ReferenceActiveInterface
+  > {
     // your custom logic to update user details
   }
 }
