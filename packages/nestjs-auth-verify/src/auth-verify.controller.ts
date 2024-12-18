@@ -1,11 +1,5 @@
 import { AuthPublic } from '@concepta/nestjs-authentication';
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Patch,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Patch, Post } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -16,6 +10,7 @@ import {
 import { AuthVerifyUpdateDto } from './dto/auth-verify-update.dto';
 import { AuthVerifyDto } from './dto/auth-verify.dto';
 import { AuthVerifyService } from './services/auth-verify.service';
+import { AuthRecoveryOtpInvalidException } from './exceptions/auth-verify-otp-invalid.exception';
 
 @Controller('auth/verify')
 @AuthPublic()
@@ -54,7 +49,7 @@ export class AuthVerifyController {
 
     if (!user) {
       // the client should have checked using validate passcode first
-      throw new BadRequestException();
+      throw new AuthRecoveryOtpInvalidException();
     }
   }
 }

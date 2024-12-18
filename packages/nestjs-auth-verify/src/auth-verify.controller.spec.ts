@@ -2,8 +2,8 @@ import { AuthVerifyController } from './auth-verify.controller';
 import { AuthVerifyService } from './services/auth-verify.service';
 import { AuthVerifyUpdateDto } from './dto/auth-verify-update.dto';
 import { mock } from 'jest-mock-extended';
-import { BadRequestException } from '@nestjs/common';
 import { AuthVerifyDto } from './dto/auth-verify.dto';
+import { AuthRecoveryOtpInvalidException } from './exceptions/auth-verify-otp-invalid.exception';
 
 describe(AuthVerifyController.name, () => {
   let controller: AuthVerifyController;
@@ -36,7 +36,7 @@ describe(AuthVerifyController.name, () => {
         .mockResolvedValue(null);
 
       const t = () => controller.confirm(passwordDto);
-      await expect(t).rejects.toThrow(BadRequestException);
+      await expect(t).rejects.toThrow(AuthRecoveryOtpInvalidException);
 
       expect(updatePasswordSpy).toHaveBeenCalledWith(passwordDto.passcode);
     });
