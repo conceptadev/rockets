@@ -18,14 +18,15 @@ import { LiteralObject } from '@concepta/nestjs-common';
 import { CrudInvalidResponseDto } from '../dto/crud-invalid-response.dto';
 import { CrudResponsePaginatedDto } from '../dto/crud-response-paginated.dto';
 import { CrudSerializationOptionsInterface } from '../interfaces/crud-serialization-options.interface';
-import { CrudResultPaginatedInterface } from '../interfaces/crud-result-paginated.interface';
+import { CrudResponsePaginatedInterface } from '../interfaces/crud-response-paginated.interface';
 import { CrudSettingsInterface } from '../interfaces/crud-settings.interface';
 import { CrudReflectionService } from '../services/crud-reflection.service';
 import { CRUD_MODULE_SETTINGS_TOKEN } from '../crud.constants';
 import { CrudException } from '../exceptions/crud.exception';
+import { crudIsPaginatedHelper } from '../util/crud-is-paginated.helper';
 
 type ResponseType =
-  | (LiteralObject & CrudResultPaginatedInterface)
+  | (LiteralObject & CrudResponsePaginatedInterface)
   | Array<LiteralObject>;
 
 export class CrudSerializeInterceptor implements NestInterceptor {
@@ -62,7 +63,7 @@ export class CrudSerializeInterceptor implements NestInterceptor {
 
     // determine the type to use
     const type =
-      !Array.isArray(response) && response?.__isPaginated === true
+      !Array.isArray(response) && crudIsPaginatedHelper(response) === true
         ? options?.paginatedType
         : options?.type;
 

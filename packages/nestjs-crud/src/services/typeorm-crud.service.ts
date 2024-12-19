@@ -9,7 +9,7 @@ import {
 
 import { CrudQueryHelper } from '../util/crud-query.helper';
 import { CrudQueryOptionsInterface } from '../interfaces/crud-query-options.interface';
-import { CrudResultPaginatedInterface } from '../interfaces/crud-result-paginated.interface';
+import { CrudResponsePaginatedInterface } from '../interfaces/crud-response-paginated.interface';
 import { CrudQueryException } from '../exceptions/crud-query.exception';
 import { ParsedRequestParams, QueryJoin } from '@nestjsx/crud-request';
 
@@ -26,7 +26,7 @@ export class TypeOrmCrudService<
   async getMany(
     req: CrudRequest,
     queryOptions?: CrudQueryOptionsInterface,
-  ): Promise<T[] | CrudResultPaginatedInterface<T>> {
+  ): Promise<T[] | CrudResponsePaginatedInterface<T>> {
     // apply options
     this.crudQueryHelper.modifyRequest(req, queryOptions);
 
@@ -47,11 +47,8 @@ export class TypeOrmCrudService<
       // yes, just return
       return result;
     } else {
-      // not an array, add pagination hint
-      return {
-        ...result,
-        __isPaginated: this.decidePagination(req.parsed, req.options),
-      };
+      // not an array, return as is
+      return result;
     }
   }
 

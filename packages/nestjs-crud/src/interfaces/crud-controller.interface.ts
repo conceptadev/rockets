@@ -1,5 +1,5 @@
 import { DeepPartial } from 'typeorm';
-import { CreateManyDto } from '@nestjsx/crud';
+import { CrudCreateManyInterface } from './crud-create-many.interface';
 import { CrudRequestInterface } from '../interfaces/crud-request.interface';
 import { CrudResponsePaginatedInterface } from './crud-response-paginated.interface';
 import { AdditionalCrudMethodArgs } from '../crud.types';
@@ -10,47 +10,47 @@ export interface CrudControllerInterface<
   Updatable extends DeepPartial<Entity>,
   Replaceable extends Creatable = Creatable,
 > {
-  getMany?: (
+  getMany?(
     crudRequest: CrudRequestInterface,
     ...rest: AdditionalCrudMethodArgs
-  ) => Promise<CrudResponsePaginatedInterface<Entity> | Entity[]>;
+  ): Promise<CrudResponsePaginatedInterface<Entity> | Entity[]>;
 
-  getOne?: (
+  getOne?(
     crudRequest: CrudRequestInterface,
     ...rest: AdditionalCrudMethodArgs
-  ) => Promise<Entity>;
+  ): Promise<Entity>;
 
-  createOne?: (
+  createOne?(
     crudRequest: CrudRequestInterface,
     dto: Creatable,
     ...rest: AdditionalCrudMethodArgs
-  ) => Promise<Entity>;
+  ): Promise<Entity>;
 
-  createMany?: (
+  createMany?(
     crudRequest: CrudRequestInterface,
-    dto: CreateManyDto<Creatable>,
+    dto: CrudCreateManyInterface<Creatable>,
     ...rest: AdditionalCrudMethodArgs
-  ) => Promise<Entity[]>;
+  ): Promise<Entity[]>;
 
-  updateOne?: (
+  updateOne?(
     crudRequest: CrudRequestInterface,
     dto: Updatable,
     ...rest: AdditionalCrudMethodArgs
-  ) => Promise<Entity>;
+  ): Promise<Entity>;
 
-  replaceOne?: (
+  replaceOne?(
     crudRequest: CrudRequestInterface,
     dto: Replaceable,
     ...rest: AdditionalCrudMethodArgs
-  ) => Promise<Entity>;
+  ): Promise<Entity>;
 
-  deleteOne?: (
+  deleteOne?(
     crudRequest: CrudRequestInterface,
     ...rest: AdditionalCrudMethodArgs
-  ) => Promise<Entity | void>;
+  ): Promise<Entity | void>;
 
-  recoverOne?: (
+  recoverOne?(
     crudRequest: CrudRequestInterface,
     ...rest: AdditionalCrudMethodArgs
-  ) => Promise<Entity>;
+  ): Promise<Entity>;
 }
