@@ -1,5 +1,6 @@
 import { applyDecorators, Post } from '@nestjs/common';
 import { CrudCreateManyOptionsInterface } from '../../interfaces/crud-route-options.interface';
+import { CrudValidationOptions } from '../../crud.types';
 import { CrudActions } from '../../crud.enums';
 import { CrudAction } from '../routes/crud-action.decorator';
 import { CRUD_MODULE_ROUTE_CREATE_MANY_DEFAULT_PATH } from '../../crud.constants';
@@ -16,15 +17,20 @@ export const CrudCreateMany = (
 ) => {
   const {
     path = CRUD_MODULE_ROUTE_CREATE_MANY_DEFAULT_PATH,
+    dto,
     validation,
     serialization,
     api,
   } = { ...options };
 
+  const validationMerged: CrudValidationOptions = dto
+    ? { expectedType: dto, ...validation }
+    : validation;
+
   return applyDecorators(
     Post(path),
     CrudAction(CrudActions.CreateMany),
-    CrudValidate(validation),
+    CrudValidate(validationMerged),
     CrudSerialize(serialization),
     CrudApiOperation(api?.operation),
     CrudApiResponse(CrudActions.CreateMany, api?.response),
