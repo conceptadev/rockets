@@ -7,8 +7,9 @@ import {
   ReferenceAssigneeInterface,
   ReferenceAssignment,
   ReferenceId,
+  OtpCreateParamsInterface,
 } from '@concepta/nestjs-common';
-import { OtpCreatableInterface, OtpInterface } from '@concepta/nestjs-common';
+import { OtpInterface } from '@concepta/nestjs-common';
 import {
   QueryOptionsInterface,
   ReferenceLookupException,
@@ -38,14 +39,13 @@ export class OtpService implements OtpServiceInterface {
   /**
    * Create a otp with a for the given assignee.
    *
-   * @param assignment - The otp assignment
-   * @param otp - The data to create
+   * @param params - The otp params
    */
   async create(
-    assignment: ReferenceAssignment,
-    otp: OtpCreatableInterface,
-    queryOptions?: QueryOptionsInterface,
+    params: OtpCreateParamsInterface<QueryOptionsInterface>,
   ): Promise<OtpInterface> {
+    const { assignment, otp, queryOptions, clearOnCreate } = params;
+
     if (!this.settings.types[otp.type])
       throw new OtpTypeNotDefinedException(otp.type);
 
@@ -69,14 +69,29 @@ export class OtpService implements OtpServiceInterface {
       // new repo proxy
       const repoProxy = new RepositoryProxy<OtpInterface>(assignmentRepo);
 
-      // try to save the item
-      return repoProxy.repository(queryOptions).save({
-        category,
-        type,
-        assignee,
-        passcode,
-        expirationDate,
-      });
+      return repoProxy
+        .transaction(queryOptions)
+        .commit(async (transaction): Promise<OtpInterface> => {
+          // nested query options
+          const nestedQueryOptions = { ...queryOptions, transaction };
+
+          // if clearOnCreate was defined, use it, otherwise get default settings
+          const shouldClear =
+            clearOnCreate === true || clearOnCreate === false
+              ? clearOnCreate
+              : this.settings.clearOnCreate;
+
+          if (shouldClear)
+            await this.clear(assignment, dto, nestedQueryOptions);
+
+          return repoProxy.repository(nestedQueryOptions).save({
+            category,
+            type,
+            assignee,
+            passcode,
+            expirationDate,
+          });
+        });
     } catch (e) {
       throw new ReferenceMutateException(assignmentRepo.metadata.targetName, {
         originalError: e,

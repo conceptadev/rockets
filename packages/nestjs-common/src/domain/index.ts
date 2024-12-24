@@ -36,6 +36,7 @@ export { RoleUpdatableInterface } from './role/interfaces/role-updatable.interfa
 export { RoleInterface } from './role/interfaces/role.interface';
 
 export { OtpClearInterface } from './otp/interfaces/otp-clear.interface';
+export { OtpCreateParamsInterface } from './otp/interfaces/otp-create-params.interface';
 export { OtpCreatableInterface } from './otp/interfaces/otp-creatable.interface';
 export { OtpCreateInterface } from './otp/interfaces/otp-create.interface';
 export { OtpDeleteInterface } from './otp/interfaces/otp-delete.interface';

@@ -18,6 +18,8 @@ import { AuthRecoveryUpdatePasswordDto } from './dto/auth-recovery-update-passwo
 
 import { UserEntityFixture } from './__fixtures__/user/entities/user-entity.fixture';
 import { AppModuleDbFixture } from './__fixtures__/app.module.db.fixture';
+import { HttpAdapterHost } from '@nestjs/core';
+import { ExceptionsFilter } from '@concepta/nestjs-exception';
 
 describe(AuthRecoveryController, () => {
   let app: INestApplication;
@@ -32,6 +34,9 @@ describe(AuthRecoveryController, () => {
       imports: [AppModuleDbFixture],
     }).compile();
     app = moduleFixture.createNestApplication();
+    const exceptionsFilter = app.get(HttpAdapterHost);
+    app.useGlobalFilters(new ExceptionsFilter(exceptionsFilter));
+
     await app.init();
 
     otpService = moduleFixture.get<OtpService>(OtpService);
@@ -82,6 +87,21 @@ describe(AuthRecoveryController, () => {
     await validateRecoverPassword(app, user);
   });
 
+  it('GET auth/recovery/passcode/{passcode} fail after create', async () => {
+    const user = await getFirstUser(app);
+
+    const otpCreateDto = await createOtp(settings, otpService, user.id);
+    // this should clear old otp
+    await createOtp(settings, otpService, user.id, true);
+
+    const { passcode } = otpCreateDto;
+
+    // should fail
+    await supertest(app.getHttpServer())
+      .get(`/auth/recovery/passcode/${passcode}`)
+      .expect(400);
+  });
+
   it('POST auth/recovery/password', async () => {
     const user = await getFirstUser(app);
 
@@ -127,15 +147,20 @@ const createOtp = async (
   config: AuthRecoverySettingsInterface,
   otpService: OtpService,
   userId: string,
+  clearOnCreate?: boolean,
 ): Promise<OtpInterface> => {
   const { category, assignment, type, expiresIn } = config.otp;
 
-  return await otpService.create(assignment, {
-    category,
-    type,
-    expiresIn,
-    assignee: {
-      id: userId,
+  return await otpService.create({
+    assignment,
+    otp: {
+      category,
+      type,
+      expiresIn,
+      assignee: {
+        id: userId,
+      },
     },
+    clearOnCreate,
   });
 };
