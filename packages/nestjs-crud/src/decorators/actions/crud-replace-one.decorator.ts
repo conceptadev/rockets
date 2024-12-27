@@ -1,5 +1,6 @@
 import { applyDecorators, Put, SetMetadata } from '@nestjs/common';
 import { CrudReplaceOneOptionsInterface } from '../../interfaces/crud-route-options.interface';
+import { CrudValidationOptions } from '../../crud.types';
 import { CrudActions } from '../../crud.enums';
 import { CrudAction } from '../routes/crud-action.decorator';
 import {
@@ -20,17 +21,22 @@ export const CrudReplaceOne = (
 ) => {
   const {
     path = CRUD_MODULE_ROUTE_ID_DEFAULT_PATH,
+    dto,
     validation,
     serialization,
     api,
     ...rest
   } = { ...options };
 
+  const validationMerged: CrudValidationOptions = dto
+    ? { expectedType: dto, ...validation }
+    : validation;
+
   return applyDecorators(
     Put(path),
     CrudAction(CrudActions.ReplaceOne),
     SetMetadata(CRUD_MODULE_ROUTE_REPLACE_ONE_METADATA, rest),
-    CrudValidate(validation),
+    CrudValidate(validationMerged),
     CrudSerialize(serialization),
     CrudApiOperation(api?.operation),
     CrudApiParam(api?.params),
