@@ -28,7 +28,7 @@ export const invitationDefaultConfig = registerAs(
       expiresIn: '7d',
       clearOtpOnCreate: process.env.INVITATION_OTP_CLEAR_ON_CREATE
         ? process.env.INVITATION_OTP_CLEAR_ON_CREATE === 'true'
-        : undefined,
+        : false,
     },
   }),
 );

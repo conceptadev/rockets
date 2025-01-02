@@ -1,4 +1,5 @@
 import ms from 'ms';
+import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { OtpInterface } from '@concepta/nestjs-common';
@@ -13,7 +14,6 @@ import { UserOtpEntityFixture } from '../__fixtures__/entities/user-otp-entity.f
 import { UserFactoryFixture } from '../__fixtures__/factories/user.factory.fixture';
 import { UserOtpFactoryFixture } from '../__fixtures__/factories/user-otp.factory.fixture';
 import { OTP_MODULE_REPOSITORIES_TOKEN } from '../otp.constants';
-import { Repository } from 'typeorm';
 
 describe('OtpModule', () => {
   const CATEGORY_DEFAULT = 'CATEGORY_DEFAULT';

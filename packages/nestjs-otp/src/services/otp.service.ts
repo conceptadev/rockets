@@ -41,9 +41,7 @@ export class OtpService implements OtpServiceInterface {
    *
    * @param params - The otp params
    */
-  async create(
-    params: OtpCreateParamsInterface<QueryOptionsInterface>,
-  ): Promise<OtpInterface> {
+  async create(params: OtpCreateParamsInterface): Promise<OtpInterface> {
     const { assignment, otp, queryOptions, clearOnCreate } = params;
 
     if (!this.settings.types[otp.type])

@@ -7,6 +7,6 @@ export interface OtpCreateParamsInterface<
 > {
   assignment: ReferenceAssignment;
   otp: OtpCreatableInterface;
-  queryOptions?: O;
   clearOnCreate?: boolean;
+  queryOptions?: O;
 }
