@@ -26,6 +26,9 @@ export const invitationDefaultConfig = registerAs(
       assignment: 'user-otp',
       type: 'uuid',
       expiresIn: '7d',
+      clearOtpOnCreate: process.env.INVITATION_OTP_CLEAR_ON_CREATE
+        ? process.env.INVITATION_OTP_CLEAR_ON_CREATE === 'true'
+        : false,
     },
   }),
 );

@@ -142,16 +142,21 @@ const createOtp = async (
   otpService: OtpService,
   user: UserInterface,
   category: string,
+  clearOnCreate?: boolean,
 ): Promise<OtpInterface> => {
   const { assignment, type, expiresIn } = settings.otp;
 
-  const otp = await otpService.create(assignment, {
-    category,
-    type,
-    expiresIn,
-    assignee: {
-      id: user.id,
+  const otp = await otpService.create({
+    assignment,
+    otp: {
+      category,
+      type,
+      expiresIn,
+      assignee: {
+        id: user.id,
+      },
     },
+    clearOnCreate,
   });
 
   expect(otp).toBeTruthy();

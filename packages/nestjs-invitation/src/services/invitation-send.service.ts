@@ -37,12 +37,12 @@ export class InvitationSendService {
     category: string,
     queryOptions?: QueryOptionsInterface,
   ): Promise<void> {
-    const { assignment, type, expiresIn } = this.settings.otp;
+    const { assignment, type, expiresIn, clearOtpOnCreate } = this.settings.otp;
 
     // create an OTP for this invite
-    const otp = await this.otpService.create(
+    const otp = await this.otpService.create({
       assignment,
-      {
+      otp: {
         category,
         type,
         expiresIn,
@@ -51,7 +51,8 @@ export class InvitationSendService {
         },
       },
       queryOptions,
-    );
+      clearOnCreate: clearOtpOnCreate,
+    });
 
     // send the invite email
     await this.sendEmail(user.email, code, otp.passcode, otp.expirationDate);

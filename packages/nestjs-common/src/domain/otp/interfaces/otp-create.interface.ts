@@ -1,7 +1,5 @@
 import { ReferenceQueryOptionsInterface } from '../../../reference/interfaces/reference-query-options.interface';
-import { ReferenceAssignment } from '../../../reference/interfaces/reference.types';
-
-import { OtpCreatableInterface } from './otp-creatable.interface';
+import { OtpCreateParamsInterface } from './otp-create-params.interface';
 import { OtpInterface } from './otp.interface';
 
 export interface OtpCreateInterface<
@@ -10,12 +8,7 @@ export interface OtpCreateInterface<
   /**
    * Create a otp with a for the given assignee.
    *
-   * @param assignment - The otp assignment
-   * @param otp - The OTP to create
+   * @param params - The otp params
    */
-  create(
-    assignment: ReferenceAssignment,
-    otp: OtpCreatableInterface,
-    options?: O,
-  ): Promise<OtpInterface>;
+  create(params: OtpCreateParamsInterface<O>): Promise<OtpInterface>;
 }
