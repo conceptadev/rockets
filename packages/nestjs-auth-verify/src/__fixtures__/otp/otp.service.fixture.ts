@@ -2,7 +2,6 @@ import { randomUUID } from 'crypto';
 import { Injectable } from '@nestjs/common';
 
 import {
-  OtpCreatableInterface,
   OtpCreateParamsInterface,
   OtpInterface,
   ReferenceAssigneeInterface,
@@ -16,7 +15,6 @@ import { UserFixture } from '../user/user.fixture';
 export class OtpServiceFixture implements AuthVerifyOtpServiceInterface {
   async create({ otp }: OtpCreateParamsInterface): Promise<OtpInterface> {
     const { assignee, category, type } = otp;
-    
     return {
       id: randomUUID(),
       category,
