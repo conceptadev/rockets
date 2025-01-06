@@ -4,6 +4,7 @@ import { OtpCreatableInterface } from '@concepta/nestjs-common';
 export interface InvitationOtpSettingsInterface
   extends Pick<OtpCreatableInterface, 'type' | 'expiresIn'> {
   assignment: ReferenceAssignment;
+  clearOtpOnCreate?: boolean;
 }
 
 export interface InvitationSettingsInterface {

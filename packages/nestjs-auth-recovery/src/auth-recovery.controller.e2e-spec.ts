@@ -1,4 +1,5 @@
 import supertest from 'supertest';
+import { HttpAdapterHost } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
@@ -6,6 +7,7 @@ import { OtpInterface, UserInterface } from '@concepta/nestjs-common';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { EmailService } from '@concepta/nestjs-email';
 import { OtpService } from '@concepta/nestjs-otp';
+import { ExceptionsFilter } from '@concepta/nestjs-exception';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
 
 import { AUTH_RECOVERY_MODULE_SETTINGS_TOKEN } from './auth-recovery.constants';
@@ -32,6 +34,9 @@ describe(AuthRecoveryController, () => {
       imports: [AppModuleDbFixture],
     }).compile();
     app = moduleFixture.createNestApplication();
+    const exceptionsFilter = app.get(HttpAdapterHost);
+    app.useGlobalFilters(new ExceptionsFilter(exceptionsFilter));
+
     await app.init();
 
     otpService = moduleFixture.get<OtpService>(OtpService);
@@ -82,6 +87,21 @@ describe(AuthRecoveryController, () => {
     await validateRecoverPassword(app, user);
   });
 
+  it('GET auth/recovery/passcode/{passcode} fail after create', async () => {
+    const user = await getFirstUser(app);
+
+    const otpCreateDto = await createOtp(settings, otpService, user.id);
+    // this should clear old otp
+    await createOtp(settings, otpService, user.id, true);
+
+    const { passcode } = otpCreateDto;
+
+    // should fail
+    await supertest(app.getHttpServer())
+      .get(`/auth/recovery/passcode/${passcode}`)
+      .expect(400);
+  });
+
   it('POST auth/recovery/password', async () => {
     const user = await getFirstUser(app);
 
@@ -127,15 +147,20 @@ const createOtp = async (
   config: AuthRecoverySettingsInterface,
   otpService: OtpService,
   userId: string,
+  clearOnCreate?: boolean,
 ): Promise<OtpInterface> => {
   const { category, assignment, type, expiresIn } = config.otp;
 
-  return await otpService.create(assignment, {
-    category,
-    type,
-    expiresIn,
-    assignee: {
-      id: userId,
+  return await otpService.create({
+    assignment,
+    otp: {
+      category,
+      type,
+      expiresIn,
+      assignee: {
+        id: userId,
+      },
     },
+    clearOnCreate,
   });
 };

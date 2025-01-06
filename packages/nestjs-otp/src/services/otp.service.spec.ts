@@ -1,4 +1,5 @@
 import ms from 'ms';
+import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { OtpInterface } from '@concepta/nestjs-common';
@@ -12,6 +13,7 @@ import { UserEntityFixture } from '../__fixtures__/entities/user-entity.fixture'
 import { UserOtpEntityFixture } from '../__fixtures__/entities/user-otp-entity.fixture';
 import { UserFactoryFixture } from '../__fixtures__/factories/user.factory.fixture';
 import { UserOtpFactoryFixture } from '../__fixtures__/factories/user-otp.factory.fixture';
+import { OTP_MODULE_REPOSITORIES_TOKEN } from '../otp.constants';
 
 describe('OtpModule', () => {
   const CATEGORY_DEFAULT = 'CATEGORY_DEFAULT';
@@ -20,6 +22,7 @@ describe('OtpModule', () => {
   let seedingSource: SeedingSource;
   let otpModule: OtpModule;
   let otpService: OtpService;
+  let repository: Repository<OtpInterface>;
   let connectionNumber = 1;
   let userFactory: UserFactoryFixture;
   let userOtpFactory: UserOtpFactoryFixture;
@@ -44,12 +47,18 @@ describe('OtpModule', () => {
   const defaultCreateOtp = async (
     options: Pick<OtpInterface, 'assignee'> &
       Partial<Pick<OtpInterface, 'type'>>,
+    clearOnCreate?: boolean,
   ) =>
-    await otpService.create('userOtp', {
-      type: 'uuid',
-      expiresIn: '1h',
-      category: CATEGORY_DEFAULT,
-      ...options,
+    await otpService.create({
+      assignment: 'userOtp',
+      otp: {
+        type: 'uuid',
+        expiresIn: '1h',
+        category: CATEGORY_DEFAULT,
+        ...options,
+      },
+      queryOptions: {},
+      clearOnCreate,
     });
 
   // try to delete
@@ -64,6 +73,7 @@ describe('OtpModule', () => {
 
   beforeEach(async () => {
     const connectionName = `test_${connectionNumber++}`;
+    process.env.OTP_CLEAR_ON_CREATE = 'true';
 
     testModule = await Test.createTestingModule({
       imports: [
@@ -73,6 +83,8 @@ describe('OtpModule', () => {
           database: ':memory:',
           synchronize: true,
           entities: [UserEntityFixture, UserOtpEntityFixture],
+          logging: true,
+          logger: 'simple-console',
         }),
         OtpModule.register({
           entities: {
@@ -96,6 +108,10 @@ describe('OtpModule', () => {
 
     otpModule = testModule.get<OtpModule>(OtpModule);
     otpService = testModule.get<OtpService>(OtpService);
+    const allRepo = testModule.get<Record<string, Repository<OtpInterface>>>(
+      OTP_MODULE_REPOSITORIES_TOKEN,
+    );
+    repository = allRepo.userOtp;
   });
 
   afterEach(() => {
@@ -155,6 +171,55 @@ describe('OtpModule', () => {
       expect(otp.passcode.length).toBeGreaterThan(0);
       expect(otp.expirationDate).toBeInstanceOf(Date);
       expect(otp.assignee.id).toBeTruthy();
+    });
+
+    it('create with success and check previous otp invalid', async () => {
+      const assignee = await factoryCreateUser();
+      const otp = await defaultCreateOtp({ assignee });
+      const otp_2 = await defaultCreateOtp({ assignee });
+
+      // make sure previous was deleted
+      expect(await defaultIsValidOtp(otp)).toBeNull();
+      // check new one
+      expect((await defaultIsValidOtp(otp_2, true))?.assignee.id).toBe(
+        otp.assignee.id,
+      );
+    });
+
+    it('create with success and check previous otp valid', async () => {
+      const assignee = await factoryCreateUser();
+      const otp = await defaultCreateOtp({ assignee });
+      const otp_2 = await defaultCreateOtp({ assignee }, false);
+
+      // make sure previous was deleted
+      expect((await defaultIsValidOtp(otp, true))?.assignee.id).toBe(
+        otp.assignee.id,
+      );
+      expect(await defaultIsValidOtp(otp)).toBeNull();
+      // check new one
+      expect((await defaultIsValidOtp(otp_2, true))?.assignee.id).toBe(
+        otp.assignee.id,
+      );
+    });
+
+    it('create with success and check previous otp invalid after transaction error', async () => {
+      const assignee = await factoryCreateUser();
+      const otp = await defaultCreateOtp({ assignee });
+
+      jest.spyOn(repository, 'save').mockImplementationOnce(() => {
+        throw new Error('Error on save');
+      });
+      // spy on with error
+      try {
+        await defaultCreateOtp({ assignee });
+      } catch (e) {
+        expect(e).toBeInstanceOf(Error);
+      }
+
+      // validate first one created,
+      expect((await defaultIsValidOtp(otp, true))?.assignee.id).toBe(
+        otp.assignee.id,
+      );
     });
 
     it('create with fail', async () => {

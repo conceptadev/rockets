@@ -16,5 +16,6 @@ export const otpDefaultConfig = registerAs(
         validator: uuidValidatorUtil,
       },
     },
+    clearOnCreate: process.env.OTP_CLEAR_ON_CREATE == 'true' ? true : false,
   }),
 );
