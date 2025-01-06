@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 
 import {
   OtpCreatableInterface,
+  OtpCreateParamsInterface,
   OtpInterface,
   ReferenceAssigneeInterface,
   ReferenceIdInterface,
@@ -13,11 +14,9 @@ import { UserFixture } from '../user/user.fixture';
 
 @Injectable()
 export class OtpServiceFixture implements AuthVerifyOtpServiceInterface {
-  async create(
-    _assignment: string,
-    otp: OtpCreatableInterface,
-  ): Promise<OtpInterface> {
+  async create({ otp }: OtpCreateParamsInterface): Promise<OtpInterface> {
     const { assignee, category, type } = otp;
+    
     return {
       id: randomUUID(),
       category,
