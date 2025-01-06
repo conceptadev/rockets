@@ -25,4 +25,9 @@ export interface OtpInterface
    * Date it will expire
    */
   expirationDate: Date;
+
+  /**
+   * is active status
+   */
+  active: boolean;
 }

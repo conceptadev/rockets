@@ -22,6 +22,9 @@ export abstract class OtpPostgresEntity
   @Column({ type: 'timestamptz' })
   expirationDate!: Date;
 
+  @Column({ default: true })
+  active!: boolean;
+
   /**
    * Should be overwrite by the table it will be assigned to
    */

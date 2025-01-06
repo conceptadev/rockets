@@ -22,6 +22,9 @@ export class UserOtpEntityFixture
   @Column()
   passcode!: string;
 
+  @Column({ default: true })
+  active!: boolean;
+
   @Column({ type: 'datetime' })
   expirationDate!: Date;
 

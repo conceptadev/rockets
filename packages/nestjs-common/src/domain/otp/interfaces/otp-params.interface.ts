@@ -1,11 +1,11 @@
 import { ReferenceQueryOptionsInterface } from '../../../reference/interfaces/reference-query-options.interface';
+import { ReferenceAssignment } from '../../../reference/interfaces/reference.types';
 import { OtpCreatableInterface } from './otp-creatable.interface';
-import { OtpParamsInterface } from './otp-params.interface';
 
-export interface OtpCreateParamsInterface<
+export interface OtpParamsInterface<
   O extends ReferenceQueryOptionsInterface = ReferenceQueryOptionsInterface,
-> extends Pick<OtpParamsInterface, 'assignment' | 'otp'>,
-    Partial<Pick<OtpCreatableInterface, 'rateSeconds' | 'rateThreshold'>> {
+> {
+  assignment: ReferenceAssignment;
+  otp: OtpCreatableInterface;
   queryOptions?: O;
-  clearOnCreate?: boolean;
 }
