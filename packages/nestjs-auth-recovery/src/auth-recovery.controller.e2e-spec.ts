@@ -1,4 +1,5 @@
 import supertest from 'supertest';
+import { HttpAdapterHost } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
@@ -6,6 +7,7 @@ import { OtpInterface, UserInterface } from '@concepta/nestjs-common';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { EmailService } from '@concepta/nestjs-email';
 import { OtpService } from '@concepta/nestjs-otp';
+import { ExceptionsFilter } from '@concepta/nestjs-exception';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
 
 import { AUTH_RECOVERY_MODULE_SETTINGS_TOKEN } from './auth-recovery.constants';
@@ -18,8 +20,6 @@ import { AuthRecoveryUpdatePasswordDto } from './dto/auth-recovery-update-passwo
 
 import { UserEntityFixture } from './__fixtures__/user/entities/user-entity.fixture';
 import { AppModuleDbFixture } from './__fixtures__/app.module.db.fixture';
-import { HttpAdapterHost } from '@nestjs/core';
-import { ExceptionsFilter } from '@concepta/nestjs-exception';
 
 describe(AuthRecoveryController, () => {
   let app: INestApplication;

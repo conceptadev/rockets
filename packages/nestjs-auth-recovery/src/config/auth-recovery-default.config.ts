@@ -36,7 +36,7 @@ export const authRecoveryDefaultConfig = registerAs(
       expiresIn: '1h',
       clearOtpOnCreate: process.env.AUTH_RECOVERY_OTP_CLEAR_ON_CREATE
         ? process.env.AUTH_RECOVERY_OTP_CLEAR_ON_CREATE === 'true'
-        : undefined,
+        : false,
     },
   }),
 );
