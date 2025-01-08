@@ -29,7 +29,7 @@ export class AuthVerifyController {
   @ApiOkResponse()
   @Post('/send')
   async send(@Body() verifyPasswordDto: AuthVerifyDto): Promise<void> {
-    await this.authVerifyService.send(verifyPasswordDto.email);
+    await this.authVerifyService.send({ email: verifyPasswordDto.email });
   }
 
   @ApiOperation({
@@ -45,7 +45,7 @@ export class AuthVerifyController {
   async confirm(@Body() updatePasswordDto: AuthVerifyUpdateDto): Promise<void> {
     const { passcode } = updatePasswordDto;
 
-    const user = await this.authVerifyService.confirmUser(passcode);
+    const user = await this.authVerifyService.confirmUser({ passcode });
 
     if (!user) {
       // the client should have checked using validate passcode first

@@ -17,10 +17,11 @@ import {
   ReferenceAssigneeInterface,
   ReferenceIdInterface,
 } from '@concepta/nestjs-common';
-import {
-  EntityManagerProxy,
-  QueryOptionsInterface,
-} from '@concepta/typeorm-common';
+import { EntityManagerProxy } from '@concepta/typeorm-common';
+import { AuthVerifySendParamsInterface } from '../interfaces/auth-verify-send-params.interface';
+import { AuthVerifyConfirmParamsInterface } from '../interfaces/auth-verify-confirm-params.interface';
+import { AuthVerifyRevokeParamsInterface } from '../interfaces/auth-verify-revoke-params.interface';
+import { AuthVerifyValidateParamsInterface } from '../interfaces/auth-verify-validate-params.interface';
 
 @Injectable()
 export class AuthVerifyService implements AuthVerifyServiceInterface {
@@ -43,17 +44,17 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
    *
    * @param email - user email
    */
-  async send(
-    email: string,
-    queryOptions?: QueryOptionsInterface,
-  ): Promise<void> {
+  async send(params: AuthVerifySendParamsInterface): Promise<void> {
+    const { email, queryOptions } = params;
+
     // verify the user by providing an email
     const user = await this.userLookupService.byEmail(email, queryOptions);
 
     // did we find a user?
     if (user) {
       // extract required otp properties
-      const { category, assignment, type, expiresIn } = this.config.otp;
+      const { category, assignment, type, expiresIn, clearOtpOnCreate } =
+        this.config.otp;
       // create an OTP save it in the database
       const otp = await this.otpService.create({
         assignment,
@@ -66,6 +67,7 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
           },
         },
         queryOptions,
+        clearOnCreate: clearOtpOnCreate,
       });
 
       // send en email with a verify OTP
@@ -87,10 +89,9 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
    * @param deleteIfValid - flag to delete if valid or not
    */
   async validatePasscode(
-    passcode: string,
-    deleteIfValid = false,
-    queryOptions?: QueryOptionsInterface,
+    params: AuthVerifyValidateParamsInterface,
   ): Promise<ReferenceAssigneeInterface | null> {
+    const { passcode, deleteIfValid = false, queryOptions } = params;
     // extract required properties
     const { category, assignment } = this.config.otp;
 
@@ -110,9 +111,9 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
    * @param queryOptions - query options
    */
   async confirmUser(
-    passcode: string,
-    queryOptions?: QueryOptionsInterface,
+    params: AuthVerifyConfirmParamsInterface,
   ): Promise<ReferenceIdInterface | null> {
+    const { passcode, queryOptions } = params;
     // run in transaction
     return this.entityManagerProxy
       .transaction(queryOptions)
@@ -121,11 +122,11 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
         const nestedQueryOptions = { ...queryOptions, transaction };
 
         // get otp by passcode, but no delete it until all workflow pass
-        const otp = await this.validatePasscode(
+        const otp = await this.validatePasscode({
           passcode,
-          true,
-          nestedQueryOptions,
-        );
+          deleteIfValid: true,
+          queryOptions: nestedQueryOptions,
+        });
 
         // did we get an otp?
         if (otp) {
@@ -139,7 +140,10 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
           );
 
           if (user) {
-            await this.revokeAllUserVerifyToken(user.email, nestedQueryOptions);
+            await this.revokeAllUserVerifyToken({
+              email: user.email,
+              queryOptions: nestedQueryOptions,
+            });
           }
 
           return user;
@@ -156,9 +160,9 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
    * @param email - user email
    */
   async revokeAllUserVerifyToken(
-    email: string,
-    queryOptions?: QueryOptionsInterface,
+    params: AuthVerifyRevokeParamsInterface,
   ): Promise<void> {
+    const { email, queryOptions } = params;
     // verify users password by providing an email
     const user = await this.userLookupService.byEmail(email, queryOptions);
 

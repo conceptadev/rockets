@@ -80,7 +80,7 @@ describe(AuthVerifyService, () => {
 
   describe(AuthVerifyService.prototype.send, () => {
     it('should send password verify', async () => {
-      const result = await authVerifyService.send(UserFixture.email);
+      const result = await authVerifyService.send({ email: UserFixture.email });
 
       expect(result).toBeUndefined();
       expect(spyUserLookupServiceByEmail).toHaveBeenCalledTimes(1);
@@ -100,7 +100,7 @@ describe(AuthVerifyService, () => {
 
   describe(AuthVerifyService.prototype.validatePasscode, () => {
     it('should call otp validator', async () => {
-      await authVerifyService.validatePasscode('GOOD_PASSCODE');
+      await authVerifyService.validatePasscode({ passcode: 'GOOD_PASSCODE' });
 
       expect(spyOtpServiceValidate).toHaveBeenCalledWith(
         settings.otp.assignment,
@@ -111,19 +111,23 @@ describe(AuthVerifyService, () => {
     });
 
     it('should validate good passcode', async () => {
-      const otp = await authVerifyService.validatePasscode('GOOD_PASSCODE');
+      const otp = await authVerifyService.validatePasscode({
+        passcode: 'GOOD_PASSCODE',
+      });
       expect(otp).toEqual({ assignee: UserFixture });
     });
 
     it('should not validate bad passcode', async () => {
-      const otp = await authVerifyService.validatePasscode('BAD_PASSCODE');
+      const otp = await authVerifyService.validatePasscode({
+        passcode: 'BAD_PASSCODE',
+      });
       expect(otp).toBeNull();
     });
   });
 
   describe(AuthVerifyService.prototype.confirmUser, () => {
     it('should call user mutate service', async () => {
-      await authVerifyService.confirmUser('GOOD_PASSCODE');
+      await authVerifyService.confirmUser({ passcode: 'GOOD_PASSCODE' });
 
       expect(spyUserMutateServiceUpdate).toHaveBeenCalledTimes(1);
       expect(spyUserMutateServiceUpdate).toHaveBeenCalledWith(
@@ -136,13 +140,17 @@ describe(AuthVerifyService, () => {
     });
 
     it('should update password', async () => {
-      const user = await authVerifyService.confirmUser('GOOD_PASSCODE');
+      const user = await authVerifyService.confirmUser({
+        passcode: 'GOOD_PASSCODE',
+      });
 
       expect(user).toEqual(UserFixture);
     });
 
     it('should fail to update password', async () => {
-      const user = await authVerifyService.confirmUser('FAKE_PASSCODE');
+      const user = await authVerifyService.confirmUser({
+        passcode: 'FAKE_PASSCODE',
+      });
 
       expect(user).toBeNull();
     });

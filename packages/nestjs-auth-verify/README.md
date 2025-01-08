@@ -298,7 +298,8 @@ Here's an example of how to implement the OTP service:
 import {
   OtpCreatableInterface, OtpInterface,
   ReferenceAssigneeInterface,
-  ReferenceAssignment
+  ReferenceAssignment,
+  OtpCreateParamsInterface
 } from '@concepta/nestjs-common';
 import {
   QueryOptionsInterface
@@ -317,9 +318,7 @@ export class YourAuthVerifyOtpService implements AuthVerifyOtpServiceInterface {
   constructor() {}
 
   async create(
-    assignment: ReferenceAssignment,
-    otp: OtpCreatableInterface,
-    queryOptions?: QueryOptionsInterface,
+    params: OtpCreateParamsInterface
   ): Promise<OtpInterface> {
     // your custom logic to create OTP
   }

@@ -25,7 +25,7 @@ describe(AuthVerifyController.name, () => {
 
       await controller.send(dto);
 
-      expect(verifyPasswordSpy).toHaveBeenCalledWith(dto.email);
+      expect(verifyPasswordSpy).toHaveBeenCalledWith({ email: dto.email });
     });
   });
 
@@ -38,7 +38,9 @@ describe(AuthVerifyController.name, () => {
       const t = () => controller.confirm(passwordDto);
       await expect(t).rejects.toThrow(AuthRecoveryOtpInvalidException);
 
-      expect(updatePasswordSpy).toHaveBeenCalledWith(passwordDto.passcode);
+      expect(updatePasswordSpy).toHaveBeenCalledWith({
+        passcode: passwordDto.passcode,
+      });
     });
 
     it('should call updatePassword method of AuthVerifyService', async () => {
@@ -50,7 +52,9 @@ describe(AuthVerifyController.name, () => {
 
       await controller.confirm(passwordDto);
 
-      expect(updatePasswordSpy).toHaveBeenCalledWith(passwordDto.passcode);
+      expect(updatePasswordSpy).toHaveBeenCalledWith({
+        passcode: passwordDto.passcode,
+      });
     });
   });
 });

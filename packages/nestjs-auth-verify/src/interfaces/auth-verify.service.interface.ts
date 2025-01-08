@@ -1,14 +1,14 @@
 import { ReferenceIdInterface } from '@concepta/nestjs-common';
-import { QueryOptionsInterface } from '@concepta/typeorm-common';
+import { AuthVerifySendParamsInterface } from './auth-verify-send-params.interface';
+import { AuthVerifyConfirmParamsInterface } from './auth-verify-confirm-params.interface';
+import { AuthVerifyRevokeParamsInterface } from './auth-verify-revoke-params.interface';
 
 export interface AuthVerifyServiceInterface {
-  send(email: string, queryOptions?: QueryOptionsInterface): Promise<void>;
+  send(params: AuthVerifySendParamsInterface): Promise<void>;
   confirmUser(
-    passcode: string,
-    queryOptions?: QueryOptionsInterface,
+    params: AuthVerifyConfirmParamsInterface,
   ): Promise<ReferenceIdInterface | null>;
   revokeAllUserVerifyToken(
-    email: string,
-    queryOptions?: QueryOptionsInterface,
+    params: AuthVerifyRevokeParamsInterface,
   ): Promise<void>;
 }
