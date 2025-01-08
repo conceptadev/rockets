@@ -13,10 +13,12 @@ export const invitationDefaultConfig = registerAs(
       baseUrl: 'http://localhost:3000',
       templates: {
         invitation: {
+          logo: 'images/logo.png',
           fileName: __dirname + '/../assets/invitation.template.hbs',
           subject: 'Access Invitation',
         },
         invitationAccepted: {
+          logo: 'images/logo.png',
           fileName: __dirname + '/../assets/invitation-accepted.template.hbs',
           subject: 'Invitation Accepted',
         },

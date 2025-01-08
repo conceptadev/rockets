@@ -87,7 +87,7 @@ export class InvitationSendService {
     resetTokenExp: Date,
   ): Promise<void> {
     const { from, baseUrl } = this.settings.email;
-    const { subject, fileName } = this.settings.email.templates.invitation;
+    const { subject, fileName, logo } = this.settings.email.templates.invitation;
 
     try {
       await this.emailService.sendMail({
@@ -96,6 +96,7 @@ export class InvitationSendService {
         to: email,
         template: fileName,
         context: {
+          logo: `${baseUrl}/${logo}`,
           tokenUrl: `${baseUrl}/?code=${code}&passcode=${passcode}`,
           tokenExp: resetTokenExp,
         },

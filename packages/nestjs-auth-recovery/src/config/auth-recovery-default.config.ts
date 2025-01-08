@@ -15,14 +15,17 @@ export const authRecoveryDefaultConfig = registerAs(
       tokenUrlFormatter: formatTokenUrl,
       templates: {
         recoverLogin: {
+          logo: 'image/logo.png',
           fileName: __dirname + '/../assets/recover-login.template.hbs',
           subject: 'Login Recovery',
         },
         recoverPassword: {
+          logo: 'image/logo.png',
           fileName: __dirname + '/../assets/recover-password.template.hbs',
           subject: 'Password Recovery',
         },
         passwordUpdated: {
+          logo: 'image/logo.png',
           fileName:
             __dirname + '/../assets/password-updated-successfully.template',
           subject: 'Password Updated Successfully',

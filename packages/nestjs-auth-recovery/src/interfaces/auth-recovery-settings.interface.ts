@@ -14,14 +14,17 @@ export interface AuthRecoverySettingsInterface {
     tokenUrlFormatter?: (baseUrl: string, passcode: string) => string;
     templates: {
       recoverLogin: {
+        logo: string;
         fileName: string;
         subject: string;
       };
       recoverPassword: {
+        logo: string;
         fileName: string;
         subject: string;
       };
       passwordUpdated: {
+        logo: string;
         fileName: string;
         subject: string;
       };

@@ -13,10 +13,12 @@ export interface InvitationSettingsInterface {
     baseUrl: string;
     templates: {
       invitation: {
+        logo: string;
         fileName: string;
         subject: string;
       };
       invitationAccepted: {
+        logo: string;
         fileName: string;
         subject: string;
       };

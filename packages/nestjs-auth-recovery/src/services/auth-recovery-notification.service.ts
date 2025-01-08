@@ -34,13 +34,14 @@ export class AuthRecoveryNotificationService
       baseUrl,
       tokenUrlFormatter = formatTokenUrl,
     } = this.settings.email;
-    const { subject, fileName } = this.settings.email.templates.recoverPassword;
+    const { subject, fileName, logo } = this.settings.email.templates.recoverPassword;
     await this.sendEmail({
       from,
       subject,
       to: email,
       template: fileName,
       context: {
+        logo: `${baseUrl}/${logo}`,
         tokenUrl: tokenUrlFormatter(baseUrl, passcode),
         tokenExp: resetTokenExp,
       },

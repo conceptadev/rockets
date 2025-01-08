@@ -121,8 +121,8 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
    * @param email - Email
    */
   async sendEmail(email: string): Promise<void> {
-    const { from } = this.settings.email;
-    const { subject, fileName } =
+    const { from, baseUrl } = this.settings.email;
+    const { subject, fileName, logo } =
       this.settings.email.templates.invitationAccepted;
 
     try {
@@ -131,6 +131,9 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
         subject,
         to: email,
         template: fileName,
+        context: {
+          logo: `${baseUrl}/${logo}`,
+        },
       });
     } catch (e: unknown) {
       throw new InvitationSendMailException(email, {
