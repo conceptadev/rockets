@@ -40,9 +40,15 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
   ) {}
 
   /**
-   * Send email to verify email.
+   * Send an email to verify a user's email address.
    *
-   * @param email - user email
+   * This method:
+   * 1. Looks up the user by email
+   * 2. If found, creates a one-time passcode (OTP)
+   * 3. Sends verification email with the OTP
+   * 4. Returns void regardless of whether user exists (for security)
+   *
+   * @param params - Parameters for sending verification email
    */
   async send(params: AuthVerifySendParamsInterface): Promise<void> {
     const { email, queryOptions } = params;
@@ -55,6 +61,7 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
       // extract required otp properties
       const { category, assignment, type, expiresIn, clearOtpOnCreate } =
         this.config.otp;
+
       // create an OTP save it in the database
       const otp = await this.otpService.create({
         assignment,
@@ -71,11 +78,11 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
       });
 
       // send en email with a verify OTP
-      await this.notificationService.sendVerifyEmail(
+      await this.notificationService.sendVerifyEmail({
         email,
-        otp.passcode,
-        otp.expirationDate,
-      );
+        passcode: otp.passcode,
+        resetTokenExp: otp.expirationDate,
+      });
     }
 
     // !!! Falling through to void is intentional              !!!!
@@ -83,10 +90,15 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
   }
 
   /**
-   * Validate passcode and return it's user.
+   * Send an email to verify a user's email address.
    *
-   * @param passcode - user's passcode
-   * @param deleteIfValid - flag to delete if valid or not
+   * This method:
+   * 1. Looks up the user by email
+   * 2. If found, creates a one-time passcode (OTP)
+   * 3. Sends verification email with the OTP
+   * 4. Returns void regardless of whether user exists (for security)
+   *
+   * @param params - Parameters for sending verification email
    */
   async validatePasscode(
     params: AuthVerifyValidateParamsInterface,
@@ -105,10 +117,15 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
   }
 
   /**
-   * Change user's password by providing it's OTP passcode and the new password.
+   * Confirms a user's account by validating their OTP passcode.
    *
-   * @param passcode - OTP user's passcode
-   * @param queryOptions - query options
+   * This method:
+   * 1. Validates the provided OTP passcode
+   * 2. If valid, marks the user's account as active
+   * 3. Revokes all other verification tokens for this user
+   * 4. Returns the updated user if successful, null if invalid passcode
+   *
+   * @param params - Parameters for confirming user
    */
   async confirmUser(
     params: AuthVerifyConfirmParamsInterface,
@@ -155,9 +172,10 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
   }
 
   /**
-   * Clear all other user verify tokens
+   * Revokes all verification tokens for a given user
    *
-   * @param email - user email
+   * @param params - Parameters for revoking tokens
+   * @returns Promise that resolves when tokens are revoked
    */
   async revokeAllUserVerifyToken(
     params: AuthVerifyRevokeParamsInterface,

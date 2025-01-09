@@ -8,6 +8,7 @@ import {
 import { AuthVerifyEmailServiceInterface } from '../interfaces/auth-verify-email.service.interface';
 import { AuthVerifySettingsInterface } from '../interfaces/auth-verify-settings.interface';
 import { formatTokenUrl } from '../auth-verify.utils';
+import { AuthVerifyEmailParamsInterface } from '../interfaces/auth-verify-email-params.interface';
 
 @Injectable()
 export class AuthVerifyNotificationService
@@ -24,11 +25,8 @@ export class AuthVerifyNotificationService
     await this.emailService.sendMail(sendMailOptions);
   }
 
-  async sendVerifyEmail(
-    email: string,
-    passcode: string,
-    resetTokenExp: Date,
-  ): Promise<void> {
+  async sendVerifyEmail(params: AuthVerifyEmailParamsInterface): Promise<void> {
+    const { email, passcode, resetTokenExp } = params;
     const {
       from,
       baseUrl,

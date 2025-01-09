@@ -46,11 +46,11 @@ describe('AuthVerifyNotificationService', () => {
   });
 
   it('Send verify email password', async () => {
-    await authVerifyNotificationService.sendVerifyEmail(
-      'me@mail.com',
-      'me',
-      new Date(),
-    );
+    await authVerifyNotificationService.sendVerifyEmail({
+      email: 'me@mail.com',
+      passcode: 'me',
+      resetTokenExp: new Date(),
+    });
     expect(spyEmailService).toHaveBeenCalledTimes(1);
   });
 
@@ -58,11 +58,11 @@ describe('AuthVerifyNotificationService', () => {
     authVerifyNotificationService['settings'].email.tokenUrlFormatter =
       undefined;
 
-    await authVerifyNotificationService.sendVerifyEmail(
-      'me@mail.com',
-      'me',
-      new Date(),
-    );
+    await authVerifyNotificationService.sendVerifyEmail({
+      email: 'me@mail.com',
+      passcode: 'me',
+      resetTokenExp: new Date(),
+    });
     expect(spyEmailService).toHaveBeenCalledTimes(1);
   });
 });

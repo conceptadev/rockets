@@ -90,11 +90,11 @@ describe(AuthVerifyService, () => {
       );
 
       expect(sendVerifyEmail).toHaveBeenCalledTimes(1);
-      expect(sendVerifyEmail).toHaveBeenCalledWith(
-        UserFixture.email,
-        'GOOD_PASSCODE',
-        expect.any(Date),
-      );
+      expect(sendVerifyEmail).toHaveBeenCalledWith({
+        email: UserFixture.email,
+        passcode: 'GOOD_PASSCODE',
+        resetTokenExp: expect.any(Date),
+      });
     });
   });
 
