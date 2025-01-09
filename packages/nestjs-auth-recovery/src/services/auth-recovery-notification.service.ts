@@ -34,7 +34,8 @@ export class AuthRecoveryNotificationService
       baseUrl,
       tokenUrlFormatter = formatTokenUrl,
     } = this.settings.email;
-    const { subject, fileName, logo } = this.settings.email.templates.recoverPassword;
+    const { subject, fileName, logo } =
+      this.settings.email.templates.recoverPassword;
     await this.sendEmail({
       from,
       subject,
@@ -49,8 +50,9 @@ export class AuthRecoveryNotificationService
   }
 
   async sendPasswordUpdatedSuccessfullyEmail(email: string): Promise<void> {
-    const { from, baseUrl} = this.settings.email;
-    const { subject, fileName, logo } = this.settings.email.templates.passwordUpdated;
+    const { from, baseUrl } = this.settings.email;
+    const { subject, fileName, logo } =
+      this.settings.email.templates.passwordUpdated;
     await this.sendEmail({
       from,
       subject,
@@ -64,7 +66,8 @@ export class AuthRecoveryNotificationService
 
   async sendRecoverLoginEmail(email: string, username: string): Promise<void> {
     const { from, baseUrl } = this.settings.email;
-    const { subject, fileName, logo } = this.settings.email.templates.recoverLogin;
+    const { subject, fileName, logo } =
+      this.settings.email.templates.recoverLogin;
     await this.sendEmail({
       from,
       subject,
