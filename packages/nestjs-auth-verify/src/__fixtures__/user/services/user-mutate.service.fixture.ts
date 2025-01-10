@@ -12,8 +12,6 @@ import { UserFixture } from '../user.fixture';
 export class UserMutateServiceFixture
   implements AuthVerifyUserMutateServiceInterface
 {
-  // ReferenceIdInterface & ReferenceActiveInterface,
-  //   ReferenceIdInterface & ReferenceEmailInterface & ReferenceActiveInterface,
   async update(
     object: ReferenceIdInterface<string> & ReferenceActiveInterface,
   ): ReturnType<AuthVerifyUserMutateServiceInterface['update']> {

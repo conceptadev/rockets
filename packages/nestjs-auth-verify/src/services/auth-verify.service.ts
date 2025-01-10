@@ -22,6 +22,7 @@ import { AuthVerifySendParamsInterface } from '../interfaces/auth-verify-send-pa
 import { AuthVerifyConfirmParamsInterface } from '../interfaces/auth-verify-confirm-params.interface';
 import { AuthVerifyRevokeParamsInterface } from '../interfaces/auth-verify-revoke-params.interface';
 import { AuthVerifyValidateParamsInterface } from '../interfaces/auth-verify-validate-params.interface';
+import { AuthVerifyNotificationServiceInterface } from '../interfaces/auth-verify-notification.service.interface';
 
 @Injectable()
 export class AuthVerifyService implements AuthVerifyServiceInterface {
@@ -34,7 +35,8 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
     private readonly userLookupService: AuthVerifyUserLookupServiceInterface,
     @Inject(AUTH_VERIFY_MODULE_USER_MUTATE_SERVICE_TOKEN)
     private readonly userMutateService: AuthVerifyUserMutateServiceInterface,
-    private readonly notificationService: AuthVerifyNotificationService,
+    @Inject(AuthVerifyNotificationService)
+    private readonly notificationService: AuthVerifyNotificationServiceInterface,
     @Inject(AUTH_VERIFY_MODULE_ENTITY_MANAGER_PROXY_TOKEN)
     private readonly entityManagerProxy: EntityManagerProxy,
   ) {}

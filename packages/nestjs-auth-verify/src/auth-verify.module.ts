@@ -4,10 +4,6 @@ import {
   AuthVerifyAsyncOptions,
   AuthVerifyModuleClass,
   AuthVerifyOptions,
-  createAuthVerifyControllers,
-  createAuthVerifyExports,
-  createAuthVerifyImports,
-  createAuthVerifyProviders,
 } from './auth-verify.module-definition';
 
 @Module({})
@@ -26,15 +22,5 @@ export class AuthVerifyModule extends AuthVerifyModuleClass {
 
   static forRootAsync(options: AuthVerifyAsyncOptions): DynamicModule {
     return super.registerAsync({ ...options, global: true });
-  }
-
-  static forFeature(options: AuthVerifyOptions): DynamicModule {
-    return {
-      module: AuthVerifyModule,
-      imports: createAuthVerifyImports(),
-      providers: createAuthVerifyProviders({ overrides: options }),
-      controllers: createAuthVerifyControllers(options),
-      exports: createAuthVerifyExports(),
-    };
   }
 }
