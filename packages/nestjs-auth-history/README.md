@@ -1,6 +1,9 @@
 # Rockets NestJS Auth History
 
-A module for tracking authentication history and events, providing services for creating, reading, updating and deleting auth history records. Includes event handling for authenticated requests, repository management, and access control.
+A module for tracking authentication history and events, providing services
+for creating, reading, updating and deleting auth history records. Includes
+event handling for authenticated requests, repository management, and access
+control.
 
 ## Project
 
