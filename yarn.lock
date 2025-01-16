@@ -870,6 +870,38 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@concepta/nestjs-auth-history@workspace:packages/nestjs-auth-history":
+  version: 0.0.0-use.local
+  resolution: "@concepta/nestjs-auth-history@workspace:packages/nestjs-auth-history"
+  dependencies:
+    "@concepta/nestjs-access-control": "npm:^6.0.0-alpha.0"
+    "@concepta/nestjs-auth-jwt": "npm:^6.0.0-alpha.0"
+    "@concepta/nestjs-authentication": "npm:^6.0.0-alpha.0"
+    "@concepta/nestjs-common": "npm:^6.0.0-alpha.0"
+    "@concepta/nestjs-crud": "npm:^6.0.0-alpha.0"
+    "@concepta/nestjs-event": "npm:^6.0.0-alpha.0"
+    "@concepta/nestjs-exception": "npm:^6.0.0-alpha.0"
+    "@concepta/nestjs-jwt": "npm:^6.0.0-alpha.0"
+    "@concepta/nestjs-password": "npm:^6.0.0-alpha.0"
+    "@concepta/nestjs-typeorm-ext": "npm:^6.0.0-alpha.0"
+    "@concepta/typeorm-common": "npm:^6.0.0-alpha.0"
+    "@concepta/typeorm-seeding": "npm:^4.0.0"
+    "@faker-js/faker": "npm:^8.4.1"
+    "@nestjs/common": "npm:^10.4.1"
+    "@nestjs/config": "npm:^3.2.3"
+    "@nestjs/core": "npm:^10.4.1"
+    "@nestjs/swagger": "npm:^7.4.0"
+    "@nestjs/testing": "npm:^10.4.1"
+    "@nestjs/typeorm": "npm:^10.0.2"
+    accesscontrol: "npm:^2.2.1"
+    supertest: "npm:^6.3.4"
+  peerDependencies:
+    class-transformer: "*"
+    class-validator: "*"
+    typeorm: ^0.3.0
+  languageName: unknown
+  linkType: soft
+
 "@concepta/nestjs-auth-jwt@npm:^6.0.0-alpha.0, @concepta/nestjs-auth-jwt@workspace:packages/nestjs-auth-jwt":
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-auth-jwt@workspace:packages/nestjs-auth-jwt"

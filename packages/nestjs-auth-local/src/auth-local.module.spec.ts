@@ -34,6 +34,7 @@ import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.int
 import { UserLookupServiceFixture } from './__fixtures__/user/user-lookup.service.fixture';
 import { UserModuleFixture } from './__fixtures__/user/user.module.fixture';
 import { AuthLocalValidateUserService } from './services/auth-local-validate-user.service';
+import { EventModule } from '@concepta/nestjs-event';
 
 describe(AuthLocalModule, () => {
   const jwtService = new JwtService();
@@ -217,6 +218,7 @@ function testModuleFactory(
       UserModuleFixture,
       AuthenticationModule.forRoot({}),
       JwtModule.forRoot({}),
+      EventModule.forRoot({}),
       ...extraImports,
     ],
   };
