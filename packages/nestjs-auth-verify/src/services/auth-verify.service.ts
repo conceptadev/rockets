@@ -61,7 +61,15 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
     // did we find a user?
     if (user) {
       // extract required otp properties
-      const { category, assignment, type, expiresIn, clearOtpOnCreate } =
+      const {
+        category,
+        assignment,
+        type,
+        expiresIn,
+        clearOtpOnCreate, 
+        rateSeconds,
+        rateThreshold,
+       } =
         this.config.otp;
 
       // create an OTP save it in the database
@@ -77,6 +85,8 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
         },
         queryOptions,
         clearOnCreate: clearOtpOnCreate,
+        rateSeconds,
+        rateThreshold,
       });
 
       // send en email with a verify OTP
@@ -86,9 +96,6 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
         resetTokenExp: otp.expirationDate,
       });
     }
-
-    // !!! Falling through to void is intentional              !!!!
-    // !!! Do NOT give any indication if e-mail does not exist !!!!
   }
 
   /**
