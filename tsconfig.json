@@ -111,6 +111,9 @@
       "path": "packages/nestjs-report"
     },
     {
+      "path": "packages/nestjs-auth-verify"
+    },
+    {
       "path": "packages/nestjs-auth-history"
     }
   ]
