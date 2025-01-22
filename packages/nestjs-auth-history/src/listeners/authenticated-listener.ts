@@ -59,6 +59,7 @@ export class AuthenticatedListener
       );
     } catch (err) {
       Logger.error(err);
+      return false;
     }
     return true;
   }

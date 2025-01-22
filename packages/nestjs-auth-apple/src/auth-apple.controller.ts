@@ -1,4 +1,11 @@
-import { Controller, Inject, Get, UseGuards, Post } from '@nestjs/common';
+import {
+  Controller,
+  Inject,
+  Get,
+  UseGuards,
+  Post,
+  Optional,
+} from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import {
   AuthenticatedEventInterface,
@@ -44,7 +51,9 @@ export class AuthAppleController {
   constructor(
     @Inject(AUTH_APPLE_ISSUE_TOKEN_SERVICE_TOKEN)
     private issueTokenService: IssueTokenServiceInterface,
-    private readonly eventDispatchService: EventDispatchService,
+    @Optional()
+    @Inject(EventDispatchService)
+    private readonly eventDispatchService?: EventDispatchService,
   ) {}
 
   /**
@@ -70,14 +79,15 @@ export class AuthAppleController {
   ): Promise<AuthenticationResponseInterface> {
     const response = this.issueTokenService.responsePayload(user.id);
 
-    await this.dispatchAuthenticatedEvent({
-      userInfo: {
-        userId: user.id,
-        ipAddress: authInfo?.ipAddress || '',
-        deviceInfo: authInfo?.deviceInfo || '',
-        authType: AUTH_APPLE_AUTHENTICATION_TYPE,
-      },
-    });
+    if (this.eventDispatchService)
+      await this.dispatchAuthenticatedEvent({
+        userInfo: {
+          userId: user.id,
+          ipAddress: authInfo?.ipAddress || '',
+          deviceInfo: authInfo?.deviceInfo || '',
+          authType: AUTH_APPLE_AUTHENTICATION_TYPE,
+        },
+      });
 
     return response;
   }
@@ -85,14 +95,17 @@ export class AuthAppleController {
   protected async dispatchAuthenticatedEvent(
     payload?: AuthenticatedEventInterface,
   ): Promise<boolean> {
-    const authenticatedEventAsync = new AuthAppleAuthenticatedEventAsync(
-      payload,
-    );
+    if (this.eventDispatchService) {
+      const authenticatedEventAsync = new AuthAppleAuthenticatedEventAsync(
+        payload,
+      );
 
-    const eventResult = await this.eventDispatchService.async(
-      authenticatedEventAsync,
-    );
+      const eventResult = await this.eventDispatchService.async(
+        authenticatedEventAsync,
+      );
 
-    return eventResult.every((it) => it === true);
+      return eventResult.every((it) => it === true);
+    }
+    return true;
   }
 }

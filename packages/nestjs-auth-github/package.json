@@ -26,6 +26,7 @@
   "devDependencies": {
     "@concepta/nestjs-auth-jwt": "^6.0.0-alpha.0",
     "@concepta/nestjs-crud": "^6.0.0-alpha.0",
+    "@concepta/nestjs-event": "^6.0.0-alpha.0",
     "@concepta/nestjs-jwt": "^6.0.0-alpha.0",
     "@concepta/nestjs-password": "^6.0.0-alpha.0",
     "@concepta/nestjs-typeorm-ext": "^6.0.0-alpha.0",

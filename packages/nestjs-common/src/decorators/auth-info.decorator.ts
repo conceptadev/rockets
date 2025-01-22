@@ -8,9 +8,11 @@ export const AuthInfo = createParamDecorator(
   ): AuthenticatedUserInfoInterface | string | undefined => {
     const request = ctx.switchToHttp().getRequest();
     const ipAddress =
+      request.ip ||
       request.connection?.ip ||
       request.headers['x-forwarded-for'] ||
       request.connection?.remoteAddress ||
+      request.connection?.remote_addr ||
       '';
     const deviceInfo = request.headers['user-agent'] || '';
     const userLoginInfo: AuthenticatedUserInfoInterface = {

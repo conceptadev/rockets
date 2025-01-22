@@ -19,6 +19,8 @@ import { AuthHistoryCrudService } from './services/auth-history-crud.service';
 
 import { authHistoryDefaultConfig } from './config/auth-history-default.config';
 import { AuthHistoryAccessQueryService } from './services/auth-history-query.service';
+import { AuthenticatedListener } from './listeners/authenticated-listener';
+import { AuthHistoryMutateService } from './services/auth-history-mutate.service';
 
 const RAW_OPTIONS_TOKEN = Symbol('__AUTH_HISTORY_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -83,6 +85,8 @@ export function createAuthHistoryProviders(options: {
   return [
     ...(options.providers ?? []),
     AuthHistoryCrudService,
+    AuthenticatedListener,
+    AuthHistoryMutateService,
     createAuthHistorySettingsProvider(options.overrides),
     createAuthHistoryAccessQueryServiceProvider(options.overrides),
   ];
