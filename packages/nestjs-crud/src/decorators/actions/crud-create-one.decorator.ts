@@ -6,6 +6,7 @@ import { CRUD_MODULE_ROUTE_CREATE_ONE_METADATA } from '../../crud.constants';
 import { CrudValidate } from '../routes/crud-validate.decorator';
 import { CrudSerialize } from '../routes/crud-serialize.decorator';
 import { CrudApiOperation } from '../openapi/crud-api-operation.decorator';
+import { CrudApiBody } from '../openapi/crud-api-body.decorator';
 import { CrudApiResponse } from '../openapi/crud-api-response.decorator';
 
 /**
@@ -21,6 +22,10 @@ export const CrudCreateOne = (options: CrudCreateOneOptionsInterface = {}) => {
     CrudValidate(validation),
     CrudSerialize(serialization),
     CrudApiOperation(api?.operation),
+    CrudApiBody({
+      type: options?.dto,
+      ...options?.api?.body,
+    }),
     CrudApiResponse(CrudActions.CreateOne, api?.response),
   );
 };
