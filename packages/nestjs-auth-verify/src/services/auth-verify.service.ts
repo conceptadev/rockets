@@ -66,11 +66,10 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
         assignment,
         type,
         expiresIn,
-        clearOtpOnCreate, 
+        clearOtpOnCreate,
         rateSeconds,
         rateThreshold,
-       } =
-        this.config.otp;
+      } = this.config.otp;
 
       // create an OTP save it in the database
       const otp = await this.otpService.create({
