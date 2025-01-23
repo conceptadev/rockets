@@ -11,6 +11,7 @@ import { CrudValidate } from '../routes/crud-validate.decorator';
 import { CrudSerialize } from '../routes/crud-serialize.decorator';
 import { CrudApiOperation } from '../openapi/crud-api-operation.decorator';
 import { CrudApiParam } from '../openapi/crud-api-param.decorator';
+import { CrudApiBody } from '../openapi/crud-api-body.decorator';
 import { CrudApiResponse } from '../openapi/crud-api-response.decorator';
 
 /**
@@ -40,6 +41,10 @@ export const CrudReplaceOne = (
     CrudSerialize(serialization),
     CrudApiOperation(api?.operation),
     CrudApiParam(api?.params),
+    CrudApiBody({
+      type: options?.dto,
+      ...options?.api?.body,
+    }),
     CrudApiResponse(CrudActions.ReplaceOne, api?.response),
   );
 };
