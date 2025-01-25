@@ -22,8 +22,14 @@ export abstract class AuthHistorySqliteEntity
   /**
    * deviceInfo
    */
-  @Column({ type: 'text' })
-  deviceInfo!: string;
+  @Column({ type: 'text', nullable: true, default: null })
+  deviceInfo!: string | null;
+
+  /**
+   * Failure reason
+   */
+  @Column({ type: 'text', nullable: true, default: null })
+  failureReason!: string | null;
 
   /**
    * User ID

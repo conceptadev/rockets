@@ -18,4 +18,6 @@ export const USER_SUCCESS: AuthLocalCredentialsInterface = {
   passwordHash: LOGIN_SUCCESS.password,
   passwordSalt: LOGIN_SUCCESS.password,
   username: LOGIN_SUCCESS.username,
+  lastLogin: null,
+  loginAttempts: 0,
 };

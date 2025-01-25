@@ -168,7 +168,6 @@ describe(AuthLocalModule, () => {
               AuthLocalModule.forFeature({
                 userLookupService: ffUserLookupService,
                 issueTokenService: ffIssueTokenService,
-                settings: {},
               }),
             ],
             providers: [TestService],

@@ -86,6 +86,7 @@ export class AuthAppleController {
           ipAddress: authInfo?.ipAddress || '',
           deviceInfo: authInfo?.deviceInfo || '',
           authType: AUTH_APPLE_AUTHENTICATION_TYPE,
+          success: true,
         },
       });
 

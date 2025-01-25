@@ -79,6 +79,7 @@ export class AuthGoogleController {
           ipAddress: authInfo?.ipAddress || '',
           deviceInfo: authInfo?.deviceInfo || '',
           authType: AUTH_GOOGLE_AUTHENTICATION_TYPE,
+          success: true,
         },
       });
 

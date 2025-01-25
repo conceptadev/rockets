@@ -14,6 +14,7 @@ export class AuthHistoryCreateDto
       'authType',
       'ipAddress',
       'deviceInfo',
+      'success',
     ] as const),
     PickType(AuthHistoryDto, ['deviceInfo'] as const),
   )

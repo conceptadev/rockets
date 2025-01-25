@@ -1,26 +1,33 @@
-import { Strategy } from 'passport-local';
-import { validateOrReject } from 'class-validator';
-import { Inject, Injectable } from '@nestjs/common';
+import { PassportStrategyFactory } from '@concepta/nestjs-authentication';
 import {
   ReferenceIdInterface,
   ReferenceUsername,
 } from '@concepta/nestjs-common';
-import { PassportStrategyFactory } from '@concepta/nestjs-authentication';
+import { Inject, Injectable, Optional } from '@nestjs/common';
+import { validateOrReject } from 'class-validator';
+import { Strategy } from 'passport-local';
 
 import {
+  AUTH_LOCAL_AUTHENTICATION_TYPE,
   AUTH_LOCAL_MODULE_SETTINGS_TOKEN,
+  AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN,
   AUTH_LOCAL_MODULE_VALIDATE_USER_SERVICE_TOKEN,
   AUTH_LOCAL_STRATEGY_NAME,
 } from './auth-local.constants';
 
-import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.interface';
-import { AuthLocalValidateUserServiceInterface } from './interfaces/auth-local-validate-user-service.interface';
-import { AuthLocalException } from './exceptions/auth-local.exception';
+import { EventDispatchService } from '@concepta/nestjs-event';
+import { AuthLocalAuthenticatedEventAsync } from './events/auth-local-authenticated.event';
 import { AuthLocalInvalidCredentialsException } from './exceptions/auth-local-invalid-credentials.exception';
 import { AuthLocalInvalidLoginDataException } from './exceptions/auth-local-invalid-login-data.exception';
 import { AuthLocalMissingLoginDtoException } from './exceptions/auth-local-missing-login-dto.exception';
-import { AuthLocalMissingUsernameFieldException } from './exceptions/auth-local-missing-username-field.exception';
 import { AuthLocalMissingPasswordFieldException } from './exceptions/auth-local-missing-password-field.exception';
+import { AuthLocalMissingUsernameFieldException } from './exceptions/auth-local-missing-username-field.exception';
+import { AuthLocalException } from './exceptions/auth-local.exception';
+import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.interface';
+import { AuthLocalUserLookupServiceInterface } from './interfaces/auth-local-user-lookup-service.interface';
+import { AuthLocalValidateUserServiceInterface } from './interfaces/auth-local-validate-user-service.interface';
+import { AuthLocalRequestInterface } from './interfaces/auth-local-request.interface';
+import { RuntimeException } from '@concepta/nestjs-exception';
 
 /**
  * Define the Local strategy using passport.
@@ -42,10 +49,16 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
     private settings: AuthLocalSettingsInterface,
     @Inject(AUTH_LOCAL_MODULE_VALIDATE_USER_SERVICE_TOKEN)
     private validateUserService: AuthLocalValidateUserServiceInterface,
+    @Inject(AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN)
+    protected readonly userLookupService: AuthLocalUserLookupServiceInterface,
+    @Optional()
+    @Inject(EventDispatchService)
+    private readonly eventDispatchService?: EventDispatchService,
   ) {
     super({
       usernameField: settings?.usernameField,
       passwordField: settings?.passwordField,
+      passReqToCallback: true,
     });
   }
 
@@ -53,10 +66,19 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
    * Validate the user based on the username and password
    * from the request body
    *
+   * @param req - The request object
    * @param username - The username to authenticate
    * @param password - The plain text password
+   * @returns A validated user with an ID if successful
+   * @throws AuthLocalInvalidLoginDataException If login data validation fails
+   * @throws AuthLocalInvalidCredentialsException If credentials are invalid
+   * @throws AuthLocalException If another error occurs during validation
    */
-  async validate(username: ReferenceUsername, password: string) {
+  async validate(
+    req: AuthLocalRequestInterface,
+    username: ReferenceUsername,
+    password: string,
+  ) {
     // break out the settings
     const { loginDto, usernameField, passwordField } = this.assertSettings();
 
@@ -68,9 +90,18 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
     try {
       await validateOrReject(dto);
     } catch (e) {
-      throw new AuthLocalInvalidLoginDataException({
+      const error = new AuthLocalInvalidLoginDataException({
         originalError: e,
       });
+
+      // register failed attempt
+      await this.dispatchAuthAttemptEvent(
+        req,
+        username,
+        false,
+        error.safeMessage,
+      );
+      throw error;
     }
 
     let validatedUser: ReferenceIdInterface;
@@ -82,24 +113,33 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
         password,
       });
     } catch (e) {
-      // did they throw an invalid credentials exception?
+      let throwError: RuntimeException;
+
       if (e instanceof AuthLocalInvalidCredentialsException) {
-        // yes, use theirs
-        throw e;
+        throwError = e;
       } else {
-        // something else went wrong
-        throw new AuthLocalException({ originalError: e });
+        throwError = new AuthLocalException({ originalError: e });
       }
+      await this.dispatchAuthAttemptEvent(
+        req,
+        username,
+        false,
+        throwError.message,
+      );
+      throw throwError;
     }
 
     // did we get a valid user?
     if (!validatedUser) {
-      throw new AuthLocalInvalidCredentialsException({
+      const error = new AuthLocalInvalidCredentialsException({
         message: `Unable to validate user with username: %s`,
         messageParams: [username],
       });
+      await this.dispatchAuthAttemptEvent(req, username, false, error.message);
+      throw error;
     }
 
+    await this.dispatchAuthAttemptEvent(req, username, true);
     return validatedUser;
   }
 
@@ -107,7 +147,8 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
    * Return settings asserted as definitely defined.
    */
   protected assertSettings(): Required<AuthLocalSettingsInterface> {
-    const { loginDto, usernameField, passwordField } = this.settings;
+    const { loginDto, usernameField, passwordField, maxAttempts, minAttempts } =
+      this.settings;
 
     // is the login dto missing?
     if (!loginDto) {
@@ -124,6 +165,53 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
       throw new AuthLocalMissingPasswordFieldException();
     }
 
-    return { loginDto, usernameField, passwordField };
+    return { loginDto, usernameField, passwordField, maxAttempts, minAttempts };
+  }
+
+  /**
+   * TODO: review if this should be done in a middleware instead
+   * and review request with ip property.
+   */
+  protected async dispatchAuthAttemptEvent(
+    req: AuthLocalRequestInterface,
+    username: string,
+    success: boolean,
+    failureReason?: string | null,
+  ): Promise<void> {
+    if (this.eventDispatchService) {
+      const user = await this.userLookupService.byUsername(username);
+      if (user) {
+        const info = this.getAuthenticatedUserInfo(req);
+
+        const failMessage = failureReason ? { failureReason } : {};
+        const authenticatedEventAsync = new AuthLocalAuthenticatedEventAsync({
+          userInfo: {
+            userId: user.id,
+            ipAddress: info.ipAddress || '',
+            deviceInfo: info.deviceInfo || '',
+            authType: AUTH_LOCAL_AUTHENTICATION_TYPE,
+            success,
+            ...failMessage,
+          },
+        });
+
+        await this.eventDispatchService.async(authenticatedEventAsync);
+      }
+    }
+  }
+
+  // TODO: review if this is the best solution
+  protected getAuthenticatedUserInfo(req: AuthLocalRequestInterface): {
+    ipAddress: string;
+    deviceInfo: string;
+  } {
+    req.headers;
+    const ipAddress = req?.ip ?? '';
+    const deviceInfo = req?.headers?.['user-agent'] ?? '';
+
+    return {
+      ipAddress,
+      deviceInfo,
+    };
   }
 }

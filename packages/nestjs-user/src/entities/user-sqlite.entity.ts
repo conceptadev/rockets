@@ -1,4 +1,4 @@
-import { Column } from 'typeorm';
+import { Column, CreateDateColumn } from 'typeorm';
 import { CommonSqliteEntity } from '@concepta/typeorm-common';
 import { UserEntityInterface } from '../interfaces/user-entity.interface';
 import { UserPasswordHistoryEntityInterface } from '../interfaces/user-password-history-entity.interface';
@@ -36,6 +36,22 @@ export abstract class UserSqliteEntity
    */
   @Column({ type: 'text', nullable: true, default: null })
   passwordSalt: string | null = null;
+
+  /**
+   * Login attempts
+   */
+  @Column({ default: 0 })
+  loginAttempts!: number;
+
+  /**
+   * Last login date
+   */
+  @CreateDateColumn({
+    type: 'datetime',
+    nullable: true,
+    default: null,
+  })
+  lastLogin: Date | null = null;
 
   userPasswordHistory?: UserPasswordHistoryEntityInterface;
 }

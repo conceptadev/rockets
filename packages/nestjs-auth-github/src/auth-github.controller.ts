@@ -81,6 +81,7 @@ export class AuthGithubController {
           ipAddress: authInfo?.ipAddress || '',
           deviceInfo: authInfo?.deviceInfo || '',
           authType: AUTH_GITHUB_AUTHENTICATION_TYPE,
+          success: true,
         },
       });
 

@@ -3,7 +3,6 @@ import { AuthenticatedUserInfoInterface } from '../domain/authentication/interfa
 
 export const AuthInfo = createParamDecorator(
   (
-    data: keyof AuthenticatedUserInfoInterface | undefined,
     ctx: ExecutionContext,
   ): AuthenticatedUserInfoInterface | string | undefined => {
     const request = ctx.switchToHttp().getRequest();
@@ -20,6 +19,6 @@ export const AuthInfo = createParamDecorator(
       deviceInfo,
     };
 
-    return data ? userLoginInfo?.[data] : userLoginInfo;
+    return userLoginInfo;
   },
 );

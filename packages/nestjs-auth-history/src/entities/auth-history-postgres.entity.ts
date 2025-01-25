@@ -25,8 +25,14 @@ export abstract class AuthHistoryPostgresEntity
   /**
    * deviceInfo
    */
-  @Column({ type: 'citext' })
-  deviceInfo!: string;
+  @Column({ type: 'citext', nullable: true, default: null })
+  deviceInfo!: string | null;
+
+  /**
+   * Failure reason
+   */
+  @Column({ type: 'citext', nullable: true, default: null })
+  failureReason!: string | null;
 
   /**
    * User ID

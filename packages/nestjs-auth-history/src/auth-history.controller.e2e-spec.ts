@@ -105,6 +105,7 @@ describe('AuthHistoryController (e2e)', () => {
           deviceInfo: 'IOS',
           user,
           userId: user.id,
+          success: true,
         })
         .expect(201);
     });

@@ -11,4 +11,6 @@ export interface AuthHistoryInterface
       AuthenticatedUserRequestInterface,
       'authType' | 'ipAddress' | 'deviceInfo'
     >,
-    Partial<Pick<AuthenticatedUserRequestInterface, 'deviceInfo'>> {}
+    Partial<
+      Pick<AuthenticatedUserRequestInterface, 'deviceInfo' | 'failureReason'>
+    > {}

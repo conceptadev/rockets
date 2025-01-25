@@ -7,9 +7,6 @@ import {
 import {
   AuthenticatedUserInterface,
   AuthenticationResponseInterface,
-  AuthenticatedEventInterface,
-  AuthInfo,
-  AuthenticatedUserInfoInterface,
 } from '@concepta/nestjs-common';
 import { EventDispatchService } from '@concepta/nestjs-event';
 import { Controller, Inject, Optional, Post, UseGuards } from '@nestjs/common';
@@ -19,13 +16,9 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import {
-  AUTH_LOCAL_AUTHENTICATION_TYPE,
-  AUTH_LOCAL_MODULE_ISSUE_TOKEN_SERVICE_TOKEN,
-} from './auth-local.constants';
+import { AUTH_LOCAL_MODULE_ISSUE_TOKEN_SERVICE_TOKEN } from './auth-local.constants';
 import { AuthLocalGuard } from './auth-local.guard';
 import { AuthLocalLoginDto } from './dto/auth-local-login.dto';
-import { AuthLocalAuthenticatedEventAsync } from './events/auth-local-authenticated.event';
 
 /**
  * Auth Local controller
@@ -58,37 +51,7 @@ export class AuthLocalController {
   @Post()
   async login(
     @AuthUser() user: AuthenticatedUserInterface,
-    @AuthInfo() authInfo: AuthenticatedUserInfoInterface,
   ): Promise<AuthenticationResponseInterface> {
-    const response = await this.issueTokenService.responsePayload(user.id);
-
-    if (this.eventDispatchService)
-      await this.dispatchAuthenticatedEvent({
-        userInfo: {
-          userId: user.id,
-          ipAddress: authInfo?.ipAddress || '',
-          deviceInfo: authInfo?.deviceInfo || '',
-          authType: AUTH_LOCAL_AUTHENTICATION_TYPE,
-        },
-      });
-
-    return response;
-  }
-
-  protected async dispatchAuthenticatedEvent(
-    payload?: AuthenticatedEventInterface,
-  ): Promise<boolean> {
-    if (this.eventDispatchService) {
-      const authenticatedEventAsync = new AuthLocalAuthenticatedEventAsync(
-        payload,
-      );
-
-      const eventResult = await this.eventDispatchService.async(
-        authenticatedEventAsync,
-      );
-
-      return eventResult.every((it) => it === true);
-    }
-    return true;
+    return await this.issueTokenService.responsePayload(user.id);
   }
 }

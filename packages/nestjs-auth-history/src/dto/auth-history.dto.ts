@@ -1,7 +1,7 @@
 import { AuthHistoryInterface, CommonEntityDto } from '@concepta/nestjs-common';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
-import { IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
 /**
  * AuthHistory DTO
@@ -54,4 +54,15 @@ export class AuthHistoryDto
   })
   @IsOptional()
   deviceInfo?: string;
+
+  /**
+   * Success
+   */
+  @Expose()
+  @ApiProperty({
+    type: 'boolean',
+    description: 'Whether authentication was successful',
+  })
+  @IsBoolean()
+  success: boolean = false;
 }
