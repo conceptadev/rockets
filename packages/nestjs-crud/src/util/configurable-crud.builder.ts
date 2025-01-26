@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { DeepPartial, ObjectLiteral, Repository } from 'typeorm';
 import { applyDecorators, Inject, Type } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -61,41 +62,77 @@ export class ConfigurableCrudBuilder<
       recoverOne,
     } = options;
 
+    const operationIdPrefix =
+      (Array.isArray(options.controller?.path)
+        ? options.controller?.path.join()
+        : options.controller?.path
+      )?.replace(/[^\w]/g, '_') ?? randomUUID();
+
     return {
       CrudController: applyDecorators(
         CrudController(controller),
         ...(controller?.extraDecorators ?? []),
       ),
       CrudGetMany: applyDecorators(
-        CrudGetMany(getMany),
+        CrudGetMany({
+          api: { operation: { operationId: `${operationIdPrefix}_getMany` } },
+          ...getMany,
+        }),
         ...(getMany?.extraDecorators ?? []),
       ),
       CrudGetOne: applyDecorators(
-        CrudGetOne(getOne),
+        CrudGetOne({
+          api: { operation: { operationId: `${operationIdPrefix}_getOne` } },
+          ...getOne,
+        }),
         ...(getOne?.extraDecorators ?? []),
       ),
       CrudCreateMany: applyDecorators(
-        CrudCreateMany(createMany),
+        CrudCreateMany({
+          api: {
+            operation: { operationId: `${operationIdPrefix}_createMany` },
+          },
+          ...createMany,
+        }),
         ...(createMany?.extraDecorators ?? []),
       ),
       CrudCreateOne: applyDecorators(
-        CrudCreateOne(createOne),
+        CrudCreateOne({
+          api: { operation: { operationId: `${operationIdPrefix}_createOne` } },
+          ...createOne,
+        }),
         ...(createOne?.extraDecorators ?? []),
       ),
       CrudUpdateOne: applyDecorators(
-        CrudUpdateOne(updateOne),
+        CrudUpdateOne({
+          api: { operation: { operationId: `${operationIdPrefix}_updateOne` } },
+          ...updateOne,
+        }),
         ...(updateOne?.extraDecorators ?? []),
       ),
       CrudReplaceOne: applyDecorators(
-        CrudReplaceOne(replaceOne),
+        CrudReplaceOne({
+          api: {
+            operation: { operationId: `${operationIdPrefix}_replaceOne` },
+          },
+          ...replaceOne,
+        }),
         ...(replaceOne?.extraDecorators ?? []),
       ),
       CrudDeleteOne: applyDecorators(
-        CrudDeleteOne(deleteOne),
+        CrudDeleteOne({
+          api: { operation: { operationId: `${operationIdPrefix}_deleteOne` } },
+          ...deleteOne,
+        }),
         ...(deleteOne?.extraDecorators ?? []),
       ),
       CrudRecoverOne: applyDecorators(
-        CrudRecoverOne(recoverOne),
+        CrudRecoverOne({
+          api: {
+            operation: { operationId: `${operationIdPrefix}_recoverOne` },
+          },
+          ...recoverOne,
+        }),
         ...(recoverOne?.extraDecorators ?? []),
       ),
     };

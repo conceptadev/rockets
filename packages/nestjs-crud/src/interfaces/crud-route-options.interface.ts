@@ -1,5 +1,6 @@
 import { Type } from '@nestjs/common';
 import {
+  ApiBodyOptions,
   ApiOperationOptions,
   ApiParamOptions,
   ApiQueryOptions,
@@ -23,6 +24,7 @@ export interface CrudRouteOptionsInterface {
     operation?: ApiOperationOptions;
     query?: ApiQueryOptions[];
     params?: ApiParamOptions;
+    body?: ApiBodyOptions;
     response?: ApiResponseOptions;
   };
 }
