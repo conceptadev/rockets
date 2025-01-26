@@ -94,6 +94,7 @@ describe(InvitationSendService, () => {
         to: testUser.email,
         from: settings.email.from,
         context: {
+          logo: `${settings.email.baseUrl}/${settings.email.templates.invitation.logo}`,
           tokenUrl: `${settings.email.baseUrl}/?code=${inviteCode}&passcode=${passcode}`,
           tokenExp: expirationDate,
         },

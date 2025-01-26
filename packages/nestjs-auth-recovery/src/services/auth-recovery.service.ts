@@ -167,7 +167,7 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
           );
 
           if (user) {
-            await this.notificationService.sendPasswordUpdatedSuccefullyEmail(
+            await this.notificationService.sendPasswordUpdatedSuccessfullyEmail(
               user.email,
             );
             await this.revokeAllUserPasswordRecoveries(
