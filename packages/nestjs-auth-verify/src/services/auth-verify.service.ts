@@ -95,6 +95,9 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
         resetTokenExp: otp.expirationDate,
       });
     }
+
+    // !!! Falling through to void is intentional              !!!!
+    // !!! Do NOT give any indication if e-mail does not exist !!!!
   }
 
   /**
