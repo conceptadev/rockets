@@ -44,6 +44,13 @@ export { CrudValidate } from './decorators/routes/crud-validate.decorator';
 export { CrudRequest } from './decorators/params/crud-request.decorator';
 export { CrudBody } from './decorators/params/crud-body.decorator';
 
+// api decorators
+export { CrudApiBody } from './decorators/openapi/crud-api-body.decorator';
+export { CrudApiOperation } from './decorators/openapi/crud-api-operation.decorator';
+export { CrudApiParam } from './decorators/openapi/crud-api-param.decorator';
+export { CrudApiQuery } from './decorators/openapi/crud-api-query.decorator';
+export { CrudApiResponse } from './decorators/openapi/crud-api-response.decorator';
+
 // classes
 export { CrudQueryHelper } from './util/crud-query.helper';
 export { TypeOrmCrudService } from './services/typeorm-crud.service';
