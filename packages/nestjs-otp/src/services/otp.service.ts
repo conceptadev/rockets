@@ -1,13 +1,19 @@
 import ms from 'ms';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { DeepPartial, Repository } from 'typeorm';
+import {
+  DeepPartial,
+  FindOptionsWhere,
+  LessThanOrEqual,
+  Repository,
+} from 'typeorm';
 import { Inject, Injectable, Type } from '@nestjs/common';
 import {
   ReferenceAssigneeInterface,
   ReferenceAssignment,
   ReferenceId,
   OtpCreateParamsInterface,
+  OtpValidateLimitParamsInterface,
 } from '@concepta/nestjs-common';
 import { OtpInterface } from '@concepta/nestjs-common';
 import {
@@ -26,6 +32,7 @@ import { OtpServiceInterface } from '../interfaces/otp-service.interface';
 import { OtpCreateDto } from '../dto/otp-create.dto';
 import { OtpTypeNotDefinedException } from '../exceptions/otp-type-not-defined.exception';
 import { OtpEntityNotFoundException } from '../exceptions/otp-entity-not-found.exception';
+import { OtpLimitReachedException } from '../exceptions/otp-limit-reached.exception';
 
 @Injectable()
 export class OtpService implements OtpServiceInterface {
@@ -41,8 +48,17 @@ export class OtpService implements OtpServiceInterface {
    *
    * @param params - The otp params
    */
-  async create(params: OtpCreateParamsInterface): Promise<OtpInterface> {
-    const { assignment, otp, queryOptions, clearOnCreate } = params;
+  async create(
+    params: OtpCreateParamsInterface<QueryOptionsInterface>,
+  ): Promise<OtpInterface> {
+    const {
+      assignment,
+      otp,
+      queryOptions,
+      clearOnCreate,
+      rateSeconds,
+      rateThreshold,
+    } = params;
 
     if (!this.settings.types[otp.type])
       throw new OtpTypeNotDefinedException(otp.type);
@@ -50,17 +66,24 @@ export class OtpService implements OtpServiceInterface {
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
-    // try to find the relationship
+    // validate the data
+    const dto = await this.validateDto<OtpCreateDto>(OtpCreateDto, otp);
+
+    // generate a passcode
+    const passcode = this.settings.types[otp.type].generator();
+
+    // break out the vars
+    const { category, type, assignee, expiresIn } = dto;
+
+    // check if amount of otp by time frame has been reached
+    await this.validateOtpCreationLimit({
+      assignment,
+      assignee,
+      category,
+      rateSeconds,
+      rateThreshold,
+    });
     try {
-      // validate the data
-      const dto = await this.validateDto<OtpCreateDto>(OtpCreateDto, otp);
-
-      // generate a passcode
-      const passcode = this.settings.types[otp.type].generator();
-
-      // break out the vars
-      const { category, type, assignee, expiresIn } = dto;
-
       // generate the expiration date
       const expirationDate = this.getExpirationDate(expiresIn);
 
@@ -73,14 +96,27 @@ export class OtpService implements OtpServiceInterface {
           // nested query options
           const nestedQueryOptions = { ...queryOptions, transaction };
 
+          // clear history if defined
+          if (
+            this.settings.keepHistoryDays &&
+            this.settings.keepHistoryDays > 0
+          )
+            this.clearHistory(assignment, otp, queryOptions);
+
           // if clearOnCreate was defined, use it, otherwise get default settings
           const shouldClear =
             clearOnCreate === true || clearOnCreate === false
               ? clearOnCreate
               : this.settings.clearOnCreate;
 
-          if (shouldClear)
-            await this.clear(assignment, dto, nestedQueryOptions);
+          if (shouldClear) {
+            // this should make inactive instead of delete
+            await this.inactivatePreviousOtp(
+              assignment,
+              dto,
+              nestedQueryOptions,
+            );
+          }
 
           return repoProxy.repository(nestedQueryOptions).save({
             category,
@@ -88,12 +124,49 @@ export class OtpService implements OtpServiceInterface {
             assignee,
             passcode,
             expirationDate,
+            active: true,
           });
         });
     } catch (e) {
       throw new ReferenceMutateException(assignmentRepo.metadata.targetName, {
         originalError: e,
       });
+    }
+  }
+
+  private async validateOtpCreationLimit(
+    params: OtpValidateLimitParamsInterface,
+  ): Promise<void> {
+    const { assignment, assignee, category, rateSeconds, rateThreshold } =
+      params;
+
+    // check if validation config should be overridden
+    const finalRateSeconds =
+      rateSeconds && rateSeconds >= 0 ? rateSeconds : this.settings.rateSeconds;
+    const finalOtpLimit =
+      rateThreshold && rateThreshold >= 0
+        ? rateThreshold
+        : this.settings.rateThreshold;
+
+    // only check if it was defined
+    if (finalRateSeconds && finalOtpLimit) {
+      const cutoffDate = new Date();
+      cutoffDate.setSeconds(cutoffDate.getSeconds() - finalRateSeconds);
+
+      // get all active and inactive
+      const recentOtps = await this.getAssignedOtps(assignment, {
+        assignee,
+        category,
+      });
+
+      // get otp in the time frame
+      const recentOtpCount = recentOtps.filter(
+        (otp) => otp.dateCreated > cutoffDate,
+      ).length;
+
+      if (recentOtpCount >= finalOtpLimit) {
+        throw new OtpLimitReachedException();
+      }
     }
   }
 
@@ -111,7 +184,14 @@ export class OtpService implements OtpServiceInterface {
     queryOptions?: QueryOptionsInterface,
   ): Promise<ReferenceAssigneeInterface | null> {
     // get otp from an assigned user for a category
-    const assignedOtp = await this.getByPasscode(assignment, otp, queryOptions);
+    const assignedOtp = await this.getActiveByPasscode(
+      assignment,
+      {
+        ...otp,
+        active: true,
+      },
+      queryOptions,
+    );
 
     // check if otp is expired
     const now = new Date();
@@ -199,16 +279,39 @@ export class OtpService implements OtpServiceInterface {
     }
   }
 
+  async clearHistory(
+    assignment: ReferenceAssignment,
+    otp: Pick<OtpInterface, 'assignee' | 'category'>,
+    queryOptions?: QueryOptionsInterface,
+  ): Promise<void> {
+    const keepHistoryDays = this.settings.keepHistoryDays;
+    // get only otps based on date for history days
+    const assignedOtps = await this.getAssignedOtps(
+      assignment,
+      otp,
+      queryOptions,
+      keepHistoryDays,
+    );
+
+    // Map to get ids
+    const assignedOtpIds = assignedOtps.map((assignedOtp) => assignedOtp.id);
+
+    if (assignedOtpIds.length > 0)
+      await this.deleteOtp(assignment, assignedOtpIds, queryOptions);
+  }
+
   /**
-   * Get all OTPs for assignee.
+   * Get all OTPs for assignee. of filtered by date based on keep history days
    *
    * @param assignment - The assignment of the check
    * @param otp - The otp to get assignments
    */
+  // TODO: recieve query in parameters
   protected async getAssignedOtps(
     assignment: ReferenceAssignment,
     otp: Pick<OtpInterface, 'assignee' | 'category'>,
     queryOptions?: QueryOptionsInterface,
+    keepHistoryDays?: number,
   ): Promise<OtpInterface[]> {
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
@@ -221,12 +324,18 @@ export class OtpService implements OtpServiceInterface {
 
     // try to find the relationships
     try {
+      // simple query or query by date from history
+      const query:
+        | FindOptionsWhere<OtpInterface>[]
+        | FindOptionsWhere<OtpInterface> = this.buildFindQuery(
+        assignee.id,
+        category,
+        keepHistoryDays,
+      );
+
       // make the query
       const assignments = await repoProxy.repository(queryOptions).find({
-        where: {
-          assignee: { id: assignee.id },
-          category,
-        },
+        where: query,
         relations: ['assignee'],
       });
 
@@ -239,6 +348,29 @@ export class OtpService implements OtpServiceInterface {
     }
   }
 
+  private buildFindQuery(
+    assigneeId: string,
+    category: string,
+    keepHistoryDays?: number,
+  ) {
+    let query:
+      | FindOptionsWhere<OtpInterface>[]
+      | FindOptionsWhere<OtpInterface> = {
+      assignee: { id: assigneeId },
+      category,
+    };
+    // filter by date
+    if (keepHistoryDays) {
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - keepHistoryDays);
+      query = {
+        assignee: { id: assigneeId },
+        category,
+        dateCreated: LessThanOrEqual(cutoffDate),
+      };
+    }
+    return query;
+  }
   protected async getByPasscode(
     assignment: ReferenceAssignment,
     otp: Pick<OtpInterface, 'category' | 'passcode'>,
@@ -260,6 +392,41 @@ export class OtpService implements OtpServiceInterface {
         where: {
           category,
           passcode,
+        },
+        relations: ['assignee'],
+      });
+
+      // return the otps from assignee
+      return assignment;
+    } catch (e) {
+      throw new ReferenceLookupException(assignmentRepo.metadata.targetName, {
+        originalError: e,
+      });
+    }
+  }
+
+  protected async getActiveByPasscode(
+    assignment: ReferenceAssignment,
+    otp: Pick<OtpInterface, 'category' | 'passcode' | 'active'>,
+    queryOptions?: QueryOptionsInterface,
+  ): Promise<OtpInterface | null> {
+    // break out properties
+    const { category, passcode, active } = otp;
+
+    // get the assignment repo
+    const assignmentRepo = this.getAssignmentRepo(assignment);
+
+    // new repo proxy
+    const repoProxy = new RepositoryProxy<OtpInterface>(assignmentRepo);
+
+    // try to find the assignment
+    try {
+      // make the query
+      const assignment = await repoProxy.repository(queryOptions).findOne({
+        where: {
+          category,
+          passcode,
+          active,
         },
         relations: ['assignee'],
       });
@@ -313,6 +480,39 @@ export class OtpService implements OtpServiceInterface {
     }
 
     return dto;
+  }
+
+  protected async inactivatePreviousOtp(
+    assignment: ReferenceAssignment,
+    otp: Pick<OtpInterface, 'assignee' | 'category'>,
+    queryOptions?: QueryOptionsInterface,
+  ): Promise<void> {
+    // get the assignment repo
+    const assignmentRepo = this.getAssignmentRepo(assignment);
+
+    // break out the args
+    const { assignee, category } = otp;
+
+    // new repo proxy
+    const repoProxy = new RepositoryProxy<OtpInterface>(assignmentRepo);
+
+    // try to find the relationships
+    try {
+      // make previous inactive
+      await repoProxy.repository(queryOptions).update(
+        {
+          assignee: { id: assignee.id },
+          category,
+        },
+        {
+          active: false,
+        },
+      );
+    } catch (e) {
+      throw new ReferenceLookupException(assignmentRepo.metadata.targetName, {
+        originalError: e,
+      });
+    }
   }
 
   // TODO: move this to a help function
