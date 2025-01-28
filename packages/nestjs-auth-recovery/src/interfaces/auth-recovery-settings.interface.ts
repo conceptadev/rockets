@@ -2,7 +2,8 @@ import { ReferenceAssignment } from '@concepta/nestjs-common';
 import { OtpCreatableInterface } from '@concepta/nestjs-common';
 
 export interface AuthRecoveryOtpSettingsInterface
-  extends Pick<OtpCreatableInterface, 'category' | 'type' | 'expiresIn'> {
+  extends Pick<OtpCreatableInterface, 'category' | 'type' | 'expiresIn'>,
+    Partial<Pick<OtpCreatableInterface, 'rateSeconds' | 'rateThreshold'>> {
   assignment: ReferenceAssignment;
   clearOtpOnCreate?: boolean;
 }
@@ -14,14 +15,17 @@ export interface AuthRecoverySettingsInterface {
     tokenUrlFormatter?: (baseUrl: string, passcode: string) => string;
     templates: {
       recoverLogin: {
+        logo: string;
         fileName: string;
         subject: string;
       };
       recoverPassword: {
+        logo: string;
         fileName: string;
         subject: string;
       };
       passwordUpdated: {
+        logo: string;
         fileName: string;
         subject: string;
       };

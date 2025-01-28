@@ -8,5 +8,5 @@ export interface AuthRecoveryNotificationServiceInterface {
     passcode: string,
     resetTokenExp: Date,
   ): Promise<void>;
-  sendPasswordUpdatedSuccefullyEmail(email: string): Promise<void>;
+  sendPasswordUpdatedSuccessfullyEmail(email: string): Promise<void>;
 }

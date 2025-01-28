@@ -61,8 +61,15 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
     // did we find a user?
     if (user) {
       // extract required otp properties
-      const { category, assignment, type, expiresIn, clearOtpOnCreate } =
-        this.config.otp;
+      const {
+        category,
+        assignment,
+        type,
+        expiresIn,
+        clearOtpOnCreate,
+        rateSeconds,
+        rateThreshold,
+      } = this.config.otp;
 
       // create an OTP save it in the database
       const otp = await this.otpService.create({
@@ -77,6 +84,8 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
         },
         queryOptions,
         clearOnCreate: clearOtpOnCreate,
+        rateSeconds,
+        rateThreshold,
       });
 
       // send en email with a verify OTP

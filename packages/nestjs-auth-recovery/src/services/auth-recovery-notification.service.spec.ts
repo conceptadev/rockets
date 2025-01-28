@@ -75,7 +75,7 @@ describe('AuthRecoveryNotificationService', () => {
   });
 
   it('Send recover email password', async () => {
-    await authRecoveryNotificationService.sendPasswordUpdatedSuccefullyEmail(
+    await authRecoveryNotificationService.sendPasswordUpdatedSuccessfullyEmail(
       'me@mail.com',
     );
     expect(emailService.sendMail).toHaveBeenCalled();
