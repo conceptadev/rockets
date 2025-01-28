@@ -14,6 +14,7 @@ import { UserOtpEntityFixture } from '../__fixtures__/entities/user-otp-entity.f
 import { UserFactoryFixture } from '../__fixtures__/factories/user.factory.fixture';
 import { UserOtpFactoryFixture } from '../__fixtures__/factories/user-otp.factory.fixture';
 import { OTP_MODULE_REPOSITORIES_TOKEN } from '../otp.constants';
+import { OtpLimitReachedException } from '../exceptions/otp-limit-reached.exception';
 
 describe('OtpModule', () => {
   const CATEGORY_DEFAULT = 'CATEGORY_DEFAULT';
@@ -48,6 +49,8 @@ describe('OtpModule', () => {
     options: Pick<OtpInterface, 'assignee'> &
       Partial<Pick<OtpInterface, 'type'>>,
     clearOnCreate?: boolean,
+    rateSeconds?: number,
+    rateThreshold?: number,
   ) =>
     await otpService.create({
       assignment: 'userOtp',
@@ -59,6 +62,8 @@ describe('OtpModule', () => {
       },
       queryOptions: {},
       clearOnCreate,
+      rateSeconds,
+      rateThreshold,
     });
 
   // try to delete
@@ -72,9 +77,14 @@ describe('OtpModule', () => {
   ) => await otpService.validate('userOtp', otp, deleteIfValid);
 
   beforeEach(async () => {
-    const connectionName = `test_${connectionNumber++}`;
-    process.env.OTP_CLEAR_ON_CREATE = 'true';
+    // process.env.OTP_CLEAR_ON_CREATE = 'true';
+    // process.env.OTP_RATE_SECONDS = '10';
+    // process.env.OTP_RATE_THRESHOLD = '2';
+    await initModule();
+  });
 
+  const initModule = async () => {
+    const connectionName = `test_${connectionNumber++}`;
     testModule = await Test.createTestingModule({
       imports: [
         TypeOrmExtModule.forRoot({
@@ -112,9 +122,12 @@ describe('OtpModule', () => {
       OTP_MODULE_REPOSITORIES_TOKEN,
     );
     repository = allRepo.userOtp;
-  });
+  };
 
   afterEach(() => {
+    process.env.OTP_CLEAR_ON_CREATE = undefined;
+    process.env.OTP_RATE_SECONDS = undefined;
+    process.env.OTP_RATE_THRESHOLD = undefined;
     jest.clearAllMocks();
     testModule.close();
   });
@@ -176,7 +189,7 @@ describe('OtpModule', () => {
     it('create with success and check previous otp invalid', async () => {
       const assignee = await factoryCreateUser();
       const otp = await defaultCreateOtp({ assignee });
-      const otp_2 = await defaultCreateOtp({ assignee });
+      const otp_2 = await defaultCreateOtp({ assignee }, true);
 
       // make sure previous was deleted
       expect(await defaultIsValidOtp(otp)).toBeNull();
@@ -239,6 +252,120 @@ describe('OtpModule', () => {
       } catch (e) {
         expect(e).toBeInstanceOf(OtpTypeNotDefinedException);
       }
+    });
+
+    describe('create with limit ', () => {
+      it('create with fail limit', async () => {
+        process.env.OTP_CLEAR_ON_CREATE = 'true';
+        process.env.OTP_RATE_SECONDS = '10';
+        process.env.OTP_RATE_THRESHOLD = '2';
+        await initModule();
+        const assignee = await factoryCreateUser();
+        await defaultCreateOtp({ assignee });
+        await defaultCreateOtp({ assignee });
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        try {
+          await defaultCreateOtp({ assignee });
+          fail('Expected OtpLimitReachedException to be thrown');
+        } catch (e) {
+          expect(e).toBeInstanceOf(OtpLimitReachedException);
+        }
+      });
+
+      it('create with fail limit 2', async () => {
+        process.env.OTP_CLEAR_ON_CREATE = 'true';
+        process.env.OTP_RATE_SECONDS = '10';
+        process.env.OTP_RATE_THRESHOLD = '3';
+        await initModule();
+        const assignee = await factoryCreateUser();
+        await defaultCreateOtp({ assignee });
+        await defaultCreateOtp({ assignee });
+        await defaultCreateOtp({ assignee });
+        try {
+          await defaultCreateOtp({ assignee });
+          fail('Expected OtpLimitReachedException to be thrown');
+        } catch (e) {
+          expect(e).toBeInstanceOf(OtpLimitReachedException);
+        }
+      });
+
+      it('create with success limit using override', async () => {
+        process.env.OTP_CLEAR_ON_CREATE = 'true';
+        process.env.OTP_RATE_SECONDS = `10`;
+        process.env.OTP_RATE_THRESHOLD = '5';
+        const clearOnCreate = false;
+        const rateSeconds = 10;
+        const rateThreshold = 3;
+        await initModule();
+        const assignee = await factoryCreateUser();
+        await defaultCreateOtp(
+          { assignee },
+          clearOnCreate,
+          rateSeconds,
+          rateThreshold,
+        );
+        await defaultCreateOtp(
+          { assignee },
+          clearOnCreate,
+          rateSeconds,
+          rateThreshold,
+        );
+        await defaultCreateOtp(
+          { assignee },
+          clearOnCreate,
+          rateSeconds,
+          rateThreshold,
+        );
+        try {
+          await defaultCreateOtp(
+            { assignee },
+            clearOnCreate,
+            rateSeconds,
+            rateThreshold,
+          );
+          fail('Expected OtpLimitReachedException to be thrown');
+        } catch (e) {
+          expect(e).toBeInstanceOf(OtpLimitReachedException);
+        }
+      });
+
+      it('create with success limit', async () => {
+        process.env.OTP_CLEAR_ON_CREATE = 'true';
+        process.env.OTP_RATE_SECONDS = '10';
+        process.env.OTP_RATE_THRESHOLD = '4';
+        await initModule();
+        const assignee = await factoryCreateUser();
+        await defaultCreateOtp({ assignee });
+        await defaultCreateOtp({ assignee });
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        const otp = await defaultCreateOtp({ assignee });
+
+        expect(otp.category).toBe(CATEGORY_DEFAULT);
+        expect(otp.type).toBe('uuid');
+        expect(typeof otp.passcode).toBe('string');
+        expect(otp.passcode.length).toBeGreaterThan(0);
+        expect(otp.expirationDate).toBeInstanceOf(Date);
+        expect(otp.assignee.id).toBeTruthy();
+      });
+
+      it('create with success with limit 2', async () => {
+        process.env.OTP_CLEAR_ON_CREATE = 'true';
+        process.env.OTP_RATE_SECONDS = '1';
+        process.env.OTP_RATE_THRESHOLD = '4';
+        await initModule();
+        const assignee = await factoryCreateUser();
+        await defaultCreateOtp({ assignee });
+        await defaultCreateOtp({ assignee });
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        const otp = await defaultCreateOtp({ assignee });
+
+        expect(otp.category).toBe(CATEGORY_DEFAULT);
+        expect(otp.type).toBe('uuid');
+        expect(typeof otp.passcode).toBe('string');
+        expect(otp.passcode.length).toBeGreaterThan(0);
+        expect(otp.expirationDate).toBeInstanceOf(Date);
+        expect(otp.assignee.id).toBeTruthy();
+      });
     });
   });
 

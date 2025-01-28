@@ -19,7 +19,7 @@ import {
 } from './auth-google.constants';
 import { AuthGoogleGuard } from './auth-google.guard';
 import { EventDispatchService } from '@concepta/nestjs-event';
-import { AuthGoogleAuthenticatedEventAsync } from './events/auth-GOOGLE-authenticated.event';
+import { AuthGoogleAuthenticatedEventAsync } from './events/auth-google-authenticated.event';
 
 /**
  * Google controller

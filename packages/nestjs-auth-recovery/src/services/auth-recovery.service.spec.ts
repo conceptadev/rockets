@@ -78,7 +78,7 @@ describe(AuthRecoveryService, () => {
       .mockResolvedValue(undefined);
 
     spySendRecoverPasswordSuccessEmail = jest
-      .spyOn(notificationService, 'sendPasswordUpdatedSuccefullyEmail')
+      .spyOn(notificationService, 'sendPasswordUpdatedSuccessfullyEmail')
       .mockResolvedValue(undefined);
 
     spyOtpServiceValidate = jest.spyOn(otpService, 'validate');
