@@ -1,5 +1,6 @@
 import { EventAsyncInterface } from './interfaces/event-async.interface';
 import { Event } from './event';
+import { EventManager } from '../event-manager';
 
 /**
  * Abstract async event class.
@@ -23,8 +24,19 @@ import { Event } from './event';
  *
  * // create an event
  * const myEvent = new MyEvent({id: 1234, active: true});
+ *
+ * // emit the event
+ * myEvent.emit();
  * ```
  */
 export abstract class EventAsync<P = undefined, R = P>
   extends Event<P, Promise<R>>
-  implements EventAsyncInterface<P, R> {}
+  implements EventAsyncInterface<P, R>
+{
+  /**
+   * Emit the event.
+   */
+  async emit() {
+    return EventManager.dispatch.async<EventAsyncInterface<P, R>>(this);
+  }
+}

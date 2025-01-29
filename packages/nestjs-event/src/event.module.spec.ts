@@ -6,6 +6,7 @@ import { EVENT_MODULE_EMITTER_SERVICE_TOKEN } from './event-constants';
 import { EventModule } from './event.module';
 import { EventDispatchService } from './services/event-dispatch.service';
 import { EventListenService } from './services/event-listen.service';
+import { EventManager } from './event-manager';
 
 describe(EventModule, () => {
   let testModule: TestingModule;
@@ -13,6 +14,7 @@ describe(EventModule, () => {
   let emitterInstance: EventEmitter2;
   let listenService: EventListenService;
   let dispatchService: EventDispatchService;
+  let eventManager: EventManager;
 
   describe(EventModule.forRoot, () => {
     beforeEach(async () => {
@@ -45,6 +47,7 @@ describe(EventModule, () => {
     emitterInstance = testModule.get(EVENT_MODULE_EMITTER_SERVICE_TOKEN);
     listenService = testModule.get(EventListenService);
     dispatchService = testModule.get(EventDispatchService);
+    eventManager = testModule.get(EventManager);
   }
 
   function commonTests() {
@@ -52,5 +55,8 @@ describe(EventModule, () => {
     expect(emitterInstance).toBeInstanceOf(EventEmitter2);
     expect(listenService).toBeInstanceOf(EventListenService);
     expect(dispatchService).toBeInstanceOf(EventDispatchService);
+    expect(eventManager).toBeInstanceOf(EventManager);
+    expect(EventManager.dispatch).toStrictEqual(dispatchService);
+    expect(EventManager.listen).toStrictEqual(listenService);
   }
 });
