@@ -3,7 +3,7 @@ import { EventException } from './exceptions/event.exception';
 import { EventDispatchService } from './services/event-dispatch.service';
 import { EventListenService } from './services/event-listen.service';
 
-interface InitializationOptions {
+interface EventManagerOptions {
   allowManualShutdown: boolean;
 }
 
@@ -26,11 +26,16 @@ export class EventManager {
    *
    * @param eventDispatchService - Instance of the event dispatch service.
    * @param eventListenService - Instance of the event listen service.
+   * @param options - Options.
    */
   private constructor(
     private eventDispatchService: EventDispatchService,
     private eventListenService: EventListenService,
-  ) {}
+    options: EventManagerOptions = { allowManualShutdown: false },
+  ) {
+    // apply manual shutdown setting
+    EventManager.allowManualShutdown = options.allowManualShutdown;
+  }
 
   /**
    * Intialize the singleton.
@@ -39,26 +44,25 @@ export class EventManager {
    *
    * @param eventDispatchService - Instance of the event dispatch service.
    * @param eventListenService - Instance of the event listen service.
-   * @param options - Initialization options.
+   * @param options - Event manager options.
    */
   public static initialize(
     eventDispatchService: EventDispatchService,
     eventListenService: EventListenService,
-    options: InitializationOptions = { allowManualShutdown: false },
+    options: EventManagerOptions = { allowManualShutdown: false },
   ) {
     // already have an instance?
-    if (EventManager.instance) {
+    if (this.instance) {
       // Log a warning
       // TODO: eventually this should throw an exception
-      Logger.warn(`${EventManager.name} has already been initialized.`);
+      Logger.warn(`${this.name} has already been initialized.`);
     } else {
       // create new instance
-      EventManager.instance = new EventManager(
+      this.instance = new EventManager(
         eventDispatchService,
         eventListenService,
+        options,
       );
-      // apply manual shutdown setting
-      EventManager.allowManualShutdown = options.allowManualShutdown;
     }
   }
 
@@ -66,11 +70,11 @@ export class EventManager {
    * Returns the singleton instance.
    */
   public static getInstance(): EventManager {
-    if (EventManager.instance instanceof EventManager) {
-      return EventManager.instance;
+    if (this.instance instanceof EventManager) {
+      return this.instance;
     } else {
       throw new EventException({
-        message: `${EventManager.name} has not been initialized.`,
+        message: `${this.name} has not been initialized.`,
       });
     }
   }
