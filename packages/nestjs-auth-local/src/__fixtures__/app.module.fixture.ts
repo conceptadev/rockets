@@ -7,11 +7,13 @@ import { AuthJwtModule } from '@concepta/nestjs-auth-jwt';
 import { AuthLocalModule } from '../auth-local.module';
 import { UserLookupServiceFixture } from './user/user-lookup.service.fixture';
 import { UserModuleFixture } from './user/user.module.fixture';
+import { EventModule } from '@concepta/nestjs-event';
 
 @Module({
   imports: [
     JwtModule.forRoot({}),
     AuthenticationModule.forRoot({}),
+    EventModule.forRoot({}),
     AuthJwtModule.forRootAsync({
       inject: [UserLookupServiceFixture],
       useFactory: (userLookupService: UserLookupServiceFixture) => ({

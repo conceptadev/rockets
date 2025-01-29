@@ -134,17 +134,21 @@ export function createAuthLocalValidateUserServiceProvider(
       RAW_OPTIONS_TOKEN,
       AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN,
       AUTH_LOCAL_MODULE_PASSWORD_VALIDATION_SERVICE_TOKEN,
+      AUTH_LOCAL_MODULE_SETTINGS_TOKEN,
     ],
     useFactory: async (
-      options: Pick<AuthLocalOptions, 'validateUserService'>,
+      options: Pick<AuthLocalOptions, 'validateUserService' | 'settings'>,
       userLookupService: AuthLocalUserLookupServiceInterface,
       passwordValidationService: PasswordValidationServiceInterface,
+      settings: AuthLocalSettingsInterface,
     ) =>
       optionsOverrides?.validateUserService ??
       options.validateUserService ??
+      // TODO: what do we initialize like this?
       new AuthLocalValidateUserService(
         userLookupService,
         passwordValidationService,
+        options.settings || settings,
       ),
   };
 }

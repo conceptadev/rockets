@@ -18,3 +18,5 @@ export const AUTH_APPLE_VERIFY_ALGORITHM = 'RS256';
 export const AUTH_APPLE_TOKEN_ISSUER = 'https://appleid.apple.com';
 
 export const AUTH_APPLE_JWT_KEYS = 'https://appleid.apple.com/auth/keys';
+
+export const AUTH_APPLE_AUTHENTICATION_TYPE = 'auth-apple';

@@ -92,6 +92,7 @@ export class TypeOrmCrudService<
   ): ReturnType<xTypeOrmCrudService<T>['createOne']> {
     // apply options
     this.crudQueryHelper.modifyRequest(req, queryOptions);
+
     // return parent result
     try {
       return super.createOne(req, dto);

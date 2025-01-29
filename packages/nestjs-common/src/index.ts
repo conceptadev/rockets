@@ -5,6 +5,7 @@ export { ReferenceIdDto } from './reference/dto/reference-id.dto';
 
 // Decorators
 export { AuthUser } from './decorators/auth-user.decorator';
+export { AuthInfo } from './decorators/auth-info.decorator';
 
 // Module utilities
 export { createSettingsProvider } from './modules/utils/create-settings-provider';
@@ -38,6 +39,7 @@ export {
 
 // Reference interfaces
 export { ReferenceActiveInterface } from './reference/interfaces/reference-active.interface';
+export { ReferenceLockStatusInterface } from './reference/interfaces/reference-lock-status.interface';
 export { ReferenceAssigneeInterface } from './reference/interfaces/reference-assignee.interface';
 export { ReferenceEmailInterface } from './reference/interfaces/reference-email.interface';
 export { ReferenceIdInterface } from './reference/interfaces/reference-id.interface';

@@ -112,6 +112,9 @@
     },
     {
       "path": "packages/nestjs-auth-verify"
+    },
+    {
+      "path": "packages/nestjs-auth-history"
     }
   ]
 }

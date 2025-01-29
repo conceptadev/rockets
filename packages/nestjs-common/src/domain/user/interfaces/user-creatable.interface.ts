@@ -3,5 +3,5 @@ import { PasswordPlainInterface } from '../../password/interfaces/password-plain
 
 export interface UserCreatableInterface
   extends Pick<UserInterface, 'username' | 'email'>,
-    Partial<Pick<UserInterface, 'active'>>,
+    Partial<Pick<UserInterface, 'active' | 'loginAttempts' | 'lastLogin'>>,
     Partial<PasswordPlainInterface> {}

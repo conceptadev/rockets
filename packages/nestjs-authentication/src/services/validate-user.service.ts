@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   ReferenceActiveInterface,
   ReferenceIdInterface,
+  ReferenceLockStatusInterface,
 } from '@concepta/nestjs-common';
 import { ValidateUserServiceInterface } from '../interfaces/validate-user-service.interface';
 
@@ -23,5 +24,12 @@ export abstract class ValidateUserService<
     user: ReferenceIdInterface & ReferenceActiveInterface,
   ): Promise<boolean> {
     return user.active === true;
+  }
+
+  async isLocked(
+    user: ReferenceLockStatusInterface,
+    maxAttempts: number,
+  ): Promise<boolean> {
+    return user.loginAttempts > 0 && user.loginAttempts >= maxAttempts;
   }
 }

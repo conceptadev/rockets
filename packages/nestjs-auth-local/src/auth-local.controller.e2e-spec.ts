@@ -5,27 +5,31 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { AppModuleDbFixture } from './__fixtures__/app.module.fixture';
 import { PasswordValidationService } from '@concepta/nestjs-password';
-import { LOGIN_SUCCESS } from './__fixtures__/user/constants';
+import { LOGIN_SUCCESS, USER_SUCCESS } from './__fixtures__/user/constants';
 import { HttpAdapterHost } from '@nestjs/core';
 import { ExceptionsFilter } from '@concepta/nestjs-exception';
 import { AUTH_LOCAL_MODULE_VALIDATE_USER_SERVICE_TOKEN } from './auth-local.constants';
 import { AuthLocalInvalidCredentialsException } from './exceptions/auth-local-invalid-credentials.exception';
+import { UserLookupServiceFixture } from './__fixtures__/user/user-lookup.service.fixture';
 
 describe('AuthLocalController (e2e)', () => {
   let app: INestApplication;
+  let userLookupService: UserLookupServiceFixture;
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModuleDbFixture],
     })
       .overrideProvider(PasswordValidationService)
       .useValue({
-        validateObject: () => {
-          return true;
+        validateObject: (passwordPlain: string) => {
+          if (passwordPlain === LOGIN_SUCCESS.password) return true;
+          else return false;
         },
       })
       .compile();
     app = moduleFixture.createNestApplication();
 
+    userLookupService = app.get(UserLookupServiceFixture);
     const exceptionsFilter = app.get(HttpAdapterHost);
     app.useGlobalFilters(new ExceptionsFilter(exceptionsFilter));
 
@@ -138,6 +142,45 @@ describe('AuthLocalController (e2e)', () => {
           'The provided username or password is incorrect. Please try again.',
         );
         expect(response.status).toBe(400);
+      });
+  });
+
+  it('POST auth/login password fail message', async () => {
+    const payload = {
+      ...LOGIN_SUCCESS,
+      password: 'wrong_password',
+    };
+
+    await supertest(app.getHttpServer())
+      .post('/auth/login')
+      .send(payload)
+      .then((response) => {
+        expect(response.body.message).toBe(
+          `The provided username or password is incorrect. Please try again.`,
+        );
+        expect(response.status).toBe(401);
+      });
+  });
+
+  it('POST auth/login password fail attempt message', async () => {
+    const payload = {
+      ...LOGIN_SUCCESS,
+      password: 'wrong_password',
+    };
+
+    jest.spyOn(userLookupService, 'byUsername').mockResolvedValue({
+      ...USER_SUCCESS,
+      loginAttempts: 4,
+    });
+
+    await supertest(app.getHttpServer())
+      .post('/auth/login')
+      .send(payload)
+      .then((response) => {
+        expect(response.body.message).toBe(
+          'Warning: You have 6 attempts remaining before your account is locked.',
+        );
+        expect(response.status).toBe(401);
       });
   });
 });
