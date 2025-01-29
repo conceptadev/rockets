@@ -7,6 +7,8 @@ import {
   InvitationGetUserEventPayloadInterface,
   InvitationGetUserEventResponseInterface,
 } from '@concepta/nestjs-common';
+import { PasswordStrengthEnum } from '@concepta/nestjs-password';
+import { PasswordStrengthByRoleCallback } from '../user.types';
 
 export interface UserSettingsInterface {
   invitationRequestEvent?: EventClassInterface<
@@ -28,4 +30,9 @@ export interface UserSettingsInterface {
      */
     limitDays?: number | undefined;
   };
+
+  passwordStrength?: {
+    passwordStrengthCallback?: PasswordStrengthByRoleCallback
+    
+  }
 }

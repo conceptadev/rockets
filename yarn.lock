@@ -1507,6 +1507,7 @@ __metadata:
     accesscontrol: "npm:^2.2.1"
     supertest: "npm:^6.3.4"
   peerDependencies:
+    "@concepta/nestjs-role": ^6.0.0-alpha.1
     class-transformer: "*"
     class-validator: "*"
     typeorm: ^0.3.0

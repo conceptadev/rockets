@@ -1,3 +1,5 @@
+import { PasswordStrengthEnum } from "../enum/password-strength.enum";
+
 /**
  * Password Strength Service Interface
  */
@@ -7,5 +9,5 @@ export interface PasswordStrengthServiceInterface {
    *
    * @param password - The plain text password
    */
-  isStrong(password: string): boolean;
+  isStrong(password: string, passwordStrength?: PasswordStrengthEnum): boolean;
 }

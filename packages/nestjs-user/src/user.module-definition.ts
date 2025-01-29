@@ -192,6 +192,7 @@ export function createUserPasswordServiceProvider(
       RAW_OPTIONS_TOKEN,
       UserLookupService,
       PasswordCreationService,
+      USER_MODULE_SETTINGS_TOKEN,
       {
         token: UserPasswordHistoryService,
         optional: true,
@@ -201,6 +202,7 @@ export function createUserPasswordServiceProvider(
       options: UserOptionsInterface,
       userLookUpService: UserLookupServiceInterface,
       passwordCreationService: PasswordCreationService,
+      userSettings: UserSettingsInterface,
       userPasswordHistoryService?: UserPasswordHistoryService,
     ) =>
       optionsOverrides?.userPasswordService ??
@@ -208,6 +210,7 @@ export function createUserPasswordServiceProvider(
       new UserPasswordService(
         userLookUpService,
         passwordCreationService,
+        userSettings,
         userPasswordHistoryService,
       ),
   };

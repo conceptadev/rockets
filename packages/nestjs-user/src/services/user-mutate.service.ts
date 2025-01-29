@@ -4,6 +4,7 @@ import { MutateService } from '@concepta/typeorm-common';
 import {
   PasswordPlainInterface,
   UserCreatableInterface,
+  UserRolesInterface,
   UserUpdatableInterface,
 } from '@concepta/nestjs-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
@@ -45,7 +46,7 @@ export class UserMutateService
   }
 
   protected async transform<T extends DeepPartial<UserEntityInterface>>(
-    user: T | (T & PasswordPlainInterface),
+    user: T | (T & PasswordPlainInterface & Partial<UserRolesInterface>),
   ): Promise<DeepPartial<UserEntityInterface>> {
     // do we need to hash the password?
     if ('password' in user && typeof user.password === 'string') {

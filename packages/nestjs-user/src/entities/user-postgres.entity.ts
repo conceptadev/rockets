@@ -2,6 +2,7 @@ import { Column } from 'typeorm';
 import { CommonPostgresEntity } from '@concepta/typeorm-common';
 import { UserEntityInterface } from '../interfaces/user-entity.interface';
 import { UserPasswordHistoryEntityInterface } from '../interfaces/user-password-history-entity.interface';
+import { RoleOwnableInterface } from '@concepta/nestjs-common';
 
 /**
  * User Entity
@@ -39,6 +40,8 @@ export abstract class UserPostgresEntity
    */
   @Column({ type: 'text', nullable: true, default: null })
   passwordSalt: string | null = null;
+
+  userRoles?: RoleOwnableInterface[];
 
   userPasswordHistory?: UserPasswordHistoryEntityInterface;
 }
