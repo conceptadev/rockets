@@ -1,4 +1,4 @@
-import { Controller, Inject, Get, UseGuards, Optional } from '@nestjs/common';
+import { Controller, Inject, Get, UseGuards } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import {
   AuthenticatedEventInterface,
@@ -18,7 +18,6 @@ import {
   AUTH_GOOGLE_ISSUE_TOKEN_SERVICE_TOKEN,
 } from './auth-google.constants';
 import { AuthGoogleGuard } from './auth-google.guard';
-import { EventDispatchService } from '@concepta/nestjs-event';
 import { AuthGoogleAuthenticatedEventAsync } from './events/auth-google-authenticated.event';
 
 /**
@@ -44,9 +43,6 @@ export class AuthGoogleController {
   constructor(
     @Inject(AUTH_GOOGLE_ISSUE_TOKEN_SERVICE_TOKEN)
     private issueTokenService: IssueTokenServiceInterface,
-    @Optional()
-    @Inject(EventDispatchService)
-    private readonly eventDispatchService?: EventDispatchService,
   ) {}
 
   /**
@@ -72,15 +68,14 @@ export class AuthGoogleController {
   ): Promise<AuthenticationResponseInterface> {
     const response = this.issueTokenService.responsePayload(user.id);
 
-    if (this.eventDispatchService)
-      await this.dispatchAuthenticatedEvent({
-        userInfo: {
-          userId: user.id,
-          ipAddress: authInfo?.ipAddress || '',
-          deviceInfo: authInfo?.deviceInfo || '',
-          authType: AUTH_GOOGLE_AUTHENTICATION_TYPE,
-        },
-      });
+    await this.dispatchAuthenticatedEvent({
+      userInfo: {
+        userId: user.id,
+        ipAddress: authInfo?.ipAddress || '',
+        deviceInfo: authInfo?.deviceInfo || '',
+        authType: AUTH_GOOGLE_AUTHENTICATION_TYPE,
+      },
+    });
 
     return response;
   }
@@ -88,17 +83,12 @@ export class AuthGoogleController {
   protected async dispatchAuthenticatedEvent(
     payload?: AuthenticatedEventInterface,
   ): Promise<boolean> {
-    if (this.eventDispatchService) {
-      const authenticatedEventAsync = new AuthGoogleAuthenticatedEventAsync(
-        payload,
-      );
+    const authenticatedEventAsync = new AuthGoogleAuthenticatedEventAsync(
+      payload,
+    );
 
-      const eventResult = await this.eventDispatchService.async(
-        authenticatedEventAsync,
-      );
+    const eventResult = await authenticatedEventAsync.emit();
 
-      return eventResult.every((it) => it === true);
-    }
-    return true;
+    return eventResult.every((it) => it === true);
   }
 }

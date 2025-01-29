@@ -1,4 +1,4 @@
-import { Controller, Inject, Get, UseGuards, Optional } from '@nestjs/common';
+import { Controller, Inject, Get, UseGuards } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import {
   AuthenticatedEventInterface,
@@ -18,7 +18,6 @@ import {
   AUTH_GITHUB_ISSUE_TOKEN_SERVICE_TOKEN,
 } from './auth-github.constants';
 import { AuthGithubGuard } from './auth-github.guard';
-import { EventDispatchService } from '@concepta/nestjs-event';
 import { AuthGithubAuthenticatedEventAsync } from './events/auth-github-authenticated.event';
 
 // TODO: improve documentation
@@ -45,9 +44,6 @@ export class AuthGithubController {
   constructor(
     @Inject(AUTH_GITHUB_ISSUE_TOKEN_SERVICE_TOKEN)
     private issueTokenService: IssueTokenServiceInterface,
-    @Optional()
-    @Inject(EventDispatchService)
-    private readonly eventDispatchService: EventDispatchService,
   ) {}
 
   /**
@@ -74,15 +70,14 @@ export class AuthGithubController {
   ): Promise<AuthenticationResponseInterface> {
     const response = this.issueTokenService.responsePayload(user.id);
 
-    if (this.eventDispatchService)
-      await this.dispatchAuthenticatedEvent({
-        userInfo: {
-          userId: user.id,
-          ipAddress: authInfo?.ipAddress || '',
-          deviceInfo: authInfo?.deviceInfo || '',
-          authType: AUTH_GITHUB_AUTHENTICATION_TYPE,
-        },
-      });
+    await this.dispatchAuthenticatedEvent({
+      userInfo: {
+        userId: user.id,
+        ipAddress: authInfo?.ipAddress || '',
+        deviceInfo: authInfo?.deviceInfo || '',
+        authType: AUTH_GITHUB_AUTHENTICATION_TYPE,
+      },
+    });
 
     return response;
   }
@@ -90,17 +85,12 @@ export class AuthGithubController {
   protected async dispatchAuthenticatedEvent(
     payload?: AuthenticatedEventInterface,
   ): Promise<boolean> {
-    if (this.eventDispatchService) {
-      const authenticatedEventAsync = new AuthGithubAuthenticatedEventAsync(
-        payload,
-      );
+    const authenticatedEventAsync = new AuthGithubAuthenticatedEventAsync(
+      payload,
+    );
 
-      const eventResult = await this.eventDispatchService.async(
-        authenticatedEventAsync,
-      );
+    const eventResult = await authenticatedEventAsync.emit();
 
-      return eventResult.every((it) => it === true);
-    }
-    return true;
+    return eventResult.every((it) => it === true);
   }
 }
