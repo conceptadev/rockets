@@ -10,6 +10,7 @@ export * from './services/interfaces/event-listen-on-options.interface';
 
 // classes
 export * from './event.module';
+export * from './event-manager';
 export * from './events/event';
 export * from './events/event-sync';
 export * from './events/event-async';

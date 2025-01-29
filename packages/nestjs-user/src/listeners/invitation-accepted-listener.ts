@@ -1,13 +1,9 @@
-import {
-  EventAsyncInterface,
-  EventListenerOn,
-  EventListenService,
-} from '@concepta/nestjs-event';
+import { EventAsyncInterface, EventListenerOn } from '@concepta/nestjs-event';
 import {
   INVITATION_MODULE_CATEGORY_USER_KEY,
   InvitationAcceptedEventPayloadInterface,
 } from '@concepta/nestjs-common';
-import { Inject, Injectable, OnModuleInit, Optional } from '@nestjs/common';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 
 import { USER_MODULE_SETTINGS_TOKEN } from '../user.constants';
 import { UserMutateService } from '../services/user-mutate.service';
@@ -28,16 +24,13 @@ export class InvitationAcceptedListener
     private settings: UserSettingsInterface,
     private userLookupService: UserLookupService,
     private userMutateService: UserMutateService,
-    @Optional()
-    @Inject(EventListenService)
-    private eventListenService?: EventListenService,
   ) {
     super();
   }
 
   onModuleInit() {
-    if (this.eventListenService && this.settings.invitationRequestEvent) {
-      this.eventListenService.on(this.settings.invitationRequestEvent, this);
+    if (this.settings.invitationRequestEvent) {
+      this.on(this.settings.invitationRequestEvent);
     }
   }
 

@@ -1,5 +1,4 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EventDispatchService } from '@concepta/nestjs-event';
 import { AppModule } from './app.module';
 import {
   OrderCreatedListener,
@@ -12,7 +11,6 @@ describe('AppModule', () => {
   let app: TestingModule;
   let ordersController: OrderController;
   let ordersService: OrderService;
-  let eventDispatchService: EventDispatchService;
   let spySync: jest.SpyInstance;
   let spyAsync: jest.SpyInstance;
 
@@ -26,14 +24,13 @@ describe('AppModule', () => {
 
     ordersController = app.get<OrderController>(OrderController);
     ordersService = app.get<OrderService>(OrderService);
-    eventDispatchService = app.get<EventDispatchService>(EventDispatchService);
 
     ordersService.onModuleInit();
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     jest.clearAllMocks();
-    eventDispatchService['eventEmitter'].removeAllListeners();
+    app && (await app.close());
   });
 
   describe('listening', () => {

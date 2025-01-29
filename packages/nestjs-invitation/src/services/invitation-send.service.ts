@@ -4,7 +4,6 @@ import {
   ReferenceEmailInterface,
   ReferenceIdInterface,
 } from '@concepta/nestjs-common';
-import { EventDispatchService } from '@concepta/nestjs-event';
 import { InvitationGetUserEventResponseInterface } from '@concepta/nestjs-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
@@ -28,7 +27,6 @@ export class InvitationSendService {
     private readonly emailService: InvitationEmailServiceInterface,
     @Inject(INVITATION_MODULE_OTP_SERVICE_TOKEN)
     private readonly otpService: InvitationOtpServiceInterface,
-    private readonly eventDispatchService: EventDispatchService,
   ) {}
 
   async send(
@@ -72,13 +70,13 @@ export class InvitationSendService {
     payload?: LiteralObject,
     queryOptions?: QueryOptionsInterface,
   ): Promise<InvitationGetUserEventResponseInterface> {
-    const eventResult = await this.eventDispatchService.async(
-      new InvitationGetUserEventAsync({
-        email,
-        data: payload,
-        queryOptions,
-      }),
-    );
+    const getUserEvent = new InvitationGetUserEventAsync({
+      email,
+      data: payload,
+      queryOptions,
+    });
+
+    const eventResult = await getUserEvent.emit();
 
     const user = eventResult?.find((it) => it.id && it.email);
 

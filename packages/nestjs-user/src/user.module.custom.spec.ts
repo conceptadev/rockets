@@ -9,6 +9,7 @@ import { UserLookupCustomService } from './__fixtures__/services/user-lookup.cus
 import { UserModuleCustomFixture } from './__fixtures__/user.module.custom.fixture';
 
 describe('AppModule', () => {
+  let testModule: TestingModule;
   let userModule: UserModuleCustomFixture;
   let userLookupService: UserLookupCustomService;
   let userCrudService: UserCrudService;
@@ -17,7 +18,7 @@ describe('AppModule', () => {
   let userPasswordService: UserPasswordService;
 
   beforeEach(async () => {
-    const testModule: TestingModule = await Test.createTestingModule({
+    testModule = await Test.createTestingModule({
       imports: [AppModuleCustomFixture],
     }).compile();
 
@@ -34,8 +35,9 @@ describe('AppModule', () => {
     userController = testModule.get<UserController>(UserController);
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     jest.clearAllMocks();
+    testModule && (await testModule.close());
   });
 
   describe('module', () => {
