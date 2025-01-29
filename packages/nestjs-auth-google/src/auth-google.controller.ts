@@ -1,8 +1,11 @@
 import { Controller, Inject, Get, UseGuards } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import {
+  AuthenticatedEventInterface,
+  AuthenticatedUserInfoInterface,
   AuthenticatedUserInterface,
   AuthenticationResponseInterface,
+  AuthInfo,
 } from '@concepta/nestjs-common';
 import {
   AuthUser,
@@ -10,8 +13,12 @@ import {
   AuthenticationJwtResponseDto,
   AuthPublic,
 } from '@concepta/nestjs-authentication';
-import { AUTH_GOOGLE_ISSUE_TOKEN_SERVICE_TOKEN } from './auth-google.constants';
+import {
+  AUTH_GOOGLE_AUTHENTICATION_TYPE,
+  AUTH_GOOGLE_ISSUE_TOKEN_SERVICE_TOKEN,
+} from './auth-google.constants';
 import { AuthGoogleGuard } from './auth-google.guard';
+import { AuthGoogleAuthenticatedEventAsync } from './events/auth-google-authenticated.event';
 
 /**
  * Google controller
@@ -57,7 +64,31 @@ export class AuthGoogleController {
   @Get('callback')
   async get(
     @AuthUser() user: AuthenticatedUserInterface,
+    @AuthInfo() authInfo: AuthenticatedUserInfoInterface,
   ): Promise<AuthenticationResponseInterface> {
-    return this.issueTokenService.responsePayload(user.id);
+    const response = this.issueTokenService.responsePayload(user.id);
+
+    await this.dispatchAuthenticatedEvent({
+      userInfo: {
+        userId: user.id,
+        ipAddress: authInfo?.ipAddress || '',
+        deviceInfo: authInfo?.deviceInfo || '',
+        authType: AUTH_GOOGLE_AUTHENTICATION_TYPE,
+      },
+    });
+
+    return response;
+  }
+
+  protected async dispatchAuthenticatedEvent(
+    payload?: AuthenticatedEventInterface,
+  ): Promise<boolean> {
+    const authenticatedEventAsync = new AuthGoogleAuthenticatedEventAsync(
+      payload,
+    );
+
+    const eventResult = await authenticatedEventAsync.emit();
+
+    return eventResult.every((it) => it === true);
   }
 }
