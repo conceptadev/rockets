@@ -6,7 +6,6 @@ import {
 } from '@concepta/nestjs-common';
 import { InvitationInterface } from '@concepta/nestjs-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
-import { EventDispatchService } from '@concepta/nestjs-event';
 import { BaseService, QueryOptionsInterface } from '@concepta/typeorm-common';
 
 import {
@@ -35,7 +34,6 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
     private readonly emailService: InvitationEmailServiceInterface,
     @Inject(INVITATION_MODULE_OTP_SERVICE_TOKEN)
     private readonly otpService: InvitationOtpServiceInterface,
-    private readonly eventDispatchService: EventDispatchService,
     private readonly invitationRevocationService: InvitationRevocationService,
   ) {
     super(invitationRepo);
@@ -108,9 +106,7 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
       queryOptions,
     });
 
-    const eventResult = await this.eventDispatchService.async(
-      invitationAcceptedEventAsync,
-    );
+    const eventResult = await invitationAcceptedEventAsync.emit();
 
     return eventResult.every((it) => it === true);
   }

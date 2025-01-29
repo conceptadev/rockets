@@ -4,7 +4,7 @@ import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
 import { INVITATION_MODULE_CATEGORY_ORG_KEY } from '@concepta/nestjs-common';
 import { SeedingSource } from '@concepta/typeorm-seeding';
-import { EventDispatchService, EventModule } from '@concepta/nestjs-event';
+import { EventModule } from '@concepta/nestjs-event';
 import { UserEntityInterface, UserModule } from '@concepta/nestjs-user';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { InvitationEntityInterface } from '@concepta/nestjs-invitation/src/interfaces/invitation.entity.interface';
@@ -29,7 +29,6 @@ import { PasswordModule } from '@concepta/nestjs-password';
 describe(InvitationAcceptedListener, () => {
   const category = INVITATION_MODULE_CATEGORY_ORG_KEY;
   let app: INestApplication;
-  let eventDispatchService: EventDispatchService;
   let seedingSource: SeedingSource;
   let testUser: UserEntityInterface;
   let testOwner: OwnerEntityFixture;
@@ -84,9 +83,6 @@ describe(InvitationAcceptedListener, () => {
     app = testingModule.createNestApplication();
     await app.init();
 
-    eventDispatchService =
-      testingModule.get<EventDispatchService>(EventDispatchService);
-
     seedingSource = new SeedingSource({
       dataSource: testingModule.get(getDataSourceToken()),
     });
@@ -132,9 +128,7 @@ describe(InvitationAcceptedListener, () => {
       },
     });
 
-    const eventResult = await eventDispatchService.async(
-      invitationAcceptedEventAsync,
-    );
+    const eventResult = await invitationAcceptedEventAsync.emit();
 
     const result = eventResult.every((it) => it === true);
 
