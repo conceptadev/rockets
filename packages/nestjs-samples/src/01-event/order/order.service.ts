@@ -1,14 +1,10 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Order } from './entities/order.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
 import {
   OrderCreatedEvent,
   OrderCreatedEventAsync,
 } from './events/order-created.event';
-import {
-  EventDispatchService,
-  EventListenService,
-} from '@concepta/nestjs-event';
 import { OnModuleInit } from '@nestjs/common';
 import {
   OrderCreatedListener,
@@ -30,21 +26,14 @@ export class OrderService implements OnModuleInit {
     },
   ];
 
-  constructor(
-    @Inject(EventDispatchService)
-    private eventDispatchService: EventDispatchService,
-    @Inject(EventListenService)
-    private eventListenService: EventListenService,
-  ) {}
-
   onModuleInit() {
     // register a sync listener
     const listener = new OrderCreatedListener();
-    this.eventListenService.on(OrderCreatedEvent, listener);
+    listener.on(OrderCreatedEvent);
 
     // register an async listener
     const listenerAsync = new OrderCreatedListenerAsync();
-    this.eventListenService.on(OrderCreatedEventAsync, listenerAsync);
+    listenerAsync.on(OrderCreatedEventAsync);
   }
 
   async create(createOrderDto: CreateOrderDto) {
@@ -58,7 +47,7 @@ export class OrderService implements OnModuleInit {
     const orderEvent = new OrderCreatedEvent(order);
 
     // dispatch the event
-    this.eventDispatchService.sync(orderEvent);
+    orderEvent.emit();
 
     return order;
   }
@@ -74,7 +63,7 @@ export class OrderService implements OnModuleInit {
     const orderEventAsync = new OrderCreatedEventAsync(order);
 
     // dispatch the event
-    await this.eventDispatchService.async(orderEventAsync);
+    await orderEventAsync.emit();
 
     return order;
   }
