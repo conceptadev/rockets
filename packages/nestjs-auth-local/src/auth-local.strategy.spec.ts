@@ -19,7 +19,11 @@ import { AuthLocalInvalidCredentialsException } from './exceptions/auth-local-in
 import { AuthLocalInvalidLoginDataException } from './exceptions/auth-local-invalid-login-data.exception';
 import { AuthLocalAuthenticatedEventAsync } from './events/auth-local-authenticated.event';
 import { AUTH_LOCAL_AUTHENTICATION_TYPE } from './auth-local.constants';
-import { EventDispatchService, EventListenService, EventManager } from '@concepta/nestjs-event';
+import {
+  EventDispatchService,
+  EventListenService,
+  EventManager,
+} from '@concepta/nestjs-event';
 import { AuthLocalInvalidPasswordException } from './exceptions/auth-local-invalid-password.exception';
 import { AuthLocalUserAttemptsException } from './exceptions/auth-local-user-attempts.exception';
 import { AuthLocalRequestInterface } from './interfaces/auth-local-request.interface';
@@ -66,7 +70,7 @@ describe(AuthLocalStrategy.name, () => {
       settings,
     );
     eventDispatchService = mock<EventDispatchService>();
-    eventListenService = mock<EventListenService>(); 
+    eventListenService = mock<EventListenService>();
     authLocalStrategy = new AuthLocalStrategy(
       settings,
       validateUserService,

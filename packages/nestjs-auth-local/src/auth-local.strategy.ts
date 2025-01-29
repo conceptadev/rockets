@@ -174,7 +174,6 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
     success: boolean,
     failureReason?: string | null,
   ): Promise<void> {
-
     const user = await this.userLookupService.byUsername(username);
     if (user) {
       const info = this.getAuthenticatedUserInfo(req);
