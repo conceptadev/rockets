@@ -18,6 +18,7 @@ import {
 import { EventOptionsInterface } from './interfaces/event-options.interface';
 import { EventOptionsExtrasInterface } from './interfaces/event-options-extras.interface';
 import { EventSettingsInterface } from './interfaces/event-settings.interface';
+import { EventManager } from './event-manager';
 import { EventListenService } from './services/event-listen.service';
 import { EventDispatchService } from './services/event-dispatch.service';
 import { eventSettingsConfig } from './config/event-settings.config';
@@ -69,6 +70,7 @@ export function createEventExports(): Required<
   return [
     EVENT_MODULE_SETTINGS_TOKEN,
     EVENT_MODULE_EMITTER_SERVICE_TOKEN,
+    EventManager,
     EventListenService,
     EventDispatchService,
   ];
@@ -85,6 +87,7 @@ export function createEventProviders(options: {
     EventDispatchService,
     createEventSettingsProvider(options.overrides),
     createEventEmitterServiceProvider(),
+    createEventManagerProvider(),
   ];
 }
 
@@ -105,6 +108,20 @@ export function createEventEmitterServiceProvider(): Provider {
     inject: [EVENT_MODULE_SETTINGS_TOKEN],
     useFactory: async (settings: EventSettingsInterface) => {
       return new EventEmitter2(settings?.emitter);
+    },
+  };
+}
+
+export function createEventManagerProvider(): Provider {
+  return {
+    provide: EventManager,
+    inject: [EventDispatchService, EventListenService],
+    useFactory: async (
+      eventDispatchService: EventDispatchService,
+      eventListenService: EventListenService,
+    ): Promise<EventManager> => {
+      EventManager.initialize(eventDispatchService, eventListenService);
+      return EventManager.getInstance();
     },
   };
 }

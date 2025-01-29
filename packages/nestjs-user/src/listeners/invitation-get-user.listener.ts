@@ -1,9 +1,5 @@
-import {
-  EventAsyncInterface,
-  EventListenerOn,
-  EventListenService,
-} from '@concepta/nestjs-event';
-import { Inject, Injectable, OnModuleInit, Optional } from '@nestjs/common';
+import { EventAsyncInterface, EventListenerOn } from '@concepta/nestjs-event';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import {
   EventInstance,
   EventReturnType,
@@ -34,16 +30,13 @@ export class InvitationGetUserListener
     private settings: UserSettingsInterface,
     private userLookupService: UserLookupService,
     private userMutateService: UserMutateService,
-    @Optional()
-    @Inject(EventListenService)
-    private eventListenService?: EventListenService,
   ) {
     super();
   }
 
   onModuleInit() {
-    if (this.eventListenService && this.settings.invitationGetUserEvent) {
-      this.eventListenService.on(this.settings.invitationGetUserEvent, this);
+    if (this.settings.invitationGetUserEvent) {
+      this.on(this.settings.invitationGetUserEvent);
     }
   }
 

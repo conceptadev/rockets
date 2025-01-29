@@ -62,7 +62,7 @@ describe('UserController (e2e)', () => {
 
     afterEach(async () => {
       jest.clearAllMocks();
-      return app ? await app.close() : undefined;
+      app && (await app.close());
     });
 
     it('GET /user', async () => {

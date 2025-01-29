@@ -11,7 +11,6 @@ import { OtpService } from '@concepta/nestjs-otp';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { EmailService } from '@concepta/nestjs-email';
-import { EventDispatchService } from '@concepta/nestjs-event';
 
 import { INVITATION_MODULE_SETTINGS_TOKEN } from '../invitation.constants';
 import { InvitationFactory } from '../invitation.factory';
@@ -21,12 +20,13 @@ import { InvitationAcceptanceService } from './invitation-acceptance.service';
 import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
 import { InvitationEntityFixture } from '../__fixtures__/invitation/entities/invitation.entity.fixture';
 import { UserEntityFixture } from '../__fixtures__/user/entities/user-entity.fixture';
+import { InvitationAcceptedEventAsync } from '../events/invitation-accepted.event';
 
 describe(InvitationAcceptanceService, () => {
   const category = INVITATION_MODULE_CATEGORY_USER_KEY;
 
   let spyEmailService: jest.SpyInstance;
-  let spyEventDispatchService: jest.SpyInstance;
+  let spyAcceptEventEmit: jest.SpyInstance;
 
   let app: INestApplication;
   let seedingSource: SeedingSource;
@@ -59,9 +59,9 @@ describe(InvitationAcceptanceService, () => {
       INVITATION_MODULE_SETTINGS_TOKEN,
     );
 
-    spyEventDispatchService = jest.spyOn(
-      EventDispatchService.prototype,
-      'async',
+    spyAcceptEventEmit = jest.spyOn(
+      InvitationAcceptedEventAsync.prototype,
+      'emit',
     );
 
     seedingSource = new SeedingSource({
@@ -89,7 +89,7 @@ describe(InvitationAcceptanceService, () => {
 
   afterEach(async () => {
     jest.clearAllMocks();
-    return app ? await app.close() : undefined;
+    app && (await app.close());
   });
 
   it('Validate passcode', async () => {
@@ -121,7 +121,7 @@ describe(InvitationAcceptanceService, () => {
     );
 
     expect(spyEmailService).toHaveBeenCalledTimes(1);
-    expect(spyEventDispatchService).toHaveBeenCalledTimes(1);
+    expect(spyAcceptEventEmit).toHaveBeenCalledTimes(1);
     expect(inviteAccepted).toEqual(true);
   });
 
@@ -132,7 +132,7 @@ describe(InvitationAcceptanceService, () => {
     );
 
     expect(spyEmailService).toHaveBeenCalledTimes(0);
-    expect(spyEventDispatchService).toHaveBeenCalledTimes(0);
+    expect(spyAcceptEventEmit).toHaveBeenCalledTimes(0);
     expect(inviteAccepted).toEqual(false);
   });
 });
