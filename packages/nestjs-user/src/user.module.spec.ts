@@ -22,6 +22,7 @@ import { AppModuleFixture } from './__fixtures__/app.module.fixture';
 import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
 
 describe('AppModule', () => {
+  let testModule: TestingModule;
   let userModule: UserModule;
   let userLookupService: UserLookupService;
   let userMutateService: UserMutateService;
@@ -36,7 +37,7 @@ describe('AppModule', () => {
   let userPasswordHistoryRepo: Repository<UserEntityFixture>;
 
   beforeEach(async () => {
-    const testModule: TestingModule = await Test.createTestingModule({
+    testModule = await Test.createTestingModule({
       imports: [AppModuleFixture],
     }).compile();
 
@@ -69,8 +70,9 @@ describe('AppModule', () => {
     userController = testModule.get<UserController>(UserController);
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     jest.clearAllMocks();
+    testModule && (await testModule.close());
   });
 
   describe('module', () => {

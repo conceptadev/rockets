@@ -1,16 +1,6 @@
 import { AuthenticatedEventInterface } from '@concepta/nestjs-common';
-import {
-  EventAsyncInterface,
-  EventListenerOn,
-  EventListenService,
-} from '@concepta/nestjs-event';
-import {
-  Inject,
-  Injectable,
-  Logger,
-  OnModuleInit,
-  Optional,
-} from '@nestjs/common';
+import { EventAsyncInterface, EventListenerOn } from '@concepta/nestjs-event';
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { AUTH_HISTORY_MODULE_SETTINGS_TOKEN } from '../auth-history.constants';
 import { AuthHistoryMutateServiceInterface } from '../interfaces/auth-history-mutate-service.interface';
 import { AuthHistorySettingsInterface } from '../interfaces/auth-history-settings.interface';
@@ -28,17 +18,14 @@ export class AuthenticatedListener
     private settings: AuthHistorySettingsInterface,
     @Inject(AuthHistoryMutateService)
     private authHistoryMutateService: AuthHistoryMutateServiceInterface,
-    @Optional()
-    @Inject(EventListenService)
-    private eventListenService?: EventListenService,
   ) {
     super();
   }
 
   onModuleInit() {
-    if (this.eventListenService && this.settings.authenticatedEvents) {
+    if (this.settings.authenticatedEvents) {
       this.settings.authenticatedEvents.forEach((event) => {
-        this.eventListenService?.on(event, this);
+        this.on(event);
       });
     }
   }

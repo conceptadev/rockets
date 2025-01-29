@@ -19,7 +19,7 @@ import { AuthLocalInvalidCredentialsException } from './exceptions/auth-local-in
 import { AuthLocalInvalidLoginDataException } from './exceptions/auth-local-invalid-login-data.exception';
 import { AuthLocalAuthenticatedEventAsync } from './events/auth-local-authenticated.event';
 import { AUTH_LOCAL_AUTHENTICATION_TYPE } from './auth-local.constants';
-import { EventDispatchService } from '@concepta/nestjs-event';
+import { EventDispatchService, EventListenService, EventManager } from '@concepta/nestjs-event';
 import { AuthLocalInvalidPasswordException } from './exceptions/auth-local-invalid-password.exception';
 import { AuthLocalUserAttemptsException } from './exceptions/auth-local-user-attempts.exception';
 import { AuthLocalRequestInterface } from './interfaces/auth-local-request.interface';
@@ -39,6 +39,7 @@ describe(AuthLocalStrategy.name, () => {
   let passwordValidationService: PasswordValidationService;
   let authLocalStrategy: AuthLocalStrategy;
   let eventDispatchService: EventDispatchService;
+  let eventListenService: EventListenService;
   let spyOnDispatchService: jest.SpyInstance;
   const req: AuthLocalRequestInterface = {
     ip: '127.0.0.1',
@@ -65,16 +66,21 @@ describe(AuthLocalStrategy.name, () => {
       settings,
     );
     eventDispatchService = mock<EventDispatchService>();
+    eventListenService = mock<EventListenService>(); 
     authLocalStrategy = new AuthLocalStrategy(
       settings,
       validateUserService,
       userLookUpService,
-      eventDispatchService,
     );
 
+    EventManager.initialize(eventDispatchService, eventListenService, {
+      allowManualShutdown: true,
+    });
+
     spyOnDispatchService = jest
-      .spyOn(eventDispatchService, 'async')
+      .spyOn(EventManager.dispatch, 'async')
       .mockResolvedValue([]);
+
     user = new UserFixture();
     user.id = randomUUID();
     user.active = true;

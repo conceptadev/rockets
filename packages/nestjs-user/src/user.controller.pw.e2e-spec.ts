@@ -115,7 +115,7 @@ describe('User Controller (password e2e)', () => {
 
     afterEach(async () => {
       jest.clearAllMocks();
-      return app ? await app.close() : undefined;
+      app && (await app.close());
     });
 
     describe(`UserPasswordController WITH current password required`, () => {

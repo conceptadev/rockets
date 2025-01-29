@@ -79,6 +79,10 @@ describe(InvitationModule, () => {
     });
   });
 
+  afterEach(async () => {
+    testModule && (await testModule.close());
+  });
+
   describe(InvitationModule.register, () => {
     beforeEach(async () => {
       testModule = await Test.createTestingModule(
@@ -102,6 +106,10 @@ describe(InvitationModule, () => {
       commonVars();
       commonTests();
     });
+  });
+
+  afterEach(async () => {
+    testModule && (await testModule.close());
   });
 
   describe(InvitationModule.forRootAsync, () => {
@@ -142,6 +150,10 @@ describe(InvitationModule, () => {
     });
   });
 
+  afterEach(async () => {
+    testModule && (await testModule.close());
+  });
+
   describe(InvitationModule.registerAsync, () => {
     beforeEach(async () => {
       testModule = await Test.createTestingModule(
@@ -178,6 +190,10 @@ describe(InvitationModule, () => {
       commonVars();
       commonTests();
     });
+  });
+
+  afterEach(async () => {
+    testModule && (await testModule.close());
   });
 
   function commonVars() {

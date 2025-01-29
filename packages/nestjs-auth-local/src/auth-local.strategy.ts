@@ -3,7 +3,7 @@ import {
   ReferenceIdInterface,
   ReferenceUsername,
 } from '@concepta/nestjs-common';
-import { Inject, Injectable, Optional } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { validateOrReject } from 'class-validator';
 import { Strategy } from 'passport-local';
 
@@ -15,7 +15,6 @@ import {
   AUTH_LOCAL_STRATEGY_NAME,
 } from './auth-local.constants';
 
-import { EventDispatchService } from '@concepta/nestjs-event';
 import { AuthLocalAuthenticatedEventAsync } from './events/auth-local-authenticated.event';
 import { AuthLocalInvalidCredentialsException } from './exceptions/auth-local-invalid-credentials.exception';
 import { AuthLocalInvalidLoginDataException } from './exceptions/auth-local-invalid-login-data.exception';
@@ -51,9 +50,6 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
     private validateUserService: AuthLocalValidateUserServiceInterface,
     @Inject(AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN)
     protected readonly userLookupService: AuthLocalUserLookupServiceInterface,
-    @Optional()
-    @Inject(EventDispatchService)
-    private readonly eventDispatchService?: EventDispatchService,
   ) {
     super({
       usernameField: settings?.usernameField,
@@ -178,25 +174,24 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
     success: boolean,
     failureReason?: string | null,
   ): Promise<void> {
-    if (this.eventDispatchService) {
-      const user = await this.userLookupService.byUsername(username);
-      if (user) {
-        const info = this.getAuthenticatedUserInfo(req);
 
-        const failMessage = failureReason ? { failureReason } : {};
-        const authenticatedEventAsync = new AuthLocalAuthenticatedEventAsync({
-          userInfo: {
-            userId: user.id,
-            ipAddress: info.ipAddress || '',
-            deviceInfo: info.deviceInfo || '',
-            authType: AUTH_LOCAL_AUTHENTICATION_TYPE,
-            success,
-            ...failMessage,
-          },
-        });
+    const user = await this.userLookupService.byUsername(username);
+    if (user) {
+      const info = this.getAuthenticatedUserInfo(req);
 
-        await this.eventDispatchService.async(authenticatedEventAsync);
-      }
+      const failMessage = failureReason ? { failureReason } : {};
+      const authenticatedEventAsync = new AuthLocalAuthenticatedEventAsync({
+        userInfo: {
+          userId: user.id,
+          ipAddress: info.ipAddress || '',
+          deviceInfo: info.deviceInfo || '',
+          authType: AUTH_LOCAL_AUTHENTICATION_TYPE,
+          success,
+          ...failMessage,
+        },
+      });
+
+      await authenticatedEventAsync.emit();
     }
   }
 

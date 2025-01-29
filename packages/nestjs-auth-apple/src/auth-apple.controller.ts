@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Inject,
-  Get,
-  UseGuards,
-  Post,
-  Optional,
-} from '@nestjs/common';
+import { Controller, Inject, Get, UseGuards, Post } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import {
   AuthenticatedEventInterface,
@@ -26,7 +19,6 @@ import {
 } from './auth-apple.constants';
 import { AuthAppleGuard } from './auth-apple.guard';
 import { AuthAppleAuthenticatedEventAsync } from './events/auth-apple-authenticated.event';
-import { EventDispatchService } from '@concepta/nestjs-event';
 
 /**
  * Apple controller
@@ -51,9 +43,6 @@ export class AuthAppleController {
   constructor(
     @Inject(AUTH_APPLE_ISSUE_TOKEN_SERVICE_TOKEN)
     private issueTokenService: IssueTokenServiceInterface,
-    @Optional()
-    @Inject(EventDispatchService)
-    private readonly eventDispatchService?: EventDispatchService,
   ) {}
 
   /**
@@ -79,16 +68,15 @@ export class AuthAppleController {
   ): Promise<AuthenticationResponseInterface> {
     const response = this.issueTokenService.responsePayload(user.id);
 
-    if (this.eventDispatchService)
-      await this.dispatchAuthenticatedEvent({
-        userInfo: {
-          userId: user.id,
-          ipAddress: authInfo?.ipAddress || '',
-          deviceInfo: authInfo?.deviceInfo || '',
-          authType: AUTH_APPLE_AUTHENTICATION_TYPE,
-          success: true,
-        },
-      });
+    await this.dispatchAuthenticatedEvent({
+      userInfo: {
+        userId: user.id,
+        ipAddress: authInfo?.ipAddress || '',
+        deviceInfo: authInfo?.deviceInfo || '',
+        authType: AUTH_APPLE_AUTHENTICATION_TYPE,
+        success: true,
+      },
+    });
 
     return response;
   }
@@ -96,17 +84,12 @@ export class AuthAppleController {
   protected async dispatchAuthenticatedEvent(
     payload?: AuthenticatedEventInterface,
   ): Promise<boolean> {
-    if (this.eventDispatchService) {
-      const authenticatedEventAsync = new AuthAppleAuthenticatedEventAsync(
-        payload,
-      );
+    const authenticatedEventAsync = new AuthAppleAuthenticatedEventAsync(
+      payload,
+    );
 
-      const eventResult = await this.eventDispatchService.async(
-        authenticatedEventAsync,
-      );
+    const eventResult = await authenticatedEventAsync.emit();
 
-      return eventResult.every((it) => it === true);
-    }
-    return true;
+    return eventResult.every((it) => it === true);
   }
 }

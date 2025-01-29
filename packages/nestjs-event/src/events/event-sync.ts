@@ -1,5 +1,6 @@
 import { EventSyncInterface } from './interfaces/event-sync.interface';
 import { Event } from './event';
+import { EventManager } from '../event-manager';
 
 /**
  * Abstract synchronous event class.
@@ -19,12 +20,23 @@ import { Event } from './event';
  * type MyPayloadType = {id: number, active: boolean};
  *
  * // event class
- * class MyEvent extends Event<MyPayloadType> {}
+ * class MyEvent extends EventSync<MyPayloadType> {}
  *
  * // create an event
  * const myEvent = new MyEvent({id: 1234, active: true});
+ *
+ * // emit the event
+ * myEvent.emit();
  * ```
  */
 export abstract class EventSync<P = undefined>
   extends Event<P, void>
-  implements EventSyncInterface<P> {}
+  implements EventSyncInterface<P>
+{
+  /**
+   * Emit the event.
+   */
+  emit(): boolean {
+    return EventManager.dispatch.sync<P>(this);
+  }
+}
