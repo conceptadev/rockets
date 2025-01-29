@@ -3,6 +3,10 @@ import { EventException } from './exceptions/event.exception';
 import { EventDispatchService } from './services/event-dispatch.service';
 import { EventListenService } from './services/event-listen.service';
 
+interface InitializationOptions {
+  allowManualShutdown: boolean;
+}
+
 /**
  * Single class for managing global access to event services.
  */
@@ -40,7 +44,7 @@ export class EventManager {
   public static initialize(
     eventDispatchService: EventDispatchService,
     eventListenService: EventListenService,
-    options: { allowManualShutdown: boolean } = { allowManualShutdown: false },
+    options: InitializationOptions = { allowManualShutdown: false },
   ) {
     // already have an instance?
     if (EventManager.instance) {
