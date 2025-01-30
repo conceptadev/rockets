@@ -1,4 +1,4 @@
-import { PasswordStrengthEnum } from "../enum/password-strength.enum";
+import { PasswordStrengthEnum } from '../enum/password-strength.enum';
 
 export interface PasswordCreateObjectOptionsInterface {
   /**
@@ -11,5 +11,5 @@ export interface PasswordCreateObjectOptionsInterface {
    */
   required?: boolean;
 
-  passwordStrength?: PasswordStrengthEnum
+  passwordStrength?: PasswordStrengthEnum | null;
 }

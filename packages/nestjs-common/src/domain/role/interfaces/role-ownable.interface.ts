@@ -3,5 +3,5 @@ import { RoleInterface } from './role.interface';
 
 export interface RoleOwnableInterface {
   roleId: ReferenceId;
-  role?: RoleInterface;
+  role: Partial<RoleInterface>;
 }

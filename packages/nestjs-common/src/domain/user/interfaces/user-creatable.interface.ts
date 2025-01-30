@@ -6,4 +6,4 @@ export interface UserCreatableInterface
   extends Pick<UserInterface, 'username' | 'email'>,
     Partial<Pick<UserInterface, 'active'>>,
     Partial<PasswordPlainInterface>,
-    Partial<UserRolesInterface> { }
+    Partial<UserRolesInterface> {}

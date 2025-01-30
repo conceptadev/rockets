@@ -41,7 +41,7 @@ export abstract class UserPostgresEntity
   @Column({ type: 'text', nullable: true, default: null })
   passwordSalt: string | null = null;
 
-  userRoles?: RoleOwnableInterface[];
+  userRoles?: Partial<RoleOwnableInterface>[];
 
   userPasswordHistory?: UserPasswordHistoryEntityInterface;
 }

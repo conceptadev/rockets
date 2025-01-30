@@ -28,11 +28,16 @@ export class PasswordStrengthService
    * @param password - the plain text password
    * @returns password strength
    */
-  isStrong(password: string, passwordStrength?: PasswordStrengthEnum): boolean {
+  isStrong(
+    password: string,
+    passwordStrength?: PasswordStrengthEnum | null,
+  ): boolean {
     // Get min password Strength
     // TODO: should it overwrite event is is lower then min password
-    const minStrength = passwordStrength ||
-      this.settings?.minPasswordStrength || PasswordStrengthEnum.None;
+    const minStrength =
+      passwordStrength ||
+      this.settings?.minPasswordStrength ||
+      PasswordStrengthEnum.None;
 
     // check strength of the password
     const result = zxcvbn(password);

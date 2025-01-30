@@ -26,8 +26,8 @@ export const userDefaultConfig = registerAs(
         limitDays: isNaN(limitDays) || limitDays < 1 ? undefined : limitDays,
       },
       passwordStrength: {
-        passwordStrengthCallback: defaultPasswordStrengthByRole
-      }
+        passwordStrengthCallback: defaultPasswordStrengthByRole,
+      },
     };
   },
 );

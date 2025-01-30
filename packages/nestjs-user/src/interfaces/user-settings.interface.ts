@@ -7,7 +7,6 @@ import {
   InvitationGetUserEventPayloadInterface,
   InvitationGetUserEventResponseInterface,
 } from '@concepta/nestjs-common';
-import { PasswordStrengthEnum } from '@concepta/nestjs-password';
 import { PasswordStrengthByRoleCallback } from '../user.types';
 
 export interface UserSettingsInterface {
@@ -32,7 +31,6 @@ export interface UserSettingsInterface {
   };
 
   passwordStrength?: {
-    passwordStrengthCallback?: PasswordStrengthByRoleCallback
-    
-  }
+    passwordStrengthCallback?: PasswordStrengthByRoleCallback;
+  };
 }

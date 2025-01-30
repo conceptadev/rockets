@@ -6,5 +6,5 @@ export interface UserUpdatableInterface
   extends Partial<
       Pick<UserCreatableInterface, 'email' | 'password' | 'active'>
     >,
-  Partial<PasswordPlainCurrentInterface>,
-  Partial<UserRolesInterface> { }
+    Partial<PasswordPlainCurrentInterface>,
+    Partial<UserRolesInterface> {}

@@ -11,6 +11,7 @@ import {
   PasswordCreationService,
   PasswordStorageInterface,
   PasswordStorageService,
+  PasswordStrengthEnum,
   PasswordValidationService,
 } from '@concepta/nestjs-password';
 import { SeedingSource } from '@concepta/typeorm-seeding';
@@ -98,12 +99,11 @@ describe('User Controller (password e2e)', () => {
         entity: UserPasswordHistoryEntityFixture,
       });
 
-      fakeUser = await userFactory.create(
-        await passwordStorageService.hashObject({
-          id: userId,
-          password: userPassword,
-        }),
-      );
+      const userWithPassword = await passwordStorageService.hashObject({
+        id: userId,
+        password: userPassword,
+      });
+      fakeUser = await userFactory.create(userWithPassword);
 
       await userPasswordHistoryFactory.create(
         await passwordStorageService.hashObject({
@@ -236,6 +236,218 @@ describe('User Controller (password e2e)', () => {
         } else {
           fail('User not updated');
         }
+      });
+    });
+
+    describe(`UserPasswordController user WITH roles`, () => {
+      it('Should update password', async () => {
+        passwordCreationService['settings'].requireCurrentToUpdate = false;
+
+        jest.spyOn(userLookupService, 'byId').mockResolvedValueOnce({
+          ...fakeUser,
+          userRoles: [
+            {
+              role: {
+                name: 'manager',
+              },
+            },
+          ],
+        } as UserEntityFixture);
+
+        await supertest(app.getHttpServer())
+          .patch(`/user/${userId}`)
+          .set('Authorization', `bearer ${authToken}`)
+          .send({
+            password: userNewPassword,
+          })
+          .expect(200);
+
+        const updatedUser = await userLookupService.byId(userId);
+
+        if (updatedUser) {
+          const isPasswordValid =
+            await passwordValidationService.validateObject(
+              userNewPassword,
+              updatedUser,
+            );
+          expect(isPasswordValid).toEqual<boolean>(true);
+        } else {
+          fail('User not updated');
+        }
+      });
+
+      it('Should not update weak password for admin', async () => {
+        passwordCreationService['settings'].requireCurrentToUpdate = false;
+        userPasswordService['userSettings'].passwordStrength = {
+          passwordStrengthCallback: (
+            roles: string[],
+          ): PasswordStrengthEnum | null => {
+            if (roles.includes('admin')) {
+              return PasswordStrengthEnum.VeryStrong;
+            }
+            return null;
+          },
+        };
+
+        jest.spyOn(userLookupService, 'byId').mockResolvedValue({
+          ...fakeUser,
+          userRoles: [
+            {
+              role: {
+                name: 'admin',
+              },
+            },
+          ],
+        });
+
+        await supertest(app.getHttpServer())
+          .patch(`/user/${userId}`)
+          .set('Authorization', `bearer ${authToken}`)
+          .send({
+            password: userNewPassword,
+          })
+          .expect(400)
+          .expect((res) => {
+            expect(res.body.message).toBe('Password is not strong enough');
+            expect(res.body.errorCode).toBe('PASSWORD_NOT_STRONG_ERROR');
+          });
+      });
+
+      it('Should not update weak password for admin', async () => {
+        passwordCreationService['settings'].requireCurrentToUpdate = false;
+        userPasswordService['userSettings'].passwordStrength = {
+          passwordStrengthCallback: (
+            roles: string[],
+          ): PasswordStrengthEnum | null => {
+            if (roles.includes('admin')) {
+              return PasswordStrengthEnum.VeryStrong;
+            }
+            if (roles.includes('user')) {
+              return PasswordStrengthEnum.None;
+            }
+            return null;
+          },
+        };
+
+        jest.spyOn(userLookupService, 'byId').mockResolvedValue({
+          ...fakeUser,
+          userRoles: [
+            {
+              role: {
+                name: 'admin',
+              },
+            },
+            {
+              role: {
+                name: 'user',
+              },
+            },
+          ],
+        });
+
+        await supertest(app.getHttpServer())
+          .patch(`/user/${userId}`)
+          .set('Authorization', `bearer ${authToken}`)
+          .send({
+            password: userNewPassword,
+          })
+          .expect(400)
+          .expect((res) => {
+            expect(res.body.message).toBe('Password is not strong enough');
+            expect(res.body.errorCode).toBe('PASSWORD_NOT_STRONG_ERROR');
+          });
+      });
+
+      it('Should update with weak password for admin', async () => {
+        passwordCreationService['settings'].requireCurrentToUpdate = false;
+        userPasswordService['userSettings'].passwordStrength = {
+          passwordStrengthCallback: (
+            roles: string[],
+          ): PasswordStrengthEnum | null => {
+            if (roles.includes('user')) {
+              return PasswordStrengthEnum.None;
+            }
+            return null;
+          },
+        };
+
+        jest.spyOn(userLookupService, 'byId').mockResolvedValue({
+          ...fakeUser,
+          userRoles: [
+            {
+              role: {
+                name: 'user',
+              },
+            },
+          ],
+        });
+
+        await supertest(app.getHttpServer())
+          .patch(`/user/${userId}`)
+          .set('Authorization', `bearer ${authToken}`)
+          .send({
+            password: userNewPassword,
+          })
+          .expect(200);
+      });
+
+      it('Should update password for admin and user ', async () => {
+        passwordCreationService['settings'].requireCurrentToUpdate = false;
+        userPasswordService['userSettings'].passwordStrength = {
+          passwordStrengthCallback: (
+            roles: string[],
+          ): PasswordStrengthEnum | null => {
+            if (roles.includes('admin')) {
+              return PasswordStrengthEnum.VeryStrong;
+            }
+            if (roles.includes('user')) {
+              return PasswordStrengthEnum.None;
+            }
+            return null;
+          },
+        };
+
+        jest.spyOn(userLookupService, 'byId').mockResolvedValue({
+          ...fakeUser,
+          userRoles: [
+            {
+              role: {
+                name: 'user',
+              },
+            },
+          ],
+        });
+
+        await supertest(app.getHttpServer())
+          .patch(`/user/${userId}`)
+          .set('Authorization', `bearer ${authToken}`)
+          .send({
+            password: userNewPassword,
+          })
+          .expect(200);
+
+        jest.spyOn(userLookupService, 'byId').mockResolvedValue({
+          ...fakeUser,
+          userRoles: [
+            {
+              role: {
+                name: 'admin',
+              },
+            },
+          ],
+        });
+
+        await supertest(app.getHttpServer())
+          .patch(`/user/${userId}`)
+          .set('Authorization', `bearer ${authToken}`)
+          .send({
+            password: userPassword,
+          })
+          .expect(400)
+          .expect((res) => {
+            expect(res.body.message).toBe('Password is not strong enough');
+            expect(res.body.errorCode).toBe('PASSWORD_NOT_STRONG_ERROR');
+          });
       });
     });
   });

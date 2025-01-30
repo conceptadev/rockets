@@ -1,4 +1,4 @@
-import { PasswordStrengthEnum } from "../enum/password-strength.enum";
+import { PasswordStrengthEnum } from '../enum/password-strength.enum';
 
 /**
  * Password Strength Service Interface

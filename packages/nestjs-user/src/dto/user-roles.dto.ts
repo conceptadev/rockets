@@ -1,4 +1,7 @@
-import { RoleOwnableInterface, UserRolesInterface } from '@concepta/nestjs-common';
+import {
+  RoleOwnableInterface,
+  UserRolesInterface,
+} from '@concepta/nestjs-common';
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
 
@@ -7,7 +10,8 @@ export class UserRolesDto implements UserRolesInterface {
   @Expose()
   @ApiProperty({
     type: 'array',
+    isArray: true,
     description: 'User roles',
   })
-  userRoles!: RoleOwnableInterface[];
+  userRoles!: Partial<RoleOwnableInterface>[];
 }
