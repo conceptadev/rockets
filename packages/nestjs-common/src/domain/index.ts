@@ -24,6 +24,8 @@ export { UserOwnableInterface } from './user/interfaces/user-ownable.interface';
 export { UserUpdatableInterface } from './user/interfaces/user-updatable.interface';
 export { UserInterface } from './user/interfaces/user.interface';
 
+export { UserRolesInterface } from './user/interfaces/user-roles.interface';
+
 export { FederatedCreatableInterface } from './federated/interfaces/federated-creatable.interface';
 export { FederatedUpdatableInterface } from './federated/interfaces/federated-updatable.interface';
 export { FederatedInterface } from './federated/interfaces/federated.interface';
@@ -33,6 +35,7 @@ export { RoleAssignmentCreatableInterface } from './role/interfaces/role-assignm
 export { RoleAssignmentInterface } from './role/interfaces/role-assignment.interface';
 export { RoleCreatableInterface } from './role/interfaces/role-creatable.interface';
 export { RoleUpdatableInterface } from './role/interfaces/role-updatable.interface';
+export { RoleOwnableInterface } from './role/interfaces/role-ownable.interface';
 export { RoleInterface } from './role/interfaces/role.interface';
 
 export { OtpClearInterface } from './otp/interfaces/otp-clear.interface';

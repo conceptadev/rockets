@@ -4,6 +4,7 @@ import { UserUpdatableInterface } from '@concepta/nestjs-common';
 import { UserDto } from './user.dto';
 import { UserPasswordDto } from './user-password.dto';
 import { UserPasswordUpdateDto } from './user-password-update.dto';
+import { UserRolesDto } from './user-roles.dto';
 
 /**
  * User Update DTO
@@ -14,5 +15,6 @@ export class UserUpdateDto
     PartialType(PickType(UserDto, ['email', 'active'] as const)),
     PartialType(UserPasswordDto),
     PartialType(UserPasswordUpdateDto),
+    PartialType(UserRolesDto),
   )
   implements UserUpdatableInterface {}

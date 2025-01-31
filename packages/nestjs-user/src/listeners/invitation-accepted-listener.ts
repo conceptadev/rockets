@@ -63,6 +63,8 @@ export class InvitationAcceptedListener
         throw new UserNotFoundException();
       }
 
+      // TODO: UPDATE PASSWORD how to get roles here?
+      // should return on user lookup?
       await this.userMutateService.update(
         { ...user, password: newPassword },
         event.payload?.queryOptions,
