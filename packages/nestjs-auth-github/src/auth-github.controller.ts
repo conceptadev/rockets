@@ -1,24 +1,17 @@
-import { Controller, Inject, Get, UseGuards } from '@nestjs/common';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import {
-  AuthenticatedEventInterface,
-  AuthenticatedUserInfoInterface,
-  AuthenticatedUserInterface,
-  AuthenticationResponseInterface,
-  AuthInfo,
-} from '@concepta/nestjs-common';
-import {
-  AuthUser,
-  IssueTokenServiceInterface,
   AuthenticationJwtResponseDto,
   AuthPublic,
+  AuthUser,
+  IssueTokenServiceInterface,
 } from '@concepta/nestjs-authentication';
 import {
-  AUTH_GITHUB_AUTHENTICATION_TYPE,
-  AUTH_GITHUB_ISSUE_TOKEN_SERVICE_TOKEN,
-} from './auth-github.constants';
+  AuthenticatedUserInterface,
+  AuthenticationResponseInterface,
+} from '@concepta/nestjs-common';
+import { Controller, Get, Inject, UseGuards } from '@nestjs/common';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { AUTH_GITHUB_ISSUE_TOKEN_SERVICE_TOKEN } from './auth-github.constants';
 import { AuthGithubGuard } from './auth-github.guard';
-import { AuthGithubAuthenticatedEventAsync } from './events/auth-github-authenticated.event';
 
 // TODO: improve documentation
 /**
@@ -66,32 +59,7 @@ export class AuthGithubController {
   @Get('callback')
   async get(
     @AuthUser() user: AuthenticatedUserInterface,
-    @AuthInfo() authInfo: AuthenticatedUserInfoInterface,
   ): Promise<AuthenticationResponseInterface> {
-    const response = this.issueTokenService.responsePayload(user.id);
-
-    await this.dispatchAuthenticatedEvent({
-      userInfo: {
-        userId: user.id,
-        ipAddress: authInfo?.ipAddress || '',
-        deviceInfo: authInfo?.deviceInfo || '',
-        authType: AUTH_GITHUB_AUTHENTICATION_TYPE,
-        success: true,
-      },
-    });
-
-    return response;
-  }
-
-  protected async dispatchAuthenticatedEvent(
-    payload?: AuthenticatedEventInterface,
-  ): Promise<boolean> {
-    const authenticatedEventAsync = new AuthGithubAuthenticatedEventAsync(
-      payload,
-    );
-
-    const eventResult = await authenticatedEventAsync.emit();
-
-    return eventResult.every((it) => it === true);
+    return this.issueTokenService.responsePayload(user.id);
   }
 }

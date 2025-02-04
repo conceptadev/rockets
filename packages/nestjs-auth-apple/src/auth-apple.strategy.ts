@@ -7,6 +7,7 @@ import {
 } from '@concepta/nestjs-federated';
 
 import {
+  AUTH_APPLE_AUTHENTICATION_TYPE,
   AUTH_APPLE_MODULE_SETTINGS_TOKEN,
   AUTH_APPLE_SERVICE_TOKEN,
   AUTH_APPLE_STRATEGY_NAME,
@@ -19,6 +20,11 @@ import { Strategy } from 'passport-apple';
 import { AuthAppleServiceInterface } from './interfaces/auth-apple-service.interface';
 import { mapProfile } from './utils/auth-apple-map-profile';
 import { AuthAppleCredentialsInterface } from './interfaces/auth-apple-credentials.interface';
+import { AuthAppleAuthenticatedEventAsync } from './events/auth-apple-authenticated.event';
+import {
+  AuthenticationRequestInterface,
+  getAuthenticatedUserInfo,
+} from '@concepta/nestjs-authentication';
 
 @Injectable()
 export class AuthAppleStrategy extends PassportStrategy(
@@ -41,10 +47,11 @@ export class AuthAppleStrategy extends PassportStrategy(
       privateKeyString: settings?.privateKeyString,
       callbackURL: settings?.callbackURL,
       scope: settings?.scope,
-      passReqToCallback: false,
+      passReqToCallback: true,
     });
   }
   async validate(
+    req: AuthenticationRequestInterface,
     _accessToken: string,
     _refreshToken: string,
     idToken: string,
@@ -73,6 +80,7 @@ export class AuthAppleStrategy extends PassportStrategy(
       throw new UnauthorizedException();
     }
 
+    await this.dispatchAuthAttemptEvent(req, user.id, true);
     return user;
   }
 
@@ -86,5 +94,28 @@ export class AuthAppleStrategy extends PassportStrategy(
     if (!appleProfile?.email) {
       throw new AuthAppleMissingEmailException();
     }
+  }
+
+  protected async dispatchAuthAttemptEvent(
+    req: AuthenticationRequestInterface,
+    userId: string,
+    success: boolean,
+    failureReason?: string | null,
+  ): Promise<void> {
+    const info = getAuthenticatedUserInfo(req);
+
+    const failMessage = failureReason ? { failureReason } : {};
+    const authenticatedEventAsync = new AuthAppleAuthenticatedEventAsync({
+      userInfo: {
+        userId: userId,
+        ipAddress: info.ipAddress || '',
+        deviceInfo: info.deviceInfo || '',
+        authType: AUTH_APPLE_AUTHENTICATION_TYPE,
+        success,
+        ...failMessage,
+      },
+    });
+
+    await authenticatedEventAsync.emit();
   }
 }

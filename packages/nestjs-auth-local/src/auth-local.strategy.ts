@@ -1,4 +1,8 @@
-import { PassportStrategyFactory } from '@concepta/nestjs-authentication';
+import {
+  AuthenticationRequestInterface,
+  getAuthenticatedUserInfo,
+  PassportStrategyFactory,
+} from '@concepta/nestjs-authentication';
 import {
   ReferenceIdInterface,
   ReferenceUsername,
@@ -25,7 +29,6 @@ import { AuthLocalException } from './exceptions/auth-local.exception';
 import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.interface';
 import { AuthLocalUserLookupServiceInterface } from './interfaces/auth-local-user-lookup-service.interface';
 import { AuthLocalValidateUserServiceInterface } from './interfaces/auth-local-validate-user-service.interface';
-import { AuthLocalRequestInterface } from './interfaces/auth-local-request.interface';
 import { RuntimeException } from '@concepta/nestjs-exception';
 
 /**
@@ -71,7 +74,7 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
    * @throws AuthLocalException If another error occurs during validation
    */
   async validate(
-    req: AuthLocalRequestInterface,
+    req: AuthenticationRequestInterface,
     username: ReferenceUsername,
     password: string,
   ) {
@@ -169,14 +172,14 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
    * and review request with ip property.
    */
   protected async dispatchAuthAttemptEvent(
-    req: AuthLocalRequestInterface,
+    req: AuthenticationRequestInterface,
     username: string,
     success: boolean,
     failureReason?: string | null,
   ): Promise<void> {
     const user = await this.userLookupService.byUsername(username);
     if (user) {
-      const info = this.getAuthenticatedUserInfo(req);
+      const info = getAuthenticatedUserInfo(req);
 
       const failMessage = failureReason ? { failureReason } : {};
       const authenticatedEventAsync = new AuthLocalAuthenticatedEventAsync({
@@ -192,20 +195,5 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
 
       await authenticatedEventAsync.emit();
     }
-  }
-
-  // TODO: review if this is the best solution
-  protected getAuthenticatedUserInfo(req: AuthLocalRequestInterface): {
-    ipAddress: string;
-    deviceInfo: string;
-  } {
-    req.headers;
-    const ipAddress = req?.ip ?? '';
-    const deviceInfo = req?.headers?.['user-agent'] ?? '';
-
-    return {
-      ipAddress,
-      deviceInfo,
-    };
   }
 }

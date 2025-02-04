@@ -26,7 +26,7 @@ import {
 } from '@concepta/nestjs-event';
 import { AuthLocalInvalidPasswordException } from './exceptions/auth-local-invalid-password.exception';
 import { AuthLocalUserAttemptsException } from './exceptions/auth-local-user-attempts.exception';
-import { AuthLocalRequestInterface } from './interfaces/auth-local-request.interface';
+import { AuthenticationRequestInterface } from '@concepta/nestjs-authentication';
 
 describe(AuthLocalStrategy.name, () => {
   const USERNAME = 'username';
@@ -45,7 +45,7 @@ describe(AuthLocalStrategy.name, () => {
   let eventDispatchService: EventDispatchService;
   let eventListenService: EventListenService;
   let spyOnDispatchService: jest.SpyInstance;
-  const req: AuthLocalRequestInterface = {
+  const req: AuthenticationRequestInterface = {
     ip: '127.0.0.1',
     headers: {
       'user-agent': 'IOS',

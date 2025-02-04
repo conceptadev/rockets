@@ -1,11 +1,8 @@
 import { Controller, Inject, Get, UseGuards, Post } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import {
-  AuthenticatedEventInterface,
   AuthenticatedUserInterface,
   AuthenticationResponseInterface,
-  AuthenticatedUserInfoInterface,
-  AuthInfo,
 } from '@concepta/nestjs-common';
 import {
   AuthUser,
@@ -13,12 +10,8 @@ import {
   AuthenticationJwtResponseDto,
   AuthPublic,
 } from '@concepta/nestjs-authentication';
-import {
-  AUTH_APPLE_AUTHENTICATION_TYPE,
-  AUTH_APPLE_ISSUE_TOKEN_SERVICE_TOKEN,
-} from './auth-apple.constants';
+import { AUTH_APPLE_ISSUE_TOKEN_SERVICE_TOKEN } from './auth-apple.constants';
 import { AuthAppleGuard } from './auth-apple.guard';
-import { AuthAppleAuthenticatedEventAsync } from './events/auth-apple-authenticated.event';
 
 /**
  * Apple controller
@@ -64,32 +57,7 @@ export class AuthAppleController {
   @Post('callback')
   async post(
     @AuthUser() user: AuthenticatedUserInterface,
-    @AuthInfo() authInfo: AuthenticatedUserInfoInterface,
   ): Promise<AuthenticationResponseInterface> {
-    const response = this.issueTokenService.responsePayload(user.id);
-
-    await this.dispatchAuthenticatedEvent({
-      userInfo: {
-        userId: user.id,
-        ipAddress: authInfo?.ipAddress || '',
-        deviceInfo: authInfo?.deviceInfo || '',
-        authType: AUTH_APPLE_AUTHENTICATION_TYPE,
-        success: true,
-      },
-    });
-
-    return response;
-  }
-
-  protected async dispatchAuthenticatedEvent(
-    payload?: AuthenticatedEventInterface,
-  ): Promise<boolean> {
-    const authenticatedEventAsync = new AuthAppleAuthenticatedEventAsync(
-      payload,
-    );
-
-    const eventResult = await authenticatedEventAsync.emit();
-
-    return eventResult.every((it) => it === true);
+    return this.issueTokenService.responsePayload(user.id);
   }
 }
