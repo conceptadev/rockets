@@ -11,5 +11,9 @@ export interface PasswordCreateObjectOptionsInterface {
    */
   required?: boolean;
 
+  /**
+   * Optional password strength requirement. If provided, will validate
+   * that password meets minimum strength requirements.
+   */
   passwordStrength?: PasswordStrengthEnum | null;
 }

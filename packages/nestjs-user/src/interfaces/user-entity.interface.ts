@@ -4,4 +4,4 @@ import { PasswordStorageInterface } from '@concepta/nestjs-password';
 export interface UserEntityInterface
   extends UserInterface,
     PasswordStorageInterface,
-    Partial<UserRolesInterface> {}
+    UserRolesInterface {}

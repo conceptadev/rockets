@@ -1,9 +1,11 @@
 import { PasswordStrengthEnum } from '@concepta/nestjs-password';
-import { PasswordStrengthByRoleCallback } from './user.types';
+import { PasswordStrengthTransform } from './user.types';
+import { PasswordStrengthTransformOptionsInterface } from '@concepta/nestjs-common';
 
-export const defaultPasswordStrengthByRole: PasswordStrengthByRoleCallback = (
-  roles: string[],
+export const defaultPasswordStrengthTransform: PasswordStrengthTransform = (
+  options: PasswordStrengthTransformOptionsInterface,
 ): PasswordStrengthEnum | null => {
+  const { roles } = options;
   // Default implementation - require medium strength for all roles
   if (roles.includes('admin')) {
     return PasswordStrengthEnum.VeryStrong;

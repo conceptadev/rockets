@@ -1,3 +1,4 @@
+import { PasswordStrengthTransformOptionsInterface } from '@concepta/nestjs-common';
 import { PasswordStrengthEnum } from '@concepta/nestjs-password';
 
 export enum UserResource {
@@ -5,6 +6,6 @@ export enum UserResource {
   'Many' = 'user-list',
 }
 
-export type PasswordStrengthByRoleCallback = (
-  userRoles: string[],
+export type PasswordStrengthTransform = (
+  options: PasswordStrengthTransformOptionsInterface,
 ) => PasswordStrengthEnum | null;

@@ -25,6 +25,7 @@ import { UserPasswordHistoryLookupService } from './services/user-password-histo
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
 import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
 import { UserPasswordHistoryEntityFixture } from './__fixtures__/user-password-history.entity.fixture';
+import { UserRoleService } from './services/user-role.service';
 
 describe('User Controller (password e2e)', () => {
   describe('Password Update Flow', () => {
@@ -37,6 +38,7 @@ describe('User Controller (password e2e)', () => {
     let passwordCreationService: PasswordCreationService;
     let userLookupService: UserLookupService;
     let userPasswordService: UserPasswordService;
+    let userRoleService: UserRoleService;
     let userPasswordHistoryLookupService: UserPasswordHistoryLookupService;
     let issueTokenService: IssueTokenService;
     let accessControlService: AccessControlService;
@@ -75,6 +77,7 @@ describe('User Controller (password e2e)', () => {
       passwordCreationService = app.get(PasswordCreationService);
       userLookupService = app.get(UserLookupService);
       userPasswordService = app.get(UserPasswordService);
+      userRoleService = app.get(UserRoleService);
       userPasswordHistoryLookupService = app.get(
         UserPasswordHistoryLookupService,
       );
@@ -278,10 +281,10 @@ describe('User Controller (password e2e)', () => {
 
       it('Should not update weak password for admin', async () => {
         passwordCreationService['settings'].requireCurrentToUpdate = false;
-        userPasswordService['userSettings'].passwordStrength = {
-          passwordStrengthCallback: (
-            roles: string[],
-          ): PasswordStrengthEnum | null => {
+        userRoleService['userSettings'].passwordStrength = {
+          passwordStrengthTransform: ({
+            roles,
+          }): PasswordStrengthEnum | null => {
             if (roles.includes('admin')) {
               return PasswordStrengthEnum.VeryStrong;
             }
@@ -315,10 +318,10 @@ describe('User Controller (password e2e)', () => {
 
       it('Should not update weak password for admin', async () => {
         passwordCreationService['settings'].requireCurrentToUpdate = false;
-        userPasswordService['userSettings'].passwordStrength = {
-          passwordStrengthCallback: (
-            roles: string[],
-          ): PasswordStrengthEnum | null => {
+        userRoleService['userSettings'].passwordStrength = {
+          passwordStrengthTransform: ({
+            roles,
+          }): PasswordStrengthEnum | null => {
             if (roles.includes('admin')) {
               return PasswordStrengthEnum.VeryStrong;
             }
@@ -360,10 +363,10 @@ describe('User Controller (password e2e)', () => {
 
       it('Should update with weak password for admin', async () => {
         passwordCreationService['settings'].requireCurrentToUpdate = false;
-        userPasswordService['userSettings'].passwordStrength = {
-          passwordStrengthCallback: (
-            roles: string[],
-          ): PasswordStrengthEnum | null => {
+        userRoleService['userSettings'].passwordStrength = {
+          passwordStrengthTransform: ({
+            roles,
+          }): PasswordStrengthEnum | null => {
             if (roles.includes('user')) {
               return PasswordStrengthEnum.None;
             }
@@ -393,10 +396,10 @@ describe('User Controller (password e2e)', () => {
 
       it('Should update password for admin and user ', async () => {
         passwordCreationService['settings'].requireCurrentToUpdate = false;
-        userPasswordService['userSettings'].passwordStrength = {
-          passwordStrengthCallback: (
-            roles: string[],
-          ): PasswordStrengthEnum | null => {
+        userRoleService['userSettings'].passwordStrength = {
+          passwordStrengthTransform: ({
+            roles,
+          }): PasswordStrengthEnum | null => {
             if (roles.includes('admin')) {
               return PasswordStrengthEnum.VeryStrong;
             }

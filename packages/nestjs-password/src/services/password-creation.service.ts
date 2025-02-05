@@ -81,10 +81,9 @@ export class PasswordCreationService
     if (typeof password === 'string') {
       // check strength
       if (
-        !this.passwordStrengthService.isStrong(
-          password,
-          options?.passwordStrength,
-        )
+        !this.passwordStrengthService.isStrong(password, {
+          passwordStrength: options?.passwordStrength,
+        })
       ) {
         throw new PasswordNotStrongException();
       }

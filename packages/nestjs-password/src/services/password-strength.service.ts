@@ -6,6 +6,7 @@ import { PASSWORD_MODULE_SETTINGS_TOKEN } from '../password.constants';
 import { PasswordStrengthEnum } from '../enum/password-strength.enum';
 import { PasswordStrengthServiceInterface } from '../interfaces/password-strength-service.interface';
 import { PasswordSettingsInterface } from '../interfaces/password-settings.interface';
+import { PasswordStrengthOptionsInterface } from '../interfaces/password-strength-options.interface';
 
 /**
  * Service to validate password strength
@@ -30,10 +31,11 @@ export class PasswordStrengthService
    */
   isStrong(
     password: string,
-    passwordStrength?: PasswordStrengthEnum | null,
+    options?: PasswordStrengthOptionsInterface,
   ): boolean {
-    // Get min password Strength
-    // TODO: should it overwrite event is is lower then min password
+    const { passwordStrength } = options || {};
+
+    // TODO: Should we allow overriding the minimum password strength even if the provided strength is lower than the configured minimum?
     const minStrength =
       passwordStrength ||
       this.settings?.minPasswordStrength ||

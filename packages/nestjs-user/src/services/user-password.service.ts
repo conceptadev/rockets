@@ -2,7 +2,6 @@ import { HttpStatus, Inject, Injectable, Optional } from '@nestjs/common';
 import {
   ReferenceId,
   ReferenceIdInterface,
-  RoleOwnableInterface,
   UserRolesInterface,
 } from '@concepta/nestjs-common';
 import {
@@ -25,8 +24,8 @@ import { UserLookupService } from './user-lookup.service';
 import { UserPasswordHistoryService } from './user-password-history.service';
 import { UserException } from '../exceptions/user-exception';
 import { UserNotFoundException } from '../exceptions/user-not-found-exception';
-import { USER_MODULE_SETTINGS_TOKEN } from '../user.constants';
-import { UserSettingsInterface } from '../interfaces/user-settings.interface';
+import { UserRoleService } from './user-role.service';
+import { UserRoleServiceInterface } from '../interfaces/user-role-service.interface';
 
 /**
  * User password service
@@ -44,8 +43,9 @@ export class UserPasswordService implements UserPasswordServiceInterface {
     protected readonly userLookupService: UserLookupServiceInterface,
     @Inject(PasswordCreationService)
     protected readonly passwordCreationService: PasswordCreationServiceInterface,
-    @Inject(USER_MODULE_SETTINGS_TOKEN)
-    protected readonly userSettings: UserSettingsInterface,
+    @Optional()
+    @Inject(UserRoleService)
+    private userRoleService?: UserRoleServiceInterface,
     @Optional()
     @Inject(UserPasswordHistoryService)
     private userPasswordHistoryService?: UserPasswordHistoryServiceInterface,
@@ -89,8 +89,10 @@ export class UserPasswordService implements UserPasswordServiceInterface {
       // create safe object
       const targetSafe = { ...passwordDto, password };
 
-      const roles = await this.getUserRoles(passwordDto, userToUpdateId);
-      const passwordStrength = await this.getPasswordStrength(roles);
+      const passwordStrength = await this.getPasswordStrength(
+        passwordDto,
+        userToUpdateId,
+      );
 
       const userWithPasswordHashed =
         await this.passwordCreationService.createObject(targetSafe, {
@@ -117,63 +119,33 @@ export class UserPasswordService implements UserPasswordServiceInterface {
     // return the object untouched
     return passwordDto;
   }
-  // TODO: add function to call the callback and this can ber overwrite
 
   /**
-   * Get user roles from either the password DTO or by looking up the user.
+   * Get the password strength based on user roles
    *
-   * @param passwordDto - Password DTO that may contain user roles
-   * @param userToUpdateId - Optional ID of user to lookup roles for
-   * @returns Array of role names, or empty array if no roles found
+   * @param userDto - The user object containing roles
+   * @param userToUpdateId - Optional ID of user being updated
+   * @returns The resolved password strength enum value, or null/undefined if no roles service
    */
-  protected async getUserRoles(
-    passwordDto: Partial<UserRolesInterface>,
+  protected async getPasswordStrength(
+    userDto: UserRolesInterface,
     userToUpdateId?: ReferenceId,
-  ): Promise<string[]> {
-    // get roles based on user id
-    if (userToUpdateId) {
-      const user:
-        | (ReferenceIdInterface<string> & Partial<UserRolesInterface>)
-        | null = await this.userLookupService.byId(userToUpdateId);
-      if (user && user.userRoles) return this.mapRoles(user.userRoles);
-    }
-
-    // get roles from payload
+  ): Promise<PasswordStrengthEnum | null | undefined> {
+    let passwordStrength;
     if (
-      passwordDto.userRoles &&
-      passwordDto.userRoles?.some((userRole) => userRole.role?.name)
+      this.userRoleService &&
+      this.userRoleService.getUserRoles &&
+      this.userRoleService.resolvePasswordStrength
     ) {
-      return this.mapRoles(passwordDto.userRoles);
+      const roles = await this.userRoleService.getUserRoles(
+        userDto,
+        userToUpdateId,
+      );
+      passwordStrength = await this.userRoleService.resolvePasswordStrength(
+        roles,
+      );
     }
-
-    return [];
-  }
-
-  mapRoles(userRoles: Partial<Pick<RoleOwnableInterface, 'role'>>[]) {
-    return [
-      ...new Set(
-        userRoles
-          .filter((userRole) => userRole.role?.name)
-          .map((userRole) => userRole.role?.name ?? ''),
-      ),
-    ];
-  }
-  /**
-   * Get password strength based on user roles. if callback is not enough
-   * user can always be able to overwrite this method to take advantage of injections
-   *
-   * @param roles - Array of role names to check against
-   * @returns Password strength enum value if callback exists and roles are provided,
-   * undefined otherwise
-   */
-  protected getPasswordStrength(
-    roles?: string[],
-  ): PasswordStrengthEnum | null | undefined {
-    return (
-      roles &&
-      this.userSettings.passwordStrength?.passwordStrengthCallback &&
-      this.userSettings.passwordStrength?.passwordStrengthCallback(roles || [])
-    );
+    return passwordStrength;
   }
   async getPasswordStore(
     userId: ReferenceId,

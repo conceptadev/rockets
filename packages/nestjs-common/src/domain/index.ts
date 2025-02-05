@@ -12,6 +12,7 @@ export { AuthorizationPayloadInterface } from './authorization/interfaces/author
 
 export { PasswordPlainCurrentInterface } from './password/interfaces/password-plain-current.interface';
 export { PasswordPlainInterface } from './password/interfaces/password-plain.interface';
+export { PasswordStrengthTransformOptionsInterface } from './password/interfaces/password-strength-transform-options.interface';
 
 export { OrgCreatableInterface } from './org/interfaces/org-creatable.interface';
 export { OrgMemberInterface } from './org/interfaces/org-member.interface';

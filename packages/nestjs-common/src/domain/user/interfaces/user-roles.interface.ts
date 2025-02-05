@@ -1,5 +1,5 @@
 import { RoleOwnableInterface } from '../../role/interfaces/role-ownable.interface';
 
 export interface UserRolesInterface {
-  userRoles: Partial<Pick<RoleOwnableInterface, 'role'>>[];
+  userRoles?: RoleOwnableInterface[];
 }

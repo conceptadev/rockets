@@ -38,6 +38,7 @@ import { UserController } from './user.controller';
 import { InvitationAcceptedListener } from './listeners/invitation-accepted-listener';
 import { InvitationGetUserListener } from './listeners/invitation-get-user.listener';
 import { userDefaultConfig } from './config/user-default.config';
+import { UserRoleService } from './services/user-role.service';
 
 const RAW_OPTIONS_TOKEN = Symbol('__USER_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -97,6 +98,7 @@ export function createUserProviders(options: {
     InvitationAcceptedListener,
     InvitationGetUserListener,
     UserPasswordHistoryMutateService,
+    UserRoleService,
     createUserSettingsProvider(options.overrides),
     createUserLookupServiceProvider(options.overrides),
     createUserMutateServiceProvider(options.overrides),
@@ -192,7 +194,7 @@ export function createUserPasswordServiceProvider(
       RAW_OPTIONS_TOKEN,
       UserLookupService,
       PasswordCreationService,
-      USER_MODULE_SETTINGS_TOKEN,
+      UserRoleService,
       {
         token: UserPasswordHistoryService,
         optional: true,
@@ -202,7 +204,7 @@ export function createUserPasswordServiceProvider(
       options: UserOptionsInterface,
       userLookUpService: UserLookupServiceInterface,
       passwordCreationService: PasswordCreationService,
-      userSettings: UserSettingsInterface,
+      userRoleService: UserRoleService,
       userPasswordHistoryService?: UserPasswordHistoryService,
     ) =>
       optionsOverrides?.userPasswordService ??
@@ -210,7 +212,7 @@ export function createUserPasswordServiceProvider(
       new UserPasswordService(
         userLookUpService,
         passwordCreationService,
-        userSettings,
+        userRoleService,
         userPasswordHistoryService,
       ),
   };

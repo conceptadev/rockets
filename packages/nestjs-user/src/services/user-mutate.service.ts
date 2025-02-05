@@ -46,7 +46,7 @@ export class UserMutateService
   }
 
   protected async transform<T extends DeepPartial<UserEntityInterface>>(
-    user: T | (T & PasswordPlainInterface & Partial<UserRolesInterface>),
+    user: T | (T & PasswordPlainInterface & UserRolesInterface),
   ): Promise<DeepPartial<UserEntityInterface>> {
     // do we need to hash the password?
     if ('password' in user && typeof user.password === 'string') {
