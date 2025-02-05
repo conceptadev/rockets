@@ -1,5 +1,5 @@
 import { EventAsyncInterface } from './interfaces/event-async.interface';
-import { Event } from './event';
+import { EventBase } from './event-base';
 import { EventManager } from '../event-manager';
 
 /**
@@ -8,11 +8,11 @@ import { EventManager } from '../event-manager';
  * To create a custom **async** event, extend the
  * {@link EventAsync} class.
  *
- * You can override and customize the [payload]{@link Event#payload} getter
- * if desired. Please read the documentation for the abstract {@link Event} class
+ * You can override and customize the [payload]{@link EventBase#payload} getter
+ * if desired. Please read the documentation for the abstract {@link EventBase} class
  * for the complete documentation.
  *
- * For synchronous events, see the {@link EventSync} abstract class.
+ * For standard events, see the {@link Event} abstract class.
  *
  * @example
  * ```ts
@@ -30,13 +30,13 @@ import { EventManager } from '../event-manager';
  * ```
  */
 export abstract class EventAsync<P = undefined, R = P>
-  extends Event<P, Promise<R>>
+  extends EventBase<P, Promise<R>>
   implements EventAsyncInterface<P, R>
 {
   /**
    * Emit the event.
    */
   async emit() {
-    return EventManager.dispatch.async<EventAsyncInterface<P, R>>(this);
+    return EventManager.dispatch.emitAsync<EventAsyncInterface<P, R>>(this);
   }
 }
