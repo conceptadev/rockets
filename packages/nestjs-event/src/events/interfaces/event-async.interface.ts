@@ -1,7 +1,7 @@
-import { EventInterface } from './event.interface';
+import { EventBaseInterface } from './event-base.interface';
 
 /**
  * The interface that all async events must adhere to
  */
 export interface EventAsyncInterface<P = undefined, R = P>
-  extends EventInterface<P, Promise<R>> {}
+  extends EventBaseInterface<P, Promise<R>> {}

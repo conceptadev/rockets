@@ -1,18 +1,18 @@
-import { EVENT_MODULE_EVENT_KEY_PREFIX } from '../event-constants';
-import { EventPayload } from '../event-types';
 import { EventInterface } from './interfaces/event.interface';
+import { EventBase } from './event-base';
+import { EventManager } from '../event-manager';
 
 /**
  * Abstract event class.
  *
- * To create a custom event, extend the {@link Event} class.
+ * To create a custom event, extend the
+ * {@link Event} class.
  *
- * You must implement one of the {@link EventSyncInterface} or {@link EventAsyncInterface}
- * interfaces.
+ * You can override and customize the [payload]{@link EventBase#payload} getter
+ * if desired. Please read the documentation for the abstract {@link EventBase} class
+ * for the complete documentation.
  *
- * There are additional abstract classes available which have implemented the
- * sync and async event types for your convenience. They are {@link EventSync}
- * and {@link EventAsync}.
+ * For asynchronous events, see the {@link EventAsync} abstract class.
  *
  * @example
  * ```ts
@@ -20,69 +20,23 @@ import { EventInterface } from './interfaces/event.interface';
  * type MyPayloadType = {id: number, active: boolean};
  *
  * // event class
- * class MyEvent extends Event<MyPayloadType>
- *   implements EventSyncInterface<MyPayloadType>
- * {}
+ * class MyEvent extends Event<MyPayloadType> {}
  *
  * // create an event
  * const myEvent = new MyEvent({id: 1234, active: true});
+ *
+ * // emit the event
+ * myEvent.emit();
  * ```
  */
-export abstract class Event<P = undefined, R = P>
-  implements EventInterface<P, R>
+export abstract class Event<P = undefined>
+  extends EventBase<P, void>
+  implements EventInterface<P>
 {
   /**
-   * Expects return of payload
-   *
-   * @internal
+   * Emit the event.
    */
-  readonly expectsReturnOf!: R;
-
-  /**
-   * Event key.
-   *
-   * @returns The event key string.
-   */
-  static get key(): string {
-    return `${EVENT_MODULE_EVENT_KEY_PREFIX}${this.name}`;
-  }
-
-  /**
-   * Event key.
-   *
-   * @returns The event key string.
-   */
-  get key(): string {
-    return `${EVENT_MODULE_EVENT_KEY_PREFIX}${this.constructor.name}`;
-  }
-
-  /**
-   * The payload that was passed to the constructor.
-   */
-  private _payload: EventPayload<P>;
-
-  /**
-   * Constructor
-   *
-   * @param payload - Payload to emit when the event is dispatched.
-   */
-  constructor(payload?: EventPayload<P>);
-
-  /**
-   * Constructor
-   *
-   * @param payload - Payload to emit when the event is dispatched.
-   */
-  constructor(payload: EventPayload<P>) {
-    this._payload = payload;
-  }
-
-  /**
-   * Returns payload that was passed to the Event constructor.
-   *
-   * @returns The event payload.
-   */
-  get payload(): EventPayload<P> {
-    return this._payload;
+  emit(): boolean {
+    return EventManager.dispatch.emit<P>(this);
   }
 }

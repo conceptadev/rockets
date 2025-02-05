@@ -1,14 +1,14 @@
 import EventEmitter2 from 'eventemitter2';
 import { EventManager } from '../event-manager';
+import { Event } from '../events/event';
 import { EventAsync } from '../events/event-async';
-import { EventSync } from '../events/event-sync';
 import { EventDispatchService } from '../services/event-dispatch.service';
 import { EventListenService } from '../services/event-listen.service';
 import { EventListenerOn } from './event-listener-on';
 
 describe(EventListenerOn, () => {
   describe('options', () => {
-    class TestEvent extends EventSync {}
+    class TestEvent extends Event {}
     class TestListenOn extends EventListenerOn<TestEvent> {
       listen(): void {
         return;
@@ -26,8 +26,8 @@ describe(EventListenerOn, () => {
     });
   });
 
-  describe(EventSync, () => {
-    class TestEvent extends EventSync<number> {}
+  describe(Event, () => {
+    class TestEvent extends Event<number> {}
     let eventPayload: number | undefined;
 
     class TestListenOn extends EventListenerOn<TestEvent> {
