@@ -35,6 +35,7 @@ export class UserRoleService implements UserRoleServiceInterface {
     }
 
     // get roles from payload
+    // TODO: review this, maybe do a logic to get by role Id as well ?
     if (
       userDto.userRoles &&
       userDto.userRoles?.some((userRole) => userRole.role?.name)
