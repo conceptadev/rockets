@@ -17,7 +17,7 @@ import { EventClassInterface } from '../events/interfaces/event-class.interface'
  * type MyPayloadType = {id: number, active: boolean};
  *
  * // example event class
- * class MyEvent extends EventSync<MyPayloadType> {}
+ * class MyEvent extends Event<MyPayloadType> {}
  *
  * // example listener class
  * class MyListenOn extends EventListenerOn<MyEvent> {

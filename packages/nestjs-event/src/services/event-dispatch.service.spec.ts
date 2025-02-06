@@ -6,7 +6,7 @@ import { EventAsync } from '../events/event-async';
 import { EventDispatchService } from './event-dispatch.service';
 import { EventEmitter2 } from 'eventemitter2';
 import { Test } from '@nestjs/testing';
-import { EventSync } from '../events/event-sync';
+import { Event } from '../events/event';
 import { EventDispatchException } from '../exceptions/event-dispatch.exception';
 import { EventReturnType } from '../event-types';
 import { EventSettingsInterface } from '../interfaces/event-settings.interface';
@@ -40,14 +40,14 @@ describe(EventDispatchService, () => {
     expect(eventDispatchService).toBeInstanceOf(EventDispatchService);
   });
 
-  describe(EventDispatchService.prototype.sync, () => {
-    class TestEvent extends EventSync<number> {}
+  describe(EventDispatchService.prototype.emit, () => {
+    class TestEvent extends Event<number> {}
 
     it('should emit event with no listener', async () => {
       const testEvent = new TestEvent(123);
       const spy = jest.spyOn(eventEmitter, 'emit');
 
-      const result: boolean = eventDispatchService.sync(testEvent);
+      const result: boolean = eventDispatchService.emit(testEvent);
 
       expect(result).toEqual(false);
       expect(spy).toHaveBeenCalledTimes(1);
@@ -66,7 +66,7 @@ describe(EventDispatchService, () => {
 
       eventEmitter.on(testEvent.key, listener);
 
-      const result: boolean = eventDispatchService.sync(testEvent);
+      const result: boolean = eventDispatchService.emit(testEvent);
 
       expect(eventPayload).toEqual(456);
       expect(result).toEqual(true);
@@ -87,21 +87,23 @@ describe(EventDispatchService, () => {
       eventEmitter.on(testEvent.key, listener);
 
       const t = () => {
-        eventDispatchService.sync(testEvent);
+        eventDispatchService.emit(testEvent);
       };
 
       expect(t).toThrow(EventDispatchException);
     });
   });
 
-  describe(EventDispatchService.prototype.async, () => {
+  describe(EventDispatchService.prototype.emitAsync, () => {
     class TestEvent extends EventAsync {}
 
     it('should emit an async event with no listener', async () => {
       const testEvent = new TestEvent();
       const spy = jest.spyOn(eventEmitter, 'emitAsync');
 
-      const result: undefined[] = await eventDispatchService.async(testEvent);
+      const result: undefined[] = await eventDispatchService.emitAsync(
+        testEvent,
+      );
 
       expect(result).toEqual([]);
       expect(spy).toHaveBeenCalledTimes(1);
@@ -122,7 +124,9 @@ describe(EventDispatchService, () => {
 
       eventEmitter.on(testEvent.key, listener);
 
-      const result: undefined[] = await eventDispatchService.async(testEvent);
+      const result: undefined[] = await eventDispatchService.emitAsync(
+        testEvent,
+      );
 
       expect(eventPayload).toBeUndefined();
       expect(result).toEqual([undefined]);
@@ -142,9 +146,9 @@ describe(EventDispatchService, () => {
 
       eventEmitter.on(testEvent.key, listener);
 
-      await expect(eventDispatchService.async(testEvent)).rejects.toThrowError(
-        EventDispatchException,
-      );
+      await expect(
+        eventDispatchService.emitAsync(testEvent),
+      ).rejects.toThrowError(EventDispatchException);
     });
 
     describe('with boolean payload', () => {
@@ -154,7 +158,9 @@ describe(EventDispatchService, () => {
         const testEvent = new TestEvent(true);
         const spy = jest.spyOn(eventEmitter, 'emitAsync');
 
-        const result: boolean[] = await eventDispatchService.async(testEvent);
+        const result: boolean[] = await eventDispatchService.emitAsync(
+          testEvent,
+        );
 
         expect(result).toEqual([]);
         expect(spy).toHaveBeenCalledTimes(1);
@@ -174,7 +180,9 @@ describe(EventDispatchService, () => {
         );
         eventEmitter.on(testEvent.key, listener);
 
-        const result: boolean[] = await eventDispatchService.async(testEvent);
+        const result: boolean[] = await eventDispatchService.emitAsync(
+          testEvent,
+        );
 
         expect(eventPayload).toEqual(true);
         expect(result).toEqual([true]);
@@ -194,7 +202,7 @@ describe(EventDispatchService, () => {
         const testEvent = new TestEvent([true, 1, 'a']);
         const spy = jest.spyOn(eventEmitter, 'emitAsync');
 
-        const result: TestEventType[] = await eventDispatchService.async(
+        const result: TestEventType[] = await eventDispatchService.emitAsync(
           testEvent,
         );
 
@@ -214,7 +222,7 @@ describe(EventDispatchService, () => {
         );
         eventEmitter.on(testEvent.key, listener);
 
-        const result: TestEventType[] = await eventDispatchService.async(
+        const result: TestEventType[] = await eventDispatchService.emitAsync(
           testEvent,
         );
 
@@ -240,7 +248,9 @@ describe(EventDispatchService, () => {
 
         eventEmitter.on(testEvent.key, listener);
 
-        const result: boolean[] = await eventDispatchService.async(testEvent);
+        const result: boolean[] = await eventDispatchService.emitAsync(
+          testEvent,
+        );
 
         expect(result).toEqual([true]);
         expect(spy).toHaveBeenCalledTimes(1);

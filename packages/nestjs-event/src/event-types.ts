@@ -1,11 +1,11 @@
-import { EventInterface } from './events/interfaces/event.interface';
+import { EventBaseInterface } from './events/interfaces/event-base.interface';
 import { EventAsyncInterface } from './events/interfaces/event-async.interface';
 import { EventExpectsReturnOfInterface } from './events/interfaces/event-expects-return-of.interface';
 
 export type EventPayload<V> = V;
 
-export type EventInstance<E> = E extends EventInterface<infer V, infer R>
-  ? EventInterface<V, R>
+export type EventInstance<E> = E extends EventBaseInterface<infer V, infer R>
+  ? EventBaseInterface<V, R>
   : never;
 
 export type EventAsyncInstance<E> = E extends EventAsyncInterface<

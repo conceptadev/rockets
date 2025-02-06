@@ -1,11 +1,11 @@
 import { EventEmitter2, Listener as EmitterListener } from 'eventemitter2';
-import { EventSync } from '../events/event-sync';
+import { Event } from '../events/event';
 import { EventListenerException } from '../exceptions/event-listener.exception';
 import { EventListener } from './event-listener';
 import { EventListenerOn } from './event-listener-on';
 
 describe(EventListener, () => {
-  class TestEvent extends EventSync<number> {}
+  class TestEvent extends Event<number> {}
   class TestListenOn extends EventListener<TestEvent> {
     listen(): void {
       return;
