@@ -6,11 +6,11 @@ export const defaultPasswordStrengthTransform: PasswordStrengthTransform = (
   options: PasswordStrengthTransformOptionsInterface,
 ): PasswordStrengthEnum | null => {
   const { roles } = options;
-  // Default implementation - require medium strength for all roles
-  if (roles.includes('admin')) {
+
+  if (roles.some((role) => role.role?.name === 'admin')) {
     return PasswordStrengthEnum.VeryStrong;
   }
-  if (roles.includes('user')) {
+  if (roles.some((role) => role.role?.name === 'user')) {
     return PasswordStrengthEnum.Strong;
   }
 

@@ -16,27 +16,17 @@ export interface UserRoleServiceInterface {
   getUserRoles(
     userDto: UserRolesInterface,
     userToUpdateId?: ReferenceId,
-  ): Promise<string[]>;
-
-  /**
-   * Normalize role names by filtering out invalid roles and removing duplicates.
-   *
-   * @param userRoles - Array of user role objects that may contain role names
-   * @returns Array of unique, valid role names
-   */
-  normalizeRoleNames(
-    userRoles: Partial<Pick<RoleOwnableInterface, 'role'>>[],
-  ): string[];
+  ): Promise<RoleOwnableInterface[]>;
 
   /**
    * Get password strength based on user roles.
    * Uses the configured passwordStrengthTransform callback if available.
    *
-   * @param roles - Array of role names to check against
+   * @param roles - Array of roles to check against
    * @returns Password strength enum value if callback exists and roles are provided,
    * undefined otherwise
    */
   resolvePasswordStrength(
-    roles?: string[],
+    roles?: RoleOwnableInterface[],
   ): PasswordStrengthEnum | null | undefined;
 }

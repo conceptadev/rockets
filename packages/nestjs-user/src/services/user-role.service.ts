@@ -25,36 +25,21 @@ export class UserRoleService implements UserRoleServiceInterface {
   async getUserRoles(
     userDto: UserRolesInterface,
     userToUpdateId?: ReferenceId,
-  ): Promise<string[]> {
+  ): Promise<RoleOwnableInterface[]> {
     // get roles based on user id
     if (userToUpdateId) {
       const user: (ReferenceIdInterface<string> & UserRolesInterface) | null =
         await this.userLookupService.byId(userToUpdateId);
-      if (user && user.userRoles)
-        return this.normalizeRoleNames(user.userRoles);
+      if (user && user.userRoles) return user.userRoles;
     }
 
     // get roles from payload
-    // TODO: review this, maybe do a logic to get by role Id as well ?
-    if (
-      userDto.userRoles &&
-      userDto.userRoles?.some((userRole) => userRole.role?.name)
-    ) {
-      return this.normalizeRoleNames(userDto.userRoles);
-    }
+    if (userDto.userRoles && userDto.userRoles.length > 0)
+      return userDto.userRoles;
 
     return [];
   }
 
-  normalizeRoleNames(userRoles: Partial<Pick<RoleOwnableInterface, 'role'>>[]) {
-    return Array.from(
-      new Set(
-        userRoles
-          .filter((userRole) => userRole.role?.name)
-          .map((userRole) => userRole.role?.name ?? ''),
-      ),
-    );
-  }
   /**
    * Get password strength based on user roles. if callback is not enough
    * user can always be able to overwrite this method to take advantage of injections
@@ -64,7 +49,7 @@ export class UserRoleService implements UserRoleServiceInterface {
    * undefined otherwise
    */
   resolvePasswordStrength(
-    roles?: string[],
+    roles?: RoleOwnableInterface[],
   ): PasswordStrengthEnum | null | undefined {
     return (
       roles &&

@@ -285,7 +285,7 @@ describe('User Controller (password e2e)', () => {
           passwordStrengthTransform: ({
             roles,
           }): PasswordStrengthEnum | null => {
-            if (roles.includes('admin')) {
+            if (roles.some((role) => role.role?.name === 'admin')) {
               return PasswordStrengthEnum.VeryStrong;
             }
             return null;
@@ -322,10 +322,10 @@ describe('User Controller (password e2e)', () => {
           passwordStrengthTransform: ({
             roles,
           }): PasswordStrengthEnum | null => {
-            if (roles.includes('admin')) {
+            if (roles.some((role) => role.role?.name === 'admin')) {
               return PasswordStrengthEnum.VeryStrong;
             }
-            if (roles.includes('user')) {
+            if (roles.some((role) => role.role?.name === 'user')) {
               return PasswordStrengthEnum.None;
             }
             return null;
@@ -367,7 +367,7 @@ describe('User Controller (password e2e)', () => {
           passwordStrengthTransform: ({
             roles,
           }): PasswordStrengthEnum | null => {
-            if (roles.includes('user')) {
+            if (roles.some((role) => role.role?.name === 'user')) {
               return PasswordStrengthEnum.None;
             }
             return null;
@@ -400,10 +400,10 @@ describe('User Controller (password e2e)', () => {
           passwordStrengthTransform: ({
             roles,
           }): PasswordStrengthEnum | null => {
-            if (roles.includes('admin')) {
+            if (roles.some((role) => role.role?.name === 'admin')) {
               return PasswordStrengthEnum.VeryStrong;
             }
-            if (roles.includes('user')) {
+            if (roles.some((role) => role.role?.name === 'user')) {
               return PasswordStrengthEnum.None;
             }
             return null;

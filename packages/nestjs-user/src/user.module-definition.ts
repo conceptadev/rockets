@@ -98,11 +98,11 @@ export function createUserProviders(options: {
     InvitationAcceptedListener,
     InvitationGetUserListener,
     UserPasswordHistoryMutateService,
-    UserRoleService,
     createUserSettingsProvider(options.overrides),
     createUserLookupServiceProvider(options.overrides),
     createUserMutateServiceProvider(options.overrides),
     createUserPasswordServiceProvider(options.overrides),
+    createUserRoleServiceProvider(options.overrides),
     createUserPasswordHistoryServiceProvider(options.overrides),
     createUserPasswordHistoryLookupServiceProvider(),
     createUserPasswordHistoryMutateServiceProvider(),
@@ -119,6 +119,7 @@ export function createUserExports(): Required<
     UserMutateService,
     UserCrudService,
     UserPasswordService,
+    UserRoleService,
     UserPasswordHistoryService,
     UserPasswordHistoryLookupService,
     UserPasswordHistoryMutateService,
@@ -215,6 +216,23 @@ export function createUserPasswordServiceProvider(
         userRoleService,
         userPasswordHistoryService,
       ),
+  };
+}
+
+export function createUserRoleServiceProvider(
+  optionsOverrides?: UserOptions,
+): Provider {
+  return {
+    provide: UserRoleService,
+    inject: [RAW_OPTIONS_TOKEN, USER_MODULE_SETTINGS_TOKEN, UserLookupService],
+    useFactory: async (
+      options: UserOptionsInterface,
+      settings: UserSettingsInterface,
+      userLookUpService: UserLookupServiceInterface,
+    ) =>
+      optionsOverrides?.userRoleService ??
+      options.userRoleService ??
+      new UserRoleService(settings, userLookUpService),
   };
 }
 
