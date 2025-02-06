@@ -1,6 +1,6 @@
 // interfaces & types
+export * from './events/interfaces/event-base.interface';
 export * from './events/interfaces/event.interface';
-export * from './events/interfaces/event-sync.interface';
 export * from './events/interfaces/event-async.interface';
 export * from './events/interfaces/event-class.interface';
 export * from './interfaces/event-options.interface';
@@ -11,8 +11,8 @@ export * from './services/interfaces/event-listen-on-options.interface';
 // classes
 export * from './event.module';
 export * from './event-manager';
+export * from './events/event-base';
 export * from './events/event';
-export * from './events/event-sync';
 export * from './events/event-async';
 export * from './exceptions/event-dispatch.exception';
 export * from './exceptions/event-listen.exception';

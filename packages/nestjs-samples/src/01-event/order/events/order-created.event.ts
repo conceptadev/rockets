@@ -1,8 +1,8 @@
 import {
   EventAsync,
   EventAsyncInterface,
-  EventSync,
-  EventSyncInterface,
+  Event,
+  EventInterface,
 } from '@concepta/nestjs-event';
 
 export type OrderCreatedEventInterface = {
@@ -11,8 +11,8 @@ export type OrderCreatedEventInterface = {
 };
 
 export class OrderCreatedEvent
-  extends EventSync<OrderCreatedEventInterface>
-  implements EventSyncInterface<OrderCreatedEventInterface> {}
+  extends Event<OrderCreatedEventInterface>
+  implements EventInterface<OrderCreatedEventInterface> {}
 
 export class OrderCreatedEventAsync
   extends EventAsync<OrderCreatedEventInterface>

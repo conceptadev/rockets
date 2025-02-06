@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
 import { EventDispatchException } from '../exceptions/event-dispatch.exception';
-import { EventSyncInterface } from '../events/interfaces/event-sync.interface';
+import { EventInterface } from '../events/interfaces/event.interface';
 import { EventAsyncInstance, EventReturnPayload } from '../event-types';
 import { EVENT_MODULE_EMITTER_SERVICE_TOKEN } from '../event-constants';
 
@@ -23,21 +23,21 @@ export class EventDispatchService {
   ) {}
 
   /**
-   * Dispatch an event synchronously.
+   * Dispatch an event.
    *
-   * Synchronously calls each of the listeners registered for the event,
+   * Calls each of the listeners registered for the event,
    * in the order they were registered, passing the event arguments to each.
    *
    * @example
    * ```ts
    * import { Injectable } from '@nestjs/common';
-   * import { EventDispatchService, EventSync } from '@concepta/nestjs-events';
+   * import { EventDispatchService, Event } from '@concepta/nestjs-events';
    *
    * // event payload type
    * export type MyPayloadType = {id: number};
    *
    * // event class
-   * export class MyEvent extends EventSync<MyPayloadType> {}
+   * export class MyEvent extends Event<MyPayloadType> {}
    *
    * @Injectable()
    * class MyClass {
@@ -47,7 +47,7 @@ export class EventDispatchService {
    * // event instance
    * const myEvent = new MyEvent({id: 1234});
    * // dispatch the event
-   * this.eventDispatchService.sync(myEvent);
+   * this.eventDispatchService.emit(myEvent);
    * }
    * }
    * ```
@@ -55,7 +55,7 @@ export class EventDispatchService {
    * @param event - The event being dispatched.
    * @returns boolean Returns true if the event had listeners, false otherwise.
    */
-  sync<P>(event: EventSyncInterface<P>): boolean {
+  emit<P>(event: EventInterface<P>): boolean {
     try {
       // call event dispatcher
       return this.eventEmitter.emit(event.key, event);
@@ -108,7 +108,7 @@ export class EventDispatchService {
    * @param event - The event being dispatched.
    * @returns An array of return payloads, one for each listener that subscribed to the event.
    */
-  async async<E>(
+  async emitAsync<E>(
     event: E & EventAsyncInstance<E>,
   ): Promise<EventReturnPayload<E>[]> {
     // our result

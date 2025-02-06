@@ -4,7 +4,7 @@ import {
   EVENT_MODULE_EMITTER_SERVICE_TOKEN,
   EVENT_MODULE_SETTINGS_TOKEN,
 } from '../event-constants';
-import { EventSync } from '../events/event-sync';
+import { Event } from '../events/event';
 import { EventListenerOn } from '../listeners/event-listener-on';
 import { EventListenService } from './event-listen.service';
 import { EventAsync } from '../events/event-async';
@@ -45,15 +45,15 @@ describe(EventListenService, () => {
   });
 
   describe(EventListenService.prototype.on, () => {
-    describe('sync', () => {
-      class TestEvent extends EventSync<number> {}
+    describe('event', () => {
+      class TestEvent extends Event<number> {}
       class TestListenOn extends EventListenerOn<TestEvent> {
         listen(e: TestEvent) {
           e.payload; // no-op
         }
       }
 
-      it('should listen to event with sync listener', () => {
+      it('should listen to event with listener', () => {
         const listener = new TestListenOn();
         const testEvent = new TestEvent(123);
 
@@ -108,7 +108,7 @@ describe(EventListenService, () => {
       });
     });
 
-    describe('async', () => {
+    describe('event async', () => {
       class TestEvent extends EventAsync<string> {}
 
       class TestListenOn extends EventListenerOn<TestEvent> {
@@ -117,7 +117,7 @@ describe(EventListenService, () => {
         }
       }
 
-      it('should listen to event with async listener', async () => {
+      it('should listen to async event with listener', async () => {
         const listener = new TestListenOn();
         const testEvent = new TestEvent('def');
 
