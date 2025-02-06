@@ -41,7 +41,7 @@ export abstract class UserSqliteEntity
    * Login attempts
    */
   @Column({ default: 0 })
-  loginAttempts!: number;
+  loginAttempts?: number;
 
   /**
    * Last login date
@@ -51,7 +51,7 @@ export abstract class UserSqliteEntity
     nullable: true,
     default: null,
   })
-  lastLogin: Date | null = null;
+  lastLogin?: Date | null = null;
 
   userPasswordHistory?: UserPasswordHistoryEntityInterface;
 }

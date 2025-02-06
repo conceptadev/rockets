@@ -43,13 +43,13 @@ export abstract class UserPostgresEntity
    * Login attempts
    */
   @Column({ default: 0 })
-  loginAttempts!: number;
+  loginAttempts?: number;
 
   /**
    * Last login date
    */
   @CreateDateColumn({ type: 'timestamptz', nullable: true, default: null })
-  lastLogin: Date | null = null;
+  lastLogin?: Date | null = null;
 
   userPasswordHistory?: UserPasswordHistoryEntityInterface;
 }

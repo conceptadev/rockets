@@ -74,6 +74,7 @@ export class AuthLocalValidateUserService
         this.settings &&
         this.settings.maxAttempts > 0 &&
         this.settings.minAttempts > 0 &&
+        user.loginAttempts &&
         user.loginAttempts >= this.settings.minAttempts;
 
       if (shouldDisplayAttemptsError) {

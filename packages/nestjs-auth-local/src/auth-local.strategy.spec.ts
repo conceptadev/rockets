@@ -82,7 +82,7 @@ describe(AuthLocalStrategy.name, () => {
     });
 
     spyOnDispatchService = jest
-      .spyOn(EventManager.dispatch, 'async')
+      .spyOn(EventManager.dispatch, 'emitAsync')
       .mockResolvedValue([]);
 
     user = new UserFixture();

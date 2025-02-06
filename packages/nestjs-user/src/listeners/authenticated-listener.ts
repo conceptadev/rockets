@@ -69,7 +69,7 @@ export class AuthenticatedListener
           await this.userMutateService.update(
             {
               id: user.id,
-              loginAttempts: user.loginAttempts + 1,
+              loginAttempts: (user.loginAttempts || 0) + 1,
             },
             payload.queryOptions,
           );

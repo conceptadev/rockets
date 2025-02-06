@@ -16,7 +16,7 @@ export class UserFixture
 
   passwordSalt!: string | null;
 
-  loginAttempts!: number;
+  loginAttempts?: number;
 
-  lastLogin!: Date | null;
+  lastLogin?: Date | null;
 }

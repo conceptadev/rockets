@@ -1,4 +1,4 @@
 export interface ReferenceLockStatusInterface {
-  loginAttempts: number;
-  lastLogin: Date | null;
+  loginAttempts?: number;
+  lastLogin?: Date | null;
 }

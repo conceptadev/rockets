@@ -30,6 +30,8 @@ export abstract class ValidateUserService<
     user: ReferenceLockStatusInterface,
     maxAttempts: number,
   ): Promise<boolean> {
-    return user.loginAttempts > 0 && user.loginAttempts >= maxAttempts;
+    return (
+      user.loginAttempts !== undefined && user.loginAttempts >= maxAttempts
+    );
   }
 }
