@@ -14,7 +14,6 @@ import {
   PasswordCreationService,
   PasswordCreationServiceInterface,
   PasswordStorageInterface,
-  PasswordStrengthEnum,
 } from '@concepta/nestjs-password';
 
 import { UserPasswordServiceInterface } from '../interfaces/user-password-service.interface';
@@ -44,11 +43,11 @@ export class UserPasswordService implements UserPasswordServiceInterface {
     @Inject(PasswordCreationService)
     protected readonly passwordCreationService: PasswordCreationServiceInterface,
     @Optional()
-    @Inject(UserRoleService)
-    private userRoleService?: UserRoleServiceInterface,
-    @Optional()
     @Inject(UserPasswordHistoryService)
     private userPasswordHistoryService?: UserPasswordHistoryServiceInterface,
+    @Optional()
+    @Inject(UserRoleService)
+    private userRoleService?: UserRoleServiceInterface,
   ) {}
 
   async setPassword(
@@ -88,11 +87,13 @@ export class UserPasswordService implements UserPasswordServiceInterface {
 
       // create safe object
       const targetSafe = { ...passwordDto, password };
-
-      const passwordStrength = await this.getPasswordStrength(
-        passwordDto,
-        userToUpdateId,
-      );
+      let passwordStrength;
+      if (this.userRoleService) {
+        passwordStrength = await this.userRoleService.getPasswordStrength(
+          passwordDto.userRoles,
+          userToUpdateId,
+        );
+      }
 
       const userWithPasswordHashed =
         await this.passwordCreationService.createObject(targetSafe, {
@@ -120,33 +121,6 @@ export class UserPasswordService implements UserPasswordServiceInterface {
     return passwordDto;
   }
 
-  /**
-   * Get the password strength based on user roles
-   *
-   * @param userDto - The user object containing roles
-   * @param userToUpdateId - Optional ID of user being updated
-   * @returns The resolved password strength enum value, or null/undefined if no roles service
-   */
-  protected async getPasswordStrength(
-    userDto: UserRolesInterface,
-    userToUpdateId?: ReferenceId,
-  ): Promise<PasswordStrengthEnum | null | undefined> {
-    let passwordStrength;
-    if (
-      this.userRoleService &&
-      this.userRoleService.getUserRoles &&
-      this.userRoleService.resolvePasswordStrength
-    ) {
-      const roles = await this.userRoleService.getUserRoles(
-        userDto,
-        userToUpdateId,
-      );
-      passwordStrength = await this.userRoleService.resolvePasswordStrength(
-        roles,
-      );
-    }
-    return passwordStrength;
-  }
   async getPasswordStore(
     userId: ReferenceId,
   ): Promise<ReferenceIdInterface & PasswordStorageInterface> {

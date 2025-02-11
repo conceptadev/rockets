@@ -12,6 +12,8 @@ import { UserSettingsInterface } from '../interfaces/user-settings.interface';
 import { USER_MODULE_SETTINGS_TOKEN } from '../user.constants';
 import { UserLookupService } from './user-lookup.service';
 import { UserRoleServiceInterface } from '../interfaces/user-role-service.interface';
+import { UserRolesException } from '../exceptions/user-roles-exception';
+import { UserRolePasswordException } from '../exceptions/user-role-password-exception';
 
 @Injectable()
 export class UserRoleService implements UserRoleServiceInterface {
@@ -22,20 +24,20 @@ export class UserRoleService implements UserRoleServiceInterface {
     protected readonly userLookupService: UserLookupServiceInterface,
   ) {}
 
-  async getUserRoles(
-    userDto: UserRolesInterface,
-    userToUpdateId?: ReferenceId,
-  ): Promise<RoleOwnableInterface[]> {
-    // get roles based on user id
-    if (userToUpdateId) {
-      const user: (ReferenceIdInterface<string> & UserRolesInterface) | null =
-        await this.userLookupService.byId(userToUpdateId);
-      if (user && user.userRoles) return user.userRoles;
+  async getUserRoles(userId?: ReferenceId): Promise<RoleOwnableInterface[]> {
+    if (userId) {
+      try {
+        const user: (ReferenceIdInterface<string> & UserRolesInterface) | null =
+          await this.userLookupService.byId(userId);
+        if (user && user.userRoles) {
+          return user.userRoles;
+        }
+      } catch (err) {
+        throw new UserRolesException(userId, {
+          originalError: err,
+        });
+      }
     }
-
-    // get roles from payload
-    if (userDto.userRoles && userDto.userRoles.length > 0)
-      return userDto.userRoles;
 
     return [];
   }
@@ -50,11 +52,39 @@ export class UserRoleService implements UserRoleServiceInterface {
    */
   resolvePasswordStrength(
     roles?: RoleOwnableInterface[],
-  ): PasswordStrengthEnum | null | undefined {
-    return (
-      roles &&
-      this.userSettings.passwordStrength?.passwordStrengthTransform &&
-      this.userSettings.passwordStrength?.passwordStrengthTransform({ roles })
-    );
+  ): PasswordStrengthEnum | undefined {
+    if (roles) {
+      try {
+        return (
+          this.userSettings.passwordStrength?.passwordStrengthTransform &&
+          this.userSettings.passwordStrength?.passwordStrengthTransform({
+            roles,
+          })
+        );
+      } catch (err) {
+        throw new UserRolePasswordException({
+          originalError: err,
+        });
+      }
+    }
+  }
+
+  /**
+   * Get the password strength based on user roles
+   *
+   * @param userRoles - The user roles
+   * @param userToUpdateId - Optional ID of user being updated
+   * @returns The resolved password strength enum value, or null/undefined if no roles service
+   */
+  async getPasswordStrength(
+    userRoles?: RoleOwnableInterface[],
+    userToUpdateId?: ReferenceId,
+  ): Promise<PasswordStrengthEnum | undefined> {
+    let passwordStrength = undefined;
+
+    const roles = userRoles ?? (await this.getUserRoles(userToUpdateId));
+    passwordStrength = await this.resolvePasswordStrength(roles);
+
+    return passwordStrength;
   }
 }

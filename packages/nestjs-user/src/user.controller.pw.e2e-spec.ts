@@ -1,12 +1,6 @@
-import supertest from 'supertest';
-import { randomUUID } from 'crypto';
-import { getDataSourceToken } from '@nestjs/typeorm';
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import { HttpAdapterHost } from '@nestjs/core';
-import { ExceptionsFilter } from '@concepta/nestjs-exception';
-import { IssueTokenService } from '@concepta/nestjs-authentication';
 import { AccessControlService } from '@concepta/nestjs-access-control';
+import { IssueTokenService } from '@concepta/nestjs-authentication';
+import { ExceptionsFilter } from '@concepta/nestjs-exception';
 import {
   PasswordCreationService,
   PasswordStorageInterface,
@@ -15,16 +9,22 @@ import {
   PasswordValidationService,
 } from '@concepta/nestjs-password';
 import { SeedingSource } from '@concepta/typeorm-seeding';
+import { INestApplication } from '@nestjs/common';
+import { HttpAdapterHost } from '@nestjs/core';
+import { Test, TestingModule } from '@nestjs/testing';
+import { getDataSourceToken } from '@nestjs/typeorm';
+import { randomUUID } from 'crypto';
+import supertest from 'supertest';
 
-import { UserFactory } from './user.factory';
 import { UserLookupService } from './services/user-lookup.service';
-import { UserPasswordHistoryFactory } from './user-password-history.factory';
-import { UserPasswordService } from './services/user-password.service';
 import { UserPasswordHistoryLookupService } from './services/user-password-history-lookup.service';
+import { UserPasswordService } from './services/user-password.service';
+import { UserPasswordHistoryFactory } from './user-password-history.factory';
+import { UserFactory } from './user.factory';
 
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
-import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
 import { UserPasswordHistoryEntityFixture } from './__fixtures__/user-password-history.entity.fixture';
+import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
 import { UserRoleService } from './services/user-role.service';
 
 describe('User Controller (password e2e)', () => {
@@ -282,13 +282,16 @@ describe('User Controller (password e2e)', () => {
       it('Should not update weak password for admin', async () => {
         passwordCreationService['settings'].requireCurrentToUpdate = false;
         userRoleService['userSettings'].passwordStrength = {
-          passwordStrengthTransform: ({
-            roles,
-          }): PasswordStrengthEnum | null => {
-            if (roles.some((role) => role.role?.name === 'admin')) {
+          passwordStrengthTransform: (
+            options,
+          ): PasswordStrengthEnum | undefined => {
+            if (
+              options?.roles &&
+              options?.roles.some((role) => role.role?.name === 'admin')
+            ) {
               return PasswordStrengthEnum.VeryStrong;
             }
-            return null;
+            return undefined;
           },
         };
 
@@ -296,6 +299,7 @@ describe('User Controller (password e2e)', () => {
           ...fakeUser,
           userRoles: [
             {
+              roleId: randomUUID(),
               role: {
                 name: 'admin',
               },
@@ -319,16 +323,22 @@ describe('User Controller (password e2e)', () => {
       it('Should not update weak password for admin', async () => {
         passwordCreationService['settings'].requireCurrentToUpdate = false;
         userRoleService['userSettings'].passwordStrength = {
-          passwordStrengthTransform: ({
-            roles,
-          }): PasswordStrengthEnum | null => {
-            if (roles.some((role) => role.role?.name === 'admin')) {
+          passwordStrengthTransform: (
+            options,
+          ): PasswordStrengthEnum | undefined => {
+            if (
+              options?.roles &&
+              options?.roles.some((role) => role.role?.name === 'admin')
+            ) {
               return PasswordStrengthEnum.VeryStrong;
             }
-            if (roles.some((role) => role.role?.name === 'user')) {
+            if (
+              options?.roles &&
+              options?.roles.some((role) => role.role?.name === 'user')
+            ) {
               return PasswordStrengthEnum.None;
             }
-            return null;
+            return undefined;
           },
         };
 
@@ -336,11 +346,13 @@ describe('User Controller (password e2e)', () => {
           ...fakeUser,
           userRoles: [
             {
+              roleId: randomUUID(),
               role: {
                 name: 'admin',
               },
             },
             {
+              roleId: randomUUID(),
               role: {
                 name: 'user',
               },
@@ -364,13 +376,16 @@ describe('User Controller (password e2e)', () => {
       it('Should update with weak password for admin', async () => {
         passwordCreationService['settings'].requireCurrentToUpdate = false;
         userRoleService['userSettings'].passwordStrength = {
-          passwordStrengthTransform: ({
-            roles,
-          }): PasswordStrengthEnum | null => {
-            if (roles.some((role) => role.role?.name === 'user')) {
+          passwordStrengthTransform: (
+            options,
+          ): PasswordStrengthEnum | undefined => {
+            if (
+              options?.roles &&
+              options?.roles.some((role) => role.role?.name === 'user')
+            ) {
               return PasswordStrengthEnum.None;
             }
-            return null;
+            return undefined;
           },
         };
 
@@ -378,6 +393,7 @@ describe('User Controller (password e2e)', () => {
           ...fakeUser,
           userRoles: [
             {
+              roleId: randomUUID(),
               role: {
                 name: 'user',
               },
@@ -397,16 +413,22 @@ describe('User Controller (password e2e)', () => {
       it('Should update password for admin and user ', async () => {
         passwordCreationService['settings'].requireCurrentToUpdate = false;
         userRoleService['userSettings'].passwordStrength = {
-          passwordStrengthTransform: ({
-            roles,
-          }): PasswordStrengthEnum | null => {
-            if (roles.some((role) => role.role?.name === 'admin')) {
+          passwordStrengthTransform: (
+            options,
+          ): PasswordStrengthEnum | undefined => {
+            if (
+              options?.roles &&
+              options?.roles.some((role) => role.role?.name === 'admin')
+            ) {
               return PasswordStrengthEnum.VeryStrong;
             }
-            if (roles.some((role) => role.role?.name === 'user')) {
+            if (
+              options?.roles &&
+              options?.roles.some((role) => role.role?.name === 'user')
+            ) {
               return PasswordStrengthEnum.None;
             }
-            return null;
+            return undefined;
           },
         };
 
@@ -414,6 +436,7 @@ describe('User Controller (password e2e)', () => {
           ...fakeUser,
           userRoles: [
             {
+              roleId: randomUUID(),
               role: {
                 name: 'user',
               },
@@ -433,6 +456,7 @@ describe('User Controller (password e2e)', () => {
           ...fakeUser,
           userRoles: [
             {
+              roleId: randomUUID(),
               role: {
                 name: 'admin',
               },

@@ -213,8 +213,8 @@ export function createUserPasswordServiceProvider(
       new UserPasswordService(
         userLookUpService,
         passwordCreationService,
-        userRoleService,
         userPasswordHistoryService,
+        userRoleService,
       ),
   };
 }

@@ -1,22 +1,14 @@
-import {
-  ReferenceId,
-  RoleOwnableInterface,
-  UserRolesInterface,
-} from '@concepta/nestjs-common';
+import { ReferenceId, RoleOwnableInterface } from '@concepta/nestjs-common';
 import { PasswordStrengthEnum } from '@concepta/nestjs-password';
 
 export interface UserRoleServiceInterface {
   /**
    * Get user roles from either the user DTO or by looking up the user.
    *
-   * @param userDto - User DTO that may contain user roles
-   * @param userToUpdateId - Optional ID of user to lookup roles for
+   * @param userId - Optional ID of user to lookup roles for
    * @returns Array of role names, or empty array if no roles found
    */
-  getUserRoles(
-    userDto: UserRolesInterface,
-    userToUpdateId?: ReferenceId,
-  ): Promise<RoleOwnableInterface[]>;
+  getUserRoles(userId?: ReferenceId): Promise<RoleOwnableInterface[]>;
 
   /**
    * Get password strength based on user roles.
@@ -28,5 +20,17 @@ export interface UserRoleServiceInterface {
    */
   resolvePasswordStrength(
     roles?: RoleOwnableInterface[],
-  ): PasswordStrengthEnum | null | undefined;
+  ): PasswordStrengthEnum | undefined;
+
+  /**
+   * Get the password strength based on user roles
+   *
+   * @param userRoles - Optional array of roles from the user object
+   * @param userToUpdateId - Optional ID of user being updated
+   * @returns The resolved password strength enum value, or undefined if no roles found
+   */
+  getPasswordStrength(
+    userRoles?: RoleOwnableInterface[],
+    userToUpdateId?: ReferenceId,
+  ): Promise<PasswordStrengthEnum | undefined>;
 }

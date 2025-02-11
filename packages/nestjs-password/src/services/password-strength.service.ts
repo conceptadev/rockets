@@ -24,10 +24,17 @@ export class PasswordStrengthService
   ) {}
 
   /**
-   * Method to check if password is strong
+   * Check if a password meets the minimum strength requirements.
+   * Uses zxcvbn to score password strength from 0-4:
    *
-   * @param password - the plain text password
-   * @returns password strength
+   * The minimum required strength can be specified via:
+   * 1. The options.passwordStrength parameter - If defined it will be used as the minimum required strength
+   * 2. The module settings minPasswordStrength - Global minimum strength setting
+   * 3. Defaults to PasswordStrengthEnum.None (0) - If no other strength requirements specified
+   *
+   * @param password - The password to check
+   * @param options - Optional strength validation options
+   * @returns True if password meets minimum strength, false otherwise
    */
   isStrong(
     password: string,
@@ -35,10 +42,9 @@ export class PasswordStrengthService
   ): boolean {
     const { passwordStrength } = options || {};
 
-    // TODO: Should we allow overriding the minimum password strength even if the provided strength is lower than the configured minimum?
     const minStrength =
-      passwordStrength ||
-      this.settings?.minPasswordStrength ||
+      passwordStrength ??
+      this.settings?.minPasswordStrength ??
       PasswordStrengthEnum.None;
 
     // check strength of the password

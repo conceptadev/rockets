@@ -7,5 +7,5 @@ export enum UserResource {
 }
 
 export type PasswordStrengthTransform = (
-  options: PasswordStrengthTransformOptionsInterface,
-) => PasswordStrengthEnum | null;
+  options?: PasswordStrengthTransformOptionsInterface,
+) => PasswordStrengthEnum | undefined;

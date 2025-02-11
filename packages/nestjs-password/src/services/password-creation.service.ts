@@ -14,6 +14,7 @@ import { PasswordHistoryPasswordInterface } from '../interfaces/password-history
 import { PasswordNotStrongException } from '../exceptions/password-not-strong.exception';
 import { PasswordCurrentRequiredException } from '../exceptions/password-current-required.exception';
 import { PasswordUsedRecentlyException } from '../exceptions/password-used-recently.exception';
+import { PasswordException } from '../exceptions/password.exception';
 
 /**
  * Service with functions related to password creation
@@ -74,23 +75,32 @@ export class PasswordCreationService
   ): Promise<
     Omit<T, 'password'> | (Omit<T, 'password'> & PasswordStorageInterface)
   > {
-    // extract properties
-    const { password } = object;
+    try {
+      // extract properties
+      const { password } = object;
 
-    // is the password in the object?
-    if (typeof password === 'string') {
-      // check strength
-      if (
-        !this.passwordStrengthService.isStrong(password, {
-          passwordStrength: options?.passwordStrength,
-        })
-      ) {
-        throw new PasswordNotStrongException();
+      // is the password in the object?
+      if (typeof password === 'string') {
+        // check strength
+        if (
+          !this.passwordStrengthService.isStrong(password, {
+            passwordStrength: options?.passwordStrength,
+          })
+        ) {
+          throw new PasswordNotStrongException();
+        }
       }
-    }
 
-    // finally hash it
-    return this.passwordStorageService.hashObject(object, options);
+      return this.passwordStorageService.hashObject(object, options);
+    } catch (err) {
+      if (err instanceof PasswordNotStrongException) {
+        throw err;
+      }
+      throw new PasswordException({
+        message: 'Failed to create password',
+        originalError: err,
+      });
+    }
   }
 
   public async validateCurrent(
