@@ -5,7 +5,6 @@ export { ReferenceIdDto } from './reference/dto/reference-id.dto';
 
 // Decorators
 export { AuthUser } from './decorators/auth-user.decorator';
-export { AuthInfo } from './decorators/auth-info.decorator';
 
 // Module utilities
 export { createSettingsProvider } from './modules/utils/create-settings-provider';
