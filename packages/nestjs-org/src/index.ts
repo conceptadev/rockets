@@ -1,4 +1,5 @@
 export { OrgModule } from './org.module';
+export { OrgCrudBuilder } from './org.crud-builder';
 
 export { OrgPostgresEntity } from './entities/org-postgres.entity';
 export { OrgSqliteEntity } from './entities/org-sqlite.entity';
