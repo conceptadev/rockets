@@ -54,7 +54,7 @@ export { CrudApiResponse } from './decorators/openapi/crud-api-response.decorato
 // classes
 export { CrudQueryHelper } from './util/crud-query.helper';
 export { TypeOrmCrudService } from './services/typeorm-crud.service';
-export { AbstractCrudController } from './controllers/abstract-crud.controller';
+export { CrudBaseController } from './controllers/crud-base.controller';
 
 // dto
 export { CrudResponsePaginatedDto } from './dto/crud-response-paginated.dto';

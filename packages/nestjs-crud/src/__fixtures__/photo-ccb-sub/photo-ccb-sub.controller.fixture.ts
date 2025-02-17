@@ -18,21 +18,7 @@ const crudBuilder = new ConfigurableCrudBuilder<
   PhotoEntityInterfaceFixture,
   PhotoCreatableInterfaceFixture,
   PhotoUpdatableInterfaceFixture
->();
-
-const {
-  ConfigurableServiceClass,
-  ConfigurableControllerClass,
-  CrudController,
-  CrudGetMany,
-  CrudGetOne,
-  CrudCreateMany,
-  CrudCreateOne,
-  CrudUpdateOne,
-  CrudReplaceOne,
-  CrudDeleteOne,
-  CrudRecoverOne,
-} = crudBuilder.build({
+>({
   service: {
     entity: PhotoFixture,
     injectionToken: PHOTO_CRUD_SERVICE_TOKEN,
@@ -63,6 +49,20 @@ const {
   },
   recoverOne: { path: 'recover/:id' },
 });
+
+const {
+  ConfigurableServiceClass,
+  ConfigurableControllerClass,
+  CrudController,
+  CrudGetMany,
+  CrudGetOne,
+  CrudCreateMany,
+  CrudCreateOne,
+  CrudUpdateOne,
+  CrudReplaceOne,
+  CrudDeleteOne,
+  CrudRecoverOne,
+} = crudBuilder.build();
 
 export class PhotoCcbSubCrudServiceFixture extends ConfigurableServiceClass {}
 
