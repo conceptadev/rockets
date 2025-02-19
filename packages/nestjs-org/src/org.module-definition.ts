@@ -55,11 +55,11 @@ function definitionTransform(
   extras: OrgOptionsExtrasInterface,
 ): DynamicModule {
   const { providers = [] } = definition;
-  const { controllers = [], global = false, entities, crudBuilder } = extras;
+  const { controllers = [], global = false, entities, orgCrudBuilder } = extras;
 
-  if (crudBuilder) {
+  if (orgCrudBuilder) {
     const { ConfigurableControllerClass, ConfigurableServiceProvider } =
-      crudBuilder.build();
+      orgCrudBuilder.build();
     controllers.push(ConfigurableControllerClass);
     providers.push(ConfigurableServiceProvider);
   }

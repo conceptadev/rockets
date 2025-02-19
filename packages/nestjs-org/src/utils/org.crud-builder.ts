@@ -17,14 +17,14 @@ import {
   OrgCreatableInterface,
   OrgUpdatableInterface,
 } from '@concepta/nestjs-common';
-import { OrgDto } from './dto/org.dto';
-import { OrgCreateDto } from './dto/org-create.dto';
-import { OrgCreateManyDto } from './dto/org-create-many.dto';
-import { OrgUpdateDto } from './dto/org-update.dto';
-import { OrgPaginatedDto } from './dto/org-paginated.dto';
-import { OrgEntityInterface } from './interfaces/org-entity.interface';
-import { OrgResource } from './org.types';
-import { ORG_MODULE_CONFIGURABLE_CRUD_SERVICE_TOKEN } from './org.constants';
+import { OrgDto } from '../dto/org.dto';
+import { OrgCreateDto } from '../dto/org-create.dto';
+import { OrgCreateManyDto } from '../dto/org-create-many.dto';
+import { OrgUpdateDto } from '../dto/org-update.dto';
+import { OrgPaginatedDto } from '../dto/org-paginated.dto';
+import { OrgEntityInterface } from '../interfaces/org-entity.interface';
+import { OrgResource } from '../org.types';
+import { ORG_MODULE_CONFIGURABLE_CRUD_SERVICE_TOKEN } from '../org.constants';
 import { DeepPartial, ObjectLiteral } from 'typeorm';
 
 const orgCrudBuilderDefaultOptions: ConfigurableCrudOptions = {
