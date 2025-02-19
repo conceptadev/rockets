@@ -21,8 +21,8 @@ import { RoleEntityInterface } from '../interfaces/role-entity.interface';
 import { RoleSettingsInterface } from '../interfaces/role-settings.interface';
 import { RoleServiceInterface } from '../interfaces/role-service.interface';
 import { RoleAssignmentContext } from '../interfaces/role-assignment-context';
-import { RoleAssignmentOptions } from '../interfaces/role-assignment-options';
-import { RolesAssignmentOptions } from '../interfaces/roles-assignment-options';
+import { RoleAssignmentOptionsInterface } from '../interfaces/role-assignment-options.interface';
+import { RolesAssignmentOptionsInterface } from '../interfaces/roles-assignment-options.interface';
 
 @Injectable()
 export class RoleService implements RoleServiceInterface {
@@ -81,7 +81,7 @@ export class RoleService implements RoleServiceInterface {
    * @param queryOptions - Optional query options
    */
   async isAssignedRole<T extends ReferenceIdInterface>(
-    options: RoleAssignmentOptions<T>,
+    options: RoleAssignmentOptionsInterface<T>,
     queryOptions?: QueryOptionsInterface,
   ): Promise<boolean> {
     const { assignment, role, assignee } = options;
@@ -120,7 +120,7 @@ export class RoleService implements RoleServiceInterface {
    * @param queryOptions - Optional query options
    */
   async isAssignedRoles<T extends ReferenceIdInterface>(
-    options: RolesAssignmentOptions<T>,
+    options: RolesAssignmentOptionsInterface<T>,
     queryOptions?: QueryOptionsInterface,
   ): Promise<boolean> {
     const { assignment, roles, assignee } = options;
@@ -157,7 +157,7 @@ export class RoleService implements RoleServiceInterface {
    * @param queryOptions - Optional query options
    */
   async assignRole<T extends ReferenceIdInterface>(
-    options: RoleAssignmentOptions<T>,
+    options: RoleAssignmentOptionsInterface<T>,
     queryOptions?: QueryOptionsInterface,
   ): Promise<RoleAssignmentEntityInterface> {
     const { assignment, role, assignee } = options;
@@ -203,7 +203,7 @@ export class RoleService implements RoleServiceInterface {
    * @param queryOptions - Optional query options
    */
   async assignRoles<T extends ReferenceIdInterface>(
-    options: RolesAssignmentOptions<T>,
+    options: RolesAssignmentOptionsInterface<T>,
     queryOptions?: QueryOptionsInterface,
   ): Promise<RoleAssignmentEntityInterface[]> {
     const { assignment, roles, assignee } = options;
@@ -256,7 +256,7 @@ export class RoleService implements RoleServiceInterface {
    * @param queryOptions - Optional query options
    */
   async revokeRole<T extends ReferenceIdInterface>(
-    options: RoleAssignmentOptions<T>,
+    options: RoleAssignmentOptionsInterface<T>,
     queryOptions?: QueryOptionsInterface,
   ): Promise<void> {
     const { assignment, role, assignee } = options;
@@ -279,7 +279,7 @@ export class RoleService implements RoleServiceInterface {
    * @param queryOptions - Optional query options
    */
   async revokeRoles<T extends ReferenceIdInterface>(
-    options: RolesAssignmentOptions<T>,
+    options: RolesAssignmentOptionsInterface<T>,
     queryOptions?: QueryOptionsInterface,
   ): Promise<void> {
     const { assignment, roles, assignee } = options;
