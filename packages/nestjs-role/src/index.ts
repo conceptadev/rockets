@@ -15,9 +15,9 @@ export { RoleAssignmentEntityInterface } from './interfaces/role-assignment-enti
 export { RoleEntityInterface } from './interfaces/role-entity.interface';
 export { RoleLookupServiceInterface } from './interfaces/role-lookup-service.interface';
 export { RoleMutateServiceInterface } from './interfaces/role-mutate-service.interface';
-export { AssignmentContext } from './interfaces/assignment-context';
-export { RoleAssignmentParams } from './interfaces/role-assignment-params';
-export { RolesAssignmentParams } from './interfaces/roles-assignment-params';
+export { RoleAssignmentContext } from './interfaces/role-assignment-context';
+export { RoleAssignmentOptions } from './interfaces/role-assignment-options';
+export { RolesAssignmentOptions } from './interfaces/roles-assignment-options';
 
 export { RoleAssignmentCreateManyDto } from './dto/role-assignment-create-many.dto';
 export { RoleAssignmentCreateDto } from './dto/role-assignment-create.dto';
