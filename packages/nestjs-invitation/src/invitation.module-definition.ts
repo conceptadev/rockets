@@ -29,6 +29,8 @@ import { InvitationSendService } from './services/invitation-send.service';
 import { InvitationRevocationService } from './services/invitation-revocation.service';
 import { invitationDefaultConfig } from './config/invitation-default.config';
 import { InvitationReattemptController } from './controllers/invitation-reattempt.controller';
+import { InvitationEmailServiceInterface } from './interfaces/invitation-email.service.interface';
+import { InvitationOtpServiceInterface } from './interfaces/invitation-otp.service.interface';
 
 const RAW_OPTIONS_TOKEN = Symbol('__INVITATION_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -94,6 +96,7 @@ export function createInvitationExports(): DynamicModule['exports'] {
     INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN,
     INVITATION_MODULE_USER_MUTATE_SERVICE_TOKEN,
     InvitationService,
+    InvitationSendService,
   ];
 }
 
@@ -106,13 +109,13 @@ export function createInvitationProviders(options: {
     InvitationService,
     InvitationCrudService,
     InvitationAcceptanceService,
-    InvitationSendService,
     InvitationRevocationService,
     createInvitationSettingsProvider(options.overrides),
     createInvitationOtpServiceProvider(options.overrides),
     createInvitationEmailServiceProvider(options.overrides),
     createInvitationUserLookupServiceProvider(options.overrides),
     createInvitationUserMutateServiceProvider(options.overrides),
+    createInvitationSendServiceProvider(options.overrides),
   ];
 }
 
@@ -183,5 +186,28 @@ export function createInvitationUserMutateServiceProvider(
     inject: [RAW_OPTIONS_TOKEN],
     useFactory: async (options: InvitationOptionsInterface) =>
       optionsOverrides?.userMutateService ?? options.userMutateService,
+  };
+}
+
+export function createInvitationSendServiceProvider(
+  optionsOverrides?: InvitationOptions,
+): Provider {
+  return {
+    provide: InvitationSendService,
+    inject: [
+      RAW_OPTIONS_TOKEN,
+      INVITATION_MODULE_SETTINGS_TOKEN,
+      INVITATION_MODULE_EMAIL_SERVICE_TOKEN,
+      INVITATION_MODULE_OTP_SERVICE_TOKEN,
+    ],
+    useFactory: async (
+      options: InvitationOptionsInterface,
+      settings: InvitationSettingsInterface,
+      emailService: InvitationEmailServiceInterface,
+      otpService: InvitationOtpServiceInterface,
+    ) =>
+      optionsOverrides?.invitationSendService ??
+      options.invitationSendService ??
+      new InvitationSendService(settings, emailService, otpService),
   };
 }

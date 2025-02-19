@@ -18,15 +18,16 @@ import { InvitationEmailServiceInterface } from '../interfaces/invitation-email.
 import { InvitationSendMailException } from '../exceptions/invitation-send-mail.exception';
 import { InvitationGetUserEventAsync } from '../events/invitation-get-user.event';
 import { InvitationUserUndefinedException } from '../exceptions/invitation-user-undefined.exception';
+import { InvitationSendServiceInterface } from '../interfaces/invitation-send.service.interface';
 
-export class InvitationSendService {
+export class InvitationSendService implements InvitationSendServiceInterface {
   constructor(
     @Inject(INVITATION_MODULE_SETTINGS_TOKEN)
-    private readonly settings: InvitationSettingsInterface,
+    protected readonly settings: InvitationSettingsInterface,
     @Inject(INVITATION_MODULE_EMAIL_SERVICE_TOKEN)
-    private readonly emailService: InvitationEmailServiceInterface,
+    protected readonly emailService: InvitationEmailServiceInterface,
     @Inject(INVITATION_MODULE_OTP_SERVICE_TOKEN)
-    private readonly otpService: InvitationOtpServiceInterface,
+    protected readonly otpService: InvitationOtpServiceInterface,
   ) {}
 
   async send(
@@ -87,7 +88,7 @@ export class InvitationSendService {
     return user;
   }
 
-  protected async sendEmail(
+  async sendEmail(
     email: string,
     code: string,
     passcode: string,
