@@ -10,6 +10,11 @@ export { OrgMutateService } from './services/org-mutate.service';
 export { OrgCrudService } from './services/org-crud.service';
 export { OrgController } from './org.controller';
 
+// org member
+export { OrgMemberService } from './services/org-member.service';
+export { OrgMemberLookupService } from './services/org-member-lookup.service';
+export { OrgMemberMutateService } from './services/org-member-mutate.service';
+
 export { OrgEntityInterface } from './interfaces/org-entity.interface';
 export { OrgLookupServiceInterface } from './interfaces/org-lookup-service.interface';
 export { OrgMutateServiceInterface } from './interfaces/org-mutate-service.interface';
