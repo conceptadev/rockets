@@ -2,17 +2,10 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEmail, IsObject, IsOptional, IsString } from 'class-validator';
 import { Exclude, Expose } from 'class-transformer';
 import { LiteralObject } from '@concepta/nestjs-common';
-
-@Expose()
-export class TempClass {
-  @Expose()
-  @IsString()
-  @ApiProperty()
-  name!: string;
-}
+import { InvitationCreatableInterface } from '../interfaces/invitation-creatable.interface';
 
 @Exclude()
-export class InvitationCreateDto {
+export class InvitationCreateDto implements InvitationCreatableInterface {
   @Expose()
   @ApiProperty({
     title: 'user email',

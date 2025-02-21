@@ -29,6 +29,7 @@ import { InvitationSendService } from './services/invitation-send.service';
 import { InvitationRevocationService } from './services/invitation-revocation.service';
 import { invitationDefaultConfig } from './config/invitation-default.config';
 import { InvitationReattemptController } from './controllers/invitation-reattempt.controller';
+import { InvitationMutateService } from './services/invitation-mutate.service';
 
 const RAW_OPTIONS_TOKEN = Symbol('__INVITATION_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -108,6 +109,7 @@ export function createInvitationProviders(options: {
     InvitationAcceptanceService,
     InvitationSendService,
     InvitationRevocationService,
+    InvitationMutateService,
     createInvitationSettingsProvider(options.overrides),
     createInvitationOtpServiceProvider(options.overrides),
     createInvitationEmailServiceProvider(options.overrides),

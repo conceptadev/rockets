@@ -1,4 +1,3 @@
-import { randomUUID } from 'crypto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { InvitationInterface } from '@concepta/nestjs-common';
 import {
@@ -28,6 +27,8 @@ import { InvitationCrudService } from '../services/invitation-crud.service';
 import { InvitationSendService } from '../services/invitation-send.service';
 import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
 import { InvitationException } from '../exceptions/invitation.exception';
+import { InvitationMutateService } from '../services/invitation-mutate.service';
+import { randomUUID } from 'crypto';
 
 @CrudController({
   path: 'invitation',
@@ -54,6 +55,7 @@ export class InvitationController
   constructor(
     private readonly invitationSendService: InvitationSendService,
     private readonly invitationCrudService: InvitationCrudService,
+    private readonly invitationMutateService: InvitationMutateService,
   ) {}
 
   @CrudReadMany()
@@ -80,7 +82,7 @@ export class InvitationController
     summary: 'Create one invitation.',
   })
   async createOneCustom(
-    @CrudRequest() crudRequest: CrudRequestInterface,
+    @CrudRequest() _crudRequest: CrudRequestInterface,
     @CrudBody() invitationCreateDto: InvitationCreateDto,
   ) {
     const { email, category, payload } = invitationCreateDto;
@@ -98,13 +100,19 @@ export class InvitationController
             },
           );
 
-          invite = await this.invitationCrudService.createOne(crudRequest, {
-            user,
-            email,
-            category,
-            code: randomUUID(),
-            constraints: payload,
-          });
+          invite = await this.invitationMutateService.create(
+            {
+              user: user,
+              email,
+              category,
+              payload: payload,
+              code: randomUUID(),
+              constraints: payload,
+            },
+            {
+              transaction,
+            },
+          );
 
           if (user !== undefined && invite !== undefined) {
             await this.invitationSendService.send(user, invite.code, category, {

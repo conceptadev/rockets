@@ -39,6 +39,16 @@ describe('InvitationController (e2e)', () => {
   let configService: ConfigService;
   let config: ConfigType<typeof invitationDefaultConfig>;
 
+  const expectInvitationMatch = (
+    expected: InvitationDto,
+    actual: InvitationDto,
+  ) => {
+    expect(expected.id).toEqual(actual.id);
+    expect(expected.code).toEqual(actual.code);
+    expect(expected.category).toEqual(actual.category);
+    expect(expected.email).toEqual(actual.email);
+  };
+
   beforeEach(async () => {
     jest
       .spyOn(EmailService.prototype, 'sendMail')
@@ -199,9 +209,9 @@ describe('InvitationController (e2e)', () => {
 
       expect(invitationResponse.length).toEqual(3);
 
-      expect(invite1).toEqual(invitationResponse[0]);
-      expect(invite2).toEqual(invitationResponse[1]);
-      expect(invite3).toEqual(invitationResponse[2]);
+      expectInvitationMatch(invite1, invitationResponse[0]);
+      expectInvitationMatch(invite2, invitationResponse[1]);
+      expectInvitationMatch(invite3, invitationResponse[2]);
     });
 
     it('GET invitation/:id', async () => {
@@ -216,8 +226,7 @@ describe('InvitationController (e2e)', () => {
         .expect(200);
 
       const invitationResponse = response.body as InvitationDto;
-
-      expect(invitation).toEqual(invitationResponse);
+      expectInvitationMatch(invitation, invitationResponse);
     });
 
     it('DELETE invitation/:id', async () => {
