@@ -95,6 +95,7 @@ export function createInvitationExports(): DynamicModule['exports'] {
     INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN,
     INVITATION_MODULE_USER_MUTATE_SERVICE_TOKEN,
     InvitationService,
+    InvitationMutateService,
   ];
 }
 

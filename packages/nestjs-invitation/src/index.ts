@@ -6,3 +6,5 @@ export { InvitationGetUserEventAsync } from './events/invitation-get-user.event'
 
 export { InvitationPostgresEntity } from './entities/invitation-postgres.entity';
 export { InvitationSqliteEntity } from './entities/invitation-sqlite.entity';
+
+export { InvitationMutateService } from './services/invitation-mutate.service';
