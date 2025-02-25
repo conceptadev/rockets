@@ -8,5 +8,5 @@ import { OrgProfileDto } from './org-profile.dto';
  */
 @Exclude()
 export class OrgProfileCreateDto
-  extends IntersectionType(PickType(OrgProfileDto, ['orgId'] as const))
+  extends PickType(OrgProfileDto, ['orgId'] as const)
   implements OrgProfileCreatableInterface {}
