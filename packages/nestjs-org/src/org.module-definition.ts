@@ -16,7 +16,6 @@ import {
   ORG_MODULE_SETTINGS_TOKEN,
   ORG_MODULE_OWNER_LOOKUP_SERVICE_TOKEN,
   ORG_MODULE_ORG_ENTITY_KEY,
-  ORG_MODULE_CONFIGURABLE_CRUD_SERVICE_TOKEN,
 } from './org.constants';
 import { OrgOptionsInterface } from './interfaces/org-options.interface';
 import { OrgOptionsExtrasInterface } from './interfaces/org-options-extras.interface';
@@ -55,14 +54,13 @@ function definitionTransform(
   extras: OrgOptionsExtrasInterface,
 ): DynamicModule {
   const { providers = [] } = definition;
-  const { controllers = [], global = false, entities, orgCrudBuilder } = extras;
-
-  if (orgCrudBuilder) {
-    const { ConfigurableControllerClass, ConfigurableServiceProvider } =
-      orgCrudBuilder.build();
-    controllers.push(ConfigurableControllerClass);
-    providers.push(ConfigurableServiceProvider);
-  }
+  const {
+    global = false,
+    entities,
+    controllers,
+    extraControllers = [],
+    extraProviders = [],
+  } = extras;
 
   if (!entities) {
     throw new Error('You must provide the entities option');
@@ -72,8 +70,8 @@ function definitionTransform(
     ...definition,
     global,
     imports: createOrgImports({ entities }),
-    providers: createOrgProviders({ providers }),
-    controllers: createOrgControllers({ controllers }),
+    providers: createOrgProviders({ providers, extraProviders }),
+    controllers: createOrgControllers({ controllers, extraControllers }),
     exports: [ConfigModule, RAW_OPTIONS_TOKEN, ...createOrgExports()],
   };
 }
@@ -90,9 +88,11 @@ export function createOrgImports(
 export function createOrgProviders(options: {
   overrides?: OrgOptions;
   providers?: Provider[];
+  extraProviders?: Provider[];
 }): Provider[] {
   return [
     ...(options.providers ?? []),
+    ...(options.extraProviders ?? []),
     OrgCrudService,
     OrgMemberService,
     OrgMemberLookupService,
@@ -102,10 +102,6 @@ export function createOrgProviders(options: {
     createOrgOwnerLookupServiceProvider(options.overrides),
     createOrgLookupServiceProvider(options.overrides),
     createOrgMutateServiceProvider(options.overrides),
-    {
-      provide: ORG_MODULE_CONFIGURABLE_CRUD_SERVICE_TOKEN,
-      useExisting: OrgCrudService,
-    },
   ];
 }
 
@@ -114,7 +110,6 @@ export function createOrgExports(): Required<
 >['exports'] {
   return [
     ORG_MODULE_SETTINGS_TOKEN,
-    ORG_MODULE_CONFIGURABLE_CRUD_SERVICE_TOKEN,
     ORG_MODULE_OWNER_LOOKUP_SERVICE_TOKEN,
     OrgLookupService,
     OrgMutateService,
@@ -126,11 +121,11 @@ export function createOrgExports(): Required<
 }
 
 export function createOrgControllers(
-  overrides: Pick<OrgOptions, 'controllers'> = {},
+  overrides: Pick<OrgOptions, 'controllers' | 'extraControllers'> = {},
 ): DynamicModule['controllers'] {
   return overrides?.controllers?.length
     ? overrides.controllers
-    : [OrgController];
+    : [OrgController, ...(overrides.extraControllers ?? [])];
 }
 
 export function createOrgSettingsProvider(

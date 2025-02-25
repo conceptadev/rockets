@@ -6,3 +6,5 @@
 export { OrgFactory } from './seeding/org.factory';
 export { OrgOwnerFactory } from './seeding/org-owner.factory';
 export { OrgSeeder } from './seeding/org.seeder';
+export { OrgProfileFactory } from './seeding/org-profile.factory';
+export { OrgProfileSeeder } from './seeding/org-profile.seeder';

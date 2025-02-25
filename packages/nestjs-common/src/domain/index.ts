@@ -14,10 +14,14 @@ export { PasswordPlainCurrentInterface } from './password/interfaces/password-pl
 export { PasswordPlainInterface } from './password/interfaces/password-plain.interface';
 
 export { OrgCreatableInterface } from './org/interfaces/org-creatable.interface';
+export { OrgOwnableInterface } from './org/interfaces/org-ownable.interface';
 export { OrgMemberInterface } from './org/interfaces/org-member.interface';
 export { OrgOwnerInterface } from './org/interfaces/org-owner.interface';
 export { OrgUpdatableInterface } from './org/interfaces/org-updatable.interface';
 export { OrgInterface } from './org/interfaces/org.interface';
+
+export { OrgProfileInterface } from './org-profile/interfaces/org-profile.interface';
+export { OrgProfileCreatableInterface } from './org-profile/interfaces/org-profile-creatable.interface';
 
 export { UserCreatableInterface } from './user/interfaces/user-creatable.interface';
 export { UserOwnableInterface } from './user/interfaces/user-ownable.interface';

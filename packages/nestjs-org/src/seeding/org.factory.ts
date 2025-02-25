@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
 import { Factory } from '@concepta/typeorm-seeding';
 import { OrgEntityInterface } from '../interfaces/org-entity.interface';
+import { OrgOwnerFactory } from './org-owner.factory';
 
 /**
  * Org factory
@@ -20,6 +21,15 @@ export class OrgFactory extends Factory<OrgEntityInterface> {
 
     // return the new org
     return org;
+  }
+
+  protected async finalize(org: OrgEntityInterface): Promise<void> {
+    if (!org.ownerId) {
+      // create one owner
+      const ownerFactory = this.factory(OrgOwnerFactory);
+      const owner = await ownerFactory.create();
+      org.ownerId = owner.id;
+    }
   }
 
   /**
