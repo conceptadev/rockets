@@ -51,9 +51,7 @@ export class RoleService implements RoleServiceInterface {
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
     // new repo proxy
-    const repoProxy = new RepositoryProxy<RoleAssignmentEntityInterface>(
-      assignmentRepo,
-    );
+    const repoProxy = this.createRepoProxy(assignmentRepo);
 
     // try to find the relationships
     try {
@@ -90,9 +88,7 @@ export class RoleService implements RoleServiceInterface {
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
     // new repo proxy
-    const repoProxy = new RepositoryProxy<RoleAssignmentEntityInterface>(
-      assignmentRepo,
-    );
+    const repoProxy = this.createRepoProxy(assignmentRepo);
 
     // try to find the relationship
     try {
@@ -190,9 +186,7 @@ export class RoleService implements RoleServiceInterface {
     );
 
     // Use repository proxy to apply query options
-    const repoProxy = new RepositoryProxy<RoleAssignmentEntityInterface>(
-      assignmentRepo,
-    );
+    const repoProxy = this.createRepoProxy(assignmentRepo);
     return repoProxy.repository(queryOptions).save(roleAssignment);
   }
 
@@ -243,9 +237,7 @@ export class RoleService implements RoleServiceInterface {
     }
 
     // Use repository proxy to apply query options
-    const repoProxy = new RepositoryProxy<RoleAssignmentEntityInterface>(
-      assignmentRepo,
-    );
+    const repoProxy = this.createRepoProxy(assignmentRepo);
     return repoProxy.repository(queryOptions).save(roleAssignments);
   }
 
@@ -263,9 +255,7 @@ export class RoleService implements RoleServiceInterface {
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
     // Use repository proxy to apply query options
-    const repoProxy = new RepositoryProxy<RoleAssignmentEntityInterface>(
-      assignmentRepo,
-    );
+    const repoProxy = this.createRepoProxy(assignmentRepo);
     await repoProxy.repository(queryOptions).delete({
       role: { id: role.id },
       assignee: { id: assignee.id },
@@ -286,9 +276,7 @@ export class RoleService implements RoleServiceInterface {
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
     // Use repository proxy to apply query options
-    const repoProxy = new RepositoryProxy<RoleAssignmentEntityInterface>(
-      assignmentRepo,
-    );
+    const repoProxy = this.createRepoProxy(assignmentRepo);
 
     for (const role of roles) {
       await repoProxy.repository(queryOptions).delete({
@@ -323,5 +311,16 @@ export class RoleService implements RoleServiceInterface {
       // bad assignment
       throw new RoleAssignmentNotFoundException(assignment);
     }
+  }
+  /**
+   * Create a repository proxy for the given assignment repository
+   *
+   * @internal
+   * @param assignmentRepo - The role assignment repository
+   */
+  private createRepoProxy(
+    assignmentRepo: Repository<RoleAssignmentEntityInterface>,
+  ): RepositoryProxy<RoleAssignmentEntityInterface> {
+    return new RepositoryProxy<RoleAssignmentEntityInterface>(assignmentRepo);
   }
 }
