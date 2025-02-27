@@ -17,37 +17,62 @@ import { CrudRequest } from '../decorators/params/crud-request.decorator';
 import { CrudRequestInterface } from '../interfaces/crud-request.interface';
 import { CrudCreateManyInterface } from '../interfaces/crud-create-many.interface';
 import { TypeOrmCrudService } from '../services/typeorm-crud.service';
-import { AbstractCrudController } from '../controllers/abstract-crud.controller';
+import { CrudBaseController } from '../controllers/crud-base.controller';
 import { ConfigurableCrudDecorators } from './interfaces/configurable-crud-decorators.interface';
 import { ConfigurableCrudHost } from './interfaces/configurable-crud-host.interface';
 import { ConfigurableCrudOptions } from './interfaces/configurable-crud-options.interface';
+import { ConfigurableCrudOptionsTransformer } from '../crud.types';
 
 export class ConfigurableCrudBuilder<
   Entity extends ObjectLiteral,
   Creatable extends DeepPartial<Entity>,
   Updatable extends DeepPartial<Entity>,
   Replaceable extends Creatable = Creatable,
+  ExtraOptions extends ObjectLiteral = ObjectLiteral,
 > {
-  build<O extends ConfigurableCrudOptions = ConfigurableCrudOptions>(
-    options: O,
-  ): ConfigurableCrudHost<Entity, Creatable, Updatable, Replaceable> {
+  private extras: ExtraOptions;
+  private optionsTransform: ConfigurableCrudOptionsTransformer<ExtraOptions>;
+
+  constructor(private options: ConfigurableCrudOptions) {
+    this.extras = {} as ExtraOptions;
+    this.optionsTransform = (options, _extras) => options;
+  }
+
+  setExtras(
+    extras: ExtraOptions,
+    optionsTransform: ConfigurableCrudOptionsTransformer<ExtraOptions>,
+  ): ConfigurableCrudBuilder<
+    Entity,
+    Creatable,
+    Updatable,
+    Replaceable,
+    ExtraOptions
+  > {
+    this.extras = extras;
+    this.optionsTransform = optionsTransform;
+    return this;
+  }
+
+  build(): ConfigurableCrudHost<Entity, Creatable, Updatable, Replaceable> {
+    const options = this.optionsTransform(this.options, this.extras);
     const decorators = this.generateDecorators(options);
     const ConfigurableServiceClass = this.generateService<Entity>(
       options.service,
     );
-    const ConfigurableControllerClass = this.generateClass<O>(
-      options,
-      decorators,
-    );
+    const ConfigurableControllerClass = this.generateClass(options, decorators);
 
     return {
+      ConfigurableServiceProvider: {
+        provide: options.service.injectionToken,
+        useClass: ConfigurableServiceClass,
+      },
       ConfigurableServiceClass,
       ConfigurableControllerClass,
       ...decorators,
     };
   }
 
-  generateDecorators<O extends ConfigurableCrudOptions>(
+  private generateDecorators<O extends ConfigurableCrudOptions>(
     options: O,
   ): ConfigurableCrudDecorators {
     const {
@@ -138,10 +163,10 @@ export class ConfigurableCrudBuilder<
     };
   }
 
-  generateClass<O extends ConfigurableCrudOptions>(
+  private generateClass<O extends ConfigurableCrudOptions>(
     options: O,
     decorators: ConfigurableCrudDecorators,
-  ): typeof AbstractCrudController<Entity, Creatable, Updatable, Replaceable> {
+  ): typeof CrudBaseController<Entity, Creatable, Updatable, Replaceable> {
     const {
       CrudController,
       CrudGetMany,
@@ -154,7 +179,7 @@ export class ConfigurableCrudBuilder<
       CrudRecoverOne,
     } = decorators;
 
-    class InternalCrudClass extends AbstractCrudController<
+    class InternalCrudClass extends CrudBaseController<
       Entity,
       Creatable,
       Updatable,
@@ -327,7 +352,7 @@ export class ConfigurableCrudBuilder<
     return InternalCrudClass;
   }
 
-  generateService<Entity extends ObjectLiteral>(
+  private generateService<Entity extends ObjectLiteral>(
     options: ConfigurableCrudOptions['service'],
   ): Type<TypeOrmCrudService<Entity>> {
     // standard repository injection style

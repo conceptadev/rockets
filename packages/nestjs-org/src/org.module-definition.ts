@@ -54,7 +54,13 @@ function definitionTransform(
   extras: OrgOptionsExtrasInterface,
 ): DynamicModule {
   const { providers = [] } = definition;
-  const { controllers, global = false, entities } = extras;
+  const {
+    global = false,
+    entities,
+    controllers,
+    extraControllers = [],
+    extraProviders = [],
+  } = extras;
 
   if (!entities) {
     throw new Error('You must provide the entities option');
@@ -64,8 +70,8 @@ function definitionTransform(
     ...definition,
     global,
     imports: createOrgImports({ entities }),
-    providers: createOrgProviders({ providers }),
-    controllers: createOrgControllers({ controllers }),
+    providers: createOrgProviders({ providers, extraProviders }),
+    controllers: createOrgControllers({ controllers, extraControllers }),
     exports: [ConfigModule, RAW_OPTIONS_TOKEN, ...createOrgExports()],
   };
 }
@@ -82,9 +88,11 @@ export function createOrgImports(
 export function createOrgProviders(options: {
   overrides?: OrgOptions;
   providers?: Provider[];
+  extraProviders?: Provider[];
 }): Provider[] {
   return [
     ...(options.providers ?? []),
+    ...(options.extraProviders ?? []),
     OrgCrudService,
     OrgMemberService,
     OrgMemberLookupService,
@@ -113,11 +121,11 @@ export function createOrgExports(): Required<
 }
 
 export function createOrgControllers(
-  overrides: Pick<OrgOptions, 'controllers'> = {},
+  overrides: Pick<OrgOptions, 'controllers' | 'extraControllers'> = {},
 ): DynamicModule['controllers'] {
-  return overrides?.controllers !== undefined
+  return overrides?.controllers?.length
     ? overrides.controllers
-    : [OrgController];
+    : [OrgController, ...(overrides.extraControllers ?? [])];
 }
 
 export function createOrgSettingsProvider(

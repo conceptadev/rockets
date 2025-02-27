@@ -10,7 +10,7 @@ import { PhotoCreateManyDtoFixture } from '../photo/dto/photo-create-many.dto.fi
 import { PhotoUpdateDtoFixture } from '../photo/dto/photo-update.dto.fixture';
 import { ConfigurableCrudBuilder } from '../../util/configurable-crud.builder';
 import { CrudSoftDelete } from '../../decorators/routes/crud-soft-delete.decorator';
-import { AbstractCrudController } from '../../controllers/abstract-crud.controller';
+import { CrudBaseController } from '../../controllers/crud-base.controller';
 import { CrudRequest } from '../../decorators/params/crud-request.decorator';
 import { CrudRequestInterface } from '../../interfaces/crud-request.interface';
 import { TypeOrmCrudService } from '../../services/typeorm-crud.service';
@@ -22,20 +22,7 @@ const crudBuilder = new ConfigurableCrudBuilder<
   PhotoEntityInterfaceFixture,
   PhotoCreatableInterfaceFixture,
   PhotoUpdatableInterfaceFixture
->();
-
-const {
-  ConfigurableServiceClass,
-  CrudController,
-  CrudGetMany,
-  CrudGetOne,
-  CrudCreateMany,
-  CrudCreateOne,
-  CrudUpdateOne,
-  CrudReplaceOne,
-  CrudDeleteOne,
-  CrudRecoverOne,
-} = crudBuilder.build({
+>({
   service: {
     entity: PhotoFixture,
     injectionToken: PHOTO_CRUD_SERVICE_TOKEN,
@@ -67,10 +54,23 @@ const {
   recoverOne: { path: 'recover/:id' },
 });
 
+const {
+  ConfigurableServiceClass,
+  CrudController,
+  CrudGetMany,
+  CrudGetOne,
+  CrudCreateMany,
+  CrudCreateOne,
+  CrudUpdateOne,
+  CrudReplaceOne,
+  CrudDeleteOne,
+  CrudRecoverOne,
+} = crudBuilder.build();
+
 export class PhotoCcbCustomCrudServiceFixture extends ConfigurableServiceClass {}
 
 @CrudController
-export class PhotoCcbCustomControllerFixture extends AbstractCrudController<
+export class PhotoCcbCustomControllerFixture extends CrudBaseController<
   PhotoEntityInterfaceFixture,
   PhotoCreatableInterfaceFixture,
   PhotoUpdatableInterfaceFixture

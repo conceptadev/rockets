@@ -1,10 +1,10 @@
 import { Seeder } from '@concepta/typeorm-seeding';
-import { OrgFactory } from './org.factory';
+import { OrgProfileFactory } from './org-profile.factory';
 
 /**
- * Org seeder
+ * Org Profile seeder
  */
-export class OrgSeeder extends Seeder {
+export class OrgProfileSeeder extends Seeder {
   /**
    * Runner
    */
@@ -15,9 +15,9 @@ export class OrgSeeder extends Seeder {
       : 50;
 
     // the factory
-    const orgFactory = this.factory(OrgFactory);
+    const orgProfileFactory = this.factory(OrgProfileFactory);
 
     // create a bunch
-    await orgFactory.createMany(createAmount);
+    await orgProfileFactory.createMany(createAmount);
   }
 }
