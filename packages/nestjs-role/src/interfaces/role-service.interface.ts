@@ -1,101 +1,85 @@
-import {
-  ReferenceAssignment,
-  ReferenceIdInterface,
-} from '@concepta/nestjs-common';
-import { RoleInterface } from '@concepta/nestjs-common';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 import { RoleEntityInterface } from './role-entity.interface';
 import { RoleAssignmentEntityInterface } from './role-assignment-entity.interface';
+import { RoleAssignmentContext } from './role-assignment-context';
+import { RoleAssignmentOptionsInterface } from './role-assignment-options.interface';
+import { RolesAssignmentOptionsInterface } from './roles-assignment-options.interface';
 
 export interface RoleServiceInterface {
   /**
    * Get all roles for assignee.
    *
-   * @param assignment - The assignment of the check (same as entity key)
-   * @param assignee - The assignee to check
+   * @param options - The assignment and assignee of the check (same as entity key)
    */
   getAssignedRoles(
-    assignment: ReferenceAssignment,
-    assignee: ReferenceIdInterface,
+    options: RoleAssignmentContext<ReferenceIdInterface>,
     queryOptions?: QueryOptionsInterface,
   ): Promise<RoleEntityInterface[]>;
 
   /**
    * Check if the assignee is a member of one role.
    *
-   * @param assignment - The assignment of the check
-   * @param role - The role to check
-   * @param assignee - The assignee to check
+   * @param options - The assignment, roles and assignee to check
+   * @param queryOptions - Optional query options
    */
   isAssignedRole<T extends ReferenceIdInterface>(
-    assignment: ReferenceAssignment,
-    role: Partial<RoleInterface>,
-    assignee: T,
+    options: RoleAssignmentOptionsInterface<T>,
     queryOptions?: QueryOptionsInterface,
   ): Promise<boolean>;
 
   /**
    * Check if the assignee is a member of every role.
    *
-   * @param assignment - The assignment of the check
-   * @param roles - The roles to check
-   * @param assignee - The assignee to check
+   * @param options - The assignment, roles and assignee to check
+   * @param queryOptions - Optional query options
    */
   isAssignedRoles<T extends ReferenceIdInterface>(
-    assignment: ReferenceAssignment,
-    roles: ReferenceIdInterface[],
-    assignee: T,
+    options: RolesAssignmentOptionsInterface<T>,
     queryOptions?: QueryOptionsInterface,
   ): Promise<boolean>;
+
   /**
    * Assign a role to an assignee.
    *
-   * @param assignment - The assignment type
-   * @param role - The role to assign
-   * @param assignee - The assignee to assign the role
+   * @param options - The assignment, role and assignee
+   * @param queryOptions - Optional query options
    */
-  assignRole(
-    assignment: ReferenceAssignment,
-    role: ReferenceIdInterface,
-    assignee: ReferenceIdInterface,
+  assignRole<T extends ReferenceIdInterface>(
+    options: RoleAssignmentOptionsInterface<T>,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<RoleAssignmentEntityInterface>;
 
   /**
    * Assign multiple roles to an assignee.
    *
-   * @param assignment - The assignment type
-   * @param roles - The roles to assign
-   * @param assignee - The assignee to assign the roles
+   * @param options - The assignment, roles and assignee
+   * @param queryOptions - Optional query options
    */
-  assignRoles(
-    assignment: ReferenceAssignment,
-    roles: ReferenceIdInterface[],
-    assignee: ReferenceIdInterface,
+  assignRoles<T extends ReferenceIdInterface>(
+    options: RolesAssignmentOptionsInterface<T>,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<RoleAssignmentEntityInterface[]>;
 
   /**
    * Revoke a role from an assignee.
    *
-   * @param assignment - The assignment type
-   * @param role - The role to revoke
-   * @param assignee - The assignee from whom the role is to be revoked
+   * @param options - The assignment, role and assignee
+   * @param queryOptions - Optional query options
    */
-  revokeRole(
-    assignment: ReferenceAssignment,
-    role: ReferenceIdInterface,
-    assignee: ReferenceIdInterface,
+  revokeRole<T extends ReferenceIdInterface>(
+    options: RoleAssignmentOptionsInterface<T>,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<void>;
 
   /**
    * Revoke multiple roles from an assignee.
    *
-   * @param assignment - The assignment type
-   * @param roles - The roles to revoke
-   * @param assignee - The assignee from whom the roles are to be revoked
+   * @param options - The assignment, roles and assignee
+   * @param queryOptions - Optional query options
    */
-  revokeRoles(
-    assignment: ReferenceAssignment,
-    roles: ReferenceIdInterface[],
-    assignee: ReferenceIdInterface,
+  revokeRoles<T extends ReferenceIdInterface>(
+    options: RolesAssignmentOptionsInterface<T>,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<void>;
 }
