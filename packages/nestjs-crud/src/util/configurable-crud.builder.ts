@@ -21,11 +21,7 @@ import { CrudBaseController } from '../controllers/crud-base.controller';
 import { ConfigurableCrudDecorators } from './interfaces/configurable-crud-decorators.interface';
 import { ConfigurableCrudHost } from './interfaces/configurable-crud-host.interface';
 import { ConfigurableCrudOptions } from './interfaces/configurable-crud-options.interface';
-
-type OptionsTransformer<T extends ObjectLiteral> = (
-  options: ConfigurableCrudOptions,
-  extras?: T,
-) => ConfigurableCrudOptions;
+import { ConfigurableCrudOptionsTransformer } from '../crud.types';
 
 export class ConfigurableCrudBuilder<
   Entity extends ObjectLiteral,
@@ -35,7 +31,7 @@ export class ConfigurableCrudBuilder<
   ExtraOptions extends ObjectLiteral = ObjectLiteral,
 > {
   private extras: ExtraOptions;
-  private optionsTransform: OptionsTransformer<ExtraOptions>;
+  private optionsTransform: ConfigurableCrudOptionsTransformer<ExtraOptions>;
 
   constructor(private options: ConfigurableCrudOptions) {
     this.extras = {} as ExtraOptions;
@@ -44,7 +40,7 @@ export class ConfigurableCrudBuilder<
 
   setExtras(
     extras: ExtraOptions,
-    optionsTransform: OptionsTransformer<ExtraOptions>,
+    optionsTransform: ConfigurableCrudOptionsTransformer<ExtraOptions>,
   ): ConfigurableCrudBuilder<
     Entity,
     Creatable,
