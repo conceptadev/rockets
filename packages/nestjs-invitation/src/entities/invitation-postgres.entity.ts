@@ -4,6 +4,7 @@ import { ReferenceActive, ReferenceIdInterface } from '@concepta/nestjs-common';
 import { CommonPostgresEntity } from '@concepta/typeorm-common';
 
 import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
+import { ReferenceEmailInterface } from '@concepta/nestjs-common/src';
 
 // TODO check this entity later
 export abstract class InvitationPostgresEntity
@@ -25,5 +26,5 @@ export abstract class InvitationPostgresEntity
   @Column({ type: 'jsonb' })
   constraints?: PlainLiteralObject;
 
-  user!: ReferenceIdInterface;
+  user!: ReferenceIdInterface & ReferenceEmailInterface;
 }

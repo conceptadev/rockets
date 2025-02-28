@@ -1,4 +1,9 @@
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  AccessControlCreateOne,
+  AccessControlDeleteOne,
+  AccessControlReadMany,
+  AccessControlReadOne,
+} from '@concepta/nestjs-access-control';
 import { InvitationInterface } from '@concepta/nestjs-common';
 import {
   CrudBody,
@@ -11,24 +16,16 @@ import {
   CrudRequest,
   CrudRequestInterface,
 } from '@concepta/nestjs-crud';
-import {
-  AccessControlCreateOne,
-  AccessControlDeleteOne,
-  AccessControlReadMany,
-  AccessControlReadOne,
-} from '@concepta/nestjs-access-control';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { InvitationCreateDto } from '../dto/invitation-create.dto';
-import { InvitationDto } from '../dto/invitation.dto';
 import { InvitationPaginatedDto } from '../dto/invitation-paginated.dto';
+import { InvitationDto } from '../dto/invitation.dto';
+import { InvitationException } from '../exceptions/invitation.exception';
 import { InvitationCreatableInterface } from '../interfaces/invitation-creatable.interface';
 import { InvitationResource } from '../invitation.types';
 import { InvitationCrudService } from '../services/invitation-crud.service';
 import { InvitationSendService } from '../services/invitation-send.service';
-import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
-import { InvitationException } from '../exceptions/invitation.exception';
-import { InvitationMutateService } from '../services/invitation-mutate.service';
-import { randomUUID } from 'crypto';
 
 @CrudController({
   path: 'invitation',
@@ -55,7 +52,6 @@ export class InvitationController
   constructor(
     private readonly invitationSendService: InvitationSendService,
     private readonly invitationCrudService: InvitationCrudService,
-    private readonly invitationMutateService: InvitationMutateService,
   ) {}
 
   @CrudReadMany()
@@ -85,37 +81,23 @@ export class InvitationController
     @CrudRequest() _crudRequest: CrudRequestInterface,
     @CrudBody() invitationCreateDto: InvitationCreateDto,
   ) {
-    const { email, category, payload } = invitationCreateDto;
-    let invite: InvitationEntityInterface | undefined;
+    let invite:
+      | Required<Pick<InvitationInterface, 'id' | 'user' | 'code' | 'category'>>
+      | undefined;
 
     try {
       await this.invitationCrudService
         .transaction()
         .commit(async (transaction): Promise<void> => {
-          const user = await this.invitationSendService.getUser(
-            email,
-            payload,
+          invite = await this.invitationSendService.create(
+            invitationCreateDto,
             {
               transaction,
             },
           );
 
-          invite = await this.invitationMutateService.create(
-            {
-              user: user,
-              email,
-              category,
-              payload: payload,
-              code: randomUUID(),
-              constraints: payload,
-            },
-            {
-              transaction,
-            },
-          );
-
-          if (user !== undefined && invite !== undefined) {
-            await this.invitationSendService.send(user, invite.code, category, {
+          if (invite !== undefined && invite.user !== undefined) {
+            await this.invitationSendService.send(invite, {
               transaction,
             });
           } else {

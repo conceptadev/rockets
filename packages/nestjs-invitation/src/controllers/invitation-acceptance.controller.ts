@@ -58,11 +58,11 @@ export class InvitationAcceptanceController {
     }
 
     try {
-      success = await this.invitationAcceptanceService.accept(
+      success = await this.invitationAcceptanceService.accept({
         invitation,
         passcode,
-        payload,
-      );
+        constraints: payload,
+      });
     } catch (e) {
       Logger.error(e);
     }

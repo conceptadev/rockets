@@ -8,3 +8,4 @@ export { InvitationPostgresEntity } from './entities/invitation-postgres.entity'
 export { InvitationSqliteEntity } from './entities/invitation-sqlite.entity';
 
 export { InvitationMutateService } from './services/invitation-mutate.service';
+export { InvitationAcceptOptionsInterface } from './interfaces/invitation-accept-options.interface';

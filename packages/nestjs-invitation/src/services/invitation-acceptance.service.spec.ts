@@ -114,11 +114,14 @@ describe(InvitationAcceptanceService, () => {
   it('Accept invite and update password', async () => {
     const otp = await createOtp(settings, otpService, testUser, category);
 
-    const inviteAccepted = await invitationAcceptanceService.accept(
-      testInvitation,
-      otp.passcode,
-      { userId: otp.assignee.id, newPassword: 'hOdv2A2h%' },
-    );
+    const inviteAccepted = await invitationAcceptanceService.accept({
+      invitation: testInvitation,
+      passcode: otp.passcode,
+      constraints: {
+        userId: otp.assignee.id,
+        newPassword: 'hOdv2A2h%',
+      },
+    });
 
     expect(spyEmailService).toHaveBeenCalledTimes(1);
     expect(spyAcceptEventEmit).toHaveBeenCalledTimes(1);
@@ -126,10 +129,10 @@ describe(InvitationAcceptanceService, () => {
   });
 
   it('Accept invite and update password (fail)', async () => {
-    const inviteAccepted = await invitationAcceptanceService.accept(
-      testInvitation,
-      'FAKE_PASSCODE',
-    );
+    const inviteAccepted = await invitationAcceptanceService.accept({
+      invitation: testInvitation,
+      passcode: 'FAKE_PASSCODE',
+    });
 
     expect(spyEmailService).toHaveBeenCalledTimes(0);
     expect(spyAcceptEventEmit).toHaveBeenCalledTimes(0);

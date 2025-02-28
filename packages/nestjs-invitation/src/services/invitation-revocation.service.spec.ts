@@ -94,7 +94,11 @@ describe(InvitationRevocationService, () => {
         category,
       });
 
-      await invitationSendService.send(testUser, invitation.code, category);
+      await invitationSendService.send({
+        user: testUser,
+        code: invitation.code,
+        category,
+      });
 
       const invitations = await invitationRepo.find({
         where: {
@@ -106,7 +110,10 @@ describe(InvitationRevocationService, () => {
       expect(invitations.length).toEqual(1);
       expect(invitations[0].user).toEqual(testUser);
 
-      await invitationRevocationService.revokeAll(testUser.email, category);
+      await invitationRevocationService.revokeAll({
+        email: testUser.email,
+        category,
+      });
 
       const countAfter = await invitationRepo.count();
 

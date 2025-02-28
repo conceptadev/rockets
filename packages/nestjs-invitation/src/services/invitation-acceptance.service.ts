@@ -23,6 +23,7 @@ import { InvitationSettingsInterface } from '../interfaces/invitation-settings.i
 import { InvitationOtpServiceInterface } from '../interfaces/invitation-otp.service.interface';
 import { InvitationEmailServiceInterface } from '../interfaces/invitation-email.service.interface';
 import { InvitationSendMailException } from '../exceptions/invitation-send-mail.exception';
+import { InvitationAcceptOptionsInterface } from '../interfaces/invitation-accept-options.interface';
 
 export class InvitationAcceptanceService extends BaseService<InvitationEntityInterface> {
   constructor(
@@ -43,11 +44,10 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
    * Activate user's account by providing its OTP passcode and the new password.
    */
   async accept(
-    invitationDto: InvitationDto,
-    passcode: string,
-    payload?: LiteralObject,
+    options: InvitationAcceptOptionsInterface,
     queryOptions?: QueryOptionsInterface,
   ): Promise<boolean> {
+    const { invitation: invitationDto, passcode, constraints } = options;
     const { category, email } = invitationDto;
 
     // run in transaction
@@ -68,14 +68,16 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
         if (otp) {
           const success = await this.dispatchEvent(
             invitationDto,
-            { ...payload, userId: invitationDto.user.id },
+            { ...constraints, userId: invitationDto.user.id },
             nestedQueryOptions,
           );
 
           if (success) {
             await this.invitationRevocationService.revokeAll(
-              email,
-              category,
+              {
+                email,
+                category,
+              },
               nestedQueryOptions,
             );
 

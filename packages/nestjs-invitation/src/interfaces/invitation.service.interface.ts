@@ -1,22 +1,27 @@
-import {
-  LiteralObject,
-  ReferenceEmailInterface,
-  ReferenceIdInterface,
-} from '@concepta/nestjs-common';
-import { InvitationDto } from '../dto/invitation.dto';
+import { InvitationInterface } from '@concepta/nestjs-common/src';
+import { QueryOptionsInterface } from '@concepta/typeorm-common';
+import { InvitationAcceptOptionsInterface } from './invitation-accept-options.interface';
+import { InvitationCreatableInterface } from './invitation-creatable.interface';
+import { InvitationRevokeOptionsInterface } from './invitation-revoke-options.interface';
 
 export interface InvitationServiceInterface {
+  create(
+    createDto: InvitationCreatableInterface,
+    queryOptions?: QueryOptionsInterface,
+  ): Promise<Required<Pick<InvitationInterface, 'id' | 'user'>>>;
+
   send(
-    user: ReferenceIdInterface & ReferenceEmailInterface,
-    code: string,
-    category: string,
+    invitation: InvitationInterface,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<void>;
 
   accept(
-    invitationDto: InvitationDto,
-    passcode: string,
-    payload?: LiteralObject,
+    options: InvitationAcceptOptionsInterface,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<boolean>;
 
-  revokeAll(email: string, category: string): Promise<void>;
+  revokeAll(
+    options: InvitationRevokeOptionsInterface,
+    queryOptions?: QueryOptionsInterface,
+  ): Promise<void>;
 }

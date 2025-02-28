@@ -1,12 +1,9 @@
 import { Inject } from '@nestjs/common';
 import {
-  LiteralObject,
-  ReferenceEmailInterface,
-  ReferenceIdInterface,
+  InvitationInterface,
+  InvitationGetUserEventResponseInterface,
 } from '@concepta/nestjs-common';
-import { InvitationGetUserEventResponseInterface } from '@concepta/nestjs-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
-
 import {
   INVITATION_MODULE_EMAIL_SERVICE_TOKEN,
   INVITATION_MODULE_OTP_SERVICE_TOKEN,
@@ -19,7 +16,12 @@ import { InvitationSendMailException } from '../exceptions/invitation-send-mail.
 import { InvitationGetUserEventAsync } from '../events/invitation-get-user.event';
 import { InvitationUserUndefinedException } from '../exceptions/invitation-user-undefined.exception';
 
-export class InvitationSendService {
+import { InvitationSendServiceInterface } from '../interfaces/invitation-send-service.interface';
+import { InvitationCreatableInterface } from '../interfaces/invitation-creatable.interface';
+import { InvitationMutateService } from './invitation-mutate.service';
+import { randomUUID } from 'crypto';
+
+export class InvitationSendService implements InvitationSendServiceInterface {
   constructor(
     @Inject(INVITATION_MODULE_SETTINGS_TOKEN)
     private readonly settings: InvitationSettingsInterface,
@@ -27,12 +29,46 @@ export class InvitationSendService {
     private readonly emailService: InvitationEmailServiceInterface,
     @Inject(INVITATION_MODULE_OTP_SERVICE_TOKEN)
     private readonly otpService: InvitationOtpServiceInterface,
+    private readonly invitationMutateService: InvitationMutateService,
   ) {}
 
+  /**
+   * Creates a new invitation
+   *
+   * @param createDto - The invitation creation data transfer object containing email and
+   *                   optional constraints
+   * @param queryOptions - Optional query parameters for the database operation
+   * @returns A promise that resolves to the created invitation with id, user, code and
+   *          category
+   */
+  async create(
+    createDto: InvitationCreatableInterface,
+    queryOptions?: QueryOptionsInterface,
+  ): Promise<
+    Required<Pick<InvitationInterface, 'id' | 'user' | 'code' | 'category'>>
+  > {
+    const { email, constraints } = createDto;
+    const user = await this.getUser(
+      {
+        email,
+        constraints,
+      },
+      queryOptions,
+    );
+
+    const invite = await this.invitationMutateService.create(
+      {
+        ...createDto,
+        user: user,
+        code: randomUUID(),
+      },
+      queryOptions,
+    );
+    return invite;
+  }
+
   async send(
-    user: ReferenceIdInterface & ReferenceEmailInterface,
-    code: string,
-    category: string,
+    invitation: Pick<InvitationInterface, 'category' | 'user' | 'code'>,
     queryOptions?: QueryOptionsInterface,
   ): Promise<void> {
     const {
@@ -43,7 +79,7 @@ export class InvitationSendService {
       rateSeconds,
       rateThreshold,
     } = this.settings.otp;
-
+    const { category, user, code } = invitation;
     // create an OTP for this invite
     const otp = await this.otpService.create({
       assignment,
@@ -66,13 +102,14 @@ export class InvitationSendService {
   }
 
   async getUser(
-    email: string,
-    payload?: LiteralObject,
+    options: Pick<InvitationInterface, 'email'> &
+      Partial<Pick<InvitationInterface, 'constraints'>>,
     queryOptions?: QueryOptionsInterface,
   ): Promise<InvitationGetUserEventResponseInterface> {
+    const { email, constraints } = options;
     const getUserEvent = new InvitationGetUserEventAsync({
       email,
-      data: payload,
+      data: constraints,
       queryOptions,
     });
 

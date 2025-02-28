@@ -104,7 +104,7 @@ describe('InvitationController (e2e)', () => {
       await createInvite(app, {
         email: user.email,
         category: orgCategory,
-        payload,
+        constraints: payload,
       });
     });
 
@@ -139,7 +139,7 @@ describe('InvitationController (e2e)', () => {
       await createInvite(app, {
         email: user.email,
         category: userCategory,
-        payload,
+        constraints: payload,
       });
     });
 
@@ -147,7 +147,7 @@ describe('InvitationController (e2e)', () => {
       await createInvite(app, {
         email: 'test@mail.com',
         category: userCategory,
-        payload,
+        constraints: payload,
       });
     });
 
@@ -155,7 +155,7 @@ describe('InvitationController (e2e)', () => {
       const invitationDto = await createInvite(app, {
         email: 'test@mail.com',
         category: userCategory,
-        payload,
+        constraints: payload,
       });
 
       await supertest(app.getHttpServer())
@@ -195,7 +195,7 @@ describe('InvitationController (e2e)', () => {
       const invitationCreateDto = {
         email: user.email,
         category: userCategory,
-        payload,
+        constraints: payload,
       } as InvitationCreateDto;
       const invite1 = await createInvite(app, invitationCreateDto);
       const invite2 = await createInvite(app, invitationCreateDto);
@@ -218,7 +218,7 @@ describe('InvitationController (e2e)', () => {
       const invitation = await createInvite(app, {
         email: user.email,
         category: userCategory,
-        payload,
+        constraints: payload,
       });
 
       const response = await supertest(app.getHttpServer())
@@ -233,7 +233,7 @@ describe('InvitationController (e2e)', () => {
       const invitation = await createInvite(app, {
         email: user.email,
         category: userCategory,
-        payload,
+        constraints: payload,
       });
 
       await supertest(app.getHttpServer())
