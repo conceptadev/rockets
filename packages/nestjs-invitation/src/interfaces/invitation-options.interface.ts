@@ -5,6 +5,7 @@ import { InvitationOtpServiceInterface } from './invitation-otp.service.interfac
 import { InvitationSettingsInterface } from './invitation-settings.interface';
 import { InvitationUserLookupServiceInterface } from './invitation-user-lookup.service.interface';
 import { InvitationUserMutateServiceInterface } from './invitation-user-mutate.service.interface';
+import { InvitationSendServiceInterface } from './invitation-send-service.interface';
 
 export interface InvitationOptionsInterface
   extends ModuleOptionsControllerInterface {
@@ -13,4 +14,5 @@ export interface InvitationOptionsInterface
   emailService: InvitationEmailServiceInterface;
   userLookupService: InvitationUserLookupServiceInterface;
   userMutateService: InvitationUserMutateServiceInterface;
+  invitationSendService?: InvitationSendServiceInterface;
 }

@@ -36,6 +36,8 @@ import { OtpServiceFixture } from './__fixtures__/otp/otp.service.fixture';
 import { MailerServiceFixture } from './__fixtures__/email/mailer.service.fixture';
 import { InvitationEntityFixture } from './__fixtures__/invitation/entities/invitation.entity.fixture';
 import { default as ormConfig } from './__fixtures__/ormconfig.fixture';
+import { InvitationSendServiceInterface } from './interfaces/invitation-send-service.interface';
+import { InvitationSendServiceFixture } from './__fixtures__/user/services/invitation-send.service.fixture';
 
 describe(InvitationModule, () => {
   let testModule: TestingModule;
@@ -45,7 +47,7 @@ describe(InvitationModule, () => {
   let userLookupService: InvitationUserLookupServiceInterface;
   let userMutateService: InvitationUserMutateServiceInterface;
   let invitationService: InvitationServiceInterface;
-  let invitationSendService: InvitationSendService;
+  let invitationSendService: InvitationSendServiceInterface;
   let invitationAcceptanceService: InvitationAcceptanceService;
   let invitationRevocationService: InvitationRevocationService;
   let invitationController: InvitationController;
@@ -63,6 +65,7 @@ describe(InvitationModule, () => {
             otpService: new OtpServiceFixture(),
             userLookupService: new UserLookupServiceFixture(),
             userMutateService: new UserMutateServiceFixture(),
+            invitationSendService: new InvitationSendServiceFixture(),
             entities: {
               invitation: {
                 entity: InvitationEntityFixture,
@@ -92,6 +95,7 @@ describe(InvitationModule, () => {
             otpService: new OtpServiceFixture(),
             userLookupService: new UserLookupServiceFixture(),
             userMutateService: new UserMutateServiceFixture(),
+            invitationSendService: new InvitationSendServiceFixture(),
             entities: {
               invitation: {
                 entity: InvitationEntityFixture,
@@ -122,17 +126,20 @@ describe(InvitationModule, () => {
               UserMutateServiceFixture,
               OtpServiceFixture,
               EmailService,
+              InvitationSendServiceFixture,
             ],
             useFactory: (
               userLookupService,
               userMutateService,
               otpService,
               emailService,
+              invitationSendService,
             ) => ({
               userLookupService,
               userMutateService,
               otpService,
               emailService,
+              invitationSendService,
             }),
             entities: {
               invitation: {
@@ -164,17 +171,20 @@ describe(InvitationModule, () => {
               UserMutateServiceFixture,
               OtpServiceFixture,
               EmailService,
+              InvitationSendServiceFixture,
             ],
             useFactory: (
               userLookupService,
               userMutateService,
               otpService,
               emailService,
+              invitationSendService,
             ) => ({
               userLookupService,
               userMutateService,
               otpService,
               emailService,
+              invitationSendService,
             }),
             entities: {
               invitation: {
@@ -216,7 +226,7 @@ describe(InvitationModule, () => {
 
     invitationService = testModule.get<InvitationService>(InvitationService);
 
-    invitationSendService = testModule.get<InvitationSendService>(
+    invitationSendService = testModule.get<InvitationSendServiceInterface>(
       InvitationSendService,
     );
 
@@ -249,7 +259,7 @@ describe(InvitationModule, () => {
     expect(userLookupService).toBeInstanceOf(UserLookupServiceFixture);
     expect(userMutateService).toBeInstanceOf(UserMutateServiceFixture);
     expect(invitationService).toBeInstanceOf(InvitationService);
-    expect(invitationSendService).toBeInstanceOf(InvitationSendService);
+    expect(invitationSendService).toBeInstanceOf(InvitationSendServiceFixture);
     expect(invitationAcceptanceService).toBeInstanceOf(
       InvitationAcceptanceService,
     );

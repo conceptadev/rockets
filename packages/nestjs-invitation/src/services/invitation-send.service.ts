@@ -24,12 +24,12 @@ import { randomUUID } from 'crypto';
 export class InvitationSendService implements InvitationSendServiceInterface {
   constructor(
     @Inject(INVITATION_MODULE_SETTINGS_TOKEN)
-    private readonly settings: InvitationSettingsInterface,
+    protected readonly settings: InvitationSettingsInterface,
     @Inject(INVITATION_MODULE_EMAIL_SERVICE_TOKEN)
-    private readonly emailService: InvitationEmailServiceInterface,
+    protected readonly emailService: InvitationEmailServiceInterface,
     @Inject(INVITATION_MODULE_OTP_SERVICE_TOKEN)
-    private readonly otpService: InvitationOtpServiceInterface,
-    private readonly invitationMutateService: InvitationMutateService,
+    protected readonly otpService: InvitationOtpServiceInterface,
+    protected readonly invitationMutateService: InvitationMutateService,
   ) {}
 
   /**
@@ -124,7 +124,7 @@ export class InvitationSendService implements InvitationSendServiceInterface {
     return user;
   }
 
-  protected async sendEmail(
+  async sendEmail(
     email: string,
     code: string,
     passcode: string,
