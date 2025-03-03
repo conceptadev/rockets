@@ -7,7 +7,7 @@ import { CrudCreateManyInterface } from '../interfaces/crud-create-many.interfac
 import { CrudResponsePaginatedInterface } from '../interfaces/crud-response-paginated.interface';
 import { TypeOrmCrudService } from '../services/typeorm-crud.service';
 
-export abstract class AbstractCrudController<
+export class CrudBaseController<
   Entity extends ObjectLiteral,
   Creatable extends DeepPartial<Entity>,
   Updatable extends DeepPartial<Entity>,

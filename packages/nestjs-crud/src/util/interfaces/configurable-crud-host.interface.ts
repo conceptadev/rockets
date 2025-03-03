@@ -1,6 +1,6 @@
-import { Type } from '@nestjs/common';
+import { ClassProvider, Type } from '@nestjs/common';
 import { DeepPartial, ObjectLiteral } from 'typeorm';
-import { AbstractCrudController } from '../../controllers/abstract-crud.controller';
+import { CrudBaseController } from '../../controllers/crud-base.controller';
 import { TypeOrmCrudService } from '../../services/typeorm-crud.service';
 import { ConfigurableCrudDecorators } from './configurable-crud-decorators.interface';
 
@@ -10,11 +10,12 @@ export interface ConfigurableCrudHost<
   Updatable extends DeepPartial<Entity>,
   Replaceable extends Creatable = Creatable,
 > extends ConfigurableCrudDecorators {
-  ConfigurableControllerClass: typeof AbstractCrudController<
+  ConfigurableControllerClass: typeof CrudBaseController<
     Entity,
     Creatable,
     Updatable,
     Replaceable
   >;
   ConfigurableServiceClass: Type<TypeOrmCrudService<Entity>>;
+  ConfigurableServiceProvider: ClassProvider;
 }

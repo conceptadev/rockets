@@ -13,7 +13,7 @@ import { SeedingSource } from '@concepta/typeorm-seeding';
 import { EmailService } from '@concepta/nestjs-email';
 
 import { INVITATION_MODULE_SETTINGS_TOKEN } from '../invitation.constants';
-import { InvitationFactory } from '../invitation.factory';
+import { InvitationFactory } from '../seeding/invitation.factory';
 import { InvitationSettingsInterface } from '../interfaces/invitation-settings.interface';
 import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
 import { InvitationAcceptanceService } from './invitation-acceptance.service';

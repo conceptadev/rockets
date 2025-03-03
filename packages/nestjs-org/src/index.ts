@@ -1,4 +1,6 @@
 export { OrgModule } from './org.module';
+export { OrgCrudBuilder } from './utils/org.crud-builder';
+export { OrgProfileCrudBuilder } from './utils/org-profile.crud-builder';
 
 export { OrgPostgresEntity } from './entities/org-postgres.entity';
 export { OrgSqliteEntity } from './entities/org-sqlite.entity';
@@ -9,6 +11,11 @@ export { OrgLookupService } from './services/org-lookup.service';
 export { OrgMutateService } from './services/org-mutate.service';
 export { OrgCrudService } from './services/org-crud.service';
 export { OrgController } from './org.controller';
+
+// org member
+export { OrgMemberService } from './services/org-member.service';
+export { OrgMemberLookupService } from './services/org-member-lookup.service';
+export { OrgMemberMutateService } from './services/org-member-mutate.service';
 
 export { OrgEntityInterface } from './interfaces/org-entity.interface';
 export { OrgLookupServiceInterface } from './interfaces/org-lookup-service.interface';

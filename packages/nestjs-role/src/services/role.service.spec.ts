@@ -121,7 +121,10 @@ describe('RoleModule', () => {
   describe('getAssignedRoles', () => {
     it('should return assigned roles', async () => {
       const assignedRoles: Partial<RoleEntityFixture>[] =
-        await roleService.getAssignedRoles('user', testUser);
+        await roleService.getAssignedRoles({
+          assignment: 'user',
+          assignee: testUser,
+        });
 
       expect(assignedRoles).toBeInstanceOf(Array);
       expect(assignedRoles.length).toEqual(1);
@@ -130,17 +133,21 @@ describe('RoleModule', () => {
 
   describe('isAssignedRole', () => {
     it('should be assigned to one', async () => {
-      const result = await roleService.isAssignedRole(
-        'user',
-        testRole1,
-        testUser,
-      );
+      const result = await roleService.isAssignedRole({
+        assignment: 'user',
+        role: testRole1,
+        assignee: testUser,
+      });
       expect(result).toEqual(true);
     });
 
     it('should not be assigned to one', async () => {
       expect(
-        await roleService.isAssignedRole('user', testRole2, testUser),
+        await roleService.isAssignedRole({
+          assignment: 'user',
+          role: testRole2,
+          assignee: testUser,
+        }),
       ).toEqual(false);
     });
   });
@@ -148,34 +155,42 @@ describe('RoleModule', () => {
   describe('isAssignedRoles', () => {
     it('should be assigned to all', async () => {
       expect(
-        await roleService.isAssignedRoles('user', [testRole1], testUser),
+        await roleService.isAssignedRoles({
+          assignment: 'user',
+          roles: [testRole1],
+          assignee: testUser,
+        }),
       ).toEqual(true);
     });
 
     it('should not be assigned to all', async () => {
       expect(
-        await roleService.isAssignedRoles(
-          'user',
-          [testRole1, testRole2],
-          testUser,
-        ),
+        await roleService.isAssignedRoles({
+          assignment: 'user',
+          roles: [testRole1, testRole2],
+          assignee: testUser,
+        }),
       ).toEqual(false);
     });
 
     it('impossible to be assigned to none', async () => {
-      expect(await roleService.isAssignedRoles('user', [], testUser)).toEqual(
-        false,
-      );
+      expect(
+        await roleService.isAssignedRoles({
+          assignment: 'user',
+          roles: [],
+          assignee: testUser,
+        }),
+      ).toEqual(false);
     });
   });
 
   describe('assignRole', () => {
     it('should assign a role to an assignee', async () => {
-      const assignedRole = await roleService.assignRole(
-        'user',
-        testRole2,
-        testUser,
-      );
+      const assignedRole = await roleService.assignRole({
+        assignment: 'user',
+        role: testRole2,
+        assignee: testUser,
+      });
 
       expect(assignedRole).toBeDefined();
       expect(assignedRole.role.id).toEqual(testRole2.id);
@@ -184,7 +199,11 @@ describe('RoleModule', () => {
 
     it('should throw conflict error if the role is already assigned', async () => {
       await expect(
-        roleService.assignRole('user', testRole1, testUser),
+        roleService.assignRole({
+          assignment: 'user',
+          role: testRole1,
+          assignee: testUser,
+        }),
       ).rejects.toThrow(RoleAssignmentConflictException);
     });
   });
@@ -193,11 +212,11 @@ describe('RoleModule', () => {
     it('should assign multiple roles to an assignee', async () => {
       const rolesToAssign = [testRole2, testRole3];
 
-      const assignedRoles = await roleService.assignRoles(
-        'user',
-        rolesToAssign,
-        testUser,
-      );
+      const assignedRoles = await roleService.assignRoles({
+        assignment: 'user',
+        roles: rolesToAssign,
+        assignee: testUser,
+      });
 
       expect(assignedRoles).toHaveLength(2);
       expect(assignedRoles[0].role.id).toEqual(testRole2.id);
@@ -210,81 +229,109 @@ describe('RoleModule', () => {
       const rolesToAssign = [testRole1, testRole2];
 
       await expect(
-        roleService.assignRoles('user', rolesToAssign, testUser),
+        roleService.assignRoles({
+          assignment: 'user',
+          roles: rolesToAssign,
+          assignee: testUser,
+        }),
       ).rejects.toThrow(RoleAssignmentConflictException);
     });
   });
 
   describe('revokeRole', () => {
     it('should revoke a role from an assignee', async () => {
-      await roleService.revokeRole('user', testRole1, testUser);
+      await roleService.revokeRole({
+        assignment: 'user',
+        role: testRole1,
+        assignee: testUser,
+      });
 
-      const isAssigned = await roleService.isAssignedRole(
-        'user',
-        testRole1,
-        testUser,
-      );
+      const isAssigned = await roleService.isAssignedRole({
+        assignment: 'user',
+        role: testRole1,
+        assignee: testUser,
+      });
 
       expect(isAssigned).toBe(false);
     });
 
     it('should not throw an error if the role assignment does not exist', async () => {
       await expect(
-        roleService.revokeRole('user', testRole2, testUser),
+        roleService.revokeRole({
+          assignment: 'user',
+          role: testRole2,
+          assignee: testUser,
+        }),
       ).resolves.toBeUndefined();
     });
   });
 
   describe('revokeRoles', () => {
     it('should revoke multiple roles from an assignee', async () => {
-      await roleService.assignRoles('user', [testRole2, testRole3], testUser);
+      await roleService.assignRoles({
+        assignment: 'user',
+        roles: [testRole2, testRole3],
+        assignee: testUser,
+      });
 
-      await roleService.revokeRoles('user', [testRole2, testRole3], testUser);
+      await roleService.revokeRoles({
+        assignment: 'user',
+        roles: [testRole2, testRole3],
+        assignee: testUser,
+      });
 
-      const isAssigned = await roleService.isAssignedRoles(
-        'user',
-        [testRole1],
-        testUser,
-      );
+      const isAssigned = await roleService.isAssignedRoles({
+        assignment: 'user',
+        roles: [testRole1],
+        assignee: testUser,
+      });
       expect(isAssigned).toBe(true);
 
-      const isRole2Assigned = await roleService.isAssignedRole(
-        'user',
-        testRole2,
-        testUser,
-      );
+      const isRole2Assigned = await roleService.isAssignedRole({
+        assignment: 'user',
+        role: testRole2,
+        assignee: testUser,
+      });
 
       expect(isRole2Assigned).toBe(false);
 
-      const isRole3Assigned = await roleService.isAssignedRole(
-        'user',
-        testRole2,
-        testUser,
-      );
+      const isRole3Assigned = await roleService.isAssignedRole({
+        assignment: 'user',
+        role: testRole2,
+        assignee: testUser,
+      });
 
       expect(isRole3Assigned).toBe(false);
     });
 
     it('should revoke all roles from an assignee', async () => {
-      await roleService.assignRoles('user', [testRole2, testRole3], testUser);
+      await roleService.assignRoles({
+        assignment: 'user',
+        roles: [testRole2, testRole3],
+        assignee: testUser,
+      });
 
-      await roleService.revokeRoles(
-        'user',
-        [testRole1, testRole2, testRole3],
-        testUser,
-      );
+      await roleService.revokeRoles({
+        assignment: 'user',
+        roles: [testRole1, testRole2, testRole3],
+        assignee: testUser,
+      });
 
-      const assignedRoles = await roleService.getAssignedRoles(
-        'user',
-        testUser,
-      );
+      const assignedRoles = await roleService.getAssignedRoles({
+        assignment: 'user',
+        assignee: testUser,
+      });
 
       expect(assignedRoles).toHaveLength(0);
     });
 
     it('should not throw an error if none of the role assignments exist', async () => {
       await expect(
-        roleService.revokeRoles('user', [testRole2], testUser),
+        roleService.revokeRoles({
+          assignment: 'user',
+          roles: [testRole2],
+          assignee: testUser,
+        }),
       ).resolves.toBeUndefined();
     });
   });

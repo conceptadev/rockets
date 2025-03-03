@@ -41,6 +41,6 @@ export class OrgLookupService
    * @param org - The org of which owner to retrieve.
    */
   async getOwner(org: OrgOwnerInterface, queryOptions?: QueryOptionsInterface) {
-    return this.ownerLookupService.byId(org.owner.id, queryOptions);
+    return this.ownerLookupService.byId(org.ownerId, queryOptions);
   }
 }

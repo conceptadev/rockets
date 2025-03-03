@@ -23,6 +23,7 @@ import { OwnerModuleFixture } from './__fixtures__/owner.module.fixture';
 import { OrgMemberEntityFixture } from './__fixtures__/org-member.entity.fixture';
 import { UserEntityFixture } from './__fixtures__/user-entity.fixture';
 import { InvitationEntityFixture } from './__fixtures__/invitation.entity.fixture';
+import { OrgProfileEntityFixture } from './__fixtures__/org-profile.entity.fixture';
 
 describe('OrgModule', () => {
   let orgModule: OrgModule;
@@ -44,6 +45,7 @@ describe('OrgModule', () => {
             OrgEntityFixture,
             OwnerEntityFixture,
             OrgMemberEntityFixture,
+            OrgProfileEntityFixture,
             UserEntityFixture,
             InvitationEntityFixture,
           ],
@@ -57,7 +59,7 @@ describe('OrgModule', () => {
             org: {
               entity: OrgEntityFixture,
             },
-            orgMember: {
+            'org-member': {
               entity: OrgMemberEntityFixture,
             },
           },
