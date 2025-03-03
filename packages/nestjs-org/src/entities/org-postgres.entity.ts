@@ -1,5 +1,9 @@
 import { Column } from 'typeorm';
-import { ReferenceIdInterface } from '@concepta/nestjs-common';
+import {
+  OrgProfileInterface,
+  ReferenceId,
+  ReferenceIdInterface,
+} from '@concepta/nestjs-common';
 import { CommonPostgresEntity } from '@concepta/typeorm-common';
 import { OrgEntityInterface } from '../interfaces/org-entity.interface';
 
@@ -23,7 +27,18 @@ export abstract class OrgPostgresEntity
   active = true;
 
   /**
+   * Owner Id
+   */
+  @Column('uuid', { nullable: false })
+  ownerId!: ReferenceId;
+
+  /**
    * Owner
    */
-  owner!: ReferenceIdInterface;
+  owner?: ReferenceIdInterface;
+
+  /**
+   * Profile
+   */
+  orgProfile?: OrgProfileInterface;
 }

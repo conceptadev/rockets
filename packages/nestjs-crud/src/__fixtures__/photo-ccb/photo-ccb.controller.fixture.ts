@@ -16,40 +16,40 @@ const crudBuilder = new ConfigurableCrudBuilder<
   PhotoEntityInterfaceFixture,
   PhotoCreatableInterfaceFixture,
   PhotoUpdatableInterfaceFixture
->();
+>({
+  service: {
+    entity: PhotoFixture,
+    injectionToken: PHOTO_CRUD_SERVICE_TOKEN,
+  },
+  controller: {
+    path: 'photo',
+    model: {
+      type: PhotoDtoFixture,
+      paginatedType: PhotoPaginatedDtoFixture,
+    },
+  },
+  getMany: {},
+  getOne: {},
+  createMany: {
+    dto: PhotoCreateManyDtoFixture,
+  },
+  createOne: {
+    dto: PhotoCreateDtoFixture,
+  },
+  updateOne: {
+    dto: PhotoUpdateDtoFixture,
+  },
+  replaceOne: {
+    dto: PhotoUpdateDtoFixture,
+  },
+  deleteOne: {
+    extraDecorators: [CrudSoftDelete(true)],
+  },
+  recoverOne: { path: 'recover/:id' },
+});
 
 const { ConfigurableControllerClass, ConfigurableServiceClass } =
-  crudBuilder.build({
-    service: {
-      entity: PhotoFixture,
-      injectionToken: PHOTO_CRUD_SERVICE_TOKEN,
-    },
-    controller: {
-      path: 'photo',
-      model: {
-        type: PhotoDtoFixture,
-        paginatedType: PhotoPaginatedDtoFixture,
-      },
-    },
-    getMany: {},
-    getOne: {},
-    createMany: {
-      dto: PhotoCreateManyDtoFixture,
-    },
-    createOne: {
-      dto: PhotoCreateDtoFixture,
-    },
-    updateOne: {
-      dto: PhotoUpdateDtoFixture,
-    },
-    replaceOne: {
-      dto: PhotoUpdateDtoFixture,
-    },
-    deleteOne: {
-      extraDecorators: [CrudSoftDelete(true)],
-    },
-    recoverOne: { path: 'recover/:id' },
-  });
+  crudBuilder.build();
 
 export class PhotoCcbCrudServiceFixture extends ConfigurableServiceClass {}
 export class PhotoCcbControllerFixture extends ConfigurableControllerClass {}

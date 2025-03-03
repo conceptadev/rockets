@@ -3,12 +3,17 @@ import {
   IsBoolean,
   IsOptional,
   IsString,
+  IsUUID,
   ValidateNested,
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
-import { ReferenceIdInterface } from '@concepta/nestjs-common';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  OrgProfileInterface,
+  ReferenceIdInterface,
+} from '@concepta/nestjs-common';
 import { OrgInterface } from '@concepta/nestjs-common';
 import { CommonEntityDto, ReferenceIdDto } from '@concepta/nestjs-common';
+import { OrgProfileDto } from './profile/org-profile.dto';
 
 /**
  * Org DTO
@@ -39,14 +44,39 @@ export class OrgDto extends CommonEntityDto implements OrgInterface {
   active = true;
 
   /**
-   * Owner
+   * Owner ID
    */
   @Expose()
   @ApiProperty({
+    type: 'string',
+    description: 'The org owner ID',
+  })
+  @IsUUID()
+  ownerId!: string;
+
+  /**
+   * Owner
+   */
+  @Expose()
+  @ApiPropertyOptional({
     type: ReferenceIdDto,
     description: 'The owner of the org',
   })
   @Type(() => ReferenceIdDto)
+  @IsOptional()
   @ValidateNested()
-  owner: ReferenceIdInterface = { id: '' };
+  owner?: ReferenceIdInterface;
+
+  /**
+   * Org Profile
+   */
+  @Expose()
+  @ApiPropertyOptional({
+    type: OrgProfileDto,
+    description: 'The org profile',
+  })
+  @Type(() => OrgProfileDto)
+  @IsOptional()
+  @ValidateNested()
+  orgProfile?: OrgProfileInterface;
 }
