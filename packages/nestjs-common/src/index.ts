@@ -45,6 +45,13 @@ export { ReferenceQueryOptionsInterface } from './reference/interfaces/reference
 export { ReferenceSubjectInterface } from './reference/interfaces/reference-subject.interface';
 export { ReferenceUsernameInterface } from './reference/interfaces/reference-username.interface';
 export { ReferenceUserInterface } from './reference/interfaces/reference-user.interface';
+export { ReferenceRoleInterface } from './reference/interfaces/reference-role.interface';
+export { ReferenceRolesInterface } from './reference/interfaces/reference-roles.interface';
+
+// role interface
+export { RoleAssignmentInterface } from './domain/role/interfaces/role-assignment.interface';
+export { RoleAssignmentCreatableInterface } from './domain/role/interfaces/role-assignment-creatable.interface';
+export { RoleAssigneesInterface } from './domain/role/interfaces/role-assignees.interface';
 
 // Lookup interfaces
 export { LookupEmailInterface } from './reference/interfaces/lookup/lookup-email.interface';

@@ -19,9 +19,10 @@ import { InvitationCreateDto } from '../dto/invitation-create.dto';
 import { InvitationDto } from '../dto/invitation.dto';
 import { InvitationAcceptInviteDto } from '../dto/invitation-accept-invite.dto';
 import { invitationDefaultConfig } from '../config/invitation-default.config';
-import { InvitationFactory } from '../invitation.factory';
+import { InvitationFactory } from '../seeding/invitation.factory';
 import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
 import { InvitationSettingsInterface } from '../interfaces/invitation-settings.interface';
+
 import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
 import { InvitationEntityFixture } from '../__fixtures__/invitation/entities/invitation.entity.fixture';
 import { UserEntityFixture } from '../__fixtures__/user/entities/user-entity.fixture';

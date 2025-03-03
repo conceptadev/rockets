@@ -11,7 +11,7 @@ import { getDynamicRepositoryToken } from '@concepta/nestjs-typeorm-ext';
 import { INVITATION_MODULE_CATEGORY_USER_KEY } from '@concepta/nestjs-common';
 
 import { INVITATION_MODULE_INVITATION_ENTITY_KEY } from '../invitation.constants';
-import { InvitationFactory } from '../invitation.factory';
+import { InvitationFactory } from '../seeding/invitation.factory';
 import { InvitationSendService } from './invitation-send.service';
 import { InvitationRevocationService } from './invitation-revocation.service';
 import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';

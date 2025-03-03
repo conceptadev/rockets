@@ -17,6 +17,7 @@ import { OwnerFactoryFixture } from './__fixtures__/owner-factory.fixture';
 import { OrgMemberEntityFixture } from './__fixtures__/org-member.entity.fixture';
 import { UserEntityFixture } from './__fixtures__/user-entity.fixture';
 import { InvitationEntityFixture } from './__fixtures__/invitation.entity.fixture';
+import { OrgProfileEntityFixture } from './__fixtures__/org-profile.entity.fixture';
 
 describe('OrgController (e2e)', () => {
   describe('Rest', () => {
@@ -34,6 +35,7 @@ describe('OrgController (e2e)', () => {
               OrgEntityFixture,
               OwnerEntityFixture,
               OrgMemberEntityFixture,
+              OrgProfileEntityFixture,
               UserEntityFixture,
               InvitationEntityFixture,
             ],
@@ -47,7 +49,7 @@ describe('OrgController (e2e)', () => {
               org: {
                 entity: OrgEntityFixture,
               },
-              orgMember: {
+              'org-member': {
                 entity: OrgMemberEntityFixture,
               },
             },
@@ -68,8 +70,10 @@ describe('OrgController (e2e)', () => {
 
       const orgSeeder = new OrgSeeder({
         factories: [
-          new OrgFactory({ entity: OrgEntityFixture }),
-          new OwnerFactoryFixture(),
+          new OrgFactory({
+            entity: OrgEntityFixture,
+            factories: [new OwnerFactoryFixture()],
+          }),
         ],
       });
 
