@@ -91,7 +91,7 @@ export class EventDispatchService {
    * const myEvent = new MyEvent({...myPayloadType, active: false});
    * // dispatch the event
    * const allPayloads: MyPayloadType[] =
-   * await this.eventDispatchService.async(myEvent);
+   * await this.eventDispatchService.emitAsync(myEvent);
    * // merge it
    * allPayloads.forEach((payload) => {
    * // did any listener set it to true?

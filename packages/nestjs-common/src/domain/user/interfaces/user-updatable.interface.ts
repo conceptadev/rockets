@@ -3,6 +3,9 @@ import { PasswordPlainCurrentInterface } from '../../password/interfaces/passwor
 
 export interface UserUpdatableInterface
   extends Partial<
-      Pick<UserCreatableInterface, 'email' | 'password' | 'active'>
+      Pick<
+        UserCreatableInterface,
+        'email' | 'password' | 'active' | 'loginAttempts' | 'lastLogin'
+      >
     >,
     Partial<PasswordPlainCurrentInterface> {}

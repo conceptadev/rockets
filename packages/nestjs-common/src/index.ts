@@ -38,6 +38,7 @@ export {
 
 // Reference interfaces
 export { ReferenceActiveInterface } from './reference/interfaces/reference-active.interface';
+export { ReferenceLockStatusInterface } from './reference/interfaces/reference-lock-status.interface';
 export { ReferenceAssigneeInterface } from './reference/interfaces/reference-assignee.interface';
 export { ReferenceEmailInterface } from './reference/interfaces/reference-email.interface';
 export { ReferenceIdInterface } from './reference/interfaces/reference-id.interface';

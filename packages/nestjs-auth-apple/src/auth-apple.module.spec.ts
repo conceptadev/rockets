@@ -16,6 +16,7 @@ import { AuthAppleModule } from './auth-apple.module';
 
 import { FederatedEntityFixture } from './__fixtures__/federated-entity.fixture';
 import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
+import { EventModule } from '@concepta/nestjs-event';
 
 describe(AuthAppleModule, () => {
   let authAppleModule: AuthAppleModule;
@@ -31,6 +32,7 @@ describe(AuthAppleModule, () => {
             entities: [UserEntityFixture, FederatedEntityFixture],
           }),
           JwtModule.forRoot({}),
+          EventModule.forRoot({}),
           AuthAppleModule.forRoot({}),
           AuthenticationModule.forRoot({}),
           AuthJwtModule.forRootAsync({

@@ -21,5 +21,17 @@ export const authLocalDefaultConfig = registerAs(
      * The field name to use for the password.
      */
     passwordField: process.env.AUTH_LOCAL_PASSWORD_FIELD ?? 'password',
+    /**
+     * The maximum number of login attempts allowed before account is locked
+     */
+    maxAttempts: process.env?.AUTH_LOCAL_MAX_ATTEMPT
+      ? Number(process.env?.AUTH_LOCAL_MAX_ATTEMPT)
+      : 10,
+    /**
+     * The minimum number of login attempts to be allowed before account is locked
+     */
+    minAttempts: process.env?.AUTH_LOCAL_MIN_ATTEMPT
+      ? Number(process.env?.AUTH_LOCAL_MIN_ATTEMPT)
+      : 3,
   }),
 );

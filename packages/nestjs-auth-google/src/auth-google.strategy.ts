@@ -7,6 +7,7 @@ import {
 } from '@concepta/nestjs-federated';
 
 import {
+  AUTH_GOOGLE_AUTHENTICATION_TYPE,
   AUTH_GOOGLE_MODULE_SETTINGS_TOKEN,
   AUTH_GOOGLE_STRATEGY_NAME,
 } from './auth-google.constants';
@@ -17,6 +18,11 @@ import { AuthGoogleMissingEmailException } from './exceptions/auth-google-missin
 import { AuthGoogleMissingIdException } from './exceptions/auth-google-missing-id.exception';
 import { mapProfile } from './utils/auth-google-map-profile';
 import { Strategy } from 'passport-google-oauth20';
+import {
+  AuthenticationRequestInterface,
+  getAuthenticatedUserInfo,
+} from '@concepta/nestjs-authentication';
+import { AuthGoogleAuthenticatedEventAsync } from './events/auth-google-authenticated.event';
 
 @Injectable()
 export class AuthGoogleStrategy extends PassportStrategy(
@@ -33,10 +39,12 @@ export class AuthGoogleStrategy extends PassportStrategy(
       clientSecret: settings?.clientSecret,
       callbackURL: settings?.callbackURL,
       scope: settings?.scope,
+      passReqToCallback: true,
     });
   }
 
   async validate(
+    req: AuthenticationRequestInterface,
     _accessToken: string,
     _refreshToken: string,
     profile: AuthGoogleProfileInterface,
@@ -64,6 +72,30 @@ export class AuthGoogleStrategy extends PassportStrategy(
       throw new UnauthorizedException();
     }
 
+    await this.dispatchAuthAttemptEvent(req, user.id, true);
     return user;
+  }
+
+  protected async dispatchAuthAttemptEvent(
+    req: AuthenticationRequestInterface,
+    userId: string,
+    success: boolean,
+    failureReason?: string | null,
+  ): Promise<void> {
+    const info = getAuthenticatedUserInfo(req);
+
+    const failMessage = failureReason ? { failureReason } : {};
+    const authenticatedEventAsync = new AuthGoogleAuthenticatedEventAsync({
+      userInfo: {
+        userId: userId,
+        ipAddress: info.ipAddress || '',
+        deviceInfo: info.deviceInfo || '',
+        authType: AUTH_GOOGLE_AUTHENTICATION_TYPE,
+        success,
+        ...failMessage,
+      },
+    });
+
+    await authenticatedEventAsync.emit();
   }
 }

@@ -5,11 +5,14 @@ export * from './config/authentication-default.config';
 export { AuthUser } from './decorators/auth-user.decorator';
 export { AuthPublic } from './decorators/auth-public.decorator';
 
+export { getAuthenticatedUserInfo } from './authentication.utils';
+
 export * from './interfaces/authentication-options.interface';
 
 export { VerifyTokenServiceInterface } from './interfaces/verify-token-service.interface';
 export { IssueTokenServiceInterface } from './interfaces/issue-token-service.interface';
 export { ValidateUserServiceInterface } from './interfaces/validate-user-service.interface';
+export { AuthenticationRequestInterface } from './interfaces/authentication-request.interface';
 export * from './factories/passport-strategy.factory';
 
 export * from './guards/auth.guard';

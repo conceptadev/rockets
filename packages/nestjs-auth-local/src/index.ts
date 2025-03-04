@@ -6,6 +6,7 @@ export { AuthLocalCredentialsInterface } from './interfaces/auth-local-credentia
 
 // DTOs
 export { AuthLocalLoginDto } from './dto/auth-local-login.dto';
+export { AuthLocalAuthenticatedEventAsync } from './events/auth-local-authenticated.event';
 
 // module
 export { AuthLocalModule } from './auth-local.module';

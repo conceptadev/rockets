@@ -2,11 +2,14 @@ export { EmailSendOptionsInterface } from './email/interfaces/email-send-options
 export { EmailSendInterface } from './email/interfaces/email-send.interface';
 
 export { AuthenticatedUserInterface } from './authentication/interfaces/authenticated-user.interface';
+export { AuthenticatedUserInfoInterface } from './authentication/interfaces/authenticated-user-info.interface';
 export { AuthenticationAccessInterface } from './authentication/interfaces/authentication-access.interface';
 export { AuthenticationCodeInterface } from './authentication/interfaces/authentication-code.interface';
 export { AuthenticationLoginInterface } from './authentication/interfaces/authentication-login.interface';
 export { AuthenticationRefreshInterface } from './authentication/interfaces/authentication-refresh.interface';
 export { AuthenticationResponseInterface } from './authentication/interfaces/authentication-response.interface';
+export { AuthenticatedEventInterface } from './authentication/interfaces/authenticated-event-payload.interface';
+export { AuthenticatedUserRequestInterface } from './authentication/interfaces/authenticated-info.interface';
 
 export { AuthorizationPayloadInterface } from './authorization/interfaces/authorization-payload.interface';
 
@@ -27,6 +30,11 @@ export { UserCreatableInterface } from './user/interfaces/user-creatable.interfa
 export { UserOwnableInterface } from './user/interfaces/user-ownable.interface';
 export { UserUpdatableInterface } from './user/interfaces/user-updatable.interface';
 export { UserInterface } from './user/interfaces/user.interface';
+
+export { AuthHistoryCreatableInterface } from './auth-history/interfaces/auth-history-creatable.interface';
+export { AuthenticatedUserInfoInterface as AuthHistoryLoginInterface } from './authentication/interfaces/authenticated-user-info.interface';
+export { AuthHistoryOwnableInterface } from './auth-history/interfaces/auth-history-ownable.interface';
+export { AuthHistoryInterface } from './auth-history/interfaces/auth-history.interface';
 
 export { FederatedCreatableInterface } from './federated/interfaces/federated-creatable.interface';
 export { FederatedUpdatableInterface } from './federated/interfaces/federated-updatable.interface';

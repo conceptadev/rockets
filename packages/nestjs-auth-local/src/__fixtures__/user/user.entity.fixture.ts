@@ -15,4 +15,8 @@ export class UserFixture
   passwordHash!: string | null;
 
   passwordSalt!: string | null;
+
+  loginAttempts?: number;
+
+  lastLogin?: Date | null;
 }

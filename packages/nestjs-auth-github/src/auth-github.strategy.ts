@@ -8,6 +8,7 @@ import {
 } from '@concepta/nestjs-federated';
 
 import {
+  AUTH_GITHUB_AUTHENTICATION_TYPE,
   AUTH_GITHUB_MODULE_SETTINGS_TOKEN,
   AUTH_GITHUB_STRATEGY_NAME,
 } from './auth-github.constants';
@@ -17,6 +18,9 @@ import { AuthGithubProfileInterface } from './interfaces/auth-github-profile.int
 import { AuthGithubMissingEmailException } from './exceptions/auth-github-missing-email.exception';
 import { AuthGithubMissingIdException } from './exceptions/auth-github-missing-id.exception';
 import { mapProfile } from './utils/auth-github-map-profile';
+import { AuthGithubAuthenticatedEventAsync } from './events/auth-github-authenticated.event';
+import { getAuthenticatedUserInfo } from '@concepta/nestjs-authentication/src';
+import { AuthenticationRequestInterface } from '@concepta/nestjs-authentication';
 
 @Injectable()
 export class AuthGithubStrategy extends PassportStrategy(
@@ -32,10 +36,12 @@ export class AuthGithubStrategy extends PassportStrategy(
       clientID: settings?.clientId,
       clientSecret: settings?.clientSecret,
       callbackURL: settings?.callbackURL,
+      passReqToCallback: true,
     });
   }
 
   async validate(
+    req: AuthenticationRequestInterface,
     _accessToken: string,
     _refreshToken: string,
     profile: AuthGithubProfileInterface,
@@ -62,7 +68,30 @@ export class AuthGithubStrategy extends PassportStrategy(
     if (!user) {
       throw new UnauthorizedException();
     }
-
+    await this.dispatchAuthAttemptEvent(req, user.id, true);
     return user;
+  }
+
+  protected async dispatchAuthAttemptEvent(
+    req: AuthenticationRequestInterface,
+    userId: string,
+    success: boolean,
+    failureReason?: string | null,
+  ): Promise<void> {
+    const info = getAuthenticatedUserInfo(req);
+
+    const failMessage = failureReason ? { failureReason } : {};
+    const authenticatedEventAsync = new AuthGithubAuthenticatedEventAsync({
+      userInfo: {
+        userId: userId,
+        ipAddress: info.ipAddress || '',
+        deviceInfo: info.deviceInfo || '',
+        authType: AUTH_GITHUB_AUTHENTICATION_TYPE,
+        success,
+        ...failMessage,
+      },
+    });
+
+    await authenticatedEventAsync.emit();
   }
 }
