@@ -5,7 +5,7 @@ export { InvitationAcceptedEventAsync } from './events/invitation-accepted.event
 export { InvitationGetUserEventAsync } from './events/invitation-get-user.event';
 
 export { InvitationEntityInterface } from './interfaces/invitation.entity.interface';
-export { InvitationCreatableInterface } from './interfaces/invitation-creatable.interface';
+export { InvitationCreateOneInterface as InvitationCreatableInterface } from './interfaces/invitation-create-one.interface';
 export { InvitationServiceInterface } from './interfaces/invitation.service.interface';
 
 export { InvitationPostgresEntity } from './entities/invitation-postgres.entity';

@@ -61,7 +61,7 @@ export class InvitationAcceptanceController {
       success = await this.invitationAcceptanceService.accept({
         invitation,
         passcode,
-        constraints: payload,
+        payload,
       });
     } catch (e) {
       Logger.error(e);

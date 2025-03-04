@@ -17,7 +17,7 @@ import { InvitationGetUserEventAsync } from '../events/invitation-get-user.event
 import { InvitationUserUndefinedException } from '../exceptions/invitation-user-undefined.exception';
 
 import { InvitationSendServiceInterface } from '../interfaces/invitation-send-service.interface';
-import { InvitationCreatableInterface } from '../interfaces/invitation-creatable.interface';
+import { InvitationCreateOneInterface } from '../interfaces/invitation-create-one.interface';
 import { InvitationMutateService } from './invitation-mutate.service';
 import { randomUUID } from 'crypto';
 
@@ -42,7 +42,7 @@ export class InvitationSendService implements InvitationSendServiceInterface {
    *          category
    */
   async create(
-    createDto: InvitationCreatableInterface,
+    createDto: InvitationCreateOneInterface,
     queryOptions?: QueryOptionsInterface,
   ): Promise<
     Required<Pick<InvitationInterface, 'id' | 'user' | 'code' | 'category'>>

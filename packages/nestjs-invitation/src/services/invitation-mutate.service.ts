@@ -3,8 +3,8 @@ import { MutateService } from '@concepta/typeorm-common';
 import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 
-import { InvitationMutateCreateDto } from '../dto/invitation-mutate-create.dto';
-import { InvitationMutateCreateInterface } from '../interfaces/invitation-mutate-create.interface';
+import { InvitationCreateDto } from '../dto/invitation-create.dto';
+import { InvitationCreatableInterface } from '../interfaces/invitation-creatable.interface';
 import { InvitationMutateServiceInterface } from '../interfaces/invitation-mutate-service.interface';
 import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
 import { INVITATION_MODULE_INVITATION_ENTITY_KEY } from '../invitation.constants';
@@ -16,12 +16,12 @@ import { INVITATION_MODULE_INVITATION_ENTITY_KEY } from '../invitation.constants
 export class InvitationMutateService
   extends MutateService<
     InvitationEntityInterface,
-    InvitationMutateCreateInterface,
+    InvitationCreatableInterface,
     never
   >
   implements InvitationMutateServiceInterface
 {
-  protected createDto = InvitationMutateCreateDto;
+  protected createDto = InvitationCreateDto;
   protected updateDto!: never;
 
   /**

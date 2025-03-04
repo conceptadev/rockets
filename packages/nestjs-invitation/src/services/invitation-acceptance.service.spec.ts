@@ -117,7 +117,7 @@ describe(InvitationAcceptanceService, () => {
     const inviteAccepted = await invitationAcceptanceService.accept({
       invitation: testInvitation,
       passcode: otp.passcode,
-      constraints: {
+      payload: {
         userId: otp.assignee.id,
         newPassword: 'hOdv2A2h%',
       },

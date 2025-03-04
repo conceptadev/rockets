@@ -15,7 +15,7 @@ import { SeedingSource } from '@concepta/typeorm-seeding';
 import { getDataSourceToken } from '@nestjs/typeorm';
 
 import { INVITATION_MODULE_DEFAULT_SETTINGS_TOKEN } from '../invitation.constants';
-import { InvitationCreateDto } from '../dto/invitation-create.dto';
+import { InvitationCreateOneDto } from '../dto/invitation-create-one.dto';
 import { InvitationDto } from '../dto/invitation.dto';
 import { InvitationAcceptInviteDto } from '../dto/invitation-accept-invite.dto';
 import { invitationDefaultConfig } from '../config/invitation-default.config';
@@ -197,7 +197,7 @@ describe('InvitationController (e2e)', () => {
         email: user.email,
         category: userCategory,
         constraints: payload,
-      } as InvitationCreateDto;
+      } as InvitationCreateOneDto;
       const invite1 = await createInvite(app, invitationCreateDto);
       const invite2 = await createInvite(app, invitationCreateDto);
       const invite3 = await createInvite(app, invitationCreateDto);
@@ -250,7 +250,7 @@ describe('InvitationController (e2e)', () => {
 
 const createInvite = async (
   app: INestApplication,
-  invitationCreateDto: InvitationCreateDto,
+  invitationCreateDto: InvitationCreateOneDto,
 ): Promise<InvitationDto> => {
   const response = await supertest(app.getHttpServer())
     .post('/invitation')

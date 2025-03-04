@@ -18,11 +18,11 @@ import {
 } from '@concepta/nestjs-crud';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { InvitationCreateDto } from '../dto/invitation-create.dto';
+import { InvitationCreateOneDto } from '../dto/invitation-create-one.dto';
 import { InvitationPaginatedDto } from '../dto/invitation-paginated.dto';
 import { InvitationDto } from '../dto/invitation.dto';
 import { InvitationException } from '../exceptions/invitation.exception';
-import { InvitationCreatableInterface } from '../interfaces/invitation-creatable.interface';
+import { InvitationCreateOneInterface } from '../interfaces/invitation-create-one.interface';
 import { InvitationResource } from '../invitation.types';
 import { InvitationCrudService } from '../services/invitation-crud.service';
 import { InvitationSendService } from '../services/invitation-send.service';
@@ -45,8 +45,8 @@ export class InvitationController
   implements
     CrudControllerInterface<
       InvitationInterface,
-      InvitationCreatableInterface,
-      InvitationCreatableInterface
+      InvitationCreateOneInterface,
+      InvitationCreateOneInterface
     >
 {
   constructor(
@@ -79,7 +79,7 @@ export class InvitationController
   })
   async createOneCustom(
     @CrudRequest() _crudRequest: CrudRequestInterface,
-    @CrudBody() invitationCreateDto: InvitationCreateDto,
+    @CrudBody() invitationCreateOneDto: InvitationCreateOneDto,
   ) {
     let invite:
       | Required<Pick<InvitationInterface, 'id' | 'user' | 'code' | 'category'>>
@@ -90,7 +90,7 @@ export class InvitationController
         .transaction()
         .commit(async (transaction): Promise<void> => {
           invite = await this.invitationSendService.create(
-            invitationCreateDto,
+            invitationCreateOneDto,
             {
               transaction,
             },

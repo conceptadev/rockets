@@ -1,7 +1,7 @@
 import { InvitationInterface } from '@concepta/nestjs-common';
 import { InvitationGetUserEventResponseInterface } from '@concepta/nestjs-common/src';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
-import { InvitationCreatableInterface } from './invitation-creatable.interface';
+import { InvitationCreateOneInterface } from './invitation-create-one.interface';
 
 export interface InvitationSendServiceInterface {
   /**
@@ -12,7 +12,7 @@ export interface InvitationSendServiceInterface {
    * @returns Promise resolving to the created invitation with id and user
    */
   create(
-    createDto: InvitationCreatableInterface,
+    createDto: InvitationCreateOneInterface,
     queryOptions?: QueryOptionsInterface,
   ): Promise<Required<Pick<InvitationInterface, 'id' | 'user'>>>;
 

@@ -2,7 +2,7 @@ import { InvitationGetUserEventResponseInterface } from '@concepta/nestjs-common
 import { InvitationInterface } from '@concepta/nestjs-common/src';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 import { Injectable } from '@nestjs/common';
-import { InvitationCreatableInterface } from '../../../interfaces/invitation-creatable.interface';
+import { InvitationCreateOneInterface } from '../../../interfaces/invitation-create-one.interface';
 import { InvitationSendServiceInterface } from '../../../interfaces/invitation-send-service.interface';
 
 @Injectable()
@@ -10,7 +10,7 @@ export class InvitationSendServiceFixture
   implements InvitationSendServiceInterface
 {
   create(
-    _createDto: InvitationCreatableInterface,
+    _createDto: InvitationCreateOneInterface,
     _queryOptions?: QueryOptionsInterface,
   ): Promise<Required<Pick<InvitationInterface, 'id' | 'user'>>> {
     return Promise.resolve({

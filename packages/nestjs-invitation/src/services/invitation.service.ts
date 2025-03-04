@@ -8,7 +8,7 @@ import { InvitationRevocationService } from './invitation-revocation.service';
 import { InvitationInterface } from '@concepta/nestjs-common/src';
 import { InvitationAcceptOptionsInterface } from '../interfaces/invitation-accept-options.interface';
 import { InvitationRevokeOptionsInterface } from '../interfaces/invitation-revoke-options.interface';
-import { InvitationCreatableInterface } from '../interfaces/invitation-creatable.interface';
+import { InvitationCreateOneInterface } from '../interfaces/invitation-create-one.interface';
 
 @Injectable()
 export class InvitationService implements InvitationServiceInterface {
@@ -18,7 +18,7 @@ export class InvitationService implements InvitationServiceInterface {
     private readonly invitationRevocationService: InvitationRevocationService,
   ) {}
   async create(
-    createDto: InvitationCreatableInterface,
+    createDto: InvitationCreateOneInterface,
     queryOptions?: QueryOptionsInterface,
   ): Promise<Required<Pick<InvitationInterface, 'id' | 'user'>>> {
     return this.invitationSendService.create(createDto, queryOptions);

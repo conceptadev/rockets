@@ -47,7 +47,11 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
     options: InvitationAcceptOptionsInterface,
     queryOptions?: QueryOptionsInterface,
   ): Promise<boolean> {
-    const { invitation: invitationDto, passcode, constraints } = options;
+    const {
+      invitation: invitationDto,
+      passcode,
+      payload: constraints,
+    } = options;
     const { category, email } = invitationDto;
 
     // run in transaction
