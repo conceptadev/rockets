@@ -46,7 +46,7 @@ export interface InvitationSendServiceInterface {
 
   /**
    * Send an invitation email
-   * 
+   *
    * @param options - The email options containing recipient email, invitation code,
    *                 passcode and expiration
    * @returns Promise resolving when email is sent
