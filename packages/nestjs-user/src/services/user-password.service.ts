@@ -1,5 +1,9 @@
 import { HttpStatus, Inject, Injectable, Optional } from '@nestjs/common';
-import { ReferenceId, ReferenceIdInterface } from '@concepta/nestjs-common';
+import {
+  ReferenceId,
+  ReferenceIdInterface,
+  UserRolesInterface,
+} from '@concepta/nestjs-common';
 import {
   AuthenticatedUserInterface,
   PasswordPlainCurrentInterface,
@@ -19,6 +23,8 @@ import { UserLookupService } from './user-lookup.service';
 import { UserPasswordHistoryService } from './user-password-history.service';
 import { UserException } from '../exceptions/user-exception';
 import { UserNotFoundException } from '../exceptions/user-not-found-exception';
+import { UserRoleService } from './user-role.service';
+import { UserRoleServiceInterface } from '../interfaces/user-role-service.interface';
 
 /**
  * User password service
@@ -39,11 +45,16 @@ export class UserPasswordService implements UserPasswordServiceInterface {
     @Optional()
     @Inject(UserPasswordHistoryService)
     private userPasswordHistoryService?: UserPasswordHistoryServiceInterface,
+    @Optional()
+    @Inject(UserRoleService)
+    private userRoleService?: UserRoleServiceInterface,
   ) {}
 
   async setPassword(
     passwordDto: Partial<
-      PasswordPlainInterface & PasswordPlainCurrentInterface
+      PasswordPlainInterface &
+        PasswordPlainCurrentInterface &
+        UserRolesInterface
     >,
     userToUpdateId?: ReferenceId,
     authorizedUser?: AuthenticatedUserInterface,
@@ -76,11 +87,18 @@ export class UserPasswordService implements UserPasswordServiceInterface {
 
       // create safe object
       const targetSafe = { ...passwordDto, password };
+      let passwordStrength;
+      if (this.userRoleService) {
+        passwordStrength = await this.userRoleService.getPasswordStrength(
+          passwordDto.userRoles,
+          userToUpdateId,
+        );
+      }
 
-      // call the password creation service
       const userWithPasswordHashed =
         await this.passwordCreationService.createObject(targetSafe, {
           required: false,
+          passwordStrength,
         });
 
       // push password history if necessary

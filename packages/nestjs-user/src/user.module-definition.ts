@@ -38,6 +38,7 @@ import { UserController } from './user.controller';
 import { InvitationAcceptedListener } from './listeners/invitation-accepted-listener';
 import { InvitationGetUserListener } from './listeners/invitation-get-user.listener';
 import { userDefaultConfig } from './config/user-default.config';
+import { UserRoleService } from './services/user-role.service';
 
 const RAW_OPTIONS_TOKEN = Symbol('__USER_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -101,6 +102,7 @@ export function createUserProviders(options: {
     createUserLookupServiceProvider(options.overrides),
     createUserMutateServiceProvider(options.overrides),
     createUserPasswordServiceProvider(options.overrides),
+    createUserRoleServiceProvider(options.overrides),
     createUserPasswordHistoryServiceProvider(options.overrides),
     createUserPasswordHistoryLookupServiceProvider(),
     createUserPasswordHistoryMutateServiceProvider(),
@@ -117,6 +119,7 @@ export function createUserExports(): Required<
     UserMutateService,
     UserCrudService,
     UserPasswordService,
+    UserRoleService,
     UserPasswordHistoryService,
     UserPasswordHistoryLookupService,
     UserPasswordHistoryMutateService,
@@ -192,6 +195,7 @@ export function createUserPasswordServiceProvider(
       RAW_OPTIONS_TOKEN,
       UserLookupService,
       PasswordCreationService,
+      UserRoleService,
       {
         token: UserPasswordHistoryService,
         optional: true,
@@ -201,6 +205,7 @@ export function createUserPasswordServiceProvider(
       options: UserOptionsInterface,
       userLookUpService: UserLookupServiceInterface,
       passwordCreationService: PasswordCreationService,
+      userRoleService: UserRoleService,
       userPasswordHistoryService?: UserPasswordHistoryService,
     ) =>
       optionsOverrides?.userPasswordService ??
@@ -209,7 +214,25 @@ export function createUserPasswordServiceProvider(
         userLookUpService,
         passwordCreationService,
         userPasswordHistoryService,
+        userRoleService,
       ),
+  };
+}
+
+export function createUserRoleServiceProvider(
+  optionsOverrides?: UserOptions,
+): Provider {
+  return {
+    provide: UserRoleService,
+    inject: [RAW_OPTIONS_TOKEN, USER_MODULE_SETTINGS_TOKEN, UserLookupService],
+    useFactory: async (
+      options: UserOptionsInterface,
+      settings: UserSettingsInterface,
+      userLookUpService: UserLookupServiceInterface,
+    ) =>
+      optionsOverrides?.userRoleService ??
+      options.userRoleService ??
+      new UserRoleService(settings, userLookUpService),
   };
 }
 

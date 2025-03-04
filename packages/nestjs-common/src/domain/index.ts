@@ -12,6 +12,7 @@ export { AuthorizationPayloadInterface } from './authorization/interfaces/author
 
 export { PasswordPlainCurrentInterface } from './password/interfaces/password-plain-current.interface';
 export { PasswordPlainInterface } from './password/interfaces/password-plain.interface';
+export { PasswordStrengthTransformOptionsInterface } from './password/interfaces/password-strength-transform-options.interface';
 
 export { OrgCreatableInterface } from './org/interfaces/org-creatable.interface';
 export { OrgOwnableInterface } from './org/interfaces/org-ownable.interface';
@@ -28,6 +29,8 @@ export { UserOwnableInterface } from './user/interfaces/user-ownable.interface';
 export { UserUpdatableInterface } from './user/interfaces/user-updatable.interface';
 export { UserInterface } from './user/interfaces/user.interface';
 
+export { UserRolesInterface } from './user/interfaces/user-roles.interface';
+
 export { FederatedCreatableInterface } from './federated/interfaces/federated-creatable.interface';
 export { FederatedUpdatableInterface } from './federated/interfaces/federated-updatable.interface';
 export { FederatedInterface } from './federated/interfaces/federated.interface';
@@ -37,6 +40,7 @@ export { RoleAssignmentCreatableInterface } from './role/interfaces/role-assignm
 export { RoleAssignmentInterface } from './role/interfaces/role-assignment.interface';
 export { RoleCreatableInterface } from './role/interfaces/role-creatable.interface';
 export { RoleUpdatableInterface } from './role/interfaces/role-updatable.interface';
+export { RoleOwnableInterface } from './role/interfaces/role-ownable.interface';
 export { RoleInterface } from './role/interfaces/role.interface';
 
 export { OtpClearInterface } from './otp/interfaces/otp-clear.interface';

@@ -4,6 +4,7 @@ import {
   USER_MODULE_DEFAULT_SETTINGS_TOKEN,
   USER_MODULE_USER_PASSWORD_HISTORY_LIMIT_DAYS_DEFAULT,
 } from '../user.constants';
+import { defaultPasswordStrengthTransform } from '../user.utils';
 
 /**
  * Default configuration for User module.
@@ -23,6 +24,9 @@ export const userDefaultConfig = registerAs(
       passwordHistory: {
         enabled,
         limitDays: isNaN(limitDays) || limitDays < 1 ? undefined : limitDays,
+      },
+      passwordStrength: {
+        passwordStrengthTransform: defaultPasswordStrengthTransform,
       },
     };
   },

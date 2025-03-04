@@ -1,29 +1,31 @@
-import supertest from 'supertest';
-import { randomUUID } from 'crypto';
-import { getDataSourceToken } from '@nestjs/typeorm';
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import { HttpAdapterHost } from '@nestjs/core';
-import { ExceptionsFilter } from '@concepta/nestjs-exception';
-import { IssueTokenService } from '@concepta/nestjs-authentication';
 import { AccessControlService } from '@concepta/nestjs-access-control';
+import { IssueTokenService } from '@concepta/nestjs-authentication';
+import { ExceptionsFilter } from '@concepta/nestjs-exception';
 import {
   PasswordCreationService,
   PasswordStorageInterface,
   PasswordStorageService,
+  PasswordStrengthEnum,
   PasswordValidationService,
 } from '@concepta/nestjs-password';
 import { SeedingSource } from '@concepta/typeorm-seeding';
+import { INestApplication } from '@nestjs/common';
+import { HttpAdapterHost } from '@nestjs/core';
+import { Test, TestingModule } from '@nestjs/testing';
+import { getDataSourceToken } from '@nestjs/typeorm';
+import { randomUUID } from 'crypto';
+import supertest from 'supertest';
 
-import { UserFactory } from './user.factory';
 import { UserLookupService } from './services/user-lookup.service';
-import { UserPasswordHistoryFactory } from './user-password-history.factory';
-import { UserPasswordService } from './services/user-password.service';
 import { UserPasswordHistoryLookupService } from './services/user-password-history-lookup.service';
+import { UserPasswordService } from './services/user-password.service';
+import { UserPasswordHistoryFactory } from './user-password-history.factory';
+import { UserFactory } from './user.factory';
 
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
-import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
 import { UserPasswordHistoryEntityFixture } from './__fixtures__/user-password-history.entity.fixture';
+import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
+import { UserRoleService } from './services/user-role.service';
 
 describe('User Controller (password e2e)', () => {
   describe('Password Update Flow', () => {
@@ -36,6 +38,7 @@ describe('User Controller (password e2e)', () => {
     let passwordCreationService: PasswordCreationService;
     let userLookupService: UserLookupService;
     let userPasswordService: UserPasswordService;
+    let userRoleService: UserRoleService;
     let userPasswordHistoryLookupService: UserPasswordHistoryLookupService;
     let issueTokenService: IssueTokenService;
     let accessControlService: AccessControlService;
@@ -74,6 +77,7 @@ describe('User Controller (password e2e)', () => {
       passwordCreationService = app.get(PasswordCreationService);
       userLookupService = app.get(UserLookupService);
       userPasswordService = app.get(UserPasswordService);
+      userRoleService = app.get(UserRoleService);
       userPasswordHistoryLookupService = app.get(
         UserPasswordHistoryLookupService,
       );
@@ -98,12 +102,11 @@ describe('User Controller (password e2e)', () => {
         entity: UserPasswordHistoryEntityFixture,
       });
 
-      fakeUser = await userFactory.create(
-        await passwordStorageService.hashObject({
-          id: userId,
-          password: userPassword,
-        }),
-      );
+      const userWithPassword = await passwordStorageService.hashObject({
+        id: userId,
+        password: userPassword,
+      });
+      fakeUser = await userFactory.create(userWithPassword);
 
       await userPasswordHistoryFactory.create(
         await passwordStorageService.hashObject({
@@ -236,6 +239,242 @@ describe('User Controller (password e2e)', () => {
         } else {
           fail('User not updated');
         }
+      });
+    });
+
+    describe(`UserPasswordController user WITH roles`, () => {
+      it('Should update password', async () => {
+        passwordCreationService['settings'].requireCurrentToUpdate = false;
+
+        jest.spyOn(userLookupService, 'byId').mockResolvedValueOnce({
+          ...fakeUser,
+          userRoles: [
+            {
+              role: {
+                name: 'manager',
+              },
+            },
+          ],
+        } as UserEntityFixture);
+
+        await supertest(app.getHttpServer())
+          .patch(`/user/${userId}`)
+          .set('Authorization', `bearer ${authToken}`)
+          .send({
+            password: userNewPassword,
+          })
+          .expect(200);
+
+        const updatedUser = await userLookupService.byId(userId);
+
+        if (updatedUser) {
+          const isPasswordValid =
+            await passwordValidationService.validateObject(
+              userNewPassword,
+              updatedUser,
+            );
+          expect(isPasswordValid).toEqual<boolean>(true);
+        } else {
+          fail('User not updated');
+        }
+      });
+
+      it('Should not update weak password for admin', async () => {
+        passwordCreationService['settings'].requireCurrentToUpdate = false;
+        userRoleService['userSettings'].passwordStrength = {
+          passwordStrengthTransform: (
+            options,
+          ): PasswordStrengthEnum | undefined => {
+            if (
+              options?.roles &&
+              options?.roles.some((role) => role.role?.name === 'admin')
+            ) {
+              return PasswordStrengthEnum.VeryStrong;
+            }
+            return undefined;
+          },
+        };
+
+        jest.spyOn(userLookupService, 'byId').mockResolvedValue({
+          ...fakeUser,
+          userRoles: [
+            {
+              roleId: randomUUID(),
+              role: {
+                name: 'admin',
+              },
+            },
+          ],
+        });
+
+        await supertest(app.getHttpServer())
+          .patch(`/user/${userId}`)
+          .set('Authorization', `bearer ${authToken}`)
+          .send({
+            password: userNewPassword,
+          })
+          .expect(400)
+          .expect((res) => {
+            expect(res.body.message).toBe('Password is not strong enough');
+            expect(res.body.errorCode).toBe('PASSWORD_NOT_STRONG_ERROR');
+          });
+      });
+
+      it('Should not update weak password for admin', async () => {
+        passwordCreationService['settings'].requireCurrentToUpdate = false;
+        userRoleService['userSettings'].passwordStrength = {
+          passwordStrengthTransform: (
+            options,
+          ): PasswordStrengthEnum | undefined => {
+            if (
+              options?.roles &&
+              options?.roles.some((role) => role.role?.name === 'admin')
+            ) {
+              return PasswordStrengthEnum.VeryStrong;
+            }
+            if (
+              options?.roles &&
+              options?.roles.some((role) => role.role?.name === 'user')
+            ) {
+              return PasswordStrengthEnum.None;
+            }
+            return undefined;
+          },
+        };
+
+        jest.spyOn(userLookupService, 'byId').mockResolvedValue({
+          ...fakeUser,
+          userRoles: [
+            {
+              roleId: randomUUID(),
+              role: {
+                name: 'admin',
+              },
+            },
+            {
+              roleId: randomUUID(),
+              role: {
+                name: 'user',
+              },
+            },
+          ],
+        });
+
+        await supertest(app.getHttpServer())
+          .patch(`/user/${userId}`)
+          .set('Authorization', `bearer ${authToken}`)
+          .send({
+            password: userNewPassword,
+          })
+          .expect(400)
+          .expect((res) => {
+            expect(res.body.message).toBe('Password is not strong enough');
+            expect(res.body.errorCode).toBe('PASSWORD_NOT_STRONG_ERROR');
+          });
+      });
+
+      it('Should update with weak password for admin', async () => {
+        passwordCreationService['settings'].requireCurrentToUpdate = false;
+        userRoleService['userSettings'].passwordStrength = {
+          passwordStrengthTransform: (
+            options,
+          ): PasswordStrengthEnum | undefined => {
+            if (
+              options?.roles &&
+              options?.roles.some((role) => role.role?.name === 'user')
+            ) {
+              return PasswordStrengthEnum.None;
+            }
+            return undefined;
+          },
+        };
+
+        jest.spyOn(userLookupService, 'byId').mockResolvedValue({
+          ...fakeUser,
+          userRoles: [
+            {
+              roleId: randomUUID(),
+              role: {
+                name: 'user',
+              },
+            },
+          ],
+        });
+
+        await supertest(app.getHttpServer())
+          .patch(`/user/${userId}`)
+          .set('Authorization', `bearer ${authToken}`)
+          .send({
+            password: userNewPassword,
+          })
+          .expect(200);
+      });
+
+      it('Should update password for admin and user ', async () => {
+        passwordCreationService['settings'].requireCurrentToUpdate = false;
+        userRoleService['userSettings'].passwordStrength = {
+          passwordStrengthTransform: (
+            options,
+          ): PasswordStrengthEnum | undefined => {
+            if (
+              options?.roles &&
+              options?.roles.some((role) => role.role?.name === 'admin')
+            ) {
+              return PasswordStrengthEnum.VeryStrong;
+            }
+            if (
+              options?.roles &&
+              options?.roles.some((role) => role.role?.name === 'user')
+            ) {
+              return PasswordStrengthEnum.None;
+            }
+            return undefined;
+          },
+        };
+
+        jest.spyOn(userLookupService, 'byId').mockResolvedValue({
+          ...fakeUser,
+          userRoles: [
+            {
+              roleId: randomUUID(),
+              role: {
+                name: 'user',
+              },
+            },
+          ],
+        });
+
+        await supertest(app.getHttpServer())
+          .patch(`/user/${userId}`)
+          .set('Authorization', `bearer ${authToken}`)
+          .send({
+            password: userNewPassword,
+          })
+          .expect(200);
+
+        jest.spyOn(userLookupService, 'byId').mockResolvedValue({
+          ...fakeUser,
+          userRoles: [
+            {
+              roleId: randomUUID(),
+              role: {
+                name: 'admin',
+              },
+            },
+          ],
+        });
+
+        await supertest(app.getHttpServer())
+          .patch(`/user/${userId}`)
+          .set('Authorization', `bearer ${authToken}`)
+          .send({
+            password: userPassword,
+          })
+          .expect(400)
+          .expect((res) => {
+            expect(res.body.message).toBe('Password is not strong enough');
+            expect(res.body.errorCode).toBe('PASSWORD_NOT_STRONG_ERROR');
+          });
       });
     });
   });

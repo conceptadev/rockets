@@ -7,6 +7,7 @@ import {
   InvitationGetUserEventPayloadInterface,
   InvitationGetUserEventResponseInterface,
 } from '@concepta/nestjs-common';
+import { PasswordStrengthTransform } from '../user.types';
 
 export interface UserSettingsInterface {
   invitationRequestEvent?: EventClassInterface<
@@ -27,5 +28,9 @@ export interface UserSettingsInterface {
      * number of days that password history limitation applies for
      */
     limitDays?: number | undefined;
+  };
+
+  passwordStrength?: {
+    passwordStrengthTransform?: PasswordStrengthTransform;
   };
 }
