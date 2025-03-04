@@ -2,6 +2,7 @@ import { InvitationInterface } from '@concepta/nestjs-common';
 import { InvitationGetUserEventResponseInterface } from '@concepta/nestjs-common/src';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 import { InvitationCreateOneInterface } from './invitation-create-one.interface';
+import { InvitationSendInvitationEmailOptionsInterface } from './invitation-send-invitation-email-options.interface';
 
 export interface InvitationSendServiceInterface {
   /**
@@ -42,4 +43,15 @@ export interface InvitationSendServiceInterface {
       Partial<Pick<InvitationInterface, 'constraints'>>,
     queryOptions?: QueryOptionsInterface,
   ): Promise<InvitationGetUserEventResponseInterface>;
+
+  /**
+   * Send an invitation email
+   * 
+   * @param options - The email options containing recipient email, invitation code,
+   *                 passcode and expiration
+   * @returns Promise resolving when email is sent
+   */
+  sendInvitationEmail(
+    options: InvitationSendInvitationEmailOptionsInterface,
+  ): Promise<void>;
 }

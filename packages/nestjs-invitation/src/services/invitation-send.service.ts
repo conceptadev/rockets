@@ -20,6 +20,7 @@ import { InvitationSendServiceInterface } from '../interfaces/invitation-send-se
 import { InvitationCreateOneInterface } from '../interfaces/invitation-create-one.interface';
 import { InvitationMutateService } from './invitation-mutate.service';
 import { randomUUID } from 'crypto';
+import { InvitationSendInvitationEmailOptionsInterface } from '../interfaces/invitation-send-invitation-email-options.interface';
 
 export class InvitationSendService implements InvitationSendServiceInterface {
   constructor(
@@ -98,7 +99,12 @@ export class InvitationSendService implements InvitationSendServiceInterface {
     });
 
     // send the invite email
-    await this.sendEmail(user.email, code, otp.passcode, otp.expirationDate);
+    await this.sendInvitationEmail({
+      email: user.email,
+      code,
+      passcode: otp.passcode,
+      resetTokenExp: otp.expirationDate,
+    });
   }
 
   async getUser(
@@ -124,12 +130,10 @@ export class InvitationSendService implements InvitationSendServiceInterface {
     return user;
   }
 
-  async sendEmail(
-    email: string,
-    code: string,
-    passcode: string,
-    resetTokenExp: Date,
+  async sendInvitationEmail(
+    options: InvitationSendInvitationEmailOptionsInterface,
   ): Promise<void> {
+    const { email, code, passcode, resetTokenExp } = options;
     const { from, baseUrl } = this.settings.email;
     const { subject, fileName, logo } =
       this.settings.email.templates.invitation;

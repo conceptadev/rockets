@@ -4,6 +4,7 @@ import { QueryOptionsInterface } from '@concepta/typeorm-common';
 import { Injectable } from '@nestjs/common';
 import { InvitationCreateOneInterface } from '../../../interfaces/invitation-create-one.interface';
 import { InvitationSendServiceInterface } from '../../../interfaces/invitation-send-service.interface';
+import { InvitationSendInvitationEmailOptionsInterface } from '../../../interfaces/invitation-send-invitation-email-options.interface';
 
 @Injectable()
 export class InvitationSendServiceFixture
@@ -39,10 +40,7 @@ export class InvitationSendServiceFixture
     return Promise.resolve({} as InvitationGetUserEventResponseInterface);
   }
 
-  async sendEmail(
-    _email: string,
-    _code: string,
-    _passcode: string,
-    _resetTokenExp: Date,
+  async sendInvitationEmail(
+    _options: InvitationSendInvitationEmailOptionsInterface,
   ): Promise<void> {}
 }
