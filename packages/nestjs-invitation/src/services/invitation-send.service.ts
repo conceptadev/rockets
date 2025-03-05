@@ -117,9 +117,10 @@ export class InvitationSendService implements InvitationSendServiceInterface {
   async getUser(
     options: Pick<InvitationInterface, 'email'>,
     queryOptions?: QueryOptionsInterface,
-  ): Promise<ReferenceIdInterface<string>
-    & ReferenceUsernameInterface<string>
-    & ReferenceEmailInterface<string>
+  ): Promise<
+    ReferenceIdInterface<string> &
+      ReferenceUsernameInterface<string> &
+      ReferenceEmailInterface<string>
   > {
     const { email } = options;
     let user = await this.userLookupService.byEmail(email, queryOptions);

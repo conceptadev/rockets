@@ -1,4 +1,8 @@
-import { ReferenceEmailInterface, ReferenceIdInterface, ReferenceUsernameInterface } from '@concepta/nestjs-common';
+import {
+  ReferenceEmailInterface,
+  ReferenceIdInterface,
+  ReferenceUsernameInterface,
+} from '@concepta/nestjs-common';
 import { InvitationInterface } from '@concepta/nestjs-common/src';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 import { Injectable } from '@nestjs/common';
@@ -36,9 +40,10 @@ export class InvitationSendServiceFixture
     _options: Pick<InvitationInterface, 'email'> &
       Partial<Pick<InvitationInterface, 'constraints'>>,
     _queryOptions?: QueryOptionsInterface,
-  ): Promise<ReferenceIdInterface<string>
-    & ReferenceUsernameInterface<string>
-    & ReferenceEmailInterface<string>
+  ): Promise<
+    ReferenceIdInterface<string> &
+      ReferenceUsernameInterface<string> &
+      ReferenceEmailInterface<string>
   > {
     return Promise.resolve({
       id: '',
