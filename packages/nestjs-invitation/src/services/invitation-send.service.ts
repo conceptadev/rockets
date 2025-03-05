@@ -8,19 +8,21 @@ import {
   INVITATION_MODULE_EMAIL_SERVICE_TOKEN,
   INVITATION_MODULE_OTP_SERVICE_TOKEN,
   INVITATION_MODULE_SETTINGS_TOKEN,
+  INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+  INVITATION_MODULE_USER_MUTATE_SERVICE_TOKEN,
 } from '../invitation.constants';
 import { InvitationOtpServiceInterface } from '../interfaces/invitation-otp.service.interface';
 import { InvitationSettingsInterface } from '../interfaces/invitation-settings.interface';
 import { InvitationEmailServiceInterface } from '../interfaces/invitation-email.service.interface';
 import { InvitationSendMailException } from '../exceptions/invitation-send-mail.exception';
-import { InvitationGetUserEventAsync } from '../events/invitation-get-user.event';
-import { InvitationUserUndefinedException } from '../exceptions/invitation-user-undefined.exception';
 
 import { InvitationSendServiceInterface } from '../interfaces/invitation-send-service.interface';
 import { InvitationCreateOneInterface } from '../interfaces/invitation-create-one.interface';
 import { InvitationMutateService } from './invitation-mutate.service';
 import { randomUUID } from 'crypto';
 import { InvitationSendInvitationEmailOptionsInterface } from '../interfaces/invitation-send-invitation-email-options.interface';
+import { InvitationUserLookupServiceInterface } from '../interfaces/invitation-user-lookup.service.interface';
+import { InvitationUserMutateServiceInterface } from '../interfaces/invitation-user-mutate.service.interface';
 
 export class InvitationSendService implements InvitationSendServiceInterface {
   constructor(
@@ -30,6 +32,10 @@ export class InvitationSendService implements InvitationSendServiceInterface {
     protected readonly emailService: InvitationEmailServiceInterface,
     @Inject(INVITATION_MODULE_OTP_SERVICE_TOKEN)
     protected readonly otpService: InvitationOtpServiceInterface,
+    @Inject(INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN)
+    protected readonly userLookupService: InvitationUserLookupServiceInterface,
+    @Inject(INVITATION_MODULE_USER_MUTATE_SERVICE_TOKEN)
+    protected readonly userMutateService: InvitationUserMutateServiceInterface,
     protected readonly invitationMutateService: InvitationMutateService,
   ) {}
 
@@ -48,11 +54,10 @@ export class InvitationSendService implements InvitationSendServiceInterface {
   ): Promise<
     Required<Pick<InvitationInterface, 'id' | 'user' | 'code' | 'category'>>
   > {
-    const { email, constraints } = createDto;
+    const { email } = createDto;
     const user = await this.getUser(
       {
         email,
-        constraints,
       },
       queryOptions,
     );
@@ -108,23 +113,20 @@ export class InvitationSendService implements InvitationSendServiceInterface {
   }
 
   async getUser(
-    options: Pick<InvitationInterface, 'email'> &
-      Partial<Pick<InvitationInterface, 'constraints'>>,
+    options: Pick<InvitationInterface, 'email'>,
     queryOptions?: QueryOptionsInterface,
   ): Promise<InvitationGetUserEventResponseInterface> {
-    const { email, constraints } = options;
-    const getUserEvent = new InvitationGetUserEventAsync({
-      email,
-      data: constraints,
-      queryOptions,
-    });
-
-    const eventResult = await getUserEvent.emit();
-
-    const user = eventResult?.find((it) => it.id && it.email);
+    const { email } = options;
+    let user = await this.userLookupService.byEmail(email, queryOptions);
 
     if (!user) {
-      throw new InvitationUserUndefinedException();
+      user = await this.userMutateService.create(
+        {
+          email,
+          username: email,
+        },
+        queryOptions,
+      );
     }
 
     return user;

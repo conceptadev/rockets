@@ -32,6 +32,8 @@ import { InvitationReattemptController } from './controllers/invitation-reattemp
 import { InvitationMutateService } from './services/invitation-mutate.service';
 import { InvitationEmailServiceInterface } from './interfaces/invitation-email.service.interface';
 import { InvitationOtpServiceInterface } from './interfaces/invitation-otp.service.interface';
+import { InvitationUserLookupServiceInterface } from './interfaces/invitation-user-lookup.service.interface';
+import { InvitationUserMutateServiceInterface } from './interfaces/invitation-user-mutate.service.interface';
 
 const RAW_OPTIONS_TOKEN = Symbol('__INVITATION_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -201,6 +203,8 @@ export function createInvitationSendServiceProvider(
       INVITATION_MODULE_SETTINGS_TOKEN,
       INVITATION_MODULE_EMAIL_SERVICE_TOKEN,
       INVITATION_MODULE_OTP_SERVICE_TOKEN,
+      INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+      INVITATION_MODULE_USER_MUTATE_SERVICE_TOKEN,
       InvitationMutateService,
     ],
     useFactory: async (
@@ -208,6 +212,8 @@ export function createInvitationSendServiceProvider(
       settings: InvitationSettingsInterface,
       emailService: InvitationEmailServiceInterface,
       otpService: InvitationOtpServiceInterface,
+      userLookupService: InvitationUserLookupServiceInterface,
+      userMutateService: InvitationUserMutateServiceInterface,
       invitationMutateService: InvitationMutateService,
     ) =>
       optionsOverrides?.invitationSendService ??
@@ -216,6 +222,8 @@ export function createInvitationSendServiceProvider(
         settings,
         emailService,
         otpService,
+        userLookupService,
+        userMutateService,
         invitationMutateService,
       ),
   };

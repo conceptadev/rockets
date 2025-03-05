@@ -39,8 +39,7 @@ export interface InvitationSendServiceInterface {
    * @returns Promise resolving to the user details response
    */
   getUser(
-    options: Pick<InvitationInterface, 'email'> &
-      Partial<Pick<InvitationInterface, 'constraints'>>,
+    options: Pick<InvitationInterface, 'email'>,
     queryOptions?: QueryOptionsInterface,
   ): Promise<InvitationGetUserEventResponseInterface>;
 

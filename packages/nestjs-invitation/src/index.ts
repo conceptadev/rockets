@@ -2,7 +2,6 @@ export { InvitationModule } from './invitation.module';
 export { InvitationController } from './controllers/invitation.controller';
 export { InvitationService } from './services/invitation.service';
 export { InvitationAcceptedEventAsync } from './events/invitation-accepted.event';
-export { InvitationGetUserEventAsync } from './events/invitation-get-user.event';
 
 export { InvitationEntityInterface } from './interfaces/invitation.entity.interface';
 export { InvitationCreateOneInterface } from './interfaces/invitation-create-one.interface';
