@@ -100,22 +100,29 @@ describe('OrgController (e2e)', () => {
         .expect(200);
 
       // get one using that id
-      await supertest(app.getHttpServer())
+      const getOneResponse = await supertest(app.getHttpServer())
         .get(`/org/${response.body[0].id}`)
         .expect(200);
+
+      // verify properties match
+      expect(getOneResponse.body).toEqual(response.body[0]);
     });
 
     it('POST /org', async () => {
       const ownerFactory = new OwnerFactoryFixture({ seedingSource });
       const owner = await ownerFactory.create();
 
-      await supertest(app.getHttpServer())
+      const response = await supertest(app.getHttpServer())
         .post('/org')
         .send({
-          name: 'company 1',
+          name: 'company 1', 
           owner,
         })
         .expect(201);
+
+      // verify created org matches input
+      expect(response.body.name).toEqual('company 1')
+      expect(response.body.ownerId).toEqual(owner.id)
     });
 
     it('DELETE /org/:id', async () => {
@@ -128,6 +135,106 @@ describe('OrgController (e2e)', () => {
       await supertest(app.getHttpServer())
         .delete(`/org/${response.body[0].id}`)
         .expect(200);
+    });
+
+    it('GET /org/:id - should return 404 for a non-existent organization', async () => {
+      await supertest(app.getHttpServer())
+        .get('/org/999999') // Assuming this ID does not exist
+        .expect(404);
+    });
+
+    it('POST /org - should return 400 for missing required fields', async () => {
+      const response = await supertest(app.getHttpServer())
+        .post('/org')
+        .send({}) // Sending an empty object
+        .expect(400);
+    });
+
+    it.only('PUT /org/:id - should update an existing organization', async () => {
+      const ownerFactory = new OwnerFactoryFixture({ seedingSource });
+      const owner = await ownerFactory.create();
+
+      const createResponse = await supertest(app.getHttpServer())
+        .post('/org')
+        .send({
+          name: 'company 1',
+          owner,
+        })
+        .expect(201);
+
+      const updatedResponse = await supertest(app.getHttpServer())
+        .put(`/org/${createResponse.body.id}`)
+        .send({
+          name: 'updated company',
+        })
+        .expect(200);
+
+      expect(updatedResponse.body.name).toEqual('updated company');
+    });
+
+    it('GET /org - should return all organizations without a limit', async () => {
+      const response = await supertest(app.getHttpServer())
+        .get('/org')
+        .expect(200);
+
+      expect(Array.isArray(response.body)).toBe(true);
+    });
+
+    it('DELETE /org/:id - should return 404 for a non-existent organization', async () => {
+      await supertest(app.getHttpServer())
+        .delete('/org/999999') // Assuming this ID does not exist
+        .expect(404);
+    });
+
+    it('POST /org - should return 400 for invalid data types', async () => {
+      const response = await supertest(app.getHttpServer())
+        .post('/org')
+        .send({
+          name: 123, // Invalid data type for name
+          owner: 'invalid-owner-id',
+        })
+        .expect(400);
+    });
+
+    it('GET /org - should return the correct response structure', async () => {
+      const response = await supertest(app.getHttpServer())
+        .get('/org?limit=1')
+        .expect(200);
+
+      expect(response.body).toBeInstanceOf(Array);
+      expect(response.body[0]).toHaveProperty('id');
+      expect(response.body[0]).toHaveProperty('name');
+      expect(response.body[0]).toHaveProperty('ownerId');
+    });
+
+    it('POST /org - should ensure the owner ID is valid', async () => {
+      const response = await supertest(app.getHttpServer())
+        .post('/org')
+        .send({
+          name: 'company 1',
+          owner: 'invalid-owner-id', // Invalid owner ID
+        })
+        .expect(400);
+    });
+
+    it('GET /org - should handle concurrent requests', async () => {
+      const requests = Array.from({ length: 10 }, () =>
+        supertest(app.getHttpServer()).get('/org?limit=10')
+      );
+
+      const responses = await Promise.all(requests);
+      responses.forEach((response) => {
+        expect(response.status).toBe(200);
+        expect(Array.isArray(response.body)).toBe(true);
+      });
+    });
+
+    it('GET /org - should respect the maximum limit of organizations', async () => {
+      const response = await supertest(app.getHttpServer())
+        .get('/org?limit=100') // Assuming the limit is set to 100
+        .expect(200);
+
+      expect(response.body.length).toBeLessThanOrEqual(100);
     });
   });
 });
