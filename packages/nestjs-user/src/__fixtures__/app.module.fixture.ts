@@ -12,7 +12,6 @@ import { EventModule } from '@concepta/nestjs-event';
 import { UserModule } from '../user.module';
 import { UserResource } from '../user.types';
 import { InvitationAcceptedEventAsync } from './events/invitation-accepted.event';
-import { InvitationGetUserEventAsync } from './events/invitation-get-user.event';
 import { UserLookupService } from '../services/user-lookup.service';
 import { UserAccessQueryService } from '../services/user-access-query.service';
 
@@ -50,7 +49,6 @@ rules
     UserModule.forRoot({
       settings: {
         invitationRequestEvent: InvitationAcceptedEventAsync,
-        invitationGetUserEvent: InvitationGetUserEventAsync,
         passwordHistory: {
           enabled: true,
           limitDays: 99,

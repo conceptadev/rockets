@@ -36,6 +36,9 @@ import { OtpServiceFixture } from './__fixtures__/otp/otp.service.fixture';
 import { MailerServiceFixture } from './__fixtures__/email/mailer.service.fixture';
 import { InvitationEntityFixture } from './__fixtures__/invitation/entities/invitation.entity.fixture';
 import { default as ormConfig } from './__fixtures__/ormconfig.fixture';
+import { InvitationSendServiceInterface } from './interfaces/invitation-send-service.interface';
+import { InvitationSendServiceFixture } from './__fixtures__/invitation/entities/invitation-send.service.fixture';
+import { InvitationLocalModuleFixture } from './__fixtures__/invitation/entities/invitation-local.module.fixture';
 
 describe(InvitationModule, () => {
   let testModule: TestingModule;
@@ -45,7 +48,7 @@ describe(InvitationModule, () => {
   let userLookupService: InvitationUserLookupServiceInterface;
   let userMutateService: InvitationUserMutateServiceInterface;
   let invitationService: InvitationServiceInterface;
-  let invitationSendService: InvitationSendService;
+  let invitationSendService: InvitationSendServiceInterface;
   let invitationAcceptanceService: InvitationAcceptanceService;
   let invitationRevocationService: InvitationRevocationService;
   let invitationController: InvitationController;
@@ -53,6 +56,32 @@ describe(InvitationModule, () => {
   let invitationReattemptController: InvitationReattemptController;
 
   const mockEmailService = mock<InvitationEmailServiceInterface>();
+
+  describe(InvitationModule.forRoot, () => {
+    beforeEach(async () => {
+      testModule = await Test.createTestingModule(
+        testModuleFactory([
+          InvitationModule.forRoot({
+            emailService: mockEmailService,
+            otpService: new OtpServiceFixture(),
+            userLookupService: new UserLookupServiceFixture(),
+            userMutateService: new UserMutateServiceFixture(),
+            invitationSendService: new InvitationSendServiceFixture(),
+            entities: {
+              invitation: {
+                entity: InvitationEntityFixture,
+              },
+            },
+          }),
+        ]),
+      ).compile();
+    });
+
+    it('module should be loaded', async () => {
+      commonVars();
+      commonTests();
+    });
+  });
 
   describe(InvitationModule.forRoot, () => {
     beforeEach(async () => {
@@ -73,9 +102,12 @@ describe(InvitationModule, () => {
       ).compile();
     });
 
-    it('module should be loaded', async () => {
-      commonVars();
-      commonTests();
+    it('check send service type for default send service', async () => {
+      invitationSendService = testModule.get<InvitationSendServiceInterface>(
+        InvitationSendService,
+      );
+      // check the default
+      expect(invitationSendService).toBeInstanceOf(InvitationSendService);
     });
   });
 
@@ -92,6 +124,7 @@ describe(InvitationModule, () => {
             otpService: new OtpServiceFixture(),
             userLookupService: new UserLookupServiceFixture(),
             userMutateService: new UserMutateServiceFixture(),
+            invitationSendService: new InvitationSendServiceFixture(),
             entities: {
               invitation: {
                 entity: InvitationEntityFixture,
@@ -122,17 +155,20 @@ describe(InvitationModule, () => {
               UserMutateServiceFixture,
               OtpServiceFixture,
               EmailService,
+              InvitationSendServiceFixture,
             ],
             useFactory: (
               userLookupService,
               userMutateService,
               otpService,
               emailService,
+              invitationSendService,
             ) => ({
               userLookupService,
               userMutateService,
               otpService,
               emailService,
+              invitationSendService,
             }),
             entities: {
               invitation: {
@@ -164,17 +200,20 @@ describe(InvitationModule, () => {
               UserMutateServiceFixture,
               OtpServiceFixture,
               EmailService,
+              InvitationSendServiceFixture,
             ],
             useFactory: (
               userLookupService,
               userMutateService,
               otpService,
               emailService,
+              invitationSendService,
             ) => ({
               userLookupService,
               userMutateService,
               otpService,
               emailService,
+              invitationSendService,
             }),
             entities: {
               invitation: {
@@ -216,7 +255,7 @@ describe(InvitationModule, () => {
 
     invitationService = testModule.get<InvitationService>(InvitationService);
 
-    invitationSendService = testModule.get<InvitationSendService>(
+    invitationSendService = testModule.get<InvitationSendServiceInterface>(
       InvitationSendService,
     );
 
@@ -249,7 +288,7 @@ describe(InvitationModule, () => {
     expect(userLookupService).toBeInstanceOf(UserLookupServiceFixture);
     expect(userMutateService).toBeInstanceOf(UserMutateServiceFixture);
     expect(invitationService).toBeInstanceOf(InvitationService);
-    expect(invitationSendService).toBeInstanceOf(InvitationSendService);
+    expect(invitationSendService).toBeInstanceOf(InvitationSendServiceFixture);
     expect(invitationAcceptanceService).toBeInstanceOf(
       InvitationAcceptanceService,
     );
@@ -278,6 +317,7 @@ function testModuleFactory(
       CrudModule.forRoot({}),
       UserModuleFixture,
       OtpModuleFixture,
+      InvitationLocalModuleFixture,
       EmailModule.forRoot({ mailerService: new MailerServiceFixture() }),
       ...extraImports,
     ],

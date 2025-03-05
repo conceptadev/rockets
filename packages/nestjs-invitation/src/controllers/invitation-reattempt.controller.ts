@@ -42,6 +42,10 @@ export class InvitationReattemptController {
 
     const { category, user, email } = invitation;
 
-    await this.invitationSendService.send({ ...user, email }, code, category);
+    await this.invitationSendService.send({
+      user: { ...user, email },
+      code,
+      category,
+    });
   }
 }

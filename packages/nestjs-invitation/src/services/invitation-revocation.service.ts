@@ -16,6 +16,7 @@ import { InvitationOtpServiceInterface } from '../interfaces/invitation-otp.serv
 import { InvitationUserLookupServiceInterface } from '../interfaces/invitation-user-lookup.service.interface';
 import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
 import { InvitationException } from '../exceptions/invitation.exception';
+import { InvitationRevokeOptionsInterface } from '../interfaces/invitation-revoke-options.interface';
 
 export class InvitationRevocationService extends BaseService<InvitationEntityInterface> {
   constructor(
@@ -32,16 +33,16 @@ export class InvitationRevocationService extends BaseService<InvitationEntityInt
   }
 
   /**
-   * Revoke all invitations for email in category.
+   * Revoke all invitations for a given email address in a specific category.
    *
-   * @param email - user email
-   * @param category - the cateogory
+   * @param options - The revocation options containing email and category
+   * @param queryOptions - Optional query options for the transaction
    */
   async revokeAll(
-    email: string,
-    category: string,
+    options: InvitationRevokeOptionsInterface,
     queryOptions?: QueryOptionsInterface,
   ): Promise<void> {
+    const { email, category } = options;
     // run in transaction
     return this.transaction(queryOptions).commit(async (transaction) => {
       // override the query options
