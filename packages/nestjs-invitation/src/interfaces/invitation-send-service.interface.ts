@@ -1,5 +1,4 @@
-import { InvitationInterface } from '@concepta/nestjs-common';
-import { InvitationGetUserEventResponseInterface } from '@concepta/nestjs-common/src';
+import { InvitationInterface, ReferenceEmailInterface, ReferenceIdInterface, ReferenceUsernameInterface } from '@concepta/nestjs-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 import { InvitationCreateOneInterface } from './invitation-create-one.interface';
 import { InvitationSendInvitationEmailOptionsInterface } from './invitation-send-invitation-email-options.interface';
@@ -41,7 +40,10 @@ export interface InvitationSendServiceInterface {
   getUser(
     options: Pick<InvitationInterface, 'email'>,
     queryOptions?: QueryOptionsInterface,
-  ): Promise<InvitationGetUserEventResponseInterface>;
+  ): Promise<ReferenceIdInterface<string>
+    & ReferenceUsernameInterface<string>
+    & ReferenceEmailInterface<string>
+  >;
 
   /**
    * Send an invitation email

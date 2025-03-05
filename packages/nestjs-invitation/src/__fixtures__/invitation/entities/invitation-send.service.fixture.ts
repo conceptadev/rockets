@@ -1,4 +1,4 @@
-import { InvitationGetUserEventResponseInterface } from '@concepta/nestjs-common';
+import { ReferenceEmailInterface, ReferenceIdInterface, ReferenceUsernameInterface } from '@concepta/nestjs-common';
 import { InvitationInterface } from '@concepta/nestjs-common/src';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 import { Injectable } from '@nestjs/common';
@@ -36,8 +36,15 @@ export class InvitationSendServiceFixture
     _options: Pick<InvitationInterface, 'email'> &
       Partial<Pick<InvitationInterface, 'constraints'>>,
     _queryOptions?: QueryOptionsInterface,
-  ): Promise<InvitationGetUserEventResponseInterface> {
-    return Promise.resolve({} as InvitationGetUserEventResponseInterface);
+  ): Promise<ReferenceIdInterface<string>
+    & ReferenceUsernameInterface<string>
+    & ReferenceEmailInterface<string>
+  > {
+    return Promise.resolve({
+      id: '',
+      email: '',
+      username: '',
+    });
   }
 
   async sendInvitationEmail(

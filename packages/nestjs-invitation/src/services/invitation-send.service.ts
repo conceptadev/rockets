@@ -1,7 +1,8 @@
 import { Inject } from '@nestjs/common';
 import {
   InvitationInterface,
-  InvitationGetUserEventResponseInterface,
+  ReferenceUsernameInterface,
+  ReferenceEmailInterface,
 } from '@concepta/nestjs-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 import {
@@ -23,6 +24,7 @@ import { randomUUID } from 'crypto';
 import { InvitationSendInvitationEmailOptionsInterface } from '../interfaces/invitation-send-invitation-email-options.interface';
 import { InvitationUserLookupServiceInterface } from '../interfaces/invitation-user-lookup.service.interface';
 import { InvitationUserMutateServiceInterface } from '../interfaces/invitation-user-mutate.service.interface';
+import { ReferenceIdInterface } from '@concepta/nestjs-common/src';
 
 export class InvitationSendService implements InvitationSendServiceInterface {
   constructor(
@@ -115,7 +117,10 @@ export class InvitationSendService implements InvitationSendServiceInterface {
   async getUser(
     options: Pick<InvitationInterface, 'email'>,
     queryOptions?: QueryOptionsInterface,
-  ): Promise<InvitationGetUserEventResponseInterface> {
+  ): Promise<ReferenceIdInterface<string>
+    & ReferenceUsernameInterface<string>
+    & ReferenceEmailInterface<string>
+  > {
     const { email } = options;
     let user = await this.userLookupService.byEmail(email, queryOptions);
 
