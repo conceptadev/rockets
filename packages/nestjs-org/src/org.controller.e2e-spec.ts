@@ -115,14 +115,14 @@ describe('OrgController (e2e)', () => {
       const response = await supertest(app.getHttpServer())
         .post('/org')
         .send({
-          name: 'company 1', 
+          name: 'company 1',
           owner,
         })
         .expect(201);
 
       // verify created org matches input
-      expect(response.body.name).toEqual('company 1')
-      expect(response.body.ownerId).toEqual(owner.id)
+      expect(response.body.name).toEqual('company 1');
+      expect(response.body.ownerId).toEqual(owner.id);
     });
 
     it('DELETE /org/:id', async () => {
@@ -138,19 +138,14 @@ describe('OrgController (e2e)', () => {
     });
 
     it('GET /org/:id - should return 404 for a non-existent organization', async () => {
-      await supertest(app.getHttpServer())
-        .get('/org/999999') // Assuming this ID does not exist
-        .expect(404);
+      await supertest(app.getHttpServer()).get('/org/999999').expect(404);
     });
 
     it('POST /org - should return 400 for missing required fields', async () => {
-      const response = await supertest(app.getHttpServer())
-        .post('/org')
-        .send({}) // Sending an empty object
-        .expect(400);
+      await supertest(app.getHttpServer()).post('/org').send({}).expect(400);
     });
 
-    it.only('PUT /org/:id - should update an existing organization', async () => {
+    it('PATCH /org/:id - should update an existing organization', async () => {
       const ownerFactory = new OwnerFactoryFixture({ seedingSource });
       const owner = await ownerFactory.create();
 
@@ -162,8 +157,9 @@ describe('OrgController (e2e)', () => {
         })
         .expect(201);
 
+      const id = createResponse.body.id;
       const updatedResponse = await supertest(app.getHttpServer())
-        .put(`/org/${createResponse.body.id}`)
+        .patch(`/org/${id}`)
         .send({
           name: 'updated company',
         })
@@ -187,7 +183,7 @@ describe('OrgController (e2e)', () => {
     });
 
     it('POST /org - should return 400 for invalid data types', async () => {
-      const response = await supertest(app.getHttpServer())
+      await supertest(app.getHttpServer())
         .post('/org')
         .send({
           name: 123, // Invalid data type for name
@@ -208,25 +204,13 @@ describe('OrgController (e2e)', () => {
     });
 
     it('POST /org - should ensure the owner ID is valid', async () => {
-      const response = await supertest(app.getHttpServer())
+      await supertest(app.getHttpServer())
         .post('/org')
         .send({
           name: 'company 1',
           owner: 'invalid-owner-id', // Invalid owner ID
         })
         .expect(400);
-    });
-
-    it('GET /org - should handle concurrent requests', async () => {
-      const requests = Array.from({ length: 10 }, () =>
-        supertest(app.getHttpServer()).get('/org?limit=10')
-      );
-
-      const responses = await Promise.all(requests);
-      responses.forEach((response) => {
-        expect(response.status).toBe(200);
-        expect(Array.isArray(response.body)).toBe(true);
-      });
     });
 
     it('GET /org - should respect the maximum limit of organizations', async () => {

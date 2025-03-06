@@ -1,4 +1,4 @@
-import { Entity, OneToOne } from 'typeorm';
+import { Column, Entity, OneToOne } from 'typeorm';
 
 import { OrgProfileSqliteEntity } from '../entities/org-profile-sqlite.entity';
 import { OrgEntityFixture } from './org-entity.fixture';
@@ -10,4 +10,7 @@ import { OrgEntityFixture } from './org-entity.fixture';
 export class OrgProfileEntityFixture extends OrgProfileSqliteEntity {
   @OneToOne(() => OrgEntityFixture, (org) => org.orgProfile)
   org!: OrgEntityFixture;
+
+  @Column({ nullable: true })
+  name!: string;
 }
