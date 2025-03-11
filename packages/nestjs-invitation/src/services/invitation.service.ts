@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
+import { InvitationInterface } from '@concepta/nestjs-common';
 
 import { InvitationServiceInterface } from '../interfaces/invitation.service.interface';
 import { InvitationAcceptanceService } from './invitation-acceptance.service';
 import { InvitationSendService } from './invitation-send.service';
 import { InvitationRevocationService } from './invitation-revocation.service';
-import { InvitationInterface } from '@concepta/nestjs-common/src';
 import { InvitationAcceptOptionsInterface } from '../interfaces/invitation-accept-options.interface';
 import { InvitationRevokeOptionsInterface } from '../interfaces/invitation-revoke-options.interface';
-import { InvitationCreateOneInterface } from '../interfaces/invitation-create-one.interface';
+import { InvitationCreateInviteInterface } from '../interfaces/invitation-create-invite.interface';
 
 @Injectable()
 export class InvitationService implements InvitationServiceInterface {
@@ -18,14 +18,14 @@ export class InvitationService implements InvitationServiceInterface {
     private readonly invitationRevocationService: InvitationRevocationService,
   ) {}
   async create(
-    createDto: InvitationCreateOneInterface,
+    createInviteDto: InvitationCreateInviteInterface,
     queryOptions?: QueryOptionsInterface,
-  ): Promise<Required<Pick<InvitationInterface, 'id' | 'user'>>> {
-    return this.invitationSendService.create(createDto, queryOptions);
+  ) {
+    return this.invitationSendService.create(createInviteDto, queryOptions);
   }
 
   async send(
-    invitation: InvitationInterface,
+    invitation: Pick<InvitationInterface, 'id'>,
     queryOptions?: QueryOptionsInterface,
   ): Promise<void> {
     return this.invitationSendService.send(invitation, queryOptions);

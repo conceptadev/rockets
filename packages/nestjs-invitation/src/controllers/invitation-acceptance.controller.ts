@@ -12,12 +12,11 @@ import {
 import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   ReferenceAssigneeInterface,
-  ReferenceIdInterface,
+  InvitationInterface,
 } from '@concepta/nestjs-common';
 
 import { InvitationAcceptanceService } from '../services/invitation-acceptance.service';
 import { InvitationAcceptInviteDto } from '../dto/invitation-accept-invite.dto';
-import { InvitationDto } from '../dto/invitation.dto';
 import { InvitationNotAcceptedException } from '../exceptions/invitation-not-accepted.exception';
 import { InvitationNotFoundException } from '../exceptions/invitation-not-found.exception';
 
@@ -44,22 +43,11 @@ export class InvitationAcceptanceController {
   ): Promise<void> {
     const { passcode, payload } = invitationAcceptInviteDto;
 
-    let invitation: InvitationDto | null | undefined;
     let success: boolean | null | undefined;
 
     try {
-      invitation = await this.invitationAcceptanceService.getOneByCode(code);
-    } catch (e: unknown) {
-      Logger.error(e);
-    }
-
-    if (!invitation) {
-      throw new InvitationNotFoundException();
-    }
-
-    try {
       success = await this.invitationAcceptanceService.accept({
-        invitation,
+        code,
         passcode,
         payload,
       });
@@ -82,7 +70,7 @@ export class InvitationAcceptanceController {
     @Param('code') code: string,
     @Query('passcode') passcode: string,
   ): Promise<void> {
-    let invitation: InvitationDto | null | undefined;
+    let invitation: InvitationInterface | null | undefined;
 
     try {
       invitation = await this.invitationAcceptanceService.getOneByCode(code);
@@ -96,10 +84,8 @@ export class InvitationAcceptanceController {
 
     const { category } = invitation;
 
-    let otp:
-      | ReferenceAssigneeInterface<ReferenceIdInterface<string>>
-      | null
-      | undefined;
+    let otp: ReferenceAssigneeInterface | null = null;
+
     try {
       otp = await this.invitationAcceptanceService.validatePasscode(
         passcode,

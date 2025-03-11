@@ -115,10 +115,9 @@ describe(InvitationAcceptanceService, () => {
     const otp = await createOtp(settings, otpService, testUser, category);
 
     const inviteAccepted = await invitationAcceptanceService.accept({
-      invitation: testInvitation,
+      code: testInvitation.code,
       passcode: otp.passcode,
       payload: {
-        userId: otp.assignee.id,
         newPassword: 'hOdv2A2h%',
       },
     });
@@ -130,7 +129,7 @@ describe(InvitationAcceptanceService, () => {
 
   it('Accept invite and update password (fail)', async () => {
     const inviteAccepted = await invitationAcceptanceService.accept({
-      invitation: testInvitation,
+      code: testInvitation.code,
       passcode: 'FAKE_PASSCODE',
     });
 

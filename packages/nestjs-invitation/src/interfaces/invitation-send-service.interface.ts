@@ -1,25 +1,21 @@
-import {
-  InvitationInterface,
-  ReferenceEmailInterface,
-  ReferenceIdInterface,
-  ReferenceUsernameInterface,
-} from '@concepta/nestjs-common';
+import { InvitationUserInterface } from '@concepta/nestjs-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
-import { InvitationCreateOneInterface } from './invitation-create-one.interface';
+import { InvitationCreateInviteInterface } from './invitation-create-invite.interface';
 import { InvitationSendInvitationEmailOptionsInterface } from './invitation-send-invitation-email-options.interface';
+import { InvitationSendInviteInterface } from './invitation-send-invite.interface';
 
 export interface InvitationSendServiceInterface {
   /**
    * Create a new invitation
    *
-   * @param createDto - The invitation creation data
+   * @param createInviteDto - The invitation creation data
    * @param queryOptions - Optional query options for the transaction
    * @returns Promise resolving to the created invitation with id and user
    */
   create(
-    createDto: InvitationCreateOneInterface,
+    createInviteDto: InvitationCreateInviteInterface,
     queryOptions?: QueryOptionsInterface,
-  ): Promise<Required<Pick<InvitationInterface, 'id' | 'user'>>>;
+  ): Promise<InvitationSendInviteInterface>;
 
   /**
    * Send an invitation to a user
@@ -28,10 +24,7 @@ export interface InvitationSendServiceInterface {
    * @param queryOptions - Optional query options for the transaction
    */
   send(
-    invitation: Pick<
-      InvitationInterface,
-      'category' | 'user' | 'email' | 'code'
-    >,
+    invitation: InvitationSendInviteInterface,
     queryOptions?: QueryOptionsInterface,
   ): Promise<void>;
 
@@ -43,13 +36,9 @@ export interface InvitationSendServiceInterface {
    * @returns Promise resolving to the user details response
    */
   getUser(
-    options: Pick<InvitationInterface, 'email'>,
+    options: Pick<InvitationCreateInviteInterface, 'email' | 'constraints'>,
     queryOptions?: QueryOptionsInterface,
-  ): Promise<
-    ReferenceIdInterface<string> &
-      ReferenceUsernameInterface<string> &
-      ReferenceEmailInterface<string>
-  >;
+  ): Promise<InvitationUserInterface>;
 
   /**
    * Send an invitation email

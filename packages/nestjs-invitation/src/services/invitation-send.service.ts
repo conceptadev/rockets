@@ -1,8 +1,9 @@
+import { randomUUID } from 'crypto';
 import { Inject } from '@nestjs/common';
 import {
   InvitationInterface,
-  ReferenceUsernameInterface,
-  ReferenceEmailInterface,
+  InvitationUserInterface,
+  OtpInterface,
 } from '@concepta/nestjs-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 import {
@@ -18,13 +19,14 @@ import { InvitationEmailServiceInterface } from '../interfaces/invitation-email.
 import { InvitationSendMailException } from '../exceptions/invitation-send-mail.exception';
 
 import { InvitationSendServiceInterface } from '../interfaces/invitation-send-service.interface';
-import { InvitationCreateOneInterface } from '../interfaces/invitation-create-one.interface';
+import { InvitationCreateInviteInterface } from '../interfaces/invitation-create-invite.interface';
+import { InvitationLookupService } from './invitation-lookup.service';
 import { InvitationMutateService } from './invitation-mutate.service';
-import { randomUUID } from 'crypto';
 import { InvitationSendInvitationEmailOptionsInterface } from '../interfaces/invitation-send-invitation-email-options.interface';
 import { InvitationUserLookupServiceInterface } from '../interfaces/invitation-user-lookup.service.interface';
 import { InvitationUserMutateServiceInterface } from '../interfaces/invitation-user-mutate.service.interface';
-import { ReferenceIdInterface } from '@concepta/nestjs-common/src';
+import { InvitationSendInviteInterface } from '../interfaces/invitation-send-invite.interface';
+import { InvitationNotFoundException } from '../exceptions/invitation-not-found.exception';
 
 export class InvitationSendService implements InvitationSendServiceInterface {
   constructor(
@@ -38,25 +40,24 @@ export class InvitationSendService implements InvitationSendServiceInterface {
     protected readonly userLookupService: InvitationUserLookupServiceInterface,
     @Inject(INVITATION_MODULE_USER_MUTATE_SERVICE_TOKEN)
     protected readonly userMutateService: InvitationUserMutateServiceInterface,
+    protected readonly invitationLookupService: InvitationLookupService,
     protected readonly invitationMutateService: InvitationMutateService,
   ) {}
 
   /**
    * Creates a new invitation
    *
-   * @param createDto - The invitation creation data transfer object containing email and
+   * @param createInviteDto - The invitation creation data transfer object containing email and
    *                   optional constraints
    * @param queryOptions - Optional query parameters for the database operation
    * @returns A promise that resolves to the created invitation with id, user, code and
    *          category
    */
   async create(
-    createDto: InvitationCreateOneInterface,
+    createInviteDto: InvitationCreateInviteInterface,
     queryOptions?: QueryOptionsInterface,
-  ): Promise<
-    Required<Pick<InvitationInterface, 'id' | 'user' | 'code' | 'category'>>
-  > {
-    const { email } = createDto;
+  ): Promise<InvitationSendInviteInterface> {
+    const { email } = createInviteDto;
     const user = await this.getUser(
       {
         email,
@@ -66,17 +67,18 @@ export class InvitationSendService implements InvitationSendServiceInterface {
 
     const invite = await this.invitationMutateService.create(
       {
-        ...createDto,
+        ...createInviteDto,
         user: user,
         code: randomUUID(),
       },
       queryOptions,
     );
+
     return invite;
   }
 
   async send(
-    invitation: Pick<InvitationInterface, 'category' | 'user' | 'code'>,
+    invitation: Pick<InvitationInterface, 'id'> | InvitationSendInviteInterface,
     queryOptions?: QueryOptionsInterface,
   ): Promise<void> {
     const {
@@ -87,41 +89,65 @@ export class InvitationSendService implements InvitationSendServiceInterface {
       rateSeconds,
       rateThreshold,
     } = this.settings.otp;
-    const { category, user, code } = invitation;
-    // create an OTP for this invite
-    const otp = await this.otpService.create({
-      assignment,
-      otp: {
-        category,
-        type,
-        expiresIn,
-        assignee: {
-          id: user.id,
-        },
-      },
-      queryOptions,
-      clearOnCreate: clearOtpOnCreate,
-      rateSeconds,
-      rateThreshold,
-    });
 
-    // send the invite email
-    await this.sendInvitationEmail({
-      email: user.email,
-      code,
-      passcode: otp.passcode,
-      resetTokenExp: otp.expirationDate,
-    });
+    let theInvitation: InvitationSendInviteInterface | null;
+    let otp: OtpInterface | null;
+
+    // run in transaction
+    await this.invitationLookupService
+      .transaction(queryOptions)
+      .commit(async (transaction): Promise<boolean> => {
+        // override the query options
+        const nestedQueryOptions = { ...queryOptions, transaction };
+
+        if (invitation && 'category' in invitation) {
+          theInvitation = invitation;
+        } else {
+          theInvitation = await this.invitationLookupService.byId(
+            invitation.id,
+            nestedQueryOptions,
+          );
+        }
+
+        if (!theInvitation) {
+          throw new InvitationNotFoundException();
+        }
+
+        const { category, user, code } = theInvitation;
+
+        // create an OTP for this invite
+        otp = await this.otpService.create({
+          assignment,
+          otp: {
+            category,
+            type,
+            expiresIn,
+            assignee: {
+              id: user.id,
+            },
+          },
+          queryOptions,
+          clearOnCreate: clearOtpOnCreate,
+          rateSeconds,
+          rateThreshold,
+        });
+
+        // send the invite email
+        await this.sendInvitationEmail({
+          email: user.email,
+          code,
+          passcode: otp.passcode,
+          resetTokenExp: otp.expirationDate,
+        });
+
+        return true;
+      });
   }
 
   async getUser(
-    options: Pick<InvitationInterface, 'email'>,
+    options: Pick<InvitationCreateInviteInterface, 'email' | 'constraints'>,
     queryOptions?: QueryOptionsInterface,
-  ): Promise<
-    ReferenceIdInterface<string> &
-      ReferenceUsernameInterface<string> &
-      ReferenceEmailInterface<string>
-  > {
+  ): Promise<InvitationUserInterface> {
     const { email } = options;
     let user = await this.userLookupService.byEmail(email, queryOptions);
 

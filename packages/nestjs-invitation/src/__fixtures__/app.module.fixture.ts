@@ -59,7 +59,7 @@ import { default as ormConfig } from './ormconfig.fixture';
     PasswordModule.forRoot({}),
     UserModule.forRoot({
       settings: {
-        invitationRequestEvent: InvitationAcceptedEventAsync,
+        invitationAcceptedEvent: InvitationAcceptedEventAsync,
       },
       entities: {
         user: {

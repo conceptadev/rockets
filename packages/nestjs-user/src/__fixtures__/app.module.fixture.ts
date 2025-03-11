@@ -48,7 +48,7 @@ rules
     }),
     UserModule.forRoot({
       settings: {
-        invitationRequestEvent: InvitationAcceptedEventAsync,
+        invitationAcceptedEvent: InvitationAcceptedEventAsync,
         passwordHistory: {
           enabled: true,
           limitDays: 99,

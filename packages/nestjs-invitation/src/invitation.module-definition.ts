@@ -29,6 +29,7 @@ import { InvitationSendService } from './services/invitation-send.service';
 import { InvitationRevocationService } from './services/invitation-revocation.service';
 import { invitationDefaultConfig } from './config/invitation-default.config';
 import { InvitationReattemptController } from './controllers/invitation-reattempt.controller';
+import { InvitationLookupService } from './services/invitation-lookup.service';
 import { InvitationMutateService } from './services/invitation-mutate.service';
 import { InvitationEmailServiceInterface } from './interfaces/invitation-email.service.interface';
 import { InvitationOtpServiceInterface } from './interfaces/invitation-otp.service.interface';
@@ -99,6 +100,7 @@ export function createInvitationExports(): DynamicModule['exports'] {
     INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN,
     INVITATION_MODULE_USER_MUTATE_SERVICE_TOKEN,
     InvitationService,
+    InvitationLookupService,
     InvitationMutateService,
   ];
 }
@@ -113,6 +115,7 @@ export function createInvitationProviders(options: {
     InvitationCrudService,
     InvitationAcceptanceService,
     InvitationRevocationService,
+    InvitationLookupService,
     InvitationMutateService,
     createInvitationSettingsProvider(options.overrides),
     createInvitationOtpServiceProvider(options.overrides),
@@ -205,6 +208,7 @@ export function createInvitationSendServiceProvider(
       INVITATION_MODULE_OTP_SERVICE_TOKEN,
       INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN,
       INVITATION_MODULE_USER_MUTATE_SERVICE_TOKEN,
+      InvitationLookupService,
       InvitationMutateService,
     ],
     useFactory: async (
@@ -214,6 +218,7 @@ export function createInvitationSendServiceProvider(
       otpService: InvitationOtpServiceInterface,
       userLookupService: InvitationUserLookupServiceInterface,
       userMutateService: InvitationUserMutateServiceInterface,
+      invitationLookupService: InvitationLookupService,
       invitationMutateService: InvitationMutateService,
     ) =>
       optionsOverrides?.invitationSendService ??
@@ -224,6 +229,7 @@ export function createInvitationSendServiceProvider(
         otpService,
         userLookupService,
         userMutateService,
+        invitationLookupService,
         invitationMutateService,
       ),
   };

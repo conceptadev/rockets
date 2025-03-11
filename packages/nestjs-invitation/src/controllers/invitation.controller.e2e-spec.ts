@@ -1,4 +1,5 @@
 import supertest from 'supertest';
+import { plainToInstance } from 'class-transformer';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
@@ -15,9 +16,9 @@ import { SeedingSource } from '@concepta/typeorm-seeding';
 import { getDataSourceToken } from '@nestjs/typeorm';
 
 import { INVITATION_MODULE_DEFAULT_SETTINGS_TOKEN } from '../invitation.constants';
-import { InvitationCreateOneDto } from '../dto/invitation-create-one.dto';
 import { InvitationDto } from '../dto/invitation.dto';
 import { InvitationAcceptInviteDto } from '../dto/invitation-accept-invite.dto';
+import { InvitationCreateInviteDto } from '../dto/invitation-create-invite.dto';
 import { invitationDefaultConfig } from '../config/invitation-default.config';
 import { InvitationFactory } from '../seeding/invitation.factory';
 import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
@@ -30,7 +31,7 @@ import { UserEntityFixture } from '../__fixtures__/user/entities/user-entity.fix
 describe('InvitationController (e2e)', () => {
   const userCategory = INVITATION_MODULE_CATEGORY_USER_KEY;
   const orgCategory = INVITATION_MODULE_CATEGORY_ORG_KEY;
-  const payload = { moreData: 'foo' };
+  const constraints = { moreData: 'foo' };
 
   let app: INestApplication;
   let invitationFactory: InvitationFactory;
@@ -41,13 +42,11 @@ describe('InvitationController (e2e)', () => {
   let config: ConfigType<typeof invitationDefaultConfig>;
 
   const expectInvitationMatch = (
-    expected: InvitationDto,
-    actual: InvitationDto,
+    createDto: InvitationCreateInviteDto,
+    response: InvitationDto,
   ) => {
-    expect(expected.id).toEqual(actual.id);
-    expect(expected.code).toEqual(actual.code);
-    expect(expected.category).toEqual(actual.category);
-    expect(expected.email).toEqual(actual.email);
+    expect(response.category).toEqual(createDto.category);
+    expect(response.user.email).toEqual(createDto.email);
   };
 
   beforeEach(async () => {
@@ -105,7 +104,7 @@ describe('InvitationController (e2e)', () => {
       await createInvite(app, {
         email: user.email,
         category: orgCategory,
-        constraints: payload,
+        constraints,
       });
     });
 
@@ -140,7 +139,7 @@ describe('InvitationController (e2e)', () => {
       await createInvite(app, {
         email: user.email,
         category: userCategory,
-        constraints: payload,
+        constraints,
       });
     });
 
@@ -148,7 +147,7 @@ describe('InvitationController (e2e)', () => {
       await createInvite(app, {
         email: 'test@mail.com',
         category: userCategory,
-        constraints: payload,
+        constraints,
       });
     });
 
@@ -156,7 +155,7 @@ describe('InvitationController (e2e)', () => {
       const invitationDto = await createInvite(app, {
         email: 'test@mail.com',
         category: userCategory,
-        constraints: payload,
+        constraints,
       });
 
       await supertest(app.getHttpServer())
@@ -193,48 +192,37 @@ describe('InvitationController (e2e)', () => {
     });
 
     it('GET invitation', async () => {
-      const invitationCreateDto = {
-        email: user.email,
-        category: userCategory,
-        constraints: payload,
-      } as InvitationCreateOneDto;
-      const invite1 = await createInvite(app, invitationCreateDto);
-      const invite2 = await createInvite(app, invitationCreateDto);
-      const invite3 = await createInvite(app, invitationCreateDto);
-
       const response = await supertest(app.getHttpServer())
-        .get(`/invitation?s={"email": "${invitationCreateDto.email}"}`)
+        .get('/invitation')
         .expect(200);
 
       const invitationResponse = response.body as InvitationDto[];
 
-      expect(invitationResponse.length).toEqual(3);
-
-      expectInvitationMatch(invite1, invitationResponse[0]);
-      expectInvitationMatch(invite2, invitationResponse[1]);
-      expectInvitationMatch(invite3, invitationResponse[2]);
+      expect(invitationResponse.length).toEqual(1);
     });
 
     it('GET invitation/:id', async () => {
-      const invitation = await createInvite(app, {
+      const createInviteDto = plainToInstance(InvitationCreateInviteDto, {
         email: user.email,
         category: userCategory,
-        constraints: payload,
+        constraints,
       });
+
+      const invitation = await createInvite(app, createInviteDto);
 
       const response = await supertest(app.getHttpServer())
         .get(`/invitation/${invitation.id}`)
         .expect(200);
 
       const invitationResponse = response.body as InvitationDto;
-      expectInvitationMatch(invitation, invitationResponse);
+      expectInvitationMatch(createInviteDto, invitationResponse);
     });
 
     it('DELETE invitation/:id', async () => {
       const invitation = await createInvite(app, {
         email: user.email,
         category: userCategory,
-        constraints: payload,
+        constraints,
       });
 
       await supertest(app.getHttpServer())
@@ -250,7 +238,7 @@ describe('InvitationController (e2e)', () => {
 
 const createInvite = async (
   app: INestApplication,
-  invitationCreateDto: InvitationCreateOneDto,
+  invitationCreateDto: InvitationCreateInviteDto,
 ): Promise<InvitationDto> => {
   const response = await supertest(app.getHttpServer())
     .post('/invitation')

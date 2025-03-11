@@ -1,7 +1,11 @@
-import { InvitationInterface } from '@concepta/nestjs-common';
+import {
+  InvitationInterface,
+  ReferenceEmailInterface,
+} from '@concepta/nestjs-common';
 
 export interface InvitationSendInvitationEmailOptionsInterface
-  extends Pick<InvitationInterface, 'email' | 'code'> {
+  extends Pick<InvitationInterface, 'code'>,
+    ReferenceEmailInterface {
   passcode: string;
   resetTokenExp: Date;
 }

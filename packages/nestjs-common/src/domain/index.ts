@@ -60,6 +60,7 @@ export { CacheInterface } from './cache/interfaces/cache.interface';
 
 export { InvitationAcceptedEventPayloadInterface } from './invitation/interfaces/invitation-accepted-event-payload.interface';
 export { InvitationInterface } from './invitation/interfaces/invitation.interface';
+export { InvitationUserInterface } from './invitation/interfaces/invitation-user.interface';
 
 export { FileCreatableInterface } from './file/interfaces/file-creatable.interface';
 export { FileInterface } from './file/interfaces/file.interface';

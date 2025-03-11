@@ -1,17 +1,19 @@
 import { Exclude, Expose, Type } from 'class-transformer';
 import {
   IsBoolean,
-  IsEmail,
   IsObject,
   IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { LiteralObject, ReferenceIdInterface } from '@concepta/nestjs-common';
-import { InvitationInterface } from '@concepta/nestjs-common';
-import { CommonEntityDto, ReferenceIdDto } from '@concepta/nestjs-common';
-import { ReferenceEmailInterface } from '@concepta/nestjs-common/src';
+import { ApiProperty } from '@nestjs/swagger';
+import {
+  LiteralObject,
+  CommonEntityDto,
+  InvitationInterface,
+  InvitationUserInterface,
+} from '@concepta/nestjs-common';
+import { InvitationUserDto } from './invitation-user.dto';
 
 @Exclude()
 export class InvitationDto
@@ -25,14 +27,6 @@ export class InvitationDto
   })
   @IsBoolean()
   active = true;
-
-  @Expose()
-  @ApiProperty({
-    type: 'string',
-    description: 'Email that the invitation will be sent to',
-  })
-  @IsEmail()
-  email = '';
 
   @Expose()
   @ApiProperty({
@@ -52,7 +46,7 @@ export class InvitationDto
   category = '';
 
   @Expose()
-  @ApiPropertyOptional({
+  @ApiProperty({
     title: 'Payload',
     type: 'object',
     description:
@@ -60,14 +54,14 @@ export class InvitationDto
   })
   @IsObject()
   @IsOptional()
-  constraints?: LiteralObject;
+  constraints!: LiteralObject;
 
   @Expose()
   @ApiProperty({
-    type: ReferenceIdDto,
-    description: 'The owner of the org',
+    type: InvitationUserDto,
+    description: 'The invited user.',
   })
-  @Type(() => ReferenceIdDto)
+  @Type(() => InvitationUserDto)
   @ValidateNested()
-  user!: ReferenceIdInterface & ReferenceEmailInterface;
+  user!: InvitationUserInterface;
 }

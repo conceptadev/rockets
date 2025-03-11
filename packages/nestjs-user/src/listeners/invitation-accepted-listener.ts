@@ -29,8 +29,8 @@ export class InvitationAcceptedListener
   }
 
   onModuleInit() {
-    if (this.settings.invitationRequestEvent) {
-      this.on(this.settings.invitationRequestEvent);
+    if (this.settings.invitationAcceptedEvent) {
+      this.on(this.settings.invitationAcceptedEvent);
     }
   }
 
@@ -42,15 +42,15 @@ export class InvitationAcceptedListener
   ) {
     // check only for invitation of type category
     if (
-      event?.payload?.invitation?.category ===
-      INVITATION_MODULE_CATEGORY_USER_KEY
+      event.payload.invitation.category === INVITATION_MODULE_CATEGORY_USER_KEY
     ) {
-      const { userId, newPassword } = event?.payload?.data ?? {};
+      const userId = event.payload.invitation.user.id;
+      const { newPassword } = event.payload?.data ?? {};
 
       if (typeof userId !== 'string' || typeof newPassword !== 'string') {
         throw new UserException({
           message:
-            'The invitation accepted event payload received has invalid content. The payload must have the "userId" and "newPassword" properties.',
+            'The invitation accepted event payload received has invalid content. The payload must have the "invitation.user" and "newPassword" properties.',
         });
       }
 

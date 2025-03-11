@@ -1,17 +1,17 @@
-import { InvitationInterface } from '@concepta/nestjs-common/src';
+import { InvitationInterface } from '@concepta/nestjs-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 import { InvitationAcceptOptionsInterface } from './invitation-accept-options.interface';
-import { InvitationCreateOneInterface } from './invitation-create-one.interface';
+import { InvitationCreateInviteInterface } from './invitation-create-invite.interface';
 import { InvitationRevokeOptionsInterface } from './invitation-revoke-options.interface';
 
 export interface InvitationServiceInterface {
   create(
-    createDto: InvitationCreateOneInterface,
+    createInviteDto: InvitationCreateInviteInterface,
     queryOptions?: QueryOptionsInterface,
   ): Promise<Required<Pick<InvitationInterface, 'id' | 'user'>>>;
 
   send(
-    invitation: InvitationInterface,
+    invitation: Pick<InvitationInterface, 'id'>,
     queryOptions?: QueryOptionsInterface,
   ): Promise<void>;
 

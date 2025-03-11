@@ -1,5 +1,5 @@
 import { InvitationInterface } from '@concepta/nestjs-common';
 
 export interface InvitationCreatableInterface
-  extends Pick<InvitationInterface, 'email' | 'category' | 'user' | 'code'>,
+  extends Pick<InvitationInterface, 'category' | 'user' | 'code'>,
     Partial<Pick<InvitationInterface, 'constraints'>> {}

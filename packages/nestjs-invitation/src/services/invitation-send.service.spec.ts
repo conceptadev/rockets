@@ -75,6 +75,7 @@ describe(InvitationSendService, () => {
       const inviteCode = randomUUID();
 
       await invitationSendService.send({
+        id: 'abcdefg',
         user: testUser,
         code: inviteCode,
         category: INVITATION_MODULE_CATEGORY_USER_KEY,

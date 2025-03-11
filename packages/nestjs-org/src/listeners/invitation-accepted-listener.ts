@@ -39,16 +39,15 @@ export class InvitationAcceptedListener
   ) {
     // check only for invitation of type category
     if (
-      event?.payload?.invitation?.category ===
-      INVITATION_MODULE_CATEGORY_ORG_KEY
+      event.payload.invitation.category === INVITATION_MODULE_CATEGORY_ORG_KEY
     ) {
-      const { userId } = event?.payload?.data ?? {};
+      const userId = event.payload.invitation.user.id;
       const { orgId } = event?.payload?.invitation?.constraints ?? {};
 
       if (typeof userId !== 'string') {
         throw new OrgMemberException({
           message:
-            'The invitation accepted event payload received has invalid content. The payload must have the "userId" property.',
+            'The invitation accepted event payload received has invalid content. The payload must have the "invitation.user" property.',
         });
       }
 

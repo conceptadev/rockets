@@ -1,12 +1,12 @@
 import { Column } from 'typeorm';
 import { PlainLiteralObject } from '@nestjs/common';
-import { ReferenceActive, ReferenceIdInterface } from '@concepta/nestjs-common';
 import { CommonSqliteEntity } from '@concepta/typeorm-common';
-import { ReferenceEmailInterface } from '@concepta/nestjs-common/src';
-
+import {
+  InvitationUserInterface,
+  ReferenceActive,
+} from '@concepta/nestjs-common';
 import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
 
-// TODO check this entity later
 export abstract class InvitationSqliteEntity
   extends CommonSqliteEntity
   implements InvitationEntityInterface
@@ -15,16 +15,13 @@ export abstract class InvitationSqliteEntity
   active!: ReferenceActive;
 
   @Column()
-  email!: string;
-
-  @Column()
   code!: string;
 
   @Column()
   category!: string;
 
   @Column({ type: 'simple-json', nullable: true })
-  constraints?: PlainLiteralObject;
+  constraints!: PlainLiteralObject;
 
-  user!: ReferenceIdInterface & ReferenceEmailInterface;
+  user!: InvitationUserInterface;
 }

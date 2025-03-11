@@ -4,7 +4,7 @@ export { InvitationService } from './services/invitation.service';
 export { InvitationAcceptedEventAsync } from './events/invitation-accepted.event';
 
 export { InvitationEntityInterface } from './interfaces/invitation.entity.interface';
-export { InvitationCreateOneInterface } from './interfaces/invitation-create-one.interface';
+export { InvitationCreateInviteInterface } from './interfaces/invitation-create-invite.interface';
 export { InvitationServiceInterface } from './interfaces/invitation.service.interface';
 export { InvitationSendServiceInterface } from './interfaces/invitation-send-service.interface';
 export { InvitationSendInvitationEmailOptionsInterface } from './interfaces/invitation-send-invitation-email-options.interface';

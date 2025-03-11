@@ -1,4 +1,8 @@
-import { InvitationInterface } from '@concepta/nestjs-common/src';
+import {
+  InvitationInterface,
+  ReferenceEmailInterface,
+} from '@concepta/nestjs-common';
 
 export interface InvitationRevokeOptionsInterface
-  extends Pick<InvitationInterface, 'email' | 'category'> {}
+  extends Pick<InvitationInterface, 'category'>,
+    ReferenceEmailInterface {}

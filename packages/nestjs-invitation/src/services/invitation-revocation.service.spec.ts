@@ -4,7 +4,6 @@ import { INestApplication } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { UserEntityInterface } from '@concepta/nestjs-user';
 import { OtpService } from '@concepta/nestjs-otp';
-import { EmailService } from '@concepta/nestjs-email';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { getDynamicRepositoryToken } from '@concepta/nestjs-typeorm-ext';
@@ -12,7 +11,6 @@ import { INVITATION_MODULE_CATEGORY_USER_KEY } from '@concepta/nestjs-common';
 
 import { INVITATION_MODULE_INVITATION_ENTITY_KEY } from '../invitation.constants';
 import { InvitationFactory } from '../seeding/invitation.factory';
-import { InvitationSendService } from './invitation-send.service';
 import { InvitationRevocationService } from './invitation-revocation.service';
 import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
 import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
@@ -22,23 +20,16 @@ import { UserEntityFixture } from '../__fixtures__/user/entities/user-entity.fix
 describe(InvitationRevocationService, () => {
   const category = INVITATION_MODULE_CATEGORY_USER_KEY;
 
-  let spyEmailService: jest.SpyInstance;
-
   let app: INestApplication;
   let seedingSource: SeedingSource;
   let otpService: OtpService;
   let invitationRepo: Repository<InvitationEntityInterface>;
-  let invitationSendService: InvitationSendService;
   let invitationRevocationService: InvitationRevocationService;
 
   let testUser: UserEntityInterface;
   let invitationFactory: InvitationFactory;
 
   beforeEach(async () => {
-    spyEmailService = jest
-      .spyOn(EmailService.prototype, 'sendMail')
-      .mockImplementation(async () => undefined);
-
     const testingModule: TestingModule = await Test.createTestingModule({
       imports: [AppModuleFixture],
     }).compile();
@@ -47,10 +38,6 @@ describe(InvitationRevocationService, () => {
 
     invitationRepo = testingModule.get<Repository<InvitationEntityInterface>>(
       getDynamicRepositoryToken(INVITATION_MODULE_INVITATION_ENTITY_KEY),
-    );
-
-    invitationSendService = testingModule.get<InvitationSendService>(
-      InvitationSendService,
     );
 
     invitationRevocationService =
@@ -88,15 +75,8 @@ describe(InvitationRevocationService, () => {
     it('Should revoke all user invites', async () => {
       const spyOtpClear = jest.spyOn(otpService, 'clear');
 
-      const invitation = await invitationFactory.create({
+      await invitationFactory.create({
         user: testUser,
-        email: testUser.email,
-        category,
-      });
-
-      await invitationSendService.send({
-        user: testUser,
-        code: invitation.code,
         category,
       });
 
@@ -119,7 +99,6 @@ describe(InvitationRevocationService, () => {
 
       expect(countAfter).toEqual(0);
       expect(spyOtpClear).toHaveBeenCalledTimes(1);
-      expect(spyEmailService).toHaveBeenCalledTimes(1);
     });
   });
 });

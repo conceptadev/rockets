@@ -18,11 +18,12 @@ import {
 } from '@concepta/nestjs-crud';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { InvitationCreateOneDto } from '../dto/invitation-create-one.dto';
+import { InvitationCreateInviteDto } from '../dto/invitation-create-invite.dto';
 import { InvitationPaginatedDto } from '../dto/invitation-paginated.dto';
 import { InvitationDto } from '../dto/invitation.dto';
 import { InvitationException } from '../exceptions/invitation.exception';
-import { InvitationCreateOneInterface } from '../interfaces/invitation-create-one.interface';
+import { InvitationCreateInviteInterface } from '../interfaces/invitation-create-invite.interface';
+import { InvitationSendInviteInterface } from '../interfaces/invitation-send-invite.interface';
 import { InvitationResource } from '../invitation.types';
 import { InvitationCrudService } from '../services/invitation-crud.service';
 import { InvitationSendService } from '../services/invitation-send.service';
@@ -32,6 +33,12 @@ import { InvitationSendService } from '../services/invitation-send.service';
   model: {
     type: InvitationDto,
     paginatedType: InvitationPaginatedDto,
+  },
+  join: {
+    user: {
+      eager: true,
+      allow: ['id', 'email'],
+    },
   },
   validation: {
     transformOptions: {
@@ -45,13 +52,13 @@ export class InvitationController
   implements
     CrudControllerInterface<
       InvitationInterface,
-      InvitationCreateOneInterface,
-      InvitationCreateOneInterface
+      InvitationCreateInviteInterface,
+      never
     >
 {
   constructor(
-    private readonly invitationSendService: InvitationSendService,
     private readonly invitationCrudService: InvitationCrudService,
+    private readonly invitationSendService: InvitationSendService,
   ) {}
 
   @CrudReadMany()
@@ -77,31 +84,31 @@ export class InvitationController
   @ApiOperation({
     summary: 'Create one invitation.',
   })
-  async createOneCustom(
+  async createInvite(
     @CrudRequest() _crudRequest: CrudRequestInterface,
-    @CrudBody() invitationCreateOneDto: InvitationCreateOneDto,
+    @CrudBody() invitationCreateInviteDto: InvitationCreateInviteDto,
   ) {
-    let invite:
-      | Required<Pick<InvitationInterface, 'id' | 'user' | 'code' | 'category'>>
-      | undefined;
+    let invite: InvitationSendInviteInterface | undefined;
 
     try {
       await this.invitationCrudService
         .transaction()
         .commit(async (transaction): Promise<void> => {
           invite = await this.invitationSendService.create(
-            invitationCreateOneDto,
+            invitationCreateInviteDto,
             {
               transaction,
             },
           );
 
-          if (invite !== undefined && invite.user !== undefined) {
+          if (invite) {
             await this.invitationSendService.send(invite, {
               transaction,
             });
           } else {
-            throw new Error('User and/or invite not defined');
+            throw new InvitationException({
+              message: 'User and/or invite not defined',
+            });
           }
         });
 

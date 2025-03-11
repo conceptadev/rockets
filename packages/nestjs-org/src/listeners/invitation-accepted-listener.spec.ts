@@ -129,7 +129,7 @@ describe(InvitationAcceptedListener, () => {
     const invitationAcceptedEventAsync = new InvitationAcceptedEventAsync({
       invitation: testInvitation,
       data: {
-        userId: testInvitation.user.id,
+        user: testInvitation.user,
       },
     });
 

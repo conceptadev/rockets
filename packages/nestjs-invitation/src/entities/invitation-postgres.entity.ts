@@ -1,10 +1,12 @@
 import { Column } from 'typeorm';
 import { PlainLiteralObject } from '@nestjs/common';
-import { ReferenceActive, ReferenceIdInterface } from '@concepta/nestjs-common';
 import { CommonPostgresEntity } from '@concepta/typeorm-common';
+import {
+  ReferenceActive,
+  InvitationUserInterface,
+} from '@concepta/nestjs-common';
 
 import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
-import { ReferenceEmailInterface } from '@concepta/nestjs-common/src';
 
 // TODO check this entity later
 export abstract class InvitationPostgresEntity
@@ -15,16 +17,13 @@ export abstract class InvitationPostgresEntity
   active!: ReferenceActive;
 
   @Column()
-  email!: string;
-
-  @Column()
   code!: string;
 
   @Column()
   category!: string;
 
   @Column({ type: 'jsonb' })
-  constraints?: PlainLiteralObject;
+  constraints!: PlainLiteralObject;
 
-  user!: ReferenceIdInterface & ReferenceEmailInterface;
+  user!: InvitationUserInterface;
 }
