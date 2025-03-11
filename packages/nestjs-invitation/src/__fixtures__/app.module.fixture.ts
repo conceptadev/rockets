@@ -16,8 +16,8 @@ import { MailerModule, MailerService } from '@nestjs-modules/mailer';
 import { InvitationModule } from '../invitation.module';
 import { InvitationEntityFixture } from './invitation/entities/invitation.entity.fixture';
 import { InvitationAcceptedEventAsync } from '../events/invitation-accepted.event';
-import { UserOtpEntityFixture } from './user/entities/user-otp-entity.fixture';
-import { UserEntityFixture } from './user/entities/user-entity.fixture';
+import { UserOtpEntityFixture } from './user/entities/user-otp.entity.fixture';
+import { UserEntityFixture } from './user/entities/user.entity.fixture';
 import { default as ormConfig } from './ormconfig.fixture';
 
 @Module({

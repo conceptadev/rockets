@@ -11,12 +11,12 @@ import {
   INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN,
 } from '../invitation.constants';
 
-import { InvitationSettingsInterface } from '../interfaces/invitation-settings.interface';
-import { InvitationOtpServiceInterface } from '../interfaces/invitation-otp.service.interface';
-import { InvitationUserLookupServiceInterface } from '../interfaces/invitation-user-lookup.service.interface';
-import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
+import { InvitationSettingsInterface } from '../interfaces/options/invitation-settings.interface';
+import { InvitationOtpServiceInterface } from '../interfaces/services/invitation-otp-service.interface';
+import { InvitationUserLookupServiceInterface } from '../interfaces/services/invitation-user-lookup.service.interface';
+import { InvitationEntityInterface } from '../interfaces/domain/invitation-entity.interface';
 import { InvitationException } from '../exceptions/invitation.exception';
-import { InvitationRevokeOptionsInterface } from '../interfaces/invitation-revoke-options.interface';
+import { InvitationRevokeOptionsInterface } from '../interfaces/options/invitation-revoke-options.interface';
 
 export class InvitationRevocationService extends BaseService<InvitationEntityInterface> {
   constructor(

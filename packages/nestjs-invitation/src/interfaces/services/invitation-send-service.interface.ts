@@ -1,8 +1,8 @@
 import { InvitationUserInterface } from '@concepta/nestjs-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
-import { InvitationCreateInviteInterface } from './invitation-create-invite.interface';
-import { InvitationSendInvitationEmailOptionsInterface } from './invitation-send-invitation-email-options.interface';
-import { InvitationSendInviteInterface } from './invitation-send-invite.interface';
+import { InvitationCreateInviteInterface } from '../domain/invitation-create-invite.interface';
+import { InvitationSendInvitationEmailOptionsInterface } from '../options/invitation-send-invitation-email-options.interface';
+import { InvitationSendInviteInterface } from '../domain/invitation-send-invite.interface';
 
 export interface InvitationSendServiceInterface {
   /**

@@ -5,7 +5,7 @@ import {
   InvitationUserInterface,
   ReferenceActive,
 } from '@concepta/nestjs-common';
-import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
+import { InvitationEntityInterface } from '../interfaces/domain/invitation-entity.interface';
 
 export abstract class InvitationSqliteEntity
   extends CommonSqliteEntity

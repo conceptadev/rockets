@@ -12,10 +12,10 @@ import { INVITATION_MODULE_CATEGORY_USER_KEY } from '@concepta/nestjs-common';
 import { INVITATION_MODULE_INVITATION_ENTITY_KEY } from '../invitation.constants';
 import { InvitationFactory } from '../seeding/invitation.factory';
 import { InvitationRevocationService } from './invitation-revocation.service';
-import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
+import { InvitationEntityInterface } from '../interfaces/domain/invitation-entity.interface';
 import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
 import { InvitationEntityFixture } from '../__fixtures__/invitation/entities/invitation.entity.fixture';
-import { UserEntityFixture } from '../__fixtures__/user/entities/user-entity.fixture';
+import { UserEntityFixture } from '../__fixtures__/user/entities/user.entity.fixture';
 
 describe(InvitationRevocationService, () => {
   const category = INVITATION_MODULE_CATEGORY_USER_KEY;

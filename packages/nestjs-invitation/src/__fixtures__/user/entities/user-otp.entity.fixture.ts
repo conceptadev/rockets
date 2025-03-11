@@ -3,7 +3,7 @@ import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import { OtpInterface } from '@concepta/nestjs-common';
 import { CommonSqliteEntity } from '@concepta/typeorm-common';
 
-import { UserEntityFixture } from './user-entity.fixture';
+import { UserEntityFixture } from './user.entity.fixture';
 
 /**
  * Otp Entity Fixture

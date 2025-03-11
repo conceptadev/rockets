@@ -1,6 +1,6 @@
 import { registerAs } from '@nestjs/config';
 import { INVITATION_MODULE_DEFAULT_SETTINGS_TOKEN } from '../invitation.constants';
-import { InvitationSettingsInterface } from '../interfaces/invitation-settings.interface';
+import { InvitationSettingsInterface } from '../interfaces/options/invitation-settings.interface';
 
 /**
  * Default configuration for invitation.

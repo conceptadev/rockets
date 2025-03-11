@@ -16,10 +16,10 @@ import {
   INVITATION_MODULE_USER_MUTATE_SERVICE_TOKEN,
 } from './invitation.constants';
 
-import { InvitationOptionsInterface } from './interfaces/invitation-options.interface';
-import { InvitationOptionsExtrasInterface } from './interfaces/invitation-options-extras.interface';
-import { InvitationEntitiesOptionsInterface } from './interfaces/invitation-entities-options.interface';
-import { InvitationSettingsInterface } from './interfaces/invitation-settings.interface';
+import { InvitationOptionsInterface } from './interfaces/options/invitation-options.interface';
+import { InvitationOptionsExtrasInterface } from './interfaces/options/invitation-options-extras.interface';
+import { InvitationEntitiesOptionsInterface } from './interfaces/options/invitation-entities-options.interface';
+import { InvitationSettingsInterface } from './interfaces/options/invitation-settings.interface';
 import { InvitationController } from './controllers/invitation.controller';
 import { InvitationAcceptanceController } from './controllers/invitation-acceptance.controller';
 import { InvitationService } from './services/invitation.service';
@@ -31,10 +31,10 @@ import { invitationDefaultConfig } from './config/invitation-default.config';
 import { InvitationReattemptController } from './controllers/invitation-reattempt.controller';
 import { InvitationLookupService } from './services/invitation-lookup.service';
 import { InvitationMutateService } from './services/invitation-mutate.service';
-import { InvitationEmailServiceInterface } from './interfaces/invitation-email.service.interface';
-import { InvitationOtpServiceInterface } from './interfaces/invitation-otp.service.interface';
-import { InvitationUserLookupServiceInterface } from './interfaces/invitation-user-lookup.service.interface';
-import { InvitationUserMutateServiceInterface } from './interfaces/invitation-user-mutate.service.interface';
+import { InvitationEmailServiceInterface } from './interfaces/services/invitation-email-service.interface';
+import { InvitationOtpServiceInterface } from './interfaces/services/invitation-otp-service.interface';
+import { InvitationUserLookupServiceInterface } from './interfaces/services/invitation-user-lookup.service.interface';
+import { InvitationUserMutateServiceInterface } from './interfaces/services/invitation-user-mutate.service.interface';
 
 const RAW_OPTIONS_TOKEN = Symbol('__INVITATION_MODULE_RAW_OPTIONS_TOKEN__');
 

@@ -13,19 +13,19 @@ import {
   INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN,
   INVITATION_MODULE_USER_MUTATE_SERVICE_TOKEN,
 } from '../invitation.constants';
-import { InvitationOtpServiceInterface } from '../interfaces/invitation-otp.service.interface';
-import { InvitationSettingsInterface } from '../interfaces/invitation-settings.interface';
-import { InvitationEmailServiceInterface } from '../interfaces/invitation-email.service.interface';
+import { InvitationOtpServiceInterface } from '../interfaces/services/invitation-otp-service.interface';
+import { InvitationSettingsInterface } from '../interfaces/options/invitation-settings.interface';
+import { InvitationEmailServiceInterface } from '../interfaces/services/invitation-email-service.interface';
 import { InvitationSendMailException } from '../exceptions/invitation-send-mail.exception';
 
-import { InvitationSendServiceInterface } from '../interfaces/invitation-send-service.interface';
-import { InvitationCreateInviteInterface } from '../interfaces/invitation-create-invite.interface';
+import { InvitationSendServiceInterface } from '../interfaces/services/invitation-send-service.interface';
+import { InvitationCreateInviteInterface } from '../interfaces/domain/invitation-create-invite.interface';
 import { InvitationLookupService } from './invitation-lookup.service';
 import { InvitationMutateService } from './invitation-mutate.service';
-import { InvitationSendInvitationEmailOptionsInterface } from '../interfaces/invitation-send-invitation-email-options.interface';
-import { InvitationUserLookupServiceInterface } from '../interfaces/invitation-user-lookup.service.interface';
-import { InvitationUserMutateServiceInterface } from '../interfaces/invitation-user-mutate.service.interface';
-import { InvitationSendInviteInterface } from '../interfaces/invitation-send-invite.interface';
+import { InvitationSendInvitationEmailOptionsInterface } from '../interfaces/options/invitation-send-invitation-email-options.interface';
+import { InvitationUserLookupServiceInterface } from '../interfaces/services/invitation-user-lookup.service.interface';
+import { InvitationUserMutateServiceInterface } from '../interfaces/services/invitation-user-mutate.service.interface';
+import { InvitationSendInviteInterface } from '../interfaces/domain/invitation-send-invite.interface';
 import { InvitationNotFoundException } from '../exceptions/invitation-not-found.exception';
 
 export class InvitationSendService implements InvitationSendServiceInterface {

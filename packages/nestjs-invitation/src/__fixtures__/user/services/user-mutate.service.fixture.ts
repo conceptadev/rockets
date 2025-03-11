@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UserCreatableInterface } from '@concepta/nestjs-common';
 
-import { InvitationUserMutateServiceInterface } from '../../../interfaces/invitation-user-mutate.service.interface';
+import { InvitationUserMutateServiceInterface } from '../../../interfaces/services/invitation-user-mutate.service.interface';
 import { UserFixture } from '../user.fixture';
 
 @Injectable()

@@ -21,12 +21,12 @@ import { InvitationAcceptInviteDto } from '../dto/invitation-accept-invite.dto';
 import { InvitationCreateInviteDto } from '../dto/invitation-create-invite.dto';
 import { invitationDefaultConfig } from '../config/invitation-default.config';
 import { InvitationFactory } from '../seeding/invitation.factory';
-import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
-import { InvitationSettingsInterface } from '../interfaces/invitation-settings.interface';
+import { InvitationEntityInterface } from '../interfaces/domain/invitation-entity.interface';
+import { InvitationSettingsInterface } from '../interfaces/options/invitation-settings.interface';
 
 import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
 import { InvitationEntityFixture } from '../__fixtures__/invitation/entities/invitation.entity.fixture';
-import { UserEntityFixture } from '../__fixtures__/user/entities/user-entity.fixture';
+import { UserEntityFixture } from '../__fixtures__/user/entities/user.entity.fixture';
 
 describe('InvitationController (e2e)', () => {
   const userCategory = INVITATION_MODULE_CATEGORY_USER_KEY;

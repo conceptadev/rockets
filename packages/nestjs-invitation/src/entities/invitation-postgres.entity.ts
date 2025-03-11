@@ -6,7 +6,7 @@ import {
   InvitationUserInterface,
 } from '@concepta/nestjs-common';
 
-import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
+import { InvitationEntityInterface } from '../interfaces/domain/invitation-entity.interface';
 
 // TODO check this entity later
 export abstract class InvitationPostgresEntity

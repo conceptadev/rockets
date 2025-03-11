@@ -1,8 +1,8 @@
 import { InvitationInterface } from '@concepta/nestjs-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
-import { InvitationAcceptOptionsInterface } from './invitation-accept-options.interface';
-import { InvitationCreateInviteInterface } from './invitation-create-invite.interface';
-import { InvitationRevokeOptionsInterface } from './invitation-revoke-options.interface';
+import { InvitationAcceptOptionsInterface } from '../options/invitation-accept-options.interface';
+import { InvitationCreateInviteInterface } from '../domain/invitation-create-invite.interface';
+import { InvitationRevokeOptionsInterface } from '../options/invitation-revoke-options.interface';
 
 export interface InvitationServiceInterface {
   create(

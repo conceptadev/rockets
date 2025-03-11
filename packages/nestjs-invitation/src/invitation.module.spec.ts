@@ -14,11 +14,11 @@ import {
 } from './invitation.constants';
 
 import { InvitationModule } from './invitation.module';
-import { InvitationOtpServiceInterface } from './interfaces/invitation-otp.service.interface';
+import { InvitationOtpServiceInterface } from './interfaces/services/invitation-otp-service.interface';
 
-import { InvitationUserLookupServiceInterface } from './interfaces/invitation-user-lookup.service.interface';
-import { InvitationUserMutateServiceInterface } from './interfaces/invitation-user-mutate.service.interface';
-import { InvitationServiceInterface } from './interfaces/invitation.service.interface';
+import { InvitationUserLookupServiceInterface } from './interfaces/services/invitation-user-lookup.service.interface';
+import { InvitationUserMutateServiceInterface } from './interfaces/services/invitation-user-mutate.service.interface';
+import { InvitationServiceInterface } from './interfaces/services/invitation-service.interface';
 import { InvitationController } from './controllers/invitation.controller';
 import { InvitationAcceptanceController } from './controllers/invitation-acceptance.controller';
 import { InvitationReattemptController } from './controllers/invitation-reattempt.controller';
@@ -26,7 +26,7 @@ import { InvitationService } from './services/invitation.service';
 import { InvitationSendService } from './services/invitation-send.service';
 import { InvitationAcceptanceService } from './services/invitation-acceptance.service';
 import { InvitationRevocationService } from './services/invitation-revocation.service';
-import { InvitationEmailServiceInterface } from './interfaces/invitation-email.service.interface';
+import { InvitationEmailServiceInterface } from './interfaces/services/invitation-email-service.interface';
 
 import { UserModuleFixture } from './__fixtures__/user/user.module.fixture';
 import { UserLookupServiceFixture } from './__fixtures__/user/services/user-lookup.service.fixture';
@@ -36,7 +36,7 @@ import { OtpServiceFixture } from './__fixtures__/otp/otp.service.fixture';
 import { MailerServiceFixture } from './__fixtures__/email/mailer.service.fixture';
 import { InvitationEntityFixture } from './__fixtures__/invitation/entities/invitation.entity.fixture';
 import { default as ormConfig } from './__fixtures__/ormconfig.fixture';
-import { InvitationSendServiceInterface } from './interfaces/invitation-send-service.interface';
+import { InvitationSendServiceInterface } from './interfaces/services/invitation-send-service.interface';
 import { InvitationSendServiceFixture } from './__fixtures__/invitation/entities/invitation-send.service.fixture';
 import { InvitationLocalModuleFixture } from './__fixtures__/invitation/entities/invitation-local.module.fixture';
 

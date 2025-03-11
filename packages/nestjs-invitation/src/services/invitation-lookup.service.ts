@@ -3,8 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { LookupService } from '@concepta/typeorm-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 
-import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
-import { InvitationLookupServiceInterface } from '../interfaces/invitation-lookup-service.interface';
+import { InvitationEntityInterface } from '../interfaces/domain/invitation-entity.interface';
+import { InvitationLookupServiceInterface } from '../interfaces/services/invitation-lookup-service.interface';
 import { INVITATION_MODULE_INVITATION_ENTITY_KEY } from '../invitation.constants';
 
 /**

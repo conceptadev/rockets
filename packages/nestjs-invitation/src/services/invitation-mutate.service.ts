@@ -4,9 +4,9 @@ import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 
 import { InvitationCreateDto } from '../dto/invitation-create.dto';
-import { InvitationCreatableInterface } from '../interfaces/invitation-creatable.interface';
-import { InvitationMutateServiceInterface } from '../interfaces/invitation-mutate-service.interface';
-import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
+import { InvitationCreatableInterface } from '../interfaces/domain/invitation-creatable.interface';
+import { InvitationMutateServiceInterface } from '../interfaces/services/invitation-mutate-service.interface';
+import { InvitationEntityInterface } from '../interfaces/domain/invitation-entity.interface';
 import { INVITATION_MODULE_INVITATION_ENTITY_KEY } from '../invitation.constants';
 
 /**

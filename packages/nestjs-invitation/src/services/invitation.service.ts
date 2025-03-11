@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 import { InvitationInterface } from '@concepta/nestjs-common';
 
-import { InvitationServiceInterface } from '../interfaces/invitation.service.interface';
+import { InvitationServiceInterface } from '../interfaces/services/invitation-service.interface';
 import { InvitationAcceptanceService } from './invitation-acceptance.service';
 import { InvitationSendService } from './invitation-send.service';
 import { InvitationRevocationService } from './invitation-revocation.service';
-import { InvitationAcceptOptionsInterface } from '../interfaces/invitation-accept-options.interface';
-import { InvitationRevokeOptionsInterface } from '../interfaces/invitation-revoke-options.interface';
-import { InvitationCreateInviteInterface } from '../interfaces/invitation-create-invite.interface';
+import { InvitationAcceptOptionsInterface } from '../interfaces/options/invitation-accept-options.interface';
+import { InvitationRevokeOptionsInterface } from '../interfaces/options/invitation-revoke-options.interface';
+import { InvitationCreateInviteInterface } from '../interfaces/domain/invitation-create-invite.interface';
 
 @Injectable()
 export class InvitationService implements InvitationServiceInterface {

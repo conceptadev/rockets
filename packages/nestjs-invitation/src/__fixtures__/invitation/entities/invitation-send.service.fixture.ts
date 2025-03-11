@@ -4,10 +4,10 @@ import {
   InvitationUserInterface,
 } from '@concepta/nestjs-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
-import { InvitationCreateInviteInterface } from '../../../interfaces/invitation-create-invite.interface';
-import { InvitationSendServiceInterface } from '../../../interfaces/invitation-send-service.interface';
-import { InvitationSendInvitationEmailOptionsInterface } from '../../../interfaces/invitation-send-invitation-email-options.interface';
-import { InvitationSendInviteInterface } from '../../../interfaces/invitation-send-invite.interface';
+import { InvitationCreateInviteInterface } from '../../../interfaces/domain/invitation-create-invite.interface';
+import { InvitationSendServiceInterface } from '../../../interfaces/services/invitation-send-service.interface';
+import { InvitationSendInvitationEmailOptionsInterface } from '../../../interfaces/options/invitation-send-invitation-email-options.interface';
+import { InvitationSendInviteInterface } from '../../../interfaces/domain/invitation-send-invite.interface';
 
 @Injectable()
 export class InvitationSendServiceFixture

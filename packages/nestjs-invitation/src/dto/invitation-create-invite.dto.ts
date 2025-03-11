@@ -1,7 +1,7 @@
 import { IsEmail } from 'class-validator';
 import { Exclude, Expose } from 'class-transformer';
 import { ApiProperty, PickType } from '@nestjs/swagger';
-import { InvitationCreateInviteInterface } from '../interfaces/invitation-create-invite.interface';
+import { InvitationCreateInviteInterface } from '../interfaces/domain/invitation-create-invite.interface';
 import { InvitationCreateDto } from './invitation-create.dto';
 
 @Exclude()

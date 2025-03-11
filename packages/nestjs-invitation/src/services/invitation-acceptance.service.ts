@@ -17,12 +17,12 @@ import {
 
 import { InvitationAcceptedEventAsync } from '../events/invitation-accepted.event';
 import { InvitationRevocationService } from './invitation-revocation.service';
-import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
-import { InvitationSettingsInterface } from '../interfaces/invitation-settings.interface';
-import { InvitationOtpServiceInterface } from '../interfaces/invitation-otp.service.interface';
-import { InvitationEmailServiceInterface } from '../interfaces/invitation-email.service.interface';
+import { InvitationEntityInterface } from '../interfaces/domain/invitation-entity.interface';
+import { InvitationSettingsInterface } from '../interfaces/options/invitation-settings.interface';
+import { InvitationOtpServiceInterface } from '../interfaces/services/invitation-otp-service.interface';
+import { InvitationEmailServiceInterface } from '../interfaces/services/invitation-email-service.interface';
 import { InvitationSendMailException } from '../exceptions/invitation-send-mail.exception';
-import { InvitationAcceptOptionsInterface } from '../interfaces/invitation-accept-options.interface';
+import { InvitationAcceptOptionsInterface } from '../interfaces/options/invitation-accept-options.interface';
 import { InvitationException } from '../exceptions/invitation.exception';
 import { InvitationNotFoundException } from '../exceptions/invitation-not-found.exception';
 
