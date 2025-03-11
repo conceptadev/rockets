@@ -2,21 +2,11 @@ import {
   EventAsyncInterface,
   EventClassInterface,
 } from '@concepta/nestjs-event';
-import {
-  InvitationAcceptedEventPayloadInterface,
-  InvitationGetUserEventPayloadInterface,
-  InvitationGetUserEventResponseInterface,
-} from '@concepta/nestjs-common';
+import { InvitationAcceptedEventPayloadInterface } from '@concepta/nestjs-common';
 
 export interface UserSettingsInterface {
-  invitationRequestEvent?: EventClassInterface<
+  invitationAcceptedEvent?: EventClassInterface<
     EventAsyncInterface<InvitationAcceptedEventPayloadInterface, boolean>
-  >;
-  invitationGetUserEvent?: EventClassInterface<
-    EventAsyncInterface<
-      InvitationGetUserEventPayloadInterface,
-      InvitationGetUserEventResponseInterface
-    >
   >;
   passwordHistory?: {
     /**

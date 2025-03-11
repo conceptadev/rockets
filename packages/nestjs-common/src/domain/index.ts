@@ -59,9 +59,8 @@ export { CacheUpdateInterface } from './cache/interfaces/cache-update.interface'
 export { CacheInterface } from './cache/interfaces/cache.interface';
 
 export { InvitationAcceptedEventPayloadInterface } from './invitation/interfaces/invitation-accepted-event-payload.interface';
-export { InvitationGetUserEventPayloadInterface } from './invitation/interfaces/invitation-get-user-event-payload.interface';
-export { InvitationGetUserEventResponseInterface } from './invitation/interfaces/invitation-get-user-event-response.interface';
 export { InvitationInterface } from './invitation/interfaces/invitation.interface';
+export { InvitationUserInterface } from './invitation/interfaces/invitation-user.interface';
 
 export { FileCreatableInterface } from './file/interfaces/file-creatable.interface';
 export { FileInterface } from './file/interfaces/file.interface';

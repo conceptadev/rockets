@@ -9,9 +9,9 @@ import {
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { InvitationAcceptanceService } from '../services/invitation-acceptance.service';
-import { InvitationDto } from '../dto/invitation.dto';
 import { InvitationSendService } from '../services/invitation-send.service';
 import { InvitationNotFoundException } from '../exceptions/invitation-not-found.exception';
+import { InvitationInterface } from '@concepta/nestjs-common';
 
 @Controller('invitation-reattempt')
 @ApiTags('invitation-reattempt')
@@ -28,7 +28,7 @@ export class InvitationReattemptController {
   @ApiOkResponse()
   @Post('/:code')
   async reattemptInvite(@Param('code') code: string): Promise<void> {
-    let invitation: InvitationDto | null | undefined;
+    let invitation: InvitationInterface | null | undefined;
 
     try {
       invitation = await this.invitationAcceptanceService.getOneByCode(code);
@@ -40,8 +40,13 @@ export class InvitationReattemptController {
       throw new InvitationNotFoundException();
     }
 
-    const { category, user, email } = invitation;
+    const { id, category, user } = invitation;
 
-    await this.invitationSendService.send({ ...user, email }, code, category);
+    await this.invitationSendService.send({
+      id,
+      user,
+      code,
+      category,
+    });
   }
 }

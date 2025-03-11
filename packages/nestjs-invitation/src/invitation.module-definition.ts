@@ -16,10 +16,10 @@ import {
   INVITATION_MODULE_USER_MUTATE_SERVICE_TOKEN,
 } from './invitation.constants';
 
-import { InvitationOptionsInterface } from './interfaces/invitation-options.interface';
-import { InvitationOptionsExtrasInterface } from './interfaces/invitation-options-extras.interface';
-import { InvitationEntitiesOptionsInterface } from './interfaces/invitation-entities-options.interface';
-import { InvitationSettingsInterface } from './interfaces/invitation-settings.interface';
+import { InvitationOptionsInterface } from './interfaces/options/invitation-options.interface';
+import { InvitationOptionsExtrasInterface } from './interfaces/options/invitation-options-extras.interface';
+import { InvitationEntitiesOptionsInterface } from './interfaces/options/invitation-entities-options.interface';
+import { InvitationSettingsInterface } from './interfaces/options/invitation-settings.interface';
 import { InvitationController } from './controllers/invitation.controller';
 import { InvitationAcceptanceController } from './controllers/invitation-acceptance.controller';
 import { InvitationService } from './services/invitation.service';
@@ -29,6 +29,12 @@ import { InvitationSendService } from './services/invitation-send.service';
 import { InvitationRevocationService } from './services/invitation-revocation.service';
 import { invitationDefaultConfig } from './config/invitation-default.config';
 import { InvitationReattemptController } from './controllers/invitation-reattempt.controller';
+import { InvitationLookupService } from './services/invitation-lookup.service';
+import { InvitationMutateService } from './services/invitation-mutate.service';
+import { InvitationEmailServiceInterface } from './interfaces/services/invitation-email-service.interface';
+import { InvitationOtpServiceInterface } from './interfaces/services/invitation-otp-service.interface';
+import { InvitationUserLookupServiceInterface } from './interfaces/services/invitation-user-lookup.service.interface';
+import { InvitationUserMutateServiceInterface } from './interfaces/services/invitation-user-mutate.service.interface';
 
 const RAW_OPTIONS_TOKEN = Symbol('__INVITATION_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -94,6 +100,8 @@ export function createInvitationExports(): DynamicModule['exports'] {
     INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN,
     INVITATION_MODULE_USER_MUTATE_SERVICE_TOKEN,
     InvitationService,
+    InvitationLookupService,
+    InvitationMutateService,
   ];
 }
 
@@ -106,13 +114,15 @@ export function createInvitationProviders(options: {
     InvitationService,
     InvitationCrudService,
     InvitationAcceptanceService,
-    InvitationSendService,
     InvitationRevocationService,
+    InvitationLookupService,
+    InvitationMutateService,
     createInvitationSettingsProvider(options.overrides),
     createInvitationOtpServiceProvider(options.overrides),
     createInvitationEmailServiceProvider(options.overrides),
     createInvitationUserLookupServiceProvider(options.overrides),
     createInvitationUserMutateServiceProvider(options.overrides),
+    createInvitationSendServiceProvider(options.overrides),
   ];
 }
 
@@ -183,5 +193,44 @@ export function createInvitationUserMutateServiceProvider(
     inject: [RAW_OPTIONS_TOKEN],
     useFactory: async (options: InvitationOptionsInterface) =>
       optionsOverrides?.userMutateService ?? options.userMutateService,
+  };
+}
+
+export function createInvitationSendServiceProvider(
+  optionsOverrides?: InvitationOptions,
+): Provider {
+  return {
+    provide: InvitationSendService,
+    inject: [
+      RAW_OPTIONS_TOKEN,
+      INVITATION_MODULE_SETTINGS_TOKEN,
+      INVITATION_MODULE_EMAIL_SERVICE_TOKEN,
+      INVITATION_MODULE_OTP_SERVICE_TOKEN,
+      INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+      INVITATION_MODULE_USER_MUTATE_SERVICE_TOKEN,
+      InvitationLookupService,
+      InvitationMutateService,
+    ],
+    useFactory: async (
+      options: InvitationOptionsInterface,
+      settings: InvitationSettingsInterface,
+      emailService: InvitationEmailServiceInterface,
+      otpService: InvitationOtpServiceInterface,
+      userLookupService: InvitationUserLookupServiceInterface,
+      userMutateService: InvitationUserMutateServiceInterface,
+      invitationLookupService: InvitationLookupService,
+      invitationMutateService: InvitationMutateService,
+    ) =>
+      optionsOverrides?.invitationSendService ??
+      options.invitationSendService ??
+      new InvitationSendService(
+        settings,
+        emailService,
+        otpService,
+        userLookupService,
+        userMutateService,
+        invitationLookupService,
+        invitationMutateService,
+      ),
   };
 }

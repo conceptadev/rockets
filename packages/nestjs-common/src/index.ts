@@ -44,6 +44,7 @@ export { ReferenceIdInterface } from './reference/interfaces/reference-id.interf
 export { ReferenceQueryOptionsInterface } from './reference/interfaces/reference-query-options.interface';
 export { ReferenceSubjectInterface } from './reference/interfaces/reference-subject.interface';
 export { ReferenceUsernameInterface } from './reference/interfaces/reference-username.interface';
+export { ReferenceUserInterface } from './reference/interfaces/reference-user.interface';
 export { ReferenceRoleInterface } from './reference/interfaces/reference-role.interface';
 export { ReferenceRolesInterface } from './reference/interfaces/reference-roles.interface';
 
