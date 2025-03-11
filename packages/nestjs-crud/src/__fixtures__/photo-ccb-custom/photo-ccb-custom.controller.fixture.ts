@@ -113,7 +113,7 @@ export class PhotoCcbCustomControllerFixture extends CrudBaseController<
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() dto: PhotoUpdateDtoFixture,
   ) {
-    return this.crudService.createOne(crudRequest, dto);
+    return this.crudService.updateOne(crudRequest, dto);
   }
 
   @CrudReplaceOne

@@ -3,7 +3,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
-import { CrudModule } from '@concepta/nestjs-crud';
+import {
+  ConfigurableCrudOptions,
+  ConfigurableCrudOptionsTransformer,
+  CrudModule,
+} from '@concepta/nestjs-crud';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 
 import { OrgFactory } from '../seeding/org.factory';
@@ -20,6 +24,21 @@ import { OrgProfileEntityFixture } from '../__fixtures__/org-profile.entity.fixt
 import { OrgProfileFactory } from '../seeding/org-profile.factory';
 import { OrgProfileSeeder } from '../seeding/org-profile.seeder';
 import { OrgProfileCrudBuilder } from './org-profile.crud-builder';
+import { OrgProfileDtoFixture } from '../__fixtures__/dto/org-profile.dto.fixture';
+import { OrgProfileCreateDtoFixture } from '../__fixtures__/dto/org-profile-create.dto.fixture';
+import { OrgProfileUpdateDtoFixture } from '../__fixtures__/dto/org-profile-update.dto.fixture';
+
+type OrgProfileExtras = {
+  model: {
+    type: typeof OrgProfileDtoFixture;
+  };
+  createOne: {
+    dto: typeof OrgProfileCreateDtoFixture;
+  };
+  updateOne: {
+    dto: typeof OrgProfileUpdateDtoFixture;
+  };
+};
 
 describe('Org Profile Crud Builder (e2e)', () => {
   let app: INestApplication;
@@ -35,7 +54,43 @@ describe('Org Profile Crud Builder (e2e)', () => {
     factories: [orgFactory],
   });
 
-  const orgProfileCrudBuilder = new OrgProfileCrudBuilder();
+  const extras: OrgProfileExtras = {
+    model: {
+      type: OrgProfileDtoFixture,
+    },
+    createOne: {
+      dto: OrgProfileCreateDtoFixture,
+    },
+    updateOne: {
+      dto: OrgProfileUpdateDtoFixture,
+    },
+  };
+
+  // update config to use new dto
+  const myOptionsTransform: ConfigurableCrudOptionsTransformer<
+    OrgProfileExtras
+  > = (
+    options: ConfigurableCrudOptions,
+    extras?: OrgProfileExtras,
+  ): ConfigurableCrudOptions => {
+    if (!extras) return options;
+
+    options.controller.model.type = extras.model.type;
+    if (options.createOne) options.createOne.dto = extras.createOne.dto;
+    if (options.updateOne) options.updateOne.dto = extras.updateOne.dto;
+    return options;
+  };
+
+  // define profile with custom dtos
+  const orgProfileCrudBuilder = new OrgProfileCrudBuilder<
+    OrgProfileEntityFixture,
+    OrgProfileCreateDtoFixture,
+    OrgProfileUpdateDtoFixture,
+    OrgProfileCreateDtoFixture,
+    OrgProfileExtras
+  >();
+  orgProfileCrudBuilder.setExtras(extras, myOptionsTransform);
+
   const { ConfigurableControllerClass, ConfigurableServiceProvider } =
     orgProfileCrudBuilder.build();
 
@@ -128,6 +183,27 @@ describe('Org Profile Crud Builder (e2e)', () => {
       .post('/org-profile')
       .send({ orgId: org.id })
       .expect(201);
+  });
+
+  it('Patch /org-profile/:id - should update an existing org profile', async () => {
+    // need an org
+    const org = await orgFactory.create();
+
+    // create org profile first
+    const createResponse = await supertest(app.getHttpServer())
+      .post('/org-profile')
+      .send({ orgId: org.id })
+      .expect(201);
+
+    const id = createResponse.body.id;
+    const updatedResponse = await supertest(app.getHttpServer())
+      .patch(`/org-profile/${id}`)
+      .send({
+        name: 'Updated Profile',
+      })
+      .expect(200);
+
+    expect(updatedResponse.body.name).toEqual('Updated Profile');
   });
 
   it('DELETE /org-profile/:id', async () => {

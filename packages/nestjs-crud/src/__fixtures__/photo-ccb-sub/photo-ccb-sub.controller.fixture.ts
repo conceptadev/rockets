@@ -99,7 +99,7 @@ export class PhotoCcbSubControllerFixture extends ConfigurableControllerClass {
     crudRequest: CrudRequestInterface,
     dto: PhotoUpdatableInterfaceFixture,
   ) {
-    return super.createOne(crudRequest, dto);
+    return super.updateOne(crudRequest, dto);
   }
 
   @CrudReplaceOne
