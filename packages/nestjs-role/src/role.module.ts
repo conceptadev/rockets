@@ -9,7 +9,7 @@ import {
   createRoleExports,
   createRoleControllers,
 } from './role.module-definition';
-import { RoleMissingEntitiesOptionsException } from './exceptions/ROLE-missing-entities-options.exception';
+import { RoleMissingEntitiesOptionsException } from './exceptions/role-missing-entities-options.exception';
 
 /**
  * Role Module
