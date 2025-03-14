@@ -766,6 +766,7 @@ __metadata:
   resolution: "@concepta/nestjs-access-control@workspace:packages/nestjs-access-control"
   dependencies:
     "@concepta/nestjs-common": "npm:^6.0.0-alpha.3"
+    "@concepta/nestjs-exception": "npm:^6.0.0-alpha.3"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/core": "npm:^10.4.1"
@@ -1249,6 +1250,7 @@ __metadata:
   resolution: "@concepta/nestjs-logger-coralogix@workspace:packages/nestjs-logger-coralogix"
   dependencies:
     "@concepta/nestjs-common": "npm:^6.0.0-alpha.3"
+    "@concepta/nestjs-exception": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-logger": "npm:^6.0.0-alpha.3"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
