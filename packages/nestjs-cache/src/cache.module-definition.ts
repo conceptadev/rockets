@@ -28,6 +28,7 @@ import { cacheDefaultConfig } from './config/cache-default.config';
 import { CacheCrudController } from './controllers/cache-crud.controller';
 import { CacheCrudService } from './services/cache-crud.service';
 import { CacheService } from './services/cache.service';
+import { CacheMissingEntitiesOptionException } from './exceptions/cache-missing-entities-option.exception';
 
 const RAW_OPTIONS_TOKEN = Symbol('__CACHE_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -56,7 +57,7 @@ function definitionTransform(
   const { controllers, global = false, entities } = extras;
 
   if (!entities) {
-    throw new Error('You must provide the entities option');
+    throw new CacheMissingEntitiesOptionException();
   }
 
   return {

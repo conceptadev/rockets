@@ -1,4 +1,5 @@
 import * as bcrypt from 'bcrypt';
+import { PasswordException } from '../exceptions/password.exception';
 
 /**
  * Abstract class with functions to encapsulate hash methods
@@ -22,9 +23,10 @@ export abstract class CryptUtil {
     if (password.length && salt.length) {
       return bcrypt.hash(password, salt);
     } else {
-      throw new Error(
-        'Must have non-zero length password and salt in order to hash.',
-      );
+      throw new PasswordException({
+        message:
+          'Must have non-zero length password and salt in order to hash.',
+      });
     }
   }
 

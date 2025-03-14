@@ -12,6 +12,7 @@ import { DecoratorTargetObject } from '../../crud.types';
 import { CrudInvalidResponseDto } from '../../dto/crud-invalid-response.dto';
 import { CrudResponsePaginatedDto } from '../../dto/crud-response-paginated.dto';
 import { CrudReflectionService } from '../../services/crud-reflection.service';
+import { CrudException } from '../../exceptions/crud.exception';
 
 /**
  * Utility decorator used to apply response
@@ -31,9 +32,10 @@ export function applyApiResponse(
     const reflectionService = new CrudReflectionService();
 
     if (!('prototype' in target)) {
-      throw new Error(
-        'Cannot decorate with apply api response, target must be a class',
-      );
+      throw new CrudException({
+        message:
+          'Cannot decorate with apply api response, target must be a class',
+      });
     }
 
     // get the serialize options

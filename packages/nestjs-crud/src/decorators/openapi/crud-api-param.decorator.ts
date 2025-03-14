@@ -4,6 +4,7 @@ import { CRUD_MODULE_API_PARAMS_METADATA } from '../../crud.constants';
 import { DecoratorTargetObject } from '../../crud.types';
 import { CrudApiParamMetadataInterface } from '../../interfaces/crud-api-param-metadata.interface';
 import { CrudReflectionService } from '../../services/crud-reflection.service';
+import { CrudException } from '../../exceptions/crud.exception';
 
 /**
  * \@CrudApiParam() open api decorator
@@ -13,7 +14,9 @@ export function CrudApiParam(options?: ApiParamOptions): MethodDecorator {
     const [propertyKey] = rest;
 
     if (!('__proto__' in target)) {
-      throw new Error('Cannot decorate with api param, target must be a class');
+      throw new CrudException({
+        message: 'Cannot decorate with api param, target must be a class',
+      });
     }
 
     const reflectionService = new CrudReflectionService();

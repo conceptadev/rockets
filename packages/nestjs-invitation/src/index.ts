@@ -15,3 +15,4 @@ export { InvitationSqliteEntity } from './entities/invitation-sqlite.entity';
 export { InvitationSendMailException } from './exceptions/invitation-send-mail.exception';
 export { InvitationMutateService } from './services/invitation-mutate.service';
 export { InvitationAcceptOptionsInterface } from './interfaces/options/invitation-accept-options.interface';
+export { InvitationMissingEntitiesOptionsException } from './exceptions/invitation-missing-entities-options.exception';

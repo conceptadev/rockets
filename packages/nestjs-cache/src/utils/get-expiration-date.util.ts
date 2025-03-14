@@ -1,4 +1,5 @@
 import ms from 'ms';
+import { CacheInvalidExpiredDateException } from '../exceptions/cache-invalid-expired-date.exception';
 
 const getExpirationDate = (
   expiresIn: string | null | undefined,
@@ -9,7 +10,7 @@ const getExpirationDate = (
   const expires = ms(expiresIn);
 
   // TODO: should be a custom exception
-  if (!expires) throw new Error(`Invalid expiresIn`);
+  if (!expires) throw new CacheInvalidExpiredDateException();
 
   // add time in seconds to now as string format
   return new Date(now.getTime() + expires);

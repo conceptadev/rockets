@@ -3,6 +3,8 @@ import { InternalServerErrorException, Logger } from '@nestjs/common';
 import { registerAs } from '@nestjs/config';
 import { JwtSettingsInterface } from '../interfaces/jwt-settings.interface';
 import { JWT_MODULE_DEFAULT_SETTINGS_TOKEN } from '../jwt.constants';
+import { JwtConfigUndefinedException } from '../exceptions/jwt-config-undefined.exception';
+import { JwtFallbackConfigUndefinedException } from '../exceptions/jwt-fallback-config-undefined.exception';
 
 /**
  * Settings defaults.
@@ -46,7 +48,7 @@ export const jwtDefaultConfig = registerAs(
  */
 function configureAccessSecret(options: JwtSettingsInterface['access']) {
   if (!options) {
-    throw new Error('config options is not defined');
+    throw new JwtConfigUndefinedException();
   }
   // was an access secret provided?
   if (process.env?.JWT_MODULE_ACCESS_SECRET) {
@@ -77,10 +79,10 @@ function configureRefreshSecret(
   fallbackOptions: JwtSettingsInterface['access'],
 ) {
   if (!options) {
-    throw new Error('config options is not defined');
+    throw new JwtConfigUndefinedException();
   }
   if (!fallbackOptions) {
-    throw new Error('fallbackOptions options is not defined');
+    throw new JwtFallbackConfigUndefinedException();
   }
   // was a refresh secret provided?
   if (process.env?.JWT_MODULE_REFRESH_SECRET) {

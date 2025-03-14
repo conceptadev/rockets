@@ -35,6 +35,7 @@ import { InvitationEmailServiceInterface } from './interfaces/services/invitatio
 import { InvitationOtpServiceInterface } from './interfaces/services/invitation-otp-service.interface';
 import { InvitationUserLookupServiceInterface } from './interfaces/services/invitation-user-lookup.service.interface';
 import { InvitationUserMutateServiceInterface } from './interfaces/services/invitation-user-mutate.service.interface';
+import { InvitationMissingEntitiesOptionsException } from './exceptions/invitation-missing-entities-options.exception';
 
 const RAW_OPTIONS_TOKEN = Symbol('__INVITATION_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -66,7 +67,7 @@ function definitionTransform(
   const { controllers, entities, global = false } = extras;
 
   if (!entities) {
-    throw new Error('You must provide the entities option');
+    throw new InvitationMissingEntitiesOptionsException();
   }
 
   return {

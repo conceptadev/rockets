@@ -22,6 +22,7 @@ import { FederatedService } from './services/federated.service';
 import { FederatedOAuthService } from './services/federated-oauth.service';
 import { FederatedMutateService } from './services/federated-mutate.service';
 import { federatedDefaultConfig } from './config/federated-default.config';
+import { FederatedMissingEntitiesOptionsException } from './exceptions/federated-missing-entities-options.exception';
 
 const RAW_OPTIONS_TOKEN = Symbol('__FEDERATED_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -54,7 +55,7 @@ function definitionTransform(
   const { global = false, entities } = extras;
 
   if (!entities) {
-    throw new Error('You must provide the entities option');
+    throw new FederatedMissingEntitiesOptionsException();
   }
 
   return {

@@ -4,6 +4,7 @@ import { CRUD_MODULE_API_QUERY_METADATA } from '../../crud.constants';
 import { DecoratorTargetObject } from '../../crud.types';
 import { CrudApiQueryMetadataInterface } from '../../interfaces/crud-api-query-metadata.interface';
 import { CrudReflectionService } from '../../services/crud-reflection.service';
+import { CrudException } from '../../exceptions/crud.exception';
 
 /**
  * \@CrudApiQuery() open api decorator
@@ -26,7 +27,9 @@ export function CrudApiQuery(options?: ApiQueryOptions[]): MethodDecorator {
 
       SetMetadata(CRUD_MODULE_API_QUERY_METADATA, values)(target);
     } else {
-      throw new Error('Cannot decorate with api query, target must be a class');
+      throw new CrudException({
+        message: 'Cannot decorate with api query, target must be a class',
+      });
     }
   };
 }

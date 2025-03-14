@@ -9,6 +9,7 @@ import {
   createOrgImports,
   createOrgProviders,
 } from './org.module-definition';
+import { OrgMissingEntitiesOptionsException } from './exceptions/org-missing-entities-options.exception';
 
 /**
  * Org Module
@@ -35,7 +36,7 @@ export class OrgModule extends OrgModuleClass {
     const { entities } = options;
 
     if (!entities) {
-      throw new Error('You must provide the entities option');
+      throw new OrgMissingEntitiesOptionsException();
     }
 
     return {

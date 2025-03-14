@@ -1289,6 +1289,7 @@ __metadata:
   resolution: "@concepta/nestjs-logger@workspace:packages/nestjs-logger"
   dependencies:
     "@concepta/nestjs-common": "npm:^6.0.0-alpha.3"
+    "@concepta/nestjs-exception": "npm:^6.0.0-alpha.3"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/core": "npm:^10.4.1"

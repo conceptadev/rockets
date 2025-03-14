@@ -25,3 +25,4 @@ export { ReportNameMissingException } from './exceptions/report-name-missing.exc
 export { ReportQueryException } from './exceptions/report-query.exception';
 export { ReportServiceKeyMissingException } from './exceptions/report-service-key-missing.exception';
 export { ReportTimeoutException } from './exceptions/report-timeout.exception';
+export { ReportMissingEntitiesOptionsException } from './exceptions/report-missing-entities-options.exception';

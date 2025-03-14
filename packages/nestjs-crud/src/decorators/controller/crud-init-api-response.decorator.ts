@@ -1,3 +1,4 @@
+import { CrudException } from '../../exceptions/crud.exception';
 import { CrudReflectionService } from '../../services/crud-reflection.service';
 import { applyApiResponse } from '../util/apply-api-response.decorator';
 
@@ -28,7 +29,9 @@ export const CrudInitApiResponse =
       );
 
       if (!descriptor) {
-        throw new Error('Failed to get property descriptor');
+        throw new CrudException({
+          message: 'Failed to get property descriptor',
+        });
       }
 
       applyApiResponse(action, options)(classTarget, propertyKey, descriptor);

@@ -34,3 +34,5 @@ export { createVerifyRefreshTokenCallback } from './utils/create-verify-refresh-
 // exceptions
 export { JwtException } from './exceptions/jwt.exception';
 export { JwtVerifyException } from './exceptions/jwt-verify.exception';
+export { JwtConfigUndefinedException } from './exceptions/jwt-config-undefined.exception';
+export { JwtFallbackConfigUndefinedException } from './exceptions/jwt-fallback-config-undefined.exception';

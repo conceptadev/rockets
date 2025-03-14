@@ -3,6 +3,7 @@ import { EntityManager } from 'typeorm';
 
 import { SafeTransactionOptionsInterface } from '../interfaces/safe-transaction-options.interface';
 import { RunInTransactionCallback } from '../typeorm-common.types';
+import { RuntimeException } from '@concepta/nestjs-exception';
 
 /**
  * Safe transaction wrapper.
@@ -35,7 +36,7 @@ export async function safeTransaction<T>(
     // is strict mode enabled?
     if (options.strict === true) {
       // yes, bail out
-      const error = new Error(
+      const error = new RuntimeException(
         `Safe transaction wrapper was called with strict enabled,` +
           ` and the ${driver.options.type} database does not support transactions.`,
       );

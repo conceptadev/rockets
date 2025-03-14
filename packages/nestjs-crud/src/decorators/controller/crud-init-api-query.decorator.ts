@@ -2,6 +2,7 @@ import { ApiQuery } from '@nestjs/swagger';
 import { BaseRouteName, CrudActions } from '@nestjsx/crud';
 import { Swagger } from '@nestjsx/crud/lib/crud';
 import { CrudReflectionService } from '../../services/crud-reflection.service';
+import { CrudException } from '../../exceptions/crud.exception';
 
 /**
  * \@CrudInit() api query decorator.
@@ -31,7 +32,9 @@ export const CrudInitApiQuery =
 
       // sanity check
       if (!descriptor) {
-        throw new Error('Did not find property descriptor');
+        throw new CrudException({
+          message: 'Did not find property descriptor',
+        });
       }
 
       // get the action

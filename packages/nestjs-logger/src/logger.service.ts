@@ -4,6 +4,7 @@ import { LogLevel } from '@nestjs/common/services/logger.service';
 import { LoggerTransportService } from './logger-transport.service';
 import { LoggerServiceInterface } from './interfaces/logger-service.interface';
 import { LoggerTransportInterface } from './interfaces/logger-transport.interface';
+import { LoggerException } from './exceptions/logger.exceptions';
 
 /**
  * A service that extends the Logger class and implements {@link LoggerServiceInterface}.
@@ -114,7 +115,7 @@ export class LoggerService
     // get a trace?
     if (trace) {
       // yes, build up real error
-      const error = new Error(message);
+      const error = new LoggerException({ message });
       error.stack = trace;
       // call transport with error
       this.transportService.log(message, 'error' as LogLevel, error);

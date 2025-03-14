@@ -8,6 +8,7 @@ import {
   createCacheImports,
   createCacheProviders,
 } from './cache.module-definition';
+import { CacheMissingEntitiesOptionException } from './exceptions/cache-missing-entities-option.exception';
 
 /**
  * Cache Module
@@ -34,7 +35,7 @@ export class CacheModule extends CacheModuleClass {
     const { entities } = options;
 
     if (!entities) {
-      throw new Error('You must provide the entities option');
+      throw new CacheMissingEntitiesOptionException();
     }
 
     return {

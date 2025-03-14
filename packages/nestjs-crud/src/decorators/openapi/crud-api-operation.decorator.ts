@@ -1,5 +1,6 @@
 import { ApiOperation, ApiOperationOptions } from '@nestjs/swagger';
 import { DecoratorTargetObject } from '../../crud.types';
+import { CrudException } from '../../exceptions/crud.exception';
 
 /**
  * \@CrudApiOperation() open api decorator
@@ -27,7 +28,9 @@ export function CrudApiOperation(
 
       // sanity check
       if (!descriptor) {
-        throw new Error('Did not find property descriptor');
+        throw new CrudException({
+          message: 'Did not find property descriptor',
+        });
       }
 
       ApiOperation(mergedOptions)(
@@ -36,9 +39,9 @@ export function CrudApiOperation(
         descriptor,
       );
     } else {
-      throw new Error(
-        'Cannot decorate with api operation, target must be a class',
-      );
+      throw new CrudException({
+        message: 'Cannot decorate with api operation, target must be a class',
+      });
     }
   };
 }

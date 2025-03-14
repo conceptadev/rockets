@@ -31,3 +31,4 @@ export { RoleException } from './exceptions/role.exception';
 export { RoleAssignmentNotFoundException as AssignmentNotFoundException } from './exceptions/role-assignment-not-found.exception';
 export { RoleEntityNotFoundException as EntityNotFoundException } from './exceptions/role-entity-not-found.exception';
 export { RoleAssignmentConflictException } from './exceptions/role-assignment-conflict.exception';
+export { RoleMissingEntitiesOptionsException } from './exceptions/role-missing-entities-options.exception';
