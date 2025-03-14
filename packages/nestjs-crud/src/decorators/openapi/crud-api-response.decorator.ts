@@ -5,6 +5,7 @@ import { CRUD_MODULE_API_RESPONSE_METADATA } from '../../crud.constants';
 import { DecoratorTargetObject } from '../../crud.types';
 import { CrudApiResponseMetadataInterface } from '../../interfaces/crud-api-response-metadata.interface';
 import { CrudReflectionService } from '../../services/crud-reflection.service';
+import { CrudException } from '../../exceptions/crud.exception';
 
 /**
  * \@CrudApiResponse() open api decorator
@@ -17,9 +18,9 @@ export function CrudApiResponse(
     const [propertyKey] = rest;
 
     if (!('__proto__' in target)) {
-      throw new Error(
-        'Cannot decorate with api response, target must be a class',
-      );
+      throw new CrudException({
+        message: 'Cannot decorate with api response, target must be a class',
+      });
     }
 
     const reflectionService = new CrudReflectionService();

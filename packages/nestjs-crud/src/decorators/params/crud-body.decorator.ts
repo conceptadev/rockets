@@ -4,6 +4,7 @@ import { DecoratorTargetObject } from '../../crud.types';
 import { CrudBodyOptionsInterface } from '../../interfaces/crud-body-options.interface';
 import { CrudValidationMetadataInterface } from '../../interfaces/crud-validation-metadata.interface';
 import { CrudReflectionService } from '../../services/crud-reflection.service';
+import { CrudException } from '../../exceptions/crud.exception';
 
 /**
  * \@CrudBody() parameter decorator
@@ -15,7 +16,9 @@ export function CrudBody(
     const [propertyKey, parameterIndex] = rest;
 
     if (!('__proto__' in target)) {
-      throw new Error('Cannot decorate with body, target must be a class');
+      throw new CrudException({
+        message: 'Cannot decorate with body, target must be a class',
+      });
     }
 
     const reflectionService = new CrudReflectionService();

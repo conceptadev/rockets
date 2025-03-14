@@ -22,3 +22,4 @@ export { FederatedQueryException } from './exceptions/federated-query.exception'
 export { FederatedMutateCreateUserException } from './exceptions/federated-mutate-create.exception';
 export { FederatedUserRelationshipException } from './exceptions/federated-user-relationship.exception';
 export { FederatedUserLookupException } from './exceptions/federated-user-lookup.exception';
+export { FederatedMissingEntitiesOptionsException } from './exceptions/federated-missing-entities-options.exception';

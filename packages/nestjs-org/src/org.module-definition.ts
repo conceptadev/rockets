@@ -32,6 +32,7 @@ import { OrgMemberMutateService } from './services/org-member-mutate.service';
 import { OrgController } from './org.controller';
 import { orgDefaultConfig } from './config/org-default.config';
 import { InvitationAcceptedListener } from './listeners/invitation-accepted-listener';
+import { OrgMissingEntitiesOptionsException } from './exceptions/org-missing-entities-options.exception';
 
 const RAW_OPTIONS_TOKEN = Symbol('__ORG_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -63,7 +64,7 @@ function definitionTransform(
   } = extras;
 
   if (!entities) {
-    throw new Error('You must provide the entities option');
+    throw new OrgMissingEntitiesOptionsException();
   }
 
   return {

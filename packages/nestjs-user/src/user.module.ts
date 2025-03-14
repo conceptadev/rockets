@@ -9,6 +9,7 @@ import {
   createUserExports,
   createUserControllers,
 } from './user.module-definition';
+import { UserMissingEntitiesOptionsException } from './exceptions/user-missing-entities-options.exception';
 
 /**
  * User Module
@@ -35,7 +36,7 @@ export class UserModule extends UserModuleClass {
     const { entities } = options;
 
     if (!entities) {
-      throw new Error('You must provide the entities option');
+      throw new UserMissingEntitiesOptionsException();
     }
 
     return {

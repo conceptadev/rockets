@@ -34,6 +34,7 @@ import { RoleController } from './role.controller';
 import { RoleAssignmentController } from './role-assignment.controller';
 import { RoleAssignmentCrudService } from './services/role-assignment-crud.service';
 import { roleDefaultConfig } from './config/role-default.config';
+import { RoleMissingEntitiesOptionsException } from './exceptions/role-missing-entities-options.exception';
 
 const RAW_OPTIONS_TOKEN = Symbol('__ROLE_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -59,7 +60,7 @@ function definitionTransform(
   const { controllers, global = false, entities } = extras;
 
   if (!entities) {
-    throw new Error('You must provide the entities option');
+    throw new RoleMissingEntitiesOptionsException();
   }
 
   return {

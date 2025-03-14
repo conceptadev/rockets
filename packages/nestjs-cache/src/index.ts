@@ -13,3 +13,5 @@ export { CacheException } from './exceptions/cache.exception';
 export { CacheAssignmentNotFoundException } from './exceptions/cache-assignment-not-found.exception';
 export { CacheEntityAlreadyExistsException } from './exceptions/cache-entity-already-exists.exception';
 export { CacheEntityNotFoundException } from './exceptions/cache-entity-not-found.exception';
+export { CacheInvalidExpiredDateException } from './exceptions/cache-invalid-expired-date.exception';
+export { CacheMissingEntitiesOptionException } from './exceptions/cache-missing-entities-option.exception';

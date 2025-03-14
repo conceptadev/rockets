@@ -22,3 +22,4 @@ export { FileQueryException } from './exceptions/file-query.exception';
 export { FileServiceKeyMissingException } from './exceptions/file-service-key-missing.exception';
 export { FileStorageServiceNotFoundException } from './exceptions/file-storage-service-not-found.exception';
 export { FileUploadUrlMissingException } from './exceptions/file-upload-url-missing.exception';
+export { FileMissingEntitiesOptionsException } from './exceptions/file-missing-entities-options.exception';

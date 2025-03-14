@@ -8,6 +8,7 @@ import {
   createOtpImports,
   createOtpProviders,
 } from './otp.module-definition';
+import { OtpMissingEntitiesOptionsException } from './exceptions/otp-missing-entities-options.exception';
 
 /**
  * Otp Module
@@ -34,7 +35,7 @@ export class OtpModule extends OtpModuleClass {
     const { entities } = options;
 
     if (!entities) {
-      throw new Error('You must provide the entities option');
+      throw new OtpMissingEntitiesOptionsException();
     }
 
     return {

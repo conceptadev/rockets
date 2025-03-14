@@ -23,6 +23,7 @@ import { ReportStrategyService } from './services/report-strategy.service';
 import { reportDefaultConfig } from './config/report-default.config';
 import { ReportMutateService } from './services/report-mutate.service';
 import { ReportLookupService } from './services/report-lookup.service';
+import { ReportMissingEntitiesOptionsException } from './exceptions/report-missing-entities-options.exception';
 
 const RAW_OPTIONS_TOKEN = Symbol('__REPORT_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -55,7 +56,7 @@ function definitionTransform(
   const { global = false, entities } = extras;
 
   if (!entities) {
-    throw new Error('You must provide the entities option');
+    throw new ReportMissingEntitiesOptionsException();
   }
 
   return {

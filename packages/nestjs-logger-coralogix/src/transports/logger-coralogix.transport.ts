@@ -3,6 +3,7 @@ import { Inject, Injectable, LogLevel } from '@nestjs/common';
 import { CoralogixLogger, Log, LoggerConfig } from 'coralogix-logger';
 import { LoggerCoralogixSettingsInterface } from '../interfaces/logger-coralogix-settings.interface';
 import { LOGGER_CORALOGIX_MODULE_SETTINGS_TOKEN } from '../config/logger-coralogix.config';
+import { LoggerCoralogixException } from '../exceptions/logger-coralogix.exceptions';
 
 @Injectable()
 export class LoggerCoralogixTransport implements LoggerTransportInterface {
@@ -16,7 +17,9 @@ export class LoggerCoralogixTransport implements LoggerTransportInterface {
   ) {
     const config = settings.transportConfig;
     if (!config?.privateKey)
-      throw new Error('Coralogix privateKey is required');
+      throw new LoggerCoralogixException({
+        message: 'Coralogix privateKey is required',
+      });
     const coralogixConfig = new LoggerConfig(config);
 
     this.logLevel = settings.logLevel;

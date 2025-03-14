@@ -11,6 +11,7 @@ import {
 import { FederatedMutateService } from './services/federated-mutate.service';
 import { FederatedOAuthService } from './services/federated-oauth.service';
 import { FederatedService } from './services/federated.service';
+import { FederatedMissingEntitiesOptionsException } from './exceptions/federated-missing-entities-options.exception';
 
 @Module({
   providers: [FederatedService, FederatedOAuthService, FederatedMutateService],
@@ -37,7 +38,7 @@ export class FederatedModule extends FederatedModuleClass {
     const { entities } = options;
 
     if (!entities) {
-      throw new Error('You must provide the entities option');
+      throw new FederatedMissingEntitiesOptionsException();
     }
 
     return {

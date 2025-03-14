@@ -33,3 +33,5 @@ export { OrgResource } from './org.types';
 export { OrgException } from './exceptions/org.exception';
 export { OrgNotFoundException } from './exceptions/org-not-found.exception';
 export { OrgMemberException } from './exceptions/org-member.exception';
+
+export { OrgMissingEntitiesOptionsException } from './exceptions/org-missing-entities-options.exception';

@@ -9,6 +9,7 @@ import {
   createRoleExports,
   createRoleControllers,
 } from './role.module-definition';
+import { RoleMissingEntitiesOptionsException } from './exceptions/role-missing-entities-options.exception';
 
 /**
  * Role Module
@@ -35,7 +36,7 @@ export class RoleModule extends RoleModuleClass {
     const { entities } = options;
 
     if (!entities) {
-      throw new Error('You must provide the entities option');
+      throw new RoleMissingEntitiesOptionsException();
     }
 
     return {

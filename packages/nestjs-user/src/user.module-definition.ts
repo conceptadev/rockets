@@ -37,6 +37,7 @@ import { UserAccessQueryService } from './services/user-access-query.service';
 import { UserController } from './user.controller';
 import { InvitationAcceptedListener } from './listeners/invitation-accepted-listener';
 import { userDefaultConfig } from './config/user-default.config';
+import { UserMissingEntitiesOptionsException } from './exceptions/user-missing-entities-options.exception';
 
 const RAW_OPTIONS_TOKEN = Symbol('__USER_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -62,7 +63,7 @@ function definitionTransform(
   const { controllers, global = false, entities } = extras;
 
   if (!entities) {
-    throw new Error('You must provide the entities option');
+    throw new UserMissingEntitiesOptionsException();
   }
 
   return {

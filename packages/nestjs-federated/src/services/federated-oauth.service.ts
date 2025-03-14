@@ -126,10 +126,9 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
       );
 
       if (!newUser)
-        throw new FederatedMutateCreateUserException(
-          this.constructor.name,
-          new Error('Failed to create user'),
-        );
+        throw new FederatedMutateCreateUserException(this.constructor.name, {
+          message: 'Failed to create user',
+        });
 
       return newUser;
     } catch (e) {
@@ -163,10 +162,9 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
       );
 
       if (!federated)
-        throw new FederatedCreateException(
-          this.constructor.name,
-          new Error('Failed to create federated'),
-        );
+        throw new FederatedCreateException(this.constructor.name, {
+          message: 'Failed to create federated',
+        });
 
       return federated;
     } catch (e) {
