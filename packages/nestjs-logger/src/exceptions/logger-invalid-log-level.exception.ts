@@ -1,12 +1,10 @@
-import {
-  RuntimeException,
-  RuntimeExceptionOptions,
-} from '@concepta/nestjs-exception';
+import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
+import { LoggerException } from './logger.exceptions';
 
 /**
  * Generic exception.
  */
-export class LoggerInvalidLogLevelException extends RuntimeException {
+export class LoggerInvalidLogLevelException extends LoggerException {
   constructor(levelTrimmed: string, options?: RuntimeExceptionOptions) {
     super({
       message: 'The string "%s" is not a valid log level.',

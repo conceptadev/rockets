@@ -12,7 +12,14 @@ export { InvitationSendInvitationEmailOptionsInterface } from './interfaces/opti
 export { InvitationPostgresEntity } from './entities/invitation-postgres.entity';
 export { InvitationSqliteEntity } from './entities/invitation-sqlite.entity';
 
-export { InvitationSendMailException } from './exceptions/invitation-send-mail.exception';
 export { InvitationMutateService } from './services/invitation-mutate.service';
 export { InvitationAcceptOptionsInterface } from './interfaces/options/invitation-accept-options.interface';
+
+// exceptions
+export { InvitationException } from './exceptions/invitation.exception';
+export { InvitationUserUndefinedException } from './exceptions/invitation-user-undefined.exception';
+export { InvitationNotFoundException } from './exceptions/invitation-not-found.exception';
+export { InvitationNotAcceptedException } from './exceptions/invitation-not-accepted.exception';
+
 export { InvitationMissingEntitiesOptionsException } from './exceptions/invitation-missing-entities-options.exception';
+export { InvitationSendMailException } from './exceptions/invitation-send-mail.exception';
