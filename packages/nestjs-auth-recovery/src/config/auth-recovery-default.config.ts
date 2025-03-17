@@ -15,14 +15,17 @@ export const authRecoveryDefaultConfig = registerAs(
       tokenUrlFormatter: formatTokenUrl,
       templates: {
         recoverLogin: {
+          logo: '/public/logo.svg',
           fileName: __dirname + '/../assets/recover-login.template.hbs',
           subject: 'Login Recovery',
         },
         recoverPassword: {
+          logo: '/public/logo.svg',
           fileName: __dirname + '/../assets/recover-password.template.hbs',
           subject: 'Password Recovery',
         },
         passwordUpdated: {
+          logo: '/public/logo.svg',
           fileName:
             __dirname + '/../assets/password-updated-successfully.template',
           subject: 'Password Updated Successfully',
@@ -34,6 +37,9 @@ export const authRecoveryDefaultConfig = registerAs(
       category: 'auth-recovery',
       type: 'uuid',
       expiresIn: '1h',
+      clearOtpOnCreate: process.env.AUTH_RECOVERY_OTP_CLEAR_ON_CREATE
+        ? process.env.AUTH_RECOVERY_OTP_CLEAR_ON_CREATE === 'true'
+        : false,
     },
   }),
 );

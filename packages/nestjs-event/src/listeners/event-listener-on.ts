@@ -1,6 +1,8 @@
 import { EventListener } from './event-listener';
 import { EventListenOnInterface } from '../services/interfaces/event-listen-on.interface';
 import { EventListenOnOptionsInterface } from '../services/interfaces/event-listen-on-options.interface';
+import { EventManager } from '../event-manager';
+import { EventClassInterface } from '../events/interfaces/event-class.interface';
 
 /**
  * Abstract event listen on class.
@@ -15,7 +17,7 @@ import { EventListenOnOptionsInterface } from '../services/interfaces/event-list
  * type MyPayloadType = {id: number, active: boolean};
  *
  * // example event class
- * class MyEvent extends EventSync<MyPayloadType> {}
+ * class MyEvent extends Event<MyPayloadType> {}
  *
  * // example listener class
  * class MyListenOn extends EventListenerOn<MyEvent> {
@@ -55,5 +57,18 @@ export abstract class EventListenerOn<E>
    */
   get options(): EventListenOnOptionsInterface {
     return this._options;
+  }
+
+  /**
+   * Calls the global listern service on() method.
+   *
+   * @param eventClass - The event class to listen on.
+   * @param options - Options overrides
+   */
+  on(
+    eventClass: EventClassInterface<E>,
+    options: EventListenOnOptionsInterface = {},
+  ): void {
+    EventManager.listen.on(eventClass, this, options);
   }
 }

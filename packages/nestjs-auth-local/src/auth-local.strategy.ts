@@ -1,7 +1,10 @@
 import { Strategy } from 'passport-local';
 import { validateOrReject } from 'class-validator';
 import { Inject, Injectable } from '@nestjs/common';
-import { ReferenceIdInterface, ReferenceUsername } from '@concepta/ts-core';
+import {
+  ReferenceIdInterface,
+  ReferenceUsername,
+} from '@concepta/nestjs-common';
 import { PassportStrategyFactory } from '@concepta/nestjs-authentication';
 
 import {

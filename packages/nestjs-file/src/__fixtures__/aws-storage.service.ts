@@ -1,4 +1,4 @@
-import { FileCreatableInterface } from '@concepta/ts-common';
+import { FileCreatableInterface } from '@concepta/nestjs-common';
 import { FileStorageServiceInterface } from '../interfaces/file-storage-service.interface';
 import {
   AWS_KEY_FIXTURE,

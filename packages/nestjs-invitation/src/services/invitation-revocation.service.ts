@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
 import { Inject } from '@nestjs/common';
-import { ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import { BaseService, QueryOptionsInterface } from '@concepta/typeorm-common';
 
@@ -11,11 +11,12 @@ import {
   INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN,
 } from '../invitation.constants';
 
-import { InvitationSettingsInterface } from '../interfaces/invitation-settings.interface';
-import { InvitationOtpServiceInterface } from '../interfaces/invitation-otp.service.interface';
-import { InvitationUserLookupServiceInterface } from '../interfaces/invitation-user-lookup.service.interface';
-import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
+import { InvitationSettingsInterface } from '../interfaces/options/invitation-settings.interface';
+import { InvitationOtpServiceInterface } from '../interfaces/services/invitation-otp-service.interface';
+import { InvitationUserLookupServiceInterface } from '../interfaces/services/invitation-user-lookup.service.interface';
+import { InvitationEntityInterface } from '../interfaces/domain/invitation-entity.interface';
 import { InvitationException } from '../exceptions/invitation.exception';
+import { InvitationRevokeOptionsInterface } from '../interfaces/options/invitation-revoke-options.interface';
 
 export class InvitationRevocationService extends BaseService<InvitationEntityInterface> {
   constructor(
@@ -32,16 +33,16 @@ export class InvitationRevocationService extends BaseService<InvitationEntityInt
   }
 
   /**
-   * Revoke all invitations for email in category.
+   * Revoke all invitations for a given email address in a specific category.
    *
-   * @param email - user email
-   * @param category - the cateogory
+   * @param options - The revocation options containing email and category
+   * @param queryOptions - Optional query options for the transaction
    */
   async revokeAll(
-    email: string,
-    category: string,
+    options: InvitationRevokeOptionsInterface,
     queryOptions?: QueryOptionsInterface,
   ): Promise<void> {
+    const { email, category } = options;
     // run in transaction
     return this.transaction(queryOptions).commit(async (transaction) => {
       // override the query options
@@ -78,7 +79,9 @@ export class InvitationRevocationService extends BaseService<InvitationEntityInt
     const { assignment } = this.settings.otp;
 
     if (!assignment) {
-      throw new InvitationException('OPT assignment setting was not defined');
+      throw new InvitationException({
+        message: 'OPT assignment setting was not defined',
+      });
     }
 
     // clear all user's otps in DB
@@ -121,20 +124,20 @@ export class InvitationRevocationService extends BaseService<InvitationEntityInt
           },
         });
       } catch (e: unknown) {
-        throw new InvitationException(
-          'Fatal error while looking up invitations to delete.',
-          e,
-        );
+        throw new InvitationException({
+          message: 'Fatal error while looking up invitations to delete.',
+          originalError: e,
+        });
       }
 
       // remove the invitations
       try {
         return repo.remove(invitations);
       } catch (e: unknown) {
-        throw new InvitationException(
-          'Fatal error while removing invitations.',
-          e,
-        );
+        throw new InvitationException({
+          message: 'Fatal error while removing invitations.',
+          originalError: e,
+        });
       }
     });
   }

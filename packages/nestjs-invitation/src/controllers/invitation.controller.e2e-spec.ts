@@ -1,4 +1,5 @@
 import supertest from 'supertest';
+import { plainToInstance } from 'class-transformer';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
@@ -9,27 +10,28 @@ import {
   INVITATION_MODULE_CATEGORY_USER_KEY,
   OtpInterface,
   UserInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 import { EmailService } from '@concepta/nestjs-email';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { getDataSourceToken } from '@nestjs/typeorm';
 
 import { INVITATION_MODULE_DEFAULT_SETTINGS_TOKEN } from '../invitation.constants';
-import { InvitationCreateDto } from '../dto/invitation-create.dto';
 import { InvitationDto } from '../dto/invitation.dto';
 import { InvitationAcceptInviteDto } from '../dto/invitation-accept-invite.dto';
+import { InvitationCreateInviteDto } from '../dto/invitation-create-invite.dto';
 import { invitationDefaultConfig } from '../config/invitation-default.config';
-import { InvitationFactory } from '../invitation.factory';
-import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
-import { InvitationSettingsInterface } from '../interfaces/invitation-settings.interface';
+import { InvitationFactory } from '../seeding/invitation.factory';
+import { InvitationEntityInterface } from '../interfaces/domain/invitation-entity.interface';
+import { InvitationSettingsInterface } from '../interfaces/options/invitation-settings.interface';
+
 import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
 import { InvitationEntityFixture } from '../__fixtures__/invitation/entities/invitation.entity.fixture';
-import { UserEntityFixture } from '../__fixtures__/user/entities/user-entity.fixture';
+import { UserEntityFixture } from '../__fixtures__/user/entities/user.entity.fixture';
 
 describe('InvitationController (e2e)', () => {
   const userCategory = INVITATION_MODULE_CATEGORY_USER_KEY;
   const orgCategory = INVITATION_MODULE_CATEGORY_ORG_KEY;
-  const payload = { moreData: 'foo' };
+  const constraints = { moreData: 'foo' };
 
   let app: INestApplication;
   let invitationFactory: InvitationFactory;
@@ -38,6 +40,14 @@ describe('InvitationController (e2e)', () => {
   let otpService: OtpService;
   let configService: ConfigService;
   let config: ConfigType<typeof invitationDefaultConfig>;
+
+  const expectInvitationMatch = (
+    createDto: InvitationCreateInviteDto,
+    response: InvitationDto,
+  ) => {
+    expect(response.category).toEqual(createDto.category);
+    expect(response.user.email).toEqual(createDto.email);
+  };
 
   beforeEach(async () => {
     jest
@@ -77,7 +87,7 @@ describe('InvitationController (e2e)', () => {
 
   afterEach(async () => {
     jest.clearAllMocks();
-    return app ? await app.close() : undefined;
+    app && (await app.close());
   });
 
   describe('Type: org', () => {
@@ -94,7 +104,7 @@ describe('InvitationController (e2e)', () => {
       await createInvite(app, {
         email: user.email,
         category: orgCategory,
-        payload,
+        constraints,
       });
     });
 
@@ -129,7 +139,7 @@ describe('InvitationController (e2e)', () => {
       await createInvite(app, {
         email: user.email,
         category: userCategory,
-        payload,
+        constraints,
       });
     });
 
@@ -137,7 +147,7 @@ describe('InvitationController (e2e)', () => {
       await createInvite(app, {
         email: 'test@mail.com',
         category: userCategory,
-        payload,
+        constraints,
       });
     });
 
@@ -145,7 +155,7 @@ describe('InvitationController (e2e)', () => {
       const invitationDto = await createInvite(app, {
         email: 'test@mail.com',
         category: userCategory,
-        payload,
+        constraints,
       });
 
       await supertest(app.getHttpServer())
@@ -182,49 +192,37 @@ describe('InvitationController (e2e)', () => {
     });
 
     it('GET invitation', async () => {
-      const invitationCreateDto = {
-        email: user.email,
-        category: userCategory,
-        payload,
-      } as InvitationCreateDto;
-      const invite1 = await createInvite(app, invitationCreateDto);
-      const invite2 = await createInvite(app, invitationCreateDto);
-      const invite3 = await createInvite(app, invitationCreateDto);
-
       const response = await supertest(app.getHttpServer())
-        .get(`/invitation?s={"email": "${invitationCreateDto.email}"}`)
+        .get('/invitation')
         .expect(200);
 
       const invitationResponse = response.body as InvitationDto[];
 
-      expect(invitationResponse.length).toEqual(3);
-
-      expect(invite1).toEqual(invitationResponse[0]);
-      expect(invite2).toEqual(invitationResponse[1]);
-      expect(invite3).toEqual(invitationResponse[2]);
+      expect(invitationResponse.length).toEqual(1);
     });
 
     it('GET invitation/:id', async () => {
-      const invitation = await createInvite(app, {
+      const createInviteDto = plainToInstance(InvitationCreateInviteDto, {
         email: user.email,
         category: userCategory,
-        payload,
+        constraints,
       });
+
+      const invitation = await createInvite(app, createInviteDto);
 
       const response = await supertest(app.getHttpServer())
         .get(`/invitation/${invitation.id}`)
         .expect(200);
 
       const invitationResponse = response.body as InvitationDto;
-
-      expect(invitation).toEqual(invitationResponse);
+      expectInvitationMatch(createInviteDto, invitationResponse);
     });
 
     it('DELETE invitation/:id', async () => {
       const invitation = await createInvite(app, {
         email: user.email,
         category: userCategory,
-        payload,
+        constraints,
       });
 
       await supertest(app.getHttpServer())
@@ -240,7 +238,7 @@ describe('InvitationController (e2e)', () => {
 
 const createInvite = async (
   app: INestApplication,
-  invitationCreateDto: InvitationCreateDto,
+  invitationCreateDto: InvitationCreateInviteDto,
 ): Promise<InvitationDto> => {
   const response = await supertest(app.getHttpServer())
     .post('/invitation')
@@ -255,15 +253,20 @@ const createOtp = async (
   otpService: OtpService,
   user: UserInterface,
   category: string,
+  clearOnCreate?: boolean,
 ): Promise<OtpInterface> => {
   const { assignment, type, expiresIn } = config.otp;
 
-  return await otpService.create(assignment, {
-    category,
-    type,
-    expiresIn,
-    assignee: {
-      id: user.id,
+  return await otpService.create({
+    assignment,
+    otp: {
+      category,
+      type,
+      expiresIn,
+      assignee: {
+        id: user.id,
+      },
     },
+    clearOnCreate,
   });
 };

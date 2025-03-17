@@ -1,13 +1,9 @@
-import {
-  EventAsyncInterface,
-  EventListenerOn,
-  EventListenService,
-} from '@concepta/nestjs-event';
+import { EventAsyncInterface, EventListenerOn } from '@concepta/nestjs-event';
 import {
   INVITATION_MODULE_CATEGORY_USER_KEY,
   InvitationAcceptedEventPayloadInterface,
-} from '@concepta/ts-common';
-import { Inject, Injectable, OnModuleInit, Optional } from '@nestjs/common';
+} from '@concepta/nestjs-common';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 
 import { USER_MODULE_SETTINGS_TOKEN } from '../user.constants';
 import { UserMutateService } from '../services/user-mutate.service';
@@ -28,16 +24,13 @@ export class InvitationAcceptedListener
     private settings: UserSettingsInterface,
     private userLookupService: UserLookupService,
     private userMutateService: UserMutateService,
-    @Optional()
-    @Inject(EventListenService)
-    private eventListenService?: EventListenService,
   ) {
     super();
   }
 
   onModuleInit() {
-    if (this.eventListenService && this.settings.invitationRequestEvent) {
-      this.eventListenService.on(this.settings.invitationRequestEvent, this);
+    if (this.settings.invitationAcceptedEvent) {
+      this.on(this.settings.invitationAcceptedEvent);
     }
   }
 
@@ -49,15 +42,15 @@ export class InvitationAcceptedListener
   ) {
     // check only for invitation of type category
     if (
-      event?.payload?.invitation?.category ===
-      INVITATION_MODULE_CATEGORY_USER_KEY
+      event.payload.invitation.category === INVITATION_MODULE_CATEGORY_USER_KEY
     ) {
-      const { userId, newPassword } = event?.payload?.data ?? {};
+      const userId = event.payload.invitation.user.id;
+      const { newPassword } = event.payload?.data ?? {};
 
       if (typeof userId !== 'string' || typeof newPassword !== 'string') {
         throw new UserException({
           message:
-            'The invitation accepted event payload received has invalid content. The payload must have the "userId" and "newPassword" properties.',
+            'The invitation accepted event payload received has invalid content. The payload must have the "invitation.user" and "newPassword" properties.',
         });
       }
 

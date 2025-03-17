@@ -1,11 +1,12 @@
-import { ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import {
   RuntimeException,
   RuntimeExceptionOptions,
 } from '@concepta/nestjs-exception';
 import { HttpStatus } from '@nestjs/common';
+import { FederatedException } from './federated.exception';
 
-export class FederatedUserLookupException extends RuntimeException {
+export class FederatedUserLookupException extends FederatedException {
   context: RuntimeException['context'] & {
     entityName: string;
     user: ReferenceIdInterface;

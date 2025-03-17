@@ -23,7 +23,7 @@ import { EventInstance, EventReturnType } from '../event-types';
  * type MyEventPayload = {id: number, active: boolean};
  *
  * // example event class
- * class MyEvent extends EventSync<MyEventPayload> {}
+ * class MyEvent extends Event<MyEventPayload> {}
  *
  * // example listener class
  * class MyListenOn extends EventListener<MyEvent>

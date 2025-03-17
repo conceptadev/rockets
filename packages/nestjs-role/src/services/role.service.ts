@@ -1,13 +1,16 @@
 import { Repository } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
-import { ReferenceAssignment, ReferenceIdInterface } from '@concepta/ts-core';
+import {
+  ReferenceAssignment,
+  ReferenceIdInterface,
+} from '@concepta/nestjs-common';
 import {
   QueryOptionsInterface,
   ReferenceLookupException,
   RepositoryProxy,
 } from '@concepta/typeorm-common';
-import { EntityNotFoundException } from '../exceptions/entity-not-found.exception';
-import { AssignmentNotFoundException } from '../exceptions/assignment-not-found.exception';
+import { RoleEntityNotFoundException } from '../exceptions/role-entity-not-found.exception';
+import { RoleAssignmentNotFoundException } from '../exceptions/role-assignment-not-found.exception';
 import { RoleAssignmentConflictException } from '../exceptions/role-assignment-conflict.exception';
 import { RoleAssignmentEntityInterface } from '../interfaces/role-assignment-entity.interface';
 import {
@@ -17,6 +20,9 @@ import {
 import { RoleEntityInterface } from '../interfaces/role-entity.interface';
 import { RoleSettingsInterface } from '../interfaces/role-settings.interface';
 import { RoleServiceInterface } from '../interfaces/role-service.interface';
+import { RoleAssignmentContext } from '../interfaces/role-assignment-context';
+import { RoleAssignmentOptionsInterface } from '../interfaces/role-assignment-options.interface';
+import { RolesAssignmentOptionsInterface } from '../interfaces/roles-assignment-options.interface';
 
 @Injectable()
 export class RoleService implements RoleServiceInterface {
@@ -33,14 +39,14 @@ export class RoleService implements RoleServiceInterface {
   /**
    * Get all roles for assignee.
    *
-   * @param assignment - The assignment of the check (same as entity key)
-   * @param assignee - The assignee to check
+   * @param options - The assignment, assignee to check
+   * @param queryOptions - Optional query options
    */
   async getAssignedRoles(
-    assignment: ReferenceAssignment,
-    assignee: ReferenceIdInterface,
+    options: RoleAssignmentContext<ReferenceIdInterface>,
     queryOptions?: QueryOptionsInterface,
   ): Promise<RoleEntityInterface[]> {
+    const { assignment, assignee } = options;
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
@@ -71,16 +77,15 @@ export class RoleService implements RoleServiceInterface {
   /**
    * Check if the assignee is a member of one role.
    *
-   * @param assignment - The assignment of the check
-   * @param role - The role to check
-   * @param assignee - The assignee to check
+   * @param options - The assignment, role and assignee to check
+   * @param queryOptions - Optional query options
    */
   async isAssignedRole<T extends ReferenceIdInterface>(
-    assignment: ReferenceAssignment,
-    role: ReferenceIdInterface,
-    assignee: T,
+    options: RoleAssignmentOptionsInterface<T>,
     queryOptions?: QueryOptionsInterface,
   ): Promise<boolean> {
+    const { assignment, role, assignee } = options;
+
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
@@ -111,20 +116,21 @@ export class RoleService implements RoleServiceInterface {
   /**
    * Check if the assignee is a member of every role.
    *
-   * @param assignment - The assignment of the check
-   * @param roles - The roles to check
-   * @param assignee - The assignee to check
+   * @param options - The assignment, roles and assignee to check
+   * @param queryOptions - Optional query options
    */
   async isAssignedRoles<T extends ReferenceIdInterface>(
-    assignment: ReferenceAssignment,
-    roles: ReferenceIdInterface[],
-    assignee: T,
+    options: RolesAssignmentOptionsInterface<T>,
     queryOptions?: QueryOptionsInterface,
   ): Promise<boolean> {
+    const { assignment, roles, assignee } = options;
+
     // get all assigned roles
     const assignedRoles = await this.getAssignedRoles(
-      assignment,
-      assignee,
+      {
+        assignment,
+        assignee,
+      },
       queryOptions,
     );
 
@@ -147,23 +153,24 @@ export class RoleService implements RoleServiceInterface {
   /**
    * Assign a role to an assignee.
    *
-   * @param assignment - The assignment type
-   * @param role - The role to assign
-   * @param assignee - The assignee to assign the role
+   * @param options - The assignment, role and assignee
+   * @param queryOptions - Optional query options
    */
   async assignRole<T extends ReferenceIdInterface>(
-    assignment: ReferenceAssignment,
-    role: ReferenceIdInterface,
-    assignee: T,
+    options: RoleAssignmentOptionsInterface<T>,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<RoleAssignmentEntityInterface> {
-    // get the assignment repo
+    const { assignment, role, assignee } = options;
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
     // check if the role is already assigned
     const isAlreadyAssigned = await this.isAssignedRole(
-      assignment,
-      role,
-      assignee,
+      {
+        assignment,
+        role,
+        assignee,
+      },
+      queryOptions,
     );
 
     if (isAlreadyAssigned) {
@@ -173,7 +180,7 @@ export class RoleService implements RoleServiceInterface {
         assignee.id,
       );
     }
-
+    // TODO: Review this change to validate the transacion being used
     // create the new role assignment entity
     const roleAssignment: RoleAssignmentEntityInterface = assignmentRepo.create(
       {
@@ -182,22 +189,24 @@ export class RoleService implements RoleServiceInterface {
       },
     );
 
-    // save the new role assignment
-    return assignmentRepo.save(roleAssignment);
+    // Use repository proxy to apply query options
+    const repoProxy = new RepositoryProxy<RoleAssignmentEntityInterface>(
+      assignmentRepo,
+    );
+    return repoProxy.repository(queryOptions).save(roleAssignment);
   }
 
   /**
    * Assign multiple roles to an assignee.
    *
-   * @param assignment - The assignment type
-   * @param roles - The roles to assign
-   * @param assignee - The assignee to assign the roles
+   * @param options - The assignment, roles and assignee
+   * @param queryOptions - Optional query options
    */
   async assignRoles<T extends ReferenceIdInterface>(
-    assignment: ReferenceAssignment,
-    roles: ReferenceIdInterface[],
-    assignee: T,
+    options: RolesAssignmentOptionsInterface<T>,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<RoleAssignmentEntityInterface[]> {
+    const { assignment, roles, assignee } = options;
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
     // prepare the bulk data for assignment
@@ -205,12 +214,14 @@ export class RoleService implements RoleServiceInterface {
 
     for (const role of roles) {
       // check if the role is already assigned
-      const isAlreadyAssigned = await assignmentRepo.findOne({
-        where: {
-          role: { id: role.id },
-          assignee: { id: assignee.id },
+      const isAlreadyAssigned = await this.isAssignedRole(
+        {
+          assignment,
+          role,
+          assignee,
         },
-      });
+        queryOptions,
+      );
 
       if (isAlreadyAssigned) {
         // skip this role if it is already assigned
@@ -231,26 +242,31 @@ export class RoleService implements RoleServiceInterface {
       roleAssignments.push(roleAssignment);
     }
 
-    // perform the bulk save operation
-    return assignmentRepo.save(roleAssignments);
+    // Use repository proxy to apply query options
+    const repoProxy = new RepositoryProxy<RoleAssignmentEntityInterface>(
+      assignmentRepo,
+    );
+    return repoProxy.repository(queryOptions).save(roleAssignments);
   }
 
   /**
    * Revoke a role from an assignee.
    *
-   * @param assignment - The assignment type
-   * @param role - The role to revoke
-   * @param assignee - The assignee from whom the role is to be revoked
+   * @param options - The assignment, role and assignee
+   * @param queryOptions - Optional query options
    */
   async revokeRole<T extends ReferenceIdInterface>(
-    assignment: ReferenceAssignment,
-    role: ReferenceIdInterface,
-    assignee: T,
+    options: RoleAssignmentOptionsInterface<T>,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<void> {
+    const { assignment, role, assignee } = options;
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
-    // remove the role assignment if it exists
-    await assignmentRepo.delete({
+    // Use repository proxy to apply query options
+    const repoProxy = new RepositoryProxy<RoleAssignmentEntityInterface>(
+      assignmentRepo,
+    );
+    await repoProxy.repository(queryOptions).delete({
       role: { id: role.id },
       assignee: { id: assignee.id },
     });
@@ -259,20 +275,23 @@ export class RoleService implements RoleServiceInterface {
   /**
    * Revoke multiple roles from an assignee.
    *
-   * @param assignment - The assignment type
-   * @param roles - The roles to revoke
-   * @param assignee - The assignee from whom the roles are to be revoked
+   * @param options - The assignment, roles and assignee
+   * @param queryOptions - Optional query options
    */
   async revokeRoles<T extends ReferenceIdInterface>(
-    assignment: ReferenceAssignment,
-    roles: ReferenceIdInterface[],
-    assignee: T,
+    options: RolesAssignmentOptionsInterface<T>,
+    queryOptions?: QueryOptionsInterface,
   ): Promise<void> {
+    const { assignment, roles, assignee } = options;
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
-    // loop through each role and delete the corresponding assignment
+    // Use repository proxy to apply query options
+    const repoProxy = new RepositoryProxy<RoleAssignmentEntityInterface>(
+      assignmentRepo,
+    );
+
     for (const role of roles) {
-      await assignmentRepo.delete({
+      await repoProxy.repository(queryOptions).delete({
         role: { id: role.id },
         assignee: { id: assignee.id },
       });
@@ -298,11 +317,11 @@ export class RoleService implements RoleServiceInterface {
         return this.allRoleRepos[entityKey];
       } else {
         // bad entity key
-        throw new EntityNotFoundException(entityKey);
+        throw new RoleEntityNotFoundException(entityKey);
       }
     } else {
       // bad assignment
-      throw new AssignmentNotFoundException(assignment);
+      throw new RoleAssignmentNotFoundException(assignment);
     }
   }
 }

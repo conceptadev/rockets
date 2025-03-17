@@ -1,9 +1,11 @@
 import { Repository } from 'typeorm';
 import { Inject } from '@nestjs/common';
-import { LiteralObject, ReferenceAssigneeInterface } from '@concepta/ts-core';
-import { InvitationInterface } from '@concepta/ts-common';
+import {
+  LiteralObject,
+  ReferenceAssigneeInterface,
+} from '@concepta/nestjs-common';
+import { InvitationInterface } from '@concepta/nestjs-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
-import { EventDispatchService } from '@concepta/nestjs-event';
 import { BaseService, QueryOptionsInterface } from '@concepta/typeorm-common';
 
 import {
@@ -13,14 +15,16 @@ import {
   INVITATION_MODULE_SETTINGS_TOKEN,
 } from '../invitation.constants';
 
-import { InvitationDto } from '../dto/invitation.dto';
 import { InvitationAcceptedEventAsync } from '../events/invitation-accepted.event';
 import { InvitationRevocationService } from './invitation-revocation.service';
-import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
-import { InvitationSettingsInterface } from '../interfaces/invitation-settings.interface';
-import { InvitationOtpServiceInterface } from '../interfaces/invitation-otp.service.interface';
-import { InvitationEmailServiceInterface } from '../interfaces/invitation-email.service.interface';
+import { InvitationEntityInterface } from '../interfaces/domain/invitation-entity.interface';
+import { InvitationSettingsInterface } from '../interfaces/options/invitation-settings.interface';
+import { InvitationOtpServiceInterface } from '../interfaces/services/invitation-otp-service.interface';
+import { InvitationEmailServiceInterface } from '../interfaces/services/invitation-email-service.interface';
 import { InvitationSendMailException } from '../exceptions/invitation-send-mail.exception';
+import { InvitationAcceptOptionsInterface } from '../interfaces/options/invitation-accept-options.interface';
+import { InvitationException } from '../exceptions/invitation.exception';
+import { InvitationNotFoundException } from '../exceptions/invitation-not-found.exception';
 
 export class InvitationAcceptanceService extends BaseService<InvitationEntityInterface> {
   constructor(
@@ -32,7 +36,6 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
     private readonly emailService: InvitationEmailServiceInterface,
     @Inject(INVITATION_MODULE_OTP_SERVICE_TOKEN)
     private readonly otpService: InvitationOtpServiceInterface,
-    private readonly eventDispatchService: EventDispatchService,
     private readonly invitationRevocationService: InvitationRevocationService,
   ) {
     super(invitationRepo);
@@ -42,18 +45,34 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
    * Activate user's account by providing its OTP passcode and the new password.
    */
   async accept(
-    invitationDto: InvitationDto,
-    passcode: string,
-    payload?: LiteralObject,
+    options: InvitationAcceptOptionsInterface,
     queryOptions?: QueryOptionsInterface,
   ): Promise<boolean> {
-    const { category, email } = invitationDto;
+    const { code, passcode, payload } = options;
+
+    let invitation: InvitationInterface | null;
+    let category: string | undefined = undefined;
+    let email: string | undefined = undefined;
 
     // run in transaction
     const result = await this.transaction(queryOptions).commit(
       async (transaction): Promise<boolean> => {
         // override the query options
         const nestedQueryOptions = { ...queryOptions, transaction };
+
+        // get the invitation
+        try {
+          invitation = await this.getOneByCode(code, nestedQueryOptions);
+        } catch (e: unknown) {
+          throw new InvitationException({ originalError: e });
+        }
+
+        if (invitation) {
+          category = invitation.category;
+          email = invitation.user.email;
+        } else {
+          throw new InvitationNotFoundException();
+        }
 
         // get otp by passcode, but no delete it until all workflow pass
         const otp = await this.validatePasscode(
@@ -66,17 +85,21 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
         // did we get an otp?
         if (otp) {
           const success = await this.dispatchEvent(
-            invitationDto,
-            { ...payload, userId: invitationDto.user.id },
+            invitation,
+            payload,
             nestedQueryOptions,
           );
 
           if (success) {
             await this.invitationRevocationService.revokeAll(
-              email,
-              category,
+              {
+                email,
+                category,
+              },
               nestedQueryOptions,
             );
+
+            await this.sendEmail(email);
 
             return true;
           }
@@ -86,28 +109,21 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
       },
     );
 
-    if (result) {
-      await this.sendEmail(email);
-      return true;
-    }
-
-    return false;
+    return result;
   }
 
   protected async dispatchEvent(
-    invitationDto: InvitationDto,
+    invitation: InvitationInterface,
     payload?: LiteralObject,
     queryOptions?: QueryOptionsInterface,
   ): Promise<boolean> {
     const invitationAcceptedEventAsync = new InvitationAcceptedEventAsync({
-      invitation: invitationDto,
+      invitation,
       data: payload,
       queryOptions,
     });
 
-    const eventResult = await this.eventDispatchService.async(
-      invitationAcceptedEventAsync,
-    );
+    const eventResult = await invitationAcceptedEventAsync.emit();
 
     return eventResult.every((it) => it === true);
   }
@@ -118,8 +134,8 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
    * @param email - Email
    */
   async sendEmail(email: string): Promise<void> {
-    const { from } = this.settings.email;
-    const { subject, fileName } =
+    const { from, baseUrl } = this.settings.email;
+    const { subject, fileName, logo } =
       this.settings.email.templates.invitationAccepted;
 
     try {
@@ -128,9 +144,14 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
         subject,
         to: email,
         template: fileName,
+        context: {
+          logo: `${baseUrl}/${logo}`,
+        },
       });
     } catch (e: unknown) {
-      throw new InvitationSendMailException(e, email);
+      throw new InvitationSendMailException(email, {
+        originalError: e,
+      });
     }
   }
 

@@ -1,26 +1,25 @@
 import { randomUUID } from 'crypto';
 import { Injectable } from '@nestjs/common';
 import {
+  OtpCreateParamsInterface,
   ReferenceAssigneeInterface,
   ReferenceIdInterface,
-} from '@concepta/ts-core';
-import { OtpCreatableInterface, OtpInterface } from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
+import { OtpInterface } from '@concepta/nestjs-common';
 
 import { AuthRecoveryOtpServiceInterface } from '../../interfaces/auth-recovery-otp.service.interface';
 import { UserFixture } from '../user/user.fixture';
 
 @Injectable()
 export class OtpServiceFixture implements AuthRecoveryOtpServiceInterface {
-  async create(
-    _assignment: string,
-    otp: OtpCreatableInterface,
-  ): Promise<OtpInterface> {
+  async create({ otp }: OtpCreateParamsInterface): Promise<OtpInterface> {
     const { assignee, category, type } = otp;
     return {
       id: randomUUID(),
       category,
       type,
       assignee,
+      active: true,
       passcode: 'GOOD_PASSCODE',
       expirationDate: new Date(),
       dateCreated: new Date(),

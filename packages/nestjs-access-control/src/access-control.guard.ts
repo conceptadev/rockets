@@ -23,6 +23,7 @@ import { AccessControlSettingsInterface } from './interfaces/access-control-sett
 
 import { AccessControlService } from './services/access-control.service';
 import { AccessControlContext } from './access-control.context';
+import { AccessControllerException } from './exceptions/access-controller.exception';
 
 @Injectable()
 export class AccessControlGuard implements CanActivate {
@@ -161,7 +162,7 @@ export class AccessControlGuard implements CanActivate {
     if (queryService) {
       return queryService;
     } else {
-      throw new Error(
+      throw new AccessControllerException(
         `Access control guard was unable to resolve service ${queryOption.service.name}`,
       );
     }

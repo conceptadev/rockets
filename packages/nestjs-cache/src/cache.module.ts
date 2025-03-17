@@ -10,6 +10,7 @@ import {
 } from './cache.module-definition';
 import LOCALES from './locales';
 import { I18n } from '@concepta/i18n';
+import { CacheMissingEntitiesOptionException } from './exceptions/cache-missing-entities-option.exception';
 
 /**
  * Cache Module
@@ -41,7 +42,7 @@ export class CacheModule extends CacheModuleClass {
     const { entities } = options;
 
     if (!entities) {
-      throw new Error('You must provide the entities option');
+      throw new CacheMissingEntitiesOptionException();
     }
 
     return {

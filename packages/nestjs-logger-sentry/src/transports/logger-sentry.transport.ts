@@ -6,6 +6,7 @@ import { LOGGER_SENTRY_MODULE_SETTINGS_TOKEN } from '../config/logger-sentry.con
 import { RuntimeException, mapHttpStatus } from '@concepta/nestjs-exception';
 import { isObject } from 'class-validator';
 import { LoggerSentryExtrasInterface } from '../interfaces/logger-sentry-extras.interface';
+import { LoggerSentryException } from '../exceptions/logger-sentry.exceptions';
 
 /**
  * The transport that implements {@link LoggerTransportInterface}
@@ -34,7 +35,8 @@ export class LoggerSentryTransport implements LoggerTransportInterface {
     protected readonly settings: LoggerSentrySettingsInterface,
   ) {
     const config = settings.transportConfig;
-    if (!config) throw new Error('Sentry Config is required');
+    if (!config)
+      throw new LoggerSentryException({ message: 'Sentry Config is required' });
 
     this.logLevel = settings.logLevel;
 

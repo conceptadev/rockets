@@ -1,12 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ReferenceId } from '@concepta/ts-core';
+import { ReferenceId } from '@concepta/nestjs-common';
 import {
   JwtIssueTokenService,
   JwtIssueTokenServiceInterface,
   JwtSignOptions,
   JwtSignStringOptions,
 } from '@concepta/nestjs-jwt';
-import { AuthenticationResponseInterface } from '@concepta/ts-common';
+import { AuthenticationResponseInterface } from '@concepta/nestjs-common';
 import { IssueTokenServiceInterface } from '../interfaces/issue-token-service.interface';
 import { AuthenticationJwtResponseDto } from '../dto/authentication-jwt-response.dto';
 

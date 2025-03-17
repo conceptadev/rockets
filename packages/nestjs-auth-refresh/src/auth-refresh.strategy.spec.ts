@@ -4,9 +4,10 @@ import { mock } from 'jest-mock-extended';
 import { VerifyTokenServiceInterface } from '@concepta/nestjs-authentication';
 import { AuthRefreshUserLookupServiceInterface } from './interfaces/auth-refresh-user-lookup-service.interface';
 import { randomUUID } from 'crypto';
+import { AuthorizationPayloadInterface } from '@concepta/nestjs-common';
+import { AuthRefreshUnauthorizedException } from './exceptions/auth-refresh-unauthorized.exception';
+
 import { UserFixture } from './__fixtures__/user/user.entity.fixture';
-import { AuthorizationPayloadInterface } from '@concepta/ts-common';
-import { UnauthorizedException } from '@nestjs/common';
 
 describe(AuthRefreshStrategy, () => {
   const USERNAME = 'username';
@@ -64,7 +65,7 @@ describe(AuthRefreshStrategy, () => {
 
       const t = () =>
         authRefreshStrategy.validate(authorizationPayloadInterface);
-      await expect(t).rejects.toThrow(UnauthorizedException);
+      await expect(t).rejects.toThrow(AuthRefreshUnauthorizedException);
     });
   });
 });

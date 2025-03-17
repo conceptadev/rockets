@@ -1,14 +1,10 @@
-import { HttpStatus } from '@nestjs/common';
-import {
-  RuntimeException,
-  RuntimeExceptionOptions,
-} from '@concepta/nestjs-exception';
+import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
+import { ReportException } from './report.exception';
 
-export class ReportQueryException extends RuntimeException {
+export class ReportQueryException extends ReportException {
   constructor(options?: RuntimeExceptionOptions) {
     super({
       message: 'Error while trying to do a query to report',
-      httpStatus: HttpStatus.INTERNAL_SERVER_ERROR,
       ...options,
     });
 

@@ -1,4 +1,4 @@
-import { EmailSendOptionsInterface } from '@concepta/ts-common';
+import { EmailSendOptionsInterface } from '@concepta/nestjs-common';
 
 export interface AuthRecoveryNotificationServiceInterface {
   sendEmail(sendMailOptions: EmailSendOptionsInterface): Promise<void>;
@@ -8,5 +8,5 @@ export interface AuthRecoveryNotificationServiceInterface {
     passcode: string,
     resetTokenExp: Date,
   ): Promise<void>;
-  sendPasswordUpdatedSuccefullyEmail(email: string): Promise<void>;
+  sendPasswordUpdatedSuccessfullyEmail(email: string): Promise<void>;
 }

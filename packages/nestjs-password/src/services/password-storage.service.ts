@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { PasswordPlainInterface } from '@concepta/ts-common';
+import { PasswordPlainInterface } from '@concepta/nestjs-common';
 import { CryptUtil } from '../utils/crypt.util';
 import { PasswordStorageInterface } from '../interfaces/password-storage.interface';
 import { PasswordStorageServiceInterface } from '../interfaces/password-storage-service.interface';
 import { PasswordHashOptionsInterface } from '../interfaces/password-hash-options.interface';
 import { PasswordHashObjectOptionsInterface } from '../interfaces/password-hash-object-options.interface';
+import { PasswordRequiredException } from '../exceptions/password-required.exception';
 
 /**
  * Service with functions related to password security
@@ -93,9 +94,7 @@ export class PasswordStorageService implements PasswordStorageServiceInterface {
       };
     } else if (required === true) {
       // password is required, not good
-      throw new Error(
-        'Password is required for hashing, but non was provided.',
-      );
+      throw new PasswordRequiredException();
     }
 
     return safeObject;

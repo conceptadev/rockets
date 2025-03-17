@@ -1,4 +1,4 @@
-import { PasswordPlainInterface } from '@concepta/ts-common';
+import { PasswordPlainInterface } from '@concepta/nestjs-common';
 
 import { PasswordStrengthEnum } from '../enum/password-strength.enum';
 import { PasswordSettingsInterface } from '../interfaces/password-settings.interface';

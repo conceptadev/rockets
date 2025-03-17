@@ -1,5 +1,6 @@
 import { LogLevel } from '@nestjs/common';
 import { LOGGER_VALID_LOG_LEVELS } from '../config/logger.config';
+import { LoggerInvalidLogLevelException } from '../exceptions/logger-invalid-log-level.exception';
 
 /**
  * Helper to split log level string and assign to correct log level type.
@@ -30,7 +31,7 @@ export function splitLogLevel(levels: string): LogLevel[] {
       return levelTrimmed as LogLevel;
     } else {
       // no
-      throw new Error(`The string "${levelTrimmed}" is not a valid log level.`);
+      throw new LoggerInvalidLogLevelException(levelTrimmed);
     }
   });
 }

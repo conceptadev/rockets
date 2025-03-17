@@ -21,3 +21,8 @@ export {
   AuthGithubGuard,
   AuthGithubGuard as GithubAuthGuard,
 } from './auth-github.guard';
+
+// exceptions
+export { AuthGithubException } from './exceptions/auth-github.exception';
+export { AuthGithubMissingEmailException } from './exceptions/auth-github-missing-email.exception';
+export { AuthGithubMissingIdException } from './exceptions/auth-github-missing-id.exception';

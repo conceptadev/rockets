@@ -3,10 +3,10 @@ import { AuthJwtUserLookupServiceInterface } from './interfaces/auth-jwt-user-lo
 import { AuthJwtStrategy } from './auth-jwt.strategy';
 import { UserFixture } from './__fixtures__/user/user.entity.fixture';
 import { randomUUID } from 'crypto';
-import { AuthorizationPayloadInterface } from '@concepta/ts-common';
+import { AuthorizationPayloadInterface } from '@concepta/nestjs-common';
 import { AuthJwtSettingsInterface } from './interfaces/auth-jwt-settings.interface';
 import { VerifyTokenServiceInterface } from '@concepta/nestjs-authentication';
-import { UnauthorizedException } from '@nestjs/common';
+import { AuthJwtUnauthorizedException } from './exceptions/auth-jwt-unauthorized.exception';
 
 describe(AuthJwtStrategy, () => {
   let user: UserFixture;
@@ -50,7 +50,7 @@ describe(AuthJwtStrategy, () => {
       const t = async () => {
         await authJwtStrategy.validate(authorizationPayload);
       };
-      await expect(t).rejects.toThrow(UnauthorizedException);
+      await expect(t).rejects.toThrow(AuthJwtUnauthorizedException);
     });
   });
 });

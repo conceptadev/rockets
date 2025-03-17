@@ -1,11 +1,11 @@
-import { FindOneOptions, Repository } from 'typeorm';
 import {
   LookupIdInterface,
   ReferenceId,
   ReferenceIdInterface,
-} from '@concepta/ts-core';
-import { BaseService } from './base.service';
+} from '@concepta/nestjs-common';
+import { FindOneOptions, Repository } from 'typeorm';
 import { QueryOptionsInterface } from '../interfaces/query-options.interface';
+import { BaseService } from './base.service';
 
 /**
  * Abstract lookup service

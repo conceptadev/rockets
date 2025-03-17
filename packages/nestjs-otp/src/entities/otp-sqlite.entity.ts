@@ -1,7 +1,7 @@
 import { Column } from 'typeorm';
 import { CommonSqliteEntity } from '@concepta/typeorm-common';
-import { ReferenceIdInterface } from '@concepta/ts-core';
-import { OtpInterface } from '@concepta/ts-common';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
+import { OtpInterface } from '@concepta/nestjs-common';
 
 /**
  * Otp Sqlite Entity
@@ -21,6 +21,9 @@ export abstract class OtpSqliteEntity
 
   @Column({ type: 'datetime' })
   expirationDate!: Date;
+
+  @Column({ default: true })
+  active!: boolean;
 
   /**
    * Should be overwrite by the table it will be assigned to

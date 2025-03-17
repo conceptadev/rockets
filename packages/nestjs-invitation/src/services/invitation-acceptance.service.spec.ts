@@ -5,28 +5,28 @@ import {
   INVITATION_MODULE_CATEGORY_USER_KEY,
   OtpInterface,
   UserInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 import { UserEntityInterface } from '@concepta/nestjs-user';
 import { OtpService } from '@concepta/nestjs-otp';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { EmailService } from '@concepta/nestjs-email';
-import { EventDispatchService } from '@concepta/nestjs-event';
 
 import { INVITATION_MODULE_SETTINGS_TOKEN } from '../invitation.constants';
-import { InvitationFactory } from '../invitation.factory';
-import { InvitationSettingsInterface } from '../interfaces/invitation-settings.interface';
-import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
+import { InvitationFactory } from '../seeding/invitation.factory';
+import { InvitationSettingsInterface } from '../interfaces/options/invitation-settings.interface';
+import { InvitationEntityInterface } from '../interfaces/domain/invitation-entity.interface';
 import { InvitationAcceptanceService } from './invitation-acceptance.service';
 import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
 import { InvitationEntityFixture } from '../__fixtures__/invitation/entities/invitation.entity.fixture';
-import { UserEntityFixture } from '../__fixtures__/user/entities/user-entity.fixture';
+import { UserEntityFixture } from '../__fixtures__/user/entities/user.entity.fixture';
+import { InvitationAcceptedEventAsync } from '../events/invitation-accepted.event';
 
 describe(InvitationAcceptanceService, () => {
   const category = INVITATION_MODULE_CATEGORY_USER_KEY;
 
   let spyEmailService: jest.SpyInstance;
-  let spyEventDispatchService: jest.SpyInstance;
+  let spyAcceptEventEmit: jest.SpyInstance;
 
   let app: INestApplication;
   let seedingSource: SeedingSource;
@@ -59,9 +59,9 @@ describe(InvitationAcceptanceService, () => {
       INVITATION_MODULE_SETTINGS_TOKEN,
     );
 
-    spyEventDispatchService = jest.spyOn(
-      EventDispatchService.prototype,
-      'async',
+    spyAcceptEventEmit = jest.spyOn(
+      InvitationAcceptedEventAsync.prototype,
+      'emit',
     );
 
     seedingSource = new SeedingSource({
@@ -89,7 +89,7 @@ describe(InvitationAcceptanceService, () => {
 
   afterEach(async () => {
     jest.clearAllMocks();
-    return app ? await app.close() : undefined;
+    app && (await app.close());
   });
 
   it('Validate passcode', async () => {
@@ -114,25 +114,27 @@ describe(InvitationAcceptanceService, () => {
   it('Accept invite and update password', async () => {
     const otp = await createOtp(settings, otpService, testUser, category);
 
-    const inviteAccepted = await invitationAcceptanceService.accept(
-      testInvitation,
-      otp.passcode,
-      { userId: otp.assignee.id, newPassword: 'hOdv2A2h%' },
-    );
+    const inviteAccepted = await invitationAcceptanceService.accept({
+      code: testInvitation.code,
+      passcode: otp.passcode,
+      payload: {
+        newPassword: 'hOdv2A2h%',
+      },
+    });
 
     expect(spyEmailService).toHaveBeenCalledTimes(1);
-    expect(spyEventDispatchService).toHaveBeenCalledTimes(1);
+    expect(spyAcceptEventEmit).toHaveBeenCalledTimes(1);
     expect(inviteAccepted).toEqual(true);
   });
 
   it('Accept invite and update password (fail)', async () => {
-    const inviteAccepted = await invitationAcceptanceService.accept(
-      testInvitation,
-      'FAKE_PASSCODE',
-    );
+    const inviteAccepted = await invitationAcceptanceService.accept({
+      code: testInvitation.code,
+      passcode: 'FAKE_PASSCODE',
+    });
 
     expect(spyEmailService).toHaveBeenCalledTimes(0);
-    expect(spyEventDispatchService).toHaveBeenCalledTimes(0);
+    expect(spyAcceptEventEmit).toHaveBeenCalledTimes(0);
     expect(inviteAccepted).toEqual(false);
   });
 });
@@ -142,16 +144,21 @@ const createOtp = async (
   otpService: OtpService,
   user: UserInterface,
   category: string,
+  clearOnCreate?: boolean,
 ): Promise<OtpInterface> => {
   const { assignment, type, expiresIn } = settings.otp;
 
-  const otp = await otpService.create(assignment, {
-    category,
-    type,
-    expiresIn,
-    assignee: {
-      id: user.id,
+  const otp = await otpService.create({
+    assignment,
+    otp: {
+      category,
+      type,
+      expiresIn,
+      assignee: {
+        id: user.id,
+      },
     },
+    clearOnCreate,
   });
 
   expect(otp).toBeTruthy();

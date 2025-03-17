@@ -1,12 +1,12 @@
-import { IsDate, IsNumber, IsOptional } from 'class-validator';
-import { Exclude, Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { Exclude, Expose, Type } from 'class-transformer';
+import { IsDate, IsNumber, IsOptional } from 'class-validator';
+import { AuditInterface } from '../interfaces/audit.interface';
 import {
   AuditDateCreated,
   AuditDateDeleted,
   AuditDateUpdated,
-  AuditInterface,
-} from '@concepta/ts-core';
+} from '../interfaces/audit.types';
 
 /**
  * Audit DTO

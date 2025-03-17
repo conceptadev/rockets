@@ -4,7 +4,7 @@ import { PASSWORD_MODULE_SETTINGS_TOKEN } from '../password.constants';
 import { PasswordSettingsInterface } from '../interfaces/password-settings.interface';
 import { PasswordCreationServiceInterface } from '../interfaces/password-creation-service.interface';
 import { PasswordStrengthService } from './password-strength.service';
-import { PasswordPlainInterface } from '@concepta/ts-common';
+import { PasswordPlainInterface } from '@concepta/nestjs-common';
 import { PasswordStorageInterface } from '../interfaces/password-storage.interface';
 import { PasswordStorageService } from './password-storage.service';
 import { PasswordValidationService } from './password-validation.service';
@@ -12,7 +12,7 @@ import { PasswordCreateObjectOptionsInterface } from '../interfaces/password-cre
 import { PasswordCurrentPasswordInterface } from '../interfaces/password-current-password.interface';
 import { PasswordHistoryPasswordInterface } from '../interfaces/password-history-password.interface';
 import { PasswordNotStrongException } from '../exceptions/password-not-strong.exception';
-import { CurrentPasswordRequiredException } from '../exceptions/current-password-required.exception';
+import { PasswordCurrentRequiredException } from '../exceptions/password-current-required.exception';
 import { PasswordUsedRecentlyException } from '../exceptions/password-used-recently.exception';
 
 /**
@@ -106,7 +106,7 @@ export class PasswordCreationService
       if (this.settings?.requireCurrentToUpdate === true) {
         // TODO: should be a password exception class
         // reqs not met, throw exception
-        throw new CurrentPasswordRequiredException();
+        throw new PasswordCurrentRequiredException();
       }
     }
 

@@ -1,35 +1,36 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
+import { getDataSourceToken } from '@nestjs/typeorm';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
-import { INVITATION_MODULE_CATEGORY_ORG_KEY } from '@concepta/ts-common';
+import { INVITATION_MODULE_CATEGORY_ORG_KEY } from '@concepta/nestjs-common';
 import { SeedingSource } from '@concepta/typeorm-seeding';
-import { EventDispatchService, EventModule } from '@concepta/nestjs-event';
+import { EventModule } from '@concepta/nestjs-event';
 import { UserEntityInterface, UserModule } from '@concepta/nestjs-user';
-import { getDataSourceToken } from '@nestjs/typeorm';
-import { InvitationEntityInterface } from '@concepta/nestjs-invitation/src/interfaces/invitation.entity.interface';
-import { UserFactory } from '@concepta/nestjs-user/src/user.factory';
-import { InvitationFactory } from '@concepta/nestjs-invitation/src/invitation.factory';
+import { PasswordModule } from '@concepta/nestjs-password';
+import { InvitationEntityInterface } from '@concepta/nestjs-invitation';
+import { UserFactory } from '@concepta/nestjs-user/dist/seeding';
+import { InvitationFactory } from '@concepta/nestjs-invitation/dist/seeding';
+
+import { OrgModule } from '../org.module';
+import { OrgFactory } from '../seeding/org.factory';
+import { OrgEntityInterface } from '../interfaces/org-entity.interface';
 
 import { InvitationAcceptedListener } from './invitation-accepted-listener';
 import { OrgEntityFixture } from '../__fixtures__/org-entity.fixture';
 import { OwnerEntityFixture } from '../__fixtures__/owner-entity.fixture';
 import { OrgMemberEntityFixture } from '../__fixtures__/org-member.entity.fixture';
 import { UserEntityFixture } from '../__fixtures__/user-entity.fixture';
-import { OrgModule } from '../org.module';
 import { OwnerLookupServiceFixture } from '../__fixtures__/owner-lookup-service.fixture';
 import { OwnerModuleFixture } from '../__fixtures__/owner.module.fixture';
 import { InvitationAcceptedEventAsync } from '../__fixtures__/invitation-accepted.event';
 import { InvitationEntityFixture } from '../__fixtures__/invitation.entity.fixture';
-import { OrgFactory } from '../seeding/org.factory';
-import { OrgEntityInterface } from '../interfaces/org-entity.interface';
 import { OwnerFactoryFixture } from '../__fixtures__/owner-factory.fixture';
-import { PasswordModule } from '@concepta/nestjs-password';
+import { OrgProfileEntityFixture } from '../__fixtures__/org-profile.entity.fixture';
 
 describe(InvitationAcceptedListener, () => {
   const category = INVITATION_MODULE_CATEGORY_ORG_KEY;
   let app: INestApplication;
-  let eventDispatchService: EventDispatchService;
   let seedingSource: SeedingSource;
   let testUser: UserEntityInterface;
   let testOwner: OwnerEntityFixture;
@@ -48,6 +49,7 @@ describe(InvitationAcceptedListener, () => {
             OrgEntityFixture,
             OwnerEntityFixture,
             OrgMemberEntityFixture,
+            OrgProfileEntityFixture,
             UserEntityFixture,
             InvitationEntityFixture,
           ],
@@ -72,7 +74,7 @@ describe(InvitationAcceptedListener, () => {
             org: {
               entity: OrgEntityFixture,
             },
-            orgMember: {
+            'org-member': {
               entity: OrgMemberEntityFixture,
             },
           },
@@ -84,26 +86,25 @@ describe(InvitationAcceptedListener, () => {
     app = testingModule.createNestApplication();
     await app.init();
 
-    eventDispatchService =
-      testingModule.get<EventDispatchService>(EventDispatchService);
-
     seedingSource = new SeedingSource({
       dataSource: testingModule.get(getDataSourceToken()),
     });
 
     await seedingSource.initialize();
 
+    const ownerFactory = new OwnerFactoryFixture({
+      entity: OwnerEntityFixture,
+      seedingSource,
+    });
+
     const orgFactory = new OrgFactory({
       entity: OrgEntityFixture,
       seedingSource,
+      factories: [ownerFactory],
     });
 
     const userFactory = new UserFactory({
       entity: UserEntityFixture,
-      seedingSource,
-    });
-    const ownerFactory = new OwnerFactoryFixture({
-      entity: OwnerEntityFixture,
       seedingSource,
     });
 
@@ -128,13 +129,11 @@ describe(InvitationAcceptedListener, () => {
     const invitationAcceptedEventAsync = new InvitationAcceptedEventAsync({
       invitation: testInvitation,
       data: {
-        userId: testInvitation.user.id,
+        user: testInvitation.user,
       },
     });
 
-    const eventResult = await eventDispatchService.async(
-      invitationAcceptedEventAsync,
-    );
+    const eventResult = await invitationAcceptedEventAsync.emit();
 
     const result = eventResult.every((it) => it === true);
 

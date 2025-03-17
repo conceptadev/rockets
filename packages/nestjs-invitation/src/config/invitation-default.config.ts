@@ -1,6 +1,6 @@
 import { registerAs } from '@nestjs/config';
 import { INVITATION_MODULE_DEFAULT_SETTINGS_TOKEN } from '../invitation.constants';
-import { InvitationSettingsInterface } from '../interfaces/invitation-settings.interface';
+import { InvitationSettingsInterface } from '../interfaces/options/invitation-settings.interface';
 
 /**
  * Default configuration for invitation.
@@ -13,10 +13,12 @@ export const invitationDefaultConfig = registerAs(
       baseUrl: 'http://localhost:3000',
       templates: {
         invitation: {
+          logo: 'public/logo.svg',
           fileName: __dirname + '/../assets/invitation.template.hbs',
           subject: 'Access Invitation',
         },
         invitationAccepted: {
+          logo: 'public/logo.svg',
           fileName: __dirname + '/../assets/invitation-accepted.template.hbs',
           subject: 'Invitation Accepted',
         },
@@ -26,6 +28,9 @@ export const invitationDefaultConfig = registerAs(
       assignment: 'user-otp',
       type: 'uuid',
       expiresIn: '7d',
+      clearOtpOnCreate: process.env.INVITATION_OTP_CLEAR_ON_CREATE
+        ? process.env.INVITATION_OTP_CLEAR_ON_CREATE === 'true'
+        : false,
     },
   }),
 );

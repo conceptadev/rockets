@@ -1,9 +1,19 @@
 import { Exclude, Expose, Type } from 'class-transformer';
-import { IsBoolean, IsEmail, IsString, ValidateNested } from 'class-validator';
+import {
+  IsBoolean,
+  IsObject,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ReferenceIdInterface } from '@concepta/ts-core';
-import { InvitationInterface } from '@concepta/ts-common';
-import { CommonEntityDto, ReferenceIdDto } from '@concepta/nestjs-common';
+import {
+  LiteralObject,
+  CommonEntityDto,
+  InvitationInterface,
+  InvitationUserInterface,
+} from '@concepta/nestjs-common';
+import { InvitationUserDto } from './invitation-user.dto';
 
 @Exclude()
 export class InvitationDto
@@ -17,14 +27,6 @@ export class InvitationDto
   })
   @IsBoolean()
   active = true;
-
-  @Expose()
-  @ApiProperty({
-    type: 'string',
-    description: 'recipient email',
-  })
-  @IsEmail()
-  email = '';
 
   @Expose()
   @ApiProperty({
@@ -45,10 +47,21 @@ export class InvitationDto
 
   @Expose()
   @ApiProperty({
-    type: ReferenceIdDto,
-    description: 'The owner of the org',
+    title: 'Payload',
+    type: 'object',
+    description:
+      'payload content that will be passed through another module ir order to complete the invitation. This payload will have necessary info to target module complete the invitation e.g. new password or what ever required info. The object not have any strong type defined on purpose because the target moules will have object different signatures',
   })
-  @Type(() => ReferenceIdDto)
+  @IsObject()
+  @IsOptional()
+  constraints!: LiteralObject;
+
+  @Expose()
+  @ApiProperty({
+    type: InvitationUserDto,
+    description: 'The invited user.',
+  })
+  @Type(() => InvitationUserDto)
   @ValidateNested()
-  user!: ReferenceIdInterface;
+  user!: InvitationUserInterface;
 }

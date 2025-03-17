@@ -1,5 +1,6 @@
 import { ApiParam, ApiParamOptions } from '@nestjs/swagger';
 import { CrudReflectionService } from '../../services/crud-reflection.service';
+import { CrudException } from '../../exceptions/crud.exception';
 
 /**
  * Crud initialize open api params decorator.
@@ -31,7 +32,9 @@ export const CrudInitApiParams =
 
       // sanity check
       if (!descriptor) {
-        throw new Error('Did not find property descriptor');
+        throw new CrudException({
+          message: 'Did not find property descriptor',
+        });
       }
 
       // get the route params options

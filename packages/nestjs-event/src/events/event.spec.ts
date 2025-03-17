@@ -1,62 +1,70 @@
-import { Event } from './event';
+import { EventEmitter2 } from 'eventemitter2';
 import { EVENT_MODULE_EVENT_KEY_PREFIX } from '../event-constants';
+import { EventManager } from '../event-manager';
+import { EventListenerOn } from '../listeners/event-listener-on';
+import { EventDispatchService } from '../services/event-dispatch.service';
+import { EventListenService } from '../services/event-listen.service';
+import { Event } from './event';
 
 describe(Event, () => {
-  describe(Event.key, () => {
-    class TestEvent extends Event {}
-    it('should equal prefixed name of the class', async () => {
-      expect(`${EVENT_MODULE_EVENT_KEY_PREFIX}TestEvent`).toEqual(
-        TestEvent.key,
-      );
-    });
+  class TestEvent extends Event<boolean> {}
+  class TestListener extends EventListenerOn<TestEvent> {
+    listen(_event: TestEvent): void {}
+  }
+
+  let ee2: EventEmitter2;
+  let testEvent: TestEvent;
+  let listener: TestListener;
+
+  beforeEach(() => {
+    ee2 = new EventEmitter2();
+    testEvent = new TestEvent(true);
+    listener = new TestListener();
   });
 
-  describe(Event.prototype.key, () => {
-    class TestEvent extends Event {}
-    it('should equal prefixed name of constructed class', async () => {
-      const test = new TestEvent();
-      expect(`${EVENT_MODULE_EVENT_KEY_PREFIX}TestEvent`).toEqual(test.key);
-    });
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  describe(Event.prototype.payload, () => {
-    describe('Empty', () => {
-      class TestEvent extends Event<boolean> {}
-      it('should be undefined if no payload passed to constuctor', async () => {
-        const test = new TestEvent();
-        expect(test.payload).toBeUndefined();
-      });
+  it('should emit an event', () => {
+    const spyEmit = jest.spyOn(ee2, 'emit');
+    const spyListen = jest.spyOn(listener, 'listen');
+    ee2.on(testEvent.key, listener.listen);
+
+    expect(ee2.emit(testEvent.key, testEvent)).toEqual(true);
+    expect(spyEmit).toHaveBeenCalledTimes(1);
+    expect(spyEmit).toHaveBeenCalledWith(
+      `${EVENT_MODULE_EVENT_KEY_PREFIX}TestEvent`,
+      testEvent,
+    );
+
+    expect(spyListen).toHaveBeenCalledTimes(1);
+    expect(spyListen).toHaveBeenCalledWith(testEvent);
+  });
+
+  it(Event.prototype.emit.name, () => {
+    const ee2 = new EventEmitter2();
+    const testEvent = new TestEvent(true);
+    const listener = new TestListener();
+    const spyEmit = jest.spyOn(ee2, 'emit');
+    const spyListen = jest.spyOn(listener, 'listen');
+    const listenService = new EventListenService(ee2);
+    const dispatchService = new EventDispatchService(ee2);
+    EventManager.initialize(dispatchService, listenService, {
+      allowManualShutdown: true,
     });
+    EventManager.listen.on(TestEvent, listener);
 
-    describe('boolean', () => {
-      class TestEvent extends Event<boolean> {}
-      it('should equal payload passed to constructor', async () => {
-        const test = new TestEvent(false);
-        const testPayload = test.payload;
-        expect(testPayload).toEqual(false);
-      });
-    });
+    expect(testEvent.emit()).toEqual(true);
+    expect(spyEmit).toHaveBeenCalledTimes(1);
+    expect(spyEmit).toHaveBeenCalledWith(
+      `${EVENT_MODULE_EVENT_KEY_PREFIX}TestEvent`,
+      testEvent,
+    );
 
-    describe('object', () => {
-      type TestEventType = { z: string };
-      class TestEvent extends Event<TestEventType> {}
+    expect(spyListen).toHaveBeenCalledTimes(1);
+    expect(spyListen).toHaveBeenCalledWith(testEvent);
 
-      it('should equal payload passed to constructor', async () => {
-        const test = new TestEvent({ z: 'foo' });
-        const testPayload: TestEventType = test.payload;
-        expect(testPayload).toEqual({ z: 'foo' });
-      });
-    });
-
-    describe('array', () => {
-      type TestEventType = [boolean, number, string, { z: string }];
-      class TestEvent extends Event<TestEventType> {}
-
-      it('should equal payload passed to constructor', async () => {
-        const test = new TestEvent([true, 1, 'a', { z: 'foo' }]);
-        const testPayload: TestEventType = test.payload;
-        expect(testPayload).toEqual([true, 1, 'a', { z: 'foo' }]);
-      });
-    });
+    EventManager.shutdown();
   });
 });

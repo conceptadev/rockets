@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { ReferenceEmail } from '@concepta/ts-core';
+import { ReferenceEmail } from '@concepta/nestjs-common';
 
-import { InvitationUserLookupServiceInterface } from '../../../interfaces/invitation-user-lookup.service.interface';
+import { InvitationUserLookupServiceInterface } from '../../../interfaces/services/invitation-user-lookup.service.interface';
 import { UserFixture } from '../user.fixture';
 
 @Injectable()

@@ -1,6 +1,6 @@
 import { Exclude } from 'class-transformer';
 import { PickType } from '@nestjs/swagger';
-import { CacheUpdatableInterface } from '@concepta/ts-common';
+import { CacheUpdatableInterface } from '@concepta/nestjs-common';
 import { CacheDto } from './cache.dto';
 
 /**

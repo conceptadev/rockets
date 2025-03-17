@@ -13,7 +13,9 @@ export { CrudController } from './decorators/controller/crud-controller.decorato
 // route decorators
 export { CrudReadAll } from './decorators/actions/crud-read-all.decorator';
 export { CrudReadMany } from './decorators/actions/crud-read-many.decorator';
+export { CrudGetMany } from './decorators/actions/crud-get-many.decorator';
 export { CrudReadOne } from './decorators/actions/crud-read-one.decorator';
+export { CrudGetOne } from './decorators/actions/crud-get-one.decorator';
 export { CrudCreateOne } from './decorators/actions/crud-create-one.decorator';
 export { CrudCreateMany } from './decorators/actions/crud-create-many.decorator';
 export { CrudUpdateOne } from './decorators/actions/crud-update-one.decorator';
@@ -42,10 +44,30 @@ export { CrudValidate } from './decorators/routes/crud-validate.decorator';
 export { CrudRequest } from './decorators/params/crud-request.decorator';
 export { CrudBody } from './decorators/params/crud-body.decorator';
 
+// api decorators
+export { CrudApiBody } from './decorators/openapi/crud-api-body.decorator';
+export { CrudApiOperation } from './decorators/openapi/crud-api-operation.decorator';
+export { CrudApiParam } from './decorators/openapi/crud-api-param.decorator';
+export { CrudApiQuery } from './decorators/openapi/crud-api-query.decorator';
+export { CrudApiResponse } from './decorators/openapi/crud-api-response.decorator';
+
 // classes
 export { CrudQueryHelper } from './util/crud-query.helper';
 export { TypeOrmCrudService } from './services/typeorm-crud.service';
+export { CrudBaseController } from './controllers/crud-base.controller';
 
 // dto
 export { CrudResponsePaginatedDto } from './dto/crud-response-paginated.dto';
 export { CrudCreateManyDto } from './dto/crud-create-many.dto';
+
+// exceptions
+export { CrudException } from './exceptions/crud.exception';
+export { CrudMethodNotImplementedException } from './exceptions/crud-method-not-implemented.exception';
+export { CrudRequestException } from './exceptions/crud-request.exception';
+export { CrudQueryException } from './exceptions/crud-query.exception';
+
+// configurable crud builder
+export { ConfigurableCrudHost } from './util/interfaces/configurable-crud-host.interface';
+export { ConfigurableCrudOptions } from './util/interfaces/configurable-crud-options.interface';
+export { ConfigurableCrudBuilder } from './util/configurable-crud.builder';
+export { ConfigurableCrudOptionsTransformer } from './crud.types';

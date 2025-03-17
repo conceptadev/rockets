@@ -1,7 +1,10 @@
-import { randomUUID } from 'crypto';
-import { InternalServerErrorException, Logger } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { InvitationInterface } from '@concepta/ts-common';
+import {
+  AccessControlCreateOne,
+  AccessControlDeleteOne,
+  AccessControlReadMany,
+  AccessControlReadOne,
+} from '@concepta/nestjs-access-control';
+import { InvitationInterface } from '@concepta/nestjs-common';
 import {
   CrudBody,
   CrudController,
@@ -13,27 +16,29 @@ import {
   CrudRequest,
   CrudRequestInterface,
 } from '@concepta/nestjs-crud';
-import {
-  AccessControlCreateOne,
-  AccessControlDeleteOne,
-  AccessControlReadMany,
-  AccessControlReadOne,
-} from '@concepta/nestjs-access-control';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { InvitationCreateDto } from '../dto/invitation-create.dto';
-import { InvitationDto } from '../dto/invitation.dto';
+import { InvitationCreateInviteDto } from '../dto/invitation-create-invite.dto';
 import { InvitationPaginatedDto } from '../dto/invitation-paginated.dto';
-import { InvitationCreatableInterface } from '../interfaces/invitation-creatable.interface';
+import { InvitationDto } from '../dto/invitation.dto';
+import { InvitationException } from '../exceptions/invitation.exception';
+import { InvitationCreateInviteInterface } from '../interfaces/domain/invitation-create-invite.interface';
+import { InvitationSendInviteInterface } from '../interfaces/domain/invitation-send-invite.interface';
 import { InvitationResource } from '../invitation.types';
 import { InvitationCrudService } from '../services/invitation-crud.service';
 import { InvitationSendService } from '../services/invitation-send.service';
-import { InvitationEntityInterface } from '../interfaces/invitation.entity.interface';
 
 @CrudController({
   path: 'invitation',
   model: {
     type: InvitationDto,
     paginatedType: InvitationPaginatedDto,
+  },
+  join: {
+    user: {
+      eager: true,
+      allow: ['id', 'email'],
+    },
   },
   validation: {
     transformOptions: {
@@ -47,13 +52,13 @@ export class InvitationController
   implements
     CrudControllerInterface<
       InvitationInterface,
-      InvitationCreatableInterface,
-      InvitationCreatableInterface
+      InvitationCreateInviteInterface,
+      never
     >
 {
   constructor(
-    private readonly invitationSendService: InvitationSendService,
     private readonly invitationCrudService: InvitationCrudService,
+    private readonly invitationSendService: InvitationSendService,
   ) {}
 
   @CrudReadMany()
@@ -79,46 +84,37 @@ export class InvitationController
   @ApiOperation({
     summary: 'Create one invitation.',
   })
-  async createOneCustom(
-    @CrudRequest() crudRequest: CrudRequestInterface,
-    @CrudBody() invitationCreateDto: InvitationCreateDto,
+  async createInvite(
+    @CrudRequest() _crudRequest: CrudRequestInterface,
+    @CrudBody() invitationCreateInviteDto: InvitationCreateInviteDto,
   ) {
-    const { email, category, payload } = invitationCreateDto;
-    let invite: InvitationEntityInterface | undefined;
+    let invite: InvitationSendInviteInterface | undefined;
 
     try {
       await this.invitationCrudService
         .transaction()
         .commit(async (transaction): Promise<void> => {
-          const user = await this.invitationSendService.getUser(
-            email,
-            payload,
+          invite = await this.invitationSendService.create(
+            invitationCreateInviteDto,
             {
               transaction,
             },
           );
 
-          invite = await this.invitationCrudService.createOne(crudRequest, {
-            user,
-            email,
-            category,
-            code: randomUUID(),
-            constraints: payload,
-          });
-
-          if (user !== undefined && invite !== undefined) {
-            await this.invitationSendService.send(user, invite.code, category, {
+          if (invite) {
+            await this.invitationSendService.send(invite, {
               transaction,
             });
           } else {
-            throw new Error('User and/or invite not defined');
+            throw new InvitationException({
+              message: 'User and/or invite not defined',
+            });
           }
         });
 
       return invite;
     } catch (e: unknown) {
-      Logger.error(e);
-      throw new InternalServerErrorException();
+      throw new InvitationException({ originalError: e });
     }
   }
 
@@ -131,8 +127,7 @@ export class InvitationController
     try {
       return this.invitationCrudService.deleteOne(crudRequest);
     } catch (e: unknown) {
-      Logger.error(e);
-      throw new InternalServerErrorException();
+      throw new InvitationException({ originalError: e });
     }
   }
 }

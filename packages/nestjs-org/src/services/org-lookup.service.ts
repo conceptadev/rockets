@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
-import { OrgOwnerInterface } from '@concepta/ts-common';
+import { OrgOwnerInterface } from '@concepta/nestjs-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import { LookupService, QueryOptionsInterface } from '@concepta/typeorm-common';
 
@@ -41,6 +41,6 @@ export class OrgLookupService
    * @param org - The org of which owner to retrieve.
    */
   async getOwner(org: OrgOwnerInterface, queryOptions?: QueryOptionsInterface) {
-    return this.ownerLookupService.byId(org.owner.id, queryOptions);
+    return this.ownerLookupService.byId(org.ownerId, queryOptions);
   }
 }

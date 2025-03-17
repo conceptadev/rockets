@@ -1,4 +1,4 @@
-import { FileInterface } from '@concepta/ts-common';
+import { FileInterface } from '@concepta/nestjs-common';
 import { FileStorageServiceInterface } from '@concepta/nestjs-file';
 
 import {

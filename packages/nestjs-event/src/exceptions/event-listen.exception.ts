@@ -3,11 +3,12 @@ import {
   RuntimeExceptionOptions,
 } from '@concepta/nestjs-exception';
 import { EventListenOnInterface } from '../services/interfaces/event-listen-on.interface';
+import { EventException } from './event.exception';
 
 /**
  * Thrown when an error is caught when listening on an {@link EventListenOn}.
  */
-export class EventListenException<E> extends RuntimeException {
+export class EventListenException<E> extends EventException {
   context: RuntimeException['context'] & {
     listener: EventListenOnInterface<E>;
   };

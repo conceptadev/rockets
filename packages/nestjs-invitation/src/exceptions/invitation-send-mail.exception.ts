@@ -1,28 +1,28 @@
-import { ExceptionInterface, mapNonErrorToException } from '@concepta/ts-core';
+import {
+  RuntimeException,
+  RuntimeExceptionOptions,
+} from '@concepta/nestjs-exception';
+import { InvitationException } from './invitation.exception';
 
 /**
  * Thrown when an error occurs while attempting to deliver email.
  */
-export class InvitationSendMailException
-  extends Error
-  implements ExceptionInterface
-{
-  errorCode = 'INVITATION_SEND_MAIL_ERROR';
-
-  context: {
+export class InvitationSendMailException extends InvitationException {
+  context: RuntimeException['context'] & {
     emailAddress: string;
-    originalError: Error;
   };
 
-  constructor(
-    originalError: unknown,
-    emailAddress: string,
-    message = 'Error while trying to send invitation related email',
-  ) {
-    super(message);
+  // TODO: this is receiving email, but not using, should update
+  // message or remove email from constructor
+  constructor(emailAddress: string, options?: RuntimeExceptionOptions) {
+    super({
+      message: 'Error while trying to send invitation related email',
+      ...options,
+    });
+    this.errorCode = 'INVITATION_SEND_MAIL_ERROR';
     this.context = {
+      ...super.context,
       emailAddress,
-      originalError: mapNonErrorToException(originalError),
     };
   }
 }

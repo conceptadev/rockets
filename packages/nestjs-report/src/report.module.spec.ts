@@ -1,7 +1,7 @@
 import { Repository } from 'typeorm';
 import { DynamicModule, ModuleMetadata } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ReportStatusEnum } from '@concepta/ts-common';
+import { ReportStatusEnum } from '@concepta/nestjs-common';
 import { FileModule } from '@concepta/nestjs-file';
 import {
   getDynamicRepositoryToken,

@@ -3,7 +3,10 @@ import {
   QueryOptionsInterface,
   ReferenceMutateException,
 } from '@concepta/typeorm-common';
-import { NotAnErrorException, ReferenceIdInterface } from '@concepta/ts-core';
+import {
+  NotAnErrorException,
+  ReferenceIdInterface,
+} from '@concepta/nestjs-common';
 import {
   FEDERATED_MODULE_USER_LOOKUP_SERVICE_TOKEN,
   FEDERATED_MODULE_USER_MUTATE_SERVICE_TOKEN,
@@ -123,10 +126,9 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
       );
 
       if (!newUser)
-        throw new FederatedMutateCreateUserException(
-          this.constructor.name,
-          new Error('Failed to create user'),
-        );
+        throw new FederatedMutateCreateUserException(this.constructor.name, {
+          message: 'Failed to create user',
+        });
 
       return newUser;
     } catch (e) {
@@ -160,10 +162,9 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
       );
 
       if (!federated)
-        throw new FederatedCreateException(
-          this.constructor.name,
-          new Error('Failed to create federated'),
-        );
+        throw new FederatedCreateException(this.constructor.name, {
+          message: 'Failed to create federated',
+        });
 
       return federated;
     } catch (e) {

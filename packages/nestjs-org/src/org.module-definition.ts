@@ -32,6 +32,7 @@ import { OrgMemberMutateService } from './services/org-member-mutate.service';
 import { OrgController } from './org.controller';
 import { orgDefaultConfig } from './config/org-default.config';
 import { InvitationAcceptedListener } from './listeners/invitation-accepted-listener';
+import { OrgMissingEntitiesOptionsException } from './exceptions/org-missing-entities-options.exception';
 
 const RAW_OPTIONS_TOKEN = Symbol('__ORG_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -54,18 +55,24 @@ function definitionTransform(
   extras: OrgOptionsExtrasInterface,
 ): DynamicModule {
   const { providers = [] } = definition;
-  const { controllers, global = false, entities } = extras;
+  const {
+    global = false,
+    entities,
+    controllers,
+    extraControllers = [],
+    extraProviders = [],
+  } = extras;
 
   if (!entities) {
-    throw new Error('You must provide the entities option');
+    throw new OrgMissingEntitiesOptionsException();
   }
 
   return {
     ...definition,
     global,
     imports: createOrgImports({ entities }),
-    providers: createOrgProviders({ providers }),
-    controllers: createOrgControllers({ controllers }),
+    providers: createOrgProviders({ providers, extraProviders }),
+    controllers: createOrgControllers({ controllers, extraControllers }),
     exports: [ConfigModule, RAW_OPTIONS_TOKEN, ...createOrgExports()],
   };
 }
@@ -82,9 +89,11 @@ export function createOrgImports(
 export function createOrgProviders(options: {
   overrides?: OrgOptions;
   providers?: Provider[];
+  extraProviders?: Provider[];
 }): Provider[] {
   return [
     ...(options.providers ?? []),
+    ...(options.extraProviders ?? []),
     OrgCrudService,
     OrgMemberService,
     OrgMemberLookupService,
@@ -113,11 +122,11 @@ export function createOrgExports(): Required<
 }
 
 export function createOrgControllers(
-  overrides: Pick<OrgOptions, 'controllers'> = {},
+  overrides: Pick<OrgOptions, 'controllers' | 'extraControllers'> = {},
 ): DynamicModule['controllers'] {
-  return overrides?.controllers !== undefined
+  return overrides?.controllers?.length
     ? overrides.controllers
-    : [OrgController];
+    : [OrgController, ...(overrides.extraControllers ?? [])];
 }
 
 export function createOrgSettingsProvider(

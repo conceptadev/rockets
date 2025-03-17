@@ -1,4 +1,4 @@
-import { FileCreatableInterface } from '@concepta/ts-common';
+import { FileCreatableInterface } from '@concepta/nestjs-common';
 import { FileStrategyServiceInterface } from '../interfaces/file-strategy-service.interface';
 import { FileStorageServiceInterface } from '../interfaces/file-storage-service.interface';
 import { FileStorageServiceNotFoundException } from '../exceptions/file-storage-service-not-found.exception';

@@ -1,10 +1,10 @@
 import { Inject, Param } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { ReferenceAssignment } from '@concepta/ts-core';
+import { ReferenceAssignment } from '@concepta/nestjs-common';
 import {
   RoleAssignmentCreatableInterface,
   RoleAssignmentInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 import {
   CrudBody,
   CrudCreateOne,
@@ -21,8 +21,8 @@ import {
   ROLE_MODULE_CRUD_SERVICES_TOKEN,
   ROLE_MODULE_SETTINGS_TOKEN,
 } from './role.constants';
-import { EntityNotFoundException } from './exceptions/entity-not-found.exception';
-import { AssignmentNotFoundException } from './exceptions/assignment-not-found.exception';
+import { RoleEntityNotFoundException } from './exceptions/role-entity-not-found.exception';
+import { RoleAssignmentNotFoundException } from './exceptions/role-assignment-not-found.exception';
 import { RoleAssignmentCrudService } from './services/role-assignment-crud.service';
 import { RoleAssignmentDto } from './dto/role-assignment.dto';
 import { RoleAssignmentCreateDto } from './dto/role-assignment-create.dto';
@@ -193,11 +193,11 @@ export class RoleAssignmentController
         return this.allCrudServices[entityKey];
       } else {
         // bad entity key
-        throw new EntityNotFoundException(entityKey);
+        throw new RoleEntityNotFoundException(entityKey);
       }
     } else {
       // bad assignment
-      throw new AssignmentNotFoundException(assignment);
+      throw new RoleAssignmentNotFoundException(assignment);
     }
   }
 }

@@ -1,12 +1,8 @@
-import {
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-} from '@nestjs/common';
-import { NotAnErrorException } from '@concepta/ts-core';
-import { EmailSendOptionsInterface } from '@concepta/ts-common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { NotAnErrorException } from '@concepta/nestjs-common';
+import { EmailSendOptionsInterface } from '@concepta/nestjs-common';
 import { EmailServiceInterface } from './interfaces/email-service.interface';
+import { EmailSendException } from './exceptions/email-send.exception';
 
 @Injectable()
 export class EmailService implements EmailServiceInterface {
@@ -25,9 +21,7 @@ export class EmailService implements EmailServiceInterface {
       // log the original error
       this.logger.error(exception.message, exception.stack, EmailService.name);
       // throw a more friendly error
-      throw new InternalServerErrorException(
-        'Fatal error while trying to send email.',
-      );
+      throw new EmailSendException();
     }
   }
 }

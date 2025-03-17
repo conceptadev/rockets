@@ -25,7 +25,7 @@ import {
 import {
   OrgCreatableInterface,
   OrgUpdatableInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 import { OrgCrudService } from './services/org-crud.service';
 import { OrgDto } from './dto/org.dto';
 import { OrgCreateDto } from './dto/org-create.dto';

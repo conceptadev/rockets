@@ -1,9 +1,9 @@
-import { ReferenceId, ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceId, ReferenceIdInterface } from '@concepta/nestjs-common';
 import {
   AuthenticatedUserInterface,
   PasswordPlainCurrentInterface,
   PasswordPlainInterface,
-} from '@concepta/ts-common';
+} from '@concepta/nestjs-common';
 import {
   PasswordCreationService,
   PasswordStorageInterface,

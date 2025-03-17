@@ -1,18 +1,22 @@
-import { EventInterface } from '../events/interfaces/event.interface';
 import {
   RuntimeException,
   RuntimeExceptionOptions,
 } from '@concepta/nestjs-exception';
+import { EventBaseInterface } from '../events/interfaces/event-base.interface';
+import { EventException } from './event.exception';
 
 /**
  * Thrown when an error is caught when dispatching an {@link Event}.
  */
-export class EventDispatchException<P, R> extends RuntimeException {
+export class EventDispatchException<P, R> extends EventException {
   context: RuntimeException['context'] & {
-    event: EventInterface<P, R>;
+    event: EventBaseInterface<P, R>;
   };
 
-  constructor(event: EventInterface<P, R>, options?: RuntimeExceptionOptions) {
+  constructor(
+    event: EventBaseInterface<P, R>,
+    options?: RuntimeExceptionOptions,
+  ) {
     super({
       message: 'Error while trying to dispatch the event with key %s',
       messageParams: [event.key],

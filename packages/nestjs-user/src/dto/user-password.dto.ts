@@ -1,7 +1,7 @@
 import { Exclude, Expose } from 'class-transformer';
 import { IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { PasswordPlainInterface } from '@concepta/ts-common';
+import { PasswordPlainInterface } from '@concepta/nestjs-common';
 
 /**
  * User plain password DTO

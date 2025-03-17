@@ -1,16 +1,14 @@
-import {
-  LiteralObject,
-  ReferenceEmailInterface,
-  ReferenceIdInterface,
-} from '@concepta/ts-core';
 import { Injectable } from '@nestjs/common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
+import { InvitationInterface } from '@concepta/nestjs-common';
 
-import { InvitationServiceInterface } from '../interfaces/invitation.service.interface';
+import { InvitationServiceInterface } from '../interfaces/services/invitation-service.interface';
 import { InvitationAcceptanceService } from './invitation-acceptance.service';
 import { InvitationSendService } from './invitation-send.service';
 import { InvitationRevocationService } from './invitation-revocation.service';
-import { InvitationDto } from '../dto/invitation.dto';
+import { InvitationAcceptOptionsInterface } from '../interfaces/options/invitation-accept-options.interface';
+import { InvitationRevokeOptionsInterface } from '../interfaces/options/invitation-revoke-options.interface';
+import { InvitationCreateInviteInterface } from '../interfaces/domain/invitation-create-invite.interface';
 
 @Injectable()
 export class InvitationService implements InvitationServiceInterface {
@@ -19,48 +17,40 @@ export class InvitationService implements InvitationServiceInterface {
     private readonly invitationAcceptanceService: InvitationAcceptanceService,
     private readonly invitationRevocationService: InvitationRevocationService,
   ) {}
+  async create(
+    createInviteDto: InvitationCreateInviteInterface,
+    queryOptions?: QueryOptionsInterface,
+  ) {
+    return this.invitationSendService.create(createInviteDto, queryOptions);
+  }
 
   async send(
-    user: ReferenceIdInterface & ReferenceEmailInterface,
-    code: string,
-    category: string,
+    invitation: Pick<InvitationInterface, 'id'>,
     queryOptions?: QueryOptionsInterface,
   ): Promise<void> {
-    return this.invitationSendService.send(user, code, category, queryOptions);
+    return this.invitationSendService.send(invitation, queryOptions);
   }
 
   /**
    * Activate user's account by providing its OTP passcode and the new password.
    */
   async accept(
-    invitationDto: InvitationDto,
-    passcode: string,
-    payload?: LiteralObject,
+    options: InvitationAcceptOptionsInterface,
     queryOptions?: QueryOptionsInterface,
   ): Promise<boolean> {
-    return this.invitationAcceptanceService.accept(
-      invitationDto,
-      passcode,
-      payload,
-      queryOptions,
-    );
+    return this.invitationAcceptanceService.accept(options, queryOptions);
   }
 
   /**
-   * Revoke all invitations by email and category.
+   * Revoke all invitations for a given email address in a specific category.
    *
-   * @param email - user email
-   * @param category - the category
+   * @param options - The revocation options containing email and category
+   * @param queryOptions - Optional query options for the transaction
    */
   async revokeAll(
-    email: string,
-    category: string,
+    options: InvitationRevokeOptionsInterface,
     queryOptions?: QueryOptionsInterface,
   ): Promise<void> {
-    return this.invitationRevocationService.revokeAll(
-      email,
-      category,
-      queryOptions,
-    );
+    return this.invitationRevocationService.revokeAll(options, queryOptions);
   }
 }

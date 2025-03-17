@@ -1,6 +1,6 @@
 import { Exclude } from 'class-transformer';
 import { IntersectionType, PartialType, PickType } from '@nestjs/swagger';
-import { UserUpdatableInterface } from '@concepta/ts-common';
+import { UserUpdatableInterface } from '@concepta/nestjs-common';
 import { UserDto } from './user.dto';
 import { UserPasswordDto } from './user-password.dto';
 import { UserPasswordUpdateDto } from './user-password-update.dto';

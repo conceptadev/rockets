@@ -1,4 +1,6 @@
+import { Type } from '@nestjs/common';
 import {
+  ApiBodyOptions,
   ApiOperationOptions,
   ApiParamOptions,
   ApiQueryOptions,
@@ -22,16 +24,23 @@ export interface CrudRouteOptionsInterface {
     operation?: ApiOperationOptions;
     query?: ApiQueryOptions[];
     params?: ApiParamOptions;
+    body?: ApiBodyOptions;
     response?: ApiResponseOptions;
   };
 }
 
+export interface CrudRouteDtoOptionsInterface {
+  dto?: Type;
+}
+
 export interface CrudCreateManyOptionsInterface
-  extends CrudRouteOptionsInterface {}
+  extends CrudRouteOptionsInterface,
+    CrudRouteDtoOptionsInterface {}
 
 export interface CrudCreateOneOptionsInterface
   extends CrudRouteOptionsInterface,
-    Pick<CreateOneRouteOptions, 'returnShallow'> {}
+    Pick<CreateOneRouteOptions, 'returnShallow'>,
+    CrudRouteDtoOptionsInterface {}
 
 export interface CrudReadAllOptionsInterface
   extends CrudRouteOptionsInterface {}
@@ -41,11 +50,13 @@ export interface CrudReadOneOptionsInterface
 
 export interface CrudUpdateOneOptionsInterface
   extends CrudRouteOptionsInterface,
-    Pick<UpdateOneRouteOptions, 'returnShallow'> {}
+    Pick<UpdateOneRouteOptions, 'returnShallow'>,
+    CrudRouteDtoOptionsInterface {}
 
 export interface CrudReplaceOneOptionsInterface
   extends CrudRouteOptionsInterface,
-    Pick<ReplaceOneRouteOptions, 'returnShallow'> {}
+    Pick<ReplaceOneRouteOptions, 'returnShallow'>,
+    CrudRouteDtoOptionsInterface {}
 
 export interface CrudDeleteOneOptionsInterface
   extends CrudRouteOptionsInterface,

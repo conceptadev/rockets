@@ -1,5 +1,5 @@
 import { Factory } from '@concepta/typeorm-seeding';
-import { ReferenceIdInterface } from '@concepta/ts-core';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 
 /**
  * Org Owner factory

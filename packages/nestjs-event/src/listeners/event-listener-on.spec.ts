@@ -1,10 +1,14 @@
+import EventEmitter2 from 'eventemitter2';
+import { EventManager } from '../event-manager';
+import { Event } from '../events/event';
 import { EventAsync } from '../events/event-async';
-import { EventSync } from '../events/event-sync';
+import { EventDispatchService } from '../services/event-dispatch.service';
+import { EventListenService } from '../services/event-listen.service';
 import { EventListenerOn } from './event-listener-on';
 
 describe(EventListenerOn, () => {
   describe('options', () => {
-    class TestEvent extends EventSync {}
+    class TestEvent extends Event {}
     class TestListenOn extends EventListenerOn<TestEvent> {
       listen(): void {
         return;
@@ -22,8 +26,8 @@ describe(EventListenerOn, () => {
     });
   });
 
-  describe(EventSync, () => {
-    class TestEvent extends EventSync<number> {}
+  describe(Event, () => {
+    class TestEvent extends Event<number> {}
     let eventPayload: number | undefined;
 
     class TestListenOn extends EventListenerOn<TestEvent> {
@@ -55,6 +59,32 @@ describe(EventListenerOn, () => {
       const listener = new TestListenOn({ async: true });
       listener.listen(new TestEvent(456));
       expect(eventPayload).toEqual(456);
+    });
+  });
+
+  describe(EventListenerOn.prototype.on.name, () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    class TestEvent extends EventAsync<number, boolean> {}
+
+    class TestListenerOn extends EventListenerOn<TestEvent> {
+      async listen(e: TestEvent): Promise<boolean> {
+        return e.payload > 567;
+      }
+    }
+
+    it('Should call the listener service', () => {
+      EventManager['instance'] = undefined;
+      const ee2 = new EventEmitter2();
+      const listener = new TestListenerOn();
+      const listenService = new EventListenService(ee2);
+      const dispatchService = new EventDispatchService(ee2);
+      const spyListenOn = jest.spyOn(listenService, 'on');
+      EventManager.initialize(dispatchService, listenService);
+      listener.on(TestEvent);
+      expect(spyListenOn).toHaveBeenCalledTimes(1);
     });
   });
 });

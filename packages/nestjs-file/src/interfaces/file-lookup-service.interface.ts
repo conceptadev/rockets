@@ -1,5 +1,5 @@
-import { FileCreatableInterface, FileInterface } from '@concepta/ts-common';
-import { LookupIdInterface, ReferenceId } from '@concepta/ts-core';
+import { FileCreatableInterface, FileInterface } from '@concepta/nestjs-common';
+import { LookupIdInterface, ReferenceId } from '@concepta/nestjs-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 export interface FileLookupServiceInterface

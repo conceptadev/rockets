@@ -1,6 +1,6 @@
 {
   "name": "@concepta/i18n",
-  "version": "5.0.0",
+  "version": "6.0.0-alpha.3",
   "description": "Rockets i18n",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

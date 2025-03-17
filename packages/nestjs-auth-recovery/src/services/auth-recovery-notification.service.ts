@@ -1,5 +1,5 @@
 import { AuthRecoveryNotificationServiceInterface } from '../interfaces/auth-recovery-notification.service.interface';
-import { EmailSendOptionsInterface } from '@concepta/ts-common';
+import { EmailSendOptionsInterface } from '@concepta/nestjs-common';
 import { Inject, Injectable } from '@nestjs/common';
 import {
   AUTH_RECOVERY_MODULE_EMAIL_SERVICE_TOKEN,
@@ -34,39 +34,47 @@ export class AuthRecoveryNotificationService
       baseUrl,
       tokenUrlFormatter = formatTokenUrl,
     } = this.settings.email;
-    const { subject, fileName } = this.settings.email.templates.recoverPassword;
+    const { subject, fileName, logo } =
+      this.settings.email.templates.recoverPassword;
     await this.sendEmail({
       from,
       subject,
       to: email,
       template: fileName,
       context: {
+        logo: `${baseUrl}/${logo}`,
         tokenUrl: tokenUrlFormatter(baseUrl, passcode),
         tokenExp: resetTokenExp,
       },
     });
   }
 
-  async sendPasswordUpdatedSuccefullyEmail(email: string): Promise<void> {
-    const { from } = this.settings.email;
-    const { subject, fileName } = this.settings.email.templates.passwordUpdated;
-    await this.sendEmail({
-      from,
-      subject,
-      to: email,
-      template: fileName,
-    });
-  }
-
-  async sendRecoverLoginEmail(email: string, username: string): Promise<void> {
-    const { from } = this.settings.email;
-    const { subject, fileName } = this.settings.email.templates.recoverLogin;
+  async sendPasswordUpdatedSuccessfullyEmail(email: string): Promise<void> {
+    const { from, baseUrl } = this.settings.email;
+    const { subject, fileName, logo } =
+      this.settings.email.templates.passwordUpdated;
     await this.sendEmail({
       from,
       subject,
       to: email,
       template: fileName,
       context: {
+        logo: `${baseUrl}/${logo}`,
+      },
+    });
+  }
+
+  async sendRecoverLoginEmail(email: string, username: string): Promise<void> {
+    const { from, baseUrl } = this.settings.email;
+    const { subject, fileName, logo } =
+      this.settings.email.templates.recoverLogin;
+    await this.sendEmail({
+      from,
+      subject,
+      to: email,
+      template: fileName,
+      context: {
+        logo: `${baseUrl}/${logo}`,
         login: username,
       },
     });

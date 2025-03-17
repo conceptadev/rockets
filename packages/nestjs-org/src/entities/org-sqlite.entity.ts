@@ -1,5 +1,9 @@
 import { Column } from 'typeorm';
-import { ReferenceIdInterface } from '@concepta/ts-core';
+import {
+  OrgProfileInterface,
+  ReferenceId,
+  ReferenceIdInterface,
+} from '@concepta/nestjs-common';
 import { CommonSqliteEntity } from '@concepta/typeorm-common';
 import { OrgEntityInterface } from '../interfaces/org-entity.interface';
 
@@ -16,5 +20,19 @@ export abstract class OrgSqliteEntity
   @Column('boolean', { default: true })
   active = true;
 
+  /**
+   * Owner Id
+   */
+  @Column('uuid')
+  ownerId!: ReferenceId;
+
+  /**
+   * Owner
+   */
   owner!: ReferenceIdInterface;
+
+  /**
+   * Profile
+   */
+  orgProfile?: OrgProfileInterface;
 }

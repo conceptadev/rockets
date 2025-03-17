@@ -1,7 +1,7 @@
 import {
   ReferenceEmailInterface,
   ReferenceIdInterface,
-} from '@concepta/ts-core';
+} from '@concepta/nestjs-common';
 import { AuthGoogleEmailsInterface } from './auth-google-emails.interface';
 
 export interface AuthGoogleProfileInterface

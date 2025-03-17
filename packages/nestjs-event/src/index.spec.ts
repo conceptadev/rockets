@@ -1,7 +1,7 @@
 import {
   EventModule,
+  EventBase,
   Event,
-  EventSync,
   EventAsync,
   EventListener,
   EventListenerOn,
@@ -17,13 +17,13 @@ describe('Index', () => {
     expect(EventModule).toBeInstanceOf(Function);
   });
   it('Event should be exported', () => {
+    expect(EventBase).toBeInstanceOf(Function);
+  });
+  it('Event should be exported', () => {
     expect(Event).toBeInstanceOf(Function);
   });
   it('EventAsync should be exported', () => {
     expect(EventAsync).toBeInstanceOf(Function);
-  });
-  it('EventSync should be exported', () => {
-    expect(EventSync).toBeInstanceOf(Function);
   });
   it('EventListener should be exported', () => {
     expect(EventListener).toBeInstanceOf(Function);

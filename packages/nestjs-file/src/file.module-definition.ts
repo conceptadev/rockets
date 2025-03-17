@@ -23,6 +23,7 @@ import { FileStrategyService } from './services/file-strategy.service';
 import { fileDefaultConfig } from './config/file-default.config';
 import { FileMutateService } from './services/file-mutate.service';
 import { FileLookupService } from './services/file-lookup.service';
+import { FileMissingEntitiesOptionsException } from './exceptions/file-missing-entities-options.exception';
 
 const RAW_OPTIONS_TOKEN = Symbol('__FILE_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -49,7 +50,7 @@ function definitionTransform(
   const { global = false, entities } = extras;
 
   if (!entities) {
-    throw new Error('You must provide the entities option');
+    throw new FileMissingEntitiesOptionsException();
   }
 
   return {

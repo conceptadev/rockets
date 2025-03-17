@@ -23,6 +23,7 @@ import { OtpSettingsInterface } from './interfaces/otp-settings.interface';
 
 import { OtpService } from './services/otp.service';
 import { otpDefaultConfig } from './config/otp-default.config';
+import { OtpMissingEntitiesOptionsException } from './exceptions/otp-missing-entities-options.exception';
 
 const RAW_OPTIONS_TOKEN = Symbol('__OTP_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -48,7 +49,7 @@ function definitionTransform(
   const { global = false, entities } = extras;
 
   if (!entities) {
-    throw new Error('You must provide the entities option');
+    throw new OtpMissingEntitiesOptionsException();
   }
 
   return {

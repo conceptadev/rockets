@@ -6,7 +6,7 @@ import { Repository } from 'typeorm';
 import { FILE_MODULE_FILE_ENTITY_KEY } from '../file.constants';
 import { FileEntityInterface } from '../interfaces/file-entity.interface';
 import { FileLookupServiceInterface } from '../interfaces/file-lookup-service.interface';
-import { FileInterface } from '@concepta/ts-common';
+import { FileInterface } from '@concepta/nestjs-common';
 import { FileServiceKeyMissingException } from '../exceptions/file-service-key-missing.exception';
 import { FilenameMissingException } from '../exceptions/file-name-missing.exception';
 
