@@ -1,0 +1,21 @@
+{
+  "name": "@concepta/i18n",
+  "version": "6.0.0-alpha.3",
+  "description": "Rockets i18n",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "license": "BSD-3-Clause",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
+  ],
+  "dependencies": {
+    "i18next": "^23.12.2"
+  },
+  "devDependencies": {
+    "i18next-fs-backend": "^2.3.1",
+    "i18next-http-middleware": "^3.6.0"
+  }
+}

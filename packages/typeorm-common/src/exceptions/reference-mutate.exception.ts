@@ -2,6 +2,8 @@ import {
   RuntimeException,
   RuntimeExceptionOptions,
 } from '@concepta/nestjs-exception';
+import { t } from '@concepta/i18n';
+import { REFERENCE_MUTATE_ERROR } from '../constants';
 
 export class ReferenceMutateException extends RuntimeException {
   context: RuntimeException['context'] & {
@@ -10,7 +12,10 @@ export class ReferenceMutateException extends RuntimeException {
 
   constructor(entityName: string, options?: RuntimeExceptionOptions) {
     super({
-      message: 'Error while trying to mutate a %s reference',
+      message: t({
+        key: REFERENCE_MUTATE_ERROR,
+        defaultMessage: 'Error Default while trying to mutate a %s reference',
+      }),
       messageParams: [entityName],
       ...options,
     });
@@ -20,6 +25,6 @@ export class ReferenceMutateException extends RuntimeException {
       entityName,
     };
 
-    this.errorCode = 'REFERENCE_MUTATE_ERROR';
+    this.errorCode = REFERENCE_MUTATE_ERROR;
   }
 }

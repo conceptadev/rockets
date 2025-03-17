@@ -12,6 +12,7 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
+    "@concepta/i18n": "^6.0.0-alpha.3",
     "@concepta/nestjs-access-control": "^6.0.0-alpha.3",
     "@concepta/nestjs-common": "^6.0.0-alpha.3",
     "@concepta/nestjs-crud": "^6.0.0-alpha.3",

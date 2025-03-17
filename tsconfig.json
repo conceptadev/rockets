@@ -93,13 +93,16 @@
       "path": "packages/nestjs-cache"
     },
     {
-      "path": "packages/nestjs-auth-google"
+       "path": "packages/nestjs-auth-google"
     },
     {
       "path": "packages/nestjs-logger-coralogix"
     },
     {
       "path": "packages/nestjs-logger-sentry"
+    },
+    {
+      "path": "packages/i18n"
     },
     {
       "path": "packages/nestjs-file"
