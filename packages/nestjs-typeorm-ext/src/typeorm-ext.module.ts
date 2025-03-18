@@ -95,8 +95,8 @@ export class TypeOrmExtModule extends TypeOrmExtModuleClass {
         createDynamicRepositoryProvider(
           entityKey,
           entity,
-          repositoryFactory,
           dataSource,
+          repositoryFactory,
         ),
       );
     }

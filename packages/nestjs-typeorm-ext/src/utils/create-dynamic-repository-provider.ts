@@ -12,14 +12,15 @@ import { TypeOrmExtEntityOptionInterface } from '../interfaces/typeorm-ext-entit
  *
  * @param key - repository key
  * @param entity - the entity
+ * @param dataSource - the data source
  * @param repositoryFactory - the repository
  * @returns Repository provider
  */
 export function createDynamicRepositoryProvider(
   key: string,
   entity: EntityClassOrSchema,
-  repositoryFactory?: TypeOrmExtEntityOptionInterface['repositoryFactory'],
   dataSource: TypeOrmExtDataSourceToken = TYPEORM_EXT_MODULE_DEFAULT_DATA_SOURCE_NAME,
+  repositoryFactory?: TypeOrmExtEntityOptionInterface['repositoryFactory'],
 ): Provider {
   if (repositoryFactory) {
     return {
