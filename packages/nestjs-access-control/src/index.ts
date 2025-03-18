@@ -27,3 +27,4 @@ export * from './interfaces/access-control-service.interface';
  * COMPAT
  */
 export { ActionEnum as AccessControlAction } from './enums/action.enum';
+export { AccessControllerException } from './exceptions/access-controller.exception';

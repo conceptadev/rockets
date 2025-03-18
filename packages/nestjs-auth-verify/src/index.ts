@@ -11,3 +11,7 @@ export { AuthVerifyEmailServiceInterface } from './interfaces/auth-verify-email.
 export { AuthVerifyUserLookupServiceInterface } from './interfaces/auth-verify-user-lookup.service.interface';
 export { AuthVerifyUserMutateServiceInterface } from './interfaces/auth-verify-user-mutate.service.interface';
 export { AuthVerifyOtpServiceInterface } from './interfaces/auth-verify-otp.service.interface';
+
+// exceptions
+export { AuthVerifyException } from './exceptions/auth-verify.exception';
+export { AuthRecoveryOtpInvalidException } from './exceptions/auth-verify-otp-invalid.exception';
