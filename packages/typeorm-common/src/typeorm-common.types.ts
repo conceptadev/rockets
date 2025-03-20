@@ -1,5 +1,5 @@
-import { EntityManager } from 'typeorm';
+import { EntityManagerInterface } from './interfaces/entity-manager-repository.interface';
 
 export type RunInTransactionCallback<T> = (
-  entityManager: EntityManager | undefined,
+  entityManager: EntityManagerInterface | undefined,
 ) => Promise<T>;

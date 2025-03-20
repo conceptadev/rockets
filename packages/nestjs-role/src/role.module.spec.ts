@@ -14,6 +14,7 @@ import { ROLE_MODULE_ROLE_ENTITY_KEY } from './role.constants';
 
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
 import { RoleEntityFixture } from './__fixtures__/entities/role-entity.fixture';
+import { RepositoryInterface } from '@concepta/typeorm-common';
 
 describe('RoleModule', () => {
   let roleModule: RoleModule;
@@ -22,8 +23,8 @@ describe('RoleModule', () => {
   let roleMutateService: RoleMutateService;
   let roleCrudService: RoleCrudService;
   let roleController: RoleController;
-  let roleEntityRepo: Repository<RoleEntityFixture>;
-  let roleDynamicRepo: Repository<RoleEntityFixture>;
+  let roleEntityRepo: RepositoryInterface<RoleEntityFixture>;
+  let roleDynamicRepo: RepositoryInterface<RoleEntityFixture>;
 
   beforeEach(async () => {
     const testModule: TestingModule = await Test.createTestingModule({
@@ -31,7 +32,7 @@ describe('RoleModule', () => {
     }).compile();
 
     roleModule = testModule.get<RoleModule>(RoleModule);
-    roleEntityRepo = testModule.get<Repository<RoleEntityFixture>>(
+    roleEntityRepo = testModule.get<RepositoryInterface<RoleEntityFixture>>(
       getEntityRepositoryToken(ROLE_MODULE_ROLE_ENTITY_KEY),
     );
     roleDynamicRepo = testModule.get(

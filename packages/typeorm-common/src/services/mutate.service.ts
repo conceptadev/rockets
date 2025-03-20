@@ -1,4 +1,4 @@
-import { DeepPartial, FindOneOptions, Repository } from 'typeorm';
+import { DeepPartial, FindOneOptions } from 'typeorm';
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 import {
@@ -15,6 +15,7 @@ import { ReferenceValidationException } from '../exceptions/reference-validation
 import { ReferenceMutateException } from '../exceptions/reference-mutate.exception';
 import { ReferenceIdNoMatchException } from '../exceptions/reference-id-no-match.exception';
 import { BaseService } from './base.service';
+import { RepositoryInterface } from '../interfaces/repository.interface';
 
 /**
  * Abstract mutate service
@@ -41,7 +42,7 @@ export abstract class MutateService<
    *
    * @param repo - instance of the repo
    */
-  constructor(repo: Repository<Entity>) {
+  constructor(repo: RepositoryInterface<Entity>) {
     super(repo);
   }
 

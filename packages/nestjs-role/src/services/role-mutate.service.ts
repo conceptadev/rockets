@@ -1,6 +1,5 @@
-import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { MutateService } from '@concepta/typeorm-common';
+import { MutateService, RepositoryInterface } from '@concepta/typeorm-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import {
   RoleCreatableInterface,
@@ -34,7 +33,7 @@ export class RoleMutateService
    */
   constructor(
     @InjectDynamicRepository(ROLE_MODULE_ROLE_ENTITY_KEY)
-    repo: Repository<RoleEntityInterface>,
+    repo: RepositoryInterface<RoleEntityInterface>,
   ) {
     super(repo);
   }

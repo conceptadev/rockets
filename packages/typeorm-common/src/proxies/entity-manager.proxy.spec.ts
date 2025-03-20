@@ -1,18 +1,19 @@
-import { EntityManager, Repository } from 'typeorm';
 import { mock } from 'jest-mock-extended';
 import { EntityManagerProxy } from './entity-manager.proxy';
 import { TransactionProxy } from './transaction.proxy';
+import { EntityManagerInterface } from '../interfaces/entity-manager-repository.interface';
+import { RepositoryInterface } from '../interfaces/repository.interface';
 
 class TestEntity {}
 describe(EntityManagerProxy.name, () => {
-  let entityManager: EntityManager;
+  let entityManager: EntityManagerInterface;
   let entityManagerProxy: EntityManagerProxy;
-  let repositoryMock: Repository<TestEntity>;
+  let repositoryMock: RepositoryInterface<TestEntity>;
 
   beforeEach(() => {
-    entityManager = mock<EntityManager>();
+    entityManager = mock<EntityManagerInterface>();
     entityManagerProxy = new EntityManagerProxy(entityManager);
-    repositoryMock = mock<Repository<TestEntity>>();
+    repositoryMock = mock<RepositoryInterface<TestEntity>>();
   });
 
   describe('entityManager()', () => {
@@ -30,7 +31,7 @@ describe(EntityManagerProxy.name, () => {
 
     it('should return a repository from a transaction if transaction option provided', async () => {
       const transactionProxy = mock<TransactionProxy>();
-      const transactionRepository = mock<Repository<TestEntity>>();
+      const transactionRepository = mock<RepositoryInterface<TestEntity>>();
       await transactionProxy.repository(repositoryMock);
 
       jest.spyOn(transactionProxy, 'repository').mockImplementationOnce(() => {

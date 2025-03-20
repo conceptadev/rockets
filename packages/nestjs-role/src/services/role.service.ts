@@ -1,4 +1,3 @@
-import { Repository } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
 import {
   ReferenceAssignment,
@@ -7,6 +6,7 @@ import {
 import {
   QueryOptionsInterface,
   ReferenceLookupException,
+  RepositoryInterface,
   RepositoryProxy,
 } from '@concepta/typeorm-common';
 import { RoleEntityNotFoundException } from '../exceptions/role-entity-not-found.exception';
@@ -32,7 +32,7 @@ export class RoleService implements RoleServiceInterface {
     @Inject(ROLE_MODULE_REPOSITORIES_TOKEN)
     private allRoleRepos: Record<
       string,
-      Repository<RoleAssignmentEntityInterface>
+      RepositoryInterface<RoleAssignmentEntityInterface>
     >,
   ) {}
 
@@ -306,7 +306,7 @@ export class RoleService implements RoleServiceInterface {
    */
   protected getAssignmentRepo(
     assignment: ReferenceAssignment,
-  ): Repository<RoleAssignmentEntityInterface> {
+  ): RepositoryInterface<RoleAssignmentEntityInterface> {
     // have entity key for given assignment?
     if (this.settings.assignments[assignment]) {
       // yes, set it

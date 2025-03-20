@@ -29,3 +29,6 @@ export { TransactionProxy } from './proxies/transaction.proxy';
 
 // testing
 export { createEntityManagerMock } from './testing/utils/create-entity-manager.mock';
+
+// repository interface
+export { RepositoryInterface } from './interfaces/repository.interface';

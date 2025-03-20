@@ -1,7 +1,6 @@
-import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
-import { LookupService } from '@concepta/typeorm-common';
+import { LookupService, RepositoryInterface } from '@concepta/typeorm-common';
 
 import { ORG_MODULE_ORG_MEMBER_ENTITY_KEY } from '../org.constants';
 import { OrgMemberEntityInterface } from '../interfaces/org-member-entity.interface';
@@ -17,7 +16,7 @@ export class OrgMemberLookupService
 {
   constructor(
     @InjectDynamicRepository(ORG_MODULE_ORG_MEMBER_ENTITY_KEY)
-    repo: Repository<OrgMemberEntityInterface>,
+    repo: RepositoryInterface<OrgMemberEntityInterface>,
   ) {
     super(repo);
   }

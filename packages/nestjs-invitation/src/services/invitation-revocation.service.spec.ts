@@ -1,4 +1,3 @@
-import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
@@ -16,6 +15,7 @@ import { InvitationEntityInterface } from '../interfaces/domain/invitation-entit
 import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
 import { InvitationEntityFixture } from '../__fixtures__/invitation/entities/invitation.entity.fixture';
 import { UserEntityFixture } from '../__fixtures__/user/entities/user.entity.fixture';
+import { RepositoryInterface } from '@concepta/typeorm-common';
 
 describe(InvitationRevocationService, () => {
   const category = INVITATION_MODULE_CATEGORY_USER_KEY;
@@ -23,7 +23,7 @@ describe(InvitationRevocationService, () => {
   let app: INestApplication;
   let seedingSource: SeedingSource;
   let otpService: OtpService;
-  let invitationRepo: Repository<InvitationEntityInterface>;
+  let invitationRepo: RepositoryInterface<InvitationEntityInterface>;
   let invitationRevocationService: InvitationRevocationService;
 
   let testUser: UserEntityInterface;
@@ -36,9 +36,9 @@ describe(InvitationRevocationService, () => {
     app = testingModule.createNestApplication();
     await app.init();
 
-    invitationRepo = testingModule.get<Repository<InvitationEntityInterface>>(
-      getDynamicRepositoryToken(INVITATION_MODULE_INVITATION_ENTITY_KEY),
-    );
+    invitationRepo = testingModule.get<
+      RepositoryInterface<InvitationEntityInterface>
+    >(getDynamicRepositoryToken(INVITATION_MODULE_INVITATION_ENTITY_KEY));
 
     invitationRevocationService =
       testingModule.get<InvitationRevocationService>(
@@ -95,6 +95,7 @@ describe(InvitationRevocationService, () => {
         category,
       });
 
+      // TODO: TYPEORM - review if we need count
       const countAfter = await invitationRepo.count();
 
       expect(countAfter).toEqual(0);

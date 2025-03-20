@@ -16,6 +16,7 @@ export class RoleCrudService extends TypeOrmCrudService<RoleEntityInterface> {
    * @param roleRepo - instance of the role repository.
    */
   constructor(
+    // TODO: TYPEORM - TypeOrmCrudService uses typeorm repository
     @InjectDynamicRepository(ROLE_MODULE_ROLE_ENTITY_KEY)
     roleRepo: Repository<RoleEntityInterface>,
   ) {

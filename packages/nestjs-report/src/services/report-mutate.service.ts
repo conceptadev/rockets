@@ -1,8 +1,7 @@
 import { ReportCreatableInterface } from '@concepta/nestjs-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
-import { MutateService } from '@concepta/typeorm-common';
+import { MutateService, RepositoryInterface } from '@concepta/typeorm-common';
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
 import { ReportEntityInterface } from '../interfaces/report-entity.interface';
 
 import { ReportUpdatableInterface } from '@concepta/nestjs-common';
@@ -33,7 +32,7 @@ export class ReportMutateService
    */
   constructor(
     @InjectDynamicRepository(REPORT_MODULE_REPORT_ENTITY_KEY)
-    repo: Repository<ReportEntityInterface>,
+    repo: RepositoryInterface<ReportEntityInterface>,
   ) {
     super(repo);
   }

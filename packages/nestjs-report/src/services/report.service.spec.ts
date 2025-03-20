@@ -1,6 +1,5 @@
 import { randomUUID } from 'crypto';
 import { mock } from 'jest-mock-extended';
-import { Repository } from 'typeorm';
 import {
   ReportCreatableInterface,
   ReportStatusEnum,
@@ -13,6 +12,7 @@ import { ReportStrategyService } from './report-strategy.service';
 import { ReportService } from './report.service';
 import { ReportMutateService } from './report-mutate.service';
 import { ReportLookupService } from './report-lookup.service';
+import { RepositoryInterface } from '@concepta/typeorm-common';
 
 const mockReport: ReportEntityInterface = {
   id: randomUUID(),
@@ -35,7 +35,7 @@ const mockReportCreateDto: ReportCreateDto = {
 
 describe(ReportService.name, () => {
   let reportService: ReportService;
-  let reportRepo: jest.Mocked<Repository<ReportEntityInterface>>;
+  let reportRepo: jest.Mocked<RepositoryInterface<ReportEntityInterface>>;
   let reportStrategyService: jest.Mocked<ReportStrategyService>;
   let reportMutateService: ReportMutateService;
   let reportLookupService: ReportLookupService;
@@ -180,9 +180,9 @@ describe(ReportService.name, () => {
 });
 
 function createMockRepository(): jest.Mocked<
-  Repository<ReportEntityInterface>
+  RepositoryInterface<ReportEntityInterface>
 > {
-  return mock<Repository<ReportEntityInterface>>({
+  return mock<RepositoryInterface<ReportEntityInterface>>({
     findOne: jest.fn().mockResolvedValue(mockReport),
     create: jest.fn().mockReturnValue(mockReport),
     save: jest.fn().mockResolvedValue(mockReport),

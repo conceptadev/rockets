@@ -1,4 +1,4 @@
-import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
+import { FindManyOptions, FindOneOptions } from 'typeorm';
 import { ReferenceIdInterface } from '@concepta/nestjs-common';
 
 import { QueryOptionsInterface } from '../interfaces/query-options.interface';
@@ -7,6 +7,7 @@ import { SafeTransactionOptionsInterface } from '../interfaces/safe-transaction-
 import { ReferenceLookupException } from '../exceptions/reference-lookup.exception';
 import { RepositoryProxy } from '../proxies/repository.proxy';
 import { TransactionProxy } from '../proxies/transaction.proxy';
+import { RepositoryInterface } from '../interfaces/repository.interface';
 
 /**
  * Abstract service
@@ -19,7 +20,7 @@ export abstract class BaseService<Entity extends ReferenceIdInterface> {
    *
    * @param repo - instance of the repo
    */
-  constructor(private repo: Repository<Entity>) {
+  constructor(private repo: RepositoryInterface<Entity>) {
     this.repositoryProxy = new RepositoryProxy(repo);
   }
 
@@ -59,6 +60,7 @@ export abstract class BaseService<Entity extends ReferenceIdInterface> {
       return this.repository(queryOptions).findOne(options);
     } catch (e) {
       // fatal orm error
+      // TODO: remove metadata
       throw new ReferenceLookupException(this.metadata.name, {
         originalError: e,
       });
@@ -70,7 +72,9 @@ export abstract class BaseService<Entity extends ReferenceIdInterface> {
    *
    * @param queryOptions - Options
    */
-  public repository(queryOptions?: QueryOptionsInterface): Repository<Entity> {
+  public repository(
+    queryOptions?: QueryOptionsInterface,
+  ): RepositoryInterface<Entity> {
     return this.repositoryProxy.repository(queryOptions);
   }
 

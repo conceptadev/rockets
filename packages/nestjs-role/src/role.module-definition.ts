@@ -35,6 +35,7 @@ import { RoleAssignmentController } from './role-assignment.controller';
 import { RoleAssignmentCrudService } from './services/role-assignment-crud.service';
 import { roleDefaultConfig } from './config/role-default.config';
 import { RoleMissingEntitiesOptionsException } from './exceptions/role-missing-entities-options.exception';
+import { RepositoryInterface } from '@concepta/typeorm-common';
 
 const RAW_OPTIONS_TOKEN = Symbol('__ROLE_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -145,7 +146,7 @@ export function createRoleLookupServiceProvider(
     ],
     useFactory: async (
       options: RoleOptionsInterface,
-      roleRepo: Repository<RoleEntityInterface>,
+      roleRepo: RepositoryInterface<RoleEntityInterface>,
     ) =>
       optionsOverrides?.roleLookupService ??
       options.roleLookupService ??
@@ -164,7 +165,7 @@ export function createRoleMutateServiceProvider(
     ],
     useFactory: async (
       options: RoleOptionsInterface,
-      roleRepo: Repository<RoleEntityInterface>,
+      roleRepo: RepositoryInterface<RoleEntityInterface>,
     ) =>
       optionsOverrides?.roleMutateService ??
       options.roleMutateService ??
@@ -190,10 +191,11 @@ export function createRoleRepositoriesProviders(
   return [
     {
       provide: ROLE_MODULE_REPOSITORIES_TOKEN,
-      useFactory: (...args: Repository<RoleAssignmentInterface>[]) => {
+
+      useFactory: (...args: RepositoryInterface<RoleAssignmentInterface>[]) => {
         const repoInstances: Record<
           string,
-          Repository<RoleAssignmentInterface>
+          RepositoryInterface<RoleAssignmentInterface>
         > = {};
 
         for (const entityKey in entities) {
@@ -205,6 +207,7 @@ export function createRoleRepositoriesProviders(
       inject: reposToInject,
     },
     {
+      // TODO: TYPEORM CRUD NEEDS TYPEORM
       provide: ROLE_MODULE_CRUD_SERVICES_TOKEN,
       useFactory: (...args: Repository<RoleAssignmentInterface>[]) => {
         const serviceInstances: Record<string, RoleAssignmentCrudService> = {};

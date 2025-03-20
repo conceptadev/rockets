@@ -12,7 +12,9 @@ import { CrudQueryOptionsInterface } from '../interfaces/crud-query-options.inte
 import { CrudResponsePaginatedInterface } from '../interfaces/crud-response-paginated.interface';
 import { CrudQueryException } from '../exceptions/crud-query.exception';
 import { ParsedRequestParams, QueryJoin } from '@nestjsx/crud-request';
+import { EntityManagerInterface } from '@concepta/typeorm-common/dist/interfaces/entity-manager-repository.interface';
 
+// TODO: TYPEORM - review what to do
 @Injectable()
 export class TypeOrmCrudService<
   T extends ObjectLiteral,
@@ -169,7 +171,11 @@ export class TypeOrmCrudService<
   }
 
   transaction(options?: SafeTransactionOptionsInterface): TransactionProxy {
-    return new TransactionProxy(this.repo.manager, options);
+    // TODO: TYPEORM: this manager is from repository of typeorm because class exends crud typeorm
+    return new TransactionProxy(
+      this.repo.manager as EntityManagerInterface,
+      options,
+    );
   }
 
   protected setJoin(

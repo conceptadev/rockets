@@ -1,11 +1,14 @@
-import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import {
   ReferenceEmail,
   ReferenceSubject,
   ReferenceUsername,
 } from '@concepta/nestjs-common';
-import { LookupService, QueryOptionsInterface } from '@concepta/typeorm-common';
+import {
+  LookupService,
+  QueryOptionsInterface,
+  RepositoryInterface,
+} from '@concepta/typeorm-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 
 import { USER_MODULE_USER_ENTITY_KEY } from '../user.constants';
@@ -27,7 +30,7 @@ export class UserLookupService
    */
   constructor(
     @InjectDynamicRepository(USER_MODULE_USER_ENTITY_KEY)
-    repo: Repository<UserEntityInterface>,
+    repo: RepositoryInterface<UserEntityInterface>,
   ) {
     super(repo);
   }

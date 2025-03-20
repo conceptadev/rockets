@@ -5,12 +5,13 @@ import { getDynamicRepositoryToken } from '@concepta/nestjs-typeorm-ext';
 import { UserController } from '@concepta/nestjs-user';
 import { AppModule } from './app.module';
 import { UserEntity } from './user/user.entity';
+import { RepositoryInterface } from '@concepta/typeorm-common';
 
 describe('AppModule', () => {
   let userModule: UserModule;
   let userLookupService: UserLookupService;
   let userController: UserController;
-  let userRepo: Repository<UserEntity>;
+  let userRepo: RepositoryInterface<UserEntity>;
 
   beforeEach(async () => {
     const testModule: TestingModule = await Test.createTestingModule({

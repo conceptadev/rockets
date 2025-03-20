@@ -1,9 +1,9 @@
 import { Logger } from '@nestjs/common';
-import { EntityManager } from 'typeorm';
 
 import { SafeTransactionOptionsInterface } from '../interfaces/safe-transaction-options.interface';
 import { RunInTransactionCallback } from '../typeorm-common.types';
 import { RuntimeException } from '@concepta/nestjs-exception';
+import { EntityManagerInterface } from '../interfaces/entity-manager-repository.interface';
 
 /**
  * Safe transaction wrapper.
@@ -19,7 +19,7 @@ import { RuntimeException } from '@concepta/nestjs-exception';
  * @param options - Options
  */
 export async function safeTransaction<T>(
-  entityManager: EntityManager,
+  entityManager: EntityManagerInterface,
   runInTransaction: RunInTransactionCallback<T>,
   options: SafeTransactionOptionsInterface = { strict: true },
 ): Promise<T> {

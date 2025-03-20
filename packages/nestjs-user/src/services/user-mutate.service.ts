@@ -1,6 +1,6 @@
-import { DeepPartial, Repository } from 'typeorm';
+import { DeepPartial } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { MutateService } from '@concepta/typeorm-common';
+import { MutateService, RepositoryInterface } from '@concepta/typeorm-common';
 import {
   PasswordPlainInterface,
   UserCreatableInterface,
@@ -38,7 +38,7 @@ export class UserMutateService
    */
   constructor(
     @InjectDynamicRepository(USER_MODULE_USER_ENTITY_KEY)
-    repo: Repository<UserEntityInterface>,
+    repo: RepositoryInterface<UserEntityInterface>,
     protected readonly userPasswordService: UserPasswordService,
   ) {
     super(repo);

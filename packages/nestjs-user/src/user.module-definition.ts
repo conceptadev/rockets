@@ -1,4 +1,3 @@
-import { Repository } from 'typeorm';
 import {
   ConfigurableModuleBuilder,
   DynamicModule,
@@ -38,6 +37,7 @@ import { UserController } from './user.controller';
 import { InvitationAcceptedListener } from './listeners/invitation-accepted-listener';
 import { userDefaultConfig } from './config/user-default.config';
 import { UserMissingEntitiesOptionsException } from './exceptions/user-missing-entities-options.exception';
+import { RepositoryInterface } from '@concepta/typeorm-common';
 
 const RAW_OPTIONS_TOKEN = Symbol('__USER_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -153,7 +153,7 @@ export function createUserLookupServiceProvider(
     ],
     useFactory: async (
       options: UserOptionsInterface,
-      userRepo: Repository<UserEntityInterface>,
+      userRepo: RepositoryInterface<UserEntityInterface>,
     ) =>
       optionsOverrides?.userLookupService ??
       options.userLookupService ??
@@ -173,7 +173,7 @@ export function createUserMutateServiceProvider(
     ],
     useFactory: async (
       options: UserOptionsInterface,
-      userRepo: Repository<UserEntityInterface>,
+      userRepo: RepositoryInterface<UserEntityInterface>,
       userPasswordService: UserPasswordService,
     ) =>
       optionsOverrides?.userMutateService ??
@@ -226,7 +226,7 @@ export function createUserPasswordHistoryLookupServiceProvider(): Provider {
     ],
     useFactory: async (
       settings: UserSettingsInterface,
-      userPasswordHistoryRepoToken?: Repository<UserPasswordHistoryEntityInterface>,
+      userPasswordHistoryRepoToken?: RepositoryInterface<UserPasswordHistoryEntityInterface>,
     ) => {
       if (
         settings?.passwordHistory?.enabled === true &&
@@ -254,7 +254,7 @@ export function createUserPasswordHistoryMutateServiceProvider(): Provider {
     ],
     useFactory: async (
       settings: UserSettingsInterface,
-      userPasswordHistoryRepoToken?: Repository<UserPasswordHistoryEntityInterface>,
+      userPasswordHistoryRepoToken?: RepositoryInterface<UserPasswordHistoryEntityInterface>,
     ) => {
       if (
         settings?.passwordHistory?.enabled === true &&
@@ -294,7 +294,7 @@ export function createUserPasswordHistoryServiceProvider(
     useFactory: async (
       options: UserOptionsInterface,
       settings: UserSettingsInterface,
-      userPasswordHistoryRepoToken?: Repository<UserPasswordHistoryEntityInterface>,
+      userPasswordHistoryRepoToken?: RepositoryInterface<UserPasswordHistoryEntityInterface>,
       userPasswordHistoryLookupService?: UserPasswordHistoryLookupService,
       userPasswordHistoryMutateService?: UserPasswordHistoryMutateService,
     ) => {

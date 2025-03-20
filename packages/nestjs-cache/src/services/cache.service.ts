@@ -1,6 +1,6 @@
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { DeepPartial, Repository } from 'typeorm';
+import { DeepPartial } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
 import {
   CacheInterface,
@@ -16,6 +16,7 @@ import {
   ReferenceLookupException,
   ReferenceMutateException,
   ReferenceValidationException,
+  RepositoryInterface,
   RepositoryProxy,
 } from '@concepta/typeorm-common';
 import {
@@ -34,7 +35,7 @@ import { CacheAssignmentNotFoundException } from '../exceptions/cache-assignment
 export class CacheService implements CacheServiceInterface {
   constructor(
     @Inject(CACHE_MODULE_REPOSITORIES_TOKEN)
-    private allCacheRepos: Record<string, Repository<CacheInterface>>,
+    private allCacheRepos: Record<string, RepositoryInterface<CacheInterface>>,
     @Inject(CACHE_MODULE_SETTINGS_TOKEN)
     protected readonly settings: CacheSettingsInterface,
   ) {}
@@ -326,7 +327,7 @@ export class CacheService implements CacheServiceInterface {
    */
   protected getAssignmentRepo(
     assignment: ReferenceAssignment,
-  ): Repository<CacheInterface> {
+  ): RepositoryInterface<CacheInterface> {
     if (this.settings.assignments[assignment]) {
       // get entity key based on assignment
       const entityKey = this.settings.assignments[assignment].entityKey;

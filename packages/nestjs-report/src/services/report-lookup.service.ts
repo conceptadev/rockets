@@ -1,7 +1,10 @@
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
-import { LookupService, QueryOptionsInterface } from '@concepta/typeorm-common';
+import {
+  LookupService,
+  QueryOptionsInterface,
+  RepositoryInterface,
+} from '@concepta/typeorm-common';
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
 
 import { REPORT_MODULE_REPORT_ENTITY_KEY } from '../report.constants';
 import { ReportEntityInterface } from '../interfaces/report-entity.interface';
@@ -22,7 +25,7 @@ export class ReportLookupService
 {
   constructor(
     @InjectDynamicRepository(REPORT_MODULE_REPORT_ENTITY_KEY)
-    repo: Repository<ReportEntityInterface>,
+    repo: RepositoryInterface<ReportEntityInterface>,
   ) {
     super(repo);
   }

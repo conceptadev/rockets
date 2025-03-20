@@ -1,3 +1,4 @@
+import { Repository } from 'typeorm';
 import {
   getDynamicRepositoryToken,
   getEntityRepositoryToken,
@@ -5,7 +6,6 @@ import {
 } from '@concepta/nestjs-typeorm-ext';
 import { DynamicModule, ModuleMetadata } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { Repository } from 'typeorm';
 
 import { FileService } from './services/file.service';
 

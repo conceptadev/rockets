@@ -1,7 +1,10 @@
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
-import { LookupService, QueryOptionsInterface } from '@concepta/typeorm-common';
+import {
+  LookupService,
+  QueryOptionsInterface,
+  RepositoryInterface,
+} from '@concepta/typeorm-common';
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
 
 import { FILE_MODULE_FILE_ENTITY_KEY } from '../file.constants';
 import { FileEntityInterface } from '../interfaces/file-entity.interface';
@@ -20,7 +23,7 @@ export class FileLookupService
 {
   constructor(
     @InjectDynamicRepository(FILE_MODULE_FILE_ENTITY_KEY)
-    repo: Repository<FileEntityInterface>,
+    repo: RepositoryInterface<FileEntityInterface>,
   ) {
     super(repo);
   }

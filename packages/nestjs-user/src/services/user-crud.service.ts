@@ -16,6 +16,7 @@ export class UserCrudService extends TypeOrmCrudService<UserEntityInterface> {
    * @param userRepo - instance of the user repository.
    */
   constructor(
+    // TODO: TYPEORM - tpeorm crud service uses a service ties to typeorm
     @InjectDynamicRepository(USER_MODULE_USER_ENTITY_KEY)
     protected readonly userRepo: Repository<UserEntityInterface>,
   ) {

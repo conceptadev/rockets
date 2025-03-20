@@ -1,6 +1,5 @@
-import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { MutateService } from '@concepta/typeorm-common';
+import { MutateService, RepositoryInterface } from '@concepta/typeorm-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import { FileCreatableInterface } from '@concepta/nestjs-common';
 import { FileEntityInterface } from '../interfaces/file-entity.interface';
@@ -31,7 +30,7 @@ export class FileMutateService
    */
   constructor(
     @InjectDynamicRepository(FILE_MODULE_FILE_ENTITY_KEY)
-    repo: Repository<FileEntityInterface>,
+    repo: RepositoryInterface<FileEntityInterface>,
   ) {
     super(repo);
   }

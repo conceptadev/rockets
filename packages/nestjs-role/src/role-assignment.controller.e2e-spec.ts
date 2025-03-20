@@ -1,6 +1,5 @@
 import assert from 'assert';
 import supertest from 'supertest';
-import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
@@ -17,11 +16,12 @@ import { AppModuleFixture } from './__fixtures__/app.module.fixture';
 import { RoleEntityFixture } from './__fixtures__/entities/role-entity.fixture';
 import { UserFactoryFixture } from './__fixtures__/factories/user.factory.fixture';
 import { UserRoleFactoryFixture } from './__fixtures__/factories/user-role.factory.fixture';
+import { RepositoryInterface } from '@concepta/typeorm-common';
 
 describe('RoleAssignmentController (e2e)', () => {
   let app: INestApplication;
   let seedingSource: SeedingSource;
-  let roleRepo: Repository<RoleEntityFixture>;
+  let roleRepo: RepositoryInterface<RoleEntityFixture>;
   let userFactory: UserFactoryFixture;
   let userRoleFactory: UserRoleFactoryFixture;
 
