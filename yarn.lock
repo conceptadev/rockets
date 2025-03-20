@@ -1439,6 +1439,7 @@ __metadata:
     "@concepta/nestjs-password": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-typeorm-ext": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-user": "npm:^6.0.0-alpha.3"
+    "@concepta/typeorm-common": "npm:^6.0.0-alpha.3"
     "@nestjs-modules/mailer": "npm:^1.11.2"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/core": "npm:^10.4.1"
