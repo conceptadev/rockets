@@ -24,13 +24,14 @@ import {
   FILE_NAME_FIXTURE,
   UPLOAD_URL_FIXTURE,
 } from './__fixtures__/constants.fixture';
+import { RepositoryInterface } from '@concepta/typeorm-common';
 
 describe(FileModule, () => {
   let testModule: TestingModule;
   let fileModule: FileModule;
   let fileService: FileService;
-  let fileEntityRepo: Repository<FileEntityInterface>;
-  let fileDynamicRepo: Repository<FileEntityInterface>;
+  let fileEntityRepo: RepositoryInterface<FileEntityInterface>;
+  let fileDynamicRepo: RepositoryInterface<FileEntityInterface>;
 
   describe(FileModule.forRoot, () => {
     beforeEach(async () => {
@@ -138,7 +139,7 @@ describe(FileModule, () => {
   const commonVars = () => {
     fileModule = testModule.get(FileModule);
     fileService = testModule.get(FileService);
-    fileEntityRepo = testModule.get<Repository<FileEntityFixture>>(
+    fileEntityRepo = testModule.get<RepositoryInterface<FileEntityFixture>>(
       getEntityRepositoryToken(FILE_MODULE_FILE_ENTITY_KEY),
     );
     fileDynamicRepo = testModule.get(
