@@ -1,7 +1,7 @@
 import { mock } from 'jest-mock-extended';
 import { EntityManagerProxy } from './entity-manager.proxy';
 import { TransactionProxy } from './transaction.proxy';
-import { EntityManagerInterface } from '../interfaces/entity-manager-repository.interface';
+import { EntityManagerInterface } from '../interfaces/entity-manager.interface';
 import { RepositoryInterface } from '../interfaces/repository.interface';
 
 class TestEntity {}

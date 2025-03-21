@@ -1,4 +1,4 @@
-import { EntityManagerInterface } from './entity-manager-repository.interface';
+import { EntityManagerInterface } from './entity-manager.interface';
 
 export interface EntityManagerOptionInterface {
   entityManager?: EntityManagerInterface;

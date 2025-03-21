@@ -1,4 +1,4 @@
-import { EntityManagerInterface } from './interfaces/entity-manager-repository.interface';
+import { EntityManagerInterface } from './interfaces/entity-manager.interface';
 
 export type RunInTransactionCallback<T> = (
   entityManager: EntityManagerInterface | undefined,

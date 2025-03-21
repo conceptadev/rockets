@@ -26,7 +26,7 @@ import { AuthVerifyController } from './auth-verify.controller';
 import { AuthVerifyService } from './services/auth-verify.service';
 import { AuthVerifyNotificationService } from './services/auth-verify-notification.service';
 import { AuthVerifyEmailServiceInterface } from './interfaces/auth-verify-email.service.interface';
-import { EntityManagerInterface } from '@concepta/typeorm-common/dist/interfaces/entity-manager-repository.interface';
+import { EntityManagerInterface } from '@concepta/typeorm-common';
 
 const RAW_OPTIONS_TOKEN = Symbol('__AUTH_VERIFY_MODULE_RAW_OPTIONS_TOKEN__');
 

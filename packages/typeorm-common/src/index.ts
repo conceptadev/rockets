@@ -32,3 +32,4 @@ export { createEntityManagerMock } from './testing/utils/create-entity-manager.m
 
 // repository interface
 export { RepositoryInterface } from './interfaces/repository.interface';
+export { EntityManagerInterface } from './interfaces/entity-manager.interface';

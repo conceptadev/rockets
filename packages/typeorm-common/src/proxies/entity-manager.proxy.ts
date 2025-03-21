@@ -3,7 +3,7 @@ import { QueryOptionsInterface } from '../interfaces/query-options.interface';
 import { SafeTransactionOptionsInterface } from '../interfaces/safe-transaction-options.interface';
 import { TransactionProxy } from './transaction.proxy';
 import { RepositoryInterface } from '../interfaces/repository.interface';
-import { EntityManagerInterface } from '../interfaces/entity-manager-repository.interface';
+import { EntityManagerInterface } from '../interfaces/entity-manager.interface';
 import { ObjectLiteral } from 'typeorm';
 
 export class EntityManagerProxy {

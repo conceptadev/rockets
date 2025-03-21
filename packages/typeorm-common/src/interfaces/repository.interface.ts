@@ -1,5 +1,5 @@
 import { ObjectLiteral, Repository } from 'typeorm';
-import { EntityManagerInterface } from './entity-manager-repository.interface';
+import { EntityManagerInterface } from './entity-manager.interface';
 
 export interface RepositoryInterface<Entity extends ObjectLiteral>
   extends Pick<

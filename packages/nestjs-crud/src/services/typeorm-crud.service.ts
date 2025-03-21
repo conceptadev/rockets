@@ -12,7 +12,7 @@ import { CrudQueryOptionsInterface } from '../interfaces/crud-query-options.inte
 import { CrudResponsePaginatedInterface } from '../interfaces/crud-response-paginated.interface';
 import { CrudQueryException } from '../exceptions/crud-query.exception';
 import { ParsedRequestParams, QueryJoin } from '@nestjsx/crud-request';
-import { EntityManagerInterface } from '@concepta/typeorm-common/dist/interfaces/entity-manager-repository.interface';
+import { EntityManagerInterface } from '@concepta/typeorm-common';
 
 // TODO: TYPEORM - review what to do
 @Injectable()

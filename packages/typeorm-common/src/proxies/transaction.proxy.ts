@@ -3,7 +3,7 @@ import { SafeTransactionOptionsInterface } from '../interfaces/safe-transaction-
 import { RunInTransactionCallback } from '../typeorm-common.types';
 import { safeTransaction } from '../utils/safe-transaction.util';
 import { RepositoryInterface } from '../interfaces/repository.interface';
-import { EntityManagerInterface } from '../interfaces/entity-manager-repository.interface';
+import { EntityManagerInterface } from '../interfaces/entity-manager.interface';
 import { ObjectLiteral } from 'typeorm';
 
 type TransactionCallback<T> =

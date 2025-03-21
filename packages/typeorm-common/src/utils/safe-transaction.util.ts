@@ -3,7 +3,7 @@ import { Logger } from '@nestjs/common';
 import { SafeTransactionOptionsInterface } from '../interfaces/safe-transaction-options.interface';
 import { RunInTransactionCallback } from '../typeorm-common.types';
 import { RuntimeException } from '@concepta/nestjs-exception';
-import { EntityManagerInterface } from '../interfaces/entity-manager-repository.interface';
+import { EntityManagerInterface } from '../interfaces/entity-manager.interface';
 
 /**
  * Safe transaction wrapper.
