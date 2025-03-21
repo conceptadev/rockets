@@ -1,4 +1,3 @@
-import { Repository } from 'typeorm';
 import { Inject } from '@nestjs/common';
 import {
   LiteralObject,
@@ -6,7 +5,11 @@ import {
 } from '@concepta/nestjs-common';
 import { InvitationInterface } from '@concepta/nestjs-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
-import { BaseService, QueryOptionsInterface } from '@concepta/typeorm-common';
+import {
+  BaseService,
+  QueryOptionsInterface,
+  RepositoryInterface,
+} from '@concepta/typeorm-common';
 
 import {
   INVITATION_MODULE_EMAIL_SERVICE_TOKEN,
@@ -31,7 +34,7 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
     @Inject(INVITATION_MODULE_SETTINGS_TOKEN)
     private readonly settings: InvitationSettingsInterface,
     @InjectDynamicRepository(INVITATION_MODULE_INVITATION_ENTITY_KEY)
-    invitationRepo: Repository<InvitationEntityInterface>,
+    invitationRepo: RepositoryInterface<InvitationEntityInterface>,
     @Inject(INVITATION_MODULE_EMAIL_SERVICE_TOKEN)
     private readonly emailService: InvitationEmailServiceInterface,
     @Inject(INVITATION_MODULE_OTP_SERVICE_TOKEN)

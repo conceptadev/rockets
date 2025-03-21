@@ -1,6 +1,5 @@
-import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { LookupService } from '@concepta/typeorm-common';
+import { LookupService, RepositoryInterface } from '@concepta/typeorm-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 
 import { InvitationEntityInterface } from '../interfaces/domain/invitation-entity.interface';
@@ -22,7 +21,7 @@ export class InvitationLookupService
    */
   constructor(
     @InjectDynamicRepository(INVITATION_MODULE_INVITATION_ENTITY_KEY)
-    repo: Repository<InvitationEntityInterface>,
+    repo: RepositoryInterface<InvitationEntityInterface>,
   ) {
     super(repo);
   }

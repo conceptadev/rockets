@@ -1,5 +1,4 @@
 import { randomUUID } from 'crypto';
-import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
@@ -16,6 +15,7 @@ import { InvitationSettingsInterface } from '../interfaces/options/invitation-se
 import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
 import { UserEntityFixture } from '../__fixtures__/user/entities/user.entity.fixture';
 import { UserOtpEntityFixture } from '../__fixtures__/user/entities/user-otp.entity.fixture';
+import { RepositoryInterface } from '@concepta/typeorm-common';
 
 describe(InvitationSendService, () => {
   let spyEmailService: jest.SpyInstance;
@@ -23,7 +23,7 @@ describe(InvitationSendService, () => {
   let app: INestApplication;
   let seedingSource: SeedingSource;
   let settings: InvitationSettingsInterface;
-  let userOtpRepo: Repository<UserOtpEntityFixture>;
+  let userOtpRepo: RepositoryInterface<UserOtpEntityFixture>;
   let invitationSendService: InvitationSendService;
 
   let testUser: UserEntityInterface;
@@ -43,7 +43,7 @@ describe(InvitationSendService, () => {
       INVITATION_MODULE_SETTINGS_TOKEN,
     );
 
-    userOtpRepo = testingModule.get<Repository<UserOtpEntityFixture>>(
+    userOtpRepo = testingModule.get<RepositoryInterface<UserOtpEntityFixture>>(
       getDynamicRepositoryToken('user-otp'),
     );
 

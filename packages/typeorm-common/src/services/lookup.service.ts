@@ -3,9 +3,10 @@ import {
   ReferenceId,
   ReferenceIdInterface,
 } from '@concepta/nestjs-common';
-import { FindOneOptions, Repository } from 'typeorm';
+import { FindOneOptions } from 'typeorm';
 import { QueryOptionsInterface } from '../interfaces/query-options.interface';
 import { BaseService } from './base.service';
+import { RepositoryInterface } from '../interfaces/repository.interface';
 
 /**
  * Abstract lookup service
@@ -19,7 +20,7 @@ export abstract class LookupService<Entity extends ReferenceIdInterface>
    *
    * @param repo - instance of the repo
    */
-  constructor(repo: Repository<Entity>) {
+  constructor(repo: RepositoryInterface<Entity>) {
     super(repo);
   }
 

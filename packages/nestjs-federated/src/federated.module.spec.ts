@@ -34,6 +34,7 @@ import { UserEntityFixture } from './__fixtures__/user/entities/user.entity.fixt
 import { UserLookupServiceFixture } from './__fixtures__/user/services/user-lookup.service.fixture';
 import { UserMutateServiceFixture } from './__fixtures__/user/services/user-mutate.service.fixture';
 import { FederatedEntityFixture } from './__fixtures__/federated/federated-entity.fixture';
+import { RepositoryInterface } from '@concepta/typeorm-common';
 
 describe(FederatedModule, () => {
   let testModule: TestingModule;
@@ -42,8 +43,8 @@ describe(FederatedModule, () => {
   let federatedOauthService: FederatedOAuthService;
   let userLookupService: FederatedUserLookupServiceInterface;
   let userMutateService: FederatedUserMutateServiceInterface;
-  let federatedEntityRepo: Repository<FederatedEntityInterface>;
-  let federatedDynamicRepo: Repository<FederatedEntityInterface>;
+  let federatedEntityRepo: RepositoryInterface<FederatedEntityInterface>;
+  let federatedDynamicRepo: RepositoryInterface<FederatedEntityInterface>;
   let federatedMutateService: FederatedMutateService;
 
   describe(FederatedModule.forRoot, () => {
@@ -232,9 +233,9 @@ describe(FederatedModule, () => {
     userMutateService = testModule.get<FederatedUserMutateServiceInterface>(
       UserMutateServiceFixture,
     );
-    federatedEntityRepo = testModule.get<Repository<FederatedEntityFixture>>(
-      getEntityRepositoryToken(FEDERATED_MODULE_FEDERATED_ENTITY_KEY),
-    );
+    federatedEntityRepo = testModule.get<
+      RepositoryInterface<FederatedEntityFixture>
+    >(getEntityRepositoryToken(FEDERATED_MODULE_FEDERATED_ENTITY_KEY));
     federatedDynamicRepo = testModule.get(
       getDynamicRepositoryToken(FEDERATED_MODULE_FEDERATED_ENTITY_KEY),
     );

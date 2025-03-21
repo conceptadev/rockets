@@ -20,6 +20,7 @@ import { UserAccessQueryService } from './services/user-access-query.service';
 
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
 import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
+import { RepositoryInterface } from '@concepta/typeorm-common';
 
 describe('AppModule', () => {
   let testModule: TestingModule;
@@ -33,8 +34,8 @@ describe('AppModule', () => {
   let userPasswordHistoryMutateService: UserPasswordHistoryMutateService;
   let userAccessQueryService: UserAccessQueryService;
   let userController: UserController;
-  let userRepo: Repository<UserEntityFixture>;
-  let userPasswordHistoryRepo: Repository<UserEntityFixture>;
+  let userRepo: RepositoryInterface<UserEntityFixture>;
+  let userPasswordHistoryRepo: RepositoryInterface<UserEntityFixture>;
 
   beforeEach(async () => {
     testModule = await Test.createTestingModule({

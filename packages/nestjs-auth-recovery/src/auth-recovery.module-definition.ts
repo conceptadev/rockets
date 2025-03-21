@@ -1,4 +1,3 @@
-import { EntityManager } from 'typeorm';
 import {
   ConfigurableModuleBuilder,
   DynamicModule,
@@ -27,6 +26,7 @@ import { AuthRecoveryController } from './auth-recovery.controller';
 import { AuthRecoveryService } from './services/auth-recovery.service';
 import { AuthRecoveryNotificationService } from './services/auth-recovery-notification.service';
 import { AuthRecoveryEmailServiceInterface } from './interfaces/auth-recovery-email.service.interface';
+import { EntityManagerInterface } from '@concepta/typeorm-common';
 
 const RAW_OPTIONS_TOKEN = Symbol('__AUTH_RECOVERY_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -199,7 +199,7 @@ export function createAuthRecoveryEntityManagerProxyProvider(
     inject: [RAW_OPTIONS_TOKEN, getEntityManagerToken()],
     useFactory: async (
       options: Pick<AuthRecoveryOptions, 'entityManagerProxy'>,
-      defaultEntityManager: EntityManager,
+      defaultEntityManager: EntityManagerInterface,
     ) =>
       optionsOverrides?.entityManagerProxy ??
       options.entityManagerProxy ??

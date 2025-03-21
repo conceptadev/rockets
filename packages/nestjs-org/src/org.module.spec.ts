@@ -24,6 +24,7 @@ import { OrgMemberEntityFixture } from './__fixtures__/org-member.entity.fixture
 import { UserEntityFixture } from './__fixtures__/user-entity.fixture';
 import { InvitationEntityFixture } from './__fixtures__/invitation.entity.fixture';
 import { OrgProfileEntityFixture } from './__fixtures__/org-profile.entity.fixture';
+import { RepositoryInterface } from '@concepta/typeorm-common';
 
 describe('OrgModule', () => {
   let orgModule: OrgModule;
@@ -32,8 +33,8 @@ describe('OrgModule', () => {
   let ownerLookupService: OwnerLookupServiceFixture;
   let orgCrudService: OrgCrudService;
   let orgController: OrgController;
-  let orgEntityRepo: Repository<OrgEntityFixture>;
-  let orgDynamicRepo: Repository<OrgEntityFixture>;
+  let orgEntityRepo: RepositoryInterface<OrgEntityFixture>;
+  let orgDynamicRepo: RepositoryInterface<OrgEntityFixture>;
 
   beforeEach(async () => {
     const testModule: TestingModule = await Test.createTestingModule({
@@ -70,7 +71,7 @@ describe('OrgModule', () => {
     }).compile();
 
     orgModule = testModule.get<OrgModule>(OrgModule);
-    orgEntityRepo = testModule.get<Repository<OrgEntityFixture>>(
+    orgEntityRepo = testModule.get<RepositoryInterface<OrgEntityFixture>>(
       getEntityRepositoryToken(ORG_MODULE_ORG_ENTITY_KEY),
     );
     orgDynamicRepo = testModule.get(

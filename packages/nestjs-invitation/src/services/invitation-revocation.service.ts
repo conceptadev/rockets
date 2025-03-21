@@ -1,8 +1,11 @@
-import { Repository } from 'typeorm';
 import { Inject } from '@nestjs/common';
 import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
-import { BaseService, QueryOptionsInterface } from '@concepta/typeorm-common';
+import {
+  BaseService,
+  QueryOptionsInterface,
+  RepositoryInterface,
+} from '@concepta/typeorm-common';
 
 import {
   INVITATION_MODULE_INVITATION_ENTITY_KEY,
@@ -23,7 +26,7 @@ export class InvitationRevocationService extends BaseService<InvitationEntityInt
     @Inject(INVITATION_MODULE_SETTINGS_TOKEN)
     private readonly settings: InvitationSettingsInterface,
     @InjectDynamicRepository(INVITATION_MODULE_INVITATION_ENTITY_KEY)
-    invitationRepo: Repository<InvitationEntityInterface>,
+    invitationRepo: RepositoryInterface<InvitationEntityInterface>,
     @Inject(INVITATION_MODULE_OTP_SERVICE_TOKEN)
     private readonly otpService: InvitationOtpServiceInterface,
     @Inject(INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN)

@@ -29,13 +29,14 @@ import { ReportEntityFixture } from './__fixtures__/report/report-entity.fixture
 import { UserEntityFixture } from './__fixtures__/user/entities/user.entity.fixture';
 import { ReportModule } from './report.module';
 import { delay } from './utils/delay.util';
+import { RepositoryInterface } from '@concepta/typeorm-common';
 
 describe(ReportModule, () => {
   let testModule: TestingModule;
   let reportModule: ReportModule;
   let reportService: ReportService;
-  let reportEntityRepo: Repository<ReportEntityInterface>;
-  let reportDynamicRepo: Repository<ReportEntityInterface>;
+  let reportEntityRepo: RepositoryInterface<ReportEntityInterface>;
+  let reportDynamicRepo: RepositoryInterface<ReportEntityInterface>;
 
   describe(ReportModule.forRootAsync, () => {
     beforeEach(async () => {
@@ -171,7 +172,7 @@ describe(ReportModule, () => {
   const commonVars = () => {
     reportModule = testModule.get(ReportModule);
     reportService = testModule.get(ReportService);
-    reportEntityRepo = testModule.get<Repository<ReportEntityFixture>>(
+    reportEntityRepo = testModule.get<RepositoryInterface<ReportEntityFixture>>(
       getEntityRepositoryToken(REPORT_MODULE_REPORT_ENTITY_KEY),
     );
     reportDynamicRepo = testModule.get(

@@ -1,5 +1,4 @@
 import ms from 'ms';
-import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { OtpInterface } from '@concepta/nestjs-common';
@@ -15,6 +14,7 @@ import { UserFactoryFixture } from '../__fixtures__/factories/user.factory.fixtu
 import { UserOtpFactoryFixture } from '../__fixtures__/factories/user-otp.factory.fixture';
 import { OTP_MODULE_REPOSITORIES_TOKEN } from '../otp.constants';
 import { OtpLimitReachedException } from '../exceptions/otp-limit-reached.exception';
+import { RepositoryInterface } from '@concepta/typeorm-common';
 
 describe('OtpModule', () => {
   const CATEGORY_DEFAULT = 'CATEGORY_DEFAULT';
@@ -23,7 +23,7 @@ describe('OtpModule', () => {
   let seedingSource: SeedingSource;
   let otpModule: OtpModule;
   let otpService: OtpService;
-  let repository: Repository<OtpInterface>;
+  let repository: RepositoryInterface<OtpInterface>;
   let connectionNumber = 1;
   let userFactory: UserFactoryFixture;
   let userOtpFactory: UserOtpFactoryFixture;
@@ -118,9 +118,9 @@ describe('OtpModule', () => {
 
     otpModule = testModule.get<OtpModule>(OtpModule);
     otpService = testModule.get<OtpService>(OtpService);
-    const allRepo = testModule.get<Record<string, Repository<OtpInterface>>>(
-      OTP_MODULE_REPOSITORIES_TOKEN,
-    );
+    const allRepo = testModule.get<
+      Record<string, RepositoryInterface<OtpInterface>>
+    >(OTP_MODULE_REPOSITORIES_TOKEN);
     repository = allRepo.userOtp;
   };
 

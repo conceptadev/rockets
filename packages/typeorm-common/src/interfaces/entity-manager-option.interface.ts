@@ -1,5 +1,5 @@
-import { EntityManager } from 'typeorm';
+import { EntityManagerInterface } from './entity-manager.interface';
 
 export interface EntityManagerOptionInterface {
-  entityManager?: EntityManager;
+  entityManager?: EntityManagerInterface;
 }

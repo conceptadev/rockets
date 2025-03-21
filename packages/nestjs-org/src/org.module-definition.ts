@@ -1,4 +1,3 @@
-import { Repository } from 'typeorm';
 import {
   ConfigurableModuleBuilder,
   DynamicModule,
@@ -11,7 +10,7 @@ import {
   getDynamicRepositoryToken,
   TypeOrmExtModule,
 } from '@concepta/nestjs-typeorm-ext';
-
+import { RepositoryInterface } from '@concepta/typeorm-common';
 import {
   ORG_MODULE_SETTINGS_TOKEN,
   ORG_MODULE_OWNER_LOOKUP_SERVICE_TOKEN,
@@ -163,7 +162,7 @@ export function createOrgLookupServiceProvider(
     ],
     useFactory: async (
       options: OrgOptionsInterface,
-      orgRepo: Repository<OrgEntityInterface>,
+      orgRepo: RepositoryInterface<OrgEntityInterface>,
       ownerLookupService: OrgOwnerLookupServiceInterface,
     ) =>
       optionsOverrides?.orgLookupService ??
@@ -183,7 +182,7 @@ export function createOrgMutateServiceProvider(
     ],
     useFactory: async (
       options: OrgOptionsInterface,
-      orgRepo: Repository<OrgEntityInterface>,
+      orgRepo: RepositoryInterface<OrgEntityInterface>,
     ) =>
       optionsOverrides?.orgLookupService ??
       options.orgLookupService ??

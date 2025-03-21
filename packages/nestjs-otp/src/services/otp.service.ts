@@ -1,12 +1,7 @@
 import ms from 'ms';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import {
-  DeepPartial,
-  FindOptionsWhere,
-  LessThanOrEqual,
-  Repository,
-} from 'typeorm';
+import { DeepPartial, FindOptionsWhere, LessThanOrEqual } from 'typeorm';
 import { Inject, Injectable, Type } from '@nestjs/common';
 import {
   ReferenceAssigneeInterface,
@@ -21,6 +16,7 @@ import {
   ReferenceLookupException,
   ReferenceMutateException,
   ReferenceValidationException,
+  RepositoryInterface,
   RepositoryProxy,
 } from '@concepta/typeorm-common';
 import {
@@ -38,7 +34,7 @@ import { OtpLimitReachedException } from '../exceptions/otp-limit-reached.except
 export class OtpService implements OtpServiceInterface {
   constructor(
     @Inject(OTP_MODULE_REPOSITORIES_TOKEN)
-    private allOtpRepos: Record<string, Repository<OtpInterface>>,
+    private allOtpRepos: Record<string, RepositoryInterface<OtpInterface>>,
     @Inject(OTP_MODULE_SETTINGS_TOKEN)
     protected readonly settings: OtpSettingsInterface,
   ) {}
@@ -448,7 +444,7 @@ export class OtpService implements OtpServiceInterface {
    */
   protected getAssignmentRepo(
     assignment: ReferenceAssignment,
-  ): Repository<OtpInterface> {
+  ): RepositoryInterface<OtpInterface> {
     // repo matching assignment was injected?
     if (this.allOtpRepos[assignment]) {
       // yes, return it
@@ -498,6 +494,7 @@ export class OtpService implements OtpServiceInterface {
 
     // try to find the relationships
     try {
+      // TODO: TYPEORM REMOVE UPDATE REPLACE FOR SAVE
       // make previous inactive
       await repoProxy.repository(queryOptions).update(
         {

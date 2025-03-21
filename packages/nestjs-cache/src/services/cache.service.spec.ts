@@ -1,4 +1,3 @@
-import { Repository } from 'typeorm';
 import { mock } from 'jest-mock-extended';
 import { ReferenceAssignment } from '@concepta/nestjs-common';
 import {
@@ -9,6 +8,7 @@ import {
   QueryOptionsInterface,
   ReferenceMutateException,
   ReferenceValidationException,
+  RepositoryInterface,
   RepositoryProxy,
 } from '@concepta/typeorm-common';
 
@@ -26,7 +26,7 @@ jest.mock('../utils/get-expiration-date.util', () => ({
 
 describe('CacheService', () => {
   let service: CacheService;
-  let repo: Repository<CacheInterface>;
+  let repo: RepositoryInterface<CacheInterface>;
   let settings: CacheSettingsInterface;
   const cacheDto: CacheCreatableInterface = {
     key: 'testKey',
@@ -42,7 +42,7 @@ describe('CacheService', () => {
   const repoProxyMock = mock<RepositoryProxy<CacheInterface>>();
 
   beforeEach(() => {
-    repo = mock<Repository<CacheInterface>>();
+    repo = mock<RepositoryInterface<CacheInterface>>();
     settings = mock<CacheSettingsInterface>();
     settings.assignments = {
       testAssignment: { entityKey: 'testAssignment' },

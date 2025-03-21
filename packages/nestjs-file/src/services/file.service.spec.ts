@@ -1,8 +1,11 @@
 import { FileCreatableInterface } from '@concepta/nestjs-common';
-import { TransactionProxy } from '@concepta/typeorm-common';
+import {
+  RepositoryInterface,
+  TransactionProxy,
+} from '@concepta/typeorm-common';
 import { randomUUID } from 'crypto';
 import { mock } from 'jest-mock-extended';
-import { DataSource, EntityManager, Repository } from 'typeorm';
+import { DataSource, EntityManager } from 'typeorm';
 import { FileEntityFixture } from '../__fixtures__/file/file-entity.fixture';
 import { FileCreateDto } from '../dto/file-create.dto';
 import { FileQueryException } from '../exceptions/file-query.exception';
@@ -14,7 +17,7 @@ import { FileService } from './file.service';
 
 describe(FileService.name, () => {
   let fileService: FileService;
-  let fileRepo: jest.Mocked<Repository<FileEntityInterface>>;
+  let fileRepo: jest.Mocked<RepositoryInterface<FileEntityInterface>>;
   let fileStrategyService: jest.Mocked<FileStrategyService>;
   let fileMutateService: FileMutateService;
   let fileLookupService: FileLookupService;
@@ -128,8 +131,10 @@ describe(FileService.name, () => {
   });
 });
 
-function createMockRepository(): jest.Mocked<Repository<FileEntityInterface>> {
-  return mock<Repository<FileEntityFixture>>();
+function createMockRepository(): jest.Mocked<
+  RepositoryInterface<FileEntityInterface>
+> {
+  return mock<RepositoryInterface<FileEntityFixture>>();
 }
 
 function createMockFileStrategyService(): jest.Mocked<FileStrategyService> {

@@ -3,6 +3,7 @@ import {
   getDynamicRepositoryToken,
   TypeOrmExtModule,
 } from '@concepta/nestjs-typeorm-ext';
+import { RepositoryInterface } from '@concepta/typeorm-common';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getDataSourceToken } from '@nestjs/typeorm';
@@ -25,7 +26,7 @@ describe('RoleModule', () => {
   let seedingSource: SeedingSource;
   let roleModule: RoleModule;
   let roleService: RoleService;
-  let roleRepo: Repository<RoleEntityFixture>;
+  let roleRepo: RepositoryInterface<RoleEntityFixture>;
 
   let testRole1: RoleEntityFixture;
   let testRole2: RoleEntityFixture;

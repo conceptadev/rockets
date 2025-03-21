@@ -1,7 +1,6 @@
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
-import { MutateService } from '@concepta/typeorm-common';
+import { MutateService, RepositoryInterface } from '@concepta/typeorm-common';
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
 
 import { InvitationCreateDto } from '../dto/invitation-create.dto';
 import { InvitationCreatableInterface } from '../interfaces/domain/invitation-creatable.interface';
@@ -31,7 +30,7 @@ export class InvitationMutateService
    */
   constructor(
     @InjectDynamicRepository(INVITATION_MODULE_INVITATION_ENTITY_KEY)
-    repo: Repository<InvitationEntityInterface>,
+    repo: RepositoryInterface<InvitationEntityInterface>,
   ) {
     super(repo);
   }

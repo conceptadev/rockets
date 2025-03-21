@@ -1,6 +1,5 @@
 import supertest from 'supertest';
 import { mock } from 'jest-mock-extended';
-import { Repository } from 'typeorm';
 
 import { INestApplication, Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -12,6 +11,7 @@ import { AppModule } from './app.module';
 import { UserEntity } from './user/user.entity';
 import { UserDto } from './user/user.controller';
 import { HttpAdapterHost } from '@nestjs/core';
+import { RepositoryInterface } from '@concepta/typeorm-common';
 
 const sleep = (ms: number) => {
   return new Promise((resolve) => {
@@ -30,7 +30,7 @@ describe('AppController (e2e)', () => {
         .overrideProvider('USER_MODULE_USER_ENTITY_REPO_TOKEN')
         .useValue(mock<UserEntity>())
         .overrideProvider('USER_MODULE_USER_CUSTOM_REPO_TOKEN')
-        .useValue(mock<Repository<UserEntity>>())
+        .useValue(mock<RepositoryInterface<UserEntity>>())
         .overrideProvider(UserCrudService)
         .useValue({})
         .compile();
