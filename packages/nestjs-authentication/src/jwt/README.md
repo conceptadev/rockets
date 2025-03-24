@@ -7,8 +7,8 @@ module.
 
 ## Project
 
-[![NPM Latest](https://img.shields.io/npm/v/@concepta/nestjs-jwt)](https://www.npmjs.com/package/@concepta/nestjs-jwt)
-[![NPM Downloads](https://img.shields.io/npm/dw/@conceptadev/nestjs-jwt)](https://www.npmjs.com/package/@concepta/nestjs-jwt)
+[![NPM Latest](https://img.shields.io/npm/v/@concepta/nestjs-authentication)](https://www.npmjs.com/package/@concepta/nestjs-authentication)
+[![NPM Downloads](https://img.shields.io/npm/dw/@conceptadev/nestjs-jwt)](https://www.npmjs.com/package/@concepta/nestjs-authentication)
 [![GH Last Commit](https://img.shields.io/github/last-commit/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets)
 [![GH Contrib](https://img.shields.io/github/contributors/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets/graphs/contributors)
 [![NestJS Dep](https://img.shields.io/github/package-json/dependency-version/conceptadev/rockets/@nestjs/common?label=NestJS&logo=nestjs&filename=packages%2Fnestjs-core%2Fpackage.json)](https://www.npmjs.com/package/@nestjs/common)
@@ -80,7 +80,7 @@ management.
 To get started, install the `JwtModule` package:
 
 ```sh
-yarn add @concepta/nestjs-jwt
+yarn add @concepta/nestjs-authentication
 ```
 
 ## Basic Setup
@@ -124,7 +124,7 @@ export class CustomJwtIssueTokenService implements JwtIssueTokenServiceInterface
 
 ```ts
 import { Module } from '@nestjs/common';
-import { JwtModule } from '@concepta/nestjs-jwt';
+import { JwtModule } from '@concepta/nestjs-authentication';
 import { CustomJwtIssueTokenService } from './custom-jwt-issue-token.service';
 
 @Module({
@@ -170,7 +170,7 @@ To set up the `JwtModule`, follow these steps:
 
 ```ts
 import { Module } from '@nestjs/common';
-import { JwtModule } from '@concepta/nestjs-jwt';
+import { JwtModule } from '@concepta/nestjs-authentication';
 
 @Module({
   imports: [
@@ -195,7 +195,7 @@ Here is an example of how to configure each property of the settings:
 
 ```ts
 import { Module } from '@nestjs/common';
-import { JwtModule } from '@concepta/nestjs-jwt';
+import { JwtModule } from '@concepta/nestjs-authentication';
 
 @Module({
   imports: [
@@ -327,7 +327,7 @@ export class CustomJwtService implements JwtServiceInterface {
 
 ```ts
 import { Module } from '@nestjs/common';
-import { JwtModule } from '@concepta/nestjs-jwt';
+import { JwtModule } from '@concepta/nestjs-authentication';
 import { CustomJwtIssueTokenService } from './custom-jwt-issue-token.service';
 import { CustomJwtVerifyTokenService } from './custom-jwt-verify-token.service';
 

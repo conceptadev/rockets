@@ -790,7 +790,6 @@ __metadata:
     "@concepta/nestjs-crud": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-exception": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-federated": "npm:^6.0.0-alpha.3"
-    "@concepta/nestjs-jwt": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-password": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-typeorm-ext": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-user": "npm:^6.0.0-alpha.3"
@@ -821,7 +820,6 @@ __metadata:
     "@concepta/nestjs-crud": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-exception": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-federated": "npm:^6.0.0-alpha.3"
-    "@concepta/nestjs-jwt": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-password": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-typeorm-ext": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-user": "npm:^6.0.0-alpha.3"
@@ -851,7 +849,6 @@ __metadata:
     "@concepta/nestjs-crud": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-exception": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-federated": "npm:^6.0.0-alpha.3"
-    "@concepta/nestjs-jwt": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-password": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-typeorm-ext": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-user": "npm:^6.0.0-alpha.3"
@@ -878,7 +875,6 @@ __metadata:
     "@concepta/nestjs-authentication": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-common": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-exception": "npm:^6.0.0-alpha.3"
-    "@concepta/nestjs-jwt": "npm:^6.0.0-alpha.3"
     "@concepta/typeorm-common": "npm:^6.0.0-alpha.3"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
@@ -900,7 +896,6 @@ __metadata:
     "@concepta/nestjs-authentication": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-common": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-exception": "npm:^6.0.0-alpha.3"
-    "@concepta/nestjs-jwt": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-password": "npm:^6.0.0-alpha.3"
     "@concepta/typeorm-common": "npm:^6.0.0-alpha.3"
     "@nestjs/common": "npm:^10.4.1"
@@ -930,7 +925,6 @@ __metadata:
     "@concepta/nestjs-crud": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-email": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-exception": "npm:^6.0.0-alpha.3"
-    "@concepta/nestjs-jwt": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-otp": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-password": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-typeorm-ext": "npm:^6.0.0-alpha.3"
@@ -960,7 +954,6 @@ __metadata:
     "@concepta/nestjs-authentication": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-common": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-exception": "npm:^6.0.0-alpha.3"
-    "@concepta/nestjs-jwt": "npm:^6.0.0-alpha.3"
     "@concepta/typeorm-common": "npm:^6.0.0-alpha.3"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
@@ -985,7 +978,6 @@ __metadata:
     "@concepta/nestjs-crud": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-email": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-exception": "npm:^6.0.0-alpha.3"
-    "@concepta/nestjs-jwt": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-otp": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-password": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-typeorm-ext": "npm:^6.0.0-alpha.3"
@@ -1014,7 +1006,6 @@ __metadata:
   dependencies:
     "@concepta/nestjs-common": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-exception": "npm:^6.0.0-alpha.3"
-    "@concepta/nestjs-jwt": "npm:^6.0.0-alpha.3"
     "@nestjs/common": "npm:^10.4.1"
     "@nestjs/config": "npm:^3.2.3"
     "@nestjs/core": "npm:^10.4.1"
@@ -1022,8 +1013,14 @@ __metadata:
     "@nestjs/passport": "npm:^10.0.3"
     "@nestjs/swagger": "npm:^7.4.0"
     "@nestjs/testing": "npm:^10.4.1"
+    "@types/jsonwebtoken": "npm:9.0.6"
+    "@types/passport-jwt": "npm:^3.0.13"
+    "@types/passport-strategy": "npm:^0.2.38"
+    express-serve-static-core: "npm:^0.1.1"
     jest-mock-extended: "npm:^2.0.9"
+    jsonwebtoken: "npm:^9.0.2"
     passport: "npm:^0.7.0"
+    passport-jwt: "npm:^4.0.1"
     passport-strategy: "npm:^1.0.0"
   peerDependencies:
     class-transformer: "*"
@@ -1224,27 +1221,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@concepta/nestjs-jwt@npm:^6.0.0-alpha.3, @concepta/nestjs-jwt@workspace:packages/nestjs-jwt":
-  version: 0.0.0-use.local
-  resolution: "@concepta/nestjs-jwt@workspace:packages/nestjs-jwt"
-  dependencies:
-    "@concepta/nestjs-common": "npm:^6.0.0-alpha.3"
-    "@concepta/nestjs-exception": "npm:^6.0.0-alpha.3"
-    "@nestjs/common": "npm:^10.4.1"
-    "@nestjs/config": "npm:^3.2.3"
-    "@nestjs/jwt": "npm:^10.2.0"
-    "@nestjs/testing": "npm:^10.4.1"
-    "@types/jsonwebtoken": "npm:9.0.6"
-    "@types/passport-jwt": "npm:^3.0.13"
-    "@types/passport-strategy": "npm:^0.2.38"
-    express-serve-static-core: "npm:^0.1.1"
-    jest-mock-extended: "npm:^2.0.9"
-    jsonwebtoken: "npm:^9.0.2"
-    passport-jwt: "npm:^4.0.1"
-    passport-strategy: "npm:^1.0.0"
-  languageName: unknown
-  linkType: soft
-
 "@concepta/nestjs-logger-coralogix@workspace:packages/nestjs-logger-coralogix":
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-logger-coralogix@workspace:packages/nestjs-logger-coralogix"
@@ -1434,7 +1410,6 @@ __metadata:
     "@concepta/nestjs-email": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-event": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-exception": "npm:^6.0.0-alpha.3"
-    "@concepta/nestjs-jwt": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-logger": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-password": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-typeorm-ext": "npm:^6.0.0-alpha.3"
@@ -1496,7 +1471,6 @@ __metadata:
     "@concepta/nestjs-crud": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-event": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-exception": "npm:^6.0.0-alpha.3"
-    "@concepta/nestjs-jwt": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-password": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-typeorm-ext": "npm:^6.0.0-alpha.3"
     "@concepta/typeorm-common": "npm:^6.0.0-alpha.3"
@@ -5700,6 +5674,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ansis@npm:^3.9.0":
+  version: 3.17.0
+  resolution: "ansis@npm:3.17.0"
+  checksum: 10c0/d8fa94ca7bb91e7e5f8a7d323756aa075facce07c5d02ca883673e128b2873d16f93e0dec782f98f1eeb1f2b3b4b7b60dcf0ad98fb442e75054fe857988cc5cb
+  languageName: node
+  linkType: hard
+
 "any-promise@npm:^1.0.0":
   version: 1.3.0
   resolution: "any-promise@npm:1.3.0"
@@ -6936,22 +6917,6 @@ __metadata:
   dependencies:
     restore-cursor: "npm:^3.1.0"
   checksum: 10c0/92a2f98ff9037d09be3dfe1f0d749664797fb674bf388375a2207a1203b69d41847abf16434203e0089212479e47a358b13a0222ab9fccfe8e2644a7ccebd111
-  languageName: node
-  linkType: hard
-
-"cli-highlight@npm:^2.1.11":
-  version: 2.1.11
-  resolution: "cli-highlight@npm:2.1.11"
-  dependencies:
-    chalk: "npm:^4.0.0"
-    highlight.js: "npm:^10.7.1"
-    mz: "npm:^2.4.0"
-    parse5: "npm:^5.1.1"
-    parse5-htmlparser2-tree-adapter: "npm:^6.0.0"
-    yargs: "npm:^16.0.0"
-  bin:
-    highlight: bin/highlight
-  checksum: 10c0/b5b4af3b968aa9df77eee449a400fbb659cf47c4b03a395370bd98d5554a00afaa5819b41a9a8a1ca0d37b0b896a94e57c65289b37359a25b700b1f56eb04852
   languageName: node
   linkType: hard
 
@@ -10451,7 +10416,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:^10.2.2, glob@npm:^10.3.10, glob@npm:^10.3.3, glob@npm:~10.4.1":
+"glob@npm:^10.2.2, glob@npm:^10.3.10, glob@npm:^10.3.3, glob@npm:^10.4.5, glob@npm:~10.4.1":
   version: 10.4.5
   resolution: "glob@npm:10.4.5"
   dependencies:
@@ -10746,13 +10711,6 @@ __metadata:
   version: 1.0.0
   resolution: "hexoid@npm:1.0.0"
   checksum: 10c0/9c45e8ba676b9eb88455631ebceec4c829a8374a583410dc735472ab9808bf11339fcd074633c3fa30e420901b894d8a92ffd5e2e21eddd41149546e05a91f69
-  languageName: node
-  linkType: hard
-
-"highlight.js@npm:^10.7.1":
-  version: 10.7.3
-  resolution: "highlight.js@npm:10.7.3"
-  checksum: 10c0/073837eaf816922427a9005c56c42ad8786473dc042332dfe7901aa065e92bc3d94ebf704975257526482066abb2c8677cc0326559bb8621e046c21c5991c434
   languageName: node
   linkType: hard
 
@@ -14545,15 +14503,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mkdirp@npm:^2.1.3":
-  version: 2.1.6
-  resolution: "mkdirp@npm:2.1.6"
-  bin:
-    mkdirp: dist/cjs/src/bin.js
-  checksum: 10c0/96f551c651dd8f5f9435d53df1a7b9bfc553be769ee6da5192c37c1f303a376ef1c6996f96913d4a8d357060451d4526a346031d1919f92c58806a5fa3cd8dfe
-  languageName: node
-  linkType: hard
-
 "modify-values@npm:^1.0.0":
   version: 1.0.1
   resolution: "modify-values@npm:1.0.1"
@@ -14651,7 +14600,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mz@npm:^2.4.0, mz@npm:^2.5.0":
+"mz@npm:^2.5.0":
   version: 2.7.0
   resolution: "mz@npm:2.7.0"
   dependencies:
@@ -15699,15 +15648,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"parse5-htmlparser2-tree-adapter@npm:^6.0.0":
-  version: 6.0.1
-  resolution: "parse5-htmlparser2-tree-adapter@npm:6.0.1"
-  dependencies:
-    parse5: "npm:^6.0.1"
-  checksum: 10c0/dfa5960e2aaf125707e19a4b1bc333de49232eba5a6ffffb95d313a7d6087c3b7a274b58bee8d3bd41bdf150638815d1d601a42bbf2a0345208c3c35b1279556
-  languageName: node
-  linkType: hard
-
 "parse5-htmlparser2-tree-adapter@npm:^7.0.0":
   version: 7.0.0
   resolution: "parse5-htmlparser2-tree-adapter@npm:7.0.0"
@@ -15718,17 +15658,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"parse5@npm:6.0.1, parse5@npm:^6.0.1":
+"parse5@npm:6.0.1":
   version: 6.0.1
   resolution: "parse5@npm:6.0.1"
   checksum: 10c0/595821edc094ecbcfb9ddcb46a3e1fe3a718540f8320eff08b8cf6742a5114cce2d46d45f95c26191c11b184dcaf4e2960abcd9c5ed9eb9393ac9a37efcfdecb
-  languageName: node
-  linkType: hard
-
-"parse5@npm:^5.1.1":
-  version: 5.1.1
-  resolution: "parse5@npm:5.1.1"
-  checksum: 10c0/b0f87a77a7fea5f242e3d76917c983bbea47703b9371801d51536b78942db6441cbda174bf84eb30e47315ddc6f8a0b57d68e562c790154430270acd76c1fa03
   languageName: node
   linkType: hard
 
@@ -16935,14 +16868,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"reflect-metadata@npm:^0.1.13, reflect-metadata@npm:^0.1.14":
+"reflect-metadata@npm:^0.1.13":
   version: 0.1.14
   resolution: "reflect-metadata@npm:0.1.14"
   checksum: 10c0/3a6190c7f6cb224f26a012d11f9e329360c01c1945e2cbefea23976a8bacf9db6b794aeb5bf18adcb673c448a234fbc06fc41853c00a6c206b30f0777ecf019e
   languageName: node
   linkType: hard
 
-"reflect-metadata@npm:^0.2.1":
+"reflect-metadata@npm:^0.2.2":
   version: 0.2.2
   resolution: "reflect-metadata@npm:0.2.2"
   checksum: 10c0/1cd93a15ea291e420204955544637c264c216e7aac527470e393d54b4bb075f10a17e60d8168ec96600c7e0b9fcc0cb0bb6e91c3fbf5b0d8c9056f04e6ac1ec2
@@ -17281,9 +17214,9 @@ __metadata:
     lerna: "npm:^3.22.1"
     markdownlint-cli: "npm:^0.41.0"
     prettier: "npm:^2.8.8"
-    reflect-metadata: "npm:^0.1.14"
+    reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^3.0.2"
-    rxjs: "npm:^7.8.1"
+    rxjs: "npm:^7.8.2"
     standard-version: "npm:^9.5.0"
     supertest: "npm:^6.3.4"
     ts-jest: "npm:^27.1.5"
@@ -17292,7 +17225,7 @@ __metadata:
     tsconfig-paths: "npm:^3.15.0"
     typedoc: "npm:^0.25.13"
     typedoc-plugin-coverage: "npm:^3.3.0"
-    typeorm: "npm:^0.3.20"
+    typeorm: "npm:^0.3.21"
     typescript: "npm:^4.9.5"
   languageName: unknown
   linkType: soft
@@ -17367,6 +17300,15 @@ __metadata:
   dependencies:
     tslib: "npm:^1.9.0"
   checksum: 10c0/e556a13a9aa89395e5c9d825eabcfa325568d9c9990af720f3f29f04a888a3b854f25845c2b55875d875381abcae2d8100af9cacdc57576e7ed6be030a01d2fe
+  languageName: node
+  linkType: hard
+
+"rxjs@npm:^7.8.2":
+  version: 7.8.2
+  resolution: "rxjs@npm:7.8.2"
+  dependencies:
+    tslib: "npm:^2.1.0"
+  checksum: 10c0/1fcd33d2066ada98ba8f21fcbbcaee9f0b271de1d38dc7f4e256bfbc6ffcdde68c8bfb69093de7eeb46f24b1fb820620bf0223706cff26b4ab99a7ff7b2e2c45
   languageName: node
   linkType: hard
 
@@ -18038,6 +17980,13 @@ __metadata:
   version: 1.0.3
   resolution: "sprintf-js@npm:1.0.3"
   checksum: 10c0/ecadcfe4c771890140da5023d43e190b7566d9cf8b2d238600f31bec0fc653f328da4450eb04bd59a431771a8e9cc0e118f0aa3974b683a4981b4e07abc2a5bb
+  languageName: node
+  linkType: hard
+
+"sql-highlight@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "sql-highlight@npm:6.0.0"
+  checksum: 10c0/f79998ad298d90eeefbbbc2a3b6424defda5ff1252259fa701466ac830224da598aca6ee97b84fd56948bb5d4d671ee59d3096fe6402013a66c646ec481139eb
   languageName: node
   linkType: hard
 
@@ -19306,39 +19255,38 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typeorm@npm:^0.3.20":
-  version: 0.3.20
-  resolution: "typeorm@npm:0.3.20"
+"typeorm@npm:^0.3.21":
+  version: 0.3.21
+  resolution: "typeorm@npm:0.3.21"
   dependencies:
     "@sqltools/formatter": "npm:^1.2.5"
+    ansis: "npm:^3.9.0"
     app-root-path: "npm:^3.1.0"
     buffer: "npm:^6.0.3"
-    chalk: "npm:^4.1.2"
-    cli-highlight: "npm:^2.1.11"
     dayjs: "npm:^1.11.9"
     debug: "npm:^4.3.4"
     dotenv: "npm:^16.0.3"
-    glob: "npm:^10.3.10"
-    mkdirp: "npm:^2.1.3"
-    reflect-metadata: "npm:^0.2.1"
+    glob: "npm:^10.4.5"
     sha.js: "npm:^2.4.11"
+    sql-highlight: "npm:^6.0.0"
     tslib: "npm:^2.5.0"
-    uuid: "npm:^9.0.0"
+    uuid: "npm:^11.0.5"
     yargs: "npm:^17.6.2"
   peerDependencies:
     "@google-cloud/spanner": ^5.18.0
     "@sap/hana-client": ^2.12.25
-    better-sqlite3: ^7.1.2 || ^8.0.0 || ^9.0.0
+    better-sqlite3: ^8.0.0 || ^9.0.0 || ^10.0.0 || ^11.0.0
     hdb-pool: ^0.1.6
     ioredis: ^5.0.4
     mongodb: ^5.8.0
-    mssql: ^9.1.1 || ^10.0.1
+    mssql: ^9.1.1 || ^10.0.1 || ^11.0.1
     mysql2: ^2.2.5 || ^3.0.1
     oracledb: ^6.3.0
     pg: ^8.5.1
     pg-native: ^3.0.0
     pg-query-stream: ^4.0.0
     redis: ^3.1.1 || ^4.0.0
+    reflect-metadata: ^0.1.14 || ^0.2.0
     sql.js: ^1.4.0
     sqlite3: ^5.0.3
     ts-node: ^10.7.0
@@ -19382,7 +19330,7 @@ __metadata:
     typeorm: cli.js
     typeorm-ts-node-commonjs: cli-ts-node-commonjs.js
     typeorm-ts-node-esm: cli-ts-node-esm.js
-  checksum: 10c0/7e4be724641beef86ae36289c87b6e66bfaf19a4313f089926d36d2d6f0d67f9314d942711c9d83ab8a174b8622148c2f7e83e6c1448d638ee3ab24469257814
+  checksum: 10c0/4e1a827bc7a5028c6ebcefea5ce17076394379cfdf74b34a94bc1a17c918fd85ee71d9cf891acb10f46c9e460f91809f9df4a4d42538f2505f1ada3a99ee487a
   languageName: node
   linkType: hard
 
@@ -19697,6 +19645,15 @@ __metadata:
   bin:
     uuid: dist/bin/uuid
   checksum: 10c0/1607dd32ac7fc22f2d8f77051e6a64845c9bce5cd3dd8aa0070c074ec73e666a1f63c7b4e0f4bf2bc8b9d59dc85a15e17807446d9d2b17c8485fbc2147b27f9b
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^11.0.5":
+  version: 11.1.0
+  resolution: "uuid@npm:11.1.0"
+  bin:
+    uuid: dist/esm/bin/uuid
+  checksum: 10c0/34aa51b9874ae398c2b799c88a127701408cd581ee89ec3baa53509dd8728cbb25826f2a038f9465f8b7be446f0fbf11558862965b18d21c993684297628d4d3
   languageName: node
   linkType: hard
 

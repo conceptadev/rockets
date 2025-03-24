@@ -1,9 +1,9 @@
-import { JwtVerifyTokenService } from '@concepta/nestjs-jwt';
 import { mock } from 'jest-mock-extended';
-import { ValidateTokenServiceInterface } from '../interfaces/validate-token-service.interface';
+import { ValidateTokenServiceInterface } from '../../core/interfaces/validate-token-service.interface';
 import { VerifyTokenService } from './verify-token.service';
-import { AuthenticationAccessTokenException } from '../exceptions/authentication-access-token.exception';
-import { AuthenticationRefreshTokenException } from '../exceptions/authentication-refresh-token.exception';
+import { AuthenticationAccessTokenException } from '../../core/exceptions/authentication-access-token.exception';
+import { AuthenticationRefreshTokenException } from '../../core/exceptions/authentication-refresh-token.exception';
+import { JwtVerifyTokenService } from './jwt-verify-token.service';
 
 describe(VerifyTokenService, () => {
   const token = 'token';

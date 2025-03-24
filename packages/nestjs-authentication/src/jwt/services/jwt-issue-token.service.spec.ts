@@ -1,6 +1,7 @@
 import { JwtIssueTokenService } from './jwt-issue-token.service';
-import { JwtService } from './jwt.service';
+
 import { mock } from 'jest-mock-extended';
+import { JwtService } from './jwt.service';
 
 describe(JwtIssueTokenService, () => {
   let jwtService: JwtService;

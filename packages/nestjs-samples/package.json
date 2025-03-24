@@ -21,7 +21,6 @@
     "@concepta/nestjs-email": "^6.0.0-alpha.3",
     "@concepta/nestjs-event": "^6.0.0-alpha.3",
     "@concepta/nestjs-exception": "^6.0.0-alpha.3",
-    "@concepta/nestjs-jwt": "^6.0.0-alpha.3",
     "@concepta/nestjs-logger": "^6.0.0-alpha.3",
     "@concepta/nestjs-password": "^6.0.0-alpha.3",
     "@concepta/nestjs-typeorm-ext": "^6.0.0-alpha.3",

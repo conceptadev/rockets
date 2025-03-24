@@ -1,4 +1,4 @@
-import { NestJwtModuleOptions } from '../jwt.externals';
+import { NestJwtModuleOptions } from "../jwt.externals";
 
 /**
  * JWT module settings interface

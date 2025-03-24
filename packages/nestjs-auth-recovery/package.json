@@ -25,7 +25,6 @@
     "@concepta/nestjs-authentication": "^6.0.0-alpha.3",
     "@concepta/nestjs-crud": "^6.0.0-alpha.3",
     "@concepta/nestjs-email": "^6.0.0-alpha.3",
-    "@concepta/nestjs-jwt": "^6.0.0-alpha.3",
     "@concepta/nestjs-otp": "^6.0.0-alpha.3",
     "@concepta/nestjs-password": "^6.0.0-alpha.3",
     "@concepta/nestjs-typeorm-ext": "^6.0.0-alpha.3",

@@ -153,7 +153,7 @@ Finally, set up the module configuration:
 ```ts
 import { AuthenticationModule, IssueTokenService } from '@concepta/nestjs-authentication';
 import { FederatedModule } from '@concepta/nestjs-federated';
-import { JwtModule } from '@concepta/nestjs-jwt';
+import { JwtModule } from '@concepta/nestjs-authentication';
 import { Module } from '@nestjs/common';
 import { FederatedUserLookupService } from './federated/federated-lookup.service';
 import { UserMutateServiceFixture } from './federated/federated-mutate.service';
@@ -236,7 +236,7 @@ For a detailed implementation example, refer to:
 
 ```ts
 import { Injectable } from '@nestjs/common';
-import { JwtIssueService } from '@concepta/nestjs-jwt';
+import { JwtIssueService } from '@concepta/nestjs-authentication';
 import { AuthenticationResponseInterface } from '@concepta/nestjs-common';
 import { IssueTokenServiceInterface } from '../interfaces/issue-token-service.interface';
 
@@ -276,7 +276,7 @@ To customize the jwt service:
 2. Provide it in the module configuration:
 
 ```ts
-import { JwtService } from '@concepta/nestjs-jwt';
+import { JwtService } from '@concepta/nestjs-authentication';
 // ...
 AuthAppleModule.forRoot({
   jwtService: new JwtService({
@@ -291,7 +291,7 @@ Create a custom service that implements `AuthAppleServiceInterface`, this
 service will be responsable for verify and decode the idToken from Apple.
 
 ```ts
-import { JwtService } from '@concepta/nestjs-jwt';
+import { JwtService } from '@concepta/nestjs-authentication';
 // ...
 AuthAppleModule.forRoot({
   authAppleService: new MyAuthAppleService(),

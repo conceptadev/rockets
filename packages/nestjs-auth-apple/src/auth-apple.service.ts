@@ -1,6 +1,6 @@
 import { JwksClient } from 'jwks-rsa';
 import { Inject, Injectable } from '@nestjs/common';
-import { JwtVerifyServiceInterface } from '@concepta/nestjs-jwt';
+import { JwtVerifyServiceInterface } from '@concepta/nestjs-authentication';
 import {
   AUTH_APPLE_JWT_KEYS,
   AUTH_APPLE_JWT_SERVICE_TOKEN,

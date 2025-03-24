@@ -30,7 +30,7 @@
       - [Step 2: Make an Authenticated Request](#step-2-make-an-authenticated-request)
       - [Example Curl Calls](#example-curl-calls)
 - [How to Guides](#how-to-guides)
-  - [1. How to Set Up AuthenticationModule with forRoot and JwtModule from @concepta/nestjs-jwt](#1-how-to-set-up-authenticationmodule-with-forroot-and-jwtmodule-from-conceptanestjs-jwt)
+  - [1. How to Set Up AuthenticationModule with forRoot and JwtModule from @concepta/nestjs-authentication](#1-how-to-set-up-authenticationmodule-with-forroot-and-jwtmodule-from-conceptanestjs-jwt)
   - [2. How to Configure AuthenticationModule Settings](#2-how-to-configure-authenticationmodule-settings)
 - [Explanation](#explanation)
   - [Conceptual Overview](#conceptual-overview)
@@ -376,7 +376,7 @@ import { Module } from '@nestjs/common';
 
 import { Pet } from './entity/pet.entity';
 import { User } from './user/user.entity';
-import { JwtModule } from '@concepta/nestjs-jwt';
+import { JwtModule } from '@concepta/nestjs-authentication';
 import { AuthenticationModule } from '@concepta/nestjs-authentication';
 import { AuthJwtModule } from '@concepta/nestjs-auth-jwt';
 import { MyJwtUserLookupService } from './services/my-jwt-user-lookup.service';
@@ -514,7 +514,7 @@ this will return whatever was defined at `bySubject` method from
 
 ## How to Guides
 
-### 1. How to Set Up AuthenticationModule with forRoot and JwtModule from @concepta/nestjs-jwt
+### 1. How to Set Up AuthenticationModule with forRoot and JwtModule from @concepta/nestjs-authentication
 
 The `@concepta/nestjs-authentication` module is designed to integrate
 seamlessly with other modules in the authentication suite, such as
@@ -530,7 +530,7 @@ necessary packages using your package manager.
 
 Here is a basic example using `yarn`:
 
-yarn add @nestjs-authentication @concepta/nestjs-jwt
+yarn add @nestjs-authentication @concepta/nestjs-authentication
 
 #### Example Setup
 
@@ -591,7 +591,7 @@ AuthenticationModule.forRoot({
 
 ```ts
 import { Injectable } from '@nestjs/common';
-import { JwtIssueService } from '@concepta/nestjs-jwt';
+import { JwtIssueService } from '@concepta/nestjs-authentication';
 import { AuthenticationResponseInterface } from '@concepta/nestjs-common';
 import { IssueTokenServiceInterface } from '../interfaces/issue-token-service.interface';
 
@@ -636,7 +636,7 @@ export class MyIssueTokenService implements IssueTokenServiceInterface {
 
 ```ts
 import { Injectable } from '@nestjs/common';
-import { JwtVerifyService } from '@concepta/nestjs-jwt';
+import { JwtVerifyService } from '@concepta/nestjs-authentication';
 import { ValidateTokenServiceInterface } from '../interfaces/validate-token-service.interface';
 import { VerifyTokenServiceInterface } from '../interfaces/verify-token-service.interface';
 import { BadRequestException } from '@nestjs/common';

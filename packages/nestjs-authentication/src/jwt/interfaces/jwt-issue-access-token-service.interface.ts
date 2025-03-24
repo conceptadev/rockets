@@ -1,4 +1,5 @@
-import { JwtSignOptions, JwtSignStringOptions } from '../jwt.types';
+import { JwtSignOptions, JwtSignStringOptions } from "../jwt.types";
+
 
 export interface JwtIssueAccessTokenServiceInterface {
   accessToken(payload: string, options?: JwtSignStringOptions): Promise<string>;

@@ -11,7 +11,7 @@ import {
   createVerifyAccessTokenCallback,
   JwtStrategy,
   JwtStrategyOptionsInterface,
-} from '@concepta/nestjs-jwt';
+} from '@concepta/nestjs-authentication';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 import {

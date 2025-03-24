@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthenticationModule } from '@concepta/nestjs-authentication';
-import { JwtModule } from '@concepta/nestjs-jwt';
+import { JwtModule } from '@concepta/nestjs-authentication';
 import { AuthJwtModule } from '@concepta/nestjs-auth-jwt';
 
 // import { default as ormConfig } from './ormconfig.fixture';

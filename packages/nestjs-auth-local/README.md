@@ -84,7 +84,6 @@ npm install class-validator
 npm install @concepta/nestjs-common
 npm install @concepta/nestjs-authentication
 npm install @concepta/nestjs-password
-npm install @concepta/nestjs-jwt
 npm install @concepta/nestjs-auth-local
 
 or
@@ -94,7 +93,6 @@ yarn add class-validator
 yarn add @concepta/nestjs-common
 yarn add @concepta/nestjs-authentication
 yarn add @concepta/nestjs-password
-yarn add @concepta/nestjs-jwt
 yarn add @concepta/nestjs-auth-local
 
 ```
@@ -194,7 +192,7 @@ Configure the module to include the necessary services `userLookupService`.
 // app.module.ts
 import { Module } from '@nestjs/common';
 import { AuthLocalModule } from '@concepta/nestjs-auth-local';
-import { JwtModule } from '@concepta/nestjs-jwt';
+import { JwtModule } from '@concepta/nestjs-authentication';
 import { UserLookupService } from './user-lookup.service';
 
 @Module({
@@ -348,7 +346,7 @@ import {
   JwtIssueService,
   JwtIssueServiceInterface,
   JwtSignService,
-} from '@concepta/nestjs-jwt';
+} from '@concepta/nestjs-authentication';
 
 @Injectable()
 export class MyJwtIssueService extends JwtIssueService {
@@ -377,7 +375,7 @@ Or you can completely replace the default implementation:
 ```ts
 // my-jwt-issue.service.ts
 import { Injectable } from '@nestjs/common';
-import { JwtIssueServiceInterface } from '@concepta/nestjs-jwt';
+import { JwtIssueServiceInterface } from '@concepta/nestjs-authentication';
 
 @Injectable()
 export class MyJwtIssueService implements JwtIssueServiceInterface {

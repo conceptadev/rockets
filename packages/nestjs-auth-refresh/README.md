@@ -302,7 +302,7 @@ documentation.
 ```ts
   // app.module.ts
 import { Module } from '@nestjs/common';
-import { ExtractJwt } from '@concepta/nestjs-jwt';
+import { ExtractJwt } from '@concepta/nestjs-authentication';
 import { AuthRefreshModule, AuthRefreshSettingsInterface } from '@concepta/nestjs-auth-refresh';
 
 const settings: AuthRefreshSettingsInterface = {

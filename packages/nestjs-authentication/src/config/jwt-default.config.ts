@@ -1,10 +1,10 @@
 import { randomUUID } from 'crypto';
 import { InternalServerErrorException, Logger } from '@nestjs/common';
 import { registerAs } from '@nestjs/config';
-import { JwtSettingsInterface } from '../interfaces/jwt-settings.interface';
-import { JWT_MODULE_DEFAULT_SETTINGS_TOKEN } from '../jwt.constants';
-import { JwtConfigUndefinedException } from '../exceptions/jwt-config-undefined.exception';
-import { JwtFallbackConfigUndefinedException } from '../exceptions/jwt-fallback-config-undefined.exception';
+import { JwtSettingsInterface } from '../jwt/interfaces/jwt-settings.interface';
+import { JWT_MODULE_DEFAULT_SETTINGS_TOKEN } from '../jwt/jwt.constants';
+import { JwtConfigUndefinedException } from '../jwt/exceptions/jwt-config-undefined.exception';
+import { JwtFallbackConfigUndefinedException } from '../jwt/exceptions/jwt-fallback-config-undefined.exception';
 
 /**
  * Settings defaults.

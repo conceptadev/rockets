@@ -9,19 +9,19 @@ import { createSettingsProvider } from '@concepta/nestjs-common';
 import {
   JwtIssueTokenService,
   JwtVerifyTokenService,
-} from '@concepta/nestjs-jwt';
+} from './jwt';
 
 import {
   AUTHENTICATION_MODULE_SETTINGS_TOKEN,
   AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN,
-} from './authentication.constants';
+} from './core/authentication.constants';
 
-import { AuthenticationOptionsInterface } from './interfaces/authentication-options.interface';
-import { AuthenticationOptionsExtrasInterface } from './interfaces/authentication-options-extras.interface';
-import { AuthenticationSettingsInterface } from './interfaces/authentication-settings.interface';
-import { ValidateTokenServiceInterface } from './interfaces/validate-token-service.interface';
-import { VerifyTokenService } from './services/verify-token.service';
-import { IssueTokenService } from './services/issue-token.service';
+import { AuthenticationOptionsInterface } from './core/interfaces/authentication-options.interface';
+import { AuthenticationOptionsExtrasInterface } from './core/interfaces/authentication-options-extras.interface';
+import { AuthenticationSettingsInterface } from './core/interfaces/authentication-settings.interface';
+import { ValidateTokenServiceInterface } from './core/interfaces/validate-token-service.interface';
+import { VerifyTokenService } from './jwt/services/verify-token.service';
+import { IssueTokenService } from './jwt/services/issue-token.service';
 import { authenticationDefaultConfig } from './config/authentication-default.config';
 
 const RAW_OPTIONS_TOKEN = Symbol('__AUTHENTICATION_MODULE_RAW_OPTIONS_TOKEN__');

@@ -20,7 +20,7 @@ import {
   createAuthLocalValidateUserServiceProvider,
 } from './auth-local.module-definition';
 import { AuthLocalValidateUserService } from './services/auth-local-validate-user.service';
-import { JwtIssueTokenService } from '@concepta/nestjs-jwt';
+import { JwtIssueTokenService } from '@concepta/nestjs-authentication';
 
 describe('Auth-local.module-definition', () => {
   describe(createAuthLocalExports.name, () => {
