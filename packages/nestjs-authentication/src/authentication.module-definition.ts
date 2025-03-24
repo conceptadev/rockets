@@ -6,10 +6,7 @@ import {
 import { ConfigModule } from '@nestjs/config';
 
 import { createSettingsProvider } from '@concepta/nestjs-common';
-import {
-  JwtIssueTokenService,
-  JwtVerifyTokenService,
-} from './jwt';
+import { JwtIssueTokenService, JwtVerifyTokenService } from './jwt';
 
 import {
   AUTHENTICATION_MODULE_SETTINGS_TOKEN,

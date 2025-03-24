@@ -1,5 +1,4 @@
-import { JwtSignOptions, JwtSignStringOptions } from "../jwt.types";
-
+import { JwtSignOptions, JwtSignStringOptions } from '../jwt.types';
 
 export interface JwtIssueRefreshTokenServiceInterface {
   refreshToken(

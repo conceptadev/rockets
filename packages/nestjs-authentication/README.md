@@ -30,7 +30,7 @@
       - [Step 2: Make an Authenticated Request](#step-2-make-an-authenticated-request)
       - [Example Curl Calls](#example-curl-calls)
 - [How to Guides](#how-to-guides)
-  - [1. How to Set Up AuthenticationModule with forRoot and JwtModule from @concepta/nestjs-authentication](#1-how-to-set-up-authenticationmodule-with-forroot-and-jwtmodule-from-conceptanestjs-jwt)
+  - [1. How to Set Up AuthenticationModule with forRoot and JwtModule from @concepta/nestjs-authentication](#1-how-to-set-up-authenticationmodule-with-forroot-and-jwtmodule-from-conceptanestjs-authentication)
   - [2. How to Configure AuthenticationModule Settings](#2-how-to-configure-authenticationmodule-settings)
 - [Explanation](#explanation)
   - [Conceptual Overview](#conceptual-overview)

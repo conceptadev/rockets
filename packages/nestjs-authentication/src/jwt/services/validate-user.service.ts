@@ -5,7 +5,6 @@ import {
 } from '@concepta/nestjs-common';
 import { ValidateUserServiceInterface } from '../../core/interfaces/validate-user-service.interface';
 
-
 @Injectable()
 export abstract class ValidateUserService<
   T extends unknown[] = unknown[],
