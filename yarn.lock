@@ -890,6 +890,8 @@ __metadata:
   peerDependencies:
     class-transformer: "*"
     class-validator: "*"
+    rxjs: ^7.1.0
+    typeorm: ^0.3.0
   languageName: unknown
   linkType: soft
 

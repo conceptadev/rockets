@@ -91,7 +91,6 @@ describe(AuthVerifyService, () => {
     expect(spyUserMutateServiceUpdate).toBeDefined();
   });
 
-
   describe(AuthVerifyService.prototype.send, () => {
     it('should send password verify', async () => {
       const result = await authVerifyService.send({ email: UserFixture.email });

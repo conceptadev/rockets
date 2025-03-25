@@ -7,7 +7,6 @@ import { ConfigModule } from '@nestjs/config';
 
 import { createSettingsProvider } from '@concepta/nestjs-common';
 
-
 import {
   AUTHENTICATION_MODULE_SETTINGS_TOKEN,
   AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN,

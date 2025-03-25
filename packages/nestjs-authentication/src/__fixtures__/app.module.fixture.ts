@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { EmailModule, EmailService } from '@concepta/nestjs-email';
-import { AuthJwtModule } from '@concepta/nestjs-auth-jwt';
 
 import { TypeOrmModuleFixture } from './typeorm.module.fixture';
 import { OtpServiceFixture } from './otp/otp.service.fixture';
