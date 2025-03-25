@@ -1,8 +1,8 @@
 import { FactoryProvider } from '@nestjs/common';
 import { mock } from 'jest-mock-extended';
-import { OtpServiceFixture } from './__fixtures__/otp/otp.service.fixture';
-import { UserLookupServiceFixture } from './__fixtures__/user/services/user-lookup.service.fixture';
-import { UserMutateServiceFixture } from './__fixtures__/user/services/user-mutate.service.fixture';
+import { OtpServiceFixture } from '../__fixtures__/otp/otp.service.fixture';
+import { UserLookupServiceFixture } from '../__fixtures__/user/services/user-lookup.service.fixture';
+import { UserMutateServiceFixture } from '../__fixtures__/user/services/user-mutate.service.fixture';
 import {
   AUTH_VERIFY_MODULE_EMAIL_SERVICE_TOKEN,
   AUTH_VERIFY_MODULE_OTP_SERVICE_TOKEN,
@@ -10,7 +10,7 @@ import {
   AUTH_VERIFY_MODULE_USER_LOOKUP_SERVICE_TOKEN,
   AUTH_VERIFY_MODULE_USER_MUTATE_SERVICE_TOKEN,
 } from './auth-verify.constants';
-import { AuthVerifyController } from './auth-verify.controller';
+import { AuthVerifyController } from './controllers/auth-verify.controller';
 import {
   createAuthVerifyControllers,
   createAuthVerifyEmailServiceProvider,

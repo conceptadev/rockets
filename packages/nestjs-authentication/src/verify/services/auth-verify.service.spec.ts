@@ -5,7 +5,7 @@ import {
   AUTH_VERIFY_MODULE_SETTINGS_TOKEN,
   AUTH_VERIFY_MODULE_USER_LOOKUP_SERVICE_TOKEN,
   AUTH_VERIFY_MODULE_USER_MUTATE_SERVICE_TOKEN,
-} from '../auth-verify.constants';
+} from '../../verify/auth-verify.constants';
 
 import { AuthVerifyService } from './auth-verify.service';
 import { AuthVerifyNotificationService } from './auth-verify-notification.service';
@@ -16,9 +16,9 @@ import { AuthVerifyUserLookupServiceInterface } from '../interfaces/auth-verify-
 import { AuthVerifyNotificationServiceInterface } from '../interfaces/auth-verify-notification.service.interface';
 import { AuthVerifyUserMutateServiceInterface } from '../interfaces/auth-verify-user-mutate.service.interface';
 
-import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
-import { OtpServiceFixture } from '../__fixtures__/otp/otp.service.fixture';
-import { UserFixture } from '../__fixtures__/user/user.fixture';
+import { AppModuleFixture } from '../../__fixtures__/app.module.fixture';
+import { OtpServiceFixture } from '../../__fixtures__/otp/otp.service.fixture';
+import { UserFixture } from '../../__fixtures__/user/user.fixture';
 
 describe(AuthVerifyService, () => {
   let app: INestApplication;
@@ -77,6 +77,20 @@ describe(AuthVerifyService, () => {
     jest.clearAllMocks();
     return app ? await app.close() : undefined;
   });
+
+  it('should send password verify', async () => {
+    expect(authVerifyService).toBeDefined();
+    expect(otpService).toBeDefined();
+    expect(settings).toBeDefined();
+    expect(notificationService).toBeDefined();
+    expect(userLookupService).toBeDefined();
+    expect(userMutateService).toBeDefined();
+    expect(sendVerifyEmail).toBeDefined();
+    expect(spyOtpServiceValidate).toBeDefined();
+    expect(spyUserLookupServiceByEmail).toBeDefined();
+    expect(spyUserMutateServiceUpdate).toBeDefined();
+  });
+
 
   describe(AuthVerifyService.prototype.send, () => {
     it('should send password verify', async () => {

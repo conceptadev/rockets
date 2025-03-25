@@ -11,7 +11,7 @@ import {
   AUTH_VERIFY_MODULE_USER_LOOKUP_SERVICE_TOKEN,
   AUTH_VERIFY_MODULE_USER_MUTATE_SERVICE_TOKEN,
   AUTH_VERIFY_MODULE_ENTITY_MANAGER_PROXY_TOKEN,
-} from '../auth-verify.constants';
+} from '../../verify/auth-verify.constants';
 import { AuthVerifyNotificationService } from './auth-verify-notification.service';
 import {
   ReferenceAssigneeInterface,

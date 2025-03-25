@@ -4,10 +4,10 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   AUTH_VERIFY_MODULE_EMAIL_SERVICE_TOKEN,
   AUTH_VERIFY_MODULE_SETTINGS_TOKEN,
-} from '../auth-verify.constants';
+} from '../../verify/auth-verify.constants';
 import { AuthVerifyEmailServiceInterface } from '../interfaces/auth-verify-email.service.interface';
 import { AuthVerifySettingsInterface } from '../interfaces/auth-verify-settings.interface';
-import { formatTokenUrl } from '../auth-verify.utils';
+import { formatTokenUrl } from '../../verify/auth-verify.utils';
 import { AuthVerifyEmailParamsInterface } from '../interfaces/auth-verify-email-params.interface';
 
 @Injectable()

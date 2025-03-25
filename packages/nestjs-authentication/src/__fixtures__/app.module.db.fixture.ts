@@ -3,8 +3,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
 import { PasswordModule } from '@concepta/nestjs-password';
-import { AuthenticationModule } from '@concepta/nestjs-authentication';
-import { JwtModule } from '@concepta/nestjs-authentication';
+
 import { AuthJwtModule } from '@concepta/nestjs-auth-jwt';
 import { OtpModule, OtpService } from '@concepta/nestjs-otp';
 import { EmailModule, EmailService } from '@concepta/nestjs-email';
@@ -14,12 +13,14 @@ import {
   UserMutateService,
 } from '@concepta/nestjs-user';
 
-import { AuthVerifyModule } from '../auth-verify.module';
+import { AuthVerifyModule } from '../verify/auth-verify.module';
 import { UserOtpEntityFixture } from './user/entities/user-otp-entity.fixture';
 import { UserEntityFixture } from './user/entities/user-entity.fixture';
 
 import { default as ormConfig } from './ormconfig.fixture';
 import { MailerServiceFixture } from './email/mailer.service.fixture';
+import { JwtModule } from '../jwt/jwt.module';
+import { AuthenticationModule } from '../authentication.module';
 
 @Module({
   imports: [
@@ -33,12 +34,13 @@ import { MailerServiceFixture } from './email/mailer.service.fixture';
           context.getClass().name === 'UserController',
       },
     }),
-    AuthJwtModule.forRootAsync({
-      inject: [UserLookupService],
-      useFactory: (userLookupService: UserLookupService) => ({
-        userLookupService,
-      }),
-    }),
+    // TODO: review why this break tests
+    // AuthJwtModule.forRootAsync({
+    //   inject: [UserLookupService],
+    //   useFactory: (userLookupService: UserLookupService) => ({
+    //     userLookupService,
+    //   }),
+    // }),
     AuthVerifyModule.forRootAsync({
       inject: [UserLookupService, UserMutateService, OtpService, EmailService],
       useFactory: (

@@ -5,7 +5,7 @@ import {
   ReferenceSubject,
 } from '@concepta/nestjs-common';
 
-import { AuthVerifyUserLookupServiceInterface } from '../../../interfaces/auth-verify-user-lookup.service.interface';
+import { AuthVerifyUserLookupServiceInterface } from '../../../verify/interfaces/auth-verify-user-lookup.service.interface';
 
 import { UserFixture } from '../user.fixture';
 

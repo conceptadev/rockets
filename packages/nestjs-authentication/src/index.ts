@@ -12,7 +12,7 @@ export * from './core/exceptions/authentication-refresh-token.exception';
 
 // JWT exports
 export * from './jwt/services/issue-token.service';
-export * from './jwt/services/verify-token.service';
+export { VerifyTokenService } from './jwt/services/verify-token.service';
 export * from './jwt/services/validate-user.service';
 export * from './jwt/dto/authentication-jwt-response.dto';
 
@@ -29,4 +29,8 @@ export * from './core/interfaces/verify-token-service.interface';
 // passport
 export * from './password/factories/passport-strategy.factory';
 // JWT exports
+export { JwtModule } from './jwt/jwt.module';
 export * from './jwt';
+
+export { AuthVerifyModule } from './verify/auth-verify.module';
+export * from './verify';

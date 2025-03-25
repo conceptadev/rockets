@@ -4,7 +4,7 @@ import {
   ReferenceIdInterface,
 } from '@concepta/nestjs-common';
 
-import { AuthVerifyUserMutateServiceInterface } from '../../../interfaces/auth-verify-user-mutate.service.interface';
+import { AuthVerifyUserMutateServiceInterface } from '../../../verify/interfaces/auth-verify-user-mutate.service.interface';
 
 import { UserFixture } from '../user.fixture';
 

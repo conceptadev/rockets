@@ -8,15 +8,15 @@ import { EmailService } from '@concepta/nestjs-email';
 import { OtpService } from '@concepta/nestjs-otp';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
 
-import { AUTH_VERIFY_MODULE_SETTINGS_TOKEN } from './auth-verify.constants';
+import { AUTH_VERIFY_MODULE_SETTINGS_TOKEN } from '../../verify/auth-verify.constants';
 
 import { AuthVerifyController } from './auth-verify.controller';
-import { AuthVerifySettingsInterface } from './interfaces/auth-verify-settings.interface';
-import { AuthVerifyDto } from './dto/auth-verify.dto';
-import { AuthVerifyUpdateDto } from './dto/auth-verify-update.dto';
+import { AuthVerifySettingsInterface } from '../interfaces/auth-verify-settings.interface';
+import { AuthVerifyDto } from '../dto/auth-verify.dto';
+import { AuthVerifyUpdateDto } from '../dto/auth-verify-update.dto';
 
-import { UserEntityFixture } from './__fixtures__/user/entities/user-entity.fixture';
-import { AppModuleDbFixture } from './__fixtures__/app.module.db.fixture';
+import { UserEntityFixture } from '../../__fixtures__/user/entities/user-entity.fixture';
+import { AppModuleDbFixture } from '../../__fixtures__/app.module.db.fixture';
 
 describe(AuthVerifyController, () => {
   let app: INestApplication;

@@ -7,8 +7,6 @@ import {
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { JwtModule } from './jwt';
-
 import {
   AUTHENTICATION_MODULE_SETTINGS_TOKEN,
   AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN,
@@ -27,6 +25,7 @@ import { GlobalModuleFixture } from './__fixtures__/global.module.fixture';
 import { ValidateTokenServiceFixture } from './__fixtures__/services/validate-token.service.fixture';
 import { VerifyTokenServiceFixture } from './__fixtures__/services/verify-token.service.fixture';
 import { IssueTokenServiceFixture } from './__fixtures__/services/issue-token.service.fixture';
+import { JwtModule } from './jwt/jwt.module';
 
 describe(AuthenticationModule, () => {
   let testModule: TestingModule;

@@ -6,7 +6,7 @@ import {
 import { ConfigModule } from '@nestjs/config';
 
 import { createSettingsProvider } from '@concepta/nestjs-common';
-import { JwtIssueTokenService, JwtVerifyTokenService } from './jwt';
+
 
 import {
   AUTHENTICATION_MODULE_SETTINGS_TOKEN,
@@ -20,6 +20,8 @@ import { ValidateTokenServiceInterface } from './core/interfaces/validate-token-
 import { VerifyTokenService } from './jwt/services/verify-token.service';
 import { IssueTokenService } from './jwt/services/issue-token.service';
 import { authenticationDefaultConfig } from './config/authentication-default.config';
+import { JwtVerifyTokenService } from './jwt/services/jwt-verify-token.service';
+import { JwtIssueTokenService } from './jwt/services/jwt-issue-token.service';
 
 const RAW_OPTIONS_TOKEN = Symbol('__AUTHENTICATION_MODULE_RAW_OPTIONS_TOKEN__');
 

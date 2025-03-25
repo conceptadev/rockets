@@ -1,5 +1,5 @@
 import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
-import { AuthVerifyException } from './auth-verify.exception';
+import { AuthVerifyException } from '../exceptions/auth-verify.exception';
 import { HttpStatus } from '@nestjs/common';
 
 export class AuthRecoveryOtpInvalidException extends AuthVerifyException {

@@ -2,10 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { EmailService } from '@concepta/nestjs-email';
 
-import { AUTH_VERIFY_MODULE_EMAIL_SERVICE_TOKEN } from '../auth-verify.constants';
-import { AuthVerifyNotificationService } from './auth-verify-notification.service';
+import { AUTH_VERIFY_MODULE_EMAIL_SERVICE_TOKEN } from '../../verify/auth-verify.constants';
+import { AuthVerifyNotificationService } from '../services/auth-verify-notification.service';
 
-import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
+import { AppModuleFixture } from '../../__fixtures__/app.module.fixture';
 
 describe('AuthVerifyNotificationService', () => {
   let app: INestApplication;

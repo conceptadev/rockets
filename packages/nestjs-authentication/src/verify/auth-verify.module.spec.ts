@@ -4,7 +4,7 @@ import { mock } from 'jest-mock-extended';
 
 import { EmailModule, EmailService } from '@concepta/nestjs-email';
 
-import { AuthVerifyController } from './auth-verify.controller';
+import { AuthVerifyController } from './controllers/auth-verify.controller';
 import { AuthVerifyModule } from './auth-verify.module';
 import { AuthVerifyEmailServiceInterface } from './interfaces/auth-verify-email.service.interface';
 import { AuthVerifyOtpServiceInterface } from './interfaces/auth-verify-otp.service.interface';
@@ -13,13 +13,13 @@ import { AuthVerifyUserMutateServiceInterface } from './interfaces/auth-verify-u
 import { AuthVerifyServiceInterface } from './interfaces/auth-verify.service.interface';
 import { AuthVerifyService } from './services/auth-verify.service';
 
-import { MailerServiceFixture } from './__fixtures__/email/mailer.service.fixture';
-import { OtpModuleFixture } from './__fixtures__/otp/otp.module.fixture';
-import { OtpServiceFixture } from './__fixtures__/otp/otp.service.fixture';
-import { TypeOrmModuleFixture } from './__fixtures__/typeorm.module.fixture';
-import { UserLookupServiceFixture } from './__fixtures__/user/services/user-lookup.service.fixture';
-import { UserMutateServiceFixture } from './__fixtures__/user/services/user-mutate.service.fixture';
-import { UserModuleFixture } from './__fixtures__/user/user.module.fixture';
+import { MailerServiceFixture } from '../__fixtures__/email/mailer.service.fixture';
+import { OtpModuleFixture } from '../__fixtures__/otp/otp.module.fixture';
+import { OtpServiceFixture } from '../__fixtures__/otp/otp.service.fixture';
+import { TypeOrmModuleFixture } from '../__fixtures__/typeorm.module.fixture';
+import { UserLookupServiceFixture } from '../__fixtures__/user/services/user-lookup.service.fixture';
+import { UserMutateServiceFixture } from '../__fixtures__/user/services/user-mutate.service.fixture';
+import { UserModuleFixture } from '../__fixtures__/user/user.module.fixture';
 
 describe(AuthVerifyModule, () => {
   let testModule: TestingModule;

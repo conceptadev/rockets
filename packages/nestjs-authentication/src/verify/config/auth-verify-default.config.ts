@@ -1,7 +1,7 @@
 import { registerAs } from '@nestjs/config';
-import { AUTH_VERIFY_MODULE_DEFAULT_SETTINGS_TOKEN } from '../auth-verify.constants';
+import { AUTH_VERIFY_MODULE_DEFAULT_SETTINGS_TOKEN } from '../../verify/auth-verify.constants';
 import { AuthVerifySettingsInterface } from '../interfaces/auth-verify-settings.interface';
-import { formatTokenUrl } from '../auth-verify.utils';
+import { formatTokenUrl } from '../../verify/auth-verify.utils';
 
 /**
  * Default configuration for auth verify.

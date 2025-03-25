@@ -8,7 +8,7 @@ import {
   ReferenceIdInterface,
 } from '@concepta/nestjs-common';
 
-import { AuthVerifyOtpServiceInterface } from '../../interfaces/auth-verify-otp.service.interface';
+import { AuthVerifyOtpServiceInterface } from '../../verify/interfaces/auth-verify-otp.service.interface';
 import { UserFixture } from '../user/user.fixture';
 
 @Injectable()
