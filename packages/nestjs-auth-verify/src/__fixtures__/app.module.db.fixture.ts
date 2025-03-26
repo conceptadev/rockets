@@ -3,9 +3,11 @@ import { Module } from '@nestjs/common';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
 import { PasswordModule } from '@concepta/nestjs-password';
-import { AuthenticationModule } from '@concepta/nestjs-authentication';
-import { JwtModule } from '@concepta/nestjs-authentication';
-import { AuthJwtModule } from '@concepta/nestjs-auth-jwt';
+import {
+  AuthenticationModule,
+  AuthJwtModule,
+  JwtModule,
+} from '@concepta/nestjs-authentication';
 import { OtpModule, OtpService } from '@concepta/nestjs-otp';
 import { EmailModule, EmailService } from '@concepta/nestjs-email';
 import {

@@ -45,9 +45,6 @@
       "path": "packages/nestjs-auth-local"
     },
     {
-      "path": "packages/nestjs-auth-jwt"
-    },
-    {
       "path": "packages/nestjs-auth-github"
     },
     {

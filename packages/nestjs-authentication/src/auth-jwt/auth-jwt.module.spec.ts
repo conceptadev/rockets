@@ -8,13 +8,6 @@ import {
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { JwtModule } from '@concepta/nestjs-authentication';
-import {
-  AuthenticationModule,
-  VerifyTokenService,
-  VerifyTokenServiceInterface,
-} from '@concepta/nestjs-authentication';
-
 import {
   AUTH_JWT_MODULE_SETTINGS_TOKEN,
   AUTH_JWT_MODULE_USER_LOOKUP_SERVICE_TOKEN,
@@ -25,9 +18,13 @@ import { AuthJwtModule } from './auth-jwt.module';
 import { AuthJwtSettingsInterface } from './interfaces/auth-jwt-settings.interface';
 import { AuthJwtUserLookupServiceInterface } from './interfaces/auth-jwt-user-lookup-service.interface';
 
-import { UserModuleFixture } from './__fixtures__/user/user.module.fixture';
-import { UserLookupServiceFixture } from './__fixtures__/user/user-lookup.service.fixture';
-import { JwtVerifyTokenService } from '@concepta/nestjs-authentication';
+import { UserModuleFixture } from '../__fixtures__/user/user.module.fixture';
+import { UserLookupServiceFixture } from '../__fixtures__/user/user-lookup.service.fixture';
+import { JwtVerifyTokenService } from '../jwt/services/jwt-verify-token.service';
+import { VerifyTokenService } from '../jwt/services/verify-token.service';
+import { VerifyTokenServiceInterface } from '../core/interfaces/verify-token-service.interface';
+import { AuthenticationModule } from '../authentication.module';
+import { JwtModule } from '../jwt/jwt.module';
 
 describe(AuthJwtModule, () => {
   const jwtVerifyTokenService = mock<JwtVerifyTokenService>();

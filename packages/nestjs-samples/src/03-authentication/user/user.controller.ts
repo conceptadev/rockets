@@ -1,5 +1,5 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '@concepta/nestjs-auth-jwt';
+import { JwtAuthGuard } from '@concepta/nestjs-authentication';
 import { ReferenceUsername } from '@concepta/nestjs-common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 

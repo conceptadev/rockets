@@ -26,7 +26,6 @@
     "@nestjs/swagger": "^7.4.0"
   },
   "devDependencies": {
-    "@concepta/nestjs-auth-jwt": "^6.0.0-alpha.3",
     "@concepta/nestjs-authentication": "^6.0.0-alpha.3",
     "@concepta/typeorm-seeding": "^4.0.0",
     "@faker-js/faker": "^8.4.1",

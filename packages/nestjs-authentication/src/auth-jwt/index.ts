@@ -1,5 +1,5 @@
-export * from './auth-jwt.module';
-export * from './auth-jwt.strategy';
+export { AuthJwtModule } from './auth-jwt.module';
+export { AuthJwtStrategy } from './auth-jwt.strategy';
 export { AuthJwtGuard, AuthJwtGuard as JwtAuthGuard } from './auth-jwt.guard';
 // exceptions
 export { AuthJwtException } from './exceptions/auth-jwt.exception';

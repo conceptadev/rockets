@@ -25,7 +25,7 @@
     "passport-apple": "^2.0.2"
   },
   "devDependencies": {
-    "@concepta/nestjs-auth-jwt": "^6.0.0-alpha.3",
+    "@concepta/nestjs-authentication": "^6.0.0-alpha.3",
     "@concepta/nestjs-crud": "^6.0.0-alpha.3",
     "@concepta/nestjs-password": "^6.0.0-alpha.3",
     "@concepta/nestjs-typeorm-ext": "^6.0.0-alpha.3",

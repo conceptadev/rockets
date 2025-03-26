@@ -2,8 +2,8 @@ import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { randomUUID } from 'crypto';
 import { mock } from 'jest-mock-extended';
-import { UserFixture } from './__fixtures__/user/user.entity.fixture';
-import { UserModuleFixture } from './__fixtures__/user/user.module.fixture';
+import { UserFixture } from '../__fixtures__/user/user.entity.fixture';
+import { UserModuleFixture } from '../__fixtures__/user/user.module.fixture';
 import { AuthJwtGuard } from './auth-jwt.guard';
 
 describe(AuthJwtGuard, () => {

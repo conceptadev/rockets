@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
-import { AuthenticationModule } from '@concepta/nestjs-authentication';
-import { JwtModule } from '@concepta/nestjs-authentication';
-import { AuthJwtModule } from '@concepta/nestjs-auth-jwt';
+import {
+  AuthenticationModule,
+  JwtModule,
+  AuthJwtModule,
+} from '@concepta/nestjs-authentication';
 
 // import { default as ormConfig } from './ormconfig.fixture';
 import { AuthLocalModule } from '../auth-local.module';

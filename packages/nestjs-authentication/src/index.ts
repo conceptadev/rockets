@@ -30,3 +30,4 @@ export * from './core/interfaces/verify-token-service.interface';
 export * from './password/factories/passport-strategy.factory';
 // JWT exports
 export * from './jwt';
+export * from './auth-jwt';

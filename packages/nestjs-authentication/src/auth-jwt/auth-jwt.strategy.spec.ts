@@ -1,11 +1,11 @@
 import { mock } from 'jest-mock-extended';
 import { AuthJwtUserLookupServiceInterface } from './interfaces/auth-jwt-user-lookup-service.interface';
 import { AuthJwtStrategy } from './auth-jwt.strategy';
-import { UserFixture } from './__fixtures__/user/user.entity.fixture';
+import { UserFixture } from '../__fixtures__/user/user.entity.fixture';
 import { randomUUID } from 'crypto';
 import { AuthorizationPayloadInterface } from '@concepta/nestjs-common';
 import { AuthJwtSettingsInterface } from './interfaces/auth-jwt-settings.interface';
-import { VerifyTokenServiceInterface } from '@concepta/nestjs-authentication';
+import { VerifyTokenServiceInterface } from '../core/interfaces/verify-token-service.interface';
 import { AuthJwtUnauthorizedException } from './exceptions/auth-jwt-unauthorized.exception';
 
 describe(AuthJwtStrategy, () => {

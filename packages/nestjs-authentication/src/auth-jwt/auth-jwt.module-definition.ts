@@ -6,11 +6,9 @@ import {
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 
-import {
-  VerifyTokenService,
-  VerifyTokenServiceInterface,
-} from '@concepta/nestjs-authentication';
 import { createSettingsProvider } from '@concepta/nestjs-common';
+import { VerifyTokenService } from '../jwt/services/verify-token.service';
+import { VerifyTokenServiceInterface } from '../core/interfaces/verify-token-service.interface';
 
 import { AuthJwtOptionsInterface } from './interfaces/auth-jwt-options.interface';
 import { AuthJwtOptionsExtrasInterface } from './interfaces/auth-jwt-options-extras.interface';

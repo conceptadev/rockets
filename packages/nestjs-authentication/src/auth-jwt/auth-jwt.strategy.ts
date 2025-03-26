@@ -3,15 +3,7 @@ import {
   ReferenceIdInterface,
   AuthorizationPayloadInterface,
 } from '@concepta/nestjs-common';
-import {
-  PassportStrategyFactory,
-  VerifyTokenServiceInterface,
-} from '@concepta/nestjs-authentication';
-import {
-  createVerifyAccessTokenCallback,
-  JwtStrategy,
-  JwtStrategyOptionsInterface,
-} from '@concepta/nestjs-authentication';
+
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 import {
@@ -24,6 +16,11 @@ import {
 import { AuthJwtSettingsInterface } from './interfaces/auth-jwt-settings.interface';
 import { AuthJwtUserLookupServiceInterface } from './interfaces/auth-jwt-user-lookup-service.interface';
 import { AuthJwtUnauthorizedException } from './exceptions/auth-jwt-unauthorized.exception';
+import { PassportStrategyFactory } from '../password/factories/passport-strategy.factory';
+import { JwtStrategy } from '../jwt/jwt.strategy';
+import { VerifyTokenServiceInterface } from '../core/interfaces/verify-token-service.interface';
+import { JwtStrategyOptionsInterface } from '../jwt/interfaces/jwt-strategy-options.interface';
+import { createVerifyAccessTokenCallback } from '../jwt/utils/create-verify-access-token-callback.util';
 
 @Injectable()
 export class AuthJwtStrategy extends PassportStrategyFactory<JwtStrategy>(
