@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { AuthLocalModule } from '@concepta/nestjs-auth-local';
-import { AuthRefreshModule } from '@concepta/nestjs-auth-refresh';
 import {
   AuthenticationModule,
   AuthJwtModule,
   JwtModule,
+  AuthRefreshModule,
 } from '@concepta/nestjs-authentication';
 import { UserModule, UserLookupService } from '@concepta/nestjs-user';
 import { PasswordModule } from '@concepta/nestjs-password';

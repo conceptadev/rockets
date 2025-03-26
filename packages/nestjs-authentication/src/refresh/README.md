@@ -5,8 +5,8 @@ the request (headers, cookies, body, query, etc).
 
 ## Project
 
-[![NPM Latest](https://img.shields.io/npm/v/@concepta/nestjs-auth-refresh)](https://www.npmjs.com/package/@concepta/nestjs-auth-refresh)
-[![NPM Downloads](https://img.shields.io/npm/dw/@conceptadev/nestjs-auth-refresh)](https://www.npmjs.com/package/@concepta/nestjs-auth-refresh)
+[![NPM Latest](https://img.shields.io/npm/v/@concepta/nestjs-authentication)](https://www.npmjs.com/package/@concepta/nestjs-authentication)
+[![NPM Downloads](https://img.shields.io/npm/dw/@conceptadev/nestjs-authentication)](https://www.npmjs.com/package/@concepta/nestjs-authentication)
 [![GH Last Commit](https://img.shields.io/github/last-commit/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets)
 [![GH Contrib](https://img.shields.io/github/contributors/conceptadev/rockets?logo=github)](https://github.com/conceptadev/rockets/graphs/contributors)
 [![NestJS Dep](https://img.shields.io/github/package-json/dependency-version/conceptadev/rockets/@nestjs/common?label=NestJS&logo=nestjs&filename=packages%2Fnestjs-core%2Fpackage.json)](https://www.npmjs.com/package/@nestjs/common)
@@ -85,7 +85,7 @@ To install the `AuthRefreshModule` package, run the following command in
 your terminal:
 
 ```bash
-npm install @concepta/nestjs-auth-refresh
+npm install @concepta/nestjs-authentication
 ```
 
 ##### Add the AuthRefreshModule to Your NestJS Application
@@ -95,7 +95,7 @@ your main application module (usually `app.module.ts`) and register it using the
 `forRoot` or `forRootAsync` method:
 
 ```typescript
-import { AuthRefreshModule } from '@concepta/nestjs-auth-refresh';
+import { AuthRefreshModule } from '@concepta/nestjs-authentication';
 
 @Module({
   imports: [
@@ -113,7 +113,7 @@ export class AppModule {}
 
 To demonstrate the basic setup of the `AuthRefreshModule`, let's consider
 a scenario where we want to refresh JWT tokens. In this example, we will use
-`@concepta/nestjs-auth-refresh` in conjunction with other essential modules
+`@concepta/nestjs-authentication` in conjunction with other essential modules
 such as `@concepta/nestjs-auth-jwt`, `@concepta/nestjs-auth-local`, and
 `@concepta/nestjs-authentication`. These modules work together to provide a
 comprehensive and secure token refresh mechanism.
@@ -303,7 +303,7 @@ documentation.
   // app.module.ts
 import { Module } from '@nestjs/common';
 import { ExtractJwt } from '@concepta/nestjs-authentication';
-import { AuthRefreshModule, AuthRefreshSettingsInterface } from '@concepta/nestjs-auth-refresh';
+import { AuthRefreshModule, AuthRefreshSettingsInterface } from '@concepta/nestjs-authentication';
 
 const settings: AuthRefreshSettingsInterface = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -331,7 +331,7 @@ export class AppModule {}
 
 ### 7. Integration with Other NestJS Modules
 
-Integrate `@concepta/nestjs-auth-refresh` with other NestJS modules
+Integrate `@concepta/nestjs-authentication` with other NestJS modules
 like `@concepta/nestjs-user`, `@concepta/nestjs-auth-local`,
 `@concepta/nestjs-auth-jwt`, and more for a comprehensive
 authentication system.

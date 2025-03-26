@@ -6,12 +6,10 @@ import {
 import { ConfigModule } from '@nestjs/config';
 
 import { createSettingsProvider } from '@concepta/nestjs-common';
-import {
-  IssueTokenService,
-  IssueTokenServiceInterface,
-  VerifyTokenService,
-  VerifyTokenServiceInterface,
-} from '@concepta/nestjs-authentication';
+import { IssueTokenService } from '../jwt/services/issue-token.service';
+import { IssueTokenServiceInterface } from '../core/interfaces/issue-token-service.interface';
+import { VerifyTokenService } from '../jwt/services/verify-token.service';
+import { VerifyTokenServiceInterface } from '../core/interfaces/verify-token-service.interface';
 
 import {
   AUTH_REFRESH_MODULE_ISSUE_SERVICE_TOKEN,

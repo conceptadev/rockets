@@ -1,7 +1,7 @@
 import { AuthRefreshStrategy } from './auth-refresh.strategy';
 import { AuthRefreshSettingsInterface } from './interfaces/auth-refresh-settings.interface';
 import { mock } from 'jest-mock-extended';
-import { VerifyTokenServiceInterface } from '@concepta/nestjs-authentication';
+import { VerifyTokenServiceInterface } from '../core/interfaces/verify-token-service.interface';
 import { AuthRefreshUserLookupServiceInterface } from './interfaces/auth-refresh-user-lookup-service.interface';
 import { randomUUID } from 'crypto';
 import { AuthorizationPayloadInterface } from '@concepta/nestjs-common';

@@ -14,7 +14,6 @@
   "dependencies": {
     "@concepta/nestjs-authentication": "^6.0.0-alpha.3",
     "@concepta/nestjs-auth-local": "^6.0.0-alpha.3",
-    "@concepta/nestjs-auth-refresh": "^6.0.0-alpha.3",
     "@concepta/nestjs-common": "^6.0.0-alpha.3",
     "@concepta/nestjs-crud": "^6.0.0-alpha.3",
     "@concepta/nestjs-email": "^6.0.0-alpha.3",

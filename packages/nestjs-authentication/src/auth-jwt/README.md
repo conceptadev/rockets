@@ -893,3 +893,7 @@ This setup enhances the user experience by maintaining sessions securely and
 seamlessly. The integration involves configuring both modules to use the same
 token issuance and verification mechanisms, ensuring smooth interoperability
 and security.
+
+The `AuthJwtModule` is designed to integrate
+seamlessly with other modules in the authentication suite, such as
+`@concepta/nestjs-auth-local` and the refresh functionality from `@concepta/nestjs-authentication`.

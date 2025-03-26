@@ -9,13 +9,11 @@ import {
   AuthenticatedUserInterface,
   AuthenticationResponseInterface,
 } from '@concepta/nestjs-common';
-import {
-  IssueTokenServiceInterface,
-  IssueTokenService,
-  AuthUser,
-  AuthenticationJwtResponseDto,
-  AuthPublic,
-} from '@concepta/nestjs-authentication';
+import { IssueTokenServiceInterface } from '../core/interfaces/issue-token-service.interface';
+import { IssueTokenService } from '../jwt/services/issue-token.service';
+import { AuthUser } from '../core/decorators/auth-user.decorator';
+import { AuthenticationJwtResponseDto } from '../jwt/dto/authentication-jwt-response.dto';
+import { AuthPublic } from '../core/decorators/auth-public.decorator';
 import { AuthRefreshDto } from './dto/auth-refresh.dto';
 import { AuthRefreshGuard } from './auth-refresh.guard';
 

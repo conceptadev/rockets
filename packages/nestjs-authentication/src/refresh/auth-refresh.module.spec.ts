@@ -6,19 +6,16 @@ import {
   ModuleMetadata,
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  JwtIssueTokenService,
-  JwtModule,
-  JwtService,
-  JwtVerifyTokenService,
-} from '@concepta/nestjs-authentication';
-import {
-  AuthenticationModule,
-  IssueTokenService,
-  IssueTokenServiceInterface,
-  VerifyTokenService,
-  VerifyTokenServiceInterface,
-} from '@concepta/nestjs-authentication';
+import { JwtIssueTokenService } from '../jwt/services/jwt-issue-token.service';
+import { JwtModule } from '../jwt/jwt.module';
+import { JwtService } from '../jwt/services/jwt.service';
+import { JwtVerifyTokenService } from '../jwt/services/jwt-verify-token.service';
+
+import { AuthenticationModule } from '../authentication.module';
+import { IssueTokenService } from '../jwt/services/issue-token.service';
+import { IssueTokenServiceInterface } from '../core/interfaces/issue-token-service.interface';
+import { VerifyTokenService } from '../jwt/services/verify-token.service';
+import { VerifyTokenServiceInterface } from '../core/interfaces/verify-token-service.interface';
 
 import {
   AUTH_REFRESH_MODULE_ISSUE_SERVICE_TOKEN,

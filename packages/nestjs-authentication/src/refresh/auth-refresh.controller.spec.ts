@@ -1,4 +1,4 @@
-import { IssueTokenServiceInterface } from '@concepta/nestjs-authentication';
+import { IssueTokenServiceInterface } from '../core/interfaces/issue-token-service.interface';
 import {
   AuthenticatedUserInterface,
   AuthenticationResponseInterface,

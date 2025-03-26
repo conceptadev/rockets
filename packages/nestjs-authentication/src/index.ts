@@ -1,33 +1,33 @@
-// Main module
-export * from './authentication.module';
+export { AuthenticationModule } from './authentication.module';
 
-// Core exports
-export * from './core/decorators/auth-user.decorator';
-export * from './core/decorators/auth-public.decorator';
-export * from './core/guards/auth.guard';
-export * from './core/guards/fastify-auth.guard';
-export * from './core/exceptions/authentication.exception';
-export * from './core/exceptions/authentication-access-token.exception';
-export * from './core/exceptions/authentication-refresh-token.exception';
+export { authenticationDefaultConfig } from './config/authentication-default.config';
 
-// JWT exports
-export * from './jwt/services/issue-token.service';
-export * from './jwt/services/verify-token.service';
-export * from './jwt/services/validate-user.service';
-export * from './jwt/dto/authentication-jwt-response.dto';
+export { AuthUser } from './core/decorators/auth-user.decorator';
+export { AuthPublic } from './core/decorators/auth-public.decorator';
 
-// Notification exports
+export { AuthenticationOptionsInterface } from './core/interfaces/authentication-options.interface';
 
-// Configuration
+export { VerifyTokenServiceInterface } from './core/interfaces/verify-token-service.interface';
+export { IssueTokenServiceInterface } from './core/interfaces/issue-token-service.interface';
+export { ValidateUserServiceInterface } from './core/interfaces/validate-user-service.interface';
+export { PassportStrategyFactory } from './password/factories/passport-strategy.factory';
 
-// Service interfaces (for customization)
-export * from './core/interfaces/issue-token-service.interface';
-export * from './core/interfaces/validate-user-service.interface';
-export * from './core/interfaces/validate-token-service.interface';
-export * from './core/interfaces/verify-token-service.interface';
+export { AuthGuard } from './core/guards/auth.guard';
 
-// passport
-export * from './password/factories/passport-strategy.factory';
+export { AuthenticationJwtResponseDto } from './jwt/dto/authentication-jwt-response.dto';
+
+export { IssueTokenService } from './jwt/services/issue-token.service';
+export { VerifyTokenService } from './jwt/services/verify-token.service';
+export { ValidateUserService } from './jwt/services/validate-user.service';
+
+export { AuthGuardOptions, AuthGuardCtr } from './core/authentication.types';
+export { AuthenticationException } from './core/exceptions/authentication.exception';
+export { AuthenticationAccessTokenException } from './core/exceptions/authentication-access-token.exception';
+export { AuthenticationRefreshTokenException } from './core/exceptions/authentication-refresh-token.exception';
+
 // JWT exports
 export * from './jwt';
 export * from './auth-jwt';
+
+// Refresh exports
+export * from './refresh';

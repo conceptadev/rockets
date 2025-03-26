@@ -1,12 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
-import {
-  PassportStrategyFactory,
-  VerifyTokenServiceInterface,
-} from '@concepta/nestjs-authentication';
-import {
-  createVerifyRefreshTokenCallback,
-  JwtStrategy,
-} from '@concepta/nestjs-authentication';
+import { PassportStrategyFactory } from '../password/factories/passport-strategy.factory';
+import { VerifyTokenServiceInterface } from '../core/interfaces/verify-token-service.interface';
+import { createVerifyRefreshTokenCallback, JwtStrategy } from '../jwt';
 import { AuthorizationPayloadInterface } from '@concepta/nestjs-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 

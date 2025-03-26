@@ -93,8 +93,8 @@ in a NestJS application.
 
 The `@concepta/nestjs-authentication` module is designed to integrate
 seamlessly with other modules in the authentication suite, such as
-`@concepta/nestjs-auth-jwt`, `@concepta/nestjs-auth-local`,
-`@concepta/nestjs-auth-recovery`, and `@concepta/nestjs-auth-refresh`.
+`@concepta/nestjs-auth-jwt`, `@concepta/nestjs-auth-local`, and
+`@concepta/nestjs-auth-recovery`.
 
 For optimal functionality, it is recommended to use these modules together to
 address various aspects of authentication and token management in your NestJS
@@ -106,7 +106,7 @@ the necessary packages using your package manager.
 Here is a basic example using `yarn`:
 
 ```sh
-yarn add @concepta/nestjs-authentication @concepta/nestjs-auth-jwt @concepta/nestjs-auth-local @concepta/nestjs-auth-recovery @concepta/nestjs-auth-refresh
+yarn add @concepta/nestjs-authentication @concepta/nestjs-auth-jwt @concepta/nestjs-auth-local @concepta/nestjs-auth-recovery
 ```
 
 ### Basic Setup in a NestJS Project
@@ -518,8 +518,8 @@ this will return whatever was defined at `bySubject` method from
 
 The `@concepta/nestjs-authentication` module is designed to integrate
 seamlessly with other modules in the authentication suite, such as
-`@concepta/nestjs-auth-jwt`, `@concepta/nestjs-auth-local`,
-`@concepta/nestjs-auth-recovery`, and `@concepta/nestjs-auth-refresh`.
+`@concepta/nestjs-auth-jwt`, `@concepta/nestjs-auth-local`, and
+`@concepta/nestjs-auth-recovery`.
 
 For optimal functionality, it is recommended to use these modules
 together to address various aspects of authentication and token management
@@ -782,8 +782,6 @@ authentication suite. Here are some integration details:
   authentication strategies such as username and password.
 - **@concepta/nestjs-auth-recovery**: Use `@concepta/nestjs-auth-recovery` for
   account recovery processes like password reset.
-- **@concepta/nestjs-auth-refresh**: Use `@concepta/nestjs-auth-refresh` for
-  handling token refresh mechanisms.
 
 By combining these modules, you can create a comprehensive authentication system
 that meets various security requirements and user needs.

@@ -63,9 +63,6 @@
       "path": "packages/nestjs-org"
     },
     {
-      "path": "packages/nestjs-auth-refresh"
-    },
-    {
       "path": "packages/nestjs-swagger-ui"
     },
     {
