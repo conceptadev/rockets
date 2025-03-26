@@ -22,7 +22,7 @@ import { AuthRefreshOptionsInterface } from './interfaces/auth-refresh-options.i
 import { AuthRefreshOptionsExtrasInterface } from './interfaces/auth-refresh-options-extras.interface';
 import { AuthRefreshSettingsInterface } from './interfaces/auth-refresh-settings.interface';
 import { AuthRefreshController } from './auth-refresh.controller';
-import { authRefreshDefaultConfig } from './config/auth-refresh-default.config';
+import { authRefreshDefaultConfig } from '../config/auth-refresh-default.config';
 import { AuthRefreshStrategy } from './auth-refresh.strategy';
 
 const RAW_OPTIONS_TOKEN = Symbol('__AUTH_REFRESH_MODULE_RAW_OPTIONS_TOKEN__');

@@ -18,7 +18,7 @@ import {
   AUTH_JWT_MODULE_USER_LOOKUP_SERVICE_TOKEN,
   AUTH_JWT_MODULE_VERIFY_TOKEN_SERVICE_TOKEN,
 } from './auth-jwt.constants';
-import { authJwtDefaultConfig } from './config/auth-jwt-default.config';
+import { authJwtDefaultConfig } from '../config/auth-jwt-default.config';
 import { AuthJwtStrategy } from './auth-jwt.strategy';
 import { AuthJwtGuard } from './auth-jwt.guard';
 

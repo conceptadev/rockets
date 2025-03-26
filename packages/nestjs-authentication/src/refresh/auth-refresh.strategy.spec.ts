@@ -7,7 +7,7 @@ import { randomUUID } from 'crypto';
 import { AuthorizationPayloadInterface } from '@concepta/nestjs-common';
 import { AuthRefreshUnauthorizedException } from './exceptions/auth-refresh-unauthorized.exception';
 
-import { UserFixture } from './__fixtures__/user/user.entity.fixture';
+import { UserFixture } from '../__fixtures__/user/user.entity.fixture';
 
 describe(AuthRefreshStrategy, () => {
   const USERNAME = 'username';

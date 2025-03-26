@@ -1,7 +1,7 @@
 import { registerAs } from '@nestjs/config';
-import { ExtractJwt } from '../../jwt/index';
-import { AUTH_REFRESH_MODULE_DEFAULT_SETTINGS_TOKEN } from '../auth-refresh.constants';
-import { AuthRefreshSettingsInterface } from '../interfaces/auth-refresh-settings.interface';
+import { ExtractJwt } from '../jwt/index';
+import { AUTH_REFRESH_MODULE_DEFAULT_SETTINGS_TOKEN } from '../refresh/auth-refresh.constants';
+import { AuthRefreshSettingsInterface } from '../refresh/interfaces/auth-refresh-settings.interface';
 
 /**
  * Default configuration for auth refresh.

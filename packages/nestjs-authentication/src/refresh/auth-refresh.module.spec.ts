@@ -28,8 +28,8 @@ import { AuthRefreshSettingsInterface } from './interfaces/auth-refresh-settings
 import { AuthRefreshUserLookupServiceInterface } from './interfaces/auth-refresh-user-lookup-service.interface';
 import { AuthRefreshModule } from './auth-refresh.module';
 
-import { UserLookupServiceFixture } from './__fixtures__/user/user-lookup.service.fixture';
-import { UserModuleFixture } from './__fixtures__/user/user.module.fixture';
+import { UserLookupServiceFixture } from '../__fixtures__/user/user-lookup.service.fixture';
+import { UserModuleFixture } from '../__fixtures__/user/user.module.fixture';
 
 describe(AuthRefreshModule, () => {
   const jwtService = new JwtService();

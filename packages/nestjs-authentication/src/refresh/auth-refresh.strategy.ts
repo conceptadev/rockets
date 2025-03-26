@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { PassportStrategyFactory } from '../password/factories/passport-strategy.factory';
+import { PassportStrategyFactory } from '../core/factories/passport-strategy.factory';
 import { VerifyTokenServiceInterface } from '../core/interfaces/verify-token-service.interface';
 import { createVerifyRefreshTokenCallback, JwtStrategy } from '../jwt';
 import { AuthorizationPayloadInterface } from '@concepta/nestjs-common';

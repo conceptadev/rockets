@@ -10,7 +10,7 @@ export { AuthenticationOptionsInterface } from './core/interfaces/authentication
 export { VerifyTokenServiceInterface } from './core/interfaces/verify-token-service.interface';
 export { IssueTokenServiceInterface } from './core/interfaces/issue-token-service.interface';
 export { ValidateUserServiceInterface } from './core/interfaces/validate-user-service.interface';
-export { PassportStrategyFactory } from './password/factories/passport-strategy.factory';
+export { PassportStrategyFactory } from './core/factories/passport-strategy.factory';
 
 export { AuthGuard } from './core/guards/auth.guard';
 
