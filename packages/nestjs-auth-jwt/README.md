@@ -110,7 +110,6 @@ npm install class-validator
 npm install @nestjs/jwt
 npm install @concepta/nestjs-common
 npm install @concepta/nestjs-authentication
-npm install @concepta/nestjs-jwt
 npm install @concepta/nestjs-auth-jwt
 ```
 
@@ -122,7 +121,6 @@ yarn add class-validator
 yarn add @nestjs/jwt
 yarn add @concepta/nestjs-common
 yarn add @concepta/nestjs-authentication
-yarn add @concepta/nestjs-jwt
 yarn add @concepta/nestjs-auth-jwt
 ```
 
@@ -298,7 +296,7 @@ import { UserService } from './user.service';
 import { PetService } from './pet.service';
 import { User } from './user.entity';
 import { Pet } from './pet.entity';
-import { JwtModule, ExtractJwt } from '@concepta/nestjs-jwt';
+import { JwtModule, ExtractJwt } from '@concepta/nestjs-authentication';
 import { ConfigService } from '@nestjs/config';
 
 @Module({
@@ -432,7 +430,7 @@ export class MyProviderModule {};
 import * as jwt from 'jsonwebtoken';
 import { Module } from '@nestjs/common';
 import { AuthJwtModule } from '@concepta/nestjs-auth-jwt';
-import { JwtModule, ExtractJwt } from '@concepta/nestjs-jwt';
+import { JwtModule, ExtractJwt } from '@concepta/nestjs-authentication';
 import { UserLookupService } from './user-lookup.service';
 
 // define the verifyToken function
@@ -471,7 +469,7 @@ export class AppModule {}
 import * as jwt from 'jsonwebtoken';
 import { Module } from '@nestjs/common';
 import { AuthJwtModule } from '@concepta/nestjs-auth-jwt';
-import { JwtModule, ExtractJwt } from '@concepta/nestjs-jwt';
+import { JwtModule, ExtractJwt } from '@concepta/nestjs-authentication';
 import { ConfigService } from '@nestjs/config';
 import { MyProviderModule } from './my-provider.module';
 
@@ -522,7 +520,7 @@ export class AppModule {};
 import * as jwt from 'jsonwebtoken';
 import { Module } from '@nestjs/common';
 import { AuthJwtModule } from '@concepta/nestjs-auth-jwt';
-import { JwtModule, ExtractJwt } from '@concepta/nestjs-jwt';
+import { JwtModule, ExtractJwt } from '@concepta/nestjs-authentication';
 import { ConfigService } from '@nestjs/config';
 import { MyProviderModule } from './my-provider.module';
 
@@ -694,7 +692,7 @@ AuthJwtModule.registerAsync({
 ### 8. Overwriting the settings
 
 ```ts
-import { ExtractJwt, JwtStrategyOptionsInterface } from "@concepta/nestjs-jwt";
+import { ExtractJwt, JwtStrategyOptionsInterface } from "@concepta/nestjs-authentication";
 
 const settings: JwtStrategyOptionsInterface = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

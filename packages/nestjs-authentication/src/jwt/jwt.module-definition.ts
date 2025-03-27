@@ -14,10 +14,11 @@ import {
 } from './jwt.constants';
 
 import { JwtOptionsExtrasInterface } from './interfaces/jwt-options-extras.interface';
-import { jwtDefaultConfig } from './config/jwt-default.config';
+
 import { JwtSettingsInterface } from './interfaces/jwt-settings.interface';
 import { JwtOptionsInterface } from './interfaces/jwt-options.interface';
 import { JwtServiceInterface } from './interfaces/jwt-service.interface';
+import { jwtDefaultConfig } from '../config/jwt-default.config';
 import { JwtService } from './services/jwt.service';
 import { JwtIssueTokenService } from './services/jwt-issue-token.service';
 import { JwtVerifyTokenService } from './services/jwt-verify-token.service';

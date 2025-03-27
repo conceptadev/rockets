@@ -3,7 +3,7 @@ import {
   ReferenceActiveInterface,
   ReferenceIdInterface,
 } from '@concepta/nestjs-common';
-import { ValidateUserServiceInterface } from '../interfaces/validate-user-service.interface';
+import { ValidateUserServiceInterface } from '../../core/interfaces/validate-user-service.interface';
 
 @Injectable()
 export abstract class ValidateUserService<

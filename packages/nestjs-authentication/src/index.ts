@@ -1,26 +1,32 @@
+// Main module
 export * from './authentication.module';
 
-export * from './config/authentication-default.config';
+// Core exports
+export * from './core/decorators/auth-user.decorator';
+export * from './core/decorators/auth-public.decorator';
+export * from './core/guards/auth.guard';
+export * from './core/guards/fastify-auth.guard';
+export * from './core/exceptions/authentication.exception';
+export * from './core/exceptions/authentication-access-token.exception';
+export * from './core/exceptions/authentication-refresh-token.exception';
 
-export { AuthUser } from './decorators/auth-user.decorator';
-export { AuthPublic } from './decorators/auth-public.decorator';
+// JWT exports
+export * from './jwt/services/issue-token.service';
+export * from './jwt/services/verify-token.service';
+export * from './jwt/services/validate-user.service';
+export * from './jwt/dto/authentication-jwt-response.dto';
 
-export * from './interfaces/authentication-options.interface';
+// Notification exports
 
-export { VerifyTokenServiceInterface } from './interfaces/verify-token-service.interface';
-export { IssueTokenServiceInterface } from './interfaces/issue-token-service.interface';
-export { ValidateUserServiceInterface } from './interfaces/validate-user-service.interface';
-export * from './factories/passport-strategy.factory';
+// Configuration
 
-export * from './guards/auth.guard';
+// Service interfaces (for customization)
+export * from './core/interfaces/issue-token-service.interface';
+export * from './core/interfaces/validate-user-service.interface';
+export * from './core/interfaces/validate-token-service.interface';
+export * from './core/interfaces/verify-token-service.interface';
 
-export { AuthenticationJwtResponseDto } from './dto/authentication-jwt-response.dto';
-
-export { IssueTokenService } from './services/issue-token.service';
-export { VerifyTokenService } from './services/verify-token.service';
-export { ValidateUserService } from './services/validate-user.service';
-
-export { AuthGuardOptions, AuthGuardCtr } from './authentication.types';
-export { AuthenticationException } from './exceptions/authentication.exception';
-export { AuthenticationAccessTokenException } from './exceptions/authentication-access-token.exception';
-export { AuthenticationRefreshTokenException } from './exceptions/authentication-refresh-token.exception';
+// passport
+export * from './password/factories/passport-strategy.factory';
+// JWT exports
+export * from './jwt';

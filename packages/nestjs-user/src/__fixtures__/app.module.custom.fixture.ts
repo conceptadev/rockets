@@ -4,7 +4,7 @@ import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { PasswordModule } from '@concepta/nestjs-password';
 import { AuthenticationModule } from '@concepta/nestjs-authentication';
 import { AuthJwtModule } from '@concepta/nestjs-auth-jwt';
-import { JwtModule } from '@concepta/nestjs-jwt';
+import { JwtModule } from '@concepta/nestjs-authentication';
 import { AccessControlModule } from '@concepta/nestjs-access-control';
 import { CrudModule } from '@concepta/nestjs-crud';
 import { EventModule } from '@concepta/nestjs-event';

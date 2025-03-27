@@ -1,4 +1,4 @@
-import { ValidateTokenServiceInterface } from '../../interfaces/validate-token-service.interface';
+import { ValidateTokenServiceInterface } from '../../core/interfaces/validate-token-service.interface';
 
 export class ValidateTokenServiceFixture
   implements ValidateTokenServiceInterface

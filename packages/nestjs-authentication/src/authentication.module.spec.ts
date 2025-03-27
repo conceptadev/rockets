@@ -7,21 +7,21 @@ import {
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { JwtModule } from '@concepta/nestjs-jwt';
+import { JwtModule } from './jwt';
 
 import {
   AUTHENTICATION_MODULE_SETTINGS_TOKEN,
   AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN,
-} from './authentication.constants';
+} from './core/authentication.constants';
 
-import { AuthenticationSettingsInterface } from './interfaces/authentication-settings.interface';
-import { IssueTokenServiceInterface } from './interfaces/issue-token-service.interface';
-import { VerifyTokenServiceInterface } from './interfaces/verify-token-service.interface';
-import { ValidateTokenServiceInterface } from './interfaces/validate-token-service.interface';
+import { AuthenticationSettingsInterface } from './core/interfaces/authentication-settings.interface';
+import { IssueTokenServiceInterface } from './core/interfaces/issue-token-service.interface';
+import { VerifyTokenServiceInterface } from './core/interfaces/verify-token-service.interface';
+import { ValidateTokenServiceInterface } from './core/interfaces/validate-token-service.interface';
 
 import { AuthenticationModule } from './authentication.module';
-import { VerifyTokenService } from './services/verify-token.service';
-import { IssueTokenService } from './services/issue-token.service';
+import { VerifyTokenService } from './jwt/services/verify-token.service';
+import { IssueTokenService } from './jwt/services/issue-token.service';
 
 import { GlobalModuleFixture } from './__fixtures__/global.module.fixture';
 import { ValidateTokenServiceFixture } from './__fixtures__/services/validate-token.service.fixture';

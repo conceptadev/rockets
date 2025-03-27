@@ -6,7 +6,6 @@ import {
   JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
 } from '../jwt.constants';
 import { JwtSignOptions, JwtSignStringOptions } from '../jwt.types';
-
 @Injectable()
 export class JwtIssueTokenService implements JwtIssueTokenServiceInterface {
   constructor(

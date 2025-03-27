@@ -10,7 +10,7 @@ import {
   JwtIssueTokenService,
   JwtModule,
   JwtService,
-} from '@concepta/nestjs-jwt';
+} from '@concepta/nestjs-authentication';
 import {
   AuthenticationModule,
   IssueTokenService,

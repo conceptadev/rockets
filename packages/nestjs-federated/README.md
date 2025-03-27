@@ -105,7 +105,7 @@ Finally, set up the module configuration:
 ```ts
 import { AuthenticationModule } from '@concepta/nestjs-authentication';
 import { FederatedModule } from '@concepta/nestjs-federated';
-import { JwtModule } from '@concepta/nestjs-jwt';
+import { JwtModule } from '@concepta/nestjs-authentication';
 import { Module } from '@nestjs/common';
 import { FederatedUserLookupService } from './federated/federated-lookup.service';
 import { UserMutateServiceFixture } from './federated/federated-mutate.service';

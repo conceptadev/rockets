@@ -11,7 +11,7 @@ import {
   JwtModule,
   JwtService,
   JwtVerifyTokenService,
-} from '@concepta/nestjs-jwt';
+} from '@concepta/nestjs-authentication';
 import {
   AuthenticationModule,
   IssueTokenService,

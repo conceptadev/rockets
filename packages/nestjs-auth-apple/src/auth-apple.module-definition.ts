@@ -7,7 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 
 import { createSettingsProvider } from '@concepta/nestjs-common';
 import { FederatedOAuthService } from '@concepta/nestjs-federated';
-import { JwtService } from '@concepta/nestjs-jwt';
+import { JwtService } from '@concepta/nestjs-authentication';
 import {
   IssueTokenService,
   IssueTokenServiceInterface,

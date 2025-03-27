@@ -1,5 +1,5 @@
 import { JwtVerifyOptions } from '@nestjs/jwt';
-import { VerifyTokenServiceInterface } from '../../interfaces/verify-token-service.interface';
+import { VerifyTokenServiceInterface } from '../../core/interfaces/verify-token-service.interface';
 
 export class VerifyTokenServiceFixture implements VerifyTokenServiceInterface {
   public discriminator = 'default';
