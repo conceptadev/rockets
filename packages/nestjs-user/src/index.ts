@@ -1,4 +1,5 @@
 export { UserModule } from './user.module';
+export { UserProfileCrudBuilder } from './utils/user-profile.crud-builder';
 
 export { UserPostgresEntity } from './entities/user-postgres.entity';
 export { UserSqliteEntity } from './entities/user-sqlite.entity';
@@ -22,6 +23,15 @@ export { UserPasswordDto } from './dto/user-password.dto';
 export { UserPasswordUpdateDto } from './dto/user-password-update.dto';
 export { UserUpdateDto } from './dto/user-update.dto';
 export { UserDto } from './dto/user.dto';
+
+export { UserProfileEntityInterface } from './interfaces/user-profile-entity.interface';
+export { UserProfilePostgresEntity } from './entities/user-profile-postgres.entity';
+export { UserProfileSqliteEntity } from './entities/user-profile-sqlite.entity';
+
+export { UserProfileDto } from './dto/profile/user-profile.dto';
+export { UserProfileCreateDto } from './dto/profile/user-profile-create.dto';
+export { UserProfileUpdateDto } from './dto/profile/user-profile-update.dto';
+export { UserProfilePaginatedDto } from './dto/profile/user-profile-paginated.dto';
 
 export { UserResource } from './user.types';
 
