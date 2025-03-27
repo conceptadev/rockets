@@ -455,6 +455,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/runtime@npm:^7.23.2":
+  version: 7.26.10
+  resolution: "@babel/runtime@npm:7.26.10"
+  dependencies:
+    regenerator-runtime: "npm:^0.14.0"
+  checksum: 10c0/6dc6d88c7908f505c4f7770fb4677dfa61f68f659b943c2be1f2a99cb6680343462867abf2d49822adc435932919b36c77ac60125793e719ea8745f2073d3745
+  languageName: node
+  linkType: hard
+
 "@babel/runtime@npm:^7.23.9":
   version: 7.25.6
   resolution: "@babel/runtime@npm:7.25.6"
@@ -761,6 +770,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@concepta/i18n@npm:^6.0.0-alpha.3, @concepta/i18n@workspace:packages/i18n":
+  version: 0.0.0-use.local
+  resolution: "@concepta/i18n@workspace:packages/i18n"
+  dependencies:
+    i18next: "npm:^23.12.2"
+    i18next-fs-backend: "npm:^2.3.1"
+    i18next-http-middleware: "npm:^3.6.0"
+  languageName: unknown
+  linkType: soft
+
 "@concepta/nestjs-access-control@npm:^6.0.0-alpha.3, @concepta/nestjs-access-control@workspace:packages/nestjs-access-control":
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-access-control@workspace:packages/nestjs-access-control"
@@ -1035,6 +1054,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-cache@workspace:packages/nestjs-cache"
   dependencies:
+    "@concepta/i18n": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-access-control": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-common": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-crud": "npm:^6.0.0-alpha.3"
@@ -1530,6 +1550,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@concepta/typeorm-common@workspace:packages/typeorm-common"
   dependencies:
+    "@concepta/i18n": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-common": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-exception": "npm:^6.0.0-alpha.3"
     "@concepta/nestjs-typeorm-ext": "npm:^6.0.0-alpha.3"
@@ -10982,6 +11003,29 @@ __metadata:
   bin:
     husky: lib/bin.js
   checksum: 10c0/aacb2b8fbfed0ec161f94e9b08d422c51fec073def4e165e57da42f47c10f520a5f0a88b42efc667784e314a1af83cf1994b582cd6f4b0333739921a601c6187
+  languageName: node
+  linkType: hard
+
+"i18next-fs-backend@npm:^2.3.1":
+  version: 2.6.0
+  resolution: "i18next-fs-backend@npm:2.6.0"
+  checksum: 10c0/d54169d0fe757f2b0ec31ef5dcf5fe57e209a1afface07b397ec857e18a695c122aab79567d54b98e01185f6a5809cc9d881a412942fb6a06bbbde95a926690b
+  languageName: node
+  linkType: hard
+
+"i18next-http-middleware@npm:^3.6.0":
+  version: 3.7.1
+  resolution: "i18next-http-middleware@npm:3.7.1"
+  checksum: 10c0/fa56108cdeab7ebd9a8232a08e4b6fc8526aeb443a0e45e35393279b48f77b767ce6b2238567b84f2c89a0829d8ae3ba315ff56126f19c15c8c6ac2635d393d9
+  languageName: node
+  linkType: hard
+
+"i18next@npm:^23.12.2":
+  version: 23.16.8
+  resolution: "i18next@npm:23.16.8"
+  dependencies:
+    "@babel/runtime": "npm:^7.23.2"
+  checksum: 10c0/57d249191e8a39bbbbe190cfa2e2bb651d0198e14444fe80453d3df8d02927de3c147c77724e9ae6c72fa241898cd761e3fdcd55d053db373471f1ac084bf345
   languageName: node
   linkType: hard
 

@@ -3,6 +3,8 @@ import {
   RuntimeException,
   RuntimeExceptionOptions,
 } from '@concepta/nestjs-exception';
+import { t } from '@concepta/i18n';
+import { REFERENCE_VALIDATION_ERROR } from '../constants';
 
 export class ReferenceValidationException extends RuntimeException {
   context: RuntimeException['context'] & {
@@ -16,7 +18,10 @@ export class ReferenceValidationException extends RuntimeException {
     options?: RuntimeExceptionOptions,
   ) {
     super({
-      message: 'Data for the %s reference is not valid',
+      message: t({
+        key: REFERENCE_VALIDATION_ERROR,
+        defaultMessage: 'Data for the %s reference is not valid',
+      }),
       messageParams: [entityName],
       ...options,
     });
@@ -27,6 +32,6 @@ export class ReferenceValidationException extends RuntimeException {
       validationErrors,
     };
 
-    this.errorCode = 'REFERENCE_VALIDATION_ERROR';
+    this.errorCode = REFERENCE_VALIDATION_ERROR;
   }
 }

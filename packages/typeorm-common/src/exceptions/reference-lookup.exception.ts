@@ -2,6 +2,8 @@ import {
   RuntimeException,
   RuntimeExceptionOptions,
 } from '@concepta/nestjs-exception';
+import { t } from '@concepta/i18n';
+import { REFERENCE_LOOKUP_ERROR } from '../constants';
 
 export class ReferenceLookupException extends RuntimeException {
   context: RuntimeException['context'] & {
@@ -10,7 +12,10 @@ export class ReferenceLookupException extends RuntimeException {
 
   constructor(entityName: string, options?: RuntimeExceptionOptions) {
     super({
-      message: 'Error while trying to lookup a %s reference',
+      message: t({
+        key: REFERENCE_LOOKUP_ERROR,
+        defaultMessage: 'Error while trying to lookup a %s reference',
+      }),
       messageParams: [entityName],
       ...options,
     });
@@ -20,6 +25,6 @@ export class ReferenceLookupException extends RuntimeException {
       entityName,
     };
 
-    this.errorCode = 'REFERENCE_LOOKUP_ERROR';
+    this.errorCode = REFERENCE_LOOKUP_ERROR;
   }
 }
