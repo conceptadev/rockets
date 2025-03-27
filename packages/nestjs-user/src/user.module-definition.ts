@@ -60,7 +60,13 @@ function definitionTransform(
   extras: UserOptionsExtrasInterface,
 ): DynamicModule {
   const { providers = [], imports = [] } = definition;
-  const { controllers, global = false, entities } = extras;
+  const {
+    global = false,
+    entities,
+    controllers,
+    extraControllers = [],
+    extraProviders = [],
+  } = extras;
 
   if (!entities) {
     throw new UserMissingEntitiesOptionsException();
@@ -70,8 +76,8 @@ function definitionTransform(
     ...definition,
     global,
     imports: createUserImports({ imports, entities }),
-    providers: createUserProviders({ providers }),
-    controllers: createUserControllers({ controllers }),
+    providers: createUserProviders({ providers, extraProviders }),
+    controllers: createUserControllers({ controllers, extraControllers }),
     exports: [ConfigModule, RAW_OPTIONS_TOKEN, ...createUserExports()],
   };
 }
@@ -89,9 +95,11 @@ export function createUserImports(
 export function createUserProviders(options: {
   overrides?: UserOptions;
   providers?: Provider[];
+  extraProviders?: Provider[];
 }): Provider[] {
   return [
     ...(options.providers ?? []),
+    ...(options.extraProviders ?? []),
     UserCrudService,
     PasswordCreationService,
     InvitationAcceptedListener,
@@ -124,11 +132,11 @@ export function createUserExports(): Required<
 }
 
 export function createUserControllers(
-  overrides: Pick<UserOptions, 'controllers'> = {},
+  overrides: Pick<UserOptions, 'controllers' | 'extraControllers'> = {},
 ): DynamicModule['controllers'] {
   return overrides?.controllers !== undefined
     ? overrides.controllers
-    : [UserController];
+    : [UserController, ...(overrides.extraControllers ?? [])];
 }
 
 export function createUserSettingsProvider(

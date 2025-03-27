@@ -28,6 +28,9 @@ export { UserOwnableInterface } from './user/interfaces/user-ownable.interface';
 export { UserUpdatableInterface } from './user/interfaces/user-updatable.interface';
 export { UserInterface } from './user/interfaces/user.interface';
 
+export { UserProfileInterface } from './user-profile/interfaces/user-profile.interface';
+export { UserProfileCreatableInterface } from './user-profile/interfaces/user-profile-creatable.interface';
+
 export { FederatedCreatableInterface } from './federated/interfaces/federated-creatable.interface';
 export { FederatedUpdatableInterface } from './federated/interfaces/federated-updatable.interface';
 export { FederatedInterface } from './federated/interfaces/federated.interface';
