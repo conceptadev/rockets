@@ -1,16 +1,18 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
-import { AuthenticationModule } from '@concepta/nestjs-authentication';
-import { AuthJwtModule } from '@concepta/nestjs-auth-jwt';
-import { JwtModule } from '@concepta/nestjs-jwt';
-import { CrudModule } from '@concepta/nestjs-crud';
 import {
-  UserModule,
+  AuthenticationCoreModule,
+  AuthJwtModule,
+  JwtModule,
+} from '@concepta/nestjs-authentication';
+import { CrudModule } from '@concepta/nestjs-crud';
+import { FederatedModule } from '@concepta/nestjs-federated';
+import { PasswordModule } from '@concepta/nestjs-password';
+import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
+import {
   UserLookupService,
+  UserModule,
   UserMutateService,
 } from '@concepta/nestjs-user';
-import { PasswordModule } from '@concepta/nestjs-password';
-import { FederatedModule } from '@concepta/nestjs-federated';
+import { Test, TestingModule } from '@nestjs/testing';
 import { AuthAppleController } from './auth-apple.controller';
 import { AuthAppleModule } from './auth-apple.module';
 
@@ -32,7 +34,7 @@ describe(AuthAppleModule, () => {
           }),
           JwtModule.forRoot({}),
           AuthAppleModule.forRoot({}),
-          AuthenticationModule.forRoot({}),
+          AuthenticationCoreModule.forRoot({}),
           AuthJwtModule.forRootAsync({
             inject: [UserLookupService],
             useFactory: (userLookupService) => ({

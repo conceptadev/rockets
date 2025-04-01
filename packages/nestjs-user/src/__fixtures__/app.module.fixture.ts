@@ -1,10 +1,12 @@
 import { AccessControl } from 'accesscontrol';
 import { Module } from '@nestjs/common';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
-import { AuthenticationModule } from '@concepta/nestjs-authentication';
+import {
+  AuthenticationCoreModule,
+  AuthJwtModule,
+  JwtModule,
+} from '@concepta/nestjs-authentication';
 import { AccessControlModule } from '@concepta/nestjs-access-control';
-import { JwtModule } from '@concepta/nestjs-jwt';
-import { AuthJwtModule } from '@concepta/nestjs-auth-jwt';
 import { PasswordModule } from '@concepta/nestjs-password';
 import { CrudModule } from '@concepta/nestjs-crud';
 import { EventModule } from '@concepta/nestjs-event';
@@ -40,7 +42,7 @@ rules
         userLookupService,
       }),
     }),
-    AuthenticationModule.forRoot({}),
+    AuthenticationCoreModule.forRoot({}),
     PasswordModule.forRoot({}),
     AccessControlModule.forRoot({
       settings: { rules },

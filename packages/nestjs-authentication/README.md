@@ -30,7 +30,7 @@
       - [Step 2: Make an Authenticated Request](#step-2-make-an-authenticated-request)
       - [Example Curl Calls](#example-curl-calls)
 - [How to Guides](#how-to-guides)
-  - [1. How to Set Up AuthenticationModule with forRoot and JwtModule from @concepta/nestjs-jwt](#1-how-to-set-up-authenticationmodule-with-forroot-and-jwtmodule-from-conceptanestjs-jwt)
+  - [1. How to Set Up AuthenticationModule with forRoot and JwtModule from @concepta/nestjs-authentication](#1-how-to-set-up-authenticationmodule-with-forroot-and-jwtmodule-from-conceptanestjs-authentication)
   - [2. How to Configure AuthenticationModule Settings](#2-how-to-configure-authenticationmodule-settings)
 - [Explanation](#explanation)
   - [Conceptual Overview](#conceptual-overview)
@@ -93,8 +93,8 @@ in a NestJS application.
 
 The `@concepta/nestjs-authentication` module is designed to integrate
 seamlessly with other modules in the authentication suite, such as
-`@concepta/nestjs-auth-jwt`, `@concepta/nestjs-auth-local`,
-`@concepta/nestjs-auth-recovery`, and `@concepta/nestjs-auth-refresh`.
+`@concepta/nestjs-auth-jwt`, `@concepta/nestjs-auth-local`, and
+`@concepta/nestjs-auth-recovery`.
 
 For optimal functionality, it is recommended to use these modules together to
 address various aspects of authentication and token management in your NestJS
@@ -106,7 +106,7 @@ the necessary packages using your package manager.
 Here is a basic example using `yarn`:
 
 ```sh
-yarn add @concepta/nestjs-authentication @concepta/nestjs-auth-jwt @concepta/nestjs-auth-local @concepta/nestjs-auth-recovery @concepta/nestjs-auth-refresh
+yarn add @concepta/nestjs-authentication @concepta/nestjs-auth-jwt @concepta/nestjs-auth-local @concepta/nestjs-auth-recovery
 ```
 
 ### Basic Setup in a NestJS Project
@@ -376,7 +376,7 @@ import { Module } from '@nestjs/common';
 
 import { Pet } from './entity/pet.entity';
 import { User } from './user/user.entity';
-import { JwtModule } from '@concepta/nestjs-jwt';
+import { JwtModule } from '@concepta/nestjs-authentication';
 import { AuthenticationModule } from '@concepta/nestjs-authentication';
 import { AuthJwtModule } from '@concepta/nestjs-auth-jwt';
 import { MyJwtUserLookupService } from './services/my-jwt-user-lookup.service';
@@ -514,12 +514,12 @@ this will return whatever was defined at `bySubject` method from
 
 ## How to Guides
 
-### 1. How to Set Up AuthenticationModule with forRoot and JwtModule from @concepta/nestjs-jwt
+### 1. How to Set Up AuthenticationModule with forRoot and JwtModule from @concepta/nestjs-authentication
 
 The `@concepta/nestjs-authentication` module is designed to integrate
 seamlessly with other modules in the authentication suite, such as
-`@concepta/nestjs-auth-jwt`, `@concepta/nestjs-auth-local`,
-`@concepta/nestjs-auth-recovery`, and `@concepta/nestjs-auth-refresh`.
+`@concepta/nestjs-auth-jwt`, `@concepta/nestjs-auth-local`, and
+`@concepta/nestjs-auth-recovery`.
 
 For optimal functionality, it is recommended to use these modules
 together to address various aspects of authentication and token management
@@ -530,7 +530,7 @@ necessary packages using your package manager.
 
 Here is a basic example using `yarn`:
 
-yarn add @nestjs-authentication @concepta/nestjs-jwt
+yarn add @nestjs-authentication @concepta/nestjs-authentication
 
 #### Example Setup
 
@@ -591,7 +591,7 @@ AuthenticationModule.forRoot({
 
 ```ts
 import { Injectable } from '@nestjs/common';
-import { JwtIssueService } from '@concepta/nestjs-jwt';
+import { JwtIssueService } from '@concepta/nestjs-authentication';
 import { AuthenticationResponseInterface } from '@concepta/nestjs-common';
 import { IssueTokenServiceInterface } from '../interfaces/issue-token-service.interface';
 
@@ -636,7 +636,7 @@ export class MyIssueTokenService implements IssueTokenServiceInterface {
 
 ```ts
 import { Injectable } from '@nestjs/common';
-import { JwtVerifyService } from '@concepta/nestjs-jwt';
+import { JwtVerifyService } from '@concepta/nestjs-authentication';
 import { ValidateTokenServiceInterface } from '../interfaces/validate-token-service.interface';
 import { VerifyTokenServiceInterface } from '../interfaces/verify-token-service.interface';
 import { BadRequestException } from '@nestjs/common';
@@ -782,8 +782,6 @@ authentication suite. Here are some integration details:
   authentication strategies such as username and password.
 - **@concepta/nestjs-auth-recovery**: Use `@concepta/nestjs-auth-recovery` for
   account recovery processes like password reset.
-- **@concepta/nestjs-auth-refresh**: Use `@concepta/nestjs-auth-refresh` for
-  handling token refresh mechanisms.
 
 By combining these modules, you can create a comprehensive authentication system
 that meets various security requirements and user needs.

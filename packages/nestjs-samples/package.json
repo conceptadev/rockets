@@ -12,16 +12,13 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
-    "@concepta/nestjs-auth-jwt": "^6.0.0-alpha.4",
     "@concepta/nestjs-auth-local": "^6.0.0-alpha.4",
-    "@concepta/nestjs-auth-refresh": "^6.0.0-alpha.4",
     "@concepta/nestjs-authentication": "^6.0.0-alpha.4",
     "@concepta/nestjs-common": "^6.0.0-alpha.4",
     "@concepta/nestjs-crud": "^6.0.0-alpha.4",
     "@concepta/nestjs-email": "^6.0.0-alpha.4",
     "@concepta/nestjs-event": "^6.0.0-alpha.4",
     "@concepta/nestjs-exception": "^6.0.0-alpha.4",
-    "@concepta/nestjs-jwt": "^6.0.0-alpha.4",
     "@concepta/nestjs-logger": "^6.0.0-alpha.4",
     "@concepta/nestjs-password": "^6.0.0-alpha.4",
     "@concepta/nestjs-typeorm-ext": "^6.0.0-alpha.4",

@@ -33,9 +33,6 @@
       "path": "packages/nestjs-event"
     },
     {
-      "path": "packages/nestjs-jwt"
-    },
-    {
       "path": "packages/nestjs-logger"
     },
     {
@@ -46,9 +43,6 @@
     },
     {
       "path": "packages/nestjs-auth-local"
-    },
-    {
-      "path": "packages/nestjs-auth-jwt"
     },
     {
       "path": "packages/nestjs-auth-github"
@@ -67,9 +61,6 @@
     },
     {
       "path": "packages/nestjs-org"
-    },
-    {
-      "path": "packages/nestjs-auth-refresh"
     },
     {
       "path": "packages/nestjs-swagger-ui"

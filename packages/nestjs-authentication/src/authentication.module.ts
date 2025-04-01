@@ -1,41 +1,32 @@
 import { DynamicModule, Module } from '@nestjs/common';
 
 import {
-  AuthenticationAsyncOptions,
+  AuthenticationCombinedAsyncOptions,
+  AuthenticationCombinedOptions,
   AuthenticationModuleClass,
-  AuthenticationOptions,
-  createAuthenticationImports,
-  createAuthenticationProviders,
-  createAuthenticationExports,
 } from './authentication.module-definition';
 
 /**
- * Authentication module
+ * Combined authentication module that provides all authentication options features
+ *
+ * This module combines the options for the following modules:
+ * - JwtModule: For JWT token handling
+ * - AuthenticationModule: For core authentication services
+ * - AuthJwtModule: For JWT-based authentication (optional)
+ * - AuthRefreshModule: For refresh token handling (optional)
  */
 @Module({})
 export class AuthenticationModule extends AuthenticationModuleClass {
-  static register(options: AuthenticationOptions): DynamicModule {
-    return super.register(options);
-  }
-
-  static registerAsync(options: AuthenticationAsyncOptions): DynamicModule {
-    return super.registerAsync(options);
-  }
-
-  static forRoot(options: AuthenticationOptions): DynamicModule {
+  static forRoot(options: AuthenticationCombinedOptions): DynamicModule {
     return super.register({ ...options, global: true });
   }
 
-  static forRootAsync(options: AuthenticationAsyncOptions): DynamicModule {
-    return super.registerAsync({ ...options, global: true });
-  }
-
-  static forFeature(options: AuthenticationOptions): DynamicModule {
-    return {
-      module: AuthenticationModule,
-      imports: createAuthenticationImports(),
-      providers: createAuthenticationProviders({ overrides: options }),
-      exports: createAuthenticationExports(),
-    };
+  static forRootAsync(
+    options: AuthenticationCombinedAsyncOptions,
+  ): DynamicModule {
+    return super.registerAsync({
+      ...options,
+      global: true,
+    });
   }
 }

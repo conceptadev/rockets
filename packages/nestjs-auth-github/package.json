@@ -24,9 +24,8 @@
     "passport-github": "^1.1.0"
   },
   "devDependencies": {
-    "@concepta/nestjs-auth-jwt": "^6.0.0-alpha.4",
+    "@concepta/nestjs-authentication": "^6.0.0-alpha.4",
     "@concepta/nestjs-crud": "^6.0.0-alpha.4",
-    "@concepta/nestjs-jwt": "^6.0.0-alpha.4",
     "@concepta/nestjs-password": "^6.0.0-alpha.4",
     "@concepta/nestjs-typeorm-ext": "^6.0.0-alpha.4",
     "@concepta/nestjs-user": "^6.0.0-alpha.4",

@@ -11,7 +11,7 @@ import {
   AccessControlFilter,
   AccessControlGuard,
 } from '@concepta/nestjs-access-control';
-import { AuthJwtGuard } from '@concepta/nestjs-auth-jwt';
+import { AuthJwtGuard } from '@concepta/nestjs-authentication';
 
 import { UserFactory } from './user.factory';
 import { UserSeeder } from './user.seeder';

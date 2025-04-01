@@ -15,9 +15,6 @@
   "references": [
     {
       "path": "../typeorm-common"
-    },
-    {
-      "path": "../nestjs-auth-jwt"
     }
   ]
 }
