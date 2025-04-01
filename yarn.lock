@@ -807,27 +807,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@concepta/nestjs-auth-refresh@workspace:packages/nestjs-auth-refresh":
-  version: 0.0.0-use.local
-  resolution: "@concepta/nestjs-auth-refresh@workspace:packages/nestjs-auth-refresh"
-  dependencies:
-    "@concepta/nestjs-authentication": "npm:^6.0.0-alpha.4"
-    "@concepta/nestjs-common": "npm:^6.0.0-alpha.4"
-    "@concepta/nestjs-exception": "npm:^6.0.0-alpha.4"
-    "@concepta/typeorm-common": "npm:^6.0.0-alpha.4"
-    "@nestjs/common": "npm:^10.4.1"
-    "@nestjs/config": "npm:^3.2.3"
-    "@nestjs/core": "npm:^10.4.1"
-    "@nestjs/swagger": "npm:^7.4.0"
-    "@nestjs/testing": "npm:^10.4.1"
-    jest-mock-extended: "npm:^2.0.9"
-  peerDependencies:
-    class-transformer: "*"
-    class-validator: "*"
-    rxjs: ^7.1.0
-  languageName: unknown
-  linkType: soft
-
 "@concepta/nestjs-auth-verify@workspace:packages/nestjs-auth-verify":
   version: 0.0.0-use.local
   resolution: "@concepta/nestjs-auth-verify@workspace:packages/nestjs-auth-verify"
