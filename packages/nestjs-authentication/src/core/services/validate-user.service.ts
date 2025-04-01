@@ -3,7 +3,7 @@ import {
   ReferenceActiveInterface,
   ReferenceIdInterface,
 } from '@concepta/nestjs-common';
-import { ValidateUserServiceInterface } from '../../core/interfaces/validate-user-service.interface';
+import { ValidateUserServiceInterface } from '../interfaces/validate-user-service.interface';
 
 @Injectable()
 export abstract class ValidateUserService<
@@ -20,7 +20,7 @@ export abstract class ValidateUserService<
    * Returns true if user is considered valid for authentication purposes.
    */
   async isActive(
-    user: ReferenceIdInterface & ReferenceActiveInterface,
+    user: ReferenceIdInterface & ReferenceActiveInterface, 
   ): Promise<boolean> {
     return user.active === true;
   }

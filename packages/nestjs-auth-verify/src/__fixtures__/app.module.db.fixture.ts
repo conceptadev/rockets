@@ -4,7 +4,7 @@ import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
 import { PasswordModule } from '@concepta/nestjs-password';
 import {
-  AuthenticationModule,
+  AuthenticationCoreModule,
   AuthJwtModule,
   JwtModule,
 } from '@concepta/nestjs-authentication';
@@ -28,7 +28,7 @@ import { MailerServiceFixture } from './email/mailer.service.fixture';
     TypeOrmExtModule.forRoot(ormConfig),
     CrudModule.forRoot({}),
     JwtModule.forRoot({}),
-    AuthenticationModule.forRoot({
+    AuthenticationCoreModule.forRoot({
       settings: {
         disableGuard: (context, guard) =>
           guard.constructor.name === 'AuthJwtGuard' &&

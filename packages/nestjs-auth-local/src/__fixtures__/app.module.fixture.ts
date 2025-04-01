@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import {
-  AuthenticationModule,
   JwtModule,
   AuthJwtModule,
+  AuthenticationCoreModule,
 } from '@concepta/nestjs-authentication';
 
 // import { default as ormConfig } from './ormconfig.fixture';
@@ -13,7 +13,7 @@ import { UserModuleFixture } from './user/user.module.fixture';
 @Module({
   imports: [
     JwtModule.forRoot({}),
-    AuthenticationModule.forRoot({}),
+    AuthenticationCoreModule.forRoot({}),
     AuthJwtModule.forRootAsync({
       inject: [UserLookupServiceFixture],
       useFactory: (userLookupService: UserLookupServiceFixture) => ({

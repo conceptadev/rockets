@@ -7,12 +7,12 @@ import {
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
+  AuthenticationCoreModule,
   JwtIssueTokenService,
   JwtModule,
   JwtService,
 } from '@concepta/nestjs-authentication';
 import {
-  AuthenticationModule,
   IssueTokenService,
   IssueTokenServiceInterface,
 } from '@concepta/nestjs-authentication';
@@ -215,7 +215,7 @@ function testModuleFactory(
   return {
     imports: [
       UserModuleFixture,
-      AuthenticationModule.forRoot({}),
+      AuthenticationCoreModule.forRoot({}),
       JwtModule.forRoot({}),
       ...extraImports,
     ],

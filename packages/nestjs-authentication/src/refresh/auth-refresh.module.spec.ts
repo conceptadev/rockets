@@ -11,7 +11,7 @@ import { JwtModule } from '../jwt/jwt.module';
 import { JwtService } from '../jwt/services/jwt.service';
 import { JwtVerifyTokenService } from '../jwt/services/jwt-verify-token.service';
 
-import { AuthenticationModule } from '../authentication.module';
+import { AuthenticationCoreModule } from '../authentication-core.module';
 import { IssueTokenService } from '../jwt/services/issue-token.service';
 import { IssueTokenServiceInterface } from '../core/interfaces/issue-token-service.interface';
 import { VerifyTokenService } from '../jwt/services/verify-token.service';
@@ -234,7 +234,7 @@ function testModuleFactory(
   return {
     imports: [
       UserModuleFixture,
-      AuthenticationModule.forRoot({}),
+      AuthenticationCoreModule.forRoot({}),
       JwtModule.forRoot({}),
       ...extraImports,
     ],

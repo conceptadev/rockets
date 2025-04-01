@@ -2,7 +2,7 @@ import { AccessControl } from 'accesscontrol';
 import { Module } from '@nestjs/common';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import {
-  AuthenticationModule,
+  AuthenticationCoreModule,
   AuthJwtModule,
   JwtModule,
 } from '@concepta/nestjs-authentication';
@@ -42,7 +42,7 @@ rules
         userLookupService,
       }),
     }),
-    AuthenticationModule.forRoot({}),
+    AuthenticationCoreModule.forRoot({}),
     PasswordModule.forRoot({}),
     AccessControlModule.forRoot({
       settings: { rules },

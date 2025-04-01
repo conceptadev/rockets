@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { PasswordModule } from '@concepta/nestjs-password';
 import {
+  AuthenticationCoreModule,
   AuthenticationModule,
   AuthJwtModule,
   JwtModule,
@@ -41,7 +42,7 @@ rules
         userLookupService,
       }),
     }),
-    AuthenticationModule.forRoot({}),
+    AuthenticationCoreModule.forRoot({}),
     PasswordModule.forRoot({}),
     AccessControlModule.forRoot({ settings: { rules } }),
     UserModule.forRootAsync({

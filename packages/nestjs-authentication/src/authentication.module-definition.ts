@@ -4,32 +4,26 @@ import {
   Provider,
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-
-import { createSettingsProvider } from '@concepta/nestjs-common';
-import { JwtIssueTokenService, JwtVerifyTokenService } from './jwt';
-
-import {
-  AUTHENTICATION_MODULE_SETTINGS_TOKEN,
-  AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN,
-} from './core/authentication.constants';
-
-import { AuthenticationOptionsInterface } from './core/interfaces/authentication-options.interface';
+import { AuthenticationCombinedOptionsInterface } from './core/interfaces/authentication-combined-options.interface';
 import { AuthenticationOptionsExtrasInterface } from './core/interfaces/authentication-options-extras.interface';
-import { AuthenticationSettingsInterface } from './core/interfaces/authentication-settings.interface';
-import { ValidateTokenServiceInterface } from './core/interfaces/validate-token-service.interface';
-import { VerifyTokenService } from './jwt/services/verify-token.service';
-import { IssueTokenService } from './jwt/services/issue-token.service';
-import { authenticationDefaultConfig } from './config/authentication-default.config';
+import { authenticationOptionsDefaultConfig } from './config/authentication-options-default.config';
+import { JwtOptionsInterface } from './jwt/interfaces/jwt-options.interface';
+import { AuthenticationCoreModule } from './authentication-core.module';
+import { JwtModule } from './jwt';
+import { AuthJwtModule } from './auth-jwt';
+import { AuthRefreshModule } from './refresh';
+import { AuthJwtOptionsInterface } from './auth-jwt/interfaces/auth-jwt-options.interface';
+import { AuthRefreshOptionsInterface } from './refresh/interfaces/auth-refresh-options.interface';
 
-const RAW_OPTIONS_TOKEN = Symbol('__AUTHENTICATION_MODULE_RAW_OPTIONS_TOKEN__');
+const AUTHENTICATION_MODULE_RAW_OPTIONS_TOKEN = Symbol('__AUTHENTICATION_MODULE_RAW_OPTIONS_TOKEN__');
 
 export const {
   ConfigurableModuleClass: AuthenticationModuleClass,
-  OPTIONS_TYPE: AUTHENTICATION_OPTIONS_TYPE,
-  ASYNC_OPTIONS_TYPE: AUTHENTICATION_ASYNC_OPTIONS_TYPE,
-} = new ConfigurableModuleBuilder<AuthenticationOptionsInterface>({
-  moduleName: 'Authentication',
-  optionsInjectionToken: RAW_OPTIONS_TOKEN,
+  OPTIONS_TYPE: AUTHENTICATION_MODULE_OPTIONS_TYPE,
+  ASYNC_OPTIONS_TYPE: AUTHENTICATION_MODULE_ASYNC_OPTIONS_TYPE,
+} = new ConfigurableModuleBuilder<AuthenticationCombinedOptionsInterface>({
+  moduleName: 'AuthenticationCombined',
+  optionsInjectionToken: AUTHENTICATION_MODULE_RAW_OPTIONS_TOKEN,
 })
   .setExtras<AuthenticationOptionsExtrasInterface>(
     { global: false },
@@ -37,122 +31,119 @@ export const {
   )
   .build();
 
-export type AuthenticationOptions = Omit<
-  typeof AUTHENTICATION_OPTIONS_TYPE,
+export type AuthenticationCombinedOptions = Omit<
+  typeof AUTHENTICATION_MODULE_OPTIONS_TYPE,
   'global'
 >;
 
-export type AuthenticationAsyncOptions = Omit<
-  typeof AUTHENTICATION_ASYNC_OPTIONS_TYPE,
+export type AuthenticationCombinedAsyncOptions = Omit<
+  typeof AUTHENTICATION_MODULE_ASYNC_OPTIONS_TYPE,
   'global'
 >;
 
+/**
+ * Transform the definition to include the combined modules
+ */
 function definitionTransform(
   definition: DynamicModule,
   extras: AuthenticationOptionsExtrasInterface,
 ): DynamicModule {
-  const { providers = [] } = definition;
-  const { global = false } = extras;
+  const { imports = [], providers = [], exports = [] } = definition;
 
+  
   return {
     ...definition,
-    global,
-    imports: createAuthenticationImports(),
-    providers: createAuthenticationProviders({ providers }),
-    exports: [
-      ConfigModule,
-      RAW_OPTIONS_TOKEN,
-      ...(createAuthenticationExports() ?? []),
-    ],
+    global: extras.global,
+    imports: createAuthenticationOptionsImports({ imports }),
+    providers: createAuthenticationOptionsProviders({ providers }),
+    exports: createAuthenticationOptionsExports({ exports }),
   };
 }
 
-export function createAuthenticationImports(): DynamicModule['imports'] {
-  return [ConfigModule.forFeature(authenticationDefaultConfig)];
-}
-
-export function createAuthenticationExports(): DynamicModule['exports'] {
+/**
+ * Create imports for the combined module
+ */
+export function createAuthenticationOptionsImports(options: {
+  imports: DynamicModule['imports']
+}): DynamicModule['imports'] {
   return [
-    AUTHENTICATION_MODULE_SETTINGS_TOKEN,
-    AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN,
-    IssueTokenService,
-    VerifyTokenService,
+    ...options.imports || [],
+    ConfigModule.forFeature(authenticationOptionsDefaultConfig),
+    AuthenticationCoreModule.forRootAsync({
+      inject: [AUTHENTICATION_MODULE_RAW_OPTIONS_TOKEN],
+      useFactory: (options: AuthenticationCombinedOptionsInterface) => {
+        return {
+          verifyTokenService: options.authentication?.verifyTokenService || options.services?.verifyTokenService,
+          issueTokenService: options.authentication?.issueTokenService || options.services?.issueTokenService,
+          validateTokenService: options.authentication?.validateTokenService || options.services?.validateTokenService,
+          settings: options.authentication?.settings,
+        };
+      }
+    }),
+    JwtModule.forRootAsync({
+      inject: [AUTHENTICATION_MODULE_RAW_OPTIONS_TOKEN],
+      useFactory: (options: AuthenticationCombinedOptionsInterface): JwtOptionsInterface => {
+        return {
+          jwtIssueTokenService: options.jwt?.jwtIssueTokenService || options.services?.jwtIssueTokenService,
+          jwtRefreshService: options.jwt?.jwtRefreshService || options.services?.jwtRefreshService,
+          jwtVerifyTokenService: options.jwt?.jwtVerifyTokenService || options.services?.jwtVerifyTokenService,
+          jwtAccessService: options.jwt?.jwtAccessService || options.services?.jwtAccessService,
+          jwtService: options.jwt?.jwtService || options.services?.jwtService,
+          settings: options.jwt?.settings,
+        };
+      }
+    }),
+    AuthJwtModule.forRootAsync({
+      inject: [AUTHENTICATION_MODULE_RAW_OPTIONS_TOKEN],
+      useFactory: (options: AuthenticationCombinedOptionsInterface): AuthJwtOptionsInterface => {
+        return {
+          appGuard: options.authJwt?.appGuard,
+          verifyTokenService: options.authJwt?.verifyTokenService || options.services?.verifyTokenService,
+          userLookupService:
+            options.authJwt?.userLookupService ||
+            options.services?.userLookupService,
+          settings: options.authJwt?.settings,
+        };
+      }
+    }),
+    AuthRefreshModule.forRootAsync({
+      inject: [AUTHENTICATION_MODULE_RAW_OPTIONS_TOKEN],
+      useFactory: (options: AuthenticationCombinedOptionsInterface): AuthRefreshOptionsInterface => {
+        return {
+          verifyTokenService: options.refresh?.verifyTokenService || options.services?.verifyTokenService,
+          issueTokenService: options.refresh?.issueTokenService || options.services?.issueTokenService,
+          userLookupService: options.refresh?.userLookupService || options.services?.userLookupService,
+          settings: options.refresh?.settings,
+        };
+      }
+    }),
   ];
 }
 
-export function createAuthenticationProviders(options: {
-  overrides?: AuthenticationOptions;
+/**
+ * Create exports for the combined module
+ */
+export function createAuthenticationOptionsExports(options: {
+  exports: DynamicModule['exports']
+}): DynamicModule['exports'] {
+  
+  return [
+    ...(options.exports || [] ),
+    ConfigModule,
+    AUTHENTICATION_MODULE_RAW_OPTIONS_TOKEN,
+    JwtModule,
+    AuthJwtModule,
+    AuthRefreshModule,
+  ];
+}
+
+/**
+ * Create providers for the combined module
+ */
+export function createAuthenticationOptionsProviders(options: {
   providers?: Provider[];
 }): Provider[] {
   return [
     ...(options.providers ?? []),
-    JwtIssueTokenService,
-    JwtVerifyTokenService,
-    createAuthenticationOptionsProvider(options.overrides),
-    createAuthenticationVerifyTokenServiceProvider(options.overrides),
-    createAuthenticationIssueTokenServiceProvider(options.overrides),
-    createAuthenticationValidateTokenServiceProvider(options.overrides),
   ];
-}
-
-export function createAuthenticationOptionsProvider(
-  optionsOverrides?: AuthenticationOptions,
-): Provider {
-  return createSettingsProvider<
-    AuthenticationSettingsInterface,
-    AuthenticationOptionsInterface
-  >({
-    settingsToken: AUTHENTICATION_MODULE_SETTINGS_TOKEN,
-    optionsToken: RAW_OPTIONS_TOKEN,
-    settingsKey: authenticationDefaultConfig.KEY,
-    optionsOverrides,
-  });
-}
-
-export function createAuthenticationIssueTokenServiceProvider(
-  optionsOverrides?: AuthenticationOptions,
-): Provider {
-  return {
-    provide: IssueTokenService,
-    inject: [RAW_OPTIONS_TOKEN, JwtIssueTokenService],
-    useFactory: async (
-      options: AuthenticationOptionsInterface,
-      jwtIssueTokenService: JwtIssueTokenService,
-    ) =>
-      optionsOverrides?.issueTokenService ??
-      options.issueTokenService ??
-      new IssueTokenService(jwtIssueTokenService),
-  };
-}
-
-export function createAuthenticationVerifyTokenServiceProvider(
-  optionsOverrides?: AuthenticationOptions,
-): Provider {
-  return {
-    provide: VerifyTokenService,
-    inject: [
-      RAW_OPTIONS_TOKEN,
-      JwtVerifyTokenService,
-      AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN,
-    ],
-    useFactory: async (
-      options: AuthenticationOptionsInterface,
-      jwtVerifyService: JwtVerifyTokenService,
-      validateTokenService: ValidateTokenServiceInterface,
-    ) =>
-      optionsOverrides?.verifyTokenService ??
-      options.verifyTokenService ??
-      new VerifyTokenService(jwtVerifyService, validateTokenService),
-  };
-}
-
-export function createAuthenticationValidateTokenServiceProvider(
-  optionsOverrides?: AuthenticationOptions,
-): Provider {
-  return {
-    provide: AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN,
-    inject: [RAW_OPTIONS_TOKEN],
-    useFactory: async (options: AuthenticationOptionsInterface) =>
-      optionsOverrides?.validateTokenService ?? options.validateTokenService,
-  };
-}
+} 

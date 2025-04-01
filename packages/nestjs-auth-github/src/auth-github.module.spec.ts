@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import {
-  AuthenticationModule,
+  AuthenticationCoreModule,
   AuthJwtModule,
   JwtModule,
 } from '@concepta/nestjs-authentication';
@@ -34,7 +34,7 @@ describe(AuthGithubModule, () => {
           }),
           JwtModule.forRoot({}),
           AuthGithubModule.forRoot({}),
-          AuthenticationModule.forRoot({}),
+          AuthenticationCoreModule.forRoot({}),
           AuthJwtModule.forRootAsync({
             inject: [UserLookupService],
             useFactory: (userLookupService) => ({

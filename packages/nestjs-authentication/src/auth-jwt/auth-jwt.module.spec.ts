@@ -23,8 +23,9 @@ import { UserLookupServiceFixture } from '../__fixtures__/user/user-lookup.servi
 import { JwtVerifyTokenService } from '../jwt/services/jwt-verify-token.service';
 import { VerifyTokenService } from '../jwt/services/verify-token.service';
 import { VerifyTokenServiceInterface } from '../core/interfaces/verify-token-service.interface';
-import { AuthenticationModule } from '../authentication.module';
+
 import { JwtModule } from '../jwt/jwt.module';
+import { AuthenticationCoreModule } from '../authentication-core.module';
 
 describe(AuthJwtModule, () => {
   const jwtVerifyTokenService = mock<JwtVerifyTokenService>();
@@ -210,7 +211,7 @@ function testModuleFactory(
 ): ModuleMetadata {
   return {
     imports: [
-      AuthenticationModule.forRoot({}),
+      AuthenticationCoreModule.forRoot({}),
       JwtModule.forRoot({}),
       UserModuleFixture,
       ...extraImports,
