@@ -21,7 +21,9 @@ import { ValidateTokenServiceInterface } from './core/interfaces/validate-token-
 import { IssueTokenService } from './jwt/services/issue-token.service';
 import { VerifyTokenService } from './jwt/services/verify-token.service';
 
-const RAW_OPTIONS_TOKEN = Symbol('__AUTHENTICATION_CORE_MODULE_RAW_OPTIONS_TOKEN__');
+const RAW_OPTIONS_TOKEN = Symbol(
+  '__AUTHENTICATION_CORE_MODULE_RAW_OPTIONS_TOKEN__',
+);
 
 export const {
   ConfigurableModuleClass: AuthenticationCoreModuleClass,
@@ -68,9 +70,7 @@ function definitionTransform(
 }
 
 export function createAuthenticationImports(): DynamicModule['imports'] {
-  return [
-    ConfigModule.forFeature(authenticationDefaultConfig),
-  ];
+  return [ConfigModule.forFeature(authenticationDefaultConfig)];
 }
 
 export function createAuthenticationExports(): DynamicModule['exports'] {

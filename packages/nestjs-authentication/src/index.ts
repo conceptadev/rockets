@@ -1,13 +1,11 @@
 export { AuthenticationCoreModule } from './authentication-core.module';
 export { AuthenticationModule } from './authentication.module';
 
-
 export { authenticationDefaultConfig } from './config/authentication-default.config';
 export { jwtDefaultConfig } from './config/jwt-default.config';
 export { authJwtDefaultConfig } from './config/auth-jwt-default.config';
 export { authRefreshDefaultConfig } from './config/auth-refresh-default.config';
 export { authenticationOptionsDefaultConfig as authenticationCombinedConfig } from './config/authentication-options-default.config';
-
 
 // Export config
 export { AuthUser } from './core/decorators/auth-user.decorator';

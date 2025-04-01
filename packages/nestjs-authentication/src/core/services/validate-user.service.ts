@@ -20,7 +20,7 @@ export abstract class ValidateUserService<
    * Returns true if user is considered valid for authentication purposes.
    */
   async isActive(
-    user: ReferenceIdInterface & ReferenceActiveInterface, 
+    user: ReferenceIdInterface & ReferenceActiveInterface,
   ): Promise<boolean> {
     return user.active === true;
   }

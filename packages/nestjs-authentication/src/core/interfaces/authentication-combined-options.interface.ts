@@ -1,6 +1,9 @@
-
 import { AuthJwtOptionsInterface } from '../../auth-jwt/interfaces/auth-jwt-options.interface';
-import { JwtIssueTokenServiceInterface, JwtServiceInterface, JwtVerifyTokenServiceInterface } from '../../jwt';
+import {
+  JwtIssueTokenServiceInterface,
+  JwtServiceInterface,
+  JwtVerifyTokenServiceInterface,
+} from '../../jwt';
 import { JwtOptions } from '../../jwt/jwt.module-definition';
 import { AuthRefreshOptions } from '../../refresh/auth-refresh.module-definition';
 import { AuthUserLookupServiceInterface } from './auth-user-lookup-service.interface';
@@ -32,7 +35,7 @@ export interface AuthenticationCombinedOptionsInterface {
    * Auth Refresh module options
    */
   refresh?: AuthRefreshOptions;
-  
+
   services: {
     jwtService?: JwtServiceInterface;
     jwtAccessService?: JwtServiceInterface;
@@ -44,5 +47,5 @@ export interface AuthenticationCombinedOptionsInterface {
     issueTokenService?: IssueTokenServiceInterface;
     verifyTokenService?: VerifyTokenServiceInterface;
     validateTokenService?: ValidateTokenServiceInterface;
-  }
-} 
+  };
+}

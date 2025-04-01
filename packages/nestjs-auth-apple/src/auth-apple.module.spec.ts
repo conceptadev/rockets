@@ -1,7 +1,7 @@
 import {
   AuthenticationCoreModule,
   AuthJwtModule,
-  JwtModule
+  JwtModule,
 } from '@concepta/nestjs-authentication';
 import { CrudModule } from '@concepta/nestjs-crud';
 import { FederatedModule } from '@concepta/nestjs-federated';

@@ -4,10 +4,10 @@ import { AuthRefreshSettingsInterface } from '../../refresh/interfaces/auth-refr
 @Injectable()
 export class AuthRefreshServiceFixture {
   public discriminator: string = 'default';
-  
+
   constructor(private readonly options?: AuthRefreshSettingsInterface) {}
-  
+
   getOptions(): AuthRefreshSettingsInterface | undefined {
     return this.options;
   }
-} 
+}

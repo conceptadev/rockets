@@ -15,7 +15,9 @@ import { AuthRefreshModule } from './refresh';
 import { AuthJwtOptionsInterface } from './auth-jwt/interfaces/auth-jwt-options.interface';
 import { AuthRefreshOptionsInterface } from './refresh/interfaces/auth-refresh-options.interface';
 
-const AUTHENTICATION_MODULE_RAW_OPTIONS_TOKEN = Symbol('__AUTHENTICATION_MODULE_RAW_OPTIONS_TOKEN__');
+const AUTHENTICATION_MODULE_RAW_OPTIONS_TOKEN = Symbol(
+  '__AUTHENTICATION_MODULE_RAW_OPTIONS_TOKEN__',
+);
 
 export const {
   ConfigurableModuleClass: AuthenticationModuleClass,
@@ -50,7 +52,6 @@ function definitionTransform(
 ): DynamicModule {
   const { imports = [], providers = [], exports = [] } = definition;
 
-  
   return {
     ...definition,
     global: extras.global,
@@ -64,58 +65,85 @@ function definitionTransform(
  * Create imports for the combined module
  */
 export function createAuthenticationOptionsImports(options: {
-  imports: DynamicModule['imports']
+  imports: DynamicModule['imports'];
 }): DynamicModule['imports'] {
   return [
-    ...options.imports || [],
+    ...(options.imports || []),
     ConfigModule.forFeature(authenticationOptionsDefaultConfig),
     AuthenticationCoreModule.forRootAsync({
       inject: [AUTHENTICATION_MODULE_RAW_OPTIONS_TOKEN],
       useFactory: (options: AuthenticationCombinedOptionsInterface) => {
         return {
-          verifyTokenService: options.authentication?.verifyTokenService || options.services?.verifyTokenService,
-          issueTokenService: options.authentication?.issueTokenService || options.services?.issueTokenService,
-          validateTokenService: options.authentication?.validateTokenService || options.services?.validateTokenService,
+          verifyTokenService:
+            options.authentication?.verifyTokenService ||
+            options.services?.verifyTokenService,
+          issueTokenService:
+            options.authentication?.issueTokenService ||
+            options.services?.issueTokenService,
+          validateTokenService:
+            options.authentication?.validateTokenService ||
+            options.services?.validateTokenService,
           settings: options.authentication?.settings,
         };
-      }
+      },
     }),
     JwtModule.forRootAsync({
       inject: [AUTHENTICATION_MODULE_RAW_OPTIONS_TOKEN],
-      useFactory: (options: AuthenticationCombinedOptionsInterface): JwtOptionsInterface => {
+      useFactory: (
+        options: AuthenticationCombinedOptionsInterface,
+      ): JwtOptionsInterface => {
         return {
-          jwtIssueTokenService: options.jwt?.jwtIssueTokenService || options.services?.jwtIssueTokenService,
-          jwtRefreshService: options.jwt?.jwtRefreshService || options.services?.jwtRefreshService,
-          jwtVerifyTokenService: options.jwt?.jwtVerifyTokenService || options.services?.jwtVerifyTokenService,
-          jwtAccessService: options.jwt?.jwtAccessService || options.services?.jwtAccessService,
+          jwtIssueTokenService:
+            options.jwt?.jwtIssueTokenService ||
+            options.services?.jwtIssueTokenService,
+          jwtRefreshService:
+            options.jwt?.jwtRefreshService ||
+            options.services?.jwtRefreshService,
+          jwtVerifyTokenService:
+            options.jwt?.jwtVerifyTokenService ||
+            options.services?.jwtVerifyTokenService,
+          jwtAccessService:
+            options.jwt?.jwtAccessService || options.services?.jwtAccessService,
           jwtService: options.jwt?.jwtService || options.services?.jwtService,
           settings: options.jwt?.settings,
         };
-      }
+      },
     }),
     AuthJwtModule.forRootAsync({
       inject: [AUTHENTICATION_MODULE_RAW_OPTIONS_TOKEN],
-      useFactory: (options: AuthenticationCombinedOptionsInterface): AuthJwtOptionsInterface => {
+      useFactory: (
+        options: AuthenticationCombinedOptionsInterface,
+      ): AuthJwtOptionsInterface => {
         return {
           appGuard: options.authJwt?.appGuard,
-          verifyTokenService: options.authJwt?.verifyTokenService || options.services?.verifyTokenService,
+          verifyTokenService:
+            options.authJwt?.verifyTokenService ||
+            options.services?.verifyTokenService,
           userLookupService:
             options.authJwt?.userLookupService ||
             options.services?.userLookupService,
           settings: options.authJwt?.settings,
         };
-      }
+      },
     }),
     AuthRefreshModule.forRootAsync({
       inject: [AUTHENTICATION_MODULE_RAW_OPTIONS_TOKEN],
-      useFactory: (options: AuthenticationCombinedOptionsInterface): AuthRefreshOptionsInterface => {
+      useFactory: (
+        options: AuthenticationCombinedOptionsInterface,
+      ): AuthRefreshOptionsInterface => {
         return {
-          verifyTokenService: options.refresh?.verifyTokenService || options.services?.verifyTokenService,
-          issueTokenService: options.refresh?.issueTokenService || options.services?.issueTokenService,
-          userLookupService: options.refresh?.userLookupService || options.services?.userLookupService,
+          verifyTokenService:
+            options.refresh?.verifyTokenService ||
+            options.services?.verifyTokenService,
+          issueTokenService:
+            options.refresh?.issueTokenService ||
+            options.services?.issueTokenService,
+          userLookupService:
+            options.refresh?.userLookupService ||
+            options.services?.userLookupService,
           settings: options.refresh?.settings,
         };
-      }
+      },
     }),
   ];
 }
@@ -124,11 +152,10 @@ export function createAuthenticationOptionsImports(options: {
  * Create exports for the combined module
  */
 export function createAuthenticationOptionsExports(options: {
-  exports: DynamicModule['exports']
+  exports: DynamicModule['exports'];
 }): DynamicModule['exports'] {
-  
   return [
-    ...(options.exports || [] ),
+    ...(options.exports || []),
     ConfigModule,
     AUTHENTICATION_MODULE_RAW_OPTIONS_TOKEN,
     JwtModule,
@@ -143,7 +170,5 @@ export function createAuthenticationOptionsExports(options: {
 export function createAuthenticationOptionsProviders(options: {
   providers?: Provider[];
 }): Provider[] {
-  return [
-    ...(options.providers ?? []),
-  ];
-} 
+  return [...(options.providers ?? [])];
+}
