@@ -15,7 +15,7 @@ import {
   AuthenticationJwtResponseDto,
   AuthPublic,
 } from '@concepta/nestjs-authentication';
-import { AUTH_LOCAL_MODULE_ISSUE_TOKEN_SERVICE_TOKEN } from './auth-local.constants';
+import { AuthLocalIssueTokenService } from './auth-local.constants';
 import { AuthLocalLoginDto } from './dto/auth-local-login.dto';
 import { AuthLocalGuard } from './auth-local.guard';
 
@@ -28,7 +28,7 @@ import { AuthLocalGuard } from './auth-local.guard';
 @ApiTags('auth')
 export class AuthLocalController {
   constructor(
-    @Inject(AUTH_LOCAL_MODULE_ISSUE_TOKEN_SERVICE_TOKEN)
+    @Inject(AuthLocalIssueTokenService)
     private issueTokenService: IssueTokenServiceInterface,
   ) {}
 

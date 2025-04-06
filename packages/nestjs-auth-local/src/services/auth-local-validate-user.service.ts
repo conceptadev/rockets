@@ -3,8 +3,8 @@ import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import { ValidateUserService } from '@concepta/nestjs-authentication';
 import { PasswordValidationServiceInterface } from '@concepta/nestjs-password';
 import {
-  AUTH_LOCAL_MODULE_PASSWORD_VALIDATION_SERVICE_TOKEN,
-  AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+  AuthLocalPasswordValidationService,
+  AuthLocalUserLookupService,
 } from '../auth-local.constants';
 import { AuthLocalValidateUserInterface } from '../interfaces/auth-local-validate-user.interface';
 import { AuthLocalValidateUserServiceInterface } from '../interfaces/auth-local-validate-user-service.interface';
@@ -19,9 +19,9 @@ export class AuthLocalValidateUserService
   implements AuthLocalValidateUserServiceInterface
 {
   constructor(
-    @Inject(AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN)
+    @Inject(AuthLocalUserLookupService)
     protected readonly userLookupService: AuthLocalUserLookupServiceInterface,
-    @Inject(AUTH_LOCAL_MODULE_PASSWORD_VALIDATION_SERVICE_TOKEN)
+    @Inject(AuthLocalPasswordValidationService)
     protected readonly passwordValidationService: PasswordValidationServiceInterface,
   ) {
     super();

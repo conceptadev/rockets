@@ -3,10 +3,6 @@ import {
   AuthLocalAsyncOptions,
   AuthLocalModuleClass,
   AuthLocalOptions,
-  createAuthLocalControllers,
-  createAuthLocalExports,
-  createAuthLocalImports,
-  createAuthLocalProviders,
 } from './auth-local.module-definition';
 
 /**
@@ -28,15 +24,5 @@ export class AuthLocalModule extends AuthLocalModuleClass {
 
   static forRootAsync(options: AuthLocalAsyncOptions): DynamicModule {
     return super.registerAsync({ ...options, global: true });
-  }
-
-  static forFeature(options: AuthLocalOptions): DynamicModule {
-    return {
-      module: AuthLocalModule,
-      imports: createAuthLocalImports(),
-      providers: createAuthLocalProviders({ overrides: options }),
-      controllers: createAuthLocalControllers(options),
-      exports: createAuthLocalExports(),
-    };
   }
 }

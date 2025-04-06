@@ -9,17 +9,16 @@ import { createSettingsProvider } from '@concepta/nestjs-common';
 import {
   JwtIssueTokenService,
   JwtVerifyTokenService,
+  JwtVerifyTokenServiceInterface,
 } from '@concepta/nestjs-jwt';
 
-import {
-  AUTHENTICATION_MODULE_SETTINGS_TOKEN,
-  AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN,
-} from './authentication.constants';
+import { AUTHENTICATION_MODULE_SETTINGS_TOKEN } from './authentication.constants';
 
 import { AuthenticationOptionsInterface } from './interfaces/authentication-options.interface';
 import { AuthenticationOptionsExtrasInterface } from './interfaces/authentication-options-extras.interface';
 import { AuthenticationSettingsInterface } from './interfaces/authentication-settings.interface';
 import { ValidateTokenServiceInterface } from './interfaces/validate-token-service.interface';
+import { ValidateTokenService } from './authentication.constants';
 import { VerifyTokenService } from './services/verify-token.service';
 import { IssueTokenService } from './services/issue-token.service';
 import { authenticationDefaultConfig } from './config/authentication-default.config';
@@ -77,7 +76,7 @@ export function createAuthenticationImports(): DynamicModule['imports'] {
 export function createAuthenticationExports(): DynamicModule['exports'] {
   return [
     AUTHENTICATION_MODULE_SETTINGS_TOKEN,
-    AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN,
+    ValidateTokenService,
     IssueTokenService,
     VerifyTokenService,
   ];
@@ -133,14 +132,10 @@ export function createAuthenticationVerifyTokenServiceProvider(
 ): Provider {
   return {
     provide: VerifyTokenService,
-    inject: [
-      RAW_OPTIONS_TOKEN,
-      JwtVerifyTokenService,
-      AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN,
-    ],
+    inject: [RAW_OPTIONS_TOKEN, JwtVerifyTokenService, ValidateTokenService],
     useFactory: async (
       options: AuthenticationOptionsInterface,
-      jwtVerifyService: JwtVerifyTokenService,
+      jwtVerifyService: JwtVerifyTokenServiceInterface,
       validateTokenService: ValidateTokenServiceInterface,
     ) =>
       optionsOverrides?.verifyTokenService ??
@@ -153,7 +148,7 @@ export function createAuthenticationValidateTokenServiceProvider(
   optionsOverrides?: AuthenticationOptions,
 ): Provider {
   return {
-    provide: AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN,
+    provide: ValidateTokenService,
     inject: [RAW_OPTIONS_TOKEN],
     useFactory: async (options: AuthenticationOptionsInterface) =>
       optionsOverrides?.validateTokenService ?? options.validateTokenService,

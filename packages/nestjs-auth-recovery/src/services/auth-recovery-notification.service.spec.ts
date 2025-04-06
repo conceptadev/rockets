@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { EmailService } from '@concepta/nestjs-email';
 
-import { AUTH_RECOVERY_MODULE_EMAIL_SERVICE_TOKEN } from '../auth-recovery.constants';
+import { AuthRecoveryEmailService } from '../auth-recovery.constants';
 import { AuthRecoveryNotificationService } from './auth-recovery-notification.service';
 
 import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
@@ -21,9 +21,7 @@ describe('AuthRecoveryNotificationService', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    emailService = moduleFixture.get<EmailService>(
-      AUTH_RECOVERY_MODULE_EMAIL_SERVICE_TOKEN,
-    );
+    emailService = moduleFixture.get<EmailService>(AuthRecoveryEmailService);
 
     spyEmailService = jest
       .spyOn(emailService, 'sendMail')

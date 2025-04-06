@@ -1,24 +1,9 @@
 import { mock } from 'jest-mock-extended';
-import {
-  DynamicModule,
-  Inject,
-  Injectable,
-  Module,
-  ModuleMetadata,
-} from '@nestjs/common';
+import { DynamicModule, ModuleMetadata } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { EmailModule, EmailService } from '@concepta/nestjs-email';
 
-import {
-  AUTH_RECOVERY_MODULE_EMAIL_SERVICE_TOKEN,
-  AUTH_RECOVERY_MODULE_OTP_SERVICE_TOKEN,
-  AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
-  AUTH_RECOVERY_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-  AUTH_RECOVERY_MODULE_USER_MUTATE_SERVICE_TOKEN,
-} from './auth-recovery.constants';
-
-import { AuthRecoverySettingsInterface } from './interfaces/auth-recovery-settings.interface';
 import { AuthRecoveryOtpServiceInterface } from './interfaces/auth-recovery-otp.service.interface';
 import { AuthRecoveryEmailServiceInterface } from './interfaces/auth-recovery-email.service.interface';
 import { AuthRecoveryUserLookupServiceInterface } from './interfaces/auth-recovery-user-lookup.service.interface';
@@ -151,97 +136,6 @@ describe(AuthRecoveryModule, () => {
     it('module should be loaded', async () => {
       commonVars();
       commonTests();
-    });
-  });
-
-  describe(AuthRecoveryModule.forFeature, () => {
-    @Module({})
-    class GlobalModule {}
-
-    @Module({})
-    class ForFeatureModule {}
-
-    @Injectable()
-    class TestService {
-      constructor(
-        @Inject(AUTH_RECOVERY_MODULE_SETTINGS_TOKEN)
-        public settings: AuthRecoverySettingsInterface,
-        @Inject(AUTH_RECOVERY_MODULE_EMAIL_SERVICE_TOKEN)
-        public emailService: AuthRecoveryEmailServiceInterface,
-        @Inject(AUTH_RECOVERY_MODULE_OTP_SERVICE_TOKEN)
-        public otpService: AuthRecoveryOtpServiceInterface,
-        @Inject(AUTH_RECOVERY_MODULE_USER_LOOKUP_SERVICE_TOKEN)
-        public userLookupService: AuthRecoveryUserLookupServiceInterface,
-        @Inject(AUTH_RECOVERY_MODULE_USER_MUTATE_SERVICE_TOKEN)
-        public userMutateService: AuthRecoveryUserMutateServiceInterface,
-      ) {}
-    }
-
-    let testService: TestService;
-    const ffEmailService = mock<AuthRecoveryEmailServiceInterface>();
-    const ffOtpService = new OtpServiceFixture();
-    const ffUserLookupService = new UserLookupServiceFixture();
-    const ffUserMutateService = new UserMutateServiceFixture();
-
-    beforeEach(async () => {
-      const globalModule = testModuleFactory([
-        AuthRecoveryModule.forRootAsync({
-          inject: [
-            UserLookupServiceFixture,
-            UserMutateServiceFixture,
-            OtpServiceFixture,
-            EmailService,
-          ],
-          useFactory: (
-            userLookupService,
-            userMutateService,
-            otpService,
-            emailService,
-          ) => ({
-            userLookupService,
-            userMutateService,
-            otpService,
-            emailService,
-          }),
-        }),
-      ]);
-
-      testModule = await Test.createTestingModule({
-        imports: [
-          { module: GlobalModule, ...globalModule },
-          {
-            module: ForFeatureModule,
-            imports: [
-              AuthRecoveryModule.forFeature({
-                emailService: ffEmailService,
-                otpService: ffOtpService,
-                userLookupService: ffUserLookupService,
-                userMutateService: ffUserMutateService,
-              }),
-            ],
-            providers: [TestService],
-          },
-        ],
-      }).compile();
-
-      testService = testModule.get(TestService);
-    });
-
-    it('module should be loaded', async () => {
-      commonVars();
-      commonTests();
-    });
-
-    it('should have custom providers', async () => {
-      commonVars();
-      expect(testService.emailService).toBe(ffEmailService);
-      expect(testService.emailService).not.toBe(emailService);
-      expect(testService.otpService).toBe(ffOtpService);
-      expect(testService.otpService).not.toBe(otpService);
-      expect(testService.userLookupService).toBe(ffUserLookupService);
-      expect(testService.userLookupService).not.toBe(userLookupService);
-      expect(testService.userMutateService).toBe(ffUserMutateService);
-      expect(testService.userMutateService).not.toBe(userMutateService);
     });
   });
 

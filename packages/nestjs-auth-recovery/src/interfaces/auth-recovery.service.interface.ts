@@ -15,7 +15,7 @@ export interface AuthRecoveryServiceInterface {
   ): Promise<void>;
   validatePasscode(
     passcode: string,
-    deleteIfValid: boolean,
+    deleteIfValid?: boolean,
     queryOptions?: QueryOptionsInterface,
   ): Promise<ReferenceAssigneeInterface | null>;
   updatePassword(

@@ -8,7 +8,7 @@ import { PasswordValidationService } from '@concepta/nestjs-password';
 import { LOGIN_SUCCESS } from './__fixtures__/user/constants';
 import { HttpAdapterHost } from '@nestjs/core';
 import { ExceptionsFilter } from '@concepta/nestjs-exception';
-import { AUTH_LOCAL_MODULE_VALIDATE_USER_SERVICE_TOKEN } from './auth-local.constants';
+import { AuthLocalValidateUserService } from './services/auth-local-validate-user.service';
 import { AuthLocalInvalidCredentialsException } from './exceptions/auth-local-invalid-credentials.exception';
 
 describe('AuthLocalController (e2e)', () => {
@@ -59,9 +59,7 @@ describe('AuthLocalController (e2e)', () => {
   });
 
   it('POST auth/login username not found with custom message', async () => {
-    const validateUserService = app.get(
-      AUTH_LOCAL_MODULE_VALIDATE_USER_SERVICE_TOKEN,
-    );
+    const validateUserService = app.get(AuthLocalValidateUserService);
 
     jest
       .spyOn(validateUserService, 'validateUser')

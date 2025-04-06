@@ -225,7 +225,7 @@ Create the Lookup Service for AuthJwtModule
 
 ```typescript
 // my-jwt-user-lookup.service.ts
-import { AuthJwtUserLookupServiceInterface } from '@concepta/nestjs-auth-jwt/dist/interfaces/auth-jwt-user-lookup-service.interface';
+import { AuthJwtUserLookupServiceInterface } from '@concepta/nestjs-auth-jwt';
 import { ReferenceIdInterface, ReferenceSubject } from '@concepta/nestjs-common';
 
 export class MyJwtUserLookupService implements AuthJwtUserLookupServiceInterface {
@@ -244,8 +244,10 @@ Create the Lookup Service for Auth Local
 // my-auth-local-user-lookup.service.ts
 import { Injectable } from '@nestjs/common';
 import { ReferenceUsername } from '@concepta/nestjs-common';
-import { AuthLocalUserLookupServiceInterface } from '@concepta/nestjs-auth-local';
-import { AuthLocalCredentialsInterface } from '@concepta/nestjs-auth-local/dist/interfaces/auth-local-credentials.interface';
+import {
+  AuthLocalUserLookupServiceInterface,
+  AuthLocalCredentialsInterface
+} from '@concepta/nestjs-auth-local';
 
 @Injectable()
 export class MyAuthLocalUserLookupService implements AuthLocalUserLookupServiceInterface {

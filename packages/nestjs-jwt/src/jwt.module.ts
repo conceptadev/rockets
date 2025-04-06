@@ -4,9 +4,6 @@ import {
   JwtModuleClass,
   JwtOptions,
   JwtAsyncOptions,
-  createJwtImports,
-  createJwtProviders,
-  createJwtExports,
 } from './jwt.module-definition';
 
 @Module({})
@@ -25,14 +22,5 @@ export class JwtModule extends JwtModuleClass {
 
   static forRootAsync(options: JwtAsyncOptions): DynamicModule {
     return super.registerAsync({ ...options, global: true });
-  }
-
-  static forFeature(options: JwtOptions): DynamicModule {
-    return {
-      module: JwtModule,
-      imports: createJwtImports(options),
-      providers: createJwtProviders({ overrides: options }),
-      exports: createJwtExports(),
-    };
   }
 }

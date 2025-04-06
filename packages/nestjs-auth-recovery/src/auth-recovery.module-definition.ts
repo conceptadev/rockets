@@ -10,12 +10,12 @@ import { createSettingsProvider } from '@concepta/nestjs-common';
 import { EntityManagerProxy } from '@concepta/typeorm-common';
 
 import {
-  AUTH_RECOVERY_MODULE_EMAIL_SERVICE_TOKEN,
-  AUTH_RECOVERY_MODULE_OTP_SERVICE_TOKEN,
   AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
   AUTH_RECOVERY_MODULE_ENTITY_MANAGER_PROXY_TOKEN,
-  AUTH_RECOVERY_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-  AUTH_RECOVERY_MODULE_USER_MUTATE_SERVICE_TOKEN,
+  AuthRecoveryOtpService,
+  AuthRecoveryEmailService,
+  AuthRecoveryUserLookupService,
+  AuthRecoveryUserMutateService,
 } from './auth-recovery.constants';
 
 import { AuthRecoveryOptionsInterface } from './interfaces/auth-recovery-options.interface';
@@ -77,10 +77,10 @@ export function createAuthRecoveryImports(): DynamicModule['imports'] {
 export function createAuthRecoveryExports() {
   return [
     AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
-    AUTH_RECOVERY_MODULE_OTP_SERVICE_TOKEN,
-    AUTH_RECOVERY_MODULE_EMAIL_SERVICE_TOKEN,
-    AUTH_RECOVERY_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-    AUTH_RECOVERY_MODULE_USER_MUTATE_SERVICE_TOKEN,
+    AuthRecoveryOtpService,
+    AuthRecoveryEmailService,
+    AuthRecoveryUserLookupService,
+    AuthRecoveryUserMutateService,
     AuthRecoveryService,
   ];
 }
@@ -128,7 +128,7 @@ export function createAuthRecoveryOtpServiceProvider(
   optionsOverrides?: Pick<AuthRecoveryOptions, 'otpService'>,
 ): Provider {
   return {
-    provide: AUTH_RECOVERY_MODULE_OTP_SERVICE_TOKEN,
+    provide: AuthRecoveryOtpService,
     inject: [RAW_OPTIONS_TOKEN],
     useFactory: async (options: Pick<AuthRecoveryOptions, 'otpService'>) =>
       optionsOverrides?.otpService ?? options.otpService,
@@ -139,7 +139,7 @@ export function createAuthRecoveryEmailServiceProvider(
   optionsOverrides?: Pick<AuthRecoveryOptions, 'emailService'>,
 ): Provider {
   return {
-    provide: AUTH_RECOVERY_MODULE_EMAIL_SERVICE_TOKEN,
+    provide: AuthRecoveryEmailService,
     inject: [RAW_OPTIONS_TOKEN],
     useFactory: async (options: Pick<AuthRecoveryOptions, 'emailService'>) =>
       optionsOverrides?.emailService ?? options.emailService,
@@ -150,7 +150,7 @@ export function createAuthRecoveryUserLookupServiceProvider(
   optionsOverrides?: Pick<AuthRecoveryOptions, 'userLookupService'>,
 ): Provider {
   return {
-    provide: AUTH_RECOVERY_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+    provide: AuthRecoveryUserLookupService,
     inject: [RAW_OPTIONS_TOKEN],
     useFactory: async (
       options: Pick<AuthRecoveryOptions, 'userLookupService'>,
@@ -162,7 +162,7 @@ export function createAuthRecoveryUserMutateServiceProvider(
   optionsOverrides?: Pick<AuthRecoveryOptions, 'userMutateService'>,
 ): Provider {
   return {
-    provide: AUTH_RECOVERY_MODULE_USER_MUTATE_SERVICE_TOKEN,
+    provide: AuthRecoveryUserMutateService,
     inject: [RAW_OPTIONS_TOKEN],
     useFactory: async (
       options: Pick<AuthRecoveryOptions, 'userMutateService'>,
@@ -178,7 +178,7 @@ export function createAuthRecoveryNotificationServiceProvider(
     inject: [
       RAW_OPTIONS_TOKEN,
       AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
-      AUTH_RECOVERY_MODULE_EMAIL_SERVICE_TOKEN,
+      AuthRecoveryEmailService,
     ],
     useFactory: async (
       options: Pick<AuthRecoveryOptions, 'notificationService'>,

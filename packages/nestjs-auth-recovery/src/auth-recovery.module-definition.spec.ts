@@ -4,11 +4,11 @@ import { OtpServiceFixture } from './__fixtures__/otp/otp.service.fixture';
 import { UserLookupServiceFixture } from './__fixtures__/user/services/user-lookup.service.fixture';
 import { UserMutateServiceFixture } from './__fixtures__/user/services/user-mutate.service.fixture';
 import {
-  AUTH_RECOVERY_MODULE_EMAIL_SERVICE_TOKEN,
-  AUTH_RECOVERY_MODULE_OTP_SERVICE_TOKEN,
   AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
-  AUTH_RECOVERY_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-  AUTH_RECOVERY_MODULE_USER_MUTATE_SERVICE_TOKEN,
+  AuthRecoveryOtpService,
+  AuthRecoveryEmailService,
+  AuthRecoveryUserLookupService,
+  AuthRecoveryUserMutateService,
 } from './auth-recovery.constants';
 import { AuthRecoveryController } from './auth-recovery.controller';
 import {
@@ -45,10 +45,10 @@ describe('AuthRecoveryModuleDefinition', () => {
       const result = createAuthRecoveryExports();
       expect(result).toEqual([
         AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
-        AUTH_RECOVERY_MODULE_OTP_SERVICE_TOKEN,
-        AUTH_RECOVERY_MODULE_EMAIL_SERVICE_TOKEN,
-        AUTH_RECOVERY_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-        AUTH_RECOVERY_MODULE_USER_MUTATE_SERVICE_TOKEN,
+        AuthRecoveryOtpService,
+        AuthRecoveryEmailService,
+        AuthRecoveryUserLookupService,
+        AuthRecoveryUserMutateService,
         AuthRecoveryService,
       ]);
     });

@@ -1,10 +1,4 @@
-import {
-  DynamicModule,
-  Inject,
-  Injectable,
-  Module,
-  ModuleMetadata,
-} from '@nestjs/common';
+import { DynamicModule, ModuleMetadata } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   JwtIssueTokenService,
@@ -20,14 +14,6 @@ import {
   VerifyTokenServiceInterface,
 } from '@concepta/nestjs-authentication';
 
-import {
-  AUTH_REFRESH_MODULE_ISSUE_SERVICE_TOKEN,
-  AUTH_REFRESH_MODULE_SETTINGS_TOKEN,
-  AUTH_REFRESH_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-  AUTH_REFRESH_MODULE_VERIFY_SERVICE_TOKEN,
-} from './auth-refresh.constants';
-
-import { AuthRefreshSettingsInterface } from './interfaces/auth-refresh-settings.interface';
 import { AuthRefreshUserLookupServiceInterface } from './interfaces/auth-refresh-user-lookup-service.interface';
 import { AuthRefreshModule } from './auth-refresh.module';
 
@@ -135,84 +121,6 @@ describe(AuthRefreshModule, () => {
     it('module should be loaded', async () => {
       commonVars(testModule);
       commonTests();
-    });
-  });
-
-  describe(AuthRefreshModule.forFeature, () => {
-    @Module({})
-    class GlobalModule {}
-
-    @Module({})
-    class ForFeatureModule {}
-
-    @Injectable()
-    class TestService {
-      constructor(
-        @Inject(AUTH_REFRESH_MODULE_SETTINGS_TOKEN)
-        public settings: AuthRefreshSettingsInterface,
-        @Inject(AUTH_REFRESH_MODULE_USER_LOOKUP_SERVICE_TOKEN)
-        public userLookupService: AuthRefreshUserLookupServiceInterface,
-        @Inject(AUTH_REFRESH_MODULE_VERIFY_SERVICE_TOKEN)
-        public verifyTokenService: VerifyTokenServiceInterface,
-        @Inject(AUTH_REFRESH_MODULE_ISSUE_SERVICE_TOKEN)
-        public issueTokenService: IssueTokenServiceInterface,
-      ) {}
-    }
-
-    let testService: TestService;
-    const ffUserLookupService = new UserLookupServiceFixture();
-    const ffVerifyTokenService = new VerifyTokenService(jwtVerifyTokenService);
-    const ffIssueTokenService = new IssueTokenService(jwtIssueTokenService);
-
-    beforeEach(async () => {
-      const globalModule = testModuleFactory([
-        AuthRefreshModule.forRootAsync({
-          inject: [
-            VerifyTokenService,
-            IssueTokenService,
-            UserLookupServiceFixture,
-          ],
-          useFactory: (
-            verifyTokenService: VerifyTokenService,
-            issueTokenService: IssueTokenService,
-            userLookupService: UserLookupServiceFixture,
-          ) => ({ verifyTokenService, issueTokenService, userLookupService }),
-        }),
-      ]);
-
-      testModule = await Test.createTestingModule({
-        imports: [
-          { module: GlobalModule, ...globalModule },
-          {
-            module: ForFeatureModule,
-            imports: [
-              AuthRefreshModule.forFeature({
-                issueTokenService: ffIssueTokenService,
-                verifyTokenService: ffVerifyTokenService,
-                userLookupService: ffUserLookupService,
-              }),
-            ],
-            providers: [TestService],
-          },
-        ],
-      }).compile();
-
-      testService = testModule.get(TestService);
-    });
-
-    it('module should be loaded', async () => {
-      commonVars(testModule);
-      commonTests();
-    });
-
-    it('should have custom providers', async () => {
-      commonVars(testModule);
-      expect(testService.userLookupService).toBe(ffUserLookupService);
-      expect(testService.userLookupService).not.toBe(userLookupService);
-      expect(testService.verifyTokenService).toBe(ffVerifyTokenService);
-      expect(testService.verifyTokenService).not.toBe(verifyTokenService);
-      expect(testService.issueTokenService).toBe(ffIssueTokenService);
-      expect(testService.issueTokenService).not.toBe(issueTokenService);
     });
   });
 

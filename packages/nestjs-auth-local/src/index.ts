@@ -1,4 +1,7 @@
 // interfaces
+export { AuthLocalOptionsInterface } from './interfaces/auth-local-options.interface';
+export { AuthLocalOptionsExtrasInterface } from './interfaces/auth-local-options-extras.interface';
+export { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.interface';
 export { AuthLocalValidateUserInterface } from './interfaces/auth-local-validate-user.interface';
 export { AuthLocalUserLookupServiceInterface } from './interfaces/auth-local-user-lookup-service.interface';
 export { AuthLocalValidateUserServiceInterface } from './interfaces/auth-local-validate-user-service.interface';
@@ -16,6 +19,12 @@ export {
   AuthLocalGuard,
   AuthLocalGuard as LocalAuthGuard,
 } from './auth-local.guard';
+
+export {
+  AuthLocalIssueTokenService,
+  AuthLocalUserLookupService,
+  AuthLocalPasswordValidationService,
+} from './auth-local.constants';
 
 // exceptions
 export { AuthLocalException } from './exceptions/auth-local.exception';

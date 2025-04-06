@@ -7,10 +7,10 @@ import { AuthRecoveryUserLookupServiceInterface } from '../interfaces/auth-recov
 import { AuthRecoveryUserMutateServiceInterface } from '../interfaces/auth-recovery-user-mutate.service.interface';
 import {
   AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
-  AUTH_RECOVERY_MODULE_OTP_SERVICE_TOKEN,
-  AUTH_RECOVERY_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-  AUTH_RECOVERY_MODULE_USER_MUTATE_SERVICE_TOKEN,
   AUTH_RECOVERY_MODULE_ENTITY_MANAGER_PROXY_TOKEN,
+  AuthRecoveryOtpService,
+  AuthRecoveryUserLookupService,
+  AuthRecoveryUserMutateService,
 } from '../auth-recovery.constants';
 import { AuthRecoveryNotificationService } from './auth-recovery-notification.service';
 import {
@@ -21,19 +21,21 @@ import {
   EntityManagerProxy,
   QueryOptionsInterface,
 } from '@concepta/typeorm-common';
+import { AuthRecoveryNotificationServiceInterface } from '../interfaces/auth-recovery-notification.service.interface';
 
 @Injectable()
 export class AuthRecoveryService implements AuthRecoveryServiceInterface {
   constructor(
     @Inject(AUTH_RECOVERY_MODULE_SETTINGS_TOKEN)
     private readonly config: AuthRecoverySettingsInterface,
-    @Inject(AUTH_RECOVERY_MODULE_OTP_SERVICE_TOKEN)
+    @Inject(AuthRecoveryOtpService)
     private readonly otpService: AuthRecoveryOtpServiceInterface,
-    @Inject(AUTH_RECOVERY_MODULE_USER_LOOKUP_SERVICE_TOKEN)
+    @Inject(AuthRecoveryUserLookupService)
     private readonly userLookupService: AuthRecoveryUserLookupServiceInterface,
-    @Inject(AUTH_RECOVERY_MODULE_USER_MUTATE_SERVICE_TOKEN)
+    @Inject(AuthRecoveryUserMutateService)
     private readonly userMutateService: AuthRecoveryUserMutateServiceInterface,
-    private readonly notificationService: AuthRecoveryNotificationService,
+    @Inject(AuthRecoveryNotificationService)
+    private readonly notificationService: AuthRecoveryNotificationServiceInterface,
     @Inject(AUTH_RECOVERY_MODULE_ENTITY_MANAGER_PROXY_TOKEN)
     private readonly entityManagerProxy: EntityManagerProxy,
   ) {}

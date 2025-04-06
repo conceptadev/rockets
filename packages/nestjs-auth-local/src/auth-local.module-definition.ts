@@ -16,11 +16,10 @@ import {
 } from '@concepta/nestjs-authentication';
 
 import {
-  AUTH_LOCAL_MODULE_ISSUE_TOKEN_SERVICE_TOKEN,
-  AUTH_LOCAL_MODULE_PASSWORD_VALIDATION_SERVICE_TOKEN,
   AUTH_LOCAL_MODULE_SETTINGS_TOKEN,
-  AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-  AUTH_LOCAL_MODULE_VALIDATE_USER_SERVICE_TOKEN,
+  AuthLocalIssueTokenService,
+  AuthLocalUserLookupService,
+  AuthLocalPasswordValidationService,
 } from './auth-local.constants';
 
 import { AuthLocalOptionsExtrasInterface } from './interfaces/auth-local-options-extras.interface';
@@ -75,13 +74,13 @@ export function createAuthLocalImports(): DynamicModule['imports'] {
   return [ConfigModule.forFeature(authLocalDefaultConfig)];
 }
 
-export function createAuthLocalExports(): string[] {
+export function createAuthLocalExports() {
   return [
     AUTH_LOCAL_MODULE_SETTINGS_TOKEN,
-    AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-    AUTH_LOCAL_MODULE_ISSUE_TOKEN_SERVICE_TOKEN,
-    AUTH_LOCAL_MODULE_VALIDATE_USER_SERVICE_TOKEN,
-    AUTH_LOCAL_MODULE_PASSWORD_VALIDATION_SERVICE_TOKEN,
+    AuthLocalUserLookupService,
+    AuthLocalIssueTokenService,
+    AuthLocalPasswordValidationService,
+    AuthLocalValidateUserService,
   ];
 }
 
@@ -129,11 +128,11 @@ export function createAuthLocalValidateUserServiceProvider(
   optionsOverrides?: Pick<AuthLocalOptions, 'validateUserService'>,
 ): Provider {
   return {
-    provide: AUTH_LOCAL_MODULE_VALIDATE_USER_SERVICE_TOKEN,
+    provide: AuthLocalValidateUserService,
     inject: [
       RAW_OPTIONS_TOKEN,
-      AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-      AUTH_LOCAL_MODULE_PASSWORD_VALIDATION_SERVICE_TOKEN,
+      AuthLocalUserLookupService,
+      AuthLocalPasswordValidationService,
     ],
     useFactory: async (
       options: Pick<AuthLocalOptions, 'validateUserService'>,
@@ -153,7 +152,7 @@ export function createAuthLocalIssueTokenServiceProvider(
   optionsOverrides?: Pick<AuthLocalOptions, 'issueTokenService'>,
 ): Provider {
   return {
-    provide: AUTH_LOCAL_MODULE_ISSUE_TOKEN_SERVICE_TOKEN,
+    provide: AuthLocalIssueTokenService,
     inject: [RAW_OPTIONS_TOKEN, IssueTokenService],
     useFactory: async (
       options: Pick<AuthLocalOptions, 'issueTokenService'>,
@@ -169,7 +168,7 @@ export function createAuthLocalPasswordValidationServiceProvider(
   optionsOverrides?: Pick<AuthLocalOptions, 'passwordValidationService'>,
 ): Provider {
   return {
-    provide: AUTH_LOCAL_MODULE_PASSWORD_VALIDATION_SERVICE_TOKEN,
+    provide: AuthLocalPasswordValidationService,
     inject: [RAW_OPTIONS_TOKEN, PasswordValidationService],
     useFactory: async (
       options: Pick<AuthLocalOptions, 'passwordValidationService'>,
@@ -185,7 +184,7 @@ export function createAuthLocalUserLookupServiceProvider(
   optionsOverrides?: Pick<AuthLocalOptions, 'userLookupService'>,
 ): Provider {
   return {
-    provide: AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+    provide: AuthLocalUserLookupService,
     inject: [RAW_OPTIONS_TOKEN],
     useFactory: async (options: AuthLocalOptionsInterface) =>
       optionsOverrides?.userLookupService ?? options.userLookupService,

@@ -11,11 +11,11 @@ import {
 } from '@concepta/nestjs-common';
 import {
   IssueTokenServiceInterface,
-  IssueTokenService,
   AuthUser,
   AuthenticationJwtResponseDto,
   AuthPublic,
 } from '@concepta/nestjs-authentication';
+import { AuthRefreshIssueTokenService } from './auth-refresh.constants';
 import { AuthRefreshDto } from './dto/auth-refresh.dto';
 import { AuthRefreshGuard } from './auth-refresh.guard';
 
@@ -28,7 +28,7 @@ import { AuthRefreshGuard } from './auth-refresh.guard';
 @ApiTags('auth')
 export class AuthRefreshController {
   constructor(
-    @Inject(IssueTokenService)
+    @Inject(AuthRefreshIssueTokenService)
     private issueTokenService: IssueTokenServiceInterface,
   ) {}
 

@@ -23,6 +23,7 @@ import { AuthVerifyConfirmParamsInterface } from '../interfaces/auth-verify-conf
 import { AuthVerifyRevokeParamsInterface } from '../interfaces/auth-verify-revoke-params.interface';
 import { AuthVerifyValidateParamsInterface } from '../interfaces/auth-verify-validate-params.interface';
 import { AuthVerifyNotificationServiceInterface } from '../interfaces/auth-verify-notification.service.interface';
+import { AuthRecoveryOtpInvalidException } from '../exceptions/auth-verify-otp-invalid.exception';
 
 @Injectable()
 export class AuthVerifyService implements AuthVerifyServiceInterface {
@@ -172,13 +173,13 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
               email: user.email,
               queryOptions: nestedQueryOptions,
             });
-          }
 
-          return user;
+            return user;
+          }
         }
 
         // otp was not found
-        return null;
+        throw new AuthRecoveryOtpInvalidException();
       });
   }
 
@@ -192,7 +193,7 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
     params: AuthVerifyRevokeParamsInterface,
   ): Promise<void> {
     const { email, queryOptions } = params;
-    // verify users password by providing an email
+    // verify user by providing an email
     const user = await this.userLookupService.byEmail(email, queryOptions);
 
     // did we find a user?

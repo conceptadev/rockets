@@ -45,7 +45,7 @@ describe('AuthVerifyNotificationService', () => {
     expect(spyEmailService).toHaveBeenCalledTimes(1);
   });
 
-  it('Send verify email password', async () => {
+  it('Send verify email passcode', async () => {
     await authVerifyNotificationService.sendVerifyEmail({
       email: 'me@mail.com',
       passcode: 'me',
@@ -54,7 +54,7 @@ describe('AuthVerifyNotificationService', () => {
     expect(spyEmailService).toHaveBeenCalledTimes(1);
   });
 
-  it('Send verify email password', async () => {
+  it('Send verify email passcode', async () => {
     authVerifyNotificationService['settings'].email.tokenUrlFormatter =
       undefined;
 
