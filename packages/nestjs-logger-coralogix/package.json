@@ -1,6 +1,6 @@
 {
   "name": "@concepta/nestjs-logger-coralogix",
-  "version": "6.0.0-alpha.4",
+  "version": "7.0.0-alpha.0",
   "description": "Rockets NestJS Logger",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,9 +12,9 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
-    "@concepta/nestjs-common": "^6.0.0-alpha.4",
-    "@concepta/nestjs-exception": "^6.0.0-alpha.4",
-    "@concepta/nestjs-logger": "^6.0.0-alpha.4",
+    "@concepta/nestjs-common": "^7.0.0-alpha.0",
+    "@concepta/nestjs-exception": "^7.0.0-alpha.0",
+    "@concepta/nestjs-logger": "^7.0.0-alpha.0",
     "@nestjs/common": "^10.4.1",
     "@nestjs/config": "^3.2.3",
     "@nestjs/core": "^10.4.1",
