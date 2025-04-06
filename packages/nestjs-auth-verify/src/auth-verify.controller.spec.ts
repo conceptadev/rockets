@@ -3,7 +3,6 @@ import { AuthVerifyService } from './services/auth-verify.service';
 import { AuthVerifyUpdateDto } from './dto/auth-verify-update.dto';
 import { mock } from 'jest-mock-extended';
 import { AuthVerifyDto } from './dto/auth-verify.dto';
-import { AuthRecoveryOtpInvalidException } from './exceptions/auth-verify-otp-invalid.exception';
 
 describe(AuthVerifyController.name, () => {
   let controller: AuthVerifyController;
@@ -11,7 +10,7 @@ describe(AuthVerifyController.name, () => {
   const dto: AuthVerifyDto = {
     email: 'test@example.com',
   };
-  const passwordDto: AuthVerifyUpdateDto = {
+  const authVerifyUpdateDto: AuthVerifyUpdateDto = {
     passcode: '123456',
   };
   beforeEach(() => {
@@ -21,39 +20,38 @@ describe(AuthVerifyController.name, () => {
 
   describe('send', () => {
     it('should call send method of AuthVerifyService', async () => {
-      const verifyPasswordSpy = jest.spyOn(authVerifyService, 'send');
+      const verifySendSpy = jest.spyOn(authVerifyService, 'send');
 
       await controller.send(dto);
 
-      expect(verifyPasswordSpy).toHaveBeenCalledWith({ email: dto.email });
+      expect(verifySendSpy).toHaveBeenCalledWith({ email: dto.email });
     });
   });
 
-  describe('updatePassword', () => {
-    it('should call updatePassword method of AuthVerifyService', async () => {
-      const updatePasswordSpy = jest
+  describe('confirm', () => {
+    it('should call confirmUser method of AuthVerifyService', async () => {
+      const confirmUserSpy = jest
         .spyOn(authVerifyService, 'confirmUser')
         .mockResolvedValue(null);
 
-      const t = () => controller.confirm(passwordDto);
-      await expect(t).rejects.toThrow(AuthRecoveryOtpInvalidException);
+      await controller.confirm(authVerifyUpdateDto);
 
-      expect(updatePasswordSpy).toHaveBeenCalledWith({
-        passcode: passwordDto.passcode,
+      expect(confirmUserSpy).toHaveBeenCalledWith({
+        passcode: authVerifyUpdateDto.passcode,
       });
     });
 
-    it('should call updatePassword method of AuthVerifyService', async () => {
-      const updatePasswordSpy = jest
+    it('should call confirmUser method of AuthVerifyService', async () => {
+      const confirmUserSpy = jest
         .spyOn(authVerifyService, 'confirmUser')
         .mockResolvedValue({
           id: '1',
         });
 
-      await controller.confirm(passwordDto);
+      await controller.confirm(authVerifyUpdateDto);
 
-      expect(updatePasswordSpy).toHaveBeenCalledWith({
-        passcode: passwordDto.passcode,
+      expect(confirmUserSpy).toHaveBeenCalledWith({
+        passcode: authVerifyUpdateDto.passcode,
       });
     });
   });

@@ -7,6 +7,8 @@ export { AuthVerifyUpdateDto } from './dto/auth-verify-update.dto';
 
 // interfaces
 export { AuthVerifySettingsInterface } from './interfaces/auth-verify-settings.interface';
+export { AuthVerifyOptionsInterface } from './interfaces/auth-verify-options.interface';
+export { AuthVerifyOptionsExtrasInterface } from './interfaces/auth-verify-options-extras.interface';
 export { AuthVerifyEmailServiceInterface } from './interfaces/auth-verify-email.service.interface';
 export { AuthVerifyUserLookupServiceInterface } from './interfaces/auth-verify-user-lookup.service.interface';
 export { AuthVerifyUserMutateServiceInterface } from './interfaces/auth-verify-user-mutate.service.interface';

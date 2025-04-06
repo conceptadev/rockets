@@ -16,7 +16,7 @@ export const authVerifyDefaultConfig = registerAs(
       templates: {
         verifyEmail: {
           fileName: __dirname + '/../assets/verify.template.hbs',
-          subject: 'Password Verify',
+          subject: 'Verify Email',
         },
       },
     },

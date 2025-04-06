@@ -4,9 +4,6 @@ import {
   AuthJwtAsyncOptions,
   AuthJwtModuleClass,
   AuthJwtOptions,
-  createAuthJwtExports,
-  createAuthJwtImports,
-  createAuthJwtProviders,
 } from './auth-jwt.module-definition';
 
 /**
@@ -28,14 +25,5 @@ export class AuthJwtModule extends AuthJwtModuleClass {
 
   static forRootAsync(options: AuthJwtAsyncOptions): DynamicModule {
     return super.registerAsync({ ...options, global: true });
-  }
-
-  static forFeature(options: AuthJwtOptions): DynamicModule {
-    return {
-      module: AuthJwtModule,
-      imports: createAuthJwtImports(),
-      providers: createAuthJwtProviders({ overrides: options }),
-      exports: createAuthJwtExports(),
-    };
   }
 }

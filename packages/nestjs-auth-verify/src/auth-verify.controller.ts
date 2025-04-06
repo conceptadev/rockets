@@ -10,7 +10,6 @@ import {
 import { AuthVerifyUpdateDto } from './dto/auth-verify-update.dto';
 import { AuthVerifyDto } from './dto/auth-verify.dto';
 import { AuthVerifyService } from './services/auth-verify.service';
-import { AuthRecoveryOtpInvalidException } from './exceptions/auth-verify-otp-invalid.exception';
 
 @Controller('auth/verify')
 @AuthPublic()
@@ -28,8 +27,8 @@ export class AuthVerifyController {
   })
   @ApiOkResponse()
   @Post('/send')
-  async send(@Body() verifyPasswordDto: AuthVerifyDto): Promise<void> {
-    await this.authVerifyService.send({ email: verifyPasswordDto.email });
+  async send(@Body() authVerifyDto: AuthVerifyDto): Promise<void> {
+    await this.authVerifyService.send({ email: authVerifyDto.email });
   }
 
   @ApiOperation({
@@ -37,19 +36,16 @@ export class AuthVerifyController {
   })
   @ApiBody({
     type: AuthVerifyUpdateDto,
-    description: 'DTO of update password.',
+    description: 'DTO of verify email.',
   })
   @ApiOkResponse()
   @ApiBadRequestResponse()
   @Patch('/confirm')
-  async confirm(@Body() updatePasswordDto: AuthVerifyUpdateDto): Promise<void> {
-    const { passcode } = updatePasswordDto;
+  async confirm(
+    @Body() authVerifyUpdateDto: AuthVerifyUpdateDto,
+  ): Promise<void> {
+    const { passcode } = authVerifyUpdateDto;
 
-    const user = await this.authVerifyService.confirmUser({ passcode });
-
-    if (!user) {
-      // the client should have checked using validate passcode first
-      throw new AuthRecoveryOtpInvalidException();
-    }
+    await this.authVerifyService.confirmUser({ passcode });
   }
 }

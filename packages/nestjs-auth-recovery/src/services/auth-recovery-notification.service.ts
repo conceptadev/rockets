@@ -2,8 +2,8 @@ import { AuthRecoveryNotificationServiceInterface } from '../interfaces/auth-rec
 import { EmailSendOptionsInterface } from '@concepta/nestjs-common';
 import { Inject, Injectable } from '@nestjs/common';
 import {
-  AUTH_RECOVERY_MODULE_EMAIL_SERVICE_TOKEN,
   AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
+  AuthRecoveryEmailService,
 } from '../auth-recovery.constants';
 import { AuthRecoveryEmailServiceInterface } from '../interfaces/auth-recovery-email.service.interface';
 import { AuthRecoverySettingsInterface } from '../interfaces/auth-recovery-settings.interface';
@@ -16,7 +16,7 @@ export class AuthRecoveryNotificationService
   constructor(
     @Inject(AUTH_RECOVERY_MODULE_SETTINGS_TOKEN)
     private readonly settings: AuthRecoverySettingsInterface,
-    @Inject(AUTH_RECOVERY_MODULE_EMAIL_SERVICE_TOKEN)
+    @Inject(AuthRecoveryEmailService)
     private readonly emailService: AuthRecoveryEmailServiceInterface,
   ) {}
 

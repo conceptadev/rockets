@@ -3,8 +3,8 @@ import { INestApplication } from '@nestjs/common';
 
 import {
   AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
-  AUTH_RECOVERY_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-  AUTH_RECOVERY_MODULE_USER_MUTATE_SERVICE_TOKEN,
+  AuthRecoveryUserLookupService,
+  AuthRecoveryUserMutateService,
 } from '../auth-recovery.constants';
 
 import { AuthRecoveryService } from './auth-recovery.service';
@@ -61,12 +61,12 @@ describe(AuthRecoveryService, () => {
 
     userLookupService =
       moduleFixture.get<AuthRecoveryUserLookupServiceInterface>(
-        AUTH_RECOVERY_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+        AuthRecoveryUserLookupService,
       );
 
     userMutateService =
       moduleFixture.get<AuthRecoveryUserMutateServiceInterface>(
-        AUTH_RECOVERY_MODULE_USER_MUTATE_SERVICE_TOKEN,
+        AuthRecoveryUserMutateService,
       );
 
     spySendRecoverLoginEmail = jest

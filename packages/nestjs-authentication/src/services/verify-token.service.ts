@@ -1,17 +1,21 @@
 import { Inject, Injectable, Optional } from '@nestjs/common';
-import { JwtVerifyTokenService } from '@concepta/nestjs-jwt';
-import { AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN } from '../authentication.constants';
+import {
+  JwtVerifyTokenService,
+  JwtVerifyTokenServiceInterface,
+} from '@concepta/nestjs-jwt';
 import { ValidateTokenServiceInterface } from '../interfaces/validate-token-service.interface';
 import { VerifyTokenServiceInterface } from '../interfaces/verify-token-service.interface';
+import { ValidateTokenService } from '../authentication.constants';
 import { AuthenticationAccessTokenException } from '../exceptions/authentication-access-token.exception';
 import { AuthenticationRefreshTokenException } from '../exceptions/authentication-refresh-token.exception';
 
 @Injectable()
 export class VerifyTokenService implements VerifyTokenServiceInterface {
   constructor(
-    protected readonly jwtVerifyTokenService: JwtVerifyTokenService,
+    @Inject(JwtVerifyTokenService)
+    protected readonly jwtVerifyTokenService: JwtVerifyTokenServiceInterface,
     @Optional()
-    @Inject(AUTHENTICATION_MODULE_VALIDATE_TOKEN_SERVICE_TOKEN)
+    @Inject(ValidateTokenService)
     protected readonly validateTokenService?: ValidateTokenServiceInterface,
   ) {}
 

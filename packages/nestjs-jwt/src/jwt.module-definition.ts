@@ -8,9 +8,9 @@ import { createSettingsProvider } from '@concepta/nestjs-common';
 import { NestJwtModule } from './jwt.externals';
 
 import {
-  JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
-  JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
   JWT_MODULE_SETTINGS_TOKEN,
+  JwtAccessService,
+  JwtRefreshService,
 } from './jwt.constants';
 
 import { JwtOptionsExtrasInterface } from './interfaces/jwt-options-extras.interface';
@@ -69,8 +69,8 @@ export function createJwtImports(
 export function createJwtExports() {
   return [
     JWT_MODULE_SETTINGS_TOKEN,
-    JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
-    JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
+    JwtAccessService,
+    JwtRefreshService,
     JwtService,
     JwtIssueTokenService,
     JwtVerifyTokenService,
@@ -107,7 +107,7 @@ export function createJwtServiceAccessTokenProvider(
   optionsOverrides?: JwtOptions,
 ): Provider {
   return {
-    provide: JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
+    provide: JwtAccessService,
     inject: [RAW_OPTIONS_TOKEN, JWT_MODULE_SETTINGS_TOKEN],
     useFactory: async (
       options: JwtOptionsInterface,
@@ -123,7 +123,7 @@ export function createJwtServiceRefreshTokenProvider(
   optionsOverrides?: JwtOptions,
 ): Provider {
   return {
-    provide: JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
+    provide: JwtRefreshService,
     inject: [RAW_OPTIONS_TOKEN, JWT_MODULE_SETTINGS_TOKEN],
     useFactory: async (
       options: JwtOptionsInterface,
@@ -156,11 +156,7 @@ export function createJwtIssueServiceProvider(
 ): Provider {
   return {
     provide: JwtIssueTokenService,
-    inject: [
-      RAW_OPTIONS_TOKEN,
-      JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
-      JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
-    ],
+    inject: [RAW_OPTIONS_TOKEN, JwtAccessService, JwtRefreshService],
     useFactory: async (
       options: JwtOptionsInterface,
       jwtAccessService: JwtServiceInterface,
@@ -177,11 +173,7 @@ export function createJwtVerifyServiceProvider(
 ): Provider {
   return {
     provide: JwtVerifyTokenService,
-    inject: [
-      RAW_OPTIONS_TOKEN,
-      JWT_MODULE_JWT_ACCESS_SERVICE_TOKEN,
-      JWT_MODULE_JWT_REFRESH_SERVICE_TOKEN,
-    ],
+    inject: [RAW_OPTIONS_TOKEN, JwtAccessService, JwtRefreshService],
     useFactory: async (
       options: JwtOptionsInterface,
       jwtAccessService: JwtServiceInterface,

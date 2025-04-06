@@ -16,6 +16,8 @@ import { AuthVerifyUserLookupServiceInterface } from '../interfaces/auth-verify-
 import { AuthVerifyNotificationServiceInterface } from '../interfaces/auth-verify-notification.service.interface';
 import { AuthVerifyUserMutateServiceInterface } from '../interfaces/auth-verify-user-mutate.service.interface';
 
+import { AuthRecoveryOtpInvalidException } from '../exceptions/auth-verify-otp-invalid.exception';
+
 import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
 import { OtpServiceFixture } from '../__fixtures__/otp/otp.service.fixture';
 import { UserFixture } from '../__fixtures__/user/user.fixture';
@@ -79,7 +81,7 @@ describe(AuthVerifyService, () => {
   });
 
   describe(AuthVerifyService.prototype.send, () => {
-    it('should send password verify', async () => {
+    it('should send passcode verify', async () => {
       const result = await authVerifyService.send({ email: UserFixture.email });
 
       expect(result).toBeUndefined();
@@ -139,7 +141,7 @@ describe(AuthVerifyService, () => {
       );
     });
 
-    it('should update password', async () => {
+    it('should confirm user', async () => {
       const user = await authVerifyService.confirmUser({
         passcode: 'GOOD_PASSCODE',
       });
@@ -147,12 +149,14 @@ describe(AuthVerifyService, () => {
       expect(user).toEqual(UserFixture);
     });
 
-    it('should fail to update password', async () => {
-      const user = await authVerifyService.confirmUser({
-        passcode: 'FAKE_PASSCODE',
-      });
+    it('should fail to confirm user', async () => {
+      const t = async () => {
+        await authVerifyService.confirmUser({
+          passcode: 'FAKE_PASSCODE',
+        });
+      };
 
-      expect(user).toBeNull();
+      expect(t).rejects.toThrow(AuthRecoveryOtpInvalidException);
     });
   });
 });

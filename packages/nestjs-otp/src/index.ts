@@ -6,6 +6,13 @@ export { OtpSqliteEntity } from './entities/otp-sqlite.entity';
 
 export { OtpCreateDto } from './dto/otp-create.dto';
 
+// interfaces
+export { OtpOptionsInterface } from './interfaces/otp-options.interface';
+export { OtpOptionsExtrasInterface } from './interfaces/otp-options-extras.interface';
+export { OtpSettingsInterface } from './interfaces/otp-settings.interface';
+export { OtpServiceInterface } from './interfaces/otp-service.interface';
+export { OtpTypeServiceInterface } from './interfaces/otp-type-service.interface';
+
 // exceptions
 export { OtpException } from './exceptions/otp.exception';
 export { OtpEntityNotFoundException } from './exceptions/otp-entity-not-found.exception';

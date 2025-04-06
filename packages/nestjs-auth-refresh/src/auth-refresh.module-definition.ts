@@ -14,10 +14,10 @@ import {
 } from '@concepta/nestjs-authentication';
 
 import {
-  AUTH_REFRESH_MODULE_ISSUE_SERVICE_TOKEN,
   AUTH_REFRESH_MODULE_SETTINGS_TOKEN,
-  AUTH_REFRESH_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-  AUTH_REFRESH_MODULE_VERIFY_SERVICE_TOKEN,
+  AuthRefreshIssueTokenService,
+  AuthRefreshUserLookupService,
+  AuthRefreshVerifyService,
 } from './auth-refresh.constants';
 
 import { AuthRefreshOptionsInterface } from './interfaces/auth-refresh-options.interface';
@@ -76,9 +76,9 @@ export function createAuthRefreshImports(): DynamicModule['imports'] {
 export function createAuthRefreshExports() {
   return [
     AUTH_REFRESH_MODULE_SETTINGS_TOKEN,
-    AUTH_REFRESH_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-    AUTH_REFRESH_MODULE_VERIFY_SERVICE_TOKEN,
-    AUTH_REFRESH_MODULE_ISSUE_SERVICE_TOKEN,
+    AuthRefreshUserLookupService,
+    AuthRefreshVerifyService,
+    AuthRefreshIssueTokenService,
     AuthRefreshStrategy,
   ];
 }
@@ -125,7 +125,7 @@ export function createAuthRefreshVerifyTokenServiceProvider(
   optionsOverrides?: AuthRefreshOptions,
 ): Provider {
   return {
-    provide: AUTH_REFRESH_MODULE_VERIFY_SERVICE_TOKEN,
+    provide: AuthRefreshVerifyService,
     inject: [RAW_OPTIONS_TOKEN, VerifyTokenService],
     useFactory: async (
       options: AuthRefreshOptions,
@@ -141,7 +141,7 @@ export function createAuthRefreshIssueTokenServiceProvider(
   optionsOverrides?: AuthRefreshOptions,
 ): Provider {
   return {
-    provide: AUTH_REFRESH_MODULE_ISSUE_SERVICE_TOKEN,
+    provide: AuthRefreshIssueTokenService,
     inject: [RAW_OPTIONS_TOKEN, IssueTokenService],
     useFactory: async (
       options: AuthRefreshOptionsInterface,
@@ -157,7 +157,7 @@ export function createAuthRefreshUserLookupServiceProvider(
   optionsOverrides?: AuthRefreshOptions,
 ): Provider {
   return {
-    provide: AUTH_REFRESH_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+    provide: AuthRefreshUserLookupService,
     inject: [RAW_OPTIONS_TOKEN],
     useFactory: async (options: AuthRefreshOptionsInterface) =>
       optionsOverrides?.userLookupService ?? options.userLookupService,

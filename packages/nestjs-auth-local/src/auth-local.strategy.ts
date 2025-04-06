@@ -9,7 +9,6 @@ import { PassportStrategyFactory } from '@concepta/nestjs-authentication';
 
 import {
   AUTH_LOCAL_MODULE_SETTINGS_TOKEN,
-  AUTH_LOCAL_MODULE_VALIDATE_USER_SERVICE_TOKEN,
   AUTH_LOCAL_STRATEGY_NAME,
 } from './auth-local.constants';
 
@@ -21,6 +20,7 @@ import { AuthLocalInvalidLoginDataException } from './exceptions/auth-local-inva
 import { AuthLocalMissingLoginDtoException } from './exceptions/auth-local-missing-login-dto.exception';
 import { AuthLocalMissingUsernameFieldException } from './exceptions/auth-local-missing-username-field.exception';
 import { AuthLocalMissingPasswordFieldException } from './exceptions/auth-local-missing-password-field.exception';
+import { AuthLocalValidateUserService } from './services/auth-local-validate-user.service';
 
 /**
  * Define the Local strategy using passport.
@@ -40,7 +40,7 @@ export class AuthLocalStrategy extends PassportStrategyFactory<Strategy>(
   constructor(
     @Inject(AUTH_LOCAL_MODULE_SETTINGS_TOKEN)
     private settings: AuthLocalSettingsInterface,
-    @Inject(AUTH_LOCAL_MODULE_VALIDATE_USER_SERVICE_TOKEN)
+    @Inject(AuthLocalValidateUserService)
     private validateUserService: AuthLocalValidateUserServiceInterface,
   ) {
     super({

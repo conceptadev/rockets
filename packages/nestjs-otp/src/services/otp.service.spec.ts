@@ -93,7 +93,6 @@ describe('OtpModule', () => {
           database: ':memory:',
           synchronize: true,
           entities: [UserEntityFixture, UserOtpEntityFixture],
-          logging: true,
           logger: 'simple-console',
         }),
         OtpModule.register({

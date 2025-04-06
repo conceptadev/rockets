@@ -1,5 +1,13 @@
 import { AuthPublic } from '@concepta/nestjs-authentication';
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -12,13 +20,17 @@ import { AuthRecoveryRecoverLoginDto } from './dto/auth-recovery-recover-login.d
 import { AuthRecoveryRecoverPasswordDto } from './dto/auth-recovery-recover-password.dto';
 import { AuthRecoveryUpdatePasswordDto } from './dto/auth-recovery-update-password.dto';
 import { AuthRecoveryOtpInvalidException } from './exceptions/auth-recovery-otp-invalid.exception';
+import { AuthRecoveryServiceInterface } from './interfaces/auth-recovery.service.interface';
 import { AuthRecoveryService } from './services/auth-recovery.service';
 
 @Controller('auth/recovery')
 @AuthPublic()
 @ApiTags('auth')
 export class AuthRecoveryController {
-  constructor(private readonly authRecoveryService: AuthRecoveryService) {}
+  constructor(
+    @Inject(AuthRecoveryService)
+    private readonly authRecoveryService: AuthRecoveryServiceInterface,
+  ) {}
 
   @ApiOperation({
     summary:

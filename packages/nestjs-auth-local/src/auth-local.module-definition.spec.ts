@@ -4,11 +4,10 @@ import { FactoryProvider } from '@nestjs/common';
 import { mock } from 'jest-mock-extended';
 import { UserLookupServiceFixture } from './__fixtures__/user/user-lookup.service.fixture';
 import {
-  AUTH_LOCAL_MODULE_ISSUE_TOKEN_SERVICE_TOKEN,
-  AUTH_LOCAL_MODULE_PASSWORD_VALIDATION_SERVICE_TOKEN,
   AUTH_LOCAL_MODULE_SETTINGS_TOKEN,
-  AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-  AUTH_LOCAL_MODULE_VALIDATE_USER_SERVICE_TOKEN,
+  AuthLocalIssueTokenService,
+  AuthLocalPasswordValidationService,
+  AuthLocalUserLookupService,
 } from './auth-local.constants';
 import { AuthLocalController } from './auth-local.controller';
 import {
@@ -28,10 +27,10 @@ describe('Auth-local.module-definition', () => {
       const result = createAuthLocalExports();
       expect(result).toEqual([
         AUTH_LOCAL_MODULE_SETTINGS_TOKEN,
-        AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-        AUTH_LOCAL_MODULE_ISSUE_TOKEN_SERVICE_TOKEN,
-        AUTH_LOCAL_MODULE_VALIDATE_USER_SERVICE_TOKEN,
-        AUTH_LOCAL_MODULE_PASSWORD_VALIDATION_SERVICE_TOKEN,
+        AuthLocalUserLookupService,
+        AuthLocalIssueTokenService,
+        AuthLocalPasswordValidationService,
+        AuthLocalValidateUserService,
       ]);
     });
   });

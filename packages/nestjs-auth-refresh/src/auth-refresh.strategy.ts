@@ -11,10 +11,10 @@ import { AuthorizationPayloadInterface } from '@concepta/nestjs-common';
 import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 import {
-  AUTH_REFRESH_MODULE_STRATEGY_NAME,
-  AUTH_REFRESH_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-  AUTH_REFRESH_MODULE_VERIFY_SERVICE_TOKEN,
   AUTH_REFRESH_MODULE_SETTINGS_TOKEN,
+  AUTH_REFRESH_MODULE_STRATEGY_NAME,
+  AuthRefreshUserLookupService,
+  AuthRefreshVerifyService,
 } from './auth-refresh.constants';
 
 import { AuthRefreshSettingsInterface } from './interfaces/auth-refresh-settings.interface';
@@ -29,9 +29,9 @@ export class AuthRefreshStrategy extends PassportStrategyFactory<JwtStrategy>(
   constructor(
     @Inject(AUTH_REFRESH_MODULE_SETTINGS_TOKEN)
     settings: Partial<AuthRefreshSettingsInterface>,
-    @Inject(AUTH_REFRESH_MODULE_VERIFY_SERVICE_TOKEN)
+    @Inject(AuthRefreshVerifyService)
     verifyTokenService: VerifyTokenServiceInterface,
-    @Inject(AUTH_REFRESH_MODULE_USER_LOOKUP_SERVICE_TOKEN)
+    @Inject(AuthRefreshUserLookupService)
     private userLookupService: AuthRefreshUserLookupServiceInterface,
   ) {
     const options: Partial<AuthRefreshSettingsInterface> = {

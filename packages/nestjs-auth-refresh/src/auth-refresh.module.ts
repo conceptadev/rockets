@@ -4,10 +4,6 @@ import {
   AuthRefreshAsyncOptions,
   AuthRefreshModuleClass,
   AuthRefreshOptions,
-  createAuthRefreshControllers,
-  createAuthRefreshExports,
-  createAuthRefreshImports,
-  createAuthRefreshProviders,
 } from './auth-refresh.module-definition';
 
 /**
@@ -29,15 +25,5 @@ export class AuthRefreshModule extends AuthRefreshModuleClass {
 
   static forRootAsync(options: AuthRefreshAsyncOptions): DynamicModule {
     return super.registerAsync({ ...options, global: true });
-  }
-
-  static forFeature(options: AuthRefreshOptions): DynamicModule {
-    return {
-      module: AuthRefreshModule,
-      imports: createAuthRefreshImports(),
-      providers: createAuthRefreshProviders({ overrides: options }),
-      controllers: createAuthRefreshControllers(options),
-      exports: createAuthRefreshExports(),
-    };
   }
 }

@@ -4,9 +4,6 @@ import {
   AuthenticationAsyncOptions,
   AuthenticationModuleClass,
   AuthenticationOptions,
-  createAuthenticationImports,
-  createAuthenticationProviders,
-  createAuthenticationExports,
 } from './authentication.module-definition';
 
 /**
@@ -28,14 +25,5 @@ export class AuthenticationModule extends AuthenticationModuleClass {
 
   static forRootAsync(options: AuthenticationAsyncOptions): DynamicModule {
     return super.registerAsync({ ...options, global: true });
-  }
-
-  static forFeature(options: AuthenticationOptions): DynamicModule {
-    return {
-      module: AuthenticationModule,
-      imports: createAuthenticationImports(),
-      providers: createAuthenticationProviders({ overrides: options }),
-      exports: createAuthenticationExports(),
-    };
   }
 }

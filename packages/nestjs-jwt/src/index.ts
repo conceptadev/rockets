@@ -6,6 +6,8 @@ export {
 } from './jwt.types';
 
 // interfaces
+export { JwtOptionsInterface } from './interfaces/jwt-options.interface';
+export { JwtSettingsInterface } from './interfaces/jwt-settings.interface';
 export { JwtStrategyOptionsInterface } from './interfaces/jwt-strategy-options.interface';
 export { JwtServiceInterface } from './interfaces/jwt-service.interface';
 export { JwtSignServiceInterface } from './interfaces/jwt-sign-service.interface';
@@ -16,6 +18,9 @@ export { JwtIssueRefreshTokenServiceInterface } from './interfaces/jwt-issue-ref
 export { JwtVerifyTokenServiceInterface } from './interfaces/jwt-verify-token-service.interface';
 export { JwtVerifyAccessTokenInterface } from './interfaces/jwt-verify-access-token.interface';
 export { JwtVerifyRefreshTokenInterface } from './interfaces/jwt-verify-refresh-token.interface';
+
+// service tokens
+export { JwtAccessService, JwtRefreshService } from './jwt.constants';
 
 // classes
 export { JwtModule } from './jwt.module';

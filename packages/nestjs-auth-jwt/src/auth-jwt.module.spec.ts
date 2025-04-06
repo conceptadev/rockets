@@ -1,28 +1,15 @@
 import { mock } from 'jest-mock-extended';
-import {
-  DynamicModule,
-  Inject,
-  Injectable,
-  Module,
-  ModuleMetadata,
-} from '@nestjs/common';
+import { DynamicModule, ModuleMetadata } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-
 import { JwtModule, JwtVerifyTokenService } from '@concepta/nestjs-jwt';
 import {
   AuthenticationModule,
   VerifyTokenService,
-  VerifyTokenServiceInterface,
 } from '@concepta/nestjs-authentication';
 
-import {
-  AUTH_JWT_MODULE_SETTINGS_TOKEN,
-  AUTH_JWT_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-  AUTH_JWT_MODULE_VERIFY_TOKEN_SERVICE_TOKEN,
-} from './auth-jwt.constants';
+import { AuthJwtUserLookupService } from './auth-jwt.constants';
 
 import { AuthJwtModule } from './auth-jwt.module';
-import { AuthJwtSettingsInterface } from './interfaces/auth-jwt-settings.interface';
 import { AuthJwtUserLookupServiceInterface } from './interfaces/auth-jwt-user-lookup-service.interface';
 
 import { UserModuleFixture } from './__fixtures__/user/user.module.fixture';
@@ -114,89 +101,9 @@ describe(AuthJwtModule, () => {
     });
   });
 
-  describe(AuthJwtModule.forFeature, () => {
-    @Module({})
-    class GlobalModule {}
-
-    @Module({})
-    class ForFeatureModule {}
-
-    @Injectable()
-    class TestService {
-      constructor(
-        @Inject(AUTH_JWT_MODULE_SETTINGS_TOKEN)
-        public settings: AuthJwtSettingsInterface,
-        @Inject(AUTH_JWT_MODULE_USER_LOOKUP_SERVICE_TOKEN)
-        public userLookupService: AuthJwtUserLookupServiceInterface,
-        @Inject(AUTH_JWT_MODULE_VERIFY_TOKEN_SERVICE_TOKEN)
-        public verifyTokenService: VerifyTokenServiceInterface,
-      ) {}
-    }
-
-    let testService: TestService;
-    const fromReqFunc = (): string => {
-      return 'hi';
-    };
-    const verifyTokenFunc = (
-      _token: string,
-      _done: (err?: Error, decodedToken?: unknown) => void,
-    ) => undefined;
-    const ffUserLookupService = new UserLookupServiceFixture();
-    const ffVerifyTokenService = new VerifyTokenService(jwtVerifyTokenService);
-
-    beforeEach(async () => {
-      const globalModule = testModuleFactory([
-        AuthJwtModule.forRootAsync({
-          inject: [VerifyTokenService, UserLookupServiceFixture],
-          useFactory: (
-            verifyTokenService: VerifyTokenService,
-            userLookupService: AuthJwtUserLookupServiceInterface,
-          ) => ({ verifyTokenService, userLookupService }),
-        }),
-      ]);
-
-      testModule = await Test.createTestingModule({
-        imports: [
-          { module: GlobalModule, ...globalModule },
-          {
-            module: ForFeatureModule,
-            imports: [
-              AuthJwtModule.forFeature({
-                userLookupService: ffUserLookupService,
-                verifyTokenService: ffVerifyTokenService,
-                settings: {
-                  jwtFromRequest: fromReqFunc,
-                  verifyToken: verifyTokenFunc,
-                },
-              }),
-            ],
-            providers: [TestService],
-          },
-        ],
-      }).compile();
-
-      testService = testModule.get(TestService);
-    });
-
-    it('module should be loaded', async () => {
-      commonVars(testModule);
-      commonTests();
-    });
-
-    it('should have custom providers', async () => {
-      commonVars(testModule);
-      expect(testService.settings.jwtFromRequest).toBe(fromReqFunc);
-      expect(testService.settings.verifyToken).toBe(verifyTokenFunc);
-      expect(testService.userLookupService).toBe(ffUserLookupService);
-      expect(testService.userLookupService).not.toBe(userLookupService);
-      expect(testService.verifyTokenService).toBe(ffVerifyTokenService);
-      expect(testService.verifyTokenService).not.toBe(verifyTokenService);
-    });
-  });
-
   function commonVars(module: TestingModule) {
     authJwtModule = module.get(AuthJwtModule);
-    userLookupService = module.get(UserLookupServiceFixture);
+    userLookupService = module.get(AuthJwtUserLookupService);
     verifyTokenService = module.get(VerifyTokenService);
   }
 

@@ -4,10 +4,6 @@ import {
   AuthRecoveryAsyncOptions,
   AuthRecoveryModuleClass,
   AuthRecoveryOptions,
-  createAuthRecoveryControllers,
-  createAuthRecoveryExports,
-  createAuthRecoveryImports,
-  createAuthRecoveryProviders,
 } from './auth-recovery.module-definition';
 
 @Module({})
@@ -26,15 +22,5 @@ export class AuthRecoveryModule extends AuthRecoveryModuleClass {
 
   static forRootAsync(options: AuthRecoveryAsyncOptions): DynamicModule {
     return super.registerAsync({ ...options, global: true });
-  }
-
-  static forFeature(options: AuthRecoveryOptions): DynamicModule {
-    return {
-      module: AuthRecoveryModule,
-      imports: createAuthRecoveryImports(),
-      providers: createAuthRecoveryProviders({ overrides: options }),
-      controllers: createAuthRecoveryControllers(options),
-      exports: createAuthRecoveryExports(),
-    };
   }
 }
