@@ -5,6 +5,14 @@ export { AuthVerifyNotificationService } from './services/auth-verify-notificati
 export { AuthVerifyDto } from './dto/auth-verify.dto';
 export { AuthVerifyUpdateDto } from './dto/auth-verify-update.dto';
 
+// tokens
+export {
+  AuthVerifyOtpService,
+  AuthVerifyEmailService,
+  AuthVerifyUserLookupService,
+  AuthVerifyUserMutateService,
+} from './auth-verify.constants';
+
 // interfaces
 export { AuthVerifySettingsInterface } from './interfaces/auth-verify-settings.interface';
 export { AuthVerifyOptionsInterface } from './interfaces/auth-verify-options.interface';

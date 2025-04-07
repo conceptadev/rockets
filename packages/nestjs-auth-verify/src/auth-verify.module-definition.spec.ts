@@ -4,11 +4,11 @@ import { OtpServiceFixture } from './__fixtures__/otp/otp.service.fixture';
 import { UserLookupServiceFixture } from './__fixtures__/user/services/user-lookup.service.fixture';
 import { UserMutateServiceFixture } from './__fixtures__/user/services/user-mutate.service.fixture';
 import {
-  AUTH_VERIFY_MODULE_EMAIL_SERVICE_TOKEN,
-  AUTH_VERIFY_MODULE_OTP_SERVICE_TOKEN,
   AUTH_VERIFY_MODULE_SETTINGS_TOKEN,
-  AUTH_VERIFY_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-  AUTH_VERIFY_MODULE_USER_MUTATE_SERVICE_TOKEN,
+  AuthVerifyEmailService,
+  AuthVerifyOtpService,
+  AuthVerifyUserLookupService,
+  AuthVerifyUserMutateService,
 } from './auth-verify.constants';
 import { AuthVerifyController } from './auth-verify.controller';
 import {
@@ -45,10 +45,10 @@ describe('AuthVerifyModuleDefinition', () => {
       const result = createAuthVerifyExports();
       expect(result).toEqual([
         AUTH_VERIFY_MODULE_SETTINGS_TOKEN,
-        AUTH_VERIFY_MODULE_OTP_SERVICE_TOKEN,
-        AUTH_VERIFY_MODULE_EMAIL_SERVICE_TOKEN,
-        AUTH_VERIFY_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-        AUTH_VERIFY_MODULE_USER_MUTATE_SERVICE_TOKEN,
+        AuthVerifyOtpService,
+        AuthVerifyEmailService,
+        AuthVerifyUserLookupService,
+        AuthVerifyUserMutateService,
         AuthVerifyService,
       ]);
     });

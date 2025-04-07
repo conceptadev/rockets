@@ -3,8 +3,8 @@ import { INestApplication } from '@nestjs/common';
 
 import {
   AUTH_VERIFY_MODULE_SETTINGS_TOKEN,
-  AUTH_VERIFY_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-  AUTH_VERIFY_MODULE_USER_MUTATE_SERVICE_TOKEN,
+  AuthVerifyUserLookupService,
+  AuthVerifyUserMutateService,
 } from '../auth-verify.constants';
 
 import { AuthVerifyService } from './auth-verify.service';
@@ -59,11 +59,11 @@ describe(AuthVerifyService, () => {
       );
 
     userLookupService = moduleFixture.get<AuthVerifyUserLookupServiceInterface>(
-      AUTH_VERIFY_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+      AuthVerifyUserLookupService,
     );
 
     userMutateService = moduleFixture.get<AuthVerifyUserMutateServiceInterface>(
-      AUTH_VERIFY_MODULE_USER_MUTATE_SERVICE_TOKEN,
+      AuthVerifyUserMutateService,
     );
 
     sendVerifyEmail = jest
