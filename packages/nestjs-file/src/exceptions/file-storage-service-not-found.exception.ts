@@ -1,7 +1,7 @@
 import {
   RuntimeException,
   RuntimeExceptionOptions,
-} from '@concepta/nestjs-exception';
+} from '@concepta/nestjs-common';
 import { FileException } from './file.exception';
 
 export class FileStorageServiceNotFoundException extends FileException {

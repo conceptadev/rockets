@@ -16,7 +16,9 @@ import {
 import { PasswordStorageInterface } from '@concepta/nestjs-password';
 import { ApiTags } from '@nestjs/swagger';
 import {
+  AuthUser,
   AuthenticatedUserInterface,
+  RuntimeException,
   UserCreatableInterface,
   UserUpdatableInterface,
 } from '@concepta/nestjs-common';
@@ -41,9 +43,7 @@ import { UserUpdateDto } from './dto/user-update.dto';
 import { UserPaginatedDto } from './dto/user-paginated.dto';
 import { UserAccessQueryService } from './services/user-access-query.service';
 import { UserPasswordService } from './services/user-password.service';
-import { AuthUser } from '@concepta/nestjs-common';
 import { UserBadRequestException } from './exceptions/user-bad-request-exception';
-import { RuntimeException } from '@concepta/nestjs-exception';
 
 /**
  * User controller.

@@ -79,3 +79,19 @@ export { AuditDateDeletedInterface } from './audit/interfaces/audit-date-deleted
 export { AuditDateUpdatedInterface } from './audit/interfaces/audit-date-updated.interface';
 export { AuditVersionInterface } from './audit/interfaces/audit-version.interface';
 export { AuditInterface } from './audit/interfaces/audit.interface';
+
+// exception types
+export { RuntimeExceptionContext } from './exceptions/exception.types';
+
+// filters
+export { ExceptionsFilter } from './filters/exceptions.filter';
+
+// exception interfaces
+export { RuntimeExceptionOptions } from './exceptions/interfaces/runtime-exception-options.interface';
+export { RuntimeExceptionInterface } from './exceptions/interfaces/runtime-exception.interface';
+
+// exceptions
+export { RuntimeException } from './exceptions/runtime.exception';
+
+// utils
+export { mapHttpStatus } from './utils/map-http-status.util';

@@ -1,7 +1,7 @@
 import {
   RuntimeException,
   RuntimeExceptionOptions,
-} from '@concepta/nestjs-exception';
+} from '@concepta/nestjs-common';
 
 export class AccessControllerException extends RuntimeException {
   constructor(message: string, options?: RuntimeExceptionOptions) {

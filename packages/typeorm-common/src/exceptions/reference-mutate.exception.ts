@@ -1,7 +1,7 @@
 import {
   RuntimeException,
   RuntimeExceptionOptions,
-} from '@concepta/nestjs-exception';
+} from '@concepta/nestjs-common';
 
 export class ReferenceMutateException extends RuntimeException {
   context: RuntimeException['context'] & {

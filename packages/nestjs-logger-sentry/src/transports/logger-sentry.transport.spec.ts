@@ -1,16 +1,16 @@
 import { BadRequestException, HttpStatus, LogLevel } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import * as Sentry from '@sentry/node';
+import {
+  mapHttpStatus,
+  RuntimeException,
+  RuntimeExceptionOptions,
+} from '@concepta/nestjs-common';
 
 import { LOGGER_SENTRY_MODULE_SETTINGS_TOKEN } from '../config/logger-sentry.config';
 import { LoggerSentryConfigInterface } from '../interfaces/logger-sentry-config.interface';
 import { LoggerSentrySettingsInterface } from '../interfaces/logger-sentry-settings.interface';
 import { LoggerSentryTransport } from './logger-sentry.transport';
-import {
-  mapHttpStatus,
-  RuntimeException,
-  RuntimeExceptionOptions,
-} from '@concepta/nestjs-exception';
 import { isObject } from 'class-validator';
 
 jest.mock('@sentry/node');

@@ -1,5 +1,5 @@
+import { RuntimeException } from '@concepta/nestjs-common';
 import { AuthenticationException } from './authentication.exception';
-import { RuntimeException } from '@concepta/nestjs-exception';
 
 describe(AuthenticationException.name, () => {
   it('should extend BadRequestException', () => {

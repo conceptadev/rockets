@@ -1,4 +1,4 @@
-import { RuntimeExceptionInterface } from '@concepta/nestjs-exception';
+import { RuntimeExceptionInterface } from '@concepta/nestjs-common';
 
 export interface LoggerSentryExtrasInterface
   extends Partial<

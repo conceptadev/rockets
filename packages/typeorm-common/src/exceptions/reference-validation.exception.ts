@@ -2,7 +2,7 @@ import { ValidationError } from 'class-validator';
 import {
   RuntimeException,
   RuntimeExceptionOptions,
-} from '@concepta/nestjs-exception';
+} from '@concepta/nestjs-common';
 
 export class ReferenceValidationException extends RuntimeException {
   context: RuntimeException['context'] & {

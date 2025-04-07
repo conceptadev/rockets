@@ -1,5 +1,5 @@
-import { RuntimeException } from '@concepta/nestjs-exception';
 import { HttpStatus } from '@nestjs/common';
+import { RuntimeException } from '@concepta/nestjs-common';
 import { CacheException } from './cache.exception';
 
 export class CacheEntityAlreadyExistsException extends CacheException {

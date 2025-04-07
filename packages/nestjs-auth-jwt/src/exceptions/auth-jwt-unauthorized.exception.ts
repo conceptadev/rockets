@@ -1,4 +1,4 @@
-import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
+import { RuntimeExceptionOptions } from '@concepta/nestjs-common';
 import { AuthJwtException } from './auth-jwt.exception';
 
 export class AuthJwtUnauthorizedException extends AuthJwtException {

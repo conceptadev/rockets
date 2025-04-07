@@ -12,7 +12,6 @@
   ],
   "dependencies": {
     "@concepta/nestjs-common": "^7.0.0-alpha.1",
-    "@concepta/nestjs-exception": "^7.0.0-alpha.1",
     "@concepta/nestjs-file": "^7.0.0-alpha.1",
     "@concepta/nestjs-typeorm-ext": "^7.0.0-alpha.1",
     "@concepta/typeorm-common": "^7.0.0-alpha.1",

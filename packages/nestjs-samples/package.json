@@ -20,7 +20,6 @@
     "@concepta/nestjs-crud": "^7.0.0-alpha.1",
     "@concepta/nestjs-email": "^7.0.0-alpha.1",
     "@concepta/nestjs-event": "^7.0.0-alpha.1",
-    "@concepta/nestjs-exception": "^7.0.0-alpha.1",
     "@concepta/nestjs-jwt": "^7.0.0-alpha.1",
     "@concepta/nestjs-logger": "^7.0.0-alpha.1",
     "@concepta/nestjs-password": "^7.0.0-alpha.1",

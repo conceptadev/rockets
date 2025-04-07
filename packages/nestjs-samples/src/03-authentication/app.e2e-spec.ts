@@ -5,7 +5,7 @@ import { INestApplication, Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthenticationResponseInterface } from '@concepta/nestjs-common';
 import { UserCrudService } from '@concepta/nestjs-user';
-import { ExceptionsFilter } from '@concepta/nestjs-exception';
+import { ExceptionsFilter } from '@concepta/nestjs-common';
 
 import { AppModule } from './app.module';
 import { UserEntity } from './user/user.entity';

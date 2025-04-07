@@ -15,9 +15,6 @@
   "references": [
     {
       "path": "../nestjs-federated"
-    },
-    {
-      "path": "../nestjs-exception"
     }
   ]
 }

@@ -1,7 +1,8 @@
 import {
   RuntimeException,
   RuntimeExceptionOptions,
-} from '@concepta/nestjs-exception';
+} from '@concepta/nestjs-common';
+
 /**
  * Generic federated exception.
  */

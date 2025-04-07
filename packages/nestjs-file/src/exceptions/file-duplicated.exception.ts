@@ -2,7 +2,7 @@ import { HttpStatus } from '@nestjs/common';
 import {
   RuntimeException,
   RuntimeExceptionOptions,
-} from '@concepta/nestjs-exception';
+} from '@concepta/nestjs-common';
 import { FileException } from './file.exception';
 
 export class FileDuplicateEntryException extends FileException {

@@ -4,7 +4,7 @@ import { getDataSourceToken } from '@nestjs/typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
-import { ExceptionsFilter } from '@concepta/nestjs-exception';
+import { ExceptionsFilter } from '@concepta/nestjs-common';
 import { IssueTokenService } from '@concepta/nestjs-authentication';
 import { AccessControlService } from '@concepta/nestjs-access-control';
 import {
