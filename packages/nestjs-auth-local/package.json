@@ -1,6 +1,6 @@
 {
   "name": "@concepta/nestjs-auth-local",
-  "version": "7.0.0-alpha.0",
+  "version": "7.0.0-alpha.1",
   "description": "Rockets NestJS Local Authentication",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,11 +12,11 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
-    "@concepta/nestjs-authentication": "^7.0.0-alpha.0",
-    "@concepta/nestjs-common": "^7.0.0-alpha.0",
-    "@concepta/nestjs-exception": "^7.0.0-alpha.0",
-    "@concepta/nestjs-password": "^7.0.0-alpha.0",
-    "@concepta/typeorm-common": "^7.0.0-alpha.0",
+    "@concepta/nestjs-authentication": "^7.0.0-alpha.1",
+    "@concepta/nestjs-common": "^7.0.0-alpha.1",
+    "@concepta/nestjs-exception": "^7.0.0-alpha.1",
+    "@concepta/nestjs-password": "^7.0.0-alpha.1",
+    "@concepta/typeorm-common": "^7.0.0-alpha.1",
     "@nestjs/common": "^10.4.1",
     "@nestjs/config": "^3.2.3",
     "@nestjs/core": "^10.4.1",
@@ -24,8 +24,8 @@
     "passport-local": "^1.0.0"
   },
   "devDependencies": {
-    "@concepta/nestjs-auth-jwt": "^7.0.0-alpha.0",
-    "@concepta/nestjs-jwt": "^7.0.0-alpha.0",
+    "@concepta/nestjs-auth-jwt": "^7.0.0-alpha.1",
+    "@concepta/nestjs-jwt": "^7.0.0-alpha.1",
     "@nestjs/testing": "^10.4.1",
     "@types/passport-local": "^1.0.38",
     "@types/supertest": "^2.0.16",

@@ -1,6 +1,6 @@
 {
   "name": "@concepta/nestjs-authentication",
-  "version": "7.0.0-alpha.0",
+  "version": "7.0.0-alpha.1",
   "description": "Rockets NestJS Authentication",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,9 +12,9 @@
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}"
   ],
   "dependencies": {
-    "@concepta/nestjs-common": "^7.0.0-alpha.0",
-    "@concepta/nestjs-exception": "^7.0.0-alpha.0",
-    "@concepta/nestjs-jwt": "^7.0.0-alpha.0",
+    "@concepta/nestjs-common": "^7.0.0-alpha.1",
+    "@concepta/nestjs-exception": "^7.0.0-alpha.1",
+    "@concepta/nestjs-jwt": "^7.0.0-alpha.1",
     "@nestjs/common": "^10.4.1",
     "@nestjs/config": "^3.2.3",
     "@nestjs/core": "^10.4.1",
