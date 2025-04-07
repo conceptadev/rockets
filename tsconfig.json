@@ -21,9 +21,6 @@
       "path": "packages/nestjs-common"
     },
     {
-      "path": "packages/nestjs-exception"
-    },
-    {
       "path": "packages/nestjs-access-control"
     },
     {

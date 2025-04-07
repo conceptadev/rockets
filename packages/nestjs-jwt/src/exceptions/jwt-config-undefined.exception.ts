@@ -1,4 +1,4 @@
-import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
+import { RuntimeExceptionOptions } from '@concepta/nestjs-common';
 import { JwtException } from './jwt.exception';
 
 export class JwtConfigUndefinedException extends JwtException {

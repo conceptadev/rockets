@@ -1,4 +1,4 @@
-import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
+import { RuntimeExceptionOptions } from '@concepta/nestjs-common';
 import { OtpException } from './otp.exception';
 
 export class OtpLimitReachedException extends OtpException {

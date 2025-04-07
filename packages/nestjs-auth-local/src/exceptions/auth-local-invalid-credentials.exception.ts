@@ -1,4 +1,4 @@
-import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
+import { RuntimeExceptionOptions } from '@concepta/nestjs-common';
 import { AuthLocalUnauthorizedException } from './auth-local-unauthorized.exception';
 
 export class AuthLocalInvalidCredentialsException extends AuthLocalUnauthorizedException {

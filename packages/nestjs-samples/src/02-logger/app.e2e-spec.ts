@@ -13,7 +13,7 @@ import { CreateOrderDto } from './order/dto/create-order.dto';
 
 import { LoggerService } from '@concepta/nestjs-logger';
 import { HttpAdapterHost } from '@nestjs/core';
-import { ExceptionsFilter } from '@concepta/nestjs-exception';
+import { ExceptionsFilter } from '@concepta/nestjs-common';
 
 describe('AppController (e2e)', () => {
   describe('Express', () => {

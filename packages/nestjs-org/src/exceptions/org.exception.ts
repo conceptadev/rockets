@@ -1,7 +1,7 @@
 import {
   RuntimeException,
   RuntimeExceptionOptions,
-} from '@concepta/nestjs-exception';
+} from '@concepta/nestjs-common';
 
 export class OrgException extends RuntimeException {
   constructor(options?: RuntimeExceptionOptions) {

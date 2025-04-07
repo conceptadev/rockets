@@ -1,9 +1,9 @@
-import { ReferenceIdInterface } from '@concepta/nestjs-common';
+import { HttpStatus } from '@nestjs/common';
 import {
+  ReferenceIdInterface,
   RuntimeException,
   RuntimeExceptionOptions,
-} from '@concepta/nestjs-exception';
-import { HttpStatus } from '@nestjs/common';
+} from '@concepta/nestjs-common';
 import { FederatedException } from './federated.exception';
 
 export class FederatedUserLookupException extends FederatedException {

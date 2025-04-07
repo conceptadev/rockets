@@ -1,5 +1,5 @@
-import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
 import { HttpStatus } from '@nestjs/common';
+import { RuntimeExceptionOptions } from '@concepta/nestjs-common';
 import { CrudException } from './crud.exception';
 /**
  * Generic crud exception.

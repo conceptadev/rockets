@@ -1,9 +1,9 @@
 import { format } from 'util';
 import { HttpStatus } from '@nestjs/common';
-import { mapNonErrorToException } from '@concepta/nestjs-common';
-import { RuntimeExceptionInterface } from '../interfaces/runtime-exception.interface';
-import { RuntimeExceptionOptions } from '../interfaces/runtime-exception-options.interface';
-import { RuntimeExceptionContext } from '../exception.types';
+import { mapNonErrorToException } from '../utils/map-non-error-to-exception.util';
+import { RuntimeExceptionInterface } from './interfaces/runtime-exception.interface';
+import { RuntimeExceptionOptions } from './interfaces/runtime-exception-options.interface';
+import { RuntimeExceptionContext } from './exception.types';
 
 export class RuntimeException
   extends Error

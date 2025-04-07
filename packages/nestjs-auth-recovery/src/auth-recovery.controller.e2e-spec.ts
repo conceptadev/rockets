@@ -7,7 +7,7 @@ import { OtpInterface, UserInterface } from '@concepta/nestjs-common';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { EmailService } from '@concepta/nestjs-email';
 import { OtpService } from '@concepta/nestjs-otp';
-import { ExceptionsFilter } from '@concepta/nestjs-exception';
+import { ExceptionsFilter } from '@concepta/nestjs-common';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
 
 import { AUTH_RECOVERY_MODULE_SETTINGS_TOKEN } from './auth-recovery.constants';

@@ -1,5 +1,5 @@
-import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
 import { HttpStatus } from '@nestjs/common';
+import { RuntimeExceptionOptions } from '@concepta/nestjs-common';
 import { ReportException } from './report.exception';
 
 export class ReportIdMissingException extends ReportException {

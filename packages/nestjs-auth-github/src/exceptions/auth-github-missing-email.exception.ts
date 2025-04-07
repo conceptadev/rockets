@@ -1,4 +1,4 @@
-import { RuntimeExceptionOptions } from '@concepta/nestjs-exception';
+import { RuntimeExceptionOptions } from '@concepta/nestjs-common';
 import { AuthGithubException } from './auth-github.exception';
 
 export class AuthGithubMissingEmailException extends AuthGithubException {

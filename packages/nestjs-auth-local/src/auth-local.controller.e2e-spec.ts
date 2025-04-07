@@ -7,7 +7,7 @@ import { AppModuleDbFixture } from './__fixtures__/app.module.fixture';
 import { PasswordValidationService } from '@concepta/nestjs-password';
 import { LOGIN_SUCCESS } from './__fixtures__/user/constants';
 import { HttpAdapterHost } from '@nestjs/core';
-import { ExceptionsFilter } from '@concepta/nestjs-exception';
+import { ExceptionsFilter } from '@concepta/nestjs-common';
 import { AuthLocalValidateUserService } from './services/auth-local-validate-user.service';
 import { AuthLocalInvalidCredentialsException } from './exceptions/auth-local-invalid-credentials.exception';
 

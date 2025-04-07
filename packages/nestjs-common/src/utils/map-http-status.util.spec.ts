@@ -1,4 +1,4 @@
-import { mapHttpStatus } from './map-http-status.util';
+import { mapHttpStatus } from '../utils/map-http-status.util';
 import { ERROR_CODE_HTTP_UNKNOWN } from '../constants/error-codes.constants';
 
 describe(mapHttpStatus.name, () => {
