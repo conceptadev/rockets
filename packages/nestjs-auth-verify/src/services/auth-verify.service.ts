@@ -7,10 +7,10 @@ import { AuthVerifyUserLookupServiceInterface } from '../interfaces/auth-verify-
 import { AuthVerifyUserMutateServiceInterface } from '../interfaces/auth-verify-user-mutate.service.interface';
 import {
   AUTH_VERIFY_MODULE_SETTINGS_TOKEN,
-  AUTH_VERIFY_MODULE_OTP_SERVICE_TOKEN,
-  AUTH_VERIFY_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-  AUTH_VERIFY_MODULE_USER_MUTATE_SERVICE_TOKEN,
   AUTH_VERIFY_MODULE_ENTITY_MANAGER_PROXY_TOKEN,
+  AuthVerifyOtpService,
+  AuthVerifyUserLookupService,
+  AuthVerifyUserMutateService,
 } from '../auth-verify.constants';
 import { AuthVerifyNotificationService } from './auth-verify-notification.service';
 import {
@@ -30,11 +30,11 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
   constructor(
     @Inject(AUTH_VERIFY_MODULE_SETTINGS_TOKEN)
     private readonly config: AuthVerifySettingsInterface,
-    @Inject(AUTH_VERIFY_MODULE_OTP_SERVICE_TOKEN)
+    @Inject(AuthVerifyOtpService)
     private readonly otpService: AuthVerifyOtpServiceInterface,
-    @Inject(AUTH_VERIFY_MODULE_USER_LOOKUP_SERVICE_TOKEN)
+    @Inject(AuthVerifyUserLookupService)
     private readonly userLookupService: AuthVerifyUserLookupServiceInterface,
-    @Inject(AUTH_VERIFY_MODULE_USER_MUTATE_SERVICE_TOKEN)
+    @Inject(AuthVerifyUserMutateService)
     private readonly userMutateService: AuthVerifyUserMutateServiceInterface,
     @Inject(AuthVerifyNotificationService)
     private readonly notificationService: AuthVerifyNotificationServiceInterface,

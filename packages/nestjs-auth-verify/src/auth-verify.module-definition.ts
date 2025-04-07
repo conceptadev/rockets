@@ -10,12 +10,12 @@ import { createSettingsProvider } from '@concepta/nestjs-common';
 import { EntityManagerProxy } from '@concepta/typeorm-common';
 
 import {
-  AUTH_VERIFY_MODULE_EMAIL_SERVICE_TOKEN,
-  AUTH_VERIFY_MODULE_OTP_SERVICE_TOKEN,
   AUTH_VERIFY_MODULE_SETTINGS_TOKEN,
   AUTH_VERIFY_MODULE_ENTITY_MANAGER_PROXY_TOKEN,
-  AUTH_VERIFY_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-  AUTH_VERIFY_MODULE_USER_MUTATE_SERVICE_TOKEN,
+  AuthVerifyEmailService,
+  AuthVerifyOtpService,
+  AuthVerifyUserLookupService,
+  AuthVerifyUserMutateService,
 } from './auth-verify.constants';
 
 import { AuthVerifyOptionsInterface } from './interfaces/auth-verify-options.interface';
@@ -74,10 +74,10 @@ export function createAuthVerifyImports(): DynamicModule['imports'] {
 export function createAuthVerifyExports() {
   return [
     AUTH_VERIFY_MODULE_SETTINGS_TOKEN,
-    AUTH_VERIFY_MODULE_OTP_SERVICE_TOKEN,
-    AUTH_VERIFY_MODULE_EMAIL_SERVICE_TOKEN,
-    AUTH_VERIFY_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-    AUTH_VERIFY_MODULE_USER_MUTATE_SERVICE_TOKEN,
+    AuthVerifyOtpService,
+    AuthVerifyEmailService,
+    AuthVerifyUserLookupService,
+    AuthVerifyUserMutateService,
     AuthVerifyService,
   ];
 }
@@ -125,7 +125,7 @@ export function createAuthVerifyOtpServiceProvider(
   optionsOverrides?: Pick<AuthVerifyOptions, 'otpService'>,
 ): Provider {
   return {
-    provide: AUTH_VERIFY_MODULE_OTP_SERVICE_TOKEN,
+    provide: AuthVerifyOtpService,
     inject: [RAW_OPTIONS_TOKEN],
     useFactory: async (options: Pick<AuthVerifyOptions, 'otpService'>) =>
       optionsOverrides?.otpService ?? options.otpService,
@@ -136,7 +136,7 @@ export function createAuthVerifyEmailServiceProvider(
   optionsOverrides?: Pick<AuthVerifyOptions, 'emailService'>,
 ): Provider {
   return {
-    provide: AUTH_VERIFY_MODULE_EMAIL_SERVICE_TOKEN,
+    provide: AuthVerifyEmailService,
     inject: [RAW_OPTIONS_TOKEN],
     useFactory: async (options: Pick<AuthVerifyOptions, 'emailService'>) =>
       optionsOverrides?.emailService ?? options.emailService,
@@ -147,7 +147,7 @@ export function createAuthVerifyUserLookupServiceProvider(
   optionsOverrides?: Pick<AuthVerifyOptions, 'userLookupService'>,
 ): Provider {
   return {
-    provide: AUTH_VERIFY_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+    provide: AuthVerifyUserLookupService,
     inject: [RAW_OPTIONS_TOKEN],
     useFactory: async (options: Pick<AuthVerifyOptions, 'userLookupService'>) =>
       optionsOverrides?.userLookupService ?? options.userLookupService,
@@ -158,7 +158,7 @@ export function createAuthVerifyUserMutateServiceProvider(
   optionsOverrides?: Pick<AuthVerifyOptions, 'userMutateService'>,
 ): Provider {
   return {
-    provide: AUTH_VERIFY_MODULE_USER_MUTATE_SERVICE_TOKEN,
+    provide: AuthVerifyUserMutateService,
     inject: [RAW_OPTIONS_TOKEN],
     useFactory: async (options: Pick<AuthVerifyOptions, 'userMutateService'>) =>
       optionsOverrides?.userMutateService ?? options.userMutateService,
@@ -173,7 +173,7 @@ export function createAuthVerifyNotificationServiceProvider(
     inject: [
       RAW_OPTIONS_TOKEN,
       AUTH_VERIFY_MODULE_SETTINGS_TOKEN,
-      AUTH_VERIFY_MODULE_EMAIL_SERVICE_TOKEN,
+      AuthVerifyEmailService,
     ],
     useFactory: async (
       options: Pick<AuthVerifyOptions, 'notificationService'>,

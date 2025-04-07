@@ -2,8 +2,8 @@ import { AuthVerifyNotificationServiceInterface } from '../interfaces/auth-verif
 import { EmailSendOptionsInterface } from '@concepta/nestjs-common';
 import { Inject, Injectable } from '@nestjs/common';
 import {
-  AUTH_VERIFY_MODULE_EMAIL_SERVICE_TOKEN,
   AUTH_VERIFY_MODULE_SETTINGS_TOKEN,
+  AuthVerifyEmailService,
 } from '../auth-verify.constants';
 import { AuthVerifyEmailServiceInterface } from '../interfaces/auth-verify-email.service.interface';
 import { AuthVerifySettingsInterface } from '../interfaces/auth-verify-settings.interface';
@@ -17,7 +17,7 @@ export class AuthVerifyNotificationService
   constructor(
     @Inject(AUTH_VERIFY_MODULE_SETTINGS_TOKEN)
     private readonly settings: AuthVerifySettingsInterface,
-    @Inject(AUTH_VERIFY_MODULE_EMAIL_SERVICE_TOKEN)
+    @Inject(AuthVerifyEmailService)
     private readonly emailService: AuthVerifyEmailServiceInterface,
   ) {}
 
