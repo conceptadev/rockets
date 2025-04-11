@@ -3,15 +3,12 @@ import {
   DynamicModule,
   Provider,
 } from '@nestjs/common';
-import { getEntityManagerToken } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 
 import { createSettingsProvider } from '@concepta/nestjs-common';
-import { EntityManagerProxy } from '@concepta/typeorm-common';
 
 import {
   AUTH_VERIFY_MODULE_SETTINGS_TOKEN,
-  AUTH_VERIFY_MODULE_ENTITY_MANAGER_PROXY_TOKEN,
   AuthVerifyEmailService,
   AuthVerifyOtpService,
   AuthVerifyUserLookupService,
@@ -26,7 +23,6 @@ import { AuthVerifyController } from './auth-verify.controller';
 import { AuthVerifyService } from './services/auth-verify.service';
 import { AuthVerifyNotificationService } from './services/auth-verify-notification.service';
 import { AuthVerifyEmailServiceInterface } from './interfaces/auth-verify-email.service.interface';
-import { EntityManagerInterface } from '@concepta/typeorm-common';
 
 const RAW_OPTIONS_TOKEN = Symbol('__AUTH_VERIFY_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -95,7 +91,6 @@ export function createAuthVerifyProviders(options: {
     createAuthVerifyUserLookupServiceProvider(options.overrides),
     createAuthVerifyUserMutateServiceProvider(options.overrides),
     createAuthVerifyNotificationServiceProvider(options.overrides),
-    createAuthVerifyEntityManagerProxyProvider(options.overrides),
   ];
 }
 
@@ -183,21 +178,5 @@ export function createAuthVerifyNotificationServiceProvider(
       optionsOverrides?.notificationService ??
       options.notificationService ??
       new AuthVerifyNotificationService(settings, emailService),
-  };
-}
-
-export function createAuthVerifyEntityManagerProxyProvider(
-  optionsOverrides?: Pick<AuthVerifyOptions, 'entityManagerProxy'>,
-): Provider {
-  return {
-    provide: AUTH_VERIFY_MODULE_ENTITY_MANAGER_PROXY_TOKEN,
-    inject: [RAW_OPTIONS_TOKEN, getEntityManagerToken()],
-    useFactory: async (
-      options: Pick<AuthVerifyOptions, 'entityManagerProxy'>,
-      defaultEntityManager: EntityManagerInterface,
-    ) =>
-      optionsOverrides?.entityManagerProxy ??
-      options.entityManagerProxy ??
-      new EntityManagerProxy(defaultEntityManager),
   };
 }

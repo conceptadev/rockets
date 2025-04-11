@@ -12,7 +12,6 @@ import {
   JwtStrategy,
   JwtStrategyOptionsInterface,
 } from '@concepta/nestjs-jwt';
-import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 import {
   AUTH_JWT_STRATEGY_NAME,
@@ -53,12 +52,8 @@ export class AuthJwtStrategy extends PassportStrategyFactory<JwtStrategy>(
    */
   async validate(
     payload: AuthorizationPayloadInterface,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<ReferenceIdInterface> {
-    const user = await this.userLookupService.bySubject(
-      payload.sub,
-      queryOptions,
-    );
+    const user = await this.userLookupService.bySubject(payload.sub);
 
     if (user) {
       return user;

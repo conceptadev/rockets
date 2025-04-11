@@ -3,15 +3,12 @@ import {
   DynamicModule,
   Provider,
 } from '@nestjs/common';
-import { getEntityManagerToken } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 
 import { createSettingsProvider } from '@concepta/nestjs-common';
-import { EntityManagerProxy } from '@concepta/typeorm-common';
 
 import {
   AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
-  AUTH_RECOVERY_MODULE_ENTITY_MANAGER_PROXY_TOKEN,
   AuthRecoveryOtpService,
   AuthRecoveryEmailService,
   AuthRecoveryUserLookupService,
@@ -26,7 +23,6 @@ import { AuthRecoveryController } from './auth-recovery.controller';
 import { AuthRecoveryService } from './services/auth-recovery.service';
 import { AuthRecoveryNotificationService } from './services/auth-recovery-notification.service';
 import { AuthRecoveryEmailServiceInterface } from './interfaces/auth-recovery-email.service.interface';
-import { EntityManagerInterface } from '@concepta/typeorm-common';
 
 const RAW_OPTIONS_TOKEN = Symbol('__AUTH_RECOVERY_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -98,7 +94,6 @@ export function createAuthRecoveryProviders(options: {
     createAuthRecoveryUserLookupServiceProvider(options.overrides),
     createAuthRecoveryUserMutateServiceProvider(options.overrides),
     createAuthRecoveryNotificationServiceProvider(options.overrides),
-    createAuthRecoveryEntityManagerProxyProvider(options.overrides),
   ];
 }
 
@@ -188,21 +183,5 @@ export function createAuthRecoveryNotificationServiceProvider(
       optionsOverrides?.notificationService ??
       options.notificationService ??
       new AuthRecoveryNotificationService(settings, emailService),
-  };
-}
-
-export function createAuthRecoveryEntityManagerProxyProvider(
-  optionsOverrides?: Pick<AuthRecoveryOptions, 'entityManagerProxy'>,
-): Provider {
-  return {
-    provide: AUTH_RECOVERY_MODULE_ENTITY_MANAGER_PROXY_TOKEN,
-    inject: [RAW_OPTIONS_TOKEN, getEntityManagerToken()],
-    useFactory: async (
-      options: Pick<AuthRecoveryOptions, 'entityManagerProxy'>,
-      defaultEntityManager: EntityManagerInterface,
-    ) =>
-      optionsOverrides?.entityManagerProxy ??
-      options.entityManagerProxy ??
-      new EntityManagerProxy(defaultEntityManager),
   };
 }

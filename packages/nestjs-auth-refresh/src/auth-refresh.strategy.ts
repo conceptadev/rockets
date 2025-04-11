@@ -8,7 +8,6 @@ import {
   JwtStrategy,
 } from '@concepta/nestjs-jwt';
 import { AuthorizationPayloadInterface } from '@concepta/nestjs-common';
-import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 import {
   AUTH_REFRESH_MODULE_SETTINGS_TOKEN,
@@ -47,14 +46,8 @@ export class AuthRefreshStrategy extends PassportStrategyFactory<JwtStrategy>(
    *
    * @param payload - Authorization payload
    */
-  async validate(
-    payload: AuthorizationPayloadInterface,
-    queryOptions?: QueryOptionsInterface,
-  ) {
-    const user = await this.userLookupService.bySubject(
-      payload.sub,
-      queryOptions,
-    );
+  async validate(payload: AuthorizationPayloadInterface) {
+    const user = await this.userLookupService.bySubject(payload.sub);
 
     if (!user) {
       throw new AuthRefreshUnauthorizedException();

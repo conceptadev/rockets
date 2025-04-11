@@ -1,11 +1,7 @@
 import { FileCreatableInterface } from '@concepta/nestjs-common';
-import {
-  RepositoryInterface,
-  TransactionProxy,
-} from '@concepta/typeorm-common';
+import { RepositoryInterface } from '@concepta/typeorm-common';
 import { randomUUID } from 'crypto';
 import { mock } from 'jest-mock-extended';
-import { DataSource, EntityManager } from 'typeorm';
 import { FileEntityFixture } from '../__fixtures__/file/file-entity.fixture';
 import { FileCreateDto } from '../dto/file-create.dto';
 import { FileQueryException } from '../exceptions/file-query.exception';
@@ -53,12 +49,6 @@ describe(FileService.name, () => {
       fileLookupService,
     );
     fileRepo.create.mockReturnValue(mockFile);
-    const mockTransactionalEntityManager = mock<EntityManager>({
-      connection: mock<DataSource>(),
-    });
-    fileRepo.manager.transaction = jest.fn().mockImplementation(async (cb) => {
-      return await cb(mockTransactionalEntityManager);
-    });
   });
 
   describe('push', () => {
@@ -68,23 +58,6 @@ describe(FileService.name, () => {
           return Promise.resolve(mockFile.uploadUri || '');
         },
       );
-      interface MockTransaction {}
-      const mockTransaction = mock<MockTransaction>();
-      const mockTransactionProxy = mock<TransactionProxy>({
-        commit: jest
-          .fn()
-          .mockImplementation((callback) => callback(mockTransaction)),
-      });
-      mockTransactionProxy.repository(fileRepo);
-
-      jest
-        .spyOn(mockTransactionProxy, 'repository')
-        .mockImplementationOnce(() => {
-          return fileRepo;
-        });
-      jest
-        .spyOn(fileMutateService, 'transaction')
-        .mockReturnValue(mockTransactionProxy);
       jest
         .spyOn(fileLookupService, 'getUniqueFile')
         .mockReturnValueOnce(Promise.resolve(null))

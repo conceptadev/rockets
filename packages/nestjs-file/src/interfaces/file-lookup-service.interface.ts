@@ -1,11 +1,13 @@
-import { FileCreatableInterface, FileInterface } from '@concepta/nestjs-common';
-import { LookupIdInterface, ReferenceId } from '@concepta/nestjs-common';
-import { QueryOptionsInterface } from '@concepta/typeorm-common';
+import {
+  ByIdInterface,
+  ReferenceId,
+  FileCreatableInterface,
+  FileInterface,
+} from '@concepta/nestjs-common';
 
 export interface FileLookupServiceInterface
-  extends LookupIdInterface<ReferenceId, FileInterface, QueryOptionsInterface> {
+  extends ByIdInterface<ReferenceId, FileInterface> {
   getUniqueFile(
     org: Pick<FileCreatableInterface, 'serviceKey' | 'fileName'>,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<FileInterface | null>;
 }

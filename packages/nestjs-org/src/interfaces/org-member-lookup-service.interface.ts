@@ -1,13 +1,8 @@
 import {
-  LookupIdInterface,
+  ByIdInterface,
   ReferenceId,
   ReferenceIdInterface,
 } from '@concepta/nestjs-common';
-import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 export interface OrgMemberLookupServiceInterface
-  extends LookupIdInterface<
-    ReferenceId,
-    ReferenceIdInterface,
-    QueryOptionsInterface
-  > {}
+  extends ByIdInterface<ReferenceId, ReferenceIdInterface> {}

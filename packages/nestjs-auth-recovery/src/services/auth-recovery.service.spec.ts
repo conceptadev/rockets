@@ -99,7 +99,6 @@ describe(AuthRecoveryService, () => {
       expect(spyUserLookupServiceByEmail).toHaveBeenCalledTimes(1);
       expect(spyUserLookupServiceByEmail).toHaveBeenCalledWith(
         UserFixture.email,
-        undefined,
       );
 
       expect(spySendRecoverLoginEmail).toHaveBeenCalledTimes(1);
@@ -120,7 +119,6 @@ describe(AuthRecoveryService, () => {
       expect(spyUserLookupServiceByEmail).toHaveBeenCalledTimes(1);
       expect(spyUserLookupServiceByEmail).toHaveBeenCalledWith(
         UserFixture.email,
-        undefined,
       );
 
       expect(spySendRecoverPasswordEmail).toHaveBeenCalledTimes(1);
@@ -140,7 +138,6 @@ describe(AuthRecoveryService, () => {
         settings.otp.assignment,
         { category: settings.otp.category, passcode: 'GOOD_PASSCODE' },
         false,
-        undefined,
       );
     });
 
@@ -163,13 +160,10 @@ describe(AuthRecoveryService, () => {
       );
 
       expect(spyUserMutateServiceUpdate).toHaveBeenCalledTimes(1);
-      expect(spyUserMutateServiceUpdate).toHaveBeenCalledWith(
-        {
-          id: UserFixture.id,
-          password: '$!Abc123bsksl6764579',
-        },
-        expect.any(Object),
-      );
+      expect(spyUserMutateServiceUpdate).toHaveBeenCalledWith({
+        id: UserFixture.id,
+        password: '$!Abc123bsksl6764579',
+      });
     });
 
     it('should send success email', async () => {

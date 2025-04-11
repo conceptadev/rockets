@@ -91,26 +91,18 @@ export class InvitationController
     let invite: InvitationSendInviteInterface | undefined;
 
     try {
-      await this.invitationCrudService
-        .transaction()
-        .commit(async (transaction): Promise<void> => {
-          invite = await this.invitationSendService.create(
-            invitationCreateInviteDto,
-            {
-              transaction,
-            },
-          );
+      await this.invitationCrudService;
+      invite = await this.invitationSendService.create(
+        invitationCreateInviteDto,
+      );
 
-          if (invite) {
-            await this.invitationSendService.send(invite, {
-              transaction,
-            });
-          } else {
-            throw new InvitationException({
-              message: 'User and/or invite not defined',
-            });
-          }
+      if (invite) {
+        await this.invitationSendService.send(invite);
+      } else {
+        throw new InvitationException({
+          message: 'User and/or invite not defined',
         });
+      }
 
       return invite;
     } catch (e: unknown) {

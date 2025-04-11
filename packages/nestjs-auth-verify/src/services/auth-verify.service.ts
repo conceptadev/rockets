@@ -7,7 +7,6 @@ import { AuthVerifyUserLookupServiceInterface } from '../interfaces/auth-verify-
 import { AuthVerifyUserMutateServiceInterface } from '../interfaces/auth-verify-user-mutate.service.interface';
 import {
   AUTH_VERIFY_MODULE_SETTINGS_TOKEN,
-  AUTH_VERIFY_MODULE_ENTITY_MANAGER_PROXY_TOKEN,
   AuthVerifyOtpService,
   AuthVerifyUserLookupService,
   AuthVerifyUserMutateService,
@@ -17,7 +16,6 @@ import {
   ReferenceAssigneeInterface,
   ReferenceIdInterface,
 } from '@concepta/nestjs-common';
-import { EntityManagerProxy } from '@concepta/typeorm-common';
 import { AuthVerifySendParamsInterface } from '../interfaces/auth-verify-send-params.interface';
 import { AuthVerifyConfirmParamsInterface } from '../interfaces/auth-verify-confirm-params.interface';
 import { AuthVerifyRevokeParamsInterface } from '../interfaces/auth-verify-revoke-params.interface';
@@ -38,8 +36,6 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
     private readonly userMutateService: AuthVerifyUserMutateServiceInterface,
     @Inject(AuthVerifyNotificationService)
     private readonly notificationService: AuthVerifyNotificationServiceInterface,
-    @Inject(AUTH_VERIFY_MODULE_ENTITY_MANAGER_PROXY_TOKEN)
-    private readonly entityManagerProxy: EntityManagerProxy,
   ) {}
 
   /**
@@ -54,10 +50,10 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
    * @param params - Parameters for sending verification email
    */
   async send(params: AuthVerifySendParamsInterface): Promise<void> {
-    const { email, queryOptions } = params;
+    const { email } = params;
 
     // verify the user by providing an email
-    const user = await this.userLookupService.byEmail(email, queryOptions);
+    const user = await this.userLookupService.byEmail(email);
 
     // did we find a user?
     if (user) {
@@ -83,7 +79,6 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
             id: user.id,
           },
         },
-        queryOptions,
         clearOnCreate: clearOtpOnCreate,
         rateSeconds,
         rateThreshold,
@@ -115,7 +110,7 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
   async validatePasscode(
     params: AuthVerifyValidateParamsInterface,
   ): Promise<ReferenceAssigneeInterface | null> {
-    const { passcode, deleteIfValid = false, queryOptions } = params;
+    const { passcode, deleteIfValid = false } = params;
     // extract required properties
     const { category, assignment } = this.config.otp;
 
@@ -124,7 +119,6 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
       assignment,
       { category, passcode },
       deleteIfValid,
-      queryOptions,
     );
   }
 
@@ -142,45 +136,33 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
   async confirmUser(
     params: AuthVerifyConfirmParamsInterface,
   ): Promise<ReferenceIdInterface | null> {
-    const { passcode, queryOptions } = params;
-    // run in transaction
-    return this.entityManagerProxy
-      .transaction(queryOptions)
-      .commit(async (transaction): Promise<ReferenceIdInterface | null> => {
-        // nested query options
-        const nestedQueryOptions = { ...queryOptions, transaction };
+    const { passcode } = params;
 
-        // get otp by passcode, but no delete it until all workflow pass
-        const otp = await this.validatePasscode({
-          passcode,
-          deleteIfValid: true,
-          queryOptions: nestedQueryOptions,
+    // get otp by passcode, but no delete it until all workflow pass
+    const otp = await this.validatePasscode({
+      passcode,
+      deleteIfValid: true,
+    });
+
+    // did we get an otp?
+    if (otp) {
+      // call user mutate service
+      const user = await this.userMutateService.update({
+        id: otp.assignee.id,
+        active: true,
+      });
+
+      if (user) {
+        await this.revokeAllUserVerifyToken({
+          email: user.email,
         });
 
-        // did we get an otp?
-        if (otp) {
-          // call user mutate service
-          const user = await this.userMutateService.update(
-            {
-              id: otp.assignee.id,
-              active: true,
-            },
-            nestedQueryOptions,
-          );
+        return user;
+      }
+    }
 
-          if (user) {
-            await this.revokeAllUserVerifyToken({
-              email: user.email,
-              queryOptions: nestedQueryOptions,
-            });
-
-            return user;
-          }
-        }
-
-        // otp was not found
-        throw new AuthRecoveryOtpInvalidException();
-      });
+    // otp was not found
+    throw new AuthRecoveryOtpInvalidException();
   }
 
   /**
@@ -192,25 +174,21 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
   async revokeAllUserVerifyToken(
     params: AuthVerifyRevokeParamsInterface,
   ): Promise<void> {
-    const { email, queryOptions } = params;
+    const { email } = params;
     // verify user by providing an email
-    const user = await this.userLookupService.byEmail(email, queryOptions);
+    const user = await this.userLookupService.byEmail(email);
 
     // did we find a user?
     if (user) {
       // extract required otp properties
       const { category, assignment } = this.config.otp;
       // clear all user's otps in DB
-      await this.otpService.clear(
-        assignment,
-        {
-          category,
-          assignee: {
-            id: user.id,
-          },
+      await this.otpService.clear(assignment, {
+        category,
+        assignee: {
+          id: user.id,
         },
-        queryOptions,
-      );
+      });
     }
   }
 }

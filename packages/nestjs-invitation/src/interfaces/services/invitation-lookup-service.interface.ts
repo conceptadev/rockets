@@ -1,3 +1,3 @@
-import { LookupIdInterface } from '@concepta/nestjs-common';
+import { ByIdInterface } from '@concepta/nestjs-common';
 
-export interface InvitationLookupServiceInterface extends LookupIdInterface {}
+export interface InvitationLookupServiceInterface extends ByIdInterface {}

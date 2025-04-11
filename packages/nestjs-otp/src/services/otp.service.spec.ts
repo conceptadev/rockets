@@ -60,7 +60,6 @@ describe('OtpModule', () => {
         category: CATEGORY_DEFAULT,
         ...options,
       },
-      queryOptions: {},
       clearOnCreate,
       rateSeconds,
       rateThreshold,

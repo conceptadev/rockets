@@ -5,11 +5,7 @@ import {
 } from '@concepta/nestjs-common';
 import { InvitationInterface } from '@concepta/nestjs-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
-import {
-  BaseService,
-  QueryOptionsInterface,
-  RepositoryInterface,
-} from '@concepta/typeorm-common';
+import { RepositoryInterface } from '@concepta/typeorm-common';
 
 import {
   INVITATION_MODULE_EMAIL_SERVICE_TOKEN,
@@ -29,101 +25,72 @@ import { InvitationAcceptOptionsInterface } from '../interfaces/options/invitati
 import { InvitationException } from '../exceptions/invitation.exception';
 import { InvitationNotFoundException } from '../exceptions/invitation-not-found.exception';
 
-export class InvitationAcceptanceService extends BaseService<InvitationEntityInterface> {
+export class InvitationAcceptanceService {
   constructor(
     @Inject(INVITATION_MODULE_SETTINGS_TOKEN)
     private readonly settings: InvitationSettingsInterface,
     @InjectDynamicRepository(INVITATION_MODULE_INVITATION_ENTITY_KEY)
-    invitationRepo: RepositoryInterface<InvitationEntityInterface>,
+    protected readonly invitationRepo: RepositoryInterface<InvitationEntityInterface>,
     @Inject(INVITATION_MODULE_EMAIL_SERVICE_TOKEN)
     private readonly emailService: InvitationEmailServiceInterface,
     @Inject(INVITATION_MODULE_OTP_SERVICE_TOKEN)
     private readonly otpService: InvitationOtpServiceInterface,
     private readonly invitationRevocationService: InvitationRevocationService,
-  ) {
-    super(invitationRepo);
-  }
+  ) {}
 
   /**
    * Activate user's account by providing its OTP passcode and the new password.
    */
-  async accept(
-    options: InvitationAcceptOptionsInterface,
-    queryOptions?: QueryOptionsInterface,
-  ): Promise<boolean> {
+  async accept(options: InvitationAcceptOptionsInterface): Promise<boolean> {
     const { code, passcode, payload } = options;
 
     let invitation: InvitationInterface | null;
     let category: string | undefined = undefined;
     let email: string | undefined = undefined;
 
-    // run in transaction
-    const result = await this.transaction(queryOptions).commit(
-      async (transaction): Promise<boolean> => {
-        // override the query options
-        const nestedQueryOptions = { ...queryOptions, transaction };
+    // get the invitation
+    try {
+      invitation = await this.getOneByCode(code);
+    } catch (e: unknown) {
+      throw new InvitationException({ originalError: e });
+    }
 
-        // get the invitation
-        try {
-          invitation = await this.getOneByCode(code, nestedQueryOptions);
-        } catch (e: unknown) {
-          throw new InvitationException({ originalError: e });
-        }
+    if (invitation) {
+      category = invitation.category;
+      email = invitation.user.email;
+    } else {
+      throw new InvitationNotFoundException();
+    }
 
-        if (invitation) {
-          category = invitation.category;
-          email = invitation.user.email;
-        } else {
-          throw new InvitationNotFoundException();
-        }
+    // get otp by passcode, but no delete it until all workflow pass
+    const otp = await this.validatePasscode(passcode, category, true);
 
-        // get otp by passcode, but no delete it until all workflow pass
-        const otp = await this.validatePasscode(
-          passcode,
+    // did we get an otp?
+    if (otp) {
+      const success = await this.dispatchEvent(invitation, payload);
+
+      if (success) {
+        await this.invitationRevocationService.revokeAll({
+          email,
           category,
-          true,
-          nestedQueryOptions,
-        );
+        });
 
-        // did we get an otp?
-        if (otp) {
-          const success = await this.dispatchEvent(
-            invitation,
-            payload,
-            nestedQueryOptions,
-          );
+        await this.sendEmail(email);
 
-          if (success) {
-            await this.invitationRevocationService.revokeAll(
-              {
-                email,
-                category,
-              },
-              nestedQueryOptions,
-            );
+        return true;
+      }
+    }
 
-            await this.sendEmail(email);
-
-            return true;
-          }
-        }
-
-        return false;
-      },
-    );
-
-    return result;
+    return false;
   }
 
   protected async dispatchEvent(
     invitation: InvitationInterface,
     payload?: LiteralObject,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<boolean> {
     const invitationAcceptedEventAsync = new InvitationAcceptedEventAsync({
       invitation,
       data: payload,
-      queryOptions,
     });
 
     const eventResult = await invitationAcceptedEventAsync.emit();
@@ -162,13 +129,12 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
    * Get one invitation by code.
    *
    * @param code - Pass code string
-   * @param queryOptions - Query options
    */
-  async getOneByCode(
-    code: string,
-    queryOptions?: QueryOptionsInterface,
-  ): Promise<InvitationInterface | null> {
-    return this.findOne({ where: { code }, relations: ['user'] }, queryOptions);
+  async getOneByCode(code: string): Promise<InvitationInterface | null> {
+    return this.invitationRepo.findOne({
+      where: { code },
+      relations: ['user'],
+    });
   }
 
   /**
@@ -177,13 +143,11 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
    * @param passcode - User's passcode
    * @param category - Category
    * @param deleteIfValid - Flag to delete if valid or not
-   * @param queryOptions - Query Options
    */
   async validatePasscode(
     passcode: string,
     category: string,
     deleteIfValid = false,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<ReferenceAssigneeInterface | null> {
     // extract required properties
     const { assignment } = this.settings.otp;
@@ -193,7 +157,6 @@ export class InvitationAcceptanceService extends BaseService<InvitationEntityInt
       assignment,
       { category, passcode },
       deleteIfValid,
-      queryOptions,
     );
   }
 }

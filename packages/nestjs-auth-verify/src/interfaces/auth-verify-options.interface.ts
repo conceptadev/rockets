@@ -1,4 +1,3 @@
-import { EntityManagerProxy } from '@concepta/typeorm-common';
 import { AuthVerifySettingsInterface } from './auth-verify-settings.interface';
 import { AuthVerifyOtpServiceInterface } from './auth-verify-otp.service.interface';
 import { AuthVerifyEmailServiceInterface } from './auth-verify-email.service.interface';
@@ -13,5 +12,4 @@ export interface AuthVerifyOptionsInterface {
   userLookupService: AuthVerifyUserLookupServiceInterface;
   userMutateService: AuthVerifyUserMutateServiceInterface;
   notificationService?: AuthVerifyNotificationServiceInterface;
-  entityManagerProxy?: EntityManagerProxy;
 }

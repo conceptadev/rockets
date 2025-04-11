@@ -14,7 +14,6 @@ import { AuthVerifyController } from './auth-verify.controller';
 import {
   createAuthVerifyControllers,
   createAuthVerifyEmailServiceProvider,
-  createAuthVerifyEntityManagerProxyProvider,
   createAuthVerifyExports,
   createAuthVerifyNotificationServiceProvider,
   createAuthVerifyOtpServiceProvider,
@@ -27,13 +26,11 @@ import { AuthVerifyUserLookupServiceInterface } from './interfaces/auth-verify-u
 import { AuthVerifyUserMutateServiceInterface } from './interfaces/auth-verify-user-mutate.service.interface';
 import { AuthVerifyNotificationServiceInterface } from './interfaces/auth-verify-notification.service.interface';
 import { AuthVerifyNotificationService } from './services/auth-verify-notification.service';
-import { EntityManagerProxy } from '@concepta/typeorm-common';
 
 describe('AuthVerifyModuleDefinition', () => {
   const mockEmailService = mock<AuthVerifyEmailServiceInterface>();
   const mockAuthVerifyNotification =
     mock<AuthVerifyNotificationServiceInterface>();
-  const mockEntityManagerProxy = mock<EntityManagerProxy>();
   const mockAuthVerifyOptions = {
     emailService: mockEmailService,
     otpService: new OtpServiceFixture(),
@@ -261,37 +258,6 @@ describe('AuthVerifyModuleDefinition', () => {
       });
 
       expect(useFactoryResult).toBe(mockAuthVerifyNotification);
-    });
-  });
-  describe(createAuthVerifyEntityManagerProxyProvider.name, () => {
-    it('should return a default AuthVerifyNotificationService', async () => {
-      const provider =
-        createAuthVerifyEntityManagerProxyProvider() as FactoryProvider;
-
-      const useFactoryResult = await provider.useFactory({});
-
-      expect(useFactoryResult).toBeInstanceOf(EntityManagerProxy);
-    });
-
-    it('should override notificationService', async () => {
-      const provider = createAuthVerifyEntityManagerProxyProvider({
-        entityManagerProxy: mockEntityManagerProxy,
-      }) as FactoryProvider;
-
-      const useFactoryResult = await provider.useFactory();
-
-      expect(useFactoryResult).toBe(mockEntityManagerProxy);
-    });
-
-    it('should return an notificationService from initialization', async () => {
-      const provider =
-        createAuthVerifyEntityManagerProxyProvider() as FactoryProvider;
-
-      const useFactoryResult = await provider.useFactory({
-        entityManagerProxy: mockEntityManagerProxy,
-      });
-
-      expect(useFactoryResult).toBe(mockEntityManagerProxy);
     });
   });
 });

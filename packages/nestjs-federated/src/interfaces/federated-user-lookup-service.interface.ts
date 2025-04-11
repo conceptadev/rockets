@@ -1,20 +1,11 @@
 import {
-  LookupEmailInterface,
-  LookupIdInterface,
+  ByEmailInterface,
+  ByIdInterface,
   ReferenceEmail,
   ReferenceId,
 } from '@concepta/nestjs-common';
-import { QueryOptionsInterface } from '@concepta/typeorm-common';
 import { FederatedCredentialsInterface } from './federated-credentials.interface';
 
 export interface FederatedUserLookupServiceInterface
-  extends LookupIdInterface<
-      ReferenceId,
-      FederatedCredentialsInterface,
-      QueryOptionsInterface
-    >,
-    LookupEmailInterface<
-      ReferenceEmail,
-      FederatedCredentialsInterface,
-      QueryOptionsInterface
-    > {}
+  extends ByIdInterface<ReferenceId, FederatedCredentialsInterface>,
+    ByEmailInterface<ReferenceEmail, FederatedCredentialsInterface> {}

@@ -19,6 +19,3 @@ export const AuthRecoveryUserLookupService = Symbol(
 export const AuthRecoveryUserMutateService = Symbol(
   '__AUTH_RECOVERY_MODULE_USER_MUTATE_SERVICE_TOKEN__',
 );
-
-export const AUTH_RECOVERY_MODULE_ENTITY_MANAGER_PROXY_TOKEN =
-  'AUTH_RECOVERY_MODULE_ENTITY_MANAGER_PROXY_TOKEN';

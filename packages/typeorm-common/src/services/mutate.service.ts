@@ -10,25 +10,21 @@ import {
   Type,
 } from '@concepta/nestjs-common';
 
-import { QueryOptionsInterface } from '../interfaces/query-options.interface';
 import { ReferenceValidationException } from '../exceptions/reference-validation.exception';
 import { ReferenceMutateException } from '../exceptions/reference-mutate.exception';
 import { ReferenceIdNoMatchException } from '../exceptions/reference-id-no-match.exception';
-import { BaseService } from './base.service';
 import { RepositoryInterface } from '../interfaces/repository.interface';
 
 /**
  * Abstract mutate service
  */
 export abstract class MutateService<
-    Entity extends ReferenceIdInterface,
-    Creatable extends DeepPartial<Entity>,
-    Updatable extends DeepPartial<Entity>,
-    Replaceable extends Creatable = Creatable,
-    Removable extends DeepPartial<Entity> = DeepPartial<Entity>,
-  >
-  extends BaseService<Entity>
-  implements
+  Entity extends ReferenceIdInterface,
+  Creatable extends DeepPartial<Entity>,
+  Updatable extends DeepPartial<Entity>,
+  Replaceable extends Creatable = Creatable,
+  Removable extends DeepPartial<Entity> = DeepPartial<Entity>,
+> implements
     CreateOneInterface<Creatable, Entity>,
     UpdateOneInterface<Updatable & ReferenceIdInterface, Entity>,
     ReplaceOneInterface<Replaceable & ReferenceIdInterface, Entity>,
@@ -42,9 +38,7 @@ export abstract class MutateService<
    *
    * @param repo - instance of the repo
    */
-  constructor(repo: RepositoryInterface<Entity>) {
-    super(repo);
-  }
+  constructor(protected repo: RepositoryInterface<Entity>) {}
 
   /**
    * Create one
@@ -52,18 +46,15 @@ export abstract class MutateService<
    * @param data - the reference to create
    * @returns the created reference
    */
-  async create(
-    data: Creatable,
-    queryOptions?: QueryOptionsInterface,
-  ): Promise<Entity> {
+  async create(data: Creatable): Promise<Entity> {
     // validate the data
     const dto = await this.validate<Creatable>(this.createDto, data);
     // apply transformations
     const transformed = await this.transform(dto);
     // create new entity
-    const entity = this.repository(queryOptions).create(transformed);
+    const entity = this.repo.create(transformed);
     // try to save the entity
-    return this.save(entity, queryOptions);
+    return this.repo.save(entity);
   }
 
   /**
@@ -72,10 +63,7 @@ export abstract class MutateService<
    * @param data - the reference data to update
    * @returns the updated reference
    */
-  async update(
-    data: Updatable & ReferenceIdInterface,
-    queryOptions?: QueryOptionsInterface,
-  ): Promise<Entity> {
+  async update(data: Updatable & ReferenceIdInterface): Promise<Entity> {
     // the entity we will update
     const entity = await this.findById(data.id);
     // yes, validate the data
@@ -83,12 +71,9 @@ export abstract class MutateService<
     // apply transformations
     const transformed = await this.transform(dto);
     // merge changes into the entity
-    const mergedEntity = this.repository(queryOptions).merge(
-      entity,
-      transformed,
-    );
+    const mergedEntity = this.repo.merge(entity, transformed);
     // try to save it
-    return this.save(mergedEntity, queryOptions);
+    return this.save(mergedEntity);
   }
 
   /**
@@ -97,10 +82,7 @@ export abstract class MutateService<
    * @param data - the reference data to replace
    * @returns the replaced reference
    */
-  async replace(
-    data: Replaceable & ReferenceIdInterface,
-    queryOptions?: QueryOptionsInterface,
-  ): Promise<Entity> {
+  async replace(data: Replaceable & ReferenceIdInterface): Promise<Entity> {
     // the entity we will replace
     const entity = await this.findById(data.id);
     // yes, validate the data
@@ -108,43 +90,33 @@ export abstract class MutateService<
     // apply transformations
     const transformed = await this.transform(dto);
     // merge changes into the entity
-    const mergedEntity = this.repository(queryOptions).merge(
-      entity,
-      transformed,
-    );
+    const mergedEntity = this.repo.merge(entity, transformed);
     // try to save it
-    return this.save(mergedEntity, queryOptions);
+    return this.save(mergedEntity);
   }
 
   /**
    * Remove one
    *
    * @param data - the reference data to remove
-   * @param queryOptions - query options
    * @returns the removed reference
    */
-  async remove(
-    data: Removable & ReferenceIdInterface,
-    queryOptions?: QueryOptionsInterface,
-  ): Promise<Entity> {
+  async remove(data: Removable & ReferenceIdInterface): Promise<Entity> {
     // try to find it
     const entity = await this.findById(data.id);
     // try to remove it
-    return this.delete(entity, queryOptions);
+    return this.delete(entity);
   }
 
   /**
    * @internal
    */
-  private async save(
-    entity: Entity,
-    queryOptions?: QueryOptionsInterface,
-  ): Promise<Entity> {
+  private async save(entity: Entity): Promise<Entity> {
     // try to save it
     try {
-      return this.repository(queryOptions).save(entity);
+      return this.repo.save(entity);
     } catch (e) {
-      throw new ReferenceMutateException(this.metadata.name, {
+      throw new ReferenceMutateException(this.repo.metadata.name, {
         originalError: e,
       });
     }
@@ -153,15 +125,12 @@ export abstract class MutateService<
   /**
    * @internal
    */
-  private async delete(
-    entity: Entity,
-    queryOptions?: QueryOptionsInterface,
-  ): Promise<Entity> {
+  private async delete(entity: Entity): Promise<Entity> {
     // try to save it
     try {
-      return this.repository(queryOptions).remove(entity);
+      return this.repo.remove(entity);
     } catch (e) {
-      throw new ReferenceMutateException(this.metadata.name, {
+      throw new ReferenceMutateException(this.repo.metadata.name, {
         originalError: e,
       });
     }
@@ -184,7 +153,7 @@ export abstract class MutateService<
     if (validationErrors.length) {
       // yes, throw error
       throw new ReferenceValidationException(
-        this.metadata.name,
+        this.repo.metadata.name,
         validationErrors,
       );
     }
@@ -197,7 +166,6 @@ export abstract class MutateService<
    */
   protected async transform(
     data: DeepPartial<Entity>,
-    _queryOptions?: QueryOptionsInterface,
   ): Promise<DeepPartial<Entity>> {
     return data;
   }
@@ -205,25 +173,19 @@ export abstract class MutateService<
   /**
    * @internal
    */
-  protected async findById(
-    id: string,
-    queryOptions?: QueryOptionsInterface,
-  ): Promise<Entity> {
+  protected async findById(id: string): Promise<Entity> {
     // try to find the ref
     // TODO: remove this type assertion when fix is released
     // https://github.com/typeorm/typeorm/issues/8939
-    const entity = await this.findOne(
-      {
-        where: { id },
-      } as FindOneOptions<Entity>,
-      queryOptions,
-    );
+    const entity = await this.repo.findOne({
+      where: { id },
+    } as FindOneOptions<Entity>);
 
     // did we get one?
     if (entity) {
       return entity;
     } else {
-      throw new ReferenceIdNoMatchException(this.metadata.name, id);
+      throw new ReferenceIdNoMatchException(this.repo.metadata.name, id);
     }
   }
 }

@@ -1,13 +1,11 @@
 import {
   ReferenceUsername,
-  LookupUsernameInterface,
+  ByUsernameInterface,
 } from '@concepta/nestjs-common';
-import { QueryOptionsInterface } from '@concepta/typeorm-common';
 import { AuthLocalCredentialsInterface } from './auth-local-credentials.interface';
 
 export interface AuthLocalUserLookupServiceInterface
-  extends LookupUsernameInterface<
+  extends ByUsernameInterface<
     ReferenceUsername,
-    AuthLocalCredentialsInterface,
-    QueryOptionsInterface
+    AuthLocalCredentialsInterface
   > {}

@@ -3,11 +3,6 @@ import {
   InvitationUserInterface,
   UserCreatableInterface,
 } from '@concepta/nestjs-common';
-import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 export interface InvitationUserMutateServiceInterface
-  extends CreateOneInterface<
-    UserCreatableInterface,
-    InvitationUserInterface,
-    QueryOptionsInterface
-  > {}
+  extends CreateOneInterface<UserCreatableInterface, InvitationUserInterface> {}

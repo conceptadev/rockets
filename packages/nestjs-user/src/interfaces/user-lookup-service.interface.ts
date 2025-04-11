@@ -1,29 +1,16 @@
 import {
-  LookupEmailInterface,
-  LookupIdInterface,
-  LookupSubjectInterface,
-  LookupUsernameInterface,
+  ByEmailInterface,
+  ByIdInterface,
+  BySubjectInterface,
+  ByUsernameInterface,
   ReferenceId,
   ReferenceIdInterface,
   ReferenceSubject,
   ReferenceUsername,
 } from '@concepta/nestjs-common';
-import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 export interface UserLookupServiceInterface
-  extends LookupIdInterface,
-    LookupEmailInterface<
-      ReferenceId,
-      ReferenceIdInterface,
-      QueryOptionsInterface
-    >,
-    LookupSubjectInterface<
-      ReferenceSubject,
-      ReferenceIdInterface,
-      QueryOptionsInterface
-    >,
-    LookupUsernameInterface<
-      ReferenceUsername,
-      ReferenceIdInterface,
-      QueryOptionsInterface
-    > {}
+  extends ByIdInterface,
+    ByEmailInterface<ReferenceId, ReferenceIdInterface>,
+    BySubjectInterface<ReferenceSubject, ReferenceIdInterface>,
+    ByUsernameInterface<ReferenceUsername, ReferenceIdInterface> {}

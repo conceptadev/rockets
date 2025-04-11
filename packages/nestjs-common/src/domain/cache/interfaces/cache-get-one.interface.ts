@@ -1,11 +1,8 @@
-import { ReferenceQueryOptionsInterface } from '../../../reference/interfaces/reference-query-options.interface';
 import { ReferenceAssignment } from '../../../reference/interfaces/reference.types';
 
 import { CacheInterface } from './cache.interface';
 
-export interface CacheGetOneInterface<
-  O extends ReferenceQueryOptionsInterface = ReferenceQueryOptionsInterface,
-> {
+export interface CacheGetOneInterface {
   /**
    * Get One cache based on params
    *
@@ -15,6 +12,5 @@ export interface CacheGetOneInterface<
   get(
     assignment: ReferenceAssignment,
     cache: Pick<CacheInterface, 'key' | 'type' | 'assignee'>,
-    queryOptions?: O,
   ): Promise<CacheInterface | null>;
 }

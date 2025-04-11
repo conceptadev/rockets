@@ -3,9 +3,7 @@ import { Inject } from '@nestjs/common';
 import {
   InvitationInterface,
   InvitationUserInterface,
-  OtpInterface,
 } from '@concepta/nestjs-common';
-import { QueryOptionsInterface } from '@concepta/typeorm-common';
 import {
   INVITATION_MODULE_EMAIL_SERVICE_TOKEN,
   INVITATION_MODULE_OTP_SERVICE_TOKEN,
@@ -49,37 +47,28 @@ export class InvitationSendService implements InvitationSendServiceInterface {
    *
    * @param createInviteDto - The invitation creation data transfer object containing email and
    *                   optional constraints
-   * @param queryOptions - Optional query parameters for the database operation
    * @returns A promise that resolves to the created invitation with id, user, code and
    *          category
    */
   async create(
     createInviteDto: InvitationCreateInviteInterface,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<InvitationSendInviteInterface> {
     const { email } = createInviteDto;
-    const user = await this.getUser(
-      {
-        email,
-      },
-      queryOptions,
-    );
+    const user = await this.getUser({
+      email,
+    });
 
-    const invite = await this.invitationMutateService.create(
-      {
-        ...createInviteDto,
-        user: user,
-        code: randomUUID(),
-      },
-      queryOptions,
-    );
+    const invite = await this.invitationMutateService.create({
+      ...createInviteDto,
+      user: user,
+      code: randomUUID(),
+    });
 
     return invite;
   }
 
   async send(
     invitation: Pick<InvitationInterface, 'id'> | InvitationSendInviteInterface,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<void> {
     const {
       assignment,
@@ -91,74 +80,55 @@ export class InvitationSendService implements InvitationSendServiceInterface {
     } = this.settings.otp;
 
     let theInvitation: InvitationSendInviteInterface | null;
-    let otp: OtpInterface | null;
 
-    // run in transaction
-    await this.invitationLookupService
-      .transaction(queryOptions)
-      .commit(async (transaction): Promise<boolean> => {
-        // override the query options
-        const nestedQueryOptions = { ...queryOptions, transaction };
+    if (invitation && 'category' in invitation) {
+      theInvitation = invitation;
+    } else {
+      theInvitation = await this.invitationLookupService.byId(invitation.id);
+    }
 
-        if (invitation && 'category' in invitation) {
-          theInvitation = invitation;
-        } else {
-          theInvitation = await this.invitationLookupService.byId(
-            invitation.id,
-            nestedQueryOptions,
-          );
-        }
+    if (!theInvitation) {
+      throw new InvitationNotFoundException();
+    }
 
-        if (!theInvitation) {
-          throw new InvitationNotFoundException();
-        }
+    const { category, user, code } = theInvitation;
 
-        const { category, user, code } = theInvitation;
+    // create an OTP for this invite
+    const otp = await this.otpService.create({
+      assignment,
+      otp: {
+        category,
+        type,
+        expiresIn,
+        assignee: {
+          id: user.id,
+        },
+      },
+      clearOnCreate: clearOtpOnCreate,
+      rateSeconds,
+      rateThreshold,
+    });
 
-        // create an OTP for this invite
-        otp = await this.otpService.create({
-          assignment,
-          otp: {
-            category,
-            type,
-            expiresIn,
-            assignee: {
-              id: user.id,
-            },
-          },
-          queryOptions,
-          clearOnCreate: clearOtpOnCreate,
-          rateSeconds,
-          rateThreshold,
-        });
-
-        // send the invite email
-        await this.sendInvitationEmail({
-          email: user.email,
-          code,
-          passcode: otp.passcode,
-          resetTokenExp: otp.expirationDate,
-        });
-
-        return true;
-      });
+    // send the invite email
+    await this.sendInvitationEmail({
+      email: user.email,
+      code,
+      passcode: otp.passcode,
+      resetTokenExp: otp.expirationDate,
+    });
   }
 
   async getUser(
     options: Pick<InvitationCreateInviteInterface, 'email' | 'constraints'>,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<InvitationUserInterface> {
     const { email } = options;
-    let user = await this.userLookupService.byEmail(email, queryOptions);
+    let user = await this.userLookupService.byEmail(email);
 
     if (!user) {
-      user = await this.userMutateService.create(
-        {
-          email,
-          username: email,
-        },
-        queryOptions,
-      );
+      user = await this.userMutateService.create({
+        email,
+        username: email,
+      });
     }
 
     return user;

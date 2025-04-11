@@ -12,12 +12,10 @@ import {
   Type,
 } from '@concepta/nestjs-common';
 import {
-  QueryOptionsInterface,
   ReferenceLookupException,
   ReferenceMutateException,
   ReferenceValidationException,
   RepositoryInterface,
-  RepositoryProxy,
 } from '@concepta/typeorm-common';
 import {
   CACHE_MODULE_REPOSITORIES_TOKEN,
@@ -49,7 +47,6 @@ export class CacheService implements CacheServiceInterface {
   async create(
     assignment: ReferenceAssignment,
     cache: CacheCreateDto,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<CacheInterface> {
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
@@ -67,11 +64,8 @@ export class CacheService implements CacheServiceInterface {
         expiresIn ?? this.settings.expiresIn,
       );
 
-      // new repo proxy
-      const repoProxy = new RepositoryProxy<CacheInterface>(assignmentRepo);
-
       // try to save the item
-      return repoProxy.repository(queryOptions).save({
+      return assignmentRepo.save({
         key,
         type,
         data,
@@ -88,7 +82,6 @@ export class CacheService implements CacheServiceInterface {
   async update(
     assignment: ReferenceAssignment,
     cache: CacheUpdatableInterface,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<CacheInterface> {
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
@@ -100,25 +93,22 @@ export class CacheService implements CacheServiceInterface {
     const expirationDate = getExpirationDate(
       dto.expiresIn ?? this.settings.expiresIn,
     );
-    // new repo proxy
-    const repoProxy = new RepositoryProxy<CacheInterface>(assignmentRepo);
 
     // try to update the item
     try {
-      const assignedCache = await this.findCache(repoProxy, dto, queryOptions);
+      const assignedCache = await this.findCache(assignmentRepo, dto);
       if (!assignedCache)
         throw new CacheEntityNotFoundException(
           assignmentRepo.metadata.targetName,
         );
 
       const mergedEntity = await this.mergeEntity(
-        repoProxy,
+        assignmentRepo,
         assignedCache,
         dto,
-        queryOptions,
       );
 
-      return repoProxy.repository(queryOptions).save({
+      return assignmentRepo.save({
         ...mergedEntity,
         expirationDate,
       });
@@ -138,13 +128,12 @@ export class CacheService implements CacheServiceInterface {
   async delete(
     assignment: ReferenceAssignment,
     cache: Pick<CacheInterface, 'key' | 'type' | 'assignee'>,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<void> {
     // get cache from an assigned user for a category
-    const assignedCache = await this.get(assignment, cache, queryOptions);
+    const assignedCache = await this.get(assignment, cache);
 
     if (assignedCache) {
-      this.deleteCache(assignment, assignedCache.id, queryOptions);
+      this.deleteCache(assignment, assignedCache.id);
     }
   }
 
@@ -157,7 +146,6 @@ export class CacheService implements CacheServiceInterface {
   async getAssignedCaches(
     assignment: ReferenceAssignment,
     cache: Pick<CacheInterface, 'assignee'>,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<CacheInterface[]> {
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
@@ -165,13 +153,10 @@ export class CacheService implements CacheServiceInterface {
     // break out the args
     const { assignee } = cache;
 
-    // new repo proxy
-    const repoProxy = new RepositoryProxy<CacheInterface>(assignmentRepo);
-
     // try to find the relationships
     try {
       // make the query
-      const assignments = await repoProxy.repository(queryOptions).find({
+      const assignments = await assignmentRepo.find({
         where: {
           assignee: { id: assignee.id },
         },
@@ -190,15 +175,11 @@ export class CacheService implements CacheServiceInterface {
   async get(
     assignment: ReferenceAssignment,
     cache: Pick<CacheInterface, 'key' | 'type' | 'assignee'>,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<CacheInterface | null> {
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
-    // new repo proxy
-    const repoProxy = new RepositoryProxy<CacheInterface>(assignmentRepo);
-
-    return await this.findCache(repoProxy, cache, queryOptions);
+    return await this.findCache(assignmentRepo, cache);
   }
 
   /**
@@ -210,14 +191,9 @@ export class CacheService implements CacheServiceInterface {
   async clear(
     assignment: ReferenceAssignment,
     cache: Pick<CacheInterface, 'assignee'>,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<void> {
     // get all caches from an assigned user for a category
-    const assignedCaches = await this.getAssignedCaches(
-      assignment,
-      cache,
-      queryOptions,
-    );
+    const assignedCaches = await this.getAssignedCaches(assignment, cache);
 
     // Map to get ids
     const assignedCacheIds = assignedCaches.map(
@@ -225,7 +201,7 @@ export class CacheService implements CacheServiceInterface {
     );
 
     if (assignedCacheIds.length > 0)
-      await this.deleteCache(assignment, assignedCacheIds, queryOptions);
+      await this.deleteCache(assignment, assignedCacheIds);
   }
 
   /**
@@ -238,16 +214,12 @@ export class CacheService implements CacheServiceInterface {
   protected async deleteCache(
     assignment: ReferenceAssignment,
     id: ReferenceId | ReferenceId[],
-    queryOptions?: QueryOptionsInterface,
   ): Promise<void> {
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
-    // new repo proxy
-    const repoProxy = new RepositoryProxy<CacheInterface>(assignmentRepo);
-
     try {
-      await repoProxy.repository(queryOptions).delete(id);
+      await assignmentRepo.delete(id);
     } catch (e) {
       throw new ReferenceMutateException(assignmentRepo.metadata.targetName, {
         originalError: e,
@@ -258,13 +230,12 @@ export class CacheService implements CacheServiceInterface {
   async updateOrCreate(
     assignment: ReferenceAssignment,
     cache: CacheCreateDto,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<CacheInterface> {
-    const existingCache = await this.get(assignment, cache, queryOptions);
+    const existingCache = await this.get(assignment, cache);
     if (existingCache) {
-      return await this.update(assignment, cache, queryOptions);
+      return await this.update(assignment, cache);
     } else {
-      return await this.create(assignment, cache, queryOptions);
+      return await this.create(assignment, cache);
     }
   }
 
@@ -292,13 +263,12 @@ export class CacheService implements CacheServiceInterface {
   }
 
   protected async findCache(
-    repoProxy: RepositoryProxy<CacheInterface>,
+    repo: RepositoryInterface<CacheInterface>,
     cache: Pick<CacheInterface, 'key' | 'type' | 'assignee'>,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<CacheInterface | null> {
     const { key, type, assignee } = cache;
+
     try {
-      const repo = repoProxy.repository(queryOptions);
       if (!key || !type || !assignee || !assignee.id) {
         return null;
       }
@@ -312,10 +282,9 @@ export class CacheService implements CacheServiceInterface {
       });
       return cache;
     } catch (e) {
-      throw new ReferenceLookupException(
-        repoProxy.repository(queryOptions).metadata.targetName,
-        { originalError: e },
-      );
+      throw new ReferenceLookupException(repo.metadata.targetName, {
+        originalError: e,
+      });
     }
   }
 
@@ -347,11 +316,10 @@ export class CacheService implements CacheServiceInterface {
   }
 
   private async mergeEntity(
-    repoProxy: RepositoryProxy<CacheInterface>,
+    repo: RepositoryInterface<CacheInterface>,
     assignedCache: CacheInterface,
     dto: CacheUpdateDto,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<CacheInterface> {
-    return repoProxy.repository(queryOptions).merge(assignedCache, dto);
+    return repo.merge(assignedCache, dto);
   }
 }

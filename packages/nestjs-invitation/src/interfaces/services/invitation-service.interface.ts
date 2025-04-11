@@ -1,5 +1,4 @@
 import { InvitationInterface } from '@concepta/nestjs-common';
-import { QueryOptionsInterface } from '@concepta/typeorm-common';
 import { InvitationAcceptOptionsInterface } from '../options/invitation-accept-options.interface';
 import { InvitationCreateInviteInterface } from '../domain/invitation-create-invite.interface';
 import { InvitationRevokeOptionsInterface } from '../options/invitation-revoke-options.interface';
@@ -7,21 +6,11 @@ import { InvitationRevokeOptionsInterface } from '../options/invitation-revoke-o
 export interface InvitationServiceInterface {
   create(
     createInviteDto: InvitationCreateInviteInterface,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<Required<Pick<InvitationInterface, 'id' | 'user'>>>;
 
-  send(
-    invitation: Pick<InvitationInterface, 'id'>,
-    queryOptions?: QueryOptionsInterface,
-  ): Promise<void>;
+  send(invitation: Pick<InvitationInterface, 'id'>): Promise<void>;
 
-  accept(
-    options: InvitationAcceptOptionsInterface,
-    queryOptions?: QueryOptionsInterface,
-  ): Promise<boolean>;
+  accept(options: InvitationAcceptOptionsInterface): Promise<boolean>;
 
-  revokeAll(
-    options: InvitationRevokeOptionsInterface,
-    queryOptions?: QueryOptionsInterface,
-  ): Promise<void>;
+  revokeAll(options: InvitationRevokeOptionsInterface): Promise<void>;
 }

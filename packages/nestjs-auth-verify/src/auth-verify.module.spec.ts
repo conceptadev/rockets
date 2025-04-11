@@ -16,7 +16,6 @@ import { AuthVerifyService } from './services/auth-verify.service';
 import { MailerServiceFixture } from './__fixtures__/email/mailer.service.fixture';
 import { OtpModuleFixture } from './__fixtures__/otp/otp.module.fixture';
 import { OtpServiceFixture } from './__fixtures__/otp/otp.service.fixture';
-import { TypeOrmModuleFixture } from './__fixtures__/typeorm.module.fixture';
 import { UserLookupServiceFixture } from './__fixtures__/user/services/user-lookup.service.fixture';
 import { UserMutateServiceFixture } from './__fixtures__/user/services/user-mutate.service.fixture';
 import { UserModuleFixture } from './__fixtures__/user/user.module.fixture';
@@ -171,7 +170,6 @@ function testModuleFactory(
 ): ModuleMetadata {
   return {
     imports: [
-      TypeOrmModuleFixture,
       UserModuleFixture,
       OtpModuleFixture,
       EmailModule.forRoot({ mailerService: new MailerServiceFixture() }),

@@ -7,7 +7,6 @@ import { AuthRecoveryUserLookupServiceInterface } from '../interfaces/auth-recov
 import { AuthRecoveryUserMutateServiceInterface } from '../interfaces/auth-recovery-user-mutate.service.interface';
 import {
   AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
-  AUTH_RECOVERY_MODULE_ENTITY_MANAGER_PROXY_TOKEN,
   AuthRecoveryOtpService,
   AuthRecoveryUserLookupService,
   AuthRecoveryUserMutateService,
@@ -17,10 +16,6 @@ import {
   ReferenceAssigneeInterface,
   ReferenceIdInterface,
 } from '@concepta/nestjs-common';
-import {
-  EntityManagerProxy,
-  QueryOptionsInterface,
-} from '@concepta/typeorm-common';
 import { AuthRecoveryNotificationServiceInterface } from '../interfaces/auth-recovery-notification.service.interface';
 
 @Injectable()
@@ -36,8 +31,6 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
     private readonly userMutateService: AuthRecoveryUserMutateServiceInterface,
     @Inject(AuthRecoveryNotificationService)
     private readonly notificationService: AuthRecoveryNotificationServiceInterface,
-    @Inject(AUTH_RECOVERY_MODULE_ENTITY_MANAGER_PROXY_TOKEN)
-    private readonly entityManagerProxy: EntityManagerProxy,
   ) {}
 
   /**
@@ -45,12 +38,9 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
    *
    * @param email - user email
    */
-  async recoverLogin(
-    email: string,
-    queryOptions?: QueryOptionsInterface,
-  ): Promise<void> {
+  async recoverLogin(email: string): Promise<void> {
     // recover the user by providing an email
-    const user = await this.userLookupService.byEmail(email, queryOptions);
+    const user = await this.userLookupService.byEmail(email);
 
     // did we find the user?
     if (user) {
@@ -70,12 +60,9 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
    *
    * @param email - user email
    */
-  async recoverPassword(
-    email: string,
-    queryOptions?: QueryOptionsInterface,
-  ): Promise<void> {
+  async recoverPassword(email: string): Promise<void> {
     // recover the user by providing an email
-    const user = await this.userLookupService.byEmail(email, queryOptions);
+    const user = await this.userLookupService.byEmail(email);
 
     // did we find a user?
     if (user) {
@@ -100,7 +87,6 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
             id: user.id,
           },
         },
-        queryOptions,
         clearOnCreate: clearOtpOnCreate,
         rateSeconds,
         rateThreshold,
@@ -127,7 +113,6 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
   async validatePasscode(
     passcode: string,
     deleteIfValid = false,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<ReferenceAssigneeInterface | null> {
     // extract required properties
     const { category, assignment } = this.config.otp;
@@ -137,7 +122,6 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
       assignment,
       { category, passcode },
       deleteIfValid,
-      queryOptions,
     );
   }
 
@@ -150,49 +134,30 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
   async updatePassword(
     passcode: string,
     newPassword: string,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<ReferenceIdInterface | null> {
-    // run in transaction
-    return this.entityManagerProxy
-      .transaction(queryOptions)
-      .commit(async (transaction): Promise<ReferenceIdInterface | null> => {
-        // nested query options
-        const nestedQueryOptions = { ...queryOptions, transaction };
+    // get otp by passcode, but no delete it until all workflow pass
+    const otp = await this.validatePasscode(passcode, false);
 
-        // get otp by passcode, but no delete it until all workflow pass
-        const otp = await this.validatePasscode(
-          passcode,
-          false,
-          nestedQueryOptions,
-        );
-
-        // did we get an otp?
-        if (otp) {
-          // call user mutate service
-          const user = await this.userMutateService.update(
-            {
-              id: otp.assignee.id,
-              password: newPassword,
-            },
-            nestedQueryOptions,
-          );
-
-          if (user) {
-            await this.notificationService.sendPasswordUpdatedSuccessfullyEmail(
-              user.email,
-            );
-            await this.revokeAllUserPasswordRecoveries(
-              user.email,
-              nestedQueryOptions,
-            );
-          }
-
-          return user;
-        }
-
-        // otp was not found
-        return null;
+    // did we get an otp?
+    if (otp) {
+      // call user mutate service
+      const user = await this.userMutateService.update({
+        id: otp.assignee.id,
+        password: newPassword,
       });
+
+      if (user) {
+        await this.notificationService.sendPasswordUpdatedSuccessfullyEmail(
+          user.email,
+        );
+        await this.revokeAllUserPasswordRecoveries(user.email);
+      }
+
+      return user;
+    }
+
+    // otp was not found
+    return null;
   }
 
   /**
@@ -200,28 +165,21 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
    *
    * @param email - user email
    */
-  async revokeAllUserPasswordRecoveries(
-    email: string,
-    queryOptions?: QueryOptionsInterface,
-  ): Promise<void> {
+  async revokeAllUserPasswordRecoveries(email: string): Promise<void> {
     // recover users password by providing an email
-    const user = await this.userLookupService.byEmail(email, queryOptions);
+    const user = await this.userLookupService.byEmail(email);
 
     // did we find a user?
     if (user) {
       // extract required otp properties
       const { category, assignment } = this.config.otp;
       // clear all user's otps in DB
-      await this.otpService.clear(
-        assignment,
-        {
-          category,
-          assignee: {
-            id: user.id,
-          },
+      await this.otpService.clear(assignment, {
+        category,
+        assignee: {
+          id: user.id,
         },
-        queryOptions,
-      );
+      });
     }
 
     // !!! Falling through to void is intentional              !!!!

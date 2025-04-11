@@ -1,12 +1,8 @@
-// interfaces
-export { QueryOptionsInterface } from './interfaces/query-options.interface';
-export { SafeTransactionOptionsInterface } from './interfaces/safe-transaction-options.interface';
-
 // types
 export { RunInTransactionCallback } from './typeorm-common.types';
 
 // services
-export { BaseService } from './services/base.service';
+export { TypeOrmRepositoryService } from './services/typeorm-repository.service';
 export { LookupService } from './services/lookup.service';
 export { MutateService } from './services/mutate.service';
 
@@ -22,14 +18,5 @@ export { AuditSqlLiteEntity } from './entities/audit/audit-sqlite.entity';
 export { CommonPostgresEntity } from './entities/common/common-postgres.entity';
 export { CommonSqliteEntity } from './entities/common/common-sqlite.entity';
 
-// proxies
-export { EntityManagerProxy } from './proxies/entity-manager.proxy';
-export { RepositoryProxy } from './proxies/repository.proxy';
-export { TransactionProxy } from './proxies/transaction.proxy';
-
-// testing
-export { createEntityManagerMock } from './testing/utils/create-entity-manager.mock';
-
 // repository interface
 export { RepositoryInterface } from './interfaces/repository.interface';
-export { EntityManagerInterface } from './interfaces/entity-manager.interface';

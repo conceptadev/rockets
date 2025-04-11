@@ -4,10 +4,8 @@ import {
   ReferenceIdInterface,
 } from '@concepta/nestjs-common';
 import {
-  QueryOptionsInterface,
   ReferenceLookupException,
   RepositoryInterface,
-  RepositoryProxy,
 } from '@concepta/typeorm-common';
 import { RoleEntityNotFoundException } from '../exceptions/role-entity-not-found.exception';
 import { RoleAssignmentNotFoundException } from '../exceptions/role-assignment-not-found.exception';
@@ -40,25 +38,18 @@ export class RoleService implements RoleServiceInterface {
    * Get all roles for assignee.
    *
    * @param options - The assignment, assignee to check
-   * @param queryOptions - Optional query options
    */
   async getAssignedRoles(
     options: RoleAssignmentContext<ReferenceIdInterface>,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<RoleEntityInterface[]> {
     const { assignment, assignee } = options;
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
-    // new repo proxy
-    const repoProxy = new RepositoryProxy<RoleAssignmentEntityInterface>(
-      assignmentRepo,
-    );
-
     // try to find the relationships
     try {
       // make the query
-      const assignments = await repoProxy.repository(queryOptions).find({
+      const assignments = await assignmentRepo.find({
         where: {
           assignee: { id: assignee.id },
         },
@@ -68,7 +59,7 @@ export class RoleService implements RoleServiceInterface {
       // return the roles
       return assignments.map((assignment) => assignment.role);
     } catch (e) {
-      throw new ReferenceLookupException(assignmentRepo.metadata.targetName, {
+      throw new ReferenceLookupException(assignmentRepo.metadata.name, {
         originalError: e,
       });
     }
@@ -78,26 +69,19 @@ export class RoleService implements RoleServiceInterface {
    * Check if the assignee is a member of one role.
    *
    * @param options - The assignment, role and assignee to check
-   * @param queryOptions - Optional query options
    */
   async isAssignedRole<T extends ReferenceIdInterface>(
     options: RoleAssignmentOptionsInterface<T>,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<boolean> {
     const { assignment, role, assignee } = options;
 
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
-    // new repo proxy
-    const repoProxy = new RepositoryProxy<RoleAssignmentEntityInterface>(
-      assignmentRepo,
-    );
-
     // try to find the relationship
     try {
       // make the query
-      const assignment = await repoProxy.repository(queryOptions).findOne({
+      const assignment = await assignmentRepo.findOne({
         where: {
           role: { id: role.id },
           assignee: { id: assignee.id },
@@ -117,22 +101,17 @@ export class RoleService implements RoleServiceInterface {
    * Check if the assignee is a member of every role.
    *
    * @param options - The assignment, roles and assignee to check
-   * @param queryOptions - Optional query options
    */
   async isAssignedRoles<T extends ReferenceIdInterface>(
     options: RolesAssignmentOptionsInterface<T>,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<boolean> {
     const { assignment, roles, assignee } = options;
 
     // get all assigned roles
-    const assignedRoles = await this.getAssignedRoles(
-      {
-        assignment,
-        assignee,
-      },
-      queryOptions,
-    );
+    const assignedRoles = await this.getAssignedRoles({
+      assignment,
+      assignee,
+    });
 
     // get any roles to check?
     if (roles.length) {
@@ -154,24 +133,19 @@ export class RoleService implements RoleServiceInterface {
    * Assign a role to an assignee.
    *
    * @param options - The assignment, role and assignee
-   * @param queryOptions - Optional query options
    */
   async assignRole<T extends ReferenceIdInterface>(
     options: RoleAssignmentOptionsInterface<T>,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<RoleAssignmentEntityInterface> {
     const { assignment, role, assignee } = options;
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
     // check if the role is already assigned
-    const isAlreadyAssigned = await this.isAssignedRole(
-      {
-        assignment,
-        role,
-        assignee,
-      },
-      queryOptions,
-    );
+    const isAlreadyAssigned = await this.isAssignedRole({
+      assignment,
+      role,
+      assignee,
+    });
 
     if (isAlreadyAssigned) {
       throw new RoleAssignmentConflictException(
@@ -189,22 +163,16 @@ export class RoleService implements RoleServiceInterface {
       },
     );
 
-    // Use repository proxy to apply query options
-    const repoProxy = new RepositoryProxy<RoleAssignmentEntityInterface>(
-      assignmentRepo,
-    );
-    return repoProxy.repository(queryOptions).save(roleAssignment);
+    return assignmentRepo.save(roleAssignment);
   }
 
   /**
    * Assign multiple roles to an assignee.
    *
    * @param options - The assignment, roles and assignee
-   * @param queryOptions - Optional query options
    */
   async assignRoles<T extends ReferenceIdInterface>(
     options: RolesAssignmentOptionsInterface<T>,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<RoleAssignmentEntityInterface[]> {
     const { assignment, roles, assignee } = options;
     const assignmentRepo = this.getAssignmentRepo(assignment);
@@ -214,14 +182,11 @@ export class RoleService implements RoleServiceInterface {
 
     for (const role of roles) {
       // check if the role is already assigned
-      const isAlreadyAssigned = await this.isAssignedRole(
-        {
-          assignment,
-          role,
-          assignee,
-        },
-        queryOptions,
-      );
+      const isAlreadyAssigned = await this.isAssignedRole({
+        assignment,
+        role,
+        assignee,
+      });
 
       if (isAlreadyAssigned) {
         // skip this role if it is already assigned
@@ -242,31 +207,21 @@ export class RoleService implements RoleServiceInterface {
       roleAssignments.push(roleAssignment);
     }
 
-    // Use repository proxy to apply query options
-    const repoProxy = new RepositoryProxy<RoleAssignmentEntityInterface>(
-      assignmentRepo,
-    );
-    return repoProxy.repository(queryOptions).save(roleAssignments);
+    return assignmentRepo.save(roleAssignments);
   }
 
   /**
    * Revoke a role from an assignee.
    *
    * @param options - The assignment, role and assignee
-   * @param queryOptions - Optional query options
    */
   async revokeRole<T extends ReferenceIdInterface>(
     options: RoleAssignmentOptionsInterface<T>,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<void> {
     const { assignment, role, assignee } = options;
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
-    // Use repository proxy to apply query options
-    const repoProxy = new RepositoryProxy<RoleAssignmentEntityInterface>(
-      assignmentRepo,
-    );
-    await repoProxy.repository(queryOptions).delete({
+    await assignmentRepo.delete({
       role: { id: role.id },
       assignee: { id: assignee.id },
     });
@@ -276,22 +231,15 @@ export class RoleService implements RoleServiceInterface {
    * Revoke multiple roles from an assignee.
    *
    * @param options - The assignment, roles and assignee
-   * @param queryOptions - Optional query options
    */
   async revokeRoles<T extends ReferenceIdInterface>(
     options: RolesAssignmentOptionsInterface<T>,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<void> {
     const { assignment, roles, assignee } = options;
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
-    // Use repository proxy to apply query options
-    const repoProxy = new RepositoryProxy<RoleAssignmentEntityInterface>(
-      assignmentRepo,
-    );
-
     for (const role of roles) {
-      await repoProxy.repository(queryOptions).delete({
+      await assignmentRepo.delete({
         role: { id: role.id },
         assignee: { id: assignee.id },
       });

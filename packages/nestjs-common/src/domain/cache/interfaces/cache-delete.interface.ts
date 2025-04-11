@@ -1,10 +1,7 @@
-import { ReferenceQueryOptionsInterface } from '../../../reference/interfaces/reference-query-options.interface';
 import { ReferenceAssignment } from '../../../reference/interfaces/reference.types';
 import { CacheInterface } from './cache.interface';
 
-export interface CacheDeleteInterface<
-  O extends ReferenceQueryOptionsInterface = ReferenceQueryOptionsInterface,
-> {
+export interface CacheDeleteInterface {
   /**
    * Delete a cache based on params
    *
@@ -14,6 +11,5 @@ export interface CacheDeleteInterface<
   delete(
     assignment: ReferenceAssignment,
     cache: Pick<CacheInterface, 'key' | 'type' | 'assignee'>,
-    options?: O,
   ): Promise<void>;
 }

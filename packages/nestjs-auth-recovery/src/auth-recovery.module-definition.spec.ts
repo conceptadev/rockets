@@ -14,7 +14,6 @@ import { AuthRecoveryController } from './auth-recovery.controller';
 import {
   createAuthRecoveryControllers,
   createAuthRecoveryEmailServiceProvider,
-  createAuthRecoveryEntityManagerProxyProvider,
   createAuthRecoveryExports,
   createAuthRecoveryNotificationServiceProvider,
   createAuthRecoveryOtpServiceProvider,
@@ -27,13 +26,11 @@ import { AuthRecoveryUserLookupServiceInterface } from './interfaces/auth-recove
 import { AuthRecoveryUserMutateServiceInterface } from './interfaces/auth-recovery-user-mutate.service.interface';
 import { AuthRecoveryNotificationServiceInterface } from './interfaces/auth-recovery-notification.service.interface';
 import { AuthRecoveryNotificationService } from './services/auth-recovery-notification.service';
-import { EntityManagerProxy } from '@concepta/typeorm-common';
 
 describe('AuthRecoveryModuleDefinition', () => {
   const mockEmailService = mock<AuthRecoveryEmailServiceInterface>();
   const mockAuthRecoveryNotification =
     mock<AuthRecoveryNotificationServiceInterface>();
-  const mockEntityManagerProxy = mock<EntityManagerProxy>();
   const mockAuthRecoveryOptions = {
     emailService: mockEmailService,
     otpService: new OtpServiceFixture(),
@@ -263,37 +260,6 @@ describe('AuthRecoveryModuleDefinition', () => {
       });
 
       expect(useFactoryResult).toBe(mockAuthRecoveryNotification);
-    });
-  });
-  describe(createAuthRecoveryEntityManagerProxyProvider.name, () => {
-    it('should return a default AuthRecoveryNotificationService', async () => {
-      const provider =
-        createAuthRecoveryEntityManagerProxyProvider() as FactoryProvider;
-
-      const useFactoryResult = await provider.useFactory({});
-
-      expect(useFactoryResult).toBeInstanceOf(EntityManagerProxy);
-    });
-
-    it('should override notificationService', async () => {
-      const provider = createAuthRecoveryEntityManagerProxyProvider({
-        entityManagerProxy: mockEntityManagerProxy,
-      }) as FactoryProvider;
-
-      const useFactoryResult = await provider.useFactory();
-
-      expect(useFactoryResult).toBe(mockEntityManagerProxy);
-    });
-
-    it('should return an notificationService from initialization', async () => {
-      const provider =
-        createAuthRecoveryEntityManagerProxyProvider() as FactoryProvider;
-
-      const useFactoryResult = await provider.useFactory({
-        entityManagerProxy: mockEntityManagerProxy,
-      });
-
-      expect(useFactoryResult).toBe(mockEntityManagerProxy);
     });
   });
 });

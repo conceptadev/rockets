@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { QueryOptionsInterface } from '@concepta/typeorm-common';
 import { InvitationUserInterface } from '@concepta/nestjs-common';
 import { InvitationSendInviteInterface } from '../../../interfaces/domain/invitation-send-invite.interface';
 import { InvitationSendInvitationEmailOptionsInterface } from '../../../interfaces/options/invitation-send-invitation-email-options.interface';
@@ -12,7 +11,6 @@ export class InvitationSendServiceFixture
 {
   async create(
     _createDto: InvitationCreateInviteInterface,
-    _queryOptions?: QueryOptionsInterface,
   ): Promise<InvitationSendInviteInterface> {
     return {
       id: 'test-id',
@@ -25,14 +23,10 @@ export class InvitationSendServiceFixture
     };
   }
 
-  async send(
-    _invitation: InvitationSendInviteInterface,
-    _queryOptions?: QueryOptionsInterface,
-  ): Promise<void> {}
+  async send(_invitation: InvitationSendInviteInterface): Promise<void> {}
 
   async getUser(
     _options: InvitationUserInterface,
-    _queryOptions?: QueryOptionsInterface,
   ): Promise<InvitationUserInterface> {
     return {} as InvitationUserInterface;
   }

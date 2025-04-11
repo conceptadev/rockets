@@ -88,7 +88,6 @@ describe(AuthVerifyService, () => {
       expect(spyUserLookupServiceByEmail).toHaveBeenCalledTimes(1);
       expect(spyUserLookupServiceByEmail).toHaveBeenCalledWith(
         UserFixture.email,
-        undefined,
       );
 
       expect(sendVerifyEmail).toHaveBeenCalledTimes(1);
@@ -108,7 +107,6 @@ describe(AuthVerifyService, () => {
         settings.otp.assignment,
         { category: settings.otp.category, passcode: 'GOOD_PASSCODE' },
         false,
-        undefined,
       );
     });
 
@@ -132,13 +130,10 @@ describe(AuthVerifyService, () => {
       await authVerifyService.confirmUser({ passcode: 'GOOD_PASSCODE' });
 
       expect(spyUserMutateServiceUpdate).toHaveBeenCalledTimes(1);
-      expect(spyUserMutateServiceUpdate).toHaveBeenCalledWith(
-        {
-          id: UserFixture.id,
-          active: true,
-        },
-        expect.any(Object),
-      );
+      expect(spyUserMutateServiceUpdate).toHaveBeenCalledWith({
+        id: UserFixture.id,
+        active: true,
+      });
     });
 
     it('should confirm user', async () => {

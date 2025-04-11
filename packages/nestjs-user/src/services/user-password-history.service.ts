@@ -10,7 +10,6 @@ import { UserException } from '../exceptions/user-exception';
 import { UserPasswordHistoryServiceInterface } from '../interfaces/user-password-history-service.interface';
 import { UserSettingsInterface } from '../interfaces/user-settings.interface';
 import { USER_MODULE_SETTINGS_TOKEN } from '../user.constants';
-import { QueryOptionsInterface } from '@concepta/typeorm-common';
 import { FindManyOptions } from 'typeorm';
 
 @Injectable()
@@ -28,7 +27,6 @@ export class UserPasswordHistoryService
 
   async getHistory(
     userId: ReferenceId,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<(ReferenceIdInterface & PasswordStorageInterface)[]> {
     let history: (ReferenceIdInterface & PasswordStorageInterface)[] | null;
 
@@ -36,7 +34,6 @@ export class UserPasswordHistoryService
       // try to lookup the user
       history = await this.userPasswordHistoryLookupService.find(
         this.getHistoryFindManyOptions(userId),
-        queryOptions,
       );
     } catch (e: unknown) {
       throw new UserException({
@@ -53,16 +50,12 @@ export class UserPasswordHistoryService
   async pushHistory(
     userId: string,
     passwordStore: PasswordStorageInterface,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<void> {
     try {
-      await this.userPasswordHistoryMutateService.create(
-        {
-          userId,
-          ...passwordStore,
-        },
-        queryOptions,
-      );
+      await this.userPasswordHistoryMutateService.create({
+        userId,
+        ...passwordStore,
+      });
     } catch (e: unknown) {
       throw new UserException({
         message:

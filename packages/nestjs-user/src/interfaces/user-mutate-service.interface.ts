@@ -9,7 +9,6 @@ import {
   UserCreatableInterface,
   UserUpdatableInterface,
 } from '@concepta/nestjs-common';
-import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 import { UserEntityInterface } from './user-entity.interface';
 
@@ -17,16 +16,10 @@ export interface UserMutateServiceInterface
   extends CreateOneInterface<UserCreatableInterface, UserEntityInterface>,
     UpdateOneInterface<
       UserUpdatableInterface & ReferenceIdInterface,
-      UserEntityInterface,
-      QueryOptionsInterface
+      UserEntityInterface
     >,
     ReplaceOneInterface<
       UserCreatableInterface & ReferenceIdInterface,
-      UserEntityInterface,
-      QueryOptionsInterface
+      UserEntityInterface
     >,
-    RemoveOneInterface<
-      UserEntityInterface,
-      UserEntityInterface,
-      QueryOptionsInterface
-    > {}
+    RemoveOneInterface<UserEntityInterface, UserEntityInterface> {}

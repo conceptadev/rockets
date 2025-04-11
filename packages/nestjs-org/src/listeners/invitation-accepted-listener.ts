@@ -57,10 +57,7 @@ export class InvitationAcceptedListener
         });
       }
 
-      await this.orgMemberService.add(
-        { userId, orgId },
-        event.payload?.queryOptions,
-      );
+      await this.orgMemberService.add({ userId, orgId });
 
       return true;
     }

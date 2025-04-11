@@ -1,9 +1,5 @@
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
-import {
-  LookupService,
-  QueryOptionsInterface,
-  RepositoryInterface,
-} from '@concepta/typeorm-common';
+import { LookupService, RepositoryInterface } from '@concepta/typeorm-common';
 import { Injectable } from '@nestjs/common';
 
 import { REPORT_MODULE_REPORT_ENTITY_KEY } from '../report.constants';
@@ -25,45 +21,34 @@ export class ReportLookupService
 {
   constructor(
     @InjectDynamicRepository(REPORT_MODULE_REPORT_ENTITY_KEY)
-    repo: RepositoryInterface<ReportEntityInterface>,
+    protected readonly repo: RepositoryInterface<ReportEntityInterface>,
   ) {
     super(repo);
   }
-  async getUniqueReport(
-    report: Pick<ReportInterface, 'serviceKey' | 'name'>,
-    queryOptions?: QueryOptionsInterface,
-  ) {
+
+  async getUniqueReport(report: Pick<ReportInterface, 'serviceKey' | 'name'>) {
     if (!report.serviceKey) {
       throw new ReportServiceKeyMissingException();
     }
     if (!report.name) {
       throw new ReportNameMissingException();
     }
-    return this.findOne(
-      {
-        where: {
-          serviceKey: report.serviceKey,
-          name: report.name,
-        },
+    return this.repo.findOne({
+      where: {
+        serviceKey: report.serviceKey,
+        name: report.name,
       },
-      queryOptions,
-    );
+    });
   }
 
-  async getWithFile(
-    report: ReferenceIdInterface,
-    queryOptions?: QueryOptionsInterface,
-  ) {
+  async getWithFile(report: ReferenceIdInterface) {
     try {
-      return this.findOne(
-        {
-          where: {
-            id: report.id,
-          },
-          relations: ['file'],
+      return this.repo.findOne({
+        where: {
+          id: report.id,
         },
-        queryOptions,
-      );
+        relations: ['file'],
+      });
     } catch (originalError) {
       throw new ReportQueryException({ originalError });
     }

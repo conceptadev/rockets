@@ -1,12 +1,9 @@
-import { ReferenceQueryOptionsInterface } from '../../../reference/interfaces/reference-query-options.interface';
 import { ReferenceAssignment } from '../../../reference/interfaces/reference.types';
 
 import { CacheCreatableInterface } from './cache-creatable.interface';
 import { CacheInterface } from './cache.interface';
 
-export interface CacheCreateInterface<
-  O extends ReferenceQueryOptionsInterface = ReferenceQueryOptionsInterface,
-> {
+export interface CacheCreateInterface {
   /**
    * Create a cache with a for the given assignee.
    *
@@ -16,6 +13,5 @@ export interface CacheCreateInterface<
   create(
     assignment: ReferenceAssignment,
     cache: CacheCreatableInterface,
-    options?: O,
   ): Promise<CacheInterface>;
 }

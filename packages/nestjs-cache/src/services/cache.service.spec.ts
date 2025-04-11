@@ -5,11 +5,9 @@ import {
   CacheInterface,
 } from '@concepta/nestjs-common';
 import {
-  QueryOptionsInterface,
   ReferenceMutateException,
   ReferenceValidationException,
   RepositoryInterface,
-  RepositoryProxy,
 } from '@concepta/typeorm-common';
 
 import { CacheService } from './cache.service';
@@ -36,10 +34,8 @@ describe('CacheService', () => {
     expiresIn: '1h',
   };
 
-  const queryOptions: QueryOptionsInterface = {};
   const assignment: ReferenceAssignment = 'testAssignment';
   const cacheCreateDto = new CacheCreateDto();
-  const repoProxyMock = mock<RepositoryProxy<CacheInterface>>();
 
   beforeEach(() => {
     repo = mock<RepositoryInterface<CacheInterface>>();
@@ -55,15 +51,10 @@ describe('CacheService', () => {
     it('should create a cache entry', async () => {
       Object.assign(cacheCreateDto, cacheDto);
 
-      repoProxyMock.repository.mockReturnValue(repo);
-
       // Mocking validateDto method
       service['validateDto'] = jest.fn().mockResolvedValue(cacheCreateDto);
 
-      // Mocking RepositoryProxy class
-      jest.spyOn(RepositoryProxy.prototype, 'repository').mockReturnValue(repo);
-
-      await service.create(assignment, cacheDto, queryOptions);
+      await service.create(assignment, cacheDto);
 
       expect(repo.save).toHaveBeenCalledWith({
         key: cacheDto.key,
@@ -80,31 +71,15 @@ describe('CacheService', () => {
       const error = new ReferenceValidationException('error', []);
       service['validateDto'] = jest.fn().mockRejectedValue(error);
 
-      await expect(
-        service.create(assignment, cacheDto, queryOptions),
-      ).rejects.toThrow(ReferenceValidationException);
-    });
-
-    it('should throw a ReferenceMutateException on error', async () => {
-      const assignment: ReferenceAssignment = 'testAssignment';
-
-      jest
-        .spyOn(RepositoryProxy.prototype, 'repository')
-        .mockImplementationOnce(() => {
-          throw new Error();
-        });
-
-      const t = async () =>
-        await service.create(assignment, cacheDto, queryOptions);
-      expect(t).rejects.toThrow(ReferenceMutateException);
+      await expect(service.create(assignment, cacheDto)).rejects.toThrow(
+        ReferenceValidationException,
+      );
     });
   });
 
   describe(CacheService.prototype.update, () => {
     it('should update a cache entry', async () => {
       Object.assign(cacheCreateDto, cacheDto);
-
-      repoProxyMock.repository.mockReturnValue(repo);
 
       service['validateDto'] = jest.fn().mockResolvedValueOnce(cacheDto);
       const result = {
@@ -125,9 +100,7 @@ describe('CacheService', () => {
       });
       service['mergeEntity'] = jest.fn().mockResolvedValue(result);
 
-      jest.spyOn(RepositoryProxy.prototype, 'repository').mockReturnValue(repo);
-
-      await service.update(assignment, cacheDto, queryOptions);
+      await service.update(assignment, cacheDto);
 
       expect(repo.save).toHaveBeenCalledWith(result);
     });
@@ -138,9 +111,9 @@ describe('CacheService', () => {
       const error = new ReferenceValidationException('error', []);
       service['validateDto'] = jest.fn().mockRejectedValue(error);
 
-      await expect(
-        service.update(assignment, cacheDto, queryOptions),
-      ).rejects.toThrow(ReferenceValidationException);
+      await expect(service.update(assignment, cacheDto)).rejects.toThrow(
+        ReferenceValidationException,
+      );
     });
 
     it('should throw a ReferenceMutateException on error', async () => {
@@ -149,7 +122,7 @@ describe('CacheService', () => {
       const error = new Error('error');
       service['mergeEntity'] = jest.fn().mockResolvedValue(error);
 
-      const t = () => service.update(assignment, cacheDto, queryOptions);
+      const t = () => service.update(assignment, cacheDto);
       await expect(t).rejects.toThrow(ReferenceMutateException);
     });
   });

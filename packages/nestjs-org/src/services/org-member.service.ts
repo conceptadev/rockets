@@ -1,10 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
-import {
-  BaseService,
-  QueryOptionsInterface,
-  RepositoryInterface,
-} from '@concepta/typeorm-common';
+import { RepositoryInterface } from '@concepta/typeorm-common';
 
 import { ORG_MODULE_ORG_MEMBER_ENTITY_KEY } from '../org.constants';
 import { OrgMemberEntityInterface } from '../interfaces/org-member-entity.interface';
@@ -16,28 +12,19 @@ import { OrgMemberMutateService } from './org-member-mutate.service';
 import { OrgMemberException } from '../exceptions/org-member.exception';
 
 @Injectable()
-export class OrgMemberService
-  extends BaseService<OrgMemberEntityInterface>
-  implements OrgMemberServiceInterface
-{
+export class OrgMemberService implements OrgMemberServiceInterface {
   constructor(
     @InjectDynamicRepository(ORG_MODULE_ORG_MEMBER_ENTITY_KEY)
-    repo: RepositoryInterface<OrgMemberEntityInterface>,
+    protected readonly repo: RepositoryInterface<OrgMemberEntityInterface>,
     protected readonly orgLookupService: OrgLookupService,
     protected readonly orgMemberLookupService: OrgMemberLookupService,
     protected readonly orgMemberMutateService: OrgMemberMutateService,
-  ) {
-    super(repo);
-  }
+  ) {}
 
   async add(
     orgMember: OrgMemberCreatableInterface,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<OrgMemberEntityInterface> {
-    const orgMemberFound = await this.orgMemberLookupService.findOne(
-      { where: orgMember },
-      queryOptions,
-    );
+    const orgMemberFound = await this.repo.findOne({ where: orgMember });
 
     if (orgMemberFound) {
       const { userId, orgId } = orgMember;
@@ -47,13 +34,10 @@ export class OrgMemberService
       });
     }
 
-    return await this.orgMemberMutateService.create(orgMember, queryOptions);
+    return await this.orgMemberMutateService.create(orgMember);
   }
 
-  async remove(
-    id: string,
-    queryOptions?: QueryOptionsInterface,
-  ): Promise<OrgMemberEntityInterface> {
-    return await this.orgMemberMutateService.remove({ id }, queryOptions);
+  async remove(id: string): Promise<OrgMemberEntityInterface> {
+    return await this.orgMemberMutateService.remove({ id });
   }
 }

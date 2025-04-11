@@ -41,7 +41,6 @@ export { ReferenceActiveInterface } from './reference/interfaces/reference-activ
 export { ReferenceAssigneeInterface } from './reference/interfaces/reference-assignee.interface';
 export { ReferenceEmailInterface } from './reference/interfaces/reference-email.interface';
 export { ReferenceIdInterface } from './reference/interfaces/reference-id.interface';
-export { ReferenceQueryOptionsInterface } from './reference/interfaces/reference-query-options.interface';
 export { ReferenceSubjectInterface } from './reference/interfaces/reference-subject.interface';
 export { ReferenceUsernameInterface } from './reference/interfaces/reference-username.interface';
 export { ReferenceUserInterface } from './reference/interfaces/reference-user.interface';
@@ -54,16 +53,16 @@ export { RoleAssignmentCreatableInterface } from './domain/role/interfaces/role-
 export { RoleAssigneesInterface } from './domain/role/interfaces/role-assignees.interface';
 
 // Lookup interfaces
-export { LookupEmailInterface } from './reference/interfaces/lookup/lookup-email.interface';
-export { LookupIdInterface } from './reference/interfaces/lookup/lookup-id.interface';
-export { LookupSubjectInterface } from './reference/interfaces/lookup/lookup-subject.interface';
-export { LookupUsernameInterface } from './reference/interfaces/lookup/lookup-username.interface';
+export { ByEmailInterface } from './model/query/by-email.interface';
+export { ByIdInterface } from './model/query/by-id.interface';
+export { BySubjectInterface } from './model/query/by-subject.interface';
+export { ByUsernameInterface } from './model/query/by-username.interface';
 
 // Mutation interfaces
-export { CreateOneInterface } from './reference/interfaces/mutate/create-one.interface';
-export { RemoveOneInterface } from './reference/interfaces/mutate/remove-one.interface';
-export { ReplaceOneInterface } from './reference/interfaces/mutate/replace-one.interface';
-export { UpdateOneInterface } from './reference/interfaces/mutate/update-one.interface';
+export { CreateOneInterface } from './model/mutate/create-one.interface';
+export { RemoveOneInterface } from './model/mutate/remove-one.interface';
+export { ReplaceOneInterface } from './model/mutate/replace-one.interface';
+export { UpdateOneInterface } from './model/mutate/update-one.interface';
 
 // Audit types
 export {

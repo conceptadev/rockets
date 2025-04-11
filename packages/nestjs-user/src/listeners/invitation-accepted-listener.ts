@@ -54,19 +54,13 @@ export class InvitationAcceptedListener
         });
       }
 
-      const user = await this.userLookupService.byId(
-        userId,
-        event.payload?.queryOptions,
-      );
+      const user = await this.userLookupService.byId(userId);
 
       if (!user) {
         throw new UserNotFoundException();
       }
 
-      await this.userMutateService.update(
-        { ...user, password: newPassword },
-        event.payload?.queryOptions,
-      );
+      await this.userMutateService.update({ ...user, password: newPassword });
 
       return true;
     }
