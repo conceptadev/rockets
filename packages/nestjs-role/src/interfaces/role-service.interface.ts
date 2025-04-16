@@ -1,5 +1,4 @@
 import { ReferenceIdInterface } from '@concepta/nestjs-common';
-import { RoleEntityInterface } from './role-entity.interface';
 import { RoleAssignmentEntityInterface } from './role-assignment-entity.interface';
 import { RoleAssignmentContext } from './role-assignment-context';
 import { RoleAssignmentOptionsInterface } from './role-assignment-options.interface';
@@ -13,7 +12,7 @@ export interface RoleServiceInterface {
    */
   getAssignedRoles(
     options: RoleAssignmentContext<ReferenceIdInterface>,
-  ): Promise<RoleEntityInterface[]>;
+  ): Promise<ReferenceIdInterface[]>;
 
   /**
    * Check if the assignee is a member of one role.

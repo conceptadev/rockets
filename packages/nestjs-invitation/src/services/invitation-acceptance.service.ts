@@ -1,17 +1,18 @@
 import { Inject } from '@nestjs/common';
 import {
+  AssigneeRelationInterface,
+  InvitationInterface,
   LiteralObject,
-  ReferenceAssigneeInterface,
+  RepositoryInterface,
 } from '@concepta/nestjs-common';
-import { InvitationInterface } from '@concepta/nestjs-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
-import { RepositoryInterface } from '@concepta/typeorm-common';
 
 import {
   INVITATION_MODULE_EMAIL_SERVICE_TOKEN,
   INVITATION_MODULE_INVITATION_ENTITY_KEY,
   INVITATION_MODULE_OTP_SERVICE_TOKEN,
   INVITATION_MODULE_SETTINGS_TOKEN,
+  INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN,
 } from '../invitation.constants';
 
 import { InvitationAcceptedEventAsync } from '../events/invitation-accepted.event';
@@ -24,6 +25,8 @@ import { InvitationSendMailException } from '../exceptions/invitation-send-mail.
 import { InvitationAcceptOptionsInterface } from '../interfaces/options/invitation-accept-options.interface';
 import { InvitationException } from '../exceptions/invitation.exception';
 import { InvitationNotFoundException } from '../exceptions/invitation-not-found.exception';
+import { InvitationUserLookupServiceInterface } from '../interfaces/services/invitation-user-lookup.service.interface';
+import { InvitationUserUndefinedException } from '../exceptions/invitation-user-undefined.exception';
 
 export class InvitationAcceptanceService {
   constructor(
@@ -36,6 +39,8 @@ export class InvitationAcceptanceService {
     @Inject(INVITATION_MODULE_OTP_SERVICE_TOKEN)
     private readonly otpService: InvitationOtpServiceInterface,
     private readonly invitationRevocationService: InvitationRevocationService,
+    @Inject(INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN)
+    private readonly userLookupService: InvitationUserLookupServiceInterface,
   ) {}
 
   /**
@@ -55,9 +60,20 @@ export class InvitationAcceptanceService {
       throw new InvitationException({ originalError: e });
     }
 
+    if (!invitation) {
+      throw new InvitationNotFoundException();
+    }
+
+    // get the user
+    const user = await this.userLookupService.byId(invitation.userId);
+
+    if (!user) {
+      throw new InvitationUserUndefinedException();
+    }
+
     if (invitation) {
       category = invitation.category;
-      email = invitation.user.email;
+      email = user.email;
     } else {
       throw new InvitationNotFoundException();
     }
@@ -133,7 +149,6 @@ export class InvitationAcceptanceService {
   async getOneByCode(code: string): Promise<InvitationInterface | null> {
     return this.invitationRepo.findOne({
       where: { code },
-      relations: ['user'],
     });
   }
 
@@ -148,7 +163,7 @@ export class InvitationAcceptanceService {
     passcode: string,
     category: string,
     deleteIfValid = false,
-  ): Promise<ReferenceAssigneeInterface | null> {
+  ): Promise<AssigneeRelationInterface | null> {
     // extract required properties
     const { assignment } = this.settings.otp;
 

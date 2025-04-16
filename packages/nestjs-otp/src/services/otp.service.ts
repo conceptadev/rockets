@@ -1,21 +1,22 @@
 import ms from 'ms';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { DeepPartial, FindOptionsWhere, LessThanOrEqual } from 'typeorm';
 import { Inject, Injectable, Type } from '@nestjs/common';
 import {
-  ReferenceAssigneeInterface,
   ReferenceAssignment,
   ReferenceId,
+  OtpInterface,
   OtpCreateParamsInterface,
   OtpValidateLimitParamsInterface,
+  RepositoryInterface,
+  DeepPartial,
+  AssigneeRelationInterface,
+  RepositoryInternals,
 } from '@concepta/nestjs-common';
-import { OtpInterface } from '@concepta/nestjs-common';
 import {
   ReferenceLookupException,
   ReferenceMutateException,
   ReferenceValidationException,
-  RepositoryInterface,
 } from '@concepta/typeorm-common';
 import {
   OTP_MODULE_REPOSITORIES_TOKEN,
@@ -59,12 +60,12 @@ export class OtpService implements OtpServiceInterface {
     const passcode = this.settings.types[otp.type].generator();
 
     // break out the vars
-    const { category, type, assignee, expiresIn } = dto;
+    const { category, type, assigneeId, expiresIn } = dto;
 
     // check if amount of otp by time frame has been reached
     await this.validateOtpCreationLimit({
       assignment,
-      assignee,
+      assigneeId,
       category,
       rateSeconds,
       rateThreshold,
@@ -91,7 +92,7 @@ export class OtpService implements OtpServiceInterface {
       return assignmentRepo.save({
         category,
         type,
-        assignee,
+        assigneeId,
         passcode,
         expirationDate,
         active: true,
@@ -106,7 +107,7 @@ export class OtpService implements OtpServiceInterface {
   private async validateOtpCreationLimit(
     params: OtpValidateLimitParamsInterface,
   ): Promise<void> {
-    const { assignment, assignee, category, rateSeconds, rateThreshold } =
+    const { assignment, assigneeId, category, rateSeconds, rateThreshold } =
       params;
 
     // check if validation config should be overridden
@@ -124,7 +125,7 @@ export class OtpService implements OtpServiceInterface {
 
       // get all active and inactive
       const recentOtps = await this.getAssignedOtps(assignment, {
-        assignee,
+        assigneeId,
         category,
       });
 
@@ -150,7 +151,7 @@ export class OtpService implements OtpServiceInterface {
     assignment: ReferenceAssignment,
     otp: Pick<OtpInterface, 'category' | 'passcode'>,
     deleteIfValid = false,
-  ): Promise<ReferenceAssigneeInterface | null> {
+  ): Promise<AssigneeRelationInterface | null> {
     // get otp from an assigned user for a category
     const assignedOtp = await this.getActiveByPasscode(assignment, {
       ...otp,
@@ -180,7 +181,7 @@ export class OtpService implements OtpServiceInterface {
    */
   async delete(
     assignment: ReferenceAssignment,
-    otp: Pick<OtpInterface, 'assignee' | 'category' | 'passcode'>,
+    otp: Pick<OtpInterface, 'assigneeId' | 'category' | 'passcode'>,
   ): Promise<void> {
     // get otp from an assigned user for a category
     const assignedOtp = await this.getByPasscode(assignment, otp);
@@ -198,7 +199,7 @@ export class OtpService implements OtpServiceInterface {
    */
   async clear(
     assignment: ReferenceAssignment,
-    otp: Pick<OtpInterface, 'assignee' | 'category'>,
+    otp: Pick<OtpInterface, 'assigneeId' | 'category'>,
   ): Promise<void> {
     // get all otps from an assigned user for a category
     const assignedOtps = await this.getAssignedOtps(assignment, otp);
@@ -235,7 +236,7 @@ export class OtpService implements OtpServiceInterface {
 
   async clearHistory(
     assignment: ReferenceAssignment,
-    otp: Pick<OtpInterface, 'assignee' | 'category'>,
+    otp: Pick<OtpInterface, 'assigneeId' | 'category'>,
   ): Promise<void> {
     const keepHistoryDays = this.settings.keepHistoryDays;
     // get only otps based on date for history days
@@ -261,30 +262,26 @@ export class OtpService implements OtpServiceInterface {
   // TODO: recieve query in parameters
   protected async getAssignedOtps(
     assignment: ReferenceAssignment,
-    otp: Pick<OtpInterface, 'assignee' | 'category'>,
+    otp: Pick<OtpInterface, 'assigneeId' | 'category'>,
     keepHistoryDays?: number,
   ): Promise<OtpInterface[]> {
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
     // break out the args
-    const { assignee, category } = otp;
+    const { assigneeId, category } = otp;
 
     // try to find the relationships
     try {
       // simple query or query by date from history
       const query:
-        | FindOptionsWhere<OtpInterface>[]
-        | FindOptionsWhere<OtpInterface> = this.buildFindQuery(
-        assignee.id,
-        category,
-        keepHistoryDays,
-      );
+        | RepositoryInternals.FindOptionsWhere<OtpInterface>[]
+        | RepositoryInternals.FindOptionsWhere<OtpInterface> =
+        this.buildFindQuery(assignment, assigneeId, category, keepHistoryDays);
 
       // make the query
       const assignments = await assignmentRepo.find({
         where: query,
-        relations: ['assignee'],
       });
 
       // return the otps from assignee
@@ -297,24 +294,29 @@ export class OtpService implements OtpServiceInterface {
   }
 
   private buildFindQuery(
+    assignment: ReferenceAssignment,
     assigneeId: string,
     category: string,
     keepHistoryDays?: number,
   ) {
+    // get the assignment repo
+    const assignmentRepo = this.getAssignmentRepo(assignment);
+
     let query:
-      | FindOptionsWhere<OtpInterface>[]
-      | FindOptionsWhere<OtpInterface> = {
-      assignee: { id: assigneeId },
+      | RepositoryInternals.FindOptionsWhere<OtpInterface>[]
+      | RepositoryInternals.FindOptionsWhere<OtpInterface> = {
+      assigneeId,
       category,
     };
+
     // filter by date
     if (keepHistoryDays) {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - keepHistoryDays);
       query = {
-        assignee: { id: assigneeId },
+        assigneeId,
         category,
-        dateCreated: LessThanOrEqual(cutoffDate),
+        dateCreated: assignmentRepo.lte(cutoffDate),
       };
     }
     return query;
@@ -337,7 +339,6 @@ export class OtpService implements OtpServiceInterface {
           category,
           passcode,
         },
-        relations: ['assignee'],
       });
 
       // return the otps from assignee
@@ -368,7 +369,6 @@ export class OtpService implements OtpServiceInterface {
           passcode,
           active,
         },
-        relations: ['assignee'],
       });
 
       // return the otps from assignee
@@ -424,13 +424,13 @@ export class OtpService implements OtpServiceInterface {
 
   protected async inactivatePreviousOtp(
     assignment: ReferenceAssignment,
-    otp: Pick<OtpInterface, 'assignee' | 'category'>,
+    otp: Pick<OtpInterface, 'assigneeId' | 'category'>,
   ): Promise<void> {
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
     // break out the args
-    const { assignee, category } = otp;
+    const { assigneeId, category } = otp;
 
     // try to find the relationships
     try {
@@ -438,7 +438,7 @@ export class OtpService implements OtpServiceInterface {
       // make previous inactive
       await assignmentRepo.update(
         {
-          assignee: { id: assignee.id },
+          assigneeId,
           category,
         },
         {

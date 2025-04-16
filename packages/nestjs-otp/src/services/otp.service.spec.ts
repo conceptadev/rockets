@@ -1,7 +1,7 @@
 import ms from 'ms';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getDataSourceToken } from '@nestjs/typeorm';
-import { OtpInterface } from '@concepta/nestjs-common';
+import { OtpInterface, RepositoryInterface } from '@concepta/nestjs-common';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { OtpModule } from '../otp.module';
@@ -14,7 +14,6 @@ import { UserFactoryFixture } from '../__fixtures__/factories/user.factory.fixtu
 import { UserOtpFactoryFixture } from '../__fixtures__/factories/user-otp.factory.fixture';
 import { OTP_MODULE_REPOSITORIES_TOKEN } from '../otp.constants';
 import { OtpLimitReachedException } from '../exceptions/otp-limit-reached.exception';
-import { RepositoryInterface } from '@concepta/typeorm-common';
 
 describe('OtpModule', () => {
   const CATEGORY_DEFAULT = 'CATEGORY_DEFAULT';
@@ -33,7 +32,7 @@ describe('OtpModule', () => {
   };
 
   const factoryCreateOtp = async (
-    overrides: Partial<OtpInterface> & Pick<OtpInterface, 'assignee'>,
+    overrides: Partial<OtpInterface> & Pick<OtpInterface, 'assigneeId'>,
   ) => {
     const now = new Date();
     const expirationDate = new Date(now.getTime() + ms('1d'));
@@ -46,7 +45,7 @@ describe('OtpModule', () => {
   };
 
   const defaultCreateOtp = async (
-    options: Pick<OtpInterface, 'assignee'> &
+    options: Pick<OtpInterface, 'assigneeId'> &
       Partial<Pick<OtpInterface, 'type'>>,
     clearOnCreate?: boolean,
     rateSeconds?: number,
@@ -67,7 +66,7 @@ describe('OtpModule', () => {
 
   // try to delete
   const defaultDeleteOtp = async (
-    otp: Pick<OtpInterface, 'assignee' | 'passcode' | 'category'>,
+    otp: Pick<OtpInterface, 'assigneeId' | 'passcode' | 'category'>,
   ) => await otpService.delete('userOtp', otp);
 
   const defaultIsValidOtp = async (
@@ -142,15 +141,15 @@ describe('OtpModule', () => {
   describe('otpService isValid', () => {
     it('check if is valid true', async () => {
       const assignee = await factoryCreateUser();
-      const otp = await factoryCreateOtp({ assignee });
-      expect((await defaultIsValidOtp(otp))?.assignee.id).toBe(otp.assignee.id);
+      const otp = await factoryCreateOtp({ assigneeId: assignee.id });
+      expect((await defaultIsValidOtp(otp))?.assigneeId).toBe(otp.assigneeId);
     });
 
     it('check if is valid after delete', async () => {
       const assignee = await factoryCreateUser();
-      const otp = await factoryCreateOtp({ assignee });
-      expect((await defaultIsValidOtp(otp, true))?.assignee.id).toBe(
-        otp.assignee.id,
+      const otp = await factoryCreateOtp({ assigneeId: assignee.id });
+      expect((await defaultIsValidOtp(otp, true))?.assigneeId).toBe(
+        otp.assigneeId,
       );
       expect(await defaultIsValidOtp(otp)).toBeNull();
       expect(await defaultIsValidOtp(otp, true)).toBeNull();
@@ -164,7 +163,7 @@ describe('OtpModule', () => {
 
       const otp = await factoryCreateOtp({
         expirationDate: expirationDate,
-        assignee,
+        assigneeId: assignee.id,
       });
 
       expect(await defaultIsValidOtp(otp)).toBeNull();
@@ -174,68 +173,68 @@ describe('OtpModule', () => {
   describe('otpService create', () => {
     it('create with success', async () => {
       const assignee = await factoryCreateUser();
-      const otp = await defaultCreateOtp({ assignee });
+      const otp = await defaultCreateOtp({ assigneeId: assignee.id });
 
       expect(otp.category).toBe(CATEGORY_DEFAULT);
       expect(otp.type).toBe('uuid');
       expect(typeof otp.passcode).toBe('string');
       expect(otp.passcode.length).toBeGreaterThan(0);
       expect(otp.expirationDate).toBeInstanceOf(Date);
-      expect(otp.assignee.id).toBeTruthy();
+      expect(otp.assigneeId).toBeTruthy();
     });
 
     it('create with success and check previous otp invalid', async () => {
       const assignee = await factoryCreateUser();
-      const otp = await defaultCreateOtp({ assignee });
-      const otp_2 = await defaultCreateOtp({ assignee }, true);
+      const otp = await defaultCreateOtp({ assigneeId: assignee.id });
+      const otp_2 = await defaultCreateOtp({ assigneeId: assignee.id }, true);
 
       // make sure previous was deleted
       expect(await defaultIsValidOtp(otp)).toBeNull();
       // check new one
-      expect((await defaultIsValidOtp(otp_2, true))?.assignee.id).toBe(
-        otp.assignee.id,
+      expect((await defaultIsValidOtp(otp_2, true))?.assigneeId).toBe(
+        otp.assigneeId,
       );
     });
 
     it('create with success and check previous otp valid', async () => {
       const assignee = await factoryCreateUser();
-      const otp = await defaultCreateOtp({ assignee });
-      const otp_2 = await defaultCreateOtp({ assignee }, false);
+      const otp = await defaultCreateOtp({ assigneeId: assignee.id });
+      const otp_2 = await defaultCreateOtp({ assigneeId: assignee.id }, false);
 
       // make sure previous was deleted
-      expect((await defaultIsValidOtp(otp, true))?.assignee.id).toBe(
-        otp.assignee.id,
+      expect((await defaultIsValidOtp(otp, true))?.assigneeId).toBe(
+        otp.assigneeId,
       );
       expect(await defaultIsValidOtp(otp)).toBeNull();
       // check new one
-      expect((await defaultIsValidOtp(otp_2, true))?.assignee.id).toBe(
-        otp.assignee.id,
+      expect((await defaultIsValidOtp(otp_2, true))?.assigneeId).toBe(
+        otp.assigneeId,
       );
     });
 
     it('create with success and check previous otp invalid after transaction error', async () => {
       const assignee = await factoryCreateUser();
-      const otp = await defaultCreateOtp({ assignee });
+      const otp = await defaultCreateOtp({ assigneeId: assignee.id });
 
       jest.spyOn(repository, 'save').mockImplementationOnce(() => {
         throw new Error('Error on save');
       });
       // spy on with error
       try {
-        await defaultCreateOtp({ assignee });
+        await defaultCreateOtp({ assigneeId: assignee.id });
       } catch (e) {
         expect(e).toBeInstanceOf(Error);
       }
 
       // validate first one created,
-      expect((await defaultIsValidOtp(otp, true))?.assignee.id).toBe(
-        otp.assignee.id,
+      expect((await defaultIsValidOtp(otp, true))?.assigneeId).toBe(
+        otp.assigneeId,
       );
     });
 
     it('create with fail', async () => {
       const assignee = await factoryCreateUser();
-      const otp = await defaultCreateOtp({ assignee });
+      const otp = await defaultCreateOtp({ assigneeId: assignee.id });
 
       expect(otp).toBeTruthy();
       expect(
@@ -246,7 +245,7 @@ describe('OtpModule', () => {
     it('create with fail 2', async () => {
       try {
         const assignee = await factoryCreateUser();
-        await defaultCreateOtp({ assignee, type: 'wrongType' });
+        await defaultCreateOtp({ assigneeId: assignee.id, type: 'wrongType' });
       } catch (e) {
         expect(e).toBeInstanceOf(OtpTypeNotDefinedException);
       }
@@ -259,11 +258,11 @@ describe('OtpModule', () => {
         process.env.OTP_RATE_THRESHOLD = '2';
         await initModule();
         const assignee = await factoryCreateUser();
-        await defaultCreateOtp({ assignee });
-        await defaultCreateOtp({ assignee });
+        await defaultCreateOtp({ assigneeId: assignee.id });
+        await defaultCreateOtp({ assigneeId: assignee.id });
         await new Promise((resolve) => setTimeout(resolve, 2000));
         try {
-          await defaultCreateOtp({ assignee });
+          await defaultCreateOtp({ assigneeId: assignee.id });
           fail('Expected OtpLimitReachedException to be thrown');
         } catch (e) {
           expect(e).toBeInstanceOf(OtpLimitReachedException);
@@ -276,11 +275,11 @@ describe('OtpModule', () => {
         process.env.OTP_RATE_THRESHOLD = '3';
         await initModule();
         const assignee = await factoryCreateUser();
-        await defaultCreateOtp({ assignee });
-        await defaultCreateOtp({ assignee });
-        await defaultCreateOtp({ assignee });
+        await defaultCreateOtp({ assigneeId: assignee.id });
+        await defaultCreateOtp({ assigneeId: assignee.id });
+        await defaultCreateOtp({ assigneeId: assignee.id });
         try {
-          await defaultCreateOtp({ assignee });
+          await defaultCreateOtp({ assigneeId: assignee.id });
           fail('Expected OtpLimitReachedException to be thrown');
         } catch (e) {
           expect(e).toBeInstanceOf(OtpLimitReachedException);
@@ -297,26 +296,26 @@ describe('OtpModule', () => {
         await initModule();
         const assignee = await factoryCreateUser();
         await defaultCreateOtp(
-          { assignee },
+          { assigneeId: assignee.id },
           clearOnCreate,
           rateSeconds,
           rateThreshold,
         );
         await defaultCreateOtp(
-          { assignee },
+          { assigneeId: assignee.id },
           clearOnCreate,
           rateSeconds,
           rateThreshold,
         );
         await defaultCreateOtp(
-          { assignee },
+          { assigneeId: assignee.id },
           clearOnCreate,
           rateSeconds,
           rateThreshold,
         );
         try {
           await defaultCreateOtp(
-            { assignee },
+            { assigneeId: assignee.id },
             clearOnCreate,
             rateSeconds,
             rateThreshold,
@@ -333,17 +332,17 @@ describe('OtpModule', () => {
         process.env.OTP_RATE_THRESHOLD = '4';
         await initModule();
         const assignee = await factoryCreateUser();
-        await defaultCreateOtp({ assignee });
-        await defaultCreateOtp({ assignee });
+        await defaultCreateOtp({ assigneeId: assignee.id });
+        await defaultCreateOtp({ assigneeId: assignee.id });
         await new Promise((resolve) => setTimeout(resolve, 2000));
-        const otp = await defaultCreateOtp({ assignee });
+        const otp = await defaultCreateOtp({ assigneeId: assignee.id });
 
         expect(otp.category).toBe(CATEGORY_DEFAULT);
         expect(otp.type).toBe('uuid');
         expect(typeof otp.passcode).toBe('string');
         expect(otp.passcode.length).toBeGreaterThan(0);
         expect(otp.expirationDate).toBeInstanceOf(Date);
-        expect(otp.assignee.id).toBeTruthy();
+        expect(otp.assigneeId).toBeTruthy();
       });
 
       it('create with success with limit 2', async () => {
@@ -352,17 +351,17 @@ describe('OtpModule', () => {
         process.env.OTP_RATE_THRESHOLD = '4';
         await initModule();
         const assignee = await factoryCreateUser();
-        await defaultCreateOtp({ assignee });
-        await defaultCreateOtp({ assignee });
+        await defaultCreateOtp({ assigneeId: assignee.id });
+        await defaultCreateOtp({ assigneeId: assignee.id });
         await new Promise((resolve) => setTimeout(resolve, 2000));
-        const otp = await defaultCreateOtp({ assignee });
+        const otp = await defaultCreateOtp({ assigneeId: assignee.id });
 
         expect(otp.category).toBe(CATEGORY_DEFAULT);
         expect(otp.type).toBe('uuid');
         expect(typeof otp.passcode).toBe('string');
         expect(otp.passcode.length).toBeGreaterThan(0);
         expect(otp.expirationDate).toBeInstanceOf(Date);
-        expect(otp.assignee.id).toBeTruthy();
+        expect(otp.assigneeId).toBeTruthy();
       });
     });
   });
@@ -370,7 +369,7 @@ describe('OtpModule', () => {
   describe('otpService delete', () => {
     it('delete with success', async () => {
       const assignee = await factoryCreateUser();
-      const otp = await defaultCreateOtp({ assignee });
+      const otp = await defaultCreateOtp({ assigneeId: assignee.id });
       expect(otp).toBeTruthy();
 
       // try to delete
@@ -384,16 +383,14 @@ describe('OtpModule', () => {
   describe('otpService clear', () => {
     it('clear with success', async () => {
       const assignee = await factoryCreateUser();
-      const otp = await defaultCreateOtp({ assignee });
+      const otp = await defaultCreateOtp({ assigneeId: assignee.id });
 
       expect(otp).toBeTruthy();
-      expect((await defaultIsValidOtp(otp))?.assignee.id).toBe(otp.assignee.id);
+      expect((await defaultIsValidOtp(otp))?.assigneeId).toBe(otp.assigneeId);
 
-      const otp2 = await defaultCreateOtp({ assignee });
+      const otp2 = await defaultCreateOtp({ assigneeId: assignee.id });
       expect(otp2).toBeTruthy();
-      expect((await defaultIsValidOtp(otp2))?.assignee.id).toBe(
-        otp2.assignee.id,
-      );
+      expect((await defaultIsValidOtp(otp2))?.assigneeId).toBe(otp2.assigneeId);
 
       // try to clear
       expect(await otpService.clear('userOtp', otp)).toBeUndefined();

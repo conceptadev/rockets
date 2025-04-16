@@ -2,11 +2,9 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   ReferenceAssignment,
   ReferenceIdInterface,
-} from '@concepta/nestjs-common';
-import {
-  ReferenceLookupException,
   RepositoryInterface,
-} from '@concepta/typeorm-common';
+} from '@concepta/nestjs-common';
+import { ReferenceLookupException } from '@concepta/typeorm-common';
 import { RoleEntityNotFoundException } from '../exceptions/role-entity-not-found.exception';
 import { RoleAssignmentNotFoundException } from '../exceptions/role-assignment-not-found.exception';
 import { RoleAssignmentConflictException } from '../exceptions/role-assignment-conflict.exception';
@@ -15,12 +13,11 @@ import {
   ROLE_MODULE_REPOSITORIES_TOKEN,
   ROLE_MODULE_SETTINGS_TOKEN,
 } from '../role.constants';
-import { RoleEntityInterface } from '../interfaces/role-entity.interface';
 import { RoleSettingsInterface } from '../interfaces/role-settings.interface';
 import { RoleServiceInterface } from '../interfaces/role-service.interface';
-import { RoleAssignmentContext } from '../interfaces/role-assignment-context';
 import { RoleAssignmentOptionsInterface } from '../interfaces/role-assignment-options.interface';
 import { RolesAssignmentOptionsInterface } from '../interfaces/roles-assignment-options.interface';
+import { RoleAssignmentContext } from '../interfaces/role-assignment-context';
 
 @Injectable()
 export class RoleService implements RoleServiceInterface {
@@ -41,7 +38,7 @@ export class RoleService implements RoleServiceInterface {
    */
   async getAssignedRoles(
     options: RoleAssignmentContext<ReferenceIdInterface>,
-  ): Promise<RoleEntityInterface[]> {
+  ): Promise<ReferenceIdInterface[]> {
     const { assignment, assignee } = options;
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
@@ -51,13 +48,12 @@ export class RoleService implements RoleServiceInterface {
       // make the query
       const assignments = await assignmentRepo.find({
         where: {
-          assignee: { id: assignee.id },
+          assigneeId: assignee.id,
         },
-        relations: ['role', 'assignee'],
       });
 
       // return the roles
-      return assignments.map((assignment) => assignment.role);
+      return assignments.map((assignment) => ({ id: assignment.roleId }));
     } catch (e) {
       throw new ReferenceLookupException(assignmentRepo.metadata.name, {
         originalError: e,
@@ -83,8 +79,8 @@ export class RoleService implements RoleServiceInterface {
       // make the query
       const assignment = await assignmentRepo.findOne({
         where: {
-          role: { id: role.id },
-          assignee: { id: assignee.id },
+          roleId: role.id,
+          assigneeId: assignee.id,
         },
       });
 
@@ -156,12 +152,10 @@ export class RoleService implements RoleServiceInterface {
     }
     // TODO: Review this change to validate the transacion being used
     // create the new role assignment entity
-    const roleAssignment: RoleAssignmentEntityInterface = assignmentRepo.create(
-      {
-        role,
-        assignee,
-      },
-    );
+    const roleAssignment = assignmentRepo.create({
+      roleId: role.id,
+      assigneeId: assignee.id,
+    });
 
     return assignmentRepo.save(roleAssignment);
   }
@@ -200,8 +194,8 @@ export class RoleService implements RoleServiceInterface {
       // create and add the new role assignment entity to the bulk array
       const roleAssignment: RoleAssignmentEntityInterface =
         assignmentRepo.create({
-          role,
-          assignee,
+          roleId: role.id,
+          assigneeId: assignee.id,
         });
 
       roleAssignments.push(roleAssignment);
@@ -222,8 +216,8 @@ export class RoleService implements RoleServiceInterface {
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
     await assignmentRepo.delete({
-      role: { id: role.id },
-      assignee: { id: assignee.id },
+      roleId: role.id,
+      assigneeId: assignee.id,
     });
   }
 
@@ -240,8 +234,8 @@ export class RoleService implements RoleServiceInterface {
 
     for (const role of roles) {
       await assignmentRepo.delete({
-        role: { id: role.id },
-        assignee: { id: assignee.id },
+        roleId: role.id,
+        assigneeId: assignee.id,
       });
     }
   }

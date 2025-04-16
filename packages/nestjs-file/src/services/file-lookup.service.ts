@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
-import { LookupService, RepositoryInterface } from '@concepta/typeorm-common';
-import { FileInterface } from '@concepta/nestjs-common';
+import { FileInterface, RepositoryInterface } from '@concepta/nestjs-common';
+import { LookupService } from '@concepta/typeorm-common';
 
 import { FILE_MODULE_FILE_ENTITY_KEY } from '../file.constants';
 import { FileEntityInterface } from '../interfaces/file-entity.interface';

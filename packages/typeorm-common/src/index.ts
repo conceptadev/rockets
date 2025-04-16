@@ -17,6 +17,3 @@ export { AuditPostgresEntity } from './entities/audit/audit-postgres.entity';
 export { AuditSqlLiteEntity } from './entities/audit/audit-sqlite.entity';
 export { CommonPostgresEntity } from './entities/common/common-postgres.entity';
 export { CommonSqliteEntity } from './entities/common/common-sqlite.entity';
-
-// repository interface
-export { RepositoryInterface } from './interfaces/repository.interface';

@@ -1,5 +1,5 @@
 import { Column, Unique } from 'typeorm';
-import { ReferenceId, ReferenceIdInterface } from '@concepta/nestjs-common';
+import { ReferenceId } from '@concepta/nestjs-common';
 import { CommonSqliteEntity } from '@concepta/typeorm-common';
 
 import { OrgMemberEntityInterface } from '../interfaces/org-member-entity.interface';
@@ -12,13 +12,9 @@ export abstract class OrgMemberSqliteEntity
   @Column('boolean', { default: true })
   active = true;
 
-  @Column()
+  @Column({ type: 'uuid' })
   userId!: ReferenceId;
 
-  @Column()
+  @Column({ type: 'uuid' })
   orgId!: ReferenceId;
-
-  user!: ReferenceIdInterface;
-
-  org!: ReferenceIdInterface;
 }

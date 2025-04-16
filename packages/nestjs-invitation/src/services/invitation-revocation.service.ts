@@ -1,7 +1,7 @@
 import { Inject } from '@nestjs/common';
 import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
-import { RepositoryInterface } from '@concepta/typeorm-common';
+import { RepositoryInterface } from '@concepta/nestjs-common';
 
 import {
   INVITATION_MODULE_INVITATION_ENTITY_KEY,
@@ -67,9 +67,7 @@ export class InvitationRevocationService {
     // clear all user's otps in DB
     return this.otpService.clear(assignment, {
       category,
-      assignee: {
-        id: user.id,
-      },
+      assigneeId: user.id,
     });
   }
 
@@ -88,7 +86,7 @@ export class InvitationRevocationService {
     try {
       invitations = await this.invitationRepo.find({
         where: {
-          user: { id: user.id },
+          userId: user.id,
           category,
         },
       });

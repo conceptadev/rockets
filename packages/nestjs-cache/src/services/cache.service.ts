@@ -1,21 +1,19 @@
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { DeepPartial } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
 import {
   CacheInterface,
   CacheUpdatableInterface,
-} from '@concepta/nestjs-common';
-import {
+  DeepPartial,
   ReferenceAssignment,
   ReferenceId,
   Type,
+  RepositoryInterface,
 } from '@concepta/nestjs-common';
 import {
   ReferenceLookupException,
   ReferenceMutateException,
   ReferenceValidationException,
-  RepositoryInterface,
 } from '@concepta/typeorm-common';
 import {
   CACHE_MODULE_REPOSITORIES_TOKEN,
@@ -55,7 +53,7 @@ export class CacheService implements CacheServiceInterface {
     const dto = await this.validateDto<CacheCreateDto>(CacheCreateDto, cache);
 
     // break out the vars
-    const { key, type, data, assignee, expiresIn } = dto;
+    const { key, type, data, assigneeId, expiresIn } = dto;
 
     // try to find the relationship
     try {
@@ -69,7 +67,7 @@ export class CacheService implements CacheServiceInterface {
         key,
         type,
         data,
-        assignee,
+        assigneeId,
         expirationDate,
       });
     } catch (e) {
@@ -127,7 +125,7 @@ export class CacheService implements CacheServiceInterface {
    */
   async delete(
     assignment: ReferenceAssignment,
-    cache: Pick<CacheInterface, 'key' | 'type' | 'assignee'>,
+    cache: Pick<CacheInterface, 'key' | 'type' | 'assigneeId'>,
   ): Promise<void> {
     // get cache from an assigned user for a category
     const assignedCache = await this.get(assignment, cache);
@@ -145,22 +143,21 @@ export class CacheService implements CacheServiceInterface {
    */
   async getAssignedCaches(
     assignment: ReferenceAssignment,
-    cache: Pick<CacheInterface, 'assignee'>,
+    cache: Pick<CacheInterface, 'assigneeId'>,
   ): Promise<CacheInterface[]> {
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
     // break out the args
-    const { assignee } = cache;
+    const { assigneeId } = cache;
 
     // try to find the relationships
     try {
       // make the query
       const assignments = await assignmentRepo.find({
         where: {
-          assignee: { id: assignee.id },
+          assigneeId,
         },
-        relations: ['assignee'],
       });
 
       // return the caches from assignee
@@ -174,7 +171,7 @@ export class CacheService implements CacheServiceInterface {
 
   async get(
     assignment: ReferenceAssignment,
-    cache: Pick<CacheInterface, 'key' | 'type' | 'assignee'>,
+    cache: Pick<CacheInterface, 'key' | 'type' | 'assigneeId'>,
   ): Promise<CacheInterface | null> {
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
@@ -190,7 +187,7 @@ export class CacheService implements CacheServiceInterface {
    */
   async clear(
     assignment: ReferenceAssignment,
-    cache: Pick<CacheInterface, 'assignee'>,
+    cache: Pick<CacheInterface, 'assigneeId'>,
   ): Promise<void> {
     // get all caches from an assigned user for a category
     const assignedCaches = await this.getAssignedCaches(assignment, cache);
@@ -264,21 +261,20 @@ export class CacheService implements CacheServiceInterface {
 
   protected async findCache(
     repo: RepositoryInterface<CacheInterface>,
-    cache: Pick<CacheInterface, 'key' | 'type' | 'assignee'>,
+    cache: Pick<CacheInterface, 'key' | 'type' | 'assigneeId'>,
   ): Promise<CacheInterface | null> {
-    const { key, type, assignee } = cache;
+    const { key, type, assigneeId } = cache;
 
     try {
-      if (!key || !type || !assignee || !assignee.id) {
+      if (!key || !type || !assigneeId) {
         return null;
       }
       const cache = await repo.findOne({
         where: {
           key,
           type,
-          assignee,
+          assigneeId,
         },
-        relations: ['assignee'],
       });
       return cache;
     } catch (e) {

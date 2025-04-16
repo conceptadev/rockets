@@ -29,7 +29,7 @@ import { ReportEntityFixture } from './__fixtures__/report/report-entity.fixture
 import { UserEntityFixture } from './__fixtures__/user/entities/user.entity.fixture';
 import { ReportModule } from './report.module';
 import { delay } from './utils/delay.util';
-import { RepositoryInterface } from '@concepta/typeorm-common';
+import { RepositoryInterface } from '@concepta/nestjs-common';
 
 describe(ReportModule, () => {
   let testModule: TestingModule;

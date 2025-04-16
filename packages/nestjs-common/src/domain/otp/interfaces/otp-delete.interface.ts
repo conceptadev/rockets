@@ -10,6 +10,6 @@ export interface OtpDeleteInterface {
    */
   delete(
     assignment: ReferenceAssignment,
-    otp: Pick<OtpInterface, 'assignee' | 'category' | 'passcode'>,
+    otp: Pick<OtpInterface, 'assigneeId' | 'category' | 'passcode'>,
   ): Promise<void>;
 }

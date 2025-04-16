@@ -11,6 +11,6 @@ export interface CacheGetOneInterface {
    */
   get(
     assignment: ReferenceAssignment,
-    cache: Pick<CacheInterface, 'key' | 'type' | 'assignee'>,
+    cache: Pick<CacheInterface, 'key' | 'type' | 'assigneeId'>,
   ): Promise<CacheInterface | null>;
 }

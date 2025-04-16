@@ -1,6 +1,8 @@
 export { EmailSendOptionsInterface } from './email/interfaces/email-send-options.interface';
 export { EmailSendInterface } from './email/interfaces/email-send.interface';
 
+export { AssigneeRelationInterface } from './assignee/interfaces/assignee-relation.interface';
+
 export { AuthenticatedUserInterface } from './authentication/interfaces/authenticated-user.interface';
 export { AuthenticationAccessInterface } from './authentication/interfaces/authentication-access.interface';
 export { AuthenticationCodeInterface } from './authentication/interfaces/authentication-code.interface';
@@ -26,6 +28,7 @@ export { OrgProfileCreatableInterface } from './org-profile/interfaces/org-profi
 export { UserCreatableInterface } from './user/interfaces/user-creatable.interface';
 export { UserOwnableInterface } from './user/interfaces/user-ownable.interface';
 export { UserUpdatableInterface } from './user/interfaces/user-updatable.interface';
+export { UserRelationInterface } from './user/interfaces/user-relation.interface';
 export { UserInterface } from './user/interfaces/user.interface';
 
 export { UserProfileInterface } from './user-profile/interfaces/user-profile.interface';
@@ -40,6 +43,7 @@ export { RoleAssignmentCreatableInterface } from './role/interfaces/role-assignm
 export { RoleAssignmentInterface } from './role/interfaces/role-assignment.interface';
 export { RoleCreatableInterface } from './role/interfaces/role-creatable.interface';
 export { RoleUpdatableInterface } from './role/interfaces/role-updatable.interface';
+export { RoleRelationInterface } from './role/interfaces/role-relation.interface';
 export { RoleInterface } from './role/interfaces/role.interface';
 
 export { OtpClearInterface } from './otp/interfaces/otp-clear.interface';

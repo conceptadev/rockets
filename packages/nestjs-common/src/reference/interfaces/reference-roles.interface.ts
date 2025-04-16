@@ -1,8 +1,10 @@
 import { ReferenceIdInterface } from './reference-id.interface';
 
 /**
- * Identifiable by roles.
+ * References roles.
  */
-export interface ReferenceRolesInterface<T = ReferenceIdInterface> {
+export interface ReferenceRolesInterface<
+  T extends ReferenceIdInterface = ReferenceIdInterface,
+> {
   roles: T[];
 }

@@ -44,7 +44,7 @@ export class InvitationAcceptedListener
     if (
       event.payload.invitation.category === INVITATION_MODULE_CATEGORY_USER_KEY
     ) {
-      const userId = event.payload.invitation.user.id;
+      const userId = event.payload.invitation.userId;
       const { newPassword } = event.payload?.data ?? {};
 
       if (typeof userId !== 'string' || typeof newPassword !== 'string') {

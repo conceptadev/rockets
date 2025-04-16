@@ -13,7 +13,7 @@ import {
 } from '../auth-recovery.constants';
 import { AuthRecoveryNotificationService } from './auth-recovery-notification.service';
 import {
-  ReferenceAssigneeInterface,
+  AssigneeRelationInterface,
   ReferenceIdInterface,
 } from '@concepta/nestjs-common';
 import { AuthRecoveryNotificationServiceInterface } from '../interfaces/auth-recovery-notification.service.interface';
@@ -83,9 +83,7 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
           category,
           type,
           expiresIn,
-          assignee: {
-            id: user.id,
-          },
+          assigneeId: user.id,
         },
         clearOnCreate: clearOtpOnCreate,
         rateSeconds,
@@ -113,7 +111,7 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
   async validatePasscode(
     passcode: string,
     deleteIfValid = false,
-  ): Promise<ReferenceAssigneeInterface | null> {
+  ): Promise<AssigneeRelationInterface | null> {
     // extract required properties
     const { category, assignment } = this.config.otp;
 
@@ -142,7 +140,7 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
     if (otp) {
       // call user mutate service
       const user = await this.userMutateService.update({
-        id: otp.assignee.id,
+        id: otp.assigneeId,
         password: newPassword,
       });
 
@@ -176,9 +174,7 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
       // clear all user's otps in DB
       await this.otpService.clear(assignment, {
         category,
-        assignee: {
-          id: user.id,
-        },
+        assigneeId: user.id,
       });
     }
 

@@ -1,6 +1,7 @@
 import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CrudModule } from '@concepta/nestjs-crud';
+import { RepositoryInterface } from '@concepta/nestjs-common';
 import {
   getDynamicRepositoryToken,
   getEntityRepositoryToken,
@@ -24,7 +25,6 @@ import { OrgMemberEntityFixture } from './__fixtures__/org-member.entity.fixture
 import { UserEntityFixture } from './__fixtures__/user-entity.fixture';
 import { InvitationEntityFixture } from './__fixtures__/invitation.entity.fixture';
 import { OrgProfileEntityFixture } from './__fixtures__/org-profile.entity.fixture';
-import { RepositoryInterface } from '@concepta/typeorm-common';
 
 describe('OrgModule', () => {
   let orgModule: OrgModule;

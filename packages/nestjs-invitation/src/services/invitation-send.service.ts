@@ -25,6 +25,7 @@ import { InvitationUserLookupServiceInterface } from '../interfaces/services/inv
 import { InvitationUserMutateServiceInterface } from '../interfaces/services/invitation-user-mutate.service.interface';
 import { InvitationSendInviteInterface } from '../interfaces/domain/invitation-send-invite.interface';
 import { InvitationNotFoundException } from '../exceptions/invitation-not-found.exception';
+import { InvitationUserUndefinedException } from '../exceptions/invitation-user-undefined.exception';
 
 export class InvitationSendService implements InvitationSendServiceInterface {
   constructor(
@@ -60,7 +61,7 @@ export class InvitationSendService implements InvitationSendServiceInterface {
 
     const invite = await this.invitationMutateService.create({
       ...createInviteDto,
-      user: user,
+      userId: user.id,
       code: randomUUID(),
     });
 
@@ -91,7 +92,7 @@ export class InvitationSendService implements InvitationSendServiceInterface {
       throw new InvitationNotFoundException();
     }
 
-    const { category, user, code } = theInvitation;
+    const { category, userId, code } = theInvitation;
 
     // create an OTP for this invite
     const otp = await this.otpService.create({
@@ -100,14 +101,19 @@ export class InvitationSendService implements InvitationSendServiceInterface {
         category,
         type,
         expiresIn,
-        assignee: {
-          id: user.id,
-        },
+        assigneeId: userId,
       },
       clearOnCreate: clearOtpOnCreate,
       rateSeconds,
       rateThreshold,
     });
+
+    // lookup the user
+    const user = await this.userLookupService.byId(userId);
+
+    if (!user) {
+      throw new InvitationUserUndefinedException();
+    }
 
     // send the invite email
     await this.sendInvitationEmail({

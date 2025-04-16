@@ -34,12 +34,6 @@ import { InvitationSendService } from '../services/invitation-send.service';
     type: InvitationDto,
     paginatedType: InvitationPaginatedDto,
   },
-  join: {
-    user: {
-      eager: true,
-      allow: ['id', 'email'],
-    },
-  },
   validation: {
     transformOptions: {
       // TODO temporary fix because this could be unsafe

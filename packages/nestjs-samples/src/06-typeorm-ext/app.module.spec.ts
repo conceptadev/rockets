@@ -1,11 +1,11 @@
 import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
+import { RepositoryInterface } from '@concepta/nestjs-common';
 import { UserModule, UserLookupService } from '@concepta/nestjs-user';
 import { getDynamicRepositoryToken } from '@concepta/nestjs-typeorm-ext';
 import { UserController } from '@concepta/nestjs-user';
 import { AppModule } from './app.module';
 import { UserEntity } from './user/user.entity';
-import { RepositoryInterface } from '@concepta/typeorm-common';
 
 describe('AppModule', () => {
   let userModule: UserModule;

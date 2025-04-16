@@ -57,7 +57,6 @@ import { CacheCreateDto } from '../dto/cache-create.dto';
       disabled: true,
     },
   },
-  join: { cache: { eager: true }, assignee: { eager: true } },
 })
 export class CacheCrudController
   implements

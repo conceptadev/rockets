@@ -10,6 +10,6 @@ export interface CacheClearInterface {
    */
   clear(
     assignment: ReferenceAssignment,
-    cache: Pick<CacheInterface, 'assignee'>,
+    cache: Pick<CacheInterface, 'assigneeId'>,
   ): Promise<void>;
 }

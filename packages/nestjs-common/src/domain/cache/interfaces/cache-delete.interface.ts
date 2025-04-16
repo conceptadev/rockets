@@ -10,6 +10,6 @@ export interface CacheDeleteInterface {
    */
   delete(
     assignment: ReferenceAssignment,
-    cache: Pick<CacheInterface, 'key' | 'type' | 'assignee'>,
+    cache: Pick<CacheInterface, 'key' | 'type' | 'assigneeId'>,
   ): Promise<void>;
 }

@@ -4,7 +4,10 @@ import {
   Provider,
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { createSettingsProvider } from '@concepta/nestjs-common';
+import {
+  RepositoryInterface,
+  createSettingsProvider,
+} from '@concepta/nestjs-common';
 import { PasswordCreationService } from '@concepta/nestjs-password';
 import {
   getDynamicRepositoryToken,
@@ -37,7 +40,6 @@ import { UserController } from './user.controller';
 import { InvitationAcceptedListener } from './listeners/invitation-accepted-listener';
 import { userDefaultConfig } from './config/user-default.config';
 import { UserMissingEntitiesOptionsException } from './exceptions/user-missing-entities-options.exception';
-import { RepositoryInterface } from '@concepta/typeorm-common';
 
 const RAW_OPTIONS_TOKEN = Symbol('__USER_MODULE_RAW_OPTIONS_TOKEN__');
 

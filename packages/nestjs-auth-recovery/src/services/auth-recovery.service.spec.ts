@@ -143,7 +143,7 @@ describe(AuthRecoveryService, () => {
 
     it('should validate good passcode', async () => {
       const otp = await authRecoveryService.validatePasscode('GOOD_PASSCODE');
-      expect(otp).toEqual({ assignee: UserFixture });
+      expect(otp).toEqual({ assigneeId: UserFixture.id });
     });
 
     it('should not validate bad passcode', async () => {

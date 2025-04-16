@@ -1,10 +1,11 @@
-import { DeepPartial } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { MutateService, RepositoryInterface } from '@concepta/typeorm-common';
+import { MutateService } from '@concepta/typeorm-common';
 import {
+  DeepPartial,
   PasswordPlainInterface,
   UserCreatableInterface,
   UserUpdatableInterface,
+  RepositoryInterface,
 } from '@concepta/nestjs-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 

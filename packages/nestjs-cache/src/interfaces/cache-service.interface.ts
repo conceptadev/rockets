@@ -22,6 +22,6 @@ export interface CacheServiceInterface
 
   getAssignedCaches(
     assignment: ReferenceAssignment,
-    cache: Pick<CacheInterface, 'assignee'>,
+    cache: Pick<CacheInterface, 'assigneeId'>,
   ): Promise<CacheInterface[]>;
 }

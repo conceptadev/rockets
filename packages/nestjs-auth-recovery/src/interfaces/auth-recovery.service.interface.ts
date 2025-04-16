@@ -1,5 +1,5 @@
 import {
-  ReferenceAssigneeInterface,
+  AssigneeRelationInterface,
   ReferenceIdInterface,
 } from '@concepta/nestjs-common';
 
@@ -9,7 +9,7 @@ export interface AuthRecoveryServiceInterface {
   validatePasscode(
     passcode: string,
     deleteIfValid?: boolean,
-  ): Promise<ReferenceAssigneeInterface | null>;
+  ): Promise<AssigneeRelationInterface | null>;
   updatePassword(
     passcode: string,
     newPassword: string,

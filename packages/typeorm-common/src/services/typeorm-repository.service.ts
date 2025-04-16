@@ -1,20 +1,26 @@
 import {
-  DeepPartial,
   FindManyOptions,
   FindOneOptions,
   FindOptionsWhere,
-  RemoveOptions,
+  LessThan,
+  LessThanOrEqual,
+  MoreThan,
+  MoreThanOrEqual,
   Repository,
-  SaveOptions,
 } from 'typeorm';
-import { ReferenceIdInterface } from '@concepta/nestjs-common';
-import { RepositoryInterface } from '../interfaces/repository.interface';
+import {
+  DeepPartial,
+  RepositoryInternals,
+  RepositoryInterface,
+} from '@concepta/nestjs-common';
 import { ReferenceLookupException } from '../exceptions/reference-lookup.exception';
+import { PlainLiteralObject } from '@nestjs/common';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 /**
  * Abstract service
  */
-export class TypeOrmRepositoryService<Entity extends ReferenceIdInterface>
+export class TypeOrmRepositoryService<Entity extends PlainLiteralObject>
   implements RepositoryInterface<Entity>
 {
   /**
@@ -27,12 +33,16 @@ export class TypeOrmRepositoryService<Entity extends ReferenceIdInterface>
   /**
    * Find wrapper.
    *
-   * @param options - Find many options
+   * @param options - Find many optionsq
    */
-  async find(options?: FindManyOptions<Entity>): Promise<Entity[]> {
+  async find(
+    options?: RepositoryInternals.FindManyOptions<Entity>,
+  ): Promise<Entity[]> {
     try {
+      // type assertion
+      const cleanOptions: FindManyOptions | undefined = options;
       // call the repo find
-      return this.repo.find(options);
+      return this.repo.find(cleanOptions);
     } catch (e) {
       // fatal orm error
       throw new ReferenceLookupException(this.metadata.name, {
@@ -46,10 +56,12 @@ export class TypeOrmRepositoryService<Entity extends ReferenceIdInterface>
    *
    * @param options - Find one options
    */
-  async findOne(options: FindOneOptions<Entity>): Promise<Entity | null> {
+  async findOne(
+    options: RepositoryInternals.FindOneOptions<Entity>,
+  ): Promise<Entity | null> {
     try {
       // call the repo find one
-      return this.repo.findOne(options);
+      return this.repo.findOne(options as FindOneOptions<Entity>);
     } catch (e) {
       // fatal orm error
       // TODO: remove metadata?
@@ -70,22 +82,30 @@ export class TypeOrmRepositoryService<Entity extends ReferenceIdInterface>
   // Wrappers
   //
   async findBy(
-    where: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[],
+    where:
+      | RepositoryInternals.FindOptionsWhere<Entity>
+      | RepositoryInternals.FindOptionsWhere<Entity>[],
   ): Promise<Entity[]> {
-    return this.repo.findBy(where);
+    if (Array.isArray(where)) {
+      return this.repo.findBy(where as FindOptionsWhere<Entity>[]);
+    } else {
+      return this.repo.findBy(where as FindOptionsWhere<Entity>);
+    }
   }
 
-  async count(options?: FindManyOptions<Entity>): Promise<number> {
-    return this.repo.count(options);
+  async count(
+    options?: RepositoryInternals.FindManyOptions<Entity>,
+  ): Promise<number> {
+    return this.repo.count(options as FindManyOptions<Entity>);
   }
 
-  create(entityLike: DeepPartial<Entity>): Entity {
-    return this.repo.create(entityLike);
+  create(entityLike: DeepPartial<Entity> | never): Entity {
+    return this.repo.create(entityLike as Entity);
   }
 
   async save<T extends DeepPartial<Entity>>(
     entities: T | T[],
-    options?: SaveOptions,
+    options?: RepositoryInternals.SaveOptions,
   ): Promise<(T & Entity) | (T & Entity)[]> {
     if (Array.isArray(entities)) {
       return this.repo.save(entities, options);
@@ -95,16 +115,40 @@ export class TypeOrmRepositoryService<Entity extends ReferenceIdInterface>
   }
 
   async update(
-    ...params: Parameters<Repository<Entity>['update']>
-  ): ReturnType<Repository<Entity>['update']> {
-    return this.repo.update(...params);
+    criteria:
+      | string
+      | string[]
+      | number
+      | number[]
+      | Date
+      | Date[]
+      | RepositoryInternals.FindOptionsWhere<Entity>,
+    partialEntity: RepositoryInternals.QueryDeepPartialEntity<Entity>,
+  ): Promise<RepositoryInternals.UpdateResult> {
+    return this.repo.update(
+      criteria as
+        | string
+        | string[]
+        | number
+        | number[]
+        | Date
+        | Date[]
+        | FindOptionsWhere<Entity>,
+      partialEntity as QueryDeepPartialEntity<Entity>,
+    );
   }
 
-  async remove(entities: Entity[], options?: RemoveOptions): Promise<Entity[]>;
-  async remove(entity: Entity, options?: RemoveOptions): Promise<Entity>;
+  async remove(
+    entities: Entity[],
+    options?: RepositoryInternals.RemoveOptions,
+  ): Promise<Entity[]>;
+  async remove(
+    entity: Entity,
+    options?: RepositoryInternals.RemoveOptions,
+  ): Promise<Entity>;
   async remove(
     entity: Entity | Entity[],
-    removeOptions?: RemoveOptions,
+    removeOptions?: RepositoryInternals.RemoveOptions,
   ): Promise<Entity | Entity[]> {
     if (Array.isArray(entity)) {
       return this.repo.remove(entity, removeOptions);
@@ -114,9 +158,25 @@ export class TypeOrmRepositoryService<Entity extends ReferenceIdInterface>
   }
 
   async delete(
-    ...params: Parameters<Repository<Entity>['delete']>
-  ): ReturnType<Repository<Entity>['delete']> {
-    return this.repo.delete(...params);
+    criteria:
+      | string
+      | string[]
+      | number
+      | number[]
+      | Date
+      | Date[]
+      | RepositoryInternals.FindOptionsWhere<Entity>,
+  ): Promise<RepositoryInternals.DeleteResult> {
+    return this.repo.delete(
+      criteria as
+        | string
+        | string[]
+        | number
+        | number[]
+        | Date
+        | Date[]
+        | FindOptionsWhere<Entity>,
+    );
   }
 
   merge(
@@ -124,5 +184,21 @@ export class TypeOrmRepositoryService<Entity extends ReferenceIdInterface>
     ...entityLikes: DeepPartial<Entity>[]
   ): Entity {
     return this.repo.merge(mergeIntoEntity, ...entityLikes);
+  }
+
+  gt<T>(value: T) {
+    return MoreThan<T>(value);
+  }
+
+  gte<T>(value: T) {
+    return MoreThanOrEqual<T>(value);
+  }
+
+  lt<T>(value: T) {
+    return LessThan<T>(value);
+  }
+
+  lte<T>(value: T) {
+    return LessThanOrEqual<T>(value);
   }
 }

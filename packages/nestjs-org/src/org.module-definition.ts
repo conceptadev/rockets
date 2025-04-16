@@ -10,7 +10,7 @@ import {
   getDynamicRepositoryToken,
   TypeOrmExtModule,
 } from '@concepta/nestjs-typeorm-ext';
-import { RepositoryInterface } from '@concepta/typeorm-common';
+import { RepositoryInterface } from '@concepta/nestjs-common';
 import {
   ORG_MODULE_SETTINGS_TOKEN,
   ORG_MODULE_OWNER_LOOKUP_SERVICE_TOKEN,

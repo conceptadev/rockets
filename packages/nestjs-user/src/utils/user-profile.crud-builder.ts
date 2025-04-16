@@ -1,4 +1,4 @@
-import { DeepPartial, ObjectLiteral } from 'typeorm';
+import { PlainLiteralObject } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import {
   ConfigurableCrudBuilder,
@@ -13,7 +13,10 @@ import {
   AccessControlReplaceOne,
   AccessControlUpdateOne,
 } from '@concepta/nestjs-access-control';
-import { UserProfileCreatableInterface } from '@concepta/nestjs-common';
+import {
+  DeepPartial,
+  UserProfileCreatableInterface,
+} from '@concepta/nestjs-common';
 import { USER_MODULE_CONFIGURABLE_CRUD_PROFILE_SERVICE_TOKEN } from '../user.constants';
 import { UserProfileDto } from '../dto/profile/user-profile.dto';
 import { UserProfilePaginatedDto } from '../dto/profile/user-profile-paginated.dto';
@@ -69,7 +72,7 @@ export class UserProfileCrudBuilder<
     UserProfileCreatableInterface,
   Updatable extends DeepPartial<Entity> = DeepPartial<Entity>,
   Replaceable extends Creatable = Creatable,
-  ExtraOptions extends ObjectLiteral = ObjectLiteral,
+  ExtraOptions extends PlainLiteralObject = PlainLiteralObject,
 > extends ConfigurableCrudBuilder<
   Entity,
   Creatable,

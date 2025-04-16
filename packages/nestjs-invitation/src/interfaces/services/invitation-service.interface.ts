@@ -6,7 +6,7 @@ import { InvitationRevokeOptionsInterface } from '../options/invitation-revoke-o
 export interface InvitationServiceInterface {
   create(
     createInviteDto: InvitationCreateInviteInterface,
-  ): Promise<Required<Pick<InvitationInterface, 'id' | 'user'>>>;
+  ): Promise<Required<Pick<InvitationInterface, 'id' | 'userId'>>>;
 
   send(invitation: Pick<InvitationInterface, 'id'>): Promise<void>;
 

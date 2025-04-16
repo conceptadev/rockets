@@ -1,3 +1,4 @@
+import { PlainLiteralObject } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import {
   ConfigurableCrudBuilder,
@@ -14,6 +15,7 @@ import {
   AccessControlUpdateOne,
 } from '@concepta/nestjs-access-control';
 import {
+  DeepPartial,
   OrgCreatableInterface,
   OrgUpdatableInterface,
 } from '@concepta/nestjs-common';
@@ -25,7 +27,6 @@ import { OrgPaginatedDto } from '../dto/org-paginated.dto';
 import { OrgEntityInterface } from '../interfaces/org-entity.interface';
 import { OrgResource } from '../org.types';
 import { ORG_MODULE_CONFIGURABLE_CRUD_SERVICE_TOKEN } from '../org.constants';
-import { DeepPartial, ObjectLiteral } from 'typeorm';
 
 const orgCrudBuilderDefaultOptions: ConfigurableCrudOptions = {
   service: {
@@ -78,7 +79,7 @@ export class OrgCrudBuilder<
   Updatable extends DeepPartial<Entity> &
     OrgUpdatableInterface = DeepPartial<Entity> & OrgUpdatableInterface,
   Replaceable extends Creatable = Creatable,
-  ExtraOptions extends ObjectLiteral = ObjectLiteral,
+  ExtraOptions extends PlainLiteralObject = PlainLiteralObject,
 > extends ConfigurableCrudBuilder<
   Entity,
   Creatable,

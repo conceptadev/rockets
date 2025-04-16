@@ -1,4 +1,3 @@
-import { DeepPartial, FindOneOptions } from 'typeorm';
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 import {
@@ -8,12 +7,14 @@ import {
   ReplaceOneInterface,
   UpdateOneInterface,
   Type,
+  RepositoryInterface,
+  RepositoryInternals,
+  DeepPartial,
 } from '@concepta/nestjs-common';
 
 import { ReferenceValidationException } from '../exceptions/reference-validation.exception';
 import { ReferenceMutateException } from '../exceptions/reference-mutate.exception';
 import { ReferenceIdNoMatchException } from '../exceptions/reference-id-no-match.exception';
-import { RepositoryInterface } from '../interfaces/repository.interface';
 
 /**
  * Abstract mutate service
@@ -179,7 +180,7 @@ export abstract class MutateService<
     // https://github.com/typeorm/typeorm/issues/8939
     const entity = await this.repo.findOne({
       where: { id },
-    } as FindOneOptions<Entity>);
+    } as RepositoryInternals.FindOneOptions<Entity>);
 
     // did we get one?
     if (entity) {

@@ -1,6 +1,7 @@
-import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
-import { MutateService, RepositoryInterface } from '@concepta/typeorm-common';
 import { Injectable } from '@nestjs/common';
+import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
+import { MutateService } from '@concepta/typeorm-common';
+import { RepositoryInterface } from '@concepta/nestjs-common';
 
 import { InvitationCreateDto } from '../dto/invitation-create.dto';
 import { InvitationCreatableInterface } from '../interfaces/domain/invitation-creatable.interface';

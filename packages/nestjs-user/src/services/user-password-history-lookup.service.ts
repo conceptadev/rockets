@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { LookupService, RepositoryInterface } from '@concepta/typeorm-common';
+import { ReferenceId, RepositoryInterface } from '@concepta/nestjs-common';
+import { LookupService } from '@concepta/typeorm-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 
 import { USER_MODULE_USER_PASSWORD_HISTORY_ENTITY_KEY } from '../user.constants';
 import { UserPasswordHistoryEntityInterface } from '../interfaces/user-password-history-entity.interface';
-import { ReferenceId } from '@concepta/nestjs-common';
 
 @Injectable()
 export class UserPasswordHistoryLookupService extends LookupService<UserPasswordHistoryEntityInterface> {
@@ -16,6 +16,6 @@ export class UserPasswordHistoryLookupService extends LookupService<UserPassword
   }
 
   async byUserId(userId: ReferenceId) {
-    return this.repo.findBy({ userId });
+    return this.userPasswordHistoryRepo.findBy({ userId });
   }
 }

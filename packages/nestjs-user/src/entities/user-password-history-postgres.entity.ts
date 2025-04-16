@@ -2,7 +2,6 @@ import { Column } from 'typeorm';
 import { ReferenceId } from '@concepta/nestjs-common';
 import { CommonPostgresEntity } from '@concepta/typeorm-common';
 import { UserPasswordHistoryEntityInterface } from '../interfaces/user-password-history-entity.interface';
-import { UserEntityInterface } from '../interfaces/user-entity.interface';
 
 /**
  * User Entity
@@ -28,9 +27,4 @@ export abstract class UserPasswordHistoryPostgresEntity
    */
   @Column({ type: 'uuid' })
   userId!: ReferenceId;
-
-  /**
-   * Should be configured by the implementation
-   */
-  user?: UserEntityInterface;
 }

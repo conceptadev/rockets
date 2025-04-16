@@ -5,7 +5,10 @@ import { INestApplication } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { getDynamicRepositoryToken } from '@concepta/nestjs-typeorm-ext';
-import { RoleAssignmentCreatableInterface } from '@concepta/nestjs-common';
+import {
+  RepositoryInterface,
+  RoleAssignmentCreatableInterface,
+} from '@concepta/nestjs-common';
 
 import { ROLE_MODULE_ROLE_ENTITY_KEY } from './role.constants';
 
@@ -16,7 +19,6 @@ import { AppModuleFixture } from './__fixtures__/app.module.fixture';
 import { RoleEntityFixture } from './__fixtures__/entities/role-entity.fixture';
 import { UserFactoryFixture } from './__fixtures__/factories/user.factory.fixture';
 import { UserRoleFactoryFixture } from './__fixtures__/factories/user-role.factory.fixture';
-import { RepositoryInterface } from '@concepta/typeorm-common';
 
 describe('RoleAssignmentController (e2e)', () => {
   let app: INestApplication;
@@ -62,8 +64,8 @@ describe('RoleAssignmentController (e2e)', () => {
     for (const role of roles) {
       await userRoleFactory
         .map((userRole) => {
-          userRole.role = role;
-          userRole.assignee = user;
+          userRole.roleId = role.id;
+          userRole.assigneeId = user.id;
         })
         .create();
     }
@@ -82,8 +84,8 @@ describe('RoleAssignmentController (e2e)', () => {
 
     const userRole = await userRoleFactory
       .map((userRole) => {
-        userRole.role = roles[0];
-        userRole.assignee = user;
+        userRole.roleId = roles[0].id;
+        userRole.assigneeId = user.id;
       })
       .create();
 
@@ -91,8 +93,8 @@ describe('RoleAssignmentController (e2e)', () => {
       .get(`/role-assignment/user/${userRole.id}`)
       .expect(200)
       .then((res) => {
-        assert.strictEqual(res.body.role.id, roles[0].id);
-        assert.strictEqual(res.body.assignee.id, user.id);
+        assert.strictEqual(res.body.roleId, roles[0].id);
+        assert.strictEqual(res.body.assigneeId, user.id);
       });
   });
 
@@ -101,8 +103,8 @@ describe('RoleAssignmentController (e2e)', () => {
     const user = await userFactory.create();
 
     const payload: RoleAssignmentCreatableInterface = {
-      role: { id: roles[0].id },
-      assignee: { id: user.id },
+      roleId: roles[0].id,
+      assigneeId: user.id,
     };
 
     await supertest(app.getHttpServer())
@@ -110,8 +112,8 @@ describe('RoleAssignmentController (e2e)', () => {
       .send(payload)
       .expect(201)
       .then((res) => {
-        assert.strictEqual(res.body.role.id, roles[0].id);
-        assert.strictEqual(res.body.assignee.id, user.id);
+        assert.strictEqual(res.body.roleId, roles[0].id);
+        assert.strictEqual(res.body.assigneeId, user.id);
       });
   });
 
@@ -121,8 +123,8 @@ describe('RoleAssignmentController (e2e)', () => {
 
     const userRole = await userRoleFactory
       .map((userRole) => {
-        userRole.role = roles[0];
-        userRole.assignee = user;
+        userRole.roleId = roles[0].id;
+        userRole.assigneeId = user.id;
       })
       .create();
 

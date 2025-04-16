@@ -14,10 +14,7 @@ export class InvitationSendServiceFixture
   ): Promise<InvitationSendInviteInterface> {
     return {
       id: 'test-id',
-      user: {
-        id: 'test-user-id',
-        email: 'test@email.com',
-      },
+      userId: 'test-user-id',
       category: 'foo',
       code: 'bar',
     };

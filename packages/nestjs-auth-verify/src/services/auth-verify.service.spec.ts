@@ -114,7 +114,7 @@ describe(AuthVerifyService, () => {
       const otp = await authVerifyService.validatePasscode({
         passcode: 'GOOD_PASSCODE',
       });
-      expect(otp).toEqual({ assignee: UserFixture });
+      expect(otp).toEqual({ assigneeId: UserFixture.id });
     });
 
     it('should not validate bad passcode', async () => {

@@ -1,4 +1,5 @@
-import { DeepPartial, ObjectLiteral } from 'typeorm';
+import { PlainLiteralObject } from '@nestjs/common';
+import { DeepPartial } from '@concepta/nestjs-common';
 import { AdditionalCrudMethodArgs } from '../crud.types';
 import { CrudMethodNotImplementedException } from '../exceptions/crud-method-not-implemented.exception';
 import { CrudControllerInterface } from '../interfaces/crud-controller.interface';
@@ -8,7 +9,7 @@ import { CrudResponsePaginatedInterface } from '../interfaces/crud-response-pagi
 import { TypeOrmCrudService } from '../services/typeorm-crud.service';
 
 export class CrudBaseController<
-  Entity extends ObjectLiteral,
+  Entity extends PlainLiteralObject,
   Creatable extends DeepPartial<Entity>,
   Updatable extends DeepPartial<Entity>,
   Replaceable extends Creatable = Creatable,

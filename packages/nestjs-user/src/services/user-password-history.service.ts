@@ -1,6 +1,10 @@
 import { MoreThan } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
-import { ReferenceId, ReferenceIdInterface } from '@concepta/nestjs-common';
+import {
+  ReferenceId,
+  ReferenceIdInterface,
+  RepositoryInternals,
+} from '@concepta/nestjs-common';
 import { PasswordStorageInterface } from '@concepta/nestjs-password';
 
 import { UserPasswordHistoryLookupService } from './user-password-history-lookup.service';
@@ -10,7 +14,7 @@ import { UserException } from '../exceptions/user-exception';
 import { UserPasswordHistoryServiceInterface } from '../interfaces/user-password-history-service.interface';
 import { UserSettingsInterface } from '../interfaces/user-settings.interface';
 import { USER_MODULE_SETTINGS_TOKEN } from '../user.constants';
-import { FindManyOptions } from 'typeorm';
+import { UserPasswordHistoryEntityInterface } from '../interfaces/user-password-history-entity.interface';
 
 @Injectable()
 export class UserPasswordHistoryService
@@ -65,9 +69,11 @@ export class UserPasswordHistoryService
     }
   }
 
-  protected getHistoryFindManyOptions(userId: ReferenceId): FindManyOptions {
+  protected getHistoryFindManyOptions(
+    userId: ReferenceId,
+  ): RepositoryInternals.FindManyOptions<UserPasswordHistoryEntityInterface> {
     // the base query
-    const query: FindManyOptions & {
+    const query: RepositoryInternals.FindManyOptions<UserPasswordHistoryEntityInterface> & {
       where: {
         userId: ReferenceId;
         dateCreated?: ReturnType<typeof MoreThan>;

@@ -7,6 +7,7 @@ import {
   ModuleMetadata,
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { RepositoryInterface } from '@concepta/nestjs-common';
 import {
   getDynamicRepositoryToken,
   getEntityRepositoryToken,
@@ -34,7 +35,7 @@ import { UserEntityFixture } from './__fixtures__/user/entities/user.entity.fixt
 import { UserLookupServiceFixture } from './__fixtures__/user/services/user-lookup.service.fixture';
 import { UserMutateServiceFixture } from './__fixtures__/user/services/user-mutate.service.fixture';
 import { FederatedEntityFixture } from './__fixtures__/federated/federated-entity.fixture';
-import { RepositoryInterface } from '@concepta/typeorm-common';
+import {} from '@concepta/nestjs-common';
 
 describe(FederatedModule, () => {
   let testModule: TestingModule;

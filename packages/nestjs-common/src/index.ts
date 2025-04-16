@@ -24,7 +24,9 @@ export { NotAnErrorException } from './exceptions/not-an-error.exception';
 // Utility types and functions
 export { LiteralObject } from './utils/interfaces/literal-object.interface';
 export { Type } from './utils/interfaces/type.interface';
+export { DeepPartial } from './utils/interfaces/deep-partial.interface';
 export { mapNonErrorToException } from './utils/map-non-error-to-exception.util';
+export { mapHttpStatus } from './utils/map-http-status.util';
 
 // Reference types
 export {
@@ -39,6 +41,7 @@ export {
 // Reference interfaces
 export { ReferenceActiveInterface } from './reference/interfaces/reference-active.interface';
 export { ReferenceAssigneeInterface } from './reference/interfaces/reference-assignee.interface';
+export { ReferenceAssignmentInterface } from './reference/interfaces/reference-assignment.interface';
 export { ReferenceEmailInterface } from './reference/interfaces/reference-email.interface';
 export { ReferenceIdInterface } from './reference/interfaces/reference-id.interface';
 export { ReferenceSubjectInterface } from './reference/interfaces/reference-subject.interface';
@@ -47,12 +50,7 @@ export { ReferenceUserInterface } from './reference/interfaces/reference-user.in
 export { ReferenceRoleInterface } from './reference/interfaces/reference-role.interface';
 export { ReferenceRolesInterface } from './reference/interfaces/reference-roles.interface';
 
-// role interface
-export { RoleAssignmentInterface } from './domain/role/interfaces/role-assignment.interface';
-export { RoleAssignmentCreatableInterface } from './domain/role/interfaces/role-assignment-creatable.interface';
-export { RoleAssigneesInterface } from './domain/role/interfaces/role-assignees.interface';
-
-// Lookup interfaces
+// Query interfaces
 export { ByEmailInterface } from './model/query/by-email.interface';
 export { ByIdInterface } from './model/query/by-id.interface';
 export { BySubjectInterface } from './model/query/by-subject.interface';
@@ -63,6 +61,9 @@ export { CreateOneInterface } from './model/mutate/create-one.interface';
 export { RemoveOneInterface } from './model/mutate/remove-one.interface';
 export { ReplaceOneInterface } from './model/mutate/replace-one.interface';
 export { UpdateOneInterface } from './model/mutate/update-one.interface';
+
+// Repository interfaces
+export { RepositoryInterface } from './repository/interfaces/repository.interface';
 
 // Audit types
 export {
@@ -92,5 +93,5 @@ export { RuntimeExceptionInterface } from './exceptions/interfaces/runtime-excep
 // exceptions
 export { RuntimeException } from './exceptions/runtime.exception';
 
-// utils
-export { mapHttpStatus } from './utils/map-http-status.util';
+// !!! THESE EXPORTS ARE TEMPORARY AND MAY BE REMOVED IN THE FUTURE !!!
+export { RepositoryInternals } from './repository/interfaces/repository-internals';

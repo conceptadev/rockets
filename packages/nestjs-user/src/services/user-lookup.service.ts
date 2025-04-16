@@ -3,8 +3,9 @@ import {
   ReferenceEmail,
   ReferenceSubject,
   ReferenceUsername,
+  RepositoryInterface,
 } from '@concepta/nestjs-common';
-import { LookupService, RepositoryInterface } from '@concepta/typeorm-common';
+import { LookupService } from '@concepta/typeorm-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 
 import { USER_MODULE_USER_ENTITY_KEY } from '../user.constants';

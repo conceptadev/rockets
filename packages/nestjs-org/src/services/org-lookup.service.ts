@@ -1,7 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { OrgOwnerInterface } from '@concepta/nestjs-common';
+import {
+  OrgOwnerInterface,
+  RepositoryInterface,
+} from '@concepta/nestjs-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
-import { LookupService, RepositoryInterface } from '@concepta/typeorm-common';
+import { LookupService } from '@concepta/typeorm-common';
 
 import {
   ORG_MODULE_ORG_ENTITY_KEY,

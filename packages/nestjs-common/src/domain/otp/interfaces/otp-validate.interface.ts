@@ -1,5 +1,5 @@
-import { ReferenceAssigneeInterface } from '../../../reference/interfaces/reference-assignee.interface';
 import { ReferenceAssignment } from '../../../reference/interfaces/reference.types';
+import { AssigneeRelationInterface } from '../../assignee/interfaces/assignee-relation.interface';
 import { OtpInterface } from './otp.interface';
 
 export interface OtpValidateInterface {
@@ -14,5 +14,5 @@ export interface OtpValidateInterface {
     assignment: ReferenceAssignment,
     otp: Pick<OtpInterface, 'category' | 'passcode'>,
     deleteIfValid: boolean,
-  ): Promise<ReferenceAssigneeInterface | null>;
+  ): Promise<AssigneeRelationInterface | null>;
 }

@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
-import { NotAnErrorException } from '@concepta/nestjs-common';
-import { RepositoryInterface } from '@concepta/typeorm-common';
+import {
+  NotAnErrorException,
+  RepositoryInterface,
+} from '@concepta/nestjs-common';
 
 import { FEDERATED_MODULE_FEDERATED_ENTITY_KEY } from '../federated.constants';
 
 import { FederatedServiceInterface } from '../interfaces/federated-service.interface';
 import { FederatedEntityInterface } from '../interfaces/federated-entity.interface';
 import { FederatedQueryException } from '../exceptions/federated-query.exception';
-import {} from '@concepta/typeorm-common';
 
 @Injectable()
 export class FederatedService implements FederatedServiceInterface {

@@ -10,6 +10,6 @@ export interface OtpClearInterface {
    */
   clear(
     assignment: ReferenceAssignment,
-    otp: Pick<OtpInterface, 'assignee' | 'category'>,
+    otp: Pick<OtpInterface, 'assigneeId' | 'category'>,
   ): Promise<void>;
 }

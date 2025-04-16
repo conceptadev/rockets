@@ -19,10 +19,7 @@ export class InvitationSendServiceFixture
       id: 'test-id',
       category: 'foo',
       code: 'bar',
-      user: {
-        id: 'test-user-id',
-        email: 'test@email.com',
-      },
+      userId: 'test-user-id',
     });
   }
 

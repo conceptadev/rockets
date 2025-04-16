@@ -1,19 +1,11 @@
-import { Exclude, Expose, Type } from 'class-transformer';
-import {
-  IsBoolean,
-  IsObject,
-  IsOptional,
-  IsString,
-  ValidateNested,
-} from 'class-validator';
+import { Exclude, Expose } from 'class-transformer';
+import { IsBoolean, IsObject, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   LiteralObject,
   CommonEntityDto,
   InvitationInterface,
-  InvitationUserInterface,
 } from '@concepta/nestjs-common';
-import { InvitationUserDto } from './invitation-user.dto';
 
 @Exclude()
 export class InvitationDto
@@ -58,10 +50,9 @@ export class InvitationDto
 
   @Expose()
   @ApiProperty({
-    type: InvitationUserDto,
-    description: 'The invited user.',
+    type: 'string',
+    description: 'The invited user ID.',
   })
-  @Type(() => InvitationUserDto)
-  @ValidateNested()
-  user!: InvitationUserInterface;
+  @IsString()
+  userId!: string;
 }

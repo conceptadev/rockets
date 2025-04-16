@@ -1,5 +1,5 @@
 import { FileCreatableInterface } from '@concepta/nestjs-common';
-import { RepositoryInterface } from '@concepta/typeorm-common';
+import { RepositoryInterface } from '@concepta/nestjs-common';
 import { randomUUID } from 'crypto';
 import { mock } from 'jest-mock-extended';
 import { FileEntityFixture } from '../__fixtures__/file/file-entity.fixture';

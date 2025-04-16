@@ -1,5 +1,6 @@
 import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
+import { RepositoryInterface } from '@concepta/nestjs-common';
 import { getDynamicRepositoryToken } from '@concepta/nestjs-typeorm-ext';
 import { PasswordCreationService } from '@concepta/nestjs-password';
 
@@ -20,7 +21,6 @@ import { UserAccessQueryService } from './services/user-access-query.service';
 
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
 import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
-import { RepositoryInterface } from '@concepta/typeorm-common';
 
 describe('AppModule', () => {
   let testModule: TestingModule;

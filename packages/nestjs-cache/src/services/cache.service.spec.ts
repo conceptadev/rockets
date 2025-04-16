@@ -3,11 +3,11 @@ import { ReferenceAssignment } from '@concepta/nestjs-common';
 import {
   CacheCreatableInterface,
   CacheInterface,
+  RepositoryInterface,
 } from '@concepta/nestjs-common';
 import {
   ReferenceMutateException,
   ReferenceValidationException,
-  RepositoryInterface,
 } from '@concepta/typeorm-common';
 
 import { CacheService } from './cache.service';
@@ -30,7 +30,7 @@ describe('CacheService', () => {
     key: 'testKey',
     type: 'testType',
     data: 'testData',
-    assignee: { id: 'testAssignee' },
+    assigneeId: 'testAssignee',
     expiresIn: '1h',
   };
 
@@ -60,7 +60,7 @@ describe('CacheService', () => {
         key: cacheDto.key,
         type: cacheDto.type,
         data: cacheDto.data,
-        assignee: cacheDto.assignee,
+        assigneeId: cacheDto.assigneeId,
         expirationDate,
       });
     });
@@ -86,7 +86,7 @@ describe('CacheService', () => {
         key: cacheDto.key,
         type: cacheDto.type,
         data: cacheDto.data,
-        assignee: cacheDto.assignee,
+        assigneeId: cacheDto.assigneeId,
         expirationDate,
       };
       service['findCache'] = jest.fn().mockImplementationOnce(() => {

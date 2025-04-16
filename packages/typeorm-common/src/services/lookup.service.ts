@@ -2,9 +2,9 @@ import {
   ByIdInterface,
   ReferenceId,
   ReferenceIdInterface,
+  RepositoryInterface,
+  RepositoryInternals,
 } from '@concepta/nestjs-common';
-import { FindManyOptions, FindOneOptions } from 'typeorm';
-import { RepositoryInterface } from '../interfaces/repository.interface';
 
 /**
  * Abstract lookup service
@@ -19,7 +19,9 @@ export abstract class LookupService<Entity extends ReferenceIdInterface>
    */
   constructor(protected readonly repo: RepositoryInterface<Entity>) {}
 
-  async find(options?: FindManyOptions<Entity>): Promise<Entity[]> {
+  async find(
+    options?: RepositoryInternals.FindManyOptions<Entity>,
+  ): Promise<Entity[]> {
     return this.repo.find(options);
   }
 
@@ -29,8 +31,8 @@ export abstract class LookupService<Entity extends ReferenceIdInterface>
    * @param id - the id
    */
   async byId(id: ReferenceId): Promise<Entity | null> {
-    // TODO: remove this type assertion when fix is released
-    // https://github.com/typeorm/typeorm/issues/8939
-    return this.repo.findOne({ where: { id } } as FindOneOptions<Entity>);
+    return this.repo.findOne({
+      where: { id },
+    } as RepositoryInternals.FindOneOptions<Entity>);
   }
 }

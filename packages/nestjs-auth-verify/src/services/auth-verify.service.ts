@@ -13,7 +13,7 @@ import {
 } from '../auth-verify.constants';
 import { AuthVerifyNotificationService } from './auth-verify-notification.service';
 import {
-  ReferenceAssigneeInterface,
+  AssigneeRelationInterface,
   ReferenceIdInterface,
 } from '@concepta/nestjs-common';
 import { AuthVerifySendParamsInterface } from '../interfaces/auth-verify-send-params.interface';
@@ -75,9 +75,7 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
           category,
           type,
           expiresIn,
-          assignee: {
-            id: user.id,
-          },
+          assigneeId: user.id,
         },
         clearOnCreate: clearOtpOnCreate,
         rateSeconds,
@@ -109,7 +107,7 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
    */
   async validatePasscode(
     params: AuthVerifyValidateParamsInterface,
-  ): Promise<ReferenceAssigneeInterface | null> {
+  ): Promise<AssigneeRelationInterface | null> {
     const { passcode, deleteIfValid = false } = params;
     // extract required properties
     const { category, assignment } = this.config.otp;
@@ -148,7 +146,7 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
     if (otp) {
       // call user mutate service
       const user = await this.userMutateService.update({
-        id: otp.assignee.id,
+        id: otp.assigneeId,
         active: true,
       });
 
@@ -185,9 +183,7 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
       // clear all user's otps in DB
       await this.otpService.clear(assignment, {
         category,
-        assignee: {
-          id: user.id,
-        },
+        assigneeId: user.id,
       });
     }
   }
