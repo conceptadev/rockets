@@ -1,8 +1,6 @@
 import { ValidationError } from 'class-validator';
-import {
-  RuntimeException,
-  RuntimeExceptionOptions,
-} from '@concepta/nestjs-common';
+import { RuntimeException } from '../../exceptions/runtime.exception';
+import { RuntimeExceptionOptions } from '../../exceptions/interfaces/runtime-exception-options.interface';
 
 export class ReferenceValidationException extends RuntimeException {
   context: RuntimeException['context'] & {

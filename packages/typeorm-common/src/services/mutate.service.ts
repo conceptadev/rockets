@@ -10,11 +10,10 @@ import {
   RepositoryInterface,
   RepositoryInternals,
   DeepPartial,
+  ReferenceValidationException,
+  ReferenceMutateException,
+  ReferenceIdNoMatchException,
 } from '@concepta/nestjs-common';
-
-import { ReferenceValidationException } from '../exceptions/reference-validation.exception';
-import { ReferenceMutateException } from '../exceptions/reference-mutate.exception';
-import { ReferenceIdNoMatchException } from '../exceptions/reference-id-no-match.exception';
 
 /**
  * Abstract mutate service

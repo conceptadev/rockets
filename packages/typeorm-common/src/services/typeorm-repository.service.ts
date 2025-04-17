@@ -8,13 +8,13 @@ import {
   MoreThanOrEqual,
   Repository,
 } from 'typeorm';
+import { PlainLiteralObject } from '@nestjs/common';
 import {
   DeepPartial,
   RepositoryInternals,
   RepositoryInterface,
+  ReferenceLookupException,
 } from '@concepta/nestjs-common';
-import { ReferenceLookupException } from '../exceptions/reference-lookup.exception';
-import { PlainLiteralObject } from '@nestjs/common';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 /**

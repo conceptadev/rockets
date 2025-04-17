@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ReferenceMutateException } from '@concepta/typeorm-common';
 import {
   NotAnErrorException,
   ReferenceIdInterface,
+  ReferenceMutateException,
 } from '@concepta/nestjs-common';
 import {
   FEDERATED_MODULE_USER_LOOKUP_SERVICE_TOKEN,

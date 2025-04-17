@@ -1,8 +1,6 @@
-import { ReferenceId } from '@concepta/nestjs-common';
-import {
-  RuntimeException,
-  RuntimeExceptionOptions,
-} from '@concepta/nestjs-common';
+import { ReferenceId } from '../interfaces/reference.types';
+import { RuntimeException } from '../../exceptions/runtime.exception';
+import { RuntimeExceptionOptions } from '../../exceptions/interfaces/runtime-exception-options.interface';
 
 export class ReferenceIdNoMatchException extends RuntimeException {
   context: RuntimeException['context'] & {

@@ -4,11 +4,9 @@ import {
   CacheCreatableInterface,
   CacheInterface,
   RepositoryInterface,
-} from '@concepta/nestjs-common';
-import {
   ReferenceMutateException,
   ReferenceValidationException,
-} from '@concepta/typeorm-common';
+} from '@concepta/nestjs-common';
 
 import { CacheService } from './cache.service';
 import { CacheSettingsInterface } from '../interfaces/cache-settings.interface';

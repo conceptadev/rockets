@@ -9,12 +9,10 @@ import {
   ReferenceId,
   Type,
   RepositoryInterface,
-} from '@concepta/nestjs-common';
-import {
   ReferenceLookupException,
   ReferenceMutateException,
   ReferenceValidationException,
-} from '@concepta/typeorm-common';
+} from '@concepta/nestjs-common';
 import {
   CACHE_MODULE_REPOSITORIES_TOKEN,
   CACHE_MODULE_SETTINGS_TOKEN,

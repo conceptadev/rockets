@@ -12,12 +12,10 @@ import {
   DeepPartial,
   AssigneeRelationInterface,
   RepositoryInternals,
-} from '@concepta/nestjs-common';
-import {
   ReferenceLookupException,
   ReferenceMutateException,
   ReferenceValidationException,
-} from '@concepta/typeorm-common';
+} from '@concepta/nestjs-common';
 import {
   OTP_MODULE_REPOSITORIES_TOKEN,
   OTP_MODULE_SETTINGS_TOKEN,

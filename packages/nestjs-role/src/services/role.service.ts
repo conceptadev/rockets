@@ -3,8 +3,8 @@ import {
   ReferenceAssignment,
   ReferenceIdInterface,
   RepositoryInterface,
+  ReferenceLookupException,
 } from '@concepta/nestjs-common';
-import { ReferenceLookupException } from '@concepta/typeorm-common';
 import { RoleEntityNotFoundException } from '../exceptions/role-entity-not-found.exception';
 import { RoleAssignmentNotFoundException } from '../exceptions/role-assignment-not-found.exception';
 import { RoleAssignmentConflictException } from '../exceptions/role-assignment-conflict.exception';

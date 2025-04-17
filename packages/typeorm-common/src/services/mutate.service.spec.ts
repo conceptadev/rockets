@@ -4,10 +4,12 @@ import { getDataSourceToken } from '@nestjs/typeorm';
 import { INestApplication } from '@nestjs/common';
 
 import { MutateService } from './mutate.service';
-import { ReferenceMutateException } from '../exceptions/reference-mutate.exception';
-import { ReferenceValidationException } from '../exceptions/reference-validation.exception';
-import { ReferenceIdNoMatchException } from '../exceptions/reference-id-no-match.exception';
-import { ReferenceLookupException } from '../exceptions/reference-lookup.exception';
+import {
+  ReferenceMutateException,
+  ReferenceValidationException,
+  ReferenceIdNoMatchException,
+  ReferenceLookupException,
+} from '@concepta/nestjs-common';
 
 import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
 import { TestMutateServiceFixture } from '../__fixtures__/services/test-mutate.service.fixture';

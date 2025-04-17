@@ -3,12 +3,12 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 
-import { ReferenceLookupException } from '../exceptions/reference-lookup.exception';
+import { ReferenceLookupException } from '@concepta/nestjs-common';
 
+import { TypeOrmRepositoryService } from './typeorm-repository.service';
 import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
 import { TestModuleFixture } from '../__fixtures__/test.module.fixture';
 import { TestEntityFixture } from '../__fixtures__/test.entity.fixture';
-import { TypeOrmRepositoryService } from './typeorm-repository.service';
 import { TestTypeOrmRepositoryServiceFixture } from '../__fixtures__/services/test-typeorm-repository.service.fixture';
 
 describe(TypeOrmRepositoryService, () => {

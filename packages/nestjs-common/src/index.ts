@@ -50,6 +50,12 @@ export { ReferenceUserInterface } from './reference/interfaces/reference-user.in
 export { ReferenceRoleInterface } from './reference/interfaces/reference-role.interface';
 export { ReferenceRolesInterface } from './reference/interfaces/reference-roles.interface';
 
+// reference exceptions
+export { ReferenceLookupException } from './reference/exceptions/reference-lookup.exception';
+export { ReferenceMutateException } from './reference/exceptions/reference-mutate.exception';
+export { ReferenceValidationException } from './reference/exceptions/reference-validation.exception';
+export { ReferenceIdNoMatchException } from './reference/exceptions/reference-id-no-match.exception';
+
 // Query interfaces
 export { ByEmailInterface } from './model/query/by-email.interface';
 export { ByIdInterface } from './model/query/by-id.interface';
