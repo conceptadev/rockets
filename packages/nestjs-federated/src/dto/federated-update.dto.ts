@@ -8,5 +8,5 @@ import { FederatedDto } from './federated.dto';
  */
 @Exclude()
 export class FederatedUpdateDto
-  extends PickType(FederatedDto, ['provider', 'subject'] as const)
+  extends PickType(FederatedDto, ['id', 'provider', 'subject'] as const)
   implements FederatedUpdatableInterface {}

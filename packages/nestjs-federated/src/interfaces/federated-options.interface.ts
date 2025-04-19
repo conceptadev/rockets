@@ -1,17 +1,11 @@
 import { FederatedSettingsInterface } from './federated-settings.interface';
-import { FederatedUserMutateServiceInterface } from './federated-user-mutate-service.interface';
-import { FederatedUserLookupServiceInterface } from './federated-user-lookup-service.interface';
+import { FederatedUserModelServiceInterface } from './federated-user-model-service.interface';
 
 export interface FederatedOptionsInterface {
   /**
-   * Implementation of a class to lookup users
+   * Implementation of user model service class.
    */
-  userLookupService: FederatedUserLookupServiceInterface;
-
-  /**
-   * Implementation of a class to issue tokens
-   */
-  userMutateService: FederatedUserMutateServiceInterface;
+  userModelService: FederatedUserModelServiceInterface;
 
   /**
    * Settings

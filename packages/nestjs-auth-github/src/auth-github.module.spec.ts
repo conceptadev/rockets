@@ -38,8 +38,7 @@ describe(AuthGithubModule, () => {
           FederatedModule.forRootAsync({
             inject: [UserModelService],
             useFactory: (userModelService) => ({
-              userLookupService: userModelService,
-              userMutateService: userModelService,
+              userModelService,
             }),
             entities: {
               federated: {

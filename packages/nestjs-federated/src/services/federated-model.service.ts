@@ -1,28 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import { RepositoryInterface } from '@concepta/nestjs-common';
-import { MutateService } from '@concepta/typeorm-common';
+import { ModelService, RepositoryInterface } from '@concepta/nestjs-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import {
   FederatedCreatableInterface,
   FederatedUpdatableInterface,
 } from '@concepta/nestjs-common';
 import { FederatedEntityInterface } from '../interfaces/federated-entity.interface';
-import { FederatedMutateServiceInterface } from '../interfaces/federated-mutate-service.interface';
+import { FederatedModelServiceInterface } from '../interfaces/federated-model-service.interface';
 import { FederatedCreateDto } from '../dto/federated-create.dto';
 import { FederatedUpdateDto } from '../dto/federated-update.dto';
 import { FEDERATED_MODULE_FEDERATED_ENTITY_KEY } from '../federated.constants';
 
 /**
- * Federated mutate service
+ * Federated model service
  */
 @Injectable()
-export class FederatedMutateService
-  extends MutateService<
+export class FederatedModelService
+  extends ModelService<
     FederatedEntityInterface,
     FederatedCreatableInterface,
     FederatedUpdatableInterface
   >
-  implements FederatedMutateServiceInterface
+  implements FederatedModelServiceInterface
 {
   protected createDto = FederatedCreateDto;
   protected updateDto = FederatedUpdateDto;

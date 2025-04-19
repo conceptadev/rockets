@@ -4,14 +4,14 @@ import {
 } from '@concepta/nestjs-common';
 import { FederatedException } from './federated.exception';
 
-export class FederatedMutateCreateUserException extends FederatedException {
+export class FederatedCreateUserException extends FederatedException {
   context: RuntimeException['context'] & {
     entityName: string;
   };
 
   constructor(entityName: string, options?: RuntimeExceptionOptions) {
     super({
-      message: 'Error while trying to mutate a %s reference',
+      message: 'Error while trying to create a %s reference',
       messageParams: [entityName],
       ...options,
     });
@@ -21,6 +21,6 @@ export class FederatedMutateCreateUserException extends FederatedException {
       entityName,
     };
 
-    this.errorCode = 'FEDERATED_MUTATE_CREATE_USER_ERROR';
+    this.errorCode = 'FEDERATED_CREATE_USER_ERROR';
   }
 }

@@ -6,7 +6,7 @@ import {
 } from '@concepta/nestjs-common';
 import { FederatedException } from './federated.exception';
 
-export class FederatedUserLookupException extends FederatedException {
+export class FederatedFindUserException extends FederatedException {
   context: RuntimeException['context'] & {
     entityName: string;
     user: ReferenceIdInterface;

@@ -11,7 +11,7 @@ import {
 } from '@concepta/nestjs-common';
 import { FederatedEntityInterface } from './federated-entity.interface';
 
-export interface FederatedMutateServiceInterface
+export interface FederatedModelServiceInterface
   extends CreateOneInterface<
       FederatedCreatableInterface,
       FederatedEntityInterface

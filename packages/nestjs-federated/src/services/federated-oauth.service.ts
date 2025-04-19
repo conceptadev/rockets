@@ -4,31 +4,27 @@ import {
   ReferenceIdInterface,
   ReferenceMutateException,
 } from '@concepta/nestjs-common';
-import {
-  FEDERATED_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-  FEDERATED_MODULE_USER_MUTATE_SERVICE_TOKEN,
-} from '../federated.constants';
+import { FEDERATED_MODULE_USER_MODEL_SERVICE_TOKEN } from '../federated.constants';
 import { FederatedEntityInterface } from '../interfaces/federated-entity.interface';
-import { FederatedUserLookupServiceInterface } from '../interfaces/federated-user-lookup-service.interface';
-import { FederatedUserMutateServiceInterface } from '../interfaces/federated-user-mutate-service.interface';
+import { FederatedUserModelServiceInterface } from '../interfaces/federated-user-model-service.interface';
 import { FederatedService } from './federated.service';
 import { FederatedCredentialsInterface } from '../interfaces/federated-credentials.interface';
 import { FederatedOAuthServiceInterface } from '../interfaces/federated-oauth-service.interface';
 import { FederatedCreateException } from '../exceptions/federated-create.exception';
-import { FederatedMutateCreateUserException } from '../exceptions/federated-mutate-create.exception';
-import { FederatedUserLookupException } from '../exceptions/federated-user-lookup.exception';
-import { FederatedMutateService } from './federated-mutate.service';
+import { FederatedCreateUserException } from '../exceptions/federated-create-user.exception';
+import { FederatedFindUserException } from '../exceptions/federated-find-user.exception';
+import { FederatedModelService } from './federated-model.service';
 import { FederatedUserRelationshipException } from '../exceptions/federated-user-relationship.exception';
+import { FederatedModelServiceInterface } from '../interfaces/federated-model-service.interface';
 
 @Injectable()
 export class FederatedOAuthService implements FederatedOAuthServiceInterface {
   constructor(
-    @Inject(FEDERATED_MODULE_USER_LOOKUP_SERVICE_TOKEN)
-    public userLookupService: FederatedUserLookupServiceInterface,
-    @Inject(FEDERATED_MODULE_USER_MUTATE_SERVICE_TOKEN)
-    public userMutateService: FederatedUserMutateServiceInterface,
+    @Inject(FEDERATED_MODULE_USER_MODEL_SERVICE_TOKEN)
+    public userModelService: FederatedUserModelServiceInterface,
     public federatedService: FederatedService,
-    public federatedMutateService: FederatedMutateService,
+    @Inject(FederatedModelService)
+    public federatedModelService: FederatedModelServiceInterface,
   ) {}
 
   /**
@@ -53,10 +49,10 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
         throw new FederatedUserRelationshipException(federated.id);
       }
 
-      const user = await this.userLookupService.byId(federated.user.id);
+      const user = await this.userModelService.byId(federated.user.id);
 
       if (!user) {
-        throw new FederatedUserLookupException(
+        throw new FederatedFindUserException(
           this.constructor.name,
           federated.user,
         );
@@ -77,7 +73,7 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
     subject: string,
   ): Promise<FederatedCredentialsInterface> {
     // Check if user exists by email
-    const user = await this.userLookupService.byEmail(email);
+    const user = await this.userModelService.byEmail(email);
     const userResult: FederatedCredentialsInterface = user
       ? user
       : await this.createUser(email, email);
@@ -98,23 +94,20 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
     username: string,
   ): Promise<FederatedCredentialsInterface> {
     try {
-      const newUser = await this.userMutateService.create({
+      const newUser = await this.userModelService.create({
         email,
         username,
       });
 
       if (!newUser)
-        throw new FederatedMutateCreateUserException(this.constructor.name, {
+        throw new FederatedCreateUserException(this.constructor.name, {
           message: 'Failed to create user',
         });
 
       return newUser;
     } catch (e) {
       const exception = e instanceof Error ? e : new NotAnErrorException(e);
-      throw new FederatedMutateCreateUserException(
-        this.constructor.name,
-        exception,
-      );
+      throw new FederatedCreateUserException(this.constructor.name, exception);
     }
   }
 
@@ -129,7 +122,7 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
     user: ReferenceIdInterface,
   ): Promise<FederatedEntityInterface> {
     try {
-      const federated = await this.federatedMutateService.create({
+      const federated = await this.federatedModelService.create({
         provider,
         subject,
         user,
