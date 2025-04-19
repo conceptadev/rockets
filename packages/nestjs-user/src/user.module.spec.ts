@@ -18,8 +18,7 @@ import { UserModelService } from './services/user-model.service';
 import { UserPasswordService } from './services/user-password.service';
 import { UserModelServiceInterface } from './interfaces/user-model-service.interface';
 import { UserPasswordHistoryService } from './services/user-password-history.service';
-import { UserPasswordHistoryLookupService } from './services/user-password-history-lookup.service';
-import { UserPasswordHistoryMutateService } from './services/user-password-history-mutate.service';
+import { UserPasswordHistoryModelService } from './services/user-password-history-model.service';
 import { UserAccessQueryService } from './services/user-access-query.service';
 
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
@@ -32,8 +31,7 @@ describe('AppModule', () => {
   let userModelService: UserModelServiceInterface;
   let userPasswordService: UserPasswordService;
   let userPasswordHistoryService: UserPasswordHistoryService;
-  let userPasswordHistoryLookupService: UserPasswordHistoryLookupService;
-  let userPasswordHistoryMutateService: UserPasswordHistoryMutateService;
+  let userPasswordHistoryModelService: UserPasswordHistoryModelService;
   let userAccessQueryService: UserAccessQueryService;
   let userController: UserController;
   let userRepo: RepositoryInterface<UserEntityFixture>;
@@ -57,13 +55,9 @@ describe('AppModule', () => {
     userPasswordHistoryService = testModule.get<UserPasswordHistoryService>(
       UserPasswordHistoryService,
     );
-    userPasswordHistoryLookupService =
-      testModule.get<UserPasswordHistoryLookupService>(
-        UserPasswordHistoryLookupService,
-      );
-    userPasswordHistoryMutateService =
-      testModule.get<UserPasswordHistoryMutateService>(
-        UserPasswordHistoryMutateService,
+    userPasswordHistoryModelService =
+      testModule.get<UserPasswordHistoryModelService>(
+        UserPasswordHistoryModelService,
       );
     userAccessQueryService = testModule.get<UserAccessQueryService>(
       UserAccessQueryService,
@@ -101,22 +95,13 @@ describe('AppModule', () => {
         UserPasswordHistoryService,
       );
       expect(
-        userPasswordHistoryService['userPasswordHistoryLookupService'],
-      ).toBeInstanceOf(UserPasswordHistoryLookupService);
-      expect(
-        userPasswordHistoryService['userPasswordHistoryMutateService'],
-      ).toBeInstanceOf(UserPasswordHistoryMutateService);
-      expect(userPasswordHistoryLookupService).toBeInstanceOf(
-        UserPasswordHistoryLookupService,
+        userPasswordHistoryService['userPasswordHistoryModelService'],
+      ).toBeInstanceOf(UserPasswordHistoryModelService);
+      expect(userPasswordHistoryModelService).toBeInstanceOf(
+        UserPasswordHistoryModelService,
       );
       expect(
-        userPasswordHistoryLookupService['userPasswordHistoryRepo'],
-      ).toBeInstanceOf(Repository);
-      expect(userPasswordHistoryMutateService).toBeInstanceOf(
-        UserPasswordHistoryMutateService,
-      );
-      expect(
-        userPasswordHistoryMutateService['userPasswordHistoryRepo'],
+        userPasswordHistoryModelService['userPasswordHistoryRepo'],
       ).toBeInstanceOf(Repository);
       expect(userAccessQueryService).toBeInstanceOf(UserAccessQueryService);
       expect(userController).toBeInstanceOf(UserController);

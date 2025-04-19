@@ -7,8 +7,7 @@ import {
   PasswordStorageInterface,
 } from '@concepta/nestjs-common';
 
-import { UserPasswordHistoryLookupService } from './user-password-history-lookup.service';
-import { UserPasswordHistoryMutateService } from './user-password-history-mutate.service';
+import { UserPasswordHistoryModelService } from './user-password-history-model.service';
 
 import { UserException } from '../exceptions/user-exception';
 import { UserPasswordHistoryServiceInterface } from '../interfaces/user-password-history-service.interface';
@@ -23,10 +22,8 @@ export class UserPasswordHistoryService
   constructor(
     @Inject(USER_MODULE_SETTINGS_TOKEN)
     protected readonly userSettings: UserSettingsInterface,
-    @Inject(UserPasswordHistoryLookupService)
-    protected readonly userPasswordHistoryLookupService: UserPasswordHistoryLookupService,
-    @Inject(UserPasswordHistoryMutateService)
-    protected readonly userPasswordHistoryMutateService: UserPasswordHistoryMutateService,
+    @Inject(UserPasswordHistoryModelService)
+    protected readonly userPasswordHistoryModelService: UserPasswordHistoryModelService,
   ) {}
 
   async getHistory(
@@ -35,8 +32,8 @@ export class UserPasswordHistoryService
     let history: (ReferenceIdInterface & PasswordStorageInterface)[] | null;
 
     try {
-      // try to lookup the user
-      history = await this.userPasswordHistoryLookupService.find(
+      // try to find the history
+      history = await this.userPasswordHistoryModelService.find(
         this.getHistoryFindManyOptions(userId),
       );
     } catch (e: unknown) {
@@ -56,7 +53,7 @@ export class UserPasswordHistoryService
     passwordStore: PasswordStorageInterface,
   ): Promise<void> {
     try {
-      await this.userPasswordHistoryMutateService.create({
+      await this.userPasswordHistoryModelService.create({
         userId,
         ...passwordStore,
       });

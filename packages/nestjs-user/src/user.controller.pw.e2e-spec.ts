@@ -20,7 +20,7 @@ import { SeedingSource } from '@concepta/typeorm-seeding';
 import { UserFactory } from './user.factory';
 import { UserPasswordHistoryFactory } from './user-password-history.factory';
 import { UserPasswordService } from './services/user-password.service';
-import { UserPasswordHistoryLookupService } from './services/user-password-history-lookup.service';
+import { UserPasswordHistoryModelService } from './services/user-password-history-model.service';
 import { UserModelServiceInterface } from './interfaces/user-model-service.interface';
 import { UserModelService } from './services/user-model.service';
 
@@ -39,7 +39,7 @@ describe('User Controller (password e2e)', () => {
     let passwordCreationService: PasswordCreationService;
     let userModelService: UserModelServiceInterface;
     let userPasswordService: UserPasswordService;
-    let userPasswordHistoryLookupService: UserPasswordHistoryLookupService;
+    let userPasswordHistoryModelService: UserPasswordHistoryModelService;
     let issueTokenService: IssueTokenService;
     let accessControlService: AccessControlService;
 
@@ -77,8 +77,8 @@ describe('User Controller (password e2e)', () => {
       passwordCreationService = app.get(PasswordCreationService);
       userModelService = app.get(UserModelService);
       userPasswordService = app.get(UserPasswordService);
-      userPasswordHistoryLookupService = app.get(
-        UserPasswordHistoryLookupService,
+      userPasswordHistoryModelService = app.get(
+        UserPasswordHistoryModelService,
       );
       issueTokenService = app.get(IssueTokenService);
       accessControlService = app.get(AccessControlService);
@@ -149,7 +149,7 @@ describe('User Controller (password e2e)', () => {
         }
 
         const userPasswordHistory =
-          await userPasswordHistoryLookupService.byUserId(updatedUser.id);
+          await userPasswordHistoryModelService.byUserId(updatedUser.id);
         expect(userPasswordHistory).toEqual(expect.any(Array));
         expect(userPasswordHistory.length).toEqual(2);
         expect(userPasswordHistory).toEqual(

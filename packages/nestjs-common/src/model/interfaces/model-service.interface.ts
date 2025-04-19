@@ -1,5 +1,11 @@
 import { DeepPartial } from '../../utils/deep-partial';
 import { ReferenceIdInterface } from '../../reference/interfaces/reference-id.interface';
+import { ByIdInterface } from './query/by-id.interface';
+import { CreateOneInterface } from './mutate/create-one.interface';
+import { UpdateOneInterface } from './mutate/update-one.interface';
+import { ReplaceOneInterface } from './mutate/replace-one.interface';
+import { RemoveOneInterface } from './mutate/remove-one.interface';
+import { FindInterface } from './query/find.interface';
 
 export interface ModelServiceInterface<
   Entity extends ReferenceIdInterface,
@@ -8,14 +14,9 @@ export interface ModelServiceInterface<
   Replaceable extends Creatable & Pick<Entity, 'id'> = Creatable &
     Pick<Entity, 'id'>,
   Removable extends Pick<Entity, 'id'> = Pick<Entity, 'id'>,
-> {
-  byId(id: Entity['id']): Promise<Entity | null>;
-
-  create(data: Creatable): Promise<Entity>;
-
-  update(data: Updatable): Promise<Entity>;
-
-  replace(data: Replaceable): Promise<Entity>;
-
-  remove(data: Removable): Promise<Entity>;
-}
+> extends FindInterface<Entity, Entity>,
+    ByIdInterface<Entity['id'], Entity>,
+    CreateOneInterface<Creatable, Entity>,
+    UpdateOneInterface<Updatable, Entity>,
+    ReplaceOneInterface<Replaceable, Entity>,
+    RemoveOneInterface<Removable, Entity> {}

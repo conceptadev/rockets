@@ -115,7 +115,7 @@ export class UserPasswordService implements UserPasswordServiceInterface {
     let user: (ReferenceIdInterface & Partial<PasswordStorageInterface>) | null;
 
     try {
-      // try to lookup the user
+      // try to find the user
       user = await this.userModelService.byId(userId);
     } catch (e: unknown) {
       throw new UserException({

@@ -34,8 +34,7 @@ import { UserCrudService } from './services/user-crud.service';
 import { UserModelService } from './services/user-model.service';
 import { UserPasswordService } from './services/user-password.service';
 import { UserPasswordHistoryService } from './services/user-password-history.service';
-import { UserPasswordHistoryLookupService } from './services/user-password-history-lookup.service';
-import { UserPasswordHistoryMutateService } from './services/user-password-history-mutate.service';
+import { UserPasswordHistoryModelService } from './services/user-password-history-model.service';
 import { UserAccessQueryService } from './services/user-access-query.service';
 import { UserController } from './user.controller';
 import { InvitationAcceptedListener } from './listeners/invitation-accepted-listener';
@@ -107,13 +106,11 @@ export function createUserProviders(options: {
     UserCrudService,
     PasswordCreationService,
     InvitationAcceptedListener,
-    UserPasswordHistoryMutateService,
     createUserSettingsProvider(options.overrides),
     createUserModelServiceProvider(options.overrides),
     createUserPasswordServiceProvider(options.overrides),
     createUserPasswordHistoryServiceProvider(options.overrides),
-    createUserPasswordHistoryLookupServiceProvider(),
-    createUserPasswordHistoryMutateServiceProvider(),
+    createUserPasswordHistoryModelServiceProvider(),
     createUserAccessQueryServiceProvider(options.overrides),
   ];
 }
@@ -127,8 +124,7 @@ export function createUserExports(): Required<
     UserModelService,
     UserPasswordService,
     UserPasswordHistoryService,
-    UserPasswordHistoryLookupService,
-    UserPasswordHistoryMutateService,
+    UserPasswordHistoryModelService,
     UserAccessQueryService,
   ];
 }
@@ -204,9 +200,9 @@ export function createUserPasswordServiceProvider(
   };
 }
 
-export function createUserPasswordHistoryLookupServiceProvider(): Provider {
+export function createUserPasswordHistoryModelServiceProvider(): Provider {
   return {
-    provide: UserPasswordHistoryLookupService,
+    provide: UserPasswordHistoryModelService,
     inject: [
       USER_MODULE_SETTINGS_TOKEN,
       {
@@ -224,35 +220,7 @@ export function createUserPasswordHistoryLookupServiceProvider(): Provider {
         settings?.passwordHistory?.enabled === true &&
         userPasswordHistoryRepoToken
       ) {
-        return new UserPasswordHistoryLookupService(
-          userPasswordHistoryRepoToken,
-        );
-      }
-    },
-  };
-}
-
-export function createUserPasswordHistoryMutateServiceProvider(): Provider {
-  return {
-    provide: UserPasswordHistoryMutateService,
-    inject: [
-      USER_MODULE_SETTINGS_TOKEN,
-      {
-        token: getDynamicRepositoryToken(
-          USER_MODULE_USER_PASSWORD_HISTORY_ENTITY_KEY,
-        ),
-        optional: true,
-      },
-    ],
-    useFactory: async (
-      settings: UserSettingsInterface,
-      userPasswordHistoryRepoToken?: RepositoryInterface<UserPasswordHistoryEntityInterface>,
-    ) => {
-      if (
-        settings?.passwordHistory?.enabled === true &&
-        userPasswordHistoryRepoToken
-      ) {
-        return new UserPasswordHistoryMutateService(
+        return new UserPasswordHistoryModelService(
           userPasswordHistoryRepoToken,
         );
       }
@@ -275,11 +243,7 @@ export function createUserPasswordHistoryServiceProvider(
         optional: true,
       },
       {
-        token: UserPasswordHistoryLookupService,
-        optional: true,
-      },
-      {
-        token: UserPasswordHistoryMutateService,
+        token: UserPasswordHistoryModelService,
         optional: true,
       },
     ],
@@ -287,8 +251,7 @@ export function createUserPasswordHistoryServiceProvider(
       options: UserOptionsInterface,
       settings: UserSettingsInterface,
       userPasswordHistoryRepoToken?: RepositoryInterface<UserPasswordHistoryEntityInterface>,
-      userPasswordHistoryLookupService?: UserPasswordHistoryLookupService,
-      userPasswordHistoryMutateService?: UserPasswordHistoryMutateService,
+      userPasswordHistoryModelService?: UserPasswordHistoryModelService,
     ) => {
       // if password history is enabled?
       if (settings?.passwordHistory?.enabled === true) {
@@ -302,13 +265,11 @@ export function createUserPasswordHistoryServiceProvider(
           return overridingServiceOption;
         } else if (
           userPasswordHistoryRepoToken &&
-          userPasswordHistoryLookupService &&
-          userPasswordHistoryMutateService
+          userPasswordHistoryModelService
         ) {
           return new UserPasswordHistoryService(
             settings,
-            userPasswordHistoryLookupService,
-            userPasswordHistoryMutateService,
+            userPasswordHistoryModelService,
           );
         }
       }

@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { RepositoryInterface } from '@concepta/nestjs-common';
-import { MutateService } from '@concepta/typeorm-common';
+import {
+  ModelService,
+  ReferenceId,
+  RepositoryInterface,
+} from '@concepta/nestjs-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 
 import { USER_MODULE_USER_PASSWORD_HISTORY_ENTITY_KEY } from '../user.constants';
@@ -9,7 +12,7 @@ import { UserPasswordHistoryCreatableInterface } from '../interfaces/user-passwo
 import { UserPasswordHistoryCreateDto } from '../dto/user-password-history-create.dto';
 
 @Injectable()
-export class UserPasswordHistoryMutateService extends MutateService<
+export class UserPasswordHistoryModelService extends ModelService<
   UserPasswordHistoryEntityInterface,
   UserPasswordHistoryCreatableInterface,
   never,
@@ -20,6 +23,10 @@ export class UserPasswordHistoryMutateService extends MutateService<
     protected readonly userPasswordHistoryRepo: RepositoryInterface<UserPasswordHistoryEntityInterface>,
   ) {
     super(userPasswordHistoryRepo);
+  }
+
+  async byUserId(userId: ReferenceId) {
+    return this.userPasswordHistoryRepo.findBy({ userId });
   }
 
   protected createDto = UserPasswordHistoryCreateDto;

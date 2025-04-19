@@ -39,7 +39,7 @@ export abstract class ModelService<
    *
    * @param options - Find many options
    */
-  protected async find(
+  async find(
     options?: RepositoryInternals.FindManyOptions<Entity>,
   ): Promise<Entity[]> {
     return this.repo.find(options);

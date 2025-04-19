@@ -61,6 +61,7 @@ export { ModelService } from './model/model.service';
 export { ModelServiceInterface } from './model/interfaces/model-service.interface';
 
 // model query interfaces
+export { FindInterface } from './model/interfaces/query/find.interface';
 export { ByEmailInterface } from './model/interfaces/query/by-email.interface';
 export { ByIdInterface } from './model/interfaces/query/by-id.interface';
 export { BySubjectInterface } from './model/interfaces/query/by-subject.interface';
