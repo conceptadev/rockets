@@ -8,6 +8,8 @@ import {
 
 /**
  * Abstract lookup service
+ *
+ * @deprecated - will be removed when model service refactor is complete.
  */
 export abstract class LookupService<Entity extends ReferenceIdInterface>
   implements ByIdInterface<ReferenceId, Entity>

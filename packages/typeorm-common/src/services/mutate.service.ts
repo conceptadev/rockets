@@ -17,6 +17,8 @@ import {
 
 /**
  * Abstract mutate service
+ *
+ * @deprecated - will be removed when model service refactor is complete.
  */
 export abstract class MutateService<
   Entity extends ReferenceIdInterface,
