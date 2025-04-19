@@ -18,14 +18,14 @@ describe('AppModule', () => {
       .compile();
 
     const issueTokenService = module.get<IssueTokenService>(IssueTokenService);
-    const userLookupService = module.get<AuthLocalUserModelServiceInterface>(
+    const userModelService = module.get<AuthLocalUserModelServiceInterface>(
       AuthLocalUserModelService,
     );
     const authLocalcontroller = module.get(AuthLocalController);
 
     expect(module).toBeInstanceOf(TestingModule);
     expect(issueTokenService).toBeInstanceOf(IssueTokenService);
-    expect(userLookupService).toBeInstanceOf(Object);
+    expect(userModelService).toBeInstanceOf(Object);
     expect(authLocalcontroller).toBeInstanceOf(AuthLocalController);
     expect(authLocalcontroller['issueTokenService']).toBeInstanceOf(
       IssueTokenService,

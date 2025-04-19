@@ -4,9 +4,6 @@ export { UserProfileCrudBuilder } from './utils/user-profile.crud-builder';
 export { UserPostgresEntity } from './entities/user-postgres.entity';
 export { UserSqliteEntity } from './entities/user-sqlite.entity';
 
-export { UserLookupService } from './services/user-lookup.service';
-export { UserMutateService } from './services/user-mutate.service';
-
 export { UserModelService } from './services/user-model.service';
 export { UserPasswordService } from './services/user-password.service';
 export { UserAccessQueryService } from './services/user-access-query.service';
@@ -14,8 +11,6 @@ export { UserCrudService } from './services/user-crud.service';
 export { UserController } from './user.controller';
 
 export { UserEntityInterface } from './interfaces/user-entity.interface';
-export { UserLookupServiceInterface } from './interfaces/user-lookup-service.interface';
-export { UserMutateServiceInterface } from './interfaces/user-mutate-service.interface';
 export { UserModelServiceInterface } from './interfaces/user-model-service.interface';
 export { UserPasswordServiceInterface } from './interfaces/user-password-service.interface';
 
