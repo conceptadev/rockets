@@ -41,7 +41,7 @@ request (headers, cookies, body, query, etc).
   - [1. Registering AuthJwtModule Synchronously](#1-registering-authjwtmodule-synchronously)
   - [2. Registering AuthJwtModule Asynchronously](#2-registering-authjwtmodule-asynchronously)
   - [3. Global Registering AuthJwtModule Asynchronously](#3-global-registering-authjwtmodule-asynchronously)
-  - [4. Using Custom User Lookup Service](#4-using-custom-user-lookup-service)
+  - [4. Using Custom User Model Service](#4-using-custom-user-model-service)
   - [5. Implementing and Using Custom Token Verification Service](#5-implementing-and-using-custom-token-verification-service)
   - [6. Setting Up a Custom Guard](#6-setting-up-a-custom-guard)
     - [Step 1: Implement the Custom Guard](#step-1-implement-the-custom-guard)
@@ -130,7 +130,7 @@ yarn add @concepta/nestjs-auth-jwt
 
 Import the `AuthJwtModule` and required services in your application module.
 Ensure to import `JwtModule` and provide the necessary configuration options,
-including the required `userLookupService`.
+including the required `userModelService`.
 
 ### 1.3 Basic Setup in a NestJS Project
 
@@ -215,13 +215,13 @@ export class UserService {
 ```
 
 ```ts
-// user-lookup.service.ts
-import { AuthJwtUserLookupServiceInterface } from '@concepta/nestjs-auth-jwt';
+// user-model.service.ts
+import { AuthJwtUserModelServiceInterface } from '@concepta/nestjs-auth-jwt';
 import { ReferenceIdInterface, ReferenceSubject } from '@concepta/nestjs-common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-export class UserLookupService implements AuthJwtUserLookupServiceInterface {
+export class UserModelService implements AuthJwtUserModelServiceInterface {
    constructor(
     private userService: UserService,
   ) {}
@@ -307,8 +307,8 @@ import { ConfigService } from '@nestjs/config';
     JwtModule.forRoot({}), // <- required for AuthJwtModule to work
     AuthJwtModule.registerAsync({
       inject: [UserService],
-      useFactory: async (userLookupService: UserService) => ({
-        userLookupService,        
+      useFactory: async (userModelService: UserService) => ({
+        userModelService,        
       }),
     }),
   ],
@@ -406,7 +406,7 @@ curl -X GET http://localhost:3000/user/1/pets \
 ### Setting Up a Custom Module for Providers
 
 Before diving into the How-To Guides, we'll set up a custom module that
-includes the necessary providers and exports for `UserLookupService`,
+includes the necessary providers and exports for `UserModelService`,
 `MyVerifyTokenService`, and `MyAppGuard`.
 
 This will ensure that our asynchronous registration examples can
@@ -414,13 +414,13 @@ inject these services correctly.
 
 ```ts
 import { Module } from '@nestjs/common';
-import { UserLookupService } from './user-lookup.service';
+import { UserModelService } from './user-model.service';
 import { MyVerifyTokenService } from './verify-token.service';
 import { MyAppGuard } from './my-app-guard';
 
 @Module({
-  providers: [UserLookupService, MyVerifyTokenService, MyAppGuard],
-  exports: [UserLookupService, MyVerifyTokenService, MyAppGuard],
+  providers: [UserModelService, MyVerifyTokenService, MyAppGuard],
+  exports: [UserModelService, MyVerifyTokenService, MyAppGuard],
 });
 
 export class MyProviderModule {};
@@ -433,7 +433,7 @@ import * as jwt from 'jsonwebtoken';
 import { Module } from '@nestjs/common';
 import { AuthJwtModule } from '@concepta/nestjs-auth-jwt';
 import { JwtModule, ExtractJwt } from '@concepta/nestjs-jwt';
-import { UserLookupService } from './user-lookup.service';
+import { UserModelService } from './user-model.service';
 
 // define the verifyToken function
 const verifyToken = async (
@@ -452,7 +452,7 @@ const verifyToken = async (
   imports: [
     JwtModule.forRoot({}), // <- required for AuthJwtModule to work
     AuthJwtModule.register({
-      userLookupService: new UserLookupService(), // <- required
+      userModelService: new UserModelService(), // <- required
       settings: {
         jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
         verifyToken,
@@ -496,11 +496,11 @@ const verifyToken = (configService: ConfigService) => async (
       imports: [MyProviderModule],
       useFactory: async (
         configService: ConfigService,
-        userLookupService: UserLookupService,
+        userModelService: UserModelService,
         verifyTokenService: MyVerifyTokenService,
         appGuard: MyAppGuard,
       ) => ({
-        userLookupService, // injected via useFactory
+        userModelService, // injected via useFactory
         settings: {
           jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
           verifyToken: verifyToken(configService),
@@ -508,7 +508,7 @@ const verifyToken = (configService: ConfigService) => async (
         verifyTokenService, // injected via useFactory
         appGuard, // injected via useFactory
       }),
-      inject: [ConfigService, UserLookupService, MyVerifyTokenService, MyAppGuard],
+      inject: [ConfigService, UserModelService, MyVerifyTokenService, MyAppGuard],
     }),
   ],
 });
@@ -547,11 +547,11 @@ const verifyToken = (configService: ConfigService) => async (
       imports: [MyProviderModule],
       useFactory: async (
         configService: ConfigService,
-        userLookupService: UserLookupService,
+        userModelService: UserModelService,
         verifyTokenService: MyVerifyTokenService,
         appGuard: MyAppGuard,
       ) => ({
-        userLookupService, // injected via useFactory
+        userModelService, // injected via useFactory
         settings: {
           jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
           verifyToken: verifyToken(configService),
@@ -559,7 +559,7 @@ const verifyToken = (configService: ConfigService) => async (
         verifyTokenService, // injected via useFactory
         appGuard, // injected via useFactory
       }),
-      inject: [ConfigService, UserLookupService, MyVerifyTokenService, MyAppGuard],
+      inject: [ConfigService, UserModelService, MyVerifyTokenService, MyAppGuard],
     }),
   ],
 });
@@ -567,19 +567,19 @@ const verifyToken = (configService: ConfigService) => async (
 export class AppModule {};
 ```
 
-### 4. Using Custom User Lookup Service
+### 4. Using Custom User Model Service
 
 This service is responsible for looking up user information based
-on the JWT payload. It implements the `AuthJwtUserLookupServiceInterface`
+on the JWT payload. It implements the `AuthJwtUserModelServiceInterface`
 and must be provided to the module.
 
 ```ts
-import { AuthJwtUserLookupServiceInterface } from '@concepta/nestjs-auth-jwt';
+import { AuthJwtUserModelServiceInterface } from '@concepta/nestjs-auth-jwt';
 import { ReferenceIdInterface, ReferenceSubject } from '@concepta/nestjs-common';
 
-export class UserLookupService implements AuthJwtUserLookupServiceInterface {
+export class UserModelService implements AuthJwtUserModelServiceInterface {
   async bySubject(subject: ReferenceSubject): Promise<ReferenceIdInterface>  {
-    // implement user lookup logic here
+    // implement user model logic here
   }
 }
 ```
@@ -661,8 +661,8 @@ Update the module configuration to use the custom guard.
 ```ts
 // ...
 AuthJwtModule.registerAsync({
-  useFactory: async (userLookupService: UserService) => ({
-    userLookupService,
+  useFactory: async (userModelService: UserService) => ({
+    userModelService,
     appGuard: MyAppGuard, // use the custom guard
   }),
   inject: [UserService],
@@ -682,8 +682,8 @@ Update the module configuration to disable the global `APP_GUARD`.
 ```ts
 // ...
 AuthJwtModule.registerAsync({
-  useFactory: async (userLookupService: UserService) => ({
-    userLookupService,
+  useFactory: async (userModelService: UserService) => ({
+    userModelService,
     appGuard: false, // disable the global APP_GUARD
   }),
   inject: [UserService],
@@ -714,8 +714,8 @@ const settings: JwtStrategyOptionsInterface = {
 
 // ...
 AuthJwtModule.registerAsync({
-  useFactory: async (userLookupService: UserService) => ({
-    userLookupService,
+  useFactory: async (userModelService: UserService) => ({
+    userModelService,
     settings,
   }),
   inject: [UserService],
@@ -763,7 +763,7 @@ to customize the behavior of the `AuthJwtModule`.
 
 Below is a summary of the key options:
 
-- ### userLookupService (required)
+- ### userModelService (required)
 
   - Service for looking up user information based on JWT payload.
 
@@ -781,7 +781,7 @@ Below is a summary of the key options:
 
 ## 3. AuthJwtModule Classes and Interfaces
 
-- AuthJwtUserLookupServiceInterface
+- AuthJwtUserModelServiceInterface
 - VerifyTokenServiceInterface
 - JwtStrategyOptionsInterface
 
