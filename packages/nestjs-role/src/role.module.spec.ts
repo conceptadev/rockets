@@ -1,5 +1,6 @@
 import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
+import { RepositoryInterface } from '@concepta/nestjs-common';
 import {
   getDynamicRepositoryToken,
   getEntityRepositoryToken,
@@ -14,7 +15,6 @@ import { ROLE_MODULE_ROLE_ENTITY_KEY } from './role.constants';
 
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
 import { RoleEntityFixture } from './__fixtures__/entities/role-entity.fixture';
-import { RepositoryInterface } from '@concepta/typeorm-common';
 
 describe('RoleModule', () => {
   let roleModule: RoleModule;

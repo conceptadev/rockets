@@ -17,13 +17,11 @@ Authenticate via federated login
    - [Getting Started with Federated Authentication](#getting-started-with-federated-authentication)
      - [Step 1: Create User Entity](#step-1-create-user-entity)
      - [Step 2: Create Federated Entity](#step-2-create-federated-entity)
-     - [Step 3: Implement FederatedUserLookupServiceInterface](#step-3-implement-federateduserlookupserviceinterface)
-     - [Step 4: Implement FederatedUserMutateServiceInterface](#step-4-implement-federatedusermutateserviceinterface)
-     - [Step 5: Configure the Module](#step-5-configure-the-module)
-     - [Step 6: Integrate with other Oauth Module](#step-6-integrate-with-other-oauth-module)
+     - [Step 3: Implement FederatedUserModelServiceInterface](#step-3-implement-federatedusermodelserviceinterface)
+     - [Step 4: Configure the Module](#step-4-configure-the-module)
+     - [Step 5: Integrate with other Oauth Module](#step-5-integrate-with-other-oauth-module)
 2. [How-To Guides](#how-to-guides)
-   - [Implement FederatedUserLookupServiceInterface](#implement-federateduserlookupserviceinterface)
-   - [Implement FederatedUserMutateServiceInterface](#implement-federatedusermutateserviceinterface)
+   - [Implement FederatedUserModelServiceInterface](#implement-federatedusermodelserviceinterface)
    - [Using federated with Rockets Github Module](#using-federated-with-rockets-github-module)
 3. [Reference](#reference)
 4. [Explanation](#explanation)
@@ -88,17 +86,12 @@ export class FederatedEntity extends FederatedSqliteEntity {
 }
 ```
 
-### Step 3: Implement FederatedUserLookupServiceInterface
+### Step 3: Implement FederatedUserModelServiceInterface
 
-Refer to [Implement FederatedUserLookupServiceInterface](#implement-federateduserlookupserviceinterface)
+Refer to [Implement FederatedUserModelServiceInterface](#implement-federatedusermodelserviceinterface)
 section
 
-### Step 4: Implement FederatedUserMutateServiceInterface
-
-Refer to [Implement FederatedUserMutateServiceInterface](#implement-federatedusermutateserviceinterface)
-section
-
-### Step 5: Configure the Module
+### Step 4: Configure the Module
 
 Finally, set up the module configuration:
 
@@ -107,8 +100,7 @@ import { AuthenticationModule } from '@concepta/nestjs-authentication';
 import { FederatedModule } from '@concepta/nestjs-federated';
 import { JwtModule } from '@concepta/nestjs-jwt';
 import { Module } from '@nestjs/common';
-import { FederatedUserLookupService } from './federated/federated-lookup.service';
-import { UserMutateServiceFixture } from './federated/federated-mutate.service';
+import { FederatedUserModelService } from './federated/federated-model.service';
 import { FederatedEntity } from './federated/federated.entity';
 import { AuthGithubModule } from '@concepta/nestjs-auth-github';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
@@ -132,8 +124,7 @@ import { UserEntity } from './user/user.entity';
           entity: FederatedEntity,
         },
       },
-      userLookupService: new FederatedUserLookupService(),
-      userMutateService: new UserMutateServiceFixture(),
+      userModelService: new FederatedUserModelService(),
     }),
   ],
   controllers: [],
@@ -145,7 +136,7 @@ export class AppModule {}
 This configuration uses SQLite for testing, but you can use any database
 supported by TypeORM.
 
-### Step 6: Integrate with other Oauth Module
+### Step 5: Integrate with other Oauth Module
 
 To complete the integration with OAuth providers and set up the whole
 authentication flow, you'll need to implement one of the @concepta social
@@ -177,9 +168,9 @@ social accounts.
 
 ## How-To Guides
 
-### Implement FederatedUserLookupServiceInterface
+### Implement FederatedUserModelServiceInterface
 
-Create a service that implements `FederatedUserLookupServiceInterface`:
+Create a service that implements `FederatedUserModelServiceInterface`:
 
 ```ts
 // user.mock.ts
@@ -191,22 +182,23 @@ export const mockUser = {
 ```
 
 ```ts
-// user-lookup.service.ts
+// user-model.service.ts
 import { Injectable } from '@nestjs/common';
 import { ReferenceEmail } from '@concepta/nestjs-common';
-import { 
-  FederatedUserLookupServiceInterface 
+import {
+  FederatedUserModelServiceInterface 
+  FederatedCredentialsInterface,
 } from '@concepta/nestjs-federated';
 import { mockUser } from './user.mock';
 
 
 @Injectable()
-export class UserLookupServiceFixture
-  implements FederatedUserLookupServiceInterface
+export class UserModelServiceFixture
+  implements FederatedUserModelServiceInterface
 {
   async byId(
     id: string
-  ): ReturnType<FederatedUserLookupServiceInterface['byId']> {
+  ): ReturnType<FederatedUserModelServiceInterface['byId']> {
     if (id === mockUser.id) {
       return mockUser;
     } else {
@@ -219,30 +211,9 @@ export class UserLookupServiceFixture
   ): Promise<UserInterface | null> {
     return email === mockUser.email ? mockUser : null;
   }
-}
-```
 
-### Implement FederatedUserMutateServiceInterface
-
-Create a service that implements `FederatedUserMutateServiceInterface`:
-
-```ts
-// user-mutate.service.ts
-import { 
-  FederatedCredentialsInterface, 
-  FederatedUserMutateServiceInterface 
-} from '@concepta/nestjs-federated';
-import { 
-  FederatedUserMutateInterface 
-} from '@concepta/nestjs-federated';
-import { Injectable } from '@nestjs/common';
-import { mockUser } from './user.mock';
-
-@Injectable()
-export class UserMutateServiceFixture 
-  implements FederatedUserMutateServiceInterface {
   async create(
-    _object: FederatedUserMutateInterface
+    _object: ReferenceEmailInterface & ReferenceUsernameInterface
   ): Promise<FederatedCredentialsInterface> {
     return mockUser;
   }
@@ -280,17 +251,11 @@ functionality within your NestJS application.
 The `FederatedOptionsInterface` defines the configuration options for the
 federated module. Here are the responsibilities of each option:
 
-- **userLookupService**: This is an implementation of the
-  `FederatedUserLookupServiceInterface`. It is responsible for looking up users
+- **userModelService**: This is an implementation of the
+  `FederatedUserModelServiceInterface`. It is responsible for looking up users
   based on various criteria such as user ID or email. This service ensures that
   the application can retrieve user information from the database or any other
   storage mechanism.
-
-- **userMutateService**: This is an implementation of the
-  `FederatedUserMutateServiceInterface`. It handles the creation and mutation
-  of user data. This service is crucial for managing user accounts, especially
-  when new users sign up via federated authentication or when existing user
-  data needs to be updated.
 
 By configuring these options, you can customize the behavior of the federated
 module to suit your application's requirements, ensuring seamless integration

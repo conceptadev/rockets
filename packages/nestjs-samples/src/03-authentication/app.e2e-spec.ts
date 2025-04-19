@@ -1,17 +1,19 @@
 import supertest from 'supertest';
 import { mock } from 'jest-mock-extended';
 
+import { HttpAdapterHost } from '@nestjs/core';
 import { INestApplication, Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthenticationResponseInterface } from '@concepta/nestjs-common';
+import {
+  AuthenticationResponseInterface,
+  ExceptionsFilter,
+  RepositoryInterface,
+} from '@concepta/nestjs-common';
 import { UserCrudService } from '@concepta/nestjs-user';
-import { ExceptionsFilter } from '@concepta/nestjs-common';
 
 import { AppModule } from './app.module';
 import { UserEntity } from './user/user.entity';
 import { UserDto } from './user/user.controller';
-import { HttpAdapterHost } from '@nestjs/core';
-import { RepositoryInterface } from '@concepta/typeorm-common';
 
 const sleep = (ms: number) => {
   return new Promise((resolve) => {

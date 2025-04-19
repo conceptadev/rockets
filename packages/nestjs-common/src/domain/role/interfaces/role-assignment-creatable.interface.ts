@@ -1,4 +1,6 @@
-import { RoleAssignmentInterface } from './role-assignment.interface';
+import { AssigneeRelationInterface } from '../../assignee/interfaces/assignee-relation.interface';
+import { RoleRelationInterface } from './role-relation.interface';
 
 export interface RoleAssignmentCreatableInterface
-  extends Pick<RoleAssignmentInterface, 'role' | 'assignee'> {}
+  extends RoleRelationInterface,
+    AssigneeRelationInterface {}

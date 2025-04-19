@@ -12,11 +12,12 @@ import { EventModule } from '@concepta/nestjs-event';
 import { UserModule } from '../user.module';
 import { UserResource } from '../user.types';
 import { InvitationAcceptedEventAsync } from './events/invitation-accepted.event';
-import { UserLookupService } from '../services/user-lookup.service';
 import { UserAccessQueryService } from '../services/user-access-query.service';
 
 import { ormConfig } from './ormconfig.fixture';
 import { UserEntityFixture } from './user.entity.fixture';
+import { UserModelService } from '../services/user-model.service';
+import { UserModelServiceInterface } from '../interfaces/user-model-service.interface';
 import { UserPasswordHistoryEntityFixture } from './user-password-history.entity.fixture';
 
 const rules = new AccessControl();
@@ -35,9 +36,9 @@ rules
     EventModule.forRoot({}),
     JwtModule.forRoot({}),
     AuthJwtModule.forRootAsync({
-      inject: [UserLookupService],
-      useFactory: (userLookupService: UserLookupService) => ({
-        userLookupService,
+      inject: [UserModelService],
+      useFactory: (userModelService: UserModelServiceInterface) => ({
+        userModelService,
       }),
     }),
     AuthenticationModule.forRoot({}),

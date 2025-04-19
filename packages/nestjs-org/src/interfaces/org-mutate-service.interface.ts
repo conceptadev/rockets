@@ -10,22 +10,15 @@ import {
   OrgUpdatableInterface,
 } from '@concepta/nestjs-common';
 import { OrgEntityInterface } from './org-entity.interface';
-import { QueryOptionsInterface } from '@concepta/typeorm-common';
 
 export interface OrgMutateServiceInterface
   extends CreateOneInterface<OrgCreatableInterface, OrgEntityInterface>,
     UpdateOneInterface<
       OrgUpdatableInterface & ReferenceIdInterface,
-      OrgEntityInterface,
-      QueryOptionsInterface
+      OrgEntityInterface
     >,
     ReplaceOneInterface<
       OrgCreatableInterface & ReferenceIdInterface,
-      OrgEntityInterface,
-      QueryOptionsInterface
+      OrgEntityInterface
     >,
-    RemoveOneInterface<
-      OrgEntityInterface,
-      OrgEntityInterface,
-      QueryOptionsInterface
-    > {}
+    RemoveOneInterface<OrgEntityInterface, OrgEntityInterface> {}

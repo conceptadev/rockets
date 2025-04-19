@@ -3,8 +3,7 @@ import { INestApplication } from '@nestjs/common';
 
 import {
   AUTH_VERIFY_MODULE_SETTINGS_TOKEN,
-  AuthVerifyUserLookupService,
-  AuthVerifyUserMutateService,
+  AuthVerifyUserModelService,
 } from '../auth-verify.constants';
 
 import { AuthVerifyService } from './auth-verify.service';
@@ -12,10 +11,8 @@ import { AuthVerifyNotificationService } from './auth-verify-notification.servic
 
 import { AuthVerifySettingsInterface } from '../interfaces/auth-verify-settings.interface';
 import { AuthVerifyOtpServiceInterface } from '../interfaces/auth-verify-otp.service.interface';
-import { AuthVerifyUserLookupServiceInterface } from '../interfaces/auth-verify-user-lookup.service.interface';
+import { AuthVerifyUserModelServiceInterface } from '../interfaces/auth-verify-user-model.service.interface';
 import { AuthVerifyNotificationServiceInterface } from '../interfaces/auth-verify-notification.service.interface';
-import { AuthVerifyUserMutateServiceInterface } from '../interfaces/auth-verify-user-mutate.service.interface';
-
 import { AuthRecoveryOtpInvalidException } from '../exceptions/auth-verify-otp-invalid.exception';
 
 import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
@@ -27,14 +24,13 @@ describe(AuthVerifyService, () => {
   let authVerifyService: AuthVerifyService;
   let notificationService: AuthVerifyNotificationServiceInterface;
   let otpService: AuthVerifyOtpServiceInterface;
-  let userLookupService: AuthVerifyUserLookupServiceInterface;
-  let userMutateService: AuthVerifyUserMutateServiceInterface;
+  let userModelService: AuthVerifyUserModelServiceInterface;
   let settings: AuthVerifySettingsInterface;
 
   let sendVerifyEmail: jest.SpyInstance;
   let spyOtpServiceValidate: jest.SpyInstance;
-  let spyUserLookupServiceByEmail: jest.SpyInstance;
-  let spyUserMutateServiceUpdate: jest.SpyInstance;
+  let spyUserModelServiceByEmail: jest.SpyInstance;
+  let spyUserModelServiceUpdate: jest.SpyInstance;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -58,12 +54,8 @@ describe(AuthVerifyService, () => {
         AuthVerifyNotificationService,
       );
 
-    userLookupService = moduleFixture.get<AuthVerifyUserLookupServiceInterface>(
-      AuthVerifyUserLookupService,
-    );
-
-    userMutateService = moduleFixture.get<AuthVerifyUserMutateServiceInterface>(
-      AuthVerifyUserMutateService,
+    userModelService = moduleFixture.get<AuthVerifyUserModelServiceInterface>(
+      AuthVerifyUserModelService,
     );
 
     sendVerifyEmail = jest
@@ -71,8 +63,8 @@ describe(AuthVerifyService, () => {
       .mockResolvedValue(undefined);
 
     spyOtpServiceValidate = jest.spyOn(otpService, 'validate');
-    spyUserLookupServiceByEmail = jest.spyOn(userLookupService, 'byEmail');
-    spyUserMutateServiceUpdate = jest.spyOn(userMutateService, 'update');
+    spyUserModelServiceByEmail = jest.spyOn(userModelService, 'byEmail');
+    spyUserModelServiceUpdate = jest.spyOn(userModelService, 'update');
   });
 
   afterEach(async () => {
@@ -85,10 +77,9 @@ describe(AuthVerifyService, () => {
       const result = await authVerifyService.send({ email: UserFixture.email });
 
       expect(result).toBeUndefined();
-      expect(spyUserLookupServiceByEmail).toHaveBeenCalledTimes(1);
-      expect(spyUserLookupServiceByEmail).toHaveBeenCalledWith(
+      expect(spyUserModelServiceByEmail).toHaveBeenCalledTimes(1);
+      expect(spyUserModelServiceByEmail).toHaveBeenCalledWith(
         UserFixture.email,
-        undefined,
       );
 
       expect(sendVerifyEmail).toHaveBeenCalledTimes(1);
@@ -108,7 +99,6 @@ describe(AuthVerifyService, () => {
         settings.otp.assignment,
         { category: settings.otp.category, passcode: 'GOOD_PASSCODE' },
         false,
-        undefined,
       );
     });
 
@@ -116,7 +106,7 @@ describe(AuthVerifyService, () => {
       const otp = await authVerifyService.validatePasscode({
         passcode: 'GOOD_PASSCODE',
       });
-      expect(otp).toEqual({ assignee: UserFixture });
+      expect(otp).toEqual({ assigneeId: UserFixture.id });
     });
 
     it('should not validate bad passcode', async () => {
@@ -128,17 +118,14 @@ describe(AuthVerifyService, () => {
   });
 
   describe(AuthVerifyService.prototype.confirmUser, () => {
-    it('should call user mutate service', async () => {
+    it('should call user model service', async () => {
       await authVerifyService.confirmUser({ passcode: 'GOOD_PASSCODE' });
 
-      expect(spyUserMutateServiceUpdate).toHaveBeenCalledTimes(1);
-      expect(spyUserMutateServiceUpdate).toHaveBeenCalledWith(
-        {
-          id: UserFixture.id,
-          active: true,
-        },
-        expect.any(Object),
-      );
+      expect(spyUserModelServiceUpdate).toHaveBeenCalledTimes(1);
+      expect(spyUserModelServiceUpdate).toHaveBeenCalledWith({
+        id: UserFixture.id,
+        active: true,
+      });
     });
 
     it('should confirm user', async () => {

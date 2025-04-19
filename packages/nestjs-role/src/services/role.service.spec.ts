@@ -3,7 +3,10 @@ import {
   getDynamicRepositoryToken,
   TypeOrmExtModule,
 } from '@concepta/nestjs-typeorm-ext';
-import { RepositoryInterface } from '@concepta/typeorm-common';
+import {
+  ReferenceIdInterface,
+  RepositoryInterface,
+} from '@concepta/nestjs-common';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getDataSourceToken } from '@nestjs/typeorm';
@@ -28,9 +31,9 @@ describe('RoleModule', () => {
   let roleService: RoleService;
   let roleRepo: RepositoryInterface<RoleEntityFixture>;
 
-  let testRole1: RoleEntityFixture;
-  let testRole2: RoleEntityFixture;
-  let testRole3: RoleEntityFixture;
+  let testRole1: ReferenceIdInterface;
+  let testRole2: ReferenceIdInterface;
+  let testRole3: ReferenceIdInterface;
   let testUser: UserEntityFixture;
 
   let connectionNumber = 1;
@@ -93,8 +96,8 @@ describe('RoleModule', () => {
     const userRoleFactory = new UserRoleFactoryFixture({ seedingSource });
 
     await userRoleFactory.create({
-      role: testRole1,
-      assignee: testUser,
+      roleId: testRole1.id,
+      assigneeId: testUser.id,
     });
 
     roleModule = testModule.get<RoleModule>(RoleModule);
@@ -194,8 +197,8 @@ describe('RoleModule', () => {
       });
 
       expect(assignedRole).toBeDefined();
-      expect(assignedRole.role.id).toEqual(testRole2.id);
-      expect(assignedRole.assignee.id).toEqual(testUser.id);
+      expect(assignedRole.roleId).toEqual(testRole2.id);
+      expect(assignedRole.assigneeId).toEqual(testUser.id);
     });
 
     it('should throw conflict error if the role is already assigned', async () => {
@@ -220,10 +223,10 @@ describe('RoleModule', () => {
       });
 
       expect(assignedRoles).toHaveLength(2);
-      expect(assignedRoles[0].role.id).toEqual(testRole2.id);
-      expect(assignedRoles[0].assignee.id).toEqual(testUser.id);
-      expect(assignedRoles[1].role.id).toEqual(testRole3.id);
-      expect(assignedRoles[1].assignee.id).toEqual(testUser.id);
+      expect(assignedRoles[0].roleId).toEqual(testRole2.id);
+      expect(assignedRoles[0].assigneeId).toEqual(testUser.id);
+      expect(assignedRoles[1].roleId).toEqual(testRole3.id);
+      expect(assignedRoles[1].assigneeId).toEqual(testUser.id);
     });
 
     it('should throw conflict error if any role is already assigned', async () => {

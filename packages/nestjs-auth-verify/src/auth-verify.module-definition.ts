@@ -3,19 +3,15 @@ import {
   DynamicModule,
   Provider,
 } from '@nestjs/common';
-import { getEntityManagerToken } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 
 import { createSettingsProvider } from '@concepta/nestjs-common';
-import { EntityManagerProxy } from '@concepta/typeorm-common';
 
 import {
   AUTH_VERIFY_MODULE_SETTINGS_TOKEN,
-  AUTH_VERIFY_MODULE_ENTITY_MANAGER_PROXY_TOKEN,
   AuthVerifyEmailService,
   AuthVerifyOtpService,
-  AuthVerifyUserLookupService,
-  AuthVerifyUserMutateService,
+  AuthVerifyUserModelService,
 } from './auth-verify.constants';
 
 import { AuthVerifyOptionsInterface } from './interfaces/auth-verify-options.interface';
@@ -26,7 +22,6 @@ import { AuthVerifyController } from './auth-verify.controller';
 import { AuthVerifyService } from './services/auth-verify.service';
 import { AuthVerifyNotificationService } from './services/auth-verify-notification.service';
 import { AuthVerifyEmailServiceInterface } from './interfaces/auth-verify-email.service.interface';
-import { EntityManagerInterface } from '@concepta/typeorm-common';
 
 const RAW_OPTIONS_TOKEN = Symbol('__AUTH_VERIFY_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -76,8 +71,7 @@ export function createAuthVerifyExports() {
     AUTH_VERIFY_MODULE_SETTINGS_TOKEN,
     AuthVerifyOtpService,
     AuthVerifyEmailService,
-    AuthVerifyUserLookupService,
-    AuthVerifyUserMutateService,
+    AuthVerifyUserModelService,
     AuthVerifyService,
   ];
 }
@@ -92,10 +86,8 @@ export function createAuthVerifyProviders(options: {
     createAuthVerifySettingsProvider(options.overrides),
     createAuthVerifyOtpServiceProvider(options.overrides),
     createAuthVerifyEmailServiceProvider(options.overrides),
-    createAuthVerifyUserLookupServiceProvider(options.overrides),
-    createAuthVerifyUserMutateServiceProvider(options.overrides),
+    createAuthVerifyUserModelServiceProvider(options.overrides),
     createAuthVerifyNotificationServiceProvider(options.overrides),
-    createAuthVerifyEntityManagerProxyProvider(options.overrides),
   ];
 }
 
@@ -143,25 +135,14 @@ export function createAuthVerifyEmailServiceProvider(
   };
 }
 
-export function createAuthVerifyUserLookupServiceProvider(
-  optionsOverrides?: Pick<AuthVerifyOptions, 'userLookupService'>,
+export function createAuthVerifyUserModelServiceProvider(
+  optionsOverrides?: Pick<AuthVerifyOptions, 'userModelService'>,
 ): Provider {
   return {
-    provide: AuthVerifyUserLookupService,
+    provide: AuthVerifyUserModelService,
     inject: [RAW_OPTIONS_TOKEN],
-    useFactory: async (options: Pick<AuthVerifyOptions, 'userLookupService'>) =>
-      optionsOverrides?.userLookupService ?? options.userLookupService,
-  };
-}
-
-export function createAuthVerifyUserMutateServiceProvider(
-  optionsOverrides?: Pick<AuthVerifyOptions, 'userMutateService'>,
-): Provider {
-  return {
-    provide: AuthVerifyUserMutateService,
-    inject: [RAW_OPTIONS_TOKEN],
-    useFactory: async (options: Pick<AuthVerifyOptions, 'userMutateService'>) =>
-      optionsOverrides?.userMutateService ?? options.userMutateService,
+    useFactory: async (options: Pick<AuthVerifyOptions, 'userModelService'>) =>
+      optionsOverrides?.userModelService ?? options.userModelService,
   };
 }
 
@@ -183,21 +164,5 @@ export function createAuthVerifyNotificationServiceProvider(
       optionsOverrides?.notificationService ??
       options.notificationService ??
       new AuthVerifyNotificationService(settings, emailService),
-  };
-}
-
-export function createAuthVerifyEntityManagerProxyProvider(
-  optionsOverrides?: Pick<AuthVerifyOptions, 'entityManagerProxy'>,
-): Provider {
-  return {
-    provide: AUTH_VERIFY_MODULE_ENTITY_MANAGER_PROXY_TOKEN,
-    inject: [RAW_OPTIONS_TOKEN, getEntityManagerToken()],
-    useFactory: async (
-      options: Pick<AuthVerifyOptions, 'entityManagerProxy'>,
-      defaultEntityManager: EntityManagerInterface,
-    ) =>
-      optionsOverrides?.entityManagerProxy ??
-      options.entityManagerProxy ??
-      new EntityManagerProxy(defaultEntityManager),
   };
 }

@@ -1,10 +1,10 @@
 import { AuditInterface } from '../../../audit/interfaces/audit.interface';
-import { ReferenceAssigneeInterface } from '../../../reference/interfaces/reference-assignee.interface';
 import { ReferenceIdInterface } from '../../../reference/interfaces/reference-id.interface';
+import { AssigneeRelationInterface } from '../../assignee/interfaces/assignee-relation.interface';
 
 export interface OtpInterface
   extends ReferenceIdInterface,
-    ReferenceAssigneeInterface,
+    AssigneeRelationInterface,
     AuditInterface {
   /**
    * Name

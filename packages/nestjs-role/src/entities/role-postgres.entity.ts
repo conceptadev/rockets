@@ -1,5 +1,4 @@
 import { Column } from 'typeorm';
-import { ReferenceAssigneeInterface } from '@concepta/nestjs-common';
 import { CommonPostgresEntity } from '@concepta/typeorm-common';
 import { RoleEntityInterface } from '../interfaces/role-entity.interface';
 
@@ -21,11 +20,4 @@ export abstract class RolePostgresEntity
    */
   @Column()
   description!: string;
-
-  /**
-   * Assignees
-   *
-   * You will need to decorate this in your concrete entity class.
-   */
-  assignees!: ReferenceAssigneeInterface[];
 }

@@ -1,10 +1,9 @@
 import { Global, Module } from '@nestjs/common';
-import { UserLookupServiceFixture } from './services/user-lookup.service.fixture';
-import { UserMutateServiceFixture } from './services/user-mutate.service.fixture';
+import { UserModelServiceFixture } from './services/user-model.service.fixture';
 
 @Global()
 @Module({
-  providers: [UserLookupServiceFixture, UserMutateServiceFixture],
-  exports: [UserLookupServiceFixture, UserMutateServiceFixture],
+  providers: [UserModelServiceFixture],
+  exports: [UserModelServiceFixture],
 })
 export class UserModuleFixture {}

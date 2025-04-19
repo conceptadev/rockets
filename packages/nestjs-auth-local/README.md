@@ -31,7 +31,7 @@ remote data source.
   - [1. Registering AuthLocalModule Synchronously](#1-registering-authlocalmodule-synchronously)
   - [2. Registering AuthLocalModule Asynchronously](#2-registering-authlocalmodule-asynchronously)
   - [3. Global Registering AuthLocalModule Asynchronously](#3-global-registering-authlocalmodule-asynchronously)
-  - [4. Implementing User Lookup Service](#4-implementing-user-lookup-service)
+  - [4. Implementing User Model Service](#4-implementing-user-model-service)
   - [5. Implementing custom token issuance service](#5-implementing-custom-token-issuance-service)
   - [6. Implementing a custom user validation service](#6-implementing-a-custom-user-validation-service)
   - [7. Implementing a custom password validation service](#7-implementing-a-custom-password-validation-service)
@@ -108,7 +108,7 @@ Ensure to provide the necessary configuration options at
 The `AuthLocalOptionsInterface` defines the configuration options for the
 local authentication strategy within a NestJS application using the
 `@concepta/nestjs-auth-local` package. This interface allows for the customization
-of `userLookupService`, `issueTokenService`, `validateUserService`, and
+of `userModelService`, `issueTokenService`, `validateUserService`, and
 `passwordValidationService`. Please see [Reference](#reference) for more
 details.
 
@@ -144,10 +144,10 @@ export class User {
 
 ## Step 2: Create Services
 
-Next, you need to create the `UserLookupService`. This
+Next, you need to create the `UserModelService`. This
 service is responsible for the business logic related to
 retrieving user data. It should implement the
-`AuthLocalUserLookupServiceInterface`.
+`AuthLocalUserModelServiceInterface`.
 
 Within this service, implement the `byUsername` method to
 fetch user details by their username (or email). Ensure that
@@ -160,14 +160,14 @@ to authenticate the user, which is a configurable option
 in the `AuthLocalModule`.
 
 ```ts
-// user-lookup.service.ts
+// user-model.service.ts
 import { Injectable } from '@nestjs/common';
 import { ReferenceUsername } from '@concepta/nestjs-common';
-import { AuthLocalUserLookupServiceInterface } from '@concepta/nestjs-auth-local';
+import { AuthLocalUserModelServiceInterface } from '@concepta/nestjs-auth-local';
 import { AuthLocalCredentialsInterface } from '@concepta/nestjs-auth-local/dist/interfaces/auth-local-credentials.interface';
 
 @Injectable()
-export class UserLookupService implements AuthLocalUserLookupServiceInterface {
+export class UserModelService implements AuthLocalUserModelServiceInterface {
   async byUsername(
     username: ReferenceUsername,
   ): Promise<AuthLocalCredentialsInterface | null> {
@@ -188,20 +188,20 @@ export class UserLookupService implements AuthLocalUserLookupServiceInterface {
 
 ## Step 3: Configure the Module
 
-Configure the module to include the necessary services `userLookupService`.
+Configure the module to include the necessary services `userModelService`.
 
 ```ts
 // app.module.ts
 import { Module } from '@nestjs/common';
 import { AuthLocalModule } from '@concepta/nestjs-auth-local';
 import { JwtModule } from '@concepta/nestjs-jwt';
-import { UserLookupService } from './user-lookup.service';
+import { UserModelService } from './user-model.service';
 
 @Module({
   imports: [
     JwtModule.forRoot({}),
     AuthLocalModule.forRoot({
-      userLookupService: new UserLookupService(),
+      userModelService: new UserModelService(),
     }),
   ],
   controllers: [],
@@ -280,7 +280,7 @@ Response (example):
 
 //...
   AuthLocalModule.register({
-    userLookupService: new MyUserLookupService(), // required
+    userModelService: new MyUserModelService(), // required
   }),
 //...
 ```
@@ -289,14 +289,14 @@ Response (example):
 
 ```ts
 // app.module.ts
-import { MyUserLookupService } from './services/my-user-lookup.service.ts';
+import { MyUserModelService } from './services/my-user-model.service.ts';
 
 //...
 AuthLocalModule.registerAsync({
-  useFactory: async (userLookupService: MyUserLookupService) => ({
-    userLookupService, // required
+  useFactory: async (userModelService: MyUserModelService) => ({
+    userModelService, // required
   }),
-  inject: [MyUserLookupService],
+  inject: [MyUserModelService],
 }),
 //...
 ```
@@ -308,27 +308,27 @@ AuthLocalModule.registerAsync({
 
 //...
 AuthLocalModule.forRootAsync({
-  useFactory: async (userLookupService: MyUserLookupService) => ({
-    userLookupService, 
+  useFactory: async (userModelService: MyUserModelService) => ({
+    userModelService, 
   }),
-  inject: [MyUserLookupService],
+  inject: [MyUserModelService],
 }),
 //...
 ```
 
-### 4. Implementing User Lookup Service
+### 4. Implementing User Model Service
 
 ```ts
-// my-user-lookup.service.ts
+// my-user-model.service.ts
 import { Injectable } from '@nestjs/common';
 import {
-  AuthLocalUserLookupServiceInterface,
+  AuthLocalUserModelServiceInterface,
   AuthLocalCredentialsInterface
 } from '@concepta/nestjs-auth-local';
 
 @Injectable()
-export class MyUserLookupService
-  implements AuthLocalUserLookupServiceInterface {
+export class MyUserModelService
+  implements AuthLocalUserModelServiceInterface {
   async byUsername(username: string): Promise<AuthLocalCredentialsInterface | null> {
     // implement custom logic to return the user's credentials
     return null;
@@ -565,7 +565,7 @@ export const localSettings = {
 
 ```ts
 AuthLocalModule.forRoot({
-  userLookupService: new UserLookupService(),
+  userModelService: new UserModelService(),
   issueTokenService: new MyIssueTokenService(), // <- optional
   passwordValidationService: new PasswordValidationService(), // <- optional
   settings: localSettings

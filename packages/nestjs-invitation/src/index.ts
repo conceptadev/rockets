@@ -12,7 +12,7 @@ export { InvitationSendInvitationEmailOptionsInterface } from './interfaces/opti
 export { InvitationPostgresEntity } from './entities/invitation-postgres.entity';
 export { InvitationSqliteEntity } from './entities/invitation-sqlite.entity';
 
-export { InvitationMutateService } from './services/invitation-mutate.service';
+export { InvitationModelService } from './services/invitation-model.service';
 export { InvitationAcceptOptionsInterface } from './interfaces/options/invitation-accept-options.interface';
 
 // exceptions

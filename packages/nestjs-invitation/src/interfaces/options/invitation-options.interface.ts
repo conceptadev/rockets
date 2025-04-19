@@ -3,8 +3,7 @@ import { ModuleOptionsControllerInterface } from '@concepta/nestjs-common';
 import { InvitationEmailServiceInterface } from '../services/invitation-email-service.interface';
 import { InvitationOtpServiceInterface } from '../services/invitation-otp-service.interface';
 import { InvitationSettingsInterface } from './invitation-settings.interface';
-import { InvitationUserLookupServiceInterface } from '../services/invitation-user-lookup.service.interface';
-import { InvitationUserMutateServiceInterface } from '../services/invitation-user-mutate.service.interface';
+import { InvitationUserModelServiceInterface } from '../services/invitation-user-model.service.interface';
 import { InvitationSendServiceInterface } from '../services/invitation-send-service.interface';
 
 export interface InvitationOptionsInterface
@@ -12,7 +11,6 @@ export interface InvitationOptionsInterface
   settings?: InvitationSettingsInterface;
   otpService: InvitationOtpServiceInterface;
   emailService: InvitationEmailServiceInterface;
-  userLookupService: InvitationUserLookupServiceInterface;
-  userMutateService: InvitationUserMutateServiceInterface;
+  userModelService: InvitationUserModelServiceInterface;
   invitationSendService?: InvitationSendServiceInterface;
 }

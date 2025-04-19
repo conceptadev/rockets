@@ -2,12 +2,13 @@ import { randomUUID } from 'crypto';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
+import { RepositoryInterface } from '@concepta/nestjs-common';
+import { INVITATION_MODULE_CATEGORY_USER_KEY } from '@concepta/nestjs-common';
 import { UserEntityInterface } from '@concepta/nestjs-user';
 import { EmailService } from '@concepta/nestjs-email';
 import { getDynamicRepositoryToken } from '@concepta/nestjs-typeorm-ext';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
-import { INVITATION_MODULE_CATEGORY_USER_KEY } from '@concepta/nestjs-common';
 
 import { INVITATION_MODULE_SETTINGS_TOKEN } from '../invitation.constants';
 import { InvitationSendService } from './invitation-send.service';
@@ -15,7 +16,6 @@ import { InvitationSettingsInterface } from '../interfaces/options/invitation-se
 import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
 import { UserEntityFixture } from '../__fixtures__/user/entities/user.entity.fixture';
 import { UserOtpEntityFixture } from '../__fixtures__/user/entities/user-otp.entity.fixture';
-import { RepositoryInterface } from '@concepta/typeorm-common';
 
 describe(InvitationSendService, () => {
   let spyEmailService: jest.SpyInstance;
@@ -76,13 +76,13 @@ describe(InvitationSendService, () => {
 
       await invitationSendService.send({
         id: 'abcdefg',
-        user: testUser,
+        userId: testUser.id,
         code: inviteCode,
         category: INVITATION_MODULE_CATEGORY_USER_KEY,
       });
 
       const otps = await userOtpRepo.find({
-        where: { assignee: { id: testUser.id } },
+        where: { assigneeId: testUser.id },
       });
 
       expect(otps.length).toEqual(1);

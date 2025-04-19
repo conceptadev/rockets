@@ -4,8 +4,14 @@ import {
   Provider,
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { createSettingsProvider } from '@concepta/nestjs-common';
-import { PasswordCreationService } from '@concepta/nestjs-password';
+import {
+  RepositoryInterface,
+  createSettingsProvider,
+} from '@concepta/nestjs-common';
+import {
+  PasswordCreationService,
+  PasswordStorageService,
+} from '@concepta/nestjs-password';
 import {
   getDynamicRepositoryToken,
   TypeOrmExtModule,
@@ -22,22 +28,19 @@ import { UserOptionsExtrasInterface } from './interfaces/user-options-extras.int
 import { UserEntitiesOptionsInterface } from './interfaces/user-entities-options.interface';
 import { UserSettingsInterface } from './interfaces/user-settings.interface';
 import { UserEntityInterface } from './interfaces/user-entity.interface';
-import { UserLookupServiceInterface } from './interfaces/user-lookup-service.interface';
 import { UserPasswordHistoryEntityInterface } from './interfaces/user-password-history-entity.interface';
 
 import { UserCrudService } from './services/user-crud.service';
-import { UserLookupService } from './services/user-lookup.service';
-import { UserMutateService } from './services/user-mutate.service';
+import { UserModelService } from './services/user-model.service';
 import { UserPasswordService } from './services/user-password.service';
 import { UserPasswordHistoryService } from './services/user-password-history.service';
-import { UserPasswordHistoryLookupService } from './services/user-password-history-lookup.service';
-import { UserPasswordHistoryMutateService } from './services/user-password-history-mutate.service';
+import { UserPasswordHistoryModelService } from './services/user-password-history-model.service';
 import { UserAccessQueryService } from './services/user-access-query.service';
 import { UserController } from './user.controller';
 import { InvitationAcceptedListener } from './listeners/invitation-accepted-listener';
 import { userDefaultConfig } from './config/user-default.config';
 import { UserMissingEntitiesOptionsException } from './exceptions/user-missing-entities-options.exception';
-import { RepositoryInterface } from '@concepta/typeorm-common';
+import { UserModelServiceInterface } from './interfaces/user-model-service.interface';
 
 const RAW_OPTIONS_TOKEN = Symbol('__USER_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -103,14 +106,11 @@ export function createUserProviders(options: {
     UserCrudService,
     PasswordCreationService,
     InvitationAcceptedListener,
-    UserPasswordHistoryMutateService,
     createUserSettingsProvider(options.overrides),
-    createUserLookupServiceProvider(options.overrides),
-    createUserMutateServiceProvider(options.overrides),
+    createUserModelServiceProvider(options.overrides),
     createUserPasswordServiceProvider(options.overrides),
     createUserPasswordHistoryServiceProvider(options.overrides),
-    createUserPasswordHistoryLookupServiceProvider(),
-    createUserPasswordHistoryMutateServiceProvider(),
+    createUserPasswordHistoryModelServiceProvider(),
     createUserAccessQueryServiceProvider(options.overrides),
   ];
 }
@@ -120,13 +120,11 @@ export function createUserExports(): Required<
 >['exports'] {
   return [
     USER_MODULE_SETTINGS_TOKEN,
-    UserLookupService,
-    UserMutateService,
     UserCrudService,
+    UserModelService,
     UserPasswordService,
     UserPasswordHistoryService,
-    UserPasswordHistoryLookupService,
-    UserPasswordHistoryMutateService,
+    UserPasswordHistoryModelService,
     UserAccessQueryService,
   ];
 }
@@ -150,11 +148,11 @@ export function createUserSettingsProvider(
   });
 }
 
-export function createUserLookupServiceProvider(
+export function createUserModelServiceProvider(
   optionsOverrides?: UserOptions,
 ): Provider {
   return {
-    provide: UserLookupService,
+    provide: UserModelService,
     inject: [
       RAW_OPTIONS_TOKEN,
       getDynamicRepositoryToken(USER_MODULE_USER_ENTITY_KEY),
@@ -163,30 +161,9 @@ export function createUserLookupServiceProvider(
       options: UserOptionsInterface,
       userRepo: RepositoryInterface<UserEntityInterface>,
     ) =>
-      optionsOverrides?.userLookupService ??
-      options.userLookupService ??
-      new UserLookupService(userRepo),
-  };
-}
-
-export function createUserMutateServiceProvider(
-  optionsOverrides?: UserOptions,
-): Provider {
-  return {
-    provide: UserMutateService,
-    inject: [
-      RAW_OPTIONS_TOKEN,
-      getDynamicRepositoryToken(USER_MODULE_USER_ENTITY_KEY),
-      UserPasswordService,
-    ],
-    useFactory: async (
-      options: UserOptionsInterface,
-      userRepo: RepositoryInterface<UserEntityInterface>,
-      userPasswordService: UserPasswordService,
-    ) =>
-      optionsOverrides?.userMutateService ??
-      options.userMutateService ??
-      new UserMutateService(userRepo, userPasswordService),
+      optionsOverrides?.userModelService ??
+      options.userModelService ??
+      new UserModelService(userRepo),
   };
 }
 
@@ -197,8 +174,9 @@ export function createUserPasswordServiceProvider(
     provide: UserPasswordService,
     inject: [
       RAW_OPTIONS_TOKEN,
-      UserLookupService,
+      UserModelService,
       PasswordCreationService,
+      PasswordStorageService,
       {
         token: UserPasswordHistoryService,
         optional: true,
@@ -206,23 +184,25 @@ export function createUserPasswordServiceProvider(
     ],
     useFactory: async (
       options: UserOptionsInterface,
-      userLookUpService: UserLookupServiceInterface,
+      userModelService: UserModelServiceInterface,
       passwordCreationService: PasswordCreationService,
+      passwordStorageService: PasswordStorageService,
       userPasswordHistoryService?: UserPasswordHistoryService,
     ) =>
       optionsOverrides?.userPasswordService ??
       options.userPasswordService ??
       new UserPasswordService(
-        userLookUpService,
+        userModelService,
         passwordCreationService,
+        passwordStorageService,
         userPasswordHistoryService,
       ),
   };
 }
 
-export function createUserPasswordHistoryLookupServiceProvider(): Provider {
+export function createUserPasswordHistoryModelServiceProvider(): Provider {
   return {
-    provide: UserPasswordHistoryLookupService,
+    provide: UserPasswordHistoryModelService,
     inject: [
       USER_MODULE_SETTINGS_TOKEN,
       {
@@ -240,35 +220,7 @@ export function createUserPasswordHistoryLookupServiceProvider(): Provider {
         settings?.passwordHistory?.enabled === true &&
         userPasswordHistoryRepoToken
       ) {
-        return new UserPasswordHistoryLookupService(
-          userPasswordHistoryRepoToken,
-        );
-      }
-    },
-  };
-}
-
-export function createUserPasswordHistoryMutateServiceProvider(): Provider {
-  return {
-    provide: UserPasswordHistoryMutateService,
-    inject: [
-      USER_MODULE_SETTINGS_TOKEN,
-      {
-        token: getDynamicRepositoryToken(
-          USER_MODULE_USER_PASSWORD_HISTORY_ENTITY_KEY,
-        ),
-        optional: true,
-      },
-    ],
-    useFactory: async (
-      settings: UserSettingsInterface,
-      userPasswordHistoryRepoToken?: RepositoryInterface<UserPasswordHistoryEntityInterface>,
-    ) => {
-      if (
-        settings?.passwordHistory?.enabled === true &&
-        userPasswordHistoryRepoToken
-      ) {
-        return new UserPasswordHistoryMutateService(
+        return new UserPasswordHistoryModelService(
           userPasswordHistoryRepoToken,
         );
       }
@@ -291,11 +243,7 @@ export function createUserPasswordHistoryServiceProvider(
         optional: true,
       },
       {
-        token: UserPasswordHistoryLookupService,
-        optional: true,
-      },
-      {
-        token: UserPasswordHistoryMutateService,
+        token: UserPasswordHistoryModelService,
         optional: true,
       },
     ],
@@ -303,8 +251,7 @@ export function createUserPasswordHistoryServiceProvider(
       options: UserOptionsInterface,
       settings: UserSettingsInterface,
       userPasswordHistoryRepoToken?: RepositoryInterface<UserPasswordHistoryEntityInterface>,
-      userPasswordHistoryLookupService?: UserPasswordHistoryLookupService,
-      userPasswordHistoryMutateService?: UserPasswordHistoryMutateService,
+      userPasswordHistoryModelService?: UserPasswordHistoryModelService,
     ) => {
       // if password history is enabled?
       if (settings?.passwordHistory?.enabled === true) {
@@ -318,13 +265,11 @@ export function createUserPasswordHistoryServiceProvider(
           return overridingServiceOption;
         } else if (
           userPasswordHistoryRepoToken &&
-          userPasswordHistoryLookupService &&
-          userPasswordHistoryMutateService
+          userPasswordHistoryModelService
         ) {
           return new UserPasswordHistoryService(
             settings,
-            userPasswordHistoryLookupService,
-            userPasswordHistoryMutateService,
+            userPasswordHistoryModelService,
           );
         }
       }

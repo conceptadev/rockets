@@ -6,8 +6,11 @@ import {
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-import { RoleAssignmentInterface } from '@concepta/nestjs-common';
-import { createSettingsProvider } from '@concepta/nestjs-common';
+import {
+  RepositoryInterface,
+  RoleAssignmentInterface,
+  createSettingsProvider,
+} from '@concepta/nestjs-common';
 import {
   TypeOrmExtModule,
   getDynamicRepositoryToken,
@@ -35,7 +38,6 @@ import { RoleAssignmentController } from './role-assignment.controller';
 import { RoleAssignmentCrudService } from './services/role-assignment-crud.service';
 import { roleDefaultConfig } from './config/role-default.config';
 import { RoleMissingEntitiesOptionsException } from './exceptions/role-missing-entities-options.exception';
-import { RepositoryInterface } from '@concepta/typeorm-common';
 
 const RAW_OPTIONS_TOKEN = Symbol('__ROLE_MODULE_RAW_OPTIONS_TOKEN__');
 

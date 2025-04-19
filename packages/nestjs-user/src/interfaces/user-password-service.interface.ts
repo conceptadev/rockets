@@ -1,13 +1,11 @@
-import { ReferenceId, ReferenceIdInterface } from '@concepta/nestjs-common';
 import {
+  ReferenceId,
+  ReferenceIdInterface,
   AuthenticatedUserInterface,
   PasswordPlainCurrentInterface,
   PasswordPlainInterface,
-} from '@concepta/nestjs-common';
-import {
-  PasswordCreationService,
   PasswordStorageInterface,
-} from '@concepta/nestjs-password';
+} from '@concepta/nestjs-common';
 
 export interface UserPasswordServiceInterface {
   /**
@@ -23,17 +21,16 @@ export interface UserPasswordServiceInterface {
   ) => Promise<ReferenceIdInterface & PasswordStorageInterface>;
 
   /**
-   * Set the password (hash) on the user object.
+   * Set the password and save in database.
    *
    * @param passwordDto - The object containing the password, and optionally the current password.
    * @param userToUpdateId - The id of the user being updated.
    * @param authorizedUser - The authorized user
    */
   setPassword: (
-    passwordDto: Partial<
-      PasswordPlainInterface & PasswordPlainCurrentInterface
-    >,
+    passwordDto: PasswordPlainInterface &
+      Partial<PasswordPlainCurrentInterface>,
     userToUpdateId?: ReferenceId,
     authorizedUser?: AuthenticatedUserInterface,
-  ) => ReturnType<PasswordCreationService['createObject']>;
+  ) => Promise<void>;
 }

@@ -18,18 +18,18 @@ import {
 import {
   AUTH_LOCAL_MODULE_SETTINGS_TOKEN,
   AuthLocalIssueTokenService,
-  AuthLocalUserLookupService,
+  AuthLocalUserModelService,
   AuthLocalPasswordValidationService,
 } from './auth-local.constants';
 
 import { AuthLocalOptionsExtrasInterface } from './interfaces/auth-local-options-extras.interface';
 import { AuthLocalOptionsInterface } from './interfaces/auth-local-options.interface';
 import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.interface';
+import { AuthLocalUserModelServiceInterface } from './interfaces/auth-local-user-model-service.interface';
 import { authLocalDefaultConfig } from './config/auth-local-default.config';
 import { AuthLocalController } from './auth-local.controller';
 import { AuthLocalStrategy } from './auth-local.strategy';
 import { AuthLocalValidateUserService } from './services/auth-local-validate-user.service';
-import { AuthLocalUserLookupServiceInterface } from './interfaces/auth-local-user-lookup-service.interface';
 
 const RAW_OPTIONS_TOKEN = Symbol('__AUTH_LOCAL_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -77,7 +77,7 @@ export function createAuthLocalImports(): DynamicModule['imports'] {
 export function createAuthLocalExports() {
   return [
     AUTH_LOCAL_MODULE_SETTINGS_TOKEN,
-    AuthLocalUserLookupService,
+    AuthLocalUserModelService,
     AuthLocalIssueTokenService,
     AuthLocalPasswordValidationService,
     AuthLocalValidateUserService,
@@ -97,7 +97,7 @@ export function createAuthLocalProviders(options: {
     createAuthLocalOptionsProvider(options.overrides),
     createAuthLocalValidateUserServiceProvider(options.overrides),
     createAuthLocalIssueTokenServiceProvider(options.overrides),
-    createAuthLocalUserLookupServiceProvider(options.overrides),
+    createAuthLocalUserModelServiceProvider(options.overrides),
     createAuthLocalPasswordValidationServiceProvider(options.overrides),
   ];
 }
@@ -131,18 +131,18 @@ export function createAuthLocalValidateUserServiceProvider(
     provide: AuthLocalValidateUserService,
     inject: [
       RAW_OPTIONS_TOKEN,
-      AuthLocalUserLookupService,
+      AuthLocalUserModelService,
       AuthLocalPasswordValidationService,
     ],
     useFactory: async (
       options: Pick<AuthLocalOptions, 'validateUserService'>,
-      userLookupService: AuthLocalUserLookupServiceInterface,
+      userModelService: AuthLocalUserModelServiceInterface,
       passwordValidationService: PasswordValidationServiceInterface,
     ) =>
       optionsOverrides?.validateUserService ??
       options.validateUserService ??
       new AuthLocalValidateUserService(
-        userLookupService,
+        userModelService,
         passwordValidationService,
       ),
   };
@@ -180,13 +180,13 @@ export function createAuthLocalPasswordValidationServiceProvider(
   };
 }
 
-export function createAuthLocalUserLookupServiceProvider(
-  optionsOverrides?: Pick<AuthLocalOptions, 'userLookupService'>,
+export function createAuthLocalUserModelServiceProvider(
+  optionsOverrides?: Pick<AuthLocalOptions, 'userModelService'>,
 ): Provider {
   return {
-    provide: AuthLocalUserLookupService,
+    provide: AuthLocalUserModelService,
     inject: [RAW_OPTIONS_TOKEN],
     useFactory: async (options: AuthLocalOptionsInterface) =>
-      optionsOverrides?.userLookupService ?? options.userLookupService,
+      optionsOverrides?.userModelService ?? options.userModelService,
   };
 }

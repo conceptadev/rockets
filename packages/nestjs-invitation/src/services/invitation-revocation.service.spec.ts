@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
+import { RepositoryInterface } from '@concepta/nestjs-common';
 import { UserEntityInterface } from '@concepta/nestjs-user';
 import { OtpService } from '@concepta/nestjs-otp';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
@@ -15,7 +16,6 @@ import { InvitationEntityInterface } from '../interfaces/domain/invitation-entit
 import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
 import { InvitationEntityFixture } from '../__fixtures__/invitation/entities/invitation.entity.fixture';
 import { UserEntityFixture } from '../__fixtures__/user/entities/user.entity.fixture';
-import { RepositoryInterface } from '@concepta/typeorm-common';
 
 describe(InvitationRevocationService, () => {
   const category = INVITATION_MODULE_CATEGORY_USER_KEY;
@@ -76,19 +76,18 @@ describe(InvitationRevocationService, () => {
       const spyOtpClear = jest.spyOn(otpService, 'clear');
 
       await invitationFactory.create({
-        user: testUser,
+        userId: testUser.id,
         category,
       });
 
       const invitations = await invitationRepo.find({
         where: {
-          user: { id: testUser.id },
+          userId: testUser.id,
         },
-        relations: ['user'],
       });
 
       expect(invitations.length).toEqual(1);
-      expect(invitations[0].user).toEqual(testUser);
+      expect(invitations[0].userId).toEqual(testUser.id);
 
       await invitationRevocationService.revokeAll({
         email: testUser.email,
@@ -96,9 +95,9 @@ describe(InvitationRevocationService, () => {
       });
 
       // TODO: TYPEORM - review if we need count
-      const countAfter = await invitationRepo.count();
+      const allInvitations = await invitationRepo.find();
 
-      expect(countAfter).toEqual(0);
+      expect(allInvitations.length).toEqual(0);
       expect(spyOtpClear).toHaveBeenCalledTimes(1);
     });
   });

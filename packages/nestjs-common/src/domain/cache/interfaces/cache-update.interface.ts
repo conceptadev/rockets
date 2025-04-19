@@ -1,11 +1,8 @@
-import { ReferenceQueryOptionsInterface } from '../../../reference/interfaces/reference-query-options.interface';
 import { ReferenceAssignment } from '../../../reference/interfaces/reference.types';
 import { CacheUpdatableInterface } from './cache-updatable.interface';
 import { CacheInterface } from './cache.interface';
 
-export interface CacheUpdateInterface<
-  O extends ReferenceQueryOptionsInterface = ReferenceQueryOptionsInterface,
-> {
+export interface CacheUpdateInterface {
   /**
    * Update a cache based on params
    *
@@ -15,6 +12,5 @@ export interface CacheUpdateInterface<
   update(
     assignment: ReferenceAssignment,
     cache: CacheUpdatableInterface,
-    options?: O,
   ): Promise<CacheInterface>;
 }

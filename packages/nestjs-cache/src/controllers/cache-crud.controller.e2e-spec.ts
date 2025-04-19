@@ -56,7 +56,7 @@ describe('CacheAssignmentController (e2e)', () => {
   it('GET /cache/user', async () => {
     await userCacheFactory
       .map((userCache) => {
-        userCache.assignee = user;
+        userCache.assigneeId = user.id;
       })
       .createMany(2);
 
@@ -71,7 +71,7 @@ describe('CacheAssignmentController (e2e)', () => {
   it('GET /cache/user/:id', async () => {
     const userCache = await userCacheFactory
       .map((userCache) => {
-        userCache.assignee = user;
+        userCache.assigneeId = user.id;
       })
       .create();
 
@@ -81,14 +81,14 @@ describe('CacheAssignmentController (e2e)', () => {
       )
       .expect(200)
       .then((res) => {
-        assert.strictEqual(res.body.assignee.id, user.id);
+        assert.strictEqual(res.body.assigneeId, user.id);
       });
   });
 
   it('GET /cache/user/ with key and type filters', async () => {
     const userCache = await userCacheFactory
       .map((userCache) => {
-        userCache.assignee = user;
+        userCache.assigneeId = user.id;
         userCache.key = 'specific-key';
         userCache.type = 'specific-type';
         userCache.data = JSON.stringify({ name: 'John Doe' });
@@ -105,7 +105,7 @@ describe('CacheAssignmentController (e2e)', () => {
       .expect(200)
       .then((res) => {
         const response = res.body[0];
-        assert.strictEqual(response.assignee.id, user.id);
+        assert.strictEqual(response.assigneeId, user.id);
         assert.strictEqual(response.key, userCache.key);
         assert.strictEqual(response.type, userCache.type);
         assert.strictEqual(response.data, userCache.data);
@@ -118,7 +118,7 @@ describe('CacheAssignmentController (e2e)', () => {
       type: 'filter',
       data: '{}',
       expiresIn: '1d',
-      assignee: { id: user.id },
+      assigneeId: user.id,
     };
 
     await supertest(app.getHttpServer())
@@ -127,7 +127,7 @@ describe('CacheAssignmentController (e2e)', () => {
       .expect(201)
       .then((res) => {
         expect(res.body.key).toBe(payload.key);
-        expect(res.body.assignee.id).toBe(user.id);
+        expect(res.body.assigneeId).toBe(user.id);
       });
   });
 
@@ -146,28 +146,13 @@ describe('CacheAssignmentController (e2e)', () => {
       .expect(400);
   });
 
-  it('POST /cache/user wrong assignee id', async () => {
-    const payload = {
-      key: 'dashboard-1',
-      type: 'filter',
-      data: '{}',
-      expiresIn: '1d',
-      assignee: { id: 'test' },
-    };
-
-    await supertest(app.getHttpServer())
-      .post('/cache/user')
-      .send(payload)
-      .expect(500);
-  });
-
   it('POST /cache/user Duplicated', async () => {
     const payload: CacheCreatableInterface = {
       key: 'dashboard-1',
       type: 'filter',
       data: '{}',
       expiresIn: '1d',
-      assignee: { id: user.id },
+      assigneeId: user.id,
     };
 
     await supertest(app.getHttpServer())
@@ -176,7 +161,7 @@ describe('CacheAssignmentController (e2e)', () => {
       .expect(201)
       .then((res) => {
         expect(res.body.key).toBe(payload.key);
-        expect(res.body.assignee.id).toBe(user.id);
+        expect(res.body.assigneeId).toBe(user.id);
       });
   });
 
@@ -186,14 +171,14 @@ describe('CacheAssignmentController (e2e)', () => {
         CacheCreatableInterface,
         'key' | 'expiresIn' | 'type' | 'data'
       > {
-      assignee: { id: string | null } | null;
+      assigneeId: string | null;
     }
     const payload: ExtendedCacheCreatableInterface = {
       key: 'dashboard-1',
       type: 'filter',
       data: '{}',
       expiresIn: '1d',
-      assignee: { id: user.id },
+      assigneeId: user.id,
     };
 
     await supertest(app.getHttpServer())
@@ -202,25 +187,25 @@ describe('CacheAssignmentController (e2e)', () => {
       .expect(201)
       .then((res) => {
         expect(res.body.key).toBe(payload.key);
-        expect(res.body.assignee.id).toBe(user.id);
+        expect(res.body.assigneeId).toBe(user.id);
       });
 
     payload.data = '{ "name": "John Doe" }';
     payload.expiresIn = null;
-    payload.assignee = { id: null };
+    payload.assigneeId = null;
 
     await supertest(app.getHttpServer())
       .post('/cache/user')
       .send(payload)
       .expect(400);
 
-    payload.assignee = { id: '' };
+    payload.assigneeId = '';
     await supertest(app.getHttpServer())
       .post('/cache/user')
       .send(payload)
-      .expect(500);
+      .expect(400);
 
-    payload.assignee = null;
+    payload.assigneeId = null;
     await supertest(app.getHttpServer())
       .post('/cache/user')
       .send(payload)
@@ -233,7 +218,7 @@ describe('CacheAssignmentController (e2e)', () => {
       type: 'filter',
       data: '{}',
       expiresIn: '1d',
-      assignee: { id: user.id },
+      assigneeId: user.id,
     };
 
     let cacheId = '';
@@ -246,7 +231,7 @@ describe('CacheAssignmentController (e2e)', () => {
         cacheId = res.body.id;
         expect(typeof res.body.id).toEqual('string');
         expect(res.body.key).toBe(payload.key);
-        expect(res.body.assignee.id).toBe(user.id);
+        expect(res.body.assigneeId).toBe(user.id);
       });
 
     payload.data = '{ "name": "John Doe" }';
@@ -259,14 +244,14 @@ describe('CacheAssignmentController (e2e)', () => {
       .then((res) => {
         expect(res.body.key).toBe(payload.key);
         expect(res.body.data).toBe(payload.data);
-        expect(res.body.assignee.id).toBe(user.id);
+        expect(res.body.assigneeId).toBe(user.id);
       });
 
     const url =
       `/cache/user/` +
       `?filter[0]=key||$eq||${payload.key}` +
       `&filter[1]=type||$eq||${payload.type}` +
-      `&filter[2]=assignee.id||$eq||${payload.assignee.id}`;
+      `&filter[2]=assigneeId||$eq||${payload.assigneeId}`;
 
     // Assuming your endpoint can filter by key and type
     await supertest(app.getHttpServer())
@@ -274,7 +259,7 @@ describe('CacheAssignmentController (e2e)', () => {
       .expect(200)
       .then((res) => {
         const response = res.body[0];
-        assert.strictEqual(response.assignee.id, user.id);
+        assert.strictEqual(response.assigneeId, user.id);
         assert.strictEqual(response.key, payload.key);
         assert.strictEqual(response.type, payload.type);
         assert.strictEqual(response.data, payload.data);
@@ -287,7 +272,7 @@ describe('CacheAssignmentController (e2e)', () => {
       type: 'filter',
       data: '{}',
       expiresIn: '1d',
-      assignee: { id: user.id },
+      assigneeId: user.id,
     };
 
     const cacheId = randomUUID();
@@ -299,7 +284,7 @@ describe('CacheAssignmentController (e2e)', () => {
       .then((res) => {
         expect(res.body.id).toBe(cacheId);
         expect(res.body.key).toBe(payload.key);
-        expect(res.body.assignee.id).toBe(user.id);
+        expect(res.body.assigneeId).toBe(user.id);
       });
 
     payload.data = '{ "name": "John Doe" }';
@@ -312,14 +297,14 @@ describe('CacheAssignmentController (e2e)', () => {
       .then((res) => {
         expect(res.body.key).toBe(payload.key);
         expect(res.body.data).toBe(payload.data);
-        expect(res.body.assignee.id).toBe(user.id);
+        expect(res.body.assigneeId).toBe(user.id);
       });
 
     const url =
       `/cache/user/` +
       `?filter[0]=key||$eq||${payload.key}` +
       `&filter[1]=type||$eq||${payload.type}` +
-      `&filter[2]=assignee.id||$eq||${payload.assignee.id}`;
+      `&filter[2]=assigneeId||$eq||${payload.assigneeId}`;
 
     // Assuming your endpoint can filter by key and type
     await supertest(app.getHttpServer())
@@ -327,7 +312,7 @@ describe('CacheAssignmentController (e2e)', () => {
       .expect(200)
       .then((res) => {
         const response = res.body[0];
-        assert.strictEqual(response.assignee.id, user.id);
+        assert.strictEqual(response.assigneeId, user.id);
         assert.strictEqual(response.key, payload.key);
         assert.strictEqual(response.type, payload.type);
         assert.strictEqual(response.data, payload.data);
@@ -337,7 +322,7 @@ describe('CacheAssignmentController (e2e)', () => {
   it('DELETE /cache/user/:id', async () => {
     const userCache = await userCacheFactory
       .map((userCache) => {
-        userCache.assignee = user;
+        userCache.assigneeId = user.id;
       })
       .create();
 

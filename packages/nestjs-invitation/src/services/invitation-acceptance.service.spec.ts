@@ -82,7 +82,7 @@ describe(InvitationAcceptanceService, () => {
 
     testUser = await userFactory.create();
     testInvitation = await invitationFactory.create({
-      user: testUser,
+      userId: testUser.id,
       category,
     });
   });
@@ -99,7 +99,7 @@ describe(InvitationAcceptanceService, () => {
       otp.passcode,
       category,
     );
-    expect(validOtp?.assignee).toEqual(testUser);
+    expect(validOtp?.assigneeId).toEqual(testUser.id);
   });
 
   it('Validate passcode (invalid)', async () => {
@@ -154,9 +154,7 @@ const createOtp = async (
       category,
       type,
       expiresIn,
-      assignee: {
-        id: user.id,
-      },
+      assigneeId: user.id,
     },
     clearOnCreate,
   });
@@ -166,7 +164,7 @@ const createOtp = async (
   expect(otp.expirationDate).toBeTruthy();
   expect(otp.category).toEqual(category);
   expect(otp.type).toEqual(type);
-  expect(otp.assignee.id).toEqual(user.id);
+  expect(otp.assigneeId).toEqual(user.id);
 
   return otp;
 };

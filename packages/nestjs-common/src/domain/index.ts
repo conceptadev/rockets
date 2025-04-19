@@ -1,6 +1,8 @@
 export { EmailSendOptionsInterface } from './email/interfaces/email-send-options.interface';
 export { EmailSendInterface } from './email/interfaces/email-send.interface';
 
+export { AssigneeRelationInterface } from './assignee/interfaces/assignee-relation.interface';
+
 export { AuthenticatedUserInterface } from './authentication/interfaces/authenticated-user.interface';
 export { AuthenticationAccessInterface } from './authentication/interfaces/authentication-access.interface';
 export { AuthenticationCodeInterface } from './authentication/interfaces/authentication-code.interface';
@@ -10,8 +12,10 @@ export { AuthenticationResponseInterface } from './authentication/interfaces/aut
 
 export { AuthorizationPayloadInterface } from './authorization/interfaces/authorization-payload.interface';
 
+export { PasswordStorageInterface } from './password/interfaces/password-storage.interface';
 export { PasswordPlainCurrentInterface } from './password/interfaces/password-plain-current.interface';
 export { PasswordPlainInterface } from './password/interfaces/password-plain.interface';
+export { isPasswordStorage } from './password/is-password-storage.typeguard';
 
 export { OrgCreatableInterface } from './org/interfaces/org-creatable.interface';
 export { OrgOwnableInterface } from './org/interfaces/org-ownable.interface';
@@ -26,6 +30,8 @@ export { OrgProfileCreatableInterface } from './org-profile/interfaces/org-profi
 export { UserCreatableInterface } from './user/interfaces/user-creatable.interface';
 export { UserOwnableInterface } from './user/interfaces/user-ownable.interface';
 export { UserUpdatableInterface } from './user/interfaces/user-updatable.interface';
+export { UserReplaceableInterface } from './user/interfaces/user-replaceable.interface';
+export { UserRelationInterface } from './user/interfaces/user-relation.interface';
 export { UserInterface } from './user/interfaces/user.interface';
 
 export { UserProfileInterface } from './user-profile/interfaces/user-profile.interface';
@@ -40,6 +46,7 @@ export { RoleAssignmentCreatableInterface } from './role/interfaces/role-assignm
 export { RoleAssignmentInterface } from './role/interfaces/role-assignment.interface';
 export { RoleCreatableInterface } from './role/interfaces/role-creatable.interface';
 export { RoleUpdatableInterface } from './role/interfaces/role-updatable.interface';
+export { RoleRelationInterface } from './role/interfaces/role-relation.interface';
 export { RoleInterface } from './role/interfaces/role.interface';
 
 export { OtpClearInterface } from './otp/interfaces/otp-clear.interface';

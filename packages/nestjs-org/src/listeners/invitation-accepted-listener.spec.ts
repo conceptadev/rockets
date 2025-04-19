@@ -119,7 +119,7 @@ describe(InvitationAcceptedListener, () => {
       owner: testOwner,
     });
     testInvitation = await invitationFactory.create({
-      user: testUser,
+      userId: testUser.id,
       category,
       constraints: { orgId: testOrg.id },
     });
@@ -129,7 +129,7 @@ describe(InvitationAcceptedListener, () => {
     const invitationAcceptedEventAsync = new InvitationAcceptedEventAsync({
       invitation: testInvitation,
       data: {
-        user: testInvitation.user,
+        userId: testInvitation.userId,
       },
     });
 

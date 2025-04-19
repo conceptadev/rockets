@@ -55,7 +55,6 @@ import { RoleAssignmentResource } from './role.types';
       disabled: true,
     },
   },
-  join: { role: { eager: true }, assignee: { eager: true } },
 })
 export class RoleAssignmentController
   implements

@@ -10,8 +10,7 @@ import { createSettingsProvider } from '@concepta/nestjs-common';
 
 import {
   FEDERATED_MODULE_SETTINGS_TOKEN,
-  FEDERATED_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-  FEDERATED_MODULE_USER_MUTATE_SERVICE_TOKEN,
+  FEDERATED_MODULE_USER_MODEL_SERVICE_TOKEN,
 } from './federated.constants';
 
 import { FederatedOptionsInterface } from './interfaces/federated-options.interface';
@@ -20,7 +19,7 @@ import { FederatedOptionsExtrasInterface } from './interfaces/federated-options-
 import { FederatedSettingsInterface } from './interfaces/federated-settings.interface';
 import { FederatedService } from './services/federated.service';
 import { FederatedOAuthService } from './services/federated-oauth.service';
-import { FederatedMutateService } from './services/federated-mutate.service';
+import { FederatedModelService } from './services/federated-model.service';
 import { federatedDefaultConfig } from './config/federated-default.config';
 import { FederatedMissingEntitiesOptionsException } from './exceptions/federated-missing-entities-options.exception';
 
@@ -81,11 +80,10 @@ export function createFederatedExports(): Required<
 >['exports'] {
   return [
     FEDERATED_MODULE_SETTINGS_TOKEN,
-    FEDERATED_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-    FEDERATED_MODULE_USER_MUTATE_SERVICE_TOKEN,
+    FEDERATED_MODULE_USER_MODEL_SERVICE_TOKEN,
     FederatedService,
     FederatedOAuthService,
-    FederatedMutateService,
+    FederatedModelService,
   ];
 }
 
@@ -96,11 +94,10 @@ export function createFederatedProviders(options: {
   return [
     ...(options.providers ?? []),
     createFederatedSettingsProvider(options.overrides),
-    createFederatedUserLookupServiceProvider(options.overrides),
-    createFederatedUserMutateServiceProvider(options.overrides),
+    createFederatedUserModelServiceProvider(options.overrides),
     FederatedService,
     FederatedOAuthService,
-    FederatedMutateService,
+    FederatedModelService,
   ];
 }
 
@@ -118,24 +115,13 @@ export function createFederatedSettingsProvider(
   });
 }
 
-export function createFederatedUserLookupServiceProvider(
+export function createFederatedUserModelServiceProvider(
   optionsOverrides?: FederatedOptions,
 ): Provider {
   return {
-    provide: FEDERATED_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+    provide: FEDERATED_MODULE_USER_MODEL_SERVICE_TOKEN,
     inject: [RAW_OPTIONS_TOKEN],
     useFactory: async (options: FederatedOptionsInterface) =>
-      optionsOverrides?.userLookupService ?? options.userLookupService,
-  };
-}
-
-export function createFederatedUserMutateServiceProvider(
-  optionsOverrides?: FederatedOptions,
-): Provider {
-  return {
-    provide: FEDERATED_MODULE_USER_MUTATE_SERVICE_TOKEN,
-    inject: [RAW_OPTIONS_TOKEN],
-    useFactory: async (options: FederatedOptionsInterface) =>
-      optionsOverrides?.userMutateService ?? options.userMutateService,
+      optionsOverrides?.userModelService ?? options.userModelService,
   };
 }

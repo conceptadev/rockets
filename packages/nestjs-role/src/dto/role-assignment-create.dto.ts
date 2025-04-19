@@ -8,5 +8,5 @@ import { RoleAssignmentDto } from './role-assignment.dto';
  */
 @Exclude()
 export class RoleAssignmentCreateDto
-  extends PickType(RoleAssignmentDto, ['role', 'assignee'] as const)
+  extends PickType(RoleAssignmentDto, ['roleId', 'assigneeId'] as const)
   implements RoleAssignmentCreatableInterface {}

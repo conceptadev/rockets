@@ -4,7 +4,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 
 import { LookupService } from './lookup.service';
-import { ReferenceLookupException } from '../exceptions/reference-lookup.exception';
 
 import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
 import { TestModuleFixture } from '../__fixtures__/test.module.fixture';
@@ -66,20 +65,6 @@ describe(LookupService, () => {
     it('wrong id', async () => {
       const result = await testLookupService.byId(RANDOM_UUID);
       expect(result?.version).toBe(undefined);
-    });
-  });
-
-  describe(LookupService.prototype['findOne'], () => {
-    it('lookup exception', async () => {
-      jest
-        .spyOn(testLookupService['repo'], 'findOne')
-        .mockImplementationOnce(() => {
-          throw new Error();
-        });
-
-      await expect(testLookupService['findOne']({})).rejects.toThrow(
-        ReferenceLookupException,
-      );
     });
   });
 });

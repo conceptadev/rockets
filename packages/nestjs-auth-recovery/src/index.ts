@@ -6,15 +6,14 @@ export { AuthRecoveryNotificationService } from './services/auth-recovery-notifi
 export {
   AuthRecoveryEmailService,
   AuthRecoveryOtpService,
-  AuthRecoveryUserLookupService,
-  AuthRecoveryUserMutateService,
+  AuthRecoveryUserModelService,
+  AuthRecoveryUserPasswordService,
 } from './auth-recovery.constants';
 
 export { AuthRecoveryOptionsInterface } from './interfaces/auth-recovery-options.interface';
 export { AuthRecoveryOptionsExtrasInterface } from './interfaces/auth-recovery-options-extras.interface';
 export { AuthRecoverySettingsInterface } from './interfaces/auth-recovery-settings.interface';
-export { AuthRecoveryUserLookupServiceInterface } from './interfaces/auth-recovery-user-lookup.service.interface';
-export { AuthRecoveryUserMutateServiceInterface } from './interfaces/auth-recovery-user-mutate.service.interface';
+export { AuthRecoveryUserModelServiceInterface } from './interfaces/auth-recovery-user-model.service.interface';
 export { AuthRecoveryEmailServiceInterface } from './interfaces/auth-recovery-email.service.interface';
 export { AuthRecoveryOtpServiceInterface } from './interfaces/auth-recovery-otp.service.interface';
 export { AuthRecoveryServiceInterface } from './interfaces/auth-recovery.service.interface';

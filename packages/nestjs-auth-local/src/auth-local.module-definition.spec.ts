@@ -2,12 +2,12 @@ import { IssueTokenService } from '@concepta/nestjs-authentication';
 import { PasswordValidationService } from '@concepta/nestjs-password';
 import { FactoryProvider } from '@nestjs/common';
 import { mock } from 'jest-mock-extended';
-import { UserLookupServiceFixture } from './__fixtures__/user/user-lookup.service.fixture';
+import { UserModelServiceFixture } from './__fixtures__/user/user-model.service.fixture';
 import {
   AUTH_LOCAL_MODULE_SETTINGS_TOKEN,
   AuthLocalIssueTokenService,
   AuthLocalPasswordValidationService,
-  AuthLocalUserLookupService,
+  AuthLocalUserModelService,
 } from './auth-local.constants';
 import { AuthLocalController } from './auth-local.controller';
 import {
@@ -15,7 +15,7 @@ import {
   createAuthLocalExports,
   createAuthLocalIssueTokenServiceProvider,
   createAuthLocalPasswordValidationServiceProvider,
-  createAuthLocalUserLookupServiceProvider,
+  createAuthLocalUserModelServiceProvider,
   createAuthLocalValidateUserServiceProvider,
 } from './auth-local.module-definition';
 import { AuthLocalValidateUserService } from './services/auth-local-validate-user.service';
@@ -27,7 +27,7 @@ describe('Auth-local.module-definition', () => {
       const result = createAuthLocalExports();
       expect(result).toEqual([
         AUTH_LOCAL_MODULE_SETTINGS_TOKEN,
-        AuthLocalUserLookupService,
+        AuthLocalUserModelService,
         AuthLocalIssueTokenService,
         AuthLocalPasswordValidationService,
         AuthLocalValidateUserService,
@@ -81,15 +81,15 @@ describe('Auth-local.module-definition', () => {
   });
 
   describe(createAuthLocalValidateUserServiceProvider.name, () => {
-    class TestUserLookupService extends UserLookupServiceFixture {}
+    class TestUserModelService extends UserModelServiceFixture {}
     class TestPasswordValidationService extends PasswordValidationService {}
     class TestAuthLocalValidateUserService extends AuthLocalValidateUserService {}
 
-    const testUserLookupService = mock<TestUserLookupService>();
+    const testUserModelService = mock<TestUserModelService>();
     const testPasswordValidationService = mock<TestPasswordValidationService>();
     const testAuthLocalValidateUserService =
       new TestAuthLocalValidateUserService(
-        testUserLookupService,
+        testUserModelService,
         testPasswordValidationService,
       );
 
@@ -166,32 +166,33 @@ describe('Auth-local.module-definition', () => {
     });
   });
 
-  describe(createAuthLocalUserLookupServiceProvider.name, () => {
-    class LookupService extends UserLookupServiceFixture {}
-    class OverrideLookupService extends UserLookupServiceFixture {}
+  describe(createAuthLocalUserModelServiceProvider.name, () => {
+    class TestModelService extends UserModelServiceFixture {}
+    class OverrideModelService extends UserModelServiceFixture {}
 
-    it('should return a default userLookupService', async () => {
-      const provider: FactoryProvider =
-        createAuthLocalUserLookupServiceProvider({
-          userLookupService: new OverrideLookupService(),
-        }) as FactoryProvider;
+    it('should return a default userModelService', async () => {
+      const provider: FactoryProvider = createAuthLocalUserModelServiceProvider(
+        {
+          userModelService: new OverrideModelService(),
+        },
+      ) as FactoryProvider;
 
       // useFactory is for when class was initially defined
       const useFactoryResult = await provider.useFactory({
-        userLookupService: new LookupService(),
+        userModelService: new TestModelService(),
       });
-      expect(useFactoryResult).toBeInstanceOf(OverrideLookupService);
+      expect(useFactoryResult).toBeInstanceOf(OverrideModelService);
     });
 
-    it('should return a userLookupService from initialization', async () => {
+    it('should return a userModelService from initialization', async () => {
       const provider: FactoryProvider =
-        createAuthLocalUserLookupServiceProvider() as FactoryProvider;
+        createAuthLocalUserModelServiceProvider() as FactoryProvider;
 
       // useFactory is for when class was initially defined
       const useFactoryResult = await provider.useFactory({
-        userLookupService: new LookupService(),
+        userModelService: new TestModelService(),
       });
-      expect(useFactoryResult).toBeInstanceOf(LookupService);
+      expect(useFactoryResult).toBeInstanceOf(TestModelService);
     });
   });
 

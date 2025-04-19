@@ -1,10 +1,7 @@
 import { Column } from 'typeorm';
 import { PlainLiteralObject } from '@nestjs/common';
 import { CommonSqliteEntity } from '@concepta/typeorm-common';
-import {
-  InvitationUserInterface,
-  ReferenceActive,
-} from '@concepta/nestjs-common';
+import { ReferenceActive, ReferenceId } from '@concepta/nestjs-common';
 import { InvitationEntityInterface } from '../interfaces/domain/invitation-entity.interface';
 
 export abstract class InvitationSqliteEntity
@@ -23,5 +20,6 @@ export abstract class InvitationSqliteEntity
   @Column({ type: 'simple-json', nullable: true })
   constraints!: PlainLiteralObject;
 
-  user!: InvitationUserInterface;
+  @Column({ type: 'uuid' })
+  userId!: ReferenceId;
 }

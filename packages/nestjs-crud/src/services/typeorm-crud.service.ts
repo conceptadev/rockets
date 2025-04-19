@@ -2,17 +2,12 @@ import { ObjectLiteral, Repository, SelectQueryBuilder } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { CrudRequest, JoinOptions, QueryOptions } from '@nestjsx/crud';
 import { TypeOrmCrudService as xTypeOrmCrudService } from '@nestjsx/crud-typeorm';
-import {
-  SafeTransactionOptionsInterface,
-  TransactionProxy,
-} from '@concepta/typeorm-common';
 
 import { CrudQueryHelper } from '../util/crud-query.helper';
 import { CrudQueryOptionsInterface } from '../interfaces/crud-query-options.interface';
 import { CrudResponsePaginatedInterface } from '../interfaces/crud-response-paginated.interface';
 import { CrudQueryException } from '../exceptions/crud-query.exception';
 import { ParsedRequestParams, QueryJoin } from '@nestjsx/crud-request';
-import { EntityManagerInterface } from '@concepta/typeorm-common';
 
 // TODO: TYPEORM - review what to do
 @Injectable()
@@ -168,14 +163,6 @@ export class TypeOrmCrudService<
         originalError: e,
       });
     }
-  }
-
-  transaction(options?: SafeTransactionOptionsInterface): TransactionProxy {
-    // TODO: TYPEORM: this manager is from repository of typeorm because class exends crud typeorm
-    return new TransactionProxy(
-      this.repo.manager as EntityManagerInterface,
-      options,
-    );
   }
 
   protected setJoin(

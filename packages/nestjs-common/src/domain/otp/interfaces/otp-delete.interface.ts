@@ -1,10 +1,7 @@
-import { ReferenceQueryOptionsInterface } from '../../../reference/interfaces/reference-query-options.interface';
 import { ReferenceAssignment } from '../../../reference/interfaces/reference.types';
 import { OtpInterface } from './otp.interface';
 
-export interface OtpDeleteInterface<
-  O extends ReferenceQueryOptionsInterface = ReferenceQueryOptionsInterface,
-> {
+export interface OtpDeleteInterface {
   /**
    * Delete a otp based on params
    *
@@ -13,7 +10,6 @@ export interface OtpDeleteInterface<
    */
   delete(
     assignment: ReferenceAssignment,
-    otp: Pick<OtpInterface, 'assignee' | 'category' | 'passcode'>,
-    options?: O,
+    otp: Pick<OtpInterface, 'assigneeId' | 'category' | 'passcode'>,
   ): Promise<void>;
 }

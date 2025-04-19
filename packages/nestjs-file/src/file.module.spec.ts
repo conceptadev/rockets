@@ -1,11 +1,12 @@
 import { Repository } from 'typeorm';
+import { Test, TestingModule } from '@nestjs/testing';
+import { DynamicModule, ModuleMetadata } from '@nestjs/common';
 import {
   getDynamicRepositoryToken,
   getEntityRepositoryToken,
   TypeOrmExtModule,
 } from '@concepta/nestjs-typeorm-ext';
-import { DynamicModule, ModuleMetadata } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
+import { RepositoryInterface } from '@concepta/nestjs-common';
 
 import { FileService } from './services/file.service';
 
@@ -24,7 +25,6 @@ import {
   FILE_NAME_FIXTURE,
   UPLOAD_URL_FIXTURE,
 } from './__fixtures__/constants.fixture';
-import { RepositoryInterface } from '@concepta/typeorm-common';
 
 describe(FileModule, () => {
   let testModule: TestingModule;

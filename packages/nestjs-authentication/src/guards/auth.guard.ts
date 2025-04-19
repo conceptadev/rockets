@@ -22,7 +22,7 @@ import { FastifyAuthGuard } from './fastify-auth.guard';
  * @UseGuards(AuthGuard('local'))
  * @Post('login')
  * async authenticateWithGuard(
- *   @AuthUser() user: CredentialLookupInterface,
+ *   @AuthUser() user: AuthLocalCredentialsInterface,
  * ): Promise<AuthenticationResponseInterface> {
  *
  *   const token = this.issueTokenService.issueAccessToken(user.username);

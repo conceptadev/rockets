@@ -1,11 +1,8 @@
-import { ReferenceAssigneeInterface } from '../../../reference/interfaces/reference-assignee.interface';
-import { ReferenceQueryOptionsInterface } from '../../../reference/interfaces/reference-query-options.interface';
 import { ReferenceAssignment } from '../../../reference/interfaces/reference.types';
+import { AssigneeRelationInterface } from '../../assignee/interfaces/assignee-relation.interface';
 import { OtpInterface } from './otp.interface';
 
-export interface OtpValidateInterface<
-  O extends ReferenceQueryOptionsInterface = ReferenceQueryOptionsInterface,
-> {
+export interface OtpValidateInterface {
   /**
    * Check if otp is valid
    *
@@ -17,6 +14,5 @@ export interface OtpValidateInterface<
     assignment: ReferenceAssignment,
     otp: Pick<OtpInterface, 'category' | 'passcode'>,
     deleteIfValid: boolean,
-    options?: O,
-  ): Promise<ReferenceAssigneeInterface | null>;
+  ): Promise<AssigneeRelationInterface | null>;
 }

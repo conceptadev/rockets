@@ -1,13 +1,13 @@
 import { Column, Unique } from 'typeorm';
 import { CommonSqliteEntity } from '@concepta/typeorm-common';
-import { ReferenceIdInterface } from '@concepta/nestjs-common';
+import { ReferenceId } from '@concepta/nestjs-common';
 import { CacheInterface } from '@concepta/nestjs-common';
 
 /**
  * Cache Sqlite Entity
  */
 
-@Unique(['key', 'type', 'assignee.id'])
+@Unique(['key', 'type', 'assigneeId'])
 export abstract class CacheSqliteEntity
   extends CommonSqliteEntity
   implements CacheInterface
@@ -24,8 +24,6 @@ export abstract class CacheSqliteEntity
   @Column({ type: 'datetime', nullable: true })
   expirationDate!: Date | null;
 
-  /**
-   * Should be overwrite by the table it will be assigned to
-   */
-  assignee!: ReferenceIdInterface;
+  @Column({ type: 'uuid' })
+  assigneeId!: ReferenceId;
 }

@@ -9,6 +9,6 @@ export const AuthJwtVerifyTokenService = Symbol(
   '__AUTH_JWT_MODULE_VERIFY_TOKEN_SERVICE_TOKEN__',
 );
 
-export const AuthJwtUserLookupService = Symbol(
-  '__AUTH_JWT_MODULE_USER_LOOKUP_SERVICE_TOKEN__',
+export const AuthJwtUserModelService = Symbol(
+  '__AUTH_JWT_MODULE_USER_MODEL_SERVICE_TOKEN__',
 );

@@ -1,10 +1,7 @@
-import { ReferenceQueryOptionsInterface } from '../../../reference/interfaces/reference-query-options.interface';
 import { ReferenceAssignment } from '../../../reference/interfaces/reference.types';
 import { OtpInterface } from './otp.interface';
 
-export interface OtpClearInterface<
-  O extends ReferenceQueryOptionsInterface = ReferenceQueryOptionsInterface,
-> {
+export interface OtpClearInterface {
   /**
    * Clear all otps for assign in given category.
    *
@@ -13,7 +10,6 @@ export interface OtpClearInterface<
    */
   clear(
     assignment: ReferenceAssignment,
-    otp: Pick<OtpInterface, 'assignee' | 'category'>,
-    options?: O,
+    otp: Pick<OtpInterface, 'assigneeId' | 'category'>,
   ): Promise<void>;
 }

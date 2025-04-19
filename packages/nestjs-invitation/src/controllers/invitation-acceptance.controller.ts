@@ -11,8 +11,8 @@ import {
 } from '@nestjs/common';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
-  ReferenceAssigneeInterface,
   InvitationInterface,
+  AssigneeRelationInterface,
 } from '@concepta/nestjs-common';
 
 import { InvitationAcceptanceService } from '../services/invitation-acceptance.service';
@@ -84,7 +84,7 @@ export class InvitationAcceptanceController {
 
     const { category } = invitation;
 
-    let otp: ReferenceAssigneeInterface | null = null;
+    let otp: AssigneeRelationInterface | null = null;
 
     try {
       otp = await this.invitationAcceptanceService.validatePasscode(

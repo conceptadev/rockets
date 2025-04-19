@@ -1,6 +1,5 @@
-import { Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { ReferenceIdInterface } from '@concepta/nestjs-common';
-import { UserRoleEntityFixture } from './user-role-entity.fixture';
 
 /**
  * User Entity Fixture
@@ -9,7 +8,4 @@ import { UserRoleEntityFixture } from './user-role-entity.fixture';
 export class UserEntityFixture implements ReferenceIdInterface {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
-
-  @OneToMany(() => UserRoleEntityFixture, (userRole) => userRole.assignee)
-  userRoles!: UserRoleEntityFixture[];
 }

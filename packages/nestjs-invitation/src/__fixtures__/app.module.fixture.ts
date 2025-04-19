@@ -3,11 +3,7 @@ import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
 import { OtpModule, OtpService } from '@concepta/nestjs-otp';
 import { EmailModule, EmailService } from '@concepta/nestjs-email';
-import {
-  UserLookupService,
-  UserModule,
-  UserMutateService,
-} from '@concepta/nestjs-user';
+import { UserModelService, UserModule } from '@concepta/nestjs-user';
 import { EmailSendOptionsInterface } from '@concepta/nestjs-common';
 import { EventModule } from '@concepta/nestjs-event';
 import { PasswordModule } from '@concepta/nestjs-password';
@@ -31,15 +27,9 @@ import { default as ormConfig } from './ormconfig.fixture';
       useFactory: (mailerService: MailerService) => ({ mailerService }),
     }),
     InvitationModule.registerAsync({
-      inject: [UserLookupService, UserMutateService, OtpService, EmailService],
-      useFactory: (
-        userLookupService,
-        userMutateService,
-        otpService,
-        emailService,
-      ) => ({
-        userLookupService,
-        userMutateService,
+      inject: [UserModelService, OtpService, EmailService],
+      useFactory: (userModelService, otpService, emailService) => ({
+        userModelService,
         otpService,
         emailService,
       }),

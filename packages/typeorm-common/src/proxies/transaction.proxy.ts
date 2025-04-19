@@ -2,9 +2,7 @@ import { EntityManagerProxy } from './entity-manager.proxy';
 import { SafeTransactionOptionsInterface } from '../interfaces/safe-transaction-options.interface';
 import { RunInTransactionCallback } from '../typeorm-common.types';
 import { safeTransaction } from '../utils/safe-transaction.util';
-import { RepositoryInterface } from '../interfaces/repository.interface';
-import { EntityManagerInterface } from '../interfaces/entity-manager.interface';
-import { ObjectLiteral } from 'typeorm';
+import { EntityManager, ObjectLiteral, Repository } from 'typeorm';
 
 type TransactionCallback<T> =
   | (() => Promise<T>)
@@ -13,10 +11,10 @@ type TransactionCallback<T> =
 export class TransactionProxy {
   private entityManagerProxy: EntityManagerProxy;
   private parentTransaction?: TransactionProxy;
-  private transactionalEntityManager?: EntityManagerInterface;
+  private transactionalEntityManager?: EntityManager;
 
   constructor(
-    entityManager: EntityManagerInterface,
+    entityManager: EntityManager,
     private options?: SafeTransactionOptionsInterface,
   ) {
     this.entityManagerProxy = new EntityManagerProxy(entityManager);
@@ -24,8 +22,8 @@ export class TransactionProxy {
   }
 
   repository<E extends ObjectLiteral>(
-    targetRepository: RepositoryInterface<E>,
-  ): RepositoryInterface<E> {
+    targetRepository: Repository<E>,
+  ): Repository<E> {
     if (this.parentTransaction) {
       return this.parentTransaction.repository<E>(targetRepository);
     } else {
@@ -50,7 +48,7 @@ export class TransactionProxy {
   private callback<T>(
     runInTransaction: TransactionCallback<T>,
   ): RunInTransactionCallback<T> {
-    return async (entityManager: EntityManagerInterface | undefined) => {
+    return async (entityManager: EntityManager | undefined) => {
       this.transactionalEntityManager = entityManager;
       return runInTransaction(this);
     };

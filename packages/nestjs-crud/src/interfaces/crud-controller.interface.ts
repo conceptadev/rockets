@@ -1,4 +1,4 @@
-import { DeepPartial } from 'typeorm';
+import { DeepPartial } from '@concepta/nestjs-common';
 import { CrudCreateManyInterface } from './crud-create-many.interface';
 import { CrudRequestInterface } from '../interfaces/crud-request.interface';
 import { CrudResponsePaginatedInterface } from './crud-response-paginated.interface';

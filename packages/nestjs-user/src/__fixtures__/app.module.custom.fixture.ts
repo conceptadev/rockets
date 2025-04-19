@@ -12,10 +12,11 @@ import { EventModule } from '@concepta/nestjs-event';
 import { UserModule } from '../user.module';
 import { createUserRepositoryFixture } from './create-user-repository.fixture';
 import { UserModuleCustomFixture } from './user.module.custom.fixture';
-import { UserLookupCustomService } from './services/user-lookup.custom.service';
+import { UserModelCustomService } from './services/user-model.custom.service';
 import { ormConfig } from './ormconfig.fixture';
 import { UserEntityFixture } from './user.entity.fixture';
 import { UserResource } from '../user.types';
+import { UserModelServiceInterface } from '../interfaces/user-model-service.interface';
 
 const rules = new AccessControl();
 rules
@@ -34,18 +35,18 @@ rules
     EventModule.forRoot({}),
     JwtModule.forRoot({}),
     AuthJwtModule.forRootAsync({
-      inject: [UserLookupCustomService],
-      useFactory: (userLookupService: UserLookupCustomService) => ({
-        userLookupService,
+      inject: [UserModelCustomService],
+      useFactory: (userModelService: UserModelServiceInterface) => ({
+        userModelService,
       }),
     }),
     AuthenticationModule.forRoot({}),
     PasswordModule.forRoot({}),
     AccessControlModule.forRoot({ settings: { rules } }),
     UserModule.forRootAsync({
-      inject: [UserLookupCustomService],
-      useFactory: async (userLookupService: UserLookupCustomService) => ({
-        userLookupService,
+      inject: [UserModelCustomService],
+      useFactory: async (userModelService: UserModelServiceInterface) => ({
+        userModelService,
         settings: {
           passwordHistory: {
             enabled: true,

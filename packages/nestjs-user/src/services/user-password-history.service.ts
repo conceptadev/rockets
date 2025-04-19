@@ -1,17 +1,18 @@
-import { MoreThan } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
-import { ReferenceId, ReferenceIdInterface } from '@concepta/nestjs-common';
-import { PasswordStorageInterface } from '@concepta/nestjs-password';
+import {
+  ReferenceId,
+  ReferenceIdInterface,
+  RepositoryInternals,
+  PasswordStorageInterface,
+} from '@concepta/nestjs-common';
 
-import { UserPasswordHistoryLookupService } from './user-password-history-lookup.service';
-import { UserPasswordHistoryMutateService } from './user-password-history-mutate.service';
+import { UserPasswordHistoryModelService } from './user-password-history-model.service';
 
 import { UserException } from '../exceptions/user-exception';
 import { UserPasswordHistoryServiceInterface } from '../interfaces/user-password-history-service.interface';
 import { UserSettingsInterface } from '../interfaces/user-settings.interface';
 import { USER_MODULE_SETTINGS_TOKEN } from '../user.constants';
-import { QueryOptionsInterface } from '@concepta/typeorm-common';
-import { FindManyOptions } from 'typeorm';
+import { UserPasswordHistoryEntityInterface } from '../interfaces/user-password-history-entity.interface';
 
 @Injectable()
 export class UserPasswordHistoryService
@@ -20,23 +21,19 @@ export class UserPasswordHistoryService
   constructor(
     @Inject(USER_MODULE_SETTINGS_TOKEN)
     protected readonly userSettings: UserSettingsInterface,
-    @Inject(UserPasswordHistoryLookupService)
-    protected readonly userPasswordHistoryLookupService: UserPasswordHistoryLookupService,
-    @Inject(UserPasswordHistoryMutateService)
-    protected readonly userPasswordHistoryMutateService: UserPasswordHistoryMutateService,
+    @Inject(UserPasswordHistoryModelService)
+    protected readonly userPasswordHistoryModelService: UserPasswordHistoryModelService,
   ) {}
 
   async getHistory(
     userId: ReferenceId,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<(ReferenceIdInterface & PasswordStorageInterface)[]> {
     let history: (ReferenceIdInterface & PasswordStorageInterface)[] | null;
 
     try {
-      // try to lookup the user
-      history = await this.userPasswordHistoryLookupService.find(
+      // try to find the history
+      history = await this.userPasswordHistoryModelService.find(
         this.getHistoryFindManyOptions(userId),
-        queryOptions,
       );
     } catch (e: unknown) {
       throw new UserException({
@@ -53,16 +50,12 @@ export class UserPasswordHistoryService
   async pushHistory(
     userId: string,
     passwordStore: PasswordStorageInterface,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<void> {
     try {
-      await this.userPasswordHistoryMutateService.create(
-        {
-          userId,
-          ...passwordStore,
-        },
-        queryOptions,
-      );
+      await this.userPasswordHistoryModelService.create({
+        userId,
+        ...passwordStore,
+      });
     } catch (e: unknown) {
       throw new UserException({
         message:
@@ -72,12 +65,14 @@ export class UserPasswordHistoryService
     }
   }
 
-  protected getHistoryFindManyOptions(userId: ReferenceId): FindManyOptions {
+  protected getHistoryFindManyOptions(
+    userId: ReferenceId,
+  ): RepositoryInternals.FindManyOptions<UserPasswordHistoryEntityInterface> {
     // the base query
-    const query: FindManyOptions & {
+    const query: RepositoryInternals.FindManyOptions<UserPasswordHistoryEntityInterface> & {
       where: {
         userId: ReferenceId;
-        dateCreated?: ReturnType<typeof MoreThan>;
+        dateCreated?: ReturnType<UserPasswordHistoryModelService['gt']>;
       };
     } = {
       where: {
@@ -97,7 +92,8 @@ export class UserPasswordHistoryService
         limitDate.getDate() - this.userSettings.passwordHistory.limitDays,
       );
       // set the created at query
-      query.where.dateCreated = MoreThan(limitDate);
+      query.where.dateCreated =
+        this.userPasswordHistoryModelService.gt(limitDate);
     }
 
     return query;

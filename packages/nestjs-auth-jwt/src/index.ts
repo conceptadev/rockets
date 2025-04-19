@@ -6,11 +6,11 @@ export { AuthJwtGuard, AuthJwtGuard as JwtAuthGuard } from './auth-jwt.guard';
 export { AuthJwtOptionsInterface } from './interfaces/auth-jwt-options.interface';
 export { AuthJwtOptionsExtrasInterface } from './interfaces/auth-jwt-options-extras.interface';
 export { AuthJwtSettingsInterface } from './interfaces/auth-jwt-settings.interface';
-export { AuthJwtUserLookupServiceInterface } from './interfaces/auth-jwt-user-lookup-service.interface';
+export { AuthJwtUserModelServiceInterface } from './interfaces/auth-jwt-user-model-service.interface';
 
 // tokens
 export {
-  AuthJwtUserLookupService,
+  AuthJwtUserModelService,
   AuthJwtVerifyTokenService,
 } from './auth-jwt.constants';
 

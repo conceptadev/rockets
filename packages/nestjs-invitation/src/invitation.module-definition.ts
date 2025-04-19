@@ -12,8 +12,7 @@ import {
   INVITATION_MODULE_EMAIL_SERVICE_TOKEN,
   INVITATION_MODULE_OTP_SERVICE_TOKEN,
   INVITATION_MODULE_SETTINGS_TOKEN,
-  INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-  INVITATION_MODULE_USER_MUTATE_SERVICE_TOKEN,
+  INVITATION_MODULE_USER_MODEL_SERVICE_TOKEN,
 } from './invitation.constants';
 
 import { InvitationOptionsInterface } from './interfaces/options/invitation-options.interface';
@@ -29,12 +28,10 @@ import { InvitationSendService } from './services/invitation-send.service';
 import { InvitationRevocationService } from './services/invitation-revocation.service';
 import { invitationDefaultConfig } from './config/invitation-default.config';
 import { InvitationReattemptController } from './controllers/invitation-reattempt.controller';
-import { InvitationLookupService } from './services/invitation-lookup.service';
-import { InvitationMutateService } from './services/invitation-mutate.service';
+import { InvitationModelService } from './services/invitation-model.service';
 import { InvitationEmailServiceInterface } from './interfaces/services/invitation-email-service.interface';
 import { InvitationOtpServiceInterface } from './interfaces/services/invitation-otp-service.interface';
-import { InvitationUserLookupServiceInterface } from './interfaces/services/invitation-user-lookup.service.interface';
-import { InvitationUserMutateServiceInterface } from './interfaces/services/invitation-user-mutate.service.interface';
+import { InvitationUserModelServiceInterface } from './interfaces/services/invitation-user-model.service.interface';
 import { InvitationMissingEntitiesOptionsException } from './exceptions/invitation-missing-entities-options.exception';
 
 const RAW_OPTIONS_TOKEN = Symbol('__INVITATION_MODULE_RAW_OPTIONS_TOKEN__');
@@ -98,11 +95,9 @@ export function createInvitationExports(): DynamicModule['exports'] {
     INVITATION_MODULE_SETTINGS_TOKEN,
     INVITATION_MODULE_OTP_SERVICE_TOKEN,
     INVITATION_MODULE_EMAIL_SERVICE_TOKEN,
-    INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-    INVITATION_MODULE_USER_MUTATE_SERVICE_TOKEN,
+    INVITATION_MODULE_USER_MODEL_SERVICE_TOKEN,
     InvitationService,
-    InvitationLookupService,
-    InvitationMutateService,
+    InvitationModelService,
   ];
 }
 
@@ -116,13 +111,11 @@ export function createInvitationProviders(options: {
     InvitationCrudService,
     InvitationAcceptanceService,
     InvitationRevocationService,
-    InvitationLookupService,
-    InvitationMutateService,
+    InvitationModelService,
     createInvitationSettingsProvider(options.overrides),
     createInvitationOtpServiceProvider(options.overrides),
     createInvitationEmailServiceProvider(options.overrides),
-    createInvitationUserLookupServiceProvider(options.overrides),
-    createInvitationUserMutateServiceProvider(options.overrides),
+    createInvitationUserModelServiceProvider(options.overrides),
     createInvitationSendServiceProvider(options.overrides),
   ];
 }
@@ -175,25 +168,14 @@ export function createInvitationEmailServiceProvider(
   };
 }
 
-export function createInvitationUserLookupServiceProvider(
+export function createInvitationUserModelServiceProvider(
   optionsOverrides?: InvitationOptions,
 ): Provider {
   return {
-    provide: INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+    provide: INVITATION_MODULE_USER_MODEL_SERVICE_TOKEN,
     inject: [RAW_OPTIONS_TOKEN],
     useFactory: async (options: InvitationOptionsInterface) =>
-      optionsOverrides?.userLookupService ?? options.userLookupService,
-  };
-}
-
-export function createInvitationUserMutateServiceProvider(
-  optionsOverrides?: InvitationOptions,
-): Provider {
-  return {
-    provide: INVITATION_MODULE_USER_MUTATE_SERVICE_TOKEN,
-    inject: [RAW_OPTIONS_TOKEN],
-    useFactory: async (options: InvitationOptionsInterface) =>
-      optionsOverrides?.userMutateService ?? options.userMutateService,
+      optionsOverrides?.userModelService ?? options.userModelService,
   };
 }
 
@@ -207,20 +189,16 @@ export function createInvitationSendServiceProvider(
       INVITATION_MODULE_SETTINGS_TOKEN,
       INVITATION_MODULE_EMAIL_SERVICE_TOKEN,
       INVITATION_MODULE_OTP_SERVICE_TOKEN,
-      INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-      INVITATION_MODULE_USER_MUTATE_SERVICE_TOKEN,
-      InvitationLookupService,
-      InvitationMutateService,
+      INVITATION_MODULE_USER_MODEL_SERVICE_TOKEN,
+      InvitationModelService,
     ],
     useFactory: async (
       options: InvitationOptionsInterface,
       settings: InvitationSettingsInterface,
       emailService: InvitationEmailServiceInterface,
       otpService: InvitationOtpServiceInterface,
-      userLookupService: InvitationUserLookupServiceInterface,
-      userMutateService: InvitationUserMutateServiceInterface,
-      invitationLookupService: InvitationLookupService,
-      invitationMutateService: InvitationMutateService,
+      userModelService: InvitationUserModelServiceInterface,
+      invitationModelService: InvitationModelService,
     ) =>
       optionsOverrides?.invitationSendService ??
       options.invitationSendService ??
@@ -228,10 +206,8 @@ export function createInvitationSendServiceProvider(
         settings,
         emailService,
         otpService,
-        userLookupService,
-        userMutateService,
-        invitationLookupService,
-        invitationMutateService,
+        userModelService,
+        invitationModelService,
       ),
   };
 }

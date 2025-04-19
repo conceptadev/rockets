@@ -1,16 +1,9 @@
-import { Entity, ManyToOne, Unique } from 'typeorm';
-import { ReferenceIdInterface } from '@concepta/nestjs-common';
-import { UserEntityFixture } from './user-entity.fixture';
+import { Entity, Unique } from 'typeorm';
 import { CacheSqliteEntity } from '../../entities/cache-sqlite.entity';
 
 /**
  * Cache Entity Fixture
  */
 @Entity()
-@Unique(['key', 'type', 'assignee.id'])
-export class UserCacheEntityFixture extends CacheSqliteEntity {
-  @ManyToOne(() => UserEntityFixture, (user) => user.userCaches, {
-    nullable: false,
-  })
-  assignee!: ReferenceIdInterface;
-}
+@Unique(['key', 'type', 'assigneeId'])
+export class UserCacheEntityFixture extends CacheSqliteEntity {}

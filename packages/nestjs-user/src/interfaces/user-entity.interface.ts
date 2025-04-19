@@ -1,5 +1,7 @@
-import { UserInterface } from '@concepta/nestjs-common';
-import { PasswordStorageInterface } from '@concepta/nestjs-password';
+import {
+  UserInterface,
+  PasswordStorageInterface,
+} from '@concepta/nestjs-common';
 
 export interface UserEntityInterface
   extends UserInterface,

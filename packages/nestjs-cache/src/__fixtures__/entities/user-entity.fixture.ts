@@ -1,6 +1,5 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { ReferenceIdInterface } from '@concepta/nestjs-common';
-import { UserCacheEntityFixture } from './user-cache-entity.fixture';
 
 /**
  * User Entity Fixture
@@ -12,7 +11,4 @@ export class UserEntityFixture implements ReferenceIdInterface {
 
   @Column({ default: false })
   isActive!: boolean;
-
-  @OneToMany(() => UserCacheEntityFixture, (userCache) => userCache.assignee)
-  userCaches!: UserCacheEntityFixture[];
 }

@@ -10,8 +10,8 @@ export const AuthLocalIssueTokenService = Symbol(
   '__AUTH_LOCAL_MODULE_ISSUE_TOKEN_SERVICE_TOKEN__',
 );
 
-export const AuthLocalUserLookupService = Symbol(
-  '__AUTH_LOCAL_MODULE_USER_LOOKUP_SERVICE_TOKEN__',
+export const AuthLocalUserModelService = Symbol(
+  '__AUTH_LOCAL_MODULE_USER_MODEL_SERVICE_TOKEN__',
 );
 
 export const AuthLocalPasswordValidationService = Symbol(

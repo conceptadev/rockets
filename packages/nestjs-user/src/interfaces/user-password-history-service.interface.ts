@@ -1,5 +1,8 @@
-import { PasswordStorageInterface } from '@concepta/nestjs-password';
-import { ReferenceId, ReferenceIdInterface } from '@concepta/nestjs-common';
+import {
+  ReferenceId,
+  ReferenceIdInterface,
+  PasswordStorageInterface,
+} from '@concepta/nestjs-common';
 
 export interface UserPasswordHistoryServiceInterface {
   /**

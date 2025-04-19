@@ -12,7 +12,7 @@ import { ReportStrategyService } from './report-strategy.service';
 import { ReportService } from './report.service';
 import { ReportMutateService } from './report-mutate.service';
 import { ReportLookupService } from './report-lookup.service';
-import { RepositoryInterface } from '@concepta/typeorm-common';
+import { RepositoryInterface } from '@concepta/nestjs-common';
 
 const mockReport: ReportEntityInterface = {
   id: randomUUID(),
@@ -52,17 +52,6 @@ describe(ReportService.name, () => {
       reportLookupService,
     );
     reportRepo.create.mockReturnValue(mockReport);
-    const mockTransactionalEntityManager = {
-      findOne: jest.fn().mockResolvedValue(null),
-      create: jest.fn().mockReturnValue(mockReport),
-      save: jest.fn().mockResolvedValue(mockReport),
-    };
-
-    reportRepo.manager.transaction = jest
-      .fn()
-      .mockImplementation(async (cb) => {
-        return await cb(mockTransactionalEntityManager);
-      });
   });
 
   describe('generate', () => {

@@ -1,10 +1,7 @@
-import { ReferenceQueryOptionsInterface } from '../../../reference/interfaces/reference-query-options.interface';
 import { ReferenceAssignment } from '../../../reference/interfaces/reference.types';
 import { CacheInterface } from './cache.interface';
 
-export interface CacheClearInterface<
-  O extends ReferenceQueryOptionsInterface = ReferenceQueryOptionsInterface,
-> {
+export interface CacheClearInterface {
   /**
    * Clear all caches for assign in given category.
    *
@@ -13,7 +10,6 @@ export interface CacheClearInterface<
    */
   clear(
     assignment: ReferenceAssignment,
-    cache: Pick<CacheInterface, 'assignee'>,
-    options?: O,
+    cache: Pick<CacheInterface, 'assigneeId'>,
   ): Promise<void>;
 }

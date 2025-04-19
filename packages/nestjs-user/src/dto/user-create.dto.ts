@@ -2,7 +2,7 @@ import { Exclude } from 'class-transformer';
 import { IntersectionType, PartialType, PickType } from '@nestjs/swagger';
 import { UserCreatableInterface } from '@concepta/nestjs-common';
 import { UserDto } from './user.dto';
-import { UserPasswordDto } from './user-password.dto';
+import { UserPasswordHashDto } from './user-password-hash.dto';
 
 /**
  * User Create DTO
@@ -12,6 +12,6 @@ export class UserCreateDto
   extends IntersectionType(
     PickType(UserDto, ['username', 'email'] as const),
     PartialType(PickType(UserDto, ['active'] as const)),
-    PartialType(UserPasswordDto),
+    PartialType(UserPasswordHashDto),
   )
   implements UserCreatableInterface {}

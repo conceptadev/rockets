@@ -9,15 +9,13 @@ import { CrudModule } from '@concepta/nestjs-crud';
 
 import {
   INVITATION_MODULE_OTP_SERVICE_TOKEN,
-  INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-  INVITATION_MODULE_USER_MUTATE_SERVICE_TOKEN,
+  INVITATION_MODULE_USER_MODEL_SERVICE_TOKEN,
 } from './invitation.constants';
 
 import { InvitationModule } from './invitation.module';
 import { InvitationOtpServiceInterface } from './interfaces/services/invitation-otp-service.interface';
 
-import { InvitationUserLookupServiceInterface } from './interfaces/services/invitation-user-lookup.service.interface';
-import { InvitationUserMutateServiceInterface } from './interfaces/services/invitation-user-mutate.service.interface';
+import { InvitationUserModelServiceInterface } from './interfaces/services/invitation-user-model.service.interface';
 import { InvitationServiceInterface } from './interfaces/services/invitation-service.interface';
 import { InvitationController } from './controllers/invitation.controller';
 import { InvitationAcceptanceController } from './controllers/invitation-acceptance.controller';
@@ -29,8 +27,7 @@ import { InvitationRevocationService } from './services/invitation-revocation.se
 import { InvitationEmailServiceInterface } from './interfaces/services/invitation-email-service.interface';
 
 import { UserModuleFixture } from './__fixtures__/user/user.module.fixture';
-import { UserLookupServiceFixture } from './__fixtures__/user/services/user-lookup.service.fixture';
-import { UserMutateServiceFixture } from './__fixtures__/user/services/user-mutate.service.fixture';
+import { UserModelServiceFixture } from './__fixtures__/user/services/user-model.service.fixture';
 import { OtpModuleFixture } from './__fixtures__/otp/otp.module.fixture';
 import { OtpServiceFixture } from './__fixtures__/otp/otp.service.fixture';
 import { MailerServiceFixture } from './__fixtures__/email/mailer.service.fixture';
@@ -45,8 +42,7 @@ describe(InvitationModule, () => {
   let invitationModule: InvitationModule;
   let otpService: InvitationOtpServiceInterface;
   let emailService: InvitationEmailServiceInterface;
-  let userLookupService: InvitationUserLookupServiceInterface;
-  let userMutateService: InvitationUserMutateServiceInterface;
+  let userModelService: InvitationUserModelServiceInterface;
   let invitationService: InvitationServiceInterface;
   let invitationSendService: InvitationSendServiceInterface;
   let invitationAcceptanceService: InvitationAcceptanceService;
@@ -64,8 +60,7 @@ describe(InvitationModule, () => {
           InvitationModule.forRoot({
             emailService: mockEmailService,
             otpService: new OtpServiceFixture(),
-            userLookupService: new UserLookupServiceFixture(),
-            userMutateService: new UserMutateServiceFixture(),
+            userModelService: new UserModelServiceFixture(),
             invitationSendService: new InvitationSendServiceFixture(),
             entities: {
               invitation: {
@@ -90,8 +85,7 @@ describe(InvitationModule, () => {
           InvitationModule.forRoot({
             emailService: mockEmailService,
             otpService: new OtpServiceFixture(),
-            userLookupService: new UserLookupServiceFixture(),
-            userMutateService: new UserMutateServiceFixture(),
+            userModelService: new UserModelServiceFixture(),
             entities: {
               invitation: {
                 entity: InvitationEntityFixture,
@@ -122,8 +116,7 @@ describe(InvitationModule, () => {
           InvitationModule.register({
             emailService: mockEmailService,
             otpService: new OtpServiceFixture(),
-            userLookupService: new UserLookupServiceFixture(),
-            userMutateService: new UserMutateServiceFixture(),
+            userModelService: new UserModelServiceFixture(),
             invitationSendService: new InvitationSendServiceFixture(),
             entities: {
               invitation: {
@@ -151,21 +144,18 @@ describe(InvitationModule, () => {
         testModuleFactory([
           InvitationModule.forRootAsync({
             inject: [
-              UserLookupServiceFixture,
-              UserMutateServiceFixture,
+              UserModelServiceFixture,
               OtpServiceFixture,
               EmailService,
               InvitationSendServiceFixture,
             ],
             useFactory: (
-              userLookupService,
-              userMutateService,
+              userModelService,
               otpService,
               emailService,
               invitationSendService,
             ) => ({
-              userLookupService,
-              userMutateService,
+              userModelService,
               otpService,
               emailService,
               invitationSendService,
@@ -196,21 +186,18 @@ describe(InvitationModule, () => {
         testModuleFactory([
           InvitationModule.registerAsync({
             inject: [
-              UserLookupServiceFixture,
-              UserMutateServiceFixture,
+              UserModelServiceFixture,
               OtpServiceFixture,
               EmailService,
               InvitationSendServiceFixture,
             ],
             useFactory: (
-              userLookupService,
-              userMutateService,
+              userModelService,
               otpService,
               emailService,
               invitationSendService,
             ) => ({
-              userLookupService,
-              userMutateService,
+              userModelService,
               otpService,
               emailService,
               invitationSendService,
@@ -245,12 +232,8 @@ describe(InvitationModule, () => {
       INVITATION_MODULE_OTP_SERVICE_TOKEN,
     );
 
-    userLookupService = testModule.get<InvitationUserLookupServiceInterface>(
-      INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-    );
-
-    userMutateService = testModule.get<InvitationUserMutateServiceInterface>(
-      INVITATION_MODULE_USER_MUTATE_SERVICE_TOKEN,
+    userModelService = testModule.get<InvitationUserModelServiceInterface>(
+      INVITATION_MODULE_USER_MODEL_SERVICE_TOKEN,
     );
 
     invitationService = testModule.get<InvitationService>(InvitationService);
@@ -285,8 +268,7 @@ describe(InvitationModule, () => {
     expect(invitationModule).toBeInstanceOf(InvitationModule);
     expect(otpService).toBeInstanceOf(OtpServiceFixture);
     expect(emailService).toBeInstanceOf(EmailService);
-    expect(userLookupService).toBeInstanceOf(UserLookupServiceFixture);
-    expect(userMutateService).toBeInstanceOf(UserMutateServiceFixture);
+    expect(userModelService).toBeInstanceOf(UserModelServiceFixture);
     expect(invitationService).toBeInstanceOf(InvitationService);
     expect(invitationSendService).toBeInstanceOf(InvitationSendServiceFixture);
     expect(invitationAcceptanceService).toBeInstanceOf(

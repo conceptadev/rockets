@@ -22,9 +22,7 @@ export class CacheSeeder extends Seeder {
 
     // create a bunch
     await cacheFactory.createMany(createAmount, {
-      assignee: {
-        id: user.id,
-      },
+      assigneeId: user.id,
     });
   }
 }

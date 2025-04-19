@@ -11,7 +11,7 @@ export class CacheUpdateDto
   extends PickType(CacheDto, [
     'key',
     'type',
-    'assignee',
+    'assigneeId',
     'data',
     'expiresIn',
   ] as const)

@@ -1,9 +1,7 @@
-import { IsOptional, IsString, ValidateNested } from 'class-validator';
-import { Exclude, Expose, Type } from 'class-transformer';
+import { IsOptional, IsString } from 'class-validator';
+import { Exclude, Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { ReferenceAssigneeInterface } from '@concepta/nestjs-common';
-import { RoleInterface } from '@concepta/nestjs-common';
-import { CommonEntityDto, ReferenceIdDto } from '@concepta/nestjs-common';
+import { RoleInterface, CommonEntityDto } from '@concepta/nestjs-common';
 
 /**
  * Role DTO
@@ -32,17 +30,4 @@ export class RoleDto extends CommonEntityDto implements RoleInterface {
   @IsString()
   @IsOptional()
   description = '';
-
-  /**
-   * Assignee
-   */
-  @Expose({ toPlainOnly: true })
-  @ApiProperty({
-    type: ReferenceIdDto,
-    isArray: true,
-    description: 'Assignee',
-  })
-  @Type(() => ReferenceIdDto)
-  @ValidateNested({ each: true })
-  assignees: ReferenceAssigneeInterface[] = [];
 }

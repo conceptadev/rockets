@@ -1,4 +1,4 @@
-import { PasswordStorageInterface } from './password-storage.interface';
+import { PasswordStorageInterface } from '@concepta/nestjs-common';
 import { PasswordValidateOptionsInterface } from './password-validate-options.interface';
 
 /**
