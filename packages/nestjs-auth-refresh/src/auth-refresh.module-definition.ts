@@ -16,7 +16,7 @@ import {
 import {
   AUTH_REFRESH_MODULE_SETTINGS_TOKEN,
   AuthRefreshIssueTokenService,
-  AuthRefreshUserLookupService,
+  AuthRefreshUserModelService,
   AuthRefreshVerifyService,
 } from './auth-refresh.constants';
 
@@ -76,7 +76,7 @@ export function createAuthRefreshImports(): DynamicModule['imports'] {
 export function createAuthRefreshExports() {
   return [
     AUTH_REFRESH_MODULE_SETTINGS_TOKEN,
-    AuthRefreshUserLookupService,
+    AuthRefreshUserModelService,
     AuthRefreshVerifyService,
     AuthRefreshIssueTokenService,
     AuthRefreshStrategy,
@@ -95,7 +95,7 @@ export function createAuthRefreshProviders(options: {
     createAuthRefreshOptionsProvider(options.overrides),
     createAuthRefreshVerifyTokenServiceProvider(options.overrides),
     createAuthRefreshIssueTokenServiceProvider(options.overrides),
-    createAuthRefreshUserLookupServiceProvider(options.overrides),
+    createAuthRefreshUserModelServiceProvider(options.overrides),
   ];
 }
 
@@ -153,13 +153,13 @@ export function createAuthRefreshIssueTokenServiceProvider(
   };
 }
 
-export function createAuthRefreshUserLookupServiceProvider(
+export function createAuthRefreshUserModelServiceProvider(
   optionsOverrides?: AuthRefreshOptions,
 ): Provider {
   return {
-    provide: AuthRefreshUserLookupService,
+    provide: AuthRefreshUserModelService,
     inject: [RAW_OPTIONS_TOKEN],
     useFactory: async (options: AuthRefreshOptionsInterface) =>
-      optionsOverrides?.userLookupService ?? options.userLookupService,
+      optionsOverrides?.userModelService ?? options.userModelService,
   };
 }

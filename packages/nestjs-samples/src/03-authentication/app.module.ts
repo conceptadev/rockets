@@ -38,7 +38,7 @@ import { createUserRepository } from './user/create-user-repository';
     AuthRefreshModule.registerAsync({
       inject: [UserModelService],
       useFactory: (userModelService: UserModelServiceInterface) => ({
-        userLookupService: userModelService,
+        userModelService,
       }),
     }),
     AuthenticationModule.forRoot({}),

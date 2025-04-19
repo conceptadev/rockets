@@ -2,14 +2,14 @@ import {
   IssueTokenServiceInterface,
   VerifyTokenService,
 } from '@concepta/nestjs-authentication';
-import { AuthRefreshUserLookupServiceInterface } from './auth-refresh-user-lookup-service.interface';
+import { AuthRefreshUserModelServiceInterface } from './auth-refresh-user-model-service.interface';
 import { AuthRefreshSettingsInterface } from './auth-refresh-settings.interface';
 
 export interface AuthRefreshOptionsInterface {
   /**
    * Implementation of a class that returns user identity
    */
-  userLookupService: AuthRefreshUserLookupServiceInterface;
+  userModelService: AuthRefreshUserModelServiceInterface;
 
   /**
    * Implementation of a class to issue tokens

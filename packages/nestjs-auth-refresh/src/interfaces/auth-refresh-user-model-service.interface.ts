@@ -4,5 +4,5 @@ import {
   ReferenceSubject,
 } from '@concepta/nestjs-common';
 
-export interface AuthRefreshUserLookupServiceInterface
+export interface AuthRefreshUserModelServiceInterface
   extends BySubjectInterface<ReferenceSubject, ReferenceIdInterface> {}

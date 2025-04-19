@@ -3,11 +3,11 @@ import {
   ReferenceIdInterface,
   ReferenceSubject,
 } from '@concepta/nestjs-common';
-import { AuthRefreshUserLookupServiceInterface } from '../../interfaces/auth-refresh-user-lookup-service.interface';
+import { AuthRefreshUserModelServiceInterface } from '../../interfaces/auth-refresh-user-model-service.interface';
 
 @Injectable()
-export class UserLookupServiceFixture
-  implements AuthRefreshUserLookupServiceInterface
+export class UserModelServiceFixture
+  implements AuthRefreshUserModelServiceInterface
 {
   async bySubject(subject: ReferenceSubject): Promise<ReferenceIdInterface> {
     throw new Error(`Method not implemented, cant get ${subject}.`);

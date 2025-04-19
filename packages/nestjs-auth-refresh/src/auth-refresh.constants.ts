@@ -15,6 +15,6 @@ export const AuthRefreshIssueTokenService = Symbol(
   '__AUTH_REFRESH_MODULE_ISSUE_TOKEN_SERVICE_TOKEN__',
 );
 
-export const AuthRefreshUserLookupService = Symbol(
-  '__AUTH_REFRESH_MODULE_USER_LOOKUP_SERVICE_TOKEN__',
+export const AuthRefreshUserModelService = Symbol(
+  '__AUTH_REFRESH_MODULE_USER_MODEL_SERVICE_TOKEN__',
 );
