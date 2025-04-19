@@ -10,6 +10,7 @@ import { UserPasswordHashDto } from './user-password-hash.dto';
 @Exclude()
 export class UserUpdateDto
   extends IntersectionType(
+    PickType(UserDto, ['id'] as const),
     PartialType(PickType(UserDto, ['email', 'active'] as const)),
     PartialType(UserPasswordHashDto),
   )

@@ -4,8 +4,7 @@ import {
   BySubjectInterface,
   ByUsernameInterface,
   CreateOneInterface,
-  ReferenceId,
-  ReferenceIdInterface,
+  ReferenceEmail,
   ReferenceSubject,
   ReferenceUsername,
   RemoveOneInterface,
@@ -15,22 +14,21 @@ import {
 import {
   UserCreatableInterface,
   UserUpdatableInterface,
+  UserReplaceableInterface,
 } from '@concepta/nestjs-common';
-
 import { UserEntityInterface } from './user-entity.interface';
 
-export interface UserModelServiceInterface
-  extends ByIdInterface<ReferenceId, UserEntityInterface>,
-    ByEmailInterface<ReferenceId, UserEntityInterface>,
-    BySubjectInterface<ReferenceSubject, UserEntityInterface>,
-    ByUsernameInterface<ReferenceUsername, UserEntityInterface>,
-    CreateOneInterface<UserCreatableInterface, UserEntityInterface>,
-    UpdateOneInterface<
-      UserUpdatableInterface & ReferenceIdInterface,
-      UserEntityInterface
-    >,
-    ReplaceOneInterface<
-      UserCreatableInterface & ReferenceIdInterface,
-      UserEntityInterface
-    >,
-    RemoveOneInterface<UserEntityInterface, UserEntityInterface> {}
+export interface UserModelServiceInterface<
+  Entity extends UserEntityInterface = UserEntityInterface,
+  Creatable extends UserCreatableInterface = UserCreatableInterface,
+  Updatable extends UserUpdatableInterface = UserUpdatableInterface,
+  Replaceable extends UserReplaceableInterface = UserReplaceableInterface,
+  Removable extends Pick<Entity, 'id'> = Pick<Entity, 'id'>,
+> extends ByIdInterface<Entity['id'], Entity>,
+    ByEmailInterface<ReferenceEmail, Entity>,
+    BySubjectInterface<ReferenceSubject, Entity>,
+    ByUsernameInterface<ReferenceUsername, Entity>,
+    CreateOneInterface<Creatable, Entity>,
+    UpdateOneInterface<Updatable, Entity>,
+    ReplaceOneInterface<Replaceable, Entity>,
+    RemoveOneInterface<Removable, Entity> {}

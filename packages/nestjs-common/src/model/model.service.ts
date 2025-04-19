@@ -4,17 +4,12 @@ import { plainToInstance } from 'class-transformer';
 import { Type } from '../utils/interfaces/type.interface';
 import { DeepPartial } from '../utils/deep-partial';
 import { ReferenceIdInterface } from '../reference/interfaces/reference-id.interface';
-import { ByIdInterface } from './interfaces/query/by-id.interface';
-import { CreateOneInterface } from './interfaces/mutate/create-one.interface';
-import { UpdateOneInterface } from './interfaces/mutate/update-one.interface';
-import { ReplaceOneInterface } from './interfaces/mutate/replace-one.interface';
-import { RemoveOneInterface } from './interfaces/mutate/remove-one.interface';
 import { RepositoryInterface } from '../repository/interfaces/repository.interface';
 import { RepositoryInternals } from '../repository/interfaces/repository-internals';
 import { ReferenceIdNoMatchException } from '../reference/exceptions/reference-id-no-match.exception';
 import { ReferenceValidationException } from '../reference/exceptions/reference-validation.exception';
 import { ReferenceMutateException } from '../reference/exceptions/reference-mutate.exception';
-import { ReferenceIdRequired } from '../reference/reference.types';
+import { ModelServiceInterface } from './interfaces/model-service.interface';
 
 /**
  * Abstract mutate service
@@ -22,15 +17,12 @@ import { ReferenceIdRequired } from '../reference/reference.types';
 export abstract class ModelService<
   Entity extends ReferenceIdInterface,
   Creatable extends DeepPartial<Entity>,
-  Updatable extends DeepPartial<Entity>,
-  Replaceable extends Creatable = Creatable,
-  Removable extends DeepPartial<Entity> = DeepPartial<Entity>,
+  Updatable extends DeepPartial<Entity> & ReferenceIdInterface<Entity['id']>,
+  Replaceable extends Creatable & Pick<Entity, 'id'> = Creatable &
+    Pick<Entity, 'id'>,
+  Removable extends Pick<Entity, 'id'> = Pick<Entity, 'id'>,
 > implements
-    ByIdInterface<Entity['id'], Entity>,
-    CreateOneInterface<Creatable, Entity>,
-    UpdateOneInterface<Updatable, Entity>,
-    ReplaceOneInterface<Replaceable, Entity>,
-    RemoveOneInterface<Removable, Entity>
+    ModelServiceInterface<Entity, Creatable, Updatable, Replaceable, Removable>
 {
   protected abstract createDto: Type<Creatable>;
   protected abstract updateDto: Type<Updatable>;
@@ -47,7 +39,7 @@ export abstract class ModelService<
    *
    * @param options - Find many options
    */
-  async find(
+  protected async find(
     options?: RepositoryInternals.FindManyOptions<Entity>,
   ): Promise<Entity[]> {
     return this.repo.find(options);
@@ -87,7 +79,7 @@ export abstract class ModelService<
    * @param data - the reference data to update
    * @returns the updated reference
    */
-  async update(data: ReferenceIdRequired<Updatable>): Promise<Entity> {
+  async update(data: Updatable): Promise<Entity> {
     // the entity we will update
     const entity = await this.findByIdOrFail(data.id);
     // yes, validate the data
@@ -106,7 +98,7 @@ export abstract class ModelService<
    * @param data - the reference data to replace
    * @returns the replaced reference
    */
-  async replace(data: ReferenceIdRequired<Replaceable>): Promise<Entity> {
+  async replace(data: Replaceable): Promise<Entity> {
     // the entity we will replace
     const entity = await this.findByIdOrFail(data.id);
     // yes, validate the data
@@ -125,7 +117,7 @@ export abstract class ModelService<
    * @param data - the reference data to remove
    * @returns the removed reference
    */
-  async remove(data: ReferenceIdRequired<Removable>): Promise<Entity> {
+  async remove(data: Removable): Promise<Entity> {
     // try to find it
     const entity = await this.findByIdOrFail(data.id);
     // try to remove it

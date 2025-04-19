@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   UserCreatableInterface,
   UserUpdatableInterface,
+  UserReplaceableInterface,
   RepositoryInterface,
   ModelService,
   ReferenceUsername,
@@ -24,7 +25,8 @@ export class UserModelService
   extends ModelService<
     UserEntityInterface,
     UserCreatableInterface,
-    UserUpdatableInterface
+    UserUpdatableInterface,
+    UserReplaceableInterface
   >
   implements UserModelServiceInterface
 {

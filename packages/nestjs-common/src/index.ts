@@ -58,6 +58,7 @@ export { ReferenceIdNoMatchException } from './reference/exceptions/reference-id
 
 // model services
 export { ModelService } from './model/model.service';
+export { ModelServiceInterface } from './model/interfaces/model-service.interface';
 
 // model query interfaces
 export { ByEmailInterface } from './model/interfaces/query/by-email.interface';

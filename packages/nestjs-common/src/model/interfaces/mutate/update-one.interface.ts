@@ -1,9 +1,8 @@
 import { ReferenceIdInterface } from '../../../reference/interfaces/reference-id.interface';
-import { ReferenceIdRequired } from '../../../reference/reference.types';
 
 export interface UpdateOneInterface<
-  T extends Partial<ReferenceIdInterface>,
-  U extends Partial<ReferenceIdInterface> = T,
+  T extends ReferenceIdInterface,
+  U extends ReferenceIdInterface = T,
 > {
-  update: (object: ReferenceIdRequired<T>) => Promise<U>;
+  update: (object: T) => Promise<U>;
 }

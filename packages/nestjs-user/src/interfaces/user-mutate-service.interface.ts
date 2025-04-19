@@ -12,6 +12,9 @@ import {
 
 import { UserEntityInterface } from './user-entity.interface';
 
+/**
+ * @deprecated - will be removed after model service refactor
+ */
 export interface UserMutateServiceInterface
   extends CreateOneInterface<UserCreatableInterface, UserEntityInterface>,
     UpdateOneInterface<

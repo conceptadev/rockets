@@ -30,6 +30,7 @@ export { OrgProfileCreatableInterface } from './org-profile/interfaces/org-profi
 export { UserCreatableInterface } from './user/interfaces/user-creatable.interface';
 export { UserOwnableInterface } from './user/interfaces/user-ownable.interface';
 export { UserUpdatableInterface } from './user/interfaces/user-updatable.interface';
+export { UserReplaceableInterface } from './user/interfaces/user-replaceable.interface';
 export { UserRelationInterface } from './user/interfaces/user-relation.interface';
 export { UserInterface } from './user/interfaces/user.interface';
 
