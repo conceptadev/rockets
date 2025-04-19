@@ -3,13 +3,11 @@ import { Inject, Injectable } from '@nestjs/common';
 import { AuthVerifyServiceInterface } from '../interfaces/auth-verify.service.interface';
 import { AuthVerifySettingsInterface } from '../interfaces/auth-verify-settings.interface';
 import { AuthVerifyOtpServiceInterface } from '../interfaces/auth-verify-otp.service.interface';
-import { AuthVerifyUserLookupServiceInterface } from '../interfaces/auth-verify-user-lookup.service.interface';
-import { AuthVerifyUserMutateServiceInterface } from '../interfaces/auth-verify-user-mutate.service.interface';
+import { AuthVerifyUserModelServiceInterface } from '../interfaces/auth-verify-user-model.service.interface';
 import {
   AUTH_VERIFY_MODULE_SETTINGS_TOKEN,
   AuthVerifyOtpService,
-  AuthVerifyUserLookupService,
-  AuthVerifyUserMutateService,
+  AuthVerifyUserModelService,
 } from '../auth-verify.constants';
 import { AuthVerifyNotificationService } from './auth-verify-notification.service';
 import {
@@ -30,10 +28,8 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
     private readonly config: AuthVerifySettingsInterface,
     @Inject(AuthVerifyOtpService)
     private readonly otpService: AuthVerifyOtpServiceInterface,
-    @Inject(AuthVerifyUserLookupService)
-    private readonly userLookupService: AuthVerifyUserLookupServiceInterface,
-    @Inject(AuthVerifyUserMutateService)
-    private readonly userMutateService: AuthVerifyUserMutateServiceInterface,
+    @Inject(AuthVerifyUserModelService)
+    private readonly userModelService: AuthVerifyUserModelServiceInterface,
     @Inject(AuthVerifyNotificationService)
     private readonly notificationService: AuthVerifyNotificationServiceInterface,
   ) {}
@@ -53,7 +49,7 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
     const { email } = params;
 
     // verify the user by providing an email
-    const user = await this.userLookupService.byEmail(email);
+    const user = await this.userModelService.byEmail(email);
 
     // did we find a user?
     if (user) {
@@ -144,8 +140,8 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
 
     // did we get an otp?
     if (otp) {
-      // call user mutate service
-      const user = await this.userMutateService.update({
+      // call user model service
+      const user = await this.userModelService.update({
         id: otp.assigneeId,
         active: true,
       });
@@ -174,7 +170,7 @@ export class AuthVerifyService implements AuthVerifyServiceInterface {
   ): Promise<void> {
     const { email } = params;
     // verify user by providing an email
-    const user = await this.userLookupService.byEmail(email);
+    const user = await this.userModelService.byEmail(email);
 
     // did we find a user?
     if (user) {

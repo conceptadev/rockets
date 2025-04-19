@@ -8,24 +8,21 @@ import { AuthVerifyController } from './auth-verify.controller';
 import { AuthVerifyModule } from './auth-verify.module';
 import { AuthVerifyEmailServiceInterface } from './interfaces/auth-verify-email.service.interface';
 import { AuthVerifyOtpServiceInterface } from './interfaces/auth-verify-otp.service.interface';
-import { AuthVerifyUserLookupServiceInterface } from './interfaces/auth-verify-user-lookup.service.interface';
-import { AuthVerifyUserMutateServiceInterface } from './interfaces/auth-verify-user-mutate.service.interface';
+import { AuthVerifyUserModelServiceInterface } from './interfaces/auth-verify-user-model.service.interface';
 import { AuthVerifyServiceInterface } from './interfaces/auth-verify.service.interface';
 import { AuthVerifyService } from './services/auth-verify.service';
 
 import { MailerServiceFixture } from './__fixtures__/email/mailer.service.fixture';
 import { OtpModuleFixture } from './__fixtures__/otp/otp.module.fixture';
 import { OtpServiceFixture } from './__fixtures__/otp/otp.service.fixture';
-import { UserLookupServiceFixture } from './__fixtures__/user/services/user-lookup.service.fixture';
-import { UserMutateServiceFixture } from './__fixtures__/user/services/user-mutate.service.fixture';
+import { UserModelServiceFixture } from './__fixtures__/user/services/user-model.service.fixture';
 import { UserModuleFixture } from './__fixtures__/user/user.module.fixture';
 
 describe(AuthVerifyModule, () => {
   let testModule: TestingModule;
   let authVerifyModule: AuthVerifyModule;
   let otpService: AuthVerifyOtpServiceInterface;
-  let userLookupService: AuthVerifyUserLookupServiceInterface;
-  let userMutateService: AuthVerifyUserMutateServiceInterface;
+  let userModelService: AuthVerifyUserModelServiceInterface;
   let authVerifyService: AuthVerifyServiceInterface;
   let authVerifyController: AuthVerifyController;
   let emailService: EmailService;
@@ -39,8 +36,7 @@ describe(AuthVerifyModule, () => {
           AuthVerifyModule.forRoot({
             emailService: mockEmailService,
             otpService: new OtpServiceFixture(),
-            userLookupService: new UserLookupServiceFixture(),
-            userMutateService: new UserMutateServiceFixture(),
+            userModelService: new UserModelServiceFixture(),
           }),
         ]),
       ).compile();
@@ -59,8 +55,7 @@ describe(AuthVerifyModule, () => {
           AuthVerifyModule.register({
             emailService: mockEmailService,
             otpService: new OtpServiceFixture(),
-            userLookupService: new UserLookupServiceFixture(),
-            userMutateService: new UserMutateServiceFixture(),
+            userModelService: new UserModelServiceFixture(),
           }),
         ]),
       ).compile();
@@ -77,20 +72,9 @@ describe(AuthVerifyModule, () => {
       testModule = await Test.createTestingModule(
         testModuleFactory([
           AuthVerifyModule.forRootAsync({
-            inject: [
-              UserLookupServiceFixture,
-              UserMutateServiceFixture,
-              OtpServiceFixture,
-              EmailService,
-            ],
-            useFactory: (
-              userLookupService,
-              userMutateService,
-              otpService,
-              emailService,
-            ) => ({
-              userLookupService,
-              userMutateService,
+            inject: [UserModelServiceFixture, OtpServiceFixture, EmailService],
+            useFactory: (userModelService, otpService, emailService) => ({
+              userModelService,
               otpService,
               emailService,
             }),
@@ -110,20 +94,9 @@ describe(AuthVerifyModule, () => {
       testModule = await Test.createTestingModule(
         testModuleFactory([
           AuthVerifyModule.registerAsync({
-            inject: [
-              UserLookupServiceFixture,
-              UserMutateServiceFixture,
-              OtpServiceFixture,
-              EmailService,
-            ],
-            useFactory: (
-              userLookupService,
-              userMutateService,
-              otpService,
-              emailService,
-            ) => ({
-              userLookupService,
-              userMutateService,
+            inject: [UserModelServiceFixture, OtpServiceFixture, EmailService],
+            useFactory: (userModelService, otpService, emailService) => ({
+              userModelService,
               otpService,
               emailService,
             }),
@@ -143,11 +116,8 @@ describe(AuthVerifyModule, () => {
     otpService =
       testModule.get<AuthVerifyOtpServiceInterface>(OtpServiceFixture);
     emailService = testModule.get<EmailService>(EmailService);
-    userLookupService = testModule.get<AuthVerifyUserLookupServiceInterface>(
-      UserLookupServiceFixture,
-    );
-    userMutateService = testModule.get<AuthVerifyUserMutateServiceInterface>(
-      UserMutateServiceFixture,
+    userModelService = testModule.get<AuthVerifyUserModelServiceInterface>(
+      UserModelServiceFixture,
     );
     authVerifyService = testModule.get<AuthVerifyService>(AuthVerifyService);
     authVerifyController =
@@ -158,8 +128,7 @@ describe(AuthVerifyModule, () => {
     expect(authVerifyModule).toBeInstanceOf(AuthVerifyModule);
     expect(otpService).toBeInstanceOf(OtpServiceFixture);
     expect(emailService).toBeInstanceOf(EmailService);
-    expect(userLookupService).toBeInstanceOf(UserLookupServiceFixture);
-    expect(userMutateService).toBeInstanceOf(UserMutateServiceFixture);
+    expect(userModelService).toBeInstanceOf(UserModelServiceFixture);
     expect(authVerifyService).toBeInstanceOf(AuthVerifyService);
     expect(authVerifyController).toBeInstanceOf(AuthVerifyController);
   }

@@ -11,8 +11,7 @@ import {
   AUTH_VERIFY_MODULE_SETTINGS_TOKEN,
   AuthVerifyEmailService,
   AuthVerifyOtpService,
-  AuthVerifyUserLookupService,
-  AuthVerifyUserMutateService,
+  AuthVerifyUserModelService,
 } from './auth-verify.constants';
 
 import { AuthVerifyOptionsInterface } from './interfaces/auth-verify-options.interface';
@@ -72,8 +71,7 @@ export function createAuthVerifyExports() {
     AUTH_VERIFY_MODULE_SETTINGS_TOKEN,
     AuthVerifyOtpService,
     AuthVerifyEmailService,
-    AuthVerifyUserLookupService,
-    AuthVerifyUserMutateService,
+    AuthVerifyUserModelService,
     AuthVerifyService,
   ];
 }
@@ -88,8 +86,7 @@ export function createAuthVerifyProviders(options: {
     createAuthVerifySettingsProvider(options.overrides),
     createAuthVerifyOtpServiceProvider(options.overrides),
     createAuthVerifyEmailServiceProvider(options.overrides),
-    createAuthVerifyUserLookupServiceProvider(options.overrides),
-    createAuthVerifyUserMutateServiceProvider(options.overrides),
+    createAuthVerifyUserModelServiceProvider(options.overrides),
     createAuthVerifyNotificationServiceProvider(options.overrides),
   ];
 }
@@ -138,25 +135,14 @@ export function createAuthVerifyEmailServiceProvider(
   };
 }
 
-export function createAuthVerifyUserLookupServiceProvider(
-  optionsOverrides?: Pick<AuthVerifyOptions, 'userLookupService'>,
+export function createAuthVerifyUserModelServiceProvider(
+  optionsOverrides?: Pick<AuthVerifyOptions, 'userModelService'>,
 ): Provider {
   return {
-    provide: AuthVerifyUserLookupService,
+    provide: AuthVerifyUserModelService,
     inject: [RAW_OPTIONS_TOKEN],
-    useFactory: async (options: Pick<AuthVerifyOptions, 'userLookupService'>) =>
-      optionsOverrides?.userLookupService ?? options.userLookupService,
-  };
-}
-
-export function createAuthVerifyUserMutateServiceProvider(
-  optionsOverrides?: Pick<AuthVerifyOptions, 'userMutateService'>,
-): Provider {
-  return {
-    provide: AuthVerifyUserMutateService,
-    inject: [RAW_OPTIONS_TOKEN],
-    useFactory: async (options: Pick<AuthVerifyOptions, 'userMutateService'>) =>
-      optionsOverrides?.userMutateService ?? options.userMutateService,
+    useFactory: async (options: Pick<AuthVerifyOptions, 'userModelService'>) =>
+      optionsOverrides?.userModelService ?? options.userModelService,
   };
 }
 

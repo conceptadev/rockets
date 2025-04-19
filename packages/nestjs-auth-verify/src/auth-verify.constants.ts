@@ -12,10 +12,6 @@ export const AuthVerifyEmailService = Symbol(
   '__AUTH_VERIFY_MODULE_EMAIL_SERVICE_TOKEN__',
 );
 
-export const AuthVerifyUserLookupService = Symbol(
-  '__AUTH_VERIFY_MODULE_USER_LOOKUP_SERVICE_TOKEN__',
-);
-
-export const AuthVerifyUserMutateService = Symbol(
-  '__AUTH_VERIFY_MODULE_USER_MUTATE_SERVICE_TOKEN__',
+export const AuthVerifyUserModelService = Symbol(
+  '__AUTH_VERIFY_MODULE_USER_MODEL_SERVICE_TOKEN__',
 );
