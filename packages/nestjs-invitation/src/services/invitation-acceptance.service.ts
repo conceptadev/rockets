@@ -12,7 +12,7 @@ import {
   INVITATION_MODULE_INVITATION_ENTITY_KEY,
   INVITATION_MODULE_OTP_SERVICE_TOKEN,
   INVITATION_MODULE_SETTINGS_TOKEN,
-  INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+  INVITATION_MODULE_USER_MODEL_SERVICE_TOKEN,
 } from '../invitation.constants';
 
 import { InvitationAcceptedEventAsync } from '../events/invitation-accepted.event';
@@ -25,7 +25,7 @@ import { InvitationSendMailException } from '../exceptions/invitation-send-mail.
 import { InvitationAcceptOptionsInterface } from '../interfaces/options/invitation-accept-options.interface';
 import { InvitationException } from '../exceptions/invitation.exception';
 import { InvitationNotFoundException } from '../exceptions/invitation-not-found.exception';
-import { InvitationUserLookupServiceInterface } from '../interfaces/services/invitation-user-lookup.service.interface';
+import { InvitationUserModelServiceInterface } from '../interfaces/services/invitation-user-model.service.interface';
 import { InvitationUserUndefinedException } from '../exceptions/invitation-user-undefined.exception';
 
 export class InvitationAcceptanceService {
@@ -39,8 +39,8 @@ export class InvitationAcceptanceService {
     @Inject(INVITATION_MODULE_OTP_SERVICE_TOKEN)
     private readonly otpService: InvitationOtpServiceInterface,
     private readonly invitationRevocationService: InvitationRevocationService,
-    @Inject(INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN)
-    private readonly userLookupService: InvitationUserLookupServiceInterface,
+    @Inject(INVITATION_MODULE_USER_MODEL_SERVICE_TOKEN)
+    private readonly userModelService: InvitationUserModelServiceInterface,
   ) {}
 
   /**
@@ -65,7 +65,7 @@ export class InvitationAcceptanceService {
     }
 
     // get the user
-    const user = await this.userLookupService.byId(invitation.userId);
+    const user = await this.userModelService.byId(invitation.userId);
 
     if (!user) {
       throw new InvitationUserUndefinedException();

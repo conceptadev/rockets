@@ -24,7 +24,7 @@ export interface InvitationSendServiceInterface {
   /**
    * Get user details for an invitation
    *
-   * @param options - The user lookup options including email and optional constraints
+   * @param options - The user find options including email and optional constraints
    * @returns Promise resolving to the user details response
    */
   getUser(

@@ -1,29 +1,25 @@
 import { Injectable } from '@nestjs/common';
+import { ModelService, RepositoryInterface } from '@concepta/nestjs-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
-import { MutateService } from '@concepta/typeorm-common';
-import { RepositoryInterface } from '@concepta/nestjs-common';
 
-import { InvitationCreateDto } from '../dto/invitation-create.dto';
-import { InvitationCreatableInterface } from '../interfaces/domain/invitation-creatable.interface';
-import { InvitationMutateServiceInterface } from '../interfaces/services/invitation-mutate-service.interface';
 import { InvitationEntityInterface } from '../interfaces/domain/invitation-entity.interface';
+import { InvitationModelServiceInterface } from '../interfaces/services/invitation-model-service.interface';
 import { INVITATION_MODULE_INVITATION_ENTITY_KEY } from '../invitation.constants';
+import { InvitationCreatableInterface } from '../interfaces/domain/invitation-creatable.interface';
+import { InvitationCreateDto } from '../dto/invitation-create.dto';
 
 /**
- * Invitation mutate service
+ * Invitation model service
  */
 @Injectable()
-export class InvitationMutateService
-  extends MutateService<
+export class InvitationModelService
+  extends ModelService<
     InvitationEntityInterface,
     InvitationCreatableInterface,
     never
   >
-  implements InvitationMutateServiceInterface
+  implements InvitationModelServiceInterface
 {
-  protected createDto = InvitationCreateDto;
-  protected updateDto!: never;
-
   /**
    * Constructor
    *
@@ -35,4 +31,7 @@ export class InvitationMutateService
   ) {
     super(repo);
   }
+
+  protected createDto = InvitationCreateDto;
+  protected updateDto!: never;
 }

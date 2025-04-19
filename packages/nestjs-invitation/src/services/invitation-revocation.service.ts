@@ -7,12 +7,12 @@ import {
   INVITATION_MODULE_INVITATION_ENTITY_KEY,
   INVITATION_MODULE_OTP_SERVICE_TOKEN,
   INVITATION_MODULE_SETTINGS_TOKEN,
-  INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN,
+  INVITATION_MODULE_USER_MODEL_SERVICE_TOKEN,
 } from '../invitation.constants';
 
 import { InvitationSettingsInterface } from '../interfaces/options/invitation-settings.interface';
 import { InvitationOtpServiceInterface } from '../interfaces/services/invitation-otp-service.interface';
-import { InvitationUserLookupServiceInterface } from '../interfaces/services/invitation-user-lookup.service.interface';
+import { InvitationUserModelServiceInterface } from '../interfaces/services/invitation-user-model.service.interface';
 import { InvitationEntityInterface } from '../interfaces/domain/invitation-entity.interface';
 import { InvitationException } from '../exceptions/invitation.exception';
 import { InvitationRevokeOptionsInterface } from '../interfaces/options/invitation-revoke-options.interface';
@@ -25,8 +25,8 @@ export class InvitationRevocationService {
     protected readonly invitationRepo: RepositoryInterface<InvitationEntityInterface>,
     @Inject(INVITATION_MODULE_OTP_SERVICE_TOKEN)
     private readonly otpService: InvitationOtpServiceInterface,
-    @Inject(INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN)
-    private readonly userLookupService: InvitationUserLookupServiceInterface,
+    @Inject(INVITATION_MODULE_USER_MODEL_SERVICE_TOKEN)
+    private readonly userModelService: InvitationUserModelServiceInterface,
   ) {}
 
   /**
@@ -37,7 +37,7 @@ export class InvitationRevocationService {
   async revokeAll(options: InvitationRevokeOptionsInterface): Promise<void> {
     const { email, category } = options;
     // get the user by email
-    const user = await this.userLookupService.byEmail(email);
+    const user = await this.userModelService.byEmail(email);
 
     // did we find a user?
     if (user) {

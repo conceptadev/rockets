@@ -46,7 +46,7 @@ describe('InvitationController (e2e)', () => {
     response: InvitationDto,
   ) => {
     expect(response.category).toEqual(createDto.category);
-    // TODO: this needs another call to lookup user
+    // TODO: this needs another call to find user
     // expect(response.user.email).toEqual(createDto.email);
   };
 

@@ -8,8 +8,7 @@ import {
   INVITATION_MODULE_EMAIL_SERVICE_TOKEN,
   INVITATION_MODULE_OTP_SERVICE_TOKEN,
   INVITATION_MODULE_SETTINGS_TOKEN,
-  INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN,
-  INVITATION_MODULE_USER_MUTATE_SERVICE_TOKEN,
+  INVITATION_MODULE_USER_MODEL_SERVICE_TOKEN,
 } from '../invitation.constants';
 import { InvitationOtpServiceInterface } from '../interfaces/services/invitation-otp-service.interface';
 import { InvitationSettingsInterface } from '../interfaces/options/invitation-settings.interface';
@@ -18,11 +17,9 @@ import { InvitationSendMailException } from '../exceptions/invitation-send-mail.
 
 import { InvitationSendServiceInterface } from '../interfaces/services/invitation-send-service.interface';
 import { InvitationCreateInviteInterface } from '../interfaces/domain/invitation-create-invite.interface';
-import { InvitationLookupService } from './invitation-lookup.service';
-import { InvitationMutateService } from './invitation-mutate.service';
+import { InvitationModelService } from './invitation-model.service';
 import { InvitationSendInvitationEmailOptionsInterface } from '../interfaces/options/invitation-send-invitation-email-options.interface';
-import { InvitationUserLookupServiceInterface } from '../interfaces/services/invitation-user-lookup.service.interface';
-import { InvitationUserMutateServiceInterface } from '../interfaces/services/invitation-user-mutate.service.interface';
+import { InvitationUserModelServiceInterface } from '../interfaces/services/invitation-user-model.service.interface';
 import { InvitationSendInviteInterface } from '../interfaces/domain/invitation-send-invite.interface';
 import { InvitationNotFoundException } from '../exceptions/invitation-not-found.exception';
 import { InvitationUserUndefinedException } from '../exceptions/invitation-user-undefined.exception';
@@ -35,12 +32,9 @@ export class InvitationSendService implements InvitationSendServiceInterface {
     protected readonly emailService: InvitationEmailServiceInterface,
     @Inject(INVITATION_MODULE_OTP_SERVICE_TOKEN)
     protected readonly otpService: InvitationOtpServiceInterface,
-    @Inject(INVITATION_MODULE_USER_LOOKUP_SERVICE_TOKEN)
-    protected readonly userLookupService: InvitationUserLookupServiceInterface,
-    @Inject(INVITATION_MODULE_USER_MUTATE_SERVICE_TOKEN)
-    protected readonly userMutateService: InvitationUserMutateServiceInterface,
-    protected readonly invitationLookupService: InvitationLookupService,
-    protected readonly invitationMutateService: InvitationMutateService,
+    @Inject(INVITATION_MODULE_USER_MODEL_SERVICE_TOKEN)
+    protected readonly userModelService: InvitationUserModelServiceInterface,
+    protected readonly invitationModelService: InvitationModelService,
   ) {}
 
   /**
@@ -59,7 +53,7 @@ export class InvitationSendService implements InvitationSendServiceInterface {
       email,
     });
 
-    const invite = await this.invitationMutateService.create({
+    const invite = await this.invitationModelService.create({
       ...createInviteDto,
       userId: user.id,
       code: randomUUID(),
@@ -85,7 +79,7 @@ export class InvitationSendService implements InvitationSendServiceInterface {
     if (invitation && 'category' in invitation) {
       theInvitation = invitation;
     } else {
-      theInvitation = await this.invitationLookupService.byId(invitation.id);
+      theInvitation = await this.invitationModelService.byId(invitation.id);
     }
 
     if (!theInvitation) {
@@ -108,8 +102,8 @@ export class InvitationSendService implements InvitationSendServiceInterface {
       rateThreshold,
     });
 
-    // lookup the user
-    const user = await this.userLookupService.byId(userId);
+    // find the user by id
+    const user = await this.userModelService.byId(userId);
 
     if (!user) {
       throw new InvitationUserUndefinedException();
@@ -128,10 +122,10 @@ export class InvitationSendService implements InvitationSendServiceInterface {
     options: Pick<InvitationCreateInviteInterface, 'email' | 'constraints'>,
   ): Promise<InvitationUserInterface> {
     const { email } = options;
-    let user = await this.userLookupService.byEmail(email);
+    let user = await this.userModelService.byEmail(email);
 
     if (!user) {
-      user = await this.userMutateService.create({
+      user = await this.userModelService.create({
         email,
         username: email,
       });
