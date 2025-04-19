@@ -24,7 +24,7 @@ export class FederatedFindUserException extends FederatedException {
       ...options,
     });
 
-    this.errorCode = 'FEDERATED_USER_LOOKUP_ERROR';
+    this.errorCode = 'FEDERATED_FIND_USER_ERROR';
 
     this.context = {
       ...super.context,

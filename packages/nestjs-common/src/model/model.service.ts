@@ -35,6 +35,34 @@ export abstract class ModelService<
   constructor(protected repo: RepositoryInterface<Entity>) {}
 
   /**
+   * Greater than
+   */
+  gt<T>(value: T) {
+    return this.repo.gt(value);
+  }
+
+  /**
+   * Greater than or equal
+   */
+  gte<T>(value: T) {
+    return this.repo.gte(value);
+  }
+
+  /**
+   * Less than or equal
+   */
+  lt<T>(value: T) {
+    return this.repo.lt(value);
+  }
+
+  /**
+   * Less than
+   */
+  lte<T>(value: T) {
+    return this.repo.lte(value);
+  }
+
+  /**
    * Find
    *
    * @param options - Find many options

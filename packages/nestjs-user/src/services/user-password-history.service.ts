@@ -1,4 +1,3 @@
-import { MoreThan } from 'typeorm';
 import { Inject, Injectable } from '@nestjs/common';
 import {
   ReferenceId,
@@ -73,7 +72,7 @@ export class UserPasswordHistoryService
     const query: RepositoryInternals.FindManyOptions<UserPasswordHistoryEntityInterface> & {
       where: {
         userId: ReferenceId;
-        dateCreated?: ReturnType<typeof MoreThan>;
+        dateCreated?: ReturnType<UserPasswordHistoryModelService['gt']>;
       };
     } = {
       where: {
@@ -93,7 +92,8 @@ export class UserPasswordHistoryService
         limitDate.getDate() - this.userSettings.passwordHistory.limitDays,
       );
       // set the created at query
-      query.where.dateCreated = MoreThan(limitDate);
+      query.where.dateCreated =
+        this.userPasswordHistoryModelService.gt(limitDate);
     }
 
     return query;
