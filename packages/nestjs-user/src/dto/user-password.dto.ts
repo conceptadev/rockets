@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { PasswordPlainInterface } from '@concepta/nestjs-common';
 
 /**
- * User plain password DTO
+ * User plain password
  */
 @Exclude()
 export class UserPasswordDto implements PasswordPlainInterface {

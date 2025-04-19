@@ -1,14 +1,14 @@
 import { FactoryProvider } from '@nestjs/common';
 import { mock } from 'jest-mock-extended';
 import { OtpServiceFixture } from './__fixtures__/otp/otp.service.fixture';
-import { UserLookupServiceFixture } from './__fixtures__/user/services/user-lookup.service.fixture';
-import { UserMutateServiceFixture } from './__fixtures__/user/services/user-mutate.service.fixture';
+import { UserModelServiceFixture } from './__fixtures__/user/services/user-model.service.fixture';
+import { UserPasswordServiceFixture } from './__fixtures__/user/services/user-password.service.fixture';
 import {
   AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
   AuthRecoveryOtpService,
   AuthRecoveryEmailService,
-  AuthRecoveryUserLookupService,
-  AuthRecoveryUserMutateService,
+  AuthRecoveryUserModelService,
+  AuthRecoveryUserPasswordService,
 } from './auth-recovery.constants';
 import { AuthRecoveryController } from './auth-recovery.controller';
 import {
@@ -17,15 +17,15 @@ import {
   createAuthRecoveryExports,
   createAuthRecoveryNotificationServiceProvider,
   createAuthRecoveryOtpServiceProvider,
-  createAuthRecoveryUserLookupServiceProvider,
-  createAuthRecoveryUserMutateServiceProvider,
+  createAuthRecoveryUserModelServiceProvider,
+  createAuthRecoveryUserPasswordServiceProvider,
 } from './auth-recovery.module-definition';
 import { AuthRecoveryEmailServiceInterface } from './interfaces/auth-recovery-email.service.interface';
 import { AuthRecoveryService } from './services/auth-recovery.service';
-import { AuthRecoveryUserLookupServiceInterface } from './interfaces/auth-recovery-user-lookup.service.interface';
-import { AuthRecoveryUserMutateServiceInterface } from './interfaces/auth-recovery-user-mutate.service.interface';
+import { AuthRecoveryUserModelServiceInterface } from './interfaces/auth-recovery-user-model.service.interface';
 import { AuthRecoveryNotificationServiceInterface } from './interfaces/auth-recovery-notification.service.interface';
 import { AuthRecoveryNotificationService } from './services/auth-recovery-notification.service';
+import { UserPasswordServiceInterface } from '@concepta/nestjs-user';
 
 describe('AuthRecoveryModuleDefinition', () => {
   const mockEmailService = mock<AuthRecoveryEmailServiceInterface>();
@@ -34,8 +34,8 @@ describe('AuthRecoveryModuleDefinition', () => {
   const mockAuthRecoveryOptions = {
     emailService: mockEmailService,
     otpService: new OtpServiceFixture(),
-    userLookupService: new UserLookupServiceFixture(),
-    userMutateService: new UserMutateServiceFixture(),
+    userModelService: new UserModelServiceFixture(),
+    userPasswordService: new UserPasswordServiceFixture(),
   };
   describe(createAuthRecoveryExports.name, () => {
     it('should return an array with the expected tokens', () => {
@@ -44,8 +44,8 @@ describe('AuthRecoveryModuleDefinition', () => {
         AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
         AuthRecoveryOtpService,
         AuthRecoveryEmailService,
-        AuthRecoveryUserLookupService,
-        AuthRecoveryUserMutateService,
+        AuthRecoveryUserModelService,
+        AuthRecoveryUserPasswordService,
         AuthRecoveryService,
       ]);
     });
@@ -165,66 +165,68 @@ describe('AuthRecoveryModuleDefinition', () => {
     });
   });
 
-  describe(createAuthRecoveryUserLookupServiceProvider.name, () => {
+  describe(createAuthRecoveryUserModelServiceProvider.name, () => {
     it('should return a have no default', async () => {
       const provider =
-        createAuthRecoveryUserLookupServiceProvider() as FactoryProvider;
+        createAuthRecoveryUserModelServiceProvider() as FactoryProvider;
 
       const useFactoryResult = await provider.useFactory({});
 
       expect(useFactoryResult).toBe(undefined);
     });
 
-    it('should override userLookupService', async () => {
-      const provider = createAuthRecoveryUserLookupServiceProvider({
-        userLookupService: mockAuthRecoveryOptions.userLookupService,
+    it('should override userModelService', async () => {
+      const provider = createAuthRecoveryUserModelServiceProvider({
+        userModelService: mockAuthRecoveryOptions.userModelService,
       }) as FactoryProvider;
 
       const useFactoryResult = await provider.useFactory();
 
-      expect(useFactoryResult).toBe(mockAuthRecoveryOptions.userLookupService);
+      expect(useFactoryResult).toBe(mockAuthRecoveryOptions.userModelService);
     });
 
-    it('should return an userLookupService from initialization', async () => {
+    it('should return an userModelService from initialization', async () => {
       const provider =
-        createAuthRecoveryUserLookupServiceProvider() as FactoryProvider;
+        createAuthRecoveryUserModelServiceProvider() as FactoryProvider;
 
-      const mockService = mock<AuthRecoveryUserLookupServiceInterface>();
+      const mockService = mock<AuthRecoveryUserModelServiceInterface>();
       const useFactoryResult = await provider.useFactory({
-        userLookupService: mockService,
+        userModelService: mockService,
       });
 
       expect(useFactoryResult).toBe(mockService);
     });
   });
 
-  describe(createAuthRecoveryUserMutateServiceProvider.name, () => {
+  describe(createAuthRecoveryUserPasswordServiceProvider.name, () => {
     it('should return a have no default', async () => {
       const provider =
-        createAuthRecoveryUserMutateServiceProvider() as FactoryProvider;
+        createAuthRecoveryUserPasswordServiceProvider() as FactoryProvider;
 
       const useFactoryResult = await provider.useFactory({});
 
       expect(useFactoryResult).toBe(undefined);
     });
 
-    it('should override userMutateService', async () => {
-      const provider = createAuthRecoveryUserMutateServiceProvider({
-        userMutateService: mockAuthRecoveryOptions.userMutateService,
+    it('should override userPasswordService', async () => {
+      const provider = createAuthRecoveryUserPasswordServiceProvider({
+        userPasswordService: mockAuthRecoveryOptions.userPasswordService,
       }) as FactoryProvider;
 
       const useFactoryResult = await provider.useFactory();
 
-      expect(useFactoryResult).toBe(mockAuthRecoveryOptions.userMutateService);
+      expect(useFactoryResult).toBe(
+        mockAuthRecoveryOptions.userPasswordService,
+      );
     });
 
-    it('should return an userMutateService from initialization', async () => {
+    it('should return an userPasswordService from initialization', async () => {
       const provider =
-        createAuthRecoveryUserMutateServiceProvider() as FactoryProvider;
+        createAuthRecoveryUserPasswordServiceProvider() as FactoryProvider;
 
-      const mockService = mock<AuthRecoveryUserMutateServiceInterface>();
+      const mockService = mock<UserPasswordServiceInterface>();
       const useFactoryResult = await provider.useFactory({
-        userMutateService: mockService,
+        userPasswordService: mockService,
       });
 
       expect(useFactoryResult).toBe(mockService);

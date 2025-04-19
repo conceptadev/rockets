@@ -1,24 +1,33 @@
-import { HttpStatus, Inject, Injectable, Optional } from '@nestjs/common';
-import { ReferenceId, ReferenceIdInterface } from '@concepta/nestjs-common';
 import {
+  forwardRef,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Optional,
+} from '@nestjs/common';
+import {
+  ReferenceId,
+  ReferenceIdInterface,
+  isPasswordStorage,
   AuthenticatedUserInterface,
   PasswordPlainCurrentInterface,
   PasswordPlainInterface,
+  PasswordStorageInterface,
 } from '@concepta/nestjs-common';
 import {
-  isPasswordStorage,
   PasswordCreationService,
   PasswordCreationServiceInterface,
-  PasswordStorageInterface,
+  PasswordStorageService,
+  PasswordStorageServiceInterface,
 } from '@concepta/nestjs-password';
 
 import { UserPasswordServiceInterface } from '../interfaces/user-password-service.interface';
-import { UserLookupServiceInterface } from '../interfaces/user-lookup-service.interface';
 import { UserPasswordHistoryServiceInterface } from '../interfaces/user-password-history-service.interface';
-import { UserLookupService } from './user-lookup.service';
 import { UserPasswordHistoryService } from './user-password-history.service';
 import { UserException } from '../exceptions/user-exception';
 import { UserNotFoundException } from '../exceptions/user-not-found-exception';
+import { UserModelServiceInterface } from '../interfaces/user-model-service.interface';
+import { UserModelService } from './user-model.service';
 
 /**
  * User password service
@@ -28,79 +37,76 @@ export class UserPasswordService implements UserPasswordServiceInterface {
   /**
    * Constructor
    *
-   * @param userLookupService - user lookup service
+   * @param userModelService - user model service
    * @param passwordCreationService - password creation service
+   * @param passwordStorageService - password storage service
+   * @param userPasswordHistoryService - user password history creation service
    */
   constructor(
-    @Inject(UserLookupService)
-    protected readonly userLookupService: UserLookupServiceInterface,
+    @Inject(forwardRef(() => UserModelService))
+    protected readonly userModelService: UserModelServiceInterface,
     @Inject(PasswordCreationService)
     protected readonly passwordCreationService: PasswordCreationServiceInterface,
+    @Inject(PasswordStorageService)
+    protected readonly passwordStorageService: PasswordStorageServiceInterface,
     @Optional()
     @Inject(UserPasswordHistoryService)
     private userPasswordHistoryService?: UserPasswordHistoryServiceInterface,
   ) {}
 
   async setPassword(
-    passwordDto: Partial<
-      PasswordPlainInterface & PasswordPlainCurrentInterface
-    >,
+    passwordDto: PasswordPlainInterface &
+      Partial<PasswordPlainCurrentInterface>,
     userToUpdateId?: ReferenceId,
     authorizedUser?: AuthenticatedUserInterface,
-  ): ReturnType<PasswordCreationService['createObject']> {
+  ): Promise<void> {
     // break out the password
-    const { password } = passwordDto ?? {};
+    const { password } = passwordDto;
 
     // user to update
     let userToUpdate:
       | (ReferenceIdInterface & PasswordStorageInterface)
       | undefined = undefined;
 
-    // did we receive a password to set?
-    if (typeof password === 'string') {
-      // are we updating?
-      if (userToUpdateId) {
-        // yes, get the user
-        userToUpdate = await this.getPasswordStore(userToUpdateId);
+    // are we updating?
+    if (userToUpdateId) {
+      // yes, get the user
+      userToUpdate = await this.getPasswordStore(userToUpdateId);
 
-        // call current password validation helper
-        await this.validateCurrent(
-          userToUpdate,
-          passwordDto?.passwordCurrent,
-          authorizedUser,
-        );
+      // call current password validation helper
+      await this.validateCurrent(
+        userToUpdate,
+        passwordDto?.passwordCurrent,
+        authorizedUser,
+      );
 
-        // call password history validation helper
-        await this.validateHistory(userToUpdate, password);
-      }
-
-      // create safe object
-      const targetSafe = { ...passwordDto, password };
-
-      // call the password creation service
-      const userWithPasswordHashed =
-        await this.passwordCreationService.createObject(targetSafe, {
-          required: false,
-        });
-
-      // push password history if necessary
-      if (
-        this.userPasswordHistoryService &&
-        userToUpdate &&
-        isPasswordStorage(userWithPasswordHashed)
-      ) {
-        await this.userPasswordHistoryService.pushHistory(
-          userToUpdate.id,
-          userWithPasswordHashed,
-        );
-      }
-
-      // return user
-      return userWithPasswordHashed;
+      // call password history validation helper
+      await this.validateHistory(userToUpdate, password);
     }
 
-    // return the object untouched
-    return passwordDto;
+    // call the password creation service
+    const passwordHashed = await this.passwordStorageService.hash(password);
+
+    // push password history if necessary
+    if (
+      this.userPasswordHistoryService &&
+      userToUpdate &&
+      isPasswordStorage(passwordHashed)
+    ) {
+      await this.userPasswordHistoryService.pushHistory(
+        userToUpdate.id,
+        passwordHashed,
+      );
+    }
+
+    // update the user
+    if (userToUpdate) {
+      await this.userModelService.update({
+        id: userToUpdate.id,
+        passwordHash: passwordHashed.passwordHash,
+        passwordSalt: passwordHashed.passwordSalt,
+      });
+    }
   }
 
   async getPasswordStore(
@@ -110,7 +116,7 @@ export class UserPasswordService implements UserPasswordServiceInterface {
 
     try {
       // try to lookup the user
-      user = await this.userLookupService.byId(userId);
+      user = await this.userModelService.byId(userId);
     } catch (e: unknown) {
       throw new UserException({
         message: 'Cannot update password, error while getting user by id',

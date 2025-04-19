@@ -3,11 +3,11 @@ import {
   ReferenceIdInterface,
   ReferenceSubject,
 } from '@concepta/nestjs-common';
-import { AuthJwtUserLookupServiceInterface } from '../../interfaces/auth-jwt-user-lookup-service.interface';
+import { AuthJwtUserModelServiceInterface } from '../../interfaces/auth-jwt-user-model-service.interface';
 
 @Injectable()
-export class UserLookupServiceFixture
-  implements AuthJwtUserLookupServiceInterface
+export class UserModelServiceFixture
+  implements AuthJwtUserModelServiceInterface
 {
   async bySubject(subject: ReferenceSubject): Promise<ReferenceIdInterface> {
     throw new Error(`Method not implemented, cant get ${subject}.`);

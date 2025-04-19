@@ -2,13 +2,17 @@ import {
   ByEmailInterface,
   ByIdInterface,
   ReferenceEmail,
+  ReferenceEmailInterface,
   ReferenceId,
   ReferenceIdInterface,
   ReferenceUsernameInterface,
 } from '@concepta/nestjs-common';
 
-export interface AuthRecoveryUserLookupServiceInterface
-  extends ByIdInterface<ReferenceId, ReferenceIdInterface>,
+export interface AuthRecoveryUserModelServiceInterface
+  extends ByIdInterface<
+      ReferenceId,
+      ReferenceIdInterface & ReferenceEmailInterface
+    >,
     ByEmailInterface<
       ReferenceEmail,
       ReferenceIdInterface & ReferenceUsernameInterface

@@ -10,6 +10,7 @@ import { OtpModule, OtpService } from '@concepta/nestjs-otp';
 import { EmailModule, EmailService } from '@concepta/nestjs-email';
 import {
   UserLookupService,
+  UserModelServiceInterface,
   UserModule,
   UserMutateService,
 } from '@concepta/nestjs-user';
@@ -35,8 +36,8 @@ import { MailerServiceFixture } from './email/mailer.service.fixture';
     }),
     AuthJwtModule.forRootAsync({
       inject: [UserLookupService],
-      useFactory: (userLookupService: UserLookupService) => ({
-        userLookupService,
+      useFactory: (userModelService: UserModelServiceInterface) => ({
+        userModelService,
       }),
     }),
     AuthVerifyModule.forRootAsync({

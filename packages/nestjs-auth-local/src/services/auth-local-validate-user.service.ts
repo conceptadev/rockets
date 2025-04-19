@@ -4,11 +4,11 @@ import { ValidateUserService } from '@concepta/nestjs-authentication';
 import { PasswordValidationServiceInterface } from '@concepta/nestjs-password';
 import {
   AuthLocalPasswordValidationService,
-  AuthLocalUserLookupService,
+  AuthLocalUserModelService,
 } from '../auth-local.constants';
 import { AuthLocalValidateUserInterface } from '../interfaces/auth-local-validate-user.interface';
 import { AuthLocalValidateUserServiceInterface } from '../interfaces/auth-local-validate-user-service.interface';
-import { AuthLocalUserLookupServiceInterface } from '../interfaces/auth-local-user-lookup-service.interface';
+import { AuthLocalUserModelServiceInterface } from '../interfaces/auth-local-user-model-service.interface';
 import { AuthLocalUsernameNotFoundException } from '../exceptions/auth-local-username-not-found.exception';
 import { AuthLocalUserInactiveException } from '../exceptions/auth-local-user-inactive.exception';
 import { AuthLocalInvalidPasswordException } from '../exceptions/auth-local-invalid-password.exception';
@@ -19,8 +19,8 @@ export class AuthLocalValidateUserService
   implements AuthLocalValidateUserServiceInterface
 {
   constructor(
-    @Inject(AuthLocalUserLookupService)
-    protected readonly userLookupService: AuthLocalUserLookupServiceInterface,
+    @Inject(AuthLocalUserModelService)
+    protected readonly userModelService: AuthLocalUserModelServiceInterface,
     @Inject(AuthLocalPasswordValidationService)
     protected readonly passwordValidationService: PasswordValidationServiceInterface,
   ) {
@@ -34,7 +34,7 @@ export class AuthLocalValidateUserService
     dto: AuthLocalValidateUserInterface,
   ): Promise<ReferenceIdInterface> {
     // try to get the user by username
-    const user = await this.userLookupService.byUsername(dto.username);
+    const user = await this.userModelService.byUsername(dto.username);
 
     // did we get a user?
     if (!user) {

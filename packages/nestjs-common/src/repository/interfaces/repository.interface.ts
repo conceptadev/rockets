@@ -1,6 +1,6 @@
 import { PlainLiteralObject } from '@nestjs/common';
 
-import { DeepPartial } from '../../utils/interfaces/deep-partial.interface';
+import { DeepPartial } from '../../utils/deep-partial';
 
 import { RepositoryInternals } from './repository-internals';
 

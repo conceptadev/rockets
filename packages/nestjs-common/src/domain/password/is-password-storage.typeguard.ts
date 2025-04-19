@@ -1,4 +1,4 @@
-import { PasswordStorageInterface } from '../interfaces/password-storage.interface';
+import { PasswordStorageInterface } from './interfaces/password-storage.interface';
 
 export function isPasswordStorage(
   target: unknown,

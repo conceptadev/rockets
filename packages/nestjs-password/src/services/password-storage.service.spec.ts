@@ -1,5 +1,5 @@
 import { fail } from 'assert';
-import { PasswordStorageInterface } from '../interfaces/password-storage.interface';
+import { PasswordStorageInterface } from '@concepta/nestjs-common';
 import { PasswordStorageService } from './password-storage.service';
 import { PasswordValidationService } from './password-validation.service';
 import { PasswordRequiredException } from '../exceptions/password-required.exception';

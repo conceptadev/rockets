@@ -5,7 +5,7 @@ import { AuthJwtModule } from '@concepta/nestjs-auth-jwt';
 
 // import { default as ormConfig } from './ormconfig.fixture';
 import { AuthLocalModule } from '../auth-local.module';
-import { UserLookupServiceFixture } from './user/user-lookup.service.fixture';
+import { UserModelServiceFixture } from './user/user-model.service.fixture';
 import { UserModuleFixture } from './user/user.module.fixture';
 
 @Module({
@@ -13,15 +13,15 @@ import { UserModuleFixture } from './user/user.module.fixture';
     JwtModule.forRoot({}),
     AuthenticationModule.forRoot({}),
     AuthJwtModule.forRootAsync({
-      inject: [UserLookupServiceFixture],
-      useFactory: (userLookupService: UserLookupServiceFixture) => ({
-        userLookupService,
+      inject: [UserModelServiceFixture],
+      useFactory: (userModelService: UserModelServiceFixture) => ({
+        userModelService,
       }),
     }),
     AuthLocalModule.forRootAsync({
-      inject: [UserLookupServiceFixture],
-      useFactory: (userLookupService) => ({
-        userLookupService,
+      inject: [UserModelServiceFixture],
+      useFactory: (userModelService) => ({
+        userModelService,
       }),
     }),
     UserModuleFixture,

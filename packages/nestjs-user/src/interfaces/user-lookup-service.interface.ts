@@ -4,13 +4,13 @@ import {
   BySubjectInterface,
   ByUsernameInterface,
   ReferenceId,
-  ReferenceIdInterface,
   ReferenceSubject,
   ReferenceUsername,
 } from '@concepta/nestjs-common';
+import { UserEntityInterface } from './user-entity.interface';
 
 export interface UserLookupServiceInterface
-  extends ByIdInterface,
-    ByEmailInterface<ReferenceId, ReferenceIdInterface>,
-    BySubjectInterface<ReferenceSubject, ReferenceIdInterface>,
-    ByUsernameInterface<ReferenceUsername, ReferenceIdInterface> {}
+  extends ByIdInterface<ReferenceId, UserEntityInterface>,
+    ByEmailInterface<ReferenceId, UserEntityInterface>,
+    BySubjectInterface<ReferenceSubject, UserEntityInterface>,
+    ByUsernameInterface<ReferenceUsername, UserEntityInterface> {}

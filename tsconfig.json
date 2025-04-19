@@ -51,9 +51,6 @@
       "path": "packages/nestjs-auth-github"
     },
     {
-      "path": "packages/nestjs-samples"
-    },
-    {
       "path": "packages/nestjs-typeorm-ext"
     },
     {
@@ -109,6 +106,9 @@
     },
     {
       "path": "packages/nestjs-auth-verify"
-    }
+    },
+    {
+      "path": "packages/nestjs-samples"
+    },
   ]
 }

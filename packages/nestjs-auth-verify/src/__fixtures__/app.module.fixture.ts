@@ -20,7 +20,7 @@ import { MailerServiceFixture } from './email/mailer.service.fixture';
     AuthJwtModule.forRootAsync({
       inject: [UserLookupServiceFixture],
       useFactory: (userLookupService: UserLookupServiceFixture) => ({
-        userLookupService,
+        userModelService: userLookupService,
       }),
     }),
     AuthVerifyModule.forRootAsync({

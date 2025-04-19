@@ -1,5 +1,7 @@
-import { PasswordPlainInterface } from '@concepta/nestjs-common';
-import { PasswordStorageInterface } from './password-storage.interface';
+import {
+  PasswordPlainInterface,
+  PasswordStorageInterface,
+} from '@concepta/nestjs-common';
 
 export interface PasswordCurrentPasswordInterface
   extends PasswordPlainInterface {

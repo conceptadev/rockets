@@ -6,11 +6,12 @@ import {
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 
 import { USER_MODULE_SETTINGS_TOKEN } from '../user.constants';
-import { UserMutateService } from '../services/user-mutate.service';
 import { UserSettingsInterface } from '../interfaces/user-settings.interface';
-import { UserLookupService } from '../services/user-lookup.service';
 import { UserNotFoundException } from '../exceptions/user-not-found-exception';
 import { UserException } from '../exceptions/user-exception';
+
+import { UserModelServiceInterface } from '../interfaces/user-model-service.interface';
+import { UserModelService } from '../services/user-model.service';
 
 @Injectable()
 export class InvitationAcceptedListener
@@ -22,8 +23,8 @@ export class InvitationAcceptedListener
   constructor(
     @Inject(USER_MODULE_SETTINGS_TOKEN)
     private settings: UserSettingsInterface,
-    private userLookupService: UserLookupService,
-    private userMutateService: UserMutateService,
+    @Inject(UserModelService)
+    private userModelService: UserModelServiceInterface,
   ) {
     super();
   }
@@ -45,22 +46,21 @@ export class InvitationAcceptedListener
       event.payload.invitation.category === INVITATION_MODULE_CATEGORY_USER_KEY
     ) {
       const userId = event.payload.invitation.userId;
-      const { newPassword } = event.payload?.data ?? {};
 
-      if (typeof userId !== 'string' || typeof newPassword !== 'string') {
+      if (typeof userId !== 'string') {
         throw new UserException({
           message:
-            'The invitation accepted event payload received has invalid content. The payload must have the "invitation.user" and "newPassword" properties.',
+            'The invitation accepted event payload received has invalid content. The payload must have the "invitation.user" property.',
         });
       }
 
-      const user = await this.userLookupService.byId(userId);
+      const user = await this.userModelService.byId(userId);
 
       if (!user) {
         throw new UserNotFoundException();
       }
 
-      await this.userMutateService.update({ ...user, password: newPassword });
+      await this.userModelService.update({ ...user });
 
       return true;
     }

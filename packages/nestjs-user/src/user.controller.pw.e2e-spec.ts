@@ -4,22 +4,25 @@ import { getDataSourceToken } from '@nestjs/typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
-import { ExceptionsFilter } from '@concepta/nestjs-common';
+import {
+  ExceptionsFilter,
+  PasswordStorageInterface,
+} from '@concepta/nestjs-common';
 import { IssueTokenService } from '@concepta/nestjs-authentication';
 import { AccessControlService } from '@concepta/nestjs-access-control';
 import {
   PasswordCreationService,
-  PasswordStorageInterface,
   PasswordStorageService,
   PasswordValidationService,
 } from '@concepta/nestjs-password';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 
 import { UserFactory } from './user.factory';
-import { UserLookupService } from './services/user-lookup.service';
 import { UserPasswordHistoryFactory } from './user-password-history.factory';
 import { UserPasswordService } from './services/user-password.service';
 import { UserPasswordHistoryLookupService } from './services/user-password-history-lookup.service';
+import { UserModelServiceInterface } from './interfaces/user-model-service.interface';
+import { UserModelService } from './services/user-model.service';
 
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
 import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
@@ -34,7 +37,7 @@ describe('User Controller (password e2e)', () => {
     let passwordValidationService: PasswordValidationService;
     let passwordStorageService: PasswordStorageService;
     let passwordCreationService: PasswordCreationService;
-    let userLookupService: UserLookupService;
+    let userModelService: UserModelServiceInterface;
     let userPasswordService: UserPasswordService;
     let userPasswordHistoryLookupService: UserPasswordHistoryLookupService;
     let issueTokenService: IssueTokenService;
@@ -72,7 +75,7 @@ describe('User Controller (password e2e)', () => {
       passwordValidationService = app.get(PasswordValidationService);
       passwordStorageService = app.get(PasswordStorageService);
       passwordCreationService = app.get(PasswordCreationService);
-      userLookupService = app.get(UserLookupService);
+      userModelService = app.get(UserModelService);
       userPasswordService = app.get(UserPasswordService);
       userPasswordHistoryLookupService = app.get(
         UserPasswordHistoryLookupService,
@@ -131,7 +134,7 @@ describe('User Controller (password e2e)', () => {
           })
           .expect(200);
 
-        const updatedUser = await userLookupService.byId(userId);
+        const updatedUser = await userModelService.byId(userId);
         expect(updatedUser).toBeInstanceOf(UserEntityFixture);
 
         if (updatedUser) {
@@ -178,7 +181,7 @@ describe('User Controller (password e2e)', () => {
           })
           .expect(400);
 
-        const unchangedUser = await userLookupService.byId(userId);
+        const unchangedUser = await userModelService.byId(userId);
         expect(unchangedUser).toBeInstanceOf(UserEntityFixture);
 
         if (unchangedUser) {
@@ -223,7 +226,7 @@ describe('User Controller (password e2e)', () => {
           })
           .expect(200);
 
-        const updatedUser = await userLookupService.byId(userId);
+        const updatedUser = await userModelService.byId(userId);
         expect(updatedUser).toBeInstanceOf(UserEntityFixture);
 
         if (updatedUser) {

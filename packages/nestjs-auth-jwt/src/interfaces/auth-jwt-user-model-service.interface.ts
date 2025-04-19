@@ -4,5 +4,5 @@ import {
   ReferenceSubject,
 } from '@concepta/nestjs-common';
 
-export interface AuthJwtUserLookupServiceInterface
+export interface AuthJwtUserModelServiceInterface
   extends BySubjectInterface<ReferenceSubject, ReferenceIdInterface> {}

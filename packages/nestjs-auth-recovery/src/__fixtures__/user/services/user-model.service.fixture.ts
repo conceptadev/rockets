@@ -5,17 +5,17 @@ import {
   ReferenceSubject,
 } from '@concepta/nestjs-common';
 
-import { AuthRecoveryUserLookupServiceInterface } from '../../../interfaces/auth-recovery-user-lookup.service.interface';
+import { AuthRecoveryUserModelServiceInterface } from '../../../interfaces/auth-recovery-user-model.service.interface';
 
 import { UserFixture } from '../user.fixture';
 
 @Injectable()
-export class UserLookupServiceFixture
-  implements AuthRecoveryUserLookupServiceInterface
+export class UserModelServiceFixture
+  implements AuthRecoveryUserModelServiceInterface
 {
   async byId(
     id: string,
-  ): ReturnType<AuthRecoveryUserLookupServiceInterface['byId']> {
+  ): ReturnType<AuthRecoveryUserModelServiceInterface['byId']> {
     if (id === UserFixture.id) {
       return UserFixture;
     } else {
@@ -25,7 +25,7 @@ export class UserLookupServiceFixture
 
   async byEmail(
     email: ReferenceEmail,
-  ): ReturnType<AuthRecoveryUserLookupServiceInterface['byEmail']> {
+  ): ReturnType<AuthRecoveryUserModelServiceInterface['byEmail']> {
     return email === UserFixture.email ? UserFixture : null;
   }
 

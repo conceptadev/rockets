@@ -2,8 +2,7 @@ import { Exclude } from 'class-transformer';
 import { IntersectionType, PartialType, PickType } from '@nestjs/swagger';
 import { UserUpdatableInterface } from '@concepta/nestjs-common';
 import { UserDto } from './user.dto';
-import { UserPasswordDto } from './user-password.dto';
-import { UserPasswordUpdateDto } from './user-password-update.dto';
+import { UserPasswordHashDto } from './user-password-hash.dto';
 
 /**
  * User Update DTO
@@ -12,7 +11,6 @@ import { UserPasswordUpdateDto } from './user-password-update.dto';
 export class UserUpdateDto
   extends IntersectionType(
     PartialType(PickType(UserDto, ['email', 'active'] as const)),
-    PartialType(UserPasswordDto),
-    PartialType(UserPasswordUpdateDto),
+    PartialType(UserPasswordHashDto),
   )
   implements UserUpdatableInterface {}

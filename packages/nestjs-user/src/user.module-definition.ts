@@ -8,7 +8,10 @@ import {
   RepositoryInterface,
   createSettingsProvider,
 } from '@concepta/nestjs-common';
-import { PasswordCreationService } from '@concepta/nestjs-password';
+import {
+  PasswordCreationService,
+  PasswordStorageService,
+} from '@concepta/nestjs-password';
 import {
   getDynamicRepositoryToken,
   TypeOrmExtModule,
@@ -25,10 +28,10 @@ import { UserOptionsExtrasInterface } from './interfaces/user-options-extras.int
 import { UserEntitiesOptionsInterface } from './interfaces/user-entities-options.interface';
 import { UserSettingsInterface } from './interfaces/user-settings.interface';
 import { UserEntityInterface } from './interfaces/user-entity.interface';
-import { UserLookupServiceInterface } from './interfaces/user-lookup-service.interface';
 import { UserPasswordHistoryEntityInterface } from './interfaces/user-password-history-entity.interface';
 
 import { UserCrudService } from './services/user-crud.service';
+import { UserModelService } from './services/user-model.service';
 import { UserLookupService } from './services/user-lookup.service';
 import { UserMutateService } from './services/user-mutate.service';
 import { UserPasswordService } from './services/user-password.service';
@@ -40,6 +43,7 @@ import { UserController } from './user.controller';
 import { InvitationAcceptedListener } from './listeners/invitation-accepted-listener';
 import { userDefaultConfig } from './config/user-default.config';
 import { UserMissingEntitiesOptionsException } from './exceptions/user-missing-entities-options.exception';
+import { UserModelServiceInterface } from './interfaces/user-model-service.interface';
 
 const RAW_OPTIONS_TOKEN = Symbol('__USER_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -107,13 +111,15 @@ export function createUserProviders(options: {
     InvitationAcceptedListener,
     UserPasswordHistoryMutateService,
     createUserSettingsProvider(options.overrides),
-    createUserLookupServiceProvider(options.overrides),
-    createUserMutateServiceProvider(options.overrides),
+    createUserModelServiceProvider(options.overrides),
     createUserPasswordServiceProvider(options.overrides),
     createUserPasswordHistoryServiceProvider(options.overrides),
     createUserPasswordHistoryLookupServiceProvider(),
     createUserPasswordHistoryMutateServiceProvider(),
     createUserAccessQueryServiceProvider(options.overrides),
+    // DEPRECATED
+    createUserLookupServiceProvider(options.overrides),
+    createUserMutateServiceProvider(options.overrides),
   ];
 }
 
@@ -122,14 +128,16 @@ export function createUserExports(): Required<
 >['exports'] {
   return [
     USER_MODULE_SETTINGS_TOKEN,
-    UserLookupService,
-    UserMutateService,
     UserCrudService,
+    UserModelService,
     UserPasswordService,
     UserPasswordHistoryService,
     UserPasswordHistoryLookupService,
     UserPasswordHistoryMutateService,
     UserAccessQueryService,
+    // DEPRECATED
+    UserLookupService,
+    UserMutateService,
   ];
 }
 
@@ -152,11 +160,11 @@ export function createUserSettingsProvider(
   });
 }
 
-export function createUserLookupServiceProvider(
+export function createUserModelServiceProvider(
   optionsOverrides?: UserOptions,
 ): Provider {
   return {
-    provide: UserLookupService,
+    provide: UserModelService,
     inject: [
       RAW_OPTIONS_TOKEN,
       getDynamicRepositoryToken(USER_MODULE_USER_ENTITY_KEY),
@@ -165,30 +173,9 @@ export function createUserLookupServiceProvider(
       options: UserOptionsInterface,
       userRepo: RepositoryInterface<UserEntityInterface>,
     ) =>
-      optionsOverrides?.userLookupService ??
-      options.userLookupService ??
-      new UserLookupService(userRepo),
-  };
-}
-
-export function createUserMutateServiceProvider(
-  optionsOverrides?: UserOptions,
-): Provider {
-  return {
-    provide: UserMutateService,
-    inject: [
-      RAW_OPTIONS_TOKEN,
-      getDynamicRepositoryToken(USER_MODULE_USER_ENTITY_KEY),
-      UserPasswordService,
-    ],
-    useFactory: async (
-      options: UserOptionsInterface,
-      userRepo: RepositoryInterface<UserEntityInterface>,
-      userPasswordService: UserPasswordService,
-    ) =>
-      optionsOverrides?.userMutateService ??
-      options.userMutateService ??
-      new UserMutateService(userRepo, userPasswordService),
+      optionsOverrides?.userModelService ??
+      options.userModelService ??
+      new UserModelService(userRepo),
   };
 }
 
@@ -199,8 +186,9 @@ export function createUserPasswordServiceProvider(
     provide: UserPasswordService,
     inject: [
       RAW_OPTIONS_TOKEN,
-      UserLookupService,
+      UserModelService,
       PasswordCreationService,
+      PasswordStorageService,
       {
         token: UserPasswordHistoryService,
         optional: true,
@@ -208,15 +196,17 @@ export function createUserPasswordServiceProvider(
     ],
     useFactory: async (
       options: UserOptionsInterface,
-      userLookUpService: UserLookupServiceInterface,
+      userModelService: UserModelServiceInterface,
       passwordCreationService: PasswordCreationService,
+      passwordStorageService: PasswordStorageService,
       userPasswordHistoryService?: UserPasswordHistoryService,
     ) =>
       optionsOverrides?.userPasswordService ??
       options.userPasswordService ??
       new UserPasswordService(
-        userLookUpService,
+        userModelService,
         passwordCreationService,
+        passwordStorageService,
         userPasswordHistoryService,
       ),
   };
@@ -344,5 +334,51 @@ export function createUserAccessQueryServiceProvider(
       optionsOverrides?.userAccessQueryService ??
       options.userAccessQueryService ??
       new UserAccessQueryService(),
+  };
+}
+
+/**
+ * @deprecated - will be removed after model service refactoring
+ */
+export function createUserLookupServiceProvider(
+  optionsOverrides?: UserOptions,
+): Provider {
+  return {
+    provide: UserLookupService,
+    inject: [
+      RAW_OPTIONS_TOKEN,
+      getDynamicRepositoryToken(USER_MODULE_USER_ENTITY_KEY),
+    ],
+    useFactory: async (
+      options: UserOptionsInterface,
+      userRepo: RepositoryInterface<UserEntityInterface>,
+    ) =>
+      optionsOverrides?.userLookupService ??
+      options.userLookupService ??
+      new UserLookupService(userRepo),
+  };
+}
+
+/**
+ * @deprecated - will be removed after model service refactoring
+ */
+export function createUserMutateServiceProvider(
+  optionsOverrides?: UserOptions,
+): Provider {
+  return {
+    provide: UserMutateService,
+    inject: [
+      RAW_OPTIONS_TOKEN,
+      getDynamicRepositoryToken(USER_MODULE_USER_ENTITY_KEY),
+      UserPasswordService,
+    ],
+    useFactory: async (
+      options: UserOptionsInterface,
+      userRepo: RepositoryInterface<UserEntityInterface>,
+      userPasswordService: UserPasswordService,
+    ) =>
+      optionsOverrides?.userMutateService ??
+      options.userMutateService ??
+      new UserMutateService(userRepo, userPasswordService),
   };
 }

@@ -3,8 +3,8 @@ import { AppModule } from './app.module';
 import { IssueTokenService } from '@concepta/nestjs-authentication';
 import {
   AuthLocalController,
-  AuthLocalUserLookupService,
-  AuthLocalUserLookupServiceInterface,
+  AuthLocalUserModelService,
+  AuthLocalUserModelServiceInterface,
 } from '@concepta/nestjs-auth-local';
 import { UserCrudService } from '@concepta/nestjs-user';
 
@@ -18,8 +18,8 @@ describe('AppModule', () => {
       .compile();
 
     const issueTokenService = module.get<IssueTokenService>(IssueTokenService);
-    const userLookupService = module.get<AuthLocalUserLookupServiceInterface>(
-      AuthLocalUserLookupService,
+    const userLookupService = module.get<AuthLocalUserModelServiceInterface>(
+      AuthLocalUserModelService,
     );
     const authLocalcontroller = module.get(AuthLocalController);
 

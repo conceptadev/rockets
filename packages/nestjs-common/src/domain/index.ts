@@ -12,8 +12,10 @@ export { AuthenticationResponseInterface } from './authentication/interfaces/aut
 
 export { AuthorizationPayloadInterface } from './authorization/interfaces/authorization-payload.interface';
 
+export { PasswordStorageInterface } from './password/interfaces/password-storage.interface';
 export { PasswordPlainCurrentInterface } from './password/interfaces/password-plain-current.interface';
 export { PasswordPlainInterface } from './password/interfaces/password-plain.interface';
+export { isPasswordStorage } from './password/is-password-storage.typeguard';
 
 export { OrgCreatableInterface } from './org/interfaces/org-creatable.interface';
 export { OrgOwnableInterface } from './org/interfaces/org-ownable.interface';

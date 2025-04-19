@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { MutateService } from '@concepta/typeorm-common';
 import {
-  DeepPartial,
-  PasswordPlainInterface,
   UserCreatableInterface,
   UserUpdatableInterface,
   RepositoryInterface,
@@ -18,6 +16,8 @@ import { UserUpdateDto } from '../dto/user-update.dto';
 
 /**
  * User mutate service
+ *
+ * @deprecated - will be removed after model service refactoring
  */
 @Injectable()
 export class UserMutateService
@@ -43,18 +43,5 @@ export class UserMutateService
     protected readonly userPasswordService: UserPasswordService,
   ) {
     super(repo);
-  }
-
-  protected async transform<T extends DeepPartial<UserEntityInterface>>(
-    user: T | (T & PasswordPlainInterface),
-  ): Promise<DeepPartial<UserEntityInterface>> {
-    // do we need to hash the password?
-    if ('password' in user && typeof user.password === 'string') {
-      // yes, hash it
-      return this.userPasswordService.setPassword(user, user?.id);
-    } else {
-      // no changes
-      return user;
-    }
   }
 }

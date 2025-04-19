@@ -1,10 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
+import { UserPasswordServiceInterface } from '@concepta/nestjs-user';
 
 import {
   AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
-  AuthRecoveryUserLookupService,
-  AuthRecoveryUserMutateService,
+  AuthRecoveryUserModelService,
+  AuthRecoveryUserPasswordService,
 } from '../auth-recovery.constants';
 
 import { AuthRecoveryService } from './auth-recovery.service';
@@ -12,9 +13,8 @@ import { AuthRecoveryNotificationService } from './auth-recovery-notification.se
 
 import { AuthRecoverySettingsInterface } from '../interfaces/auth-recovery-settings.interface';
 import { AuthRecoveryOtpServiceInterface } from '../interfaces/auth-recovery-otp.service.interface';
-import { AuthRecoveryUserLookupServiceInterface } from '../interfaces/auth-recovery-user-lookup.service.interface';
+import { AuthRecoveryUserModelServiceInterface } from '../interfaces/auth-recovery-user-model.service.interface';
 import { AuthRecoveryNotificationServiceInterface } from '../interfaces/auth-recovery-notification.service.interface';
-import { AuthRecoveryUserMutateServiceInterface } from '../interfaces/auth-recovery-user-mutate.service.interface';
 
 import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
 import { OtpServiceFixture } from '../__fixtures__/otp/otp.service.fixture';
@@ -25,16 +25,16 @@ describe(AuthRecoveryService, () => {
   let authRecoveryService: AuthRecoveryService;
   let notificationService: AuthRecoveryNotificationServiceInterface;
   let otpService: AuthRecoveryOtpServiceInterface;
-  let userLookupService: AuthRecoveryUserLookupServiceInterface;
-  let userMutateService: AuthRecoveryUserMutateServiceInterface;
+  let userModelService: AuthRecoveryUserModelServiceInterface;
+  let userPasswordService: UserPasswordServiceInterface;
   let settings: AuthRecoverySettingsInterface;
 
   let spySendRecoverLoginEmail: jest.SpyInstance;
   let spySendRecoverPasswordEmail: jest.SpyInstance;
   let spySendRecoverPasswordSuccessEmail: jest.SpyInstance;
   let spyOtpServiceValidate: jest.SpyInstance;
-  let spyUserLookupServiceByEmail: jest.SpyInstance;
-  let spyUserMutateServiceUpdate: jest.SpyInstance;
+  let spyUserModelServiceByEmail: jest.SpyInstance;
+  let spyUserPasswordServiceSetPassword: jest.SpyInstance;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -59,15 +59,13 @@ describe(AuthRecoveryService, () => {
         AuthRecoveryNotificationService,
       );
 
-    userLookupService =
-      moduleFixture.get<AuthRecoveryUserLookupServiceInterface>(
-        AuthRecoveryUserLookupService,
-      );
+    userModelService = moduleFixture.get<AuthRecoveryUserModelServiceInterface>(
+      AuthRecoveryUserModelService,
+    );
 
-    userMutateService =
-      moduleFixture.get<AuthRecoveryUserMutateServiceInterface>(
-        AuthRecoveryUserMutateService,
-      );
+    userPasswordService = moduleFixture.get<UserPasswordServiceInterface>(
+      AuthRecoveryUserPasswordService,
+    );
 
     spySendRecoverLoginEmail = jest
       .spyOn(notificationService, 'sendRecoverLoginEmail')
@@ -82,8 +80,11 @@ describe(AuthRecoveryService, () => {
       .mockResolvedValue(undefined);
 
     spyOtpServiceValidate = jest.spyOn(otpService, 'validate');
-    spyUserLookupServiceByEmail = jest.spyOn(userLookupService, 'byEmail');
-    spyUserMutateServiceUpdate = jest.spyOn(userMutateService, 'update');
+    spyUserModelServiceByEmail = jest.spyOn(userModelService, 'byEmail');
+    spyUserPasswordServiceSetPassword = jest.spyOn(
+      userPasswordService,
+      'setPassword',
+    );
   });
 
   afterEach(async () => {
@@ -96,8 +97,8 @@ describe(AuthRecoveryService, () => {
       const result = await authRecoveryService.recoverLogin(UserFixture.email);
 
       expect(result).toBeUndefined();
-      expect(spyUserLookupServiceByEmail).toHaveBeenCalledTimes(1);
-      expect(spyUserLookupServiceByEmail).toHaveBeenCalledWith(
+      expect(spyUserModelServiceByEmail).toHaveBeenCalledTimes(1);
+      expect(spyUserModelServiceByEmail).toHaveBeenCalledWith(
         UserFixture.email,
       );
 
@@ -116,8 +117,8 @@ describe(AuthRecoveryService, () => {
       );
 
       expect(result).toBeUndefined();
-      expect(spyUserLookupServiceByEmail).toHaveBeenCalledTimes(1);
-      expect(spyUserLookupServiceByEmail).toHaveBeenCalledWith(
+      expect(spyUserModelServiceByEmail).toHaveBeenCalledTimes(1);
+      expect(spyUserModelServiceByEmail).toHaveBeenCalledWith(
         UserFixture.email,
       );
 
@@ -153,17 +154,17 @@ describe(AuthRecoveryService, () => {
   });
 
   describe(AuthRecoveryService.prototype.updatePassword, () => {
-    it('should call user mutate service', async () => {
+    it('should call user password service', async () => {
       await authRecoveryService.updatePassword(
         'GOOD_PASSCODE',
         '$!Abc123bsksl6764579',
       );
 
-      expect(spyUserMutateServiceUpdate).toHaveBeenCalledTimes(1);
-      expect(spyUserMutateServiceUpdate).toHaveBeenCalledWith({
-        id: UserFixture.id,
-        password: '$!Abc123bsksl6764579',
-      });
+      expect(spyUserPasswordServiceSetPassword).toHaveBeenCalledTimes(1);
+      expect(spyUserPasswordServiceSetPassword).toHaveBeenCalledWith(
+        { password: '$!Abc123bsksl6764579' },
+        UserFixture.id,
+      );
     });
 
     it('should send success email', async () => {

@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ReferenceSubject, ReferenceUsername } from '@concepta/nestjs-common';
 import { AuthLocalCredentialsInterface } from '../../interfaces/auth-local-credentials.interface';
-import { AuthLocalUserLookupServiceInterface } from '../../interfaces/auth-local-user-lookup-service.interface';
+import { AuthLocalUserModelServiceInterface } from '../../interfaces/auth-local-user-model-service.interface';
 import { LOGIN_SUCCESS, USER_SUCCESS } from './constants';
 
 @Injectable()
-export class UserLookupServiceFixture
-  implements AuthLocalUserLookupServiceInterface
+export class UserModelServiceFixture
+  implements AuthLocalUserModelServiceInterface
 {
   async byUsername(
     username: ReferenceUsername,

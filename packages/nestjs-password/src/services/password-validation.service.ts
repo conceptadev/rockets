@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { PasswordStorageInterface } from '@concepta/nestjs-common';
 import { CryptUtil } from '../utils/crypt.util';
-import { PasswordStorageInterface } from '../interfaces/password-storage.interface';
 import { PasswordValidationServiceInterface } from '../interfaces/password-validation-service.interface';
 import { PasswordValidateOptionsInterface } from '../interfaces/password-validate-options.interface';
 

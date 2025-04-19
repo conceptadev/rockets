@@ -3,13 +3,12 @@ import { Inject, Injectable } from '@nestjs/common';
 import { AuthRecoveryServiceInterface } from '../interfaces/auth-recovery.service.interface';
 import { AuthRecoverySettingsInterface } from '../interfaces/auth-recovery-settings.interface';
 import { AuthRecoveryOtpServiceInterface } from '../interfaces/auth-recovery-otp.service.interface';
-import { AuthRecoveryUserLookupServiceInterface } from '../interfaces/auth-recovery-user-lookup.service.interface';
-import { AuthRecoveryUserMutateServiceInterface } from '../interfaces/auth-recovery-user-mutate.service.interface';
+import { AuthRecoveryUserModelServiceInterface } from '../interfaces/auth-recovery-user-model.service.interface';
 import {
   AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
   AuthRecoveryOtpService,
-  AuthRecoveryUserLookupService,
-  AuthRecoveryUserMutateService,
+  AuthRecoveryUserModelService,
+  AuthRecoveryUserPasswordService,
 } from '../auth-recovery.constants';
 import { AuthRecoveryNotificationService } from './auth-recovery-notification.service';
 import {
@@ -17,6 +16,7 @@ import {
   ReferenceIdInterface,
 } from '@concepta/nestjs-common';
 import { AuthRecoveryNotificationServiceInterface } from '../interfaces/auth-recovery-notification.service.interface';
+import { UserPasswordServiceInterface } from '@concepta/nestjs-user';
 
 @Injectable()
 export class AuthRecoveryService implements AuthRecoveryServiceInterface {
@@ -25,10 +25,10 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
     private readonly config: AuthRecoverySettingsInterface,
     @Inject(AuthRecoveryOtpService)
     private readonly otpService: AuthRecoveryOtpServiceInterface,
-    @Inject(AuthRecoveryUserLookupService)
-    private readonly userLookupService: AuthRecoveryUserLookupServiceInterface,
-    @Inject(AuthRecoveryUserMutateService)
-    private readonly userMutateService: AuthRecoveryUserMutateServiceInterface,
+    @Inject(AuthRecoveryUserModelService)
+    private readonly userModelService: AuthRecoveryUserModelServiceInterface,
+    @Inject(AuthRecoveryUserPasswordService)
+    private readonly userPasswordService: UserPasswordServiceInterface,
     @Inject(AuthRecoveryNotificationService)
     private readonly notificationService: AuthRecoveryNotificationServiceInterface,
   ) {}
@@ -40,7 +40,7 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
    */
   async recoverLogin(email: string): Promise<void> {
     // recover the user by providing an email
-    const user = await this.userLookupService.byEmail(email);
+    const user = await this.userModelService.byEmail(email);
 
     // did we find the user?
     if (user) {
@@ -62,7 +62,7 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
    */
   async recoverPassword(email: string): Promise<void> {
     // recover the user by providing an email
-    const user = await this.userLookupService.byEmail(email);
+    const user = await this.userModelService.byEmail(email);
 
     // did we find a user?
     if (user) {
@@ -138,16 +138,22 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
 
     // did we get an otp?
     if (otp) {
-      // call user mutate service
-      const user = await this.userMutateService.update({
-        id: otp.assigneeId,
-        password: newPassword,
-      });
+      // get user by otp assigneeId
+      const user = await this.userModelService.byId(otp.assigneeId);
 
       if (user) {
+        // call set the password
+        await this.userPasswordService.setPassword(
+          {
+            password: newPassword,
+          },
+          otp.assigneeId,
+        );
+
         await this.notificationService.sendPasswordUpdatedSuccessfullyEmail(
           user.email,
         );
+
         await this.revokeAllUserPasswordRecoveries(user.email);
       }
 
@@ -165,7 +171,7 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
    */
   async revokeAllUserPasswordRecoveries(email: string): Promise<void> {
     // recover users password by providing an email
-    const user = await this.userLookupService.byEmail(email);
+    const user = await this.userModelService.byEmail(email);
 
     // did we find a user?
     if (user) {

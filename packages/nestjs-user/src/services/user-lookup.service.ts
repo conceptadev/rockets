@@ -14,6 +14,8 @@ import { UserLookupServiceInterface } from '../interfaces/user-lookup-service.in
 
 /**
  * User lookup service
+ *
+ * @deprecated - will be removed after model service refactoring
  */
 @Injectable()
 export class UserLookupService

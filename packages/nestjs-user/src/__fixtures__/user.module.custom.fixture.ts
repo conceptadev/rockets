@@ -1,9 +1,12 @@
 import { Global, Module } from '@nestjs/common';
-import { UserLookupCustomService } from './services/user-lookup.custom.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserModelCustomService } from './services/user-model.custom.service';
+import { UserEntityFixture } from './user.entity.fixture';
 
 @Global()
 @Module({
-  providers: [UserLookupCustomService],
-  exports: [UserLookupCustomService],
+  imports: [TypeOrmModule.forFeature([UserEntityFixture])],
+  providers: [UserModelCustomService],
+  exports: [UserModelCustomService],
 })
 export class UserModuleCustomFixture {}

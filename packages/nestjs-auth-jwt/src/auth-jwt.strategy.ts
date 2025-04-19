@@ -16,12 +16,12 @@ import {
 import {
   AUTH_JWT_STRATEGY_NAME,
   AUTH_JWT_MODULE_SETTINGS_TOKEN,
-  AuthJwtUserLookupService,
+  AuthJwtUserModelService,
   AuthJwtVerifyTokenService,
 } from './auth-jwt.constants';
 
 import { AuthJwtSettingsInterface } from './interfaces/auth-jwt-settings.interface';
-import { AuthJwtUserLookupServiceInterface } from './interfaces/auth-jwt-user-lookup-service.interface';
+import { AuthJwtUserModelServiceInterface } from './interfaces/auth-jwt-user-model-service.interface';
 import { AuthJwtUnauthorizedException } from './exceptions/auth-jwt-unauthorized.exception';
 
 @Injectable()
@@ -34,8 +34,8 @@ export class AuthJwtStrategy extends PassportStrategyFactory<JwtStrategy>(
     settings: Partial<AuthJwtSettingsInterface>,
     @Inject(AuthJwtVerifyTokenService)
     verifyTokenService: VerifyTokenServiceInterface,
-    @Inject(AuthJwtUserLookupService)
-    private userLookupService: AuthJwtUserLookupServiceInterface,
+    @Inject(AuthJwtUserModelService)
+    private userModelService: AuthJwtUserModelServiceInterface,
   ) {
     const options: Partial<JwtStrategyOptionsInterface> = {
       verifyToken: createVerifyAccessTokenCallback(verifyTokenService),
@@ -53,7 +53,7 @@ export class AuthJwtStrategy extends PassportStrategyFactory<JwtStrategy>(
   async validate(
     payload: AuthorizationPayloadInterface,
   ): Promise<ReferenceIdInterface> {
-    const user = await this.userLookupService.bySubject(payload.sub);
+    const user = await this.userModelService.bySubject(payload.sub);
 
     if (user) {
       return user;

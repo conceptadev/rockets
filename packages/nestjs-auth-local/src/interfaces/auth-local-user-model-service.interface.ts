@@ -4,7 +4,7 @@ import {
 } from '@concepta/nestjs-common';
 import { AuthLocalCredentialsInterface } from './auth-local-credentials.interface';
 
-export interface AuthLocalUserLookupServiceInterface
+export interface AuthLocalUserModelServiceInterface
   extends ByUsernameInterface<
     ReferenceUsername,
     AuthLocalCredentialsInterface
