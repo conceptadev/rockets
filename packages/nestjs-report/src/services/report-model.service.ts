@@ -1,30 +1,45 @@
-import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
-import { LookupService } from '@concepta/typeorm-common';
 import { Injectable } from '@nestjs/common';
-
-import { REPORT_MODULE_REPORT_ENTITY_KEY } from '../report.constants';
-import { ReportEntityInterface } from '../interfaces/report-entity.interface';
-import { ReportLookupServiceInterface } from '../interfaces/report-lookup-service.interface';
 import {
+  ModelService,
   ReferenceIdInterface,
+  ReportCreatableInterface,
   ReportInterface,
+  ReportUpdatableInterface,
   RepositoryInterface,
 } from '@concepta/nestjs-common';
+import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
+import { ReportEntityInterface } from '../interfaces/report-entity.interface';
+import { ReportCreateDto } from '../dto/report-create.dto';
+import { ReportUpdateDto } from '../dto/report-update.dto';
+import { ReportModelServiceInterface } from '../interfaces/report-model-service.interface';
+import { REPORT_MODULE_REPORT_ENTITY_KEY } from '../report.constants';
 import { ReportServiceKeyMissingException } from '../exceptions/report-service-key-missing.exception';
 import { ReportNameMissingException } from '../exceptions/report-name-missing.exception';
 import { ReportQueryException } from '../exceptions/report-query.exception';
 
 /**
- * Report lookup service
+ * Report model service
  */
 @Injectable()
-export class ReportLookupService
-  extends LookupService<ReportEntityInterface>
-  implements ReportLookupServiceInterface
+export class ReportModelService
+  extends ModelService<
+    ReportEntityInterface,
+    ReportCreatableInterface,
+    ReportUpdatableInterface
+  >
+  implements ReportModelServiceInterface
 {
+  protected createDto = ReportCreateDto;
+  protected updateDto = ReportUpdateDto;
+
+  /**
+   * Constructor
+   *
+   * @param repo - instance of the report repo
+   */
   constructor(
     @InjectDynamicRepository(REPORT_MODULE_REPORT_ENTITY_KEY)
-    protected readonly repo: RepositoryInterface<ReportEntityInterface>,
+    repo: RepositoryInterface<ReportEntityInterface>,
   ) {
     super(repo);
   }
@@ -50,7 +65,6 @@ export class ReportLookupService
         where: {
           id: report.id,
         },
-        relations: ['file'],
       });
     } catch (originalError) {
       throw new ReportQueryException({ originalError });

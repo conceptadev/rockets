@@ -17,8 +17,8 @@ export class MyReportGeneratorService
   generateTimeout: number = 60000;
 
   async getDownloadUrl(report: ReportInterface): Promise<string> {
-    if (!report?.file?.id) return '';
-    const file = await this.fileService.fetch({ id: report.file.id });
+    if (!report?.fileId) return '';
+    const file = await this.fileService.fetch({ id: report.fileId });
     return file.downloadUrl || '';
   }
 

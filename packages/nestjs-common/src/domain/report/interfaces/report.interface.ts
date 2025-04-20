@@ -1,11 +1,15 @@
 import { AuditInterface } from '../../../audit/interfaces/audit.interface';
 import { ReferenceIdInterface } from '../../../reference/interfaces/reference-id.interface';
+import { FileOwnableInterface } from '../../file/interfaces/file-ownable.interface';
 import { ReportStatusEnum } from '../enum/report-status.enum';
 
 /**
  * Interface representing a report entity
  */
-export interface ReportInterface extends ReferenceIdInterface, AuditInterface {
+export interface ReportInterface
+  extends ReferenceIdInterface,
+    FileOwnableInterface,
+    AuditInterface {
   /**
    * Service key associated with the report
    */
@@ -30,6 +34,4 @@ export interface ReportInterface extends ReferenceIdInterface, AuditInterface {
    * Dynamic download URI for the report
    */
   downloadUrl?: string;
-
-  file?: ReferenceIdInterface;
 }

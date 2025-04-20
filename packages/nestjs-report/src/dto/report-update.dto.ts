@@ -9,7 +9,7 @@ import { ReportDto } from './report.dto';
 @Exclude()
 export class ReportUpdateDto
   extends IntersectionType(
-    PickType(ReportDto, ['status', 'file'] as const),
-    PartialType(PickType(ReportDto, ['errorMessage'] as const)),
+    PickType(ReportDto, ['id', 'status'] as const),
+    PartialType(PickType(ReportDto, ['errorMessage', 'fileId'] as const)),
   )
   implements ReportUpdatableInterface {}

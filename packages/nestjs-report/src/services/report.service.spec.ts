@@ -10,9 +10,9 @@ import { ReportQueryException } from '../exceptions/report-query.exception';
 import { ReportEntityInterface } from '../interfaces/report-entity.interface';
 import { ReportStrategyService } from './report-strategy.service';
 import { ReportService } from './report.service';
-import { ReportMutateService } from './report-mutate.service';
-import { ReportLookupService } from './report-lookup.service';
+import { ReportModelService } from './report-model.service';
 import { RepositoryInterface } from '@concepta/nestjs-common';
+import { ReportModelServiceInterface } from '../interfaces/report-model-service.interface';
 
 const mockReport: ReportEntityInterface = {
   id: randomUUID(),
@@ -25,6 +25,7 @@ const mockReport: ReportEntityInterface = {
   dateUpdated: new Date(),
   dateDeleted: new Date(),
   version: 1,
+  fileId: randomUUID(),
 };
 
 const mockReportCreateDto: ReportCreateDto = {
@@ -37,19 +38,16 @@ describe(ReportService.name, () => {
   let reportService: ReportService;
   let reportRepo: jest.Mocked<RepositoryInterface<ReportEntityInterface>>;
   let reportStrategyService: jest.Mocked<ReportStrategyService>;
-  let reportMutateService: ReportMutateService;
-  let reportLookupService: ReportLookupService;
+  let reportModelService: ReportModelServiceInterface;
 
   beforeEach(() => {
     reportRepo = createMockRepository();
     reportStrategyService = createMockReportStrategyService();
-    reportMutateService = new ReportMutateService(reportRepo);
-    reportLookupService = new ReportLookupService(reportRepo);
+    reportModelService = new ReportModelService(reportRepo);
 
     reportService = new ReportService(
       reportStrategyService,
-      reportMutateService,
-      reportLookupService,
+      reportModelService,
     );
     reportRepo.create.mockReturnValue(mockReport);
   });
@@ -122,7 +120,6 @@ describe(ReportService.name, () => {
 
       expect(reportRepo.findOne).toHaveBeenCalledWith({
         where: { id: mockReport.id },
-        relations: ['file'],
       });
       expect(result.downloadUrl).toBe(mockReport.downloadUrl);
     });
@@ -130,9 +127,7 @@ describe(ReportService.name, () => {
     it('should return download URL for existing report', async () => {
       const reportWithFile = {
         ...mockReport,
-        file: {
-          id: randomUUID(),
-        },
+        fileId: randomUUID(),
       };
       reportRepo.findOne.mockResolvedValue(reportWithFile);
       reportStrategyService.getDownloadUrl.mockImplementationOnce(
@@ -146,7 +141,6 @@ describe(ReportService.name, () => {
 
       expect(reportRepo.findOne).toHaveBeenCalledWith({
         where: { id: reportWithFile.id },
-        relations: ['file'],
       });
       expect(reportStrategyService.getDownloadUrl).toHaveBeenCalledWith(
         reportWithFile,
@@ -162,7 +156,6 @@ describe(ReportService.name, () => {
       );
       expect(reportRepo.findOne).toHaveBeenCalledWith({
         where: { id: mockReport.id },
-        relations: ['file'],
       });
     });
   });

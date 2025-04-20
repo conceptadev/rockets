@@ -75,6 +75,7 @@ export { InvitationUserInterface } from './invitation/interfaces/invitation-user
 
 export { FileCreatableInterface } from './file/interfaces/file-creatable.interface';
 export { FileUpdatableInterface } from './file/interfaces/file-updatable.interface';
+export { FileOwnableInterface } from './file/interfaces/file-ownable.interface';
 export { FileInterface } from './file/interfaces/file.interface';
 
 export { ReportStatusEnum } from './report/enum/report-status.enum';

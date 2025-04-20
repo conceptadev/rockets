@@ -145,7 +145,7 @@ describe('OrgController (e2e)', () => {
       await supertest(app.getHttpServer()).post('/org').send({}).expect(400);
     });
 
-    it.only('PATCH /org/:id - should update an existing organization', async () => {
+    it('PATCH /org/:id - should update an existing organization', async () => {
       const ownerFactory = new OwnerFactoryFixture({ seedingSource });
       const owner = await ownerFactory.create();
 

@@ -25,7 +25,6 @@ export class FederatedService implements FederatedServiceInterface {
           provider,
           subject,
         },
-        relations: ['user'],
       });
     } catch (e) {
       const exception = e instanceof Error ? e : new NotAnErrorException(e);

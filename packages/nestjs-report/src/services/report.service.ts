@@ -12,12 +12,10 @@ import { ReportIdMissingException } from '../exceptions/report-id-missing.except
 import { ReportQueryException } from '../exceptions/report-query.exception';
 import { ReportEntityInterface } from '../interfaces/report-entity.interface';
 import { ReportGeneratorResultInterface } from '../interfaces/report-generator-result.interface';
-import { ReportLookupServiceInterface } from '../interfaces/report-lookup-service.interface';
-import { ReportMutateServiceInterface } from '../interfaces/report-mutate-service.interface';
+import { ReportModelServiceInterface } from '../interfaces/report-model-service.interface';
 import { ReportServiceInterface } from '../interfaces/report-service.interface';
 import { REPORT_STRATEGY_SERVICE_KEY } from '../report.constants';
-import { ReportLookupService } from './report-lookup.service';
-import { ReportMutateService } from './report-mutate.service';
+import { ReportModelService } from './report-model.service';
 import { ReportStrategyService } from './report-strategy.service';
 
 /**
@@ -28,10 +26,8 @@ export class ReportService implements ReportServiceInterface {
   constructor(
     @Inject(REPORT_STRATEGY_SERVICE_KEY)
     private reportStrategyService: ReportStrategyService,
-    @Inject(ReportMutateService)
-    private reportMutateService: ReportMutateServiceInterface,
-    @Inject(ReportLookupService)
-    private reportLookupService: ReportLookupServiceInterface,
+    @Inject(ReportModelService)
+    private reportModelService: ReportModelServiceInterface,
   ) {}
 
   async generate(report: ReportCreatableInterface): Promise<ReportInterface> {
@@ -53,7 +49,7 @@ export class ReportService implements ReportServiceInterface {
       throw new ReportIdMissingException();
     }
 
-    const dbReport = await this.reportLookupService.getWithFile(report);
+    const dbReport = await this.reportModelService.getWithFile(report);
 
     if (!dbReport) {
       throw new ReportQueryException({
@@ -71,7 +67,7 @@ export class ReportService implements ReportServiceInterface {
       throw new ReportIdMissingException();
     }
 
-    this.reportMutateService.update(report);
+    this.reportModelService.update(report);
   }
 
   protected async generateAndProcessReport(
@@ -93,13 +89,13 @@ export class ReportService implements ReportServiceInterface {
   protected async createAndSaveReport(
     report: ReportCreatableInterface,
   ): Promise<ReportEntityInterface> {
-    return await this.reportMutateService.create(report);
+    return await this.reportModelService.create(report);
   }
 
   protected async checkExistingReport(
     report: ReportCreatableInterface,
   ): Promise<void> {
-    const existingReport = await this.reportLookupService.getUniqueReport(
+    const existingReport = await this.reportModelService.getUniqueReport(
       report,
     );
 
@@ -111,7 +107,7 @@ export class ReportService implements ReportServiceInterface {
   protected async addDownloadUrl(
     report: ReportInterface,
   ): Promise<ReportEntityInterface> {
-    if (report.file?.id) {
+    if (report.fileId) {
       try {
         report.downloadUrl = await this.reportStrategyService.getDownloadUrl(
           report,
