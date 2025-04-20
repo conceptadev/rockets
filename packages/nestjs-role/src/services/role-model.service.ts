@@ -1,28 +1,28 @@
 import { Injectable } from '@nestjs/common';
-import { MutateService } from '@concepta/typeorm-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import {
+  ModelService,
   RepositoryInterface,
   RoleCreatableInterface,
   RoleUpdatableInterface,
 } from '@concepta/nestjs-common';
 import { RoleEntityInterface } from '../interfaces/role-entity.interface';
-import { RoleMutateServiceInterface } from '../interfaces/role-mutate-service.interface';
+import { RoleModelServiceInterface } from '../interfaces/role-model-service.interface';
 import { RoleCreateDto } from '../dto/role-create.dto';
 import { RoleUpdateDto } from '../dto/role-update.dto';
 import { ROLE_MODULE_ROLE_ENTITY_KEY } from '../role.constants';
 
 /**
- * Role mutate service
+ * Role model service
  */
 @Injectable()
-export class RoleMutateService
-  extends MutateService<
+export class RoleModelService
+  extends ModelService<
     RoleEntityInterface,
     RoleCreatableInterface,
     RoleUpdatableInterface
   >
-  implements RoleMutateServiceInterface
+  implements RoleModelServiceInterface
 {
   protected createDto = RoleCreateDto;
   protected updateDto = RoleUpdateDto;

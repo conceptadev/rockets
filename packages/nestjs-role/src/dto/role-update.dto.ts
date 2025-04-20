@@ -8,5 +8,5 @@ import { RoleDto } from './role.dto';
  */
 @Exclude()
 export class RoleUpdateDto
-  extends PickType(RoleDto, ['name', 'description'] as const)
+  extends PickType(RoleDto, ['id', 'name', 'description'] as const)
   implements RoleUpdatableInterface {}

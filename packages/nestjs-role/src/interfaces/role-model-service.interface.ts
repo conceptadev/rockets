@@ -4,15 +4,16 @@ import {
   RemoveOneInterface,
   ReplaceOneInterface,
   UpdateOneInterface,
-} from '@concepta/nestjs-common';
-import {
   RoleCreatableInterface,
   RoleUpdatableInterface,
+  ByIdInterface,
+  ReferenceId,
 } from '@concepta/nestjs-common';
 import { RoleEntityInterface } from './role-entity.interface';
 
-export interface RoleMutateServiceInterface
-  extends CreateOneInterface<RoleCreatableInterface, RoleEntityInterface>,
+export interface RoleModelServiceInterface
+  extends ByIdInterface<ReferenceId, ReferenceIdInterface>,
+    CreateOneInterface<RoleCreatableInterface, RoleEntityInterface>,
     UpdateOneInterface<
       RoleUpdatableInterface & ReferenceIdInterface,
       RoleEntityInterface

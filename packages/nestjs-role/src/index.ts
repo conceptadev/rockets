@@ -6,15 +6,13 @@ export { RoleAssignmentPostgresEntity } from './entities/role-assignment-postgre
 export { RoleAssignmentSqliteEntity } from './entities/role-assignment-sqlite.entity';
 
 export { RoleService } from './services/role.service';
-export { RoleLookupService } from './services/role-lookup.service';
-export { RoleMutateService } from './services/role-mutate.service';
+export { RoleModelService } from './services/role-model.service';
 export { RoleCrudService } from './services/role-crud.service';
 export { RoleController } from './role.controller';
 
 export { RoleAssignmentEntityInterface } from './interfaces/role-assignment-entity.interface';
 export { RoleEntityInterface } from './interfaces/role-entity.interface';
-export { RoleLookupServiceInterface } from './interfaces/role-lookup-service.interface';
-export { RoleMutateServiceInterface } from './interfaces/role-mutate-service.interface';
+export { RoleModelServiceInterface } from './interfaces/role-model-service.interface';
 
 export { RoleAssignmentCreateManyDto } from './dto/role-assignment-create-many.dto';
 export { RoleAssignmentCreateDto } from './dto/role-assignment-create.dto';
