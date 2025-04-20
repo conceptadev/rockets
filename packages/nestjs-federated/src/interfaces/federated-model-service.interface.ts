@@ -16,12 +16,12 @@ export interface FederatedModelServiceInterface
       FederatedCreatableInterface,
       FederatedEntityInterface
     >,
-    UpdateOneInterface<
-      FederatedUpdatableInterface & ReferenceIdInterface,
-      FederatedEntityInterface
-    >,
+    UpdateOneInterface<FederatedUpdatableInterface, FederatedEntityInterface>,
     ReplaceOneInterface<
       FederatedCreatableInterface & ReferenceIdInterface,
       FederatedEntityInterface
     >,
-    RemoveOneInterface<FederatedEntityInterface> {}
+    RemoveOneInterface<
+      Pick<FederatedEntityInterface, 'id'>,
+      FederatedEntityInterface
+    > {}

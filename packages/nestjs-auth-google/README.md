@@ -24,7 +24,7 @@ Authenticate requests using Google OAuth2
    - [Customizing the Issue Token Service](#customizing-the-issue-token-service)
    - [Overriding Default Controllers](#overriding-default-controllers)
    - [Implementing custom settings](#implementing-custom-settings)
-   - [Implementing custom user lookup or custom mutate service](#implementing-custom-user-lookup-or-custom-mutate-service)
+   - [Implementing custom user model service](#implementing-custom-user-model-service)
 4. [Reference](#reference)
 5. [Explanation](#explanation)
    - [Overview of the Flow](#overview-of-the-flow)
@@ -137,8 +137,7 @@ import { AuthenticationModule, IssueTokenService } from '@concepta/nestjs-authen
 import { FederatedModule } from '@concepta/nestjs-federated';
 import { JwtModule } from '@concepta/nestjs-jwt';
 import { Module } from '@nestjs/common';
-import { FederatedUserLookupService } from './federated/federated-lookup.service';
-import { UserMutateServiceFixture } from './federated/federated-mutate.service';
+import { FederatedUserModelService } from './federated/federated-model.service';
 import { FederatedEntity } from './federated/federated.entity';
 import { AuthGoogleModule } from '@concepta/nestjs-auth-google';
 import { GoogleIssueTokenService } from './google/issue-token.service';
@@ -166,8 +165,7 @@ import { UserEntity } from './user/user.entity';
           entity: FederatedEntity,
         },
       },
-      userLookupService: new FederatedUserLookupService(),
-      userMutateService: new UserMutateServiceFixture(),
+      userModelService: new FederatedUserModelService(),
     }),
   ],
   controllers: [],
@@ -362,7 +360,7 @@ AuthGoogleModule.forRoot({
 //...
 ```
 
-### Implementing custom user lookup or custom mutate service
+### Implementing custom user model service
 
 If you need to customize, how to get the user information, or how to create
 the user, you will need to update the federated options. Please refer for

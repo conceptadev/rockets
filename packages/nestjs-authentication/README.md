@@ -221,14 +221,14 @@ export class PetService {
 }
 ```
 
-Create the Lookup Service for AuthJwtModule
+Create the Model Service for AuthJwtModule
 
 ```typescript
-// my-jwt-user-lookup.service.ts
-import { AuthJwtUserLookupServiceInterface } from '@concepta/nestjs-auth-jwt';
+// my-jwt-user-model.service.ts
+import { AuthJwtUserModelServiceInterface } from '@concepta/nestjs-auth-jwt';
 import { ReferenceIdInterface, ReferenceSubject } from '@concepta/nestjs-common';
 
-export class MyJwtUserLookupService implements AuthJwtUserLookupServiceInterface {
+export class MyJwtUserModelService implements AuthJwtUserModelServiceInterface {
   async bySubject(subject: ReferenceSubject): Promise<ReferenceIdInterface> {
     // return authorized user
     return {
@@ -238,19 +238,19 @@ export class MyJwtUserLookupService implements AuthJwtUserLookupServiceInterface
 }
 ```
 
-Create the Lookup Service for Auth Local
+Create the Model Service for Auth Local
 
 ```ts
-// my-auth-local-user-lookup.service.ts
+// my-auth-local-user-model.service.ts
 import { Injectable } from '@nestjs/common';
 import { ReferenceUsername } from '@concepta/nestjs-common';
 import {
-  AuthLocalUserLookupServiceInterface,
+  AuthLocalUserModelServiceInterface,
   AuthLocalCredentialsInterface
 } from '@concepta/nestjs-auth-local';
 
 @Injectable()
-export class MyAuthLocalUserLookupService implements AuthLocalUserLookupServiceInterface {
+export class MyAuthLocalUserModelService implements AuthLocalUserModelServiceInterface {
   async byUsername(
     username: ReferenceUsername,
   ): Promise<AuthLocalCredentialsInterface | null> {
@@ -381,9 +381,9 @@ import { User } from './user/user.entity';
 import { JwtModule } from '@concepta/nestjs-jwt';
 import { AuthenticationModule } from '@concepta/nestjs-authentication';
 import { AuthJwtModule } from '@concepta/nestjs-auth-jwt';
-import { MyJwtUserLookupService } from './services/my-jwt-user-lookup.service';
+import { MyJwtUserModelService } from './services/my-jwt-user-model.service';
 import { AuthLocalModule } from '@concepta/nestjs-auth-local';
-import { MyAuthLocalUserLookupService } from './services/my-auth-local-user-lookup.service';
+import { MyAuthLocalUserModelService } from './services/my-auth-local-user-model.service';
 import { MyAuthLocalPasswordValidationService } from './services/my-auth-local-password-validation.service';
 import { MyJwtVerifyTokenService } from './services/jwt-verify-token.service';
 
@@ -397,13 +397,13 @@ import { MyJwtVerifyTokenService } from './services/jwt-verify-token.service';
     }),
     AuthLocalModule.forRoot({
       // this service contains the byUsername method
-      userLookupService: new MyAuthLocalUserLookupService(),
+      userModelService: new MyAuthLocalUserModelService(),
       // this service contains the validate the password logic
       passwordValidationService: new MyAuthLocalPasswordValidationService(), //
     }),
     AuthJwtModule.forRoot({
       // this contains the bySubject method that will get user based on the token
-      userLookupService: new MyJwtUserLookupService(),
+      userModelService: new MyJwtUserModelService(),
       // service to validate the jwt token
       verifyTokenService: new MyJwtVerifyTokenService(),
     }),
@@ -501,7 +501,7 @@ curl -X GET http://localhost:3000/user/5b3f5fd3-9426-4c4d-a06d-b4d55079034d/pets
 
 To get authenticated user, we can use the decorator `@AuthUser()`
 this will return whatever was defined at `bySubject` method from
-`MyJwtUserLookupService`.
+`MyJwtUserModelService`.
 
 ```ts
 @Get(':id/pets')
@@ -544,8 +544,8 @@ To set up the `AuthenticationModule` and `JwtModule`, follow these steps:
 //...
   AuthenticationModule.forRoot({}),
   AuthJwtModule.forRoot({
-    // this lookup contains bySubject method
-    userLookupService: new JwtUserLookupService(),
+    // this model service contains bySubject method
+    userModelService: new JwtUserModelService(),
   }),
   JwtModule.forRoot({
     secret: 'your-secret-key',

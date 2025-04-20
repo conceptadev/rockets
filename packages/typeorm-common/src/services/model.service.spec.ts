@@ -1,27 +1,27 @@
+import { randomUUID } from 'crypto';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { INestApplication } from '@nestjs/common';
 
-import { MutateService } from './mutate.service';
 import {
   ReferenceMutateException,
   ReferenceValidationException,
   ReferenceIdNoMatchException,
-  ReferenceLookupException,
+  ModelService,
 } from '@concepta/nestjs-common';
 
 import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
-import { TestMutateServiceFixture } from '../__fixtures__/services/test-mutate.service.fixture';
+import { TestModelServiceFixture } from '../__fixtures__/services/test-model.service.fixture';
 import { TestModuleFixture } from '../__fixtures__/test.module.fixture';
 import { TestEntityFixture } from '../__fixtures__/test.entity.fixture';
 import { TestFactoryFixture } from '../__fixtures__/test.factory.fixture';
 
-describe(MutateService, () => {
+describe(ModelService, () => {
   const WRONG_UUID = '3bfd065e-0c30-11ed-861d-0242ac120002';
   let app: INestApplication;
   let testModuleFixture: TestModuleFixture;
-  let testMutateService: TestMutateServiceFixture;
+  let testModelService: TestModelServiceFixture;
   let seedingSource: SeedingSource;
   let testFactory: TestFactoryFixture;
 
@@ -33,8 +33,8 @@ describe(MutateService, () => {
     app = moduleFixture.createNestApplication();
     testModuleFixture = moduleFixture.get<TestModuleFixture>(TestModuleFixture);
 
-    testMutateService = moduleFixture.get<TestMutateServiceFixture>(
-      TestMutateServiceFixture,
+    testModelService = moduleFixture.get<TestModelServiceFixture>(
+      TestModelServiceFixture,
     );
 
     seedingSource = new SeedingSource({
@@ -57,9 +57,24 @@ describe(MutateService, () => {
     expect(testModuleFixture).toBeInstanceOf(TestModuleFixture);
   });
 
-  describe(MutateService.prototype.create, () => {
+  describe(ModelService.prototype.byId, () => {
     it('success', async () => {
-      const savedData = await testMutateService.create({
+      const testObject = await testFactory.create();
+      const result = await testModelService.byId(testObject.id);
+
+      expect(result).toBeInstanceOf(TestEntityFixture);
+      expect(result?.version).toBe(testObject.version);
+    });
+
+    it('wrong id', async () => {
+      const result = await testModelService.byId(randomUUID());
+      expect(result?.version).toBe(undefined);
+    });
+  });
+
+  describe(ModelService.prototype.create, () => {
+    it('success', async () => {
+      const savedData = await testModelService.create({
         firstName: 'Bob',
       });
 
@@ -68,15 +83,15 @@ describe(MutateService, () => {
       expect(savedData.version).toEqual(1);
     });
 
-    it.skip('exception', async () => {
+    it('exception', async () => {
       jest
-        .spyOn(testMutateService['repo'], 'save')
+        .spyOn(testModelService['repo'], 'save')
         .mockImplementationOnce(() => {
           throw Error();
         });
 
       const t = async () => {
-        return testMutateService.create({ firstName: 'Bob' });
+        return testModelService.create({ firstName: 'Bob' });
       };
 
       await expect(t).rejects.toThrow(ReferenceMutateException);
@@ -84,21 +99,21 @@ describe(MutateService, () => {
 
     it('invalid', async () => {
       const t = async () => {
-        return testMutateService.create({ firstName: 'B' });
+        return testModelService.create({ firstName: 'B' });
       };
 
       await expect(t).rejects.toThrow(ReferenceValidationException);
     });
   });
 
-  describe(MutateService.prototype.update, () => {
+  describe(ModelService.prototype.update, () => {
     it('success', async () => {
       const testObject = await testFactory.create({ firstName: 'Bob' });
 
       expect(testObject.firstName).toBe('Bob');
       expect(testObject.version).toBe(1);
 
-      const entity = await testMutateService.update({
+      const entity = await testModelService.update({
         id: testObject.id,
         firstName: 'Bill',
       });
@@ -110,7 +125,7 @@ describe(MutateService, () => {
 
     it('not found', async () => {
       const t = async () => {
-        return testMutateService.update({
+        return testModelService.update({
           id: WRONG_UUID,
         });
       };
@@ -121,7 +136,7 @@ describe(MutateService, () => {
     it('found but not valid', async () => {
       const testObject = await testFactory.create();
       const t = async () => {
-        return testMutateService.update({
+        return testModelService.update({
           id: testObject.id,
           firstName: 'A',
         });
@@ -134,13 +149,13 @@ describe(MutateService, () => {
       const testObject = await testFactory.create();
 
       jest
-        .spyOn(testMutateService['repo'], 'save')
+        .spyOn(testModelService['repo'], 'save')
         .mockImplementationOnce(() => {
           throw new Error();
         });
 
       const t = async () => {
-        return testMutateService.update({
+        return testModelService.update({
           id: testObject.id,
         });
       };
@@ -149,7 +164,7 @@ describe(MutateService, () => {
     });
   });
 
-  describe(MutateService.prototype.replace, () => {
+  describe(ModelService.prototype.replace, () => {
     it('success', async () => {
       const pastDate = new Date();
       pastDate.setMilliseconds(pastDate.getMilliseconds() - 100);
@@ -165,7 +180,7 @@ describe(MutateService, () => {
       expect(testObject.firstName).toEqual('Bob');
       expect(testObject.version).toEqual(5);
 
-      const entity = await testMutateService.replace({
+      const entity = await testModelService.replace({
         id: testObject.id,
         firstName: 'Bill',
       });
@@ -180,7 +195,7 @@ describe(MutateService, () => {
 
     it('not found', async () => {
       const t = async () => {
-        return testMutateService.replace({
+        return testModelService.replace({
           id: WRONG_UUID,
           firstName: 'Bill',
         });
@@ -193,7 +208,7 @@ describe(MutateService, () => {
       const testObject = await testFactory.create();
 
       const t = async () => {
-        return testMutateService.replace({
+        return testModelService.replace({
           id: testObject.id,
           firstName: 'B',
         });
@@ -206,13 +221,13 @@ describe(MutateService, () => {
       const testObject = await testFactory.create();
 
       jest
-        .spyOn(testMutateService['repo'], 'save')
+        .spyOn(testModelService['repo'], 'save')
         .mockImplementationOnce(() => {
           throw new Error();
         });
 
       const t = async () => {
-        return testMutateService.replace({
+        return testModelService.replace({
           id: testObject.id,
           firstName: 'Bill',
         });
@@ -222,26 +237,24 @@ describe(MutateService, () => {
     });
   });
 
-  describe(MutateService.prototype.remove, () => {
+  describe(ModelService.prototype.remove, () => {
     it('success', async () => {
       const testObject = await testFactory.create();
 
-      const remove = jest.spyOn(testMutateService['repo'], 'remove');
+      const remove = jest.spyOn(testModelService['repo'], 'remove');
 
-      await testMutateService.remove({ id: testObject.id });
+      await testModelService.remove({ id: testObject.id });
 
       expect(remove).toBeCalledTimes(1);
 
-      const t = async () => {
-        return testMutateService['findById'](testObject.id);
-      };
+      const foundObject = await testModelService.byId(testObject.id);
 
-      await expect(t).rejects.toThrow(ReferenceIdNoMatchException);
+      expect(foundObject).toEqual(null);
     });
 
     it('id does not match', async () => {
       const t = async () => {
-        return testMutateService.remove({
+        return testModelService.remove({
           id: WRONG_UUID,
         });
       };
@@ -253,34 +266,16 @@ describe(MutateService, () => {
       const testObject = await testFactory.create();
 
       const t = async () => {
-        return testMutateService.remove(testObject);
+        return testModelService.remove(testObject);
       };
 
       jest
-        .spyOn(testMutateService['repo'], 'remove')
+        .spyOn(testModelService['repo'], 'remove')
         .mockImplementationOnce(() => {
           throw new Error();
         });
 
       await expect(t).rejects.toThrow(ReferenceMutateException);
-    });
-  });
-
-  describe(MutateService.prototype['findById'], () => {
-    it.skip('exception', async () => {
-      const testObject = await testFactory.create();
-
-      const t = async () => {
-        return testMutateService['findById'](testObject.id);
-      };
-
-      jest
-        .spyOn(testMutateService['repo'], 'findOne')
-        .mockImplementationOnce(() => {
-          throw new Error();
-        });
-
-      await expect(t).rejects.toThrow(ReferenceLookupException);
     });
   });
 });

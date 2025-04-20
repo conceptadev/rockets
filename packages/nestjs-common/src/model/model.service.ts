@@ -98,7 +98,7 @@ export abstract class ModelService<
     // create new entity
     const entity = this.repo.create(transformed);
     // try to save the entity
-    return this.repo.save(entity);
+    return this.save(entity);
   }
 
   /**

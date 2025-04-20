@@ -11,7 +11,6 @@ import { OrgSeeder } from './seeding/org.seeder';
 import { OrgModule } from './org.module';
 import { OrgEntityFixture } from './__fixtures__/org-entity.fixture';
 import { OwnerEntityFixture } from './__fixtures__/owner-entity.fixture';
-import { OwnerModelServiceFixture } from './__fixtures__/owner-model-service.fixture';
 import { OwnerModuleFixture } from './__fixtures__/owner.module.fixture';
 import { OwnerFactoryFixture } from './__fixtures__/owner-factory.fixture';
 import { OrgMemberEntityFixture } from './__fixtures__/org-member.entity.fixture';
@@ -40,11 +39,7 @@ describe('OrgController (e2e)', () => {
               InvitationEntityFixture,
             ],
           }),
-          OrgModule.registerAsync({
-            inject: [OwnerModelServiceFixture],
-            useFactory: (ownerModelService: OwnerModelServiceFixture) => ({
-              ownerModelService,
-            }),
+          OrgModule.register({
             entities: {
               org: {
                 entity: OrgEntityFixture,
@@ -57,7 +52,6 @@ describe('OrgController (e2e)', () => {
           CrudModule.forRoot({}),
           OwnerModuleFixture.register(),
         ],
-        providers: [OwnerModelServiceFixture],
       }).compile();
       app = moduleFixture.createNestApplication();
       await app.init();

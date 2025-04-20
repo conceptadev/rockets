@@ -22,4 +22,4 @@ export interface RoleModelServiceInterface
       RoleCreatableInterface & ReferenceIdInterface,
       RoleEntityInterface
     >,
-    RemoveOneInterface<RoleEntityInterface, RoleEntityInterface> {}
+    RemoveOneInterface<Pick<RoleEntityInterface, 'id'>, RoleEntityInterface> {}

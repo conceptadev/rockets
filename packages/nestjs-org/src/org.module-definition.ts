@@ -13,7 +13,6 @@ import {
 import { RepositoryInterface } from '@concepta/nestjs-common';
 import {
   ORG_MODULE_SETTINGS_TOKEN,
-  ORG_MODULE_OWNER_MODEL_SERVICE_TOKEN,
   ORG_MODULE_ORG_ENTITY_KEY,
 } from './org.constants';
 import { OrgOptionsInterface } from './interfaces/org-options.interface';
@@ -29,7 +28,6 @@ import { OrgController } from './org.controller';
 import { orgDefaultConfig } from './config/org-default.config';
 import { InvitationAcceptedListener } from './listeners/invitation-accepted-listener';
 import { OrgMissingEntitiesOptionsException } from './exceptions/org-missing-entities-options.exception';
-import { OrgOwnerModelServiceInterface } from './interfaces/org-owner-model-service.interface';
 
 const RAW_OPTIONS_TOKEN = Symbol('__ORG_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -96,7 +94,6 @@ export function createOrgProviders(options: {
     OrgMemberModelService,
     InvitationAcceptedListener,
     createOrgSettingsProvider(options.overrides),
-    createOrgOwnerModelServiceProvider(options.overrides),
     createOrgModelServiceProvider(options.overrides),
   ];
 }
@@ -106,7 +103,6 @@ export function createOrgExports(): Required<
 >['exports'] {
   return [
     ORG_MODULE_SETTINGS_TOKEN,
-    ORG_MODULE_OWNER_MODEL_SERVICE_TOKEN,
     OrgModelService,
     OrgCrudService,
     OrgMemberService,
@@ -133,17 +129,6 @@ export function createOrgSettingsProvider(
   });
 }
 
-export function createOrgOwnerModelServiceProvider(
-  optionsOverrides?: OrgOptions,
-): Provider {
-  return {
-    provide: ORG_MODULE_OWNER_MODEL_SERVICE_TOKEN,
-    inject: [RAW_OPTIONS_TOKEN],
-    useFactory: async (options: OrgOptionsInterface) =>
-      optionsOverrides?.ownerModelService ?? options.ownerModelService,
-  };
-}
-
 export function createOrgModelServiceProvider(
   optionsOverrides?: OrgOptions,
 ): Provider {
@@ -152,15 +137,13 @@ export function createOrgModelServiceProvider(
     inject: [
       RAW_OPTIONS_TOKEN,
       getDynamicRepositoryToken(ORG_MODULE_ORG_ENTITY_KEY),
-      ORG_MODULE_OWNER_MODEL_SERVICE_TOKEN,
     ],
     useFactory: async (
       options: OrgOptionsInterface,
       orgRepo: RepositoryInterface<OrgEntityInterface>,
-      ownerModelService: OrgOwnerModelServiceInterface,
     ) =>
       optionsOverrides?.orgModelService ??
       options.orgModelService ??
-      new OrgModelService(orgRepo, ownerModelService),
+      new OrgModelService(orgRepo),
   };
 }

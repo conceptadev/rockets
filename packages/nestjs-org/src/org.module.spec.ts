@@ -11,14 +11,10 @@ import { OrgModule } from './org.module';
 import { OrgCrudService } from './services/org-crud.service';
 import { OrgController } from './org.controller';
 import { OrgModelService } from './services/org-model.service';
-import {
-  ORG_MODULE_ORG_ENTITY_KEY,
-  ORG_MODULE_OWNER_MODEL_SERVICE_TOKEN,
-} from './org.constants';
+import { ORG_MODULE_ORG_ENTITY_KEY } from './org.constants';
 
 import { OrgEntityFixture } from './__fixtures__/org-entity.fixture';
 import { OwnerEntityFixture } from './__fixtures__/owner-entity.fixture';
-import { OwnerModelServiceFixture } from './__fixtures__/owner-model-service.fixture';
 import { OwnerModuleFixture } from './__fixtures__/owner.module.fixture';
 import { OrgMemberEntityFixture } from './__fixtures__/org-member.entity.fixture';
 import { UserEntityFixture } from './__fixtures__/user-entity.fixture';
@@ -28,7 +24,6 @@ import { OrgProfileEntityFixture } from './__fixtures__/org-profile.entity.fixtu
 describe('OrgModule', () => {
   let orgModule: OrgModule;
   let orgModelService: OrgModelService;
-  let ownerModelService: OwnerModelServiceFixture;
   let orgCrudService: OrgCrudService;
   let orgController: OrgController;
   let orgEntityRepo: RepositoryInterface<OrgEntityFixture>;
@@ -49,11 +44,7 @@ describe('OrgModule', () => {
             InvitationEntityFixture,
           ],
         }),
-        OrgModule.forRootAsync({
-          inject: [OwnerModelServiceFixture],
-          useFactory: (ownerModelService: OwnerModelServiceFixture) => ({
-            ownerModelService,
-          }),
+        OrgModule.forRoot({
           entities: {
             org: {
               entity: OrgEntityFixture,
@@ -76,9 +67,6 @@ describe('OrgModule', () => {
       getDynamicRepositoryToken(ORG_MODULE_ORG_ENTITY_KEY),
     );
     orgModelService = testModule.get<OrgModelService>(OrgModelService);
-    ownerModelService = testModule.get<OwnerModelServiceFixture>(
-      ORG_MODULE_OWNER_MODEL_SERVICE_TOKEN,
-    );
     orgCrudService = testModule.get<OrgCrudService>(OrgCrudService);
     orgController = testModule.get<OrgController>(OrgController);
   });
@@ -95,8 +83,6 @@ describe('OrgModule', () => {
       expect(orgCrudService).toBeInstanceOf(OrgCrudService);
       expect(orgModelService).toBeInstanceOf(OrgModelService);
       expect(orgModelService['repo']).toBeInstanceOf(Repository);
-      expect(ownerModelService).toBeInstanceOf(OwnerModelServiceFixture);
-      expect(ownerModelService['repo']).toBeInstanceOf(Repository);
       expect(orgModelService['repo'].find).toBeInstanceOf(Function);
       expect(orgController).toBeInstanceOf(OrgController);
     });
