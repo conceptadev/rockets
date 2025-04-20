@@ -9,9 +9,9 @@ import {
   ReferenceId,
   Type,
   RepositoryInterface,
-  ReferenceLookupException,
-  ReferenceMutateException,
-  ReferenceValidationException,
+  ModelQueryException,
+  ModelMutateException,
+  ModelValidationException,
 } from '@concepta/nestjs-common';
 import {
   CACHE_MODULE_REPOSITORIES_TOKEN,
@@ -69,7 +69,7 @@ export class CacheService implements CacheServiceInterface {
         expirationDate,
       });
     } catch (e) {
-      throw new ReferenceMutateException(assignmentRepo.metadata.targetName, {
+      throw new ModelMutateException(assignmentRepo.metadata.targetName, {
         originalError: e,
       });
     }
@@ -109,7 +109,7 @@ export class CacheService implements CacheServiceInterface {
         expirationDate,
       });
     } catch (e) {
-      throw new ReferenceMutateException(assignmentRepo.metadata.targetName, {
+      throw new ModelMutateException(assignmentRepo.metadata.targetName, {
         originalError: e,
       });
     }
@@ -161,7 +161,7 @@ export class CacheService implements CacheServiceInterface {
       // return the caches from assignee
       return assignments;
     } catch (e) {
-      throw new ReferenceLookupException(assignmentRepo.metadata.targetName, {
+      throw new ModelQueryException(assignmentRepo.metadata.targetName, {
         originalError: e,
       });
     }
@@ -216,7 +216,7 @@ export class CacheService implements CacheServiceInterface {
     try {
       await assignmentRepo.delete(id);
     } catch (e) {
-      throw new ReferenceMutateException(assignmentRepo.metadata.targetName, {
+      throw new ModelMutateException(assignmentRepo.metadata.targetName, {
         originalError: e,
       });
     }
@@ -248,7 +248,7 @@ export class CacheService implements CacheServiceInterface {
     // any errors?
     if (validationErrors.length) {
       // yes, throw error
-      throw new ReferenceValidationException(
+      throw new ModelValidationException(
         this.constructor.name,
         validationErrors,
       );
@@ -276,7 +276,7 @@ export class CacheService implements CacheServiceInterface {
       });
       return cache;
     } catch (e) {
-      throw new ReferenceLookupException(repo.metadata.targetName, {
+      throw new ModelQueryException(repo.metadata.targetName, {
         originalError: e,
       });
     }

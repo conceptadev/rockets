@@ -4,8 +4,8 @@ import {
   CacheCreatableInterface,
   CacheInterface,
   RepositoryInterface,
-  ReferenceMutateException,
-  ReferenceValidationException,
+  ModelMutateException,
+  ModelValidationException,
 } from '@concepta/nestjs-common';
 
 import { CacheService } from './cache.service';
@@ -63,14 +63,14 @@ describe('CacheService', () => {
       });
     });
 
-    it('should throw a ReferenceValidationException on error', async () => {
+    it('should throw a ModelValidationException on error', async () => {
       const assignment: ReferenceAssignment = 'testAssignment';
 
-      const error = new ReferenceValidationException('error', []);
+      const error = new ModelValidationException('error', []);
       service['validateDto'] = jest.fn().mockRejectedValue(error);
 
       await expect(service.create(assignment, cacheDto)).rejects.toThrow(
-        ReferenceValidationException,
+        ModelValidationException,
       );
     });
   });
@@ -103,25 +103,25 @@ describe('CacheService', () => {
       expect(repo.save).toHaveBeenCalledWith(result);
     });
 
-    it('should throw a ReferenceValidationException on error', async () => {
+    it('should throw a ModelValidationException on error', async () => {
       const assignment: ReferenceAssignment = 'testAssignment';
 
-      const error = new ReferenceValidationException('error', []);
+      const error = new ModelValidationException('error', []);
       service['validateDto'] = jest.fn().mockRejectedValue(error);
 
       await expect(service.update(assignment, cacheDto)).rejects.toThrow(
-        ReferenceValidationException,
+        ModelValidationException,
       );
     });
 
-    it('should throw a ReferenceMutateException on error', async () => {
+    it('should throw a ModelMutateException on error', async () => {
       const assignment: ReferenceAssignment = 'testAssignment';
 
       const error = new Error('error');
       service['mergeEntity'] = jest.fn().mockResolvedValue(error);
 
       const t = () => service.update(assignment, cacheDto);
-      await expect(t).rejects.toThrow(ReferenceMutateException);
+      await expect(t).rejects.toThrow(ModelMutateException);
     });
   });
 });

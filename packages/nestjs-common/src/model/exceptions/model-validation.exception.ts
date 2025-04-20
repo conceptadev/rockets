@@ -1,30 +1,30 @@
-import { ReferenceId } from '../interfaces/reference.types';
+import { ValidationError } from 'class-validator';
 import { RuntimeException } from '../../exceptions/runtime.exception';
 import { RuntimeExceptionOptions } from '../../exceptions/interfaces/runtime-exception-options.interface';
 
-export class ReferenceIdNoMatchException extends RuntimeException {
+export class ModelValidationException extends RuntimeException {
   context: RuntimeException['context'] & {
     entityName: string;
-    id: ReferenceId;
+    validationErrors: ValidationError[];
   };
 
   constructor(
     entityName: string,
-    id: ReferenceId,
+    validationErrors: ValidationError[],
     options?: RuntimeExceptionOptions,
   ) {
     super({
-      message: 'No match for %s reference id %s.',
-      messageParams: [entityName, id],
+      message: 'Data for the %s model is not valid',
+      messageParams: [entityName],
       ...options,
     });
-
-    this.errorCode = 'REFERENCE_ID_NO_MATCH';
 
     this.context = {
       ...super.context,
       entityName,
-      id,
+      validationErrors,
     };
+
+    this.errorCode = 'MODEL_VALIDATION_ERROR';
   }
 }

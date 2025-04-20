@@ -50,11 +50,11 @@ export { ReferenceUserInterface } from './reference/interfaces/reference-user.in
 export { ReferenceRoleInterface } from './reference/interfaces/reference-role.interface';
 export { ReferenceRolesInterface } from './reference/interfaces/reference-roles.interface';
 
-// reference exceptions
-export { ReferenceLookupException } from './reference/exceptions/reference-lookup.exception';
-export { ReferenceMutateException } from './reference/exceptions/reference-mutate.exception';
-export { ReferenceValidationException } from './reference/exceptions/reference-validation.exception';
-export { ReferenceIdNoMatchException } from './reference/exceptions/reference-id-no-match.exception';
+// model exceptions
+export { ModelQueryException } from './model/exceptions/model-query.exception';
+export { ModelMutateException } from './model/exceptions/model-mutate.exception';
+export { ModelValidationException } from './model/exceptions/model-validation.exception';
+export { ModelIdNoMatchException } from './model/exceptions/model-id-no-match.exception';
 
 // model services
 export { ModelService } from './model/model.service';

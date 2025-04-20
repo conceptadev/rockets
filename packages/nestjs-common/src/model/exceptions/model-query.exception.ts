@@ -1,14 +1,14 @@
 import { RuntimeException } from '../../exceptions/runtime.exception';
 import { RuntimeExceptionOptions } from '../../exceptions/interfaces/runtime-exception-options.interface';
 
-export class ReferenceMutateException extends RuntimeException {
+export class ModelQueryException extends RuntimeException {
   context: RuntimeException['context'] & {
     entityName: string;
   };
 
   constructor(entityName: string, options?: RuntimeExceptionOptions) {
     super({
-      message: 'Error while trying to mutate a %s reference',
+      message: 'Error while trying to query a %s model',
       messageParams: [entityName],
       ...options,
     });
@@ -18,6 +18,6 @@ export class ReferenceMutateException extends RuntimeException {
       entityName,
     };
 
-    this.errorCode = 'REFERENCE_MUTATE_ERROR';
+    this.errorCode = 'MODEL_QUERY_ERROR';
   }
 }

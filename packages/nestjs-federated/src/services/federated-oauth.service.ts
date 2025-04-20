@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   NotAnErrorException,
   ReferenceIdInterface,
-  ReferenceMutateException,
+  ModelMutateException,
 } from '@concepta/nestjs-common';
 import { FEDERATED_MODULE_USER_MODEL_SERVICE_TOKEN } from '../federated.constants';
 import { FederatedEntityInterface } from '../interfaces/federated-entity.interface';
@@ -136,7 +136,7 @@ export class FederatedOAuthService implements FederatedOAuthServiceInterface {
       return federated;
     } catch (e) {
       const exception = e instanceof Error ? e : new NotAnErrorException(e);
-      throw new ReferenceMutateException(this.constructor.name, exception);
+      throw new ModelMutateException(this.constructor.name, exception);
     }
   }
 }

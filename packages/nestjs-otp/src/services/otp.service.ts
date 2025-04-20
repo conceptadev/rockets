@@ -12,9 +12,9 @@ import {
   DeepPartial,
   AssigneeRelationInterface,
   RepositoryInternals,
-  ReferenceLookupException,
-  ReferenceMutateException,
-  ReferenceValidationException,
+  ModelQueryException,
+  ModelMutateException,
+  ModelValidationException,
 } from '@concepta/nestjs-common';
 import {
   OTP_MODULE_REPOSITORIES_TOKEN,
@@ -96,7 +96,7 @@ export class OtpService implements OtpServiceInterface {
         active: true,
       });
     } catch (e) {
-      throw new ReferenceMutateException(assignmentRepo.metadata.targetName, {
+      throw new ModelMutateException(assignmentRepo.metadata.targetName, {
         originalError: e,
       });
     }
@@ -226,7 +226,7 @@ export class OtpService implements OtpServiceInterface {
     try {
       await assignmentRepo.delete(id);
     } catch (e) {
-      throw new ReferenceMutateException(assignmentRepo.metadata.targetName, {
+      throw new ModelMutateException(assignmentRepo.metadata.targetName, {
         originalError: e,
       });
     }
@@ -285,7 +285,7 @@ export class OtpService implements OtpServiceInterface {
       // return the otps from assignee
       return assignments;
     } catch (e) {
-      throw new ReferenceLookupException(assignmentRepo.metadata.targetName, {
+      throw new ModelQueryException(assignmentRepo.metadata.targetName, {
         originalError: e,
       });
     }
@@ -342,7 +342,7 @@ export class OtpService implements OtpServiceInterface {
       // return the otps from assignee
       return assignment;
     } catch (e) {
-      throw new ReferenceLookupException(assignmentRepo.metadata.targetName, {
+      throw new ModelQueryException(assignmentRepo.metadata.targetName, {
         originalError: e,
       });
     }
@@ -372,7 +372,7 @@ export class OtpService implements OtpServiceInterface {
       // return the otps from assignee
       return assignment;
     } catch (e) {
-      throw new ReferenceLookupException(assignmentRepo.metadata.targetName, {
+      throw new ModelQueryException(assignmentRepo.metadata.targetName, {
         originalError: e,
       });
     }
@@ -411,7 +411,7 @@ export class OtpService implements OtpServiceInterface {
     // any errors?
     if (validationErrors.length) {
       // yes, throw error
-      throw new ReferenceValidationException(
+      throw new ModelValidationException(
         this.constructor.name,
         validationErrors,
       );
@@ -444,7 +444,7 @@ export class OtpService implements OtpServiceInterface {
         },
       );
     } catch (e) {
-      throw new ReferenceLookupException(assignmentRepo.metadata.targetName, {
+      throw new ModelQueryException(assignmentRepo.metadata.targetName, {
         originalError: e,
       });
     }

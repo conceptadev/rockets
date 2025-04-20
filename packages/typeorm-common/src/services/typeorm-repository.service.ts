@@ -13,7 +13,7 @@ import {
   DeepPartial,
   RepositoryInternals,
   RepositoryInterface,
-  ReferenceLookupException,
+  ModelQueryException,
 } from '@concepta/nestjs-common';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
@@ -45,7 +45,7 @@ export class TypeOrmRepositoryService<Entity extends PlainLiteralObject>
       return this.repo.find(cleanOptions);
     } catch (e) {
       // fatal orm error
-      throw new ReferenceLookupException(this.metadata.name, {
+      throw new ModelQueryException(this.metadata.name, {
         originalError: e,
       });
     }
@@ -65,7 +65,7 @@ export class TypeOrmRepositoryService<Entity extends PlainLiteralObject>
     } catch (e) {
       // fatal orm error
       // TODO: remove metadata?
-      throw new ReferenceLookupException(this.metadata.name, {
+      throw new ModelQueryException(this.metadata.name, {
         originalError: e,
       });
     }

@@ -6,9 +6,9 @@ import { DeepPartial } from '../utils/deep-partial';
 import { ReferenceIdInterface } from '../reference/interfaces/reference-id.interface';
 import { RepositoryInterface } from '../repository/interfaces/repository.interface';
 import { RepositoryInternals } from '../repository/interfaces/repository-internals';
-import { ReferenceIdNoMatchException } from '../reference/exceptions/reference-id-no-match.exception';
-import { ReferenceValidationException } from '../reference/exceptions/reference-validation.exception';
-import { ReferenceMutateException } from '../reference/exceptions/reference-mutate.exception';
+import { ModelIdNoMatchException } from './exceptions/model-id-no-match.exception';
+import { ModelValidationException } from './exceptions/model-validation.exception';
+import { ModelMutateException } from './exceptions/model-mutate.exception';
 import { ModelServiceInterface } from './interfaces/model-service.interface';
 
 /**
@@ -160,7 +160,7 @@ export abstract class ModelService<
     try {
       return this.repo.save(entity);
     } catch (e) {
-      throw new ReferenceMutateException(this.repo.metadata.name, {
+      throw new ModelMutateException(this.repo.metadata.name, {
         originalError: e,
       });
     }
@@ -174,7 +174,7 @@ export abstract class ModelService<
     try {
       return this.repo.remove(entity);
     } catch (e) {
-      throw new ReferenceMutateException(this.repo.metadata.name, {
+      throw new ModelMutateException(this.repo.metadata.name, {
         originalError: e,
       });
     }
@@ -196,7 +196,7 @@ export abstract class ModelService<
     // any errors?
     if (validationErrors.length) {
       // yes, throw error
-      throw new ReferenceValidationException(
+      throw new ModelValidationException(
         this.repo.metadata.name,
         validationErrors,
       );
@@ -225,7 +225,7 @@ export abstract class ModelService<
     if (entity) {
       return entity;
     } else {
-      throw new ReferenceIdNoMatchException(this.repo.metadata.name, id);
+      throw new ModelIdNoMatchException(this.repo.metadata.name, id);
     }
   }
 }

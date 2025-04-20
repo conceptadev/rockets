@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 
-import { ReferenceLookupException } from '@concepta/nestjs-common';
+import { ModelQueryException } from '@concepta/nestjs-common';
 
 import { TypeOrmRepositoryService } from './typeorm-repository.service';
 import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
@@ -46,13 +46,13 @@ describe(TypeOrmRepositoryService, () => {
   });
 
   describe(TypeOrmRepositoryService.prototype['findOne'], () => {
-    it('lookup exception', async () => {
+    it('query exception', async () => {
       jest.spyOn(testService['repo'], 'findOne').mockImplementationOnce(() => {
         throw new Error();
       });
 
       await expect(testService['findOne']({})).rejects.toThrow(
-        ReferenceLookupException,
+        ModelQueryException,
       );
     });
   });

@@ -5,9 +5,9 @@ import { getDataSourceToken } from '@nestjs/typeorm';
 import { INestApplication } from '@nestjs/common';
 
 import {
-  ReferenceMutateException,
-  ReferenceValidationException,
-  ReferenceIdNoMatchException,
+  ModelMutateException,
+  ModelValidationException,
+  ModelIdNoMatchException,
   ModelService,
 } from '@concepta/nestjs-common';
 
@@ -94,7 +94,7 @@ describe(ModelService, () => {
         return testModelService.create({ firstName: 'Bob' });
       };
 
-      await expect(t).rejects.toThrow(ReferenceMutateException);
+      await expect(t).rejects.toThrow(ModelMutateException);
     });
 
     it('invalid', async () => {
@@ -102,7 +102,7 @@ describe(ModelService, () => {
         return testModelService.create({ firstName: 'B' });
       };
 
-      await expect(t).rejects.toThrow(ReferenceValidationException);
+      await expect(t).rejects.toThrow(ModelValidationException);
     });
   });
 
@@ -130,7 +130,7 @@ describe(ModelService, () => {
         });
       };
 
-      await expect(t()).rejects.toThrow(ReferenceIdNoMatchException);
+      await expect(t()).rejects.toThrow(ModelIdNoMatchException);
     });
 
     it('found but not valid', async () => {
@@ -142,7 +142,7 @@ describe(ModelService, () => {
         });
       };
 
-      await expect(t).rejects.toThrow(ReferenceValidationException);
+      await expect(t).rejects.toThrow(ModelValidationException);
     });
 
     it('found, valid, but exception on save', async () => {
@@ -160,7 +160,7 @@ describe(ModelService, () => {
         });
       };
 
-      await expect(t).rejects.toThrow(ReferenceMutateException);
+      await expect(t).rejects.toThrow(ModelMutateException);
     });
   });
 
@@ -201,7 +201,7 @@ describe(ModelService, () => {
         });
       };
 
-      await expect(t).rejects.toThrow(ReferenceIdNoMatchException);
+      await expect(t).rejects.toThrow(ModelIdNoMatchException);
     });
 
     it('found but not valid', async () => {
@@ -214,7 +214,7 @@ describe(ModelService, () => {
         });
       };
 
-      await expect(t).rejects.toThrow(ReferenceValidationException);
+      await expect(t).rejects.toThrow(ModelValidationException);
     });
 
     it('found, valid, but exception on save', async () => {
@@ -233,7 +233,7 @@ describe(ModelService, () => {
         });
       };
 
-      await expect(t).rejects.toThrow(ReferenceMutateException);
+      await expect(t).rejects.toThrow(ModelMutateException);
     });
   });
 
@@ -259,7 +259,7 @@ describe(ModelService, () => {
         });
       };
 
-      await expect(t).rejects.toThrow(ReferenceIdNoMatchException);
+      await expect(t).rejects.toThrow(ModelIdNoMatchException);
     });
 
     it('exception', async () => {
@@ -275,7 +275,7 @@ describe(ModelService, () => {
           throw new Error();
         });
 
-      await expect(t).rejects.toThrow(ReferenceMutateException);
+      await expect(t).rejects.toThrow(ModelMutateException);
     });
   });
 });

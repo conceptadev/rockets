@@ -1,14 +1,14 @@
 import { RuntimeException } from '../../exceptions/runtime.exception';
 import { RuntimeExceptionOptions } from '../../exceptions/interfaces/runtime-exception-options.interface';
 
-export class ReferenceLookupException extends RuntimeException {
+export class ModelMutateException extends RuntimeException {
   context: RuntimeException['context'] & {
     entityName: string;
   };
 
   constructor(entityName: string, options?: RuntimeExceptionOptions) {
     super({
-      message: 'Error while trying to lookup a %s reference',
+      message: 'Error while trying to mutate a %s model',
       messageParams: [entityName],
       ...options,
     });
@@ -18,6 +18,6 @@ export class ReferenceLookupException extends RuntimeException {
       entityName,
     };
 
-    this.errorCode = 'REFERENCE_LOOKUP_ERROR';
+    this.errorCode = 'MODEL_MUTATE_ERROR';
   }
 }

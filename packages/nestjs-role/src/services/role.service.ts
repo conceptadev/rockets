@@ -3,7 +3,7 @@ import {
   ReferenceAssignment,
   ReferenceIdInterface,
   RepositoryInterface,
-  ReferenceLookupException,
+  ModelQueryException,
 } from '@concepta/nestjs-common';
 import { RoleEntityNotFoundException } from '../exceptions/role-entity-not-found.exception';
 import { RoleAssignmentNotFoundException } from '../exceptions/role-assignment-not-found.exception';
@@ -55,7 +55,7 @@ export class RoleService implements RoleServiceInterface {
       // return the roles
       return assignments.map((assignment) => ({ id: assignment.roleId }));
     } catch (e) {
-      throw new ReferenceLookupException(assignmentRepo.metadata.name, {
+      throw new ModelQueryException(assignmentRepo.metadata.name, {
         originalError: e,
       });
     }
@@ -87,7 +87,7 @@ export class RoleService implements RoleServiceInterface {
       // return true if we found an assignment
       return assignment ? true : false;
     } catch (e) {
-      throw new ReferenceLookupException(assignmentRepo.metadata.targetName, {
+      throw new ModelQueryException(assignmentRepo.metadata.targetName, {
         originalError: e,
       });
     }
