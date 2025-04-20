@@ -13,7 +13,7 @@ import {
 import { RepositoryInterface } from '@concepta/nestjs-common';
 import {
   ORG_MODULE_SETTINGS_TOKEN,
-  ORG_MODULE_OWNER_LOOKUP_SERVICE_TOKEN,
+  ORG_MODULE_OWNER_MODEL_SERVICE_TOKEN,
   ORG_MODULE_ORG_ENTITY_KEY,
 } from './org.constants';
 import { OrgOptionsInterface } from './interfaces/org-options.interface';
@@ -21,17 +21,15 @@ import { OrgOptionsExtrasInterface } from './interfaces/org-options-extras.inter
 import { OrgEntitiesOptionsInterface } from './interfaces/org-entities-options.interface';
 import { OrgSettingsInterface } from './interfaces/org-settings.interface';
 import { OrgEntityInterface } from './interfaces/org-entity.interface';
-import { OrgOwnerLookupServiceInterface } from './interfaces/org-owner-lookup-service.interface';
-import { OrgLookupService } from './services/org-lookup.service';
-import { OrgMutateService } from './services/org-mutate.service';
+import { OrgModelService } from './services/org-model.service';
 import { OrgCrudService } from './services/org-crud.service';
 import { OrgMemberService } from './services/org-member.service';
-import { OrgMemberLookupService } from './services/org-member-lookup.service';
-import { OrgMemberMutateService } from './services/org-member-mutate.service';
+import { OrgMemberModelService } from './services/org-member-model.service';
 import { OrgController } from './org.controller';
 import { orgDefaultConfig } from './config/org-default.config';
 import { InvitationAcceptedListener } from './listeners/invitation-accepted-listener';
 import { OrgMissingEntitiesOptionsException } from './exceptions/org-missing-entities-options.exception';
+import { OrgOwnerModelServiceInterface } from './interfaces/org-owner-model-service.interface';
 
 const RAW_OPTIONS_TOKEN = Symbol('__ORG_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -95,13 +93,11 @@ export function createOrgProviders(options: {
     ...(options.extraProviders ?? []),
     OrgCrudService,
     OrgMemberService,
-    OrgMemberLookupService,
-    OrgMemberMutateService,
+    OrgMemberModelService,
     InvitationAcceptedListener,
     createOrgSettingsProvider(options.overrides),
-    createOrgOwnerLookupServiceProvider(options.overrides),
-    createOrgLookupServiceProvider(options.overrides),
-    createOrgMutateServiceProvider(options.overrides),
+    createOrgOwnerModelServiceProvider(options.overrides),
+    createOrgModelServiceProvider(options.overrides),
   ];
 }
 
@@ -110,13 +106,11 @@ export function createOrgExports(): Required<
 >['exports'] {
   return [
     ORG_MODULE_SETTINGS_TOKEN,
-    ORG_MODULE_OWNER_LOOKUP_SERVICE_TOKEN,
-    OrgLookupService,
-    OrgMutateService,
+    ORG_MODULE_OWNER_MODEL_SERVICE_TOKEN,
+    OrgModelService,
     OrgCrudService,
     OrgMemberService,
-    OrgMemberLookupService,
-    OrgMemberMutateService,
+    OrgMemberModelService,
   ];
 }
 
@@ -139,53 +133,34 @@ export function createOrgSettingsProvider(
   });
 }
 
-export function createOrgOwnerLookupServiceProvider(
+export function createOrgOwnerModelServiceProvider(
   optionsOverrides?: OrgOptions,
 ): Provider {
   return {
-    provide: ORG_MODULE_OWNER_LOOKUP_SERVICE_TOKEN,
+    provide: ORG_MODULE_OWNER_MODEL_SERVICE_TOKEN,
     inject: [RAW_OPTIONS_TOKEN],
     useFactory: async (options: OrgOptionsInterface) =>
-      optionsOverrides?.ownerLookupService ?? options.ownerLookupService,
+      optionsOverrides?.ownerModelService ?? options.ownerModelService,
   };
 }
 
-export function createOrgLookupServiceProvider(
+export function createOrgModelServiceProvider(
   optionsOverrides?: OrgOptions,
 ): Provider {
   return {
-    provide: OrgLookupService,
+    provide: OrgModelService,
     inject: [
       RAW_OPTIONS_TOKEN,
       getDynamicRepositoryToken(ORG_MODULE_ORG_ENTITY_KEY),
-      ORG_MODULE_OWNER_LOOKUP_SERVICE_TOKEN,
+      ORG_MODULE_OWNER_MODEL_SERVICE_TOKEN,
     ],
     useFactory: async (
       options: OrgOptionsInterface,
       orgRepo: RepositoryInterface<OrgEntityInterface>,
-      ownerLookupService: OrgOwnerLookupServiceInterface,
+      ownerModelService: OrgOwnerModelServiceInterface,
     ) =>
-      optionsOverrides?.orgLookupService ??
-      options.orgLookupService ??
-      new OrgLookupService(orgRepo, ownerLookupService),
-  };
-}
-
-export function createOrgMutateServiceProvider(
-  optionsOverrides?: OrgOptions,
-): Provider {
-  return {
-    provide: OrgMutateService,
-    inject: [
-      RAW_OPTIONS_TOKEN,
-      getDynamicRepositoryToken(ORG_MODULE_ORG_ENTITY_KEY),
-    ],
-    useFactory: async (
-      options: OrgOptionsInterface,
-      orgRepo: RepositoryInterface<OrgEntityInterface>,
-    ) =>
-      optionsOverrides?.orgLookupService ??
-      options.orgLookupService ??
-      new OrgMutateService(orgRepo),
+      optionsOverrides?.orgModelService ??
+      options.orgModelService ??
+      new OrgModelService(orgRepo, ownerModelService),
   };
 }

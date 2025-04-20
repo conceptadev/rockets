@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import { RepositoryInterface } from '@concepta/nestjs-common';
 
@@ -6,19 +6,17 @@ import { ORG_MODULE_ORG_MEMBER_ENTITY_KEY } from '../org.constants';
 import { OrgMemberEntityInterface } from '../interfaces/org-member-entity.interface';
 import { OrgMemberServiceInterface } from '../interfaces/org-member-service.interface';
 import { OrgMemberCreatableInterface } from '../interfaces/org-member-creatable.interface';
-import { OrgLookupService } from './org-lookup.service';
-import { OrgMemberLookupService } from './org-member-lookup.service';
-import { OrgMemberMutateService } from './org-member-mutate.service';
+import { OrgMemberModelService } from './org-member-model.service';
 import { OrgMemberException } from '../exceptions/org-member.exception';
+import { OrgMemberModelServiceInterface } from '../interfaces/org-member-model-service.interface';
 
 @Injectable()
 export class OrgMemberService implements OrgMemberServiceInterface {
   constructor(
     @InjectDynamicRepository(ORG_MODULE_ORG_MEMBER_ENTITY_KEY)
     protected readonly repo: RepositoryInterface<OrgMemberEntityInterface>,
-    protected readonly orgLookupService: OrgLookupService,
-    protected readonly orgMemberLookupService: OrgMemberLookupService,
-    protected readonly orgMemberMutateService: OrgMemberMutateService,
+    @Inject(OrgMemberModelService)
+    protected readonly orgMemberModelService: OrgMemberModelServiceInterface,
   ) {}
 
   async add(
@@ -34,10 +32,10 @@ export class OrgMemberService implements OrgMemberServiceInterface {
       });
     }
 
-    return await this.orgMemberMutateService.create(orgMember);
+    return await this.orgMemberModelService.create(orgMember);
   }
 
   async remove(id: string): Promise<OrgMemberEntityInterface> {
-    return await this.orgMemberMutateService.remove({ id });
+    return await this.orgMemberModelService.remove({ id });
   }
 }

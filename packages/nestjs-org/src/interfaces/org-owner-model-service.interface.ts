@@ -4,5 +4,5 @@ import {
   ReferenceIdInterface,
 } from '@concepta/nestjs-common';
 
-export interface OrgOwnerLookupServiceInterface
+export interface OrgOwnerModelServiceInterface
   extends ByIdInterface<ReferenceId, ReferenceIdInterface> {}

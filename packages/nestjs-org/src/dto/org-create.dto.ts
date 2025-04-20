@@ -9,7 +9,7 @@ import { OrgDto } from './org.dto';
 @Exclude()
 export class OrgCreateDto
   extends IntersectionType(
-    PickType(OrgDto, ['name', 'owner'] as const),
+    PickType(OrgDto, ['name', 'ownerId'] as const),
     PartialType(PickType(OrgDto, ['active'] as const)),
   )
   implements OrgCreatableInterface {}

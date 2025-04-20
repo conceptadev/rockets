@@ -22,6 +22,7 @@ export { OrgOwnableInterface } from './org/interfaces/org-ownable.interface';
 export { OrgMemberInterface } from './org/interfaces/org-member.interface';
 export { OrgOwnerInterface } from './org/interfaces/org-owner.interface';
 export { OrgUpdatableInterface } from './org/interfaces/org-updatable.interface';
+export { OrgReplaceableInterface } from './org/interfaces/org-replaceable.interface';
 export { OrgInterface } from './org/interfaces/org.interface';
 
 export { OrgProfileInterface } from './org-profile/interfaces/org-profile.interface';

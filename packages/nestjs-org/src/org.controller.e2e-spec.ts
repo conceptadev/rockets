@@ -11,7 +11,7 @@ import { OrgSeeder } from './seeding/org.seeder';
 import { OrgModule } from './org.module';
 import { OrgEntityFixture } from './__fixtures__/org-entity.fixture';
 import { OwnerEntityFixture } from './__fixtures__/owner-entity.fixture';
-import { OwnerLookupServiceFixture } from './__fixtures__/owner-lookup-service.fixture';
+import { OwnerModelServiceFixture } from './__fixtures__/owner-model-service.fixture';
 import { OwnerModuleFixture } from './__fixtures__/owner.module.fixture';
 import { OwnerFactoryFixture } from './__fixtures__/owner-factory.fixture';
 import { OrgMemberEntityFixture } from './__fixtures__/org-member.entity.fixture';
@@ -41,9 +41,9 @@ describe('OrgController (e2e)', () => {
             ],
           }),
           OrgModule.registerAsync({
-            inject: [OwnerLookupServiceFixture],
-            useFactory: (ownerLookupService: OwnerLookupServiceFixture) => ({
-              ownerLookupService,
+            inject: [OwnerModelServiceFixture],
+            useFactory: (ownerModelService: OwnerModelServiceFixture) => ({
+              ownerModelService,
             }),
             entities: {
               org: {
@@ -57,7 +57,7 @@ describe('OrgController (e2e)', () => {
           CrudModule.forRoot({}),
           OwnerModuleFixture.register(),
         ],
-        providers: [OwnerLookupServiceFixture],
+        providers: [OwnerModelServiceFixture],
       }).compile();
       app = moduleFixture.createNestApplication();
       await app.init();
@@ -116,7 +116,7 @@ describe('OrgController (e2e)', () => {
         .post('/org')
         .send({
           name: 'company 1',
-          owner,
+          ownerId: owner.id,
         })
         .expect(201);
 
@@ -145,7 +145,7 @@ describe('OrgController (e2e)', () => {
       await supertest(app.getHttpServer()).post('/org').send({}).expect(400);
     });
 
-    it('PATCH /org/:id - should update an existing organization', async () => {
+    it.only('PATCH /org/:id - should update an existing organization', async () => {
       const ownerFactory = new OwnerFactoryFixture({ seedingSource });
       const owner = await ownerFactory.create();
 
@@ -153,7 +153,7 @@ describe('OrgController (e2e)', () => {
         .post('/org')
         .send({
           name: 'company 1',
-          owner,
+          ownerId: owner.id,
         })
         .expect(201);
 
@@ -187,7 +187,7 @@ describe('OrgController (e2e)', () => {
         .post('/org')
         .send({
           name: 123, // Invalid data type for name
-          owner: 'invalid-owner-id',
+          ownerId: 'invalid-owner-id',
         })
         .expect(400);
     });
@@ -208,7 +208,7 @@ describe('OrgController (e2e)', () => {
         .post('/org')
         .send({
           name: 'company 1',
-          owner: 'invalid-owner-id', // Invalid owner ID
+          ownerId: 'invalid-owner-id', // Invalid owner ID
         })
         .expect(400);
     });

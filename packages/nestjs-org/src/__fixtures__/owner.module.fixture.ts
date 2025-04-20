@@ -2,12 +2,12 @@ import { DynamicModule, Global, Module } from '@nestjs/common';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 
 import { OwnerEntityFixture } from './owner-entity.fixture';
-import { OwnerLookupServiceFixture } from './owner-lookup-service.fixture';
+import { OwnerModelServiceFixture } from './owner-model-service.fixture';
 
 @Global()
 @Module({
-  providers: [OwnerLookupServiceFixture],
-  exports: [OwnerLookupServiceFixture],
+  providers: [OwnerModelServiceFixture],
+  exports: [OwnerModelServiceFixture],
 })
 export class OwnerModuleFixture {
   static register(): DynamicModule {
