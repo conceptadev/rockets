@@ -6,8 +6,7 @@ import { FileEntityFixture } from '../__fixtures__/file/file-entity.fixture';
 import { FileCreateDto } from '../dto/file-create.dto';
 import { FileQueryException } from '../exceptions/file-query.exception';
 import { FileEntityInterface } from '../interfaces/file-entity.interface';
-import { FileLookupService } from './file-lookup.service';
-import { FileMutateService } from './file-mutate.service';
+import { FileModelService } from './file-model.service';
 import { FileStrategyService } from './file-strategy.service';
 import { FileService } from './file.service';
 
@@ -15,8 +14,7 @@ describe(FileService.name, () => {
   let fileService: FileService;
   let fileRepo: jest.Mocked<RepositoryInterface<FileEntityInterface>>;
   let fileStrategyService: jest.Mocked<FileStrategyService>;
-  let fileMutateService: FileMutateService;
-  let fileLookupService: FileLookupService;
+  let fileModelService: FileModelService;
 
   const mockFile: FileEntityInterface = {
     id: randomUUID(),
@@ -40,14 +38,9 @@ describe(FileService.name, () => {
   beforeEach(() => {
     fileRepo = createMockRepository();
     fileStrategyService = createMockFileStrategyService();
-    fileMutateService = new FileMutateService(fileRepo);
-    fileLookupService = new FileLookupService(fileRepo);
+    fileModelService = new FileModelService(fileRepo);
 
-    fileService = new FileService(
-      fileStrategyService,
-      fileMutateService,
-      fileLookupService,
-    );
+    fileService = new FileService(fileStrategyService, fileModelService);
     fileRepo.create.mockReturnValue(mockFile);
   });
 
@@ -59,11 +52,11 @@ describe(FileService.name, () => {
         },
       );
       jest
-        .spyOn(fileLookupService, 'getUniqueFile')
+        .spyOn(fileModelService, 'getUniqueFile')
         .mockReturnValueOnce(Promise.resolve(null))
         .mockReturnValueOnce(Promise.resolve(mockFile));
       jest
-        .spyOn(fileMutateService, 'create')
+        .spyOn(fileModelService, 'create')
         .mockReturnValue(Promise.resolve(mockFile));
 
       const result = await fileService.push(mockFileCreateDto);

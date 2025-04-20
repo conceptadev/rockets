@@ -73,6 +73,7 @@ export { InvitationInterface } from './invitation/interfaces/invitation.interfac
 export { InvitationUserInterface } from './invitation/interfaces/invitation-user.interface';
 
 export { FileCreatableInterface } from './file/interfaces/file-creatable.interface';
+export { FileUpdatableInterface } from './file/interfaces/file-updatable.interface';
 export { FileInterface } from './file/interfaces/file.interface';
 
 export { ReportStatusEnum } from './report/enum/report-status.enum';
