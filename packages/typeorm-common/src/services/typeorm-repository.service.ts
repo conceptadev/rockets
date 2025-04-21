@@ -15,7 +15,6 @@ import {
   RepositoryInterface,
   ModelQueryException,
 } from '@concepta/nestjs-common';
-import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 /**
  * Abstract service
@@ -114,46 +113,13 @@ export class TypeOrmRepositoryService<Entity extends PlainLiteralObject>
     }
   }
 
-  async update(
-    criteria:
-      | string
-      | string[]
-      | number
-      | number[]
-      | Date
-      | Date[]
-      | RepositoryInternals.FindOptionsWhere<Entity>,
-    partialEntity: RepositoryInternals.QueryDeepPartialEntity<Entity>,
-  ): Promise<RepositoryInternals.UpdateResult> {
-    return this.repo.update(
-      criteria as
-        | string
-        | string[]
-        | number
-        | number[]
-        | Date
-        | Date[]
-        | FindOptionsWhere<Entity>,
-      partialEntity as QueryDeepPartialEntity<Entity>,
-    );
-  }
-
-  async remove(
-    entities: Entity[],
-    options?: RepositoryInternals.RemoveOptions,
-  ): Promise<Entity[]>;
-  async remove(
-    entity: Entity,
-    options?: RepositoryInternals.RemoveOptions,
-  ): Promise<Entity>;
-  async remove(
-    entity: Entity | Entity[],
-    removeOptions?: RepositoryInternals.RemoveOptions,
-  ): Promise<Entity | Entity[]> {
+  async remove(entities: Entity[]): Promise<Entity[]>;
+  async remove(entity: Entity): Promise<Entity>;
+  async remove(entity: Entity | Entity[]): Promise<Entity | Entity[]> {
     if (Array.isArray(entity)) {
-      return this.repo.remove(entity, removeOptions);
+      return this.repo.remove(entity);
     } else {
-      return this.repo.remove(entity, removeOptions);
+      return this.repo.remove(entity);
     }
   }
 

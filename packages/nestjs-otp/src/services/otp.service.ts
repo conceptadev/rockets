@@ -434,15 +434,17 @@ export class OtpService implements OtpServiceInterface {
     try {
       // TODO: TYPEORM REMOVE UPDATE REPLACE FOR SAVE
       // make previous inactive
-      await assignmentRepo.update(
-        {
+      const assignmentObject = await assignmentRepo.findOne({
+        where: {
           assigneeId,
           category,
         },
-        {
-          active: false,
-        },
-      );
+      });
+
+      if (assignmentObject) {
+        assignmentObject.active = false;
+        await assignmentRepo.save(assignmentObject);
+      }
     } catch (e) {
       throw new ModelQueryException(assignmentRepo.metadata.targetName, {
         originalError: e,

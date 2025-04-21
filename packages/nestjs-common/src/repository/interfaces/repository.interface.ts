@@ -34,26 +34,8 @@ export interface RepositoryInterface<Entity extends PlainLiteralObject> {
     options?: RepositoryInternals.SaveOptions,
   ): Promise<T & Entity>;
 
-  update(
-    criteria:
-      | string
-      | string[]
-      | number
-      | number[]
-      | Date
-      | Date[]
-      | RepositoryInternals.FindOptionsWhere<Entity>,
-    partialEntity: RepositoryInternals.QueryDeepPartialEntity<Entity>,
-  ): Promise<RepositoryInternals.UpdateResult>;
-
-  remove(
-    entities: Entity[],
-    options?: RepositoryInternals.RemoveOptions,
-  ): Promise<Entity[]>;
-  remove(
-    entity: Entity,
-    options?: RepositoryInternals.RemoveOptions,
-  ): Promise<Entity>;
+  remove(entities: Entity[]): Promise<Entity[]>;
+  remove(entity: Entity): Promise<Entity>;
 
   delete(
     criteria:
