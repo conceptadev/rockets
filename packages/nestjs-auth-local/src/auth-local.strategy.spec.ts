@@ -58,9 +58,7 @@ describe(AuthLocalStrategy.name, () => {
 
   describe(AuthLocalStrategy.prototype.validate, () => {
     it('should return user', async () => {
-      jest
-        .spyOn(passwordValidationService, 'validateObject')
-        .mockResolvedValue(true);
+      jest.spyOn(passwordValidationService, 'validate').mockResolvedValue(true);
 
       const result = await authLocalStrategy.validate(USERNAME, PASSWORD);
       expect(result.id).toBe(user.id);
@@ -147,9 +145,9 @@ describe(AuthLocalStrategy.name, () => {
       await expect(t).rejects.toThrow(AuthLocalInvalidCredentialsException);
     });
 
-    it('should be invalid on passwordService.validateObject', async () => {
+    it('should be invalid on passwordService.validate', async () => {
       jest
-        .spyOn(passwordValidationService, 'validateObject')
+        .spyOn(passwordValidationService, 'validate')
         .mockResolvedValue(false);
 
       const t = () => authLocalStrategy.validate(USERNAME, PASSWORD);

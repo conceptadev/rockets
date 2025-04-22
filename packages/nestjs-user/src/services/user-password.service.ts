@@ -174,7 +174,7 @@ export class UserPasswordService implements UserPasswordServiceInterface {
 
   protected async validateHistory(
     user: ReferenceIdInterface,
-    password?: string,
+    password: string,
   ): Promise<boolean> {
     // was a history service injected?
     if (this.userPasswordHistoryService) {

@@ -17,7 +17,7 @@ describe(AuthLocalValidateUserService.name, () => {
     } as unknown as AuthLocalUserModelServiceInterface;
 
     passwordValidationService = {
-      validateObject: jest.fn(),
+      validate: jest.fn(),
     } as unknown as PasswordValidationServiceInterface;
 
     service = new AuthLocalValidateUserService(
@@ -66,7 +66,7 @@ describe(AuthLocalValidateUserService.name, () => {
       jest.spyOn(userModelService, 'byUsername').mockResolvedValue(USER);
       jest.spyOn(service, 'isActive').mockResolvedValue(true);
       jest
-        .spyOn(passwordValidationService, 'validateObject')
+        .spyOn(passwordValidationService, 'validate')
         .mockResolvedValue(false);
 
       const t = () =>
@@ -82,9 +82,7 @@ describe(AuthLocalValidateUserService.name, () => {
     it('should return the user if the user is found, active, and the password is valid', async () => {
       jest.spyOn(userModelService, 'byUsername').mockResolvedValue(USER);
       jest.spyOn(service, 'isActive').mockResolvedValue(true);
-      jest
-        .spyOn(passwordValidationService, 'validateObject')
-        .mockResolvedValue(true);
+      jest.spyOn(passwordValidationService, 'validate').mockResolvedValue(true);
 
       const result = await service.validateUser({
         username: USER.username,

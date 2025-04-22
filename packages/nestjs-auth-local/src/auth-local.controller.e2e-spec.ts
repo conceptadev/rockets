@@ -19,7 +19,7 @@ describe('AuthLocalController (e2e)', () => {
     })
       .overrideProvider(PasswordValidationService)
       .useValue({
-        validateObject: () => {
+        validate: () => {
           return true;
         },
       })

@@ -11,7 +11,6 @@ export * from './interfaces/password-options.interface';
 export * from './interfaces/password-storage-service.interface';
 export * from './interfaces/password-validation-service.interface';
 export * from './interfaces/password-creation-service.interface';
-export { PasswordCreateObjectOptionsInterface } from './interfaces/password-create-object-options.interface';
 
 export { PasswordException } from './exceptions/password.exception';
 export { PasswordCurrentRequiredException } from './exceptions/password-current-required.exception';

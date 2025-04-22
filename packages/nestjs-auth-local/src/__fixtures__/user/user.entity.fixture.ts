@@ -12,7 +12,7 @@ export class UserFixture
 
   password!: string;
 
-  passwordHash!: string | null;
+  passwordHash!: string;
 
-  passwordSalt!: string | null;
+  passwordSalt!: string;
 }

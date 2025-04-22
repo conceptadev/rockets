@@ -138,11 +138,10 @@ describe('User Controller (password e2e)', () => {
         expect(updatedUser).toBeInstanceOf(UserEntityFixture);
 
         if (updatedUser) {
-          const isPasswordValid =
-            await passwordValidationService.validateObject(
-              userNewPassword,
-              updatedUser,
-            );
+          const isPasswordValid = await passwordValidationService.validate({
+            password: userNewPassword,
+            ...updatedUser,
+          });
           expect(isPasswordValid).toEqual<boolean>(true);
         } else {
           fail('User not found');
@@ -230,11 +229,10 @@ describe('User Controller (password e2e)', () => {
         expect(updatedUser).toBeInstanceOf(UserEntityFixture);
 
         if (updatedUser) {
-          const isPasswordValid =
-            await passwordValidationService.validateObject(
-              userNewPassword,
-              updatedUser,
-            );
+          const isPasswordValid = await passwordValidationService.validate({
+            password: userNewPassword,
+            ...updatedUser,
+          });
           expect(isPasswordValid).toEqual<boolean>(true);
         } else {
           fail('User not updated');

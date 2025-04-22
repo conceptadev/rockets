@@ -13,14 +13,14 @@ export abstract class UserPasswordHistoryPostgresEntity
   /**
    * Password hash
    */
-  @Column({ type: 'text', nullable: true, default: null })
-  passwordHash: string | null = null;
+  @Column({ type: 'text', nullable: true })
+  passwordHash!: string;
 
   /**
    * Password salt
    */
-  @Column({ type: 'text', nullable: true, default: null })
-  passwordSalt: string | null = null;
+  @Column({ type: 'text', nullable: true })
+  passwordSalt!: string;
 
   /**
    * User ID
