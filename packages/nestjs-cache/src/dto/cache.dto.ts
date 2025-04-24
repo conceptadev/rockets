@@ -1,8 +1,6 @@
 import { Exclude, Expose, Type } from 'class-transformer';
-import { Allow, IsOptional, IsString, ValidateNested } from 'class-validator';
-import { ReferenceIdInterface } from '@concepta/nestjs-common';
-import { CacheInterface } from '@concepta/nestjs-common';
-import { CommonEntityDto, ReferenceIdDto } from '@concepta/nestjs-common';
+import { Allow, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { CacheInterface, CommonEntityDto } from '@concepta/nestjs-common';
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
@@ -63,13 +61,13 @@ export class CacheDto extends CommonEntityDto implements CacheInterface {
    * Assignee
    */
   @Expose()
-  @Type(() => ReferenceIdDto)
   @ApiProperty({
-    type: ReferenceIdDto,
-    description: 'assignee',
+    type: 'string',
+    description: 'assignee id',
   })
-  @ValidateNested()
-  assignee: ReferenceIdInterface = new ReferenceIdDto();
+  @IsString()
+  @IsNotEmpty()
+  assigneeId!: string;
 
   /**
    * expirationDate

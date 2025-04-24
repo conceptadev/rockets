@@ -4,18 +4,14 @@ import {
   FederatedAsyncOptions,
   FederatedModuleClass,
   FederatedOptions,
-  createFederatedExports,
-  createFederatedImports,
-  createFederatedProviders,
 } from './federated.module-definition';
-import { FederatedMutateService } from './services/federated-mutate.service';
+import { FederatedModelService } from './services/federated-model.service';
 import { FederatedOAuthService } from './services/federated-oauth.service';
 import { FederatedService } from './services/federated.service';
-import { FederatedMissingEntitiesOptionsException } from './exceptions/federated-missing-entities-options.exception';
 
 @Module({
-  providers: [FederatedService, FederatedOAuthService, FederatedMutateService],
-  exports: [FederatedService, FederatedOAuthService, FederatedMutateService],
+  providers: [FederatedService, FederatedOAuthService, FederatedModelService],
+  exports: [FederatedService, FederatedOAuthService, FederatedModelService],
 })
 export class FederatedModule extends FederatedModuleClass {
   static register(options: FederatedOptions): DynamicModule {
@@ -32,20 +28,5 @@ export class FederatedModule extends FederatedModuleClass {
 
   static forRootAsync(options: FederatedAsyncOptions): DynamicModule {
     return super.registerAsync({ ...options, global: true });
-  }
-
-  static forFeature(options: FederatedOptions): DynamicModule {
-    const { entities } = options;
-
-    if (!entities) {
-      throw new FederatedMissingEntitiesOptionsException();
-    }
-
-    return {
-      module: FederatedModule,
-      imports: createFederatedImports({ entities }),
-      providers: createFederatedProviders({ overrides: options }),
-      exports: createFederatedExports(),
-    };
   }
 }

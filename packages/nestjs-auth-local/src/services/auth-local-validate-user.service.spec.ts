@@ -1,6 +1,6 @@
 import { PasswordValidationServiceInterface } from '@concepta/nestjs-password';
 import { AuthLocalValidateUserService } from './auth-local-validate-user.service';
-import { AuthLocalUserLookupServiceInterface } from '../interfaces/auth-local-user-lookup-service.interface';
+import { AuthLocalUserModelServiceInterface } from '../interfaces/auth-local-user-model-service.interface';
 import { AuthLocalValidateUserInterface } from '../interfaces/auth-local-validate-user.interface';
 
 describe(AuthLocalValidateUserService.name, () => {
@@ -8,20 +8,20 @@ describe(AuthLocalValidateUserService.name, () => {
   const PASSWORD = 'test';
 
   let service: AuthLocalValidateUserService;
-  let userLookupService: AuthLocalUserLookupServiceInterface;
+  let userModelService: AuthLocalUserModelServiceInterface;
   let passwordValidationService: PasswordValidationServiceInterface;
 
   beforeEach(() => {
-    userLookupService = {
+    userModelService = {
       byUsername: jest.fn(),
-    } as unknown as AuthLocalUserLookupServiceInterface;
+    } as unknown as AuthLocalUserModelServiceInterface;
 
     passwordValidationService = {
-      validateObject: jest.fn(),
+      validate: jest.fn(),
     } as unknown as PasswordValidationServiceInterface;
 
     service = new AuthLocalValidateUserService(
-      userLookupService,
+      userModelService,
       passwordValidationService,
     );
   });
@@ -36,7 +36,7 @@ describe(AuthLocalValidateUserService.name, () => {
       passwordSalt: 'salt',
     };
     it('should throw an error if no user is found for the given username', async () => {
-      jest.spyOn(userLookupService, 'byUsername').mockResolvedValue(null);
+      jest.spyOn(userModelService, 'byUsername').mockResolvedValue(null);
 
       const t = () =>
         service.validateUser({
@@ -49,7 +49,7 @@ describe(AuthLocalValidateUserService.name, () => {
     });
 
     it('should throw an error if the user is inactive', async () => {
-      jest.spyOn(userLookupService, 'byUsername').mockResolvedValue(USER);
+      jest.spyOn(userModelService, 'byUsername').mockResolvedValue(USER);
       jest.spyOn(service, 'isActive').mockResolvedValue(false);
 
       const t = () =>
@@ -63,10 +63,10 @@ describe(AuthLocalValidateUserService.name, () => {
     });
 
     it('should throw an error if the password is invalid', async () => {
-      jest.spyOn(userLookupService, 'byUsername').mockResolvedValue(USER);
+      jest.spyOn(userModelService, 'byUsername').mockResolvedValue(USER);
       jest.spyOn(service, 'isActive').mockResolvedValue(true);
       jest
-        .spyOn(passwordValidationService, 'validateObject')
+        .spyOn(passwordValidationService, 'validate')
         .mockResolvedValue(false);
 
       const t = () =>
@@ -80,11 +80,9 @@ describe(AuthLocalValidateUserService.name, () => {
     });
 
     it('should return the user if the user is found, active, and the password is valid', async () => {
-      jest.spyOn(userLookupService, 'byUsername').mockResolvedValue(USER);
+      jest.spyOn(userModelService, 'byUsername').mockResolvedValue(USER);
       jest.spyOn(service, 'isActive').mockResolvedValue(true);
-      jest
-        .spyOn(passwordValidationService, 'validateObject')
-        .mockResolvedValue(true);
+      jest.spyOn(passwordValidationService, 'validate').mockResolvedValue(true);
 
       const result = await service.validateUser({
         username: USER.username,

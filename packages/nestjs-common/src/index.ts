@@ -24,7 +24,9 @@ export { NotAnErrorException } from './exceptions/not-an-error.exception';
 // Utility types and functions
 export { LiteralObject } from './utils/interfaces/literal-object.interface';
 export { Type } from './utils/interfaces/type.interface';
+export { DeepPartial } from './utils/deep-partial';
 export { mapNonErrorToException } from './utils/map-non-error-to-exception.util';
+export { mapHttpStatus } from './utils/map-http-status.util';
 
 // Reference types
 export {
@@ -39,31 +41,40 @@ export {
 // Reference interfaces
 export { ReferenceActiveInterface } from './reference/interfaces/reference-active.interface';
 export { ReferenceAssigneeInterface } from './reference/interfaces/reference-assignee.interface';
+export { ReferenceAssignmentInterface } from './reference/interfaces/reference-assignment.interface';
 export { ReferenceEmailInterface } from './reference/interfaces/reference-email.interface';
 export { ReferenceIdInterface } from './reference/interfaces/reference-id.interface';
-export { ReferenceQueryOptionsInterface } from './reference/interfaces/reference-query-options.interface';
 export { ReferenceSubjectInterface } from './reference/interfaces/reference-subject.interface';
 export { ReferenceUsernameInterface } from './reference/interfaces/reference-username.interface';
 export { ReferenceUserInterface } from './reference/interfaces/reference-user.interface';
 export { ReferenceRoleInterface } from './reference/interfaces/reference-role.interface';
 export { ReferenceRolesInterface } from './reference/interfaces/reference-roles.interface';
 
-// role interface
-export { RoleAssignmentInterface } from './domain/role/interfaces/role-assignment.interface';
-export { RoleAssignmentCreatableInterface } from './domain/role/interfaces/role-assignment-creatable.interface';
-export { RoleAssigneesInterface } from './domain/role/interfaces/role-assignees.interface';
+// model exceptions
+export { ModelQueryException } from './model/exceptions/model-query.exception';
+export { ModelMutateException } from './model/exceptions/model-mutate.exception';
+export { ModelValidationException } from './model/exceptions/model-validation.exception';
+export { ModelIdNoMatchException } from './model/exceptions/model-id-no-match.exception';
 
-// Lookup interfaces
-export { LookupEmailInterface } from './reference/interfaces/lookup/lookup-email.interface';
-export { LookupIdInterface } from './reference/interfaces/lookup/lookup-id.interface';
-export { LookupSubjectInterface } from './reference/interfaces/lookup/lookup-subject.interface';
-export { LookupUsernameInterface } from './reference/interfaces/lookup/lookup-username.interface';
+// model services
+export { ModelService } from './model/model.service';
+export { ModelServiceInterface } from './model/interfaces/model-service.interface';
 
-// Mutation interfaces
-export { CreateOneInterface } from './reference/interfaces/mutate/create-one.interface';
-export { RemoveOneInterface } from './reference/interfaces/mutate/remove-one.interface';
-export { ReplaceOneInterface } from './reference/interfaces/mutate/replace-one.interface';
-export { UpdateOneInterface } from './reference/interfaces/mutate/update-one.interface';
+// model query interfaces
+export { FindInterface } from './model/interfaces/query/find.interface';
+export { ByEmailInterface } from './model/interfaces/query/by-email.interface';
+export { ByIdInterface } from './model/interfaces/query/by-id.interface';
+export { BySubjectInterface } from './model/interfaces/query/by-subject.interface';
+export { ByUsernameInterface } from './model/interfaces/query/by-username.interface';
+
+// model mutation interfaces
+export { CreateOneInterface } from './model/interfaces/mutate/create-one.interface';
+export { RemoveOneInterface } from './model/interfaces/mutate/remove-one.interface';
+export { ReplaceOneInterface } from './model/interfaces/mutate/replace-one.interface';
+export { UpdateOneInterface } from './model/interfaces/mutate/update-one.interface';
+
+// Repository interfaces
+export { RepositoryInterface } from './repository/interfaces/repository.interface';
 
 // Audit types
 export {
@@ -93,5 +104,5 @@ export { RuntimeExceptionInterface } from './exceptions/interfaces/runtime-excep
 // exceptions
 export { RuntimeException } from './exceptions/runtime.exception';
 
-// utils
-export { mapHttpStatus } from './utils/map-http-status.util';
+// !!! THESE EXPORTS ARE TEMPORARY AND MAY BE REMOVED IN THE FUTURE !!!
+export { RepositoryInternals } from './repository/interfaces/repository-internals';

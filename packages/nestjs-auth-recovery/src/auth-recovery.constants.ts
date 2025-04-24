@@ -12,13 +12,10 @@ export const AuthRecoveryEmailService = Symbol(
   '__AUTH_RECOVERY_MODULE_EMAIL_SERVICE_TOKEN__',
 );
 
-export const AuthRecoveryUserLookupService = Symbol(
-  '__AUTH_RECOVERY_MODULE_USER_LOOKUP_SERVICE_TOKEN__',
+export const AuthRecoveryUserModelService = Symbol(
+  '__AUTH_RECOVERY_MODULE_USER_MODEL_SERVICE_TOKEN__',
 );
 
-export const AuthRecoveryUserMutateService = Symbol(
-  '__AUTH_RECOVERY_MODULE_USER_MUTATE_SERVICE_TOKEN__',
+export const AuthRecoveryUserPasswordService = Symbol(
+  '__AUTH_RECOVERY_MODULE_USER_PASSWORD_SERVICE_TOKEN__',
 );
-
-export const AUTH_RECOVERY_MODULE_ENTITY_MANAGER_PROXY_TOKEN =
-  'AUTH_RECOVERY_MODULE_ENTITY_MANAGER_PROXY_TOKEN';

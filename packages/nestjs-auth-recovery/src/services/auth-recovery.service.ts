@@ -3,25 +3,20 @@ import { Inject, Injectable } from '@nestjs/common';
 import { AuthRecoveryServiceInterface } from '../interfaces/auth-recovery.service.interface';
 import { AuthRecoverySettingsInterface } from '../interfaces/auth-recovery-settings.interface';
 import { AuthRecoveryOtpServiceInterface } from '../interfaces/auth-recovery-otp.service.interface';
-import { AuthRecoveryUserLookupServiceInterface } from '../interfaces/auth-recovery-user-lookup.service.interface';
-import { AuthRecoveryUserMutateServiceInterface } from '../interfaces/auth-recovery-user-mutate.service.interface';
+import { AuthRecoveryUserModelServiceInterface } from '../interfaces/auth-recovery-user-model.service.interface';
 import {
   AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
-  AUTH_RECOVERY_MODULE_ENTITY_MANAGER_PROXY_TOKEN,
   AuthRecoveryOtpService,
-  AuthRecoveryUserLookupService,
-  AuthRecoveryUserMutateService,
+  AuthRecoveryUserModelService,
+  AuthRecoveryUserPasswordService,
 } from '../auth-recovery.constants';
 import { AuthRecoveryNotificationService } from './auth-recovery-notification.service';
 import {
-  ReferenceAssigneeInterface,
+  AssigneeRelationInterface,
   ReferenceIdInterface,
 } from '@concepta/nestjs-common';
-import {
-  EntityManagerProxy,
-  QueryOptionsInterface,
-} from '@concepta/typeorm-common';
 import { AuthRecoveryNotificationServiceInterface } from '../interfaces/auth-recovery-notification.service.interface';
+import { UserPasswordServiceInterface } from '@concepta/nestjs-user';
 
 @Injectable()
 export class AuthRecoveryService implements AuthRecoveryServiceInterface {
@@ -30,14 +25,12 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
     private readonly config: AuthRecoverySettingsInterface,
     @Inject(AuthRecoveryOtpService)
     private readonly otpService: AuthRecoveryOtpServiceInterface,
-    @Inject(AuthRecoveryUserLookupService)
-    private readonly userLookupService: AuthRecoveryUserLookupServiceInterface,
-    @Inject(AuthRecoveryUserMutateService)
-    private readonly userMutateService: AuthRecoveryUserMutateServiceInterface,
+    @Inject(AuthRecoveryUserModelService)
+    private readonly userModelService: AuthRecoveryUserModelServiceInterface,
+    @Inject(AuthRecoveryUserPasswordService)
+    private readonly userPasswordService: UserPasswordServiceInterface,
     @Inject(AuthRecoveryNotificationService)
     private readonly notificationService: AuthRecoveryNotificationServiceInterface,
-    @Inject(AUTH_RECOVERY_MODULE_ENTITY_MANAGER_PROXY_TOKEN)
-    private readonly entityManagerProxy: EntityManagerProxy,
   ) {}
 
   /**
@@ -45,12 +38,9 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
    *
    * @param email - user email
    */
-  async recoverLogin(
-    email: string,
-    queryOptions?: QueryOptionsInterface,
-  ): Promise<void> {
+  async recoverLogin(email: string): Promise<void> {
     // recover the user by providing an email
-    const user = await this.userLookupService.byEmail(email, queryOptions);
+    const user = await this.userModelService.byEmail(email);
 
     // did we find the user?
     if (user) {
@@ -70,12 +60,9 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
    *
    * @param email - user email
    */
-  async recoverPassword(
-    email: string,
-    queryOptions?: QueryOptionsInterface,
-  ): Promise<void> {
+  async recoverPassword(email: string): Promise<void> {
     // recover the user by providing an email
-    const user = await this.userLookupService.byEmail(email, queryOptions);
+    const user = await this.userModelService.byEmail(email);
 
     // did we find a user?
     if (user) {
@@ -96,11 +83,8 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
           category,
           type,
           expiresIn,
-          assignee: {
-            id: user.id,
-          },
+          assigneeId: user.id,
         },
-        queryOptions,
         clearOnCreate: clearOtpOnCreate,
         rateSeconds,
         rateThreshold,
@@ -127,8 +111,7 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
   async validatePasscode(
     passcode: string,
     deleteIfValid = false,
-    queryOptions?: QueryOptionsInterface,
-  ): Promise<ReferenceAssigneeInterface | null> {
+  ): Promise<AssigneeRelationInterface | null> {
     // extract required properties
     const { category, assignment } = this.config.otp;
 
@@ -137,7 +120,6 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
       assignment,
       { category, passcode },
       deleteIfValid,
-      queryOptions,
     );
   }
 
@@ -150,49 +132,36 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
   async updatePassword(
     passcode: string,
     newPassword: string,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<ReferenceIdInterface | null> {
-    // run in transaction
-    return this.entityManagerProxy
-      .transaction(queryOptions)
-      .commit(async (transaction): Promise<ReferenceIdInterface | null> => {
-        // nested query options
-        const nestedQueryOptions = { ...queryOptions, transaction };
+    // get otp by passcode, but no delete it until all workflow pass
+    const otp = await this.validatePasscode(passcode, false);
 
-        // get otp by passcode, but no delete it until all workflow pass
-        const otp = await this.validatePasscode(
-          passcode,
-          false,
-          nestedQueryOptions,
+    // did we get an otp?
+    if (otp) {
+      // get user by otp assigneeId
+      const user = await this.userModelService.byId(otp.assigneeId);
+
+      if (user) {
+        // call set the password
+        await this.userPasswordService.setPassword(
+          {
+            password: newPassword,
+          },
+          otp.assigneeId,
         );
 
-        // did we get an otp?
-        if (otp) {
-          // call user mutate service
-          const user = await this.userMutateService.update(
-            {
-              id: otp.assignee.id,
-              password: newPassword,
-            },
-            nestedQueryOptions,
-          );
+        await this.notificationService.sendPasswordUpdatedSuccessfullyEmail(
+          user.email,
+        );
 
-          if (user) {
-            await this.notificationService.sendPasswordUpdatedSuccessfullyEmail(
-              user.email,
-            );
-            await this.revokeAllUserPasswordRecoveries(
-              user.email,
-              nestedQueryOptions,
-            );
-          }
+        await this.revokeAllUserPasswordRecoveries(user.email);
+      }
 
-          return user;
-        }
+      return user;
+    }
 
-        // otp was not found
-        return null;
-      });
+    // otp was not found
+    return null;
   }
 
   /**
@@ -200,28 +169,19 @@ export class AuthRecoveryService implements AuthRecoveryServiceInterface {
    *
    * @param email - user email
    */
-  async revokeAllUserPasswordRecoveries(
-    email: string,
-    queryOptions?: QueryOptionsInterface,
-  ): Promise<void> {
+  async revokeAllUserPasswordRecoveries(email: string): Promise<void> {
     // recover users password by providing an email
-    const user = await this.userLookupService.byEmail(email, queryOptions);
+    const user = await this.userModelService.byEmail(email);
 
     // did we find a user?
     if (user) {
       // extract required otp properties
       const { category, assignment } = this.config.otp;
       // clear all user's otps in DB
-      await this.otpService.clear(
-        assignment,
-        {
-          category,
-          assignee: {
-            id: user.id,
-          },
-        },
-        queryOptions,
-      );
+      await this.otpService.clear(assignment, {
+        category,
+        assigneeId: user.id,
+      });
     }
 
     // !!! Falling through to void is intentional              !!!!

@@ -1,7 +1,7 @@
 import { OtpInterface } from './otp.interface';
 
 export interface OtpCreatableInterface
-  extends Pick<OtpInterface, 'category' | 'type' | 'assignee'> {
+  extends Pick<OtpInterface, 'category' | 'type' | 'assigneeId'> {
   expiresIn: string;
   /**
    * The minimum number of seconds that must pass between OTP generation requests.

@@ -1,44 +1,36 @@
 import { FactoryProvider } from '@nestjs/common';
 import { mock } from 'jest-mock-extended';
 import { OtpServiceFixture } from './__fixtures__/otp/otp.service.fixture';
-import { UserLookupServiceFixture } from './__fixtures__/user/services/user-lookup.service.fixture';
-import { UserMutateServiceFixture } from './__fixtures__/user/services/user-mutate.service.fixture';
+import { UserModelServiceFixture } from './__fixtures__/user/services/user-model.service.fixture';
 import {
   AUTH_VERIFY_MODULE_SETTINGS_TOKEN,
   AuthVerifyEmailService,
   AuthVerifyOtpService,
-  AuthVerifyUserLookupService,
-  AuthVerifyUserMutateService,
+  AuthVerifyUserModelService,
 } from './auth-verify.constants';
 import { AuthVerifyController } from './auth-verify.controller';
 import {
   createAuthVerifyControllers,
   createAuthVerifyEmailServiceProvider,
-  createAuthVerifyEntityManagerProxyProvider,
   createAuthVerifyExports,
   createAuthVerifyNotificationServiceProvider,
   createAuthVerifyOtpServiceProvider,
-  createAuthVerifyUserLookupServiceProvider,
-  createAuthVerifyUserMutateServiceProvider,
+  createAuthVerifyUserModelServiceProvider,
 } from './auth-verify.module-definition';
 import { AuthVerifyEmailServiceInterface } from './interfaces/auth-verify-email.service.interface';
 import { AuthVerifyService } from './services/auth-verify.service';
-import { AuthVerifyUserLookupServiceInterface } from './interfaces/auth-verify-user-lookup.service.interface';
-import { AuthVerifyUserMutateServiceInterface } from './interfaces/auth-verify-user-mutate.service.interface';
+import { AuthVerifyUserModelServiceInterface } from './interfaces/auth-verify-user-model.service.interface';
 import { AuthVerifyNotificationServiceInterface } from './interfaces/auth-verify-notification.service.interface';
 import { AuthVerifyNotificationService } from './services/auth-verify-notification.service';
-import { EntityManagerProxy } from '@concepta/typeorm-common';
 
 describe('AuthVerifyModuleDefinition', () => {
   const mockEmailService = mock<AuthVerifyEmailServiceInterface>();
   const mockAuthVerifyNotification =
     mock<AuthVerifyNotificationServiceInterface>();
-  const mockEntityManagerProxy = mock<EntityManagerProxy>();
   const mockAuthVerifyOptions = {
     emailService: mockEmailService,
     otpService: new OtpServiceFixture(),
-    userLookupService: new UserLookupServiceFixture(),
-    userMutateService: new UserMutateServiceFixture(),
+    userModelService: new UserModelServiceFixture(),
   };
   describe(createAuthVerifyExports.name, () => {
     it('should return an array with the expected tokens', () => {
@@ -47,8 +39,7 @@ describe('AuthVerifyModuleDefinition', () => {
         AUTH_VERIFY_MODULE_SETTINGS_TOKEN,
         AuthVerifyOtpService,
         AuthVerifyEmailService,
-        AuthVerifyUserLookupService,
-        AuthVerifyUserMutateService,
+        AuthVerifyUserModelService,
         AuthVerifyService,
       ]);
     });
@@ -166,66 +157,33 @@ describe('AuthVerifyModuleDefinition', () => {
     });
   });
 
-  describe(createAuthVerifyUserLookupServiceProvider.name, () => {
+  describe(createAuthVerifyUserModelServiceProvider.name, () => {
     it('should return a have no default', async () => {
       const provider =
-        createAuthVerifyUserLookupServiceProvider() as FactoryProvider;
+        createAuthVerifyUserModelServiceProvider() as FactoryProvider;
 
       const useFactoryResult = await provider.useFactory({});
 
       expect(useFactoryResult).toBe(undefined);
     });
 
-    it('should override userLookupService', async () => {
-      const provider = createAuthVerifyUserLookupServiceProvider({
-        userLookupService: mockAuthVerifyOptions.userLookupService,
+    it('should override userModelService', async () => {
+      const provider = createAuthVerifyUserModelServiceProvider({
+        userModelService: mockAuthVerifyOptions.userModelService,
       }) as FactoryProvider;
 
       const useFactoryResult = await provider.useFactory();
 
-      expect(useFactoryResult).toBe(mockAuthVerifyOptions.userLookupService);
+      expect(useFactoryResult).toBe(mockAuthVerifyOptions.userModelService);
     });
 
-    it('should return an userLookupService from initialization', async () => {
+    it('should return an userModelService from initialization', async () => {
       const provider =
-        createAuthVerifyUserLookupServiceProvider() as FactoryProvider;
+        createAuthVerifyUserModelServiceProvider() as FactoryProvider;
 
-      const mockService = mock<AuthVerifyUserLookupServiceInterface>();
+      const mockService = mock<AuthVerifyUserModelServiceInterface>();
       const useFactoryResult = await provider.useFactory({
-        userLookupService: mockService,
-      });
-
-      expect(useFactoryResult).toBe(mockService);
-    });
-  });
-
-  describe(createAuthVerifyUserMutateServiceProvider.name, () => {
-    it('should return a have no default', async () => {
-      const provider =
-        createAuthVerifyUserMutateServiceProvider() as FactoryProvider;
-
-      const useFactoryResult = await provider.useFactory({});
-
-      expect(useFactoryResult).toBe(undefined);
-    });
-
-    it('should override userMutateService', async () => {
-      const provider = createAuthVerifyUserMutateServiceProvider({
-        userMutateService: mockAuthVerifyOptions.userMutateService,
-      }) as FactoryProvider;
-
-      const useFactoryResult = await provider.useFactory();
-
-      expect(useFactoryResult).toBe(mockAuthVerifyOptions.userMutateService);
-    });
-
-    it('should return an userMutateService from initialization', async () => {
-      const provider =
-        createAuthVerifyUserMutateServiceProvider() as FactoryProvider;
-
-      const mockService = mock<AuthVerifyUserMutateServiceInterface>();
-      const useFactoryResult = await provider.useFactory({
-        userMutateService: mockService,
+        userModelService: mockService,
       });
 
       expect(useFactoryResult).toBe(mockService);
@@ -261,37 +219,6 @@ describe('AuthVerifyModuleDefinition', () => {
       });
 
       expect(useFactoryResult).toBe(mockAuthVerifyNotification);
-    });
-  });
-  describe(createAuthVerifyEntityManagerProxyProvider.name, () => {
-    it('should return a default AuthVerifyNotificationService', async () => {
-      const provider =
-        createAuthVerifyEntityManagerProxyProvider() as FactoryProvider;
-
-      const useFactoryResult = await provider.useFactory({});
-
-      expect(useFactoryResult).toBeInstanceOf(EntityManagerProxy);
-    });
-
-    it('should override notificationService', async () => {
-      const provider = createAuthVerifyEntityManagerProxyProvider({
-        entityManagerProxy: mockEntityManagerProxy,
-      }) as FactoryProvider;
-
-      const useFactoryResult = await provider.useFactory();
-
-      expect(useFactoryResult).toBe(mockEntityManagerProxy);
-    });
-
-    it('should return an notificationService from initialization', async () => {
-      const provider =
-        createAuthVerifyEntityManagerProxyProvider() as FactoryProvider;
-
-      const useFactoryResult = await provider.useFactory({
-        entityManagerProxy: mockEntityManagerProxy,
-      });
-
-      expect(useFactoryResult).toBe(mockEntityManagerProxy);
     });
   });
 });

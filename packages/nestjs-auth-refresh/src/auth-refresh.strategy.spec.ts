@@ -2,7 +2,7 @@ import { AuthRefreshStrategy } from './auth-refresh.strategy';
 import { AuthRefreshSettingsInterface } from './interfaces/auth-refresh-settings.interface';
 import { mock } from 'jest-mock-extended';
 import { VerifyTokenServiceInterface } from '@concepta/nestjs-authentication';
-import { AuthRefreshUserLookupServiceInterface } from './interfaces/auth-refresh-user-lookup-service.interface';
+import { AuthRefreshUserModelServiceInterface } from './interfaces/auth-refresh-user-model-service.interface';
 import { randomUUID } from 'crypto';
 import { AuthorizationPayloadInterface } from '@concepta/nestjs-common';
 import { AuthRefreshUnauthorizedException } from './exceptions/auth-refresh-unauthorized.exception';
@@ -14,7 +14,7 @@ describe(AuthRefreshStrategy, () => {
 
   let user: UserFixture;
   let settings: Partial<AuthRefreshSettingsInterface>;
-  let userLookUpService: AuthRefreshUserLookupServiceInterface;
+  let userModelService: AuthRefreshUserModelServiceInterface;
   let verifyTokenService: VerifyTokenServiceInterface;
   let authRefreshStrategy: AuthRefreshStrategy;
   let authorizationPayloadInterface: AuthorizationPayloadInterface;
@@ -24,12 +24,12 @@ describe(AuthRefreshStrategy, () => {
 
     settings = mock<Partial<AuthRefreshSettingsInterface>>();
 
-    userLookUpService = mock<AuthRefreshUserLookupServiceInterface>();
+    userModelService = mock<AuthRefreshUserModelServiceInterface>();
     verifyTokenService = mock<VerifyTokenServiceInterface>();
     authRefreshStrategy = new AuthRefreshStrategy(
       settings,
       verifyTokenService,
-      userLookUpService,
+      userModelService,
     );
 
     user = new UserFixture();
@@ -39,7 +39,7 @@ describe(AuthRefreshStrategy, () => {
       sub: USERNAME,
     };
 
-    jest.spyOn(userLookUpService, 'bySubject').mockResolvedValue(user);
+    jest.spyOn(userModelService, 'bySubject').mockResolvedValue(user);
   });
 
   it('constructor', async () => {
@@ -47,7 +47,7 @@ describe(AuthRefreshStrategy, () => {
     authRefreshStrategy = new AuthRefreshStrategy(
       settings,
       verifyTokenService,
-      userLookUpService,
+      userModelService,
     );
     expect(true).toBeTruthy();
   });
@@ -61,7 +61,7 @@ describe(AuthRefreshStrategy, () => {
     });
 
     it(`should throw UnauthorizedException`, async () => {
-      jest.spyOn(userLookUpService, 'bySubject').mockResolvedValue(null);
+      jest.spyOn(userModelService, 'bySubject').mockResolvedValue(null);
 
       const t = () =>
         authRefreshStrategy.validate(authorizationPayloadInterface);

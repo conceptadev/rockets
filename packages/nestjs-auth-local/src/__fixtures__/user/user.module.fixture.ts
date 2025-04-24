@@ -1,9 +1,9 @@
 import { Global, Module } from '@nestjs/common';
-import { UserLookupServiceFixture } from './user-lookup.service.fixture';
+import { UserModelServiceFixture } from './user-model.service.fixture';
 
 @Global()
 @Module({
-  providers: [UserLookupServiceFixture],
-  exports: [UserLookupServiceFixture],
+  providers: [UserModelServiceFixture],
+  exports: [UserModelServiceFixture],
 })
 export class UserModuleFixture {}

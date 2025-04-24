@@ -1,14 +1,8 @@
-export interface PasswordValidateOptionsInterface {
-  /**
-   * Plain text password
-   */
-  password: string;
-  /**
-   * Hashed password
-   */
-  passwordHash: string;
-  /**
-   * Salt used when hashing
-   */
-  passwordSalt: string;
-}
+import {
+  PasswordPlainInterface,
+  PasswordStorageInterface,
+} from '@concepta/nestjs-common';
+
+export interface PasswordValidateOptionsInterface
+  extends PasswordPlainInterface,
+    PasswordStorageInterface {}

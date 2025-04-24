@@ -21,19 +21,15 @@ Verify user password using email
   - [1. How to define the AuthVerifySettings](#1-how-to-define-the-authverifysettings)
   - [2. How to define the OtpService](#2-how-to-define-the-otpservice)
   - [3. How to define EmailService](#3-how-to-define-the-emailservice)
-  - [4. How to define the UserLookupService](#4-how-to-define-the-userlookupservice)
-  - [5. How to define the UserMutateService](#5-how-to-define-the-usermutateservice)
-  - [6. How to define the NotificationService](#6-how-to-define-the-notificationservice)
-  - [7. How to define the EntityManagerProxy](#7-how-to-define-the-entitymanagerproxy)
+  - [4. How to define the UserModelService](#4-how-to-define-the-usermodelservice)
+  - [5. How to define the NotificationService](#5-how-to-define-the-notificationservice)
 
 - [Engineering Concepts](#engineering-concepts)
   - [1. Dynamic Configuration Settings](#1-dynamic-configuration-settings)
   - [2. Dynamic OTP service](#2-dynamic-otp-service)
   - [3. Dynamic Email Service](#3-dynamic-email-service)
-  - [4. User Lookup Service](#4-user-lookup-service)
-  - [5. User Mutate Service](#5-user-mutate-service)
-  - [6. Notification Service (Optional)](#6-notification-service-optional)
-  - [7. Entity Manager Proxy (Optional)](#7-entity-manager-proxy-optional)
+  - [4. User Model Service](#4-user-model-service)
+  - [5. Notification Service (Optional)](#5-notification-service-optional)
 
 ## Tutorials
 
@@ -117,7 +113,7 @@ Let's take advantage of the following modules to set up the verify
 module:
 
 - [@concepta/nestjs-user](https://github.com/conceptadev/rockets/tree/main/packages/nestjs-user)
-  - Provides `UserLookupService` to get users and `UserMutateService` to
+  - Provides `UserModelService` to get users and to
     update them
 - [@concepta/nestjs-otp](https://github.com/conceptadev/rockets/tree/main/packages/nestjs-otp)
   - Provides `OtpService` to create one-time passwords
@@ -139,8 +135,7 @@ import { authVerifyDefaultConfig } from './config/auth-verify-default.config';
 import { AuthVerifyModule } from '@concepta/nestjs-auth-verify';
 import { EmailModule, EmailService } from '@concepta/nestjs-email';
 import {
-  UserLookupService,
-  UserMutateService,
+  UserModelService,
 } from '@concepta/nestjs-user';
 import {
   OtpService,
@@ -153,21 +148,18 @@ import {
     ///
     AuthVerifyModule.forRootAsync({
       inject: [
-        UserLookupService,
-        UserMutateService,
+        UserModelService,
         OtpService,
         EmailService,
         authVerifyDefaultConfig.KEY,
       ],
       useFactory: (
-        userLookupService,
-        userMutateService,
+        userModelService,
         otpService,
         emailService,
         settings: ConfigType<typeof authVerifyDefaultConfig>,
       ) => ({
-        userLookupService,
-        userMutateService,
+        userModelService,
         otpService,
         emailService,
         settings,
@@ -402,82 +394,39 @@ AuthVerifyModule.forRootAsync({
     }),
 ```
 
-### 4. How to define the UserLookupService
+### 4. How to define the UserModelService
 
 ```ts
 import {
-  LookupEmailInterface,
-  LookupIdInterface,
+  QueryEmailInterface,
+  QueryIdInterface,
+  ReferenceActiveInterface,
   ReferenceEmail,
   ReferenceId,
   ReferenceIdInterface,
   ReferenceUsernameInterface,
+  UpdateOneInterface,
 } from '@concepta/nestjs-common';
-import { QueryOptionsInterface } from '@concepta/typeorm-common';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class YourAuthVerifyUserLookupService
-  implements AuthVerifyUserLookupServiceInterface {
+export class YourAuthVerifyUserModelService
+  implements AuthVerifyUserModelServiceInterface {
   
   async findById(
     id: ReferenceId,
-    options?: QueryOptionsInterface,
   ): Promise<ReferenceIdInterface | null> {
     // your custom logic to find user by ID
   }
 
   async findByEmail(
     email: ReferenceEmail,
-    options?: QueryOptionsInterface,
   ): Promise<ReferenceIdInterface & ReferenceUsernameInterface | null> {
     // your custom logic to find user by email
   }
-}
-```
 
-Now let's add the new user lookup service to our module:
-
-```ts
-AuthVerifyModule.forRootAsync({
-  inject: [
-    //...
-    YourAuthVerifyUserLookupService,
-    //...
-  ],
-  useFactory: (
-    //...
-    userLookupService,
-    //...
-  ) => ({
-    //...
-    userLookupService,
-    //...
-  }),
-}),
-```
-
-### 5. How to define the UserMutateService
-
-Here's an example of how to implement the `UserMutateService`:
-
-```ts
-import {
-  ReferenceActiveInterface,
-  ReferenceEmailInterface,
-  ReferenceIdInterface,
-  UpdateOneInterface,
-} from '@concepta/nestjs-common';
-import { QueryOptionsInterface } from '@concepta/typeorm-common';
-import { Injectable } from '@nestjs/common';
-
-@Injectable()
-export class YourAuthVerifyUserMutateService
-  implements AuthVerifyUserMutateServiceInterface {
-  
   async update(
     user: ReferenceIdInterface & ReferenceActiveInterface,
-    options?: QueryOptionsInterface,
   ): Promise<
     ReferenceIdInterface & 
     ReferenceEmailInterface & 
@@ -488,28 +437,28 @@ export class YourAuthVerifyUserMutateService
 }
 ```
 
-Now let's add the new user mutate service to our module:
+Now let's add the new user model service to our module:
 
 ```ts
 AuthVerifyModule.forRootAsync({
   inject: [
     //...
-    YourAuthVerifyUserMutateService,
+    YourAuthVerifyUserModelService,
     //...
   ],
   useFactory: (
     //...
-    userMutateService,
+    userModelService,
     //...
   ) => ({
     //...
-    userMutateService,
+    userModelService,
     //...
   }),
 }),
 ```
 
-### 6. How to define the NotificationService
+### 5. How to define the NotificationService
 
 Here's an example of how to implement the `NotificationService`:
 
@@ -554,48 +503,6 @@ AuthVerifyModule.forRootAsync({
     //...
   }),
 }),
-```
-
-### 7. How to define the EntityManagerProxy
-
-Here's an example of how to implement the `EntityManagerProxy`:
-
-```ts
-
-import { EntityManager, ObjectLiteral, Repository } from 'typeorm';
-import { EntityManagerOptionInterface } from '../interfaces/entity-manager-option.interface';
-import { QueryOptionsInterface } from '../interfaces/query-options.interface';
-import { SafeTransactionOptionsInterface } from '../interfaces/safe-transaction-options.interface';
-import { TransactionProxy } from './transaction.proxy';
-
-export class EntityManagerProxy {
-  constructor(private _entityManager: EntityManager) {}
-
-  entityManager() {
-    return this._entityManager;
-  }
-
-  repository<T extends ObjectLiteral>(
-    repository: Repository<T>,
-    options?: QueryOptionsInterface & EntityManagerOptionInterface,
-  ): Repository<T> {
-    if (options?.transaction) {
-      return options.transaction.repository(repository);
-    } else if (
-      options?.entityManager &&
-      options?.entityManager !== repository.manager
-    ) {
-      return options.entityManager.withRepository<T, Repository<T>>(repository);
-    } else {
-      return repository;
-    }
-  }
-
-  transaction(options?: SafeTransactionOptionsInterface): TransactionProxy {
-    return new TransactionProxy(this._entityManager, options);
-  }
-}
-
 ```
 
 ## Engineering Concepts
@@ -658,43 +565,24 @@ which extends the `EmailSendInterface`. The key method to implement is:
 See [3. How to define the EmailService](#3-how-to-define-the-emailservice)
 under How-To Guides for more details on implementing the EmailService.
 
-### 4. User Lookup Service
+### 4. User Model Service
 
-The user lookup service is responsible for retrieving user information
+The user model service is responsible for retrieving user information
 during the verification process. It must implement the
-`AuthVerifyUserLookupServiceInterface` which extends both
-`LookupIdInterface` and `LookupEmailInterface`. The key methods to
-implement are:
+`AuthVerifyUserModelServiceInterface` which extends both
+`QueryIdInterface`, `QueryEmailInterface` and `UpdateOneInterface`. The key
+methods to implement are:
 
 - `byId()`: Retrieves a user by their unique identifier
 - `byEmail()`: Retrieves a user by their email address
+- `update()`: Updates user data with verification status changes
 
-The lookup service provides a standardized way to query user data
+The model service provides a standardized way to query user data
 regardless of your underlying user storage implementation. This
 abstraction allows the auth verification module to work with any user
 data source while maintaining a consistent interface.
 
-### 5. User Mutate Service
-
-The user mutate service handles updating user data during the verification
-process. It must implement the `AuthVerifyUserMutateServiceInterface` which
-extends the `UpdateOneInterface`. The key method to implement is:
-
-- `update()`: Updates user data with verification status changes
-
-This service is crucial for persisting verification state changes to your user
-records. For example, when a user successfully verifies their email, the mutate
-service updates their account to reflect the verified status.
-
-The mutate service works in conjunction with the lookup service to provide
-a complete user data management solution. While the lookup service handles
-retrieving user information, the mutate service manages modifications to
-user data.
-
-See [5. How to Define the UserMutateService](#5-how-to-define-the-usermutateservice)
-under How-To Guides for more details on implementing the UserMutateService.
-
-### 6. Notification Service (Optional)
+### 5. Notification Service (Optional)
 
 The notification service is an optional component that handles sending
 verification-related notifications to users. It must implement the
@@ -719,40 +607,3 @@ When implemented, the notification service:
 While optional, implementing a notification service can help standardize your
 verification-related communications and reduce code duplication. The module
 provides a default implementation that you can use or extend.
-
-See [6. How to Define the NotificationService](#6-how-to-define-the-notificationservice)
-under How-To Guides for more details on implementing the NotificationService.
-
-### 7. Entity Manager Proxy (Optional)
-
-The entity manager proxy is an optional component that provides transaction
-management capabilities for database operations. It wraps TypeORM's
-EntityManager to provide a consistent interface for managing database
-transactions across the verification process.
-
-When provided, the entity manager proxy:
-
-- Manages database transactions for verification operations
-- Ensures data consistency during multi-step processes
-- Provides rollback capabilities if errors occur
-
-The proxy is particularly useful when:
-
-- Updating user verification status
-- Creating and managing OTP tokens
-- Coordinating multiple database operations
-
-The EntityManagerProxy class offers several key methods:
-
-- `entityManager()`: Returns the underlying EntityManager instance
-- `repository()`: Gets a repository instance with transaction context
-- `transaction()`: Creates a new transaction context
-
-While optional, using the entity manager proxy is recommended when your
-verification process involves multiple database operations that need to
-maintain consistency. The module's core services are designed to work
-with the proxy when available.
-
-See [7. How to define the EntityManagerProxy](#7-how-to-define-the-entitymanagerproxy)
-under How-To Guides for more details on implementing and using
-the EntityManagerProxy.

@@ -9,9 +9,9 @@ import { AuthJwtModule } from '@concepta/nestjs-auth-jwt';
 import { OtpModule, OtpService } from '@concepta/nestjs-otp';
 import { EmailModule, EmailService } from '@concepta/nestjs-email';
 import {
-  UserLookupService,
+  UserModelService,
+  UserModelServiceInterface,
   UserModule,
-  UserMutateService,
 } from '@concepta/nestjs-user';
 
 import { AuthVerifyModule } from '../auth-verify.module';
@@ -34,21 +34,15 @@ import { MailerServiceFixture } from './email/mailer.service.fixture';
       },
     }),
     AuthJwtModule.forRootAsync({
-      inject: [UserLookupService],
-      useFactory: (userLookupService: UserLookupService) => ({
-        userLookupService,
+      inject: [UserModelService],
+      useFactory: (userModelService: UserModelServiceInterface) => ({
+        userModelService,
       }),
     }),
     AuthVerifyModule.forRootAsync({
-      inject: [UserLookupService, UserMutateService, OtpService, EmailService],
-      useFactory: (
-        userLookupService,
-        userMutateService,
-        otpService,
-        emailService,
-      ) => ({
-        userLookupService,
-        userMutateService,
+      inject: [UserModelService, OtpService, EmailService],
+      useFactory: (userModelService, otpService, emailService) => ({
+        userModelService,
         otpService,
         emailService,
       }),

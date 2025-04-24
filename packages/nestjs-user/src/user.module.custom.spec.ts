@@ -1,20 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserCrudService } from './services/user-crud.service';
-import { UserMutateService } from './services/user-mutate.service';
+import { UserModelService } from './services/user-model.service';
 import { UserPasswordService } from './services/user-password.service';
 import { UserController } from './user.controller';
 
 import { AppModuleCustomFixture } from './__fixtures__/app.module.custom.fixture';
-import { UserLookupCustomService } from './__fixtures__/services/user-lookup.custom.service';
+import { UserModelCustomService } from './__fixtures__/services/user-model.custom.service';
 import { UserModuleCustomFixture } from './__fixtures__/user.module.custom.fixture';
+import { UserModelServiceInterface } from './interfaces/user-model-service.interface';
 
 describe('AppModule', () => {
   let testModule: TestingModule;
   let userModule: UserModuleCustomFixture;
-  let userLookupService: UserLookupCustomService;
   let userCrudService: UserCrudService;
+  let userModelService: UserModelServiceInterface;
+  let userModelCustomService: UserModelCustomService;
   let userController: UserController;
-  let userMutateService: UserMutateService;
   let userPasswordService: UserPasswordService;
 
   beforeEach(async () => {
@@ -25,10 +26,10 @@ describe('AppModule', () => {
     userModule = testModule.get<UserModuleCustomFixture>(
       UserModuleCustomFixture,
     );
-    userLookupService = testModule.get<UserLookupCustomService>(
-      UserLookupCustomService,
+    userModelService = testModule.get<UserModelService>(UserModelService);
+    userModelCustomService = testModule.get<UserModelCustomService>(
+      UserModelCustomService,
     );
-    userMutateService = testModule.get<UserMutateService>(UserMutateService);
     userPasswordService =
       testModule.get<UserPasswordService>(UserPasswordService);
     userCrudService = testModule.get<UserCrudService>(UserCrudService);
@@ -43,8 +44,8 @@ describe('AppModule', () => {
   describe('module', () => {
     it('should be loaded', async () => {
       expect(userModule).toBeInstanceOf(UserModuleCustomFixture);
-      expect(userLookupService).toBeInstanceOf(UserLookupCustomService);
-      expect(userMutateService).toBeInstanceOf(UserMutateService);
+      expect(userModelService).toBeInstanceOf(UserModelService);
+      expect(userModelCustomService).toBeInstanceOf(UserModelCustomService);
       expect(userPasswordService).toBeInstanceOf(UserPasswordService);
       expect(userCrudService).toBeInstanceOf(UserCrudService);
       expect(userController).toBeInstanceOf(UserController);

@@ -17,7 +17,7 @@ import { AuthJwtOptionsExtrasInterface } from './interfaces/auth-jwt-options-ext
 import { AuthJwtSettingsInterface } from './interfaces/auth-jwt-settings.interface';
 import {
   AUTH_JWT_MODULE_SETTINGS_TOKEN,
-  AuthJwtUserLookupService,
+  AuthJwtUserModelService,
   AuthJwtVerifyTokenService,
 } from './auth-jwt.constants';
 import { authJwtDefaultConfig } from './config/auth-jwt-default.config';
@@ -69,7 +69,7 @@ export function createAuthJwtImports(): DynamicModule['imports'] {
 export function createAuthJwtExports() {
   return [
     AUTH_JWT_MODULE_SETTINGS_TOKEN,
-    AuthJwtUserLookupService,
+    AuthJwtUserModelService,
     AuthJwtVerifyTokenService,
     AuthJwtStrategy,
     AuthJwtGuard,
@@ -87,7 +87,7 @@ export function createAuthJwtProviders(options: {
     VerifyTokenService,
     createAuthJwtOptionsProvider(options.overrides),
     createAuthJwtVerifyTokenServiceProvider(options.overrides),
-    createAuthJwtUserLookupServiceProvider(options.overrides),
+    createAuthJwtUserModelServiceProvider(options.overrides),
     createAuthJwtAppGuardProvider(options.overrides),
   ];
 }
@@ -122,14 +122,14 @@ export function createAuthJwtVerifyTokenServiceProvider(
   };
 }
 
-export function createAuthJwtUserLookupServiceProvider(
-  optionsOverrides?: Pick<AuthJwtOptions, 'userLookupService'>,
+export function createAuthJwtUserModelServiceProvider(
+  optionsOverrides?: Pick<AuthJwtOptions, 'userModelService'>,
 ): Provider {
   return {
-    provide: AuthJwtUserLookupService,
+    provide: AuthJwtUserModelService,
     inject: [RAW_OPTIONS_TOKEN],
-    useFactory: async (options: Pick<AuthJwtOptions, 'userLookupService'>) =>
-      optionsOverrides?.userLookupService ?? options.userLookupService,
+    useFactory: async (options: Pick<AuthJwtOptions, 'userModelService'>) =>
+      optionsOverrides?.userModelService ?? options.userModelService,
   };
 }
 

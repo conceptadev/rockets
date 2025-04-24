@@ -8,12 +8,9 @@ export * from './services/password-validation.service';
 export * from './services/password-strength.service';
 
 export * from './interfaces/password-options.interface';
-export * from './interfaces/password-storage.interface';
 export * from './interfaces/password-storage-service.interface';
 export * from './interfaces/password-validation-service.interface';
 export * from './interfaces/password-creation-service.interface';
-export { PasswordCreateObjectOptionsInterface } from './interfaces/password-create-object-options.interface';
-export { isPasswordStorage } from './utils/is-password-storage.typeguard';
 
 export { PasswordException } from './exceptions/password.exception';
 export { PasswordCurrentRequiredException } from './exceptions/password-current-required.exception';

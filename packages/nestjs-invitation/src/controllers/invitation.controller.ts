@@ -34,12 +34,6 @@ import { InvitationSendService } from '../services/invitation-send.service';
     type: InvitationDto,
     paginatedType: InvitationPaginatedDto,
   },
-  join: {
-    user: {
-      eager: true,
-      allow: ['id', 'email'],
-    },
-  },
   validation: {
     transformOptions: {
       // TODO temporary fix because this could be unsafe
@@ -91,26 +85,17 @@ export class InvitationController
     let invite: InvitationSendInviteInterface | undefined;
 
     try {
-      await this.invitationCrudService
-        .transaction()
-        .commit(async (transaction): Promise<void> => {
-          invite = await this.invitationSendService.create(
-            invitationCreateInviteDto,
-            {
-              transaction,
-            },
-          );
+      invite = await this.invitationSendService.create(
+        invitationCreateInviteDto,
+      );
 
-          if (invite) {
-            await this.invitationSendService.send(invite, {
-              transaction,
-            });
-          } else {
-            throw new InvitationException({
-              message: 'User and/or invite not defined',
-            });
-          }
+      if (invite) {
+        await this.invitationSendService.send(invite);
+      } else {
+        throw new InvitationException({
+          message: 'User and/or invite not defined',
         });
+      }
 
       return invite;
     } catch (e: unknown) {

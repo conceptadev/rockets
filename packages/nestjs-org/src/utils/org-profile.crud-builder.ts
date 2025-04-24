@@ -1,4 +1,4 @@
-import { DeepPartial, ObjectLiteral } from 'typeorm';
+import { PlainLiteralObject } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import {
   ConfigurableCrudBuilder,
@@ -13,7 +13,10 @@ import {
   AccessControlReplaceOne,
   AccessControlUpdateOne,
 } from '@concepta/nestjs-access-control';
-import { OrgProfileCreatableInterface } from '@concepta/nestjs-common';
+import {
+  DeepPartial,
+  OrgProfileCreatableInterface,
+} from '@concepta/nestjs-common';
 import { OrgProfileResource } from '../org.types';
 import { OrgProfileEntityInterface } from '../interfaces/org-profile-entity.interface';
 import { OrgProfileDto } from '../dto/profile/org-profile.dto';
@@ -69,7 +72,7 @@ export class OrgProfileCrudBuilder<
     OrgProfileCreatableInterface,
   Updatable extends DeepPartial<Entity> = DeepPartial<Entity>,
   Replaceable extends Creatable = Creatable,
-  ExtraOptions extends ObjectLiteral = ObjectLiteral,
+  ExtraOptions extends PlainLiteralObject = PlainLiteralObject,
 > extends ConfigurableCrudBuilder<
   Entity,
   Creatable,

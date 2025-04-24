@@ -6,8 +6,12 @@ import {
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-import { RoleAssignmentInterface } from '@concepta/nestjs-common';
-import { createSettingsProvider } from '@concepta/nestjs-common';
+import {
+  RepositoryInterface,
+  RoleAssignmentInterface,
+  createSettingsProvider,
+} from '@concepta/nestjs-common';
+
 import {
   TypeOrmExtModule,
   getDynamicRepositoryToken,
@@ -27,15 +31,13 @@ import { RoleEntityInterface } from './interfaces/role-entity.interface';
 import { RoleSettingsInterface } from './interfaces/role-settings.interface';
 
 import { RoleService } from './services/role.service';
-import { RoleLookupService } from './services/role-lookup.service';
-import { RoleMutateService } from './services/role-mutate.service';
+import { RoleModelService } from './services/role-model.service';
 import { RoleCrudService } from './services/role-crud.service';
 import { RoleController } from './role.controller';
 import { RoleAssignmentController } from './role-assignment.controller';
 import { RoleAssignmentCrudService } from './services/role-assignment-crud.service';
 import { roleDefaultConfig } from './config/role-default.config';
 import { RoleMissingEntitiesOptionsException } from './exceptions/role-missing-entities-options.exception';
-import { RepositoryInterface } from '@concepta/typeorm-common';
 
 const RAW_OPTIONS_TOKEN = Symbol('__ROLE_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -93,8 +95,7 @@ export function createRoleProviders(
   return [
     ...(options.providers ?? []),
     createRoleSettingsProvider(options.overrides),
-    createRoleLookupServiceProvider(options.overrides),
-    createRoleMutateServiceProvider(options.overrides),
+    createRoleModelServiceProvider(options.overrides),
     ...createRoleRepositoriesProviders({
       entities: options.overrides?.entities ?? options.entities,
     }),
@@ -110,8 +111,7 @@ export function createRoleExports(): Required<
     ROLE_MODULE_SETTINGS_TOKEN,
     ROLE_MODULE_REPOSITORIES_TOKEN,
     RoleService,
-    RoleLookupService,
-    RoleMutateService,
+    RoleModelService,
     RoleCrudService,
   ];
 }
@@ -135,11 +135,11 @@ export function createRoleSettingsProvider(
   });
 }
 
-export function createRoleLookupServiceProvider(
+export function createRoleModelServiceProvider(
   optionsOverrides?: RoleOptions,
 ): Provider {
   return {
-    provide: RoleLookupService,
+    provide: RoleModelService,
     inject: [
       RAW_OPTIONS_TOKEN,
       getDynamicRepositoryToken(ROLE_MODULE_ROLE_ENTITY_KEY),
@@ -148,28 +148,9 @@ export function createRoleLookupServiceProvider(
       options: RoleOptionsInterface,
       roleRepo: RepositoryInterface<RoleEntityInterface>,
     ) =>
-      optionsOverrides?.roleLookupService ??
-      options.roleLookupService ??
-      new RoleLookupService(roleRepo),
-  };
-}
-
-export function createRoleMutateServiceProvider(
-  optionsOverrides?: RoleOptions,
-): Provider {
-  return {
-    provide: RoleMutateService,
-    inject: [
-      RAW_OPTIONS_TOKEN,
-      getDynamicRepositoryToken(ROLE_MODULE_ROLE_ENTITY_KEY),
-    ],
-    useFactory: async (
-      options: RoleOptionsInterface,
-      roleRepo: RepositoryInterface<RoleEntityInterface>,
-    ) =>
-      optionsOverrides?.roleMutateService ??
-      options.roleMutateService ??
-      new RoleMutateService(roleRepo),
+      optionsOverrides?.roleModelService ??
+      options.roleModelService ??
+      new RoleModelService(roleRepo),
   };
 }
 

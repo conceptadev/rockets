@@ -6,7 +6,7 @@ import { OtpService } from './services/otp.service';
 
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
 import { DynamicModule } from '@nestjs/common';
-import { RepositoryInterface } from '@concepta/typeorm-common';
+import { RepositoryInterface } from '@concepta/nestjs-common';
 
 describe(OtpModule.name, () => {
   let otpModule: OtpModule;

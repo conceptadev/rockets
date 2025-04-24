@@ -1,7 +1,13 @@
 import { randomUUID } from 'crypto';
-import { DeepPartial, ObjectLiteral, Repository } from 'typeorm';
-import { applyDecorators, Inject, Type } from '@nestjs/common';
+import { Repository } from 'typeorm';
+import {
+  applyDecorators,
+  Inject,
+  PlainLiteralObject,
+  Type,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { DeepPartial } from '@concepta/nestjs-common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import { CrudCreateMany } from '../decorators/actions/crud-create-many.decorator';
 import { CrudCreateOne } from '../decorators/actions/crud-create-one.decorator';
@@ -24,11 +30,11 @@ import { ConfigurableCrudOptions } from './interfaces/configurable-crud-options.
 import { ConfigurableCrudOptionsTransformer } from '../crud.types';
 
 export class ConfigurableCrudBuilder<
-  Entity extends ObjectLiteral,
+  Entity extends PlainLiteralObject,
   Creatable extends DeepPartial<Entity>,
   Updatable extends DeepPartial<Entity>,
   Replaceable extends Creatable = Creatable,
-  ExtraOptions extends ObjectLiteral = ObjectLiteral,
+  ExtraOptions extends PlainLiteralObject = PlainLiteralObject,
 > {
   private extras: ExtraOptions;
   private optionsTransform: ConfigurableCrudOptionsTransformer<ExtraOptions>;
@@ -352,7 +358,7 @@ export class ConfigurableCrudBuilder<
     return InternalCrudClass;
   }
 
-  private generateService<Entity extends ObjectLiteral>(
+  private generateService<Entity extends PlainLiteralObject>(
     options: ConfigurableCrudOptions['service'],
   ): Type<TypeOrmCrudService<Entity>> {
     // standard repository injection style

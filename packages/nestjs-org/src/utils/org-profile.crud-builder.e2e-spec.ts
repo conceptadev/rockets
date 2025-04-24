@@ -14,7 +14,6 @@ import { OrgFactory } from '../seeding/org.factory';
 import { OrgModule } from '../org.module';
 import { OrgEntityFixture } from '../__fixtures__/org-entity.fixture';
 import { OwnerEntityFixture } from '../__fixtures__/owner-entity.fixture';
-import { OwnerLookupServiceFixture } from '../__fixtures__/owner-lookup-service.fixture';
 import { OwnerModuleFixture } from '../__fixtures__/owner.module.fixture';
 import { OwnerFactoryFixture } from '../__fixtures__/owner-factory.fixture';
 import { OrgMemberEntityFixture } from '../__fixtures__/org-member.entity.fixture';
@@ -110,11 +109,7 @@ describe('Org Profile Crud Builder (e2e)', () => {
             InvitationEntityFixture,
           ],
         }),
-        OrgModule.registerAsync({
-          inject: [OwnerLookupServiceFixture],
-          useFactory: (ownerLookupService: OwnerLookupServiceFixture) => ({
-            ownerLookupService,
-          }),
+        OrgModule.register({
           entities: {
             org: {
               entity: OrgEntityFixture,
@@ -132,7 +127,6 @@ describe('Org Profile Crud Builder (e2e)', () => {
         CrudModule.forRoot({}),
         OwnerModuleFixture.register(),
       ],
-      providers: [OwnerLookupServiceFixture],
     }).compile();
     app = moduleFixture.createNestApplication();
     await app.init();

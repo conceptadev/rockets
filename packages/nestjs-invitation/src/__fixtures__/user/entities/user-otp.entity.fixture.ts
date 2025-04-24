@@ -1,9 +1,7 @@
-import { Column, Entity, ManyToOne } from 'typeorm';
-import { ReferenceIdInterface } from '@concepta/nestjs-common';
+import { Column, Entity } from 'typeorm';
+import { ReferenceId } from '@concepta/nestjs-common';
 import { OtpInterface } from '@concepta/nestjs-common';
 import { CommonSqliteEntity } from '@concepta/typeorm-common';
-
-import { UserEntityFixture } from './user.entity.fixture';
 
 /**
  * Otp Entity Fixture
@@ -28,6 +26,6 @@ export class UserOtpEntityFixture
   @Column({ type: 'datetime' })
   expirationDate!: Date;
 
-  @ManyToOne(() => UserEntityFixture, (user) => user.userOtps)
-  assignee!: ReferenceIdInterface;
+  @Column()
+  assigneeId!: ReferenceId;
 }

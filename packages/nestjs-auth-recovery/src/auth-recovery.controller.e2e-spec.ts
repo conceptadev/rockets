@@ -157,9 +157,7 @@ const createOtp = async (
       category,
       type,
       expiresIn,
-      assignee: {
-        id: userId,
-      },
+      assigneeId: userId,
     },
     clearOnCreate,
   });

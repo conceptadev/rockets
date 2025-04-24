@@ -21,8 +21,7 @@ import { FileService } from './services/file.service';
 import { FileStrategyService } from './services/file-strategy.service';
 
 import { fileDefaultConfig } from './config/file-default.config';
-import { FileMutateService } from './services/file-mutate.service';
-import { FileLookupService } from './services/file-lookup.service';
+import { FileModelService } from './services/file-model.service';
 import { FileMissingEntitiesOptionsException } from './exceptions/file-missing-entities-options.exception';
 
 const RAW_OPTIONS_TOKEN = Symbol('__FILE_MODULE_RAW_OPTIONS_TOKEN__');
@@ -86,10 +85,8 @@ export function createFileProviders(options: {
     ...(options.providers ?? []),
     createFileSettingsProvider(options.overrides),
     createStrategyServiceProvider(options.overrides),
-    // TODO: move to be overwrittable
-    FileMutateService,
-    // TODO: move to be overwrittable
-    FileLookupService,
+    // TODO: move to be overridable
+    FileModelService,
     FileStrategyService,
     FileService,
   ];

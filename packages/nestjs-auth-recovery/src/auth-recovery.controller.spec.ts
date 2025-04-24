@@ -59,9 +59,7 @@ describe(AuthRecoveryController.name, () => {
       const validatePasscodeSpy = jest
         .spyOn(authRecoveryService, 'validatePasscode')
         .mockResolvedValue({
-          assignee: {
-            id: '1',
-          },
+          assigneeId: '1',
         });
 
       await controller.validatePasscode(passwordDto.passcode);

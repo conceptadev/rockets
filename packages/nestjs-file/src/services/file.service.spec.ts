@@ -1,17 +1,12 @@
 import { FileCreatableInterface } from '@concepta/nestjs-common';
-import {
-  RepositoryInterface,
-  TransactionProxy,
-} from '@concepta/typeorm-common';
+import { RepositoryInterface } from '@concepta/nestjs-common';
 import { randomUUID } from 'crypto';
 import { mock } from 'jest-mock-extended';
-import { DataSource, EntityManager } from 'typeorm';
 import { FileEntityFixture } from '../__fixtures__/file/file-entity.fixture';
 import { FileCreateDto } from '../dto/file-create.dto';
 import { FileQueryException } from '../exceptions/file-query.exception';
 import { FileEntityInterface } from '../interfaces/file-entity.interface';
-import { FileLookupService } from './file-lookup.service';
-import { FileMutateService } from './file-mutate.service';
+import { FileModelService } from './file-model.service';
 import { FileStrategyService } from './file-strategy.service';
 import { FileService } from './file.service';
 
@@ -19,8 +14,7 @@ describe(FileService.name, () => {
   let fileService: FileService;
   let fileRepo: jest.Mocked<RepositoryInterface<FileEntityInterface>>;
   let fileStrategyService: jest.Mocked<FileStrategyService>;
-  let fileMutateService: FileMutateService;
-  let fileLookupService: FileLookupService;
+  let fileModelService: FileModelService;
 
   const mockFile: FileEntityInterface = {
     id: randomUUID(),
@@ -44,21 +38,10 @@ describe(FileService.name, () => {
   beforeEach(() => {
     fileRepo = createMockRepository();
     fileStrategyService = createMockFileStrategyService();
-    fileMutateService = new FileMutateService(fileRepo);
-    fileLookupService = new FileLookupService(fileRepo);
+    fileModelService = new FileModelService(fileRepo);
 
-    fileService = new FileService(
-      fileStrategyService,
-      fileMutateService,
-      fileLookupService,
-    );
+    fileService = new FileService(fileStrategyService, fileModelService);
     fileRepo.create.mockReturnValue(mockFile);
-    const mockTransactionalEntityManager = mock<EntityManager>({
-      connection: mock<DataSource>(),
-    });
-    fileRepo.manager.transaction = jest.fn().mockImplementation(async (cb) => {
-      return await cb(mockTransactionalEntityManager);
-    });
   });
 
   describe('push', () => {
@@ -68,29 +51,12 @@ describe(FileService.name, () => {
           return Promise.resolve(mockFile.uploadUri || '');
         },
       );
-      interface MockTransaction {}
-      const mockTransaction = mock<MockTransaction>();
-      const mockTransactionProxy = mock<TransactionProxy>({
-        commit: jest
-          .fn()
-          .mockImplementation((callback) => callback(mockTransaction)),
-      });
-      mockTransactionProxy.repository(fileRepo);
-
       jest
-        .spyOn(mockTransactionProxy, 'repository')
-        .mockImplementationOnce(() => {
-          return fileRepo;
-        });
-      jest
-        .spyOn(fileMutateService, 'transaction')
-        .mockReturnValue(mockTransactionProxy);
-      jest
-        .spyOn(fileLookupService, 'getUniqueFile')
+        .spyOn(fileModelService, 'getUniqueFile')
         .mockReturnValueOnce(Promise.resolve(null))
         .mockReturnValueOnce(Promise.resolve(mockFile));
       jest
-        .spyOn(fileMutateService, 'create')
+        .spyOn(fileModelService, 'create')
         .mockReturnValue(Promise.resolve(mockFile));
 
       const result = await fileService.push(mockFileCreateDto);

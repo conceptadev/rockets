@@ -6,7 +6,7 @@ import { InvitationDto } from './invitation.dto';
 @Exclude()
 export class InvitationCreateDto
   extends IntersectionType(
-    PickType(InvitationDto, ['category', 'user', 'code'] as const),
+    PickType(InvitationDto, ['category', 'userId', 'code'] as const),
     PartialType(PickType(InvitationDto, ['constraints'] as const)),
   )
   implements InvitationCreatableInterface {}

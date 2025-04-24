@@ -12,6 +12,6 @@ export class CacheCreateDto
     'data',
     'type',
     'expiresIn',
-    'assignee',
+    'assigneeId',
   ] as const)
   implements CacheCreatableInterface {}

@@ -1,15 +1,15 @@
 import { randomUUID } from 'crypto';
 import { mock } from 'jest-mock-extended';
+import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import { PasswordValidationService } from '@concepta/nestjs-password';
 import { BadRequestException, HttpStatus } from '@nestjs/common';
 import { AuthLocalStrategy } from './auth-local.strategy';
 import { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.interface';
-import { AuthLocalUserLookupServiceInterface } from './interfaces/auth-local-user-lookup-service.interface';
+import { AuthLocalUserModelServiceInterface } from './interfaces/auth-local-user-model-service.interface';
 import { AuthLocalValidateUserServiceInterface } from './interfaces/auth-local-validate-user-service.interface';
 import { AuthLocalValidateUserService } from './services/auth-local-validate-user.service';
 
 import { UserFixture } from './__fixtures__/user/user.entity.fixture';
-import { ReferenceIdInterface } from '@concepta/nestjs-common';
 import { AuthLocalValidateUserInterface } from './interfaces/auth-local-validate-user.interface';
 import { AuthLocalException } from './exceptions/auth-local.exception';
 import { AuthLocalInvalidCredentialsException } from './exceptions/auth-local-invalid-credentials.exception';
@@ -21,7 +21,7 @@ describe(AuthLocalStrategy.name, () => {
 
   let user: UserFixture;
   let settings: AuthLocalSettingsInterface;
-  let userLookUpService: AuthLocalUserLookupServiceInterface;
+  let userModelService: AuthLocalUserModelServiceInterface;
   let validateUserService: AuthLocalValidateUserServiceInterface;
   let passwordValidationService: PasswordValidationService;
   let authLocalStrategy: AuthLocalStrategy;
@@ -33,10 +33,10 @@ describe(AuthLocalStrategy.name, () => {
       passwordField: PASSWORD,
     });
 
-    userLookUpService = mock<AuthLocalUserLookupServiceInterface>();
+    userModelService = mock<AuthLocalUserModelServiceInterface>();
     passwordValidationService = mock<PasswordValidationService>();
     validateUserService = new AuthLocalValidateUserService(
-      userLookUpService,
+      userModelService,
       passwordValidationService,
     );
     authLocalStrategy = new AuthLocalStrategy(settings, validateUserService);
@@ -45,7 +45,7 @@ describe(AuthLocalStrategy.name, () => {
     user.id = randomUUID();
     user.active = true;
     jest.resetAllMocks();
-    jest.spyOn(userLookUpService, 'byUsername').mockResolvedValue(user);
+    jest.spyOn(userModelService, 'byUsername').mockResolvedValue(user);
   });
 
   it('constructor', async () => {
@@ -58,9 +58,7 @@ describe(AuthLocalStrategy.name, () => {
 
   describe(AuthLocalStrategy.prototype.validate, () => {
     it('should return user', async () => {
-      jest
-        .spyOn(passwordValidationService, 'validateObject')
-        .mockResolvedValue(true);
+      jest.spyOn(passwordValidationService, 'validate').mockResolvedValue(true);
 
       const result = await authLocalStrategy.validate(USERNAME, PASSWORD);
       expect(result.id).toBe(user.id);
@@ -140,16 +138,16 @@ describe(AuthLocalStrategy.name, () => {
       await expect(t).rejects.toThrow(AuthLocalInvalidLoginDataException);
     });
 
-    it('should return no user on userLookupService.byUsername', async () => {
-      jest.spyOn(userLookUpService, 'byUsername').mockResolvedValue(null);
+    it('should return no user on userModelService.byUsername', async () => {
+      jest.spyOn(userModelService, 'byUsername').mockResolvedValue(null);
 
       const t = () => authLocalStrategy.validate(USERNAME, PASSWORD);
       await expect(t).rejects.toThrow(AuthLocalInvalidCredentialsException);
     });
 
-    it('should be invalid on passwordService.validateObject', async () => {
+    it('should be invalid on passwordService.validate', async () => {
       jest
-        .spyOn(passwordValidationService, 'validateObject')
+        .spyOn(passwordValidationService, 'validate')
         .mockResolvedValue(false);
 
       const t = () => authLocalStrategy.validate(USERNAME, PASSWORD);

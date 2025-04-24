@@ -1,9 +1,11 @@
-import { Exclude, Expose, Type } from 'class-transformer';
-import { IsEnum, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { Exclude, Expose } from 'class-transformer';
+import { IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ReferenceIdInterface } from '@concepta/nestjs-common';
-import { ReportInterface, ReportStatusEnum } from '@concepta/nestjs-common';
-import { CommonEntityDto, ReferenceIdDto } from '@concepta/nestjs-common';
+import {
+  ReportInterface,
+  ReportStatusEnum,
+  CommonEntityDto,
+} from '@concepta/nestjs-common';
 
 /**
  * Report DTO
@@ -57,10 +59,9 @@ export class ReportDto extends CommonEntityDto implements ReportInterface {
 
   @Expose()
   @ApiProperty({
-    type: ReferenceIdDto,
-    description: 'The file of the report',
+    type: 'string',
+    description: 'The file id of the report',
   })
-  @Type(() => ReferenceIdDto)
-  @ValidateNested()
-  file: ReferenceIdInterface = { id: '' };
+  @IsUUID()
+  fileId!: string;
 }

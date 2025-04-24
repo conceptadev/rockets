@@ -1,6 +1,5 @@
 import { Column, Entity, Unique } from 'typeorm';
-import { ReportStatusEnum } from '@concepta/nestjs-common';
-import { ReferenceIdInterface } from '@concepta/nestjs-common';
+import { ReferenceId, ReportStatusEnum } from '@concepta/nestjs-common';
 import { CommonSqliteEntity } from '@concepta/typeorm-common';
 import { ReportEntityInterface } from '../interfaces/report-entity.interface';
 
@@ -28,5 +27,6 @@ export class ReportSqliteEntity
   @Column({ type: 'text', nullable: true, default: null })
   errorMessage: string | null = null;
 
-  file!: ReferenceIdInterface;
+  @Column({ type: 'uuid', nullable: true, default: null })
+  fileId!: ReferenceId;
 }

@@ -6,42 +6,40 @@ import { JwtModule } from '@concepta/nestjs-jwt';
 
 import { AuthRecoveryModule } from '../auth-recovery.module';
 
-import { TypeOrmModuleFixture } from './typeorm.module.fixture';
 import { OtpServiceFixture } from './otp/otp.service.fixture';
-import { UserLookupServiceFixture } from './user/services/user-lookup.service.fixture';
-import { UserMutateServiceFixture } from './user/services/user-mutate.service.fixture';
+import { UserModelServiceFixture } from './user/services/user-model.service.fixture';
+import { UserPasswordServiceFixture } from './user/services/user-password.service.fixture';
 import { UserModuleFixture } from './user/user.module.fixture';
 import { OtpModuleFixture } from './otp/otp.module.fixture';
 import { MailerServiceFixture } from './email/mailer.service.fixture';
 
 @Module({
   imports: [
-    TypeOrmModuleFixture,
     JwtModule.forRoot({}),
     AuthenticationModule.forRoot({}),
     AuthJwtModule.forRootAsync({
-      inject: [UserLookupServiceFixture],
-      useFactory: (userLookupService: UserLookupServiceFixture) => ({
-        userLookupService,
+      inject: [UserModelServiceFixture],
+      useFactory: (userModelService: UserModelServiceFixture) => ({
+        userModelService,
       }),
     }),
     AuthRecoveryModule.forRootAsync({
       inject: [
         EmailService,
         OtpServiceFixture,
-        UserLookupServiceFixture,
-        UserMutateServiceFixture,
+        UserModelServiceFixture,
+        UserPasswordServiceFixture,
       ],
       useFactory: (
         emailService,
         otpService,
-        userLookupService,
-        userMutateService,
+        userModelService,
+        userPasswordService,
       ) => ({
         emailService,
         otpService,
-        userLookupService,
-        userMutateService,
+        userModelService,
+        userPasswordService,
       }),
     }),
     EmailModule.forRoot({ mailerService: new MailerServiceFixture() }),

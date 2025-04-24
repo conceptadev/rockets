@@ -1,7 +1,6 @@
 import { Column } from 'typeorm';
 import { CommonSqliteEntity } from '@concepta/typeorm-common';
 import { UserEntityInterface } from '../interfaces/user-entity.interface';
-import { UserPasswordHistoryEntityInterface } from '../interfaces/user-password-history-entity.interface';
 
 export abstract class UserSqliteEntity
   extends CommonSqliteEntity
@@ -28,14 +27,12 @@ export abstract class UserSqliteEntity
   /**
    * Password hash
    */
-  @Column({ type: 'text', nullable: true, default: null })
-  passwordHash: string | null = null;
+  @Column({ type: 'text', nullable: true })
+  passwordHash!: string;
 
   /**
    * Password salt
    */
-  @Column({ type: 'text', nullable: true, default: null })
-  passwordSalt: string | null = null;
-
-  userPasswordHistory?: UserPasswordHistoryEntityInterface;
+  @Column({ type: 'text', nullable: true })
+  passwordSalt!: string;
 }

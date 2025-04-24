@@ -16,9 +16,10 @@ import {
 } from '@concepta/nestjs-password';
 
 import { AuthLocalModule } from './auth-local.module';
-import { AuthLocalUserLookupServiceInterface } from './interfaces/auth-local-user-lookup-service.interface';
+import { AuthLocalUserModelServiceInterface } from './interfaces/auth-local-user-model-service.interface';
+import { AuthLocalValidateUserServiceInterface } from './interfaces/auth-local-validate-user-service.interface';
 
-import { UserLookupServiceFixture } from './__fixtures__/user/user-lookup.service.fixture';
+import { UserModelServiceFixture } from './__fixtures__/user/user-model.service.fixture';
 import { UserModuleFixture } from './__fixtures__/user/user.module.fixture';
 import { AuthLocalValidateUserService } from './services/auth-local-validate-user.service';
 
@@ -28,8 +29,8 @@ describe(AuthLocalModule, () => {
 
   let testModule: TestingModule;
   let authLocalModule: AuthLocalModule;
-  let userLookupService: AuthLocalUserLookupServiceInterface;
-  let validateUserService: AuthLocalUserLookupServiceInterface;
+  let userModelService: AuthLocalUserModelServiceInterface;
+  let validateUserService: AuthLocalValidateUserServiceInterface;
   let issueTokenService: IssueTokenServiceInterface;
   let passwordValidationService: PasswordValidationServiceInterface;
 
@@ -39,7 +40,7 @@ describe(AuthLocalModule, () => {
         testModuleFactory([
           AuthLocalModule.forRoot({
             issueTokenService: new IssueTokenService(jwtIssueTokenService),
-            userLookupService: new UserLookupServiceFixture(),
+            userModelService: new UserModelServiceFixture(),
           }),
         ]),
       ).compile();
@@ -57,7 +58,7 @@ describe(AuthLocalModule, () => {
         testModuleFactory([
           AuthLocalModule.register({
             issueTokenService: new IssueTokenService(jwtIssueTokenService),
-            userLookupService: new UserLookupServiceFixture(),
+            userModelService: new UserModelServiceFixture(),
           }),
         ]),
       ).compile();
@@ -74,11 +75,11 @@ describe(AuthLocalModule, () => {
       testModule = await Test.createTestingModule(
         testModuleFactory([
           AuthLocalModule.forRootAsync({
-            inject: [IssueTokenService, UserLookupServiceFixture],
+            inject: [IssueTokenService, UserModelServiceFixture],
             useFactory: (
               issueTokenService: IssueTokenServiceInterface,
-              userLookupService: AuthLocalUserLookupServiceInterface,
-            ) => ({ issueTokenService, userLookupService }),
+              userModelService: AuthLocalUserModelServiceInterface,
+            ) => ({ issueTokenService, userModelService }),
           }),
         ]),
       ).compile();
@@ -95,11 +96,11 @@ describe(AuthLocalModule, () => {
       testModule = await Test.createTestingModule(
         testModuleFactory([
           AuthLocalModule.registerAsync({
-            inject: [IssueTokenService, UserLookupServiceFixture],
+            inject: [IssueTokenService, UserModelServiceFixture],
             useFactory: (
               issueTokenService: IssueTokenService,
-              userLookupService: AuthLocalUserLookupServiceInterface,
-            ) => ({ issueTokenService, userLookupService }),
+              userModelService: AuthLocalUserModelServiceInterface,
+            ) => ({ issueTokenService, userModelService }),
           }),
         ]),
       ).compile();
@@ -113,7 +114,7 @@ describe(AuthLocalModule, () => {
 
   function commonVars(module: TestingModule) {
     authLocalModule = module.get(AuthLocalModule);
-    userLookupService = module.get(UserLookupServiceFixture);
+    userModelService = module.get(UserModelServiceFixture);
     validateUserService = module.get(AuthLocalValidateUserService);
     issueTokenService = module.get(IssueTokenService);
     passwordValidationService = module.get(PasswordValidationService);
@@ -121,7 +122,7 @@ describe(AuthLocalModule, () => {
 
   function commonTests() {
     expect(authLocalModule).toBeInstanceOf(AuthLocalModule);
-    expect(userLookupService).toBeInstanceOf(UserLookupServiceFixture);
+    expect(userModelService).toBeInstanceOf(UserModelServiceFixture);
     expect(issueTokenService).toBeInstanceOf(IssueTokenService);
     expect(passwordValidationService).toBeInstanceOf(PasswordValidationService);
     expect(validateUserService).toBeInstanceOf(AuthLocalValidateUserService);

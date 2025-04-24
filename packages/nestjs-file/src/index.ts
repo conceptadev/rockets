@@ -11,6 +11,7 @@ export { FileService } from './services/file.service';
 
 export { FileDto } from './dto/file.dto';
 export { FileCreateDto } from './dto/file-create.dto';
+export { FileUpdateDto } from './dto/file-update.dto';
 
 export { FileException } from './exceptions/file.exception';
 export { FileCreateException } from './exceptions/file-create.exception';

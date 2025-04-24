@@ -14,10 +14,10 @@ import {
   VerifyTokenServiceInterface,
 } from '@concepta/nestjs-authentication';
 
-import { AuthRefreshUserLookupServiceInterface } from './interfaces/auth-refresh-user-lookup-service.interface';
+import { AuthRefreshUserModelServiceInterface } from './interfaces/auth-refresh-user-model-service.interface';
 import { AuthRefreshModule } from './auth-refresh.module';
 
-import { UserLookupServiceFixture } from './__fixtures__/user/user-lookup.service.fixture';
+import { UserModelServiceFixture } from './__fixtures__/user/user-model.service.fixture';
 import { UserModuleFixture } from './__fixtures__/user/user.module.fixture';
 
 describe(AuthRefreshModule, () => {
@@ -30,7 +30,7 @@ describe(AuthRefreshModule, () => {
 
   let testModule: TestingModule;
   let authRefreshModule: AuthRefreshModule;
-  let userLookupService: AuthRefreshUserLookupServiceInterface;
+  let userModelService: AuthRefreshUserModelServiceInterface;
   let issueTokenService: IssueTokenServiceInterface;
   let verifyTokenService: VerifyTokenServiceInterface;
 
@@ -41,7 +41,7 @@ describe(AuthRefreshModule, () => {
           AuthRefreshModule.forRoot({
             verifyTokenService: new VerifyTokenService(jwtVerifyTokenService),
             issueTokenService: new IssueTokenService(jwtIssueTokenService),
-            userLookupService: new UserLookupServiceFixture(),
+            userModelService: new UserModelServiceFixture(),
           }),
         ]),
       ).compile();
@@ -60,7 +60,7 @@ describe(AuthRefreshModule, () => {
           AuthRefreshModule.register({
             verifyTokenService: new VerifyTokenService(jwtVerifyTokenService),
             issueTokenService: new IssueTokenService(jwtIssueTokenService),
-            userLookupService: new UserLookupServiceFixture(),
+            userModelService: new UserModelServiceFixture(),
           }),
         ]),
       ).compile();
@@ -80,13 +80,17 @@ describe(AuthRefreshModule, () => {
             inject: [
               VerifyTokenService,
               IssueTokenService,
-              UserLookupServiceFixture,
+              UserModelServiceFixture,
             ],
             useFactory: (
               verifyTokenService: VerifyTokenService,
               issueTokenService: IssueTokenServiceInterface,
-              userLookupService: AuthRefreshUserLookupServiceInterface,
-            ) => ({ verifyTokenService, issueTokenService, userLookupService }),
+              userModelService: AuthRefreshUserModelServiceInterface,
+            ) => ({
+              verifyTokenService,
+              issueTokenService,
+              userModelService: userModelService,
+            }),
           }),
         ]),
       ).compile();
@@ -106,13 +110,17 @@ describe(AuthRefreshModule, () => {
             inject: [
               VerifyTokenService,
               IssueTokenService,
-              UserLookupServiceFixture,
+              UserModelServiceFixture,
             ],
             useFactory: (
               verifyTokenService: VerifyTokenService,
               issueTokenService: IssueTokenService,
-              userLookupService: AuthRefreshUserLookupServiceInterface,
-            ) => ({ verifyTokenService, issueTokenService, userLookupService }),
+              userModelService: AuthRefreshUserModelServiceInterface,
+            ) => ({
+              verifyTokenService,
+              issueTokenService,
+              userModelService: userModelService,
+            }),
           }),
         ]),
       ).compile();
@@ -126,14 +134,14 @@ describe(AuthRefreshModule, () => {
 
   function commonVars(module: TestingModule) {
     authRefreshModule = module.get(AuthRefreshModule);
-    userLookupService = module.get(UserLookupServiceFixture);
+    userModelService = module.get(UserModelServiceFixture);
     verifyTokenService = module.get(VerifyTokenService);
     issueTokenService = module.get(IssueTokenService);
   }
 
   function commonTests() {
     expect(authRefreshModule).toBeInstanceOf(AuthRefreshModule);
-    expect(userLookupService).toBeInstanceOf(UserLookupServiceFixture);
+    expect(userModelService).toBeInstanceOf(UserModelServiceFixture);
     expect(issueTokenService).toBeInstanceOf(IssueTokenService);
     expect(verifyTokenService).toBeInstanceOf(VerifyTokenService);
   }

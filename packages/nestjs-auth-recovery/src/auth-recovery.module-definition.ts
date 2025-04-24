@@ -3,19 +3,16 @@ import {
   DynamicModule,
   Provider,
 } from '@nestjs/common';
-import { getEntityManagerToken } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 
 import { createSettingsProvider } from '@concepta/nestjs-common';
-import { EntityManagerProxy } from '@concepta/typeorm-common';
 
 import {
   AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
-  AUTH_RECOVERY_MODULE_ENTITY_MANAGER_PROXY_TOKEN,
   AuthRecoveryOtpService,
   AuthRecoveryEmailService,
-  AuthRecoveryUserLookupService,
-  AuthRecoveryUserMutateService,
+  AuthRecoveryUserModelService,
+  AuthRecoveryUserPasswordService,
 } from './auth-recovery.constants';
 
 import { AuthRecoveryOptionsInterface } from './interfaces/auth-recovery-options.interface';
@@ -26,7 +23,6 @@ import { AuthRecoveryController } from './auth-recovery.controller';
 import { AuthRecoveryService } from './services/auth-recovery.service';
 import { AuthRecoveryNotificationService } from './services/auth-recovery-notification.service';
 import { AuthRecoveryEmailServiceInterface } from './interfaces/auth-recovery-email.service.interface';
-import { EntityManagerInterface } from '@concepta/typeorm-common';
 
 const RAW_OPTIONS_TOKEN = Symbol('__AUTH_RECOVERY_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -79,8 +75,8 @@ export function createAuthRecoveryExports() {
     AUTH_RECOVERY_MODULE_SETTINGS_TOKEN,
     AuthRecoveryOtpService,
     AuthRecoveryEmailService,
-    AuthRecoveryUserLookupService,
-    AuthRecoveryUserMutateService,
+    AuthRecoveryUserModelService,
+    AuthRecoveryUserPasswordService,
     AuthRecoveryService,
   ];
 }
@@ -95,10 +91,9 @@ export function createAuthRecoveryProviders(options: {
     createAuthRecoverySettingsProvider(options.overrides),
     createAuthRecoveryOtpServiceProvider(options.overrides),
     createAuthRecoveryEmailServiceProvider(options.overrides),
-    createAuthRecoveryUserLookupServiceProvider(options.overrides),
-    createAuthRecoveryUserMutateServiceProvider(options.overrides),
+    createAuthRecoveryUserModelServiceProvider(options.overrides),
+    createAuthRecoveryUserPasswordServiceProvider(options.overrides),
     createAuthRecoveryNotificationServiceProvider(options.overrides),
-    createAuthRecoveryEntityManagerProxyProvider(options.overrides),
   ];
 }
 
@@ -146,27 +141,27 @@ export function createAuthRecoveryEmailServiceProvider(
   };
 }
 
-export function createAuthRecoveryUserLookupServiceProvider(
-  optionsOverrides?: Pick<AuthRecoveryOptions, 'userLookupService'>,
+export function createAuthRecoveryUserModelServiceProvider(
+  optionsOverrides?: Pick<AuthRecoveryOptions, 'userModelService'>,
 ): Provider {
   return {
-    provide: AuthRecoveryUserLookupService,
+    provide: AuthRecoveryUserModelService,
     inject: [RAW_OPTIONS_TOKEN],
     useFactory: async (
-      options: Pick<AuthRecoveryOptions, 'userLookupService'>,
-    ) => optionsOverrides?.userLookupService ?? options.userLookupService,
+      options: Pick<AuthRecoveryOptions, 'userModelService'>,
+    ) => optionsOverrides?.userModelService ?? options.userModelService,
   };
 }
 
-export function createAuthRecoveryUserMutateServiceProvider(
-  optionsOverrides?: Pick<AuthRecoveryOptions, 'userMutateService'>,
+export function createAuthRecoveryUserPasswordServiceProvider(
+  optionsOverrides?: Pick<AuthRecoveryOptions, 'userPasswordService'>,
 ): Provider {
   return {
-    provide: AuthRecoveryUserMutateService,
+    provide: AuthRecoveryUserPasswordService,
     inject: [RAW_OPTIONS_TOKEN],
     useFactory: async (
-      options: Pick<AuthRecoveryOptions, 'userMutateService'>,
-    ) => optionsOverrides?.userMutateService ?? options.userMutateService,
+      options: Pick<AuthRecoveryOptions, 'userPasswordService'>,
+    ) => optionsOverrides?.userPasswordService ?? options.userPasswordService,
   };
 }
 
@@ -188,21 +183,5 @@ export function createAuthRecoveryNotificationServiceProvider(
       optionsOverrides?.notificationService ??
       options.notificationService ??
       new AuthRecoveryNotificationService(settings, emailService),
-  };
-}
-
-export function createAuthRecoveryEntityManagerProxyProvider(
-  optionsOverrides?: Pick<AuthRecoveryOptions, 'entityManagerProxy'>,
-): Provider {
-  return {
-    provide: AUTH_RECOVERY_MODULE_ENTITY_MANAGER_PROXY_TOKEN,
-    inject: [RAW_OPTIONS_TOKEN, getEntityManagerToken()],
-    useFactory: async (
-      options: Pick<AuthRecoveryOptions, 'entityManagerProxy'>,
-      defaultEntityManager: EntityManagerInterface,
-    ) =>
-      optionsOverrides?.entityManagerProxy ??
-      options.entityManagerProxy ??
-      new EntityManagerProxy(defaultEntityManager),
   };
 }

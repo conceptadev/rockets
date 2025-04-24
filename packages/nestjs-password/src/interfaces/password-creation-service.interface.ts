@@ -1,26 +1,23 @@
-import { PasswordPlainInterface } from '@concepta/nestjs-common';
-import { PasswordStorageInterface } from './password-storage.interface';
+import { PasswordStorageInterface } from '@concepta/nestjs-common';
 import { PasswordCurrentPasswordInterface } from './password-current-password.interface';
-import { PasswordCreateObjectOptionsInterface } from './password-create-object-options.interface';
 import { PasswordHistoryPasswordInterface } from './password-history-password.interface';
+import { PasswordHashOptionsInterface } from './password-hash-options.interface';
 
 /**
  * Password Creation Service Interface
  */
 export interface PasswordCreationServiceInterface {
   /**
-   * Create password for an object (optionally).
+   * Create a password using a salt, if no
+   * was passed, then generate one automatically.
    *
-   * @param object - An object containing the new password to hash.
-   * @param options - Password create options.
-   * @returns A new object with the password hashed, with salt added.
+   * @param password - Password to be hashed
+   * @param options - Hash options
    */
-  createObject<T extends PasswordPlainInterface>(
-    object: T,
-    options?: PasswordCreateObjectOptionsInterface,
-  ): Promise<
-    Omit<T, 'password'> | (Omit<T, 'password'> & PasswordStorageInterface)
-  >;
+  create(
+    password: string,
+    options?: PasswordHashOptionsInterface,
+  ): Promise<PasswordStorageInterface>;
 
   /**
    * Validate the current password for the targeted object.
@@ -39,21 +36,6 @@ export interface PasswordCreationServiceInterface {
    * @returns boolean Returns true if password has NOT been used withing configured range.
    */
   validateHistory: (
-    options: Partial<PasswordHistoryPasswordInterface>,
+    options: PasswordHistoryPasswordInterface,
   ) => Promise<boolean>;
-
-  /**
-   * Check if attempt is valid.
-   *
-   * @returns Number of attempts user has to try
-   */
-  checkAttempt(numOfAttempts: number): boolean;
-
-  /**
-   * Check number of attempts of using password
-   *
-   * @param numOfAttempts - number of attempts
-   * @returns number of attempts left
-   */
-  checkAttemptLeft(numOfAttempts: number): number;
 }

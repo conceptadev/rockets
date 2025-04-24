@@ -6,27 +6,26 @@ import { EmailModule, EmailService } from '@concepta/nestjs-email';
 
 import { AuthRecoveryOtpServiceInterface } from './interfaces/auth-recovery-otp.service.interface';
 import { AuthRecoveryEmailServiceInterface } from './interfaces/auth-recovery-email.service.interface';
-import { AuthRecoveryUserLookupServiceInterface } from './interfaces/auth-recovery-user-lookup.service.interface';
-import { AuthRecoveryUserMutateServiceInterface } from './interfaces/auth-recovery-user-mutate.service.interface';
+import { AuthRecoveryUserModelServiceInterface } from './interfaces/auth-recovery-user-model.service.interface';
 import { AuthRecoveryServiceInterface } from './interfaces/auth-recovery.service.interface';
 import { AuthRecoveryController } from './auth-recovery.controller';
 import { AuthRecoveryModule } from './auth-recovery.module';
 import { AuthRecoveryService } from './services/auth-recovery.service';
 
-import { UserLookupServiceFixture } from './__fixtures__/user/services/user-lookup.service.fixture';
+import { UserModelServiceFixture } from './__fixtures__/user/services/user-model.service.fixture';
 import { UserModuleFixture } from './__fixtures__/user/user.module.fixture';
 import { OtpModuleFixture } from './__fixtures__/otp/otp.module.fixture';
-import { UserMutateServiceFixture } from './__fixtures__/user/services/user-mutate.service.fixture';
+import { UserPasswordServiceFixture } from './__fixtures__/user/services/user-password.service.fixture';
 import { OtpServiceFixture } from './__fixtures__/otp/otp.service.fixture';
 import { MailerServiceFixture } from './__fixtures__/email/mailer.service.fixture';
-import { TypeOrmModuleFixture } from './__fixtures__/typeorm.module.fixture';
+import { UserPasswordServiceInterface } from '@concepta/nestjs-user';
 
 describe(AuthRecoveryModule, () => {
   let testModule: TestingModule;
   let authRecoveryModule: AuthRecoveryModule;
   let otpService: AuthRecoveryOtpServiceInterface;
-  let userLookupService: AuthRecoveryUserLookupServiceInterface;
-  let userMutateService: AuthRecoveryUserMutateServiceInterface;
+  let userModelService: AuthRecoveryUserModelServiceInterface;
+  let userPasswordService: UserPasswordServiceInterface;
   let authRecoveryService: AuthRecoveryServiceInterface;
   let authRecoveryController: AuthRecoveryController;
   let emailService: EmailService;
@@ -40,8 +39,8 @@ describe(AuthRecoveryModule, () => {
           AuthRecoveryModule.forRoot({
             emailService: mockEmailService,
             otpService: new OtpServiceFixture(),
-            userLookupService: new UserLookupServiceFixture(),
-            userMutateService: new UserMutateServiceFixture(),
+            userModelService: new UserModelServiceFixture(),
+            userPasswordService: new UserPasswordServiceFixture(),
           }),
         ]),
       ).compile();
@@ -60,8 +59,8 @@ describe(AuthRecoveryModule, () => {
           AuthRecoveryModule.register({
             emailService: mockEmailService,
             otpService: new OtpServiceFixture(),
-            userLookupService: new UserLookupServiceFixture(),
-            userMutateService: new UserMutateServiceFixture(),
+            userModelService: new UserModelServiceFixture(),
+            userPasswordService: new UserPasswordServiceFixture(),
           }),
         ]),
       ).compile();
@@ -79,19 +78,19 @@ describe(AuthRecoveryModule, () => {
         testModuleFactory([
           AuthRecoveryModule.forRootAsync({
             inject: [
-              UserLookupServiceFixture,
-              UserMutateServiceFixture,
+              UserModelServiceFixture,
+              UserPasswordServiceFixture,
               OtpServiceFixture,
               EmailService,
             ],
             useFactory: (
-              userLookupService,
-              userMutateService,
+              userModelService,
+              userPasswordService,
               otpService,
               emailService,
             ) => ({
-              userLookupService,
-              userMutateService,
+              userModelService,
+              userPasswordService,
               otpService,
               emailService,
             }),
@@ -112,19 +111,19 @@ describe(AuthRecoveryModule, () => {
         testModuleFactory([
           AuthRecoveryModule.registerAsync({
             inject: [
-              UserLookupServiceFixture,
-              UserMutateServiceFixture,
+              UserModelServiceFixture,
+              UserPasswordServiceFixture,
               OtpServiceFixture,
               EmailService,
             ],
             useFactory: (
-              userLookupService,
-              userMutateService,
+              userModelService,
+              userPasswordService,
               otpService,
               emailService,
             ) => ({
-              userLookupService,
-              userMutateService,
+              userModelService,
+              userPasswordService,
               otpService,
               emailService,
             }),
@@ -144,11 +143,11 @@ describe(AuthRecoveryModule, () => {
     otpService =
       testModule.get<AuthRecoveryOtpServiceInterface>(OtpServiceFixture);
     emailService = testModule.get<EmailService>(EmailService);
-    userLookupService = testModule.get<AuthRecoveryUserLookupServiceInterface>(
-      UserLookupServiceFixture,
+    userModelService = testModule.get<AuthRecoveryUserModelServiceInterface>(
+      UserModelServiceFixture,
     );
-    userMutateService = testModule.get<AuthRecoveryUserMutateServiceInterface>(
-      UserMutateServiceFixture,
+    userPasswordService = testModule.get<UserPasswordServiceInterface>(
+      UserPasswordServiceFixture,
     );
     authRecoveryService =
       testModule.get<AuthRecoveryService>(AuthRecoveryService);
@@ -161,8 +160,8 @@ describe(AuthRecoveryModule, () => {
     expect(authRecoveryModule).toBeInstanceOf(AuthRecoveryModule);
     expect(otpService).toBeInstanceOf(OtpServiceFixture);
     expect(emailService).toBeInstanceOf(EmailService);
-    expect(userLookupService).toBeInstanceOf(UserLookupServiceFixture);
-    expect(userMutateService).toBeInstanceOf(UserMutateServiceFixture);
+    expect(userModelService).toBeInstanceOf(UserModelServiceFixture);
+    expect(userPasswordService).toBeInstanceOf(UserPasswordServiceFixture);
     expect(authRecoveryService).toBeInstanceOf(AuthRecoveryService);
     expect(authRecoveryController).toBeInstanceOf(AuthRecoveryController);
   }
@@ -173,7 +172,6 @@ function testModuleFactory(
 ): ModuleMetadata {
   return {
     imports: [
-      TypeOrmModuleFixture,
       UserModuleFixture,
       OtpModuleFixture,
       EmailModule.forRoot({ mailerService: new MailerServiceFixture() }),

@@ -21,7 +21,6 @@ import { OrgEntityFixture } from '../__fixtures__/org-entity.fixture';
 import { OwnerEntityFixture } from '../__fixtures__/owner-entity.fixture';
 import { OrgMemberEntityFixture } from '../__fixtures__/org-member.entity.fixture';
 import { UserEntityFixture } from '../__fixtures__/user-entity.fixture';
-import { OwnerLookupServiceFixture } from '../__fixtures__/owner-lookup-service.fixture';
 import { OwnerModuleFixture } from '../__fixtures__/owner.module.fixture';
 import { InvitationAcceptedEventAsync } from '../__fixtures__/invitation-accepted.event';
 import { InvitationEntityFixture } from '../__fixtures__/invitation.entity.fixture';
@@ -63,9 +62,7 @@ describe(InvitationAcceptedListener, () => {
           },
         }),
         OrgModule.forRootAsync({
-          inject: [OwnerLookupServiceFixture],
-          useFactory: (ownerLookupService: OwnerLookupServiceFixture) => ({
-            ownerLookupService,
+          useFactory: () => ({
             settings: {
               invitationRequestEvent: InvitationAcceptedEventAsync,
             },
@@ -116,10 +113,10 @@ describe(InvitationAcceptedListener, () => {
     testUser = await userFactory.create();
     testOwner = await ownerFactory.create();
     testOrg = await orgFactory.create({
-      owner: testOwner,
+      ownerId: testOwner.id,
     });
     testInvitation = await invitationFactory.create({
-      user: testUser,
+      userId: testUser.id,
       category,
       constraints: { orgId: testOrg.id },
     });
@@ -129,7 +126,7 @@ describe(InvitationAcceptedListener, () => {
     const invitationAcceptedEventAsync = new InvitationAcceptedEventAsync({
       invitation: testInvitation,
       data: {
-        user: testInvitation.user,
+        userId: testInvitation.userId,
       },
     });
 

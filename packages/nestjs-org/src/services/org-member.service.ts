@@ -1,43 +1,28 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
-import {
-  BaseService,
-  QueryOptionsInterface,
-  RepositoryInterface,
-} from '@concepta/typeorm-common';
+import { RepositoryInterface } from '@concepta/nestjs-common';
 
 import { ORG_MODULE_ORG_MEMBER_ENTITY_KEY } from '../org.constants';
 import { OrgMemberEntityInterface } from '../interfaces/org-member-entity.interface';
 import { OrgMemberServiceInterface } from '../interfaces/org-member-service.interface';
 import { OrgMemberCreatableInterface } from '../interfaces/org-member-creatable.interface';
-import { OrgLookupService } from './org-lookup.service';
-import { OrgMemberLookupService } from './org-member-lookup.service';
-import { OrgMemberMutateService } from './org-member-mutate.service';
+import { OrgMemberModelService } from './org-member-model.service';
 import { OrgMemberException } from '../exceptions/org-member.exception';
+import { OrgMemberModelServiceInterface } from '../interfaces/org-member-model-service.interface';
 
 @Injectable()
-export class OrgMemberService
-  extends BaseService<OrgMemberEntityInterface>
-  implements OrgMemberServiceInterface
-{
+export class OrgMemberService implements OrgMemberServiceInterface {
   constructor(
     @InjectDynamicRepository(ORG_MODULE_ORG_MEMBER_ENTITY_KEY)
-    repo: RepositoryInterface<OrgMemberEntityInterface>,
-    protected readonly orgLookupService: OrgLookupService,
-    protected readonly orgMemberLookupService: OrgMemberLookupService,
-    protected readonly orgMemberMutateService: OrgMemberMutateService,
-  ) {
-    super(repo);
-  }
+    protected readonly repo: RepositoryInterface<OrgMemberEntityInterface>,
+    @Inject(OrgMemberModelService)
+    protected readonly orgMemberModelService: OrgMemberModelServiceInterface,
+  ) {}
 
   async add(
     orgMember: OrgMemberCreatableInterface,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<OrgMemberEntityInterface> {
-    const orgMemberFound = await this.orgMemberLookupService.findOne(
-      { where: orgMember },
-      queryOptions,
-    );
+    const orgMemberFound = await this.repo.findOne({ where: orgMember });
 
     if (orgMemberFound) {
       const { userId, orgId } = orgMember;
@@ -47,13 +32,10 @@ export class OrgMemberService
       });
     }
 
-    return await this.orgMemberMutateService.create(orgMember, queryOptions);
+    return this.orgMemberModelService.create(orgMember);
   }
 
-  async remove(
-    id: string,
-    queryOptions?: QueryOptionsInterface,
-  ): Promise<OrgMemberEntityInterface> {
-    return await this.orgMemberMutateService.remove({ id }, queryOptions);
+  async remove(id: string): Promise<OrgMemberEntityInterface> {
+    return this.orgMemberModelService.remove({ id });
   }
 }

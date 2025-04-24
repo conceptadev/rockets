@@ -40,11 +40,11 @@ export class InvitationReattemptController {
       throw new InvitationNotFoundException();
     }
 
-    const { id, category, user } = invitation;
+    const { id, category, userId } = invitation;
 
     await this.invitationSendService.send({
       id,
-      user,
+      userId,
       code,
       category,
     });

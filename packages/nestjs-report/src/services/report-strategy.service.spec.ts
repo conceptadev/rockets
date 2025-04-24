@@ -28,6 +28,7 @@ class MockStorageService implements ReportGeneratorServiceInterface {
       dateUpdated: new Date(),
       dateDeleted: new Date(),
       version: 1,
+      fileId: randomUUID(),
     };
     return Promise.resolve(mockReport);
   }

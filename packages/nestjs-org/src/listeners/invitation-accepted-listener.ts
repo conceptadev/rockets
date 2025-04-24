@@ -41,7 +41,7 @@ export class InvitationAcceptedListener
     if (
       event.payload.invitation.category === INVITATION_MODULE_CATEGORY_ORG_KEY
     ) {
-      const userId = event.payload.invitation.user.id;
+      const userId = event.payload.invitation.userId;
       const { orgId } = event?.payload?.invitation?.constraints ?? {};
 
       if (typeof userId !== 'string') {
@@ -57,10 +57,7 @@ export class InvitationAcceptedListener
         });
       }
 
-      await this.orgMemberService.add(
-        { userId, orgId },
-        event.payload?.queryOptions,
-      );
+      await this.orgMemberService.add({ userId, orgId });
 
       return true;
     }

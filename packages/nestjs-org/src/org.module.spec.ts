@@ -1,6 +1,7 @@
 import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CrudModule } from '@concepta/nestjs-crud';
+import { RepositoryInterface } from '@concepta/nestjs-common';
 import {
   getDynamicRepositoryToken,
   getEntityRepositoryToken,
@@ -9,28 +10,20 @@ import {
 import { OrgModule } from './org.module';
 import { OrgCrudService } from './services/org-crud.service';
 import { OrgController } from './org.controller';
-import { OrgLookupService } from './services/org-lookup.service';
-import { OrgMutateService } from './services/org-mutate.service';
-import {
-  ORG_MODULE_ORG_ENTITY_KEY,
-  ORG_MODULE_OWNER_LOOKUP_SERVICE_TOKEN,
-} from './org.constants';
+import { OrgModelService } from './services/org-model.service';
+import { ORG_MODULE_ORG_ENTITY_KEY } from './org.constants';
 
 import { OrgEntityFixture } from './__fixtures__/org-entity.fixture';
 import { OwnerEntityFixture } from './__fixtures__/owner-entity.fixture';
-import { OwnerLookupServiceFixture } from './__fixtures__/owner-lookup-service.fixture';
 import { OwnerModuleFixture } from './__fixtures__/owner.module.fixture';
 import { OrgMemberEntityFixture } from './__fixtures__/org-member.entity.fixture';
 import { UserEntityFixture } from './__fixtures__/user-entity.fixture';
 import { InvitationEntityFixture } from './__fixtures__/invitation.entity.fixture';
 import { OrgProfileEntityFixture } from './__fixtures__/org-profile.entity.fixture';
-import { RepositoryInterface } from '@concepta/typeorm-common';
 
 describe('OrgModule', () => {
   let orgModule: OrgModule;
-  let orgLookupService: OrgLookupService;
-  let orgMutateService: OrgMutateService;
-  let ownerLookupService: OwnerLookupServiceFixture;
+  let orgModelService: OrgModelService;
   let orgCrudService: OrgCrudService;
   let orgController: OrgController;
   let orgEntityRepo: RepositoryInterface<OrgEntityFixture>;
@@ -51,11 +44,7 @@ describe('OrgModule', () => {
             InvitationEntityFixture,
           ],
         }),
-        OrgModule.forRootAsync({
-          inject: [OwnerLookupServiceFixture],
-          useFactory: (ownerLookupService: OwnerLookupServiceFixture) => ({
-            ownerLookupService,
-          }),
+        OrgModule.forRoot({
           entities: {
             org: {
               entity: OrgEntityFixture,
@@ -77,11 +66,7 @@ describe('OrgModule', () => {
     orgDynamicRepo = testModule.get(
       getDynamicRepositoryToken(ORG_MODULE_ORG_ENTITY_KEY),
     );
-    orgLookupService = testModule.get<OrgLookupService>(OrgLookupService);
-    orgMutateService = testModule.get<OrgMutateService>(OrgMutateService);
-    ownerLookupService = testModule.get<OwnerLookupServiceFixture>(
-      ORG_MODULE_OWNER_LOOKUP_SERVICE_TOKEN,
-    );
+    orgModelService = testModule.get<OrgModelService>(OrgModelService);
     orgCrudService = testModule.get<OrgCrudService>(OrgCrudService);
     orgController = testModule.get<OrgController>(OrgController);
   });
@@ -96,14 +81,9 @@ describe('OrgModule', () => {
       expect(orgEntityRepo).toBeInstanceOf(Repository);
       expect(orgDynamicRepo).toBeInstanceOf(Repository);
       expect(orgCrudService).toBeInstanceOf(OrgCrudService);
-      expect(orgLookupService).toBeInstanceOf(OrgLookupService);
-      expect(orgLookupService['repo']).toBeInstanceOf(Repository);
-      expect(orgLookupService['repo'].find).toBeInstanceOf(Function);
-      expect(orgMutateService).toBeInstanceOf(OrgMutateService);
-      expect(orgMutateService['repo']).toBeInstanceOf(Repository);
-      expect(ownerLookupService).toBeInstanceOf(OwnerLookupServiceFixture);
-      expect(ownerLookupService['repo']).toBeInstanceOf(Repository);
-      expect(orgMutateService['repo'].find).toBeInstanceOf(Function);
+      expect(orgModelService).toBeInstanceOf(OrgModelService);
+      expect(orgModelService['repo']).toBeInstanceOf(Repository);
+      expect(orgModelService['repo'].find).toBeInstanceOf(Function);
       expect(orgController).toBeInstanceOf(OrgController);
     });
   });

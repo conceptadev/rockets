@@ -1,10 +1,7 @@
 import { Column } from 'typeorm';
 import { PlainLiteralObject } from '@nestjs/common';
 import { CommonPostgresEntity } from '@concepta/typeorm-common';
-import {
-  ReferenceActive,
-  InvitationUserInterface,
-} from '@concepta/nestjs-common';
+import { ReferenceActive, ReferenceId } from '@concepta/nestjs-common';
 
 import { InvitationEntityInterface } from '../interfaces/domain/invitation-entity.interface';
 
@@ -25,5 +22,6 @@ export abstract class InvitationPostgresEntity
   @Column({ type: 'jsonb' })
   constraints!: PlainLiteralObject;
 
-  user!: InvitationUserInterface;
+  @Column({ type: 'uuid' })
+  userId!: ReferenceId;
 }

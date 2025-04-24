@@ -36,7 +36,7 @@ the request (headers, cookies, body, query, etc).
   - [1. Registering AuthRefreshModule Synchronously](#1-registering-authrefreshmodule-synchronously)
   - [2. Registering AuthRefreshModule Asynchronously](#2-registering-authrefreshmodule-asynchronously)
   - [3. Global Registering AuthRefreshModule Asynchronously](#3-global-registering-authrefreshmodule-asynchronously)
-  - [4. Using Custom User Lookup Service](#4-using-custom-user-lookup-service)
+  - [4. Using Custom User Model Service](#4-using-custom-user-model-service)
   - [5. Implementing and Using Custom Token Verification Service](#5-implementing-and-using-custom-token-verification-service)
   - [6. Overwriting the Settings](#6-overwriting-the-settings)
   - [7. Integration with Other NestJS Modules](#7-integration-with-other-nestjs-modules)
@@ -127,19 +127,19 @@ We will continue with the tutorial in the [Authentication Module Documentation](
 To add the `AuthRefreshModule` to your NestJS application, import the module
 in your main application module (usually `app.module.ts`) and register it
 using the `forRoot` or `forRootAsync` method, let's use the
-`MyJwtUserLookupService` created at
+`MyJwtUserModelService` created at
 [Authentication Module Documentation](https://github.com/conceptadev/rockets/tree/main/packages/nestjs-authentication):
 
 ```ts
 //...
 AuthRefreshModule.forRoot({
-  userLookupService: new MyJwtUserLookupService()
+  userModelService: new MyJwtUserModelService()
 }),
 //... 
 ```
 
-> Additionally, you can take advantage of the `MyUserLookupService`
-> from the `@concepta/nestjs-user` module to streamline user lookup
+> Additionally, you can take advantage of the `MyUserModelService`
+> from the `@concepta/nestjs-user` module to streamline user model
 > operations within your authentication flow, check
 > [User Module Documentation](https://www.rockets.tools/reference/rockets/nestjs-user/README)
 > for reference:
@@ -228,7 +228,7 @@ curl -X POST \
 ```ts
 //...
 AuthRefreshModule.register({
-  userLookupService: new MyUserLookupService(),
+  userModelService: new MyUserModelService(),
   issueTokenService: new MyIssueTokenService(),
 }),
 //...
@@ -239,12 +239,12 @@ AuthRefreshModule.register({
 ```ts
 //...
 AuthRefreshModule.registerAsync({
-  inject: [MyUserLookupService, MyIssueTokenService],
+  inject: [MyUserModelService, MyIssueTokenService],
   useFactory: async (
-    userLookupService: MyUserLookupService,
+    userModelService: MyUserModelService,
     issueTokenService: MyIssueTokenService
   ) => ({
-    userLookupService,
+    userModelService,
     issueTokenService,
   }),
 }),
@@ -256,24 +256,24 @@ AuthRefreshModule.registerAsync({
 ```ts
 //...
 AuthRefreshModule.forRootAsync({
-  inject: [MyUserLookupService, MyIssueTokenService],
+  inject: [MyUserModelService, MyIssueTokenService],
   useFactory: async (
-    userLookupService: MyUserLookupService,
+    userModelService: MyUserModelService,
     issueTokenService: MyIssueTokenService
   ) => ({
-    userLookupService,
+    userModelService,
     issueTokenService,
   }),
 }),
 //...
 ```
 
-### 4. Using Custom User Lookup Service
+### 4. Using Custom User Model Service
 
 ```ts
 //...
 @Injectable()
-export class MyUserLookupService extends AuthRefreshUserLookupServiceInterface {
+export class MyUserModelService extends AuthRefreshUserModelServiceInterface {
   constructor(private userService: UserService) {}
 
   async bySubject(subject: ReferenceSubject): Promise<ReferenceIdInterface> {

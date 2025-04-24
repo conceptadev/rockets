@@ -4,11 +4,7 @@ import { AuthenticationModule } from '@concepta/nestjs-authentication';
 import { AuthJwtModule } from '@concepta/nestjs-auth-jwt';
 import { JwtModule } from '@concepta/nestjs-jwt';
 import { CrudModule } from '@concepta/nestjs-crud';
-import {
-  UserModule,
-  UserLookupService,
-  UserMutateService,
-} from '@concepta/nestjs-user';
+import { UserModule, UserModelService } from '@concepta/nestjs-user';
 import { PasswordModule } from '@concepta/nestjs-password';
 import { FederatedModule } from '@concepta/nestjs-federated';
 import { AuthGoogleController } from './auth-google.controller';
@@ -34,16 +30,15 @@ describe(AuthGoogleModule, () => {
           AuthGoogleModule.forRoot({}),
           AuthenticationModule.forRoot({}),
           AuthJwtModule.forRootAsync({
-            inject: [UserLookupService],
-            useFactory: (userLookupService) => ({
-              userLookupService,
+            inject: [UserModelService],
+            useFactory: (userModelService) => ({
+              userModelService,
             }),
           }),
           FederatedModule.forRootAsync({
-            inject: [UserLookupService, UserMutateService],
-            useFactory: (userLookupService, userMutateService) => ({
-              userLookupService,
-              userMutateService,
+            inject: [UserModelService],
+            useFactory: (userModelService) => ({
+              userModelService,
             }),
             entities: {
               federated: {

@@ -4,22 +4,25 @@ import { getDataSourceToken } from '@nestjs/typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
-import { ExceptionsFilter } from '@concepta/nestjs-common';
+import {
+  ExceptionsFilter,
+  PasswordStorageInterface,
+} from '@concepta/nestjs-common';
 import { IssueTokenService } from '@concepta/nestjs-authentication';
 import { AccessControlService } from '@concepta/nestjs-access-control';
 import {
   PasswordCreationService,
-  PasswordStorageInterface,
   PasswordStorageService,
   PasswordValidationService,
 } from '@concepta/nestjs-password';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 
 import { UserFactory } from './user.factory';
-import { UserLookupService } from './services/user-lookup.service';
 import { UserPasswordHistoryFactory } from './user-password-history.factory';
 import { UserPasswordService } from './services/user-password.service';
-import { UserPasswordHistoryLookupService } from './services/user-password-history-lookup.service';
+import { UserPasswordHistoryModelService } from './services/user-password-history-model.service';
+import { UserModelServiceInterface } from './interfaces/user-model-service.interface';
+import { UserModelService } from './services/user-model.service';
 
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
 import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
@@ -34,9 +37,9 @@ describe('User Controller (password e2e)', () => {
     let passwordValidationService: PasswordValidationService;
     let passwordStorageService: PasswordStorageService;
     let passwordCreationService: PasswordCreationService;
-    let userLookupService: UserLookupService;
+    let userModelService: UserModelServiceInterface;
     let userPasswordService: UserPasswordService;
-    let userPasswordHistoryLookupService: UserPasswordHistoryLookupService;
+    let userPasswordHistoryModelService: UserPasswordHistoryModelService;
     let issueTokenService: IssueTokenService;
     let accessControlService: AccessControlService;
 
@@ -72,10 +75,10 @@ describe('User Controller (password e2e)', () => {
       passwordValidationService = app.get(PasswordValidationService);
       passwordStorageService = app.get(PasswordStorageService);
       passwordCreationService = app.get(PasswordCreationService);
-      userLookupService = app.get(UserLookupService);
+      userModelService = app.get(UserModelService);
       userPasswordService = app.get(UserPasswordService);
-      userPasswordHistoryLookupService = app.get(
-        UserPasswordHistoryLookupService,
+      userPasswordHistoryModelService = app.get(
+        UserPasswordHistoryModelService,
       );
       issueTokenService = app.get(IssueTokenService);
       accessControlService = app.get(AccessControlService);
@@ -131,22 +134,21 @@ describe('User Controller (password e2e)', () => {
           })
           .expect(200);
 
-        const updatedUser = await userLookupService.byId(userId);
+        const updatedUser = await userModelService.byId(userId);
         expect(updatedUser).toBeInstanceOf(UserEntityFixture);
 
         if (updatedUser) {
-          const isPasswordValid =
-            await passwordValidationService.validateObject(
-              userNewPassword,
-              updatedUser,
-            );
+          const isPasswordValid = await passwordValidationService.validate({
+            password: userNewPassword,
+            ...updatedUser,
+          });
           expect(isPasswordValid).toEqual<boolean>(true);
         } else {
           fail('User not found');
         }
 
         const userPasswordHistory =
-          await userPasswordHistoryLookupService.byUserId(updatedUser.id);
+          await userPasswordHistoryModelService.byUserId(updatedUser.id);
         expect(userPasswordHistory).toEqual(expect.any(Array));
         expect(userPasswordHistory.length).toEqual(2);
         expect(userPasswordHistory).toEqual(
@@ -178,7 +180,7 @@ describe('User Controller (password e2e)', () => {
           })
           .expect(400);
 
-        const unchangedUser = await userLookupService.byId(userId);
+        const unchangedUser = await userModelService.byId(userId);
         expect(unchangedUser).toBeInstanceOf(UserEntityFixture);
 
         if (unchangedUser) {
@@ -223,15 +225,14 @@ describe('User Controller (password e2e)', () => {
           })
           .expect(200);
 
-        const updatedUser = await userLookupService.byId(userId);
+        const updatedUser = await userModelService.byId(userId);
         expect(updatedUser).toBeInstanceOf(UserEntityFixture);
 
         if (updatedUser) {
-          const isPasswordValid =
-            await passwordValidationService.validateObject(
-              userNewPassword,
-              updatedUser,
-            );
+          const isPasswordValid = await passwordValidationService.validate({
+            password: userNewPassword,
+            ...updatedUser,
+          });
           expect(isPasswordValid).toEqual<boolean>(true);
         } else {
           fail('User not updated');

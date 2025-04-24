@@ -1,5 +1,5 @@
 import { fail } from 'assert';
-import { PasswordStorageInterface } from '../interfaces/password-storage.interface';
+import { PasswordStorageInterface } from '@concepta/nestjs-common';
 import { PasswordStorageService } from './password-storage.service';
 import { PasswordValidationService } from './password-validation.service';
 import { PasswordRequiredException } from '../exceptions/password-required.exception';
@@ -82,10 +82,10 @@ describe(PasswordStorageService, () => {
       expect(typeof passwordStorageObject.passwordSalt).toEqual('string');
 
       // check if password encrypt can be decrypted
-      const isValid = await validationService.validateObject(
-        PASSWORD_MEDIUM,
-        passwordStorageObject,
-      );
+      const isValid = await validationService.validate({
+        password: PASSWORD_MEDIUM,
+        ...passwordStorageObject,
+      });
 
       expect(isValid).toEqual(true);
     });
@@ -105,10 +105,10 @@ describe(PasswordStorageService, () => {
       expect(passwordStorageObject.passwordSalt).toEqual(PASSWORD_SALT);
 
       // check if password encrypt can be decrypted
-      const isValid = await validationService.validateObject(
-        PASSWORD_MEDIUM,
-        passwordStorageObject,
-      );
+      const isValid = await validationService.validate({
+        password: PASSWORD_MEDIUM,
+        ...passwordStorageObject,
+      });
 
       expect(isValid).toEqual(true);
     });
@@ -125,10 +125,10 @@ describe(PasswordStorageService, () => {
         typeof passwordStorageObject.passwordSalt === 'string'
       ) {
         // check if password encrypt can be decrypted
-        const isValid = await validationService.validateObject(
-          PASSWORD_MEDIUM,
-          passwordStorageObject as PasswordStorageInterface,
-        );
+        const isValid = await validationService.validate({
+          password: PASSWORD_MEDIUM,
+          ...(passwordStorageObject as PasswordStorageInterface),
+        });
 
         expect(isValid).toEqual(true);
       } else {
@@ -153,10 +153,10 @@ describe(PasswordStorageService, () => {
         typeof passwordStorageObject.passwordSalt === 'string'
       ) {
         // check if password encrypt can be decrypted
-        const isValid = await validationService.validateObject(
-          PASSWORD_MEDIUM,
-          passwordStorageObject as PasswordStorageInterface,
-        );
+        const isValid = await validationService.validate({
+          password: PASSWORD_MEDIUM,
+          ...(passwordStorageObject as PasswordStorageInterface),
+        });
 
         expect(isValid).toEqual(true);
       } else {

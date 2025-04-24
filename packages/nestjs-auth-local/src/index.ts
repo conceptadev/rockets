@@ -3,7 +3,7 @@ export { AuthLocalOptionsInterface } from './interfaces/auth-local-options.inter
 export { AuthLocalOptionsExtrasInterface } from './interfaces/auth-local-options-extras.interface';
 export { AuthLocalSettingsInterface } from './interfaces/auth-local-settings.interface';
 export { AuthLocalValidateUserInterface } from './interfaces/auth-local-validate-user.interface';
-export { AuthLocalUserLookupServiceInterface } from './interfaces/auth-local-user-lookup-service.interface';
+export { AuthLocalUserModelServiceInterface } from './interfaces/auth-local-user-model-service.interface';
 export { AuthLocalValidateUserServiceInterface } from './interfaces/auth-local-validate-user-service.interface';
 export { AuthLocalCredentialsInterface } from './interfaces/auth-local-credentials.interface';
 
@@ -22,7 +22,7 @@ export {
 
 export {
   AuthLocalIssueTokenService,
-  AuthLocalUserLookupService,
+  AuthLocalUserModelService,
   AuthLocalPasswordValidationService,
 } from './auth-local.constants';
 
