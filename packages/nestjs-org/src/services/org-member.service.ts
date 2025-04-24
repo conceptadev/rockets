@@ -32,10 +32,10 @@ export class OrgMemberService implements OrgMemberServiceInterface {
       });
     }
 
-    return await this.orgMemberModelService.create(orgMember);
+    return this.orgMemberModelService.create(orgMember);
   }
 
   async remove(id: string): Promise<OrgMemberEntityInterface> {
-    return await this.orgMemberModelService.remove({ id });
+    return this.orgMemberModelService.remove({ id });
   }
 }

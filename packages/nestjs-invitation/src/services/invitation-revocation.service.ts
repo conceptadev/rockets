@@ -99,7 +99,7 @@ export class InvitationRevocationService {
 
     // remove the invitations
     try {
-      return this.invitationRepo.remove(invitations);
+      return await this.invitationRepo.remove(invitations);
     } catch (e: unknown) {
       throw new InvitationException({
         message: 'Fatal error while removing invitations.',

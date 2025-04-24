@@ -85,7 +85,6 @@ export class InvitationController
     let invite: InvitationSendInviteInterface | undefined;
 
     try {
-      await this.invitationCrudService;
       invite = await this.invitationSendService.create(
         invitationCreateInviteDto,
       );

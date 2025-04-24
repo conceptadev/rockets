@@ -87,7 +87,7 @@ export class OtpService implements OtpServiceInterface {
         await this.inactivatePreviousOtp(assignment, dto);
       }
 
-      return assignmentRepo.save({
+      return await assignmentRepo.save({
         category,
         type,
         assigneeId,

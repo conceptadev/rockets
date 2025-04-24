@@ -158,7 +158,7 @@ export abstract class ModelService<
   private async save(entity: Entity): Promise<Entity> {
     // try to save it
     try {
-      return this.repo.save(entity);
+      return await this.repo.save(entity);
     } catch (e) {
       throw new ModelMutateException(this.repo.metadata.name, {
         originalError: e,
@@ -172,7 +172,7 @@ export abstract class ModelService<
   private async delete(entity: Entity): Promise<Entity> {
     // try to save it
     try {
-      return this.repo.remove(entity);
+      return await this.repo.remove(entity);
     } catch (e) {
       throw new ModelMutateException(this.repo.metadata.name, {
         originalError: e,
@@ -194,7 +194,7 @@ export abstract class ModelService<
     const validationErrors = await validate(dto);
 
     // any errors?
-    if (validationErrors.length) {
+    if (validationErrors?.length) {
       // yes, throw error
       throw new ModelValidationException(
         this.repo.metadata.name,
