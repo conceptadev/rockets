@@ -6,11 +6,11 @@ import {
 import { ConfigModule } from '@nestjs/config';
 
 import { createSettingsProvider } from '@concepta/nestjs-common';
+import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import {
+  RepositoryInterface,
   getDynamicRepositoryToken,
-  TypeOrmExtModule,
-} from '@concepta/nestjs-typeorm-ext';
-import { RepositoryInterface } from '@concepta/nestjs-common';
+} from '@concepta/nestjs-common';
 import {
   ORG_MODULE_SETTINGS_TOKEN,
   ORG_MODULE_ORG_ENTITY_KEY,

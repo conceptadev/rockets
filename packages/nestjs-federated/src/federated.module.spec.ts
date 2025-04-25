@@ -1,12 +1,12 @@
 import { Repository } from 'typeorm';
 import { DynamicModule, ModuleMetadata } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { RepositoryInterface } from '@concepta/nestjs-common';
 import {
+  RepositoryInterface,
   getDynamicRepositoryToken,
   getEntityRepositoryToken,
-  TypeOrmExtModule,
-} from '@concepta/nestjs-typeorm-ext';
+} from '@concepta/nestjs-common';
+import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 
 import { FederatedModule } from './federated.module';
 import { FederatedService } from './services/federated.service';
@@ -21,7 +21,6 @@ import { UserModuleFixture } from './__fixtures__/user/user.module.fixture';
 import { UserEntityFixture } from './__fixtures__/user/entities/user.entity.fixture';
 import { UserModelServiceFixture } from './__fixtures__/user/services/user-model.service.fixture';
 import { FederatedEntityFixture } from './__fixtures__/federated/federated-entity.fixture';
-import {} from '@concepta/nestjs-common';
 
 describe(FederatedModule, () => {
   let testModule: TestingModule;

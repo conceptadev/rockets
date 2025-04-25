@@ -6,8 +6,10 @@ import { UserEntityInterface } from '@concepta/nestjs-user';
 import { OtpService } from '@concepta/nestjs-otp';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
 import { SeedingSource } from '@concepta/typeorm-seeding';
-import { getDynamicRepositoryToken } from '@concepta/nestjs-typeorm-ext';
-import { INVITATION_MODULE_CATEGORY_USER_KEY } from '@concepta/nestjs-common';
+import {
+  INVITATION_MODULE_CATEGORY_USER_KEY,
+  getDynamicRepositoryToken,
+} from '@concepta/nestjs-common';
 
 import { INVITATION_MODULE_INVITATION_ENTITY_KEY } from '../invitation.constants';
 import { InvitationFactory } from '../seeding/invitation.factory';

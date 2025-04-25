@@ -1,20 +1,19 @@
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { ModelQueryException } from '@concepta/nestjs-common';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 
-import { ModelQueryException } from '@concepta/nestjs-common';
+import { TypeOrmRepositoryAdapter } from './typeorm-repository.adapter';
+import { AppModuleFixture } from '../__fixtures__/repository/app.module.fixture';
+import { TestModuleFixture } from '../__fixtures__/repository/test.module.fixture';
+import { TestEntityFixture } from '../__fixtures__/repository/test.entity.fixture';
+import { TypeOrmRepositoryAdapterFixture } from '../__fixtures__/repository/services/typeorm-repository.adapter.fixture';
 
-import { TypeOrmRepositoryService } from './typeorm-repository.service';
-import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
-import { TestModuleFixture } from '../__fixtures__/test.module.fixture';
-import { TestEntityFixture } from '../__fixtures__/test.entity.fixture';
-import { TestTypeOrmRepositoryServiceFixture } from '../__fixtures__/services/test-typeorm-repository.service.fixture';
-
-describe(TypeOrmRepositoryService, () => {
+describe(TypeOrmRepositoryAdapter, () => {
   let app: INestApplication;
   let testModuleFixture: TestModuleFixture;
-  let testService: TypeOrmRepositoryService<TestEntityFixture>;
+  let testService: TypeOrmRepositoryAdapter<TestEntityFixture>;
   let seedingSource: SeedingSource;
 
   beforeEach(async () => {
@@ -25,8 +24,8 @@ describe(TypeOrmRepositoryService, () => {
     app = moduleFixture.createNestApplication();
     testModuleFixture = moduleFixture.get<TestModuleFixture>(TestModuleFixture);
 
-    testService = moduleFixture.get<TestTypeOrmRepositoryServiceFixture>(
-      TestTypeOrmRepositoryServiceFixture,
+    testService = moduleFixture.get<TypeOrmRepositoryAdapterFixture>(
+      TypeOrmRepositoryAdapterFixture,
     );
 
     seedingSource = new SeedingSource({
@@ -42,10 +41,10 @@ describe(TypeOrmRepositoryService, () => {
 
   it('should be loaded', async () => {
     expect(testModuleFixture).toBeInstanceOf(TestModuleFixture);
-    expect(testService).toBeInstanceOf(TestTypeOrmRepositoryServiceFixture);
+    expect(testService).toBeInstanceOf(TypeOrmRepositoryAdapterFixture);
   });
 
-  describe(TypeOrmRepositoryService.prototype['findOne'], () => {
+  describe(TypeOrmRepositoryAdapter.prototype['findOne'], () => {
     it('query exception', async () => {
       jest.spyOn(testService['repo'], 'findOne').mockImplementationOnce(() => {
         throw new Error();

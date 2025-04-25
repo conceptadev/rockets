@@ -1,5 +1,5 @@
 import { Column, Entity, Unique } from 'typeorm';
-import { CommonPostgresEntity } from '@concepta/typeorm-common';
+import { CommonPostgresEntity } from '@concepta/nestjs-typeorm-ext';
 import { FileEntityInterface } from '../interfaces/file-entity.interface';
 
 /**

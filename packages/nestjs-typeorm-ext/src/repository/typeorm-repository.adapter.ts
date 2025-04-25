@@ -19,7 +19,7 @@ import {
 /**
  * Abstract service
  */
-export class TypeOrmRepositoryService<Entity extends PlainLiteralObject>
+export class TypeOrmRepositoryAdapter<Entity extends PlainLiteralObject>
   implements RepositoryInterface<Entity>
 {
   /**

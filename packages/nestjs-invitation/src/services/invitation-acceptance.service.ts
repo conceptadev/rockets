@@ -4,8 +4,8 @@ import {
   InvitationInterface,
   LiteralObject,
   RepositoryInterface,
+  InjectDynamicRepository,
 } from '@concepta/nestjs-common';
-import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 
 import {
   INVITATION_MODULE_EMAIL_SERVICE_TOKEN,

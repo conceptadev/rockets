@@ -1,11 +1,9 @@
 import { CrudModule } from '@concepta/nestjs-crud';
-import {
-  getDynamicRepositoryToken,
-  TypeOrmExtModule,
-} from '@concepta/nestjs-typeorm-ext';
+import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import {
   ReferenceIdInterface,
   RepositoryInterface,
+  getDynamicRepositoryToken,
 } from '@concepta/nestjs-common';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { Test, TestingModule } from '@nestjs/testing';

@@ -2,11 +2,11 @@ import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { DynamicModule, ModuleMetadata } from '@nestjs/common';
 import {
+  RepositoryInterface,
   getDynamicRepositoryToken,
   getEntityRepositoryToken,
-  TypeOrmExtModule,
-} from '@concepta/nestjs-typeorm-ext';
-import { RepositoryInterface } from '@concepta/nestjs-common';
+} from '@concepta/nestjs-common';
+import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 
 import { FileService } from './services/file.service';
 

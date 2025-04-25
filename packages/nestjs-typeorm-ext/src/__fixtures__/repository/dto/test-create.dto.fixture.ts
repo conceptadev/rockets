@@ -1,9 +1,7 @@
 import { IsOptional, IsString, MinLength } from 'class-validator';
 import { TestCreatableInterfaceFixture } from '../interface/test-creatable.interface.fixture';
 
-export class AuditEntityCreateDtoFixture
-  implements TestCreatableInterfaceFixture
-{
+export class TestCreateDtoFixture implements TestCreatableInterfaceFixture {
   @IsString()
   @MinLength(2)
   firstName = '';

@@ -1,7 +1,9 @@
 import { Inject } from '@nestjs/common';
 import { ReferenceIdInterface } from '@concepta/nestjs-common';
-import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
-import { RepositoryInterface } from '@concepta/nestjs-common';
+import {
+  RepositoryInterface,
+  InjectDynamicRepository,
+} from '@concepta/nestjs-common';
 
 import {
   INVITATION_MODULE_INVITATION_ENTITY_KEY,

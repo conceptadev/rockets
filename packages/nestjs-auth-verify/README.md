@@ -293,9 +293,6 @@ import {
   ReferenceAssignment,
   OtpCreateParamsInterface
 } from '@concepta/nestjs-common';
-import {
-  QueryOptionsInterface
-} from '@concepta/typeorm-common';
 import { Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { OtpServiceInterface } from '../interfaces/otp-service.interface';
@@ -319,7 +316,6 @@ export class YourAuthVerifyOtpService implements AuthVerifyOtpServiceInterface {
     assignment: ReferenceAssignment,
     otp: Pick<OtpInterface, 'category' | 'passcode'>,
     deleteIfValid = false,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<ReferenceAssigneeInterface | null> {
     // your custom logic to validate OTP
   }
@@ -327,7 +323,6 @@ export class YourAuthVerifyOtpService implements AuthVerifyOtpServiceInterface {
   async clear(
     assignment: ReferenceAssignment,
     otp: Pick<OtpInterface, 'assignee' | 'category'>,
-    queryOptions?: QueryOptionsInterface,
   ): Promise<void> {
     // your custom logic to clear OTP
   }

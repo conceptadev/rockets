@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import {
   NotAnErrorException,
   RepositoryInterface,
+  InjectDynamicRepository,
 } from '@concepta/nestjs-common';
 
 import { FEDERATED_MODULE_FEDERATED_ENTITY_KEY } from '../federated.constants';

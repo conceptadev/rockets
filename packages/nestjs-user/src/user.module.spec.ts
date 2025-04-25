@@ -1,7 +1,9 @@
 import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
-import { RepositoryInterface } from '@concepta/nestjs-common';
-import { getDynamicRepositoryToken } from '@concepta/nestjs-typeorm-ext';
+import {
+  RepositoryInterface,
+  getDynamicRepositoryToken,
+} from '@concepta/nestjs-common';
 import {
   PasswordCreationService,
   PasswordStorageService,

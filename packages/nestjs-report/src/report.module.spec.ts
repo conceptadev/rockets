@@ -1,13 +1,13 @@
 import { Repository } from 'typeorm';
 import { DynamicModule, ModuleMetadata } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ReportStatusEnum } from '@concepta/nestjs-common';
-import { FileModule } from '@concepta/nestjs-file';
 import {
+  ReportStatusEnum,
   getDynamicRepositoryToken,
   getEntityRepositoryToken,
-  TypeOrmExtModule,
-} from '@concepta/nestjs-typeorm-ext';
+} from '@concepta/nestjs-common';
+import { FileModule } from '@concepta/nestjs-file';
+import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 
 import { ReportService } from './services/report.service';
 

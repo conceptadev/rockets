@@ -1,12 +1,12 @@
 import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CrudModule } from '@concepta/nestjs-crud';
-import { RepositoryInterface } from '@concepta/nestjs-common';
 import {
+  RepositoryInterface,
   getDynamicRepositoryToken,
   getEntityRepositoryToken,
-  TypeOrmExtModule,
-} from '@concepta/nestjs-typeorm-ext';
+} from '@concepta/nestjs-common';
+import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { OrgModule } from './org.module';
 import { OrgCrudService } from './services/org-crud.service';
 import { OrgController } from './org.controller';
