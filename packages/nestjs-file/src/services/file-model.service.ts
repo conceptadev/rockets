@@ -5,8 +5,8 @@ import {
   FileUpdatableInterface,
   ModelService,
   RepositoryInterface,
+  InjectDynamicRepository,
 } from '@concepta/nestjs-common';
-import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import { FileEntityInterface } from '../interfaces/file-entity.interface';
 import { FileModelServiceInterface } from '../interfaces/file-model-service.interface';
 

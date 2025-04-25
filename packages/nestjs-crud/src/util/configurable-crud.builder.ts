@@ -7,8 +7,7 @@ import {
   Type,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeepPartial } from '@concepta/nestjs-common';
-import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
+import { DeepPartial, InjectDynamicRepository } from '@concepta/nestjs-common';
 import { CrudCreateMany } from '../decorators/actions/crud-create-many.decorator';
 import { CrudCreateOne } from '../decorators/actions/crud-create-one.decorator';
 import { CrudDeleteOne } from '../decorators/actions/crud-delete-one.decorator';

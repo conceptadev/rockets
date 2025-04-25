@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import {
   ModelService,
   RepositoryInterface,
   RoleCreatableInterface,
   RoleUpdatableInterface,
+  InjectDynamicRepository,
 } from '@concepta/nestjs-common';
 import { RoleEntityInterface } from '../interfaces/role-entity.interface';
 import { RoleModelServiceInterface } from '../interfaces/role-model-service.interface';

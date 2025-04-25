@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { ModelService, RepositoryInterface } from '@concepta/nestjs-common';
-import { InjectDynamicRepository } from '../../decorators/inject-dynamic-repository.decorator';
+import {
+  ModelService,
+  RepositoryInterface,
+  InjectDynamicRepository,
+} from '@concepta/nestjs-common';
 import { AUDIT_TOKEN } from '../repository/test.constants.fixture';
 import { TestEntityFixture } from '../repository/test.entity.fixture';
 import { TestCreateDtoFixture } from '../repository/dto/test-create.dto.fixture';

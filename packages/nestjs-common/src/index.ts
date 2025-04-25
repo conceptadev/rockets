@@ -80,6 +80,10 @@ export { RepositoryInterface } from './repository/interfaces/repository.interfac
 export { getEntityRepositoryToken } from './repository/utils/get-entity-repository-token';
 export { getDynamicRepositoryToken } from './repository/utils/get-dynamic-repository-token';
 
+// Repository decorators
+export { InjectEntityRepository } from './repository/decorators/inject-entity-repository.decorator';
+export { InjectDynamicRepository } from './repository/decorators/inject-dynamic-repository.decorator';
+
 // Audit types
 export {
   AuditDateCreated,

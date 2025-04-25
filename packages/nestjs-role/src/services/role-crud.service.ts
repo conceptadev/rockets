@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
+import { InjectDynamicRepository } from '@concepta/nestjs-common';
 import { TypeOrmCrudService } from '@concepta/nestjs-crud';
 import { ROLE_MODULE_ROLE_ENTITY_KEY } from '../role.constants';
 import { RoleEntityInterface } from '../interfaces/role-entity.interface';
