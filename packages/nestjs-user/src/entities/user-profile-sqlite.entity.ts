@@ -1,5 +1,5 @@
 import { Column } from 'typeorm';
-import { CommonSqliteEntity } from '@concepta/typeorm-common';
+import { CommonSqliteEntity } from '@concepta/nestjs-typeorm-ext';
 import { UserProfileEntityInterface } from '../interfaces/user-profile-entity.interface';
 
 /**

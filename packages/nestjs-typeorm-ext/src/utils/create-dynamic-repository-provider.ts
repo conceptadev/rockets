@@ -1,8 +1,8 @@
 import { DataSource } from 'typeorm';
 import { Provider } from '@nestjs/common';
 import { getDataSourceToken, getRepositoryToken } from '@nestjs/typeorm';
+import { getDynamicRepositoryToken } from '@concepta/nestjs-common';
 import { TypeOrmExtDataSourceToken } from '../typeorm-ext.types';
-import { getDynamicRepositoryToken } from './get-dynamic-repository-token';
 import { TYPEORM_EXT_MODULE_DEFAULT_DATA_SOURCE_NAME } from '../typeorm-ext.constants';
 import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
 import { TypeOrmExtEntityOptionInterface } from '../interfaces/typeorm-ext-entity-options.interface';

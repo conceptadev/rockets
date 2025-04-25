@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
-
+import { TypeOrmExtModule } from '../../typeorm-ext.module';
 import { TestModuleFixture } from './test.module.fixture';
 import { ormConfig } from './ormconfig.fixture';
 

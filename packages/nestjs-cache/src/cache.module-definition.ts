@@ -5,11 +5,11 @@ import {
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-import { createSettingsProvider } from '@concepta/nestjs-common';
 import {
+  createSettingsProvider,
   getDynamicRepositoryToken,
-  TypeOrmExtModule,
-} from '@concepta/nestjs-typeorm-ext';
+} from '@concepta/nestjs-common';
+import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 
 import {
   CACHE_MODULE_CRUD_SERVICES_TOKEN,

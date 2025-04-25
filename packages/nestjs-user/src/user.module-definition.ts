@@ -7,15 +7,13 @@ import { ConfigModule } from '@nestjs/config';
 import {
   RepositoryInterface,
   createSettingsProvider,
+  getDynamicRepositoryToken,
 } from '@concepta/nestjs-common';
 import {
   PasswordCreationService,
   PasswordStorageService,
 } from '@concepta/nestjs-password';
-import {
-  getDynamicRepositoryToken,
-  TypeOrmExtModule,
-} from '@concepta/nestjs-typeorm-ext';
+import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 
 import {
   USER_MODULE_SETTINGS_TOKEN,

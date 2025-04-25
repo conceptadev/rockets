@@ -1,6 +1,6 @@
 import { Column } from 'typeorm';
 import { PlainLiteralObject } from '@nestjs/common';
-import { CommonPostgresEntity } from '@concepta/typeorm-common';
+import { CommonPostgresEntity } from '@concepta/nestjs-typeorm-ext';
 import { ReferenceActive, ReferenceId } from '@concepta/nestjs-common';
 
 import { InvitationEntityInterface } from '../interfaces/domain/invitation-entity.interface';

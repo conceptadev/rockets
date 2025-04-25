@@ -4,7 +4,7 @@ import {
   ReferenceId,
   ReferenceIdInterface,
 } from '@concepta/nestjs-common';
-import { CommonSqliteEntity } from '@concepta/typeorm-common';
+import { CommonSqliteEntity } from '@concepta/nestjs-typeorm-ext';
 import { OrgEntityInterface } from '../interfaces/org-entity.interface';
 
 /**

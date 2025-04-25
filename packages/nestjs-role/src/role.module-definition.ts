@@ -10,12 +10,10 @@ import {
   RepositoryInterface,
   RoleAssignmentInterface,
   createSettingsProvider,
+  getDynamicRepositoryToken,
 } from '@concepta/nestjs-common';
 
-import {
-  TypeOrmExtModule,
-  getDynamicRepositoryToken,
-} from '@concepta/nestjs-typeorm-ext';
+import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 
 import {
   ROLE_MODULE_CRUD_SERVICES_TOKEN,

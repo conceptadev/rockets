@@ -1,5 +1,5 @@
 import { Inject } from '@nestjs/common';
-import { getEntityRepositoryToken } from '../utils/get-entity-repository-token';
+import { getEntityRepositoryToken } from '@concepta/nestjs-common';
 
 export const InjectEntityRepository = (key: string) => {
   return Inject(getEntityRepositoryToken(key));
