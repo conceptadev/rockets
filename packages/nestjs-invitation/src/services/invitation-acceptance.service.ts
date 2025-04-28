@@ -1,4 +1,4 @@
-import { Inject } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
 import {
   AssigneeRelationInterface,
   InvitationInterface,
@@ -173,5 +173,33 @@ export class InvitationAcceptanceService {
       { category, passcode },
       deleteIfValid,
     );
+  }
+
+  async validate(code: string, passcode: string): Promise<void> {
+    let invitation: InvitationInterface | null | undefined;
+
+    try {
+      invitation = await this.getOneByCode(code);
+    } catch (e) {
+      Logger.error(e);
+    }
+
+    if (!invitation) {
+      throw new InvitationNotFoundException();
+    }
+
+    const { category } = invitation;
+
+    let otp: AssigneeRelationInterface | null = null;
+
+    try {
+      otp = await this.validatePasscode(passcode, category);
+    } catch (e) {
+      Logger.error(e);
+    }
+
+    if (!otp) {
+      throw new InvitationNotFoundException();
+    }
   }
 }

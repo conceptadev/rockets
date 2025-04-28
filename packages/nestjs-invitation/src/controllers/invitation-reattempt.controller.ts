@@ -1,6 +1,5 @@
 import {
   Controller,
-  Logger,
   Param,
   Post,
   UsePipes,
@@ -8,17 +7,13 @@ import {
 } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { InvitationAcceptanceService } from '../services/invitation-acceptance.service';
-import { InvitationSendService } from '../services/invitation-send.service';
-import { InvitationNotFoundException } from '../exceptions/invitation-not-found.exception';
-import { InvitationInterface } from '@concepta/nestjs-common';
+import { InvitationAttemptService } from '../services/invitation-attempt.service';
 
 @Controller('invitation-reattempt')
 @ApiTags('invitation-reattempt')
 export class InvitationReattemptController {
   constructor(
-    private readonly invitationAcceptanceService: InvitationAcceptanceService,
-    private readonly invitationSendService: InvitationSendService,
+    private readonly invitationAttemptService: InvitationAttemptService,
   ) {}
 
   @UsePipes(new ValidationPipe({ transform: true, forbidUnknownValues: true }))
@@ -28,25 +23,6 @@ export class InvitationReattemptController {
   @ApiOkResponse()
   @Post('/:code')
   async reattemptInvite(@Param('code') code: string): Promise<void> {
-    let invitation: InvitationInterface | null | undefined;
-
-    try {
-      invitation = await this.invitationAcceptanceService.getOneByCode(code);
-    } catch (e: unknown) {
-      Logger.error(e);
-    }
-
-    if (!invitation) {
-      throw new InvitationNotFoundException();
-    }
-
-    const { id, category, userId } = invitation;
-
-    await this.invitationSendService.send({
-      id,
-      userId,
-      code,
-      category,
-    });
+    await this.invitationAttemptService.send(code);
   }
 }
