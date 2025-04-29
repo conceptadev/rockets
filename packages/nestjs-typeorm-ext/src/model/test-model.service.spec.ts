@@ -11,11 +11,11 @@ import {
   ModelService,
 } from '@concepta/nestjs-common';
 
-import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
-import { TestModelServiceFixture } from '../__fixtures__/services/test-model.service.fixture';
-import { TestModuleFixture } from '../__fixtures__/test.module.fixture';
-import { TestEntityFixture } from '../__fixtures__/test.entity.fixture';
-import { TestFactoryFixture } from '../__fixtures__/test.factory.fixture';
+import { AppModuleFixture } from '../__fixtures__/repository/app.module.fixture';
+import { TestModelServiceFixture } from '../__fixtures__/model/test-model.service.fixture';
+import { TestModuleFixture } from '../__fixtures__/repository/test.module.fixture';
+import { TestEntityFixture } from '../__fixtures__/repository/test.entity.fixture';
+import { TestFactoryFixture } from '../__fixtures__/repository/test.factory.fixture';
 
 describe(ModelService, () => {
   const WRONG_UUID = '3bfd065e-0c30-11ed-861d-0242ac120002';

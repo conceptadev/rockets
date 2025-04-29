@@ -1,5 +1,7 @@
 # Rockets TypeORM Common
 
+THIS PACKAGE IS DEPRECATED AND SHOULD NO LONGER BE PUBLISHED
+
 The common module contains commonly used TypeORM embeds, utilities.
 
 ## Project

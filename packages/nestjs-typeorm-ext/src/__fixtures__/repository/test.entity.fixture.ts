@@ -1,6 +1,6 @@
 import { Column, Entity } from 'typeorm';
 import { TestInterfaceFixture } from './interface/test-entity.interface.fixture';
-import { CommonSqliteEntity } from '../entities/common/common-sqlite.entity';
+import { CommonSqliteEntity } from '../../entities/common/common-sqlite.entity';
 
 @Entity()
 export class TestEntityFixture

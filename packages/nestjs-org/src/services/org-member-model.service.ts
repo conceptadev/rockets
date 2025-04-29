@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import {
   Type,
   RepositoryInterface,
   ModelService,
+  InjectDynamicRepository,
 } from '@concepta/nestjs-common';
 
 import { OrgMemberModelServiceInterface } from '../interfaces/org-member-model-service.interface';

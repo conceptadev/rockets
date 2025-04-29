@@ -1,6 +1,6 @@
 import { Column, Entity, Unique } from 'typeorm';
 import { ReferenceId, ReportStatusEnum } from '@concepta/nestjs-common';
-import { CommonSqliteEntity } from '@concepta/typeorm-common';
+import { CommonSqliteEntity } from '@concepta/nestjs-typeorm-ext';
 import { ReportEntityInterface } from '../interfaces/report-entity.interface';
 
 /**

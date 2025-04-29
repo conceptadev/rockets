@@ -27,7 +27,6 @@
     "@concepta/nestjs-password": "^7.0.0-alpha.3",
     "@concepta/nestjs-typeorm-ext": "^7.0.0-alpha.3",
     "@concepta/nestjs-user": "^7.0.0-alpha.3",
-    "@concepta/typeorm-common": "^7.0.0-alpha.3",
     "@concepta/typeorm-seeding": "^4.0.0",
     "@faker-js/faker": "^8.4.1",
     "@nestjs-modules/mailer": "^1.11.2",

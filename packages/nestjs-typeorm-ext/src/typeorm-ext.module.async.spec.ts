@@ -1,8 +1,10 @@
 import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
+import {
+  getDynamicRepositoryToken,
+  getEntityRepositoryToken,
+} from '@concepta/nestjs-common';
 import { TypeOrmExtModule } from './typeorm-ext.module';
-import { getDynamicRepositoryToken } from './utils/get-dynamic-repository-token';
-import { getEntityRepositoryToken } from './utils/get-entity-repository-token';
 
 import { PhotoModuleFixture } from './__fixtures__/photo/photo.module.fixture';
 import { PhotoEntityInterfaceFixture } from './__fixtures__/photo/interfaces/photo-entity.interface.fixture';

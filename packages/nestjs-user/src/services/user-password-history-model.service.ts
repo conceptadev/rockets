@@ -3,8 +3,8 @@ import {
   ModelService,
   ReferenceId,
   RepositoryInterface,
+  InjectDynamicRepository,
 } from '@concepta/nestjs-common';
-import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 
 import { USER_MODULE_USER_PASSWORD_HISTORY_ENTITY_KEY } from '../user.constants';
 import { UserPasswordHistoryEntityInterface } from '../interfaces/user-password-history-entity.interface';

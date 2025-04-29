@@ -3,10 +3,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { RepositoryInterface } from '@concepta/nestjs-common';
-import { INVITATION_MODULE_CATEGORY_USER_KEY } from '@concepta/nestjs-common';
+import {
+  INVITATION_MODULE_CATEGORY_USER_KEY,
+  getDynamicRepositoryToken,
+} from '@concepta/nestjs-common';
 import { UserEntityInterface } from '@concepta/nestjs-user';
 import { EmailService } from '@concepta/nestjs-email';
-import { getDynamicRepositoryToken } from '@concepta/nestjs-typeorm-ext';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
 

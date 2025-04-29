@@ -1,6 +1,6 @@
 import { Column } from 'typeorm';
-import { CommonPostgresEntity } from '@concepta/typeorm-common';
 import { OrgInterface } from '@concepta/nestjs-common';
+import { CommonPostgresEntity } from '@concepta/nestjs-typeorm-ext';
 import { OrgProfileEntityInterface } from '../interfaces/org-profile-entity.interface';
 
 /**

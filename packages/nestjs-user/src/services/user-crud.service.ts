@@ -1,7 +1,7 @@
 import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { TypeOrmCrudService } from '@concepta/nestjs-crud';
-import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
+import { InjectDynamicRepository } from '@concepta/nestjs-common';
 import { USER_MODULE_USER_ENTITY_KEY } from '../user.constants';
 import { UserEntityInterface } from '../interfaces/user-entity.interface';
 

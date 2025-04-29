@@ -1,10 +1,10 @@
 import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
-import { RepositoryInterface } from '@concepta/nestjs-common';
 import {
+  RepositoryInterface,
   getDynamicRepositoryToken,
   getEntityRepositoryToken,
-} from '@concepta/nestjs-typeorm-ext';
+} from '@concepta/nestjs-common';
 import { RoleModule } from './role.module';
 import { RoleService } from './services/role.service';
 import { RoleCrudService } from './services/role-crud.service';

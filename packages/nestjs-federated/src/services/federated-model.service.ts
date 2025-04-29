@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { ModelService, RepositoryInterface } from '@concepta/nestjs-common';
-import { InjectDynamicRepository } from '@concepta/nestjs-typeorm-ext';
 import {
+  ModelService,
+  RepositoryInterface,
   FederatedCreatableInterface,
   FederatedUpdatableInterface,
+  InjectDynamicRepository,
 } from '@concepta/nestjs-common';
 import { FederatedEntityInterface } from '../interfaces/federated-entity.interface';
 import { FederatedModelServiceInterface } from '../interfaces/federated-model-service.interface';

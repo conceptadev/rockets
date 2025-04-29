@@ -1,6 +1,6 @@
 import { Column, Unique } from 'typeorm';
 import { ReferenceId } from '@concepta/nestjs-common';
-import { CommonSqliteEntity } from '@concepta/typeorm-common';
+import { CommonSqliteEntity } from '@concepta/nestjs-typeorm-ext';
 
 import { OrgMemberEntityInterface } from '../interfaces/org-member-entity.interface';
 

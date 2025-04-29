@@ -1,5 +1,4 @@
-import { ReferenceId } from '@concepta/nestjs-common';
-import { CommonEntityDto } from '@concepta/nestjs-common';
+import { ReferenceId, CommonEntityDto } from '@concepta/nestjs-common';
 
 import { TestInterfaceFixture } from '../interface/test-entity.interface.fixture';
 
