@@ -80,7 +80,9 @@ describe(AuthAppleService.name, () => {
   describe(AuthAppleService.prototype.verifyIdToken.name, () => {
     it('should verify and decode the token', async () => {
       // Setup JWT decode mock to return the token with header
-      jest.spyOn(jwtService, 'decode').mockImplementation(() => mockDecodedTokenWithHeader);
+      jest
+        .spyOn(jwtService, 'decode')
+        .mockImplementation(() => mockDecodedTokenWithHeader);
 
       // Mock fetchPublicKey
       const mockGetSigningKey = jest.fn().mockResolvedValue({
@@ -123,7 +125,9 @@ describe(AuthAppleService.name, () => {
 
     it('should throw an error if public key cannot be fetched', async () => {
       // Mock extractKeyId
-      jest.spyOn(jwtService, 'decode').mockImplementation(() => mockDecodedTokenWithHeader);
+      jest
+        .spyOn(jwtService, 'decode')
+        .mockImplementation(() => mockDecodedTokenWithHeader);
 
       // Mock fetchPublicKey to throw an error
       (JwksClient as jest.Mock).mockImplementation(() => ({
@@ -202,7 +206,9 @@ describe(AuthAppleService.name, () => {
   describe(AuthAppleService.prototype['extractKeyId'].name, () => {
     it('should extract key ID from token header', () => {
       // Mock the JWT service decode method
-      jest.spyOn(jwtService, 'decode').mockImplementation(() => mockDecodedTokenWithHeader);
+      jest
+        .spyOn(jwtService, 'decode')
+        .mockImplementation(() => mockDecodedTokenWithHeader);
 
       // Call the private method using any casting
       const kid = service['extractKeyId'](mockToken);
@@ -287,9 +293,9 @@ describe(AuthAppleService.name, () => {
 
     it('should throw AuthAppleDecodeException if token verification fails', async () => {
       // Mock verifyAsync to throw an error
-      jest.spyOn(jwtService, 'verifyAsync').mockRejectedValue(
-        new Error('Verification failed'),
-      );
+      jest
+        .spyOn(jwtService, 'verifyAsync')
+        .mockRejectedValue(new Error('Verification failed'));
 
       // Call and expect the service to throw the appropriate error
       await expect(

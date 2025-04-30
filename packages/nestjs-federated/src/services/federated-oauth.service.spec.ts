@@ -97,7 +97,9 @@ describe('FederatedOAuthService', () => {
       jest.spyOn(federatedService, 'exists').mockResolvedValue(null);
       jest.spyOn(userModelService, 'byEmail').mockResolvedValue(null);
       jest.spyOn(userModelService, 'create').mockResolvedValue(mockUser);
-      jest.spyOn(federatedModelService, 'create').mockResolvedValue(mockFederated);
+      jest
+        .spyOn(federatedModelService, 'create')
+        .mockResolvedValue(mockFederated);
 
       // Act
       const result = await service.sign(
@@ -128,7 +130,9 @@ describe('FederatedOAuthService', () => {
       // Arrange
       jest.spyOn(federatedService, 'exists').mockResolvedValue(null);
       jest.spyOn(userModelService, 'byEmail').mockResolvedValue(mockUser);
-      jest.spyOn(federatedModelService, 'create').mockResolvedValue(mockFederated);
+      jest
+        .spyOn(federatedModelService, 'create')
+        .mockResolvedValue(mockFederated);
 
       // Act
       const result = await service.sign(
@@ -158,7 +162,9 @@ describe('FederatedOAuthService', () => {
         ...mockFederated,
         user: { id: null } as unknown as { id: string },
       };
-      jest.spyOn(federatedService, 'exists').mockResolvedValue(federatedWithoutUser);
+      jest
+        .spyOn(federatedService, 'exists')
+        .mockResolvedValue(federatedWithoutUser);
 
       // Act & Assert
       await expect(
@@ -181,9 +187,9 @@ describe('FederatedOAuthService', () => {
       // Arrange
       jest.spyOn(federatedService, 'exists').mockResolvedValue(null);
       jest.spyOn(userModelService, 'byEmail').mockResolvedValue(null);
-      jest.spyOn(userModelService, 'create').mockRejectedValue(
-        new Error('Failed to create user'),
-      );
+      jest
+        .spyOn(userModelService, 'create')
+        .mockRejectedValue(new Error('Failed to create user'));
 
       // Act & Assert
       await expect(
@@ -195,9 +201,9 @@ describe('FederatedOAuthService', () => {
       // Arrange
       jest.spyOn(federatedService, 'exists').mockResolvedValue(null);
       jest.spyOn(userModelService, 'byEmail').mockResolvedValue(mockUser);
-      jest.spyOn(federatedModelService, 'create').mockRejectedValue(
-        new Error('Failed to create federated'),
-      );
+      jest
+        .spyOn(federatedModelService, 'create')
+        .mockRejectedValue(new Error('Failed to create federated'));
 
       // Act & Assert
       await expect(

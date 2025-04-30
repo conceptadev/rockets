@@ -31,7 +31,9 @@ describe(UserAccessQueryService.name, () => {
     it('should delegate to canUpdatePassword method', async () => {
       // Arrange
       const expectedResult = true;
-      const mockCanUpdatePassword = jest.fn().mockResolvedValueOnce(expectedResult);
+      const mockCanUpdatePassword = jest
+        .fn()
+        .mockResolvedValueOnce(expectedResult);
       jest
         .spyOn(service.constructor.prototype, 'canUpdatePassword')
         .mockImplementationOnce(mockCanUpdatePassword);
@@ -72,11 +74,13 @@ describe(UserAccessQueryService.name, () => {
         action: ActionEnum.UPDATE,
       });
       jest.spyOn(context, 'getUser').mockReturnValueOnce(userAuthorizedDto);
-      jest.spyOn(context, 'getRequest').mockImplementationOnce((property?: string) => {
-        if (property === 'params') return userParamDto;
-        if (property === 'body') return userPasswordDto;
-        return null;
-      });
+      jest
+        .spyOn(context, 'getRequest')
+        .mockImplementationOnce((property?: string) => {
+          if (property === 'params') return userParamDto;
+          if (property === 'body') return userPasswordDto;
+          return null;
+        });
 
       // Act
       const result = await service.canAccess(context);
@@ -96,11 +100,13 @@ describe(UserAccessQueryService.name, () => {
         action: ActionEnum.UPDATE,
       });
       jest.spyOn(context, 'getUser').mockReturnValueOnce(userAuthorizedDto);
-      jest.spyOn(context, 'getRequest').mockImplementation((property?: string) => {
-        if (property === 'params') return userParamDto;
-        if (property === 'body') return userPasswordDto;
-        return null;
-      });
+      jest
+        .spyOn(context, 'getRequest')
+        .mockImplementation((property?: string) => {
+          if (property === 'params') return userParamDto;
+          if (property === 'body') return userPasswordDto;
+          return null;
+        });
 
       // Act
       const result = await service.canAccess(context);
@@ -121,11 +127,13 @@ describe(UserAccessQueryService.name, () => {
         action: ActionEnum.UPDATE,
       });
       jest.spyOn(context, 'getUser').mockReturnValueOnce(userAuthorizedDto);
-      jest.spyOn(context, 'getRequest').mockImplementationOnce((property?: string) => {
-        if (property === 'params') return userParamDto;
-        if (property === 'body') return userPasswordDto;
-        return null;
-      });
+      jest
+        .spyOn(context, 'getRequest')
+        .mockImplementationOnce((property?: string) => {
+          if (property === 'params') return userParamDto;
+          if (property === 'body') return userPasswordDto;
+          return null;
+        });
 
       // Act
       const result = await service.canAccess(context);

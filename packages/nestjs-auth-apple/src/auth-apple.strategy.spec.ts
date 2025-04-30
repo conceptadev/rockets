@@ -152,8 +152,12 @@ describe('AuthAppleStrategy', () => {
   describe('validate', () => {
     it('should successfully validate token and return user', async () => {
       // Setup with proper AuthAppleProfileInterface
-      jest.spyOn(authAppleService, 'verifyIdToken').mockResolvedValue(mockProfile);
-      jest.spyOn(authAppleService, 'validateClaims').mockImplementation((profile) => Promise.resolve());
+      jest
+        .spyOn(authAppleService, 'verifyIdToken')
+        .mockResolvedValue(mockProfile);
+      jest
+        .spyOn(authAppleService, 'validateClaims')
+        .mockImplementation((_profile) => Promise.resolve());
       jest.spyOn(federatedOAuthService, 'sign').mockResolvedValue(mockUser);
 
       const result = await strategy.validate('token', 'refresh', 'idToken');
@@ -162,11 +166,15 @@ describe('AuthAppleStrategy', () => {
 
     it('should throw UnauthorizedException when federatedOAuthService.sign returns null', async () => {
       // Setup with proper AuthAppleProfileInterface
-      jest.spyOn(authAppleService, 'verifyIdToken').mockResolvedValue(mockProfile);
-      jest.spyOn(authAppleService, 'validateClaims').mockImplementation((profile) => Promise.resolve());
-      jest.spyOn(federatedOAuthService, 'sign').mockResolvedValue(
-        null as unknown as FederatedCredentialsInterface,
-      );
+      jest
+        .spyOn(authAppleService, 'verifyIdToken')
+        .mockResolvedValue(mockProfile);
+      jest
+        .spyOn(authAppleService, 'validateClaims')
+        .mockImplementation((_profile) => Promise.resolve());
+      jest
+        .spyOn(federatedOAuthService, 'sign')
+        .mockResolvedValue(null as unknown as FederatedCredentialsInterface);
 
       await expect(
         strategy.validate('token', 'refresh', 'idToken'),
@@ -175,14 +183,20 @@ describe('AuthAppleStrategy', () => {
 
     it('should throw AuthAppleMissingEmailException when mapped profile has no email', async () => {
       // Setup with proper AuthAppleProfileInterface
-      jest.spyOn(authAppleService, 'verifyIdToken').mockResolvedValue(mockProfile);
-      jest.spyOn(authAppleService, 'validateClaims').mockImplementation((profile) => Promise.resolve());
-      
+      jest
+        .spyOn(authAppleService, 'verifyIdToken')
+        .mockResolvedValue(mockProfile);
+      jest
+        .spyOn(authAppleService, 'validateClaims')
+        .mockImplementation((_profile) => Promise.resolve());
+
       const mockMappedProfileNoEmail: AuthAppleCredentialsInterface = {
         id: 'test-id',
         email: '',
       };
-      jest.spyOn({ mapProfile }, 'mapProfile').mockReturnValue(mockMappedProfileNoEmail);
+      jest
+        .spyOn({ mapProfile }, 'mapProfile')
+        .mockReturnValue(mockMappedProfileNoEmail);
 
       await expect(
         strategy.validate('token', 'refresh', 'idToken'),
@@ -191,14 +205,20 @@ describe('AuthAppleStrategy', () => {
 
     it('should throw AuthAppleMissingIdException when mapped profile has no id', async () => {
       // Setup with proper AuthAppleProfileInterface
-      jest.spyOn(authAppleService, 'verifyIdToken').mockResolvedValue(mockProfile);
-      jest.spyOn(authAppleService, 'validateClaims').mockImplementation((profile) => Promise.resolve());
-      
+      jest
+        .spyOn(authAppleService, 'verifyIdToken')
+        .mockResolvedValue(mockProfile);
+      jest
+        .spyOn(authAppleService, 'validateClaims')
+        .mockImplementation((_profile) => Promise.resolve());
+
       const mockMappedProfileNoId: AuthAppleCredentialsInterface = {
         id: '',
         email: 'test@example.com',
       };
-      jest.spyOn({ mapProfile }, 'mapProfile').mockReturnValue(mockMappedProfileNoId);
+      jest
+        .spyOn({ mapProfile }, 'mapProfile')
+        .mockReturnValue(mockMappedProfileNoId);
 
       await expect(
         strategy.validate('token', 'refresh', 'idToken'),
@@ -207,8 +227,12 @@ describe('AuthAppleStrategy', () => {
 
     it('should not throw error for valid profile', async () => {
       // Setup with proper AuthAppleProfileInterface
-      jest.spyOn(authAppleService, 'verifyIdToken').mockResolvedValue(mockProfile);
-      jest.spyOn(authAppleService, 'validateClaims').mockImplementation((profile) => Promise.resolve());
+      jest
+        .spyOn(authAppleService, 'verifyIdToken')
+        .mockResolvedValue(mockProfile);
+      jest
+        .spyOn(authAppleService, 'validateClaims')
+        .mockImplementation((_profile) => Promise.resolve());
       jest.spyOn(federatedOAuthService, 'sign').mockResolvedValue(mockUser);
 
       await expect(
@@ -221,8 +245,12 @@ describe('AuthAppleStrategy', () => {
   describe('validateAppleProfile method', () => {
     it('should not throw for valid profile', async () => {
       // Setup mocks
-      jest.spyOn(authAppleService, 'verifyIdToken').mockResolvedValue(mockProfile);
-      jest.spyOn(authAppleService, 'validateClaims').mockImplementation((profile) => Promise.resolve());
+      jest
+        .spyOn(authAppleService, 'verifyIdToken')
+        .mockResolvedValue(mockProfile);
+      jest
+        .spyOn(authAppleService, 'validateClaims')
+        .mockImplementation((_profile) => Promise.resolve());
       jest.spyOn(federatedOAuthService, 'sign').mockResolvedValue(mockUser);
 
       // This won't throw since the profile is valid
@@ -234,14 +262,20 @@ describe('AuthAppleStrategy', () => {
     it('should throw AuthAppleMissingIdException if id is missing', async () => {
       // Setup mocks with invalid profile (no id)
       const profileWithoutId = { ...mockProfile, sub: '' };
-      const mappedProfileWithoutId: AuthAppleCredentialsInterface = { 
-        ...mockMappedProfile, 
-        id: '' 
+      const mappedProfileWithoutId: AuthAppleCredentialsInterface = {
+        ...mockMappedProfile,
+        id: '',
       };
 
-      jest.spyOn(authAppleService, 'verifyIdToken').mockResolvedValue(profileWithoutId);
-      jest.spyOn(authAppleService, 'validateClaims').mockImplementation((profile) => Promise.resolve());
-      jest.spyOn({ mapProfile }, 'mapProfile').mockReturnValue(mappedProfileWithoutId);
+      jest
+        .spyOn(authAppleService, 'verifyIdToken')
+        .mockResolvedValue(profileWithoutId);
+      jest
+        .spyOn(authAppleService, 'validateClaims')
+        .mockImplementation((_profile) => Promise.resolve());
+      jest
+        .spyOn({ mapProfile }, 'mapProfile')
+        .mockReturnValue(mappedProfileWithoutId);
 
       // Will throw because of missing id
       await expect(
@@ -252,14 +286,20 @@ describe('AuthAppleStrategy', () => {
     it('should throw AuthAppleMissingEmailException if email is missing', async () => {
       // Setup mocks with invalid profile (no email)
       const profileWithoutEmail = { ...mockProfile, email: '' };
-      const mappedProfileWithoutEmail: AuthAppleCredentialsInterface = { 
-        ...mockMappedProfile, 
-        email: '' 
+      const mappedProfileWithoutEmail: AuthAppleCredentialsInterface = {
+        ...mockMappedProfile,
+        email: '',
       };
 
-      jest.spyOn(authAppleService, 'verifyIdToken').mockResolvedValue(profileWithoutEmail);
-      jest.spyOn(authAppleService, 'validateClaims').mockImplementation((profile) => Promise.resolve());
-      jest.spyOn({ mapProfile }, 'mapProfile').mockReturnValue(mappedProfileWithoutEmail);
+      jest
+        .spyOn(authAppleService, 'verifyIdToken')
+        .mockResolvedValue(profileWithoutEmail);
+      jest
+        .spyOn(authAppleService, 'validateClaims')
+        .mockImplementation((_profile) => Promise.resolve());
+      jest
+        .spyOn({ mapProfile }, 'mapProfile')
+        .mockReturnValue(mappedProfileWithoutEmail);
 
       // Will throw because of missing email
       await expect(
