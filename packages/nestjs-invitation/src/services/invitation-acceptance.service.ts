@@ -164,15 +164,20 @@ export class InvitationAcceptanceService {
     category: string,
     deleteIfValid = false,
   ): Promise<AssigneeRelationInterface | null> {
-    // extract required properties
-    const { assignment } = this.settings.otp;
+    try {
+      // extract required properties
+      const { assignment } = this.settings.otp;
 
-    // validate passcode return passcode's user was found
-    return this.otpService.validate(
-      assignment,
-      { category, passcode },
-      deleteIfValid,
-    );
+      // validate passcode return passcode's user was found
+      return this.otpService.validate(
+        assignment,
+        { category, passcode },
+        deleteIfValid,
+      );
+    } catch (e) {
+      Logger.error(e);
+      return null;
+    }
   }
 
   async validate(code: string, passcode: string): Promise<void> {
@@ -190,13 +195,7 @@ export class InvitationAcceptanceService {
 
     const { category } = invitation;
 
-    let otp: AssigneeRelationInterface | null = null;
-
-    try {
-      otp = await this.validatePasscode(passcode, category);
-    } catch (e) {
-      Logger.error(e);
-    }
+    const otp = await this.validatePasscode(passcode, category);
 
     if (!otp) {
       throw new InvitationNotFoundException();
