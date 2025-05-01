@@ -1,4 +1,4 @@
-import { Inject } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
 import {
   AssigneeRelationInterface,
   InvitationInterface,
@@ -164,14 +164,41 @@ export class InvitationAcceptanceService {
     category: string,
     deleteIfValid = false,
   ): Promise<AssigneeRelationInterface | null> {
-    // extract required properties
-    const { assignment } = this.settings.otp;
+    try {
+      // extract required properties
+      const { assignment } = this.settings.otp;
 
-    // validate passcode return passcode's user was found
-    return this.otpService.validate(
-      assignment,
-      { category, passcode },
-      deleteIfValid,
-    );
+      // validate passcode return passcode's user was found
+      return this.otpService.validate(
+        assignment,
+        { category, passcode },
+        deleteIfValid,
+      );
+    } catch (e) {
+      Logger.error(e);
+      return null;
+    }
+  }
+
+  async validate(code: string, passcode: string): Promise<void> {
+    let invitation: InvitationInterface | null | undefined;
+
+    try {
+      invitation = await this.getOneByCode(code);
+    } catch (e) {
+      Logger.error(e);
+    }
+
+    if (!invitation) {
+      throw new InvitationNotFoundException();
+    }
+
+    const { category } = invitation;
+
+    const otp = await this.validatePasscode(passcode, category);
+
+    if (!otp) {
+      throw new InvitationNotFoundException();
+    }
   }
 }

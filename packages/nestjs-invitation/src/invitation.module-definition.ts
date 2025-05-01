@@ -33,6 +33,7 @@ import { InvitationEmailServiceInterface } from './interfaces/services/invitatio
 import { InvitationOtpServiceInterface } from './interfaces/services/invitation-otp-service.interface';
 import { InvitationUserModelServiceInterface } from './interfaces/services/invitation-user-model.service.interface';
 import { InvitationMissingEntitiesOptionsException } from './exceptions/invitation-missing-entities-options.exception';
+import { InvitationAttemptService } from './services/invitation-attempt.service';
 
 const RAW_OPTIONS_TOKEN = Symbol('__INVITATION_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -112,6 +113,7 @@ export function createInvitationProviders(options: {
     InvitationAcceptanceService,
     InvitationRevocationService,
     InvitationModelService,
+    InvitationAttemptService,
     createInvitationSettingsProvider(options.overrides),
     createInvitationOtpServiceProvider(options.overrides),
     createInvitationEmailServiceProvider(options.overrides),
