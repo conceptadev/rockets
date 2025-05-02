@@ -4,7 +4,6 @@ import { CrudModule } from '@concepta/nestjs-crud';
 import {
   RepositoryInterface,
   getDynamicRepositoryToken,
-  getEntityRepositoryToken,
 } from '@concepta/nestjs-common';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { OrgModule } from './org.module';
@@ -60,9 +59,6 @@ describe('OrgModule', () => {
     }).compile();
 
     orgModule = testModule.get<OrgModule>(OrgModule);
-    orgEntityRepo = testModule.get<RepositoryInterface<OrgEntityFixture>>(
-      getEntityRepositoryToken(ORG_MODULE_ORG_ENTITY_KEY),
-    );
     orgDynamicRepo = testModule.get(
       getDynamicRepositoryToken(ORG_MODULE_ORG_ENTITY_KEY),
     );

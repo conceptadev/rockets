@@ -15,12 +15,8 @@ import {
 } from '@concepta/nestjs-crud';
 import { ApiTags } from '@nestjs/swagger';
 import {
-  // AuthUser,
-  // AuthenticatedUserInterface,
-  // RuntimeException,
   UserCreatableInterface,
   UserUpdatableInterface,
-  // PasswordStorageInterface,
 } from '@concepta/nestjs-common';
 import {
   AccessControlCreateMany,
@@ -33,17 +29,15 @@ import {
   AccessControlUpdateOne,
 } from '@concepta/nestjs-access-control';
 
-import { UserResource } from './user.types';
-import { UserCrudService } from './services/user-crud.service';
-import { UserEntityInterface } from './interfaces/user-entity.interface';
-import { UserDto } from './dto/user.dto';
-import { UserCreateDto } from './dto/user-create.dto';
-import { UserCreateManyDto } from './dto/user-create-many.dto';
-import { UserUpdateDto } from './dto/user-update.dto';
-import { UserPaginatedDto } from './dto/user-paginated.dto';
-import { UserAccessQueryService } from './services/user-access-query.service';
-// import { UserPasswordService } from './services/user-password.service';
-// import { UserBadRequestException } from './exceptions/user-bad-request-exception';
+import { UserResource } from '../../user.types';
+import { UserCrudServiceFixture } from '../services/user-crud.service.fixture';
+import { UserEntityInterface } from '../../interfaces/user-entity.interface';
+import { UserDto } from '../../dto/user.dto';
+import { UserCreateDto } from '../../dto/user-create.dto';
+import { UserCreateManyDto } from '../../dto/user-create-many.dto';
+import { UserUpdateDto } from '../../dto/user-update.dto';
+import { UserPaginatedDto } from '../../dto/user-paginated.dto';
+import { UserAccessQueryService } from '../../services/user-access-query.service';
 
 /**
  * User controller.
@@ -59,7 +53,7 @@ import { UserAccessQueryService } from './services/user-access-query.service';
   service: UserAccessQueryService,
 })
 @ApiTags('user')
-export class UserController
+export class UserCrudControllerFixture
   implements
     CrudControllerInterface<
       UserEntityInterface,
@@ -71,10 +65,9 @@ export class UserController
    * Constructor.
    *
    * @param userCrudService - instance of the user crud service
-  //  * @param userPasswordService - instance of user password service
    */
   constructor(
-    private userCrudService: UserCrudService, // private userPasswordService: UserPasswordService,
+    private userCrudService: UserCrudServiceFixture, // private userPasswordService: UserPasswordService,
   ) {}
 
   /**
@@ -111,15 +104,6 @@ export class UserController
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() userCreateManyDto: UserCreateManyDto,
   ) {
-    // the final data
-    // const hashed = [];
-
-    // loop all dtos
-    // for (const userCreateDto of userCreateManyDto.bulk) {
-    // hash it
-    // hashed.push(await this.userPasswordService.setPassword(userCreateDto));
-    // }
-
     // call crud service to create
     return this.userCrudService.createMany(crudRequest, userCreateManyDto);
   }
@@ -136,11 +120,6 @@ export class UserController
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() userCreateDto: UserCreateDto,
   ) {
-    // call crud service to create
-    // return this.userCrudService.createOne(
-    //   crudRequest,
-    //   await this.userPasswordService.setPassword(userCreateDto),
-    // );
     return this.userCrudService.createOne(crudRequest, userCreateDto);
   }
 
@@ -155,25 +134,7 @@ export class UserController
   async updateOne(
     @CrudRequest() crudRequest: CrudRequestInterface,
     @CrudBody() userUpdateDto: UserUpdateDto,
-    // @Param('id') userId?: string,
-    // @AuthUser() authorizededUser?: AuthenticatedUserInterface,
   ) {
-    // let hashedObject: Partial<PasswordStorageInterface>;
-
-    // try {
-    //   hashedObject = await this.userPasswordService.setPassword(
-    //     userUpdateDto,
-    //     userId,
-    //     authorizededUser,
-    //   );
-    // } catch (e) {
-    //   if (e instanceof RuntimeException) {
-    //     throw e;
-    //   } else {
-    //     throw new UserBadRequestException({ originalError: e });
-    //   }
-    // }
-
     return this.userCrudService.updateOne(crudRequest, userUpdateDto);
   }
 

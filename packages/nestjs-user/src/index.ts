@@ -7,12 +7,11 @@ export { UserSqliteEntity } from './entities/user-sqlite.entity';
 export { UserModelService } from './services/user-model.service';
 export { UserPasswordService } from './services/user-password.service';
 export { UserAccessQueryService } from './services/user-access-query.service';
-export { UserCrudService } from './services/user-crud.service';
-export { UserController } from './user.controller';
 
 export { UserEntityInterface } from './interfaces/user-entity.interface';
 export { UserModelServiceInterface } from './interfaces/user-model-service.interface';
 export { UserPasswordServiceInterface } from './interfaces/user-password-service.interface';
+export { UserEntitiesOptionsInterface } from './interfaces/user-entities-options.interface';
 
 export { UserCreateManyDto } from './dto/user-create-many.dto';
 export { UserCreateDto } from './dto/user-create.dto';

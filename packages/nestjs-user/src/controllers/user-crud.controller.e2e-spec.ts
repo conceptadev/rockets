@@ -13,13 +13,13 @@ import {
 } from '@concepta/nestjs-access-control';
 import { AuthJwtGuard } from '@concepta/nestjs-auth-jwt';
 
-import { UserFactory } from './user.factory';
-import { UserSeeder } from './user.seeder';
+import { UserFactory } from '../user.factory';
+import { UserSeeder } from '../user.seeder';
 
-import { AppModuleFixture } from './__fixtures__/app.module.fixture';
-import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
+import { UserEntityFixture } from '../__fixtures__/user.entity.fixture';
+import { AppModuleCrudFixture } from '../__fixtures__/app.module.crud.fixture';
 
-describe('UserController (e2e)', () => {
+describe('UserCrudController (e2e)', () => {
   describe('Normal CRUD flow', () => {
     let app: INestApplication;
     let seedingSource: SeedingSource;
@@ -29,7 +29,7 @@ describe('UserController (e2e)', () => {
 
     beforeEach(async () => {
       const moduleFixture: TestingModule = await Test.createTestingModule({
-        imports: [AppModuleFixture],
+        imports: [AppModuleCrudFixture],
       }).compile();
       app = moduleFixture.createNestApplication();
       await app.init();

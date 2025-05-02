@@ -4,7 +4,6 @@ import { DynamicModule, ModuleMetadata } from '@nestjs/common';
 import {
   RepositoryInterface,
   getDynamicRepositoryToken,
-  getEntityRepositoryToken,
 } from '@concepta/nestjs-common';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 
@@ -30,7 +29,6 @@ describe(FileModule, () => {
   let testModule: TestingModule;
   let fileModule: FileModule;
   let fileService: FileService;
-  let fileEntityRepo: RepositoryInterface<FileEntityInterface>;
   let fileDynamicRepo: RepositoryInterface<FileEntityInterface>;
 
   describe(FileModule.forRoot, () => {
@@ -139,9 +137,6 @@ describe(FileModule, () => {
   const commonVars = () => {
     fileModule = testModule.get(FileModule);
     fileService = testModule.get(FileService);
-    fileEntityRepo = testModule.get<RepositoryInterface<FileEntityFixture>>(
-      getEntityRepositoryToken(FILE_MODULE_FILE_ENTITY_KEY),
-    );
     fileDynamicRepo = testModule.get(
       getDynamicRepositoryToken(FILE_MODULE_FILE_ENTITY_KEY),
     );
@@ -150,7 +145,6 @@ describe(FileModule, () => {
   const commonTests = async () => {
     expect(fileModule).toBeInstanceOf(FileModule);
     expect(fileService).toBeInstanceOf(FileService);
-    expect(fileEntityRepo).toBeInstanceOf(Repository);
     expect(fileDynamicRepo).toBeInstanceOf(Repository);
 
     const result = await fileService.push({

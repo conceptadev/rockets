@@ -1,4 +1,3 @@
-import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   RepositoryInterface,
@@ -8,14 +7,13 @@ import {
   PasswordCreationService,
   PasswordStorageService,
 } from '@concepta/nestjs-password';
+import { TypeOrmRepositoryAdapter } from '@concepta/nestjs-typeorm-ext';
 
 import {
   USER_MODULE_USER_ENTITY_KEY,
   USER_MODULE_USER_PASSWORD_HISTORY_ENTITY_KEY,
 } from './user.constants';
 import { UserModule } from './user.module';
-import { UserCrudService } from './services/user-crud.service';
-import { UserController } from './user.controller';
 import { UserModelService } from './services/user-model.service';
 import { UserPasswordService } from './services/user-password.service';
 import { UserModelServiceInterface } from './interfaces/user-model-service.interface';
@@ -29,13 +27,11 @@ import { UserEntityFixture } from './__fixtures__/user.entity.fixture';
 describe('AppModule', () => {
   let testModule: TestingModule;
   let userModule: UserModule;
-  let userCrudService: UserCrudService;
   let userModelService: UserModelServiceInterface;
   let userPasswordService: UserPasswordService;
   let userPasswordHistoryService: UserPasswordHistoryService;
   let userPasswordHistoryModelService: UserPasswordHistoryModelService;
   let userAccessQueryService: UserAccessQueryService;
-  let userController: UserController;
   let userRepo: RepositoryInterface<UserEntityFixture>;
   let userPasswordHistoryRepo: RepositoryInterface<UserEntityFixture>;
 
@@ -64,8 +60,6 @@ describe('AppModule', () => {
     userAccessQueryService = testModule.get<UserAccessQueryService>(
       UserAccessQueryService,
     );
-    userCrudService = testModule.get<UserCrudService>(UserCrudService);
-    userController = testModule.get<UserController>(UserController);
   });
 
   afterEach(async () => {
@@ -76,9 +70,8 @@ describe('AppModule', () => {
   describe('module', () => {
     it('should be loaded', async () => {
       expect(userModule).toBeInstanceOf(UserModule);
-      expect(userRepo).toBeInstanceOf(Repository);
-      expect(userPasswordHistoryRepo).toBeInstanceOf(Repository);
-      expect(userCrudService).toBeInstanceOf(UserCrudService);
+      expect(userRepo).toBeInstanceOf(TypeOrmRepositoryAdapter);
+      expect(userPasswordHistoryRepo).toBeInstanceOf(TypeOrmRepositoryAdapter);
       expect(userModelService).toBeInstanceOf(UserModelService);
       expect(userPasswordService).toBeInstanceOf(UserPasswordService);
       expect(userPasswordService['userModelService']).toBeInstanceOf(
@@ -104,9 +97,8 @@ describe('AppModule', () => {
       );
       expect(
         userPasswordHistoryModelService['userPasswordHistoryRepo'],
-      ).toBeInstanceOf(Repository);
+      ).toBeInstanceOf(TypeOrmRepositoryAdapter);
       expect(userAccessQueryService).toBeInstanceOf(UserAccessQueryService);
-      expect(userController).toBeInstanceOf(UserController);
     });
   });
 });

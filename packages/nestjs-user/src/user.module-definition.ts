@@ -13,7 +13,6 @@ import {
   PasswordCreationService,
   PasswordStorageService,
 } from '@concepta/nestjs-password';
-import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 
 import {
   USER_MODULE_SETTINGS_TOKEN,
@@ -23,21 +22,17 @@ import {
 
 import { UserOptionsInterface } from './interfaces/user-options.interface';
 import { UserOptionsExtrasInterface } from './interfaces/user-options-extras.interface';
-import { UserEntitiesOptionsInterface } from './interfaces/user-entities-options.interface';
 import { UserSettingsInterface } from './interfaces/user-settings.interface';
 import { UserEntityInterface } from './interfaces/user-entity.interface';
 import { UserPasswordHistoryEntityInterface } from './interfaces/user-password-history-entity.interface';
 
-import { UserCrudService } from './services/user-crud.service';
 import { UserModelService } from './services/user-model.service';
 import { UserPasswordService } from './services/user-password.service';
 import { UserPasswordHistoryService } from './services/user-password-history.service';
 import { UserPasswordHistoryModelService } from './services/user-password-history-model.service';
 import { UserAccessQueryService } from './services/user-access-query.service';
-import { UserController } from './user.controller';
 import { InvitationAcceptedListener } from './listeners/invitation-accepted-listener';
 import { userDefaultConfig } from './config/user-default.config';
-import { UserMissingEntitiesOptionsException } from './exceptions/user-missing-entities-options.exception';
 import { UserModelServiceInterface } from './interfaces/user-model-service.interface';
 
 const RAW_OPTIONS_TOKEN = Symbol('__USER_MODULE_RAW_OPTIONS_TOKEN__');
@@ -61,35 +56,23 @@ function definitionTransform(
   extras: UserOptionsExtrasInterface,
 ): DynamicModule {
   const { providers = [], imports = [] } = definition;
-  const {
-    global = false,
-    entities,
-    controllers,
-    extraControllers = [],
-    extraProviders = [],
-  } = extras;
-
-  if (!entities) {
-    throw new UserMissingEntitiesOptionsException();
-  }
+  const { global = false, extraProviders = [] } = extras;
 
   return {
     ...definition,
     global,
-    imports: createUserImports({ imports, entities }),
+    imports: createUserImports({ imports }),
     providers: createUserProviders({ providers, extraProviders }),
-    controllers: createUserControllers({ controllers, extraControllers }),
     exports: [ConfigModule, RAW_OPTIONS_TOKEN, ...createUserExports()],
   };
 }
 
 export function createUserImports(
-  options: Pick<DynamicModule, 'imports'> & UserEntitiesOptionsInterface,
+  options: Pick<DynamicModule, 'imports'>,
 ): Required<Pick<DynamicModule, 'imports'>>['imports'] {
   return [
     ...(options.imports ?? []),
     ConfigModule.forFeature(userDefaultConfig),
-    TypeOrmExtModule.forFeature(options.entities),
   ];
 }
 
@@ -101,7 +84,6 @@ export function createUserProviders(options: {
   return [
     ...(options.providers ?? []),
     ...(options.extraProviders ?? []),
-    UserCrudService,
     PasswordCreationService,
     InvitationAcceptedListener,
     createUserSettingsProvider(options.overrides),
@@ -118,21 +100,12 @@ export function createUserExports(): Required<
 >['exports'] {
   return [
     USER_MODULE_SETTINGS_TOKEN,
-    UserCrudService,
     UserModelService,
     UserPasswordService,
     UserPasswordHistoryService,
     UserPasswordHistoryModelService,
     UserAccessQueryService,
   ];
-}
-
-export function createUserControllers(
-  overrides: Pick<UserOptions, 'controllers' | 'extraControllers'> = {},
-): DynamicModule['controllers'] {
-  return overrides?.controllers !== undefined
-    ? overrides.controllers
-    : [UserController, ...(overrides.extraControllers ?? [])];
 }
 
 export function createUserSettingsProvider(

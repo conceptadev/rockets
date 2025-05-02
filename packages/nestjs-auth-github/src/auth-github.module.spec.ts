@@ -48,12 +48,14 @@ describe(AuthGithubModule, () => {
           }),
           CrudModule.forRoot({}),
           PasswordModule.forRoot({}),
-          UserModule.forRoot({
-            entities: {
-              user: {
-                entity: UserEntityFixture,
-              },
-            },
+          UserModule.forRootAsync({
+            imports: [
+              TypeOrmExtModule.forFeature({
+                user: {
+                  entity: UserEntityFixture,
+                },
+              }),
+            ],
           }),
         ],
       }).compile();

@@ -47,15 +47,19 @@ import { default as ormConfig } from './ormconfig.fixture';
       },
     }),
     PasswordModule.forRoot({}),
-    UserModule.forRoot({
-      settings: {
-        invitationAcceptedEvent: InvitationAcceptedEventAsync,
-      },
-      entities: {
-        user: {
-          entity: UserEntityFixture,
+    UserModule.forRootAsync({
+      imports: [
+        TypeOrmExtModule.forFeature({
+          user: {
+            entity: UserEntityFixture,
+          },
+        }),
+      ],
+      useFactory: () => ({
+        settings: {
+          invitationAcceptedEvent: InvitationAcceptedEventAsync,
         },
-      },
+      }),
     }),
     EmailModule.register({
       mailerService: {

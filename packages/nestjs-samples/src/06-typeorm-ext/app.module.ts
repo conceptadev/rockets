@@ -15,14 +15,16 @@ import { UserEntity } from './user/user.entity';
     }),
     CrudModule.forRoot({}),
     PasswordModule.forRoot({}),
-    UserModule.forRoot({
-      entities: {
-        user: {
-          entity: UserEntity,
-          repositoryFactory: (dataSource: DataSource) =>
-            dataSource.getRepository(UserEntity).extend<unknown>({}),
-        },
-      },
+    UserModule.forRootAsync({
+      imports: [
+        TypeOrmExtModule.forFeature({
+          user: {
+            entity: UserEntity,
+            repositoryFactory: (dataSource: DataSource) =>
+              dataSource.getRepository(UserEntity).extend<unknown>({}),
+          },
+        }),
+      ],
     }),
   ],
 })

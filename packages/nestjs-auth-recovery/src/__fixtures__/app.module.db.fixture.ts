@@ -62,12 +62,14 @@ import { MailerServiceFixture } from './email/mailer.service.fixture';
       },
     }),
     PasswordModule.forRoot({}),
-    UserModule.forRoot({
-      entities: {
-        user: {
-          entity: UserEntityFixture,
-        },
-      },
+    UserModule.forRootAsync({
+      imports: [
+        TypeOrmExtModule.forFeature({
+          user: {
+            entity: UserEntityFixture,
+          },
+        }),
+      ],
     }),
     EmailModule.forRoot({
       mailerService: new MailerServiceFixture(),

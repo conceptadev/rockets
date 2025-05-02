@@ -45,13 +45,15 @@ import { createUserRepository } from './user/create-user-repository';
     JwtModule.forRoot({}),
     PasswordModule.forRoot({}),
     CrudModule.forRoot({}),
-    UserModule.forRoot({
-      entities: {
-        user: {
-          entity: UserEntity,
-          repositoryFactory: createUserRepository,
-        },
-      },
+    UserModule.forRootAsync({
+      imports: [
+        TypeOrmExtModule.forFeature({
+          user: {
+            entity: UserEntity,
+            repositoryFactory: createUserRepository,
+          },
+        }),
+      ],
     }),
   ],
   controllers: [CustomUserController],
