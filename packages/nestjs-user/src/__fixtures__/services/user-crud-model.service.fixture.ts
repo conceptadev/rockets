@@ -5,7 +5,7 @@ import {
   UserReplaceableInterface,
 } from '@concepta/nestjs-common';
 import { UserModelServiceInterface } from '../../interfaces/user-model-service.interface';
-import { UserEntityInterface } from '../../interfaces/user-entity.interface';
+import { UserEntityInterface } from '@concepta/nestjs-common';
 
 @Injectable()
 export class UserCrudModelServiceFixture

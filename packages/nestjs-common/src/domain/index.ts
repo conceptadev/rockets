@@ -34,6 +34,7 @@ export { UserUpdatableInterface } from './user/interfaces/user-updatable.interfa
 export { UserReplaceableInterface } from './user/interfaces/user-replaceable.interface';
 export { UserRelationInterface } from './user/interfaces/user-relation.interface';
 export { UserInterface } from './user/interfaces/user.interface';
+export { UserEntityInterface } from './user/interfaces/user-entity.interface';
 
 export { UserProfileInterface } from './user-profile/interfaces/user-profile.interface';
 export { UserProfileCreatableInterface } from './user-profile/interfaces/user-profile-creatable.interface';

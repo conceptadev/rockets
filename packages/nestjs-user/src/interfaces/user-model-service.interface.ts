@@ -16,7 +16,7 @@ import {
   UserUpdatableInterface,
   UserReplaceableInterface,
 } from '@concepta/nestjs-common';
-import { UserEntityInterface } from './user-entity.interface';
+import { UserEntityInterface } from '@concepta/nestjs-common';
 
 export interface UserModelServiceInterface<
   Entity extends UserEntityInterface = UserEntityInterface,

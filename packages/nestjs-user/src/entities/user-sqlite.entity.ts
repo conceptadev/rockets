@@ -1,6 +1,6 @@
 import { Column } from 'typeorm';
 import { CommonSqliteEntity } from '@concepta/nestjs-typeorm-ext';
-import { UserEntityInterface } from '../interfaces/user-entity.interface';
+import { UserEntityInterface } from '@concepta/nestjs-common';
 
 export abstract class UserSqliteEntity
   extends CommonSqliteEntity

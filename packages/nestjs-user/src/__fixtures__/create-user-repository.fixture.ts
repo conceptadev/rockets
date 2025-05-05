@@ -1,5 +1,5 @@
 import { DataSource, FindOneOptions } from 'typeorm';
-import { UserEntityInterface } from '../interfaces/user-entity.interface';
+import { UserEntityInterface } from '@concepta/nestjs-common';
 import { UserEntityFixture } from './user.entity.fixture';
 
 export function createUserRepositoryFixture(dataSource: DataSource) {
