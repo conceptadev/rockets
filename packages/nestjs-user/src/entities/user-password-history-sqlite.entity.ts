@@ -1,7 +1,6 @@
 import { Column } from 'typeorm';
-import { ReferenceId } from '@concepta/nestjs-common';
+import { ReferenceId, UserPasswordHistoryEntityInterface } from '@concepta/nestjs-common';
 import { CommonSqliteEntity } from '@concepta/nestjs-typeorm-ext';
-import { UserPasswordHistoryEntityInterface } from '@concepta/nestjs-common';
 
 /**
  * User Entity

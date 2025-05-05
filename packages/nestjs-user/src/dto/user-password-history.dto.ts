@@ -1,8 +1,7 @@
 import { IsString, IsUUID } from 'class-validator';
 import { Exclude, Expose } from 'class-transformer';
-import { CommonEntityDto } from '@concepta/nestjs-common';
+import { CommonEntityDto, UserPasswordHistoryInterface } from '@concepta/nestjs-common';
 import { ApiProperty } from '@nestjs/swagger';
-import { UserPasswordHistoryInterface } from '@concepta/nestjs-common';
 
 /**
  * User Password History DTO

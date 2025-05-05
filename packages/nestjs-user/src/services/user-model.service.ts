@@ -9,8 +9,8 @@ import {
   ReferenceSubject,
   ReferenceEmail,
   InjectDynamicRepository,
+  UserEntityInterface,
 } from '@concepta/nestjs-common';
-import { UserEntityInterface } from '@concepta/nestjs-common';
 
 import { UserModelServiceInterface } from '../interfaces/user-model-service.interface';
 import { USER_MODULE_USER_ENTITY_KEY } from '../user.constants';
