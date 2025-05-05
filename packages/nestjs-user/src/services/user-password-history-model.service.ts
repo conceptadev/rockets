@@ -7,7 +7,7 @@ import {
 } from '@concepta/nestjs-common';
 
 import { USER_MODULE_USER_PASSWORD_HISTORY_ENTITY_KEY } from '../user.constants';
-import { UserPasswordHistoryEntityInterface } from '../interfaces/user-password-history-entity.interface';
+import { UserPasswordHistoryEntityInterface } from '@concepta/nestjs-common';
 import { UserPasswordHistoryCreatableInterface } from '../interfaces/user-password-history-creatable.interface';
 import { UserPasswordHistoryCreateDto } from '../dto/user-password-history-create.dto';
 

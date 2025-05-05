@@ -5,7 +5,7 @@ import { UserException } from '../exceptions/user-exception';
 import { ReferenceId, PasswordStorageInterface } from '@concepta/nestjs-common';
 import { USER_MODULE_SETTINGS_TOKEN } from '../user.constants';
 import { UserSettingsInterface } from '../interfaces/user-settings.interface';
-import { UserPasswordHistoryEntityInterface } from '../interfaces/user-password-history-entity.interface';
+import { UserPasswordHistoryEntityInterface } from '@concepta/nestjs-common';
 
 describe(UserPasswordHistoryService.name, () => {
   let service: UserPasswordHistoryService;

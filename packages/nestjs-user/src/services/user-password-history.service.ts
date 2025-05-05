@@ -12,7 +12,7 @@ import { UserException } from '../exceptions/user-exception';
 import { UserPasswordHistoryServiceInterface } from '../interfaces/user-password-history-service.interface';
 import { UserSettingsInterface } from '../interfaces/user-settings.interface';
 import { USER_MODULE_SETTINGS_TOKEN } from '../user.constants';
-import { UserPasswordHistoryEntityInterface } from '../interfaces/user-password-history-entity.interface';
+import { UserPasswordHistoryEntityInterface } from '@concepta/nestjs-common';
 
 @Injectable()
 export class UserPasswordHistoryService

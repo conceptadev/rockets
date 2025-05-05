@@ -8,12 +8,13 @@ import {
   RepositoryInterface,
   createSettingsProvider,
   getDynamicRepositoryToken,
+  UserEntityInterface,
+  UserPasswordHistoryEntityInterface,
 } from '@concepta/nestjs-common';
 import {
   PasswordCreationService,
   PasswordStorageService,
 } from '@concepta/nestjs-password';
-import { UserEntityInterface } from '@concepta/nestjs-common';
 
 import {
   USER_MODULE_SETTINGS_TOKEN,
@@ -24,7 +25,6 @@ import {
 import { UserOptionsInterface } from './interfaces/user-options.interface';
 import { UserOptionsExtrasInterface } from './interfaces/user-options-extras.interface';
 import { UserSettingsInterface } from './interfaces/user-settings.interface';
-import { UserPasswordHistoryEntityInterface } from './interfaces/user-password-history-entity.interface';
 
 import { UserModelService } from './services/user-model.service';
 import { UserPasswordService } from './services/user-password.service';

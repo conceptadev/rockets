@@ -1,4 +1,4 @@
-import { UserPasswordHistoryInterface } from './user-password-history.interface';
+import { UserPasswordHistoryInterface } from '@concepta/nestjs-common';
 
 export interface UserPasswordHistoryCreatableInterface
   extends Pick<

@@ -39,6 +39,9 @@ export { UserEntityInterface } from './user/interfaces/user-entity.interface';
 export { UserProfileInterface } from './user-profile/interfaces/user-profile.interface';
 export { UserProfileCreatableInterface } from './user-profile/interfaces/user-profile-creatable.interface';
 
+export { UserPasswordHistoryInterface } from './user-password-history/interfaces/user-password-history.interface';
+export { UserPasswordHistoryEntityInterface } from './user-password-history/interfaces/user-password-history-entity.interface';
+
 export { FederatedCreatableInterface } from './federated/interfaces/federated-creatable.interface';
 export { FederatedUpdatableInterface } from './federated/interfaces/federated-updatable.interface';
 export { FederatedInterface } from './federated/interfaces/federated.interface';
