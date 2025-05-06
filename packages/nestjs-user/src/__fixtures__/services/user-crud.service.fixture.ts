@@ -1,7 +1,7 @@
 import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { TypeOrmCrudService } from '@concepta/nestjs-crud';
-import { UserEntityInterface } from '../../interfaces/user-entity.interface';
+import { UserEntityInterface } from '@concepta/nestjs-common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntityFixture } from '../user.entity.fixture';
 

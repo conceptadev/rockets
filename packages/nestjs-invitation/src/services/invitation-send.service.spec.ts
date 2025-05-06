@@ -7,7 +7,7 @@ import {
   INVITATION_MODULE_CATEGORY_USER_KEY,
   getDynamicRepositoryToken,
 } from '@concepta/nestjs-common';
-import { UserEntityInterface } from '@concepta/nestjs-user';
+import { UserEntityInterface } from '@concepta/nestjs-common';
 import { EmailService } from '@concepta/nestjs-email';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';

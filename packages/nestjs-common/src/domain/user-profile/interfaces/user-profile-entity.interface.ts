@@ -1,3 +1,3 @@
-import { UserProfileInterface } from '@concepta/nestjs-common';
+import { UserProfileInterface } from './user-profile.interface';
 
 export interface UserProfileEntityInterface extends UserProfileInterface {}

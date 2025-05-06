@@ -1,14 +1,10 @@
 export { UserModule } from './user.module';
 export { UserProfileCrudBuilder } from './utils/user-profile.crud-builder';
 
-export { UserPostgresEntity } from './entities/user-postgres.entity';
-export { UserSqliteEntity } from './entities/user-sqlite.entity';
-
 export { UserModelService } from './services/user-model.service';
 export { UserPasswordService } from './services/user-password.service';
 export { UserAccessQueryService } from './services/user-access-query.service';
 
-export { UserEntityInterface } from './interfaces/user-entity.interface';
 export { UserModelServiceInterface } from './interfaces/user-model-service.interface';
 export { UserPasswordServiceInterface } from './interfaces/user-password-service.interface';
 export { UserEntitiesOptionsInterface } from './interfaces/user-entities-options.interface';
@@ -22,9 +18,8 @@ export { UserPasswordHashDto } from './dto/user-password-hash.dto';
 export { UserUpdateDto } from './dto/user-update.dto';
 export { UserDto } from './dto/user.dto';
 
-export { UserProfileEntityInterface } from './interfaces/user-profile-entity.interface';
-export { UserProfilePostgresEntity } from './entities/user-profile-postgres.entity';
-export { UserProfileSqliteEntity } from './entities/user-profile-sqlite.entity';
+// Interfaces now in nestjs-common
+// Entities moved to nestjs-typeorm-ext
 
 export { UserProfileDto } from './dto/profile/user-profile.dto';
 export { UserProfileCreateDto } from './dto/profile/user-profile-create.dto';

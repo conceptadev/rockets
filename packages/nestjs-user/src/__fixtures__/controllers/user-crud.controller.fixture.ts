@@ -31,7 +31,7 @@ import {
 
 import { UserResource } from '../../user.types';
 import { UserCrudServiceFixture } from '../services/user-crud.service.fixture';
-import { UserEntityInterface } from '../../interfaces/user-entity.interface';
+import { UserEntityInterface } from '@concepta/nestjs-common';
 import { UserDto } from '../../dto/user.dto';
 import { UserCreateDto } from '../../dto/user-create.dto';
 import { UserCreateManyDto } from '../../dto/user-create-many.dto';

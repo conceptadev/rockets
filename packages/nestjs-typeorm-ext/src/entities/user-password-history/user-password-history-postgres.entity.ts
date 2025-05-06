@@ -1,7 +1,9 @@
 import { Column } from 'typeorm';
-import { ReferenceId } from '@concepta/nestjs-common';
-import { CommonPostgresEntity } from '@concepta/nestjs-typeorm-ext';
-import { UserPasswordHistoryEntityInterface } from '../interfaces/user-password-history-entity.interface';
+import {
+  ReferenceId,
+  UserPasswordHistoryEntityInterface,
+} from '@concepta/nestjs-common';
+import { CommonPostgresEntity } from '../common/common-postgres.entity';
 
 /**
  * User Entity
