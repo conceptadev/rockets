@@ -28,6 +28,7 @@ export { OrgInterface } from './org/interfaces/org.interface';
 export { OrgProfileInterface } from './org-profile/interfaces/org-profile.interface';
 export { OrgProfileCreatableInterface } from './org-profile/interfaces/org-profile-creatable.interface';
 
+// User interfaces
 export { UserCreatableInterface } from './user/interfaces/user-creatable.interface';
 export { UserOwnableInterface } from './user/interfaces/user-ownable.interface';
 export { UserUpdatableInterface } from './user/interfaces/user-updatable.interface';
@@ -38,6 +39,7 @@ export { UserEntityInterface } from './user/interfaces/user-entity.interface';
 
 export { UserProfileInterface } from './user-profile/interfaces/user-profile.interface';
 export { UserProfileCreatableInterface } from './user-profile/interfaces/user-profile-creatable.interface';
+export { UserProfileEntityInterface } from './user-profile/interfaces/user-profile-entity.interface';
 
 export { UserPasswordHistoryInterface } from './user-password-history/interfaces/user-password-history.interface';
 export { UserPasswordHistoryEntityInterface } from './user-password-history/interfaces/user-password-history-entity.interface';

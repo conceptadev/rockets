@@ -1,12 +1,12 @@
 import { Column } from 'typeorm';
-import { CommonPostgresEntity } from '@concepta/nestjs-typeorm-ext';
+import { CommonSqliteEntity } from '../common/common-sqlite.entity';
 import { UserEntityInterface } from '@concepta/nestjs-common';
 
 /**
  * User Entity
  */
-export abstract class UserPostgresEntity
-  extends CommonPostgresEntity
+export abstract class UserSqliteEntity
+  extends CommonSqliteEntity
   implements UserEntityInterface
 {
   /**
@@ -38,4 +38,4 @@ export abstract class UserPostgresEntity
    */
   @Column({ type: 'text', nullable: true })
   passwordSalt!: string;
-}
+} 

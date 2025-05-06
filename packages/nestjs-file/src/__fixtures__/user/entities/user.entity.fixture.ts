@@ -1,5 +1,5 @@
 import { Entity, OneToOne } from 'typeorm';
-import { UserSqliteEntity } from '@concepta/nestjs-user';
+import { UserSqliteEntity } from '@concepta/nestjs-typeorm-ext';
 import { FileEntityFixture } from '../../file/file-entity.fixture';
 
 @Entity()
