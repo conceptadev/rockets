@@ -63,6 +63,7 @@ describe(InvitationAcceptedListener, () => {
               },
             }),
           ],
+          useFactory: () => ({}),
         }),
         OrgModule.forRootAsync({
           useFactory: () => ({

@@ -56,6 +56,7 @@ describe(AuthGoogleModule, () => {
                 },
               }),
             ],
+            useFactory: () => ({}),
           }),
         ],
       }).compile();

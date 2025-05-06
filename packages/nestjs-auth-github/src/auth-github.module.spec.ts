@@ -56,6 +56,7 @@ describe(AuthGithubModule, () => {
                 },
               }),
             ],
+            useFactory: () => ({}),
           }),
         ],
       }).compile();
