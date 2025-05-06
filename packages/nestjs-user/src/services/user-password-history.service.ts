@@ -4,7 +4,7 @@ import {
   ReferenceIdInterface,
   RepositoryInternals,
   PasswordStorageInterface,
-  UserPasswordHistoryEntityInterface
+  UserPasswordHistoryEntityInterface,
 } from '@concepta/nestjs-common';
 
 import { UserPasswordHistoryModelService } from './user-password-history-model.service';

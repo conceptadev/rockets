@@ -38,4 +38,4 @@ export abstract class UserPostgresEntity
    */
   @Column({ type: 'text', nullable: true })
   passwordSalt!: string;
-} 
+}

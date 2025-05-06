@@ -5,7 +5,7 @@ import {
   INVITATION_MODULE_CATEGORY_USER_KEY,
   OtpInterface,
   UserInterface,
-  UserEntityInterface
+  UserEntityInterface,
 } from '@concepta/nestjs-common';
 import { OtpService } from '@concepta/nestjs-otp';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';

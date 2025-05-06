@@ -38,4 +38,4 @@ export abstract class UserSqliteEntity
    */
   @Column({ type: 'text', nullable: true })
   passwordSalt!: string;
-} 
+}

@@ -1,7 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
-import { RepositoryInterface, UserEntityInterface } from '@concepta/nestjs-common';
+import {
+  RepositoryInterface,
+  UserEntityInterface,
+} from '@concepta/nestjs-common';
 import { OtpService } from '@concepta/nestjs-otp';
 import { UserFactory } from '@concepta/nestjs-user/src/seeding';
 import { SeedingSource } from '@concepta/typeorm-seeding';
