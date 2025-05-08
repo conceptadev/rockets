@@ -56,6 +56,7 @@ describe(AuthAppleModule, () => {
                 },
               }),
             ],
+            useFactory: () => ({}),
           }),
         ],
       }).compile();

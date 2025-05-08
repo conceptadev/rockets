@@ -54,6 +54,7 @@ import { createUserRepository } from './user/create-user-repository';
           },
         }),
       ],
+      useFactory: () => ({}),
     }),
   ],
   controllers: [CustomUserController],

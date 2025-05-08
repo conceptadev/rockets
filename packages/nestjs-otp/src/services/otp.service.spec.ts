@@ -93,13 +93,17 @@ describe('OtpModule', () => {
           entities: [UserEntityFixture, UserOtpEntityFixture],
           logger: 'simple-console',
         }),
-        OtpModule.register({
-          entities: {
-            userOtp: {
-              entity: UserOtpEntityFixture,
-              dataSource: connectionName,
-            },
-          },
+        OtpModule.registerAsync({
+          imports: [
+            TypeOrmExtModule.forFeature({
+              userOtp: {
+                entity: UserOtpEntityFixture,
+                dataSource: connectionName,
+              },
+            }),
+          ],
+          useFactory: () => ({}),
+          entities: ['userOtp'],
         }),
       ],
     }).compile();

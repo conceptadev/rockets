@@ -39,12 +39,16 @@ import { default as ormConfig } from './ormconfig.fixture';
         },
       },
     }),
-    OtpModule.forRoot({
-      entities: {
-        'user-otp': {
-          entity: UserOtpEntityFixture,
-        },
-      },
+    OtpModule.forRootAsync({
+      imports: [
+        TypeOrmExtModule.forFeature({
+          'user-otp': {
+            entity: UserOtpEntityFixture,
+          },
+        }),
+      ],
+      useFactory: () => ({}),
+      entities: ['user-otp'],
     }),
     PasswordModule.forRoot({}),
     UserModule.forRootAsync({

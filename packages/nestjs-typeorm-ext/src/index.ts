@@ -22,3 +22,7 @@ export { UserPasswordHistorySqliteEntity } from './entities/user-password-histor
 // user profile entities
 export { UserProfilePostgresEntity } from './entities/user-profile/user-profile-postgres.entity';
 export { UserProfileSqliteEntity } from './entities/user-profile/user-profile-sqlite.entity';
+
+// OTP entities
+export { OtpPostgresEntity } from './entities/otp/otp-postgres.entity';
+export { OtpSqliteEntity } from './entities/otp/otp-sqlite.entity';
