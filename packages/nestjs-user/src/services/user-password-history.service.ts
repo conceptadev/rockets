@@ -4,6 +4,7 @@ import {
   ReferenceIdInterface,
   RepositoryInternals,
   PasswordStorageInterface,
+  UserPasswordHistoryEntityInterface,
 } from '@concepta/nestjs-common';
 
 import { UserPasswordHistoryModelService } from './user-password-history-model.service';
@@ -12,7 +13,6 @@ import { UserException } from '../exceptions/user-exception';
 import { UserPasswordHistoryServiceInterface } from '../interfaces/user-password-history-service.interface';
 import { UserSettingsInterface } from '../interfaces/user-settings.interface';
 import { USER_MODULE_SETTINGS_TOKEN } from '../user.constants';
-import { UserPasswordHistoryEntityInterface } from '../interfaces/user-password-history-entity.interface';
 
 @Injectable()
 export class UserPasswordHistoryService

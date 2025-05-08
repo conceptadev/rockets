@@ -6,6 +6,7 @@ import { TypeOrmExtDataSourceToken } from '../typeorm-ext.types';
 import { TYPEORM_EXT_MODULE_DEFAULT_DATA_SOURCE_NAME } from '../typeorm-ext.constants';
 import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
 import { TypeOrmExtEntityOptionInterface } from '../interfaces/typeorm-ext-entity-options.interface';
+import { TypeOrmRepositoryAdapter } from '../repository/typeorm-repository.adapter';
 
 /**
  *  Create dynamic repository provider function
@@ -27,13 +28,16 @@ export function createDynamicRepositoryProvider(
       provide: getDynamicRepositoryToken(key),
       inject: [getDataSourceToken(dataSource)],
       useFactory: (dataSource: DataSource) => {
-        return repositoryFactory(dataSource);
+        return new TypeOrmRepositoryAdapter(repositoryFactory(dataSource));
       },
     };
   } else {
     return {
       provide: getDynamicRepositoryToken(key),
-      useExisting: getRepositoryToken(entity, dataSource),
+      inject: [getRepositoryToken(entity, dataSource)],
+      useFactory: (repoInstance) => {
+        return new TypeOrmRepositoryAdapter(repoInstance);
+      },
     };
   }
 }

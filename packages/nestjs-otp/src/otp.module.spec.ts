@@ -12,6 +12,7 @@ describe(OtpModule.name, () => {
   let otpModule: OtpModule;
   let otpService: OtpService;
   let otpDynamicRepo: Record<string, RepositoryInterface<OtpInterface>>;
+
   beforeEach(async () => {
     const testModule: TestingModule = await Test.createTestingModule({
       imports: [AppModuleFixture],
@@ -57,12 +58,6 @@ describe(OtpModule.name, () => {
     it('should call super.registerAsync in register method', () => {
       OtpModule.registerAsync({});
       expect(spyRegisterAsync).toHaveBeenCalled();
-    });
-
-    it('should throw an error in forFeature method', () => {
-      expect(() => OtpModule.forFeature({})).toThrow(
-        'You must provide the entities option',
-      );
     });
   });
 });

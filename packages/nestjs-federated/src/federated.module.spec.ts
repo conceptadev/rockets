@@ -4,7 +4,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import {
   RepositoryInterface,
   getDynamicRepositoryToken,
-  getEntityRepositoryToken,
 } from '@concepta/nestjs-common';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 
@@ -28,7 +27,6 @@ describe(FederatedModule, () => {
   let federatedService: FederatedService;
   let federatedOauthService: FederatedOAuthService;
   let userModelService: FederatedUserModelServiceInterface;
-  let federatedEntityRepo: RepositoryInterface<FederatedEntityInterface>;
   let federatedDynamicRepo: RepositoryInterface<FederatedEntityInterface>;
   let federatedModelService: FederatedModelService;
 
@@ -134,9 +132,6 @@ describe(FederatedModule, () => {
     userModelService = testModule.get<FederatedUserModelServiceInterface>(
       UserModelServiceFixture,
     );
-    federatedEntityRepo = testModule.get<
-      RepositoryInterface<FederatedEntityFixture>
-    >(getEntityRepositoryToken(FEDERATED_MODULE_FEDERATED_ENTITY_KEY));
     federatedDynamicRepo = testModule.get(
       getDynamicRepositoryToken(FEDERATED_MODULE_FEDERATED_ENTITY_KEY),
     );
@@ -148,7 +143,6 @@ describe(FederatedModule, () => {
     expect(federatedModelService).toBeInstanceOf(FederatedModelService);
     expect(federatedOauthService).toBeInstanceOf(FederatedOAuthService);
     expect(userModelService).toBeInstanceOf(UserModelServiceFixture);
-    expect(federatedEntityRepo).toBeInstanceOf(Repository);
     expect(federatedDynamicRepo).toBeInstanceOf(Repository);
   }
 });

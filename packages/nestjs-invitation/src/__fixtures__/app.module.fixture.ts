@@ -39,23 +39,31 @@ import { default as ormConfig } from './ormconfig.fixture';
         },
       },
     }),
-    OtpModule.forRoot({
-      entities: {
-        'user-otp': {
-          entity: UserOtpEntityFixture,
-        },
-      },
+    OtpModule.forRootAsync({
+      imports: [
+        TypeOrmExtModule.forFeature({
+          'user-otp': {
+            entity: UserOtpEntityFixture,
+          },
+        }),
+      ],
+      useFactory: () => ({}),
+      entities: ['user-otp'],
     }),
     PasswordModule.forRoot({}),
-    UserModule.forRoot({
-      settings: {
-        invitationAcceptedEvent: InvitationAcceptedEventAsync,
-      },
-      entities: {
-        user: {
-          entity: UserEntityFixture,
+    UserModule.forRootAsync({
+      imports: [
+        TypeOrmExtModule.forFeature({
+          user: {
+            entity: UserEntityFixture,
+          },
+        }),
+      ],
+      useFactory: () => ({
+        settings: {
+          invitationAcceptedEvent: InvitationAcceptedEventAsync,
         },
-      },
+      }),
     }),
     EmailModule.register({
       mailerService: {

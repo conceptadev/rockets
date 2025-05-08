@@ -3,7 +3,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import {
   RepositoryInterface,
   getDynamicRepositoryToken,
-  getEntityRepositoryToken,
 } from '@concepta/nestjs-common';
 import { RoleModule } from './role.module';
 import { RoleService } from './services/role.service';
@@ -30,9 +29,6 @@ describe('RoleModule', () => {
     }).compile();
 
     roleModule = testModule.get<RoleModule>(RoleModule);
-    roleEntityRepo = testModule.get<RepositoryInterface<RoleEntityFixture>>(
-      getEntityRepositoryToken(ROLE_MODULE_ROLE_ENTITY_KEY),
-    );
     roleDynamicRepo = testModule.get(
       getDynamicRepositoryToken(ROLE_MODULE_ROLE_ENTITY_KEY),
     );

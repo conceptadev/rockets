@@ -18,7 +18,7 @@ with full CRUD, DTOs, sample data factory and seeder.
 ## Usage
 
 ```ts
-// ...
+import { Module } from '@nestjs/common';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { OtpModule } from '@concepta/nestjs-user';
 import { CrudModule } from '@concepta/nestjs-crud';
@@ -30,7 +30,17 @@ import { CrudModule } from '@concepta/nestjs-crud';
       url: 'postgres://user:pass@localhost:5432/postgres',
     }),
     CrudModule.forRoot({}),
-    OtpModule.forRoot({}),
+    OtpModule.forRootAsync({
+      imports: [
+        TypeOrmExtModule.forFeature({
+          otp: {
+            entity: YourOtpEntity,
+          },
+        }),
+      ],
+      useFactory: () => ({}),
+      entities: ['otp'],
+    }),
   ],
 })
 export class AppModule {}

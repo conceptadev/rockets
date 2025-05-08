@@ -6,7 +6,8 @@ import { CrudModule } from '@concepta/nestjs-crud';
 import { INVITATION_MODULE_CATEGORY_ORG_KEY } from '@concepta/nestjs-common';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { EventModule } from '@concepta/nestjs-event';
-import { UserEntityInterface, UserModule } from '@concepta/nestjs-user';
+import { UserEntityInterface } from '@concepta/nestjs-common';
+import { UserModule } from '@concepta/nestjs-user';
 import { PasswordModule } from '@concepta/nestjs-password';
 import { InvitationEntityInterface } from '@concepta/nestjs-invitation';
 import { UserFactory } from '@concepta/nestjs-user/dist/seeding';
@@ -54,12 +55,15 @@ describe(InvitationAcceptedListener, () => {
           ],
         }),
         PasswordModule.forRoot({}),
-        UserModule.forRoot({
-          entities: {
-            user: {
-              entity: UserEntityFixture,
-            },
-          },
+        UserModule.forRootAsync({
+          imports: [
+            TypeOrmExtModule.forFeature({
+              user: {
+                entity: UserEntityFixture,
+              },
+            }),
+          ],
+          useFactory: () => ({}),
         }),
         OrgModule.forRootAsync({
           useFactory: () => ({

@@ -6,7 +6,6 @@ import { AuthenticationModule } from '@concepta/nestjs-authentication';
 import { AuthJwtModule } from '@concepta/nestjs-auth-jwt';
 import { JwtModule } from '@concepta/nestjs-jwt';
 import { AccessControlModule } from '@concepta/nestjs-access-control';
-import { CrudModule } from '@concepta/nestjs-crud';
 import { EventModule } from '@concepta/nestjs-event';
 
 import { UserModule } from '../user.module';
@@ -31,7 +30,6 @@ rules
   imports: [
     UserModuleCustomFixture,
     TypeOrmExtModule.forRoot(ormConfig),
-    CrudModule.forRoot({}),
     EventModule.forRoot({}),
     JwtModule.forRoot({}),
     AuthJwtModule.forRootAsync({
@@ -44,6 +42,14 @@ rules
     PasswordModule.forRoot({}),
     AccessControlModule.forRoot({ settings: { rules } }),
     UserModule.forRootAsync({
+      imports: [
+        TypeOrmExtModule.forFeature({
+          user: {
+            entity: UserEntityFixture,
+            repositoryFactory: createUserRepositoryFixture,
+          },
+        }),
+      ],
       inject: [UserModelCustomService],
       useFactory: async (userModelService: UserModelServiceInterface) => ({
         userModelService,
@@ -53,12 +59,6 @@ rules
           },
         },
       }),
-      entities: {
-        user: {
-          entity: UserEntityFixture,
-          repositoryFactory: createUserRepositoryFixture,
-        },
-      },
     }),
   ],
 })

@@ -1,8 +1,7 @@
 import { IsBoolean, IsEmail, IsString } from 'class-validator';
 import { Exclude, Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { CommonEntityDto } from '@concepta/nestjs-common';
-import { UserInterface } from '@concepta/nestjs-common';
+import { CommonEntityDto, UserInterface } from '@concepta/nestjs-common';
 
 /**
  * User DTO

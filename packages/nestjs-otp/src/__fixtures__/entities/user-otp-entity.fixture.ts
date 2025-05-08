@@ -1,5 +1,5 @@
 import { Entity } from 'typeorm';
-import { OtpSqliteEntity } from '../../entities/otp-sqlite.entity';
+import { OtpSqliteEntity } from '@concepta/nestjs-typeorm-ext';
 
 /**
  * Otp Entity Fixture
