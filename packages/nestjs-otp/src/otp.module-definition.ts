@@ -8,8 +8,6 @@ import { ConfigModule } from '@nestjs/config';
 import {
   createSettingsProvider,
   getDynamicRepositoryToken,
-  OtpInterface,
-  RepositoryInterface,
 } from '@concepta/nestjs-common';
 
 import {
@@ -19,7 +17,6 @@ import {
 
 import { OtpOptionsInterface } from './interfaces/otp-options.interface';
 import { OtpOptionsExtrasInterface } from './interfaces/otp-options-extras.interface';
-import { OtpEntitiesOptionsInterface } from './interfaces/otp-entities-options.interface';
 import { OtpSettingsInterface } from './interfaces/otp-settings.interface';
 
 import { OtpService } from './services/otp.service';
@@ -71,18 +68,17 @@ export function createOtpImports(options: {
   ];
 }
 
-export function createOtpProviders(
-  options: OtpEntitiesOptionsInterface & {
-    overrides?: OtpOptions;
-    providers?: Provider[];
-  },
-): Provider[] {
+export function createOtpProviders(options: {
+  entities: string[];
+  overrides?: OtpOptions;
+  providers?: Provider[];
+}): Provider[] {
   return [
     ...(options.providers ?? []),
     OtpService,
     createOtpSettingsProvider(options.overrides),
     createOtpRepositoriesProvider({
-      entities: options.entities
+      entities: options.entities,
     }),
   ];
 }
@@ -104,10 +100,11 @@ export function createOtpSettingsProvider(
   });
 }
 
-export function createOtpRepositoriesProvider(
-  options: OtpEntitiesOptionsInterface,
-): Provider {
+export function createOtpRepositoriesProvider(options: {
+  entities: string[];
+}): Provider {
   const { entities } = options;
+
   const reposToInject = [];
   const keyTracker: Record<string, number> = {};
 

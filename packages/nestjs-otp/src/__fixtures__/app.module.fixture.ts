@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { OtpModule } from '../otp.module';
 import { UserEntityFixture } from './entities/user-entity.fixture';
 import { UserOtpEntityFixture } from './entities/user-otp-entity.fixture';
+import { OtpEntitiesOptionsInterface } from '../interfaces/otp-entities-options.interface';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { UserOtpEntityFixture } from './entities/user-otp-entity.fixture';
     }),
     OtpModule.registerAsync({
       imports: [
-        TypeOrmExtModule.forFeature({
+        TypeOrmExtModule.forFeature<OtpEntitiesOptionsInterface>({
           userOtp: {
             entity: UserOtpEntityFixture,
           },

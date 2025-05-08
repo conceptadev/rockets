@@ -16,3 +16,4 @@ export { OtpEntityNotFoundException } from './exceptions/otp-entity-not-found.ex
 export { OtpTypeNotDefinedException } from './exceptions/otp-type-not-defined.exception';
 export { OtpMissingEntitiesOptionsException } from './exceptions/otp-missing-entities-options.exception';
 export { OtpLimitReachedException } from './exceptions/otp-limit-reached.exception';
+export { OtpEntitiesOptionsInterface } from './interfaces/otp-entities-options.interface';
