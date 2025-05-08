@@ -54,12 +54,16 @@ import { MailerServiceFixture } from './email/mailer.service.fixture';
         emailService,
       }),
     }),
-    OtpModule.forRoot({
-      entities: {
-        userOtp: {
-          entity: UserOtpEntityFixture,
-        },
-      },
+    OtpModule.forRootAsync({
+      useFactory: () => ({}),
+      entities: ['userOtp'],
+      imports: [
+        TypeOrmExtModule.forFeature({
+          userOtp: {
+            entity: UserOtpEntityFixture,
+          },
+        }),
+      ],
     }),
     PasswordModule.forRoot({}),
     UserModule.forRootAsync({

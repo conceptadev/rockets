@@ -4,11 +4,7 @@ import {
   OtpAsyncOptions,
   OtpModuleClass,
   OtpOptions,
-  createOtpExports,
-  createOtpImports,
-  createOtpProviders,
 } from './otp.module-definition';
-import { OtpMissingEntitiesOptionsException } from './exceptions/otp-missing-entities-options.exception';
 
 /**
  * Otp Module
@@ -29,20 +25,5 @@ export class OtpModule extends OtpModuleClass {
 
   static forRootAsync(options: OtpAsyncOptions): DynamicModule {
     return super.registerAsync({ ...options, global: true });
-  }
-
-  static forFeature(options: OtpOptions): DynamicModule {
-    const { entities } = options;
-
-    if (!entities) {
-      throw new OtpMissingEntitiesOptionsException();
-    }
-
-    return {
-      module: OtpModule,
-      imports: createOtpImports({ entities }),
-      providers: createOtpProviders({ entities, overrides: options }),
-      exports: createOtpExports(),
-    };
   }
 }

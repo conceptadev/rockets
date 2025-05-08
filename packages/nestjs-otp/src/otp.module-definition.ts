@@ -8,8 +8,9 @@ import { ConfigModule } from '@nestjs/config';
 import {
   createSettingsProvider,
   getDynamicRepositoryToken,
+  OtpInterface,
+  RepositoryInterface,
 } from '@concepta/nestjs-common';
-import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 
 import {
   OTP_MODULE_REPOSITORIES_TOKEN,
@@ -45,7 +46,7 @@ function definitionTransform(
   definition: DynamicModule,
   extras: OtpOptionsExtrasInterface,
 ): DynamicModule {
-  const { providers = [] } = definition;
+  const { providers = [], imports = [] } = definition;
   const { global = false, entities } = extras;
 
   if (!entities) {
@@ -55,18 +56,18 @@ function definitionTransform(
   return {
     ...definition,
     global,
-    imports: createOtpImports({ entities }),
+    imports: createOtpImports({ imports }),
     providers: createOtpProviders({ entities, providers }),
     exports: [ConfigModule, RAW_OPTIONS_TOKEN, ...createOtpExports()],
   };
 }
 
-export function createOtpImports(
-  options: OtpEntitiesOptionsInterface,
-): DynamicModule['imports'] {
+export function createOtpImports(options: {
+  imports: DynamicModule['imports'];
+}): DynamicModule['imports'] {
   return [
+    ...(options.imports || []),
     ConfigModule.forFeature(otpDefaultConfig),
-    TypeOrmExtModule.forFeature(options.entities),
   ];
 }
 
@@ -81,7 +82,7 @@ export function createOtpProviders(
     OtpService,
     createOtpSettingsProvider(options.overrides),
     createOtpRepositoriesProvider({
-      entities: options.overrides?.entities ?? options.entities,
+      entities: options.entities
     }),
   ];
 }
@@ -107,13 +108,12 @@ export function createOtpRepositoriesProvider(
   options: OtpEntitiesOptionsInterface,
 ): Provider {
   const { entities } = options;
-
   const reposToInject = [];
   const keyTracker: Record<string, number> = {};
 
   let entityIdx = 0;
 
-  for (const entityKey in entities) {
+  for (const entityKey of entities) {
     reposToInject[entityIdx] = getDynamicRepositoryToken(entityKey);
     keyTracker[entityKey] = entityIdx++;
   }
@@ -123,7 +123,7 @@ export function createOtpRepositoriesProvider(
     useFactory: (...args: string[]) => {
       const repoInstances: Record<string, string> = {};
 
-      for (const entityKey in entities) {
+      for (const entityKey of entities) {
         repoInstances[entityKey] = args[keyTracker[entityKey]];
       }
 

@@ -1,12 +1,12 @@
 import { Column } from 'typeorm';
 import { ReferenceId, OtpInterface } from '@concepta/nestjs-common';
-import { CommonSqliteEntity } from '@concepta/nestjs-typeorm-ext';
+import { CommonPostgresEntity } from '../common/common-postgres.entity';
 
 /**
- * Otp Sqlite Entity
+ * Otp Postgres Entity
  */
-export abstract class OtpSqliteEntity
-  extends CommonSqliteEntity
+export abstract class OtpPostgresEntity
+  extends CommonPostgresEntity
   implements OtpInterface
 {
   @Column()
@@ -18,7 +18,7 @@ export abstract class OtpSqliteEntity
   @Column()
   passcode!: string;
 
-  @Column({ type: 'datetime' })
+  @Column({ type: 'timestamptz' })
   expirationDate!: Date;
 
   @Column({ default: true })

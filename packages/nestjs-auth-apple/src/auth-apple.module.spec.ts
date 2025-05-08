@@ -59,9 +59,7 @@ describe(AuthAppleModule, () => {
             useFactory: () => ({}),
           }),
         ],
-      }
-  
-      ).compile();
+      }).compile();
 
       authAppleModule = module.get(AuthAppleModule);
       authAppleController = module.get(AuthAppleController);

@@ -1,6 +1,5 @@
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { Module } from '@nestjs/common';
-
 import { OtpModule } from '../otp.module';
 import { UserEntityFixture } from './entities/user-entity.fixture';
 import { UserOtpEntityFixture } from './entities/user-otp-entity.fixture';
@@ -13,12 +12,16 @@ import { UserOtpEntityFixture } from './entities/user-otp-entity.fixture';
       synchronize: true,
       entities: [UserEntityFixture, UserOtpEntityFixture],
     }),
-    OtpModule.register({
-      entities: {
-        userOtp: {
-          entity: UserOtpEntityFixture,
-        },
-      },
+    OtpModule.registerAsync({
+      imports: [
+        TypeOrmExtModule.forFeature({
+          userOtp: {
+            entity: UserOtpEntityFixture,
+          },
+        }),
+      ],
+      useFactory: () => ({}),
+      entities: ['userOtp'],
     }),
   ],
 })
