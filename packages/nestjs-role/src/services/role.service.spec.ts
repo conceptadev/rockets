@@ -1,5 +1,5 @@
 import { CrudModule } from '@concepta/nestjs-crud';
-import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
+import { TypeOrmExtModule, TypeOrmRepositoryAdapter } from '@concepta/nestjs-typeorm-ext';
 import {
   ReferenceIdInterface,
   RepositoryInterface,
@@ -8,7 +8,6 @@ import {
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getDataSourceToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { RoleModule } from '../role.module';
 import { RoleService } from '../services/role.service';
 
@@ -116,7 +115,7 @@ describe('RoleModule', () => {
       expect(roleService).toBeInstanceOf(RoleService);
     });
     it('should be have expected repos', async () => {
-      expect(roleRepo).toBeInstanceOf(Repository);
+      expect(roleRepo).toBeInstanceOf(TypeOrmRepositoryAdapter);
     });
   });
 

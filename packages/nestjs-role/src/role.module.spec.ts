@@ -1,4 +1,3 @@
-import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   RepositoryInterface,
@@ -13,6 +12,7 @@ import { ROLE_MODULE_ROLE_ENTITY_KEY } from './role.constants';
 
 import { AppModuleFixture } from './__fixtures__/app.module.fixture';
 import { RoleEntityFixture } from './__fixtures__/entities/role-entity.fixture';
+import { TypeOrmRepositoryAdapter } from '@concepta/nestjs-typeorm-ext';
 
 describe('RoleModule', () => {
   let roleModule: RoleModule;
@@ -45,12 +45,11 @@ describe('RoleModule', () => {
   describe('module', () => {
     it('should be loaded', async () => {
       expect(roleModule).toBeInstanceOf(RoleModule);
-      expect(roleEntityRepo).toBeInstanceOf(Repository);
-      expect(roleDynamicRepo).toBeInstanceOf(Repository);
+      expect(roleDynamicRepo).toBeInstanceOf(TypeOrmRepositoryAdapter);
       expect(roleService).toBeInstanceOf(RoleService);
       expect(roleCrudService).toBeInstanceOf(RoleCrudService);
       expect(roleModelService).toBeInstanceOf(RoleModelService);
-      expect(roleModelService['repo']).toBeInstanceOf(Repository);
+      expect(roleModelService['repo']).toBeInstanceOf(TypeOrmRepositoryAdapter);
       expect(roleModelService['repo'].find).toBeInstanceOf(Function);
       expect(roleController).toBeInstanceOf(RoleController);
     });

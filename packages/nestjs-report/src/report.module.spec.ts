@@ -1,4 +1,3 @@
-import { Repository } from 'typeorm';
 import { DynamicModule, ModuleMetadata } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
@@ -6,7 +5,7 @@ import {
   getDynamicRepositoryToken,
 } from '@concepta/nestjs-common';
 import { FileModule } from '@concepta/nestjs-file';
-import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
+import { TypeOrmExtModule, TypeOrmRepositoryAdapter } from '@concepta/nestjs-typeorm-ext';
 
 import { ReportService } from './services/report.service';
 
@@ -178,7 +177,7 @@ describe(ReportModule, () => {
   const commonTests = async () => {
     expect(reportModule).toBeInstanceOf(ReportModule);
     expect(reportService).toBeInstanceOf(ReportService);
-    expect(reportDynamicRepo).toBeInstanceOf(Repository);
+    expect(reportDynamicRepo).toBeInstanceOf(TypeOrmRepositoryAdapter);
 
     const result = await reportService.generate({
       name: REPORT_NAME_FIXTURE,
