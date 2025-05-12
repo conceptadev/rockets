@@ -1,4 +1,3 @@
-import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   RepositoryInterface,
@@ -7,6 +6,7 @@ import {
 import { UserModule, UserModelService } from '@concepta/nestjs-user';
 import { AppModule } from './app.module';
 import { UserEntity } from './user/user.entity';
+import { TypeOrmRepositoryAdapter } from '@concepta/nestjs-typeorm-ext';
 
 describe('AppModule', () => {
   let userModule: UserModule;
@@ -30,9 +30,9 @@ describe('AppModule', () => {
   describe('module', () => {
     it('should be loaded', async () => {
       expect(userModule).toBeInstanceOf(UserModule);
-      expect(userRepo).toBeInstanceOf(Repository);
+      expect(userRepo).toBeInstanceOf(TypeOrmRepositoryAdapter);
       expect(userModelService).toBeInstanceOf(UserModelService);
-      expect(userModelService['repo']).toBeInstanceOf(Repository);
+      expect(userModelService['repo']).toBeInstanceOf(TypeOrmRepositoryAdapter);
       expect(userModelService['repo'].find).toBeInstanceOf(Function);
     });
   });
