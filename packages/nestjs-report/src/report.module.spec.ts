@@ -5,7 +5,10 @@ import {
   getDynamicRepositoryToken,
 } from '@concepta/nestjs-common';
 import { FileModule } from '@concepta/nestjs-file';
-import { TypeOrmExtModule, TypeOrmRepositoryAdapter } from '@concepta/nestjs-typeorm-ext';
+import {
+  TypeOrmExtModule,
+  TypeOrmRepositoryAdapter,
+} from '@concepta/nestjs-typeorm-ext';
 
 import { ReportService } from './services/report.service';
 

@@ -14,8 +14,6 @@ import {
   RoleEntityInterface,
 } from '@concepta/nestjs-common';
 
-import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
-
 import {
   ROLE_MODULE_CRUD_SERVICES_TOKEN,
   ROLE_MODULE_REPOSITORIES_TOKEN,
@@ -80,7 +78,6 @@ export function createRoleImports(
   return [
     ...(options.imports ?? []),
     ConfigModule.forFeature(roleDefaultConfig),
-    TypeOrmExtModule.forFeature(options.entities),
   ];
 }
 
@@ -162,23 +159,42 @@ export function createRoleRepositoriesProviders(
 
   let repoIdx = 0;
 
-  for (const entityKey in entities) {
-    reposToInject[repoIdx] = getDynamicRepositoryToken(entityKey);
-    keyTracker[entityKey] = repoIdx++;
+  // add role entity
+  reposToInject[repoIdx] = getDynamicRepositoryToken(
+    ROLE_MODULE_ROLE_ENTITY_KEY,
+  );
+  keyTracker[ROLE_MODULE_ROLE_ENTITY_KEY] = repoIdx++;
+
+  // now get all role assignments
+  if (entities.roleAssignments) {
+    for (const entityKey of entities.roleAssignments) {
+      reposToInject[repoIdx] = getDynamicRepositoryToken(entityKey);
+      keyTracker[entityKey] = repoIdx++;
+    }
   }
 
   return [
     {
       provide: ROLE_MODULE_REPOSITORIES_TOKEN,
-
-      useFactory: (...args: RepositoryInterface<RoleAssignmentInterface>[]) => {
+      useFactory: (
+        ...args: RepositoryInterface<
+          RoleEntityInterface | RoleAssignmentInterface
+        >[]
+      ) => {
         const repoInstances: Record<
           string,
-          RepositoryInterface<RoleAssignmentInterface>
+          RepositoryInterface<RoleEntityInterface | RoleAssignmentInterface>
         > = {};
 
-        for (const entityKey in entities) {
-          repoInstances[entityKey] = args[keyTracker[entityKey]];
+        // Add the role repository
+        repoInstances[ROLE_MODULE_ROLE_ENTITY_KEY] =
+          args[keyTracker[ROLE_MODULE_ROLE_ENTITY_KEY]];
+
+        // Add all assignment repositories
+        if (entities.roleAssignments) {
+          for (const entityKey of entities.roleAssignments) {
+            repoInstances[entityKey] = args[keyTracker[entityKey]];
+          }
         }
 
         return repoInstances;
@@ -191,10 +207,17 @@ export function createRoleRepositoriesProviders(
       useFactory: (...args: Repository<RoleAssignmentInterface>[]) => {
         const serviceInstances: Record<string, RoleAssignmentCrudService> = {};
 
-        for (const entityKey in entities) {
-          serviceInstances[entityKey] = new RoleAssignmentCrudService(
-            args[keyTracker[entityKey]],
+        serviceInstances[ROLE_MODULE_ROLE_ENTITY_KEY] =
+          new RoleAssignmentCrudService(
+            args[keyTracker[ROLE_MODULE_ROLE_ENTITY_KEY]],
           );
+
+        if (entities.roleAssignments) {
+          for (const entityKey of entities.roleAssignments) {
+            serviceInstances[entityKey] = new RoleAssignmentCrudService(
+              args[keyTracker[entityKey]],
+            );
+          }
         }
 
         return serviceInstances;

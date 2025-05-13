@@ -4,7 +4,10 @@ import {
   RepositoryInterface,
   getDynamicRepositoryToken,
 } from '@concepta/nestjs-common';
-import { TypeOrmExtModule, TypeOrmRepositoryAdapter } from '@concepta/nestjs-typeorm-ext';
+import {
+  TypeOrmExtModule,
+  TypeOrmRepositoryAdapter,
+} from '@concepta/nestjs-typeorm-ext';
 
 import { FederatedModule } from './federated.module';
 import { FederatedService } from './services/federated.service';

@@ -1,5 +1,8 @@
 import { CrudModule } from '@concepta/nestjs-crud';
-import { TypeOrmExtModule, TypeOrmRepositoryAdapter } from '@concepta/nestjs-typeorm-ext';
+import {
+  TypeOrmExtModule,
+  TypeOrmRepositoryAdapter,
+} from '@concepta/nestjs-typeorm-ext';
 import {
   ReferenceIdInterface,
   RepositoryInterface,
@@ -53,22 +56,29 @@ describe('RoleModule', () => {
             ApiKeyRoleEntityFixture,
           ],
         }),
-        RoleModule.register({
-          settings: {
-            assignments: {
-              user: { entityKey: 'userRole' },
-            },
-          },
+        RoleModule.registerAsync({
+          imports: [
+            TypeOrmExtModule.forFeature({
+              role: {
+                entity: RoleEntityFixture,
+                dataSource: connectionName,
+              },
+              userRole: {
+                entity: UserRoleEntityFixture,
+                dataSource: connectionName,
+              },
+            }),
+          ],
           entities: {
-            role: {
-              entity: RoleEntityFixture,
-              dataSource: connectionName,
-            },
-            userRole: {
-              entity: UserRoleEntityFixture,
-              dataSource: connectionName,
-            },
+            roleAssignments: ['userRole'],
           },
+          useFactory: () => ({
+            settings: {
+              assignments: {
+                user: { entityKey: 'userRole' },
+              },
+            },
+          }),
         }),
         CrudModule.forRoot({}),
       ],

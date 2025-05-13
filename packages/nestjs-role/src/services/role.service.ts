@@ -4,8 +4,6 @@ import {
   ReferenceIdInterface,
   RepositoryInterface,
   ModelQueryException,
-  LiteralObject,
-  ReferenceId,
   RoleAssignmentEntityInterface,
 } from '@concepta/nestjs-common';
 import { RoleEntityNotFoundException } from '../exceptions/role-entity-not-found.exception';

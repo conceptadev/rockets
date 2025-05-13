@@ -5,8 +5,6 @@ import {
 } from '@concepta/nestjs-common';
 import { RoleModule } from './role.module';
 import { RoleService } from './services/role.service';
-import { RoleCrudService } from './services/role-crud.service';
-import { RoleController } from './role.controller';
 import { RoleModelService } from './services/role-model.service';
 import { ROLE_MODULE_ROLE_ENTITY_KEY } from './role.constants';
 
@@ -18,9 +16,6 @@ describe('RoleModule', () => {
   let roleModule: RoleModule;
   let roleService: RoleService;
   let roleModelService: RoleModelService;
-  let roleCrudService: RoleCrudService;
-  let roleController: RoleController;
-  let roleEntityRepo: RepositoryInterface<RoleEntityFixture>;
   let roleDynamicRepo: RepositoryInterface<RoleEntityFixture>;
 
   beforeEach(async () => {
@@ -34,8 +29,6 @@ describe('RoleModule', () => {
     );
     roleService = testModule.get<RoleService>(RoleService);
     roleModelService = testModule.get<RoleModelService>(RoleModelService);
-    roleCrudService = testModule.get<RoleCrudService>(RoleCrudService);
-    roleController = testModule.get<RoleController>(RoleController);
   });
 
   afterEach(() => {
@@ -47,11 +40,9 @@ describe('RoleModule', () => {
       expect(roleModule).toBeInstanceOf(RoleModule);
       expect(roleDynamicRepo).toBeInstanceOf(TypeOrmRepositoryAdapter);
       expect(roleService).toBeInstanceOf(RoleService);
-      expect(roleCrudService).toBeInstanceOf(RoleCrudService);
       expect(roleModelService).toBeInstanceOf(RoleModelService);
       expect(roleModelService['repo']).toBeInstanceOf(TypeOrmRepositoryAdapter);
       expect(roleModelService['repo'].find).toBeInstanceOf(Function);
-      expect(roleController).toBeInstanceOf(RoleController);
     });
   });
 });

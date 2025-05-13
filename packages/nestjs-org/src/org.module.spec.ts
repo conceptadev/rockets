@@ -4,7 +4,10 @@ import {
   RepositoryInterface,
   getDynamicRepositoryToken,
 } from '@concepta/nestjs-common';
-import { TypeOrmExtModule, TypeOrmRepositoryAdapter } from '@concepta/nestjs-typeorm-ext';
+import {
+  TypeOrmExtModule,
+  TypeOrmRepositoryAdapter,
+} from '@concepta/nestjs-typeorm-ext';
 import { OrgModule } from './org.module';
 import { OrgCrudService } from './services/org-crud.service';
 import { OrgController } from './org.controller';

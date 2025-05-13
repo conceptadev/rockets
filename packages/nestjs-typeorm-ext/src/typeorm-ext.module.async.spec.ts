@@ -36,10 +36,9 @@ describe('AppModule', () => {
       expect(photoModule).toBeInstanceOf(PhotoModuleFixture);
       expect(photoCustomRepo).toBeInstanceOf(TypeOrmRepositoryAdapter);
     });
-    
+
     it.skip('should use custom repository', async () => {
       expect(photoCustomRepo['customMethod']).toBeInstanceOf(Function);
     });
-    
   });
 });
