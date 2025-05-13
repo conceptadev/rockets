@@ -4,11 +4,13 @@ import {
   ReferenceIdInterface,
   RepositoryInterface,
   ModelQueryException,
+  LiteralObject,
+  ReferenceId,
+  RoleAssignmentEntityInterface,
 } from '@concepta/nestjs-common';
 import { RoleEntityNotFoundException } from '../exceptions/role-entity-not-found.exception';
 import { RoleAssignmentNotFoundException } from '../exceptions/role-assignment-not-found.exception';
 import { RoleAssignmentConflictException } from '../exceptions/role-assignment-conflict.exception';
-import { RoleAssignmentEntityInterface } from '../interfaces/role-assignment-entity.interface';
 import {
   ROLE_MODULE_REPOSITORIES_TOKEN,
   ROLE_MODULE_SETTINGS_TOKEN,

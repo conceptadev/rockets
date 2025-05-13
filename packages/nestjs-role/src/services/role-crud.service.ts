@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectDynamicRepository } from '@concepta/nestjs-common';
 import { TypeOrmCrudService } from '@concepta/nestjs-crud';
 import { ROLE_MODULE_ROLE_ENTITY_KEY } from '../role.constants';
-import { RoleEntityInterface } from '../interfaces/role-entity.interface';
+import { RoleEntityInterface } from '@concepta/nestjs-common';
 
 /**
  * Role CRUD service

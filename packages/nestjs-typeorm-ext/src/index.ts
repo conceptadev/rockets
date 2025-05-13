@@ -26,3 +26,10 @@ export { UserProfileSqliteEntity } from './entities/user-profile/user-profile-sq
 // OTP entities
 export { OtpPostgresEntity } from './entities/otp/otp-postgres.entity';
 export { OtpSqliteEntity } from './entities/otp/otp-sqlite.entity';
+// role entities
+export { RolePostgresEntity } from './entities/role/role-postgres.entity';
+export { RoleSqliteEntity } from './entities/role/role-sqlite.entity';
+
+// role assignment entities
+export { RoleAssignmentPostgresEntity } from './entities/role/role-assignment-postgres.entity';
+export { RoleAssignmentSqliteEntity } from './entities/role/role-assignment-sqlite.entity';

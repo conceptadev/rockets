@@ -1,6 +1,7 @@
 import { Column } from 'typeorm';
-import { CommonSqliteEntity } from '@concepta/nestjs-typeorm-ext';
-import { RoleEntityInterface } from '../interfaces/role-entity.interface';
+
+import { RoleEntityInterface } from '@concepta/nestjs-common';
+import { CommonSqliteEntity } from '../common/common-sqlite.entity';
 
 /**
  * Role Sqlite Entity

@@ -8,8 +8,8 @@ import {
   RoleUpdatableInterface,
   ByIdInterface,
   ReferenceId,
+  RoleEntityInterface,
 } from '@concepta/nestjs-common';
-import { RoleEntityInterface } from './role-entity.interface';
 
 export interface RoleModelServiceInterface
   extends ByIdInterface<ReferenceId, ReferenceIdInterface>,

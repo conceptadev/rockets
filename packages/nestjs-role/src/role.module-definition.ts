@@ -11,6 +11,7 @@ import {
   RoleAssignmentInterface,
   createSettingsProvider,
   getDynamicRepositoryToken,
+  RoleEntityInterface,
 } from '@concepta/nestjs-common';
 
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
@@ -25,7 +26,6 @@ import {
 import { RoleOptionsInterface } from './interfaces/role-options.interface';
 import { RoleOptionsExtrasInterface } from './interfaces/role-options-extras.interface';
 import { RoleEntitiesOptionsInterface } from './interfaces/role-entities-options.interface';
-import { RoleEntityInterface } from './interfaces/role-entity.interface';
 import { RoleSettingsInterface } from './interfaces/role-settings.interface';
 
 import { RoleService } from './services/role.service';

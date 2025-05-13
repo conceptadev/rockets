@@ -30,7 +30,7 @@ import { RoleCreateDto } from './dto/role-create.dto';
 import { RoleCreateManyDto } from './dto/role-create-many.dto';
 import { RoleUpdateDto } from './dto/role-update.dto';
 import { RolePaginatedDto } from './dto/role-paginated.dto';
-import { RoleEntityInterface } from './interfaces/role-entity.interface';
+import { RoleEntityInterface } from '@concepta/nestjs-common';
 import { RoleResource } from './role.types';
 
 /**
