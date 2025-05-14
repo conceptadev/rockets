@@ -24,7 +24,7 @@ import {
   RoleCreatableInterface,
   RoleUpdatableInterface,
 } from '@concepta/nestjs-common';
-import { RoleCrudService } from '../../services/role-crud.service';
+import { RoleCrudServiceFixture } from '../service/role-crud.service.fixture';
 import { RoleDto } from '../../dto/role.dto';
 import { RoleCreateDto } from '../../dto/role-create.dto';
 import { RoleCreateManyDto } from '../../dto/role-create-many.dto';
@@ -57,7 +57,7 @@ export class RoleControllerFixture
    *
    * @param roleCrudService - instance of the Role crud service
    */
-  constructor(private roleCrudService: RoleCrudService) {}
+  constructor(private roleCrudService: RoleCrudServiceFixture) {}
 
   /**
    * Get many

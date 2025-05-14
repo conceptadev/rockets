@@ -2,8 +2,6 @@ export { RoleModule } from './role.module';
 
 export { RoleService } from './services/role.service';
 export { RoleModelService } from './services/role-model.service';
-export { RoleCrudService } from './services/role-crud.service';
-export { RoleControllerFixture as RoleController } from './__fixtures__/controller/role.controller.fixture';
 
 export { RoleAssignmentEntityInterface } from '@concepta/nestjs-common';
 export { RoleEntityInterface } from '@concepta/nestjs-common';

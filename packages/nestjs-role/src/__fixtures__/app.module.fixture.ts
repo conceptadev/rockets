@@ -38,9 +38,7 @@ import { UserRoleEntityFixture } from './entities/user-role-entity.fixture';
           },
         }),
       ],
-      entities: {
-        roleAssignments: ['userRole', 'apiKeyRole'],
-      },
+      entities: ['userRole', 'apiKeyRole'],
       useFactory: () => ({
         settings: {
           assignments: {

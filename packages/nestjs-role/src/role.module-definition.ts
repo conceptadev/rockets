@@ -1,4 +1,3 @@
-import { Repository } from 'typeorm';
 import {
   ConfigurableModuleBuilder,
   DynamicModule,
@@ -15,7 +14,6 @@ import {
 } from '@concepta/nestjs-common';
 
 import {
-  ROLE_MODULE_CRUD_SERVICES_TOKEN,
   ROLE_MODULE_REPOSITORIES_TOKEN,
   ROLE_MODULE_ROLE_ENTITY_KEY,
   ROLE_MODULE_SETTINGS_TOKEN,
@@ -23,15 +21,11 @@ import {
 
 import { RoleOptionsInterface } from './interfaces/role-options.interface';
 import { RoleOptionsExtrasInterface } from './interfaces/role-options-extras.interface';
-import { RoleEntitiesOptionsInterface } from './interfaces/role-entities-options.interface';
 import { RoleSettingsInterface } from './interfaces/role-settings.interface';
 
 import { RoleService } from './services/role.service';
 import { RoleModelService } from './services/role-model.service';
-import { RoleCrudService } from './services/role-crud.service';
-import { RoleControllerFixture } from './__fixtures__/controller/role.controller.fixture';
-import { RoleAssignmentControllerFixture } from './__fixtures__/controller/role-assignment.controller.fixture';
-import { RoleAssignmentCrudService } from './services/role-assignment-crud.service';
+
 import { roleDefaultConfig } from './config/role-default.config';
 import { RoleMissingEntitiesOptionsException } from './exceptions/role-missing-entities-options.exception';
 
@@ -73,7 +67,8 @@ function definitionTransform(
 }
 
 export function createRoleImports(
-  options: Pick<DynamicModule, 'imports'> & RoleEntitiesOptionsInterface,
+  options: Pick<DynamicModule, 'imports'> &
+    Pick<RoleOptionsExtrasInterface, 'entities'>,
 ): DynamicModule['imports'] {
   return [
     ...(options.imports ?? []),
@@ -82,10 +77,10 @@ export function createRoleImports(
 }
 
 export function createRoleProviders(
-  options: RoleEntitiesOptionsInterface & {
+  options: {
     overrides?: RoleOptions;
     providers?: Provider[];
-  },
+  } & Pick<RoleOptionsExtrasInterface, 'entities'>,
 ): Provider[] {
   return [
     ...(options.providers ?? []),
@@ -95,7 +90,6 @@ export function createRoleProviders(
       entities: options.overrides?.entities ?? options.entities,
     }),
     RoleService,
-    RoleCrudService,
   ];
 }
 
@@ -107,16 +101,13 @@ export function createRoleExports(): Required<
     ROLE_MODULE_REPOSITORIES_TOKEN,
     RoleService,
     RoleModelService,
-    RoleCrudService,
   ];
 }
 
 export function createRoleControllers(
   overrides: Pick<RoleOptions, 'controllers'> = {},
 ): DynamicModule['controllers'] {
-  return overrides?.controllers !== undefined
-    ? overrides.controllers
-    : [RoleControllerFixture, RoleAssignmentControllerFixture];
+  return overrides?.controllers !== undefined ? overrides.controllers : [];
 }
 
 export function createRoleSettingsProvider(
@@ -150,7 +141,7 @@ export function createRoleModelServiceProvider(
 }
 
 export function createRoleRepositoriesProviders(
-  options: RoleEntitiesOptionsInterface,
+  options: Pick<RoleOptionsExtrasInterface, 'entities'>,
 ): Provider[] {
   const { entities } = options;
 
@@ -166,8 +157,8 @@ export function createRoleRepositoriesProviders(
   keyTracker[ROLE_MODULE_ROLE_ENTITY_KEY] = repoIdx++;
 
   // now get all role assignments
-  if (entities.roleAssignments) {
-    for (const entityKey of entities.roleAssignments) {
+  if (entities) {
+    for (const entityKey of entities) {
       reposToInject[repoIdx] = getDynamicRepositoryToken(entityKey);
       keyTracker[entityKey] = repoIdx++;
     }
@@ -191,36 +182,13 @@ export function createRoleRepositoriesProviders(
           args[keyTracker[ROLE_MODULE_ROLE_ENTITY_KEY]];
 
         // Add all assignment repositories
-        if (entities.roleAssignments) {
-          for (const entityKey of entities.roleAssignments) {
+        if (entities) {
+          for (const entityKey of entities) {
             repoInstances[entityKey] = args[keyTracker[entityKey]];
           }
         }
 
         return repoInstances;
-      },
-      inject: reposToInject,
-    },
-    {
-      // TODO: TYPEORM CRUD NEEDS TYPEORM
-      provide: ROLE_MODULE_CRUD_SERVICES_TOKEN,
-      useFactory: (...args: Repository<RoleAssignmentInterface>[]) => {
-        const serviceInstances: Record<string, RoleAssignmentCrudService> = {};
-
-        serviceInstances[ROLE_MODULE_ROLE_ENTITY_KEY] =
-          new RoleAssignmentCrudService(
-            args[keyTracker[ROLE_MODULE_ROLE_ENTITY_KEY]],
-          );
-
-        if (entities.roleAssignments) {
-          for (const entityKey of entities.roleAssignments) {
-            serviceInstances[entityKey] = new RoleAssignmentCrudService(
-              args[keyTracker[entityKey]],
-            );
-          }
-        }
-
-        return serviceInstances;
       },
       inject: reposToInject,
     },

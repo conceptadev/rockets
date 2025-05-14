@@ -69,9 +69,7 @@ describe('RoleModule', () => {
               },
             }),
           ],
-          entities: {
-            roleAssignments: ['userRole'],
-          },
+          entities: ['userRole'],
           useFactory: () => ({
             settings: {
               assignments: {

@@ -7,7 +7,7 @@ import { RoleFactory } from '../role.factory';
 import { RoleSeeder } from '../role.seeder';
 
 import { RoleEntityFixture } from '../__fixtures__/entities/role-entity.fixture';
-import { AppModuleE2EFixture } from '../__fixtures__/app.module-e2e.fixture';
+import { AppModuleCrudFixture } from '../__fixtures__/app.module.crud.fixture';
 
 describe('RoleController (e2e)', () => {
   describe('Rest', () => {
@@ -16,7 +16,7 @@ describe('RoleController (e2e)', () => {
 
     beforeEach(async () => {
       const moduleFixture: TestingModule = await Test.createTestingModule({
-        imports: [AppModuleE2EFixture],
+        imports: [AppModuleCrudFixture],
       }).compile();
       app = moduleFixture.createNestApplication();
       await app.init();
