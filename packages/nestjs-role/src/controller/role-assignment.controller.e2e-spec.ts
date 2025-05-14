@@ -10,15 +10,16 @@ import {
   getDynamicRepositoryToken,
 } from '@concepta/nestjs-common';
 
-import { ROLE_MODULE_ROLE_ENTITY_KEY } from './role.constants';
+import { ROLE_MODULE_ROLE_ENTITY_KEY } from '../role.constants';
 
-import { RoleFactory } from './role.factory';
-import { RoleSeeder } from './role.seeder';
+import { RoleFactory } from '../role.factory';
+import { RoleSeeder } from '../role.seeder';
 
-import { AppModuleFixture } from './__fixtures__/app.module.fixture';
-import { RoleEntityFixture } from './__fixtures__/entities/role-entity.fixture';
-import { UserFactoryFixture } from './__fixtures__/factories/user.factory.fixture';
-import { UserRoleFactoryFixture } from './__fixtures__/factories/user-role.factory.fixture';
+import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
+import { RoleEntityFixture } from '../__fixtures__/entities/role-entity.fixture';
+import { UserFactoryFixture } from '../__fixtures__/factories/user.factory.fixture';
+import { UserRoleFactoryFixture } from '../__fixtures__/factories/user-role.factory.fixture';
+import { AppModuleE2EFixture } from '../__fixtures__/app.module-e2e.fixture';
 
 describe('RoleAssignmentController (e2e)', () => {
   let app: INestApplication;
@@ -29,7 +30,7 @@ describe('RoleAssignmentController (e2e)', () => {
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModuleFixture],
+      imports: [AppModuleE2EFixture],
     }).compile();
     app = moduleFixture.createNestApplication();
     await app.init();

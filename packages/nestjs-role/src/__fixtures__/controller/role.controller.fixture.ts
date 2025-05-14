@@ -24,14 +24,14 @@ import {
   RoleCreatableInterface,
   RoleUpdatableInterface,
 } from '@concepta/nestjs-common';
-import { RoleCrudService } from './services/role-crud.service';
-import { RoleDto } from './dto/role.dto';
-import { RoleCreateDto } from './dto/role-create.dto';
-import { RoleCreateManyDto } from './dto/role-create-many.dto';
-import { RoleUpdateDto } from './dto/role-update.dto';
-import { RolePaginatedDto } from './dto/role-paginated.dto';
+import { RoleCrudService } from '../../services/role-crud.service';
+import { RoleDto } from '../../dto/role.dto';
+import { RoleCreateDto } from '../../dto/role-create.dto';
+import { RoleCreateManyDto } from '../../dto/role-create-many.dto';
+import { RoleUpdateDto } from '../../dto/role-update.dto';
+import { RolePaginatedDto } from '../../dto/role-paginated.dto';
 import { RoleEntityInterface } from '@concepta/nestjs-common';
-import { RoleResource } from './role.types';
+import { RoleResource } from '../../role.types';
 
 /**
  * Role controller.
@@ -44,7 +44,7 @@ import { RoleResource } from './role.types';
     paginatedType: RolePaginatedDto,
   },
 })
-export class RoleController
+export class RoleControllerFixture
   implements
     CrudControllerInterface<
       RoleEntityInterface,

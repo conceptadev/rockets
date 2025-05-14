@@ -1,3 +1,4 @@
+
 import { Inject, Param } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ReferenceAssignment } from '@concepta/nestjs-common';
@@ -20,15 +21,15 @@ import {
 import {
   ROLE_MODULE_CRUD_SERVICES_TOKEN,
   ROLE_MODULE_SETTINGS_TOKEN,
-} from './role.constants';
-import { RoleEntityNotFoundException } from './exceptions/role-entity-not-found.exception';
-import { RoleAssignmentNotFoundException } from './exceptions/role-assignment-not-found.exception';
-import { RoleAssignmentCrudService } from './services/role-assignment-crud.service';
-import { RoleAssignmentDto } from './dto/role-assignment.dto';
-import { RoleAssignmentCreateDto } from './dto/role-assignment-create.dto';
-import { RoleAssignmentPaginatedDto } from './dto/role-assignment-paginated.dto';
-import { RoleAssignmentCreateManyDto } from './dto/role-assignment-create-many.dto';
-import { RoleSettingsInterface } from './interfaces/role-settings.interface';
+} from '../../role.constants';
+import { RoleEntityNotFoundException } from '../../exceptions/role-entity-not-found.exception';
+import { RoleAssignmentNotFoundException } from '../../exceptions/role-assignment-not-found.exception';
+import { RoleAssignmentCrudService } from '../../services/role-assignment-crud.service';
+import { RoleAssignmentDto } from '../../dto/role-assignment.dto';
+import { RoleAssignmentCreateDto } from '../../dto/role-assignment-create.dto';
+import { RoleAssignmentPaginatedDto } from '../../dto/role-assignment-paginated.dto';
+import { RoleAssignmentCreateManyDto } from '../../dto/role-assignment-create-many.dto';
+import { RoleSettingsInterface } from '../../interfaces/role-settings.interface';
 import {
   AccessControlCreateMany,
   AccessControlCreateOne,
@@ -36,7 +37,7 @@ import {
   AccessControlReadMany,
   AccessControlReadOne,
 } from '@concepta/nestjs-access-control';
-import { RoleAssignmentResource } from './role.types';
+import { RoleAssignmentResource } from '../../role.types';
 
 /**
  * Role assignment controller.
@@ -56,7 +57,7 @@ import { RoleAssignmentResource } from './role.types';
     },
   },
 })
-export class RoleAssignmentController
+export class RoleAssignmentControllerFixture
   implements
     CrudControllerInterface<
       RoleAssignmentInterface,
@@ -72,8 +73,6 @@ export class RoleAssignmentController
    * @param allCrudServices - instances of all crud services
    */
   constructor(
-    @Inject(ROLE_MODULE_SETTINGS_TOKEN)
-    private settings: RoleSettingsInterface,
     @Inject(ROLE_MODULE_CRUD_SERVICES_TOKEN)
     private allCrudServices: Record<string, RoleAssignmentCrudService>,
   ) {}
@@ -182,10 +181,15 @@ export class RoleAssignmentController
   protected getCrudService(
     assignment: ReferenceAssignment,
   ): RoleAssignmentCrudService {
+    // get the entity key for this assignment
+    const assignments: Record<string, { entityKey: string }> = {
+      user: { entityKey: 'userRole' },
+      'api-key': { entityKey: 'apiKeyRole' },
+    };
     // have entity key for given assignment?
-    if (this.settings.assignments[assignment]) {
-      // yes, set it
-      const entityKey = this.settings.assignments[assignment].entityKey;
+    if (assignment in assignments) {
+      // get the entity key for this assignment
+      const entityKey = assignments[assignment as keyof typeof assignments].entityKey;
       // repo matching assignment was injected?
       if (this.allCrudServices[entityKey]) {
         // yes, return it

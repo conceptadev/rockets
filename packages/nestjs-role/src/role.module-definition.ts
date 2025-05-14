@@ -29,8 +29,8 @@ import { RoleSettingsInterface } from './interfaces/role-settings.interface';
 import { RoleService } from './services/role.service';
 import { RoleModelService } from './services/role-model.service';
 import { RoleCrudService } from './services/role-crud.service';
-import { RoleController } from './role.controller';
-import { RoleAssignmentController } from './role-assignment.controller';
+import { RoleControllerFixture } from './__fixtures__/controller/role.controller.fixture';
+import { RoleAssignmentControllerFixture } from './__fixtures__/controller/role-assignment.controller.fixture';
 import { RoleAssignmentCrudService } from './services/role-assignment-crud.service';
 import { roleDefaultConfig } from './config/role-default.config';
 import { RoleMissingEntitiesOptionsException } from './exceptions/role-missing-entities-options.exception';
@@ -116,7 +116,7 @@ export function createRoleControllers(
 ): DynamicModule['controllers'] {
   return overrides?.controllers !== undefined
     ? overrides.controllers
-    : [RoleController, RoleAssignmentController];
+    : [RoleControllerFixture, RoleAssignmentControllerFixture];
 }
 
 export function createRoleSettingsProvider(
