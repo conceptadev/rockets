@@ -52,28 +52,23 @@ function definitionTransform(
   extras: ReportOptionsExtrasInterface,
 ): DynamicModule {
   const { providers = [], imports = [] } = definition;
-  const { global = false, entities } = extras;
-
-  if (!entities) {
-    throw new ReportMissingEntitiesOptionsException();
-  }
+  const { global = false } = extras;
 
   return {
     ...definition,
     global,
-    imports: createReportImports({ imports, entities }),
+    imports: createReportImports({ imports }),
     providers: createReportProviders({ providers }),
     exports: [ConfigModule, RAW_OPTIONS_TOKEN, ...createReportExports()],
   };
 }
 
 export function createReportImports(
-  options: Pick<DynamicModule, 'imports'> & ReportEntitiesOptionsInterface,
+  options: Pick<DynamicModule, 'imports'>,
 ): DynamicModule['imports'] {
   return [
     ...(options.imports ?? []),
     ConfigModule.forFeature(reportDefaultConfig),
-    TypeOrmExtModule.forFeature(options.entities),
   ];
 }
 

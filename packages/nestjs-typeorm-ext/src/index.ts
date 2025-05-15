@@ -33,3 +33,6 @@ export { RoleSqliteEntity } from './entities/role/role-sqlite.entity';
 // role assignment entities
 export { RoleAssignmentPostgresEntity } from './entities/role/role-assignment-postgres.entity';
 export { RoleAssignmentSqliteEntity } from './entities/role/role-assignment-sqlite.entity';
+// report entities
+export { ReportPostgresEntity } from './entities/report/report-postgres.entity';
+export { ReportSqliteEntity } from './entities/report/report-sqlite.entity';
