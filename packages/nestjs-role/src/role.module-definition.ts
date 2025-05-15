@@ -1,3 +1,4 @@
+import { Repository } from 'typeorm';
 import {
   ConfigurableModuleBuilder,
   DynamicModule,
@@ -21,6 +22,7 @@ import {
 
 import { RoleOptionsInterface } from './interfaces/role-options.interface';
 import { RoleOptionsExtrasInterface } from './interfaces/role-options-extras.interface';
+import { RoleEntitiesOptionsInterface } from './interfaces/role-entities-options.interface';
 import { RoleSettingsInterface } from './interfaces/role-settings.interface';
 
 import { RoleService } from './services/role.service';
@@ -50,7 +52,7 @@ function definitionTransform(
   extras: RoleOptionsExtrasInterface,
 ): DynamicModule {
   const { providers = [], imports = [] } = definition;
-  const { controllers, global = false, entities } = extras;
+  const { global = false, entities } = extras;
 
   if (!entities) {
     throw new RoleMissingEntitiesOptionsException();
@@ -62,7 +64,6 @@ function definitionTransform(
     imports: createRoleImports({ imports, entities }),
     providers: createRoleProviders({ entities, providers }),
     exports: [ConfigModule, RAW_OPTIONS_TOKEN, ...createRoleExports()],
-    controllers: createRoleControllers({ controllers }),
   };
 }
 
@@ -102,12 +103,6 @@ export function createRoleExports(): Required<
     RoleService,
     RoleModelService,
   ];
-}
-
-export function createRoleControllers(
-  overrides: Pick<RoleOptions, 'controllers'> = {},
-): DynamicModule['controllers'] {
-  return overrides?.controllers !== undefined ? overrides.controllers : [];
 }
 
 export function createRoleSettingsProvider(

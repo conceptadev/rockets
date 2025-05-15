@@ -3,8 +3,6 @@ export { RoleModule } from './role.module';
 export { RoleService } from './services/role.service';
 export { RoleModelService } from './services/role-model.service';
 
-export { RoleAssignmentEntityInterface } from '@concepta/nestjs-common';
-export { RoleEntityInterface } from '@concepta/nestjs-common';
 export { RoleModelServiceInterface } from './interfaces/role-model-service.interface';
 
 export { RoleAssignmentCreateManyDto } from './dto/role-assignment-create-many.dto';

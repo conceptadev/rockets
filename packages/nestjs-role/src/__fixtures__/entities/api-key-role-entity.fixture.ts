@@ -1,4 +1,4 @@
-import { RoleAssignmentSqliteEntity } from '@concepta/nestjs-typeorm-ext/src/entities/role/role-assignment-sqlite.entity';
+import { RoleAssignmentSqliteEntity } from '@concepta/nestjs-typeorm-ext';
 import { Entity } from 'typeorm';
 
 /**
