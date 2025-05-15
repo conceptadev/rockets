@@ -5,8 +5,8 @@ import {
   RoleCreatableInterface,
   RoleUpdatableInterface,
   InjectDynamicRepository,
+  RoleEntityInterface,
 } from '@concepta/nestjs-common';
-import { RoleEntityInterface } from '../interfaces/role-entity.interface';
 import { RoleModelServiceInterface } from '../interfaces/role-model-service.interface';
 import { RoleCreateDto } from '../dto/role-create.dto';
 import { RoleUpdateDto } from '../dto/role-update.dto';

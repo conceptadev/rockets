@@ -1,7 +1,9 @@
 import { Column, Unique } from 'typeorm';
-import { ReferenceId } from '@concepta/nestjs-common';
-import { CommonSqliteEntity } from '@concepta/nestjs-typeorm-ext';
-import { RoleAssignmentEntityInterface } from '../interfaces/role-assignment-entity.interface';
+import {
+  ReferenceId,
+  RoleAssignmentEntityInterface,
+} from '@concepta/nestjs-common';
+import { CommonSqliteEntity } from '../common/common-sqlite.entity';
 
 /**
  * Role Assignment Sqlite Entity

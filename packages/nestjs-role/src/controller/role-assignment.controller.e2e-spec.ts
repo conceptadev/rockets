@@ -2,23 +2,20 @@ import assert from 'assert';
 import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { getDataSourceToken } from '@nestjs/typeorm';
+import { getDataSourceToken, getRepositoryToken } from '@nestjs/typeorm';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import {
   RepositoryInterface,
   RoleAssignmentCreatableInterface,
-  getDynamicRepositoryToken,
 } from '@concepta/nestjs-common';
 
-import { ROLE_MODULE_ROLE_ENTITY_KEY } from './role.constants';
+import { RoleFactory } from '../role.factory';
+import { RoleSeeder } from '../role.seeder';
 
-import { RoleFactory } from './role.factory';
-import { RoleSeeder } from './role.seeder';
-
-import { AppModuleFixture } from './__fixtures__/app.module.fixture';
-import { RoleEntityFixture } from './__fixtures__/entities/role-entity.fixture';
-import { UserFactoryFixture } from './__fixtures__/factories/user.factory.fixture';
-import { UserRoleFactoryFixture } from './__fixtures__/factories/user-role.factory.fixture';
+import { RoleEntityFixture } from '../__fixtures__/entities/role-entity.fixture';
+import { UserFactoryFixture } from '../__fixtures__/factories/user.factory.fixture';
+import { UserRoleFactoryFixture } from '../__fixtures__/factories/user-role.factory.fixture';
+import { AppModuleCrudFixture } from '../__fixtures__/app.module.crud.fixture';
 
 describe('RoleAssignmentController (e2e)', () => {
   let app: INestApplication;
@@ -29,7 +26,7 @@ describe('RoleAssignmentController (e2e)', () => {
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModuleFixture],
+      imports: [AppModuleCrudFixture],
     }).compile();
     app = moduleFixture.createNestApplication();
     await app.init();
@@ -49,7 +46,7 @@ describe('RoleAssignmentController (e2e)', () => {
 
     await seedingSource.run.one(roleSeeder);
 
-    roleRepo = app.get(getDynamicRepositoryToken(ROLE_MODULE_ROLE_ENTITY_KEY));
+    roleRepo = app.get(getRepositoryToken(RoleEntityFixture));
   });
 
   afterEach(async () => {

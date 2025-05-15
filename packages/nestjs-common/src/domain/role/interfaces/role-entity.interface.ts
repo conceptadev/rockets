@@ -1,3 +1,3 @@
-import { RoleInterface } from '@concepta/nestjs-common';
+import { RoleInterface } from './role.interface';
 
 export interface RoleEntityInterface extends RoleInterface {}

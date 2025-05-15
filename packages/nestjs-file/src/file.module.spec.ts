@@ -1,11 +1,13 @@
-import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { DynamicModule, ModuleMetadata } from '@nestjs/common';
 import {
   RepositoryInterface,
   getDynamicRepositoryToken,
 } from '@concepta/nestjs-common';
-import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
+import {
+  TypeOrmExtModule,
+  TypeOrmRepositoryAdapter,
+} from '@concepta/nestjs-typeorm-ext';
 
 import { FileService } from './services/file.service';
 
@@ -145,7 +147,7 @@ describe(FileModule, () => {
   const commonTests = async () => {
     expect(fileModule).toBeInstanceOf(FileModule);
     expect(fileService).toBeInstanceOf(FileService);
-    expect(fileDynamicRepo).toBeInstanceOf(Repository);
+    expect(fileDynamicRepo).toBeInstanceOf(TypeOrmRepositoryAdapter);
 
     const result = await fileService.push({
       fileName: FILE_NAME_FIXTURE,

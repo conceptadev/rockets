@@ -3,11 +3,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { SeedingSource } from '@concepta/typeorm-seeding';
-import { RoleFactory } from './role.factory';
-import { RoleSeeder } from './role.seeder';
+import { RoleFactory } from '../role.factory';
+import { RoleSeeder } from '../role.seeder';
 
-import { AppModuleFixture } from './__fixtures__/app.module.fixture';
-import { RoleEntityFixture } from './__fixtures__/entities/role-entity.fixture';
+import { RoleEntityFixture } from '../__fixtures__/entities/role-entity.fixture';
+import { AppModuleCrudFixture } from '../__fixtures__/app.module.crud.fixture';
 
 describe('RoleController (e2e)', () => {
   describe('Rest', () => {
@@ -16,7 +16,7 @@ describe('RoleController (e2e)', () => {
 
     beforeEach(async () => {
       const moduleFixture: TestingModule = await Test.createTestingModule({
-        imports: [AppModuleFixture],
+        imports: [AppModuleCrudFixture],
       }).compile();
       app = moduleFixture.createNestApplication();
       await app.init();

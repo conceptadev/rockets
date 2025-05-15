@@ -1,11 +1,13 @@
-import { Repository } from 'typeorm';
 import { DynamicModule, ModuleMetadata } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   RepositoryInterface,
   getDynamicRepositoryToken,
 } from '@concepta/nestjs-common';
-import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
+import {
+  TypeOrmExtModule,
+  TypeOrmRepositoryAdapter,
+} from '@concepta/nestjs-typeorm-ext';
 
 import { FederatedModule } from './federated.module';
 import { FederatedService } from './services/federated.service';
@@ -143,7 +145,7 @@ describe(FederatedModule, () => {
     expect(federatedModelService).toBeInstanceOf(FederatedModelService);
     expect(federatedOauthService).toBeInstanceOf(FederatedOAuthService);
     expect(userModelService).toBeInstanceOf(UserModelServiceFixture);
-    expect(federatedDynamicRepo).toBeInstanceOf(Repository);
+    expect(federatedDynamicRepo).toBeInstanceOf(TypeOrmRepositoryAdapter);
   }
 });
 

@@ -25,6 +25,7 @@ import { UserEntity } from './user/user.entity';
           },
         }),
       ],
+      useFactory: () => ({}),
     }),
   ],
 })
