@@ -7,7 +7,7 @@ import {
   CreateOneInterface,
   ReferenceIdInterface,
   UpdateOneInterface,
-  ReportEntityInterface
+  ReportEntityInterface,
 } from '@concepta/nestjs-common';
 
 export interface ReportModelServiceInterface

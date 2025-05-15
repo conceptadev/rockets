@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { createSettingsProvider } from '@concepta/nestjs-common';
 
 import {
@@ -14,7 +13,6 @@ import {
 } from './report.constants';
 
 import { ReportOptionsInterface } from './interfaces/report-options.interface';
-import { ReportEntitiesOptionsInterface } from './interfaces/report-entities-options.interface';
 import { ReportOptionsExtrasInterface } from './interfaces/report-options-extras.interface';
 import { ReportSettingsInterface } from './interfaces/report-settings.interface';
 import { ReportService } from './services/report.service';
@@ -22,7 +20,6 @@ import { ReportStrategyService } from './services/report-strategy.service';
 
 import { reportDefaultConfig } from './config/report-default.config';
 import { ReportModelService } from './services/report-model.service';
-import { ReportMissingEntitiesOptionsException } from './exceptions/report-missing-entities-options.exception';
 
 const RAW_OPTIONS_TOKEN = Symbol('__REPORT_MODULE_RAW_OPTIONS_TOKEN__');
 

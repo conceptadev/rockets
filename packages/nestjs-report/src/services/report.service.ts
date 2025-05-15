@@ -3,7 +3,7 @@ import {
   ReportInterface,
   ReportStatusEnum,
   ReportEntityInterface,
-  mapNonErrorToException
+  mapNonErrorToException,
 } from '@concepta/nestjs-common';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 
