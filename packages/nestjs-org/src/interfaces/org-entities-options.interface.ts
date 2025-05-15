@@ -5,9 +5,9 @@ import {
   ORG_MODULE_ORG_ENTITY_KEY,
   ORG_MODULE_ORG_PROFILE_ENTITY_KEY,
 } from '../org.constants';
-import { OrgEntityInterface } from './org-entity.interface';
-import { OrgMemberEntityInterface } from './org-member-entity.interface';
-import { OrgProfileEntityInterface } from './org-profile-entity.interface';
+import { OrgEntityInterface } from '@concepta/nestjs-common';
+import { OrgMemberEntityInterface } from '@concepta/nestjs-common';
+import { OrgProfileEntityInterface } from '@concepta/nestjs-common';
 
 export interface OrgEntitiesOptionsInterface {
   entities: {

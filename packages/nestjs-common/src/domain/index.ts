@@ -24,9 +24,12 @@ export { OrgOwnerInterface } from './org/interfaces/org-owner.interface';
 export { OrgUpdatableInterface } from './org/interfaces/org-updatable.interface';
 export { OrgReplaceableInterface } from './org/interfaces/org-replaceable.interface';
 export { OrgInterface } from './org/interfaces/org.interface';
+export { OrgEntityInterface } from './org/interfaces/org-entity.interface';
+export { OrgMemberEntityInterface } from './org/interfaces/org-member-entity.interface';
 
 export { OrgProfileInterface } from './org-profile/interfaces/org-profile.interface';
 export { OrgProfileCreatableInterface } from './org-profile/interfaces/org-profile-creatable.interface';
+export { OrgProfileEntityInterface } from './org-profile/interfaces/org-profile-entity.interface';
 
 // User interfaces
 export { UserCreatableInterface } from './user/interfaces/user-creatable.interface';

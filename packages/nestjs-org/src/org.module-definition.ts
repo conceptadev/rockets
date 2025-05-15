@@ -19,7 +19,7 @@ import { OrgOptionsInterface } from './interfaces/org-options.interface';
 import { OrgOptionsExtrasInterface } from './interfaces/org-options-extras.interface';
 import { OrgEntitiesOptionsInterface } from './interfaces/org-entities-options.interface';
 import { OrgSettingsInterface } from './interfaces/org-settings.interface';
-import { OrgEntityInterface } from './interfaces/org-entity.interface';
+import { OrgEntityInterface } from '@concepta/nestjs-common';
 import { OrgModelService } from './services/org-model.service';
 import { OrgCrudService } from './services/org-crud.service';
 import { OrgMemberService } from './services/org-member.service';

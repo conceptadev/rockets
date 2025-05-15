@@ -15,7 +15,6 @@ export { OrgController } from './org.controller';
 export { OrgMemberService } from './services/org-member.service';
 export { OrgMemberModelService } from './services/org-member-model.service';
 
-export { OrgEntityInterface } from './interfaces/org-entity.interface';
 export { OrgModelServiceInterface } from './interfaces/org-model-service.interface';
 
 export { OrgCreateManyDto } from './dto/org-create-many.dto';

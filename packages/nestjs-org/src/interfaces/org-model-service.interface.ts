@@ -9,7 +9,7 @@ import {
   ReferenceId,
   OrgReplaceableInterface,
 } from '@concepta/nestjs-common';
-import { OrgEntityInterface } from './org-entity.interface';
+import { OrgEntityInterface } from '@concepta/nestjs-common';
 
 export interface OrgModelServiceInterface
   extends ByIdInterface<ReferenceId, OrgEntityInterface>,
