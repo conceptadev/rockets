@@ -14,7 +14,7 @@ import { ReportService } from './services/report.service';
 
 import { REPORT_MODULE_REPORT_ENTITY_KEY } from './report.constants';
 
-import { ReportEntityInterface } from './interfaces/report-entity.interface';
+import { ReportEntityInterface } from '@concepta/nestjs-common/src/domain/report/interfaces/report-entity.interface';
 
 import { AwsStorageService } from './__fixtures__/aws-storage.service';
 import {
@@ -43,6 +43,13 @@ describe(ReportModule, () => {
       testModule = await Test.createTestingModule(
         testModuleFactory([
           ReportModule.forRootAsync({
+            imports: [
+              TypeOrmExtModule.forFeature({
+                report: {
+                  entity: ReportEntityFixture,
+                },
+              }),
+            ],
             inject: [
               MyReportGeneratorService,
               MyReportGeneratorShortDelayService,
@@ -56,11 +63,6 @@ describe(ReportModule, () => {
                 myGeneratorWithDelay,
               ],
             }),
-            entities: {
-              report: {
-                entity: ReportEntityFixture,
-              },
-            },
           }),
         ]),
       ).compile();
@@ -150,15 +152,17 @@ describe(ReportModule, () => {
       testModule = await Test.createTestingModule(
         testModuleFactory([
           ReportModule.registerAsync({
+            imports: [
+              TypeOrmExtModule.forFeature({
+                report: {
+                  entity: ReportEntityFixture,
+                },
+              }),
+            ],
             inject: [MyReportGeneratorService],
             useFactory: (awsStorageService: MyReportGeneratorService) => ({
               reportGeneratorServices: [awsStorageService],
             }),
-            entities: {
-              report: {
-                entity: ReportEntityFixture,
-              },
-            },
           }),
         ]),
       ).compile();

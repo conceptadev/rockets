@@ -4,13 +4,11 @@ import {
   ReportCreatableInterface,
   ReportInterface,
   ReportUpdatableInterface,
-} from '@concepta/nestjs-common';
-import {
   CreateOneInterface,
   ReferenceIdInterface,
   UpdateOneInterface,
+  ReportEntityInterface,
 } from '@concepta/nestjs-common';
-import { ReportEntityInterface } from './report-entity.interface';
 
 export interface ReportModelServiceInterface
   extends ByIdInterface<ReferenceId, ReportEntityInterface>,

@@ -1,25 +1,28 @@
 import { Column, Entity, Unique } from 'typeorm';
-import { ReferenceId, ReportStatusEnum } from '@concepta/nestjs-common';
-import { CommonSqliteEntity } from '@concepta/nestjs-typeorm-ext';
-import { ReportEntityInterface } from '../interfaces/report-entity.interface';
+import {
+  ReferenceId,
+  ReportStatusEnum,
+  ReportEntityInterface,
+} from '@concepta/nestjs-common';
+import { CommonPostgresEntity } from '../common/common-postgres.entity';
 
 /**
- * Report Sqlite Entity
+ * Report Postgres Entity
  */
 @Entity()
-@Unique(['name', 'serviceKey'])
-export class ReportSqliteEntity
-  extends CommonSqliteEntity
+@Unique(['serviceKey', 'name'])
+export class ReportPostgresEntity
+  extends CommonPostgresEntity
   implements ReportEntityInterface
 {
   @Column()
   serviceKey!: string;
 
-  @Column({ collation: 'NOCASE' })
+  @Column({ type: 'citext' })
   name!: string;
 
   @Column({
-    type: 'text',
+    type: 'enum',
     enum: ReportStatusEnum,
   })
   status!: ReportStatusEnum;
