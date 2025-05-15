@@ -1,4 +1,3 @@
-import { Repository } from 'typeorm';
 import {
   ConfigurableModuleBuilder,
   DynamicModule,
@@ -22,7 +21,6 @@ import {
 
 import { RoleOptionsInterface } from './interfaces/role-options.interface';
 import { RoleOptionsExtrasInterface } from './interfaces/role-options-extras.interface';
-import { RoleEntitiesOptionsInterface } from './interfaces/role-entities-options.interface';
 import { RoleSettingsInterface } from './interfaces/role-settings.interface';
 
 import { RoleService } from './services/role.service';
