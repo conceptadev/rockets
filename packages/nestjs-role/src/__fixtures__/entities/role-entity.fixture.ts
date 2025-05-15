@@ -1,6 +1,6 @@
 import { Entity } from 'typeorm';
-import { RoleSqliteEntity } from '../../entities/role-sqlite.entity';
-import { RoleEntityInterface } from '../../interfaces/role-entity.interface';
+import { RoleEntityInterface } from '@concepta/nestjs-common';
+import { RoleSqliteEntity } from '@concepta/nestjs-typeorm-ext';
 
 /**
  * Role Entity Fixture

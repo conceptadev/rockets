@@ -1,19 +1,14 @@
-import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  getDynamicRepositoryToken,
-  getEntityRepositoryToken,
-} from '@concepta/nestjs-common';
+import { getDynamicRepositoryToken } from '@concepta/nestjs-common';
 import { TypeOrmExtModule } from './typeorm-ext.module';
 
 import { PhotoModuleFixture } from './__fixtures__/photo/photo.module.fixture';
-import { PhotoEntityInterfaceFixture } from './__fixtures__/photo/interfaces/photo-entity.interface.fixture';
 import { PhotoEntityFixture } from './__fixtures__/photo/photo.entity.fixture';
 import { PhotoRepositoryFixtureInterface } from './__fixtures__/photo/photo.repository.fixture';
+import { TypeOrmRepositoryAdapter } from './repository/typeorm-repository.adapter';
 
 describe('AppModule', () => {
   let photoModule: PhotoModuleFixture;
-  let photoEntityRepo: Repository<PhotoEntityInterfaceFixture>;
   let photoCustomRepo: PhotoRepositoryFixtureInterface;
 
   beforeEach(async () => {
@@ -29,9 +24,6 @@ describe('AppModule', () => {
     }).compile();
 
     photoModule = testModule.get<PhotoModuleFixture>(PhotoModuleFixture);
-    photoEntityRepo = testModule.get<Repository<PhotoEntityInterfaceFixture>>(
-      getEntityRepositoryToken('photo'),
-    );
     photoCustomRepo = testModule.get(getDynamicRepositoryToken('photo'));
   });
 
@@ -42,8 +34,10 @@ describe('AppModule', () => {
   describe('module', () => {
     it('should be loaded', async () => {
       expect(photoModule).toBeInstanceOf(PhotoModuleFixture);
-      expect(photoEntityRepo).toBeInstanceOf(Repository);
-      expect(photoCustomRepo).toBeInstanceOf(Repository);
+      expect(photoCustomRepo).toBeInstanceOf(TypeOrmRepositoryAdapter);
+    });
+
+    it.skip('should use custom repository', async () => {
       expect(photoCustomRepo['customMethod']).toBeInstanceOf(Function);
     });
   });

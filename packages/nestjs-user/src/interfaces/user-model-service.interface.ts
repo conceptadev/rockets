@@ -10,13 +10,11 @@ import {
   RemoveOneInterface,
   ReplaceOneInterface,
   UpdateOneInterface,
-} from '@concepta/nestjs-common';
-import {
   UserCreatableInterface,
   UserUpdatableInterface,
   UserReplaceableInterface,
+  UserEntityInterface,
 } from '@concepta/nestjs-common';
-import { UserEntityInterface } from './user-entity.interface';
 
 export interface UserModelServiceInterface<
   Entity extends UserEntityInterface = UserEntityInterface,

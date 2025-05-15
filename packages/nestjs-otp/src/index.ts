@@ -1,9 +1,6 @@
 export { OtpModule } from './otp.module';
 export { OtpService } from './services/otp.service';
 
-export { OtpPostgresEntity } from './entities/otp-postgres.entity';
-export { OtpSqliteEntity } from './entities/otp-sqlite.entity';
-
 export { OtpCreateDto } from './dto/otp-create.dto';
 
 // interfaces
@@ -19,3 +16,4 @@ export { OtpEntityNotFoundException } from './exceptions/otp-entity-not-found.ex
 export { OtpTypeNotDefinedException } from './exceptions/otp-type-not-defined.exception';
 export { OtpMissingEntitiesOptionsException } from './exceptions/otp-missing-entities-options.exception';
 export { OtpLimitReachedException } from './exceptions/otp-limit-reached.exception';
+export { OtpEntitiesOptionsInterface } from './interfaces/otp-entities-options.interface';

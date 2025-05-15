@@ -11,7 +11,6 @@ import { TypeOrmExtDataSourceToken } from './typeorm-ext.types';
 
 import { TypeOrmExtEntityOptionInterface } from './interfaces/typeorm-ext-entity-options.interface';
 import { resolveDataSourceName } from './utils/resolve-data-source-name';
-import { createEntityRepositoryProvider } from './utils/create-entity-repository-provider';
 import { createDynamicRepositoryProvider } from './utils/create-dynamic-repository-provider';
 
 import {
@@ -60,8 +59,8 @@ export class TypeOrmExtModule extends TypeOrmExtModuleClass {
     return module;
   }
 
-  static forFeature(
-    entityOptions: Record<string, TypeOrmExtEntityOptionInterface>,
+  static forFeature<T extends Record<string, TypeOrmExtEntityOptionInterface>>(
+    entityOptions: T,
   ): DynamicModule {
     const dataSources: Record<string, TypeOrmExtDataSourceToken> = {};
 
@@ -91,7 +90,6 @@ export class TypeOrmExtModule extends TypeOrmExtModuleClass {
       entitiesByDS[dsName].push(entity);
 
       providers.push(
-        createEntityRepositoryProvider(entityKey, entity, dataSource),
         createDynamicRepositoryProvider(
           entityKey,
           entity,

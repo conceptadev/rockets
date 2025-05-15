@@ -18,16 +18,17 @@ import {
   UserProfileCreatableInterface,
 } from '@concepta/nestjs-common';
 import { USER_MODULE_CONFIGURABLE_CRUD_PROFILE_SERVICE_TOKEN } from '../user.constants';
+import { UserProfileSqliteEntity } from '@concepta/nestjs-typeorm-ext';
 import { UserProfileDto } from '../dto/profile/user-profile.dto';
 import { UserProfilePaginatedDto } from '../dto/profile/user-profile-paginated.dto';
 import { UserProfileCreateDto } from '../dto/profile/user-profile-create.dto';
 import { UserProfileUpdateDto } from '../dto/profile/user-profile-update.dto';
-import { UserProfileEntityInterface } from '../interfaces/user-profile-entity.interface';
+import { UserProfileEntityInterface } from '@concepta/nestjs-common';
 import { UserProfileResource } from '../user.types';
 
 const userProfileCrudBuilderDefaultOptions: ConfigurableCrudOptions = {
   service: {
-    entityKey: 'user-profile',
+    entity: UserProfileSqliteEntity,
     injectionToken: USER_MODULE_CONFIGURABLE_CRUD_PROFILE_SERVICE_TOKEN,
   },
   controller: {

@@ -1,5 +1,5 @@
 import { Entity } from 'typeorm';
-import { UserPasswordHistorySqliteEntity } from '../entities/user-password-history-sqlite.entity';
+import { UserPasswordHistorySqliteEntity } from '@concepta/nestjs-typeorm-ext';
 
 @Entity()
 export class UserPasswordHistoryEntityFixture extends UserPasswordHistorySqliteEntity {}

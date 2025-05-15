@@ -1,17 +1,8 @@
 export { RoleModule } from './role.module';
 
-export { RolePostgresEntity } from './entities/role-postgres.entity';
-export { RoleSqliteEntity } from './entities/role-sqlite.entity';
-export { RoleAssignmentPostgresEntity } from './entities/role-assignment-postgres.entity';
-export { RoleAssignmentSqliteEntity } from './entities/role-assignment-sqlite.entity';
-
 export { RoleService } from './services/role.service';
 export { RoleModelService } from './services/role-model.service';
-export { RoleCrudService } from './services/role-crud.service';
-export { RoleController } from './role.controller';
 
-export { RoleAssignmentEntityInterface } from './interfaces/role-assignment-entity.interface';
-export { RoleEntityInterface } from './interfaces/role-entity.interface';
 export { RoleModelServiceInterface } from './interfaces/role-model-service.interface';
 
 export { RoleAssignmentCreateManyDto } from './dto/role-assignment-create-many.dto';

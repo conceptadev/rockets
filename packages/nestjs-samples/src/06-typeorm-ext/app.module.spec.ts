@@ -1,21 +1,16 @@
-import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   RepositoryInterface,
   getDynamicRepositoryToken,
 } from '@concepta/nestjs-common';
-import {
-  UserModule,
-  UserModelService,
-  UserController,
-} from '@concepta/nestjs-user';
+import { UserModule, UserModelService } from '@concepta/nestjs-user';
 import { AppModule } from './app.module';
 import { UserEntity } from './user/user.entity';
+import { TypeOrmRepositoryAdapter } from '@concepta/nestjs-typeorm-ext';
 
 describe('AppModule', () => {
   let userModule: UserModule;
   let userModelService: UserModelService;
-  let userController: UserController;
   let userRepo: RepositoryInterface<UserEntity>;
 
   beforeEach(async () => {
@@ -26,7 +21,6 @@ describe('AppModule', () => {
     userModule = testModule.get<UserModule>(UserModule);
     userRepo = testModule.get(getDynamicRepositoryToken('user'));
     userModelService = testModule.get<UserModelService>(UserModelService);
-    userController = testModule.get<UserController>(UserController);
   });
 
   afterEach(() => {
@@ -36,11 +30,10 @@ describe('AppModule', () => {
   describe('module', () => {
     it('should be loaded', async () => {
       expect(userModule).toBeInstanceOf(UserModule);
-      expect(userRepo).toBeInstanceOf(Repository);
+      expect(userRepo).toBeInstanceOf(TypeOrmRepositoryAdapter);
       expect(userModelService).toBeInstanceOf(UserModelService);
-      expect(userModelService['repo']).toBeInstanceOf(Repository);
+      expect(userModelService['repo']).toBeInstanceOf(TypeOrmRepositoryAdapter);
       expect(userModelService['repo'].find).toBeInstanceOf(Function);
-      expect(userController).toBeInstanceOf(UserController);
     });
   });
 });

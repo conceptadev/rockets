@@ -1,12 +1,13 @@
-import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CrudModule } from '@concepta/nestjs-crud';
 import {
   RepositoryInterface,
   getDynamicRepositoryToken,
-  getEntityRepositoryToken,
 } from '@concepta/nestjs-common';
-import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
+import {
+  TypeOrmExtModule,
+  TypeOrmRepositoryAdapter,
+} from '@concepta/nestjs-typeorm-ext';
 import { OrgModule } from './org.module';
 import { OrgCrudService } from './services/org-crud.service';
 import { OrgController } from './org.controller';
@@ -26,7 +27,6 @@ describe('OrgModule', () => {
   let orgModelService: OrgModelService;
   let orgCrudService: OrgCrudService;
   let orgController: OrgController;
-  let orgEntityRepo: RepositoryInterface<OrgEntityFixture>;
   let orgDynamicRepo: RepositoryInterface<OrgEntityFixture>;
 
   beforeEach(async () => {
@@ -60,9 +60,6 @@ describe('OrgModule', () => {
     }).compile();
 
     orgModule = testModule.get<OrgModule>(OrgModule);
-    orgEntityRepo = testModule.get<RepositoryInterface<OrgEntityFixture>>(
-      getEntityRepositoryToken(ORG_MODULE_ORG_ENTITY_KEY),
-    );
     orgDynamicRepo = testModule.get(
       getDynamicRepositoryToken(ORG_MODULE_ORG_ENTITY_KEY),
     );
@@ -78,11 +75,10 @@ describe('OrgModule', () => {
   describe('module', () => {
     it('should be loaded', async () => {
       expect(orgModule).toBeInstanceOf(OrgModule);
-      expect(orgEntityRepo).toBeInstanceOf(Repository);
-      expect(orgDynamicRepo).toBeInstanceOf(Repository);
+      expect(orgDynamicRepo).toBeInstanceOf(TypeOrmRepositoryAdapter);
       expect(orgCrudService).toBeInstanceOf(OrgCrudService);
       expect(orgModelService).toBeInstanceOf(OrgModelService);
-      expect(orgModelService['repo']).toBeInstanceOf(Repository);
+      expect(orgModelService['repo']).toBeInstanceOf(TypeOrmRepositoryAdapter);
       expect(orgModelService['repo'].find).toBeInstanceOf(Function);
       expect(orgController).toBeInstanceOf(OrgController);
     });

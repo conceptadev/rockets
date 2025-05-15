@@ -1,5 +1,7 @@
-import { ReferenceIdInterface } from '@concepta/nestjs-common';
-import { RoleAssignmentEntityInterface } from './role-assignment-entity.interface';
+import {
+  ReferenceIdInterface,
+  RoleAssignmentEntityInterface,
+} from '@concepta/nestjs-common';
 import { RoleAssignmentContext } from './role-assignment-context';
 import { RoleAssignmentOptionsInterface } from './role-assignment-options.interface';
 import { RolesAssignmentOptionsInterface } from './roles-assignment-options.interface';

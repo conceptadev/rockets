@@ -1,9 +1,5 @@
-import { TypeOrmExtEntityOptionInterface } from '@concepta/nestjs-typeorm-ext';
-import { ROLE_MODULE_ROLE_ENTITY_KEY } from '../role.constants';
-import { RoleEntityInterface } from './role-entity.interface';
+import { ROLE_MODULE_ROLE_ASSIGNMENT_KEY } from '../role.constants';
 
 export interface RoleEntitiesOptionsInterface {
-  entities: {
-    [ROLE_MODULE_ROLE_ENTITY_KEY]: TypeOrmExtEntityOptionInterface<RoleEntityInterface>;
-  } & Record<string, TypeOrmExtEntityOptionInterface>;
+  [ROLE_MODULE_ROLE_ASSIGNMENT_KEY]?: string[];
 }

@@ -24,24 +24,29 @@ import { UserRoleEntityFixture } from './entities/user-role-entity.fixture';
         ApiKeyRoleEntityFixture,
       ],
     }),
-    RoleModule.register({
-      settings: {
-        assignments: {
-          user: { entityKey: 'userRole' },
-          'api-key': { entityKey: 'apiKeyRole' },
+    RoleModule.registerAsync({
+      imports: [
+        TypeOrmExtModule.forFeature({
+          role: {
+            entity: RoleEntityFixture,
+          },
+          userRole: {
+            entity: UserRoleEntityFixture,
+          },
+          apiKeyRole: {
+            entity: ApiKeyRoleEntityFixture,
+          },
+        }),
+      ],
+      entities: ['userRole', 'apiKeyRole'],
+      useFactory: () => ({
+        settings: {
+          assignments: {
+            user: { entityKey: 'userRole' },
+            'api-key': { entityKey: 'apiKeyRole' },
+          },
         },
-      },
-      entities: {
-        role: {
-          entity: RoleEntityFixture,
-        },
-        userRole: {
-          entity: UserRoleEntityFixture,
-        },
-        apiKeyRole: {
-          entity: ApiKeyRoleEntityFixture,
-        },
-      },
+      }),
     }),
     CrudModule.forRoot({}),
   ],

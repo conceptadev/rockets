@@ -28,15 +28,22 @@ export { OrgInterface } from './org/interfaces/org.interface';
 export { OrgProfileInterface } from './org-profile/interfaces/org-profile.interface';
 export { OrgProfileCreatableInterface } from './org-profile/interfaces/org-profile-creatable.interface';
 
+// User interfaces
 export { UserCreatableInterface } from './user/interfaces/user-creatable.interface';
 export { UserOwnableInterface } from './user/interfaces/user-ownable.interface';
 export { UserUpdatableInterface } from './user/interfaces/user-updatable.interface';
 export { UserReplaceableInterface } from './user/interfaces/user-replaceable.interface';
 export { UserRelationInterface } from './user/interfaces/user-relation.interface';
 export { UserInterface } from './user/interfaces/user.interface';
+export { UserEntityInterface } from './user/interfaces/user-entity.interface';
 
 export { UserProfileInterface } from './user-profile/interfaces/user-profile.interface';
 export { UserProfileCreatableInterface } from './user-profile/interfaces/user-profile-creatable.interface';
+export { UserProfileEntityInterface } from './user-profile/interfaces/user-profile-entity.interface';
+
+export { UserPasswordHistoryInterface } from './user-password-history/interfaces/user-password-history.interface';
+export { UserPasswordHistoryEntityInterface } from './user-password-history/interfaces/user-password-history-entity.interface';
+export { UserPasswordHistoryCreatableInterface } from './user-password-history/interfaces/user-password-history-creatable.interface';
 
 export { FederatedCreatableInterface } from './federated/interfaces/federated-creatable.interface';
 export { FederatedUpdatableInterface } from './federated/interfaces/federated-updatable.interface';
@@ -45,10 +52,12 @@ export { FederatedInterface } from './federated/interfaces/federated.interface';
 export { RoleAssigneesInterface } from './role/interfaces/role-assignees.interface';
 export { RoleAssignmentCreatableInterface } from './role/interfaces/role-assignment-creatable.interface';
 export { RoleAssignmentInterface } from './role/interfaces/role-assignment.interface';
+export { RoleAssignmentEntityInterface } from './role/interfaces/role-assignment-entity.interface';
 export { RoleCreatableInterface } from './role/interfaces/role-creatable.interface';
 export { RoleUpdatableInterface } from './role/interfaces/role-updatable.interface';
 export { RoleRelationInterface } from './role/interfaces/role-relation.interface';
 export { RoleInterface } from './role/interfaces/role.interface';
+export { RoleEntityInterface } from './role/interfaces/role-entity.interface';
 
 export { OtpClearInterface } from './otp/interfaces/otp-clear.interface';
 export { OtpParamsInterface } from './otp/interfaces/otp-params.interface';
@@ -82,6 +91,7 @@ export { ReportStatusEnum } from './report/enum/report-status.enum';
 export { ReportCreatableInterface } from './report/interfaces/report-creatable.interface';
 export { ReportUpdatableInterface } from './report/interfaces/report-updatable.interface';
 export { ReportInterface } from './report/interfaces/report.interface';
+export { ReportEntityInterface } from './report/interfaces/report-entity.interface';
 
 export {
   INVITATION_MODULE_CATEGORY_ORG_KEY,

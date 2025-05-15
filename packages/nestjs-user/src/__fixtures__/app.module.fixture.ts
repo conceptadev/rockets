@@ -6,7 +6,6 @@ import { AccessControlModule } from '@concepta/nestjs-access-control';
 import { JwtModule } from '@concepta/nestjs-jwt';
 import { AuthJwtModule } from '@concepta/nestjs-auth-jwt';
 import { PasswordModule } from '@concepta/nestjs-password';
-import { CrudModule } from '@concepta/nestjs-crud';
 import { EventModule } from '@concepta/nestjs-event';
 
 import { UserModule } from '../user.module';
@@ -32,7 +31,6 @@ rules
 @Module({
   imports: [
     TypeOrmExtModule.forRoot(ormConfig),
-    CrudModule.forRoot({}),
     EventModule.forRoot({}),
     JwtModule.forRoot({}),
     AuthJwtModule.forRootAsync({
@@ -47,22 +45,26 @@ rules
       settings: { rules },
       queryServices: [UserAccessQueryService],
     }),
-    UserModule.forRoot({
-      settings: {
-        invitationAcceptedEvent: InvitationAcceptedEventAsync,
-        passwordHistory: {
-          enabled: true,
-          limitDays: 99,
+    UserModule.forRootAsync({
+      imports: [
+        TypeOrmExtModule.forFeature({
+          user: {
+            entity: UserEntityFixture,
+          },
+          'user-password-history': {
+            entity: UserPasswordHistoryEntityFixture,
+          },
+        }),
+      ],
+      useFactory: () => ({
+        settings: {
+          invitationAcceptedEvent: InvitationAcceptedEventAsync,
+          passwordHistory: {
+            enabled: true,
+            limitDays: 99,
+          },
         },
-      },
-      entities: {
-        user: {
-          entity: UserEntityFixture,
-        },
-        'user-password-history': {
-          entity: UserPasswordHistoryEntityFixture,
-        },
-      },
+      }),
     }),
   ],
 })
