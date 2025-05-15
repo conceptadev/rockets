@@ -91,6 +91,7 @@ export { ReportStatusEnum } from './report/enum/report-status.enum';
 export { ReportCreatableInterface } from './report/interfaces/report-creatable.interface';
 export { ReportUpdatableInterface } from './report/interfaces/report-updatable.interface';
 export { ReportInterface } from './report/interfaces/report.interface';
+export { ReportEntityInterface } from './report/interfaces/report-entity.interface';
 
 export {
   INVITATION_MODULE_CATEGORY_ORG_KEY,
