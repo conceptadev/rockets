@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectDynamicRepository } from '@concepta/nestjs-common';
 import { TypeOrmCrudService } from '@concepta/nestjs-crud';
 import { ORG_MODULE_ORG_ENTITY_KEY } from '../org.constants';
-import { OrgEntityInterface } from '../interfaces/org-entity.interface';
+import { OrgEntityInterface } from '@concepta/nestjs-common';
 
 /**
  * Org CRUD service

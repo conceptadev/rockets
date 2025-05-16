@@ -5,7 +5,7 @@ import {
 } from '@concepta/nestjs-common';
 
 import { ORG_MODULE_ORG_MEMBER_ENTITY_KEY } from '../org.constants';
-import { OrgMemberEntityInterface } from '../interfaces/org-member-entity.interface';
+import { OrgMemberEntityInterface } from '@concepta/nestjs-common';
 import { OrgMemberServiceInterface } from '../interfaces/org-member-service.interface';
 import { OrgMemberCreatableInterface } from '../interfaces/org-member-creatable.interface';
 import { OrgMemberModelService } from './org-member-model.service';

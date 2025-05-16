@@ -15,7 +15,7 @@ import { InvitationFactory } from '@concepta/nestjs-invitation/dist/seeding';
 
 import { OrgModule } from '../org.module';
 import { OrgFactory } from '../seeding/org.factory';
-import { OrgEntityInterface } from '../interfaces/org-entity.interface';
+import { OrgEntityInterface } from '@concepta/nestjs-common';
 
 import { InvitationAcceptedListener } from './invitation-accepted-listener';
 import { OrgEntityFixture } from '../__fixtures__/org-entity.fixture';
@@ -66,19 +66,17 @@ describe(InvitationAcceptedListener, () => {
           useFactory: () => ({}),
         }),
         OrgModule.forRootAsync({
+          imports: [
+            TypeOrmExtModule.forFeature({
+              org: { entity: OrgEntityFixture },
+              'org-member': { entity: OrgMemberEntityFixture },
+            }),
+          ],
           useFactory: () => ({
             settings: {
               invitationRequestEvent: InvitationAcceptedEventAsync,
             },
           }),
-          entities: {
-            org: {
-              entity: OrgEntityFixture,
-            },
-            'org-member': {
-              entity: OrgMemberEntityFixture,
-            },
-          },
         }),
         CrudModule.forRoot({}),
         OwnerModuleFixture.register(),

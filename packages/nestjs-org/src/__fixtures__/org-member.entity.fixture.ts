@@ -1,5 +1,5 @@
 import { Entity } from 'typeorm';
-import { OrgMemberSqliteEntity } from '../entities/org-member-sqlite.entity';
+import { OrgMemberSqliteEntity } from '@concepta/nestjs-typeorm-ext';
 
 @Entity()
 export class OrgMemberEntityFixture extends OrgMemberSqliteEntity {}

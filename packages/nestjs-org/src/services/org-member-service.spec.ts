@@ -6,7 +6,7 @@ import {
   getDynamicRepositoryToken,
   RepositoryInterface,
 } from '@concepta/nestjs-common';
-import { OrgMemberEntityInterface } from '../interfaces/org-member-entity.interface';
+import { OrgMemberEntityInterface } from '@concepta/nestjs-common';
 import { OrgMemberCreatableInterface } from '../interfaces/org-member-creatable.interface';
 import { ORG_MODULE_ORG_MEMBER_ENTITY_KEY } from '../org.constants';
 

@@ -18,7 +18,7 @@ import {
   OrgProfileCreatableInterface,
 } from '@concepta/nestjs-common';
 import { OrgProfileResource } from '../org.types';
-import { OrgProfileEntityInterface } from '../interfaces/org-profile-entity.interface';
+import { OrgProfileEntityInterface } from '@concepta/nestjs-common';
 import { OrgProfileDto } from '../dto/profile/org-profile.dto';
 import { OrgProfilePaginatedDto } from '../dto/profile/org-profile-paginated.dto';
 import { OrgProfileCreateDto } from '../dto/profile/org-profile-create.dto';

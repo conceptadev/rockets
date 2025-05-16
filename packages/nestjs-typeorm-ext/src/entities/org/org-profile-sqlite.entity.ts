@@ -1,7 +1,7 @@
 import { Column } from 'typeorm';
 import { OrgInterface } from '@concepta/nestjs-common';
-import { CommonSqliteEntity } from '@concepta/nestjs-typeorm-ext';
-import { OrgProfileEntityInterface } from '../interfaces/org-profile-entity.interface';
+import { CommonSqliteEntity } from '../common/common-sqlite.entity';
+import { OrgProfileEntityInterface } from '@concepta/nestjs-common';
 
 /**
  * Org Profile Sqlite Entity

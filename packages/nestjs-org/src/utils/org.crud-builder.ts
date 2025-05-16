@@ -24,7 +24,7 @@ import { OrgCreateDto } from '../dto/org-create.dto';
 import { OrgCreateManyDto } from '../dto/org-create-many.dto';
 import { OrgUpdateDto } from '../dto/org-update.dto';
 import { OrgPaginatedDto } from '../dto/org-paginated.dto';
-import { OrgEntityInterface } from '../interfaces/org-entity.interface';
+import { OrgEntityInterface } from '@concepta/nestjs-common';
 import { OrgResource } from '../org.types';
 import { ORG_MODULE_CONFIGURABLE_CRUD_SERVICE_TOKEN } from '../org.constants';
 
