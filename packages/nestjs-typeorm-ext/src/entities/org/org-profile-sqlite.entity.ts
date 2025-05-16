@@ -1,18 +1,15 @@
 import { Column } from 'typeorm';
 import { OrgInterface } from '@concepta/nestjs-common';
-import { CommonPostgresEntity } from '@concepta/nestjs-typeorm-ext';
+import { CommonSqliteEntity } from '../common/common-sqlite.entity';
 import { OrgProfileEntityInterface } from '@concepta/nestjs-common';
 
 /**
- * Org Profile Postgres Entity
+ * Org Profile Sqlite Entity
  */
-export abstract class OrgProfilePostgresEntity
-  extends CommonPostgresEntity
+export abstract class OrgProfileSqliteEntity
+  extends CommonSqliteEntity
   implements OrgProfileEntityInterface
 {
-  /**
-   * Flag to determine if the org is active or not
-   */
   @Column('uuid')
   orgId!: string;
 

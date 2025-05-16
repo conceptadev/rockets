@@ -66,19 +66,17 @@ describe(InvitationAcceptedListener, () => {
           useFactory: () => ({}),
         }),
         OrgModule.forRootAsync({
+          imports: [
+            TypeOrmExtModule.forFeature({
+              org: { entity: OrgEntityFixture },
+              'org-member': { entity: OrgMemberEntityFixture },
+            }),
+          ],
           useFactory: () => ({
             settings: {
               invitationRequestEvent: InvitationAcceptedEventAsync,
             },
           }),
-          entities: {
-            org: {
-              entity: OrgEntityFixture,
-            },
-            'org-member': {
-              entity: OrgMemberEntityFixture,
-            },
-          },
         }),
         CrudModule.forRoot({}),
         OwnerModuleFixture.register(),

@@ -109,24 +109,21 @@ describe('Org Profile Crud Builder (e2e)', () => {
             InvitationEntityFixture,
           ],
         }),
-        OrgModule.register({
-          entities: {
-            org: {
-              entity: OrgEntityFixture,
-            },
-            'org-member': {
-              entity: OrgMemberEntityFixture,
-            },
-            'org-profile': {
-              entity: OrgProfileEntityFixture,
-            },
-          },
-          extraControllers: [ConfigurableControllerClass],
-          extraProviders: [ConfigurableServiceProvider],
+        OrgModule.forRootAsync({
+          imports: [
+            TypeOrmExtModule.forFeature({
+              org: { entity: OrgEntityFixture },
+              'org-member': { entity: OrgMemberEntityFixture },
+              'org-profile': { entity: OrgProfileEntityFixture },
+            }),
+          ],
+          useFactory: () => ({}),
         }),
         CrudModule.forRoot({}),
         OwnerModuleFixture.register(),
       ],
+      controllers: [ConfigurableControllerClass],
+      providers: [ConfigurableServiceProvider],
     }).compile();
     app = moduleFixture.createNestApplication();
     await app.init();

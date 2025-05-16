@@ -23,6 +23,14 @@ export { UserPasswordHistorySqliteEntity } from './entities/user-password-histor
 export { UserProfilePostgresEntity } from './entities/user-profile/user-profile-postgres.entity';
 export { UserProfileSqliteEntity } from './entities/user-profile/user-profile-sqlite.entity';
 
+// org entities
+export { OrgPostgresEntity } from './entities/org/org-postgres.entity';
+export { OrgSqliteEntity } from './entities/org/org-sqlite.entity';
+export { OrgMemberPostgresEntity } from './entities/org/org-member-postgres.entity';
+export { OrgMemberSqliteEntity } from './entities/org/org-member-sqlite.entity';
+export { OrgProfilePostgresEntity } from './entities/org/org-profile-postgres.entity';
+export { OrgProfileSqliteEntity } from './entities/org/org-profile-sqlite.entity';
+
 // OTP entities
 export { OtpPostgresEntity } from './entities/otp/otp-postgres.entity';
 export { OtpSqliteEntity } from './entities/otp/otp-sqlite.entity';

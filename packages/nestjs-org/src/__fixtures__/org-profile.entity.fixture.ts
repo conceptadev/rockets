@@ -1,6 +1,6 @@
 import { Column, Entity, OneToOne } from 'typeorm';
 
-import { OrgProfileSqliteEntity } from '../entities/org-profile-sqlite.entity';
+import { OrgProfileSqliteEntity } from '@concepta/nestjs-typeorm-ext';
 import { OrgEntityFixture } from './org-entity.fixture';
 
 /**

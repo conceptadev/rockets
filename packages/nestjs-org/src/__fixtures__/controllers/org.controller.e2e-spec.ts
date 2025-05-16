@@ -6,17 +6,17 @@ import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 
-import { OrgFactory } from './seeding/org.factory';
-import { OrgSeeder } from './seeding/org.seeder';
-import { OrgModule } from './org.module';
-import { OrgEntityFixture } from './__fixtures__/org-entity.fixture';
-import { OwnerEntityFixture } from './__fixtures__/owner-entity.fixture';
-import { OwnerModuleFixture } from './__fixtures__/owner.module.fixture';
-import { OwnerFactoryFixture } from './__fixtures__/owner-factory.fixture';
-import { OrgMemberEntityFixture } from './__fixtures__/org-member.entity.fixture';
-import { UserEntityFixture } from './__fixtures__/user-entity.fixture';
-import { InvitationEntityFixture } from './__fixtures__/invitation.entity.fixture';
-import { OrgProfileEntityFixture } from './__fixtures__/org-profile.entity.fixture';
+import { OrgFactory } from '../../seeding/org.factory';
+import { OrgSeeder } from '../../seeding/org.seeder';
+import { OrgModule } from '../../org.module';
+import { OrgEntityFixture } from '../org-entity.fixture';
+import { OwnerEntityFixture } from '../owner-entity.fixture';
+import { OwnerModuleFixture } from '../owner.module.fixture';
+import { OwnerFactoryFixture } from '../owner-factory.fixture';
+import { OrgMemberEntityFixture } from '../org-member.entity.fixture';
+import { UserEntityFixture } from '../user-entity.fixture';
+import { InvitationEntityFixture } from '../invitation.entity.fixture';
+import { OrgProfileEntityFixture } from '../org-profile.entity.fixture';
 
 describe('OrgController (e2e)', () => {
   describe('Rest', () => {
@@ -39,15 +39,14 @@ describe('OrgController (e2e)', () => {
               InvitationEntityFixture,
             ],
           }),
-          OrgModule.register({
-            entities: {
-              org: {
-                entity: OrgEntityFixture,
-              },
-              'org-member': {
-                entity: OrgMemberEntityFixture,
-              },
-            },
+          OrgModule.registerAsync({
+            imports: [
+              TypeOrmExtModule.forFeature({
+                org: { entity: OrgEntityFixture },
+                'org-member': { entity: OrgMemberEntityFixture },
+              }),
+            ],
+            useFactory: () => ({}),
           }),
           CrudModule.forRoot({}),
           OwnerModuleFixture.register(),

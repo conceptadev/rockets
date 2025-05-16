@@ -26,14 +26,14 @@ import {
   OrgCreatableInterface,
   OrgUpdatableInterface,
 } from '@concepta/nestjs-common';
-import { OrgCrudService } from './services/org-crud.service';
-import { OrgDto } from './dto/org.dto';
-import { OrgCreateDto } from './dto/org-create.dto';
-import { OrgCreateManyDto } from './dto/org-create-many.dto';
-import { OrgUpdateDto } from './dto/org-update.dto';
-import { OrgPaginatedDto } from './dto/org-paginated.dto';
+import { OrgCrudService } from '../org-crud.service';
+import { OrgDto } from '../../dto/org.dto';
+import { OrgCreateDto } from '../../dto/org-create.dto';
+import { OrgCreateManyDto } from '../../dto/org-create-many.dto';
+import { OrgUpdateDto } from '../../dto/org-update.dto';
+import { OrgPaginatedDto } from '../../dto/org-paginated.dto';
 import { OrgEntityInterface } from '@concepta/nestjs-common';
-import { OrgResource } from './org.types';
+import { OrgResource } from '../../org.types';
 
 /**
  * Org controller.
