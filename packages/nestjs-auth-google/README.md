@@ -159,12 +159,12 @@ import { UserEntity } from './user/user.entity';
     AuthGoogleModule.forRoot({
       issueTokenService: new GoogleIssueTokenService(),
     }),
-    FederatedModule.forRoot({
-      entities: {
-        federated: {
-          entity: FederatedEntity,
-        },
+    TypeOrmExtModule.forFeature({
+      federated: {
+        entity: FederatedEntity,
       },
+    }),
+    FederatedModule.forRoot({
       userModelService: new FederatedUserModelService(),
     }),
   ],

@@ -177,12 +177,12 @@ import { UserEntity } from './user/user.entity';
     AuthAppleModule.forRoot({
       issueTokenService: new MyIssueTokenService(),
     }),
-    FederatedModule.forRoot({
-      entities: {
-        federated: {
-          entity: FederatedEntity,
-        },
+    TypeOrmExtModule.forFeature({
+      federated: {
+        entity: FederatedEntity,
       },
+    }),
+    FederatedModule.forRoot({
       userModelService: new FederatedUserModelService(),
     }),
   ],

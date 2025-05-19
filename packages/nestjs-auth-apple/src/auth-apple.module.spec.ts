@@ -36,15 +36,17 @@ describe(AuthAppleModule, () => {
             }),
           }),
           FederatedModule.forRootAsync({
+            imports: [
+              TypeOrmExtModule.forFeature({
+                federated: {
+                  entity: FederatedEntityFixture,
+                },
+              }),
+            ],
             inject: [UserModelService],
             useFactory: (userModelService) => ({
               userModelService,
             }),
-            entities: {
-              federated: {
-                entity: FederatedEntityFixture,
-              },
-            },
           }),
           CrudModule.forRoot({}),
           PasswordModule.forRoot({}),

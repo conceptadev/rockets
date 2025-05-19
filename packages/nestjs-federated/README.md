@@ -118,12 +118,12 @@ import { UserEntity } from './user/user.entity';
     }),
     JwtModule.forRoot({}),
     AuthenticationModule.forRoot({}),
-    FederatedModule.forRoot({
-      entities: {
-        federated: {
-          entity: FederatedEntity,
-        },
+    TypeOrmExtModule.forFeature({
+      federated: {
+        entity: FederatedEntity,
       },
+    }),
+    FederatedModule.forRoot({
       userModelService: new FederatedUserModelService(),
     }),
   ],

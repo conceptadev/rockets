@@ -158,12 +158,12 @@ import { UserEntity } from './user/user.entity';
     AuthGithubModule.forRoot({
       issueTokenService: new GitHubIssueTokenService(),
     }),
-    FederatedModule.forRoot({
-      entities: {
-        federated: {
-          entity: FederatedEntity,
-        },
+    TypeOrmExtModule.forFeature({
+      federated: {
+        entity: FederatedEntity,
       },
+    }),
+    FederatedModule.forRoot({
       userModelService: new FederatedUserModelService(),
     }),
   ],
