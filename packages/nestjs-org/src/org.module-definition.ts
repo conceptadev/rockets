@@ -69,7 +69,6 @@ export function createOrgImports(options: {
 export function createOrgProviders(options: {
   overrides?: OrgOptions;
   providers?: Provider[];
-  extraProviders?: Provider[];
 }): Provider[] {
   return [
     ...(options.providers ?? []),

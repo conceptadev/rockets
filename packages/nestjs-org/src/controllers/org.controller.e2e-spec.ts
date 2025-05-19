@@ -1,22 +1,22 @@
 import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { getDataSourceToken } from '@nestjs/typeorm';
-import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
+import { getDataSourceToken, TypeOrmModule } from '@nestjs/typeorm';
 import { CrudModule } from '@concepta/nestjs-crud';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 
-import { OrgFactory } from '../../seeding/org.factory';
-import { OrgSeeder } from '../../seeding/org.seeder';
-import { OrgModule } from '../../org.module';
-import { OrgEntityFixture } from '../org-entity.fixture';
-import { OwnerEntityFixture } from '../owner-entity.fixture';
-import { OwnerModuleFixture } from '../owner.module.fixture';
-import { OwnerFactoryFixture } from '../owner-factory.fixture';
-import { OrgMemberEntityFixture } from '../org-member.entity.fixture';
-import { UserEntityFixture } from '../user-entity.fixture';
-import { InvitationEntityFixture } from '../invitation.entity.fixture';
-import { OrgProfileEntityFixture } from '../org-profile.entity.fixture';
+import { OrgFactory } from '../seeding/org.factory';
+import { OrgSeeder } from '../seeding/org.seeder';
+import { OrgEntityFixture } from '../__fixtures__/org-entity.fixture';
+import { OwnerEntityFixture } from '../__fixtures__/owner-entity.fixture';
+import { OwnerModuleFixture } from '../__fixtures__/owner.module.fixture';
+import { OwnerFactoryFixture } from '../__fixtures__/owner-factory.fixture';
+import { OrgMemberEntityFixture } from '../__fixtures__/org-member.entity.fixture';
+import { UserEntityFixture } from '../__fixtures__/user-entity.fixture';
+import { InvitationEntityFixture } from '../__fixtures__/invitation.entity.fixture';
+import { OrgProfileEntityFixture } from '../__fixtures__/org-profile.entity.fixture';
+import { OrgControllerFixture } from '../__fixtures__/controllers/org.controller.fixture';
+import { OrgCrudService } from '../__fixtures__/org-crud.service';
 
 describe('OrgController (e2e)', () => {
   describe('Rest', () => {
@@ -26,7 +26,7 @@ describe('OrgController (e2e)', () => {
     beforeEach(async () => {
       const moduleFixture: TestingModule = await Test.createTestingModule({
         imports: [
-          TypeOrmExtModule.forRoot({
+          TypeOrmModule.forRoot({
             type: 'sqlite',
             database: ':memory:',
             synchronize: true,
@@ -39,18 +39,19 @@ describe('OrgController (e2e)', () => {
               InvitationEntityFixture,
             ],
           }),
-          OrgModule.registerAsync({
-            imports: [
-              TypeOrmExtModule.forFeature({
-                org: { entity: OrgEntityFixture },
-                'org-member': { entity: OrgMemberEntityFixture },
-              }),
-            ],
-            useFactory: () => ({}),
-          }),
+          TypeOrmModule.forFeature([
+            OrgEntityFixture,
+            OwnerEntityFixture,
+            OrgMemberEntityFixture,
+            OrgProfileEntityFixture,
+            UserEntityFixture,
+            InvitationEntityFixture,
+          ]),
           CrudModule.forRoot({}),
           OwnerModuleFixture.register(),
         ],
+        controllers: [OrgControllerFixture],
+        providers: [OrgCrudService],
       }).compile();
       app = moduleFixture.createNestApplication();
       await app.init();
@@ -154,7 +155,9 @@ describe('OrgController (e2e)', () => {
       const updatedResponse = await supertest(app.getHttpServer())
         .patch(`/org/${id}`)
         .send({
+          id,
           name: 'updated company',
+          active: true,
         })
         .expect(200);
 

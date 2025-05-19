@@ -9,7 +9,7 @@ import { OrgDto } from './org.dto';
 @Exclude()
 export class OrgUpdateDto
   extends IntersectionType(
-    PickType(OrgDto, ['id', 'name', 'active'] as const),
-    PartialType(PickType(OrgDto, ['ownerId'] as const)),
+    PickType(OrgDto, ['id'] as const),
+    PartialType(PickType(OrgDto, ['name', 'active', 'ownerId'] as const)),
   )
   implements OrgUpdatableInterface {}

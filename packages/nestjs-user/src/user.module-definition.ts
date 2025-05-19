@@ -56,13 +56,13 @@ function definitionTransform(
   extras: UserOptionsExtrasInterface,
 ): DynamicModule {
   const { providers = [], imports = [] } = definition;
-  const { global = false, extraProviders = [] } = extras;
+  const { global = false } = extras;
 
   return {
     ...definition,
     global,
     imports: createUserImports({ imports }),
-    providers: createUserProviders({ providers, extraProviders }),
+    providers: createUserProviders({ providers }),
     exports: [ConfigModule, RAW_OPTIONS_TOKEN, ...createUserExports()],
   };
 }
@@ -79,11 +79,9 @@ export function createUserImports(
 export function createUserProviders(options: {
   overrides?: UserOptions;
   providers?: Provider[];
-  extraProviders?: Provider[];
 }): Provider[] {
   return [
     ...(options.providers ?? []),
-    ...(options.extraProviders ?? []),
     PasswordCreationService,
     InvitationAcceptedListener,
     createUserSettingsProvider(options.overrides),

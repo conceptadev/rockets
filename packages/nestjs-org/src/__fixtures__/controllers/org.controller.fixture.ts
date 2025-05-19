@@ -46,7 +46,7 @@ import { OrgResource } from '../../org.types';
   },
 })
 @ApiTags('org')
-export class OrgController
+export class OrgControllerFixture
   implements
     CrudControllerInterface<
       OrgEntityInterface,
