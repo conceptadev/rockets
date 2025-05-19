@@ -14,7 +14,7 @@ import { FederatedService } from './services/federated.service';
 import { FederatedOAuthService } from './services/federated-oauth.service';
 import { FEDERATED_MODULE_FEDERATED_ENTITY_KEY } from './federated.constants';
 
-import { FederatedEntityInterface } from './interfaces/federated-entity.interface';
+import { FederatedEntityInterface } from '@concepta/nestjs-common';
 import { FederatedUserModelServiceInterface } from './interfaces/federated-user-model-service.interface';
 import { FederatedModelService } from './services/federated-model.service';
 
@@ -36,13 +36,13 @@ describe(FederatedModule, () => {
     beforeEach(async () => {
       testModule = await Test.createTestingModule(
         testModuleFactory([
+          TypeOrmExtModule.forFeature({
+            federated: {
+              entity: FederatedEntityFixture,
+            },
+          }),
           FederatedModule.forRoot({
             userModelService: new UserModelServiceFixture(),
-            entities: {
-              federated: {
-                entity: FederatedEntityFixture,
-              },
-            },
           }),
         ]),
       ).compile();
@@ -58,13 +58,13 @@ describe(FederatedModule, () => {
     beforeEach(async () => {
       testModule = await Test.createTestingModule(
         testModuleFactory([
+          TypeOrmExtModule.forFeature({
+            federated: {
+              entity: FederatedEntityFixture,
+            },
+          }),
           FederatedModule.register({
             userModelService: new UserModelServiceFixture(),
-            entities: {
-              federated: {
-                entity: FederatedEntityFixture,
-              },
-            },
           }),
         ]),
       ).compile();
@@ -81,15 +81,17 @@ describe(FederatedModule, () => {
       testModule = await Test.createTestingModule(
         testModuleFactory([
           FederatedModule.forRootAsync({
+            imports: [
+              TypeOrmExtModule.forFeature({
+                federated: {
+                  entity: FederatedEntityFixture,
+                },
+              }),
+            ],
             inject: [UserModelServiceFixture],
             useFactory: (userModelService) => ({
               userModelService,
             }),
-            entities: {
-              federated: {
-                entity: FederatedEntityFixture,
-              },
-            },
           }),
         ]),
       ).compile();
@@ -106,15 +108,17 @@ describe(FederatedModule, () => {
       testModule = await Test.createTestingModule(
         testModuleFactory([
           FederatedModule.registerAsync({
+            imports: [
+              TypeOrmExtModule.forFeature({
+                federated: {
+                  entity: FederatedEntityFixture,
+                },
+              }),
+            ],
             inject: [UserModelServiceFixture],
             useFactory: (userModelService) => ({
               userModelService,
             }),
-            entities: {
-              federated: {
-                entity: FederatedEntityFixture,
-              },
-            },
           }),
         ]),
       ).compile();

@@ -5,7 +5,7 @@ import {
   ModelMutateException,
 } from '@concepta/nestjs-common';
 import { FEDERATED_MODULE_USER_MODEL_SERVICE_TOKEN } from '../federated.constants';
-import { FederatedEntityInterface } from '../interfaces/federated-entity.interface';
+import { FederatedEntityInterface } from '@concepta/nestjs-common';
 import { FederatedUserModelServiceInterface } from '../interfaces/federated-user-model-service.interface';
 import { FederatedService } from './federated.service';
 import { FederatedCredentialsInterface } from '../interfaces/federated-credentials.interface';

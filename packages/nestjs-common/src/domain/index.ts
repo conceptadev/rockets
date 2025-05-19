@@ -51,6 +51,7 @@ export { UserPasswordHistoryCreatableInterface } from './user-password-history/i
 export { FederatedCreatableInterface } from './federated/interfaces/federated-creatable.interface';
 export { FederatedUpdatableInterface } from './federated/interfaces/federated-updatable.interface';
 export { FederatedInterface } from './federated/interfaces/federated.interface';
+export { FederatedEntityInterface } from './federated/interfaces/federated-entity.interface';
 
 export { RoleAssigneesInterface } from './role/interfaces/role-assignees.interface';
 export { RoleAssignmentCreatableInterface } from './role/interfaces/role-assignment-creatable.interface';

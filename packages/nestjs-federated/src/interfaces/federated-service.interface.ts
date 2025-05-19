@@ -1,4 +1,4 @@
-import { FederatedEntityInterface } from './federated-entity.interface';
+import { FederatedEntityInterface } from '@concepta/nestjs-common';
 
 export interface FederatedServiceInterface {
   exists(

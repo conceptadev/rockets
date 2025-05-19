@@ -1,14 +1,14 @@
 import { Column, Entity } from 'typeorm';
 import { ReferenceIdInterface } from '@concepta/nestjs-common';
-import { CommonPostgresEntity } from '@concepta/nestjs-typeorm-ext';
-import { FederatedEntityInterface } from '../interfaces/federated-entity.interface';
+import { FederatedEntityInterface } from '@concepta/nestjs-common';
+import { CommonSqliteEntity } from '../common/common-sqlite.entity';
 
 /**
- * Federated Postgres Entity
+ * Federated Sqlite Entity
  */
 @Entity()
-export class FederatedPostgresEntity
-  extends CommonPostgresEntity
+export class FederatedSqliteEntity
+  extends CommonSqliteEntity
   implements FederatedEntityInterface
 {
   /**

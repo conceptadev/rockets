@@ -76,7 +76,7 @@ Next, create the `FederatedEntity`:
 
 ```ts
 import { Entity, ManyToOne } from 'typeorm';
-import { FederatedSqliteEntity } from '@concepta/nestjs-federated';
+import { FederatedSqliteEntity } from '@concepta/nestjs-typeorm-ext';
 import { UserEntity } from '../user/user.entity';
 
 @Entity()

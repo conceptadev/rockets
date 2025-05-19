@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FederatedService } from './federated.service';
 import { RepositoryInterface } from '@concepta/nestjs-common';
-import { FederatedEntityInterface } from '../interfaces/federated-entity.interface';
+import { FederatedEntityInterface } from '@concepta/nestjs-common';
 import { FederatedQueryException } from '../exceptions/federated-query.exception';
 import { FEDERATED_MODULE_FEDERATED_ENTITY_KEY } from '../federated.constants';
 import { getDynamicRepositoryToken } from '@concepta/nestjs-common';
