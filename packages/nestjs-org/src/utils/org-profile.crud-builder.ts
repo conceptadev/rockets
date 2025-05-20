@@ -18,16 +18,17 @@ import {
   OrgProfileCreatableInterface,
 } from '@concepta/nestjs-common';
 import { OrgProfileResource } from '../org.types';
-import { OrgProfileEntityInterface } from '../interfaces/org-profile-entity.interface';
+import { OrgProfileEntityInterface } from '@concepta/nestjs-common';
 import { OrgProfileDto } from '../dto/profile/org-profile.dto';
 import { OrgProfilePaginatedDto } from '../dto/profile/org-profile-paginated.dto';
 import { OrgProfileCreateDto } from '../dto/profile/org-profile-create.dto';
 import { OrgProfileUpdateDto } from '../dto/profile/org-profile-update.dto';
 import { ORG_MODULE_CONFIGURABLE_CRUD_PROFILE_SERVICE_TOKEN } from '../org.constants';
+import { OrgProfileEntityFixture } from '../__fixtures__/org-profile.entity.fixture';
 
 const orgProfileCrudBuilderDefaultOptions: ConfigurableCrudOptions = {
   service: {
-    entityKey: 'org-profile',
+    entity: OrgProfileEntityFixture,
     injectionToken: ORG_MODULE_CONFIGURABLE_CRUD_PROFILE_SERVICE_TOKEN,
   },
   controller: {

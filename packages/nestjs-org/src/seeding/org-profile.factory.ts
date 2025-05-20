@@ -1,5 +1,5 @@
 import { Factory } from '@concepta/typeorm-seeding';
-import { OrgProfileEntityInterface } from '../interfaces/org-profile-entity.interface';
+import { OrgProfileEntityInterface } from '@concepta/nestjs-common';
 import { OrgFactory } from './org.factory';
 
 /**

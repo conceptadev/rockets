@@ -1,3 +1,3 @@
-import { OrgProfileInterface } from '@concepta/nestjs-common';
+import { OrgProfileInterface } from './org-profile.interface';
 
 export interface OrgProfileEntityInterface extends OrgProfileInterface {}

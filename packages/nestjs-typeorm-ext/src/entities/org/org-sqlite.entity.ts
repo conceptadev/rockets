@@ -4,38 +4,32 @@ import {
   ReferenceId,
   ReferenceIdInterface,
 } from '@concepta/nestjs-common';
-import { CommonPostgresEntity } from '@concepta/nestjs-typeorm-ext';
-import { OrgEntityInterface } from '../interfaces/org-entity.interface';
+import { CommonSqliteEntity } from '../common/common-sqlite.entity';
+import { OrgEntityInterface } from '@concepta/nestjs-common';
 
 /**
- * Org Postgres Entity
+ * Org Sqlite Entity
  */
-export abstract class OrgPostgresEntity
-  extends CommonPostgresEntity
+export abstract class OrgSqliteEntity
+  extends CommonSqliteEntity
   implements OrgEntityInterface
 {
-  /**
-   * Name
-   */
   @Column()
   name!: string;
 
-  /**
-   * Flag to determine if the org is active or not
-   */
   @Column('boolean', { default: true })
   active = true;
 
   /**
    * Owner Id
    */
-  @Column('uuid', { nullable: false })
+  @Column('uuid')
   ownerId!: ReferenceId;
 
   /**
    * Owner
    */
-  owner?: ReferenceIdInterface;
+  owner!: ReferenceIdInterface;
 
   /**
    * Profile

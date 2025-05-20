@@ -26,14 +26,14 @@ import {
   OrgCreatableInterface,
   OrgUpdatableInterface,
 } from '@concepta/nestjs-common';
-import { OrgCrudService } from './services/org-crud.service';
-import { OrgDto } from './dto/org.dto';
-import { OrgCreateDto } from './dto/org-create.dto';
-import { OrgCreateManyDto } from './dto/org-create-many.dto';
-import { OrgUpdateDto } from './dto/org-update.dto';
-import { OrgPaginatedDto } from './dto/org-paginated.dto';
-import { OrgEntityInterface } from './interfaces/org-entity.interface';
-import { OrgResource } from './org.types';
+import { OrgCrudService } from '../org-crud.service';
+import { OrgDto } from '../../dto/org.dto';
+import { OrgCreateDto } from '../../dto/org-create.dto';
+import { OrgCreateManyDto } from '../../dto/org-create-many.dto';
+import { OrgUpdateDto } from '../../dto/org-update.dto';
+import { OrgPaginatedDto } from '../../dto/org-paginated.dto';
+import { OrgEntityInterface } from '@concepta/nestjs-common';
+import { OrgResource } from '../../org.types';
 
 /**
  * Org controller.
@@ -46,7 +46,7 @@ import { OrgResource } from './org.types';
   },
 })
 @ApiTags('org')
-export class OrgController
+export class OrgControllerFixture
   implements
     CrudControllerInterface<
       OrgEntityInterface,

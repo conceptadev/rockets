@@ -1,12 +1,11 @@
 import { Column, Unique } from 'typeorm';
 import { ReferenceId } from '@concepta/nestjs-common';
-import { CommonPostgresEntity } from '@concepta/nestjs-typeorm-ext';
-
-import { OrgMemberEntityInterface } from '../interfaces/org-member-entity.interface';
+import { CommonSqliteEntity } from '../common/common-sqlite.entity';
+import { OrgMemberEntityInterface } from '@concepta/nestjs-common';
 
 @Unique(['userId', 'orgId'])
-export abstract class OrgMemberPostgresEntity
-  extends CommonPostgresEntity
+export abstract class OrgMemberSqliteEntity
+  extends CommonSqliteEntity
   implements OrgMemberEntityInterface
 {
   @Column('boolean', { default: true })
