@@ -201,7 +201,7 @@ export class UserCache extends CacheSqliteEntity {
 
 ```typescript
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
 import { CacheModule } from '@concepta/nestjs-cache';
 import { User } from '../user/user.entity';
@@ -209,13 +209,12 @@ import { UserCache } from './user-cache.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmExtModule.forFeature({
+          userCache: {
+            entity: UserCache,
+          },
+        }),
     CacheModule.register({
-      entities: {
-        userCache: {
-          entity: UserCache,
-        },
-      },
       settings: {
         assignments: {
           user: { entityKey: 'userCache' },
@@ -431,15 +430,15 @@ This method allows you to pass configuration options directly.
 ```ts
 @Module({
   imports: [
+    TypeOrmExtModule.forFeature({
+          userCache: {
+            entity: UserCacheEntityFixture,
+          },
+        }),
     CacheModule.register({
       settings: {
         assignments: {
           user: { entityKey: 'userCache' },
-        },
-      },
-      entities: {
-        userCache: {
-          entity: UserCacheEntityFixture,
         },
       },
     }),
@@ -458,15 +457,18 @@ asynchronous operations to get the configuration options.
 @Module({
   imports: [
     CacheModule.registerAsync({
+      imports: [
+        TypeOrmExtModule.forFeature({
+          userCache: {
+            entity: UserCacheEntityFixture,
+          },
+        }),
+      ],
+      entities: ['userCache'],
       useFactory: async () => ({
         settings: {
           assignments: {
             user: { entityKey: 'userCache' },
-          },
-        },
-        entities: {
-          userCache: {
-            entity: UserCacheEntityFixture,
           },
         },
       }),
@@ -486,15 +488,18 @@ asynchronous operations to get the configuration options.
 @Module({
   imports: [
     CacheModule.forRootAsync({
+      imports: [
+        TypeOrmExtModule.forFeature({
+          userCache: {
+            entity: UserCacheEntityFixture,
+          },
+        }),
+      ],
+      entities: ['userCache'],
       useFactory: async () => ({
         settings: {
           assignments: {
             user: { entityKey: 'userCache' },
-          },
-        },
-        entities: {
-          userCache: {
-            entity: UserCacheEntityFixture,
           },
         },
       }),
@@ -515,19 +520,22 @@ dealing with multiple entities.
 @Module({
   imports: [
     CacheModule.registerAsync({
+      imports: [
+        TypeOrmExtModule.forFeature({
+          userCache: {
+            entity: UserCacheEntityFixture,
+          },
+           petCache: {
+            entity: PetCacheEntity,
+          },
+        }),
+      ],
+      entities: ['userCache'],
       useFactory: async () => ({
         settings: {
           assignments: {
             user: { entityKey: 'userCache' },
             pet: { entityKey: 'petCache' },
-          },
-        },
-        entities: {
-          userCache: {
-            entity: UserCacheEntityFixture,
-          },
-          petCache: {
-            entity: PetCacheEntity,
           },
         },
       }),

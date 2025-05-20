@@ -1,6 +1,6 @@
 import { Column, Unique } from 'typeorm';
 import { ReferenceId, CacheInterface } from '@concepta/nestjs-common';
-import { CommonPostgresEntity } from '@concepta/nestjs-typeorm-ext';
+import { CommonPostgresEntity } from '../common/common-postgres.entity';
 
 /**
  * Cache Postgres Entity

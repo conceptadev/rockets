@@ -16,7 +16,6 @@ export class RoleCrudServiceFixture extends TypeOrmCrudService<RoleEntityInterfa
    * @param roleRepo - instance of the role repository.
    */
   constructor(
-    // TODO: TYPEORM - TypeOrmCrudService uses typeorm repository
     @InjectRepository(RoleEntityFixture)
     roleRepo: Repository<RoleEntityInterface>,
   ) {

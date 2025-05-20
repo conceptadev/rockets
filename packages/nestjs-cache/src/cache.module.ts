@@ -4,11 +4,7 @@ import {
   CacheAsyncOptions,
   CacheModuleClass,
   CacheOptions,
-  createCacheExports,
-  createCacheImports,
-  createCacheProviders,
 } from './cache.module-definition';
-import { CacheMissingEntitiesOptionException } from './exceptions/cache-missing-entities-option.exception';
 
 /**
  * Cache Module
@@ -29,20 +25,5 @@ export class CacheModule extends CacheModuleClass {
 
   static forRootAsync(options: CacheAsyncOptions): DynamicModule {
     return super.registerAsync({ ...options, global: true });
-  }
-
-  static forFeature(options: CacheOptions): DynamicModule {
-    const { entities } = options;
-
-    if (!entities) {
-      throw new CacheMissingEntitiesOptionException();
-    }
-
-    return {
-      module: CacheModule,
-      imports: createCacheImports({ entities }),
-      providers: createCacheProviders({ entities, overrides: options }),
-      exports: createCacheExports(),
-    };
   }
 }

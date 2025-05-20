@@ -46,7 +46,7 @@ function definitionTransform(
   const { providers = [], imports = [] } = definition;
   const { global = false, entities } = extras;
 
-  if (!entities) {
+  if (!entities || entities.length === 0) {
     throw new OtpMissingEntitiesOptionsException();
   }
 

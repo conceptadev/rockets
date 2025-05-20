@@ -1,6 +1,6 @@
 import { Column, Unique } from 'typeorm';
 import { ReferenceId, CacheInterface } from '@concepta/nestjs-common';
-import { CommonSqliteEntity } from '@concepta/nestjs-typeorm-ext';
+import { CommonSqliteEntity } from '../common/common-sqlite.entity';
 
 /**
  * Cache Sqlite Entity
