@@ -1,9 +1,5 @@
-import { Entity, OneToOne } from 'typeorm';
+import { Entity } from 'typeorm';
 import { UserSqliteEntity } from '@concepta/nestjs-typeorm-ext';
-import { FileEntityFixture } from '../../file/file-entity.fixture';
 
 @Entity()
-export class UserEntityFixture extends UserSqliteEntity {
-  @OneToOne(() => FileEntityFixture)
-  document!: FileEntityFixture;
-}
+export class UserEntityFixture extends UserSqliteEntity {}

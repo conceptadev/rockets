@@ -85,9 +85,6 @@ export class UserEntity {
 
   @Column()
   name: string;
-
-  @OneToMany(() => FederatedEntity, (federated) => federated.user)
-  federated!: FederatedEntity;
 }
 ```
 
@@ -101,10 +98,7 @@ import { FederatedSqliteEntity } from '@concepta/nestjs-typeorm-ext';
 import { UserEntity } from '../user/user.entity';
 
 @Entity()
-export class FederatedEntity extends FederatedSqliteEntity {
-  @ManyToOne(() => UserEntity, (user) => user.federated)
-  user!: UserEntity;
-}
+export class FederatedEntity extends FederatedSqliteEntity {}
 ```
 
 #### Step 3: Environment Variables
