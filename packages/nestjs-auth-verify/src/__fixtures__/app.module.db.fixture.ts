@@ -67,6 +67,7 @@ import { MailerServiceFixture } from './email/mailer.service.fixture';
           },
         }),
       ],
+      useFactory: () => ({}),
     }),
     EmailModule.forRoot({
       mailerService: new MailerServiceFixture(),
