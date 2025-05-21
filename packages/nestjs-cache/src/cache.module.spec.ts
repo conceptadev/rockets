@@ -58,11 +58,5 @@ describe(CacheModule.name, () => {
       CacheModule.registerAsync({});
       expect(spyRegisterAsync).toHaveBeenCalled();
     });
-
-    it('should throw an error in forFeature method', () => {
-      expect(() => CacheModule.forFeature({})).toThrow(
-        'You must provide the entities option',
-      );
-    });
   });
 });

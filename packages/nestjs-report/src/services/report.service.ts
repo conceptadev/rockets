@@ -2,15 +2,15 @@ import {
   ReportCreatableInterface,
   ReportInterface,
   ReportStatusEnum,
+  ReportEntityInterface,
+  mapNonErrorToException,
 } from '@concepta/nestjs-common';
-import { mapNonErrorToException } from '@concepta/nestjs-common';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 
 import { ReportCreateException } from '../exceptions/report-create.exception';
 import { ReportDuplicateEntryException } from '../exceptions/report-duplicated.exception';
 import { ReportIdMissingException } from '../exceptions/report-id-missing.exception';
 import { ReportQueryException } from '../exceptions/report-query.exception';
-import { ReportEntityInterface } from '../interfaces/report-entity.interface';
 import { ReportGeneratorResultInterface } from '../interfaces/report-generator-result.interface';
 import { ReportModelServiceInterface } from '../interfaces/report-model-service.interface';
 import { ReportServiceInterface } from '../interfaces/report-service.interface';

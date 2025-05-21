@@ -6,7 +6,6 @@ import {
 import { ConfigModule } from '@nestjs/config';
 
 import { createSettingsProvider } from '@concepta/nestjs-common';
-import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import {
   RepositoryInterface,
   getDynamicRepositoryToken,
@@ -17,17 +16,14 @@ import {
 } from './org.constants';
 import { OrgOptionsInterface } from './interfaces/org-options.interface';
 import { OrgOptionsExtrasInterface } from './interfaces/org-options-extras.interface';
-import { OrgEntitiesOptionsInterface } from './interfaces/org-entities-options.interface';
 import { OrgSettingsInterface } from './interfaces/org-settings.interface';
-import { OrgEntityInterface } from './interfaces/org-entity.interface';
+import { OrgEntityInterface } from '@concepta/nestjs-common';
 import { OrgModelService } from './services/org-model.service';
-import { OrgCrudService } from './services/org-crud.service';
 import { OrgMemberService } from './services/org-member.service';
 import { OrgMemberModelService } from './services/org-member-model.service';
-import { OrgController } from './org.controller';
+
 import { orgDefaultConfig } from './config/org-default.config';
 import { InvitationAcceptedListener } from './listeners/invitation-accepted-listener';
-import { OrgMissingEntitiesOptionsException } from './exceptions/org-missing-entities-options.exception';
 
 const RAW_OPTIONS_TOKEN = Symbol('__ORG_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -49,47 +45,33 @@ function definitionTransform(
   definition: DynamicModule,
   extras: OrgOptionsExtrasInterface,
 ): DynamicModule {
-  const { providers = [] } = definition;
-  const {
-    global = false,
-    entities,
-    controllers,
-    extraControllers = [],
-    extraProviders = [],
-  } = extras;
-
-  if (!entities) {
-    throw new OrgMissingEntitiesOptionsException();
-  }
+  const { imports, providers = [] } = definition;
+  const { global = false } = extras;
 
   return {
     ...definition,
     global,
-    imports: createOrgImports({ entities }),
-    providers: createOrgProviders({ providers, extraProviders }),
-    controllers: createOrgControllers({ controllers, extraControllers }),
+    imports: createOrgImports({ imports }),
+    providers: createOrgProviders({ providers }),
     exports: [ConfigModule, RAW_OPTIONS_TOKEN, ...createOrgExports()],
   };
 }
 
-export function createOrgImports(
-  options: OrgEntitiesOptionsInterface,
-): DynamicModule['imports'] {
+export function createOrgImports(options: {
+  imports: DynamicModule['imports'];
+}): DynamicModule['imports'] {
   return [
+    ...(options.imports || []),
     ConfigModule.forFeature(orgDefaultConfig),
-    TypeOrmExtModule.forFeature(options.entities),
   ];
 }
 
 export function createOrgProviders(options: {
   overrides?: OrgOptions;
   providers?: Provider[];
-  extraProviders?: Provider[];
 }): Provider[] {
   return [
     ...(options.providers ?? []),
-    ...(options.extraProviders ?? []),
-    OrgCrudService,
     OrgMemberService,
     OrgMemberModelService,
     InvitationAcceptedListener,
@@ -104,18 +86,9 @@ export function createOrgExports(): Required<
   return [
     ORG_MODULE_SETTINGS_TOKEN,
     OrgModelService,
-    OrgCrudService,
     OrgMemberService,
     OrgMemberModelService,
   ];
-}
-
-export function createOrgControllers(
-  overrides: Pick<OrgOptions, 'controllers' | 'extraControllers'> = {},
-): DynamicModule['controllers'] {
-  return overrides?.controllers?.length
-    ? overrides.controllers
-    : [OrgController, ...(overrides.extraControllers ?? [])];
 }
 
 export function createOrgSettingsProvider(

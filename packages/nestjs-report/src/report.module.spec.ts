@@ -1,19 +1,20 @@
-import { Repository } from 'typeorm';
 import { DynamicModule, ModuleMetadata } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   ReportStatusEnum,
   getDynamicRepositoryToken,
-  getEntityRepositoryToken,
 } from '@concepta/nestjs-common';
 import { FileModule } from '@concepta/nestjs-file';
-import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
+import {
+  TypeOrmExtModule,
+  TypeOrmRepositoryAdapter,
+} from '@concepta/nestjs-typeorm-ext';
 
 import { ReportService } from './services/report.service';
 
 import { REPORT_MODULE_REPORT_ENTITY_KEY } from './report.constants';
 
-import { ReportEntityInterface } from './interfaces/report-entity.interface';
+import { ReportEntityInterface } from '@concepta/nestjs-common/src/domain/report/interfaces/report-entity.interface';
 
 import { AwsStorageService } from './__fixtures__/aws-storage.service';
 import {
@@ -35,7 +36,6 @@ describe(ReportModule, () => {
   let testModule: TestingModule;
   let reportModule: ReportModule;
   let reportService: ReportService;
-  let reportEntityRepo: RepositoryInterface<ReportEntityInterface>;
   let reportDynamicRepo: RepositoryInterface<ReportEntityInterface>;
 
   describe(ReportModule.forRootAsync, () => {
@@ -43,6 +43,13 @@ describe(ReportModule, () => {
       testModule = await Test.createTestingModule(
         testModuleFactory([
           ReportModule.forRootAsync({
+            imports: [
+              TypeOrmExtModule.forFeature({
+                report: {
+                  entity: ReportEntityFixture,
+                },
+              }),
+            ],
             inject: [
               MyReportGeneratorService,
               MyReportGeneratorShortDelayService,
@@ -56,11 +63,6 @@ describe(ReportModule, () => {
                 myGeneratorWithDelay,
               ],
             }),
-            entities: {
-              report: {
-                entity: ReportEntityFixture,
-              },
-            },
           }),
         ]),
       ).compile();
@@ -150,15 +152,17 @@ describe(ReportModule, () => {
       testModule = await Test.createTestingModule(
         testModuleFactory([
           ReportModule.registerAsync({
+            imports: [
+              TypeOrmExtModule.forFeature({
+                report: {
+                  entity: ReportEntityFixture,
+                },
+              }),
+            ],
             inject: [MyReportGeneratorService],
             useFactory: (awsStorageService: MyReportGeneratorService) => ({
               reportGeneratorServices: [awsStorageService],
             }),
-            entities: {
-              report: {
-                entity: ReportEntityFixture,
-              },
-            },
           }),
         ]),
       ).compile();
@@ -172,9 +176,6 @@ describe(ReportModule, () => {
   const commonVars = () => {
     reportModule = testModule.get(ReportModule);
     reportService = testModule.get(ReportService);
-    reportEntityRepo = testModule.get<RepositoryInterface<ReportEntityFixture>>(
-      getEntityRepositoryToken(REPORT_MODULE_REPORT_ENTITY_KEY),
-    );
     reportDynamicRepo = testModule.get(
       getDynamicRepositoryToken(REPORT_MODULE_REPORT_ENTITY_KEY),
     );
@@ -183,8 +184,7 @@ describe(ReportModule, () => {
   const commonTests = async () => {
     expect(reportModule).toBeInstanceOf(ReportModule);
     expect(reportService).toBeInstanceOf(ReportService);
-    expect(reportEntityRepo).toBeInstanceOf(Repository);
-    expect(reportDynamicRepo).toBeInstanceOf(Repository);
+    expect(reportDynamicRepo).toBeInstanceOf(TypeOrmRepositoryAdapter);
 
     const result = await reportService.generate({
       name: REPORT_NAME_FIXTURE,

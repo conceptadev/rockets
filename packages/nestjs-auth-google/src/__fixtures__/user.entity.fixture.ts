@@ -1,9 +1,5 @@
-import { Entity, OneToMany } from 'typeorm';
-import { UserSqliteEntity } from '@concepta/nestjs-user';
-import { FederatedEntityFixture } from './federated-entity.fixture';
+import { Entity } from 'typeorm';
+import { UserSqliteEntity } from '@concepta/nestjs-typeorm-ext';
 
 @Entity()
-export class UserEntityFixture extends UserSqliteEntity {
-  @OneToMany(() => FederatedEntityFixture, (federated) => federated.user)
-  federateds!: UserEntityFixture;
-}
+export class UserEntityFixture extends UserSqliteEntity {}

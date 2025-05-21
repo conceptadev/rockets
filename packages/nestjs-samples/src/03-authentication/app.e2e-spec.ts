@@ -9,7 +9,6 @@ import {
   ExceptionsFilter,
   RepositoryInterface,
 } from '@concepta/nestjs-common';
-import { UserCrudService } from '@concepta/nestjs-user';
 
 import { AppModule } from './app.module';
 import { UserEntity } from './user/user.entity';
@@ -33,8 +32,6 @@ describe('AppController (e2e)', () => {
         .useValue(mock<UserEntity>())
         .overrideProvider('USER_MODULE_USER_CUSTOM_REPO_TOKEN')
         .useValue(mock<RepositoryInterface<UserEntity>>())
-        .overrideProvider(UserCrudService)
-        .useValue({})
         .compile();
 
       app = moduleFixture.createNestApplication();
@@ -113,10 +110,7 @@ describe('AppController (e2e)', () => {
     beforeEach(async () => {
       const moduleFixture: TestingModule = await Test.createTestingModule({
         imports: [AppModule],
-      })
-        .overrideProvider(UserCrudService)
-        .useValue({})
-        .compile();
+      }).compile();
 
       app = moduleFixture.createNestApplication();
       await app.init();

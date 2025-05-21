@@ -6,7 +6,7 @@ import {
   FederatedUpdatableInterface,
   InjectDynamicRepository,
 } from '@concepta/nestjs-common';
-import { FederatedEntityInterface } from '../interfaces/federated-entity.interface';
+import { FederatedEntityInterface } from '@concepta/nestjs-common';
 import { FederatedModelServiceInterface } from '../interfaces/federated-model-service.interface';
 import { FederatedCreateDto } from '../dto/federated-create.dto';
 import { FederatedUpdateDto } from '../dto/federated-update.dto';

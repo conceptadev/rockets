@@ -9,24 +9,17 @@ import {
   createSettingsProvider,
   getDynamicRepositoryToken,
 } from '@concepta/nestjs-common';
-import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 
 import {
-  CACHE_MODULE_CRUD_SERVICES_TOKEN,
   CACHE_MODULE_REPOSITORIES_TOKEN,
   CACHE_MODULE_SETTINGS_TOKEN,
 } from './cache.constants';
 
-import { CacheEntitiesOptionsInterface } from './interfaces/cache-entities-options.interface';
 import { CacheOptionsExtrasInterface } from './interfaces/cache-options-extras.interface';
 import { CacheOptionsInterface } from './interfaces/cache-options.interface';
 import { CacheSettingsInterface } from './interfaces/cache-settings.interface';
 
-import { CacheInterface } from '@concepta/nestjs-common';
-import { Repository } from 'typeorm';
 import { cacheDefaultConfig } from './config/cache-default.config';
-import { CacheCrudController } from './controllers/cache-crud.controller';
-import { CacheCrudService } from './services/cache-crud.service';
 import { CacheService } from './services/cache.service';
 import { CacheMissingEntitiesOptionException } from './exceptions/cache-missing-entities-option.exception';
 
@@ -53,51 +46,41 @@ function definitionTransform(
   definition: DynamicModule,
   extras: CacheOptionsExtrasInterface,
 ): DynamicModule {
-  const { providers } = definition;
-  const { controllers, global = false, entities } = extras;
+  const { imports, providers } = definition;
+  const { global = false, entities } = extras;
 
-  if (!entities) {
+  if (!entities || entities.length === 0) {
     throw new CacheMissingEntitiesOptionException();
   }
 
   return {
     ...definition,
     global,
-    imports: createCacheImports({ entities }),
+    imports: createCacheImports({ imports }),
     providers: createCacheProviders({ entities, providers }),
     exports: [ConfigModule, RAW_OPTIONS_TOKEN, ...createCacheExports()],
-    controllers: createCacheControllers({ controllers }),
   };
 }
 
-export function createCacheControllers(
-  overrides: Pick<CacheOptions, 'controllers'> = {},
-): DynamicModule['controllers'] {
-  return overrides?.controllers !== undefined
-    ? overrides.controllers
-    : [CacheCrudController];
-}
-
-export function createCacheImports(
-  options: CacheEntitiesOptionsInterface,
-): DynamicModule['imports'] {
+export function createCacheImports(options: {
+  imports: DynamicModule['imports'];
+}): DynamicModule['imports'] {
   return [
+    ...(options.imports || []),
     ConfigModule.forFeature(cacheDefaultConfig),
-    TypeOrmExtModule.forFeature(options.entities),
   ];
 }
 
-export function createCacheProviders(
-  options: CacheEntitiesOptionsInterface & {
-    overrides?: CacheOptions;
-    providers?: Provider[];
-  },
-): Provider[] {
+export function createCacheProviders(options: {
+  entities: string[];
+  overrides?: CacheOptions;
+  providers?: Provider[];
+}): Provider[] {
   return [
     ...(options.providers ?? []),
     createCacheSettingsProvider(options.overrides),
     ...createCacheRepositoriesProvider({
-      entities: options.overrides?.entities ?? options.entities,
+      entities: options.entities,
     }),
     CacheService,
   ];
@@ -124,9 +107,9 @@ export function createCacheSettingsProvider(
   });
 }
 
-export function createCacheRepositoriesProvider(
-  options: CacheEntitiesOptionsInterface,
-): Provider[] {
+export function createCacheRepositoriesProvider(options: {
+  entities: string[];
+}): Provider[] {
   const { entities } = options;
 
   const reposToInject = [];
@@ -134,7 +117,7 @@ export function createCacheRepositoriesProvider(
 
   let entityIdx = 0;
 
-  for (const entityKey in entities) {
+  for (const entityKey of entities) {
     reposToInject[entityIdx] = getDynamicRepositoryToken(entityKey);
     keyTracker[entityKey] = entityIdx++;
   }
@@ -146,26 +129,11 @@ export function createCacheRepositoriesProvider(
       useFactory: (...args: string[]) => {
         const repoInstances: Record<string, string> = {};
 
-        for (const entityKey in entities) {
+        for (const entityKey of entities) {
           repoInstances[entityKey] = args[keyTracker[entityKey]];
         }
 
         return repoInstances;
-      },
-    },
-    {
-      provide: CACHE_MODULE_CRUD_SERVICES_TOKEN,
-      inject: reposToInject,
-      useFactory: (...args: Repository<CacheInterface>[]) => {
-        const serviceInstances: Record<string, CacheCrudService> = {};
-
-        for (const entityKey in entities) {
-          serviceInstances[entityKey] = new CacheCrudService(
-            args[keyTracker[entityKey]],
-          );
-        }
-
-        return serviceInstances;
       },
     },
   ];

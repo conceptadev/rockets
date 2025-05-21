@@ -6,16 +6,12 @@ import {
   AuthLocalUserModelService,
   AuthLocalUserModelServiceInterface,
 } from '@concepta/nestjs-auth-local';
-import { UserCrudService } from '@concepta/nestjs-user';
 
 describe('AppModule', () => {
   it('should be imported', async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    })
-      .overrideProvider(UserCrudService)
-      .useValue({})
-      .compile();
+    }).compile();
 
     const issueTokenService = module.get<IssueTokenService>(IssueTokenService);
     const userModelService = module.get<AuthLocalUserModelServiceInterface>(

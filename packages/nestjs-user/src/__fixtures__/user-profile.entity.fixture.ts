@@ -1,16 +1,11 @@
-import { Column, Entity, OneToOne } from 'typeorm';
-
-import { UserProfileSqliteEntity } from '../entities/user-profile-sqlite.entity';
-import { UserEntityFixture } from './user.entity.fixture';
+import { Column, Entity } from 'typeorm';
+import { UserProfileSqliteEntity } from '@concepta/nestjs-typeorm-ext';
 
 /**
  * User Profile Entity Fixture
  */
 @Entity()
 export class UserProfileEntityFixture extends UserProfileSqliteEntity {
-  @OneToOne(() => UserEntityFixture, (user) => user.userProfile)
-  user!: UserEntityFixture;
-
   @Column({ nullable: true })
   firstName!: string;
 }

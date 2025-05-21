@@ -1,16 +1,16 @@
-import assert from 'assert';
-import supertest from 'supertest';
-import { randomUUID } from 'crypto';
+import { CacheCreatableInterface } from '@concepta/nestjs-common';
+import { SeedingSource } from '@concepta/typeorm-seeding';
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getDataSourceToken } from '@nestjs/typeorm';
-import { CacheCreatableInterface } from '@concepta/nestjs-common';
-import { SeedingSource } from '@concepta/typeorm-seeding';
+import assert from 'assert';
+import { randomUUID } from 'crypto';
+import supertest from 'supertest';
 
 import { CacheFactory } from '../cache.factory';
 import { CacheSeeder } from '../cache.seeder';
 
-import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
+import { AppCrudModuleFixture } from '../__fixtures__/app-crud.module.fixture';
 import { UserCacheEntityFixture } from '../__fixtures__/entities/user-cache-entity.fixture';
 import { UserEntityFixture } from '../__fixtures__/entities/user-entity.fixture';
 import { UserCacheFactoryFixture } from '../__fixtures__/factories/user-cache.factory.fixture';
@@ -25,7 +25,7 @@ describe('CacheAssignmentController (e2e)', () => {
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModuleFixture],
+      imports: [AppCrudModuleFixture],
     }).compile();
     app = moduleFixture.createNestApplication();
     await app.init();

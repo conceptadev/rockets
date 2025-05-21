@@ -6,7 +6,8 @@ import { CrudModule } from '@concepta/nestjs-crud';
 import { INVITATION_MODULE_CATEGORY_ORG_KEY } from '@concepta/nestjs-common';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { EventModule } from '@concepta/nestjs-event';
-import { UserEntityInterface, UserModule } from '@concepta/nestjs-user';
+import { UserEntityInterface } from '@concepta/nestjs-common';
+import { UserModule } from '@concepta/nestjs-user';
 import { PasswordModule } from '@concepta/nestjs-password';
 import { InvitationEntityInterface } from '@concepta/nestjs-invitation';
 import { UserFactory } from '@concepta/nestjs-user/dist/seeding';
@@ -14,7 +15,7 @@ import { InvitationFactory } from '@concepta/nestjs-invitation/dist/seeding';
 
 import { OrgModule } from '../org.module';
 import { OrgFactory } from '../seeding/org.factory';
-import { OrgEntityInterface } from '../interfaces/org-entity.interface';
+import { OrgEntityInterface } from '@concepta/nestjs-common';
 
 import { InvitationAcceptedListener } from './invitation-accepted-listener';
 import { OrgEntityFixture } from '../__fixtures__/org-entity.fixture';
@@ -54,27 +55,28 @@ describe(InvitationAcceptedListener, () => {
           ],
         }),
         PasswordModule.forRoot({}),
-        UserModule.forRoot({
-          entities: {
-            user: {
-              entity: UserEntityFixture,
-            },
-          },
+        UserModule.forRootAsync({
+          imports: [
+            TypeOrmExtModule.forFeature({
+              user: {
+                entity: UserEntityFixture,
+              },
+            }),
+          ],
+          useFactory: () => ({}),
         }),
         OrgModule.forRootAsync({
+          imports: [
+            TypeOrmExtModule.forFeature({
+              org: { entity: OrgEntityFixture },
+              'org-member': { entity: OrgMemberEntityFixture },
+            }),
+          ],
           useFactory: () => ({
             settings: {
               invitationRequestEvent: InvitationAcceptedEventAsync,
             },
           }),
-          entities: {
-            org: {
-              entity: OrgEntityFixture,
-            },
-            'org-member': {
-              entity: OrgMemberEntityFixture,
-            },
-          },
         }),
         CrudModule.forRoot({}),
         OwnerModuleFixture.register(),

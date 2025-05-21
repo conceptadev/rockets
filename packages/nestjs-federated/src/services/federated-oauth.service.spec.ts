@@ -3,7 +3,7 @@ import { FederatedOAuthService } from './federated-oauth.service';
 import { FederatedService } from './federated.service';
 import { FederatedModelService } from './federated-model.service';
 import { FederatedUserModelServiceInterface } from '../interfaces/federated-user-model-service.interface';
-import { FederatedEntityInterface } from '../interfaces/federated-entity.interface';
+import { FederatedEntityInterface } from '@concepta/nestjs-common';
 import { FederatedCredentialsInterface } from '../interfaces/federated-credentials.interface';
 import { FederatedCreateUserException } from '../exceptions/federated-create-user.exception';
 import { FederatedFindUserException } from '../exceptions/federated-find-user.exception';

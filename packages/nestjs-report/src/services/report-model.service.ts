@@ -7,8 +7,8 @@ import {
   ReportUpdatableInterface,
   RepositoryInterface,
   InjectDynamicRepository,
+  ReportEntityInterface,
 } from '@concepta/nestjs-common';
-import { ReportEntityInterface } from '../interfaces/report-entity.interface';
 import { ReportCreateDto } from '../dto/report-create.dto';
 import { ReportUpdateDto } from '../dto/report-update.dto';
 import { ReportModelServiceInterface } from '../interfaces/report-model-service.interface';

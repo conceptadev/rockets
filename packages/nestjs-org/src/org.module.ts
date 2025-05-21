@@ -4,12 +4,7 @@ import {
   OrgAsyncOptions,
   OrgModuleClass,
   OrgOptions,
-  createOrgControllers,
-  createOrgExports,
-  createOrgImports,
-  createOrgProviders,
 } from './org.module-definition';
-import { OrgMissingEntitiesOptionsException } from './exceptions/org-missing-entities-options.exception';
 
 /**
  * Org Module
@@ -30,21 +25,5 @@ export class OrgModule extends OrgModuleClass {
 
   static forRootAsync(options: OrgAsyncOptions): DynamicModule {
     return super.registerAsync({ ...options, global: true });
-  }
-
-  static forFeature(options: OrgOptions): DynamicModule {
-    const { entities } = options;
-
-    if (!entities) {
-      throw new OrgMissingEntitiesOptionsException();
-    }
-
-    return {
-      module: OrgModule,
-      imports: createOrgImports({ entities }),
-      providers: createOrgProviders({ overrides: options }),
-      exports: createOrgExports(),
-      controllers: createOrgControllers(options),
-    };
   }
 }

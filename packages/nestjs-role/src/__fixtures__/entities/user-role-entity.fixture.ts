@@ -1,5 +1,5 @@
+import { RoleAssignmentSqliteEntity } from '@concepta/nestjs-typeorm-ext';
 import { Entity } from 'typeorm';
-import { RoleAssignmentSqliteEntity } from '../../entities/role-assignment-sqlite.entity';
 
 /**
  * Role Entity Fixture

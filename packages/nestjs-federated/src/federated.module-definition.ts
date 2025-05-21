@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { createSettingsProvider } from '@concepta/nestjs-common';
 
 import {
@@ -14,14 +13,12 @@ import {
 } from './federated.constants';
 
 import { FederatedOptionsInterface } from './interfaces/federated-options.interface';
-import { FederatedEntitiesOptionsInterface } from './interfaces/federated-entities-options.interface';
 import { FederatedOptionsExtrasInterface } from './interfaces/federated-options-extras.interface';
 import { FederatedSettingsInterface } from './interfaces/federated-settings.interface';
 import { FederatedService } from './services/federated.service';
 import { FederatedOAuthService } from './services/federated-oauth.service';
 import { FederatedModelService } from './services/federated-model.service';
 import { federatedDefaultConfig } from './config/federated-default.config';
-import { FederatedMissingEntitiesOptionsException } from './exceptions/federated-missing-entities-options.exception';
 
 const RAW_OPTIONS_TOKEN = Symbol('__FEDERATED_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -50,28 +47,24 @@ function definitionTransform(
   definition: DynamicModule,
   extras: FederatedOptionsExtrasInterface,
 ): DynamicModule {
-  const { providers = [] } = definition;
-  const { global = false, entities } = extras;
-
-  if (!entities) {
-    throw new FederatedMissingEntitiesOptionsException();
-  }
+  const { imports = [], providers = [] } = definition;
+  const { global = false } = extras;
 
   return {
     ...definition,
     global,
-    imports: createFederatedImports({ entities }),
+    imports: createFederatedImports({ imports }),
     providers: createFederatedProviders({ providers }),
     exports: [ConfigModule, RAW_OPTIONS_TOKEN, ...createFederatedExports()],
   };
 }
 
-export function createFederatedImports(
-  options: FederatedEntitiesOptionsInterface,
-): DynamicModule['imports'] {
+export function createFederatedImports(options: {
+  imports: DynamicModule['imports'];
+}): DynamicModule['imports'] {
   return [
+    ...(options.imports || []),
     ConfigModule.forFeature(federatedDefaultConfig),
-    TypeOrmExtModule.forFeature(options.entities),
   ];
 }
 

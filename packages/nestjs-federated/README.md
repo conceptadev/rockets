@@ -76,7 +76,7 @@ Next, create the `FederatedEntity`:
 
 ```ts
 import { Entity, ManyToOne } from 'typeorm';
-import { FederatedSqliteEntity } from '@concepta/nestjs-federated';
+import { FederatedSqliteEntity } from '@concepta/nestjs-typeorm-ext';
 import { UserEntity } from '../user/user.entity';
 
 @Entity()
@@ -118,12 +118,12 @@ import { UserEntity } from './user/user.entity';
     }),
     JwtModule.forRoot({}),
     AuthenticationModule.forRoot({}),
-    FederatedModule.forRoot({
-      entities: {
-        federated: {
-          entity: FederatedEntity,
-        },
+    TypeOrmExtModule.forFeature({
+      federated: {
+        entity: FederatedEntity,
       },
+    }),
+    FederatedModule.forRoot({
       userModelService: new FederatedUserModelService(),
     }),
   ],

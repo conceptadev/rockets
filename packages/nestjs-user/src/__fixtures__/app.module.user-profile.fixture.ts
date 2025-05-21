@@ -1,6 +1,5 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
-import { PasswordModule } from '@concepta/nestjs-password';
+import { Global, Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import {
   ConfigurableCrudOptions,
   ConfigurableCrudOptionsTransformer,
@@ -8,16 +7,13 @@ import {
 } from '@concepta/nestjs-crud';
 import { EventModule } from '@concepta/nestjs-event';
 
-import { UserModule } from '../user.module';
-import { InvitationAcceptedEventAsync } from './events/invitation-accepted.event';
-
 import { ormConfig } from './ormconfig.fixture';
-import { UserEntityFixture } from './user.entity.fixture';
 import { UserProfileEntityFixture } from './user-profile.entity.fixture';
 import { UserProfileCrudBuilder } from '../utils/user-profile.crud-builder';
 import { UserProfileDtoFixture } from './dto/user-profile.dto.fixture';
 import { UserProfileCreateDtoFixture } from './dto/user-profile-create.dto.fixture';
 import { UserProfileUpdateDtoFixture } from './dto/user-profile-update.dto.fixture';
+import { UserCrudModelServiceFixture } from './services/user-crud-model.service.fixture';
 
 type UserProfileExtras = {
   model: {
@@ -53,6 +49,7 @@ const myOptionsTransform: ConfigurableCrudOptionsTransformer<
   if (!extras) return options;
 
   options.controller.model.type = extras.model.type;
+  options.service.entity = UserProfileEntityFixture;
   if (options.createOne) options.createOne.dto = extras.createOne.dto;
   if (options.updateOne) options.updateOne.dto = extras.updateOne.dto;
   return options;
@@ -71,27 +68,16 @@ userProfileCrudBuilder.setExtras(extras, myOptionsTransform);
 const { ConfigurableControllerClass, ConfigurableServiceProvider } =
   userProfileCrudBuilder.build();
 
+@Global()
 @Module({
   imports: [
-    TypeOrmExtModule.forRoot(ormConfig),
+    TypeOrmModule.forRoot(ormConfig),
+    TypeOrmModule.forFeature([UserProfileEntityFixture]),
     CrudModule.forRoot({}),
     EventModule.forRoot({}),
-    PasswordModule.forRoot({}),
-    UserModule.forRoot({
-      settings: {
-        invitationAcceptedEvent: InvitationAcceptedEventAsync,
-      },
-      entities: {
-        user: {
-          entity: UserEntityFixture,
-        },
-        'user-profile': {
-          entity: UserProfileEntityFixture,
-        },
-      },
-      extraControllers: [ConfigurableControllerClass],
-      extraProviders: [ConfigurableServiceProvider],
-    }),
   ],
+  providers: [UserCrudModelServiceFixture, ConfigurableServiceProvider],
+  exports: [UserCrudModelServiceFixture, ConfigurableServiceProvider],
+  controllers: [ConfigurableControllerClass],
 })
 export class AppModuleUserProfileFixture {}

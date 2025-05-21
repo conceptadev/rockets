@@ -1,8 +1,7 @@
 import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { getDataSourceToken } from '@nestjs/typeorm';
-import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
+import { getDataSourceToken, TypeOrmModule } from '@nestjs/typeorm';
 import {
   ConfigurableCrudOptions,
   ConfigurableCrudOptionsTransformer,
@@ -11,10 +10,8 @@ import {
 import { SeedingSource } from '@concepta/typeorm-seeding';
 
 import { OrgFactory } from '../seeding/org.factory';
-import { OrgModule } from '../org.module';
 import { OrgEntityFixture } from '../__fixtures__/org-entity.fixture';
 import { OwnerEntityFixture } from '../__fixtures__/owner-entity.fixture';
-import { OwnerModuleFixture } from '../__fixtures__/owner.module.fixture';
 import { OwnerFactoryFixture } from '../__fixtures__/owner-factory.fixture';
 import { OrgMemberEntityFixture } from '../__fixtures__/org-member.entity.fixture';
 import { UserEntityFixture } from '../__fixtures__/user-entity.fixture';
@@ -96,7 +93,7 @@ describe('Org Profile Crud Builder (e2e)', () => {
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
-        TypeOrmExtModule.forRoot({
+        TypeOrmModule.forRoot({
           type: 'sqlite',
           database: ':memory:',
           synchronize: true,
@@ -109,24 +106,11 @@ describe('Org Profile Crud Builder (e2e)', () => {
             InvitationEntityFixture,
           ],
         }),
-        OrgModule.register({
-          entities: {
-            org: {
-              entity: OrgEntityFixture,
-            },
-            'org-member': {
-              entity: OrgMemberEntityFixture,
-            },
-            'org-profile': {
-              entity: OrgProfileEntityFixture,
-            },
-          },
-          extraControllers: [ConfigurableControllerClass],
-          extraProviders: [ConfigurableServiceProvider],
-        }),
+        TypeOrmModule.forFeature([OrgProfileEntityFixture]),
         CrudModule.forRoot({}),
-        OwnerModuleFixture.register(),
       ],
+      controllers: [ConfigurableControllerClass],
+      providers: [ConfigurableServiceProvider],
     }).compile();
     app = moduleFixture.createNestApplication();
     await app.init();

@@ -1067,7 +1067,6 @@ __metadata:
   resolution: "@concepta/nestjs-crud@workspace:packages/nestjs-crud"
   dependencies:
     "@concepta/nestjs-common": "npm:^7.0.0-alpha.3"
-    "@concepta/nestjs-typeorm-ext": "npm:^7.0.0-alpha.3"
     "@concepta/typeorm-seeding": "npm:^4.0.0"
     "@faker-js/faker": "npm:^8.4.1"
     "@nestjs/common": "npm:^10.4.1"
@@ -1270,7 +1269,6 @@ __metadata:
   dependencies:
     "@concepta/nestjs-access-control": "npm:^7.0.0-alpha.3"
     "@concepta/nestjs-common": "npm:^7.0.0-alpha.3"
-    "@concepta/nestjs-crud": "npm:^7.0.0-alpha.3"
     "@concepta/nestjs-event": "npm:^7.0.0-alpha.3"
     "@concepta/nestjs-invitation": "npm:^7.0.0-alpha.3"
     "@concepta/nestjs-password": "npm:^7.0.0-alpha.3"
@@ -1285,6 +1283,7 @@ __metadata:
     "@nestjs/typeorm": "npm:^10.0.2"
     supertest: "npm:^6.3.4"
   peerDependencies:
+    "@concepta/nestjs-crud": ^7.0.0-alpha.3
     class-transformer: "*"
     class-validator: "*"
     typeorm: ^0.3.0

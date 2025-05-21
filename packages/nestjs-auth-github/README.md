@@ -70,9 +70,6 @@ export class UserEntity {
 
   @Column()
   name: string;
-
-  @OneToMany(() => FederatedEntity, (federated) => federated.user)
-  federated!: FederatedEntity;
 }
 ```
 
@@ -82,14 +79,11 @@ Next, associate the `UserEntity` to the `FederatedEntity`:
 
 ```ts
 import { Entity, ManyToOne } from 'typeorm';
-import { FederatedSqliteEntity } from '@concepta/nestjs-federated';
+import { FederatedSqliteEntity } from '@concepta/nestjs-typeorm-ext';
 import { UserEntity } from '../user/user.entity';
 
 @Entity()
-export class FederatedEntity extends FederatedSqliteEntity {
-  @ManyToOne(() => UserEntity, (user) => user.federated)
-  user!: UserEntity;
-}
+export class FederatedEntity extends FederatedSqliteEntity {}
 ```
 
 ### Step 3: Environment Variables
@@ -158,12 +152,12 @@ import { UserEntity } from './user/user.entity';
     AuthGithubModule.forRoot({
       issueTokenService: new GitHubIssueTokenService(),
     }),
-    FederatedModule.forRoot({
-      entities: {
-        federated: {
-          entity: FederatedEntity,
-        },
+    TypeOrmExtModule.forFeature({
+      federated: {
+        entity: FederatedEntity,
       },
+    }),
+    FederatedModule.forRoot({
       userModelService: new FederatedUserModelService(),
     }),
   ],

@@ -1,7 +1,5 @@
 import {
   FederatedModule,
-  FederatedPostgresEntity,
-  FederatedSqliteEntity,
   FederatedService,
   FederatedOAuthService,
   FederatedDto,
@@ -12,18 +10,6 @@ import {
 describe('Federated Module', () => {
   it('should be a function', () => {
     expect(FederatedModule).toBeInstanceOf(Function);
-  });
-});
-
-describe('Federated Postgres Entity', () => {
-  it('should be a function', () => {
-    expect(FederatedPostgresEntity).toBeInstanceOf(Function);
-  });
-});
-
-describe('Federated Sqlite Entity', () => {
-  it('should be a function', () => {
-    expect(FederatedSqliteEntity).toBeInstanceOf(Function);
   });
 });
 

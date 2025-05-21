@@ -9,7 +9,6 @@ import {
   createSettingsProvider,
   getDynamicRepositoryToken,
 } from '@concepta/nestjs-common';
-import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 
 import {
   OTP_MODULE_REPOSITORIES_TOKEN,
@@ -18,7 +17,6 @@ import {
 
 import { OtpOptionsInterface } from './interfaces/otp-options.interface';
 import { OtpOptionsExtrasInterface } from './interfaces/otp-options-extras.interface';
-import { OtpEntitiesOptionsInterface } from './interfaces/otp-entities-options.interface';
 import { OtpSettingsInterface } from './interfaces/otp-settings.interface';
 
 import { OtpService } from './services/otp.service';
@@ -45,43 +43,42 @@ function definitionTransform(
   definition: DynamicModule,
   extras: OtpOptionsExtrasInterface,
 ): DynamicModule {
-  const { providers = [] } = definition;
+  const { providers = [], imports = [] } = definition;
   const { global = false, entities } = extras;
 
-  if (!entities) {
+  if (!entities || entities.length === 0) {
     throw new OtpMissingEntitiesOptionsException();
   }
 
   return {
     ...definition,
     global,
-    imports: createOtpImports({ entities }),
+    imports: createOtpImports({ imports }),
     providers: createOtpProviders({ entities, providers }),
     exports: [ConfigModule, RAW_OPTIONS_TOKEN, ...createOtpExports()],
   };
 }
 
-export function createOtpImports(
-  options: OtpEntitiesOptionsInterface,
-): DynamicModule['imports'] {
+export function createOtpImports(options: {
+  imports: DynamicModule['imports'];
+}): DynamicModule['imports'] {
   return [
+    ...(options.imports || []),
     ConfigModule.forFeature(otpDefaultConfig),
-    TypeOrmExtModule.forFeature(options.entities),
   ];
 }
 
-export function createOtpProviders(
-  options: OtpEntitiesOptionsInterface & {
-    overrides?: OtpOptions;
-    providers?: Provider[];
-  },
-): Provider[] {
+export function createOtpProviders(options: {
+  entities: string[];
+  overrides?: OtpOptions;
+  providers?: Provider[];
+}): Provider[] {
   return [
     ...(options.providers ?? []),
     OtpService,
     createOtpSettingsProvider(options.overrides),
     createOtpRepositoriesProvider({
-      entities: options.overrides?.entities ?? options.entities,
+      entities: options.entities,
     }),
   ];
 }
@@ -103,9 +100,9 @@ export function createOtpSettingsProvider(
   });
 }
 
-export function createOtpRepositoriesProvider(
-  options: OtpEntitiesOptionsInterface,
-): Provider {
+export function createOtpRepositoriesProvider(options: {
+  entities: string[];
+}): Provider {
   const { entities } = options;
 
   const reposToInject = [];
@@ -113,7 +110,7 @@ export function createOtpRepositoriesProvider(
 
   let entityIdx = 0;
 
-  for (const entityKey in entities) {
+  for (const entityKey of entities) {
     reposToInject[entityIdx] = getDynamicRepositoryToken(entityKey);
     keyTracker[entityKey] = entityIdx++;
   }
@@ -123,7 +120,7 @@ export function createOtpRepositoriesProvider(
     useFactory: (...args: string[]) => {
       const repoInstances: Record<string, string> = {};
 
-      for (const entityKey in entities) {
+      for (const entityKey of entities) {
         repoInstances[entityKey] = args[keyTracker[entityKey]];
       }
 

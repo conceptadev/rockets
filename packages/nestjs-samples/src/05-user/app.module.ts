@@ -9,12 +9,14 @@ import { UserEntity } from './user/user.entity';
   imports: [
     TypeOrmExtModule.forRoot(dbConfig),
     CrudModule.forRoot({}),
-    UserModule.forRoot({
-      entities: {
-        user: {
-          entity: UserEntity,
-        },
-      },
+    UserModule.forRootAsync({
+      imports: [
+        TypeOrmExtModule.forFeature({
+          user: {
+            entity: UserEntity,
+          },
+        }),
+      ],
     }),
   ],
 })
