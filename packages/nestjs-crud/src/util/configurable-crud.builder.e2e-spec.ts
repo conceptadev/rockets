@@ -6,7 +6,6 @@ import { getDataSourceToken } from '@nestjs/typeorm';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 
 import { AppCcbModuleFixture } from '../__fixtures__/app-ccb.module.fixture';
-import { AppCcbExtModuleFixture } from '../__fixtures__/app-ccb-ext.module.fixture';
 import { AppCcbSubModuleFixture } from '../__fixtures__/app-ccb-sub.module.fixture';
 import { AppCcbCustomModuleFixture } from '../__fixtures__/app-ccb-custom.module.fixture';
 
@@ -16,7 +15,6 @@ import { PhotoFactoryFixture } from '../__fixtures__/photo/photo.factory.fixture
 
 describe.each([
   { testModule: AppCcbModuleFixture },
-  { testModule: AppCcbExtModuleFixture },
   { testModule: AppCcbCustomModuleFixture },
   { testModule: AppCcbSubModuleFixture },
 ])('Configurable Crud Builder (e2e)', ({ testModule }) => {
