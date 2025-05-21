@@ -26,7 +26,11 @@ export class UserPasswordHistoryModelService extends ModelService<
   }
 
   async byUserId(userId: ReferenceId) {
-    return this.userPasswordHistoryRepo.findBy({ userId });
+    return this.userPasswordHistoryRepo.find({
+      where: {
+        userId
+      }
+    });
   }
 
   protected createDto = UserPasswordHistoryCreateDto;

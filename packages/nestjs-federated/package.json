@@ -17,8 +17,8 @@
     "@nestjs/swagger": "^7.4.0"
   },
   "devDependencies": {
-    "@concepta/nestjs-user": "^7.0.0-alpha.3",
     "@concepta/nestjs-typeorm-ext": "^7.0.0-alpha.3",
+    "@concepta/nestjs-user": "^7.0.0-alpha.3",
     "@nestjs/testing": "^10.4.1"
   },
   "peerDependencies": {

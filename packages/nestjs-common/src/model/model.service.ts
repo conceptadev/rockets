@@ -160,7 +160,7 @@ export abstract class ModelService<
     try {
       return await this.repo.save(entity);
     } catch (e) {
-      throw new ModelMutateException(this.repo.metadata.name, {
+      throw new ModelMutateException(this.repo.entityName(), {
         originalError: e,
       });
     }
@@ -174,7 +174,7 @@ export abstract class ModelService<
     try {
       return await this.repo.remove(entity);
     } catch (e) {
-      throw new ModelMutateException(this.repo.metadata.name, {
+      throw new ModelMutateException(this.repo.entityName(), {
         originalError: e,
       });
     }
@@ -197,7 +197,7 @@ export abstract class ModelService<
     if (validationErrors?.length) {
       // yes, throw error
       throw new ModelValidationException(
-        this.repo.metadata.name,
+        this.repo.entityName(),
         validationErrors,
       );
     }
@@ -225,7 +225,7 @@ export abstract class ModelService<
     if (entity) {
       return entity;
     } else {
-      throw new ModelIdNoMatchException(this.repo.metadata.name, id);
+      throw new ModelIdNoMatchException(this.repo.entityName(), id);
     }
   }
 }
