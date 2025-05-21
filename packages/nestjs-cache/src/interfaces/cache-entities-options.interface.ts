@@ -1,5 +1,7 @@
-import { TypeOrmExtEntityOptionInterface } from '@concepta/nestjs-typeorm-ext';
+import {
+  CacheInterface,
+  RepositoryEntityOptionInterface,
+} from '@concepta/nestjs-common';
 
-export interface CacheEntitiesOptionsInterface {
-  entities: Record<string, TypeOrmExtEntityOptionInterface>;
-}
+export interface CacheEntitiesOptionsInterface
+  extends Record<string, RepositoryEntityOptionInterface<CacheInterface>> {}

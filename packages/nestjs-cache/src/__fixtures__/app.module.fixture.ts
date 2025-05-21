@@ -2,7 +2,6 @@ import { APP_FILTER } from '@nestjs/core';
 import { Module } from '@nestjs/common';
 import { ExceptionsFilter } from '@concepta/nestjs-common';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
-import { CrudModule } from '@concepta/nestjs-crud';
 import { CacheModule } from '../cache.module';
 import { UserEntityFixture } from './entities/user-entity.fixture';
 import { UserCacheEntityFixture } from './entities/user-cache-entity.fixture';
@@ -15,20 +14,25 @@ import { UserCacheEntityFixture } from './entities/user-cache-entity.fixture';
       synchronize: true,
       entities: [UserEntityFixture, UserCacheEntityFixture],
     }),
-    CacheModule.register({
-      entities: {
-        userCache: {
-          entity: UserCacheEntityFixture,
+    CacheModule.registerAsync({
+      imports: [
+        TypeOrmExtModule.forFeature({
+          userCache: {
+            entity: UserCacheEntityFixture,
+          },
+        }),
+      ],
+      useFactory: () => ({
+        settings: {
+          assignments: {
+            user: { entityKey: 'userCache' },
+          },
         },
-      },
-      settings: {
-        assignments: {
-          user: { entityKey: 'userCache' },
-        },
-      },
+      }),
+      entities: ['userCache'],
     }),
-    CrudModule.forRoot({}),
   ],
+  controllers: [],
   providers: [
     {
       provide: APP_FILTER,
