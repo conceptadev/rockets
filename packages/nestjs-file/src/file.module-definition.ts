@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { createSettingsProvider } from '@concepta/nestjs-common';
 
 import {
@@ -14,7 +13,6 @@ import {
 } from './file.constants';
 
 import { FileOptionsInterface } from './interfaces/file-options.interface';
-import { FileEntitiesOptionsInterface } from './interfaces/file-entities-options.interface';
 import { FileOptionsExtrasInterface } from './interfaces/file-options-extras.interface';
 import { FileSettingsInterface } from './interfaces/file-settings.interface';
 import { FileService } from './services/file.service';
@@ -22,7 +20,6 @@ import { FileStrategyService } from './services/file-strategy.service';
 
 import { fileDefaultConfig } from './config/file-default.config';
 import { FileModelService } from './services/file-model.service';
-import { FileMissingEntitiesOptionsException } from './exceptions/file-missing-entities-options.exception';
 
 const RAW_OPTIONS_TOKEN = Symbol('__FILE_MODULE_RAW_OPTIONS_TOKEN__');
 

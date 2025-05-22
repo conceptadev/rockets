@@ -127,12 +127,13 @@ describe(AuthRecoveryController, () => {
       .expect(200);
   });
 
-  const getFirstUser = async (_app: INestApplication): Promise<UserInterface> => {
+  const getFirstUser = async (
+    _app: INestApplication,
+  ): Promise<UserInterface> => {
     const response = await userModelService.find();
     return response[0];
   };
 });
-
 
 const validateRecoverPassword = async (
   app: INestApplication,

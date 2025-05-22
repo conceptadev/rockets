@@ -1,9 +1,4 @@
-import {
-  FileCreateDto,
-  FileDto,
-  FileModule,
-  FileService,
-} from './index';
+import { FileCreateDto, FileDto, FileModule, FileService } from './index';
 
 describe('File Module', () => {
   it('should be a function', () => {
