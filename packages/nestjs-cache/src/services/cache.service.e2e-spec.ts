@@ -1,7 +1,7 @@
 import {
   CacheCreatableInterface,
   CacheInterface,
-  RepositoryInterface
+  RepositoryInterface,
 } from '@concepta/nestjs-common';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { getDataSourceToken } from '@nestjs/typeorm';
@@ -23,27 +23,31 @@ jest.mock('../utils/get-expiration-date.util', () => ({
 }));
 
 describe(CacheService.name, () => {
-  let cacheModule: CacheModule;
   let cacheService: CacheService;
-  let cacheDynamicRepo: Record<string, RepositoryInterface<CacheInterface>>;
   let seedingSource: SeedingSource;
   let userFactory: UserFactoryFixture;
   let user: UserEntityFixture;
 
-  const createTestCache = (overrides: Partial<CacheCreatableInterface> = {}): CacheCreatableInterface => ({
+  const createTestCache = (
+    overrides: Partial<CacheCreatableInterface> = {},
+  ): CacheCreatableInterface => ({
     key: 'test-key',
     type: 'test-type',
     data: 'test-data',
     assigneeId: user.id,
     expiresIn: '1h',
-    ...overrides
+    ...overrides,
   });
 
-  const createTestCacheQuery = (overrides: Partial<Pick<CacheInterface, 'key' | 'type' | 'assigneeId'>> = {}) => ({
+  const createTestCacheQuery = (
+    overrides: Partial<
+      Pick<CacheInterface, 'key' | 'type' | 'assigneeId'>
+    > = {},
+  ) => ({
     key: 'test-key',
     type: 'test-type',
     assigneeId: user.id,
-    ...overrides
+    ...overrides,
   });
 
   beforeEach(async () => {
@@ -91,10 +95,13 @@ describe(CacheService.name, () => {
     });
 
     it('should return null for non-existent cache', async () => {
-      const nonExistentCache = await cacheService.get('user', createTestCacheQuery({
-        key: 'non-existent-key',
-        type: 'non-existent-type'
-      }));
+      const nonExistentCache = await cacheService.get(
+        'user',
+        createTestCacheQuery({
+          key: 'non-existent-key',
+          type: 'non-existent-type',
+        }),
+      );
       expect(nonExistentCache).toBeNull();
     });
   });
@@ -109,7 +116,7 @@ describe(CacheService.name, () => {
       const updatedCache = await cacheService.update('user', {
         ...createTestCacheQuery(),
         data: updatedData,
-        expiresIn: '1h'
+        expiresIn: '1h',
       });
 
       expect(updatedCache.data).toBe(updatedData);
@@ -126,7 +133,10 @@ describe(CacheService.name, () => {
 
       await cacheService.delete('user', createTestCacheQuery());
 
-      const deletedCache = await cacheService.get('user', createTestCacheQuery());
+      const deletedCache = await cacheService.get(
+        'user',
+        createTestCacheQuery(),
+      );
       expect(deletedCache).toBeNull();
     });
   });
@@ -140,14 +150,14 @@ describe(CacheService.name, () => {
       await cacheService.create('user', cache2);
 
       const userCaches = await cacheService.getAssignedCaches('user', {
-        assigneeId: user.id
+        assigneeId: user.id,
       });
 
       expect(userCaches).toHaveLength(2);
       expect(userCaches[0].assigneeId).toBe(user.id);
       expect(userCaches[1].assigneeId).toBe(user.id);
-      expect(userCaches.map(cache => cache.key)).toContain(cache1.key);
-      expect(userCaches.map(cache => cache.key)).toContain(cache2.key);
+      expect(userCaches.map((cache) => cache.key)).toContain(cache1.key);
+      expect(userCaches.map((cache) => cache.key)).toContain(cache2.key);
     });
   });
 
@@ -160,11 +170,11 @@ describe(CacheService.name, () => {
       await cacheService.create('user', cache2);
 
       await cacheService.clear('user', {
-        assigneeId: user.id
+        assigneeId: user.id,
       });
 
       const userCaches = await cacheService.getAssignedCaches('user', {
-        assigneeId: user.id
+        assigneeId: user.id,
       });
       expect(userCaches).toHaveLength(0);
     });
@@ -182,7 +192,7 @@ describe(CacheService.name, () => {
       const updatedData = 'updated-data';
       const updatedCache = await cacheService.updateOrCreate('user', {
         ...cacheData,
-        data: updatedData
+        data: updatedData,
       });
 
       expect(updatedCache.data).toBe(updatedData);
@@ -191,7 +201,7 @@ describe(CacheService.name, () => {
       expect(updatedCache.assigneeId).toBe(user.id);
 
       const userCaches = await cacheService.getAssignedCaches('user', {
-        assigneeId: user.id
+        assigneeId: user.id,
       });
       expect(userCaches).toHaveLength(1);
     });

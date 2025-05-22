@@ -28,8 +28,8 @@ export class UserPasswordHistoryModelService extends ModelService<
   async byUserId(userId: ReferenceId) {
     return this.userPasswordHistoryRepo.find({
       where: {
-        userId
-      }
+        userId,
+      },
     });
   }
 

@@ -13,9 +13,7 @@ describe(FederatedService.name, () => {
   beforeEach(async () => {
     const mockRepo = {
       findOne: jest.fn(),
-      metadata: {
-        name: 'FederatedEntity',
-      },
+      entityName: () => 'FederatedEntity',
     };
 
     const module: TestingModule = await Test.createTestingModule({

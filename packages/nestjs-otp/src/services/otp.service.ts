@@ -4,7 +4,6 @@ import { validate } from 'class-validator';
 import { Inject, Injectable, Type } from '@nestjs/common';
 import {
   ReferenceAssignment,
-  ReferenceId,
   OtpInterface,
   OtpCreateParamsInterface,
   OtpValidateLimitParamsInterface,
@@ -202,8 +201,7 @@ export class OtpService implements OtpServiceInterface {
     // get all otps from an assigned user for a category
     const assignedOtps = await this.getAssignedOtps(assignment, otp);
 
-    if (assignedOtps.length > 0)
-      await this.deleteOtp(assignment, assignedOtps);
+    if (assignedOtps.length > 0) await this.deleteOtp(assignment, assignedOtps);
   }
 
   /**
@@ -241,8 +239,7 @@ export class OtpService implements OtpServiceInterface {
       keepHistoryDays,
     );
 
-    if (assignedOtps.length > 0)
-      await this.deleteOtp(assignment, assignedOtps);
+    if (assignedOtps.length > 0) await this.deleteOtp(assignment, assignedOtps);
   }
 
   /**

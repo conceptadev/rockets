@@ -1,7 +1,6 @@
 import {
   FindManyOptions,
   FindOneOptions,
-  FindOptionsWhere,
   LessThan,
   LessThanOrEqual,
   MoreThan,
@@ -74,7 +73,7 @@ export class TypeOrmRepositoryAdapter<Entity extends PlainLiteralObject>
    * Get the entity name from the repository metadata.
    */
   entityName(): string {
-    return this.repo.metadata.name;
+    return this.repo.metadata?.name || this.repo.metadata?.targetName;
   }
 
   async count(

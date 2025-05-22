@@ -5,7 +5,6 @@ import { DeepPartial } from '../../utils/deep-partial';
 import { RepositoryInternals } from './repository-internals';
 
 export interface RepositoryInterface<Entity extends PlainLiteralObject> {
-
   entityName(): string;
 
   find(

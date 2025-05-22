@@ -6,7 +6,6 @@ import {
   CacheUpdatableInterface,
   DeepPartial,
   ReferenceAssignment,
-  ReferenceId,
   Type,
   RepositoryInterface,
   ModelQueryException,
@@ -94,9 +93,7 @@ export class CacheService implements CacheServiceInterface {
     try {
       const assignedCache = await this.findCache(assignmentRepo, dto);
       if (!assignedCache)
-        throw new CacheEntityNotFoundException(
-          assignmentRepo.entityName(),
-        );
+        throw new CacheEntityNotFoundException(assignmentRepo.entityName());
 
       const mergedEntity = await this.mergeEntity(
         assignmentRepo,
