@@ -1,4 +1,4 @@
-import { AuthVerifyController } from './auth-verify.controller';
+import { AuthVerifyController } from './__fixtures__/auth-verify.controller';
 import { AuthVerifyService } from './services/auth-verify.service';
 import { AuthVerifyUpdateDto } from './dto/auth-verify-update.dto';
 import { mock } from 'jest-mock-extended';

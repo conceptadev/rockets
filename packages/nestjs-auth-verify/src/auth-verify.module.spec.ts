@@ -4,7 +4,7 @@ import { mock } from 'jest-mock-extended';
 
 import { EmailModule, EmailService } from '@concepta/nestjs-email';
 
-import { AuthVerifyController } from './auth-verify.controller';
+import { AuthVerifyController } from './__fixtures__/auth-verify.controller';
 import { AuthVerifyModule } from './auth-verify.module';
 import { AuthVerifyEmailServiceInterface } from './interfaces/auth-verify-email.service.interface';
 import { AuthVerifyOtpServiceInterface } from './interfaces/auth-verify-otp.service.interface';

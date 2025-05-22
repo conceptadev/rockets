@@ -91,6 +91,7 @@ export { FileCreatableInterface } from './file/interfaces/file-creatable.interfa
 export { FileUpdatableInterface } from './file/interfaces/file-updatable.interface';
 export { FileOwnableInterface } from './file/interfaces/file-ownable.interface';
 export { FileInterface } from './file/interfaces/file.interface';
+export { FileEntityInterface } from './file/interfaces/file-entity.interface';
 
 export { ReportStatusEnum } from './report/enum/report-status.enum';
 export { ReportCreatableInterface } from './report/interfaces/report-creatable.interface';

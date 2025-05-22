@@ -46,28 +46,23 @@ function definitionTransform(
   extras: FileOptionsExtrasInterface,
 ): DynamicModule {
   const { providers = [], imports = [] } = definition;
-  const { global = false, entities } = extras;
-
-  if (!entities) {
-    throw new FileMissingEntitiesOptionsException();
-  }
+  const { global = false } = extras;
 
   return {
     ...definition,
     global,
-    imports: createFileImports({ imports, entities }),
+    imports: createFileImports({ imports }),
     providers: createFileProviders({ providers }),
     exports: [ConfigModule, RAW_OPTIONS_TOKEN, ...createFileExports()],
   };
 }
 
 export function createFileImports(
-  options: Pick<DynamicModule, 'imports'> & FileEntitiesOptionsInterface,
+  options: Pick<DynamicModule, 'imports'>,
 ): DynamicModule['imports'] {
   return [
     ...(options.imports ?? []),
     ConfigModule.forFeature(fileDefaultConfig),
-    TypeOrmExtModule.forFeature(options.entities),
   ];
 }
 

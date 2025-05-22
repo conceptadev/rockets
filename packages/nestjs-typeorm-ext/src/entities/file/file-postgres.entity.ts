@@ -1,14 +1,15 @@
 import { Column, Entity, Unique } from 'typeorm';
-import { CommonSqliteEntity } from '@concepta/nestjs-typeorm-ext';
-import { FileEntityInterface } from '../interfaces/file-entity.interface';
+
+import { FileEntityInterface } from '@concepta/nestjs-common';
+import { CommonPostgresEntity } from '../common/common-postgres.entity';
 
 /**
- * File Sqlite Entity
+ * File Postgres Entity
  */
 @Entity()
-@Unique(['fileName', 'serviceKey'])
-export class FileSqliteEntity
-  extends CommonSqliteEntity
+@Unique(['serviceKey', 'fileName'])
+export class FilePostgresEntity
+  extends CommonPostgresEntity
   implements FileEntityInterface
 {
   /**

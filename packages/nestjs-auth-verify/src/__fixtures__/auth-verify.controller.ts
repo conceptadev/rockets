@@ -7,9 +7,9 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthVerifyUpdateDto } from './dto/auth-verify-update.dto';
-import { AuthVerifyDto } from './dto/auth-verify.dto';
-import { AuthVerifyService } from './services/auth-verify.service';
+import { AuthVerifyUpdateDto } from '../dto/auth-verify-update.dto';
+import { AuthVerifyDto } from '../dto/auth-verify.dto';
+import { AuthVerifyService } from '../services/auth-verify.service';
 
 @Controller('auth/verify')
 @AuthPublic()

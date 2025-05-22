@@ -7,7 +7,7 @@ import {
   RepositoryInterface,
   InjectDynamicRepository,
 } from '@concepta/nestjs-common';
-import { FileEntityInterface } from '../interfaces/file-entity.interface';
+import { FileEntityInterface } from '@concepta/nestjs-common';
 import { FileModelServiceInterface } from '../interfaces/file-model-service.interface';
 
 import { FileCreateDto } from '../dto/file-create.dto';
