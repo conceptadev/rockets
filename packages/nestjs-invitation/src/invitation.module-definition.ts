@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { createSettingsProvider } from '@concepta/nestjs-common';
 
 import {
@@ -17,22 +16,16 @@ import {
 
 import { InvitationOptionsInterface } from './interfaces/options/invitation-options.interface';
 import { InvitationOptionsExtrasInterface } from './interfaces/options/invitation-options-extras.interface';
-import { InvitationEntitiesOptionsInterface } from './interfaces/options/invitation-entities-options.interface';
 import { InvitationSettingsInterface } from './interfaces/options/invitation-settings.interface';
-import { InvitationController } from './controllers/invitation.controller';
-import { InvitationAcceptanceController } from './controllers/invitation-acceptance.controller';
 import { InvitationService } from './services/invitation.service';
-import { InvitationCrudService } from './services/invitation-crud.service';
 import { InvitationAcceptanceService } from './services/invitation-acceptance.service';
 import { InvitationSendService } from './services/invitation-send.service';
 import { InvitationRevocationService } from './services/invitation-revocation.service';
 import { invitationDefaultConfig } from './config/invitation-default.config';
-import { InvitationReattemptController } from './controllers/invitation-reattempt.controller';
 import { InvitationModelService } from './services/invitation-model.service';
 import { InvitationEmailServiceInterface } from './interfaces/services/invitation-email-service.interface';
 import { InvitationOtpServiceInterface } from './interfaces/services/invitation-otp-service.interface';
 import { InvitationUserModelServiceInterface } from './interfaces/services/invitation-user-model.service.interface';
-import { InvitationMissingEntitiesOptionsException } from './exceptions/invitation-missing-entities-options.exception';
 import { InvitationAttemptService } from './services/invitation-attempt.service';
 
 const RAW_OPTIONS_TOKEN = Symbol('__INVITATION_MODULE_RAW_OPTIONS_TOKEN__');
@@ -61,19 +54,14 @@ function definitionTransform(
   definition: DynamicModule,
   extras: InvitationOptionsExtrasInterface,
 ): DynamicModule {
-  const { providers = [] } = definition;
-  const { controllers, entities, global = false } = extras;
-
-  if (!entities) {
-    throw new InvitationMissingEntitiesOptionsException();
-  }
+  const { imports = [], providers = [] } = definition;
+  const { global = false } = extras;
 
   return {
     ...definition,
     global,
-    imports: createInvitationImports({ entities }),
+    imports: createInvitationImports({ imports }),
     providers: createInvitationProviders({ providers }),
-    controllers: createInvitationControllers({ controllers }),
     exports: [
       ConfigModule,
       RAW_OPTIONS_TOKEN,
@@ -82,12 +70,12 @@ function definitionTransform(
   };
 }
 
-export function createInvitationImports(
-  options: InvitationEntitiesOptionsInterface,
-): DynamicModule['imports'] {
+export function createInvitationImports(options: {
+  imports: DynamicModule['imports'];
+}): DynamicModule['imports'] {
   return [
+    ...(options.imports || []),
     ConfigModule.forFeature(invitationDefaultConfig),
-    TypeOrmExtModule.forFeature(options.entities),
   ];
 }
 
@@ -99,6 +87,10 @@ export function createInvitationExports(): DynamicModule['exports'] {
     INVITATION_MODULE_USER_MODEL_SERVICE_TOKEN,
     InvitationService,
     InvitationModelService,
+    InvitationAcceptanceService,
+    InvitationRevocationService,
+    InvitationAttemptService,
+    InvitationSendService,
   ];
 }
 
@@ -109,7 +101,6 @@ export function createInvitationProviders(options: {
   return [
     ...(options.providers ?? []),
     InvitationService,
-    InvitationCrudService,
     InvitationAcceptanceService,
     InvitationRevocationService,
     InvitationModelService,
@@ -122,17 +113,17 @@ export function createInvitationProviders(options: {
   ];
 }
 
-export function createInvitationControllers(
-  overrides: Pick<InvitationOptions, 'controllers'> = {},
-): DynamicModule['controllers'] {
-  return overrides?.controllers !== undefined
-    ? overrides.controllers
-    : [
-        InvitationController,
-        InvitationAcceptanceController,
-        InvitationReattemptController,
-      ];
-}
+// export function createInvitationControllers(
+//   overrides: Pick<InvitationOptions, 'controllers'> = {},
+// ): DynamicModule['controllers'] {
+//   return overrides?.controllers !== undefined
+//     ? overrides.controllers
+//     : [
+//         InvitationController,
+//         InvitationAcceptanceController,
+//         InvitationReattemptController,
+//       ];
+// }
 
 export function createInvitationSettingsProvider(
   optionsOverrides?: InvitationOptions,

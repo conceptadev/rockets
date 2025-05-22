@@ -10,6 +10,7 @@ import {
   INVITATION_MODULE_CATEGORY_USER_KEY,
   OtpInterface,
   UserInterface,
+  InvitationEntityInterface,
 } from '@concepta/nestjs-common';
 import { EmailService } from '@concepta/nestjs-email';
 import { SeedingSource } from '@concepta/typeorm-seeding';
@@ -21,12 +22,12 @@ import { InvitationAcceptInviteDto } from '../dto/invitation-accept-invite.dto';
 import { InvitationCreateInviteDto } from '../dto/invitation-create-invite.dto';
 import { invitationDefaultConfig } from '../config/invitation-default.config';
 import { InvitationFactory } from '../seeding/invitation.factory';
-import { InvitationEntityInterface } from '../interfaces/domain/invitation-entity.interface';
+
 import { InvitationSettingsInterface } from '../interfaces/options/invitation-settings.interface';
 
-import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
 import { InvitationEntityFixture } from '../__fixtures__/invitation/entities/invitation.entity.fixture';
 import { UserEntityFixture } from '../__fixtures__/user/entities/user.entity.fixture';
+import { AppCrudModuleFixture } from '../__fixtures__/app-crud.module.fixture';
 
 describe('InvitationController (e2e)', () => {
   const userCategory = INVITATION_MODULE_CATEGORY_USER_KEY;
@@ -56,7 +57,7 @@ describe('InvitationController (e2e)', () => {
       .mockImplementation(async () => undefined);
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModuleFixture],
+      imports: [AppCrudModuleFixture],
     }).compile();
     app = moduleFixture.createNestApplication();
     await app.init();

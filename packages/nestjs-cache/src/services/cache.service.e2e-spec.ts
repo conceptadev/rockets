@@ -1,7 +1,6 @@
 import {
   CacheCreatableInterface,
   CacheInterface,
-  RepositoryInterface,
 } from '@concepta/nestjs-common';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { getDataSourceToken } from '@nestjs/typeorm';
@@ -10,8 +9,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppModuleFixture } from '../__fixtures__/app.module.fixture';
 import { UserEntityFixture } from '../__fixtures__/entities/user-entity.fixture';
 import { UserFactoryFixture } from '../__fixtures__/factories/user.factory.fixture';
-import { CACHE_MODULE_REPOSITORIES_TOKEN } from '../cache.constants';
-import { CacheModule } from '../cache.module';
 import { CacheService } from './cache.service';
 
 const expirationDate = new Date();
@@ -55,11 +52,7 @@ describe(CacheService.name, () => {
       imports: [AppModuleFixture],
     }).compile();
 
-    cacheModule = testModule.get<CacheModule>(CacheModule);
     cacheService = testModule.get<CacheService>(CacheService);
-    cacheDynamicRepo = testModule.get<
-      Record<string, RepositoryInterface<CacheInterface>>
-    >(CACHE_MODULE_REPOSITORIES_TOKEN);
 
     seedingSource = new SeedingSource({
       dataSource: testModule.get(getDataSourceToken()),

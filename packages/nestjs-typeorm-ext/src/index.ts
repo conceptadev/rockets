@@ -50,3 +50,6 @@ export { FederatedSqliteEntity } from './entities/federated/federated-sqlite.ent
 // cache entities
 export { CachePostgresEntity } from './entities/cache/cache-postgres.entity';
 export { CacheSqliteEntity } from './entities/cache/cache-sqlite.entity';
+// invitation entities
+export { InvitationPostgresEntity } from './entities/invitation/invitation-postgres.entity';
+export { InvitationSqliteEntity } from './entities/invitation/invitation-sqlite.entity';

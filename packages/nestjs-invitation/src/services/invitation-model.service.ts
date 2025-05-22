@@ -5,7 +5,7 @@ import {
   InjectDynamicRepository,
 } from '@concepta/nestjs-common';
 
-import { InvitationEntityInterface } from '../interfaces/domain/invitation-entity.interface';
+import { InvitationEntityInterface } from '@concepta/nestjs-common';
 import { InvitationModelServiceInterface } from '../interfaces/services/invitation-model-service.interface';
 import { INVITATION_MODULE_INVITATION_ENTITY_KEY } from '../invitation.constants';
 import { InvitationCreatableInterface } from '../interfaces/domain/invitation-creatable.interface';

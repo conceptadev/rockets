@@ -17,7 +17,7 @@ import {
 
 import { InvitationAcceptedEventAsync } from '../events/invitation-accepted.event';
 import { InvitationRevocationService } from './invitation-revocation.service';
-import { InvitationEntityInterface } from '../interfaces/domain/invitation-entity.interface';
+import { InvitationEntityInterface } from '@concepta/nestjs-common';
 import { InvitationSettingsInterface } from '../interfaces/options/invitation-settings.interface';
 import { InvitationOtpServiceInterface } from '../interfaces/services/invitation-otp-service.interface';
 import { InvitationEmailServiceInterface } from '../interfaces/services/invitation-email-service.interface';

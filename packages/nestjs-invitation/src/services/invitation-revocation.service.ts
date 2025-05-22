@@ -15,7 +15,7 @@ import {
 import { InvitationSettingsInterface } from '../interfaces/options/invitation-settings.interface';
 import { InvitationOtpServiceInterface } from '../interfaces/services/invitation-otp-service.interface';
 import { InvitationUserModelServiceInterface } from '../interfaces/services/invitation-user-model.service.interface';
-import { InvitationEntityInterface } from '../interfaces/domain/invitation-entity.interface';
+import { InvitationEntityInterface } from '@concepta/nestjs-common';
 import { InvitationException } from '../exceptions/invitation.exception';
 import { InvitationRevokeOptionsInterface } from '../interfaces/options/invitation-revoke-options.interface';
 

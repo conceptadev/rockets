@@ -15,13 +15,21 @@ import { InvitationAcceptedEventAsync } from '../events/invitation-accepted.even
 import { UserOtpEntityFixture } from './user/entities/user-otp.entity.fixture';
 import { UserEntityFixture } from './user/entities/user.entity.fixture';
 import { default as ormConfig } from './ormconfig.fixture';
+import { InvitationController } from './controllers/invitation.controller';
 import { InvitationAcceptanceController } from './controllers/invitation-acceptance.controller';
 import { InvitationReattemptController } from './controllers/invitation-reattempt.controller';
+import { InvitationCrudService } from '../services/invitation-crud.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
     EventModule.forRoot({}),
     TypeOrmExtModule.forRoot(ormConfig),
+    TypeOrmModule.forFeature([
+      InvitationEntityFixture,
+      UserEntityFixture,
+      UserOtpEntityFixture,
+    ]),
     CrudModule.forRoot({}),
     MailerModule.forRoot({ transport: { host: '' } }),
     EmailModule.forRootAsync({
@@ -80,6 +88,7 @@ import { InvitationReattemptController } from './controllers/invitation-reattemp
     }),
   ],
   providers: [
+    InvitationCrudService,
     {
       provide: Logger,
       useValue: {
@@ -91,9 +100,9 @@ import { InvitationReattemptController } from './controllers/invitation-reattemp
     },
   ],
   controllers: [
-    // InvitationController,
+    InvitationController,
     InvitationAcceptanceController,
     InvitationReattemptController,
   ],
 })
-export class AppModuleFixture {}
+export class AppCrudModuleFixture {}
