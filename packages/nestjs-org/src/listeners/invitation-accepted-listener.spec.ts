@@ -3,13 +3,16 @@ import { INestApplication } from '@nestjs/common';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { CrudModule } from '@concepta/nestjs-crud';
-import { INVITATION_MODULE_CATEGORY_ORG_KEY } from '@concepta/nestjs-common';
+import {
+  INVITATION_MODULE_CATEGORY_ORG_KEY,
+  InvitationEntityInterface,
+} from '@concepta/nestjs-common';
 import { SeedingSource } from '@concepta/typeorm-seeding';
 import { EventModule } from '@concepta/nestjs-event';
 import { UserEntityInterface } from '@concepta/nestjs-common';
 import { UserModule } from '@concepta/nestjs-user';
 import { PasswordModule } from '@concepta/nestjs-password';
-import { InvitationEntityInterface } from '@concepta/nestjs-invitation';
+
 import { UserFactory } from '@concepta/nestjs-user/dist/seeding';
 import { InvitationFactory } from '@concepta/nestjs-invitation/dist/seeding';
 

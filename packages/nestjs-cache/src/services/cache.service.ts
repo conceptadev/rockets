@@ -6,7 +6,6 @@ import {
   CacheUpdatableInterface,
   DeepPartial,
   ReferenceAssignment,
-  ReferenceId,
   Type,
   RepositoryInterface,
   ModelQueryException,
@@ -69,7 +68,7 @@ export class CacheService implements CacheServiceInterface {
         expirationDate,
       });
     } catch (e) {
-      throw new ModelMutateException(assignmentRepo.metadata.targetName, {
+      throw new ModelMutateException(assignmentRepo.entityName(), {
         originalError: e,
       });
     }
@@ -94,9 +93,7 @@ export class CacheService implements CacheServiceInterface {
     try {
       const assignedCache = await this.findCache(assignmentRepo, dto);
       if (!assignedCache)
-        throw new CacheEntityNotFoundException(
-          assignmentRepo.metadata.targetName,
-        );
+        throw new CacheEntityNotFoundException(assignmentRepo.entityName());
 
       const mergedEntity = await this.mergeEntity(
         assignmentRepo,
@@ -109,7 +106,7 @@ export class CacheService implements CacheServiceInterface {
         expirationDate,
       });
     } catch (e) {
-      throw new ModelMutateException(assignmentRepo.metadata.targetName, {
+      throw new ModelMutateException(assignmentRepo.entityName(), {
         originalError: e,
       });
     }
@@ -129,7 +126,7 @@ export class CacheService implements CacheServiceInterface {
     const assignedCache = await this.get(assignment, cache);
 
     if (assignedCache) {
-      this.deleteCache(assignment, assignedCache.id);
+      return this.deleteCache(assignment, assignedCache);
     }
   }
 
@@ -161,7 +158,7 @@ export class CacheService implements CacheServiceInterface {
       // return the caches from assignee
       return assignments;
     } catch (e) {
-      throw new ModelQueryException(assignmentRepo.metadata.targetName, {
+      throw new ModelQueryException(assignmentRepo.entityName(), {
         originalError: e,
       });
     }
@@ -190,13 +187,8 @@ export class CacheService implements CacheServiceInterface {
     // get all caches from an assigned user for a category
     const assignedCaches = await this.getAssignedCaches(assignment, cache);
 
-    // Map to get ids
-    const assignedCacheIds = assignedCaches.map(
-      (assignedCache) => assignedCache.id,
-    );
-
-    if (assignedCacheIds.length > 0)
-      await this.deleteCache(assignment, assignedCacheIds);
+    if (assignedCaches.length > 0)
+      await this.deleteCache(assignment, assignedCaches);
   }
 
   /**
@@ -204,19 +196,19 @@ export class CacheService implements CacheServiceInterface {
    *
    * @internal
    * @param assignment - The assignment to delete id from
-   * @param id - The id or ids to delete
+   * @param entity - The id or ids to delete
    */
   protected async deleteCache(
     assignment: ReferenceAssignment,
-    id: ReferenceId | ReferenceId[],
+    entity: CacheInterface | CacheInterface[],
   ): Promise<void> {
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
     try {
-      await assignmentRepo.delete(id);
+      await assignmentRepo.remove(Array.isArray(entity) ? entity : [entity]);
     } catch (e) {
-      throw new ModelMutateException(assignmentRepo.metadata.targetName, {
+      throw new ModelMutateException(assignmentRepo.entityName(), {
         originalError: e,
       });
     }
@@ -276,7 +268,7 @@ export class CacheService implements CacheServiceInterface {
       });
       return cache;
     } catch (e) {
-      throw new ModelQueryException(repo.metadata.targetName, {
+      throw new ModelQueryException(repo.entityName(), {
         originalError: e,
       });
     }

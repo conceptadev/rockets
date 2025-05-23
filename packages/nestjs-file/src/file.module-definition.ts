@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-import { TypeOrmExtModule } from '@concepta/nestjs-typeorm-ext';
 import { createSettingsProvider } from '@concepta/nestjs-common';
 
 import {
@@ -14,7 +13,6 @@ import {
 } from './file.constants';
 
 import { FileOptionsInterface } from './interfaces/file-options.interface';
-import { FileEntitiesOptionsInterface } from './interfaces/file-entities-options.interface';
 import { FileOptionsExtrasInterface } from './interfaces/file-options-extras.interface';
 import { FileSettingsInterface } from './interfaces/file-settings.interface';
 import { FileService } from './services/file.service';
@@ -22,7 +20,6 @@ import { FileStrategyService } from './services/file-strategy.service';
 
 import { fileDefaultConfig } from './config/file-default.config';
 import { FileModelService } from './services/file-model.service';
-import { FileMissingEntitiesOptionsException } from './exceptions/file-missing-entities-options.exception';
 
 const RAW_OPTIONS_TOKEN = Symbol('__FILE_MODULE_RAW_OPTIONS_TOKEN__');
 
@@ -46,28 +43,23 @@ function definitionTransform(
   extras: FileOptionsExtrasInterface,
 ): DynamicModule {
   const { providers = [], imports = [] } = definition;
-  const { global = false, entities } = extras;
-
-  if (!entities) {
-    throw new FileMissingEntitiesOptionsException();
-  }
+  const { global = false } = extras;
 
   return {
     ...definition,
     global,
-    imports: createFileImports({ imports, entities }),
+    imports: createFileImports({ imports }),
     providers: createFileProviders({ providers }),
     exports: [ConfigModule, RAW_OPTIONS_TOKEN, ...createFileExports()],
   };
 }
 
 export function createFileImports(
-  options: Pick<DynamicModule, 'imports'> & FileEntitiesOptionsInterface,
+  options: Pick<DynamicModule, 'imports'>,
 ): DynamicModule['imports'] {
   return [
     ...(options.imports ?? []),
     ConfigModule.forFeature(fileDefaultConfig),
-    TypeOrmExtModule.forFeature(options.entities),
   ];
 }
 

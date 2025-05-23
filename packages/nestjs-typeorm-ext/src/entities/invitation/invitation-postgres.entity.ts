@@ -1,11 +1,13 @@
 import { Column } from 'typeorm';
 import { PlainLiteralObject } from '@nestjs/common';
 import { ReferenceActive, ReferenceId } from '@concepta/nestjs-common';
-import { CommonSqliteEntity } from '@concepta/nestjs-typeorm-ext';
-import { InvitationEntityInterface } from '../interfaces/domain/invitation-entity.interface';
+import { InvitationEntityInterface } from '@concepta/nestjs-common';
 
-export abstract class InvitationSqliteEntity
-  extends CommonSqliteEntity
+import { CommonPostgresEntity } from '../common/common-postgres.entity';
+
+// TODO check this entity later
+export abstract class InvitationPostgresEntity
+  extends CommonPostgresEntity
   implements InvitationEntityInterface
 {
   @Column('boolean', { default: true })
@@ -17,7 +19,7 @@ export abstract class InvitationSqliteEntity
   @Column()
   category!: string;
 
-  @Column({ type: 'simple-json', nullable: true })
+  @Column({ type: 'jsonb' })
   constraints!: PlainLiteralObject;
 
   @Column({ type: 'uuid' })

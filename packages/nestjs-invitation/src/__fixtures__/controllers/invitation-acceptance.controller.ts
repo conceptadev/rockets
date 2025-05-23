@@ -11,9 +11,9 @@ import {
 } from '@nestjs/common';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { InvitationAcceptanceService } from '../services/invitation-acceptance.service';
-import { InvitationAcceptInviteDto } from '../dto/invitation-accept-invite.dto';
-import { InvitationNotAcceptedException } from '../exceptions/invitation-not-accepted.exception';
+import { InvitationAcceptanceService } from '../../services/invitation-acceptance.service';
+import { InvitationAcceptInviteDto } from '../../dto/invitation-accept-invite.dto';
+import { InvitationNotAcceptedException } from '../../exceptions/invitation-not-accepted.exception';
 
 @Controller('invitation-acceptance')
 @ApiTags('invitation-acceptance')

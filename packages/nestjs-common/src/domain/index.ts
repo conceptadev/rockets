@@ -85,11 +85,13 @@ export { CacheInterface } from './cache/interfaces/cache.interface';
 export { InvitationAcceptedEventPayloadInterface } from './invitation/interfaces/invitation-accepted-event-payload.interface';
 export { InvitationInterface } from './invitation/interfaces/invitation.interface';
 export { InvitationUserInterface } from './invitation/interfaces/invitation-user.interface';
+export { InvitationEntityInterface } from './invitation/invitation-entity.interface';
 
 export { FileCreatableInterface } from './file/interfaces/file-creatable.interface';
 export { FileUpdatableInterface } from './file/interfaces/file-updatable.interface';
 export { FileOwnableInterface } from './file/interfaces/file-ownable.interface';
 export { FileInterface } from './file/interfaces/file.interface';
+export { FileEntityInterface } from './file/interfaces/file-entity.interface';
 
 export { ReportStatusEnum } from './report/enum/report-status.enum';
 export { ReportCreatableInterface } from './report/interfaces/report-creatable.interface';

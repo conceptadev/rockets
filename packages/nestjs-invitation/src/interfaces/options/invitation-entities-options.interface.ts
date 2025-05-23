@@ -1,9 +1,9 @@
-import { TypeOrmExtEntityOptionInterface } from '@concepta/nestjs-typeorm-ext';
 import { INVITATION_MODULE_INVITATION_ENTITY_KEY } from '../../invitation.constants';
-import { InvitationEntityInterface } from '../domain/invitation-entity.interface';
+import {
+  InvitationEntityInterface,
+  RepositoryEntityOptionInterface,
+} from '@concepta/nestjs-common';
 
 export interface InvitationEntitiesOptionsInterface {
-  entities: {
-    [INVITATION_MODULE_INVITATION_ENTITY_KEY]: TypeOrmExtEntityOptionInterface<InvitationEntityInterface>;
-  };
+  [INVITATION_MODULE_INVITATION_ENTITY_KEY]: RepositoryEntityOptionInterface<InvitationEntityInterface>;
 }

@@ -4,7 +4,6 @@ import { validate } from 'class-validator';
 import { Inject, Injectable, Type } from '@nestjs/common';
 import {
   ReferenceAssignment,
-  ReferenceId,
   OtpInterface,
   OtpCreateParamsInterface,
   OtpValidateLimitParamsInterface,
@@ -96,7 +95,7 @@ export class OtpService implements OtpServiceInterface {
         active: true,
       });
     } catch (e) {
-      throw new ModelMutateException(assignmentRepo.metadata.targetName, {
+      throw new ModelMutateException(assignmentRepo.entityName(), {
         originalError: e,
       });
     }
@@ -165,7 +164,7 @@ export class OtpService implements OtpServiceInterface {
 
     // if is valid and deleteIfValid is true, delete the otp
     if (isValid && deleteIfValid) {
-      await this.deleteOtp(assignment, assignedOtp.id);
+      await this.deleteOtp(assignment, assignedOtp);
     }
 
     return assignedOtp;
@@ -185,7 +184,7 @@ export class OtpService implements OtpServiceInterface {
     const assignedOtp = await this.getByPasscode(assignment, otp);
 
     if (assignedOtp) {
-      this.deleteOtp(assignment, assignedOtp.id);
+      return this.deleteOtp(assignment, assignedOtp);
     }
   }
 
@@ -202,11 +201,7 @@ export class OtpService implements OtpServiceInterface {
     // get all otps from an assigned user for a category
     const assignedOtps = await this.getAssignedOtps(assignment, otp);
 
-    // Map to get ids
-    const assignedOtpIds = assignedOtps.map((assignedOtp) => assignedOtp.id);
-
-    if (assignedOtpIds.length > 0)
-      await this.deleteOtp(assignment, assignedOtpIds);
+    if (assignedOtps.length > 0) await this.deleteOtp(assignment, assignedOtps);
   }
 
   /**
@@ -214,19 +209,19 @@ export class OtpService implements OtpServiceInterface {
    *
    * @internal
    * @param assignment - The assignment to delete id from
-   * @param id - The id or ids to delete
+   * @param entity - The id or ids to delete
    */
   protected async deleteOtp(
     assignment: ReferenceAssignment,
-    id: ReferenceId | ReferenceId[],
+    entity: OtpInterface | OtpInterface[],
   ): Promise<void> {
     // get the assignment repo
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
     try {
-      await assignmentRepo.delete(id);
+      await assignmentRepo.remove(Array.isArray(entity) ? entity : [entity]);
     } catch (e) {
-      throw new ModelMutateException(assignmentRepo.metadata.targetName, {
+      throw new ModelMutateException(assignmentRepo.entityName(), {
         originalError: e,
       });
     }
@@ -244,11 +239,7 @@ export class OtpService implements OtpServiceInterface {
       keepHistoryDays,
     );
 
-    // Map to get ids
-    const assignedOtpIds = assignedOtps.map((assignedOtp) => assignedOtp.id);
-
-    if (assignedOtpIds.length > 0)
-      await this.deleteOtp(assignment, assignedOtpIds);
+    if (assignedOtps.length > 0) await this.deleteOtp(assignment, assignedOtps);
   }
 
   /**
@@ -285,7 +276,7 @@ export class OtpService implements OtpServiceInterface {
       // return the otps from assignee
       return assignments;
     } catch (e) {
-      throw new ModelQueryException(assignmentRepo.metadata.targetName, {
+      throw new ModelQueryException(assignmentRepo.entityName(), {
         originalError: e,
       });
     }
@@ -342,7 +333,7 @@ export class OtpService implements OtpServiceInterface {
       // return the otps from assignee
       return assignment;
     } catch (e) {
-      throw new ModelQueryException(assignmentRepo.metadata.targetName, {
+      throw new ModelQueryException(assignmentRepo.entityName(), {
         originalError: e,
       });
     }
@@ -372,7 +363,7 @@ export class OtpService implements OtpServiceInterface {
       // return the otps from assignee
       return assignment;
     } catch (e) {
-      throw new ModelQueryException(assignmentRepo.metadata.targetName, {
+      throw new ModelQueryException(assignmentRepo.entityName(), {
         originalError: e,
       });
     }
@@ -446,7 +437,7 @@ export class OtpService implements OtpServiceInterface {
         await assignmentRepo.save(assignmentObject);
       }
     } catch (e) {
-      throw new ModelQueryException(assignmentRepo.metadata.targetName, {
+      throw new ModelQueryException(assignmentRepo.entityName(), {
         originalError: e,
       });
     }

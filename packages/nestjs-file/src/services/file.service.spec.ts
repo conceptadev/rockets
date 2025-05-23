@@ -5,7 +5,7 @@ import { mock } from 'jest-mock-extended';
 import { FileEntityFixture } from '../__fixtures__/file/file-entity.fixture';
 import { FileCreateDto } from '../dto/file-create.dto';
 import { FileQueryException } from '../exceptions/file-query.exception';
-import { FileEntityInterface } from '../interfaces/file-entity.interface';
+import { FileEntityInterface } from '@concepta/nestjs-common';
 import { FileModelService } from './file-model.service';
 import { FileStrategyService } from './file-strategy.service';
 import { FileService } from './file.service';

@@ -18,15 +18,15 @@ import {
 } from '@concepta/nestjs-crud';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { InvitationCreateInviteDto } from '../dto/invitation-create-invite.dto';
-import { InvitationPaginatedDto } from '../dto/invitation-paginated.dto';
-import { InvitationDto } from '../dto/invitation.dto';
-import { InvitationException } from '../exceptions/invitation.exception';
-import { InvitationCreateInviteInterface } from '../interfaces/domain/invitation-create-invite.interface';
-import { InvitationSendInviteInterface } from '../interfaces/domain/invitation-send-invite.interface';
-import { InvitationResource } from '../invitation.types';
-import { InvitationCrudService } from '../services/invitation-crud.service';
-import { InvitationSendService } from '../services/invitation-send.service';
+import { InvitationCreateInviteDto } from '../../dto/invitation-create-invite.dto';
+import { InvitationPaginatedDto } from '../../dto/invitation-paginated.dto';
+import { InvitationDto } from '../../dto/invitation.dto';
+import { InvitationException } from '../../exceptions/invitation.exception';
+import { InvitationCreateInviteInterface } from '../../interfaces/domain/invitation-create-invite.interface';
+import { InvitationSendInviteInterface } from '../../interfaces/domain/invitation-send-invite.interface';
+import { InvitationResource } from '../../invitation.types';
+import { InvitationCrudService } from '../../services/invitation-crud.service';
+import { InvitationSendService } from '../../services/invitation-send.service';
 
 @CrudController({
   path: 'invitation',

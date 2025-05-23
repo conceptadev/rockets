@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { InvitationAttemptService } from '../services/invitation-attempt.service';
+import { InvitationAttemptService } from '../../services/invitation-attempt.service';
 
 @Controller('invitation-reattempt')
 @ApiTags('invitation-reattempt')

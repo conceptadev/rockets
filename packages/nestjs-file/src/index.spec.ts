@@ -1,27 +1,8 @@
-import {
-  FileCreateDto,
-  FileDto,
-  FileModule,
-  FilePostgresEntity,
-  FileService,
-  FileSqliteEntity,
-} from './index';
+import { FileCreateDto, FileDto, FileModule, FileService } from './index';
 
 describe('File Module', () => {
   it('should be a function', () => {
     expect(FileModule).toBeInstanceOf(Function);
-  });
-});
-
-describe('File Postgres Entity', () => {
-  it('should be a function', () => {
-    expect(FilePostgresEntity).toBeInstanceOf(Function);
-  });
-});
-
-describe('File Sqlite Entity', () => {
-  it('should be a function', () => {
-    expect(FileSqliteEntity).toBeInstanceOf(Function);
   });
 });
 

@@ -55,7 +55,7 @@ export class RoleService implements RoleServiceInterface {
       // return the roles
       return assignments.map((assignment) => ({ id: assignment.roleId }));
     } catch (e) {
-      throw new ModelQueryException(assignmentRepo.metadata.name, {
+      throw new ModelQueryException(assignmentRepo.entityName(), {
         originalError: e,
       });
     }
@@ -87,7 +87,7 @@ export class RoleService implements RoleServiceInterface {
       // return true if we found an assignment
       return assignment ? true : false;
     } catch (e) {
-      throw new ModelQueryException(assignmentRepo.metadata.targetName, {
+      throw new ModelQueryException(assignmentRepo.entityName(), {
         originalError: e,
       });
     }
@@ -215,10 +215,18 @@ export class RoleService implements RoleServiceInterface {
     const { assignment, role, assignee } = options;
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
-    await assignmentRepo.delete({
-      roleId: role.id,
-      assigneeId: assignee.id,
-    });
+    if (role?.id && assignee?.id) {
+      const roleAssignment = await assignmentRepo.find({
+        where: {
+          roleId: role.id,
+          assigneeId: assignee.id,
+        },
+      });
+
+      if (roleAssignment) {
+        await assignmentRepo.remove(roleAssignment);
+      }
+    }
   }
 
   /**
@@ -233,10 +241,18 @@ export class RoleService implements RoleServiceInterface {
     const assignmentRepo = this.getAssignmentRepo(assignment);
 
     for (const role of roles) {
-      await assignmentRepo.delete({
-        roleId: role.id,
-        assigneeId: assignee.id,
-      });
+      if (role?.id && assignee?.id) {
+        const roleAssignment = await assignmentRepo.find({
+          where: {
+            roleId: role.id,
+            assigneeId: assignee.id,
+          },
+        });
+
+        if (roleAssignment) {
+          await assignmentRepo.remove(roleAssignment);
+        }
+      }
     }
   }
 

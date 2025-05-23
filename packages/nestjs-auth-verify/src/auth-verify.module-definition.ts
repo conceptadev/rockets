@@ -18,7 +18,7 @@ import { AuthVerifyOptionsInterface } from './interfaces/auth-verify-options.int
 import { AuthVerifyOptionsExtrasInterface } from './interfaces/auth-verify-options-extras.interface';
 import { AuthVerifySettingsInterface } from './interfaces/auth-verify-settings.interface';
 import { authVerifyDefaultConfig } from './config/auth-verify-default.config';
-import { AuthVerifyController } from './auth-verify.controller';
+import { AuthVerifyController } from './__fixtures__/auth-verify.controller';
 import { AuthVerifyService } from './services/auth-verify.service';
 import { AuthVerifyNotificationService } from './services/auth-verify-notification.service';
 import { AuthVerifyEmailServiceInterface } from './interfaces/auth-verify-email.service.interface';

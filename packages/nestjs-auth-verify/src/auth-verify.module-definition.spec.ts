@@ -8,7 +8,7 @@ import {
   AuthVerifyOtpService,
   AuthVerifyUserModelService,
 } from './auth-verify.constants';
-import { AuthVerifyController } from './auth-verify.controller';
+import { AuthVerifyController } from './__fixtures__/auth-verify.controller';
 import {
   createAuthVerifyControllers,
   createAuthVerifyEmailServiceProvider,

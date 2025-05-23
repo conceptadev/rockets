@@ -5,16 +5,10 @@ import { DeepPartial } from '../../utils/deep-partial';
 import { RepositoryInternals } from './repository-internals';
 
 export interface RepositoryInterface<Entity extends PlainLiteralObject> {
-  metadata: { name: string; targetName: string };
+  entityName(): string;
 
   find(
     options?: RepositoryInternals.FindManyOptions<Entity>,
-  ): Promise<Entity[]>;
-
-  findBy(
-    where:
-      | RepositoryInternals.FindOptionsWhere<Entity>
-      | RepositoryInternals.FindOptionsWhere<Entity>[],
   ): Promise<Entity[]>;
 
   findOne(
@@ -36,17 +30,6 @@ export interface RepositoryInterface<Entity extends PlainLiteralObject> {
 
   remove(entities: Entity[]): Promise<Entity[]>;
   remove(entity: Entity): Promise<Entity>;
-
-  delete(
-    criteria:
-      | string
-      | string[]
-      | number
-      | number[]
-      | Date
-      | Date[]
-      | RepositoryInternals.FindOptionsWhere<Entity>,
-  ): Promise<RepositoryInternals.DeleteResult>;
 
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   gt<T>(value: T): any;

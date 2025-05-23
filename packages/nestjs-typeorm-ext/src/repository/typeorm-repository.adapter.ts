@@ -1,7 +1,6 @@
 import {
   FindManyOptions,
   FindOneOptions,
-  FindOptionsWhere,
   LessThan,
   LessThanOrEqual,
   MoreThan,
@@ -44,7 +43,7 @@ export class TypeOrmRepositoryAdapter<Entity extends PlainLiteralObject>
       return this.repo.find(cleanOptions);
     } catch (e) {
       // fatal orm error
-      throw new ModelQueryException(this.metadata.name, {
+      throw new ModelQueryException(this.entityName(), {
         originalError: e,
       });
     }
@@ -64,32 +63,17 @@ export class TypeOrmRepositoryAdapter<Entity extends PlainLiteralObject>
     } catch (e) {
       // fatal orm error
       // TODO: remove metadata?
-      throw new ModelQueryException(this.metadata.name, {
+      throw new ModelQueryException(this.entityName(), {
         originalError: e,
       });
     }
   }
 
   /**
-   * @internal
+   * Get the entity name from the repository metadata.
    */
-  get metadata() {
-    return this.repo.metadata;
-  }
-
-  //
-  // Wrappers
-  //
-  async findBy(
-    where:
-      | RepositoryInternals.FindOptionsWhere<Entity>
-      | RepositoryInternals.FindOptionsWhere<Entity>[],
-  ): Promise<Entity[]> {
-    if (Array.isArray(where)) {
-      return this.repo.findBy(where as FindOptionsWhere<Entity>[]);
-    } else {
-      return this.repo.findBy(where as FindOptionsWhere<Entity>);
-    }
+  entityName(): string {
+    return this.repo.metadata?.name || this.repo.metadata?.targetName;
   }
 
   async count(
@@ -121,28 +105,6 @@ export class TypeOrmRepositoryAdapter<Entity extends PlainLiteralObject>
     } else {
       return this.repo.remove(entity);
     }
-  }
-
-  async delete(
-    criteria:
-      | string
-      | string[]
-      | number
-      | number[]
-      | Date
-      | Date[]
-      | RepositoryInternals.FindOptionsWhere<Entity>,
-  ): Promise<RepositoryInternals.DeleteResult> {
-    return this.repo.delete(
-      criteria as
-        | string
-        | string[]
-        | number
-        | number[]
-        | Date
-        | Date[]
-        | FindOptionsWhere<Entity>,
-    );
   }
 
   merge(

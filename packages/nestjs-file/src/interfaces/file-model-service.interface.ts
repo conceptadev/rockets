@@ -4,7 +4,7 @@ import {
   ReferenceId,
 } from '@concepta/nestjs-common';
 import { CreateOneInterface } from '@concepta/nestjs-common';
-import { FileEntityInterface } from './file-entity.interface';
+import { FileEntityInterface } from '@concepta/nestjs-common';
 
 export interface FileModelServiceInterface
   extends ByIdInterface<ReferenceId, FileEntityInterface>,

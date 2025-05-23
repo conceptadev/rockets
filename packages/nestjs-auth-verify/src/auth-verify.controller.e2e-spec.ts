@@ -10,17 +10,19 @@ import { UserFactory } from '@concepta/nestjs-user/src/seeding';
 
 import { AUTH_VERIFY_MODULE_SETTINGS_TOKEN } from './auth-verify.constants';
 
-import { AuthVerifyController } from './auth-verify.controller';
+import { AuthVerifyController } from './__fixtures__/auth-verify.controller';
 import { AuthVerifySettingsInterface } from './interfaces/auth-verify-settings.interface';
 import { AuthVerifyDto } from './dto/auth-verify.dto';
 import { AuthVerifyUpdateDto } from './dto/auth-verify-update.dto';
 
 import { UserEntityFixture } from './__fixtures__/user/entities/user-entity.fixture';
 import { AppModuleDbFixture } from './__fixtures__/app.module.db.fixture';
+import { UserModelService } from '@concepta/nestjs-user';
 
 describe(AuthVerifyController, () => {
   let app: INestApplication;
   let otpService: OtpService;
+  let userModelService: UserModelService;
   let settings: AuthVerifySettingsInterface;
   let seedingSource: SeedingSource;
   let userFactory: UserFactory;
@@ -33,6 +35,7 @@ describe(AuthVerifyController, () => {
     await app.init();
 
     otpService = moduleFixture.get<OtpService>(OtpService);
+    userModelService = moduleFixture.get<UserModelService>(UserModelService);
 
     settings = moduleFixture.get<AuthVerifySettingsInterface>(
       AUTH_VERIFY_MODULE_SETTINGS_TOKEN,
@@ -81,15 +84,14 @@ describe(AuthVerifyController, () => {
       } as AuthVerifyUpdateDto)
       .expect(200);
   });
+
+  const getFirstUser = async (
+    _app: INestApplication,
+  ): Promise<UserInterface> => {
+    const response = await userModelService.find();
+    return response[0];
+  };
 });
-
-const getFirstUser = async (app: INestApplication): Promise<UserInterface> => {
-  const response = await supertest(app.getHttpServer())
-    .get('/user?limit=1')
-    .expect(200);
-
-  return response?.body[0];
-};
 
 const send = async (
   app: INestApplication,
