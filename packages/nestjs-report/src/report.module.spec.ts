@@ -213,12 +213,12 @@ function testModuleFactory(
         synchronize: true,
         entities: [UserEntityFixture, FileEntityFixture, ReportEntityFixture],
       }),
-      FileModule.forRoot({
-        entities: {
-          file: {
-            entity: FileEntityFixture,
-          },
+      TypeOrmExtModule.forFeature({
+        file: {
+          entity: FileEntityFixture,
         },
+      }),
+      FileModule.forRoot({
         storageServices: [new AwsStorageService()],
       }),
       ReportGeneratorModuleFixture,
