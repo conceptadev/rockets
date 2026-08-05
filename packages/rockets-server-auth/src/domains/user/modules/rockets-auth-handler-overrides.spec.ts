@@ -1,4 +1,7 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { RocketsAuthPortsModule } from '../../../shared/ports/rockets-auth-ports.module';
+import { RocketsGetUserByEmailHandler } from '../application/queries/handlers/rockets-get-user-by-email.handler';
+import { RocketsCreateOtpHandler } from '../../../domains/otp/application/commands/handlers/rockets-create-otp.handler';
+import { describe, it, expect } from 'vitest';
 import { Injectable, PlainLiteralObject } from '@nestjs/common';
 import { AbstractSignupUserHandler } from '../application/commands/handlers/abstract-signup-user.handler';
 import { AbstractAdminUserListHandler } from '../application/commands/handlers/abstract-admin-user-list.handler';
@@ -290,25 +293,6 @@ describe('Handler Override Pattern', () => {
   // ─── Ports Module Handler Overrides ─────────────────────────
 
   describe('RocketsAuthPortsModule.forRoot() handler overrides', () => {
-    // Loaded in beforeAll (not top-level imports) to defer module
-    // evaluation past this file's own imports — these three participate
-    // in a require cycle with the test setup above.
-    let RocketsAuthPortsModule: typeof import('../../../shared/ports/rockets-auth-ports.module').RocketsAuthPortsModule;
-    let RocketsGetUserByEmailHandler: typeof import('../application/queries/handlers/rockets-get-user-by-email.handler').RocketsGetUserByEmailHandler;
-    let RocketsCreateOtpHandler: typeof import('../../../domains/otp/application/commands/handlers/rockets-create-otp.handler').RocketsCreateOtpHandler;
-
-    beforeAll(async () => {
-      ({ RocketsAuthPortsModule } = await import(
-        '../../../shared/ports/rockets-auth-ports.module'
-      ));
-      ({ RocketsGetUserByEmailHandler } = await import(
-        '../application/queries/handlers/rockets-get-user-by-email.handler'
-      ));
-      ({ RocketsCreateOtpHandler } = await import(
-        '../../../domains/otp/application/commands/handlers/rockets-create-otp.handler'
-      ));
-    });
-
     @Injectable()
     class CustomGetUserByEmailHandler {
       async execute(): Promise<null> {

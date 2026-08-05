@@ -81,6 +81,10 @@ describe('sample-code-review — Firebase + GitHub + analysis (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
+    // Dynamic ON PURPOSE: src/app.module.ts reads FIREBASE_USE_FAKE at
+    // MODULE SCOPE (line ~20), and under ESM semantics a static import
+    // would evaluate it before this file's process.env assignments above.
+    // Deferring the import to beforeAll guarantees fake mode is set first.
     const { AppModule } = await import('../src/app.module');
     app = await NestFactory.create(AppModule, { logger: ['error'] });
     app.useGlobalPipes(

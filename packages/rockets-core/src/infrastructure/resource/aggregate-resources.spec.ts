@@ -1,3 +1,4 @@
+import { defineSubResource } from './define-sub-resource';
 import { describe, it, expect } from 'vitest';
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 import type { RepositoryModuleInterface } from '@concepta/nestjs-repository';
@@ -477,7 +478,6 @@ describe('buildAppRegistrationPlan', () => {
   // ────────────────────────────────────────────────────────────────────
   describe('sub-resource flattening', () => {
     it('flattens a single nested sub-resource into the resources array', async () => {
-      const { defineSubResource } = await import('./define-sub-resource');
       const parent = defineResource({
         key: 'pet',
         path: 'pets',
@@ -501,7 +501,6 @@ describe('buildAppRegistrationPlan', () => {
     });
 
     it('flattens N-level nested sub-resources recursively', async () => {
-      const { defineSubResource } = await import('./define-sub-resource');
       class CommentEntity {
         id!: string;
       }
@@ -540,7 +539,6 @@ describe('buildAppRegistrationPlan', () => {
     });
 
     it('contributes the sub entity to repositoryPersistence', async () => {
-      const { defineSubResource } = await import('./define-sub-resource');
       const parent = defineResource({
         key: 'pet',
         path: 'pets',
@@ -568,7 +566,6 @@ describe('buildAppRegistrationPlan', () => {
     });
 
     it('validates sub-resource relations against the same entity index', async () => {
-      const { defineSubResource } = await import('./define-sub-resource');
       class UnregisteredEntity {
         id!: string;
         pet?: PetEntity;
@@ -607,7 +604,6 @@ describe('buildAppRegistrationPlan', () => {
     });
 
     it('handles a mixed input: one parent with subs, another sibling without (council gap)', async () => {
-      const { defineSubResource } = await import('./define-sub-resource');
       class TagEntity {
         id!: string;
       }
@@ -640,7 +636,6 @@ describe('buildAppRegistrationPlan', () => {
     });
 
     it('throws when a sub-resource KEY collides with another resource on a different entity (council gap)', async () => {
-      const { defineSubResource } = await import('./define-sub-resource');
       class CollidingEntity {
         id!: string;
       }

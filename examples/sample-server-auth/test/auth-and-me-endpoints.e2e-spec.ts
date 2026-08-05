@@ -1,3 +1,5 @@
+import { DataSource } from 'typeorm';
+import { RoleEntity } from '../src/modules/role/role.entity';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
@@ -215,9 +217,7 @@ describe('Auth & Me Endpoints (e2e)', () => {
       const adminUserId = signupRes.body.id;
 
       // Get admin role ID from DB
-      const { DataSource } = await import('typeorm');
       const dataSource = app.get(DataSource);
-      const { RoleEntity } = await import('../src/modules/role/role.entity');
       const roleRepo = dataSource.getRepository(RoleEntity);
       const adminRole = await roleRepo.findOne({ where: { name: 'admin' } });
 
