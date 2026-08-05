@@ -1,7 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import type { PlainLiteralObject, Type } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { z } from 'zod';
-import { rocketsFieldMeta } from './field-meta';
+import { rocketsFieldMeta, unwrapField } from './field-meta';
+import { compileDtoClass } from './zod-dto';
 import { f } from './fields';
 import { projectSchema } from './zod-projections';
 
@@ -129,6 +131,57 @@ describe('projectSchema response exposure', () => {
 
     const { response } = projectSchema('Pet', schema, entity, noOwner);
     expect(computedElementKeys(response.items)).toEqual(['id', 'label']);
+  });
+
+  /**
+   * RUNTIME layer (the schema strip above is documentation): the rebuilt
+   * field must keep its rocketsFieldMeta registration — losing it means
+   * compileDtoClass never installs the compute @Transform and the field
+   * silently vanishes from every HTTP response while OpenAPI still
+   * documents it (found in PR review).
+   */
+  it('keeps the compute meta on the stripped rebuilt field', () => {
+    const nested = z.object({
+      id: f.pk(),
+      internalNote: f.string({ dto: { response: false } }),
+    });
+    const schema = z.object({
+      id: f.pk(),
+      items: f.compute(z.array(nested), () => []).optional(),
+    });
+
+    const { response } = projectSchema('Pet', schema, entity, noOwner);
+    const { meta } = unwrapField(response.items as z.ZodType, 'Pet.items');
+    expect(typeof meta.compute).toBe('function');
+  });
+
+  it('strips hidden and undeclared keys from the compute OUTPUT at runtime', () => {
+    const nested = z.object({
+      id: f.pk(),
+      label: f.string(),
+      internalNote: f.string({ dto: { response: false } }),
+    });
+    const row = {
+      id: '1',
+      label: 'ok',
+      internalNote: 'must-not-leak',
+      undeclaredColumn: 'must-not-leak-either',
+    };
+    const schema = z.object({
+      id: f.pk(),
+      items: f.compute(z.array(nested), () => [row]).optional(),
+    });
+
+    const { response } = projectSchema('Pet', schema, entity, noOwner);
+    const Dto = compileDtoClass(z.object(response), 'PetResponseDto');
+    const instance = plainToInstance(Dto, { id: '1' });
+
+    expect(instance).toMatchObject({
+      items: [{ id: '1', label: 'ok' }],
+    });
+    const items = (instance as { items?: Record<string, unknown>[] }).items;
+    expect(items?.[0]).not.toHaveProperty('internalNote');
+    expect(items?.[0]).not.toHaveProperty('undeclaredColumn');
   });
 
   it('leaves a computed field untouched when nothing is hidden', () => {

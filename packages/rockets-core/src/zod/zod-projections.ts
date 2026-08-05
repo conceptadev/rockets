@@ -6,6 +6,7 @@ import {
   asClassicSchema,
   isDbGenerated,
   relationPropertyFor,
+  rocketsFieldMeta,
   type RocketsRelationTarget,
   unwrapField,
 } from './field-meta';
@@ -178,7 +179,7 @@ function isResponseExposed(
  * keeps its exact original wrappers.
  */
 function withHiddenFieldsRemoved(field: z.ZodType, path: string): z.ZodType {
-  const { base, optional, nullable } = unwrapField(field, path);
+  const { base, optional, nullable, meta } = unwrapField(field, path);
   const stripped = stripHidden(base, path);
   if (stripped === base) {
     return field;
@@ -186,6 +187,11 @@ function withHiddenFieldsRemoved(field: z.ZodType, path: string): z.ZodType {
   let rebuilt = stripped;
   if (nullable) rebuilt = rebuilt.nullable();
   if (optional) rebuilt = rebuilt.optional();
+  // The rebuilt node is a NEW zod instance; without re-registering the
+  // original field meta, `compileDtoClass` would no longer see
+  // `meta.compute` and the field would silently vanish from every HTTP
+  // response while OpenAPI still documented it.
+  rocketsFieldMeta.add(rebuilt, meta);
   return rebuilt;
 }
 

@@ -1,3 +1,4 @@
+import { inspect } from 'node:util';
 import {
   ExceptionInterface,
   mapHttpStatus,
@@ -142,12 +143,14 @@ export class RocketsCoreExceptionsFilter implements ExceptionFilter {
         stack?: string;
         context?: { originalError?: unknown };
       };
-      this.logger.error('Unhandled 5xx', e.stack ?? String(exception));
+      // `inspect` over String(): a stack-less non-Error exception would
+      // otherwise log as the useless '[object Object]'.
+      this.logger.error('Unhandled 5xx', e.stack ?? inspect(exception));
       const orig = e.context?.originalError;
       if (orig) {
         this.logger.error(
           'Unhandled 5xx originalError',
-          (orig as { stack?: string }).stack ?? String(orig),
+          (orig as { stack?: string }).stack ?? inspect(orig),
         );
       }
     }
