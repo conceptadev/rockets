@@ -13,7 +13,7 @@ restructures packages between alphas. Work through this checklist; do not assume
 - For each package the user lists, run `npm view <pkg>@<version> dependencies peerDependencies version`.
 - Build the dependency graph: note which `@concepta/*` packages the new version **drops** or **renames**
   (historically `nestjs-common` → `nestjs-core`; `email`/`event` had no 8.x;
-  `swagger-ui` → `@bitwild/rockets-core`; `typeorm-ext` removed — app-owned entities).
+  `swagger-ui` → `@conceptadev/rockets-core`; `typeorm-ext` removed — app-owned entities).
 - Check what the repo's source actually imports from the dropped packages:
   `grep -rl "@concepta/nestjs-common" packages/*/src`. Those are your migration sites.
 
@@ -34,7 +34,7 @@ restructures packages between alphas. Work through this checklist; do not assume
 - **common → core.** Re-point moved symbols (`DomainAggregate` from `…/aggregate`, `ActionEnum`,
   `RuntimeException`, references, audit) to `@concepta/nestjs-core`. Removed re-exports (e.g. `AccessControlAction`) get deleted, not faked.
 - **Exception identity.** Concepta exceptions extend `@concepta/nestjs-core`'s `RuntimeException`, which is a
-  *different class* from `@bitwild/rockets-app`'s. Any `instanceof RuntimeException` / global filter that
+  *different class* from `@conceptadev/rockets-app`'s. Any `instanceof RuntimeException` / global filter that
   imported from `@concepta/nestjs-common` must switch to `@concepta/nestjs-core`, or concepta errors become 500s.
 - **Config shapes.** Option interfaces change (e.g. role `assignments` requiring a flat `entityKey`). Read the
   installed `.d.ts` in `node_modules/<pkg>/dist`, not upstream `src` at HEAD.

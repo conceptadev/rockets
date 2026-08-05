@@ -7,10 +7,10 @@ export type {
   UserMetadataCreatableInterface,
   UserMetadataUpdatableInterface,
   UserMetadataModelUpdatableInterface,
-} from '@bitwild/rockets-core';
+} from '@conceptadev/rockets-core';
 
 export {
   BaseUserMetadataDto,
   BaseUserMetadataCreateDto,
   BaseUserMetadataUpdateDto,
-} from '@bitwild/rockets-core';
+} from '@conceptadev/rockets-core';

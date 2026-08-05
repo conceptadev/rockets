@@ -6,9 +6,9 @@ import {
   PassthroughEntityHookBase,
   getActor,
   getCrudContext,
-} from '@bitwild/rockets-core';
+} from '@conceptadev/rockets-core';
 import { AuditAction, AuditLogEntity } from './audit-log.entity';
-import { InjectDynamicRepository } from '@bitwild/rockets-core';
+import { InjectDynamicRepository } from '@conceptadev/rockets-core';
 
 /**
  * Repo hook that writes an `audit_logs` row after every mutating

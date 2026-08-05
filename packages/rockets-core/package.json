@@ -1,6 +1,6 @@
 {
-  "name": "@bitwild/rockets-core",
-  "version": "1.0.0-alpha.10",
+  "name": "@conceptadev/rockets-core",
+  "version": "0.0.1-dev.0",
   "description": "Rockets Core - auth-provider-agnostic server infrastructure",
   "author": "Thiago Ramalho <thiago.ramalho@concepta.com>",
   "license": "BSD-3-Clause",
@@ -32,7 +32,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/btwld/rockets.git",
+    "url": "git+https://github.com/conceptadev/rockets.git",
     "directory": "packages/rockets-core"
   },
   "engines": {
@@ -46,19 +46,20 @@
     "CHANGELOG.md"
   ],
   "scripts": {
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
     "build": "tsc -p tsconfig.json",
-    "prepack": "yarn run -T build",
+    "prepack": "yarn run -T clean && yarn run -T build",
     "build:watch": "tsc -p tsconfig.json --watch",
     "test": "jest --config ./jest.config.json",
     "test:typetests": "node ../../node_modules/typescript/bin/tsc --noEmit -p tsconfig.typetest.json",
     "test:e2e": "jest --config ./jest.config-e2e.json"
   },
   "dependencies": {
-    "@concepta/nestjs-access-control": "8.0.0-alpha.7",
-    "@concepta/nestjs-authentication": "8.0.0-alpha.7",
-    "@concepta/nestjs-core": "8.0.0-alpha.7",
-    "@concepta/nestjs-crud": "8.0.0-alpha.7",
-    "@concepta/nestjs-repository": "8.0.0-alpha.7",
+    "@concepta/nestjs-access-control": "8.0.0-alpha.8",
+    "@concepta/nestjs-authentication": "8.0.0-alpha.8",
+    "@concepta/nestjs-core": "8.0.0-alpha.8",
+    "@concepta/nestjs-crud": "8.0.0-alpha.8",
+    "@concepta/nestjs-repository": "8.0.0-alpha.8",
     "@nestjs/common": "12.0.0-alpha.5",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "12.0.0-alpha.5",
@@ -67,7 +68,7 @@
     "pluralize": "^8.0.0"
   },
   "devDependencies": {
-    "@bitwild/rockets-repository-typeorm": "1.0.0-alpha.10",
+    "@conceptadev/rockets-repository-typeorm": "workspace:^",
     "@nestjs/testing": "12.0.0-alpha.5",
     "@nestjs/typeorm": "11.0.3",
     "@types/pluralize": "^0.0.33",

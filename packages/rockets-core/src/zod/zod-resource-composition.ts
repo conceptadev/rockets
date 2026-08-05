@@ -1,6 +1,7 @@
 import type { PlainLiteralObject, Type } from '@nestjs/common';
 import { z } from 'zod';
 import {
+  OwnerScopeHook,
   OwnerStampHook,
   type ResourceRelationEntry,
   type RocketsResourceDefinition,
@@ -47,21 +48,37 @@ export function resolveOwnerColumns(
   return columns;
 }
 
-export function applyOwnerStamp(
+/**
+ * Auto-wire the owner hook pair for every owner column: `OwnerStampHook`
+ * on the write path and `OwnerScopeHook` on the read path. Each side has
+ * its own opt-out (`ownerStamp` / `ownerScope`).
+ */
+export function applyOwnerHooks(
   entity: Type<PlainLiteralObject>,
   ownerColumns: readonly string[],
   userHooks: RocketsResourceDefinition<PlainLiteralObject>['hooks'],
   ownerStamp: boolean | undefined,
+  ownerScope: boolean | undefined,
   owner: string | ZodOwnerConfig | undefined,
 ): RocketsResourceDefinition<PlainLiteralObject>['hooks'] {
-  if (ownerStamp === false || ownerColumns.length === 0) {
+  if (ownerColumns.length === 0) {
     return userHooks;
   }
   const stampOptions = typeof owner === 'string' ? undefined : owner;
-  const stampHooks = ownerColumns.map((column) =>
-    OwnerStampHook.for(entity, column, stampOptions),
-  );
-  return [...stampHooks, ...(userHooks ?? [])];
+  const stampHooks =
+    ownerStamp === false
+      ? []
+      : ownerColumns.map((column) =>
+          OwnerStampHook.for(entity, column, stampOptions),
+        );
+  const scopeHooks =
+    ownerScope === false
+      ? []
+      : ownerColumns.map((column) => OwnerScopeHook.for(entity, column));
+  if (stampHooks.length === 0 && scopeHooks.length === 0) {
+    return userHooks;
+  }
+  return [...stampHooks, ...scopeHooks, ...(userHooks ?? [])];
 }
 
 export function mergeRelations(

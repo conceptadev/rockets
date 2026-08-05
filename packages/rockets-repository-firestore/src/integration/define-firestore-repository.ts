@@ -1,5 +1,5 @@
 import type { DynamicModule, PlainLiteralObject, Type } from '@nestjs/common';
-import type { RepositoryBootstrap } from '@bitwild/rockets-core';
+import type { RepositoryBootstrap } from '@conceptadev/rockets-core';
 import type {
   DynamicRepositoryModule,
   RepositoryProviderOptions,

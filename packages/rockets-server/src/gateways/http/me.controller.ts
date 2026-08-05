@@ -7,20 +7,20 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import type { AuthorizedUser } from '@bitwild/rockets-core';
+import type { AuthorizedUser } from '@conceptadev/rockets-core';
 import {
   UpsertUserMetadataCommand,
   GetUserMetadataQuery,
   UserUpdateDto,
   UserResponseDto,
-} from '@bitwild/rockets-core';
+} from '@conceptadev/rockets-core';
 import type {
   UserMetadataEntityInterface,
   UserMetadataUpdatableInterface,
-} from '@bitwild/rockets-core';
+} from '@conceptadev/rockets-core';
 import type { RocketsUserMetadataDtoConfig } from '../../rockets.tokens';
 import { ROCKETS_USER_METADATA_DTO_TOKEN } from '../../rockets.tokens';
-import { AuthUser, whitelistedFromDto } from '@bitwild/rockets-core';
+import { AuthUser, whitelistedFromDto } from '@conceptadev/rockets-core';
 
 @ApiTags('user')
 @ApiBearerAuth()

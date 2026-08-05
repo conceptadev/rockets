@@ -1,6 +1,6 @@
 import { ConflictException, PlainLiteralObject } from '@nestjs/common';
 import { Where } from '@concepta/nestjs-repository';
-import { defineHook } from '@bitwild/rockets-core';
+import { defineHook } from '@conceptadev/rockets-core';
 import { PetEntity } from './pet.schema';
 
 /**

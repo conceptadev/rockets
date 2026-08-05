@@ -1,9 +1,7 @@
-import './patch-crud-module-for-e2e.bootstrap';
-
 import { RocketsAuthExceptionsFilter } from '../../shared/compatibility/rockets-auth-exceptions.filter';
 import { EmailSendInterface } from '@concepta/nestjs-common';
 import { EventModule } from '@concepta/nestjs-event';
-import { TypeOrmRepositoryModule } from '@bitwild/rockets-repository-typeorm';
+import { TypeOrmRepositoryModule } from '@conceptadev/rockets-repository-typeorm';
 import {
   DynamicModule,
   INestApplication,
@@ -15,7 +13,7 @@ import { ConfigService } from '@nestjs/config';
 import { HttpAdapterHost } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { RocketsModule } from '@bitwild/rockets';
+import { RocketsModule } from '@conceptadev/rockets';
 import { ormConfig } from '../../__fixtures__/ormconfig.fixture';
 import { InvitationEntityFixture } from '../../__fixtures__/invitation/invitation.entity.fixture';
 import { UserOtpEntityFixture } from '../../__fixtures__/user/user-otp-entity.fixture';

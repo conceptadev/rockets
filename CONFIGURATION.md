@@ -31,8 +31,8 @@ flowchart LR
   DM --> APP["Nest App"]
 ```
 
-**Two layers, one surface.** `@bitwild/rockets` (server) is a thin presentation
-layer over `@bitwild/rockets-core`. Server adds the `MeController`, the global
+**Two layers, one surface.** `@conceptadev/rockets` (server) is a thin presentation
+layer over `@conceptadev/rockets-core`. Server adds the `MeController`, the global
 guard opt-in, and the `auth` chain; core does the actual resource→module
 conversion. You only ever call `RocketsModule.forRoot` (server). Core's
 `forRootAsync` is called internally.
@@ -211,7 +211,7 @@ flowchart LR
   hatch for namespaced keys.
 
 > **Branch note.** `InjectDynamicRepository` and `RepositoryModuleInterface` are
-> provided by `@bitwild/rockets-repository`, which this branch treats as the
+> provided by `@conceptadev/rockets-repository`, which this branch treats as the
 > active repository abstraction (`rockets-core` re-exports them so features
 > import from core). No decorator-to-core migration is pending. The dynamic
 > token contract above is unchanged: registration and injection both resolve the
@@ -473,7 +473,7 @@ interface AuthAdapterInterface {
 opt **out**, never in. Routes are guarded unless explicitly made public
 (`@AuthPublic()`) or the global guard is disabled.
 
-### 7a. External auth (`@bitwild/rockets`) — you own `authenticate()`
+### 7a. External auth (`@conceptadev/rockets`) — you own `authenticate()`
 
 Minimum (core stub shape):
 
@@ -506,7 +506,7 @@ RocketsModule.forRoot({
 });
 ```
 
-### 7b. Built-in auth (`@bitwild/rockets-auth`) — `defineRocketsAuth`
+### 7b. Built-in auth (`@conceptadev/rockets-auth`) — `defineRocketsAuth`
 
 Full JWT / signup / login / recovery / OTP / admin / invitation system. Returns
 an `AuthBootstrap` (adapter defaults to `RocketsJwtAuthAdapter`).
@@ -669,7 +669,7 @@ flowchart TD
 
 ## 11. Open items (flagged from the code)
 
-1. **Repository import source** — on this branch `@bitwild/rockets-repository` is
+1. **Repository import source** — on this branch `@conceptadev/rockets-repository` is
    full self-contained source (no longer a thin `@concepta/nestjs-repository`
    wrapper). `RepositoryModuleInterface` / `InjectDynamicRepository` resolve from
    it directly; no decorator-to-core migration is pending here.

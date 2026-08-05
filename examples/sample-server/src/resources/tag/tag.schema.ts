@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { baseEntity, f } from '@bitwild/rockets-core/zod';
+import { baseEntity, f, rocketsFieldMeta } from '@conceptadev/rockets-core/zod';
 
 /**
  * Source of truth for the tag resource surface. Near-pure module:
@@ -28,6 +28,7 @@ export const tagSchema = baseEntity({
     .max(20)
     .refine((value) => value.startsWith('#'), 'color must start with "#"')
     .meta({ example: '#ff0000' })
+    .register(rocketsFieldMeta, { dto: { response: true } })
     .optional(),
 });
 

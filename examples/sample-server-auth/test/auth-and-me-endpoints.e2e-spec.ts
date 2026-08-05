@@ -2,12 +2,12 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { CommandBus } from '@nestjs/cqrs';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
-import { ExceptionsFilter } from '@bitwild/rockets';
+import { ExceptionsFilter } from '@conceptadev/rockets';
 import { CreateRoleCommand, AssignRoleCommand } from '@concepta/nestjs-role';
 import {
   ROLE_CRUD_ENTITY_KEY,
   USER_ROLE_ENTITY_KEY,
-} from '@bitwild/rockets-auth';
+} from '@conceptadev/rockets-auth';
 import { AppModule } from '../src/app.module';
 
 /**

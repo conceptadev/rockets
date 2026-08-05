@@ -11,8 +11,8 @@ import {
   ExceptionsFilter,
   RocketsModule,
   defineTypeOrmRepository,
-} from '@bitwild/rockets';
-import type { ResourceInput } from '@bitwild/rockets';
+} from '@conceptadev/rockets';
+import type { ResourceInput } from '@conceptadev/rockets';
 import {
   UserMetadataCreateDto,
   UserMetadataEntity,

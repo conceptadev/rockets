@@ -9,7 +9,7 @@ import {
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { Test, type TestingModule } from '@nestjs/testing';
 import request from 'supertest';
-import { AuthPublic, AuthUser } from '@bitwild/rockets-core';
+import { AuthPublic, AuthUser } from '@conceptadev/rockets-core';
 import { AuthorizedUser } from './domain/interfaces/auth-user.interface';
 import { IsNotEmpty, IsString, IsOptional } from 'class-validator';
 import {
@@ -86,7 +86,7 @@ class TestController {
 class TestModule {}
 
 describe('RocketsModule (e2e)', () => {
-  let app: INestApplication;
+  let app: INestApplication | undefined;
 
   class TestUserMetadataCreateDto implements UserMetadataCreatableInterface {
     @IsNotEmpty()
@@ -134,7 +134,11 @@ describe('RocketsModule (e2e)', () => {
   };
 
   afterEach(async () => {
-    if (app) await app.close();
+    const currentApp = app;
+    app = undefined;
+    if (currentApp) {
+      await currentApp.close();
+    }
   });
 
   describe('Original /user endpoints', () => {

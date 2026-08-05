@@ -7,7 +7,7 @@ import {
 } from '@nestjs/swagger';
 import { cleanupOpenApiDoc } from 'nestjs-zod';
 import request from 'supertest';
-import { ExceptionsFilter } from '@bitwild/rockets';
+import { ExceptionsFilter } from '@conceptadev/rockets';
 import { AppModule } from '../src/app.module';
 
 /**

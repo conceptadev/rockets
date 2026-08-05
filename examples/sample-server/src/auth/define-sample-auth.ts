@@ -1,5 +1,5 @@
-import type { AuthBootstrap } from '@bitwild/rockets-core';
-import { defineModuleResource } from '@bitwild/rockets-core';
+import type { AuthBootstrap } from '@conceptadev/rockets-core';
+import { defineModuleResource } from '@conceptadev/rockets-core';
 import { UserEntity } from './user.entity';
 import { AuthController } from './auth.controller';
 import { SampleAuthAdapter } from './auth.adapter';

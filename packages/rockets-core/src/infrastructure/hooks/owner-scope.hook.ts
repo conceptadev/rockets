@@ -132,7 +132,10 @@ export class OwnerScopeHook<
  * cache so repeated calls with the same pair reuse the same class (and
  * thus the same provider).
  */
-const ownerScopeSubclassCache = new Map<
+// WeakMap, not Map: the key is the entity CLASS. A strong-keyed cache
+// would pin every entity (and its module closure) for the process
+// lifetime. Matches schema-registry.ts / paginated-dto.factory.ts.
+const ownerScopeSubclassCache = new WeakMap<
   Type<PlainLiteralObject>,
   Map<string, Type<OwnerScopeHook<PlainLiteralObject>>>
 >();

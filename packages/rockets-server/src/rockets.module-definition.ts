@@ -5,12 +5,12 @@ import {
   Provider,
 } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
-import type { AuthBootstrap } from '@bitwild/rockets-core';
+import type { AuthBootstrap } from '@conceptadev/rockets-core';
 import {
   RocketsCoreModule,
   AuthServerGuard,
   ROCKETS_CORE_SETTINGS_TOKEN,
-} from '@bitwild/rockets-core';
+} from '@conceptadev/rockets-core';
 import { MeController } from './gateways/http/me.controller';
 import { RocketsOptionsInterface } from './infrastructure/config/interfaces/rockets-options.interface';
 import type { RocketsOptionsExtrasInterface } from './infrastructure/config/interfaces/rockets-options-extras.interface';

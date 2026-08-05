@@ -1,7 +1,7 @@
 {
   "name": "api",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1-dev.0",
   "description": "sample-code-review API — NestJS + Rockets (Firebase auth, GitHub OAuth, code review).",
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -14,13 +14,13 @@
     "test:e2e:auth": "jest --config jest-e2e.config.json --testPathPattern=auth-connection"
   },
   "dependencies": {
-    "@bitwild/rockets": "workspace:^",
-    "@bitwild/rockets-adapter-firebase": "workspace:^",
-    "@bitwild/rockets-core": "workspace:^",
-    "@bitwild/rockets-repository-firestore": "workspace:^",
-    "@bitwild/rockets-repository-typeorm": "workspace:^",
-    "@concepta/nestjs-core": "8.0.0-alpha.7",
-    "@concepta/nestjs-repository": "8.0.0-alpha.7",
+    "@concepta/nestjs-core": "8.0.0-alpha.8",
+    "@concepta/nestjs-repository": "8.0.0-alpha.8",
+    "@conceptadev/rockets": "workspace:^",
+    "@conceptadev/rockets-adapter-firebase": "workspace:^",
+    "@conceptadev/rockets-core": "workspace:^",
+    "@conceptadev/rockets-repository-firestore": "workspace:^",
+    "@conceptadev/rockets-repository-typeorm": "workspace:^",
     "@nestjs/common": "12.0.0-alpha.5",
     "@nestjs/config": "4.0.4",
     "@nestjs/core": "12.0.0-alpha.5",

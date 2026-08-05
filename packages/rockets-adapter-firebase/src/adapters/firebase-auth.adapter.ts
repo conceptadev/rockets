@@ -5,8 +5,8 @@ import type {
   AuthAttemptResult,
   AuthRequest,
   AuthorizedUser,
-} from '@bitwild/rockets-core';
-import { extractBearerToken } from '@bitwild/rockets-core';
+} from '@conceptadev/rockets-core';
+import { extractBearerToken } from '@conceptadev/rockets-core';
 
 import {
   FIREBASE_AUTH_MODULE_OPTIONS_TOKEN,

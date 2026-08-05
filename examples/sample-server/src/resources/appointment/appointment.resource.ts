@@ -1,5 +1,5 @@
-import { defineResource } from '@bitwild/rockets';
-import { OwnerScopeHook } from '@bitwild/rockets-core';
+import { defineResource } from '@conceptadev/rockets';
+import { OwnerScopeHook } from '@conceptadev/rockets-core';
 import { AppointmentEntity } from './appointment.entity';
 
 const AppointmentOwnerScope = OwnerScopeHook.for(AppointmentEntity);

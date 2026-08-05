@@ -1,6 +1,6 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
-import { ExceptionsFilter } from '@bitwild/rockets';
+import { ExceptionsFilter } from '@conceptadev/rockets';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 

@@ -17,7 +17,7 @@ import {
   AbstractUpsertUserMetadataHandler,
   GetUserMetadataQuery,
   UpsertUserMetadataCommand,
-} from '@bitwild/rockets-core';
+} from '@conceptadev/rockets-core';
 import { RocketsModule } from './rockets.module';
 import { e2eAuthBootstrap } from './__fixtures__/providers/e2e-auth-bootstrap.fixture';
 

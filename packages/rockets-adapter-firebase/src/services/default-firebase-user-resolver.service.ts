@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { AuthorizedUser } from '@bitwild/rockets-core';
+import { AuthorizedUser } from '@conceptadev/rockets-core';
 
 import { FirebaseDecodedTokenInterface } from '../interfaces/firebase-decoded-token.interface';
 import { FirebaseUserResolverInterface } from '../interfaces/firebase-user-resolver.interface';

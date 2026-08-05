@@ -184,19 +184,36 @@ export function defineSubResource<E extends PlainLiteralObject>(
 }
 
 /**
- * `entity: () => Class` thunk vs `entity: Class`. Class constructors
- * carry a non-empty `prototype`; thunks (arrow functions) usually do
- * not. We distinguish by checking for own-property `prototype` plus a
- * `constructor` self-link — the safest structural shape that also
- * doesn't need to walk runtime to disambiguate.
+ * `entity: () => Class` thunk vs `entity: Class`, decided from the
+ * `prototype` property DESCRIPTOR rather than from its mere presence:
+ *
+ * - arrow functions and methods have no own `prototype` → thunk;
+ * - an ES6 `class` gets a NON-writable `prototype` (spec-mandated) →
+ *   entity class;
+ * - a `function () { … }` gets a writable `prototype`, and is equally
+ *   valid as an ES5 constructor or as a thunk → genuinely ambiguous.
+ *
+ * The old check keyed off presence alone, so the third case silently
+ * resolved to "entity class" and a `function` thunk was used verbatim as
+ * the entity. Ambiguity now throws instead of guessing wrong.
  */
 function isThunk<E extends PlainLiteralObject>(
   value: Type<E> | (() => Type<E>),
 ): value is () => Type<E> {
   if (typeof value !== 'function') return false;
-  // A class declared with `class X {}` has its own `prototype.constructor === X`.
-  // An arrow thunk `() => X` does not have a `prototype` property at all.
-  return !Object.prototype.hasOwnProperty.call(value, 'prototype');
+
+  const prototype = Object.getOwnPropertyDescriptor(value, 'prototype');
+  if (prototype === undefined) return true;
+  if (prototype.writable === false) return false;
+
+  throw new Error(
+    `[defineSubResource] Cannot tell whether "${
+      value.name || '<anonymous>'
+    }" is an entity class or a thunk returning one: a \`function\` ` +
+      'expression is valid as both. Pass the class directly ' +
+      '(`entity: MyEntity`) or use an arrow thunk ' +
+      '(`entity: () => MyEntity`).',
+  );
 }
 
 /**
@@ -215,9 +232,9 @@ export function isSubResourceDefinition(
 }
 
 /**
- * Camel-case the input. Used to derive default parent params from the
- * parent's resource key (e.g. `pet` → `petId`, `categoryAddress` →
- * `categoryAddressId`).
+ * Derive the default parent param from the parent's resource key by
+ * appending `Id` (`pet` → `petId`, `categoryAddress` → `categoryAddressId`).
+ * The key is already camel-case; nothing is re-cased here.
  */
 export function defaultParentParam(parentKey: string): string {
   return `${parentKey}Id`;

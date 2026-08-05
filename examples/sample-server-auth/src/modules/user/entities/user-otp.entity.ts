@@ -7,8 +7,9 @@ export class UserOtpEntity extends AuditedSqliteEntity {
   @Column()
   category!: string;
 
-  @Column({ nullable: true })
-  type?: string;
+  // `OtpInterface.type` is required (the OTP module always supplies it).
+  @Column()
+  type!: string;
 
   @Column()
   passcode!: string;

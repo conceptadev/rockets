@@ -1,5 +1,5 @@
 /**
- * Contract test between `@bitwild/rockets-core` and `@bitwild/rockets`.
+ * Contract test between `@conceptadev/rockets-core` and `@conceptadev/rockets`.
  *
  * Why this file exists
  * --------------------
@@ -12,14 +12,14 @@
  * `rockets-server-auth`'s JWT adapter, etc.) break at runtime.
  *
  * This spec deliberately:
- *   - imports the adapter type STRAIGHT from `@bitwild/rockets-core`,
+ *   - imports the adapter type STRAIGHT from `@conceptadev/rockets-core`,
  *   - implements it with a hand-built class that satisfies ONLY the
  *     core contract (no helper utilities, no server-side conveniences),
  *   - wires it into `RocketsModule.forRoot()`, and
  *   - hits `GET /me` to prove the round-trip works.
  *
  * If `RocketsCoreModule` ever stops accepting an `AuthAdapterInterface`
- * from `@bitwild/rockets-core` as a valid `authProvider`, this file
+ * from `@conceptadev/rockets-core` as a valid `authProvider`, this file
  * fails to compile — which is the whole point. Don't "fix" it by
  * casting; fix the contract.
  */
@@ -31,8 +31,8 @@ import type {
   AuthAdapterInterface,
   AuthAttemptResult,
   AuthRequest,
-} from '@bitwild/rockets-core';
-import { extractBearerToken } from '@bitwild/rockets-core';
+} from '@conceptadev/rockets-core';
+import { extractBearerToken } from '@conceptadev/rockets-core';
 
 import { IsNotEmpty, IsString } from 'class-validator';
 
@@ -59,7 +59,7 @@ class MetadataUpdateDto implements UserMetadataModelUpdatableInterface {
 }
 
 /**
- * Implements ONLY `@bitwild/rockets-core`'s `AuthAdapterInterface` —
+ * Implements ONLY `@conceptadev/rockets-core`'s `AuthAdapterInterface` —
  * no server-side imports. This is exactly the shape a 3rd-party
  * Bearer-token adapter (Firebase, Auth0, custom) ships with.
  */
@@ -152,9 +152,8 @@ describe('Core ↔ Server auth-adapter contract (e2e)', () => {
     // server-side re-exports with hand-written duplicates.
     const fromServer: typeof import('../domain/interfaces/auth-adapter.interface') =
       jest.requireActual('../domain/interfaces/auth-adapter.interface');
-    const fromCore: typeof import('@bitwild/rockets-core') = jest.requireActual(
-      '@bitwild/rockets-core',
-    );
+    const fromCore: typeof import('@conceptadev/rockets-core') =
+      jest.requireActual('@conceptadev/rockets-core');
     expect(typeof fromServer).toBe('object');
     expect(typeof fromCore).toBe('object');
   });

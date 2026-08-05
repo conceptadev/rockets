@@ -7,15 +7,15 @@ import type {
   AuthAdapterInterface,
   AuthAttemptResult,
   AuthRequest,
-} from '@bitwild/rockets-core';
+} from '@conceptadev/rockets-core';
 import {
   createStubAuthBootstrap,
   extractBearerToken,
-} from '@bitwild/rockets-core';
+} from '@conceptadev/rockets-core';
 import type {
   UserMetadataCreatableInterface,
   UserMetadataModelUpdatableInterface,
-} from '@bitwild/rockets-core';
+} from '@conceptadev/rockets-core';
 import { RocketsModule } from '../rockets.module';
 import { StubUserMetadataEntity } from '../__fixtures__/entities/stub-user-metadata.entity';
 import { E2eFakeRepositoryModule } from './helpers/e2e-fake-repository.module';

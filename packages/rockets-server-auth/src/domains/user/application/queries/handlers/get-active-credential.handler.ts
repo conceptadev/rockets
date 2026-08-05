@@ -8,7 +8,7 @@ import {
 } from '@concepta/nestjs-repository';
 
 import { USER_CREDENTIALS_ENTITY_KEY } from '../../../../../shared/constants/repository-entity-keys.constants';
-import { resolveBitwildAppContext } from '../../../../../shared/compatibility/resolve-bitwild-app-context';
+import { resolveConceptadevAppContext } from '../../../../../shared/compatibility/resolve-conceptadev-app-context';
 import { GetActiveCredentialQuery } from '../impl/get-active-credential.query';
 
 @QueryHandler(GetActiveCredentialQuery)
@@ -30,7 +30,7 @@ export class GetActiveCredentialHandler
   ): Promise<UserCredentialEntityInterface | null> {
     if (!this.credentialsRepo) return null;
 
-    const ctx = resolveBitwildAppContext(query.ctx);
+    const ctx = resolveConceptadevAppContext(query.ctx);
 
     return await this.credentialsRepo.findOne({
       where: Where.and(

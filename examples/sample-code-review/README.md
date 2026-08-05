@@ -27,11 +27,11 @@ demos, this one exercises Rockets under real-world conditions:
   and forwards the ID token to the API.
 
 The layout intentionally mirrors
-[`rockets-starter`](https://github.com/btwld/rockets-starter)
-(`apps/api` + `apps/web`). In this monorepo every `@bitwild/*` import
+[`rockets-starter`](https://github.com/conceptadev/rockets-starter)
+(`apps/api` + `apps/web`). In this monorepo every `@conceptadev/*` import
 resolves to local `packages/*` via `workspace:^` — live integration
 test for in-development SDK changes. Published packages:
-`1.0.0-alpha.9` on npm (`@alpha` dist-tag).
+`0.0.1-dev.0` on npm (`@alpha` dist-tag).
 
 ```text
 rockets/                           (SDK monorepo, source of truth)
@@ -46,7 +46,7 @@ rockets/                           (SDK monorepo, source of truth)
 ### Auth flow
 
 ```text
-Web (Firebase client SDK)               API (@bitwild/rockets)
+Web (Firebase client SDK)               API (@conceptadev/rockets)
 ───────────────────────────             ───────────────────────────
 1. email/password login          →      (no participation)
 2. user.getIdToken()             →      Authorization: Bearer <Firebase JWT>
@@ -62,8 +62,8 @@ token. The Rockets server validates that token on every request.
 | Layer | Responsibility |
 |---|---|
 | Firebase (client) | Web login; `user.getIdToken()` |
-| `@bitwild/rockets-adapter-firebase` | Verifies ID token via Firebase Admin SDK |
-| `@bitwild/rockets` | Global `AuthServerGuard` + `MeController` + protected routes |
+| `@conceptadev/rockets-adapter-firebase` | Verifies ID token via Firebase Admin SDK |
+| `@conceptadev/rockets` | Global `AuthServerGuard` + `MeController` + protected routes |
 | Your controllers | `@AuthUser()`, `@Ctx()` — user already authenticated |
 
 A second adapter, `defineApiKeyAuth()`, runs after Firebase in the
@@ -89,7 +89,7 @@ yarn install
 yarn build
 ```
 
-The `build` step compiles every local `@bitwild/*` package — required
+The `build` step compiles every local `@conceptadev/*` package — required
 before the example runs.
 
 ### Configure
@@ -267,7 +267,7 @@ Order is preserved end-to-end — Firebase tries first; API key is the fallback.
 | Data | Backend | Configuration |
 |---|---|---|
 | GitHub OAuth tokens, `userMetadata` | SQLite (TypeORM) via root `repository:` | `DATABASE_PATH` or `:memory:` |
-| Code-review reports | Firestore via `@bitwild/rockets-repository-firestore` | `FIREBASE_FIRESTORE_REPORTS_COLLECTION` (default `code_review_reports`) |
+| Code-review reports | Firestore via `@conceptadev/rockets-repository-firestore` | `FIREBASE_FIRESTORE_REPORTS_COLLECTION` (default `code_review_reports`) |
 
 `CodeReviewReportEntity` uses `repository: codeReviewReportsRepository`
 from `defineFirestoreRepository()` with `collection` on the entity row
@@ -285,7 +285,7 @@ leak out of the analysis folder.
 | `APP_PUBLIC_URL` | Public base URL used to build the GitHub OAuth authorize URL (default `http://localhost:3001`). |
 | `DATABASE_PATH` | SQLite file path; default `:memory:` (see "Run the API against persistent SQLite"). |
 | `FIREBASE_PROJECT_ID` | Required when not using the fake verifier. Must match the web's `VITE_FIREBASE_PROJECT_ID`. |
-| `FIREBASE_SERVICE_ACCOUNT_PATH` / `GOOGLE_APPLICATION_CREDENTIALS` | Path to a Firebase service-account JSON (read by `@bitwild/rockets-repository-firestore`). |
+| `FIREBASE_SERVICE_ACCOUNT_PATH` / `GOOGLE_APPLICATION_CREDENTIALS` | Path to a Firebase service-account JSON (read by `@conceptadev/rockets-repository-firestore`). |
 | `FIREBASE_USE_FAKE` | `'true'` switches Firebase Auth to the in-process fake verifier. |
 | `FIREBASE_FIRESTORE_REPORTS_COLLECTION` | Firestore collection id for code-review reports (default `code_review_reports`). |
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | GitHub OAuth App credentials. **Not** `GITHUB_OAUTH_CLIENT_ID`/`SECRET` — boot requires exactly these two names (`GithubConfig` throws if missing). |
@@ -315,8 +315,8 @@ see "Call the API with an API key (server-to-server)" above.
 
 | `rockets-starter` (GitHub) | This example |
 |---|---|
-| `@bitwild/rockets@1.0.0-alpha.9` from npm | `workspace:^` → local `packages/*` (integration test for in-development SDK) |
-| Built-in `@bitwild/rockets-auth` | Firebase via `defineFirebaseAuth()` |
+| `@conceptadev/rockets@0.0.1-dev.0` from npm | `workspace:^` → local `packages/*` (integration test for in-development SDK) |
+| Built-in `@conceptadev/rockets-auth` | Firebase via `defineFirebaseAuth()` |
 | Next.js web | Vite + React (same ports `3000` / `3001`) |
 | PostgreSQL | SQLite + Firestore |
 

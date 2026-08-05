@@ -15,11 +15,11 @@ import {
 } from '@nestjs/swagger';
 import { CommandBus } from '@nestjs/cqrs';
 import { Ctx, type AppContextInterface } from '@concepta/nestjs-core';
-import type { AuthorizedUser } from '@bitwild/rockets';
+import type { AuthorizedUser } from '@conceptadev/rockets';
 import type { Pet } from '../pet/pet.schema';
 import { TransferPetOwnershipDto } from './dto/transfer-pet-ownership.dto';
 import { TransferPetOwnershipCommand } from './commands/impl/transfer-pet-ownership.command';
-import { AuthUser } from '@bitwild/rockets-core';
+import { AuthUser } from '@conceptadev/rockets-core';
 
 /**
  * HTTP gateway for pet-transfer. Dispatches via `CommandBus.execute` —

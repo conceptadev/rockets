@@ -1,6 +1,6 @@
 {
-  "name": "@bitwild/rockets",
-  "version": "1.0.0-alpha.10",
+  "name": "@conceptadev/rockets",
+  "version": "0.0.1-dev.0",
   "description": "Rockets server — external-auth composition layer: AuthAdapterInterface, /me, declarative CRUD resources, and database-agnostic persistence",
   "author": "Thiago Ramalho <thiago.ramalho@concepta.com>",
   "license": "BSD-3-Clause",
@@ -12,7 +12,12 @@
       "require": "./dist/index.js",
       "import": "./dist/index.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./typeorm": {
+      "types": "./dist/typeorm.d.ts",
+      "require": "./dist/typeorm.js",
+      "import": "./dist/typeorm.js"
+    }
   },
   "sideEffects": false,
   "publishConfig": {
@@ -20,13 +25,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/btwld/rockets.git",
+    "url": "git+https://github.com/conceptadev/rockets.git",
     "directory": "packages/rockets-server"
   },
   "bugs": {
-    "url": "https://github.com/btwld/rockets/issues"
+    "url": "https://github.com/conceptadev/rockets/issues"
   },
-  "homepage": "https://github.com/btwld/rockets/tree/main/packages/rockets-server#readme",
+  "homepage": "https://github.com/conceptadev/rockets/tree/main/packages/rockets-server#readme",
   "keywords": [
     "nestjs",
     "rockets",
@@ -41,7 +46,7 @@
   ],
   "funding": {
     "type": "github",
-    "url": "https://github.com/sponsors/btwld"
+    "url": "https://github.com/sponsors/conceptadev"
   },
   "engines": {
     "node": ">=18.0.0",
@@ -59,8 +64,9 @@
     "CHANGELOG.md"
   ],
   "scripts": {
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
     "build": "tsc -p tsconfig.json",
-    "prepack": "yarn run -T build",
+    "prepack": "yarn run -T clean && yarn run -T build",
     "build:watch": "tsc -p tsconfig.json --watch",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -70,9 +76,9 @@
     "generate-swagger": "ts-node src/generate-swagger.ts"
   },
   "dependencies": {
-    "@bitwild/rockets-core": "1.0.0-alpha.10",
-    "@bitwild/rockets-repository-typeorm": "1.0.0-alpha.10",
-    "@concepta/nestjs-core": "8.0.0-alpha.7",
+    "@concepta/nestjs-core": "8.0.0-alpha.8",
+    "@conceptadev/rockets-core": "workspace:^",
+    "@conceptadev/rockets-repository-typeorm": "workspace:^",
     "@nestjs/common": "12.0.0-alpha.5",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "12.0.0-alpha.5",
@@ -81,7 +87,7 @@
     "@nestjs/typeorm": "^11.0.0"
   },
   "devDependencies": {
-    "@concepta/nestjs-crud": "8.0.0-alpha.7",
+    "@concepta/nestjs-crud": "8.0.0-alpha.8",
     "@nestjs/platform-express": "12.0.0-alpha.5",
     "@nestjs/testing": "12.0.0-alpha.5",
     "@nestjs/typeorm": "^11.0.0",

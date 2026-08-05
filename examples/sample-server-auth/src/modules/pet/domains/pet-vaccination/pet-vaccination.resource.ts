@@ -1,4 +1,4 @@
-import { defineResource } from '@bitwild/rockets';
+import { defineResource } from '@conceptadev/rockets';
 import { Operation } from '@concepta/nestjs-core';
 import { PetVaccinationEntity } from './pet-vaccination.entity';
 import { PetEntity } from '../pet/pet.entity';

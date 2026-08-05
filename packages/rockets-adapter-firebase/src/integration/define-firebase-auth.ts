@@ -1,4 +1,4 @@
-import type { AuthBootstrap } from '@bitwild/rockets-core';
+import type { AuthBootstrap } from '@conceptadev/rockets-core';
 
 import { FirebaseAuthAdapter } from '../adapters/firebase-auth.adapter';
 import type { FirebaseAuthModuleAsyncOptions } from '../interfaces/firebase-auth-async-options.interface';

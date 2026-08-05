@@ -8,7 +8,7 @@ import type {
   ResourceInput,
   RocketsAccessControlConfig,
   RocketsUserMetadataConfig,
-} from '@bitwild/rockets-core';
+} from '@conceptadev/rockets-core';
 
 export interface DisableControllerOptionsInterface {
   me?: boolean;

@@ -16,11 +16,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Ctx, type AppContextInterface } from '@concepta/nestjs-core';
-import type { AuthorizedUser } from '@bitwild/rockets';
+import type { AuthorizedUser } from '@conceptadev/rockets';
 import { PetShareEntity } from './pet-share.entity';
 import { PetShareCreateDto, PetShareResponseDto } from './pet-share.dto';
 import { PetShareService } from './pet-share.service';
-import { AuthUser } from '@bitwild/rockets-core';
+import { AuthUser } from '@conceptadev/rockets-core';
 
 /**
  * Thin HTTP gateway. `@Ctx()` resolves the per-request `AppContextHost`

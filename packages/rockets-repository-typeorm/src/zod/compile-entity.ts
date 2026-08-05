@@ -2,7 +2,7 @@ import type { PlainLiteralObject, Type } from '@nestjs/common';
 import type {
   SchemaEntityCompiler,
   SchemaEntityCompilerOptions,
-} from '@bitwild/rockets-core';
+} from '@conceptadev/rockets-core';
 import {
   readEntityMeta,
   registerSchemaEntity,
@@ -11,7 +11,7 @@ import {
   unwrapField,
   RocketsRelationFieldMeta,
   type SchemaPersistenceRow,
-} from '@bitwild/rockets-core/zod';
+} from '@conceptadev/rockets-core/zod';
 import {
   Column,
   CreateDateColumn,
@@ -52,7 +52,7 @@ import { z } from 'zod';
  * This is the TypeORM implementation of the adapter-neutral
  * {@link SchemaEntityCompiler} contract — the DB-specific half of the
  * zod layer. The DB-agnostic translation (DTOs, projections, the
- * schema→entity registry) lives in `@bitwild/rockets-core/zod`.
+ * schema→entity registry) lives in `@conceptadev/rockets-core/zod`.
  */
 export interface CompileEntityOptions {
   /** Class name, e.g. `TagEntity` — drives `deriveEntityKey`. */
@@ -63,7 +63,7 @@ export interface CompileEntityOptions {
 
 /**
  * TypeORM implementation of the adapter-neutral
- * {@link SchemaEntityCompiler} contract from `@bitwild/rockets-core`. It
+ * {@link SchemaEntityCompiler} contract from `@conceptadev/rockets-core`. It
  * narrows the `unknown` schema to a zod object (boot-time error
  * otherwise) and delegates to the typed compiler below. Other adapters
  * implement the same contract with their own representation — a

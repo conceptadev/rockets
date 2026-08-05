@@ -3,7 +3,7 @@ import {
   createStubAuthBootstrap,
   type AuthAdapterInterface,
   type AuthBootstrap,
-} from '@bitwild/rockets-core';
+} from '@conceptadev/rockets-core';
 
 /** Wrap a test adapter class as an {@link AuthBootstrap} for server e2e. */
 export function e2eAuthBootstrap<Adapter extends AuthAdapterInterface>(

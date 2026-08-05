@@ -1,6 +1,6 @@
 import { Injectable, Module } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import type { AuthRequest } from '@bitwild/rockets-core';
+import type { AuthRequest } from '@conceptadev/rockets-core';
 
 import {
   FIREBASE_AUTH_MODULE_OPTIONS_TOKEN,
@@ -13,7 +13,7 @@ import { FirebaseDecodedTokenInterface } from '../interfaces/firebase-decoded-to
 import { FirebaseTokenVerifierInterface } from '../interfaces/firebase-token-verifier.interface';
 import { FirebaseUserResolverInterface } from '../interfaces/firebase-user-resolver.interface';
 import { DefaultFirebaseUserResolverService } from '../services/default-firebase-user-resolver.service';
-import { AuthorizedUser } from '@bitwild/rockets-core';
+import { AuthorizedUser } from '@conceptadev/rockets-core';
 
 class FakeVerifier implements FirebaseTokenVerifierInterface {
   async verifyIdToken(): Promise<FirebaseDecodedTokenInterface> {

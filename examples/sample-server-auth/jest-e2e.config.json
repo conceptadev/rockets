@@ -4,13 +4,13 @@
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
   "moduleNameMapper": {
-    "^@bitwild/rockets-auth$": "<rootDir>/../../packages/rockets-server-auth/dist/index.js",
-    "^@bitwild/rockets$": "<rootDir>/../../packages/rockets-server/dist/index.js",
-    "^@bitwild/rockets-core$": "<rootDir>/../../packages/rockets-core/dist/index.js",
-    "^@bitwild/rockets-common$": "<rootDir>/../../packages/rockets-common/dist/index.js",
-    "^@bitwild/rockets-repository$": "<rootDir>/../../packages/rockets-repository/dist/index.js",
-    "^@bitwild/rockets-crud$": "<rootDir>/../../packages/rockets-crud/dist/index.js",
-    "^@bitwild/rockets-access-control$": "<rootDir>/../../packages/rockets-access-control/dist/index.js",
+    "^@conceptadev/rockets-auth$": "<rootDir>/../../packages/rockets-server-auth/dist/index.js",
+    "^@conceptadev/rockets$": "<rootDir>/../../packages/rockets-server/dist/index.js",
+    "^@conceptadev/rockets-core$": "<rootDir>/../../packages/rockets-core/dist/index.js",
+    "^@conceptadev/rockets-common$": "<rootDir>/../../packages/rockets-common/dist/index.js",
+    "^@conceptadev/rockets-repository$": "<rootDir>/../../packages/rockets-repository/dist/index.js",
+    "^@conceptadev/rockets-crud$": "<rootDir>/../../packages/rockets-crud/dist/index.js",
+    "^@conceptadev/rockets-access-control$": "<rootDir>/../../packages/rockets-access-control/dist/index.js",
     "^@nestjs/common$": "<rootDir>/../../node_modules/@nestjs/common",
     "^@nestjs/core$": "<rootDir>/../../node_modules/@nestjs/core",
     "^@nestjs/cqrs$": "<rootDir>/../../node_modules/@nestjs/cqrs",
@@ -40,5 +40,5 @@
       }
     ]
   },
-  "transformIgnorePatterns": ["/node_modules/(?!@nestjs/)"]
+  "transformIgnorePatterns": ["/node_modules/(?!(@nestjs|@concepta)/)"]
 }

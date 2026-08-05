@@ -4,7 +4,7 @@ import {
   CreateOneInterface,
   RemoveOneInterface,
   UpdateOneInterface,
-} from '@bitwild/rockets-core';
+} from '@conceptadev/rockets-core';
 
 /**
  * Pet Appointment Status Enumeration

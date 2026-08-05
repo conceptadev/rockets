@@ -1,15 +1,7 @@
 {
-  "moduleFileExtensions": [
-    "js",
-    "json",
-    "ts"
-  ],
-  "setupFilesAfterEnv": [
-    "jest-extended/all"
-  ],
-  "roots": [
-    "<rootDir>/packages"
-  ],
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "setupFilesAfterEnv": ["jest-extended/all"],
+  "roots": ["<rootDir>/packages"],
   "coverageProvider": "v8",
   "coverageThreshold": {
     "global": {
@@ -20,11 +12,7 @@
     }
   },
   "testRegex": "packages/.*\\.spec\\.ts$",
-  "testPathIgnorePatterns": [
-    "/node_modules/",
-    "/dist/",
-    "/examples/"
-  ],
+  "testPathIgnorePatterns": ["/node_modules/", "/dist/", "/examples/"],
   "transform": {
     "^.+\\.ts$": [
       "ts-jest",
@@ -44,9 +32,7 @@
       }
     ]
   },
-  "transformIgnorePatterns": [
-    "/node_modules/(?!@nestjs/)"
-  ],
+  "transformIgnorePatterns": ["/node_modules/(?!(@nestjs|@concepta)/)"],
   "collectCoverageFrom": [
     "packages/**/*.ts",
     "!packages/**/*.d.ts",

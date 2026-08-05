@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { HttpAdapterHost } from '@nestjs/core';
-import { ExceptionsFilter } from '@bitwild/rockets';
+import { ExceptionsFilter } from '@conceptadev/rockets';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { FakeEmailGateway } from '../src/events';

@@ -7,10 +7,7 @@
   "testTimeout": 30000,
   "maxWorkers": 1,
   "transform": {
-    "^.+\\.ts$": [
-      "ts-jest",
-      { "tsconfig": "<rootDir>/tsconfig.json" }
-    ],
+    "^.+\\.ts$": ["ts-jest", { "tsconfig": "<rootDir>/tsconfig.json" }],
     "^.+\\.js$": [
       "babel-jest",
       {
@@ -23,5 +20,5 @@
       }
     ]
   },
-  "transformIgnorePatterns": ["/node_modules/(?!@nestjs/)"]
+  "transformIgnorePatterns": ["/node_modules/(?!(@nestjs|@concepta)/)"]
 }

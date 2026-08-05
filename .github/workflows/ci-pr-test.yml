@@ -23,8 +23,8 @@ jobs:
 
       - uses: actions/cache@v3
         with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+          path: '/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('/yarn.lock') }}
 
       - name: Install
         run: yarn --immutable
@@ -34,6 +34,8 @@ jobs:
         run: yarn lint:all
       - name: Unit tests
         run: yarn test:ci
+      - name: E2E coverage
+        run: yarn test:e2e:cov
       - name: Save the PR number in an artifact
         shell: bash
         env:
@@ -50,3 +52,5 @@ jobs:
             junit.xml
             coverage/lcov.info
             coverage/coverage-final.json
+            coverage-e2e/lcov.info
+            coverage-e2e/coverage-final.json

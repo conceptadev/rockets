@@ -6,8 +6,8 @@ import {
   SwaggerModule,
 } from '@nestjs/swagger';
 import { cleanupOpenApiDoc } from 'nestjs-zod';
-import { RocketsModule, defineTypeOrmRepository } from '@bitwild/rockets';
-import type { ResourceInput } from '@bitwild/rockets';
+import { RocketsModule, defineTypeOrmRepository } from '@conceptadev/rockets';
+import type { ResourceInput } from '@conceptadev/rockets';
 import {
   UserMetadataCreateDto,
   UserMetadataEntity,

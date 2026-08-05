@@ -1,4 +1,4 @@
-import type { RocketsUserMetadataConfig } from '@bitwild/rockets-core';
+import type { RocketsUserMetadataConfig } from '@conceptadev/rockets-core';
 
 export const RAW_OPTIONS_TOKEN = Symbol(
   '__ROCKETS_SERVER_MODULE_RAW_OPTIONS_TOKEN__',

@@ -126,13 +126,13 @@ export function materialiseSubResource(args: {
     : undefined;
 
   const composedDecorators: readonly ClassDecorator[] = [
+    ...(ScopeGuard ? [UseGuards(ScopeGuard) as ClassDecorator] : []),
     ...(def.decorators ?? []),
     parentApiParam,
-    ...(ScopeGuard ? [UseGuards(ScopeGuard) as ClassDecorator] : []),
   ];
 
   const composedProviders: readonly Provider[] = ScopeGuard
-    ? [...(def.providers ?? []), ScopeGuard]
+    ? [ScopeGuard, ...(def.providers ?? [])]
     : def.providers ?? [];
 
   const persistenceModule = def.repository ?? parentPersistenceModule;
@@ -149,7 +149,30 @@ export function materialiseSubResource(args: {
     request: composedRequest,
   };
 
-  return defineResource(materialised);
+  const bundle = defineResource(materialised);
+
+  if (!ScopeGuard && !ScopeHook) {
+    return bundle;
+  }
+
+  // Both scoping classes are handed to `defineResource` as providers; a
+  // regression in provider merging would silently unscope the nested
+  // route, so assert they survived before publishing the bundle.
+  const resolvedProviders = bundle.core.providers ?? [];
+  if (ScopeGuard && !resolvedProviders.includes(ScopeGuard)) {
+    throw new Error(
+      `defineResource(${parentKey}): PathScopeGuard was dropped during ` +
+        `sub-resource materialisation for segment "${segment}".`,
+    );
+  }
+  if (ScopeHook && !resolvedProviders.includes(ScopeHook)) {
+    throw new Error(
+      `defineResource(${parentKey}): PathScopeHook was dropped during ` +
+        `sub-resource materialisation for segment "${segment}".`,
+    );
+  }
+
+  return bundle;
 }
 
 function composeSubResourceOperationsDecorators(

@@ -18,14 +18,14 @@ import {
 import { randomBytes } from 'crypto';
 import { RepositoryInterface, Where } from '@concepta/nestjs-repository';
 
-import type { AuthorizedUser } from '@bitwild/rockets-core';
+import type { AuthorizedUser } from '@conceptadev/rockets-core';
 import { ApiKeyEntity } from './api-key.entity';
 import {
   ApiKeyResponseDto,
   CreateApiKeyDto,
   CreateApiKeyResponseDto,
 } from './api-key.dto';
-import { AuthUser, InjectDynamicRepository } from '@bitwild/rockets-core';
+import { AuthUser, InjectDynamicRepository } from '@conceptadev/rockets-core';
 
 @ApiTags('API Keys')
 @ApiBearerAuth()

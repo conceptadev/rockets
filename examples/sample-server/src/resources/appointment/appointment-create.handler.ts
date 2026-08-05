@@ -7,15 +7,15 @@ import {
   PlainLiteralObject,
 } from '@nestjs/common';
 import { CrudAdapter, CrudCreateCommand, CrudQueryException } from '@concepta/nestjs-crud';
-import { CrudCommandHandlerBase } from '@bitwild/rockets-core';
+import { CrudCommandHandlerBase } from '@conceptadev/rockets-core';
 import { RepositoryInterface, TransactionScope, Where } from '@concepta/nestjs-repository';
-import { getActor } from '@bitwild/rockets-core';
+import { getActor } from '@conceptadev/rockets-core';
 import { PetEntity } from '../pet/pet.schema';
 import type { Pet } from '../pet/pet.schema';
 import { AppointmentEntity, type AppointmentRow } from './appointment.entity';
 import { ReminderEntity } from './reminder.schema';
 import type { ReminderRow } from './reminder.schema';
-import { InjectCrudAdapter, InjectDynamicRepository } from '@bitwild/rockets-core';
+import { InjectCrudAdapter, InjectDynamicRepository } from '@conceptadev/rockets-core';
 
 type AppointmentCreatePayload = PlainLiteralObject & {
   petId: string;

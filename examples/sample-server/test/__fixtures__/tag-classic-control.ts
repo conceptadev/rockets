@@ -14,7 +14,7 @@ import {
   PartialType,
   PickType,
 } from '@nestjs/swagger';
-import { defineResource } from '@bitwild/rockets';
+import { defineResource } from '@conceptadev/rockets';
 
 /**
  * Handwritten (classic) tag control — the comparison baseline for

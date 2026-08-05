@@ -457,7 +457,7 @@ export function DashboardPage() {
               <input
                 type="text"
                 className={fieldClass}
-                placeholder="btwld/rockets"
+                placeholder="conceptadev/rockets"
                 value={reportFilterGithub}
                 data-testid="reports-filter-github"
                 onChange={(e) => setReportFilterGithub(e.target.value)}

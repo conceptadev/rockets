@@ -1,4 +1,4 @@
-import { AuthorizedUser } from '@bitwild/rockets-core';
+import { AuthorizedUser } from '@conceptadev/rockets-core';
 
 import { FirebaseDecodedTokenInterface } from './firebase-decoded-token.interface';
 

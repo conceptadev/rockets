@@ -5,8 +5,10 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import { CrudContextOverlay } from '@concepta/nestjs-crud';
-import { CrudMetaview } from '../crud-compat';
+import {
+  CrudContextException,
+  CrudContextOverlay,
+} from '@concepta/nestjs-crud';
 
 /**
  * Guarded replacement for the upstream `CrudContextOverlay` interceptor.
@@ -22,11 +24,11 @@ import { CrudMetaview } from '../crud-compat';
  * `createSafeCrudRootModule` in `rockets-core.module-definition.ts`). The
  * guard:
  *
- * 1. Reads the `@CrudOperation` metadata via upstream `CrudMetaview`.
- * 2. If present, delegates to `overlay.attach(context)` — identical to
- *    upstream behavior on CRUD routes.
- * 3. If absent, skips `attach` entirely — non-CRUD routes pass through
- *    untouched.
+ * 1. Delegates to `overlay.attach(context)` — identical to upstream behavior
+ *    on CRUD routes.
+ * 2. If upstream reports no entity for the handler, skips the overlay so
+ *    non-CRUD routes pass through untouched.
+ * 3. Any other CRUD context error still bubbles.
  *
  * This preserves upstream semantics for CRUD controllers while letting
  * mixed-controller apps coexist without a 500.
@@ -34,22 +36,25 @@ import { CrudMetaview } from '../crud-compat';
 // TODO(upstream: concepta/nestjs-crud) — the upstream master branch has
 // already fixed CrudContextOverlay.attach() to no-op on handlers without
 // @CrudOperation metadata (commit 5249672f), but the fix is NOT yet
-// shipped in the published 8.0.0-alpha.5 we consume. Once a new alpha
-// (≥ 8.0.0-alpha.6) ships with this fix and we bump, delete this file,
+// shipped in the published alpha we consume. Once a release includes that
+// behavior, delete this file,
 // delete createSafeCrudRootModule() in rockets-core.module-definition.ts,
 // and the bare CrudModule.forRoot({}) will be safe for mixed apps.
 @Injectable()
 export class SafeCrudContextInterceptor implements NestInterceptor {
-  constructor(
-    private readonly overlay: CrudContextOverlay,
-    private readonly metaview: CrudMetaview,
-  ) {}
+  constructor(private readonly overlay: CrudContextOverlay) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
-    const handler = context.getHandler();
-    const operation = this.metaview.getOperation(handler);
-    if (operation !== undefined) {
+    try {
       this.overlay.attach(context);
+    } catch (error: unknown) {
+      if (
+        error instanceof CrudContextException &&
+        error.message.includes('No entity defined')
+      ) {
+        return next.handle();
+      }
+      throw error;
     }
     return next.handle();
   }

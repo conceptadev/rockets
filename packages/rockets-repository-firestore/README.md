@@ -1,6 +1,6 @@
-# @bitwild/rockets-repository-firestore
+# @conceptadev/rockets-repository-firestore
 
-[![NPM](https://img.shields.io/npm/v/@bitwild/rockets-repository-firestore)](https://www.npmjs.com/package/@bitwild/rockets-repository-firestore)
+[![NPM](https://img.shields.io/npm/v/@conceptadev/rockets-repository-firestore)](https://www.npmjs.com/package/@conceptadev/rockets-repository-firestore)
 [![NestJS](https://img.shields.io/badge/NestJS-12-ea2845?logo=nestjs&logoColor=white)](https://nestjs.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
@@ -8,14 +8,14 @@
 > Firestore-backed entities with a TypeORM (or any other) default adapter, per
 > entity.
 
-**Status:** preview (`1.0.0-alpha.9` on npm, dist-tag `alpha`). API stable
+**Status:** preview (`0.0.1-dev.0` on npm, dist-tag `alpha`). API stable
 enough to use; expect refinements before 1.0.
 
 ---
 
 ## 1. Introduction
 
-`@bitwild/rockets-repository-firestore` implements `RepositoryAdapter` and
+`@conceptadev/rockets-repository-firestore` implements `RepositoryAdapter` and
 `DynamicRepositoryModule` from `@concepta/nestjs-repository`, so any Rockets
 handler that talks to `RepositoryInterface<T>` will work against Firestore
 without code changes.
@@ -52,7 +52,7 @@ Other entities continue on the default adapter (TypeORM, in most apps).
 
 - You need ACID transactions across multiple entities — stay on a SQL adapter
   for cross-entity transactional flows.
-- You only want SQL — install `@bitwild/rockets-repository-typeorm` instead.
+- You only want SQL — install `@conceptadev/rockets-repository-typeorm` instead.
 
 ---
 
@@ -61,7 +61,7 @@ Other entities continue on the default adapter (TypeORM, in most apps).
 ### Install
 
 ```bash
-yarn add @bitwild/rockets-repository-firestore@alpha @bitwild/rockets-core@alpha \
+yarn add @conceptadev/rockets-repository-firestore@alpha @conceptadev/rockets-core@alpha \
   firebase-admin
 ```
 
@@ -85,8 +85,8 @@ Credential paths (`FIREBASE_SERVICE_ACCOUNT_PATH`,
 ### Use one entity on Firestore
 
 ```typescript
-import { defineModuleResource } from '@bitwild/rockets-core';
-import { defineFirestoreRepository } from '@bitwild/rockets-repository-firestore';
+import { defineModuleResource } from '@conceptadev/rockets-core';
+import { defineFirestoreRepository } from '@conceptadev/rockets-repository-firestore';
 
 import { AnalyticsEventEntity } from './analytics-event.entity';
 
@@ -151,7 +151,7 @@ Do not use environment flags. Inject the in-memory backend explicitly:
 import {
   defineFirestoreRepository,
   InMemoryFirestoreBackend,
-} from '@bitwild/rockets-repository-firestore';
+} from '@conceptadev/rockets-repository-firestore';
 
 const testRepository = defineFirestoreRepository({
   backend: new InMemoryFirestoreBackend(),

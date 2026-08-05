@@ -4,10 +4,10 @@ export type {
   UserCreatableInterface,
   UserUpdatableInterface,
   UserModelUpdatableInterface,
-} from '@bitwild/rockets-core';
+} from '@conceptadev/rockets-core';
 
 export {
   BaseUserDto,
   BaseUserCreateDto,
   BaseUserUpdateDto,
-} from '@bitwild/rockets-core';
+} from '@conceptadev/rockets-core';

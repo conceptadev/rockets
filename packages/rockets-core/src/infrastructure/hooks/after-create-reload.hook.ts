@@ -61,7 +61,10 @@ export abstract class AfterCreateReloadHook<
   }
 }
 
-const subclassCache = new Map<
+// WeakMap, not Map: the key is the entity CLASS. A strong-keyed cache
+// would pin every entity (and its module closure) for the process
+// lifetime. Matches schema-registry.ts / paginated-dto.factory.ts.
+const subclassCache = new WeakMap<
   Type<PlainLiteralObject>,
   Type<AfterCreateReloadHook<PlainLiteralObject>>
 >();

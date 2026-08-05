@@ -2,14 +2,14 @@ import 'reflect-metadata';
 import { ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
-import { ExceptionsFilter } from '@bitwild/rockets';
+import { ExceptionsFilter } from '@conceptadev/rockets';
 
 import helmet from 'helmet';
 
 import { AppModule } from './app.module';
 import { UserMetadataUpdateDto } from './user-metadata.schema';
 import { patchMePatchOpenApi } from './swagger/patch-me-openapi';
-import { SwaggerUiService } from '@bitwild/rockets-core';
+import { SwaggerUiService } from '@conceptadev/rockets-core';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

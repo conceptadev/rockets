@@ -4,8 +4,8 @@ import {
   buildRocketsAuthResources,
   defineRocketsAuth,
   type DefineRocketsAuthInput,
-} from '@bitwild/rockets-auth';
-import { RocketsModule } from '@bitwild/rockets';
+} from '@conceptadev/rockets-auth';
+import { RocketsModule } from '@conceptadev/rockets';
 import type { EmailSendOptionsInterface } from '@concepta/nestjs-common/dist/domain/email/interfaces/email-send-options.interface';
 
 import { ACService } from './access-control.service';

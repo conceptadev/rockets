@@ -126,12 +126,12 @@ module.exports = {
           {
             paths: [
               {
-                name: '@bitwild/rockets',
+                name: '@conceptadev/rockets',
                 message:
                   'rockets-core must not depend on rockets-server (would create a cycle).',
               },
               {
-                name: '@bitwild/rockets-server-auth',
+                name: '@conceptadev/rockets-server-auth',
                 message:
                   'rockets-core must not depend on rockets-server-auth (would create a cycle).',
               },

@@ -1,26 +1,26 @@
-# @bitwild/rockets-core
+# @conceptadev/rockets-core
 
-[![NPM](https://img.shields.io/npm/v/@bitwild/rockets-core)](https://www.npmjs.com/package/@bitwild/rockets-core)
+[![NPM](https://img.shields.io/npm/v/@conceptadev/rockets-core)](https://www.npmjs.com/package/@conceptadev/rockets-core)
 [![NestJS](https://img.shields.io/badge/NestJS-12-ea2845?logo=nestjs&logoColor=white)](https://nestjs.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
 > Configuration-driven composition layer: one options object → planner →
 > upstream `@concepta/nestjs-*` modules registered as Nest imports.
 
-**Status:** stable (`1.0.0-alpha.9` on npm, dist-tag `alpha`).
+**Status:** stable (`0.0.1-dev.0` on npm, dist-tag `alpha`).
 
 ---
 
 ## 1. Introduction
 
-`@bitwild/rockets-core` is the **planner and wiring layer** — not the
+`@conceptadev/rockets-core` is the **planner and wiring layer** — not the
 repository/CRUD/hook motor. It solves: _“I already use Concepta motors, but I
 still hand-wire Nest modules, entity lists, and auth guards on every new
 service.”_ The motor is `@concepta/nestjs-repository`, `@concepta/nestjs-crud`,
 and `@concepta/nestjs-core` (hook resolution) — core depends on them directly
 and re-exports the symbols apps need (`InjectDynamicRepository`,
 `RepositoryInterface`, `AuthUser`, `SwaggerUiModule`, …; the former
-`@bitwild/rockets-common` package was merged into core). Core owns:
+`@conceptadev/rockets-common` package was merged into core). Core owns:
 
 - An auth contract (`AuthAdapterInterface`) and a global guard that runs
   adapters in a chain.
@@ -37,14 +37,14 @@ and re-exports the symbols apps need (`InjectDynamicRepository`,
 - You want full control over composition (no `/me` route, no global guard
   defaults) and will write a thin server module yourself.
 - You are building another package (an adapter, a presentation layer) that needs
-  the same contracts as `@bitwild/rockets` and `@bitwild/rockets-auth`.
+  the same contracts as `@conceptadev/rockets` and `@conceptadev/rockets-auth`.
 
 ### When NOT to use this package
 
 - You want an external-auth server with `/me` and a global guard out of the box
-  → use `@bitwild/rockets`.
+  → use `@conceptadev/rockets`.
 - You want a complete built-in auth system (signup, login, OTP, admin) → use
-  `@bitwild/rockets-auth`.
+  `@conceptadev/rockets-auth`.
 
 Both packages above re-export almost everything in core, so you usually depend
 on one of them — not on core directly.
@@ -56,7 +56,7 @@ on one of them — not on core directly.
 ### Install
 
 ```bash
-yarn add @bitwild/rockets-core@alpha \
+yarn add @conceptadev/rockets-core@alpha \
   @nestjs/common @nestjs/core @nestjs/cqrs @nestjs/swagger \
   class-transformer class-validator
 ```
@@ -75,7 +75,7 @@ import {
   AuthAttemptResult,
   AuthRequest,
   extractBearerToken,
-} from '@bitwild/rockets-core';
+} from '@conceptadev/rockets-core';
 
 @Injectable()
 export class JwtAdapter implements AuthAdapterInterface {
@@ -106,7 +106,7 @@ import {
   RocketsCoreModule,
   AuthServerGuard,
   defineResource,
-} from '@bitwild/rockets-core';
+} from '@conceptadev/rockets-core';
 import { JwtAdapter } from './auth/jwt.adapter';
 import { PetEntity } from './pet.entity';
 import { defineTypeOrmRepository } from './repository/define-typeorm-repository';
@@ -139,9 +139,9 @@ export class AppModule {}
 
 `defineTypeOrmRepository` is a small app-local `RepositoryBootstrap` wrapper
 (TypeORM connection options + planner-derived entity list) around
-`TypeOrmRepositoryModule` from `@bitwild/rockets-repository-typeorm`. Keep the
+`TypeOrmRepositoryModule` from `@conceptadev/rockets-repository-typeorm`. Keep the
 helper in the sample app (or copy into yours) — do not pull TypeORM into
-`@bitwild/rockets-core` itself.
+`@conceptadev/rockets-core` itself.
 
 ---
 
@@ -153,7 +153,7 @@ Use `defineModuleResource` when a feature needs its own Nest wiring or a
 junction table without auto-generated CRUD.
 
 ```typescript
-import { defineModuleResource } from '@bitwild/rockets-core';
+import { defineModuleResource } from '@conceptadev/rockets-core';
 
 export const billingFeature = defineModuleResource({
   entities: [InvoiceEntity],
@@ -173,7 +173,7 @@ Export the minimum to avoid name collisions across bundles.
 `userId` column; pass a second argument to override.
 
 ```typescript
-import { OwnerStampHook, OwnerScopeHook } from '@bitwild/rockets-core';
+import { OwnerStampHook, OwnerScopeHook } from '@conceptadev/rockets-core';
 
 defineResource({
   entity: PetEntity,
@@ -191,7 +191,7 @@ class, use `defineHook`. It returns a hook token you pass in `hooks:` like the
 built-ins:
 
 ```typescript
-import { defineHook } from '@bitwild/rockets-core';
+import { defineHook } from '@conceptadev/rockets-core';
 import { PetEntity } from './pet.entity';
 
 export const PetNameNormalizeHook = defineHook(PetEntity, {
@@ -210,8 +210,8 @@ The default adapter goes in `repository:`. Override per entity inside
 `defineModuleResource` with a `RepositoryBootstrap` (same pattern as TypeORM):
 
 ```typescript
-import { defineModuleResource } from '@bitwild/rockets-core';
-import { defineFirestoreRepository } from '@bitwild/rockets-repository-firestore';
+import { defineModuleResource } from '@conceptadev/rockets-core';
+import { defineFirestoreRepository } from '@conceptadev/rockets-repository-firestore';
 
 const firestoreRepository = defineFirestoreRepository();
 
@@ -246,7 +246,7 @@ import {
   InjectDynamicRepository,
   RepositoryInterface,
   Where,
-} from '@bitwild/rockets-core';
+} from '@conceptadev/rockets-core';
 
 @Injectable()
 export class PetService {
@@ -268,7 +268,7 @@ CRUD-generated controllers do not expose method signatures you can decorate. Use
 
 ```typescript
 import { CommandHandler } from '@nestjs/cqrs';
-import { getActor } from '@bitwild/rockets-core';
+import { getActor } from '@conceptadev/rockets-core';
 
 @CommandHandler(CrudCreateCommand)
 export class PetCreateHandler {
@@ -285,7 +285,7 @@ The global `AuthServerGuard` skips routes tagged with `@AuthPublic`.
 
 ```typescript
 import { Controller, Get } from '@nestjs/common';
-import { AuthPublic } from '@bitwild/rockets-core';
+import { AuthPublic } from '@conceptadev/rockets-core';
 
 @Controller('health')
 export class HealthController {
@@ -297,22 +297,22 @@ export class HealthController {
 }
 ```
 
-### Zod-first resources (`@bitwild/rockets-core/zod`)
+### Zod-first resources (`@conceptadev/rockets-core/zod`)
 
 The zod-first resource layer ships as the subpath export
-`@bitwild/rockets-core/zod` (`zodResource`, `zodSubResource`,
+`@conceptadev/rockets-core/zod` (`zodResource`, `zodSubResource`,
 `bindZodResources`, the `f.*` field helpers, `defineZodUserMetadata`,
 `rocketsFieldMeta`, `rocketsEntityMeta`). `zod` and `nestjs-zod` are
-**optional peerDependencies** of core — the main `@bitwild/rockets-core`
+**optional peerDependencies** of core — the main `@conceptadev/rockets-core`
 entry stays zod-free, so apps that skip the subpath never install them.
 
 Entity generation is delegated to a `SchemaEntityCompiler`. The TypeORM
-implementation lives at `@bitwild/rockets-repository-typeorm/zod`; bind it
+implementation lives at `@conceptadev/rockets-repository-typeorm/zod`; bind it
 once at startup:
 
 ```typescript
-import { bindZodResources } from '@bitwild/rockets-core/zod';
-import { typeOrmZodEntityCompiler } from '@bitwild/rockets-repository-typeorm/zod';
+import { bindZodResources } from '@conceptadev/rockets-core/zod';
+import { typeOrmZodEntityCompiler } from '@conceptadev/rockets-repository-typeorm/zod';
 
 bindZodResources(typeOrmZodEntityCompiler);
 ```
@@ -368,7 +368,7 @@ Many-to-many: junction sub-resource + two FKs — no `@ManyToMany`.
 ### Add role-based access control (opt-in `accessControl`)
 
 ACL is opt-in. Pass the `accessControl` option (type
-`RocketsAccessControlConfig`, exported from `@bitwild/rockets-core`) and core
+`RocketsAccessControlConfig`, exported from `@conceptadev/rockets-core`) and core
 registers the upstream `AccessControlModule` from
 `@concepta/nestjs-access-control` — including the guard and any `CanAccess`
 query services. When the option is omitted, no ACL module, guard, or provider
@@ -403,9 +403,9 @@ class PetController {
 
 | Motor (`@concepta/nestjs-*`)                     | Import path                                    | What core does with it                                                                            |
 | ------------------------------------------------ | ---------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `repository`                                     | `@bitwild/rockets-core` (re-export)            | `buildAppRegistrationPlan` calls `repository.forRoot(entities)` and `forFeature` per resource row |
-| `crud`                                           | `@bitwild/rockets-core` (re-export)            | Each `defineResource` becomes a `CrudModule.forFeature` import                                    |
-| `core`, `authentication`                         | `@bitwild/rockets-core` (re-export)            | `CoreModule.forRoot` (hook resolution) in `createCoreImports`; swagger UI is core's own module    |
+| `repository`                                     | `@conceptadev/rockets-core` (re-export)            | `buildAppRegistrationPlan` calls `repository.forRoot(entities)` and `forFeature` per resource row |
+| `crud`                                           | `@conceptadev/rockets-core` (re-export)            | Each `defineResource` becomes a `CrudModule.forFeature` import                                    |
+| `core`, `authentication`                         | `@conceptadev/rockets-core` (re-export)            | `CoreModule.forRoot` (hook resolution) in `createCoreImports`; swagger UI is core's own module    |
 | `access-control`                                 | `@concepta/nestjs-access-control` (direct)     | Opt-in: the `accessControl` option registers `AccessControlModule`; omitted → no ACL wiring       |
 
 Core **does not** fork upstream behaviour — it only expands `resources[]`,
@@ -426,7 +426,7 @@ expect.
 | `global`       | `boolean` (default `true`)                           | optional  | Module is global — exports visible app-wide.                                                                                                                                                                                         |
 | `swagger`      | `SwaggerUiOptionsInterface`                          | optional  | Swagger UI customization (`settings`, `documentBuilder`). Core always registers Swagger UI; this only tunes it.                                                                                                                      |
 
-† `auth` is required at the presentation layer (e.g. `@bitwild/rockets` always
+† `auth` is required at the presentation layer (e.g. `@conceptadev/rockets` always
 needs an auth source). Core itself boots without it for tests.
 
 ### `AuthAdapterInterface`

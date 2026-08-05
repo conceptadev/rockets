@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { auditableEntity, f } from '@bitwild/rockets-core/zod';
+import { auditableEntity, f, rocketsFieldMeta } from '@conceptadev/rockets-core/zod';
 import { zodEntityCompiler } from '../../zod-bindings';
 import { tagSchema } from '../tag/tag.schema';
 import { PetTagEntity, petTagSchema } from './pet-tag.schema';
@@ -32,11 +32,11 @@ export enum PetStatus {
  * | flat `tags` array                | `compute` over the eager `petTags` rows      |
  */
 export const vaccinationResponseShape = z.object({
-  id: z.uuid(),
-  name: z.string().meta({ example: 'Rabies' }),
-  dateAdministered: z.string().meta({ example: '2024-01-15' }),
-  dateExpires: z.string().meta({ example: '2025-01-15' }).optional(),
-  petId: z.uuid(),
+  id: f.pk(),
+  name: f.string({ example: 'Rabies' }),
+  dateAdministered: f.string({ example: '2024-01-15' }),
+  dateExpires: f.string({ example: '2025-01-15' }).optional(),
+  petId: z.uuid().register(rocketsFieldMeta, { dto: { response: true } }),
 });
 
 export const petSchema = auditableEntity({

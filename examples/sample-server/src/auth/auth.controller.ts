@@ -7,7 +7,7 @@ import {
   ApiProperty,
   ApiPropertyOptional,
 } from '@nestjs/swagger';
-import { AuthPublic } from '@bitwild/rockets-core';
+import { AuthPublic } from '@conceptadev/rockets-core';
 import { SampleAuthAdapter } from './auth.adapter';
 import { UserRole } from './user.entity';
 import {

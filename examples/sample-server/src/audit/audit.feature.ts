@@ -1,4 +1,4 @@
-import { defineModuleResource } from '@bitwild/rockets-core';
+import { defineModuleResource } from '@conceptadev/rockets-core';
 import { AuditLogEntity } from './audit-log.entity';
 import { AuditLogController } from './audit-log.controller';
 import { AuditLogService } from './audit-log.service';

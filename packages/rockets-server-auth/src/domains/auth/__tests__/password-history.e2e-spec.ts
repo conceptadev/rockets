@@ -1,7 +1,5 @@
 import 'reflect-metadata';
 
-import '../../../__e2e__/helpers/patch-crud-module-for-e2e.bootstrap';
-
 import { INestApplication } from '@nestjs/common';
 import { TestingModule } from '@nestjs/testing';
 import request from 'supertest';

@@ -49,10 +49,9 @@ function registerFieldMeta(schema: z.ZodType, meta: RocketsFieldMeta): void {
 }
 
 /**
- * Apply `.meta()` (when there is API-facing text) and the field-meta
- * registration (when there is db/dto metadata) to a built schema,
- * preserving its precise type. No-ops when there is nothing to attach, so
- * a plain `f.string()` stays a bare `z.string()`.
+ * Apply `.meta()` (when there is API-facing text) and field-meta
+ * registration (response opt-in + any db/dto knobs) to a built schema,
+ * preserving its precise type.
  */
 function decorate<T extends z.ZodType>(schema: T, o: FieldOpts): T {
   let result = schema;
@@ -69,13 +68,14 @@ function decorate<T extends z.ZodType>(schema: T, o: FieldOpts): T {
     ...(o.index ? { index: true } : {}),
     ...(o.column ? { column: o.column } : {}),
   };
+  // Scalar helpers opt into the response DTO by default — private fields
+  // pass `dto: { response: false }`. Raw `z.string()` without meta stays
+  // hidden (opt-in projection in projectSchema).
   const meta: RocketsFieldMeta = {
     ...(Object.keys(db).length > 0 ? { db } : {}),
-    ...(o.dto ? { dto: o.dto } : {}),
+    dto: { response: true, ...o.dto },
   };
-  if (Object.keys(meta).length > 0) {
-    registerFieldMeta(result, meta);
-  }
+  registerFieldMeta(result, meta);
   return result;
 }
 
@@ -106,15 +106,23 @@ const version = () =>
   z
     .int()
     .default(1)
-    .register(rocketsFieldMeta, { dto: { create: false, update: false } });
+    .register(rocketsFieldMeta, {
+      dto: { create: false, update: false, response: true },
+    });
 
 /**
  * Owner column (uuid). Marks the field `{ owner: true }` so the zod
- * resource layer auto-wires an `OwnerStampHook` for it. Combine with the
- * resource-level `owner: 'fieldName'` if the resource also scopes reads by
- * owner — the two declarations dedupe.
+ * resource layer auto-wires `OwnerStampHook` + `OwnerScopeHook` for it.
+ * Exposed on the response DTO by default (ownership is part of the
+ * public row); still excluded from create/update via the owner-column
+ * projection rule. Combine with the resource-level `owner: 'fieldName'`
+ * if declared both ways — the two dedupe.
  */
-const owner = () => z.uuid().register(rocketsFieldMeta, { owner: true });
+const owner = () =>
+  z.uuid().register(rocketsFieldMeta, {
+    owner: true,
+    dto: { response: true },
+  });
 
 // --- Foreign key --------------------------------------------------------
 
@@ -134,7 +142,7 @@ const fk = (target: RocketsRelationFieldMeta['target'], o: FkOpts = {}) => {
   const { dto, db, ...relation } = o;
   const meta: RocketsFieldMeta = {
     db: { index: true, ...db },
-    ...(dto ? { dto } : {}),
+    dto: { response: true, ...dto },
     relation: { target, ...relation },
   };
   return z.uuid().register(rocketsFieldMeta, meta);

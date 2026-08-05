@@ -18,14 +18,14 @@ import {
   ExceptionsFilter,
   RocketsModule,
   defineTypeOrmRepository,
-} from '@bitwild/rockets';
+} from '@conceptadev/rockets';
 import type {
   RocketsRepositoryModuleInterface,
   SchemaEntityCompiler,
   SchemaEntityCompilerOptions,
-} from '@bitwild/rockets';
+} from '@conceptadev/rockets';
 import { CrudAdapter, CrudCreateCommand } from '@concepta/nestjs-crud';
-import { CrudCommandHandlerBase, InjectCrudAdapter } from '@bitwild/rockets-core';
+import { CrudCommandHandlerBase, InjectCrudAdapter } from '@conceptadev/rockets-core';
 import {
   InjectDynamicRepository,
   RepositoryInterface,
@@ -36,8 +36,8 @@ import {
   UserMetadataUpdateDto,
 } from '../src/user-metadata.schema';
 import { defineSampleAuth, sampleAuthUserResource } from '../src/auth';
-import { rocketsEntityMeta, rocketsFieldMeta, f } from '@bitwild/rockets-core/zod';
-import { typeOrmZodEntityCompiler } from '@bitwild/rockets-repository-typeorm/zod';
+import { rocketsEntityMeta, rocketsFieldMeta, f } from '@conceptadev/rockets-core/zod';
+import { typeOrmZodEntityCompiler } from '@conceptadev/rockets-repository-typeorm/zod';
 import { zodResource } from '../src/zod-bindings';
 
 /**
@@ -57,22 +57,33 @@ export const productSchema = z.object({
   id: z
     .uuid()
     .register(rocketsFieldMeta, { db: { pk: true, generated: true } }),
-  name: z.string().min(1).max(100),
+  name: z
+    .string()
+    .min(1)
+    .max(100)
+    .register(rocketsFieldMeta, { dto: { response: true } }),
   /** Server-computed by ProductCreateHandler — never client-supplied. */
   slug: z
     .string()
     .max(120)
-    .register(rocketsFieldMeta, { dto: { create: false, update: false } })
+    .register(rocketsFieldMeta, {
+      dto: { create: false, update: false, response: true },
+    })
     .optional(),
   price: z.number().register(rocketsFieldMeta, {
     db: { column: { type: 'decimal', precision: 10, scale: 2 } },
+    dto: { response: true },
   }),
   attrs: z
     .record(z.string(), z.unknown())
-    .register(rocketsFieldMeta, { db: { column: { type: 'simple-json' } } })
+    .register(rocketsFieldMeta, {
+      db: { column: { type: 'simple-json' } },
+      dto: { response: true },
+    })
     .optional(),
   categoryId: z.uuid().register(rocketsFieldMeta, {
     db: { index: true },
+    dto: { response: true },
     // Explicit `unknown` return: product↔category reference each other;
     // the annotation stops TS from chasing the type cycle (TS7022) —
     // the thunk is narrowed at runtime anyway.
@@ -87,7 +98,11 @@ export const categorySchema = z.object({
   id: z
     .uuid()
     .register(rocketsFieldMeta, { db: { pk: true, generated: true } }),
-  name: z.string().min(1).max(100),
+  name: z
+    .string()
+    .min(1)
+    .max(100)
+    .register(rocketsFieldMeta, { dto: { response: true } }),
   products: f.hasMany(productSchema, {
     mappedBy: 'categoryId',
     expose: true,

@@ -20,7 +20,7 @@
       }
     ]
   },
-  "transformIgnorePatterns": ["/node_modules/(?!@nestjs/)"],
+  "transformIgnorePatterns": ["/node_modules/(?!(@nestjs|@concepta)/)"],
   "moduleNameMapper": {
     "^../repository/code-review-reports\\.persistence$": "<rootDir>/test/stubs/code-review-reports.persistence.stub.ts"
   }

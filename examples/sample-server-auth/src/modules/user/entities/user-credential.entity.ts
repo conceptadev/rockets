@@ -5,8 +5,10 @@ import { AuditedSqliteEntity } from '../../../shared/persistence/audited-sqlite.
 /** Password credentials row for `@concepta/nestjs-user` v8 (`CreateUserCredentialCommand`). */
 @Entity()
 export class UserCredentialEntity extends AuditedSqliteEntity {
-  @Column({ type: 'text', nullable: true })
-  passwordHash?: string;
+  // `PasswordStorageInterface.passwordHash` is required — a credential row
+  // only exists once a password has been stored.
+  @Column({ type: 'text' })
+  passwordHash!: string;
 
   @Column({ type: 'text', nullable: true })
   passwordSalt?: string;

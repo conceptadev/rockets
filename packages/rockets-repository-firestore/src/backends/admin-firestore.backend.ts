@@ -205,12 +205,14 @@ export class AdminFirestoreBackend implements FirestoreBackend {
     });
   }
 
+  /**
+   * `Date` goes to the SDK untouched: Firestore stores it as a native
+   * `Timestamp`, which {@link normalise} converts straight back to a
+   * `Date`. Stringifying here is what made that round trip lossy and
+   * left `normalise`'s `instanceof Timestamp` branch permanently dead.
+   */
   private serialise(data: Record<string, unknown>): Record<string, unknown> {
-    const next: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(data)) {
-      next[key] = value instanceof Date ? value.toISOString() : value;
-    }
-    return next;
+    return { ...data };
   }
 
   private normalise(

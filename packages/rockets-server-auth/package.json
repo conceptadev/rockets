@@ -1,6 +1,6 @@
 {
-  "name": "@bitwild/rockets-auth",
-  "version": "0.0.1",
+  "name": "@conceptadev/rockets-auth",
+  "version": "0.0.1-dev.0",
   "description": "Rockets Auth - Complete authentication and authorization solution for NestJS with JWT, OAuth, OTP, role-based access control, and more",
   "author": "Thiago Ramalho <thiago.ramalho@concepta.com>",
   "license": "BSD-3-Clause",
@@ -20,13 +20,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/btwld/rockets.git",
+    "url": "git+https://github.com/conceptadev/rockets.git",
     "directory": "packages/rockets-server-auth"
   },
   "bugs": {
-    "url": "https://github.com/btwld/rockets/issues"
+    "url": "https://github.com/conceptadev/rockets/issues"
   },
-  "homepage": "https://github.com/btwld/rockets/tree/main/packages/rockets-server-auth#readme",
+  "homepage": "https://github.com/conceptadev/rockets/tree/main/packages/rockets-server-auth#readme",
   "keywords": [
     "nestjs",
     "rockets",
@@ -46,7 +46,7 @@
   ],
   "funding": {
     "type": "github",
-    "url": "https://github.com/sponsors/btwld"
+    "url": "https://github.com/sponsors/conceptadev"
   },
   "engines": {
     "node": ">=18.0.0",
@@ -64,8 +64,9 @@
     "CHANGELOG.md"
   ],
   "scripts": {
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
     "build": "tsc -p tsconfig.json",
-    "prepack": "yarn run -T build",
+    "prepack": "yarn run -T clean && yarn run -T build",
     "build:watch": "tsc -p tsconfig.json --watch",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -75,21 +76,21 @@
     "generate-swagger": "ts-node src/generate-swagger.ts"
   },
   "dependencies": {
-    "@bitwild/rockets-core": "workspace:^",
-    "@concepta/nestjs-access-control": "8.0.0-alpha.7",
-    "@concepta/nestjs-authentication": "8.0.0-alpha.7",
+    "@concepta/nestjs-access-control": "8.0.0-alpha.8",
+    "@concepta/nestjs-authentication": "8.0.0-alpha.8",
     "@concepta/nestjs-common": "8.0.0-alpha.6",
-    "@concepta/nestjs-core": "8.0.0-alpha.7",
-    "@concepta/nestjs-crud": "8.0.0-alpha.7",
+    "@concepta/nestjs-core": "8.0.0-alpha.8",
+    "@concepta/nestjs-crud": "8.0.0-alpha.8",
     "@concepta/nestjs-email": "7.0.0-alpha.10",
     "@concepta/nestjs-event": "7.0.0-alpha.10",
-    "@concepta/nestjs-federated": "8.0.0-alpha.7",
-    "@concepta/nestjs-invitation": "8.0.0-alpha.7",
-    "@concepta/nestjs-otp": "8.0.0-alpha.7",
-    "@concepta/nestjs-password": "8.0.0-alpha.7",
-    "@concepta/nestjs-repository": "8.0.0-alpha.7",
-    "@concepta/nestjs-role": "8.0.0-alpha.7",
-    "@concepta/nestjs-user": "8.0.0-alpha.7",
+    "@concepta/nestjs-federated": "8.0.0-alpha.8",
+    "@concepta/nestjs-invitation": "8.0.0-alpha.8",
+    "@concepta/nestjs-otp": "8.0.0-alpha.8",
+    "@concepta/nestjs-password": "8.0.0-alpha.8",
+    "@concepta/nestjs-repository": "8.0.0-alpha.8",
+    "@concepta/nestjs-role": "8.0.0-alpha.8",
+    "@concepta/nestjs-user": "8.0.0-alpha.8",
+    "@conceptadev/rockets-core": "workspace:^",
     "@nestjs/common": "12.0.0-alpha.5",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "12.0.0-alpha.5",
@@ -106,8 +107,8 @@
     "reflect-metadata": "^0.1.14"
   },
   "devDependencies": {
-    "@bitwild/rockets": "workspace:^",
-    "@bitwild/rockets-repository-typeorm": "workspace:^",
+    "@conceptadev/rockets": "workspace:^",
+    "@conceptadev/rockets-repository-typeorm": "workspace:^",
     "@nestjs/jwt": "^11.0.0",
     "@nestjs/platform-express": "12.0.0-alpha.5",
     "@nestjs/testing": "12.0.0-alpha.5",

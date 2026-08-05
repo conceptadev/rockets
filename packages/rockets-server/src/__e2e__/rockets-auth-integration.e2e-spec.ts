@@ -10,7 +10,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 import { IsString } from 'class-validator';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { TypeOrmRepositoryModule } from '@bitwild/rockets-repository-typeorm';
+import { TypeOrmRepositoryModule } from '@conceptadev/rockets-repository-typeorm';
 import {
   AUTH_ADAPTERS_TOKEN,
   defineModuleResource,
@@ -21,11 +21,11 @@ import {
   type AuthRequest,
   type UserMetadataCreatableInterface,
   type UserMetadataModelUpdatableInterface,
-} from '@bitwild/rockets-core';
+} from '@conceptadev/rockets-core';
 import {
   InjectDynamicRepository,
   type RepositoryInterface,
-} from '@bitwild/rockets-core';
+} from '@conceptadev/rockets-core';
 import request from 'supertest';
 import { RocketsModule } from '../rockets.module';
 import { StubUserMetadataEntity } from '../__fixtures__/entities/stub-user-metadata.entity';

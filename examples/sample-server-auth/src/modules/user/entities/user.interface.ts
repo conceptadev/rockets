@@ -3,7 +3,7 @@ import {
   RocketsAuthUserInterface,
   RocketsAuthUserCreatableInterface,
   RocketsAuthUserUpdatableInterface,
-} from '@bitwild/rockets-auth';
+} from '@conceptadev/rockets-auth';
 
 export interface UserEntityInterface extends RocketsAuthUserEntityInterface {
   age?: number;

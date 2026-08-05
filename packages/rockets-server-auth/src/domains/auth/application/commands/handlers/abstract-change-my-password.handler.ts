@@ -9,7 +9,7 @@ import {
   UserPasswordCurrentInvalidException,
 } from '@concepta/nestjs-user';
 
-import { resolveBitwildAppContext } from '../../../../../shared/compatibility/resolve-bitwild-app-context';
+import { resolveConceptadevAppContext } from '../../../../../shared/compatibility/resolve-conceptadev-app-context';
 import { ChangeMyPasswordCommand } from '../impl/change-my-password.command';
 
 export interface ChangeMyPasswordPayload {
@@ -71,7 +71,7 @@ export abstract class AbstractChangeMyPasswordHandler
     payload: ChangeMyPasswordPayload,
   ): Promise<void> {
     await this.commandBus.execute(
-      new UpdateUserPasswordCommand(resolveBitwildAppContext(ctx), userId, {
+      new UpdateUserPasswordCommand(resolveConceptadevAppContext(ctx), userId, {
         password: payload.next,
         passwordCurrent: payload.current,
       }),

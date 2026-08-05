@@ -13,7 +13,7 @@ import { resolveEntityKey } from '../utils/resolve-entity-key.util';
  * non-derived keys (e.g. `'billing/invoice'`).
  *
  * Delegates to the upstream-parity string-only `InjectDynamicRepository` from
- * `@bitwild/rockets-repository`, resolving the class to its key first.
+ * `@conceptadev/rockets-repository`, resolving the class to its key first.
  *
  * @example
  * ```ts

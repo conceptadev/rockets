@@ -7,10 +7,10 @@ import {
   PassthroughEntityHookBase,
   getActor,
   getCrudContext,
-} from '@bitwild/rockets-core';
+} from '@conceptadev/rockets-core';
 import { PetEntity } from '../pet/pet.schema';
 import { PetShareEntity } from './pet-share.entity';
-import { InjectDynamicRepository } from '@bitwild/rockets-core';
+import { InjectDynamicRepository } from '@conceptadev/rockets-core';
 
 /**
  * Broadens pet visibility from strict "owner-only" to "owner OR shared

@@ -3,4 +3,4 @@ export {
   UserRoleItemDto,
   UserUpdateDto,
   UserResponseDto,
-} from '@bitwild/rockets-core';
+} from '@conceptadev/rockets-core';

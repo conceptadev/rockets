@@ -1,6 +1,6 @@
 {
   "name": "typescript-config",
-  "version": "1.0.0",
+  "version": "0.0.1-dev.0",
   "description": "Shared TypeScript configs for sample-code-review (aligned with rockets-starter).",
   "private": true,
   "files": [

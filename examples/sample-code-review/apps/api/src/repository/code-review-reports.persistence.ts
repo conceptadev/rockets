@@ -1,4 +1,4 @@
-import { defineFirestoreRepository } from '@bitwild/rockets-repository-firestore';
+import { defineFirestoreRepository } from '@conceptadev/rockets-repository-firestore';
 
 export const CODE_REVIEW_REPORT_COLLECTION =
   process.env.FIREBASE_FIRESTORE_REPORTS_COLLECTION?.trim() ??

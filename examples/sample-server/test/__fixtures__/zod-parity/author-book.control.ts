@@ -18,7 +18,7 @@ import {
   MaxLength,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { defineResource } from '@bitwild/rockets';
+import { defineResource } from '@conceptadev/rockets';
 
 /**
  * Handwritten CONTROL twin of the zod author/book pair

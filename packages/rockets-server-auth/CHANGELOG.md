@@ -1,7 +1,7 @@
 # Changelog
 
-All notable changes to the `@bitwild/rockets-auth` package will be documented in
-this file.
+All notable changes to the `@conceptadev/rockets-auth` package will be
+documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to
@@ -13,7 +13,7 @@ and this project adheres to
 
 - **`repositoryPersistence` removed** from `RocketsAuthOptionsExtrasInterface`.
   Use **`defineRocketsAuth()`** from this package: it registers auth entities
-  through `@bitwild/rockets-core`’s planner (`resources[]`) and returns a
+  through `@conceptadev/rockets-core`’s planner (`resources[]`) and returns a
   **`RocketsAuthIntegration`** for `RocketsModule.forRoot({ auth: ... })`.
   `RocketsModule` loads **`RocketsCoreModule` before `RocketsAuthModule`** when
   `auth` is an integration bundle so dynamic repositories exist at auth boot.
@@ -206,10 +206,10 @@ and this project adheres to
 - Includes peer dependencies: `class-transformer`, `class-validator`, `rxjs`
 - BSD-3-Clause license
 
-[1.0.0-alpha.7]: https://github.com/btwld/rockets/releases/tag/v1.0.0-alpha.7
-[1.0.0-alpha.5]: https://github.com/btwld/rockets/releases/tag/v1.0.0-alpha.5
-[1.0.0-alpha.4]: https://github.com/btwld/rockets/releases/tag/v1.0.0-alpha.4
-[1.0.0-alpha.3]: https://github.com/btwld/rockets/releases/tag/v1.0.0-alpha.3
-[1.0.0-alpha.2]: https://github.com/btwld/rockets/releases/tag/v1.0.0-alpha.2
-[1.0.0-alpha.1]: https://github.com/btwld/rockets/releases/tag/v1.0.0-alpha.1
-[1.0.0-alpha.0]: https://github.com/btwld/rockets/releases/tag/v1.0.0-alpha.0
+[1.0.0-alpha.7]: https://github.com/conceptadev/rockets/releases/tag/v1.0.0-alpha.7
+[1.0.0-alpha.5]: https://github.com/conceptadev/rockets/releases/tag/v1.0.0-alpha.5
+[1.0.0-alpha.4]: https://github.com/conceptadev/rockets/releases/tag/v1.0.0-alpha.4
+[1.0.0-alpha.3]: https://github.com/conceptadev/rockets/releases/tag/v1.0.0-alpha.3
+[1.0.0-alpha.2]: https://github.com/conceptadev/rockets/releases/tag/v1.0.0-alpha.2
+[1.0.0-alpha.1]: https://github.com/conceptadev/rockets/releases/tag/v1.0.0-alpha.1
+[1.0.0-alpha.0]: https://github.com/conceptadev/rockets/releases/tag/v1.0.0-alpha.0

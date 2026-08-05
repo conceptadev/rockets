@@ -21,15 +21,19 @@ jobs:
 
       - uses: actions/cache@v3
         with:
-          path: "**/node_modules"
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+          path: "/node_modules"
+          key: ${{ runner.os }}-modules-${{ hashFiles('/yarn.lock') }}
 
       - name: Install
         run: yarn --immutable
       - name: Build
         run: yarn build
+      - name: Linting
+        run: yarn lint:all
       - name: Unit tests
         run: yarn test:ci
+      - name: E2E coverage
+        run: yarn test:e2e:cov
       - name: Process Test Results
         uses: dorny/test-reporter@v1
         with:
@@ -39,10 +43,10 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
-          files: ./coverage/coverage-final.json
+          files: ./coverage/coverage-final.json,./coverage-e2e/coverage-final.json
           verbose: true
       - name: Upload coverage to Codacy
         uses: codacy/codacy-coverage-reporter-action@v1.3.0
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: ./coverage/lcov.info
+          coverage-reports: ./coverage/lcov.info,./coverage-e2e/lcov.info

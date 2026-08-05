@@ -1,5 +1,5 @@
 import { APP_GUARD } from '@nestjs/core';
-import { ROCKETS_CORE_SETTINGS_TOKEN } from '@bitwild/rockets-core';
+import { ROCKETS_CORE_SETTINGS_TOKEN } from '@conceptadev/rockets-core';
 import { MeController } from './gateways/http/me.controller';
 import {
   createRocketsControllers,

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { f, rocketsFieldMeta, WireRow, SchemaPersistenceRow } from '@bitwild/rockets-core/zod';
+import { f, rocketsFieldMeta, WireRow, SchemaPersistenceRow } from '@conceptadev/rockets-core/zod';
 import { compileZodEntity } from '../../zod-bindings';
 import { ReminderEntity } from './reminder.schema';
 

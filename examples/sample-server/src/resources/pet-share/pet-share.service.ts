@@ -8,7 +8,7 @@ import { RepositoryInterface, TransactionScope, Where } from '@concepta/nestjs-r
 import { PetEntity } from '../pet/pet.schema';
 import type { Pet } from '../pet/pet.schema';
 import { PetShareEntity, PetSharePermission } from './pet-share.entity';
-import { InjectDynamicRepository } from '@bitwild/rockets-core';
+import { InjectDynamicRepository } from '@conceptadev/rockets-core';
 
 export interface ShareCreateInput {
   readonly petId: string;

@@ -6,7 +6,8 @@
  * nestjs-crud directly.
  */
 
-export type { CrudRequestConfig } from '@concepta/nestjs-crud/dist/infrastructure/request/interfaces/crud-request-config.interface';
-export type { CrudResponseConfig } from '@concepta/nestjs-crud/dist/infrastructure/request/interfaces/crud-response-config.interface';
-export type { CrudParamOptionInterface } from '@concepta/nestjs-crud/dist/infrastructure/interfaces/crud-param-option.interface';
-export { CrudMetaview } from '@concepta/nestjs-crud/dist/infrastructure/services/crud-metaview.service';
+export type {
+  CrudParamOptionInterface,
+  CrudRequestConfig,
+  CrudResponseConfig,
+} from '@concepta/nestjs-crud';

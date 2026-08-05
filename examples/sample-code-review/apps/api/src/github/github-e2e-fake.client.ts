@@ -21,9 +21,9 @@ export class GithubE2eFakeClient {
   listRepositories(_accessToken: string): Promise<GithubRepoSummary[]> {
     return Promise.resolve([
       {
-        owner: 'btwld',
+        owner: 'conceptadev',
         name: 'rockets',
-        fullName: 'btwld/rockets',
+        fullName: 'conceptadev/rockets',
         defaultBranch: 'main',
         language: 'TypeScript',
         private: false,

@@ -46,7 +46,7 @@ export class UserEntity extends AuditedSqliteEntity {
   @OneToMany(() => UserOtpEntity, (userOtp) => userOtp.assignee)
   userOtps?: UserOtpEntity[];
 
-  @OneToMany(() => FederatedEntity, (federated) => federated.assignee)
+  @OneToMany(() => FederatedEntity, (federated) => federated.user)
   federatedAccounts?: FederatedEntity[];
 
   @OneToOne(() => UserMetadataEntity, (userMetadata) => userMetadata.user, {

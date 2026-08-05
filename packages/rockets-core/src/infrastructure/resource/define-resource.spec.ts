@@ -2,7 +2,7 @@ import { Injectable, type PlainLiteralObject } from '@nestjs/common';
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 import { Operation } from '@concepta/nestjs-core';
 import { Where } from '@concepta/nestjs-repository';
-import { TypeOrmRepositoryModule } from '@bitwild/rockets-repository-typeorm';
+import { TypeOrmRepositoryModule } from '@conceptadev/rockets-repository-typeorm';
 import {
   CrudOperationResolver,
   type ConfigurableCrudGeneratedOptions,
@@ -1264,6 +1264,78 @@ describe('defineResource', () => {
       const sub = bundle.subResources![0];
       const Guard = PathScopeGuard.for('widgetId', 'widget', 'userId');
       expect(sub.core.providers ?? []).not.toContain(Guard);
+    });
+
+    /**
+     * RED — HIGH CWE-284 (partial): consumer hooks/providers must never
+     * drop PathScope primitives, PathScopeGuard must be prepended ahead
+     * of consumer providers, and `meta.guards` must expose the guard for
+     * a boot-time invariant. Today hooks merge correctly; Guard is still
+     * appended and `meta.guards` is absent.
+     */
+    it('keeps PathScopeGuard and PathScopeHook when consumer supplies hooks/providers', async () => {
+      const { defineSubResource } = await import('./define-sub-resource');
+      const { PathScopeGuard } = await import('../guards/path-scope.guard');
+      const { PathScopeHook } = await import('../hooks/path-scope.hook');
+
+      @EntityHook()
+      @Injectable()
+      class CustomPartHook extends PassthroughEntityHookBase<PlainLiteralObject> {}
+
+      class CustomProvider {}
+
+      const bundle = defineResource({
+        key: 'widget',
+        entity: WidgetEntity,
+        path: 'widgets',
+        tags: ['Widgets'],
+        subResources: {
+          parts: defineSubResource({
+            key: 'widgetPart',
+            entity: PartEntity,
+            hooks: [CustomPartHook],
+            providers: [CustomProvider],
+            operations: { list: { output: WidgetResponseDto } },
+          }),
+        },
+      });
+      const sub = bundle.subResources![0];
+      const Guard = PathScopeGuard.for('widgetId', 'widget', 'userId');
+      const Hook = PathScopeHook.for(PartEntity, 'widgetId', 'widgetId');
+      const providers = sub.core.providers ?? [];
+
+      // Already true today — documents that "silent replace" is a false positive.
+      expect(providers).toContain(Guard);
+      expect(providers).toContain(Hook);
+    });
+
+    it('prepends PathScopeGuard ahead of consumer providers', async () => {
+      const { defineSubResource } = await import('./define-sub-resource');
+      const { PathScopeGuard } = await import('../guards/path-scope.guard');
+
+      class CustomProvider {}
+
+      const bundle = defineResource({
+        key: 'widget',
+        entity: WidgetEntity,
+        path: 'widgets',
+        tags: ['Widgets'],
+        subResources: {
+          parts: defineSubResource({
+            key: 'widgetPart',
+            entity: PartEntity,
+            providers: [CustomProvider],
+            operations: { list: { output: WidgetResponseDto } },
+          }),
+        },
+      });
+      const sub = bundle.subResources![0];
+      const Guard = PathScopeGuard.for('widgetId', 'widget', 'userId');
+      const providers = sub.core.providers ?? [];
+
+      expect(providers.indexOf(Guard)).toBeLessThan(
+        providers.indexOf(CustomProvider),
+      );
     });
 
     it('throws at runtime when an empty-string segment key slips through (defence in depth)', async () => {

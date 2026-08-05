@@ -8,8 +8,20 @@
     "^.+\\.ts$": [
       "ts-jest",
       { "tsconfig": "<rootDir>/../../tsconfig.jest.json" }
+    ],
+    "^.+\\.js$": [
+      "babel-jest",
+      {
+        "configFile": false,
+        "plugins": [
+          "<rootDir>/../../scripts/babel-plugin-import-meta-url-filename.cjs",
+          "<rootDir>/../../scripts/babel-plugin-dynamic-import-to-require.cjs",
+          "@babel/plugin-transform-modules-commonjs"
+        ]
+      }
     ]
   },
+  "transformIgnorePatterns": ["node_modules/(?!(@nestjs|@concepta)/)"],
   "moduleNameMapper": {
     "^@concepta/nestjs-core/aggregate$": "<rootDir>/../../node_modules/@concepta/nestjs-core/dist/index-aggregate",
     "^@concepta/nestjs-invitation/dist/(.*)$": "<rootDir>/../../node_modules/@concepta/nestjs-invitation/dist/$1"

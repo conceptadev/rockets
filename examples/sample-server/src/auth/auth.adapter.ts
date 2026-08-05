@@ -29,10 +29,10 @@ import type {
   AuthAttemptResult,
   AuthRequest,
   AuthorizedUser,
-} from '@bitwild/rockets';
-import { extractBearerToken } from '@bitwild/rockets';
+} from '@conceptadev/rockets';
+import { extractBearerToken } from '@conceptadev/rockets';
 import { UserEntity, UserRole } from './user.entity';
-import { InjectDynamicRepository } from '@bitwild/rockets-core';
+import { InjectDynamicRepository } from '@conceptadev/rockets-core';
 
 // Hardcoded for demo only — see file header.
 const JWT_SECRET = 'sample-server-secret-do-not-use-in-production';

@@ -27,21 +27,22 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
       - name: Download artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/download-artifact@v4
         with:
-          workflow: ci-pr-test.yml
           name: test-results
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Get PR Number
         id: vars
-        run: echo ::set-output name=pr_num::$(cat pr_num.txt)
+        run: echo "pr_num=$(cat pr_num.txt)" >> "$GITHUB_OUTPUT"
       - name: Upload to Codecov
         uses: codecov/codecov-action@v2
         with:
-          files: ${{ github.workspace }}/coverage/coverage-final.json
+          files: ${{ github.workspace }}/coverage/coverage-final.json,${{ github.workspace }}/coverage-e2e/coverage-final.json
           override_pr: ${{ steps.vars.outputs.pr_num }}
           verbose: true
       - name: Upload coverage to Codacy
         uses: codacy/codacy-coverage-reporter-action@v1.3.0
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: ${{ github.workspace }}/coverage/lcov.info
+          coverage-reports: ${{ github.workspace }}/coverage/lcov.info,${{ github.workspace }}/coverage-e2e/lcov.info
