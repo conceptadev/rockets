@@ -18,13 +18,17 @@ are environment/isolation, not logic — separate the two before editing source.
 
 ## Known failure classes and fixes
 
+- **Cross-suite bleed in a shared worker.** A suite green in isolation fails intermittently in the full run
+  (typically an unexpected 404), with the victim rotating between runs. Root cause is cumulative process state
+  across many Nest + TypeORM app boots. Both package e2e scripts (`test:e2e`, `test:e2e:cov`) already run one
+  process per spec file via `scripts/run-isolated-e2e.cjs` (as does sample-server) — if a suite still flakes
+  there, the bug is inside that one file. The runner disappears with the Vitest migration (`pool: 'forks'`).
 - **Barrel registration collisions.** Importing a `domains/*/index` barrel registers `@CommandHandler`/
-  `@QueryHandler` in global Reflect metadata and breaks later Nest apps in the same worker. Never import a barrel
-  in an e2e file that boots an app. Barrel-only specs run **last** via `scripts/jest-e2e-barrel-last-sequencer.cjs`
-  (wired in both `jest.config-e2e.json` and the coverage config).
-- **Teardown / open handles.** "force exiting Jest" / "worker failed to exit" + `Parse Error: Expected HTTP/`
-  from supertest = a prior app wasn't closed. Ensure `await app.close()` in `afterEach`/`afterAll`; for
-  cross-suite flakiness use per-file isolation (`scripts/run-isolated-e2e.cjs`, as sample-server does).
+  `@QueryHandler` in global Reflect metadata and breaks later Nest apps in the same process. Never import a
+  barrel in an e2e file that boots an app. (The barrel-last sequencer is gone; no barrel-only specs exist.)
+- **Teardown / open handles.** A hanging suite process + `Parse Error: Expected HTTP/` from supertest = an app
+  wasn't closed. Ensure `await app.close()` in `afterEach`/`afterAll`. `forceExit` is off on purpose — a leak
+  hangs and gets reported instead of being masked.
 - **Fixture drift (v7→v8).** Symptoms: 500s, `Class extends value undefined`, `x is not a function`. Fix the
   fixture to the v8 pattern — `RepositoryModule.forFeature` for every entity, no duplicate `TypeOrmModule.forRoot`,
   correct `extras` (user/otp/role/federated/invitation). Reuse `packages/rockets-server-auth/src/__fixtures__/`

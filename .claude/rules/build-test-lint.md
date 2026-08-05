@@ -27,19 +27,24 @@ with `supertest` are the primary way to verify behavior in this project.
 - Reuse existing fixtures from `packages/rockets-server-auth/src/__fixtures__/`.
 - Shared bootstrap helpers live in `packages/rockets-server-auth/src/__e2e__/helpers/`.
 
-## Barrel / Index File Tests
+## E2E Process Isolation
 
-Importing a barrel like `domains/user/index` registers all `@CommandHandler` /
-`@QueryHandler` decorators in **global Reflect metadata**. This breaks later
-Nest apps created in the same Jest process (`maxWorkers: 1`).
+Package e2e suites run **one Jest process per spec file** via
+`scripts/run-isolated-e2e.cjs` (both `test:e2e` and `test:e2e:cov` route
+through it). Sharing one worker made the full run fail ~25% of the time with
+a rotating victim suite — cumulative process state across ~30 Nest + TypeORM
+app boots; every suite is green in isolation. `forceExit` is off: a suite
+that leaks a handle hangs its own process and gets reported instead of
+poisoning the next suite.
 
-Rules for barrel tests:
+The runner is a bridge: the planned Vitest migration (`pool: 'forks'` +
+`isolate: true` gives the same per-file process isolation natively) deletes
+it along with the Babel ESM-compat plugins.
 
-1. Name the file descriptively (e.g. `rockets-auth-user-domain-barrel.e2e-spec.ts`).
-2. The custom **`testSequencer`** at `scripts/jest-e2e-barrel-last-sequencer.cjs`
-   guarantees it runs **after** all other e2e files. Both `jest.config-e2e.json`
-   and `jest.config-e2e.coverage.json` reference it.
-3. **Never** import a barrel inside an e2e file that also boots a Nest app.
+Also: **never** import a `domains/*/index` barrel inside an e2e file that
+boots a Nest app — barrels register `@CommandHandler` / `@QueryHandler` in
+global Reflect metadata. (The old barrel-last `testSequencer` is gone; no
+barrel-only specs exist anymore.)
 
 ## Test File Placement
 

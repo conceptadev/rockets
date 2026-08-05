@@ -289,11 +289,12 @@ providers, or `--no-verify`. If stuck, the rule is to **ask**, not work around.
 **Testing policy.** E2E/integration is the **default**, not the exception: new
 tests are `*.e2e-spec.ts` (real Nest app + supertest + SQLite) unless a unit test
 is specifically justified. Coverage target ≥80% statements/lines via
-`yarn test:e2e:cov`. Barrel imports (`domains/*/index`) register CQRS metadata
-globally and **must run last** — handled by
-`scripts/jest-e2e-barrel-last-sequencer.cjs`. Never import a barrel inside an
-e2e file that also boots a Nest app. A low *unit*-test count is not a defect
-here.
+`yarn test:e2e:cov`. Package e2e runs one Jest process per spec file
+(`scripts/run-isolated-e2e.cjs`) — shared-worker runs flaked from cumulative
+process state across ~30 app boots; the runner is a bridge until the Vitest
+migration (`pool: 'forks'`) makes it native. Never import a `domains/*/index`
+barrel inside an e2e file that also boots a Nest app (barrels register CQRS
+metadata globally). A low *unit*-test count is not a defect here.
 
 **Stability.** The public surface (`AuthAdapterInterface`, `defineResource`,
 `defineModuleResource`, `RepositoryInterface`, `RocketsModule.forRoot` options)
