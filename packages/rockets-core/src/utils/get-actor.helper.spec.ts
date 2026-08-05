@@ -1,3 +1,4 @@
+import { vi, describe, it, expect } from 'vitest';
 import type { PlainLiteralObject } from '@nestjs/common';
 import type { OverlayRef } from '@concepta/nestjs-core';
 import { ActorCtx } from '../infrastructure/interceptors/actor.overlay';
@@ -14,11 +15,11 @@ describe('getActor', () => {
 
   it('reads the actor from the overlay when .with(ActorCtx) is callable', () => {
     const ctx = {
-      supports: jest.fn(
+      supports: vi.fn(
         (ref: OverlayRef<string, PlainLiteralObject, unknown[]>) =>
           ref === ActorCtx,
       ),
-      with: jest.fn((ref: OverlayRef<string, PlainLiteralObject, unknown[]>) =>
+      with: vi.fn((ref: OverlayRef<string, PlainLiteralObject, unknown[]>) =>
         ref === ActorCtx ? { id: 'user-1', type: 'user' as const } : undefined,
       ),
     };

@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { extractBearerToken } from './extract-bearer-token';
 import type { AuthRequest } from '../../domain/interfaces/auth-adapter.interface';
 

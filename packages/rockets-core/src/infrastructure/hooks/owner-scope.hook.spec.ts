@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import type { PlainLiteralObject } from '@nestjs/common';
 import type { OverlayRef } from '@concepta/nestjs-core';
 import { OwnerScopeHook, DEFAULT_OWNER_COLUMN } from './owner-scope.hook';

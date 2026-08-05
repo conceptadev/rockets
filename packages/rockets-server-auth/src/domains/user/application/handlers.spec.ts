@@ -1,3 +1,4 @@
+import { vi, expect, type Mock, describe, it, beforeEach } from 'vitest';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { HttpStatus } from '@nestjs/common';
 import {
@@ -17,12 +18,12 @@ const userPlain = { id: 'u1', email: 'a@b.com', username: 'alice' };
 const aggregate = { id: 'u1', toPlain: () => userPlain };
 
 describe('User application handlers', () => {
-  let queryBus: { execute: jest.Mock };
-  let commandBus: { execute: jest.Mock };
+  let queryBus: { execute: Mock };
+  let commandBus: { execute: Mock };
 
   beforeEach(() => {
-    queryBus = { execute: jest.fn() };
-    commandBus = { execute: jest.fn() };
+    queryBus = { execute: vi.fn() };
+    commandBus = { execute: vi.fn() };
   });
 
   describe('GetUserHandler', () => {
@@ -68,7 +69,7 @@ describe('User application handlers', () => {
       queryBus.execute.mockResolvedValueOnce(null).mockResolvedValueOnce(null);
       try {
         await handler.execute(new GetUserQuery('u1'));
-        fail('expected throw');
+        expect.fail('expected throw');
       } catch (err) {
         expect(err).toBeInstanceOf(UserException);
         expect((err as UserException).httpStatus).toBe(HttpStatus.NOT_FOUND);

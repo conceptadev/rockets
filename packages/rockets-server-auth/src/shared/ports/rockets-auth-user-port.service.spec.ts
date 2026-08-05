@@ -1,3 +1,4 @@
+import { vi, type Mock, describe, it, expect, beforeEach } from 'vitest';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 
 import { RocketsAuthUserPortService } from './rockets-auth-user-port.service';
@@ -11,15 +12,15 @@ import { GetActiveCredentialQuery } from '../../domains/user/application/queries
 
 describe('RocketsAuthUserPortService', () => {
   let service: RocketsAuthUserPortService;
-  let queryBus: { execute: jest.Mock };
-  let commandBus: { execute: jest.Mock };
+  let queryBus: { execute: Mock };
+  let commandBus: { execute: Mock };
 
   const userPlain = { id: 'u1', email: 'a@b.com', username: 'alice' };
   const aggregate = { id: 'u1', toPlain: () => userPlain };
 
   beforeEach(() => {
-    queryBus = { execute: jest.fn() };
-    commandBus = { execute: jest.fn() };
+    queryBus = { execute: vi.fn() };
+    commandBus = { execute: vi.fn() };
     service = new RocketsAuthUserPortService(
       queryBus as unknown as QueryBus,
       commandBus as unknown as CommandBus,

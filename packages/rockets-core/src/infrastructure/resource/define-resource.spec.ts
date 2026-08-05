@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { Injectable, type PlainLiteralObject } from '@nestjs/common';
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 import { Operation } from '@concepta/nestjs-core';

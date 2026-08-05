@@ -1,6 +1,6 @@
 ---
 name: e2e-fixer
-description: Diagnose and fix failing or flaky tests in this monorepo, with a bias for e2e (*.e2e-spec.ts). Use when tests fail after a change, when a suite passes alone but fails in the full run, on fixture/bootstrap drift, barrel-registration collisions, teardown/open-handle leaks, or missing jest matchers. Triggers on "fix the tests", "e2e failing", "flaky test", "tests pass alone but not together".
+description: Diagnose and fix failing or flaky tests in this monorepo, with a bias for e2e (*.e2e-spec.ts). Use when tests fail after a change, when a suite passes alone but fails in the full run, on fixture/bootstrap drift, barrel-registration collisions, teardown/open-handle leaks, or runner/config drift. Triggers on "fix the tests", "e2e failing", "flaky test", "tests pass alone but not together".
 ---
 
 # E2E Fixer
@@ -10,19 +10,18 @@ are environment/isolation, not logic — separate the two before editing source.
 
 ## First: is it mine, pre-existing, or flaky?
 
-1. Run the failing suite **in isolation**: `corepack yarn jest --config jest.config-e2e.json "<suite-path>"`.
-   Passes alone but fails in the full run → isolation/teardown flake, not a logic bug.
+1. Run the failing suite **in isolation**: `corepack yarn vitest run --config vitest.e2e.config.ts "<suite-path>"`.
+   Passes alone but fails in the full run → see the known rotating-404 flake in CHANGELOG.md before digging.
 2. Establish a baseline with `git stash` (keep node_modules) and re-run the suite. Same failure on clean HEAD
    → pre-existing, not your regression. Say so explicitly; do not "fix" pre-existing breakage silently.
-3. Filter ts-jest noise: pipe through `grep -vE "TS151002|ts-jest\[config\]"`.
 
 ## Known failure classes and fixes
 
-- **Cross-suite bleed in a shared worker.** A suite green in isolation fails intermittently in the full run
-  (typically an unexpected 404), with the victim rotating between runs. Root cause is cumulative process state
-  across many Nest + TypeORM app boots. Both package e2e scripts (`test:e2e`, `test:e2e:cov`) already run one
-  process per spec file via `scripts/run-isolated-e2e.cjs` (as does sample-server) — if a suite still flakes
-  there, the bug is inside that one file. The runner disappears with the Vitest migration (`pool: 'forks'`).
+- **Rotating-404 full-run flake (pre-existing, under investigation).** ~1 in 4 full e2e runs, one suite fails
+  with an unexpected 404 (can even turn an expected 401 into a 404); a different suite each run; never
+  reproduces solo (20+ runs, incl. under synthetic CPU load) and survives one-worker fresh-fork execution.
+  Evidence + next step (instrumented hunt) live in CHANGELOG.md "Known flaky failure". Rerun once to confirm
+  it is this flake; do NOT retry-loop, skip, or weaken assertions.
 - **Barrel registration collisions.** Importing a `domains/*/index` barrel registers `@CommandHandler`/
   `@QueryHandler` in global Reflect metadata and breaks later Nest apps in the same process. Never import a
   barrel in an e2e file that boots an app. (The barrel-last sequencer is gone; no barrel-only specs exist.)
@@ -33,10 +32,8 @@ are environment/isolation, not logic — separate the two before editing source.
   fixture to the v8 pattern — `RepositoryModule.forFeature` for every entity, no duplicate `TypeOrmModule.forRoot`,
   correct `extras` (user/otp/role/federated/invitation). Reuse `packages/rockets-server-auth/src/__fixtures__/`
   and `__e2e__/helpers/`.
-- **Missing matchers.** `toBeArrayOfSize is not a function` → `jest-extended` not wired. Add
-  `"setupFilesAfterEnv": ["jest-extended/all"]` to the jest config (it was a real gap, not a bug).
-- **Module-resolution after a bump.** `Cannot find module '@concepta/.../subpath'` in jest → see **upstream-migrator**:
-  fix `tsconfig.jest.json` (`isolatedModules` + `module: commonjs`) and `moduleNameMapper`.
+- **Module-resolution after a bump.** `Cannot find module '@concepta/.../subpath'` → see **upstream-migrator**.
+  Vitest resolves the package `exports` maps natively; if a subpath fails, the exports map itself is wrong.
 
 ## Rules
 

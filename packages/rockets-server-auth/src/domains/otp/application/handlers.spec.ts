@@ -1,3 +1,4 @@
+import { vi, type Mock, describe, it, expect, beforeEach } from 'vitest';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import {
   ValidateOtpQuery,
@@ -14,12 +15,12 @@ import { RocketsClearOtpsHandler } from './commands/handlers/rockets-clear-otps.
 import { RocketsClearOtpsCommand } from './commands/impl/rockets-clear-otps.command';
 
 describe('OTP application handlers', () => {
-  let queryBus: { execute: jest.Mock };
-  let commandBus: { execute: jest.Mock };
+  let queryBus: { execute: Mock };
+  let commandBus: { execute: Mock };
 
   beforeEach(() => {
-    queryBus = { execute: jest.fn() };
-    commandBus = { execute: jest.fn() };
+    queryBus = { execute: vi.fn() };
+    commandBus = { execute: vi.fn() };
   });
 
   describe('RocketsValidateOtpHandler', () => {

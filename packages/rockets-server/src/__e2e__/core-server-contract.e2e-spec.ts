@@ -23,6 +23,7 @@
  * fails to compile — which is the whole point. Don't "fix" it by
  * casting; fix the contract.
  */
+import { vi, describe, it, expect, afterEach } from 'vitest';
 import { INestApplication, Injectable } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
@@ -146,14 +147,16 @@ describe('Core ↔ Server auth-adapter contract (e2e)', () => {
       .expect(401);
   });
 
-  it('Server re-exports of AuthAdapterInterface and AuthorizedUser still match core', () => {
+  it('Server re-exports of AuthAdapterInterface and AuthorizedUser still match core', async () => {
     // Module-level imports at the top compile against core types
     // directly; this assertion is a tripwire if anyone replaces the
     // server-side re-exports with hand-written duplicates.
-    const fromServer: typeof import('../domain/interfaces/auth-adapter.interface') =
-      jest.requireActual('../domain/interfaces/auth-adapter.interface');
-    const fromCore: typeof import('@conceptadev/rockets-core') =
-      jest.requireActual('@conceptadev/rockets-core');
+    const fromServer = await vi.importActual<
+      typeof import('../domain/interfaces/auth-adapter.interface')
+    >('../domain/interfaces/auth-adapter.interface');
+    const fromCore = await vi.importActual<
+      typeof import('@conceptadev/rockets-core')
+    >('@conceptadev/rockets-core');
     expect(typeof fromServer).toBe('object');
     expect(typeof fromCore).toBe('object');
   });

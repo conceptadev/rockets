@@ -1,20 +1,23 @@
+import { vi, describe, it, expect, beforeEach } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { FirebaseAuthConfigurationException } from '../exceptions/firebase-auth-configuration.exception';
 import { resolveFirebaseAdminAuth } from '../utils/resolve-firebase-admin-auth.util';
 
-jest.mock('firebase-admin/auth', () => ({
-  getAuth: jest.fn(),
+vi.mock('firebase-admin/auth', () => ({
+  getAuth: vi.fn(),
 }));
 
 import { getAuth } from 'firebase-admin/auth';
 
 describe('resolveFirebaseAdminAuth', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('uses legacy `.auth()` when present', () => {
     const auth = {
-      verifyIdToken: jest.fn(),
+      verifyIdToken: vi.fn(),
     };
     const app = { auth: () => auth };
 
@@ -24,9 +27,9 @@ describe('resolveFirebaseAdminAuth', () => {
 
   it('falls back to modular `getAuth(app)` when `.auth` is absent', () => {
     const auth = {
-      verifyIdToken: jest.fn(),
+      verifyIdToken: vi.fn(),
     };
-    (getAuth as jest.Mock).mockReturnValue(auth);
+    (getAuth as Mock).mockReturnValue(auth);
     const app = { name: '[DEFAULT]' };
 
     expect(resolveFirebaseAdminAuth(app)).toBe(auth);
@@ -34,7 +37,7 @@ describe('resolveFirebaseAdminAuth', () => {
   });
 
   it('wraps modular `getAuth` failures in FirebaseAuthConfigurationException', () => {
-    (getAuth as jest.Mock).mockImplementation(() => {
+    (getAuth as Mock).mockImplementation(() => {
       throw new Error('app not found');
     });
 

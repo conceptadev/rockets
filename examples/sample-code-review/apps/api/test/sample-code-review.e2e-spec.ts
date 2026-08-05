@@ -6,6 +6,7 @@ process.env.GITHUB_OAUTH_CALLBACK_URL = 'http://localhost:3001/github/oauth/call
 process.env.OPENAI_API_KEY = '';
 process.env.OPEN_API_KEY = '';
 
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import request from 'supertest';

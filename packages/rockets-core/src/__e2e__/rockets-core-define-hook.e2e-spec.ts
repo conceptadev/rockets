@@ -13,6 +13,7 @@
  *  3. **Entity binding.** The generated hook is fenced to its entity and
  *     does not fire for operations on a different one.
  */
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import {
   ConflictException,
   Global,

@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { isCrudResource } from './aggregate-resources';
 import { defineResource } from './define-resource';
 import { defineModuleResource } from './define-module-resource';

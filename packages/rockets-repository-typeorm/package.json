@@ -48,7 +48,7 @@
     "build": "tsc -p tsconfig.json",
     "prepack": "yarn run -T clean && yarn run -T build",
     "build:watch": "tsc -p tsconfig.json --watch",
-    "test": "cd ../.. && jest --testPathPattern=rockets-repository-typeorm"
+    "test": "cd ../.. && ./node_modules/.bin/vitest run packages/rockets-repository-typeorm"
   },
   "dependencies": {
     "@concepta/nestjs-repository-typeorm": "8.0.0-alpha.8",
@@ -57,10 +57,9 @@
   "devDependencies": {
     "@nestjs/common": "12.0.0-alpha.5",
     "@nestjs/testing": "12.0.0-alpha.5",
-    "jest": "^29.7.0",
-    "ts-jest": "^29.2.0",
     "typeorm": "^0.3.20",
     "typescript": "^5.4.0",
+    "vitest": "^4.1.10",
     "zod": "^4.4.3"
   },
   "peerDependencies": {

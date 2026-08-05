@@ -1,3 +1,4 @@
+import { vi, type Mocked, describe, it, expect } from 'vitest';
 import { Logger } from '@nestjs/common';
 import { OtpInterface } from '@concepta/nestjs-otp';
 
@@ -29,19 +30,19 @@ const settings: RocketsAuthSettingsInterface = {
 };
 
 function makeService() {
-  const userPort: jest.Mocked<Pick<RocketsAuthUserPortService, 'byEmail'>> = {
-    byEmail: jest.fn(),
+  const userPort: Mocked<Pick<RocketsAuthUserPortService, 'byEmail'>> = {
+    byEmail: vi.fn(),
   };
-  const otpPort: jest.Mocked<
+  const otpPort: Mocked<
     Pick<RocketsAuthOtpPortService, 'create' | 'validate' | 'clear'>
   > = {
-    create: jest.fn(),
-    validate: jest.fn(),
-    clear: jest.fn(),
+    create: vi.fn(),
+    validate: vi.fn(),
+    clear: vi.fn(),
   };
-  const notif: jest.Mocked<RocketsAuthOtpNotificationServiceInterface> = {
-    sendOtpEmail: jest.fn(),
-  } as unknown as jest.Mocked<RocketsAuthOtpNotificationServiceInterface>;
+  const notif: Mocked<RocketsAuthOtpNotificationServiceInterface> = {
+    sendOtpEmail: vi.fn(),
+  } as unknown as Mocked<RocketsAuthOtpNotificationServiceInterface>;
 
   const service = new RocketsAuthOtpService(
     settings,
@@ -51,13 +52,13 @@ function makeService() {
   );
   // suppress error logging in tests
   (service as unknown as { logger: Logger }).logger = {
-    log: jest.fn(),
-    error: jest.fn(),
-    warn: jest.fn(),
-    debug: jest.fn(),
-    verbose: jest.fn(),
-    fatal: jest.fn(),
-    setLogLevels: jest.fn(),
+    log: vi.fn(),
+    error: vi.fn(),
+    warn: vi.fn(),
+    debug: vi.fn(),
+    verbose: vi.fn(),
+    fatal: vi.fn(),
+    setLogLevels: vi.fn(),
     localInstance: {} as Logger,
   } as unknown as Logger;
 
@@ -111,7 +112,7 @@ describe(RocketsAuthOtpService.name, () => {
         passcode: 'sms-001',
       } as OtpInterface);
 
-      const sms = jest.fn();
+      const sms = vi.fn();
       class SmsOtp extends RocketsAuthOtpService {
         protected async deliver(
           email: string,

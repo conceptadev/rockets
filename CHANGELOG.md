@@ -5,6 +5,48 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ## [Unreleased]
 
+### Testing infrastructure — Jest replaced by Vitest
+
+The whole monorepo (6 packages + 3 example workspaces) now tests under
+Vitest 4. What this deletes, permanently:
+
+- `scripts/run-isolated-e2e.cjs` — the one-process-per-spec-file bridge;
+  `pool: 'forks'` gives every spec file a fresh process natively (verified:
+  distinct pid per file even at one worker).
+- Both Babel plugins that adapted the ESM-only `@nestjs` v12 dist to
+  Jest's CJS runtime — Vitest runs ESM natively.
+- All 14 Jest config files, `tsconfig.jest.json`, and every jest/ts-jest/
+  babel-jest/jest-junit/jest-extended/jest-mock-extended/@types/jest
+  dependency. The root `scripts/` directory no longer exists.
+
+Decorator metadata (NestJS DI) is emitted by `unplugin-swc` — esbuild,
+Vitest's default transform, cannot emit it. Test files import their API
+explicitly (`import { describe, it, expect, vi } from 'vitest'`);
+`globals` is `false` in every config, so nothing depends on ambient
+typings. Test counts match the Jest baselines exactly: units 62 files /
+572 tests, package e2e 30 / 156, samples 8/194 + 2/40 + 4 files/9 tests.
+CI junit + lcov + json artifacts are produced at the same paths as
+before. Migration incidentally fixed two latent defects: the
+sample-code-review Jest config had lost its `setupFiles` wiring (its
+FIREBASE_PROJECT_ID default never applied), and a lazy-`require` cycle
+workaround in `rockets-auth-handler-overrides.spec.ts` became typed
+`beforeAll` dynamic imports.
+
+### Known flaky failure under investigation (pre-existing)
+
+Roughly 1 in 4 *full* e2e runs, one suite fails with an unexpected 404 —
+a different suite each time. Evidence collected so far: it reproduces
+with a deterministic auth actor and no owner scoping; a failing request
+can 404 while the immediately preceding list request saw the row; it can
+turn an expected **401 into a 404** (so it is not data visibility); it
+has never reproduced in 20+ solo runs of any single suite, including
+under 6× synthetic CPU load; it survives one-worker sequential execution
+in fresh forked processes (distinct pids verified), which rules out
+cross-process and worker-reuse contamination. The signature predates the
+Vitest migration (identical under Jest) and also occurs in the
+sample-server suite. Next step is an instrumented hunt that captures the
+404 response body and the server-side route table at failure time.
+
 ### Security
 
 - **Owner scoping is now on by default** (`zodResource` / `zodSubResource`).
@@ -94,7 +136,7 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 - `relation.shape` projections are filtered by the response opt-in rule
   while `f.compute` schemas are only filtered for explicit
   `response: false`; unifying the two is deliberate follow-up work.
-- `scripts/run-isolated-e2e.cjs` and the two Babel plugins that adapt the
-  ESM-only `@nestjs` v12 dist to Jest's CJS runtime are bridges: the
-  planned Vitest migration (native ESM, `pool: 'forks'` isolation) removes
-  all of them.
+- ~~`scripts/run-isolated-e2e.cjs` and the two Babel plugins that adapt
+  the ESM-only `@nestjs` v12 dist to Jest's CJS runtime are bridges: the
+  planned Vitest migration (native ESM, `pool: 'forks'` isolation)
+  removes all of them.~~ Done — see "Testing infrastructure" above.

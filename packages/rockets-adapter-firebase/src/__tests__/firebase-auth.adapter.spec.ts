@@ -1,3 +1,4 @@
+import { vi, describe, it, expect } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import type { AuthRequest } from '@conceptadev/rockets-core';
 
@@ -87,7 +88,7 @@ async function makeAdapter(opts: {
 describe(FirebaseAuthAdapter.name, () => {
   describe('no credential', () => {
     it('returns matched: false when no Authorization header is present', async () => {
-      const verify = jest.fn();
+      const verify = vi.fn();
       const adapter = await makeAdapter({
         verifier: { verifyIdToken: verify } as FirebaseTokenVerifierInterface,
       });
@@ -98,7 +99,7 @@ describe(FirebaseAuthAdapter.name, () => {
     });
 
     it('returns matched: false when Authorization header uses a non-Bearer scheme', async () => {
-      const verify = jest.fn();
+      const verify = vi.fn();
       const adapter = await makeAdapter({
         verifier: { verifyIdToken: verify } as FirebaseTokenVerifierInterface,
       });
@@ -111,7 +112,7 @@ describe(FirebaseAuthAdapter.name, () => {
     });
 
     it('returns matched: false for an empty Bearer value', async () => {
-      const verify = jest.fn();
+      const verify = vi.fn();
       const adapter = await makeAdapter({
         verifier: { verifyIdToken: verify } as FirebaseTokenVerifierInterface,
       });
@@ -180,7 +181,7 @@ describe(FirebaseAuthAdapter.name, () => {
     });
 
     it('forwards `checkRevoked` from module options to the verifier', async () => {
-      const verifyIdToken = jest.fn().mockResolvedValue({
+      const verifyIdToken = vi.fn().mockResolvedValue({
         uid: 'user-1',
         sub: 'user-1',
       });

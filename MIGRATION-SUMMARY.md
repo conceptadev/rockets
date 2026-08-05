@@ -103,7 +103,7 @@ yarn test:e2e       # 31/35 suites, 248 tests pass; 4 fail (above)
 - Build is `tsc --build` (incremental) — it does NOT delete orphaned `dist`
   outputs. After renames, `rm -rf packages/*/dist *.tsbuildinfo` before a build,
   or stale `.js` files reference deleted packages at runtime.
-- `tsconfig.jest.json` runs tests with `strict:false`; some adopted code had
+- Tests historically transpiled with `strict:false` (now via the Vitest/SWC pipeline); some adopted code had
   bugs that only surface there (union narrowing). Fixes must pass BOTH modes.
 - Adding `reflect-metadata` as a dep to `rockets-app` made yarn nest a
   redundant `@nestjs/common` under `packages/rockets-app/node_modules`, which

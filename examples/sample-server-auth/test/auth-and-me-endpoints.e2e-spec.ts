@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { CommandBus } from '@nestjs/cqrs';

@@ -1,3 +1,4 @@
+import { vi, describe, it, expect } from 'vitest';
 import { Logger } from '@nestjs/common';
 import { getErrorDetails, logAndGetErrorDetails } from './error-logging.helper';
 
@@ -9,7 +10,7 @@ describe('error-logging.helper (e2e coverage)', () => {
 
   it('covers logAndGetErrorDetails', () => {
     const logger = {
-      error: jest.fn(),
+      error: vi.fn(),
     } as unknown as Logger;
     const out = logAndGetErrorDetails(new Error('x'), logger, 'ctx', {
       id: '1',

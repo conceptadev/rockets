@@ -105,9 +105,9 @@ For local-only dev with no external services, set in `apps/api/.env`:
 FIREBASE_USE_FAKE=true
 ```
 
-E2E tests inject an in-memory Firestore backend via a Jest stub
-(`test/stubs/code-review-reports.persistence.stub.ts`), not an env
-flag.
+E2E tests inject an in-memory Firestore backend via a Vitest
+`resolve.alias` entry pointing at
+`test/stubs/code-review-reports.persistence.stub.ts`, not an env flag.
 
 For real Firebase, drop the service-account JSON at
 `apps/api/secrets/firebase-service-account.json` and set

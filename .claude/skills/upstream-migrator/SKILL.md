@@ -39,12 +39,15 @@ restructures packages between alphas. Work through this checklist; do not assume
 - **Config shapes.** Option interfaces change (e.g. role `assignments` requiring a flat `entityKey`). Read the
   installed `.d.ts` in `node_modules/<pkg>/dist`, not upstream `src` at HEAD.
 
-## 4. Jest layer (separate from the build)
+## 4. Test-runner layer (separate from the build)
 
-- ts-jest under nodenext needs `isolatedModules: true` + `module: commonjs` in `tsconfig.jest.json`
-  (decouples test transpile from the build; downlevels dynamic `import()` so jest's CJS VM runs it).
-- Mirror every `exports`-subpath mapping in **both** `tsconfig.jest.json` `paths` **and** jest `moduleNameMapper`
-  (and the per-package `jest.config*.json`), pointing at the real `dist` file.
+- The runner is Vitest (native ESM): package `exports` maps resolve directly,
+  so a subpath that fails under Vitest fails because the **exports map itself**
+  is wrong — fix it upstream-side or via a `resolve.alias` entry in the
+  relevant `vitest*.config.ts`, never with a paths/moduleNameMapper mirror.
+- After a bump, run both `yarn test` and `yarn test:e2e`; a
+  `Cannot find module '@concepta/.../subpath'` here is the exports-map
+  signal above.
 
 ## 5. Verify
 

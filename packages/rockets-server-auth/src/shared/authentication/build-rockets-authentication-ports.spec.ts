@@ -1,3 +1,4 @@
+import { vi, describe, it, expect } from 'vitest';
 import { PlainLiteralObject } from '@nestjs/common';
 import { Command, Query } from '@nestjs/cqrs';
 
@@ -154,7 +155,7 @@ function baseOptionsWithRequiredNotifications(): RocketsAuthOptionsInterface {
   return {
     settings: {} as RocketsAuthOptionsInterface['settings'],
     services: {
-      mailerService: { sendMail: jest.fn() },
+      mailerService: { sendMail: vi.fn() },
     },
     authentication: {
       ports: {

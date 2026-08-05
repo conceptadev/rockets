@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeAll } from 'vitest';
 import { Injectable, PlainLiteralObject } from '@nestjs/common';
 import { AbstractSignupUserHandler } from '../application/commands/handlers/abstract-signup-user.handler';
 import { AbstractAdminUserListHandler } from '../application/commands/handlers/abstract-admin-user-list.handler';
@@ -289,19 +290,24 @@ describe('Handler Override Pattern', () => {
   // ─── Ports Module Handler Overrides ─────────────────────────
 
   describe('RocketsAuthPortsModule.forRoot() handler overrides', () => {
-    // Lazily import to avoid circular deps in test setup
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const {
-      RocketsAuthPortsModule,
-    } = require('../../../shared/ports/rockets-auth-ports.module');
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const {
-      RocketsGetUserByEmailHandler,
-    } = require('../application/queries/handlers/rockets-get-user-by-email.handler');
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const {
-      RocketsCreateOtpHandler,
-    } = require('../../../domains/otp/application/commands/handlers/rockets-create-otp.handler');
+    // Loaded in beforeAll (not top-level imports) to defer module
+    // evaluation past this file's own imports — these three participate
+    // in a require cycle with the test setup above.
+    let RocketsAuthPortsModule: typeof import('../../../shared/ports/rockets-auth-ports.module').RocketsAuthPortsModule;
+    let RocketsGetUserByEmailHandler: typeof import('../application/queries/handlers/rockets-get-user-by-email.handler').RocketsGetUserByEmailHandler;
+    let RocketsCreateOtpHandler: typeof import('../../../domains/otp/application/commands/handlers/rockets-create-otp.handler').RocketsCreateOtpHandler;
+
+    beforeAll(async () => {
+      ({ RocketsAuthPortsModule } = await import(
+        '../../../shared/ports/rockets-auth-ports.module'
+      ));
+      ({ RocketsGetUserByEmailHandler } = await import(
+        '../application/queries/handlers/rockets-get-user-by-email.handler'
+      ));
+      ({ RocketsCreateOtpHandler } = await import(
+        '../../../domains/otp/application/commands/handlers/rockets-create-otp.handler'
+      ));
+    });
 
     @Injectable()
     class CustomGetUserByEmailHandler {

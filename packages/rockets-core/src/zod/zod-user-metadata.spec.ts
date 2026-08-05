@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import type { PlainLiteralObject, Type } from '@nestjs/common';
 import { z } from 'zod';
 import type { SchemaEntityCompiler } from '../common';

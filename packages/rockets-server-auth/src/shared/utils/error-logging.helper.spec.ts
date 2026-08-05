@@ -1,3 +1,4 @@
+import { vi, type Mocked, describe, it, expect, beforeEach } from 'vitest';
 import { Logger } from '@nestjs/common';
 import { getErrorDetails, logAndGetErrorDetails } from './error-logging.helper';
 
@@ -24,10 +25,10 @@ describe('error-logging.helper', () => {
   });
 
   describe('logAndGetErrorDetails', () => {
-    let logger: jest.Mocked<Pick<Logger, 'error'>>;
+    let logger: Mocked<Pick<Logger, 'error'>>;
 
     beforeEach(() => {
-      logger = { error: jest.fn() };
+      logger = { error: vi.fn() };
     });
 
     it('logs prefixed message + stack + context', () => {

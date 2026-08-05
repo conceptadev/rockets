@@ -4,6 +4,7 @@
  * same `where` shape as Concepta's `Where.eq`, and the `findOne`, `create`,
  * `update` methods used by production handlers.
  */
+import { describe, it, expect } from 'vitest';
 import { Where, type RepositoryInterface } from '@conceptadev/rockets-core';
 import {
   UpsertUserMetadataHandler,

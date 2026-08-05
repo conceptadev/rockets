@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { deriveEntityKey } from './derive-entity-key.util';
 
 describe('deriveEntityKey', () => {

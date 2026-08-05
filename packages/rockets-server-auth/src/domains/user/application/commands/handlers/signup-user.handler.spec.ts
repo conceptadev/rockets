@@ -1,3 +1,4 @@
+import { vi, describe, it, expect } from 'vitest';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { TransactionScope } from '@concepta/nestjs-repository';
 import type { CrudContextInterface } from '@concepta/nestjs-crud';
@@ -24,11 +25,11 @@ const userPlain = { id: 'u1', email: 'a@b.com', username: 'alice' };
 const aggregate = { id: 'u1', toPlain: () => userPlain };
 
 function buildHandler() {
-  const queryBus = { execute: jest.fn() };
-  const commandBus = { execute: jest.fn() };
+  const queryBus = { execute: vi.fn() };
+  const commandBus = { execute: vi.fn() };
   // run the txScope callback eagerly so the test exercises the inner work
   const txScope = {
-    run: jest.fn(async (_ctx: unknown, fn: () => Promise<unknown>) => fn()),
+    run: vi.fn(async (_ctx: unknown, fn: () => Promise<unknown>) => fn()),
   };
   const handler = new SignupUserHandler(
     commandBus as unknown as CommandBus,

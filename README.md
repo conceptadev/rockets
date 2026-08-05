@@ -1052,7 +1052,7 @@ rockets/
 | ----------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `yarn publish:conceptadev`        | Build + publish all `@conceptadev/*` packages to npm (`--tag alpha`). See `scripts/publish-conceptadev-order.txt`. |
 | `yarn install && yarn build`  | Bootstrap + compile every local `@conceptadev/*` package.                                                      |
-| `yarn test`                   | Unit tests (jest, 30s timeout).                                                                            |
+| `yarn test`                   | Unit tests (Vitest).                                                                            |
 | `yarn test:e2e`               | E2E tests across all packages and sample apps.                                                             |
 | `yarn lint` / `yarn lint:fix` | ESLint.                                                                                                    |
 | `yarn lint:md`                | Markdown lint.                                                                                             |

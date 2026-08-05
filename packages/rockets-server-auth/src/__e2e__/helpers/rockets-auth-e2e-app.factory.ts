@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { RocketsAuthExceptionsFilter } from '../../shared/compatibility/rockets-auth-exceptions.filter';
 import { EmailSendInterface } from '@concepta/nestjs-common';
 import { EventModule } from '@concepta/nestjs-event';
@@ -48,7 +49,7 @@ import {
     {
       provide: ConfigService,
       useValue: {
-        get: jest.fn().mockImplementation((key: string) => {
+        get: vi.fn().mockImplementation((key: string) => {
           if (key === 'jwt.secret') return 'test-secret';
           if (key === 'jwt.expiresIn') return '1h';
           return null;

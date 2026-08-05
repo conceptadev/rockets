@@ -9,6 +9,7 @@
  *    same registration plan as CRUD bundles.
  *  - CQRS handlers can resolve the registered repositories.
  */
+import { describe, it, expect, afterAll } from 'vitest';
 import {
   Global,
   INestApplication,

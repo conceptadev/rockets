@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import type { PlainLiteralObject, Type } from '@nestjs/common';
 import { OwnerScopeHook, OwnerStampHook } from '../index';
 import { applyOwnerHooks } from './zod-resource-composition';

@@ -25,7 +25,10 @@ if (process.env.FIREBASE_USE_FAKE === 'true') {
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      ...(process.env.JEST_WORKER_ID !== undefined
+      // Hermetic under test: never read a developer's real .env files.
+      // Vitest sets VITEST=true in every worker (Jest's equivalent was
+      // JEST_WORKER_ID, which Vitest never sets).
+      ...(process.env.VITEST !== undefined
         ? { ignoreEnvFile: true }
         : { envFilePath: ['.env.local', '.env'] }),
     }),

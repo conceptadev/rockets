@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { readFirebaseErrorCode } from '../utils/read-firebase-error-code.util';
 
 describe('readFirebaseErrorCode', () => {

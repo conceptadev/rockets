@@ -1,3 +1,4 @@
+import { vi, type Mock, describe, it, expect, beforeEach } from 'vitest';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 
 import { RocketsAuthOtpPortService } from './rockets-auth-otp-port.service';
@@ -7,12 +8,12 @@ import { RocketsValidateOtpQuery } from '../../domains/otp/application/queries/i
 
 describe('RocketsAuthOtpPortService', () => {
   let service: RocketsAuthOtpPortService;
-  let commandBus: { execute: jest.Mock };
-  let queryBus: { execute: jest.Mock };
+  let commandBus: { execute: Mock };
+  let queryBus: { execute: Mock };
 
   beforeEach(() => {
-    commandBus = { execute: jest.fn() };
-    queryBus = { execute: jest.fn() };
+    commandBus = { execute: vi.fn() };
+    queryBus = { execute: vi.fn() };
     service = new RocketsAuthOtpPortService(
       commandBus as unknown as CommandBus,
       queryBus as unknown as QueryBus,

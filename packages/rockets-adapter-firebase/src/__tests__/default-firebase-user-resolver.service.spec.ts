@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { DefaultFirebaseUserResolverService } from '../services/default-firebase-user-resolver.service';
 
 describe(DefaultFirebaseUserResolverService.name, () => {

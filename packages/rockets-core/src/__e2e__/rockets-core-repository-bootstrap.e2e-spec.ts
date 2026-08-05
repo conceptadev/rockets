@@ -1,3 +1,4 @@
+import { vi, describe, it, expect } from 'vitest';
 import {
   Global,
   Injectable,
@@ -73,7 +74,7 @@ class InMemoryRepoStub {
  * Build a fresh fake bootstrap and a sibling alt adapter for each test.
  *
  * - The bootstrap implements `RepositoryBootstrap` with `forRoot` and
- *   `forFeature` as jest spies. `forFeature` registers each entity's
+ *   `forFeature` as vi spies. `forFeature` registers each entity's
  *   `DYNAMIC_REPOSITORY_TOKEN_<key>` with a stub repo so upstream
  *   `RepositoryModule.forFeature(...)` can wire its registration token.
  * - The alt adapter is plain `RepositoryModuleInterface` — used to
@@ -112,12 +113,12 @@ function createFixture() {
   @Module({})
   class NoopRootModule {}
 
-  const forFeature = jest.fn(
+  const forFeature = vi.fn(
     (entities: RepositoryProviderOptions[]): DynamicRepositoryModule =>
       buildAdapterDynamicModule(entities, 'BootstrapAdapter'),
   );
 
-  const forRoot = jest.fn(
+  const forRoot = vi.fn(
     (_entities: ReadonlyArray<Type<PlainLiteralObject>>): DynamicModule => ({
       module: NoopRootModule,
       providers: [],
@@ -131,7 +132,7 @@ function createFixture() {
     forRoot,
   };
 
-  const altForFeature = jest.fn(
+  const altForFeature = vi.fn(
     (entities: RepositoryProviderOptions[]): DynamicRepositoryModule =>
       buildAdapterDynamicModule(entities, 'AltAdapter'),
   );
@@ -258,7 +259,7 @@ describe('RocketsCoreModule — RepositoryBootstrap.forRoot wiring (e2e)', () =>
     @Module({})
     class AltRootModule {}
 
-    const altForRoot = jest.fn(
+    const altForRoot = vi.fn(
       (_entities: ReadonlyArray<Type<PlainLiteralObject>>): DynamicModule => ({
         module: AltRootModule,
         global: true,
@@ -267,7 +268,7 @@ describe('RocketsCoreModule — RepositoryBootstrap.forRoot wiring (e2e)', () =>
 
     const firestoreBootstrap: RepositoryBootstrap = {
       name: 'firestore-bootstrap',
-      forFeature: jest.fn(
+      forFeature: vi.fn(
         (entities: RepositoryProviderOptions[]): DynamicRepositoryModule =>
           buildAdapterDynamicModule(entities, 'FirestoreBootstrap'),
       ),

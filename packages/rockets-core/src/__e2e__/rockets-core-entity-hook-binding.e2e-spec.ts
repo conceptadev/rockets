@@ -15,6 +15,7 @@
  *     by `@EntityHook({ entity: A })` is `RepoSpec.isEntity(<A-key>)`,
  *     which the resolver consults per invocation.
  */
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import {
   Global,
   INestApplication,

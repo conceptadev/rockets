@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { RocketsAuthRoleAdminModule } from './rockets-auth-role-admin.module';
 import { RocketsAuthRoleDto } from '../infrastructure/dto/rockets-auth-role.dto';
 

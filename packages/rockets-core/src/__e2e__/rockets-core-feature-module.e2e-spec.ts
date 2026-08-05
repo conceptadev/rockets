@@ -8,6 +8,7 @@
  *  - `module.controllers` are mounted by Nest.
  *  - Per-entity `repository` override creates a separate adapter group.
  */
+import { describe, it, expect, afterEach } from 'vitest';
 import {
   Controller,
   Get,

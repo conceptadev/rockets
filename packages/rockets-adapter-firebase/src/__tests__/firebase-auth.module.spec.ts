@@ -1,3 +1,4 @@
+import { vi, describe, it, expect } from 'vitest';
 import { Injectable, Module } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import type { AuthRequest } from '@conceptadev/rockets-core';
@@ -63,7 +64,7 @@ describe(FirebaseAuthModule.name, () => {
   });
 
   it('wires the default verifier (firebase-admin wrapper) when only `firebaseApp` is provided', async () => {
-    const fakeApp = { auth: () => ({ verifyIdToken: jest.fn() }) };
+    const fakeApp = { auth: () => ({ verifyIdToken: vi.fn() }) };
 
     const moduleRef = await Test.createTestingModule({
       imports: [FirebaseAuthModule.forRoot({ firebaseApp: fakeApp })],
@@ -85,7 +86,7 @@ describe(FirebaseAuthModule.name, () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         FirebaseAuthModule.forRoot({
-          firebaseApp: { auth: () => ({ verifyIdToken: jest.fn() }) },
+          firebaseApp: { auth: () => ({ verifyIdToken: vi.fn() }) },
           verifier: FakeVerifier,
         }),
       ],

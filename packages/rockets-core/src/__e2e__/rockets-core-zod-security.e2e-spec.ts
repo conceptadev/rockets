@@ -12,6 +12,7 @@
  *    Asserted over HTTP (u2 gets 404 on u1's children), not by
  *    inspecting a metadata mirror that the builder sets itself.
  */
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import {
   Global,
   INestApplication,

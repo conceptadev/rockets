@@ -13,7 +13,7 @@ Run checks in this order after code changes:
 
 CI also runs: `yarn lint:all`, `yarn test:ci`
 
-Coverage: `yarn test:e2e:cov` (uses `jest.config-e2e.coverage.json`).
+Coverage: `yarn test:e2e:cov` (root `vitest.e2e.config.ts` + `--coverage`).
 
 # Testing Strategy
 
@@ -27,24 +27,28 @@ with `supertest` are the primary way to verify behavior in this project.
 - Reuse existing fixtures from `packages/rockets-server-auth/src/__fixtures__/`.
 - Shared bootstrap helpers live in `packages/rockets-server-auth/src/__e2e__/helpers/`.
 
-## E2E Process Isolation
+## Test Runner: Vitest
 
-Package e2e suites run **one Jest process per spec file** via
-`scripts/run-isolated-e2e.cjs` (both `test:e2e` and `test:e2e:cov` route
-through it). Sharing one worker made the full run fail ~25% of the time with
-a rotating victim suite — cumulative process state across ~30 Nest + TypeORM
-app boots; every suite is green in isolation. `forceExit` is off: a suite
-that leaks a handle hangs its own process and gets reported instead of
-poisoning the next suite.
+The monorepo tests under **Vitest 4** (`vitest.config.ts` for units,
+`vitest.e2e.config.ts` for package e2e; each example workspace carries its
+own `vitest.e2e.config.ts`). Key facts:
 
-The runner is a bridge: the planned Vitest migration (`pool: 'forks'` +
-`isolate: true` gives the same per-file process isolation natively) deletes
-it along with the Babel ESM-compat plugins.
+- Decorator metadata (Nest DI) comes from `unplugin-swc` — esbuild cannot
+  emit it. Never remove the swc plugin from a config.
+- `globals` is `false` everywhere: every test file imports what it uses
+  (`import { describe, it, expect, vi } from 'vitest'`).
+- `pool: 'forks'` runs each spec file in a fresh process — the isolation
+  the old Jest setup needed a custom runner script for. There is no
+  `scripts/` directory anymore; do not reintroduce one for test plumbing.
+- A known **pre-existing** flake (~1 in 4 full e2e runs, one rotating
+  suite fails with an unexpected 404) is documented in CHANGELOG.md under
+  "Known flaky failure". Reruns are green. Do not "fix" it by retrying,
+  skipping, or weakening assertions — it needs the instrumented hunt
+  described there.
 
 Also: **never** import a `domains/*/index` barrel inside an e2e file that
 boots a Nest app — barrels register `@CommandHandler` / `@QueryHandler` in
-global Reflect metadata. (The old barrel-last `testSequencer` is gone; no
-barrel-only specs exist anymore.)
+global Reflect metadata.
 
 ## Test File Placement
 

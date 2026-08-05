@@ -1,3 +1,4 @@
+import { vi, type Mocked, describe, it, expect } from 'vitest';
 import { DynamicModule, Module } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getDynamicRepositoryToken } from '@conceptadev/rockets-core';
@@ -37,31 +38,31 @@ function rocketsOptionsFixture(): RocketsOptions {
   };
 }
 
-function metadataRepositoryFixture(): jest.Mocked<
+function metadataRepositoryFixture(): Mocked<
   RepositoryInterface<UserMetadataEntityInterface>
 > {
   return {
     entityName: 'UserMetadata',
-    findOne: jest.fn().mockResolvedValue(null),
-    create: jest.fn(),
-    save: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    remove: jest.fn(),
-    find: jest.fn(),
-    merge: jest.fn(),
-    gt: jest.fn(),
-    gte: jest.fn(),
-    lt: jest.fn(),
-    lte: jest.fn(),
-  } as unknown as jest.Mocked<RepositoryInterface<UserMetadataEntityInterface>>;
+    findOne: vi.fn().mockResolvedValue(null),
+    create: vi.fn(),
+    save: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
+    remove: vi.fn(),
+    find: vi.fn(),
+    merge: vi.fn(),
+    gt: vi.fn(),
+    gte: vi.fn(),
+    lt: vi.fn(),
+    lte: vi.fn(),
+  } as unknown as Mocked<RepositoryInterface<UserMetadataEntityInterface>>;
 }
 
 @Module({})
 class UserModuleTestHarnessModule {
   static forTest(
     options: RocketsOptions,
-    repo: jest.Mocked<RepositoryInterface<UserMetadataEntityInterface>>,
+    repo: Mocked<RepositoryInterface<UserMetadataEntityInterface>>,
   ): DynamicModule {
     return {
       module: UserModuleTestHarnessModule,

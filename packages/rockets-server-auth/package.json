@@ -68,11 +68,11 @@
     "build": "tsc -p tsconfig.json",
     "prepack": "yarn run -T clean && yarn run -T build",
     "build:watch": "tsc -p tsconfig.json --watch",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:e2e": "jest --config ./jest.config-e2e.json",
-    "test:e2e:cov": "jest --config ./jest.config-e2e.coverage.json --coverage",
-    "test:cov": "jest --coverage",
+    "test": "cd ../.. && ./node_modules/.bin/vitest run packages/rockets-server-auth",
+    "test:watch": "cd ../.. && ./node_modules/.bin/vitest packages/rockets-server-auth",
+    "test:e2e": "cd ../.. && ./node_modules/.bin/vitest run --config vitest.e2e.config.ts packages/rockets-server-auth",
+    "test:e2e:cov": "cd ../.. && ./node_modules/.bin/vitest run --config vitest.e2e.config.ts --coverage packages/rockets-server-auth",
+    "test:cov": "cd ../.. && ./node_modules/.bin/vitest run --coverage packages/rockets-server-auth",
     "generate-swagger": "ts-node src/generate-swagger.ts"
   },
   "dependencies": {
@@ -118,13 +118,11 @@
     "@types/passport-strategy": "^0.2.38",
     "@types/supertest": "^6.0.2",
     "express-serve-static-core": "^0.1.1",
-    "jest": "^29.7.0",
-    "jest-mock-extended": "^4.0.0",
     "sqlite3": "^5.1.4",
     "supertest": "^6.3.4",
-    "ts-jest": "^29.2.0",
     "ts-node": "^10.9.2",
-    "typeorm": "^0.3.0"
+    "typeorm": "^0.3.0",
+    "vitest": "^4.1.10"
   },
   "peerDependencies": {
     "class-transformer": "*",

@@ -12,6 +12,7 @@
  *  5. Hard delete + soft delete on both top-level and sub-resource.
  *  6. List / read on both, with and without relation joins.
  */
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import {
   Global,
   INestApplication,

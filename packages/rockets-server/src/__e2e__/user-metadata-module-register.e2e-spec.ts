@@ -3,6 +3,7 @@
  * Tests that the MeController works with CommandBus/QueryBus dispatch
  * in a standalone wiring (not through RocketsModule).
  */
+import { describe, it, expect, afterEach } from 'vitest';
 import {
   DynamicModule,
   Module,

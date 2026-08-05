@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { FirebaseAuthConfigurationException } from '../exceptions/firebase-auth-configuration.exception';
 import { FirebaseAuthException } from '../exceptions/firebase-auth.exception';
 import {

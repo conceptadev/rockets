@@ -289,12 +289,15 @@ providers, or `--no-verify`. If stuck, the rule is to **ask**, not work around.
 **Testing policy.** E2E/integration is the **default**, not the exception: new
 tests are `*.e2e-spec.ts` (real Nest app + supertest + SQLite) unless a unit test
 is specifically justified. Coverage target ≥80% statements/lines via
-`yarn test:e2e:cov`. Package e2e runs one Jest process per spec file
-(`scripts/run-isolated-e2e.cjs`) — shared-worker runs flaked from cumulative
-process state across ~30 app boots; the runner is a bridge until the Vitest
-migration (`pool: 'forks'`) makes it native. Never import a `domains/*/index`
-barrel inside an e2e file that also boots a Nest app (barrels register CQRS
-metadata globally). A low *unit*-test count is not a defect here.
+`yarn test:e2e:cov`. The runner is **Vitest 4** (`vitest.config.ts` units,
+`vitest.e2e.config.ts` e2e; `pool: 'forks'` = fresh process per spec file;
+`unplugin-swc` supplies the decorator metadata Nest DI needs; `globals` off —
+tests import from 'vitest' explicitly). There is no `scripts/` directory and
+no Jest anywhere. A known pre-existing rotating-404 full-run flake is
+documented in CHANGELOG.md — do not report it as a new regression. Never
+import a `domains/*/index` barrel inside an e2e file that also boots a Nest
+app (barrels register CQRS metadata globally). A low *unit*-test count is not
+a defect here.
 
 **Stability.** The public surface (`AuthAdapterInterface`, `defineResource`,
 `defineModuleResource`, `RepositoryInterface`, `RocketsModule.forRoot` options)
@@ -333,8 +336,9 @@ legitimate findings — just not news.
 - **Testing policy is aspirational.** `AGENTS.md` says e2e is the default, but
   `rockets-core` is 22 unit / 9 e2e, three placement conventions coexist
   (co-located `*.spec.ts`, `__e2e__/`, `__tests__/`), a `*.typetest.ts`
-  convention exists that no jest config picks up, and unit thresholds in
-  `jest.config.json` are 50/40/50/50 — not the cited 80%.
+  convention exists that no test-runner config picks up (only a manual
+  `tsc --noEmit` script), and unit thresholds in `vitest.config.ts` are
+  50/40/50/50 — not the cited 80%.
 - **`rockets-server` re-exports the `SchemaEntityCompiler` type but exposes no
   `/zod` subpath**, so consumers must dual-import from
   `@bitwild/rockets-core/zod` + `@bitwild/rockets-repository-typeorm/zod` —

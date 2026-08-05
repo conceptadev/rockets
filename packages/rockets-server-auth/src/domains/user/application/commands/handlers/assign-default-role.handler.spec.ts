@@ -1,3 +1,4 @@
+import { vi, type Mock, describe, it, expect, beforeEach } from 'vitest';
 import { InternalServerErrorException } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { AssignRoleCommand } from '@concepta/nestjs-role';
@@ -16,12 +17,12 @@ function buildSettings(
 }
 
 describe('AssignDefaultRoleHandler', () => {
-  let queryBus: { execute: jest.Mock };
-  let commandBus: { execute: jest.Mock };
+  let queryBus: { execute: Mock };
+  let commandBus: { execute: Mock };
 
   beforeEach(() => {
-    queryBus = { execute: jest.fn() };
-    commandBus = { execute: jest.fn() };
+    queryBus = { execute: vi.fn() };
+    commandBus = { execute: vi.fn() };
   });
 
   it('returns false and skips assignment when defaultUserRoleName unset', async () => {

@@ -1,3 +1,4 @@
+import { vi, describe, it, expect, afterEach } from 'vitest';
 import { TypeOrmModule, type TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { TypeOrmRepositoryModule } from '@conceptadev/rockets-repository-typeorm';
 import { defineTypeOrmRepository } from './define-typeorm-repository';
@@ -15,7 +16,7 @@ class TypeOrmRepositorySpecEntity {
 
 describe('defineTypeOrmRepository', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('delegates feature registration to TypeOrmRepositoryModule', () => {
@@ -29,7 +30,7 @@ describe('defineTypeOrmRepository', () => {
     const featureModule: TypeOrmRepositoryFeatureModule = {
       module: TypeOrmRepositorySpecEntity,
     };
-    const forFeature = jest
+    const forFeature = vi
       .spyOn(TypeOrmRepositoryModule, 'forFeature')
       .mockReturnValue(featureModule);
 
@@ -44,7 +45,7 @@ describe('defineTypeOrmRepository', () => {
       synchronize: true,
     };
     const repository = defineTypeOrmRepository(connection);
-    const forRoot = jest.spyOn(TypeOrmModule, 'forRoot');
+    const forRoot = vi.spyOn(TypeOrmModule, 'forRoot');
 
     repository.forRoot([TypeOrmRepositorySpecEntity]);
 

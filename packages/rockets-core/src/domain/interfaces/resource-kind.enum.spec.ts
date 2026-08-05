@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { ResourceKind } from './resource-kind.enum';
 
 describe('ResourceKind enum', () => {
