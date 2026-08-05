@@ -365,6 +365,27 @@ Eager `compileEntity` in `*.schema.ts` is only for import-cycle breaks
 Unsupported without `db.column`: arbitrary zod types (record, union, …).
 Many-to-many: junction sub-resource + two FKs — no `@ManyToMany`.
 
+#### Response exposure is opt-in (secrets are explicit)
+
+The response DTO mirrors the project's classic idiom — class-level
+`@Exclude()` + per-field `@Expose()` — derived from the schema:
+
+| You write | On the wire? |
+|---|---|
+| `name: f.string()` | yes — every `f.*` helper registers `response: true` |
+| `id: f.pk()`, `f.createdAt()`, … | yes — base-entity columns expose by default |
+| `legacy: z.string()` (raw zod, no meta) | **no** — forgetting to annotate fails closed |
+| `passwordHash: f.string({ dto: { response: false } })` | **never** — this is the `@Exclude()` equivalent, and it is mandatory for secrets |
+
+There is deliberately **no name-based heuristic**: a column named
+`apiKey` or `passwordHash` written with an `f.*` helper IS exposed until
+you opt it out. Audit tip: `grep -rn "response: false" src/` lists every
+hidden column in one command.
+
+`f.compute` fields are response-only and are additionally stripped at
+runtime to their declared shape — hidden or undeclared keys of embedded
+rows never serialize.
+
 ### Add role-based access control (opt-in `accessControl`)
 
 ACL is opt-in. Pass the `accessControl` option (type

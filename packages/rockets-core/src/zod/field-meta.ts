@@ -65,12 +65,22 @@ export interface RocketsDbFieldMeta {
  * Per-DTO field roles. Defaults when omitted:
  * - `create` / `update` — `true` unless the field is db-generated
  *   (`generated` / `createdAt` / `updatedAt`).
- * - `response` — always `true`.
+ * - `response` — OPT-IN. A field reaches the response DTO only when it
+ *   says so: every `f.*` helper registers `response: true` for you, and
+ *   base-entity columns (pk / createdAt / updatedAt / deletedAt) expose
+ *   by default. Raw zod without metadata stays OFF the wire — forgetting
+ *   to annotate fails closed. This mirrors the project's classic DTO
+ *   idiom (class-level `@Exclude()` + per-field `@Expose()`), just
+ *   derived from the schema instead of hand-written.
+ *
+ * Secrets: there is deliberately NO name-based heuristic. A credential
+ * column written with an `f.*` helper IS exposed unless you opt it out —
+ * `passwordHash: f.string({ dto: { response: false } })` is mandatory,
+ * exactly like the explicit `@Exclude()` it replaces.
  *
  * Explicit values always win over the derived default, so a
  * server-assigned field can still be opted into create
- * (`{ dto: { create: true } }`) and a secret column can be kept out of
- * responses (`{ dto: { response: false } }`).
+ * (`{ dto: { create: true } }`).
  */
 export interface RocketsDtoFieldMeta {
   readonly create?: boolean;
