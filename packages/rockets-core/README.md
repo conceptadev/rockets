@@ -376,6 +376,8 @@ The response DTO mirrors the project's classic idiom — class-level
 | `id: f.pk()`, `f.createdAt()`, … | yes — base-entity columns expose by default |
 | `legacy: z.string()` (raw zod, no meta) | **no** — forgetting to annotate fails closed |
 | `passwordHash: f.string({ dto: { response: false } })` | **never** — this is the `@Exclude()` equivalent, and it is mandatory for secrets |
+| `userId: f.owner()` | yes — an opaque owner reference, like GitHub's `owner.id` or Stripe's `customer`; the UI needs a stable key to group by author |
+| `userId: f.owner({ dto: { response: false } })` | **no** — opt out where the owner id has no business on the wire (typically `ownerScope: false` resources whose rows are visible to non-owners) |
 
 There is deliberately **no name-based heuristic**: a column named
 `apiKey` or `passwordHash` written with an `f.*` helper IS exposed until

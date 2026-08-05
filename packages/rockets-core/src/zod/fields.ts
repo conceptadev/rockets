@@ -110,18 +110,42 @@ const version = () =>
       dto: { create: false, update: false, response: true },
     });
 
+/** `f.owner` options — only the response role is configurable. */
+interface OwnerOpts {
+  /**
+   * Per-projection DTO roles. Only `response` is honoured: create and
+   * update are decided by the owner-column projection rule (the server
+   * stamps the value; a client-supplied one is rejected), so overriding
+   * them here would be silently ignored.
+   */
+  readonly dto?: Pick<RocketsDtoFieldMeta, 'response'>;
+}
+
 /**
  * Owner column (uuid). Marks the field `{ owner: true }` so the zod
  * resource layer auto-wires `OwnerStampHook` + `OwnerScopeHook` for it.
- * Exposed on the response DTO by default (ownership is part of the
- * public row); still excluded from create/update via the owner-column
- * projection rule. Combine with the resource-level `owner: 'fieldName'`
- * if declared both ways — the two dedupe.
+ * Always excluded from create/update via the owner-column projection
+ * rule. Combine with the resource-level `owner: 'fieldName'` if declared
+ * both ways — the two dedupe.
+ *
+ * **Exposed on the response by default**, matching how mainstream APIs
+ * return an owner reference (GitHub `owner.id`, Stripe `customer`): the
+ * UI needs a stable key to group rows by author and to answer "is this
+ * mine?" without an extra round-trip. The value is an opaque,
+ * non-sequential uuid, so it is not enumerable.
+ *
+ * Opt out where the owner id has no business on the wire — typically a
+ * resource with `ownerScope: false` whose rows are visible to people
+ * other than the owner (public catalogue, shared team board):
+ *
+ * ```ts
+ * userId: f.owner({ dto: { response: false } })
+ * ```
  */
-const owner = () =>
+const owner = (o: OwnerOpts = {}) =>
   z.uuid().register(rocketsFieldMeta, {
     owner: true,
-    dto: { response: true },
+    dto: { response: o.dto?.response ?? true },
   });
 
 // --- Foreign key --------------------------------------------------------

@@ -103,6 +103,41 @@ describe('projectSchema response exposure', () => {
     expect(responseKeys(schema)).toEqual(['id']);
   });
 
+  /**
+   * The owner column ships on the wire by default (stable key for the UI
+   * to group by author / answer "is this mine?"), but a resource whose
+   * rows are visible to non-owners can hide it.
+   */
+  it('f.owner() is exposed by default and stays out of create/update', () => {
+    const schema = z.object({ id: f.pk(), userId: f.owner() });
+    const owners = new Set(['userId']);
+    const { response, create, update } = projectSchema(
+      'Pet',
+      schema,
+      entity,
+      owners,
+    );
+
+    expect(Object.keys(response)).toContain('userId');
+    expect(Object.keys(create)).not.toContain('userId');
+    expect(Object.keys(update)).not.toContain('userId');
+  });
+
+  it('f.owner({ dto: { response: false } }) keeps the owner id off the wire', () => {
+    const schema = z.object({
+      id: f.pk(),
+      userId: f.owner({ dto: { response: false } }),
+    });
+    const { response } = projectSchema(
+      'Pet',
+      schema,
+      entity,
+      new Set(['userId']),
+    );
+
+    expect(Object.keys(response)).toEqual(['id']);
+  });
+
   it('f.* scalars opt into the response DTO by default', () => {
     const schema = z.object({
       id: f.pk(),
