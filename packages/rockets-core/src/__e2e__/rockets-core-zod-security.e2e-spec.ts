@@ -103,11 +103,32 @@ class NoteEntity {
   @UpdateDateColumn() dateUpdated!: Date;
 }
 
+/**
+ * Compute element schema carrying a hidden column — the PR-review repro:
+ * the compute callback returns rows that include `internalNote`
+ * (response: false) plus a key never declared at all. Neither may reach
+ * the wire, while the computed field itself MUST (a regression once
+ * dropped the whole field silently).
+ */
+const noteRefShape = z.object({
+  label: f.string(),
+  internalNote: f.string({ dto: { response: false } }),
+});
+
 const noteSchema = baseEntity({
   title: f.string(),
   /** Write-only — must stay out of the response DTO (HIGH CWE-200). */
   internalNote: f.string({ dto: { response: false } }),
   userId: f.owner(),
+  refs: f
+    .compute(z.array(noteRefShape), (row) => [
+      {
+        label: `ref-${String(row.title)}`,
+        internalNote: 'compute-must-not-leak',
+        undeclaredColumn: 'undeclared-must-not-leak',
+      },
+    ])
+    .optional(),
 });
 
 const noteResource = zodResource({
@@ -206,6 +227,31 @@ describe('zod security HIGHs (e2e RED) — owner scope + response exposure', () 
       expect(responseSchemaKeys(noteResource.zod.dtos.response)).not.toContain(
         'internalNote',
       );
+    });
+
+    /**
+     * Wire-level proof for the computed-field projection (PR-review HIGH):
+     * the field must be PRESENT (a rebuilt schema once lost its meta
+     * registration and the field vanished from responses entirely) and
+     * must carry only declared, non-hidden keys — through the real
+     * serializer pipeline, not plainToInstance in isolation.
+     */
+    it('computed field reaches the wire minus hidden and undeclared keys', async () => {
+      const created = await request(app.getHttpServer())
+        .post('/notes')
+        .set('Authorization', 'Bearer u1')
+        .send({ title: 'compute-check', internalNote: 'x' })
+        .expect(201);
+
+      const read = await request(app.getHttpServer())
+        .get(`/notes/${created.body.id}`)
+        .set('Authorization', 'Bearer u1')
+        .expect(200);
+
+      expect(read.body.refs).toEqual([{ label: 'ref-compute-check' }]);
+      const ref = (read.body.refs as Record<string, unknown>[])[0];
+      expect(ref).not.toHaveProperty('internalNote');
+      expect(ref).not.toHaveProperty('undeclaredColumn');
     });
 
     it('HTTP create/read responses omit internalNote', async () => {
