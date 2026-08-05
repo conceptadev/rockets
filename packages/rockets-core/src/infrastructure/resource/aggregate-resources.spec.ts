@@ -32,7 +32,7 @@ class PetEntity {
   // `keyof PetEntity`, so tests declare these as relation properties.
   tags?: AuditEntity[];
   subs?: AuditEntity[];
-  a?: AuditEntity[];
+  a?: VaccinationEntity[];
 }
 
 @Entity('vaccinations_t')

@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "module": "preserve",
+    "moduleResolution": "bundler"
+  },
+  "include": [
+    "packages/*/src/**/*.spec.ts",
+    "packages/*/src/**/*.e2e-spec.ts",
+    "packages/*/src/**/__e2e__/**/*.ts",
+    "packages/*/src/**/__fixtures__/**/*.ts",
+    "examples/*/test/**/*.ts",
+    "examples/sample-code-review/apps/api/test/**/*.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

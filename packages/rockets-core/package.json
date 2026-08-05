@@ -50,9 +50,9 @@
     "build": "tsc -p tsconfig.json",
     "prepack": "yarn run -T clean && yarn run -T build",
     "build:watch": "tsc -p tsconfig.json --watch",
-    "test": "cd ../.. && ./node_modules/.bin/vitest run packages/rockets-core",
+    "test": "cd ../.. && ./node_modules/.bin/vitest run --project unit packages/rockets-core",
     "test:typetests": "node ../../node_modules/typescript/bin/tsc --noEmit -p tsconfig.typetest.json",
-    "test:e2e": "cd ../.. && ./node_modules/.bin/vitest run --config vitest.e2e.config.ts packages/rockets-core"
+    "test:e2e": "cd ../.. && ./node_modules/.bin/vitest run --project e2e-packages packages/rockets-core"
   },
   "dependencies": {
     "@concepta/nestjs-access-control": "8.0.0-alpha.8",

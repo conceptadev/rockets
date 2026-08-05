@@ -10,7 +10,7 @@ are environment/isolation, not logic — separate the two before editing source.
 
 ## First: is it mine, pre-existing, or flaky?
 
-1. Run the failing suite **in isolation**: `corepack yarn vitest run --config vitest.e2e.config.ts "<suite-path>"`.
+1. Run the failing suite **in isolation**: `corepack yarn vitest run --project e2e-packages "<suite-path>"`.
    Passes alone but fails in the full run → see the known rotating-404 flake in CHANGELOG.md before digging.
 2. Establish a baseline with `git stash` (keep node_modules) and re-run the suite. Same failure on clean HEAD
    → pre-existing, not your regression. Say so explicitly; do not "fix" pre-existing breakage silently.

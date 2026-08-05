@@ -34,16 +34,18 @@ describe('Auth & Me Endpoints (e2e)', () => {
 
     await app.init();
 
-    // Seed required roles via CQRS (same pattern as role-based-access test)
+    // Seed required roles via CQRS (same pattern as role-based-access test).
+    // `ctx` is typed `PlainLiteralObject`; `{}` yields the same fresh
+    // `AppContextHost` that `null` produced.
     const commandBus = app.get(CommandBus);
     await commandBus.execute(
-      new CreateRoleCommand(null, ROLE_CRUD_ENTITY_KEY, {
+      new CreateRoleCommand({}, ROLE_CRUD_ENTITY_KEY, {
         name: 'admin',
         description: 'Administrator',
       }),
     );
     await commandBus.execute(
-      new CreateRoleCommand(null, ROLE_CRUD_ENTITY_KEY, {
+      new CreateRoleCommand({}, ROLE_CRUD_ENTITY_KEY, {
         name: 'user',
         description: 'Default user role',
       }),
@@ -223,7 +225,7 @@ describe('Auth & Me Endpoints (e2e)', () => {
         // Assign admin role
         await commandBus.execute(
           new AssignRoleCommand(
-            null,
+            {},
             USER_ROLE_ENTITY_KEY,
             adminRole.id,
             adminUserId,

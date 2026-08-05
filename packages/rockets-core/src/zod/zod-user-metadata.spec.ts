@@ -22,12 +22,14 @@ describe('defineZodUserMetadata projections', () => {
     },
   };
 
-  const dtoKeys = (dto: Type<object>): string[] => {
-    const schema = (dto as unknown as { schema?: z.ZodObject }).schema;
-    if (schema === undefined) {
+  /** nestjs-zod DTO classes carry the compiled schema as a STATIC property. */
+  type ZodDtoClass = Type<object> & { readonly schema?: z.ZodObject };
+
+  const dtoKeys = (dto: ZodDtoClass | undefined): string[] => {
+    if (dto?.schema === undefined) {
       throw new Error('expected a nestjs-zod DTO with .schema');
     }
-    return Object.keys(schema.shape);
+    return Object.keys(dto.schema.shape);
   };
 
   const build = (extra: Record<string, z.ZodType>) =>
@@ -35,7 +37,7 @@ describe('defineZodUserMetadata projections', () => {
       auditableEntity({
         userId: f.string({ max: 255 }),
         ...extra,
-      }) as z.ZodObject,
+      }),
       { entityCompiler },
     );
 

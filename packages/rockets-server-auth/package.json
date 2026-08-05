@@ -68,11 +68,11 @@
     "build": "tsc -p tsconfig.json",
     "prepack": "yarn run -T clean && yarn run -T build",
     "build:watch": "tsc -p tsconfig.json --watch",
-    "test": "cd ../.. && ./node_modules/.bin/vitest run packages/rockets-server-auth",
-    "test:watch": "cd ../.. && ./node_modules/.bin/vitest packages/rockets-server-auth",
-    "test:e2e": "cd ../.. && ./node_modules/.bin/vitest run --config vitest.e2e.config.ts packages/rockets-server-auth",
-    "test:e2e:cov": "cd ../.. && ./node_modules/.bin/vitest run --config vitest.e2e.config.ts --coverage packages/rockets-server-auth",
-    "test:cov": "cd ../.. && ./node_modules/.bin/vitest run --coverage packages/rockets-server-auth",
+    "test": "cd ../.. && ./node_modules/.bin/vitest run --project unit packages/rockets-server-auth",
+    "test:watch": "cd ../.. && ./node_modules/.bin/vitest --project unit packages/rockets-server-auth",
+    "test:e2e": "cd ../.. && ./node_modules/.bin/vitest run --project e2e-packages packages/rockets-server-auth",
+    "test:e2e:cov": "cd ../.. && ./node_modules/.bin/vitest run --project e2e-packages --coverage packages/rockets-server-auth",
+    "test:cov": "cd ../.. && ./node_modules/.bin/vitest run --project unit --coverage packages/rockets-server-auth",
     "generate-swagger": "ts-node src/generate-swagger.ts"
   },
   "dependencies": {

@@ -1,7 +1,7 @@
 {
   "name": "@conceptadev/rockets",
   "version": "0.0.1-dev.0",
-  "description": "Rockets server — external-auth composition layer: AuthAdapterInterface, /me, declarative CRUD resources, and database-agnostic persistence",
+  "description": "Rockets server \u2014 external-auth composition layer: AuthAdapterInterface, /me, declarative CRUD resources, and database-agnostic persistence",
   "author": "Thiago Ramalho <thiago.ramalho@concepta.com>",
   "license": "BSD-3-Clause",
   "main": "dist/index.js",
@@ -68,11 +68,11 @@
     "build": "tsc -p tsconfig.json",
     "prepack": "yarn run -T clean && yarn run -T build",
     "build:watch": "tsc -p tsconfig.json --watch",
-    "test": "cd ../.. && ./node_modules/.bin/vitest run packages/rockets-server",
-    "test:watch": "cd ../.. && ./node_modules/.bin/vitest packages/rockets-server",
-    "test:e2e": "cd ../.. && ./node_modules/.bin/vitest run --config vitest.e2e.config.ts packages/rockets-server",
-    "test:e2e:cov": "cd ../.. && ./node_modules/.bin/vitest run --config vitest.e2e.config.ts --coverage packages/rockets-server",
-    "test:cov": "cd ../.. && ./node_modules/.bin/vitest run --coverage packages/rockets-server",
+    "test": "cd ../.. && ./node_modules/.bin/vitest run --project unit packages/rockets-server",
+    "test:watch": "cd ../.. && ./node_modules/.bin/vitest --project unit packages/rockets-server",
+    "test:e2e": "cd ../.. && ./node_modules/.bin/vitest run --project e2e-packages packages/rockets-server",
+    "test:e2e:cov": "cd ../.. && ./node_modules/.bin/vitest run --project e2e-packages --coverage packages/rockets-server",
+    "test:cov": "cd ../.. && ./node_modules/.bin/vitest run --project unit --coverage packages/rockets-server",
     "generate-swagger": "ts-node src/generate-swagger.ts"
   },
   "dependencies": {

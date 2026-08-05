@@ -28,6 +28,7 @@ import type {
   AuthAttemptResult,
   AuthRequest,
 } from '../domain/interfaces/auth-adapter.interface';
+import type { AuthorizedUser } from '../domain/interfaces/auth-user.interface';
 import { extractBearerToken } from '../infrastructure/auth/extract-bearer-token';
 import { RocketsCoreModule } from '../rockets-core.module';
 import { USER_METADATA_MODULE_ENTITY_KEY } from '../rockets-core.constants';
@@ -46,13 +47,21 @@ class RoleAuthProvider implements AuthAdapterInterface {
     if (token === 'admin') {
       return {
         matched: true,
-        user: { id: 'admin-1', sub: 'admin-1', roles: ['admin'] },
+        user: {
+          id: 'admin-1',
+          sub: 'admin-1',
+          userRoles: [{ role: { name: 'admin' } }],
+        },
       };
     }
     if (token === 'user') {
       return {
         matched: true,
-        user: { id: 'user-1', sub: 'user-1', roles: ['user'] },
+        user: {
+          id: 'user-1',
+          sub: 'user-1',
+          userRoles: [{ role: { name: 'user' } }],
+        },
       };
     }
     return { matched: true, error: new UnauthorizedException() };
@@ -64,10 +73,10 @@ class AcService implements AccessControlServiceInterface {
     return context.switchToHttp().getRequest().user;
   }
   async getUserRoles(context: ExecutionContext): Promise<string | string[]> {
-    const user = context.switchToHttp().getRequest().user as {
-      roles?: string[];
-    };
-    return user?.roles ?? [];
+    const user = context.switchToHttp().getRequest().user as
+      | Pick<AuthorizedUser, 'userRoles'>
+      | undefined;
+    return user?.userRoles?.map((userRole) => userRole.role.name) ?? [];
   }
 }
 

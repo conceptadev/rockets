@@ -1,6 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import type { PlainLiteralObject, Type } from '@nestjs/common';
-import { OwnerScopeHook, OwnerStampHook } from '../index';
+import {
+  EntityHook,
+  OwnerScopeHook,
+  OwnerStampHook,
+  PassthroughEntityHookBase,
+} from '../index';
 import { applyOwnerHooks } from './zod-resource-composition';
 
 describe('applyOwnerHooks', () => {
@@ -59,8 +64,11 @@ describe('applyOwnerHooks', () => {
   });
 
   it('returns the user hooks untouched when there is no owner column', () => {
-    class CustomHook {}
-    const userHooks = [CustomHook as Type<PlainLiteralObject>];
+    // `applyOwnerHooks` is typed at the `PlainLiteralObject` altitude, so
+    // the fixture hook is parameterized the same way.
+    @EntityHook()
+    class CustomHook extends PassthroughEntityHookBase<PlainLiteralObject> {}
+    const userHooks = [CustomHook];
 
     const hooks = applyOwnerHooks(
       entity,
@@ -75,8 +83,11 @@ describe('applyOwnerHooks', () => {
   });
 
   it('preserves user hooks after the auto-wired owner hooks', () => {
-    class CustomHook {}
-    const userHooks = [CustomHook as Type<PlainLiteralObject>];
+    // `applyOwnerHooks` is typed at the `PlainLiteralObject` altitude, so
+    // the fixture hook is parameterized the same way.
+    @EntityHook()
+    class CustomHook extends PassthroughEntityHookBase<PlainLiteralObject> {}
+    const userHooks = [CustomHook];
 
     const hooks = applyOwnerHooks(
       entity,

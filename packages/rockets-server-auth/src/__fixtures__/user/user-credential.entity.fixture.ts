@@ -4,8 +4,10 @@ import { AuditedSqliteEntityFixture } from '../persistence/audited-sqlite.entity
 
 @Entity()
 export class UserCredentialEntityFixture extends AuditedSqliteEntityFixture {
-  @Column({ type: 'text', nullable: true })
-  passwordHash?: string;
+  // `PasswordStorageInterface.passwordHash` is required — a credential row
+  // only exists once a password has been stored.
+  @Column({ type: 'text' })
+  passwordHash!: string;
 
   @Column({ type: 'text', nullable: true })
   passwordSalt?: string;

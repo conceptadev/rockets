@@ -289,8 +289,9 @@ providers, or `--no-verify`. If stuck, the rule is to **ask**, not work around.
 **Testing policy.** E2E/integration is the **default**, not the exception: new
 tests are `*.e2e-spec.ts` (real Nest app + supertest + SQLite) unless a unit test
 is specifically justified. Coverage target ≥80% statements/lines via
-`yarn test:e2e:cov`. The runner is **Vitest 4** (`vitest.config.ts` units,
-`vitest.e2e.config.ts` e2e; `pool: 'forks'` = fresh process per spec file;
+`yarn test:e2e:cov`. The runner is **Vitest 4** in the `projects` model (root
+`vitest.config.ts` declares unit/e2e/example projects, `vitest.shared.ts`
+holds the common settings; `pool: 'forks'` = fresh process per spec file;
 `unplugin-swc` supplies the decorator metadata Nest DI needs; `globals` off —
 tests import from 'vitest' explicitly). There is no `scripts/` directory and
 no Jest anywhere. A known pre-existing rotating-404 full-run flake is

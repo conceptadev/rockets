@@ -1,7 +1,7 @@
 {
   "name": "@conceptadev/rockets-adapter-firebase",
   "version": "0.0.1-dev.0",
-  "description": "Firebase Authentication adapter for Rockets — implements AuthAdapterInterface from @conceptadev/rockets-core, validates Firebase ID tokens, maps to AuthorizedUser",
+  "description": "Firebase Authentication adapter for Rockets \u2014 implements AuthAdapterInterface from @conceptadev/rockets-core, validates Firebase ID tokens, maps to AuthorizedUser",
   "author": "Thiago Ramalho <thiago.ramalho@concepta.com>",
   "license": "BSD-3-Clause",
   "main": "dist/index.js",
@@ -38,7 +38,7 @@
     "build": "tsc -p tsconfig.json",
     "prepack": "yarn run -T clean && yarn run -T build",
     "build:watch": "tsc -p tsconfig.json --watch",
-    "test": "cd ../.. && ./node_modules/.bin/vitest run packages/rockets-adapter-firebase"
+    "test": "cd ../.. && ./node_modules/.bin/vitest run --project unit packages/rockets-adapter-firebase"
   },
   "dependencies": {
     "@conceptadev/rockets-core": "workspace:^",

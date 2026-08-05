@@ -1,7 +1,7 @@
 {
   "name": "@conceptadev/rockets-repository-firestore",
   "version": "0.0.1-dev.0",
-  "description": "Firestore repository adapter for Rockets — implements RepositoryModuleInterface and RepositoryAdapter from @concepta/nestjs-repository",
+  "description": "Firestore repository adapter for Rockets \u2014 implements RepositoryModuleInterface and RepositoryAdapter from @concepta/nestjs-repository",
   "author": "Thiago Ramalho <thiago.ramalho@concepta.com>",
   "license": "BSD-3-Clause",
   "main": "dist/index.js",
@@ -36,7 +36,7 @@
     "build": "tsc -p tsconfig.json",
     "prepack": "yarn run -T clean && yarn run -T build",
     "build:watch": "tsc -p tsconfig.json --watch",
-    "test": "cd ../.. && ./node_modules/.bin/vitest run packages/rockets-repository-firestore"
+    "test": "cd ../.. && ./node_modules/.bin/vitest run --project unit packages/rockets-repository-firestore"
   },
   "dependencies": {
     "@concepta/nestjs-core": "8.0.0-alpha.8",

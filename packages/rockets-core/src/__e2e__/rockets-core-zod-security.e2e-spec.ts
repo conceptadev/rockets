@@ -18,7 +18,7 @@ import {
   INestApplication,
   Injectable,
   Module,
-  type PlainLiteralObject,
+  type Type,
   UnauthorizedException,
 } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
@@ -119,7 +119,10 @@ const noteResource = zodResource({
   operations: ['list', 'read', 'create'],
 });
 
-function responseSchemaKeys(dto: { readonly schema?: z.ZodObject }): string[] {
+/** nestjs-zod DTO classes carry the compiled schema as a STATIC property. */
+type ZodDtoClass = Type<object> & { readonly schema?: z.ZodObject };
+
+function responseSchemaKeys(dto: ZodDtoClass): string[] {
   const schema = dto.schema;
   if (schema === undefined) {
     throw new Error('expected nestjs-zod DTO with .schema');
@@ -232,7 +235,7 @@ class SecParentEntity {
   @PrimaryGeneratedColumn('uuid') id!: string;
   @Column({ type: 'varchar' }) name!: string;
   @Column({ type: 'varchar' }) userId!: string;
-  children?: unknown[];
+  children?: SecChildEntity[];
 }
 
 @Entity('sec_children')
@@ -261,7 +264,7 @@ class SecChildResponseDto {
 
 @EntityHook()
 @Injectable()
-class CustomChildHook extends PassthroughEntityHookBase<PlainLiteralObject> {}
+class CustomChildHook extends PassthroughEntityHookBase<SecChildEntity> {}
 
 const ParentOwnerStamp = OwnerStampHook.for(SecParentEntity);
 

@@ -62,4 +62,8 @@ export type { RocketsAuthRoleUpdatableInterface } from './domains/role/interface
 export type { RocketsAuthRoleEntityInterface } from './domains/role/interfaces/rockets-auth-role-entity.interface';
 export type { RocketsAuthUserMetadataEntityInterface } from './domains/user/interfaces/rockets-auth-user-metadata-entity.interface';
 export type { RocketsAuthUserMetadataCreatableInterface } from './domains/user/interfaces/rockets-auth-user-metadata-creatable.interface';
+export type {
+  RocketsAuthUserMetadataUpdatableInterface,
+  RocketsAuthUserMetadataModelUpdatableInterface,
+} from './domains/user/interfaces/rockets-auth-user-metadata-updatable.interface';
 export type { RocketsAuthUserMetadataRequestInterface } from './domains/user/interfaces/rockets-auth-user-metadata-request.interface';

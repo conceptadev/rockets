@@ -30,6 +30,8 @@ jobs:
         run: yarn build
       - name: Linting
         run: yarn lint:all
+      - name: Typecheck tests
+        run: yarn typecheck:spec
       - name: Unit tests
         run: yarn test:ci
       - name: E2E coverage

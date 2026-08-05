@@ -1,29 +1,17 @@
 import path from 'node:path';
-import swc from 'unplugin-swc';
-import { defineConfig } from 'vitest/config';
+import { defineProject, mergeConfig } from 'vitest/config';
+import shared from '../../../../vitest.shared';
 
 /**
- * E2E runner for the sample-code-review API. Mirrors the root
- * `vitest.e2e.config.ts`. The Jest `moduleNameMapper` stub swap (real
+ * E2E project for the sample-code-review API — registered in the root
+ * `vitest.config.ts` `projects` list and runnable standalone via
+ * `--config` from the workspace. The Jest `moduleNameMapper` stub swap (real
  * Firestore persistence -> in-memory backend stub) is ported as a regex
  * alias below.
  */
-export default defineConfig({
-  plugins: [
-    // Vitest's default esbuild transform does not emit decorator metadata,
-    // which Nest DI requires; SWC does when configured below.
-    swc.vite({
-      jsc: {
-        parser: { syntax: 'typescript', decorators: true },
-        transform: {
-          legacyDecorator: true,
-          decoratorMetadata: true,
-        },
-        target: 'es2021',
-      },
-      module: { type: 'es6' },
-    }),
-  ],
+export default mergeConfig(
+  shared,
+  defineProject({
   resolve: {
     alias: [
       {
@@ -39,9 +27,8 @@ export default defineConfig({
     ],
   },
   test: {
-    globals: false,
-    environment: 'node',
-    pool: 'forks',
+    name: 'e2e-sample-code-review',
+    sequence: { groupOrder: 4 },
     testTimeout: 30_000,
     hookTimeout: 30_000,
     // The Jest config ran with maxWorkers: 1; keep sequential execution.
@@ -50,4 +37,5 @@ export default defineConfig({
     include: ['test/**/*.e2e-spec.ts'],
     exclude: ['**/node_modules/**', '**/dist/**'],
   },
-});
+}),
+);

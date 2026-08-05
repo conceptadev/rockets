@@ -5,6 +5,7 @@ import {
   type ExecutionContext,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { ExecutionContextHost } from '@nestjs/core/helpers/execution-context-host';
 import { CrudValidate } from '@concepta/nestjs-crud';
 import { lastValueFrom, of } from 'rxjs';
 import { ZodBodyValidationInterceptor } from './zod-body-validation.interceptor';
@@ -125,26 +126,8 @@ describe('ZodBodyValidationInterceptor', () => {
   }
 
   function createContext(req: { body?: unknown }): ExecutionContext {
-    return {
-      getClass: () => target,
-      getHandler: () => handler,
-      switchToHttp: () => ({
-        getRequest: <T = typeof req>() => req as T,
-        getResponse: <T = unknown>() => undefined as T,
-        getNext: <T = unknown>() => undefined as T,
-      }),
-      switchToRpc: () => ({
-        getContext: <T = unknown>() => undefined as T,
-        getData: <T = unknown>() => undefined as T,
-      }),
-      switchToWs: () => ({
-        getClient: <T = unknown>() => undefined as T,
-        getData: <T = unknown>() => undefined as T,
-        getPattern: () => undefined,
-      }),
-      getArgs: <T extends Array<unknown> = Array<unknown>>() => [] as T,
-      getArgByIndex: <T = unknown>() => undefined as T,
-      getType: () => 'http',
-    };
+    // Nest's real context host (defaults to the 'http' type) avoids
+    // hand-mocking ExecutionContext's generic methods.
+    return new ExecutionContextHost([req], target, handler);
   }
 });

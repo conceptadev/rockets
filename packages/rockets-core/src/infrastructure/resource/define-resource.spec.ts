@@ -1281,7 +1281,7 @@ describe('defineResource', () => {
 
       @EntityHook()
       @Injectable()
-      class CustomPartHook extends PassthroughEntityHookBase<PlainLiteralObject> {}
+      class CustomPartHook extends PassthroughEntityHookBase<PartEntity> {}
 
       class CustomProvider {}
 

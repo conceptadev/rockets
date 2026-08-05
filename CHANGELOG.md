@@ -19,6 +19,17 @@ Vitest 4. What this deletes, permanently:
   babel-jest/jest-junit/jest-extended/jest-mock-extended/@types/jest
   dependency. The root `scripts/` directory no longer exists.
 
+The setup follows Vitest 4's official monorepo guidance — the
+`projects` model: the root `vitest.config.ts` declares every project
+(`unit`, `e2e-packages`, one per example workspace) and
+`vitest.shared.ts` carries the shared plugin/settings (deliberately not
+the root config — merging a projects-bearing config into a project is a
+documented pitfall). Example configs are `defineProject` +
+`mergeConfig(shared, …)`; one SWC block exists instead of five.
+Coverage and reporters live at root (root-only by design); coverage
+thresholds are asserted per run by the unit-gate scripts, because the
+e2e coverage run was historically threshold-free.
+
 Decorator metadata (NestJS DI) is emitted by `unplugin-swc` — esbuild,
 Vitest's default transform, cannot emit it. Test files import their API
 explicitly (`import { describe, it, expect, vi } from 'vitest'`);
@@ -26,7 +37,20 @@ explicitly (`import { describe, it, expect, vi } from 'vitest'`);
 typings. Test counts match the Jest baselines exactly: units 62 files /
 572 tests, package e2e 30 / 156, samples 8/194 + 2/40 + 4 files/9 tests.
 CI junit + lcov + json artifacts are produced at the same paths as
-before. Migration incidentally fixed two latent defects: the
+before.
+
+Test files are now actually type-checked (`yarn typecheck:spec`, wired
+into CI): ts-jest ran with `isolatedModules` and therefore only
+transpiled, so spec files were never seen by the compiler — under SWC
+that stayed true. The new gate surfaced 42 latent type errors across 19
+files on its first run (stale fixtures importing upstream members that
+no longer exist, alpha.8 entity-contract drift in the e2e factory
+fixtures, deep `dist/` imports blocked by upstream exports maps, and
+under-typed test doubles), all fixed rather than suppressed. Two
+interfaces that consumers legitimately need
+(`EmailSendOptionsInterface`, `RocketsAuthUserMetadataModelUpdatableInterface`)
+are now exported from `@conceptadev/rockets-auth`'s public index instead
+of being reachable only through `dist/` paths. Migration incidentally fixed two latent defects: the
 sample-code-review Jest config had lost its `setupFiles` wiring (its
 FIREBASE_PROJECT_ID default never applied), and a lazy-`require` cycle
 workaround in `rockets-auth-handler-overrides.spec.ts` became typed

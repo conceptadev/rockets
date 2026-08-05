@@ -7,13 +7,15 @@ description: Build, test, and lint commands for the project
 Run checks in this order after code changes:
 
 1. `yarn build`
-2. `yarn test`
-3. `yarn test:e2e`
-4. `yarn lint`
+2. `yarn typecheck:spec` — type-checks all test files (the runner only
+   transpiles; without this, spec type errors ship silently)
+3. `yarn test`
+4. `yarn test:e2e`
+5. `yarn lint`
 
-CI also runs: `yarn lint:all`, `yarn test:ci`
+CI also runs: `yarn lint:all`, `yarn typecheck:spec`, `yarn test:ci`
 
-Coverage: `yarn test:e2e:cov` (root `vitest.e2e.config.ts` + `--coverage`).
+Coverage: `yarn test:e2e:cov` (the `e2e-packages` project + `--coverage`).
 
 # Testing Strategy
 
@@ -29,9 +31,11 @@ with `supertest` are the primary way to verify behavior in this project.
 
 ## Test Runner: Vitest
 
-The monorepo tests under **Vitest 4** (`vitest.config.ts` for units,
-`vitest.e2e.config.ts` for package e2e; each example workspace carries its
-own `vitest.e2e.config.ts`). Key facts:
+The monorepo tests under **Vitest 4** using the `projects` model: the
+root `vitest.config.ts` declares every project (`unit`, `e2e-packages`,
+and one per example workspace); `vitest.shared.ts` carries the common
+plugin/settings. Select with `--project <name>`; `vitest run` with no
+filter runs everything (requires `yarn build` first). Key facts:
 
 - Decorator metadata (Nest DI) comes from `unplugin-swc` — esbuild cannot
   emit it. Never remove the swc plugin from a config.

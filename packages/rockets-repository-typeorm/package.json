@@ -48,7 +48,7 @@
     "build": "tsc -p tsconfig.json",
     "prepack": "yarn run -T clean && yarn run -T build",
     "build:watch": "tsc -p tsconfig.json --watch",
-    "test": "cd ../.. && ./node_modules/.bin/vitest run packages/rockets-repository-typeorm"
+    "test": "cd ../.. && ./node_modules/.bin/vitest run --project unit packages/rockets-repository-typeorm"
   },
   "dependencies": {
     "@concepta/nestjs-repository-typeorm": "8.0.0-alpha.8",

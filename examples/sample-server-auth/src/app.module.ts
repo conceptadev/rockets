@@ -4,9 +4,9 @@ import {
   buildRocketsAuthResources,
   defineRocketsAuth,
   type DefineRocketsAuthInput,
+  type EmailSendOptionsInterface,
 } from '@conceptadev/rockets-auth';
 import { RocketsModule } from '@conceptadev/rockets';
-import type { EmailSendOptionsInterface } from '@concepta/nestjs-common/dist/domain/email/interfaces/email-send-options.interface';
 
 import { ACService } from './access-control.service';
 import { acRules } from './app.acl';

@@ -85,8 +85,8 @@ class ParentEntity {
   @DeleteDateColumn() dateDeleted?: Date;
   // Phantom relation properties — typed only; defineSubResource keys
   // must satisfy `keyof Parent`. The actual joins live on the child.
-  children?: unknown[];
-  childrenNoReload?: unknown[];
+  children?: ChildEntity[];
+  childrenNoReload?: ChildNoReloadEntity[];
 }
 
 @Entity('children')

@@ -1,37 +1,25 @@
-import swc from 'unplugin-swc';
-import { defineConfig } from 'vitest/config';
+import { defineProject, mergeConfig } from 'vitest/config';
+import shared from '../../vitest.shared';
 
 /**
- * E2E runner for the sample-server-auth example. Mirrors the root
- * `vitest.e2e.config.ts`. The former Jest `moduleNameMapper` entries are not
- * ported: workspace packages (`@conceptadev/*`) resolve to their built `dist`
+ * E2E project for the sample-server-auth example — registered in the root
+ * `vitest.config.ts` `projects` list and runnable standalone via
+ * `--config` from the workspace. The former Jest `moduleNameMapper`
+ * entries are not ported: workspace packages (`@conceptadev/*`) resolve to their built `dist`
  * through normal node resolution, and the `@nestjs/*` / `@concepta/*` /
  * `typeorm` mappings only replicated hoisting that node resolution already
  * provides.
  */
-export default defineConfig({
-  plugins: [
-    // Vitest's default esbuild transform does not emit decorator metadata,
-    // which Nest DI requires; SWC does when configured below.
-    swc.vite({
-      jsc: {
-        parser: { syntax: 'typescript', decorators: true },
-        transform: {
-          legacyDecorator: true,
-          decoratorMetadata: true,
-        },
-        target: 'es2021',
-      },
-      module: { type: 'es6' },
-    }),
-  ],
+export default mergeConfig(
+  shared,
+  defineProject({
   test: {
-    globals: false,
-    environment: 'node',
-    pool: 'forks',
+    name: 'e2e-sample-server-auth',
+    sequence: { groupOrder: 3 },
     testTimeout: 30_000,
     hookTimeout: 30_000,
     include: ['test/**/*.e2e-spec.ts'],
     exclude: ['**/node_modules/**', '**/dist/**'],
   },
-});
+}),
+);
