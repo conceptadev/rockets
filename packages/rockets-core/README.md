@@ -386,6 +386,54 @@ hidden column in one command.
 runtime to their declared shape — hidden or undeclared keys of embedded
 rows never serialize.
 
+#### Custom row scoping (group / dealer / tenant) — opt-in, never default
+
+Owner scoping (`f.owner()` → rows filtered by `actor.id`) is the only
+scoping the framework wires automatically. Anything richer — "dealer
+users see every row of _their_ dealer", tenant columns, shared-access
+rules — is deliberately **opt-in, written by the consumer**. The
+pieces:
+
+1. **Carry the group id on the actor.** Your auth adapter owns this:
+   put it in `Actor.metadata` (the designated free-form bag —
+   `{ dealerId: 'dealer-7' }`), sourced from a token claim or a DB
+   lookup.
+2. **Write a scope hook** (~20 lines). `ownerScope: false` turns the
+   per-user filter off; your hook takes its place:
+
+   ```ts
+   @EntityHook({ entity: UserEntity })
+   @Injectable()
+   export class DealerScopeHook extends PassthroughEntityHookBase<PlainLiteralObject> {
+     override async beforeFindAndCount(options, ctx?) {
+       const dealerId = getActor(ctx)?.metadata?.dealerId;
+       return withAndWhere(options, Where.eq('dealerId', dealerId));
+     }
+     // beforeFindOne likewise — read/update/delete route through it.
+   }
+
+   zodResource({
+     name: 'User',
+     schema: userSchema,      // declares the dealerId column
+     ownerScope: false,       // off: per-user; on duty: per-dealer
+     hooks: [DealerScopeHook],
+   });
+   ```
+
+   Working references, both shipped in `examples/sample-server`:
+   `reminder-owner-scope.hook.ts` (indirect ownership through a parent
+   row) and `pet-owner-or-shared.hook.ts` (owner OR share-grant).
+3. **Admin sees everything via a separate surface**, not a bypass:
+   `/admin/users` behind an `AdminGuard`, backed by a service that
+   injects the repository directly (no scope hook). See
+   `examples/sample-server/src/admin/`. Hooks never learn about roles —
+   the actor they receive is narrowed to `{ id, type, metadata }` on
+   purpose, so authorization stays in guards.
+
+A declarative version of this recipe (scope policies + ACL-possession
+bypass) is under discussion:
+<https://github.com/btwld/rockets/discussions/32>.
+
 ### Add role-based access control (opt-in `accessControl`)
 
 ACL is opt-in. Pass the `accessControl` option (type
