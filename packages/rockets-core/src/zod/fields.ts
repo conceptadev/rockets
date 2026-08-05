@@ -237,16 +237,44 @@ const enumField = <const T extends Record<string, string>>(
 };
 
 /**
+ * The declared wire shape, relaxed where persistence legitimately
+ * differs from it: any key documented as a `string` may also arrive as a
+ * `Date`, because computed fields routinely re-emit rows loaded by the
+ * ORM (`f.createdAt()` documents an ISO string; TypeORM hands back a
+ * `Date`, and the serializer converts it downstream).
+ *
+ * Everything else stays strict, which is the point: a hand-built object
+ * with the wrong type on a key, or a key read from a property that does
+ * not exist on the source row, fails to COMPILE instead of silently
+ * shipping `42` where the schema promised a string, or `undefined` where
+ * it promised a value.
+ */
+type ComputeResult<T> = T extends string
+  ? string | Date
+  : T extends ReadonlyArray<infer E>
+  ? ReadonlyArray<ComputeResult<E>>
+  : T extends object
+  ? { readonly [K in keyof T]: ComputeResult<T[K]> }
+  : T;
+
+/**
  * Response-only COMPUTED field. `fn` receives the raw row (after eager
  * relations load) and returns the projected value; the passed `schema`
  * documents its shape in OpenAPI. The `row` parameter is typed here, so
  * the callback needs no annotation — unlike a raw
  * `.register(rocketsFieldMeta, { compute })` inside a generic composer,
  * where contextual typing breaks and forces a manual `row` type.
+ *
+ * The RETURN is checked against {@link ComputeResult} of the schema:
+ * TypeScript is the contract for value types, and the runtime strip in
+ * `compileDtoClass` is the contract for which KEYS may ship. Undeclared
+ * keys are removed at serialization time (they cannot leak); wrong value
+ * types are caught in the editor (runtime `parse` would reject the
+ * legitimate `Date` case above).
  */
 const compute = <T extends z.ZodType>(
   schema: T,
-  fn: (row: Readonly<Record<string, unknown>>) => unknown,
+  fn: (row: Readonly<Record<string, unknown>>) => ComputeResult<z.output<T>>,
 ): T => {
   registerFieldMeta(schema, { compute: fn });
   return schema;

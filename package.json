@@ -151,7 +151,7 @@
     "codacy:analyze:fix": ".codacy/cli.sh analyze --fix",
     "codacy:analyze:file": ".codacy/cli.sh analyze",
     "codacy:analyze:security": ".codacy/cli.sh analyze -t trivy",
-    "typecheck:spec": "tsc --noEmit -p tsconfig.spec.json"
+    "typecheck:spec": "tsc --noEmit -p tsconfig.spec.json && yarn workspace @conceptadev/rockets-core test:typetests"
   },
   "packageManager": "yarn@4.4.0",
   "dependencies": {
