@@ -93,6 +93,16 @@ the same standards as source.
 | `packages/rockets-adapter-firebase` | Firebase auth adapter |
 | `examples/*` | Runnable sample apps, exercised by e2e |
 
+## A note on the repository URL
+
+Package metadata (`repository`, `homepage`, `bugs`) points at
+`github.com/btwld/rockets`, which is where this project lives today. The
+organization will move to `conceptadev` later; when it does, those three
+fields in every publishable `package.json`, plus the links in the root
+and per-package READMEs, must be updated in the same change. Until then
+`btwld` is the correct value — `conceptadev/rockets` does not exist and
+redirects elsewhere.
+
 ## License
 
 By contributing, you agree that your contributions are licensed under
