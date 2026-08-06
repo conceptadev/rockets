@@ -56,6 +56,19 @@ FIREBASE_PROJECT_ID default never applied), and a lazy-`require` cycle
 workaround in `rockets-auth-handler-overrides.spec.ts` became typed
 `beforeAll` dynamic imports.
 
+### Security — dependencies
+
+- **TypeORM bumped 0.3.28 → 0.3.31**, clearing both advisories that
+  `yarn npm audit` reported: SQL injection in
+  `UpdateQueryBuilder`/`SoftDeleteQueryBuilder` `orderBy` on
+  MySQL/MariaDB (GHSA-9ggv-8w38-r7pm, fixed in 0.3.29) and
+  `migration:generate` template-literal code injection
+  (GHSA-2rp8-mm9q-fp49, fixed in 0.3.31). The version was held back by a
+  root `resolutions` pin, so bumping the declared ranges alone had no
+  effect — the pin was raised too. Audit now reports only two
+  deprecation notices (eslint 8, rimraf 3), both dev-only tooling that
+  never ships to consumers.
+
 ### Intermittent e2e failures — diagnosed, not a code defect
 
 Full e2e runs intermittently failed (~1 in 4) with a rotating victim

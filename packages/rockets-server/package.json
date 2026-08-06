@@ -95,7 +95,7 @@
     "sqlite3": "^5.1.6",
     "supertest": "^6.3.4",
     "ts-node": "^10.9.2",
-    "typeorm": "^0.3.20",
+    "typeorm": "^0.3.31",
     "vitest": "^4.1.10"
   },
   "peerDependencies": {

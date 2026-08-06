@@ -75,7 +75,7 @@
     "accesscontrol": "^2.2.1",
     "nestjs-zod": "^5.4.0",
     "supertest": "^6.3.4",
-    "typeorm": "^0.3.20",
+    "typeorm": "^0.3.31",
     "vitest": "^4.1.10",
     "zod": "^4.4.3"
   },
