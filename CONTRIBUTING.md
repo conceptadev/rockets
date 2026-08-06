@@ -93,6 +93,58 @@ the same standards as source.
 | `packages/rockets-adapter-firebase` | Firebase auth adapter |
 | `examples/*` | Runnable sample apps, exercised by e2e |
 
+## Releasing
+
+All release commands are thin wrappers over Yarn 4's native versioning and
+publishing — there is no custom release script to maintain.
+
+**1. Bump versions** (every publishable workspace, in one command):
+
+| Command | From `0.0.1-alpha.3` you get |
+|---|---|
+| `yarn version:alpha` | `0.0.1-alpha.4` |
+| `yarn version:patch` | `0.0.2` |
+| `yarn version:minor` | `0.1.0` |
+| `yarn version:major` | `1.0.0` |
+
+Prereleases continue whichever identifier the current version carries, so
+moving from `alpha` to `beta` is an explicit one-time bump — run
+`yarn workspaces foreach -A --no-private version 0.1.0-beta.0 --deferred`
+followed by `yarn version apply --all`.
+
+**2. Verify before publishing:**
+
+```bash
+yarn release:check   # build + typecheck:spec + lint:all + test + test:e2e
+yarn release:audit   # fails on high-severity advisories
+yarn release:dry     # lists exactly what each tarball will contain
+```
+
+Read the `release:dry` output: each tarball must carry `dist/`,
+`README.md`, `LICENSE.txt` and `CHANGELOG.md`, and must NOT carry `src/`,
+`*.spec.*` or `docs/`. Cross-package dependencies are published as real
+version ranges — Yarn resolves the `workspace:^` protocol at pack time
+(verified: a packed `package.json` contains `^0.0.1-dev.0`, never
+`workspace:`).
+
+**3. Publish** to the matching dist-tag:
+
+```bash
+yarn publish:alpha    # or publish:beta / publish:latest
+```
+
+Each of these re-runs `release:check`, does a clean build, then publishes
+in topological order so dependencies go out before dependents. Use
+`publish:latest` only for a stable release — it is the tag `npm install`
+resolves by default.
+
+**4. Confirm:**
+
+```bash
+npm view @conceptadev/rockets
+npm dist-tag ls @conceptadev/rockets
+```
+
 ## A note on the repository URL
 
 Package metadata (`repository`, `homepage`, `bugs`) points at
