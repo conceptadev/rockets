@@ -133,9 +133,17 @@ before running the full e2e suite.
 - Firestore adapter round-trips `Date` values as native Firestore
   `Timestamp`s. Previously dates were stringified on write and guessed
   back from field names on read (`startsWith('date') || endsWith('At')`),
-  so `dateCreated` came back a `Date` while `birthday` came back a string.
-  **Data note:** rows written by earlier versions store ISO strings and are
-  no longer converted on read.
+  so `dateCreated` came back a `Date` while `birthday` came back a string
+  — the returned TYPE depended on the field NAME. Native `Timestamp`
+  also makes range queries and ordering by date work correctly (ISO
+  strings only sorted by lexicographic luck).
+  **Storage format change, safe now:** rows written by earlier builds
+  hold ISO strings and are no longer converted on read. This is a
+  non-issue today — `@conceptadev/rockets-repository-firestore` has never
+  been published to npm (404 on the registry) and the only in-repo
+  consumer is the sample app's test stub, so no persisted data exists to
+  migrate. Doing this after the first release would have required a
+  backfill.
 - `InMemoryFirestoreBackend` keeps its store per instance; previously all
   instances in a process shared one module-level `Map`.
 - Hook subclass caches (`OwnerScopeHook`, `OwnerStampHook`,

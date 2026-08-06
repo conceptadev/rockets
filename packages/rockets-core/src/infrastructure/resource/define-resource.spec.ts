@@ -1251,11 +1251,10 @@ describe('defineResource', () => {
     });
 
     /**
-     * RED — HIGH CWE-284 (partial): consumer hooks/providers must never
-     * drop PathScope primitives, PathScopeGuard must be prepended ahead
-     * of consumer providers, and `meta.guards` must expose the guard for
-     * a boot-time invariant. Today hooks merge correctly; Guard is still
-     * appended and `meta.guards` is absent.
+     * HIGH CWE-284: consumer-supplied hooks/providers must never drop the
+     * PathScope primitives, and PathScopeGuard must sit ahead of consumer
+     * providers. Asserted on `core.providers` — the artifact the DI
+     * container actually receives.
      */
     it('keeps PathScopeGuard and PathScopeHook when consumer supplies hooks/providers', async () => {
       @EntityHook()
