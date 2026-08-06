@@ -1,4 +1,4 @@
-import { AuthorizedUser } from '@conceptadev/rockets-core';
+import { AuthorizedUser } from '@concepta/rockets-core';
 
 import { FirebaseDecodedTokenInterface } from './firebase-decoded-token.interface';
 

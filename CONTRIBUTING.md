@@ -6,9 +6,9 @@ need to get a change merged.
 ## Before you start
 
 - **Bug or feature?** Open an issue first using one of the
-  [templates](https://github.com/btwld/rockets/issues/new/choose). For a
+  [templates](https://github.com/conceptadev/rockets/issues/new/choose). For a
   design question or an idea that is not yet a proposal, use
-  [Discussions](https://github.com/btwld/rockets/discussions).
+  [Discussions](https://github.com/conceptadev/rockets/discussions).
 - **Security issue?** Do **not** open a public issue — see
   [SECURITY.md](SECURITY.md).
 
@@ -141,19 +141,20 @@ resolves by default.
 **4. Confirm:**
 
 ```bash
-npm view @conceptadev/rockets
-npm dist-tag ls @conceptadev/rockets
+npm view @concepta/rockets
+npm dist-tag ls @concepta/rockets
 ```
 
-## A note on the repository URL
+## Naming
 
-Package metadata (`repository`, `homepage`, `bugs`) points at
-`github.com/btwld/rockets`, which is where this project lives today. The
-organization will move to `conceptadev` later; when it does, those three
-fields in every publishable `package.json`, plus the links in the root
-and per-package READMEs, must be updated in the same change. Until then
-`btwld` is the correct value — `conceptadev/rockets` does not exist and
-redirects elsewhere.
+The npm scope is `@concepta` — the same scope as the upstream
+`@concepta/nestjs-*` packages this project composes. Rockets packages are
+distinguished by their name (`@concepta/rockets-core`,
+`@concepta/rockets-auth`, …), not by a separate scope.
+
+The GitHub organization is `conceptadev`, so package metadata
+(`repository`, `homepage`, `bugs`) points at
+`github.com/conceptadev/rockets`.
 
 ## License
 

@@ -12,8 +12,8 @@ import {
   ExceptionsFilter,
   RocketsModule,
   defineTypeOrmRepository,
-} from '@conceptadev/rockets';
-import type { ResourceInput } from '@conceptadev/rockets';
+} from '@concepta/rockets';
+import type { ResourceInput } from '@concepta/rockets';
 import {
   UserMetadataCreateDto,
   UserMetadataEntity,

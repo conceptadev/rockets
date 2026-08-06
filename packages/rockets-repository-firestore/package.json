@@ -1,5 +1,5 @@
 {
-  "name": "@conceptadev/rockets-repository-firestore",
+  "name": "@concepta/rockets-repository-firestore",
   "version": "0.0.1-dev.0",
   "description": "Firestore repository adapter for Rockets — implements RepositoryModuleInterface and RepositoryAdapter from @concepta/nestjs-repository",
   "author": "Thiago Ramalho <thiago.ramalho@concepta.com>",
@@ -20,7 +20,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/btwld/rockets.git",
+    "url": "git+https://github.com/conceptadev/rockets.git",
     "directory": "packages/rockets-repository-firestore"
   },
   "engines": {
@@ -42,7 +42,7 @@
   "dependencies": {
     "@concepta/nestjs-core": "8.0.0-alpha.8",
     "@concepta/nestjs-repository": "8.0.0-alpha.8",
-    "@conceptadev/rockets-core": "workspace:^"
+    "@concepta/rockets-core": "workspace:^"
   },
   "devDependencies": {
     "@nestjs/common": "12.0.0-alpha.5",
@@ -61,9 +61,9 @@
       "optional": true
     }
   },
-  "homepage": "https://github.com/btwld/rockets/tree/main/packages/rockets-repository-firestore#readme",
+  "homepage": "https://github.com/conceptadev/rockets/tree/main/packages/rockets-repository-firestore#readme",
   "bugs": {
-    "url": "https://github.com/btwld/rockets/issues"
+    "url": "https://github.com/conceptadev/rockets/issues"
   },
   "keywords": [
     "nestjs",

@@ -1,7 +1,7 @@
 import { vi, type Mocked, describe, it, expect } from 'vitest';
 import { DynamicModule, Module } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { getDynamicRepositoryToken } from '@conceptadev/rockets-core';
+import { getDynamicRepositoryToken } from '@concepta/rockets-core';
 import { CqrsModule } from '@nestjs/cqrs';
 import { UserModule } from './user.module';
 import { MeController } from './gateways/http/me.controller';
@@ -9,15 +9,15 @@ import {
   USER_METADATA_MODULE_ENTITY_KEY,
   UpsertUserMetadataHandler,
   GetUserMetadataHandler,
-} from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';
 import {
   RAW_OPTIONS_TOKEN,
   ROCKETS_USER_METADATA_DTO_TOKEN,
 } from './rockets.tokens';
 import type { RocketsOptions } from './rockets.module-definition';
 import { StubUserMetadataEntity } from './__fixtures__/entities/stub-user-metadata.entity';
-import type { RepositoryInterface } from '@conceptadev/rockets-core';
-import type { UserMetadataEntityInterface } from '@conceptadev/rockets-core';
+import type { RepositoryInterface } from '@concepta/rockets-core';
+import type { UserMetadataEntityInterface } from '@concepta/rockets-core';
 
 class MetadataCreateDto {
   userId!: string;

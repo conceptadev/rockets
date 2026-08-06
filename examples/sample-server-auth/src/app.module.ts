@@ -5,8 +5,8 @@ import {
   defineRocketsAuth,
   type DefineRocketsAuthInput,
   type EmailSendOptionsInterface,
-} from '@conceptadev/rockets-auth';
-import { RocketsModule } from '@conceptadev/rockets';
+} from '@concepta/rockets-auth';
+import { RocketsModule } from '@concepta/rockets';
 
 import { ACService } from './access-control.service';
 import { acRules } from './app.acl';

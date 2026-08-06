@@ -18,7 +18,7 @@ const ERROR_MESSAGE_FALLBACK = 'Internal Server Error';
 
 /**
  * Until upstream `@concepta/nestjs-*` exceptions are ported to
- * `@conceptadev/rockets-app`, their `RuntimeException` class is a different
+ * `@concepta/rockets-app`, their `RuntimeException` class is a different
  * constructor — conceptadev's global filter treats them as unknown errors (500).
  */
 @Catch()

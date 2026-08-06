@@ -1,5 +1,5 @@
 import { Provider } from '@nestjs/common';
-import { defineModuleResource } from '@conceptadev/rockets-core';
+import { defineModuleResource } from '@concepta/rockets-core';
 
 import { GithubConfig } from '../config/github.config';
 import { GithubApiClient } from './github-api.client';

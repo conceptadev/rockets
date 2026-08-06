@@ -4,10 +4,10 @@ export type {
   UserCreatableInterface,
   UserUpdatableInterface,
   UserModelUpdatableInterface,
-} from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';
 
 export {
   BaseUserDto,
   BaseUserCreateDto,
   BaseUserUpdateDto,
-} from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';

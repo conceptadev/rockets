@@ -1,6 +1,6 @@
-# @conceptadev/rockets-repository-firestore
+# @concepta/rockets-repository-firestore
 
-[![NPM](https://img.shields.io/npm/v/@conceptadev/rockets-repository-firestore)](https://www.npmjs.com/package/@conceptadev/rockets-repository-firestore)
+[![NPM](https://img.shields.io/npm/v/@concepta/rockets-repository-firestore)](https://www.npmjs.com/package/@concepta/rockets-repository-firestore)
 [![NestJS](https://img.shields.io/badge/NestJS-12-ea2845?logo=nestjs&logoColor=white)](https://nestjs.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
@@ -15,7 +15,7 @@ enough to use; expect refinements before 1.0.
 
 ## 1. Introduction
 
-`@conceptadev/rockets-repository-firestore` implements `RepositoryAdapter` and
+`@concepta/rockets-repository-firestore` implements `RepositoryAdapter` and
 `DynamicRepositoryModule` from `@concepta/nestjs-repository`, so any Rockets
 handler that talks to `RepositoryInterface<T>` will work against Firestore
 without code changes.
@@ -52,7 +52,7 @@ Other entities continue on the default adapter (TypeORM, in most apps).
 
 - You need ACID transactions across multiple entities — stay on a SQL adapter
   for cross-entity transactional flows.
-- You only want SQL — install `@conceptadev/rockets-repository-typeorm` instead.
+- You only want SQL — install `@concepta/rockets-repository-typeorm` instead.
 
 ---
 
@@ -61,7 +61,7 @@ Other entities continue on the default adapter (TypeORM, in most apps).
 ### Install
 
 ```bash
-yarn add @conceptadev/rockets-repository-firestore@alpha @conceptadev/rockets-core@alpha \
+yarn add @concepta/rockets-repository-firestore@alpha @concepta/rockets-core@alpha \
   firebase-admin
 ```
 
@@ -85,8 +85,8 @@ Credential paths (`FIREBASE_SERVICE_ACCOUNT_PATH`,
 ### Use one entity on Firestore
 
 ```typescript
-import { defineModuleResource } from '@conceptadev/rockets-core';
-import { defineFirestoreRepository } from '@conceptadev/rockets-repository-firestore';
+import { defineModuleResource } from '@concepta/rockets-core';
+import { defineFirestoreRepository } from '@concepta/rockets-repository-firestore';
 
 import { AnalyticsEventEntity } from './analytics-event.entity';
 
@@ -151,7 +151,7 @@ Do not use environment flags. Inject the in-memory backend explicitly:
 import {
   defineFirestoreRepository,
   InMemoryFirestoreBackend,
-} from '@conceptadev/rockets-repository-firestore';
+} from '@concepta/rockets-repository-firestore';
 
 const testRepository = defineFirestoreRepository({
   backend: new InMemoryFirestoreBackend(),

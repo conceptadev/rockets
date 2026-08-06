@@ -2,7 +2,7 @@ import { defineSubResource } from './define-sub-resource';
 import { describe, it, expect } from 'vitest';
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 import type { RepositoryModuleInterface } from '@concepta/nestjs-repository';
-import { TypeOrmRepositoryModule } from '@conceptadev/rockets-repository-typeorm';
+import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
 import type { RepositoryPersistenceConfig } from '../../domain/interfaces/repository-persistence.interface';
 import type {
   UserMetadataCreatableInterface,

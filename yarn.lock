@@ -854,11 +854,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@conceptadev/rockets-adapter-firebase@workspace:^, @conceptadev/rockets-adapter-firebase@workspace:packages/rockets-adapter-firebase":
+"@concepta/rockets-adapter-firebase@workspace:^, @concepta/rockets-adapter-firebase@workspace:packages/rockets-adapter-firebase":
   version: 0.0.0-use.local
-  resolution: "@conceptadev/rockets-adapter-firebase@workspace:packages/rockets-adapter-firebase"
+  resolution: "@concepta/rockets-adapter-firebase@workspace:packages/rockets-adapter-firebase"
   dependencies:
-    "@conceptadev/rockets-core": "workspace:^"
+    "@concepta/rockets-core": "workspace:^"
     "@nestjs/common": "npm:12.0.0-alpha.5"
     "@nestjs/core": "npm:12.0.0-alpha.5"
     "@nestjs/testing": "npm:12.0.0-alpha.5"
@@ -874,9 +874,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@conceptadev/rockets-auth@workspace:^, @conceptadev/rockets-auth@workspace:packages/rockets-server-auth":
+"@concepta/rockets-auth@workspace:^, @concepta/rockets-auth@workspace:packages/rockets-server-auth":
   version: 0.0.0-use.local
-  resolution: "@conceptadev/rockets-auth@workspace:packages/rockets-server-auth"
+  resolution: "@concepta/rockets-auth@workspace:packages/rockets-server-auth"
   dependencies:
     "@concepta/nestjs-access-control": "npm:8.0.0-alpha.8"
     "@concepta/nestjs-authentication": "npm:8.0.0-alpha.8"
@@ -892,9 +892,9 @@ __metadata:
     "@concepta/nestjs-repository": "npm:8.0.0-alpha.8"
     "@concepta/nestjs-role": "npm:8.0.0-alpha.8"
     "@concepta/nestjs-user": "npm:8.0.0-alpha.8"
-    "@conceptadev/rockets": "workspace:^"
-    "@conceptadev/rockets-core": "workspace:^"
-    "@conceptadev/rockets-repository-typeorm": "workspace:^"
+    "@concepta/rockets": "workspace:^"
+    "@concepta/rockets-core": "workspace:^"
+    "@concepta/rockets-repository-typeorm": "workspace:^"
     "@nestjs/common": "npm:12.0.0-alpha.5"
     "@nestjs/config": "npm:^4.0.4"
     "@nestjs/core": "npm:12.0.0-alpha.5"
@@ -931,16 +931,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@conceptadev/rockets-core@workspace:^, @conceptadev/rockets-core@workspace:packages/rockets-core":
+"@concepta/rockets-core@workspace:^, @concepta/rockets-core@workspace:packages/rockets-core":
   version: 0.0.0-use.local
-  resolution: "@conceptadev/rockets-core@workspace:packages/rockets-core"
+  resolution: "@concepta/rockets-core@workspace:packages/rockets-core"
   dependencies:
     "@concepta/nestjs-access-control": "npm:8.0.0-alpha.8"
     "@concepta/nestjs-authentication": "npm:8.0.0-alpha.8"
     "@concepta/nestjs-core": "npm:8.0.0-alpha.8"
     "@concepta/nestjs-crud": "npm:8.0.0-alpha.8"
     "@concepta/nestjs-repository": "npm:8.0.0-alpha.8"
-    "@conceptadev/rockets-repository-typeorm": "workspace:^"
+    "@concepta/rockets-repository-typeorm": "workspace:^"
     "@nestjs/common": "npm:12.0.0-alpha.5"
     "@nestjs/config": "npm:^4.0.4"
     "@nestjs/core": "npm:12.0.0-alpha.5"
@@ -970,13 +970,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@conceptadev/rockets-repository-firestore@workspace:^, @conceptadev/rockets-repository-firestore@workspace:packages/rockets-repository-firestore":
+"@concepta/rockets-repository-firestore@workspace:^, @concepta/rockets-repository-firestore@workspace:packages/rockets-repository-firestore":
   version: 0.0.0-use.local
-  resolution: "@conceptadev/rockets-repository-firestore@workspace:packages/rockets-repository-firestore"
+  resolution: "@concepta/rockets-repository-firestore@workspace:packages/rockets-repository-firestore"
   dependencies:
     "@concepta/nestjs-core": "npm:8.0.0-alpha.8"
     "@concepta/nestjs-repository": "npm:8.0.0-alpha.8"
-    "@conceptadev/rockets-core": "workspace:^"
+    "@concepta/rockets-core": "workspace:^"
     "@nestjs/common": "npm:12.0.0-alpha.5"
     "@nestjs/testing": "npm:12.0.0-alpha.5"
     firebase-admin: "npm:^13.0.0"
@@ -992,12 +992,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@conceptadev/rockets-repository-typeorm@workspace:^, @conceptadev/rockets-repository-typeorm@workspace:packages/rockets-repository-typeorm":
+"@concepta/rockets-repository-typeorm@workspace:^, @concepta/rockets-repository-typeorm@workspace:packages/rockets-repository-typeorm":
   version: 0.0.0-use.local
-  resolution: "@conceptadev/rockets-repository-typeorm@workspace:packages/rockets-repository-typeorm"
+  resolution: "@concepta/rockets-repository-typeorm@workspace:packages/rockets-repository-typeorm"
   dependencies:
     "@concepta/nestjs-repository-typeorm": "npm:8.0.0-alpha.8"
-    "@conceptadev/rockets-core": "workspace:^"
+    "@concepta/rockets-core": "workspace:^"
     "@nestjs/common": "npm:12.0.0-alpha.5"
     "@nestjs/testing": "npm:12.0.0-alpha.5"
     typeorm: "npm:^0.3.31"
@@ -1018,14 +1018,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@conceptadev/rockets@workspace:^, @conceptadev/rockets@workspace:packages/rockets-server":
+"@concepta/rockets@workspace:^, @concepta/rockets@workspace:packages/rockets-server":
   version: 0.0.0-use.local
-  resolution: "@conceptadev/rockets@workspace:packages/rockets-server"
+  resolution: "@concepta/rockets@workspace:packages/rockets-server"
   dependencies:
     "@concepta/nestjs-core": "npm:8.0.0-alpha.8"
     "@concepta/nestjs-crud": "npm:8.0.0-alpha.8"
-    "@conceptadev/rockets-core": "workspace:^"
-    "@conceptadev/rockets-repository-typeorm": "workspace:^"
+    "@concepta/rockets-core": "workspace:^"
+    "@concepta/rockets-repository-typeorm": "workspace:^"
     "@nestjs/common": "npm:12.0.0-alpha.5"
     "@nestjs/config": "npm:^4.0.4"
     "@nestjs/core": "npm:12.0.0-alpha.5"
@@ -5153,11 +5153,11 @@ __metadata:
   dependencies:
     "@concepta/nestjs-core": "npm:8.0.0-alpha.8"
     "@concepta/nestjs-repository": "npm:8.0.0-alpha.8"
-    "@conceptadev/rockets": "workspace:^"
-    "@conceptadev/rockets-adapter-firebase": "workspace:^"
-    "@conceptadev/rockets-core": "workspace:^"
-    "@conceptadev/rockets-repository-firestore": "workspace:^"
-    "@conceptadev/rockets-repository-typeorm": "workspace:^"
+    "@concepta/rockets": "workspace:^"
+    "@concepta/rockets-adapter-firebase": "workspace:^"
+    "@concepta/rockets-core": "workspace:^"
+    "@concepta/rockets-repository-firestore": "workspace:^"
+    "@concepta/rockets-repository-typeorm": "workspace:^"
     "@nestjs/cli": "npm:12.0.0-alpha.6"
     "@nestjs/common": "npm:12.0.0-alpha.5"
     "@nestjs/config": "npm:4.0.4"
@@ -5492,56 +5492,47 @@ __metadata:
   linkType: hard
 
 "body-parser@npm:^2.2.1":
-  version: 2.2.2
-  resolution: "body-parser@npm:2.2.2"
+  version: 2.3.0
+  resolution: "body-parser@npm:2.3.0"
   dependencies:
     bytes: "npm:^3.1.2"
-    content-type: "npm:^1.0.5"
+    content-type: "npm:^2.0.0"
     debug: "npm:^4.4.3"
-    http-errors: "npm:^2.0.0"
-    iconv-lite: "npm:^0.7.0"
+    http-errors: "npm:^2.0.1"
+    iconv-lite: "npm:^0.7.2"
     on-finished: "npm:^2.4.1"
-    qs: "npm:^6.14.1"
-    raw-body: "npm:^3.0.1"
-    type-is: "npm:^2.0.1"
-  checksum: 10c0/95a830a003b38654b75166ca765358aa92ee3d561bf0e41d6ccdde0e1a0c9783cab6b90b20eb635d23172c010b59d3563a137a738e74da4ba714463510d05137
+    qs: "npm:^6.15.2"
+    raw-body: "npm:^3.0.2"
+    type-is: "npm:^2.1.0"
+  checksum: 10c0/2a8fbbdc471b588338555a3e1a597d1eb0ad0c21cf20fdc3bac5d3f8d9c3a4b19b4163575ab852a43a5dfc0df7770ced5284f979e561f1a24c2f851ce89e695a
   languageName: node
   linkType: hard
 
 "brace-expansion@npm:^1.1.7":
-  version: 1.1.12
-  resolution: "brace-expansion@npm:1.1.12"
+  version: 1.1.18
+  resolution: "brace-expansion@npm:1.1.18"
   dependencies:
     balanced-match: "npm:^1.0.0"
     concat-map: "npm:0.0.1"
-  checksum: 10c0/975fecac2bb7758c062c20d0b3b6288c7cc895219ee25f0a64a9de662dbac981ff0b6e89909c3897c1f84fa353113a721923afdec5f8b2350255b097f12b1f73
+  checksum: 10c0/3432c18a9e2ebf94162d4effb62198bd0adea06a9f332b2c0188df5d5e30b1e51ea3c848b6608e47d0b857ebe1ea5b3888ed3326dd3c4f6f9645c94153cf9c14
   languageName: node
   linkType: hard
 
 "brace-expansion@npm:^2.0.1":
-  version: 2.0.2
-  resolution: "brace-expansion@npm:2.0.2"
+  version: 2.1.4
+  resolution: "brace-expansion@npm:2.1.4"
   dependencies:
     balanced-match: "npm:^1.0.0"
-  checksum: 10c0/6d117a4c793488af86b83172deb6af143e94c17bc53b0b3cec259733923b4ca84679d506ac261f4ba3c7ed37c46018e2ff442f9ce453af8643ecd64f4a54e6cf
+  checksum: 10c0/6c0a0e2573eac1dc565b52b1e1bfbeba39bf1830d106ebbc61ff1eaefcf610e9111cd3baa091addd18e33292135c99e019d3184d966389d85dc958fdcdc1449f
   languageName: node
   linkType: hard
 
-"brace-expansion@npm:^5.0.2":
-  version: 5.0.2
-  resolution: "brace-expansion@npm:5.0.2"
+"brace-expansion@npm:^5.0.2, brace-expansion@npm:^5.0.5":
+  version: 5.0.9
+  resolution: "brace-expansion@npm:5.0.9"
   dependencies:
     balanced-match: "npm:^4.0.2"
-  checksum: 10c0/60c765e5df6fc0ceca3d5703202ae6779db61f28ea3bf93a04dbf0d50c22ef8e4644e09d0459c827077cd2d09ba8f199a04d92c36419fcf874601a5565013174
-  languageName: node
-  linkType: hard
-
-"brace-expansion@npm:^5.0.5":
-  version: 5.0.7
-  resolution: "brace-expansion@npm:5.0.7"
-  dependencies:
-    balanced-match: "npm:^4.0.2"
-  checksum: 10c0/4769109c3c082de178e449a371bcad50d51ab468f644bce2dd9188efe0cf0a080ed102105d7fc8577382cedc45bad7e6443a91bf3d8102264ee8cf927dbaf205
+  checksum: 10c0/3dea38884a1c3c8b1c9c44a7402a0c76fca460f70cffb3127242b0b4cbf4472019e022ade021eec44838ff19f1dac2625dfd11dd459d7e1e055b0698a8d52fec
   languageName: node
   linkType: hard
 
@@ -6000,6 +5991,13 @@ __metadata:
   version: 1.0.5
   resolution: "content-type@npm:1.0.5"
   checksum: 10c0/b76ebed15c000aee4678c3707e0860cb6abd4e680a598c0a26e17f0bfae723ec9cc2802f0ff1bc6e4d80603719010431d2231018373d4dde10f9ccff9dadf5af
+  languageName: node
+  linkType: hard
+
+"content-type@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "content-type@npm:2.0.0"
+  checksum: 10c0/491539fff707d7594b0ca4fabcc084bef2a31ffa754ff0a4f80c4377e3963cff0394317f9271c24087596c97fa675bc123d61fa34ffe65b4904e7d3d3098de72
   languageName: node
   linkType: hard
 
@@ -11054,7 +11052,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"raw-body@npm:^3.0.1":
+"raw-body@npm:^3.0.2":
   version: 3.0.2
   resolution: "raw-body@npm:3.0.2"
   dependencies:
@@ -11631,10 +11629,10 @@ __metadata:
     "@concepta/nestjs-repository": "npm:8.0.0-alpha.8"
     "@concepta/nestjs-role": "npm:8.0.0-alpha.8"
     "@concepta/nestjs-user": "npm:8.0.0-alpha.8"
-    "@conceptadev/rockets": "workspace:^"
-    "@conceptadev/rockets-auth": "workspace:^"
-    "@conceptadev/rockets-core": "workspace:^"
-    "@conceptadev/rockets-repository-typeorm": "workspace:^"
+    "@concepta/rockets": "workspace:^"
+    "@concepta/rockets-auth": "workspace:^"
+    "@concepta/rockets-core": "workspace:^"
+    "@concepta/rockets-repository-typeorm": "workspace:^"
     "@nestjs/common": "npm:12.0.0-alpha.5"
     "@nestjs/core": "npm:12.0.0-alpha.5"
     "@nestjs/cqrs": "npm:11.0.3"
@@ -11672,9 +11670,9 @@ __metadata:
     "@concepta/nestjs-core": "npm:8.0.0-alpha.8"
     "@concepta/nestjs-crud": "npm:8.0.0-alpha.8"
     "@concepta/nestjs-repository": "npm:8.0.0-alpha.8"
-    "@conceptadev/rockets": "workspace:^"
-    "@conceptadev/rockets-core": "workspace:^"
-    "@conceptadev/rockets-repository-typeorm": "workspace:^"
+    "@concepta/rockets": "workspace:^"
+    "@concepta/rockets-core": "workspace:^"
+    "@concepta/rockets-repository-typeorm": "workspace:^"
     "@nestjs/cli": "npm:12.0.0-alpha.6"
     "@nestjs/common": "npm:12.0.0-alpha.5"
     "@nestjs/core": "npm:12.0.0-alpha.5"
@@ -12806,6 +12804,17 @@ __metadata:
     media-typer: "npm:^1.1.0"
     mime-types: "npm:^3.0.0"
   checksum: 10c0/7f7ec0a060b16880bdad36824ab37c26019454b67d73e8a465ed5a3587440fbe158bc765f0da68344498235c877e7dbbb1600beccc94628ed05599d667951b99
+  languageName: node
+  linkType: hard
+
+"type-is@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "type-is@npm:2.1.0"
+  dependencies:
+    content-type: "npm:^2.0.0"
+    media-typer: "npm:^1.1.0"
+    mime-types: "npm:^3.0.0"
+  checksum: 10c0/a6018f8f509de48f2c7429305e3a920e73b374fa93127dd0877ae1c2df65a5d33907caac8afb0c37a9b9fc7c49f29e3f55d668963dc845d966930b667c07f50e
   languageName: node
   linkType: hard
 

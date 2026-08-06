@@ -3,12 +3,12 @@
 [![NestJS](https://img.shields.io/badge/NestJS-12-ea2845?logo=nestjs&logoColor=white)](https://nestjs.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
-> Reference app for `@conceptadev/rockets-auth` — built-in user system
+> Reference app for `@concepta/rockets-auth` — built-in user system
 > (signup, login, OTP, password recovery, invitations, admin user CRUD)
 > with role-based access control and ownership-scoped resources.
 
-Monorepo dev: `@conceptadev/*` resolves via `workspace:^`. External apps:
-`yarn add @conceptadev/rockets-auth@alpha`.
+Monorepo dev: `@concepta/*` resolves via `workspace:^`. External apps:
+`yarn add @concepta/rockets-auth@alpha`.
 
 ---
 
@@ -186,7 +186,7 @@ examples/sample-server-auth
 | `POST /signup` | New user signup. Wired through `userCrud`. |
 | `POST /token/password` | Login (username + password → access + refresh token). |
 | `POST /token/refresh` | Refresh the access token. |
-| `GET /me`, `PATCH /me` | From `@conceptadev/rockets`. |
+| `GET /me`, `PATCH /me` | From `@concepta/rockets`. |
 | `PATCH /me/password` | Password change. |
 | `POST /otp`, `PATCH /otp` | OTP issue / verify. |
 | `POST /recovery/*` | Password recovery flow (wired to notification handlers). |

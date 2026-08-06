@@ -5,12 +5,12 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { CommandBus } from '@nestjs/cqrs';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
-import { ExceptionsFilter } from '@conceptadev/rockets';
+import { ExceptionsFilter } from '@concepta/rockets';
 import { CreateRoleCommand, AssignRoleCommand } from '@concepta/nestjs-role';
 import {
   ROLE_CRUD_ENTITY_KEY,
   USER_ROLE_ENTITY_KEY,
-} from '@conceptadev/rockets-auth';
+} from '@concepta/rockets-auth';
 import { AppModule } from '../src/app.module';
 
 /**

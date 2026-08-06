@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { baseEntity, f, rocketsFieldMeta } from '@conceptadev/rockets-core/zod';
+import { baseEntity, f, rocketsFieldMeta } from '@concepta/rockets-core/zod';
 
 /**
  * Source of truth for the tag resource surface. Near-pure module:

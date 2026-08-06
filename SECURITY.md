@@ -20,7 +20,7 @@ tracked here until a fixed version ships.
 **Do not open a public issue.**
 
 Report privately through
-[GitHub Security Advisories](https://github.com/btwld/rockets/security/advisories/new).
+[GitHub Security Advisories](https://github.com/conceptadev/rockets/security/advisories/new).
 If you cannot use that, email <thiago.ramalho@concepta.com> with
 `SECURITY` in the subject.
 

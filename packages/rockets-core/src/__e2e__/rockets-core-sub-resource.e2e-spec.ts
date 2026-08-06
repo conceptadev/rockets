@@ -31,7 +31,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { TypeOrmRepositoryModule } from '@conceptadev/rockets-repository-typeorm';
+import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
 import { getDynamicRepositoryToken } from '@concepta/nestjs-repository';
 import { Expose, Type } from 'class-transformer';
 import { IsOptional, IsString, IsUUID } from 'class-validator';

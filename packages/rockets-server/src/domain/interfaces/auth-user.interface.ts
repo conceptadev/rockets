@@ -1,1 +1,1 @@
-export type { AuthorizedUser } from '@conceptadev/rockets-core';
+export type { AuthorizedUser } from '@concepta/rockets-core';

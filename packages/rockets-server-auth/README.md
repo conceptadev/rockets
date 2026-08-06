@@ -1,6 +1,6 @@
-# @conceptadev/rockets-auth
+# @concepta/rockets-auth
 
-[![NPM](https://img.shields.io/npm/v/@conceptadev/rockets-auth)](https://www.npmjs.com/package/@conceptadev/rockets-auth)
+[![NPM](https://img.shields.io/npm/v/@concepta/rockets-auth)](https://www.npmjs.com/package/@concepta/rockets-auth)
 [![NestJS](https://img.shields.io/badge/NestJS-12-ea2845?logo=nestjs&logoColor=white)](https://nestjs.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
@@ -9,7 +9,7 @@
 > `defineRocketsAuth()` integration.
 
 **Status:** alpha (`0.0.1-dev.0`, published on npm as
-`@conceptadev/rockets-auth@alpha`). API on the `defineRocketsAuth()` surface is
+`@concepta/rockets-auth@alpha`). API on the `defineRocketsAuth()` surface is
 stable; the OAuth submodule is parked pending upstream v8 ports (see
 [Known limitations](#known-limitations)).
 
@@ -17,22 +17,22 @@ stable; the OAuth submodule is parked pending upstream v8 ports (see
 
 ## 1. Introduction
 
-`@conceptadev/rockets-auth` is what you reach for when your application owns its
-users. It is the alternative to `@conceptadev/rockets` for the case where you do
+`@concepta/rockets-auth` is what you reach for when your application owns its
+users. It is the alternative to `@concepta/rockets` for the case where you do
 **not** delegate authentication to an external IdP.
 
 It composes the v8 line of `@concepta/nestjs-*` **identity motors** (`user`,
 `password`, `otp`, `role`, `invitation`, `federated`, `email`, `event`, plus
 `authentication`) into a single configuration shape and exposes them as an
 `AuthBootstrap` for `RocketsModule.forRoot({ auth: ... })` from
-`@conceptadev/rockets`. It does **not** replace repository/CRUD/hook motors — those
+`@concepta/rockets`. It does **not** replace repository/CRUD/hook motors — those
 still come from core (which re-exports the `@concepta/nestjs-*` motors).
 
 ### What it gives you
 
 - **HTTP routes** (mounted by the bundle):
   - `POST /token/password` — login. `POST /token/refresh` — refresh.
-  - `PATCH /me` (password change) and the rest of `/me` from `@conceptadev/rockets`.
+  - `PATCH /me` (password change) and the rest of `/me` from `@concepta/rockets`.
   - `POST /otp`, `PATCH /otp` — OTP issue / verify.
   - `POST /signup` — user signup (wired through `userCrud`).
   - Admin: `/admin/users`, `/admin/users/:userId/roles`, `/admin/invitations` (+
@@ -58,9 +58,9 @@ still come from core (which re-exports the `@concepta/nestjs-*` motors).
 ### When NOT to use this package
 
 - Users live in an external IdP (Firebase, Auth0, Okta, custom JWT) → use
-  `@conceptadev/rockets` + the matching adapter.
+  `@concepta/rockets` + the matching adapter.
 - You only need login + a custom user table without OTP / invitations / admin →
-  drop to `@conceptadev/rockets` and write a small JWT adapter yourself.
+  drop to `@concepta/rockets` and write a small JWT adapter yourself.
 
 ---
 
@@ -69,24 +69,24 @@ still come from core (which re-exports the `@concepta/nestjs-*` motors).
 ### Install
 
 ```bash
-yarn add @conceptadev/rockets-auth@alpha @conceptadev/rockets@alpha @conceptadev/rockets-core@alpha \
+yarn add @concepta/rockets-auth@alpha @concepta/rockets@alpha @concepta/rockets-core@alpha \
   @nestjs/common @nestjs/core @nestjs/cqrs @nestjs/swagger @nestjs/jwt @nestjs/passport \
   class-transformer class-validator reflect-metadata rxjs
 ```
 
 Bring the upstream `@concepta/nestjs-*` packages and a repository adapter your
-app supports (e.g. `@conceptadev/rockets-repository-typeorm` + `typeorm`).
+app supports (e.g. `@concepta/rockets-repository-typeorm` + `typeorm`).
 
 ### Minimal working example
 
 ```typescript
 import { Module } from '@nestjs/common';
 import { EventModule } from '@concepta/nestjs-event';
-import { RocketsModule } from '@conceptadev/rockets';
+import { RocketsModule } from '@concepta/rockets';
 import {
   defineRocketsAuth,
   buildRocketsAuthResources,
-} from '@conceptadev/rockets-auth';
+} from '@concepta/rockets-auth';
 import { defineTypeOrmRepository } from './repository/define-typeorm-repository';
 
 import {
@@ -201,7 +201,7 @@ export class AppModule {}
 ```
 
 `defineTypeOrmRepository` is the same app-local `RepositoryBootstrap` helper
-used with `@conceptadev/rockets` (wrap `TypeOrmModule.forRoot` +
+used with `@concepta/rockets` (wrap `TypeOrmModule.forRoot` +
 `TypeOrmRepositoryModule.forFeature`). Run `yarn sample-auth:dev` from the
 monorepo root for a full working app.
 
@@ -252,7 +252,7 @@ slot at it.
 import {
   AbstractSignupUserHandler,
   SignupUserCommand,
-} from '@conceptadev/rockets-auth';
+} from '@concepta/rockets-auth';
 
 @CommandHandler(SignupUserCommand)
 export class SignupWithReferralHandler extends AbstractSignupUserHandler {
@@ -354,10 +354,10 @@ mgmt).
 | `access-control`           | RBAC (re-exported from this package for convenience) |
 
 **Shared stack (path A and B):** repository + CRUD + hooks still run through
-`@conceptadev/rockets-core` and the same `repository` / `resources[]` options on
+`@concepta/rockets-core` and the same `repository` / `resources[]` options on
 `RocketsModule.forRoot`.
 
-**This package does not depend on `@conceptadev/rockets`** — your app imports both
+**This package does not depend on `@concepta/rockets`** — your app imports both
 when you need built-in auth HTTP and `/me`.
 
 ### Entry points
@@ -392,7 +392,7 @@ when you need built-in auth HTTP and `/me`.
 | `user`, `password`, `otp`, `email`, `crud`, `role`, `federated`, `invitation` | Per-module config blocks, forwarded as-is to upstream modules.                                                                                                             |
 | `services.mailerService`                                                      | Required mailer adapter. Use a logger fallback for dev.                                                                                                                    |
 | `services.userAccessQueryService`                                             | Optional `CanAccess` for access-control queries.                                                                                                                           |
-| `swagger`                                                                     | Forwarded to `SwaggerUiModule` from `@conceptadev/rockets-core`.                                                                                                                                            |
+| `swagger`                                                                     | Forwarded to `SwaggerUiModule` from `@concepta/rockets-core`.                                                                                                                                            |
 
 ### Module-level extras
 

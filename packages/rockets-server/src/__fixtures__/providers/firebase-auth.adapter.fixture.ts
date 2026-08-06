@@ -3,8 +3,8 @@ import type {
   AuthAdapterInterface,
   AuthAttemptResult,
   AuthRequest,
-} from '@conceptadev/rockets-core';
-import { extractBearerToken } from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';
+import { extractBearerToken } from '@concepta/rockets-core';
 
 @Injectable()
 export class FirebaseAuthAdapterFixture implements AuthAdapterInterface {

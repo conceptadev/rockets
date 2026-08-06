@@ -13,7 +13,7 @@ import { resolveEntityKey } from '../utils/resolve-entity-key.util';
  * non-derived keys.
  *
  * Delegates to the upstream-parity string-only `InjectCrudAdapter` from
- * `@conceptadev/rockets-crud`, resolving the class to its key first.
+ * `@concepta/rockets-crud`, resolving the class to its key first.
  *
  * @example
  * ```ts

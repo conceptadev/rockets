@@ -1,4 +1,4 @@
-import { defineResource } from '@conceptadev/rockets';
+import { defineResource } from '@concepta/rockets';
 import { Operation } from '@concepta/nestjs-core';
 import { PetAppointmentEntity } from './pet-appointment.entity';
 import { PetEntity } from '../pet/pet.entity';

@@ -8,7 +8,7 @@ import {
 } from '@nestjs/swagger';
 import { cleanupOpenApiDoc } from 'nestjs-zod';
 import request from 'supertest';
-import { ExceptionsFilter } from '@conceptadev/rockets';
+import { ExceptionsFilter } from '@concepta/rockets';
 import { AppModule } from '../src/app.module';
 
 /**

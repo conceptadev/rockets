@@ -7,7 +7,7 @@ import {
   f,
   rocketsEntityMeta,
   rocketsFieldMeta,
-} from '@conceptadev/rockets-core/zod';
+} from '@concepta/rockets-core/zod';
 import { compileEntity } from './compile-entity';
 
 function columnsFor(target: Function) {

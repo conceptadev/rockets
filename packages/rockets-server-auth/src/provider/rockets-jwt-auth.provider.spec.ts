@@ -4,7 +4,7 @@ import { QueryBus } from '@nestjs/cqrs';
 import { ValidateAndVerifyAccessTokenQuery } from '@concepta/nestjs-authentication';
 import { GetAssignedRolesQuery } from '@concepta/nestjs-role';
 import { GetUserBySubjectQuery } from '@concepta/nestjs-user';
-import type { AuthRequest } from '@conceptadev/rockets-core';
+import type { AuthRequest } from '@concepta/rockets-core';
 
 import { RocketsJwtAuthAdapter } from './rockets-jwt-auth.adapter';
 import { RocketsGetRolesByIdsQuery } from '../domains/role/application/queries/impl/rockets-get-roles-by-ids.query';

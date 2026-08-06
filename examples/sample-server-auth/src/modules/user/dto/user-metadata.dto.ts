@@ -2,7 +2,7 @@ import {
   RocketsAuthUserMetadataDto,
   type RocketsAuthUserMetadataCreatableInterface,
   type RocketsAuthUserMetadataModelUpdatableInterface,
-} from '@conceptadev/rockets-auth';
+} from '@concepta/rockets-auth';
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
 import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';

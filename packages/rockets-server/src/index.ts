@@ -40,7 +40,7 @@ export {
   EntityHook,
   EntityHookBase,
   PassthroughEntityHookBase,
-} from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';
 
 export type {
   AuthAdapterInterface,
@@ -74,9 +74,9 @@ export type {
   WithActor,
   EntityHookContext,
   RocketsCrudContext,
-} from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';
 
-export { isRepositoryBootstrap } from '@conceptadev/rockets-core';
+export { isRepositoryBootstrap } from '@concepta/rockets-core';
 
 // ── Re-export common utilities ──
 export { Ctx } from '@concepta/nestjs-core';
@@ -105,11 +105,11 @@ export {
   logAndGetErrorDetails,
   getErrorDetails,
   SwaggerUiService,
-} from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';
 export type {
   ErrorDetails,
   RocketsRepositoryModuleInterface,
-} from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';
 
 // ── Declarative resource definition (re-exported from core) ──
 export {
@@ -126,7 +126,7 @@ export {
   defineSubResource,
   isSubResourceDefinition,
   PathScopeHook,
-} from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';
 export type {
   AppRegistrationPlan,
   ResourceInput,
@@ -148,4 +148,4 @@ export type {
   BoundRelation,
   EntityConstructor,
   RelationOptions,
-} from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';

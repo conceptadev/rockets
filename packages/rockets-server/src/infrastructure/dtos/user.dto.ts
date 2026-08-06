@@ -3,4 +3,4 @@ export {
   UserRoleItemDto,
   UserUpdateDto,
   UserResponseDto,
-} from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';

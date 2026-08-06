@@ -1,5 +1,5 @@
 {
-  "name": "@conceptadev/rockets-core",
+  "name": "@concepta/rockets-core",
   "version": "0.0.1-dev.0",
   "description": "Rockets Core - auth-provider-agnostic server infrastructure",
   "author": "Thiago Ramalho <thiago.ramalho@concepta.com>",
@@ -32,7 +32,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/btwld/rockets.git",
+    "url": "git+https://github.com/conceptadev/rockets.git",
     "directory": "packages/rockets-core"
   },
   "engines": {
@@ -68,7 +68,7 @@
     "pluralize": "^8.0.0"
   },
   "devDependencies": {
-    "@conceptadev/rockets-repository-typeorm": "workspace:^",
+    "@concepta/rockets-repository-typeorm": "workspace:^",
     "@nestjs/testing": "12.0.0-alpha.5",
     "@nestjs/typeorm": "11.0.3",
     "@types/pluralize": "^0.0.33",
@@ -94,9 +94,9 @@
       "optional": true
     }
   },
-  "homepage": "https://github.com/btwld/rockets/tree/main/packages/rockets-core#readme",
+  "homepage": "https://github.com/conceptadev/rockets/tree/main/packages/rockets-core#readme",
   "bugs": {
-    "url": "https://github.com/btwld/rockets/issues"
+    "url": "https://github.com/conceptadev/rockets/issues"
   },
   "keywords": [
     "nestjs",

@@ -10,8 +10,8 @@ import type {
   AuthAttemptResult,
   AuthRequest,
   AuthorizedUser,
-} from '@conceptadev/rockets';
-import { extractBearerToken } from '@conceptadev/rockets';
+} from '@concepta/rockets';
+import { extractBearerToken } from '@concepta/rockets';
 
 const MOCK_USERS: Record<string, AuthorizedUser> = {
   'token-1': {

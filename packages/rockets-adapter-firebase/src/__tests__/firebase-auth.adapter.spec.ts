@@ -1,6 +1,6 @@
 import { vi, describe, it, expect } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
-import type { AuthRequest } from '@conceptadev/rockets-core';
+import type { AuthRequest } from '@concepta/rockets-core';
 
 import {
   FIREBASE_AUTH_MODULE_OPTIONS_TOKEN,

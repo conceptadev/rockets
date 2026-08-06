@@ -1,1 +1,1 @@
-export type { AuthAdapterInterface } from '@conceptadev/rockets-core';
+export type { AuthAdapterInterface } from '@concepta/rockets-core';

@@ -2,7 +2,7 @@
  * e2e regression cover for the three round-2 HIGH findings.
  *
  * Persistence uses handwritten TypeORM entities so this suite does not
- * depend on `@conceptadev/rockets-repository-typeorm/zod` resolving the
+ * depend on `@concepta/rockets-repository-typeorm/zod` resolving the
  * same zod registry as local `src/zod` (dist vs src WeakMap split).
  * Schema → DTO projection still goes through `zodResource`.
  *
@@ -31,7 +31,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { TypeOrmRepositoryModule } from '@conceptadev/rockets-repository-typeorm';
+import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
 import { getDynamicRepositoryToken } from '@concepta/nestjs-repository';
 import { Expose } from 'class-transformer';
 import { IsString } from 'class-validator';

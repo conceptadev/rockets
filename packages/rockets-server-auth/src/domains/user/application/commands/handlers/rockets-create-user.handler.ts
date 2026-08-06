@@ -5,7 +5,7 @@ import { CreateUserCommand } from '@concepta/nestjs-user';
 
 import { RocketsEntity } from '../../../../../shared/constants/repository-entity-keys.constants';
 import { RocketsCreateUserCommand } from '../impl/rockets-create-user.command';
-import { createRepositoryContext } from '@conceptadev/rockets-core';
+import { createRepositoryContext } from '@concepta/rockets-core';
 
 @CommandHandler(RocketsCreateUserCommand)
 export class RocketsCreateUserHandler

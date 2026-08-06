@@ -1,4 +1,4 @@
-import type { FirebaseAuthModuleOptions } from '@conceptadev/rockets-adapter-firebase';
+import type { FirebaseAuthModuleOptions } from '@concepta/rockets-adapter-firebase';
 
 import { createFirebaseAdminApp } from './create-firebase-admin-app';
 import { SampleFakeFirebaseVerifier } from './sample-fake-firebase-verifier';

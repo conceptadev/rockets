@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { rocketsFieldMeta } from '@conceptadev/rockets-core/zod';
+import { rocketsFieldMeta } from '@concepta/rockets-core/zod';
 import { zodResource } from '../../zod-bindings';
 
 /**

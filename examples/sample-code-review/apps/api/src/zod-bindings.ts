@@ -1,5 +1,5 @@
-import { bindZodResources } from '@conceptadev/rockets-core/zod';
-import { typeOrmZodEntityCompiler } from '@conceptadev/rockets-repository-typeorm/zod';
+import { bindZodResources } from '@concepta/rockets-core/zod';
+import { typeOrmZodEntityCompiler } from '@concepta/rockets-repository-typeorm/zod';
 
 /**
  * The app-level persistence-compiler choice — one line, one place.

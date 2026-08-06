@@ -1,6 +1,6 @@
 import { vi, describe, it, expect, afterEach } from 'vitest';
 import { TypeOrmModule, type TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { TypeOrmRepositoryModule } from '@conceptadev/rockets-repository-typeorm';
+import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
 import { defineTypeOrmRepository } from './define-typeorm-repository';
 
 type TypeOrmRepositoryFeatureInput = Parameters<

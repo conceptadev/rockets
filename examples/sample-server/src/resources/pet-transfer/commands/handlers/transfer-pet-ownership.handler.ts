@@ -11,7 +11,7 @@ import { PetShareEntity } from '../../../pet-share/pet-share.entity';
 import { UserEntity } from '../../../../auth/user.entity';
 import { TransferPetOwnershipCommand } from '../impl/transfer-pet-ownership.command';
 import { PetTransferredEvent } from '../../events/pet-transferred.event';
-import { InjectDynamicRepository } from '@conceptadev/rockets-core';
+import { InjectDynamicRepository } from '@concepta/rockets-core';
 
 /**
  * CQRS handler for pet ownership transfer.

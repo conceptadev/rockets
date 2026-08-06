@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the `@conceptadev/rockets-auth` package will be
+All notable changes to the `@concepta/rockets-auth` package will be
 documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -13,7 +13,7 @@ and this project adheres to
 
 - **`repositoryPersistence` removed** from `RocketsAuthOptionsExtrasInterface`.
   Use **`defineRocketsAuth()`** from this package: it registers auth entities
-  through `@conceptadev/rockets-core`’s planner (`resources[]`) and returns a
+  through `@concepta/rockets-core`’s planner (`resources[]`) and returns a
   **`RocketsAuthIntegration`** for `RocketsModule.forRoot({ auth: ... })`.
   `RocketsModule` loads **`RocketsCoreModule` before `RocketsAuthModule`** when
   `auth` is an integration bundle so dynamic repositories exist at auth boot.

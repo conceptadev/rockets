@@ -5,9 +5,9 @@ import type {
   AuthAdapterInterface,
   AuthAttemptResult,
   AuthRequest,
-} from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';
 import { ApiKeyEntity } from './api-key.entity';
-import { InjectDynamicRepository } from '@conceptadev/rockets-core';
+import { InjectDynamicRepository } from '@concepta/rockets-core';
 
 /**
  * Authenticates requests via an `X-API-Key` header.

@@ -8,15 +8,15 @@ import type {
   AuthAdapterInterface,
   AuthAttemptResult,
   AuthRequest,
-} from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';
 import {
   createStubAuthBootstrap,
   extractBearerToken,
-} from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';
 import type {
   UserMetadataCreatableInterface,
   UserMetadataModelUpdatableInterface,
-} from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';
 import { RocketsModule } from '../rockets.module';
 import { StubUserMetadataEntity } from '../__fixtures__/entities/stub-user-metadata.entity';
 import { E2eFakeRepositoryModule } from './helpers/e2e-fake-repository.module';

@@ -9,7 +9,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { TypeOrmRepositoryModule } from '@conceptadev/rockets-repository-typeorm';
+import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
 import {
   CrudOperationResolver,
   CrudListQuery,
@@ -25,15 +25,15 @@ import { IsOptional, IsString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Exclude, Expose, Type } from 'class-transformer';
 import request from 'supertest';
-import { RepositoryModule } from '@conceptadev/rockets-core';
+import { RepositoryModule } from '@concepta/rockets-core';
 import type {
   AuthAdapterInterface,
   AuthAttemptResult,
   AuthRequest,
   UserMetadataCreatableInterface,
   UserMetadataModelUpdatableInterface,
-} from '@conceptadev/rockets-core';
-import { extractBearerToken } from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';
+import { extractBearerToken } from '@concepta/rockets-core';
 import { RocketsModule } from '../rockets.module';
 import { StubUserMetadataEntity } from '../__fixtures__/entities/stub-user-metadata.entity';
 import { E2eFakeRepositoryModule } from './helpers/e2e-fake-repository.module';

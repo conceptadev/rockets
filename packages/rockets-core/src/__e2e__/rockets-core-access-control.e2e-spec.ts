@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { TypeOrmRepositoryModule } from '@conceptadev/rockets-repository-typeorm';
+import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 import { CrudResponsePaginatedDto } from '@concepta/nestjs-crud';
 import { getDynamicRepositoryToken } from '@concepta/nestjs-repository';

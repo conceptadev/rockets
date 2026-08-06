@@ -4,7 +4,7 @@ import { f } from './fields';
 
 /**
  * Type-level contract for `f.compute` callbacks. Run with
- * `yarn workspace @conceptadev/rockets-core test:typetests`.
+ * `yarn workspace @concepta/rockets-core test:typetests`.
  *
  * The division of labour: the runtime strip in `compileDtoClass` decides
  * which KEYS may ship (undeclared and `response: false` keys are removed

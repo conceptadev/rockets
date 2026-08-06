@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { f, rocketsEntityMeta, rocketsFieldMeta } from '@conceptadev/rockets-core/zod';
+import { f, rocketsEntityMeta, rocketsFieldMeta } from '@concepta/rockets-core/zod';
 import { zodEntityCompiler } from '../../zod-bindings';
 
 export enum PetSharePermission {

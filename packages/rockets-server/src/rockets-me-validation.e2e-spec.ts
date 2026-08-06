@@ -22,8 +22,8 @@ import type {
   AuthAdapterInterface,
   AuthAttemptResult,
   AuthRequest,
-} from '@conceptadev/rockets-core';
-import { extractBearerToken } from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';
+import { extractBearerToken } from '@concepta/rockets-core';
 import { e2eAuthBootstrap } from './__fixtures__/providers/e2e-auth-bootstrap.fixture';
 
 class MetadataCreateDto implements UserMetadataCreatableInterface {

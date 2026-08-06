@@ -1,4 +1,4 @@
-import { defineModuleResource } from '@conceptadev/rockets-core';
+import { defineModuleResource } from '@concepta/rockets-core';
 import { AdminGuard } from './admin.guard';
 import { AdminPetController } from './admin-pet.controller';
 import { AdminPetService } from './admin-pet.service';

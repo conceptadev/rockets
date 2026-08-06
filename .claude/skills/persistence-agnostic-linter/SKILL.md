@@ -19,9 +19,9 @@ module options and must stay swappable. Flag and fix anything that nails the cod
 ## Require instead
 
 - `@InjectDynamicRepository(KEY)` + `RepositoryInterface<Entity>`. Feature/server code imports these from
-  `@conceptadev/rockets-core` (it re-exports `InjectDynamicRepository`, `RepositoryInterface`,
+  `@concepta/rockets-core` (it re-exports `InjectDynamicRepository`, `RepositoryInterface`,
   `RepositoryModuleInterface`, `Where`, `getDynamicRepositoryToken`). Only core/lower packages import from
-  `@conceptadev/rockets-repository` directly.
+  `@concepta/rockets-repository` directly.
 - Entity registration through bundles in `resources[]`: `defineResource()` auto-contributes its entity row;
   `defineModuleResource({ entities: [...] })` contributes extra rows; `userMetadata.entity` for the metadata row.
 - A single top-level `repository: RepositoryModuleInterface` (default adapter) at the module root; per-entity

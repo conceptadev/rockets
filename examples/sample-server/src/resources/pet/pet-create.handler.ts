@@ -5,7 +5,7 @@ import {
   CrudCreateHandler,
 } from '@concepta/nestjs-crud';
 import { PetEntity } from './pet.schema';
-import { InjectCrudAdapter } from '@conceptadev/rockets-core';
+import { InjectCrudAdapter } from '@concepta/rockets-core';
 
 /**
  * Reference: a custom create command handler on a **zod** resource

@@ -6,8 +6,8 @@ body:
       label: Package
       description: Which package is affected?
       options:
-        - "@conceptadev/rockets"
-        - "@conceptadev/rockets-auth"
+        - "@concepta/rockets"
+        - "@concepta/rockets-auth"
         - Both
     validations:
       required: true

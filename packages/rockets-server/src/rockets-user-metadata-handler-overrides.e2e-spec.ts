@@ -18,7 +18,7 @@ import {
   AbstractUpsertUserMetadataHandler,
   GetUserMetadataQuery,
   UpsertUserMetadataCommand,
-} from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';
 import { RocketsModule } from './rockets.module';
 import { e2eAuthBootstrap } from './__fixtures__/providers/e2e-auth-bootstrap.fixture';
 

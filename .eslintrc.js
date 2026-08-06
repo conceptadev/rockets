@@ -126,12 +126,12 @@ module.exports = {
           {
             paths: [
               {
-                name: '@conceptadev/rockets',
+                name: '@concepta/rockets',
                 message:
                   'rockets-core must not depend on rockets-server (would create a cycle).',
               },
               {
-                name: '@conceptadev/rockets-server-auth',
+                name: '@concepta/rockets-auth',
                 message:
                   'rockets-core must not depend on rockets-server-auth (would create a cycle).',
               },

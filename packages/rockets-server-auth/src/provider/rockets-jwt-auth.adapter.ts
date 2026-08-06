@@ -9,8 +9,8 @@ import type {
   AuthAttemptResult,
   AuthRequest,
   AuthorizedUser,
-} from '@conceptadev/rockets-core';
-import { extractBearerToken } from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';
+import { extractBearerToken } from '@concepta/rockets-core';
 import { userAggregateToEntity } from '../shared/utils/aggregate-mappers';
 import { resolveUserRoles } from '../shared/utils/resolve-user-role-names';
 

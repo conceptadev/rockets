@@ -2,4 +2,4 @@
 export {
   RocketsCoreExceptionsFilter as ExceptionsFilter,
   ERROR_MESSAGE_FALLBACK,
-} from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';

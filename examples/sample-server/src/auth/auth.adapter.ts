@@ -29,10 +29,10 @@ import type {
   AuthAttemptResult,
   AuthRequest,
   AuthorizedUser,
-} from '@conceptadev/rockets';
-import { extractBearerToken } from '@conceptadev/rockets';
+} from '@concepta/rockets';
+import { extractBearerToken } from '@concepta/rockets';
 import { UserEntity, UserRole } from './user.entity';
-import { InjectDynamicRepository } from '@conceptadev/rockets-core';
+import { InjectDynamicRepository } from '@concepta/rockets-core';
 
 // Hardcoded for demo only — see file header.
 const JWT_SECRET = 'sample-server-secret-do-not-use-in-production';

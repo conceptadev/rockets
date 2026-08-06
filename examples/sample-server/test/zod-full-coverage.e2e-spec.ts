@@ -19,14 +19,14 @@ import {
   ExceptionsFilter,
   RocketsModule,
   defineTypeOrmRepository,
-} from '@conceptadev/rockets';
+} from '@concepta/rockets';
 import type {
   RocketsRepositoryModuleInterface,
   SchemaEntityCompiler,
   SchemaEntityCompilerOptions,
-} from '@conceptadev/rockets';
+} from '@concepta/rockets';
 import { CrudAdapter, CrudCreateCommand } from '@concepta/nestjs-crud';
-import { CrudCommandHandlerBase, InjectCrudAdapter } from '@conceptadev/rockets-core';
+import { CrudCommandHandlerBase, InjectCrudAdapter } from '@concepta/rockets-core';
 import {
   InjectDynamicRepository,
   RepositoryInterface,
@@ -37,8 +37,8 @@ import {
   UserMetadataUpdateDto,
 } from '../src/user-metadata.schema';
 import { defineSampleAuth, sampleAuthUserResource } from '../src/auth';
-import { rocketsEntityMeta, rocketsFieldMeta, f } from '@conceptadev/rockets-core/zod';
-import { typeOrmZodEntityCompiler } from '@conceptadev/rockets-repository-typeorm/zod';
+import { rocketsEntityMeta, rocketsFieldMeta, f } from '@concepta/rockets-core/zod';
+import { typeOrmZodEntityCompiler } from '@concepta/rockets-repository-typeorm/zod';
 import { zodResource } from '../src/zod-bindings';
 
 /**

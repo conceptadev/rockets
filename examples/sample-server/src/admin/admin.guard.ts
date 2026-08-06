@@ -5,7 +5,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import type { AuthorizedUser } from '@conceptadev/rockets';
+import type { AuthorizedUser } from '@concepta/rockets';
 import { UserRole } from '../auth/user.entity';
 
 /**

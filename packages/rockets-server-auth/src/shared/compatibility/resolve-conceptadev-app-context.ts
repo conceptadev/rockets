@@ -3,7 +3,7 @@ import { AppContextHost } from '@concepta/nestjs-core';
 
 /**
  * Upstream `@concepta/nestjs-common` `getAppContext()` stores a different
- * `AppContextHost` class on the request. `@conceptadev/rockets-repository`
+ * `AppContextHost` class on the request. `@concepta/rockets-repository`
  * expects the conceptadev host at runtime. For auth flows that only need
  * repository I/O, a fresh conceptadev host is sufficient.
  */

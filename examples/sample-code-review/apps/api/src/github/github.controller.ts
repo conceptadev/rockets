@@ -14,9 +14,9 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthPublic } from '@conceptadev/rockets';
+import { AuthPublic } from '@concepta/rockets';
 import { Ctx, type AppContextInterface } from '@concepta/nestjs-core';
-import type { AuthorizedUser } from '@conceptadev/rockets';
+import type { AuthorizedUser } from '@concepta/rockets';
 import { GithubConfig } from '../config/github.config';
 import {
   GithubConnectDto,
@@ -25,7 +25,7 @@ import {
   GithubRepoResponseDto,
 } from './github.dto';
 import { GithubService } from './github.service';
-import { AuthUser } from '@conceptadev/rockets-core';
+import { AuthUser } from '@concepta/rockets-core';
 
 @ApiTags('GitHub')
 @Controller('github')

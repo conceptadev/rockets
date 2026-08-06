@@ -49,7 +49,7 @@ fixtures, deep `dist/` imports blocked by upstream exports maps, and
 under-typed test doubles), all fixed rather than suppressed. Two
 interfaces that consumers legitimately need
 (`EmailSendOptionsInterface`, `RocketsAuthUserMetadataModelUpdatableInterface`)
-are now exported from `@conceptadev/rockets-auth`'s public index instead
+are now exported from `@concepta/rockets-auth`'s public index instead
 of being reachable only through `dist/` paths.
 
 Migration incidentally fixed two latent defects: the
@@ -57,6 +57,23 @@ sample-code-review Jest config had lost its `setupFiles` wiring (its
 FIREBASE_PROJECT_ID default never applied), and a lazy-`require` cycle
 workaround in `rockets-auth-handler-overrides.spec.ts` became typed
 `beforeAll` dynamic imports.
+
+### Naming
+
+- **npm scope renamed `@conceptadev` → `@concepta`.** Rockets packages now
+  publish alongside the upstream `@concepta/nestjs-*` stack they compose,
+  distinguished by name rather than by a separate scope:
+  `@concepta/rockets`, `@concepta/rockets-auth`, `@concepta/rockets-core`,
+  `@concepta/rockets-repository-typeorm`,
+  `@concepta/rockets-repository-firestore`,
+  `@concepta/rockets-adapter-firebase`. Nothing had been published under
+  the old scope, so no consumer is affected.
+- **GitHub organization is `conceptadev`**; every `repository`,
+  `homepage` and `bugs` field now points at `github.com/conceptadev/rockets`.
+- An architecture lint rule that forbids `rockets-core` from importing the
+  auth package referenced a package name that never existed
+  (`@concepta/rockets-server-auth` vs the real `@concepta/rockets-auth`), so
+  it could never fire. Corrected and verified to trigger.
 
 ### Security — dependencies
 
@@ -154,7 +171,7 @@ before running the full e2e suite.
   strings only sorted by lexicographic luck).
   **Storage format change, safe now:** rows written by earlier builds
   hold ISO strings and are no longer converted on read. This is a
-  non-issue today — `@conceptadev/rockets-repository-firestore` has never
+  non-issue today — `@concepta/rockets-repository-firestore` has never
   been published to npm (404 on the registry) and the only in-repo
   consumer is the sample app's test stub, so no persisted data exists to
   migrate. Doing this after the first release would have required a

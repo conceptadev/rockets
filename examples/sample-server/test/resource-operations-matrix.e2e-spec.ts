@@ -8,7 +8,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { HttpAdapterHost } from '@nestjs/core';
-import { ExceptionsFilter } from '@conceptadev/rockets';
+import { ExceptionsFilter } from '@concepta/rockets';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 

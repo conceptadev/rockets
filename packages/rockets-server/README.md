@@ -1,6 +1,6 @@
-# @conceptadev/rockets
+# @concepta/rockets
 
-[![NPM](https://img.shields.io/npm/v/@conceptadev/rockets)](https://www.npmjs.com/package/@conceptadev/rockets)
+[![NPM](https://img.shields.io/npm/v/@concepta/rockets)](https://www.npmjs.com/package/@concepta/rockets)
 [![NestJS](https://img.shields.io/badge/NestJS-12-ea2845?logo=nestjs&logoColor=white)](https://nestjs.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
@@ -21,18 +21,18 @@ is **Path A** (identity lives outside the app).
 ### The problem this package solves
 
 You already have users somewhere else (Firebase, Okta, a central
-`@conceptadev/rockets-auth` deployment, a custom JWT issuer, API keys). Each new
+`@concepta/rockets-auth` deployment, a custom JWT issuer, API keys). Each new
 NestJS workflow API still needs the same glue: verify credentials, attach
 `request.user`, expose `/me`, register CRUD from config, enforce a global guard.
 
-**`@conceptadev/rockets` removes that repeated glue** so you pass `auth` +
+**`@concepta/rockets` removes that repeated glue** so you pass `auth` +
 `resources[]` and ship domain code. It does **not** own signup/login tables —
-that is `@conceptadev/rockets-auth` (Path B) or your external IdP.
+that is `@concepta/rockets-auth` (Path B) or your external IdP.
 
 ### What this package is
 
-`@conceptadev/rockets` (npm name without the `-server` suffix) is the
-**external-auth composition layer** on top of `@conceptadev/rockets-core`. It does
+`@concepta/rockets` (npm name without the `-server` suffix) is the
+**external-auth composition layer** on top of `@concepta/rockets-core`. It does
 not replace the `@concepta/nestjs-*` motors (repository, CRUD, hooks) — it adds
 `/me`, the default global guard, and merges `auth` integrations into
 `RocketsCoreModule`. Use it when your users live in another system (Firebase,
@@ -62,9 +62,9 @@ repositories, swagger registration) is re-exported from core.
 ### When NOT to use this package
 
 - You want a **complete built-in auth system** (signup, login, password
-  recovery, OTP, oauth, admin user CRUD) → use `@conceptadev/rockets-server-auth`.
+  recovery, OTP, oauth, admin user CRUD) → use `@concepta/rockets-server-auth`.
 - You want full composition control (no `/me`, no global guard) → drop to
-  `@conceptadev/rockets-core`.
+  `@concepta/rockets-core`.
 
 ### Stargate micro apps (this package)
 
@@ -74,10 +74,10 @@ a **micro app** on this package:
 | Layer                  | Owner                                             | Rockets surface                                            |
 | ---------------------- | ------------------------------------------------- | ---------------------------------------------------------- |
 | Cross-system workflows | Stargate                                          | HTTP steps → your micro app base URL                       |
-| Identity               | Once per product (IdP or `@conceptadev/rockets-auth`) | `auth: AuthBootstrap` → **same issuer** in every micro app |
+| Identity               | Once per product (IdP or `@concepta/rockets-auth`) | `auth: AuthBootstrap` → **same issuer** in every micro app |
 | Domain                 | Squad per micro app                               | `resources[]`, `repository`, optional Firestore override   |
 
-**What `@conceptadev/rockets` adds** on top of core (so every micro app shares the
+**What `@concepta/rockets` adds** on top of core (so every micro app shares the
 same shell):
 
 - `MeController` — `GET /me`, `PATCH /me` + local `userMetadata` row
@@ -89,7 +89,7 @@ Stargate orchestrates; **this package runs the API**. Do not duplicate
 signup/login DB per generated app.
 
 ```text
-  Stargate (workflows) ──HTTP──▶ Micro app (@conceptadev/rockets)
+  Stargate (workflows) ──HTTP──▶ Micro app (@concepta/rockets)
                                         │
                                         ▼
                                  Identity (shared issuer)
@@ -111,14 +111,14 @@ pattern:
 ### Install
 
 ```bash
-yarn add @conceptadev/rockets@alpha \
+yarn add @concepta/rockets@alpha \
   class-transformer class-validator reflect-metadata rxjs
 ```
 
-`@conceptadev/rockets` pulls in `rockets-core` and the matching `@concepta/nestjs-*`
-motors transitively (repository + CRUD re-exported by `@conceptadev/rockets-core`).
-Add TypeORM (`@conceptadev/rockets-repository-typeorm`, `typeorm`, `@nestjs/typeorm`,
-driver) only when you use SQL. Add other `@conceptadev/*` packages only if you import
+`@concepta/rockets` pulls in `rockets-core` and the matching `@concepta/nestjs-*`
+motors transitively (repository + CRUD re-exported by `@concepta/rockets-core`).
+Add TypeORM (`@concepta/rockets-repository-typeorm`, `typeorm`, `@nestjs/typeorm`,
+driver) only when you use SQL. Add other `@concepta/*` packages only if you import
 from
 them directly.
 
@@ -136,7 +136,7 @@ import {
   AuthAttemptResult,
   AuthRequest,
   extractBearerToken,
-} from '@conceptadev/rockets';
+} from '@concepta/rockets';
 
 @Injectable()
 export class JwtAdapter implements AuthAdapterInterface {
@@ -162,7 +162,7 @@ export class JwtAdapter implements AuthAdapterInterface {
 ```typescript
 // src/app.module.ts
 import { Module } from '@nestjs/common';
-import { RocketsModule, defineResource } from '@conceptadev/rockets';
+import { RocketsModule, defineResource } from '@concepta/rockets';
 import { JwtAdapter } from './auth/jwt.adapter';
 import { PetEntity } from './pet.entity';
 import { UserMetadataEntity } from './user/user-metadata.entity';
@@ -209,9 +209,9 @@ Pass an array. The guard iterates in order. The first adapter that returns
 that error is thrown.
 
 ```typescript
-import { defineFirebaseAuth } from '@conceptadev/rockets-adapter-firebase';
-import { defineModuleResource } from '@conceptadev/rockets-core';
-import { RocketsModule } from '@conceptadev/rockets';
+import { defineFirebaseAuth } from '@concepta/rockets-adapter-firebase';
+import { defineModuleResource } from '@concepta/rockets-core';
+import { RocketsModule } from '@concepta/rockets';
 
 import { defineApiKeyAuth, apiKeyAuthResource } from './auth-api-key';
 import { UserEntity } from './auth/user.entity';
@@ -239,7 +239,7 @@ Order matters: cheap, common credentials first; fallbacks last.
 Keep the guard global, but tag specific routes public.
 
 ```typescript
-import { AuthPublic } from '@conceptadev/rockets';
+import { AuthPublic } from '@concepta/rockets';
 
 @Controller('public')
 export class PublicController {
@@ -280,7 +280,7 @@ side-effects, alternative storage):
 import {
   AbstractUpsertUserMetadataHandler,
   AbstractGetUserMetadataHandler,
-} from '@conceptadev/rockets';
+} from '@concepta/rockets';
 
 class MyUpsertHandler extends AbstractUpsertUserMetadataHandler {
   /* ... */
@@ -306,8 +306,8 @@ For integrations like Firebase that need their own Nest module (admin SDK, http
 clients), pass the integration object from the adapter helper:
 
 ```typescript
-import { defineFirebaseAuth } from '@conceptadev/rockets-adapter-firebase';
-import { defineModuleResource } from '@conceptadev/rockets-core';
+import { defineFirebaseAuth } from '@concepta/rockets-adapter-firebase';
+import { defineModuleResource } from '@concepta/rockets-core';
 
 RocketsModule.forRoot({
   auth: defineFirebaseAuth({
@@ -330,8 +330,8 @@ When `forRoot()` is set, core imports the returned module and injects
 Default adapter at the root; per-entity override inside `defineModuleResource`:
 
 ```typescript
-import { defineModuleResource } from '@conceptadev/rockets';
-import { defineFirestoreRepository } from '@conceptadev/rockets-repository-firestore';
+import { defineModuleResource } from '@concepta/rockets';
+import { defineFirestoreRepository } from '@concepta/rockets-repository-firestore';
 
 const firestoreRepository = defineFirestoreRepository();
 
@@ -354,10 +354,10 @@ defineModuleResource({
 
 | Layer                      | Package                                          | Role                                                                                    |
 | -------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------- |
-| Motor                      | `@concepta/nestjs-repository`, `crud`, `hook`, … | Runtime behaviour (via `@conceptadev/rockets-*` facades)                                    |
-| Planner                    | `@conceptadev/rockets-core`                          | `buildAppRegistrationPlan`, `defineResource`, `AuthServerGuard`                         |
-| **This package**           | `@conceptadev/rockets`                               | `RocketsModule`, `MeController`, `APP_GUARD` wiring                                     |
-| Built-in identity (path B) | `@conceptadev/rockets-auth`                          | `defineRocketsAuth()` — **sibling**, not a dependency of this package; apps import both |
+| Motor                      | `@concepta/nestjs-repository`, `crud`, `hook`, … | Runtime behaviour (via `@concepta/rockets-*` facades)                                    |
+| Planner                    | `@concepta/rockets-core`                          | `buildAppRegistrationPlan`, `defineResource`, `AuthServerGuard`                         |
+| **This package**           | `@concepta/rockets`                               | `RocketsModule`, `MeController`, `APP_GUARD` wiring                                     |
+| Built-in identity (path B) | `@concepta/rockets-auth`                          | `defineRocketsAuth()` — **sibling**, not a dependency of this package; apps import both |
 
 Path B:
 `RocketsModule.forRoot({ auth: defineRocketsAuth(...), repository, resources })`.
@@ -383,7 +383,7 @@ Path B:
 | `GET /me`   | Returns the authenticated user + their `userMetadata` row (joined by `id`).   |
 | `PATCH /me` | Validates `body.userMetadata` against `userMetadata.updateDto`, then upserts. |
 
-### Re-exports from `@conceptadev/rockets-core`
+### Re-exports from `@concepta/rockets-core`
 
 Everything most apps need:
 
@@ -438,7 +438,7 @@ external-auth server rules:
 - Keep this package focused on Path A: auth chain composition, default global
   guard, `/me`, and metadata handlers.
 - Do not add signup/login/OTP/role-admin behavior here. Built-in identity
-  belongs in `@conceptadev/rockets-auth`.
+  belongs in `@concepta/rockets-auth`.
 - Keep auth adapters responsible for identity resolution only. Resource
   ownership and app authorization stay in resource hooks, guards, or app policy
   code.

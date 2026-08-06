@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createdEntity, f } from '@conceptadev/rockets-core/zod';
+import { createdEntity, f } from '@concepta/rockets-core/zod';
 import { compileZodEntity } from '../zod-bindings';
 
 export enum UserRole {

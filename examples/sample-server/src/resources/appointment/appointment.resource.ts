@@ -1,5 +1,5 @@
-import { defineResource } from '@conceptadev/rockets';
-import { OwnerScopeHook } from '@conceptadev/rockets-core';
+import { defineResource } from '@concepta/rockets';
+import { OwnerScopeHook } from '@concepta/rockets-core';
 import { AppointmentEntity } from './appointment.entity';
 
 const AppointmentOwnerScope = OwnerScopeHook.for(AppointmentEntity);

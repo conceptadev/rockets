@@ -23,7 +23,7 @@ import {
   InvitationAcceptanceConfig,
   INVITATION_ACCEPTANCE_CONFIG_TOKEN,
 } from '../../infrastructure/config/invitation-acceptance.config';
-import { whitelistedFromDto } from '@conceptadev/rockets-core';
+import { whitelistedFromDto } from '@concepta/rockets-core';
 
 /**
  * Invitation User Acceptance Listener

@@ -16,7 +16,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import request from 'supertest';
 
-import { ExceptionsFilter } from '@conceptadev/rockets';
+import { ExceptionsFilter } from '@concepta/rockets';
 
 import { AppModule } from '../src/app.module';
 

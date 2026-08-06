@@ -17,18 +17,18 @@ import { IsOptional, IsString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
 import request from 'supertest';
-import { extractBearerToken } from '@conceptadev/rockets-core';
+import { extractBearerToken } from '@concepta/rockets-core';
 import type {
   AuthAdapterInterface,
   AuthAttemptResult,
   AuthRequest,
   UserMetadataCreatableInterface,
   UserMetadataModelUpdatableInterface,
-} from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';
 import { RocketsModule } from '../rockets.module';
 import { StubUserMetadataEntity } from '../__fixtures__/entities/stub-user-metadata.entity';
-import { defineResource } from '@conceptadev/rockets-core';
-import { TypeOrmRepositoryModule } from '@conceptadev/rockets-repository-typeorm';
+import { defineResource } from '@concepta/rockets-core';
+import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
 import { E2eFakeRepositoryModule } from './helpers/e2e-fake-repository.module';
 import { e2eAuthBootstrap } from '../__fixtures__/providers/e2e-auth-bootstrap.fixture';
 

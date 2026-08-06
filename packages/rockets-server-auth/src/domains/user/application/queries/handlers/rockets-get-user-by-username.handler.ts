@@ -5,7 +5,7 @@ import { GetUserByUsernameQuery } from '@concepta/nestjs-user';
 import { RocketsEntity } from '../../../../../shared/constants/repository-entity-keys.constants';
 
 import { RocketsGetUserByUsernameQuery } from '../impl/rockets-get-user-by-username.query';
-import { createRepositoryContext } from '@conceptadev/rockets-core';
+import { createRepositoryContext } from '@concepta/rockets-core';
 
 @QueryHandler(RocketsGetUserByUsernameQuery)
 export class RocketsGetUserByUsernameHandler

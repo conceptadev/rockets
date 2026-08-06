@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { RocketsModule } from '@conceptadev/rockets';
-import { defineFirebaseAuth } from '@conceptadev/rockets-adapter-firebase';
-import { defineModuleResource } from '@conceptadev/rockets-core';
+import { RocketsModule } from '@concepta/rockets';
+import { defineFirebaseAuth } from '@concepta/rockets-adapter-firebase';
+import { defineModuleResource } from '@concepta/rockets-core';
 import { createFirebaseAdminApp } from './auth-firebase';
 
 import { resolveFirebaseAuthModuleOptions } from './auth-firebase';

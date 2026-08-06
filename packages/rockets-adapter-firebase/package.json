@@ -1,7 +1,7 @@
 {
-  "name": "@conceptadev/rockets-adapter-firebase",
+  "name": "@concepta/rockets-adapter-firebase",
   "version": "0.0.1-dev.0",
-  "description": "Firebase Authentication adapter for Rockets — implements AuthAdapterInterface from @conceptadev/rockets-core, validates Firebase ID tokens, maps to AuthorizedUser",
+  "description": "Firebase Authentication adapter for Rockets — implements AuthAdapterInterface from @concepta/rockets-core, validates Firebase ID tokens, maps to AuthorizedUser",
   "author": "Thiago Ramalho <thiago.ramalho@concepta.com>",
   "license": "BSD-3-Clause",
   "main": "dist/index.js",
@@ -20,7 +20,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/btwld/rockets.git",
+    "url": "git+https://github.com/conceptadev/rockets.git",
     "directory": "packages/rockets-adapter-firebase"
   },
   "engines": {
@@ -41,7 +41,7 @@
     "test": "cd ../.. && ./node_modules/.bin/vitest run --project unit packages/rockets-adapter-firebase"
   },
   "dependencies": {
-    "@conceptadev/rockets-core": "workspace:^",
+    "@concepta/rockets-core": "workspace:^",
     "@nestjs/common": "12.0.0-alpha.5",
     "@nestjs/core": "12.0.0-alpha.5"
   },
@@ -60,9 +60,9 @@
       "optional": true
     }
   },
-  "homepage": "https://github.com/btwld/rockets/tree/main/packages/rockets-adapter-firebase#readme",
+  "homepage": "https://github.com/conceptadev/rockets/tree/main/packages/rockets-adapter-firebase#readme",
   "bugs": {
-    "url": "https://github.com/btwld/rockets/issues"
+    "url": "https://github.com/conceptadev/rockets/issues"
   },
   "keywords": [
     "nestjs",

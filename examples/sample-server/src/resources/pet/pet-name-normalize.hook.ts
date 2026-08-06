@@ -1,5 +1,5 @@
 import { PlainLiteralObject } from '@nestjs/common';
-import { defineHook } from '@conceptadev/rockets-core';
+import { defineHook } from '@concepta/rockets-core';
 import { PetEntity } from './pet.schema';
 
 /**

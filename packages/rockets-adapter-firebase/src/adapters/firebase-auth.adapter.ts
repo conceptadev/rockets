@@ -5,8 +5,8 @@ import type {
   AuthAttemptResult,
   AuthRequest,
   AuthorizedUser,
-} from '@conceptadev/rockets-core';
-import { extractBearerToken } from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';
+import { extractBearerToken } from '@concepta/rockets-core';
 
 import {
   FIREBASE_AUTH_MODULE_OPTIONS_TOKEN,

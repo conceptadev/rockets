@@ -4,7 +4,7 @@ import {
   CreateOneInterface,
   RemoveOneInterface,
   UpdateOneInterface,
-} from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';
 
 /**
  * Pet Appointment Status Enumeration

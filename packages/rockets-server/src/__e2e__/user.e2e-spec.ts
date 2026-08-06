@@ -3,7 +3,7 @@ import { INestApplication, Controller, Get, Module } from '@nestjs/common';
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
-import { AuthUser } from '@conceptadev/rockets-core';
+import { AuthUser } from '@concepta/rockets-core';
 import { AuthorizedUser } from '../domain/interfaces/auth-user.interface';
 import { UserUpdateDto } from '../infrastructure/dtos/user.dto';
 import { IsString, IsOptional } from 'class-validator';

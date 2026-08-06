@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the `@conceptadev/rockets` package will be documented
+All notable changes to the `@concepta/rockets` package will be documented
 in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -12,8 +12,8 @@ and this project adheres to
 ### Added
 
 - **`RocketsAuthIntegration`** (`ROCKETS_AUTH_INTEGRATION_KIND`,
-  `isRocketsAuthIntegration`) in `@conceptadev/rockets-core` for bundles
-  returned by `@conceptadev/rockets-auth` **`defineRocketsAuth()`**.
+  `isRocketsAuthIntegration`) in `@concepta/rockets-core` for bundles
+  returned by `@concepta/rockets-auth` **`defineRocketsAuth()`**.
 
 - **Auth adapter chain** — `auth` in `RocketsModule.forRoot` / `forRootAsync`
   now accepts an array: `auth: [AdapterA, AdapterB]`. The `AuthServerGuard`
@@ -21,10 +21,10 @@ and this project adheres to
   inputs continue to work (normalised to a one-element chain).
 
 - **`extractBearerToken(request: AuthRequest): string | null`** exported from
-  `@conceptadev/rockets-core` (and re-exported from `@conceptadev/rockets`). Replaces
+  `@concepta/rockets-core` (and re-exported from `@concepta/rockets`). Replaces
   the removed `BearerTokenAuthAdapter` helper.
 
-- **`AUTH_ADAPTERS_TOKEN`** exported from `@conceptadev/rockets-core`. Injects the
+- **`AUTH_ADAPTERS_TOKEN`** exported from `@concepta/rockets-core`. Injects the
   full ordered adapter chain as `ReadonlyArray<AuthAdapterInterface>`.
 
 - **`collectAdapters`** and **`resolveAuthChain`** exported from the respective
@@ -62,7 +62,7 @@ and this project adheres to
   implement `AuthAdapterInterface` directly.
 
 - **`AUTH_ADAPTER_TOKEN`** (singular) — replaced by `AUTH_ADAPTERS_TOKEN` (the
-  full chain). `RocketsAuthProvider` alias on `@conceptadev/rockets` is also
+  full chain). `RocketsAuthProvider` alias on `@concepta/rockets` is also
   removed.
 
 - **`AuthorizeUserInterface`** and **`ValidateTokenInterface`** — removed.
@@ -92,7 +92,7 @@ export class MyAdapter extends BearerTokenAuthAdapter {
 **After:**
 
 ```typescript
-import { extractBearerToken } from '@conceptadev/rockets-core';
+import { extractBearerToken } from '@concepta/rockets-core';
 
 @Injectable()
 export class MyAdapter implements AuthAdapterInterface {

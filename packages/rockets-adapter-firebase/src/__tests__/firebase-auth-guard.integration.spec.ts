@@ -14,7 +14,7 @@ import {
   AUTH_ADAPTERS_TOKEN,
   AuthServerGuard,
   type AuthorizedUser,
-} from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';
 
 import { FirebaseAuthAdapter } from '../adapters/firebase-auth.adapter';
 import { defineFirebaseAuth } from '../integration/define-firebase-auth';

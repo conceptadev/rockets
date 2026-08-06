@@ -5,7 +5,7 @@ import shared from '../../vitest.shared';
  * E2E project for the sample-server-auth example — registered in the root
  * `vitest.config.ts` `projects` list and runnable standalone via
  * `--config` from the workspace. The former Jest `moduleNameMapper`
- * entries are not ported: workspace packages (`@conceptadev/*`) resolve to their built `dist`
+ * entries are not ported: workspace packages (`@concepta/*`) resolve to their built `dist`
  * through normal node resolution, and the `@nestjs/*` / `@concepta/*` /
  * `typeorm` mappings only replicated hoisting that node resolution already
  * provides.

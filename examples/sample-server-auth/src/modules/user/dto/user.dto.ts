@@ -1,4 +1,4 @@
-import { RocketsAuthUserDto } from '@conceptadev/rockets-auth';
+import { RocketsAuthUserDto } from '@concepta/rockets-auth';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
 import { IsOptional, ValidateNested } from 'class-validator';

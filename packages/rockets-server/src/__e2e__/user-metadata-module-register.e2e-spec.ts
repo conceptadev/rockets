@@ -16,11 +16,11 @@ import {
   HttpAdapterHost,
   Reflector,
 } from '@nestjs/core';
-import { AuthUserContextOverlay } from '@conceptadev/rockets-core';
+import { AuthUserContextOverlay } from '@concepta/rockets-core';
 import { CqrsModule } from '@nestjs/cqrs';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
-import { getDynamicRepositoryToken } from '@conceptadev/rockets-core';
+import { getDynamicRepositoryToken } from '@concepta/rockets-core';
 import { IsOptional, IsString } from 'class-validator';
 
 import {
@@ -28,7 +28,7 @@ import {
   USER_METADATA_MODULE_ENTITY_KEY,
   UpsertUserMetadataHandler,
   GetUserMetadataHandler,
-} from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';
 import { ServerAuthAdapterFixture } from '../__fixtures__/providers/server-auth.adapter.fixture';
 import { UserMetadataRepositoryFixture } from '../__fixtures__/repositories/user-metadata.repository.fixture';
 import { AuthServerGuard } from '../infrastructure/guards/auth-server.guard';

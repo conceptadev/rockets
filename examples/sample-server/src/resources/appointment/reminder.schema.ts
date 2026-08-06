@@ -4,7 +4,7 @@ import {
   f,
   rocketsFieldMeta,
   SchemaPersistenceRow,
-} from '@conceptadev/rockets-core/zod';
+} from '@concepta/rockets-core/zod';
 import { zodEntityCompiler } from '../../zod-bindings';
 import { AppointmentEntity } from './appointment.entity';
 

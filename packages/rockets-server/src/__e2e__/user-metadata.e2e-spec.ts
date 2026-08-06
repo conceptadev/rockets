@@ -4,13 +4,13 @@ import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { AuthUser } from '@conceptadev/rockets-core';
+import { AuthUser } from '@concepta/rockets-core';
 import {
   AuthorizedUser,
   UpsertUserMetadataCommand,
   GetUserMetadataQuery,
   UserMetadataEntityInterface,
-} from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';
 import { UserUpdateDto } from '../infrastructure/dtos/user.dto';
 import { IsString, IsOptional } from 'class-validator';
 

@@ -5,14 +5,14 @@
  * `update` methods used by production handlers.
  */
 import { describe, it, expect } from 'vitest';
-import { Where, type RepositoryInterface } from '@conceptadev/rockets-core';
+import { Where, type RepositoryInterface } from '@concepta/rockets-core';
 import {
   UpsertUserMetadataHandler,
   UpsertUserMetadataCommand,
   GetUserMetadataHandler,
   GetUserMetadataQuery,
   type UserMetadataEntityInterface,
-} from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';
 import { UserMetadataEntityFixture } from '../entities/user-metadata.entity.fixture';
 import { UserMetadataRepositoryFixture } from './user-metadata.repository.fixture';
 

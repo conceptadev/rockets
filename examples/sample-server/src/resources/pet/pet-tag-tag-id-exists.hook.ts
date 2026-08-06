@@ -8,11 +8,11 @@ import {
   EntityHook,
   type EntityHookContext,
   PassthroughEntityHookBase,
-} from '@conceptadev/rockets-core';
+} from '@concepta/rockets-core';
 import { PetTagEntity } from './pet-tag.schema';
 import { TagEntity } from '../tag/tag.zod';
 import type { Tag } from '../tag/tag.schema';
-import { InjectDynamicRepository } from '@conceptadev/rockets-core';
+import { InjectDynamicRepository } from '@concepta/rockets-core';
 
 /**
  * Ensures `tagId` references an existing {@link TagEntity} row before the

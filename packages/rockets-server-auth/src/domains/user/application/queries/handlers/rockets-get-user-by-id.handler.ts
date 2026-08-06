@@ -5,7 +5,7 @@ import { GetUserQuery } from '@concepta/nestjs-user';
 import { RocketsEntity } from '../../../../../shared/constants/repository-entity-keys.constants';
 
 import { RocketsGetUserByIdQuery } from '../impl/rockets-get-user-by-id.query';
-import { createRepositoryContext } from '@conceptadev/rockets-core';
+import { createRepositoryContext } from '@concepta/rockets-core';
 
 @QueryHandler(RocketsGetUserByIdQuery)
 export class RocketsGetUserByIdHandler
