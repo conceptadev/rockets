@@ -32,7 +32,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/conceptadev/rockets.git",
+    "url": "git+https://github.com/btwld/rockets.git",
     "directory": "packages/rockets-core"
   },
   "engines": {
@@ -93,5 +93,21 @@
     "zod": {
       "optional": true
     }
-  }
+  },
+  "homepage": "https://github.com/btwld/rockets/tree/main/packages/rockets-core#readme",
+  "bugs": {
+    "url": "https://github.com/btwld/rockets/issues"
+  },
+  "keywords": [
+    "nestjs",
+    "rockets",
+    "core",
+    "crud",
+    "repository",
+    "typescript",
+    "zod",
+    "dependency-injection",
+    "backend",
+    "api"
+  ]
 }

@@ -1050,9 +1050,10 @@ rockets/
 
 | Command                       | Purpose                                                                                                    |
 | ----------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `yarn publish:conceptadev`        | Build + publish all `@conceptadev/*` packages to npm (`--tag alpha`). See `scripts/publish-conceptadev-order.txt`. |
+| `yarn publish:conceptadev`    | Build + publish all `@conceptadev/*` packages to npm (`--tag alpha`).                                      |
 | `yarn install && yarn build`  | Bootstrap + compile every local `@conceptadev/*` package.                                                      |
-| `yarn test`                   | Unit tests (Vitest).                                                                            |
+| `yarn test`                   | Unit tests (Vitest).                                                                                       |
+| `yarn typecheck:spec`         | Type-checks test files — the runner only transpiles them.                                                  |
 | `yarn test:e2e`               | E2E tests across all packages and sample apps.                                                             |
 | `yarn lint` / `yarn lint:fix` | ESLint.                                                                                                    |
 | `yarn lint:md`                | Markdown lint.                                                                                             |
@@ -1081,18 +1082,29 @@ or coding agent can run it every time.
 - Do not add unused public types, flags, or options. If a field is not consumed
   by runtime behavior, remove it.
 - Update docs and tests for any changed public behavior.
-- Run, in order: `yarn build`, `yarn test`, `yarn test:e2e`, `yarn lint`.
+- Run, in order: `yarn build`, `yarn typecheck:spec`, `yarn test`,
+  `yarn test:e2e`, `yarn lint:all`.
 - If an example app covers the behavior, run its targeted e2e too.
 
 ## 5. Contributing
 
-- Open an issue first for anything beyond a minor bug fix or doc tweak.
+Read [CONTRIBUTING.md](CONTRIBUTING.md) for the full setup, the checks your
+PR must pass, and the code standards. In short:
+
+- Open an issue first for anything beyond a minor bug fix or doc tweak; use
+  [Discussions](https://github.com/btwld/rockets/discussions) for design
+  questions.
 - Match the existing patterns: read the surrounding code before editing, prefer
   minimal diffs, no `any`, no `as unknown as Type`.
-- Run `yarn lint && yarn test && yarn test:e2e` before sending a PR.
+- Run `yarn build && yarn typecheck:spec && yarn lint:all && yarn test &&
+  yarn test:e2e` before sending a PR.
 - The repo uses [Conventional Commits](https://www.conventionalcommits.org/)
   (`feat:`, `fix:`, `chore:`, …). `husky` runs commit-msg + pre-commit hooks; do
   not bypass them.
+- Reporting a vulnerability: see [SECURITY.md](SECURITY.md) — never in a public
+  issue.
+- Participation is governed by our
+  [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## 6. Security
 

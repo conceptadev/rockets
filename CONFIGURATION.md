@@ -303,7 +303,7 @@ parent's `subResources` map, keyed by a **real relation property of the parent
 entity** (typo → compile error). The parent materialises it into a peer CRUD
 resource with a composed path and auto-injected `PathScopeGuard` + `PathScopeHook`.
 
-```
+```text
 parent path  +  :<parentKey>  +  segment
    /pets      +     /:petId      +    /tags     →   /pets/:petId/tags
 ```
@@ -512,7 +512,8 @@ Full JWT / signup / login / recovery / OTP / admin / invitation system. Returns
 an `AuthBootstrap` (adapter defaults to `RocketsJwtAuthAdapter`).
 
 > **The option shape is NOT `{ jwt, signup, login, … }`.** It is
-> `DefineRocketsAuthInput = RocketsAuthAsyncOptions & { persistence, userMetadata, userCrud, … }`.
+> `DefineRocketsAuthInput = RocketsAuthAsyncOptions &`
+> `{ persistence, userMetadata, userCrud, … }`.
 > The wire-protocol config lives under a nested `authentication` block.
 
 ```ts
@@ -669,7 +670,8 @@ flowchart TD
 
 ## 11. Open items (flagged from the code)
 
-1. **Repository import source** — on this branch `@conceptadev/rockets-repository` is
+1. **Repository import source** — on this branch
+   `@conceptadev/rockets-repository` is
    full self-contained source (no longer a thin `@concepta/nestjs-repository`
    wrapper). `RepositoryModuleInterface` / `InjectDynamicRepository` resolve from
    it directly; no decorator-to-core migration is pending here.
@@ -709,7 +711,8 @@ flowchart TD
 
 ### 12.1 Convertibility map (the proof — every field lands somewhere real)
 
-Verified against source: crud `CrudRequestConfig = { params, body, bodyBatch, validation }`
+Verified against source: crud
+`CrudRequestConfig = { params, body, bodyBatch, validation }`
 (`crud-request-config.interface.ts`), `CrudQueryOptionsInterface.join: JoinClause[]`,
 repository `RepositoryProviderOptions = { key, entity, relations }`
 (`repository-provider-options.interface.ts`), `JoinClause` + relation `through`
@@ -730,7 +733,8 @@ metadata (`join-clause.interface.ts`, `repository-relation-metadata.interface.ts
 | `relations` (`federated`, `distinctFilter`) | `CrudJoin` / `join: JoinClause[]` | `relations: Record<name, RelationActionConfig>` |
 | sub-resource link (direct FK) | `request.params` + `PathScopeHook` (where + stamp) | `WhereCondition` on FK column |
 
-**M:N note:** the repository models junctions (`through: { relation, fromKey, toKey }`)
+**M:N note:** the repository models junctions
+(`through: { relation, fromKey, toKey }`)
 and `WhereCondition.relation` lets a filter cross a join — so M:N is supported for
 **reads** (list/read through the junction). A **writable** sub-resource stays a
 direct 1:N FK (you stamp one column on create), which is why a junction is exposed

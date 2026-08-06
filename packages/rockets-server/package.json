@@ -1,7 +1,7 @@
 {
   "name": "@conceptadev/rockets",
   "version": "0.0.1-dev.0",
-  "description": "Rockets server — external-auth composition layer: AuthAdapterInterface, /me, declarative CRUD resources, and database-agnostic persistence",
+  "description": "Rockets server \u2014 external-auth composition layer: AuthAdapterInterface, /me, declarative CRUD resources, and database-agnostic persistence",
   "author": "Thiago Ramalho <thiago.ramalho@concepta.com>",
   "license": "BSD-3-Clause",
   "main": "dist/index.js",
@@ -25,13 +25,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/conceptadev/rockets.git",
+    "url": "git+https://github.com/btwld/rockets.git",
     "directory": "packages/rockets-server"
   },
   "bugs": {
-    "url": "https://github.com/conceptadev/rockets/issues"
+    "url": "https://github.com/btwld/rockets/issues"
   },
-  "homepage": "https://github.com/conceptadev/rockets/tree/main/packages/rockets-server#readme",
+  "homepage": "https://github.com/btwld/rockets/tree/main/packages/rockets-server#readme",
   "keywords": [
     "nestjs",
     "rockets",
@@ -46,7 +46,7 @@
   ],
   "funding": {
     "type": "github",
-    "url": "https://github.com/sponsors/conceptadev"
+    "url": "https://github.com/sponsors/btwld"
   },
   "engines": {
     "node": ">=18.0.0",

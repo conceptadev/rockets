@@ -50,7 +50,9 @@ under-typed test doubles), all fixed rather than suppressed. Two
 interfaces that consumers legitimately need
 (`EmailSendOptionsInterface`, `RocketsAuthUserMetadataModelUpdatableInterface`)
 are now exported from `@conceptadev/rockets-auth`'s public index instead
-of being reachable only through `dist/` paths. Migration incidentally fixed two latent defects: the
+of being reachable only through `dist/` paths.
+
+Migration incidentally fixed two latent defects: the
 sample-code-review Jest config had lost its `setupFiles` wiring (its
 FIREBASE_PROJECT_ID default never applied), and a lazy-`require` cycle
 workaround in `rockets-auth-handler-overrides.spec.ts` became typed

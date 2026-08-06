@@ -15,7 +15,7 @@ deleting the wrappers. Consolidate `rockets-common` into `rockets-app`.
 
 ## End-state package layout
 
-```
+```text
 app  ←  repository  ←  crud         (lowest → highest layer)
               ↑                ↖
         repository-typeorm      core ← server / server-auth
@@ -50,7 +50,8 @@ app  ←  repository  ←  crud         (lowest → highest layer)
     `@concepta/nestjs-common` kernel symbols split to app (52 files, 7 upstream-only
     symbols kept).
   - Rewired core `HookModule.forRoot({})` → `RocketsAppModule.forRoot()`.
-  - This resolved the silent `AppContextHost`-identity bug (the #1 risk flagged up front).
+  - This resolved the silent `AppContextHost`-identity bug (the #1 risk
+    flagged up front).
 
 ## Why the `@bitwild` repository now DIVERGES from upstream (important)
 
@@ -65,7 +66,8 @@ upstream `@concepta/nestjs-*` packages hits a cross-identity mismatch
 
 1. **`rockets-crud`: `crud.operations`, `crud.adapter`** — PRE-EXISTING
    crud-internal test infra (dist-module `DataSource` DI wiring; ctx-overlay
-   generics in the test helper). Never passed in this repo's baseline. Source is clean.
+   generics in the test helper). Never passed in this repo's baseline. Source
+     is clean.
 
 2. **`rockets-server-auth`: `me-password`, `password-history`** — ARCHITECTURAL
    BOUNDARY. server-auth composes `@bitwild` core (→ forces the `@bitwild`
@@ -77,6 +79,7 @@ upstream `@concepta/nestjs-*` packages hits a cross-identity mismatch
 ## OPEN DECISION for next session (server-auth)
 
 Closing the server-auth boundary needs one of:
+
 - **(A)** Migrate the upstream auth stack (`nestjs-invitation`, `nestjs-user`,
   `nestjs-otp`, `nestjs-role`, `nestjs-password`, `nestjs-federated`) to the
   `@bitwild` stack. Large, separate effort — makes server-auth fully self-contained.
@@ -103,7 +106,8 @@ yarn test:e2e       # 31/35 suites, 248 tests pass; 4 fail (above)
 - Build is `tsc --build` (incremental) — it does NOT delete orphaned `dist`
   outputs. After renames, `rm -rf packages/*/dist *.tsbuildinfo` before a build,
   or stale `.js` files reference deleted packages at runtime.
-- Tests historically transpiled with `strict:false` (now via the Vitest/SWC pipeline); some adopted code had
+- Tests historically transpiled with `strict:false` (now via the Vitest/SWC
+pipeline); some adopted code had
   bugs that only surface there (union narrowing). Fixes must pass BOTH modes.
 - Adding `reflect-metadata` as a dep to `rockets-app` made yarn nest a
   redundant `@nestjs/common` under `packages/rockets-app/node_modules`, which

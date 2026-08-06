@@ -20,13 +20,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/conceptadev/rockets.git",
+    "url": "git+https://github.com/btwld/rockets.git",
     "directory": "packages/rockets-server-auth"
   },
   "bugs": {
-    "url": "https://github.com/conceptadev/rockets/issues"
+    "url": "https://github.com/btwld/rockets/issues"
   },
-  "homepage": "https://github.com/conceptadev/rockets/tree/main/packages/rockets-server-auth#readme",
+  "homepage": "https://github.com/btwld/rockets/tree/main/packages/rockets-server-auth#readme",
   "keywords": [
     "nestjs",
     "rockets",
@@ -46,7 +46,7 @@
   ],
   "funding": {
     "type": "github",
-    "url": "https://github.com/sponsors/conceptadev"
+    "url": "https://github.com/sponsors/btwld"
   },
   "engines": {
     "node": ">=18.0.0",

@@ -564,7 +564,8 @@ specific rules:
   feature-local `TypeOrmModule.forFeature()`.
 - When changing public exports, confirm the symbol is real runtime surface and
   documented here.
-- Run `yarn build`, `yarn test`, `yarn test:e2e`, and `yarn lint` from the
+- Run `yarn build`, `yarn typecheck:spec`, `yarn test`, `yarn test:e2e`, and
+  `yarn lint:all` from the
   repository root.
 
 ---

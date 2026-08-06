@@ -446,7 +446,8 @@ external-auth server rules:
   hard-code a storage adapter.
 - If `RocketsModule.forRoot` / `forRootAsync` behavior changes, update both
   docs and e2e coverage.
-- Run `yarn build`, `yarn test`, `yarn test:e2e`, and `yarn lint` from the
+- Run `yarn build`, `yarn typecheck:spec`, `yarn test`, `yarn test:e2e`, and
+  `yarn lint:all` from the
   repository root.
 
 ---
