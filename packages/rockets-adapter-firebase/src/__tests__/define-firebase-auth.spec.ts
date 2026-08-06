@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { FirebaseAuthAdapter } from '../adapters/firebase-auth.adapter';
 import { defineFirebaseAuth } from '../integration/define-firebase-auth';
 import { FirebaseAuthModule } from '../modules/firebase-auth.module';

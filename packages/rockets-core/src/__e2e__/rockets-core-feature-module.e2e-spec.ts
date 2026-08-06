@@ -8,6 +8,7 @@
  *  - `module.controllers` are mounted by Nest.
  *  - Per-entity `repository` override creates a separate adapter group.
  */
+import { describe, it, expect, afterEach } from 'vitest';
 import {
   Controller,
   Get,
@@ -193,6 +194,50 @@ describe('RocketsCoreModule + defineModuleResource (e2e)', () => {
       .get('/widgets/ping')
       .set('Authorization', 'Bearer valid')
       .expect(200, { value: 'widget-pong' });
+  });
+
+  /**
+   * GUARDS AN UPSTREAM STRING MATCH. `SafeCrudContextInterceptor` decides
+   * to skip the CRUD overlay on non-CRUD routes by matching
+   * `error.message.includes('No entity defined')` — `CrudContextException`
+   * carries no error code, so the message IS the contract.
+   *
+   * A plain `@Controller` with no `@CrudEntity` is exactly the case that
+   * match exists for. If upstream rewords the message, the interceptor
+   * stops swallowing and this route 500s. Keep this test until the
+   * upstream fix (concepta/nestjs-crud 5249672f) ships and the
+   * interceptor can be deleted.
+   */
+  it('serves a non-CRUD controller without a 500 (upstream message contract)', async () => {
+    const widgetFeature = defineModuleResource({
+      entities: [{ key: 'widget', entity: WidgetEntity }],
+      controllers: [WidgetController],
+      providers: [WidgetService],
+    });
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        RocketsCoreModule.forRoot({
+          auth: createStubAuthBootstrap(FeatureE2eAuthAdapter),
+          providers: [FeatureE2eAuthAdapter],
+          userMetadata: featureUserMetadataConfig,
+          repository: DEFAULT_FAKE_ADAPTER,
+          resources: [widgetFeature],
+          global: true,
+        }),
+      ],
+      providers: [{ provide: APP_GUARD, useClass: AuthServerGuard }],
+    }).compile();
+
+    app = moduleRef.createNestApplication();
+    await app.init();
+
+    const response = await request(app.getHttpServer())
+      .get('/widgets/ping')
+      .set('Authorization', 'Bearer valid');
+
+    expect(response.status).not.toBe(500);
+    expect(response.status).toBe(200);
   });
 
   it('routes a per-entity `repository` override to a separate adapter group', async () => {

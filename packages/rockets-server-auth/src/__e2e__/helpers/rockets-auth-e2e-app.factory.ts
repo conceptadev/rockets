@@ -1,9 +1,8 @@
-import './patch-crud-module-for-e2e.bootstrap';
-
+import { vi } from 'vitest';
 import { RocketsAuthExceptionsFilter } from '../../shared/compatibility/rockets-auth-exceptions.filter';
 import { EmailSendInterface } from '@concepta/nestjs-common';
 import { EventModule } from '@concepta/nestjs-event';
-import { TypeOrmRepositoryModule } from '@bitwild/rockets-repository-typeorm';
+import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
 import {
   DynamicModule,
   INestApplication,
@@ -15,7 +14,7 @@ import { ConfigService } from '@nestjs/config';
 import { HttpAdapterHost } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { RocketsModule } from '@bitwild/rockets';
+import { RocketsModule } from '@concepta/rockets';
 import { ormConfig } from '../../__fixtures__/ormconfig.fixture';
 import { InvitationEntityFixture } from '../../__fixtures__/invitation/invitation.entity.fixture';
 import { UserOtpEntityFixture } from '../../__fixtures__/user/user-otp-entity.fixture';
@@ -50,7 +49,7 @@ import {
     {
       provide: ConfigService,
       useValue: {
-        get: jest.fn().mockImplementation((key: string) => {
+        get: vi.fn().mockImplementation((key: string) => {
           if (key === 'jwt.secret') return 'test-secret';
           if (key === 'jwt.expiresIn') return '1h';
           return null;

@@ -1,9 +1,11 @@
+import { vi, describe, it, expect } from 'vitest';
+
 import { FirebaseTokenVerifierService } from '../services/firebase-token-verifier.service';
 import * as firebaseAdminAuthUtils from '../utils/resolve-firebase-admin-auth.util';
 
 describe(FirebaseTokenVerifierService.name, () => {
   it('delegates to firebase-admin auth() and forwards `checkRevoked`', async () => {
-    const verifyIdToken = jest.fn().mockResolvedValue({
+    const verifyIdToken = vi.fn().mockResolvedValue({
       uid: 'fb-1',
       email: 'a@b.com',
       iat: 1234,
@@ -23,7 +25,7 @@ describe(FirebaseTokenVerifierService.name, () => {
   });
 
   it('defaults `checkRevoked` to false when not supplied', async () => {
-    const verifyIdToken = jest.fn().mockResolvedValue({ uid: 'fb-1' });
+    const verifyIdToken = vi.fn().mockResolvedValue({ uid: 'fb-1' });
     const fakeApp = { auth: () => ({ verifyIdToken }) };
 
     const verifier = new FirebaseTokenVerifierService(fakeApp);
@@ -34,8 +36,8 @@ describe(FirebaseTokenVerifierService.name, () => {
   });
 
   it('uses getAuth() for modular firebase-admin/app instances', async () => {
-    const verifyIdToken = jest.fn().mockResolvedValue({ uid: 'modular-1' });
-    const resolveAuthSpy = jest
+    const verifyIdToken = vi.fn().mockResolvedValue({ uid: 'modular-1' });
+    const resolveAuthSpy = vi
       .spyOn(firebaseAdminAuthUtils, 'resolveFirebaseAdminAuth')
       .mockReturnValue({ verifyIdToken });
 
@@ -54,7 +56,7 @@ describe(FirebaseTokenVerifierService.name, () => {
   it('propagates firebase-admin errors verbatim', async () => {
     const fakeApp = {
       auth: () => ({
-        verifyIdToken: jest.fn().mockRejectedValue(
+        verifyIdToken: vi.fn().mockRejectedValue(
           Object.assign(new Error('expired'), {
             code: 'auth/id-token-expired',
           }),

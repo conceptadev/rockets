@@ -55,9 +55,9 @@ export interface SchemaEntityCompilerOptions {
  *    relations) and ignore the rest explicitly.
  *
  * The TypeORM reference implementation is
- * `@bitwild/rockets-repository-typeorm/zod` (`typeOrmZodEntityCompiler`); the
+ * `@concepta/rockets-repository-typeorm/zod` (`typeOrmZodEntityCompiler`); the
  * DB-agnostic zod resource layer that consumes this contract is
- * `@bitwild/rockets-core/zod`.
+ * `@concepta/rockets-core/zod`.
  *
  * Wire it up by exposing the compiler on the adapter's
  * {@link RepositoryModuleInterface.entityCompiler} so schema layers can

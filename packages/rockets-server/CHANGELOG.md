@@ -1,7 +1,7 @@
 # Changelog
 
-All notable changes to the `@bitwild/rockets` package will be documented in this
-file.
+All notable changes to the `@concepta/rockets` package will be documented
+in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to
@@ -12,8 +12,8 @@ and this project adheres to
 ### Added
 
 - **`RocketsAuthIntegration`** (`ROCKETS_AUTH_INTEGRATION_KIND`,
-  `isRocketsAuthIntegration`) in `@bitwild/rockets-core` for bundles returned by
-  `@bitwild/rockets-auth` **`defineRocketsAuth()`**.
+  `isRocketsAuthIntegration`) in `@concepta/rockets-core` for bundles
+  returned by `@concepta/rockets-auth` **`defineRocketsAuth()`**.
 
 - **Auth adapter chain** — `auth` in `RocketsModule.forRoot` / `forRootAsync`
   now accepts an array: `auth: [AdapterA, AdapterB]`. The `AuthServerGuard`
@@ -21,10 +21,10 @@ and this project adheres to
   inputs continue to work (normalised to a one-element chain).
 
 - **`extractBearerToken(request: AuthRequest): string | null`** exported from
-  `@bitwild/rockets-core` (and re-exported from `@bitwild/rockets`). Replaces
+  `@concepta/rockets-core` (and re-exported from `@concepta/rockets`). Replaces
   the removed `BearerTokenAuthAdapter` helper.
 
-- **`AUTH_ADAPTERS_TOKEN`** exported from `@bitwild/rockets-core`. Injects the
+- **`AUTH_ADAPTERS_TOKEN`** exported from `@concepta/rockets-core`. Injects the
   full ordered adapter chain as `ReadonlyArray<AuthAdapterInterface>`.
 
 - **`collectAdapters`** and **`resolveAuthChain`** exported from the respective
@@ -62,7 +62,7 @@ and this project adheres to
   implement `AuthAdapterInterface` directly.
 
 - **`AUTH_ADAPTER_TOKEN`** (singular) — replaced by `AUTH_ADAPTERS_TOKEN` (the
-  full chain). `RocketsAuthProvider` alias on `@bitwild/rockets` is also
+  full chain). `RocketsAuthProvider` alias on `@concepta/rockets` is also
   removed.
 
 - **`AuthorizeUserInterface`** and **`ValidateTokenInterface`** — removed.
@@ -92,7 +92,7 @@ export class MyAdapter extends BearerTokenAuthAdapter {
 **After:**
 
 ```typescript
-import { extractBearerToken } from '@bitwild/rockets-core';
+import { extractBearerToken } from '@concepta/rockets-core';
 
 @Injectable()
 export class MyAdapter implements AuthAdapterInterface {
@@ -256,10 +256,10 @@ const adapters = app.get<AuthAdapterInterface[]>(AUTH_ADAPTERS_TOKEN);
 - Compatible with NestJS 10.x
 - BSD-3-Clause license
 
-[1.0.0-alpha.7]: https://github.com/btwld/rockets/releases/tag/v1.0.0-alpha.7
-[1.0.0-alpha.5]: https://github.com/btwld/rockets/releases/tag/v1.0.0-alpha.5
-[1.0.0-alpha.4]: https://github.com/btwld/rockets/releases/tag/v1.0.0-alpha.4
-[1.0.0-alpha.3]: https://github.com/btwld/rockets/releases/tag/v1.0.0-alpha.3
-[1.0.0-alpha.2]: https://github.com/btwld/rockets/releases/tag/v1.0.0-alpha.2
-[1.0.0-alpha.1]: https://github.com/btwld/rockets/releases/tag/v1.0.0-alpha.1
-[1.0.0-alpha.0]: https://github.com/btwld/rockets/releases/tag/v1.0.0-alpha.0
+[1.0.0-alpha.7]: https://github.com/conceptadev/rockets/releases/tag/v1.0.0-alpha.7
+[1.0.0-alpha.5]: https://github.com/conceptadev/rockets/releases/tag/v1.0.0-alpha.5
+[1.0.0-alpha.4]: https://github.com/conceptadev/rockets/releases/tag/v1.0.0-alpha.4
+[1.0.0-alpha.3]: https://github.com/conceptadev/rockets/releases/tag/v1.0.0-alpha.3
+[1.0.0-alpha.2]: https://github.com/conceptadev/rockets/releases/tag/v1.0.0-alpha.2
+[1.0.0-alpha.1]: https://github.com/conceptadev/rockets/releases/tag/v1.0.0-alpha.1
+[1.0.0-alpha.0]: https://github.com/conceptadev/rockets/releases/tag/v1.0.0-alpha.0

@@ -1,3 +1,4 @@
+import { vi, type Mock, describe, it, expect, beforeEach } from 'vitest';
 import {
   ExecutionContext,
   ForbiddenException,
@@ -8,13 +9,15 @@ import { IsAssignedRoleQuery } from '@concepta/nestjs-role';
 import { AdminGuard } from './admin.guard';
 import type { RocketsAuthSettingsInterface } from '../shared/interfaces/rockets-auth-settings.interface';
 
-jest.mock('../shared/utils/error-logging.helper', () => ({
-  logAndGetErrorDetails: jest.fn().mockReturnValue({ errorMessage: 'err' }),
+vi.mock('../shared/utils/error-logging.helper', () => ({
+  logAndGetErrorDetails: vi.fn().mockReturnValue({ errorMessage: 'err' }),
 }));
 
 describe('AdminGuard', () => {
   let guard: AdminGuard;
-  let queryBus: jest.Mocked<Pick<QueryBus, 'execute'>>;
+  // Vitest's Mocked<> cannot absorb QueryBus.execute's 4 overloads from a
+  // bare vi.fn(); the sibling specs' `{ execute: Mock }` shape is used instead.
+  let queryBus: { execute: Mock };
   let settings: RocketsAuthSettingsInterface;
 
   const createContext = (user: { id: string } | undefined): ExecutionContext =>
@@ -25,7 +28,7 @@ describe('AdminGuard', () => {
     } as ExecutionContext);
 
   beforeEach(() => {
-    queryBus = { execute: jest.fn() };
+    queryBus = { execute: vi.fn() };
     settings = {
       role: { adminRoleName: 'admin' },
     } as RocketsAuthSettingsInterface;

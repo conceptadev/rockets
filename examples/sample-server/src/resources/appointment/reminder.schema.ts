@@ -1,5 +1,10 @@
 import { z } from 'zod';
-import { createdEntity, f, SchemaPersistenceRow } from '@bitwild/rockets-core/zod';
+import {
+  createdEntity,
+  f,
+  rocketsFieldMeta,
+  SchemaPersistenceRow,
+} from '@concepta/rockets-core/zod';
 import { zodEntityCompiler } from '../../zod-bindings';
 import { AppointmentEntity } from './appointment.entity';
 
@@ -27,7 +32,9 @@ export const reminderSchema = createdEntity({
   // appointment is a classic handwritten entity (no zod schema), so this
   // relation targets the entity class — the entity-class target form.
   appointmentId: f.fk(() => AppointmentEntity, { include: 'default' }),
-  sendAt: z.iso.datetime(),
+  sendAt: z.iso
+    .datetime()
+    .register(rocketsFieldMeta, { dto: { response: true } }),
   sent: f.bool({
     default: false,
     description: 'Whether the reminder was dispatched',

@@ -1,3 +1,4 @@
+import { vi, type Mocked, describe, it, expect, beforeEach } from 'vitest';
 import { CommandBus } from '@nestjs/cqrs';
 import { UnauthorizedException } from '@nestjs/common';
 import {
@@ -12,10 +13,10 @@ import { AbstractChangeMyPasswordHandler } from './abstract-change-my-password.h
 
 describe(ChangeMyPasswordHandler.name, () => {
   let handler: ChangeMyPasswordHandler;
-  let commandBus: jest.Mocked<Pick<CommandBus, 'execute'>>;
+  let commandBus: Mocked<Pick<CommandBus, 'execute'>>;
 
   beforeEach(() => {
-    commandBus = { execute: jest.fn().mockResolvedValue(undefined) };
+    commandBus = { execute: vi.fn().mockResolvedValue(undefined) };
     handler = new ChangeMyPasswordHandler(commandBus as unknown as CommandBus);
   });
 
@@ -86,7 +87,7 @@ describe(ChangeMyPasswordHandler.name, () => {
     });
 
     it('honors a subclass overriding only `persist` to mirror to a side-store', async () => {
-      const mirror = jest.fn();
+      const mirror = vi.fn();
 
       class WithMirror extends AbstractChangeMyPasswordHandler {
         protected async persist(

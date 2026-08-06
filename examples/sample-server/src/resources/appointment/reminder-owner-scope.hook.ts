@@ -5,10 +5,10 @@ import {
   type EntityHookContext,
   PassthroughEntityHookBase,
   getActor,
-} from '@bitwild/rockets-core';
+} from '@concepta/rockets-core';
 import { ReminderEntity } from './reminder.schema';
 import { AppointmentEntity, type AppointmentRow } from './appointment.entity';
-import { InjectDynamicRepository } from '@bitwild/rockets-core';
+import { InjectDynamicRepository } from '@concepta/rockets-core';
 
 /**
  * Scopes reminders to the authenticated user's own appointments.

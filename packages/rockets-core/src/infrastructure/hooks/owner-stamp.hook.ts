@@ -126,7 +126,10 @@ export interface OwnerStampHookOptions {
   readonly stampOn?: 'create' | 'create-update';
 }
 
-const ownerStampSubclassCache = new Map<
+// WeakMap, not Map: the key is the entity CLASS. A strong-keyed cache
+// would pin every entity (and its module closure) for the process
+// lifetime. Matches schema-registry.ts / paginated-dto.factory.ts.
+const ownerStampSubclassCache = new WeakMap<
   Type<PlainLiteralObject>,
   Map<string, Type<OwnerStampHook<PlainLiteralObject>>>
 >();

@@ -24,6 +24,7 @@
  *   2. Test 2 stays useful as a structural-contract test until the override
  *      module is removed.
  */
+import { describe, it, expect, beforeAll } from 'vitest';
 import {
   PasswordCreationService,
   PasswordStorageService,

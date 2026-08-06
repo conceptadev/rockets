@@ -1,5 +1,5 @@
 import { Injectable, PlainLiteralObject } from '@nestjs/common';
-import { EntityHook, PassthroughEntityHookBase } from '@bitwild/rockets-core';
+import { EntityHook, PassthroughEntityHookBase } from '@concepta/rockets-core';
 import { EventBus } from '@nestjs/cqrs';
 import { PetEntity } from '../resources/pet/pet.schema';
 import { PetCreatedEvent } from './pet-created.event';

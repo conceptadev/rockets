@@ -5,12 +5,12 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { DataSource } from 'typeorm';
 import { AppModule } from './app.module';
-import { ExceptionsFilter } from '@bitwild/rockets';
+import { ExceptionsFilter } from '@concepta/rockets';
 
 import {
   ROLE_CRUD_ENTITY_KEY,
   USER_ROLE_ENTITY_KEY,
-} from '@bitwild/rockets-auth';
+} from '@concepta/rockets-auth';
 import {
   AssignRoleCommand,
   CreateRoleCommand,
@@ -21,7 +21,7 @@ import { CreateUserCommand, GetUserByEmailQuery } from '@concepta/nestjs-user';
 import helmet from 'helmet';
 import { RoleEntity } from './modules/role/role.entity';
 import { UserMetadataEntity } from './modules/user/entities/user-metadata.entity';
-import { SwaggerUiService } from '@bitwild/rockets-core';
+import { SwaggerUiService } from '@concepta/rockets-core';
 
 // v8 commands/queries call `AppContextHost.from(ctx)` which only accepts
 // an `AppContextHost`, `null`, `undefined`, or an empty object `{}`.

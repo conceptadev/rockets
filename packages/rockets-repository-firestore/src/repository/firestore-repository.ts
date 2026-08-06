@@ -170,7 +170,7 @@ export class FirestoreRepository<
   ): Promise<Entity> {
     const field = this.requireSoftDeleteField();
     const id = this.resolveId(entity);
-    const removedAt = new Date().toISOString();
+    const removedAt = new Date();
     const patch = { [field]: removedAt } as DeepPartial<Entity>;
     const merged = this.toStore({ ...entity, ...patch, id });
     await this.options.backend.set(this.options.collection, id, merged, true);
@@ -239,13 +239,25 @@ export class FirestoreRepository<
     return randomUUID();
   }
 
+  /**
+   * `Date` values are handed to the backend AS DATES. Firestore has a
+   * native `Timestamp` type and the admin SDK maps `Date` onto it both
+   * ways, so the type survives the round trip and no reconstruction is
+   * needed on read.
+   *
+   * This used to write `value.toISOString()`, which threw the type away
+   * — and `fromStore` then tried to guess it back from the field name
+   * (`startsWith('date') || endsWith('At')`). That made the returned
+   * TYPE depend on the field NAME: `dateCreated` came back a `Date`,
+   * `birthday` and `validFrom` came back strings.
+   */
   private toStore(entity: DeepPartial<Entity>): Record<string, unknown> {
     const next: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(entity)) {
       if (value === undefined) {
         continue;
       }
-      next[key] = value instanceof Date ? value.toISOString() : value;
+      next[key] = value;
     }
     const id = (entity as { readonly id?: string }).id;
     if (typeof id === 'string') {
@@ -255,16 +267,7 @@ export class FirestoreRepository<
   }
 
   private fromStore(row: Record<string, unknown>): Entity {
-    const next: Record<string, unknown> = { ...row };
-    for (const [key, value] of Object.entries(next)) {
-      if (typeof value === 'string' && isIsoDateString(value)) {
-        const column = this.metadata.columns.find((col) => col.name === key);
-        if (column && (key.startsWith('date') || key.endsWith('At'))) {
-          next[key] = new Date(value);
-        }
-      }
-    }
-    return next as Entity;
+    return { ...row } as Entity;
   }
 }
 
@@ -278,10 +281,6 @@ function mapOrderBy<Entity extends PlainLiteralObject>(
     field: clause.field,
     direction: clause.order === SortOrder.DESC ? 'desc' : 'asc',
   }));
-}
-
-function isIsoDateString(value: string): boolean {
-  return /^\d{4}-\d{2}-\d{2}T/.test(value) && !Number.isNaN(Date.parse(value));
 }
 
 /** Narrows to this adapter instance (e.g. for Firestore-only helpers). */

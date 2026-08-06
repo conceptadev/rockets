@@ -10,7 +10,7 @@ import { RuntimeException as ConceptaRuntimeException } from '@concepta/nestjs-c
 import {
   ExceptionInterface,
   ExceptionsFilter,
-  RuntimeException as BitwildRuntimeException,
+  RuntimeException as ConceptaDevRuntimeException,
 } from '@concepta/nestjs-core';
 
 const ERROR_CODE_UNKNOWN = 'UNKNOWN';
@@ -18,23 +18,23 @@ const ERROR_MESSAGE_FALLBACK = 'Internal Server Error';
 
 /**
  * Until upstream `@concepta/nestjs-*` exceptions are ported to
- * `@bitwild/rockets-app`, their `RuntimeException` class is a different
- * constructor — bitwild's global filter treats them as unknown errors (500).
+ * `@concepta/rockets-app`, their `RuntimeException` class is a different
+ * constructor — conceptadev's global filter treats them as unknown errors (500).
  */
 @Catch()
 export class RocketsAuthExceptionsFilter implements ExceptionFilter {
-  private readonly bitwildFilter: ExceptionsFilter;
+  private readonly conceptadevFilter: ExceptionsFilter;
 
   constructor(private readonly httpAdapterHost: HttpAdapterHost) {
-    this.bitwildFilter = new ExceptionsFilter(httpAdapterHost);
+    this.conceptadevFilter = new ExceptionsFilter(httpAdapterHost);
   }
 
   catch(exception: unknown, host: ArgumentsHost): void {
     if (
-      exception instanceof BitwildRuntimeException ||
+      exception instanceof ConceptaDevRuntimeException ||
       exception instanceof HttpException
     ) {
-      this.bitwildFilter.catch(toExceptionInterface(exception), host);
+      this.conceptadevFilter.catch(toExceptionInterface(exception), host);
       return;
     }
 
@@ -66,7 +66,7 @@ export class RocketsAuthExceptionsFilter implements ExceptionFilter {
       return;
     }
 
-    this.bitwildFilter.catch(toExceptionInterface(exception), host);
+    this.conceptadevFilter.catch(toExceptionInterface(exception), host);
   }
 }
 

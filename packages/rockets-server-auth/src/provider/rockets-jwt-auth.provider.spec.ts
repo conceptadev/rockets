@@ -1,9 +1,10 @@
+import { vi, type Mock, describe, it, expect, beforeEach } from 'vitest';
 import { UnauthorizedException } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 import { ValidateAndVerifyAccessTokenQuery } from '@concepta/nestjs-authentication';
 import { GetAssignedRolesQuery } from '@concepta/nestjs-role';
 import { GetUserBySubjectQuery } from '@concepta/nestjs-user';
-import type { AuthRequest } from '@bitwild/rockets-core';
+import type { AuthRequest } from '@concepta/rockets-core';
 
 import { RocketsJwtAuthAdapter } from './rockets-jwt-auth.adapter';
 import { RocketsGetRolesByIdsQuery } from '../domains/role/application/queries/impl/rockets-get-roles-by-ids.query';
@@ -18,10 +19,10 @@ function makeRequest(authorization?: string): AuthRequest {
 
 describe('RocketsJwtAuthAdapter', () => {
   let provider: RocketsJwtAuthAdapter;
-  let queryBus: { execute: jest.Mock };
+  let queryBus: { execute: Mock };
 
   beforeEach(() => {
-    queryBus = { execute: jest.fn() };
+    queryBus = { execute: vi.fn() };
     provider = new RocketsJwtAuthAdapter(queryBus as unknown as QueryBus);
   });
 

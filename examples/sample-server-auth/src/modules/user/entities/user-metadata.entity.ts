@@ -7,7 +7,7 @@ import {
   OneToOne,
   JoinColumn,
 } from 'typeorm';
-import { BaseUserMetadataEntityInterface } from '@bitwild/rockets';
+import { BaseUserMetadataEntityInterface } from '@concepta/rockets';
 import { UserEntity } from './user.entity';
 
 @Entity('userMetadata')

@@ -49,10 +49,9 @@ function registerFieldMeta(schema: z.ZodType, meta: RocketsFieldMeta): void {
 }
 
 /**
- * Apply `.meta()` (when there is API-facing text) and the field-meta
- * registration (when there is db/dto metadata) to a built schema,
- * preserving its precise type. No-ops when there is nothing to attach, so
- * a plain `f.string()` stays a bare `z.string()`.
+ * Apply `.meta()` (when there is API-facing text) and field-meta
+ * registration (response opt-in + any db/dto knobs) to a built schema,
+ * preserving its precise type.
  */
 function decorate<T extends z.ZodType>(schema: T, o: FieldOpts): T {
   let result = schema;
@@ -69,13 +68,14 @@ function decorate<T extends z.ZodType>(schema: T, o: FieldOpts): T {
     ...(o.index ? { index: true } : {}),
     ...(o.column ? { column: o.column } : {}),
   };
+  // Scalar helpers opt into the response DTO by default — private fields
+  // pass `dto: { response: false }`. Raw `z.string()` without meta stays
+  // hidden (opt-in projection in projectSchema).
   const meta: RocketsFieldMeta = {
     ...(Object.keys(db).length > 0 ? { db } : {}),
-    ...(o.dto ? { dto: o.dto } : {}),
+    dto: { response: true, ...o.dto },
   };
-  if (Object.keys(meta).length > 0) {
-    registerFieldMeta(result, meta);
-  }
+  registerFieldMeta(result, meta);
   return result;
 }
 
@@ -106,15 +106,47 @@ const version = () =>
   z
     .int()
     .default(1)
-    .register(rocketsFieldMeta, { dto: { create: false, update: false } });
+    .register(rocketsFieldMeta, {
+      dto: { create: false, update: false, response: true },
+    });
+
+/** `f.owner` options — only the response role is configurable. */
+interface OwnerOpts {
+  /**
+   * Per-projection DTO roles. Only `response` is honoured: create and
+   * update are decided by the owner-column projection rule (the server
+   * stamps the value; a client-supplied one is rejected), so overriding
+   * them here would be silently ignored.
+   */
+  readonly dto?: Pick<RocketsDtoFieldMeta, 'response'>;
+}
 
 /**
  * Owner column (uuid). Marks the field `{ owner: true }` so the zod
- * resource layer auto-wires an `OwnerStampHook` for it. Combine with the
- * resource-level `owner: 'fieldName'` if the resource also scopes reads by
- * owner — the two declarations dedupe.
+ * resource layer auto-wires `OwnerStampHook` + `OwnerScopeHook` for it.
+ * Always excluded from create/update via the owner-column projection
+ * rule. Combine with the resource-level `owner: 'fieldName'` if declared
+ * both ways — the two dedupe.
+ *
+ * **Exposed on the response by default**, matching how mainstream APIs
+ * return an owner reference (GitHub `owner.id`, Stripe `customer`): the
+ * UI needs a stable key to group rows by author and to answer "is this
+ * mine?" without an extra round-trip. The value is an opaque,
+ * non-sequential uuid, so it is not enumerable.
+ *
+ * Opt out where the owner id has no business on the wire — typically a
+ * resource with `ownerScope: false` whose rows are visible to people
+ * other than the owner (public catalogue, shared team board):
+ *
+ * ```ts
+ * userId: f.owner({ dto: { response: false } })
+ * ```
  */
-const owner = () => z.uuid().register(rocketsFieldMeta, { owner: true });
+const owner = (o: OwnerOpts = {}) =>
+  z.uuid().register(rocketsFieldMeta, {
+    owner: true,
+    dto: { response: o.dto?.response ?? true },
+  });
 
 // --- Foreign key --------------------------------------------------------
 
@@ -134,7 +166,7 @@ const fk = (target: RocketsRelationFieldMeta['target'], o: FkOpts = {}) => {
   const { dto, db, ...relation } = o;
   const meta: RocketsFieldMeta = {
     db: { index: true, ...db },
-    ...(dto ? { dto } : {}),
+    dto: { response: true, ...dto },
     relation: { target, ...relation },
   };
   return z.uuid().register(rocketsFieldMeta, meta);
@@ -205,16 +237,44 @@ const enumField = <const T extends Record<string, string>>(
 };
 
 /**
+ * The declared wire shape, relaxed where persistence legitimately
+ * differs from it: any key documented as a `string` may also arrive as a
+ * `Date`, because computed fields routinely re-emit rows loaded by the
+ * ORM (`f.createdAt()` documents an ISO string; TypeORM hands back a
+ * `Date`, and the serializer converts it downstream).
+ *
+ * Everything else stays strict, which is the point: a hand-built object
+ * with the wrong type on a key, or a key read from a property that does
+ * not exist on the source row, fails to COMPILE instead of silently
+ * shipping `42` where the schema promised a string, or `undefined` where
+ * it promised a value.
+ */
+type ComputeResult<T> = T extends string
+  ? string | Date
+  : T extends ReadonlyArray<infer E>
+  ? ReadonlyArray<ComputeResult<E>>
+  : T extends object
+  ? { readonly [K in keyof T]: ComputeResult<T[K]> }
+  : T;
+
+/**
  * Response-only COMPUTED field. `fn` receives the raw row (after eager
  * relations load) and returns the projected value; the passed `schema`
  * documents its shape in OpenAPI. The `row` parameter is typed here, so
  * the callback needs no annotation — unlike a raw
  * `.register(rocketsFieldMeta, { compute })` inside a generic composer,
  * where contextual typing breaks and forces a manual `row` type.
+ *
+ * The RETURN is checked against {@link ComputeResult} of the schema:
+ * TypeScript is the contract for value types, and the runtime strip in
+ * `compileDtoClass` is the contract for which KEYS may ship. Undeclared
+ * keys are removed at serialization time (they cannot leak); wrong value
+ * types are caught in the editor (runtime `parse` would reject the
+ * legitimate `Date` case above).
  */
 const compute = <T extends z.ZodType>(
   schema: T,
-  fn: (row: Readonly<Record<string, unknown>>) => unknown,
+  fn: (row: Readonly<Record<string, unknown>>) => ComputeResult<z.output<T>>,
 ): T => {
   registerFieldMeta(schema, { compute: fn });
   return schema;

@@ -1,6 +1,6 @@
 {
   "name": "web",
-  "version": "0.1.0",
+  "version": "0.0.1-dev.0",
   "description": "sample-code-review Web — React UI (Firebase + GitHub); talks to local api :3001.",
   "private": true,
   "type": "module",

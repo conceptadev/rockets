@@ -1,3 +1,12 @@
+import {
+  vi,
+  type Mocked,
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+} from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Injectable } from '@nestjs/common';
 
@@ -36,11 +45,11 @@ function createInvitationAcceptedEvent(
 
 describe('InvitationUserAcceptanceListener', () => {
   let listener: InvitationUserAcceptanceListener;
-  let mockUserPortService: jest.Mocked<
+  let mockUserPortService: Mocked<
     Pick<RocketsAuthUserPortService, 'byId' | 'update'>
   >;
-  let mockPasswordService: jest.Mocked<PasswordCreationService>;
-  let mockCommandBus: jest.Mocked<Pick<CommandBus, 'execute'>>;
+  let mockPasswordService: Mocked<PasswordCreationService>;
+  let mockCommandBus: Mocked<Pick<CommandBus, 'execute'>>;
 
   const mockUser = {
     id: 'user-123',
@@ -94,23 +103,23 @@ describe('InvitationUserAcceptanceListener', () => {
 
   beforeEach(async () => {
     mockUserPortService = {
-      byId: jest.fn(),
-      update: jest.fn(),
-    } as jest.Mocked<Pick<RocketsAuthUserPortService, 'byId' | 'update'>>;
+      byId: vi.fn(),
+      update: vi.fn(),
+    } as Mocked<Pick<RocketsAuthUserPortService, 'byId' | 'update'>>;
 
     mockPasswordService = {
-      create: jest.fn(),
-    } as unknown as jest.Mocked<PasswordCreationService>;
+      create: vi.fn(),
+    } as unknown as Mocked<PasswordCreationService>;
 
     mockCommandBus = {
-      execute: jest.fn(),
-    } as jest.Mocked<Pick<CommandBus, 'execute'>>;
+      execute: vi.fn(),
+    } as Mocked<Pick<CommandBus, 'execute'>>;
 
     // Pass-through TransactionScope mock — runs the callback in-place so
     // assertions on side effects still work, and re-throws on failure so the
     // outer catch in the listener receives the error.
     const txScopeMock = {
-      run: jest.fn(
+      run: vi.fn(
         async (_ctx: unknown, fn: () => Promise<unknown>) => await fn(),
       ),
     } as unknown as TransactionScope;
@@ -153,7 +162,7 @@ describe('InvitationUserAcceptanceListener', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('handle', () => {

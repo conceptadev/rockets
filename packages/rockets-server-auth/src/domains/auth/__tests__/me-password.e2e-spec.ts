@@ -1,6 +1,5 @@
+import { vi, describe, it, expect, beforeAll, afterAll } from 'vitest';
 import 'reflect-metadata';
-
-import '../../../__e2e__/helpers/patch-crud-module-for-e2e.bootstrap';
 
 import { INestApplication } from '@nestjs/common';
 import { TestingModule } from '@nestjs/testing';
@@ -14,7 +13,7 @@ import {
 describe('MePassword (e2e) — Phase 1 (auth) — change-password flow', () => {
   let app: INestApplication;
   let module: TestingModule;
-  const mockEmail = { sendMail: jest.fn().mockResolvedValue(undefined) };
+  const mockEmail = { sendMail: vi.fn().mockResolvedValue(undefined) };
 
   const credentials = {
     email: 'me-password-e2e@example.com',

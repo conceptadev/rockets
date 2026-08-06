@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import 'reflect-metadata';
 import { getMetadataArgsStorage } from 'typeorm';
 import { z } from 'zod';
@@ -6,7 +7,7 @@ import {
   f,
   rocketsEntityMeta,
   rocketsFieldMeta,
-} from '@bitwild/rockets-core/zod';
+} from '@concepta/rockets-core/zod';
 import { compileEntity } from './compile-entity';
 
 function columnsFor(target: Function) {

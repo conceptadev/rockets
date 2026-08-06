@@ -1,3 +1,4 @@
+import { vi, describe, it, expect } from 'vitest';
 import type { DynamicModule, PlainLiteralObject, Type } from '@nestjs/common';
 import type { RepositoryBootstrap } from '../../domain/interfaces/repository-bootstrap.interface';
 import type { AppRegistrationPlan } from '../resource/planner/app-registration-plan.types';
@@ -15,7 +16,7 @@ function createBootstrap(name: string): RepositoryBootstrap {
   return {
     name,
     forFeature: () => ({ module: class FeatureModule {} }),
-    forRoot: jest.fn(
+    forRoot: vi.fn(
       (_entities: ReadonlyArray<Type<PlainLiteralObject>>): DynamicModule => ({
         module: class RootModule {},
       }),
@@ -29,7 +30,7 @@ describe('collectBootstrapForRootImports', () => {
       crudResources: [],
       entityRegistrations: [
         {
-          module: { name: 'plain', forFeature: jest.fn() },
+          module: { name: 'plain', forFeature: vi.fn() },
           entities: [{ key: 'widget', entity: WidgetEntity }],
         },
       ],

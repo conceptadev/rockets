@@ -3,7 +3,7 @@ import {
   RocketsAuthRoleCreatableInterface,
   RocketsAuthRoleDto,
   RocketsAuthRoleUpdatableInterface,
-} from '@bitwild/rockets-auth';
+} from '@concepta/rockets-auth';
 
 export class RoleDto extends RocketsAuthRoleDto {}
 

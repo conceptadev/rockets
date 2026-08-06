@@ -1,3 +1,4 @@
+import { describe, it, expect, afterEach } from 'vitest';
 import { rocketsAuthOptionsDefaultConfig } from './rockets-auth-options-default.config';
 
 describe('rocketsAuthOptionsDefaultConfig', () => {

@@ -1,3 +1,4 @@
+import { vi, type Mocked, describe, it, expect, beforeEach } from 'vitest';
 import { Logger } from '@nestjs/common';
 import {
   logAndGetErrorDetails,
@@ -6,17 +7,17 @@ import {
 } from './error-logging.helper';
 
 describe('ErrorLoggingHelper', () => {
-  let mockLogger: jest.Mocked<
+  let mockLogger: Mocked<
     Pick<Logger, 'error' | 'log' | 'warn' | 'debug' | 'verbose'>
   >;
 
   beforeEach(() => {
     mockLogger = {
-      error: jest.fn(),
-      log: jest.fn(),
-      warn: jest.fn(),
-      debug: jest.fn(),
-      verbose: jest.fn(),
+      error: vi.fn(),
+      log: vi.fn(),
+      warn: vi.fn(),
+      debug: vi.fn(),
+      verbose: vi.fn(),
     };
   });
 

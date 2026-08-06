@@ -1,4 +1,4 @@
-import { defineModuleResource } from '@bitwild/rockets-core';
+import { defineModuleResource } from '@concepta/rockets-core';
 import { FakeEmailGateway } from './email.gateway';
 import { NotifyOnPetCreatedListener } from './notify-on-pet-created.listener';
 import { PetCreatedEventHook } from './pet-created-event.hook';

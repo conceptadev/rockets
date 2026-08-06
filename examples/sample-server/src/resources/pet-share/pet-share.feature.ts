@@ -1,4 +1,4 @@
-import { defineModuleResource } from '@bitwild/rockets-core';
+import { defineModuleResource } from '@concepta/rockets-core';
 import { PetShareEntity } from './pet-share.entity';
 import { PetShareController } from './pet-share.controller';
 import { PetShareService } from './pet-share.service';

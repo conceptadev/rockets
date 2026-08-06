@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { rocketsFieldMeta } from '@bitwild/rockets-core/zod';
+import { rocketsFieldMeta } from '@concepta/rockets-core/zod';
 import { zodResource } from '../../zod-bindings';
 
 /**
@@ -23,7 +23,12 @@ export const authorSchema = z.object({
   id: z
     .uuid()
     .register(rocketsFieldMeta, { db: { pk: true, generated: true } }),
-  name: z.string().min(1).max(100).meta({ example: 'Machado de Assis' }),
+  name: z
+    .string()
+    .min(1)
+    .max(100)
+    .meta({ example: 'Machado de Assis' })
+    .register(rocketsFieldMeta, { dto: { response: true } }),
   dateCreated: z.iso
     .datetime()
     .register(rocketsFieldMeta, { db: { createdAt: true } }),
@@ -36,12 +41,17 @@ export const bookSchema = z.object({
   id: z
     .uuid()
     .register(rocketsFieldMeta, { db: { pk: true, generated: true } }),
-  title: z.string().min(1).max(200).meta({ example: 'Dom Casmurro' }),
+  title: z
+    .string()
+    .min(1)
+    .max(200)
+    .meta({ example: 'Dom Casmurro' })
+    .register(rocketsFieldMeta, { dto: { response: true } }),
   isbn: z
     .string()
     .max(20)
     .meta({ example: '9788535914061' })
-    .register(rocketsFieldMeta, { dto: { update: false } }),
+    .register(rocketsFieldMeta, { dto: { update: false, response: true } }),
   internalNote: z
     .string()
     .max(500)
@@ -49,6 +59,7 @@ export const bookSchema = z.object({
     .optional(),
   authorId: z.uuid().register(rocketsFieldMeta, {
     db: { index: true },
+    dto: { response: true },
     relation: {
       target: () => authorSchema,
       expose: true,

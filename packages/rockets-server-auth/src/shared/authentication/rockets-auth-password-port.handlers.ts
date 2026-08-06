@@ -9,7 +9,7 @@ import { ValidateCurrentPasswordCommand } from '@concepta/nestjs-password';
 import { UpdateUserPasswordCommand } from '@concepta/nestjs-user';
 
 import { GetActiveCredentialQuery } from '../../domains/user/application/queries/impl/get-active-credential.query';
-import { resolveBitwildAppContext } from '../compatibility/resolve-bitwild-app-context';
+import { resolveConceptadevAppContext } from '../compatibility/resolve-conceptadev-app-context';
 import {
   RocketsAuthSetPasswordPortCommand,
   RocketsAuthValidatePasswordPortCommand,
@@ -63,7 +63,7 @@ export class RocketsAuthSetPasswordPortHandler
   async execute(command: RocketsAuthSetPasswordPortCommand): Promise<void> {
     await this.commandBus.execute(
       new UpdateUserPasswordCommand(
-        resolveBitwildAppContext(command.ctx),
+        resolveConceptadevAppContext(command.ctx),
         command.assigneeId,
         {
           password: command.password,

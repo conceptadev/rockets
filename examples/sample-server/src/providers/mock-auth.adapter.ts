@@ -10,8 +10,8 @@ import type {
   AuthAttemptResult,
   AuthRequest,
   AuthorizedUser,
-} from '@bitwild/rockets';
-import { extractBearerToken } from '@bitwild/rockets';
+} from '@concepta/rockets';
+import { extractBearerToken } from '@concepta/rockets';
 
 const MOCK_USERS: Record<string, AuthorizedUser> = {
   'token-1': {

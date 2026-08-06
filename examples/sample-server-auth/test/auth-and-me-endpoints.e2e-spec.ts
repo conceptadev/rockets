@@ -1,13 +1,16 @@
+import { DataSource } from 'typeorm';
+import { RoleEntity } from '../src/modules/role/role.entity';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { CommandBus } from '@nestjs/cqrs';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
-import { ExceptionsFilter } from '@bitwild/rockets';
+import { ExceptionsFilter } from '@concepta/rockets';
 import { CreateRoleCommand, AssignRoleCommand } from '@concepta/nestjs-role';
 import {
   ROLE_CRUD_ENTITY_KEY,
   USER_ROLE_ENTITY_KEY,
-} from '@bitwild/rockets-auth';
+} from '@concepta/rockets-auth';
 import { AppModule } from '../src/app.module';
 
 /**
@@ -33,16 +36,18 @@ describe('Auth & Me Endpoints (e2e)', () => {
 
     await app.init();
 
-    // Seed required roles via CQRS (same pattern as role-based-access test)
+    // Seed required roles via CQRS (same pattern as role-based-access test).
+    // `ctx` is typed `PlainLiteralObject`; `{}` yields the same fresh
+    // `AppContextHost` that `null` produced.
     const commandBus = app.get(CommandBus);
     await commandBus.execute(
-      new CreateRoleCommand(null, ROLE_CRUD_ENTITY_KEY, {
+      new CreateRoleCommand({}, ROLE_CRUD_ENTITY_KEY, {
         name: 'admin',
         description: 'Administrator',
       }),
     );
     await commandBus.execute(
-      new CreateRoleCommand(null, ROLE_CRUD_ENTITY_KEY, {
+      new CreateRoleCommand({}, ROLE_CRUD_ENTITY_KEY, {
         name: 'user',
         description: 'Default user role',
       }),
@@ -212,9 +217,7 @@ describe('Auth & Me Endpoints (e2e)', () => {
       const adminUserId = signupRes.body.id;
 
       // Get admin role ID from DB
-      const { DataSource } = await import('typeorm');
       const dataSource = app.get(DataSource);
-      const { RoleEntity } = await import('../src/modules/role/role.entity');
       const roleRepo = dataSource.getRepository(RoleEntity);
       const adminRole = await roleRepo.findOne({ where: { name: 'admin' } });
 
@@ -222,7 +225,7 @@ describe('Auth & Me Endpoints (e2e)', () => {
         // Assign admin role
         await commandBus.execute(
           new AssignRoleCommand(
-            null,
+            {},
             USER_ROLE_ENTITY_KEY,
             adminRole.id,
             adminUserId,

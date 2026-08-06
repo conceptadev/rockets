@@ -4,7 +4,7 @@ import {
   CreateOneInterface,
   RemoveOneInterface,
   UpdateOneInterface,
-} from '@bitwild/rockets-core';
+} from '@concepta/rockets-core';
 
 /**
  * Pet Vaccination Interface

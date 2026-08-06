@@ -1,8 +1,13 @@
+import { defineSubResource } from './define-sub-resource';
+import { PathScopeGuard } from '../guards/path-scope.guard';
+import { PathScopeHook } from '../hooks/path-scope.hook';
+import { AfterCreateReloadHook } from '../hooks/after-create-reload.hook';
+import { describe, it, expect } from 'vitest';
 import { Injectable, type PlainLiteralObject } from '@nestjs/common';
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 import { Operation } from '@concepta/nestjs-core';
 import { Where } from '@concepta/nestjs-repository';
-import { TypeOrmRepositoryModule } from '@bitwild/rockets-repository-typeorm';
+import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
 import {
   CrudOperationResolver,
   type ConfigurableCrudGeneratedOptions,
@@ -1025,7 +1030,6 @@ describe('defineResource', () => {
     });
 
     it('materialises a single sub-resource into a full bundle', async () => {
-      const { defineSubResource } = await import('./define-sub-resource');
       const bundle = defineResource({
         key: 'widget',
         entity: WidgetEntity,
@@ -1046,7 +1050,6 @@ describe('defineResource', () => {
     });
 
     it('composes the path as <parent.path>/:<parentKey>/<segment>', async () => {
-      const { defineSubResource } = await import('./define-sub-resource');
       const bundle = defineResource({
         key: 'widget',
         entity: WidgetEntity,
@@ -1066,7 +1069,6 @@ describe('defineResource', () => {
     });
 
     it('honors explicit parentKey override', async () => {
-      const { defineSubResource } = await import('./define-sub-resource');
       const bundle = defineResource({
         key: 'widget',
         entity: WidgetEntity,
@@ -1087,7 +1089,6 @@ describe('defineResource', () => {
     });
 
     it('inherits parent tags when sub does not declare tags', async () => {
-      const { defineSubResource } = await import('./define-sub-resource');
       const bundle = defineResource({
         key: 'widget',
         entity: WidgetEntity,
@@ -1110,7 +1111,6 @@ describe('defineResource', () => {
     });
 
     it('overrides tags when sub declares its own', async () => {
-      const { defineSubResource } = await import('./define-sub-resource');
       const bundle = defineResource({
         key: 'widget',
         entity: WidgetEntity,
@@ -1131,8 +1131,6 @@ describe('defineResource', () => {
     });
 
     it('defaults owner to userId (guard injected) when owner is omitted', async () => {
-      const { defineSubResource } = await import('./define-sub-resource');
-      const { PathScopeGuard } = await import('../guards/path-scope.guard');
       const bundle = defineResource({
         key: 'widget',
         entity: WidgetEntity,
@@ -1152,8 +1150,6 @@ describe('defineResource', () => {
     });
 
     it('auto-injects PathScopeGuard into sub providers when owner is declared', async () => {
-      const { defineSubResource } = await import('./define-sub-resource');
-      const { PathScopeGuard } = await import('../guards/path-scope.guard');
       const bundle = defineResource({
         key: 'widget',
         entity: WidgetEntity,
@@ -1174,8 +1170,6 @@ describe('defineResource', () => {
     });
 
     it('honors owner override when auto-binding the guard', async () => {
-      const { defineSubResource } = await import('./define-sub-resource');
-      const { PathScopeGuard } = await import('../guards/path-scope.guard');
       const bundle = defineResource({
         key: 'widget',
         entity: WidgetEntity,
@@ -1196,10 +1190,6 @@ describe('defineResource', () => {
     });
 
     it('does NOT auto-inject AfterCreateReloadHook by default (opt-in)', async () => {
-      const { defineSubResource } = await import('./define-sub-resource');
-      const { AfterCreateReloadHook } = await import(
-        '../hooks/after-create-reload.hook'
-      );
       const bundle = defineResource({
         key: 'widget',
         entity: WidgetEntity,
@@ -1220,10 +1210,6 @@ describe('defineResource', () => {
     });
 
     it('opts in to AfterCreateReloadHook when reloadAfterCreate is true', async () => {
-      const { defineSubResource } = await import('./define-sub-resource');
-      const { AfterCreateReloadHook } = await import(
-        '../hooks/after-create-reload.hook'
-      );
       const bundle = defineResource({
         key: 'widget',
         entity: WidgetEntity,
@@ -1245,8 +1231,6 @@ describe('defineResource', () => {
     });
 
     it('skips the auto guard when owner is false', async () => {
-      const { defineSubResource } = await import('./define-sub-resource');
-      const { PathScopeGuard } = await import('../guards/path-scope.guard');
       const bundle = defineResource({
         key: 'widget',
         entity: WidgetEntity,
@@ -1266,8 +1250,71 @@ describe('defineResource', () => {
       expect(sub.core.providers ?? []).not.toContain(Guard);
     });
 
+    /**
+     * HIGH CWE-284: consumer-supplied hooks/providers must never drop the
+     * PathScope primitives, and PathScopeGuard must sit ahead of consumer
+     * providers. Asserted on `core.providers` — the artifact the DI
+     * container actually receives.
+     */
+    it('keeps PathScopeGuard and PathScopeHook when consumer supplies hooks/providers', async () => {
+      @EntityHook()
+      @Injectable()
+      class CustomPartHook extends PassthroughEntityHookBase<PartEntity> {}
+
+      class CustomProvider {}
+
+      const bundle = defineResource({
+        key: 'widget',
+        entity: WidgetEntity,
+        path: 'widgets',
+        tags: ['Widgets'],
+        subResources: {
+          parts: defineSubResource({
+            key: 'widgetPart',
+            entity: PartEntity,
+            hooks: [CustomPartHook],
+            providers: [CustomProvider],
+            operations: { list: { output: WidgetResponseDto } },
+          }),
+        },
+      });
+      const sub = bundle.subResources![0];
+      const Guard = PathScopeGuard.for('widgetId', 'widget', 'userId');
+      const Hook = PathScopeHook.for(PartEntity, 'widgetId', 'widgetId');
+      const providers = sub.core.providers ?? [];
+
+      // Already true today — documents that "silent replace" is a false positive.
+      expect(providers).toContain(Guard);
+      expect(providers).toContain(Hook);
+    });
+
+    it('prepends PathScopeGuard ahead of consumer providers', async () => {
+      class CustomProvider {}
+
+      const bundle = defineResource({
+        key: 'widget',
+        entity: WidgetEntity,
+        path: 'widgets',
+        tags: ['Widgets'],
+        subResources: {
+          parts: defineSubResource({
+            key: 'widgetPart',
+            entity: PartEntity,
+            providers: [CustomProvider],
+            operations: { list: { output: WidgetResponseDto } },
+          }),
+        },
+      });
+      const sub = bundle.subResources![0];
+      const Guard = PathScopeGuard.for('widgetId', 'widget', 'userId');
+      const providers = sub.core.providers ?? [];
+
+      expect(providers.indexOf(Guard)).toBeLessThan(
+        providers.indexOf(CustomProvider),
+      );
+    });
+
     it('throws at runtime when an empty-string segment key slips through (defence in depth)', async () => {
-      const { defineSubResource } = await import('./define-sub-resource');
       // Empty-string keys are blocked at compile time by the
       // `keyof Entity` constraint, so the call site uses
       // `@ts-expect-error` to assert TS rejects it. The runtime check
@@ -1293,7 +1340,6 @@ describe('defineResource', () => {
     });
 
     it('produces a separate persistence entry for the sub entity', async () => {
-      const { defineSubResource } = await import('./define-sub-resource');
       const bundle = defineResource({
         key: 'widget',
         entity: WidgetEntity,
@@ -1314,7 +1360,6 @@ describe('defineResource', () => {
     });
 
     it('inherits parent persistence module when sub does not declare one', async () => {
-      const { defineSubResource } = await import('./define-sub-resource');
       const bundle = defineResource({
         key: 'widget',
         entity: WidgetEntity,
@@ -1334,7 +1379,6 @@ describe('defineResource', () => {
     });
 
     it('composes deeply nested sub-resources (N-level)', async () => {
-      const { defineSubResource } = await import('./define-sub-resource');
       class GrandPartEntity {
         id!: string;
       }
@@ -1375,7 +1419,6 @@ describe('defineResource', () => {
     });
 
     it('composes a 3-level path (a/:aId/b/:bId/c/:cId/d)', async () => {
-      const { defineSubResource } = await import('./define-sub-resource');
       class L3 {
         id!: string;
       }
@@ -1423,7 +1466,6 @@ describe('defineResource', () => {
     });
 
     it('composes the path for every entry when parent path is an array', async () => {
-      const { defineSubResource } = await import('./define-sub-resource');
       const bundle = defineResource({
         key: 'widget',
         entity: WidgetEntity,
@@ -1445,7 +1487,6 @@ describe('defineResource', () => {
     });
 
     it('strips trailing slash on parent path before composition', async () => {
-      const { defineSubResource } = await import('./define-sub-resource');
       const bundle = defineResource({
         key: 'widget',
         entity: WidgetEntity,
@@ -1465,7 +1506,6 @@ describe('defineResource', () => {
     });
 
     it('kebab-cases the segment key for the URL by default (camelCase → kebab-case)', async () => {
-      const { defineSubResource } = await import('./define-sub-resource');
       class WithCamelCaseRelation {
         id!: string;
         name!: string;
@@ -1500,7 +1540,6 @@ describe('defineResource', () => {
       // The two entities below are STRUCTURALLY distinct so TypeScript's
       // structural typing actually engages the invariance check on the
       // phantom marker.
-      const { defineSubResource } = await import('./define-sub-resource');
       class CompletelyUnrelated {
         readonly nothingLikePartEntity: number = 0;
         readonly aBrandNewField: { whoa: boolean } = { whoa: true };
@@ -1524,7 +1563,6 @@ describe('defineResource', () => {
     });
 
     it('accepts a thunk `() => Class` for the sub entity (db-agnostic, circular-import safe)', async () => {
-      const { defineSubResource } = await import('./define-sub-resource');
       const bundle = defineResource({
         key: 'widget',
         entity: WidgetEntity,
@@ -1547,7 +1585,6 @@ describe('defineResource', () => {
     });
 
     it('honors segment override (decouples URL from entity property)', async () => {
-      const { defineSubResource } = await import('./define-sub-resource');
       const bundle = defineResource({
         key: 'widget',
         entity: WidgetEntity,

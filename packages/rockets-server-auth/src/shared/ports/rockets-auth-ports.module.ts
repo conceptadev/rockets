@@ -1,14 +1,5 @@
 import { Global, Module, Provider, Type } from '@nestjs/common';
-import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { PasswordPort, UserPort } from '@concepta/nestjs-authentication';
-import {
-  AUTHENTICATION_PASSWORD_PORT_TOKEN,
-  AUTHENTICATION_USER_PORT_TOKEN,
-} from '@concepta/nestjs-authentication/dist/authentication.constants';
 
-import { buildRocketsAuthenticationPorts } from '../authentication/build-rockets-authentication-ports';
-import { RAW_OPTIONS_TOKEN } from '../constants/rockets-auth-raw-options.token';
-import type { RocketsAuthOptionsInterface } from '../interfaces/rockets-auth-options.interface';
 import {
   RocketsAuthOtpPortService,
   ROCKETS_AUTH_OTP_PORT_TOKEN,
@@ -94,40 +85,7 @@ export class RocketsAuthPortsModule {
       ...resolvedOtpHandlers,
     ];
 
-    const authenticationUpstreamPortProviders: Provider[] = [
-      {
-        provide: AUTHENTICATION_USER_PORT_TOKEN,
-        inject: [QueryBus, CommandBus, RAW_OPTIONS_TOKEN],
-        useFactory: (
-          queryBus: QueryBus,
-          commandBus: CommandBus,
-          opts: RocketsAuthOptionsInterface,
-        ): UserPort =>
-          new UserPort(
-            buildRocketsAuthenticationPorts(opts).user,
-            queryBus,
-            commandBus,
-          ),
-      },
-      {
-        provide: AUTHENTICATION_PASSWORD_PORT_TOKEN,
-        inject: [CommandBus, RAW_OPTIONS_TOKEN],
-        useFactory: (
-          commandBus: CommandBus,
-          opts: RocketsAuthOptionsInterface,
-        ): PasswordPort =>
-          new PasswordPort(
-            buildRocketsAuthenticationPorts(opts).password,
-            commandBus,
-          ),
-      },
-    ];
-
-    const allProviders = [
-      ...serviceProviders,
-      ...authenticationUpstreamPortProviders,
-      ...handlerProviders,
-    ];
+    const allProviders = [...serviceProviders, ...handlerProviders];
 
     return {
       module: RocketsAuthPortsModule,

@@ -4,14 +4,15 @@
  * same `where` shape as Concepta's `Where.eq`, and the `findOne`, `create`,
  * `update` methods used by production handlers.
  */
-import { Where, type RepositoryInterface } from '@bitwild/rockets-core';
+import { describe, it, expect } from 'vitest';
+import { Where, type RepositoryInterface } from '@concepta/rockets-core';
 import {
   UpsertUserMetadataHandler,
   UpsertUserMetadataCommand,
   GetUserMetadataHandler,
   GetUserMetadataQuery,
   type UserMetadataEntityInterface,
-} from '@bitwild/rockets-core';
+} from '@concepta/rockets-core';
 import { UserMetadataEntityFixture } from '../entities/user-metadata.entity.fixture';
 import { UserMetadataRepositoryFixture } from './user-metadata.repository.fixture';
 

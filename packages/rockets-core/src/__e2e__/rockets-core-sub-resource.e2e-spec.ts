@@ -12,6 +12,7 @@
  *  5. Hard delete + soft delete on both top-level and sub-resource.
  *  6. List / read on both, with and without relation joins.
  */
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import {
   Global,
   INestApplication,
@@ -30,7 +31,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { TypeOrmRepositoryModule } from '@bitwild/rockets-repository-typeorm';
+import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
 import { getDynamicRepositoryToken } from '@concepta/nestjs-repository';
 import { Expose, Type } from 'class-transformer';
 import { IsOptional, IsString, IsUUID } from 'class-validator';
@@ -84,8 +85,8 @@ class ParentEntity {
   @DeleteDateColumn() dateDeleted?: Date;
   // Phantom relation properties — typed only; defineSubResource keys
   // must satisfy `keyof Parent`. The actual joins live on the child.
-  children?: unknown[];
-  childrenNoReload?: unknown[];
+  children?: ChildEntity[];
+  childrenNoReload?: ChildNoReloadEntity[];
 }
 
 @Entity('children')

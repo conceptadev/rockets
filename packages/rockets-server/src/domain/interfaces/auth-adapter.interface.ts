@@ -1,1 +1,1 @@
-export type { AuthAdapterInterface } from '@bitwild/rockets-core';
+export type { AuthAdapterInterface } from '@concepta/rockets-core';

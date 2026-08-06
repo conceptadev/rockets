@@ -1,6 +1,6 @@
 ---
 name: e2e-fixer
-description: Diagnose and fix failing or flaky tests in this monorepo, with a bias for e2e (*.e2e-spec.ts). Use when tests fail after a change, when a suite passes alone but fails in the full run, on fixture/bootstrap drift, barrel-registration collisions, teardown/open-handle leaks, or missing jest matchers. Triggers on "fix the tests", "e2e failing", "flaky test", "tests pass alone but not together".
+description: Diagnose and fix failing or flaky tests in this monorepo, with a bias for e2e (*.e2e-spec.ts). Use when tests fail after a change, when a suite passes alone but fails in the full run, on fixture/bootstrap drift, barrel-registration collisions, teardown/open-handle leaks, or runner/config drift. Triggers on "fix the tests", "e2e failing", "flaky test", "tests pass alone but not together".
 ---
 
 # E2E Fixer
@@ -10,29 +10,31 @@ are environment/isolation, not logic — separate the two before editing source.
 
 ## First: is it mine, pre-existing, or flaky?
 
-1. Run the failing suite **in isolation**: `corepack yarn jest --config jest.config-e2e.json "<suite-path>"`.
-   Passes alone but fails in the full run → isolation/teardown flake, not a logic bug.
+1. Run the failing suite **in isolation**: `corepack yarn vitest run --project e2e-packages "<suite-path>"`.
+   Passes alone but fails in the full run → see the known rotating-404 flake in CHANGELOG.md before digging.
 2. Establish a baseline with `git stash` (keep node_modules) and re-run the suite. Same failure on clean HEAD
    → pre-existing, not your regression. Say so explicitly; do not "fix" pre-existing breakage silently.
-3. Filter ts-jest noise: pipe through `grep -vE "TS151002|ts-jest\[config\]"`.
 
 ## Known failure classes and fixes
 
+- **Rotating full-run failures = host memory pressure, not a code bug.** Symptoms vary (unexpected 404, an
+  expected 401 arriving as 404, `Parse Error: Expected HTTP/`) with a different victim suite each run. Tell:
+  the failing run takes ~20x longer than a passing one (216s vs 10.8s) and the real failures are 30s timeouts
+  with no HTTP response. Check free RAM / pageouts before touching any test. Diagnosis and evidence in
+  CHANGELOG.md "Intermittent e2e failures". Fix the host (`--maxWorkers=2`, free memory) — never retry-loop,
+  skip, or weaken assertions.
 - **Barrel registration collisions.** Importing a `domains/*/index` barrel registers `@CommandHandler`/
-  `@QueryHandler` in global Reflect metadata and breaks later Nest apps in the same worker. Never import a barrel
-  in an e2e file that boots an app. Barrel-only specs run **last** via `scripts/jest-e2e-barrel-last-sequencer.cjs`
-  (wired in both `jest.config-e2e.json` and the coverage config).
-- **Teardown / open handles.** "force exiting Jest" / "worker failed to exit" + `Parse Error: Expected HTTP/`
-  from supertest = a prior app wasn't closed. Ensure `await app.close()` in `afterEach`/`afterAll`; for
-  cross-suite flakiness use per-file isolation (`scripts/run-isolated-e2e.cjs`, as sample-server does).
+  `@QueryHandler` in global Reflect metadata and breaks later Nest apps in the same process. Never import a
+  barrel in an e2e file that boots an app. (The barrel-last sequencer is gone; no barrel-only specs exist.)
+- **Teardown / open handles.** A hanging suite process + `Parse Error: Expected HTTP/` from supertest = an app
+  wasn't closed. Ensure `await app.close()` in `afterEach`/`afterAll`. `forceExit` is off on purpose — a leak
+  hangs and gets reported instead of being masked.
 - **Fixture drift (v7→v8).** Symptoms: 500s, `Class extends value undefined`, `x is not a function`. Fix the
   fixture to the v8 pattern — `RepositoryModule.forFeature` for every entity, no duplicate `TypeOrmModule.forRoot`,
   correct `extras` (user/otp/role/federated/invitation). Reuse `packages/rockets-server-auth/src/__fixtures__/`
   and `__e2e__/helpers/`.
-- **Missing matchers.** `toBeArrayOfSize is not a function` → `jest-extended` not wired. Add
-  `"setupFilesAfterEnv": ["jest-extended/all"]` to the jest config (it was a real gap, not a bug).
-- **Module-resolution after a bump.** `Cannot find module '@concepta/.../subpath'` in jest → see **upstream-migrator**:
-  fix `tsconfig.jest.json` (`isolatedModules` + `module: commonjs`) and `moduleNameMapper`.
+- **Module-resolution after a bump.** `Cannot find module '@concepta/.../subpath'` → see **upstream-migrator**.
+  Vitest resolves the package `exports` maps natively; if a subpath fails, the exports map itself is wrong.
 
 ## Rules
 

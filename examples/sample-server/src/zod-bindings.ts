@@ -1,15 +1,15 @@
-import { bindZodResources } from '@bitwild/rockets-core/zod';
+import { bindZodResources } from '@concepta/rockets-core/zod';
 import {
   typeOrmZodEntityCompiler,
   compileEntity,
-} from '@bitwild/rockets-repository-typeorm/zod';
+} from '@concepta/rockets-repository-typeorm/zod';
 
 /**
  * THE app-level persistence-compiler choice — one line, one place.
  *
  * The zod layer never hardwires an ORM: entity generation goes through
  * the adapter-neutral `SchemaEntityCompiler` contract
- * (`@bitwild/rockets-core`). Swapping the whole app to another store is
+ * (`@concepta/rockets-core`). Swapping the whole app to another store is
  * changing the import below (e.g. to a `firestoreZodEntityCompiler`)
  * plus the `repository:` adapter in app.module. Schemas, resources,
  * DTOs and Swagger stay untouched.

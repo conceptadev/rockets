@@ -3,11 +3,11 @@
 [![NestJS](https://img.shields.io/badge/NestJS-12-ea2845?logo=nestjs&logoColor=white)](https://nestjs.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
-> Canonical reference app for `@bitwild/rockets` micro apps — JWT auth,
+> Canonical reference app for `@concepta/rockets` micro apps — JWT auth,
 > zod-first resources, owner scoping, and `defineTypeOrmRepository`.
 
-Monorepo dev: `@bitwild/*` resolves via `workspace:^` to local
-`packages/*`. External apps install from npm (`@bitwild/rockets@alpha`).
+Monorepo dev: `@concepta/*` resolves via `workspace:^` to local
+`packages/*`. External apps install from npm (`@concepta/rockets@alpha`).
 
 For **Firebase / external IdP** auth, use
 [sample-code-review](../sample-code-review) instead.
@@ -17,7 +17,7 @@ For **Firebase / external IdP** auth, use
 ## 1. Introduction
 
 `sample-server` is the runnable, e2e-tested reference for
-`@bitwild/rockets`. It exists to:
+`@concepta/rockets`. It exists to:
 
 - Demonstrate every flavour of `resources[]` bundle: `defineResource()`
   (CRUD), `defineSubResource()` (nested CRUD), `defineModuleResource()`
@@ -117,7 +117,7 @@ curl http://localhost:3000/pets -H "Authorization: Bearer $TOKEN"
 
 ### Add a new zod CRUD resource
 
-1. `src/resources/<thing>/<thing>.schema.ts` — zod schema + `f.*` field helpers (`@bitwild/rockets-core/zod`).
+1. `src/resources/<thing>/<thing>.schema.ts` — zod schema + `f.*` field helpers (`@concepta/rockets-core/zod`).
 2. `src/resources/<thing>/<thing>.resource.ts` —
    `zodResource({ schema, hooks?, operations })`.
 3. `src/resources/<thing>/index.ts` — re-export.

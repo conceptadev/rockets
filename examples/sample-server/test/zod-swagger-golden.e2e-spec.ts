@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeAll } from 'vitest';
 import { INestApplication, Module } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import {
@@ -6,8 +7,8 @@ import {
   SwaggerModule,
 } from '@nestjs/swagger';
 import { cleanupOpenApiDoc } from 'nestjs-zod';
-import { RocketsModule, defineTypeOrmRepository } from '@bitwild/rockets';
-import type { ResourceInput } from '@bitwild/rockets';
+import { RocketsModule, defineTypeOrmRepository } from '@concepta/rockets';
+import type { ResourceInput } from '@concepta/rockets';
 import {
   UserMetadataCreateDto,
   UserMetadataEntity,

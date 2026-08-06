@@ -6,11 +6,12 @@ process.env.GITHUB_OAUTH_CALLBACK_URL = 'http://localhost:3001/github/oauth/call
 process.env.OPENAI_API_KEY = '';
 process.env.OPEN_API_KEY = '';
 
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import request from 'supertest';
 
-import { ExceptionsFilter } from '@bitwild/rockets';
+import { ExceptionsFilter } from '@concepta/rockets';
 
 const FIREBASE_USER = 'Bearer fb-user-token';
 
@@ -80,6 +81,10 @@ describe('sample-code-review — Firebase + GitHub + analysis (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
+    // Dynamic ON PURPOSE: src/app.module.ts reads FIREBASE_USE_FAKE at
+    // MODULE SCOPE (line ~20), and under ESM semantics a static import
+    // would evaluate it before this file's process.env assignments above.
+    // Deferring the import to beforeAll guarantees fake mode is set first.
     const { AppModule } = await import('../src/app.module');
     app = await NestFactory.create(AppModule, { logger: ['error'] });
     app.useGlobalPipes(
@@ -123,16 +128,16 @@ describe('sample-code-review — Firebase + GitHub + analysis (e2e)', () => {
       .expect(200);
 
     expect(
-      repos.body.some((r: { fullName: string }) => r.fullName === 'btwld/rockets'),
+      repos.body.some((r: { fullName: string }) => r.fullName === 'conceptadev/rockets'),
     ).toBe(true);
 
     const review = await request(app.getHttpServer())
       .post('/analysis/review')
       .set('Authorization', FIREBASE_USER)
-      .send({ owner: 'btwld', repo: 'rockets' })
+      .send({ owner: 'conceptadev', repo: 'rockets' })
       .expect(202);
 
-    expect(review.body.fullName).toBe('btwld/rockets');
+    expect(review.body.fullName).toBe('conceptadev/rockets');
     expect(['queued', 'fetching', 'analyzing']).toContain(review.body.status);
 
     const reportId = review.body.id as string;
@@ -143,7 +148,7 @@ describe('sample-code-review — Firebase + GitHub + analysis (e2e)', () => {
     const secondReview = await request(app.getHttpServer())
       .post('/analysis/review')
       .set('Authorization', FIREBASE_USER)
-      .send({ owner: 'btwld', repo: 'rockets' })
+      .send({ owner: 'conceptadev', repo: 'rockets' })
       .expect(202);
     const secondReportId = secondReview.body.id as string;
     const secondCompleted = await waitForTerminalReport(app, secondReportId);
@@ -197,12 +202,12 @@ describe('sample-code-review — Firebase + GitHub + analysis (e2e)', () => {
 
     await request(app.getHttpServer())
       .get('/analysis/reports')
-      .query({ github: 'btwld/rockets' })
+      .query({ github: 'conceptadev/rockets' })
       .set('Authorization', FIREBASE_USER)
       .expect(200)
       .expect((res) => {
         expect(res.body.length).toBeGreaterThanOrEqual(1);
-        expect(res.body[0].fullName).toBe('btwld/rockets');
+        expect(res.body[0].fullName).toBe('conceptadev/rockets');
       });
 
     await request(app.getHttpServer())

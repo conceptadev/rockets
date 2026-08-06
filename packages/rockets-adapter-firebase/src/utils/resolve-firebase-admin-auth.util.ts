@@ -1,5 +1,7 @@
 import { getAuth } from 'firebase-admin/auth';
 
+import { FirebaseAuthConfigurationException } from '../exceptions/firebase-auth-configuration.exception';
+
 export interface FirebaseAdminAuth {
   verifyIdToken(
     token: string,
@@ -22,5 +24,13 @@ export function resolveFirebaseAdminAuth(
   if (typeof legacy.auth === 'function') {
     return legacy.auth();
   }
-  return getAuth(firebaseApp as Parameters<typeof getAuth>[0]);
+  try {
+    return getAuth(firebaseApp as Parameters<typeof getAuth>[0]);
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : 'Unknown Firebase app error';
+    throw new FirebaseAuthConfigurationException(
+      `Firebase app is not a usable Firebase Admin auth app: ${message}`,
+    );
+  }
 }

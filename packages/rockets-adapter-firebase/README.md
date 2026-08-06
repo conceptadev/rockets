@@ -1,6 +1,6 @@
-# @bitwild/rockets-adapter-firebase
+# @concepta/rockets-adapter-firebase
 
-[![NPM](https://img.shields.io/npm/v/@bitwild/rockets-adapter-firebase)](https://www.npmjs.com/package/@bitwild/rockets-adapter-firebase)
+[![NPM](https://img.shields.io/npm/v/@concepta/rockets-adapter-firebase)](https://www.npmjs.com/package/@concepta/rockets-adapter-firebase)
 [![NestJS](https://img.shields.io/badge/NestJS-12-ea2845?logo=nestjs&logoColor=white)](https://nestjs.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
@@ -8,15 +8,15 @@
 > maps the decoded payload to `AuthorizedUser`, and plugs into the standard
 > `auth` chain.
 
-**Status:** preview (`1.0.0-alpha.9` on npm, dist-tag `alpha`). API expected to
+**Status:** preview (`0.0.1-dev.0` on npm, dist-tag `alpha`). API expected to
 stay shape-compatible through 1.0.
 
 ---
 
 ## 1. Introduction
 
-`@bitwild/rockets-adapter-firebase` is a self-contained Nest module that
-implements `AuthAdapterInterface` from `@bitwild/rockets-core`. It owns:
+`@concepta/rockets-adapter-firebase` is a self-contained Nest module that
+implements `AuthAdapterInterface` from `@concepta/rockets-core`. It owns:
 
 - `FirebaseAuthAdapter` — extracts the bearer token, verifies it with the
   Firebase Admin SDK, and returns a Rockets `AuthorizedUser`.
@@ -53,7 +53,7 @@ is an optional peer dep; the package types model only the subset of
 ### Install
 
 ```bash
-yarn add @bitwild/rockets-adapter-firebase@alpha firebase-admin
+yarn add @concepta/rockets-adapter-firebase@alpha firebase-admin
 ```
 
 `firebase-admin` is an optional peer dependency — required when you let the
@@ -68,9 +68,9 @@ Use the `defineFirebaseAuth()` helper. It returns an `AuthBootstrap` that
 
 ```typescript
 import { initializeApp, applicationDefault } from 'firebase-admin/app';
-import { defineFirebaseAuth } from '@bitwild/rockets-adapter-firebase';
-import { RocketsModule } from '@bitwild/rockets';
-import { defineModuleResource } from '@bitwild/rockets-core';
+import { defineFirebaseAuth } from '@concepta/rockets-adapter-firebase';
+import { RocketsModule } from '@concepta/rockets';
+import { defineModuleResource } from '@concepta/rockets-core';
 
 import { UserEntity } from './auth/user.entity';
 
@@ -178,13 +178,13 @@ FirebaseAuthModule.forRootAsync({
 ### Read the user inside a handler
 
 The adapter writes the `AuthorizedUser` onto the request the same way every
-Rockets adapter does. Use `@AuthUser()` from `@bitwild/rockets-core` in
-controllers, or `getActor(context)` from `@bitwild/rockets-core` inside CRUD
+Rockets adapter does. Use `@AuthUser()` from `@concepta/rockets-core` in
+controllers, or `getActor(context)` from `@concepta/rockets-core` inside CRUD
 command/query handlers.
 
 ```typescript
-import { AuthUser } from '@bitwild/rockets-core';
-import type { AuthorizedUser } from '@bitwild/rockets-core';
+import { AuthUser } from '@concepta/rockets-core';
+import type { AuthorizedUser } from '@concepta/rockets-core';
 
 @Controller('profile')
 export class ProfileController {

@@ -1,3 +1,7 @@
+import { RocketsAuthPortsModule } from '../../../shared/ports/rockets-auth-ports.module';
+import { RocketsGetUserByEmailHandler } from '../application/queries/handlers/rockets-get-user-by-email.handler';
+import { RocketsCreateOtpHandler } from '../../../domains/otp/application/commands/handlers/rockets-create-otp.handler';
+import { describe, it, expect } from 'vitest';
 import { Injectable, PlainLiteralObject } from '@nestjs/common';
 import { AbstractSignupUserHandler } from '../application/commands/handlers/abstract-signup-user.handler';
 import { AbstractAdminUserListHandler } from '../application/commands/handlers/abstract-admin-user-list.handler';
@@ -16,9 +20,9 @@ import { SignupUserCommand } from '../application/commands/impl/signup-user.comm
 import {
   CrudAdapter,
   CrudResponsePaginatedInterface,
+  type CrudQueryInterface,
+  type CrudCommandInterface,
 } from '@concepta/nestjs-crud';
-import type { CrudQueryInterface } from '@concepta/nestjs-crud/dist/application/queries/interfaces/crud-query.interface';
-import type { CrudCommandInterface } from '@concepta/nestjs-crud/dist/application/commands/interfaces/crud-command.interface';
 import { RocketsAuthUserEntityInterface } from '../interfaces/rockets-auth-user-entity.interface';
 
 /**
@@ -289,20 +293,6 @@ describe('Handler Override Pattern', () => {
   // ─── Ports Module Handler Overrides ─────────────────────────
 
   describe('RocketsAuthPortsModule.forRoot() handler overrides', () => {
-    // Lazily import to avoid circular deps in test setup
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const {
-      RocketsAuthPortsModule,
-    } = require('../../../shared/ports/rockets-auth-ports.module');
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const {
-      RocketsGetUserByEmailHandler,
-    } = require('../application/queries/handlers/rockets-get-user-by-email.handler');
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const {
-      RocketsCreateOtpHandler,
-    } = require('../../../domains/otp/application/commands/handlers/rockets-create-otp.handler');
-
     @Injectable()
     class CustomGetUserByEmailHandler {
       async execute(): Promise<null> {

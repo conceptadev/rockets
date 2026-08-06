@@ -112,7 +112,15 @@ function getPathScopeGuardSubclass(
   ownerColumn: string,
   parentPk: string,
 ): Type<PathScopeGuard> {
-  const cacheKey = `${parentParam}::${parentEntityKey}::${ownerColumn}::${parentPk}`;
+  // JSON.stringify over the tuple, not a `::`-joined string: delimiter
+  // joining collides whenever a component can contain the delimiter, and
+  // nothing validates that these four never do.
+  const cacheKey = JSON.stringify([
+    parentParam,
+    parentEntityKey,
+    ownerColumn,
+    parentPk,
+  ]);
   const existing = pathScopeGuardCache.get(cacheKey);
   if (existing) return existing;
 

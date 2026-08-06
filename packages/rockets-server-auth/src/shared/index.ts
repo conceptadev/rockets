@@ -5,6 +5,13 @@ export { rocketsAuthOptionsDefaultConfig } from './config/rockets-auth-options-d
 
 export { RocketsAuthException } from './exceptions/rockets-auth.exception';
 
+// The mailerService option's contract — public so consumers can type their
+// own implementations without deep-importing upstream dist paths.
+export type {
+  EmailSendInterface,
+  EmailSendOptionsInterface,
+} from './email/email-send.interfaces';
+
 export {
   logAndGetErrorDetails,
   getErrorDetails,

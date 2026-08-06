@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { INestApplication, Module, ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import {
@@ -11,8 +12,8 @@ import {
   ExceptionsFilter,
   RocketsModule,
   defineTypeOrmRepository,
-} from '@bitwild/rockets';
-import type { ResourceInput } from '@bitwild/rockets';
+} from '@concepta/rockets';
+import type { ResourceInput } from '@concepta/rockets';
 import {
   UserMetadataCreateDto,
   UserMetadataEntity,

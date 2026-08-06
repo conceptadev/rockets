@@ -1,3 +1,4 @@
+import { vi, type Mocked, describe, it, expect } from 'vitest';
 import type {
   RepositoryInterface,
   Where as WhereType,
@@ -11,19 +12,19 @@ import { RocketsGetRolesByIdsHandler } from './rockets-get-roles-by-ids.handler'
 import { RocketsGetRolesByIdsQuery } from '../impl/rockets-get-roles-by-ids.query';
 import { AbstractRocketsGetRolesByIdsHandler } from './abstract-rockets-get-roles-by-ids.handler';
 
-type Repo = jest.Mocked<RepositoryInterface<RoleEntityInterface>>;
+type Repo = Mocked<RepositoryInterface<RoleEntityInterface>>;
 
 function repoFixture(): Repo {
   return {
     entityName: 'Role',
-    findOne: jest.fn(),
-    find: jest.fn(),
-    create: jest.fn(),
-    save: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    remove: jest.fn(),
-    merge: jest.fn(),
+    findOne: vi.fn(),
+    find: vi.fn(),
+    create: vi.fn(),
+    save: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
+    remove: vi.fn(),
+    merge: vi.fn(),
   } as unknown as Repo;
 }
 

@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import {
@@ -7,7 +8,7 @@ import {
 } from '@nestjs/swagger';
 import { cleanupOpenApiDoc } from 'nestjs-zod';
 import request from 'supertest';
-import { ExceptionsFilter } from '@bitwild/rockets';
+import { ExceptionsFilter } from '@concepta/rockets';
 import { AppModule } from '../src/app.module';
 
 /**

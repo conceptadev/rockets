@@ -94,7 +94,7 @@ export { isRepositoryBootstrap } from './domain/interfaces/repository-bootstrap.
 
 // Repository abstraction primitives — re-exported so downstream layers
 // (`rockets`, `rockets-server-auth`) consume the persistence contract through
-// core and never depend on `@bitwild/rockets-repository` directly.
+// core and never depend on `@concepta/rockets-repository` directly.
 export type {
   RepositoryModuleInterface,
   RepositoryInterface,
@@ -165,7 +165,7 @@ export type {
 } from './domain/interfaces/rockets-resource-definition.interface';
 export type { CrudResource } from './domain/interfaces/rockets-resource-bundle.interface';
 
-// Swagger (re-exported so consumers don't need @bitwild/rockets-app directly)
+// Swagger (re-exported so consumers don't need @concepta/rockets-app directly)
 
 // Options interfaces
 export type { RocketsCoreOptionsInterface } from './infrastructure/config/interfaces/rockets-core-options.interface';
@@ -221,7 +221,7 @@ export { UpsertUserMetadataHandler } from './application/commands/handlers/upser
 export { GetUserMetadataQuery } from './application/queries/impl/get-user-metadata.query';
 export { AbstractGetUserMetadataHandler } from './application/queries/handlers/abstract-get-user-metadata.handler';
 export { GetUserMetadataHandler } from './application/queries/handlers/get-user-metadata.handler';
-// Shared infrastructure (formerly @bitwild/rockets-common)
+// Shared infrastructure (formerly @concepta/rockets-common)
 export * from './common';
 
 // Constants

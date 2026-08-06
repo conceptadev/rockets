@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import {
   INestApplication,
   ValidationPipe,
@@ -9,21 +10,22 @@ import request from 'supertest';
 import { CommandBus } from '@nestjs/cqrs';
 import { AppModule } from '../src/app.module';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
-import { ExceptionsFilter } from '@bitwild/rockets';
+import { ExceptionsFilter } from '@concepta/rockets';
 import { CreateRoleCommand, AssignRoleCommand } from '@concepta/nestjs-role';
 import {
   ROLE_CRUD_ENTITY_KEY,
   USER_ROLE_ENTITY_KEY,
-} from '@bitwild/rockets-auth';
+} from '@concepta/rockets-auth';
 import { acRules } from '../src/app.acl';
 
 // `AppContextHost.from()` only accepts `AppContextHost | null | undefined | {}`.
 // `createRepositoryContext({entity: ...})` returns a non-empty plain object,
 // which the upstream context validator rejects with "Expected AppContextHost
-// or nullish value, got object". Use `null` to match the bootstrap pattern in
-// `main.ts` and the sibling `auth-and-me-endpoints.e2e-spec.ts`.
-const roleCrudContext = null;
-const userRoleAssignmentContext = null;
+// or nullish value, got object". The command signatures type `ctx` as
+// `PlainLiteralObject`, so pass `{}` — `AppContextHost.from({})` yields the
+// same fresh context as `null` did.
+const roleCrudContext = {};
+const userRoleAssignmentContext = {};
 
 @Catch()
 class LoggingExceptionsFilter implements ExceptionFilter {

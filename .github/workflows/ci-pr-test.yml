@@ -23,8 +23,11 @@ jobs:
 
       - uses: actions/cache@v3
         with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+          # Relative paths: '/node_modules' never exists and
+          # hashFiles('/yarn.lock') hashes nothing, so the cache was
+          # silently dead and every run cold-installed.
+          path: node_modules
+          key: ${{ runner.os }}-modules-${{ hashFiles('yarn.lock') }}
 
       - name: Install
         run: yarn --immutable
@@ -32,8 +35,12 @@ jobs:
         run: yarn build
       - name: Linting
         run: yarn lint:all
+      - name: Typecheck tests
+        run: yarn typecheck:spec
       - name: Unit tests
         run: yarn test:ci
+      - name: E2E coverage
+        run: yarn test:e2e:cov
       - name: Save the PR number in an artifact
         shell: bash
         env:
@@ -50,3 +57,5 @@ jobs:
             junit.xml
             coverage/lcov.info
             coverage/coverage-final.json
+            coverage-e2e/lcov.info
+            coverage-e2e/coverage-final.json

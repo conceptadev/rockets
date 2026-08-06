@@ -7,13 +7,15 @@ description: Build, test, and lint commands for the project
 Run checks in this order after code changes:
 
 1. `yarn build`
-2. `yarn test`
-3. `yarn test:e2e`
-4. `yarn lint`
+2. `yarn typecheck:spec` — type-checks all test files (the runner only
+   transpiles; without this, spec type errors ship silently)
+3. `yarn test`
+4. `yarn test:e2e`
+5. `yarn lint`
 
-CI also runs: `yarn lint:all`, `yarn test:ci`
+CI also runs: `yarn lint:all`, `yarn typecheck:spec`, `yarn test:ci`
 
-Coverage: `yarn test:e2e:cov` (uses `jest.config-e2e.coverage.json`).
+Coverage: `yarn test:e2e:cov` (the `e2e-packages` project + `--coverage`).
 
 # Testing Strategy
 
@@ -27,19 +29,31 @@ with `supertest` are the primary way to verify behavior in this project.
 - Reuse existing fixtures from `packages/rockets-server-auth/src/__fixtures__/`.
 - Shared bootstrap helpers live in `packages/rockets-server-auth/src/__e2e__/helpers/`.
 
-## Barrel / Index File Tests
+## Test Runner: Vitest
 
-Importing a barrel like `domains/user/index` registers all `@CommandHandler` /
-`@QueryHandler` decorators in **global Reflect metadata**. This breaks later
-Nest apps created in the same Jest process (`maxWorkers: 1`).
+The monorepo tests under **Vitest 4** using the `projects` model: the
+root `vitest.config.ts` declares every project (`unit`, `e2e-packages`,
+and one per example workspace); `vitest.shared.ts` carries the common
+plugin/settings. Select with `--project <name>`; `vitest run` with no
+filter runs everything (requires `yarn build` first). Key facts:
 
-Rules for barrel tests:
+- Decorator metadata (Nest DI) comes from `unplugin-swc` — esbuild cannot
+  emit it. Never remove the swc plugin from a config.
+- `globals` is `false` everywhere: every test file imports what it uses
+  (`import { describe, it, expect, vi } from 'vitest'`).
+- `pool: 'forks'` runs each spec file in a fresh process — the isolation
+  the old Jest setup needed a custom runner script for. There is no
+  `scripts/` directory anymore; do not reintroduce one for test plumbing.
+- Intermittent full-run failures with a rotating victim suite are
+  **host memory pressure**, not a code defect — diagnosed in CHANGELOG.md
+  ("Intermittent e2e failures"). A failing run takes ~20x longer and the
+  captured failures are 30s timeouts, not real HTTP errors. On a
+  memory-constrained machine use `--maxWorkers=2` or free memory; never
+  "fix" it by retrying, skipping, or weakening assertions.
 
-1. Name the file descriptively (e.g. `rockets-auth-user-domain-barrel.e2e-spec.ts`).
-2. The custom **`testSequencer`** at `scripts/jest-e2e-barrel-last-sequencer.cjs`
-   guarantees it runs **after** all other e2e files. Both `jest.config-e2e.json`
-   and `jest.config-e2e.coverage.json` reference it.
-3. **Never** import a barrel inside an e2e file that also boots a Nest app.
+Also: **never** import a `domains/*/index` barrel inside an e2e file that
+boots a Nest app — barrels register `@CommandHandler` / `@QueryHandler` in
+global Reflect metadata.
 
 ## Test File Placement
 

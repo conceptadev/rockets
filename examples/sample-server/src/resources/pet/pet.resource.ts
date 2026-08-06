@@ -42,6 +42,10 @@ export const petResource = zodResource({
   // cycle); zodResource reuses that registered class.
   // key / path / tags derived: `pet` → `pets` / `['Pets']`.
   owner: 'userId', // stamps userId from the actor + excludes it from create/update
+  // Custom {@link PetOwnerOrSharedHook} owns read-side scoping (owner OR
+  // share). Opt out of the default OwnerScopeHook so the two filters do
+  // not AND together and collapse the share path.
+  ownerScope: false,
   hooks: [
     // OwnerStampHook for `userId` is auto-wired from `owner` (prepended
     // ahead of these).

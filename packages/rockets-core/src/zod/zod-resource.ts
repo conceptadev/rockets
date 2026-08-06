@@ -8,7 +8,7 @@ import type {
 } from '../index';
 import { compileZodCore } from './compile-zod-resource-core';
 import { zodModuleResource } from './zod-module-resource';
-import { applyOwnerStamp, mergeRelations } from './zod-resource-composition';
+import { applyOwnerHooks, mergeRelations } from './zod-resource-composition';
 import type {
   ZodResourceDefinition,
   ZodResourceManifest,
@@ -42,6 +42,7 @@ export function zodResource(
     entityCompiler,
     owner,
     ownerStamp,
+    ownerScope,
     ...passthrough
   } = definition;
 
@@ -61,11 +62,12 @@ export function zodResource(
     entity: core.entity,
     operations: core.operations,
     relations: mergeRelations(passthrough.relations, core.relations),
-    hooks: applyOwnerStamp(
+    hooks: applyOwnerHooks(
       core.entity,
       core.ownerColumns,
       passthrough.hooks,
       ownerStamp,
+      ownerScope,
       owner,
     ),
   });
@@ -90,6 +92,7 @@ export function zodSubResource(
     entity: entityOverride,
     entityCompiler,
     ownerStamp,
+    ownerScope,
     ...passthrough
   } = definition;
 
@@ -108,11 +111,12 @@ export function zodSubResource(
     entity: core.entity,
     operations: core.operations,
     relations: mergeRelations(passthrough.relations, core.relations),
-    hooks: applyOwnerStamp(
+    hooks: applyOwnerHooks(
       core.entity,
       core.ownerColumns,
       passthrough.hooks,
       ownerStamp,
+      ownerScope,
       undefined,
     ),
   });

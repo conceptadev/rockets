@@ -13,6 +13,7 @@
  *  3. **Entity binding.** The generated hook is fenced to its entity and
  *     does not fire for operations on a different one.
  */
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import {
   ConflictException,
   Global,
@@ -26,7 +27,7 @@ import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { TypeOrmRepositoryModule } from '@bitwild/rockets-repository-typeorm';
+import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
 import {
   getDynamicRepositoryToken,
   type RepositoryInterface,

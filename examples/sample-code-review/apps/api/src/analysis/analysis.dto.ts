@@ -12,7 +12,7 @@ import {
 } from './code-review-report.types';
 
 export class RunCodeReviewDto {
-  @ApiProperty({ example: 'btwld' })
+  @ApiProperty({ example: 'conceptadev' })
   @IsString()
   @IsNotEmpty()
   @MaxLength(128)
@@ -27,8 +27,8 @@ export class RunCodeReviewDto {
 
 export class ListCodeReviewReportsQueryDto {
   @ApiPropertyOptional({
-    description: 'Filter by GitHub repo (matches fullName, e.g. btwld/rockets)',
-    example: 'btwld/rockets',
+    description: 'Filter by GitHub repo (matches fullName, e.g. conceptadev/rockets)',
+    example: 'conceptadev/rockets',
   })
   @IsOptional()
   @IsString()
@@ -154,7 +154,7 @@ export class CodeReviewReportResponseDto {
   @ApiProperty()
   id!: string;
 
-  @ApiProperty({ example: 'btwld/rockets' })
+  @ApiProperty({ example: 'conceptadev/rockets' })
   fullName!: string;
 
   @ApiProperty({ example: 'completed' })

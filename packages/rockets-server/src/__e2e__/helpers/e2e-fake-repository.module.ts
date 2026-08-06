@@ -1,7 +1,7 @@
 import { Global, Module } from '@nestjs/common';
-import { getDynamicRepositoryToken } from '@bitwild/rockets-core';
-import type { RepositoryModuleInterface } from '@bitwild/rockets-core';
-import { USER_METADATA_MODULE_ENTITY_KEY } from '@bitwild/rockets-core';
+import { getDynamicRepositoryToken } from '@concepta/rockets-core';
+import type { RepositoryModuleInterface } from '@concepta/rockets-core';
+import { USER_METADATA_MODULE_ENTITY_KEY } from '@concepta/rockets-core';
 import { UserMetadataRepositoryFixture } from '../../__fixtures__/repositories/user-metadata.repository.fixture';
 
 class InMemoryExtraRepo {

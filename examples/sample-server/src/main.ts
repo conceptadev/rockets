@@ -4,12 +4,12 @@ import { StandardSchemaValidationPipe, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule } from '@nestjs/swagger';
 import { cleanupOpenApiDoc } from 'nestjs-zod';
 import { AppModule } from './app.module';
-import { ExceptionsFilter } from '@bitwild/rockets';
+import { ExceptionsFilter } from '@concepta/rockets';
 
 import helmet from 'helmet';
 import { UserMetadataUpdateDto } from './user-metadata.schema';
 import { patchMePatchOpenApi } from './swagger/patch-me-openapi';
-import { SwaggerUiService } from '@bitwild/rockets-core';
+import { SwaggerUiService } from '@concepta/rockets-core';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

@@ -10,5 +10,5 @@ jobs:
     steps:
       - uses: actions/add-to-project@v1.0.2
         with:
-          project-url: https://github.com/orgs/btwld/projects/6
+          project-url: https://github.com/orgs/conceptadev/projects/6
           github-token: ${{ secrets.ADD_TO_PROJECT_PAT }}

@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { RocketsModule } from '@bitwild/rockets';
+import { RocketsModule } from '@concepta/rockets';
 import { userMetadataConfig } from './user-metadata.schema';
 import { defineSampleAuth, sampleAuthUserResource } from './auth';
 import { defineTypeOrmRepository } from './repository/define-typeorm-repository';

@@ -1,5 +1,6 @@
+import { describe, it, expect } from 'vitest';
 import { APP_GUARD } from '@nestjs/core';
-import { ROCKETS_CORE_SETTINGS_TOKEN } from '@bitwild/rockets-core';
+import { ROCKETS_CORE_SETTINGS_TOKEN } from '@concepta/rockets-core';
 import { MeController } from './gateways/http/me.controller';
 import {
   createRocketsControllers,

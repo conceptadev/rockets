@@ -7,7 +7,7 @@ import {
   type OtpCreatableInterface,
 } from '@concepta/nestjs-otp';
 
-import { resolveBitwildAppContext } from '../compatibility/resolve-bitwild-app-context';
+import { resolveConceptadevAppContext } from '../compatibility/resolve-conceptadev-app-context';
 import { RocketsAuthCreateOtpPortCommand } from './rockets-auth-create-otp-port.command';
 
 /**
@@ -28,7 +28,7 @@ export class RocketsAuthCreateOtpPortHandler
   ): Promise<AuthenticationOtpInterface> {
     const aggregate: Otp = await this.commandBus.execute(
       new CreateOtpCommand(
-        resolveBitwildAppContext(command.ctx),
+        resolveConceptadevAppContext(command.ctx),
         command.namespace,
         command.otp as OtpCreatableInterface,
         {

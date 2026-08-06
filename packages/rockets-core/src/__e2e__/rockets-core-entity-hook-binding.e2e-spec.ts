@@ -15,6 +15,7 @@
  *     by `@EntityHook({ entity: A })` is `RepoSpec.isEntity(<A-key>)`,
  *     which the resolver consults per invocation.
  */
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import {
   Global,
   INestApplication,
@@ -27,7 +28,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { TypeOrmRepositoryModule } from '@bitwild/rockets-repository-typeorm';
+import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
 import {
   type RepositoryInterface,
   getDynamicRepositoryToken,

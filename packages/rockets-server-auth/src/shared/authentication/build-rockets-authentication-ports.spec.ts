@@ -1,3 +1,4 @@
+import { vi, describe, it, expect } from 'vitest';
 import { PlainLiteralObject } from '@nestjs/common';
 import { Command, Query } from '@nestjs/cqrs';
 
@@ -154,7 +155,7 @@ function baseOptionsWithRequiredNotifications(): RocketsAuthOptionsInterface {
   return {
     settings: {} as RocketsAuthOptionsInterface['settings'],
     services: {
-      mailerService: { sendMail: jest.fn() },
+      mailerService: { sendMail: vi.fn() },
     },
     authentication: {
       ports: {
@@ -301,10 +302,16 @@ describe(buildRocketsAuthenticationPorts.name, () => {
   });
 
   describe('fail-fast on missing required notification commands', () => {
+    // The typed interface makes each notification command required, so a
+    // typed consumer cannot omit a single field — the runtime fail-fast
+    // targets untyped/JS consumers. Rebuild `ports` without the whole
+    // notification block; the builder throws naming the first missing
+    // command, which is exactly what each test asserts.
     it('throws when sendRecoverLoginNotificationCommand is missing', () => {
       const options = baseOptionsWithRequiredNotifications();
-      delete options.authentication!.ports!.recoveryNotification!
-        .sendRecoverLoginNotificationCommand;
+      const { recoveryNotification: _omitted, ...ports } =
+        options.authentication!.ports!;
+      options.authentication = { ...options.authentication, ports };
 
       expect(() => buildRocketsAuthenticationPorts(options)).toThrow(
         /recoveryNotification\.sendRecoverLoginNotificationCommand/,
@@ -313,8 +320,9 @@ describe(buildRocketsAuthenticationPorts.name, () => {
 
     it('throws when sendVerifyNotificationCommand is missing', () => {
       const options = baseOptionsWithRequiredNotifications();
-      delete options.authentication!.ports!.verifyNotification!
-        .sendVerifyNotificationCommand;
+      const { verifyNotification: _omitted, ...ports } =
+        options.authentication!.ports!;
+      options.authentication = { ...options.authentication, ports };
 
       expect(() => buildRocketsAuthenticationPorts(options)).toThrow(
         /verifyNotification\.sendVerifyNotificationCommand/,

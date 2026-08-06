@@ -8,26 +8,37 @@ import type {
 } from '../interfaces/firestore-query.interface';
 import { applyFirestorePostFilters } from '../repository/firestore-post-filter';
 
-const stores = new Map<string, Map<string, Record<string, unknown>>>();
-
-function collectionStore(
-  collection: string,
-): Map<string, Record<string, unknown>> {
-  let store = stores.get(collection);
-  if (!store) {
-    store = new Map();
-    stores.set(collection, store);
-  }
-  return store;
-}
-
-/** In-memory Firestore backend for unit tests and explicit test harnesses. */
+/**
+ * In-memory Firestore backend for unit tests and explicit test harnesses.
+ *
+ * State is PER INSTANCE. It used to live in a module-level `Map`, which
+ * meant every `new InMemoryFirestoreBackend()` in a process shared one
+ * store: two independent apps saw each other's documents, and tests
+ * leaked rows into one another unless they happened to use distinct
+ * collection names.
+ */
 export class InMemoryFirestoreBackend implements FirestoreBackend {
+  private readonly stores = new Map<
+    string,
+    Map<string, Record<string, unknown>>
+  >();
+
+  private collectionStore(
+    collection: string,
+  ): Map<string, Record<string, unknown>> {
+    let store = this.stores.get(collection);
+    if (!store) {
+      store = new Map();
+      this.stores.set(collection, store);
+    }
+    return store;
+  }
+
   async get(
     collection: string,
     documentId: string,
   ): Promise<Record<string, unknown> | null> {
-    return collectionStore(collection).get(documentId) ?? null;
+    return this.collectionStore(collection).get(documentId) ?? null;
   }
 
   async set(
@@ -36,7 +47,7 @@ export class InMemoryFirestoreBackend implements FirestoreBackend {
     data: Record<string, unknown>,
     merge = false,
   ): Promise<void> {
-    const store = collectionStore(collection);
+    const store = this.collectionStore(collection);
     const current = store.get(documentId);
     store.set(
       documentId,
@@ -45,7 +56,7 @@ export class InMemoryFirestoreBackend implements FirestoreBackend {
   }
 
   async delete(collection: string, documentId: string): Promise<void> {
-    collectionStore(collection).delete(documentId);
+    this.collectionStore(collection).delete(documentId);
   }
 
   async queryBranch(
@@ -95,7 +106,7 @@ export class InMemoryFirestoreBackend implements FirestoreBackend {
       return rows;
     }
 
-    const rows = [...collectionStore(collection).values()];
+    const rows = [...this.collectionStore(collection).values()];
     return rows.filter((row) =>
       branch.filters.every((filter) => matchesFilter(row, filter)),
     );

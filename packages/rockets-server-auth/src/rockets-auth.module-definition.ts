@@ -10,7 +10,7 @@ import {
   SafeCrudContextInterceptor,
   buildAccessControlImport,
   SwaggerUiModule,
-} from '@bitwild/rockets-core';
+} from '@concepta/rockets-core';
 import { PassportModule } from '@nestjs/passport';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { CqrsModule } from '@nestjs/cqrs';

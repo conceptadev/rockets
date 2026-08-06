@@ -28,6 +28,9 @@ coverage-rockets-*
 CODE_SIMPLIFICATION_REPORT.md
 graphify-out/
 code-analysis-out/
+# Per-run analyser output (index/symbols dumps) — regenerate, never commit
+**/docs/code-analysis/runs/
+junit.xml
 
 # nyc test coverage
 .nyc_output

@@ -1,26 +1,26 @@
-# @bitwild/rockets-core
+# @concepta/rockets-core
 
-[![NPM](https://img.shields.io/npm/v/@bitwild/rockets-core)](https://www.npmjs.com/package/@bitwild/rockets-core)
+[![NPM](https://img.shields.io/npm/v/@concepta/rockets-core)](https://www.npmjs.com/package/@concepta/rockets-core)
 [![NestJS](https://img.shields.io/badge/NestJS-12-ea2845?logo=nestjs&logoColor=white)](https://nestjs.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
 > Configuration-driven composition layer: one options object → planner →
 > upstream `@concepta/nestjs-*` modules registered as Nest imports.
 
-**Status:** stable (`1.0.0-alpha.9` on npm, dist-tag `alpha`).
+**Status:** stable (`0.0.1-dev.0` on npm, dist-tag `alpha`).
 
 ---
 
 ## 1. Introduction
 
-`@bitwild/rockets-core` is the **planner and wiring layer** — not the
+`@concepta/rockets-core` is the **planner and wiring layer** — not the
 repository/CRUD/hook motor. It solves: _“I already use Concepta motors, but I
 still hand-wire Nest modules, entity lists, and auth guards on every new
 service.”_ The motor is `@concepta/nestjs-repository`, `@concepta/nestjs-crud`,
 and `@concepta/nestjs-core` (hook resolution) — core depends on them directly
 and re-exports the symbols apps need (`InjectDynamicRepository`,
 `RepositoryInterface`, `AuthUser`, `SwaggerUiModule`, …; the former
-`@bitwild/rockets-common` package was merged into core). Core owns:
+`@concepta/rockets-common` package was merged into core). Core owns:
 
 - An auth contract (`AuthAdapterInterface`) and a global guard that runs
   adapters in a chain.
@@ -37,14 +37,14 @@ and re-exports the symbols apps need (`InjectDynamicRepository`,
 - You want full control over composition (no `/me` route, no global guard
   defaults) and will write a thin server module yourself.
 - You are building another package (an adapter, a presentation layer) that needs
-  the same contracts as `@bitwild/rockets` and `@bitwild/rockets-auth`.
+  the same contracts as `@concepta/rockets` and `@concepta/rockets-auth`.
 
 ### When NOT to use this package
 
 - You want an external-auth server with `/me` and a global guard out of the box
-  → use `@bitwild/rockets`.
+  → use `@concepta/rockets`.
 - You want a complete built-in auth system (signup, login, OTP, admin) → use
-  `@bitwild/rockets-auth`.
+  `@concepta/rockets-auth`.
 
 Both packages above re-export almost everything in core, so you usually depend
 on one of them — not on core directly.
@@ -56,7 +56,7 @@ on one of them — not on core directly.
 ### Install
 
 ```bash
-yarn add @bitwild/rockets-core@alpha \
+yarn add @concepta/rockets-core@alpha \
   @nestjs/common @nestjs/core @nestjs/cqrs @nestjs/swagger \
   class-transformer class-validator
 ```
@@ -75,7 +75,7 @@ import {
   AuthAttemptResult,
   AuthRequest,
   extractBearerToken,
-} from '@bitwild/rockets-core';
+} from '@concepta/rockets-core';
 
 @Injectable()
 export class JwtAdapter implements AuthAdapterInterface {
@@ -106,7 +106,7 @@ import {
   RocketsCoreModule,
   AuthServerGuard,
   defineResource,
-} from '@bitwild/rockets-core';
+} from '@concepta/rockets-core';
 import { JwtAdapter } from './auth/jwt.adapter';
 import { PetEntity } from './pet.entity';
 import { defineTypeOrmRepository } from './repository/define-typeorm-repository';
@@ -139,9 +139,9 @@ export class AppModule {}
 
 `defineTypeOrmRepository` is a small app-local `RepositoryBootstrap` wrapper
 (TypeORM connection options + planner-derived entity list) around
-`TypeOrmRepositoryModule` from `@bitwild/rockets-repository-typeorm`. Keep the
+`TypeOrmRepositoryModule` from `@concepta/rockets-repository-typeorm`. Keep the
 helper in the sample app (or copy into yours) — do not pull TypeORM into
-`@bitwild/rockets-core` itself.
+`@concepta/rockets-core` itself.
 
 ---
 
@@ -153,7 +153,7 @@ Use `defineModuleResource` when a feature needs its own Nest wiring or a
 junction table without auto-generated CRUD.
 
 ```typescript
-import { defineModuleResource } from '@bitwild/rockets-core';
+import { defineModuleResource } from '@concepta/rockets-core';
 
 export const billingFeature = defineModuleResource({
   entities: [InvoiceEntity],
@@ -173,7 +173,7 @@ Export the minimum to avoid name collisions across bundles.
 `userId` column; pass a second argument to override.
 
 ```typescript
-import { OwnerStampHook, OwnerScopeHook } from '@bitwild/rockets-core';
+import { OwnerStampHook, OwnerScopeHook } from '@concepta/rockets-core';
 
 defineResource({
   entity: PetEntity,
@@ -191,7 +191,7 @@ class, use `defineHook`. It returns a hook token you pass in `hooks:` like the
 built-ins:
 
 ```typescript
-import { defineHook } from '@bitwild/rockets-core';
+import { defineHook } from '@concepta/rockets-core';
 import { PetEntity } from './pet.entity';
 
 export const PetNameNormalizeHook = defineHook(PetEntity, {
@@ -210,8 +210,8 @@ The default adapter goes in `repository:`. Override per entity inside
 `defineModuleResource` with a `RepositoryBootstrap` (same pattern as TypeORM):
 
 ```typescript
-import { defineModuleResource } from '@bitwild/rockets-core';
-import { defineFirestoreRepository } from '@bitwild/rockets-repository-firestore';
+import { defineModuleResource } from '@concepta/rockets-core';
+import { defineFirestoreRepository } from '@concepta/rockets-repository-firestore';
 
 const firestoreRepository = defineFirestoreRepository();
 
@@ -246,7 +246,7 @@ import {
   InjectDynamicRepository,
   RepositoryInterface,
   Where,
-} from '@bitwild/rockets-core';
+} from '@concepta/rockets-core';
 
 @Injectable()
 export class PetService {
@@ -268,7 +268,7 @@ CRUD-generated controllers do not expose method signatures you can decorate. Use
 
 ```typescript
 import { CommandHandler } from '@nestjs/cqrs';
-import { getActor } from '@bitwild/rockets-core';
+import { getActor } from '@concepta/rockets-core';
 
 @CommandHandler(CrudCreateCommand)
 export class PetCreateHandler {
@@ -285,7 +285,7 @@ The global `AuthServerGuard` skips routes tagged with `@AuthPublic`.
 
 ```typescript
 import { Controller, Get } from '@nestjs/common';
-import { AuthPublic } from '@bitwild/rockets-core';
+import { AuthPublic } from '@concepta/rockets-core';
 
 @Controller('health')
 export class HealthController {
@@ -297,22 +297,22 @@ export class HealthController {
 }
 ```
 
-### Zod-first resources (`@bitwild/rockets-core/zod`)
+### Zod-first resources (`@concepta/rockets-core/zod`)
 
 The zod-first resource layer ships as the subpath export
-`@bitwild/rockets-core/zod` (`zodResource`, `zodSubResource`,
+`@concepta/rockets-core/zod` (`zodResource`, `zodSubResource`,
 `bindZodResources`, the `f.*` field helpers, `defineZodUserMetadata`,
 `rocketsFieldMeta`, `rocketsEntityMeta`). `zod` and `nestjs-zod` are
-**optional peerDependencies** of core — the main `@bitwild/rockets-core`
+**optional peerDependencies** of core — the main `@concepta/rockets-core`
 entry stays zod-free, so apps that skip the subpath never install them.
 
 Entity generation is delegated to a `SchemaEntityCompiler`. The TypeORM
-implementation lives at `@bitwild/rockets-repository-typeorm/zod`; bind it
+implementation lives at `@concepta/rockets-repository-typeorm/zod`; bind it
 once at startup:
 
 ```typescript
-import { bindZodResources } from '@bitwild/rockets-core/zod';
-import { typeOrmZodEntityCompiler } from '@bitwild/rockets-repository-typeorm/zod';
+import { bindZodResources } from '@concepta/rockets-core/zod';
+import { typeOrmZodEntityCompiler } from '@concepta/rockets-repository-typeorm/zod';
 
 bindZodResources(typeOrmZodEntityCompiler);
 ```
@@ -365,10 +365,81 @@ Eager `compileEntity` in `*.schema.ts` is only for import-cycle breaks
 Unsupported without `db.column`: arbitrary zod types (record, union, …).
 Many-to-many: junction sub-resource + two FKs — no `@ManyToMany`.
 
+#### Response exposure is opt-in (secrets are explicit)
+
+The response DTO mirrors the project's classic idiom — class-level
+`@Exclude()` + per-field `@Expose()` — derived from the schema:
+
+| You write | On the wire? |
+|---|---|
+| `name: f.string()` | yes — every `f.*` helper registers `response: true` |
+| `id: f.pk()`, `f.createdAt()`, … | yes — base-entity columns expose by default |
+| `legacy: z.string()` (raw zod, no meta) | **no** — forgetting to annotate fails closed |
+| `passwordHash: f.string({ dto: { response: false } })` | **never** — this is the `@Exclude()` equivalent, and it is mandatory for secrets |
+| `userId: f.owner()` | yes — an opaque owner reference, like GitHub's `owner.id` or Stripe's `customer`; the UI needs a stable key to group by author |
+| `userId: f.owner({ dto: { response: false } })` | **no** — opt out where the owner id has no business on the wire (typically `ownerScope: false` resources whose rows are visible to non-owners) |
+
+There is deliberately **no name-based heuristic**: a column named
+`apiKey` or `passwordHash` written with an `f.*` helper IS exposed until
+you opt it out. Audit tip: `grep -rn "response: false" src/` lists every
+hidden column in one command.
+
+`f.compute` fields are response-only and are additionally stripped at
+runtime to their declared shape — hidden or undeclared keys of embedded
+rows never serialize.
+
+#### Custom row scoping (group / dealer / tenant) — opt-in, never default
+
+Owner scoping (`f.owner()` → rows filtered by `actor.id`) is the only
+scoping the framework wires automatically. Anything richer — "dealer
+users see every row of _their_ dealer", tenant columns, shared-access
+rules — is deliberately **opt-in, written by the consumer**. The
+pieces:
+
+1. **Carry the group id on the actor.** Your auth adapter owns this:
+   put it in `Actor.metadata` (the designated free-form bag —
+   `{ dealerId: 'dealer-7' }`), sourced from a token claim or a DB
+   lookup.
+2. **Write a scope hook** (~20 lines). `ownerScope: false` turns the
+   per-user filter off; your hook takes its place:
+
+   ```ts
+   @EntityHook({ entity: UserEntity })
+   @Injectable()
+   export class DealerScopeHook extends PassthroughEntityHookBase<PlainLiteralObject> {
+     override async beforeFindAndCount(options, ctx?) {
+       const dealerId = getActor(ctx)?.metadata?.dealerId;
+       return withAndWhere(options, Where.eq('dealerId', dealerId));
+     }
+     // beforeFindOne likewise — read/update/delete route through it.
+   }
+
+   zodResource({
+     name: 'User',
+     schema: userSchema,      // declares the dealerId column
+     ownerScope: false,       // off: per-user; on duty: per-dealer
+     hooks: [DealerScopeHook],
+   });
+   ```
+
+   Working references, both shipped in `examples/sample-server`:
+   `reminder-owner-scope.hook.ts` (indirect ownership through a parent
+   row) and `pet-owner-or-shared.hook.ts` (owner OR share-grant).
+3. **Admin sees everything via a separate surface**, not a bypass:
+   `/admin/users` behind an `AdminGuard`, backed by a service that
+   injects the repository directly (no scope hook). See
+   `examples/sample-server/src/admin/`. Hooks never learn about roles —
+   the actor they receive is narrowed to `{ id, type, metadata }` on
+   purpose, so authorization stays in guards.
+
+A declarative version of this recipe (scope policies + ACL-possession
+bypass) is under discussion:
+<https://github.com/conceptadev/rockets/discussions/32>.
+
 ### Add role-based access control (opt-in `accessControl`)
 
 ACL is opt-in. Pass the `accessControl` option (type
-`RocketsAccessControlConfig`, exported from `@bitwild/rockets-core`) and core
+`RocketsAccessControlConfig`, exported from `@concepta/rockets-core`) and core
 registers the upstream `AccessControlModule` from
 `@concepta/nestjs-access-control` — including the guard and any `CanAccess`
 query services. When the option is omitted, no ACL module, guard, or provider
@@ -403,9 +474,9 @@ class PetController {
 
 | Motor (`@concepta/nestjs-*`)                     | Import path                                    | What core does with it                                                                            |
 | ------------------------------------------------ | ---------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `repository`                                     | `@bitwild/rockets-core` (re-export)            | `buildAppRegistrationPlan` calls `repository.forRoot(entities)` and `forFeature` per resource row |
-| `crud`                                           | `@bitwild/rockets-core` (re-export)            | Each `defineResource` becomes a `CrudModule.forFeature` import                                    |
-| `core`, `authentication`                         | `@bitwild/rockets-core` (re-export)            | `CoreModule.forRoot` (hook resolution) in `createCoreImports`; swagger UI is core's own module    |
+| `repository`                                     | `@concepta/rockets-core` (re-export)            | `buildAppRegistrationPlan` calls `repository.forRoot(entities)` and `forFeature` per resource row |
+| `crud`                                           | `@concepta/rockets-core` (re-export)            | Each `defineResource` becomes a `CrudModule.forFeature` import                                    |
+| `core`, `authentication`                         | `@concepta/rockets-core` (re-export)            | `CoreModule.forRoot` (hook resolution) in `createCoreImports`; swagger UI is core's own module    |
 | `access-control`                                 | `@concepta/nestjs-access-control` (direct)     | Opt-in: the `accessControl` option registers `AccessControlModule`; omitted → no ACL wiring       |
 
 Core **does not** fork upstream behaviour — it only expands `resources[]`,
@@ -426,7 +497,7 @@ expect.
 | `global`       | `boolean` (default `true`)                           | optional  | Module is global — exports visible app-wide.                                                                                                                                                                                         |
 | `swagger`      | `SwaggerUiOptionsInterface`                          | optional  | Swagger UI customization (`settings`, `documentBuilder`). Core always registers Swagger UI; this only tunes it.                                                                                                                      |
 
-† `auth` is required at the presentation layer (e.g. `@bitwild/rockets` always
+† `auth` is required at the presentation layer (e.g. `@concepta/rockets` always
 needs an auth source). Core itself boots without it for tests.
 
 ### `AuthAdapterInterface`
@@ -493,7 +564,8 @@ specific rules:
   feature-local `TypeOrmModule.forFeature()`.
 - When changing public exports, confirm the symbol is real runtime surface and
   documented here.
-- Run `yarn build`, `yarn test`, `yarn test:e2e`, and `yarn lint` from the
+- Run `yarn build`, `yarn typecheck:spec`, `yarn test`, `yarn test:e2e`, and
+  `yarn lint:all` from the
   repository root.
 
 ---

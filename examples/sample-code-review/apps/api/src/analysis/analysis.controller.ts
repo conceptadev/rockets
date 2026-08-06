@@ -15,7 +15,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Ctx, type AppContextInterface } from '@concepta/nestjs-core';
-import type { AuthorizedUser } from '@bitwild/rockets';
+import type { AuthorizedUser } from '@concepta/rockets';
 
 import {
   CodeReviewReportListItemDto,
@@ -30,7 +30,7 @@ import { CodeReviewReportEntity } from './code-review-report.entity';
 import { CodeReviewReportExecutionEntity } from './code-review-report-execution.entity';
 import type { CodeReviewReportView } from './code-review-report.view';
 import { CODE_REVIEW_REPORT_COLLECTION } from '../repository/code-review-reports.persistence';
-import { AuthUser } from '@bitwild/rockets-core';
+import { AuthUser } from '@concepta/rockets-core';
 
 @ApiTags('Code review')
 @ApiBearerAuth()

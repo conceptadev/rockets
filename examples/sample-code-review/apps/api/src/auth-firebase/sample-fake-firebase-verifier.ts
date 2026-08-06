@@ -8,7 +8,7 @@ import type {
   FirebaseDecodedTokenInterface,
   FirebaseTokenVerifierInterface,
   FirebaseVerifyOptions,
-} from '@bitwild/rockets-adapter-firebase';
+} from '@concepta/rockets-adapter-firebase';
 
 const FIXTURES: Record<string, FirebaseDecodedTokenInterface> = {
   'fb-admin-token': {

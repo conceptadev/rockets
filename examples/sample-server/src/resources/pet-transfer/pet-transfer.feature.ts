@@ -1,5 +1,5 @@
 import { CqrsModule } from '@nestjs/cqrs';
-import { defineModuleResource } from '@bitwild/rockets-core';
+import { defineModuleResource } from '@concepta/rockets-core';
 import { PetTransferController } from './pet-transfer.controller';
 import { TransferPetOwnershipHandler } from './commands/handlers/transfer-pet-ownership.handler';
 

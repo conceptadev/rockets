@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { FirestoreRepositoryModule } from '../firestore-repository.module';
 import { InMemoryFirestoreBackend } from '../backends/in-memory-firestore.backend';
 import { defineFirestoreRepository } from '../integration/define-firestore-repository';

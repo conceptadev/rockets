@@ -3,8 +3,8 @@ import type {
   AuthAdapterInterface,
   AuthAttemptResult,
   AuthRequest,
-} from '@bitwild/rockets-core';
-import { extractBearerToken } from '@bitwild/rockets-core';
+} from '@concepta/rockets-core';
+import { extractBearerToken } from '@concepta/rockets-core';
 
 @Injectable()
 export class ServerAuthAdapterFixture implements AuthAdapterInterface {

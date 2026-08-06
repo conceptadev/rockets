@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { defineResource } from '@bitwild/rockets';
+import { defineResource } from '@concepta/rockets';
 import {
   AccessControlQuery,
   AccessControlReadMany,

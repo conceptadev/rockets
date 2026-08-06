@@ -27,6 +27,13 @@ export interface ZodResourceDefinition
   readonly operations?: readonly ZodCrudOperation[] | ZodResourceOperations;
   readonly owner?: string | ZodOwnerConfig;
   readonly ownerStamp?: boolean;
+  /**
+   * When `false`, skip auto-wiring {@link OwnerScopeHook} for owner
+   * columns. Default `true` (read-side ownership enforced whenever
+   * `f.owner()` / `owner` is present). Write-side stamping is gated by
+   * {@link ownerStamp}.
+   */
+  readonly ownerScope?: boolean;
 }
 
 export interface ZodOwnerConfig extends OwnerStampHookOptions {
@@ -63,4 +70,6 @@ export interface ZodSubResourceDefinition
   readonly operations?: readonly ZodCrudOperation[] | ZodResourceOperations;
   /** See {@link ZodResourceDefinition.ownerStamp}. Default `true`. */
   readonly ownerStamp?: boolean;
+  /** See {@link ZodResourceDefinition.ownerScope}. Default `true`. */
+  readonly ownerScope?: boolean;
 }

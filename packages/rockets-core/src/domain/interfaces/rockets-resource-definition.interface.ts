@@ -491,7 +491,7 @@ export interface RocketsResourceDefinition<E extends PlainLiteralObject> {
   readonly decorators?: readonly ClassDecorator[];
   /**
    * Controller-level CRUD request config. Sets the URL `params` shape
-   * that upstream `@bitwild/rockets-crud` validates against the route's
+   * that upstream `@concepta/rockets-crud` validates against the route's
    * `:tokens`. Default:
    *
    * ```ts

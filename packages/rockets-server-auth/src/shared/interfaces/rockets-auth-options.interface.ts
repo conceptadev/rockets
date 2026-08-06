@@ -9,7 +9,7 @@ import {
 } from '@concepta/nestjs-email';
 import { OtpOptionsInterface } from '@concepta/nestjs-otp';
 import { PasswordOptionsInterface } from '@concepta/nestjs-password';
-import type { SwaggerUiOptionsInterface } from '@bitwild/rockets-core';
+import type { SwaggerUiOptionsInterface } from '@concepta/rockets-core';
 import type {
   FederatedOptionsInterface,
   FederatedUserPortSettings,
@@ -33,7 +33,7 @@ import { RocketsAuthSettingsInterface } from './rockets-auth-settings.interface'
 /**
  * Options accepted by `CrudModule.forRoot()` (the upstream interface
  * `CrudModuleOptionsInterface` is not exported publicly in
- * `@bitwild/rockets-crud@v8.0.0-alpha.5`, so we extract it via TS
+ * `@concepta/rockets-crud@v8.0.0-alpha.5`, so we extract it via TS
  * inference instead of deep-importing).
  */
 type CrudModuleOptions = Parameters<typeof CrudModule.forRoot>[0];

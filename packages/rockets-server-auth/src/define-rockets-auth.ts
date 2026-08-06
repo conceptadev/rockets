@@ -7,8 +7,8 @@ import type {
   AuthBootstrap,
   ResourceInput,
   RocketsUserMetadataConfig,
-} from '@bitwild/rockets-core';
-import { defineModuleResource } from '@bitwild/rockets-core';
+} from '@concepta/rockets-core';
+import { defineModuleResource } from '@concepta/rockets-core';
 
 import { RocketsJwtAuthAdapter } from './provider/rockets-jwt-auth.adapter';
 import type { RocketsAuthAsyncOptions } from './rockets-auth.module-definition';

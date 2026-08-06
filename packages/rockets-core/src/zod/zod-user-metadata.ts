@@ -6,6 +6,7 @@ import type {
   UserMetadataModelUpdatableInterface,
 } from '../index';
 import { compileZodEntity } from './compile-zod-entity';
+import { projectSchema } from './zod-projections';
 import { compileDtoClass, namedZodDto } from './zod-dto';
 
 /**
@@ -22,6 +23,35 @@ const USER_METADATA_BASE_FIELDS = [
   'dateDeleted',
   'version',
 ] as const;
+
+/**
+ * Server-managed columns, never writable through the API — enforced on top
+ * of the projection so the guarantee holds even for a schema that declares
+ * these fields as plain zod without `db` metadata.
+ */
+const CREATE_MANAGED_FIELDS = [
+  'id',
+  'dateCreated',
+  'dateUpdated',
+  'dateDeleted',
+  'version',
+] as const;
+
+/** Update additionally freezes ownership. */
+const UPDATE_MANAGED_FIELDS = [...CREATE_MANAGED_FIELDS, 'userId'] as const;
+
+function omitKeys(
+  shape: Record<string, z.ZodType>,
+  keys: readonly string[],
+): Record<string, z.ZodType> {
+  return Object.fromEntries(
+    Object.entries(shape).filter(([key]) => !keys.includes(key)),
+  );
+}
+
+function pascalCase(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
 
 export interface ZodUserMetadataOptions {
   /** PascalCase base for generated class names. Default `'UserMetadata'`. */
@@ -74,32 +104,36 @@ export function defineZodUserMetadata(
     'defineZodUserMetadata',
   );
 
+  // Same projection pass `zodResource` uses. Before, this helper hand-rolled
+  // its DTOs (`schema.omit(...)` + `compileDtoClass(schema)`), which made the
+  // response DTO the ENTIRE schema — `dto: { response: false }` was silently
+  // ignored and every userMetadata column reached the wire (CWE-200). Sharing
+  // `projectSchema` means there is one projection path, not two to keep in
+  // sync.
+  const projections = projectSchema(name, schema, entity, new Set());
+
+  const responseNested = Object.fromEntries(
+    Object.entries(projections.responseNested).map(([property, shape]) => [
+      property,
+      compileDtoClass(shape, `${name}${pascalCase(property)}ResponseDto`),
+    ]),
+  );
+
   const createDto = namedZodDto<UserMetadataCreatableInterface>(
-    schema.omit({
-      id: true,
-      dateCreated: true,
-      dateUpdated: true,
-      dateDeleted: true,
-      version: true,
-    }),
+    z.object(omitKeys(projections.create, CREATE_MANAGED_FIELDS)),
     `${name}CreateDto`,
   );
 
   const updateDto = namedZodDto<UserMetadataModelUpdatableInterface>(
-    schema
-      .omit({
-        id: true,
-        userId: true,
-        dateCreated: true,
-        dateUpdated: true,
-        dateDeleted: true,
-        version: true,
-      })
-      .partial(),
+    z.object(omitKeys(projections.update, UPDATE_MANAGED_FIELDS)),
     `${name}UpdateDto`,
   );
 
-  const responseDto = compileDtoClass(schema, `${name}ResponseDto`);
+  const responseDto = compileDtoClass(
+    z.object(projections.response),
+    `${name}ResponseDto`,
+    responseNested,
+  );
 
   return {
     entity,

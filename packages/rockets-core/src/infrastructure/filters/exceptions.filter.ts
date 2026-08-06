@@ -1,3 +1,4 @@
+import { inspect } from 'node:util';
 import {
   ExceptionInterface,
   mapHttpStatus,
@@ -8,15 +9,68 @@ import {
   ArgumentsHost,
   ExceptionFilter,
   HttpException,
-  ValidationPipe,
+  Logger,
 } from '@nestjs/common';
 import { isObject } from '@nestjs/common/utils/shared.utils';
 import { HttpAdapterHost } from '@nestjs/core';
 
 export const ERROR_MESSAGE_FALLBACK = 'Internal Server Error';
 
+/**
+ * Structural shape of a `class-validator` `ValidationError`. Declared
+ * locally on purpose: the filter only reads these three fields, and
+ * depending on `class-validator` types here would couple the core
+ * package to a validation library it does not otherwise need.
+ */
+interface ValidationErrorLike {
+  readonly property: string;
+  readonly constraints?: Readonly<Record<string, string>>;
+  readonly children?: readonly ValidationErrorLike[];
+}
+
+function isValidationErrorList(
+  value: unknown,
+): value is readonly ValidationErrorLike[] {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (item) =>
+        isObject(item) &&
+        typeof (item as { property?: unknown }).property === 'string',
+    )
+  );
+}
+
+/**
+ * Flatten nested validation errors into constraint messages, prefixing
+ * child messages with the parent property (`address.street must be …`).
+ *
+ * Reimplemented rather than borrowed: the previous version reached into
+ * `new ValidationPipe()['flattenValidationErrors']`, a PRIVATE Nest
+ * method accessed by string index — invisible to the compiler and free
+ * to disappear in any Nest patch release.
+ */
+function flattenValidationErrors(
+  errors: readonly ValidationErrorLike[],
+): string[] {
+  const messages: string[] = [];
+  for (const error of errors) {
+    if (error.constraints) {
+      messages.push(...Object.values(error.constraints));
+    }
+    if (error.children && error.children.length > 0) {
+      for (const child of flattenValidationErrors(error.children)) {
+        messages.push(`${error.property}.${child}`);
+      }
+    }
+  }
+  return messages;
+}
+
 @Catch()
 export class RocketsCoreExceptionsFilter implements ExceptionFilter {
+  private readonly logger = new Logger(RocketsCoreExceptionsFilter.name);
+
   constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
 
   catch(rawException: ExceptionInterface, host: ArgumentsHost): void {
@@ -72,28 +126,31 @@ export class RocketsCoreExceptionsFilter implements ExceptionFilter {
 
     if (
       !(exception instanceof HttpException) &&
-      exception.context?.validationErrors
+      isValidationErrorList(exception.context?.validationErrors)
     ) {
-      const nestValidationPipe = new ValidationPipe();
-      message = nestValidationPipe['flattenValidationErrors'](
-        exception.context.validationErrors as [],
-      );
+      message = flattenValidationErrors(exception.context.validationErrors);
       statusCode = 400;
     }
 
-    if (statusCode >= 500 && process.env.NODE_ENV !== 'production') {
+    // Logged through Nest's Logger, not `console`, and at every 5xx —
+    // whether the trace is printed is the consuming app's decision
+    // (log levels, custom logger, transports), not this library's, and
+    // it is certainly not `NODE_ENV`'s: that variable is unset in plenty
+    // of production containers, which is exactly when the old
+    // `!== 'production'` check leaked stack traces to stdout.
+    if (statusCode >= 500) {
       const e = exception as {
         stack?: string;
         context?: { originalError?: unknown };
       };
-      // eslint-disable-next-line no-console
-      console.error('[RocketsCoreExceptionsFilter] 5xx:', e.stack ?? exception);
+      // `inspect` over String(): a stack-less non-Error exception would
+      // otherwise log as the useless '[object Object]'.
+      this.logger.error('Unhandled 5xx', e.stack ?? inspect(exception));
       const orig = e.context?.originalError;
       if (orig) {
-        // eslint-disable-next-line no-console
-        console.error(
-          '[RocketsCoreExceptionsFilter] originalError:',
-          (orig as { stack?: string }).stack ?? orig,
+        this.logger.error(
+          'Unhandled 5xx originalError',
+          (orig as { stack?: string }).stack ?? inspect(orig),
         );
       }
     }

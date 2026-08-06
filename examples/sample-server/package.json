@@ -1,22 +1,21 @@
 {
   "name": "sample-server",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1-dev.0",
   "scripts": {
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "build": "tsc -p tsconfig.json",
-    "test:e2e": "node ../../scripts/run-isolated-e2e.cjs jest-e2e.config.json",
-    "test:e2e:shared": "jest --config jest-e2e.config.json"
+    "test:e2e": "vitest run --config vitest.e2e.config.ts"
   },
   "dependencies": {
-    "@bitwild/rockets": "workspace:^",
-    "@bitwild/rockets-core": "workspace:^",
-    "@bitwild/rockets-repository-typeorm": "workspace:^",
-    "@concepta/nestjs-core": "8.0.0-alpha.7",
-    "@concepta/nestjs-crud": "8.0.0-alpha.7",
-    "@concepta/nestjs-repository": "8.0.0-alpha.7",
+    "@concepta/nestjs-core": "8.0.0-alpha.8",
+    "@concepta/nestjs-crud": "8.0.0-alpha.8",
+    "@concepta/nestjs-repository": "8.0.0-alpha.8",
+    "@concepta/rockets": "workspace:^",
+    "@concepta/rockets-core": "workspace:^",
+    "@concepta/rockets-repository-typeorm": "workspace:^",
     "@nestjs/common": "12.0.0-alpha.5",
     "@nestjs/core": "12.0.0-alpha.5",
     "@nestjs/cqrs": "11.0.3",
@@ -31,24 +30,24 @@
     "reflect-metadata": "^0.1.14",
     "rxjs": "^7.8.1",
     "sqlite3": "^5.1.7",
-    "typeorm": "^0.3.20",
+    "typeorm": "^0.3.31",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@nestjs/cli": "12.0.0-alpha.6",
     "@nestjs/schematics": "12.0.0-alpha.9",
     "@nestjs/testing": "12.0.0-alpha.5",
-    "@types/jest": "^29.5.0",
+    "@swc/core": "^1.15.47",
     "@types/jsonwebtoken": "^9.0.3",
     "@types/node": "^18.19.44",
     "@types/supertest": "^6.0.2",
-    "jest": "^29.7.0",
     "supertest": "^6.3.4",
-    "ts-jest": "^29.2.0",
     "ts-loader": "^9.5.1",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "unplugin-swc": "^1.5.10",
+    "vitest": "^4.1.10"
   },
   "resolutions": {
     "@nestjs/common": "12.0.0-alpha.5",

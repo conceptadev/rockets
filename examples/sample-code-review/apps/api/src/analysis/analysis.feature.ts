@@ -1,4 +1,4 @@
-import { defineModuleResource } from '@bitwild/rockets-core';
+import { defineModuleResource } from '@concepta/rockets-core';
 
 import { OpenaiConfig } from '../config/openai.config';
 import {

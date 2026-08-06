@@ -7,11 +7,12 @@
  *   FIREBASE_WEB_API_KEY=AIza... \
  *   yarn test:e2e --testPathPattern=firebase-live-auth
  */
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import request from 'supertest';
 
-import { ExceptionsFilter } from '@bitwild/rockets';
+import { ExceptionsFilter } from '@concepta/rockets';
 
 import { AppModule } from '../src/app.module';
 

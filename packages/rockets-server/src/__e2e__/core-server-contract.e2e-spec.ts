@@ -1,5 +1,5 @@
 /**
- * Contract test between `@bitwild/rockets-core` and `@bitwild/rockets`.
+ * Contract test between `@concepta/rockets-core` and `@concepta/rockets`.
  *
  * Why this file exists
  * --------------------
@@ -12,17 +12,18 @@
  * `rockets-server-auth`'s JWT adapter, etc.) break at runtime.
  *
  * This spec deliberately:
- *   - imports the adapter type STRAIGHT from `@bitwild/rockets-core`,
+ *   - imports the adapter type STRAIGHT from `@concepta/rockets-core`,
  *   - implements it with a hand-built class that satisfies ONLY the
  *     core contract (no helper utilities, no server-side conveniences),
  *   - wires it into `RocketsModule.forRoot()`, and
  *   - hits `GET /me` to prove the round-trip works.
  *
  * If `RocketsCoreModule` ever stops accepting an `AuthAdapterInterface`
- * from `@bitwild/rockets-core` as a valid `authProvider`, this file
+ * from `@concepta/rockets-core` as a valid `authProvider`, this file
  * fails to compile — which is the whole point. Don't "fix" it by
  * casting; fix the contract.
  */
+import { vi, describe, it, expect, afterEach } from 'vitest';
 import { INestApplication, Injectable } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
@@ -31,8 +32,8 @@ import type {
   AuthAdapterInterface,
   AuthAttemptResult,
   AuthRequest,
-} from '@bitwild/rockets-core';
-import { extractBearerToken } from '@bitwild/rockets-core';
+} from '@concepta/rockets-core';
+import { extractBearerToken } from '@concepta/rockets-core';
 
 import { IsNotEmpty, IsString } from 'class-validator';
 
@@ -59,7 +60,7 @@ class MetadataUpdateDto implements UserMetadataModelUpdatableInterface {
 }
 
 /**
- * Implements ONLY `@bitwild/rockets-core`'s `AuthAdapterInterface` —
+ * Implements ONLY `@concepta/rockets-core`'s `AuthAdapterInterface` —
  * no server-side imports. This is exactly the shape a 3rd-party
  * Bearer-token adapter (Firebase, Auth0, custom) ships with.
  */
@@ -146,15 +147,16 @@ describe('Core ↔ Server auth-adapter contract (e2e)', () => {
       .expect(401);
   });
 
-  it('Server re-exports of AuthAdapterInterface and AuthorizedUser still match core', () => {
+  it('Server re-exports of AuthAdapterInterface and AuthorizedUser still match core', async () => {
     // Module-level imports at the top compile against core types
     // directly; this assertion is a tripwire if anyone replaces the
     // server-side re-exports with hand-written duplicates.
-    const fromServer: typeof import('../domain/interfaces/auth-adapter.interface') =
-      jest.requireActual('../domain/interfaces/auth-adapter.interface');
-    const fromCore: typeof import('@bitwild/rockets-core') = jest.requireActual(
-      '@bitwild/rockets-core',
-    );
+    const fromServer = await vi.importActual<
+      typeof import('../domain/interfaces/auth-adapter.interface')
+    >('../domain/interfaces/auth-adapter.interface');
+    const fromCore = await vi.importActual<
+      typeof import('@concepta/rockets-core')
+    >('@concepta/rockets-core');
     expect(typeof fromServer).toBe('object');
     expect(typeof fromCore).toBe('object');
   });
