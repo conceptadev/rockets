@@ -17,11 +17,12 @@ are environment/isolation, not logic — separate the two before editing source.
 
 ## Known failure classes and fixes
 
-- **Rotating-404 full-run flake (pre-existing, under investigation).** ~1 in 4 full e2e runs, one suite fails
-  with an unexpected 404 (can even turn an expected 401 into a 404); a different suite each run; never
-  reproduces solo (20+ runs, incl. under synthetic CPU load) and survives one-worker fresh-fork execution.
-  Evidence + next step (instrumented hunt) live in CHANGELOG.md "Known flaky failure". Rerun once to confirm
-  it is this flake; do NOT retry-loop, skip, or weaken assertions.
+- **Rotating full-run failures = host memory pressure, not a code bug.** Symptoms vary (unexpected 404, an
+  expected 401 arriving as 404, `Parse Error: Expected HTTP/`) with a different victim suite each run. Tell:
+  the failing run takes ~20x longer than a passing one (216s vs 10.8s) and the real failures are 30s timeouts
+  with no HTTP response. Check free RAM / pageouts before touching any test. Diagnosis and evidence in
+  CHANGELOG.md "Intermittent e2e failures". Fix the host (`--maxWorkers=2`, free memory) — never retry-loop,
+  skip, or weaken assertions.
 - **Barrel registration collisions.** Importing a `domains/*/index` barrel registers `@CommandHandler`/
   `@QueryHandler` in global Reflect metadata and breaks later Nest apps in the same process. Never import a
   barrel in an e2e file that boots an app. (The barrel-last sequencer is gone; no barrel-only specs exist.)

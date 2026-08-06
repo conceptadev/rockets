@@ -56,20 +56,34 @@ FIREBASE_PROJECT_ID default never applied), and a lazy-`require` cycle
 workaround in `rockets-auth-handler-overrides.spec.ts` became typed
 `beforeAll` dynamic imports.
 
-### Known flaky failure under investigation (pre-existing)
+### Intermittent e2e failures — diagnosed, not a code defect
 
-Roughly 1 in 4 *full* e2e runs, one suite fails with an unexpected 404 —
-a different suite each time. Evidence collected so far: it reproduces
-with a deterministic auth actor and no owner scoping; a failing request
-can 404 while the immediately preceding list request saw the row; it can
-turn an expected **401 into a 404** (so it is not data visibility); it
-has never reproduced in 20+ solo runs of any single suite, including
-under 6× synthetic CPU load; it survives one-worker sequential execution
-in fresh forked processes (distinct pids verified), which rules out
-cross-process and worker-reuse contamination. The signature predates the
-Vitest migration (identical under Jest) and also occurs in the
-sample-server suite. Next step is an instrumented hunt that captures the
-404 response body and the server-side route table at failure time.
+Full e2e runs intermittently failed (~1 in 4) with a rotating victim
+suite and inconsistent symptoms (unexpected 404, an expected 401
+arriving as 404, `Parse Error: Expected HTTP/` from supertest). The
+instrumented hunt closed it: **host memory pressure, not a defect in
+this repo.**
+
+Evidence: a failing run took **216s against 10.8s** for a passing one,
+with two independent suites stalling in the same instant; the captured
+failures were 30s timeouts with no HTTP response at all (no 404 was ever
+returned — the earlier 404 reading was a symptom of a request dying
+mid-flight); sampling the host during the loop showed **~16 MB of free
+RAM and continuous pageouts** on a 16 GB machine already carrying 26 GB
+of swap. When the OS swaps a Node process mid-request, it freezes long
+enough for supertest to time out, and the surfaced error varies with
+where it froze.
+
+This explains every property that defeated the earlier hypotheses
+(leaked apps, libuv threadpool exhaustion, poisoned file pairs,
+cross-process state — all tested and ruled out): the cause is host-level,
+so process isolation cannot prevent it, a single suite never triggers it,
+and the signature predates the Vitest migration (identical under Jest).
+
+Not a CI risk: a full run peaks at ~650 MB across 4 workers, well within
+the 4 GB of a standard GitHub runner. On a memory-constrained
+workstation, lower the worker count (`--maxWorkers=2`) or free memory
+before running the full e2e suite.
 
 ### Security
 

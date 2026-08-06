@@ -44,11 +44,12 @@ filter runs everything (requires `yarn build` first). Key facts:
 - `pool: 'forks'` runs each spec file in a fresh process — the isolation
   the old Jest setup needed a custom runner script for. There is no
   `scripts/` directory anymore; do not reintroduce one for test plumbing.
-- A known **pre-existing** flake (~1 in 4 full e2e runs, one rotating
-  suite fails with an unexpected 404) is documented in CHANGELOG.md under
-  "Known flaky failure". Reruns are green. Do not "fix" it by retrying,
-  skipping, or weakening assertions — it needs the instrumented hunt
-  described there.
+- Intermittent full-run failures with a rotating victim suite are
+  **host memory pressure**, not a code defect — diagnosed in CHANGELOG.md
+  ("Intermittent e2e failures"). A failing run takes ~20x longer and the
+  captured failures are 30s timeouts, not real HTTP errors. On a
+  memory-constrained machine use `--maxWorkers=2` or free memory; never
+  "fix" it by retrying, skipping, or weakening assertions.
 
 Also: **never** import a `domains/*/index` barrel inside an e2e file that
 boots a Nest app — barrels register `@CommandHandler` / `@QueryHandler` in
