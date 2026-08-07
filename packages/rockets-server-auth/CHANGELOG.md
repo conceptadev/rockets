@@ -27,6 +27,11 @@ and this project adheres to
   explicitly reverse that ownership.
 - CQRS handlers have one owner. Signup and password-validation registrations no
   longer compete with upstream handlers for the same command.
+- Admin role handler overrides now apply consistently to list, read, create,
+  update, and delete operations.
+- Generated controller factories share one typed decorator path, and the
+  controller extras contract no longer advertises the unsupported `useHooks`
+  option or an unused handler-override alias.
 - Recovery password rotation preserves history, strength validation,
   transactions, and credential lifecycle events.
 - Node.js 20 is the minimum supported runtime.

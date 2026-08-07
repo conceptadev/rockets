@@ -1,27 +1,6 @@
 /**
- * Regression test pair for G9 (`.context/upstream-gaps.md`).
- *
- * The two tests are intentionally adjacent so the bug + workaround are
- * self-documenting: anyone removing `RocketsValidateCurrentPasswordHandler`
- * immediately sees the upstream behavior they would re-expose.
- *
- * - **Test 1 (bug demonstration):** the upstream `PasswordCreationService.validateCurrent`
- *   does `{ password, ...target }`. When `target` is a v8 aggregate that exposes
- *   `passwordHash` via a getter on the prototype (not as an own enumerable
- *   property), the spread silently drops the field. bcrypt then compares
- *   the supplied password against `undefined` and returns `false` for a
- *   valid password.
- *
- * - **Test 2 (workaround in action):** our `RocketsValidateCurrentPasswordHandler`
- *   normalizes the target via `toPlain()` / `.props` / direct property read
- *   into a plain `PasswordStorageInterface` before delegating to the same
- *   upstream service. Same input, correct result.
- *
- * When upstream ships the spread fix:
- *   1. Test 1 will flip to returning `true` (delete it; the assertion
- *      becomes meaningless and would silently hide future regressions).
- *   2. Replace Rockets' dedicated command/handler with the upstream command
- *      once aggregate targets work there without competing CQRS ownership.
+ * The upstream spread drops prototype getters; these tests preserve that
+ * compatibility constraint and verify Rockets' aggregate normalization.
  */
 import { describe, it, expect, beforeAll } from 'vitest';
 import {
@@ -37,15 +16,11 @@ import {
   RocketsValidateCurrentPasswordHandler,
 } from './rockets-validate-current-password.handler';
 
-// --- Fixtures ---------------------------------------------------------
-
 /**
- * Mimics the shape of a v8 `UserCredentials` aggregate:
- * `passwordHash` is exposed as a **prototype getter** plus a `toPlain()`
- * snapshot — neither of which survives `{ ...target }`.
+ * Mimics a credentials aggregate whose password hash is exposed by a getter
+ * and `toPlain()`, rather than an own enumerable property.
  */
 class AggregateLikeCredential {
-  // Stored privately on the instance; the getter is on the prototype.
   constructor(private readonly _passwordHash: string) {}
 
   get passwordHash(): string {
@@ -68,9 +43,7 @@ function buildPasswordCreationService(): PasswordCreationService {
   return new PasswordCreationService(policy, storage, validation, strength);
 }
 
-// --- Tests ------------------------------------------------------------
-
-describe('G9 — validateCurrent aggregate-spread bug', () => {
+describe('current-password aggregate compatibility', () => {
   const plainPassword = 'CorrectHorseBatteryStaple1!';
   let service: PasswordCreationService;
   let aggregate: AggregateLikeCredential;
@@ -81,8 +54,7 @@ describe('G9 — validateCurrent aggregate-spread bug', () => {
     aggregate = new AggregateLikeCredential(stored.passwordHash);
   });
 
-  it('Sanity — upstream `validateCurrent` returns true when given a plain POJO target', async () => {
-    // Baseline so the next test isn't blamed on hash/strength config.
+  it('validates a plain password-storage object upstream', async () => {
     const pojo = { passwordHash: aggregate.passwordHash };
     const result = await service.validateCurrent({
       password: plainPassword,
@@ -91,12 +63,7 @@ describe('G9 — validateCurrent aggregate-spread bug', () => {
     expect(result).toBe(true);
   });
 
-  it('BUG — upstream `validateCurrent` throws when target is an aggregate (passwordHash via getter)', async () => {
-    // Exact same hash, exact same plain password — only the target shape
-    // differs. The spread `{password, ...target}` drops the prototype
-    // getter and bcrypt then receives `hash: undefined` and throws
-    // `data and hash arguments required` — surfacing as HTTP 500 in
-    // production at the `PATCH /me/password` endpoint.
+  it('documents the upstream failure for aggregate credential targets', async () => {
     await expect(
       service.validateCurrent({
         password: plainPassword,
@@ -105,24 +72,23 @@ describe('G9 — validateCurrent aggregate-spread bug', () => {
     ).rejects.toThrow(/data and hash arguments required/);
   });
 
-  it('FIX — RocketsValidateCurrentPasswordHandler normalizes the aggregate and validates correctly', async () => {
-    // Same aggregate that the upstream service silently rejected above.
+  it('normalizes aggregate credentials before validation', async () => {
     const handler = new RocketsValidateCurrentPasswordHandler(service);
     const command = new RocketsValidateCurrentPasswordCommand(
       plainPassword,
       aggregate as unknown as { passwordHash: string },
     );
     const result = await handler.execute(command);
-    expect(result).toBe(true); // Correctly validates the right password.
+    expect(result).toBe(true);
   });
 
-  it('FIX — RocketsValidateCurrentPasswordHandler also rejects a wrong password against the same aggregate', async () => {
+  it('rejects an incorrect password after normalization', async () => {
     const handler = new RocketsValidateCurrentPasswordHandler(service);
     const command = new RocketsValidateCurrentPasswordCommand(
       'totally-wrong-password',
       aggregate as unknown as { passwordHash: string },
     );
     const result = await handler.execute(command);
-    expect(result).toBe(false); // Proves the fix isn't just blanket-accepting.
+    expect(result).toBe(false);
   });
 });

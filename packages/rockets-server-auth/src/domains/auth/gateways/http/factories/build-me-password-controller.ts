@@ -2,12 +2,11 @@ import {
   Body,
   Controller,
   HttpCode,
-  Logger,
   Patch,
   Req,
-  Type,
   UseGuards,
 } from '@nestjs/common';
+import type { Type } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { Throttle } from '@nestjs/throttler';
 import {
@@ -25,17 +24,11 @@ import type { Request } from 'express';
 
 import { ChangeMyPasswordCommand } from '../../../application/commands/impl/change-my-password.command';
 import { RocketsAuthChangePasswordDto } from '../../../infrastructure/dto/rockets-auth-change-password.dto';
-import { MePasswordControllerExtras } from '../../../interfaces/me-password-controller-extras.interface';
-import { RocketsAuthUserInterface } from '../../../../user/interfaces/rockets-auth-user.interface';
-/**
- * Build the `MePassword` HTTP controller, applying any consumer-supplied
- * `extras.classDecorators` and `extras.routes.changePassword.decorators`.
- *
- * The controller delegates to {@link ChangeMyPasswordCommand} via
- * `CommandBus`. To customise behavior (filters, side effects, persistence),
- * subclass `AbstractChangeMyPasswordHandler` and register the override —
- * do NOT replace the controller.
- */
+import type { MePasswordControllerExtras } from '../../../interfaces/me-password-controller-extras.interface';
+import type { RocketsAuthUserInterface } from '../../../../user/interfaces/rockets-auth-user.interface';
+import { applyControllerExtras } from '../../../../../shared/utils/apply-controller-extras.helper';
+
+/** Build the password-change controller and apply consumer decorators. */
 export function buildMePasswordController(
   extras: MePasswordControllerExtras = {},
 ): Type<unknown> {
@@ -44,8 +37,6 @@ export function buildMePasswordController(
   @ApiBearerAuth()
   @UseGuards(JwtGuard)
   class MePasswordController {
-    private readonly logger = new Logger(MePasswordController.name);
-
     constructor(private readonly commandBus: CommandBus) {}
 
     @Patch('password')
@@ -94,40 +85,8 @@ export function buildMePasswordController(
     }
   }
 
-  applyExtras(MePasswordController, extras);
-  return MePasswordController;
-}
-
-/**
- * Apply consumer-supplied decorators to the built controller. Stays
- * private to this factory — every domain has its own factory + a copy of
- * this helper to avoid coupling factories to a shared file (§2.8 keeps
- * factories self-contained for clarity).
- */
-function applyExtras(
-  controllerClass: Type<unknown>,
-  extras: MePasswordControllerExtras,
-): void {
-  for (const decorator of extras.classDecorators ?? []) {
-    decorator(controllerClass);
-  }
-
-  const routeMap: Record<keyof NonNullable<typeof extras.routes>, string> = {
+  applyControllerExtras(MePasswordController, extras, {
     changePassword: 'changePassword',
-  };
-
-  for (const [routeKey, methodName] of Object.entries(routeMap) as Array<
-    [keyof typeof routeMap, string]
-  >) {
-    const cfg = extras.routes?.[routeKey];
-    if (!cfg?.decorators) continue;
-
-    const proto = controllerClass.prototype as Record<string, unknown>;
-    const descriptor = Object.getOwnPropertyDescriptor(proto, methodName);
-    if (!descriptor) continue;
-
-    for (const decorator of cfg.decorators) {
-      decorator(proto, methodName, descriptor);
-    }
-  }
+  });
+  return MePasswordController;
 }

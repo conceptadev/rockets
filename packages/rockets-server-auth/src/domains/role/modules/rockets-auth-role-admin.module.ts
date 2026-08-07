@@ -1,9 +1,9 @@
 import { CrudResponsePaginatedDto, CrudModule } from '@concepta/nestjs-crud';
 import {
   applyDecorators,
-  DynamicModule,
+  type DynamicModule,
   Module,
-  Type,
+  type Type,
   UseGuards,
 } from '@nestjs/common';
 import { Operation } from '@concepta/nestjs-core';
@@ -15,11 +15,11 @@ import { RocketsAuthRoleDto } from '../infrastructure/dto/rockets-auth-role.dto'
 import { RocketsAuthRoleCreateDto } from '../infrastructure/dto/rockets-auth-role-create.dto';
 import { AdminGuard } from '../../../guards/admin.guard';
 import { ROLE_CRUD_ENTITY_KEY } from '../../../shared/constants/repository-entity-keys.constants';
-import { RoleCrudOptionsExtrasInterface } from '../../../shared/interfaces/rockets-auth-options-extras.interface';
-import { RocketsAuthRoleEntityInterface } from '../interfaces/rockets-auth-role-entity.interface';
-import { RocketsAuthRoleInterface } from '../interfaces/rockets-auth-role.interface';
+import type { RoleCrudOptionsExtrasInterface } from '../../../shared/interfaces/rockets-auth-options-extras.interface';
+import type { RocketsAuthRoleEntityInterface } from '../interfaces/rockets-auth-role-entity.interface';
+import type { RocketsAuthRoleInterface } from '../interfaces/rockets-auth-role.interface';
 import { buildAdminUserRolesController } from '../gateways/http/factories/build-admin-user-roles-controller';
-import {
+import type {
   AdminRoleResourceExtras,
   AdminUserRolesControllerExtras,
 } from '../interfaces/role-controller-extras.interface';
@@ -52,10 +52,12 @@ function buildOperations(
     {
       operation: Operation.List,
       ...operationExtraDecorators(routes.list?.decorators),
+      ...(routes.list?.handler ? { queryHandler: routes.list.handler } : {}),
     },
     {
       operation: Operation.Read,
       ...operationExtraDecorators(routes.read?.decorators),
+      ...(routes.read?.handler ? { queryHandler: routes.read.handler } : {}),
     },
     {
       operation: Operation.Create,
@@ -103,6 +105,9 @@ function buildOperations(
     {
       operation: Operation.Delete,
       ...operationExtraDecorators(routes.delete?.decorators),
+      ...(routes.delete?.handler
+        ? { commandHandler: routes.delete.handler }
+        : {}),
     },
   ];
 }

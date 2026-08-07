@@ -6,9 +6,9 @@ import {
   Param,
   Patch,
   Post,
-  Type,
   UseGuards,
 } from '@nestjs/common';
+import type { Type } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -24,10 +24,10 @@ import {
   AcceptInvitationCommand,
   CreateInvitationByEmailCommand,
   FindInvitationByCodeQuery,
-  Invitation,
   InvitationNotFoundException,
   RevokeInvitationsCommand,
   SendInvitationCommand,
+  type Invitation,
 } from '@concepta/nestjs-invitation';
 
 import { AdminGuard } from '../../../../../guards/admin.guard';
@@ -37,18 +37,14 @@ import { RocketsAuthInvitationCreateDto } from '../../../infrastructure/dto/rock
 import { RocketsAuthInvitationResponseDto } from '../../../infrastructure/dto/rockets-auth-invitation-response.dto';
 import { RocketsAuthInvitationRevokeDto } from '../../../infrastructure/dto/rockets-auth-invitation-revoke.dto';
 import { RocketsAuthInvitationNotAcceptedException } from '../../../domain/exceptions/invitation.exception';
-import {
+import type {
   InvitationAcceptanceControllerExtras,
   InvitationControllerExtras,
   InvitationReattemptControllerExtras,
   InvitationRevocationControllerExtras,
 } from '../../../interfaces/invitation-controller-extras.interface';
 
-/**
- * Build `POST /admin/invitations` (create + send).
- * Replaces the cast `} as RocketsAuthInvitationResponseDto` (W4) by
- * constructing the response DTO via `plainToInstance`.
- */
+/** Build `POST /admin/invitations` and materialize its response DTO. */
 export function buildInvitationController(
   extras: InvitationControllerExtras = {},
 ): Type<unknown> {

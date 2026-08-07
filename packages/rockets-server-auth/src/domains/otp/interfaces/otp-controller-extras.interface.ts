@@ -1,4 +1,4 @@
-import {
+import type {
   RocketsAuthControllerExtrasBase,
   RocketsAuthRouteExtrasBase,
 } from '../../../shared/interfaces/controller/rockets-auth-controller-extras.interface';

@@ -434,9 +434,8 @@ re-exported — import them directly from `@concepta/nestjs-access-control`.
 
 - **OAuth providers (Apple, Google, GitHub)** are deferred — upstream
   `@concepta/nestjs-auth-{apple,google,github,router}` have not been ported to
-  v8. The folder `src/domains/oauth/` is parked with the v7 wiring preserved as
-  a comment and `TODO(upstream:)` markers. `extras.auth.guards` exists for
-  forward-compat plumbing but routes resolve only after the upstream ports ship.
+  v8. `extras.auth.guards` remains as forward-compatible plumbing, but Rockets
+  does not register OAuth routes until compatible upstream providers ship.
 - **Email and event modules** are on v7 (`@concepta/nestjs-email@7.0.0-alpha.10`,
   `@concepta/nestjs-event@7.0.0-alpha.10`) while the rest of the stack —
   including `@concepta/nestjs-access-control` — is on v8. The cross-version mix

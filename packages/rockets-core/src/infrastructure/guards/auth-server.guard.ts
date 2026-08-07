@@ -7,7 +7,8 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import {
+import type { AuthPublicMetadata } from '@concepta/nestjs-authentication';
+import type {
   AuthAdapterInterface,
   AuthRequest,
 } from '../../domain/interfaces/auth-adapter.interface';
@@ -39,14 +40,12 @@ export class AuthServerGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const isDisabled = this.reflector.getAllAndOverride<boolean | 'classLevel'>(
+    const isDisabled = this.reflector.getAllAndOverride<AuthPublicMetadata>(
       ROCKETS_DISABLE_GUARDS_TOKEN,
       [context.getHandler(), context.getClass()],
     );
 
-    // Upstream AuthPublic({ classLevel: true }) deliberately stores the
-    // sentinel `classLevel` instead of `true` so its own guard can distinguish
-    // an explicit class-wide choice from an accidental one.
+    // Upstream uses this sentinel for explicit controller-wide public access.
     if (isDisabled === true || isDisabled === 'classLevel') {
       return true;
     }
