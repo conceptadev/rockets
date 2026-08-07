@@ -35,8 +35,6 @@ import { RocketsAuthOtpException } from '../../domain/exceptions/rockets-auth-ot
  *
  * Register an override via
  * `{ provide: RocketsAuthOtpService, useClass: MyOtpService }`.
- *
- * See `.context/v8-ddd-refactor-plan.md` §3.3.
  */
 @Injectable()
 export class RocketsAuthOtpService implements RocketsAuthOtpServiceInterface {

@@ -5,9 +5,9 @@ import {
   Logger,
   Param,
   Post,
-  Type,
   UseGuards,
 } from '@nestjs/common';
+import type { Type } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import {
   ApiBadRequestResponse,
@@ -29,7 +29,8 @@ import {
 
 import { AdminGuard } from '../../../../../guards/admin.guard';
 import { USER_ROLE_ENTITY_KEY } from '../../../../../shared/constants/repository-entity-keys.constants';
-import { AdminUserRolesControllerExtras } from '../../../interfaces/role-controller-extras.interface';
+import type { AdminUserRolesControllerExtras } from '../../../interfaces/role-controller-extras.interface';
+import { applyControllerExtras } from '../../../../../shared/utils/apply-controller-extras.helper';
 
 class AdminAssignUserRoleDto {
   @ApiProperty({
@@ -42,14 +43,7 @@ class AdminAssignUserRoleDto {
   roleId!: string;
 }
 
-/**
- * Build the `admin/users/:userId/roles` controller, applying any
- * consumer-supplied extras (`classDecorators`, per-route `decorators`).
- *
- * The two routes (`list`, `assign`) are thin shells around the upstream
- * `@concepta/nestjs-role` query/command classes via CQRS buses — no
- * business logic lives in the controller.
- */
+/** Build the admin user-role controller and apply consumer decorators. */
 export function buildAdminUserRolesController(
   extras: AdminUserRolesControllerExtras = {},
 ): Type<unknown> {
@@ -93,33 +87,9 @@ export function buildAdminUserRolesController(
     }
   }
 
-  applyExtras(AdminUserRolesController, extras);
-  return AdminUserRolesController;
-}
-
-function applyExtras(
-  controllerClass: Type<unknown>,
-  extras: AdminUserRolesControllerExtras,
-): void {
-  for (const decorator of extras.classDecorators ?? []) {
-    decorator(controllerClass);
-  }
-
-  const routeMap: Record<string, string> = {
+  applyControllerExtras(AdminUserRolesController, extras, {
     list: 'list',
     assign: 'assign',
-  };
-
-  for (const [routeKey, methodName] of Object.entries(routeMap)) {
-    const cfg = extras.routes?.[routeKey as keyof typeof extras.routes];
-    if (!cfg?.decorators) continue;
-
-    const proto = controllerClass.prototype as Record<string, unknown>;
-    const descriptor = Object.getOwnPropertyDescriptor(proto, methodName);
-    if (!descriptor) continue;
-
-    for (const decorator of cfg.decorators) {
-      decorator(proto, methodName, descriptor);
-    }
-  }
+  });
+  return AdminUserRolesController;
 }

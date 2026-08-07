@@ -3,9 +3,9 @@ import {
   Controller,
   Patch,
   Post,
-  Type,
   UnauthorizedException,
 } from '@nestjs/common';
+import type { Type } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { Throttle } from '@nestjs/throttler';
 import {
@@ -18,26 +18,19 @@ import {
 } from '@nestjs/swagger';
 import {
   AuthPublic,
-  AuthenticatedResponseInterface,
   AuthenticationResponseDto,
   IssueAuthenticatedResponseCommand,
+  type AuthenticatedResponseInterface,
 } from '@concepta/nestjs-authentication';
 import { OtpException } from '@concepta/nestjs-otp';
 
 import { RocketsAuthOtpConfirmDto } from '../../../infrastructure/dto/rockets-auth-otp-confirm.dto';
 import { RocketsAuthOtpSendDto } from '../../../infrastructure/dto/rockets-auth-otp-send.dto';
 import { RocketsAuthOtpService } from '../../../infrastructure/services/rockets-auth-otp.service';
-import { OtpControllerExtras } from '../../../interfaces/otp-controller-extras.interface';
+import type { OtpControllerExtras } from '../../../interfaces/otp-controller-extras.interface';
+import { applyControllerExtras } from '../../../../../shared/utils/apply-controller-extras.helper';
 
-/**
- * Build the OTP controller, applying any consumer-supplied
- * `extras.classDecorators`, `routes.send.decorators`, and
- * `routes.confirm.decorators`.
- *
- * Business logic lives in {@link RocketsAuthOtpService} (overrideable via
- * its per-method seams). To customise transport, swap the service via DI;
- * to add guards / throttling / ACL, append decorators via extras.
- */
+/** Build the OTP controller and apply consumer-supplied decorators. */
 export function buildRocketsAuthOtpController(
   extras: OtpControllerExtras = {},
 ): Type<unknown> {
@@ -117,33 +110,9 @@ export function buildRocketsAuthOtpController(
     }
   }
 
-  applyExtras(RocketsAuthOtpController, extras);
-  return RocketsAuthOtpController;
-}
-
-function applyExtras(
-  controllerClass: Type<unknown>,
-  extras: OtpControllerExtras,
-): void {
-  for (const decorator of extras.classDecorators ?? []) {
-    decorator(controllerClass);
-  }
-
-  const routeMap: Record<string, string> = {
+  applyControllerExtras(RocketsAuthOtpController, extras, {
     send: 'sendOtp',
     confirm: 'confirmOtp',
-  };
-
-  for (const [routeKey, methodName] of Object.entries(routeMap)) {
-    const cfg = extras.routes?.[routeKey as keyof typeof extras.routes];
-    if (!cfg?.decorators) continue;
-
-    const proto = controllerClass.prototype as Record<string, unknown>;
-    const descriptor = Object.getOwnPropertyDescriptor(proto, methodName);
-    if (!descriptor) continue;
-
-    for (const decorator of cfg.decorators) {
-      decorator(proto, methodName, descriptor);
-    }
-  }
+  });
+  return RocketsAuthOtpController;
 }

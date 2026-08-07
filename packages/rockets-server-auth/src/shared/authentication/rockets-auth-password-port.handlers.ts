@@ -2,7 +2,7 @@ import {
   CommandBus,
   CommandHandler,
   EventPublisher,
-  ICommandHandler,
+  type ICommandHandler,
   QueryBus,
 } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
@@ -24,9 +24,8 @@ import {
   RocketsAuthValidatePasswordPortCommand,
 } from './rockets-auth-password-port.commands';
 
-// Upstream v8 exposes the repository/settings types but not their DI tokens.
-// Keep the compatibility strings isolated here until those constants are
-// exported from @concepta/nestjs-user.
+// Upstream exposes these types but not their DI tokens. Keep the compatibility
+// strings isolated until @concepta/nestjs-user exports the constants.
 const USER_CREDENTIALS_REPOSITORY_TOKEN = 'USER_CREDENTIALS_REPOSITORY_TOKEN';
 const USER_MODULE_SETTINGS_TOKEN = 'USER_MODULE_SETTINGS_TOKEN';
 

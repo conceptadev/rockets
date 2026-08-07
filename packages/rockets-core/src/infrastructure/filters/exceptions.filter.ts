@@ -84,13 +84,9 @@ export class RocketsCoreExceptionsFilter implements ExceptionFilter {
     // validation failure), surface that exception directly so the client
     // sees the intended status (401/403/400) instead of an opaque 500.
     //
-    // NOTE: in upstream `@concepta/nestjs-common@8.0.0-alpha.4`, the
-    // descendants of `RuntimeException` lose `context.originalError`
-    // when their constructors do `Object.assign({}, super.context, …)`
-    // (`super.context` resolves on the prototype, not on `this`). For
-    // pre-handler validation that must surface as 4xx, prefer a NestJS
-    // Guard or Pipe over a `Before*` repo hook so the `HttpException`
-    // never enters the wrapping pipeline in the first place.
+    // Upstream RuntimeException subclasses currently lose `originalError`
+    // while rebuilding their context. Guards and pipes avoid that wrapping for
+    // pre-handler validation that must preserve a 4xx response.
     const unwrapped =
       this.unwrapToHttpException(rawException) ??
       this.unwrapToClientRuntimeException(rawException);

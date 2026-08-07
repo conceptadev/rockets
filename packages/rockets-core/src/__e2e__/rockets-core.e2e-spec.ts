@@ -13,6 +13,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import request from 'supertest';
 import { getDynamicRepositoryToken } from '@concepta/nestjs-repository';
+import { AuthPublic as ConceptaAuthPublic } from '@concepta/nestjs-authentication';
 import type {
   AuthAdapterInterface,
   AuthAttemptResult,
@@ -163,6 +164,17 @@ class TestController {
   }
 }
 
+@ApiTags('test')
+@Controller('class-public')
+@ConceptaAuthPublic({ classLevel: true })
+class ClassPublicController {
+  @Get()
+  @ApiOkResponse({ description: 'Controller-wide public route ping' })
+  getPublic() {
+    return { message: 'class public' };
+  }
+}
+
 // ────────────────────────────────────────────────────────────────────
 // Tests
 // ────────────────────────────────────────────────────────────────────
@@ -184,7 +196,7 @@ describe('RocketsCoreModule (e2e)', () => {
           global: true,
         }),
       ],
-      controllers: [TestController],
+      controllers: [TestController, ClassPublicController],
       providers: [{ provide: APP_GUARD, useClass: AuthServerGuard }],
     }).compile();
 
@@ -232,6 +244,12 @@ describe('RocketsCoreModule (e2e)', () => {
         .get('/test/public')
         .expect(200)
         .expect({ message: 'public' }));
+
+    it('supports the upstream controller-wide public marker', () =>
+      request(app.getHttpServer())
+        .get('/class-public')
+        .expect(200)
+        .expect({ message: 'class public' }));
   });
 
   describe('@AuthUser decorator', () => {

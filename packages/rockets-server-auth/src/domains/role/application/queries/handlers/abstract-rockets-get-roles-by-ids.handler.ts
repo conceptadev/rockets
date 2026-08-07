@@ -1,9 +1,9 @@
-import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
+import { QueryHandler, type IQueryHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
-import { RoleEntityInterface } from '@concepta/nestjs-role';
+import type { RoleEntityInterface } from '@concepta/nestjs-role';
 import {
   getDynamicRepositoryToken,
-  RepositoryInterface,
+  type RepositoryInterface,
   Where,
 } from '@concepta/nestjs-repository';
 
@@ -13,9 +13,7 @@ import { RocketsGetRolesByIdsQuery } from '../impl/rockets-get-roles-by-ids.quer
 /**
  * Template-method query handler for `RocketsGetRolesByIdsQuery`.
  *
- * Seams: `buildFilter / fetch / mapResponse` (same shape as every other
- * read handler in this package — see `.context/v8-ddd-refactor-plan.md`
- * §2.7).
+ * Override `buildFilter`, `fetch`, or `mapResponse` for targeted behavior.
  */
 @QueryHandler(RocketsGetRolesByIdsQuery)
 export abstract class AbstractRocketsGetRolesByIdsHandler

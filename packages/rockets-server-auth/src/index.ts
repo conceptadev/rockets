@@ -7,10 +7,8 @@ export type { DefineRocketsAuthInput } from './define-rockets-auth';
 
 export * from './domains/auth';
 export * from './domains/user';
-// TODO(upstream: concepta/nestjs-auth-apple|github|google) — re-add
-// `export * from './domains/oauth'` once v8 OAuth provider packages ship.
-// The domain is parked under `domains/oauth/` (controller body preserved
-// in a block comment for fast restore).
+// TODO(upstream: concepta/nestjs-auth-apple|github|google) — export the OAuth
+// domain once compatible v8 provider packages ship.
 export * from './domains/otp';
 export * from './domains/role';
 export * from './domains/invitation';

@@ -6,10 +6,8 @@ import type { PlainLiteralObject } from '@nestjs/common';
  * first argument.
  *
  * Structurally equivalent to the upstream `RepositoryContextInterface`
- * declared in `@concepta/rockets-repository@v8.0.0-alpha.5` — kept local
- * because the upstream type is not exported on the public barrel
- * (only the `RepoCtx` overlay ref is). Defining it here avoids a deep
- * `/dist/` import.
+ * declared in `@concepta/nestjs-repository`. The public barrel exports only
+ * `RepoCtx`, so keeping this small shape local avoids a deep import.
  */
 export interface RepositoryContextInterface extends PlainLiteralObject {
   entity: string;

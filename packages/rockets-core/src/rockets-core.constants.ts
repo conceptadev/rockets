@@ -8,8 +8,7 @@ export const ROCKETS_CORE_SETTINGS_TOKEN =
  */
 export const AUTH_ADAPTERS_TOKEN = Symbol('ROCKETS_AUTH_ADAPTERS');
 
-// Use the same string value as @concepta/nestjs-authentication for backward compatibility
-// with existing @AuthPublic() decorators from concepta packages
+/** Must match the upstream AuthPublic metadata key for interoperability. */
 export const ROCKETS_DISABLE_GUARDS_TOKEN =
   'AUTHENTICATION_MODULE_DISABLE_GUARDS_TOKEN';
 

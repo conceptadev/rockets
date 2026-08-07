@@ -1,5 +1,3 @@
-import { Type } from '@nestjs/common';
-
 /**
  * Decorator factory shape — anything compatible with `@SetMetadata`,
  * `@UseGuards`, `@Throttle`, `@ApiTags`, custom decorators, etc.
@@ -31,17 +29,3 @@ export interface MePasswordControllerExtras {
     changePassword?: MePasswordRouteExtras;
   };
 }
-
-/**
- * Phase-1 acceptance: every gateway controller in this package SHOULD
- * accept this same triplet shape — `classDecorators`, `routes[*].decorators`,
- * and (where a backing handler exists) `routes[*].useHandler: Type<...>`.
- *
- * The `useHandler` slot is reserved for controllers whose request handlers
- * are factored into separate `@Injectable()` classes (the canonical pattern
- * documented in `.context/v8-ddd-refactor-plan.md` §2.8). The auth domain
- * keeps its handler logic in the CQRS command, so `useHandler` is unused
- * here — but the field is part of the contract for symmetry across
- * controllers.
- */
-export type RocketsAuthRouteHandlerOverride = Type<unknown>;

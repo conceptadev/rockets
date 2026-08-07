@@ -1,22 +1,16 @@
-import { Type } from '@nestjs/common';
-import {
+import type { Type } from '@nestjs/common';
+import type {
   RocketsAuthControllerExtrasBase,
   RocketsAuthRouteExtrasBase,
 } from '../../../shared/interfaces/controller/rockets-auth-controller-extras.interface';
 
 /**
- * Extras for the **admin/roles** declarative CRUD controller. Forwarded into
- * `CrudModule.forFeature` as additional `controller.extraDecorators` and
- * `controller.useHooks`. Per-operation decorators / handler overrides are
- * applied per `Operation` key.
+ * Extras for the admin role CRUD resource. Class and route decorators are
+ * forwarded to the generated controller; each route can replace its handler.
  */
 export interface AdminRoleResourceRouteExtras
   extends RocketsAuthRouteExtrasBase {
-  /**
-   * Replace the CommandHandler for this operation. Must be a Type<unknown>
-   * registered as a Nest provider — the resource builder resolves it from
-   * the DI container.
-   */
+  /** Replace the operation handler with a Nest provider class. */
   handler?: Type<unknown>;
 }
 

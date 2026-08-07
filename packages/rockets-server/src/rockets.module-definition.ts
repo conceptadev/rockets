@@ -82,7 +82,7 @@ function resolveSingleContribution<
   return first;
 }
 
-/** Resolve integration-owned defaults once before building the Nest module. */
+/** Resolve explicit app options and integration-owned defaults. */
 export function resolveRocketsComposition(
   extras: RocketsOptionsExtrasInterface = {},
 ): ResolvedRocketsComposition {

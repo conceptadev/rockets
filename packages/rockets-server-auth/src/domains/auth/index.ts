@@ -26,5 +26,4 @@ export type {
   MePasswordRouteExtras,
   RocketsAuthClassDecorator,
   RocketsAuthMethodDecorator,
-  RocketsAuthRouteHandlerOverride,
 } from './interfaces/me-password-controller-extras.interface';
