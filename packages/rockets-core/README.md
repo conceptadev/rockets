@@ -7,7 +7,7 @@
 > Configuration-driven composition layer: one options object → planner →
 > upstream `@concepta/nestjs-*` modules registered as Nest imports.
 
-**Status:** stable (`0.0.1-dev.0` on npm, dist-tag `alpha`).
+**Status:** pre-1.0 preview (`0.0.1-dev.0`, npm dist-tag `alpha`).
 
 ---
 
@@ -105,16 +105,17 @@ import { APP_GUARD } from '@nestjs/core';
 import {
   RocketsCoreModule,
   AuthServerGuard,
+  defineAuthAdapter,
   defineResource,
 } from '@concepta/rockets-core';
 import { JwtAdapter } from './auth/jwt.adapter';
 import { PetEntity } from './pet.entity';
-import { defineTypeOrmRepository } from './repository/define-typeorm-repository';
+import { defineTypeOrmRepository } from '@concepta/rockets-repository-typeorm';
 
 @Module({
   imports: [
     RocketsCoreModule.forRoot({
-      auth: JwtAdapter,
+      auth: defineAuthAdapter(JwtAdapter),
       repository: defineTypeOrmRepository({
         type: 'sqlite',
         database: ':memory:',
@@ -130,18 +131,15 @@ export class AppModule {}
 
 ### What just happened
 
-- `auth: JwtAdapter` registered the adapter as a provider; core exposes the
-  ordered chain on `AUTH_ADAPTERS_TOKEN` for `AuthServerGuard`.
+- `defineAuthAdapter(JwtAdapter)` registered and exported the adapter; core
+  exposes the ordered chain on `AUTH_ADAPTERS_TOKEN` for `AuthServerGuard`.
 - `repository: defineTypeOrmRepository(...)` is the only place that mentions
   TypeORM. The planner collects entities from `resources[]` and registers them.
 - `defineResource({ entity: PetEntity })` produced `GET/POST/PATCH/DELETE /pets`
   with validation and Swagger schema. No controller was written.
 
-`defineTypeOrmRepository` is a small app-local `RepositoryBootstrap` wrapper
-(TypeORM connection options + planner-derived entity list) around
-`TypeOrmRepositoryModule` from `@concepta/rockets-repository-typeorm`. Keep the
-helper in the sample app (or copy into yours) — do not pull TypeORM into
-`@concepta/rockets-core` itself.
+`defineTypeOrmRepository` is owned by
+`@concepta/rockets-repository-typeorm`; core remains storage-agnostic.
 
 ---
 
@@ -487,7 +485,7 @@ expect.
 
 | Option         | Type                                                 | Required  | Description                                                                                                                                                                                                                          |
 | -------------- | ---------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `auth`         | `AuthBootstrap` or array                             | optional† | Auth wiring from `defineFirebaseAuth()`, `defineRocketsAuth()`, or app-local helpers. Each entry supplies `adapter` and optional `forRoot()` for external Nest modules. Entity rows belong in `resources[]`, not on the auth helper. |
+| `auth`         | `AuthBootstrap` or array                             | optional† | Auth wiring from `defineFirebaseAuth()`, `defineRocketsAuth()`, or app-local helpers. Each entry supplies an `adapter`, optional `forRoot()`, and optional integration-owned defaults through `contributes`; explicit app options win. |
 | `repository`   | `RepositoryModuleInterface` or `RepositoryBootstrap` | optional  | Default persistence adapter. A bootstrap owns both `forRoot(entities)` and `forFeature(entities)`.                                                                                                                                   |
 | `userMetadata` | `RocketsUserMetadataConfig`                          | optional  | Entity + DTOs for the metadata table joined to external users.                                                                                                                                                                       |
 | `resources`    | `ReadonlyArray<ResourceInput>`                       | optional  | Mix of `defineResource`, `defineModuleResource`, and manual `RocketsResourceConfig`.                                                                                                                                                 |

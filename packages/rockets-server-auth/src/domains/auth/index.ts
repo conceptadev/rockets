@@ -7,6 +7,7 @@
 // Gateway controllers
 export { buildMePasswordController } from './gateways/http/factories/build-me-password-controller';
 export { RocketsAuthTokenController } from './gateways/http/controllers/rockets-auth-token.controller';
+export { RocketsAuthRecoveryController } from './gateways/http/controllers/rockets-auth-recovery.controller';
 
 // Application — Commands
 export { ChangeMyPasswordCommand } from './application/commands/impl/change-my-password.command';

@@ -22,6 +22,18 @@ class SoftWidgetEntity {
   dateRemoved!: Date | null;
 }
 
+class OwnedWidgetEntity {
+  id!: string;
+  title!: string;
+  userId!: string;
+}
+
+class OrderedWidgetEntity {
+  id!: string;
+  group!: string;
+  rank!: number;
+}
+
 describe(FirestoreRepositoryModule.name, () => {
   const backend = new InMemoryFirestoreBackend();
 
@@ -192,5 +204,162 @@ describe(FirestoreRepositoryModule.name, () => {
     const [rows, total] = await repo.findAndCount({ take: 1 });
     expect(rows).toHaveLength(1);
     expect(total).toBe(2);
+  });
+
+  it('applies every predicate when a branch also targets a document id', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'owned-widget',
+              entity: OwnedWidgetEntity,
+              collection: 'owned-widgets-id-filter',
+            },
+          ],
+          { backend: new InMemoryFirestoreBackend() },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<OwnedWidgetEntity>>(
+      getDynamicRepositoryToken('owned-widget'),
+    );
+
+    await repo.create({ id: 'private-1', title: 'Private', userId: 'actor-a' });
+
+    const hidden = await repo.findOne({
+      where: Where.and(
+        Where.eq<OwnedWidgetEntity>('id', 'private-1'),
+        Where.eq<OwnedWidgetEntity>('userId', 'actor-b'),
+      ),
+    });
+
+    expect(hidden).toBeNull();
+  });
+
+  it('supports id IN together with additional predicates', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'owned-widget',
+              entity: OwnedWidgetEntity,
+              collection: 'owned-widgets-id-in',
+            },
+          ],
+          { backend: new InMemoryFirestoreBackend() },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<OwnedWidgetEntity>>(
+      getDynamicRepositoryToken('owned-widget'),
+    );
+
+    await repo.create({ id: 'owned-a', title: 'A', userId: 'actor-a' });
+    await repo.create({ id: 'owned-b', title: 'B', userId: 'actor-b' });
+    await repo.create({ id: 'outside-set', title: 'C', userId: 'actor-a' });
+
+    const rows = await repo.find({
+      where: Where.and(
+        Where.in<OwnedWidgetEntity>('id', ['owned-a', 'owned-b']),
+        Where.eq<OwnedWidgetEntity>('userId', 'actor-a'),
+      ),
+    });
+
+    expect(rows.map((row) => row.id)).toEqual(['owned-a']);
+  });
+
+  it('returns the generated id from upsert', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'widget',
+              entity: WidgetEntity,
+              collection: 'widget-upsert',
+            },
+          ],
+          { backend: new InMemoryFirestoreBackend() },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<WidgetEntity>>(
+      getDynamicRepositoryToken('widget'),
+    );
+
+    const result = await repo.upsert({ title: 'Generated id' });
+
+    expect(result.id).toEqual(expect.any(String));
+    await expect(
+      repo.findOne({ where: Where.eq('id', result.id) }),
+    ).resolves.toMatchObject({ id: result.id, title: 'Generated id' });
+  });
+
+  it('rejects create when the document id already exists', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'widget',
+              entity: WidgetEntity,
+              collection: 'widget-duplicate-create',
+            },
+          ],
+          { backend: new InMemoryFirestoreBackend() },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<WidgetEntity>>(
+      getDynamicRepositoryToken('widget'),
+    );
+
+    await repo.create({ id: 'same-id', title: 'Original' });
+
+    await expect(
+      repo.create({ id: 'same-id', title: 'Replacement' }),
+    ).rejects.toThrow();
+    await expect(
+      repo.findOne({ where: Where.eq('id', 'same-id') }),
+    ).resolves.toMatchObject({ title: 'Original' });
+  });
+
+  it('uses every order clause as a deterministic tie-breaker', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'ordered-widget',
+              entity: OrderedWidgetEntity,
+              collection: 'ordered-widgets',
+            },
+          ],
+          { backend: new InMemoryFirestoreBackend() },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<OrderedWidgetEntity>>(
+      getDynamicRepositoryToken('ordered-widget'),
+    );
+
+    await repo.create({ id: 'rank-2', group: 'same', rank: 2 });
+    await repo.create({ id: 'rank-1', group: 'same', rank: 1 });
+
+    const rows = await repo.find({
+      order: [
+        { field: 'group', order: SortOrder.ASC },
+        { field: 'rank', order: SortOrder.ASC },
+      ],
+    });
+
+    expect(rows.map((row) => row.id)).toEqual(['rank-1', 'rank-2']);
   });
 });

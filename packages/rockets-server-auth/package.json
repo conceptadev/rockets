@@ -1,7 +1,7 @@
 {
   "name": "@concepta/rockets-auth",
   "version": "0.0.1-dev.0",
-  "description": "Rockets Auth - Complete authentication and authorization solution for NestJS with JWT, OAuth, OTP, role-based access control, and more",
+  "description": "Rockets Auth - JWT authentication, account recovery, OTP, invitations, and role-based access control for NestJS",
   "author": "Thiago Ramalho <thiago.ramalho@concepta.com>",
   "license": "BSD-3-Clause",
   "main": "dist/index.js",
@@ -45,16 +45,10 @@
     "typescript"
   ],
   "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=8.0.0"
-  },
-  "bin": {
-    "rockets-auth-swagger": "./bin/generate-swagger.js"
+    "node": ">=20.0.0"
   },
   "files": [
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}",
-    "bin/generate-swagger.js",
-    "SWAGGER.md",
     "README.md",
     "LICENSE.txt",
     "CHANGELOG.md"
@@ -68,8 +62,7 @@
     "test:watch": "cd ../.. && ./node_modules/.bin/vitest --project unit packages/rockets-server-auth",
     "test:e2e": "cd ../.. && ./node_modules/.bin/vitest run --project e2e-packages packages/rockets-server-auth",
     "test:e2e:cov": "cd ../.. && ./node_modules/.bin/vitest run --project e2e-packages --coverage packages/rockets-server-auth",
-    "test:cov": "cd ../.. && ./node_modules/.bin/vitest run --project unit --coverage packages/rockets-server-auth",
-    "generate-swagger": "ts-node src/generate-swagger.ts"
+    "test:cov": "cd ../.. && ./node_modules/.bin/vitest run --project unit --coverage packages/rockets-server-auth"
   },
   "dependencies": {
     "@concepta/nestjs-access-control": "8.0.0-alpha.8",
@@ -116,7 +109,6 @@
     "express-serve-static-core": "^0.1.1",
     "sqlite3": "^5.1.4",
     "supertest": "^6.3.4",
-    "ts-node": "^10.9.2",
     "typeorm": "^0.3.31",
     "vitest": "^4.1.10"
   },

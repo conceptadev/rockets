@@ -42,7 +42,7 @@ export function buildRocketsAuthOtpController(
   extras: OtpControllerExtras = {},
 ): Type<unknown> {
   @Controller('otp')
-  @AuthPublic()
+  @AuthPublic({ classLevel: true })
   @ApiTags('Authentication')
   class RocketsAuthOtpController {
     constructor(

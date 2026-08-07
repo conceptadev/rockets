@@ -1,42 +1,97 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { APP_GUARD } from '@nestjs/core';
-import { ROCKETS_CORE_SETTINGS_TOKEN } from '@concepta/rockets-core';
+import {
+  RocketsCoreModule,
+  ROCKETS_CORE_SETTINGS_TOKEN,
+  type AuthAdapterInterface,
+  type AuthAttemptResult,
+  type AuthBootstrap,
+  type AuthRequest,
+  type RepositoryModuleInterface,
+  type ResourceInput,
+  type RocketsUserMetadataConfig,
+  type UserMetadataCreatableInterface,
+  type UserMetadataModelUpdatableInterface,
+} from '@concepta/rockets-core';
 import { MeController } from './gateways/http/me.controller';
 import {
   createRocketsControllers,
+  createRocketsImports,
   createRocketsProviders,
   createRocketsExports,
 } from './rockets.module-definition';
-import { RAW_OPTIONS_TOKEN } from './rockets.tokens';
+import {
+  RAW_OPTIONS_TOKEN,
+  ROCKETS_USER_METADATA_DTO_TOKEN,
+} from './rockets.tokens';
+
+class ContributedAuthAdapter implements AuthAdapterInterface {
+  authenticate(_request: AuthRequest): Promise<AuthAttemptResult> {
+    return Promise.resolve({ matched: false });
+  }
+}
+class ContributedMetadataEntity {}
+class ContributedMetadataCreateDto implements UserMetadataCreatableInterface {
+  userId!: string;
+}
+class ContributedMetadataUpdateDto
+  implements UserMetadataModelUpdatableInterface
+{
+  id!: string;
+}
+
+const contributedRepository = {
+  forFeature: vi.fn(),
+} as unknown as RepositoryModuleInterface;
+const contributedResource = {
+  key: 'auth-resource',
+} as unknown as ResourceInput;
+const contributedUserMetadata = {
+  entity: ContributedMetadataEntity,
+  createDto: ContributedMetadataCreateDto,
+  updateDto: ContributedMetadataUpdateDto,
+} as RocketsUserMetadataConfig;
+
+function contributedAuth(
+  overrides: Record<string, unknown> = {},
+): AuthBootstrap {
+  return {
+    adapter: ContributedAuthAdapter,
+    contributes: {
+      repository: contributedRepository,
+      resources: [contributedResource],
+      userMetadata: contributedUserMetadata,
+      enableGlobalGuard: false,
+      ...overrides,
+    },
+  } as AuthBootstrap;
+}
 
 describe('RocketsModuleDefinition', () => {
   describe('createRocketsControllers', () => {
-    it('should return MeController by default when no options provided', () => {
+    it('does not mount /me when no user-metadata contract is provided', () => {
       const result = createRocketsControllers({});
 
-      expect(result).toContain(MeController);
-      expect(result).toHaveLength(1);
+      expect(result).toEqual([]);
     });
 
-    it('should return MeController when extras is empty object', () => {
+    it('does not mount /me for empty extras', () => {
       const result = createRocketsControllers({ extras: {} });
 
-      expect(result).toContain(MeController);
-      expect(result).toHaveLength(1);
+      expect(result).toEqual([]);
     });
 
-    it('should return MeController when disableController is empty object', () => {
+    it('does not mount /me from disableController alone', () => {
       const result = createRocketsControllers({
         extras: { disableController: {} },
       });
 
-      expect(result).toContain(MeController);
-      expect(result).toHaveLength(1);
+      expect(result).toEqual([]);
     });
 
-    it('should return MeController when disableController.me is false', () => {
+    it('mounts /me when user metadata is configured', () => {
       const result = createRocketsControllers({
-        extras: { disableController: { me: false } },
+        extras: { userMetadata: contributedUserMetadata },
       });
 
       expect(result).toContain(MeController);
@@ -45,7 +100,10 @@ describe('RocketsModuleDefinition', () => {
 
     it('should exclude MeController when disableController.me is true', () => {
       const result = createRocketsControllers({
-        extras: { disableController: { me: true } },
+        extras: {
+          disableController: { me: true },
+          userMetadata: contributedUserMetadata,
+        },
       });
 
       expect(result).not.toContain(MeController);
@@ -123,6 +181,84 @@ describe('RocketsModuleDefinition', () => {
         providers: [CustomProvider],
       });
       expect(result).toContain(CustomProvider);
+    });
+
+    it('uses auth-contributed metadata and guard defaults', () => {
+      const result = createRocketsProviders({
+        extras: { auth: contributedAuth() },
+      });
+      const metadataProvider = result.find(
+        (provider) =>
+          typeof provider === 'object' &&
+          'provide' in provider &&
+          provider.provide === ROCKETS_USER_METADATA_DTO_TOKEN,
+      ) as { useValue: unknown };
+      const guardProvider = result.find(
+        (provider) =>
+          typeof provider === 'object' &&
+          'provide' in provider &&
+          provider.provide === APP_GUARD,
+      );
+
+      expect(metadataProvider.useValue).toEqual({
+        updateDto: ContributedMetadataUpdateDto,
+      });
+      expect(guardProvider).toBeUndefined();
+    });
+  });
+
+  describe('createRocketsImports', () => {
+    it('forwards auth-contributed persistence defaults to core', () => {
+      const forRootAsync = vi
+        .spyOn(RocketsCoreModule, 'forRootAsync')
+        .mockReturnValue({ module: RocketsCoreModule });
+
+      createRocketsImports({
+        imports: [],
+        extras: { auth: contributedAuth() },
+      });
+
+      expect(forRootAsync).toHaveBeenCalledWith(
+        expect.objectContaining({
+          repository: contributedRepository,
+          resources: [contributedResource],
+          userMetadata: contributedUserMetadata,
+        }),
+      );
+      forRootAsync.mockRestore();
+    });
+
+    it('lets explicit app settings override auth defaults while retaining auth resources', () => {
+      const appRepository = {
+        forFeature: vi.fn(),
+      } as unknown as RepositoryModuleInterface;
+      const appResource = { key: 'app-resource' } as unknown as ResourceInput;
+      const appUserMetadata = {
+        ...contributedUserMetadata,
+        updateDto: class AppMetadataUpdateDto extends ContributedMetadataUpdateDto {},
+      };
+      const forRootAsync = vi
+        .spyOn(RocketsCoreModule, 'forRootAsync')
+        .mockReturnValue({ module: RocketsCoreModule });
+
+      createRocketsImports({
+        imports: [],
+        extras: {
+          auth: contributedAuth(),
+          repository: appRepository,
+          resources: [appResource],
+          userMetadata: appUserMetadata,
+        },
+      });
+
+      expect(forRootAsync).toHaveBeenCalledWith(
+        expect.objectContaining({
+          repository: appRepository,
+          resources: [contributedResource, appResource],
+          userMetadata: appUserMetadata,
+        }),
+      );
+      forRootAsync.mockRestore();
     });
   });
 

@@ -114,7 +114,7 @@ export function buildInvitationAcceptanceController(
   extras: InvitationAcceptanceControllerExtras = {},
 ): Type<unknown> {
   @Controller('invitation-acceptance')
-  @AuthPublic()
+  @AuthPublic({ classLevel: true })
   @ApiTags('auth')
   class InvitationAcceptanceController {
     constructor(private readonly commandBus: CommandBus) {}

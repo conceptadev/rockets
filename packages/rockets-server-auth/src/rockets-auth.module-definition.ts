@@ -12,8 +12,9 @@ import {
   SwaggerUiModule,
 } from '@concepta/rockets-core';
 import { PassportModule } from '@nestjs/passport';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { CqrsModule } from '@nestjs/cqrs';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ConfigModule } from '@nestjs/config';
 import {
   AuthenticationModule,
@@ -45,7 +46,6 @@ import {
 import {
   CreatePasswordCommand,
   PasswordModule,
-  ValidateCurrentPasswordCommand,
   ValidatePasswordHistoryCommand,
 } from '@concepta/nestjs-password';
 import { RepositoryModule } from '@concepta/nestjs-repository';
@@ -98,9 +98,13 @@ import {
   RocketsAuthSetPasswordPortHandler,
   RocketsAuthValidatePasswordPortHandler,
 } from './shared/authentication/rockets-auth-password-port.handlers';
-import { RocketsValidateCurrentPasswordOverrideModule } from './shared/authentication/rockets-validate-current-password-override.module';
+import {
+  RocketsValidateCurrentPasswordCommand,
+  RocketsValidateCurrentPasswordHandler,
+} from './shared/authentication/rockets-validate-current-password.handler';
 import { RocketsAuthCreateOtpPortHandler } from './shared/authentication/rockets-auth-create-otp-port.handler';
 import { ConceptaRepositoryCompatModule } from './shared/compatibility/concepta-repository-compat.module';
+import { RocketsAuthRecoveryController } from './domains/auth/gateways/http/controllers/rockets-auth-recovery.controller';
 
 export { RAW_OPTIONS_TOKEN } from './shared/constants/rockets-auth-raw-options.token';
 
@@ -281,6 +285,7 @@ export function createRocketsAuthControllers(options: {
   // `AuthenticationModule`; HTTP routes for `/token/password` and
   // `/token/refresh` are composed in {@link RocketsAuthTokenController}.
   if (!disableController.token) list.push(RocketsAuthTokenController);
+  if (!disableController.recovery) list.push(RocketsAuthRecoveryController);
   if (!disableController.otp) {
     list.push(buildRocketsAuthOtpController(options.extras?.otp?.controller));
   }
@@ -334,6 +339,15 @@ export function createRocketsAuthImports(importOptions: {
     RocketsAuthPortsModule.forRoot(importOptions.extras?.ports),
     ConfigModule.forFeature(rocketsAuthOptionsDefaultConfig),
     createSafeCrudRootModule(),
+    ...(importOptions.extras?.throttling === false
+      ? []
+      : [
+          ThrottlerModule.forRoot(
+            importOptions.extras?.throttling ?? [
+              { name: 'default', limit: 1000, ttl: 60000 },
+            ],
+          ),
+        ]),
     SwaggerUiModule.registerAsync({
       inject: [RAW_OPTIONS_TOKEN],
       useFactory: (options: RocketsAuthOptionsInterface) => ({
@@ -364,6 +378,23 @@ export function createRocketsAuthImports(importOptions: {
           settings: {
             ...authSettings,
             jwt: resolveJwtSettings(authSettings?.jwt),
+            mfa: {
+              ...authSettings?.mfa,
+              // Mounting the recovery controller implies that the upstream
+              // RecoveryService must be active. Its built-in defaults supply
+              // the OTP policy when the consumer does not override it.
+              recovery: authSettings?.mfa?.recovery ?? {
+                otp: {
+                  namespace: ROCKETS_AUTH_OTP_ASSIGNMENT,
+                  category: 'auth-recovery',
+                  type: 'uuid',
+                  expiresIn: '1h',
+                  duplicateStrategy: 'DEACTIVATE',
+                  rateSeconds: 60,
+                  rateThreshold: 5,
+                },
+              },
+            },
             strategies: {
               local: {},
               jwt: {},
@@ -405,8 +436,6 @@ export function createRocketsAuthImports(importOptions: {
       }),
     }),
 
-    RocketsValidateCurrentPasswordOverrideModule,
-
     UserModule.forRootAsync({
       inject: [RAW_OPTIONS_TOKEN],
       entities: {
@@ -414,6 +443,7 @@ export function createRocketsAuthImports(importOptions: {
         credentials: USER_CREDENTIALS_ENTITY_KEY,
       },
       imports: [...(importOptions.extras?.user?.imports || [])],
+      providers: [RocketsAuthSetPasswordPortHandler],
       useFactory: (options: RocketsAuthOptionsInterface) => {
         const userSettings = options.user?.settings;
         warnOrThrowOnRequireCurrentOverride(userSettings?.password);
@@ -429,7 +459,7 @@ export function createRocketsAuthImports(importOptions: {
           ports: {
             password: {
               createCommand: CreatePasswordCommand,
-              validateCurrentCommand: ValidateCurrentPasswordCommand,
+              validateCurrentCommand: RocketsValidateCurrentPasswordCommand,
               // Default-on: prevents silent password reuse. Without this,
               // `UserPasswordPort.validateHistory()` no-ops and returns
               // true for every reused password — even when the consumer
@@ -594,7 +624,7 @@ export function createRocketsAuthProviders(options: {
   providers?: Provider[];
   extras?: RocketsAuthOptionsExtrasInterface;
 }): Provider[] {
-  return [
+  const providers: Provider[] = [
     ...(options.providers ?? []),
     createRocketsAuthSettingsProvider(),
     RocketsAuthOtpService,
@@ -605,7 +635,13 @@ export function createRocketsAuthProviders(options: {
     RocketsGetRolesByIdsHandler,
     ChangeMyPasswordHandler,
     RocketsAuthValidatePasswordPortHandler,
-    RocketsAuthSetPasswordPortHandler,
     RocketsAuthCreateOtpPortHandler,
+    RocketsValidateCurrentPasswordHandler,
   ];
+
+  if (options.extras?.throttling !== false) {
+    providers.push({ provide: APP_GUARD, useClass: ThrottlerGuard });
+  }
+
+  return providers;
 }

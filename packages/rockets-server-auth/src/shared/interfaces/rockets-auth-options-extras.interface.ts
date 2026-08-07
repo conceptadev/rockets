@@ -2,6 +2,7 @@ import { AccessControlOptionsInterface } from '@concepta/nestjs-access-control';
 import type { CanAccess } from '@concepta/nestjs-access-control';
 import type { CanActivate } from '@nestjs/common';
 import type { AuthenticationOptionsExtrasInterface } from '@concepta/nestjs-authentication';
+import type { ThrottlerModuleOptions } from '@nestjs/throttler';
 import { RocketsAuthUserMetadataCreatableInterface } from '../../domains/user/interfaces/rockets-auth-user-metadata-creatable.interface';
 import { DynamicModule, Provider, Type } from '@nestjs/common';
 import { RocketsAuthUserCreatableInterface } from '../../domains/user/interfaces/rockets-auth-user-creatable.interface';
@@ -158,6 +159,9 @@ export interface DisableControllerOptionsInterface {
 
   /** Disable `/token/password` and `/token/refresh`. */
   token?: boolean;
+
+  /** Disable account-recovery routes under `/recovery`. */
+  recovery?: boolean;
 }
 
 export interface RocketsAuthOptionsExtrasInterface
@@ -222,6 +226,12 @@ export interface RocketsAuthOptionsExtrasInterface
     queryServices?: Provider<CanAccess>[];
   };
   disableController?: DisableControllerOptionsInterface;
+  /**
+   * Global request-throttling configuration. Route-specific limits declared by
+   * Rockets Auth use the `default` throttler. Pass `false` only when the host
+   * application already owns the global throttler module and guard.
+   */
+  throttling?: false | ThrottlerModuleOptions;
   invitation?: {
     imports?: DynamicModule['imports'];
     /**

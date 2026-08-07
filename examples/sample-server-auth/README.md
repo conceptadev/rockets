@@ -169,7 +169,6 @@ examples/sample-server-auth
 │   ├── app.acl.ts                   Role + resource enums + accesscontrol grants
 │   ├── access-control.service.ts    AccessControlServiceInterface impl
 │   ├── main.ts                      Bootstrap (helmet, validation, swagger)
-│   ├── repository/                  defineTypeOrmRepository bootstrap (shared with defineRocketsAuth)
 │   ├── shared/persistence/          AuditedSqliteEntity (app-owned audit columns)
 │   ├── modules/
 │   │   ├── user/                    UserEntity + credential / otp / role-link entities + DTOs
@@ -189,7 +188,8 @@ examples/sample-server-auth
 | `GET /me`, `PATCH /me` | From `@concepta/rockets`. |
 | `PATCH /me/password` | Password change. |
 | `POST /otp`, `PATCH /otp` | OTP issue / verify. |
-| `POST /recovery/*` | Password recovery flow (wired to notification handlers). |
+| `POST /recovery/login`, `POST /recovery/password` | Enumeration-safe recovery initiation. |
+| `GET /recovery/passcode/:passcode`, `PATCH /recovery/password` | Passcode validation and password reset. |
 | `/admin/users`, `/admin/users/:userId/roles` | Admin user CRUD + role assignment. |
 | `/admin/roles` | Role CRUD (`roleCrud` config). |
 | `/admin/invitations`, `/invitation-acceptance`, … | Invitation flow. |
@@ -206,11 +206,11 @@ examples/sample-server-auth
 
 ### Persistence wiring
 
-A single `defineTypeOrmRepository({...})` bootstrap is shared by
-`RocketsModule.forRoot({ repository })` and `defineRocketsAuth({
-persistence: { module } })`. The planner derives the full entity list
-from `resources[]`, `userMetadata.entity`, and the auth
-`persistence.entities` map — there is no top-level
+A single `defineTypeOrmRepository({...})` bootstrap is passed to
+`defineRocketsAuth({ persistence: { module } })`. That integration contributes
+the root repository, auth resources, and metadata contract to
+`RocketsModule`. The planner derives the full entity list from app resources
+and the auth `persistence.entities` map — there is no top-level
 `TypeOrmModule.forRoot({ entities: [...] })` to keep in sync. Pet
 resources omit per-resource `persistence` so they inherit the root
 adapter.

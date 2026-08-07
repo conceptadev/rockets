@@ -7,7 +7,7 @@
 > External-auth NestJS server. One options object → adapter chain, global guard,
 > `/me`, declarative CRUD resources, swagger.
 
-**Status:** stable (`0.0.1-dev.0` on npm, dist-tag `alpha`).
+**Status:** pre-1.0 preview (`0.0.1-dev.0`, npm dist-tag `alpha`).
 
 **Stack context:**
 [Repository README](../../README.md#what-problem-each-layer-solves) — Concepta
@@ -62,7 +62,8 @@ repositories, swagger registration) is re-exported from core.
 ### When NOT to use this package
 
 - You want a **complete built-in auth system** (signup, login, password
-  recovery, OTP, oauth, admin user CRUD) → use `@concepta/rockets-server-auth`.
+  recovery, OTP, invitations, admin user CRUD) → use
+  `@concepta/rockets-auth` alongside this package.
 - You want full composition control (no `/me`, no global guard) → drop to
   `@concepta/rockets-core`.
 
@@ -124,8 +125,9 @@ them directly.
 
 ### Minimal working app
 
-A single CRUD resource (`pets`) and a single JWT adapter. The `auth`,
-`userMetadata`, and `resources` are the three options most apps care about.
+A single CRUD resource (`pets`) and a single JWT adapter. `createServer()` is
+the canonical launch-facing API; it returns a Nest entry module that can be
+passed straight to `NestFactory.create()`.
 
 ```typescript
 // src/auth/jwt.adapter.ts
@@ -135,6 +137,7 @@ import {
   AuthAdapterInterface,
   AuthAttemptResult,
   AuthRequest,
+  defineAuthAdapter,
   extractBearerToken,
 } from '@concepta/rockets';
 
@@ -157,37 +160,38 @@ export class JwtAdapter implements AuthAdapterInterface {
     }
   }
 }
+
+export const jwtAuth = defineAuthAdapter(JwtAdapter);
 ```
 
 ```typescript
-// src/app.module.ts
-import { Module } from '@nestjs/common';
-import { RocketsModule, defineResource } from '@concepta/rockets';
-import { JwtAdapter } from './auth/jwt.adapter';
+// src/server.ts
+import { NestFactory } from '@nestjs/core';
+import { createServer, defineResource } from '@concepta/rockets';
+import { defineTypeOrmRepository } from '@concepta/rockets-repository-typeorm';
+import { jwtAuth } from './auth/jwt.adapter';
 import { PetEntity } from './pet.entity';
 import { UserMetadataEntity } from './user/user-metadata.entity';
 import { UserMetadataCreateDto, UserMetadataUpdateDto } from './user/dto';
-import { defineTypeOrmRepository } from './repository/define-typeorm-repository';
 
-@Module({
-  imports: [
-    RocketsModule.forRoot({
-      auth: JwtAdapter,
-      userMetadata: {
-        entity: UserMetadataEntity,
-        createDto: UserMetadataCreateDto,
-        updateDto: UserMetadataUpdateDto,
-      },
-      repository: defineTypeOrmRepository({
-        type: 'sqlite',
-        database: ':memory:',
-        synchronize: true,
-      }),
-      resources: [defineResource({ entity: PetEntity })],
-    }),
-  ],
-})
-export class AppModule {}
+export const server = createServer({
+  auth: jwtAuth,
+  userMetadata: {
+    entity: UserMetadataEntity,
+    createDto: UserMetadataCreateDto,
+    updateDto: UserMetadataUpdateDto,
+  },
+  repository: defineTypeOrmRepository({
+    type: 'sqlite',
+    database: ':memory:',
+    synchronize: true,
+  }),
+  resources: [defineResource({ entity: PetEntity })],
+});
+
+// main.ts
+const app = await NestFactory.create(server);
+await app.listen(3000);
 ```
 
 You now have:
@@ -311,9 +315,7 @@ import { defineModuleResource } from '@concepta/rockets-core';
 
 RocketsModule.forRoot({
   auth: defineFirebaseAuth({
-    forRoot: {
-      firebaseApp: admin.initializeApp({ credential: applicationDefault() }),
-    },
+    firebaseApp: admin.initializeApp({ credential: applicationDefault() }),
     // forRootAsync: { useFactory: resolveFirebaseOptions, inject: [ConfigService] },
   }),
   userMetadata,
@@ -359,15 +361,24 @@ defineModuleResource({
 | **This package**           | `@concepta/rockets`                               | `RocketsModule`, `MeController`, `APP_GUARD` wiring                                     |
 | Built-in identity (path B) | `@concepta/rockets-auth`                          | `defineRocketsAuth()` — **sibling**, not a dependency of this package; apps import both |
 
-Path B:
-`RocketsModule.forRoot({ auth: defineRocketsAuth(...), repository, resources })`.
+Path B: `createServer({ auth: defineRocketsAuth(...), resources })`. The auth
+integration contributes its persistence rows, root repository, metadata
+contract, and guard preference; explicit server options still win.
+
+### `createServer(definition)`
+
+The canonical public facade. It accepts the same static definition as
+`RocketsModule.forRoot()` and returns a Nest `DynamicModule`. Pass it directly
+to `NestFactory.create()` or import it into a larger host module. Use
+`RocketsModule.forRootAsync()` only when the host itself must build the whole
+definition asynchronously.
 
 ### `RocketsModule.forRoot(options)` / `forRootAsync(options)`
 
 | Option              | Type                                               | Required                  | Description                                                                                                              |
 | ------------------- | -------------------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `auth`              | `AuthBootstrap \| ReadonlyArray<AuthBootstrap>`    | yes                       | From `defineFirebaseAuth()`, `defineRocketsAuth()`, or app-local helpers. Pair entity rows on `resources[]`.             |
-| `userMetadata`      | `RocketsUserMetadataConfig`                        | yes when `/me` is enabled | `{ entity, createDto, updateDto, responseDto?, repository? }`. Used by `MeController` and the default metadata handlers. |
+| `auth`              | `AuthBootstrap \| ReadonlyArray<AuthBootstrap>`    | yes                       | From `defineFirebaseAuth()`, `defineRocketsAuth()`, or app-local helpers. Integrations may contribute owned defaults.    |
+| `userMetadata`      | `RocketsUserMetadataConfig`                        | optional                  | When present, mounts `/me` and its metadata handlers. Explicit configuration overrides an auth contribution.            |
 | `repository`        | `RepositoryModuleInterface \| RepositoryBootstrap` | optional                  | Default persistence adapter forwarded to core. Omit if the auth integration registers everything.                        |
 | `resources`         | `ReadonlyArray<ResourceInput>`                     | optional                  | Bundles from `defineResource` / `defineModuleResource` / hand-built `RocketsResourceConfig`.                             |
 | `enableGlobalGuard` | `boolean` (default `true`)                         | optional                  | Set `false` to skip the `APP_GUARD: AuthServerGuard` provider.                                                           |
@@ -416,16 +427,13 @@ Everything most apps need:
   for back-compat).
 - Error helpers: `logAndGetErrorDetails`, `getErrorDetails`, `ErrorDetails`.
 
-### Swagger generation
+### OpenAPI generation
 
-The package ships a CLI helper to dump the OpenAPI spec to disk:
-
-```bash
-yarn rockets-swagger > swagger.json
-```
-
-Driven by the same `RocketsModule` so the spec reflects the running app's
-resources.
+OpenAPI is app-owned because only the application knows its complete entry
+module, global prefixes, and document settings. Build the document from the
+same `server` definition with Nest's `SwaggerModule.createDocument(app,
+config)`. The runnable samples demonstrate both Swagger UI and document
+post-processing; the packages do not expose a misleading standalone CLI.
 
 ---
 

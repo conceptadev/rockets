@@ -3,8 +3,7 @@
  *
  * The two tests are intentionally adjacent so the bug + workaround are
  * self-documenting: anyone removing `RocketsValidateCurrentPasswordHandler`
- * (or `RocketsValidateCurrentPasswordOverrideModule`) immediately sees the
- * upstream behavior they would re-expose.
+ * immediately sees the upstream behavior they would re-expose.
  *
  * - **Test 1 (bug demonstration):** the upstream `PasswordCreationService.validateCurrent`
  *   does `{ password, ...target }`. When `target` is a v8 aggregate that exposes
@@ -21,8 +20,8 @@
  * When upstream ships the spread fix:
  *   1. Test 1 will flip to returning `true` (delete it; the assertion
  *      becomes meaningless and would silently hide future regressions).
- *   2. Test 2 stays useful as a structural-contract test until the override
- *      module is removed.
+ *   2. Replace Rockets' dedicated command/handler with the upstream command
+ *      once aggregate targets work there without competing CQRS ownership.
  */
 import { describe, it, expect, beforeAll } from 'vitest';
 import {
@@ -31,10 +30,12 @@ import {
   PasswordStrengthService,
   PasswordValidationService,
   PasswordPolicy,
-  ValidateCurrentPasswordCommand,
 } from '@concepta/nestjs-password';
 
-import { RocketsValidateCurrentPasswordHandler } from './rockets-validate-current-password.handler';
+import {
+  RocketsValidateCurrentPasswordCommand,
+  RocketsValidateCurrentPasswordHandler,
+} from './rockets-validate-current-password.handler';
 
 // --- Fixtures ---------------------------------------------------------
 
@@ -107,7 +108,7 @@ describe('G9 — validateCurrent aggregate-spread bug', () => {
   it('FIX — RocketsValidateCurrentPasswordHandler normalizes the aggregate and validates correctly', async () => {
     // Same aggregate that the upstream service silently rejected above.
     const handler = new RocketsValidateCurrentPasswordHandler(service);
-    const command = new ValidateCurrentPasswordCommand(
+    const command = new RocketsValidateCurrentPasswordCommand(
       plainPassword,
       aggregate as unknown as { passwordHash: string },
     );
@@ -117,7 +118,7 @@ describe('G9 — validateCurrent aggregate-spread bug', () => {
 
   it('FIX — RocketsValidateCurrentPasswordHandler also rejects a wrong password against the same aggregate', async () => {
     const handler = new RocketsValidateCurrentPasswordHandler(service);
-    const command = new ValidateCurrentPasswordCommand(
+    const command = new RocketsValidateCurrentPasswordCommand(
       'totally-wrong-password',
       aggregate as unknown as { passwordHash: string },
     );

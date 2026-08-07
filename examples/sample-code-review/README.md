@@ -75,7 +75,7 @@ chain so server-to-server callers can authenticate with `X-Api-Key`.
 
 ### Prerequisites
 
-- Node 18+, Yarn 4.
+- Node 20+, Yarn 4.
 - A Firebase project for real auth (or `FIREBASE_USE_FAKE=true` for
   in-process verification).
 - A GitHub OAuth App if you want the GitHub connect flow to work.
@@ -227,7 +227,7 @@ examples/sample-code-review
 │   │       ├── auth-firebase/                   defineFirebaseAuth wiring
 │   │       ├── auth-api-key/                    Second AuthBootstrap in the chain — ApiKeyEntity + POST /api-keys (mint) + adapter
 │   │       ├── github/                          GitHub OAuth + repo browse
-│   │       ├── repository/                      defineTypeOrmRepository + Firestore persistence helpers
+│   │       ├── repository/                      Firestore persistence helper
 │   │       ├── config/                          GithubConfig / OpenaiConfig (env-var readers)
 │   │       ├── zod-bindings.ts                   bindZodResources(typeOrmZodEntityCompiler)
 │   │       ├── user-metadata.schema.ts           zod schema -> { entity, createDto, updateDto, responseDto }

@@ -25,6 +25,33 @@ describe('firestore-where.translator', () => {
     ]);
   });
 
+  it('maps id IN to direct document lookups', () => {
+    const branch = translateDnfBranch([Where.in('id', ['doc-1', 'doc-2'])]);
+
+    expect(branch.documentIds).toEqual(['doc-1', 'doc-2']);
+    expect(branch.filters).toEqual([]);
+  });
+
+  it('intersects multiple document-id predicates in an AND branch', () => {
+    const branch = translateDnfBranch([
+      Where.in('id', ['doc-1', 'doc-2']),
+      Where.eq('id', 'doc-2'),
+    ]);
+
+    expect(branch.documentId).toBe('doc-2');
+    expect(branch.documentIds).toBeUndefined();
+  });
+
+  it('represents a contradictory document-id branch as an empty lookup', () => {
+    const branch = translateDnfBranch([
+      Where.in('id', ['doc-1']),
+      Where.eq('id', 'doc-2'),
+    ]);
+
+    expect(branch.documentIds).toEqual([]);
+    expect(branch.documentId).toBeUndefined();
+  });
+
   it('maps IS_NULL to post-filter', () => {
     const branch = translateDnfBranch([Where.isNull('note')]);
     expect(branch.postFilters).toEqual([{ kind: 'is_null', field: 'note' }]);

@@ -8,10 +8,11 @@ TypeORM implementation of the Rockets dynamic repository contract.
 
 This is a **thin wrapper** over
 [`@concepta/nestjs-repository-typeorm`](https://www.npmjs.com/package/@concepta/nestjs-repository-typeorm):
-the main entry re-exports the upstream package verbatim, so consumers depend
-on a single `@concepta/*` package instead of reaching for the upstream one
-directly. The Rockets-specific addition — the zod `SchemaEntityCompiler` —
-lives at the `/zod` subpath and is the only code this package owns.
+the main entry re-exports the upstream package, so consumers depend on a single
+`@concepta/*` package instead of reaching for the upstream one directly. It
+also owns the Rockets bootstrap that combines TypeORM connection options with
+the planner-derived entity list. The zod `SchemaEntityCompiler` lives at the
+`/zod` subpath.
 
 ## Install
 
@@ -19,7 +20,24 @@ lives at the `/zod` subpath and is the only code this package owns.
 npm install @concepta/rockets-repository-typeorm typeorm
 ```
 
-## Repository module
+## Repository bootstrap
+
+Use one bootstrap at the server boundary. Rockets derives the entity list from
+the resources, so the connection never repeats it:
+
+```ts
+import { createServer } from '@concepta/rockets';
+import { defineTypeOrmRepository } from '@concepta/rockets-repository-typeorm';
+
+const repository = defineTypeOrmRepository({
+  type: 'postgres',
+  url: process.env.DATABASE_URL,
+});
+
+createServer({ repository, resources });
+```
+
+For lower-level module registration, the upstream exports remain available:
 
 ```ts
 import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
@@ -46,6 +64,8 @@ export const { zodResource, zodSubResource } =
 
 `zod` and `nestjs-zod` are **optional peers** — you only pay for them if you
 import the `/zod` subpath.
+
+Requires Node.js 20 or newer.
 
 ## License
 

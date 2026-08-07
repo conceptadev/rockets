@@ -32,6 +32,7 @@ export {
   Where,
   getDynamicRepositoryToken,
   RepositoryModule,
+  defineAuthAdapter,
   createStubAuthBootstrap,
   AuthUser,
   ActorCtx,
@@ -74,6 +75,7 @@ export type {
   WithActor,
   EntityHookContext,
   RocketsCrudContext,
+  DefineAuthAdapterOptions,
 } from '@concepta/rockets-core';
 
 export { isRepositoryBootstrap } from '@concepta/rockets-core';
@@ -88,6 +90,8 @@ export { ExceptionsFilter } from './infrastructure/filters/exceptions.filter';
 
 // ── Server's own exports ──
 export { RocketsModule } from './rockets.module';
+export { createServer } from './create-server';
+export type { RocketsServerDefinition } from './create-server';
 export type {
   RocketsOptions,
   RocketsAsyncOptions,
@@ -100,7 +104,6 @@ export type {
 } from './infrastructure/config/interfaces/rockets-options-extras.interface';
 export { UserModule } from './user.module';
 export { MeController } from './gateways/http/me.controller';
-export { defineTypeOrmRepository } from './repository/define-typeorm-repository';
 export {
   logAndGetErrorDetails,
   getErrorDetails,

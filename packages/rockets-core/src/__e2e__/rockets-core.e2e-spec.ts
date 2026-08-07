@@ -28,7 +28,9 @@ import {
   USER_METADATA_MODULE_ENTITY_KEY,
 } from '../rockets-core.constants';
 import { UpsertUserMetadataCommand } from '../application/commands/impl/upsert-user-metadata.command';
+import { UpsertUserMetadataHandler } from '../application/commands/handlers/upsert-user-metadata.handler';
 import { GetUserMetadataQuery } from '../application/queries/impl/get-user-metadata.query';
+import { GetUserMetadataHandler } from '../application/queries/handlers/get-user-metadata.handler';
 
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { createStubAuthBootstrap } from '../infrastructure/auth/create-stub-auth-bootstrap';
@@ -175,6 +177,10 @@ describe('RocketsCoreModule (e2e)', () => {
         RocketsCoreModule.forRoot({
           auth: createStubAuthBootstrap(MockAuthAdapter),
           providers: [MockAuthAdapter],
+          handlers: {
+            upsertUserMetadata: UpsertUserMetadataHandler,
+            getUserMetadata: GetUserMetadataHandler,
+          },
           global: true,
         }),
       ],
