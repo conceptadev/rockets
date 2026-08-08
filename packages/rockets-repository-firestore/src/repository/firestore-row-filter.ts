@@ -2,6 +2,8 @@ import type { FirestoreQueryFilter } from '../interfaces/firestore-query.interfa
 import {
   compareFirestoreValues,
   firestoreValuesEqual,
+  readFirestoreField,
+  sameFirestoreRangeType,
 } from './firestore-value';
 
 /** Apply the non-post-filter predicates that Firestore would normally execute. */
@@ -17,27 +19,55 @@ function matches(
   row: Record<string, unknown>,
   filter: FirestoreQueryFilter,
 ): boolean {
-  const value = row[filter.field];
+  const field = readFirestoreField(row, filter.field);
+  const value = field.value;
   switch (filter.op) {
     case '==':
-      return firestoreValuesEqual(value, filter.value);
+      return field.exists && firestoreValuesEqual(value, filter.value);
     case '!=':
-      return !firestoreValuesEqual(value, filter.value);
+      return (
+        field.exists &&
+        value !== null &&
+        !firestoreValuesEqual(value, filter.value)
+      );
     case '<':
-      return compareFirestoreValues(value, filter.value) < 0;
+      return rangeMatch(
+        field.exists,
+        value,
+        filter.value,
+        (result) => result < 0,
+      );
     case '<=':
-      return compareFirestoreValues(value, filter.value) <= 0;
+      return rangeMatch(
+        field.exists,
+        value,
+        filter.value,
+        (result) => result <= 0,
+      );
     case '>':
-      return compareFirestoreValues(value, filter.value) > 0;
+      return rangeMatch(
+        field.exists,
+        value,
+        filter.value,
+        (result) => result > 0,
+      );
     case '>=':
-      return compareFirestoreValues(value, filter.value) >= 0;
+      return rangeMatch(
+        field.exists,
+        value,
+        filter.value,
+        (result) => result >= 0,
+      );
     case 'in':
       return (
+        field.exists &&
         Array.isArray(filter.value) &&
         filter.value.some((candidate) => firestoreValuesEqual(value, candidate))
       );
     case 'not-in':
       return (
+        field.exists &&
+        value !== null &&
         Array.isArray(filter.value) &&
         !filter.value.some((candidate) =>
           firestoreValuesEqual(value, candidate),
@@ -45,6 +75,7 @@ function matches(
       );
     case 'array-contains':
       return (
+        field.exists &&
         Array.isArray(value) &&
         value.some((candidate) => firestoreValuesEqual(candidate, filter.value))
       );
@@ -53,4 +84,19 @@ function matches(
       return exhaustive;
     }
   }
+}
+
+function rangeMatch(
+  exists: boolean,
+  value: unknown,
+  candidate: unknown,
+  predicate: (result: number) => boolean,
+): boolean {
+  return (
+    exists &&
+    value !== null &&
+    candidate !== null &&
+    sameFirestoreRangeType(value, candidate) &&
+    predicate(compareFirestoreValues(value, candidate))
+  );
 }

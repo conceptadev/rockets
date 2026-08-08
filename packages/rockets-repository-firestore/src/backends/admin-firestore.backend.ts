@@ -1,7 +1,6 @@
 import { getApp } from 'firebase-admin/app';
 import {
   getFirestore,
-  Timestamp,
   type DocumentData,
   type Query,
 } from 'firebase-admin/firestore';
@@ -18,6 +17,7 @@ import type {
 import { applyFirestorePostFilters } from '../repository/firestore-post-filter';
 import { applyFirestoreFilters } from '../repository/firestore-row-filter';
 import { sortFirestoreRows } from '../repository/firestore-sort';
+import { normalizeFirestoreValue } from '../repository/firestore-value';
 
 export class AdminFirestoreBackend implements FirestoreBackend {
   private db() {
@@ -205,7 +205,7 @@ export class AdminFirestoreBackend implements FirestoreBackend {
     }
     const next: Record<string, unknown> = { id: documentId };
     for (const [key, value] of Object.entries(data)) {
-      next[key] = value instanceof Timestamp ? value.toDate() : value;
+      next[key] = normalizeFirestoreValue(value);
     }
     return next;
   }
