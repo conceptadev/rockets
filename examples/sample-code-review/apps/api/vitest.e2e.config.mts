@@ -1,10 +1,11 @@
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineProject, mergeConfig } from 'vitest/config';
-import shared from '../../../../vitest.shared';
+import shared from '../../../../vitest.shared.mts';
 
 /**
  * E2E project for the sample-code-review API — registered in the root
- * `vitest.config.ts` `projects` list and runnable standalone via
+ * `vitest.config.mts` `projects` list and runnable standalone via
  * `--config` from the workspace. The Jest `moduleNameMapper` stub swap (real
  * Firestore persistence -> in-memory backend stub) is ported as a regex
  * alias below.
@@ -20,7 +21,7 @@ export default mergeConfig(
         // moduleNameMapper).
         find: /^\.\.\/repository\/code-review-reports\.persistence$/,
         replacement: path.resolve(
-          __dirname,
+          path.dirname(fileURLToPath(import.meta.url)),
           'test/stubs/code-review-reports.persistence.stub.ts',
         ),
       },

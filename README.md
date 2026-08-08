@@ -1007,8 +1007,9 @@ rockets/
 - **Rockets packages**: `0.0.1-dev.0` on npm
   (`yarn add @concepta/rockets@alpha`, or pin `0.0.1-dev.0`). Monorepo packages
   keep `workspace:^` for local development.
-- **Upstream Concepta packages**: v8 line at `8.0.0-alpha.7` (`nestjs-common` /
-  `nestjs-hook` at `8.0.0-alpha.6`). Two modules still on v7
+- **Upstream Concepta packages**: v8 modules are pinned to `8.0.0-alpha.8`;
+  `@concepta/nestjs-common` remains at its latest published v8 build,
+  `8.0.0-alpha.6`. Two modules remain on v7
   (`@concepta/nestjs-email`, `@concepta/nestjs-event`) pending the v8 port.
   Swagger UI ships from `@concepta/rockets-core`. Auth persistence entities are
   app-owned TypeORM classes — do not use `@concepta/nestjs-typeorm-ext`.

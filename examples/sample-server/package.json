@@ -7,7 +7,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "build": "tsc -p tsconfig.json",
-    "test:e2e": "vitest run --config vitest.e2e.config.ts"
+    "test:e2e": "vitest run --config vitest.e2e.config.mts"
   },
   "dependencies": {
     "@concepta/nestjs-core": "8.0.0-alpha.8",
