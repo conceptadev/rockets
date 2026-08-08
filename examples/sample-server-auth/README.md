@@ -103,11 +103,11 @@ authenticated as an admin.
 
 The three roles in `src/app.acl.ts`:
 
-| Role | Pet / Vaccination / Appointment |
-|---|---|
-| `admin` | `createAny`, `readAny`, `updateAny`, `deleteAny` |
-| `manager` | `createAny`, `readAny`, `updateAny` (no delete) |
-| `user` | `createOwn`, `readOwn`, `updateOwn`, `deleteOwn` (ownership-checked by `PetAccessQueryService`) |
+| Role      | Pet / Vaccination / Appointment                                                                 |
+| --------- | ----------------------------------------------------------------------------------------------- |
+| `admin`   | `createAny`, `readAny`, `updateAny`, `deleteAny`                                                |
+| `manager` | `createAny`, `readAny`, `updateAny` (no delete)                                                 |
+| `user`    | `createOwn`, `readOwn`, `updateOwn`, `deleteOwn` (ownership-checked by `PetAccessQueryService`) |
 
 The `PetAccessQueryService.canAccess()` runs **after** the grant table
 matches — it refines `:own` rules by comparing `pet.userId` to the
@@ -169,7 +169,6 @@ examples/sample-server-auth
 │   ├── app.acl.ts                   Role + resource enums + accesscontrol grants
 │   ├── access-control.service.ts    AccessControlServiceInterface impl
 │   ├── main.ts                      Bootstrap (helmet, validation, swagger)
-│   ├── repository/                  defineTypeOrmRepository bootstrap (shared with defineRocketsAuth)
 │   ├── shared/persistence/          AuditedSqliteEntity (app-owned audit columns)
 │   ├── modules/
 │   │   ├── user/                    UserEntity + credential / otp / role-link entities + DTOs
@@ -181,36 +180,37 @@ examples/sample-server-auth
 
 ### Auth surface (exposed by the bundle)
 
-| Route | Purpose |
-|---|---|
-| `POST /signup` | New user signup. Wired through `userCrud`. |
-| `POST /token/password` | Login (username + password → access + refresh token). |
-| `POST /token/refresh` | Refresh the access token. |
-| `GET /me`, `PATCH /me` | From `@concepta/rockets`. |
-| `PATCH /me/password` | Password change. |
-| `POST /otp`, `PATCH /otp` | OTP issue / verify. |
-| `POST /recovery/*` | Password recovery flow (wired to notification handlers). |
-| `/admin/users`, `/admin/users/:userId/roles` | Admin user CRUD + role assignment. |
-| `/admin/roles` | Role CRUD (`roleCrud` config). |
-| `/admin/invitations`, `/invitation-acceptance`, … | Invitation flow. |
+| Route                                                                     | Purpose                                               |
+| ------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `POST /signup`                                                            | New user signup. Wired through `userCrud`.            |
+| `POST /token/password`                                                    | Login (username + password → access + refresh token). |
+| `POST /token/refresh`                                                     | Refresh the access token.                             |
+| `GET /me`, `PATCH /me`                                                    | From `@concepta/rockets`.                             |
+| `PATCH /me/password`                                                      | Password change.                                      |
+| `POST /otp`, `PATCH /otp`                                                 | OTP issue / verify.                                   |
+| `POST /recovery/login`, `POST /recovery/password`                         | Enumeration-safe recovery initiation.                 |
+| `POST /recovery/passcode` with `{ passcode }`, `PATCH /recovery/password` | Passcode validation and password reset.               |
+| `/admin/users`, `/admin/users/:userId/roles`                              | Admin user CRUD + role assignment.                    |
+| `/admin/roles`                                                            | Role CRUD (`roleCrud` config).                        |
+| `/admin/invitations`, `/invitation-acceptance`, …                         | Invitation flow.                                      |
 
 ### Environment variables
 
-| Var | Default | Purpose |
-|---|---|---|
-| `ADMIN_EMAIL` | **required** | Email for the admin user seeded on every boot (`main.ts`). No default — the app exits if unset. |
-| `ADMIN_PASSWORD` | **required** | Password for the seeded admin user. No default — the app exits if unset. |
-| `PORT` | `3001` | HTTP port (`process.env.PORT \|\| 3001`). |
-| `ALLOWED_ORIGINS` | `*` | Comma-separated CORS allowlist. |
-| `SWAGGER_UI_PATH` | `api` | Swagger UI mount path. |
+| Var               | Default      | Purpose                                                                                         |
+| ----------------- | ------------ | ----------------------------------------------------------------------------------------------- |
+| `ADMIN_EMAIL`     | **required** | Email for the admin user seeded on every boot (`main.ts`). No default — the app exits if unset. |
+| `ADMIN_PASSWORD`  | **required** | Password for the seeded admin user. No default — the app exits if unset.                        |
+| `PORT`            | `3001`       | HTTP port (`process.env.PORT \|\| 3001`).                                                       |
+| `ALLOWED_ORIGINS` | `*`          | Comma-separated CORS allowlist.                                                                 |
+| `SWAGGER_UI_PATH` | `api`        | Swagger UI mount path.                                                                          |
 
 ### Persistence wiring
 
-A single `defineTypeOrmRepository({...})` bootstrap is shared by
-`RocketsModule.forRoot({ repository })` and `defineRocketsAuth({
-persistence: { module } })`. The planner derives the full entity list
-from `resources[]`, `userMetadata.entity`, and the auth
-`persistence.entities` map — there is no top-level
+A single `defineTypeOrmRepository({...})` bootstrap is passed to
+`defineRocketsAuth({ persistence: { module } })`. That integration contributes
+the root repository, auth resources, and metadata contract to
+`RocketsModule`. The planner derives the full entity list from app resources
+and the auth `persistence.entities` map — there is no top-level
 `TypeOrmModule.forRoot({ entities: [...] })` to keep in sync. Pet
 resources omit per-resource `persistence` so they inherit the root
 adapter.

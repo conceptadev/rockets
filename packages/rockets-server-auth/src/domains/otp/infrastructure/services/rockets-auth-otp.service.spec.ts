@@ -66,6 +66,7 @@ function makeService() {
 }
 
 describe(RocketsAuthOtpService.name, () => {
+  const ctx = {};
   describe('sendOtp default flow', () => {
     it('resolves user, issues otp, delivers email', async () => {
       const { service, userPort, otpPort, notif } = makeService();
@@ -76,10 +77,11 @@ describe(RocketsAuthOtpService.name, () => {
         passcode: '123-abc',
       } as OtpInterface);
 
-      await service.sendOtp('a@b.com');
+      await service.sendOtp(ctx, 'a@b.com');
 
-      expect(userPort.byEmail).toHaveBeenCalledWith('a@b.com');
+      expect(userPort.byEmail).toHaveBeenCalledWith(ctx, 'a@b.com');
       expect(otpPort.create).toHaveBeenCalledWith(
+        ctx,
         expect.objectContaining({
           assignment: ROCKETS_AUTH_OTP_ASSIGNMENT,
           otp: expect.objectContaining({ assigneeId: 'u1' }),
@@ -95,7 +97,7 @@ describe(RocketsAuthOtpService.name, () => {
       const { service, userPort, otpPort, notif } = makeService();
       userPort.byEmail.mockResolvedValueOnce(null);
 
-      await service.sendOtp('unknown@b.com');
+      await service.sendOtp(ctx, 'unknown@b.com');
 
       expect(otpPort.create).not.toHaveBeenCalled();
       expect(notif.sendOtpEmail).not.toHaveBeenCalled();
@@ -128,7 +130,7 @@ describe(RocketsAuthOtpService.name, () => {
         notif,
       );
 
-      await sub.sendOtp('a@b.com');
+      await sub.sendOtp(ctx, 'a@b.com');
 
       expect(sms).toHaveBeenCalledWith('a@b.com', 'sms-001');
       expect(notif.sendOtpEmail).not.toHaveBeenCalled();
@@ -152,7 +154,7 @@ describe(RocketsAuthOtpService.name, () => {
         notif,
       );
 
-      await expect(sub.sendOtp('a@b.com')).rejects.toThrow(
+      await expect(sub.sendOtp(ctx, 'a@b.com')).rejects.toThrow(
         RocketsAuthOtpException,
       );
       expect(notif.sendOtpEmail).not.toHaveBeenCalled();
@@ -176,7 +178,7 @@ describe(RocketsAuthOtpService.name, () => {
         notif,
       );
 
-      await expect(sub.confirmOtp('a@b.com', 'whatever')).rejects.toThrow(
+      await expect(sub.confirmOtp(ctx, 'a@b.com', 'whatever')).rejects.toThrow(
         RocketsAuthOtpException,
       );
     });

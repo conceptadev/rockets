@@ -3,9 +3,7 @@ import { UserInterface } from '@concepta/nestjs-user';
 import { DomainAggregate } from '@concepta/nestjs-core/aggregate';
 import { CreateUserCommand } from '@concepta/nestjs-user';
 
-import { RocketsEntity } from '../../../../../shared/constants/repository-entity-keys.constants';
 import { RocketsCreateUserCommand } from '../impl/rockets-create-user.command';
-import { createRepositoryContext } from '@concepta/rockets-core';
 
 @CommandHandler(RocketsCreateUserCommand)
 export class RocketsCreateUserHandler
@@ -20,12 +18,11 @@ export class RocketsCreateUserHandler
   async execute(
     command: RocketsCreateUserCommand,
   ): Promise<DomainAggregate<UserInterface> | null> {
-    const ctx = createRepositoryContext(RocketsEntity.user);
     const dto = {
       username: command.data.username ?? command.data.email ?? '',
       email: command.data.email ?? '',
       active: command.data.active,
     };
-    return this.commandBus.execute(new CreateUserCommand(ctx, dto));
+    return this.commandBus.execute(new CreateUserCommand(command.ctx, dto));
   }
 }

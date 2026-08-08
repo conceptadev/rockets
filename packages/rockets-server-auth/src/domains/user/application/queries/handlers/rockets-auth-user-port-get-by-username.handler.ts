@@ -9,8 +9,7 @@ import { RocketsAuthUserPortGetByUsernameQuery } from '../impl/rockets-auth-user
 /**
  * Dispatches upstream `GetUserByUsernameQuery` with the HTTP request repository
  * context from `UserPort#getByUsername` (`query.ctx`, i.e. `getAppContext(req)`).
- * Using `createRepositoryContext()` here breaks TypeORM adapters: they expect
- * an `AppContextHost`, not a plain object.
+ * The same request context must reach TypeORM adapters unchanged.
  */
 @QueryHandler(RocketsAuthUserPortGetByUsernameQuery)
 export class RocketsAuthUserPortGetByUsernameHandler

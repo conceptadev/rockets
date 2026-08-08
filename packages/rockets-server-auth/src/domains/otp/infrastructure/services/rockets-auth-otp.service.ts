@@ -4,7 +4,12 @@ import {
   RocketsAuthOtpPortService,
   ROCKETS_AUTH_OTP_PORT_TOKEN,
 } from '../../../../shared/ports/rockets-auth-otp-port.service';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  type PlainLiteralObject,
+} from '@nestjs/common';
 import { OtpInterface } from '@concepta/nestjs-otp';
 import {
   RocketsAuthUserPortService,
@@ -51,15 +56,15 @@ export class RocketsAuthOtpService implements RocketsAuthOtpServiceInterface {
     protected readonly otpNotificationService: RocketsAuthOtpNotificationServiceInterface,
   ) {}
 
-  async sendOtp(email: string): Promise<void> {
+  async sendOtp(ctx: PlainLiteralObject, email: string): Promise<void> {
     try {
-      const user = await this.resolveUser(email);
+      const user = await this.resolveUser(ctx, email);
       if (!user) {
         this.logger.log('OTP request for non-existent user');
         return;
       }
 
-      const otp = await this.issueOtp(user);
+      const otp = await this.issueOtp(ctx, user);
       await this.deliver(email, otp);
 
       const { category, expiresIn } = this.settings.otp;
@@ -87,15 +92,16 @@ export class RocketsAuthOtpService implements RocketsAuthOtpServiceInterface {
   }
 
   async confirmOtp(
+    ctx: PlainLiteralObject,
     email: string,
     passcode: string,
   ): Promise<ReferenceIdInterface> {
-    const user = await this.resolveUser(email);
+    const user = await this.resolveUser(ctx, email);
     if (!user) {
       throw new RocketsAuthOtpException();
     }
 
-    const valid = await this.validatePasscode(user, passcode);
+    const valid = await this.validatePasscode(ctx, user, passcode);
     if (!valid) {
       throw new RocketsAuthOtpException();
     }
@@ -104,15 +110,19 @@ export class RocketsAuthOtpService implements RocketsAuthOtpServiceInterface {
 
   /** Look up the user by email. Override to add caching, fallbacks, etc. */
   protected async resolveUser(
+    ctx: PlainLiteralObject,
     email: string,
   ): Promise<ReferenceIdInterface | null> {
-    return this.userPort.byEmail(email);
+    return this.userPort.byEmail(ctx, email);
   }
 
   /** Issue an OTP for the given user. Override to add cooldown / rate limit. */
-  protected async issueOtp(user: ReferenceIdInterface): Promise<OtpInterface> {
+  protected async issueOtp(
+    ctx: PlainLiteralObject,
+    user: ReferenceIdInterface,
+  ): Promise<OtpInterface> {
     const { assignment, category, expiresIn } = this.settings.otp;
-    return this.otpService.create({
+    return this.otpService.create(ctx, {
       assignment,
       otp: {
         category,
@@ -136,11 +146,13 @@ export class RocketsAuthOtpService implements RocketsAuthOtpServiceInterface {
 
   /** Validate a passcode for the given user. Override for alternate flows. */
   protected async validatePasscode(
+    ctx: PlainLiteralObject,
     user: ReferenceIdInterface,
     passcode: string,
   ): Promise<boolean> {
     const { assignment, category } = this.settings.otp;
     const result = await this.otpService.validate(
+      ctx,
       assignment,
       { category, passcode },
       true,

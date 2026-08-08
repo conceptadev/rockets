@@ -27,7 +27,7 @@ export class AssignDefaultRoleHandler
   ) {}
 
   async execute(command: AssignDefaultRoleCommand): Promise<boolean> {
-    const { userId } = command;
+    const { ctx, userId } = command;
     const roleName = this.settings.role.defaultUserRoleName;
 
     // Valid scenario — app intentionally skips default-role assignment.
@@ -41,7 +41,7 @@ export class AssignDefaultRoleHandler
     const role = await this.queryBus.execute<
       RocketsGetRoleByNameQuery,
       RoleEntityInterface | null
-    >(new RocketsGetRoleByNameQuery(roleName));
+    >(new RocketsGetRoleByNameQuery(ctx, roleName));
 
     // Misconfiguration — role was named in settings but doesn't exist in DB.
     // Failing closed prevents users from being created without their expected
@@ -60,7 +60,7 @@ export class AssignDefaultRoleHandler
     }
 
     await this.commandBus.execute(
-      new AssignRoleCommand({}, RocketsEntity.userRole, role.id, userId),
+      new AssignRoleCommand(ctx, RocketsEntity.userRole, role.id, userId),
     );
     return true;
   }

@@ -1,15 +1,15 @@
 import { RocketsAuthUserMetadataEntityInterface } from '../../interfaces/rockets-auth-user-metadata-entity.interface';
 import { RocketsAuthUserMetadataUpdatableInterface } from '../../interfaces/rockets-auth-user-metadata-updatable.interface';
-import { RepositoryContextInterface } from '@concepta/rockets-core';
+import type { PlainLiteralObject } from '@nestjs/common';
 
 export interface UserMetadataRepositoryInterface {
   findByUserId(
-    ctx: RepositoryContextInterface,
+    ctx: PlainLiteralObject,
     userId: string,
   ): Promise<RocketsAuthUserMetadataEntityInterface | null>;
 
   save(
-    ctx: RepositoryContextInterface,
+    ctx: PlainLiteralObject,
     userId: string,
     data: RocketsAuthUserMetadataUpdatableInterface,
   ): Promise<RocketsAuthUserMetadataEntityInterface>;

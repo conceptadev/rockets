@@ -1,4 +1,5 @@
 import { QueryBus } from '@nestjs/cqrs';
+import type { PlainLiteralObject } from '@nestjs/common';
 import {
   GetAssignedRolesQuery,
   RoleAssignment,
@@ -31,12 +32,13 @@ export interface UserRolesView {
  */
 export async function resolveUserRoles(
   queryBus: QueryBus,
+  ctx: PlainLiteralObject,
   userId: string,
 ): Promise<UserRolesView['userRoles']> {
   const assignments = await queryBus.execute<
     GetAssignedRolesQuery,
     RoleAssignment[]
-  >(new GetAssignedRolesQuery({}, RocketsEntity.userRole, userId));
+  >(new GetAssignedRolesQuery(ctx, RocketsEntity.userRole, userId));
 
   if (!assignments?.length) {
     return [];
@@ -46,7 +48,7 @@ export async function resolveUserRoles(
   const roles = await queryBus.execute<
     RocketsGetRolesByIdsQuery,
     RoleEntityInterface[]
-  >(new RocketsGetRolesByIdsQuery(roleIds));
+  >(new RocketsGetRolesByIdsQuery(ctx, roleIds));
 
   return roles.map((role) => ({ role: { name: role.name } }));
 }

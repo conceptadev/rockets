@@ -25,6 +25,6 @@ export interface AuthBootstrap<
 > {
   readonly adapter: Type<Adapter>;
   readonly forRoot?: () => DynamicModule;
-  /** Persistence and server defaults owned by this integration. */
+  /** Composition defaults owned by this integration; explicit app options win. */
   readonly contributes?: AuthBootstrapContributions;
 }

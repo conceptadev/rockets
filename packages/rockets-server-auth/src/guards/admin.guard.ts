@@ -16,6 +16,7 @@ import { RocketsEntity } from '../shared/constants/repository-entity-keys.consta
 import { ROCKETS_AUTH_MODULE_OPTIONS_DEFAULT_SETTINGS_TOKEN } from '../shared/constants/rockets-auth.constants';
 import { logAndGetErrorDetails } from '../shared/utils/error-logging.helper';
 import { RocketsGetRoleByNameQuery } from '../domains/role/application/queries/impl/rockets-get-role-by-name.query';
+import { getAppContext } from '@concepta/rockets-core';
 
 @Injectable()
 export class AdminGuard implements CanActivate {
@@ -29,6 +30,7 @@ export class AdminGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
+    const ctx = getAppContext(request);
     const user = request.user;
 
     const ADMIN_ROLE = this.settings.role.adminRoleName;
@@ -43,14 +45,14 @@ export class AdminGuard implements CanActivate {
       const role = await this.queryBus.execute<
         RocketsGetRoleByNameQuery,
         RoleEntityInterface | null
-      >(new RocketsGetRoleByNameQuery(ADMIN_ROLE));
+      >(new RocketsGetRoleByNameQuery(ctx, ADMIN_ROLE));
 
       if (!role) {
         throw new ForbiddenException();
       }
 
       return await this.queryBus.execute<IsAssignedRoleQuery, boolean>(
-        new IsAssignedRoleQuery({}, RocketsEntity.userRole, role.id, user.id),
+        new IsAssignedRoleQuery(ctx, RocketsEntity.userRole, role.id, user.id),
       );
     } catch (error) {
       if (error instanceof ForbiddenException) {

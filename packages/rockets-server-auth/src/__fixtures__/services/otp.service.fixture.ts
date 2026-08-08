@@ -1,15 +1,16 @@
 import { ReferenceIdInterface } from '@concepta/nestjs-core';
-import { Injectable } from '@nestjs/common';
+import { Injectable, type PlainLiteralObject } from '@nestjs/common';
 import { RocketsAuthOtpServiceInterface } from '../../domains/otp/interfaces/rockets-auth-otp-service.interface';
 
 @Injectable()
 export class OtpServiceFixture implements RocketsAuthOtpServiceInterface {
-  async sendOtp(_email: string): Promise<void> {
+  async sendOtp(_ctx: PlainLiteralObject, _email: string): Promise<void> {
     // In a fixture, we don't need to actually send an email
     return Promise.resolve();
   }
 
   async confirmOtp(
+    _ctx: PlainLiteralObject,
     _email: string,
     passcode: string,
   ): Promise<ReferenceIdInterface> {

@@ -2,10 +2,8 @@ import { QueryHandler, IQueryHandler, QueryBus } from '@nestjs/cqrs';
 import { UserInterface } from '@concepta/nestjs-user';
 import { DomainAggregate } from '@concepta/nestjs-core/aggregate';
 import { GetUserByEmailQuery } from '@concepta/nestjs-user';
-import { RocketsEntity } from '../../../../../shared/constants/repository-entity-keys.constants';
 
 import { RocketsGetUserByEmailQuery } from '../impl/rockets-get-user-by-email.query';
-import { createRepositoryContext } from '@concepta/rockets-core';
 
 @QueryHandler(RocketsGetUserByEmailQuery)
 export class RocketsGetUserByEmailHandler
@@ -20,7 +18,8 @@ export class RocketsGetUserByEmailHandler
   async execute(
     query: RocketsGetUserByEmailQuery,
   ): Promise<DomainAggregate<UserInterface> | null> {
-    const ctx = createRepositoryContext(RocketsEntity.user);
-    return this.queryBus.execute(new GetUserByEmailQuery(ctx, query.email));
+    return this.queryBus.execute(
+      new GetUserByEmailQuery(query.ctx, query.email),
+    );
   }
 }

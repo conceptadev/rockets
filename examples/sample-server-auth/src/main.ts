@@ -25,7 +25,7 @@ import { SwaggerUiService } from '@concepta/rockets-core';
 
 // v8 commands/queries call `AppContextHost.from(ctx)` which only accepts
 // an `AppContextHost`, `null`, `undefined`, or an empty object `{}`.
-// The previous `createRepositoryContext(KEY)` produced `{ entity: KEY }`
+// Repository calls receive the request AppContextHost
 // which now throws `Expected AppContextHost or nullish value, got object`.
 // rockets-server-auth's internal handlers pass `{}` — match that.
 const emptyCtx = {};

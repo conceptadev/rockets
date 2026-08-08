@@ -3,6 +3,7 @@ import {
   Controller,
   Patch,
   Post,
+  Req,
   UnauthorizedException,
 } from '@nestjs/common';
 import type { Type } from '@nestjs/common';
@@ -29,6 +30,8 @@ import { RocketsAuthOtpSendDto } from '../../../infrastructure/dto/rockets-auth-
 import { RocketsAuthOtpService } from '../../../infrastructure/services/rockets-auth-otp.service';
 import type { OtpControllerExtras } from '../../../interfaces/otp-controller-extras.interface';
 import { applyControllerExtras } from '../../../../../shared/utils/apply-controller-extras.helper';
+import { getAppContext } from '@concepta/rockets-core';
+import type { Request } from 'express';
 
 /** Build the OTP controller and apply consumer-supplied decorators. */
 export function buildRocketsAuthOtpController(
@@ -62,8 +65,12 @@ export function buildRocketsAuthOtpController(
     @ApiBadRequestResponse({ description: 'Invalid email format' })
     @Throttle({ default: { limit: 3, ttl: 60000 } })
     @Post()
-    async sendOtp(@Body() dto: RocketsAuthOtpSendDto): Promise<void> {
-      return this.otpService.sendOtp(dto.email);
+    async sendOtp(
+      @Body() dto: RocketsAuthOtpSendDto,
+      @Req() req: Request,
+    ): Promise<void> {
+      const ctx = getAppContext(req);
+      return this.otpService.sendOtp(ctx, dto.email);
     }
 
     @ApiOperation({
@@ -95,11 +102,17 @@ export function buildRocketsAuthOtpController(
     @Patch()
     async confirmOtp(
       @Body() dto: RocketsAuthOtpConfirmDto,
+      @Req() req: Request,
     ): Promise<AuthenticatedResponseInterface> {
+      const ctx = getAppContext(req);
       try {
-        const user = await this.otpService.confirmOtp(dto.email, dto.passcode);
+        const user = await this.otpService.confirmOtp(
+          ctx,
+          dto.email,
+          dto.passcode,
+        );
         return this.commandBus.execute(
-          new IssueAuthenticatedResponseCommand({}, user.id),
+          new IssueAuthenticatedResponseCommand(ctx, user.id),
         );
       } catch (error) {
         if (error instanceof OtpException) {

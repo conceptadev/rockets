@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, type PlainLiteralObject } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import {
   AssigneeRelationInterface,
@@ -34,24 +34,31 @@ export class RocketsAuthOtpPortService {
     private readonly queryBus: QueryBus,
   ) {}
 
-  async create(params: RocketsCreateOtpParams): Promise<OtpInterface> {
-    return this.commandBus.execute(new RocketsCreateOtpCommand(params));
+  async create(
+    ctx: PlainLiteralObject,
+    params: RocketsCreateOtpParams,
+  ): Promise<OtpInterface> {
+    return this.commandBus.execute(new RocketsCreateOtpCommand(ctx, params));
   }
 
   async validate(
+    ctx: PlainLiteralObject,
     assignment: ReferenceAssignment,
     otp: Pick<OtpInterface, 'category' | 'passcode'>,
     deleteIfValid: boolean,
   ): Promise<AssigneeRelationInterface | null> {
     return this.queryBus.execute(
-      new RocketsValidateOtpQuery(assignment, otp, deleteIfValid),
+      new RocketsValidateOtpQuery(ctx, assignment, otp, deleteIfValid),
     );
   }
 
   async clear(
+    ctx: PlainLiteralObject,
     assignment: ReferenceAssignment,
     otp: Pick<OtpInterface, 'assigneeId' | 'category'>,
   ): Promise<void> {
-    await this.commandBus.execute(new RocketsClearOtpsCommand(assignment, otp));
+    await this.commandBus.execute(
+      new RocketsClearOtpsCommand(ctx, assignment, otp),
+    );
   }
 }

@@ -19,7 +19,7 @@ import {
 import { acRules } from '../src/app.acl';
 
 // `AppContextHost.from()` only accepts `AppContextHost | null | undefined | {}`.
-// `createRepositoryContext({entity: ...})` returns a non-empty plain object,
+// Request contexts are AppContextHost instances,
 // which the upstream context validator rejects with "Expected AppContextHost
 // or nullish value, got object". The command signatures type `ctx` as
 // `PlainLiteralObject`, so pass `{}` — `AppContextHost.from({})` yields the

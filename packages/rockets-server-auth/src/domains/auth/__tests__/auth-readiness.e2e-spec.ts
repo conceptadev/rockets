@@ -78,8 +78,13 @@ describe.sequential('Rockets Auth 1.0 readiness (e2e)', () => {
         .findOneByOrFail({ active: true });
 
       await request(app.getHttpServer())
-        .get(`/recovery/passcode/${otp.passcode}`)
+        .post('/recovery/passcode')
+        .send({ passcode: otp.passcode })
         .expect(200);
+
+      await request(app.getHttpServer())
+        .get(`/recovery/passcode/${otp.passcode}`)
+        .expect(404);
 
       const newPassword = 'RecoveredP@ssw0rd!';
       const resetResponse = await request(app.getHttpServer())

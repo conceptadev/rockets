@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler, QueryBus } from '@nestjs/cqrs';
-import { Inject, Logger } from '@nestjs/common';
+import { Inject, Logger, type PlainLiteralObject } from '@nestjs/common';
 import { EmailService } from '@concepta/nestjs-email';
 import { GetUserQuery } from '@concepta/nestjs-user';
 import { InvitationUserUndefinedException } from '@concepta/nestjs-invitation';
@@ -15,9 +15,10 @@ import type { RocketsAuthSettingsInterface } from '../../../../../shared/interfa
  */
 async function resolveUserEmail(
   queryBus: QueryBus,
+  ctx: PlainLiteralObject,
   userId: string,
 ): Promise<string> {
-  const user = await queryBus.execute(new GetUserQuery({}, userId));
+  const user = await queryBus.execute(new GetUserQuery(ctx, userId));
   if (!user?.email) {
     throw new InvitationUserUndefinedException();
   }
@@ -48,7 +49,11 @@ export class SendInvitationEmailHandler
 
   async execute(command: SendInvitationEmailCommand): Promise<void> {
     const { invitation, passcode, tokenExp } = command;
-    const email = await resolveUserEmail(this.queryBus, invitation.userId);
+    const email = await resolveUserEmail(
+      this.queryBus,
+      command.ctx,
+      invitation.userId,
+    );
     const { from, baseUrl, templates } = this.settings.email;
     const template = templates.invitation;
     this.logger.debug(`Sending invitation email to ${email}`);
@@ -89,7 +94,11 @@ export class SendAcceptedEmailHandler
 
   async execute(command: SendAcceptedEmailCommand): Promise<void> {
     const { invitation } = command;
-    const email = await resolveUserEmail(this.queryBus, invitation.userId);
+    const email = await resolveUserEmail(
+      this.queryBus,
+      command.ctx,
+      invitation.userId,
+    );
     const { from, templates } = this.settings.email;
     const template = templates.invitationAccepted;
     this.logger.debug(`Sending accepted email to ${email}`);

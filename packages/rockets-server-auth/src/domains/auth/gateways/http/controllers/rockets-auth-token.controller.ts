@@ -28,6 +28,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import type { Request } from 'express';
+import { getAppContext } from '@concepta/rockets-core';
 
 type RequestWithPassportUser = Request & {
   readonly user?: ReferenceIdInterface;
@@ -78,8 +79,9 @@ export class RocketsAuthTokenController {
     if (!user?.id) {
       throw new UnauthorizedException();
     }
+    const ctx = getAppContext(req);
     return this.commandBus.execute(
-      new IssueAuthenticatedResponseCommand({}, user.id),
+      new IssueAuthenticatedResponseCommand(ctx, user.id),
     );
   }
 
@@ -114,8 +116,9 @@ export class RocketsAuthTokenController {
     if (!user?.id) {
       throw new UnauthorizedException();
     }
+    const ctx = getAppContext(req);
     return this.commandBus.execute(
-      new IssueAuthenticatedResponseCommand({}, user.id),
+      new IssueAuthenticatedResponseCommand(ctx, user.id),
     );
   }
 }

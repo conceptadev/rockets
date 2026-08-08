@@ -3,19 +3,19 @@ import {
   RecoveryOtpInvalidException,
   RecoveryRecoverLoginDto,
   RecoveryRecoverPasswordDto,
-  RecoveryService,
   RecoveryUpdatePasswordDto,
+  RecoveryValidatePasscodeDto,
+  RecoveryService,
 } from '@concepta/nestjs-authentication';
 import {
   Body,
   Controller,
-  Get,
   HttpCode,
   Inject,
   Logger,
-  Param,
   Patch,
   Post,
+  Req,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import {
@@ -23,9 +23,10 @@ import {
   ApiBody,
   ApiOkResponse,
   ApiOperation,
-  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import { getAppContext } from '@concepta/rockets-core';
+import type { Request } from 'express';
 
 /** Public, enumeration-safe account recovery endpoints. */
 @Controller('recovery')
@@ -53,9 +54,13 @@ export class RocketsAuthRecoveryController {
       'The request was accepted, whether or not the email belongs to an account.',
   })
   @ApiBadRequestResponse({ description: 'Invalid email format' })
-  async recoverLogin(@Body() dto: RecoveryRecoverLoginDto): Promise<void> {
+  async recoverLogin(
+    @Body() dto: RecoveryRecoverLoginDto,
+    @Req() req: Request,
+  ): Promise<void> {
+    const ctx = getAppContext(req);
     await this.runEnumerationSafe('login', () =>
-      this.recoveryService.recoverLogin({}, dto.email),
+      this.recoveryService.recoverLogin(ctx, dto.email),
     );
   }
 
@@ -75,24 +80,30 @@ export class RocketsAuthRecoveryController {
   @ApiBadRequestResponse({ description: 'Invalid email format' })
   async recoverPassword(
     @Body() dto: RecoveryRecoverPasswordDto,
+    @Req() req: Request,
   ): Promise<void> {
+    const ctx = getAppContext(req);
     await this.runEnumerationSafe('password', () =>
-      this.recoveryService.recoverPassword({}, dto.email),
+      this.recoveryService.recoverPassword(ctx, dto.email),
     );
   }
 
-  @Get('passcode/:passcode')
+  @Post('passcode')
   @HttpCode(200)
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @ApiOperation({
     summary: 'Validate recovery passcode',
     description: 'Checks whether a recovery code is valid and unexpired.',
   })
-  @ApiParam({ name: 'passcode', description: 'Recovery passcode' })
+  @ApiBody({ type: RecoveryValidatePasscodeDto })
   @ApiOkResponse({ description: 'Passcode is valid' })
   @ApiBadRequestResponse({ description: 'Passcode is invalid or expired' })
-  async validatePasscode(@Param('passcode') passcode: string): Promise<void> {
-    const otp = await this.recoveryService.validatePasscode({}, passcode);
+  async validatePasscode(
+    @Body() dto: RecoveryValidatePasscodeDto,
+    @Req() req: Request,
+  ): Promise<void> {
+    const ctx = getAppContext(req);
+    const otp = await this.recoveryService.validatePasscode(ctx, dto.passcode);
     if (!otp) throw new RecoveryOtpInvalidException();
   }
 
@@ -108,9 +119,13 @@ export class RocketsAuthRecoveryController {
   @ApiBadRequestResponse({
     description: 'Passcode is invalid or expired, or password is invalid',
   })
-  async updatePassword(@Body() dto: RecoveryUpdatePasswordDto): Promise<void> {
+  async updatePassword(
+    @Body() dto: RecoveryUpdatePasswordDto,
+    @Req() req: Request,
+  ): Promise<void> {
+    const ctx = getAppContext(req);
     const user = await this.recoveryService.updatePassword(
-      {},
+      ctx,
       dto.passcode,
       dto.newPassword,
     );
@@ -123,9 +138,8 @@ export class RocketsAuthRecoveryController {
   ): Promise<void> {
     try {
       await work();
-    } catch (error) {
-      const detail = error instanceof Error ? error.stack : String(error);
-      this.logger.error(`Account ${operation} recovery failed`, detail);
+    } catch {
+      this.logger.error(`Account ${operation} recovery notification failed`);
       // A uniform success response prevents account-existence disclosure.
     }
   }
