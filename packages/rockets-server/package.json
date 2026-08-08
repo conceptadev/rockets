@@ -12,12 +12,7 @@
       "require": "./dist/index.js",
       "import": "./dist/index.js"
     },
-    "./package.json": "./package.json",
-    "./typeorm": {
-      "types": "./dist/typeorm.d.ts",
-      "require": "./dist/typeorm.js",
-      "import": "./dist/typeorm.js"
-    }
+    "./package.json": "./package.json"
   },
   "sideEffects": false,
   "publishConfig": {
@@ -45,16 +40,10 @@
     "rest-api"
   ],
   "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=8.0.0"
-  },
-  "bin": {
-    "rockets-swagger": "./bin/generate-swagger.js"
+    "node": ">=20.0.0"
   },
   "files": [
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}",
-    "bin/generate-swagger.js",
-    "SWAGGER.md",
     "README.md",
     "LICENSE.txt",
     "CHANGELOG.md"
@@ -68,36 +57,32 @@
     "test:watch": "cd ../.. && ./node_modules/.bin/vitest --project unit packages/rockets-server",
     "test:e2e": "cd ../.. && ./node_modules/.bin/vitest run --project e2e-packages packages/rockets-server",
     "test:e2e:cov": "cd ../.. && ./node_modules/.bin/vitest run --project e2e-packages --coverage packages/rockets-server",
-    "test:cov": "cd ../.. && ./node_modules/.bin/vitest run --project unit --coverage packages/rockets-server",
-    "generate-swagger": "ts-node src/generate-swagger.ts"
+    "test:cov": "cd ../.. && ./node_modules/.bin/vitest run --project unit --coverage packages/rockets-server"
   },
   "dependencies": {
     "@concepta/nestjs-core": "8.0.0-alpha.8",
     "@concepta/rockets-core": "workspace:^",
-    "@concepta/rockets-repository-typeorm": "workspace:^",
     "@nestjs/common": "12.0.0-alpha.5",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "12.0.0-alpha.5",
     "@nestjs/cqrs": "^11.0.0",
-    "@nestjs/swagger": "12.0.0-alpha.2",
-    "@nestjs/typeorm": "^11.0.0"
+    "@nestjs/swagger": "12.0.0-alpha.2"
   },
   "devDependencies": {
     "@concepta/nestjs-crud": "8.0.0-alpha.8",
+    "@concepta/rockets-repository-typeorm": "workspace:^",
     "@nestjs/platform-express": "12.0.0-alpha.5",
     "@nestjs/testing": "12.0.0-alpha.5",
     "@nestjs/typeorm": "^11.0.0",
     "@types/supertest": "^6.0.2",
     "sqlite3": "^5.1.6",
     "supertest": "^6.3.4",
-    "ts-node": "^10.9.2",
     "typeorm": "^0.3.31",
     "vitest": "^4.1.10"
   },
   "peerDependencies": {
     "class-transformer": "*",
     "class-validator": "*",
-    "rxjs": "^7.1.0",
-    "typeorm": "^0.3.0"
+    "rxjs": "^7.1.0"
   }
 }

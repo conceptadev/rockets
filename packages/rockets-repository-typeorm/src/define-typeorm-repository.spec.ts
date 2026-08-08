@@ -1,7 +1,8 @@
-import { vi, describe, it, expect, afterEach } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { TypeOrmModule, type TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
-import { defineTypeOrmRepository } from './define-typeorm-repository';
+import { TypeOrmRepositoryModule } from '@concepta/nestjs-repository-typeorm';
+
+import * as TypeOrmAdapter from './index';
 
 type TypeOrmRepositoryFeatureInput = Parameters<
   typeof TypeOrmRepositoryModule.forFeature
@@ -15,15 +16,23 @@ class TypeOrmRepositorySpecEntity {
 }
 
 describe('defineTypeOrmRepository', () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
+  afterEach(() => vi.restoreAllMocks());
 
-  it('delegates feature registration to TypeOrmRepositoryModule', () => {
-    const repository = defineTypeOrmRepository({
-      type: 'sqlite',
-      database: ':memory:',
-    });
+  function define(connection: TypeOrmModuleOptions) {
+    return (
+      TypeOrmAdapter as unknown as {
+        defineTypeOrmRepository: (options: TypeOrmModuleOptions) => {
+          forFeature: typeof TypeOrmRepositoryModule.forFeature;
+          forRoot: (
+            entities: ReadonlyArray<typeof TypeOrmRepositorySpecEntity>,
+          ) => unknown;
+        };
+      }
+    ).defineTypeOrmRepository(connection);
+  }
+
+  it('is owned by the TypeORM adapter package and delegates feature registration', () => {
+    const repository = define({ type: 'sqlite', database: ':memory:' });
     const entities: TypeOrmRepositoryFeatureInput = [
       { key: 'typeormRepositorySpec', entity: TypeOrmRepositorySpecEntity },
     ];
@@ -44,7 +53,7 @@ describe('defineTypeOrmRepository', () => {
       database: ':memory:',
       synchronize: true,
     };
-    const repository = defineTypeOrmRepository(connection);
+    const repository = define(connection);
     const forRoot = vi.spyOn(TypeOrmModule, 'forRoot');
 
     repository.forRoot([TypeOrmRepositorySpecEntity]);

@@ -11,132 +11,34 @@ and this project adheres to
 
 ### Added
 
-- **`RocketsAuthIntegration`** (`ROCKETS_AUTH_INTEGRATION_KIND`,
-  `isRocketsAuthIntegration`) in `@concepta/rockets-core` for bundles
-  returned by `@concepta/rockets-auth` **`defineRocketsAuth()`**.
-
-- **Auth adapter chain** — `auth` in `RocketsModule.forRoot` / `forRootAsync`
-  now accepts an array: `auth: [AdapterA, AdapterB]`. The `AuthServerGuard`
-  iterates the chain and stops on the first conclusive result. Single `Type`
-  inputs continue to work (normalised to a one-element chain).
-
-- **`extractBearerToken(request: AuthRequest): string | null`** exported from
-  `@concepta/rockets-core` (and re-exported from `@concepta/rockets`). Replaces
-  the removed `BearerTokenAuthAdapter` helper.
-
-- **`AUTH_ADAPTERS_TOKEN`** exported from `@concepta/rockets-core`. Injects the
-  full ordered adapter chain as `ReadonlyArray<AuthAdapterInterface>`.
-
-- **`collectAdapters`** and **`resolveAuthChain`** exported from the respective
-  module-definition files for unit-testing.
+- `createServer(definition)`, the canonical launch-facing facade that returns a
+  Nest entry module for direct use with `NestFactory.create()`.
+- `defineAuthAdapter(Adapter, options?)`, a complete host module for custom
+  authentication adapters.
+- Auth integrations can contribute owned resources, user metadata, a root
+  repository, and a default guard preference through `AuthBootstrap`.
+- Executable coverage for direct server launch, ordered multi-credential auth,
+  private-by-default routes, and metadata-free micro apps.
 
 ### Changed
 
-- **`RocketsModule`**: when `extras.auth` is a `RocketsAuthIntegration`, merges
-  `resources` and appends `nestImports` **after**
-  `RocketsCoreModule.forRootAsync` so repository rows exist before
-  `RocketsAuthModule` boots. Merges `userMetadata` /
-  `rocketsDefaults.enableGlobalGuard` from the integration when not set on
-  extras.
-
-- **`AuthAdapterInterface`** — the contract now has a single method
-  `authenticate(request: AuthRequest): Promise<AuthAttemptResult>`.
-  `AuthAttemptResult` is a discriminated union; see below.
-
-- **`AuthAttemptResult.error`** is now `HttpException` instead of
-  `UnauthorizedException`, allowing adapters to return 403 and other status
-  codes.
-
-- **`AuthServerGuard`** now logs every adapter decision at `debug` level and
-  wraps unexpected thrown errors in a generic `401` (details are only emitted to
-  the server-side `Logger`).
-
-- **`authExternallyProvided`** is no longer a user-facing config field. The flag
-  is inferred internally by `resolveAuthChain` based on entry type
-  (`RocketsAuthIntegration` → externally provided; bare `Type` /
-  `AuthFeatureBundle` → auto-registered).
+- `RocketsModule` resolves auth contributions before module registration.
+  Explicit app options win; conflicting integration defaults fail during
+  composition.
+- `userMetadata` is optional. The `/me` controller and default metadata
+  handlers are registered only when a metadata contract exists.
+- Class-wide `@AuthPublic({ classLevel: true })` metadata is honored by
+  `AuthServerGuard`.
+- TypeORM bootstrap ownership moved to
+  `@concepta/rockets-repository-typeorm`; the server no longer depends on
+  TypeORM.
+- Node.js 20 is the minimum supported runtime.
 
 ### Removed
 
-- **`BearerTokenAuthAdapter`** abstract class — use `extractBearerToken` and
-  implement `AuthAdapterInterface` directly.
-
-- **`AUTH_ADAPTER_TOKEN`** (singular) — replaced by `AUTH_ADAPTERS_TOKEN` (the
-  full chain). `RocketsAuthProvider` alias on `@concepta/rockets` is also
-  removed.
-
-- **`AuthorizeUserInterface`** and **`ValidateTokenInterface`** — removed.
-
-### Migration guide
-
-#### Implement `authenticate` instead of `validateToken`
-
-**Before:**
-
-```typescript
-@Injectable()
-export class MyAdapter extends BearerTokenAuthAdapter {
-  async validateToken(token: string): Promise<AuthorizedUser> {
-    const decoded = await verify(token);
-    return {
-      id: decoded.sub,
-      sub: decoded.sub,
-      email: decoded.email,
-      userRoles: [],
-      claims: {},
-    };
-  }
-}
-```
-
-**After:**
-
-```typescript
-import { extractBearerToken } from '@concepta/rockets-core';
-
-@Injectable()
-export class MyAdapter implements AuthAdapterInterface {
-  async authenticate(request: AuthRequest): Promise<AuthAttemptResult> {
-    const token = extractBearerToken(request);
-    if (token === null) return { matched: false };
-
-    try {
-      const decoded = await verify(token);
-      return {
-        matched: true,
-        user: {
-          id: decoded.sub,
-          sub: decoded.sub,
-          email: decoded.email,
-          userRoles: [],
-          claims: {},
-        },
-      };
-    } catch {
-      return {
-        matched: true,
-        error: new UnauthorizedException('Authentication failed'),
-      };
-    }
-  }
-}
-```
-
-#### Replace `AUTH_ADAPTER_TOKEN` with `AUTH_ADAPTERS_TOKEN`
-
-**Before:**
-
-```typescript
-providers: [{ provide: AUTH_ADAPTER_TOKEN, useClass: MyAdapter }];
-```
-
-**After:**
-
-```typescript
-// Remove the manual provider — Rockets registers adapters automatically via
-// the `auth` option. Inject AUTH_ADAPTERS_TOKEN to read the chain.
-const adapters = app.get<AuthAdapterInterface[]>(AUTH_ADAPTERS_TOKEN);
-```
+- The `rockets-swagger` manifest entry. OpenAPI generation belongs to the
+  consumer application because only it owns the complete Nest graph and
+  document settings.
 
 ## [1.0.0-alpha.7] - 2026-02-19
 

@@ -14,7 +14,7 @@ class FakeVerifier implements FirebaseTokenVerifierInterface {
 describe('defineFirebaseAuth', () => {
   it('returns AuthBootstrap with FirebaseAuthAdapter and forRoot (sync path)', () => {
     const bootstrap = defineFirebaseAuth({
-      forRoot: { verifier: FakeVerifier },
+      verifier: FakeVerifier,
     });
 
     expect(bootstrap.adapter).toBe(FirebaseAuthAdapter);

@@ -201,6 +201,15 @@ function createCoreProviders(options: {
     providers.push(...buildAuthChainProviders(authBootstraps));
   }
 
+  const userMetadataProviders: Provider[] =
+    options.extras?.userMetadata || options.extras?.handlers
+      ? [
+          options.extras?.handlers?.upsertUserMetadata ??
+            UpsertUserMetadataHandler,
+          options.extras?.handlers?.getUserMetadata ?? GetUserMetadataHandler,
+        ]
+      : [];
+
   return [
     ...providers,
     AuthServerGuard,
@@ -214,8 +223,7 @@ function createCoreProviders(options: {
     // zod constraints — this interceptor fills the gap without importing nestjs-zod.
     { provide: APP_INTERCEPTOR, useClass: ZodBodyValidationInterceptor },
     // Built-in user-metadata CQRS (override in `extras.handlers` if you need to customize storage)
-    options.extras?.handlers?.upsertUserMetadata ?? UpsertUserMetadataHandler,
-    options.extras?.handlers?.getUserMetadata ?? GetUserMetadataHandler,
+    ...userMetadataProviders,
     ...(options.extras?.providers ?? []),
     ...extractResourceProviders(options.plan.crudResources),
   ];

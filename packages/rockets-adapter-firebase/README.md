@@ -8,8 +8,8 @@
 > maps the decoded payload to `AuthorizedUser`, and plugs into the standard
 > `auth` chain.
 
-**Status:** preview (`0.0.1-dev.0` on npm, dist-tag `alpha`). API expected to
-stay shape-compatible through 1.0.
+**Status:** pre-1.0 preview (`0.0.1-dev.0`, npm dist-tag `alpha`). Public
+shapes may still change before 1.0.
 
 ---
 
@@ -62,8 +62,8 @@ module wrap the SDK (the common case).
 ### Wire it into a Rockets app
 
 Use the `defineFirebaseAuth()` helper. It returns an `AuthBootstrap` that
-`RocketsModule.forRoot({ auth })` consumes directly. When `forRoot()` /
-`forRootAsync()` is set, core imports `FirebaseAuthModule` and injects
+`createServer({ auth })` or `RocketsModule.forRoot({ auth })` consumes
+directly. Core imports `FirebaseAuthModule` and injects
 `FirebaseAuthAdapter` from that module — the adapter is not double-registered.
 
 ```typescript
@@ -80,7 +80,7 @@ const firebaseApp = initializeApp({ credential: applicationDefault() });
   imports: [
     RocketsModule.forRoot({
       auth: defineFirebaseAuth({
-        forRoot: { firebaseApp },
+        firebaseApp,
       }),
       userMetadata: {
         /* entity, createDto, updateDto */
@@ -93,8 +93,8 @@ const firebaseApp = initializeApp({ credential: applicationDefault() });
 export class AppModule {}
 ```
 
-Pass `forRootAsync` instead of `forRoot` to build options asynchronously (e.g.
-inject `ConfigService`). See
+Pass `{ forRootAsync: ... }` instead of flat sync options to build options
+asynchronously (e.g. inject `ConfigService`). See
 [How-to › Build options asynchronously](#build-options-asynchronously).
 
 ---
@@ -203,8 +203,8 @@ export class ProfileController {
 
 | Member | Purpose |
 |---|---|
-| `defineFirebaseAuth(input)` | Returns an `AuthBootstrap` for `RocketsModule.forRoot({ auth })`. Accepts `{ forRoot }` for sync or `{ forRootAsync }` for async wiring. Auth-owned entities belong on app `resources[]`, not on this helper. |
-| `DefineFirebaseAuthInput` | Discriminated input type — pass exactly one of `forRoot` / `forRootAsync`. |
+| `defineFirebaseAuth(input)` | Returns an `AuthBootstrap` for `createServer({ auth })` or `RocketsModule.forRoot({ auth })`. Pass module options directly for sync wiring, or `{ forRootAsync }` for async wiring. |
+| `DefineFirebaseAuthInput` | Input type for either flat sync options or the explicit `{ forRootAsync }` variant. |
 
 ### Module
 
