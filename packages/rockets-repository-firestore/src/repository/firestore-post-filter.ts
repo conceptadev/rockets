@@ -1,4 +1,10 @@
 import type { FirestorePostFilter } from '../interfaces/firestore-query.interface';
+import {
+  compareFirestoreValues,
+  firestoreValuesEqual,
+  readFirestoreField,
+  sameFirestoreRangeType,
+} from './firestore-value';
 
 export function applyFirestorePostFilters(
   rows: readonly Record<string, unknown>[],
@@ -17,13 +23,14 @@ function matchesPostFilter(
   row: Record<string, unknown>,
   filter: FirestorePostFilter,
 ): boolean {
-  const value = row[filter.field];
+  const field = readFirestoreField(row, filter.field);
+  const value = field.value;
 
   switch (filter.kind) {
     case 'is_null':
-      return value === null || value === undefined;
+      return field.exists && value === null;
     case 'is_not_null':
-      return value !== null && value !== undefined;
+      return field.exists && value !== null;
     case 'contains':
       return containsValue(value, filter.value);
     case 'not_contains':
@@ -37,7 +44,13 @@ function matchesPostFilter(
     case 'not_ends':
       return typeof value !== 'string' || !value.endsWith(filter.value);
     case 'nin':
-      return !filter.values.some((candidate) => candidate === value);
+      return (
+        field.exists &&
+        value !== null &&
+        !filter.values.some((candidate) =>
+          firestoreValuesEqual(candidate, value),
+        )
+      );
     case 'between':
       return compareBetween(value, filter.min, filter.max);
     case 'soft_delete_excluded':
@@ -59,25 +72,11 @@ function containsValue(fieldValue: unknown, needle: string): boolean {
 }
 
 function compareBetween(value: unknown, min: unknown, max: unknown): boolean {
-  const sortable = toComparable(value);
-  const minComparable = toComparable(min);
-  const maxComparable = toComparable(max);
-  if (
-    sortable === undefined ||
-    minComparable === undefined ||
-    maxComparable === undefined
-  ) {
-    return false;
-  }
-  return sortable >= minComparable && sortable <= maxComparable;
-}
-
-function toComparable(value: unknown): number | string | undefined {
-  if (value instanceof Date) {
-    return value.getTime();
-  }
-  if (typeof value === 'number' || typeof value === 'string') {
-    return value;
-  }
-  return undefined;
+  return (
+    value !== null &&
+    sameFirestoreRangeType(value, min) &&
+    sameFirestoreRangeType(value, max) &&
+    compareFirestoreValues(value, min) >= 0 &&
+    compareFirestoreValues(value, max) <= 0
+  );
 }

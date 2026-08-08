@@ -177,6 +177,15 @@ override — name the column `dateRemoved` or `deletedAt` on the entity class.
 If neither name is present, `delete()` calls throw at runtime with a message
 naming both supported column names.
 
+### Local query parity
+
+The in-memory backend and Admin SDK direct-document/post-filter paths match
+Firestore for missing versus explicit `null`, nested field paths, structural
+equality, and range type checks. Local `orderBy` parity is guaranteed for
+`null`, boolean, number, timestamp/`Date`, and string values. Ordering any
+other Firestore value type fails with a descriptive error instead of returning
+a misleading order.
+
 ---
 
 ## 4. Reference
