@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Enable Corepack
+        run: corepack enable
       - uses: actions/setup-node@v4
         with:
           node-version: 20.x
@@ -19,8 +21,6 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-      - name: Enable Corepack
-        run: corepack enable
       - name: Cache Firestore emulator
         uses: actions/cache@v4
         with:
