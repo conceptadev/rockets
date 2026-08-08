@@ -18,8 +18,8 @@ import { z } from 'zod';
 import {
   ExceptionsFilter,
   RocketsModule,
-  defineTypeOrmRepository,
 } from '@concepta/rockets';
+import { defineTypeOrmRepository } from '@concepta/rockets-repository-typeorm';
 import type {
   RocketsRepositoryModuleInterface,
   SchemaEntityCompiler,
