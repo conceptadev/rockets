@@ -15,7 +15,7 @@ import { RocketsAuthUserEntityInterface } from '../../../interfaces/rockets-auth
 import { AbstractSignupUserHandler } from './abstract-signup-user.handler';
 import { SignupUserCommand } from '../impl/signup-user.command';
 import { userAggregateToEntity } from '../../../../../shared/utils/aggregate-mappers';
-import { RepositoryContextInterface } from '@concepta/rockets-core';
+import type { PlainLiteralObject } from '@nestjs/common';
 
 /**
  * Drop server-controlled identity fields from a user-supplied metadata
@@ -47,9 +47,9 @@ export class SignupUserHandler extends AbstractSignupUserHandler {
     // Uniqueness check (read-only, before TX)
     await this.ensureUnique(context, dto.email, dto.username);
 
-    return this.txScope.run(context, async () => {
+    return this.txScope.run(context, async (txCtx) => {
       const userAggregate = await this.commandBus.execute(
-        new CreateUserCommand(context, {
+        new CreateUserCommand(txCtx, {
           email: dto.email,
           username: dto.username,
           active: dto.active ?? true,
@@ -63,13 +63,16 @@ export class SignupUserHandler extends AbstractSignupUserHandler {
       if (dto.userMetadata) {
         userMetadata = await this.commandBus.execute(
           new SaveUserMetadataCommand(
+            txCtx,
             userId,
             stripIdentityFields(dto.userMetadata),
           ),
         );
       }
 
-      await this.commandBus.execute(new AssignDefaultRoleCommand(userId));
+      await this.commandBus.execute(
+        new AssignDefaultRoleCommand(txCtx, userId),
+      );
 
       return {
         ...userAggregateToEntity(userAggregate),
@@ -79,7 +82,7 @@ export class SignupUserHandler extends AbstractSignupUserHandler {
   }
 
   private async ensureUnique(
-    ctx: RepositoryContextInterface,
+    ctx: PlainLiteralObject,
     email: string,
     username: string,
   ): Promise<void> {

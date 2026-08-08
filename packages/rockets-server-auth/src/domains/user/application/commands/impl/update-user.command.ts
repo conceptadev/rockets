@@ -1,10 +1,10 @@
+import type { PlainLiteralObject } from '@nestjs/common';
 import { ReferenceId } from '@concepta/nestjs-core';
 import { RocketsAuthUserUpdatableInterface } from '../../../interfaces/rockets-auth-user-updatable.interface';
-import { RepositoryContextInterface } from '@concepta/rockets-core';
 
 export class UpdateUserCommand {
   constructor(
-    public readonly ctx: RepositoryContextInterface,
+    public readonly ctx: PlainLiteralObject,
     public readonly id: ReferenceId,
     public readonly dto: RocketsAuthUserUpdatableInterface,
   ) {}

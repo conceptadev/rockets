@@ -4,7 +4,6 @@ import {
   GetUserQuery as UpstreamGetUserQuery,
   User,
 } from '@concepta/nestjs-user';
-import { RocketsEntity } from '../../../../../shared/constants/repository-entity-keys.constants';
 
 import { userAggregateToEntity } from '../../../../../shared/utils/aggregate-mappers';
 
@@ -13,7 +12,6 @@ import { RocketsAuthUserMetadataEntityInterface } from '../../../interfaces/rock
 import { UserException } from '../../../domain/exceptions/user.exception';
 import { GetUserQuery } from '../impl/get-user.query';
 import { GetUserMetadataQuery } from '../impl/get-user-metadata.query';
-import { createRepositoryContext } from '@concepta/rockets-core';
 
 @QueryHandler(GetUserQuery)
 export class GetUserHandler implements IQueryHandler<GetUserQuery> {
@@ -21,7 +19,7 @@ export class GetUserHandler implements IQueryHandler<GetUserQuery> {
 
   async execute(query: GetUserQuery): Promise<RocketsAuthUserEntityInterface> {
     const userId = String(query.id);
-    const ctx = createRepositoryContext(RocketsEntity.user);
+    const { ctx } = query;
 
     const [user, userMetadata] = await Promise.all([
       this.queryBus.execute<UpstreamGetUserQuery, User | null>(
@@ -30,7 +28,7 @@ export class GetUserHandler implements IQueryHandler<GetUserQuery> {
       this.queryBus.execute<
         GetUserMetadataQuery,
         RocketsAuthUserMetadataEntityInterface | null
-      >(new GetUserMetadataQuery(userId)),
+      >(new GetUserMetadataQuery(ctx, userId)),
     ]);
 
     if (!user) {

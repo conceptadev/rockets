@@ -11,6 +11,7 @@ import type {
   AuthorizedUser,
 } from '@concepta/rockets-core';
 import { extractBearerToken } from '@concepta/rockets-core';
+import { getAppContext } from '@concepta/rockets-core';
 import { userAggregateToEntity } from '../shared/utils/aggregate-mappers';
 import { resolveUserRoles } from '../shared/utils/resolve-user-role-names';
 
@@ -25,7 +26,8 @@ export class RocketsJwtAuthAdapter implements AuthAdapterInterface {
     if (token === null) return { matched: false };
 
     try {
-      const user = await this.validateToken(token);
+      const ctx = getAppContext(request.raw as object);
+      const user = await this.validateToken(ctx, token);
       return { matched: true, user };
     } catch (error) {
       this.logger.error(`Token validation failed: ${error || 'Unknown error'}`);
@@ -39,12 +41,15 @@ export class RocketsJwtAuthAdapter implements AuthAdapterInterface {
     }
   }
 
-  private async validateToken(token: string): Promise<AuthorizedUser> {
+  private async validateToken(
+    ctx: import('@nestjs/common').PlainLiteralObject,
+    token: string,
+  ): Promise<AuthorizedUser> {
     // v8: signature-verify + payload-validate is one query handler now,
     // wired internally by AuthenticationModule. The v7 `VerifyTokenService`
     // is gone.
     const payload = (await this.queryBus.execute(
-      new ValidateAndVerifyAccessTokenQuery({}, token),
+      new ValidateAndVerifyAccessTokenQuery(ctx, token),
     )) as { sub?: string; roles?: string[] };
 
     if (!payload?.sub) {
@@ -55,7 +60,7 @@ export class RocketsJwtAuthAdapter implements AuthAdapterInterface {
     const userResult = await this.queryBus.execute<
       GetUserBySubjectQuery,
       DomainAggregate<UserInterface> | null
-    >(new GetUserBySubjectQuery({}, payload.sub));
+    >(new GetUserBySubjectQuery(ctx, payload.sub));
 
     if (!userResult) {
       this.logger.warn(`User not found for subject: ${payload.sub}`);
@@ -63,7 +68,7 @@ export class RocketsJwtAuthAdapter implements AuthAdapterInterface {
     }
 
     const user = userAggregateToEntity(userResult);
-    const userRoles = await resolveUserRoles(this.queryBus, user.id);
+    const userRoles = await resolveUserRoles(this.queryBus, ctx, user.id);
 
     this.logger.log(`Successfully validated token for user: ${payload.sub}`);
 

@@ -30,7 +30,7 @@ export abstract class AbstractRocketsGetRolesByIdsHandler
     if (query.ids.length === 0) return this.mapResponse([]);
 
     const where = this.buildFilter(query);
-    const entities = await this.fetch(where);
+    const entities = await this.fetch(query, where);
     return this.mapResponse(entities);
   }
 
@@ -39,9 +39,10 @@ export abstract class AbstractRocketsGetRolesByIdsHandler
   }
 
   protected async fetch(
+    query: RocketsGetRolesByIdsQuery,
     where: ReturnType<AbstractRocketsGetRolesByIdsHandler['buildFilter']>,
   ): Promise<RoleEntityInterface[]> {
-    return this.roleRepo.find({ where });
+    return this.roleRepo.find({ where, ctx: query.ctx });
   }
 
   protected mapResponse(

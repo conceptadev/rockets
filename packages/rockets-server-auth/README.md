@@ -33,7 +33,7 @@ still come from core (which re-exports the `@concepta/nestjs-*` motors).
 - **HTTP routes** (mounted by the bundle):
   - `POST /token/password` — login. `POST /token/refresh` — refresh.
   - `POST /recovery/login`, `POST /recovery/password`,
-    `GET /recovery/passcode/:passcode`, `PATCH /recovery/password` —
+    `POST /recovery/passcode`, `PATCH /recovery/password` —
     enumeration-safe login/password recovery and password reset.
   - `PATCH /me` (password change) and the rest of `/me` from `@concepta/rockets`.
   - `POST /otp`, `PATCH /otp` — OTP issue / verify.
@@ -188,7 +188,9 @@ const rocketsAuth = defineRocketsAuth(rocketsAuthInput);
     EventModule.forRoot({}),
     RocketsModule.forRoot({
       auth: rocketsAuth,
-      resources: [/* your application defineResource bundles */],
+      resources: [
+        /* your application defineResource bundles */
+      ],
     }),
   ],
 })
@@ -356,19 +358,19 @@ when you need built-in auth HTTP and `/me`.
 
 ### Entry points
 
-| Symbol                                                         | Purpose                                                                                                                                                                                                            |
-| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Symbol                                                         | Purpose                                                                                                                                                                           |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `defineRocketsAuth(input)`                                     | Returns a complete `AuthBootstrap` for `createServer({ auth })` or `RocketsModule.forRoot({ auth })`, including owned persistence rows, repository, metadata, and guard defaults. |
-| `buildRocketsAuthResources(persistence, invitationEntity?)`    | Advanced helper used internally by `defineRocketsAuth`; exposed for lower-level core composition.                                                                                                                  |
-| `RocketsAuthModule.forRoot(options)` / `forRootAsync(options)` | Direct registration. Use only when you need to mount the auth module outside the `RocketsModule` composition.                                                                                                      |
-| `RocketsJwtAuthAdapter`                                        | The default JWT adapter validated by the chain. Picked by `defineRocketsAuth` unless `authAdapter` is overridden.                                                                                                  |
+| `buildRocketsAuthResources(persistence, invitationEntity?)`    | Advanced helper used internally by `defineRocketsAuth`; exposed for lower-level core composition.                                                                                 |
+| `RocketsAuthModule.forRoot(options)` / `forRootAsync(options)` | Direct registration. Use only when you need to mount the auth module outside the `RocketsModule` composition.                                                                     |
+| `RocketsJwtAuthAdapter`                                        | The default JWT adapter validated by the chain. Picked by `defineRocketsAuth` unless `authAdapter` is overridden.                                                                 |
 
 ### `defineRocketsAuth` input
 
 | Field                               | Type                                                                         | Required | Purpose                                                                                                                                                                                                    |
 | ----------------------------------- | ---------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `persistence.module`                | `RepositoryModuleInterface`                                                  | yes      | Repository contributed to the surrounding Rockets server — typically `defineTypeOrmRepository(...)`, or a lower-level repository module when the host owns root registration.                            |
-| `persistence.entities`              | `{ user, userCredentials?, userOtp?, role?, userRole?, federatedIdentity? }` | yes      | **Your** TypeORM entity classes for auth tables. No `@concepta/nestjs-typeorm-ext` — declare columns explicitly (see `examples/sample-server-auth`). |
+| `persistence.module`                | `RepositoryModuleInterface`                                                  | yes      | Repository contributed to the surrounding Rockets server — typically `defineTypeOrmRepository(...)`, or a lower-level repository module when the host owns root registration.                              |
+| `persistence.entities`              | `{ user, userCredentials?, userOtp?, role?, userRole?, federatedIdentity? }` | yes      | **Your** TypeORM entity classes for auth tables. No `@concepta/nestjs-typeorm-ext` — declare columns explicitly (see `examples/sample-server-auth`).                                                       |
 | `invitationEntity`                  | `Type`                                                                       | optional | Adds an `invitation` repository row + enables invitation routes.                                                                                                                                           |
 | `userMetadata`                      | `RocketsUserMetadataConfig`                                                  | yes      | Forwarded to `/me`; also used as the default `userCrud.userMetadataConfig`.                                                                                                                                |
 | `userCrud`                          | `UserCrudOptionsExtrasInterface`                                             | yes      | `model`, `dto.createOne` / `updateOne`, `handlers`, controller extras.                                                                                                                                     |
@@ -386,18 +388,18 @@ when you need built-in auth HTTP and `/me`.
 | `user`, `password`, `otp`, `email`, `crud`, `role`, `federated`, `invitation` | Per-module config blocks, forwarded as-is to upstream modules.                                                                                                             |
 | `services.mailerService`                                                      | Required mailer adapter. Use a logger fallback for dev.                                                                                                                    |
 | `services.userAccessQueryService`                                             | Optional `CanAccess` for access-control queries.                                                                                                                           |
-| `swagger`                                                                     | Forwarded to `SwaggerUiModule` from `@concepta/rockets-core`.                                                                                                                                            |
+| `swagger`                                                                     | Forwarded to `SwaggerUiModule` from `@concepta/rockets-core`.                                                                                                              |
 
 ### Module-level extras
 
-| Field                                                                                 | Purpose                                                                                                                                                                         |
-| ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `accessControl`                                                                       | `AccessControlOptionsInterface` + `imports` + `queryServices` — enables the global ACL guard wiring.                                                                            |
+| Field                                                                                 | Purpose                                                                                                                                                                                     |
+| ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `accessControl`                                                                       | `AccessControlOptionsInterface` + `imports` + `queryServices` — enables the global ACL guard wiring.                                                                                        |
 | `disableController`                                                                   | Drop built-in controllers (`recovery`, `otp`, `signup`, `admin`, `adminRoles`, `invitation`, `invitationAcceptance`, `invitationRevocation`, `invitationReattempt`, `mePassword`, `token`). |
-| `throttling`                                                                          | Default request-throttling options, or `false` to opt out. Login and recovery routes are protected by the global throttler guard.                                           |
-| `ports`                                                                               | `RocketsAuthPortsConfigInterface` — per-handler overrides for cross-module Command/Query plumbing.                                                                              |
-| `auth.appGuard`                                                                       | Override the global `APP_GUARD` from `AuthenticationModule`.                                                                                                                    |
-| `auth.controller` / `otp.controller` / `invitation.controllers.*` / `role.controller` | Per-controller decorator extras (`classDecorators`, `routes[*].decorators`).                                                                                                    |
+| `throttling`                                                                          | Default request-throttling options, or `false` to opt out. Login and recovery routes are protected by the global throttler guard.                                                           |
+| `ports`                                                                               | `RocketsAuthPortsConfigInterface` — per-handler overrides for cross-module Command/Query plumbing.                                                                                          |
+| `auth.appGuard`                                                                       | Override the global `APP_GUARD` from `AuthenticationModule`.                                                                                                                                |
+| `auth.controller` / `otp.controller` / `invitation.controllers.*` / `role.controller` | Per-controller decorator extras (`classDecorators`, `routes[*].decorators`).                                                                                                                |
 
 ### Domain re-exports
 

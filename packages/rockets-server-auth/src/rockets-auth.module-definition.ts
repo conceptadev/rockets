@@ -13,12 +13,17 @@ import {
 } from '@concepta/rockets-core';
 import { PassportModule } from '@nestjs/passport';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-import { CqrsModule } from '@nestjs/cqrs';
+import { CommandBus, CqrsModule, QueryBus } from '@nestjs/cqrs';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ConfigModule } from '@nestjs/config';
 import {
   AuthenticationModule,
   AuthenticationOptionsInterface,
+  OtpPort,
+  PasswordPort,
+  RecoveryPolicy,
+  RecoveryService,
+  UserPort,
 } from '@concepta/nestjs-authentication';
 import { createSettingsProvider } from '@concepta/nestjs-core';
 import { CrudContextOverlay, CrudModule } from '@concepta/nestjs-crud';
@@ -105,6 +110,7 @@ import {
 import { RocketsAuthCreateOtpPortHandler } from './shared/authentication/rockets-auth-create-otp-port.handler';
 import { ConceptaRepositoryCompatModule } from './shared/compatibility/concepta-repository-compat.module';
 import { RocketsAuthRecoveryController } from './domains/auth/gateways/http/controllers/rockets-auth-recovery.controller';
+import { RocketsRecoveryService } from './domains/auth/application/services/rockets-recovery.service';
 
 export { RAW_OPTIONS_TOKEN } from './shared/constants/rockets-auth-raw-options.token';
 
@@ -625,7 +631,6 @@ export function createRocketsAuthProviders(options: {
   extras?: RocketsAuthOptionsExtrasInterface;
 }): Provider[] {
   const providers: Provider[] = [
-    ...(options.providers ?? []),
     createRocketsAuthSettingsProvider(),
     RocketsAuthOtpService,
     RocketsAuthNotificationService,
@@ -637,11 +642,46 @@ export function createRocketsAuthProviders(options: {
     RocketsAuthValidatePasswordPortHandler,
     RocketsAuthCreateOtpPortHandler,
     RocketsValidateCurrentPasswordHandler,
+    {
+      provide: RecoveryService,
+      inject: [RAW_OPTIONS_TOKEN, CommandBus, QueryBus],
+      useFactory: (
+        authOptions: RocketsAuthOptionsInterface,
+        commandBus: CommandBus,
+        queryBus: QueryBus,
+      ) => {
+        const ports = buildRocketsAuthenticationPorts(authOptions);
+        const recoverySettings = authOptions.authentication?.settings?.mfa
+          ?.recovery ?? {
+          otp: {
+            namespace: ROCKETS_AUTH_OTP_ASSIGNMENT,
+            category: 'auth-recovery',
+            type: 'uuid',
+            expiresIn: '1h',
+            duplicateStrategy: 'DEACTIVATE' as const,
+            rateSeconds: 60,
+            rateThreshold: 5,
+          },
+        };
+        return new RocketsRecoveryService(
+          new RecoveryPolicy(recoverySettings),
+          new OtpPort(ports.otp, commandBus, queryBus),
+          new UserPort(ports.user, queryBus, commandBus),
+          new PasswordPort(ports.password, commandBus),
+          ports.recoveryNotification,
+          commandBus,
+        );
+      },
+    },
   ];
 
   if (options.extras?.throttling !== false) {
     providers.push({ provide: APP_GUARD, useClass: ThrottlerGuard });
   }
+
+  // Nest resolves later providers for the same token, so consumer overrides
+  // must follow Rockets defaults (including RecoveryService).
+  providers.push(...(options.providers ?? []));
 
   return providers;
 }

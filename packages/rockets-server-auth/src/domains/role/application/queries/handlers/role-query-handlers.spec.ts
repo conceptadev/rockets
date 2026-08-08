@@ -35,7 +35,9 @@ describe('Role query handlers', () => {
       repo.findOne.mockResolvedValueOnce(null);
       const handler = new RocketsGetRoleByNameHandler(repo);
 
-      const out = await handler.execute(new RocketsGetRoleByNameQuery('admin'));
+      const out = await handler.execute(
+        new RocketsGetRoleByNameQuery({}, 'admin'),
+      );
       expect(out).toBeNull();
       const callArg = repo.findOne.mock.calls[0][0] as {
         where: ReturnType<typeof WhereType.eq>;
@@ -50,7 +52,7 @@ describe('Role query handlers', () => {
       const handler = new RocketsGetRoleByNameHandler(repo);
 
       await expect(
-        handler.execute(new RocketsGetRoleByNameQuery('admin')),
+        handler.execute(new RocketsGetRoleByNameQuery({}, 'admin')),
       ).resolves.toBe(role);
     });
   });
@@ -61,7 +63,7 @@ describe('Role query handlers', () => {
       const handler = new RocketsGetRolesByIdsHandler(repo);
 
       await expect(
-        handler.execute(new RocketsGetRolesByIdsQuery([])),
+        handler.execute(new RocketsGetRolesByIdsQuery({}, [])),
       ).resolves.toEqual([]);
       expect(repo.find).not.toHaveBeenCalled();
     });
@@ -76,7 +78,7 @@ describe('Role query handlers', () => {
       const handler = new RocketsGetRolesByIdsHandler(repo);
 
       const out = await handler.execute(
-        new RocketsGetRolesByIdsQuery(['r1', 'r2']),
+        new RocketsGetRolesByIdsQuery({}, ['r1', 'r2']),
       );
       expect(out).toBe(roles);
       expect(repo.find).toHaveBeenCalledTimes(1);
@@ -98,7 +100,9 @@ describe('Role query handlers', () => {
       }
 
       const handler = new RedactedName(repo);
-      const out = await handler.execute(new RocketsGetRoleByNameQuery('admin'));
+      const out = await handler.execute(
+        new RocketsGetRoleByNameQuery({}, 'admin'),
+      );
       expect(out?.name).toBe('REDACTED');
       expect(repo.findOne).toHaveBeenCalledTimes(1);
     });
@@ -114,7 +118,9 @@ describe('Role query handlers', () => {
       }
 
       const handler = new WithCache(repo);
-      const out = await handler.execute(new RocketsGetRoleByNameQuery('admin'));
+      const out = await handler.execute(
+        new RocketsGetRoleByNameQuery({}, 'admin'),
+      );
       expect(out).toBe(cached);
       expect(repo.findOne).not.toHaveBeenCalled();
     });
@@ -138,7 +144,7 @@ describe('Role query handlers', () => {
 
       const handler = new DropDeleted(repo);
       const out = await handler.execute(
-        new RocketsGetRolesByIdsQuery(['r1', 'r2']),
+        new RocketsGetRolesByIdsQuery({}, ['r1', 'r2']),
       );
       expect(out).toHaveLength(1);
       expect(out[0].id).toBe('r1');

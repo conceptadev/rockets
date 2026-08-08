@@ -6,7 +6,7 @@ import { UserMetadataRepositoryInterface } from '../../domain/repositories/user-
 import { RocketsAuthUserMetadataEntityInterface } from '../../interfaces/rockets-auth-user-metadata-entity.interface';
 import { RocketsAuthUserMetadataUpdatableInterface } from '../../interfaces/rockets-auth-user-metadata-updatable.interface';
 import { USER_METADATA_MODULE_ENTITY_KEY } from '../../../../shared/constants/repository-entity-keys.constants';
-import { RepositoryContextInterface } from '@concepta/rockets-core';
+import type { PlainLiteralObject } from '@nestjs/common';
 import { InjectDynamicRepository } from '@concepta/rockets-core';
 
 @Injectable()
@@ -17,7 +17,7 @@ export class UserMetadataRepository implements UserMetadataRepositoryInterface {
   ) {}
 
   async findByUserId(
-    ctx: RepositoryContextInterface,
+    ctx: PlainLiteralObject,
     userId: string,
   ): Promise<RocketsAuthUserMetadataEntityInterface | null> {
     return this.repo.findOne({
@@ -27,7 +27,7 @@ export class UserMetadataRepository implements UserMetadataRepositoryInterface {
   }
 
   async save(
-    ctx: RepositoryContextInterface,
+    ctx: PlainLiteralObject,
     userId: string,
     data: RocketsAuthUserMetadataUpdatableInterface,
   ): Promise<RocketsAuthUserMetadataEntityInterface> {
@@ -35,7 +35,7 @@ export class UserMetadataRepository implements UserMetadataRepositoryInterface {
   }
 
   async createOrUpdate(
-    ctx: RepositoryContextInterface,
+    ctx: PlainLiteralObject,
     userId: string,
     data: RocketsAuthUserMetadataUpdatableInterface,
   ): Promise<RocketsAuthUserMetadataEntityInterface> {

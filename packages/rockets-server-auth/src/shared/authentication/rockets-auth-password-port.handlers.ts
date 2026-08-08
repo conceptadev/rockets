@@ -8,6 +8,7 @@ import {
 import { Inject } from '@nestjs/common';
 import {
   UserCredentials,
+  UserPasswordHistoryViolationException,
   UserPasswordPort,
   type UserCredentialEntityInterface,
   type UserCredentialsRepositoryInterface,
@@ -103,7 +104,13 @@ export class RocketsAuthSetPasswordPortHandler
           command.assigneeId,
           limitDate,
         );
-        await this.passwordPort.validateHistory(command.password, history);
+        const valid = await this.passwordPort.validateHistory(
+          command.password,
+          history,
+        );
+        if (!valid) {
+          throw new UserPasswordHistoryViolationException();
+        }
       }
 
       const passwordStorage = await this.passwordPort.create(command.password);

@@ -120,7 +120,8 @@ describe('InvitationUserAcceptanceListener', () => {
     // outer catch in the listener receives the error.
     const txScopeMock = {
       run: vi.fn(
-        async (_ctx: unknown, fn: () => Promise<unknown>) => await fn(),
+        async (ctx: unknown, fn: (txCtx: unknown) => Promise<unknown>) =>
+          await fn(ctx),
       ),
     } as unknown as TransactionScope;
 
@@ -194,14 +195,20 @@ describe('InvitationUserAcceptanceListener', () => {
 
       await listener.handle(event);
 
-      expect(mockUserPortService.byId).toHaveBeenCalledWith('user-123');
+      expect(mockUserPortService.byId).toHaveBeenCalledWith(
+        expect.anything(),
+        'user-123',
+      );
       expect(mockPasswordService.create).toHaveBeenCalledWith('Test123!');
-      expect(mockUserPortService.update).toHaveBeenCalledWith({
-        id: 'user-123',
-        passwordHash: 'hashed-password',
-        passwordSalt: 'salt',
-        active: true,
-      });
+      expect(mockUserPortService.update).toHaveBeenCalledWith(
+        expect.anything(),
+        {
+          id: 'user-123',
+          passwordHash: 'hashed-password',
+          passwordSalt: 'salt',
+          active: true,
+        },
+      );
       expect(mockCommandBus.execute).toHaveBeenCalledWith(
         expect.any(AssignDefaultRoleCommand),
       );
@@ -220,10 +227,10 @@ describe('InvitationUserAcceptanceListener', () => {
       await listener.handle(event);
 
       expect(mockPasswordService.create).not.toHaveBeenCalled();
-      expect(mockUserPortService.update).toHaveBeenCalledWith({
-        id: 'user-123',
-        active: true,
-      });
+      expect(mockUserPortService.update).toHaveBeenCalledWith(
+        expect.anything(),
+        { id: 'user-123', active: true },
+      );
     });
 
     it('should create user metadata when provided', async () => {
@@ -338,7 +345,10 @@ describe('InvitationUserAcceptanceListener', () => {
 
       await listener.handle(event);
 
-      expect(mockUserPortService.byId).toHaveBeenCalledWith('user-123');
+      expect(mockUserPortService.byId).toHaveBeenCalledWith(
+        expect.anything(),
+        'user-123',
+      );
       expect(mockPasswordService.create).not.toHaveBeenCalled();
       expect(mockUserPortService.update).not.toHaveBeenCalled();
     });

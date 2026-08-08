@@ -5,6 +5,7 @@ import {
   Logger,
   Param,
   Post,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import type { Type } from '@nestjs/common';
@@ -26,6 +27,8 @@ import {
   AssignRoleCommand,
   GetAssignedRolesQuery,
 } from '@concepta/nestjs-role';
+import { getAppContext } from '@concepta/rockets-core';
+import type { Request } from 'express';
 
 import { AdminGuard } from '../../../../../guards/admin.guard';
 import { USER_ROLE_ENTITY_KEY } from '../../../../../shared/constants/repository-entity-keys.constants';
@@ -64,9 +67,10 @@ export function buildAdminUserRolesController(
     @ApiOkResponse({ description: 'Roles for the user' })
     @ApiUnauthorizedResponse({ description: 'Unauthorized' })
     @Get()
-    async list(@Param('userId') userId: string) {
+    async list(@Param('userId') userId: string, @Req() req: Request) {
+      const ctx = getAppContext(req);
       return this.queryBus.execute(
-        new GetAssignedRolesQuery({}, USER_ROLE_ENTITY_KEY, userId),
+        new GetAssignedRolesQuery(ctx, USER_ROLE_ENTITY_KEY, userId),
       );
     }
 
@@ -79,9 +83,11 @@ export function buildAdminUserRolesController(
     async assign(
       @Param('userId') userId: string,
       @Body() dto: AdminAssignUserRoleDto,
+      @Req() req: Request,
     ) {
+      const ctx = getAppContext(req);
       await this.commandBus.execute(
-        new AssignRoleCommand({}, USER_ROLE_ENTITY_KEY, dto.roleId, userId),
+        new AssignRoleCommand(ctx, USER_ROLE_ENTITY_KEY, dto.roleId, userId),
       );
       this.logger.log(`Role ${dto.roleId} assigned to user ${userId}`);
     }

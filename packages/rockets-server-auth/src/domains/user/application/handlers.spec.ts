@@ -37,7 +37,7 @@ describe('User application handlers', () => {
       queryBus.execute
         .mockResolvedValueOnce(null) // upstream get-user
         .mockResolvedValueOnce(null); // get-user-metadata
-      await expect(handler.execute(new GetUserQuery('u1'))).rejects.toThrow(
+      await expect(handler.execute(new GetUserQuery({}, 'u1'))).rejects.toThrow(
         UserException,
       );
     });
@@ -47,7 +47,7 @@ describe('User application handlers', () => {
       queryBus.execute
         .mockResolvedValueOnce(aggregate)
         .mockResolvedValueOnce(meta);
-      const out = await handler.execute(new GetUserQuery('u1'));
+      const out = await handler.execute(new GetUserQuery({}, 'u1'));
       expect(out).toEqual({ ...userPlain, userMetadata: meta });
       expect(queryBus.execute).toHaveBeenCalledWith(
         expect.any(UpstreamGetUserQuery),
@@ -61,14 +61,14 @@ describe('User application handlers', () => {
       queryBus.execute
         .mockResolvedValueOnce(aggregate)
         .mockResolvedValueOnce(null);
-      const out = await handler.execute(new GetUserQuery('u1'));
+      const out = await handler.execute(new GetUserQuery({}, 'u1'));
       expect(out.userMetadata).toBeUndefined();
     });
 
     it('UserException carries 404 httpStatus', async () => {
       queryBus.execute.mockResolvedValueOnce(null).mockResolvedValueOnce(null);
       try {
-        await handler.execute(new GetUserQuery('u1'));
+        await handler.execute(new GetUserQuery({}, 'u1'));
         expect.fail('expected throw');
       } catch (err) {
         expect(err).toBeInstanceOf(UserException);

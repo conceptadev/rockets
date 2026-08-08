@@ -1,5 +1,6 @@
 import { ReferenceAssignment } from '@concepta/nestjs-core';
 import { OtpCreatableInterface } from '@concepta/nestjs-otp';
+import type { PlainLiteralObject } from '@nestjs/common';
 
 /**
  * Parameters for creating an OTP through the Rockets Auth port.
@@ -19,5 +20,8 @@ export interface RocketsCreateOtpParams {
 }
 
 export class RocketsCreateOtpCommand {
-  constructor(public readonly params: RocketsCreateOtpParams) {}
+  constructor(
+    public readonly ctx: PlainLiteralObject,
+    public readonly params: RocketsCreateOtpParams,
+  ) {}
 }

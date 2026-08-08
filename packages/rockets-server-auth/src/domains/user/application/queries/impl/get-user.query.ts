@@ -1,5 +1,9 @@
+import type { PlainLiteralObject } from '@nestjs/common';
 import { ReferenceId } from '@concepta/nestjs-core';
 
 export class GetUserQuery {
-  constructor(public readonly id: ReferenceId) {}
+  constructor(
+    public readonly ctx: PlainLiteralObject,
+    public readonly id: ReferenceId,
+  ) {}
 }

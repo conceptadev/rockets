@@ -81,8 +81,8 @@ export interface RocketsAuthOptionsInterface {
    *   Defaulted to all-enabled; pass `{ jwt: {} }` etc. to override.
    * - `mfa` — `recovery` / `verify` MFA policy overrides
    *   (`RecoveryPolicySettingsInterface` / `VerifyPolicySettingsInterface`).
-   *   Typed-reachable; no rockets default — upstream supplies defaults
-   *   when omitted.
+   *   Recovery defaults to Rockets' OTP namespace/category/rate policy when
+   *   omitted so the mounted recovery controller is always operational.
    * - `guards` — guard enable/disable policy
    *   (`GuardsPolicySettingsInterface`). Typed-reachable; no rockets
    *   default.
