@@ -139,7 +139,6 @@ Handwritten entity + DTO path still demonstrated in `pet-vaccination/` for compa
 examples/sample-server
 ├── src/
 │   ├── auth/                       AuthBootstrap + JWT signup/login
-│   ├── repository/                 defineTypeOrmRepository bootstrap
 │   ├── zod-bindings.ts             bindZodResources(typeOrmZodEntityCompiler)
 │   ├── user-metadata.schema.ts     zod schema -> { entity, createDto, updateDto, responseDto }
 │   ├── resources/                  CRUD + sub-resource + module bundles
