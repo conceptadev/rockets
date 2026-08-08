@@ -919,15 +919,12 @@ __metadata:
     reflect-metadata: "npm:^0.1.14"
     sqlite3: "npm:^5.1.4"
     supertest: "npm:^6.3.4"
-    ts-node: "npm:^10.9.2"
     typeorm: "npm:^0.3.31"
     vitest: "npm:^4.1.10"
   peerDependencies:
     class-transformer: "*"
     class-validator: "*"
     rxjs: ^7.1.0
-  bin:
-    rockets-auth-swagger: ./bin/generate-swagger.js
   languageName: unknown
   linkType: soft
 
