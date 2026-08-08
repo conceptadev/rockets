@@ -8,8 +8,8 @@
 > Firestore-backed entities with a TypeORM (or any other) default adapter, per
 > entity.
 
-**Status:** preview (`0.0.1-dev.0` on npm, dist-tag `alpha`). API stable
-enough to use; expect refinements before 1.0.
+**Status:** pre-1.0 preview (`0.0.1-dev.0`, npm dist-tag `alpha`). Public
+shapes may still change before 1.0.
 
 ---
 
@@ -33,7 +33,7 @@ Other entities continue on the default adapter (TypeORM, in most apps).
 - `FirestoreRepositoryModule.forFeature(entities, options?)` — registers dynamic
   repository providers per entity row.
 - `defineFirestoreRepository()` — `RepositoryBootstrap` with the same shape as
-  app-local `defineTypeOrmRepository` (thin delegate, no env sniffing).
+  `defineTypeOrmRepository` from `@concepta/rockets-repository-typeorm`.
 - `FirestoreRepository<Entity>` — adapter class implementing
   `RepositoryAdapter<Entity>`.
 - `ensureFirebaseAdminApp(packageRoot)` — singleton Admin initialisation for

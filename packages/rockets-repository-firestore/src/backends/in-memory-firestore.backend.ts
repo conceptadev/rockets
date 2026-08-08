@@ -2,11 +2,10 @@ import type {
   FirestoreBackend,
   FirestoreBranchQueryOptions,
 } from '../interfaces/firestore-backend.interface';
-import type {
-  FirestoreQueryBranch,
-  FirestoreQueryFilter,
-} from '../interfaces/firestore-query.interface';
+import type { FirestoreQueryBranch } from '../interfaces/firestore-query.interface';
 import { applyFirestorePostFilters } from '../repository/firestore-post-filter';
+import { applyFirestoreFilters } from '../repository/firestore-row-filter';
+import { sortFirestoreRows } from '../repository/firestore-sort';
 
 /**
  * In-memory Firestore backend for unit tests and explicit test harnesses.
@@ -55,6 +54,20 @@ export class InMemoryFirestoreBackend implements FirestoreBackend {
     );
   }
 
+  async create(
+    collection: string,
+    documentId: string,
+    data: Record<string, unknown>,
+  ): Promise<void> {
+    const store = this.collectionStore(collection);
+    if (store.has(documentId)) {
+      throw new Error(
+        `Firestore document "${collection}/${documentId}" already exists.`,
+      );
+    }
+    store.set(documentId, { ...data, id: documentId });
+  }
+
   async delete(collection: string, documentId: string): Promise<void> {
     this.collectionStore(collection).delete(documentId);
   }
@@ -65,10 +78,10 @@ export class InMemoryFirestoreBackend implements FirestoreBackend {
   ): Promise<Record<string, unknown>[]> {
     const rows = await this.loadBranchRows(collection, options.branch);
     const filtered = applyFirestorePostFilters(
-      rows,
+      applyFirestoreFilters(rows, options.branch.filters),
       options.branch.postFilters,
     );
-    const ordered = sortInMemory(filtered, options.orderBy);
+    const ordered = sortFirestoreRows(filtered, options.orderBy);
 
     const sliced = ordered.slice(options.skip ?? 0);
     if (typeof options.take === 'number' && options.take > 0) {
@@ -82,7 +95,10 @@ export class InMemoryFirestoreBackend implements FirestoreBackend {
     branch: FirestoreQueryBranch,
   ): Promise<number> {
     const rows = await this.loadBranchRows(collection, branch);
-    const filtered = applyFirestorePostFilters(rows, branch.postFilters);
+    const filtered = applyFirestorePostFilters(
+      applyFirestoreFilters(rows, branch.filters),
+      branch.postFilters,
+    );
     return filtered.length;
   }
 
@@ -95,7 +111,7 @@ export class InMemoryFirestoreBackend implements FirestoreBackend {
       return row ? [row] : [];
     }
 
-    if (branch.documentIds && branch.documentIds.length > 0) {
+    if (branch.documentIds !== undefined) {
       const rows: Record<string, unknown>[] = [];
       for (const documentId of branch.documentIds) {
         const row = await this.get(collection, documentId);
@@ -106,97 +122,6 @@ export class InMemoryFirestoreBackend implements FirestoreBackend {
       return rows;
     }
 
-    const rows = [...this.collectionStore(collection).values()];
-    return rows.filter((row) =>
-      branch.filters.every((filter) => matchesFilter(row, filter)),
-    );
+    return [...this.collectionStore(collection).values()];
   }
-}
-
-function matchesFilter(
-  row: Record<string, unknown>,
-  filter: FirestoreQueryFilter,
-): boolean {
-  const value = row[filter.field];
-  switch (filter.op) {
-    case '==':
-      return value === filter.value;
-    case '!=':
-      return value !== filter.value;
-    case '<':
-      return compare(value, filter.value) < 0;
-    case '<=':
-      return compare(value, filter.value) <= 0;
-    case '>':
-      return compare(value, filter.value) > 0;
-    case '>=':
-      return compare(value, filter.value) >= 0;
-    case 'in':
-      return (
-        Array.isArray(filter.value) &&
-        filter.value.some((candidate) => candidate === value)
-      );
-    case 'not-in':
-      return (
-        Array.isArray(filter.value) &&
-        !filter.value.some((candidate) => candidate === value)
-      );
-    case 'array-contains':
-      return Array.isArray(value) && value.includes(filter.value);
-    default: {
-      const _exhaustive: never = filter.op;
-      return _exhaustive;
-    }
-  }
-}
-
-function compare(left: unknown, right: unknown): number {
-  const a = toComparable(left);
-  const b = toComparable(right);
-  if (a === undefined || b === undefined) {
-    return -1;
-  }
-  if (a < b) {
-    return -1;
-  }
-  if (a > b) {
-    return 1;
-  }
-  return 0;
-}
-
-function toComparable(value: unknown): number | string | undefined {
-  if (value instanceof Date) {
-    return value.getTime();
-  }
-  if (typeof value === 'number' || typeof value === 'string') {
-    return value;
-  }
-  return undefined;
-}
-
-function sortInMemory(
-  rows: Record<string, unknown>[],
-  orderBy?: FirestoreBranchQueryOptions['orderBy'],
-): Record<string, unknown>[] {
-  if (!orderBy || orderBy.length === 0) {
-    return rows;
-  }
-  const clause = orderBy[0];
-  const desc = clause.direction === 'desc';
-  return [...rows].sort((left, right) => {
-    const a = left[clause.field];
-    const b = right[clause.field];
-    if (a === b) {
-      return 0;
-    }
-    if (a === undefined || a === null) {
-      return 1;
-    }
-    if (b === undefined || b === null) {
-      return -1;
-    }
-    const cmp = compare(a, b);
-    return desc ? -cmp : cmp;
-  });
 }

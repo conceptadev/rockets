@@ -73,17 +73,18 @@ function mergeAndBranch(
 ): FirestoreQueryBranch {
   const merged: FirestoreQueryFilter[] = [];
   const postFilters: FirestorePostFilter[] = [];
-  let documentId: string | undefined;
+  let candidateDocumentIds: string[] | undefined;
 
   for (const child of conditions) {
     if (isWhereCondition(child)) {
       const branch = translateCondition(child);
-      if (branch.documentId) {
-        documentId = branch.documentId;
-      }
-      if (branch.documentIds) {
-        throw new Error(
-          'Firestore adapter: documentIds in an AND branch is not supported — restructure the where clause.',
+      const childDocumentIds = branch.documentId
+        ? [branch.documentId]
+        : branch.documentIds;
+      if (childDocumentIds !== undefined) {
+        candidateDocumentIds = intersectDocumentIds(
+          candidateDocumentIds,
+          childDocumentIds,
         );
       }
       merged.push(...branch.filters);
@@ -97,11 +98,28 @@ function mergeAndBranch(
 
   assertFirestoreFilterRules(merged);
 
+  const documentSelector =
+    candidateDocumentIds === undefined
+      ? {}
+      : candidateDocumentIds.length === 1
+      ? { documentId: candidateDocumentIds[0] }
+      : { documentIds: candidateDocumentIds };
+
   return {
-    documentId,
+    ...documentSelector,
     filters: merged,
     postFilters,
   };
+}
+
+function intersectDocumentIds(
+  current: readonly string[] | undefined,
+  incoming: readonly string[],
+): string[] {
+  const uniqueIncoming = [...new Set(incoming)];
+  if (current === undefined) return uniqueIncoming;
+  const allowed = new Set(uniqueIncoming);
+  return current.filter((id) => allowed.has(id));
 }
 
 function readScalarValue(condition: WhereConditionScalar): unknown {

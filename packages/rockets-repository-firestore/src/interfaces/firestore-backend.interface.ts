@@ -21,6 +21,12 @@ export interface FirestoreBackend {
     collection: string,
     documentId: string,
   ): Promise<Record<string, unknown> | null>;
+  /** Atomically create a document and reject when its id already exists. */
+  create(
+    collection: string,
+    documentId: string,
+    data: Record<string, unknown>,
+  ): Promise<void>;
   set(
     collection: string,
     documentId: string,

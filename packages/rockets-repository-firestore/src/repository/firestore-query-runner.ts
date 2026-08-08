@@ -1,10 +1,10 @@
 import type { FirestoreBackend } from '../interfaces/firestore-backend.interface';
 import type {
-  FirestoreOrderBy,
   FirestorePostFilter,
   FirestoreQueryBranch,
   FirestoreQueryRequest,
 } from '../interfaces/firestore-query.interface';
+import { sortFirestoreRows } from './firestore-sort';
 
 export async function runFirestoreQuery(
   backend: FirestoreBackend,
@@ -43,7 +43,7 @@ export async function runFirestoreQuery(
   let results = [...merged.values()];
 
   if (!pushToServer) {
-    results = sortRows(results, request.orderBy);
+    results = sortFirestoreRows(results, request.orderBy);
     if (typeof request.skip === 'number' && request.skip > 0) {
       results = results.slice(request.skip);
     }
@@ -106,49 +106,4 @@ function augmentBranchesForSoftDelete(
 function readDocumentId(row: Record<string, unknown>): string | undefined {
   const id = row.id;
   return typeof id === 'string' && id.length > 0 ? id : undefined;
-}
-
-function sortRows(
-  rows: Record<string, unknown>[],
-  orderBy?: readonly FirestoreOrderBy[],
-): Record<string, unknown>[] {
-  if (!orderBy || orderBy.length === 0) {
-    return rows;
-  }
-
-  const clause = orderBy[0];
-  const desc = clause.direction === 'desc';
-
-  return [...rows].sort((left, right) => {
-    const a = left[clause.field];
-    const b = right[clause.field];
-    if (a === b) {
-      return 0;
-    }
-    if (a === undefined || a === null) {
-      return 1;
-    }
-    if (b === undefined || b === null) {
-      return -1;
-    }
-    const aTime = toSortableTime(a);
-    const bTime = toSortableTime(b);
-    if (!Number.isNaN(aTime) && !Number.isNaN(bTime)) {
-      return desc ? bTime - aTime : aTime - bTime;
-    }
-    if (typeof a === 'string' && typeof b === 'string') {
-      return desc ? b.localeCompare(a) : a.localeCompare(b);
-    }
-    return desc ? (a < b ? 1 : -1) : a > b ? 1 : -1;
-  });
-}
-
-function toSortableTime(value: unknown): number {
-  if (value instanceof Date) {
-    return value.getTime();
-  }
-  if (typeof value === 'string') {
-    return Date.parse(value);
-  }
-  return Number.NaN;
 }
