@@ -10,8 +10,8 @@
     "type-check": "tsc --noEmit -p tsconfig.json",
     "lint": "echo \"lint: configure eslint when needed\"",
     "clean": "rm -rf dist",
-    "test:e2e": "vitest run --config vitest.e2e.config.ts",
-    "test:e2e:auth": "vitest run --config vitest.e2e.config.ts test/auth-connection.e2e-spec.ts"
+    "test:e2e": "vitest run --config vitest.e2e.config.mts",
+    "test:e2e:auth": "vitest run --config vitest.e2e.config.mts test/auth-connection.e2e-spec.ts"
   },
   "dependencies": {
     "@concepta/nestjs-core": "8.0.0-alpha.8",

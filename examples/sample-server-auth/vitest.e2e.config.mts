@@ -1,9 +1,9 @@
 import { defineProject, mergeConfig } from 'vitest/config';
-import shared from '../../vitest.shared';
+import shared from '../../vitest.shared.mts';
 
 /**
  * E2E project for the sample-server-auth example — registered in the root
- * `vitest.config.ts` `projects` list and runnable standalone via
+ * `vitest.config.mts` `projects` list and runnable standalone via
  * `--config` from the workspace. The former Jest `moduleNameMapper`
  * entries are not ported: workspace packages (`@concepta/*`) resolve to their built `dist`
  * through normal node resolution, and the `@nestjs/*` / `@concepta/*` /
