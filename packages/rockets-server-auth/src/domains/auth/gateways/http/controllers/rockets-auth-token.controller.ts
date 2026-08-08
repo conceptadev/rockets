@@ -42,7 +42,7 @@ type RequestWithPassportUser = Request & {
  * before `AuthUserContextOverlay` runs on some Nest versions).
  */
 @Controller('token')
-@AuthPublic()
+@AuthPublic({ classLevel: true })
 @ApiTags('Authentication')
 export class RocketsAuthTokenController {
   constructor(private readonly commandBus: CommandBus) {}

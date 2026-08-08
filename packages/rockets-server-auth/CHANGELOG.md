@@ -9,20 +9,32 @@ and this project adheres to
 
 ## [Unreleased]
 
-### Breaking
-
-- **`repositoryPersistence` removed** from `RocketsAuthOptionsExtrasInterface`.
-  Use **`defineRocketsAuth()`** from this package: it registers auth entities
-  through `@concepta/rockets-core`’s planner (`resources[]`) and returns a
-  **`RocketsAuthIntegration`** for `RocketsModule.forRoot({ auth: ... })`.
-  `RocketsModule` loads **`RocketsCoreModule` before `RocketsAuthModule`** when
-  `auth` is an integration bundle so dynamic repositories exist at auth boot.
-
 ### Added
 
-- **`defineRocketsAuth`** and **`DefineRocketsAuthInput`** — single entry for
-  persistence manifest + `userMetadata` + `RocketsAuthModule.forRootAsync`
-  options.
+- Complete public account-recovery HTTP flow: enumeration-safe initiation,
+  passcode validation, and OTP-authorized password rotation.
+- Default global throttling with stricter login and recovery limits; hosts can
+  configure it or explicitly opt out.
+- End-to-end readiness coverage for duplicate CQRS ownership, recovery,
+  password reuse policy, and login throttling.
+
+### Changed
+
+- `defineRocketsAuth()` now returns a complete composition: auth persistence
+  rows, root repository, user-metadata contract, and guard preference travel
+  with the integration. Its Rockets guard defaults off because the built-in
+  authentication module already owns a JWT global guard; mixed-auth hosts can
+  explicitly reverse that ownership.
+- CQRS handlers have one owner. Signup and password-validation registrations no
+  longer compete with upstream handlers for the same command.
+- Recovery password rotation preserves history, strength validation,
+  transactions, and credential lifecycle events.
+- Node.js 20 is the minimum supported runtime.
+
+### Removed
+
+- The nonfunctional `rockets-auth-swagger` manifest entry. Applications
+  generate OpenAPI from their own complete Nest entry module.
 
 ## [1.0.0-alpha.7] - 2026-02-19
 

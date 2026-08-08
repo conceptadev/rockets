@@ -69,28 +69,39 @@ describe('Handler Override Pattern', () => {
       }
     }
 
-    it('should use default handler when signupHandler not provided', () => {
-      const config: UserCrudOptionsExtrasInterface = {};
-      const module = RocketsAuthSignUpModule.register(config);
-      const providerClasses = (module.providers as { useClass?: unknown }[])
-        ?.map((p) =>
-          typeof p === 'function' ? p : (p as { useClass?: unknown }).useClass,
+    function crudProviderClasses(
+      module: ReturnType<typeof RocketsAuthSignUpModule.register>,
+    ) {
+      return (module.imports ?? [])
+        .flatMap((entry) =>
+          typeof entry === 'object' && entry !== null && 'providers' in entry
+            ? (entry as { providers?: unknown[] }).providers ?? []
+            : [],
+        )
+        .map((provider) =>
+          typeof provider === 'function'
+            ? provider
+            : (provider as { useClass?: unknown }).useClass,
         )
         .filter(Boolean);
-      expect(providerClasses).toContain(SignupUserHandler);
+    }
+
+    it('lets CrudModule own the default signup handler exactly once', () => {
+      const config: UserCrudOptionsExtrasInterface = {};
+      const module = RocketsAuthSignUpModule.register(config);
+      expect(crudProviderClasses(module)).toContain(SignupUserHandler);
+      expect(module.providers).not.toContain(SignupUserHandler);
     });
 
-    it('should use custom handler when signupHandler provided', () => {
+    it('lets CrudModule own the custom signup handler exactly once', () => {
       const config: UserCrudOptionsExtrasInterface = {
         handlers: {
           signupHandler: CustomSignupHandler,
         },
       };
       const module = RocketsAuthSignUpModule.register(config);
-      const providerClasses = (module.providers as unknown[])?.filter(
-        (p) => p === CustomSignupHandler || p === SignupUserHandler,
-      );
-      expect(providerClasses).toContain(CustomSignupHandler);
+      expect(crudProviderClasses(module)).toContain(CustomSignupHandler);
+      expect(module.providers).not.toContain(CustomSignupHandler);
     });
 
     it('should not include default handler when custom handler provided', () => {

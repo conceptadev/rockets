@@ -1,10 +1,23 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { Command, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import type { PasswordStorageInterface } from '@concepta/nestjs-common';
-import {
-  PasswordCreationService,
-  ValidateCurrentPasswordCommand,
-} from '@concepta/nestjs-password';
+import { PasswordCreationService } from '@concepta/nestjs-password';
+
+/**
+ * Rockets-owned command for current-password validation.
+ *
+ * Using a distinct command keeps the upstream password handler and the
+ * aggregate-normalizing Rockets handler from competing for ownership of the
+ * same CQRS route.
+ */
+export class RocketsValidateCurrentPasswordCommand extends Command<boolean> {
+  constructor(
+    readonly password: string,
+    readonly target: PasswordStorageInterface,
+  ) {
+    super();
+  }
+}
 
 // TODO(upstream: concepta/nestjs-password) — `PasswordCreationService.validateCurrent`
 // flattens the target with `{ password, ...object }` (`password-creation.service.ts:51`),
@@ -53,23 +66,25 @@ function toPasswordStorageInterface(
 }
 
 /**
- * Replaces upstream {@link ValidateCurrentPasswordHandler} so current-password
- * checks work when `target` is a credentials aggregate (see `toPlain` / `props`).
+ * Handles the Rockets-owned validation command so current-password checks work
+ * when `target` is a credentials aggregate (see `toPlain` / `props`).
  */
 @Injectable()
-@CommandHandler(ValidateCurrentPasswordCommand)
+@CommandHandler(RocketsValidateCurrentPasswordCommand)
 export class RocketsValidateCurrentPasswordHandler
-  implements ICommandHandler<ValidateCurrentPasswordCommand, boolean>
+  implements ICommandHandler<RocketsValidateCurrentPasswordCommand, boolean>
 {
   constructor(
     private readonly passwordCreationService: PasswordCreationService,
   ) {}
 
-  async execute(command: ValidateCurrentPasswordCommand): Promise<boolean> {
+  async execute(
+    command: RocketsValidateCurrentPasswordCommand,
+  ): Promise<boolean> {
     const normalized = toPasswordStorageInterface(command.target);
     if (!normalized) {
       throw new InternalServerErrorException(
-        'ValidateCurrentPasswordCommand received a target without a ' +
+        'RocketsValidateCurrentPasswordCommand received a target without a ' +
           'reachable passwordHash (POJO, aggregate.toPlain(), or .props). ' +
           'Check the upstream caller that built the command.',
       );

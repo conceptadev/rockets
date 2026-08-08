@@ -96,8 +96,7 @@ export class RocketsAuthSignUpModule {
         }),
       ],
       providers: [
-        // Application: command handlers
-        SignupHandler,
+        // SignupHandler is owned by CrudModule.forFeature above.
         AssignDefaultRoleHandler,
         // Application: query handlers
         GetUserHandler,

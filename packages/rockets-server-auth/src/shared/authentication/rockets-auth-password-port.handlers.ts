@@ -1,12 +1,21 @@
 import {
   CommandBus,
   CommandHandler,
+  EventPublisher,
   ICommandHandler,
   QueryBus,
 } from '@nestjs/cqrs';
-import type { UserCredentialEntityInterface } from '@concepta/nestjs-user';
+import { Inject } from '@nestjs/common';
+import {
+  UserCredentials,
+  UserPasswordPort,
+  type UserCredentialEntityInterface,
+  type UserCredentialsRepositoryInterface,
+  type UserSettingsInterface,
+} from '@concepta/nestjs-user';
 import { ValidateCurrentPasswordCommand } from '@concepta/nestjs-password';
-import { UpdateUserPasswordCommand } from '@concepta/nestjs-user';
+import { EventContextHost } from '@concepta/nestjs-core';
+import { TransactionScope } from '@concepta/nestjs-repository';
 
 import { GetActiveCredentialQuery } from '../../domains/user/application/queries/impl/get-active-credential.query';
 import { resolveConceptadevAppContext } from '../compatibility/resolve-conceptadev-app-context';
@@ -14,6 +23,12 @@ import {
   RocketsAuthSetPasswordPortCommand,
   RocketsAuthValidatePasswordPortCommand,
 } from './rockets-auth-password-port.commands';
+
+// Upstream v8 exposes the repository/settings types but not their DI tokens.
+// Keep the compatibility strings isolated here until those constants are
+// exported from @concepta/nestjs-user.
+const USER_CREDENTIALS_REPOSITORY_TOKEN = 'USER_CREDENTIALS_REPOSITORY_TOKEN';
+const USER_MODULE_SETTINGS_TOKEN = 'USER_MODULE_SETTINGS_TOKEN';
 
 /**
  * Dispatches upstream password validation with the constructor shape {@link PasswordPort} uses.
@@ -58,17 +73,59 @@ export class RocketsAuthValidatePasswordPortHandler
 export class RocketsAuthSetPasswordPortHandler
   implements ICommandHandler<RocketsAuthSetPasswordPortCommand, void>
 {
-  constructor(private readonly commandBus: CommandBus) {}
+  constructor(
+    @Inject(USER_CREDENTIALS_REPOSITORY_TOKEN)
+    private readonly credentialsRepository: UserCredentialsRepositoryInterface,
+    @Inject(USER_MODULE_SETTINGS_TOKEN)
+    private readonly userSettings: UserSettingsInterface,
+    @Inject(UserPasswordPort)
+    private readonly passwordPort: UserPasswordPort,
+    private readonly txScope: TransactionScope,
+    private readonly eventPublisher: EventPublisher,
+  ) {}
 
   async execute(command: RocketsAuthSetPasswordPortCommand): Promise<void> {
-    await this.commandBus.execute(
-      new UpdateUserPasswordCommand(
-        resolveConceptadevAppContext(command.ctx),
+    const ctx = resolveConceptadevAppContext(command.ctx);
+
+    await this.txScope.run(ctx, async (txCtx) => {
+      const eventContext = new EventContextHost({}, {});
+      const active = await this.credentialsRepository.findActiveByUserId(
+        txCtx,
         command.assigneeId,
-        {
-          password: command.password,
-        },
-      ),
-    );
+      );
+
+      const reuseAfterDays = this.userSettings.password?.reuseAfterDays;
+      if (reuseAfterDays !== undefined && reuseAfterDays > 0) {
+        const limitDate = new Date(
+          Date.now() - reuseAfterDays * 24 * 60 * 60 * 1000,
+        );
+        const history = await this.credentialsRepository.findByUserId(
+          txCtx,
+          command.assigneeId,
+          limitDate,
+        );
+        await this.passwordPort.validateHistory(command.password, history);
+      }
+
+      const passwordStorage = await this.passwordPort.create(command.password);
+
+      if (active) {
+        const previous = this.eventPublisher.mergeObjectContext(active);
+        previous.deactivate(eventContext);
+        await this.credentialsRepository.save(txCtx, previous);
+        txCtx.trx.onCommit(() => previous.commit());
+        txCtx.trx.onRollback(() => previous.uncommit());
+      }
+
+      const next = this.eventPublisher.mergeObjectContext(
+        UserCredentials.create(eventContext, {
+          userId: command.assigneeId,
+          passwordHash: passwordStorage.passwordHash,
+        }),
+      );
+      await this.credentialsRepository.save(txCtx, next);
+      txCtx.trx.onCommit(() => next.commit());
+      txCtx.trx.onRollback(() => next.uncommit());
+    });
   }
 }
