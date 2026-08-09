@@ -16,9 +16,6 @@ export interface DisableControllerOptionsInterface {
 
 export type RocketsAuthOption = AuthBootstrap | ReadonlyArray<AuthBootstrap>;
 
-/** @deprecated Prefer {@link RocketsAuthOption}. */
-export type RocketsAuthInput = RocketsAuthOption;
-
 export interface RocketsOptionsExtrasInterface
   extends Pick<DynamicModule, 'global' | 'controllers'> {
   enableGlobalGuard?: boolean;
