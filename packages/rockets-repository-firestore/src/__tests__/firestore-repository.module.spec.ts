@@ -14,6 +14,7 @@ class WidgetEntity {
   id!: string;
   title!: string;
   dateCreated!: Date;
+  note?: string | null;
 }
 
 class SoftWidgetEntity {
@@ -31,7 +32,8 @@ class OwnedWidgetEntity {
 class OrderedWidgetEntity {
   id!: string;
   group!: string;
-  rank!: number;
+  rank?: number;
+  nested?: { rank: number };
 }
 
 describe(FirestoreRepositoryModule.name, () => {
@@ -272,6 +274,98 @@ describe(FirestoreRepositoryModule.name, () => {
     expect(rows.map((row) => row.id)).toEqual(['owned-a']);
   });
 
+  it('returns no rows for an empty id IN without falling back to a collection scan', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'owned-widget',
+              entity: OwnedWidgetEntity,
+              collection: 'owned-widgets-empty-id-in',
+            },
+          ],
+          { backend: new InMemoryFirestoreBackend() },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<OwnedWidgetEntity>>(
+      getDynamicRepositoryToken('owned-widget'),
+    );
+
+    await repo.create({ id: 'existing', title: 'A', userId: 'actor-a' });
+
+    await expect(
+      repo.find({ where: Where.in<OwnedWidgetEntity>('id', []) }),
+    ).resolves.toEqual([]);
+  });
+
+  it('rejects an empty id instead of dropping the id predicate', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'owned-widget',
+              entity: OwnedWidgetEntity,
+              collection: 'owned-widgets-empty-id',
+            },
+          ],
+          { backend: new InMemoryFirestoreBackend() },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<OwnedWidgetEntity>>(
+      getDynamicRepositoryToken('owned-widget'),
+    );
+
+    await repo.create({ id: 'existing', title: 'A', userId: 'actor-a' });
+
+    await expect(
+      repo.find({
+        where: Where.and(
+          Where.in<OwnedWidgetEntity>('id', ['']),
+          Where.eq<OwnedWidgetEntity>('userId', 'actor-a'),
+        ),
+      }),
+    ).rejects.toThrow(/query the owned-widget repository/);
+  });
+
+  it('distinguishes missing fields from null for isNull and nin', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'widget',
+              entity: WidgetEntity,
+              collection: 'widgets-missing-null',
+            },
+          ],
+          { backend: new InMemoryFirestoreBackend() },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<WidgetEntity>>(
+      getDynamicRepositoryToken('widget'),
+    );
+
+    await repo.create({ id: 'missing', title: 'Missing' });
+    await repo.create({ id: 'null', title: 'Null', note: null });
+    await repo.create({ id: 'kept', title: 'Kept', note: 'kept' });
+    await repo.create({ id: 'blocked', title: 'Blocked', note: 'blocked' });
+
+    await expect(repo.find({ where: Where.isNull('note') })).resolves.toEqual([
+      expect.objectContaining({ id: 'null' }),
+    ]);
+    await expect(
+      repo.find({ where: Where.notIn('note', ['blocked']) }),
+    ).resolves.toEqual([expect.objectContaining({ id: 'kept' })]);
+  });
+
   it('returns the generated id from upsert', async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
@@ -298,6 +392,43 @@ describe(FirestoreRepositoryModule.name, () => {
     await expect(
       repo.findOne({ where: Where.eq('id', result.id) }),
     ).resolves.toMatchObject({ id: result.id, title: 'Generated id' });
+  });
+
+  it('merges repeated upserts with the same explicit id', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'widget',
+              entity: WidgetEntity,
+              collection: 'widget-explicit-upsert',
+            },
+          ],
+          { backend: new InMemoryFirestoreBackend() },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<WidgetEntity>>(
+      getDynamicRepositoryToken('widget'),
+    );
+    const createdAt = new Date('2026-01-01T00:00:00.000Z');
+
+    await repo.upsert({
+      id: 'stable-id',
+      title: 'First',
+      dateCreated: createdAt,
+    });
+    await repo.upsert({ id: 'stable-id', title: 'Second' });
+
+    await expect(repo.find()).resolves.toEqual([
+      expect.objectContaining({
+        id: 'stable-id',
+        title: 'Second',
+        dateCreated: createdAt,
+      }),
+    ]);
   });
 
   it('rejects create when the document id already exists', async () => {
@@ -361,5 +492,93 @@ describe(FirestoreRepositoryModule.name, () => {
     });
 
     expect(rows.map((row) => row.id)).toEqual(['rank-1', 'rank-2']);
+  });
+
+  it('orders descending by a nested field path', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'ordered-widget',
+              entity: OrderedWidgetEntity,
+              collection: 'ordered-widgets-nested',
+            },
+          ],
+          { backend: new InMemoryFirestoreBackend() },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<OrderedWidgetEntity>>(
+      getDynamicRepositoryToken('ordered-widget'),
+    );
+
+    await repo.create({ id: 'low', group: 'same', nested: { rank: 1 } });
+    await repo.create({ id: 'high', group: 'same', nested: { rank: 2 } });
+
+    const rows = await repo.find({
+      order: [{ field: 'nested.rank', order: SortOrder.DESC }],
+    });
+
+    expect(rows.map((row) => row.id)).toEqual(['high', 'low']);
+  });
+
+  it('excludes documents missing the ordered field', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'ordered-widget',
+              entity: OrderedWidgetEntity,
+              collection: 'ordered-widgets-missing',
+            },
+          ],
+          { backend: new InMemoryFirestoreBackend() },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<OrderedWidgetEntity>>(
+      getDynamicRepositoryToken('ordered-widget'),
+    );
+
+    await repo.create({ id: 'missing', group: 'same' });
+    await repo.create({ id: 'present', group: 'same', rank: 1 });
+
+    const rows = await repo.find({
+      order: [{ field: 'rank', order: SortOrder.ASC }],
+    });
+
+    expect(rows.map((row) => row.id)).toEqual(['present']);
+  });
+
+  it('treats a missing soft-delete field as live by default', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'soft-widget',
+              entity: SoftWidgetEntity,
+              collection: 'soft-widgets-missing-field',
+              softDeleteField: 'dateRemoved',
+            },
+          ],
+          { backend: new InMemoryFirestoreBackend() },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<SoftWidgetEntity>>(
+      getDynamicRepositoryToken('soft-widget'),
+    );
+
+    await repo.create({ id: 'live', title: 'Live' });
+
+    await expect(repo.find()).resolves.toEqual([
+      expect.objectContaining({ id: 'live' }),
+    ]);
   });
 });

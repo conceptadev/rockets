@@ -70,7 +70,7 @@ export class AdminFirestoreBackend implements FirestoreBackend {
     const skip = options.skip ?? 0;
     const take = options.take;
 
-    if (branch.documentId || branch.documentIds !== undefined) {
+    if (branch.documentId !== undefined || branch.documentIds !== undefined) {
       const rows = await this.loadBranchRows(collection, branch);
       const filtered = applyFirestorePostFilters(
         applyFirestoreFilters(rows, branch.filters),
@@ -115,7 +115,7 @@ export class AdminFirestoreBackend implements FirestoreBackend {
   ): Promise<number> {
     if (
       branch.postFilters.length > 0 ||
-      branch.documentId ||
+      branch.documentId !== undefined ||
       branch.documentIds !== undefined
     ) {
       const rows = await this.loadBranchRows(collection, branch);
@@ -134,17 +134,22 @@ export class AdminFirestoreBackend implements FirestoreBackend {
     collection: string,
     branch: FirestoreQueryBranch,
   ): Promise<Record<string, unknown>[]> {
-    if (branch.documentId) {
+    if (branch.documentId !== undefined) {
       const row = await this.get(collection, branch.documentId);
       return row ? [row] : [];
     }
 
     if (branch.documentIds !== undefined) {
+      if (branch.documentIds.length === 0) return [];
+      const collectionRef = this.db().collection(collection);
+      const refs = branch.documentIds.map((documentId) =>
+        collectionRef.doc(documentId),
+      );
+      const snapshots = await this.db().getAll(...refs);
       const rows: Record<string, unknown>[] = [];
-      for (const documentId of branch.documentIds) {
-        const row = await this.get(collection, documentId);
-        if (row) {
-          rows.push(row);
+      for (const snapshot of snapshots) {
+        if (snapshot.exists) {
+          rows.push(this.normalise(snapshot.data(), snapshot.id));
         }
       }
       return rows;

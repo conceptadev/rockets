@@ -32,6 +32,29 @@ describe('firestore-where.translator', () => {
     expect(branch.filters).toEqual([]);
   });
 
+  it('rejects empty and non-string document ids', () => {
+    expect(() => translateDnfBranch([Where.eq('id', '')])).toThrow(
+      /non-empty string/,
+    );
+    expect(() => translateDnfBranch([Where.eq('id', null)])).toThrow(
+      /non-empty string/,
+    );
+    expect(() => translateDnfBranch([Where.in('id', [''])])).toThrow(
+      /non-empty string/,
+    );
+  });
+
+  it('caps direct document lookups at 500 ids', () => {
+    expect(() =>
+      translateDnfBranch([
+        Where.in(
+          'id',
+          Array.from({ length: 501 }, (_, index) => `doc-${index}`),
+        ),
+      ]),
+    ).toThrow(/at most 500/);
+  });
+
   it('intersects multiple document-id predicates in an AND branch', () => {
     const branch = translateDnfBranch([
       Where.in('id', ['doc-1', 'doc-2']),

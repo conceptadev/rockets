@@ -12,11 +12,15 @@ export function sortFirestoreRows(
     orderBy.every((clause) => readFirestoreField(row, clause.field).exists),
   );
 
-  return [...present].sort((left, right) => {
+  return present.sort((left, right) => {
     for (const clause of orderBy) {
       const leftValue = readFirestoreField(left, clause.field).value;
       const rightValue = readFirestoreField(right, clause.field).value;
-      const result = compareFirestoreValues(leftValue, rightValue);
+      const result = compareFirestoreValues(
+        leftValue,
+        rightValue,
+        clause.field,
+      );
       if (result !== 0) {
         return clause.direction === 'desc' ? -result : result;
       }

@@ -26,6 +26,8 @@ const RANGE_OPS: ReadonlySet<FirestoreFilterOp> = new Set([
   '!=',
 ]);
 
+const MAX_DIRECT_DOCUMENT_IDS = 500;
+
 /** Builds one conjunctive branch from DNF conditions (use with `RepositoryAdapter.toDnf`). */
 export function translateDnfBranch(
   conditions: readonly WhereCondition[],
@@ -78,9 +80,10 @@ function mergeAndBranch(
   for (const child of conditions) {
     if (isWhereCondition(child)) {
       const branch = translateCondition(child);
-      const childDocumentIds = branch.documentId
-        ? [branch.documentId]
-        : branch.documentIds;
+      const childDocumentIds =
+        branch.documentId !== undefined
+          ? [branch.documentId]
+          : branch.documentIds;
       if (childDocumentIds !== undefined) {
         candidateDocumentIds = intersectDocumentIds(
           candidateDocumentIds,
@@ -98,18 +101,20 @@ function mergeAndBranch(
 
   assertFirestoreFilterRules(merged);
 
-  const documentSelector =
-    candidateDocumentIds === undefined
-      ? {}
-      : candidateDocumentIds.length === 1
-      ? { documentId: candidateDocumentIds[0] }
-      : { documentIds: candidateDocumentIds };
-
   return {
-    ...documentSelector,
+    ...selectDocuments(candidateDocumentIds),
     filters: merged,
     postFilters,
   };
+}
+
+function selectDocuments(
+  candidateDocumentIds: readonly string[] | undefined,
+): Pick<FirestoreQueryBranch, 'documentId' | 'documentIds'> {
+  if (candidateDocumentIds === undefined) return {};
+  return candidateDocumentIds.length === 1
+    ? { documentId: candidateDocumentIds[0] }
+    : { documentIds: candidateDocumentIds };
 }
 
 function intersectDocumentIds(
@@ -167,14 +172,20 @@ function translateIdCondition(condition: WhereCondition): FirestoreQueryBranch {
   switch (condition.operator) {
     case WhereOperator.EQ:
       return {
-        documentId: String(readScalarValue(condition as WhereConditionScalar)),
+        documentId: readDocumentId(
+          readScalarValue(condition as WhereConditionScalar),
+        ),
         filters: [],
         postFilters: [],
       };
     case WhereOperator.IN: {
-      const values = asArray(readArrayValue(condition)).map((value) =>
-        String(value),
-      );
+      const rawValues = asArray(readArrayValue(condition));
+      if (rawValues.length > MAX_DIRECT_DOCUMENT_IDS) {
+        throw new Error(
+          `Firestore adapter: id "in" supports at most ${MAX_DIRECT_DOCUMENT_IDS} document ids (received ${rawValues.length}).`,
+        );
+      }
+      const values = rawValues.map(readDocumentId);
       return {
         documentIds: values,
         filters: [],
@@ -184,6 +195,15 @@ function translateIdCondition(condition: WhereCondition): FirestoreQueryBranch {
     default:
       throw unsupportedOperator(condition.operator, condition.field);
   }
+}
+
+function readDocumentId(value: unknown): string {
+  if (typeof value !== 'string' || value.length === 0) {
+    throw new Error(
+      'Firestore adapter: document ids must be non-empty string values.',
+    );
+  }
+  return value;
 }
 
 function translateNullaryCondition(

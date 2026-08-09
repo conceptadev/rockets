@@ -106,7 +106,7 @@ export class InMemoryFirestoreBackend implements FirestoreBackend {
     collection: string,
     branch: FirestoreQueryBranch,
   ): Promise<Record<string, unknown>[]> {
-    if (branch.documentId) {
+    if (branch.documentId !== undefined) {
       const row = await this.get(collection, branch.documentId);
       return row ? [row] : [];
     }

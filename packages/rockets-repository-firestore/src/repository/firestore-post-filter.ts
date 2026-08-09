@@ -2,6 +2,7 @@ import type { FirestorePostFilter } from '../interfaces/firestore-query.interfac
 import {
   compareFirestoreValues,
   firestoreValuesEqual,
+  hasNonNullFirestoreValue,
   readFirestoreField,
   sameFirestoreRangeType,
 } from './firestore-value';
@@ -10,10 +11,6 @@ export function applyFirestorePostFilters(
   rows: readonly Record<string, unknown>[],
   postFilters: readonly FirestorePostFilter[],
 ): Record<string, unknown>[] {
-  if (postFilters.length === 0) {
-    return [...rows];
-  }
-
   return rows.filter((row) =>
     postFilters.every((filter) => matchesPostFilter(row, filter)),
   );
@@ -45,8 +42,7 @@ function matchesPostFilter(
       return typeof value !== 'string' || !value.endsWith(filter.value);
     case 'nin':
       return (
-        field.exists &&
-        value !== null &&
+        hasNonNullFirestoreValue(field) &&
         !filter.values.some((candidate) =>
           firestoreValuesEqual(candidate, value),
         )
@@ -72,6 +68,8 @@ function containsValue(fieldValue: unknown, needle: string): boolean {
 }
 
 function compareBetween(value: unknown, min: unknown, max: unknown): boolean {
+  // BETWEEN is a Rockets-only client operator, so it deliberately requires
+  // all three values to share one scalar range type.
   return (
     value !== null &&
     sameFirestoreRangeType(value, min) &&

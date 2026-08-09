@@ -181,10 +181,20 @@ naming both supported column names.
 
 The in-memory backend and Admin SDK direct-document/post-filter paths match
 Firestore for missing versus explicit `null`, nested field paths, structural
-equality, and range type checks. Local `orderBy` parity is guaranteed for
-`null`, boolean, number, timestamp/`Date`, and string values. Ordering any
-other Firestore value type fails with a descriptive error instead of returning
-a misleading order.
+equality, and ranges across types using Firestore's deterministic type order.
+`between` is a client-side Rockets operator and intentionally requires its
+value and bounds to share one scalar type. Local `orderBy` supports every
+Firestore value type, including `NaN`, bytes, references, geographical points,
+arrays, vectors, and maps.
+
+Document-id `IN` queries accept at most 500 ids and use one Admin SDK `getAll`
+request. The direct-document path fetches all requested ids before applying
+`skip` and `take`, so a page limit does not reduce document reads.
+
+`createMany()` writes documents sequentially and is not atomic: if a later
+document id already exists, earlier documents from the same call remain
+created. Atomic batched creation is intentionally deferred to a future backend
+contract change.
 
 ---
 
