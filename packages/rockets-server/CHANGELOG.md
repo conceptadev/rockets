@@ -42,8 +42,6 @@ and this project adheres to
 - The `createStubAuthBootstrap()` re-export, now that `defineAuthAdapter()`
   covers the same wiring. Replace `createStubAuthBootstrap(Adapter)` with
   `defineAuthAdapter(Adapter)`.
-- `RocketsServerDefinition`, a bare alias of `RocketsOptions`. `createServer()`
-  takes `RocketsOptions` directly; use that name.
 - `RocketsAuthInput`, a bare alias of `RocketsAuthOption`. The canonical
   `RocketsAuthOption` is now exported in its place.
 
