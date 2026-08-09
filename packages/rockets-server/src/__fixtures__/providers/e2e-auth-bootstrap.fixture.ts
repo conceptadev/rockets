@@ -1,6 +1,6 @@
 import type { Type } from '@nestjs/common';
 import {
-  createStubAuthBootstrap,
+  defineAuthAdapter,
   type AuthAdapterInterface,
   type AuthBootstrap,
 } from '@concepta/rockets-core';
@@ -9,5 +9,5 @@ import {
 export function e2eAuthBootstrap<Adapter extends AuthAdapterInterface>(
   adapter: Type<Adapter>,
 ): AuthBootstrap<Adapter> {
-  return createStubAuthBootstrap(adapter);
+  return defineAuthAdapter(adapter);
 }

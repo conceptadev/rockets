@@ -9,4 +9,6 @@
 
 ### Changed
 
+- `@nestjs/typeorm` is now a required peer dependency, because
+  `defineTypeOrmRepository()` builds the TypeORM root module directly.
 - Node.js 20 is the minimum supported runtime.

@@ -33,7 +33,7 @@ import { GetUserMetadataQuery } from '../application/queries/impl/get-user-metad
 import { GetUserMetadataHandler } from '../application/queries/handlers/get-user-metadata.handler';
 
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { createStubAuthBootstrap } from '../infrastructure/auth/create-stub-auth-bootstrap';
+import { defineAuthAdapter } from '../infrastructure/auth/define-auth-adapter';
 import { AuthUser } from '../common';
 
 // ────────────────────────────────────────────────────────────────────
@@ -175,7 +175,7 @@ describe('RocketsCoreModule (e2e)', () => {
       imports: [
         TestMetadataRepoModule,
         RocketsCoreModule.forRoot({
-          auth: createStubAuthBootstrap(MockAuthAdapter),
+          auth: defineAuthAdapter(MockAuthAdapter),
           providers: [MockAuthAdapter],
           handlers: {
             upsertUserMetadata: UpsertUserMetadataHandler,

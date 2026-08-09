@@ -50,7 +50,7 @@ import { defineResource } from '../infrastructure/resource/define-resource';
 import { defineSubResource } from '../infrastructure/resource/define-sub-resource';
 import { AfterCreateReloadHook } from '../infrastructure/hooks/after-create-reload.hook';
 import { OwnerStampHook } from '../infrastructure/hooks/owner-stamp.hook';
-import { createStubAuthBootstrap } from '../infrastructure/auth/create-stub-auth-bootstrap';
+import { defineAuthAdapter } from '../infrastructure/auth/define-auth-adapter';
 
 // ── Auth fixture ──
 
@@ -310,7 +310,7 @@ describe('RocketsCoreModule + defineSubResource + AfterCreateReloadHook (e2e)', 
         }),
         MetaModule,
         RocketsCoreModule.forRoot({
-          auth: createStubAuthBootstrap(StubAuthAdapter),
+          auth: defineAuthAdapter(StubAuthAdapter),
           providers: [StubAuthAdapter],
           repository: TypeOrmRepositoryModule,
           resources: [categoryResource, parentResource, plainItemResource],

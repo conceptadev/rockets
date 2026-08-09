@@ -33,7 +33,6 @@ export {
   getDynamicRepositoryToken,
   RepositoryModule,
   defineAuthAdapter,
-  createStubAuthBootstrap,
   AuthUser,
   ActorCtx,
   getActor,

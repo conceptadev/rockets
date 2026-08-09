@@ -39,6 +39,9 @@ and this project adheres to
 - The `rockets-swagger` manifest entry. OpenAPI generation belongs to the
   consumer application because only it owns the complete Nest graph and
   document settings.
+- The `createStubAuthBootstrap()` re-export, now that `defineAuthAdapter()`
+  covers the same wiring. Replace `createStubAuthBootstrap(Adapter)` with
+  `defineAuthAdapter(Adapter)`.
 
 ## [1.0.0-alpha.7] - 2026-02-19
 

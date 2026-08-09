@@ -30,7 +30,7 @@ import {
 import { APP_GUARD } from '@nestjs/core';
 import { AuthServerGuard } from '../infrastructure/guards/auth-server.guard';
 import { defineResource } from '../infrastructure/resource/define-resource';
-import { createStubAuthBootstrap } from '../infrastructure/auth/create-stub-auth-bootstrap';
+import { defineAuthAdapter } from '../infrastructure/auth/define-auth-adapter';
 
 // ── Fixtures ──
 
@@ -107,7 +107,7 @@ describe('RocketsCoreModule — resources + resourcePersistence (e2e)', () => {
         }),
         MetaRepoModule,
         RocketsCoreModule.forRoot({
-          auth: createStubAuthBootstrap(SimpleAuthProvider),
+          auth: defineAuthAdapter(SimpleAuthProvider),
           providers: [SimpleAuthProvider],
           repository: TypeOrmRepositoryModule,
           resources: [
@@ -178,7 +178,7 @@ describe('RocketsCoreModule.forRootAsync (e2e)', () => {
         RocketsCoreModule.forRootAsync({
           useFactory: () => ({}),
           // `auth` + `providers` are sync extras (alongside useFactory).
-          auth: createStubAuthBootstrap(SimpleAuthProvider),
+          auth: defineAuthAdapter(SimpleAuthProvider),
           providers: [SimpleAuthProvider],
           global: true,
         }),

@@ -122,7 +122,6 @@ export type {
   AuthBootstrap,
   AuthBootstrapContributions,
 } from './domain/interfaces/auth-bootstrap.interface';
-export { createStubAuthBootstrap } from './infrastructure/auth/create-stub-auth-bootstrap';
 export { defineAuthAdapter } from './infrastructure/auth/define-auth-adapter';
 export type { DefineAuthAdapterOptions } from './infrastructure/auth/define-auth-adapter';
 

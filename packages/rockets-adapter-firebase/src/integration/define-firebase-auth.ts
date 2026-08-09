@@ -18,13 +18,14 @@ export type DefineFirebaseAuthInput =
   | (Readonly<FirebaseAuthModuleOptions> & {
       forRootAsync?: never;
     })
-  | Readonly<{
-      forRootAsync: FirebaseAuthModuleAsyncOptions;
-      firebaseApp?: never;
-      verifier?: never;
-      userResolver?: never;
-      checkRevoked?: never;
-    }>;
+  // The sync keys are derived from `FirebaseAuthModuleOptions` rather than
+  // listed by hand, so adding an option cannot silently leave a hole that
+  // lets a sync key ride along with `forRootAsync` and get dropped.
+  | Readonly<
+      {
+        forRootAsync: FirebaseAuthModuleAsyncOptions;
+      } & Partial<Record<keyof FirebaseAuthModuleOptions, never>>
+    >;
 
 /**
  * Build an {@link AuthBootstrap} that wires `FirebaseAuthModule` into core.

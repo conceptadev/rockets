@@ -58,6 +58,7 @@
   "devDependencies": {
     "@nestjs/common": "12.0.0-alpha.5",
     "@nestjs/testing": "12.0.0-alpha.5",
+    "@nestjs/typeorm": "11.0.3",
     "typeorm": "^0.3.31",
     "typescript": "^5.4.0",
     "vitest": "^4.1.10",

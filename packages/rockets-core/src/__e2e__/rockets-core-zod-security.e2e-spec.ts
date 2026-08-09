@@ -47,7 +47,7 @@ import { extractBearerToken } from '../infrastructure/auth/extract-bearer-token'
 import { RocketsCoreModule } from '../rockets-core.module';
 import { USER_METADATA_MODULE_ENTITY_KEY } from '../rockets-core.constants';
 import { AuthServerGuard } from '../infrastructure/guards/auth-server.guard';
-import { createStubAuthBootstrap } from '../infrastructure/auth/create-stub-auth-bootstrap';
+import { defineAuthAdapter } from '../infrastructure/auth/define-auth-adapter';
 import {
   EntityHook,
   PassthroughEntityHookBase,
@@ -166,7 +166,7 @@ describe('zod security HIGHs (e2e RED) — owner scope + response exposure', () 
         }),
         MetaModule,
         RocketsCoreModule.forRoot({
-          auth: createStubAuthBootstrap(StubAuthAdapter),
+          auth: defineAuthAdapter(StubAuthAdapter),
           providers: [StubAuthAdapter],
           repository: TypeOrmRepositoryModule,
           resources: [noteResource],
@@ -356,7 +356,7 @@ describe('HIGH CWE-284 — PathScope with consumer hooks still enforces (e2e)', 
         }),
         MetaModule,
         RocketsCoreModule.forRoot({
-          auth: createStubAuthBootstrap(StubAuthAdapter),
+          auth: defineAuthAdapter(StubAuthAdapter),
           providers: [StubAuthAdapter],
           repository: TypeOrmRepositoryModule,
           resources: [secParentResource],
