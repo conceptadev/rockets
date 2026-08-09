@@ -1,7 +1,6 @@
 import { Global, Logger, Module } from '@nestjs/common';
 import { EventModule } from '@concepta/nestjs-event';
 import {
-  buildRocketsAuthResources,
   defineRocketsAuth,
   type DefineRocketsAuthInput,
   type EmailSendOptionsInterface,
@@ -170,11 +169,10 @@ const rocketsAuthInput: DefineRocketsAuthInput = {
   },
 };
 
+// `defineRocketsAuth` contributes the auth persistence rows itself, so
+// `resources` below carries only this app's own bundles. Repeating them here
+// would register the same entity classes twice and fail the planner.
 const rocketsAuth = defineRocketsAuth(rocketsAuthInput);
-const rocketsAuthResources = buildRocketsAuthResources(
-  rocketsAuthInput.persistence,
-  rocketsAuthInput.invitationEntity,
-);
 
 @Global()
 @Module({
@@ -187,7 +185,6 @@ const rocketsAuthResources = buildRocketsAuthResources(
       enableGlobalGuard: false,
       repository: repo,
       resources: [
-        ...rocketsAuthResources,
         createPetResource(),
         createPetVaccinationResource(),
         createPetAppointmentResource(),

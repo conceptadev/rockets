@@ -104,17 +104,15 @@ describe('Handler Override Pattern', () => {
       expect(module.providers).not.toContain(CustomSignupHandler);
     });
 
-    it('should not include default handler when custom handler provided', () => {
+    it('drops the default signup handler when a custom one is provided', () => {
       const config: UserCrudOptionsExtrasInterface = {
         handlers: {
           signupHandler: CustomSignupHandler,
         },
       };
       const module = RocketsAuthSignUpModule.register(config);
-      const providerClasses = (module.providers as unknown[])?.filter(
-        (p) => p === SignupUserHandler,
-      );
-      expect(providerClasses).toHaveLength(0);
+      expect(crudProviderClasses(module)).not.toContain(SignupUserHandler);
+      expect(module.providers).not.toContain(SignupUserHandler);
     });
   });
 

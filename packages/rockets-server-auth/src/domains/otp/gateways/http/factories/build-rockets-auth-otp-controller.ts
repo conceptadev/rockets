@@ -24,14 +24,14 @@ import {
   type AuthenticatedResponseInterface,
 } from '@concepta/nestjs-authentication';
 import { OtpException } from '@concepta/nestjs-otp';
+import { getAppContext } from '@concepta/rockets-core';
+import type { Request } from 'express';
 
 import { RocketsAuthOtpConfirmDto } from '../../../infrastructure/dto/rockets-auth-otp-confirm.dto';
 import { RocketsAuthOtpSendDto } from '../../../infrastructure/dto/rockets-auth-otp-send.dto';
 import { RocketsAuthOtpService } from '../../../infrastructure/services/rockets-auth-otp.service';
 import type { OtpControllerExtras } from '../../../interfaces/otp-controller-extras.interface';
 import { applyControllerExtras } from '../../../../../shared/utils/apply-controller-extras.helper';
-import { getAppContext } from '@concepta/rockets-core';
-import type { Request } from 'express';
 
 /** Build the OTP controller and apply consumer-supplied decorators. */
 export function buildRocketsAuthOtpController(

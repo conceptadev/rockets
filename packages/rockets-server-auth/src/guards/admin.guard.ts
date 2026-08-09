@@ -11,12 +11,12 @@ import {
 import { QueryBus } from '@nestjs/cqrs';
 import { RoleEntityInterface } from '@concepta/nestjs-role';
 import { IsAssignedRoleQuery } from '@concepta/nestjs-role';
+import { getAppContext } from '@concepta/rockets-core';
 import { RocketsAuthSettingsInterface } from '../shared/interfaces/rockets-auth-settings.interface';
 import { RocketsEntity } from '../shared/constants/repository-entity-keys.constants';
 import { ROCKETS_AUTH_MODULE_OPTIONS_DEFAULT_SETTINGS_TOKEN } from '../shared/constants/rockets-auth.constants';
 import { logAndGetErrorDetails } from '../shared/utils/error-logging.helper';
 import { RocketsGetRoleByNameQuery } from '../domains/role/application/queries/impl/rockets-get-role-by-name.query';
-import { getAppContext } from '@concepta/rockets-core';
 
 @Injectable()
 export class AdminGuard implements CanActivate {

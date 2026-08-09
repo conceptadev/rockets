@@ -1,4 +1,5 @@
 import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
+import type { PlainLiteralObject } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 import { ValidateAndVerifyAccessTokenQuery } from '@concepta/nestjs-authentication';
 import { UserInterface } from '@concepta/nestjs-user';
@@ -10,8 +11,7 @@ import type {
   AuthRequest,
   AuthorizedUser,
 } from '@concepta/rockets-core';
-import { extractBearerToken } from '@concepta/rockets-core';
-import { getAppContext } from '@concepta/rockets-core';
+import { extractBearerToken, getAppContext } from '@concepta/rockets-core';
 import { userAggregateToEntity } from '../shared/utils/aggregate-mappers';
 import { resolveUserRoles } from '../shared/utils/resolve-user-role-names';
 
@@ -26,7 +26,9 @@ export class RocketsJwtAuthAdapter implements AuthAdapterInterface {
     if (token === null) return { matched: false };
 
     try {
-      const ctx = getAppContext(request.raw as object);
+      // `raw` is the native request; `getAppContext` reads the per-request
+      // `AppContextHost` off it (and mints one when absent).
+      const ctx = getAppContext(request.raw);
       const user = await this.validateToken(ctx, token);
       return { matched: true, user };
     } catch (error) {
@@ -42,7 +44,7 @@ export class RocketsJwtAuthAdapter implements AuthAdapterInterface {
   }
 
   private async validateToken(
-    ctx: import('@nestjs/common').PlainLiteralObject,
+    ctx: PlainLiteralObject,
     token: string,
   ): Promise<AuthorizedUser> {
     // v8: signature-verify + payload-validate is one query handler now,

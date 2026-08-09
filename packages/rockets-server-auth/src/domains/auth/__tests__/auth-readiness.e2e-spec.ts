@@ -19,7 +19,7 @@ const originalCredentials = {
   password: 'OriginalP@ssw0rd!',
 };
 
-describe.sequential('Rockets Auth 1.0 readiness (e2e)', () => {
+describe('Rockets Auth 1.0 readiness (e2e)', () => {
   describe('recovery and handler ownership', () => {
     let app: INestApplication;
     let module: TestingModule;
@@ -82,6 +82,8 @@ describe.sequential('Rockets Auth 1.0 readiness (e2e)', () => {
         .send({ passcode: otp.passcode })
         .expect(200);
 
+      // The v7 surface leaked the passcode in the URL. Validation is POST-only
+      // now, so the old GET route must stay unmounted.
       await request(app.getHttpServer())
         .get(`/recovery/passcode/${otp.passcode}`)
         .expect(404);

@@ -9,6 +9,16 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Breaking
+
+- Hosts must stop passing `buildRocketsAuthResources(...)` on
+  `RocketsModule.forRoot({ resources })`. `defineRocketsAuth()` now contributes
+  those rows itself, and the planner rejects an entity class registered twice —
+  keeping the explicit spread fails at boot with
+  ``entity `<Name>` registered twice``. Leave `resources` for the host's own
+  bundles; `repository` and `userMetadata` may also be dropped, since explicit
+  options still take precedence when supplied.
+
 ### Added
 
 - Complete public account-recovery HTTP flow: enumeration-safe initiation,

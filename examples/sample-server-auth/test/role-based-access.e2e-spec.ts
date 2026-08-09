@@ -19,11 +19,12 @@ import {
 import { acRules } from '../src/app.acl';
 
 // `AppContextHost.from()` only accepts `AppContextHost | null | undefined | {}`.
-// Request contexts are AppContextHost instances,
-// which the upstream context validator rejects with "Expected AppContextHost
-// or nullish value, got object". The command signatures type `ctx` as
-// `PlainLiteralObject`, so pass `{}` — `AppContextHost.from({})` yields the
-// same fresh context as `null` did.
+// A non-empty plain object — such as the `{ entity: KEY }` this file used to
+// build — is rejected with "Expected AppContextHost or nullish value, got
+// object". These commands run outside an HTTP request, so there is no request
+// `AppContextHost` to forward; the signatures type `ctx` as
+// `PlainLiteralObject`, so pass `{}` and let `AppContextHost.from({})` mint the
+// same fresh context `null` used to.
 const roleCrudContext = {};
 const userRoleAssignmentContext = {};
 

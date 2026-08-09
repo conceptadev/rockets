@@ -1,4 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import type { PlainLiteralObject } from '@nestjs/common';
 import { CommandBus, EventsHandler, IEventHandler } from '@nestjs/cqrs';
 
 import { PasswordCreationService } from '@concepta/nestjs-password';
@@ -23,9 +24,7 @@ import {
   InvitationAcceptanceConfig,
   INVITATION_ACCEPTANCE_CONFIG_TOKEN,
 } from '../../infrastructure/config/invitation-acceptance.config';
-import { whitelistedFromDto } from '@concepta/rockets-core';
-import { AppContextHost } from '@concepta/rockets-core';
-import type { PlainLiteralObject } from '@nestjs/common';
+import { AppContextHost, whitelistedFromDto } from '@concepta/rockets-core';
 
 /**
  * Invitation User Acceptance Listener

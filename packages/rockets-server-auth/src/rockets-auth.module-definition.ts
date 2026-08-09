@@ -22,6 +22,7 @@ import {
   OtpPort,
   PasswordPort,
   RecoveryPolicy,
+  RecoveryPolicySettingsInterface,
   RecoveryService,
   UserPort,
 } from '@concepta/nestjs-authentication';
@@ -136,6 +137,29 @@ export type RocketsAuthAsyncOptions = Omit<
   typeof ROCKETS_AUTH_MODULE_ASYNC_OPTIONS_TYPE,
   'global'
 >;
+
+/**
+ * Recovery OTP policy applied when the consumer does not supply
+ * `authentication.settings.mfa.recovery`.
+ *
+ * Single-sourced deliberately: `AuthenticationModule` builds its own
+ * `RecoveryPolicy` from the settings factory while
+ * {@link createRocketsAuthProviders} builds a second one for
+ * {@link RocketsRecoveryService} (upstream does not export `RecoveryPolicy`).
+ * The two must agree — a divergent namespace or category means issued passcodes
+ * stop validating.
+ */
+const ROCKETS_DEFAULT_RECOVERY_SETTINGS: RecoveryPolicySettingsInterface = {
+  otp: {
+    namespace: ROCKETS_AUTH_OTP_ASSIGNMENT,
+    category: 'auth-recovery',
+    type: 'uuid',
+    expiresIn: '1h',
+    duplicateStrategy: 'DEACTIVATE',
+    rateSeconds: 60,
+    rateThreshold: 5,
+  },
+};
 
 const jwtLogger = new Logger('RocketsAuthJwt');
 
@@ -387,19 +411,10 @@ export function createRocketsAuthImports(importOptions: {
             mfa: {
               ...authSettings?.mfa,
               // Mounting the recovery controller implies that the upstream
-              // RecoveryService must be active. Its built-in defaults supply
-              // the OTP policy when the consumer does not override it.
-              recovery: authSettings?.mfa?.recovery ?? {
-                otp: {
-                  namespace: ROCKETS_AUTH_OTP_ASSIGNMENT,
-                  category: 'auth-recovery',
-                  type: 'uuid',
-                  expiresIn: '1h',
-                  duplicateStrategy: 'DEACTIVATE',
-                  rateSeconds: 60,
-                  rateThreshold: 5,
-                },
-              },
+              // RecoveryService must be active, so the policy is never absent.
+              recovery:
+                authSettings?.mfa?.recovery ??
+                ROCKETS_DEFAULT_RECOVERY_SETTINGS,
             },
             strategies: {
               local: {},
@@ -631,6 +646,7 @@ export function createRocketsAuthProviders(options: {
   extras?: RocketsAuthOptionsExtrasInterface;
 }): Provider[] {
   const providers: Provider[] = [
+    ...(options.providers ?? []),
     createRocketsAuthSettingsProvider(),
     RocketsAuthOtpService,
     RocketsAuthNotificationService,
@@ -651,18 +667,11 @@ export function createRocketsAuthProviders(options: {
         queryBus: QueryBus,
       ) => {
         const ports = buildRocketsAuthenticationPorts(authOptions);
-        const recoverySettings = authOptions.authentication?.settings?.mfa
-          ?.recovery ?? {
-          otp: {
-            namespace: ROCKETS_AUTH_OTP_ASSIGNMENT,
-            category: 'auth-recovery',
-            type: 'uuid',
-            expiresIn: '1h',
-            duplicateStrategy: 'DEACTIVATE' as const,
-            rateSeconds: 60,
-            rateThreshold: 5,
-          },
-        };
+        // Must resolve to the same policy the settings factory above hands to
+        // AuthenticationModule.
+        const recoverySettings =
+          authOptions.authentication?.settings?.mfa?.recovery ??
+          ROCKETS_DEFAULT_RECOVERY_SETTINGS;
         return new RocketsRecoveryService(
           new RecoveryPolicy(recoverySettings),
           new OtpPort(ports.otp, commandBus, queryBus),
@@ -678,10 +687,6 @@ export function createRocketsAuthProviders(options: {
   if (options.extras?.throttling !== false) {
     providers.push({ provide: APP_GUARD, useClass: ThrottlerGuard });
   }
-
-  // Nest resolves later providers for the same token, so consumer overrides
-  // must follow Rockets defaults (including RecoveryService).
-  providers.push(...(options.providers ?? []));
 
   return providers;
 }

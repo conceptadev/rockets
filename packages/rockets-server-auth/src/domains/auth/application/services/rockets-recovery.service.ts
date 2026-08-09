@@ -5,6 +5,7 @@ import {
   PasswordPort,
   RecoveryPolicy,
   type RecoveryNotificationPortSettings,
+  type RecoveryService,
   UserPort,
 } from '@concepta/nestjs-authentication';
 import type {
@@ -13,8 +14,17 @@ import type {
   ReferenceIdInterface,
 } from '@concepta/nestjs-core';
 
+/**
+ * This class is registered under the upstream `RecoveryService` DI token, so it
+ * must stay substitutable for its public surface — otherwise an upstream caller
+ * hits `TypeError: not a function` at runtime. `Pick<…, keyof …>` projects only
+ * the public members; a plain `implements RecoveryService` cannot work because
+ * upstream declares its ports `private`.
+ */
+type RecoveryServiceContract = Pick<RecoveryService, keyof RecoveryService>;
+
 /** Rockets-owned recovery implementation that never launches detached commands. */
-export class RocketsRecoveryService {
+export class RocketsRecoveryService implements RecoveryServiceContract {
   private readonly logger = new Logger(RocketsRecoveryService.name);
 
   constructor(
@@ -27,17 +37,19 @@ export class RocketsRecoveryService {
   ) {}
 
   async recoverLogin(ctx: AppContextLike, email: string): Promise<void> {
-    const user = await this.userPort.getByEmail(ctx ?? {}, email);
+    const appCtx = ctx ?? {};
+    const user = await this.userPort.getByEmail(appCtx, email);
     if (!user) return;
     const Command = this.notifications.sendRecoverLoginNotificationCommand;
-    await this.commandBus.execute(new Command(ctx, email, user.username));
+    await this.commandBus.execute(new Command(appCtx, email, user.username));
   }
 
   async recoverPassword(ctx: AppContextLike, email: string): Promise<void> {
-    const user = await this.userPort.getByEmail(ctx ?? {}, email);
+    const appCtx = ctx ?? {};
+    const user = await this.userPort.getByEmail(appCtx, email);
     if (!user) return;
     const otp = await this.otpPort.create(
-      ctx ?? {},
+      appCtx,
       this.policy.otpNamespace,
       {
         category: this.policy.otpCategory,
@@ -55,7 +67,7 @@ export class RocketsRecoveryService {
     );
     const Command = this.notifications.sendRecoverPasswordNotificationCommand;
     await this.commandBus.execute(
-      new Command(ctx, email, otp.passcode, otp.expirationDate),
+      new Command(appCtx, email, otp.passcode, otp.expirationDate),
     );
   }
 
@@ -74,20 +86,22 @@ export class RocketsRecoveryService {
     passcode: string,
     newPassword: string,
   ): Promise<ReferenceIdInterface | null> {
-    const otp = await this.validatePasscode(ctx, passcode);
+    const appCtx = ctx ?? {};
+    const otp = await this.validatePasscode(appCtx, passcode);
     if (!otp) return null;
-    const user = await this.userPort.getById(ctx ?? {}, otp.assigneeId);
+    const user = await this.userPort.getById(appCtx, otp.assigneeId);
     if (!user) return null;
 
-    await this.passwordPort.setPassword(ctx ?? {}, newPassword, user.id);
-    await this.otpPort.clear(ctx ?? {}, this.policy.otpNamespace, {
+    await this.passwordPort.setPassword(appCtx, newPassword, user.id);
+    // Revoke before notifying: a failed mail must not leave a live passcode.
+    await this.otpPort.clear(appCtx, this.policy.otpNamespace, {
       category: this.policy.otpCategory,
       assigneeId: user.id,
     });
 
     const Command = this.notifications.sendPasswordUpdatedNotificationCommand;
     try {
-      await this.commandBus.execute(new Command(ctx, user.email));
+      await this.commandBus.execute(new Command(appCtx, user.email));
     } catch {
       this.logger.error('Password-updated recovery notification failed');
     }
@@ -98,9 +112,10 @@ export class RocketsRecoveryService {
     ctx: AppContextLike,
     email: string,
   ): Promise<void> {
-    const user = await this.userPort.getByEmail(ctx ?? {}, email);
+    const appCtx = ctx ?? {};
+    const user = await this.userPort.getByEmail(appCtx, email);
     if (!user) return;
-    await this.otpPort.clear(ctx ?? {}, this.policy.otpNamespace, {
+    await this.otpPort.clear(appCtx, this.policy.otpNamespace, {
       category: this.policy.otpCategory,
       assigneeId: user.id,
     });
