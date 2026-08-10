@@ -1,9 +1,11 @@
-import { DynamicModule, Module } from '@nestjs/common';
+import { DynamicModule, Module, UseGuards } from '@nestjs/common';
 import { Operation } from '@concepta/nestjs-core';
 import { CqrsModule } from '@nestjs/cqrs';
 import { CrudModule, CrudOperationResolver } from '@concepta/nestjs-crud';
 import { AuthPublic } from '@concepta/nestjs-authentication';
 import { ApiTags } from '@nestjs/swagger';
+
+import { AuthAccountThrottlerGuard } from '../../auth/gateways/http/guards/auth-account-throttler.guard';
 
 import { USER_CRUD_ENTITY_KEY } from '../../../shared/constants/repository-entity-keys.constants';
 import { UserCrudOptionsExtrasInterface } from '../../../shared/interfaces/rockets-auth-options-extras.interface';
@@ -40,7 +42,13 @@ export class RocketsAuthSignUpModule {
                 resource: ModelDto,
               },
               resolver: CrudOperationResolver,
-              extraDecorators: [ApiTags('auth')],
+              // Public account creation: attach the auth throttler guard so the
+              // per-IP ceiling caps signup volume from one source (account
+              // rotation cannot escape it).
+              extraDecorators: [
+                ApiTags('auth'),
+                UseGuards(AuthAccountThrottlerGuard),
+              ],
             },
             operations: [
               {

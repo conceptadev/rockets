@@ -30,6 +30,8 @@ import {
 import type { Request } from 'express';
 import { getAppContext } from '@concepta/rockets-core';
 
+import { AuthAccountThrottlerGuard } from '../guards/auth-account-throttler.guard';
+
 type RequestWithPassportUser = Request & {
   readonly user?: ReferenceIdInterface;
 };
@@ -44,6 +46,7 @@ type RequestWithPassportUser = Request & {
  */
 @Controller('token')
 @AuthPublic({ classLevel: true })
+@UseGuards(AuthAccountThrottlerGuard)
 @ApiTags('Authentication')
 export class RocketsAuthTokenController {
   constructor(private readonly commandBus: CommandBus) {}

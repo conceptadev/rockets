@@ -5,6 +5,7 @@ import {
   Post,
   Req,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
 import type { Type } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
@@ -32,6 +33,7 @@ import { RocketsAuthOtpSendDto } from '../../../infrastructure/dto/rockets-auth-
 import { RocketsAuthOtpService } from '../../../infrastructure/services/rockets-auth-otp.service';
 import type { OtpControllerExtras } from '../../../interfaces/otp-controller-extras.interface';
 import { applyControllerExtras } from '../../../../../shared/utils/apply-controller-extras.helper';
+import { AuthAccountThrottlerGuard } from '../../../../auth/gateways/http/guards/auth-account-throttler.guard';
 
 /** Build the OTP controller and apply consumer-supplied decorators. */
 export function buildRocketsAuthOtpController(
@@ -39,6 +41,7 @@ export function buildRocketsAuthOtpController(
 ): Type<unknown> {
   @Controller('otp')
   @AuthPublic({ classLevel: true })
+  @UseGuards(AuthAccountThrottlerGuard)
   @ApiTags('Authentication')
   class RocketsAuthOtpController {
     constructor(

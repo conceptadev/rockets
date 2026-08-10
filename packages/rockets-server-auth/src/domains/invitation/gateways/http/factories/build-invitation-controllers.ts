@@ -34,6 +34,7 @@ import { getAppContext } from '@concepta/rockets-core';
 import type { Request } from 'express';
 
 import { AdminGuard } from '../../../../../guards/admin.guard';
+import { AuthAccountThrottlerGuard } from '../../../../auth/gateways/http/guards/auth-account-throttler.guard';
 import { applyControllerExtras } from '../../../../../shared/utils/apply-controller-extras.helper';
 import { RocketsAuthInvitationAcceptDto } from '../../../infrastructure/dto/rockets-auth-invitation-accept.dto';
 import { RocketsAuthInvitationCreateDto } from '../../../infrastructure/dto/rockets-auth-invitation-create.dto';
@@ -116,6 +117,7 @@ export function buildInvitationAcceptanceController(
 ): Type<unknown> {
   @Controller('invitation-acceptance')
   @AuthPublic({ classLevel: true })
+  @UseGuards(AuthAccountThrottlerGuard)
   @ApiTags('auth')
   class InvitationAcceptanceController {
     constructor(private readonly commandBus: CommandBus) {}
