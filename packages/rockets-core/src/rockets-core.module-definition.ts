@@ -323,6 +323,22 @@ function normalizeAuthBootstraps(
 ): ReadonlyArray<AuthBootstrap> {
   if (input === undefined) return [];
   const entries = Array.isArray(input) ? input : [input];
+  // Core would silently drop these — refuse instead of booting an app that
+  // is missing the persistence/guard defaults the integration declared.
+  for (const bootstrap of entries) {
+    if (
+      bootstrap.identity !== undefined ||
+      bootstrap.contributes !== undefined
+    ) {
+      throw new Error(
+        'RocketsCoreModule: auth bootstrap "' +
+          bootstrap.adapter.name +
+          '" carries identity/contributes, which only @concepta/rockets ' +
+          '(createServer / RocketsModule) resolves. Use createServer(), or ' +
+          'pass userMetadata/repository/resources explicitly to core.',
+      );
+    }
+  }
   return entries;
 }
 

@@ -300,6 +300,53 @@ describe('RocketsModuleDefinition', () => {
       expect(composition.enableGlobalGuard).toBe(false);
     });
 
+    it('skips an identity resource the app already lists by reference', () => {
+      const composition = resolveRocketsComposition({
+        auth: contributedAuth(),
+        resources: [contributedResource],
+      });
+
+      expect(composition.resources).toEqual([contributedResource]);
+    });
+
+    it('throws when identity and app define the same entity differently', () => {
+      class SharedEntity {}
+      const identityResource = {
+        kind: 'crud',
+        meta: { entityClass: SharedEntity },
+      } as unknown as ResourceInput;
+      const appResource = {
+        kind: 'crud',
+        meta: { entityClass: SharedEntity },
+      } as unknown as ResourceInput;
+
+      expect(() =>
+        resolveRocketsComposition({
+          auth: contributedAuth({
+            identity: { resources: [identityResource] },
+          }),
+          resources: [appResource],
+        }),
+      ).toThrow(/SharedEntity/);
+    });
+
+    it('strips identity and contributes before handing bootstraps to core', () => {
+      const forRootAsync = vi
+        .spyOn(RocketsCoreModule, 'forRootAsync')
+        .mockReturnValue({ module: RocketsCoreModule });
+
+      createRocketsImports({
+        imports: [],
+        extras: { auth: contributedAuth() },
+      });
+
+      const coreAuth = forRootAsync.mock.calls[0][0]
+        .auth as ReadonlyArray<AuthBootstrap>;
+      expect(coreAuth[0].identity).toBeUndefined();
+      expect(coreAuth[0].contributes).toBeUndefined();
+      forRootAsync.mockRestore();
+    });
+
     it('accepts an explicit app-level opt-out even without a replacement guard', () => {
       const composition = resolveRocketsComposition({
         auth: contributedAuth({
