@@ -6,7 +6,10 @@ import type {
   AuthAttemptResult,
   AuthRequest,
 } from '../../domain/interfaces/auth-adapter.interface';
-import type { AuthBootstrapContributions } from '../../domain/interfaces/auth-bootstrap.interface';
+import type {
+  AuthBootstrapContributions,
+  AuthBootstrapIdentity,
+} from '../../domain/interfaces/auth-bootstrap.interface';
 // Imported from the package index (not the module directly) so this spec fails
 // to compile if `defineAuthAdapter` stops being part of the public surface.
 import { defineAuthAdapter } from '../../index';
@@ -24,15 +27,18 @@ describe('defineAuthAdapter', () => {
       provide: 'AUTH_DEPENDENCY',
       useValue: true,
     };
-    const contributes: AuthBootstrapContributions = { resources: [] };
+    const identity: AuthBootstrapIdentity = { resources: [] };
+    const contributes: AuthBootstrapContributions = { providesAppGuard: true };
 
     const bootstrap = defineAuthAdapter(SpecAuthAdapter, {
       providers: [dependency],
+      identity,
       contributes,
     });
     const module = bootstrap.forRoot!();
 
     expect(bootstrap.adapter).toBe(SpecAuthAdapter);
+    expect(bootstrap.identity).toBe(identity);
     expect(bootstrap.contributes).toBe(contributes);
     expect(module.providers).toEqual([dependency, SpecAuthAdapter]);
     expect(module.exports).toEqual([SpecAuthAdapter]);

@@ -53,6 +53,14 @@ describe('defineRocketsAuth', () => {
     expect(bootstrap.contributes?.enableGlobalGuard).toBe(true);
   });
 
+  it('claims identity ownership over the auth-owned persistence', () => {
+    const bootstrap = defineRocketsAuth(input());
+
+    expect(bootstrap.identity?.userMetadata).toBeDefined();
+    expect(bootstrap.identity?.repository).toBe(repository);
+    expect(bootstrap.identity?.resources?.length).toBeGreaterThan(0);
+  });
+
   it('declares the upstream JwtGuard as the replacement app guard', () => {
     const bootstrap = defineRocketsAuth(input());
 

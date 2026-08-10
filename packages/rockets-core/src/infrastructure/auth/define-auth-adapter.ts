@@ -4,14 +4,22 @@ import type { AuthAdapterInterface } from '../../domain/interfaces/auth-adapter.
 import type {
   AuthBootstrap,
   AuthBootstrapContributions,
+  AuthBootstrapIdentity,
 } from '../../domain/interfaces/auth-bootstrap.interface';
 
-/** Optional Nest wiring and server defaults owned by a custom auth adapter. */
+/**
+ * Optional Nest wiring and server defaults owned by a custom auth adapter.
+ *
+ * `identity` and `contributes` are for integration PACKAGES that own user
+ * persistence or guard behavior. App code should set `userMetadata`,
+ * `repository`, and `resources` on the module options instead.
+ */
 export interface DefineAuthAdapterOptions {
   readonly imports?: NonNullable<DynamicModule['imports']>;
   readonly controllers?: NonNullable<DynamicModule['controllers']>;
   readonly providers?: ReadonlyArray<Provider>;
   readonly exports?: NonNullable<DynamicModule['exports']>;
+  readonly identity?: AuthBootstrapIdentity;
   readonly contributes?: AuthBootstrapContributions;
 }
 
@@ -28,6 +36,7 @@ export function defineAuthAdapter<Adapter extends AuthAdapterInterface>(
 ): AuthBootstrap<Adapter> {
   return {
     adapter,
+    identity: options.identity,
     contributes: options.contributes,
     forRoot: () => ({
       module: class AuthAdapterHostModule {},

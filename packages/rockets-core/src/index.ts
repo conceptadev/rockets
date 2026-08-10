@@ -130,6 +130,7 @@ export type { DefineModuleResourceInput } from './infrastructure/resource/define
 export type {
   AuthBootstrap,
   AuthBootstrapContributions,
+  AuthBootstrapIdentity,
 } from './domain/interfaces/auth-bootstrap.interface';
 export { defineAuthAdapter } from './infrastructure/auth/define-auth-adapter';
 export type { DefineAuthAdapterOptions } from './infrastructure/auth/define-auth-adapter';

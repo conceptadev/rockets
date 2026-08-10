@@ -8,6 +8,7 @@ import { APP_GUARD } from '@nestjs/core';
 import type {
   AuthBootstrap,
   AuthBootstrapContributions,
+  AuthBootstrapIdentity,
   RepositoryBootstrap,
   RepositoryModuleInterface,
   ResourceInput,
@@ -56,7 +57,7 @@ export interface ResolvedRocketsComposition {
 }
 
 function resolveSingleContribution<
-  Key extends Exclude<keyof AuthBootstrapContributions, 'resources'>,
+  Key extends keyof AuthBootstrapContributions,
 >(
   bootstraps: ReadonlyArray<AuthBootstrap>,
   key: Key,
@@ -82,11 +83,39 @@ function resolveSingleContribution<
   return first;
 }
 
+// The chain authenticates into ONE user space, so its persistence has ONE
+// owner. Sliced ownership (metadata from one package, repository from
+// another) or two full owners are both invalid apps, not conflicts to merge.
+function resolveIdentityOwner(
+  bootstraps: ReadonlyArray<AuthBootstrap>,
+): AuthBootstrapIdentity | undefined {
+  const owners = bootstraps.filter((bootstrap) => {
+    const identity = bootstrap.identity;
+    return (
+      identity !== undefined &&
+      (identity.userMetadata !== undefined ||
+        identity.repository !== undefined ||
+        (identity.resources?.length ?? 0) > 0)
+    );
+  });
+  if (owners.length > 1) {
+    throw new Error(
+      'RocketsModule: multiple auth integrations claim identity ownership (' +
+        owners.map((owner) => owner.adapter.name).join(', ') +
+        '). Exactly one integration may provide identity persistence; set ' +
+        'userMetadata/repository/resources explicitly on the module options ' +
+        'to take ownership at the app level.',
+    );
+  }
+  return owners[0]?.identity;
+}
+
 /** Resolve explicit app options and integration-owned defaults. */
 export function resolveRocketsComposition(
   extras: RocketsOptionsExtrasInterface = {},
 ): ResolvedRocketsComposition {
   const auth = normalizeAuthBootstraps(extras.auth);
+  const identity = resolveIdentityOwner(auth);
   const enableGlobalGuard =
     extras.enableGlobalGuard ??
     resolveSingleContribution(auth, 'enableGlobalGuard');
@@ -109,14 +138,9 @@ export function resolveRocketsComposition(
 
   return {
     auth,
-    resources: [
-      ...auth.flatMap((bootstrap) => bootstrap.contributes?.resources ?? []),
-      ...(extras.resources ?? []),
-    ],
-    userMetadata:
-      extras.userMetadata ?? resolveSingleContribution(auth, 'userMetadata'),
-    repository:
-      extras.repository ?? resolveSingleContribution(auth, 'repository'),
+    resources: [...(identity?.resources ?? []), ...(extras.resources ?? [])],
+    userMetadata: extras.userMetadata ?? identity?.userMetadata,
+    repository: extras.repository ?? identity?.repository,
     enableGlobalGuard,
   };
 }
