@@ -82,7 +82,7 @@ function resolveSingleContribution<
   return first;
 }
 
-/** Resolve explicit app options and integration-owned defaults. */
+/** Resolve explicit app options and integration-owned defaults once. */
 export function resolveRocketsComposition(
   extras: RocketsOptionsExtrasInterface = {},
 ): ResolvedRocketsComposition {
