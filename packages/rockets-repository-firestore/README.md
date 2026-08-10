@@ -181,11 +181,12 @@ naming both supported column names.
 
 The in-memory backend and Admin SDK direct-document/post-filter paths match
 Firestore for missing versus explicit `null`, nested field paths, structural
-equality, and ranges across types using Firestore's deterministic type order.
-`between` is a client-side Rockets operator and intentionally requires its
-value and bounds to share one scalar type. Local `orderBy` supports every
-Firestore value type, including `NaN`, bytes, references, geographical points,
-arrays, vectors, and maps.
+equality, and scalar range filters that compare only values sharing the query
+bound's type. `between` is a client-side Rockets operator and intentionally
+requires its value and bounds to share one scalar type. Local `orderBy` uses
+Firestore's deterministic type order and supports every Firestore value type,
+including `NaN`, bytes, references, geographical points, arrays, vectors, and
+maps.
 
 Document-id `IN` queries accept at most 500 ids and use one Admin SDK `getAll`
 request. The direct-document path fetches all requested ids before applying

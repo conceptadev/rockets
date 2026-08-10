@@ -7,6 +7,7 @@ import {
   firestoreValuesEqual,
   hasNonNullFirestoreValue,
   readFirestoreField,
+  sameFirestoreRangeType,
   type FirestoreFieldValue,
 } from './firestore-value';
 
@@ -88,6 +89,7 @@ function rangeMatch(
   return (
     hasNonNullFirestoreValue(field) &&
     candidate !== null &&
+    sameFirestoreRangeType(field.value, candidate) &&
     predicate(compareFirestoreValues(field.value, candidate, fieldName))
   );
 }
