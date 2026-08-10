@@ -5,6 +5,7 @@ import {
   type Query,
 } from 'firebase-admin/firestore';
 
+import { FirestoreDuplicateIdException } from '../exceptions/firestore-duplicate-id.exception';
 import type {
   FirestoreBackend,
   FirestoreBranchQueryOptions,
@@ -18,6 +19,20 @@ import { applyFirestorePostFilters } from '../repository/firestore-post-filter';
 import { applyFirestoreFilters } from '../repository/firestore-row-filter';
 import { sortFirestoreRows } from '../repository/firestore-sort';
 import { normalizeFirestoreValue } from '../repository/firestore-value';
+
+// Batched reads keep argument lists bounded; getAll itself has no hard cap.
+const GET_ALL_CHUNK = 300;
+
+const GRPC_ALREADY_EXISTS = 6;
+
+function isAlreadyExistsError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    error.code === GRPC_ALREADY_EXISTS
+  );
+}
 
 export class AdminFirestoreBackend implements FirestoreBackend {
   private db() {
@@ -52,10 +67,17 @@ export class AdminFirestoreBackend implements FirestoreBackend {
     documentId: string,
     data: Record<string, unknown>,
   ): Promise<void> {
-    await this.db()
-      .collection(collection)
-      .doc(documentId)
-      .create(this.serialise(data));
+    try {
+      await this.db()
+        .collection(collection)
+        .doc(documentId)
+        .create(this.serialise(data));
+    } catch (error) {
+      if (isAlreadyExistsError(error)) {
+        throw new FirestoreDuplicateIdException(collection, documentId);
+      }
+      throw error;
+    }
   }
 
   async delete(collection: string, documentId: string): Promise<void> {
@@ -142,14 +164,20 @@ export class AdminFirestoreBackend implements FirestoreBackend {
     if (branch.documentIds !== undefined) {
       if (branch.documentIds.length === 0) return [];
       const collectionRef = this.db().collection(collection);
-      const refs = branch.documentIds.map((documentId) =>
-        collectionRef.doc(documentId),
-      );
-      const snapshots = await this.db().getAll(...refs);
       const rows: Record<string, unknown>[] = [];
-      for (const snapshot of snapshots) {
-        if (snapshot.exists) {
-          rows.push(this.normalise(snapshot.data(), snapshot.id));
+      for (
+        let index = 0;
+        index < branch.documentIds.length;
+        index += GET_ALL_CHUNK
+      ) {
+        const refs = branch.documentIds
+          .slice(index, index + GET_ALL_CHUNK)
+          .map((documentId) => collectionRef.doc(documentId));
+        const snapshots = await this.db().getAll(...refs);
+        for (const snapshot of snapshots) {
+          if (snapshot.exists) {
+            rows.push(this.normalise(snapshot.data(), snapshot.id));
+          }
         }
       }
       return rows;

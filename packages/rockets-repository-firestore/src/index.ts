@@ -10,6 +10,7 @@ export {
   FIRESTORE_DEFAULT_SOFT_DELETE_FIELD,
 } from './constants/firestore-soft-delete.constants';
 export { ensureFirebaseAdminApp } from './utils/ensure-firebase-admin-app';
+export { FirestoreDuplicateIdException } from './exceptions/firestore-duplicate-id.exception';
 export { InMemoryFirestoreBackend } from './backends/in-memory-firestore.backend';
 export { defineFirestoreRepository } from './integration/define-firestore-repository';
 export type { DefineFirestoreRepositoryOptions } from './integration/define-firestore-repository.config';

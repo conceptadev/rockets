@@ -118,6 +118,15 @@ export function compareFirestoreValues(
 
 /** Structural equality for Firestore values used by local query paths. */
 export function firestoreValuesEqual(left: unknown, right: unknown): boolean {
+  if (typeof left === 'number' && typeof right === 'number') {
+    // Server semantics: `== NaN` compiles to the IS_NAN unary filter
+    // (@google-cloud/firestore field-filter-internal.ts), so NaN matches NaN;
+    // and +0 equals -0. `Object.is` disagrees on both, so numbers skip it.
+    if (Number.isNaN(left) || Number.isNaN(right)) {
+      return Number.isNaN(left) && Number.isNaN(right);
+    }
+    return left === right;
+  }
   if (Object.is(left, right)) return true;
 
   const leftDate = asDate(left);
@@ -263,8 +272,18 @@ function compareNumbers(left: number, right: number): number {
 }
 
 function compareStrings(left: string, right: string): number {
+  // Code-point order matches Firestore's UTF-8 byte order; UTF-16 `<`
+  // misplaces astral code points (emoji) relative to U+E000–U+FFFF.
   if (left === right) return 0;
-  return left < right ? -1 : 1;
+  const leftPoints = Array.from(left);
+  const rightPoints = Array.from(right);
+  const commonLength = Math.min(leftPoints.length, rightPoints.length);
+  for (let index = 0; index < commonLength; index += 1) {
+    const delta =
+      leftPoints[index]!.codePointAt(0)! - rightPoints[index]!.codePointAt(0)!;
+    if (delta !== 0) return delta < 0 ? -1 : 1;
+  }
+  return compareNumbers(leftPoints.length, rightPoints.length);
 }
 
 function scalarKind(value: unknown): string | undefined {

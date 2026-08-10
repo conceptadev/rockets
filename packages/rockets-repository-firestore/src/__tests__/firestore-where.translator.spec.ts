@@ -44,15 +44,13 @@ describe('firestore-where.translator', () => {
     );
   });
 
-  it('caps direct document lookups at 500 ids', () => {
-    expect(() =>
-      translateDnfBranch([
-        Where.in(
-          'id',
-          Array.from({ length: 501 }, (_, index) => `doc-${index}`),
-        ),
-      ]),
-    ).toThrow(/at most 500/);
+  it('accepts id lists beyond the batch-write cap (backends chunk reads)', () => {
+    const ids = Array.from({ length: 800 }, (_, index) => `doc-${index}`);
+
+    const branch = translateDnfBranch([Where.in('id', ids)]);
+
+    expect(branch.documentIds).toHaveLength(800);
+    expect(branch.documentIds?.[799]).toBe('doc-799');
   });
 
   it('intersects multiple document-id predicates in an AND branch', () => {

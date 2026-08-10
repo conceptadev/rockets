@@ -8,6 +8,7 @@ import {
 import type { RepositoryInterface } from '@concepta/nestjs-repository';
 
 import { InMemoryFirestoreBackend } from '../backends/in-memory-firestore.backend';
+import { FirestoreDuplicateIdException } from '../exceptions/firestore-duplicate-id.exception';
 import { FirestoreRepositoryModule } from '../firestore-repository.module';
 
 class WidgetEntity {
@@ -455,7 +456,7 @@ describe(FirestoreRepositoryModule.name, () => {
 
     await expect(
       repo.create({ id: 'same-id', title: 'Replacement' }),
-    ).rejects.toThrow();
+    ).rejects.toBeInstanceOf(FirestoreDuplicateIdException);
     await expect(
       repo.findOne({ where: Where.eq('id', 'same-id') }),
     ).resolves.toMatchObject({ title: 'Original' });

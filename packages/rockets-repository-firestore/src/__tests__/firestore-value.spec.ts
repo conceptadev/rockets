@@ -95,6 +95,27 @@ describe('local Firestore value semantics', () => {
     ).toBe(true);
   });
 
+  it('matches server equality for NaN and signed zero', () => {
+    // Firestore `== NaN` compiles to the IS_NAN unary filter, so NaN matches
+    // NaN; -0 equals 0. NaN never equals a non-NaN number.
+    expect(firestoreValuesEqual(Number.NaN, Number.NaN)).toBe(true);
+    expect(firestoreValuesEqual(Number.NaN, 5)).toBe(false);
+    expect(firestoreValuesEqual(-0, 0)).toBe(true);
+    expect(firestoreValuesEqual(0, -0)).toBe(true);
+    expect(firestoreValuesEqual([Number.NaN], [Number.NaN])).toBe(true);
+    expect(firestoreValuesEqual({ value: -0 }, { value: 0 })).toBe(true);
+  });
+
+  it('orders strings by code points like the server, not UTF-16 units', () => {
+    // U+1F600 (😀, UTF-16 surrogate D83D) vs U+FB01 (ﬁ): code-point order
+    // puts the emoji AFTER, UTF-16 unit order would put it before.
+    expect(compareFirestoreValues('😀', 'ﬁ')).toBeGreaterThan(0);
+    expect(compareFirestoreValues('ﬁ', '😀')).toBeLessThan(0);
+    expect(compareFirestoreValues('abc', 'abd')).toBeLessThan(0);
+    expect(compareFirestoreValues('ab', 'abc')).toBeLessThan(0);
+    expect(compareFirestoreValues('😀', '😀')).toBe(0);
+  });
+
   it('compares timestamp-like SDK values with dates before SDK equality', () => {
     const date = new Date('2026-01-01T00:00:00.000Z');
     const timestamp = new TimestampStub(date);
