@@ -1,5 +1,5 @@
 import { defineConfig, mergeConfig } from 'vitest/config';
-import shared from './vitest.shared';
+import shared from './vitest.shared.mts';
 
 /**
  * Root config: declares every test project (Vitest 4 `projects` model).
@@ -22,7 +22,12 @@ export default defineConfig({
           // projects with different maxWorkers must not share a group.
           sequence: { groupOrder: 0 },
           include: ['packages/**/*.spec.ts'],
-          exclude: ['**/*.e2e-spec.ts', '**/node_modules/**', '**/dist/**'],
+          exclude: [
+            '**/*.e2e-spec.ts',
+            '**/*.emulator-spec.ts',
+            '**/node_modules/**',
+            '**/dist/**',
+          ],
         },
       }),
       mergeConfig(shared, {
@@ -43,9 +48,9 @@ export default defineConfig({
           maxWorkers: 4,
         },
       }),
-      'examples/sample-server/vitest.e2e.config.ts',
-      'examples/sample-server-auth/vitest.e2e.config.ts',
-      'examples/sample-code-review/apps/api/vitest.e2e.config.ts',
+      'examples/sample-server/vitest.e2e.config.mts',
+      'examples/sample-server-auth/vitest.e2e.config.mts',
+      'examples/sample-code-review/apps/api/vitest.e2e.config.mts',
     ],
     coverage: {
       provider: 'v8',

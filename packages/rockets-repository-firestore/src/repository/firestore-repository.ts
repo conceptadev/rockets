@@ -98,7 +98,7 @@ export class FirestoreRepository<
   ): Promise<Entity> {
     const id = this.resolveId(entity);
     const stored = this.toStore({ ...entity, id } as DeepPartial<Entity>);
-    await this.options.backend.set(this.options.collection, id, stored, false);
+    await this.options.backend.create(this.options.collection, id, stored);
     return this.fromStore(stored);
   }
 
@@ -129,7 +129,7 @@ export class FirestoreRepository<
     _options?: RepositoryUpsertOptions,
   ): Promise<Entity> {
     const id = this.resolveId(entity);
-    const stored = this.toStore(entity);
+    const stored = this.toStore({ ...entity, id } as DeepPartial<Entity>);
     await this.options.backend.set(this.options.collection, id, stored, true);
     return this.fromStore(stored);
   }

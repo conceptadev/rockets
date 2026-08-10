@@ -1,4 +1,4 @@
-import { defineModuleResource } from '@concepta/rockets-core';
+import { defineAuthAdapter, defineModuleResource } from '@concepta/rockets-core';
 import type { AuthBootstrap } from '@concepta/rockets-core';
 import { ApiKeyAuthAdapter } from './api-key.adapter';
 import { ApiKeyController } from './api-key.controller';
@@ -12,13 +12,7 @@ export const apiKeyAuthResource = defineModuleResource({
  * API key auth chain entry. Pair with `apiKeyAuthResource` in `resources[]`.
  */
 export function defineApiKeyAuth(): AuthBootstrap<ApiKeyAuthAdapter> {
-  return {
-    adapter: ApiKeyAuthAdapter,
-    forRoot: () => ({
-      module: class ApiKeyAuthHostModule {},
-      providers: [ApiKeyAuthAdapter],
-      controllers: [ApiKeyController],
-      exports: [ApiKeyAuthAdapter],
-    }),
-  };
+  return defineAuthAdapter(ApiKeyAuthAdapter, {
+    controllers: [ApiKeyController],
+  });
 }

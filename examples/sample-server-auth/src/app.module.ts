@@ -6,6 +6,7 @@ import {
   type EmailSendOptionsInterface,
 } from '@concepta/rockets-auth';
 import { RocketsModule } from '@concepta/rockets';
+import { defineTypeOrmRepository } from '@concepta/rockets-repository-typeorm';
 
 import { ACService } from './access-control.service';
 import { acRules } from './app.acl';
@@ -41,9 +42,8 @@ import {
 } from './modules/user';
 import { RoleEntity, RoleDto, RoleUpdateDto } from './modules/role';
 import { RoleCreateDto } from './modules/role/role.dto';
-import { defineTypeOrmRepository } from './repository/define-typeorm-repository';
 
-// Single TypeORM bootstrap shared by every persistence consumer below.
+// Single TypeORM bootstrap owned by the auth integration below.
 // `defineTypeOrmRepository` returns a `RepositoryBootstrap`, which the
 // planner uses for both:
 //   - `forRoot(planEntities)` — DB connection + the union of every
@@ -51,9 +51,8 @@ import { defineTypeOrmRepository } from './repository/define-typeorm-repository'
 //     `defineRocketsAuth({ persistence })`.
 //   - `forFeature(entities)` — one `DYNAMIC_REPOSITORY_TOKEN_<key>`
 //     provider per registered entity.
-// Reference equality matters: pass the SAME `repo` instance everywhere,
-// otherwise the planner splits the entity list across two adapters and
-// `TypeOrmModule.forRoot` boots with an incomplete entity set.
+// `defineRocketsAuth` contributes this same bootstrap to Rockets, so the host
+// does not need to repeat it in `RocketsModule.forRoot`.
 const repo = defineTypeOrmRepository({
   type: 'sqlite',
   database: ':memory:',
@@ -181,9 +180,6 @@ const rocketsAuth = defineRocketsAuth(rocketsAuthInput);
     PetModule,
     RocketsModule.forRoot({
       auth: rocketsAuth,
-      userMetadata: rocketsAuthInput.userMetadata,
-      enableGlobalGuard: false,
-      repository: repo,
       resources: [
         createPetResource(),
         createPetVaccinationResource(),

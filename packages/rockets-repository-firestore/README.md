@@ -8,8 +8,8 @@
 > Firestore-backed entities with a TypeORM (or any other) default adapter, per
 > entity.
 
-**Status:** preview (`0.0.1-dev.0` on npm, dist-tag `alpha`). API stable
-enough to use; expect refinements before 1.0.
+**Status:** pre-1.0 preview (`0.0.1-dev.0`, npm dist-tag `alpha`). Public
+shapes may still change before 1.0.
 
 ---
 
@@ -33,7 +33,7 @@ Other entities continue on the default adapter (TypeORM, in most apps).
 - `FirestoreRepositoryModule.forFeature(entities, options?)` — registers dynamic
   repository providers per entity row.
 - `defineFirestoreRepository()` — `RepositoryBootstrap` with the same shape as
-  app-local `defineTypeOrmRepository` (thin delegate, no env sniffing).
+  `defineTypeOrmRepository` from `@concepta/rockets-repository-typeorm`.
 - `FirestoreRepository<Entity>` — adapter class implementing
   `RepositoryAdapter<Entity>`.
 - `ensureFirebaseAdminApp(packageRoot)` — singleton Admin initialisation for
@@ -176,6 +176,25 @@ entity instance for a `dateRemoved` or `deletedAt` property
 override — name the column `dateRemoved` or `deletedAt` on the entity class.
 If neither name is present, `delete()` calls throw at runtime with a message
 naming both supported column names.
+
+### Local query parity
+
+The in-memory backend and Admin SDK direct-document/post-filter paths match
+Firestore for missing versus explicit `null`, nested field paths, structural
+equality, and ranges across types using Firestore's deterministic type order.
+`between` is a client-side Rockets operator and intentionally requires its
+value and bounds to share one scalar type. Local `orderBy` supports every
+Firestore value type, including `NaN`, bytes, references, geographical points,
+arrays, vectors, and maps.
+
+Document-id `IN` queries accept at most 500 ids and use one Admin SDK `getAll`
+request. The direct-document path fetches all requested ids before applying
+`skip` and `take`, so a page limit does not reduce document reads.
+
+`createMany()` writes documents sequentially and is not atomic: if a later
+document id already exists, earlier documents from the same call remain
+created. Atomic batched creation is intentionally deferred to a future backend
+contract change.
 
 ---
 

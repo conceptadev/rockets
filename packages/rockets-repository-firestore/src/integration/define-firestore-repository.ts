@@ -9,7 +9,7 @@ import { FirestoreRepositoryModule } from '../firestore-repository.module';
 import type { DefineFirestoreRepositoryOptions } from './define-firestore-repository.config';
 
 /**
- * Same contract as app-local `defineTypeOrmRepository`: returns a
+ * Same contract as `defineTypeOrmRepository` from the TypeORM adapter: returns a
  * {@link RepositoryBootstrap} Rockets calls `forRoot` / `forFeature`.
  *
  * Does not read environment variables or pick a backend — the app must

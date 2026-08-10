@@ -24,13 +24,13 @@
     "directory": "packages/rockets-repository-firestore"
   },
   "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=8.0.0"
+    "node": ">=20.0.0"
   },
   "files": [
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}",
     "README.md",
-    "LICENSE.txt"
+    "LICENSE.txt",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "clean": "rimraf dist tsconfig.tsbuildinfo",
