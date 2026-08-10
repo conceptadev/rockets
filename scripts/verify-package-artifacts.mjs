@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -11,23 +12,47 @@ function fail(packageName, message) {
   failures.push(`${packageName}: ${message}`);
 }
 
-function checkTarget(packageName, packageRoot, label, target) {
-  if (target.includes('/src/') || target.startsWith('./src/')) {
+// The packed tarball is the only truth about what npm consumers receive.
+// `--ignore-scripts` skips each package's prepack (clean + full rebuild);
+// the release chain builds before this script runs.
+function packedFilePaths(packageRoot) {
+  const stdout = execFileSync(
+    'npm',
+    ['pack', '--dry-run', '--json', '--ignore-scripts'],
+    { cwd: packageRoot, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 },
+  );
+  const [report] = JSON.parse(stdout);
+  return new Set(report.files.map((file) => file.path));
+}
+
+function checkTarget(packageName, packedFiles, label, target) {
+  if (typeof target !== 'string') return;
+  const normalized = target.replace(/^\.\//, '');
+  // npm pack always includes the `main`/`browser` file, even from src/ —
+  // tarball membership alone cannot catch a source entry point.
+  if (normalized.startsWith('src/') || normalized.includes('/src/')) {
     fail(packageName, `${label} points at unpublished source: ${target}`);
     return;
   }
-
-  const artifact = resolve(packageRoot, target);
-  if (!existsSync(artifact)) {
-    fail(packageName, `${label} target does not exist: ${target}`);
+  if (!packedFiles.has(normalized)) {
+    fail(packageName, `${label} target is not in the packed tarball: ${target}`);
     return;
   }
   checkedArtifacts += 1;
 }
 
-function walkExportTargets(packageName, packageRoot, label, value) {
+function tarballIncludes(packedFiles, entry) {
+  if (packedFiles.has(entry)) return true;
+  const prefix = entry.endsWith('/') ? entry : `${entry}/`;
+  for (const path of packedFiles) {
+    if (path.startsWith(prefix)) return true;
+  }
+  return false;
+}
+
+function walkExportTargets(packageName, packedFiles, label, value) {
   if (typeof value === 'string') {
-    checkTarget(packageName, packageRoot, label, value);
+    checkTarget(packageName, packedFiles, label, value);
     return;
   }
   if (value === null || typeof value !== 'object') return;
@@ -35,7 +60,7 @@ function walkExportTargets(packageName, packageRoot, label, value) {
   for (const [condition, target] of Object.entries(value)) {
     walkExportTargets(
       packageName,
-      packageRoot,
+      packedFiles,
       `${label}.${condition}`,
       target,
     );
@@ -62,32 +87,46 @@ for (const directory of readdirSync(packagesRoot, { withFileTypes: true })) {
     fail(manifest.name, 'publishConfig.access must be public');
   }
 
+  let packedFiles;
+  try {
+    packedFiles = packedFilePaths(packageRoot);
+  } catch (error) {
+    fail(manifest.name, `npm pack --dry-run failed: ${error.message}`);
+    continue;
+  }
+
   for (const entry of manifest.files ?? []) {
     if (typeof entry !== 'string' || /[*?!{[]/.test(entry)) continue;
-    checkTarget(manifest.name, packageRoot, 'files', entry);
+    if (!tarballIncludes(packedFiles, entry)) {
+      fail(manifest.name, `files entry produced no packed artifacts: ${entry}`);
+      continue;
+    }
+    checkedArtifacts += 1;
   }
 
   if (typeof manifest.main === 'string') {
-    checkTarget(manifest.name, packageRoot, 'main', manifest.main);
+    checkTarget(manifest.name, packedFiles, 'main', manifest.main);
   } else {
     fail(manifest.name, 'main is not declared');
   }
   if (typeof manifest.types === 'string') {
-    checkTarget(manifest.name, packageRoot, 'types', manifest.types);
+    checkTarget(manifest.name, packedFiles, 'types', manifest.types);
   } else {
     fail(manifest.name, 'types is not declared');
   }
 
-  walkExportTargets(manifest.name, packageRoot, 'exports', manifest.exports);
+  walkExportTargets(manifest.name, packedFiles, 'exports', manifest.exports);
 
   const bins =
     typeof manifest.bin === 'string'
       ? { [manifest.name]: manifest.bin }
       : (manifest.bin ?? {});
   for (const [name, target] of Object.entries(bins)) {
-    checkTarget(manifest.name, packageRoot, `bin.${name}`, target);
+    checkTarget(manifest.name, packedFiles, `bin.${name}`, target);
     if (typeof target !== 'string') continue;
-    const contents = readFileSync(resolve(packageRoot, target), 'utf8');
+    const binPath = resolve(packageRoot, target);
+    if (!existsSync(binPath)) continue;
+    const contents = readFileSync(binPath, 'utf8');
     if (contents.includes('ts-node/register') || contents.includes('../src/')) {
       fail(manifest.name, `bin.${name} depends on unpublished TypeScript source`);
     }
@@ -99,5 +138,7 @@ if (failures.length > 0) {
   for (const failure of failures) console.error(`- ${failure}`);
   process.exitCode = 1;
 } else {
-  console.log(`Verified ${checkedArtifacts} public package artifact targets.`);
+  console.log(
+    `Verified ${checkedArtifacts} public package targets against packed tarballs.`,
+  );
 }

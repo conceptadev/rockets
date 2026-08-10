@@ -1,5 +1,7 @@
 name: release-readiness
 
+# Gate-only: ci-pr-test already runs build/lint/typecheck/unit/e2e on every
+# pull request. This workflow adds only the release gates it does not cover.
 on:
   pull_request:
     branches: ['main']
@@ -7,7 +9,7 @@ on:
     branches: ['main']
 
 jobs:
-  release-check:
+  release-gates:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,8 +27,18 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/firebase/emulators
-          key: firestore-emulator-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+          # Keyed to the pinned firebase-tools version in
+          # scripts/run-emulator-suite.mjs — bump together.
+          key: firestore-emulator-${{ runner.os }}-firebase-tools-15.15.0
       - name: Install
         run: corepack yarn install --immutable
-      - name: Release readiness
-        run: corepack yarn release:check
+      - name: Build
+        run: corepack yarn build
+      - name: Package artifacts
+        run: corepack yarn release:packages
+      - name: Firestore emulator suite
+        run: corepack yarn test:firestore-emulator
+      - name: Samples build
+        run: corepack yarn samples:build
+      - name: Samples e2e
+        run: corepack yarn samples:test:e2e
