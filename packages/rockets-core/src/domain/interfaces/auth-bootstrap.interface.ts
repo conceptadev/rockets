@@ -13,7 +13,19 @@ export interface AuthBootstrapContributions {
   readonly resources?: ReadonlyArray<ResourceInput>;
   readonly userMetadata?: RocketsUserMetadataConfig;
   readonly repository?: RepositoryModuleInterface | RepositoryBootstrap;
+  /**
+   * Contribute `false` only together with `providesAppGuard: true` — an
+   * integration may swap the global guard, never remove it. Removing the
+   * guard entirely is an app-level decision (`enableGlobalGuard: false` on
+   * the module options).
+   */
   readonly enableGlobalGuard?: boolean;
+  /**
+   * Declares that this integration registers its own app-wide guard
+   * (`APP_GUARD`), so contributing `enableGlobalGuard: false` is a guard
+   * swap rather than leaving the app unguarded.
+   */
+  readonly providesAppGuard?: boolean;
 }
 
 /**
