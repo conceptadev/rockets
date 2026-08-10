@@ -158,6 +158,11 @@ export function defineRocketsAuth(
       // global authentication guards unless a mixed-auth host explicitly asks
       // Rockets to own the ordered adapter chain.
       enableGlobalGuard: input.rocketsDefaults?.enableGlobalGuard ?? false,
+      // The upstream guard exists unless the host disables it via
+      // `auth.appGuard: false` — declaring the swap lets the server's
+      // composition invariant reject the half-configured state where
+      // neither guard would run.
+      providesAppGuard: input.auth?.appGuard !== false,
     },
   };
 }
