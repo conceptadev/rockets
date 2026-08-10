@@ -20,9 +20,9 @@ Vitest 4. What this deletes, permanently:
   dependency. The root `scripts/` directory no longer exists.
 
 The setup follows Vitest 4's official monorepo guidance — the
-`projects` model: the root `vitest.config.ts` declares every project
+`projects` model: the root `vitest.config.mts` declares every project
 (`unit`, `e2e-packages`, one per example workspace) and
-`vitest.shared.ts` carries the shared plugin/settings (deliberately not
+`vitest.shared.mts` carries the shared plugin/settings (deliberately not
 the root config — merging a projects-bearing config into a project is a
 documented pitfall). Example configs are `defineProject` +
 `mergeConfig(shared, …)`; one SWC block exists instead of five.

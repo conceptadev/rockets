@@ -4,7 +4,7 @@
 
 [![CI](https://img.shields.io/github/actions/workflow/status/conceptadev/rockets/ci-merge.yml?branch=main&label=CI)](https://github.com/conceptadev/rockets/actions/workflows/ci-merge.yml)
 [![Codecov](https://codecov.io/gh/conceptadev/rockets/branch/main/graph/badge.svg)](https://codecov.io/gh/conceptadev/rockets)
-[![NestJS](https://img.shields.io/badge/NestJS-11-ea2845?logo=nestjs&logoColor=white)](https://nestjs.com/)
+[![NestJS](https://img.shields.io/badge/NestJS-12-ea2845?logo=nestjs&logoColor=white)](https://nestjs.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/license-BSD--3--Clause-green.svg)](LICENSE.txt)
 
@@ -13,9 +13,9 @@
 
 **Status:** pre-1.0 (`0.0.1-dev.0`, on npm under `@concepta/*` with dist-tag
 `alpha`). The public surface (`AuthAdapterInterface`, `defineResource`,
-`defineModuleResource`, `RepositoryInterface`, the `RocketsModule.forRoot`
-options shape) is stable; field renames are still possible before 1.0. Pin exact
-versions in production.
+`defineModuleResource`, `RepositoryInterface`, `createServer`) is being
+prepared for 1.0; breaking refinements are still possible until that release.
+Pin exact versions in production.
 
 ## Table of contents
 
@@ -257,7 +257,7 @@ access-control rules. Rockets does not pretend to write those for you.
 
 ### Prerequisites
 
-- Node 18+.
+- Node 20+ (required by NestJS 12).
 - A package manager (yarn 4 / npm / pnpm — examples below use yarn).
 - A database adapter — TypeORM with any supported driver is the most common.
   Firestore works via `@concepta/rockets-repository-firestore`.
@@ -307,7 +307,7 @@ yarn add @concepta/rockets@alpha \
 
 | Pulled in for you      | Packages                                                                                                              |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| Other `@concepta/*`     | `rockets-core`, `rockets-repository-typeorm`                                                                          |
+| Other `@concepta/*`     | `rockets-core`                                                                                                        |
 | Upstream motor         | `@concepta/nestjs-{core,repository,crud,authentication,access-control}` (via `@concepta/rockets-core` re-exports)      |
 | Nest (Rockets runtime) | `@nestjs/common`, `@nestjs/core`, `@nestjs/cqrs`, `@nestjs/swagger`, `@nestjs/config`                                 |
 
@@ -342,6 +342,7 @@ import {
   AuthAdapterInterface,
   AuthAttemptResult,
   AuthRequest,
+  defineAuthAdapter,
   extractBearerToken,
 } from '@concepta/rockets';
 
@@ -364,6 +365,8 @@ export class JwtAdapter implements AuthAdapterInterface {
     }
   }
 }
+
+export const jwtAuth = defineAuthAdapter(JwtAdapter);
 ```
 
 Declare a resource — this is the entire CRUD definition:
@@ -381,42 +384,24 @@ export class PetEntity {
 }
 ```
 
-Add a small TypeORM bootstrap helper in your app — the adapter is
-`@concepta/rockets-repository-typeorm`, but the connection-options wrapper stays
-app-local so core never takes a TypeORM dependency. It implements
-`RepositoryBootstrap` so the planner calls `forRoot(entities)` once from
-`resources[]` + `userMetadata`, without a hand-maintained entity list:
+Create the TypeORM bootstrap at the boundary. The adapter owns the wrapper, so
+applications do not copy infrastructure helpers:
 
 ```typescript
-// src/repository/define-typeorm-repository.ts
-import type { DynamicModule, PlainLiteralObject, Type } from '@nestjs/common';
-import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
-import type { RepositoryBootstrap } from '@concepta/rockets-core';
-import type {
-  DynamicRepositoryModule,
-  RepositoryProviderOptions,
-} from '@concepta/nestjs-repository';
+import { defineTypeOrmRepository } from '@concepta/rockets-repository-typeorm';
 
-export function defineTypeOrmRepository<
-  Connection extends TypeOrmModuleOptions,
->(connection: Connection): RepositoryBootstrap {
-  return {
-    name: 'typeorm-bootstrap',
-    forFeature(entities: RepositoryProviderOptions[]): DynamicRepositoryModule {
-      return TypeOrmRepositoryModule.forFeature(entities);
-    },
-    forRoot(entities: ReadonlyArray<Type<PlainLiteralObject>>): DynamicModule {
-      return TypeOrmModule.forRoot({ ...connection, entities: [...entities] });
-    },
-  };
-}
+const repository = defineTypeOrmRepository({
+  type: 'sqlite',
+  database: ':memory:',
+  synchronize: true,
+  dropSchema: true,
+});
 ```
 
 **Why this exists:** you pass only connection options (`type`, `database`,
 `synchronize`, …). You never maintain
 `entities: [PetEntity, UserMetadataEntity, …]` on `TypeOrmModule.forRoot`. When
-`RocketsModule` boots, the registration planner walks `resources[]`,
+the server boots, the registration planner walks `resources[]`,
 `userMetadata.entity`, and any entities contributed by auth integrations, then
 calls `forRoot(mergedEntities)` once and `forFeature` per table. Services use
 `@InjectDynamicRepository(PetEntity)` and get a `RepositoryInterface<PetEntity>`
@@ -425,41 +410,41 @@ calls `forRoot(mergedEntities)` once and `forFeature` per table. Services use
 Compose the app:
 
 ```typescript
-// src/app.module.ts
-import { Module } from '@nestjs/common';
-import { RocketsModule, defineResource } from '@concepta/rockets';
+// src/server.ts
+import { NestFactory } from '@nestjs/core';
+import { createServer, defineResource } from '@concepta/rockets';
+import { defineTypeOrmRepository } from '@concepta/rockets-repository-typeorm';
 import { OwnerStampHook, OwnerScopeHook } from '@concepta/rockets-core';
-import { JwtAdapter } from './auth/jwt.adapter';
+import { jwtAuth } from './auth/jwt.adapter';
 import { PetEntity } from './pet/pet.entity';
 import { UserMetadataEntity } from './user/user-metadata.entity';
 import { UserMetadataCreateDto, UserMetadataUpdateDto } from './user/dto';
-import { defineTypeOrmRepository } from './repository/define-typeorm-repository';
 
-@Module({
-  imports: [
-    RocketsModule.forRoot({
-      auth: JwtAdapter,
-      userMetadata: {
-        entity: UserMetadataEntity,
-        createDto: UserMetadataCreateDto,
-        updateDto: UserMetadataUpdateDto,
-      },
-      repository: defineTypeOrmRepository({
-        type: 'sqlite',
-        database: ':memory:',
-        synchronize: true,
-        dropSchema: true,
-      }),
-      resources: [
-        defineResource({
-          entity: PetEntity,
-          hooks: [OwnerStampHook.for(PetEntity), OwnerScopeHook.for(PetEntity)],
-        }),
-      ],
+const repository = defineTypeOrmRepository({
+  type: 'sqlite',
+  database: ':memory:',
+  synchronize: true,
+  dropSchema: true,
+});
+
+export const server = createServer({
+  auth: jwtAuth,
+  userMetadata: {
+    entity: UserMetadataEntity,
+    createDto: UserMetadataCreateDto,
+    updateDto: UserMetadataUpdateDto,
+  },
+  repository,
+  resources: [
+    defineResource({
+      entity: PetEntity,
+      hooks: [OwnerStampHook.for(PetEntity), OwnerScopeHook.for(PetEntity)],
     }),
   ],
-})
-export class AppModule {}
+});
+
+const app = await NestFactory.create(server);
+await app.listen(3000);
 ```
 
 Run it:
@@ -486,20 +471,15 @@ Install the same packages as above plus `@concepta/rockets-auth` and the upstrea
 `@concepta/nestjs-*` line (most are transitive dependencies; `yarn install` will
 pull them).
 
-Compose with `defineRocketsAuth()`. Reuse the same `defineTypeOrmRepository`
-helper from path A and pass the **same instance** to both
-`defineRocketsAuth({ persistence: { module: repo } })` and
-`RocketsModule.forRoot({ repository: repo })`. Register auth persistence rows
-via `buildRocketsAuthResources()` on `resources`:
+Compose with `defineRocketsAuth()`. Give it the TypeORM bootstrap once; the
+integration contributes its auth rows, root repository, metadata contract, and
+guard preference to the surrounding server:
 
 ```typescript
 import { Module } from '@nestjs/common';
-import {
-  defineRocketsAuth,
-  buildRocketsAuthResources,
-} from '@concepta/rockets-auth';
+import { defineRocketsAuth } from '@concepta/rockets-auth';
 import { RocketsModule } from '@concepta/rockets';
-import { defineTypeOrmRepository } from './repository/define-typeorm-repository';
+import { defineTypeOrmRepository } from '@concepta/rockets-repository-typeorm';
 
 const repo = defineTypeOrmRepository({
   type: 'sqlite',
@@ -542,18 +522,11 @@ const rocketsAuthInput = {
   }),
 };
 
-const rocketsAuth = defineRocketsAuth(rocketsAuthInput);
-const rocketsAuthResources = buildRocketsAuthResources(
-  rocketsAuthInput.persistence,
-  rocketsAuthInput.invitationEntity,
-);
-
 @Module({
   imports: [
     RocketsModule.forRoot({
-      auth: rocketsAuth,
-      repository: repo,
-      resources: [...rocketsAuthResources /* your defineResource bundles */],
+      auth: defineRocketsAuth(rocketsAuthInput),
+      resources: [/* your application defineResource bundles */],
     }),
   ],
 })
@@ -575,16 +548,17 @@ The monorepo ships runnable sample apps for both paths (`yarn sample:dev` and
 
 `auth` accepts a single `AuthBootstrap` or an array. Each entry is one of:
 
-- `defineFirebaseAuth({ forRoot | forRootAsync })` — Firebase Admin +
+- `defineFirebaseAuth({ firebaseApp })` or the explicit `{ forRootAsync }`
+  variant — Firebase Admin +
   `FirebaseAuthAdapter` (`@concepta/rockets-adapter-firebase`).
-- `defineRocketsAuth(...)` — built-in signup/login stack
-  (`@concepta/rockets-auth`); pair with `buildRocketsAuthResources()` on
-  `resources`.
-- App-local `AuthBootstrap` — `{ adapter, forRoot? }` for custom adapters (see
+- `defineRocketsAuth(...)` — complete built-in signup/login stack and its owned
+  persistence contributions (`@concepta/rockets-auth`).
+- `defineAuthAdapter(Adapter, options?)` — complete host wiring for a custom
+  adapter (see
   `defineApiKeyAuth()` in sample-code-review).
 
-Entity rows for auth-owned tables belong on `resources[]`, not inside the auth
-helper.
+Explicit server options override integration-contributed defaults. Conflicting
+defaults from two integrations fail at startup instead of depending on order.
 
 ```typescript
 import { defineFirebaseAuth } from '@concepta/rockets-adapter-firebase';
@@ -668,11 +642,10 @@ the caller owns the parent via `PathScopeGuard`.
 
 ### Wire TypeORM without hand-registering entities
 
-Use a small app-local `defineTypeOrmRepository` helper (full sample in **Path
-A** above). It implements `RepositoryBootstrap` from `@concepta/rockets-core`
-and wraps `TypeOrmRepositoryModule` from `@concepta/rockets-repository-typeorm`;
-only the helper (your connection options) lives in the app, so core never takes
-a TypeORM dependency. Firestore-only apps skip it and use
+Import `defineTypeOrmRepository` from
+`@concepta/rockets-repository-typeorm`. It implements `RepositoryBootstrap`
+and keeps TypeORM connection concerns in the adapter package while core stays
+storage-agnostic. Firestore-only apps skip it and use
 `@concepta/rockets-repository-firestore` instead.
 
 #### What you declare vs what the framework registers
@@ -737,8 +710,8 @@ No `TypeOrmModule.forFeature([PetEntity])` in feature modules. No
 `@InjectRepository`. If the entity is in the registration plan,
 `@InjectDynamicRepository` resolves at runtime.
 
-**Built-in auth (path B):** pass the **same** `repository` instance to both
-entry points so one connection serves app tables and auth tables:
+**Built-in auth (path B):** pass the repository to `defineRocketsAuth`; its
+composition contribution makes the same connection serve app and auth tables:
 
 ```typescript
 const repository = defineTypeOrmRepository({
@@ -758,7 +731,6 @@ const rocketsAuth = defineRocketsAuth({
 @Module({
   imports: [
     RocketsModule.forRoot({
-      repository,
       auth: rocketsAuth,
       resources: [
         /* pet resources — no per-resource persistence block */
@@ -956,20 +928,20 @@ it: one `RocketsModule.forRoot({ ... })` object is split by
 | `@concepta/nestjs-crud`                                                                         | `@concepta/rockets-core` (re-export)                            | Generated controllers, CQRS commands/queries, default handlers        |
 | `@concepta/nestjs-core`, `@concepta/nestjs-authentication`                                      | `@concepta/rockets-core`                                        | Hook resolution (`CoreModule`), shared exceptions, auth primitives    |
 | `@concepta/nestjs-access-control`                                                               | opt-in `accessControl` option (import symbols from upstream)   | Grant table, `AccessControlGuard`, route decorators                   |
-| `@concepta/nestjs-repository-typeorm`                                                           | `@concepta/rockets-repository-typeorm` (thin wrapper) + app-local bootstrap | SQL adapter — `@concepta/rockets-repository-typeorm`'s main entry re-exports the upstream package verbatim; wrapped by `defineTypeOrmRepository` |
+| `@concepta/nestjs-repository-typeorm`                                                           | `@concepta/rockets-repository-typeorm`                         | SQL adapter plus `defineTypeOrmRepository`, which supplies connection options and accepts the planner-derived entity list |
 | `@concepta/nestjs-user`, `role`, `otp`, `password`, `invitation`, `federated`, `email`, `event` | wired inside `@concepta/rockets-auth`                           | Built-in auth HTTP + persistence rows (path B only)                   |
 
 | Rockets layer               | Role                                                                                                                               |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `@concepta/rockets-core`     | **Planner and contracts**: `defineResource`, `buildAppRegistrationPlan`, `AuthServerGuard`, owner/path hooks, swagger registration |
 | `@concepta/rockets` (server) | **External-auth presentation**: `MeController`, default `APP_GUARD`, `auth` chain merge                                            |
-| `@concepta/rockets-auth`     | **Built-in identity bundle**: `defineRocketsAuth()` + `buildRocketsAuthResources()`                                                |
+| `@concepta/rockets-auth`     | **Built-in identity bundle**: `defineRocketsAuth()` with owned composition contributions                                          |
 
 **Path B uses both** `@concepta/rockets` and `@concepta/rockets-auth`:
-`defineRocketsAuth()` supplies the auth bootstrap; spread
-`buildRocketsAuthResources()` into `resources`;
-`RocketsModule.forRoot({ auth, repository, resources })` still comes from the
-server package. They are sibling packages over core, not parent/child.
+`defineRocketsAuth()` supplies the auth bootstrap plus its persistence,
+metadata, and guard defaults; `createServer({ auth, resources })` (or the
+lower-level `RocketsModule.forRoot`) still comes from the server package. They
+are sibling packages over core, not parent/child.
 
 **Repository injection (upstream contract, Rockets-local decorator):**
 
@@ -995,7 +967,7 @@ configuration façade** — not a fork.
 | **Core re-exports (former `@concepta/rockets-common`)** | `@concepta/rockets-common` was deleted; its helpers (`AuthUser`, `InjectDynamicRepository`, `SwaggerUiModule`, `deriveEntityKey`, …) and upstream re-exports now live inside `@concepta/rockets-core`. This is **not** a replacement for the upstream **app-module** composition pattern — that wiring still lives in Concepta; Rockets adds a **second** entry point (`RocketsModule.forRoot`) that feeds the same motors. |
 | **Port backlog (server path)**  | On v8 today: `core`, `repository`, `crud`, `hook`, `common`, `authentication`, `access-control`. Still on v7 in this monorepo: `swagger-ui` (and `email` / `event` on the auth path) — version-mismatched intentionally and tested in CI.                                                                                                                                                                          |
 | **Repo migration**              | Moving all of `nestjs-modules` into this git repo is **optional** for product validation. Shipping fixes against published `@concepta/*` alphas is fine; monorepo colocation is for AI context and version lock, not a prerequisite to use Rockets.                                                                                                                                             |
-| **Safe to keep building on**    | These are intentional, tested surfaces — not throwaway experiments: `AuthAdapterInterface.authenticate`, `RepositoryInterface` + dynamic repository keys (class **or** string token), `defineResource` / planner-driven entity registration, `defineRocketsAuth({ persistence: { module } })` sharing one `repository` instance with `RocketsModule.forRoot`.                                   |
+| **Safe to keep building on**    | These are intentional, tested surfaces — not throwaway experiments: `createServer`, `AuthAdapterInterface.authenticate`, `RepositoryInterface` + dynamic repository keys (class **or** string token), `defineResource` / planner-driven entity registration, and complete `defineRocketsAuth({ persistence })` contributions.                                   |
 
 **Custom validation / business rules:** use `defineHook` from
 `@concepta/rockets-core` for simple entity lifecycle rules, upstream
@@ -1008,12 +980,12 @@ to 4xx — a bare `Error` in a hook often surfaces as 500.
 
 | Package                                 | npm name                                | Purpose                                                                                                                                                                                                                            | Docs                                                      | Status  |
 | --------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------- | ------- |
-| `packages/rockets-core`                 | `@concepta/rockets-core`                 | Composition planner. Auth chain, `buildAppRegistrationPlan`, `defineResource` / `defineModuleResource` / `defineSubResource`, `defineHook`, owner/path hooks, swagger registration, shared helpers, zod layer at `@concepta/rockets-core/zod`, opt-in `accessControl`. | [README](packages/rockets-core/README.md)                 | stable  |
-| `packages/rockets-repository-typeorm`   | `@concepta/rockets-repository-typeorm`   | TypeORM adapter for the dynamic repository contract — a thin wrapper whose main entry re-exports upstream `@concepta/nestjs-repository-typeorm` verbatim, plus the zod `SchemaEntityCompiler` at `@concepta/rockets-repository-typeorm/zod`.                              | [README](packages/rockets-repository-typeorm/README.md)   | stable  |
+| `packages/rockets-core`                 | `@concepta/rockets-core`                 | Composition planner. Auth chain, `buildAppRegistrationPlan`, `defineResource` / `defineModuleResource` / `defineSubResource`, `defineHook`, owner/path hooks, swagger registration, shared helpers, zod layer at `@concepta/rockets-core/zod`, opt-in `accessControl`. | [README](packages/rockets-core/README.md)                 | preview |
+| `packages/rockets-repository-typeorm`   | `@concepta/rockets-repository-typeorm`   | TypeORM adapter and `defineTypeOrmRepository` bootstrap for planner-derived entity registration, plus the zod `SchemaEntityCompiler` at `@concepta/rockets-repository-typeorm/zod`.                                                                                   | [README](packages/rockets-repository-typeorm/README.md)   | preview |
 | `packages/rockets-repository-firestore` | `@concepta/rockets-repository-firestore` | Firestore adapter implementing `RepositoryAdapter`. Per-entity opt-in.                                                                                                                                                             | [README](packages/rockets-repository-firestore/README.md) | preview |
 | `packages/rockets-adapter-firebase`     | `@concepta/rockets-adapter-firebase`     | Firebase Auth adapter implementing `AuthAdapterInterface`.                                                                                                                                                                         | [README](packages/rockets-adapter-firebase/README.md)     | preview |
-| `packages/rockets-server`               | `@concepta/rockets`                      | External-auth presentation layer. `MeController`, `APP_GUARD` opt-in, `auth` chain.                                                                                                                                                | [README](packages/rockets-server/README.md)               | stable  |
-| `packages/rockets-server-auth`          | `@concepta/rockets-auth`                 | Built-in auth: signup, login, OTP, recovery, invitations, roles, admin user CRUD. `defineRocketsAuth()`.                                                                                                                           | [README](packages/rockets-server-auth/README.md)          | alpha   |
+| `packages/rockets-server`               | `@concepta/rockets`                      | Launch-facing `createServer`, external-auth presentation, optional `/me`, default guard, and auth chain.                                                                                                                            | [README](packages/rockets-server/README.md)               | preview |
+| `packages/rockets-server-auth`          | `@concepta/rockets-auth`                 | Built-in auth: signup, login, recovery, OTP, invitations, roles, throttling, and admin user CRUD.                                                                                                                                   | [README](packages/rockets-server-auth/README.md)          | preview |
 
 ### Repository layout
 
@@ -1035,8 +1007,9 @@ rockets/
 - **Rockets packages**: `0.0.1-dev.0` on npm
   (`yarn add @concepta/rockets@alpha`, or pin `0.0.1-dev.0`). Monorepo packages
   keep `workspace:^` for local development.
-- **Upstream Concepta packages**: v8 line at `8.0.0-alpha.7` (`nestjs-common` /
-  `nestjs-hook` at `8.0.0-alpha.6`). Two modules still on v7
+- **Upstream Concepta packages**: v8 modules are pinned to `8.0.0-alpha.8`;
+  `@concepta/nestjs-common` remains at its latest published v8 build,
+  `8.0.0-alpha.6`. Two modules remain on v7
   (`@concepta/nestjs-email`, `@concepta/nestjs-event`) pending the v8 port.
   Swagger UI ships from `@concepta/rockets-core`. Auth persistence entities are
   app-owned TypeORM classes — do not use `@concepta/nestjs-typeorm-ext`.
@@ -1044,13 +1017,14 @@ rockets/
   `testing`); satellite packages (`cqrs`, `typeorm`, `jwt`, `passport`,
   `config`, `throttler`) remain on their current stable majors until a Nest 12
   line is published.
-- **Node**: `>=18.0.0`.
+- **Node**: `>=20.0.0` (the minimum supported by NestJS 12).
 
 ### Common scripts (from the monorepo root)
 
 | Command                       | Purpose                                                                                                    |
 | ----------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `yarn publish:conceptadev`    | Build + publish all `@concepta/*` packages to npm (`--tag alpha`).                                      |
+| `yarn release:check`          | Run the complete build, package, type, lint, unit, e2e, and sample release gate.                           |
+| `yarn release:dry`            | Build publish archives for every public `@concepta/*` workspace without publishing.                       |
 | `yarn install && yarn build`  | Bootstrap + compile every local `@concepta/*` package.                                                      |
 | `yarn test`                   | Unit tests (Vitest).                                                                                       |
 | `yarn typecheck:spec`         | Type-checks test files — the runner only transpiles them.                                                  |
@@ -1060,7 +1034,6 @@ rockets/
 | `yarn sample:dev`             | Run `sample-server` in watch mode.                                                                         |
 | `yarn sample-auth:dev`        | Run `sample-server-auth` in watch mode.                                                                    |
 | `yarn sample-code-review:dev` | Build + run the full-stack example.                                                                        |
-| `yarn generate-swagger`       | Dump the OpenAPI spec from `sample-server-auth`.                                                           |
 
 ---
 

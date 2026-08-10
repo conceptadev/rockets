@@ -1,5 +1,5 @@
 import type { AuthBootstrap } from '@concepta/rockets-core';
-import { defineModuleResource } from '@concepta/rockets-core';
+import { defineAuthAdapter, defineModuleResource } from '@concepta/rockets-core';
 import { UserEntity } from './user.entity';
 import { AuthController } from './auth.controller';
 import { SampleAuthAdapter } from './auth.adapter';
@@ -14,13 +14,7 @@ export const sampleAuthUserResource = defineModuleResource({
  * `RocketsModule.forRoot({ resources: [...] })`.
  */
 export function defineSampleAuth(): AuthBootstrap<SampleAuthAdapter> {
-  return {
-    adapter: SampleAuthAdapter,
-    forRoot: () => ({
-      module: class SampleAuthHostModule {},
-      providers: [SampleAuthAdapter],
-      controllers: [AuthController],
-      exports: [SampleAuthAdapter],
-    }),
-  };
+  return defineAuthAdapter(SampleAuthAdapter, {
+    controllers: [AuthController],
+  });
 }

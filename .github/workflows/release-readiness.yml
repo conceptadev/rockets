@@ -1,0 +1,32 @@
+name: release-readiness
+
+on:
+  pull_request:
+    branches: ['main']
+  push:
+    branches: ['main']
+
+jobs:
+  release-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enable Corepack
+        run: corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: yarn
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Cache Firestore emulator
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/firebase/emulators
+          key: firestore-emulator-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+      - name: Install
+        run: corepack yarn install --immutable
+      - name: Release readiness
+        run: corepack yarn release:check
