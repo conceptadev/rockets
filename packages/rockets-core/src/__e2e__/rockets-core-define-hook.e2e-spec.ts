@@ -48,7 +48,7 @@ import { USER_METADATA_MODULE_ENTITY_KEY } from '../rockets-core.constants';
 import { AuthServerGuard } from '../infrastructure/guards/auth-server.guard';
 import { RocketsCoreExceptionsFilter } from '../infrastructure/filters/exceptions.filter';
 import { defineResource } from '../infrastructure/resource/define-resource';
-import { createStubAuthBootstrap } from '../infrastructure/auth/create-stub-auth-bootstrap';
+import { defineAuthAdapter } from '../infrastructure/auth/define-auth-adapter';
 import { defineHook } from '../infrastructure/hooks/define-hook';
 
 // ── Auth fixture ──
@@ -200,7 +200,7 @@ describe('defineHook — functional entity hook (e2e)', () => {
         }),
         MetaModule,
         RocketsCoreModule.forRoot({
-          auth: createStubAuthBootstrap(StubAuthAdapter),
+          auth: defineAuthAdapter(StubAuthAdapter),
           providers: [StubAuthAdapter],
           repository: TypeOrmRepositoryModule,
           resources: [thingResource, otherResource],

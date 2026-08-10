@@ -23,7 +23,6 @@
     "src/**/__e2e__/**"
   ],
   "references": [
-    { "path": "../rockets-core" },
-    { "path": "../rockets-repository-typeorm" }
+    { "path": "../rockets-core" }
   ]
 }

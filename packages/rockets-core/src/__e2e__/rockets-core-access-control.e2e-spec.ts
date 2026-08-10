@@ -35,7 +35,7 @@ import { USER_METADATA_MODULE_ENTITY_KEY } from '../rockets-core.constants';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthServerGuard } from '../infrastructure/guards/auth-server.guard';
 import { defineResource } from '../infrastructure/resource/define-resource';
-import { createStubAuthBootstrap } from '../infrastructure/auth/create-stub-auth-bootstrap';
+import { defineAuthAdapter } from '../infrastructure/auth/define-auth-adapter';
 
 // ── Fixtures ──
 
@@ -147,7 +147,7 @@ describe('RocketsCoreModule — opt-in accessControl (e2e)', () => {
         }),
         MetaRepoModule,
         RocketsCoreModule.forRoot({
-          auth: createStubAuthBootstrap(RoleAuthProvider),
+          auth: defineAuthAdapter(RoleAuthProvider),
           providers: [RoleAuthProvider],
           repository: TypeOrmRepositoryModule,
           resources: [

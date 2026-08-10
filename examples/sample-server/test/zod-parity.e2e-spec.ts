@@ -11,8 +11,8 @@ import request from 'supertest';
 import {
   ExceptionsFilter,
   RocketsModule,
-  defineTypeOrmRepository,
 } from '@concepta/rockets';
+import { defineTypeOrmRepository } from '@concepta/rockets-repository-typeorm';
 import type { ResourceInput } from '@concepta/rockets';
 import {
   UserMetadataCreateDto,

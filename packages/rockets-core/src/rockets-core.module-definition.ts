@@ -201,6 +201,27 @@ function createCoreProviders(options: {
     providers.push(...buildAuthChainProviders(authBootstraps));
   }
 
+  // Gate each handler on its own override, falling back to the built-in only
+  // when a metadata contract exists. The defaults inject the user-metadata
+  // dynamic repository, which is registered only via `userMetadata` — pulling
+  // one in because the *other* handler was overridden would fail DI at boot.
+  const hasUserMetadata = options.extras?.userMetadata !== undefined;
+  const userMetadataProviders: Provider[] = [];
+
+  const upsertUserMetadata =
+    options.extras?.handlers?.upsertUserMetadata ??
+    (hasUserMetadata ? UpsertUserMetadataHandler : undefined);
+  if (upsertUserMetadata !== undefined) {
+    userMetadataProviders.push(upsertUserMetadata);
+  }
+
+  const getUserMetadata =
+    options.extras?.handlers?.getUserMetadata ??
+    (hasUserMetadata ? GetUserMetadataHandler : undefined);
+  if (getUserMetadata !== undefined) {
+    userMetadataProviders.push(getUserMetadata);
+  }
+
   return [
     ...providers,
     AuthServerGuard,
@@ -214,8 +235,7 @@ function createCoreProviders(options: {
     // zod constraints — this interceptor fills the gap without importing nestjs-zod.
     { provide: APP_INTERCEPTOR, useClass: ZodBodyValidationInterceptor },
     // Built-in user-metadata CQRS (override in `extras.handlers` if you need to customize storage)
-    options.extras?.handlers?.upsertUserMetadata ?? UpsertUserMetadataHandler,
-    options.extras?.handlers?.getUserMetadata ?? GetUserMetadataHandler,
+    ...userMetadataProviders,
     ...(options.extras?.providers ?? []),
     ...extractResourceProviders(options.plan.crudResources),
   ];

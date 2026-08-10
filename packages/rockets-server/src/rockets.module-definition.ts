@@ -5,7 +5,14 @@ import {
   Provider,
 } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
-import type { AuthBootstrap } from '@concepta/rockets-core';
+import type {
+  AuthBootstrap,
+  AuthBootstrapContributions,
+  RepositoryBootstrap,
+  RepositoryModuleInterface,
+  ResourceInput,
+  RocketsUserMetadataConfig,
+} from '@concepta/rockets-core';
 import {
   RocketsCoreModule,
   AuthServerGuard,
@@ -38,6 +45,80 @@ export function normalizeAuthBootstraps(
     return [...auth];
   }
   return [auth];
+}
+
+export interface ResolvedRocketsComposition {
+  readonly auth: ReadonlyArray<AuthBootstrap>;
+  readonly resources: ReadonlyArray<ResourceInput>;
+  readonly userMetadata?: RocketsUserMetadataConfig;
+  readonly repository?: RepositoryModuleInterface | RepositoryBootstrap;
+  readonly enableGlobalGuard?: boolean;
+}
+
+function resolveSingleContribution<
+  Key extends Exclude<keyof AuthBootstrapContributions, 'resources'>,
+>(
+  bootstraps: ReadonlyArray<AuthBootstrap>,
+  key: Key,
+): AuthBootstrapContributions[Key] | undefined {
+  const values = bootstraps
+    .map((bootstrap) => bootstrap.contributes?.[key])
+    .filter(
+      (value): value is NonNullable<AuthBootstrapContributions[Key]> =>
+        value !== undefined,
+    );
+  if (values.length === 0) return undefined;
+
+  const first = values[0];
+  if (values.some((value) => value !== first)) {
+    throw new Error(
+      `RocketsModule: auth integrations contributed conflicting ${String(
+        key,
+      )} defaults. Set extras.${String(
+        key,
+      )} explicitly to resolve the conflict.`,
+    );
+  }
+  return first;
+}
+
+/** Resolve integration-owned defaults once before building the Nest module. */
+export function resolveRocketsComposition(
+  extras: RocketsOptionsExtrasInterface = {},
+): ResolvedRocketsComposition {
+  const auth = normalizeAuthBootstraps(extras.auth);
+  const enableGlobalGuard =
+    extras.enableGlobalGuard ??
+    resolveSingleContribution(auth, 'enableGlobalGuard');
+
+  // A contribution may swap the global guard, never remove it: honoring a
+  // contributed `false` with no declared replacement would silently publish
+  // every route. Opting out of a guard entirely is the app's call alone.
+  if (
+    enableGlobalGuard === false &&
+    extras.enableGlobalGuard !== false &&
+    !auth.some((bootstrap) => bootstrap.contributes?.providesAppGuard === true)
+  ) {
+    throw new Error(
+      'RocketsModule: an auth integration contributed enableGlobalGuard: ' +
+        'false without declaring a replacement guard ' +
+        '(contributes.providesAppGuard). For an intentionally public API, ' +
+        'set enableGlobalGuard: false explicitly on the module options.',
+    );
+  }
+
+  return {
+    auth,
+    resources: [
+      ...auth.flatMap((bootstrap) => bootstrap.contributes?.resources ?? []),
+      ...(extras.resources ?? []),
+    ],
+    userMetadata:
+      extras.userMetadata ?? resolveSingleContribution(auth, 'userMetadata'),
+    repository:
+      extras.repository ?? resolveSingleContribution(auth, 'repository'),
+    enableGlobalGuard,
+  };
 }
 
 export const {
@@ -92,6 +173,7 @@ export function createRocketsImports(options: {
   imports: NonNullable<DynamicModule['imports']>;
   extras?: RocketsOptionsExtrasInterface;
 }): NonNullable<DynamicModule['imports']> {
+  const composition = resolveRocketsComposition(options.extras);
   return [
     ...options.imports,
     RocketsCoreModule.forRootAsync({
@@ -99,10 +181,10 @@ export function createRocketsImports(options: {
       useFactory: (opts: RocketsOptionsInterface) => ({
         swagger: opts.swagger,
       }),
-      auth: normalizeAuthBootstraps(options.extras?.auth),
-      userMetadata: options.extras?.userMetadata,
-      repository: options.extras?.repository,
-      resources: options.extras?.resources ?? [],
+      auth: composition.auth,
+      userMetadata: composition.userMetadata,
+      repository: composition.repository,
+      resources: composition.resources,
       handlers: options.extras?.handlers,
       accessControl: options.extras?.accessControl,
       global: true,
@@ -119,9 +201,10 @@ export function createRocketsControllers(options: {
   }
 
   const disableController = options.extras?.disableController ?? {};
+  const composition = resolveRocketsComposition(options.extras);
   const controllers: DynamicModule['controllers'] = [];
 
-  if (!disableController.me) {
+  if (composition.userMetadata && !disableController.me) {
     controllers.push(MeController);
   }
 
@@ -156,28 +239,21 @@ export function createRocketsProviders(options: {
   providers?: Provider[];
   extras?: RocketsOptionsExtrasInterface;
 }): Provider[] {
-  const extrasUserMetadata = options.extras?.userMetadata;
+  const composition = resolveRocketsComposition(options.extras);
+  const extrasUserMetadata = composition.userMetadata;
   const providers: Provider[] = [
     ...(options.providers ?? []),
     createRocketsSettingsProvider(),
-    {
-      provide: ROCKETS_USER_METADATA_DTO_TOKEN,
-      useFactory: () => {
-        if (extrasUserMetadata) {
-          return {
-            updateDto: extrasUserMetadata.updateDto,
-          };
-        }
-        throw new Error(
-          'RocketsModule: user-metadata config is required. Set ' +
-            '`extras.userMetadata` to a `RocketsUserMetadataConfig` with `entity`, ' +
-            '`createDto`, and `updateDto`.',
-        );
-      },
-    },
   ];
 
-  if (options.extras?.enableGlobalGuard !== false) {
+  if (extrasUserMetadata) {
+    providers.push({
+      provide: ROCKETS_USER_METADATA_DTO_TOKEN,
+      useValue: { updateDto: extrasUserMetadata.updateDto },
+    });
+  }
+
+  if (composition.enableGlobalGuard !== false) {
     providers.push({
       provide: APP_GUARD,
       useClass: AuthServerGuard,

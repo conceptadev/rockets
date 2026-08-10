@@ -50,7 +50,7 @@ describe('FirebaseAuthAdapter + AuthServerGuard (integration)', () => {
 
   beforeAll(async () => {
     const bootstrap = defineFirebaseAuth({
-      forRoot: { verifier: StubVerifier },
+      verifier: StubVerifier,
     });
 
     const moduleRef = await Test.createTestingModule({

@@ -25,7 +25,7 @@ import { extractBearerToken } from '../infrastructure/auth/extract-bearer-token'
 import type { RepositoryBootstrap } from '../domain/interfaces/repository-bootstrap.interface';
 import { RocketsCoreModule } from '../rockets-core.module';
 import { defineModuleResource } from '../infrastructure/resource/define-module-resource';
-import { createStubAuthBootstrap } from '../infrastructure/auth/create-stub-auth-bootstrap';
+import { defineAuthAdapter } from '../infrastructure/auth/define-auth-adapter';
 
 // ────────────────────────────────────────────────────────────────────
 // Fixtures
@@ -169,7 +169,7 @@ describe('RocketsCoreModule — RepositoryBootstrap.forRoot wiring (e2e)', () =>
     const moduleRef = await Test.createTestingModule({
       imports: [
         RocketsCoreModule.forRoot({
-          auth: createStubAuthBootstrap(StubAuthAdapter),
+          auth: defineAuthAdapter(StubAuthAdapter),
           repository: fakeBootstrap,
           userMetadata: metadataConfig,
         }),
@@ -193,7 +193,7 @@ describe('RocketsCoreModule — RepositoryBootstrap.forRoot wiring (e2e)', () =>
     const moduleRef = await Test.createTestingModule({
       imports: [
         RocketsCoreModule.forRoot({
-          auth: createStubAuthBootstrap(StubAuthAdapter),
+          auth: defineAuthAdapter(StubAuthAdapter),
           repository: fakeBootstrap,
           userMetadata: metadataConfig,
           resources: [widgetFeature, gadgetFeature],
@@ -232,7 +232,7 @@ describe('RocketsCoreModule — RepositoryBootstrap.forRoot wiring (e2e)', () =>
     const moduleRef = await Test.createTestingModule({
       imports: [
         RocketsCoreModule.forRoot({
-          auth: createStubAuthBootstrap(StubAuthAdapter),
+          auth: defineAuthAdapter(StubAuthAdapter),
           repository: fakeBootstrap,
           userMetadata: metadataConfig,
           resources: [widgetFeature, analyticsFeature],
@@ -289,7 +289,7 @@ describe('RocketsCoreModule — RepositoryBootstrap.forRoot wiring (e2e)', () =>
     const moduleRef = await Test.createTestingModule({
       imports: [
         RocketsCoreModule.forRoot({
-          auth: createStubAuthBootstrap(StubAuthAdapter),
+          auth: defineAuthAdapter(StubAuthAdapter),
           repository: fakeBootstrap,
           userMetadata: metadataConfig,
           resources: [widgetFeature, analyticsFeature],
@@ -311,7 +311,7 @@ describe('RocketsCoreModule — RepositoryBootstrap.forRoot wiring (e2e)', () =>
     const moduleRef = await Test.createTestingModule({
       imports: [
         RocketsCoreModule.forRoot({
-          auth: createStubAuthBootstrap(StubAuthAdapter),
+          auth: defineAuthAdapter(StubAuthAdapter),
           repository: altAdapter,
           userMetadata: metadataConfig,
         }),

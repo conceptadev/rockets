@@ -39,12 +39,15 @@ export class AuthServerGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const isDisabled = this.reflector.getAllAndOverride<boolean>(
+    const isDisabled = this.reflector.getAllAndOverride<boolean | 'classLevel'>(
       ROCKETS_DISABLE_GUARDS_TOKEN,
       [context.getHandler(), context.getClass()],
     );
 
-    if (isDisabled === true) {
+    // Upstream AuthPublic({ classLevel: true }) deliberately stores the
+    // sentinel `classLevel` instead of `true` so its own guard can distinguish
+    // an explicit class-wide choice from an accidental one.
+    if (isDisabled === true || isDisabled === 'classLevel') {
       return true;
     }
 

@@ -33,7 +33,7 @@ import type {
   AuthRequest,
 } from '../domain/interfaces/auth-adapter.interface';
 import { extractBearerToken } from '../infrastructure/auth/extract-bearer-token';
-import { createStubAuthBootstrap } from '../infrastructure/auth/create-stub-auth-bootstrap';
+import { defineAuthAdapter } from '../infrastructure/auth/define-auth-adapter';
 import { InjectDynamicRepository } from '../common';
 import type {
   UserMetadataCreatableInterface,
@@ -173,7 +173,7 @@ describe('RocketsCoreModule + defineModuleResource (e2e)', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         RocketsCoreModule.forRoot({
-          auth: createStubAuthBootstrap(FeatureE2eAuthAdapter),
+          auth: defineAuthAdapter(FeatureE2eAuthAdapter),
           providers: [FeatureE2eAuthAdapter],
           userMetadata: featureUserMetadataConfig,
           repository: DEFAULT_FAKE_ADAPTER,
@@ -218,7 +218,7 @@ describe('RocketsCoreModule + defineModuleResource (e2e)', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         RocketsCoreModule.forRoot({
-          auth: createStubAuthBootstrap(FeatureE2eAuthAdapter),
+          auth: defineAuthAdapter(FeatureE2eAuthAdapter),
           providers: [FeatureE2eAuthAdapter],
           userMetadata: featureUserMetadataConfig,
           repository: DEFAULT_FAKE_ADAPTER,
@@ -255,7 +255,7 @@ describe('RocketsCoreModule + defineModuleResource (e2e)', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         RocketsCoreModule.forRoot({
-          auth: createStubAuthBootstrap(FeatureE2eAuthAdapter),
+          auth: defineAuthAdapter(FeatureE2eAuthAdapter),
           providers: [FeatureE2eAuthAdapter],
           userMetadata: featureUserMetadataConfig,
           repository: DEFAULT_FAKE_ADAPTER,
@@ -294,7 +294,7 @@ describe('RocketsCoreModule + defineModuleResource (e2e)', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         RocketsCoreModule.forRoot({
-          auth: createStubAuthBootstrap(FeatureE2eAuthAdapter),
+          auth: defineAuthAdapter(FeatureE2eAuthAdapter),
           providers: [FeatureE2eAuthAdapter],
           userMetadata: featureUserMetadataConfig,
           repository: DEFAULT_FAKE_ADAPTER,

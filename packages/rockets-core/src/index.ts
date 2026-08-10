@@ -118,8 +118,12 @@ export {
 export type { DefineModuleResourceInput } from './infrastructure/resource/define-module-resource';
 
 // Auth bootstrap (light / external auth wiring)
-export type { AuthBootstrap } from './domain/interfaces/auth-bootstrap.interface';
-export { createStubAuthBootstrap } from './infrastructure/auth/create-stub-auth-bootstrap';
+export type {
+  AuthBootstrap,
+  AuthBootstrapContributions,
+} from './domain/interfaces/auth-bootstrap.interface';
+export { defineAuthAdapter } from './infrastructure/auth/define-auth-adapter';
+export type { DefineAuthAdapterOptions } from './infrastructure/auth/define-auth-adapter';
 
 // Resource config & definition API
 export type { RocketsResourceConfig } from './domain/interfaces/rockets-resource.interface';

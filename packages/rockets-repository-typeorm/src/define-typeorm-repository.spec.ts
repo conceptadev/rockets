@@ -1,7 +1,11 @@
-import { vi, describe, it, expect, afterEach } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { TypeOrmModule, type TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
-import { defineTypeOrmRepository } from './define-typeorm-repository';
+import { TypeOrmRepositoryModule } from '@concepta/nestjs-repository-typeorm';
+
+// Imported from the package index (not the module directly) so this spec fails
+// to compile if `defineTypeOrmRepository` stops being part of the public
+// surface — the bootstrap is owned by this package, not the server.
+import { defineTypeOrmRepository } from './index';
 
 type TypeOrmRepositoryFeatureInput = Parameters<
   typeof TypeOrmRepositoryModule.forFeature
@@ -15,11 +19,9 @@ class TypeOrmRepositorySpecEntity {
 }
 
 describe('defineTypeOrmRepository', () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
+  afterEach(() => vi.restoreAllMocks());
 
-  it('delegates feature registration to TypeOrmRepositoryModule', () => {
+  it('is owned by the TypeORM adapter package and delegates feature registration', () => {
     const repository = defineTypeOrmRepository({
       type: 'sqlite',
       database: ':memory:',

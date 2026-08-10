@@ -9,10 +9,7 @@ import type {
   AuthAttemptResult,
   AuthRequest,
 } from '@concepta/rockets-core';
-import {
-  createStubAuthBootstrap,
-  extractBearerToken,
-} from '@concepta/rockets-core';
+import { defineAuthAdapter, extractBearerToken } from '@concepta/rockets-core';
 import type {
   UserMetadataCreatableInterface,
   UserMetadataModelUpdatableInterface,
@@ -150,7 +147,7 @@ function buildApp(adapter: Type<AuthAdapterInterface>) {
   return Test.createTestingModule({
     imports: [
       RocketsModule.forRoot({
-        auth: createStubAuthBootstrap(adapter),
+        auth: defineAuthAdapter(adapter),
         userMetadata: {
           entity: StubUserMetadataEntity,
           createDto: UserMetadataCreateDto,
@@ -166,7 +163,7 @@ function buildChainApp(adapters: ReadonlyArray<Type<AuthAdapterInterface>>) {
   return Test.createTestingModule({
     imports: [
       RocketsModule.forRoot({
-        auth: adapters.map((entry) => createStubAuthBootstrap(entry)),
+        auth: adapters.map((entry) => defineAuthAdapter(entry)),
         userMetadata: {
           entity: StubUserMetadataEntity,
           createDto: UserMetadataCreateDto,

@@ -9,20 +9,23 @@ import { FirebaseAuthModule } from '../modules/firebase-auth.module';
  * Input for {@link defineFirebaseAuth}.
  *
  * Choose exactly one wiring shape:
- *  - `forRoot` — sync options (`FirebaseAuthModule.forRoot` payload).
+ *  - flat sync options (`FirebaseAuthModule.forRoot` payload).
  *  - `forRootAsync` — async options (`FirebaseAuthModule.forRootAsync` payload).
  *
  * Auth-owned entities belong in app `resources[]`, not here.
  */
 export type DefineFirebaseAuthInput =
-  | Readonly<{
-      forRoot: FirebaseAuthModuleOptions;
+  | (Readonly<FirebaseAuthModuleOptions> & {
       forRootAsync?: never;
-    }>
-  | Readonly<{
-      forRootAsync: FirebaseAuthModuleAsyncOptions;
-      forRoot?: never;
-    }>;
+    })
+  // The sync keys are derived from `FirebaseAuthModuleOptions` rather than
+  // listed by hand, so adding an option cannot silently leave a hole that
+  // lets a sync key ride along with `forRootAsync` and get dropped.
+  | Readonly<
+      {
+        forRootAsync: FirebaseAuthModuleAsyncOptions;
+      } & Partial<Record<keyof FirebaseAuthModuleOptions, never>>
+    >;
 
 /**
  * Build an {@link AuthBootstrap} that wires `FirebaseAuthModule` into core.
@@ -33,8 +36,8 @@ export function defineFirebaseAuth(
   return {
     adapter: FirebaseAuthAdapter,
     forRoot: () =>
-      input.forRootAsync !== undefined
+      'forRootAsync' in input && input.forRootAsync !== undefined
         ? FirebaseAuthModule.forRootAsync(input.forRootAsync)
-        : FirebaseAuthModule.forRoot(input.forRoot),
+        : FirebaseAuthModule.forRoot(input),
   };
 }
