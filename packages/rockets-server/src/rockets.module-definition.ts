@@ -87,6 +87,26 @@ export function resolveRocketsComposition(
   extras: RocketsOptionsExtrasInterface = {},
 ): ResolvedRocketsComposition {
   const auth = normalizeAuthBootstraps(extras.auth);
+  const enableGlobalGuard =
+    extras.enableGlobalGuard ??
+    resolveSingleContribution(auth, 'enableGlobalGuard');
+
+  // A contribution may swap the global guard, never remove it: honoring a
+  // contributed `false` with no declared replacement would silently publish
+  // every route. Opting out of a guard entirely is the app's call alone.
+  if (
+    enableGlobalGuard === false &&
+    extras.enableGlobalGuard !== false &&
+    !auth.some((bootstrap) => bootstrap.contributes?.providesAppGuard === true)
+  ) {
+    throw new Error(
+      'RocketsModule: an auth integration contributed enableGlobalGuard: ' +
+        'false without declaring a replacement guard ' +
+        '(contributes.providesAppGuard). For an intentionally public API, ' +
+        'set enableGlobalGuard: false explicitly on the module options.',
+    );
+  }
+
   return {
     auth,
     resources: [
@@ -97,9 +117,7 @@ export function resolveRocketsComposition(
       extras.userMetadata ?? resolveSingleContribution(auth, 'userMetadata'),
     repository:
       extras.repository ?? resolveSingleContribution(auth, 'repository'),
-    enableGlobalGuard:
-      extras.enableGlobalGuard ??
-      resolveSingleContribution(auth, 'enableGlobalGuard'),
+    enableGlobalGuard,
   };
 }
 

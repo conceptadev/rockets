@@ -19,6 +19,7 @@ import {
   createRocketsImports,
   createRocketsProviders,
   createRocketsExports,
+  resolveRocketsComposition,
 } from './rockets.module-definition';
 import {
   RAW_OPTIONS_TOKEN,
@@ -62,6 +63,7 @@ function contributedAuth(
       resources: [contributedResource],
       userMetadata: contributedUserMetadata,
       enableGlobalGuard: false,
+      providesAppGuard: true,
       ...overrides,
     },
   } as AuthBootstrap;
@@ -204,6 +206,63 @@ describe('RocketsModuleDefinition', () => {
         updateDto: ContributedMetadataUpdateDto,
       });
       expect(guardProvider).toBeUndefined();
+    });
+
+    it('explicit enableGlobalGuard: true beats a contributed false', () => {
+      const result = createRocketsProviders({
+        extras: { auth: contributedAuth(), enableGlobalGuard: true },
+      });
+      const guardProvider = result.find(
+        (provider) =>
+          typeof provider === 'object' &&
+          'provide' in provider &&
+          provider.provide === APP_GUARD,
+      );
+
+      expect(guardProvider).toBeDefined();
+    });
+  });
+
+  describe('resolveRocketsComposition', () => {
+    it('throws when integrations contribute conflicting userMetadata', () => {
+      const otherUserMetadata = {
+        ...contributedUserMetadata,
+        updateDto: class OtherMetadataUpdateDto extends ContributedMetadataUpdateDto {},
+      };
+
+      expect(() =>
+        resolveRocketsComposition({
+          auth: [
+            contributedAuth(),
+            contributedAuth({ userMetadata: otherUserMetadata }),
+          ],
+        }),
+      ).toThrow(/conflicting userMetadata/);
+    });
+
+    it('throws when a contribution disables the guard without providing one', () => {
+      expect(() =>
+        resolveRocketsComposition({
+          auth: contributedAuth({ providesAppGuard: undefined }),
+        }),
+      ).toThrow(/providesAppGuard/);
+    });
+
+    it('accepts a contributed guard swap (enableGlobalGuard false + providesAppGuard)', () => {
+      const composition = resolveRocketsComposition({
+        auth: contributedAuth(),
+      });
+
+      expect(composition.enableGlobalGuard).toBe(false);
+    });
+
+    it('accepts an explicit app-level opt-out even without a replacement guard', () => {
+      const composition = resolveRocketsComposition({
+        auth: contributedAuth({ providesAppGuard: undefined }),
+        enableGlobalGuard: false,
+      });
+
+      expect(composition.enableGlobalGuard).toBe(false);
     });
   });
 
