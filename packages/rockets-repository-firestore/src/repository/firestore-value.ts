@@ -227,8 +227,8 @@ function compareMaps(
   right: Record<string, unknown>,
   field?: string,
 ): number {
-  const leftKeys = Object.keys(left).sort();
-  const rightKeys = Object.keys(right).sort();
+  const leftKeys = Object.keys(left).sort(compareStrings);
+  const rightKeys = Object.keys(right).sort(compareStrings);
   const commonLength = Math.min(leftKeys.length, rightKeys.length);
 
   for (let index = 0; index < commonLength; index += 1) {
