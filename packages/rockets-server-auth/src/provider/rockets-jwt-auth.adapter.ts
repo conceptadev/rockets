@@ -70,6 +70,10 @@ export class RocketsJwtAuthAdapter implements AuthAdapterInterface {
     }
 
     const user = userAggregateToEntity(userResult);
+    if (user.active !== true) {
+      this.logger.warn(`Inactive user rejected for subject: ${payload.sub}`);
+      throw new UnauthorizedException('User is inactive');
+    }
     const userRoles = await resolveUserRoles(this.queryBus, ctx, user.id);
 
     this.logger.log(`Successfully validated token for user: ${payload.sub}`);

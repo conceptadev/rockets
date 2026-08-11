@@ -197,9 +197,7 @@ function createCoreProviders(options: {
   ];
 
   const authBootstraps = normalizeAuthBootstraps(options.extras?.auth);
-  if (authBootstraps.length > 0) {
-    providers.push(...buildAuthChainProviders(authBootstraps));
-  }
+  providers.push(...buildAuthChainProviders(authBootstraps));
 
   // Gate each handler on its own override, falling back to the built-in only
   // when a metadata contract exists. The defaults inject the user-metadata

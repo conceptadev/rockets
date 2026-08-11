@@ -10,7 +10,8 @@ import type { ResourceInput } from '../../infrastructure/resource/planner/app-re
  * the persistence rows, root repository, and user-metadata contract for the
  * single user space every adapter in the chain authenticates into. At most
  * ONE bootstrap per app may carry this — the server rejects two owners at
- * composition time. Explicit options on `RocketsModule` still win.
+ * composition time. Explicit `RocketsModule` values override the single
+ * owner's values; they do not make multiple owners valid.
  *
  * Resolved by `@concepta/rockets` (`createServer` / `RocketsModule`);
  * `RocketsCoreModule` does not read it.

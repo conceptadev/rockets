@@ -2,6 +2,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { Controller, Get, INestApplication, Module } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
+import { AUTH_ADAPTERS_TOKEN } from '@concepta/rockets-core';
 import request from 'supertest';
 import { IsNotEmpty, IsString } from 'class-validator';
 import { E2eFakeRepositoryModule } from './__e2e__/helpers/e2e-fake-repository.module';
@@ -97,5 +98,40 @@ describe('RocketsModule enableGlobalGuard (e2e)', () => {
     await request(app.getHttpServer()).get('/guard-e2e-open').expect(200, {
       ok: true,
     });
+  });
+
+  it('boots an explicitly public module with no auth adapters', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        GuardE2eOpenModule,
+        RocketsModule.forRoot({
+          enableGlobalGuard: false,
+          disableController: { me: true },
+        }),
+      ],
+    }).compile();
+
+    app = moduleRef.createNestApplication();
+    await app.init();
+
+    expect(app.get(AUTH_ADAPTERS_TOKEN)).toEqual([]);
+    await request(app.getHttpServer()).get('/guard-e2e-open').expect(200, {
+      ok: true,
+    });
+  });
+
+  it('fails closed with the default guard when no auth adapters are configured', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        GuardE2eOpenModule,
+        RocketsModule.forRoot({ disableController: { me: true } }),
+      ],
+    }).compile();
+
+    app = moduleRef.createNestApplication();
+    await app.init();
+
+    expect(app.get(AUTH_ADAPTERS_TOKEN)).toEqual([]);
+    await request(app.getHttpServer()).get('/guard-e2e-open').expect(401);
   });
 });

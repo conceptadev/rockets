@@ -21,7 +21,10 @@ export class RocketsCreateUserHandler
     const dto = {
       username: command.data.username ?? command.data.email ?? '',
       email: command.data.email ?? '',
-      active: command.data.active,
+      // Default active like signup (`?? true`): with fail-closed auth
+      // (`active !== true`), an admin-created user with no explicit `active`
+      // would otherwise be locked out and never able to authenticate.
+      active: command.data.active ?? true,
     };
     return this.commandBus.execute(new CreateUserCommand(command.ctx, dto));
   }

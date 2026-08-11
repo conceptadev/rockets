@@ -16,6 +16,14 @@ and this project adheres to
 
 ### Breaking
 
+- Authentication is now fail-closed on `active`: a user authenticates only when
+  `active === true`. Deactivated users are rejected on both access and refresh
+  tokens, and any persisted row with `active` unset/null (or an admin-created
+  user without an explicit `active`) is treated as inactive. **Backfill legacy
+  user rows to `active: true` before deploying.** Built-in signup and
+  admin-create default new users to `active: true`; pass `active: false`
+  explicitly to create an inactive user.
+
 - Hosts must stop passing `buildRocketsAuthResources(...)` on
   `RocketsModule.forRoot({ resources })`. `defineRocketsAuth()` now contributes
   those rows itself, and the planner rejects an entity class registered twice —

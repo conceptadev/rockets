@@ -1,6 +1,7 @@
 import { vi } from 'vitest';
 import { RocketsAuthExceptionsFilter } from '../../shared/compatibility/rockets-auth-exceptions.filter';
 import { EmailSendInterface } from '@concepta/nestjs-common';
+import type { AuthenticationStrategiesSettingsInterface } from '@concepta/nestjs-authentication';
 import { EventModule } from '@concepta/nestjs-event';
 import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
 import {
@@ -15,6 +16,7 @@ import { HttpAdapterHost } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RocketsModule } from '@concepta/rockets';
+import type { AuthBootstrap } from '@concepta/rockets-core';
 import { ormConfig } from '../../__fixtures__/ormconfig.fixture';
 import { InvitationEntityFixture } from '../../__fixtures__/invitation/invitation.entity.fixture';
 import { UserOtpEntityFixture } from '../../__fixtures__/user/user-otp-entity.fixture';
@@ -72,14 +74,14 @@ const typeOrmRootEntities = [
 
 /**
  * Extras the e2e helper can splice into the factory return without each
- * test having to reproduce the full `useFactory` closure. Currently used
- * by `password-history.e2e-spec.ts` to enable the history check.
+ * test having to reproduce the full `useFactory` closure.
  */
 export interface RocketsAuthE2eFactoryExtras {
   readonly userPasswordSettings?: {
     readonly reuseAfterDays?: number;
     readonly requireCurrent?: boolean;
   };
+  readonly authenticationStrategies?: AuthenticationStrategiesSettingsInterface;
 }
 
 function defaultDefineRocketsAuthInput(
@@ -90,6 +92,9 @@ function defaultDefineRocketsAuthInput(
     useFactory: () => ({
       services: { mailerService },
       authentication: {
+        ...(extras.authenticationStrategies
+          ? { settings: { strategies: extras.authenticationStrategies } }
+          : {}),
         ports: {
           recoveryNotification: {
             sendRecoverLoginNotificationCommand:
@@ -188,10 +193,11 @@ export interface CreateRocketsAuthStandardE2eModuleOptions {
   readonly rocketsAuthOverrides?: Partial<DefineRocketsAuthInput>;
   /**
    * Per-test tweaks to the default `useFactory` return without rewriting it.
-   * Today only `userPasswordSettings` (for password-history tests). Add
-   * more knobs as tests need them.
+   * Add focused knobs as tests need them.
    */
   readonly factoryExtras?: RocketsAuthE2eFactoryExtras;
+  /** Credential-only adapters appended after the built-in identity owner. */
+  readonly additionalAuth?: ReadonlyArray<AuthBootstrap>;
 }
 
 /**
@@ -206,6 +212,7 @@ export async function createRocketsAuthStandardE2eTestingModule(
     extraControllers = [],
     rocketsAuthOverrides,
     factoryExtras,
+    additionalAuth = [],
   } = options;
 
   const baseInput = defaultDefineRocketsAuthInput(
@@ -241,7 +248,10 @@ export async function createRocketsAuthStandardE2eTestingModule(
       RoleEntityFixture,
     ]),
     RocketsModule.forRoot({
-      auth: rocketsAuth,
+      auth:
+        additionalAuth.length > 0
+          ? [rocketsAuth, ...additionalAuth]
+          : rocketsAuth,
     }),
   ];
 

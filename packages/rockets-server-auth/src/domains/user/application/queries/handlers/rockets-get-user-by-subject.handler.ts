@@ -54,6 +54,9 @@ export class RocketsGetUserBySubjectHandler
     }
 
     const plain = aggregate.toPlain();
+    if (plain.active !== true) {
+      return null;
+    }
     const userRoles = await resolveUserRoles(
       this.queryBus,
       query.ctx,

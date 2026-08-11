@@ -443,18 +443,23 @@ accepts one bootstrap or a **chain** (array, tried in order).
 interface AuthBootstrap<A extends AuthAdapterInterface = AuthAdapterInterface> {
   adapter: Type<A>;
   forRoot?: () => DynamicModule;   // host module: provides+exports the adapter
-  contributes?: {                 // integration-owned app defaults
+  identity?: {                    // singular user-space ownership
     resources?: ReadonlyArray<ResourceInput>;
     userMetadata?: RocketsUserMetadataConfig;
     repository?: RepositoryModuleInterface | RepositoryBootstrap;
+  };
+  contributes?: {                 // integration-owned guard defaults
     enableGlobalGuard?: boolean;
+    providesAppGuard?: boolean;
   };
 }
 ```
 
-Explicit server options override contributed defaults. Resource contributions
-are prepended to application resources; incompatible single-value defaults from
-multiple auth integrations fail fast instead of depending on import order.
+At most one bootstrap may claim `identity`; two owners fail at composition even
+when explicit server values are supplied. Explicit server values override the
+single owner's values, and its resources are prepended to application
+resources. Guard contributions may coexist, but conflicting values or competing
+global guards fail fast instead of depending on import order.
 
 ```mermaid
 flowchart TD
@@ -581,7 +586,15 @@ only declares application-owned resources. Explicit server options remain the
 escape hatch and take precedence over those contributed defaults. Its Rockets
 guard preference is `false` because `AuthenticationModule` already owns the JWT
 global guard; mixed-auth hosts can set `rocketsDefaults.enableGlobalGuard: true`
-and `auth.appGuard: false` to make the ordered Rockets adapter chain the owner.
+to make the ordered Rockets adapter chain the owner. In that mode, an
+unspecified upstream `auth.appGuard` is normalized to `false`; an explicit
+competing app guard is rejected because Nest global guards are cumulative.
+
+Auth throttling uses Express's resolved `request.ip`. A host behind a reverse
+proxy must configure `app.set('trust proxy', ...)` for its actual topology.
+Rockets intentionally does not trust forwarded headers on the host's behalf.
+Without that setting, clients can collapse into the proxy's single IP bucket;
+an overly broad setting lets callers spoof addresses and evade the limit.
 
 ---
 
