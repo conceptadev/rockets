@@ -154,9 +154,9 @@ function resolveIdentityOwner(
     throw new Error(
       'RocketsModule: multiple auth integrations claim identity ownership (' +
         owners.map((owner) => owner.adapter.name).join(', ') +
-        '). Exactly one integration may provide identity persistence; set ' +
-        'userMetadata/repository/resources explicitly on the module options ' +
-        'to take ownership at the app level.',
+        '). Exactly one integration may provide identity persistence. ' +
+        'Configure the remaining integrations as credential-only adapters ' +
+        'without identity ownership.',
     );
   }
   return owners[0]?.identity;
@@ -171,6 +171,28 @@ export function resolveRocketsComposition(
   const enableGlobalGuard =
     extras.enableGlobalGuard ??
     resolveSingleContribution(auth, 'enableGlobalGuard');
+
+  if (
+    enableGlobalGuard !== false &&
+    auth.some((bootstrap) => bootstrap.contributes?.providesAppGuard === true)
+  ) {
+    throw new Error(
+      'RocketsModule: configure exactly one global authentication guard. ' +
+        'The Rockets guard is enabled while an auth integration declares ' +
+        'an integration-owned APP_GUARD. Disable the integration guard or ' +
+        'set `enableGlobalGuard: false`.',
+    );
+  }
+
+  if (auth.length > 1 && enableGlobalGuard === false) {
+    throw new Error(
+      'RocketsModule: a multi-adapter authentication chain requires the ' +
+        'Rockets global guard. Multiple Nest APP_GUARD providers are ' +
+        'cumulative and cannot provide adapter fallback. Set ' +
+        '`enableGlobalGuard: true` and disable integration-owned global ' +
+        'authentication guards.',
+    );
+  }
 
   // A contribution may swap the global guard, never remove it: honoring a
   // contributed `false` with no declared replacement would silently publish

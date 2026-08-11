@@ -22,7 +22,6 @@ import { ConfigModule } from '@nestjs/config';
 import {
   AuthenticationModule,
   AuthenticationOptionsInterface,
-  OtpPort,
   PasswordPort,
   RecoveryPolicy,
   RecoveryPolicySettingsInterface,
@@ -57,7 +56,10 @@ import {
   PasswordModule,
   ValidatePasswordHistoryCommand,
 } from '@concepta/nestjs-password';
-import { RepositoryModule } from '@concepta/nestjs-repository';
+import {
+  RepositoryModule,
+  TransactionScope,
+} from '@concepta/nestjs-repository';
 import { RoleModule } from '@concepta/nestjs-role';
 import {
   CreateUserCommand,
@@ -115,6 +117,7 @@ import { RocketsAuthCreateOtpPortHandler } from './shared/authentication/rockets
 import { ConceptaRepositoryCompatModule } from './shared/compatibility/concepta-repository-compat.module';
 import { RocketsAuthRecoveryController } from './domains/auth/gateways/http/controllers/rockets-auth-recovery.controller';
 import { RocketsRecoveryService } from './domains/auth/application/services/rockets-recovery.service';
+import { RocketsAuthRecoveryOtpPort } from './shared/authentication/rockets-auth-recovery-otp.port';
 
 export { RAW_OPTIONS_TOKEN } from './shared/constants/rockets-auth-raw-options.token';
 
@@ -696,11 +699,12 @@ export function createRocketsAuthProviders(options: {
     RocketsValidateCurrentPasswordHandler,
     {
       provide: RecoveryService,
-      inject: [RAW_OPTIONS_TOKEN, CommandBus, QueryBus],
+      inject: [RAW_OPTIONS_TOKEN, CommandBus, QueryBus, TransactionScope],
       useFactory: (
         authOptions: RocketsAuthOptionsInterface,
         commandBus: CommandBus,
         queryBus: QueryBus,
+        txScope: TransactionScope,
       ) => {
         const ports = buildRocketsAuthenticationPorts(authOptions);
         // Must resolve to the same policy the settings factory above hands to
@@ -710,11 +714,12 @@ export function createRocketsAuthProviders(options: {
           ROCKETS_DEFAULT_RECOVERY_SETTINGS;
         return new RocketsRecoveryService(
           new RecoveryPolicy(recoverySettings),
-          new OtpPort(ports.otp, commandBus, queryBus),
+          new RocketsAuthRecoveryOtpPort(ports.otp, commandBus, queryBus),
           new UserPort(ports.user, queryBus, commandBus),
           new PasswordPort(ports.password, commandBus),
           ports.recoveryNotification,
           commandBus,
+          txScope,
         );
       },
     },

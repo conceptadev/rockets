@@ -69,8 +69,28 @@ describe('RocketsJwtAuthAdapter', () => {
     );
   });
 
+  it('rejects an inactive user before resolving roles', async () => {
+    const userAgg = {
+      toPlain: () => ({ id: 'u1', email: 'a@b.com', active: false }),
+    };
+    queryBus.execute
+      .mockResolvedValueOnce({ sub: 's1' })
+      .mockResolvedValueOnce(userAgg);
+
+    const result = await provider.authenticate(makeRequest('Bearer t'));
+
+    expect(result).toMatchObject({ matched: true });
+    expect('error' in result).toBe(true);
+    if ('error' in result) {
+      expect(result.error).toBeInstanceOf(UnauthorizedException);
+    }
+    expect(queryBus.execute).toHaveBeenCalledTimes(2);
+  });
+
   it('returns user with empty roles when no assignments', async () => {
-    const userAgg = { toPlain: () => ({ id: 'u1', email: 'a@b.com' }) };
+    const userAgg = {
+      toPlain: () => ({ id: 'u1', email: 'a@b.com', active: true }),
+    };
     queryBus.execute
       .mockResolvedValueOnce({ sub: 's1' })
       .mockResolvedValueOnce(userAgg)
@@ -89,7 +109,9 @@ describe('RocketsJwtAuthAdapter', () => {
   });
 
   it('resolves role names when assignments exist', async () => {
-    const userAgg = { toPlain: () => ({ id: 'u1', email: 'a@b.com' }) };
+    const userAgg = {
+      toPlain: () => ({ id: 'u1', email: 'a@b.com', active: true }),
+    };
     queryBus.execute
       .mockResolvedValueOnce({ sub: 's1', roles: ['x'] })
       .mockResolvedValueOnce(userAgg)

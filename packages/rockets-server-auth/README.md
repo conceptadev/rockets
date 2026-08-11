@@ -296,8 +296,9 @@ Available flags: `otp`, `signup`, `admin`, `adminRoles`, `invitation`,
 
 `defineRocketsAuth` defaults the Rockets guard off because the upstream
 `AuthenticationModule` already installs its own JWT `APP_GUARD`. For a mixed
-auth chain, make Rockets own the ordered adapters and turn the upstream guard
-off:
+auth chain, make Rockets own the ordered adapters. An unspecified upstream
+`auth.appGuard` is normalized to `false` in this mode; passing `false`
+explicitly remains supported and documents the ownership boundary:
 
 ```typescript
 defineRocketsAuth({
@@ -306,6 +307,25 @@ defineRocketsAuth({
   auth: { appGuard: false },
 });
 ```
+
+An explicit upstream app guard together with
+`rocketsDefaults.enableGlobalGuard: true` is rejected. Nest global guards are
+cumulative, so two authentication guards cannot model adapter fallback.
+
+### Proxy-aware throttling
+
+Rockets keys its coarse limiter from `request.ip`. Express applications behind
+a trusted reverse proxy must configure `trust proxy` in the host bootstrap:
+
+```typescript
+const app = await NestFactory.create(AppModule);
+app.set('trust proxy', ['loopback', 'linklocal', 'uniquelocal']);
+```
+
+Choose the trusted proxy value for the deployment topology; Rockets does not
+enable it automatically. Trusting unverified forwarding headers allows clients
+to spoof their address and evade IP throttling. Pass `throttling: false` only
+when another host-owned layer enforces equivalent limits.
 
 ### Customise a controller without subclassing
 
@@ -389,6 +409,10 @@ when you need built-in auth HTTP and `/me`.
 | `services.mailerService`                                                      | Required mailer adapter. Use a logger fallback for dev.                                                                                                                    |
 | `services.userAccessQueryService`                                             | Optional `CanAccess` for access-control queries.                                                                                                                           |
 | `swagger`                                                                     | Forwarded to `SwaggerUiModule` from `@concepta/rockets-core`.                                                                                                              |
+
+`authentication.ports.otp.consumeCommand` defaults to the upstream
+`ConsumeOtpCommand`; override it with a compatible CQRS command when custom OTP
+storage must participate in recovery transactions.
 
 ### Module-level extras
 

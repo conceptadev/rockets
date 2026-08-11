@@ -142,7 +142,29 @@ export type DefineRocketsAuthInput = RocketsAuthAsyncOptions & {
 export function defineRocketsAuth(
   input: DefineRocketsAuthInput,
 ): AuthBootstrap {
-  const asyncOptions = buildAsyncOptionsForAuthModule(input);
+  const rocketsOwnsGlobalGuard =
+    input.rocketsDefaults?.enableGlobalGuard === true;
+  const configuredUpstreamGuard = input.auth?.appGuard;
+
+  if (
+    rocketsOwnsGlobalGuard &&
+    configuredUpstreamGuard !== undefined &&
+    configuredUpstreamGuard !== false
+  ) {
+    throw new Error(
+      'defineRocketsAuth: Rockets global guard ownership requires ' +
+        '`auth.appGuard: false`. Configure exactly one global ' +
+        'authentication guard.',
+    );
+  }
+
+  const normalizedInput = rocketsOwnsGlobalGuard
+    ? {
+        ...input,
+        auth: { ...input.auth, appGuard: false as const },
+      }
+    : input;
+  const asyncOptions = buildAsyncOptionsForAuthModule(normalizedInput);
 
   return {
     adapter: input.authAdapter ?? RocketsJwtAuthAdapter,
@@ -166,7 +188,7 @@ export function defineRocketsAuth(
       // `auth.appGuard: false` — declaring the swap lets the server's
       // composition invariant reject the half-configured state where
       // neither guard would run.
-      providesAppGuard: input.auth?.appGuard !== false,
+      providesAppGuard: normalizedInput.auth?.appGuard !== false,
     },
   };
 }

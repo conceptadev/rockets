@@ -214,9 +214,14 @@ describe('RocketsModuleDefinition', () => {
       expect(guardProvider).toBeUndefined();
     });
 
-    it('explicit enableGlobalGuard: true beats a contributed false', () => {
+    it('enables the Rockets guard when the integration app guard is disabled', () => {
       const result = createRocketsProviders({
-        extras: { auth: contributedAuth(), enableGlobalGuard: true },
+        extras: {
+          auth: contributedAuth({
+            contributes: { providesAppGuard: false },
+          }),
+          enableGlobalGuard: true,
+        },
       });
       const guardProvider = result.find(
         (provider) =>
@@ -261,11 +266,60 @@ describe('RocketsModuleDefinition', () => {
       } as AuthBootstrap;
 
       const composition = resolveRocketsComposition({
-        auth: [contributedAuth(), credentialOnly],
+        auth: [
+          contributedAuth({
+            contributes: {
+              enableGlobalGuard: true,
+              providesAppGuard: false,
+            },
+          }),
+          credentialOnly,
+        ],
       });
 
       expect(composition.userMetadata).toBe(contributedUserMetadata);
       expect(composition.repository).toBe(contributedRepository);
+    });
+
+    it('rejects a multi-adapter chain when the Rockets guard is disabled', () => {
+      const credentialOnly = {
+        adapter: ContributedAuthAdapter,
+      } as AuthBootstrap;
+
+      expect(() =>
+        resolveRocketsComposition({
+          auth: [contributedAuth(), credentialOnly],
+        }),
+      ).toThrow(/multi-adapter|global guard|adapter chain/);
+    });
+
+    it('accepts a multi-adapter chain when the Rockets guard owns it', () => {
+      const credentialOnly = {
+        adapter: ContributedAuthAdapter,
+      } as AuthBootstrap;
+
+      const composition = resolveRocketsComposition({
+        auth: [
+          contributedAuth({
+            contributes: {
+              enableGlobalGuard: true,
+              providesAppGuard: false,
+            },
+          }),
+          credentialOnly,
+        ],
+      });
+
+      expect(composition.enableGlobalGuard).toBe(true);
+    });
+
+    it('rejects simultaneous Rockets and integration-owned app guards', () => {
+      expect(() =>
+        resolveRocketsComposition({
+          auth: contributedAuth(),
+          enableGlobalGuard: true,
+        }),
+      ).toThrow(/one global authentication guard|integration-owned/);
     });
 
     it('throws when integrations contribute conflicting guard defaults', () => {

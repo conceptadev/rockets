@@ -581,7 +581,15 @@ only declares application-owned resources. Explicit server options remain the
 escape hatch and take precedence over those contributed defaults. Its Rockets
 guard preference is `false` because `AuthenticationModule` already owns the JWT
 global guard; mixed-auth hosts can set `rocketsDefaults.enableGlobalGuard: true`
-and `auth.appGuard: false` to make the ordered Rockets adapter chain the owner.
+to make the ordered Rockets adapter chain the owner. In that mode, an
+unspecified upstream `auth.appGuard` is normalized to `false`; an explicit
+competing app guard is rejected because Nest global guards are cumulative.
+
+Auth throttling uses Express's resolved `request.ip`. A host behind a reverse
+proxy must configure `app.set('trust proxy', ...)` for its actual topology.
+Rockets intentionally does not trust forwarded headers on the host's behalf.
+Without that setting, clients can collapse into the proxy's single IP bucket;
+an overly broad setting lets callers spoof addresses and evade the limit.
 
 ---
 

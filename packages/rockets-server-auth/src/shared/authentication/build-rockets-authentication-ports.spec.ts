@@ -1,8 +1,12 @@
 import { vi, describe, it, expect } from 'vitest';
 import { PlainLiteralObject } from '@nestjs/common';
-import { Command, Query } from '@nestjs/cqrs';
+import { Command, CommandBus, Query, QueryBus } from '@nestjs/cqrs';
 
-import { ClearOtpsCommand, ValidateOtpQuery } from '@concepta/nestjs-otp';
+import {
+  ClearOtpsCommand,
+  ConsumeOtpCommand,
+  ValidateOtpQuery,
+} from '@concepta/nestjs-otp';
 import {
   GetUserByEmailQuery,
   GetUserQuery,
@@ -13,7 +17,10 @@ import type {
   AuthorizationPayloadInterface,
   Token,
 } from '@concepta/nestjs-authentication';
-import type { ReferenceEmail } from '@concepta/nestjs-core';
+import type {
+  AssigneeRelationInterface,
+  ReferenceEmail,
+} from '@concepta/nestjs-core';
 
 import { RocketsAuthUserPortGetByUsernameQuery } from '../../domains/user/application/queries/impl/rockets-auth-user-port-get-by-username.query';
 import { RocketsGetUserBySubjectQuery } from '../../domains/user/application/queries/impl/rockets-get-user-by-subject.query';
@@ -25,6 +32,7 @@ import {
 
 import { buildRocketsAuthenticationPorts } from './build-rockets-authentication-ports';
 import type { RocketsAuthOptionsInterface } from '../interfaces/rockets-auth-options.interface';
+import { RocketsAuthRecoveryOtpPort } from './rockets-auth-recovery-otp.port';
 
 // Recovery / verify notification fakes — each one must structurally
 // satisfy the upstream port command interface, otherwise the typed
@@ -151,6 +159,16 @@ class CustomGetByEmailQuery extends Query<AuthenticationUserResult> {
   }
 }
 
+class CustomConsumeOtpCommand extends Command<AssigneeRelationInterface | null> {
+  constructor(
+    public readonly ctx: PlainLiteralObject,
+    public readonly namespace: string,
+    public readonly otp: Readonly<{ category: string; passcode: string }>,
+  ) {
+    super();
+  }
+}
+
 function baseOptionsWithRequiredNotifications(): RocketsAuthOptionsInterface {
   return {
     settings: {} as RocketsAuthOptionsInterface['settings'],
@@ -194,6 +212,7 @@ describe(buildRocketsAuthenticationPorts.name, () => {
         createCommand: RocketsAuthCreateOtpPortCommand,
         validateQuery: ValidateOtpQuery,
         clearCommand: ClearOtpsCommand,
+        consumeCommand: ConsumeOtpCommand,
       });
       expect(
         ports.recoveryNotification.sendRecoverLoginNotificationCommand,
@@ -216,6 +235,44 @@ describe(buildRocketsAuthenticationPorts.name, () => {
   });
 
   describe('consumer overrides flow through', () => {
+    it('forwards a recovery OTP consume command while retaining OTP defaults', async () => {
+      const options = baseOptionsWithRequiredNotifications();
+      options.authentication = {
+        ...options.authentication,
+        ports: {
+          ...options.authentication!.ports!,
+          otp: { consumeCommand: CustomConsumeOtpCommand },
+        },
+      };
+
+      const ports = buildRocketsAuthenticationPorts(options);
+
+      expect(ports.otp.consumeCommand).toBe(CustomConsumeOtpCommand);
+      expect(ports.otp.createCommand).toBe(RocketsAuthCreateOtpPortCommand);
+      expect(ports.otp.validateQuery).toBe(ValidateOtpQuery);
+      expect(ports.otp.clearCommand).toBe(ClearOtpsCommand);
+
+      const commandBus = {
+        execute: vi.fn().mockResolvedValue({ assigneeId: 'u1' }),
+      };
+      const queryBus = { execute: vi.fn() };
+      const port = new RocketsAuthRecoveryOtpPort(
+        ports.otp,
+        commandBus as unknown as CommandBus,
+        queryBus as unknown as QueryBus,
+      );
+
+      await expect(
+        port.consume({}, 'custom-otp', {
+          category: 'recovery',
+          passcode: 'secret',
+        }),
+      ).resolves.toEqual({ assigneeId: 'u1' });
+      expect(commandBus.execute).toHaveBeenCalledWith(
+        expect.any(CustomConsumeOtpCommand),
+      );
+    });
+
     it('forwards individual user port overrides while keeping defaults for the rest', () => {
       const options = baseOptionsWithRequiredNotifications();
       // The upstream type declares `user: UserPortSettings` (all 5 keys

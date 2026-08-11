@@ -6,6 +6,7 @@ import {
   defineRocketsAuth,
   type DefineRocketsAuthInput,
 } from './define-rockets-auth';
+import { RocketsAuthModule } from './rockets-auth.module';
 
 class UserEntity {}
 class UserMetadataEntity {}
@@ -47,10 +48,32 @@ describe('defineRocketsAuth', () => {
     expect(bootstrap.contributes?.enableGlobalGuard).toBe(false);
   });
 
-  it('allows mixed-auth hosts to opt back into the Rockets guard chain', () => {
+  it('normalizes mixed-auth hosts to one Rockets-owned global guard', () => {
+    const forRootAsync = vi
+      .spyOn(RocketsAuthModule, 'forRootAsync')
+      .mockReturnValue({ module: RocketsAuthModule });
     const bootstrap = defineRocketsAuth(input({ enableGlobalGuard: true }));
 
     expect(bootstrap.contributes?.enableGlobalGuard).toBe(true);
+    expect(bootstrap.contributes?.providesAppGuard).toBe(false);
+
+    bootstrap.forRoot?.();
+
+    expect(forRootAsync).toHaveBeenCalledWith(
+      expect.objectContaining({
+        auth: expect.objectContaining({ appGuard: false }),
+      }),
+    );
+    forRootAsync.mockRestore();
+  });
+
+  it('rejects an explicit upstream app guard when Rockets owns the chain', () => {
+    expect(() =>
+      defineRocketsAuth({
+        ...input({ enableGlobalGuard: true }),
+        auth: { appGuard: true } as never,
+      }),
+    ).toThrow(/one global authentication guard|appGuard/);
   });
 
   it('claims identity ownership over the auth-owned persistence', () => {
