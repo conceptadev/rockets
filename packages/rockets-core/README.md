@@ -7,7 +7,7 @@
 > Configuration-driven composition layer: one options object → planner →
 > upstream `@concepta/nestjs-*` modules registered as Nest imports.
 
-**Status:** pre-1.0 preview. This source is prepared as `1.0.0-alpha.8`, but
+**Status:** pre-1.0 preview. The package manifest is set to `1.0.0-alpha.8`, but
 registry publication is pending; install commands below apply after the
 `alpha` dist-tag is updated.
 

@@ -11,7 +11,7 @@ and this project adheres to
 
 ### Release preparation
 
-- Package manifest prepared as `1.0.0-alpha.8`; registry publication is
+- Package manifest set to `1.0.0-alpha.8`; registry publication is
   pending.
 
 ### Added

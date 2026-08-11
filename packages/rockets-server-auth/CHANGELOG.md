@@ -11,7 +11,7 @@ and this project adheres to
 
 ### Release preparation
 
-- Package manifest prepared as `1.0.0-alpha.8`; registry publication is
+- Package manifest set to `1.0.0-alpha.8`; registry publication is
   pending.
 
 ### Breaking
@@ -30,14 +30,12 @@ and this project adheres to
   passcode validation, and OTP-authorized password rotation.
 - Default global throttling with stricter login and recovery limits; hosts can
   configure it or explicitly opt out.
-- End-to-end readiness coverage for duplicate CQRS ownership, recovery,
+- End-to-end regression coverage for duplicate CQRS ownership, recovery,
   password reuse policy, and login throttling.
 
 ### Changed
 
 - Access- and refresh-token authentication reject inactive users.
-- Recovery proof validation and consumption now share the credential-update
-  transaction, preventing a passcode from being consumed twice.
 - `defineRocketsAuth()` now returns a complete composition: auth persistence
   rows, root repository, user-metadata contract, and guard preference travel
   with the integration. Its Rockets guard defaults off because the built-in

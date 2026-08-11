@@ -11,8 +11,9 @@
 > Configuration-driven NestJS stack. One options object becomes a working API —
 > auth, dynamic repositories, generated CRUD controllers, hooks, swagger.
 
-**Status:** pre-1.0. The source tree is prepared as `1.0.0-alpha.8`; registry
-publication and the `alpha` dist-tag update are still pending. The public
+**Status:** pre-1.0. Public package manifests are aligned at `1.0.0-alpha.8`,
+and the release gates are in place; registry publication and the `alpha`
+dist-tag update are still pending. The public
 surface (`AuthAdapterInterface`, `defineResource`, `defineModuleResource`,
 `RepositoryInterface`, `createServer`) may still change before 1.0. Pin exact
 versions in production.
