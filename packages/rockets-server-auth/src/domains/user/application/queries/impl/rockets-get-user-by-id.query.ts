@@ -1,3 +1,8 @@
+import type { PlainLiteralObject } from '@nestjs/common';
+
 export class RocketsGetUserByIdQuery {
-  constructor(public readonly id: string) {}
+  constructor(
+    public readonly ctx: PlainLiteralObject,
+    public readonly id: string,
+  ) {}
 }

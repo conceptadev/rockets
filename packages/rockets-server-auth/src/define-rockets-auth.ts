@@ -49,8 +49,8 @@ function toUserMetadataConfig(
 }
 
 /**
- * Planner rows for auth persistence tables. Pass on `RocketsModule.forRoot({ resources })`
- * together with {@link defineRocketsAuth}.
+ * Planner rows for auth persistence tables. {@link defineRocketsAuth} includes
+ * these automatically; this helper remains public for lower-level composition.
  */
 export function buildRocketsAuthResources(
   persistence: RocketsAuthRepositoryPersistenceOptions,
@@ -121,8 +121,9 @@ function buildAsyncOptionsForAuthModule(
 }
 
 /**
- * Built-in auth: returns an {@link AuthBootstrap} for `RocketsModule.forRoot({ auth })`.
- * Also pass {@link buildRocketsAuthResources} on `resources` and `userMetadata` explicitly.
+ * Built-in auth: returns a complete {@link AuthBootstrap} for
+ * `RocketsModule.forRoot({ auth })`, including its persistence resources,
+ * user-metadata contract, root repository default, and guard preference.
  */
 export type DefineRocketsAuthInput = RocketsAuthAsyncOptions & {
   /**
@@ -146,5 +147,26 @@ export function defineRocketsAuth(
   return {
     adapter: input.authAdapter ?? RocketsJwtAuthAdapter,
     forRoot: () => RocketsAuthModule.forRootAsync(asyncOptions),
+    // Built-in auth owns the user space the whole adapter chain
+    // authenticates into — it is the app's single identity owner.
+    identity: {
+      resources: buildRocketsAuthResources(
+        input.persistence,
+        input.invitationEntity,
+      ),
+      userMetadata: input.userMetadata,
+      repository: input.persistence.module,
+    },
+    contributes: {
+      // AuthenticationModule installs its own JwtGuard by default. Avoid two
+      // global authentication guards unless a mixed-auth host explicitly asks
+      // Rockets to own the ordered adapter chain.
+      enableGlobalGuard: input.rocketsDefaults?.enableGlobalGuard ?? false,
+      // The upstream guard exists unless the host disables it via
+      // `auth.appGuard: false` — declaring the swap lets the server's
+      // composition invariant reject the half-configured state where
+      // neither guard would run.
+      providesAppGuard: input.auth?.appGuard !== false,
+    },
   };
 }

@@ -1,24 +1,31 @@
-import { AccessControlOptionsInterface } from '@concepta/nestjs-access-control';
-import type { CanAccess } from '@concepta/nestjs-access-control';
-import type { CanActivate } from '@nestjs/common';
+import type {
+  AccessControlOptionsInterface,
+  CanAccess,
+} from '@concepta/nestjs-access-control';
+import type {
+  CanActivate,
+  DynamicModule,
+  Provider,
+  Type,
+} from '@nestjs/common';
 import type { AuthenticationOptionsExtrasInterface } from '@concepta/nestjs-authentication';
-import { RocketsAuthUserMetadataCreatableInterface } from '../../domains/user/interfaces/rockets-auth-user-metadata-creatable.interface';
-import { DynamicModule, Provider, Type } from '@nestjs/common';
-import { RocketsAuthUserCreatableInterface } from '../../domains/user/interfaces/rockets-auth-user-creatable.interface';
-import { RocketsAuthUserUpdatableInterface } from '../../domains/user/interfaces/rockets-auth-user-updatable.interface';
-import { RocketsAuthRoleCreatableInterface } from '../../domains/role/interfaces/rockets-auth-role-creatable.interface';
-import { RocketsAuthRoleUpdatableInterface } from '../../domains/role/interfaces/rockets-auth-role-updatable.interface';
-import { RocketsAuthUserMetadataModelUpdatableInterface } from '../../domains/user/interfaces/rockets-auth-user-metadata-updatable.interface';
-import { RoleExtrasInterface } from '@concepta/nestjs-role';
-import { RocketsAuthPortsConfigInterface } from './rockets-auth-ports-config.interface';
-import {
+import type { ThrottlerModuleOptions } from '@nestjs/throttler';
+import type { RoleExtrasInterface } from '@concepta/nestjs-role';
+import type { RocketsAuthUserMetadataCreatableInterface } from '../../domains/user/interfaces/rockets-auth-user-metadata-creatable.interface';
+import type { RocketsAuthUserCreatableInterface } from '../../domains/user/interfaces/rockets-auth-user-creatable.interface';
+import type { RocketsAuthUserUpdatableInterface } from '../../domains/user/interfaces/rockets-auth-user-updatable.interface';
+import type { RocketsAuthRoleCreatableInterface } from '../../domains/role/interfaces/rockets-auth-role-creatable.interface';
+import type { RocketsAuthRoleUpdatableInterface } from '../../domains/role/interfaces/rockets-auth-role-updatable.interface';
+import type { RocketsAuthUserMetadataModelUpdatableInterface } from '../../domains/user/interfaces/rockets-auth-user-metadata-updatable.interface';
+import type { RocketsAuthPortsConfigInterface } from './rockets-auth-ports-config.interface';
+import type {
   AbstractSignupUserHandler,
   SignupUserCommand,
 } from '../../domains/user';
-import { AbstractAdminUserListHandler } from '../../domains/user/application/commands/handlers/abstract-admin-user-list.handler';
-import { AbstractAdminUserReadHandler } from '../../domains/user/application/commands/handlers/abstract-admin-user-read.handler';
-import { AbstractAdminUserUpdateHandler } from '../../domains/user/application/commands/handlers/abstract-admin-user-update.handler';
-import { AbstractAdminDeleteUserHandler } from '../../domains/user/application/commands/handlers/abstract-admin-delete-user.handler';
+import type { AbstractAdminUserListHandler } from '../../domains/user/application/commands/handlers/abstract-admin-user-list.handler';
+import type { AbstractAdminUserReadHandler } from '../../domains/user/application/commands/handlers/abstract-admin-user-read.handler';
+import type { AbstractAdminUserUpdateHandler } from '../../domains/user/application/commands/handlers/abstract-admin-user-update.handler';
+import type { AbstractAdminDeleteUserHandler } from '../../domains/user/application/commands/handlers/abstract-admin-delete-user.handler';
 
 /**
  * Generic userMetadata configuration interface
@@ -81,21 +88,11 @@ export interface UserCrudOptionsExtrasInterface {
     createOne?: Type<RocketsAuthUserCreatableInterface>;
     updateOne?: Type<RocketsAuthUserUpdatableInterface>;
   };
-  /**
-   * Optional custom signup command handler.
-   * Must extend AbstractSignupUserHandler.
-   * Overrides the default SignupUserHandler business logic
-   * while keeping all HTTP routing, swagger, and validation intact.
-   */
-  /**
-   * Optional custom admin operation handlers.
-   * Each must extend the corresponding abstract base class.
-   * Overrides the default handler for List, Read, or Update
-   * while keeping all HTTP routing, swagger, guards, and serialization intact.
-   */
+  /** Optional signup command constructor. */
   command?: {
     signupCommand?: Type<SignupUserCommand>;
   };
+  /** Optional signup and admin CQRS handler overrides. */
   handlers?: {
     signupHandler?: Type<AbstractSignupUserHandler>;
     /** Custom admin list handler. Must extend AbstractAdminUserListHandler. */
@@ -117,11 +114,7 @@ export interface RoleCrudOptionsExtrasInterface {
     createOne?: Type<RocketsAuthRoleCreatableInterface>;
     updateOne?: Type<RocketsAuthRoleUpdatableInterface>;
   };
-  /**
-   * Controller customization seams (decorators, hooks, per-route handler
-   * overrides). See `domains/role/interfaces/role-controller-extras.interface.ts`
-   * and `.context/v8-ddd-refactor-plan.md` §2.8.
-   */
+  /** Controller decorators and per-route handler overrides. */
   controller?: import('../../domains/role/interfaces/role-controller-extras.interface').RoleControllerExtras;
 }
 
@@ -158,19 +151,15 @@ export interface DisableControllerOptionsInterface {
 
   /** Disable `/token/password` and `/token/refresh`. */
   token?: boolean;
+
+  /** Disable account-recovery routes under `/recovery`. */
+  recovery?: boolean;
 }
 
 export interface RocketsAuthOptionsExtrasInterface
   extends Pick<DynamicModule, 'global' | 'controllers'> {
   user?: { imports: DynamicModule['imports'] };
-  /**
-   * Auth domain extras. `controller` accepts the standard triplet
-   * documented in `.context/v8-ddd-refactor-plan.md` §2.8:
-   * `classDecorators`, `routes[*].decorators`. The `MePasswordController`
-   * is factory-built; the `auth.controller` extras are forwarded to that
-   * factory so consumers can append guards / throttling / ACL without
-   * subclassing the controller.
-   */
+  /** Auth module imports, guards, and password-controller decorators. */
   auth?: {
     imports?: DynamicModule['imports'];
     controller?: import('../../domains/auth/interfaces/me-password-controller-extras.interface').MePasswordControllerExtras;
@@ -187,10 +176,9 @@ export interface RocketsAuthOptionsExtrasInterface
      * Forwarded to `AuthenticationModule.forRootAsync({ guards })` — registers
      * route-named guards for the auth-router feature (multi-strategy routing).
      *
-     * Note: the implementations of these guards live in the v7 OAuth provider
-     * packages (`@concepta/nestjs-auth-{google,github,apple,router}`), which
-     * are blocked by upstream gap G1. Until those ship v8, the plumbing exists
-     * but the feature is unusable. Safe to leave undefined.
+     * Compatible implementations are not yet available from the upstream
+     * OAuth provider packages, so leave this undefined unless the host supplies
+     * its own guards.
      */
     guards?: AuthenticationOptionsExtrasInterface['guards'];
   };
@@ -211,9 +199,6 @@ export interface RocketsAuthOptionsExtrasInterface
   userCrud?: UserCrudOptionsExtrasInterface;
   roleCrud?: RoleCrudOptionsExtrasInterface;
   /**
-   * Optional access control configuration.
-   */
-  /**
    * Optional `imports` / `queryServices` are forwarded to AccessControlModule.forRoot
    * so route guards can resolve domain `CanAccess` query services.
    */
@@ -222,6 +207,15 @@ export interface RocketsAuthOptionsExtrasInterface
     queryServices?: Provider<CanAccess>[];
   };
   disableController?: DisableControllerOptionsInterface;
+  /**
+   * Request-throttling configuration for the throttler that guards Rockets
+   * Auth's own public routes (signup, login, recovery, otp, invitation
+   * acceptance). Rockets Auth scopes the guard to those controllers — it does
+   * not register an app-wide `APP_GUARD`. Pass `false` to disable Rockets
+   * Auth's throttling entirely (e.g. the host enforces its own limits
+   * upstream).
+   */
+  throttling?: false | ThrottlerModuleOptions;
   invitation?: {
     imports?: DynamicModule['imports'];
     /**

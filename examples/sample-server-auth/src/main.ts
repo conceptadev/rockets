@@ -23,11 +23,12 @@ import { RoleEntity } from './modules/role/role.entity';
 import { UserMetadataEntity } from './modules/user/entities/user-metadata.entity';
 import { SwaggerUiService } from '@concepta/rockets-core';
 
-// v8 commands/queries call `AppContextHost.from(ctx)` which only accepts
-// an `AppContextHost`, `null`, `undefined`, or an empty object `{}`.
-// The previous `createRepositoryContext(KEY)` produced `{ entity: KEY }`
-// which now throws `Expected AppContextHost or nullish value, got object`.
-// rockets-server-auth's internal handlers pass `{}` — match that.
+// v8 commands/queries call `AppContextHost.from(ctx)`, which only accepts an
+// `AppContextHost`, `null`, `undefined`, or an empty object `{}`. Any other
+// plain object — such as the `{ entity: KEY }` this bootstrap used to build —
+// throws `Expected AppContextHost or nullish value, got object`. HTTP requests
+// carry a real `AppContextHost`; this seeding script runs outside a request, so
+// it passes `{}` and lets `AppContextHost.from({})` mint a fresh context.
 const emptyCtx = {};
 
 /** Minimal shape returned by nestjs-user queries/commands for this bootstrap. */

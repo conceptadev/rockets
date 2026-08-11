@@ -13,11 +13,21 @@ import {
 } from '@concepta/rockets-core';
 import { PassportModule } from '@nestjs/passport';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { CqrsModule } from '@nestjs/cqrs';
+import { CommandBus, CqrsModule, QueryBus } from '@nestjs/cqrs';
+import {
+  ThrottlerModule,
+  type ThrottlerModuleOptions,
+} from '@nestjs/throttler';
 import { ConfigModule } from '@nestjs/config';
 import {
   AuthenticationModule,
   AuthenticationOptionsInterface,
+  OtpPort,
+  PasswordPort,
+  RecoveryPolicy,
+  RecoveryPolicySettingsInterface,
+  RecoveryService,
+  UserPort,
 } from '@concepta/nestjs-authentication';
 import { createSettingsProvider } from '@concepta/nestjs-core';
 import { CrudContextOverlay, CrudModule } from '@concepta/nestjs-crud';
@@ -45,7 +55,6 @@ import {
 import {
   CreatePasswordCommand,
   PasswordModule,
-  ValidateCurrentPasswordCommand,
   ValidatePasswordHistoryCommand,
 } from '@concepta/nestjs-password';
 import { RepositoryModule } from '@concepta/nestjs-repository';
@@ -98,9 +107,14 @@ import {
   RocketsAuthSetPasswordPortHandler,
   RocketsAuthValidatePasswordPortHandler,
 } from './shared/authentication/rockets-auth-password-port.handlers';
-import { RocketsValidateCurrentPasswordOverrideModule } from './shared/authentication/rockets-validate-current-password-override.module';
+import {
+  RocketsValidateCurrentPasswordCommand,
+  RocketsValidateCurrentPasswordHandler,
+} from './shared/authentication/rockets-validate-current-password.handler';
 import { RocketsAuthCreateOtpPortHandler } from './shared/authentication/rockets-auth-create-otp-port.handler';
 import { ConceptaRepositoryCompatModule } from './shared/compatibility/concepta-repository-compat.module';
+import { RocketsAuthRecoveryController } from './domains/auth/gateways/http/controllers/rockets-auth-recovery.controller';
+import { RocketsRecoveryService } from './domains/auth/application/services/rockets-recovery.service';
 
 export { RAW_OPTIONS_TOKEN } from './shared/constants/rockets-auth-raw-options.token';
 
@@ -127,7 +141,67 @@ export type RocketsAuthAsyncOptions = Omit<
   'global'
 >;
 
+/**
+ * Recovery OTP policy applied when the consumer does not supply
+ * `authentication.settings.mfa.recovery`.
+ *
+ * Single-sourced deliberately: `AuthenticationModule` builds its own
+ * `RecoveryPolicy` from the settings factory while
+ * {@link createRocketsAuthProviders} builds a second one for
+ * {@link RocketsRecoveryService} (upstream does not export `RecoveryPolicy`).
+ * The two must agree — a divergent namespace or category means issued passcodes
+ * stop validating.
+ */
+const ROCKETS_DEFAULT_RECOVERY_SETTINGS: RecoveryPolicySettingsInterface = {
+  otp: {
+    namespace: ROCKETS_AUTH_OTP_ASSIGNMENT,
+    category: 'auth-recovery',
+    type: 'uuid',
+    expiresIn: '1h',
+    duplicateStrategy: 'DEACTIVATE',
+    rateSeconds: 60,
+    rateThreshold: 5,
+  },
+};
+
 const jwtLogger = new Logger('RocketsAuthJwt');
+
+/**
+ * Two throttler dimensions on the guarded auth routes, both applied at once:
+ *
+ * - `ip` — a coarse per-IP volume ceiling. It is NOT overridden per route, so
+ *   rotating the account field from one source cannot escape it (credential
+ *   stuffing, signup/recovery spam).
+ * - `default` — fine per-`(ip, account)` limits (via `AuthAccountThrottlerGuard`),
+ *   overridden per route with `@Throttle`. Keying on the pair means an attacker
+ *   only throttles themselves, never locks a victim out of login.
+ *
+ * A consumer `throttling` object/array replaces both. `false` disables all
+ * throttling while still registering the module (the guards resolve statically).
+ */
+function buildAuthThrottlers(
+  throttling: false | ThrottlerModuleOptions | undefined,
+): ThrottlerModuleOptions {
+  if (throttling === false) {
+    return [
+      { name: 'ip', limit: 1, ttl: 1000, skipIf: () => true },
+      { name: 'default', limit: 1, ttl: 1000, skipIf: () => true },
+    ];
+  }
+  if (throttling !== undefined) return throttling;
+  return [
+    // Matches the prior app-wide default (1000/min per IP): a non-regressive
+    // volume ceiling that account rotation cannot exceed.
+    {
+      name: 'ip',
+      limit: 1000,
+      ttl: 60000,
+      getTracker: (req: Record<string, unknown>): string =>
+        typeof req.ip === 'string' ? req.ip : 'unknown',
+    },
+    { name: 'default', limit: 1000, ttl: 60000 },
+  ];
+}
 
 /**
  * Resolves the JWT secret for a given role (access / refresh):
@@ -281,6 +355,7 @@ export function createRocketsAuthControllers(options: {
   // `AuthenticationModule`; HTTP routes for `/token/password` and
   // `/token/refresh` are composed in {@link RocketsAuthTokenController}.
   if (!disableController.token) list.push(RocketsAuthTokenController);
+  if (!disableController.recovery) list.push(RocketsAuthRecoveryController);
   if (!disableController.otp) {
     list.push(buildRocketsAuthOtpController(options.extras?.otp?.controller));
   }
@@ -334,6 +409,11 @@ export function createRocketsAuthImports(importOptions: {
     RocketsAuthPortsModule.forRoot(importOptions.extras?.ports),
     ConfigModule.forFeature(rocketsAuthOptionsDefaultConfig),
     createSafeCrudRootModule(),
+    // Always imported: the auth controllers reference the throttler guard
+    // statically, so its providers must resolve even when throttling is off.
+    ThrottlerModule.forRoot(
+      buildAuthThrottlers(importOptions.extras?.throttling),
+    ),
     SwaggerUiModule.registerAsync({
       inject: [RAW_OPTIONS_TOKEN],
       useFactory: (options: RocketsAuthOptionsInterface) => ({
@@ -364,6 +444,14 @@ export function createRocketsAuthImports(importOptions: {
           settings: {
             ...authSettings,
             jwt: resolveJwtSettings(authSettings?.jwt),
+            mfa: {
+              ...authSettings?.mfa,
+              // Mounting the recovery controller implies that the upstream
+              // RecoveryService must be active, so the policy is never absent.
+              recovery:
+                authSettings?.mfa?.recovery ??
+                ROCKETS_DEFAULT_RECOVERY_SETTINGS,
+            },
             strategies: {
               local: {},
               jwt: {},
@@ -405,8 +493,6 @@ export function createRocketsAuthImports(importOptions: {
       }),
     }),
 
-    RocketsValidateCurrentPasswordOverrideModule,
-
     UserModule.forRootAsync({
       inject: [RAW_OPTIONS_TOKEN],
       entities: {
@@ -414,6 +500,7 @@ export function createRocketsAuthImports(importOptions: {
         credentials: USER_CREDENTIALS_ENTITY_KEY,
       },
       imports: [...(importOptions.extras?.user?.imports || [])],
+      providers: [RocketsAuthSetPasswordPortHandler],
       useFactory: (options: RocketsAuthOptionsInterface) => {
         const userSettings = options.user?.settings;
         warnOrThrowOnRequireCurrentOverride(userSettings?.password);
@@ -429,7 +516,7 @@ export function createRocketsAuthImports(importOptions: {
           ports: {
             password: {
               createCommand: CreatePasswordCommand,
-              validateCurrentCommand: ValidateCurrentPasswordCommand,
+              validateCurrentCommand: RocketsValidateCurrentPasswordCommand,
               // Default-on: prevents silent password reuse. Without this,
               // `UserPasswordPort.validateHistory()` no-ops and returns
               // true for every reused password — even when the consumer
@@ -594,7 +681,7 @@ export function createRocketsAuthProviders(options: {
   providers?: Provider[];
   extras?: RocketsAuthOptionsExtrasInterface;
 }): Provider[] {
-  return [
+  const providers: Provider[] = [
     ...(options.providers ?? []),
     createRocketsAuthSettingsProvider(),
     RocketsAuthOtpService,
@@ -605,7 +692,33 @@ export function createRocketsAuthProviders(options: {
     RocketsGetRolesByIdsHandler,
     ChangeMyPasswordHandler,
     RocketsAuthValidatePasswordPortHandler,
-    RocketsAuthSetPasswordPortHandler,
     RocketsAuthCreateOtpPortHandler,
+    RocketsValidateCurrentPasswordHandler,
+    {
+      provide: RecoveryService,
+      inject: [RAW_OPTIONS_TOKEN, CommandBus, QueryBus],
+      useFactory: (
+        authOptions: RocketsAuthOptionsInterface,
+        commandBus: CommandBus,
+        queryBus: QueryBus,
+      ) => {
+        const ports = buildRocketsAuthenticationPorts(authOptions);
+        // Must resolve to the same policy the settings factory above hands to
+        // AuthenticationModule.
+        const recoverySettings =
+          authOptions.authentication?.settings?.mfa?.recovery ??
+          ROCKETS_DEFAULT_RECOVERY_SETTINGS;
+        return new RocketsRecoveryService(
+          new RecoveryPolicy(recoverySettings),
+          new OtpPort(ports.otp, commandBus, queryBus),
+          new UserPort(ports.user, queryBus, commandBus),
+          new PasswordPort(ports.password, commandBus),
+          ports.recoveryNotification,
+          commandBus,
+        );
+      },
+    },
   ];
+
+  return providers;
 }

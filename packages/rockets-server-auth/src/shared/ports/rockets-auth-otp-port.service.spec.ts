@@ -23,15 +23,18 @@ describe('RocketsAuthOtpPortService', () => {
   it('create dispatches RocketsCreateOtpCommand', async () => {
     const created = { id: 'otp1' };
     commandBus.execute.mockResolvedValueOnce(created);
-    const out = await service.create({
-      assignment: 'user-otp',
-      otp: {
-        category: 'recovery',
-        type: 'uuid',
-        assigneeId: 'u1',
-        expiresIn: '1h',
+    const out = await service.create(
+      {},
+      {
+        assignment: 'user-otp',
+        otp: {
+          category: 'recovery',
+          type: 'uuid',
+          assigneeId: 'u1',
+          expiresIn: '1h',
+        },
       },
-    });
+    );
     expect(out).toBe(created);
     expect(commandBus.execute).toHaveBeenCalledWith(
       expect.any(RocketsCreateOtpCommand),
@@ -42,6 +45,7 @@ describe('RocketsAuthOtpPortService', () => {
     const assignee = { assigneeId: 'u1' };
     queryBus.execute.mockResolvedValueOnce(assignee);
     const out = await service.validate(
+      {},
       'user-otp',
       { category: 'recovery', passcode: '123' },
       false,
@@ -54,7 +58,7 @@ describe('RocketsAuthOtpPortService', () => {
 
   it('clear dispatches RocketsClearOtpsCommand', async () => {
     commandBus.execute.mockResolvedValueOnce(undefined);
-    await service.clear('user-otp', {
+    await service.clear({}, 'user-otp', {
       category: 'recovery',
       assigneeId: 'u1',
     });

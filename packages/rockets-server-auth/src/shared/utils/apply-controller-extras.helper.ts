@@ -1,30 +1,30 @@
-import { Type } from '@nestjs/common';
-import { RocketsAuthControllerExtrasBase } from '../interfaces/controller/rockets-auth-controller-extras.interface';
+import type { Type } from '@nestjs/common';
+import type {
+  RocketsAuthControllerExtrasBase,
+  RocketsAuthRouteExtrasBase,
+} from '../interfaces/controller/rockets-auth-controller-extras.interface';
 
-/**
- * Apply consumer-supplied class- and per-route decorators to a freshly
- * built controller class. Used by every domain factory in
- * `gateways/http/factories/`.
- *
- * `routeMap` maps the public route key (consumer-facing — `accept`,
- * `revoke`, `changePassword`) to the actual method name on the class.
- */
-export function applyControllerExtras<RouteMap extends Record<string, string>>(
-  controllerClass: Type<unknown>,
-  extras: RocketsAuthControllerExtrasBase<unknown>,
-  routeMap: RouteMap,
+/** Apply consumer class and route decorators to a generated controller. */
+export function applyControllerExtras<
+  ControllerClass extends Type<unknown>,
+  RouteKey extends string,
+>(
+  controllerClass: ControllerClass,
+  extras: RocketsAuthControllerExtrasBase<
+    Partial<Record<RouteKey, RocketsAuthRouteExtrasBase>>
+  >,
+  routeMap: Record<
+    RouteKey,
+    Extract<keyof InstanceType<ControllerClass>, string>
+  >,
 ): void {
   for (const decorator of extras.classDecorators ?? []) {
     decorator(controllerClass);
   }
 
-  const routes =
-    (extras.routes as
-      | Record<string, { decorators?: MethodDecorator[] }>
-      | undefined) ?? {};
-
-  for (const [routeKey, methodName] of Object.entries(routeMap)) {
-    const cfg = routes[routeKey];
+  for (const routeKey in routeMap) {
+    const methodName = routeMap[routeKey];
+    const cfg = extras.routes?.[routeKey];
     if (!cfg?.decorators?.length) continue;
 
     const proto = controllerClass.prototype as Record<string, unknown>;

@@ -21,6 +21,18 @@ export interface FirestoreBackend {
     collection: string,
     documentId: string,
   ): Promise<Record<string, unknown> | null>;
+  /**
+   * Atomically create a document.
+   *
+   * @throws FirestoreDuplicateIdException when the id already exists —
+   * every implementation must translate its native duplicate error into
+   * this exception at the boundary.
+   */
+  create(
+    collection: string,
+    documentId: string,
+    data: Record<string, unknown>,
+  ): Promise<void>;
   set(
     collection: string,
     documentId: string,

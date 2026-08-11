@@ -37,6 +37,7 @@ describe('OTP application handlers', () => {
       queryBus.execute.mockResolvedValueOnce(null);
       const out = await handler.execute(
         new RocketsValidateOtpQuery(
+          {},
           'user-otp',
           { category: 'recovery', passcode: 'abc' },
           true,
@@ -54,6 +55,7 @@ describe('OTP application handlers', () => {
       queryBus.execute.mockResolvedValueOnce(assignee);
       const out = await handler.execute(
         new RocketsValidateOtpQuery(
+          {},
           'user-otp',
           { category: 'recovery', passcode: 'abc' },
           true,
@@ -70,6 +72,7 @@ describe('OTP application handlers', () => {
       queryBus.execute.mockResolvedValueOnce(assignee);
       const out = await handler.execute(
         new RocketsValidateOtpQuery(
+          {},
           'user-otp',
           { category: 'recovery', passcode: 'abc' },
           false,
@@ -89,15 +92,18 @@ describe('OTP application handlers', () => {
       commandBus.execute.mockResolvedValueOnce(created);
 
       const out = await handler.execute(
-        new RocketsCreateOtpCommand({
-          assignment: 'user-otp',
-          otp: {
-            category: 'recovery',
-            type: 'uuid',
-            assigneeId: 'u1',
-            expiresIn: '1h',
+        new RocketsCreateOtpCommand(
+          {},
+          {
+            assignment: 'user-otp',
+            otp: {
+              category: 'recovery',
+              type: 'uuid',
+              assigneeId: 'u1',
+              expiresIn: '1h',
+            },
           },
-        }),
+        ),
       );
 
       expect(out).toBe(created);
@@ -115,7 +121,7 @@ describe('OTP application handlers', () => {
       commandBus.execute.mockResolvedValueOnce(undefined);
 
       await handler.execute(
-        new RocketsClearOtpsCommand('user-otp', {
+        new RocketsClearOtpsCommand({}, 'user-otp', {
           category: 'recovery',
           assigneeId: 'u1',
         }),

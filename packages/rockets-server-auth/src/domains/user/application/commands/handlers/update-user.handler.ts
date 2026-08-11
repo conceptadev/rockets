@@ -38,14 +38,14 @@ export class UpdateUserHandler implements ICommandHandler<UpdateUserCommand> {
     let metadata: RocketsAuthUserEntityInterface['userMetadata'];
     if (userMetadata && Object.keys(userMetadata).length > 0) {
       metadata = await this.commandBus.execute(
-        new SaveUserMetadataCommand(userId, userMetadata),
+        new SaveUserMetadataCommand(ctx, userId, userMetadata),
       );
     } else {
       metadata =
         (await this.queryBus.execute<
           GetUserMetadataQuery,
           RocketsAuthUserMetadataEntityInterface | null
-        >(new GetUserMetadataQuery(userId))) ?? undefined;
+        >(new GetUserMetadataQuery(ctx, userId))) ?? undefined;
     }
 
     return {

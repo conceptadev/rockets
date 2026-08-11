@@ -31,7 +31,7 @@ describe('AssignDefaultRoleHandler', () => {
       commandBus as unknown as CommandBus,
       buildSettings(),
     );
-    const out = await handler.execute(new AssignDefaultRoleCommand('u1'));
+    const out = await handler.execute(new AssignDefaultRoleCommand({}, 'u1'));
     expect(out).toBe(false);
     expect(queryBus.execute).not.toHaveBeenCalled();
     expect(commandBus.execute).not.toHaveBeenCalled();
@@ -45,7 +45,7 @@ describe('AssignDefaultRoleHandler', () => {
       buildSettings({ defaultUserRoleName: 'user' }),
     );
     await expect(
-      handler.execute(new AssignDefaultRoleCommand('u1')),
+      handler.execute(new AssignDefaultRoleCommand({}, 'u1')),
     ).rejects.toBeInstanceOf(InternalServerErrorException);
     expect(queryBus.execute).toHaveBeenCalledWith(
       expect.any(RocketsGetRoleByNameQuery),
@@ -61,7 +61,7 @@ describe('AssignDefaultRoleHandler', () => {
       commandBus as unknown as CommandBus,
       buildSettings({ defaultUserRoleName: 'user' }),
     );
-    const out = await handler.execute(new AssignDefaultRoleCommand('u1'));
+    const out = await handler.execute(new AssignDefaultRoleCommand({}, 'u1'));
     expect(out).toBe(true);
     expect(commandBus.execute).toHaveBeenCalledWith(
       expect.any(AssignRoleCommand),
@@ -77,7 +77,7 @@ describe('AssignDefaultRoleHandler', () => {
       buildSettings({ defaultUserRoleName: 'user' }),
     );
     await expect(
-      handler.execute(new AssignDefaultRoleCommand('u1')),
+      handler.execute(new AssignDefaultRoleCommand({}, 'u1')),
     ).rejects.toThrow('db down');
   });
 });

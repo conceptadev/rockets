@@ -3,7 +3,7 @@ import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { StandardSchemaValidationPipe, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule } from '@nestjs/swagger';
 import { cleanupOpenApiDoc } from 'nestjs-zod';
-import { AppModule } from './app.module';
+import { server } from './app.module';
 import { ExceptionsFilter } from '@concepta/rockets';
 
 import helmet from 'helmet';
@@ -12,7 +12,7 @@ import { patchMePatchOpenApi } from './swagger/patch-me-openapi';
 import { SwaggerUiService } from '@concepta/rockets-core';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(server);
 
   app.use(helmet());
   app.enableCors({

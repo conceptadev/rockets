@@ -1,7 +1,7 @@
 # Rockets — Configuration Entry Point
 
-> Configuration reference for the **v2 DSL** (shipped). Field names below match
-> the current `packages/*/src/**` (code wins over READMEs). The v2 redesign
+> Configuration reference for the **1.0-preview DSL**. Field names below match
+> the current `packages/*/src/**` (code wins over prose). The original DSL
 > rationale, convertibility proof, and change-set live in §12.
 > Diagrams are Mermaid — they render on GitHub and in most Markdown viewers.
 
@@ -11,10 +11,11 @@
 
 You never hand NestJS a tree of modules. You write **declarative bundles**
 (`defineResource`, `defineSubResource`, `defineModuleResource`) and a few
-top-level fields (`repository`, `userMetadata`, `auth`), pass them to **one**
-`RocketsModule.forRoot({...})`, and the module-definition transform converts
-that into a single global `DynamicModule` (controllers, providers, repository
-tokens, CQRS handlers, Swagger).
+top-level fields (`repository`, `userMetadata`, `auth`), pass them to
+`createServer({...})`, and the module-definition transform converts that into a
+single global `DynamicModule` (controllers, providers, repository tokens, CQRS
+handlers, Swagger). Use `RocketsModule.forRoot({...})` directly when a larger
+Nest host module must compose Rockets with other imports or providers.
 
 ```mermaid
 flowchart LR
@@ -24,7 +25,8 @@ flowchart LR
     M["defineModuleResource()"]
     OPT["repository / userMetadata / auth / swagger"]
   end
-  YOU --> FORROOT["RocketsModule.forRoot( ... )"]
+  YOU --> CREATE["createServer( ... )"]
+  CREATE --> FORROOT["RocketsModule.forRoot( ... )"]
   FORROOT --> XFORM["definitionTransform\n(build time)"]
   XFORM --> PLAN["buildAppRegistrationPlan()"]
   PLAN --> DM["one global DynamicModule\nimports / providers / controllers / exports"]
@@ -34,12 +36,13 @@ flowchart LR
 **Two layers, one surface.** `@concepta/rockets` (server) is a thin presentation
 layer over `@concepta/rockets-core`. Server adds the `MeController`, the global
 guard opt-in, and the `auth` chain; core does the actual resource→module
-conversion. You only ever call `RocketsModule.forRoot` (server). Core's
-`forRootAsync` is called internally.
+conversion. `createServer` is the canonical definition-first facade;
+`RocketsModule.forRoot` is the lower-level composition surface. Core's
+`forRootAsync` is called internally in either case.
 
 ---
 
-## 1. The entry point — `RocketsModule.forRoot` / `forRootAsync`
+## 1. The entry point — `createServer` and `RocketsModule`
 
 The options object is split by NestJS's `ConfigurableModuleBuilder` into two
 buckets with very different lifecycles:
@@ -58,19 +61,23 @@ buckets with very different lifecycles:
 | Field | Type | Req? | Default | Purpose |
 |---|---|---|---|---|
 | `resources` | `ReadonlyArray<ResourceInput>` | optional | `[]` | The feature bundles (CRUD + module + sub flattened). |
-| `repository` | `RepositoryModuleInterface \| RepositoryBootstrap` | optional* | — | Root persistence adapter (TypeORM/Firestore/…). |
-| `userMetadata` | `RocketsUserMetadataConfig` | **required at runtime** | — | `/me` entity + DTOs. Omit → throws when the metadata DTO token resolves. |
+| `repository` | `RepositoryModuleInterface \| RepositoryBootstrap` | optional† | — | Root persistence adapter (TypeORM/Firestore/…). |
+| `userMetadata` | `RocketsUserMetadataConfig` | optional | — | `/me` entity + DTOs. When omitted, Rockets does not mount `/me` or register metadata handlers/providers. |
 | `auth` | `AuthBootstrap \| AuthBootstrap[]` | optional | `[]` | Auth chain (external adapter and/or built-in). |
 | `swagger` | `SwaggerUiOptionsInterface` | optional | — | Doc builder + UI. The **only** runtime field forwarded to core. |
 | `settings` | `RocketsSettingsInterface` (empty today) | optional | — | Reserved; no fields yet. |
 | `handlers` | `{ upsertUserMetadata?, getUserMetadata? }` | optional | built-ins | Override the user-metadata CQRS handlers. |
-| `enableGlobalGuard` | `boolean` | optional | **on** (opt-out) | Register `AuthServerGuard` as `APP_GUARD` unless `=== false`. |
+| `enableGlobalGuard` | `boolean` | optional | **on‡** | Register `AuthServerGuard` as `APP_GUARD` unless `=== false`. |
 | `disableController` | `{ me?: boolean }` | optional | `{}` | Disable built-in `MeController`. |
 | `controllers` | `DynamicModule['controllers']` | optional | — | Replace the auto controller set. |
 | `global` | `boolean` | optional | **forced `true`** | `forRoot` always makes the module global. |
 
-\* `repository` is optional in the type but persistence resolution throws if an
+† `repository` is optional in the type but persistence resolution throws if an
 entity has neither a per-entity override nor a root adapter.
+
+‡ The built-in `defineRocketsAuth()` integration contributes `false` because
+its upstream authentication module already owns a JWT global guard. Explicit
+server options always win; mixed-auth hosts can opt the Rockets chain back in.
 
 `*-server` / `*-core` split — what server forwards vs keeps:
 
@@ -436,8 +443,18 @@ accepts one bootstrap or a **chain** (array, tried in order).
 interface AuthBootstrap<A extends AuthAdapterInterface = AuthAdapterInterface> {
   adapter: Type<A>;
   forRoot?: () => DynamicModule;   // host module: provides+exports the adapter
+  contributes?: {                 // integration-owned app defaults
+    resources?: ReadonlyArray<ResourceInput>;
+    userMetadata?: RocketsUserMetadataConfig;
+    repository?: RepositoryModuleInterface | RepositoryBootstrap;
+    enableGlobalGuard?: boolean;
+  };
 }
 ```
+
+Explicit server options override contributed defaults. Resource contributions
+are prepended to application resources; incompatible single-value defaults from
+multiple auth integrations fail fast instead of depending on import order.
 
 ```mermaid
 flowchart TD
@@ -469,33 +486,26 @@ interface AuthAdapterInterface {
 ```
 
 **Global guard (default-on / opt-out):** `AuthServerGuard` is registered as
-`APP_GUARD` **unless `enableGlobalGuard === false`** — enabled by default; you
-opt **out**, never in. Routes are guarded unless explicitly made public
-(`@AuthPublic()`) or the global guard is disabled.
+`APP_GUARD` **unless `enableGlobalGuard === false`**. Auth integrations may
+contribute a different default; explicit app configuration wins. Routes are
+guarded unless explicitly made public (`@AuthPublic()`) or the global guard is
+disabled.
 
 ### 7a. External auth (`@concepta/rockets`) — you own `authenticate()`
 
-Minimum (core stub shape):
+Minimum:
 
 ```ts
-function createStubAuthBootstrap(adapter) {
-  return { adapter, forRoot: () => ({ module: class {}, providers: [adapter], exports: [adapter] }) };
-}
+const auth = defineAuthAdapter(MyAuthAdapter);
 ```
 
 Complete (`examples/sample-server/src/auth/define-sample-auth.ts`):
 
 ```ts
 export function defineSampleAuth(): AuthBootstrap<SampleAuthAdapter> {
-  return {
-    adapter: SampleAuthAdapter,
-    forRoot: () => ({
-      module: class SampleAuthHostModule {},
-      providers: [SampleAuthAdapter],
-      controllers: [AuthController],
-      exports: [SampleAuthAdapter],   // controller + entity stay internal
-    }),
-  };
+  return defineAuthAdapter(SampleAuthAdapter, {
+    controllers: [AuthController], // controller stays integration-private
+  });
 }
 
 RocketsModule.forRoot({
@@ -533,10 +543,10 @@ Concept → field map:
 |---|---|
 | JWT secrets/signing | `authentication.settings.jwt.{access,refresh}` |
 | login/strategies | `authentication.settings.strategies` |
-| recovery | `authentication.ports.recoveryNotification` (**required**) + `verifyNotification` |
+| recovery | `/recovery/*` controllers (enabled by default) + required `authentication.ports.recoveryNotification`; verification uses `verifyNotification` |
 | otp | `otp` block + `settings.otp` + `disableController.otp` |
 | signup / admin | `userCrud` (+ `handlers.*`) + `disableController.{signup,admin}` |
-| oauth / federated | `federated` block — **OAuth provider modules are NOT in v8 yet (G1 gap)** |
+| oauth / federated | `federated` persistence block; OAuth provider routes are deferred from the current 1.0 scope |
 
 Complete (`examples/sample-server-auth/src/app.module.ts`):
 
@@ -558,20 +568,20 @@ const rocketsAuthInput: DefineRocketsAuthInput = {
 };
 
 const rocketsAuth = defineRocketsAuth(rocketsAuthInput);
-const rocketsAuthResources = buildRocketsAuthResources(rocketsAuthInput.persistence, rocketsAuthInput.invitationEntity);
 
 RocketsModule.forRoot({
   auth: rocketsAuth,
-  userMetadata: rocketsAuthInput.userMetadata,
-  enableGlobalGuard: false,                 // auth uses per-controller guards
-  repository: repo,                         // SAME instance as persistence.module (reference equality!)
-  resources: [ ...rocketsAuthResources, createPetResource(), /* … */ ],
+  resources: [createPetResource(), /* … */],
 });
 ```
 
-> **Reference-equality trap:** the `repo` passed to `RocketsModule.repository`
-> and to `defineRocketsAuth({ persistence: { module: repo } })` must be the
-> **same object** — entities are grouped per adapter by identity.
+`defineRocketsAuth` contributes its persistence resources, metadata contract,
+repository bootstrap, and guard preference to the surrounding server. The host
+only declares application-owned resources. Explicit server options remain the
+escape hatch and take precedence over those contributed defaults. Its Rockets
+guard preference is `false` because `AuthenticationModule` already owns the JWT
+global guard; mixed-auth hosts can set `rocketsDefaults.enableGlobalGuard: true`
+and `auth.appGuard: false` to make the ordered Rockets adapter chain the owner.
 
 ---
 
@@ -596,16 +606,16 @@ Minimum:
 repository: defineTypeOrmRepository({ type: 'sqlite', database: ':memory:', synchronize: true })
 ```
 
-Selecting TypeORM (`examples/sample-server/src/repository/define-typeorm-repository.ts`):
+Selecting TypeORM:
 
 ```ts
-export function defineTypeOrmRepository(connection): RepositoryBootstrap {
-  return {
-    name: 'typeorm-bootstrap',
-    forFeature: (entities) => TypeOrmRepositoryModule.forFeature(entities),   // one repo token per key
-    forRoot:    (entities) => TypeOrmModule.forRoot({ ...connection, entities: [...entities] }),
-  };
-}
+import { defineTypeOrmRepository } from '@concepta/rockets-repository-typeorm';
+
+const repository = defineTypeOrmRepository({
+  type: 'sqlite',
+  database: ':memory:',
+  synchronize: true,
+});
 ```
 
 Swap to Firestore = pass a `defineFirestoreRepository(...)` instead — **no
@@ -631,7 +641,7 @@ interface RocketsUserMetadataConfig {
 }
 ```
 
-Minimum (required at runtime — omit and the metadata DTO token throws):
+Enable the optional `/me` surface by supplying:
 
 ```ts
 userMetadata: {
@@ -681,13 +691,10 @@ flowchart TD
    `sampleAuthUserResource` + `defineSampleAuth`).
 3. **`SafeCrudContextInterceptor`** — a live workaround replacing upstream's
    global `CrudContextOverlay`; flagged for removal once upstream is mixed-app safe.
-4. **OAuth (G1)** — federated/OAuth provider modules are not ported to v8 yet.
+4. **OAuth** — federated identity persistence exists, but provider-specific
+   OAuth routes are deferred from the current 1.0 scope.
 5. **`settings`** — both server and core `settings` are empty interfaces today
    (reserved slot).
-6. **Pre-existing e2e/typecheck gaps on this branch** (independent of the v2
-   work): `rockets-crud` photo-CRUD e2e ×2 + `rockets-server-auth` password e2e
-   ×2 fail (31/35); `sample-server` has 2 `CrudCommandHandler` ctor typecheck
-   errors and `sample-server-auth` 1 deep crud-import error.
 
 ---
 
@@ -697,11 +704,12 @@ flowchart TD
 
 ## 12. Signature v2 — design rationale & change-set (SHIPPED)
 
-> **Status: implemented.** The v2 DSL described in §1–§10 is live in
-> `packages/rockets-core/src/**`, with both sample apps migrated. Verified:
-> build green, core unit 296/296, core e2e 47/47, package e2e 31/35 (the 4
-> failures pre-date this work). This section keeps the *why* — the constraint,
-> the convertibility proof, the locked naming, and the change-set.
+> **Status: implemented.** The DSL described in §1–§10 is live in
+> `packages/rockets-core/src/**`, with all sample apps migrated. The root
+> `release:check` gate verifies builds, spec typechecking, code and Markdown
+> linting, unit and package E2E tests, sample builds/E2E tests, and dry-run
+> package artifacts. This section keeps the *why* — the constraint, the
+> convertibility proof, the locked naming, and the change-set.
 >
 > **Constraint:** "no breaking" meant **no functional / feature regression** —
 > NOT "cannot change the entry config". The input DSL was ours to redesign; the
@@ -746,8 +754,9 @@ do not present join as the parent-child association mechanism.
 - **Per-operation DTOs: `input` / `output`.** Not `body` (write-only word) and not
   `request` — `request` is already the `{ params, body, bodyBatch, validation }`
   envelope in crud, so it is taken. `input → request.body`, `output → response.resource`.
-- **`repository` everywhere.** Single name for "which adapter": root, per-resource,
-  per-entity, `userMetadata`. Replaces `persistence.module`.
+- **`repository` at the application/resource layer.** Single name for "which
+  adapter": root, per-resource, per-entity, and `userMetadata`. Built-in auth
+  retains `persistence.module` because that input also owns the auth entity map.
 
 ### 12.3 Final signatures
 

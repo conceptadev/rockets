@@ -7,10 +7,8 @@ export type { DefineRocketsAuthInput } from './define-rockets-auth';
 
 export * from './domains/auth';
 export * from './domains/user';
-// TODO(upstream: concepta/nestjs-auth-apple|github|google) — re-add
-// `export * from './domains/oauth'` once v8 OAuth provider packages ship.
-// The domain is parked under `domains/oauth/` (controller body preserved
-// in a block comment for fast restore).
+// TODO(upstream: concepta/nestjs-auth-apple|github|google) — export the OAuth
+// domain once compatible v8 provider packages ship.
 export * from './domains/otp';
 export * from './domains/role';
 export * from './domains/invitation';
@@ -22,7 +20,7 @@ export { RocketsJwtAuthAdapter } from './provider/rockets-jwt-auth.adapter';
 export { ROCKETS_AUTH_MODULE_OPTIONS_DEFAULT_SETTINGS_TOKEN } from './shared/constants/rockets-auth.constants';
 
 // Access-control re-exports — so consumers single-source from
-// `@concepta/rockets-server-auth` instead of dual-importing from
+// `@concepta/rockets-auth` instead of dual-importing from
 // `@concepta/nestjs-access-control`. Mirrors what `RocketsAuthModule`
 // actually wires when `extras.accessControl` is provided.
 export {

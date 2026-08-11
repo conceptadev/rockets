@@ -32,8 +32,8 @@ with `supertest` are the primary way to verify behavior in this project.
 ## Test Runner: Vitest
 
 The monorepo tests under **Vitest 4** using the `projects` model: the
-root `vitest.config.ts` declares every project (`unit`, `e2e-packages`,
-and one per example workspace); `vitest.shared.ts` carries the common
+root `vitest.config.mts` declares every project (`unit`, `e2e-packages`,
+and one per example workspace); `vitest.shared.mts` carries the common
 plugin/settings. Select with `--project <name>`; `vitest run` with no
 filter runs everything (requires `yarn build` first). Key facts:
 

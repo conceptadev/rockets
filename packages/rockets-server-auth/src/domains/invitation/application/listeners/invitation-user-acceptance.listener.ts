@@ -1,4 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import type { PlainLiteralObject } from '@nestjs/common';
 import { CommandBus, EventsHandler, IEventHandler } from '@nestjs/cqrs';
 
 import { PasswordCreationService } from '@concepta/nestjs-password';
@@ -23,7 +24,7 @@ import {
   InvitationAcceptanceConfig,
   INVITATION_ACCEPTANCE_CONFIG_TOKEN,
 } from '../../infrastructure/config/invitation-acceptance.config';
-import { whitelistedFromDto } from '@concepta/rockets-core';
+import { AppContextHost, whitelistedFromDto } from '@concepta/rockets-core';
 
 /**
  * Invitation User Acceptance Listener
@@ -72,18 +73,14 @@ export class InvitationUserAcceptanceListener
     // than leaving the user half-onboarded (active=true, no metadata, no
     // role). The outer catch keeps the event-listener contract (don't
     // re-throw — other listeners on the same event still get to run).
-    const txCtx = {
-      source: 'invitation-acceptance',
-      invitationId: invitation.id,
-      userId: invitation.userId,
-      category: invitation.category,
-    };
+    const ctx = new AppContextHost();
     try {
-      await this.txScope.run(txCtx, async () => {
+      await this.txScope.run(ctx, async (txCtx) => {
         const { password, userMetadata } =
           this.extractAcceptedData(acceptanceData);
 
         const userExists = await this.ensureUserExists({
+          ctx: txCtx,
           userId: invitation.userId,
           invitationId: invitation.id,
         });
@@ -93,9 +90,14 @@ export class InvitationUserAcceptanceListener
           password,
           invitation.userId,
         );
-        await this.updateUserActivation(invitation.userId, passwordFields);
+        await this.updateUserActivation(
+          txCtx,
+          invitation.userId,
+          passwordFields,
+        );
 
         await this.updateUserMetadata({
+          ctx: txCtx,
           userId: invitation.userId,
           userMetadata,
         });
@@ -103,7 +105,7 @@ export class InvitationUserAcceptanceListener
         const allowedRoleId = invitation.constraints?.roleId as
           | string
           | undefined;
-        await this.assignUserRole(invitation.userId, allowedRoleId);
+        await this.assignUserRole(txCtx, invitation.userId, allowedRoleId);
         this.logAcceptanceSuccess({
           invitationId: invitation.id,
           userId: invitation.userId,
@@ -126,10 +128,11 @@ export class InvitationUserAcceptanceListener
   }
 
   private async ensureUserExists(options: {
+    ctx: PlainLiteralObject;
     userId: string;
     invitationId: string;
   }): Promise<boolean> {
-    const user = await this.userModelService.byId(options.userId);
+    const user = await this.userModelService.byId(options.ctx, options.userId);
     if (!user) {
       this.logger.error('User not found for invitation', {
         userId: options.userId,
@@ -151,10 +154,11 @@ export class InvitationUserAcceptanceListener
   }
 
   private async updateUserActivation(
+    ctx: PlainLiteralObject,
     userId: string,
     passwordFields: Record<string, unknown>,
   ): Promise<void> {
-    await this.userModelService.update({
+    await this.userModelService.update(ctx, {
       id: userId,
       ...passwordFields,
       active: true,
@@ -163,10 +167,11 @@ export class InvitationUserAcceptanceListener
   }
 
   private async updateUserMetadata(options: {
+    ctx: PlainLiteralObject;
     userId: string;
     userMetadata?: InvitationAcceptanceDataInterface['userMetadata'];
   }): Promise<void> {
-    const { userId, userMetadata } = options;
+    const { ctx, userId, userMetadata } = options;
     if (!userMetadata || Object.keys(userMetadata).length === 0) return;
 
     const MetadataUpdateDto = this.config.userMetadataUpdateDto;
@@ -180,21 +185,22 @@ export class InvitationUserAcceptanceListener
     }
 
     await this.commandBus.execute(
-      new SaveUserMetadataCommand(userId, metadata),
+      new SaveUserMetadataCommand(ctx, userId, metadata),
     );
     this.logger.log('User metadata created/updated successfully', { userId });
   }
 
   private async assignUserRole(
+    ctx: PlainLiteralObject,
     userId: string,
     allowedRoleId?: string,
   ): Promise<void> {
     if (allowedRoleId) {
       await this.commandBus.execute(
-        new AssignRoleCommand({}, USER_ROLE_ENTITY_KEY, allowedRoleId, userId),
+        new AssignRoleCommand(ctx, USER_ROLE_ENTITY_KEY, allowedRoleId, userId),
       );
     } else {
-      await this.commandBus.execute(new AssignDefaultRoleCommand(userId));
+      await this.commandBus.execute(new AssignDefaultRoleCommand(ctx, userId));
     }
   }
 

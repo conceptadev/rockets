@@ -1,31 +1,22 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { Command, CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
 import type { PasswordStorageInterface } from '@concepta/nestjs-common';
-import {
-  PasswordCreationService,
-  ValidateCurrentPasswordCommand,
-} from '@concepta/nestjs-password';
+import { PasswordCreationService } from '@concepta/nestjs-password';
 
-// TODO(upstream: concepta/nestjs-password) — `PasswordCreationService.validateCurrent`
-// flattens the target with `{ password, ...object }` (`password-creation.service.ts:51`),
-// which only copies own enumerable fields. v8 `UserCredentials` aggregates expose
-// `passwordHash` via getter / `toPlain()` / `.props` — none survive the spread, so the
-// upstream check always sees `passwordHash: undefined` and returns `false` for valid
-// passwords. Tracked in: .context/upstream-gaps.md (G9). Restore when: upstream
-// replaces the spread with `{ password, ...(target?.toPlain?.() ?? target) }` or
-// reshapes the contract to require `PasswordStorageInterface` strictly. Then this
-// override module + handler can be deleted.
+/** A distinct CQRS route avoids competing with the upstream command handler. */
+export class RocketsValidateCurrentPasswordCommand extends Command<boolean> {
+  constructor(
+    readonly password: string,
+    readonly target: PasswordStorageInterface,
+  ) {
+    super();
+  }
+}
+
 /**
- * Upstream `PasswordCreationService.validateCurrent` flattens the target with
- * `Object.assign({ password }, target)`, which only copies own enumerable
- * fields — getters on the prototype chain and nested `target.props.*` are
- * dropped. v8 `UserCredentials` aggregates expose `passwordHash` exactly that
- * way (getter / nested props), so the upstream check always sees
- * `passwordHash: undefined` and returns `false` for valid passwords.
- *
- * This helper normalizes any of the three known shapes (POJO, aggregate with
- * `toPlain()`, aggregate with `.props`) into a plain
- * `PasswordStorageInterface` before delegating.
+ * Normalize credential aggregates before delegating. Upstream currently
+ * spreads the target, which drops prototype getters and nested `props`; remove
+ * this adapter when it preserves aggregate `passwordHash` values.
  */
 function toPasswordStorageInterface(
   target: unknown,
@@ -52,24 +43,23 @@ function toPasswordStorageInterface(
   return undefined;
 }
 
-/**
- * Replaces upstream {@link ValidateCurrentPasswordHandler} so current-password
- * checks work when `target` is a credentials aggregate (see `toPlain` / `props`).
- */
+/** Validate a current password after normalizing the credential shape. */
 @Injectable()
-@CommandHandler(ValidateCurrentPasswordCommand)
+@CommandHandler(RocketsValidateCurrentPasswordCommand)
 export class RocketsValidateCurrentPasswordHandler
-  implements ICommandHandler<ValidateCurrentPasswordCommand, boolean>
+  implements ICommandHandler<RocketsValidateCurrentPasswordCommand, boolean>
 {
   constructor(
     private readonly passwordCreationService: PasswordCreationService,
   ) {}
 
-  async execute(command: ValidateCurrentPasswordCommand): Promise<boolean> {
+  async execute(
+    command: RocketsValidateCurrentPasswordCommand,
+  ): Promise<boolean> {
     const normalized = toPasswordStorageInterface(command.target);
     if (!normalized) {
       throw new InternalServerErrorException(
-        'ValidateCurrentPasswordCommand received a target without a ' +
+        'RocketsValidateCurrentPasswordCommand received a target without a ' +
           'reachable passwordHash (POJO, aggregate.toPlain(), or .props). ' +
           'Check the upstream caller that built the command.',
       );

@@ -11,6 +11,7 @@ import {
 import { QueryBus } from '@nestjs/cqrs';
 import { RoleEntityInterface } from '@concepta/nestjs-role';
 import { IsAssignedRoleQuery } from '@concepta/nestjs-role';
+import { getAppContext } from '@concepta/rockets-core';
 import { RocketsAuthSettingsInterface } from '../shared/interfaces/rockets-auth-settings.interface';
 import { RocketsEntity } from '../shared/constants/repository-entity-keys.constants';
 import { ROCKETS_AUTH_MODULE_OPTIONS_DEFAULT_SETTINGS_TOKEN } from '../shared/constants/rockets-auth.constants';
@@ -29,6 +30,7 @@ export class AdminGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
+    const ctx = getAppContext(request);
     const user = request.user;
 
     const ADMIN_ROLE = this.settings.role.adminRoleName;
@@ -43,14 +45,14 @@ export class AdminGuard implements CanActivate {
       const role = await this.queryBus.execute<
         RocketsGetRoleByNameQuery,
         RoleEntityInterface | null
-      >(new RocketsGetRoleByNameQuery(ADMIN_ROLE));
+      >(new RocketsGetRoleByNameQuery(ctx, ADMIN_ROLE));
 
       if (!role) {
         throw new ForbiddenException();
       }
 
       return await this.queryBus.execute<IsAssignedRoleQuery, boolean>(
-        new IsAssignedRoleQuery({}, RocketsEntity.userRole, role.id, user.id),
+        new IsAssignedRoleQuery(ctx, RocketsEntity.userRole, role.id, user.id),
       );
     } catch (error) {
       if (error instanceof ForbiddenException) {

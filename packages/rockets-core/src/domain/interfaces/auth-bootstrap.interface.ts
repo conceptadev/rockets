@@ -6,13 +6,30 @@ import type { RocketsUserMetadataConfig } from './rockets-user-metadata-config.i
 import type { ResourceInput } from '../../infrastructure/resource/planner/app-registration-plan.types';
 
 /**
- * Defaults an auth integration can contribute to the surrounding Rockets app.
- * Explicit options on `RocketsModule` take precedence over every contribution.
+ * Identity ownership an auth integration claims over the surrounding app:
+ * the persistence rows, root repository, and user-metadata contract for the
+ * single user space every adapter in the chain authenticates into. At most
+ * ONE bootstrap per app may carry this — the server rejects two owners at
+ * composition time. Explicit options on `RocketsModule` still win.
+ *
+ * Resolved by `@concepta/rockets` (`createServer` / `RocketsModule`);
+ * `RocketsCoreModule` does not read it.
  */
-export interface AuthBootstrapContributions {
+export interface AuthBootstrapIdentity {
   readonly resources?: ReadonlyArray<ResourceInput>;
   readonly userMetadata?: RocketsUserMetadataConfig;
   readonly repository?: RepositoryModuleInterface | RepositoryBootstrap;
+}
+
+/**
+ * Per-integration guard preferences. Unlike {@link AuthBootstrapIdentity},
+ * these can coexist across an auth chain; conflicting values fail at
+ * composition. Explicit options on `RocketsModule` take precedence.
+ *
+ * Resolved by `@concepta/rockets` (`createServer` / `RocketsModule`);
+ * `RocketsCoreModule` does not read them.
+ */
+export interface AuthBootstrapContributions {
   /**
    * Contribute `false` only together with `providesAppGuard: true` — an
    * integration may swap the global guard, never remove it. Removing the
@@ -37,6 +54,8 @@ export interface AuthBootstrap<
 > {
   readonly adapter: Type<Adapter>;
   readonly forRoot?: () => DynamicModule;
-  /** Persistence and server defaults owned by this integration. */
+  /** Singular identity ownership — at most one bootstrap per app. */
+  readonly identity?: AuthBootstrapIdentity;
+  /** Guard preferences owned by this integration; explicit app options win. */
   readonly contributes?: AuthBootstrapContributions;
 }

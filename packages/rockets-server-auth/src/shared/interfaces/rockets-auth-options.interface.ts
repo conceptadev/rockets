@@ -33,7 +33,7 @@ import { RocketsAuthSettingsInterface } from './rockets-auth-settings.interface'
 /**
  * Options accepted by `CrudModule.forRoot()` (the upstream interface
  * `CrudModuleOptionsInterface` is not exported publicly in
- * `@concepta/rockets-crud@v8.0.0-alpha.5`, so we extract it via TS
+ * `@concepta/nestjs-crud`, so we extract it via TypeScript
  * inference instead of deep-importing).
  */
 type CrudModuleOptions = Parameters<typeof CrudModule.forRoot>[0];
@@ -49,8 +49,7 @@ type CrudModuleOptions = Parameters<typeof CrudModule.forRoot>[0];
  * are CQRS Command/Query class types (NOT service instances).
  *
  * The OAuth provider modules (`auth-apple`, `auth-github`, `auth-google`) are
- * intentionally absent here — they have not been ported to v8 yet upstream.
- * See `domains/oauth/` for the deferred wiring with `TODO(upstream:)` markers.
+ * intentionally absent until upstream ships compatible v8 releases.
  */
 export interface RocketsAuthOptionsInterface {
   /**
@@ -82,8 +81,8 @@ export interface RocketsAuthOptionsInterface {
    *   Defaulted to all-enabled; pass `{ jwt: {} }` etc. to override.
    * - `mfa` — `recovery` / `verify` MFA policy overrides
    *   (`RecoveryPolicySettingsInterface` / `VerifyPolicySettingsInterface`).
-   *   Typed-reachable; no rockets default — upstream supplies defaults
-   *   when omitted.
+   *   Recovery defaults to Rockets' OTP namespace/category/rate policy when
+   *   omitted so the mounted recovery controller is always operational.
    * - `guards` — guard enable/disable policy
    *   (`GuardsPolicySettingsInterface`). Typed-reachable; no rockets
    *   default.

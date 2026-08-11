@@ -12,7 +12,7 @@ export class RocketsCreateOtpHandler
     const { assignment, otp } = command.params;
     const namespace = String(assignment);
     return this.commandBus.execute(
-      new CreateOtpCommand({}, namespace, {
+      new CreateOtpCommand(command.ctx, namespace, {
         category: otp.category,
         type: otp.type,
         assigneeId: otp.assigneeId,

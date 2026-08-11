@@ -73,17 +73,19 @@ function mergeAndBranch(
 ): FirestoreQueryBranch {
   const merged: FirestoreQueryFilter[] = [];
   const postFilters: FirestorePostFilter[] = [];
-  let documentId: string | undefined;
+  let candidateDocumentIds: string[] | undefined;
 
   for (const child of conditions) {
     if (isWhereCondition(child)) {
       const branch = translateCondition(child);
-      if (branch.documentId) {
-        documentId = branch.documentId;
-      }
-      if (branch.documentIds) {
-        throw new Error(
-          'Firestore adapter: documentIds in an AND branch is not supported — restructure the where clause.',
+      const childDocumentIds =
+        branch.documentId !== undefined
+          ? [branch.documentId]
+          : branch.documentIds;
+      if (childDocumentIds !== undefined) {
+        candidateDocumentIds = intersectDocumentIds(
+          candidateDocumentIds,
+          childDocumentIds,
         );
       }
       merged.push(...branch.filters);
@@ -98,10 +100,29 @@ function mergeAndBranch(
   assertFirestoreFilterRules(merged);
 
   return {
-    documentId,
+    ...selectDocuments(candidateDocumentIds),
     filters: merged,
     postFilters,
   };
+}
+
+function selectDocuments(
+  candidateDocumentIds: readonly string[] | undefined,
+): Pick<FirestoreQueryBranch, 'documentId' | 'documentIds'> {
+  if (candidateDocumentIds === undefined) return {};
+  return candidateDocumentIds.length === 1
+    ? { documentId: candidateDocumentIds[0] }
+    : { documentIds: candidateDocumentIds };
+}
+
+function intersectDocumentIds(
+  current: readonly string[] | undefined,
+  incoming: readonly string[],
+): string[] {
+  const uniqueIncoming = [...new Set(incoming)];
+  if (current === undefined) return uniqueIncoming;
+  const allowed = new Set(uniqueIncoming);
+  return current.filter((id) => allowed.has(id));
 }
 
 function readScalarValue(condition: WhereConditionScalar): unknown {
@@ -149,14 +170,15 @@ function translateIdCondition(condition: WhereCondition): FirestoreQueryBranch {
   switch (condition.operator) {
     case WhereOperator.EQ:
       return {
-        documentId: String(readScalarValue(condition as WhereConditionScalar)),
+        documentId: readDocumentId(
+          readScalarValue(condition as WhereConditionScalar),
+        ),
         filters: [],
         postFilters: [],
       };
     case WhereOperator.IN: {
-      const values = asArray(readArrayValue(condition)).map((value) =>
-        String(value),
-      );
+      const rawValues = asArray(readArrayValue(condition));
+      const values = rawValues.map(readDocumentId);
       return {
         documentIds: values,
         filters: [],
@@ -166,6 +188,15 @@ function translateIdCondition(condition: WhereCondition): FirestoreQueryBranch {
     default:
       throw unsupportedOperator(condition.operator, condition.field);
   }
+}
+
+function readDocumentId(value: unknown): string {
+  if (typeof value !== 'string' || value.length === 0) {
+    throw new Error(
+      'Firestore adapter: document ids must be non-empty string values.',
+    );
+  }
+  return value;
 }
 
 function translateNullaryCondition(

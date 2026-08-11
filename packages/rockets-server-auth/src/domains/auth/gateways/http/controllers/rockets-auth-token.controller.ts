@@ -28,6 +28,9 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import type { Request } from 'express';
+import { getAppContext } from '@concepta/rockets-core';
+
+import { AuthAccountThrottlerGuard } from '../guards/auth-account-throttler.guard';
 
 type RequestWithPassportUser = Request & {
   readonly user?: ReferenceIdInterface;
@@ -42,7 +45,8 @@ type RequestWithPassportUser = Request & {
  * before `AuthUserContextOverlay` runs on some Nest versions).
  */
 @Controller('token')
-@AuthPublic()
+@AuthPublic({ classLevel: true })
+@UseGuards(AuthAccountThrottlerGuard)
 @ApiTags('Authentication')
 export class RocketsAuthTokenController {
   constructor(private readonly commandBus: CommandBus) {}
@@ -78,8 +82,9 @@ export class RocketsAuthTokenController {
     if (!user?.id) {
       throw new UnauthorizedException();
     }
+    const ctx = getAppContext(req);
     return this.commandBus.execute(
-      new IssueAuthenticatedResponseCommand({}, user.id),
+      new IssueAuthenticatedResponseCommand(ctx, user.id),
     );
   }
 
@@ -114,8 +119,9 @@ export class RocketsAuthTokenController {
     if (!user?.id) {
       throw new UnauthorizedException();
     }
+    const ctx = getAppContext(req);
     return this.commandBus.execute(
-      new IssueAuthenticatedResponseCommand({}, user.id),
+      new IssueAuthenticatedResponseCommand(ctx, user.id),
     );
   }
 }

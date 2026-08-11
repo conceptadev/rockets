@@ -35,7 +35,8 @@ export class RocketsAuthValidatePasswordPortCommand
 
 /**
  * CQRS command shape required by {@link PasswordPort} (`setPassword(ctx, password, assigneeId)`).
- * Bridges to {@link UpdateUserPasswordCommand} via {@link RocketsAuthSetPasswordPortHandler}.
+ * The handler enforces configured history policy, rotates the active
+ * credential transactionally, and preserves the caller's context.
  */
 export class RocketsAuthSetPasswordPortCommand
   extends Command<void>

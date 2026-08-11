@@ -37,6 +37,8 @@ jobs:
         run: yarn lint:all
       - name: Typecheck tests
         run: yarn typecheck:spec
+      - name: Verify native Vitest config loading
+        run: yarn test:config-native
       - name: Unit tests
         run: yarn test:ci
       - name: E2E coverage

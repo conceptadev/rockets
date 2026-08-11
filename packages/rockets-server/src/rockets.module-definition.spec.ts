@@ -54,17 +54,23 @@ const contributedUserMetadata = {
 } as RocketsUserMetadataConfig;
 
 function contributedAuth(
-  overrides: Record<string, unknown> = {},
+  overrides: {
+    identity?: Record<string, unknown>;
+    contributes?: Record<string, unknown>;
+  } = {},
 ): AuthBootstrap {
   return {
     adapter: ContributedAuthAdapter,
-    contributes: {
+    identity: {
       repository: contributedRepository,
       resources: [contributedResource],
       userMetadata: contributedUserMetadata,
+      ...overrides.identity,
+    },
+    contributes: {
       enableGlobalGuard: false,
       providesAppGuard: true,
-      ...overrides,
+      ...overrides.contributes,
     },
   } as AuthBootstrap;
 }
@@ -224,26 +230,64 @@ describe('RocketsModuleDefinition', () => {
   });
 
   describe('resolveRocketsComposition', () => {
-    it('throws when integrations contribute conflicting userMetadata', () => {
-      const otherUserMetadata = {
-        ...contributedUserMetadata,
-        updateDto: class OtherMetadataUpdateDto extends ContributedMetadataUpdateDto {},
-      };
+    it('throws when two integrations claim identity ownership', () => {
+      // Even structurally identical claims are invalid: the chain
+      // authenticates into ONE user space with ONE persistence owner.
+      expect(() =>
+        resolveRocketsComposition({
+          auth: [contributedAuth(), contributedAuth()],
+        }),
+      ).toThrow(/identity ownership/);
+    });
 
+    it('throws on sliced identity ownership across integrations', () => {
+      expect(() =>
+        resolveRocketsComposition({
+          auth: [
+            contributedAuth({
+              identity: { repository: undefined, resources: [] },
+            }),
+            contributedAuth({
+              identity: { userMetadata: undefined, resources: [] },
+            }),
+          ],
+        }),
+      ).toThrow(/identity ownership/);
+    });
+
+    it('accepts one identity owner among credential-only integrations', () => {
+      const credentialOnly = {
+        adapter: ContributedAuthAdapter,
+      } as AuthBootstrap;
+
+      const composition = resolveRocketsComposition({
+        auth: [contributedAuth(), credentialOnly],
+      });
+
+      expect(composition.userMetadata).toBe(contributedUserMetadata);
+      expect(composition.repository).toBe(contributedRepository);
+    });
+
+    it('throws when integrations contribute conflicting guard defaults', () => {
       expect(() =>
         resolveRocketsComposition({
           auth: [
             contributedAuth(),
-            contributedAuth({ userMetadata: otherUserMetadata }),
+            {
+              adapter: ContributedAuthAdapter,
+              contributes: { enableGlobalGuard: true },
+            } as AuthBootstrap,
           ],
         }),
-      ).toThrow(/conflicting userMetadata/);
+      ).toThrow(/conflicting enableGlobalGuard/);
     });
 
     it('throws when a contribution disables the guard without providing one', () => {
       expect(() =>
         resolveRocketsComposition({
-          auth: contributedAuth({ providesAppGuard: undefined }),
+          auth: contributedAuth({
+            contributes: { providesAppGuard: undefined },
+          }),
         }),
       ).toThrow(/providesAppGuard/);
     });
@@ -256,9 +300,58 @@ describe('RocketsModuleDefinition', () => {
       expect(composition.enableGlobalGuard).toBe(false);
     });
 
+    it('skips an identity resource the app already lists by reference', () => {
+      const composition = resolveRocketsComposition({
+        auth: contributedAuth(),
+        resources: [contributedResource],
+      });
+
+      expect(composition.resources).toEqual([contributedResource]);
+    });
+
+    it('throws when identity and app define the same entity differently', () => {
+      class SharedEntity {}
+      const identityResource = {
+        kind: 'crud',
+        meta: { entityClass: SharedEntity },
+      } as unknown as ResourceInput;
+      const appResource = {
+        kind: 'crud',
+        meta: { entityClass: SharedEntity },
+      } as unknown as ResourceInput;
+
+      expect(() =>
+        resolveRocketsComposition({
+          auth: contributedAuth({
+            identity: { resources: [identityResource] },
+          }),
+          resources: [appResource],
+        }),
+      ).toThrow(/SharedEntity/);
+    });
+
+    it('strips identity and contributes before handing bootstraps to core', () => {
+      const forRootAsync = vi
+        .spyOn(RocketsCoreModule, 'forRootAsync')
+        .mockReturnValue({ module: RocketsCoreModule });
+
+      createRocketsImports({
+        imports: [],
+        extras: { auth: contributedAuth() },
+      });
+
+      const coreAuth = forRootAsync.mock.calls[0][0]
+        .auth as ReadonlyArray<AuthBootstrap>;
+      expect(coreAuth[0].identity).toBeUndefined();
+      expect(coreAuth[0].contributes).toBeUndefined();
+      forRootAsync.mockRestore();
+    });
+
     it('accepts an explicit app-level opt-out even without a replacement guard', () => {
       const composition = resolveRocketsComposition({
-        auth: contributedAuth({ providesAppGuard: undefined }),
+        auth: contributedAuth({
+          contributes: { providesAppGuard: undefined },
+        }),
         enableGlobalGuard: false,
       });
 

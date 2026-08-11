@@ -13,8 +13,6 @@ export {
   getErrorDetails,
 } from './utils/error-logging.helper';
 export type { ErrorDetails } from './utils/error-logging.helper';
-export { createRepositoryContext } from './utils/repository-context.helper';
-export type { RepositoryContextInterface } from './utils/repository-context.helper';
 export { stripUndefined } from './utils/strip-undefined.helper';
 export { whitelistedFromDto } from './utils/whitelisted-from-dto.util';
 export { deriveEntityKey } from './utils/derive-entity-key.util';

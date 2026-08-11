@@ -12,5 +12,6 @@ description: Code editing best practices for this repository
 # Source of Truth
 
 - Behavior and API truth: `packages/*/src/**`
-- Public API surface for auth package: `packages/rockets-server-auth/swagger/swagger.json`
+- Public API surface for auth package: `packages/rockets-server-auth/src/index.ts`
+  plus its `*.e2e-spec.ts` suites (there is no generated swagger.json anymore).
 - When docs conflict with code, prefer code.

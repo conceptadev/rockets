@@ -26,14 +26,14 @@ export class RocketsValidateOtpHandler
       ValidateOtpQuery,
       AssigneeRelationInterface | null
     >(
-      new ValidateOtpQuery({}, namespace, {
+      new ValidateOtpQuery(query.ctx, namespace, {
         category: query.otp.category,
         passcode: query.otp.passcode,
       }),
     );
     if (result && query.deleteIfValid) {
       await this.commandBus.execute(
-        new ConsumeOtpCommand({}, namespace, {
+        new ConsumeOtpCommand(query.ctx, namespace, {
           category: query.otp.category,
           passcode: query.otp.passcode,
         }),

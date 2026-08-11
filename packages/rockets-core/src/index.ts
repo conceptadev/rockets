@@ -21,7 +21,11 @@ export { AuthServerGuard } from './infrastructure/guards/auth-server.guard';
 export { PathScopeGuard } from './infrastructure/guards/path-scope.guard';
 
 // Decorators
-export { AuthPublic } from './decorators/auth-public.decorator';
+export {
+  AuthPublic,
+  type AuthPublicMetadata,
+  type AuthPublicOptions,
+} from './decorators/auth-public.decorator';
 // Canonical authenticated-user param decorator (reads `request.user`).
 
 // Auth user-context overlay — re-exported so downstream layers consume it
@@ -104,6 +108,11 @@ export {
   Where,
   getDynamicRepositoryToken,
 } from '@concepta/nestjs-repository';
+export {
+  AppContextHost,
+  getAppContext,
+  type AppContextLike,
+} from '@concepta/nestjs-core';
 
 // Module resource (non-CRUD persistence + Nest module slice)
 export type {
@@ -121,6 +130,7 @@ export type { DefineModuleResourceInput } from './infrastructure/resource/define
 export type {
   AuthBootstrap,
   AuthBootstrapContributions,
+  AuthBootstrapIdentity,
 } from './domain/interfaces/auth-bootstrap.interface';
 export { defineAuthAdapter } from './infrastructure/auth/define-auth-adapter';
 export type { DefineAuthAdapterOptions } from './infrastructure/auth/define-auth-adapter';

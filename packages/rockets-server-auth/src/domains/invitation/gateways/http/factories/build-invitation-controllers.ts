@@ -6,9 +6,10 @@ import {
   Param,
   Patch,
   Post,
-  Type,
+  Req,
   UseGuards,
 } from '@nestjs/common';
+import type { Type } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -24,31 +25,30 @@ import {
   AcceptInvitationCommand,
   CreateInvitationByEmailCommand,
   FindInvitationByCodeQuery,
-  Invitation,
   InvitationNotFoundException,
   RevokeInvitationsCommand,
   SendInvitationCommand,
+  type Invitation,
 } from '@concepta/nestjs-invitation';
+import { getAppContext } from '@concepta/rockets-core';
+import type { Request } from 'express';
 
 import { AdminGuard } from '../../../../../guards/admin.guard';
+import { AuthAccountThrottlerGuard } from '../../../../auth/gateways/http/guards/auth-account-throttler.guard';
 import { applyControllerExtras } from '../../../../../shared/utils/apply-controller-extras.helper';
 import { RocketsAuthInvitationAcceptDto } from '../../../infrastructure/dto/rockets-auth-invitation-accept.dto';
 import { RocketsAuthInvitationCreateDto } from '../../../infrastructure/dto/rockets-auth-invitation-create.dto';
 import { RocketsAuthInvitationResponseDto } from '../../../infrastructure/dto/rockets-auth-invitation-response.dto';
 import { RocketsAuthInvitationRevokeDto } from '../../../infrastructure/dto/rockets-auth-invitation-revoke.dto';
 import { RocketsAuthInvitationNotAcceptedException } from '../../../domain/exceptions/invitation.exception';
-import {
+import type {
   InvitationAcceptanceControllerExtras,
   InvitationControllerExtras,
   InvitationReattemptControllerExtras,
   InvitationRevocationControllerExtras,
 } from '../../../interfaces/invitation-controller-extras.interface';
 
-/**
- * Build `POST /admin/invitations` (create + send).
- * Replaces the cast `} as RocketsAuthInvitationResponseDto` (W4) by
- * constructing the response DTO via `plainToInstance`.
- */
+/** Build `POST /admin/invitations` and materialize its response DTO. */
 export function buildInvitationController(
   extras: InvitationControllerExtras = {},
 ): Type<unknown> {
@@ -75,14 +75,16 @@ export function buildInvitationController(
     })
     async create(
       @Body() dto: RocketsAuthInvitationCreateDto,
+      @Req() req: Request,
     ): Promise<RocketsAuthInvitationResponseDto> {
+      const ctx = getAppContext(req);
       const invitation: Invitation = await this.commandBus.execute(
-        new CreateInvitationByEmailCommand({}, dto),
+        new CreateInvitationByEmailCommand(ctx, dto),
       );
       let emailError: string | undefined;
       try {
         await this.commandBus.execute(
-          new SendInvitationCommand({}, invitation.id),
+          new SendInvitationCommand(ctx, invitation.id),
         );
         this.logger.log('Invitation sent successfully', {
           invitationId: invitation.id,
@@ -114,7 +116,8 @@ export function buildInvitationAcceptanceController(
   extras: InvitationAcceptanceControllerExtras = {},
 ): Type<unknown> {
   @Controller('invitation-acceptance')
-  @AuthPublic()
+  @AuthPublic({ classLevel: true })
+  @UseGuards(AuthAccountThrottlerGuard)
   @ApiTags('auth')
   class InvitationAcceptanceController {
     constructor(private readonly commandBus: CommandBus) {}
@@ -135,10 +138,12 @@ export function buildInvitationAcceptanceController(
     async accept(
       @Param('code') code: string,
       @Body() dto: RocketsAuthInvitationAcceptDto,
+      @Req() req: Request,
     ): Promise<void> {
+      const ctx = getAppContext(req);
       const { passcode, payload } = dto;
       const result: Invitation | null = await this.commandBus.execute(
-        new AcceptInvitationCommand({}, code, { passcode, payload }),
+        new AcceptInvitationCommand(ctx, code, { passcode, payload }),
       );
       if (!result) {
         throw new RocketsAuthInvitationNotAcceptedException();
@@ -170,9 +175,13 @@ export function buildInvitationRevocationController(
         'Revoke all active invitations for a specific email and category',
     })
     @ApiCreatedResponse({ description: 'Invitations revoked successfully' })
-    async revoke(@Body() dto: RocketsAuthInvitationRevokeDto): Promise<void> {
+    async revoke(
+      @Body() dto: RocketsAuthInvitationRevokeDto,
+      @Req() req: Request,
+    ): Promise<void> {
+      const ctx = getAppContext(req);
       await this.commandBus.execute(
-        new RevokeInvitationsCommand({}, dto.email, dto.category),
+        new RevokeInvitationsCommand(ctx, dto.email, dto.category),
       );
     }
   }
@@ -210,15 +219,19 @@ export function buildInvitationReattemptController(
     @ApiCreatedResponse({
       description: 'Invitation email re-sent successfully',
     })
-    async reattempt(@Param('code') code: string): Promise<void> {
+    async reattempt(
+      @Param('code') code: string,
+      @Req() req: Request,
+    ): Promise<void> {
+      const ctx = getAppContext(req);
       const invitation: Invitation | null = await this.queryBus.execute(
-        new FindInvitationByCodeQuery({}, code),
+        new FindInvitationByCodeQuery(ctx, code),
       );
       if (!invitation) {
         throw new InvitationNotFoundException(code);
       }
       await this.commandBus.execute(
-        new SendInvitationCommand({}, invitation.id),
+        new SendInvitationCommand(ctx, invitation.id),
       );
     }
   }

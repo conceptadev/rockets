@@ -1,11 +1,11 @@
 import { getApp } from 'firebase-admin/app';
 import {
   getFirestore,
-  Timestamp,
   type DocumentData,
   type Query,
 } from 'firebase-admin/firestore';
 
+import { FirestoreDuplicateIdException } from '../exceptions/firestore-duplicate-id.exception';
 import type {
   FirestoreBackend,
   FirestoreBranchQueryOptions,
@@ -16,6 +16,23 @@ import type {
   FirestoreQueryBranch,
 } from '../interfaces/firestore-query.interface';
 import { applyFirestorePostFilters } from '../repository/firestore-post-filter';
+import { applyFirestoreFilters } from '../repository/firestore-row-filter';
+import { sortFirestoreRows } from '../repository/firestore-sort';
+import { normalizeFirestoreValue } from '../repository/firestore-value';
+
+// Batched reads keep argument lists bounded; getAll itself has no hard cap.
+const GET_ALL_CHUNK = 300;
+
+const GRPC_ALREADY_EXISTS = 6;
+
+function isAlreadyExistsError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    error.code === GRPC_ALREADY_EXISTS
+  );
+}
 
 export class AdminFirestoreBackend implements FirestoreBackend {
   private db() {
@@ -45,6 +62,24 @@ export class AdminFirestoreBackend implements FirestoreBackend {
       .set(this.serialise(data), { merge });
   }
 
+  async create(
+    collection: string,
+    documentId: string,
+    data: Record<string, unknown>,
+  ): Promise<void> {
+    try {
+      await this.db()
+        .collection(collection)
+        .doc(documentId)
+        .create(this.serialise(data));
+    } catch (error) {
+      if (isAlreadyExistsError(error)) {
+        throw new FirestoreDuplicateIdException(collection, documentId);
+      }
+      throw error;
+    }
+  }
+
   async delete(collection: string, documentId: string): Promise<void> {
     await this.db().collection(collection).doc(documentId).delete();
   }
@@ -57,13 +92,13 @@ export class AdminFirestoreBackend implements FirestoreBackend {
     const skip = options.skip ?? 0;
     const take = options.take;
 
-    if (
-      branch.documentId ||
-      (branch.documentIds && branch.documentIds.length > 0)
-    ) {
+    if (branch.documentId !== undefined || branch.documentIds !== undefined) {
       const rows = await this.loadBranchRows(collection, branch);
-      const filtered = applyFirestorePostFilters(rows, branch.postFilters);
-      const ordered = this.sortRows(filtered, options.orderBy);
+      const filtered = applyFirestorePostFilters(
+        applyFirestoreFilters(rows, branch.filters),
+        branch.postFilters,
+      );
+      const ordered = sortFirestoreRows(filtered, options.orderBy);
       const sliced = ordered.slice(skip);
       return typeof take === 'number' && take > 0
         ? sliced.slice(0, take)
@@ -102,11 +137,14 @@ export class AdminFirestoreBackend implements FirestoreBackend {
   ): Promise<number> {
     if (
       branch.postFilters.length > 0 ||
-      branch.documentId ||
-      (branch.documentIds && branch.documentIds.length > 0)
+      branch.documentId !== undefined ||
+      branch.documentIds !== undefined
     ) {
       const rows = await this.loadBranchRows(collection, branch);
-      return applyFirestorePostFilters(rows, branch.postFilters).length;
+      return applyFirestorePostFilters(
+        applyFirestoreFilters(rows, branch.filters),
+        branch.postFilters,
+      ).length;
     }
 
     const query = this.buildCollectionQuery(collection, branch);
@@ -118,17 +156,28 @@ export class AdminFirestoreBackend implements FirestoreBackend {
     collection: string,
     branch: FirestoreQueryBranch,
   ): Promise<Record<string, unknown>[]> {
-    if (branch.documentId) {
+    if (branch.documentId !== undefined) {
       const row = await this.get(collection, branch.documentId);
       return row ? [row] : [];
     }
 
-    if (branch.documentIds && branch.documentIds.length > 0) {
+    if (branch.documentIds !== undefined) {
+      if (branch.documentIds.length === 0) return [];
+      const collectionRef = this.db().collection(collection);
       const rows: Record<string, unknown>[] = [];
-      for (const documentId of branch.documentIds) {
-        const row = await this.get(collection, documentId);
-        if (row) {
-          rows.push(row);
+      for (
+        let index = 0;
+        index < branch.documentIds.length;
+        index += GET_ALL_CHUNK
+      ) {
+        const refs = branch.documentIds
+          .slice(index, index + GET_ALL_CHUNK)
+          .map((documentId) => collectionRef.doc(documentId));
+        const snapshots = await this.db().getAll(...refs);
+        for (const snapshot of snapshots) {
+          if (snapshot.exists) {
+            rows.push(this.normalise(snapshot.data(), snapshot.id));
+          }
         }
       }
       return rows;
@@ -170,41 +219,6 @@ export class AdminFirestoreBackend implements FirestoreBackend {
     return query;
   }
 
-  private sortRows(
-    rows: Record<string, unknown>[],
-    orderBy?: readonly FirestoreOrderBy[],
-  ): Record<string, unknown>[] {
-    if (!orderBy || orderBy.length === 0) {
-      return rows;
-    }
-
-    const clause = orderBy[0];
-    const desc = clause.direction === 'desc';
-
-    return [...rows].sort((left, right) => {
-      const a = left[clause.field];
-      const b = right[clause.field];
-      if (a === b) {
-        return 0;
-      }
-      if (a === undefined || a === null) {
-        return 1;
-      }
-      if (b === undefined || b === null) {
-        return -1;
-      }
-      const aTime = toSortableTime(a);
-      const bTime = toSortableTime(b);
-      if (!Number.isNaN(aTime) && !Number.isNaN(bTime)) {
-        return desc ? bTime - aTime : aTime - bTime;
-      }
-      if (typeof a === 'string' && typeof b === 'string') {
-        return desc ? b.localeCompare(a) : a.localeCompare(b);
-      }
-      return desc ? (a < b ? 1 : -1) : a > b ? 1 : -1;
-    });
-  }
-
   /**
    * `Date` goes to the SDK untouched: Firestore stores it as a native
    * `Timestamp`, which {@link normalise} converts straight back to a
@@ -224,18 +238,8 @@ export class AdminFirestoreBackend implements FirestoreBackend {
     }
     const next: Record<string, unknown> = { id: documentId };
     for (const [key, value] of Object.entries(data)) {
-      next[key] = value instanceof Timestamp ? value.toDate() : value;
+      next[key] = normalizeFirestoreValue(value);
     }
     return next;
   }
-}
-
-function toSortableTime(value: unknown): number {
-  if (value instanceof Date) {
-    return value.getTime();
-  }
-  if (typeof value === 'string') {
-    return Date.parse(value);
-  }
-  return Number.NaN;
 }

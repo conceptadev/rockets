@@ -11,7 +11,7 @@ export class RocketsClearOtpsHandler
   async execute(command: RocketsClearOtpsCommand): Promise<void> {
     const namespace = String(command.assignment);
     await this.commandBus.execute(
-      new ClearOtpsCommand({}, namespace, {
+      new ClearOtpsCommand(command.ctx, namespace, {
         category: command.otp.category,
         assigneeId: command.otp.assigneeId,
       }),

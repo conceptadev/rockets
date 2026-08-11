@@ -11,6 +11,7 @@ import { RocketsUpdateUserCommand } from '../../domains/user/application/command
 import { GetActiveCredentialQuery } from '../../domains/user/application/queries/impl/get-active-credential.query';
 
 describe('RocketsAuthUserPortService', () => {
+  const ctx = {};
   let service: RocketsAuthUserPortService;
   let queryBus: { execute: Mock };
   let commandBus: { execute: Mock };
@@ -30,7 +31,7 @@ describe('RocketsAuthUserPortService', () => {
   describe('bySubject', () => {
     it('returns null when no result', async () => {
       queryBus.execute.mockResolvedValueOnce(null);
-      await expect(service.bySubject('s1')).resolves.toBeNull();
+      await expect(service.bySubject(ctx, 's1')).resolves.toBeNull();
       expect(queryBus.execute).toHaveBeenCalledWith(
         expect.any(RocketsGetUserBySubjectQuery),
       );
@@ -38,29 +39,29 @@ describe('RocketsAuthUserPortService', () => {
 
     it('returns { id } when result has id', async () => {
       queryBus.execute.mockResolvedValueOnce({ id: 'u1' });
-      await expect(service.bySubject('s1')).resolves.toEqual({ id: 'u1' });
+      await expect(service.bySubject(ctx, 's1')).resolves.toEqual({ id: 'u1' });
     });
 
     it('returns null when result has no id field', async () => {
       queryBus.execute.mockResolvedValueOnce({});
-      await expect(service.bySubject('s1')).resolves.toBeNull();
+      await expect(service.bySubject(ctx, 's1')).resolves.toBeNull();
     });
 
     it('propagates query bus errors instead of swallowing', async () => {
       queryBus.execute.mockRejectedValueOnce(new Error('db down'));
-      await expect(service.bySubject('s1')).rejects.toThrow('db down');
+      await expect(service.bySubject(ctx, 's1')).rejects.toThrow('db down');
     });
   });
 
   describe('byId', () => {
     it('returns null when handler returns null', async () => {
       queryBus.execute.mockResolvedValueOnce(null);
-      await expect(service.byId('u1')).resolves.toBeNull();
+      await expect(service.byId(ctx, 'u1')).resolves.toBeNull();
     });
 
     it('returns plain user from aggregate.toPlain()', async () => {
       queryBus.execute.mockResolvedValueOnce(aggregate);
-      await expect(service.byId('u1')).resolves.toEqual(userPlain);
+      await expect(service.byId(ctx, 'u1')).resolves.toEqual(userPlain);
       expect(queryBus.execute).toHaveBeenCalledWith(
         expect.any(RocketsGetUserByIdQuery),
       );
@@ -68,21 +69,21 @@ describe('RocketsAuthUserPortService', () => {
 
     it('propagates errors', async () => {
       queryBus.execute.mockRejectedValueOnce(new Error('boom'));
-      await expect(service.byId('u1')).rejects.toThrow('boom');
+      await expect(service.byId(ctx, 'u1')).rejects.toThrow('boom');
     });
   });
 
   describe('byEmail (with credential enrichment)', () => {
     it('returns null when no user', async () => {
       queryBus.execute.mockResolvedValueOnce(null);
-      await expect(service.byEmail('a@b.com')).resolves.toBeNull();
+      await expect(service.byEmail(ctx, 'a@b.com')).resolves.toBeNull();
     });
 
     it('enriches user with passwordHash when credential exists', async () => {
       queryBus.execute
         .mockResolvedValueOnce(aggregate)
         .mockResolvedValueOnce({ passwordHash: 'hash1' });
-      await expect(service.byEmail('a@b.com')).resolves.toEqual({
+      await expect(service.byEmail(ctx, 'a@b.com')).resolves.toEqual({
         ...userPlain,
         passwordHash: 'hash1',
       });
@@ -100,21 +101,21 @@ describe('RocketsAuthUserPortService', () => {
       queryBus.execute
         .mockResolvedValueOnce(aggregate)
         .mockResolvedValueOnce(null);
-      await expect(service.byEmail('a@b.com')).resolves.toEqual(userPlain);
+      await expect(service.byEmail(ctx, 'a@b.com')).resolves.toEqual(userPlain);
     });
   });
 
   describe('byUsername', () => {
     it('returns null when no user', async () => {
       queryBus.execute.mockResolvedValueOnce(null);
-      await expect(service.byUsername('alice')).resolves.toBeNull();
+      await expect(service.byUsername(ctx, 'alice')).resolves.toBeNull();
     });
 
     it('enriches with credential', async () => {
       queryBus.execute
         .mockResolvedValueOnce(aggregate)
         .mockResolvedValueOnce({ passwordHash: 'hash2' });
-      await expect(service.byUsername('alice')).resolves.toEqual({
+      await expect(service.byUsername(ctx, 'alice')).resolves.toEqual({
         ...userPlain,
         passwordHash: 'hash2',
       });
@@ -128,13 +129,13 @@ describe('RocketsAuthUserPortService', () => {
   describe('update', () => {
     it('returns null when handler returns null', async () => {
       commandBus.execute.mockResolvedValueOnce(null);
-      await expect(service.update({ id: 'u1' })).resolves.toBeNull();
+      await expect(service.update(ctx, { id: 'u1' })).resolves.toBeNull();
     });
 
     it('returns plain user from updated aggregate', async () => {
       commandBus.execute.mockResolvedValueOnce(aggregate);
       await expect(
-        service.update({ id: 'u1', email: 'new@b.com' }),
+        service.update(ctx, { id: 'u1', email: 'new@b.com' }),
       ).resolves.toEqual(userPlain);
       expect(commandBus.execute).toHaveBeenCalledWith(
         expect.any(RocketsUpdateUserCommand),
@@ -145,12 +146,14 @@ describe('RocketsAuthUserPortService', () => {
   describe('create', () => {
     it('returns null when handler returns null', async () => {
       commandBus.execute.mockResolvedValueOnce(null);
-      await expect(service.create({ email: 'a@b.com' })).resolves.toBeNull();
+      await expect(
+        service.create(ctx, { email: 'a@b.com' }),
+      ).resolves.toBeNull();
     });
 
     it('returns plain user from created aggregate', async () => {
       commandBus.execute.mockResolvedValueOnce(aggregate);
-      await expect(service.create({ email: 'a@b.com' })).resolves.toEqual(
+      await expect(service.create(ctx, { email: 'a@b.com' })).resolves.toEqual(
         userPlain,
       );
       expect(commandBus.execute).toHaveBeenCalledWith(

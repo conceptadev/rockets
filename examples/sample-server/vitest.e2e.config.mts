@@ -1,9 +1,9 @@
 import { defineProject, mergeConfig } from 'vitest/config';
-import shared from '../../vitest.shared';
+import shared from '../../vitest.shared.mts';
 
 /**
  * E2E project for the sample-server example — registered in the root
- * `vitest.config.ts` `projects` list and runnable standalone via
+ * `vitest.config.mts` `projects` list and runnable standalone via
  * `--config` from the workspace.
  */
 export default mergeConfig(

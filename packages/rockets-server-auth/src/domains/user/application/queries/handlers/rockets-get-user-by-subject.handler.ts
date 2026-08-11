@@ -54,7 +54,11 @@ export class RocketsGetUserBySubjectHandler
     }
 
     const plain = aggregate.toPlain();
-    const userRoles = await resolveUserRoles(this.queryBus, plain.id);
+    const userRoles = await resolveUserRoles(
+      this.queryBus,
+      query.ctx,
+      plain.id,
+    );
 
     return {
       id: plain.id,

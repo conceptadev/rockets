@@ -35,7 +35,7 @@ export abstract class AbstractRocketsGetRoleByNameHandler
     query: RocketsGetRoleByNameQuery,
   ): Promise<RoleEntityInterface | null> {
     const where = this.buildFilter(query);
-    const entity = await this.fetch(where);
+    const entity = await this.fetch(query, where);
     return this.mapResponse(entity);
   }
 
@@ -44,9 +44,10 @@ export abstract class AbstractRocketsGetRoleByNameHandler
   }
 
   protected async fetch(
+    query: RocketsGetRoleByNameQuery,
     where: ReturnType<AbstractRocketsGetRoleByNameHandler['buildFilter']>,
   ): Promise<RoleEntityInterface | null> {
-    return this.roleRepo.findOne({ where });
+    return this.roleRepo.findOne({ where, ctx: query.ctx });
   }
 
   protected mapResponse(

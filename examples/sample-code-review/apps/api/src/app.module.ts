@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { RocketsModule } from '@concepta/rockets';
+import { defineTypeOrmRepository } from '@concepta/rockets-repository-typeorm';
 import { defineFirebaseAuth } from '@concepta/rockets-adapter-firebase';
 import { defineModuleResource } from '@concepta/rockets-core';
 import { createFirebaseAdminApp } from './auth-firebase';
@@ -13,7 +14,6 @@ import {
   UserMetadataCreateDto,
   UserMetadataUpdateDto,
 } from './user-metadata.schema';
-import { defineTypeOrmRepository } from './repository/define-typeorm-repository';
 import { githubFeature } from './github';
 import { analysisFeature } from './analysis';
 
