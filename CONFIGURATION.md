@@ -443,18 +443,23 @@ accepts one bootstrap or a **chain** (array, tried in order).
 interface AuthBootstrap<A extends AuthAdapterInterface = AuthAdapterInterface> {
   adapter: Type<A>;
   forRoot?: () => DynamicModule;   // host module: provides+exports the adapter
-  contributes?: {                 // integration-owned app defaults
+  identity?: {                    // singular user-space ownership
     resources?: ReadonlyArray<ResourceInput>;
     userMetadata?: RocketsUserMetadataConfig;
     repository?: RepositoryModuleInterface | RepositoryBootstrap;
+  };
+  contributes?: {                 // integration-owned guard defaults
     enableGlobalGuard?: boolean;
+    providesAppGuard?: boolean;
   };
 }
 ```
 
-Explicit server options override contributed defaults. Resource contributions
-are prepended to application resources; incompatible single-value defaults from
-multiple auth integrations fail fast instead of depending on import order.
+At most one bootstrap may claim `identity`; two owners fail at composition even
+when explicit server values are supplied. Explicit server values override the
+single owner's values, and its resources are prepended to application
+resources. Guard contributions may coexist, but conflicting values or competing
+global guards fail fast instead of depending on import order.
 
 ```mermaid
 flowchart TD

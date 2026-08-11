@@ -318,7 +318,10 @@ Rockets keys its coarse limiter from `request.ip`. Express applications behind
 a trusted reverse proxy must configure `trust proxy` in the host bootstrap:
 
 ```typescript
-const app = await NestFactory.create(AppModule);
+import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
+
+const app = await NestFactory.create<NestExpressApplication>(AppModule);
 app.set('trust proxy', ['loopback', 'linklocal', 'uniquelocal']);
 ```
 

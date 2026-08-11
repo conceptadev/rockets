@@ -171,11 +171,11 @@ export function resolveRocketsComposition(
   const enableGlobalGuard =
     extras.enableGlobalGuard ??
     resolveSingleContribution(auth, 'enableGlobalGuard');
+  const integrationProvidesAppGuard = auth.some(
+    (bootstrap) => bootstrap.contributes?.providesAppGuard === true,
+  );
 
-  if (
-    enableGlobalGuard !== false &&
-    auth.some((bootstrap) => bootstrap.contributes?.providesAppGuard === true)
-  ) {
+  if (enableGlobalGuard !== false && integrationProvidesAppGuard) {
     throw new Error(
       'RocketsModule: configure exactly one global authentication guard. ' +
         'The Rockets guard is enabled while an auth integration declares ' +
@@ -200,7 +200,7 @@ export function resolveRocketsComposition(
   if (
     enableGlobalGuard === false &&
     extras.enableGlobalGuard !== false &&
-    !auth.some((bootstrap) => bootstrap.contributes?.providesAppGuard === true)
+    !integrationProvidesAppGuard
   ) {
     throw new Error(
       'RocketsModule: an auth integration contributed enableGlobalGuard: ' +

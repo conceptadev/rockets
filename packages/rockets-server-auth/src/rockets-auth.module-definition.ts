@@ -440,6 +440,7 @@ export function createRocketsAuthImports(importOptions: {
         options: RocketsAuthOptionsInterface,
       ): AuthenticationOptionsInterface => {
         const authSettings = options.authentication?.settings;
+        const strategies = authSettings?.strategies;
         return {
           settings: {
             ...authSettings,
@@ -453,13 +454,13 @@ export function createRocketsAuthImports(importOptions: {
                 ROCKETS_DEFAULT_RECOVERY_SETTINGS,
             },
             strategies: {
-              ...authSettings?.strategies,
+              ...strategies,
               // Optional properties can be present with an explicit
               // `undefined`; normalize after the spread so they cannot erase
               // Rockets' default-on strategies (including the JWT APP_GUARD).
-              local: authSettings?.strategies?.local ?? {},
-              jwt: authSettings?.strategies?.jwt ?? {},
-              refresh: authSettings?.strategies?.refresh ?? {},
+              local: strategies?.local ?? {},
+              jwt: strategies?.jwt ?? {},
+              refresh: strategies?.refresh ?? {},
             },
           },
           ports: buildRocketsAuthenticationPorts(options),
