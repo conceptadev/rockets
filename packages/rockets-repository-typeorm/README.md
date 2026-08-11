@@ -6,6 +6,10 @@
 
 TypeORM implementation of the Rockets dynamic repository contract.
 
+**Status:** pre-1.0 preview. This source is prepared as `1.0.0-alpha.8`, but
+registry publication is pending; install commands below apply after the
+`alpha` dist-tag is updated.
+
 This is a **thin wrapper** over
 [`@concepta/nestjs-repository-typeorm`](https://www.npmjs.com/package/@concepta/nestjs-repository-typeorm):
 the main entry re-exports the upstream package, so consumers depend on a single
@@ -17,7 +21,7 @@ the planner-derived entity list. The zod `SchemaEntityCompiler` lives at the
 ## Install
 
 ```bash
-npm install @concepta/rockets-repository-typeorm typeorm
+npm install @concepta/rockets-repository-typeorm@alpha typeorm @nestjs/typeorm
 ```
 
 ## Repository bootstrap

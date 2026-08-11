@@ -126,7 +126,9 @@ dist
 **/generated/zod
 
 # .yarn meta
-.yarn
+.yarn/*
+!.yarn/versions/
+!.yarn/versions/*.yml
 
 # local agent scratchpad — never commit
 .context/

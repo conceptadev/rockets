@@ -7,7 +7,9 @@
 > External-auth NestJS server. One options object → adapter chain, global guard,
 > `/me`, declarative CRUD resources, swagger.
 
-**Status:** pre-1.0 preview (`0.0.1-dev.0`, npm dist-tag `alpha`).
+**Status:** pre-1.0 preview. This source is prepared as `1.0.0-alpha.8`, but
+registry publication is pending; install commands below apply after the
+`alpha` dist-tag is updated.
 
 **Stack context:**
 [Repository README](../../README.md#what-problem-each-layer-solves) — Concepta
@@ -118,7 +120,7 @@ yarn add @concepta/rockets@alpha \
 
 `@concepta/rockets` pulls in `rockets-core` and the matching `@concepta/nestjs-*`
 motors transitively (repository + CRUD re-exported by `@concepta/rockets-core`).
-Add TypeORM (`@concepta/rockets-repository-typeorm`, `typeorm`, `@nestjs/typeorm`,
+Add TypeORM (`@concepta/rockets-repository-typeorm@alpha`, `typeorm`, `@nestjs/typeorm`,
 driver) only when you use SQL. Add other `@concepta/*` packages only if you import
 from
 them directly.

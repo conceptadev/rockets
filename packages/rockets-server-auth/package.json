@@ -1,6 +1,6 @@
 {
   "name": "@concepta/rockets-auth",
-  "version": "0.0.1-dev.0",
+  "version": "1.0.0-alpha.8",
   "description": "Rockets Auth - JWT authentication, account recovery, OTP, invitations, and role-based access control for NestJS",
   "author": "Thiago Ramalho <thiago.ramalho@concepta.com>",
   "license": "BSD-3-Clause",
@@ -116,5 +116,6 @@
     "class-transformer": "*",
     "class-validator": "*",
     "rxjs": "^7.1.0"
-  }
+  },
+  "stableVersion": "0.0.1-dev.0"
 }

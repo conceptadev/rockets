@@ -9,6 +9,11 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Release preparation
+
+- Package manifest prepared as `1.0.0-alpha.8`; registry publication is
+  pending.
+
 ### Breaking
 
 - Hosts must stop passing `buildRocketsAuthResources(...)` on
@@ -30,6 +35,9 @@ and this project adheres to
 
 ### Changed
 
+- Access- and refresh-token authentication reject inactive users.
+- Recovery proof validation and consumption now share the credential-update
+  transaction, preventing a passcode from being consumed twice.
 - `defineRocketsAuth()` now returns a complete composition: auth persistence
   rows, root repository, user-metadata contract, and guard preference travel
   with the integration. Its Rockets guard defaults off because the built-in

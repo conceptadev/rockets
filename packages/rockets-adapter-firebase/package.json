@@ -1,6 +1,6 @@
 {
   "name": "@concepta/rockets-adapter-firebase",
-  "version": "0.0.1-dev.0",
+  "version": "1.0.0-alpha.8",
   "description": "Firebase Authentication adapter for Rockets — implements AuthAdapterInterface from @concepta/rockets-core, validates Firebase ID tokens, maps to AuthorizedUser",
   "author": "Thiago Ramalho <thiago.ramalho@concepta.com>",
   "license": "BSD-3-Clause",
@@ -72,5 +72,6 @@
     "firebase-admin",
     "typescript",
     "backend"
-  ]
+  ],
+  "stableVersion": "0.0.1-dev.0"
 }
