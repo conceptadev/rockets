@@ -1,10 +1,6 @@
 import { InternalServerErrorException, Type } from '@nestjs/common';
 import type { AuthenticationPortsInterface } from '@concepta/nestjs-authentication';
-import {
-  ClearOtpsCommand,
-  ConsumeOtpCommand,
-  ValidateOtpQuery,
-} from '@concepta/nestjs-otp';
+import { ClearOtpsCommand, ValidateOtpQuery } from '@concepta/nestjs-otp';
 import {
   GetUserByEmailQuery,
   GetUserQuery,
@@ -19,14 +15,6 @@ import {
   RocketsAuthSetPasswordPortCommand,
   RocketsAuthValidatePasswordPortCommand,
 } from './rockets-auth-password-port.commands';
-import type { RocketsAuthOtpPortSettings } from './rockets-auth-recovery-otp.port';
-
-export type RocketsAuthenticationPorts = Omit<
-  AuthenticationPortsInterface,
-  'otp'
-> & {
-  readonly otp: RocketsAuthOtpPortSettings;
-};
 
 /**
  * Fail-fast helper: rockets-auth no longer ships silent no-op notification
@@ -58,7 +46,7 @@ function requirePortClass<T>(
  */
 export function buildRocketsAuthenticationPorts(
   options: RocketsAuthOptionsInterface,
-): RocketsAuthenticationPorts {
+): AuthenticationPortsInterface {
   const incoming = options.authentication?.ports;
 
   return {
@@ -83,7 +71,6 @@ export function buildRocketsAuthenticationPorts(
       createCommand: RocketsAuthCreateOtpPortCommand,
       validateQuery: ValidateOtpQuery,
       clearCommand: ClearOtpsCommand,
-      consumeCommand: ConsumeOtpCommand,
       ...incoming?.otp,
     },
     recoveryNotification: {

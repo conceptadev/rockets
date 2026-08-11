@@ -1,6 +1,7 @@
 import { Logger } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import {
+  OtpPort,
   PasswordPort,
   RecoveryPolicy,
   type RecoveryNotificationPortSettings,
@@ -12,8 +13,6 @@ import type {
   AssigneeRelationInterface,
   ReferenceIdInterface,
 } from '@concepta/nestjs-core';
-import type { TransactionScope } from '@concepta/nestjs-repository';
-import type { RocketsAuthRecoveryOtpPort } from '../../../../shared/authentication/rockets-auth-recovery-otp.port';
 
 /**
  * This class is registered under the upstream `RecoveryService` DI token, so it
@@ -30,12 +29,11 @@ export class RocketsRecoveryService implements RecoveryServiceContract {
 
   constructor(
     private readonly policy: RecoveryPolicy,
-    private readonly otpPort: RocketsAuthRecoveryOtpPort,
+    private readonly otpPort: OtpPort,
     private readonly userPort: UserPort,
     private readonly passwordPort: PasswordPort,
     private readonly notifications: RecoveryNotificationPortSettings,
     private readonly commandBus: CommandBus,
-    private readonly txScope: TransactionScope,
   ) {}
 
   async recoverLogin(ctx: AppContextLike, email: string): Promise<void> {
@@ -89,36 +87,17 @@ export class RocketsRecoveryService implements RecoveryServiceContract {
     newPassword: string,
   ): Promise<ReferenceIdInterface | null> {
     const appCtx = ctx ?? {};
-    const user = await this.txScope
-      .run(appCtx, async (txCtx) => {
-        const otp = await this.otpPort.consume(
-          txCtx,
-          this.policy.otpNamespace,
-          {
-            category: this.policy.otpCategory,
-            passcode,
-          },
-        );
-        if (!otp) return null;
-
-        const foundUser = await this.userPort.getById(txCtx, otp.assigneeId);
-        if (!foundUser) {
-          throw new RecoveryUserMissingError();
-        }
-
-        await this.passwordPort.setPassword(txCtx, newPassword, foundUser.id);
-        await this.otpPort.clear(txCtx, this.policy.otpNamespace, {
-          category: this.policy.otpCategory,
-          assigneeId: foundUser.id,
-        });
-        return foundUser;
-      })
-      .catch((error: unknown) => {
-        if (error instanceof RecoveryUserMissingError) return null;
-        throw error;
-      });
-
+    const otp = await this.validatePasscode(appCtx, passcode);
+    if (!otp) return null;
+    const user = await this.userPort.getById(appCtx, otp.assigneeId);
     if (!user) return null;
+
+    await this.passwordPort.setPassword(appCtx, newPassword, user.id);
+    // Revoke before notifying: a failed mail must not leave a live passcode.
+    await this.otpPort.clear(appCtx, this.policy.otpNamespace, {
+      category: this.policy.otpCategory,
+      assigneeId: user.id,
+    });
 
     const Command = this.notifications.sendPasswordUpdatedNotificationCommand;
     try {
@@ -146,5 +125,3 @@ export class RocketsRecoveryService implements RecoveryServiceContract {
     });
   }
 }
-
-class RecoveryUserMissingError extends Error {}

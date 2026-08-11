@@ -14,18 +14,9 @@ const policy = {
 };
 
 function createSubject() {
-  const rollbackActions: Array<() => void> = [];
-  const transactionCtx = {
-    requestId: 'transaction-request',
-    onRollback(action: () => void): void {
-      rollbackActions.push(action);
-    },
-  };
-  const calls: string[] = [];
   const otpPort = {
     create: vi.fn(),
     validate: vi.fn(),
-    consume: vi.fn(),
     clear: vi.fn(),
   };
   const userPort = { getByEmail: vi.fn(), getById: vi.fn() };
@@ -36,20 +27,6 @@ function createSubject() {
     sendRecoverPasswordNotificationCommand: class {},
     sendPasswordUpdatedNotificationCommand: class {},
   };
-  const txScope = {
-    run: vi.fn(async (_ctx: unknown, operation: (ctx: unknown) => unknown) => {
-      calls.push('transaction:start');
-      try {
-        const result = await operation(transactionCtx);
-        calls.push('transaction:commit');
-        return result;
-      } catch (error) {
-        calls.push('transaction:rollback');
-        for (const action of rollbackActions.reverse()) action();
-        throw error;
-      }
-    }),
-  };
   const subject = new RocketsRecoveryService(
     policy,
     otpPort as never,
@@ -57,18 +34,8 @@ function createSubject() {
     passwordPort as never,
     notifications as never,
     commandBus as never,
-    txScope as never,
   );
-  return {
-    subject,
-    otpPort,
-    userPort,
-    passwordPort,
-    commandBus,
-    txScope,
-    transactionCtx,
-    calls,
-  };
+  return { subject, otpPort, userPort, passwordPort, commandBus };
 }
 
 describe('RocketsRecoveryService', () => {
@@ -91,116 +58,29 @@ describe('RocketsRecoveryService', () => {
     expect(commandBus.execute).toHaveBeenCalledOnce();
   });
 
-  it('commits passcode consumption, password update, and revocation before notifying', async () => {
-    const {
-      subject,
-      otpPort,
-      userPort,
-      passwordPort,
-      commandBus,
-      txScope,
-      transactionCtx,
-      calls,
-    } = createSubject();
-    otpPort.consume.mockImplementation(async () => {
-      calls.push('consume');
-      return { assigneeId: 'u1' };
-    });
+  it('revokes recovery OTPs before best-effort password-updated notification', async () => {
+    const { subject, otpPort, userPort, passwordPort, commandBus } =
+      createSubject();
+    otpPort.validate.mockResolvedValue({ assigneeId: 'u1' });
     userPort.getById.mockResolvedValue({
       id: 'u1',
       email: 'person@example.com',
     });
-    passwordPort.setPassword.mockImplementation(async () => {
-      calls.push('password');
-    });
-    otpPort.clear.mockImplementation(async () => {
-      calls.push('clear');
-    });
-    commandBus.execute.mockImplementation(async () => {
-      calls.push('notify');
-    });
+    commandBus.execute.mockRejectedValue(
+      new Error('mail provider included secret'),
+    );
 
     await expect(
       subject.updatePassword(ctx, 'otp-secret', 'password-secret'),
     ).resolves.toMatchObject({ id: 'u1' });
-    expect(txScope.run).toHaveBeenCalledOnce();
-    expect(otpPort.consume).toHaveBeenCalledWith(transactionCtx, 'auth', {
-      category: 'recovery',
-      passcode: 'otp-secret',
-    });
     expect(passwordPort.setPassword).toHaveBeenCalledWith(
-      transactionCtx,
+      ctx,
       'password-secret',
       'u1',
     );
-    expect(otpPort.clear).toHaveBeenCalledWith(transactionCtx, 'auth', {
+    expect(otpPort.clear).toHaveBeenCalledWith(ctx, 'auth', {
       category: 'recovery',
       assigneeId: 'u1',
     });
-    expect(calls).toEqual([
-      'transaction:start',
-      'consume',
-      'password',
-      'clear',
-      'transaction:commit',
-      'notify',
-    ]);
-  });
-
-  it('rolls back passcode consumption when the password update fails', async () => {
-    const {
-      subject,
-      otpPort,
-      userPort,
-      passwordPort,
-      commandBus,
-      calls,
-      transactionCtx,
-    } = createSubject();
-    let passcodeActive = true;
-    otpPort.consume.mockImplementation(async (receivedCtx: unknown) => {
-      expect(receivedCtx).toBe(transactionCtx);
-      passcodeActive = false;
-      transactionCtx.onRollback(() => {
-        passcodeActive = true;
-      });
-      calls.push('consume');
-      return { assigneeId: 'u1' };
-    });
-    userPort.getById.mockResolvedValue({
-      id: 'u1',
-      email: 'person@example.com',
-    });
-    passwordPort.setPassword.mockRejectedValue(new Error('write failed'));
-
-    await expect(
-      subject.updatePassword(ctx, 'otp-secret', 'password-secret'),
-    ).rejects.toThrow('write failed');
-
-    expect(passcodeActive).toBe(true);
-    expect(otpPort.clear).not.toHaveBeenCalled();
-    expect(commandBus.execute).not.toHaveBeenCalled();
-  });
-
-  it('does not roll back a committed password when notification fails', async () => {
-    const { subject, otpPort, userPort, commandBus, calls } = createSubject();
-    otpPort.consume.mockResolvedValue({ assigneeId: 'u1' });
-    userPort.getById.mockResolvedValue({
-      id: 'u1',
-      email: 'person@example.com',
-    });
-    commandBus.execute.mockImplementation(async () => {
-      calls.push('notify');
-      throw new Error('mail provider included secret');
-    });
-
-    await expect(
-      subject.updatePassword(ctx, 'otp-secret', 'password-secret'),
-    ).resolves.toMatchObject({ id: 'u1' });
-    expect(calls).toContain('transaction:commit');
-    expect(calls.indexOf('transaction:commit')).toBeLessThan(
-      calls.indexOf('notify'),
-    );
-    expect(calls).not.toContain('transaction:rollback');
   });
 });

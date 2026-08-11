@@ -410,10 +410,6 @@ when you need built-in auth HTTP and `/me`.
 | `services.userAccessQueryService`                                             | Optional `CanAccess` for access-control queries.                                                                                                                           |
 | `swagger`                                                                     | Forwarded to `SwaggerUiModule` from `@concepta/rockets-core`.                                                                                                              |
 
-`authentication.ports.otp.consumeCommand` defaults to the upstream
-`ConsumeOtpCommand`; override it with a compatible CQRS command when custom OTP
-storage must participate in recovery transactions.
-
 ### Module-level extras
 
 | Field                                                                                 | Purpose                                                                                                                                                                                     |

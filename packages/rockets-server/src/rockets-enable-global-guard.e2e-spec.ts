@@ -119,4 +119,19 @@ describe('RocketsModule enableGlobalGuard (e2e)', () => {
       ok: true,
     });
   });
+
+  it('fails closed with the default guard when no auth adapters are configured', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        GuardE2eOpenModule,
+        RocketsModule.forRoot({ disableController: { me: true } }),
+      ],
+    }).compile();
+
+    app = moduleRef.createNestApplication();
+    await app.init();
+
+    expect(app.get(AUTH_ADAPTERS_TOKEN)).toEqual([]);
+    await request(app.getHttpServer()).get('/guard-e2e-open').expect(401);
+  });
 });

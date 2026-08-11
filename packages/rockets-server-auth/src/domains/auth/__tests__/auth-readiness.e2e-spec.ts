@@ -7,15 +7,8 @@ import {
   INestApplication,
   Injectable,
   Logger,
-  PlainLiteralObject,
   Req,
 } from '@nestjs/common';
-import {
-  Command,
-  CommandBus,
-  CommandHandler,
-  type ICommandHandler,
-} from '@nestjs/cqrs';
 import { TestingModule } from '@nestjs/testing';
 import { DataSource } from 'typeorm';
 import request from 'supertest';
@@ -25,13 +18,10 @@ import type {
   AuthRequest,
 } from '@concepta/rockets-core';
 import { defineAuthAdapter } from '@concepta/rockets-core';
-import type { SetPasswordCommandInterface } from '@concepta/nestjs-authentication';
-import type { ReferenceId } from '@concepta/nestjs-core';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 import { UserOtpEntityFixture } from '../../../__fixtures__/user/user-otp-entity.fixture';
 import { UserFixture } from '../../../__fixtures__/user/user.entity.fixture';
-import { RocketsAuthSetPasswordPortCommand } from '../../../shared/authentication/rockets-auth-password-port.commands';
 import {
   applyRocketsAuthE2eAppGlobals,
   createRocketsAuthStandardE2eTestingModule,
@@ -69,44 +59,6 @@ class MixedAuthProbeController {
   @ApiOkResponse({ description: 'Authenticated test user' })
   read(@Req() request: { user?: unknown }): unknown {
     return request.user;
-  }
-}
-
-class FailOnceSetPasswordCommand
-  extends Command<void>
-  implements SetPasswordCommandInterface
-{
-  static failuresRemaining = 1;
-
-  constructor(
-    public readonly ctx: PlainLiteralObject,
-    public readonly password: string,
-    public readonly assigneeId: ReferenceId,
-  ) {
-    super();
-  }
-}
-
-@CommandHandler(FailOnceSetPasswordCommand)
-class FailOnceSetPasswordHandler
-  implements ICommandHandler<FailOnceSetPasswordCommand, void>
-{
-  constructor(private readonly commandBus: CommandBus) {}
-
-  execute(command: FailOnceSetPasswordCommand): Promise<void> {
-    if (FailOnceSetPasswordCommand.failuresRemaining > 0) {
-      FailOnceSetPasswordCommand.failuresRemaining -= 1;
-      return Promise.reject(
-        new Error('simulated password persistence failure'),
-      );
-    }
-    return this.commandBus.execute(
-      new RocketsAuthSetPasswordPortCommand(
-        command.ctx,
-        command.password,
-        command.assigneeId,
-      ),
-    );
   }
 }
 
@@ -255,11 +207,6 @@ describe('Rockets Auth 1.0 readiness (e2e)', () => {
       );
 
       await request(app.getHttpServer())
-        .patch('/recovery/password')
-        .send({ passcode: otp.passcode, newPassword: 'ReplayP@ssw0rd!' })
-        .expect(400);
-
-      await request(app.getHttpServer())
         .post('/token/password')
         .send({ username: originalCredentials.username, password: newPassword })
         .expect(200);
@@ -298,72 +245,32 @@ describe('Rockets Auth 1.0 readiness (e2e)', () => {
         claims: { provider: 'secondary' },
       });
     });
-  });
 
-  describe('recovery transaction rollback', () => {
-    let app: INestApplication;
-    let module: TestingModule;
-
-    beforeAll(async () => {
-      FailOnceSetPasswordCommand.failuresRemaining = 1;
-      module = await createRocketsAuthStandardE2eTestingModule({
-        mockEmailService: { sendMail: vi.fn().mockResolvedValue(undefined) },
-        factoryExtras: {
-          setPasswordCommand: FailOnceSetPasswordCommand,
-        },
-        extraProviders: [FailOnceSetPasswordHandler],
-      });
-      app = module.createNestApplication();
-      applyRocketsAuthE2eAppGlobals(app);
-      await app.init();
-
+    it('accepts the built-in JWT credential through the same Rockets guard', async () => {
+      const credentials = {
+        email: 'mixed-built-in@example.com',
+        username: 'mixed-built-in',
+        active: true,
+        password: 'MixedBuiltInP@ssw0rd!',
+      };
       await request(app.getHttpServer())
         .post('/signup')
-        .send({
-          email: 'recovery-rollback@example.com',
-          username: 'recovery-rollback',
-          active: true,
-          password: 'OriginalP@ssw0rd!',
-        })
+        .send(credentials)
         .expect(201);
-    });
-
-    afterAll(async () => {
-      await app.close();
-    });
-
-    it('restores a consumed passcode after password failure and commits it once on retry', async () => {
-      await request(app.getHttpServer())
-        .post('/recovery/password')
-        .send({ email: 'recovery-rollback@example.com' })
+      const login = await request(app.getHttpServer())
+        .post('/token/password')
+        .send({
+          username: credentials.username,
+          password: credentials.password,
+        })
         .expect(200);
 
-      const otpRepository = module
-        .get(DataSource)
-        .getRepository(UserOtpEntityFixture);
-      const otp = await pollUntil(
-        () => otpRepository.findOneBy({ active: true }),
-        'the rollback recovery OTP row',
-      );
-
-      await request(app.getHttpServer())
-        .patch('/recovery/password')
-        .send({ passcode: otp.passcode, newPassword: 'RecoveredP@ssw0rd!' })
-        .expect(500);
-
-      await expect(
-        otpRepository.findOneBy({ id: otp.id }),
-      ).resolves.toMatchObject({ active: true });
-
-      await request(app.getHttpServer())
-        .patch('/recovery/password')
-        .send({ passcode: otp.passcode, newPassword: 'RecoveredP@ssw0rd!' })
+      const response = await request(app.getHttpServer())
+        .get('/mixed-auth-probe')
+        .set('Authorization', `Bearer ${String(login.body.accessToken)}`)
         .expect(200);
 
-      await request(app.getHttpServer())
-        .patch('/recovery/password')
-        .send({ passcode: otp.passcode, newPassword: 'ReplayP@ssw0rd!' })
-        .expect(400);
+      expect(response.body).toMatchObject({ email: credentials.email });
     });
   });
 

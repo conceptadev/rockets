@@ -7,7 +7,6 @@ import {
   DynamicModule,
   INestApplication,
   Module,
-  Provider,
   Type,
   ValidationPipe,
 } from '@nestjs/common';
@@ -17,7 +16,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RocketsModule } from '@concepta/rockets';
 import type { AuthBootstrap } from '@concepta/rockets-core';
-import type { PasswordPortSettings } from '@concepta/nestjs-authentication';
 import { ormConfig } from '../../__fixtures__/ormconfig.fixture';
 import { InvitationEntityFixture } from '../../__fixtures__/invitation/invitation.entity.fixture';
 import { UserOtpEntityFixture } from '../../__fixtures__/user/user-otp-entity.fixture';
@@ -83,7 +81,6 @@ export interface RocketsAuthE2eFactoryExtras {
     readonly reuseAfterDays?: number;
     readonly requireCurrent?: boolean;
   };
-  readonly setPasswordCommand?: PasswordPortSettings['setPasswordCommand'];
 }
 
 function defaultDefineRocketsAuthInput(
@@ -95,9 +92,6 @@ function defaultDefineRocketsAuthInput(
       services: { mailerService },
       authentication: {
         ports: {
-          ...(extras.setPasswordCommand
-            ? { password: { setPasswordCommand: extras.setPasswordCommand } }
-            : {}),
           recoveryNotification: {
             sendRecoverLoginNotificationCommand:
               E2eSendRecoverLoginNotificationCommand,
@@ -201,7 +195,6 @@ export interface CreateRocketsAuthStandardE2eModuleOptions {
   readonly factoryExtras?: RocketsAuthE2eFactoryExtras;
   /** Credential-only adapters appended after the built-in identity owner. */
   readonly additionalAuth?: ReadonlyArray<AuthBootstrap>;
-  readonly extraProviders?: ReadonlyArray<Provider>;
 }
 
 /**
@@ -217,7 +210,6 @@ export async function createRocketsAuthStandardE2eTestingModule(
     rocketsAuthOverrides,
     factoryExtras,
     additionalAuth = [],
-    extraProviders = [],
   } = options;
 
   const baseInput = defaultDefineRocketsAuthInput(
@@ -263,7 +255,7 @@ export async function createRocketsAuthStandardE2eTestingModule(
   return Test.createTestingModule({
     imports,
     controllers: extraControllers,
-    providers: [...E2E_NOTIFICATION_HANDLERS, ...extraProviders],
+    providers: [...E2E_NOTIFICATION_HANDLERS],
   }).compile();
 }
 

@@ -38,10 +38,6 @@ export {
   ROCKETS_AUTH_OTP_PORT_TOKEN,
 } from './ports/rockets-auth-otp-port.service';
 export { RocketsAuthPortsModule } from './ports/rockets-auth-ports.module';
-export type {
-  RocketsAuthConsumeOtpCommandInterface,
-  RocketsAuthOtpPortSettings,
-} from './authentication/rockets-auth-recovery-otp.port';
 
 export type {
   RocketsAuthPortsConfigInterface,

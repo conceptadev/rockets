@@ -29,15 +29,6 @@ import type {
   UserSettingsInterface,
 } from '@concepta/nestjs-user';
 import { RocketsAuthSettingsInterface } from './rockets-auth-settings.interface';
-import type { RocketsAuthOtpPortSettings } from '../authentication/rockets-auth-recovery-otp.port';
-
-type RocketsAuthenticationPortsInput = Omit<
-  Partial<AuthenticationPortsInterface>,
-  'otp' | 'password'
-> & {
-  readonly otp?: Partial<RocketsAuthOtpPortSettings>;
-  readonly password?: Partial<AuthenticationPortsInterface['password']>;
-};
 
 /**
  * Options accepted by `CrudModule.forRoot()` (the upstream interface
@@ -98,8 +89,6 @@ export interface RocketsAuthOptionsInterface {
    *
    * **`ports.*` overrides (all individually overridable):**
    * - `user`, `password`, `otp` — defaulted by `buildRocketsAuthenticationPorts`.
-   *   `otp.consumeCommand` defaults to upstream `ConsumeOtpCommand` and may
-   *   be replaced for custom transactional OTP storage.
    * - `recoveryNotification`, `verifyNotification` — required; fail-fast at boot.
    * - `jwt`, `token` — optional; upstream supplies defaults
    *   (`SignAccessTokenCommand`, `IssueAccessTokenCommand`, etc.) when
@@ -110,7 +99,7 @@ export interface RocketsAuthOptionsInterface {
    * upstream resolves them at module-init time, not via the async factory.
    */
   authentication?: Omit<AuthenticationOptionsInterface, 'ports'> & {
-    ports?: RocketsAuthenticationPortsInput;
+    ports?: Partial<AuthenticationPortsInterface>;
   };
 
   /**
