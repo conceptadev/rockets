@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import type { CanActivate } from '@nestjs/common';
 import type { RepositoryModuleInterface } from '@concepta/nestjs-repository';
 import { createServer } from '@concepta/rockets';
 
@@ -68,10 +69,12 @@ describe('defineRocketsAuth', () => {
   });
 
   it('rejects an explicit upstream app guard when Rockets owns the chain', () => {
+    const competingAppGuard: CanActivate = { canActivate: () => true };
+
     expect(() =>
       defineRocketsAuth({
         ...input({ enableGlobalGuard: true }),
-        auth: { appGuard: true } as never,
+        auth: { appGuard: competingAppGuard },
       }),
     ).toThrow(/one global authentication guard|appGuard/);
   });

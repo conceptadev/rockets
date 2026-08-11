@@ -274,6 +274,31 @@ describe('Rockets Auth 1.0 readiness (e2e)', () => {
     });
   });
 
+  describe('undefined authentication strategy settings', () => {
+    let app: INestApplication;
+
+    beforeAll(async () => {
+      const module = await createRocketsAuthStandardE2eTestingModule({
+        mockEmailService: { sendMail: vi.fn().mockResolvedValue(undefined) },
+        factoryExtras: {
+          authenticationStrategies: { jwt: undefined },
+        },
+        extraControllers: [MixedAuthProbeController],
+      });
+      app = module.createNestApplication();
+      applyRocketsAuthE2eAppGlobals(app);
+      await app.init();
+    });
+
+    afterAll(async () => {
+      await app.close();
+    });
+
+    it('keeps the default JWT app guard when jwt is explicitly undefined', async () => {
+      await request(app.getHttpServer()).get('/mixed-auth-probe').expect(401);
+    });
+  });
+
   describe('request throttling', () => {
     let app: INestApplication;
     const mockEmail = { sendMail: vi.fn().mockResolvedValue(undefined) };
