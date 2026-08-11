@@ -35,7 +35,6 @@ and this project adheres to
 
 ### Changed
 
-- Access- and refresh-token authentication reject inactive users.
 - Published declarations carry the Express and Passport type dependencies they
   reference, and the public throttling configuration remains usable by strict
   NodeNext consumers on the Nest 12 alpha line.

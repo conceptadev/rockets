@@ -17,9 +17,8 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 - The representative auth sample's complete generated OpenAPI document is
   validated in process, with explicit regressions for path parameters,
   duplicate parameter keys, and mixed OpenAPI 2/3 response shapes.
-- The alpha.8 line also includes inactive-user rejection for access and refresh
-  tokens, singular/empty auth-guard composition, and Firestore-compatible
-  Unicode map-key ordering.
+- The alpha.8 line also includes Firestore-compatible Unicode map-key
+  ordering.
 
 ### Testing infrastructure — Jest replaced by Vitest
 
