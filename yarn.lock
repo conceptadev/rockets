@@ -946,6 +946,7 @@ __metadata:
     "@nestjs/testing": "npm:12.0.0-alpha.5"
     "@nestjs/throttler": "npm:^6.5.0"
     "@nestjs/typeorm": "npm:^11.0.0"
+    "@types/express": "npm:^4.17.21"
     "@types/jsonwebtoken": "npm:9.0.6"
     "@types/passport-jwt": "npm:^3.0.13"
     "@types/passport-strategy": "npm:^0.2.38"

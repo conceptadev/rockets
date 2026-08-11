@@ -1,6 +1,8 @@
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { readPublicPackageManifests } from './public-package-manifests.mjs';
 
 const defaultRepositoryRoot = resolve(
   dirname(fileURLToPath(import.meta.url)),
@@ -9,7 +11,7 @@ const defaultRepositoryRoot = resolve(
 const stableVersionPattern =
   /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
 const prereleaseVersionPattern =
-  /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
+  /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)-([0-9A-Za-z-]+)(?:\.[0-9A-Za-z-]+)*(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
 
 function retainedVersionPlans(repositoryRoot) {
   const versionsRoot = join(repositoryRoot, '.yarn', 'versions');
@@ -21,48 +23,22 @@ function retainedVersionPlans(repositoryRoot) {
     .sort();
 }
 
-function publicPackageManifests(repositoryRoot) {
-  const packagesRoot = join(repositoryRoot, 'packages');
-  if (!existsSync(packagesRoot)) return [];
-
-  return readdirSync(packagesRoot, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => {
-      const manifestPath = join(packagesRoot, entry.name, 'package.json');
-      if (!existsSync(manifestPath)) return undefined;
-
-      let manifest;
-      try {
-        manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
-      } catch (error) {
-        throw new Error(
-          `Cannot read ${manifestPath}: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        );
-      }
-
-      if (manifest.private === true) return undefined;
-      return {
-        name: manifest.name ?? entry.name,
-        version: manifest.version,
-      };
-    })
-    .filter((manifest) => manifest !== undefined)
-    .sort((left, right) => left.name.localeCompare(right.name));
-}
-
 export function assertStableRelease(repositoryRoot = defaultRepositoryRoot) {
   const versionPlans = retainedVersionPlans(repositoryRoot);
   if (versionPlans.length > 0) {
+    const recovery =
+      versionPlans.length === 1 && versionPlans[0] === 'alpha.yml'
+        ? 'Run version:stable before a patch, minor, or major bump.'
+        : 'Inspect and reconcile unexpected or incomplete plans before ' +
+          'retrying; do not apply them blindly.';
     throw new Error(
       `Retained Yarn version plan(s) must be consumed first: ${versionPlans.join(
         ', ',
-      )}. Run version:stable before a patch, minor, or major bump.`,
+      )}. ${recovery}`,
     );
   }
 
-  const manifests = publicPackageManifests(repositoryRoot);
+  const manifests = readPublicPackageManifests(repositoryRoot);
   if (manifests.length === 0) {
     throw new Error('No public package manifests were found under packages/.');
   }
@@ -101,18 +77,71 @@ export function assertStableRelease(repositoryRoot = defaultRepositoryRoot) {
   return { packageCount: manifests.length, version: versions[0] };
 }
 
+export function assertPublishChannel(
+  channel,
+  repositoryRoot = defaultRepositoryRoot,
+) {
+  if (channel === 'latest') {
+    return { channel, ...assertStableRelease(repositoryRoot) };
+  }
+  if (channel !== 'alpha' && channel !== 'beta') {
+    throw new Error(`Unsupported npm publish channel: ${String(channel)}.`);
+  }
+
+  const manifests = readPublicPackageManifests(repositoryRoot);
+  if (manifests.length === 0) {
+    throw new Error('No public package manifests were found under packages/.');
+  }
+
+  const versions = [...new Set(manifests.map(({ version }) => version))];
+  if (versions.length !== 1 || typeof versions[0] !== 'string') {
+    throw new Error(
+      `Public versions are not aligned for publish:${channel}: ${versions
+        .map(String)
+        .sort()
+        .join(', ')}`,
+    );
+  }
+
+  const version = versions[0];
+  const prerelease = prereleaseVersionPattern.exec(version);
+  if (prerelease?.[4] !== channel) {
+    throw new Error(
+      `publish:${channel} requires an aligned ${channel} prerelease; ` +
+        `found ${version}.`,
+    );
+  }
+
+  return { channel, packageCount: manifests.length, version };
+}
+
 if (
   process.argv[1] !== undefined &&
   fileURLToPath(import.meta.url) === resolve(process.argv[1])
 ) {
   try {
-    const { packageCount, version } = assertStableRelease();
-    console.log(
-      `Stable release preflight passed for ${packageCount} public packages at ${version}.`,
-    );
+    const cliArgs = process.argv.slice(2);
+    if (cliArgs.length === 0) {
+      const { packageCount, version } = assertStableRelease();
+      console.log(
+        `Stable release preflight passed for ${packageCount} public packages at ${version}.`,
+      );
+    } else if (cliArgs.length === 2 && cliArgs[0] === 'publish') {
+      const { channel, packageCount, version } = assertPublishChannel(
+        cliArgs[1],
+      );
+      console.log(
+        `Publish preflight passed for ${packageCount} public packages at ` +
+          `${version} on the ${channel} dist-tag.`,
+      );
+    } else {
+      throw new Error(
+        'Usage: node scripts/assert-stable-release.mjs [publish alpha|beta|latest]',
+      );
+    }
   } catch (error) {
     console.error(
-      `Stable release preflight failed: ${
+      `Release preflight failed: ${
         error instanceof Error ? error.message : String(error)
       }`,
     );

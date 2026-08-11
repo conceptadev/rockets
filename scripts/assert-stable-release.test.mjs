@@ -11,7 +11,10 @@ import { dirname, join, resolve } from 'node:path';
 import test, { afterEach } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
-import { assertStableRelease } from './assert-stable-release.mjs';
+import {
+  assertPublishChannel,
+  assertStableRelease,
+} from './assert-stable-release.mjs';
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const rootManifest = JSON.parse(
@@ -70,6 +73,19 @@ test('stable version commands assert the stable release state first', () => {
     rootManifest.scripts['release:packages'],
     /node --test scripts\/assert-stable-release\.test\.mjs/,
   );
+
+  for (const channel of ['alpha', 'beta', 'latest']) {
+    const command = rootManifest.scripts[`publish:${channel}`];
+    const assertionIndex = command.indexOf(
+      `node scripts/assert-stable-release.mjs publish ${channel}`,
+    );
+    const publishIndex = command.indexOf('npm publish');
+
+    assert.ok(
+      assertionIndex >= 0 && assertionIndex < publishIndex,
+      `publish:${channel} must validate its dist-tag before publishing`,
+    );
+  }
 });
 
 test('accepts aligned stable public manifests and ignores private workspaces', () => {
@@ -97,6 +113,18 @@ test('rejects a retained Yarn version plan', () => {
   );
 });
 
+test('does not recommend applying an unexpected or partial version plan', () => {
+  const root = createFixture({
+    core: { name: '@concepta/core', version: '1.2.3' },
+  });
+  addVersionPlan(root, 'partial.yml');
+
+  assert.throws(
+    () => assertStableRelease(root),
+    /partial\.yml.*inspect.*do not apply/i,
+  );
+});
+
 test('rejects a prerelease public manifest', () => {
   const root = createFixture({
     core: { name: '@concepta/core', version: '1.2.3-alpha.8' },
@@ -117,5 +145,35 @@ test('rejects misaligned public stable versions', () => {
   assert.throws(
     () => assertStableRelease(root),
     /not aligned.*1\.2\.3.*1\.3\.0/i,
+  );
+});
+
+test('accepts only versions matching the requested publish channel', () => {
+  const alphaRoot = createFixture({
+    core: { name: '@concepta/core', version: '1.2.3-alpha.8' },
+    server: { name: '@concepta/server', version: '1.2.3-alpha.8' },
+  });
+  const betaRoot = createFixture({
+    core: { name: '@concepta/core', version: '1.2.3-beta.2' },
+  });
+  const stableRoot = createFixture({
+    core: { name: '@concepta/core', version: '1.2.3' },
+  });
+
+  assert.deepEqual(assertPublishChannel('alpha', alphaRoot), {
+    channel: 'alpha',
+    packageCount: 2,
+    version: '1.2.3-alpha.8',
+  });
+  assert.equal(assertPublishChannel('beta', betaRoot).version, '1.2.3-beta.2');
+  assert.equal(assertPublishChannel('latest', stableRoot).version, '1.2.3');
+
+  assert.throws(
+    () => assertPublishChannel('latest', alphaRoot),
+    /prerelease.*promoted|stable semantic/i,
+  );
+  assert.throws(
+    () => assertPublishChannel('alpha', betaRoot),
+    /publish:alpha.*alpha prerelease.*beta/i,
   );
 });

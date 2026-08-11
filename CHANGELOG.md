@@ -11,8 +11,9 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
   publication, dist-tag updates, and the GitHub release remain separate
   post-merge operations.
 - Release gates now install the real packed tarballs in a clean consumer,
-  exercise CommonJS and ESM entry points (including `/zod`), compile a minimal
-  TypeScript app, and bootstrap/close Nest.
+  exercise CommonJS and ESM entry points (including `/zod`), strict-type every
+  public package root, compile a minimal TypeScript app, and bootstrap/close
+  Nest.
 - The representative auth sample's complete generated OpenAPI document is
   validated in process, with explicit regressions for path parameters,
   duplicate parameter keys, and mixed OpenAPI 2/3 response shapes.

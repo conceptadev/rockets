@@ -1,19 +1,12 @@
 import { execFileSync } from 'node:child_process';
-import {
-  existsSync,
-  mkdtempSync,
-  mkdirSync,
-  readFileSync,
-  readdirSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs';
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { readPublicPackageManifests } from './public-package-manifests.mjs';
+
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const packagesRoot = join(repositoryRoot, 'packages');
 const temporaryPrefix = join(tmpdir(), 'rockets-packed-consumer-');
 const temporaryRoot = mkdtempSync(temporaryPrefix);
 const tarballsRoot = join(temporaryRoot, 'tarballs');
@@ -24,10 +17,7 @@ const consumerDependencies = [
   '@nestjs/core@12.0.0-alpha.5',
   '@nestjs/platform-express@12.0.0-alpha.5',
   '@nestjs/typeorm@11.0.3',
-  '@types/express@4.17.25',
   '@types/node@20.19.43',
-  '@types/passport-jwt@3.0.13',
-  '@types/passport-strategy@0.2.38',
   'class-transformer@0.5.1',
   'class-validator@0.14.3',
   'firebase-admin@13.10.0',
@@ -60,29 +50,13 @@ function writeJson(path, value) {
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`);
 }
 
-function publicWorkspaces() {
-  return readdirSync(packagesRoot, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => {
-      const manifestPath = join(packagesRoot, entry.name, 'package.json');
-      return existsSync(manifestPath)
-        ? JSON.parse(readFileSync(manifestPath, 'utf8'))
-        : undefined;
-    })
-    .filter(
-      (manifest) =>
-        manifest !== undefined &&
-        manifest.private !== true &&
-        manifest.name?.startsWith('@concepta/'),
-    )
-    .sort((left, right) => left.name.localeCompare(right.name));
-}
-
 try {
   mkdirSync(tarballsRoot);
   mkdirSync(consumerRoot);
 
-  const workspaces = publicWorkspaces();
+  const workspaces = readPublicPackageManifests(repositoryRoot, {
+    namePrefix: '@concepta/',
+  });
   if (workspaces.length === 0) {
     throw new Error('No public @concepta/* workspaces were found.');
   }
@@ -185,8 +159,39 @@ import {
   RocketsModule,
   defineAuthAdapter,
 } from '@concepta/rockets';
+import { FirebaseAuthModule } from '@concepta/rockets-adapter-firebase';
+import {
+  RocketsAuthModule,
+  RocketsAuthRecoveryController,
+  RocketsAuthTokenController,
+  type RocketsAuthOptionsExtrasInterface,
+} from '@concepta/rockets-auth';
+import { RocketsCoreModule } from '@concepta/rockets-core';
 import { compileDtoClass, namedZodDto } from '@concepta/rockets-core/zod';
+import { FirestoreRepositoryModule } from '@concepta/rockets-repository-firestore';
+import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
+import { typeOrmZodEntityCompiler } from '@concepta/rockets-repository-typeorm/zod';
 import { z } from 'zod';
+
+export const publicPackageSymbols = [
+  FirebaseAuthModule,
+  FirestoreRepositoryModule,
+  RocketsAuthModule,
+  RocketsAuthRecoveryController,
+  RocketsAuthTokenController,
+  RocketsCoreModule,
+  TypeOrmRepositoryModule,
+  typeOrmZodEntityCompiler,
+];
+
+export const throttlingConfig: RocketsAuthOptionsExtrasInterface['throttling'] = [
+  {
+    name: 'default',
+    limit: 100,
+    ttl: 60_000,
+    getTracker: (request) => request.ip,
+  },
+];
 
 export const ConsumerDto = compileDtoClass(
   z.object({ id: z.string() }),

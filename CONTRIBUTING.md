@@ -137,6 +137,10 @@ version ranges — Yarn resolves the `workspace:^` protocol at pack time
 yarn publish:alpha    # or publish:beta / publish:latest
 ```
 
+Each publish helper checks the aligned manifest version immediately before the
+registry write. Alpha and beta versions must match their prerelease dist-tag;
+`publish:latest` accepts only stable versions with no retained version plan.
+
 Each of these re-runs `release:check`, does a clean build, then publishes
 in topological order so dependencies go out before dependents. Use
 `publish:latest` only for a stable release — it is the tag `npm install`
