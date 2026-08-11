@@ -183,6 +183,15 @@ describe('local Firestore value semantics', () => {
     ).toBeLessThan(0);
   });
 
+  it('orders map values by Unicode code-point key order', () => {
+    expect(
+      compareFirestoreValues(
+        { '\uE000': 1, '😀': 2 },
+        { '\uE000': 2, '😀': 1 },
+      ),
+    ).toBeLessThan(0);
+  });
+
   it('orders supported scalars and excludes missing ordered fields', () => {
     const rows = [
       { id: 'missing' },
