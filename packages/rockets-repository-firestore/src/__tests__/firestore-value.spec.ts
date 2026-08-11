@@ -60,7 +60,7 @@ describe('local Firestore value semantics', () => {
     ).toEqual(['null']);
   });
 
-  it('excludes missing and null values while comparing ranges across types', () => {
+  it('excludes missing, null, and cross-type values from range filters', () => {
     const rows = [
       { id: 'missing' },
       { id: 'null', value: null },
@@ -71,7 +71,16 @@ describe('local Firestore value semantics', () => {
       applyFirestoreFilters(rows, [{ field: 'value', op: '>', value: 1 }]).map(
         (row) => row.id,
       ),
-    ).toEqual(['string', 'number']);
+    ).toEqual(['number']);
+  });
+
+  it('matches non-null cross-type values for inequality filters', () => {
+    const rows = [
+      { id: 'missing' },
+      { id: 'null', value: null },
+      { id: 'string', value: '2' },
+      { id: 'number', value: 2 },
+    ];
     expect(
       applyFirestoreFilters(rows, [{ field: 'value', op: '!=', value: 3 }]).map(
         (row) => row.id,

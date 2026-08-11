@@ -45,7 +45,9 @@ export class AuthServerGuard implements CanActivate {
       [context.getHandler(), context.getClass()],
     );
 
-    // Upstream uses this sentinel for explicit controller-wide public access.
+    // Upstream AuthPublic({ classLevel: true }) deliberately stores the
+    // sentinel `classLevel` instead of `true` so its own guard can distinguish
+    // an explicit class-wide choice from an accidental one.
     if (isDisabled === true || isDisabled === 'classLevel') {
       return true;
     }

@@ -162,7 +162,7 @@ function resolveIdentityOwner(
   return owners[0]?.identity;
 }
 
-/** Resolve explicit app options and integration-owned defaults. */
+/** Resolve explicit app options and integration-owned defaults once. */
 export function resolveRocketsComposition(
   extras: RocketsOptionsExtrasInterface = {},
 ): ResolvedRocketsComposition {
