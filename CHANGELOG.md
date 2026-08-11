@@ -5,6 +5,21 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ## [Unreleased]
 
+### Release preparation
+
+- Public Rockets package manifests are aligned at `1.0.0-alpha.8`. Registry
+  publication, dist-tag updates, and the GitHub release remain separate
+  post-merge operations.
+- Release gates now install the real packed tarballs in a clean consumer,
+  exercise CommonJS and ESM entry points (including `/zod`), strict-type every
+  public package root, compile a minimal TypeScript app, and bootstrap/close
+  Nest.
+- The representative auth sample's complete generated OpenAPI document is
+  validated in process, with explicit regressions for path parameters,
+  duplicate parameter keys, and mixed OpenAPI 2/3 response shapes.
+- The alpha.8 line also includes Firestore-compatible Unicode map-key
+  ordering.
+
 ### Testing infrastructure — Jest replaced by Vitest
 
 The whole monorepo (6 packages + 3 example workspaces) now tests under

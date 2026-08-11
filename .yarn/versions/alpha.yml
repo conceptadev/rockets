@@ -1,0 +1,7 @@
+releases:
+  "@concepta/rockets-adapter-firebase": major
+  "@concepta/rockets-core": major
+  "@concepta/rockets-repository-firestore": major
+  "@concepta/rockets-repository-typeorm": major
+  "@concepta/rockets": major
+  "@concepta/rockets-auth": major

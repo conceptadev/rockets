@@ -34,7 +34,7 @@ jobs:
         run: corepack yarn install --immutable
       - name: Build
         run: corepack yarn build
-      - name: Package artifacts
+      - name: Package artifacts and clean-consumer contracts
         run: corepack yarn release:packages
       - name: Firestore emulator suite
         run: corepack yarn test:firestore-emulator

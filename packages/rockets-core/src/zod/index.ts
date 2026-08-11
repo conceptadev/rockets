@@ -37,6 +37,7 @@ export { createdEntity, baseEntity, auditableEntity } from './base-entity';
 export { zodResource, zodSubResource, bindZodResources } from './zod-resource';
 export { zodModuleResource } from './zod-module-resource';
 export { defineZodUserMetadata } from './zod-user-metadata';
+export { compileDtoClass, namedZodDto } from './zod-dto';
 export type {
   ZodResourceDefinition,
   ZodSubResourceDefinition,

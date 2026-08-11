@@ -180,7 +180,7 @@ const jwtLogger = new Logger('RocketsAuthJwt');
  * throttling while still registering the module (the guards resolve statically).
  */
 function buildAuthThrottlers(
-  throttling: false | ThrottlerModuleOptions | undefined,
+  throttling: RocketsAuthOptionsExtrasInterface['throttling'],
 ): ThrottlerModuleOptions {
   if (throttling === false) {
     return [

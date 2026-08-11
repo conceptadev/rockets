@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Release preparation
+
+- Package manifest set to `1.0.0-alpha.8`; registry publication is
+  pending.
+
 ### Added
 
 - `defineTypeOrmRepository()`, the adapter-owned `RepositoryBootstrap` that

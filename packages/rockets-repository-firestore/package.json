@@ -1,6 +1,6 @@
 {
   "name": "@concepta/rockets-repository-firestore",
-  "version": "0.0.1-dev.0",
+  "version": "1.0.0-alpha.8",
   "description": "Firestore repository adapter for Rockets — implements RepositoryModuleInterface and RepositoryAdapter from @concepta/nestjs-repository",
   "author": "Thiago Ramalho <thiago.ramalho@concepta.com>",
   "license": "BSD-3-Clause",
@@ -74,5 +74,6 @@
     "database",
     "typescript",
     "backend"
-  ]
+  ],
+  "stableVersion": "0.0.1-dev.0"
 }

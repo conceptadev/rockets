@@ -9,6 +9,11 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Release preparation
+
+- Package manifest set to `1.0.0-alpha.8`; registry publication is
+  pending.
+
 ### Breaking
 
 - Hosts must stop passing `buildRocketsAuthResources(...)` on
@@ -25,11 +30,14 @@ and this project adheres to
   passcode validation, and OTP-authorized password rotation.
 - Default global throttling with stricter login and recovery limits; hosts can
   configure it or explicitly opt out.
-- End-to-end readiness coverage for duplicate CQRS ownership, recovery,
+- End-to-end regression coverage for duplicate CQRS ownership, recovery,
   password reuse policy, and login throttling.
 
 ### Changed
 
+- Published declarations carry the Express and Passport type dependencies they
+  reference, and the public throttling configuration remains usable by strict
+  NodeNext consumers on the Nest 12 alpha line.
 - `defineRocketsAuth()` now returns a complete composition: auth persistence
   rows, root repository, user-metadata contract, and guard preference travel
   with the integration. Its Rockets guard defaults off because the built-in
