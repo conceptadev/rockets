@@ -11,11 +11,12 @@
 > Configuration-driven NestJS stack. One options object becomes a working API —
 > auth, dynamic repositories, generated CRUD controllers, hooks, swagger.
 
-**Status:** pre-1.0 (`0.0.1-dev.0`, on npm under `@concepta/*` with dist-tag
-`alpha`). The public surface (`AuthAdapterInterface`, `defineResource`,
-`defineModuleResource`, `RepositoryInterface`, `createServer`) is being
-prepared for 1.0; breaking refinements are still possible until that release.
-Pin exact versions in production.
+**Status:** pre-1.0. Public package manifests are aligned at `1.0.0-alpha.8`,
+and the release gates are in place; registry publication and the `alpha`
+dist-tag update are still pending. The public
+surface (`AuthAdapterInterface`, `defineResource`, `defineModuleResource`,
+`RepositoryInterface`, `createServer`) may still change before 1.0. Pin exact
+versions in production.
 
 ## Table of contents
 
@@ -274,7 +275,7 @@ yarn add @concepta/rockets@git@github.com:conceptadev/rockets.git#workspace=@con
 ```
 
 One caveat: at pack time yarn rewrites the internal `workspace:^` ranges to
-`^0.0.1-dev.0`, which resolves against the (older) npm alphas. Force every
+`^1.0.0-alpha.8`. Until that version is published, force every
 `@concepta/*` package to the same git commit with `resolutions` in the
 consuming app:
 
@@ -294,11 +295,12 @@ already consume the workspaces directly — nothing to configure.
 
 ### Path A — External auth (minimal app, ~30 lines)
 
-Install (minimal — one Rockets entry package is enough):
+Registry install (after `1.0.0-alpha.8` is published; until then use the GitHub
+instructions above):
 
 ```bash
 yarn add @concepta/rockets@alpha \
-  @concepta/rockets-repository-typeorm typeorm @nestjs/typeorm sqlite3 \
+  @concepta/rockets-repository-typeorm@alpha typeorm @nestjs/typeorm sqlite3 \
   class-transformer class-validator reflect-metadata rxjs
 ```
 
@@ -1004,8 +1006,9 @@ rockets/
 
 ### Versions
 
-- **Rockets packages**: `0.0.1-dev.0` on npm
-  (`yarn add @concepta/rockets@alpha`, or pin `0.0.1-dev.0`). Monorepo packages
+- **Rockets packages**: source manifests are aligned at `1.0.0-alpha.8`;
+  registry publication is pending. After publication, install the line with
+  `yarn add @concepta/rockets@alpha` or pin `1.0.0-alpha.8`. Monorepo packages
   keep `workspace:^` for local development.
 - **Upstream Concepta packages**: v8 modules are pinned to `8.0.0-alpha.8`;
   `@concepta/nestjs-common` remains at its latest published v8 build,
@@ -1024,6 +1027,7 @@ rockets/
 | Command                       | Purpose                                                                                                    |
 | ----------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `yarn release:check`          | Run the complete build, package, type, lint, unit, e2e, and sample release gate.                           |
+| `yarn release:consumer`       | Pack every public workspace and verify a clean CJS, ESM, TypeScript, and Nest consumer.                    |
 | `yarn release:dry`            | Build publish archives for every public `@concepta/*` workspace without publishing.                       |
 | `yarn install && yarn build`  | Bootstrap + compile every local `@concepta/*` package.                                                      |
 | `yarn test`                   | Unit tests (Vitest).                                                                                       |

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Release preparation
+
+- Package manifest set to `1.0.0-alpha.8`; registry publication is
+  pending.
+
 ### Added
 
 - Full `WhereOperator` coverage (EQ, NE, comparisons, IN, NIN, null checks,
@@ -30,6 +35,8 @@
   clause participates in deterministic sorting.
 - Admin SDK and in-memory backends share the same local filter and sort
   semantics for direct document lookups and post-filtered queries.
+- Unicode map-key ordering in local and post-filter sorts now matches
+  Firestore ordering.
 - Document-id `IN` accepts at most 500 ids and uses one Admin SDK `getAll`
   request; pagination is applied after all requested ids are fetched.
 - README documents supported features and Firestore platform limits.

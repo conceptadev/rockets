@@ -8,8 +8,9 @@
 > Firestore-backed entities with a TypeORM (or any other) default adapter, per
 > entity.
 
-**Status:** pre-1.0 preview (`0.0.1-dev.0`, npm dist-tag `alpha`). Public
-shapes may still change before 1.0.
+**Status:** pre-1.0 preview. The package manifest is set to `1.0.0-alpha.8`, but
+registry publication is pending; install commands below apply after the
+`alpha` dist-tag is updated. Public shapes may still change before 1.0.
 
 ---
 

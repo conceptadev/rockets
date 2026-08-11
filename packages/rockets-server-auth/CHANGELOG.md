@@ -9,7 +9,20 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Release preparation
+
+- Package manifest set to `1.0.0-alpha.8`; registry publication is
+  pending.
+
 ### Breaking
+
+- Authentication is now fail-closed on `active`: a user authenticates only when
+  `active === true`. Deactivated users are rejected on both access and refresh
+  tokens, and any persisted row with `active` unset/null (or an admin-created
+  user without an explicit `active`) is treated as inactive. **Backfill legacy
+  user rows to `active: true` before deploying.** Built-in signup and
+  admin-create default new users to `active: true`; pass `active: false`
+  explicitly to create an inactive user.
 
 - Hosts must stop passing `buildRocketsAuthResources(...)` on
   `RocketsModule.forRoot({ resources })`. `defineRocketsAuth()` now contributes
@@ -25,11 +38,14 @@ and this project adheres to
   passcode validation, and OTP-authorized password rotation.
 - Default global throttling with stricter login and recovery limits; hosts can
   configure it or explicitly opt out.
-- End-to-end readiness coverage for duplicate CQRS ownership, recovery,
+- End-to-end regression coverage for duplicate CQRS ownership, recovery,
   password reuse policy, and login throttling.
 
 ### Changed
 
+- Published declarations carry the Express and Passport type dependencies they
+  reference, and the public throttling configuration remains usable by strict
+  NodeNext consumers on the Nest 12 alpha line.
 - `defineRocketsAuth()` now returns a complete composition: auth persistence
   rows, root repository, user-metadata contract, and guard preference travel
   with the integration. Its Rockets guard defaults off because the built-in

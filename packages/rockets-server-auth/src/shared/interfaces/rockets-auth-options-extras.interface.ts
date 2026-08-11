@@ -9,7 +9,6 @@ import type {
   Type,
 } from '@nestjs/common';
 import type { AuthenticationOptionsExtrasInterface } from '@concepta/nestjs-authentication';
-import type { ThrottlerModuleOptions } from '@nestjs/throttler';
 import type { RoleExtrasInterface } from '@concepta/nestjs-role';
 import type { RocketsAuthUserMetadataCreatableInterface } from '../../domains/user/interfaces/rockets-auth-user-metadata-creatable.interface';
 import type { RocketsAuthUserCreatableInterface } from '../../domains/user/interfaces/rockets-auth-user-creatable.interface';
@@ -26,6 +25,7 @@ import type { AbstractAdminUserListHandler } from '../../domains/user/applicatio
 import type { AbstractAdminUserReadHandler } from '../../domains/user/application/commands/handlers/abstract-admin-user-read.handler';
 import type { AbstractAdminUserUpdateHandler } from '../../domains/user/application/commands/handlers/abstract-admin-user-update.handler';
 import type { AbstractAdminDeleteUserHandler } from '../../domains/user/application/commands/handlers/abstract-admin-delete-user.handler';
+import type { RocketsAuthThrottlingOptions } from './rockets-auth-throttling-options.interface';
 
 /**
  * Generic userMetadata configuration interface
@@ -215,7 +215,7 @@ export interface RocketsAuthOptionsExtrasInterface
    * Auth's throttling entirely (e.g. the host enforces its own limits
    * upstream).
    */
-  throttling?: false | ThrottlerModuleOptions;
+  throttling?: false | RocketsAuthThrottlingOptions;
   invitation?: {
     imports?: DynamicModule['imports'];
     /**

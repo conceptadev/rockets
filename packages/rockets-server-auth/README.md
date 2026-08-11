@@ -8,9 +8,10 @@
 > OTP, invitations, roles, admin user CRUD — wired as a single
 > `defineRocketsAuth()` integration.
 
-**Status:** pre-1.0 preview (`0.0.1-dev.0`, published on npm as
-`@concepta/rockets-auth@alpha`). Public shapes may still change before 1.0;
-the OAuth submodule is parked pending upstream v8 ports (see
+**Status:** pre-1.0 preview. The package manifest is set to `1.0.0-alpha.8`, but
+registry publication is pending; install commands below apply after the
+`alpha` dist-tag is updated. Public shapes may still change before 1.0; the
+OAuth submodule is parked pending upstream v8 ports (see
 [Known limitations](#known-limitations)).
 
 ---
@@ -78,7 +79,7 @@ yarn add @concepta/rockets-auth@alpha @concepta/rockets@alpha @concepta/rockets-
 ```
 
 Bring the upstream `@concepta/nestjs-*` packages and a repository adapter your
-app supports (e.g. `@concepta/rockets-repository-typeorm` + `typeorm`).
+app supports (e.g. `@concepta/rockets-repository-typeorm@alpha` + `typeorm`).
 
 ### Minimal working example
 

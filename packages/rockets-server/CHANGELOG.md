@@ -9,6 +9,11 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Release preparation
+
+- Package manifest set to `1.0.0-alpha.8`; registry publication is
+  pending.
+
 ### Added
 
 - `createServer(definition)`, the canonical launch-facing facade that returns a
@@ -22,6 +27,8 @@ and this project adheres to
 
 ### Changed
 
+- Guard ownership is singular: the presentation layer no longer registers a
+  second global auth guard when an auth integration already owns it.
 - `RocketsModule` resolves auth contributions before module registration.
   Explicit app options win; conflicting integration defaults fail during
   composition.

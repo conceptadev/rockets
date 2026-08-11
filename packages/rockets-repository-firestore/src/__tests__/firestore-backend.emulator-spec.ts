@@ -25,6 +25,14 @@ describe('Firestore backend emulator parity', () => {
       ['null', { profile: { score: null }, kind: 'null' }],
       ['number', { profile: { score: 2 }, kind: 'number', at: new Date(10) }],
       ['string', { profile: { score: '2' }, kind: 'string' }],
+      [
+        'map-code-point-first',
+        { unicodeMap: { '\uE000': 1, '😀': 2 }, kind: 'map' },
+      ],
+      [
+        'map-code-point-second',
+        { unicodeMap: { '\uE000': 2, '😀': 1 }, kind: 'map' },
+      ],
     ];
     for (const backend of backends) {
       for (const [id, row] of rows) await backend.set(collection, id, row);
@@ -72,5 +80,16 @@ describe('Firestore backend emulator parity', () => {
     });
     expect(rows.map((row) => row.id)).toEqual(['null', 'number', 'string']);
     expect((await admin.get(collection, 'number'))?.at).toBeInstanceOf(Date);
+  });
+
+  it('matches server map ordering for Unicode keys', async () => {
+    const rows = await compare({
+      branch: { filters: [], postFilters: [] },
+      orderBy: [{ field: 'unicodeMap', direction: 'asc' }],
+    });
+    expect(rows.map((row) => row.id)).toEqual([
+      'map-code-point-first',
+      'map-code-point-second',
+    ]);
   });
 });

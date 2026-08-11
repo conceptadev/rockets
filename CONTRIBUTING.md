@@ -96,26 +96,29 @@ the same standards as source.
 ## Releasing
 
 All release commands are thin wrappers over Yarn 4's native versioning and
-publishing — there is no custom release script to maintain.
+publishing. The tracked `.yarn/versions/alpha.yml` file is the retained decision
+to release the six public packages as `1.0.0`; Yarn keeps that decision while
+applying numbered prereleases.
 
 **1. Bump versions** (every publishable workspace, in one command):
 
-| Command | From `0.0.1-alpha.3` you get |
-|---|---|
-| `yarn version:alpha` | `0.0.1-alpha.4` |
-| `yarn version:patch` | `0.0.2` |
-| `yarn version:minor` | `0.1.0` |
-| `yarn version:major` | `1.0.0` |
+| Command | Example result | When to use it |
+|---|---|---|
+| `yarn version:alpha` | `1.0.0-alpha.8` → `1.0.0-alpha.9` | Advance the retained 1.0 alpha line. |
+| `yarn version:stable` | `1.0.0-alpha.8` → `1.0.0` | Finalize 1.0 and consume the retained alpha plan. |
+| `yarn version:patch` | `1.0.0` → `1.0.1` | Stable releases only, after `version:stable`. |
+| `yarn version:minor` | `1.0.0` → `1.1.0` | Stable releases only, after `version:stable`. |
+| `yarn version:major` | `1.0.0` → `2.0.0` | Stable releases only, after `version:stable`. |
 
-Prereleases continue whichever identifier the current version carries, so
-moving from `alpha` to `beta` is an explicit one-time bump — run
-`yarn workspaces foreach -A --no-private version 0.1.0-beta.0 --deferred`
-followed by `yarn version apply --all`.
+Commit the manifest changes together with the retained plan. Do not run the
+patch/minor/major helpers while `.yarn/versions/alpha.yml` is active; finalize
+it with `version:stable` first. Changing from alpha to another prerelease label
+is a reviewed release-workflow change, not an ad-hoc `version prerelease` bump.
 
 **2. Verify before publishing:**
 
 ```bash
-yarn release:check   # build + typecheck:spec + lint:all + test + test:e2e
+yarn release:check   # build + packed consumer + types + lint + tests + samples
 yarn release:audit   # fails on high-severity advisories
 yarn release:dry     # lists exactly what each tarball will contain
 ```
@@ -124,7 +127,8 @@ Read the `release:dry` output: each tarball must carry `dist/`,
 `README.md`, `LICENSE.txt` and `CHANGELOG.md`, and must NOT carry `src/`,
 `*.spec.*` or `docs/`. Cross-package dependencies are published as real
 version ranges — Yarn resolves the `workspace:^` protocol at pack time
-(verified: a packed `package.json` contains `^0.0.1-dev.0`, never
+(verified for this source line: a packed `package.json` contains
+`^1.0.0-alpha.8`, never
 `workspace:`).
 
 **3. Publish** to the matching dist-tag:
@@ -132,6 +136,10 @@ version ranges — Yarn resolves the `workspace:^` protocol at pack time
 ```bash
 yarn publish:alpha    # or publish:beta / publish:latest
 ```
+
+Each publish helper checks the aligned manifest version immediately before the
+registry write. Alpha and beta versions must match their prerelease dist-tag;
+`publish:latest` accepts only stable versions with no retained version plan.
 
 Each of these re-runs `release:check`, does a clean build, then publishes
 in topological order so dependencies go out before dependents. Use

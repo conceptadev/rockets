@@ -1,6 +1,6 @@
 {
   "name": "@concepta/rockets-core",
-  "version": "0.0.1-dev.0",
+  "version": "1.0.0-alpha.8",
   "description": "Rockets Core - auth-provider-agnostic server infrastructure",
   "author": "Thiago Ramalho <thiago.ramalho@concepta.com>",
   "license": "BSD-3-Clause",
@@ -108,5 +108,6 @@
     "dependency-injection",
     "backend",
     "api"
-  ]
+  ],
+  "stableVersion": "0.0.1-dev.0"
 }

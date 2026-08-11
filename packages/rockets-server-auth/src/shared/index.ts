@@ -23,6 +23,7 @@ export {
   RocketsAuthOptionsExtrasInterface,
   UserMetadataConfigInterface,
 } from './interfaces/rockets-auth-options-extras.interface';
+export type { RocketsAuthThrottlingOptions } from './interfaces/rockets-auth-throttling-options.interface';
 export type {
   RocketsAuthRepositoryPersistenceEntities,
   RocketsAuthRepositoryPersistenceOptions,
