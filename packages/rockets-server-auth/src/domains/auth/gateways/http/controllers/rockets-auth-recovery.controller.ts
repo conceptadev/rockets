@@ -16,8 +16,11 @@ import {
   Patch,
   Post,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
+
+import { AuthAccountThrottlerGuard } from '../guards/auth-account-throttler.guard';
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -31,6 +34,7 @@ import type { Request } from 'express';
 /** Public, enumeration-safe account recovery endpoints. */
 @Controller('recovery')
 @AuthPublic({ classLevel: true })
+@UseGuards(AuthAccountThrottlerGuard)
 @ApiTags('Authentication')
 export class RocketsAuthRecoveryController {
   private readonly logger = new Logger(RocketsAuthRecoveryController.name);
@@ -54,12 +58,12 @@ export class RocketsAuthRecoveryController {
       'The request was accepted, whether or not the email belongs to an account.',
   })
   @ApiBadRequestResponse({ description: 'Invalid email format' })
-  async recoverLogin(
+  recoverLogin(
     @Body() dto: RecoveryRecoverLoginDto,
     @Req() req: Request,
-  ): Promise<void> {
+  ): void {
     const ctx = getAppContext(req);
-    await this.runEnumerationSafe('login', () =>
+    this.dispatchEnumerationSafe('login', () =>
       this.recoveryService.recoverLogin(ctx, dto.email),
     );
   }
@@ -78,12 +82,12 @@ export class RocketsAuthRecoveryController {
       'The request was accepted, whether or not the email belongs to an account.',
   })
   @ApiBadRequestResponse({ description: 'Invalid email format' })
-  async recoverPassword(
+  recoverPassword(
     @Body() dto: RecoveryRecoverPasswordDto,
     @Req() req: Request,
-  ): Promise<void> {
+  ): void {
     const ctx = getAppContext(req);
-    await this.runEnumerationSafe('password', () =>
+    this.dispatchEnumerationSafe('password', () =>
       this.recoveryService.recoverPassword(ctx, dto.email),
     );
   }
@@ -132,15 +136,21 @@ export class RocketsAuthRecoveryController {
     if (!user) throw new RecoveryOtpInvalidException();
   }
 
-  private async runEnumerationSafe(
+  /**
+   * Respond before the work runs: known and unknown accounts cost the same
+   * wall-clock time, and a slow mail provider cannot slow the endpoint.
+   * Failures are logged with their cause and never surfaced to the caller.
+   */
+  private dispatchEnumerationSafe(
     operation: 'login' | 'password',
     work: () => Promise<void>,
-  ): Promise<void> {
-    try {
-      await work();
-    } catch {
-      this.logger.error(`Account ${operation} recovery notification failed`);
-      // A uniform success response prevents account-existence disclosure.
-    }
+  ): void {
+    void work().catch((error: unknown) => {
+      this.logger.error(`Account ${operation} recovery dispatch failed`, {
+        operation,
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+    });
   }
 }

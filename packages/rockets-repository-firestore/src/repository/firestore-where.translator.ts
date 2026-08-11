@@ -26,8 +26,6 @@ const RANGE_OPS: ReadonlySet<FirestoreFilterOp> = new Set([
   '!=',
 ]);
 
-const MAX_DIRECT_DOCUMENT_IDS = 500;
-
 /** Builds one conjunctive branch from DNF conditions (use with `RepositoryAdapter.toDnf`). */
 export function translateDnfBranch(
   conditions: readonly WhereCondition[],
@@ -180,11 +178,6 @@ function translateIdCondition(condition: WhereCondition): FirestoreQueryBranch {
       };
     case WhereOperator.IN: {
       const rawValues = asArray(readArrayValue(condition));
-      if (rawValues.length > MAX_DIRECT_DOCUMENT_IDS) {
-        throw new Error(
-          `Firestore adapter: id "in" supports at most ${MAX_DIRECT_DOCUMENT_IDS} document ids (received ${rawValues.length}).`,
-        );
-      }
       const values = rawValues.map(readDocumentId);
       return {
         documentIds: values,

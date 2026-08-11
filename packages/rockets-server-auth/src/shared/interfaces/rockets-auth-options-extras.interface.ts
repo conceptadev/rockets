@@ -208,9 +208,12 @@ export interface RocketsAuthOptionsExtrasInterface
   };
   disableController?: DisableControllerOptionsInterface;
   /**
-   * Global request-throttling configuration. Route-specific limits declared by
-   * Rockets Auth use the `default` throttler. Pass `false` only when the host
-   * application already owns the global throttler module and guard.
+   * Request-throttling configuration for the throttler that guards Rockets
+   * Auth's own public routes (signup, login, recovery, otp, invitation
+   * acceptance). Rockets Auth scopes the guard to those controllers — it does
+   * not register an app-wide `APP_GUARD`. Pass `false` to disable Rockets
+   * Auth's throttling entirely (e.g. the host enforces its own limits
+   * upstream).
    */
   throttling?: false | ThrottlerModuleOptions;
   invitation?: {

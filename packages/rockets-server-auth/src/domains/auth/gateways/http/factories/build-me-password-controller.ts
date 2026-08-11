@@ -27,6 +27,7 @@ import { RocketsAuthChangePasswordDto } from '../../../infrastructure/dto/rocket
 import type { MePasswordControllerExtras } from '../../../interfaces/me-password-controller-extras.interface';
 import type { RocketsAuthUserInterface } from '../../../../user/interfaces/rockets-auth-user.interface';
 import { applyControllerExtras } from '../../../../../shared/utils/apply-controller-extras.helper';
+import { AuthAccountThrottlerGuard } from '../guards/auth-account-throttler.guard';
 
 /** Build the password-change controller and apply consumer decorators. */
 export function buildMePasswordController(
@@ -35,7 +36,7 @@ export function buildMePasswordController(
   @Controller('me')
   @ApiTags('Me')
   @ApiBearerAuth()
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, AuthAccountThrottlerGuard)
   class MePasswordController {
     constructor(private readonly commandBus: CommandBus) {}
 

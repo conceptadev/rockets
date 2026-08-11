@@ -102,8 +102,12 @@ export class RocketsRecoveryService implements RecoveryServiceContract {
     const Command = this.notifications.sendPasswordUpdatedNotificationCommand;
     try {
       await this.commandBus.execute(new Command(appCtx, user.email));
-    } catch {
-      this.logger.error('Password-updated recovery notification failed');
+    } catch (error: unknown) {
+      this.logger.error('Password-updated recovery notification failed', {
+        userId: user.id,
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
     }
     return user;
   }

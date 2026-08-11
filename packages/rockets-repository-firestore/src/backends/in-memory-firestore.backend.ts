@@ -1,3 +1,4 @@
+import { FirestoreDuplicateIdException } from '../exceptions/firestore-duplicate-id.exception';
 import type {
   FirestoreBackend,
   FirestoreBranchQueryOptions,
@@ -61,9 +62,7 @@ export class InMemoryFirestoreBackend implements FirestoreBackend {
   ): Promise<void> {
     const store = this.collectionStore(collection);
     if (store.has(documentId)) {
-      throw new Error(
-        `Firestore document "${collection}/${documentId}" already exists.`,
-      );
+      throw new FirestoreDuplicateIdException(collection, documentId);
     }
     store.set(documentId, { ...data, id: documentId });
   }

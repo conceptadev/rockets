@@ -147,13 +147,17 @@ export function defineRocketsAuth(
   return {
     adapter: input.authAdapter ?? RocketsJwtAuthAdapter,
     forRoot: () => RocketsAuthModule.forRootAsync(asyncOptions),
-    contributes: {
+    // Built-in auth owns the user space the whole adapter chain
+    // authenticates into — it is the app's single identity owner.
+    identity: {
       resources: buildRocketsAuthResources(
         input.persistence,
         input.invitationEntity,
       ),
       userMetadata: input.userMetadata,
       repository: input.persistence.module,
+    },
+    contributes: {
       // AuthenticationModule installs its own JwtGuard by default. Avoid two
       // global authentication guards unless a mixed-auth host explicitly asks
       // Rockets to own the ordered adapter chain.

@@ -19,6 +19,26 @@ const originalCredentials = {
   password: 'OriginalP@ssw0rd!',
 };
 
+/**
+ * Recovery dispatch is fire-and-forget (the endpoint answers before the OTP
+ * row exists), so the flow test polls instead of reading immediately.
+ */
+async function pollUntil<T>(
+  read: () => Promise<T | null>,
+  what: string,
+  timeoutMs = 5000,
+): Promise<T> {
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    const value = await read();
+    if (value !== null) return value;
+    if (Date.now() > deadline) {
+      throw new Error(`Timed out after ${timeoutMs}ms waiting for ${what}`);
+    }
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  }
+}
+
 describe('Rockets Auth 1.0 readiness (e2e)', () => {
   describe('recovery and handler ownership', () => {
     let app: INestApplication;
@@ -56,6 +76,13 @@ describe('Rockets Auth 1.0 readiness (e2e)', () => {
       expect(registrationWarnings).toEqual([]);
     });
 
+    it('resolves the upstream DI tokens the password-port handlers depend on', () => {
+      // Hand-copied strings (upstream does not export the constants) — an
+      // upstream rename must fail here, not at a production boot.
+      expect(module.get('USER_CREDENTIALS_REPOSITORY_TOKEN')).toBeDefined();
+      expect(module.get('USER_MODULE_SETTINGS_TOKEN')).toBeDefined();
+    });
+
     it('supports the complete account-recovery flow without disclosing unknown emails', async () => {
       await request(app.getHttpServer())
         .post('/recovery/login')
@@ -72,10 +99,13 @@ describe('Rockets Auth 1.0 readiness (e2e)', () => {
         .send({ email: originalCredentials.email })
         .expect(200);
 
-      const otp = await module
+      const otpRepository = module
         .get(DataSource)
-        .getRepository(UserOtpEntityFixture)
-        .findOneByOrFail({ active: true });
+        .getRepository(UserOtpEntityFixture);
+      const otp = await pollUntil(
+        () => otpRepository.findOneBy({ active: true }),
+        'the recovery OTP row',
+      );
 
       await request(app.getHttpServer())
         .post('/recovery/passcode')
@@ -132,6 +162,28 @@ describe('Rockets Auth 1.0 readiness (e2e)', () => {
         .post('/token/password')
         .send({ username: 'missing-user', password: 'wrong-password' })
         .expect(429);
+    });
+
+    it('throttles per account, so one account cannot lock another out', async () => {
+      for (let attempt = 1; attempt <= 10; attempt += 1) {
+        await request(app.getHttpServer())
+          .post('/token/password')
+          .send({ username: 'victim-lockout', password: 'wrong-password' })
+          .expect(401);
+      }
+
+      // The victim's own bucket is now exhausted — proves throttling is active.
+      await request(app.getHttpServer())
+        .post('/token/password')
+        .send({ username: 'victim-lockout', password: 'wrong-password' })
+        .expect(429);
+
+      // Same client IP, a different account: its bucket is independent, so the
+      // exhausted account cannot deny login to everyone else.
+      await request(app.getHttpServer())
+        .post('/token/password')
+        .send({ username: 'other-account', password: 'wrong-password' })
+        .expect(401);
     });
   });
 });

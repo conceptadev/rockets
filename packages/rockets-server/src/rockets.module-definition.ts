@@ -2,12 +2,15 @@ import { createSettingsProvider } from '@concepta/nestjs-core';
 import {
   ConfigurableModuleBuilder,
   DynamicModule,
+  PlainLiteralObject,
   Provider,
+  Type,
 } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import type {
   AuthBootstrap,
   AuthBootstrapContributions,
+  AuthBootstrapIdentity,
   RepositoryBootstrap,
   RepositoryModuleInterface,
   ResourceInput,
@@ -17,6 +20,8 @@ import {
   RocketsCoreModule,
   AuthServerGuard,
   ROCKETS_CORE_SETTINGS_TOKEN,
+  isCrudResource,
+  isModuleResource,
 } from '@concepta/rockets-core';
 import { MeController } from './gateways/http/me.controller';
 import { RocketsOptionsInterface } from './infrastructure/config/interfaces/rockets-options.interface';
@@ -56,7 +61,7 @@ export interface ResolvedRocketsComposition {
 }
 
 function resolveSingleContribution<
-  Key extends Exclude<keyof AuthBootstrapContributions, 'resources'>,
+  Key extends keyof AuthBootstrapContributions,
 >(
   bootstraps: ReadonlyArray<AuthBootstrap>,
   key: Key,
@@ -82,11 +87,87 @@ function resolveSingleContribution<
   return first;
 }
 
+// Composition is the only consumer of identity/contributes; core refuses
+// bootstraps that still carry them, so strip before handing down.
+function toCoreAuthBootstrap({
+  identity: _identity,
+  contributes: _contributes,
+  ...bootstrap
+}: AuthBootstrap): AuthBootstrap {
+  return bootstrap;
+}
+
+function resourceEntityClasses(
+  resource: ResourceInput,
+): ReadonlyArray<Type<PlainLiteralObject>> {
+  if (isCrudResource(resource)) return [resource.meta.entityClass];
+  if (isModuleResource(resource)) {
+    return resource.entities.map((entry) => entry.entity);
+  }
+  return [];
+}
+
+// Same reference twice is idempotent (skip); the same entity defined twice
+// with different configs is a mistake — fail naming both sides instead of
+// silently picking one and changing behavior.
+function mergeIdentityResources(
+  identityResources: ReadonlyArray<ResourceInput>,
+  appResources: ReadonlyArray<ResourceInput>,
+): ReadonlyArray<ResourceInput> {
+  const appRefs = new Set<ResourceInput>(appResources);
+  const appEntities = new Set(appResources.flatMap(resourceEntityClasses));
+
+  return identityResources.filter((resource) => {
+    if (appRefs.has(resource)) return false;
+    const clash = resourceEntityClasses(resource).find((entity) =>
+      appEntities.has(entity),
+    );
+    if (clash !== undefined) {
+      throw new Error(
+        'RocketsModule: entity "' +
+          clash.name +
+          '" is provided by the auth integration (identity.resources) and ' +
+          'also listed in resources[] with a different configuration. ' +
+          'Remove one of the two definitions.',
+      );
+    }
+    return true;
+  });
+}
+
+// The chain authenticates into ONE user space, so its persistence has ONE
+// owner. Sliced ownership (metadata from one package, repository from
+// another) or two full owners are both invalid apps, not conflicts to merge.
+function resolveIdentityOwner(
+  bootstraps: ReadonlyArray<AuthBootstrap>,
+): AuthBootstrapIdentity | undefined {
+  const owners = bootstraps.filter((bootstrap) => {
+    const identity = bootstrap.identity;
+    return (
+      identity !== undefined &&
+      (identity.userMetadata !== undefined ||
+        identity.repository !== undefined ||
+        (identity.resources?.length ?? 0) > 0)
+    );
+  });
+  if (owners.length > 1) {
+    throw new Error(
+      'RocketsModule: multiple auth integrations claim identity ownership (' +
+        owners.map((owner) => owner.adapter.name).join(', ') +
+        '). Exactly one integration may provide identity persistence; set ' +
+        'userMetadata/repository/resources explicitly on the module options ' +
+        'to take ownership at the app level.',
+    );
+  }
+  return owners[0]?.identity;
+}
+
 /** Resolve explicit app options and integration-owned defaults once. */
 export function resolveRocketsComposition(
   extras: RocketsOptionsExtrasInterface = {},
 ): ResolvedRocketsComposition {
   const auth = normalizeAuthBootstraps(extras.auth);
+  const identity = resolveIdentityOwner(auth);
   const enableGlobalGuard =
     extras.enableGlobalGuard ??
     resolveSingleContribution(auth, 'enableGlobalGuard');
@@ -107,16 +188,15 @@ export function resolveRocketsComposition(
     );
   }
 
+  const appResources = extras.resources ?? [];
   return {
     auth,
     resources: [
-      ...auth.flatMap((bootstrap) => bootstrap.contributes?.resources ?? []),
-      ...(extras.resources ?? []),
+      ...mergeIdentityResources(identity?.resources ?? [], appResources),
+      ...appResources,
     ],
-    userMetadata:
-      extras.userMetadata ?? resolveSingleContribution(auth, 'userMetadata'),
-    repository:
-      extras.repository ?? resolveSingleContribution(auth, 'repository'),
+    userMetadata: extras.userMetadata ?? identity?.userMetadata,
+    repository: extras.repository ?? identity?.repository,
     enableGlobalGuard,
   };
 }
@@ -181,7 +261,7 @@ export function createRocketsImports(options: {
       useFactory: (opts: RocketsOptionsInterface) => ({
         swagger: opts.swagger,
       }),
-      auth: composition.auth,
+      auth: composition.auth.map(toCoreAuthBootstrap),
       userMetadata: composition.userMetadata,
       repository: composition.repository,
       resources: composition.resources,
