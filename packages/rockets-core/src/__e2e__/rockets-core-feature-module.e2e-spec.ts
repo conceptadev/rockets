@@ -197,18 +197,11 @@ describe('RocketsCoreModule + defineModuleResource (e2e)', () => {
   });
 
   /**
-   * GUARDS AN UPSTREAM STRING MATCH. `SafeCrudContextInterceptor` decides
-   * to skip the CRUD overlay on non-CRUD routes by matching
-   * `error.message.includes('No entity defined')` — `CrudContextException`
-   * carries no error code, so the message IS the contract.
-   *
-   * A plain `@Controller` with no `@CrudEntity` is exactly the case that
-   * match exists for. If upstream rewords the message, the interceptor
-   * stops swallowing and this route 500s. Keep this test until the
-   * upstream fix (concepta/nestjs-crud 5249672f) ships and the
-   * interceptor can be deleted.
+   * Mixed CRUD + hand-written controllers. Upstream
+   * `CrudContextOverlay.attach()` no-ops without CRUD metadata
+   * (`@concepta/nestjs-crud` `5249672`); this route must not 500.
    */
-  it('serves a non-CRUD controller without a 500 (upstream message contract)', async () => {
+  it('serves a non-CRUD controller without a 500 when mixed with CRUD', async () => {
     const widgetFeature = defineModuleResource({
       entities: [{ key: 'widget', entity: WidgetEntity }],
       controllers: [WidgetController],

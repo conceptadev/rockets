@@ -5,6 +5,19 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ## [Unreleased]
 
+### Removed
+
+- **`SafeCrudContextInterceptor`** — upstream `@concepta/nestjs-crud`
+  `CrudContextOverlay.attach()` already no-ops on non-CRUD handlers
+  (`5249672`, shipped in `8.0.0-alpha.8`). Core and auth now use
+  `CrudModule.forRoot` / `forRootAsync` directly. Mixed-controller e2e remains
+  as the regression guard.
+
+### Documentation
+
+- `SECURITY.md` and sample READMEs no longer claim an npm `alpha` channel that
+  is not published yet.
+
 ### Release preparation
 
 - Public Rockets package manifests are aligned at `1.0.0-alpha.8`. Registry
@@ -134,6 +147,16 @@ before running the full e2e suite.
 
 ### Security
 
+- OTP consume is now the single decision point for burning passcodes:
+  `RocketsValidateOtpHandler` dispatches `ConsumeOtpCommand` directly when
+  `deleteIfValid` is true (no prior `ValidateOtpQuery`), and recovery
+  `updatePassword` consumes before mutating the password. A failed password
+  write after consume still leaves the proof burned (user must restart
+  recovery). DB-level single-winner under concurrent consumes still needs
+  upstream nestjs-otp locking; this closes the application validate-then-
+  consume TOCTOU only.
+- Root resolutions bumped: `tar` → `7.5.22`, `js-yaml` → `4.3.1`,
+  `shell-quote` → `1.10.0`.
 - **Owner scoping is now on by default** (`zodResource` / `zodSubResource`).
   Any resource with an owner column (`f.owner()` or `owner: '<field>'`) gets
   an `OwnerScopeHook` on the read path in addition to the existing

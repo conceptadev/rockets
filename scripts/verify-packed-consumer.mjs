@@ -92,6 +92,8 @@ try {
   // strict resolver rejects the otherwise intentional alpha stack. Install
   // every required peer explicitly, then bypass only that upstream metadata
   // conflict; runtime imports, type checking, and app bootstrap remain gated.
+  // Remove --legacy-peer-deps when @nestjs/core@12 advertises ^12 peers
+  // (verify: npm view @nestjs/core@<ver> peerDependencies).
   run(
     'npm',
     [

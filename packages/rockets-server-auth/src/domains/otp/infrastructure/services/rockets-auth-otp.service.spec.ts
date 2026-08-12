@@ -183,4 +183,32 @@ describe(RocketsAuthOtpService.name, () => {
       );
     });
   });
+
+  describe('confirmOtp consume-null path', () => {
+    it('rejects when consume returns null and only one success when once', async () => {
+      const { service, userPort, otpPort } = makeService();
+      userPort.byEmail.mockResolvedValue({ id: 'u1' } as Awaited<
+        ReturnType<RocketsAuthUserPortService['byEmail']>
+      >);
+      let remaining = 1;
+      otpPort.validate.mockImplementation(async () => {
+        if (remaining === 0) return null;
+        remaining -= 1;
+        return { assigneeId: 'u1' };
+      });
+
+      const results = await Promise.allSettled(
+        Array.from({ length: 20 }, () =>
+          service.confirmOtp(ctx, 'a@b.com', 'shared'),
+        ),
+      );
+
+      const wins = results.filter((r) => r.status === 'fulfilled');
+      const losses = results.filter((r) => r.status === 'rejected');
+      expect(wins).toHaveLength(1);
+      expect(losses).toHaveLength(19);
+      expect(otpPort.validate).toHaveBeenCalledTimes(20);
+      expect(otpPort.validate.mock.calls[0]?.[3]).toBe(true);
+    });
+  });
 });

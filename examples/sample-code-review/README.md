@@ -30,8 +30,8 @@ The layout intentionally mirrors
 [`rockets-starter`](https://github.com/conceptadev/rockets-starter)
 (`apps/api` + `apps/web`). In this monorepo every `@concepta/*` import
 resolves to local `packages/*` via `workspace:^` — live integration
-test for in-development SDK changes. Published packages:
-`0.0.1-dev.0` on npm (`@alpha` dist-tag).
+test for in-development SDK changes. npm currently has `0.0.1-dev.0` on
+`dev`/`latest` only; `1.0.0-alpha.8` under `@alpha` is pending.
 
 ```text
 rockets/                           (SDK monorepo, source of truth)

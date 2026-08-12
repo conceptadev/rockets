@@ -702,8 +702,9 @@ flowchart TD
    rest derived"). Note: `authFeature` in the `defineModuleResource` docstring is
    still an *illustrative* name, not a real constant (the real sample is
    `sampleAuthUserResource` + `defineSampleAuth`).
-3. **`SafeCrudContextInterceptor`** — a live workaround replacing upstream's
-   global `CrudContextOverlay`; flagged for removal once upstream is mixed-app safe.
+3. ✅ **`SafeCrudContextInterceptor` removed** — upstream
+   `CrudContextOverlay.attach()` no-ops on non-CRUD handlers
+   (`@concepta/nestjs-crud` `5249672` / `8.0.0-alpha.8`).
 4. **OAuth** — federated identity persistence exists, but provider-specific
    OAuth routes are deferred from the current 1.0 scope.
 5. **`settings`** — both server and core `settings` are empty interfaces today

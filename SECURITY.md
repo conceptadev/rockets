@@ -2,14 +2,16 @@
 
 ## Supported versions
 
-Rockets is **pre-1.0** and published under the `alpha` dist-tag. Only the
-latest published alpha receives security fixes; there are no maintained
-release branches yet.
+Rockets is **pre-1.0**. The in-repo release line is `1.0.0-alpha.8`;
+publication under the `alpha` dist-tag is pending. npm currently serves an
+older `0.0.1-dev.0` drop on the `dev`/`latest` tags only — that line is
+not supported. There are no maintained release branches yet.
 
 | Version | Supported |
 |---|---|
-| latest `alpha` | yes |
-| anything older | no — upgrade to the latest alpha |
+| latest published `alpha` (once `1.0.0-alpha.8` ships) | yes |
+| `0.0.1-dev.0` on npm (`dev`/`latest`) | no — upgrade when `alpha` ships |
+| unreleased workspace builds | no |
 
 The upstream `@concepta/nestjs-*` stack this project composes is itself
 pre-release. Vulnerabilities originating there are reported upstream and
@@ -35,8 +37,9 @@ Please include:
 
 - **Acknowledgement within 3 business days.**
 - An assessment (severity and affected versions) within 10 business days.
-- A fix released on the `alpha` tag, with a GitHub Security Advisory and
-  a `CHANGELOG.md` entry crediting you unless you prefer otherwise.
+- A fix released on the supported dist-tag (once `alpha` is live), with a
+  GitHub Security Advisory and a `CHANGELOG.md` entry crediting you unless
+  you prefer otherwise.
 
 Please give us a reasonable window to release a fix before public
 disclosure.
