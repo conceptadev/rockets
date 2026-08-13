@@ -14,6 +14,8 @@ import test from 'node:test';
 
 import {
   buildPublicApiReport,
+  compareText,
+  discoverEntryPoints,
   normalizeSignature,
 } from './public-api-reports.mjs';
 
@@ -175,6 +177,47 @@ test('rejects runtime exports that have no public declaration', () => {
   } finally {
     rmSync(temporaryRoot, { recursive: true, force: true });
   }
+});
+
+test('rejects an export subpath with no resolvable .d.ts types condition', () => {
+  const temporaryRoot = mkdtempSync(join(tmpdir(), 'rockets-api-report-'));
+  const packageRoot = join(temporaryRoot, 'packages', 'fixture');
+
+  try {
+    mkdirSync(packageRoot, { recursive: true });
+    writeFileSync(
+      join(packageRoot, 'package.json'),
+      JSON.stringify({
+        name: '@concepta/fixture',
+        repository: { directory: 'packages/fixture' },
+        exports: {
+          '.': { types: './dist/index.d.ts', require: './dist/index.js' },
+          './testing': './dist/testing/index.js',
+        },
+      }),
+    );
+
+    assert.throws(
+      () => discoverEntryPoints(temporaryRoot),
+      /@concepta\/fixture export "\.\/testing" has no resolvable \.d\.ts types condition/,
+    );
+  } finally {
+    rmSync(temporaryRoot, { recursive: true, force: true });
+  }
+});
+
+test('orders report keys by code unit rather than host locale', () => {
+  // Under `cs-CZ` the "ch" digraph reverses the first pair, and under `da-DK`
+  // the case-insensitive pass reverses the second. The committed report is
+  // compared byte for byte, so ordering must not depend on the host locale.
+  assert.ok(
+    compareText(
+      'AbstractChangeMyPasswordHandler',
+      'AbstractGetUserMetadataHandler',
+    ) < 0,
+  );
+  assert.ok(compareText('RocketsEntityMeta', 'rocketsEntityMeta') < 0);
+  assert.equal(compareText('SwaggerUiModule', 'SwaggerUiModule'), 0);
 });
 
 test('normalizes internal declaration paths but preserves external package names', () => {

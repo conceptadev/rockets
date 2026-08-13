@@ -36,6 +36,9 @@ a manifest exposes them explicitly.
 - Runtime helpers have one implementation owner. Core owns the error-logging
   helpers; server and auth preserve their root export names by re-exporting
   core's declarations and runtime values.
+- `ErrorDetails` fields stay mutable. `@concepta/rockets-auth` published the
+  shape without `readonly` before core became the single owner, so restoring
+  `readonly` would narrow an already-published type.
 
 ## Declaration reports
 

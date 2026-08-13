@@ -13,6 +13,18 @@ const require = createRequire(import.meta.url);
 const allowedTypeConditions = ['types', 'import', 'require', 'default'];
 const allowedRuntimeConditions = ['require', 'default'];
 
+/**
+ * Byte-stable ordering for the committed report. `localeCompare()` follows the
+ * host's default locale, and names already in this report reorder under
+ * `cs-CZ`, `da-DK`, `tr-TR`, and `et-EE` — which would make the checked-in JSON
+ * differ per machine and fail the check for a collation artifact. Code-unit
+ * order also avoids depending on the ICU data bundled with a given Node build.
+ */
+export function compareText(left, right) {
+  if (left === right) return 0;
+  return left < right ? -1 : 1;
+}
+
 function resolveExportTarget(value, conditions, accept) {
   if (typeof value === 'string') return accept(value) ? value : null;
   if (value === null || typeof value !== 'object') return null;
@@ -42,7 +54,13 @@ export function discoverEntryPoints(repositoryRoot) {
         allowedTypeConditions,
         (target) => target.endsWith('.d.ts'),
       );
-      if (typesTarget === null) continue;
+      // Fail loudly: a subpath the report cannot inspect is still a supported
+      // import path, so silently skipping it would leave it unguarded.
+      if (typesTarget === null) {
+        throw new Error(
+          `${manifest.name} export "${subpath}" has no resolvable .d.ts types condition.`,
+        );
+      }
 
       const runtimeTarget = resolveExportTarget(
         conditions,
@@ -65,7 +83,7 @@ export function discoverEntryPoints(repositoryRoot) {
   }
 
   return entries.sort((left, right) =>
-    left.entryPoint.localeCompare(right.entryPoint),
+    compareText(left.entryPoint, right.entryPoint),
   );
 }
 
@@ -205,14 +223,12 @@ function supportingDeclarationsForEntryPoint({
       name: symbol.name,
       kind: declarationKind(checker, symbol),
       signature: declarationSignature(checker, printer, symbol, repositoryRoot),
-      referencedBy: [...referencedBy].sort((left, right) =>
-        left.localeCompare(right),
-      ),
+      referencedBy: [...referencedBy].sort(compareText),
     }))
     .sort(
       (left, right) =>
-        left.name.localeCompare(right.name) ||
-        left.signature.localeCompare(right.signature),
+        compareText(left.name, right.name) ||
+        compareText(left.signature, right.signature),
     );
 }
 
@@ -262,7 +278,7 @@ export function buildPublicApiReport(entries, repositoryRoot) {
     const declaredNames = new Set(exportedSymbols.map((symbol) => symbol.name));
     const runtimeOnly = [...runtimeNames]
       .filter((name) => !declaredNames.has(name))
-      .sort((left, right) => left.localeCompare(right));
+      .sort(compareText);
     if (runtimeOnly.length > 0) {
       throw new Error(
         `${
@@ -283,7 +299,7 @@ export function buildPublicApiReport(entries, repositoryRoot) {
           repositoryRoot,
         ),
       }))
-      .sort((left, right) => left.name.localeCompare(right.name));
+      .sort((left, right) => compareText(left.name, right.name));
 
     supportingDeclarations[entry.entryPoint] =
       supportingDeclarationsForEntryPoint({

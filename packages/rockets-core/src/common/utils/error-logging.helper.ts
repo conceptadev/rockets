@@ -1,5 +1,9 @@
 import { Logger } from '@nestjs/common';
 
+// Deliberately mutable. `@concepta/rockets-auth` published this shape without
+// `readonly` before core became the single owner and now re-exports core's
+// declaration, so adding `readonly` here would narrow an already-published
+// type. Widening it for core consumers is the safe direction.
 export interface ErrorDetails {
   errorMessage: string;
   errorStack?: string;
