@@ -10,8 +10,12 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 - **`SafeCrudContextInterceptor`** — upstream `@concepta/nestjs-crud`
   `CrudContextOverlay.attach()` already no-ops on non-CRUD handlers
   (`5249672`, shipped in `8.0.0-alpha.8`). Core and auth now use
-  `CrudModule.forRoot` / `forRootAsync` directly. Mixed-controller e2e remains
-  as the regression guard.
+  `CrudModule.forRoot` / `forRootAsync` directly. The regression guard is a
+  core e2e that mounts a plain controller next to a `defineResource` CRUD
+  resource (which boots the real `CrudContextOverlay`) and asserts the
+  non-CRUD route does not 500
+  (`rockets-core-resources.e2e-spec.ts`); every auth e2e also boots the
+  overlay via `CrudModule.forRootAsync` beside hand-written controllers.
 
 ### Documentation
 
@@ -236,19 +240,16 @@ before running the full e2e suite.
   `CrudModule.forFeature` was deleted — the upstream sparse-exports bug it
   compensated for is fixed in `@concepta/nestjs-crud 8.0.0-alpha.8`. Suites
   now run against the real framework.
-- A named e2e test pins the upstream error-message contract
-  (`'No entity defined'`) that `SafeCrudContextInterceptor` string-matches
-  on, so an upstream rewording fails loudly instead of turning non-CRUD
-  routes into 500s.
+- A core e2e mounts a plain controller next to a `defineResource` CRUD
+  resource (so the real `CrudContextOverlay` is registered) and asserts the
+  non-CRUD route stays 200, guarding the `SafeCrudContextInterceptor`
+  removal against an upstream regression.
 
 ### Known limitations
 
 - Depends on pre-release `@concepta/nestjs-* 8.0.0-alpha.x`; upstream
   interface changes between alphas can break consumers (this release
   absorbs one such change).
-- `SafeCrudContextInterceptor` still matches on the upstream exception
-  message; it is deleted once the upstream fix (concepta/nestjs-crud
-  `5249672f`) ships in a published alpha.
 - `relation.shape` projections are filtered by the response opt-in rule
   while `f.compute` schemas are only filtered for explicit
   `response: false`; unifying the two is deliberate follow-up work.

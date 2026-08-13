@@ -196,43 +196,6 @@ describe('RocketsCoreModule + defineModuleResource (e2e)', () => {
       .expect(200, { value: 'widget-pong' });
   });
 
-  /**
-   * Mixed CRUD + hand-written controllers. Upstream
-   * `CrudContextOverlay.attach()` no-ops without CRUD metadata
-   * (`@concepta/nestjs-crud` `5249672`); this route must not 500.
-   */
-  it('serves a non-CRUD controller without a 500 when mixed with CRUD', async () => {
-    const widgetFeature = defineModuleResource({
-      entities: [{ key: 'widget', entity: WidgetEntity }],
-      controllers: [WidgetController],
-      providers: [WidgetService],
-    });
-
-    const moduleRef = await Test.createTestingModule({
-      imports: [
-        RocketsCoreModule.forRoot({
-          auth: defineAuthAdapter(FeatureE2eAuthAdapter),
-          providers: [FeatureE2eAuthAdapter],
-          userMetadata: featureUserMetadataConfig,
-          repository: DEFAULT_FAKE_ADAPTER,
-          resources: [widgetFeature],
-          global: true,
-        }),
-      ],
-      providers: [{ provide: APP_GUARD, useClass: AuthServerGuard }],
-    }).compile();
-
-    app = moduleRef.createNestApplication();
-    await app.init();
-
-    const response = await request(app.getHttpServer())
-      .get('/widgets/ping')
-      .set('Authorization', 'Bearer valid');
-
-    expect(response.status).not.toBe(500);
-    expect(response.status).toBe(200);
-  });
-
   it('routes a per-entity `repository` override to a separate adapter group', async () => {
     const mixedFeature = defineModuleResource({
       entities: [
