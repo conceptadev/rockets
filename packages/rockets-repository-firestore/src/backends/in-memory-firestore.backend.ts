@@ -1,6 +1,9 @@
 import { FIRESTORE_MAX_BATCH_WRITES } from '../constants/firestore-transaction.constants';
+import { FirestoreBatchWriteLimitExceededException } from '../exceptions/firestore-batch-write-limit-exceeded.exception';
 import { FirestoreDuplicateIdException } from '../exceptions/firestore-duplicate-id.exception';
+import { FirestoreInvalidPreconditionException } from '../exceptions/firestore-invalid-precondition.exception';
 import { FirestorePreconditionFailedException } from '../exceptions/firestore-precondition-failed.exception';
+import { FirestoreTransactionReadAfterWriteException } from '../exceptions/firestore-transaction-read-after-write.exception';
 import type {
   FirestoreBackend,
   FirestoreBatchOperation,
@@ -73,14 +76,35 @@ function assertPrecondition(
   documentId: string,
   existing: StoredDocument | undefined,
   precondition: FirestoreWritePrecondition | undefined,
+  mode: 'set' | 'delete',
 ): void {
   if (precondition === undefined) {
     return;
   }
-  if (precondition.exists === true && existing === undefined) {
+  if (
+    precondition.lastUpdateTime !== undefined &&
+    precondition.exists !== undefined
+  ) {
+    throw new FirestoreInvalidPreconditionException(
+      'Firestore precondition cannot set both lastUpdateTime and exists',
+    );
+  }
+  if (precondition.exists === false) {
+    if (mode === 'set') {
+      throw new FirestoreInvalidPreconditionException(
+        'Firestore set/update precondition cannot require exists: false — use create()',
+      );
+    }
+    if (existing !== undefined) {
+      throw new FirestorePreconditionFailedException(collection, documentId);
+    }
+    return;
+  }
+  // Preconditioned set uses update semantics — document must exist.
+  if (mode === 'set' && existing === undefined) {
     throw new FirestorePreconditionFailedException(collection, documentId);
   }
-  if (precondition.exists === false && existing !== undefined) {
+  if (precondition.exists === true && existing === undefined) {
     throw new FirestorePreconditionFailedException(collection, documentId);
   }
   if (
@@ -112,9 +136,12 @@ class InMemoryFirestoreTransactionHandle implements FirestoreTransactionHandle {
     collection: string,
     documentId: string,
     data: Record<string, unknown>,
+    options?: { readonly skipExistenceRead?: boolean },
   ): Promise<void> {
-    this.assertReadable();
     const store = collectionStore(this.stores, collection);
+    if (!options?.skipExistenceRead) {
+      this.assertReadable();
+    }
     if (store.has(documentId)) {
       throw new FirestoreDuplicateIdException(collection, documentId);
     }
@@ -135,7 +162,12 @@ class InMemoryFirestoreTransactionHandle implements FirestoreTransactionHandle {
   ): Promise<void> {
     const store = collectionStore(this.stores, collection);
     const current = store.get(documentId);
-    assertPrecondition(collection, documentId, current, precondition);
+    if (precondition !== undefined && !merge) {
+      throw new FirestoreInvalidPreconditionException(
+        'Firestore preconditioned set requires merge: true (update semantics)',
+      );
+    }
+    assertPrecondition(collection, documentId, current, precondition, 'set');
     this.writes.recordWrite();
     store.set(documentId, {
       data: {
@@ -158,6 +190,7 @@ class InMemoryFirestoreTransactionHandle implements FirestoreTransactionHandle {
       documentId,
       store.get(documentId),
       precondition,
+      'delete',
     );
     this.writes.recordWrite();
     store.delete(documentId);
@@ -194,9 +227,7 @@ class InMemoryFirestoreTransactionHandle implements FirestoreTransactionHandle {
 
   private assertReadable(): void {
     if (this.wrote) {
-      throw new Error(
-        'Firestore transactions require all reads before all writes',
-      );
+      throw new FirestoreTransactionReadAfterWriteException();
     }
   }
 
@@ -259,7 +290,12 @@ export class InMemoryFirestoreBackend implements FirestoreBackend {
   ): Promise<void> {
     const store = this.rootCollectionStore(collection);
     const current = store.get(documentId);
-    assertPrecondition(collection, documentId, current, precondition);
+    if (precondition !== undefined && !merge) {
+      throw new FirestoreInvalidPreconditionException(
+        'Firestore preconditioned set requires merge: true (update semantics)',
+      );
+    }
+    assertPrecondition(collection, documentId, current, precondition, 'set');
     store.set(documentId, {
       data: {
         ...applyWriteData(current?.data, data, merge),
@@ -274,6 +310,7 @@ export class InMemoryFirestoreBackend implements FirestoreBackend {
     collection: string,
     documentId: string,
     data: Record<string, unknown>,
+    _options?: { readonly skipExistenceRead?: boolean },
   ): Promise<void> {
     const store = this.rootCollectionStore(collection);
     if (store.has(documentId)) {
@@ -297,6 +334,7 @@ export class InMemoryFirestoreBackend implements FirestoreBackend {
       documentId,
       store.get(documentId),
       precondition,
+      'delete',
     );
     store.delete(documentId);
     this.generation += 1;
@@ -356,9 +394,7 @@ export class InMemoryFirestoreBackend implements FirestoreBackend {
       return;
     }
     if (operations.length > FIRESTORE_MAX_BATCH_WRITES) {
-      throw new Error(
-        `Firestore writeBatch accepts at most ${FIRESTORE_MAX_BATCH_WRITES} operations (got ${operations.length})`,
-      );
+      throw new FirestoreBatchWriteLimitExceededException(operations.length);
     }
 
     const working = cloneStores(this.stores);

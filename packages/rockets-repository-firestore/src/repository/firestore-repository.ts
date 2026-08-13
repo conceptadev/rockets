@@ -23,6 +23,7 @@ import {
 } from '../constants/firestore-soft-delete.constants';
 import { FIRESTORE_DEFAULT_TRANSACTION_KEY } from '../constants/firestore-transaction.constants';
 import { FIRESTORE_MAX_BATCH_WRITES } from '../constants/firestore-transaction.constants';
+import { FirestoreDuplicateIdException } from '../exceptions/firestore-duplicate-id.exception';
 import type { FirestoreBackend } from '../interfaces/firestore-backend.interface';
 import type {
   FirestoreOrderBy,
@@ -48,6 +49,12 @@ export interface FirestoreRepositoryOptions<Entity extends PlainLiteralObject> {
   readonly transactionKey?: string;
   /** Derive document id from this field when `id` is omitted on create. */
   readonly uniqueDocumentIdField?: string;
+}
+
+/** Firestore-only update options (CAS precondition). */
+export interface FirestoreRepositoryUpdateOptions
+  extends RepositoryUpdateOptions {
+  readonly precondition?: FirestoreWritePrecondition;
 }
 
 type StoreClient = Pick<
@@ -83,8 +90,11 @@ export class FirestoreRepository<
   }
 
   /**
-   * Atomic field increment without a full document read-modify-write.
-   * Prefer this for counters / heartbeats outside a transaction.
+   * Atomic field increment via `FieldValue.increment`. Writes only the named
+   * field — never a full-entity merge — so concurrent updates to other fields
+   * are not clobbered. Defaults to `exists: true` so a missing document fails
+   * the write instead of being created. Pass `{ precondition: undefined }` to
+   * opt out. Returns void; re-read if you need the new counter value.
    */
   async increment(
     entity: Entity,
@@ -97,14 +107,37 @@ export class FirestoreRepository<
   ): Promise<void> {
     const client = await this.resolveClient(options?.ctx);
     const id = this.resolveId(entity);
+    const precondition =
+      options !== undefined && 'precondition' in options
+        ? options.precondition
+        : { exists: true };
     await client.set(
       this.options.collection,
       id,
       { [field]: firestoreIncrement(delta) },
       true,
-      options?.precondition,
+      precondition,
     );
     this.markDirty(options?.ctx);
+  }
+
+  /**
+   * CAS update with an explicit write precondition. Prefer this over casting
+   * through {@link update} so the precondition stays on the typed surface.
+   */
+  async updateWithPrecondition(
+    entity: Entity,
+    data: DeepPartial<Entity>,
+    options: {
+      readonly precondition: FirestoreWritePrecondition;
+      readonly ctx?: PlainLiteralObject;
+    },
+  ): Promise<Entity> {
+    return this.permeator.update.permeate(
+      data,
+      (scoped) => this.doUpdate(entity, scoped, options),
+      this.entityCtx(options.ctx),
+    );
   }
 
   protected async doFind(
@@ -176,14 +209,6 @@ export class FirestoreRepository<
       return [];
     }
 
-    if (await this.isInTransaction(options?.ctx)) {
-      const created: Entity[] = [];
-      for (const entity of entities) {
-        created.push(await this.doCreate(entity, options));
-      }
-      return created;
-    }
-
     const prepared = entities.map((entity) => {
       const id = this.resolveId(entity);
       const stored = this.toStore({ ...entity, id } as DeepPartial<Entity>, {
@@ -191,6 +216,36 @@ export class FirestoreRepository<
       });
       return { id, stored };
     });
+
+    if (await this.isInTransaction(options?.ctx)) {
+      // Firestore: all reads before all writes. Hoist existence checks, then
+      // create with skipExistenceRead so the 2nd+ item does not read-after-write.
+      const client = await this.resolveClient(options?.ctx);
+      const seen = new Set<string>();
+      for (const row of prepared) {
+        if (seen.has(row.id)) {
+          throw new FirestoreDuplicateIdException(
+            this.options.collection,
+            row.id,
+          );
+        }
+        seen.add(row.id);
+        const existing = await client.get(this.options.collection, row.id);
+        if (existing !== null) {
+          throw new FirestoreDuplicateIdException(
+            this.options.collection,
+            row.id,
+          );
+        }
+      }
+      for (const row of prepared) {
+        await client.create(this.options.collection, row.id, row.stored, {
+          skipExistenceRead: true,
+        });
+      }
+      this.markDirty(options?.ctx);
+      return prepared.map((row) => this.fromStore(row.stored));
+    }
 
     for (
       let offset = 0;
@@ -214,12 +269,18 @@ export class FirestoreRepository<
   protected async doUpdate(
     entity: Entity,
     data: DeepPartial<Entity>,
-    options?: RepositoryUpdateOptions,
+    options?: FirestoreRepositoryUpdateOptions,
   ): Promise<Entity> {
     const client = await this.resolveClient(options?.ctx);
     const id = this.resolveId(entity);
     const merged = this.toStore({ ...entity, ...data, id });
-    await client.set(this.options.collection, id, merged, true);
+    await client.set(
+      this.options.collection,
+      id,
+      merged,
+      true,
+      options?.precondition,
+    );
     this.markDirty(options?.ctx);
     return this.fromStore(merged);
   }
@@ -250,13 +311,15 @@ export class FirestoreRepository<
   ): Promise<Entity> {
     const client = await this.resolveClient(options?.ctx);
     const id = this.resolveId(entity);
-    // Replace overwrites the whole document (`merge: false`). Carrying the
-    // soft-delete state from the loaded entity keeps a live row visible and
-    // a soft-deleted row deleted; the fallback covers entities built by hand.
-    const stored = this.toStore(
-      this.carrySoftDeleteField({ ...data, id }, entity),
-      { materializeSoftDeleteNull: true },
-    );
+    // Replace overwrites the whole document (`merge: false`). Carry the
+    // soft-delete state from the loaded entity when present; otherwise read
+    // the live document so a hand-built `{ id }` entity cannot invent `null`
+    // over a soft-deleted row.
+    const payload = this.carrySoftDeleteField({ ...data, id }, entity);
+    const materializeSoftDeleteNull =
+      await this.shouldMaterializeSoftDeleteOnReplace(client, id, payload);
+
+    const stored = this.toStore(payload, { materializeSoftDeleteNull });
     await client.set(this.options.collection, id, stored, false);
     this.markDirty(options?.ctx);
     return this.fromStore(stored);
@@ -441,6 +504,38 @@ export class FirestoreRepository<
     return existing === null;
   }
 
+  /**
+   * Decide whether replace may invent `softDeleteField: null`. Never invents
+   * over an existing soft-deleted (or live) document when the caller omitted
+   * the field — including hand-built `{ id }` entities.
+   */
+  private async shouldMaterializeSoftDeleteOnReplace(
+    client: StoreClient,
+    id: string,
+    payload: DeepPartial<Entity>,
+  ): Promise<boolean> {
+    const field = this.softDeleteField;
+    if (field === undefined) {
+      return false;
+    }
+    const record: Record<string, unknown> = { ...payload };
+    if (record[field] !== undefined) {
+      return false;
+    }
+    const existing = await client.get(this.options.collection, id);
+    if (existing === null) {
+      return true;
+    }
+    if (existing[field] !== undefined) {
+      // Mutate payload via carry path: stash store value onto the object
+      // the caller already built so toStore persists it.
+      (payload as Record<string, unknown>)[field] = existing[field];
+      return false;
+    }
+    // Legacy doc missing the field — materialize so it stays listable.
+    return true;
+  }
+
   private carrySoftDeleteField(
     target: DeepPartial<Entity>,
     source: Entity,
@@ -450,11 +545,12 @@ export class FirestoreRepository<
       return target;
     }
     const next: Record<string, unknown> = { ...target };
-    if (field in next) {
+    // Explicit `undefined` (common from DTO mapping) is "not provided".
+    if (next[field] !== undefined) {
       return target;
     }
     const current: Record<string, unknown> = { ...source };
-    if (!(field in current)) {
+    if (current[field] === undefined) {
       return target;
     }
     next[field] = current[field];

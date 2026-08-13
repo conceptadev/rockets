@@ -1,5 +1,7 @@
 import { createHash } from 'node:crypto';
 
+import { FirestoreInvalidDocumentIdException } from '../exceptions/firestore-invalid-document-id.exception';
+
 /**
  * Derive a Firestore document id from a single unique field value.
  *
@@ -10,7 +12,7 @@ export function deriveFirestoreDocumentId(
   options?: { readonly hashPrefix?: string },
 ): string {
   if (typeof value !== 'string' || value.trim().length === 0) {
-    throw new Error(
+    throw new FirestoreInvalidDocumentIdException(
       'Firestore uniqueDocumentIdField must be a non-empty string on create',
     );
   }
@@ -24,10 +26,16 @@ export function deriveFirestoreDocumentId(
 }
 
 function isSafeFirestoreDocumentId(value: string): boolean {
-  if (value.length > 1500) {
+  if (Buffer.byteLength(value, 'utf8') > 1500) {
     return false;
   }
-  if (value.includes('/') || value.includes('..')) {
+  if (value === '.' || value === '..') {
+    return false;
+  }
+  if (value.includes('/')) {
+    return false;
+  }
+  if (/^__.*__$/.test(value)) {
     return false;
   }
   return true;

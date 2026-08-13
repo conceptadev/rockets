@@ -22,49 +22,70 @@ export interface ReconciledOrderBy {
 }
 
 /**
- * Firestore requires the first orderBy to be the inequality / range field.
- * Prepend or promote that field; flag when local re-sort is required.
+ * Firestore requires every inequality / range field to appear in orderBy,
+ * with those fields leading. Promote missing ones; flag when local re-sort
+ * is required.
  */
 export function reconcileOrderByWithInequality(
   branch: FirestoreQueryBranch,
   orderBy: readonly FirestoreOrderBy[] | undefined,
 ): ReconciledOrderBy {
-  const inequalityField = findInequalityField(branch);
-  if (inequalityField === undefined) {
+  const inequalityFields = findInequalityFields(branch);
+  if (inequalityFields.length === 0) {
     return { serverOrderBy: orderBy, clientReorder: false };
   }
 
   const requested = orderBy ?? [];
   if (requested.length === 0) {
     return {
-      serverOrderBy: [{ field: inequalityField, direction: 'asc' }],
+      serverOrderBy: inequalityFields.map((field) => ({
+        field,
+        direction: 'asc' as const,
+      })),
       clientReorder: false,
     };
   }
 
-  const first = requested[0];
-  if (first !== undefined && first.field === inequalityField) {
+  // Firestore only requires inequality fields to lead; their relative order
+  // among themselves is free. Keep the caller's order when the leading set
+  // matches so limit() pushdown stays available.
+  const leading = requested
+    .slice(0, inequalityFields.length)
+    .map((clause) => clause.field);
+  const inequalitySet = new Set(inequalityFields);
+  const leadingMatch =
+    leading.length === inequalityFields.length &&
+    leading.every((field) => inequalitySet.has(field)) &&
+    inequalityFields.every((field) => leading.includes(field));
+  if (leadingMatch) {
     return { serverOrderBy: requested, clientReorder: false };
   }
 
-  const withoutDup = requested.filter(
-    (clause) => clause.field !== inequalityField,
+  const remainder = requested.filter(
+    (clause) => !inequalitySet.has(clause.field),
   );
-  const promoted: FirestoreOrderBy = {
-    field: inequalityField,
-    direction: 'asc',
-  };
+  const promoted: FirestoreOrderBy[] = inequalityFields.map((field) => {
+    const existing = requested.find((clause) => clause.field === field);
+    return {
+      field,
+      direction: existing?.direction ?? 'asc',
+    };
+  });
+
   return {
-    serverOrderBy: [promoted, ...withoutDup],
+    serverOrderBy: [...promoted, ...remainder],
     clientReorder: true,
   };
 }
 
-function findInequalityField(branch: FirestoreQueryBranch): string | undefined {
+function findInequalityFields(branch: FirestoreQueryBranch): string[] {
+  const fields: string[] = [];
+  const seen = new Set<string>();
   for (const filter of branch.filters) {
-    if (INEQUALITY_OPS.has(filter.op)) {
-      return filter.field;
+    if (INEQUALITY_OPS.has(filter.op) && !seen.has(filter.field)) {
+      seen.add(filter.field);
+      fields.push(filter.field);
     }
   }
-  return undefined;
+  return fields;
 }

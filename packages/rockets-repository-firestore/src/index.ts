@@ -3,6 +3,7 @@ export {
   FirestoreRepository,
   isFirestoreRepository,
 } from './repository/firestore-repository';
+export type { FirestoreRepositoryUpdateOptions } from './repository/firestore-repository';
 export type { FirestoreProviderOptions } from './interfaces/firestore-provider-options.interface';
 export type {
   FirestoreBackend,
@@ -37,10 +38,14 @@ export { adminStreamBackfillSoftDeleteNull } from './utils/admin-stream-backfill
 export type { AdminStreamBackfillSoftDeleteNullOptions } from './utils/admin-stream-backfill-soft-delete-null';
 export { FirestoreDuplicateIdException } from './exceptions/firestore-duplicate-id.exception';
 export { FirestorePreconditionFailedException } from './exceptions/firestore-precondition-failed.exception';
+export { FirestoreInvalidPreconditionException } from './exceptions/firestore-invalid-precondition.exception';
+export { FirestoreInvalidDocumentIdException } from './exceptions/firestore-invalid-document-id.exception';
+export { FirestoreBatchWriteLimitExceededException } from './exceptions/firestore-batch-write-limit-exceeded.exception';
 export { FirestoreTransactionAbortedException } from './exceptions/firestore-transaction-aborted.exception';
 export { FirestoreTransactionBackendMismatchException } from './exceptions/firestore-transaction-backend-mismatch.exception';
 export { FirestoreTransactionRetryUnsupportedException } from './exceptions/firestore-transaction-retry-unsupported.exception';
 export { FirestoreTransactionWriteLimitExceededException } from './exceptions/firestore-transaction-write-limit-exceeded.exception';
+export { FirestoreTransactionReadAfterWriteException } from './exceptions/firestore-transaction-read-after-write.exception';
 export { InMemoryFirestoreBackend } from './backends/in-memory-firestore.backend';
 export { AdminFirestoreBackend } from './backends/admin-firestore.backend';
 export { defineFirestoreRepository } from './integration/define-firestore-repository';

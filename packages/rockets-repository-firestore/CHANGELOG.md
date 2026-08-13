@@ -18,9 +18,11 @@
     does not validate indexes, so a green suite does not prove this.
 
   The adapter writes the marker on `create`, on `upsert` that lands on a new
-  document, and on `replace` (carrying the previous state). `update` and
-  `upsert` over an existing document never invent it, so soft-deleted rows are
-  not resurrected.
+  document, and on `replace` when the document is missing / legacy. `replace`
+  preserves deletion when the loaded entity (or a live read for hand-built
+  entities / `dateRemoved: undefined`) carries the marker. `update` and
+  `upsert` over an existing document never invent it, so soft-deleted rows
+  are not resurrected.
 
 ### Added
 
@@ -38,15 +40,32 @@
   across backends; the ambient handle is bound to its backend.
 - **Atomic increment / precondition (P1-2).** `firestoreIncrement(delta)`
   sentinel + optional `FirestoreWritePrecondition` on `set`/`delete`;
-  `FirestoreRepository.increment(...)` helper.
-- **Deterministic document ids (P1-3 tier 1).** `uniqueDocumentIdField` /
-  single-column `uniqueConstraints`; composite unique refuses at boot.
-- **Inequality orderBy reconcile (P1-5).** First `orderBy` promoted to the
-  inequality field; mismatched caller order falls back to local sort
-  (no wrong server pagination).
+  `FirestoreRepository.increment(...)` writes only the counter field
+  (defaults to `exists: true`, returns `void`; pass
+  `{ precondition: undefined }` to opt out). `updateWithPrecondition`
+  exposes CAS without casting. Public typed exceptions:
+  `FirestoreInvalidPreconditionException`,
+  `FirestoreInvalidDocumentIdException`,
+  `FirestoreBatchWriteLimitExceededException`.
+- **Deterministic document ids (P1-3 tier 1).** Manual opt-in via
+  `uniqueDocumentIdField` or single-column `uniqueConstraints` on
+  `forFeature` registration (composite unique refuses at boot). Document ids
+  are validated against Firestore rules (UTF-8 byte length, `.` / `..`,
+  `__*__`, `/`). Zod / `db.unique` schema metadata is **not** auto-wired yet
+  — `f.string({ unique: true })` is ignored until a follow-up wires schema →
+  provider options.
+- **Inequality orderBy reconcile (P1-5).** Every inequality field is
+  promoted ahead of the caller's `orderBy` when the leading set does not
+  already contain them (any order among inequalities keeps `limit()`
+  pushdown); otherwise local sort (full matching set read).
 - **WriteBatch for createMany/deleteMany (P1-6).** Atomic batches of ≤500
   outside transactions; sequential inside ambient txs. Enforced
-  `FIRESTORE_MAX_TRANSACTION_WRITES` (500) on transaction handles.
+  `FIRESTORE_MAX_TRANSACTION_WRITES` / `FIRESTORE_MAX_BATCH_WRITES` (500).
+  Multi-create batch duplicate collisions report document id `"unknown"`
+  (Admin does not name the colliding op). Soft-deletable reads after a write
+  in a transaction throw `FirestoreTransactionReadAfterWriteException`.
+  Transactional `createMany` hoists existence reads before writes so N≥2
+  does not hit read-after-write.
 - `adminStreamBackfillSoftDeleteNull` (BulkWriter stream) for large
   collections; `backfillSoftDeleteNull` remains for small / in-memory.
 - Full `WhereOperator` coverage (EQ, NE, comparisons, IN, NIN, null checks,

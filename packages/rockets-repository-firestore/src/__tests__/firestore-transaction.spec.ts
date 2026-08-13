@@ -20,6 +20,7 @@ import type { FirestoreBackend } from '../interfaces/firestore-backend.interface
 import type { FirestoreTransactionHandle } from '../interfaces/firestore-transaction-handle.interface';
 import { FirestoreDuplicateIdException } from '../exceptions/firestore-duplicate-id.exception';
 import { FirestoreTransactionBackendMismatchException } from '../exceptions/firestore-transaction-backend-mismatch.exception';
+import { FirestoreTransactionReadAfterWriteException } from '../exceptions/firestore-transaction-read-after-write.exception';
 import { FirestoreTransactionWriteLimitExceededException } from '../exceptions/firestore-transaction-write-limit-exceeded.exception';
 import { isFirestoreRepository } from '../repository/firestore-repository';
 import { FIRESTORE_MAX_TRANSACTION_WRITES } from '../constants/firestore-transaction.constants';
@@ -54,6 +55,12 @@ function stubBackend(
 class AccountEntity {
   id!: string;
   balance!: number;
+}
+
+class SoftAccountEntity {
+  id!: string;
+  balance!: number;
+  dateRemoved!: Date | null;
 }
 
 function firestoreModuleFor(
@@ -135,7 +142,7 @@ describe('Firestore transactions (P1-1)', () => {
         await tx.set('accounts-raw', 'a', { id: 'a', balance: 50 }, false);
         await tx.get('accounts-raw', 'a');
       }),
-    ).rejects.toThrow(/all reads before all writes/);
+    ).rejects.toBeInstanceOf(FirestoreTransactionReadAfterWriteException);
   });
 
   it('imperative bridge refuses a Firestore retry instead of empty commit', async () => {
@@ -393,7 +400,7 @@ describe('Firestore transactions (P1-1)', () => {
         );
         await tx.create('accounts-read-order', 'b', { id: 'b', balance: 2 });
       }),
-    ).rejects.toThrow(/all reads before all writes/);
+    ).rejects.toBeInstanceOf(FirestoreTransactionReadAfterWriteException);
   });
 
   it('runInFirestoreTransaction surfaces duplicate create as FirestoreDuplicateIdException', async () => {
@@ -482,5 +489,159 @@ describe('Firestore transactions (P1-1)', () => {
     await expect(
       scope.run({}, async () => 'ok', { propagation: 'MANDATORY' }),
     ).rejects.toThrow();
+  });
+
+  it('soft-deletable upsert before a write succeeds inside a transaction', async () => {
+    const wired = await Test.createTestingModule({
+      imports: [
+        RepositoryModule.forRoot({}),
+        RepositoryModule.forFeature({
+          module: {
+            name: FirestoreRepositoryModule.name,
+            forFeature: (entities: RepositoryProviderOptions[]) =>
+              FirestoreRepositoryModule.forFeature(
+                entities.map((entity) => ({
+                  key: entity.key,
+                  entity: entity.entity,
+                  collection: 'soft-accounts-upsert-ok',
+                  softDeleteField: 'dateRemoved',
+                })),
+                { backend },
+              ),
+          },
+          entities: [{ key: 'soft-account', entity: SoftAccountEntity }],
+        }),
+      ],
+    }).compile();
+
+    const repo = wired.get<RepositoryInterface<SoftAccountEntity>>(
+      getDynamicRepositoryToken('soft-account'),
+    );
+    expect(isFirestoreRepository(repo)).toBe(true);
+    if (!isFirestoreRepository(repo)) {
+      throw new Error('expected FirestoreRepository');
+    }
+
+    await repo.transaction(async () => {
+      await repo.upsert({ id: 'a', balance: 1 });
+      await repo.update(
+        { id: 'a', balance: 1, dateRemoved: null },
+        { balance: 2 },
+      );
+    });
+
+    await expect(
+      repo.findOne({ where: Where.eq('id', 'a') }),
+    ).resolves.toMatchObject({ balance: 2, dateRemoved: null });
+  });
+
+  it('soft-deletable upsert after a write throws FIRESTORE_TRANSACTION_READ_AFTER_WRITE', async () => {
+    const wired = await Test.createTestingModule({
+      imports: [
+        RepositoryModule.forRoot({}),
+        RepositoryModule.forFeature({
+          module: {
+            name: FirestoreRepositoryModule.name,
+            forFeature: (entities: RepositoryProviderOptions[]) =>
+              FirestoreRepositoryModule.forFeature(
+                entities.map((entity) => ({
+                  key: entity.key,
+                  entity: entity.entity,
+                  collection: 'soft-accounts-upsert-raw',
+                  softDeleteField: 'dateRemoved',
+                })),
+                { backend },
+              ),
+          },
+          entities: [{ key: 'soft-account', entity: SoftAccountEntity }],
+        }),
+      ],
+    }).compile();
+
+    const repo = wired.get<RepositoryInterface<SoftAccountEntity>>(
+      getDynamicRepositoryToken('soft-account'),
+    );
+    expect(isFirestoreRepository(repo)).toBe(true);
+    if (!isFirestoreRepository(repo)) {
+      throw new Error('expected FirestoreRepository');
+    }
+
+    await expect(
+      repo.transaction(async () => {
+        await repo.create({ id: 'a', balance: 1 });
+        await repo.upsert({ id: 'a', balance: 2 });
+      }),
+    ).rejects.toBeInstanceOf(FirestoreTransactionReadAfterWriteException);
+  });
+
+  it('createMany inside a transaction hoists existence reads before writes', async () => {
+    const wired = await Test.createTestingModule({
+      imports: [
+        RepositoryModule.forRoot({}),
+        RepositoryModule.forFeature({
+          module: firestoreModuleFor(backend, 'accounts-create-many-tx'),
+          entities: [{ key: 'account', entity: AccountEntity }],
+        }),
+      ],
+    }).compile();
+
+    const repo = wired.get<RepositoryInterface<AccountEntity>>(
+      getDynamicRepositoryToken('account'),
+    );
+    expect(isFirestoreRepository(repo)).toBe(true);
+    if (!isFirestoreRepository(repo)) {
+      throw new Error('expected FirestoreRepository');
+    }
+
+    await repo.transaction(async () => {
+      await repo.createMany([
+        { id: 'a', balance: 1 },
+        { id: 'b', balance: 2 },
+        { id: 'c', balance: 3 },
+      ]);
+    });
+
+    await expect(repo.find()).resolves.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: 'a', balance: 1 }),
+        expect.objectContaining({ id: 'b', balance: 2 }),
+        expect.objectContaining({ id: 'c', balance: 3 }),
+      ]),
+    );
+  });
+
+  it('createMany inside a transaction rejects a duplicate id before writing', async () => {
+    const wired = await Test.createTestingModule({
+      imports: [
+        RepositoryModule.forRoot({}),
+        RepositoryModule.forFeature({
+          module: firestoreModuleFor(backend, 'accounts-create-many-dup'),
+          entities: [{ key: 'account', entity: AccountEntity }],
+        }),
+      ],
+    }).compile();
+
+    const repo = wired.get<RepositoryInterface<AccountEntity>>(
+      getDynamicRepositoryToken('account'),
+    );
+    expect(isFirestoreRepository(repo)).toBe(true);
+    if (!isFirestoreRepository(repo)) {
+      throw new Error('expected FirestoreRepository');
+    }
+
+    await repo.create({ id: 'a', balance: 1 });
+
+    await expect(
+      repo.transaction(async () => {
+        await repo.createMany([
+          { id: 'b', balance: 2 },
+          { id: 'a', balance: 3 },
+        ]);
+      }),
+    ).rejects.toBeInstanceOf(FirestoreDuplicateIdException);
+
+    await expect(
+      repo.findOne({ where: Where.eq('id', 'b') }),
+    ).resolves.toBeNull();
   });
 });

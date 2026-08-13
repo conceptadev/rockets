@@ -47,6 +47,7 @@ export interface FirestoreBackend {
     collection: string,
     documentId: string,
     data: Record<string, unknown>,
+    options?: { readonly skipExistenceRead?: boolean },
   ): Promise<void>;
   set(
     collection: string,

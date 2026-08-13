@@ -778,6 +778,86 @@ describe(FirestoreRepositoryModule.name, () => {
     ]);
   });
 
+  it('does not resurrect when replace passes dateRemoved: undefined', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'soft-widget',
+              entity: SoftWidgetEntity,
+              collection: 'soft-widgets-replace-undefined',
+              softDeleteField: 'dateRemoved',
+            },
+          ],
+          { backend: new InMemoryFirestoreBackend() },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<SoftWidgetEntity>>(
+      getDynamicRepositoryToken('soft-widget'),
+    );
+
+    await repo.create({ id: 'gone', title: 'Gone' });
+    const created = await repo.findOne({ where: Where.eq('id', 'gone') });
+    const removed = await repo.softDelete(created!);
+
+    await repo.replace(removed, {
+      id: 'gone',
+      title: 'Replaced',
+      dateRemoved: undefined,
+    });
+
+    await expect(repo.find()).resolves.toEqual([]);
+    await expect(repo.find({ withDeleted: true })).resolves.toEqual([
+      expect.objectContaining({
+        id: 'gone',
+        dateRemoved: expect.any(Date),
+      }),
+    ]);
+  });
+
+  it('does not resurrect when replace uses a hand-built entity without dateRemoved', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'soft-widget',
+              entity: SoftWidgetEntity,
+              collection: 'soft-widgets-replace-handbuilt',
+              softDeleteField: 'dateRemoved',
+            },
+          ],
+          { backend: new InMemoryFirestoreBackend() },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<SoftWidgetEntity>>(
+      getDynamicRepositoryToken('soft-widget'),
+    );
+
+    await repo.create({ id: 'gone', title: 'Gone' });
+    const created = await repo.findOne({ where: Where.eq('id', 'gone') });
+    await repo.softDelete(created!);
+
+    await repo.replace({ id: 'gone' } as SoftWidgetEntity, {
+      id: 'gone',
+      title: 'Replaced',
+    });
+
+    await expect(repo.find()).resolves.toEqual([]);
+    await expect(repo.find({ withDeleted: true })).resolves.toEqual([
+      expect.objectContaining({
+        id: 'gone',
+        title: 'Replaced',
+        dateRemoved: expect.any(Date),
+      }),
+    ]);
+  });
+
   it('backfillSoftDeleteNull restores legacy docs missing the soft-delete field', async () => {
     const backend = new InMemoryFirestoreBackend();
     await backend.set('soft-widgets-backfill', 'legacy', {

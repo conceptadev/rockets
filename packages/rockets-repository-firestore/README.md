@@ -71,15 +71,22 @@ a Firestore retry (throws `FIRESTORE_TRANSACTION_RETRY_UNSUPPORTED`) instead of
 committing an empty write set. The bridge logs a one-time warning on first use.
 Do not use it for hot paths that expect retries.
 
-Firestore limits a single transaction to **500 writes**; the adapter does not
-split oversized units. Inside a transaction there is no `count()` aggregation
-— `count` / `findAndCount` read every matching document and hold locks on it,
-so avoid unbounded counts in a transactional path.
+Firestore limits a single transaction to **500 writes** and refuses the
+501st write with `FIRESTORE_TRANSACTION_WRITE_LIMIT_EXCEEDED`. Inside a
+transaction there is no `count()` aggregation — `count` / `findAndCount`
+read every matching document and hold locks on it, so avoid unbounded counts
+in a transactional path.
 
-On a **soft-deletable** entity, `create` and `upsert` read the document before
-writing (to decide the soft-delete marker without resurrecting a deleted row).
-Firestore requires all reads before all writes inside a transaction, so call
-them before any write in the same transactional unit.
+On a **soft-deletable** entity, `create` and `upsert` (and `replace` when the
+caller omits the soft-delete field) read the document before writing so a
+deleted row is not resurrected. Firestore requires all reads before all
+writes inside a transaction — call those ops before any write in the same
+unit, or the adapter throws `FIRESTORE_TRANSACTION_READ_AFTER_WRITE`.
+
+Outside a transaction, soft-deletable `upsert` is still two round trips
+(read then set). A concurrent soft-delete between them can resurrect the
+row; wrap contended upserts in `repo.transaction()` / `runInFirestoreTransaction`
+when that race matters.
 
 Nesting `runInFirestoreTransaction` (or `repo.transaction()`) on the same
 backend joins the ambient transaction; nesting across two different backends
@@ -88,13 +95,37 @@ span databases. A repository bound to another backend does not join the
 ambient handle — its writes go through its own backend, outside that
 transaction.
 
-Atomic `createMany` / `deleteMany` (WriteBatch) are still follow-ups
-(issue #44 P1-6). Soft-delete exclusion is pushed server-side as
-`dateRemoved == null` (P1-4); **create** materializes an explicit `null` on
-write. Update/upsert/replace never invent that null (would resurrect
-soft-deleted docs). Legacy docs that omit the field need a one-time
-`backfillSoftDeleteNull` (or Admin stream) before they appear in default
-lists.
+`createMany` / `deleteMany` use atomic `WriteBatch` (≤500 ops per batch)
+outside transactions; inside a transaction they stay sequential on the ambient
+handle. Soft-delete exclusion is pushed server-side as `dateRemoved == null`
+(P1-4). Use `firestoreIncrement(delta)` / `repo.increment(...)` for counters
+without a full RMW transaction — `increment` writes only the counter field,
+returns `void`, and defaults to `exists: true` (missing documents fail with
+`FirestorePreconditionFailedException`). Pass `{ precondition: undefined }`
+to opt out of the exists check. Use `updateWithPrecondition(...)` for
+exists-guarded / `lastUpdateTime` updates (document `updateTime` is not yet
+exposed on entity reads — `lastUpdateTime` CAS requires a time you already
+hold). Inequality queries promote every inequality field ahead of the
+requested `orderBy` when the leading set does not already contain them
+(any order among inequalities keeps `limit()` pushdown, but each order
+needs its own composite index). When promotion changes the leading set,
+`limit()` is **not** pushed and the matching set is read then sorted
+client-side (cost scales with matches, not the page size).
+
+`update` without a precondition uses `set({ merge: true })` (nested maps
+deep-merge). `updateWithPrecondition` uses Admin `update()` (map-valued
+fields are replaced wholesale; dotted keys are field paths).
+
+Tier-1 uniqueness: set `uniqueDocumentIdField` (or a single-column
+`uniqueConstraints` entry) on the `forFeature` / entity registration row —
+composite unique refuses at boot. Zod / `db.unique` schema metadata is not
+auto-wired yet; `f.string({ unique: true })` alone does nothing.
+
+`createMany` chunks larger than 500 are **not** atomic across chunks.
+
+Legacy docs that omit the soft-delete field need a one-time
+`backfillSoftDeleteNull` or `adminStreamBackfillSoftDeleteNull` before they
+appear in default lists.
 
 Default lists that combine soft-delete with other filters / `orderBy` need
 **composite indexes**. The emulator does not validate indexes — production
@@ -228,8 +259,11 @@ naming both supported column names.
 The adapter materializes an explicit `null` for that field so default lists can
 use a server-side `== null` filter (and keep `limit` / `count` on Firestore):
 on `create`, on an `upsert` that lands on a **new** document, and on `replace`
-(which carries the previous state so a live row stays live and a deleted row
-stays deleted). `update` and `upsert` over an **existing** document never
+when the document is missing or legacy (no field yet). `replace` carries the
+soft-delete value from the loaded entity when present; if the entity is
+hand-built (`{ id }` only) or the DTO passes `dateRemoved: undefined`,
+`replace` reads the live document and preserves a soft-deleted marker instead
+of inventing `null`. `update` and `upsert` over an **existing** document never
 invent it — under `merge: true` that would resurrect soft-deleted documents.
 
 Documents written outside the adapter without the field will not appear in
@@ -300,10 +334,9 @@ Document-id `IN` queries accept at most 500 ids and use one Admin SDK `getAll`
 request. The direct-document path fetches all requested ids before applying
 `skip` and `take`, so a page limit does not reduce document reads.
 
-`createMany()` writes documents sequentially and is not atomic: if a later
-document id already exists, earlier documents from the same call remain
-created. Atomic batched creation is intentionally deferred to a future backend
-contract change.
+`createMany` / `deleteMany` commit through `WriteBatch` (atomic per ≤500-op
+chunk). Chunks larger than 500 are committed sequentially — a later chunk
+failure leaves earlier chunks applied.
 
 ---
 

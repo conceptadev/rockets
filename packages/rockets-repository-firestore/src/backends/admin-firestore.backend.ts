@@ -2,17 +2,18 @@ import { getApp } from 'firebase-admin/app';
 import {
   FieldValue,
   getFirestore,
-  Timestamp,
   type DocumentData,
   type Firestore,
-  type Precondition,
   type Query,
   type Transaction,
 } from 'firebase-admin/firestore';
 
 import { FIRESTORE_MAX_BATCH_WRITES } from '../constants/firestore-transaction.constants';
+import { FirestoreBatchWriteLimitExceededException } from '../exceptions/firestore-batch-write-limit-exceeded.exception';
 import { FirestoreDuplicateIdException } from '../exceptions/firestore-duplicate-id.exception';
+import { FirestoreInvalidPreconditionException } from '../exceptions/firestore-invalid-precondition.exception';
 import { FirestorePreconditionFailedException } from '../exceptions/firestore-precondition-failed.exception';
+import { FirestoreTransactionReadAfterWriteException } from '../exceptions/firestore-transaction-read-after-write.exception';
 import type {
   FirestoreBackend,
   FirestoreBatchOperation,
@@ -32,28 +33,61 @@ import { applyFirestoreFilters } from '../repository/firestore-row-filter';
 import { sortFirestoreRows } from '../repository/firestore-sort';
 import { normalizeFirestoreValue } from '../repository/firestore-value';
 import { FirestoreTransactionWriteCounter } from '../transaction/firestore-transaction-write-counter';
+import { toAdminPrecondition } from '../utils/firestore-precondition.util';
 
 const GET_ALL_CHUNK = 300;
 
+const GRPC_NOT_FOUND = 5;
 const GRPC_ALREADY_EXISTS = 6;
 const GRPC_FAILED_PRECONDITION = 9;
 
-function isAlreadyExistsError(error: unknown): boolean {
+function isGrpcCode(error: unknown, code: number): boolean {
   return (
     typeof error === 'object' &&
     error !== null &&
     'code' in error &&
-    error.code === GRPC_ALREADY_EXISTS
+    error.code === code
   );
 }
 
+function isAlreadyExistsError(error: unknown): boolean {
+  return isGrpcCode(error, GRPC_ALREADY_EXISTS);
+}
+
 function isFailedPreconditionError(error: unknown): boolean {
+  return isGrpcCode(error, GRPC_FAILED_PRECONDITION);
+}
+
+function isNotFoundError(error: unknown): boolean {
+  return isGrpcCode(error, GRPC_NOT_FOUND);
+}
+
+function isPreconditionedWriteFailure(
+  error: unknown,
+  precondition: FirestoreWritePrecondition | undefined,
+): boolean {
   return (
-    typeof error === 'object' &&
-    error !== null &&
-    'code' in error &&
-    error.code === GRPC_FAILED_PRECONDITION
+    isFailedPreconditionError(error) ||
+    (precondition !== undefined && isNotFoundError(error))
   );
+}
+
+function isReadAfterWriteError(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+  return /all reads before all writes/i.test(error.message);
+}
+
+async function mapTransactionRead<T>(fn: () => Promise<T>): Promise<T> {
+  try {
+    return await fn();
+  } catch (error) {
+    if (isReadAfterWriteError(error)) {
+      throw new FirestoreTransactionReadAfterWriteException();
+    }
+    throw error;
+  }
 }
 
 function serialise(data: Record<string, unknown>): Record<string, unknown> {
@@ -66,23 +100,6 @@ function serialise(data: Record<string, unknown>): Record<string, unknown> {
     }
   }
   return next;
-}
-
-function toAdminPrecondition(
-  precondition: FirestoreWritePrecondition | undefined,
-): Precondition | undefined {
-  if (precondition === undefined) {
-    return undefined;
-  }
-  if (precondition.lastUpdateTime !== undefined) {
-    return {
-      lastUpdateTime: Timestamp.fromDate(precondition.lastUpdateTime),
-    };
-  }
-  if (precondition.exists !== undefined) {
-    return { exists: precondition.exists };
-  }
-  return undefined;
 }
 
 function normalise(
@@ -111,24 +128,29 @@ class AdminFirestoreTransactionHandle implements FirestoreTransactionHandle {
     collection: string,
     documentId: string,
   ): Promise<Record<string, unknown> | null> {
-    const snap = await this.transaction.get(
-      this.db.collection(collection).doc(documentId),
-    );
-    if (!snap.exists) {
-      return null;
-    }
-    return normalise(snap.data(), documentId);
+    return mapTransactionRead(async () => {
+      const snap = await this.transaction.get(
+        this.db.collection(collection).doc(documentId),
+      );
+      if (!snap.exists) {
+        return null;
+      }
+      return normalise(snap.data(), documentId);
+    });
   }
 
   async create(
     collection: string,
     documentId: string,
     data: Record<string, unknown>,
+    options?: { readonly skipExistenceRead?: boolean },
   ): Promise<void> {
     const ref = this.db.collection(collection).doc(documentId);
-    const snap = await this.transaction.get(ref);
-    if (snap.exists) {
-      throw new FirestoreDuplicateIdException(collection, documentId);
+    if (!options?.skipExistenceRead) {
+      const snap = await mapTransactionRead(() => this.transaction.get(ref));
+      if (snap.exists) {
+        throw new FirestoreDuplicateIdException(collection, documentId);
+      }
     }
     this.writes.recordWrite();
     this.transaction.create(ref, serialise(data));
@@ -143,9 +165,14 @@ class AdminFirestoreTransactionHandle implements FirestoreTransactionHandle {
   ): Promise<void> {
     this.writes.recordWrite();
     const ref = this.db.collection(collection).doc(documentId);
-    const adminPrecondition = toAdminPrecondition(precondition);
+    const adminPrecondition = toAdminPrecondition(precondition, 'set');
     // Precondition is only valid on update/delete in the Admin SDK.
     if (adminPrecondition) {
+      if (!merge) {
+        throw new FirestoreInvalidPreconditionException(
+          'Firestore preconditioned set requires merge: true (update semantics)',
+        );
+      }
       this.transaction.update(ref, serialise(data), adminPrecondition);
       return;
     }
@@ -159,7 +186,7 @@ class AdminFirestoreTransactionHandle implements FirestoreTransactionHandle {
   ): Promise<void> {
     this.writes.recordWrite();
     const ref = this.db.collection(collection).doc(documentId);
-    const adminPrecondition = toAdminPrecondition(precondition);
+    const adminPrecondition = toAdminPrecondition(precondition, 'delete');
     if (adminPrecondition) {
       this.transaction.delete(ref, adminPrecondition);
     } else {
@@ -168,6 +195,15 @@ class AdminFirestoreTransactionHandle implements FirestoreTransactionHandle {
   }
 
   async queryBranch(
+    collection: string,
+    options: FirestoreBranchQueryOptions,
+  ): Promise<Record<string, unknown>[]> {
+    return mapTransactionRead(() =>
+      this.queryBranchUnmapped(collection, options),
+    );
+  }
+
+  private async queryBranchUnmapped(
     collection: string,
     options: FirestoreBranchQueryOptions,
   ): Promise<Record<string, unknown>[]> {
@@ -296,15 +332,23 @@ export class AdminFirestoreBackend implements FirestoreBackend {
   ): Promise<void> {
     try {
       const ref = this.db().collection(collection).doc(documentId);
-      const adminPrecondition = toAdminPrecondition(precondition);
+      const adminPrecondition = toAdminPrecondition(precondition, 'set');
       // Precondition is only valid on update/delete in the Admin SDK.
       if (adminPrecondition) {
+        if (!merge) {
+          throw new FirestoreInvalidPreconditionException(
+            'Firestore preconditioned set requires merge: true (update semantics)',
+          );
+        }
         await ref.update(serialise(data), adminPrecondition);
         return;
       }
       await ref.set(serialise(data), { merge });
     } catch (error) {
-      if (isFailedPreconditionError(error)) {
+      if (error instanceof FirestoreInvalidPreconditionException) {
+        throw error;
+      }
+      if (isPreconditionedWriteFailure(error, precondition)) {
         throw new FirestorePreconditionFailedException(collection, documentId);
       }
       throw error;
@@ -315,6 +359,7 @@ export class AdminFirestoreBackend implements FirestoreBackend {
     collection: string,
     documentId: string,
     data: Record<string, unknown>,
+    _options?: { readonly skipExistenceRead?: boolean },
   ): Promise<void> {
     try {
       await this.db()
@@ -336,14 +381,14 @@ export class AdminFirestoreBackend implements FirestoreBackend {
   ): Promise<void> {
     try {
       const ref = this.db().collection(collection).doc(documentId);
-      const adminPrecondition = toAdminPrecondition(precondition);
+      const adminPrecondition = toAdminPrecondition(precondition, 'delete');
       if (adminPrecondition) {
         await ref.delete(adminPrecondition);
       } else {
         await ref.delete();
       }
     } catch (error) {
-      if (isFailedPreconditionError(error)) {
+      if (isPreconditionedWriteFailure(error, precondition)) {
         throw new FirestorePreconditionFailedException(collection, documentId);
       }
       throw error;
@@ -442,9 +487,7 @@ export class AdminFirestoreBackend implements FirestoreBackend {
       return;
     }
     if (operations.length > FIRESTORE_MAX_BATCH_WRITES) {
-      throw new Error(
-        `Firestore writeBatch accepts at most ${FIRESTORE_MAX_BATCH_WRITES} operations (got ${operations.length})`,
-      );
+      throw new FirestoreBatchWriteLimitExceededException(operations.length);
     }
 
     const db = this.db();
@@ -462,10 +505,18 @@ export class AdminFirestoreBackend implements FirestoreBackend {
       await batch.commit();
     } catch (error) {
       if (isAlreadyExistsError(error)) {
-        const createOp = operations.find((op) => op.op === 'create');
+        const createOps = operations.filter((op) => op.op === 'create');
+        // Admin batch.commit does not say which create collided; only name
+        // the id when the batch had a single create.
+        if (createOps.length === 1) {
+          throw new FirestoreDuplicateIdException(
+            createOps[0].collection,
+            createOps[0].id,
+          );
+        }
         throw new FirestoreDuplicateIdException(
-          createOp?.collection ?? 'unknown',
-          createOp?.id ?? 'unknown',
+          createOps[0]?.collection ?? 'unknown',
+          'unknown',
         );
       }
       throw error;

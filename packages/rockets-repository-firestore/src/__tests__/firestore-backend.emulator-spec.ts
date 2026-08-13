@@ -13,6 +13,7 @@ import {
 import { AdminFirestoreBackend } from '../backends/admin-firestore.backend';
 import { InMemoryFirestoreBackend } from '../backends/in-memory-firestore.backend';
 import { FirestoreDuplicateIdException } from '../exceptions/firestore-duplicate-id.exception';
+import { FirestorePreconditionFailedException } from '../exceptions/firestore-precondition-failed.exception';
 import type { FirestoreBackend } from '../interfaces/firestore-backend.interface';
 import type { FirestoreBranchQueryOptions } from '../interfaces/firestore-backend.interface';
 import { FirestoreRepositoryModule } from '../firestore-repository.module';
@@ -434,5 +435,125 @@ describe('Firestore repository ambient transaction (emulator)', () => {
       await repo.findOne({ where: Where.eq('id', 'counter') }),
     ).toMatchObject({ value: 10 });
     expect(bodyRuns).toBeGreaterThanOrEqual(10);
+  });
+
+  it('repo.increment: sibling fields survive and missing docs fail closed', async () => {
+    class CounterEntity {
+      id!: string;
+      name!: string;
+      value!: number;
+    }
+
+    const collection = `tx-repo-increment-${randomUUID()}`;
+    const wired = await Test.createTestingModule({
+      imports: [
+        RepositoryModule.forRoot({}),
+        RepositoryModule.forFeature({
+          module: {
+            name: FirestoreRepositoryModule.name,
+            forFeature: (entities: RepositoryProviderOptions[]) =>
+              FirestoreRepositoryModule.forFeature(
+                entities.map((entity) => ({
+                  key: entity.key,
+                  entity: entity.entity,
+                  collection,
+                })),
+                { backend: admin },
+              ),
+          },
+          entities: [{ key: 'counter', entity: CounterEntity }],
+        }),
+      ],
+    }).compile();
+
+    const repo = wired.get<RepositoryInterface<CounterEntity>>(
+      getDynamicRepositoryToken('counter'),
+    );
+    expect(isFirestoreRepository(repo)).toBe(true);
+    if (!isFirestoreRepository(repo)) {
+      throw new Error('expected FirestoreRepository');
+    }
+
+    await expect(
+      repo.increment({ id: 'missing', name: 'A', value: 0 }, 'value', 1),
+    ).rejects.toBeInstanceOf(FirestorePreconditionFailedException);
+
+    const created = await repo.create({ id: 'c1', name: 'A', value: 5 });
+    await admin.set(collection, 'c1', { name: 'B' }, true);
+    await repo.increment(created, 'value', 3);
+
+    expect(await admin.get(collection, 'c1')).toEqual({
+      id: 'c1',
+      name: 'B',
+      value: 8,
+    });
+  });
+
+  it('Admin soft-delete: create/upsert/replace keep visibility rules', async () => {
+    class SoftWidgetEntity {
+      id!: string;
+      title!: string;
+      dateRemoved!: Date | null;
+    }
+
+    const collection = `soft-parity-${randomUUID()}`;
+    const wired = await Test.createTestingModule({
+      imports: [
+        RepositoryModule.forRoot({}),
+        RepositoryModule.forFeature({
+          module: {
+            name: FirestoreRepositoryModule.name,
+            forFeature: (entities: RepositoryProviderOptions[]) =>
+              FirestoreRepositoryModule.forFeature(
+                entities.map((entity) => ({
+                  key: entity.key,
+                  entity: entity.entity,
+                  collection,
+                  softDeleteField: 'dateRemoved',
+                })),
+                { backend: admin },
+              ),
+          },
+          entities: [{ key: 'soft-widget', entity: SoftWidgetEntity }],
+        }),
+      ],
+    }).compile();
+
+    const repo = wired.get<RepositoryInterface<SoftWidgetEntity>>(
+      getDynamicRepositoryToken('soft-widget'),
+    );
+
+    await repo.create({ id: 'live', title: 'Live' });
+    await expect(repo.find()).resolves.toEqual([
+      expect.objectContaining({ id: 'live', dateRemoved: null }),
+    ]);
+
+    await repo.upsert({ id: 'fresh', title: 'Fresh' });
+    await expect(
+      repo.findOne({ where: Where.eq('id', 'fresh') }),
+    ).resolves.toMatchObject({ dateRemoved: null });
+
+    const doomed = await repo.findOne({ where: Where.eq('id', 'live') });
+    await repo.softDelete(doomed!);
+    await expect(repo.find()).resolves.toEqual([
+      expect.objectContaining({ id: 'fresh' }),
+    ]);
+
+    await repo.replace({ id: 'live' } as SoftWidgetEntity, {
+      id: 'live',
+      title: 'Still gone',
+    });
+    await expect(repo.find()).resolves.toEqual([
+      expect.objectContaining({ id: 'fresh' }),
+    ]);
+    await expect(repo.find({ withDeleted: true })).resolves.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'live',
+          title: 'Still gone',
+          dateRemoved: expect.any(Date),
+        }),
+      ]),
+    );
   });
 });
