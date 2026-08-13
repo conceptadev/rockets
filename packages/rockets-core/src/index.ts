@@ -26,7 +26,8 @@ export {
   type AuthPublicMetadata,
   type AuthPublicOptions,
 } from './decorators/auth-public.decorator';
-// Canonical authenticated-user param decorator (reads `request.user`).
+// The canonical authenticated-user decorator is explicitly re-exported from
+// the shared-infrastructure section below.
 
 // Auth user-context overlay — re-exported so downstream layers consume it
 // through core instead of depending on `@concepta/nestjs-authentication`.
@@ -179,8 +180,6 @@ export type {
 } from './domain/interfaces/rockets-resource-definition.interface';
 export type { CrudResource } from './domain/interfaces/rockets-resource-bundle.interface';
 
-// Swagger (re-exported so consumers don't need @concepta/rockets-app directly)
-
 // Options interfaces
 export type { RocketsCoreOptionsInterface } from './infrastructure/config/interfaces/rockets-core-options.interface';
 export type {
@@ -235,8 +234,37 @@ export { UpsertUserMetadataHandler } from './application/commands/handlers/upser
 export { GetUserMetadataQuery } from './application/queries/impl/get-user-metadata.query';
 export { AbstractGetUserMetadataHandler } from './application/queries/handlers/abstract-get-user-metadata.handler';
 export { GetUserMetadataHandler } from './application/queries/handlers/get-user-metadata.handler';
-// Shared infrastructure (formerly @concepta/rockets-common)
-export * from './common';
+// Shared infrastructure (formerly @concepta/rockets-common). Keep this list
+// explicit so every new root-level compatibility commitment is reviewed.
+export {
+  AuthUser,
+  ByIdInterface,
+  CreateOneInterface,
+  CrudCommandHandlerBase,
+  CrudQueryHandlerBase,
+  getErrorDetails,
+  InjectCrudAdapter,
+  InjectDynamicRepository,
+  logAndGetErrorDetails,
+  RemoveOneInterface,
+  SwaggerUiModule,
+  SwaggerUiService,
+  UpdateOneInterface,
+  deriveEntityKey,
+  resolveEntityKey,
+  stripUndefined,
+  whitelistedFromDto,
+} from './common';
+export type {
+  CrudCommandInterface,
+  CrudQueryInterface,
+  ErrorDetails,
+  RocketsRepositoryModuleInterface,
+  SchemaEntityCompiler,
+  SchemaEntityCompilerOptions,
+  SwaggerUiOptionsInterface,
+  SwaggerUiSettingsInterface,
+} from './common';
 
 // Constants
 export {

@@ -51,7 +51,7 @@ export interface UserMetadataConfigInterface<
   entity: Type;
   /**
    * UserMetadata create DTO class
-   * Must extend RocketsAuthUserMetadataCreateDtoInterface
+   * Must extend RocketsAuthUserMetadataCreatableInterface.
    */
   createDto: new () => TCreateDto;
   /**

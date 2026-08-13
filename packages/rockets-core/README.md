@@ -48,8 +48,11 @@ and re-exports the symbols apps need (`InjectDynamicRepository`,
 - You want a complete built-in auth system (signup, login, OTP, admin) → use
   `@concepta/rockets-auth`.
 
-Both packages above re-export almost everything in core, so you usually depend
-on one of them — not on core directly.
+`@concepta/rockets` re-exports a curated application-facing subset of core;
+advanced context overlays, low-level CRUD compatibility types, Swagger module
+registration, and hook-construction utilities remain core-only.
+`@concepta/rockets-auth` is a sibling identity bundle rather than a core
+facade. Depend on core directly when you use one of those lower-level seams.
 
 ---
 

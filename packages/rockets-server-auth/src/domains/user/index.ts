@@ -10,7 +10,10 @@ export { RocketsAuthUserEntityInterface } from './interfaces/rockets-auth-user-e
 export { RocketsAuthUserCreatableInterface } from './interfaces/rockets-auth-user-creatable.interface';
 export { RocketsAuthUserUpdatableInterface } from './interfaces/rockets-auth-user-updatable.interface';
 export { RocketsAuthUserMetadataEntityInterface } from './interfaces/rockets-auth-user-metadata-entity.interface';
-export { RocketsAuthUserMetadataCreatableInterface as RocketsAuthUserMetadataCreateDtoInterface } from './interfaces/rockets-auth-user-metadata-creatable.interface';
+export type {
+  RocketsAuthUserMetadataCreatableInterface,
+  RocketsAuthUserMetadataCreatableInterface as RocketsAuthUserMetadataCreateDtoInterface,
+} from './interfaces/rockets-auth-user-metadata-creatable.interface';
 
 // DDD Domain Exceptions
 export {

@@ -47,6 +47,9 @@ still come from core (which re-exports the `@concepta/nestjs-*` motors).
   `AuthorizedUser` with `userRoles`.
 - **Access control** re-exports from `@concepta/nestjs-access-control` so app
   code single-sources from this package.
+- **Error helpers** (`getErrorDetails`, `logAndGetErrorDetails`, and
+  `ErrorDetails`) re-export the core-owned implementation so logging behavior
+  has one runtime owner across both composition paths.
 - **Customisation seams**: per-controller decorator extras
   (`controller.classDecorators`, `controller.routes[*].decorators`), abstract
   handler classes for every admin operation, port overrides for every
@@ -455,6 +458,11 @@ Saved here so consumers don't dual-import from
 `CanAccess`, `AccessControlOptionsInterface`, `AccessControlContextInterface`.
 Other upstream symbols (e.g. `AccessControlServiceInterface`) are not
 re-exported — import them directly from `@concepta/nestjs-access-control`.
+
+`RocketsAuthUserMetadataCreateDtoInterface` remains as a legacy source alias
+for `RocketsAuthUserMetadataCreatableInterface` during the pre-1.0 namespace
+migration. New code must use the canonical name; remove the alias only with an
+explicit migration note and reviewed API-report change.
 
 ### Known limitations
 

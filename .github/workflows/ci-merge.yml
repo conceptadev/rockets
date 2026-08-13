@@ -31,6 +31,8 @@ jobs:
         run: yarn --immutable
       - name: Build
         run: yarn build
+      - name: Public API reports
+        run: yarn api:report
       - name: Linting
         run: yarn lint:all
       - name: Typecheck tests
