@@ -165,7 +165,14 @@ export class FirestoreRepository<
   ): Promise<Entity> {
     const client = await this.resolveClient(options?.ctx);
     const id = this.resolveId(entity);
-    const stored = this.toStore({ ...entity, id } as DeepPartial<Entity>);
+    // An upsert that lands on a NEW document writes with `merge: true`, so
+    // without the marker the row has no soft-delete field at all and
+    // `field == null` never matches it — invisible to every default list.
+    // Materializing unconditionally would resurrect soft-deleted rows, so
+    // the state of the existing document decides.
+    const stored = this.toStore({ ...entity, id } as DeepPartial<Entity>, {
+      materializeSoftDeleteNull: await this.isMissingDocument(client, id),
+    });
     await client.set(this.options.collection, id, stored, true);
     this.markDirty(options?.ctx);
     return this.fromStore(stored);
@@ -178,7 +185,13 @@ export class FirestoreRepository<
   ): Promise<Entity> {
     const client = await this.resolveClient(options?.ctx);
     const id = this.resolveId(entity);
-    const stored = this.toStore({ ...data, id });
+    // Replace overwrites the whole document (`merge: false`). Carrying the
+    // soft-delete state from the loaded entity keeps a live row visible and
+    // a soft-deleted row deleted; the fallback covers entities built by hand.
+    const stored = this.toStore(
+      this.carrySoftDeleteField({ ...data, id }, entity),
+      { materializeSoftDeleteNull: true },
+    );
     await client.set(this.options.collection, id, stored, false);
     this.markDirty(options?.ctx);
     return this.fromStore(stored);
@@ -253,8 +266,11 @@ export class FirestoreRepository<
   private async resolveTransactionHandle(
     ctx?: PlainLiteralObject,
   ): Promise<FirestoreTransactionHandle | null> {
-    // Callback-scoped API (runInFirestoreTransaction) — preferred under contention.
-    const ambient = getAmbientFirestoreTransaction();
+    // Callback-scoped API (runInFirestoreTransaction) — preferred under
+    // contention. Only joined when the ambient transaction belongs to THIS
+    // repository's backend; a handle from another backend targets another
+    // database, so this repository writes through its own backend instead.
+    const ambient = getAmbientFirestoreTransaction(this.options.backend);
     if (ambient !== undefined) {
       return ambient;
     }
@@ -275,7 +291,7 @@ export class FirestoreRepository<
   private markDirty(ctx?: PlainLiteralObject): void {
     // Ambient callback transactions commit when runTransaction returns —
     // no dirty flag to track.
-    if (getAmbientFirestoreTransaction() !== undefined) {
+    if (getAmbientFirestoreTransaction(this.options.backend) !== undefined) {
       return;
     }
     const context = AppContextHost.from(ctx);
@@ -319,6 +335,42 @@ export class FirestoreRepository<
       );
     }
     return this.softDeleteField;
+  }
+
+  /**
+   * True when the soft-delete marker has to be invented for `id`. Skips the
+   * extra read when the entity is not soft-deletable or already carries the
+   * field.
+   */
+  private async isMissingDocument(
+    client: StoreClient,
+    id: string,
+  ): Promise<boolean> {
+    if (this.softDeleteField === undefined) {
+      return false;
+    }
+    const existing = await client.get(this.options.collection, id);
+    return existing === null;
+  }
+
+  private carrySoftDeleteField(
+    target: DeepPartial<Entity>,
+    source: Entity,
+  ): DeepPartial<Entity> {
+    const field = this.softDeleteField;
+    if (field === undefined) {
+      return target;
+    }
+    const next: Record<string, unknown> = { ...target };
+    if (field in next) {
+      return target;
+    }
+    const current: Record<string, unknown> = { ...source };
+    if (!(field in current)) {
+      return target;
+    }
+    next[field] = current[field];
+    return next as DeepPartial<Entity>;
   }
 
   private resolveId(entity: DeepPartial<Entity> | Entity): string {

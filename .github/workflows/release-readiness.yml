@@ -3,8 +3,10 @@ name: release-readiness
 # Gate-only: ci-pr-test already runs build/lint/typecheck/unit/e2e on every
 # pull request. This workflow adds only the release gates it does not cover.
 on:
+  # Runs on every pull request, including stacked ones — the Firestore emulator
+  # suite is the only gate for the Admin SDK path, so skipping it on non-main
+  # bases meant those claims shipped unverified.
   pull_request:
-    branches: ['main']
   push:
     branches: ['main']
 

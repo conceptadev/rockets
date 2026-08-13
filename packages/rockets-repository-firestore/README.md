@@ -72,7 +72,21 @@ committing an empty write set. The bridge logs a one-time warning on first use.
 Do not use it for hot paths that expect retries.
 
 Firestore limits a single transaction to **500 writes**; the adapter does not
-split oversized units.
+split oversized units. Inside a transaction there is no `count()` aggregation
+— `count` / `findAndCount` read every matching document and hold locks on it,
+so avoid unbounded counts in a transactional path.
+
+On a **soft-deletable** entity, `create` and `upsert` read the document before
+writing (to decide the soft-delete marker without resurrecting a deleted row).
+Firestore requires all reads before all writes inside a transaction, so call
+them before any write in the same transactional unit.
+
+Nesting `runInFirestoreTransaction` (or `repo.transaction()`) on the same
+backend joins the ambient transaction; nesting across two different backends
+throws `FIRESTORE_TRANSACTION_BACKEND_MISMATCH`, since a transaction cannot
+span databases. A repository bound to another backend does not join the
+ambient handle — its writes go through its own backend, outside that
+transaction.
 
 Atomic `createMany` / `deleteMany` (WriteBatch) are still follow-ups
 (issue #44 P1-6). Soft-delete exclusion is pushed server-side as
@@ -211,10 +225,12 @@ override — name the column `dateRemoved` or `deletedAt` on the entity class.
 If neither name is present, `delete()` calls throw at runtime with a message
 naming both supported column names.
 
-On **create**, the adapter materializes an explicit `null` for that field when
-absent so default lists can use a server-side `== null` filter (and keep
-`limit` / `count` on Firestore). Update / upsert / replace never invent that
-null — that would resurrect soft-deleted documents under `merge: true`.
+The adapter materializes an explicit `null` for that field so default lists can
+use a server-side `== null` filter (and keep `limit` / `count` on Firestore):
+on `create`, on an `upsert` that lands on a **new** document, and on `replace`
+(which carries the previous state so a live row stays live and a deleted row
+stays deleted). `update` and `upsert` over an **existing** document never
+invent it — under `merge: true` that would resurrect soft-deleted documents.
 
 Documents written outside the adapter without the field will not appear in
 default lists until backfilled:

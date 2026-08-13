@@ -683,6 +683,101 @@ describe(FirestoreRepositoryModule.name, () => {
     ]);
   });
 
+  it('keeps an upserted new document visible in default lists', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'soft-widget',
+              entity: SoftWidgetEntity,
+              collection: 'soft-widgets-upsert-visible',
+              softDeleteField: 'dateRemoved',
+            },
+          ],
+          { backend: new InMemoryFirestoreBackend() },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<SoftWidgetEntity>>(
+      getDynamicRepositoryToken('soft-widget'),
+    );
+
+    const created = await repo.upsert({ id: 'fresh', title: 'Fresh' });
+    expect(created).toMatchObject({ id: 'fresh', dateRemoved: null });
+
+    await expect(repo.find()).resolves.toEqual([
+      expect.objectContaining({ id: 'fresh' }),
+    ]);
+    await expect(repo.count()).resolves.toBe(1);
+  });
+
+  it('keeps a live document visible when replace omits the soft-delete field', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'soft-widget',
+              entity: SoftWidgetEntity,
+              collection: 'soft-widgets-replace-visible',
+              softDeleteField: 'dateRemoved',
+            },
+          ],
+          { backend: new InMemoryFirestoreBackend() },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<SoftWidgetEntity>>(
+      getDynamicRepositoryToken('soft-widget'),
+    );
+
+    await repo.create({ id: 'live', title: 'Live' });
+    const live = await repo.findOne({ where: Where.eq('id', 'live') });
+
+    await repo.replace(live!, { id: 'live', title: 'Replaced' });
+
+    await expect(repo.find()).resolves.toEqual([
+      expect.objectContaining({ id: 'live', title: 'Replaced' }),
+    ]);
+    await expect(repo.count()).resolves.toBe(1);
+  });
+
+  it('keeps a soft-deleted document deleted when replace omits the field', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'soft-widget',
+              entity: SoftWidgetEntity,
+              collection: 'soft-widgets-replace-deleted',
+              softDeleteField: 'dateRemoved',
+            },
+          ],
+          { backend: new InMemoryFirestoreBackend() },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<SoftWidgetEntity>>(
+      getDynamicRepositoryToken('soft-widget'),
+    );
+
+    await repo.create({ id: 'gone', title: 'Gone' });
+    const created = await repo.findOne({ where: Where.eq('id', 'gone') });
+    const removed = await repo.softDelete(created!);
+
+    await repo.replace(removed, { id: 'gone', title: 'Replaced' });
+
+    await expect(repo.find()).resolves.toEqual([]);
+    await expect(repo.find({ withDeleted: true })).resolves.toEqual([
+      expect.objectContaining({ id: 'gone', title: 'Replaced' }),
+    ]);
+  });
+
   it('backfillSoftDeleteNull restores legacy docs missing the soft-delete field', async () => {
     const backend = new InMemoryFirestoreBackend();
     await backend.set('soft-widgets-backfill', 'legacy', {

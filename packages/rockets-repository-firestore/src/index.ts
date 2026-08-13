@@ -20,6 +20,7 @@ export { backfillSoftDeleteNull } from './utils/backfill-soft-delete-null';
 export type { BackfillSoftDeleteNullOptions } from './utils/backfill-soft-delete-null';
 export { FirestoreDuplicateIdException } from './exceptions/firestore-duplicate-id.exception';
 export { FirestoreTransactionAbortedException } from './exceptions/firestore-transaction-aborted.exception';
+export { FirestoreTransactionBackendMismatchException } from './exceptions/firestore-transaction-backend-mismatch.exception';
 export { FirestoreTransactionRetryUnsupportedException } from './exceptions/firestore-transaction-retry-unsupported.exception';
 export { InMemoryFirestoreBackend } from './backends/in-memory-firestore.backend';
 export { AdminFirestoreBackend } from './backends/admin-firestore.backend';

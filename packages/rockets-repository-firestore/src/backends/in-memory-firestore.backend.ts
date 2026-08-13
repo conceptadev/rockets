@@ -54,6 +54,11 @@ class InMemoryFirestoreTransactionHandle implements FirestoreTransactionHandle {
     documentId: string,
     data: Record<string, unknown>,
   ): Promise<void> {
+    // The Admin handle reads the document before enqueueing the create (to
+    // raise the adapter's 409 instead of a commit-time gRPC error), so this
+    // counts as a read and Firestore rejects it after any write. Enforce the
+    // same rule here or the double hides an INVALID_ARGUMENT in production.
+    this.assertReadable();
     const store = collectionStore(this.stores, collection);
     if (store.has(documentId)) {
       throw new FirestoreDuplicateIdException(collection, documentId);

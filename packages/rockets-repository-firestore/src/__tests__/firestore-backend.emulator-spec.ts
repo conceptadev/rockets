@@ -171,6 +171,20 @@ describe('Firestore backend emulator transactions', () => {
       ).rejects.toBeInstanceOf(FirestoreDuplicateIdException);
     });
 
+    it(`${label}: transactional create after a write is rejected`, async () => {
+      const collection = `tx-read-order-${label}-${randomUUID()}`;
+
+      await expect(
+        backend.runTransaction(async (tx) => {
+          await tx.set(collection, 'a', { id: 'a', v: 1 }, false);
+          await tx.create(collection, 'b', { id: 'b', v: 2 });
+        }),
+      ).rejects.toThrow();
+
+      expect(await backend.get(collection, 'a')).toBeNull();
+      expect(await backend.get(collection, 'b')).toBeNull();
+    });
+
     it(`${label}: transactional queryBranch respects take/limit`, async () => {
       const collection = `tx-limit-${label}-${randomUUID()}`;
       for (let i = 0; i < 5; i += 1) {

@@ -1,8 +1,9 @@
 name: ci-pr-test
 
 on:
+  # No base-branch filter: stacked PRs (branch → branch → main) must be gated
+  # too. Filtering on 'main' left them with zero checks.
   pull_request:
-    branches: ['main']
 
 jobs:
   build:

@@ -12,10 +12,17 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
   `FIRESTORE_BACKEND` DI export, `transactionFactories` + `options.ctx`
   threading, transactional duplicate-id → 409 mapping, and `limit()` on
   transactional queries. Contended RMW must use the callback API.
-- Firestore soft-delete server pushdown (issue #44 P1-4): materialize
-  explicit `null` on create only; default lists/counts use `field == null`.
+- Firestore soft-delete server pushdown (issue #44 P1-4): default lists/counts
+  use `field == null`, restoring `limit()` / aggregation. **Requires a data
+  backfill and composite indexes before deploy** — see the package CHANGELOG.
   Includes `backfillSoftDeleteNull` + `firestore.indexes.example.json`.
-  Nested `runInFirestoreTransaction` joins the ambient handle.
+  Nested `runInFirestoreTransaction` joins the ambient handle on the same
+  backend and refuses to span backends.
+
+### Changed
+
+- CI: `ci-pr-test` and `release-readiness` no longer filter on a `main` base,
+  so stacked pull requests are gated (including the Firestore emulator suite).
 
 ### Removed
 

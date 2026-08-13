@@ -19,6 +19,7 @@ import { runInFirestoreTransaction } from '../transaction/run-in-firestore-trans
 import type { FirestoreBackend } from '../interfaces/firestore-backend.interface';
 import type { FirestoreTransactionHandle } from '../interfaces/firestore-transaction-handle.interface';
 import { FirestoreDuplicateIdException } from '../exceptions/firestore-duplicate-id.exception';
+import { FirestoreTransactionBackendMismatchException } from '../exceptions/firestore-transaction-backend-mismatch.exception';
 import { isFirestoreRepository } from '../repository/firestore-repository';
 
 class AccountEntity {
@@ -288,6 +289,59 @@ describe('Firestore transactions (P1-1)', () => {
 
     expect(result).toBe('nested-ok');
     expect(outerStarts).toBe(1);
+  });
+
+  it('nested runInFirestoreTransaction refuses a different backend', async () => {
+    const other = new InMemoryFirestoreBackend();
+
+    await expect(
+      runInFirestoreTransaction(backend, async () =>
+        runInFirestoreTransaction(other, async () => 'should not run'),
+      ),
+    ).rejects.toBeInstanceOf(FirestoreTransactionBackendMismatchException);
+  });
+
+  it('a repository on another backend does not join the ambient transaction', async () => {
+    const other = new InMemoryFirestoreBackend();
+    const wired = await Test.createTestingModule({
+      imports: [
+        RepositoryModule.forRoot({}),
+        RepositoryModule.forFeature({
+          module: firestoreModuleFor(other, 'accounts-other-backend'),
+          entities: [{ key: 'account', entity: AccountEntity }],
+        }),
+      ],
+    }).compile();
+
+    const repo = wired.get<RepositoryInterface<AccountEntity>>(
+      getDynamicRepositoryToken('account'),
+    );
+
+    await expect(
+      runInFirestoreTransaction(backend, async () => {
+        await repo.create({ id: 'a', balance: 1 });
+        throw new Error('roll back the ambient transaction');
+      }),
+    ).rejects.toThrow('roll back the ambient transaction');
+
+    // Written through its own backend, so the ambient rollback cannot undo it.
+    await expect(
+      repo.findOne({ where: Where.eq('id', 'a') }),
+    ).resolves.toMatchObject({ balance: 1 });
+  });
+
+  it('transactional create after a write is rejected like the Admin handle', async () => {
+    await expect(
+      backend.runTransaction(async (tx) => {
+        await tx.set(
+          'accounts-read-order',
+          'a',
+          { id: 'a', balance: 1 },
+          false,
+        );
+        await tx.create('accounts-read-order', 'b', { id: 'b', balance: 2 });
+      }),
+    ).rejects.toThrow(/all reads before all writes/);
   });
 
   it('runInFirestoreTransaction surfaces duplicate create as FirestoreDuplicateIdException', async () => {

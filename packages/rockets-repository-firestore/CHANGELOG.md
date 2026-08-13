@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+### Breaking — data migration required
+
+- **Soft-delete exclusion moved server-side (issue #44 P1-4).** Default
+  `find` / `count` now send `softDeleteField == null` to Firestore instead of
+  filtering in memory, which restores `limit()` and the `count()`
+  aggregation for every soft-deletable entity. Two consequences:
+  - **Existing documents that do not carry the field become invisible** to
+    default lists (Firestore equality never matches a missing field). Run
+    `backfillSoftDeleteNull` (or the Admin `stream()` + `BulkWriter` recipe in
+    the README) **before** deploying this version.
+  - Lists that combine soft delete with another predicate or `orderBy` now
+    need a **composite index**; without it Firestore returns
+    `FAILED_PRECONDITION`. See `firestore.indexes.example.json`. The emulator
+    does not validate indexes, so a green suite does not prove this.
+
+  The adapter writes the marker on `create`, on `upsert` that lands on a new
+  document, and on `replace` (carrying the previous state). `update` and
+  `upsert` over an existing document never invent it, so soft-deleted rows are
+  not resurrected.
+
 ### Added
 
 - **Transactions (issue #44 P1-1).** `FirestoreBackend.runTransaction` for
@@ -14,13 +34,10 @@
   `options.ctx` into the transaction. Transactional `create` maps duplicate
   ids to `FirestoreDuplicateIdException`; transactional queries push
   `limit()`.
-- Soft-delete server pushdown (issue #44 P1-4): create materializes
-  explicit `null`; default lists/counts use `field == null` on the server so
-  `limit()` / aggregation stay enabled. Update/upsert do **not** invent null
-  (avoids silent resurrection). Nested `runInFirestoreTransaction` joins the
-  ambient handle. Ships `backfillSoftDeleteNull` +
-  `firestore.indexes.example.json` for the migration/index work production
-  needs after this change.
+- Nested `runInFirestoreTransaction` joins the ambient handle on the same
+  backend and throws `FIRESTORE_TRANSACTION_BACKEND_MISMATCH` across
+  backends; the ambient handle is bound to its backend, so a repository on
+  another backend never joins it.
 - Full `WhereOperator` coverage (EQ, NE, comparisons, IN, NIN, null checks,
   string matchers, BETWEEN) with Firestore-native or post-filter execution.
 - OR support via `RepositoryAdapter.toDnf()`.
