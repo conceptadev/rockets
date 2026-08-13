@@ -243,10 +243,10 @@ of it.
 - `scripts/`: checked release, package-contract, repository-integrity, and
   integration helpers. Prefer the existing Vitest project/pool configuration
   over custom test-runner plumbing.
-- `etc/public-api-reports.json`: reviewed declaration-level contract for every
-  published TypeScript entry point. Run `yarn api:report` after
-  public export or signature changes; update it only after reviewing the
-  compatibility impact and documentation or migration note.
+- `api/public-api-reports.json`: reviewed declaration-level contract for every
+  published TypeScript entry point, alongside `api/public-api-policy.md`. Run
+  `yarn api:report` after public export or signature changes; update it only
+  after reviewing the compatibility impact and documentation or migration note.
 - `.context/`: shared scratchpad for multi-agent collaboration (gitignored).
 
 ## Rules Reference

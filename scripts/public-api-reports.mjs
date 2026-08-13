@@ -332,7 +332,7 @@ export function runPublicApiReport({
   repositoryRoot = defaultRepositoryRoot,
   update = false,
 } = {}) {
-  const reportsPath = join(repositoryRoot, 'etc', 'public-api-reports.json');
+  const reportsPath = join(repositoryRoot, 'api', 'public-api-reports.json');
   const entries = discoverEntryPoints(repositoryRoot);
   const missing = entries.flatMap((entry) =>
     [entry.typesPath, entry.runtimePath]

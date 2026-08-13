@@ -30,7 +30,7 @@ function checkedReport() {
   });
   cachedReport = JSON.parse(
     readFileSync(
-      join(repositoryRoot, 'etc', 'public-api-reports.json'),
+      join(repositoryRoot, 'api', 'public-api-reports.json'),
       'utf8',
     ),
   );

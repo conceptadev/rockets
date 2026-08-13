@@ -453,7 +453,7 @@ the following advanced seams from `@concepta/rockets-core` directly:
   `ERROR_MESSAGE_FALLBACK`, `deriveEntityKey`, `resolveEntityKey`,
   `stripUndefined`, and `whitelistedFromDto`.
 
-The repository's [public API policy](../../etc/public-api-policy.md) and
+The repository's [public API policy](../../api/public-api-policy.md) and
 committed declaration report guard this boundary. Any intentional addition,
 removal, or signature change must update the report and its documentation or
 migration note in the same change.

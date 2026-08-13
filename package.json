@@ -113,7 +113,7 @@
     "watch": "yarn build && ./node_modules/.bin/tsc --build --watch",
     "lint": "eslint \"packages/*/src/**/*.{ts,js,json}\" \"examples/sample-server-auth/{src,test}/**/*.{ts,js}\"",
     "lint:fix": "yarn lint --fix",
-    "lint:md": "markdownlint '*.md' packages/**/*.md examples/**/*.md etc/**/*.md --ignore '**/docs/code-analysis/**'",
+    "lint:md": "markdownlint '*.md' packages/**/*.md examples/**/*.md api/**/*.md --ignore '**/docs/code-analysis/**'",
     "lint:md:fix": "yarn lint:md --fix",
     "lint:all": "yarn lint && yarn lint:md && yarn check:governance",
     "check:governance": "node scripts/check-repository-governance.mjs",
