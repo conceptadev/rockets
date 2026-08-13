@@ -1,12 +1,22 @@
 import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { deleteApp, getApps, initializeApp } from 'firebase-admin/app';
+import { Test } from '@nestjs/testing';
+import {
+  getDynamicRepositoryToken,
+  RepositoryModule,
+  Where,
+  type RepositoryInterface,
+  type RepositoryProviderOptions,
+} from '@concepta/nestjs-repository';
 
 import { AdminFirestoreBackend } from '../backends/admin-firestore.backend';
 import { InMemoryFirestoreBackend } from '../backends/in-memory-firestore.backend';
 import { FirestoreDuplicateIdException } from '../exceptions/firestore-duplicate-id.exception';
 import type { FirestoreBackend } from '../interfaces/firestore-backend.interface';
 import type { FirestoreBranchQueryOptions } from '../interfaces/firestore-backend.interface';
+import { FirestoreRepositoryModule } from '../firestore-repository.module';
+import { isFirestoreRepository } from '../repository/firestore-repository';
 
 describe('Firestore backend emulator parity', () => {
   const collection = `parity-${randomUUID()}`;
@@ -335,5 +345,80 @@ describe('Firestore backend emulator transactions', () => {
     const lease = await admin.get(collection, 'lease');
     expect(typeof lease?.owner).toBe('string');
     expect(String(lease?.owner).startsWith('worker-')).toBe(true);
+  });
+});
+
+describe('Firestore repository ambient transaction (emulator)', () => {
+  const admin = new AdminFirestoreBackend();
+
+  beforeAll(() => {
+    if (!process.env.FIRESTORE_EMULATOR_HOST) {
+      throw new Error(
+        'Run this suite with `corepack yarn test:firestore-emulator`.',
+      );
+    }
+    if (getApps().length === 0) initializeApp({ projectId: 'demo-rockets' });
+  });
+
+  afterAll(async () => {
+    for (const app of getApps()) await deleteApp(app);
+  });
+
+  it('repo.transaction: 10 contended writers incrementing one counter land on 10', async () => {
+    class CounterEntity {
+      id!: string;
+      value!: number;
+    }
+
+    const collection = `tx-repo-counter-${randomUUID()}`;
+    const wired = await Test.createTestingModule({
+      imports: [
+        RepositoryModule.forRoot({}),
+        RepositoryModule.forFeature({
+          module: {
+            name: FirestoreRepositoryModule.name,
+            forFeature: (entities: RepositoryProviderOptions[]) =>
+              FirestoreRepositoryModule.forFeature(
+                entities.map((entity) => ({
+                  key: entity.key,
+                  entity: entity.entity,
+                  collection,
+                })),
+                { backend: admin },
+              ),
+          },
+          entities: [{ key: 'counter', entity: CounterEntity }],
+        }),
+      ],
+    }).compile();
+
+    const repo = wired.get<RepositoryInterface<CounterEntity>>(
+      getDynamicRepositoryToken('counter'),
+    );
+    expect(isFirestoreRepository(repo)).toBe(true);
+    if (!isFirestoreRepository(repo)) {
+      throw new Error('expected FirestoreRepository');
+    }
+
+    await repo.create({ id: 'counter', value: 0 });
+
+    let bodyRuns = 0;
+    await Promise.all(
+      Array.from({ length: 10 }, () =>
+        repo.transaction(async () => {
+          bodyRuns += 1;
+          const row = await repo.findOne({
+            where: Where.eq('id', 'counter'),
+          });
+          const value = row?.value ?? 0;
+          await repo.update(row!, { value: value + 1 });
+        }),
+      ),
+    );
+
+    expect(
+      await repo.findOne({ where: Where.eq('id', 'counter') }),
+    ).toMatchObject({ value: 10 });
+    expect(bodyRuns).toBeGreaterThanOrEqual(10);
   });
 });
