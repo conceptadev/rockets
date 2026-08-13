@@ -62,7 +62,11 @@ export function createFirestoreProvider(
   backend: FirestoreBackend,
   transactionKey: string = resolveFirestoreTransactionKey(backend),
 ): Provider {
+  assertSupportedUniqueConstraints(options);
   const collection = options.collection ?? options.key;
+  const uniqueDocumentIdField =
+    options.uniqueDocumentIdField ??
+    resolveSingleUniqueField(options.uniqueConstraints);
 
   return {
     provide: getDynamicRepositoryToken(options.key),
@@ -78,9 +82,45 @@ export function createFirestoreProvider(
         metadata,
         backend,
         transactionKey,
+        uniqueDocumentIdField,
       });
     },
   };
+}
+
+function resolveSingleUniqueField(
+  constraints: ReadonlyArray<ReadonlyArray<string>> | undefined,
+): string | undefined {
+  if (!constraints || constraints.length !== 1) {
+    return undefined;
+  }
+  const first = constraints[0];
+  if (first === undefined || first.length !== 1) {
+    return undefined;
+  }
+  return first[0];
+}
+
+/**
+ * Composite uniqueness needs a secondary index collection (issue #44 P1-3
+ * tier 2). Refuse at boot so apps do not silently accept unenforceable
+ * constraints.
+ */
+function assertSupportedUniqueConstraints(
+  options: FirestoreProviderOptions,
+): void {
+  const constraints = options.uniqueConstraints ?? [];
+  for (const constraint of constraints) {
+    if (constraint.length > 1) {
+      throw new Error(
+        `Firestore adapter: composite unique constraint [${constraint.join(
+          ', ',
+        )}] on entity "${options.key}" is not supported yet — use a single ` +
+          `uniqueDocumentIdField / natural document id, or wait for the ` +
+          `uniqueness-index collection (issue #44 P1-3 tier 2).`,
+      );
+    }
+  }
 }
 
 export function createFirestoreTransactionFactoryDescriptor(

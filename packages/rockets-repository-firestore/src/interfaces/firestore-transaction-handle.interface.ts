@@ -1,5 +1,6 @@
 import type { FirestoreBranchQueryOptions } from './firestore-backend.interface';
 import type { FirestoreQueryBranch } from './firestore-query.interface';
+import type { FirestoreWritePrecondition } from './firestore-write.interface';
 
 /**
  * Mutable view of a single Firestore transaction attempt.
@@ -10,6 +11,7 @@ import type { FirestoreQueryBranch } from './firestore-query.interface';
  *
  * Firestore requires all reads before all writes inside one attempt and may
  * retry the whole attempt under contention — keep handlers idempotent.
+ * Write count is capped at {@link FIRESTORE_MAX_TRANSACTION_WRITES}.
  */
 export interface FirestoreTransactionHandle {
   get(
@@ -26,8 +28,13 @@ export interface FirestoreTransactionHandle {
     documentId: string,
     data: Record<string, unknown>,
     merge?: boolean,
+    precondition?: FirestoreWritePrecondition,
   ): Promise<void>;
-  delete(collection: string, documentId: string): Promise<void>;
+  delete(
+    collection: string,
+    documentId: string,
+    precondition?: FirestoreWritePrecondition,
+  ): Promise<void>;
   queryBranch(
     collection: string,
     options: FirestoreBranchQueryOptions,

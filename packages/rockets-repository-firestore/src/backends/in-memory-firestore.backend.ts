@@ -1,23 +1,37 @@
+import { FIRESTORE_MAX_BATCH_WRITES } from '../constants/firestore-transaction.constants';
 import { FirestoreDuplicateIdException } from '../exceptions/firestore-duplicate-id.exception';
+import { FirestorePreconditionFailedException } from '../exceptions/firestore-precondition-failed.exception';
 import type {
   FirestoreBackend,
+  FirestoreBatchOperation,
   FirestoreBranchQueryOptions,
 } from '../interfaces/firestore-backend.interface';
 import type { FirestoreQueryBranch } from '../interfaces/firestore-query.interface';
 import type { FirestoreTransactionHandle } from '../interfaces/firestore-transaction-handle.interface';
+import type { FirestoreWritePrecondition } from '../interfaces/firestore-write.interface';
+import { isFirestoreIncrementSentinel } from '../interfaces/firestore-write.interface';
 import { applyFirestorePostFilters } from '../repository/firestore-post-filter';
 import { applyFirestoreFilters } from '../repository/firestore-row-filter';
 import { sortFirestoreRows } from '../repository/firestore-sort';
+import { FirestoreTransactionWriteCounter } from '../transaction/firestore-transaction-write-counter';
 
-type CollectionStore = Map<string, Record<string, unknown>>;
-type StoreMap = Map<string, CollectionStore>;
+type TimedCollectionStore = Map<string, StoredDocument>;
+type TimedStoreMap = Map<string, TimedCollectionStore>;
 
-function cloneStores(source: StoreMap): StoreMap {
-  const next: StoreMap = new Map();
+interface StoredDocument {
+  readonly data: Record<string, unknown>;
+  readonly updateTime: Date;
+}
+
+function cloneStores(source: TimedStoreMap): TimedStoreMap {
+  const next: TimedStoreMap = new Map();
   for (const [collection, docs] of source) {
-    const cloned: CollectionStore = new Map();
+    const cloned: TimedCollectionStore = new Map();
     for (const [id, row] of docs) {
-      cloned.set(id, { ...row });
+      cloned.set(id, {
+        data: { ...row.data },
+        updateTime: new Date(row.updateTime.getTime()),
+      });
     }
     next.set(collection, cloned);
   }
@@ -25,9 +39,9 @@ function cloneStores(source: StoreMap): StoreMap {
 }
 
 function collectionStore(
-  stores: StoreMap,
+  stores: TimedStoreMap,
   collection: string,
-): CollectionStore {
+): TimedCollectionStore {
   let store = stores.get(collection);
   if (!store) {
     store = new Map();
@@ -36,17 +50,62 @@ function collectionStore(
   return store;
 }
 
+function applyWriteData(
+  current: Record<string, unknown> | undefined,
+  data: Record<string, unknown>,
+  merge: boolean,
+): Record<string, unknown> {
+  const base = merge && current ? { ...current } : {};
+  for (const [key, value] of Object.entries(data)) {
+    if (isFirestoreIncrementSentinel(value)) {
+      const existing = base[key];
+      const currentNumber = typeof existing === 'number' ? existing : 0;
+      base[key] = currentNumber + value.__firestoreIncrement;
+    } else {
+      base[key] = value;
+    }
+  }
+  return base;
+}
+
+function assertPrecondition(
+  collection: string,
+  documentId: string,
+  existing: StoredDocument | undefined,
+  precondition: FirestoreWritePrecondition | undefined,
+): void {
+  if (precondition === undefined) {
+    return;
+  }
+  if (precondition.exists === true && existing === undefined) {
+    throw new FirestorePreconditionFailedException(collection, documentId);
+  }
+  if (precondition.exists === false && existing !== undefined) {
+    throw new FirestorePreconditionFailedException(collection, documentId);
+  }
+  if (
+    precondition.lastUpdateTime !== undefined &&
+    (existing === undefined ||
+      existing.updateTime.getTime() !== precondition.lastUpdateTime.getTime())
+  ) {
+    throw new FirestorePreconditionFailedException(collection, documentId);
+  }
+}
+
 class InMemoryFirestoreTransactionHandle implements FirestoreTransactionHandle {
   private wrote = false;
+  private readonly writes = new FirestoreTransactionWriteCounter();
 
-  constructor(private readonly stores: StoreMap) {}
+  constructor(private readonly stores: TimedStoreMap) {}
 
   async get(
     collection: string,
     documentId: string,
   ): Promise<Record<string, unknown> | null> {
     this.assertReadable();
-    return collectionStore(this.stores, collection).get(documentId) ?? null;
+    return (
+      collectionStore(this.stores, collection).get(documentId)?.data ?? null
+    );
   }
 
   async create(
@@ -54,16 +113,16 @@ class InMemoryFirestoreTransactionHandle implements FirestoreTransactionHandle {
     documentId: string,
     data: Record<string, unknown>,
   ): Promise<void> {
-    // The Admin handle reads the document before enqueueing the create (to
-    // raise the adapter's 409 instead of a commit-time gRPC error), so this
-    // counts as a read and Firestore rejects it after any write. Enforce the
-    // same rule here or the double hides an INVALID_ARGUMENT in production.
     this.assertReadable();
     const store = collectionStore(this.stores, collection);
     if (store.has(documentId)) {
       throw new FirestoreDuplicateIdException(collection, documentId);
     }
-    store.set(documentId, { ...data, id: documentId });
+    this.writes.recordWrite();
+    store.set(documentId, {
+      data: applyWriteData(undefined, { ...data, id: documentId }, false),
+      updateTime: new Date(),
+    });
     this.wrote = true;
   }
 
@@ -72,18 +131,36 @@ class InMemoryFirestoreTransactionHandle implements FirestoreTransactionHandle {
     documentId: string,
     data: Record<string, unknown>,
     merge = false,
+    precondition?: FirestoreWritePrecondition,
   ): Promise<void> {
     const store = collectionStore(this.stores, collection);
     const current = store.get(documentId);
-    store.set(
-      documentId,
-      merge && current ? { ...current, ...data } : { ...data, id: documentId },
-    );
+    assertPrecondition(collection, documentId, current, precondition);
+    this.writes.recordWrite();
+    store.set(documentId, {
+      data: {
+        ...applyWriteData(current?.data, data, merge),
+        id: documentId,
+      },
+      updateTime: new Date(),
+    });
     this.wrote = true;
   }
 
-  async delete(collection: string, documentId: string): Promise<void> {
-    collectionStore(this.stores, collection).delete(documentId);
+  async delete(
+    collection: string,
+    documentId: string,
+    precondition?: FirestoreWritePrecondition,
+  ): Promise<void> {
+    const store = collectionStore(this.stores, collection);
+    assertPrecondition(
+      collection,
+      documentId,
+      store.get(documentId),
+      precondition,
+    );
+    this.writes.recordWrite();
+    store.delete(documentId);
     this.wrote = true;
   }
 
@@ -143,7 +220,9 @@ class InMemoryFirestoreTransactionHandle implements FirestoreTransactionHandle {
       return rows;
     }
 
-    return [...collectionStore(this.stores, collection).values()];
+    return [...collectionStore(this.stores, collection).values()].map(
+      (entry) => entry.data,
+    );
   }
 }
 
@@ -157,10 +236,10 @@ class InMemoryFirestoreTransactionHandle implements FirestoreTransactionHandle {
  * collection names.
  */
 export class InMemoryFirestoreBackend implements FirestoreBackend {
-  private stores: StoreMap = new Map();
+  private stores: TimedStoreMap = new Map();
   private generation = 0;
 
-  private rootCollectionStore(collection: string): CollectionStore {
+  private rootCollectionStore(collection: string): TimedCollectionStore {
     return collectionStore(this.stores, collection);
   }
 
@@ -168,7 +247,7 @@ export class InMemoryFirestoreBackend implements FirestoreBackend {
     collection: string,
     documentId: string,
   ): Promise<Record<string, unknown> | null> {
-    return this.rootCollectionStore(collection).get(documentId) ?? null;
+    return this.rootCollectionStore(collection).get(documentId)?.data ?? null;
   }
 
   async set(
@@ -176,13 +255,18 @@ export class InMemoryFirestoreBackend implements FirestoreBackend {
     documentId: string,
     data: Record<string, unknown>,
     merge = false,
+    precondition?: FirestoreWritePrecondition,
   ): Promise<void> {
     const store = this.rootCollectionStore(collection);
     const current = store.get(documentId);
-    store.set(
-      documentId,
-      merge && current ? { ...current, ...data } : { ...data, id: documentId },
-    );
+    assertPrecondition(collection, documentId, current, precondition);
+    store.set(documentId, {
+      data: {
+        ...applyWriteData(current?.data, data, merge),
+        id: documentId,
+      },
+      updateTime: new Date(),
+    });
     this.generation += 1;
   }
 
@@ -195,12 +279,26 @@ export class InMemoryFirestoreBackend implements FirestoreBackend {
     if (store.has(documentId)) {
       throw new FirestoreDuplicateIdException(collection, documentId);
     }
-    store.set(documentId, { ...data, id: documentId });
+    store.set(documentId, {
+      data: applyWriteData(undefined, { ...data, id: documentId }, false),
+      updateTime: new Date(),
+    });
     this.generation += 1;
   }
 
-  async delete(collection: string, documentId: string): Promise<void> {
-    this.rootCollectionStore(collection).delete(documentId);
+  async delete(
+    collection: string,
+    documentId: string,
+    precondition?: FirestoreWritePrecondition,
+  ): Promise<void> {
+    const store = this.rootCollectionStore(collection);
+    assertPrecondition(
+      collection,
+      documentId,
+      store.get(documentId),
+      precondition,
+    );
+    store.delete(documentId);
     this.generation += 1;
   }
 
@@ -251,6 +349,44 @@ export class InMemoryFirestoreBackend implements FirestoreBackend {
     return result;
   }
 
+  async writeBatch(
+    operations: readonly FirestoreBatchOperation[],
+  ): Promise<void> {
+    if (operations.length === 0) {
+      return;
+    }
+    if (operations.length > FIRESTORE_MAX_BATCH_WRITES) {
+      throw new Error(
+        `Firestore writeBatch accepts at most ${FIRESTORE_MAX_BATCH_WRITES} operations (got ${operations.length})`,
+      );
+    }
+
+    const working = cloneStores(this.stores);
+    for (const operation of operations) {
+      const store = collectionStore(working, operation.collection);
+      if (operation.op === 'create') {
+        if (store.has(operation.id)) {
+          throw new FirestoreDuplicateIdException(
+            operation.collection,
+            operation.id,
+          );
+        }
+        store.set(operation.id, {
+          data: applyWriteData(
+            undefined,
+            { ...operation.data, id: operation.id },
+            false,
+          ),
+          updateTime: new Date(),
+        });
+      } else {
+        store.delete(operation.id);
+      }
+    }
+    this.stores = working;
+    this.generation += 1;
+  }
+
   private async loadBranchRows(
     collection: string,
     branch: FirestoreQueryBranch,
@@ -271,6 +407,8 @@ export class InMemoryFirestoreBackend implements FirestoreBackend {
       return rows;
     }
 
-    return [...this.rootCollectionStore(collection).values()];
+    return [...this.rootCollectionStore(collection).values()].map(
+      (entry) => entry.data,
+    );
   }
 }

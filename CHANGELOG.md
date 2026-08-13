@@ -15,9 +15,13 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 - Firestore soft-delete server pushdown (issue #44 P1-4): default lists/counts
   use `field == null`, restoring `limit()` / aggregation. **Requires a data
   backfill and composite indexes before deploy** — see the package CHANGELOG.
-  Includes `backfillSoftDeleteNull` + `firestore.indexes.example.json`.
-  Nested `runInFirestoreTransaction` joins the ambient handle on the same
-  backend and refuses to span backends.
+  Includes `backfillSoftDeleteNull` / `adminStreamBackfillSoftDeleteNull` +
+  `firestore.indexes.example.json`. Nested `runInFirestoreTransaction` joins
+  the ambient handle on the same backend and refuses to span backends.
+- Firestore P1 follow-ups: `firestoreIncrement` + write preconditions (P1-2),
+  `uniqueDocumentIdField` with boot-time refuse of composite unique (P1-3
+  tier 1), inequality `orderBy` reconcile (P1-5), WriteBatch `createMany` /
+  `deleteMany` (P1-6), and enforced 500-write transaction limit.
 
 ### Changed
 

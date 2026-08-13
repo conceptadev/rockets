@@ -4,6 +4,7 @@ import type {
   FirestoreQueryFilter,
   FirestoreQueryRequest,
 } from '../interfaces/firestore-query.interface';
+import { reconcileOrderByWithInequality } from './firestore-order-by-reconcile';
 import { sortFirestoreRows } from './firestore-sort';
 
 type FirestoreQueryClient = Pick<
@@ -24,15 +25,26 @@ export async function runFirestoreQuery(
 
   const merged = new Map<string, Record<string, unknown>>();
 
-  const pushToServer =
+  const singleBranch =
     branches.length === 1 &&
     branches[0] !== undefined &&
     branches[0].postFilters.length === 0;
 
+  const reconciled = singleBranch
+    ? reconcileOrderByWithInequality(branches[0], request.orderBy)
+    : undefined;
+
+  const pushToServer =
+    singleBranch && reconciled !== undefined && !reconciled.clientReorder;
+
   for (const branch of branches) {
+    const branchReconciled = reconcileOrderByWithInequality(
+      branch,
+      request.orderBy,
+    );
     const rows = await backend.queryBranch(collection, {
       branch,
-      orderBy: pushToServer ? request.orderBy : undefined,
+      orderBy: pushToServer ? branchReconciled.serverOrderBy : request.orderBy,
       skip: pushToServer ? request.skip : undefined,
       take: pushToServer ? request.take : undefined,
     });

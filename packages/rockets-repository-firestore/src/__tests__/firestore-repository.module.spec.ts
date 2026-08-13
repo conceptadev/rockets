@@ -896,4 +896,93 @@ describe(FirestoreRepositoryModule.name, () => {
       expect.objectContaining({ id: 'legacy' }),
     ]);
   });
+
+  it('derives the document id from uniqueDocumentIdField', async () => {
+    class BucketEntity {
+      id!: string;
+      bucketKey!: string;
+      title!: string;
+    }
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'bucket',
+              entity: BucketEntity,
+              collection: 'buckets-unique',
+              uniqueDocumentIdField: 'bucketKey',
+            },
+          ],
+          { backend: new InMemoryFirestoreBackend() },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<BucketEntity>>(
+      getDynamicRepositoryToken('bucket'),
+    );
+
+    const created = await repo.create({
+      bucketKey: 'tenant-a-orders',
+      title: 'Orders',
+    });
+    expect(created.id).toBe('tenant-a-orders');
+    await expect(
+      repo.findOne({ where: Where.eq('id', 'tenant-a-orders') }),
+    ).resolves.toMatchObject({ title: 'Orders' });
+  });
+
+  it('refuses composite uniqueConstraints at boot', () => {
+    expect(() =>
+      FirestoreRepositoryModule.forFeature(
+        [
+          {
+            key: 'widget',
+            entity: WidgetEntity,
+            uniqueConstraints: [['title', 'note']],
+          },
+        ],
+        { backend: new InMemoryFirestoreBackend() },
+      ),
+    ).toThrow(/composite unique constraint/);
+  });
+
+  it('createMany uses writeBatch outside a transaction', async () => {
+    const backend = new InMemoryFirestoreBackend();
+    const writeBatch = vi.spyOn(backend, 'writeBatch');
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'widget',
+              entity: WidgetEntity,
+              collection: 'widgets-batch-create',
+            },
+          ],
+          { backend },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<WidgetEntity>>(
+      getDynamicRepositoryToken('widget'),
+    );
+
+    const created = await repo.createMany([
+      { id: 'b1', title: 'One' },
+      { id: 'b2', title: 'Two' },
+    ]);
+    expect(created).toHaveLength(2);
+    expect(writeBatch).toHaveBeenCalled();
+    await expect(repo.find()).resolves.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: 'b1' }),
+        expect.objectContaining({ id: 'b2' }),
+      ]),
+    );
+  });
 });

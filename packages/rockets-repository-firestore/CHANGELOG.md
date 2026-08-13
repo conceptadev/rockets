@@ -33,11 +33,22 @@
   logs a one-time warning); every `do*` method threads ambient /
   `options.ctx` into the transaction. Transactional `create` maps duplicate
   ids to `FirestoreDuplicateIdException`; transactional queries push
-  `limit()`.
-- Nested `runInFirestoreTransaction` joins the ambient handle on the same
-  backend and throws `FIRESTORE_TRANSACTION_BACKEND_MISMATCH` across
-  backends; the ambient handle is bound to its backend, so a repository on
-  another backend never joins it.
+  `limit()`. Nested `runInFirestoreTransaction` joins the ambient handle on
+  the same backend and throws `FIRESTORE_TRANSACTION_BACKEND_MISMATCH`
+  across backends; the ambient handle is bound to its backend.
+- **Atomic increment / precondition (P1-2).** `firestoreIncrement(delta)`
+  sentinel + optional `FirestoreWritePrecondition` on `set`/`delete`;
+  `FirestoreRepository.increment(...)` helper.
+- **Deterministic document ids (P1-3 tier 1).** `uniqueDocumentIdField` /
+  single-column `uniqueConstraints`; composite unique refuses at boot.
+- **Inequality orderBy reconcile (P1-5).** First `orderBy` promoted to the
+  inequality field; mismatched caller order falls back to local sort
+  (no wrong server pagination).
+- **WriteBatch for createMany/deleteMany (P1-6).** Atomic batches of ≤500
+  outside transactions; sequential inside ambient txs. Enforced
+  `FIRESTORE_MAX_TRANSACTION_WRITES` (500) on transaction handles.
+- `adminStreamBackfillSoftDeleteNull` (BulkWriter stream) for large
+  collections; `backfillSoftDeleteNull` remains for small / in-memory.
 - Full `WhereOperator` coverage (EQ, NE, comparisons, IN, NIN, null checks,
   string matchers, BETWEEN) with Firestore-native or post-filter execution.
 - OR support via `RepositoryAdapter.toDnf()`.

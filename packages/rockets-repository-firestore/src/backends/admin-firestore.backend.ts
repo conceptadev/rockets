@@ -1,15 +1,21 @@
 import { getApp } from 'firebase-admin/app';
 import {
+  FieldValue,
   getFirestore,
+  Timestamp,
   type DocumentData,
   type Firestore,
+  type Precondition,
   type Query,
   type Transaction,
 } from 'firebase-admin/firestore';
 
+import { FIRESTORE_MAX_BATCH_WRITES } from '../constants/firestore-transaction.constants';
 import { FirestoreDuplicateIdException } from '../exceptions/firestore-duplicate-id.exception';
+import { FirestorePreconditionFailedException } from '../exceptions/firestore-precondition-failed.exception';
 import type {
   FirestoreBackend,
+  FirestoreBatchOperation,
   FirestoreBranchQueryOptions,
 } from '../interfaces/firestore-backend.interface';
 import type {
@@ -18,15 +24,19 @@ import type {
   FirestoreQueryBranch,
 } from '../interfaces/firestore-query.interface';
 import type { FirestoreTransactionHandle } from '../interfaces/firestore-transaction-handle.interface';
+import type { FirestoreWritePrecondition } from '../interfaces/firestore-write.interface';
+import { isFirestoreIncrementSentinel } from '../interfaces/firestore-write.interface';
 import { applyFirestorePostFilters } from '../repository/firestore-post-filter';
+import { reconcileOrderByWithInequality } from '../repository/firestore-order-by-reconcile';
 import { applyFirestoreFilters } from '../repository/firestore-row-filter';
 import { sortFirestoreRows } from '../repository/firestore-sort';
 import { normalizeFirestoreValue } from '../repository/firestore-value';
+import { FirestoreTransactionWriteCounter } from '../transaction/firestore-transaction-write-counter';
 
-// Batched reads keep argument lists bounded; getAll itself has no hard cap.
 const GET_ALL_CHUNK = 300;
 
 const GRPC_ALREADY_EXISTS = 6;
+const GRPC_FAILED_PRECONDITION = 9;
 
 function isAlreadyExistsError(error: unknown): boolean {
   return (
@@ -37,8 +47,42 @@ function isAlreadyExistsError(error: unknown): boolean {
   );
 }
 
+function isFailedPreconditionError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    error.code === GRPC_FAILED_PRECONDITION
+  );
+}
+
 function serialise(data: Record<string, unknown>): Record<string, unknown> {
-  return { ...data };
+  const next: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(data)) {
+    if (isFirestoreIncrementSentinel(value)) {
+      next[key] = FieldValue.increment(value.__firestoreIncrement);
+    } else {
+      next[key] = value;
+    }
+  }
+  return next;
+}
+
+function toAdminPrecondition(
+  precondition: FirestoreWritePrecondition | undefined,
+): Precondition | undefined {
+  if (precondition === undefined) {
+    return undefined;
+  }
+  if (precondition.lastUpdateTime !== undefined) {
+    return {
+      lastUpdateTime: Timestamp.fromDate(precondition.lastUpdateTime),
+    };
+  }
+  if (precondition.exists !== undefined) {
+    return { exists: precondition.exists };
+  }
+  return undefined;
 }
 
 function normalise(
@@ -56,6 +100,8 @@ function normalise(
 }
 
 class AdminFirestoreTransactionHandle implements FirestoreTransactionHandle {
+  private readonly writes = new FirestoreTransactionWriteCounter();
+
   constructor(
     private readonly transaction: Transaction,
     private readonly db: Firestore,
@@ -79,16 +125,12 @@ class AdminFirestoreTransactionHandle implements FirestoreTransactionHandle {
     documentId: string,
     data: Record<string, unknown>,
   ): Promise<void> {
-    // ALREADY_EXISTS for transaction.create() surfaces at commit, not at
-    // enqueue — so read first and throw the adapter's 409 shape here. Under
-    // contention Firestore retries the whole attempt; the loser then sees
-    // the winner's doc and gets FirestoreDuplicateIdException instead of a
-    // raw gRPC error.
     const ref = this.db.collection(collection).doc(documentId);
     const snap = await this.transaction.get(ref);
     if (snap.exists) {
       throw new FirestoreDuplicateIdException(collection, documentId);
     }
+    this.writes.recordWrite();
     this.transaction.create(ref, serialise(data));
   }
 
@@ -97,16 +139,32 @@ class AdminFirestoreTransactionHandle implements FirestoreTransactionHandle {
     documentId: string,
     data: Record<string, unknown>,
     merge = false,
+    precondition?: FirestoreWritePrecondition,
   ): Promise<void> {
-    this.transaction.set(
-      this.db.collection(collection).doc(documentId),
-      serialise(data),
-      { merge },
-    );
+    this.writes.recordWrite();
+    const ref = this.db.collection(collection).doc(documentId);
+    const adminPrecondition = toAdminPrecondition(precondition);
+    // Precondition is only valid on update/delete in the Admin SDK.
+    if (adminPrecondition) {
+      this.transaction.update(ref, serialise(data), adminPrecondition);
+      return;
+    }
+    this.transaction.set(ref, serialise(data), { merge });
   }
 
-  async delete(collection: string, documentId: string): Promise<void> {
-    this.transaction.delete(this.db.collection(collection).doc(documentId));
+  async delete(
+    collection: string,
+    documentId: string,
+    precondition?: FirestoreWritePrecondition,
+  ): Promise<void> {
+    this.writes.recordWrite();
+    const ref = this.db.collection(collection).doc(documentId);
+    const adminPrecondition = toAdminPrecondition(precondition);
+    if (adminPrecondition) {
+      this.transaction.delete(ref, adminPrecondition);
+    } else {
+      this.transaction.delete(ref);
+    }
   }
 
   async queryBranch(
@@ -116,6 +174,9 @@ class AdminFirestoreTransactionHandle implements FirestoreTransactionHandle {
     const branch = options.branch;
     const skip = options.skip ?? 0;
     const take = options.take;
+    const reconciled = reconcileOrderByWithInequality(branch, options.orderBy);
+    const pushLimit =
+      branch.postFilters.length === 0 && !reconciled.clientReorder;
 
     if (branch.documentId !== undefined || branch.documentIds !== undefined) {
       const rows = await this.loadBranchRows(collection, branch);
@@ -130,20 +191,21 @@ class AdminFirestoreTransactionHandle implements FirestoreTransactionHandle {
         : sliced;
     }
 
-    // Mirror the non-transactional fast path: when there are no post-filters,
-    // push orderBy + limit(skip + take) so we don't lock the whole set.
     let query = buildCollectionQuery(this.db, collection, branch);
-    if (options.orderBy) {
-      for (const clause of options.orderBy) {
+    if (reconciled.serverOrderBy) {
+      for (const clause of reconciled.serverOrderBy) {
         query = query.orderBy(clause.field, clause.direction);
       }
     }
 
-    if (branch.postFilters.length > 0) {
+    if (!pushLimit) {
       const snapshot = await this.transaction.get(query);
       const rows = snapshot.docs.map((doc) => normalise(doc.data(), doc.id));
       const filtered = applyFirestorePostFilters(rows, branch.postFilters);
-      const sliced = filtered.slice(skip);
+      const ordered = reconciled.clientReorder
+        ? sortFirestoreRows(filtered, options.orderBy)
+        : filtered;
+      const sliced = ordered.slice(skip);
       return typeof take === 'number' && take > 0
         ? sliced.slice(0, take)
         : sliced;
@@ -230,11 +292,23 @@ export class AdminFirestoreBackend implements FirestoreBackend {
     documentId: string,
     data: Record<string, unknown>,
     merge = false,
+    precondition?: FirestoreWritePrecondition,
   ): Promise<void> {
-    await this.db()
-      .collection(collection)
-      .doc(documentId)
-      .set(serialise(data), { merge });
+    try {
+      const ref = this.db().collection(collection).doc(documentId);
+      const adminPrecondition = toAdminPrecondition(precondition);
+      // Precondition is only valid on update/delete in the Admin SDK.
+      if (adminPrecondition) {
+        await ref.update(serialise(data), adminPrecondition);
+        return;
+      }
+      await ref.set(serialise(data), { merge });
+    } catch (error) {
+      if (isFailedPreconditionError(error)) {
+        throw new FirestorePreconditionFailedException(collection, documentId);
+      }
+      throw error;
+    }
   }
 
   async create(
@@ -255,8 +329,25 @@ export class AdminFirestoreBackend implements FirestoreBackend {
     }
   }
 
-  async delete(collection: string, documentId: string): Promise<void> {
-    await this.db().collection(collection).doc(documentId).delete();
+  async delete(
+    collection: string,
+    documentId: string,
+    precondition?: FirestoreWritePrecondition,
+  ): Promise<void> {
+    try {
+      const ref = this.db().collection(collection).doc(documentId);
+      const adminPrecondition = toAdminPrecondition(precondition);
+      if (adminPrecondition) {
+        await ref.delete(adminPrecondition);
+      } else {
+        await ref.delete();
+      }
+    } catch (error) {
+      if (isFailedPreconditionError(error)) {
+        throw new FirestorePreconditionFailedException(collection, documentId);
+      }
+      throw error;
+    }
   }
 
   async queryBranch(
@@ -266,6 +357,9 @@ export class AdminFirestoreBackend implements FirestoreBackend {
     const branch = options.branch;
     const skip = options.skip ?? 0;
     const take = options.take;
+    const reconciled = reconcileOrderByWithInequality(branch, options.orderBy);
+    const pushLimit =
+      branch.postFilters.length === 0 && !reconciled.clientReorder;
 
     if (branch.documentId !== undefined || branch.documentIds !== undefined) {
       const rows = await this.loadBranchRows(collection, branch);
@@ -280,22 +374,29 @@ export class AdminFirestoreBackend implements FirestoreBackend {
         : sliced;
     }
 
-    // Post-filters require in-memory evaluation, so we cannot rely on
-    // server-side limit alone — read all matching docs and slice locally.
-    if (branch.postFilters.length > 0) {
-      const query = this.buildOrderedQuery(collection, branch, options.orderBy);
+    if (!pushLimit) {
+      const query = this.buildOrderedQuery(
+        collection,
+        branch,
+        reconciled.serverOrderBy,
+      );
       const snapshot = await query.get();
       const rows = snapshot.docs.map((doc) => normalise(doc.data(), doc.id));
       const filtered = applyFirestorePostFilters(rows, branch.postFilters);
-      const sliced = filtered.slice(skip);
+      const ordered = reconciled.clientReorder
+        ? sortFirestoreRows(filtered, options.orderBy)
+        : filtered;
+      const sliced = ordered.slice(skip);
       return typeof take === 'number' && take > 0
         ? sliced.slice(0, take)
         : sliced;
     }
 
-    // Fast path: push orderBy + limit(skip + take) to Firestore, slice(skip)
-    // locally. Reads are O(skip + take), not O(collection size).
-    let query = this.buildOrderedQuery(collection, branch, options.orderBy);
+    let query = this.buildOrderedQuery(
+      collection,
+      branch,
+      reconciled.serverOrderBy,
+    );
     if (typeof take === 'number' && take > 0) {
       query = query.limit(skip + take);
     }
@@ -332,6 +433,43 @@ export class AdminFirestoreBackend implements FirestoreBackend {
     return db.runTransaction(async (transaction) =>
       fn(new AdminFirestoreTransactionHandle(transaction, db)),
     );
+  }
+
+  async writeBatch(
+    operations: readonly FirestoreBatchOperation[],
+  ): Promise<void> {
+    if (operations.length === 0) {
+      return;
+    }
+    if (operations.length > FIRESTORE_MAX_BATCH_WRITES) {
+      throw new Error(
+        `Firestore writeBatch accepts at most ${FIRESTORE_MAX_BATCH_WRITES} operations (got ${operations.length})`,
+      );
+    }
+
+    const db = this.db();
+    const batch = db.batch();
+    for (const operation of operations) {
+      const ref = db.collection(operation.collection).doc(operation.id);
+      if (operation.op === 'create') {
+        batch.create(ref, serialise(operation.data));
+      } else {
+        batch.delete(ref);
+      }
+    }
+
+    try {
+      await batch.commit();
+    } catch (error) {
+      if (isAlreadyExistsError(error)) {
+        const createOp = operations.find((op) => op.op === 'create');
+        throw new FirestoreDuplicateIdException(
+          createOp?.collection ?? 'unknown',
+          createOp?.id ?? 'unknown',
+        );
+      }
+      throw error;
+    }
   }
 
   private async loadBranchRows(

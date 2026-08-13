@@ -22,12 +22,18 @@ import {
   FIRESTORE_DEFAULT_SOFT_DELETE_FIELD,
 } from '../constants/firestore-soft-delete.constants';
 import { FIRESTORE_DEFAULT_TRANSACTION_KEY } from '../constants/firestore-transaction.constants';
+import { FIRESTORE_MAX_BATCH_WRITES } from '../constants/firestore-transaction.constants';
 import type { FirestoreBackend } from '../interfaces/firestore-backend.interface';
 import type {
   FirestoreOrderBy,
   FirestoreQueryRequest,
 } from '../interfaces/firestore-query.interface';
 import type { FirestoreTransactionHandle } from '../interfaces/firestore-transaction-handle.interface';
+import {
+  firestoreIncrement,
+  type FirestoreWritePrecondition,
+} from '../interfaces/firestore-write.interface';
+import { deriveFirestoreDocumentId } from '../utils/firestore-deterministic-id';
 import { resolveSoftDeleteFieldFromMetadata } from './firestore-entity-metadata';
 import { runFirestoreCount, runFirestoreQuery } from './firestore-query-runner';
 import { translateDnfBranch } from './firestore-where.translator';
@@ -40,6 +46,8 @@ export interface FirestoreRepositoryOptions<Entity extends PlainLiteralObject> {
   readonly metadata: RepositoryMetadataInterface<Entity>;
   readonly backend: FirestoreBackend;
   readonly transactionKey?: string;
+  /** Derive document id from this field when `id` is omitted on create. */
+  readonly uniqueDocumentIdField?: string;
 }
 
 type StoreClient = Pick<
@@ -72,6 +80,31 @@ export class FirestoreRepository<
    */
   async transaction<T>(fn: () => Promise<T>): Promise<T> {
     return runInFirestoreTransaction(this.options.backend, fn);
+  }
+
+  /**
+   * Atomic field increment without a full document read-modify-write.
+   * Prefer this for counters / heartbeats outside a transaction.
+   */
+  async increment(
+    entity: Entity,
+    field: keyof Entity & string,
+    delta: number,
+    options?: {
+      readonly ctx?: PlainLiteralObject;
+      readonly precondition?: FirestoreWritePrecondition;
+    },
+  ): Promise<void> {
+    const client = await this.resolveClient(options?.ctx);
+    const id = this.resolveId(entity);
+    await client.set(
+      this.options.collection,
+      id,
+      { [field]: firestoreIncrement(delta) },
+      true,
+      options?.precondition,
+    );
+    this.markDirty(options?.ctx);
   }
 
   protected async doFind(
@@ -139,11 +172,43 @@ export class FirestoreRepository<
     entities: DeepPartial<Entity>[],
     options?: RepositoryCreateOptions,
   ): Promise<Entity[]> {
-    const created: Entity[] = [];
-    for (const entity of entities) {
-      created.push(await this.doCreate(entity, options));
+    if (entities.length === 0) {
+      return [];
     }
-    return created;
+
+    if (await this.isInTransaction(options?.ctx)) {
+      const created: Entity[] = [];
+      for (const entity of entities) {
+        created.push(await this.doCreate(entity, options));
+      }
+      return created;
+    }
+
+    const prepared = entities.map((entity) => {
+      const id = this.resolveId(entity);
+      const stored = this.toStore({ ...entity, id } as DeepPartial<Entity>, {
+        materializeSoftDeleteNull: true,
+      });
+      return { id, stored };
+    });
+
+    for (
+      let offset = 0;
+      offset < prepared.length;
+      offset += FIRESTORE_MAX_BATCH_WRITES
+    ) {
+      const chunk = prepared.slice(offset, offset + FIRESTORE_MAX_BATCH_WRITES);
+      await this.options.backend.writeBatch(
+        chunk.map((row) => ({
+          op: 'create' as const,
+          collection: this.options.collection,
+          id: row.id,
+          data: row.stored,
+        })),
+      );
+    }
+
+    return prepared.map((row) => this.fromStore(row.stored));
   }
 
   protected async doUpdate(
@@ -212,8 +277,31 @@ export class FirestoreRepository<
     entities: Entity[],
     options?: RepositoryDeleteOptions,
   ): Promise<Entity[]> {
-    for (const entity of entities) {
-      await this.doDelete(entity, options);
+    if (entities.length === 0) {
+      return entities;
+    }
+
+    if (await this.isInTransaction(options?.ctx)) {
+      for (const entity of entities) {
+        await this.doDelete(entity, options);
+      }
+      return entities;
+    }
+
+    const ids = entities.map((entity) => this.resolveId(entity));
+    for (
+      let offset = 0;
+      offset < ids.length;
+      offset += FIRESTORE_MAX_BATCH_WRITES
+    ) {
+      const chunk = ids.slice(offset, offset + FIRESTORE_MAX_BATCH_WRITES);
+      await this.options.backend.writeBatch(
+        chunk.map((id) => ({
+          op: 'delete' as const,
+          collection: this.options.collection,
+          id,
+        })),
+      );
     }
     return entities;
   }
@@ -373,10 +461,19 @@ export class FirestoreRepository<
     return next as DeepPartial<Entity>;
   }
 
+  private async isInTransaction(ctx?: PlainLiteralObject): Promise<boolean> {
+    return (await this.resolveTransactionHandle(ctx)) !== null;
+  }
+
   private resolveId(entity: DeepPartial<Entity> | Entity): string {
     const candidate = (entity as { readonly id?: string }).id;
     if (typeof candidate === 'string' && candidate.length > 0) {
       return candidate;
+    }
+    const uniqueField = this.options.uniqueDocumentIdField;
+    if (uniqueField !== undefined) {
+      const record: Record<string, unknown> = { ...entity };
+      return deriveFirestoreDocumentId(record[uniqueField]);
     }
     return randomUUID();
   }

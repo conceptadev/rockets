@@ -20,7 +20,36 @@ import type { FirestoreBackend } from '../interfaces/firestore-backend.interface
 import type { FirestoreTransactionHandle } from '../interfaces/firestore-transaction-handle.interface';
 import { FirestoreDuplicateIdException } from '../exceptions/firestore-duplicate-id.exception';
 import { FirestoreTransactionBackendMismatchException } from '../exceptions/firestore-transaction-backend-mismatch.exception';
+import { FirestoreTransactionWriteLimitExceededException } from '../exceptions/firestore-transaction-write-limit-exceeded.exception';
 import { isFirestoreRepository } from '../repository/firestore-repository';
+import { FIRESTORE_MAX_TRANSACTION_WRITES } from '../constants/firestore-transaction.constants';
+import { firestoreIncrement } from '../interfaces/firestore-write.interface';
+
+function stubBackend(
+  overrides: Partial<FirestoreBackend> = {},
+): FirestoreBackend {
+  return {
+    get: async () => null,
+    create: async () => undefined,
+    set: async () => undefined,
+    delete: async () => undefined,
+    queryBranch: async () => [],
+    countBranch: async () => 0,
+    writeBatch: async () => undefined,
+    runTransaction: async (fn) => {
+      const handle = {
+        get: async () => null,
+        create: async () => undefined,
+        set: async () => undefined,
+        delete: async () => undefined,
+        queryBranch: async () => [],
+        countBranch: async () => 0,
+      } satisfies FirestoreTransactionHandle;
+      return fn(handle);
+    },
+    ...overrides,
+  };
+}
 
 class AccountEntity {
   id!: string;
@@ -111,13 +140,7 @@ describe('Firestore transactions (P1-1)', () => {
 
   it('imperative bridge refuses a Firestore retry instead of empty commit', async () => {
     let attempts = 0;
-    const retryingBackend: FirestoreBackend = {
-      get: async () => null,
-      create: async () => undefined,
-      set: async () => undefined,
-      delete: async () => undefined,
-      queryBranch: async () => [],
-      countBranch: async () => 0,
+    const retryingBackend = stubBackend({
       runTransaction: async (fn) => {
         const handle = {
           get: async () => ({ id: 'a', balance: 100 }),
@@ -129,12 +152,11 @@ describe('Firestore transactions (P1-1)', () => {
         } satisfies FirestoreTransactionHandle;
         attempts += 1;
         await fn(handle);
-        // Simulate SDK retry after the first successful callback return.
         attempts += 1;
         await fn(handle);
         return undefined as never;
       },
-    };
+    });
 
     const tx = new FirestoreTransaction(retryingBackend);
     await tx.start();
@@ -220,13 +242,7 @@ describe('Firestore transactions (P1-1)', () => {
   it('runInFirestoreTransaction re-executes the body when the SDK retries', async () => {
     let bodyRuns = 0;
     let attempts = 0;
-    const retryingBackend: FirestoreBackend = {
-      get: async () => null,
-      create: async () => undefined,
-      set: async () => undefined,
-      delete: async () => undefined,
-      queryBranch: async () => [],
-      countBranch: async () => 0,
+    const retryingBackend = stubBackend({
       runTransaction: async (fn) => {
         const handle = {
           get: async () => null,
@@ -244,7 +260,7 @@ describe('Firestore transactions (P1-1)', () => {
         }
         return undefined as never;
       },
-    };
+    });
 
     await runInFirestoreTransaction(retryingBackend, async () => {
       bodyRuns += 1;
@@ -256,13 +272,7 @@ describe('Firestore transactions (P1-1)', () => {
 
   it('nested runInFirestoreTransaction joins the ambient transaction', async () => {
     let outerStarts = 0;
-    const countingBackend: FirestoreBackend = {
-      get: async () => null,
-      create: async () => undefined,
-      set: async () => undefined,
-      delete: async () => undefined,
-      queryBranch: async () => [],
-      countBranch: async () => 0,
+    const countingBackend = stubBackend({
       runTransaction: async (fn) => {
         outerStarts += 1;
         const handle = {
@@ -275,7 +285,7 @@ describe('Firestore transactions (P1-1)', () => {
         } satisfies FirestoreTransactionHandle;
         return fn(handle);
       },
-    };
+    });
 
     const result = await runInFirestoreTransaction(
       countingBackend,
@@ -289,6 +299,48 @@ describe('Firestore transactions (P1-1)', () => {
 
     expect(result).toBe('nested-ok');
     expect(outerStarts).toBe(1);
+  });
+
+  it('refuses more than 500 writes in one transaction', async () => {
+    await expect(
+      backend.runTransaction(async (tx) => {
+        for (let i = 0; i <= FIRESTORE_MAX_TRANSACTION_WRITES; i += 1) {
+          await tx.set(
+            'accounts-limit',
+            `row-${i}`,
+            { id: `row-${i}`, balance: i },
+            false,
+          );
+        }
+      }),
+    ).rejects.toBeInstanceOf(FirestoreTransactionWriteLimitExceededException);
+  });
+
+  it('applies firestoreIncrement without a transaction', async () => {
+    await backend.create('counters', 'c1', { id: 'c1', value: 1 });
+    await backend.set('counters', 'c1', { value: firestoreIncrement(4) }, true);
+    expect(await backend.get('counters', 'c1')).toMatchObject({ value: 5 });
+  });
+
+  it('writeBatch creates atomically and rolls back on duplicate', async () => {
+    await backend.create('batch-coll', 'a', { id: 'a', balance: 1 });
+    await expect(
+      backend.writeBatch([
+        {
+          op: 'create',
+          collection: 'batch-coll',
+          id: 'b',
+          data: { id: 'b', balance: 2 },
+        },
+        {
+          op: 'create',
+          collection: 'batch-coll',
+          id: 'a',
+          data: { id: 'a', balance: 3 },
+        },
+      ]),
+    ).rejects.toBeInstanceOf(FirestoreDuplicateIdException);
+    expect(await backend.get('batch-coll', 'b')).toBeNull();
   });
 
   it('nested runInFirestoreTransaction refuses a different backend', async () => {
