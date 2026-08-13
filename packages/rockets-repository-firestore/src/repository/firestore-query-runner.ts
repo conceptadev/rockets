@@ -1,13 +1,19 @@
 import type { FirestoreBackend } from '../interfaces/firestore-backend.interface';
 import type {
-  FirestorePostFilter,
   FirestoreQueryBranch,
+  FirestoreQueryFilter,
   FirestoreQueryRequest,
 } from '../interfaces/firestore-query.interface';
+import { reconcileOrderByWithInequality } from './firestore-order-by-reconcile';
 import { sortFirestoreRows } from './firestore-sort';
 
+type FirestoreQueryClient = Pick<
+  FirestoreBackend,
+  'queryBranch' | 'countBranch'
+>;
+
 export async function runFirestoreQuery(
-  backend: FirestoreBackend,
+  backend: FirestoreQueryClient,
   collection: string,
   request: FirestoreQueryRequest,
 ): Promise<Record<string, unknown>[]> {
@@ -19,15 +25,26 @@ export async function runFirestoreQuery(
 
   const merged = new Map<string, Record<string, unknown>>();
 
-  const pushToServer =
+  const singleBranch =
     branches.length === 1 &&
     branches[0] !== undefined &&
     branches[0].postFilters.length === 0;
 
+  const reconciled = singleBranch
+    ? reconcileOrderByWithInequality(branches[0], request.orderBy)
+    : undefined;
+
+  const pushToServer =
+    singleBranch && reconciled !== undefined && !reconciled.clientReorder;
+
   for (const branch of branches) {
+    const branchReconciled = reconcileOrderByWithInequality(
+      branch,
+      request.orderBy,
+    );
     const rows = await backend.queryBranch(collection, {
       branch,
-      orderBy: pushToServer ? request.orderBy : undefined,
+      orderBy: pushToServer ? branchReconciled.serverOrderBy : request.orderBy,
       skip: pushToServer ? request.skip : undefined,
       take: pushToServer ? request.take : undefined,
     });
@@ -56,7 +73,7 @@ export async function runFirestoreQuery(
 }
 
 export async function runFirestoreCount(
-  backend: FirestoreBackend,
+  backend: FirestoreQueryClient,
   collection: string,
   request: Omit<FirestoreQueryRequest, 'orderBy' | 'skip' | 'take'>,
 ): Promise<number> {
@@ -83,6 +100,12 @@ export async function runFirestoreCount(
   return rows.length;
 }
 
+/**
+ * Soft-delete exclusion is a server filter (`field == null`), not a
+ * post-filter. That keeps `pushToServer` true so `limit()` / `count()` stay
+ * on the backend. Callers must materialize explicit `null` on live docs —
+ * Firestore equality does not match missing fields.
+ */
 function augmentBranchesForSoftDelete(
   branches: readonly FirestoreQueryBranch[],
   softDeleteField: string | undefined,
@@ -92,14 +115,15 @@ function augmentBranchesForSoftDelete(
     return [...branches];
   }
 
-  const exclusion: FirestorePostFilter = {
-    kind: 'soft_delete_excluded',
+  const liveFilter: FirestoreQueryFilter = {
     field: softDeleteField,
+    op: '==',
+    value: null,
   };
 
   return branches.map((branch) => ({
     ...branch,
-    postFilters: [...branch.postFilters, exclusion],
+    filters: [...branch.filters, liveFilter],
   }));
 }
 

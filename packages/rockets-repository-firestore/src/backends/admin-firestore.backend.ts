@@ -1,13 +1,22 @@
 import { getApp } from 'firebase-admin/app';
 import {
+  FieldValue,
   getFirestore,
   type DocumentData,
+  type Firestore,
   type Query,
+  type Transaction,
 } from 'firebase-admin/firestore';
 
+import { FIRESTORE_MAX_BATCH_WRITES } from '../constants/firestore-transaction.constants';
+import { FirestoreBatchWriteLimitExceededException } from '../exceptions/firestore-batch-write-limit-exceeded.exception';
 import { FirestoreDuplicateIdException } from '../exceptions/firestore-duplicate-id.exception';
+import { FirestoreInvalidPreconditionException } from '../exceptions/firestore-invalid-precondition.exception';
+import { FirestorePreconditionFailedException } from '../exceptions/firestore-precondition-failed.exception';
+import { FirestoreTransactionReadAfterWriteException } from '../exceptions/firestore-transaction-read-after-write.exception';
 import type {
   FirestoreBackend,
+  FirestoreBatchOperation,
   FirestoreBranchQueryOptions,
 } from '../interfaces/firestore-backend.interface';
 import type {
@@ -15,23 +24,287 @@ import type {
   FirestoreOrderBy,
   FirestoreQueryBranch,
 } from '../interfaces/firestore-query.interface';
+import type { FirestoreTransactionHandle } from '../interfaces/firestore-transaction-handle.interface';
+import type { FirestoreWritePrecondition } from '../interfaces/firestore-write.interface';
+import { isFirestoreIncrementSentinel } from '../interfaces/firestore-write.interface';
 import { applyFirestorePostFilters } from '../repository/firestore-post-filter';
+import { reconcileOrderByWithInequality } from '../repository/firestore-order-by-reconcile';
 import { applyFirestoreFilters } from '../repository/firestore-row-filter';
 import { sortFirestoreRows } from '../repository/firestore-sort';
 import { normalizeFirestoreValue } from '../repository/firestore-value';
+import { FirestoreTransactionWriteCounter } from '../transaction/firestore-transaction-write-counter';
+import { toAdminPrecondition } from '../utils/firestore-precondition.util';
 
-// Batched reads keep argument lists bounded; getAll itself has no hard cap.
 const GET_ALL_CHUNK = 300;
 
+const GRPC_NOT_FOUND = 5;
 const GRPC_ALREADY_EXISTS = 6;
+const GRPC_FAILED_PRECONDITION = 9;
 
-function isAlreadyExistsError(error: unknown): boolean {
+function isGrpcCode(error: unknown, code: number): boolean {
   return (
     typeof error === 'object' &&
     error !== null &&
     'code' in error &&
-    error.code === GRPC_ALREADY_EXISTS
+    error.code === code
   );
+}
+
+function isAlreadyExistsError(error: unknown): boolean {
+  return isGrpcCode(error, GRPC_ALREADY_EXISTS);
+}
+
+function isFailedPreconditionError(error: unknown): boolean {
+  return isGrpcCode(error, GRPC_FAILED_PRECONDITION);
+}
+
+function isNotFoundError(error: unknown): boolean {
+  return isGrpcCode(error, GRPC_NOT_FOUND);
+}
+
+function isPreconditionedWriteFailure(
+  error: unknown,
+  precondition: FirestoreWritePrecondition | undefined,
+): boolean {
+  return (
+    isFailedPreconditionError(error) ||
+    (precondition !== undefined && isNotFoundError(error))
+  );
+}
+
+function isReadAfterWriteError(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+  return /all reads before all writes/i.test(error.message);
+}
+
+async function mapTransactionRead<T>(fn: () => Promise<T>): Promise<T> {
+  try {
+    return await fn();
+  } catch (error) {
+    if (isReadAfterWriteError(error)) {
+      throw new FirestoreTransactionReadAfterWriteException();
+    }
+    throw error;
+  }
+}
+
+function serialise(data: Record<string, unknown>): Record<string, unknown> {
+  const next: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(data)) {
+    if (isFirestoreIncrementSentinel(value)) {
+      next[key] = FieldValue.increment(value.__firestoreIncrement);
+    } else {
+      next[key] = value;
+    }
+  }
+  return next;
+}
+
+function normalise(
+  data: DocumentData | undefined,
+  documentId: string,
+): Record<string, unknown> {
+  if (!data) {
+    return { id: documentId };
+  }
+  const next: Record<string, unknown> = { id: documentId };
+  for (const [key, value] of Object.entries(data)) {
+    next[key] = normalizeFirestoreValue(value);
+  }
+  return next;
+}
+
+class AdminFirestoreTransactionHandle implements FirestoreTransactionHandle {
+  private readonly writes = new FirestoreTransactionWriteCounter();
+
+  constructor(
+    private readonly transaction: Transaction,
+    private readonly db: Firestore,
+  ) {}
+
+  async get(
+    collection: string,
+    documentId: string,
+  ): Promise<Record<string, unknown> | null> {
+    return mapTransactionRead(async () => {
+      const snap = await this.transaction.get(
+        this.db.collection(collection).doc(documentId),
+      );
+      if (!snap.exists) {
+        return null;
+      }
+      return normalise(snap.data(), documentId);
+    });
+  }
+
+  async create(
+    collection: string,
+    documentId: string,
+    data: Record<string, unknown>,
+    options?: { readonly skipExistenceRead?: boolean },
+  ): Promise<void> {
+    const ref = this.db.collection(collection).doc(documentId);
+    if (!options?.skipExistenceRead) {
+      const snap = await mapTransactionRead(() => this.transaction.get(ref));
+      if (snap.exists) {
+        throw new FirestoreDuplicateIdException(collection, documentId);
+      }
+    }
+    this.writes.recordWrite();
+    this.transaction.create(ref, serialise(data));
+  }
+
+  async set(
+    collection: string,
+    documentId: string,
+    data: Record<string, unknown>,
+    merge = false,
+    precondition?: FirestoreWritePrecondition,
+  ): Promise<void> {
+    this.writes.recordWrite();
+    const ref = this.db.collection(collection).doc(documentId);
+    const adminPrecondition = toAdminPrecondition(precondition, 'set');
+    // Precondition is only valid on update/delete in the Admin SDK.
+    if (adminPrecondition) {
+      if (!merge) {
+        throw new FirestoreInvalidPreconditionException(
+          'Firestore preconditioned set requires merge: true (update semantics)',
+        );
+      }
+      this.transaction.update(ref, serialise(data), adminPrecondition);
+      return;
+    }
+    this.transaction.set(ref, serialise(data), { merge });
+  }
+
+  async delete(
+    collection: string,
+    documentId: string,
+    precondition?: FirestoreWritePrecondition,
+  ): Promise<void> {
+    this.writes.recordWrite();
+    const ref = this.db.collection(collection).doc(documentId);
+    const adminPrecondition = toAdminPrecondition(precondition, 'delete');
+    if (adminPrecondition) {
+      this.transaction.delete(ref, adminPrecondition);
+    } else {
+      this.transaction.delete(ref);
+    }
+  }
+
+  async queryBranch(
+    collection: string,
+    options: FirestoreBranchQueryOptions,
+  ): Promise<Record<string, unknown>[]> {
+    return mapTransactionRead(() =>
+      this.queryBranchUnmapped(collection, options),
+    );
+  }
+
+  private async queryBranchUnmapped(
+    collection: string,
+    options: FirestoreBranchQueryOptions,
+  ): Promise<Record<string, unknown>[]> {
+    const branch = options.branch;
+    const skip = options.skip ?? 0;
+    const take = options.take;
+    const reconciled = reconcileOrderByWithInequality(branch, options.orderBy);
+    const pushLimit =
+      branch.postFilters.length === 0 && !reconciled.clientReorder;
+
+    if (branch.documentId !== undefined || branch.documentIds !== undefined) {
+      const rows = await this.loadBranchRows(collection, branch);
+      const filtered = applyFirestorePostFilters(
+        applyFirestoreFilters(rows, branch.filters),
+        branch.postFilters,
+      );
+      const ordered = sortFirestoreRows(filtered, options.orderBy);
+      const sliced = ordered.slice(skip);
+      return typeof take === 'number' && take > 0
+        ? sliced.slice(0, take)
+        : sliced;
+    }
+
+    let query = buildCollectionQuery(this.db, collection, branch);
+    if (reconciled.serverOrderBy) {
+      for (const clause of reconciled.serverOrderBy) {
+        query = query.orderBy(clause.field, clause.direction);
+      }
+    }
+
+    if (!pushLimit) {
+      const snapshot = await this.transaction.get(query);
+      const rows = snapshot.docs.map((doc) => normalise(doc.data(), doc.id));
+      const filtered = applyFirestorePostFilters(rows, branch.postFilters);
+      const ordered = reconciled.clientReorder
+        ? sortFirestoreRows(filtered, options.orderBy)
+        : filtered;
+      const sliced = ordered.slice(skip);
+      return typeof take === 'number' && take > 0
+        ? sliced.slice(0, take)
+        : sliced;
+    }
+
+    if (typeof take === 'number' && take > 0) {
+      query = query.limit(skip + take);
+    }
+    const snapshot = await this.transaction.get(query);
+    const rows = snapshot.docs.map((doc) => normalise(doc.data(), doc.id));
+    return skip > 0 ? rows.slice(skip) : rows;
+  }
+
+  async countBranch(
+    collection: string,
+    branch: FirestoreQueryBranch,
+  ): Promise<number> {
+    const rows = await this.queryBranch(collection, { branch });
+    return rows.length;
+  }
+
+  private async loadBranchRows(
+    collection: string,
+    branch: FirestoreQueryBranch,
+  ): Promise<Record<string, unknown>[]> {
+    if (branch.documentId !== undefined) {
+      const row = await this.get(collection, branch.documentId);
+      return row ? [row] : [];
+    }
+
+    if (branch.documentIds !== undefined) {
+      const rows: Record<string, unknown>[] = [];
+      for (const documentId of branch.documentIds) {
+        const row = await this.get(collection, documentId);
+        if (row) {
+          rows.push(row);
+        }
+      }
+      return rows;
+    }
+
+    const query = buildCollectionQuery(this.db, collection, branch);
+    const snapshot = await this.transaction.get(query);
+    return snapshot.docs.map((doc) => normalise(doc.data(), doc.id));
+  }
+}
+
+function buildCollectionQuery(
+  db: Firestore,
+  collection: string,
+  branch: FirestoreQueryBranch,
+): Query {
+  let query: Query = db.collection(collection);
+
+  for (const filter of branch.filters) {
+    query = query.where(
+      filter.field,
+      filter.op as FirestoreFilterOp,
+      filter.value,
+    );
+  }
+
+  return query;
 }
 
 export class AdminFirestoreBackend implements FirestoreBackend {
@@ -47,7 +320,7 @@ export class AdminFirestoreBackend implements FirestoreBackend {
     if (!snap.exists) {
       return null;
     }
-    return this.normalise(snap.data(), documentId);
+    return normalise(snap.data(), documentId);
   }
 
   async set(
@@ -55,23 +328,44 @@ export class AdminFirestoreBackend implements FirestoreBackend {
     documentId: string,
     data: Record<string, unknown>,
     merge = false,
+    precondition?: FirestoreWritePrecondition,
   ): Promise<void> {
-    await this.db()
-      .collection(collection)
-      .doc(documentId)
-      .set(this.serialise(data), { merge });
+    try {
+      const ref = this.db().collection(collection).doc(documentId);
+      const adminPrecondition = toAdminPrecondition(precondition, 'set');
+      // Precondition is only valid on update/delete in the Admin SDK.
+      if (adminPrecondition) {
+        if (!merge) {
+          throw new FirestoreInvalidPreconditionException(
+            'Firestore preconditioned set requires merge: true (update semantics)',
+          );
+        }
+        await ref.update(serialise(data), adminPrecondition);
+        return;
+      }
+      await ref.set(serialise(data), { merge });
+    } catch (error) {
+      if (error instanceof FirestoreInvalidPreconditionException) {
+        throw error;
+      }
+      if (isPreconditionedWriteFailure(error, precondition)) {
+        throw new FirestorePreconditionFailedException(collection, documentId);
+      }
+      throw error;
+    }
   }
 
   async create(
     collection: string,
     documentId: string,
     data: Record<string, unknown>,
+    _options?: { readonly skipExistenceRead?: boolean },
   ): Promise<void> {
     try {
       await this.db()
         .collection(collection)
         .doc(documentId)
-        .create(this.serialise(data));
+        .create(serialise(data));
     } catch (error) {
       if (isAlreadyExistsError(error)) {
         throw new FirestoreDuplicateIdException(collection, documentId);
@@ -80,8 +374,25 @@ export class AdminFirestoreBackend implements FirestoreBackend {
     }
   }
 
-  async delete(collection: string, documentId: string): Promise<void> {
-    await this.db().collection(collection).doc(documentId).delete();
+  async delete(
+    collection: string,
+    documentId: string,
+    precondition?: FirestoreWritePrecondition,
+  ): Promise<void> {
+    try {
+      const ref = this.db().collection(collection).doc(documentId);
+      const adminPrecondition = toAdminPrecondition(precondition, 'delete');
+      if (adminPrecondition) {
+        await ref.delete(adminPrecondition);
+      } else {
+        await ref.delete();
+      }
+    } catch (error) {
+      if (isPreconditionedWriteFailure(error, precondition)) {
+        throw new FirestorePreconditionFailedException(collection, documentId);
+      }
+      throw error;
+    }
   }
 
   async queryBranch(
@@ -91,6 +402,9 @@ export class AdminFirestoreBackend implements FirestoreBackend {
     const branch = options.branch;
     const skip = options.skip ?? 0;
     const take = options.take;
+    const reconciled = reconcileOrderByWithInequality(branch, options.orderBy);
+    const pushLimit =
+      branch.postFilters.length === 0 && !reconciled.clientReorder;
 
     if (branch.documentId !== undefined || branch.documentIds !== undefined) {
       const rows = await this.loadBranchRows(collection, branch);
@@ -105,29 +419,34 @@ export class AdminFirestoreBackend implements FirestoreBackend {
         : sliced;
     }
 
-    // Post-filters require in-memory evaluation, so we cannot rely on
-    // server-side limit alone — read all matching docs and slice locally.
-    if (branch.postFilters.length > 0) {
-      const query = this.buildOrderedQuery(collection, branch, options.orderBy);
-      const snapshot = await query.get();
-      const rows = snapshot.docs.map((doc) =>
-        this.normalise(doc.data(), doc.id),
+    if (!pushLimit) {
+      const query = this.buildOrderedQuery(
+        collection,
+        branch,
+        reconciled.serverOrderBy,
       );
+      const snapshot = await query.get();
+      const rows = snapshot.docs.map((doc) => normalise(doc.data(), doc.id));
       const filtered = applyFirestorePostFilters(rows, branch.postFilters);
-      const sliced = filtered.slice(skip);
+      const ordered = reconciled.clientReorder
+        ? sortFirestoreRows(filtered, options.orderBy)
+        : filtered;
+      const sliced = ordered.slice(skip);
       return typeof take === 'number' && take > 0
         ? sliced.slice(0, take)
         : sliced;
     }
 
-    // Fast path: push orderBy + limit(skip + take) to Firestore, slice(skip)
-    // locally. Reads are O(skip + take), not O(collection size).
-    let query = this.buildOrderedQuery(collection, branch, options.orderBy);
+    let query = this.buildOrderedQuery(
+      collection,
+      branch,
+      reconciled.serverOrderBy,
+    );
     if (typeof take === 'number' && take > 0) {
       query = query.limit(skip + take);
     }
     const snapshot = await query.get();
-    const rows = snapshot.docs.map((doc) => this.normalise(doc.data(), doc.id));
+    const rows = snapshot.docs.map((doc) => normalise(doc.data(), doc.id));
     return skip > 0 ? rows.slice(skip) : rows;
   }
 
@@ -147,9 +466,61 @@ export class AdminFirestoreBackend implements FirestoreBackend {
       ).length;
     }
 
-    const query = this.buildCollectionQuery(collection, branch);
+    const query = buildCollectionQuery(this.db(), collection, branch);
     const snapshot = await query.count().get();
     return snapshot.data().count;
+  }
+
+  async runTransaction<T>(
+    fn: (tx: FirestoreTransactionHandle) => Promise<T>,
+  ): Promise<T> {
+    const db = this.db();
+    return db.runTransaction(async (transaction) =>
+      fn(new AdminFirestoreTransactionHandle(transaction, db)),
+    );
+  }
+
+  async writeBatch(
+    operations: readonly FirestoreBatchOperation[],
+  ): Promise<void> {
+    if (operations.length === 0) {
+      return;
+    }
+    if (operations.length > FIRESTORE_MAX_BATCH_WRITES) {
+      throw new FirestoreBatchWriteLimitExceededException(operations.length);
+    }
+
+    const db = this.db();
+    const batch = db.batch();
+    for (const operation of operations) {
+      const ref = db.collection(operation.collection).doc(operation.id);
+      if (operation.op === 'create') {
+        batch.create(ref, serialise(operation.data));
+      } else {
+        batch.delete(ref);
+      }
+    }
+
+    try {
+      await batch.commit();
+    } catch (error) {
+      if (isAlreadyExistsError(error)) {
+        const createOps = operations.filter((op) => op.op === 'create');
+        // Admin batch.commit does not say which create collided; only name
+        // the id when the batch had a single create.
+        if (createOps.length === 1) {
+          throw new FirestoreDuplicateIdException(
+            createOps[0].collection,
+            createOps[0].id,
+          );
+        }
+        throw new FirestoreDuplicateIdException(
+          createOps[0]?.collection ?? 'unknown',
+          'unknown',
+        );
+      }
+      throw error;
+    }
   }
 
   private async loadBranchRows(
@@ -176,33 +547,16 @@ export class AdminFirestoreBackend implements FirestoreBackend {
         const snapshots = await this.db().getAll(...refs);
         for (const snapshot of snapshots) {
           if (snapshot.exists) {
-            rows.push(this.normalise(snapshot.data(), snapshot.id));
+            rows.push(normalise(snapshot.data(), snapshot.id));
           }
         }
       }
       return rows;
     }
 
-    const query = this.buildCollectionQuery(collection, branch);
+    const query = buildCollectionQuery(this.db(), collection, branch);
     const snapshot = await query.get();
-    return snapshot.docs.map((doc) => this.normalise(doc.data(), doc.id));
-  }
-
-  private buildCollectionQuery(
-    collection: string,
-    branch: FirestoreQueryBranch,
-  ): Query {
-    let query: Query = this.db().collection(collection);
-
-    for (const filter of branch.filters) {
-      query = query.where(
-        filter.field,
-        filter.op as FirestoreFilterOp,
-        filter.value,
-      );
-    }
-
-    return query;
+    return snapshot.docs.map((doc) => normalise(doc.data(), doc.id));
   }
 
   private buildOrderedQuery(
@@ -210,36 +564,12 @@ export class AdminFirestoreBackend implements FirestoreBackend {
     branch: FirestoreQueryBranch,
     orderBy: readonly FirestoreOrderBy[] | undefined,
   ): Query {
-    let query = this.buildCollectionQuery(collection, branch);
+    let query = buildCollectionQuery(this.db(), collection, branch);
     if (orderBy) {
       for (const clause of orderBy) {
         query = query.orderBy(clause.field, clause.direction);
       }
     }
     return query;
-  }
-
-  /**
-   * `Date` goes to the SDK untouched: Firestore stores it as a native
-   * `Timestamp`, which {@link normalise} converts straight back to a
-   * `Date`. Stringifying here is what made that round trip lossy and
-   * left `normalise`'s `instanceof Timestamp` branch permanently dead.
-   */
-  private serialise(data: Record<string, unknown>): Record<string, unknown> {
-    return { ...data };
-  }
-
-  private normalise(
-    data: DocumentData | undefined,
-    documentId: string,
-  ): Record<string, unknown> {
-    if (!data) {
-      return { id: documentId };
-    }
-    const next: Record<string, unknown> = { id: documentId };
-    for (const [key, value] of Object.entries(data)) {
-      next[key] = normalizeFirestoreValue(value);
-    }
-    return next;
   }
 }

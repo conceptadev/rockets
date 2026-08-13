@@ -9,6 +9,25 @@ if (process.env.SKIP_EMULATOR && !process.env.CI) {
   process.exit(0);
 }
 
+function assertJdk21OrNewer() {
+  const result = spawnSync('java', ['-version'], { encoding: 'utf8' });
+  const output = `${result.stderr ?? ''}${result.stdout ?? ''}`;
+  const match = /version "(\d+)/.exec(output);
+  const major = match ? Number(match[1]) : Number.NaN;
+  if (!Number.isFinite(major) || major < 21) {
+    console.error(
+      'Firestore emulator requires JDK 21+ (firebase-tools). ' +
+        `Detected: ${match ? `Java ${major}` : 'no usable java -version'}.\n` +
+        'Install a modern JDK (e.g. `brew install openjdk@21`) and ensure ' +
+        '`java -version` reports 21+, or set SKIP_EMULATOR=1 locally ' +
+        '(CI never skips).',
+    );
+    process.exit(1);
+  }
+}
+
+assertJdk21OrNewer();
+
 // firebase-tools is intentionally not a workspace dependency — the pinned
 // npx invocation is the single place that names its version.
 const result = spawnSync(
@@ -27,4 +46,5 @@ const result = spawnSync(
   ],
   { stdio: 'inherit' },
 );
+
 process.exit(result.status ?? 1);
