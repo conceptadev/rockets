@@ -38,7 +38,10 @@ import { deriveFirestoreDocumentId } from '../utils/firestore-deterministic-id';
 import { resolveSoftDeleteFieldFromMetadata } from './firestore-entity-metadata';
 import { runFirestoreCount, runFirestoreQuery } from './firestore-query-runner';
 import { translateDnfBranch } from './firestore-where.translator';
-import { getAmbientFirestoreTransaction } from '../transaction/firestore-transaction-context';
+import {
+  getAmbientFirestoreTransaction,
+  getAmbientFirestoreTransactionOwner,
+} from '../transaction/firestore-transaction-context';
 import { runInFirestoreTransaction } from '../transaction/run-in-firestore-transaction';
 
 export interface FirestoreRepositoryOptions<Entity extends PlainLiteralObject> {
@@ -289,6 +292,29 @@ export class FirestoreRepository<
     entity: DeepPartial<Entity>,
     options?: RepositoryUpsertOptions,
   ): Promise<Entity> {
+    // The soft-delete decision below reads the document, then writes based on
+    // what it saw. Outside a transaction those two calls hit the raw backend
+    // non-atomically: a concurrent create+soft-delete landing between them
+    // would let this write's materialized `null` resurrect the row. Open our
+    // own transaction so the decision and the write are atomic (SDK retries
+    // re-execute on contention). Skipped when the entity already carries the
+    // soft-delete field (the write value is caller-supplied, not read-derived —
+    // no race) or there is no soft-delete field at all. Also skipped when any
+    // Firestore transaction is already ambient: a same-backend one already
+    // makes this atomic, and a foreign-backend one must keep writing through
+    // this repository's own backend (see the cross-backend test) rather than
+    // fail the span guard in runInFirestoreTransaction.
+    const softDeleteField = this.softDeleteField;
+    const needsSoftDeleteRead =
+      softDeleteField !== undefined &&
+      (entity as Record<string, unknown>)[softDeleteField] === undefined;
+    if (
+      needsSoftDeleteRead &&
+      getAmbientFirestoreTransactionOwner() === undefined &&
+      !(await this.isInTransaction(options?.ctx))
+    ) {
+      return this.transaction(() => this.doUpsert(entity, options));
+    }
     const client = await this.resolveClient(options?.ctx);
     const id = this.resolveId(entity);
     // An upsert that lands on a NEW document writes with `merge: true`, so
@@ -309,13 +335,30 @@ export class FirestoreRepository<
     data: DeepPartial<Entity>,
     options?: RepositoryUpdateOptions,
   ): Promise<Entity> {
-    const client = await this.resolveClient(options?.ctx);
     const id = this.resolveId(entity);
     // Replace overwrites the whole document (`merge: false`). Carry the
     // soft-delete state from the loaded entity when present; otherwise read
     // the live document so a hand-built `{ id }` entity cannot invent `null`
     // over a soft-deleted row.
     const payload = this.carrySoftDeleteField({ ...data, id }, entity);
+    // A read to decide materialization only happens when the payload still
+    // lacks the soft-delete field. When it does, open a transaction so a
+    // concurrent create+soft-delete cannot slip between the read and the write
+    // and get resurrected (see doUpsert, including the ambient-owner guard).
+    // The common carry path already has the field, reads nothing, and skips
+    // the transaction.
+    const softDeleteField = this.softDeleteField;
+    const needsSoftDeleteRead =
+      softDeleteField !== undefined &&
+      (payload as Record<string, unknown>)[softDeleteField] === undefined;
+    if (
+      needsSoftDeleteRead &&
+      getAmbientFirestoreTransactionOwner() === undefined &&
+      !(await this.isInTransaction(options?.ctx))
+    ) {
+      return this.transaction(() => this.doReplace(entity, data, options));
+    }
+    const client = await this.resolveClient(options?.ctx);
     const materializeSoftDeleteNull =
       await this.shouldMaterializeSoftDeleteOnReplace(client, id, payload);
 

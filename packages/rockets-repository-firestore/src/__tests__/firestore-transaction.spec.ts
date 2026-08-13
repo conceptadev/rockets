@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Test } from '@nestjs/testing';
 import {
   getDynamicRepositoryToken,
@@ -389,6 +389,49 @@ describe('Firestore transactions (P1-1)', () => {
     ).resolves.toMatchObject({ balance: 1 });
   });
 
+  it('soft-deletable upsert on another backend during an ambient transaction writes independently, not a span error', async () => {
+    const other = new InMemoryFirestoreBackend();
+    const wired = await Test.createTestingModule({
+      imports: [
+        RepositoryModule.forRoot({}),
+        RepositoryModule.forFeature({
+          module: {
+            name: FirestoreRepositoryModule.name,
+            forFeature: (entities: RepositoryProviderOptions[]) =>
+              FirestoreRepositoryModule.forFeature(
+                entities.map((entity) => ({
+                  key: entity.key,
+                  entity: entity.entity,
+                  collection: 'soft-accounts-cross-backend',
+                  softDeleteField: 'dateRemoved',
+                })),
+                { backend: other },
+              ),
+          },
+          entities: [{ key: 'soft-account', entity: SoftAccountEntity }],
+        }),
+      ],
+    }).compile();
+
+    const repo = wired.get<RepositoryInterface<SoftAccountEntity>>(
+      getDynamicRepositoryToken('soft-account'),
+    );
+
+    // `backend` (A) owns the ambient transaction; `other` (B) is a different
+    // database. The soft-deletable upsert must NOT auto-open a B transaction
+    // (that would hit the cross-backend span guard and throw). It writes
+    // through B independently, still materializing the soft-delete marker.
+    await expect(
+      runInFirestoreTransaction(backend, async () => {
+        await repo.upsert({ id: 'a', balance: 1 });
+      }),
+    ).resolves.toBeUndefined();
+
+    await expect(
+      repo.findOne({ where: Where.eq('id', 'a') }),
+    ).resolves.toMatchObject({ balance: 1, dateRemoved: null });
+  });
+
   it('transactional create after a write is rejected like the Admin handle', async () => {
     await expect(
       backend.runTransaction(async (tx) => {
@@ -572,6 +615,162 @@ describe('Firestore transactions (P1-1)', () => {
         await repo.upsert({ id: 'a', balance: 2 });
       }),
     ).rejects.toBeInstanceOf(FirestoreTransactionReadAfterWriteException);
+  });
+
+  it('soft-deletable upsert outside a transaction opens one so read+write are atomic', async () => {
+    const wired = await Test.createTestingModule({
+      imports: [
+        RepositoryModule.forRoot({}),
+        RepositoryModule.forFeature({
+          module: {
+            name: FirestoreRepositoryModule.name,
+            forFeature: (entities: RepositoryProviderOptions[]) =>
+              FirestoreRepositoryModule.forFeature(
+                entities.map((entity) => ({
+                  key: entity.key,
+                  entity: entity.entity,
+                  collection: 'soft-accounts-upsert-atomic',
+                  softDeleteField: 'dateRemoved',
+                })),
+                { backend },
+              ),
+          },
+          entities: [{ key: 'soft-account', entity: SoftAccountEntity }],
+        }),
+      ],
+    }).compile();
+
+    const repo = wired.get<RepositoryInterface<SoftAccountEntity>>(
+      getDynamicRepositoryToken('soft-account'),
+    );
+
+    const runTransaction = vi.spyOn(backend, 'runTransaction');
+    await repo.upsert({ id: 'a', balance: 1 });
+    expect(runTransaction).toHaveBeenCalledTimes(1);
+  });
+
+  it('non-soft-deletable upsert skips the transaction (no read to race)', async () => {
+    const wired = await Test.createTestingModule({
+      imports: [
+        RepositoryModule.forRoot({}),
+        RepositoryModule.forFeature({
+          module: firestoreModuleFor(backend, 'accounts-upsert-plain'),
+          entities: [{ key: 'account', entity: AccountEntity }],
+        }),
+      ],
+    }).compile();
+
+    const repo = wired.get<RepositoryInterface<AccountEntity>>(
+      getDynamicRepositoryToken('account'),
+    );
+
+    const runTransaction = vi.spyOn(backend, 'runTransaction');
+    await repo.upsert({ id: 'a', balance: 1 });
+    expect(runTransaction).not.toHaveBeenCalled();
+  });
+
+  it('soft-deletable upsert detects a concurrent write and never resurrects a soft-deleted row', async () => {
+    // Instrumented backend: injects a concurrent create+soft-delete exactly
+    // once, during the upsert's in-transaction read and before it commits. The
+    // optimistic conflict check must then reject the attempt instead of writing
+    // a materialized `null` over the row soft-deleted underneath it.
+    class InterleavingBackend extends InMemoryFirestoreBackend {
+      private injected = false;
+      onFirstRead?: () => Promise<void>;
+
+      private async fireOnce(): Promise<void> {
+        if (this.injected || this.onFirstRead === undefined) {
+          return;
+        }
+        this.injected = true;
+        await this.onFirstRead();
+      }
+
+      override async runTransaction<T>(
+        fn: (tx: FirestoreTransactionHandle) => Promise<T>,
+      ): Promise<T> {
+        return super.runTransaction(async (tx) => {
+          const wrapped: FirestoreTransactionHandle = {
+            get: async (collection, id) => {
+              const row = await tx.get(collection, id);
+              await this.fireOnce();
+              return row;
+            },
+            create: tx.create.bind(tx),
+            set: tx.set.bind(tx),
+            delete: tx.delete.bind(tx),
+            queryBranch: tx.queryBranch.bind(tx),
+            countBranch: tx.countBranch.bind(tx),
+          };
+          return fn(wrapped);
+        });
+      }
+    }
+
+    const collection = 'soft-accounts-race';
+    const interleaving = new InterleavingBackend();
+    interleaving.onFirstRead = async () => {
+      await interleaving.create(collection, 'x', { id: 'x', balance: 9 });
+      await interleaving.set(
+        collection,
+        'x',
+        { dateRemoved: new Date() },
+        true,
+      );
+    };
+
+    const wired = await Test.createTestingModule({
+      imports: [
+        RepositoryModule.forRoot({}),
+        RepositoryModule.forFeature({
+          module: {
+            name: FirestoreRepositoryModule.name,
+            forFeature: (entities: RepositoryProviderOptions[]) =>
+              FirestoreRepositoryModule.forFeature(
+                entities.map((entity) => ({
+                  key: entity.key,
+                  entity: entity.entity,
+                  collection,
+                  softDeleteField: 'dateRemoved',
+                })),
+                { backend: interleaving },
+              ),
+          },
+          entities: [{ key: 'soft-account', entity: SoftAccountEntity }],
+        }),
+      ],
+    }).compile();
+
+    const repo = wired.get<RepositoryInterface<SoftAccountEntity>>(
+      getDynamicRepositoryToken('soft-account'),
+    );
+
+    // Read saw "missing", but the concurrent create+soft-delete lands before
+    // commit, so the attempt aborts on the optimistic-conflict check. The
+    // in-memory backend has no retry loop, so the abort surfaces as a throw;
+    // real Firestore RETRIES the aborted attempt and the re-read then sees the
+    // soft-deleted row (no resurrection) and resolves. Either way the
+    // resurrecting write never commits — the load-bearing proof is the
+    // visibility assertions below, not the throw shape.
+    //
+    // The repository permeator wraps the failure in a generic query exception,
+    // so assert on the preserved `originalError` to prove the abort came from
+    // the optimistic-conflict check and not some unrelated throw.
+    const rejection = await repo.upsert({ id: 'x', balance: 1 }).then(
+      () => undefined,
+      (error: unknown) => error,
+    );
+    const originalError = (
+      rejection as { context?: { originalError?: { message?: string } } }
+    ).context?.originalError;
+    expect(originalError?.message).toMatch(/in-memory transaction conflict/);
+
+    // The row stays soft-deleted: hidden from default reads, present with
+    // `withDeleted`, never resurrected by a stale `null`.
+    await expect(repo.find()).resolves.toEqual([]);
+    await expect(repo.find({ withDeleted: true })).resolves.toEqual([
+      expect.objectContaining({ id: 'x', dateRemoved: expect.any(Date) }),
+    ]);
   });
 
   it('createMany inside a transaction hoists existence reads before writes', async () => {
