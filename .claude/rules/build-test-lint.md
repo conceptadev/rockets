@@ -7,11 +7,13 @@ description: Build, test, and lint commands for the project
 Run checks in this order after code changes:
 
 1. `yarn build`
-2. `yarn typecheck:spec` — type-checks all test files (the runner only
+2. `yarn api:report:check-built` — verifies public runtime/type declarations
+   and report-generator regressions against the fresh build
+3. `yarn typecheck:spec` — type-checks all test files (the runner only
    transpiles; without this, spec type errors ship silently)
-3. `yarn test`
-4. `yarn test:e2e`
-5. `yarn lint`
+4. `yarn test`
+5. `yarn test:e2e`
+6. `yarn lint`
 
 CI also runs: `yarn lint:all`, `yarn typecheck:spec`, `yarn test:ci`
 

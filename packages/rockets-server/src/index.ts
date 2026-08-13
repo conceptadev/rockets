@@ -83,8 +83,7 @@ export { isRepositoryBootstrap } from '@concepta/rockets-core';
 export { Ctx } from '@concepta/nestjs-core';
 export type { AppContextInterface } from '@concepta/nestjs-core';
 
-// ── Backward compatibility re-exports ──
-export { ROCKETS_MODULE_OPTIONS_DEFAULT_SETTINGS_TOKEN } from './rockets.constants';
+// ── Backward compatibility re-export ──
 export { ExceptionsFilter } from './infrastructure/filters/exceptions.filter';
 
 // ── Server's own exports ──

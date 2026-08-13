@@ -5,6 +5,16 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ## [Unreleased]
 
+### Public API governance
+
+- Declaration reports now distinguish runtime from type-only exports and
+  include same-package declarations reachable through public signatures.
+- Removed the unused pre-1.0 aliases
+  `ROCKETS_MODULE_OPTIONS_DEFAULT_SETTINGS_TOKEN` and
+  `RocketsAuthUserMetadataCreateDtoInterface`; use
+  `ROCKETS_CORE_SETTINGS_TOKEN` and
+  `RocketsAuthUserMetadataCreatableInterface`, respectively.
+
 ### Release preparation
 
 - Public Rockets package manifests are aligned at `1.0.0-alpha.8`. Registry

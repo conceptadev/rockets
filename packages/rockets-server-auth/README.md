@@ -459,10 +459,8 @@ Saved here so consumers don't dual-import from
 Other upstream symbols (e.g. `AccessControlServiceInterface`) are not
 re-exported — import them directly from `@concepta/nestjs-access-control`.
 
-`RocketsAuthUserMetadataCreateDtoInterface` remains as a legacy source alias
-for `RocketsAuthUserMetadataCreatableInterface` during the pre-1.0 namespace
-migration. New code must use the canonical name; remove the alias only with an
-explicit migration note and reviewed API-report change.
+The unused pre-1.0 `RocketsAuthUserMetadataCreateDtoInterface` alias has been
+removed. Use `RocketsAuthUserMetadataCreatableInterface`.
 
 ### Known limitations
 

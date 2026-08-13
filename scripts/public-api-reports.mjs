@@ -1,51 +1,66 @@
+import { createRequire } from 'node:module';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join, relative, resolve } from 'node:path';
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import ts from 'typescript';
 
 import { readPublicPackageManifests } from './public-package-manifests.mjs';
 
-const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const reportsPath = join(repositoryRoot, 'etc', 'public-api-reports.json');
-const update = process.argv.includes('--update');
-const allowedConditions = ['types', 'import', 'require', 'default'];
+const scriptPath = fileURLToPath(import.meta.url);
+const defaultRepositoryRoot = resolve(dirname(scriptPath), '..');
+const require = createRequire(import.meta.url);
+const allowedTypeConditions = ['types', 'import', 'require', 'default'];
+const allowedRuntimeConditions = ['require', 'default'];
 
-function resolveTypesTarget(value) {
-  if (typeof value === 'string') return value.endsWith('.d.ts') ? value : null;
+function resolveExportTarget(value, conditions, accept) {
+  if (typeof value === 'string') return accept(value) ? value : null;
   if (value === null || typeof value !== 'object') return null;
 
-  for (const condition of allowedConditions) {
-    const target = resolveTypesTarget(value[condition]);
+  for (const condition of conditions) {
+    const target = resolveExportTarget(value[condition], conditions, accept);
     if (target !== null) return target;
   }
   return null;
 }
 
-function entryPoints() {
+export function discoverEntryPoints(repositoryRoot) {
   const entries = [];
 
   for (const manifest of readPublicPackageManifests(repositoryRoot, {
     namePrefix: '@concepta/',
   })) {
-    const packageRoot = join(
-      repositoryRoot,
-      'packages',
-      manifest.repository.directory.replace(/^packages\//, ''),
-    );
+    const packageRoot = resolve(repositoryRoot, manifest.repository.directory);
 
     for (const [subpath, conditions] of Object.entries(
       manifest.exports ?? {},
     )) {
       if (subpath === './package.json') continue;
-      const target = resolveTypesTarget(conditions);
-      if (target === null) continue;
-      const filePath = resolve(packageRoot, target);
+
+      const typesTarget = resolveExportTarget(
+        conditions,
+        allowedTypeConditions,
+        (target) => target.endsWith('.d.ts'),
+      );
+      if (typesTarget === null) continue;
+
+      const runtimeTarget = resolveExportTarget(
+        conditions,
+        allowedRuntimeConditions,
+        (target) => !target.endsWith('.d.ts'),
+      );
       const entryPoint =
         subpath === '.'
           ? manifest.name
           : `${manifest.name}/${subpath.slice(2)}`;
-      entries.push({ entryPoint, filePath });
+
+      entries.push({
+        entryPoint,
+        packageRoot,
+        typesPath: resolve(packageRoot, typesTarget),
+        runtimePath:
+          runtimeTarget === null ? null : resolve(packageRoot, runtimeTarget),
+      });
     }
   }
 
@@ -54,7 +69,7 @@ function entryPoints() {
   );
 }
 
-function normalizeSignature(value) {
+export function normalizeSignature(value, repositoryRoot) {
   return value
     .replaceAll(repositoryRoot, '<repo>')
     .replaceAll('\\', '/')
@@ -62,16 +77,19 @@ function normalizeSignature(value) {
       /, \{ with: \{ ["']resolution-mode["']: ["'](?:import|require)["'] \} \}/g,
       '',
     )
+    .replace(/import\((["'])(?:\.\.?\/)[^"']+\1\)\./g, '')
     .replace(/[ \t]+$/gm, '')
     .trim();
 }
 
-function declarationKind(symbol) {
-  const resolved =
-    symbol.flags & ts.SymbolFlags.Alias
-      ? checker.getAliasedSymbol(symbol)
-      : symbol;
-  const flags = resolved.flags;
+function resolveSymbol(checker, symbol) {
+  return symbol.flags & ts.SymbolFlags.Alias
+    ? checker.getAliasedSymbol(symbol)
+    : symbol;
+}
+
+function declarationKind(checker, symbol) {
+  const flags = resolveSymbol(checker, symbol).flags;
 
   if (flags & ts.SymbolFlags.Class) return 'class';
   if (flags & ts.SymbolFlags.Interface) return 'interface';
@@ -88,11 +106,8 @@ function declarationKind(symbol) {
   return 'symbol';
 }
 
-function declarationSignature(symbol) {
-  const resolved =
-    symbol.flags & ts.SymbolFlags.Alias
-      ? checker.getAliasedSymbol(symbol)
-      : symbol;
+function declarationSignature(checker, printer, symbol, repositoryRoot) {
+  const resolved = resolveSymbol(checker, symbol);
   const declarations = resolved.declarations ?? [];
   if (declarations.length > 0) {
     return normalizeSignature(
@@ -105,6 +120,7 @@ function declarationSignature(symbol) {
           ),
         )
         .join('\n'),
+      repositoryRoot,
     );
   }
 
@@ -117,103 +133,242 @@ function declarationSignature(symbol) {
       ts.TypeFormatFlags.NoTruncation |
         ts.TypeFormatFlags.UseFullyQualifiedType,
     ),
+    repositoryRoot,
   );
 }
 
-function isDeprecated(symbol) {
-  const resolved =
-    symbol.flags & ts.SymbolFlags.Alias
-      ? checker.getAliasedSymbol(symbol)
-      : symbol;
-  const declarations = [
-    ...(symbol.declarations ?? []),
-    ...(resolved.declarations ?? []),
-  ];
-  return declarations.some(
-    (declaration) => ts.getJSDocDeprecatedTag(declaration) !== undefined,
+function isWithin(parent, child) {
+  const path = relative(parent, child);
+  return path !== '..' && !path.startsWith(`..${sep}`) && !isAbsolute(path);
+}
+
+function packageDeclarations(symbol, packageRoot) {
+  return (symbol.declarations ?? []).filter(
+    (declaration) =>
+      declaration.parent !== undefined &&
+      ts.isSourceFile(declaration.parent) &&
+      isWithin(packageRoot, declaration.getSourceFile().fileName),
   );
 }
 
-const entries = entryPoints();
-const missing = entries.filter(({ filePath }) => !existsSync(filePath));
-if (missing.length > 0) {
-  console.error(
-    'Public API report generation requires a fresh build. Missing:',
+function supportingDeclarationsForEntryPoint({
+  checker,
+  exportedSymbols,
+  packageRoot,
+  printer,
+  repositoryRoot,
+}) {
+  const exportedTargets = new Set(
+    exportedSymbols.map((symbol) => resolveSymbol(checker, symbol)),
   );
-  for (const { entryPoint, filePath } of missing) {
-    console.error(`- ${entryPoint}: ${relative(repositoryRoot, filePath)}`);
+  const references = new Map();
+
+  for (const exportedSymbol of exportedSymbols) {
+    const exportedName = exportedSymbol.name;
+    const rootSymbol = resolveSymbol(checker, exportedSymbol);
+    const visited = new Set();
+
+    const visitSymbol = (symbol) => {
+      const resolved = resolveSymbol(checker, symbol);
+      if (visited.has(resolved)) return;
+      visited.add(resolved);
+
+      for (const declaration of resolved.declarations ?? []) {
+        const visitNode = (node) => {
+          if (ts.isIdentifier(node)) {
+            const referenced = checker.getSymbolAtLocation(node);
+            if (referenced !== undefined) {
+              const target = resolveSymbol(checker, referenced);
+              if (target !== resolved && !exportedTargets.has(target)) {
+                const declarations = packageDeclarations(target, packageRoot);
+                if (declarations.length > 0) {
+                  const owners = references.get(target) ?? new Set();
+                  owners.add(exportedName);
+                  references.set(target, owners);
+                  visitSymbol(target);
+                }
+              }
+            }
+          }
+          ts.forEachChild(node, visitNode);
+        };
+
+        ts.forEachChild(declaration, visitNode);
+      }
+    };
+
+    visitSymbol(rootSymbol);
   }
-  process.exit(1);
-}
 
-const compilerOptions = {
-  module: ts.ModuleKind.NodeNext,
-  moduleResolution: ts.ModuleResolutionKind.NodeNext,
-  target: ts.ScriptTarget.ES2022,
-  skipLibCheck: true,
-  noEmit: true,
-};
-const program = ts.createProgram(
-  entries.map(({ filePath }) => filePath),
-  compilerOptions,
-);
-const checker = program.getTypeChecker();
-const printer = ts.createPrinter({
-  removeComments: true,
-  newLine: ts.NewLineKind.LineFeed,
-});
-const reports = {};
-
-for (const { entryPoint, filePath } of entries) {
-  const sourceFile = program.getSourceFile(filePath);
-  const moduleSymbol = sourceFile && checker.getSymbolAtLocation(sourceFile);
-  if (sourceFile === undefined || moduleSymbol === undefined) {
-    throw new Error(`Unable to inspect declarations for ${entryPoint}.`);
-  }
-
-  reports[entryPoint] = checker
-    .getExportsOfModule(moduleSymbol)
-    .map((symbol) => ({
+  return [...references]
+    .map(([symbol, referencedBy]) => ({
       name: symbol.name,
-      kind: declarationKind(symbol),
-      signature: declarationSignature(symbol),
-      ...(isDeprecated(symbol) ? { deprecated: true } : {}),
+      kind: declarationKind(checker, symbol),
+      signature: declarationSignature(checker, printer, symbol, repositoryRoot),
+      referencedBy: [...referencedBy].sort((left, right) =>
+        left.localeCompare(right),
+      ),
     }))
-    .sort((left, right) => left.name.localeCompare(right.name));
+    .sort(
+      (left, right) =>
+        left.name.localeCompare(right.name) ||
+        left.signature.localeCompare(right.signature),
+    );
 }
 
-const serialized = `${JSON.stringify(
-  {
-    formatVersion: 1,
-    typescriptVersion: ts.version,
-    entryPoints: reports,
-  },
-  null,
-  2,
-)}\n`;
+function runtimeExportNames(runtimePath) {
+  if (runtimePath === null) return new Set();
+  const loaded = require(runtimePath);
+  if (
+    (typeof loaded !== 'object' && typeof loaded !== 'function') ||
+    loaded === null
+  ) {
+    return new Set(['default']);
+  }
+  return new Set(Object.keys(loaded).filter((name) => name !== '__esModule'));
+}
 
-if (update) {
-  writeFileSync(reportsPath, serialized);
-  console.log(
-    `Updated ${relative(repositoryRoot, reportsPath)} for ${
-      entries.length
-    } entry points.`,
+export function buildPublicApiReport(entries, repositoryRoot) {
+  const compilerOptions = {
+    module: ts.ModuleKind.NodeNext,
+    moduleResolution: ts.ModuleResolutionKind.NodeNext,
+    target: ts.ScriptTarget.ES2022,
+    skipLibCheck: true,
+    noEmit: true,
+  };
+  const program = ts.createProgram(
+    entries.map(({ typesPath }) => typesPath),
+    compilerOptions,
   );
-} else {
-  if (!existsSync(reportsPath)) {
-    console.error(
-      `Public API report is missing. Run \`yarn api:report:update\` after a build.`,
+  const checker = program.getTypeChecker();
+  const printer = ts.createPrinter({
+    removeComments: true,
+    newLine: ts.NewLineKind.LineFeed,
+  });
+  const entryPoints = {};
+  const supportingDeclarations = {};
+
+  for (const entry of entries) {
+    const sourceFile = program.getSourceFile(entry.typesPath);
+    const moduleSymbol = sourceFile && checker.getSymbolAtLocation(sourceFile);
+    if (sourceFile === undefined || moduleSymbol === undefined) {
+      throw new Error(
+        `Unable to inspect declarations for ${entry.entryPoint}.`,
+      );
+    }
+
+    const exportedSymbols = checker.getExportsOfModule(moduleSymbol);
+    const runtimeNames = runtimeExportNames(entry.runtimePath);
+    const declaredNames = new Set(exportedSymbols.map((symbol) => symbol.name));
+    const runtimeOnly = [...runtimeNames]
+      .filter((name) => !declaredNames.has(name))
+      .sort((left, right) => left.localeCompare(right));
+    if (runtimeOnly.length > 0) {
+      throw new Error(
+        `${
+          entry.entryPoint
+        } has runtime exports without declarations: ${runtimeOnly.join(', ')}`,
+      );
+    }
+
+    entryPoints[entry.entryPoint] = exportedSymbols
+      .map((symbol) => ({
+        name: symbol.name,
+        kind: declarationKind(checker, symbol),
+        runtime: runtimeNames.has(symbol.name),
+        signature: declarationSignature(
+          checker,
+          printer,
+          symbol,
+          repositoryRoot,
+        ),
+      }))
+      .sort((left, right) => left.name.localeCompare(right.name));
+
+    supportingDeclarations[entry.entryPoint] =
+      supportingDeclarationsForEntryPoint({
+        checker,
+        exportedSymbols,
+        packageRoot: entry.packageRoot,
+        printer,
+        repositoryRoot,
+      });
+  }
+
+  return {
+    formatVersion: 2,
+    typescriptVersion: ts.version,
+    entryPoints,
+    supportingDeclarations,
+  };
+}
+
+function serializeReport(report) {
+  return `${JSON.stringify(report, null, 2)}\n`;
+}
+
+function parseArguments(argv) {
+  const args = new Set(argv);
+  return { update: args.has('--update') };
+}
+
+export function runPublicApiReport({
+  repositoryRoot = defaultRepositoryRoot,
+  update = false,
+} = {}) {
+  const reportsPath = join(repositoryRoot, 'etc', 'public-api-reports.json');
+  const entries = discoverEntryPoints(repositoryRoot);
+  const missing = entries.flatMap((entry) =>
+    [entry.typesPath, entry.runtimePath]
+      .filter((path) => path !== null && !existsSync(path))
+      .map((path) => ({ entryPoint: entry.entryPoint, path })),
+  );
+  if (missing.length > 0) {
+    const details = missing
+      .map(
+        ({ entryPoint, path }) =>
+          `- ${entryPoint}: ${relative(repositoryRoot, path)}`,
+      )
+      .join('\n');
+    throw new Error(
+      `Public API report generation requires a fresh build. Missing:\n${details}`,
     );
-    process.exit(1);
+  }
+
+  const serialized = serializeReport(
+    buildPublicApiReport(entries, repositoryRoot),
+  );
+
+  if (update) {
+    writeFileSync(reportsPath, serialized);
+    return `Updated ${relative(repositoryRoot, reportsPath)} for ${
+      entries.length
+    } entry points.`;
+  }
+
+  if (!existsSync(reportsPath)) {
+    throw new Error(
+      'Public API report is missing. Run `yarn api:report:update`.',
+    );
   }
   const expected = readFileSync(reportsPath, 'utf8');
   if (expected !== serialized) {
-    console.error(
+    throw new Error(
       'Public API declarations changed. Review the change, update the API policy/migration notes, then run `yarn api:report:update`.',
     );
-    process.exit(1);
   }
-  console.log(
-    `Verified public API reports for ${entries.length} entry points.`,
-  );
+  return `Verified public API reports for ${entries.length} entry points.`;
+}
+
+if (process.argv[1] !== undefined && resolve(process.argv[1]) === scriptPath) {
+  try {
+    console.log(
+      runPublicApiReport({
+        ...parseArguments(process.argv.slice(2)),
+      }),
+    );
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exitCode = 1;
+  }
 }

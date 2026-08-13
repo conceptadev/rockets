@@ -51,6 +51,18 @@ describe('error logging', () => {
         errorStack: error.stack,
       });
     });
+
+    it('keeps returned details mutable for existing consumers', () => {
+      const details: ErrorDetails = getErrorDetails(new Error('before'));
+
+      details.errorMessage = 'after';
+      details.errorStack = undefined;
+
+      expect(details).toEqual({
+        errorMessage: 'after',
+        errorStack: undefined,
+      });
+    });
   });
 
   describe('logAndGetErrorDetails', () => {

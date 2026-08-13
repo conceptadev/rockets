@@ -1,8 +1,8 @@
 import { Logger } from '@nestjs/common';
 
 export interface ErrorDetails {
-  readonly errorMessage: string;
-  readonly errorStack?: string;
+  errorMessage: string;
+  errorStack?: string;
 }
 
 export function getErrorDetails(error: unknown): ErrorDetails {

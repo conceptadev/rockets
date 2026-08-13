@@ -21,10 +21,14 @@ a manifest exposes them explicitly.
 
 ## Compatibility decisions
 
-- `RocketsAuthUserMetadataCreateDtoInterface` stays as a legacy alias for
-  `RocketsAuthUserMetadataCreatableInterface` during the pre-1.0 namespace
-  migration. New code uses the canonical name. Removing the alias requires an
-  explicit migration note.
+- The unused pre-1.0 aliases
+  `RocketsAuthUserMetadataCreateDtoInterface` and
+  `ROCKETS_MODULE_OPTIONS_DEFAULT_SETTINGS_TOKEN` are removed. Use
+  `RocketsAuthUserMetadataCreatableInterface` and
+  `ROCKETS_CORE_SETTINGS_TOKEN`, respectively.
+- `ExceptionsFilter` remains the supported server compatibility name because
+  the reference applications actively consume it. Its canonical implementation
+  is `RocketsCoreExceptionsFilter`.
 - Source-only re-export shims are not public subpaths. Keep one when live
   repository code or fixtures use it as an intentional internal boundary;
   delete it when it has no supported or internal consumer. Pre-1.0 status by
@@ -37,15 +41,18 @@ a manifest exposes them explicitly.
 
 [`public-api-reports.json`](public-api-reports.json) is generated from a fresh
 build with the repository's pinned TypeScript compiler. It records every
-exported name and declaration signature for all eight TypeScript entry points:
-the six package roots and the two `/zod` subpaths.
+exported name, whether the name exists at runtime, its declaration signature,
+and same-package declarations reachable through that signature for all eight
+TypeScript entry points: the six package roots and the two `/zod` subpaths.
 
 Run:
 
 ```bash
-yarn build
 yarn api:report
 ```
+
+The command performs the build and runs focused report-generator regressions.
+CI uses `yarn api:report:check-built` immediately after its existing build.
 
 CI rejects an unreviewed name or signature change. For an intentional public
 change:
@@ -53,10 +60,14 @@ change:
 1. Review the consumer and compatibility impact.
 2. Update the relevant README and add a migration note when consumers must
    change code.
-3. Run `yarn api:report:update` after the build.
+3. Run `yarn api:report:update`; it rebuilds before replacing the report.
 4. Review the JSON diff as part of the change; generation alone is not
    approval.
 
 Do not replace a curated export list with `export *` merely to equalize package
 counts. Adding a name is a compatibility commitment just as removing or
 changing one is a compatibility event.
+
+The report is a review tripwire, not proof of semantic compatibility. A diff
+can reflect a compiler or declaration-spelling change, while assignability and
+runtime behavior still require the typecheck and packed-consumer gates.

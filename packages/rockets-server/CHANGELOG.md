@@ -43,6 +43,8 @@ and this project adheres to
 
 ### Removed
 
+- `ROCKETS_MODULE_OPTIONS_DEFAULT_SETTINGS_TOKEN`, an unused pre-1.0 alias.
+  Import `ROCKETS_CORE_SETTINGS_TOKEN` from this package instead.
 - The `rockets-swagger` manifest entry. OpenAPI generation belongs to the
   consumer application because only it owns the complete Nest graph and
   document settings.

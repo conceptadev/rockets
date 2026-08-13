@@ -244,7 +244,7 @@ of it.
   integration helpers. Prefer the existing Vitest project/pool configuration
   over custom test-runner plumbing.
 - `etc/public-api-reports.json`: reviewed declaration-level contract for every
-  published TypeScript entry point. Run `yarn build && yarn api:report` after
+  published TypeScript entry point. Run `yarn api:report` after
   public export or signature changes; update it only after reviewing the
   compatibility impact and documentation or migration note.
 - `.context/`: shared scratchpad for multi-agent collaboration (gitignored).
