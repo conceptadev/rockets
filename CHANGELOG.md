@@ -5,6 +5,13 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ## [Unreleased]
 
+### Added
+
+- Firestore adapter transactions (issue #44 P1-1): `runInFirestoreTransaction`
+  (callback-scoped, retry-safe), `transactionFactories` + `options.ctx`
+  threading, transactional duplicate-id → 409 mapping, and `limit()` on
+  transactional queries. Contended RMW must use the callback API.
+
 ### Removed
 
 - **`SafeCrudContextInterceptor`** — upstream `@concepta/nestjs-crud`

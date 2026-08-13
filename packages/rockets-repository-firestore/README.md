@@ -51,9 +51,29 @@ Other entities continue on the default adapter (TypeORM, in most apps).
 
 ### When NOT to use this package
 
-- You need ACID transactions across multiple entities — stay on a SQL adapter
-  for cross-entity transactional flows.
+- You need SQL-style relational joins or multi-field unique constraints that
+  cannot map to a document id / uniqueness-index collection — see issue #44
+  "Honest limits".
 - You only want SQL — install `@concepta/rockets-repository-typeorm` instead.
+
+### Transactions
+
+Prefer `runInFirestoreTransaction(backend, async () => { … })` for contended
+read-modify-write (rate limits, leases, turn locks, idempotent enqueue). The
+body runs **inside** the SDK callback, so a contention retry re-executes it.
+Repository calls made during the callback automatically join the ambient
+transaction — no `{ ctx }` plumbing required.
+
+`TransactionScope.run(ctx, …)` with `{ ctx }` still works for uncontended
+multi-write units, but the imperative bridge **refuses** a Firestore retry
+(throws `FIRESTORE_TRANSACTION_RETRY_UNSUPPORTED`) instead of committing an
+empty write set. Do not use it for hot paths that expect retries.
+
+Firestore limits a single transaction to **500 writes**; the adapter does not
+split oversized units.
+
+Atomic `createMany` / `deleteMany` (WriteBatch) and soft-delete server-side
+pushdown are still follow-ups (issue #44 P1-4 / P1-6).
 
 ---
 

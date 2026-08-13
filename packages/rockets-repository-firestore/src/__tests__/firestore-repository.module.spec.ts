@@ -56,7 +56,7 @@ describe(FirestoreRepositoryModule.name, () => {
     ).toThrow(/initialize Firebase Admin/);
   });
 
-  it('registers a global dynamic module', () => {
+  it('registers a global dynamic module with a transaction factory', () => {
     const dynModule = FirestoreRepositoryModule.forFeature(
       [{ key: 'widget', entity: WidgetEntity }],
       { backend },
@@ -65,6 +65,7 @@ describe(FirestoreRepositoryModule.name, () => {
     expect(dynModule.module).toBe(FirestoreRepositoryModule);
     expect(dynModule.providers).toHaveLength(1);
     expect(dynModule.exports).toHaveLength(1);
+    expect(dynModule.transactionFactories).toHaveLength(1);
   });
 
   it('persists and reads through an explicit in-memory backend', async () => {

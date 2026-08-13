@@ -2,13 +2,17 @@
 
 ## Unreleased
 
-### Release preparation
-
-- Package manifest set to `1.0.0-alpha.8`; registry publication is
-  pending.
-
 ### Added
 
+- **Transactions (issue #44 P1-1).** `FirestoreBackend.runTransaction` for
+  callback-shaped atomic units; `runInFirestoreTransaction` keeps the body
+  inside the SDK callback (retries re-execute); `transactionFactories`
+  registered from `forFeature` so `TransactionScope` / `transactional: true`
+  is supported; every `do*` method threads ambient / `options.ctx` into the
+  transaction. Contended RMW must use `runInFirestoreTransaction` — the
+  imperative bridge refuses Firestore retries (throws) instead of committing
+  an empty write set. Transactional `create` maps duplicate ids to
+  `FirestoreDuplicateIdException`; transactional queries push `limit()`.
 - Full `WhereOperator` coverage (EQ, NE, comparisons, IN, NIN, null checks,
   string matchers, BETWEEN) with Firestore-native or post-filter execution.
 - OR support via `RepositoryAdapter.toDnf()`.
@@ -18,6 +22,11 @@
 - Soft delete / restore when `dateRemoved` or `deletedAt` exists on the entity.
 - `withDeleted` on find options.
 - Exported `ensureFirebaseAdminApp()` for shared Admin bootstrap with auth.
+
+### Release preparation
+
+- Package manifest set to `1.0.0-alpha.8`; registry publication is
+  pending.
 
 ### Changed
 

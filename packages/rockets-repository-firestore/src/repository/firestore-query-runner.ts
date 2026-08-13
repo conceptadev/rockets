@@ -6,8 +6,13 @@ import type {
 } from '../interfaces/firestore-query.interface';
 import { sortFirestoreRows } from './firestore-sort';
 
+type FirestoreQueryClient = Pick<
+  FirestoreBackend,
+  'queryBranch' | 'countBranch'
+>;
+
 export async function runFirestoreQuery(
-  backend: FirestoreBackend,
+  backend: FirestoreQueryClient,
   collection: string,
   request: FirestoreQueryRequest,
 ): Promise<Record<string, unknown>[]> {
@@ -56,7 +61,7 @@ export async function runFirestoreQuery(
 }
 
 export async function runFirestoreCount(
-  backend: FirestoreBackend,
+  backend: FirestoreQueryClient,
   collection: string,
   request: Omit<FirestoreQueryRequest, 'orderBy' | 'skip' | 'take'>,
 ): Promise<number> {

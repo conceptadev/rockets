@@ -2,6 +2,7 @@ import type {
   FirestoreOrderBy,
   FirestoreQueryBranch,
 } from './firestore-query.interface';
+import type { FirestoreTransactionHandle } from './firestore-transaction-handle.interface';
 
 /** @deprecated Use {@link FirestoreQueryFilter} via {@link FirestoreQueryBranch}. */
 export interface FirestoreEqualityFilter {
@@ -48,4 +49,14 @@ export interface FirestoreBackend {
     collection: string,
     branch: FirestoreQueryBranch,
   ): Promise<number>;
+  /**
+   * Run `fn` inside a single atomic unit. Admin backends map this to
+   * `Firestore.runTransaction`; the in-memory backend uses a copy-on-write
+   * snapshot. Prefer this callback form for contended read-modify-write —
+   * the imperative `TransactionInterface` bridge cannot re-run the handler
+   * body when Firestore retries an attempt.
+   */
+  runTransaction<T>(
+    fn: (tx: FirestoreTransactionHandle) => Promise<T>,
+  ): Promise<T>;
 }

@@ -2,7 +2,9 @@ import { getApp } from 'firebase-admin/app';
 import {
   getFirestore,
   type DocumentData,
+  type Firestore,
   type Query,
+  type Transaction,
 } from 'firebase-admin/firestore';
 
 import { FirestoreDuplicateIdException } from '../exceptions/firestore-duplicate-id.exception';
@@ -15,6 +17,7 @@ import type {
   FirestoreOrderBy,
   FirestoreQueryBranch,
 } from '../interfaces/firestore-query.interface';
+import type { FirestoreTransactionHandle } from '../interfaces/firestore-transaction-handle.interface';
 import { applyFirestorePostFilters } from '../repository/firestore-post-filter';
 import { applyFirestoreFilters } from '../repository/firestore-row-filter';
 import { sortFirestoreRows } from '../repository/firestore-sort';
@@ -34,6 +37,178 @@ function isAlreadyExistsError(error: unknown): boolean {
   );
 }
 
+function serialise(data: Record<string, unknown>): Record<string, unknown> {
+  return { ...data };
+}
+
+function normalise(
+  data: DocumentData | undefined,
+  documentId: string,
+): Record<string, unknown> {
+  if (!data) {
+    return { id: documentId };
+  }
+  const next: Record<string, unknown> = { id: documentId };
+  for (const [key, value] of Object.entries(data)) {
+    next[key] = normalizeFirestoreValue(value);
+  }
+  return next;
+}
+
+class AdminFirestoreTransactionHandle implements FirestoreTransactionHandle {
+  constructor(
+    private readonly transaction: Transaction,
+    private readonly db: Firestore,
+  ) {}
+
+  async get(
+    collection: string,
+    documentId: string,
+  ): Promise<Record<string, unknown> | null> {
+    const snap = await this.transaction.get(
+      this.db.collection(collection).doc(documentId),
+    );
+    if (!snap.exists) {
+      return null;
+    }
+    return normalise(snap.data(), documentId);
+  }
+
+  async create(
+    collection: string,
+    documentId: string,
+    data: Record<string, unknown>,
+  ): Promise<void> {
+    // ALREADY_EXISTS for transaction.create() surfaces at commit, not at
+    // enqueue — so read first and throw the adapter's 409 shape here. Under
+    // contention Firestore retries the whole attempt; the loser then sees
+    // the winner's doc and gets FirestoreDuplicateIdException instead of a
+    // raw gRPC error.
+    const ref = this.db.collection(collection).doc(documentId);
+    const snap = await this.transaction.get(ref);
+    if (snap.exists) {
+      throw new FirestoreDuplicateIdException(collection, documentId);
+    }
+    this.transaction.create(ref, serialise(data));
+  }
+
+  async set(
+    collection: string,
+    documentId: string,
+    data: Record<string, unknown>,
+    merge = false,
+  ): Promise<void> {
+    this.transaction.set(
+      this.db.collection(collection).doc(documentId),
+      serialise(data),
+      { merge },
+    );
+  }
+
+  async delete(collection: string, documentId: string): Promise<void> {
+    this.transaction.delete(this.db.collection(collection).doc(documentId));
+  }
+
+  async queryBranch(
+    collection: string,
+    options: FirestoreBranchQueryOptions,
+  ): Promise<Record<string, unknown>[]> {
+    const branch = options.branch;
+    const skip = options.skip ?? 0;
+    const take = options.take;
+
+    if (branch.documentId !== undefined || branch.documentIds !== undefined) {
+      const rows = await this.loadBranchRows(collection, branch);
+      const filtered = applyFirestorePostFilters(
+        applyFirestoreFilters(rows, branch.filters),
+        branch.postFilters,
+      );
+      const ordered = sortFirestoreRows(filtered, options.orderBy);
+      const sliced = ordered.slice(skip);
+      return typeof take === 'number' && take > 0
+        ? sliced.slice(0, take)
+        : sliced;
+    }
+
+    // Mirror the non-transactional fast path: when there are no post-filters,
+    // push orderBy + limit(skip + take) so we don't lock the whole set.
+    let query = buildCollectionQuery(this.db, collection, branch);
+    if (options.orderBy) {
+      for (const clause of options.orderBy) {
+        query = query.orderBy(clause.field, clause.direction);
+      }
+    }
+
+    if (branch.postFilters.length > 0) {
+      const snapshot = await this.transaction.get(query);
+      const rows = snapshot.docs.map((doc) => normalise(doc.data(), doc.id));
+      const filtered = applyFirestorePostFilters(rows, branch.postFilters);
+      const sliced = filtered.slice(skip);
+      return typeof take === 'number' && take > 0
+        ? sliced.slice(0, take)
+        : sliced;
+    }
+
+    if (typeof take === 'number' && take > 0) {
+      query = query.limit(skip + take);
+    }
+    const snapshot = await this.transaction.get(query);
+    const rows = snapshot.docs.map((doc) => normalise(doc.data(), doc.id));
+    return skip > 0 ? rows.slice(skip) : rows;
+  }
+
+  async countBranch(
+    collection: string,
+    branch: FirestoreQueryBranch,
+  ): Promise<number> {
+    const rows = await this.queryBranch(collection, { branch });
+    return rows.length;
+  }
+
+  private async loadBranchRows(
+    collection: string,
+    branch: FirestoreQueryBranch,
+  ): Promise<Record<string, unknown>[]> {
+    if (branch.documentId !== undefined) {
+      const row = await this.get(collection, branch.documentId);
+      return row ? [row] : [];
+    }
+
+    if (branch.documentIds !== undefined) {
+      const rows: Record<string, unknown>[] = [];
+      for (const documentId of branch.documentIds) {
+        const row = await this.get(collection, documentId);
+        if (row) {
+          rows.push(row);
+        }
+      }
+      return rows;
+    }
+
+    const query = buildCollectionQuery(this.db, collection, branch);
+    const snapshot = await this.transaction.get(query);
+    return snapshot.docs.map((doc) => normalise(doc.data(), doc.id));
+  }
+}
+
+function buildCollectionQuery(
+  db: Firestore,
+  collection: string,
+  branch: FirestoreQueryBranch,
+): Query {
+  let query: Query = db.collection(collection);
+
+  for (const filter of branch.filters) {
+    query = query.where(
+      filter.field,
+      filter.op as FirestoreFilterOp,
+      filter.value,
+    );
+  }
+
+  return query;
+}
+
 export class AdminFirestoreBackend implements FirestoreBackend {
   private db() {
     return getFirestore(getApp());
@@ -47,7 +222,7 @@ export class AdminFirestoreBackend implements FirestoreBackend {
     if (!snap.exists) {
       return null;
     }
-    return this.normalise(snap.data(), documentId);
+    return normalise(snap.data(), documentId);
   }
 
   async set(
@@ -59,7 +234,7 @@ export class AdminFirestoreBackend implements FirestoreBackend {
     await this.db()
       .collection(collection)
       .doc(documentId)
-      .set(this.serialise(data), { merge });
+      .set(serialise(data), { merge });
   }
 
   async create(
@@ -71,7 +246,7 @@ export class AdminFirestoreBackend implements FirestoreBackend {
       await this.db()
         .collection(collection)
         .doc(documentId)
-        .create(this.serialise(data));
+        .create(serialise(data));
     } catch (error) {
       if (isAlreadyExistsError(error)) {
         throw new FirestoreDuplicateIdException(collection, documentId);
@@ -110,9 +285,7 @@ export class AdminFirestoreBackend implements FirestoreBackend {
     if (branch.postFilters.length > 0) {
       const query = this.buildOrderedQuery(collection, branch, options.orderBy);
       const snapshot = await query.get();
-      const rows = snapshot.docs.map((doc) =>
-        this.normalise(doc.data(), doc.id),
-      );
+      const rows = snapshot.docs.map((doc) => normalise(doc.data(), doc.id));
       const filtered = applyFirestorePostFilters(rows, branch.postFilters);
       const sliced = filtered.slice(skip);
       return typeof take === 'number' && take > 0
@@ -127,7 +300,7 @@ export class AdminFirestoreBackend implements FirestoreBackend {
       query = query.limit(skip + take);
     }
     const snapshot = await query.get();
-    const rows = snapshot.docs.map((doc) => this.normalise(doc.data(), doc.id));
+    const rows = snapshot.docs.map((doc) => normalise(doc.data(), doc.id));
     return skip > 0 ? rows.slice(skip) : rows;
   }
 
@@ -147,9 +320,18 @@ export class AdminFirestoreBackend implements FirestoreBackend {
       ).length;
     }
 
-    const query = this.buildCollectionQuery(collection, branch);
+    const query = buildCollectionQuery(this.db(), collection, branch);
     const snapshot = await query.count().get();
     return snapshot.data().count;
+  }
+
+  async runTransaction<T>(
+    fn: (tx: FirestoreTransactionHandle) => Promise<T>,
+  ): Promise<T> {
+    const db = this.db();
+    return db.runTransaction(async (transaction) =>
+      fn(new AdminFirestoreTransactionHandle(transaction, db)),
+    );
   }
 
   private async loadBranchRows(
@@ -176,33 +358,16 @@ export class AdminFirestoreBackend implements FirestoreBackend {
         const snapshots = await this.db().getAll(...refs);
         for (const snapshot of snapshots) {
           if (snapshot.exists) {
-            rows.push(this.normalise(snapshot.data(), snapshot.id));
+            rows.push(normalise(snapshot.data(), snapshot.id));
           }
         }
       }
       return rows;
     }
 
-    const query = this.buildCollectionQuery(collection, branch);
+    const query = buildCollectionQuery(this.db(), collection, branch);
     const snapshot = await query.get();
-    return snapshot.docs.map((doc) => this.normalise(doc.data(), doc.id));
-  }
-
-  private buildCollectionQuery(
-    collection: string,
-    branch: FirestoreQueryBranch,
-  ): Query {
-    let query: Query = this.db().collection(collection);
-
-    for (const filter of branch.filters) {
-      query = query.where(
-        filter.field,
-        filter.op as FirestoreFilterOp,
-        filter.value,
-      );
-    }
-
-    return query;
+    return snapshot.docs.map((doc) => normalise(doc.data(), doc.id));
   }
 
   private buildOrderedQuery(
@@ -210,36 +375,12 @@ export class AdminFirestoreBackend implements FirestoreBackend {
     branch: FirestoreQueryBranch,
     orderBy: readonly FirestoreOrderBy[] | undefined,
   ): Query {
-    let query = this.buildCollectionQuery(collection, branch);
+    let query = buildCollectionQuery(this.db(), collection, branch);
     if (orderBy) {
       for (const clause of orderBy) {
         query = query.orderBy(clause.field, clause.direction);
       }
     }
     return query;
-  }
-
-  /**
-   * `Date` goes to the SDK untouched: Firestore stores it as a native
-   * `Timestamp`, which {@link normalise} converts straight back to a
-   * `Date`. Stringifying here is what made that round trip lossy and
-   * left `normalise`'s `instanceof Timestamp` branch permanently dead.
-   */
-  private serialise(data: Record<string, unknown>): Record<string, unknown> {
-    return { ...data };
-  }
-
-  private normalise(
-    data: DocumentData | undefined,
-    documentId: string,
-  ): Record<string, unknown> {
-    if (!data) {
-      return { id: documentId };
-    }
-    const next: Record<string, unknown> = { id: documentId };
-    for (const [key, value] of Object.entries(data)) {
-      next[key] = normalizeFirestoreValue(value);
-    }
-    return next;
   }
 }

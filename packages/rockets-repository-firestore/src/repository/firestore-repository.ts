@@ -1,9 +1,10 @@
 import { randomUUID } from 'crypto';
-import type { DeepPartial } from '@concepta/nestjs-core';
+import { AppContextHost, type DeepPartial } from '@concepta/nestjs-core';
 import {
   isWhereCondition,
   RepositoryAdapter,
   SortOrder,
+  TrxCtx,
   type RepositoryCreateOptions,
   type RepositoryDeleteOptions,
   type RepositoryFindOneOptions,
@@ -20,39 +21,52 @@ import {
   FIRESTORE_ALT_SOFT_DELETE_FIELD,
   FIRESTORE_DEFAULT_SOFT_DELETE_FIELD,
 } from '../constants/firestore-soft-delete.constants';
+import { FIRESTORE_DEFAULT_TRANSACTION_KEY } from '../constants/firestore-transaction.constants';
 import type { FirestoreBackend } from '../interfaces/firestore-backend.interface';
 import type {
   FirestoreOrderBy,
   FirestoreQueryRequest,
 } from '../interfaces/firestore-query.interface';
+import type { FirestoreTransactionHandle } from '../interfaces/firestore-transaction-handle.interface';
 import { resolveSoftDeleteFieldFromMetadata } from './firestore-entity-metadata';
 import { runFirestoreCount, runFirestoreQuery } from './firestore-query-runner';
 import { translateDnfBranch } from './firestore-where.translator';
+import { getAmbientFirestoreTransaction } from '../transaction/firestore-transaction-context';
 
 export interface FirestoreRepositoryOptions<Entity extends PlainLiteralObject> {
   readonly entityKey: string;
   readonly collection: string;
   readonly metadata: RepositoryMetadataInterface<Entity>;
   readonly backend: FirestoreBackend;
+  readonly transactionKey?: string;
 }
+
+type StoreClient = Pick<
+  FirestoreBackend,
+  'get' | 'create' | 'set' | 'delete' | 'queryBranch' | 'countBranch'
+>;
 
 export class FirestoreRepository<
   Entity extends PlainLiteralObject,
 > extends RepositoryAdapter<Entity> {
   readonly metadata: RepositoryMetadataInterface<Entity>;
   private readonly softDeleteField?: string;
+  private readonly transactionKey: string;
 
   constructor(private readonly options: FirestoreRepositoryOptions<Entity>) {
     super(options.entityKey);
     this.metadata = options.metadata;
     this.softDeleteField = resolveSoftDeleteFieldFromMetadata(options.metadata);
+    this.transactionKey =
+      options.transactionKey ?? FIRESTORE_DEFAULT_TRANSACTION_KEY;
   }
 
   protected async doFind(
     options?: RepositoryFindOptions<Entity>,
   ): Promise<Entity[]> {
+    const client = await this.resolveClient(options?.ctx);
     const rows = await runFirestoreQuery(
-      this.options.backend,
+      client,
       this.options.collection,
       this.buildQueryRequest(options),
     );
@@ -69,8 +83,9 @@ export class FirestoreRepository<
   protected async doCount(
     options?: RepositoryFindOptions<Entity>,
   ): Promise<number> {
+    const client = await this.resolveClient(options?.ctx);
     const request = this.buildQueryRequest(options);
-    return runFirestoreCount(this.options.backend, this.options.collection, {
+    return runFirestoreCount(client, this.options.collection, {
       branches: request.branches,
       withDeleted: request.withDeleted,
       softDeleteField: request.softDeleteField,
@@ -80,10 +95,11 @@ export class FirestoreRepository<
   protected async doFindAndCount(
     options?: RepositoryFindOptions<Entity>,
   ): Promise<[Entity[], number]> {
+    const client = await this.resolveClient(options?.ctx);
     const request = this.buildQueryRequest(options);
     const [rows, total] = await Promise.all([
-      runFirestoreQuery(this.options.backend, this.options.collection, request),
-      runFirestoreCount(this.options.backend, this.options.collection, {
+      runFirestoreQuery(client, this.options.collection, request),
+      runFirestoreCount(client, this.options.collection, {
         branches: request.branches,
         withDeleted: request.withDeleted,
         softDeleteField: request.softDeleteField,
@@ -94,11 +110,13 @@ export class FirestoreRepository<
 
   protected async doCreate(
     entity: DeepPartial<Entity>,
-    _options?: RepositoryCreateOptions,
+    options?: RepositoryCreateOptions,
   ): Promise<Entity> {
+    const client = await this.resolveClient(options?.ctx);
     const id = this.resolveId(entity);
     const stored = this.toStore({ ...entity, id } as DeepPartial<Entity>);
-    await this.options.backend.create(this.options.collection, id, stored);
+    await client.create(this.options.collection, id, stored);
+    this.markDirty(options?.ctx);
     return this.fromStore(stored);
   }
 
@@ -116,41 +134,49 @@ export class FirestoreRepository<
   protected async doUpdate(
     entity: Entity,
     data: DeepPartial<Entity>,
-    _options?: RepositoryUpdateOptions,
+    options?: RepositoryUpdateOptions,
   ): Promise<Entity> {
+    const client = await this.resolveClient(options?.ctx);
     const id = this.resolveId(entity);
     const merged = this.toStore({ ...entity, ...data, id });
-    await this.options.backend.set(this.options.collection, id, merged, true);
+    await client.set(this.options.collection, id, merged, true);
+    this.markDirty(options?.ctx);
     return this.fromStore(merged);
   }
 
   protected async doUpsert(
     entity: DeepPartial<Entity>,
-    _options?: RepositoryUpsertOptions,
+    options?: RepositoryUpsertOptions,
   ): Promise<Entity> {
+    const client = await this.resolveClient(options?.ctx);
     const id = this.resolveId(entity);
     const stored = this.toStore({ ...entity, id } as DeepPartial<Entity>);
-    await this.options.backend.set(this.options.collection, id, stored, true);
+    await client.set(this.options.collection, id, stored, true);
+    this.markDirty(options?.ctx);
     return this.fromStore(stored);
   }
 
   protected async doReplace(
     entity: Entity,
     data: DeepPartial<Entity>,
-    _options?: RepositoryUpdateOptions,
+    options?: RepositoryUpdateOptions,
   ): Promise<Entity> {
+    const client = await this.resolveClient(options?.ctx);
     const id = this.resolveId(entity);
     const stored = this.toStore({ ...data, id });
-    await this.options.backend.set(this.options.collection, id, stored, false);
+    await client.set(this.options.collection, id, stored, false);
+    this.markDirty(options?.ctx);
     return this.fromStore(stored);
   }
 
   protected async doDelete(
     entity: Entity,
-    _options?: RepositoryDeleteOptions,
+    options?: RepositoryDeleteOptions,
   ): Promise<Entity> {
+    const client = await this.resolveClient(options?.ctx);
     const id = this.resolveId(entity);
-    await this.options.backend.delete(this.options.collection, id);
+    await client.delete(this.options.collection, id);
+    this.markDirty(options?.ctx);
     return entity;
   }
 
@@ -166,26 +192,30 @@ export class FirestoreRepository<
 
   protected async doSoftDelete(
     entity: Entity,
-    _options?: RepositoryDeleteOptions,
+    options?: RepositoryDeleteOptions,
   ): Promise<Entity> {
     const field = this.requireSoftDeleteField();
+    const client = await this.resolveClient(options?.ctx);
     const id = this.resolveId(entity);
     const removedAt = new Date();
     const patch = { [field]: removedAt } as DeepPartial<Entity>;
     const merged = this.toStore({ ...entity, ...patch, id });
-    await this.options.backend.set(this.options.collection, id, merged, true);
+    await client.set(this.options.collection, id, merged, true);
+    this.markDirty(options?.ctx);
     return this.fromStore(merged);
   }
 
   protected async doRestore(
     entity: Entity,
-    _options?: RepositoryRestoreOptions,
+    options?: RepositoryRestoreOptions,
   ): Promise<Entity> {
     const field = this.requireSoftDeleteField();
+    const client = await this.resolveClient(options?.ctx);
     const id = this.resolveId(entity);
     const patch = { [field]: null } as DeepPartial<Entity>;
     const merged = this.toStore({ ...entity, ...patch, id });
-    await this.options.backend.set(this.options.collection, id, merged, true);
+    await client.set(this.options.collection, id, merged, true);
+    this.markDirty(options?.ctx);
     return this.fromStore(merged);
   }
 
@@ -198,6 +228,51 @@ export class FirestoreRepository<
     ...entityLikes: DeepPartial<Entity>[]
   ): Entity {
     return Object.assign(mergeIntoEntity, ...entityLikes);
+  }
+
+  private async resolveClient(ctx?: PlainLiteralObject): Promise<StoreClient> {
+    const handle = await this.resolveTransactionHandle(ctx);
+    return handle ?? this.options.backend;
+  }
+
+  private async resolveTransactionHandle(
+    ctx?: PlainLiteralObject,
+  ): Promise<FirestoreTransactionHandle | null> {
+    // Callback-scoped API (runInFirestoreTransaction) — preferred under contention.
+    const ambient = getAmbientFirestoreTransaction();
+    if (ambient !== undefined) {
+      return ambient;
+    }
+
+    // Imperative TransactionScope bridge — fail-closed on Firestore retry.
+    const context = AppContextHost.from(ctx);
+    if (!context.supports(TrxCtx)) {
+      return null;
+    }
+    const { trx } = context.with(TrxCtx);
+    if (!trx?.isSupported) {
+      return null;
+    }
+    const tx = await trx.getOrStart(this.transactionKey);
+    return tx.getClient<FirestoreTransactionHandle>();
+  }
+
+  private markDirty(ctx?: PlainLiteralObject): void {
+    // Ambient callback transactions commit when runTransaction returns —
+    // no dirty flag to track.
+    if (getAmbientFirestoreTransaction() !== undefined) {
+      return;
+    }
+    const context = AppContextHost.from(ctx);
+    if (!context.supports(TrxCtx)) {
+      return;
+    }
+    const { trx } = context.with(TrxCtx);
+    if (!trx?.isSupported) {
+      return;
+    }
+    const tx = trx.get(this.transactionKey);
+    tx?.markDirty();
   }
 
   private buildQueryRequest(
