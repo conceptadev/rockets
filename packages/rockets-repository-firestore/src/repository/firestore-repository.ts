@@ -32,6 +32,7 @@ import { resolveSoftDeleteFieldFromMetadata } from './firestore-entity-metadata'
 import { runFirestoreCount, runFirestoreQuery } from './firestore-query-runner';
 import { translateDnfBranch } from './firestore-where.translator';
 import { getAmbientFirestoreTransaction } from '../transaction/firestore-transaction-context';
+import { runInFirestoreTransaction } from '../transaction/run-in-firestore-transaction';
 
 export interface FirestoreRepositoryOptions<Entity extends PlainLiteralObject> {
   readonly entityKey: string;
@@ -59,6 +60,18 @@ export class FirestoreRepository<
     this.softDeleteField = resolveSoftDeleteFieldFromMetadata(options.metadata);
     this.transactionKey =
       options.transactionKey ?? FIRESTORE_DEFAULT_TRANSACTION_KEY;
+  }
+
+  /**
+   * Preferred transactional path for Firestore: `fn` runs inside the SDK
+   * callback so contention retries re-execute the body. Nested repository
+   * calls join via ambient ALS — no `{ ctx }` required.
+   *
+   * Do not use `TransactionScope` / `transactional: true` for contended
+   * read-modify-write; that bridge refuses Firestore retries.
+   */
+  async transaction<T>(fn: () => Promise<T>): Promise<T> {
+    return runInFirestoreTransaction(this.options.backend, fn);
   }
 
   protected async doFind(
@@ -114,7 +127,9 @@ export class FirestoreRepository<
   ): Promise<Entity> {
     const client = await this.resolveClient(options?.ctx);
     const id = this.resolveId(entity);
-    const stored = this.toStore({ ...entity, id } as DeepPartial<Entity>);
+    const stored = this.toStore({ ...entity, id } as DeepPartial<Entity>, {
+      materializeSoftDeleteNull: true,
+    });
     await client.create(this.options.collection, id, stored);
     this.markDirty(options?.ctx);
     return this.fromStore(stored);
@@ -325,8 +340,15 @@ export class FirestoreRepository<
    * (`startsWith('date') || endsWith('At')`). That made the returned
    * TYPE depend on the field NAME: `dateCreated` came back a `Date`,
    * `birthday` and `validFrom` came back strings.
+   *
+   * Soft-delete null is materialized **only on create**. Doing it on
+   * update/upsert/replace with `merge: true` would resurrect soft-deleted
+   * rows whenever the caller omitted the field (e.g. `update({ id }, patch)`).
    */
-  private toStore(entity: DeepPartial<Entity>): Record<string, unknown> {
+  private toStore(
+    entity: DeepPartial<Entity>,
+    options?: { readonly materializeSoftDeleteNull?: boolean },
+  ): Record<string, unknown> {
     const next: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(entity)) {
       if (value === undefined) {
@@ -337,6 +359,13 @@ export class FirestoreRepository<
     const id = (entity as { readonly id?: string }).id;
     if (typeof id === 'string') {
       next.id = id;
+    }
+    if (
+      options?.materializeSoftDeleteNull === true &&
+      this.softDeleteField !== undefined &&
+      !(this.softDeleteField in next)
+    ) {
+      next[this.softDeleteField] = null;
     }
     return next;
   }

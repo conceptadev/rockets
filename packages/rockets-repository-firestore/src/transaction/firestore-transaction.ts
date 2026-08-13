@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import type { TransactionInterface } from '@concepta/nestjs-repository';
 
 import { FirestoreTransactionAbortedException } from '../exceptions/firestore-transaction-aborted.exception';
@@ -13,10 +14,14 @@ import type { FirestoreTransactionHandle } from '../interfaces/firestore-transac
  * **refuses** a second attempt (throws
  * {@link FirestoreTransactionRetryUnsupportedException}) instead of
  * committing an empty write set and reporting success. Contended
- * read-modify-write must use {@link FirestoreBackend.runTransaction} so the
- * handler body lives inside the retryable callback.
+ * read-modify-write must use {@link FirestoreRepository.transaction} /
+ * {@link runInFirestoreTransaction} so the handler body lives inside the
+ * retryable callback.
  */
 export class FirestoreTransaction implements TransactionInterface {
+  private static readonly logger = new Logger(FirestoreTransaction.name);
+  private static warnedAboutRetryLimit = false;
+
   private handle: FirestoreTransactionHandle | null = null;
   private _isDirty = false;
   private attemptCount = 0;
@@ -35,6 +40,17 @@ export class FirestoreTransaction implements TransactionInterface {
   }
 
   async start(): Promise<void> {
+    if (!FirestoreTransaction.warnedAboutRetryLimit) {
+      FirestoreTransaction.warnedAboutRetryLimit = true;
+      FirestoreTransaction.logger.warn(
+        "TransactionScope / transactional:true uses Firestore's imperative " +
+          'bridge, which refuses SDK retries under contention ' +
+          '(FIRESTORE_TRANSACTION_RETRY_UNSUPPORTED). Prefer ' +
+          'FirestoreRepository.transaction() or runInFirestoreTransaction() ' +
+          'for contended read-modify-write.',
+      );
+    }
+
     if (this.handle !== null || this.runPromise !== null) {
       throw new FirestoreTransactionRetryUnsupportedException(
         'Firestore transaction already started',

@@ -6,13 +6,18 @@ export {
 export type { FirestoreProviderOptions } from './interfaces/firestore-provider-options.interface';
 export type { FirestoreBackend } from './interfaces/firestore-backend.interface';
 export type { FirestoreTransactionHandle } from './interfaces/firestore-transaction-handle.interface';
-export { FIRESTORE_REPOSITORY_MODULE_NAME } from './constants/firestore-repository.constants';
+export {
+  FIRESTORE_BACKEND,
+  FIRESTORE_REPOSITORY_MODULE_NAME,
+} from './constants/firestore-repository.constants';
 export { FIRESTORE_DEFAULT_TRANSACTION_KEY } from './constants/firestore-transaction.constants';
 export {
   FIRESTORE_ALT_SOFT_DELETE_FIELD,
   FIRESTORE_DEFAULT_SOFT_DELETE_FIELD,
 } from './constants/firestore-soft-delete.constants';
 export { ensureFirebaseAdminApp } from './utils/ensure-firebase-admin-app';
+export { backfillSoftDeleteNull } from './utils/backfill-soft-delete-null';
+export type { BackfillSoftDeleteNullOptions } from './utils/backfill-soft-delete-null';
 export { FirestoreDuplicateIdException } from './exceptions/firestore-duplicate-id.exception';
 export { FirestoreTransactionAbortedException } from './exceptions/firestore-transaction-aborted.exception';
 export { FirestoreTransactionRetryUnsupportedException } from './exceptions/firestore-transaction-retry-unsupported.exception';

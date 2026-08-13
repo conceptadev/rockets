@@ -7,6 +7,7 @@ import {
 } from '@concepta/nestjs-repository';
 
 import { AdminFirestoreBackend } from '../backends/admin-firestore.backend';
+import { FIRESTORE_BACKEND } from '../constants/firestore-repository.constants';
 import { FIRESTORE_DEFAULT_TRANSACTION_KEY } from '../constants/firestore-transaction.constants';
 import { FirestoreRepositoryModule } from '../firestore-repository.module';
 import type { FirestoreBackend } from '../interfaces/firestore-backend.interface';
@@ -102,10 +103,16 @@ export function createFirestoreFeatureModule(
 
   return {
     module: FirestoreRepositoryModule,
-    providers: entities.map((entity) =>
-      createFirestoreProvider(entity, resolvedBackend, transactionKey),
-    ),
-    exports: entities.map((entity) => getDynamicRepositoryToken(entity.key)),
+    providers: [
+      { provide: FIRESTORE_BACKEND, useValue: resolvedBackend },
+      ...entities.map((entity) =>
+        createFirestoreProvider(entity, resolvedBackend, transactionKey),
+      ),
+    ],
+    exports: [
+      FIRESTORE_BACKEND,
+      ...entities.map((entity) => getDynamicRepositoryToken(entity.key)),
+    ],
     transactionFactories: [
       createFirestoreTransactionFactoryDescriptor(
         resolvedBackend,

@@ -1,7 +1,7 @@
 import type { FirestoreBackend } from '../interfaces/firestore-backend.interface';
 import type {
-  FirestorePostFilter,
   FirestoreQueryBranch,
+  FirestoreQueryFilter,
   FirestoreQueryRequest,
 } from '../interfaces/firestore-query.interface';
 import { sortFirestoreRows } from './firestore-sort';
@@ -88,6 +88,12 @@ export async function runFirestoreCount(
   return rows.length;
 }
 
+/**
+ * Soft-delete exclusion is a server filter (`field == null`), not a
+ * post-filter. That keeps `pushToServer` true so `limit()` / `count()` stay
+ * on the backend. Callers must materialize explicit `null` on live docs —
+ * Firestore equality does not match missing fields.
+ */
 function augmentBranchesForSoftDelete(
   branches: readonly FirestoreQueryBranch[],
   softDeleteField: string | undefined,
@@ -97,14 +103,15 @@ function augmentBranchesForSoftDelete(
     return [...branches];
   }
 
-  const exclusion: FirestorePostFilter = {
-    kind: 'soft_delete_excluded',
+  const liveFilter: FirestoreQueryFilter = {
     field: softDeleteField,
+    op: '==',
+    value: null,
   };
 
   return branches.map((branch) => ({
     ...branch,
-    postFilters: [...branch.postFilters, exclusion],
+    filters: [...branch.filters, liveFilter],
   }));
 }
 

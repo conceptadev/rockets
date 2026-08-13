@@ -11,6 +11,7 @@ import {
 } from '@concepta/nestjs-repository';
 
 import { InMemoryFirestoreBackend } from '../backends/in-memory-firestore.backend';
+import { FIRESTORE_BACKEND } from '../constants/firestore-repository.constants';
 import { FirestoreRepositoryModule } from '../firestore-repository.module';
 import { FirestoreTransaction } from '../transaction/firestore-transaction';
 import { FirestoreTransactionRetryUnsupportedException } from '../exceptions/firestore-transaction-retry-unsupported.exception';
@@ -18,6 +19,7 @@ import { runInFirestoreTransaction } from '../transaction/run-in-firestore-trans
 import type { FirestoreBackend } from '../interfaces/firestore-backend.interface';
 import type { FirestoreTransactionHandle } from '../interfaces/firestore-transaction-handle.interface';
 import { FirestoreDuplicateIdException } from '../exceptions/firestore-duplicate-id.exception';
+import { isFirestoreRepository } from '../repository/firestore-repository';
 
 class AccountEntity {
   id!: string;
@@ -175,6 +177,45 @@ describe('Firestore transactions (P1-1)', () => {
     });
   });
 
+  it('FirestoreRepository.transaction joins ambient handle without passing backend', async () => {
+    const wired = await Test.createTestingModule({
+      imports: [
+        RepositoryModule.forRoot({}),
+        RepositoryModule.forFeature({
+          module: firestoreModuleFor(backend, 'accounts-repo-tx'),
+          entities: [{ key: 'account', entity: AccountEntity }],
+        }),
+      ],
+    }).compile();
+
+    const repo = wired.get<RepositoryInterface<AccountEntity>>(
+      getDynamicRepositoryToken('account'),
+    );
+    expect(isFirestoreRepository(repo)).toBe(true);
+    if (!isFirestoreRepository(repo)) {
+      throw new Error('expected FirestoreRepository');
+    }
+
+    expect(wired.get(FIRESTORE_BACKEND)).toBe(backend);
+
+    await repo.create({ id: 'a', balance: 100 });
+    await repo.create({ id: 'b', balance: 0 });
+
+    await repo.transaction(async () => {
+      const a = await repo.findOne({ where: Where.eq('id', 'a') });
+      const b = await repo.findOne({ where: Where.eq('id', 'b') });
+      await repo.update(a!, { balance: 55 });
+      await repo.update(b!, { balance: 45 });
+    });
+
+    expect(await repo.findOne({ where: Where.eq('id', 'a') })).toMatchObject({
+      balance: 55,
+    });
+    expect(await repo.findOne({ where: Where.eq('id', 'b') })).toMatchObject({
+      balance: 45,
+    });
+  });
+
   it('runInFirestoreTransaction re-executes the body when the SDK retries', async () => {
     let bodyRuns = 0;
     let attempts = 0;
@@ -210,6 +251,43 @@ describe('Firestore transactions (P1-1)', () => {
 
     expect(attempts).toBe(2);
     expect(bodyRuns).toBe(2);
+  });
+
+  it('nested runInFirestoreTransaction joins the ambient transaction', async () => {
+    let outerStarts = 0;
+    const countingBackend: FirestoreBackend = {
+      get: async () => null,
+      create: async () => undefined,
+      set: async () => undefined,
+      delete: async () => undefined,
+      queryBranch: async () => [],
+      countBranch: async () => 0,
+      runTransaction: async (fn) => {
+        outerStarts += 1;
+        const handle = {
+          get: async () => null,
+          create: async () => undefined,
+          set: async () => undefined,
+          delete: async () => undefined,
+          queryBranch: async () => [],
+          countBranch: async () => 0,
+        } satisfies FirestoreTransactionHandle;
+        return fn(handle);
+      },
+    };
+
+    const result = await runInFirestoreTransaction(
+      countingBackend,
+      async () => {
+        return runInFirestoreTransaction(
+          countingBackend,
+          async () => 'nested-ok',
+        );
+      },
+    );
+
+    expect(result).toBe('nested-ok');
+    expect(outerStarts).toBe(1);
   });
 
   it('runInFirestoreTransaction surfaces duplicate create as FirestoreDuplicateIdException', async () => {

@@ -208,4 +208,132 @@ describe('Firestore backend emulator transactions', () => {
     }
     expect(await admin.get(collection, 'lease')).not.toBeNull();
   });
+
+  it('admin: 10 contended writers incrementing one counter land on 10', async () => {
+    const collection = `tx-counter-${randomUUID()}`;
+    await admin.create(collection, 'counter', { id: 'counter', value: 0 });
+
+    let bodyRuns = 0;
+    await Promise.all(
+      Array.from({ length: 10 }, () =>
+        admin.runTransaction(async (tx) => {
+          bodyRuns += 1;
+          const row = await tx.get(collection, 'counter');
+          const value = typeof row?.value === 'number' ? row.value : 0;
+          await tx.set(
+            collection,
+            'counter',
+            { id: 'counter', value: value + 1 },
+            false,
+          );
+        }),
+      ),
+    );
+
+    expect(await admin.get(collection, 'counter')).toMatchObject({ value: 10 });
+    expect(bodyRuns).toBeGreaterThanOrEqual(10);
+  });
+
+  it('admin: contended multi-doc read-modify-write keeps both docs consistent', async () => {
+    const collection = `tx-multi-${randomUUID()}`;
+    await admin.create(collection, 'left', { id: 'left', value: 0 });
+    await admin.create(collection, 'right', { id: 'right', value: 0 });
+
+    const writers = 8;
+    await Promise.all(
+      Array.from({ length: writers }, () =>
+        admin.runTransaction(async (tx) => {
+          const left = await tx.get(collection, 'left');
+          const right = await tx.get(collection, 'right');
+          const leftValue = typeof left?.value === 'number' ? left.value : 0;
+          const rightValue = typeof right?.value === 'number' ? right.value : 0;
+          await tx.set(
+            collection,
+            'left',
+            { id: 'left', value: leftValue + 1 },
+            false,
+          );
+          await tx.set(
+            collection,
+            'right',
+            { id: 'right', value: rightValue + 1 },
+            false,
+          );
+        }),
+      ),
+    );
+
+    const left = await admin.get(collection, 'left');
+    const right = await admin.get(collection, 'right');
+    expect(left).toMatchObject({ value: writers });
+    expect(right).toMatchObject({ value: writers });
+  });
+
+  it('admin: lease takeover yields one winner and domain errors for losers', async () => {
+    class LeaseTakenError extends Error {
+      constructor() {
+        super('lease already taken');
+        this.name = 'LeaseTakenError';
+      }
+    }
+
+    const collection = `tx-lease-${randomUUID()}`;
+    const expiredAt = new Date(Date.now() - 60_000);
+    await admin.create(collection, 'lease', {
+      id: 'lease',
+      owner: 'stale',
+      expiresAt: expiredAt,
+    });
+
+    const results = await Promise.allSettled(
+      Array.from({ length: 6 }, (_, index) =>
+        admin.runTransaction(async (tx) => {
+          const lease = await tx.get(collection, 'lease');
+          const expiresAtRaw = lease?.expiresAt;
+          const expiresAtValue =
+            expiresAtRaw instanceof Date
+              ? expiresAtRaw.getTime()
+              : typeof expiresAtRaw === 'number'
+              ? expiresAtRaw
+              : 0;
+          const owner =
+            typeof lease?.owner === 'string' ? lease.owner : undefined;
+          const worker = `worker-${index}`;
+          if (
+            owner !== undefined &&
+            owner !== worker &&
+            expiresAtValue > Date.now()
+          ) {
+            throw new LeaseTakenError();
+          }
+          await tx.set(
+            collection,
+            'lease',
+            {
+              id: 'lease',
+              owner: worker,
+              expiresAt: new Date(Date.now() + 60_000),
+            },
+            false,
+          );
+          return worker;
+        }),
+      ),
+    );
+
+    const wins = results.filter((result) => result.status === 'fulfilled');
+    const losses = results.filter((result) => result.status === 'rejected');
+    expect(wins).toHaveLength(1);
+    expect(losses).toHaveLength(5);
+    for (const loss of losses) {
+      expect(loss.status).toBe('rejected');
+      if (loss.status === 'rejected') {
+        expect(loss.reason).toBeInstanceOf(LeaseTakenError);
+      }
+    }
+
+    const lease = await admin.get(collection, 'lease');
+    expect(typeof lease?.owner).toBe('string');
+    expect(String(lease?.owner).startsWith('worker-')).toBe(true);
+  });
 });

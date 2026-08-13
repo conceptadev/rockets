@@ -5,14 +5,22 @@
 ### Added
 
 - **Transactions (issue #44 P1-1).** `FirestoreBackend.runTransaction` for
-  callback-shaped atomic units; `runInFirestoreTransaction` keeps the body
-  inside the SDK callback (retries re-execute); `transactionFactories`
-  registered from `forFeature` so `TransactionScope` / `transactional: true`
-  is supported; every `do*` method threads ambient / `options.ctx` into the
-  transaction. Contended RMW must use `runInFirestoreTransaction` — the
-  imperative bridge refuses Firestore retries (throws) instead of committing
-  an empty write set. Transactional `create` maps duplicate ids to
-  `FirestoreDuplicateIdException`; transactional queries push `limit()`.
+  callback-shaped atomic units; `runInFirestoreTransaction` /
+  `FirestoreRepository.transaction` keep the body inside the SDK callback
+  (retries re-execute); `FIRESTORE_BACKEND` is exported from `forFeature`;
+  `transactionFactories` registered so `TransactionScope` /
+  `transactional: true` is supported (imperative bridge refuses retries and
+  logs a one-time warning); every `do*` method threads ambient /
+  `options.ctx` into the transaction. Transactional `create` maps duplicate
+  ids to `FirestoreDuplicateIdException`; transactional queries push
+  `limit()`.
+- Soft-delete server pushdown (issue #44 P1-4): create materializes
+  explicit `null`; default lists/counts use `field == null` on the server so
+  `limit()` / aggregation stay enabled. Update/upsert do **not** invent null
+  (avoids silent resurrection). Nested `runInFirestoreTransaction` joins the
+  ambient handle. Ships `backfillSoftDeleteNull` +
+  `firestore.indexes.example.json` for the migration/index work production
+  needs after this change.
 - Full `WhereOperator` coverage (EQ, NE, comparisons, IN, NIN, null checks,
   string matchers, BETWEEN) with Firestore-native or post-filter execution.
 - OR support via `RepositoryAdapter.toDnf()`.
