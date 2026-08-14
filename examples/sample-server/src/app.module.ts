@@ -25,7 +25,6 @@ import {
 import { adminFeature } from './admin';
 import { auditFeature } from './audit';
 import { eventsFeature } from './events';
-import { opsResource } from './resources/ops';
 
 export const server = createServer({
   auth: defineSampleAuth(),
@@ -38,7 +37,6 @@ export const server = createServer({
   }),
   resources: [
     sampleAuthUserResource,
-    opsResource,
     petResource,
     petVaccinationResource,
     tagZodResource,
