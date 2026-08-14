@@ -3,6 +3,7 @@ import type { RepositoryPersistenceConfig } from '../../../domain/interfaces/rep
 import type { RocketsResourceConfig } from '../../../domain/interfaces/rockets-resource.interface';
 import type { CrudResource } from '../../../domain/interfaces/rockets-resource-bundle.interface';
 import type { ModuleResource } from '../../../domain/interfaces/module-resource.interface';
+import type { OperationResource } from '../../../domain/interfaces/operation-resource.interface';
 import { ResourceKind } from '../../../domain/interfaces/resource-kind.enum';
 
 export interface AppRegistrationPlan {
@@ -14,6 +15,7 @@ export interface AppRegistrationPlan {
 export type ResourceInput<E extends PlainLiteralObject = PlainLiteralObject> =
   | CrudResource<E>
   | ModuleResource
+  | OperationResource
   | RocketsResourceConfig;
 
 export function isCrudResource(value: unknown): value is CrudResource {
@@ -28,5 +30,6 @@ export function isCrudResource(value: unknown): value is CrudResource {
 export interface SortedResourceInputs {
   readonly generatedResources: ReadonlyArray<CrudResource>;
   readonly moduleBundles: ReadonlyArray<ModuleResource>;
+  readonly operationBundles: ReadonlyArray<OperationResource>;
   readonly manualResources: ReadonlyArray<RocketsResourceConfig>;
 }

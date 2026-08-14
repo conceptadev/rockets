@@ -123,6 +123,24 @@ export {
 } from './infrastructure/resource/define-module-resource';
 export type { DefineModuleResourceInput } from './infrastructure/resource/define-module-resource';
 
+// Operation resource (typed non-CRUD endpoints)
+export type {
+  OperationResource,
+  OperationResourceDefinition,
+  OperationContext,
+  OperationRequest,
+  OperationResponse,
+  OperationHandler,
+  OperationHandlerFn,
+  OperationHandlerRef,
+  CompiledOperationDescriptor,
+  OperationHttpMethod,
+} from './domain/interfaces/operation-resource.interface';
+export {
+  defineOperationResource,
+  isOperationResource,
+} from './infrastructure/resource/define-operation-resource';
+
 // Auth bootstrap (light / external auth wiring)
 export type {
   AuthBootstrap,

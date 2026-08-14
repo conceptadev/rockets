@@ -15,6 +15,7 @@
 and the release gates are in place; registry publication and the `alpha`
 dist-tag update are still pending. The public
 surface (`AuthAdapterInterface`, `defineResource`, `defineModuleResource`,
+`defineOperationResource` / `operationResource`,
 `RepositoryInterface`, `createServer`) may still change before 1.0. Pin exact
 versions in production.
 
@@ -223,7 +224,9 @@ type ResourceInput =
   | RocketsResourceConfig // hand-built CRUD config
   | ReturnType<typeof defineResource> // CRUD with auto-defaults
   | ReturnType<typeof defineModuleResource> // non-CRUD Nest slice
-  | ReturnType<typeof defineSubResource>; // nested CRUD
+  | ReturnType<typeof defineSubResource> // nested CRUD
+  | ReturnType<typeof defineOperationResource> // typed non-CRUD endpoints
+  | ReturnType<typeof operationResource>; // zod-first operationResource
 ```
 
 `buildAppRegistrationPlan({ resourceDefinitions, repository, userMetadata })`

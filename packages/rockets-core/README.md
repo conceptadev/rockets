@@ -532,6 +532,8 @@ stop, throw.
 | `defineResource(input)`                                 | CRUD bundle: entity + DTOs + operations + hooks → auto-controller.     |
 | `defineModuleResource(input)`                           | Non-CRUD bundle: entities + Nest module slice.                         |
 | `defineSubResource(input)`                              | Nested resource (e.g. `/pets/:petId/tags`) with path-scope guard.      |
+| `defineOperationResource(input)`                        | Typed non-CRUD endpoints with a generated controller (issue #43).      |
+| `operationResource` / `query` / `command` (zod subpath) | Zod-first builders for `defineOperationResource`.                      |
 | `relation(target, prop, opts?)`                         | Type-safe cross-resource relation.                                     |
 | `extractBearerToken(request)`                           | RFC 7235 Bearer parser for adapter implementations.                    |
 | `getActor(ctx)`                                         | Read authenticated user from a CRUD context.                           |

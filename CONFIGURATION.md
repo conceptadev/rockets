@@ -10,7 +10,8 @@
 ## 0. Mental model (read this first)
 
 You never hand NestJS a tree of modules. You write **declarative bundles**
-(`defineResource`, `defineSubResource`, `defineModuleResource`) and a few
+(`defineResource`, `defineSubResource`, `defineModuleResource`,
+`operationResource` / `defineOperationResource`) and a few
 top-level fields (`repository`, `userMetadata`, `auth`), pass them to
 `createServer({...})`, and the module-definition transform converts that into a
 single global `DynamicModule` (controllers, providers, repository tokens, CQRS
@@ -23,6 +24,7 @@ flowchart LR
     R["defineResource()"]
     S["defineSubResource()"]
     M["defineModuleResource()"]
+    O["operationResource() / defineOperationResource()"]
     OPT["repository / userMetadata / auth / swagger"]
   end
   YOU --> CREATE["createServer( ... )"]
@@ -133,9 +135,11 @@ interface AppRegistrationPlan {
 }
 ```
 
-> The plan carries **no controllers and no CQRS list**. Controllers come from
-> imported `CrudModule.forFeature` / module slices. CQRS handlers are
-> re-extracted later from `crudResources[].crud.operations[].queryHandler/commandHandler`.
+> The plan carries **no hand-written controllers and no CQRS list** by default.
+> Controllers come from CRUD materialisation and from `operationResource`
+> generated adapters. CQRS handlers come from imported
+> `CrudModule.forFeature` / module slices and are re-extracted later from
+> `crudResources[].crud.operations[].queryHandler/commandHandler`.
 
 ### 2.2 Pipeline
 
@@ -361,6 +365,68 @@ petTags: defineSubResource({          // key 'petTags' must be a PetEntity relat
 | `scope` | `boolean` | no | `true` — master switch (FK filter/stamp + guard); `false` = unscoped |
 | `reloadAfterCreate` | `boolean` | no | `false` |
 | *(inherited)* | `dto`, `operations`, `relations`, `hooks`, `handlers`, `providers`, `subResources`… | no | — |
+
+---
+
+## 6a. `operationResource()` — typed non-CRUD endpoints (issue #43 v1)
+
+Use when you need **RPC-style** routes beside CRUD — health checks, actions,
+reports — without hand-rolling a Nest controller. Zod `input` / `output`
+compile to DTO classes (OpenAPI + Standard Schema whitelist). Wire the bundle
+into `resources[]` like any other resource.
+
+```ts
+import { command, operationResource, query } from '@concepta/rockets-core/zod';
+import { z } from 'zod';
+
+export const ops = operationResource({
+  path: 'ops',
+  tags: ['Ops'],
+  public: true, // class-level @AuthPublic; individual ops cannot be more private
+  operations: {
+    ping: query({
+      output: z.object({ ok: z.boolean() }),
+      handler: () => ({ ok: true }),
+    }),
+    shout: command({
+      path: 'shout',
+      status: 201, // default is 200 for both query and command
+      input: z.object({ text: z.string().min(1) }),
+      output: z.object({ text: z.string() }),
+      handler: ({ input }) => ({ text: input.text.toUpperCase() }),
+    }),
+    list: query({
+      path: 'items',
+      output: z.array(z.object({ id: z.string() })),
+      handler: () => [{ id: '1' }],
+    }),
+  },
+});
+```
+
+| Builder | Default method | Default status |
+|---|---|---|
+| `query()` | `GET` | `200` |
+| `command()` | `POST` | `200` (set `status: 201` when creating) |
+
+**Auth / ACL.** Resource `public: true` opens the whole controller. On a secured
+resource, mark individual ops with `public: true`. Setting `public: false` on
+an op under a public resource is rejected at boot. **v1 does not wire ACL
+grants** — authenticated routes are open to any authenticated user unless you
+pass method `decorators` (e.g. access-control grants). Omitting `input` means
+the raw body/query reaches the handler unvalidated.
+
+**Validation.** Responses are whitelisted against `output` when present;
+handler/`output` mismatches return **500** (server bug), not 400. Query-string
+inputs are strings — use `z.coerce.number()` / `z.coerce.boolean()` when needed.
+`output` accepts `z.object(...)` or `z.array(...)`. Duplicate `method`+`path`
+pairs inside one resource fail at boot.
+
+v1 covers `query` + `command` only. Cursor, SSE, binary, raw JSON, idempotency,
+and external-client scaffolds are follow-ups on issue #43.
+
+Lower-level escape hatch: `defineOperationResource({ path, operations: {…} })`
+with precompiled DTO classes.
 
 ---
 
@@ -675,6 +741,7 @@ flowchart TD
   Q2 -- yes --> SUB["defineSubResource()\n(in parent.subResources)"]
   Q2 -- no  --> RES["defineResource()\n(in resources[])"]
   Q1 -- no --> Q3{"Need a table / repo key,\nor custom Nest wiring?"}
+  Q3 -- "typed RPC endpoints (no CRUD)" --> OPS["operationResource() / defineOperationResource()"]
   Q3 -- "table only" --> MOD1["defineModuleResource({ entities:[X] })"]
   Q3 -- "CQRS/services, no table" --> MOD2["defineModuleResource({ entities:[], imports/providers })"]
   Q3 -- "custom controller + table" --> MOD3["defineModuleResource({ entities, controllers, providers, exports })"]
@@ -684,6 +751,7 @@ flowchart TD
 |---|---|
 | Standard CRUD HTTP surface (`/pets`) | `defineResource` |
 | Child route keyed by a parent relation (`/pets/:petId/tags`) | `defineSubResource` |
+| Typed non-CRUD endpoints (`/ops/shout`) | `operationResource` / `defineOperationResource` |
 | Register an entity for `@InjectDynamicRepository` | `defineModuleResource({ entities:[X] })` |
 | Pure CQRS/workflow, no new table | `defineModuleResource({ entities:[] })` |
 | Hand-written controller + services | `defineModuleResource({ controllers, providers })` |

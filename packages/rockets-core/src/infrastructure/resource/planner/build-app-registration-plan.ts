@@ -10,6 +10,7 @@ import { buildEntityRegistry } from './entity-registry';
 import { buildRepositoryPlan } from './repository-plan';
 import { sortResourceInputs } from './sort-resource-inputs';
 import { materialiseModuleResource } from './materialise-module-resource';
+import { materialiseOperationResource } from './materialise-operation-resource';
 import { validateResourceRelations } from './validate-relations';
 
 /**
@@ -18,11 +19,11 @@ import { validateResourceRelations } from './validate-relations';
  * the optional `userMetadata` config.
  *
  * Pipeline:
- *   1. Sort inputs (CRUD / module-resource / manual).
+ *   1. Sort inputs (CRUD / module-resource / operation-resource / manual).
  *   2. Build entity registry (dedupe + relation targets).
  *   3. Group repository rows per adapter (strict — adapter required).
  *   4. Validate CRUD relations against the registry.
- *   5. Materialise module-resource Nest slices.
+ *   5. Materialise module-resource and operation-resource Nest slices.
  *
  * @example
  * ```ts
@@ -42,8 +43,12 @@ export function buildAppRegistrationPlan(args: {
     validateRocketsUserMetadataConfig(args.userMetadata);
   }
 
-  const { generatedResources, moduleBundles, manualResources } =
-    sortResourceInputs(args.resources);
+  const {
+    generatedResources,
+    moduleBundles,
+    operationBundles,
+    manualResources,
+  } = sortResourceInputs(args.resources);
 
   const entityRegistry = buildEntityRegistry(
     generatedResources,
@@ -60,7 +65,10 @@ export function buildAppRegistrationPlan(args: {
 
   validateResourceRelations(generatedResources, entityRegistry);
 
-  const nestModules = moduleBundles.map(materialiseModuleResource);
+  const nestModules = [
+    ...moduleBundles.map(materialiseModuleResource),
+    ...operationBundles.map(materialiseOperationResource),
+  ];
 
   const crudResources: RocketsResourceConfig[] = [
     ...generatedResources.map((resource) => resource.core),

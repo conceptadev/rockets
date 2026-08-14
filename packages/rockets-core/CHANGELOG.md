@@ -9,6 +9,14 @@
 
 ### Added
 
+- **`operationResource` / `query` / `command` (issue #43 v1).** Typed non-CRUD
+  endpoints beside `zodResource`: Zod input/output → DTO + OpenAPI, generated
+  Nest controller, auth/`public`, optional `transactional`, function or
+  injectable `handle` handlers. Wired through `resources[]` as
+  `ResourceKind.Operation`. **v1 does not wire ACL grants** — authenticated
+  ops are open to any authenticated user unless you pass method `decorators`
+  (e.g. access-control grants). Cursor / SSE / binary / raw JSON / idempotency /
+  external-client scaffolds remain follow-ups.
 - `compileDtoClass` and `namedZodDto` are exported from the public
   `@concepta/rockets-core/zod` subpath.
 - `AuthBootstrapContributions`, allowing an auth integration to carry its owned
