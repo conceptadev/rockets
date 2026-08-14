@@ -7,11 +7,13 @@ description: Build, test, and lint commands for the project
 Run checks in this order after code changes:
 
 1. `yarn build`
-2. `yarn typecheck:spec` — type-checks all test files (the runner only
+2. `yarn api:report:check-built` — verifies public runtime/type declarations
+   and report-generator regressions against the fresh build
+3. `yarn typecheck:spec` — type-checks all test files (the runner only
    transpiles; without this, spec type errors ship silently)
-3. `yarn test`
-4. `yarn test:e2e`
-5. `yarn lint`
+4. `yarn test`
+5. `yarn test:e2e`
+6. `yarn lint`
 
 CI also runs: `yarn lint:all`, `yarn typecheck:spec`, `yarn test:ci`
 
@@ -42,8 +44,10 @@ filter runs everything (requires `yarn build` first). Key facts:
 - `globals` is `false` everywhere: every test file imports what it uses
   (`import { describe, it, expect, vi } from 'vitest'`).
 - `pool: 'forks'` runs each spec file in a fresh process — the isolation
-  the old Jest setup needed a custom runner script for. There is no
-  `scripts/` directory anymore; do not reintroduce one for test plumbing.
+  the old Jest setup needed a custom runner script for. The repository does
+  have `scripts/` for release, package-contract, integrity, and integration
+  helpers; prefer Vitest's project/pool configuration over adding custom test
+  runners.
 - Intermittent full-run failures with a rotating victim suite are
   **host memory pressure**, not a code defect — diagnosed in CHANGELOG.md
   ("Intermittent e2e failures"). A failing run takes ~20x longer and the
@@ -51,9 +55,10 @@ filter runs everything (requires `yarn build` first). Key facts:
   memory-constrained machine use `--maxWorkers=2` or free memory; never
   "fix" it by retrying, skipping, or weakening assertions.
 
-Also: **never** import a `domains/*/index` barrel inside an e2e file that
-boots a Nest app — barrels register `@CommandHandler` / `@QueryHandler` in
-global Reflect metadata.
+Also: avoid importing an unrelated `domains/*/index` barrel inside an E2E file
+that boots a Nest app. Importing the barrel evaluates its decorated CQRS
+classes and attaches handler metadata to those class objects; use the focused
+module imports that the test actually exercises.
 
 ## Test File Placement
 
@@ -63,6 +68,9 @@ global Reflect metadata.
 | Unit (only when needed) | `*.spec.ts` | Co-located next to the source file |
 | Fixtures | `*.fixture.ts` | `__fixtures__/` directories |
 
-## Coverage Target
+## Coverage Policy
 
-Statements / Lines ≥ **80 %** on `yarn test:e2e:cov`.
+The enforced unit gate (`yarn test:ci` and `yarn test:cov`) is statements
+**50%**, branches **50%**, functions **40%**, and lines **50%**.
+`yarn test:e2e:cov` is a reporting-only package-E2E coverage run; it has no
+threshold.

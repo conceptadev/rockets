@@ -78,6 +78,8 @@ and this project adheres to
 
 ### Removed
 
+- `RocketsAuthUserMetadataCreateDtoInterface`, an unused pre-1.0 alias. Use
+  `RocketsAuthUserMetadataCreatableInterface` instead.
 - The nonfunctional `rockets-auth-swagger` manifest entry. Applications
   generate OpenAPI from their own complete Nest entry module.
 

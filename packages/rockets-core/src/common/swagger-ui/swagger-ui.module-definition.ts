@@ -46,12 +46,12 @@ function definitionTransform(
   definition: DynamicModule,
   extras: SwaggerUiOptionsExtrasInterface,
 ): DynamicModule {
-  const { providers = [] } = definition;
+  const { imports = [], providers = [] } = definition;
 
   return {
     ...definition,
-    ...extras,
-    imports: [ConfigModule.forFeature(swaggerUiDefaultConfig)],
+    global: extras.global,
+    imports: [...imports, ConfigModule.forFeature(swaggerUiDefaultConfig)],
     providers: createSwaggerUiProviders({ providers }),
     exports: createSwaggerUiExports(),
   };

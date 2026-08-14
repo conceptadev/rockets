@@ -45,6 +45,18 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 - `SECURITY.md` and sample READMEs no longer claim an npm `alpha` channel that
   is not published yet.
 
+### Public API governance
+
+- `api/public-api-reports.json` records the declaration-level contract for
+  every published entry point, distinguishing runtime from type-only exports
+  and including same-package declarations reachable through public signatures.
+  `yarn api:report:check-built` gates it in CI.
+- Removed the unused pre-1.0 aliases
+  `ROCKETS_MODULE_OPTIONS_DEFAULT_SETTINGS_TOKEN` and
+  `RocketsAuthUserMetadataCreateDtoInterface`; use
+  `ROCKETS_CORE_SETTINGS_TOKEN` and
+  `RocketsAuthUserMetadataCreatableInterface`, respectively.
+
 ### Release preparation
 
 - Public Rockets package manifests are aligned at `1.0.0-alpha.8`. Registry
