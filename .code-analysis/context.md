@@ -224,9 +224,9 @@ real logic. Do not file "inconsistent layering" as a blanket finding; a
 `rockets-ddd-refactor` migration is in flight.
 
 **Two parallel composition roots.** `rockets-server-auth` does **not** import
-`RocketsCoreModule`. It cherry-picks `buildAccessControlImport`,
-`SwaggerUiModule`, and `SafeCrudContextInterceptor` from core and re-does its
-own wiring. Expect duplicated-looking composition between the two paths.
+`RocketsCoreModule`. It cherry-picks `buildAccessControlImport` and
+`SwaggerUiModule` from core and re-does its own wiring. Expect
+duplicated-looking composition between the two paths.
 Relatedly, the layers disagree on one field: `rockets-server` **requires**
 `userMetadata` and throws at DI time, while core treats it as optional.
 
@@ -314,11 +314,6 @@ legitimate findings — just not news.
   imports from `@concepta/nestjs-crud/dist/...` because the symbol isn't in the
   upstream barrel; the comment admits it. Core violating the barrel discipline it
   enforces on everyone else, and it breaks on any upstream `dist` reshuffle.
-- **`SafeCrudContextInterceptor` is an admitted upstream workaround.** Core calls
-  `CrudModule.forRoot({})`, filters upstream's `CrudContextOverlay`
-  `APP_INTERCEPTOR` out of the provider list, and substitutes its own. Marked
-  "remove once the upstream default is safe in mixed apps". Depends on upstream
-  provider identity.
 - **Dead option.** `defineRocketsAuth`'s `rocketsDefaults.enableGlobalGuard` is
   destructured and discarded, never read. Breaks the no-unused-fields rule.
 - **Two global-guard registration paths.** Core provides `AuthServerGuard` as a

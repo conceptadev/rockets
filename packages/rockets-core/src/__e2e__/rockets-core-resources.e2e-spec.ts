@@ -5,6 +5,8 @@ import {
   UnauthorizedException,
   Global,
   Module,
+  Controller,
+  Get,
 } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -14,7 +16,7 @@ import { CrudResponsePaginatedDto } from '@concepta/nestjs-crud';
 import { getDynamicRepositoryToken } from '@concepta/nestjs-repository';
 import { Expose, Type } from 'class-transformer';
 import { IsString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import request from 'supertest';
 import type {
   AuthAdapterInterface,
@@ -30,6 +32,7 @@ import {
 import { APP_GUARD } from '@nestjs/core';
 import { AuthServerGuard } from '../infrastructure/guards/auth-server.guard';
 import { defineResource } from '../infrastructure/resource/define-resource';
+import { defineModuleResource } from '../infrastructure/resource/define-module-resource';
 import { defineAuthAdapter } from '../infrastructure/auth/define-auth-adapter';
 
 // ── Fixtures ──
@@ -67,6 +70,24 @@ class WidgetPaginatedDto extends CrudResponsePaginatedDto<WidgetResponseDto> {
   @Type(() => WidgetResponseDto)
   @ApiProperty({ type: [WidgetResponseDto], isArray: true })
   declare data: WidgetResponseDto[];
+}
+
+// A hand-written, non-CRUD controller mounted next to the CRUD resource below.
+// Because a `defineResource` CRUD resource is present, core imports
+// `CrudModule.forRoot({})`, which registers upstream's `CrudContextOverlay` as
+// a global interceptor. This route has no CRUD metadata, so if the overlay ever
+// stops no-op-ing on non-CRUD handlers it 500s here. This is the real removal
+// guard for `SafeCrudContextInterceptor`.
+@ApiTags('plain-e2e')
+@Controller('plain')
+class PlainController {
+  @Get('ping')
+  @ApiOkResponse({
+    schema: { type: 'object', properties: { ok: { type: 'boolean' } } },
+  })
+  ping(): { ok: boolean } {
+    return { ok: true };
+  }
 }
 
 class InMemoryMetadataRepo {
@@ -123,6 +144,7 @@ describe('RocketsCoreModule — resources + resourcePersistence (e2e)', () => {
               },
               providers: [SimpleAuthProvider],
             }),
+            defineModuleResource({ controllers: [PlainController] }),
           ],
           global: true,
         }),
@@ -161,6 +183,18 @@ describe('RocketsCoreModule — resources + resourcePersistence (e2e)', () => {
   it('resource providers are exported (SimpleAuthProvider)', () => {
     const provider = app.get(SimpleAuthProvider);
     expect(provider).toBeDefined();
+  });
+
+  it('serves a non-CRUD controller without a 500 when mixed with a CRUD resource', async () => {
+    // The CRUD `widget` resource forced `CrudModule.forRoot({})` and its global
+    // `CrudContextOverlay`; this plain route must pass through it untouched.
+    const res = await request(app.getHttpServer())
+      .get('/plain/ping')
+      .set('Authorization', 'Bearer ok');
+
+    expect(res.status).not.toBe(500);
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ ok: true });
   });
 });
 

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { Test } from '@nestjs/testing';
 import {
   SortOrder,
@@ -8,8 +8,10 @@ import {
 import type { RepositoryInterface } from '@concepta/nestjs-repository';
 
 import { InMemoryFirestoreBackend } from '../backends/in-memory-firestore.backend';
+import { FIRESTORE_BACKEND } from '../constants/firestore-repository.constants';
 import { FirestoreDuplicateIdException } from '../exceptions/firestore-duplicate-id.exception';
 import { FirestoreRepositoryModule } from '../firestore-repository.module';
+import { backfillSoftDeleteNull } from '../utils/backfill-soft-delete-null';
 
 class WidgetEntity {
   id!: string;
@@ -56,15 +58,30 @@ describe(FirestoreRepositoryModule.name, () => {
     ).toThrow(/initialize Firebase Admin/);
   });
 
-  it('registers a global dynamic module', () => {
+  it('registers a global dynamic module with a transaction factory', () => {
     const dynModule = FirestoreRepositoryModule.forFeature(
       [{ key: 'widget', entity: WidgetEntity }],
       { backend },
     );
 
     expect(dynModule.module).toBe(FirestoreRepositoryModule);
-    expect(dynModule.providers).toHaveLength(1);
-    expect(dynModule.exports).toHaveLength(1);
+    expect(dynModule.providers).toHaveLength(2);
+    expect(dynModule.exports).toHaveLength(2);
+    expect(dynModule.transactionFactories).toHaveLength(1);
+  });
+
+  it('exposes the shared backend through FIRESTORE_BACKEND', async () => {
+    const shared = new InMemoryFirestoreBackend();
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [{ key: 'widget', entity: WidgetEntity, collection: 'widgets-di' }],
+          { backend: shared },
+        ),
+      ],
+    }).compile();
+
+    expect(moduleRef.get(FIRESTORE_BACKEND)).toBe(shared);
   });
 
   it('persists and reads through an explicit in-memory backend', async () => {
@@ -555,7 +572,7 @@ describe(FirestoreRepositoryModule.name, () => {
     expect(rows.map((row) => row.id)).toEqual(['present']);
   });
 
-  it('treats a missing soft-delete field as live by default', async () => {
+  it('materializes dateRemoved null on create so soft-delete lists stay server-pushable', async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         FirestoreRepositoryModule.forFeature(
@@ -563,7 +580,7 @@ describe(FirestoreRepositoryModule.name, () => {
             {
               key: 'soft-widget',
               entity: SoftWidgetEntity,
-              collection: 'soft-widgets-missing-field',
+              collection: 'soft-widgets-materialize',
               softDeleteField: 'dateRemoved',
             },
           ],
@@ -578,8 +595,474 @@ describe(FirestoreRepositoryModule.name, () => {
 
     await repo.create({ id: 'live', title: 'Live' });
 
-    await expect(repo.find()).resolves.toEqual([
-      expect.objectContaining({ id: 'live' }),
+    const found = await repo.findOne({ where: Where.eq('id', 'live') });
+    expect(found).toMatchObject({ id: 'live', dateRemoved: null });
+  });
+
+  it('does not resurrect a soft-deleted row when update omits dateRemoved', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'soft-widget',
+              entity: SoftWidgetEntity,
+              collection: 'soft-widgets-no-resurrect',
+              softDeleteField: 'dateRemoved',
+            },
+          ],
+          { backend: new InMemoryFirestoreBackend() },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<SoftWidgetEntity>>(
+      getDynamicRepositoryToken('soft-widget'),
+    );
+
+    await repo.create({ id: 'gone', title: 'Gone' });
+    const created = await repo.findOne({ where: Where.eq('id', 'gone') });
+    await repo.softDelete(created!);
+
+    await repo.update({ id: 'gone', title: 'patched' } as SoftWidgetEntity, {
+      title: 'patched',
+    });
+
+    await expect(repo.find({ where: Where.eq('id', 'gone') })).resolves.toEqual(
+      [],
+    );
+    await expect(
+      repo.find({ where: Where.eq('id', 'gone'), withDeleted: true }),
+    ).resolves.toEqual([
+      expect.objectContaining({
+        id: 'gone',
+        title: 'patched',
+        dateRemoved: expect.any(Date),
+      }),
     ]);
+  });
+
+  it('does not resurrect a soft-deleted row on upsert that omits dateRemoved', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'soft-widget',
+              entity: SoftWidgetEntity,
+              collection: 'soft-widgets-upsert-no-resurrect',
+              softDeleteField: 'dateRemoved',
+            },
+          ],
+          { backend: new InMemoryFirestoreBackend() },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<SoftWidgetEntity>>(
+      getDynamicRepositoryToken('soft-widget'),
+    );
+
+    await repo.create({ id: 'gone', title: 'Gone' });
+    const created = await repo.findOne({ where: Where.eq('id', 'gone') });
+    await repo.softDelete(created!);
+
+    await repo.upsert({ id: 'gone', title: 'upserted' });
+
+    await expect(repo.find({ where: Where.eq('id', 'gone') })).resolves.toEqual(
+      [],
+    );
+    await expect(
+      repo.find({ where: Where.eq('id', 'gone'), withDeleted: true }),
+    ).resolves.toEqual([
+      expect.objectContaining({
+        id: 'gone',
+        title: 'upserted',
+        dateRemoved: expect.any(Date),
+      }),
+    ]);
+  });
+
+  it('keeps an upserted new document visible in default lists', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'soft-widget',
+              entity: SoftWidgetEntity,
+              collection: 'soft-widgets-upsert-visible',
+              softDeleteField: 'dateRemoved',
+            },
+          ],
+          { backend: new InMemoryFirestoreBackend() },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<SoftWidgetEntity>>(
+      getDynamicRepositoryToken('soft-widget'),
+    );
+
+    const created = await repo.upsert({ id: 'fresh', title: 'Fresh' });
+    expect(created).toMatchObject({ id: 'fresh', dateRemoved: null });
+
+    await expect(repo.find()).resolves.toEqual([
+      expect.objectContaining({ id: 'fresh' }),
+    ]);
+    await expect(repo.count()).resolves.toBe(1);
+  });
+
+  it('keeps a live document visible when replace omits the soft-delete field', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'soft-widget',
+              entity: SoftWidgetEntity,
+              collection: 'soft-widgets-replace-visible',
+              softDeleteField: 'dateRemoved',
+            },
+          ],
+          { backend: new InMemoryFirestoreBackend() },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<SoftWidgetEntity>>(
+      getDynamicRepositoryToken('soft-widget'),
+    );
+
+    await repo.create({ id: 'live', title: 'Live' });
+    const live = await repo.findOne({ where: Where.eq('id', 'live') });
+
+    await repo.replace(live!, { id: 'live', title: 'Replaced' });
+
+    await expect(repo.find()).resolves.toEqual([
+      expect.objectContaining({ id: 'live', title: 'Replaced' }),
+    ]);
+    await expect(repo.count()).resolves.toBe(1);
+  });
+
+  it('keeps a soft-deleted document deleted when replace omits the field', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'soft-widget',
+              entity: SoftWidgetEntity,
+              collection: 'soft-widgets-replace-deleted',
+              softDeleteField: 'dateRemoved',
+            },
+          ],
+          { backend: new InMemoryFirestoreBackend() },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<SoftWidgetEntity>>(
+      getDynamicRepositoryToken('soft-widget'),
+    );
+
+    await repo.create({ id: 'gone', title: 'Gone' });
+    const created = await repo.findOne({ where: Where.eq('id', 'gone') });
+    const removed = await repo.softDelete(created!);
+
+    await repo.replace(removed, { id: 'gone', title: 'Replaced' });
+
+    await expect(repo.find()).resolves.toEqual([]);
+    await expect(repo.find({ withDeleted: true })).resolves.toEqual([
+      expect.objectContaining({ id: 'gone', title: 'Replaced' }),
+    ]);
+  });
+
+  it('does not resurrect when replace passes dateRemoved: undefined', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'soft-widget',
+              entity: SoftWidgetEntity,
+              collection: 'soft-widgets-replace-undefined',
+              softDeleteField: 'dateRemoved',
+            },
+          ],
+          { backend: new InMemoryFirestoreBackend() },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<SoftWidgetEntity>>(
+      getDynamicRepositoryToken('soft-widget'),
+    );
+
+    await repo.create({ id: 'gone', title: 'Gone' });
+    const created = await repo.findOne({ where: Where.eq('id', 'gone') });
+    const removed = await repo.softDelete(created!);
+
+    await repo.replace(removed, {
+      id: 'gone',
+      title: 'Replaced',
+      dateRemoved: undefined,
+    });
+
+    await expect(repo.find()).resolves.toEqual([]);
+    await expect(repo.find({ withDeleted: true })).resolves.toEqual([
+      expect.objectContaining({
+        id: 'gone',
+        dateRemoved: expect.any(Date),
+      }),
+    ]);
+  });
+
+  it('does not resurrect when replace uses a hand-built entity without dateRemoved', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'soft-widget',
+              entity: SoftWidgetEntity,
+              collection: 'soft-widgets-replace-handbuilt',
+              softDeleteField: 'dateRemoved',
+            },
+          ],
+          { backend: new InMemoryFirestoreBackend() },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<SoftWidgetEntity>>(
+      getDynamicRepositoryToken('soft-widget'),
+    );
+
+    await repo.create({ id: 'gone', title: 'Gone' });
+    const created = await repo.findOne({ where: Where.eq('id', 'gone') });
+    await repo.softDelete(created!);
+
+    await repo.replace({ id: 'gone' } as SoftWidgetEntity, {
+      id: 'gone',
+      title: 'Replaced',
+    });
+
+    await expect(repo.find()).resolves.toEqual([]);
+    await expect(repo.find({ withDeleted: true })).resolves.toEqual([
+      expect.objectContaining({
+        id: 'gone',
+        title: 'Replaced',
+        dateRemoved: expect.any(Date),
+      }),
+    ]);
+  });
+
+  it('backfillSoftDeleteNull restores legacy docs missing the soft-delete field', async () => {
+    const backend = new InMemoryFirestoreBackend();
+    await backend.set('soft-widgets-backfill', 'legacy', {
+      id: 'legacy',
+      title: 'Legacy',
+    });
+    await backend.set('soft-widgets-backfill', 'already', {
+      id: 'already',
+      title: 'Already',
+      dateRemoved: null,
+    });
+
+    const patched = await backfillSoftDeleteNull({
+      backend,
+      collection: 'soft-widgets-backfill',
+      softDeleteField: 'dateRemoved',
+    });
+    expect(patched).toBe(1);
+    expect(await backend.get('soft-widgets-backfill', 'legacy')).toMatchObject({
+      dateRemoved: null,
+    });
+  });
+
+  it('pushes soft-delete exclusion as a server filter so take/count stay on the backend', async () => {
+    const backend = new InMemoryFirestoreBackend();
+    const queryBranch = vi.spyOn(backend, 'queryBranch');
+    const countBranch = vi.spyOn(backend, 'countBranch');
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'soft-widget',
+              entity: SoftWidgetEntity,
+              collection: 'soft-widgets-pushdown',
+              softDeleteField: 'dateRemoved',
+            },
+          ],
+          { backend },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<SoftWidgetEntity>>(
+      getDynamicRepositoryToken('soft-widget'),
+    );
+
+    await repo.create({ id: 'a', title: 'A' });
+    await repo.create({ id: 'b', title: 'B' });
+    await repo.create({ id: 'c', title: 'C' });
+    const doomed = await repo.findOne({ where: Where.eq('id', 'c') });
+    await repo.softDelete(doomed!);
+
+    queryBranch.mockClear();
+    countBranch.mockClear();
+
+    const page = await repo.find({
+      order: [{ field: 'title', order: SortOrder.ASC }],
+      take: 1,
+    });
+    expect(page).toHaveLength(1);
+    expect(page[0]?.id).toBe('a');
+
+    expect(queryBranch).toHaveBeenCalled();
+    const queryCall = queryBranch.mock.calls[0]?.[1];
+    expect(queryCall?.take).toBe(1);
+    expect(queryCall?.branch.postFilters).toEqual([]);
+    expect(queryCall?.branch.filters).toContainEqual({
+      field: 'dateRemoved',
+      op: '==',
+      value: null,
+    });
+
+    const total = await repo.count();
+    expect(total).toBe(2);
+    expect(countBranch).toHaveBeenCalled();
+    const countCall = countBranch.mock.calls[0]?.[1];
+    expect(countCall?.postFilters).toEqual([]);
+    expect(countCall?.filters).toContainEqual({
+      field: 'dateRemoved',
+      op: '==',
+      value: null,
+    });
+  });
+
+  it('excludes legacy soft-delete docs that omit the field (no materialize)', async () => {
+    const backend = new InMemoryFirestoreBackend();
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'soft-widget',
+              entity: SoftWidgetEntity,
+              collection: 'soft-widgets-missing-field',
+              softDeleteField: 'dateRemoved',
+            },
+          ],
+          { backend },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<SoftWidgetEntity>>(
+      getDynamicRepositoryToken('soft-widget'),
+    );
+
+    await backend.set('soft-widgets-missing-field', 'legacy', {
+      id: 'legacy',
+      title: 'Legacy',
+    });
+
+    await expect(repo.find()).resolves.toEqual([]);
+    await expect(repo.find({ withDeleted: true })).resolves.toEqual([
+      expect.objectContaining({ id: 'legacy' }),
+    ]);
+  });
+
+  it('derives the document id from uniqueDocumentIdField', async () => {
+    class BucketEntity {
+      id!: string;
+      bucketKey!: string;
+      title!: string;
+    }
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'bucket',
+              entity: BucketEntity,
+              collection: 'buckets-unique',
+              uniqueDocumentIdField: 'bucketKey',
+            },
+          ],
+          { backend: new InMemoryFirestoreBackend() },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<BucketEntity>>(
+      getDynamicRepositoryToken('bucket'),
+    );
+
+    const created = await repo.create({
+      bucketKey: 'tenant-a-orders',
+      title: 'Orders',
+    });
+    expect(created.id).toBe('tenant-a-orders');
+    await expect(
+      repo.findOne({ where: Where.eq('id', 'tenant-a-orders') }),
+    ).resolves.toMatchObject({ title: 'Orders' });
+  });
+
+  it('refuses composite uniqueConstraints at boot', () => {
+    expect(() =>
+      FirestoreRepositoryModule.forFeature(
+        [
+          {
+            key: 'widget',
+            entity: WidgetEntity,
+            uniqueConstraints: [['title', 'note']],
+          },
+        ],
+        { backend: new InMemoryFirestoreBackend() },
+      ),
+    ).toThrow(/composite unique constraint/);
+  });
+
+  it('createMany uses writeBatch outside a transaction', async () => {
+    const backend = new InMemoryFirestoreBackend();
+    const writeBatch = vi.spyOn(backend, 'writeBatch');
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        FirestoreRepositoryModule.forFeature(
+          [
+            {
+              key: 'widget',
+              entity: WidgetEntity,
+              collection: 'widgets-batch-create',
+            },
+          ],
+          { backend },
+        ),
+      ],
+    }).compile();
+
+    const repo = moduleRef.get<RepositoryInterface<WidgetEntity>>(
+      getDynamicRepositoryToken('widget'),
+    );
+
+    const created = await repo.createMany([
+      { id: 'b1', title: 'One' },
+      { id: 'b2', title: 'Two' },
+    ]);
+    expect(created).toHaveLength(2);
+    expect(writeBatch).toHaveBeenCalled();
+    await expect(repo.find()).resolves.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: 'b1' }),
+        expect.objectContaining({ id: 'b2' }),
+      ]),
+    );
   });
 });

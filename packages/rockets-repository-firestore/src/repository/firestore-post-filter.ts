@@ -49,8 +49,6 @@ function matchesPostFilter(
       );
     case 'between':
       return compareBetween(value, filter.min, filter.max);
-    case 'soft_delete_excluded':
-      return value === null || value === undefined;
     default: {
       const _exhaustive: never = filter;
       return _exhaustive;

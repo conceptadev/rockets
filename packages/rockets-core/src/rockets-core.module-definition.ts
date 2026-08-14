@@ -9,11 +9,10 @@ import { APP_INTERCEPTOR, Reflector } from '@nestjs/core';
 import { CqrsModule } from '@nestjs/cqrs';
 import { ConfigModule } from '@nestjs/config';
 import { RepositoryModule } from '@concepta/nestjs-repository';
-import { CrudModule, CrudContextOverlay } from '@concepta/nestjs-crud';
+import { CrudModule } from '@concepta/nestjs-crud';
 import { AuthUserContextOverlay } from '@concepta/nestjs-authentication';
 import type { RocketsResourceConfig } from './domain/interfaces/rockets-resource.interface';
 import { collectBootstrapForRootImports } from './infrastructure/repository/collect-bootstrap-for-root-imports';
-import { SafeCrudContextInterceptor } from './infrastructure/interceptors/safe-crud-context.interceptor';
 import {
   buildAppRegistrationPlan,
   type AppRegistrationPlan,
@@ -139,10 +138,11 @@ function createCoreImports(
     imports.push(featureModule);
   }
 
-  // CRUD routes. Upstream `CrudModule` ships a very strict request interceptor; we
-  // replace it with a safer one so non-CRUD controllers still work in the same app.
+  // CRUD routes. Upstream `CrudContextOverlay.attach()` no-ops on handlers
+  // without CRUD metadata (nestjs-crud `5249672`), so mixed CRUD + custom
+  // controllers share one `CrudModule.forRoot()` safely.
   if (plan.crudResources.length) {
-    imports.push(createSafeCrudRootModule());
+    imports.push(CrudModule.forRoot({}));
     for (const resource of plan.crudResources) {
       imports.push(CrudModule.forFeature(resource));
     }
@@ -365,47 +365,4 @@ export function collectAdapters(
   ...instances: AuthAdapterInterface[]
 ): ReadonlyArray<AuthAdapterInterface> {
   return instances;
-}
-
-/**
- * The upstream `CrudModule` installs a “strict” request interceptor.
- *
- * That’s great for pure CRUD apps, but in Rockets you often also have other
- * controllers (auth, `/me`, one-off routes). The strict interceptor can throw on
- * those, so we swap in `SafeCrudContextInterceptor` which only activates for real
- * CRUD routes.
- */
-// Workaround: upstream `CrudContextOverlay` is a global `APP_INTERCEPTOR` and can
-// break non-CRUD routes. We remove the provider and replace it with a safe one.
-// Remove this once the upstream default is safe in mixed apps.
-function createSafeCrudRootModule(): DynamicModule {
-  const crudRoot = CrudModule.forRoot({}) as DynamicModule;
-
-  const originalProviders: NonNullable<DynamicModule['providers']> =
-    crudRoot.providers ?? [];
-  const filteredProviders = originalProviders.filter((p) => {
-    if (typeof p === 'object' && p !== null && 'provide' in p) {
-      if (
-        p.provide === APP_INTERCEPTOR &&
-        'useClass' in p &&
-        p.useClass === CrudContextOverlay
-      ) {
-        return false;
-      }
-    }
-    return true;
-  });
-
-  const originalExports: NonNullable<DynamicModule['exports']> =
-    crudRoot.exports ?? [];
-
-  return {
-    ...crudRoot,
-    providers: [
-      ...filteredProviders,
-      SafeCrudContextInterceptor,
-      { provide: APP_INTERCEPTOR, useClass: SafeCrudContextInterceptor },
-    ],
-    exports: [...originalExports, SafeCrudContextInterceptor],
-  };
 }

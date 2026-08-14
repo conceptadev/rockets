@@ -5,6 +5,46 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ## [Unreleased]
 
+### Added
+
+- Firestore adapter transactions (issue #44 P1-1): `runInFirestoreTransaction` /
+  `FirestoreRepository.transaction` (callback-scoped, retry-safe),
+  `FIRESTORE_BACKEND` DI export, `transactionFactories` + `options.ctx`
+  threading, transactional duplicate-id → 409 mapping, and `limit()` on
+  transactional queries. Contended RMW must use the callback API.
+- Firestore soft-delete server pushdown (issue #44 P1-4): default lists/counts
+  use `field == null`, restoring `limit()` / aggregation. **Requires a data
+  backfill and composite indexes before deploy** — see the package CHANGELOG.
+  Includes `backfillSoftDeleteNull` / `adminStreamBackfillSoftDeleteNull` +
+  `firestore.indexes.example.json`. Nested `runInFirestoreTransaction` joins
+  the ambient handle on the same backend and refuses to span backends.
+- Firestore P1 follow-ups: `firestoreIncrement` + write preconditions (P1-2),
+  `uniqueDocumentIdField` with boot-time refuse of composite unique (P1-3
+  tier 1), inequality `orderBy` reconcile (P1-5), WriteBatch `createMany` /
+  `deleteMany` (P1-6), and enforced 500-write transaction limit.
+
+### Changed
+
+- CI: `ci-pr-test` and `release-readiness` no longer filter on a `main` base,
+  so stacked pull requests are gated (including the Firestore emulator suite).
+
+### Removed
+
+- **`SafeCrudContextInterceptor`** — upstream `@concepta/nestjs-crud`
+  `CrudContextOverlay.attach()` already no-ops on non-CRUD handlers
+  (`5249672`, shipped in `8.0.0-alpha.8`). Core and auth now use
+  `CrudModule.forRoot` / `forRootAsync` directly. The regression guard is a
+  core e2e that mounts a plain controller next to a `defineResource` CRUD
+  resource (which boots the real `CrudContextOverlay`) and asserts the
+  non-CRUD route does not 500
+  (`rockets-core-resources.e2e-spec.ts`); every auth e2e also boots the
+  overlay via `CrudModule.forRootAsync` beside hand-written controllers.
+
+### Documentation
+
+- `SECURITY.md` and sample READMEs no longer claim an npm `alpha` channel that
+  is not published yet.
+
 ### Release preparation
 
 - Public Rockets package manifests are aligned at `1.0.0-alpha.8`. Registry
@@ -134,6 +174,16 @@ before running the full e2e suite.
 
 ### Security
 
+- OTP consume is now the single decision point for burning passcodes:
+  `RocketsValidateOtpHandler` dispatches `ConsumeOtpCommand` directly when
+  `deleteIfValid` is true (no prior `ValidateOtpQuery`), and recovery
+  `updatePassword` consumes before mutating the password. A failed password
+  write after consume still leaves the proof burned (user must restart
+  recovery). DB-level single-winner under concurrent consumes still needs
+  upstream nestjs-otp locking; this closes the application validate-then-
+  consume TOCTOU only.
+- Root resolutions bumped: `tar` → `7.5.22`, `js-yaml` → `4.3.1`,
+  `shell-quote` → `1.10.0`.
 - **Owner scoping is now on by default** (`zodResource` / `zodSubResource`).
   Any resource with an owner column (`f.owner()` or `owner: '<field>'`) gets
   an `OwnerScopeHook` on the read path in addition to the existing
@@ -213,19 +263,16 @@ before running the full e2e suite.
   `CrudModule.forFeature` was deleted — the upstream sparse-exports bug it
   compensated for is fixed in `@concepta/nestjs-crud 8.0.0-alpha.8`. Suites
   now run against the real framework.
-- A named e2e test pins the upstream error-message contract
-  (`'No entity defined'`) that `SafeCrudContextInterceptor` string-matches
-  on, so an upstream rewording fails loudly instead of turning non-CRUD
-  routes into 500s.
+- A core e2e mounts a plain controller next to a `defineResource` CRUD
+  resource (so the real `CrudContextOverlay` is registered) and asserts the
+  non-CRUD route stays 200, guarding the `SafeCrudContextInterceptor`
+  removal against an upstream regression.
 
 ### Known limitations
 
 - Depends on pre-release `@concepta/nestjs-* 8.0.0-alpha.x`; upstream
   interface changes between alphas can break consumers (this release
   absorbs one such change).
-- `SafeCrudContextInterceptor` still matches on the upstream exception
-  message; it is deleted once the upstream fix (concepta/nestjs-crud
-  `5249672f`) ships in a published alpha.
 - `relation.shape` projections are filtered by the response opt-in rule
   while `f.compute` schemas are only filtered for explicit
   `response: false`; unifying the two is deliberate follow-up work.

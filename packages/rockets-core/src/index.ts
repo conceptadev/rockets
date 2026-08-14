@@ -88,9 +88,6 @@ export {
   ERROR_MESSAGE_FALLBACK,
 } from './infrastructure/filters/exceptions.filter';
 
-/** Safe global substitute for upstream `CrudContextOverlay` on mixed CRUD + bespoke routes. */
-export { SafeCrudContextInterceptor } from './infrastructure/interceptors/safe-crud-context.interceptor';
-
 // Repository persistence interfaces
 export type { RepositoryPersistenceConfig } from './domain/interfaces/repository-persistence.interface';
 export type { RepositoryBootstrap } from './domain/interfaces/repository-bootstrap.interface';

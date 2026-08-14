@@ -33,8 +33,8 @@ describe('OTP application handlers', () => {
       );
     });
 
-    it('returns null when upstream returns null and skips consume', async () => {
-      queryBus.execute.mockResolvedValueOnce(null);
+    it('returns null when consume returns null and skips validate', async () => {
+      commandBus.execute.mockResolvedValueOnce(null);
       const out = await handler.execute(
         new RocketsValidateOtpQuery(
           {},
@@ -44,15 +44,15 @@ describe('OTP application handlers', () => {
         ),
       );
       expect(out).toBeNull();
-      expect(queryBus.execute).toHaveBeenCalledWith(
-        expect.any(ValidateOtpQuery),
+      expect(commandBus.execute).toHaveBeenCalledWith(
+        expect.any(ConsumeOtpCommand),
       );
-      expect(commandBus.execute).not.toHaveBeenCalled();
+      expect(queryBus.execute).not.toHaveBeenCalled();
     });
 
-    it('returns assignee and consumes when valid + deleteIfValid', async () => {
+    it('consumes directly when deleteIfValid without a prior validate', async () => {
       const assignee = { assigneeId: 'u1' };
-      queryBus.execute.mockResolvedValueOnce(assignee);
+      commandBus.execute.mockResolvedValueOnce(assignee);
       const out = await handler.execute(
         new RocketsValidateOtpQuery(
           {},
@@ -65,6 +65,7 @@ describe('OTP application handlers', () => {
       expect(commandBus.execute).toHaveBeenCalledWith(
         expect.any(ConsumeOtpCommand),
       );
+      expect(queryBus.execute).not.toHaveBeenCalled();
     });
 
     it('skips consume when deleteIfValid=false even on success', async () => {
@@ -79,7 +80,34 @@ describe('OTP application handlers', () => {
         ),
       );
       expect(out).toBe(assignee);
+      expect(queryBus.execute).toHaveBeenCalledWith(
+        expect.any(ValidateOtpQuery),
+      );
       expect(commandBus.execute).not.toHaveBeenCalled();
+    });
+
+    it('does not validate when deleteIfValid and skips set path on null consume', async () => {
+      let remaining = 1;
+      commandBus.execute.mockImplementation(async (cmd: unknown) => {
+        expect(cmd).toBeInstanceOf(ConsumeOtpCommand);
+        if (remaining === 0) return null;
+        remaining -= 1;
+        return { assigneeId: 'u1' };
+      });
+
+      const query = new RocketsValidateOtpQuery(
+        {},
+        'user-otp',
+        { category: 'recovery', passcode: 'shared' },
+        true,
+      );
+      const results = await Promise.all(
+        Array.from({ length: 20 }, () => handler.execute(query)),
+      );
+
+      expect(results.filter((r) => r !== null)).toHaveLength(1);
+      expect(results.filter((r) => r === null)).toHaveLength(19);
+      expect(queryBus.execute).not.toHaveBeenCalled();
     });
   });
 

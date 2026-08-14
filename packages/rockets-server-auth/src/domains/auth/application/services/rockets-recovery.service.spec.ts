@@ -58,21 +58,28 @@ describe('RocketsRecoveryService', () => {
     expect(commandBus.execute).toHaveBeenCalledOnce();
   });
 
-  it('revokes recovery OTPs before best-effort password-updated notification', async () => {
+  it('consumes the passcode before password mutate and best-effort notify', async () => {
     const { subject, otpPort, userPort, passwordPort, commandBus } =
       createSubject();
-    otpPort.validate.mockResolvedValue({ assigneeId: 'u1' });
+    commandBus.execute
+      .mockResolvedValueOnce({ assigneeId: 'u1' })
+      .mockRejectedValueOnce(new Error('mail provider included secret'));
     userPort.getById.mockResolvedValue({
       id: 'u1',
       email: 'person@example.com',
     });
-    commandBus.execute.mockRejectedValue(
-      new Error('mail provider included secret'),
-    );
 
     await expect(
       subject.updatePassword(ctx, 'otp-secret', 'password-secret'),
     ).resolves.toMatchObject({ id: 'u1' });
+    expect(otpPort.validate).not.toHaveBeenCalled();
+    expect(commandBus.execute).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        namespace: 'auth',
+        otp: { category: 'recovery', passcode: 'otp-secret' },
+      }),
+    );
     expect(passwordPort.setPassword).toHaveBeenCalledWith(
       ctx,
       'password-secret',
@@ -82,5 +89,36 @@ describe('RocketsRecoveryService', () => {
       category: 'recovery',
       assigneeId: 'u1',
     });
+  });
+
+  it('skips password mutate when consume returns null and never validates', async () => {
+    const { subject, otpPort, userPort, passwordPort, commandBus } =
+      createSubject();
+    let remaining = 1;
+    commandBus.execute.mockImplementation(
+      async (cmd: { namespace?: string }) => {
+        if (cmd.namespace === 'auth') {
+          if (remaining === 0) return null;
+          remaining -= 1;
+          return { assigneeId: 'u1' };
+        }
+        return undefined;
+      },
+    );
+    userPort.getById.mockResolvedValue({
+      id: 'u1',
+      email: 'person@example.com',
+    });
+
+    const results = await Promise.all(
+      Array.from({ length: 20 }, () =>
+        subject.updatePassword(ctx, 'shared-passcode', 'new-password'),
+      ),
+    );
+
+    expect(results.filter((r) => r !== null)).toHaveLength(1);
+    expect(results.filter((r) => r === null)).toHaveLength(19);
+    expect(passwordPort.setPassword).toHaveBeenCalledTimes(1);
+    expect(otpPort.validate).not.toHaveBeenCalled();
   });
 });
