@@ -51,8 +51,10 @@ What it adds on top of core:
   `defineSampleAuth()` / `defineApiKeyAuth()`. Each entry may include
   `forRoot()` when the adapter needs its own Nest module slice.
 
-Everything else (`defineResource`, `defineModuleResource`, hooks, dynamic
-repositories, swagger registration) is re-exported from core.
+The common application surface (`defineResource`, `defineModuleResource`,
+owner hooks, dynamic repositories, and Swagger service) is re-exported from
+core. The facade is intentionally curated; advanced core-only seams stay on
+`@concepta/rockets-core`.
 
 ### When to use this package
 
@@ -396,9 +398,9 @@ definition asynchronously.
 | `GET /me`   | Returns the authenticated user + their `userMetadata` row (joined by `id`).   |
 | `PATCH /me` | Validates `body.userMetadata` against `userMetadata.updateDto`, then upserts. |
 
-### Re-exports from `@concepta/rockets-core`
+### Curated re-exports from `@concepta/rockets-core`
 
-Everything most apps need:
+Everything most external-auth apps need:
 
 - Auth: `AuthServerGuard`, `AuthPublic`, `extractBearerToken`,
   `AUTH_ADAPTERS_TOKEN`, `ROCKETS_DISABLE_GUARDS_TOKEN`.
@@ -428,6 +430,32 @@ Everything most apps need:
 - Exceptions: `RocketsCoreExceptionsFilter` (also exported as `ExceptionsFilter`
   for back-compat).
 - Error helpers: `logAndGetErrorDetails`, `getErrorDetails`, `ErrorDetails`.
+
+This is an explicit facade, not an `export *` compatibility promise. Import
+the following advanced seams from `@concepta/rockets-core` directly:
+
+- Context/CRUD internals: `ActorOverlay`, `AppContextHost`, `AppContextLike`,
+  `AuthUserCtx`, `AuthUserContextOverlay`, `getAppContext`,
+  `CrudCommandHandlerBase`, `CrudQueryHandlerBase`, `CrudCommandInterface`,
+  `CrudQueryInterface`, `ByIdInterface`, `CreateOneInterface`,
+  `UpdateOneInterface`, `RemoveOneInterface`, and `InjectCrudAdapter`.
+- Advanced auth/access control: `AuthBootstrapContributions`,
+  `AuthBootstrapIdentity`, `AuthPublicMetadata`, `AuthPublicOptions`,
+  `RocketsAccessControlConfig`, and `buildAccessControlImport`.
+- Hook/resource construction: `AfterCreateReloadHook`, `defineHook`,
+  `EntityHookFns`, `EntityHookLifecycleKey`, `EntityHookTools`,
+  `RocketsEntityHookForResource`, `OwnedEntity`, `OwnerStampHookOptions`,
+  `PathScopeGuard`, `RocketsResourceConfig`, `DEFAULT_OWNER_COLUMN`, and
+  `defaultParentParam`.
+- Swagger and low-level utilities: `SwaggerUiModule`,
+  `SwaggerUiOptionsInterface`, `SwaggerUiSettingsInterface`,
+  `ERROR_MESSAGE_FALLBACK`, `deriveEntityKey`, `resolveEntityKey`,
+  `stripUndefined`, and `whitelistedFromDto`.
+
+The repository's [public API policy](../../api/public-api-policy.md) and
+committed declaration report guard this boundary. Any intentional addition,
+removal, or signature change must update the report and its documentation or
+migration note in the same change.
 
 ### OpenAPI generation
 

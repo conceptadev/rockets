@@ -121,5 +121,9 @@ function stripToDeclaredShape(schema: z.ZodType, value: unknown): unknown {
 export function namedZodDto<T>(schema: z.ZodObject, name: string): Type<T> {
   const cls = createZodDto(schema);
   Object.defineProperty(cls, 'name', { value: name });
+  // `createZodDto` returns the same runtime constructor described by `Type<T>`;
+  // only its generic instance type remains tied to the concrete schema. The
+  // caller's `T` is the structurally matching public DTO contract, so this cast
+  // restores that erased Nest constructor type without changing runtime data.
   return cls as unknown as Type<T>;
 }

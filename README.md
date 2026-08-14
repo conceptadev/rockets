@@ -1031,6 +1031,7 @@ rockets/
 | ----------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `yarn release:check`          | Run the complete build, package, type, lint, unit, e2e, and sample release gate.                           |
 | `yarn release:consumer`       | Pack every public workspace and verify a clean CJS, ESM, TypeScript, and Nest consumer.                    |
+| `yarn api:report`             | Build, test, and verify the committed declaration-level public API report.                               |
 | `yarn release:dry`            | Build publish archives for every public `@concepta/*` workspace without publishing.                       |
 | `yarn install && yarn build`  | Bootstrap + compile every local `@concepta/*` package.                                                      |
 | `yarn test`                   | Unit tests (Vitest).                                                                                       |
