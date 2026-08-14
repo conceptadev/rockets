@@ -35,8 +35,8 @@ function collectHandlerProviders(
  * slice). Use this when the route is a typed non-CRUD operation with Zod /
  * DTO input-output and a custom handler.
  *
- * Prefer the zod helpers `operationResource` / `query` / `command` from
- * `@concepta/rockets-core/zod` when starting from Zod schemas.
+ * Prefer the zod helper `operationResource` (`read` / `write` / `delete`
+ * builders) from `@concepta/rockets-core/zod` when starting from Zod schemas.
  */
 export function defineOperationResource(
   definition: OperationResourceDefinition,

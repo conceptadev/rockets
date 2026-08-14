@@ -6,10 +6,10 @@ import type {
   CompiledOperationDescriptor,
   OperationHandlerRef,
   OperationHttpMethod,
+  OperationResource,
   OperationResourceDefinition,
 } from '../domain/interfaces/operation-resource.interface';
 import { defineOperationResource } from '../infrastructure/resource/define-operation-resource';
-import type { OperationResource } from '../domain/interfaces/operation-resource.interface';
 import { compileDtoClass } from './zod-dto';
 
 type InferIn<TInput> = [TInput] extends [z.ZodObject]
@@ -22,91 +22,244 @@ type InferOut<TOutput> = [TOutput] extends [z.ZodType]
 
 type OperationOutputSchema = z.ZodObject | z.ZodArray;
 
-export interface OperationBuilderConfig<
-  TInput extends z.ZodObject | undefined = undefined,
-  TOutput extends OperationOutputSchema | undefined = undefined,
+/**
+ * Extract `:param` names from a path template into a string-record type.
+ * Decision (#50): keys map to path segments verbatim (no kebab-case).
+ */
+export type PathParams<S extends string> =
+  S extends `${string}:${infer Param}/${infer Rest}`
+    ? { [K in Param | keyof PathParams<`/${Rest}`>]: string }
+    : S extends `${string}:${infer Param}`
+    ? { [K in Param]: string }
+    : {};
+
+type MergeParams<A, B> = Omit<A, keyof B> & B;
+
+type ReadMethod = 'GET';
+type WriteMethod = 'POST' | 'PUT' | 'PATCH';
+type DeleteMethod = 'DELETE';
+
+interface SharedBuilderFields<
+  TInput extends z.ZodObject | undefined,
+  TOutput extends OperationOutputSchema | undefined,
+  TParams extends object,
 > {
-  readonly method?: OperationHttpMethod;
-  readonly path?: string;
   readonly status?: number;
   readonly summary?: string;
   readonly public?: boolean;
   readonly transactional?: boolean;
-  /**
-   * Body (POST/PUT/PATCH) or query (GET/DELETE).
-   * Query string values are strings — use `z.coerce.number()` / `z.coerce.boolean()`
-   * when the handler expects non-string types.
-   */
   readonly input?: TInput;
-  /**
-   * Response schema (`z.object(...)` or `z.array(z.object(...))`).
-   * Handler returns are validated against this; mismatches are HTTP 500.
-   */
   readonly output?: TOutput;
-  readonly handler: OperationHandlerRef<InferIn<TInput>, InferOut<TOutput>>;
+  readonly handler: OperationHandlerRef<
+    InferIn<TInput>,
+    InferOut<TOutput>,
+    TParams
+  >;
   readonly decorators?: readonly MethodDecorator[];
 }
 
-export type PendingOperation = {
-  readonly kind: 'query' | 'command';
-  readonly config: OperationBuilderConfig<
-    z.ZodObject | undefined,
-    OperationOutputSchema | undefined
-  >;
+export type ReadBuilderConfig<
+  TInput extends z.ZodObject | undefined = undefined,
+  TOutput extends OperationOutputSchema | undefined = undefined,
+  TParams extends object = object,
+  TOpPath extends string = '',
+> = SharedBuilderFields<TInput, TOutput, TParams> & {
+  readonly method?: ReadMethod;
+  readonly path?: TOpPath;
 };
 
-/**
- * Declare a read-style operation (default GET, status 200).
- */
-export function query<
+export type WriteBuilderConfig<
   TInput extends z.ZodObject | undefined = undefined,
   TOutput extends OperationOutputSchema | undefined = undefined,
->(config: OperationBuilderConfig<TInput, TOutput>): PendingOperation {
-  return {
-    kind: 'query',
-    config: config as PendingOperation['config'],
-  };
+  TParams extends object = object,
+  TOpPath extends string = '',
+> = SharedBuilderFields<TInput, TOutput, TParams> & {
+  readonly method?: WriteMethod;
+  readonly path?: TOpPath;
+};
+
+export type DeleteBuilderConfig<
+  TInput extends z.ZodObject | undefined = undefined,
+  TOutput extends OperationOutputSchema | undefined = undefined,
+  TParams extends object = object,
+  TOpPath extends string = '',
+> = SharedBuilderFields<TInput, TOutput, TParams> & {
+  readonly method?: DeleteMethod;
+  readonly path?: TOpPath;
+};
+
+export type PendingBuilder = 'read' | 'write' | 'delete';
+
+/**
+ * Pending operation produced by `op.read` / `op.write` / `op.delete`.
+ * Generics are preserved so `typeof resource.authored` stays informative.
+ */
+export interface PendingOperation<
+  TInput = unknown,
+  TOutput = unknown,
+  TParams extends object = object,
+> {
+  readonly builder: PendingBuilder;
+  readonly method: OperationHttpMethod;
+  readonly path: string | undefined;
+  readonly status: number | undefined;
+  readonly summary: string | undefined;
+  readonly public: boolean | undefined;
+  readonly transactional: boolean | undefined;
+  readonly input: z.ZodObject | undefined;
+  readonly output: OperationOutputSchema | undefined;
+  readonly handler: OperationHandlerRef<TInput, TOutput, TParams>;
+  readonly decorators: readonly MethodDecorator[] | undefined;
 }
 
 /**
- * Declare a write-style operation (default POST, status 200).
+ * Heterogeneous operation map. Per-op generics live on each
+ * {@link PendingOperation} value and on `authored`; the index signature uses
+ * an opaque `handler` so variance does not collapse the callback return type.
  */
-export function command<
-  TInput extends z.ZodObject | undefined = undefined,
-  TOutput extends OperationOutputSchema | undefined = undefined,
->(config: OperationBuilderConfig<TInput, TOutput>): PendingOperation {
-  return {
-    kind: 'command',
-    config: config as PendingOperation['config'],
+export type OperationRecord = {
+  readonly [key: string]: {
+    readonly builder: PendingBuilder;
+    readonly method: OperationHttpMethod;
+    readonly path: string | undefined;
+    readonly status: number | undefined;
+    readonly summary: string | undefined;
+    readonly public: boolean | undefined;
+    readonly transactional: boolean | undefined;
+    readonly input: z.ZodObject | undefined;
+    readonly output: OperationOutputSchema | undefined;
+    readonly handler: unknown;
+    readonly decorators: readonly MethodDecorator[] | undefined;
   };
+};
+
+export interface BoundBuilders<TBase extends string> {
+  read<
+    TInput extends z.ZodObject | undefined = undefined,
+    TOutput extends OperationOutputSchema | undefined = undefined,
+    const TOpPath extends string = '',
+  >(
+    config: ReadBuilderConfig<
+      TInput,
+      TOutput,
+      MergeParams<PathParams<TBase>, PathParams<TOpPath>>,
+      TOpPath
+    >,
+  ): PendingOperation<
+    InferIn<TInput>,
+    InferOut<TOutput>,
+    MergeParams<PathParams<TBase>, PathParams<TOpPath>>
+  >;
+
+  write<
+    TInput extends z.ZodObject | undefined = undefined,
+    TOutput extends OperationOutputSchema | undefined = undefined,
+    const TOpPath extends string = '',
+  >(
+    config: WriteBuilderConfig<
+      TInput,
+      TOutput,
+      MergeParams<PathParams<TBase>, PathParams<TOpPath>>,
+      TOpPath
+    >,
+  ): PendingOperation<
+    InferIn<TInput>,
+    InferOut<TOutput>,
+    MergeParams<PathParams<TBase>, PathParams<TOpPath>>
+  >;
+
+  delete<
+    TInput extends z.ZodObject | undefined = undefined,
+    TOutput extends OperationOutputSchema | undefined = undefined,
+    const TOpPath extends string = '',
+  >(
+    config: DeleteBuilderConfig<
+      TInput,
+      TOutput,
+      MergeParams<PathParams<TBase>, PathParams<TOpPath>>,
+      TOpPath
+    >,
+  ): PendingOperation<
+    InferIn<TInput>,
+    InferOut<TOutput>,
+    MergeParams<PathParams<TBase>, PathParams<TOpPath>>
+  >;
 }
 
-export interface OperationResourceInput {
-  readonly path: string;
+export interface OperationResourceInput<
+  TBase extends string,
+  TOps extends OperationRecord,
+> {
+  readonly path: TBase;
   readonly tags?: readonly string[];
   readonly public?: boolean;
-  readonly operations: Readonly<Record<string, PendingOperation>>;
+  /**
+   * Callback form only — builders must see the base path so `ctx.params`
+   * can be typed from `:segments`. Split-file composition: export
+   * `(op) => op.write({...})` factories and spread them into the record.
+   */
+  readonly operations: (op: BoundBuilders<TBase>) => TOps;
   readonly imports?: OperationResourceDefinition['imports'];
   readonly providers?: OperationResourceDefinition['providers'];
   readonly exports?: OperationResourceDefinition['exports'];
   readonly decorators?: OperationResourceDefinition['decorators'];
 }
 
+/**
+ * Zod authoring result: planner-compatible {@link OperationResource} plus the
+ * typed authored operation record (for ClientOf / inference consumers).
+ */
+export type ZodOperationResource<TOps extends OperationRecord> =
+  OperationResource & {
+    readonly authored: TOps;
+  };
+
+const OPERATION_KEY_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
+
+const RESERVED_OPERATION_KEYS = new Set([
+  'constructor',
+  'prototype',
+  '__proto__',
+  'moduleRef',
+  'toString',
+  'valueOf',
+  'hasOwnProperty',
+  'isPrototypeOf',
+  'propertyIsEnumerable',
+  'toLocaleString',
+]);
+
+function assertValidOperationKey(key: string, resourcePath: string): void {
+  if (!OPERATION_KEY_PATTERN.test(key)) {
+    throw new Error(
+      `operationResource "${resourcePath}": operation key "${key}" is not a ` +
+        `valid identifier / path segment (expected ${OPERATION_KEY_PATTERN})`,
+    );
+  }
+  if (RESERVED_OPERATION_KEYS.has(key)) {
+    throw new Error(
+      `operationResource "${resourcePath}": operation key "${key}" is reserved ` +
+        `(collides with Object.prototype or the generated controller)`,
+    );
+  }
+}
+
 function defaultMethod(
-  kind: 'query' | 'command',
+  builder: PendingBuilder,
   configured: OperationHttpMethod | undefined,
 ): OperationHttpMethod {
   if (configured !== undefined) {
     return configured;
   }
-  return kind === 'query' ? 'GET' : 'POST';
+  if (builder === 'read') {
+    return 'GET';
+  }
+  if (builder === 'delete') {
+    return 'DELETE';
+  }
+  return 'POST';
 }
 
-/**
- * Default HTTP status is 200 for both query and command.
- * Use `status: 201` (or another code) on the builder when a create-style
- * response is required — we do not infer 201 from `command` alone.
- */
 function defaultStatus(configured: number | undefined): number {
   return configured ?? 200;
 }
@@ -126,45 +279,59 @@ function compileOperationDto(schema: z.ZodType, name: string): Type<object> {
   );
 }
 
+function assertOperationHandler(
+  handler: unknown,
+  resourcePath: string,
+  key: string,
+): asserts handler is CompiledOperationDescriptor['handler'] {
+  if (typeof handler !== 'function') {
+    throw new Error(
+      `operationResource "${resourcePath}": operation "${key}" handler must be ` +
+        `a function or injectable class`,
+    );
+  }
+}
+
 function compileOperation(
   key: string,
-  pending: PendingOperation,
+  pending: OperationRecord[string],
   resourcePath: string,
 ): CompiledOperationDescriptor {
-  const { kind, config } = pending;
-  const method = defaultMethod(kind, config.method);
-  const status = defaultStatus(config.status);
-  const path = config.path ?? '';
+  const method = defaultMethod(pending.builder, pending.method);
+  const status = defaultStatus(pending.status);
+  // path=key by default; explicit `path: ''` keeps a root mount (?? not ||).
+  const path = pending.path ?? key;
 
   let inputDto: Type<object> | undefined;
-  if (config.input !== undefined) {
+  if (pending.input !== undefined) {
     inputDto = compileDtoClass(
-      config.input,
+      pending.input,
       `${pascal(resourcePath)}_${pascal(key)}Input`,
     );
   }
 
   let outputDto: Type<object> | undefined;
-  if (config.output !== undefined) {
+  if (pending.output !== undefined) {
     outputDto = compileOperationDto(
-      config.output,
+      pending.output,
       `${pascal(resourcePath)}_${pascal(key)}Output`,
     );
   }
 
+  assertOperationHandler(pending.handler, resourcePath, key);
+
   return {
     key,
-    kind,
     method,
     path,
     status,
-    summary: config.summary,
-    public: config.public,
-    transactional: config.transactional,
+    summary: pending.summary,
+    public: pending.public,
+    transactional: pending.transactional,
     inputDto,
     outputDto,
-    handler: config.handler,
-    decorators: config.decorators,
+    handler: pending.handler,
+    decorators: pending.decorators,
   };
 }
 
@@ -176,25 +343,107 @@ function pascal(value: string): string {
     .join('');
 }
 
+function toPendingRead<
+  TInput extends z.ZodObject | undefined,
+  TOutput extends OperationOutputSchema | undefined,
+  TParams extends object,
+  TOpPath extends string,
+>(
+  config: ReadBuilderConfig<TInput, TOutput, TParams, TOpPath>,
+): PendingOperation<InferIn<TInput>, InferOut<TOutput>, TParams> {
+  return {
+    builder: 'read',
+    method: defaultMethod('read', config.method),
+    path: config.path,
+    status: config.status,
+    summary: config.summary,
+    public: config.public,
+    transactional: config.transactional,
+    input: config.input,
+    output: config.output,
+    handler: config.handler,
+    decorators: config.decorators,
+  };
+}
+
+function toPendingWrite<
+  TInput extends z.ZodObject | undefined,
+  TOutput extends OperationOutputSchema | undefined,
+  TParams extends object,
+  TOpPath extends string,
+>(
+  config: WriteBuilderConfig<TInput, TOutput, TParams, TOpPath>,
+): PendingOperation<InferIn<TInput>, InferOut<TOutput>, TParams> {
+  return {
+    builder: 'write',
+    method: defaultMethod('write', config.method),
+    path: config.path,
+    status: config.status,
+    summary: config.summary,
+    public: config.public,
+    transactional: config.transactional,
+    input: config.input,
+    output: config.output,
+    handler: config.handler,
+    decorators: config.decorators,
+  };
+}
+
+function toPendingDelete<
+  TInput extends z.ZodObject | undefined,
+  TOutput extends OperationOutputSchema | undefined,
+  TParams extends object,
+  TOpPath extends string,
+>(
+  config: DeleteBuilderConfig<TInput, TOutput, TParams, TOpPath>,
+): PendingOperation<InferIn<TInput>, InferOut<TOutput>, TParams> {
+  return {
+    builder: 'delete',
+    method: defaultMethod('delete', config.method),
+    path: config.path,
+    status: config.status,
+    summary: config.summary,
+    public: config.public,
+    transactional: config.transactional,
+    input: config.input,
+    output: config.output,
+    handler: config.handler,
+    decorators: config.decorators,
+  };
+}
+
+function createBoundBuilders<TBase extends string>(): BoundBuilders<TBase> {
+  return {
+    read: toPendingRead,
+    write: toPendingWrite,
+    delete: toPendingDelete,
+  };
+}
+
 /**
- * Zod-first sibling of {@link defineResource} for typed non-CRUD endpoints.
+ * Zod-first sibling of {@link defineResource} for typed non-CRUD endpoints
+ * (issue #43 / #50 authoring surface).
  *
- * Compiles Zod input/output schemas to DTO classes (OpenAPI + Standard Schema
- * validation) and registers a generated Nest controller via
- * {@link defineOperationResource}.
- *
- * v1 covers `query()` and `command()` only — cursor, SSE, binary, raw JSON,
- * idempotency helpers, and external-client scaffolds are follow-ups.
+ * - `operations` is a callback so base-path params type `ctx.params`.
+ * - Builders: `read` (GET), `write` (POST/PUT/PATCH), `delete` (DELETE).
+ *   Input sourcing follows HTTP method (GET/DELETE → query; body otherwise).
+ * - Operation path defaults to its key (verbatim). Use `path: ''` for a
+ *   root-mounted route on the resource path.
  */
-export function operationResource(
-  input: OperationResourceInput,
-): OperationResource {
+export function operationResource<
+  const TBase extends string,
+  TOps extends OperationRecord,
+>(input: OperationResourceInput<TBase, TOps>): ZodOperationResource<TOps> {
+  const builders = createBoundBuilders<TBase>();
+  const authored = input.operations(builders);
+
   const operations: Record<string, CompiledOperationDescriptor> = {};
-  for (const [key, pending] of Object.entries(input.operations)) {
+  for (const [key, pending] of Object.entries(authored)) {
+    assertValidOperationKey(key, input.path);
     operations[key] = compileOperation(key, pending, input.path);
   }
 
-  return defineOperationResource({
+  const resource = defineOperationResource({
     path: input.path,
     tags: input.tags,
     public: input.public,
@@ -204,4 +453,10 @@ export function operationResource(
     exports: input.exports,
     decorators: input.decorators,
   });
+
+  const result: ZodOperationResource<TOps> = {
+    ...resource,
+    authored,
+  };
+  return result;
 }

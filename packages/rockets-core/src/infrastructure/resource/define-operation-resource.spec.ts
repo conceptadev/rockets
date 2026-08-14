@@ -11,11 +11,7 @@ import {
   defineOperationResource,
   isOperationResource,
 } from './define-operation-resource';
-import {
-  command,
-  operationResource,
-  query,
-} from '../../zod/zod-operation-resource';
+import { operationResource } from '../../zod/zod-operation-resource';
 import { compileDtoClass } from '../../zod/zod-dto';
 
 describe('defineOperationResource', () => {
@@ -32,16 +28,22 @@ describe('defineOperationResource', () => {
       operations: {
         echo: {
           key: 'echo',
-          kind: 'command',
           method: 'POST',
           path: '',
           status: 200,
           inputDto: Input,
           outputDto: Output,
-          handler: ({ input }) => ({
-            name: (input as { name: string }).name,
-            ok: true,
-          }),
+          handler: ({ input }) => {
+            if (
+              typeof input !== 'object' ||
+              input === null ||
+              !('name' in input) ||
+              typeof input.name !== 'string'
+            ) {
+              throw new Error('EchoInput missing name');
+            }
+            return { name: input.name, ok: true };
+          },
         },
       },
     });
@@ -60,20 +62,20 @@ describe('defineOperationResource', () => {
 });
 
 describe('operationResource (zod)', () => {
-  it('compiles query + command into an OperationResource', () => {
+  it('compiles read + write into an OperationResource', () => {
     const bundle = operationResource({
       path: 'api/widgets',
       tags: ['Widgets'],
       public: true,
-      operations: {
-        ping: query({
+      operations: (op) => ({
+        ping: op.read({
+          path: '',
           summary: 'Ping',
           output: z.object({ ok: z.literal(true) }),
           handler: () => ({ ok: true as const }),
         }),
-        shout: command({
+        shout: op.write({
           method: 'POST',
-          path: 'shout',
           status: 201,
           input: z.object({ text: z.string().min(1) }),
           output: z.object({ text: z.string() }),
@@ -81,27 +83,107 @@ describe('operationResource (zod)', () => {
             text: input.text.toUpperCase(),
           }),
         }),
-      },
+      }),
     });
 
     expect(isOperationResource(bundle)).toBe(true);
     expect(bundle.definition.operations.ping.method).toBe('GET');
+    expect(bundle.definition.operations.ping.path).toBe('');
     expect(bundle.definition.operations.shout.method).toBe('POST');
+    expect(bundle.definition.operations.shout.path).toBe('shout');
     expect(bundle.definition.operations.shout.status).toBe(201);
     expect(bundle.definition.operations.shout.inputDto).toBeDefined();
     expect(bundle.definition.operations.shout.outputDto).toBeDefined();
+  });
+
+  it('defaults operation path to the key', () => {
+    const bundle = operationResource({
+      path: 'api/ops',
+      public: true,
+      operations: (op) => ({
+        health: op.read({
+          handler: () => ({ ok: true }),
+          output: z.object({ ok: z.boolean() }),
+        }),
+      }),
+    });
+    expect(bundle.definition.operations.health.path).toBe('health');
+  });
+
+  it('rejects reserved and invalid operation keys', () => {
+    expect(() =>
+      operationResource({
+        path: 'api/bad',
+        operations: (op) => ({
+          'bad-key': op.read({ handler: () => ({ ok: true }) }),
+        }),
+      }),
+    ).toThrow(/not a valid identifier/);
+
+    expect(() =>
+      operationResource({
+        path: 'api/bad',
+        operations: (op) => ({
+          constructor: op.read({ handler: () => ({ ok: true }) }),
+        }),
+      }),
+    ).toThrow(/reserved/);
+
+    expect(() =>
+      operationResource({
+        path: 'api/bad',
+        operations: (op) => ({
+          moduleRef: op.read({ handler: () => ({ ok: true }) }),
+        }),
+      }),
+    ).toThrow(/reserved/);
+
+    expect(() =>
+      operationResource({
+        path: 'api/bad',
+        operations: (op) => ({
+          toString: op.read({ handler: () => ({ ok: true }) }),
+        }),
+      }),
+    ).toThrow(/reserved/);
+  });
+
+  it('compiles delete (query-sourced) and write PUT', () => {
+    const bundle = operationResource({
+      path: 'api/items',
+      public: true,
+      operations: (op) => ({
+        remove: op.delete({
+          input: z.object({ force: z.coerce.boolean().optional() }),
+          output: z.object({ removed: z.boolean() }),
+          handler: ({ input }) => ({ removed: input.force === true }),
+        }),
+        replace: op.write({
+          method: 'PUT',
+          input: z.object({ name: z.string() }),
+          output: z.object({ name: z.string() }),
+          handler: ({ input }) => ({ name: input.name }),
+        }),
+      }),
+    });
+
+    expect(bundle.definition.operations.remove.method).toBe('DELETE');
+    expect(bundle.definition.operations.remove.path).toBe('remove');
+    expect(bundle.definition.operations.replace.method).toBe('PUT');
+    expect(bundle.definition.operations.replace.path).toBe('replace');
   });
 
   it('registers through buildAppRegistrationPlan as a nest module', () => {
     const ops = operationResource({
       path: 'api/ops',
       public: true,
-      operations: {
-        health: query({
+      operations: (op) => ({
+        health: op.read({
+          path: '',
           handler: () => ({ ok: true }),
           output: z.object({ ok: z.boolean() }),
         }),
-      },
+      }),
     });
     const moduleSlice = defineModuleResource({
       providers: [],
@@ -124,7 +206,6 @@ describe('operationResource (zod)', () => {
         operations: {
           secret: {
             key: 'secret',
-            kind: 'query',
             method: 'GET',
             path: '',
             status: 200,
@@ -144,7 +225,6 @@ describe('operationResource (zod)', () => {
         operations: {
           echo: {
             key: 'echo',
-            kind: 'command',
             method: 'POST',
             path: '',
             status: 200,
@@ -163,7 +243,6 @@ describe('operationResource (zod)', () => {
         operations: {
           a: {
             key: 'a',
-            kind: 'query',
             method: 'GET',
             path: 'x',
             status: 200,
@@ -171,7 +250,6 @@ describe('operationResource (zod)', () => {
           },
           b: {
             key: 'b',
-            kind: 'query',
             method: 'GET',
             path: 'x',
             status: 200,

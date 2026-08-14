@@ -9,10 +9,12 @@
 
 ### Added
 
-- **`operationResource` / `query` / `command` (issue #43 v1).** Typed non-CRUD
-  endpoints beside `zodResource`: Zod input/output → DTO + OpenAPI, generated
-  Nest controller, auth/`public`, optional `transactional`, function or
-  injectable `handle` handlers. Wired through `resources[]` as
+- **`operationResource` (issue #43 / #50).** Typed non-CRUD endpoints beside
+  `zodResource`: Zod input/output → DTO + OpenAPI, generated Nest controller,
+  auth/`public`, optional `transactional`, function or injectable `handle`
+  handlers. Authoring surface: callback `operations(op)` with `op.read` /
+  `op.write` / `op.delete` (method-constrained); path defaults to the operation
+  key; `ctx.params` typed from base + op path. Wired through `resources[]` as
   `ResourceKind.Operation`. **v1 does not wire ACL grants** — authenticated
   ops are open to any authenticated user unless you pass method `decorators`
   (e.g. access-control grants). Cursor / SSE / binary / raw JSON / idempotency /

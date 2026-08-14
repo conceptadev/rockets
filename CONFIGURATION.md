@@ -368,7 +368,7 @@ petTags: defineSubResource({          // key 'petTags' must be a PetEntity relat
 
 ---
 
-## 6a. `operationResource()` — typed non-CRUD endpoints (issue #43 v1)
+## 6a. `operationResource()` — typed non-CRUD endpoints (issue #43 / #50)
 
 Use when you need **RPC-style** routes beside CRUD — health checks, actions,
 reports — without hand-rolling a Nest controller. Zod `input` / `output`
@@ -376,38 +376,47 @@ compile to DTO classes (OpenAPI + Standard Schema whitelist). Wire the bundle
 into `resources[]` like any other resource.
 
 ```ts
-import { command, operationResource, query } from '@concepta/rockets-core/zod';
+import { operationResource } from '@concepta/rockets-core/zod';
 import { z } from 'zod';
 
 export const ops = operationResource({
   path: 'ops',
   tags: ['Ops'],
   public: true, // class-level @AuthPublic; individual ops cannot be more private
-  operations: {
-    ping: query({
+  operations: (op) => ({
+    ping: op.read({
+      path: '', // root mount → GET /ops (default path is the operation key)
       output: z.object({ ok: z.boolean() }),
       handler: () => ({ ok: true }),
     }),
-    shout: command({
-      path: 'shout',
-      status: 201, // default is 200 for both query and command
+    shout: op.write({
+      status: 201, // default is 200
       input: z.object({ text: z.string().min(1) }),
       output: z.object({ text: z.string() }),
       handler: ({ input }) => ({ text: input.text.toUpperCase() }),
     }),
-    list: query({
-      path: 'items',
+    list: op.read({
+      path: 'items', // GET /ops/items (or rename the key to `items` and omit path)
       output: z.array(z.object({ id: z.string() })),
       handler: () => [{ id: '1' }],
     }),
-  },
+  }),
 });
 ```
 
-| Builder | Default method | Default status |
-|---|---|---|
-| `query()` | `GET` | `200` |
-| `command()` | `POST` | `200` (set `status: 201` when creating) |
+| Builder | Allowed methods | Default method | Default status |
+|---|---|---|---|
+| `op.read()` | `GET` | `GET` | `200` |
+| `op.write()` | `POST` / `PUT` / `PATCH` | `POST` | `200` (set `status: 201` when creating) |
+| `op.delete()` | `DELETE` | `DELETE` | `200` |
+
+**Authoring rules (#50).** `operations` is a **callback** so base-path
+`:params` type `ctx.params`. Operation path defaults to the **key verbatim**
+(not kebab-cased); use `path: ''` for a root-mounted route. Input sourcing
+follows HTTP method (`GET`/`DELETE` → query; body otherwise). The return value
+exposes `authored` (typed pending ops) for inference consumers; function
+handlers get full `ctx` typing — injectable class `handle` methods do not
+(TypeScript method bivariance).
 
 **Auth / ACL.** Resource `public: true` opens the whole controller. On a secured
 resource, mark individual ops with `public: true`. Setting `public: false` on
@@ -422,8 +431,8 @@ inputs are strings — use `z.coerce.number()` / `z.coerce.boolean()` when neede
 `output` accepts `z.object(...)` or `z.array(...)`. Duplicate `method`+`path`
 pairs inside one resource fail at boot.
 
-v1 covers `query` + `command` only. Cursor, SSE, binary, raw JSON, idempotency,
-and external-client scaffolds are follow-ups on issue #43.
+Cursor, SSE, binary, raw JSON, idempotency, and external-client scaffolds are
+follow-ups on issue #43.
 
 Lower-level escape hatch: `defineOperationResource({ path, operations: {…} })`
 with precompiled DTO classes.

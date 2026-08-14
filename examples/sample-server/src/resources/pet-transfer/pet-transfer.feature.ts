@@ -5,11 +5,14 @@ import {
   getAppContext,
   type OperationContext,
 } from '@concepta/rockets-core';
-import { command, operationResource } from '@concepta/rockets-core/zod';
+import { operationResource } from '@concepta/rockets-core/zod';
 import { z } from 'zod';
 import type { Pet } from '../pet/pet.schema';
 import { TransferPetOwnershipCommand } from './commands/impl/transfer-pet-ownership.command';
 import { TransferPetOwnershipHandler } from './commands/handlers/transfer-pet-ownership.handler';
+
+type TransferInput = { newOwnerId: string };
+type TransferParams = { petId: string };
 
 /**
  * HTTP adapter for pet-transfer via {@link operationResource} (issue #43).
@@ -21,7 +24,7 @@ class TransferPetOwnershipHttpHandler {
   constructor(private readonly commandBus: CommandBus) {}
 
   async handle(
-    ctx: OperationContext<{ newOwnerId: string }>,
+    ctx: OperationContext<TransferInput, TransferParams>,
   ): Promise<Pet> {
     if (ctx.user === undefined) {
       throw new UnauthorizedException();
@@ -45,12 +48,12 @@ class TransferPetOwnershipHttpHandler {
  * elsewhere and emits a domain command — no new tables.
  */
 export const petTransferFeature = operationResource({
-  path: 'pets/:petId/transfer',
+  path: 'pets/:petId',
   tags: ['Pet transfer'],
   imports: [CqrsModule],
   providers: [TransferPetOwnershipHandler, TransferPetOwnershipHttpHandler],
-  operations: {
-    transfer: command({
+  operations: (op) => ({
+    transfer: op.write({
       summary: 'Transfer pet ownership to another user (owner only)',
       input: z.object({ newOwnerId: z.uuid() }),
       output: z.object({
@@ -65,5 +68,5 @@ export const petTransferFeature = operationResource({
         }),
       ],
     }),
-  },
+  }),
 });

@@ -34,38 +34,51 @@ export interface OperationResponse {
 /**
  * Runtime context passed to an operation handler.
  *
- * Repositories / clients / services are not injected here in v1 — register
- * them as providers on the resource and inject them into a handler class, or
- * close over module-scoped services from a function handler.
+ * `P` is the path-param map (typed from base + operation path when using the
+ * zod `operations` callback). Repositories / clients / services are not
+ * injected here in v1 — register them as providers on the resource and inject
+ * them into a handler class, or close over module-scoped services from a
+ * function handler.
  */
-export interface OperationContext<I = unknown> {
+export interface OperationContext<
+  I = unknown,
+  P extends object = Record<string, string>,
+> {
   readonly input: I;
-  readonly params: Readonly<Record<string, string>>;
+  readonly params: Readonly<P>;
   readonly query: Readonly<Record<string, unknown>>;
   readonly request: OperationRequest;
   readonly response: OperationResponse;
   readonly user: AuthorizedUser | undefined;
 }
 
-export interface OperationHandler<I = unknown, O = unknown> {
-  handle(ctx: OperationContext<I>): Promise<O> | O;
+export interface OperationHandler<
+  I = unknown,
+  O = unknown,
+  P extends object = Record<string, string>,
+> {
+  handle(ctx: OperationContext<I, P>): Promise<O> | O;
 }
 
-export type OperationHandlerFn<I = unknown, O = unknown> = (
-  ctx: OperationContext<I>,
-) => Promise<O> | O;
+export type OperationHandlerFn<
+  I = unknown,
+  O = unknown,
+  P extends object = Record<string, string>,
+> = (ctx: OperationContext<I, P>) => Promise<O> | O;
 
-export type OperationHandlerRef<I = unknown, O = unknown> =
-  | OperationHandlerFn<I, O>
-  | Type<OperationHandler<I, O>>;
+export type OperationHandlerRef<
+  I = unknown,
+  O = unknown,
+  P extends object = Record<string, string>,
+> = OperationHandlerFn<I, O, P> | Type<OperationHandler<I, O, P>>;
 
 /**
  * Compiled operation descriptor — DTO classes already resolved.
- * Produced by {@link defineOperationResource} / zod `query`/`command`.
+ * HTTP method is the source of truth for input sourcing (GET/DELETE → query,
+ * POST/PUT/PATCH → body). There is no separate `kind` field.
  */
 export interface CompiledOperationDescriptor {
   readonly key: string;
-  readonly kind: 'query' | 'command';
   readonly method: OperationHttpMethod;
   readonly path: string;
   readonly status: number;
@@ -89,6 +102,11 @@ export interface OperationResourceDefinition {
   readonly decorators?: readonly ClassDecorator[];
 }
 
+/**
+ * Planner-facing operation resource. Non-generic so it sits in `resources[]`
+ * beside CRUD/module/sub without forcing type params through the union.
+ * The zod layer returns a narrowed subtype that preserves the operation record.
+ */
 export interface OperationResource {
   readonly kind: ResourceKind.Operation;
   readonly definition: OperationResourceDefinition;

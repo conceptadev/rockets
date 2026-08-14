@@ -20,11 +20,7 @@ import { extractBearerToken } from '../infrastructure/auth/extract-bearer-token'
 import { RocketsCoreModule } from '../rockets-core.module';
 import { AuthServerGuard } from '../infrastructure/guards/auth-server.guard';
 import { defineAuthAdapter } from '../infrastructure/auth/define-auth-adapter';
-import {
-  command,
-  operationResource,
-  query,
-} from '../zod/zod-operation-resource';
+import { operationResource } from '../zod/zod-operation-resource';
 import type { OperationContext } from '../domain/interfaces/operation-resource.interface';
 
 const OPS_MARK = 'ops:mark';
@@ -52,33 +48,38 @@ class ShoutHandler {
   }
 }
 
+const ItemSchema = z.object({ id: z.string() });
+type Item = z.infer<typeof ItemSchema>;
+
 const publicOps = operationResource({
   path: 'ops',
   tags: ['Ops'],
   public: true,
-  operations: {
-    ping: query({
+  operations: (op) => ({
+    ping: op.read({
+      path: '',
       summary: 'Health ping',
       output: z.object({ ok: z.boolean() }),
       handler: () => ({ ok: true, internal: true }),
     }),
-    items: query({
-      path: 'items',
-      output: z.array(z.object({ id: z.string() })),
-      handler: () => [{ id: 'a' }, { id: 'b', extra: true } as { id: string }],
+    items: op.read({
+      output: z.array(ItemSchema),
+      handler: (): Array<Item & { extra?: boolean }> => [
+        { id: 'a' },
+        { id: 'b', extra: true },
+      ],
     }),
-    broken: query({
-      path: 'broken',
+    broken: op.read({
       output: z.object({ ok: z.literal(true) }),
-      handler: () => ({ ok: false as unknown as true }),
+      // Intentional runtime contract break for the 500 assertion below.
+      handler: (): { ok: true } => ({ ok: false as unknown as true }),
     }),
-    voidish: query({
-      path: 'voidish',
+    voidish: op.read({
       output: z.object({ ok: z.boolean() }),
-      handler: () => undefined as unknown as { ok: boolean },
+      // Intentional runtime contract break for the 500 assertion below.
+      handler: (): { ok: boolean } => undefined as unknown as { ok: boolean },
     }),
-    search: query({
-      path: 'search',
+    search: op.read({
       input: z.object({
         term: z.string().min(1),
         take: z.coerce.number().int().optional(),
@@ -86,37 +87,47 @@ const publicOps = operationResource({
       output: z.object({ term: z.string(), take: z.number().optional() }),
       handler: ({ input }) => ({ term: input.term, take: input.take }),
     }),
-  },
+  }),
 });
 
 const securedOps = operationResource({
   path: 'secure-ops',
   tags: ['SecureOps'],
   providers: [ShoutHandler],
-  operations: {
-    shout: command({
+  operations: (op) => ({
+    shout: op.write({
       method: 'POST',
-      path: 'shout',
       status: 201,
       input: z.object({ text: z.string().min(1) }),
       output: z.object({ text: z.string() }),
       handler: ShoutHandler,
       decorators: [Mark()],
     }),
-    version: query({
-      path: 'version',
+    version: op.read({
       public: true,
       output: z.object({ version: z.string() }),
       handler: () => ({ version: '1' }),
     }),
-    tx: command({
-      path: 'tx',
+    tx: op.write({
       transactional: true,
       input: z.object({ n: z.number().int() }),
       output: z.object({ n: z.number() }),
       handler: ({ input }) => ({ n: input.n }),
     }),
-  },
+    remove: op.delete({
+      input: z.object({
+        force: z.coerce.boolean().optional(),
+      }),
+      output: z.object({ removed: z.boolean() }),
+      handler: ({ input }) => ({ removed: input.force === true }),
+    }),
+    replace: op.write({
+      method: 'PUT',
+      input: z.object({ name: z.string().min(1) }),
+      output: z.object({ name: z.string() }),
+      handler: ({ input }) => ({ name: input.name }),
+    }),
+  }),
 });
 
 describe('operationResource e2e (issue #43 v1)', () => {
@@ -224,6 +235,24 @@ describe('operationResource e2e (issue #43 v1)', () => {
       .send({ n: 3 })
       .expect(200)
       .expect({ n: 3 });
+  });
+
+  it('sources DELETE input from query string', async () => {
+    await request(app.getHttpServer())
+      .delete('/secure-ops/remove')
+      .set('Authorization', 'Bearer ok')
+      .query({ force: 'true' })
+      .expect(200)
+      .expect({ removed: true });
+  });
+
+  it('accepts PUT write methods', async () => {
+    await request(app.getHttpServer())
+      .put('/secure-ops/replace')
+      .set('Authorization', 'Bearer ok')
+      .send({ name: 'widget' })
+      .expect(200)
+      .expect({ name: 'widget' });
   });
 
   it('emits deterministic Swagger operationIds and GET query parameters', () => {
