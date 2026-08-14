@@ -13,6 +13,7 @@ import type {
   AssigneeRelationInterface,
   ReferenceIdInterface,
 } from '@concepta/nestjs-core';
+import { ConsumeOtpCommand } from '@concepta/nestjs-otp';
 
 /**
  * This class is registered under the upstream `RecoveryService` DI token, so it
@@ -81,19 +82,36 @@ export class RocketsRecoveryService implements RecoveryServiceContract {
     });
   }
 
+  private consumePasscode(
+    ctx: NonNullable<AppContextLike>,
+    passcode: string,
+  ): Promise<AssigneeRelationInterface | null> {
+    return this.commandBus.execute(
+      new ConsumeOtpCommand(ctx, this.policy.otpNamespace, {
+        category: this.policy.otpCategory,
+        passcode,
+      }),
+    );
+  }
+
   async updatePassword(
     ctx: AppContextLike,
     passcode: string,
     newPassword: string,
   ): Promise<ReferenceIdInterface | null> {
     const appCtx = ctx ?? {};
-    const otp = await this.validatePasscode(appCtx, passcode);
+    // Consume first — single application decision point (no validate-then-
+    // mutate). Passcode is burned before password mutation; a failed write
+    // still leaves the proof consumed. DB-level single-winner under concurrent
+    // consumes still needs upstream nestjs-otp locking.
+    const otp = await this.consumePasscode(appCtx, passcode);
     if (!otp) return null;
     const user = await this.userPort.getById(appCtx, otp.assigneeId);
     if (!user) return null;
 
     await this.passwordPort.setPassword(appCtx, newPassword, user.id);
-    // Revoke before notifying: a failed mail must not leave a live passcode.
+    // Clear any other active recovery OTPs for this user (defense in depth
+    // when duplicateStrategy ALLOW left siblings).
     await this.otpPort.clear(appCtx, this.policy.otpNamespace, {
       category: this.policy.otpCategory,
       assigneeId: user.id,

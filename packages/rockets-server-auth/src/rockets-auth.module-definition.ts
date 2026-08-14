@@ -7,12 +7,10 @@ import {
   Provider,
 } from '@nestjs/common';
 import {
-  SafeCrudContextInterceptor,
   buildAccessControlImport,
   SwaggerUiModule,
 } from '@concepta/rockets-core';
 import { PassportModule } from '@nestjs/passport';
-import { APP_INTERCEPTOR } from '@nestjs/core';
 import { CommandBus, CqrsModule, QueryBus } from '@nestjs/cqrs';
 import {
   ThrottlerModule,
@@ -30,7 +28,7 @@ import {
   UserPort,
 } from '@concepta/nestjs-authentication';
 import { createSettingsProvider } from '@concepta/nestjs-core';
-import { CrudContextOverlay, CrudModule } from '@concepta/nestjs-crud';
+import { CrudModule } from '@concepta/nestjs-crud';
 import { EmailModule } from '@concepta/nestjs-email';
 import {
   FederatedModule,
@@ -408,7 +406,12 @@ export function createRocketsAuthImports(importOptions: {
     ConceptaRepositoryCompatModule,
     RocketsAuthPortsModule.forRoot(importOptions.extras?.ports),
     ConfigModule.forFeature(rocketsAuthOptionsDefaultConfig),
-    createSafeCrudRootModule(),
+    CrudModule.forRootAsync({
+      inject: [RAW_OPTIONS_TOKEN],
+      useFactory: (options: RocketsAuthOptionsInterface) => ({
+        settings: options.crud?.settings,
+      }),
+    }),
     // Always imported: the auth controllers reference the throttler guard
     // statically, so its providers must resolve even when throttling is off.
     ThrottlerModule.forRoot(
@@ -619,47 +622,6 @@ export function createRocketsAuthImports(importOptions: {
   }
 
   return imports;
-}
-
-function createSafeCrudRootModule(): DynamicModule {
-  const crudRoot = CrudModule.forRootAsync({
-    inject: [RAW_OPTIONS_TOKEN],
-    useFactory: (options: RocketsAuthOptionsInterface) => ({
-      settings: options.crud?.settings,
-    }),
-  }) as DynamicModule;
-
-  const originalProviders: NonNullable<DynamicModule['providers']> =
-    crudRoot.providers ?? [];
-  const filteredProviders = originalProviders.filter((provider) => {
-    if (
-      typeof provider === 'object' &&
-      provider !== null &&
-      'provide' in provider
-    ) {
-      if (
-        provider.provide === APP_INTERCEPTOR &&
-        'useClass' in provider &&
-        provider.useClass === CrudContextOverlay
-      ) {
-        return false;
-      }
-    }
-    return true;
-  });
-
-  const originalExports: NonNullable<DynamicModule['exports']> =
-    crudRoot.exports ?? [];
-
-  return {
-    ...crudRoot,
-    providers: [
-      ...filteredProviders,
-      SafeCrudContextInterceptor,
-      { provide: APP_INTERCEPTOR, useClass: SafeCrudContextInterceptor },
-    ],
-    exports: [...originalExports, SafeCrudContextInterceptor],
-  };
 }
 
 export function createRocketsAuthExports(options: {

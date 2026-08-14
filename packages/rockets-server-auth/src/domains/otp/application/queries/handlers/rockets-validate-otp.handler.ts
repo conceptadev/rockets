@@ -22,23 +22,25 @@ export class RocketsValidateOtpHandler
     query: RocketsValidateOtpQuery,
   ): Promise<AssigneeRelationInterface | null> {
     const namespace = String(query.assignment);
-    const result = await this.queryBus.execute<
+    const otp = {
+      category: query.otp.category,
+      passcode: query.otp.passcode,
+    };
+
+    // When the passcode must be burned, ConsumeOtpCommand is the single
+    // decision point (validate+remove in one handler). Avoid a prior
+    // ValidateOtpQuery — that opens an application-level TOCTOU window.
+    // DB-level single-winner still depends on upstream nestjs-otp locking.
+    if (query.deleteIfValid) {
+      return this.commandBus.execute<
+        ConsumeOtpCommand,
+        AssigneeRelationInterface | null
+      >(new ConsumeOtpCommand(query.ctx, namespace, otp));
+    }
+
+    return this.queryBus.execute<
       ValidateOtpQuery,
       AssigneeRelationInterface | null
-    >(
-      new ValidateOtpQuery(query.ctx, namespace, {
-        category: query.otp.category,
-        passcode: query.otp.passcode,
-      }),
-    );
-    if (result && query.deleteIfValid) {
-      await this.commandBus.execute(
-        new ConsumeOtpCommand(query.ctx, namespace, {
-          category: query.otp.category,
-          passcode: query.otp.passcode,
-        }),
-      );
-    }
-    return result;
+    >(new ValidateOtpQuery(query.ctx, namespace, otp));
   }
 }

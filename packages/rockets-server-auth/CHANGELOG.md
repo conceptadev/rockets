@@ -9,6 +9,17 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Security
+
+- OTP consume is the single decision point for burning passcodes:
+  `RocketsValidateOtpHandler` dispatches `ConsumeOtpCommand` when
+  `deleteIfValid` is true (no prior `ValidateOtpQuery`), and recovery
+  `updatePassword` consumes before mutating the password. A failed password
+  write after consume still leaves the proof burned (user must restart
+  recovery). DB-level single-winner under concurrent consumes still needs
+  upstream nestjs-otp locking; this closes the application validate-then-
+  consume TOCTOU only.
+
 ### Release preparation
 
 - Package manifest set to `1.0.0-alpha.8`; registry publication is
@@ -43,6 +54,9 @@ and this project adheres to
 
 ### Changed
 
+- Auth `CrudModule` root registration no longer replaces upstream's
+  `CrudContextOverlay` with `SafeCrudContextInterceptor` (removed from core);
+  uses `CrudModule.forRootAsync` as published.
 - Published declarations carry the Express and Passport type dependencies they
   reference, and the public throttling configuration remains usable by strict
   NodeNext consumers on the Nest 12 alpha line.

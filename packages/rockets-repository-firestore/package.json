@@ -28,6 +28,7 @@
   },
   "files": [
     "dist/**/!(*.spec|*.e2e-spec|*.fixture).{js,d.ts}",
+    "firestore.indexes.example.json",
     "README.md",
     "LICENSE.txt",
     "CHANGELOG.md"

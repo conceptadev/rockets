@@ -30,6 +30,9 @@
 
 ### Removed
 
+- **`SafeCrudContextInterceptor`** public export. Upstream
+  `@concepta/nestjs-crud@8.0.0-alpha.8` already skips non-CRUD handlers in
+  `CrudContextOverlay.attach()`; Rockets uses `CrudModule.forRoot` directly.
 - `createStubAuthBootstrap()`. It had become an alias for `defineAuthAdapter()`,
   which produces the same host module and additionally accepts imports,
   controllers, providers, exports, and `contributes`. Replace

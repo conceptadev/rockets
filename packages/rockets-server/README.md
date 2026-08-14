@@ -438,8 +438,7 @@ the following advanced seams from `@concepta/rockets-core` directly:
   `AuthUserCtx`, `AuthUserContextOverlay`, `getAppContext`,
   `CrudCommandHandlerBase`, `CrudQueryHandlerBase`, `CrudCommandInterface`,
   `CrudQueryInterface`, `ByIdInterface`, `CreateOneInterface`,
-  `UpdateOneInterface`, `RemoveOneInterface`, `InjectCrudAdapter`, and
-  `SafeCrudContextInterceptor`.
+  `UpdateOneInterface`, `RemoveOneInterface`, and `InjectCrudAdapter`.
 - Advanced auth/access control: `AuthBootstrapContributions`,
   `AuthBootstrapIdentity`, `AuthPublicMetadata`, `AuthPublicOptions`,
   `RocketsAccessControlConfig`, and `buildAccessControlImport`.

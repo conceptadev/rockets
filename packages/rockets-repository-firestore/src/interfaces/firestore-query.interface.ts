@@ -57,8 +57,7 @@ export type FirestorePostFilter =
       readonly field: string;
       readonly min: unknown;
       readonly max: unknown;
-    }
-  | { readonly kind: 'soft_delete_excluded'; readonly field: string };
+    };
 
 /** One conjunctive branch (AND of conditions) — OR becomes multiple branches. */
 export interface FirestoreQueryBranch {
