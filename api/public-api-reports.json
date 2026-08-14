@@ -355,13 +355,13 @@
         "name": "ResourceInput",
         "kind": "type",
         "runtime": false,
-        "signature": "export type ResourceInput<E extends PlainLiteralObject = PlainLiteralObject> = CrudResource<E> | ModuleResource | RocketsResourceConfig;"
+        "signature": "export type ResourceInput<E extends PlainLiteralObject = PlainLiteralObject> = CrudResource<E> | ModuleResource | OperationResource | RocketsResourceConfig;"
       },
       {
         "name": "ResourceKind",
         "kind": "enum",
         "runtime": true,
-        "signature": "export declare enum ResourceKind {\n    Crud = \"crud\",\n    Module = \"module\",\n    Sub = \"sub\"\n}"
+        "signature": "export declare enum ResourceKind {\n    Crud = \"crud\",\n    Module = \"module\",\n    Sub = \"sub\",\n    Operation = \"operation\"\n}"
       },
       {
         "name": "ResourceOperationConfig",
@@ -2290,6 +2290,12 @@
         "signature": "export interface ByIdInterface<T = ReferenceId, U = ReferenceIdInterface> {\n    byId: (id: T) => Promise<U | null>;\n}"
       },
       {
+        "name": "CompiledOperationDescriptor",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface CompiledOperationDescriptor {\n    readonly key: string;\n    readonly kind: 'query' | 'command';\n    readonly method: OperationHttpMethod;\n    readonly path: string;\n    readonly status: number;\n    readonly summary?: string;\n    readonly public?: boolean;\n    readonly transactional?: boolean;\n    readonly inputDto?: Type<object>;\n    readonly outputDto?: Type<object>;\n    readonly handler: OperationHandlerRef;\n    readonly decorators?: readonly MethodDecorator[];\n}"
+      },
+      {
         "name": "CreateOneInterface",
         "kind": "interface",
         "runtime": false,
@@ -2434,6 +2440,60 @@
         "signature": "export interface ModuleResourceEntityEntry {\n    readonly key: string;\n    readonly entity: Type<PlainLiteralObject>;\n    readonly repository?: RepositoryModuleInterface;\n    readonly collection?: string;\n}"
       },
       {
+        "name": "OperationContext",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface OperationContext<I = unknown> {\n    readonly input: I;\n    readonly params: Readonly<Record<string, string>>;\n    readonly query: Readonly<Record<string, unknown>>;\n    readonly request: OperationRequest;\n    readonly response: OperationResponse;\n    readonly user: AuthorizedUser | undefined;\n}"
+      },
+      {
+        "name": "OperationHandler",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface OperationHandler<I = unknown, O = unknown> {\n    handle(ctx: OperationContext<I>): Promise<O> | O;\n}"
+      },
+      {
+        "name": "OperationHandlerFn",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type OperationHandlerFn<I = unknown, O = unknown> = (ctx: OperationContext<I>) => Promise<O> | O;"
+      },
+      {
+        "name": "OperationHandlerRef",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type OperationHandlerRef<I = unknown, O = unknown> = OperationHandlerFn<I, O> | Type<OperationHandler<I, O>>;"
+      },
+      {
+        "name": "OperationHttpMethod",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type OperationHttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';"
+      },
+      {
+        "name": "OperationRequest",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface OperationRequest {\n    readonly headers: Readonly<Record<string, string | string[] | undefined>>;\n    readonly params: Readonly<Record<string, string>>;\n    readonly query: Readonly<Record<string, unknown>>;\n    readonly raw: unknown;\n}"
+      },
+      {
+        "name": "OperationResource",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface OperationResource {\n    readonly kind: ResourceKind.Operation;\n    readonly definition: OperationResourceDefinition;\n    readonly controller: Type<unknown>;\n    readonly providers: ReadonlyArray<Provider>;\n    readonly imports?: NonNullable<DynamicModule['imports']>;\n    readonly exports?: NonNullable<DynamicModule['exports']>;\n}"
+      },
+      {
+        "name": "OperationResourceDefinition",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface OperationResourceDefinition {\n    readonly path: string;\n    readonly tags?: readonly string[];\n    readonly public?: boolean;\n    readonly operations: Readonly<Record<string, CompiledOperationDescriptor>>;\n    readonly imports?: NonNullable<DynamicModule['imports']>;\n    readonly providers?: ReadonlyArray<Provider>;\n    readonly exports?: NonNullable<DynamicModule['exports']>;\n    readonly decorators?: readonly ClassDecorator[];\n}"
+      },
+      {
+        "name": "OperationResponse",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface OperationResponse {\n    readonly raw: unknown;\n}"
+      },
+      {
         "name": "OwnedEntity",
         "kind": "interface",
         "runtime": false,
@@ -2551,13 +2611,13 @@
         "name": "ResourceInput",
         "kind": "type",
         "runtime": false,
-        "signature": "export type ResourceInput<E extends PlainLiteralObject = PlainLiteralObject> = CrudResource<E> | ModuleResource | RocketsResourceConfig;"
+        "signature": "export type ResourceInput<E extends PlainLiteralObject = PlainLiteralObject> = CrudResource<E> | ModuleResource | OperationResource | RocketsResourceConfig;"
       },
       {
         "name": "ResourceKind",
         "kind": "enum",
         "runtime": true,
-        "signature": "export declare enum ResourceKind {\n    Crud = \"crud\",\n    Module = \"module\",\n    Sub = \"sub\"\n}"
+        "signature": "export declare enum ResourceKind {\n    Crud = \"crud\",\n    Module = \"module\",\n    Sub = \"sub\",\n    Operation = \"operation\"\n}"
       },
       {
         "name": "ResourceOperationConfig",
@@ -2872,6 +2932,12 @@
         "signature": "export declare function defineModuleResource(input: DefineModuleResourceInput): ModuleResource;"
       },
       {
+        "name": "defineOperationResource",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function defineOperationResource(definition: OperationResourceDefinition): OperationResource;"
+      },
+      {
         "name": "defineResource",
         "kind": "function",
         "runtime": true,
@@ -2938,6 +3004,12 @@
         "signature": "export declare function isModuleResource(value: unknown): value is ModuleResource;"
       },
       {
+        "name": "isOperationResource",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function isOperationResource(value: unknown): value is OperationResource;"
+      },
+      {
         "name": "isRepositoryBootstrap",
         "kind": "function",
         "runtime": true,
@@ -2987,6 +3059,24 @@
       }
     ],
     "@concepta/rockets-core/zod": [
+      {
+        "name": "OperationBuilderConfig",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface OperationBuilderConfig<TInput extends z.ZodObject | undefined = undefined, TOutput extends OperationOutputSchema | undefined = undefined> {\n    readonly method?: OperationHttpMethod;\n    readonly path?: string;\n    readonly status?: number;\n    readonly summary?: string;\n    readonly public?: boolean;\n    readonly transactional?: boolean;\n    readonly input?: TInput;\n    readonly output?: TOutput;\n    readonly handler: OperationHandlerRef<InferIn<TInput>, InferOut<TOutput>>;\n    readonly decorators?: readonly MethodDecorator[];\n}"
+      },
+      {
+        "name": "OperationResourceInput",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface OperationResourceInput {\n    readonly path: string;\n    readonly tags?: readonly string[];\n    readonly public?: boolean;\n    readonly operations: Readonly<Record<string, PendingOperation>>;\n    readonly imports?: OperationResourceDefinition['imports'];\n    readonly providers?: OperationResourceDefinition['providers'];\n    readonly exports?: OperationResourceDefinition['exports'];\n    readonly decorators?: OperationResourceDefinition['decorators'];\n}"
+      },
+      {
+        "name": "PendingOperation",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type PendingOperation = {\n    readonly kind: 'query' | 'command';\n    readonly config: OperationBuilderConfig<z.ZodObject | undefined, OperationOutputSchema | undefined>;\n};"
+      },
       {
         "name": "PersistenceRow",
         "kind": "type",
@@ -3150,6 +3240,12 @@
         "signature": "export declare function bindZodResources(defaultCompiler: SchemaEntityCompiler): {\n    zodResource: typeof zodResource;\n    zodSubResource: typeof zodSubResource;\n    zodModuleResource: typeof zodModuleResource;\n    defineUserMetadata: (schema: Parameters<typeof defineZodUserMetadata>[0], options?: Omit<ZodUserMetadataOptions, 'entityCompiler'>) => RocketsUserMetadataConfig;\n};"
       },
       {
+        "name": "command",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function command<TInput extends z.ZodObject | undefined = undefined, TOutput extends OperationOutputSchema | undefined = undefined>(config: OperationBuilderConfig<TInput, TOutput>): PendingOperation;"
+      },
+      {
         "name": "compileDtoClass",
         "kind": "function",
         "runtime": true,
@@ -3190,6 +3286,18 @@
         "kind": "function",
         "runtime": true,
         "signature": "export declare function namedZodDto<T>(schema: z.ZodObject, name: string): Type<T>;"
+      },
+      {
+        "name": "operationResource",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function operationResource(input: OperationResourceInput): OperationResource;"
+      },
+      {
+        "name": "query",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function query<TInput extends z.ZodObject | undefined = undefined, TOutput extends OperationOutputSchema | undefined = undefined>(config: OperationBuilderConfig<TInput, TOutput>): PendingOperation;"
       },
       {
         "name": "readEntityMeta",
@@ -3935,6 +4043,16 @@
     ],
     "@concepta/rockets-core/zod": [
       {
+        "name": "AuthorizedUser",
+        "kind": "interface",
+        "signature": "export interface AuthorizedUser {\n    id: string;\n    sub: string;\n    email?: string;\n    userRoles?: {\n        role: {\n            name: string;\n        };\n    }[];\n    claims?: Record<string, unknown>;\n}",
+        "referencedBy": [
+          "OperationBuilderConfig",
+          "OperationResourceInput",
+          "operationResource"
+        ]
+      },
+      {
         "name": "BoolOpts",
         "kind": "interface",
         "signature": "interface BoolOpts extends FieldOpts {\n    readonly default?: boolean;\n}",
@@ -3958,6 +4076,15 @@
         "signature": "type CoerceIsoDateTime<V> = V extends string ? Date : V extends string | null ? Date | null : V extends string | undefined ? Date | undefined : V extends string | null | undefined ? Date | null | undefined : V;",
         "referencedBy": [
           "PersistenceRow"
+        ]
+      },
+      {
+        "name": "CompiledOperationDescriptor",
+        "kind": "interface",
+        "signature": "export interface CompiledOperationDescriptor {\n    readonly key: string;\n    readonly kind: 'query' | 'command';\n    readonly method: OperationHttpMethod;\n    readonly path: string;\n    readonly status: number;\n    readonly summary?: string;\n    readonly public?: boolean;\n    readonly transactional?: boolean;\n    readonly inputDto?: Type<object>;\n    readonly outputDto?: Type<object>;\n    readonly handler: OperationHandlerRef;\n    readonly decorators?: readonly MethodDecorator[];\n}",
+        "referencedBy": [
+          "OperationResourceInput",
+          "operationResource"
         ]
       },
       {
@@ -4064,6 +4191,22 @@
         ]
       },
       {
+        "name": "InferIn",
+        "kind": "type",
+        "signature": "type InferIn<TInput> = [\n    TInput\n] extends [\n    z.ZodObject\n] ? z.output<TInput> : unknown;",
+        "referencedBy": [
+          "OperationBuilderConfig"
+        ]
+      },
+      {
+        "name": "InferOut",
+        "kind": "type",
+        "signature": "type InferOut<TOutput> = [\n    TOutput\n] extends [\n    z.ZodType\n] ? z.output<TOutput> : unknown;",
+        "referencedBy": [
+          "OperationBuilderConfig"
+        ]
+      },
+      {
         "name": "IntOpts",
         "kind": "interface",
         "signature": "interface IntOpts extends FieldOpts {\n    readonly min?: number;\n    readonly max?: number;\n    readonly default?: number;\n}",
@@ -4105,6 +4248,104 @@
         "referencedBy": [
           "ZodModuleResourceEntityInput",
           "ZodModuleResourceInput"
+        ]
+      },
+      {
+        "name": "OperationContext",
+        "kind": "interface",
+        "signature": "export interface OperationContext<I = unknown> {\n    readonly input: I;\n    readonly params: Readonly<Record<string, string>>;\n    readonly query: Readonly<Record<string, unknown>>;\n    readonly request: OperationRequest;\n    readonly response: OperationResponse;\n    readonly user: AuthorizedUser | undefined;\n}",
+        "referencedBy": [
+          "OperationBuilderConfig",
+          "OperationResourceInput",
+          "operationResource"
+        ]
+      },
+      {
+        "name": "OperationHandler",
+        "kind": "interface",
+        "signature": "export interface OperationHandler<I = unknown, O = unknown> {\n    handle(ctx: OperationContext<I>): Promise<O> | O;\n}",
+        "referencedBy": [
+          "OperationBuilderConfig",
+          "OperationResourceInput",
+          "operationResource"
+        ]
+      },
+      {
+        "name": "OperationHandlerFn",
+        "kind": "type",
+        "signature": "export type OperationHandlerFn<I = unknown, O = unknown> = (ctx: OperationContext<I>) => Promise<O> | O;",
+        "referencedBy": [
+          "OperationBuilderConfig",
+          "OperationResourceInput",
+          "operationResource"
+        ]
+      },
+      {
+        "name": "OperationHandlerRef",
+        "kind": "type",
+        "signature": "export type OperationHandlerRef<I = unknown, O = unknown> = OperationHandlerFn<I, O> | Type<OperationHandler<I, O>>;",
+        "referencedBy": [
+          "OperationBuilderConfig",
+          "OperationResourceInput",
+          "operationResource"
+        ]
+      },
+      {
+        "name": "OperationHttpMethod",
+        "kind": "type",
+        "signature": "export type OperationHttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';",
+        "referencedBy": [
+          "OperationBuilderConfig",
+          "OperationResourceInput",
+          "operationResource"
+        ]
+      },
+      {
+        "name": "OperationOutputSchema",
+        "kind": "type",
+        "signature": "type OperationOutputSchema = z.ZodObject | z.ZodArray;",
+        "referencedBy": [
+          "OperationBuilderConfig",
+          "PendingOperation",
+          "command",
+          "query"
+        ]
+      },
+      {
+        "name": "OperationRequest",
+        "kind": "interface",
+        "signature": "export interface OperationRequest {\n    readonly headers: Readonly<Record<string, string | string[] | undefined>>;\n    readonly params: Readonly<Record<string, string>>;\n    readonly query: Readonly<Record<string, unknown>>;\n    readonly raw: unknown;\n}",
+        "referencedBy": [
+          "OperationBuilderConfig",
+          "OperationResourceInput",
+          "operationResource"
+        ]
+      },
+      {
+        "name": "OperationResource",
+        "kind": "interface",
+        "signature": "export interface OperationResource {\n    readonly kind: ResourceKind.Operation;\n    readonly definition: OperationResourceDefinition;\n    readonly controller: Type<unknown>;\n    readonly providers: ReadonlyArray<Provider>;\n    readonly imports?: NonNullable<DynamicModule['imports']>;\n    readonly exports?: NonNullable<DynamicModule['exports']>;\n}",
+        "referencedBy": [
+          "operationResource"
+        ]
+      },
+      {
+        "name": "OperationResourceDefinition",
+        "kind": "interface",
+        "signature": "export interface OperationResourceDefinition {\n    readonly path: string;\n    readonly tags?: readonly string[];\n    readonly public?: boolean;\n    readonly operations: Readonly<Record<string, CompiledOperationDescriptor>>;\n    readonly imports?: NonNullable<DynamicModule['imports']>;\n    readonly providers?: ReadonlyArray<Provider>;\n    readonly exports?: NonNullable<DynamicModule['exports']>;\n    readonly decorators?: readonly ClassDecorator[];\n}",
+        "referencedBy": [
+          "OperationResourceInput",
+          "operationResource"
+        ]
+      },
+      {
+        "name": "OperationResponse",
+        "kind": "interface",
+        "signature": "export interface OperationResponse {\n    readonly raw: unknown;\n}",
+        "referencedBy": [
+          "OperationBuilderConfig",
+          "OperationResourceInput",
+          "operationResource"
         ]
       },
       {
@@ -4188,10 +4429,11 @@
       {
         "name": "ResourceKind",
         "kind": "enum",
-        "signature": "export declare enum ResourceKind {\n    Crud = \"crud\",\n    Module = \"module\",\n    Sub = \"sub\"\n}",
+        "signature": "export declare enum ResourceKind {\n    Crud = \"crud\",\n    Module = \"module\",\n    Sub = \"sub\",\n    Operation = \"operation\"\n}",
         "referencedBy": [
           "ZodResourceDefinition",
           "ZodSubResourceDefinition",
+          "operationResource",
           "zodModuleResource",
           "zodResource",
           "zodSubResource"
