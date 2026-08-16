@@ -36,7 +36,10 @@ export {
 export { createdEntity, baseEntity, auditableEntity } from './base-entity';
 export { zodResource, zodSubResource, bindZodResources } from './zod-resource';
 export { zodModuleResource } from './zod-module-resource';
-export { operationResource } from './zod-operation-resource';
+export {
+  operationResource,
+  extractPathParamNames,
+} from './zod-operation-resource';
 export type {
   BoundBuilders,
   DeleteBuilderConfig,

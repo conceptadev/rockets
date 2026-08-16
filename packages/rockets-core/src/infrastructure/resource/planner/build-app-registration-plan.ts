@@ -12,6 +12,7 @@ import { sortResourceInputs } from './sort-resource-inputs';
 import { materialiseModuleResource } from './materialise-module-resource';
 import { materialiseOperationResource } from './materialise-operation-resource';
 import { validateResourceRelations } from './validate-relations';
+import { validateRouteCollisions } from './validate-route-collisions';
 
 /**
  * Plan everything a `RocketsCoreModule` boot needs from the user's
@@ -23,16 +24,8 @@ import { validateResourceRelations } from './validate-relations';
  *   2. Build entity registry (dedupe + relation targets).
  *   3. Group repository rows per adapter (strict — adapter required).
  *   4. Validate CRUD relations against the registry.
- *   5. Materialise module-resource and operation-resource Nest slices.
- *
- * @example
- * ```ts
- * buildAppRegistrationPlan({
- *   resources: [petResource, profileFeature],
- *   repository: TypeOrmRepositoryModule,
- *   userMetadata: { entity: UserMetadataEntity, ... },
- * })
- * ```
+ *   5. Reject cross-resource METHOD+path collisions (CRUD/Sub/Operation).
+ *   6. Materialise module-resource and operation-resource Nest slices.
  */
 export function buildAppRegistrationPlan(args: {
   readonly resources: ReadonlyArray<ResourceInput>;
@@ -64,6 +57,12 @@ export function buildAppRegistrationPlan(args: {
   });
 
   validateResourceRelations(generatedResources, entityRegistry);
+
+  validateRouteCollisions({
+    generatedResources,
+    manualResources,
+    operationBundles,
+  });
 
   const nestModules = [
     ...moduleBundles.map(materialiseModuleResource),

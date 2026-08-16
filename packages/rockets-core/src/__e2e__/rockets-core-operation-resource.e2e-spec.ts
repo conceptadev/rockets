@@ -130,6 +130,31 @@ const securedOps = operationResource({
   }),
 });
 
+/**
+ * Resource-level params schema only names `:orgId`. The sync op adds
+ * `:repoId` on its path — that extra Nest param must survive validation
+ * (not be stripped by the whitelist).
+ */
+const paramsOps = operationResource({
+  path: 'orgs/:orgId',
+  params: z.object({ orgId: z.uuid() }),
+  tags: ['Params'],
+  public: true,
+  operations: (op) => ({
+    sync: op.write({
+      path: 'repos/:repoId/sync',
+      output: z.object({
+        orgId: z.string(),
+        repoId: z.string(),
+      }),
+      handler: ({ params }) => ({
+        orgId: params.orgId,
+        repoId: params.repoId,
+      }),
+    }),
+  }),
+});
+
 describe('operationResource e2e (issue #43 v1)', () => {
   let app: INestApplication;
   let openApiPaths: Record<
@@ -149,7 +174,7 @@ describe('operationResource e2e (issue #43 v1)', () => {
         RocketsCoreModule.forRoot({
           auth: defineAuthAdapter(SimpleAuthProvider),
           providers: [SimpleAuthProvider],
-          resources: [publicOps, securedOps],
+          resources: [publicOps, securedOps, paramsOps],
           global: true,
         }),
       ],
@@ -253,6 +278,21 @@ describe('operationResource e2e (issue #43 v1)', () => {
       .send({ name: 'widget' })
       .expect(200)
       .expect({ name: 'widget' });
+  });
+
+  it('validates resource params and preserves op-path params not in the schema', async () => {
+    const orgId = '11111111-1111-4111-8111-111111111111';
+    const repoId = '22222222-2222-4222-8222-222222222222';
+    await request(app.getHttpServer())
+      .post(`/orgs/${orgId}/repos/${repoId}/sync`)
+      .expect(200)
+      .expect({ orgId, repoId });
+  });
+
+  it('rejects invalid resource params with 400', async () => {
+    await request(app.getHttpServer())
+      .post('/orgs/not-a-uuid/repos/repo-1/sync')
+      .expect(400);
   });
 
   it('emits deterministic Swagger operationIds and GET query parameters', () => {

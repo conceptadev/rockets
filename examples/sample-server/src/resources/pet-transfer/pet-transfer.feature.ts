@@ -49,6 +49,7 @@ class TransferPetOwnershipHttpHandler {
  */
 export const petTransferFeature = operationResource({
   path: 'pets/:petId',
+  params: z.object({ petId: z.uuid() }),
   tags: ['Pet transfer'],
   imports: [CqrsModule],
   providers: [TransferPetOwnershipHandler, TransferPetOwnershipHttpHandler],

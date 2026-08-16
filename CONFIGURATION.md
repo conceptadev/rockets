@@ -400,6 +400,12 @@ export const ops = operationResource({
       output: z.array(z.object({ id: z.string() })),
       handler: () => [{ id: '1' }],
     }),
+    // output: false opts out of response whitelist (explicit)
+    purge: op.delete({
+      status: 204,
+      output: false,
+      handler: () => undefined,
+    }),
   }),
 });
 ```
@@ -413,10 +419,16 @@ export const ops = operationResource({
 **Authoring rules (#50).** `operations` is a **callback** so base-path
 `:params` type `ctx.params`. Operation path defaults to the **key verbatim**
 (not kebab-cased); use `path: ''` for a root-mounted route. Input sourcing
-follows HTTP method (`GET`/`DELETE` → query; body otherwise). The return value
-exposes `authored` (typed pending ops) for inference consumers; function
-handlers get full `ctx` typing — injectable class `handle` methods do not
-(TypeScript method bivariance).
+follows HTTP method (`GET`/`DELETE` → query; body otherwise). **`output` is
+required** — pass a schema (whitelist + OpenAPI) or `output: false` (explicit
+opt-out). Optional resource-level `params: z.object({...})` validates named path
+params at request time (400). Keys must be `:params` on the resource `path`;
+extra Nest params from an operation path (not in the schema) are preserved.
+Cross-resource `METHOD + path` collisions with CRUD/Sub fail in
+`buildAppRegistrationPlan` (not silently at runtime). Status `204` with an
+output schema is rejected at define time. The return value exposes `authored`
+(typed pending ops) for inference consumers; function handlers get full `ctx`
+typing — injectable class `handle` methods do not (TypeScript method bivariance).
 
 **Auth / ACL.** Resource `public: true` opens the whole controller. On a secured
 resource, mark individual ops with `public: true`. Setting `public: false` on

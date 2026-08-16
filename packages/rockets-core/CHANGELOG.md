@@ -14,11 +14,13 @@
   auth/`public`, optional `transactional`, function or injectable `handle`
   handlers. Authoring surface: callback `operations(op)` with `op.read` /
   `op.write` / `op.delete` (method-constrained); path defaults to the operation
-  key; `ctx.params` typed from base + op path. Wired through `resources[]` as
-  `ResourceKind.Operation`. **v1 does not wire ACL grants** — authenticated
-  ops are open to any authenticated user unless you pass method `decorators`
-  (e.g. access-control grants). Cursor / SSE / binary / raw JSON / idempotency /
-  external-client scaffolds remain follow-ups.
+  key; `ctx.params` typed from base + op path. **`output` is required** (schema
+  or `false`); optional `params` zod validates path params; cross-resource
+  route collisions fail in `buildAppRegistrationPlan`. Wired through
+  `resources[]` as `ResourceKind.Operation`. **v1 does not wire ACL grants** —
+  authenticated ops are open to any authenticated user unless you pass method
+  `decorators` (e.g. access-control grants). Cursor / SSE / binary / raw JSON /
+  idempotency / external-client scaffolds remain follow-ups.
 - `compileDtoClass` and `namedZodDto` are exported from the public
   `@concepta/rockets-core/zod` subpath.
 - `AuthBootstrapContributions`, allowing an auth integration to carry its owned

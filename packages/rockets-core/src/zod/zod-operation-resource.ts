@@ -16,11 +16,14 @@ type InferIn<TInput> = [TInput] extends [z.ZodObject]
   ? z.output<TInput>
   : unknown;
 
-type InferOut<TOutput> = [TOutput] extends [z.ZodType]
+type InferOut<TOutput> = [TOutput] extends [false]
+  ? void
+  : [TOutput] extends [z.ZodType]
   ? z.output<TOutput>
   : unknown;
 
 type OperationOutputSchema = z.ZodObject | z.ZodArray;
+type OperationOutputConfig = OperationOutputSchema | false;
 
 /**
  * Extract `:param` names from a path template into a string-record type.
@@ -35,13 +38,28 @@ export type PathParams<S extends string> =
 
 type MergeParams<A, B> = Omit<A, keyof B> & B;
 
+type ParamsFromSchema<TParamsSchema extends z.ZodObject | undefined> = [
+  TParamsSchema,
+] extends [z.ZodObject]
+  ? z.output<TParamsSchema>
+  : {};
+
+type EffectiveParams<
+  TBase extends string,
+  TOpPath extends string,
+  TParamsSchema extends z.ZodObject | undefined,
+> = MergeParams<
+  PathParams<TBase>,
+  MergeParams<PathParams<TOpPath>, ParamsFromSchema<TParamsSchema>>
+>;
+
 type ReadMethod = 'GET';
 type WriteMethod = 'POST' | 'PUT' | 'PATCH';
 type DeleteMethod = 'DELETE';
 
 interface SharedBuilderFields<
   TInput extends z.ZodObject | undefined,
-  TOutput extends OperationOutputSchema | undefined,
+  TOutput extends OperationOutputConfig,
   TParams extends object,
 > {
   readonly status?: number;
@@ -49,7 +67,8 @@ interface SharedBuilderFields<
   readonly public?: boolean;
   readonly transactional?: boolean;
   readonly input?: TInput;
-  readonly output?: TOutput;
+  /** Required: schema to whitelist, or `false` to opt out explicitly. */
+  readonly output: TOutput;
   readonly handler: OperationHandlerRef<
     InferIn<TInput>,
     InferOut<TOutput>,
@@ -60,7 +79,7 @@ interface SharedBuilderFields<
 
 export type ReadBuilderConfig<
   TInput extends z.ZodObject | undefined = undefined,
-  TOutput extends OperationOutputSchema | undefined = undefined,
+  TOutput extends OperationOutputConfig = OperationOutputSchema,
   TParams extends object = object,
   TOpPath extends string = '',
 > = SharedBuilderFields<TInput, TOutput, TParams> & {
@@ -70,7 +89,7 @@ export type ReadBuilderConfig<
 
 export type WriteBuilderConfig<
   TInput extends z.ZodObject | undefined = undefined,
-  TOutput extends OperationOutputSchema | undefined = undefined,
+  TOutput extends OperationOutputConfig = OperationOutputSchema,
   TParams extends object = object,
   TOpPath extends string = '',
 > = SharedBuilderFields<TInput, TOutput, TParams> & {
@@ -80,7 +99,7 @@ export type WriteBuilderConfig<
 
 export type DeleteBuilderConfig<
   TInput extends z.ZodObject | undefined = undefined,
-  TOutput extends OperationOutputSchema | undefined = undefined,
+  TOutput extends OperationOutputConfig = OperationOutputSchema,
   TParams extends object = object,
   TOpPath extends string = '',
 > = SharedBuilderFields<TInput, TOutput, TParams> & {
@@ -107,7 +126,7 @@ export interface PendingOperation<
   readonly public: boolean | undefined;
   readonly transactional: boolean | undefined;
   readonly input: z.ZodObject | undefined;
-  readonly output: OperationOutputSchema | undefined;
+  readonly output: OperationOutputConfig;
   readonly handler: OperationHandlerRef<TInput, TOutput, TParams>;
   readonly decorators: readonly MethodDecorator[] | undefined;
 }
@@ -127,78 +146,88 @@ export type OperationRecord = {
     readonly public: boolean | undefined;
     readonly transactional: boolean | undefined;
     readonly input: z.ZodObject | undefined;
-    readonly output: OperationOutputSchema | undefined;
+    readonly output: OperationOutputConfig;
     readonly handler: unknown;
     readonly decorators: readonly MethodDecorator[] | undefined;
   };
 };
 
-export interface BoundBuilders<TBase extends string> {
+export interface BoundBuilders<
+  TBase extends string,
+  TParamsSchema extends z.ZodObject | undefined = undefined,
+> {
   read<
     TInput extends z.ZodObject | undefined = undefined,
-    TOutput extends OperationOutputSchema | undefined = undefined,
+    TOutput extends OperationOutputConfig = OperationOutputSchema,
     const TOpPath extends string = '',
   >(
     config: ReadBuilderConfig<
       TInput,
       TOutput,
-      MergeParams<PathParams<TBase>, PathParams<TOpPath>>,
+      EffectiveParams<TBase, TOpPath, TParamsSchema>,
       TOpPath
     >,
   ): PendingOperation<
     InferIn<TInput>,
     InferOut<TOutput>,
-    MergeParams<PathParams<TBase>, PathParams<TOpPath>>
+    EffectiveParams<TBase, TOpPath, TParamsSchema>
   >;
 
   write<
     TInput extends z.ZodObject | undefined = undefined,
-    TOutput extends OperationOutputSchema | undefined = undefined,
+    TOutput extends OperationOutputConfig = OperationOutputSchema,
     const TOpPath extends string = '',
   >(
     config: WriteBuilderConfig<
       TInput,
       TOutput,
-      MergeParams<PathParams<TBase>, PathParams<TOpPath>>,
+      EffectiveParams<TBase, TOpPath, TParamsSchema>,
       TOpPath
     >,
   ): PendingOperation<
     InferIn<TInput>,
     InferOut<TOutput>,
-    MergeParams<PathParams<TBase>, PathParams<TOpPath>>
+    EffectiveParams<TBase, TOpPath, TParamsSchema>
   >;
 
   delete<
     TInput extends z.ZodObject | undefined = undefined,
-    TOutput extends OperationOutputSchema | undefined = undefined,
+    TOutput extends OperationOutputConfig = OperationOutputSchema,
     const TOpPath extends string = '',
   >(
     config: DeleteBuilderConfig<
       TInput,
       TOutput,
-      MergeParams<PathParams<TBase>, PathParams<TOpPath>>,
+      EffectiveParams<TBase, TOpPath, TParamsSchema>,
       TOpPath
     >,
   ): PendingOperation<
     InferIn<TInput>,
     InferOut<TOutput>,
-    MergeParams<PathParams<TBase>, PathParams<TOpPath>>
+    EffectiveParams<TBase, TOpPath, TParamsSchema>
   >;
 }
 
 export interface OperationResourceInput<
   TBase extends string,
   TOps extends OperationRecord,
+  TParamsSchema extends z.ZodObject | undefined = undefined,
 > {
   readonly path: TBase;
   readonly tags?: readonly string[];
   readonly public?: boolean;
   /**
+   * Optional zod object for path params. Keys must be `:params` present on
+   * `path`. Validated at request time (400). Improves `ctx.params` typing
+   * when the schema output is narrower than `string`.
+   */
+  readonly params?: TParamsSchema;
+  /**
    * Callback form only — builders must see the base path so `ctx.params`
    * can be typed from `:segments`. Split-file composition: export
    * `(op) => op.write({...})` factories and spread them into the record.
    */
-  readonly operations: (op: BoundBuilders<TBase>) => TOps;
+  readonly operations: (op: BoundBuilders<TBase, TParamsSchema>) => TOps;
   readonly imports?: OperationResourceDefinition['imports'];
   readonly providers?: OperationResourceDefinition['providers'];
   readonly exports?: OperationResourceDefinition['exports'];
@@ -241,6 +270,35 @@ function assertValidOperationKey(key: string, resourcePath: string): void {
       `operationResource "${resourcePath}": operation key "${key}" is reserved ` +
         `(collides with Object.prototype or the generated controller)`,
     );
+  }
+}
+
+/** Runtime extract of `:param` names from a path template. */
+export function extractPathParamNames(path: string): string[] {
+  const names: string[] = [];
+  const re = /:([A-Za-z_][A-Za-z0-9_]*)/g;
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(path)) !== null) {
+    const name = match[1];
+    if (name !== undefined && !names.includes(name)) {
+      names.push(name);
+    }
+  }
+  return names;
+}
+
+function assertParamsSchemaMatchesPath(
+  resourcePath: string,
+  paramsSchema: z.ZodObject,
+): void {
+  const pathKeys = new Set(extractPathParamNames(resourcePath));
+  for (const key of Object.keys(paramsSchema.shape)) {
+    if (!pathKeys.has(key)) {
+      throw new Error(
+        `operationResource "${resourcePath}": params.${key} is not a :param ` +
+          `on path "${resourcePath}"`,
+      );
+    }
   }
 }
 
@@ -311,10 +369,21 @@ function compileOperation(
   }
 
   let outputDto: Type<object> | undefined;
-  if (pending.output !== undefined) {
+  let outputDisabled = false;
+  if (pending.output === false) {
+    outputDisabled = true;
+  } else {
     outputDto = compileOperationDto(
       pending.output,
       `${pascal(resourcePath)}_${pascal(key)}Output`,
+    );
+  }
+
+  if (status === 204 && outputDto !== undefined) {
+    throw new Error(
+      `operationResource "${resourcePath}": operation "${key}" sets status 204 ` +
+        `with an output schema — 204 responses have no body. Use output: false ` +
+        `or a non-204 status.`,
     );
   }
 
@@ -330,6 +399,7 @@ function compileOperation(
     transactional: pending.transactional,
     inputDto,
     outputDto,
+    outputDisabled,
     handler: pending.handler,
     decorators: pending.decorators,
   };
@@ -345,7 +415,7 @@ function pascal(value: string): string {
 
 function toPendingRead<
   TInput extends z.ZodObject | undefined,
-  TOutput extends OperationOutputSchema | undefined,
+  TOutput extends OperationOutputConfig,
   TParams extends object,
   TOpPath extends string,
 >(
@@ -368,7 +438,7 @@ function toPendingRead<
 
 function toPendingWrite<
   TInput extends z.ZodObject | undefined,
-  TOutput extends OperationOutputSchema | undefined,
+  TOutput extends OperationOutputConfig,
   TParams extends object,
   TOpPath extends string,
 >(
@@ -391,7 +461,7 @@ function toPendingWrite<
 
 function toPendingDelete<
   TInput extends z.ZodObject | undefined,
-  TOutput extends OperationOutputSchema | undefined,
+  TOutput extends OperationOutputConfig,
   TParams extends object,
   TOpPath extends string,
 >(
@@ -412,7 +482,10 @@ function toPendingDelete<
   };
 }
 
-function createBoundBuilders<TBase extends string>(): BoundBuilders<TBase> {
+function createBoundBuilders<
+  TBase extends string,
+  TParamsSchema extends z.ZodObject | undefined,
+>(): BoundBuilders<TBase, TParamsSchema> {
   return {
     read: toPendingRead,
     write: toPendingWrite,
@@ -426,16 +499,25 @@ function createBoundBuilders<TBase extends string>(): BoundBuilders<TBase> {
  *
  * - `operations` is a callback so base-path params type `ctx.params`.
  * - Builders: `read` (GET), `write` (POST/PUT/PATCH), `delete` (DELETE).
- *   Input sourcing follows HTTP method (GET/DELETE → query; body otherwise).
+ * - `output` is required (`schema` or `false`) so responses cannot silently leak.
  * - Operation path defaults to its key (verbatim). Use `path: ''` for a
  *   root-mounted route on the resource path.
  */
 export function operationResource<
   const TBase extends string,
   TOps extends OperationRecord,
->(input: OperationResourceInput<TBase, TOps>): ZodOperationResource<TOps> {
-  const builders = createBoundBuilders<TBase>();
+  TParamsSchema extends z.ZodObject | undefined = undefined,
+>(
+  input: OperationResourceInput<TBase, TOps, TParamsSchema>,
+): ZodOperationResource<TOps> {
+  const builders = createBoundBuilders<TBase, TParamsSchema>();
   const authored = input.operations(builders);
+
+  let paramsDto: Type<object> | undefined;
+  if (input.params !== undefined) {
+    assertParamsSchemaMatchesPath(input.path, input.params);
+    paramsDto = compileDtoClass(input.params, `${pascal(input.path)}_Params`);
+  }
 
   const operations: Record<string, CompiledOperationDescriptor> = {};
   for (const [key, pending] of Object.entries(authored)) {
@@ -447,6 +529,7 @@ export function operationResource<
     path: input.path,
     tags: input.tags,
     public: input.public,
+    paramsDto,
     operations,
     imports: input.imports,
     providers: input.providers,

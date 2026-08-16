@@ -76,6 +76,10 @@ export type OperationHandlerRef<
  * Compiled operation descriptor — DTO classes already resolved.
  * HTTP method is the source of truth for input sourcing (GET/DELETE → query,
  * POST/PUT/PATCH → body). There is no separate `kind` field.
+ *
+ * Response contract: either `outputDto` (whitelist + OpenAPI) or
+ * `outputDisabled: true` (explicit opt-out). Omitting both is rejected at
+ * define/boot time so responses cannot silently leak.
  */
 export interface CompiledOperationDescriptor {
   readonly key: string;
@@ -87,6 +91,8 @@ export interface CompiledOperationDescriptor {
   readonly transactional?: boolean;
   readonly inputDto?: Type<object>;
   readonly outputDto?: Type<object>;
+  /** Explicit opt-out of output whitelist / response OpenAPI schema. */
+  readonly outputDisabled?: boolean;
   readonly handler: OperationHandlerRef;
   readonly decorators?: readonly MethodDecorator[];
 }
@@ -95,6 +101,11 @@ export interface OperationResourceDefinition {
   readonly path: string;
   readonly tags?: readonly string[];
   readonly public?: boolean;
+  /**
+   * Optional compiled DTO for path params (from zod `params` on
+   * `operationResource`). Validated at request time → 400 on failure.
+   */
+  readonly paramsDto?: Type<object>;
   readonly operations: Readonly<Record<string, CompiledOperationDescriptor>>;
   readonly imports?: NonNullable<DynamicModule['imports']>;
   readonly providers?: ReadonlyArray<Provider>;

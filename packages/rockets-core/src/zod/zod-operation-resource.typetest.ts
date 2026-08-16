@@ -28,6 +28,7 @@ type _NoParams = ExpectTrue<AssertEqual<PathParams<'ops'>, {}>>;
 
 export const typedTransfer = operationResource({
   path: 'pets/:petId',
+  params: z.object({ petId: z.string().uuid() }),
   operations: (op) => ({
     transfer: op.write({
       input: z.object({ newOwnerId: z.string() }),
@@ -62,6 +63,7 @@ operationResource({
     bad: op.read({
       // @ts-expect-error — read builder only accepts GET
       method: 'POST',
+      output: z.object({ ok: z.boolean() }),
       handler: () => ({ ok: true }),
     }),
   }),
@@ -73,6 +75,17 @@ operationResource({
     bad: op.write({
       // @ts-expect-error — write builder rejects DELETE
       method: 'DELETE',
+      output: false,
+      handler: () => undefined,
+    }),
+  }),
+});
+
+operationResource({
+  path: 'z',
+  operations: (op) => ({
+    // @ts-expect-error — output is required (schema or false)
+    missing: op.read({
       handler: () => ({ ok: true }),
     }),
   }),

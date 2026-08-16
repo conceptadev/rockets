@@ -35,10 +35,12 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { getMetadataStorage } from 'class-validator';
+import { z } from 'zod';
 
 import { AuthUser } from '../../../common/auth/auth-user.decorator';
 import type { AuthorizedUser } from '../../../domain/interfaces/auth-user.interface';
@@ -126,6 +128,29 @@ async function applyInputDto(
 }
 
 /**
+ * Validate declared `params` schema keys, but keep any Nest path params that
+ * are not in the schema (e.g. extra `:repoId` on an operation path when the
+ * resource-level schema only names base `:orgId`).
+ */
+async function resolveOperationParams(
+  paramsDto: Type<object> | undefined,
+  params: Record<string, string>,
+): Promise<Record<string, string>> {
+  if (paramsDto === undefined) {
+    return params;
+  }
+  const validated = await applyInputDto(paramsDto, params);
+  if (
+    validated === null ||
+    typeof validated !== 'object' ||
+    Array.isArray(validated)
+  ) {
+    return params;
+  }
+  return { ...params, ...(validated as Record<string, string>) };
+}
+
+/**
  * Whitelist / validate handler output. Failures are server bugs → 500,
  * never 400 (clients did not send the response body). The failing issues
  * are logged server-side; the client response stays generic.
@@ -165,10 +190,7 @@ async function applyOutputDto(
   }
 }
 
-type ZodShapeField = {
-  readonly isOptional?: () => boolean;
-  readonly def?: { readonly type?: string };
-};
+type ZodShapeField = z.ZodType;
 
 function readZodObjectShape(
   dto: Type<object>,
@@ -185,7 +207,42 @@ function isOptionalZodField(field: ZodShapeField): boolean {
   if (typeof field.isOptional === 'function') {
     return field.isOptional();
   }
-  return field.def?.type === 'optional' || field.def?.type === 'default';
+  const def = (field as { def?: { type?: string } }).def;
+  return def?.type === 'optional' || def?.type === 'default';
+}
+
+function openApiSchemaFromZodField(
+  field: ZodShapeField,
+): Record<string, unknown> {
+  try {
+    const json = z.toJSONSchema(field) as Record<string, unknown>;
+    const { $schema: _schema, ...rest } = json;
+    return rest;
+  } catch {
+    return { type: 'string' };
+  }
+}
+
+function appendParamsOpenApiDecorators(
+  decorators: Array<ClassDecorator | MethodDecorator | PropertyDecorator>,
+  paramsDto: Type<object> | undefined,
+): void {
+  if (paramsDto === undefined) {
+    return;
+  }
+  const shape = readZodObjectShape(paramsDto);
+  if (shape === undefined) {
+    return;
+  }
+  for (const [name, field] of Object.entries(shape)) {
+    decorators.push(
+      ApiParam({
+        name,
+        required: !isOptionalZodField(field),
+        schema: openApiSchemaFromZodField(field),
+      }),
+    );
+  }
 }
 
 function appendInputOpenApiDecorators(
@@ -203,8 +260,7 @@ function appendInputOpenApiDecorators(
           ApiQuery({
             name,
             required: !isOptionalZodField(field),
-            // Query string values are strings; use z.coerce.* in the schema.
-            schema: { type: 'string' },
+            schema: openApiSchemaFromZodField(field),
           }),
         );
       }
@@ -262,6 +318,10 @@ export function buildOperationController(
       operation.outputDto,
       `"${definition.path}" op "${operation.key}" outputDto`,
     );
+    assertValidatableDto(
+      definition.paramsDto,
+      `"${definition.path}" paramsDto`,
+    );
     const routeKey = `${operation.method}:${operation.path}`;
     if (routeKeys.has(routeKey)) {
       throw new Error(
@@ -279,6 +339,7 @@ export function buildOperationController(
       : ['operations'];
   const operations = Object.values(definition.operations);
   const uniqueName = controllerClassName(definition.path);
+  const paramsDto = definition.paramsDto;
 
   @Controller(definition.path.replace(/^\//, ''))
   @ApiTags(...tags)
@@ -302,7 +363,12 @@ export function buildOperationController(
   });
 
   for (const operation of operations) {
-    attachOperationMethod(OperationResourceController, operation, uniqueName);
+    attachOperationMethod(
+      OperationResourceController,
+      operation,
+      uniqueName,
+      paramsDto,
+    );
   }
 
   return OperationResourceController;
@@ -312,6 +378,7 @@ function attachOperationMethod(
   controllerClass: Type<unknown>,
   operation: CompiledOperationDescriptor,
   controllerName: string,
+  paramsDto: Type<object> | undefined,
 ): void {
   const methodName = operation.key;
   const http = METHOD_DECORATOR[operation.method];
@@ -332,17 +399,18 @@ function attachOperationMethod(
         ? query
         : body;
     const input = await applyInputDto(operation.inputDto, rawInput);
+    const validatedParams = await resolveOperationParams(paramsDto, params);
 
     const operationRequest: OperationRequest = {
       headers: request.headers ?? {},
-      params,
+      params: validatedParams,
       query,
       raw: request,
     };
 
     const ctx: OperationContext = {
       input,
-      params,
+      params: validatedParams,
       query,
       request: operationRequest,
       response: { raw: response },
@@ -360,6 +428,9 @@ function attachOperationMethod(
       result = await handler(ctx);
     }
 
+    if (operation.outputDisabled === true) {
+      return result;
+    }
     return applyOutputDto(operation.outputDto, result, label);
   }
 
@@ -392,6 +463,7 @@ function attachOperationMethod(
         : ApiOkResponse({ type: operation.outputDto }),
     );
   }
+  appendParamsOpenApiDecorators(decorators, paramsDto);
   appendInputOpenApiDecorators(decorators, operation);
   if (operation.decorators?.length) {
     decorators.push(...operation.decorators);

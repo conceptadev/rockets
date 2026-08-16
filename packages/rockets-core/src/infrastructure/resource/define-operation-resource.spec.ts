@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
+import { Operation } from '@concepta/nestjs-core';
 
 import { ResourceKind } from '../../domain/interfaces/resource-kind.enum';
 import {
@@ -7,10 +8,12 @@ import {
   isCrudResource,
 } from './aggregate-resources';
 import { defineModuleResource } from './define-module-resource';
+import { defineResource } from './define-resource';
 import {
   defineOperationResource,
   isOperationResource,
 } from './define-operation-resource';
+import { validateRouteCollisions } from './planner/validate-route-collisions';
 import { operationResource } from '../../zod/zod-operation-resource';
 import { compileDtoClass } from '../../zod/zod-dto';
 
@@ -58,6 +61,45 @@ describe('defineOperationResource', () => {
     expect(() =>
       defineOperationResource({ path: 'api/empty', operations: {} }),
     ).toThrow(/at least one operation/);
+  });
+
+  it('rejects ops without outputDto or outputDisabled', () => {
+    expect(() =>
+      defineOperationResource({
+        path: 'api/leak',
+        operations: {
+          ping: {
+            key: 'ping',
+            method: 'GET',
+            path: '',
+            status: 200,
+            handler: () => ({ ok: true }),
+          },
+        },
+      }),
+    ).toThrow(/outputDto or outputDisabled/);
+  });
+
+  it('rejects status 204 with outputDto', () => {
+    const Output = compileDtoClass(
+      z.object({ ok: z.boolean() }),
+      'NoContentOutput',
+    );
+    expect(() =>
+      defineOperationResource({
+        path: 'api/nc',
+        operations: {
+          clear: {
+            key: 'clear',
+            method: 'DELETE',
+            path: '',
+            status: 204,
+            outputDto: Output,
+            handler: () => ({ ok: true }),
+          },
+        },
+      }),
+    ).toThrow(/status 204/);
   });
 });
 
@@ -115,7 +157,7 @@ describe('operationResource (zod)', () => {
       operationResource({
         path: 'api/bad',
         operations: (op) => ({
-          'bad-key': op.read({ handler: () => ({ ok: true }) }),
+          'bad-key': op.read({ output: false, handler: () => undefined }),
         }),
       }),
     ).toThrow(/not a valid identifier/);
@@ -124,7 +166,7 @@ describe('operationResource (zod)', () => {
       operationResource({
         path: 'api/bad',
         operations: (op) => ({
-          constructor: op.read({ handler: () => ({ ok: true }) }),
+          constructor: op.read({ output: false, handler: () => undefined }),
         }),
       }),
     ).toThrow(/reserved/);
@@ -133,7 +175,7 @@ describe('operationResource (zod)', () => {
       operationResource({
         path: 'api/bad',
         operations: (op) => ({
-          moduleRef: op.read({ handler: () => ({ ok: true }) }),
+          moduleRef: op.read({ output: false, handler: () => undefined }),
         }),
       }),
     ).toThrow(/reserved/);
@@ -142,10 +184,75 @@ describe('operationResource (zod)', () => {
       operationResource({
         path: 'api/bad',
         operations: (op) => ({
-          toString: op.read({ handler: () => ({ ok: true }) }),
+          toString: op.read({ output: false, handler: () => undefined }),
         }),
       }),
     ).toThrow(/reserved/);
+  });
+
+  it('rejects params keys that are not on the path', () => {
+    expect(() =>
+      operationResource({
+        path: 'pets/:petId',
+        params: z.object({ ownerId: z.uuid() }),
+        operations: (op) => ({
+          transfer: op.write({
+            output: false,
+            handler: () => undefined,
+          }),
+        }),
+      }),
+    ).toThrow(/params.ownerId/);
+  });
+
+  it('compiles paramsDto when params schema matches the path', () => {
+    const bundle = operationResource({
+      path: 'pets/:petId',
+      params: z.object({ petId: z.uuid() }),
+      public: true,
+      operations: (op) => ({
+        ping: op.read({
+          path: '',
+          output: z.object({ id: z.string() }),
+          handler: ({ params }) => ({ id: params.petId }),
+        }),
+      }),
+    });
+    expect(bundle.definition.paramsDto).toBeDefined();
+  });
+
+  it('rejects 204 with an output schema', () => {
+    expect(() =>
+      operationResource({
+        path: 'api/nc',
+        public: true,
+        operations: (op) => ({
+          clear: op.delete({
+            path: '',
+            status: 204,
+            output: z.object({ ok: z.boolean() }),
+            handler: () => ({ ok: true }),
+          }),
+        }),
+      }),
+    ).toThrow(/status 204/);
+  });
+
+  it('allows output: false with status 204', () => {
+    const bundle = operationResource({
+      path: 'api/nc',
+      public: true,
+      operations: (op) => ({
+        clear: op.delete({
+          path: '',
+          status: 204,
+          output: false,
+          handler: () => undefined,
+        }),
+      }),
+    });
+    expect(bundle.definition.operations.clear.outputDisabled).toBe(true);
+    expect(bundle.definition.operations.clear.outputDto).toBeUndefined();
   });
 
   it('compiles delete (query-sourced) and write PUT', () => {
@@ -198,6 +305,38 @@ describe('operationResource (zod)', () => {
     expect(isCrudResource(ops)).toBe(false);
   });
 
+  it('rejects cross-resource route collisions at plan time', () => {
+    class WidgetEntity {
+      id!: string;
+    }
+    const crud = defineResource({
+      key: 'widget',
+      entity: WidgetEntity,
+      path: 'widgets',
+      operations: [Operation.List, Operation.Read],
+    });
+    const ops = operationResource({
+      path: 'widgets',
+      public: true,
+      operations: (op) => ({
+        // GET /widgets — collides with CRUD list
+        root: op.read({
+          path: '',
+          output: z.object({ ok: z.boolean() }),
+          handler: () => ({ ok: true }),
+        }),
+      }),
+    });
+
+    expect(() =>
+      validateRouteCollisions({
+        generatedResources: [crud],
+        manualResources: [],
+        operationBundles: [ops],
+      }),
+    ).toThrow(/duplicate route GET/);
+  });
+
   it('rejects public:false ops on a public resource at controller build', () => {
     expect(() =>
       defineOperationResource({
@@ -210,6 +349,7 @@ describe('operationResource (zod)', () => {
             path: '',
             status: 200,
             public: false,
+            outputDisabled: true,
             handler: () => ({ ok: true }),
           },
         },
@@ -229,6 +369,7 @@ describe('operationResource (zod)', () => {
             path: '',
             status: 200,
             inputDto: BareDto,
+            outputDisabled: true,
             handler: () => ({ ok: true }),
           },
         },
@@ -246,6 +387,7 @@ describe('operationResource (zod)', () => {
             method: 'GET',
             path: 'x',
             status: 200,
+            outputDisabled: true,
             handler: () => ({ ok: true }),
           },
           b: {
@@ -253,6 +395,7 @@ describe('operationResource (zod)', () => {
             method: 'GET',
             path: 'x',
             status: 200,
+            outputDisabled: true,
             handler: () => ({ ok: true }),
           },
         },
