@@ -1,5 +1,3 @@
-import type { INestApplication } from '@nestjs/common';
-
 import {
   parseStructuredRoutePattern,
   structuredRoutePatternsMayOverlap,
@@ -16,12 +14,18 @@ export interface RegisteredRouteCollision {
   readonly prior: RegisteredRoute;
 }
 
+export interface RouteInspectionTarget {
+  readonly getHttpAdapter: () => {
+    readonly getInstance: () => unknown;
+  };
+}
+
 interface ExpressLikeLayer {
   readonly route?: unknown;
 }
 
 export function collectRegisteredRoutes(
-  app: Pick<INestApplication, 'getHttpAdapter'>,
+  app: RouteInspectionTarget,
 ): RegisteredRoute[] {
   const instance = app.getHttpAdapter().getInstance() as unknown;
   return collectExpressLikeRoutes(instance);
@@ -56,9 +60,7 @@ export function findRegisteredRouteCollisions(
 }
 
 export function validateRegisteredRoutes(
-  appOrRoutes:
-    | Pick<INestApplication, 'getHttpAdapter'>
-    | readonly RegisteredRoute[],
+  appOrRoutes: RouteInspectionTarget | readonly RegisteredRoute[],
 ): void {
   const routes = isRegisteredRouteArray(appOrRoutes)
     ? appOrRoutes
@@ -80,7 +82,7 @@ export function validateRegisteredRoutes(
 }
 
 function isRegisteredRouteArray(
-  value: Pick<INestApplication, 'getHttpAdapter'> | readonly RegisteredRoute[],
+  value: RouteInspectionTarget | readonly RegisteredRoute[],
 ): value is readonly RegisteredRoute[] {
   return Array.isArray(value);
 }

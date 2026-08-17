@@ -159,6 +159,7 @@ export {
 export type {
   RegisteredRoute,
   RegisteredRouteCollision,
+  RouteInspectionTarget,
 } from './infrastructure/routing/validate-registered-routes';
 
 // Resource config & definition API

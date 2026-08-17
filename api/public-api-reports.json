@@ -2758,6 +2758,12 @@
         "signature": "export declare class RoleNameDto {\n    name: string;\n}"
       },
       {
+        "name": "RouteInspectionTarget",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface RouteInspectionTarget {\n    readonly getHttpAdapter: () => {\n        readonly getInstance: () => unknown;\n    };\n}"
+      },
+      {
         "name": "SchemaEntityCompiler",
         "kind": "interface",
         "runtime": false,
@@ -2917,7 +2923,7 @@
         "name": "collectRegisteredRoutes",
         "kind": "function",
         "runtime": true,
-        "signature": "export declare function collectRegisteredRoutes(app: Pick<INestApplication, 'getHttpAdapter'>): RegisteredRoute[];"
+        "signature": "export declare function collectRegisteredRoutes(app: RouteInspectionTarget): RegisteredRoute[];"
       },
       {
         "name": "createBoundRelation",
@@ -3085,7 +3091,7 @@
         "name": "validateRegisteredRoutes",
         "kind": "function",
         "runtime": true,
-        "signature": "export declare function validateRegisteredRoutes(appOrRoutes: Pick<INestApplication, 'getHttpAdapter'> | readonly RegisteredRoute[]): void;"
+        "signature": "export declare function validateRegisteredRoutes(appOrRoutes: RouteInspectionTarget | readonly RegisteredRoute[]): void;"
       },
       {
         "name": "whitelistedFromDto",
