@@ -60,6 +60,14 @@ export interface OperationHandler<
   handle(ctx: OperationContext<I, P>): Promise<O> | O;
 }
 
+export interface OperationHandlerClassRef<
+  I = unknown,
+  O = unknown,
+  P extends object = Record<string, string>,
+> {
+  readonly useClass: Type<OperationHandler<I, O, P>>;
+}
+
 export type OperationHandlerFn<
   I = unknown,
   O = unknown,
@@ -70,7 +78,10 @@ export type OperationHandlerRef<
   I = unknown,
   O = unknown,
   P extends object = Record<string, string>,
-> = OperationHandlerFn<I, O, P> | Type<OperationHandler<I, O, P>>;
+> =
+  | OperationHandlerFn<I, O, P>
+  | Type<OperationHandler<I, O, P>>
+  | OperationHandlerClassRef<I, O, P>;
 
 /**
  * Compiled operation descriptor — DTO classes already resolved.

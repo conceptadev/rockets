@@ -202,6 +202,11 @@ export const ops = operationResource({
 `output` is required (schema or `false`). Path defaults to the operation key.
 Optional resource-level `params` validates `:path` params. Full rules:
 [CONFIGURATION.md §6a](../../CONFIGURATION.md#6a-operationresource--typed-non-crud-endpoints-issue-43--50).
+Class handlers may be passed directly or as `{ useClass: Handler }`; explicit
+resource providers for the same token take precedence over auto-registration.
+Planner collision checks only cover Rockets-owned structured routes. For a
+real adapter audit after global prefix/versioning/manual controllers are
+registered, call `validateRegisteredRoutes(app)` after `app.init()`.
 
 ### Scope rows to the authenticated user
 

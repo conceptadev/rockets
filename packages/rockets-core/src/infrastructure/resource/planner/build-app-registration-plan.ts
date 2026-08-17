@@ -12,7 +12,7 @@ import { sortResourceInputs } from './sort-resource-inputs';
 import { materialiseModuleResource } from './materialise-module-resource';
 import { materialiseOperationResource } from './materialise-operation-resource';
 import { validateResourceRelations } from './validate-relations';
-import { validateRouteCollisions } from './validate-route-collisions';
+import { validateStructuredRouteCollisions } from './validate-route-collisions';
 
 /**
  * Plan everything a `RocketsCoreModule` boot needs from the user's
@@ -58,7 +58,7 @@ export function buildAppRegistrationPlan(args: {
 
   validateResourceRelations(generatedResources, entityRegistry);
 
-  validateRouteCollisions({
+  validateStructuredRouteCollisions({
     generatedResources,
     manualResources,
     operationBundles,

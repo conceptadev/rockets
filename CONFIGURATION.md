@@ -438,11 +438,18 @@ required** — pass a schema (whitelist + OpenAPI) or `output: false` (explicit
 opt-out). Optional resource-level `params: z.object({...})` validates named path
 params at request time (400). Keys must be `:params` on the resource `path`;
 extra Nest params from an operation path (not in the schema) are preserved.
-Cross-resource `METHOD + path` collisions with CRUD/Sub fail in
-`buildAppRegistrationPlan` (not silently at runtime). Status `204` with an
-output schema is rejected at define time. The return value exposes `authored`
-(typed pending ops) for inference consumers; function handlers get full `ctx`
-typing — injectable class `handle` methods do not (TypeScript method bivariance).
+Structured cross-resource route collisions with CRUD/Sub fail in
+`buildAppRegistrationPlan` (not silently at runtime). This planner check is
+limited to Rockets-owned resource declarations; use
+`validateRegisteredRoutes(app)` after `app.init()` when you need to audit the
+actual Nest adapter routes with global prefix, versioning, and hand-written
+controllers applied. Status `204` with an output schema is rejected at define
+time. The return value exposes `authored` (typed pending ops) for inference
+consumers; function handlers get full `ctx` typing — injectable class `handle`
+methods do not (TypeScript method bivariance).
+Class handlers can be passed as `handler: TransferHttpHandler` or explicitly as
+`handler: { useClass: TransferHttpHandler }`; a matching local provider in
+`providers` wins over auto-registration.
 
 **Auth / ACL.** Resource `public: true` opens the whole controller. On a secured
 resource, mark individual ops with `public: true`. Setting `public: false` on

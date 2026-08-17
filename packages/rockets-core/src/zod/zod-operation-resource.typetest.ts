@@ -25,6 +25,9 @@ type _NestedParams = ExpectTrue<
   >
 >;
 type _NoParams = ExpectTrue<AssertEqual<PathParams<'ops'>, {}>>;
+type _WidenedParams = ExpectTrue<
+  AssertEqual<PathParams<string>, Record<string, string>>
+>;
 
 export const typedTransfer = operationResource({
   path: 'pets/:petId',

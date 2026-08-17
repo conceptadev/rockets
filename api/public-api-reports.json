@@ -2452,6 +2452,12 @@
         "signature": "export interface OperationHandler<I = unknown, O = unknown, P extends object = Record<string, string>> {\n    handle(ctx: OperationContext<I, P>): Promise<O> | O;\n}"
       },
       {
+        "name": "OperationHandlerClassRef",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface OperationHandlerClassRef<I = unknown, O = unknown, P extends object = Record<string, string>> {\n    readonly useClass: Type<OperationHandler<I, O, P>>;\n}"
+      },
+      {
         "name": "OperationHandlerFn",
         "kind": "type",
         "runtime": false,
@@ -2461,7 +2467,7 @@
         "name": "OperationHandlerRef",
         "kind": "type",
         "runtime": false,
-        "signature": "export type OperationHandlerRef<I = unknown, O = unknown, P extends object = Record<string, string>> = OperationHandlerFn<I, O, P> | Type<OperationHandler<I, O, P>>;"
+        "signature": "export type OperationHandlerRef<I = unknown, O = unknown, P extends object = Record<string, string>> = OperationHandlerFn<I, O, P> | Type<OperationHandler<I, O, P>> | OperationHandlerClassRef<I, O, P>;"
       },
       {
         "name": "OperationHttpMethod",
@@ -2546,6 +2552,18 @@
         "kind": "value",
         "runtime": true,
         "signature": "ROCKETS_DISABLE_GUARDS_TOKEN = \"AUTHENTICATION_MODULE_DISABLE_GUARDS_TOKEN\""
+      },
+      {
+        "name": "RegisteredRoute",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface RegisteredRoute {\n    readonly method: string;\n    readonly path: string;\n    readonly source?: string;\n}"
+      },
+      {
+        "name": "RegisteredRouteCollision",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface RegisteredRouteCollision {\n    readonly route: RegisteredRoute;\n    readonly prior: RegisteredRoute;\n}"
       },
       {
         "name": "RelationOptions",
@@ -2896,6 +2914,12 @@
         "signature": "export declare function buildAppRegistrationPlan(args: {\n    readonly resources: ReadonlyArray<ResourceInput>;\n    readonly repository?: RepositoryModuleInterface;\n    readonly userMetadata?: RocketsUserMetadataConfig;\n}): AppRegistrationPlan;"
       },
       {
+        "name": "collectRegisteredRoutes",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function collectRegisteredRoutes(app: Pick<INestApplication, 'getHttpAdapter'>): RegisteredRoute[];"
+      },
+      {
         "name": "createBoundRelation",
         "kind": "function",
         "runtime": true,
@@ -2960,6 +2984,12 @@
         "kind": "function",
         "runtime": true,
         "signature": "export declare function extractBearerToken(request: AuthRequest): string | null;"
+      },
+      {
+        "name": "findRegisteredRouteCollisions",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function findRegisteredRouteCollisions(routes: readonly RegisteredRoute[]): RegisteredRouteCollision[];"
       },
       {
         "name": "getActor",
@@ -3052,6 +3082,12 @@
         "signature": "export declare function stripUndefined<T extends object>(input: T): Partial<T>;"
       },
       {
+        "name": "validateRegisteredRoutes",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function validateRegisteredRoutes(appOrRoutes: Pick<INestApplication, 'getHttpAdapter'> | readonly RegisteredRoute[]): void;"
+      },
+      {
         "name": "whitelistedFromDto",
         "kind": "function",
         "runtime": true,
@@ -3087,7 +3123,7 @@
         "name": "PathParams",
         "kind": "type",
         "runtime": false,
-        "signature": "export type PathParams<S extends string> = S extends `${string}:${infer Param}/${infer Rest}` ? {\n    [K in Param | keyof PathParams<`/${Rest}`>]: string;\n} : S extends `${string}:${infer Param}` ? {\n    [K in Param]: string;\n} : {};"
+        "signature": "export type PathParams<S extends string> = string extends S ? Record<string, string> : S extends `${string}:${infer Param}/${infer Rest}` ? {\n    [K in Param | keyof PathParams<`/${Rest}`>]: string;\n} : S extends `${string}:${infer Param}` ? {\n    [K in Param]: string;\n} : {};"
       },
       {
         "name": "PendingBuilder",
@@ -4346,6 +4382,19 @@
         ]
       },
       {
+        "name": "OperationHandlerClassRef",
+        "kind": "interface",
+        "signature": "export interface OperationHandlerClassRef<I = unknown, O = unknown, P extends object = Record<string, string>> {\n    readonly useClass: Type<OperationHandler<I, O, P>>;\n}",
+        "referencedBy": [
+          "DeleteBuilderConfig",
+          "OperationResourceInput",
+          "PendingOperation",
+          "ReadBuilderConfig",
+          "WriteBuilderConfig",
+          "ZodOperationResource"
+        ]
+      },
+      {
         "name": "OperationHandlerFn",
         "kind": "type",
         "signature": "export type OperationHandlerFn<I = unknown, O = unknown, P extends object = Record<string, string>> = (ctx: OperationContext<I, P>) => Promise<O> | O;",
@@ -4361,7 +4410,7 @@
       {
         "name": "OperationHandlerRef",
         "kind": "type",
-        "signature": "export type OperationHandlerRef<I = unknown, O = unknown, P extends object = Record<string, string>> = OperationHandlerFn<I, O, P> | Type<OperationHandler<I, O, P>>;",
+        "signature": "export type OperationHandlerRef<I = unknown, O = unknown, P extends object = Record<string, string>> = OperationHandlerFn<I, O, P> | Type<OperationHandler<I, O, P>> | OperationHandlerClassRef<I, O, P>;",
         "referencedBy": [
           "DeleteBuilderConfig",
           "OperationResourceInput",

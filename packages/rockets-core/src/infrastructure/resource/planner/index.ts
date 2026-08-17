@@ -11,5 +11,8 @@ export { buildRepositoryPlan, PersistenceRegistry } from './repository-plan';
 export { resolvePersistenceAdapter } from './resolve-persistence-adapter';
 export { sortResourceInputs } from './sort-resource-inputs';
 export { validateResourceRelations } from './validate-relations';
-export { validateRouteCollisions } from './validate-route-collisions';
+export {
+  validateRouteCollisions,
+  validateStructuredRouteCollisions,
+} from './validate-route-collisions';
 export { throwOnDuplicateEntity } from './duplicate-entity.error';

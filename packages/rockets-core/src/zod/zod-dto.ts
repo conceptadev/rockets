@@ -8,6 +8,29 @@ import {
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 import { asClassicSchema, unwrapField } from './field-meta';
+import { attachOperationDtoOpenApiFields } from '../infrastructure/resource/operation-resource/openapi-dto-metadata';
+
+type ZodShapeField = z.ZodType;
+
+function isOptionalZodField(field: ZodShapeField): boolean {
+  if (typeof field.isOptional === 'function') {
+    return field.isOptional();
+  }
+  const def = (field as { def?: { type?: string } }).def;
+  return def?.type === 'optional' || def?.type === 'default';
+}
+
+function openApiSchemaFromZodField(
+  field: ZodShapeField,
+): Record<string, unknown> {
+  try {
+    const json = z.toJSONSchema(field) as Record<string, unknown>;
+    const { $schema: _schema, ...rest } = json;
+    return rest;
+  } catch {
+    return { type: 'string' };
+  }
+}
 
 /**
  * DTO classes come straight from `nestjs-zod`'s `createZodDto` — no
@@ -70,6 +93,14 @@ export function compileDtoClass(
       Transform(raw, { toPlainOnly: true })(proto, key);
     }
   }
+  attachOperationDtoOpenApiFields(
+    cls,
+    Object.entries(schema.shape).map(([fieldName, field]) => ({
+      name: fieldName,
+      required: !isOptionalZodField(field),
+      schema: openApiSchemaFromZodField(field),
+    })),
+  );
   return cls;
 }
 

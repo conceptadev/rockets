@@ -4,6 +4,11 @@ import type { OperationHttpMethod } from '../../../domain/interfaces/operation-r
 import type { OperationResource } from '../../../domain/interfaces/operation-resource.interface';
 import type { RocketsResourceConfig } from '../../../domain/interfaces/rockets-resource.interface';
 import type { CrudResource } from '../../../domain/interfaces/rockets-resource-bundle.interface';
+import {
+  parseStructuredRoutePattern,
+  structuredRoutePatternsMayOverlap,
+  type StructuredRoutePattern,
+} from './route-pattern';
 
 /**
  * Mirrors `@concepta/nestjs-crud` route defaults
@@ -16,10 +21,11 @@ const CRUD_RESTORE_PATH = '/restore/:id';
 
 interface RouteClaim {
   readonly method: OperationHttpMethod;
-  /** Canonical path for collision (`:id` and `:petId` both → `:param`). */
-  readonly canonicalPath: string;
   /** Human-readable path as declared. */
   readonly displayPath: string;
+  readonly pattern: StructuredRoutePattern;
+  readonly host?: string | RegExp | Array<string | RegExp>;
+  readonly version?: unknown;
   readonly source: string;
 }
 
@@ -57,8 +63,8 @@ const CRUD_ROUTE_DEFAULTS: Record<
 };
 
 function joinPath(base: string, segment: string): string {
-  const b = base.replace(/^\/+|\/+$/g, '');
-  const s = segment.replace(/^\/+/, '').replace(/\/+$/, '');
+  const b = trimPathSlashes(base);
+  const s = trimPathSlashes(segment);
   if (s.length === 0) {
     return b;
   }
@@ -68,15 +74,47 @@ function joinPath(base: string, segment: string): string {
   return `${b}/${s}`;
 }
 
-function canonicalizePath(path: string): string {
+function trimPathSlashes(path: string): string {
   return path
-    .replace(/\/+/g, '/')
-    .replace(/^\/|\/$/g, '')
-    .replace(/:[A-Za-z_][A-Za-z0-9_]*/g, ':param');
+    .split('/')
+    .filter((part) => part.length > 0)
+    .join('/');
 }
 
-function claimKey(method: OperationHttpMethod, canonicalPath: string): string {
-  return `${method} /${canonicalPath}`;
+function normalizeDimension(value: unknown): string {
+  if (value === undefined) {
+    return '';
+  }
+  if (Array.isArray(value)) {
+    return value.map(normalizeDimension).sort().join(',');
+  }
+  return String(value);
+}
+
+function dimensionsMayOverlap(a: unknown, b: unknown): boolean {
+  if (a === undefined || b === undefined) {
+    return true;
+  }
+  const left = new Set(
+    Array.isArray(a) ? a.map(normalizeDimension) : [normalizeDimension(a)],
+  );
+  const right = Array.isArray(b)
+    ? b.map(normalizeDimension)
+    : [normalizeDimension(b)];
+  return right.some((value) => left.has(value));
+}
+
+function claimsMayOverlap(a: RouteClaim, b: RouteClaim): boolean {
+  if (a.method !== b.method) {
+    return false;
+  }
+  if (!dimensionsMayOverlap(a.host, b.host)) {
+    return false;
+  }
+  if (!dimensionsMayOverlap(a.version, b.version)) {
+    return false;
+  }
+  return structuredRoutePatternsMayOverlap(a.pattern, b.pattern) === true;
 }
 
 function expandBases(path: string | string[] | undefined): string[] {
@@ -113,8 +151,10 @@ function collectCrudConfigRoutes(
         const displayPath = joinPath(String(base), String(segment));
         claims.push({
           method: defaults.method,
-          canonicalPath: canonicalizePath(displayPath),
           displayPath,
+          pattern: parseStructuredRoutePattern(displayPath),
+          host: crud.controller.host,
+          version: crud.controller.version,
           source: `${sourceLabel} (${op.operation})`,
         });
       }
@@ -131,8 +171,10 @@ function collectOperationRoutes(bundle: OperationResource): RouteClaim[] {
     const displayPath = joinPath(base, operation.path);
     claims.push({
       method: operation.method,
-      canonicalPath: canonicalizePath(displayPath),
       displayPath,
+      pattern: parseStructuredRoutePattern(displayPath),
+      host: undefined,
+      version: undefined,
       source: `operationResource("${base}").${operation.key}`,
     });
   }
@@ -140,18 +182,22 @@ function collectOperationRoutes(bundle: OperationResource): RouteClaim[] {
 }
 
 /**
- * Fail-fast: reject METHOD + path collisions across CRUD/Sub and
- * operation resources at plan time (before Nest last-wins).
+ * Fail-fast: reject structured route collisions across Rockets-owned CRUD/Sub
+ * and operation resources at plan time (before Nest last-wins).
  *
- * Param names are canonicalized (`:id` ≡ `:petId`) because Nest matches
- * them as the same pattern. Module-resource hand controllers are out of
- * scope (no structured path on the plan).
+ * This is intentionally not a universal app-route audit. It only sees routes
+ * represented in `resources[]`; global prefix, Nest versioning strategy, and
+ * hand-written controllers belong to the post-boot registered-route validator.
  */
-export function validateRouteCollisions(args: {
+export function validateStructuredRouteCollisions(args: {
   readonly generatedResources: ReadonlyArray<CrudResource>;
   readonly manualResources: ReadonlyArray<RocketsResourceConfig>;
   readonly operationBundles: ReadonlyArray<OperationResource>;
 }): void {
+  if (args.operationBundles.length === 0) {
+    return;
+  }
+
   const claims: RouteClaim[] = [];
 
   for (const resource of args.generatedResources) {
@@ -173,17 +219,18 @@ export function validateRouteCollisions(args: {
     claims.push(...collectOperationRoutes(bundle));
   }
 
-  const seen = new Map<string, RouteClaim>();
-  for (const claim of claims) {
-    const key = claimKey(claim.method, claim.canonicalPath);
-    const prior = seen.get(key);
-    if (prior !== undefined) {
+  for (const [index, claim] of claims.entries()) {
+    for (const prior of claims.slice(0, index)) {
+      if (!claimsMayOverlap(claim, prior)) {
+        continue;
+      }
       throw new Error(
         `buildAppRegistrationPlan: duplicate route ${claim.method} ` +
           `"/${claim.displayPath}" claimed by ${claim.source} and ` +
-          `${prior.source} (canonical "/${claim.canonicalPath}")`,
+          `${prior.source}`,
       );
     }
-    seen.set(key, claim);
   }
 }
+
+export const validateRouteCollisions = validateStructuredRouteCollisions;

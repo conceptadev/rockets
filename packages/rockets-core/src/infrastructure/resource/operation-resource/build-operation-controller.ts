@@ -26,21 +26,20 @@ import {
   Res,
   Type,
 } from '@nestjs/common';
-import { ModuleRef } from '@nestjs/core';
+import { ContextIdFactory, ModuleRef } from '@nestjs/core';
 import { Transactional } from '@concepta/nestjs-repository';
 import { AuthPublic } from '@concepta/nestjs-authentication';
 import {
   ApiBearerAuth,
   ApiBody,
-  ApiCreatedResponse,
-  ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiQuery,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { getMetadataStorage } from 'class-validator';
-import { z } from 'zod';
+import { instanceToPlain, plainToInstance } from 'class-transformer';
+import { getMetadataStorage, validate } from 'class-validator';
 
 import { AuthUser } from '../../../common/auth/auth-user.decorator';
 import type { AuthorizedUser } from '../../../domain/interfaces/auth-user.interface';
@@ -52,11 +51,15 @@ import type {
   OperationRequest,
   OperationResourceDefinition,
 } from '../../../domain/interfaces/operation-resource.interface';
-import { whitelistedFromDto } from '../../../common/utils/whitelisted-from-dto.util';
-import { getStandardSchema } from '../../../common/utils/standard-schema.util';
-import { isHandlerClass } from './is-handler-class';
+import {
+  getStandardSchema,
+  standardSchemaBadRequest,
+} from '../../../common/utils/standard-schema.util';
+import { getHandlerClass, isHandlerFunction } from './is-handler-class';
+import { readOperationDtoOpenApiFields } from './openapi-dto-metadata';
 
 const logger = new Logger('OperationResource');
+const SWAGGER_API_SECURITY_METADATA = 'swagger/apiSecurity';
 
 /** Structural view of the native request — avoids coupling core to Express. */
 interface NativeRequest {
@@ -123,8 +126,10 @@ async function applyInputDto(
     return value;
   }
   const data =
-    value !== null && typeof value === 'object' ? (value as object) : {};
-  return whitelistedFromDto(dto, data);
+    value !== null && typeof value === 'object' && !Array.isArray(value)
+      ? (value as object)
+      : {};
+  return validateAndWhitelistDto(dto, data, false);
 }
 
 /**
@@ -135,7 +140,7 @@ async function applyInputDto(
 async function resolveOperationParams(
   paramsDto: Type<object> | undefined,
   params: Record<string, string>,
-): Promise<Record<string, string>> {
+): Promise<Record<string, unknown>> {
   if (paramsDto === undefined) {
     return params;
   }
@@ -147,7 +152,40 @@ async function resolveOperationParams(
   ) {
     return params;
   }
-  return { ...params, ...(validated as Record<string, string>) };
+  return { ...params, ...(validated as Record<string, unknown>) };
+}
+
+async function validateAndWhitelistDto(
+  dto: Type<object>,
+  data: object,
+  skipMissingProperties: boolean,
+): Promise<unknown> {
+  const standard = getStandardSchema(dto);
+  if (standard) {
+    const result = await standard['~standard'].validate(data);
+    if (result.issues !== undefined) {
+      throw standardSchemaBadRequest(result.issues);
+    }
+    return result.value ?? {};
+  }
+
+  const instance = plainToInstance(dto, data, {
+    enableImplicitConversion: true,
+  });
+  const errors = await validate(instance as object, {
+    whitelist: true,
+    forbidNonWhitelisted: false,
+    forbidUnknownValues: true,
+    skipMissingProperties,
+  });
+  if (errors.length) {
+    throw new BadRequestException({
+      statusCode: 400,
+      message: errors.flatMap((e) => Object.values(e.constraints ?? {})),
+      error: 'Bad Request',
+    });
+  }
+  return instanceToPlain(instance as object);
 }
 
 /**
@@ -176,50 +214,17 @@ async function applyOutputDto(
     return result.value ?? value;
   }
 
-  if (typeof value !== 'object') {
-    return value;
+  if (typeof value !== 'object' || Array.isArray(value)) {
+    throw outputValidationError(label, 'handler returned a non-object value');
   }
 
   try {
-    return await whitelistedFromDto(dto, value as object);
+    return await validateAndWhitelistDto(dto, value, false);
   } catch (error) {
     if (error instanceof BadRequestException) {
       throw outputValidationError(label, error.getResponse());
     }
     throw error;
-  }
-}
-
-type ZodShapeField = z.ZodType;
-
-function readZodObjectShape(
-  dto: Type<object>,
-): Readonly<Record<string, ZodShapeField>> | undefined {
-  const schema = (dto as { schema?: { shape?: Record<string, ZodShapeField> } })
-    .schema;
-  if (schema?.shape === undefined || typeof schema.shape !== 'object') {
-    return undefined;
-  }
-  return schema.shape;
-}
-
-function isOptionalZodField(field: ZodShapeField): boolean {
-  if (typeof field.isOptional === 'function') {
-    return field.isOptional();
-  }
-  const def = (field as { def?: { type?: string } }).def;
-  return def?.type === 'optional' || def?.type === 'default';
-}
-
-function openApiSchemaFromZodField(
-  field: ZodShapeField,
-): Record<string, unknown> {
-  try {
-    const json = z.toJSONSchema(field) as Record<string, unknown>;
-    const { $schema: _schema, ...rest } = json;
-    return rest;
-  } catch {
-    return { type: 'string' };
   }
 }
 
@@ -230,16 +235,16 @@ function appendParamsOpenApiDecorators(
   if (paramsDto === undefined) {
     return;
   }
-  const shape = readZodObjectShape(paramsDto);
-  if (shape === undefined) {
+  const fields = readOperationDtoOpenApiFields(paramsDto);
+  if (fields === undefined) {
     return;
   }
-  for (const [name, field] of Object.entries(shape)) {
+  for (const field of fields) {
     decorators.push(
       ApiParam({
-        name,
-        required: !isOptionalZodField(field),
-        schema: openApiSchemaFromZodField(field),
+        name: field.name,
+        required: field.required,
+        schema: field.schema,
       }),
     );
   }
@@ -253,14 +258,14 @@ function appendInputOpenApiDecorators(
     return;
   }
   if (operation.method === 'GET' || operation.method === 'DELETE') {
-    const shape = readZodObjectShape(operation.inputDto);
-    if (shape) {
-      for (const [name, field] of Object.entries(shape)) {
+    const fields = readOperationDtoOpenApiFields(operation.inputDto);
+    if (fields) {
+      for (const field of fields) {
         decorators.push(
           ApiQuery({
-            name,
-            required: !isOptionalZodField(field),
-            schema: openApiSchemaFromZodField(field),
+            name: field.name,
+            required: field.required,
+            schema: field.schema,
           }),
         );
       }
@@ -282,6 +287,13 @@ function appendInputOpenApiDecorators(
 function controllerClassName(path: string): string {
   const slug = path.replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_|_$/g, '');
   return `OperationResource_${slug || 'root'}`;
+}
+
+function operationId(
+  controllerName: string,
+  operation: CompiledOperationDescriptor,
+): string {
+  return `${controllerName}_${operation.method.toLowerCase()}_${operation.key}`;
 }
 
 /**
@@ -347,9 +359,7 @@ export function buildOperationController(
     constructor(private readonly moduleRef: ModuleRef) {}
   }
 
-  if (bearerAuth) {
-    ApiBearerAuth()(OperationResourceController);
-  } else {
+  if (!bearerAuth) {
     AuthPublic({ classLevel: true })(OperationResourceController);
   }
   if (definition.decorators?.length) {
@@ -368,6 +378,7 @@ export function buildOperationController(
       operation,
       uniqueName,
       paramsDto,
+      bearerAuth,
     );
   }
 
@@ -379,6 +390,7 @@ function attachOperationMethod(
   operation: CompiledOperationDescriptor,
   controllerName: string,
   paramsDto: Type<object> | undefined,
+  controllerBearerAuth: boolean,
 ): void {
   const methodName = operation.key;
   const http = METHOD_DECORATOR[operation.method];
@@ -403,12 +415,12 @@ function attachOperationMethod(
 
     const operationRequest: OperationRequest = {
       headers: request.headers ?? {},
-      params: validatedParams,
+      params,
       query,
       raw: request,
     };
 
-    const ctx: OperationContext = {
+    const ctx: OperationContext<unknown, object> = {
       input,
       params: validatedParams,
       query,
@@ -418,14 +430,19 @@ function attachOperationMethod(
     };
 
     let result: unknown;
-    if (isHandlerClass(operation.handler)) {
-      const instance = this.moduleRef.get(operation.handler, {
-        strict: false,
+    const handlerClass = getHandlerClass(operation.handler);
+    if (handlerClass !== undefined) {
+      const contextId = ContextIdFactory.getByRequest(request);
+      const instance = await this.moduleRef.resolve(handlerClass, contextId, {
+        strict: true,
       });
       result = await instance.handle(ctx);
-    } else {
-      const handler: OperationHandlerFn = operation.handler;
+    } else if (isHandlerFunction(operation.handler)) {
+      const handler: OperationHandlerFn<unknown, unknown, object> =
+        operation.handler;
       result = await handler(ctx);
+    } else {
+      throw new Error(`operationResource: invalid handler for "${label}"`);
     }
 
     if (operation.outputDisabled === true) {
@@ -446,22 +463,24 @@ function attachOperationMethod(
     HttpCode(operation.status),
     ApiOperation({
       summary: operation.summary ?? methodName,
-      operationId: `${controllerName}_${methodName}`,
+      operationId: operationId(controllerName, operation),
     }),
   ];
 
   if (operation.public === true) {
     decorators.push(AuthPublic());
+  } else if (controllerBearerAuth) {
+    decorators.push(ApiBearerAuth());
   }
   if (operation.transactional === true) {
     decorators.push(Transactional());
   }
   if (operation.outputDto) {
     decorators.push(
-      operation.status === 201
-        ? ApiCreatedResponse({ type: operation.outputDto })
-        : ApiOkResponse({ type: operation.outputDto }),
+      ApiResponse({ status: operation.status, type: operation.outputDto }),
     );
+  } else {
+    decorators.push(ApiResponse({ status: operation.status }));
   }
   appendParamsOpenApiDecorators(decorators, paramsDto);
   appendInputOpenApiDecorators(decorators, operation);
@@ -476,6 +495,13 @@ function attachOperationMethod(
     );
   }
   applyDecorators(...decorators)(proto, methodName, descriptor);
+  if (operation.public === true && descriptor.value !== undefined) {
+    Reflect.defineMetadata(
+      SWAGGER_API_SECURITY_METADATA,
+      [{}],
+      descriptor.value,
+    );
+  }
   Object.defineProperty(proto, methodName, descriptor);
 
   Body()(proto, methodName, 0);

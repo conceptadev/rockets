@@ -1,13 +1,16 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
+  Inject,
   INestApplication,
   Injectable,
   SetMetadata,
+  Scope,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { APP_GUARD } from '@nestjs/core';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ApiProperty, DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { IsString } from 'class-validator';
 import { z } from 'zod';
 import request from 'supertest';
 
@@ -20,10 +23,12 @@ import { extractBearerToken } from '../infrastructure/auth/extract-bearer-token'
 import { RocketsCoreModule } from '../rockets-core.module';
 import { AuthServerGuard } from '../infrastructure/guards/auth-server.guard';
 import { defineAuthAdapter } from '../infrastructure/auth/define-auth-adapter';
+import { defineOperationResource } from '../infrastructure/resource/define-operation-resource';
 import { operationResource } from '../zod/zod-operation-resource';
 import type { OperationContext } from '../domain/interfaces/operation-resource.interface';
 
 const OPS_MARK = 'ops:mark';
+const LOCAL_VALUE = 'operation-resource-local-value';
 const Mark = () => SetMetadata(OPS_MARK, true);
 
 @Injectable()
@@ -46,6 +51,46 @@ class ShoutHandler {
   } {
     return { text: ctx.input.text.toUpperCase(), secret: 'leak-me' };
   }
+}
+
+@Injectable()
+class ClassFieldHandler {
+  readonly handle = (): { ok: boolean } => ({ ok: true });
+}
+
+@Injectable()
+class LocalValueHandler {
+  constructor(@Inject(LOCAL_VALUE) private readonly value: string) {}
+
+  handle(): { value: string } {
+    return { value: this.value };
+  }
+}
+
+@Injectable({ scope: Scope.REQUEST })
+class RequestScopedHandler {
+  handle(): { scoped: boolean } {
+    return { scoped: true };
+  }
+}
+
+@Injectable()
+class ReplacedHandler {
+  handle(): { source: string } {
+    return { source: 'class' };
+  }
+}
+
+class LowerInputDto {
+  @ApiProperty()
+  @IsString()
+  name!: string;
+}
+
+class LowerOutputDto {
+  @ApiProperty()
+  @IsString()
+  name!: string;
 }
 
 const ItemSchema = z.object({ id: z.string() });
@@ -86,6 +131,20 @@ const publicOps = operationResource({
       }),
       output: z.object({ term: z.string(), take: z.number().optional() }),
       handler: ({ input }) => ({ term: input.term, take: input.take }),
+    }),
+    accepted: op.write({
+      status: 202,
+      output: z.object({ queued: z.boolean() }),
+      handler: () => ({ queued: true }),
+    }),
+    noContent: op.delete({
+      status: 204,
+      output: false,
+      handler: () => undefined,
+    }),
+    classField: op.read({
+      output: z.object({ ok: z.boolean() }),
+      handler: ClassFieldHandler,
     }),
   }),
 });
@@ -155,18 +214,128 @@ const paramsOps = operationResource({
   }),
 });
 
+const diAOps = operationResource({
+  path: 'di-a',
+  public: true,
+  providers: [
+    { provide: LOCAL_VALUE, useValue: 'a' },
+    LocalValueHandler,
+    RequestScopedHandler,
+  ],
+  operations: (op) => ({
+    value: op.read({
+      path: '',
+      output: z.object({ value: z.string() }),
+      handler: LocalValueHandler,
+    }),
+    scoped: op.read({
+      output: z.object({ scoped: z.boolean() }),
+      handler: RequestScopedHandler,
+    }),
+  }),
+});
+
+const diBOps = operationResource({
+  path: 'di-b',
+  public: true,
+  providers: [{ provide: LOCAL_VALUE, useValue: 'b' }, LocalValueHandler],
+  operations: (op) => ({
+    value: op.read({
+      path: '',
+      output: z.object({ value: z.string() }),
+      handler: LocalValueHandler,
+    }),
+  }),
+});
+
+const overrideOps = operationResource({
+  path: 'override',
+  public: true,
+  providers: [
+    {
+      provide: ReplacedHandler,
+      useValue: { handle: () => ({ source: 'replacement' }) },
+    },
+  ],
+  operations: (op) => ({
+    value: op.read({
+      path: '',
+      output: z.object({ source: z.string() }),
+      handler: ReplacedHandler,
+    }),
+  }),
+});
+
+const aliasReadOps = operationResource({
+  path: 'alias',
+  public: true,
+  operations: (op) => ({
+    action: op.read({
+      path: '',
+      output: z.object({ readOnly: z.string() }),
+      handler: () => ({ readOnly: 'read' }),
+    }),
+  }),
+});
+
+const aliasWriteOps = operationResource({
+  path: 'alias',
+  public: true,
+  operations: (op) => ({
+    action: op.write({
+      path: '',
+      output: z.object({ written: z.string() }),
+      handler: () => ({ written: 'write' }),
+    }),
+  }),
+});
+
+const lowerLevelOps = defineOperationResource({
+  path: 'lower',
+  public: true,
+  operations: {
+    echo: {
+      key: 'echo',
+      method: 'POST',
+      path: '',
+      status: 200,
+      inputDto: LowerInputDto,
+      outputDto: LowerOutputDto,
+      handler: ({ input }) => input,
+    },
+    primitive: {
+      key: 'primitive',
+      method: 'GET',
+      path: 'primitive',
+      status: 200,
+      outputDto: LowerOutputDto,
+      handler: () => 'not-an-object',
+    },
+  },
+});
+
+interface OpenApiOperation {
+  readonly operationId?: string;
+  readonly parameters?: ReadonlyArray<{
+    readonly name?: string;
+    readonly in?: string;
+    readonly required?: boolean;
+  }>;
+  readonly responses?: Record<
+    string,
+    {
+      readonly content?: Record<
+        string,
+        { readonly schema?: { readonly $ref?: string } }
+      >;
+    }
+  >;
+  readonly security?: ReadonlyArray<Record<string, readonly string[]>>;
+}
+
 describe('operationResource e2e (issue #43 v1)', () => {
   let app: INestApplication;
-  let openApiPaths: Record<
-    string,
-    Record<
-      string,
-      {
-        operationId?: string;
-        parameters?: Array<{ name?: string; in?: string; required?: boolean }>;
-      }
-    >
-  >;
+  let openApiPaths: Record<string, Record<string, OpenApiOperation>>;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -174,7 +343,17 @@ describe('operationResource e2e (issue #43 v1)', () => {
         RocketsCoreModule.forRoot({
           auth: defineAuthAdapter(SimpleAuthProvider),
           providers: [SimpleAuthProvider],
-          resources: [publicOps, securedOps, paramsOps],
+          resources: [
+            publicOps,
+            securedOps,
+            paramsOps,
+            diAOps,
+            diBOps,
+            overrideOps,
+            aliasReadOps,
+            aliasWriteOps,
+            lowerLevelOps,
+          ],
           global: true,
         }),
       ],
@@ -219,6 +398,21 @@ describe('operationResource e2e (issue #43 v1)', () => {
       .query({ term: 'hi', take: '2' })
       .expect(200)
       .expect({ term: 'hi', take: 2 });
+  });
+
+  it('uses custom statuses at runtime', async () => {
+    await request(app.getHttpServer())
+      .post('/ops/accepted')
+      .expect(202)
+      .expect({ queued: true });
+    await request(app.getHttpServer()).delete('/ops/noContent').expect(204);
+  });
+
+  it('supports ES classes with instance-field handle methods', async () => {
+    await request(app.getHttpServer())
+      .get('/ops/classField')
+      .expect(200)
+      .expect({ ok: true });
   });
 
   it('rejects unauthenticated command', async () => {
@@ -295,18 +489,79 @@ describe('operationResource e2e (issue #43 v1)', () => {
       .expect(400);
   });
 
+  it('keeps operation handlers isolated to their owning resource module', async () => {
+    await request(app.getHttpServer())
+      .get('/di-a')
+      .expect(200)
+      .expect({ value: 'a' });
+    await request(app.getHttpServer())
+      .get('/di-b')
+      .expect(200)
+      .expect({ value: 'b' });
+  });
+
+  it('resolves request-scoped operation handlers', async () => {
+    await request(app.getHttpServer())
+      .get('/di-a/scoped')
+      .expect(200)
+      .expect({ scoped: true });
+  });
+
+  it('does not override explicit handler providers', async () => {
+    await request(app.getHttpServer())
+      .get('/override')
+      .expect(200)
+      .expect({ source: 'replacement' });
+  });
+
+  it('validates lower-level class-validator input strictly', async () => {
+    await request(app.getHttpServer()).post('/lower').send({}).expect(400);
+    await request(app.getHttpServer())
+      .post('/lower')
+      .send({ name: 'ok', extra: 'drop-me' })
+      .expect(200)
+      .expect({ name: 'ok' });
+  });
+
+  it('rejects lower-level class-validator primitive output', async () => {
+    await request(app.getHttpServer()).get('/lower/primitive').expect(500);
+  });
+
   it('emits deterministic Swagger operationIds and GET query parameters', () => {
     expect(openApiPaths['/ops']?.get?.operationId).toBe(
-      'OperationResource_ops_ping',
+      'OperationResource_ops_get_ping',
     );
     expect(openApiPaths['/secure-ops/shout']?.post?.operationId).toBe(
-      'OperationResource_secure_ops_shout',
+      'OperationResource_secure_ops_post_shout',
     );
     const searchParams = openApiPaths['/ops/search']?.get?.parameters ?? [];
     const queryParams = searchParams.filter((p) => p.in === 'query');
     expect(queryParams.map((p) => p.name).sort()).toEqual(['take', 'term']);
     expect(queryParams.find((p) => p.name === 'term')?.required).toBe(true);
     expect(queryParams.find((p) => p.name === 'take')?.required).toBe(false);
+  });
+
+  it('emits status-aware Swagger responses and public method security overrides', () => {
+    expect(openApiPaths['/ops/accepted']?.post?.responses).toHaveProperty(
+      '202',
+    );
+    expect(openApiPaths['/ops/noContent']?.delete?.responses).toHaveProperty(
+      '204',
+    );
+    expect(openApiPaths['/secure-ops/version']?.get?.security).toEqual([{}]);
+  });
+
+  it('uses method-discriminated Swagger operationIds and DTO component refs', () => {
+    const read = openApiPaths['/alias']?.get;
+    const write = openApiPaths['/alias']?.post;
+    expect(read?.operationId).toBe('OperationResource_alias_get_action');
+    expect(write?.operationId).toBe('OperationResource_alias_post_action');
+    const readRef =
+      read?.responses?.['200']?.content?.['application/json']?.schema?.$ref;
+    const writeRef =
+      write?.responses?.['200']?.content?.['application/json']?.schema?.$ref;
+    expect(readRef).toContain('Alias_Get_ActionOutput');
+    expect(writeRef).toContain('Alias_Post_ActionOutput');
   });
 
   it('applies custom method decorators', () => {

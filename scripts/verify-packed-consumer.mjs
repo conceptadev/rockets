@@ -11,6 +11,7 @@ const temporaryPrefix = join(tmpdir(), 'rockets-packed-consumer-');
 const temporaryRoot = mkdtempSync(temporaryPrefix);
 const tarballsRoot = join(temporaryRoot, 'tarballs');
 const consumerRoot = join(temporaryRoot, 'consumer');
+const noZodConsumerRoot = join(temporaryRoot, 'consumer-no-zod');
 
 const consumerDependencies = [
   '@nestjs/common@12.0.0-alpha.5',
@@ -53,6 +54,7 @@ function writeJson(path, value) {
 try {
   mkdirSync(tarballsRoot);
   mkdirSync(consumerRoot);
+  mkdirSync(noZodConsumerRoot);
 
   const workspaces = readPublicPackageManifests(repositoryRoot, {
     namePrefix: '@concepta/',
@@ -81,6 +83,12 @@ try {
     );
     return tarball;
   });
+  const coreTarball = tarballs.find((tarball) =>
+    tarball.includes('concepta-rockets-core-'),
+  );
+  if (coreTarball === undefined) {
+    throw new Error('Missing @concepta/rockets-core tarball.');
+  }
 
   writeJson(join(consumerRoot, 'package.json'), {
     name: 'rockets-packed-consumer-smoke',
@@ -247,6 +255,36 @@ void main().catch((error: unknown) => {
     consumerRoot,
   );
   run(process.execPath, [join('dist', 'consumer.js')], consumerRoot);
+
+  writeJson(join(noZodConsumerRoot, 'package.json'), {
+    name: 'rockets-core-no-zod-consumer-smoke',
+    version: '0.0.0',
+    private: true,
+  });
+  run(
+    'npm',
+    [
+      'install',
+      '--save-exact',
+      '--legacy-peer-deps',
+      '--no-audit',
+      '--no-fund',
+      '--loglevel=error',
+      coreTarball,
+      '@nestjs/common@12.0.0-alpha.5',
+      '@nestjs/core@12.0.0-alpha.5',
+      'class-transformer@0.5.1',
+      'class-validator@0.14.3',
+      'reflect-metadata@0.1.14',
+      'rxjs@7.8.2',
+    ],
+    noZodConsumerRoot,
+  );
+  writeFileSync(
+    join(noZodConsumerRoot, 'verify-core-no-zod.cjs'),
+    `'use strict';\nrequire('reflect-metadata');\nconst loaded = require('@concepta/rockets-core');\nif (!('RocketsCoreModule' in loaded)) throw new Error('Missing RocketsCoreModule from @concepta/rockets-core');\n`,
+  );
+  run(process.execPath, ['verify-core-no-zod.cjs'], noZodConsumerRoot);
 
   console.log(
     `Verified ${workspaces.length} packed public packages in a clean CJS, ESM, TypeScript, and Nest consumer.`,

@@ -132,6 +132,7 @@ export type {
   OperationRequest,
   OperationResponse,
   OperationHandler,
+  OperationHandlerClassRef,
   OperationHandlerFn,
   OperationHandlerRef,
   CompiledOperationDescriptor,
@@ -150,6 +151,15 @@ export type {
 } from './domain/interfaces/auth-bootstrap.interface';
 export { defineAuthAdapter } from './infrastructure/auth/define-auth-adapter';
 export type { DefineAuthAdapterOptions } from './infrastructure/auth/define-auth-adapter';
+export {
+  collectRegisteredRoutes,
+  findRegisteredRouteCollisions,
+  validateRegisteredRoutes,
+} from './infrastructure/routing/validate-registered-routes';
+export type {
+  RegisteredRoute,
+  RegisteredRouteCollision,
+} from './infrastructure/routing/validate-registered-routes';
 
 // Resource config & definition API
 export type { RocketsResourceConfig } from './domain/interfaces/rockets-resource.interface';

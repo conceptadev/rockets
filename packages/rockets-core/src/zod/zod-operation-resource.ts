@@ -10,6 +10,7 @@ import type {
   OperationResourceDefinition,
 } from '../domain/interfaces/operation-resource.interface';
 import { defineOperationResource } from '../infrastructure/resource/define-operation-resource';
+import { assertValidOperationKey } from '../infrastructure/resource/operation-resource/operation-key';
 import { compileDtoClass } from './zod-dto';
 
 type InferIn<TInput> = [TInput] extends [z.ZodObject]
@@ -29,12 +30,13 @@ type OperationOutputConfig = OperationOutputSchema | false;
  * Extract `:param` names from a path template into a string-record type.
  * Decision (#50): keys map to path segments verbatim (no kebab-case).
  */
-export type PathParams<S extends string> =
-  S extends `${string}:${infer Param}/${infer Rest}`
-    ? { [K in Param | keyof PathParams<`/${Rest}`>]: string }
-    : S extends `${string}:${infer Param}`
-    ? { [K in Param]: string }
-    : {};
+export type PathParams<S extends string> = string extends S
+  ? Record<string, string>
+  : S extends `${string}:${infer Param}/${infer Rest}`
+  ? { [K in Param | keyof PathParams<`/${Rest}`>]: string }
+  : S extends `${string}:${infer Param}`
+  ? { [K in Param]: string }
+  : {};
 
 type MergeParams<A, B> = Omit<A, keyof B> & B;
 
@@ -243,36 +245,6 @@ export type ZodOperationResource<TOps extends OperationRecord> =
     readonly authored: TOps;
   };
 
-const OPERATION_KEY_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
-
-const RESERVED_OPERATION_KEYS = new Set([
-  'constructor',
-  'prototype',
-  '__proto__',
-  'moduleRef',
-  'toString',
-  'valueOf',
-  'hasOwnProperty',
-  'isPrototypeOf',
-  'propertyIsEnumerable',
-  'toLocaleString',
-]);
-
-function assertValidOperationKey(key: string, resourcePath: string): void {
-  if (!OPERATION_KEY_PATTERN.test(key)) {
-    throw new Error(
-      `operationResource "${resourcePath}": operation key "${key}" is not a ` +
-        `valid identifier / path segment (expected ${OPERATION_KEY_PATTERN})`,
-    );
-  }
-  if (RESERVED_OPERATION_KEYS.has(key)) {
-    throw new Error(
-      `operationResource "${resourcePath}": operation key "${key}" is reserved ` +
-        `(collides with Object.prototype or the generated controller)`,
-    );
-  }
-}
-
 /** Runtime extract of `:param` names from a path template. */
 export function extractPathParamNames(path: string): string[] {
   const names: string[] = [];
@@ -364,7 +336,9 @@ function compileOperation(
   if (pending.input !== undefined) {
     inputDto = compileDtoClass(
       pending.input,
-      `${pascal(resourcePath)}_${pascal(key)}Input`,
+      `${pascal(resourcePath)}_${pascal(method.toLowerCase())}_${pascal(
+        key,
+      )}Input`,
     );
   }
 
@@ -375,7 +349,9 @@ function compileOperation(
   } else {
     outputDto = compileOperationDto(
       pending.output,
-      `${pascal(resourcePath)}_${pascal(key)}Output`,
+      `${pascal(resourcePath)}_${pascal(method.toLowerCase())}_${pascal(
+        key,
+      )}Output`,
     );
   }
 

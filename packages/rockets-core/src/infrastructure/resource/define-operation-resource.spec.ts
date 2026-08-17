@@ -402,4 +402,149 @@ describe('operationResource (zod)', () => {
       }),
     ).toThrow(/duplicate route/);
   });
+
+  it('rejects reserved and invalid operation keys in the lower-level factory', () => {
+    expect(() =>
+      defineOperationResource({
+        path: 'api/bad',
+        operations: {
+          'bad-key': {
+            key: 'bad-key',
+            method: 'GET',
+            path: '',
+            status: 200,
+            outputDisabled: true,
+            handler: () => undefined,
+          },
+        },
+      }),
+    ).toThrow(/not a valid identifier/);
+
+    expect(() =>
+      defineOperationResource({
+        path: 'api/bad',
+        operations: {
+          moduleRef: {
+            key: 'moduleRef',
+            method: 'GET',
+            path: '',
+            status: 200,
+            outputDisabled: true,
+            handler: () => undefined,
+          },
+        },
+      }),
+    ).toThrow(/reserved/);
+  });
+
+  it('does not reject version-separated CRUD routes when no operation resource exists', () => {
+    class WidgetEntity {
+      id!: string;
+    }
+
+    const v1 = {
+      crud: {
+        controller: {
+          class: WidgetEntity,
+          path: 'widgets',
+          version: '1',
+        },
+        operations: [{ operation: Operation.List }],
+      },
+    };
+    const v2 = {
+      crud: {
+        controller: {
+          class: WidgetEntity,
+          path: 'widgets',
+          version: '2',
+        },
+        operations: [{ operation: Operation.List }],
+      },
+    };
+
+    expect(() =>
+      validateRouteCollisions({
+        generatedResources: [],
+        manualResources: [v1, v2],
+        operationBundles: [],
+      }),
+    ).not.toThrow();
+  });
+
+  it('does not reject version-separated manual routes when operation resources are present', () => {
+    class WidgetEntity {
+      id!: string;
+    }
+
+    const v1 = {
+      crud: {
+        controller: {
+          class: WidgetEntity,
+          path: 'widgets',
+          version: '1',
+        },
+        operations: [{ operation: Operation.List }],
+      },
+    };
+    const v2 = {
+      crud: {
+        controller: {
+          class: WidgetEntity,
+          path: 'widgets',
+          version: '2',
+        },
+        operations: [{ operation: Operation.List }],
+      },
+    };
+    const ops = operationResource({
+      path: 'ops',
+      public: true,
+      operations: (op) => ({
+        health: op.read({
+          output: z.object({ ok: z.boolean() }),
+          handler: () => ({ ok: true }),
+        }),
+      }),
+    });
+
+    expect(() =>
+      validateRouteCollisions({
+        generatedResources: [],
+        manualResources: [v1, v2],
+        operationBundles: [ops],
+      }),
+    ).not.toThrow();
+  });
+
+  it('rejects structured static-vs-param route overlap', () => {
+    class UserEntity {
+      id!: string;
+    }
+
+    const crud = defineResource({
+      key: 'user',
+      entity: UserEntity,
+      path: 'users',
+      operations: [Operation.Read],
+    });
+    const ops = operationResource({
+      path: 'users',
+      public: true,
+      operations: (op) => ({
+        me: op.read({
+          output: z.object({ ok: z.boolean() }),
+          handler: () => ({ ok: true }),
+        }),
+      }),
+    });
+
+    expect(() =>
+      validateRouteCollisions({
+        generatedResources: [crud],
+        manualResources: [],
+        operationBundles: [ops],
+      }),
+    ).toThrow(/duplicate route GET/);
+  });
 });
