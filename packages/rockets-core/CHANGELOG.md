@@ -16,7 +16,8 @@
   `op.write` / `op.delete` (method-constrained); path defaults to the operation
   key; `ctx.params` typed from base + op path. **`output` is required** (schema
   or `false`); optional `params` zod validates path params; cross-resource
-  route collisions fail in `buildAppRegistrationPlan`. Wired through
+  route collisions fail in `buildAppRegistrationPlan`. OpenAPI query field types
+  come from Zod (`z.toJSONSchema`). Wired through
   `resources[]` as `ResourceKind.Operation`. **v1 does not wire ACL grants** —
   authenticated ops are open to any authenticated user unless you pass method
   `decorators` (e.g. access-control grants). Cursor / SSE / binary / raw JSON /

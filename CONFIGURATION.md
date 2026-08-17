@@ -408,6 +408,20 @@ export const ops = operationResource({
     }),
   }),
 });
+
+// Path params: resource `params` must list every :name on `path`.
+// Nested op segments (e.g. key `transfer` → /pets/:petId/transfer) stay in ctx.params.
+export const petTransfer = operationResource({
+  path: 'pets/:petId',
+  params: z.object({ petId: z.uuid() }),
+  operations: (op) => ({
+    transfer: op.write({
+      input: z.object({ newOwnerId: z.uuid() }),
+      output: z.object({ id: z.string(), userId: z.string() }),
+      handler: TransferHttpHandler, // injectable class with handle(ctx)
+    }),
+  }),
+});
 ```
 
 | Builder | Allowed methods | Default method | Default status |
@@ -466,13 +480,17 @@ export const sampleAuthUserResource = defineModuleResource({
 });
 ```
 
-### CQRS-only (`entities: []`) — consumes a repo another bundle registered
+### CQRS-only (`entities: []`) — no new table; hand-written Nest slice
+
+Use this when you need CQRS handlers / services **without** a generated HTTP
+surface. For typed HTTP actions over CQRS (no hand-written controller), prefer
+[`operationResource`](#6a-operationresource--typed-non-crud-endpoints-issue-43--50)
+instead — see `examples/sample-server` `petTransferFeature`.
 
 ```ts
-export const petTransferFeature = defineModuleResource({
+export const orderWorkflowFeature = defineModuleResource({
   imports: [CqrsModule],
-  controllers: [PetTransferController],
-  providers: [TransferPetOwnershipHandler],
+  providers: [PlaceOrderHandler, OrderPlacedListener],
 });
 ```
 
@@ -762,9 +780,9 @@ flowchart TD
   Q2 -- yes --> SUB["defineSubResource()\n(in parent.subResources)"]
   Q2 -- no  --> RES["defineResource()\n(in resources[])"]
   Q1 -- no --> Q3{"Need a table / repo key,\nor custom Nest wiring?"}
-  Q3 -- "typed RPC endpoints (no CRUD)" --> OPS["operationResource() / defineOperationResource()"]
+  Q3 -- "typed HTTP RPC (Zod in/out)" --> OPS["operationResource() / defineOperationResource()"]
   Q3 -- "table only" --> MOD1["defineModuleResource({ entities:[X] })"]
-  Q3 -- "CQRS/services, no table" --> MOD2["defineModuleResource({ entities:[], imports/providers })"]
+  Q3 -- "CQRS/services, no HTTP gen" --> MOD2["defineModuleResource({ entities:[], imports/providers })"]
   Q3 -- "custom controller + table" --> MOD3["defineModuleResource({ entities, controllers, providers, exports })"]
 ```
 
@@ -772,9 +790,9 @@ flowchart TD
 |---|---|
 | Standard CRUD HTTP surface (`/pets`) | `defineResource` |
 | Child route keyed by a parent relation (`/pets/:petId/tags`) | `defineSubResource` |
-| Typed non-CRUD endpoints (`/ops/shout`) | `operationResource` / `defineOperationResource` |
+| Typed non-CRUD HTTP (`POST /pets/:petId/transfer`, `/ops/shout`) | `operationResource` / `defineOperationResource` |
 | Register an entity for `@InjectDynamicRepository` | `defineModuleResource({ entities:[X] })` |
-| Pure CQRS/workflow, no new table | `defineModuleResource({ entities:[] })` |
+| CQRS/workflow providers, no generated routes | `defineModuleResource({ entities:[] })` |
 | Hand-written controller + services | `defineModuleResource({ controllers, providers })` |
 | One table on a different DB | `defineModuleResource` entity row `{ entity, repository }` |
 
@@ -926,12 +944,28 @@ petTags: defineSubResource({
 
 // ── defineModuleResource ──
 defineModuleResource({ entities: [AuditLogEntity] });
-defineModuleResource({ imports: [CqrsModule], controllers: [PetTransferController], providers: [TransferPetOwnershipHandler] });
+defineModuleResource({
+  imports: [CqrsModule],
+  providers: [PlaceOrderHandler], // CQRS-only — no generated HTTP
+});
 defineModuleResource({
   entities: [GithubConnectionEntity, { entity: SessionEntity, repository: firestoreRepo }],
   controllers: [GithubController],
   providers: [GithubService, githubApiClientProvider()],
   exports: [GithubService, GITHUB_API_CLIENT],         // public surface — collision risk
+});
+
+// ── operationResource (typed non-CRUD HTTP; prefer over hand-written controllers) ──
+operationResource({
+  path: 'pets/:petId',
+  params: z.object({ petId: z.uuid() }),
+  operations: (op) => ({
+    transfer: op.write({
+      input: z.object({ newOwnerId: z.uuid() }),
+      output: z.object({ id: z.string(), userId: z.string() }),
+      handler: TransferHttpHandler,
+    }),
+  }),
 });
 
 // ── relation: bound canonical form ──

@@ -64,6 +64,9 @@ export interface RocketsCoreOptionsExtrasInterface
    * Accepts a mix of:
    * - `defineResource()` — CRUD-shaped surfaces (auto-generated controller
    *   + persistence row).
+   * - `defineSubResource()` — nested CRUD under a parent path param.
+   * - `defineOperationResource()` / `operationResource()` — typed non-CRUD
+   *   HTTP endpoints (generated controller; no entity row).
    * - `defineModuleResource()` — non-CRUD features that contribute
    *   persistence rows and/or a Nest module slice
    *   (controllers/providers/exports/imports).

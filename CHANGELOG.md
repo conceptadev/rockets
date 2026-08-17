@@ -7,6 +7,14 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Added
 
+- **`operationResource` / `defineOperationResource` (issues #43 / #50).** Typed
+  non-CRUD HTTP endpoints beside CRUD: Zod `input`/`output` → DTO + OpenAPI,
+  generated Nest controller, auth/`public`, optional `transactional`, function
+  or injectable `handle` handlers. Authoring: callback `operations(op)` with
+  `op.read` / `op.write` / `op.delete`; path defaults to the operation key;
+  `output` required (schema or `false`); optional resource-level `params` zod;
+  cross-resource `METHOD+path` collisions fail in `buildAppRegistrationPlan`.
+  See `CONFIGURATION.md` §6a and `examples/sample-server` `petTransferFeature`.
 - Firestore adapter transactions (issue #44 P1-1): `runInFirestoreTransaction` /
   `FirestoreRepository.transaction` (callback-scoped, retry-safe),
   `FIRESTORE_BACKEND` DI export, `transactionFactories` + `options.ctx`

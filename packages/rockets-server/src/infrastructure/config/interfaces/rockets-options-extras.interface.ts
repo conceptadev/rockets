@@ -62,7 +62,9 @@ export interface RocketsOptionsExtrasInterface
    * The same `resources` option accepted by `RocketsCoreModule`.
    *
    * Mix `defineResource()` (CRUD), `defineModuleResource()` (non-CRUD
-   * persistence / Nest wiring), and hand-built `RocketsResourceConfig`.
+   * persistence / Nest wiring), `defineSubResource()` /
+   * `defineOperationResource()` / `operationResource()`, and hand-built
+   * `RocketsResourceConfig`.
    */
   resources?: ReadonlyArray<ResourceInput>;
 

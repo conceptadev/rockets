@@ -27,12 +27,14 @@ and re-exports the symbols apps need (`InjectDynamicRepository`,
 - An auth contract (`AuthAdapterInterface`) and a global guard that runs
   adapters in a chain.
 - A resource planner (`buildAppRegistrationPlan`) that turns a list of feature
-  bundles into Nest imports, dynamic repository registrations, and CRUD
-  controllers.
+  bundles into Nest imports, dynamic repository registrations, and CRUD /
+  operation controllers.
 - Reusable repository hooks for owner scoping, audit, and path-scoped
   sub-resources.
 - A typed actor overlay so handlers can read the authenticated user without
   parameter drilling.
+- A zod-first layer at `@concepta/rockets-core/zod` (`zodResource`,
+  `operationResource`, …) for schema-driven CRUD and typed non-CRUD HTTP.
 
 ### When to use this package
 
@@ -169,6 +171,38 @@ export const billingFeature = defineModuleResource({
 `RocketsCoreModule` is global, so anything in `exports` is visible app-wide.
 Export the minimum to avoid name collisions across bundles.
 
+### Add typed non-CRUD endpoints (`operationResource`)
+
+For RPC-style routes without a hand-written controller, use
+`operationResource` from `@concepta/rockets-core/zod` (or
+`defineOperationResource` on the main entry with precompiled DTOs):
+
+```typescript
+import { operationResource } from '@concepta/rockets-core/zod';
+import { z } from 'zod';
+
+export const ops = operationResource({
+  path: 'ops',
+  public: true,
+  operations: (op) => ({
+    ping: op.read({
+      path: '',
+      output: z.object({ ok: z.boolean() }),
+      handler: () => ({ ok: true }),
+    }),
+    shout: op.write({
+      input: z.object({ text: z.string().min(1) }),
+      output: z.object({ text: z.string() }),
+      handler: ({ input }) => ({ text: input.text.toUpperCase() }),
+    }),
+  }),
+});
+```
+
+`output` is required (schema or `false`). Path defaults to the operation key.
+Optional resource-level `params` validates `:path` params. Full rules:
+[CONFIGURATION.md §6a](../../CONFIGURATION.md#6a-operationresource--typed-non-crud-endpoints-issue-43--50).
+
 ### Scope rows to the authenticated user
 
 `OwnerStampHook` writes `userId` on create/update and rejects spoofing.
@@ -304,10 +338,11 @@ export class HealthController {
 
 The zod-first resource layer ships as the subpath export
 `@concepta/rockets-core/zod` (`zodResource`, `zodSubResource`,
-`bindZodResources`, the `f.*` field helpers, `defineZodUserMetadata`,
-`rocketsFieldMeta`, `rocketsEntityMeta`). `zod` and `nestjs-zod` are
-**optional peerDependencies** of core — the main `@concepta/rockets-core`
-entry stays zod-free, so apps that skip the subpath never install them.
+`operationResource`, `bindZodResources`, the `f.*` field helpers,
+`defineZodUserMetadata`, `rocketsFieldMeta`, `rocketsEntityMeta`). `zod` and
+`nestjs-zod` are **optional peerDependencies** of core — the main
+`@concepta/rockets-core` entry stays zod-free, so apps that skip the subpath
+never install them.
 
 Entity generation is delegated to a `SchemaEntityCompiler`. The TypeORM
 implementation lives at `@concepta/rockets-repository-typeorm/zod`; bind it
@@ -536,7 +571,7 @@ stop, throw.
 | `defineModuleResource(input)`                           | Non-CRUD bundle: entities + Nest module slice.                         |
 | `defineSubResource(input)`                              | Nested resource (e.g. `/pets/:petId/tags`) with path-scope guard.      |
 | `defineOperationResource(input)`                        | Typed non-CRUD endpoints with a generated controller (issue #43).      |
-| `operationResource` + `read`/`write`/`delete` (zod)     | Zod-first builders for `defineOperationResource` (issue #50).          |
+| `operationResource` + `op.read`/`op.write`/`op.delete`  | Zod-first builders for `defineOperationResource` (issue #50).          |
 | `relation(target, prop, opts?)`                         | Type-safe cross-resource relation.                                     |
 | `extractBearerToken(request)`                           | RFC 7235 Bearer parser for adapter implementations.                    |
 | `getActor(ctx)`                                         | Read authenticated user from a CRUD context.                           |

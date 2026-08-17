@@ -61,11 +61,15 @@ the user has already had to fix more than once.
    `repository` override). All other persistence rows are contributed by
    bundles inside `resources[]`:
    - `defineResource()` — CRUD-shaped, auto-contributes its entity row.
+   - `defineSubResource()` — nested CRUD under a parent path param.
+   - `operationResource()` / `defineOperationResource()` — typed non-CRUD
+     HTTP endpoints (generated controller; no entity row). Prefer the
+     zod helper from `@concepta/rockets-core/zod`.
    - `defineModuleResource({ entities, module })` — non-CRUD persistence
      and/or Nest module slice (controllers/providers/exports/imports).
      Per-entity `repository` overrides the root adapter for that one
      table; bundles with `entities: []` are valid and useful for
-     CQRS-only workflows.
+     CQRS-only workflows without generated HTTP.
    There is **no** `repositories.entities[]` block any more — registering
    the same entity in two places (or splitting key + class across files)
    is what this rule prevents.
@@ -162,6 +166,10 @@ the user has already had to fix more than once.
       sub-resource.
     - Capability matrix: `packages/rockets-core/README.md` (Zod-first
       section).
+    - Typed non-CRUD HTTP: `operationResource` with callback
+      `operations(op)` (`op.read` / `op.write` / `op.delete`); **`output`
+      required** (schema or `false`); path defaults to the key; optional
+      resource `params` for path validation. See `CONFIGURATION.md` §6a.
 
 ## How to work with the project owner
 
@@ -196,17 +204,17 @@ of it.
 - `packages/rockets-core` (`@concepta/rockets-core`): **shared server
   infrastructure** — auth abstraction (`AuthAdapterInterface`,
   `AuthServerGuard`), CQRS handlers, declarative resources (`defineResource`,
-  `defineModuleResource`, `buildAppRegistrationPlan`), root `repository`
-  adapter + `userMetadata` config, Swagger registration (`SwaggerUiModule`),
-  opt-in `accessControl` (registers `@concepta/nestjs-access-control` when
-  configured, nothing otherwise), and the shared decorators/utils formerly
-  published in `@bitwild/rockets-common` (`AuthUser`,
-  `InjectDynamicRepository`, `InjectCrudAdapter`, model interfaces,
-  `SchemaEntityCompiler` contract, error-logging/entity-key utils — now
-  `src/common/`). Also owns the **zod-first resource layer** at the
-  `@concepta/rockets-core/zod` subpath
-  (`zodResource`/`zodSubResource`/`bindZodResources`, `f.*` field helpers,
-  `rocketsFieldMeta`/`rocketsEntityMeta` registries,
+  `defineModuleResource`, `defineSubResource`, `defineOperationResource`,
+  `buildAppRegistrationPlan`), root `repository` adapter + `userMetadata`
+  config, Swagger registration (`SwaggerUiModule`), opt-in `accessControl`
+  (registers `@concepta/nestjs-access-control` when configured, nothing
+  otherwise), and the shared decorators/utils formerly published in
+  `@bitwild/rockets-common` (`AuthUser`, `InjectDynamicRepository`,
+  `InjectCrudAdapter`, model interfaces, `SchemaEntityCompiler` contract,
+  error-logging/entity-key utils — now `src/common/`). Also owns the
+  **zod-first resource layer** at the `@concepta/rockets-core/zod` subpath
+  (`zodResource`/`zodSubResource`/`operationResource`/`bindZodResources`,
+  `f.*` field helpers, `rocketsFieldMeta`/`rocketsEntityMeta` registries,
   `defineZodUserMetadata`). Zod is the first-class schema layer of Rockets;
   `zod` + `nestjs-zod` are **optional peers** and the main entry stays
   zod-free, so non-zod consumers pay nothing. The zod layer is still ORM-free:

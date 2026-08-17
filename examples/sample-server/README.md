@@ -20,8 +20,9 @@ For **Firebase / external IdP** auth, use
 `sample-server` is the runnable, e2e-tested reference for
 `@concepta/rockets`. It exists to:
 
-- Demonstrate every flavour of `resources[]` bundle: `defineResource()`
-  (CRUD), `defineSubResource()` (nested CRUD), `defineModuleResource()`
+- Demonstrate every flavour of `resources[]` bundle: `defineResource()` /
+  `zodResource()` (CRUD), `defineSubResource()` (nested CRUD),
+  `operationResource()` (typed non-CRUD HTTP), `defineModuleResource()`
   (Nest slice with controllers + services), and `AuthBootstrap` pairs
   (`defineSampleAuth()` + entity resource).
 - Show Nest 12's native Standard Schema validation path alongside the
@@ -44,7 +45,7 @@ For **Firebase / external IdP** auth, use
 | `appointmentResource`                         | `defineResource`             | Handwritten entity/DTOs; custom create handler wraps appointment + reminder writes in one `txScope`.                                         |
 | `reminderZodResource`                         | `zodResource`                | Zod-driven; FK relation meta back to the (classic) appointment entity.                                                                       |
 | `petShareFeature`                             | `defineModuleResource`       | Junction-table feature + custom controller.                                                                                                  |
-| `petTransferFeature`                          | `operationResource` + CQRS   | Issue #43: `POST /pets/:petId/transfer` via `operationResource` over the existing CommandBus handler (no hand-written controller).            |
+| `petTransferFeature`                          | `operationResource` + CQRS   | Issues #43/#50: `POST /pets/:petId/transfer` — `path: 'pets/:petId'`, op key `transfer`, `params: z.object({ petId })`, `op.write` over CommandBus (no hand-written controller). |
 | `adminFeature`                                | `defineModuleResource`       | Admin-only routes via exported guard.                                                                                                        |
 | `auditFeature`                                | `defineModuleResource`       | Cross-cutting audit trail.                                                                                                                   |
 | `eventsFeature`                               | `defineModuleResource`       | Domain-event listeners.                                                                                                                      |
@@ -130,6 +131,21 @@ from the schema. See `src/resources/tag/` (minimal) and
 
 Handwritten entity + DTO path still demonstrated in `pet-vaccination/` for comparison.
 
+### Add a typed non-CRUD endpoint (`operationResource`)
+
+See `src/resources/pet-transfer/pet-transfer.feature.ts`:
+
+1. `operationResource({ path, params?, operations: (op) => ({ … }) })` from
+   `@concepta/rockets-core/zod`.
+2. Prefer `op.write` / `op.read` / `op.delete` — path defaults to the
+   operation key (`transfer` → `/pets/:petId/transfer`).
+3. Require `output` (schema or `false`); validate path params with resource
+   `params`.
+4. Register the bundle in `app.module.ts` `resources: [...]`.
+
+CQRS handlers stay the source of truth; the operation resource is only the
+HTTP adapter.
+
 ---
 
 ## 4. Reference
@@ -142,7 +158,7 @@ examples/sample-server
 │   ├── auth/                       AuthBootstrap + JWT signup/login
 │   ├── zod-bindings.ts             bindZodResources(typeOrmZodEntityCompiler)
 │   ├── user-metadata.schema.ts     zod schema -> { entity, createDto, updateDto, responseDto }
-│   ├── resources/                  CRUD + sub-resource + module bundles
+│   ├── resources/                  CRUD + sub-resource + operationResource + module bundles
 │   ├── admin/                      Admin gate (defineModuleResource)
 │   ├── audit/                      Cross-cutting audit (consumes adminFeature)
 │   ├── events/                     Domain-event listeners

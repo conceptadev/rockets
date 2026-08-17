@@ -36,6 +36,7 @@ versions in production.
   - [Run multiple auth credentials (chain)](#run-multiple-auth-credentials-chain)
   - [Mark a route as public](#mark-a-route-as-public)
   - [Add a non-CRUD feature](#add-a-non-crud-feature-controller--service--entity)
+  - [Add typed non-CRUD endpoints](#add-typed-non-crud-endpoints-operationresource)
   - [Add a nested CRUD resource](#add-a-nested-crud-resource-petspetidtags)
   - [Wire TypeORM without hand-registering entities](#wire-typeorm-without-hand-registering-entities)
   - [Mix two persistence adapters](#mix-two-persistence-adapters)
@@ -243,6 +244,8 @@ them:
   B).
 - A list / read / create / update / delete controller per entity, with DTO
   validation and swagger schemas.
+- Typed RPC-style controllers for actions that are not CRUD (via
+  `operationResource`).
 - TypeORM (or Firestore) module registration with the entity list — replaced by
   the planner deriving the list from `resources[]`.
 - An owner-scoping hook so user A doesn't read user B's rows.
@@ -629,6 +632,42 @@ const billingFeature = defineModuleResource({
 other module — including the outer `RocketsModule.forRootAsync` factory's
 `inject:` list. Export the minimum to avoid name collisions.
 
+### Add typed non-CRUD endpoints (`operationResource`)
+
+Use when you need RPC-style routes (health, actions, reports) **without** a
+hand-written Nest controller. Prefer the zod helper from
+`@concepta/rockets-core/zod` (not re-exported on the `@concepta/rockets`
+facade today):
+
+```typescript
+import { operationResource } from '@concepta/rockets-core/zod';
+import { z } from 'zod';
+
+export const ops = operationResource({
+  path: 'ops',
+  public: true,
+  operations: (op) => ({
+    ping: op.read({
+      path: '', // GET /ops — default path is the operation key
+      output: z.object({ ok: z.boolean() }),
+      handler: () => ({ ok: true }),
+    }),
+    shout: op.write({
+      input: z.object({ text: z.string().min(1) }),
+      output: z.object({ text: z.string() }),
+      handler: ({ input }) => ({ text: input.text.toUpperCase() }),
+    }),
+  }),
+});
+```
+
+Rules that matter: **`output` is required** (schema or `output: false`);
+`operations` is a callback (`op.read` / `op.write` / `op.delete`); optional
+resource `params: z.object(...)` validates path params (400); cross-resource
+route collisions fail at plan time. Full field reference:
+[CONFIGURATION.md §6a](CONFIGURATION.md#6a-operationresource--typed-non-crud-endpoints-issue-43--50).
+Sample: `examples/sample-server` `POST /pets/:petId/transfer`.
+
 ### Add a nested CRUD resource (`/pets/:petId/tags`)
 
 ```typescript
@@ -968,11 +1007,11 @@ configuration façade** — not a fork.
 | Topic                           | Current decision                                                                                                                                                                                                                                                                                                                                                                                |
 | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Your modules stay the motor** | `RepositoryInterface`, `CrudModule`, `HookModule`, RBAC, and identity domains are unchanged upstream; Rockets calls them through `buildAppRegistrationPlan`.                                                                                                                                                                                                                                    |
-| **What Rockets owns**           | `defineResource`, `defineModuleResource`, `AuthAdapterInterface` + guard chain, `RepositoryBootstrap`, swagger registration, `/me` (server), `defineRocketsAuth()` (auth bundle).                                                                                                                                                                                                               |
+| **What Rockets owns**           | `defineResource`, `defineModuleResource`, `defineSubResource`, `defineOperationResource` / `operationResource`, `AuthAdapterInterface` + guard chain, `RepositoryBootstrap`, swagger registration, `/me` (server), `defineRocketsAuth()` (auth bundle).                                                                                                                                                                                                               |
 | **Core re-exports (former `@concepta/rockets-common`)** | `@concepta/rockets-common` was deleted; its helpers (`AuthUser`, `InjectDynamicRepository`, `SwaggerUiModule`, `deriveEntityKey`, …) and upstream re-exports now live inside `@concepta/rockets-core`. This is **not** a replacement for the upstream **app-module** composition pattern — that wiring still lives in Concepta; Rockets adds a **second** entry point (`RocketsModule.forRoot`) that feeds the same motors. |
 | **Port backlog (server path)**  | On v8 today: `core`, `repository`, `crud`, `hook`, `common`, `authentication`, `access-control`. Still on v7 in this monorepo: `swagger-ui` (and `email` / `event` on the auth path) — version-mismatched intentionally and tested in CI.                                                                                                                                                                          |
 | **Repo migration**              | Moving all of `nestjs-modules` into this git repo is **optional** for product validation. Shipping fixes against published `@concepta/*` alphas is fine; monorepo colocation is for AI context and version lock, not a prerequisite to use Rockets.                                                                                                                                             |
-| **Safe to keep building on**    | These are intentional, tested surfaces — not throwaway experiments: `createServer`, `AuthAdapterInterface.authenticate`, `RepositoryInterface` + dynamic repository keys (class **or** string token), `defineResource` / planner-driven entity registration, and complete `defineRocketsAuth({ persistence })` contributions.                                   |
+| **Safe to keep building on**    | These are intentional, tested surfaces — not throwaway experiments: `createServer`, `AuthAdapterInterface.authenticate`, `RepositoryInterface` + dynamic repository keys (class **or** string token), `defineResource` / `operationResource` / planner-driven entity registration, and complete `defineRocketsAuth({ persistence })` contributions.                                   |
 
 **Custom validation / business rules:** use `defineHook` from
 `@concepta/rockets-core` for simple entity lifecycle rules, upstream
@@ -985,7 +1024,7 @@ to 4xx — a bare `Error` in a hook often surfaces as 500.
 
 | Package                                 | npm name                                | Purpose                                                                                                                                                                                                                            | Docs                                                      | Status  |
 | --------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------- | ------- |
-| `packages/rockets-core`                 | `@concepta/rockets-core`                 | Composition planner. Auth chain, `buildAppRegistrationPlan`, `defineResource` / `defineModuleResource` / `defineSubResource`, `defineHook`, owner/path hooks, swagger registration, shared helpers, zod layer at `@concepta/rockets-core/zod`, opt-in `accessControl`. | [README](packages/rockets-core/README.md)                 | preview |
+| `packages/rockets-core`                 | `@concepta/rockets-core`                 | Composition planner. Auth chain, `buildAppRegistrationPlan`, `defineResource` / `defineModuleResource` / `defineSubResource` / `defineOperationResource`, `defineHook`, owner/path hooks, swagger registration, shared helpers, zod layer at `@concepta/rockets-core/zod` (`zodResource`, `operationResource`, …), opt-in `accessControl`. | [README](packages/rockets-core/README.md)                 | preview |
 | `packages/rockets-repository-typeorm`   | `@concepta/rockets-repository-typeorm`   | TypeORM adapter and `defineTypeOrmRepository` bootstrap for planner-derived entity registration, plus the zod `SchemaEntityCompiler` at `@concepta/rockets-repository-typeorm/zod`.                                                                                   | [README](packages/rockets-repository-typeorm/README.md)   | preview |
 | `packages/rockets-repository-firestore` | `@concepta/rockets-repository-firestore` | Firestore adapter implementing `RepositoryAdapter`. Per-entity opt-in.                                                                                                                                                             | [README](packages/rockets-repository-firestore/README.md) | preview |
 | `packages/rockets-adapter-firebase`     | `@concepta/rockets-adapter-firebase`     | Firebase Auth adapter implementing `AuthAdapterInterface`.                                                                                                                                                                         | [README](packages/rockets-adapter-firebase/README.md)     | preview |
