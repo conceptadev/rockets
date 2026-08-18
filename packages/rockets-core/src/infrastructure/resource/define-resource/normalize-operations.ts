@@ -126,18 +126,27 @@ export function normalizeOperationsInput(
     if (cfg.input !== undefined) {
       next.request = { ...(next.request ?? {}), body: cfg.input };
     }
+    // A list route serializes through the PAGINATED type, not the
+    // resource type. `paginated` is therefore meaningful on its own, and
+    // was previously read only alongside `output` — so declaring it by
+    // itself was accepted and dropped.
+    if (cfg.paginated !== undefined) {
+      if (op !== Operation.List) {
+        throw new Error(
+          `defineResource(${resourceKey}): \`operations.${label}.paginated\` is only ` +
+            `meaningful on \`list\` — no other operation serializes a collection.`,
+        );
+      }
+      next.response = { ...(next.response ?? {}), paginated: cfg.paginated };
+    }
     if (cfg.output !== undefined) {
       next.response = {
         ...(next.response ?? {}),
         resource: cfg.output,
-        // A list route serializes through the PAGINATED type, not the
-        // resource type, so an `output` override that does not carry a
-        // matching wrapper would be silently ignored on the wire and in
-        // the OpenAPI document. Derive it from the override unless the
-        // caller supplied their own.
-        ...(cfg.paginated !== undefined
-          ? { paginated: cfg.paginated }
-          : op === Operation.List
+        // Derive the wrapper from the override unless the caller supplied
+        // their own, otherwise a `list` override would be ignored on the
+        // wire and in the OpenAPI document.
+        ...(cfg.paginated === undefined && op === Operation.List
           ? { paginated: createPaginatedDto(cfg.output) }
           : {}),
       };

@@ -234,19 +234,21 @@ function resolveOperationOverrides(
           'which has no request body. Only create/update/replace accept one.',
       );
     }
-    if (output !== undefined && op === 'delete') {
-      const softReturns =
-        'soft' in config &&
-        config.soft === true &&
-        'returnDeleted' in config &&
-        config.returnDeleted === true;
-      if (!softReturns) {
-        throw new Error(
-          `[zodResource] "${name}" declares an \`output\` schema on ` +
-            '"delete" without `soft: true` + `returnDeleted: true` — the ' +
-            'route answers 204 and the schema would never be serialized.',
-        );
-      }
+    // `returnDeleted` alone decides the status: upstream `CrudDelete`
+    // sets `HttpStatus.OK` on `returnDeleted === true` regardless of
+    // `soft`, and `CrudAdapter.delete` returns the deleted row
+    // (`crud-delete.decorator.js`, `crud.adapter.js`). A hard delete that
+    // returns its row is a valid shape.
+    if (
+      output !== undefined &&
+      op === 'delete' &&
+      !('returnDeleted' in config && config.returnDeleted === true)
+    ) {
+      throw new Error(
+        `[zodResource] "${name}" declares an \`output\` schema on ` +
+          '"delete" without `returnDeleted: true` — the route answers ' +
+          '204 and the schema would never be serialized.',
+      );
     }
     if (output !== undefined && op === 'restore') {
       const restoreReturns =

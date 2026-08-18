@@ -39,8 +39,8 @@ export interface ZodOperationSchemas {
   /**
    * Response schema for the single-item body. Only valid on operations
    * that HAVE a response body — `delete` / `restore` need
-   * `returnDeleted` / `returnRestored`, otherwise they answer `204` and
-   * the override would be silently dropped.
+   * `returnDeleted` / `returnRestored` (on a hard delete too), otherwise
+   * they answer `204` and the override would be silently dropped.
    */
   readonly output?: z.ZodObject;
 }

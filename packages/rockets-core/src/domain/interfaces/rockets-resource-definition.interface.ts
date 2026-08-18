@@ -246,9 +246,11 @@ export interface ResourceDeleteOperationConfig extends ResourceOperationConfig {
   /** Soft delete vs hard delete. Default: `false` (hard). */
   readonly soft?: boolean;
   /**
-   * When `true`, the response is `200 OK` with the soft-deleted entity body
-   * (including the `dateDeleted` timestamp). Default: `false`, which keeps
-   * the response at `204 No Content`. Only meaningful when `soft: true`.
+   * When `true`, the response is `200 OK` with the deleted entity body
+   * (including the `dateDeleted` timestamp on a soft delete). Default:
+   * `false`, which keeps the response at `204 No Content`. Applies to
+   * hard deletes too — upstream sets the status from this flag alone and
+   * the adapter returns the removed row either way.
    */
   readonly returnDeleted?: boolean;
 }

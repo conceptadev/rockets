@@ -57,6 +57,16 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
   `operations.read.output` and `operations.list.output` to be identical
   existed only because of this gap and is gone — `read.output` is the
   resource-level fallback when `dto.response` is not declared.
+
+  **Upgrade-visible.** A resource that already declared
+  `operations.create.output` (or `update` / `replace` / `delete`) with a
+  DTO different from its resource-level response was silently serializing
+  the resource-level one; that route's response body now changes to the
+  declared DTO. Nothing errors — check any per-operation `output` you
+  have before upgrading. `operations.list.paginated` declared without an
+  `output` was likewise dropped and now takes effect; declaring it on any
+  operation other than `list` throws, since nothing else serializes a
+  collection.
 - CI: `ci-pr-test` and `release-readiness` no longer filter on a `main` base,
   so stacked pull requests are gated (including the Firestore emulator suite).
 
