@@ -8,11 +8,22 @@ export interface AccessControlPlanInput {
   /** Whether the app configured root `accessControl`. */
   readonly configured: boolean;
   /**
-   * Whether every authenticated route must carry a grant. Off by default:
-   * turning it on is the secure-by-default switch, and turning it on for
-   * an app that guards its routes with hand-written `AccessControl*`
-   * decorators would reject a working configuration — core cannot
-   * introspect an opaque decorator list without applying it twice.
+   * Whether every route this planner GENERATES must carry a grant.
+   *
+   * Scope, precisely: CRUD bundles (including recursively-flattened
+   * sub-resources) and operation resources. **Not** checked —
+   * `defineModuleResource` controllers, hand-built
+   * `RocketsResourceConfig` entries, and controllers owned by other
+   * packages (`MeController` in rockets-server, every rockets-server-auth
+   * controller). The planner never sees those routes, so a clean report
+   * says nothing about them.
+   *
+   * Off by default. Detecting a hand-written `AccessControl*` entry in a
+   * bundle's `decorators` is not possible AT PLAN TIME: the CRUD
+   * controller is built downstream, so the metadata does not exist yet
+   * and the only way to read it early is to apply the consumer's opaque
+   * decorator list a second time. A bootstrap-time sweep over discovered
+   * routes would close both that and the scope gap above.
    */
   readonly enforceGrants: boolean;
 }
@@ -61,7 +72,9 @@ export function planAccessControl(
         'buildAppRegistrationPlan: `accessControl.enforceGrants` is on and ' +
           `these authenticated operations carry no grant — ${detail}. ` +
           'Declare `acl` on the resource, or `acl: false` on the operation ' +
-          'to record that it is deliberately ungranted.',
+          'to record that it is deliberately ungranted. (This check covers ' +
+          'generated CRUD and operation routes only — module-resource, ' +
+          'manual and package-owned controllers are not visible here.)',
       );
     }
   }

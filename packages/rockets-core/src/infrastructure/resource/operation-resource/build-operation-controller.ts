@@ -57,7 +57,6 @@ import {
 } from '../../../common/utils/standard-schema.util';
 import { getHandlerClass, isHandlerFunction } from './is-handler-class';
 import { readOperationDtoOpenApiFields } from './openapi-dto-metadata';
-import { buildAclControllerDecorators } from '../define-resource/build-acl';
 
 const logger = new Logger('OperationResource');
 const SWAGGER_API_SECURITY_METADATA = 'swagger/apiSecurity';
@@ -406,9 +405,6 @@ export function buildOperationController(
 
   if (!bearerAuth) {
     AuthPublic({ classLevel: true })(OperationResourceController);
-  }
-  for (const decorator of buildAclControllerDecorators(definition.acl)) {
-    decorator(OperationResourceController);
   }
   if (definition.decorators?.length) {
     for (const decorator of definition.decorators) {

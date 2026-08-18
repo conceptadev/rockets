@@ -34,7 +34,11 @@ export function buildAppRegistrationPlan(args: {
   readonly userMetadata?: RocketsUserMetadataConfig;
   /** Whether the app configured root `accessControl`. */
   readonly accessControl?: boolean;
-  /** Whether every authenticated route must carry an ACL grant. */
+  /**
+   * Whether every route this planner GENERATES must carry an ACL grant.
+   * Module-resource, manual and package-owned controllers are outside
+   * what the planner can see — see `planAccessControl`.
+   */
   readonly enforceGrants?: boolean;
 }): AppRegistrationPlan {
   if (args.userMetadata) {
