@@ -6,6 +6,7 @@ import type {
   DynamicRepositoryModule,
   RepositoryProviderOptions,
 } from '@concepta/nestjs-repository';
+import { assertSingleTypeOrmInstance } from './assert-single-typeorm';
 
 /**
  * TypeORM repository bootstrap whose root entity list is derived by the
@@ -22,6 +23,11 @@ export function defineTypeOrmRepository<
     },
 
     forRoot(entities: ReadonlyArray<Type<PlainLiteralObject>>): DynamicModule {
+      // Last point before Nest's opaque "could not find DataSource
+      // element". Two copies of `typeorm` make that error the only
+      // signal; this replaces it with the paths and the fix.
+      assertSingleTypeOrmInstance();
+
       return TypeOrmModule.forRoot({
         ...connection,
         entities: [...entities],

@@ -3766,10 +3766,28 @@
         "signature": "export declare class TypeOrmTransactionFactory implements TransactionFactoryInterface {\n    private readonly dataSource;\n    constructor(dataSource: DataSource);\n    create(): TransactionInterface;\n}"
       },
       {
+        "name": "assertSingleTypeOrmInstance",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function assertSingleTypeOrmInstance(): void;"
+      },
+      {
         "name": "defineTypeOrmRepository",
         "kind": "function",
         "runtime": true,
         "signature": "export declare function defineTypeOrmRepository<Connection extends TypeOrmModuleOptions>(connection: Connection): RepositoryBootstrap;"
+      },
+      {
+        "name": "hasSingleTypeOrmInstance",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function hasSingleTypeOrmInstance(): boolean;"
+      },
+      {
+        "name": "resolvedTypeOrmRoots",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function resolvedTypeOrmRoots(): string[];"
       }
     ],
     "@concepta/rockets-repository-typeorm/zod": [
