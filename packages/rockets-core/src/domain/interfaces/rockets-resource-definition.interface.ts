@@ -8,6 +8,10 @@ import type {
   CrudResponseConfig,
 } from '../../infrastructure/crud-compat';
 import type { WhereCondition } from '@concepta/nestjs-repository';
+import type {
+  OperationAclConfig,
+  ResourceAclConfig,
+} from './resource-acl.interface';
 
 /**
  * Names of CRUD operations supported by the declarative resource definition.
@@ -198,6 +202,21 @@ export interface ResourceHandlerOverrides {
  * default command/query class.
  */
 export interface ResourceOperationConfig {
+  /**
+   * Access control for this route.
+   *
+   * Omit to inherit the action implied by the operation (`list`/`read` →
+   * read, `create` → create, `update`/`replace` → update,
+   * `delete`/`restore` → delete). `false` marks the route deliberately
+   * ungranted. Requires resource-level `acl` — an action needs a
+   * resource name to grant against.
+   *
+   * Declaring this AND a manual `AccessControl*` entry in `decorators`
+   * is rejected at definition time: upstream merges grant metadata, so
+   * a silent union of the two is exactly the ambiguity that leaves a
+   * route open in production.
+   */
+  readonly acl?: OperationAclConfig;
   /** Request input (body) DTO. Maps to `request.body`. Falls back to `definition.dto.{create,update,replace}`. */
   readonly input?: Type;
   /** Single-item output (response) DTO. Maps to `response.resource`. Falls back to `definition.dto.response`. */
@@ -523,6 +542,25 @@ export interface RocketsResourceDefinition<E extends PlainLiteralObject> {
    * unauthenticated access.
    */
   readonly public?: boolean;
+  /**
+   * Access control for this resource.
+   *
+   * Declaring it makes the generated controller carry
+   * `AccessControlQuery({ service: acl.query })` and every operation
+   * carry an `AccessControlGrant` for the action it implies —
+   * `list`/`read` → read, `create` → create, `update`/`replace` →
+   * update, `delete`/`restore` → delete. Per-operation `acl` overrides
+   * the action or opts out with `false`.
+   *
+   * Rules stay app-owned: this wires the decorators, it does not
+   * generate `acRules` or decide possession (`own` vs `any`). Ownership
+   * still lives in the `CanAccess` query service.
+   *
+   * A bundle that declares `acl` while the app configures no root
+   * `accessControl` fails at boot, as does an authenticated operation
+   * left without a grant.
+   */
+  readonly acl?: ResourceAclConfig;
   /**
    * Sub-resources nested under this resource's URL.
    *

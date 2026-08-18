@@ -1,5 +1,8 @@
-import { DynamicModule } from '@nestjs/common';
-import { AccessControlModule } from '@concepta/nestjs-access-control';
+import { DynamicModule, type Type } from '@nestjs/common';
+import {
+  AccessControlModule,
+  type CanAccess,
+} from '@concepta/nestjs-access-control';
 import { RocketsAccessControlConfig } from '../config/interfaces/rockets-core-options-extras.interface';
 
 /**
@@ -22,6 +25,23 @@ import { RocketsAccessControlConfig } from '../config/interfaces/rockets-core-op
  */
 export function buildAccessControlImport(
   config: RocketsAccessControlConfig,
+  collectedQueryServices: ReadonlyArray<Type<CanAccess>> = [],
 ): DynamicModule {
-  return AccessControlModule.forRoot({ ...config });
+  // `enforceGrants` is a Rockets planner flag, not an upstream option —
+  // forwarding it would land an unknown key in the upstream config.
+  const { enforceGrants: _enforceGrants, ...upstream } = config;
+
+  const declared = upstream.queryServices ?? [];
+  // A class already listed by the app wins: it may be registered with
+  // `useClass`/`useValue` rather than as a bare class provider, and
+  // duplicating the token would shadow that intent.
+  const merged = [
+    ...declared,
+    ...collectedQueryServices.filter((service) => !declared.includes(service)),
+  ];
+
+  return AccessControlModule.forRoot({
+    ...upstream,
+    ...(merged.length ? { queryServices: merged } : {}),
+  });
 }

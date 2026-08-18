@@ -57,6 +57,7 @@ import {
 } from '../../../common/utils/standard-schema.util';
 import { getHandlerClass, isHandlerFunction } from './is-handler-class';
 import { readOperationDtoOpenApiFields } from './openapi-dto-metadata';
+import { buildAclControllerDecorators } from '../define-resource/build-acl';
 
 const logger = new Logger('OperationResource');
 const SWAGGER_API_SECURITY_METADATA = 'swagger/apiSecurity';
@@ -349,6 +350,7 @@ export function buildOperationController(
    * module that owns it.
    */
   locallyProvided: ReadonlySet<unknown> = new Set(),
+  aclDecorators: Readonly<Record<string, readonly MethodDecorator[]>> = {},
 ): Type<unknown> {
   if (definition.public === true) {
     for (const operation of Object.values(definition.operations)) {
@@ -405,6 +407,9 @@ export function buildOperationController(
   if (!bearerAuth) {
     AuthPublic({ classLevel: true })(OperationResourceController);
   }
+  for (const decorator of buildAclControllerDecorators(definition.acl)) {
+    decorator(OperationResourceController);
+  }
   if (definition.decorators?.length) {
     for (const decorator of definition.decorators) {
       decorator(OperationResourceController);
@@ -423,6 +428,7 @@ export function buildOperationController(
       paramsDto,
       bearerAuth,
       locallyProvided,
+      aclDecorators[operation.key],
     );
   }
 
@@ -436,6 +442,7 @@ function attachOperationMethod(
   paramsDto: Type<object> | undefined,
   controllerBearerAuth: boolean,
   locallyProvided: ReadonlySet<unknown>,
+  aclDecorators: readonly MethodDecorator[] | undefined,
 ): void {
   const methodName = operation.key;
   const http = METHOD_DECORATOR[operation.method];
@@ -531,6 +538,9 @@ function attachOperationMethod(
   appendInputOpenApiDecorators(decorators, operation);
   if (operation.decorators?.length) {
     decorators.push(...operation.decorators);
+  }
+  if (aclDecorators?.length) {
+    decorators.push(...aclDecorators);
   }
 
   const descriptor = Object.getOwnPropertyDescriptor(proto, methodName);

@@ -126,6 +126,12 @@ export type {
   ModuleResourceEntityEntry,
 } from './domain/interfaces/module-resource.interface';
 export { ResourceKind } from './domain/interfaces/resource-kind.enum';
+export type {
+  OperationAclConfig,
+  ResourceAclAction,
+  ResourceAclConfig,
+  ResourceAclPlan,
+} from './domain/interfaces/resource-acl.interface';
 export {
   defineModuleResource,
   isModuleResource,

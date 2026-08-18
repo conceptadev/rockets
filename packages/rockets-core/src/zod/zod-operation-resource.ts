@@ -13,6 +13,10 @@ import { defineOperationResource } from '../infrastructure/resource/define-opera
 import { assertValidOperationKey } from '../infrastructure/resource/operation-resource/operation-key';
 import { compileDtoClass } from './zod-dto';
 import { operationDiscriminator } from '../infrastructure/resource/operation-resource/build-operation-controller';
+import type {
+  OperationAclConfig,
+  ResourceAclConfig,
+} from '../domain/interfaces/resource-acl.interface';
 
 type InferIn<TInput> = [TInput] extends [z.ZodObject]
   ? z.output<TInput>
@@ -68,6 +72,12 @@ interface SharedBuilderFields<
   readonly status?: number;
   readonly summary?: string;
   readonly public?: boolean;
+  /**
+   * Access control for this route. `op.read` and `op.delete` infer
+   * `read` / `delete`; `op.write` has no inferable action and must
+   * declare one (or `false`). Requires resource-level `acl`.
+   */
+  readonly acl?: OperationAclConfig;
   readonly transactional?: boolean;
   readonly input?: TInput;
   /** Required: schema to whitelist, or `false` to opt out explicitly. */
@@ -127,6 +137,7 @@ export interface PendingOperation<
   readonly status: number | undefined;
   readonly summary: string | undefined;
   readonly public: boolean | undefined;
+  readonly acl: OperationAclConfig | undefined;
   readonly transactional: boolean | undefined;
   readonly input: z.ZodObject | undefined;
   readonly output: OperationOutputConfig;
@@ -147,6 +158,7 @@ export type OperationRecord = {
     readonly status: number | undefined;
     readonly summary: string | undefined;
     readonly public: boolean | undefined;
+    readonly acl: OperationAclConfig | undefined;
     readonly transactional: boolean | undefined;
     readonly input: z.ZodObject | undefined;
     readonly output: OperationOutputConfig;
@@ -219,6 +231,11 @@ export interface OperationResourceInput<
   readonly path: TBase;
   readonly tags?: readonly string[];
   readonly public?: boolean;
+  /**
+   * Access control for the generated controller. Required before any
+   * operation may declare an `acl` action.
+   */
+  readonly acl?: ResourceAclConfig;
   /**
    * Optional zod object for path params. Keys must be `:params` present on
    * `path`. Validated at request time (400). Improves `ctx.params` typing
@@ -392,6 +409,7 @@ function compileOperation(
     status,
     summary: pending.summary,
     public: pending.public,
+    acl: pending.acl,
     transactional: pending.transactional,
     inputDto,
     outputDto,
@@ -424,6 +442,7 @@ function toPendingRead<
     status: config.status,
     summary: config.summary,
     public: config.public,
+    acl: config.acl,
     transactional: config.transactional,
     input: config.input,
     output: config.output,
@@ -447,6 +466,7 @@ function toPendingWrite<
     status: config.status,
     summary: config.summary,
     public: config.public,
+    acl: config.acl,
     transactional: config.transactional,
     input: config.input,
     output: config.output,
@@ -470,6 +490,7 @@ function toPendingDelete<
     status: config.status,
     summary: config.summary,
     public: config.public,
+    acl: config.acl,
     transactional: config.transactional,
     input: config.input,
     output: config.output,
@@ -525,6 +546,7 @@ export function operationResource<
     path: input.path,
     tags: input.tags,
     public: input.public,
+    acl: input.acl,
     paramsDto,
     operations,
     imports: input.imports,
