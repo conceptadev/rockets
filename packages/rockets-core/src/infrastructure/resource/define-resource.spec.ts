@@ -792,6 +792,44 @@ describe('defineResource', () => {
       expect(list?.response?.paginated).not.toBe(read?.response?.paginated);
     });
 
+    // `paginated` used to be read only alongside `output`, so declaring
+    // it alone was accepted and dropped — the list route kept
+    // serializing (and documenting) the resource-level wrapper.
+    it('honours list.paginated declared without an output', () => {
+      class ListWrapper {
+        data!: unknown[];
+      }
+      const bundle = defineResource({
+        key: 'widget',
+        entity: WidgetEntity,
+        path: 'widgets',
+        tags: ['Widgets'],
+        dto: { response: WidgetResponseDto },
+        operations: { list: { paginated: ListWrapper }, read: {} },
+      });
+
+      const list = narrow(bundle).operations.find(
+        (o) => o.operation === Operation.List,
+      );
+      expect(list?.response?.paginated).toBe(ListWrapper);
+    });
+
+    it('rejects paginated on an operation that serializes no collection', () => {
+      class ListWrapper {
+        data!: unknown[];
+      }
+      expect(() =>
+        defineResource({
+          key: 'widget',
+          entity: WidgetEntity,
+          path: 'widgets',
+          tags: ['Widgets'],
+          dto: { response: WidgetResponseDto },
+          operations: { read: { paginated: ListWrapper } },
+        }),
+      ).toThrow(/only meaningful on `list`/);
+    });
+
     it('uses read.output as the resource-level fallback when they differ', () => {
       class ReadShape {
         id!: string;

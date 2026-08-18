@@ -57,7 +57,7 @@ import { RocketsCoreModule } from '../rockets-core.module';
 import { USER_METADATA_MODULE_ENTITY_KEY } from '../rockets-core.constants';
 import { AuthServerGuard } from '../infrastructure/guards/auth-server.guard';
 import { defineAuthAdapter } from '../infrastructure/auth/define-auth-adapter';
-import { baseEntity, f, zodResource } from '../zod';
+import { baseEntity, f, zodResource, zodSubResource } from '../zod';
 import { defineResource } from '../infrastructure/resource/define-resource';
 
 // ── Auth / metadata fixtures ──
@@ -108,6 +108,21 @@ class ArticleEntity {
   @Column({ type: 'varchar' }) title!: string;
   @Column({ type: 'varchar' }) body!: string;
   @Column({ type: 'varchar', nullable: true }) slug?: string;
+  @Column({ type: 'varchar' }) userId!: string;
+  @CreateDateColumn() dateCreated!: Date;
+  @UpdateDateColumn() dateUpdated!: Date;
+  comments?: CommentEntity[];
+}
+
+@Entity('io_comments')
+class CommentEntity {
+  @PrimaryGeneratedColumn('uuid') id!: string;
+  @Column({ type: 'varchar' }) text!: string;
+  // Nullable: the create override deliberately does not accept it, so
+  // the column must tolerate the narrower body.
+  @Column({ type: 'varchar', nullable: true }) authorNote?: string;
+  @Column({ type: 'uuid' }) articleId!: string;
+  @Column({ type: 'varchar' }) userId!: string;
   @CreateDateColumn() dateCreated!: Date;
   @UpdateDateColumn() dateUpdated!: Date;
 }
@@ -132,7 +147,18 @@ class DerivedEntity {
 const articleSchema = baseEntity({
   title: f.string(),
   body: f.string(),
-  slug: f.string().optional(),
+  // Required by the resource schema, absent from the create override —
+  // that combination is the point of the first block below.
+  slug: f.string(),
+  userId: f.owner(),
+});
+
+/** Sub-resource: the override plumbing must reach it too. */
+const commentSchema = baseEntity({
+  text: f.string(),
+  authorNote: f.string().optional(),
+  articleId: f.string(),
+  userId: f.owner(),
 });
 
 /**
@@ -151,11 +177,43 @@ const articleResource = zodResource({
       output: z.object({ id: z.uuid(), title: z.string() }),
     },
     read: true,
+    // `slug` is derived server-side, so it is not part of this body.
     create: {
       input: z.object({ title: z.string(), body: z.string() }),
     },
+    // Both halves on one operation, and a response narrower than the
+    // resource projection.
+    update: {
+      input: z.object({ title: z.string() }),
+      output: z.object({ id: z.uuid(), title: z.string() }),
+    },
+    // A HARD delete that answers 200 with the removed row — upstream
+    // decides the status from `returnDeleted` alone, `soft` is not
+    // required. `id` is deliberately absent from the projection: the ORM
+    // clears the primary key on the entity it returns from a hard
+    // remove, so documenting it would document a null.
+    delete: {
+      returnDeleted: true,
+      output: z.object({ title: z.string() }),
+    },
   },
   hooks: [],
+  subResources: {
+    comments: zodSubResource({
+      name: 'Comment',
+      schema: commentSchema,
+      entity: CommentEntity,
+      parentKey: 'articleId',
+      segment: 'comments',
+      tags: ['Comments'],
+      operations: {
+        // Narrower than the derived projection: `authorNote` must not
+        // appear on the collection route.
+        list: { output: z.object({ id: z.uuid(), text: z.string() }) },
+        create: { input: z.object({ text: z.string() }) },
+      },
+    }),
+  },
 });
 
 /** Control resource: no overrides anywhere, derived DTOs must survive. */
@@ -216,7 +274,7 @@ describe('zodResource per-operation input/output (e2e)', () => {
         TypeOrmModule.forRoot({
           type: 'sqlite',
           database: ':memory:',
-          entities: [ArticleEntity, DerivedEntity, WidgetEntity],
+          entities: [ArticleEntity, CommentEntity, DerivedEntity, WidgetEntity],
           synchronize: true,
           dropSchema: true,
         }),
@@ -257,10 +315,26 @@ describe('zodResource per-operation input/output (e2e)', () => {
   });
 
   describe('input override', () => {
-    it('accepts a body that omits a field the resource schema requires', () => {
-      // `slug` is required by articleSchema but absent from the create
-      // override — the request above already proved the route accepts it.
-      expect(articleId).toBeDefined();
+    it('accepts a body that omits a field the resource schema requires', async () => {
+      // Without the override this body is a 400: `slug` is required by
+      // `articleSchema`, so the derived create DTO demands it.
+      const res = await request(app.getHttpServer())
+        .post('/articles')
+        .set('Authorization', 'Bearer u1')
+        .send({ title: 'no-slug', body: 'text' })
+        .expect(201);
+      expect(res.body.title).toBe('no-slug');
+    });
+
+    it('the derived create DTO would have required it', () => {
+      const createDto = components.ArticleCreateInputDto as {
+        required?: string[];
+      };
+      const derived = components.DerivedCreateDto as { required?: string[] };
+      expect(createDto.required?.sort()).toEqual(['body', 'title']);
+      // Control: the un-overridden resource still documents its own
+      // required set, so the assertion above is about the override.
+      expect(derived.required).toContain('label');
     });
 
     it('strips keys the override does not declare', async () => {
@@ -286,6 +360,57 @@ describe('zodResource per-operation input/output (e2e)', () => {
         .set('Authorization', 'Bearer u1')
         .send({ title: 'no-body' })
         .expect(400);
+    });
+  });
+
+  describe('update override (input and output on one operation)', () => {
+    it('accepts the narrowed body and serializes the narrowed response', async () => {
+      const created = await request(app.getHttpServer())
+        .post('/articles')
+        .set('Authorization', 'Bearer u1')
+        .send({ title: 'before', body: 'b' })
+        .expect(201);
+
+      const res = await request(app.getHttpServer())
+        .patch(`/articles/${created.body.id}`)
+        .set('Authorization', 'Bearer u1')
+        .send({ title: 'after' })
+        .expect(200);
+
+      expect(Object.keys(res.body).sort()).toEqual(['id', 'title']);
+      expect(res.body.title).toBe('after');
+    });
+
+    it('rejects a body key the update override does not declare', async () => {
+      const created = await request(app.getHttpServer())
+        .post('/articles')
+        .set('Authorization', 'Bearer u1')
+        .send({ title: 'strict', body: 'b' })
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .patch(`/articles/${created.body.id}`)
+        .set('Authorization', 'Bearer u1')
+        .send({ body: 'only-body' })
+        .expect(400);
+    });
+  });
+
+  describe('hard delete returning the removed row', () => {
+    it('answers 200 with the override projection', async () => {
+      const created = await request(app.getHttpServer())
+        .post('/articles')
+        .set('Authorization', 'Bearer u1')
+        .send({ title: 'doomed', body: 'b' })
+        .expect(201);
+
+      const res = await request(app.getHttpServer())
+        .delete(`/articles/${created.body.id}`)
+        .set('Authorization', 'Bearer u1')
+        .expect(200);
+
+      expect(Object.keys(res.body).sort()).toEqual(['title']);
+      expect(res.body.title).toBe('doomed');
     });
   });
 
@@ -331,6 +456,29 @@ describe('zodResource per-operation input/output (e2e)', () => {
       expect(components).toHaveProperty('DerivedCreateDto');
       expect(components).toHaveProperty('DerivedResponseDto');
       expect(components).not.toHaveProperty('DerivedCreateInputDto');
+    });
+  });
+
+  describe('zodSubResource carries the overrides too', () => {
+    it('accepts the narrowed create body and serializes the narrowed list', async () => {
+      await request(app.getHttpServer())
+        .post(`/articles/${articleId}/comments`)
+        .set('Authorization', 'Bearer u1')
+        .send({ text: 'nice' })
+        .expect(201);
+
+      const res = await request(app.getHttpServer())
+        .get(`/articles/${articleId}/comments`)
+        .set('Authorization', 'Bearer u1')
+        .expect(200);
+
+      const [first] = res.body.data;
+      expect(Object.keys(first).sort()).toEqual(['id', 'text']);
+    });
+
+    it('registers the sub-resource override components', () => {
+      expect(components).toHaveProperty('CommentListOutputDto');
+      expect(components).toHaveProperty('CommentCreateInputDto');
     });
   });
 

@@ -421,6 +421,9 @@ Rules worth knowing:
   is rejected on `delete` / `restore` unless `returnDeleted` /
   `returnRestored` makes the route answer with a body. Both fail at
   definition time rather than being dropped silently on the wire.
+  `returnDeleted` applies to a **hard** delete too — upstream sets the
+  status from that flag alone, so `delete: { returnDeleted: true }` with
+  an `output` is a valid shape without `soft: true`.
 
 #### Capability matrix (meta → layers)
 

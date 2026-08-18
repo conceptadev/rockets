@@ -125,12 +125,28 @@ describe('zodResource per-operation input/output validation', () => {
     ).toThrowError(/returnDeleted/);
   });
 
-  it('accepts output on a delete that returns the deleted row', () => {
+  it('accepts output on a soft delete that returns the deleted row', () => {
     expect(
       build({
         read: true,
         delete: {
           soft: true,
+          returnDeleted: true,
+          output: z.object({ id: z.uuid() }),
+        },
+      }),
+    ).not.toThrow();
+  });
+
+  // Upstream `CrudDelete` sets `HttpStatus.OK` from `returnDeleted`
+  // alone and the adapter returns the removed row on a hard delete too
+  // (`crud-delete.decorator.js`, `crud.adapter.js`) — requiring
+  // `soft: true` here would reject a config that works.
+  it('accepts output on a HARD delete that returns the deleted row', () => {
+    expect(
+      build({
+        read: true,
+        delete: {
           returnDeleted: true,
           output: z.object({ id: z.uuid() }),
         },
