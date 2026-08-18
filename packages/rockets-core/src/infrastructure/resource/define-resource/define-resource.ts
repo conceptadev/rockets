@@ -41,7 +41,6 @@ import { buildOperation, mergeProviders } from './build-operation';
 import { materialiseSubResource } from './materialise-sub-resource';
 import type { CrudRequestConfig } from '../../crud-compat';
 import {
-  buildAclControllerDecorators,
   buildAclPlan,
   resolveOperationAcl,
   withAclDecorators,
@@ -165,10 +164,7 @@ export function defineResource<E extends PlainLiteralObject>(
     tags,
     bearerAuth,
     hooks,
-    extra: [
-      ...buildAclControllerDecorators(acl),
-      ...(extraClassDecorators ?? []),
-    ],
+    extra: extraClassDecorators,
   });
 
   const controller: CrudControllerOptionsInterface<PlainLiteralObject> & {
@@ -199,6 +195,7 @@ export function defineResource<E extends PlainLiteralObject>(
       resourceAcl: acl,
       operationAcl: operationOverrides[op]?.acl,
       resourceKey: key,
+      isPublic,
     });
     if (binding.query) operationQueries.push(binding.query);
     const decorators: MethodDecorator[] = [];

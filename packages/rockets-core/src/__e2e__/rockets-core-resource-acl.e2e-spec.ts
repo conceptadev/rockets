@@ -51,6 +51,7 @@ import { RocketsCoreModule } from '../rockets-core.module';
 import { USER_METADATA_MODULE_ENTITY_KEY } from '../rockets-core.constants';
 import { AuthServerGuard } from '../infrastructure/guards/auth-server.guard';
 import { defineResource } from '../infrastructure/resource/define-resource';
+import { defineSubResource } from '../infrastructure/resource/define-sub-resource';
 import { defineAuthAdapter } from '../infrastructure/auth/define-auth-adapter';
 import { buildAppRegistrationPlan } from '../infrastructure/resource/planner';
 import { operationResource } from '../zod';
@@ -101,6 +102,11 @@ class AcService implements AccessControlServiceInterface {
 const acRules = new AccessControl();
 acRules.grant('admin').resource('widget').createAny().readAny().updateAny();
 acRules.grant('user').resource('widget').readAny().updateOwn();
+acRules.grant('admin').resource('gadget').createAny().readAny().updateAny();
+// A sub-resource is a DIFFERENT resource in the rules — it inherits
+// nothing from its parent's `acl.resource`.
+acRules.grant('admin').resource('widget-note').createAny().readAny();
+acRules.grant('user').resource('widget-note').readAny();
 
 /**
  * Never registered by the test module — it must arrive in
@@ -127,10 +133,60 @@ class WidgetAccessQueryService implements CanAccess {
 
 let ownedWidgetId = '';
 
+/**
+ * Approves everything. Paired with {@link StrictQueryService} below it
+ * proves that a per-operation `query` genuinely REPLACES the
+ * resource-level one.
+ *
+ * It has to: upstream merges query metadata across class and handler and
+ * breaks on the first service returning `true`, class-level first. A
+ * class-level default plus a method-level "override" is an OR in which
+ * the permissive one wins — so an operation could never tighten. Rockets
+ * stamps exactly one service per route for this reason.
+ */
+@Injectable()
+class PermissiveQueryService implements CanAccess {
+  async canAccess(): Promise<boolean> {
+    return true;
+  }
+}
+
+/** Refuses everything. */
+@Injectable()
+class StrictQueryService implements CanAccess {
+  async canAccess(): Promise<boolean> {
+    return false;
+  }
+}
+
+@Entity('acl_widget_notes')
+class WidgetNoteEntity {
+  @PrimaryGeneratedColumn('uuid') id!: string;
+  @Column({ type: 'varchar' }) body!: string;
+  @Column({ type: 'uuid' }) widgetId!: string;
+}
+
+class WidgetNoteCreateDto {
+  @Expose() @IsString() @ApiProperty() body!: string;
+}
+class WidgetNoteResponseDto {
+  @Expose() @ApiProperty() id!: string;
+  @Expose() @ApiProperty() body!: string;
+}
+
+@Entity('acl_gadgets')
+class GadgetEntity {
+  @PrimaryGeneratedColumn('uuid') id!: string;
+  @Column({ type: 'varchar' }) label!: string;
+}
+
 @Entity('acl_widgets')
 class WidgetEntity {
   @PrimaryGeneratedColumn('uuid') id!: string;
   @Column({ type: 'varchar' }) label!: string;
+  // Phantom relation property — `subResources` keys are constrained to
+  // `keyof E`, and the join itself lives on the child.
+  notes?: WidgetNoteEntity[];
 }
 
 class WidgetCreateDto {
@@ -182,6 +238,49 @@ const widgetResource = defineResource<WidgetEntity>({
     create: { input: WidgetCreateDto },
     update: { input: WidgetUpdateDto },
   },
+  subResources: {
+    notes: defineSubResource<WidgetNoteEntity>({
+      key: 'widgetNote',
+      entity: WidgetNoteEntity,
+      parentKey: 'widgetId',
+      segment: 'notes',
+      tags: ['Widget notes'],
+      // The path-scope ownership guard is off: `WidgetEntity` carries no
+      // owner column, and what is under test here is the ACL grant, not
+      // path scoping (covered in the sub-resource suite).
+      owner: false,
+      // Its OWN resource name. Nothing is inherited from the parent.
+      acl: { resource: 'widget-note' },
+      dto: { response: WidgetNoteResponseDto },
+      operations: {
+        list: {},
+        create: { input: WidgetNoteCreateDto },
+      },
+    }),
+  },
+});
+
+/**
+ * `read` inherits the permissive resource-level service; `update`
+ * declares its own strict one. If the resource-level service were
+ * stamped at class level, its `true` would short-circuit and the update
+ * would be allowed.
+ */
+const gadgetResource = defineResource<GadgetEntity>({
+  key: 'gadget',
+  entity: GadgetEntity,
+  path: 'gadgets',
+  tags: ['Gadgets'],
+  acl: { resource: 'gadget', query: PermissiveQueryService },
+  dto: { response: WidgetResponseDto },
+  operations: {
+    read: {},
+    create: {},
+    update: {
+      input: WidgetUpdateDto,
+      acl: { action: 'update', query: StrictQueryService },
+    },
+  },
 });
 
 /** A non-CRUD write must name its action — nothing infers it. */
@@ -217,7 +316,7 @@ describe('declarative resource acl (e2e)', () => {
         TypeOrmModule.forRoot({
           type: 'sqlite',
           database: ':memory:',
-          entities: [WidgetEntity],
+          entities: [WidgetEntity, WidgetNoteEntity, GadgetEntity],
           synchronize: true,
           dropSchema: true,
         }),
@@ -226,7 +325,7 @@ describe('declarative resource acl (e2e)', () => {
           auth: defineAuthAdapter(RoleAuthProvider),
           providers: [RoleAuthProvider],
           repository: TypeOrmRepositoryModule,
-          resources: [widgetResource, widgetOps],
+          resources: [widgetResource, widgetOps, gadgetResource],
           accessControl: {
             service: new AcService(),
             settings: { rules: acRules },
@@ -301,6 +400,46 @@ describe('declarative resource acl (e2e)', () => {
       .patch(`/widgets/${other.body.id}`)
       .set('Authorization', 'Bearer user')
       .send({ label: 'steal' })
+      .expect(403);
+  });
+
+  it('grants a sub-resource against its OWN acl.resource', async () => {
+    // `admin` has create on `widget-note`; `user` has read only. Neither
+    // grant mentions `widget`, so this proves the sub-resource is not
+    // borrowing its parent's name.
+    await request(app.getHttpServer())
+      .post(`/widgets/${ownedWidgetId}/notes`)
+      .set('Authorization', 'Bearer admin')
+      .send({ body: 'admin note' })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post(`/widgets/${ownedWidgetId}/notes`)
+      .set('Authorization', 'Bearer user')
+      .send({ body: 'nope' })
+      .expect(403);
+  });
+
+  it('a per-operation query REPLACES the resource-level one', async () => {
+    const created = await request(app.getHttpServer())
+      .post('/gadgets')
+      .set('Authorization', 'Bearer admin')
+      .send({ label: 'g1' })
+      .expect(201);
+
+    // `read` inherits the permissive service.
+    await request(app.getHttpServer())
+      .get(`/gadgets/${created.body.id}`)
+      .set('Authorization', 'Bearer admin')
+      .expect(200);
+
+    // `update` declared a strict one. If the permissive resource-level
+    // service were also consulted (class level, first, break-on-true)
+    // this would be a 200.
+    await request(app.getHttpServer())
+      .patch(`/gadgets/${created.body.id}`)
+      .set('Authorization', 'Bearer admin')
+      .send({ label: 'g2' })
       .expect(403);
   });
 
@@ -394,6 +533,36 @@ describe('declarative resource acl — boot failures', () => {
         operations: { list: { acl: 'read' } },
       }),
     ).toThrow(/needs a resource-level/);
+  });
+
+  it('rejects a public resource that also declares acl', () => {
+    expect(() =>
+      defineResource<WidgetEntity>({
+        key: 'widget',
+        entity: WidgetEntity,
+        path: 'widgets',
+        tags: ['Widgets'],
+        public: true,
+        acl: { resource: 'widget' },
+        dto: { response: WidgetResponseDto },
+        operations: { list: {} },
+      }),
+    ).toThrow(/public but carries an `acl` grant/);
+  });
+
+  it('allows a public resource whose operations opt out explicitly', () => {
+    expect(() =>
+      defineResource<WidgetEntity>({
+        key: 'widget',
+        entity: WidgetEntity,
+        path: 'widgets',
+        tags: ['Widgets'],
+        public: true,
+        acl: { resource: 'widget' },
+        dto: { response: WidgetResponseDto },
+        operations: { list: { acl: false } },
+      }),
+    ).not.toThrow();
   });
 
   it('rejects an operationResource write with no acl action', () => {

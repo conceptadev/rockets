@@ -587,7 +587,8 @@ operationResource({
 | Bundle declares `acl`, app configures no root `accessControl` | **throw** |
 | `operations.X.acl` action with no resource-level `acl` | **throw** |
 | `op.write` with no `acl` on an ACL-enabled operation resource | **throw** |
-| `accessControl.enforceGrants: true` and an authenticated op carries no grant | **throw** |
+| `public: true` on an operation that also carries a grant | **throw** |
+| `accessControl.enforceGrants: true` and a **generated** authenticated op carries no grant | **throw** |
 | `accessControl.enforceGrants: true` with no root `accessControl` | **throw** |
 
 `acl.query` services are collected across every bundle and merged into
@@ -596,25 +597,78 @@ module specifically, because the upstream guard strict-resolves from its
 own host module. You no longer declare a query service and then 500 at
 request time because nobody registered it.
 
-### `enforceGrants` is opt-in, and why
+### One `CanAccess` per route, and why `query` really overrides
 
-`enforceGrants` is the secure-by-default switch: with it on, an
-authenticated route with no grant fails the boot instead of serving.
-It defaults to **off** because core cannot tell whether a hand-written
-`AccessControl*` entry in a resource's `decorators` guards a route
-without applying that opaque decorator list a second time — and applying
-a consumer's decorators twice is not something a framework may do. Apps
-that have migrated to `acl` should turn it on; apps still using manual
-grants must not.
+The service is stamped on the **route**, never on the controller: the
+operation's own `query` when it declares one, otherwise the
+resource-level default.
 
-For the same reason, `acl` and a manual `AccessControl*` decorator on the
-same operation are **not** detected and rejected — they are documented as
+That is not a style choice. Upstream reads query metadata with
+`getAllAndMerge([getClass(), getHandler()])` and then loops the resulting
+services, **breaking on the first one that returns `true`** — class-level
+first. A class-level default plus a method-level "override" is therefore
+an OR in which the *permissive* service wins, and an operation could
+never tighten. Stamping exactly one entry per route is what makes
+`acl: { action, query }` mean what it says.
+
+A consequence worth knowing: a resource-level `query` is consulted on
+**every** route of the resource, including collection routes that have no
+row to own. Return early there (`if (!params.id) return true`).
+
+### Sub-resources do not inherit `acl`
+
+A sub-resource is a different resource in your `acRules`. It declares its
+own `acl: { resource: 'widget-note' }`; nothing is taken from the parent's
+`acl.resource`. If it declares none, it has no grants — and shows up in
+the `enforceGrants` report under its own key.
+
+### `enforceGrants` — scope and why it is opt-in
+
+With it on, a route the planner generates that is authenticated and
+carries no grant fails the boot instead of serving.
+
+**It covers exactly what the planner generates:** CRUD bundles (including
+sub-resources, which are flattened recursively) and operation resources.
+It does **not** cover:
+
+- `defineModuleResource({ module: { controllers } })` controllers
+- hand-built `RocketsResourceConfig` entries
+- controllers owned by other packages — `MeController` in
+  `rockets-server`, every `rockets-server-auth` controller
+
+Those routes never reach the planner, so a passing boot says nothing
+about them. Treat `enforceGrants` as "the generated surface is covered",
+not "the app is covered".
+
+It defaults to **off** because a hand-written `AccessControl*` entry in a
+bundle's `decorators` cannot be detected **at plan time**: the CRUD
+controller is built downstream of the planner, so the grant metadata does
+not exist yet, and the only way to read it early would be to apply the
+consumer's opaque decorator list a second time. Turning the default on
+would reject every working manual-grant app. A bootstrap-time sweep over
+discovered routes would close both this and the scope gap above.
+
+For the same reason, `acl` plus a manual `AccessControl*` decorator on the
+same operation is **not** detected and rejected — they are documented as
 mutually exclusive. Upstream's grant metadata is a `SetMetadata` write, so
 combining them means one silently wins. Use one or the other per bundle.
 
-Note that `acl.query` binds at **class** level, so the service is consulted
-on every route of the resource, including collection routes that have no
-row to own. Return early there.
+### `public` and `acl` do not mix
+
+A public route carries no authenticated user, so role resolution yields
+nothing and every grant check fails — the route would 403 for everyone.
+Declaring both on the same operation throws at definition time. Opt the
+operation out with `acl: false` if a public resource needs one ungranted
+route.
+
+### `rockets-server-auth` registers its own `AccessControlModule`
+
+`defineRocketsAuth` wires access control through its own
+`buildAccessControlImport` call, which does not receive the collected
+query services. In an app composing auth **and** `RocketsCoreModule` with
+`accessControl` on both, `acl.query` auto-registration applies to the
+core registration only — list auth-side services in that module's
+`queryServices` explicitly.
 
 ---
 

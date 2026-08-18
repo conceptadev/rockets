@@ -29,16 +29,37 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
   check-access handler returns `true` for any route with no grant
   metadata, so a forgotten decorator is an authenticated-but-open route
   that no test notices. `accessControl.enforceGrants: true` turns that
-  into a boot failure. It is opt-in because core cannot tell whether a
-  hand-written `AccessControl*` entry in a resource's `decorators` guards
-  a route without applying that opaque decorator list a second time —
-  documented in `CONFIGURATION.md` §5a along with the reason `acl` and
-  manual grant decorators are mutually exclusive rather than merged.
+  into a boot failure — **for the routes the planner generates**: CRUD
+  bundles (sub-resources included) and operation resources.
+  `defineModuleResource` controllers, hand-built resource configs and
+  controllers owned by other packages (`MeController`, the
+  rockets-server-auth controllers) are never seen by the planner, so a
+  passing boot is not a statement about them. It is opt-in because a
+  hand-written `AccessControl*` entry in a bundle's `decorators` cannot
+  be detected at plan time — the CRUD controller is built downstream, so
+  the metadata does not exist yet. Both limits, and the reason `acl` and
+  manual grant decorators are mutually exclusive rather than merged, are
+  in `CONFIGURATION.md` §5a.
+
+  The `CanAccess` service is stamped per ROUTE, never on the controller.
+  Upstream merges query metadata across class and handler and breaks on
+  the first service returning `true`, class-level first — so a
+  class-level default plus a method-level override is an OR in which the
+  permissive service wins, and an operation could never tighten. One
+  entry per route is what makes `acl: { action, query }` an override.
 
   A non-CRUD write must name its action: `POST /pets/:id/transfer` is an
   update, not a create, so `op.write` has no default and throws without
-  one. Rules stay app-owned — this wires decorators and registrations, it
-  does not generate `acRules` or decide possession.
+  one. `public: true` together with a grant also throws — a public route
+  has no user to resolve roles from, so the grant could only ever 403.
+  Sub-resources do not inherit the parent's `acl.resource`; they declare
+  their own. Rules stay app-owned — this wires decorators and
+  registrations, it does not generate `acRules` or decide possession.
+
+  **Type-level breaking change:** `CrudResource` and `OperationResource`
+  gained a required `acl` field. Bundles built by `defineResource` /
+  `defineSubResource` / `defineOperationResource` are unaffected; a
+  hand-constructed bundle object must add it.
 - **Per-operation `input` / `output` on `zodResource` / `zodSubResource`
   (issue #57).** The zod path had a single schema-derived projection, so
   an app chose between controlled projection and automatic OpenAPI. Each

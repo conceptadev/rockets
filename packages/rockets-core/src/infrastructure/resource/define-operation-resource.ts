@@ -31,9 +31,13 @@ const READ_LIKE_METHODS: ReadonlySet<OperationHttpMethod> = new Set(['GET']);
  */
 function defaultOperationFor(
   method: OperationHttpMethod,
-): ResourceOperationName {
+): ResourceOperationName | undefined {
   if (method === 'DELETE') return Operation.Delete;
-  return Operation.Read;
+  if (READ_LIKE_METHODS.has(method)) return Operation.Read;
+  // A write has no inferable action. Returning `Operation.Read` as a
+  // fallback would silently grant READ on a write if the fail-fast above
+  // were ever loosened; `undefined` makes that a loud failure instead.
+  return undefined;
 }
 
 /**
@@ -99,16 +103,27 @@ export function defineOperationResource(
       );
     }
 
+    // `Operation.Update` is a placeholder that is never read: the branch
+    // above guarantees an explicit `acl` action whenever the method has
+    // no inferable one AND access control is in play, and with no `acl`
+    // anywhere `resolveOperationAcl` returns before touching it.
+    const inferred = defaultOperationFor(operation.method) ?? Operation.Update;
+
+    const isPublic = operation.public ?? definition.public ?? false;
+
     const binding = resolveOperationAcl({
       label: key,
-      operation: defaultOperationFor(operation.method),
+      operation: inferred,
       resourceAcl: definition.acl,
       operationAcl: operation.acl,
       resourceKey: `operationResource("${definition.path}")`,
+      isPublic,
     });
 
     const decorators: MethodDecorator[] = [];
     if (binding.grant) decorators.push(binding.grant);
+    // Stamped per route, never at class level — see `OperationAclBinding`
+    // for why a class-level default cannot be overridden by a method.
     if (binding.query) {
       operationQueries.push(binding.query);
       decorators.push(
@@ -117,19 +132,14 @@ export function defineOperationResource(
     }
     if (decorators.length) aclDecorators[key] = decorators;
 
-    const isPublic = operation.public ?? definition.public ?? false;
     if (!isPublic && definition.acl === undefined && operation.acl !== false) {
       ungrantedOperations.push(key);
     }
   }
 
   const acl: ResourceAclPlan = {
-    queryServices: [
-      ...new Set([
-        ...(definition.acl?.query ? [definition.acl.query] : []),
-        ...operationQueries,
-      ]),
-    ],
+    // Only what a route actually carries — see `buildAclPlan`.
+    queryServices: [...new Set(operationQueries)],
     ungrantedOperations,
     declared: definition.acl !== undefined,
     label: `operationResource("${definition.path}")`,
