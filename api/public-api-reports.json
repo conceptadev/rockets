@@ -2125,7 +2125,7 @@
         "name": "AfterCreateReloadHook",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare abstract class AfterCreateReloadHook<E extends PlainLiteralObject> extends PassthroughEntityHookBase<E> {\n    protected repo: RepositoryInterface<E>;\n    afterCreate(created: E): Promise<E>;\n    static for<E extends PlainLiteralObject>(entity: Type<E>): Type<AfterCreateReloadHook<E>>;\n}"
+        "signature": "export declare abstract class AfterCreateReloadHook<E extends PlainLiteralObject> extends PassthroughEntityHookBase<E> {\n    protected repo: RepositoryInterface<E>;\n    afterCreate(created: E, ctx?: EntityHookContext): Promise<E>;\n    static for<E extends PlainLiteralObject>(entity: Type<E>): Type<AfterCreateReloadHook<E>>;\n}"
       },
       {
         "name": "AppContextHost",

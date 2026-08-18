@@ -302,7 +302,14 @@ const parentResource = defineResource<ParentEntity>({
   operations: {
     list: { output: ParentResponseDto },
     read: { output: ParentResponseDto },
-    create: { input: ParentCreateDto, output: ParentResponseDto },
+    // `transactional` is what exposes the reload hook's `ctx`: the row is
+    // inserted inside the transaction, so a reload that does not join it
+    // cannot see the row and the eager relation goes missing.
+    create: {
+      input: ParentCreateDto,
+      output: ParentResponseDto,
+      transactional: true,
+    },
     delete: { soft: true, returnDeleted: true },
   },
   subResources: {

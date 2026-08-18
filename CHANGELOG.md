@@ -370,6 +370,18 @@ before running the full e2e suite.
   visibility. Guard lookups still run before the operation transaction —
   Nest executes guards ahead of interceptors — which is now stated rather
   than implied.
+- **`AfterCreateReloadHook` reloaded outside the create's transaction.**
+  It called `findOne` with no `ctx`, so `getRepo(ctx)` on the TypeORM
+  adapter returned the DEFAULT repository instead of the transaction's —
+  a different `EntityManager`. Under `transactional: true` the row is
+  still uncommitted, so on any driver that gives a transaction its own
+  connection (Postgres, MySQL) the reload found nothing and the eager
+  relation silently vanished from the create response. In-memory SQLite
+  shares one connection, which is why the existing e2e suite could not
+  see it. The hook now forwards its `ctx`, which also means the reload
+  runs the entity's own read hooks — so the create response shows what a
+  read would show, and a column a read hook hides no longer reappears on
+  the way out of a create.
 - **Three-level (and deeper) sub-resource nesting returned `500`.** The
   composed `request.params` for a nested sub-resource declared only its
   own `id` and its immediate parent's param, so the upstream query parser
