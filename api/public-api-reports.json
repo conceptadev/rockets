@@ -223,7 +223,7 @@
         "name": "ExceptionsFilter",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class RocketsCoreExceptionsFilter implements ExceptionFilter {\n    private readonly httpAdapterHost;\n    private readonly logger;\n    constructor(httpAdapterHost: HttpAdapterHost);\n    catch(rawException: ExceptionInterface, host: ArgumentsHost): void;\n    private unwrapToHttpException;\n    private unwrapToClientRuntimeException;\n}"
+        "signature": "export declare class RocketsCoreExceptionsFilter implements ExceptionFilter {\n    private readonly httpAdapterHost;\n    private readonly logger;\n    private readonly serializer;\n    constructor(httpAdapterHost: HttpAdapterHost, serializer?: RocketsErrorSerializerInterface);\n    catch(rawException: ExceptionInterface, host: ArgumentsHost): void;\n    protected unwrapToHttpException(exception: unknown): HttpException | undefined;\n    protected unwrapToClientRuntimeException(exception: unknown): RuntimeException | undefined;\n}"
       },
       {
         "name": "GetUserMetadataHandler",
@@ -409,7 +409,7 @@
         "name": "RocketsCoreExceptionsFilter",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class RocketsCoreExceptionsFilter implements ExceptionFilter {\n    private readonly httpAdapterHost;\n    private readonly logger;\n    constructor(httpAdapterHost: HttpAdapterHost);\n    catch(rawException: ExceptionInterface, host: ArgumentsHost): void;\n    private unwrapToHttpException;\n    private unwrapToClientRuntimeException;\n}"
+        "signature": "export declare class RocketsCoreExceptionsFilter implements ExceptionFilter {\n    private readonly httpAdapterHost;\n    private readonly logger;\n    private readonly serializer;\n    constructor(httpAdapterHost: HttpAdapterHost, serializer?: RocketsErrorSerializerInterface);\n    catch(rawException: ExceptionInterface, host: ArgumentsHost): void;\n    protected unwrapToHttpException(exception: unknown): HttpException | undefined;\n    protected unwrapToClientRuntimeException(exception: unknown): RuntimeException | undefined;\n}"
       },
       {
         "name": "RocketsCoreModule",
@@ -2554,6 +2554,12 @@
         "signature": "ROCKETS_DISABLE_GUARDS_TOKEN = \"AUTHENTICATION_MODULE_DISABLE_GUARDS_TOKEN\""
       },
       {
+        "name": "ROCKETS_ERROR_SERIALIZER_TOKEN",
+        "kind": "value",
+        "runtime": true,
+        "signature": "ROCKETS_ERROR_SERIALIZER_TOKEN: unique symbol"
+      },
+      {
         "name": "RegisteredRoute",
         "kind": "interface",
         "runtime": false,
@@ -2677,7 +2683,7 @@
         "name": "RocketsCoreExceptionsFilter",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class RocketsCoreExceptionsFilter implements ExceptionFilter {\n    private readonly httpAdapterHost;\n    private readonly logger;\n    constructor(httpAdapterHost: HttpAdapterHost);\n    catch(rawException: ExceptionInterface, host: ArgumentsHost): void;\n    private unwrapToHttpException;\n    private unwrapToClientRuntimeException;\n}"
+        "signature": "export declare class RocketsCoreExceptionsFilter implements ExceptionFilter {\n    private readonly httpAdapterHost;\n    private readonly logger;\n    private readonly serializer;\n    constructor(httpAdapterHost: HttpAdapterHost, serializer?: RocketsErrorSerializerInterface);\n    catch(rawException: ExceptionInterface, host: ArgumentsHost): void;\n    protected unwrapToHttpException(exception: unknown): HttpException | undefined;\n    protected unwrapToClientRuntimeException(exception: unknown): RuntimeException | undefined;\n}"
       },
       {
         "name": "RocketsCoreModule",
@@ -2714,6 +2720,18 @@
         "kind": "type",
         "runtime": false,
         "signature": "export type RocketsEntityHookForResource<E extends PlainLiteralObject> = Type<EntityHookBase<E>> | Type<PassthroughEntityHookBase<E>>;"
+      },
+      {
+        "name": "RocketsErrorContext",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface RocketsErrorContext {\n    readonly statusCode: number;\n    readonly errorCode: string;\n    readonly message: unknown;\n    readonly exception: ExceptionInterface | HttpException;\n    readonly originalException: unknown;\n}"
+      },
+      {
+        "name": "RocketsErrorSerializerInterface",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface RocketsErrorSerializerInterface {\n    serialize(context: RocketsErrorContext): unknown;\n}"
       },
       {
         "name": "RocketsRepositoryModuleInterface",
@@ -2936,6 +2954,12 @@
         "kind": "function",
         "runtime": true,
         "signature": "export declare function createPaginatedDto<TResource>(resourceDto: Type<TResource>, className?: string): Type;"
+      },
+      {
+        "name": "defaultErrorSerializer",
+        "kind": "value",
+        "runtime": true,
+        "signature": "defaultErrorSerializer: RocketsErrorSerializerInterface"
       },
       {
         "name": "defaultParentParam",
