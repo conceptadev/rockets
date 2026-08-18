@@ -26,6 +26,20 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
   `output` on a `delete`/`restore` that answers `204`, throw at definition
   time instead of being dropped on the wire. Documented in the core
   README (Zod-first resources → "Per-operation `input` / `output`").
+- **Pluggable error envelope (issue #55).** `RocketsCoreExceptionsFilter`
+  hardcoded `{ statusCode, errorCode, message, timestamp }` and kept its
+  unwrap helpers private, so an app with its own envelope re-implemented
+  the whole filter — and had to preserve the `context.originalError`
+  chain while doing it, because missing it turns every hook `409` into a
+  `500`. The body shape is now a strategy:
+  `RocketsErrorSerializerInterface`, passed as the filter's second
+  constructor argument or provided under
+  `ROCKETS_ERROR_SERIALIZER_TOKEN` when the filter is registered through
+  Nest. `defaultErrorSerializer` is exported so a custom envelope can
+  extend it. Status resolution, the domain-exception → 4xx mapping and
+  the unwrap chain stay in the filter deliberately; the two unwrap
+  helpers became `protected` for subclasses that need more than the body.
+  Default output is unchanged.
 - Firestore adapter transactions (issue #44 P1-1): `runInFirestoreTransaction` /
   `FirestoreRepository.transaction` (callback-scoped, retry-safe),
   `FIRESTORE_BACKEND` DI export, `transactionFactories` + `options.ctx`

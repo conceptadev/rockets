@@ -339,6 +339,50 @@ export class HealthController {
 }
 ```
 
+### Customise the error envelope
+
+`RocketsCoreExceptionsFilter` replies with
+`{ statusCode, errorCode, message, timestamp }`. To ship a different
+shape, provide a serializer instead of forking the filter — the fork is
+what used to cost apps the `context.originalError` unwrap chain, and
+without that chain every hook `409` becomes a `500`.
+
+```typescript
+import {
+  RocketsCoreExceptionsFilter,
+  defaultErrorSerializer,
+  type RocketsErrorContext,
+  type RocketsErrorSerializerInterface,
+} from '@concepta/rockets-core';
+
+class TraceEnvelope implements RocketsErrorSerializerInterface {
+  serialize(context: RocketsErrorContext) {
+    // Extend the default rather than restating its keys.
+    return { ...(defaultErrorSerializer.serialize(context) as object), traceId };
+  }
+}
+
+app.useGlobalFilters(
+  new RocketsCoreExceptionsFilter(httpAdapterHost, new TraceEnvelope()),
+);
+```
+
+Registering the filter through Nest instead? Provide the token:
+
+```typescript
+providers: [
+  { provide: APP_FILTER, useClass: RocketsCoreExceptionsFilter },
+  { provide: ROCKETS_ERROR_SERIALIZER_TOKEN, useClass: TraceEnvelope },
+]
+```
+
+The serializer decides the **body only**. The status code, the domain
+exception → 4xx mapping and the unwrap chain stay in the filter, because
+those are the parts apps kept getting wrong. `RocketsErrorContext` also
+carries `exception` (post-unwrap) and `originalException` (as thrown) for
+correlation IDs and logging. Need more than the body? The unwrap helpers
+are `protected`, so a subclass can reuse them.
+
 ### Zod-first resources (`@concepta/rockets-core/zod`)
 
 The zod-first resource layer ships as the subpath export

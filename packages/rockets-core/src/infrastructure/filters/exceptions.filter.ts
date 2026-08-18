@@ -9,10 +9,17 @@ import {
   ArgumentsHost,
   ExceptionFilter,
   HttpException,
+  Inject,
   Logger,
+  Optional,
 } from '@nestjs/common';
 import { isObject } from '@nestjs/common/utils/shared.utils';
 import { HttpAdapterHost } from '@nestjs/core';
+import {
+  defaultErrorSerializer,
+  ROCKETS_ERROR_SERIALIZER_TOKEN,
+  type RocketsErrorSerializerInterface,
+} from './error-serializer';
 
 export const ERROR_MESSAGE_FALLBACK = 'Internal Server Error';
 
@@ -67,11 +74,31 @@ function flattenValidationErrors(
   return messages;
 }
 
+/**
+ * Global exception filter: unwraps the repository/CRUD wrapping chain so
+ * a hook's `409` stays a `409`, maps domain exceptions to their HTTP
+ * status, and writes the response body.
+ *
+ * The body SHAPE is pluggable — pass a
+ * {@link RocketsErrorSerializerInterface} as the second constructor
+ * argument, or provide {@link ROCKETS_ERROR_SERIALIZER_TOKEN} when the
+ * filter is registered through Nest. Status resolution and the unwrap
+ * chain are deliberately not pluggable: forking the whole filter to
+ * change three keys is what used to cost apps that behaviour.
+ */
 @Catch()
 export class RocketsCoreExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(RocketsCoreExceptionsFilter.name);
+  private readonly serializer: RocketsErrorSerializerInterface;
 
-  constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
+  constructor(
+    private readonly httpAdapterHost: HttpAdapterHost,
+    @Optional()
+    @Inject(ROCKETS_ERROR_SERIALIZER_TOKEN)
+    serializer?: RocketsErrorSerializerInterface,
+  ) {
+    this.serializer = serializer ?? defaultErrorSerializer;
+  }
 
   catch(rawException: ExceptionInterface, host: ArgumentsHost): void {
     const { httpAdapter } = this.httpAdapterHost;
@@ -151,12 +178,13 @@ export class RocketsCoreExceptionsFilter implements ExceptionFilter {
       }
     }
 
-    const responseBody = {
+    const responseBody = this.serializer.serialize({
       statusCode,
       errorCode,
       message,
-      timestamp: new Date().toISOString(),
-    };
+      exception,
+      originalException: rawException,
+    });
 
     httpAdapter.reply(ctx.getResponse(), responseBody, statusCode);
   }
@@ -177,7 +205,9 @@ export class RocketsCoreExceptionsFilter implements ExceptionFilter {
    * rather than throwing `HttpException` — those surface via
    * `unwrapToRuntimeException` below.
    */
-  private unwrapToHttpException(exception: unknown): HttpException | undefined {
+  protected unwrapToHttpException(
+    exception: unknown,
+  ): HttpException | undefined {
     let current: unknown = exception;
     const seen = new Set<unknown>();
     while (current && !seen.has(current)) {
@@ -200,7 +230,7 @@ export class RocketsCoreExceptionsFilter implements ExceptionFilter {
    * membrane (upstream wrapping loses `originalError` — see above).
    * Returns `undefined` if no 4xx `RuntimeException` is found.
    */
-  private unwrapToClientRuntimeException(
+  protected unwrapToClientRuntimeException(
     exception: unknown,
   ): RuntimeException | undefined {
     let current: unknown = exception;
