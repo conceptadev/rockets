@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
+import { Module } from '@nestjs/common';
 import { Operation } from '@concepta/nestjs-core';
 
 import { ResourceKind } from '../../domain/interfaces/resource-kind.enum';
@@ -100,6 +101,103 @@ describe('defineOperationResource', () => {
         },
       }),
     ).toThrow(/status 204/);
+  });
+
+  it('does not auto-register a handler already listed in providers', () => {
+    class EchoHandler {
+      handle() {
+        return { ok: true };
+      }
+    }
+
+    const bundle = defineOperationResource({
+      path: 'api/echo-prov',
+      providers: [
+        { provide: EchoHandler, useValue: { handle: () => ({ ok: true }) } },
+      ],
+      operations: {
+        ping: {
+          key: 'ping',
+          method: 'GET',
+          path: '',
+          status: 200,
+          outputDisabled: true,
+          handler: EchoHandler,
+        },
+      },
+    });
+
+    expect(bundle.providers).toHaveLength(1);
+    expect(bundle.providers[0]).toEqual({
+      provide: EchoHandler,
+      useValue: expect.objectContaining({ handle: expect.any(Function) }),
+    });
+  });
+
+  it('does not auto-register a handler exported by an imported module', () => {
+    class ImportedHandler {
+      handle() {
+        return { ok: true };
+      }
+    }
+
+    @Module({
+      providers: [ImportedHandler],
+      exports: [ImportedHandler],
+    })
+    class HandlerHostModule {}
+
+    const bundle = defineOperationResource({
+      path: 'api/echo-import',
+      imports: [HandlerHostModule],
+      operations: {
+        ping: {
+          key: 'ping',
+          method: 'GET',
+          path: '',
+          status: 200,
+          outputDisabled: true,
+          handler: ImportedHandler,
+        },
+      },
+    });
+
+    expect(bundle.providers).toEqual([]);
+    expect(bundle.imports).toEqual([HandlerHostModule]);
+  });
+
+  it('does not auto-register a handler exported by a DynamicModule import', () => {
+    class DynHandler {
+      handle() {
+        return { ok: true };
+      }
+    }
+
+    @Module({})
+    class DynHostModule {}
+
+    const bundle = defineOperationResource({
+      path: 'api/echo-dyn',
+      imports: [
+        {
+          module: DynHostModule,
+          providers: [DynHandler],
+          exports: [DynHandler],
+        },
+      ],
+      operations: {
+        ping: {
+          key: 'ping',
+          method: 'GET',
+          path: '',
+          status: 200,
+          outputDisabled: true,
+          handler: DynHandler,
+        },
+      },
+    });
+
+    expect(bundle.providers).toEqual([]);
   });
 });
 
