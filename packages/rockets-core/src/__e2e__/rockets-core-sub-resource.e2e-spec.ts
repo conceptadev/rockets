@@ -61,8 +61,10 @@ import { AfterCreateReloadHook } from '../infrastructure/hooks/after-create-relo
 import { OwnerStampHook } from '../infrastructure/hooks/owner-stamp.hook';
 import {
   EntityHook,
+  type EntityHookContext,
   PassthroughEntityHookBase,
 } from '../infrastructure/hooks/entity-hook';
+import { getCrudContext } from '../utils/get-actor.helper';
 import { defineAuthAdapter } from '../infrastructure/auth/define-auth-adapter';
 
 // ── Auth fixture ──
@@ -109,10 +111,21 @@ class ChildEntity {
   @Column({ type: 'varchar' }) title!: string;
   @Column({ type: 'uuid' }) parentId!: string;
   @Column({ type: 'uuid' }) categoryId!: string;
+  // Owner column for the GRANDCHILD's PathScopeGuard — a three-level
+  // nest scopes its parent lookup against the middle entity.
+  @Column({ type: 'varchar' }) userId!: string;
   @ManyToOne(() => CategoryEntity, { eager: true })
   @JoinColumn({ name: 'categoryId' })
   category?: CategoryEntity;
   @DeleteDateColumn() dateDeleted?: Date;
+  notes?: GrandchildEntity[];
+}
+
+@Entity('grandchildren')
+class GrandchildEntity {
+  @PrimaryGeneratedColumn('uuid') id!: string;
+  @Column({ type: 'varchar' }) label!: string;
+  @Column({ type: 'uuid' }) childId!: string;
 }
 
 @Entity('children_no_reload')
@@ -166,6 +179,16 @@ class ChildCreateDto {
   @Expose() @IsUUID() @ApiProperty() categoryId!: string;
 }
 
+class GrandchildCreateDto {
+  @Expose() @IsString() @ApiProperty() label!: string;
+}
+
+class GrandchildResponseDto {
+  @Expose() @ApiProperty() id!: string;
+  @Expose() @ApiProperty() label!: string;
+  @Expose() @ApiProperty() childId!: string;
+}
+
 class ChildResponseDto {
   @Expose() @ApiProperty() id!: string;
   @Expose() @ApiProperty() title!: string;
@@ -217,27 +240,38 @@ class MetaModule {}
  * Models the field case from #45: retention expressed as non-existence.
  * A retired parent is invisible to every read of the parent resource —
  * and therefore must be invisible to its sub-resources too.
+ *
+ * Deliberately gated on `getCrudContext(ctx)`, the shape this repo's own
+ * JSDoc teaches ("HTTP path only; an internal repository call is the
+ * caller's responsibility"). A replay context without `params` /
+ * `operation` makes that guard return `undefined` and the hook fail
+ * OPEN — so this fixture is what proves the guard hands over a real
+ * CRUD context, not just a hook list.
  */
 @EntityHook({ entity: ParentEntity })
 @Injectable()
 class ParentRetentionHook extends PassthroughEntityHookBase<ParentEntity> {
   override beforeFindOne(
     options: RepositoryFindOneOptions<ParentEntity>,
+    ctx?: EntityHookContext,
   ): RepositoryFindOneOptions<ParentEntity> {
-    return this.live(options);
+    return this.live(options, ctx);
   }
 
   override beforeFindAndCount(
     options: RepositoryFindOptions<ParentEntity>,
+    ctx?: EntityHookContext,
   ): RepositoryFindOptions<ParentEntity> {
-    return this.live(options);
+    return this.live(options, ctx);
   }
 
   private live<
     T extends
       | RepositoryFindOptions<ParentEntity>
       | RepositoryFindOneOptions<ParentEntity>,
-  >(options: T): T {
+  >(options: T, ctx: EntityHookContext | undefined): T {
+    const crudCtx = getCrudContext(ctx);
+    if (!crudCtx) return options;
     const clause = Where.eq<ParentEntity>('retired', false);
     return {
       ...options,
@@ -281,12 +315,35 @@ const parentResource = defineResource<ParentEntity>({
       // `reloadAfterCreate` opts the child into the eager-relation reload.
       owner: 'userId',
       reloadAfterCreate: true,
+      hooks: [OwnerStampHook.for(ChildEntity)],
       relations: (rel) => [rel(CategoryEntity, 'category')],
       operations: {
         list: { output: ChildResponseDto },
         read: { output: ChildResponseDto },
         create: { input: ChildCreateDto, output: ChildResponseDto },
         delete: { soft: true, returnDeleted: true },
+      },
+      // Third level. Its guard looks the CHILD up, replaying the child's
+      // own hooks — which include the `PathScopeHook` binding the child
+      // to `:parentId`. Without a CRUD context in that replay the FK
+      // clause disappears and a child of a DIFFERENT parent (same owner)
+      // becomes reachable through this path.
+      subResources: {
+        notes: defineSubResource<GrandchildEntity>({
+          key: 'grandchild',
+          entity: GrandchildEntity,
+          parentKey: 'childId',
+          segment: 'notes',
+          tags: ['Grandchildren'],
+          owner: 'userId',
+          operations: {
+            list: { output: GrandchildResponseDto },
+            create: {
+              input: GrandchildCreateDto,
+              output: GrandchildResponseDto,
+            },
+          },
+        }),
       },
     }),
     childrenNoReload: defineSubResource<ChildNoReloadEntity>({
@@ -356,6 +413,7 @@ describe('RocketsCoreModule + defineSubResource + AfterCreateReloadHook (e2e)', 
             ParentEntity,
             ChildEntity,
             ChildNoReloadEntity,
+            GrandchildEntity,
             PlainItemEntity,
           ],
           synchronize: true,
@@ -676,6 +734,62 @@ describe('RocketsCoreModule + defineSubResource + AfterCreateReloadHook (e2e)', 
       await request(app.getHttpServer())
         .delete(`/parents/${parentId}/children/${childId}`)
         .set('Authorization', 'Bearer u1')
+        .expect(404);
+    });
+  });
+  // ── Three-level nesting: the middle resource's own scope hook (#45) ──
+
+  describe('grandchild routes stay scoped to the addressed middle row', () => {
+    let parentA: string;
+    let parentB: string;
+    let childOfB: string;
+
+    beforeAll(async () => {
+      const a = await request(app.getHttpServer())
+        .post('/parents')
+        .set('Authorization', 'Bearer u1')
+        .send({ name: 'A', categoryId: categoryAId })
+        .expect(201);
+      parentA = a.body.id;
+
+      const b = await request(app.getHttpServer())
+        .post('/parents')
+        .set('Authorization', 'Bearer u1')
+        .send({ name: 'B', categoryId: categoryAId })
+        .expect(201);
+      parentB = b.body.id;
+
+      const child = await request(app.getHttpServer())
+        .post(`/parents/${parentB}/children`)
+        .set('Authorization', 'Bearer u1')
+        .send({ title: 'child-of-B', categoryId: categoryAId })
+        .expect(201);
+      childOfB = child.body.id;
+    });
+
+    it('serves the grandchild collection on the correct path', async () => {
+      await request(app.getHttpServer())
+        .get(`/parents/${parentB}/children/${childOfB}/notes`)
+        .set('Authorization', 'Bearer u1')
+        .expect(200);
+    });
+
+    // Both rows belong to the same actor, so the ownership half of the
+    // guard passes. Only the child's own `PathScopeHook` — replayed on
+    // the grandchild guard's parent lookup — rejects the mismatched
+    // `:parentId`. It needs the route params to do that.
+    it('rejects a child reached through the wrong parent', async () => {
+      await request(app.getHttpServer())
+        .get(`/parents/${parentA}/children/${childOfB}/notes`)
+        .set('Authorization', 'Bearer u1')
+        .expect(404);
+    });
+
+    it('rejects a write through the wrong parent', async () => {
+      await request(app.getHttpServer())
+        .post(`/parents/${parentA}/children/${childOfB}/notes`)
+        .set('Authorization', 'Bearer u1')
+        .send({ label: 'should-not-exist' })
         .expect(404);
     });
   });

@@ -481,7 +481,7 @@
         "name": "RocketsSubResourceDefinition",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RocketsSubResourceDefinition<Sub extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Sub;\n    readonly __sub: {\n        readonly in: (x: Sub) => void;\n        readonly out: () => Sub;\n    };\n    readonly parentKey?: string;\n    readonly parentPk?: string;\n    readonly segment?: string;\n    readonly owner?: string | false;\n    readonly scope?: boolean;\n    readonly reloadAfterCreate?: boolean;\n    readonly definition: Omit<RocketsResourceDefinition<PlainLiteralObject>, 'path' | 'tags'> & {\n        readonly tags?: readonly string[];\n    };\n}"
+        "signature": "export interface RocketsSubResourceDefinition<Sub extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Sub;\n    readonly __sub: {\n        readonly in: (x: Sub) => void;\n        readonly out: () => Sub;\n    };\n    readonly parentKey?: string;\n    readonly parentPk?: string;\n    readonly parentSelect?: readonly string[];\n    readonly segment?: string;\n    readonly owner?: string | false;\n    readonly scope?: boolean;\n    readonly reloadAfterCreate?: boolean;\n    readonly definition: Omit<RocketsResourceDefinition<PlainLiteralObject>, 'path' | 'tags'> & {\n        readonly tags?: readonly string[];\n    };\n}"
       },
       {
         "name": "RocketsSubResourceInput",
@@ -2533,7 +2533,7 @@
         "name": "PathScopeGuard",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare abstract class PathScopeGuard implements CanActivate {\n    protected parentParam: string;\n    protected parentEntityKey: string;\n    protected ownerColumn: string;\n    protected parentPk: string;\n    protected parentHooks: readonly Type[];\n    protected parentRepo: RepositoryInterface<Record<string, unknown>>;\n    canActivate(context: ExecutionContext): Promise<boolean>;\n    static for(parentParam: string, parentEntityKey: string, ownerColumn: string, parentPk?: string, parentHooks?: readonly Type[]): Type<PathScopeGuard>;\n    private parentReadContext;\n}"
+        "signature": "export declare abstract class PathScopeGuard implements CanActivate {\n    protected parentParam: string;\n    protected parentEntityKey: string;\n    protected ownerColumn: string;\n    protected parentPk: string;\n    protected parentHooks: readonly Type[];\n    protected parentSelect: readonly string[] | undefined;\n    protected parentRepo: RepositoryInterface<Record<string, unknown>>;\n    canActivate(context: ExecutionContext): Promise<boolean>;\n    static for(parentParam: string, parentEntityKey: string, ownerColumn: string, parentPk?: string, parentHooks?: readonly Type[], parentSelect?: readonly string[]): Type<PathScopeGuard>;\n    private parentReadContext;\n}"
       },
       {
         "name": "PathScopeHook",
@@ -2737,7 +2737,7 @@
         "name": "RocketsSubResourceDefinition",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RocketsSubResourceDefinition<Sub extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Sub;\n    readonly __sub: {\n        readonly in: (x: Sub) => void;\n        readonly out: () => Sub;\n    };\n    readonly parentKey?: string;\n    readonly parentPk?: string;\n    readonly segment?: string;\n    readonly owner?: string | false;\n    readonly scope?: boolean;\n    readonly reloadAfterCreate?: boolean;\n    readonly definition: Omit<RocketsResourceDefinition<PlainLiteralObject>, 'path' | 'tags'> & {\n        readonly tags?: readonly string[];\n    };\n}"
+        "signature": "export interface RocketsSubResourceDefinition<Sub extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Sub;\n    readonly __sub: {\n        readonly in: (x: Sub) => void;\n        readonly out: () => Sub;\n    };\n    readonly parentKey?: string;\n    readonly parentPk?: string;\n    readonly parentSelect?: readonly string[];\n    readonly segment?: string;\n    readonly owner?: string | false;\n    readonly scope?: boolean;\n    readonly reloadAfterCreate?: boolean;\n    readonly definition: Omit<RocketsResourceDefinition<PlainLiteralObject>, 'path' | 'tags'> & {\n        readonly tags?: readonly string[];\n    };\n}"
       },
       {
         "name": "RocketsSubResourceInput",
@@ -4729,7 +4729,7 @@
       {
         "name": "RocketsSubResourceDefinition",
         "kind": "interface",
-        "signature": "export interface RocketsSubResourceDefinition<Sub extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Sub;\n    readonly __sub: {\n        readonly in: (x: Sub) => void;\n        readonly out: () => Sub;\n    };\n    readonly parentKey?: string;\n    readonly parentPk?: string;\n    readonly segment?: string;\n    readonly owner?: string | false;\n    readonly scope?: boolean;\n    readonly reloadAfterCreate?: boolean;\n    readonly definition: Omit<RocketsResourceDefinition<PlainLiteralObject>, 'path' | 'tags'> & {\n        readonly tags?: readonly string[];\n    };\n}",
+        "signature": "export interface RocketsSubResourceDefinition<Sub extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Sub;\n    readonly __sub: {\n        readonly in: (x: Sub) => void;\n        readonly out: () => Sub;\n    };\n    readonly parentKey?: string;\n    readonly parentPk?: string;\n    readonly parentSelect?: readonly string[];\n    readonly segment?: string;\n    readonly owner?: string | false;\n    readonly scope?: boolean;\n    readonly reloadAfterCreate?: boolean;\n    readonly definition: Omit<RocketsResourceDefinition<PlainLiteralObject>, 'path' | 'tags'> & {\n        readonly tags?: readonly string[];\n    };\n}",
         "referencedBy": [
           "ZodResourceDefinition",
           "ZodSubResourceDefinition",

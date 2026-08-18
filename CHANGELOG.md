@@ -243,15 +243,35 @@ before running the full e2e suite.
   scope) stayed fully reachable through its children: `GET`, `POST` and
   `DELETE` on the nested route all succeeded where the parent's own routes
   returned `404`. The guard now replays the parent resource's `hooks` on a
-  detached context carrying the actor, and reads the full parent row (instead
-  of a primary-key-only projection) whenever the parent declares hooks, so an
-  `afterFindOne` hook can inspect the columns it needs. Behaviour is unchanged
-  for parents with no hooks. `PathScopeGuard.for()` takes an optional fifth
-  `parentHooks` argument; `defineResource` passes it automatically.
+  detached context that presents the lookup as the parent's OWN read —
+  `entity`, `operation: Read`, and the request's route params with `id`
+  bound to the row being looked up. The CRUD context is load-bearing, not
+  decoration: a hook gated on `getCrudContext(ctx)` (the shape this
+  codebase documents) fails OPEN without it, and so does the framework's
+  own `PathScopeHook` when a grandchild's guard replays it.
+  `PathScopeGuard.for()` takes optional fifth/sixth `parentHooks` /
+  `parentSelect` arguments; `defineResource` passes them automatically.
   Documented in `CONFIGURATION.md` §5 ("Which parent-side hooks run during
-  path scoping"). Guard lookups still run before the operation transaction —
+  path scoping").
+
+  Three consequences are called out there and are worth reading before
+  upgrading: a parent hook that **throws** now surfaces on nested routes
+  (it never fired there before, and a `Before*` throw reaches the client
+  as a `500` through the upstream membrane); the lookup reads the **full
+  parent row including eager relations** whenever the parent declares
+  hooks, with the new `parentSelect` on `defineSubResource` as the
+  opt-out; and `owner: false` drops the guard entirely, so a sub-resource
+  that opts out of the ownership check also opts out of parent-side
+  visibility. Guard lookups still run before the operation transaction —
   Nest executes guards ahead of interceptors — which is now stated rather
   than implied.
+- **Three-level (and deeper) sub-resource nesting returned `500`.** The
+  composed `request.params` for a nested sub-resource declared only its
+  own `id` and its immediate parent's param, so the upstream query parser
+  rejected the grandparent's `:param` with "Error on crud context
+  processing". Ancestor params are now declared `disabled: true` —
+  validated as route params, but not turned into filters, since only the
+  immediate parent's param is a FK column on the entity.
 - `RocketsCoreExceptionsFilter` logs through Nest's `Logger` instead of
   `console.error`, on every 5xx — whether traces are printed is the
   consuming app's log-level decision, no longer gated on `NODE_ENV`

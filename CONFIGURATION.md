@@ -360,6 +360,7 @@ petTags: defineSubResource({          // key 'petTags' must be a PetEntity relat
 | `entity` | `Type<E> \| (() => Type<E>)` | **yes** | — (thunk allowed for circular imports) |
 | `parentKey` | `string` | no | `${parentEntityKey}Id` (e.g. `petId`) — URL param **and** FK column |
 | `parentPk` | `string` | no | `'id'` — parent PK column the guard looks up |
+| `parentSelect` | `readonly string[]` | no | projection for the guard's parent lookup (default: pk only, or the full row when the parent has hooks) |
 | `segment` | `string` | no | `kebab-case(mapKey)` — URL segment |
 | `owner` | `string \| false` | no | `'userId'` — ownership column; `false` drops the guard (public) |
 | `scope` | `boolean` | no | `true` — master switch (FK filter/stamp + guard); `false` = unscoped |
@@ -375,18 +376,47 @@ cannot see (soft expiry, retention, tenant scope expressed as a
 `beforeFindOne` / `afterFindOne` filter) is a `404` on every nested route
 too, not just on the parent's routes.
 
-Constraints worth knowing:
+**What the replay context carries.** The lookup is presented to those
+hooks as the parent's OWN read: `getCrudContext(ctx)` returns a context
+with `entity` = the parent's key, `operation: Read`, and `params` = the
+request's route params with `id` bound to the parent row being looked up.
+A hook gated on `if (!getCrudContext(ctx)) return options;` — the shape
+this codebase documents — therefore filters here exactly as it does on the
+parent's own routes. That also makes three-level nesting behave: a
+grandchild's guard replays the middle resource's `PathScopeHook`, which
+needs `params[:parentId]` to bind the middle row to ITS parent.
 
-- The hooks run on a **detached context**: the actor overlay is present,
-  but the request's own hook set and the operation transaction are not.
-  Guards execute before Nest interceptors, so no transaction exists yet
-  — the lookup is a pre-check, never a participant in the operation's
-  transaction.
+**What it deliberately does not carry:**
+
+- **No transaction.** Nest runs guards ahead of interceptors, so no
+  operation transaction exists when the guard runs. The lookup is a
+  pre-check, never a participant. See §12 and issue #60 for the wider
+  `ctx` / `TransactionScope` seam.
+- **No `query`.** The guard applies no filter, sort or pagination of its
+  own, so the parsed query is empty rather than the child route's.
+- **Not the request's `AppContextHost`.** `defineOverlay` is
+  first-write-wins and the hook overlay interceptor has not run yet;
+  writing to the request here would pin the parent's hooks for the whole
+  request and the child's own hooks would never attach.
+
+Other constraints worth knowing:
+
 - The parent's hooks are entity-scoped by `@EntityHook({ entity })`, so
   hooks bound to a different entity never fire on this lookup.
-- When the parent declares no hooks, the lookup keeps its primary-key-only
-  projection. When it does, the full parent row is read so an
-  `afterFindOne` hook can inspect columns a narrowed projection would omit.
+- **A parent hook that throws now surfaces on nested routes.** It did not
+  fire here before. A `Before*` hook that throws an `HttpException` is
+  wrapped by the upstream membrane and reaches the client as a `500` —
+  throw a `RepositoryQueryException` with an `httpStatus` instead when the
+  status matters.
+- **Projection cost.** With no parent hooks the lookup reads the primary
+  key only. With hooks it reads the FULL parent row — including eager
+  relations — because an `afterFindOne` hook may inspect a column a
+  narrow projection would omit, and nothing declares which columns a hook
+  reads. Set `parentSelect: ['id', 'expiresAt']` on the sub-resource when
+  you know what your hooks need.
+- **`owner: false` drops the guard entirely**, and with it the parent-hook
+  replay. A sub-resource that opts out of the ownership check also opts
+  out of parent-side visibility.
 - Sub-resource hooks (`PathScopeHook`, the child's own `hooks`) are
   unaffected — they still attach normally to the child's controller.
 
