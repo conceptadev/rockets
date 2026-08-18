@@ -143,6 +143,18 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Documentation
 
+- **The non-CRUD transaction seam is documented (issue #60).**
+  `CONFIGURATION.md` §8a explains what a repository call without `ctx`
+  actually does — runs hook-free AND outside the operation's transaction
+  — with the adapter/resolver chain that causes it, copy-paste examples
+  for hooks, CQRS handlers and custom services, the
+  `SUPPORTS`-by-default propagation trap, why a guard cannot join the
+  operation's transaction, and the `grep` sweep that found the original
+  defect. Cross-linked from the core README's dynamic-repository how-to —
+  whose own example omitted `ctx`, teaching the anti-pattern — and from
+  `AGENTS.md` rule 13a. Root cause of #45; cost the field report ~45
+  minutes of source spelunking.
+
 - `SECURITY.md` and sample READMEs no longer claim an npm `alpha` channel that
   is not published yet.
 

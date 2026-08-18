@@ -952,6 +952,121 @@ core/server change**. Per-entry repository overrides can be declared on any of:
 
 Each falls back to the root `repository` adapter when omitted.
 
+### 8a. `ctx` and transactions — the seam you must not miss (issue #60)
+
+Every `RepositoryInterface` method takes an options `ctx`. It is optional
+in the type system and load-bearing at runtime. **A repository call that
+omits it silently does two things you almost never intend:**
+
+1. it runs with **all entity hooks disabled**, and
+2. it commits **outside** the surrounding operation's transaction.
+
+Neither is a type error. Neither shows up in a passing test. This is the
+root of issue #45, where a guard's parent lookup ran hook-free for a
+whole development cycle behind a green suite.
+
+The chain, in the installed packages:
+
+```text
+RepositoryAdapter.entityCtx(ctx)      // returns undefined when ctx is undefined
+  → HookResolverService.execute(...)  // early-returns when ctx.hooks is empty
+  → TransactionManager                // never consulted, so no ambient transaction
+```
+
+#### Rule: forward `ctx` from wherever you got it
+
+Inside a hook, the context is the hook's second argument:
+
+```ts
+const AuditHook = defineHook<OrderEntity>(OrderEntity, {
+  async beforeCreate(payload, ctx, { repo }) {
+    // `ctx` — not omitted. Without it this read skips every hook on
+    // `order` AND runs outside the operation's transaction, so a
+    // rollback leaves it committed.
+    const existing = await repo.findOne({
+      where: Where.eq<OrderEntity>('ref', payload.ref),
+      ctx,
+    });
+    if (existing) throw new ConflictException('duplicate ref');
+    return payload;
+  },
+});
+```
+
+Inside a CQRS handler or a service reached from a controller, take the
+CRUD context the pipeline already built:
+
+```ts
+@QueryHandler(MyQuery)
+export class MyHandler {
+  constructor(
+    @InjectDynamicRepository('order')
+    private readonly orders: RepositoryInterface<OrderEntity>,
+  ) {}
+
+  async execute(query: MyQuery) {
+    return this.orders.find({ where: …, ctx: query.crudContext });
+  }
+}
+```
+
+#### CRUD `transactional: true` vs manual `TransactionScope`
+
+`transactional: true` exists on **CRUD operations only**
+(`operations.X.transactional`) and on `operationResource` operations. It
+wraps the handler in `TransactionScope.run` with `SUPPORTS` propagation.
+Everything else — a custom service, a guard, a background job — has to
+open its own scope:
+
+```ts
+import { TransactionScope } from '@concepta/nestjs-repository';
+
+@Injectable()
+export class TransferService {
+  constructor(
+    private readonly trx: TransactionScope,
+    @InjectDynamicRepository('account')
+    private readonly accounts: RepositoryInterface<AccountEntity>,
+  ) {}
+
+  async transfer(ctx: unknown, from: string, to: string, amount: number) {
+    // `REQUIRED` starts one if none is active; the default `SUPPORTS`
+    // would silently run unprotected outside a request.
+    return this.trx.run(
+      ctx,
+      async (txCtx) => {
+        const debit = await this.accounts.findOne({ where: …, ctx: txCtx });
+        // …every call inside gets `txCtx`, or it escapes the transaction.
+        await this.accounts.update(debit, { balance: … }, { ctx: txCtx });
+      },
+      { propagation: 'REQUIRED' },
+    );
+  }
+}
+```
+
+Two traps worth naming:
+
+- **`SUPPORTS` is the default propagation.** A scope opened without
+  `propagation: 'REQUIRED'` inside a non-transactional entry point runs
+  with no transaction at all, and nothing warns.
+- **Guards run before interceptors.** A guard cannot participate in the
+  operation's transaction, because the transaction interceptor has not
+  run yet. `PathScopeGuard` is deliberately a pre-check for this reason
+  (§5).
+
+#### Auditing an app for the omission
+
+The sweep that found the real defect behind #45:
+
+```bash
+grep -rnE '\.(findOne|find|count|findAndCount|create|update|delete)\(\{' src \
+  | grep -v 'ctx'
+```
+
+Every hit is a call to read: either it is deliberately outside the
+request (a startup task, a job with its own scope) or it is a defect.
+
 ---
 
 ## 9. userMetadata
