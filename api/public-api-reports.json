@@ -3225,7 +3225,7 @@
         "name": "ZodDeleteOperationConfig",
         "kind": "type",
         "runtime": false,
-        "signature": "export type ZodDeleteOperationConfig = Omit<ResourceDeleteOperationConfig, 'input' | 'output'>;"
+        "signature": "export type ZodDeleteOperationConfig = Omit<ResourceDeleteOperationConfig, 'input' | 'output'> & ZodOperationSchemas;"
       },
       {
         "name": "ZodModuleResourceEntityDefinition",
@@ -3249,13 +3249,19 @@
         "name": "ZodOperationConfig",
         "kind": "type",
         "runtime": false,
-        "signature": "export type ZodOperationConfig = Omit<ResourceOperationConfig, 'input' | 'output'>;"
+        "signature": "export type ZodOperationConfig = Omit<ResourceOperationConfig, 'input' | 'output'> & ZodOperationSchemas;"
       },
       {
         "name": "ZodOperationResource",
         "kind": "type",
         "runtime": false,
         "signature": "export type ZodOperationResource<TOps extends OperationRecord> = OperationResource & {\n    readonly authored: TOps;\n};"
+      },
+      {
+        "name": "ZodOperationSchemas",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface ZodOperationSchemas {\n    readonly input?: z.ZodObject;\n    readonly output?: z.ZodObject;\n}"
       },
       {
         "name": "ZodResourceDefinition",
@@ -3285,7 +3291,7 @@
         "name": "ZodRestoreOperationConfig",
         "kind": "type",
         "runtime": false,
-        "signature": "export type ZodRestoreOperationConfig = Omit<ResourceRestoreOperationConfig, 'input' | 'output'>;"
+        "signature": "export type ZodRestoreOperationConfig = Omit<ResourceRestoreOperationConfig, 'input' | 'output'> & ZodOperationSchemas;"
       },
       {
         "name": "ZodSubResourceDefinition",

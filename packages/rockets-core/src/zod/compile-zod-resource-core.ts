@@ -12,6 +12,7 @@ import {
   normalizeOperations,
   opConfig,
   type ZodCrudOperation,
+  type ZodOperationSchemas,
   zodOpConfig,
   type ZodResourceOperations,
 } from './zod-operations';
@@ -46,6 +47,19 @@ export function compileZodCore(input: ZodCoreInput): CompiledZodCore {
   const enabled = (op: ZodCrudOperation): boolean =>
     ops[op] !== undefined && ops[op] !== false;
 
+  // Declaring an override on an operation left out of `operations` is
+  // not reachable: any config object enables its operation.
+  const overrides = resolveOperationOverrides(name, ops);
+  const overrideDto = (
+    op: ZodCrudOperation,
+    kind: 'Input' | 'Output',
+  ): Type<object> | undefined => {
+    const schema = overrides[op]?.[kind === 'Input' ? 'input' : 'output'];
+    return schema === undefined
+      ? undefined
+      : compileDtoClass(schema, `${name}${pascal(op)}${kind}Dto`);
+  };
+
   const ownerColumns = resolveOwnerColumns(schema, name, input.owner);
   const projections = projectSchema(
     name,
@@ -54,8 +68,13 @@ export function compileZodCore(input: ZodCoreInput): CompiledZodCore {
     new Set(ownerColumns),
   );
 
+  // An `input` override supplies the whole request body, so the derived
+  // create projection being empty is no longer a dead end.
+  const derivedBodyOps = (['create', 'replace'] as const).filter(
+    (op) => enabled(op) && overrides[op]?.input === undefined,
+  );
   if (
-    (enabled('create') || enabled('replace')) &&
+    derivedBodyOps.length > 0 &&
     Object.keys(projections.create).length === 0
   ) {
     throw new Error(
@@ -99,28 +118,36 @@ export function compileZodCore(input: ZodCoreInput): CompiledZodCore {
     responseNested,
   );
   const create = enabled('create')
-    ? compileDtoClass(z.object(projections.create), `${name}CreateDto`)
+    ? overrideDto('create', 'Input') ??
+      compileDtoClass(z.object(projections.create), `${name}CreateDto`)
     : undefined;
   const update = enabled('update')
-    ? compileDtoClass(z.object(projections.update), `${name}UpdateDto`)
+    ? overrideDto('update', 'Input') ??
+      compileDtoClass(z.object(projections.update), `${name}UpdateDto`)
     : undefined;
   const replace = enabled('replace')
-    ? compileDtoClass(z.object(projections.create), `${name}ReplaceDto`)
+    ? overrideDto('replace', 'Input') ??
+      compileDtoClass(z.object(projections.create), `${name}ReplaceDto`)
     : undefined;
+
+  // Per-operation response override; falls back to the single projected
+  // response DTO the whole resource shares.
+  const responseFor = (op: ZodCrudOperation): Type<object> =>
+    overrideDto(op, 'Output') ?? response;
 
   const operations: ResourceOperationsObject = {
     ...(enabled('list')
-      ? { list: { ...zodOpConfig(ops.list), output: response } }
+      ? { list: { ...zodOpConfig(ops.list), output: responseFor('list') } }
       : {}),
     ...(enabled('read')
-      ? { read: { ...zodOpConfig(ops.read), output: response } }
+      ? { read: { ...zodOpConfig(ops.read), output: responseFor('read') } }
       : {}),
     ...(enabled('create') && create !== undefined
       ? {
           create: {
             ...zodOpConfig(ops.create),
             input: create,
-            output: response,
+            output: responseFor('create'),
           },
         }
       : {}),
@@ -129,7 +156,7 @@ export function compileZodCore(input: ZodCoreInput): CompiledZodCore {
           update: {
             ...zodOpConfig(ops.update),
             input: update,
-            output: response,
+            output: responseFor('update'),
           },
         }
       : {}),
@@ -138,12 +165,30 @@ export function compileZodCore(input: ZodCoreInput): CompiledZodCore {
           replace: {
             ...zodOpConfig(ops.replace),
             input: replace,
-            output: response,
+            output: responseFor('replace'),
           },
         }
       : {}),
-    ...(enabled('delete') ? { delete: zodOpConfig(ops.delete) } : {}),
-    ...(enabled('restore') ? { restore: zodOpConfig(ops.restore) } : {}),
+    ...(enabled('delete')
+      ? {
+          delete: {
+            ...zodOpConfig(ops.delete),
+            ...(overrides.delete?.output
+              ? { output: responseFor('delete') }
+              : {}),
+          },
+        }
+      : {}),
+    ...(enabled('restore')
+      ? {
+          restore: {
+            ...zodOpConfig(ops.restore),
+            ...(overrides.restore?.output
+              ? { output: responseFor('restore') }
+              : {}),
+          },
+        }
+      : {}),
   };
 
   return {
@@ -154,6 +199,82 @@ export function compileZodCore(input: ZodCoreInput): CompiledZodCore {
     ownerColumns,
   };
 }
+
+/**
+ * Operations that carry a request body. `input` anywhere else is a
+ * mistake core would silently drop.
+ */
+const BODY_OPERATIONS: ReadonlySet<ZodCrudOperation> = new Set([
+  'create',
+  'update',
+  'replace',
+]);
+
+/**
+ * Reads the per-operation `input` / `output` schema overrides and fails
+ * fast on the combinations core cannot honour. Silently ignoring an
+ * override is exactly the failure mode this layer exists to prevent:
+ * the app believes it controls the contract, the wire says otherwise,
+ * and the test suite stays green.
+ */
+function resolveOperationOverrides(
+  name: string,
+  ops: ZodResourceOperations,
+): Readonly<Partial<Record<ZodCrudOperation, ZodOperationSchemas>>> {
+  const resolved: Partial<Record<ZodCrudOperation, ZodOperationSchemas>> = {};
+
+  for (const op of ALL_OPERATIONS) {
+    const config = opConfig(ops[op]);
+    const { input, output } = config;
+    if (input === undefined && output === undefined) continue;
+
+    if (input !== undefined && !BODY_OPERATIONS.has(op)) {
+      throw new Error(
+        `[zodResource] "${name}" declares an \`input\` schema on "${op}", ` +
+          'which has no request body. Only create/update/replace accept one.',
+      );
+    }
+    if (output !== undefined && op === 'delete') {
+      const softReturns =
+        'soft' in config &&
+        config.soft === true &&
+        'returnDeleted' in config &&
+        config.returnDeleted === true;
+      if (!softReturns) {
+        throw new Error(
+          `[zodResource] "${name}" declares an \`output\` schema on ` +
+            '"delete" without `soft: true` + `returnDeleted: true` — the ' +
+            'route answers 204 and the schema would never be serialized.',
+        );
+      }
+    }
+    if (output !== undefined && op === 'restore') {
+      const restoreReturns =
+        'returnRestored' in config && config.returnRestored === true;
+      if (!restoreReturns) {
+        throw new Error(
+          `[zodResource] "${name}" declares an \`output\` schema on ` +
+            '"restore" without `returnRestored: true` — the route answers ' +
+            '204 and the schema would never be serialized.',
+        );
+      }
+    }
+
+    resolved[op] = { input, output };
+  }
+
+  return resolved;
+}
+
+const ALL_OPERATIONS: readonly ZodCrudOperation[] = [
+  'list',
+  'read',
+  'create',
+  'update',
+  'replace',
+  'delete',
+  'restore',
+];
 
 function pascal(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1);
