@@ -759,26 +759,61 @@ describe('defineResource', () => {
       expect(list?.response?.resource).toBe(WidgetResponseDto);
     });
 
-    it('throws when read.output and list.output differ', () => {
+    // Differing read/list outputs used to throw, because per-operation
+    // `output` never reached the route and the resource-level DTO decided
+    // both. Now each operation carries its own response metadata, so a
+    // thinner collection projection is a supported shape.
+    it('accepts differing read.output and list.output', () => {
       class ReadShape {
         id!: string;
       }
       class ListShape {
         id!: string;
-        total!: number;
       }
-      expect(() =>
-        defineResource({
-          key: 'widget',
-          entity: WidgetEntity,
-          path: 'widgets',
-          tags: ['Widgets'],
-          operations: {
-            list: { output: ListShape },
-            read: { output: ReadShape },
-          },
-        }),
-      ).toThrow(/operations\.read\.output.*list\.output.*differ/);
+      const bundle = defineResource({
+        key: 'widget',
+        entity: WidgetEntity,
+        path: 'widgets',
+        tags: ['Widgets'],
+        operations: {
+          list: { output: ListShape },
+          read: { output: ReadShape },
+        },
+      });
+
+      const ops = narrow(bundle).operations;
+      const list = ops.find((o) => o.operation === Operation.List);
+      const read = ops.find((o) => o.operation === Operation.Read);
+      expect(read?.response?.resource).toBe(ReadShape);
+      expect(list?.response?.resource).toBe(ListShape);
+      // The collection wrapper must be rebuilt around the list override,
+      // otherwise the route documents and serializes the read shape.
+      expect(list?.response?.paginated).toBeDefined();
+      expect(list?.response?.paginated).not.toBe(read?.response?.paginated);
+    });
+
+    it('uses read.output as the resource-level fallback when they differ', () => {
+      class ReadShape {
+        id!: string;
+      }
+      class ListShape {
+        id!: string;
+      }
+      const bundle = defineResource({
+        key: 'widget',
+        entity: WidgetEntity,
+        path: 'widgets',
+        tags: ['Widgets'],
+        operations: {
+          list: { output: ListShape },
+          read: { output: ReadShape },
+          create: {},
+        },
+      });
+
+      // `create` declares no output of its own, so it falls back to the
+      // controller-level response built from `read.output`.
+      expect(narrow(bundle).controller.response?.resource).toBe(ReadShape);
     });
 
     it('does NOT promote when consumer declares dto.response explicitly', () => {

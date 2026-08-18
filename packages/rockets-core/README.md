@@ -389,6 +389,39 @@ Eager `compileEntity` in `*.schema.ts` is only for import-cycle breaks
 (`@EntityHook`, inverse `@OneToMany`). Default: let
 `zodResource({ schema })` compile.
 
+#### Per-operation `input` / `output`
+
+Each CRUD operation can override the request body and the response
+projection with its own schema, exactly as the class path does with DTO
+classes. Omit them and the operation keeps the schema-derived projection.
+
+```ts
+zodResource({
+  name: 'Article',
+  schema: articleSchema,
+  operations: {
+    // A thinner card projection for the collection route.
+    list: { output: z.object({ id: z.uuid(), title: z.string() }) },
+    read: true,
+    // `slug` is derived server-side, so it is not part of this body.
+    create: { input: z.object({ title: z.string(), body: z.string() }) },
+  },
+});
+```
+
+Rules worth knowing:
+
+- An override **replaces** the projection; it is not merged with it. A
+  field hidden by `dto: { response: false }` is exposed again if the
+  override declares it — the same explicit opt-in the class path has.
+- Generated components are named `<Name><Op>InputDto` /
+  `<Name><Op>OutputDto`, and a `list` override gets a matching paginated
+  wrapper automatically.
+- `input` is rejected on operations with no request body, and `output`
+  is rejected on `delete` / `restore` unless `returnDeleted` /
+  `returnRestored` makes the route answer with a body. Both fail at
+  definition time rather than being dropped silently on the wire.
+
 #### Capability matrix (meta → layers)
 
 | Meta flag | Entity compiler | DTO projection | E2E reference |

@@ -15,6 +15,17 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
   `output` required (schema or `false`); optional resource-level `params` zod;
   cross-resource `METHOD+path` collisions fail in `buildAppRegistrationPlan`.
   See `CONFIGURATION.md` §6a and `examples/sample-server` `petTransferFeature`.
+- **Per-operation `input` / `output` on `zodResource` / `zodSubResource`
+  (issue #57).** The zod path had a single schema-derived projection, so
+  an app chose between controlled projection and automatic OpenAPI. Each
+  CRUD operation now takes its own `input` / `output` **schema**, compiled
+  through the same pipeline as the derived DTOs (Standard Schema
+  validation + named OpenAPI components `<Name><Op>InputDto` /
+  `<Name><Op>OutputDto`). Overrides replace the projection rather than
+  merging with it. `input` on an operation with no request body, and
+  `output` on a `delete`/`restore` that answers `204`, throw at definition
+  time instead of being dropped on the wire. Documented in the core
+  README (Zod-first resources → "Per-operation `input` / `output`").
 - Firestore adapter transactions (issue #44 P1-1): `runInFirestoreTransaction` /
   `FirestoreRepository.transaction` (callback-scoped, retry-safe),
   `FIRESTORE_BACKEND` DI export, `transactionFactories` + `options.ctx`
@@ -33,6 +44,19 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Changed
 
+- **Per-operation `output` now actually reaches the route (issue #57).**
+  `defineResource` accepted `operations.<op>.output` but upstream reads
+  `response.resource` / `response.paginated` from the CONTROLLER only —
+  `CrudList` / `CrudRead` / … consume nothing but `response.serialization`
+  from their per-operation options. An `output` that differed from the
+  resource default was therefore accepted, documented nowhere, and
+  serialized with the resource-level DTO. Both metadata keys are declared
+  `MethodAndClass` upstream and resolve method-first, so `buildOperation`
+  now stamps them on the route; a `list` override additionally derives its
+  matching paginated wrapper. The guard that forced
+  `operations.read.output` and `operations.list.output` to be identical
+  existed only because of this gap and is gone — `read.output` is the
+  resource-level fallback when `dto.response` is not declared.
 - CI: `ci-pr-test` and `release-readiness` no longer filter on a `main` base,
   so stacked pull requests are gated (including the Firestore emulator suite).
 

@@ -1,5 +1,6 @@
 import type { Type } from '@nestjs/common';
 import { Operation } from '@concepta/nestjs-core';
+import { createPaginatedDto } from '../paginated-dto.factory';
 import type {
   ResourceDtoConfig,
   ResourceHandlerOverrides,
@@ -71,17 +72,12 @@ export function normalizeOperationsInput(
   };
 
   if (!dto.response) {
-    const declared = [obj.read?.output, obj.list?.output].filter(
-      (r): r is Type => r !== undefined,
-    );
-    const allSame = declared.every((r) => r === declared[0]);
-    if (declared.length > 0 && !allSame) {
-      throw new Error(
-        `defineResource(${resourceKey}): \`operations.read.output\` and \`operations.list.output\` differ. ` +
-          `Declare \`dto.response\` explicitly at the resource level so the auto-paginated DTO and any op without its own output use the right shape.`,
-      );
-    }
-    if (declared.length > 0) dto.response = declared[0];
+    // Resource-level default for operations that declare no `output` of
+    // their own (and the base the auto-paginated DTO is built from).
+    // `read` is the canonical single-item shape, so it wins over `list`.
+    // Operations that DO declare an `output` are unaffected — the route
+    // carries its own response metadata (see `buildOperationDecorators`).
+    dto.response = obj.read?.output ?? obj.list?.output;
   }
   if (!dto.create && obj.create?.input) dto.create = obj.create.input;
   if (!dto.update && obj.update?.input) dto.update = obj.update.input;
@@ -134,7 +130,16 @@ export function normalizeOperationsInput(
       next.response = {
         ...(next.response ?? {}),
         resource: cfg.output,
-        ...(cfg.paginated !== undefined ? { paginated: cfg.paginated } : {}),
+        // A list route serializes through the PAGINATED type, not the
+        // resource type, so an `output` override that does not carry a
+        // matching wrapper would be silently ignored on the wire and in
+        // the OpenAPI document. Derive it from the override unless the
+        // caller supplied their own.
+        ...(cfg.paginated !== undefined
+          ? { paginated: cfg.paginated }
+          : op === Operation.List
+          ? { paginated: createPaginatedDto(cfg.output) }
+          : {}),
       };
     }
     operationOverrides[op] = next;
