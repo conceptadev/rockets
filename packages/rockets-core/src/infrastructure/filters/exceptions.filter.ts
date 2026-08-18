@@ -178,13 +178,24 @@ export class RocketsCoreExceptionsFilter implements ExceptionFilter {
       }
     }
 
-    const responseBody = this.serializer.serialize({
+    const serialized = this.serializer.serialize({
       statusCode,
       errorCode,
       message,
-      exception,
       originalException: rawException,
     });
+    // A serializer that returns nothing would otherwise send an empty
+    // body with a correct status — a client sees a 409 it cannot read.
+    // Fall back rather than fail a second time inside the error path.
+    const responseBody =
+      serialized === null || serialized === undefined
+        ? defaultErrorSerializer.serialize({
+            statusCode,
+            errorCode,
+            message,
+            originalException: rawException,
+          })
+        : serialized;
 
     httpAdapter.reply(ctx.getResponse(), responseBody, statusCode);
   }

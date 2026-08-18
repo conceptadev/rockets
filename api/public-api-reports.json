@@ -2725,13 +2725,13 @@
         "name": "RocketsErrorContext",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RocketsErrorContext {\n    readonly statusCode: number;\n    readonly errorCode: string;\n    readonly message: unknown;\n    readonly exception: ExceptionInterface | HttpException;\n    readonly originalException: unknown;\n}"
+        "signature": "export interface RocketsErrorContext {\n    readonly statusCode: number;\n    readonly errorCode: string;\n    readonly message: unknown;\n    readonly originalException: unknown;\n}"
       },
       {
         "name": "RocketsErrorSerializerInterface",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RocketsErrorSerializerInterface {\n    serialize(context: RocketsErrorContext): unknown;\n}"
+        "signature": "export interface RocketsErrorSerializerInterface {\n    serialize(context: RocketsErrorContext): PlainLiteralObject;\n}"
       },
       {
         "name": "RocketsRepositoryModuleInterface",

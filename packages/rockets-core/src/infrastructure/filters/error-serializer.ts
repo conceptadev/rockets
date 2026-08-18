@@ -1,5 +1,4 @@
-import type { HttpException } from '@nestjs/common';
-import type { ExceptionInterface } from '@concepta/nestjs-core';
+import type { PlainLiteralObject } from '@nestjs/common';
 
 /**
  * DI token for a {@link RocketsErrorSerializerInterface}.
@@ -37,16 +36,19 @@ export interface RocketsErrorContext {
    */
   readonly message: unknown;
   /**
-   * The exception the fields above were derived from — the unwrapped one
-   * when the chain yielded an inner `HttpException` / 4xx
-   * `RuntimeException`, otherwise the exception as thrown.
-   */
-  readonly exception: ExceptionInterface | HttpException;
-  /**
-   * The exception as thrown, before any unwrapping. `unknown` because
-   * Nest hands the filter whatever was raised — a Rockets
-   * `RuntimeException`, a Nest `HttpException`, or a bare `Error` from
-   * third-party code. Narrow it before reading anything off it.
+   * The exception as thrown, before any unwrapping — the only thing here
+   * a serializer cannot reconstruct from the resolved fields, and what a
+   * correlation id or a structured log line is built from.
+   *
+   * `unknown` because Nest hands the filter whatever was raised: a
+   * Rockets `RuntimeException`, a Nest `HttpException`, or a bare
+   * `Error` from third-party code. Narrow it before reading anything off
+   * it.
+   *
+   * The POST-unwrap exception is deliberately absent. Interpreting it
+   * requires knowing the unwrap semantics the filter keeps to itself,
+   * and everything it would be read for — status, code, message — is
+   * already resolved above.
    */
   readonly originalException: unknown;
 }
@@ -68,7 +70,12 @@ export interface RocketsErrorContext {
  * ```
  */
 export interface RocketsErrorSerializerInterface {
-  serialize(context: RocketsErrorContext): unknown;
+  /**
+   * Returns the response body. An object, not `unknown`: the documented
+   * pattern is to spread the default and add to it, and a spread of
+   * `unknown` does not compile.
+   */
+  serialize(context: RocketsErrorContext): PlainLiteralObject;
 }
 
 /**
@@ -78,7 +85,11 @@ export interface RocketsErrorSerializerInterface {
  * instead of restating the four keys.
  */
 export const defaultErrorSerializer: RocketsErrorSerializerInterface = {
-  serialize({ statusCode, errorCode, message }: RocketsErrorContext): unknown {
+  serialize({
+    statusCode,
+    errorCode,
+    message,
+  }: RocketsErrorContext): PlainLiteralObject {
     return {
       statusCode,
       errorCode,
