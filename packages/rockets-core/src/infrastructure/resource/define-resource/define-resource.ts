@@ -28,6 +28,7 @@ import {
 import { buildPersistenceRelations } from './build-persistence-relations';
 import { buildOperation, mergeProviders } from './build-operation';
 import { materialiseSubResource } from './materialise-sub-resource';
+import type { CrudRequestConfig } from '../../crud-compat';
 import { deriveEntityKey } from '../../../common';
 
 type CrudDecorator = ReturnType<typeof applyDecorators>;
@@ -209,6 +210,7 @@ export function defineResource<E extends PlainLiteralObject>(
         parentTags: tags,
         parentPersistenceModule: repository,
         parentHooks: hooks,
+        parentPrimaryParam: primaryParamName(controllerRequest),
         segment,
         sub,
       });
@@ -232,4 +234,25 @@ export function defineResource<E extends PlainLiteralObject>(
   };
 
   return bundle;
+}
+
+/**
+ * Route param name the parent's own routes use for its primary key.
+ *
+ * Defaults to `'id'` — the shape `defineResource` generates when the
+ * consumer declares no `request.params`. A resource that overrides the
+ * primary (`request: { params: { code: { field: 'code', primary: true } } }`)
+ * has hooks reading `params.code`, so a sub-resource guard that hardcoded
+ * `id` would leave those hooks looking at a key that is never set: a
+ * scoping hook silently becomes a no-op, which means unscoped.
+ */
+function primaryParamName(
+  request: CrudRequestConfig<PlainLiteralObject> | undefined,
+): string {
+  const params = request?.params;
+  if (!params) return 'id';
+  for (const [name, option] of Object.entries(params)) {
+    if (option?.primary === true) return name;
+  }
+  return 'id';
 }

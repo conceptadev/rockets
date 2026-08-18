@@ -386,6 +386,10 @@ parent's own routes. That also makes three-level nesting behave: a
 grandchild's guard replays the middle resource's `PathScopeHook`, which
 needs `params[:parentId]` to bind the middle row to ITS parent.
 
+The parent's primary param is bound by NAME, taken from the parent's own
+`request.params` (default `id`) — a resource that declares a different
+primary still sees its hooks fire.
+
 **What it deliberately does not carry:**
 
 - **No transaction.** Nest runs guards ahead of interceptors, so no
