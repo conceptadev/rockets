@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   ExecutionContext,
   NotFoundException,
+  type PlainLiteralObject,
   Type,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -9,11 +10,12 @@ import {
   getDynamicRepositoryToken,
   RepoHook,
 } from '@concepta/nestjs-repository';
-import { AppContextHost, HooksCtx } from '@concepta/nestjs-core';
+import { AppContextHost, HooksCtx, Operation } from '@concepta/nestjs-core';
 import { Test } from '@nestjs/testing';
 import { PathScopeGuard } from './path-scope.guard';
 import { EntityHook, PassthroughEntityHookBase } from '../hooks/entity-hook';
 import { ActorCtx } from '../interceptors/actor.overlay';
+import { getCrudContext } from '../../utils/get-actor.helper';
 
 interface FakeParent {
   id: string;
@@ -111,8 +113,16 @@ describe('PathScopeGuard.canActivate', () => {
 
   async function buildGuard(
     parentHooks: readonly Type[] = [],
+    parentSelect?: readonly string[],
   ): Promise<{ guard: PathScopeGuard; repo: FakeParentRepo }> {
-    const Sub = PathScopeGuard.for('petId', 'pet', 'userId', 'id', parentHooks);
+    const Sub = PathScopeGuard.for(
+      'petId',
+      'pet',
+      'userId',
+      'id',
+      parentHooks,
+      parentSelect,
+    );
     const repoToken = getDynamicRepositoryToken('pet');
     const repo = new FakeParentRepo(parentRows);
     const moduleRef = await Test.createTestingModule({
@@ -191,6 +201,45 @@ describe('PathScopeGuard.canActivate', () => {
     expect(forwarded?.with(ActorCtx)).toEqual({ id: 'u1', type: 'user' });
     // Hooks may inspect columns the pk-only projection would omit.
     expect(repo.lastOptions?.select).toBeUndefined();
+  });
+
+  // Without these own properties `getCrudContext(ctx)` returns undefined
+  // and every hook gated on it — including the framework's own
+  // `PathScopeHook` — silently no-ops on the parent lookup.
+  it('the forwarded context narrows to a CRUD context for the parent read', async () => {
+    const { guard, repo } = await buildGuard([FakeParentHook]);
+    const ctx = buildExecutionContext({
+      user: { id: 'u1' },
+      // A nested route carries the ancestors' params too; `id` is the
+      // CHILD's until the guard rebinds it to the row it looks up.
+      params: { petId: 'p1', id: 'some-child', ownerId: 'o9' },
+    });
+    await expect(guard.canActivate(ctx)).resolves.toBe(true);
+
+    const crudCtx = getCrudContext(
+      repo.lastOptions?.ctx as PlainLiteralObject | undefined,
+    );
+    expect(crudCtx).toBeDefined();
+    expect(crudCtx?.entity).toBe('pet');
+    expect(crudCtx?.operation).toBe(Operation.Read);
+    expect(crudCtx?.params).toEqual({
+      petId: 'p1',
+      ownerId: 'o9',
+      id: 'p1',
+    });
+  });
+
+  it('honours an explicit parentSelect over the hook-driven full read', async () => {
+    const { guard, repo } = await buildGuard(
+      [FakeParentHook],
+      ['id', 'userId'],
+    );
+    const ctx = buildExecutionContext({
+      user: { id: 'u1' },
+      params: { petId: 'p1' },
+    });
+    await expect(guard.canActivate(ctx)).resolves.toBe(true);
+    expect(repo.lastOptions?.select).toEqual(['id', 'userId']);
   });
 
   it('keeps the pk-only projection and sends no context when the parent has no hooks', async () => {

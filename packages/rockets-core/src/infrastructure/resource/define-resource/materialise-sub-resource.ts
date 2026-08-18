@@ -89,6 +89,14 @@ export function materialiseSubResource(args: {
     ...def.request,
     params: {
       id: { field: 'id', type: 'uuid', primary: true },
+      // Ancestor params first: at three levels or more the parent path
+      // already carries its own `:param`, and the upstream query parser
+      // throws (`Error on crud context processing` → 500) on a route
+      // param it has no config for. Declared `disabled: true` so they
+      // are validated but NOT turned into route filters — only the
+      // immediate parent's param is a FK column on this entity; a
+      // grandparent's would filter on a column that does not exist.
+      ...ancestorParams(parentPath, parentParam),
       [parentParam]: { field: parentParam, type: 'uuid' },
       ...userControllerParams,
     },
@@ -131,6 +139,7 @@ export function materialiseSubResource(args: {
         ownerColumn,
         sub.parentPk ?? 'id',
         parentHooks ?? [],
+        sub.parentSelect,
       )
     : undefined;
 
@@ -182,6 +191,33 @@ export function materialiseSubResource(args: {
   }
 
   return bundle;
+}
+
+/**
+ * Route params contributed by ancestors of this sub-resource — every
+ * `:name` already present in the parent's path. Empty for a two-level
+ * nest, since a top-level parent path carries no params.
+ */
+function ancestorParams(
+  parentPath: string | readonly string[],
+  parentParam: string,
+): Record<string, CrudParamOptionInterface<PlainLiteralObject>> {
+  const paths = Array.isArray(parentPath)
+    ? (parentPath as readonly string[])
+    : [parentPath as string];
+
+  const params: Record<
+    string,
+    CrudParamOptionInterface<PlainLiteralObject>
+  > = {};
+  for (const path of paths) {
+    for (const match of path.matchAll(/:([A-Za-z0-9_]+)/g)) {
+      const name = match[1];
+      if (name === parentParam) continue;
+      params[name] = { field: name, type: 'uuid', disabled: true };
+    }
+  }
+  return params;
 }
 
 function composeSubResourceOperationsDecorators(

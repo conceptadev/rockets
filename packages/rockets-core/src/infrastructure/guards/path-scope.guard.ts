@@ -3,10 +3,17 @@ import {
   ExecutionContext,
   Injectable,
   NotFoundException,
+  type PlainLiteralObject,
   Type,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AppContextHost, HooksCtx } from '@concepta/nestjs-core';
+import {
+  ActionEnum,
+  AppContextHost,
+  HooksCtx,
+  Operation,
+} from '@concepta/nestjs-core';
+import { CrudCtx, type CrudContextInterface } from '@concepta/nestjs-crud';
 import {
   RepoHook,
   RepositoryInterface,
@@ -50,10 +57,24 @@ interface RequestWithUserAndParams {
  * wins, and `HookContextOverlay` (an `APP_INTERCEPTOR`) has not run yet
  * when guards execute. Defining `HooksCtx` on the request here would
  * pin the PARENT's hooks onto the whole request and the sub-resource's
- * own hooks would never attach. The parent lookup therefore runs on a
- * detached context carrying only the parent's hooks and the actor — and
- * deliberately outside any operation transaction, which has not started
- * at guard time either.
+ * own hooks would never attach.
+ *
+ * What the replay context carries, and what it deliberately does not:
+ *
+ * - A CRUD context shaped like the parent's OWN read route —
+ *   `entity: parentEntityKey`, `operation: Read`, and `params` = the
+ *   request's route params with `id` bound to the parent being looked
+ *   up. Without it `getCrudContext(ctx)` returns `undefined` and every
+ *   hook that gates on a CRUD context — the shape this repo documents,
+ *   an early return when the context is absent — silently no-ops here,
+ *   including the framework's own `PathScopeHook`, which is what scopes
+ *   a grandchild's parent lookup to ITS parent.
+ * - The actor overlay, so owner-scoped parent hooks resolve "who".
+ * - **No transaction.** Nest runs guards ahead of interceptors, so no
+ *   operation transaction exists yet. The parent lookup is a pre-check,
+ *   never a participant. See `CONFIGURATION.md` §5 and issue #60.
+ * - **No `query`.** The guard applies no filters, sort or pagination of
+ *   its own, so the parsed query is empty rather than the child route's.
  */
 @Injectable()
 export abstract class PathScopeGuard implements CanActivate {
@@ -64,6 +85,8 @@ export abstract class PathScopeGuard implements CanActivate {
   protected parentPk = 'id';
   /** Parent resource's entity hooks, replayed for the parent lookup. */
   protected parentHooks: readonly Type[] = [];
+  /** Explicit projection for the parent lookup (see `parentSelect`). */
+  protected parentSelect: readonly string[] | undefined = undefined;
   protected parentRepo!: RepositoryInterface<Record<string, unknown>>;
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -84,19 +107,26 @@ export abstract class PathScopeGuard implements CanActivate {
       );
     }
 
+    // Only existence + ownership matter to the guard itself, so the
+    // hook-free case reads the primary key alone. Once a parent hook is
+    // replayed the full row is read instead: an `afterFindOne` hook may
+    // inspect an expiry timestamp or a status the narrow projection
+    // would omit, and nothing declares which columns a hook reads. That
+    // includes eager relations — `parentSelect` on the sub-resource is
+    // the opt-out for a parent whose hooks need only known columns.
+    const select: readonly string[] | undefined =
+      this.parentSelect ??
+      (this.parentHooks.length ? undefined : [this.parentPk]);
+
     const parent = await this.parentRepo.findOne({
       where: Where.and(
         Where.eq<Record<string, unknown>>(this.parentPk, parentId),
         Where.eq<Record<string, unknown>>(this.ownerColumn, actorId),
       ),
-      // Only existence + ownership matter here; pulling all parent
-      // columns (and any eager relations) on every sub-resource request
-      // would be wasteful. `select` narrows the read to the primary key
-      // — but only when no parent hook is replayed, because an
-      // `afterFindOne` hook that inspects a non-selected column (an
-      // expiry timestamp, a status) would otherwise decide on `undefined`.
-      ...(this.parentHooks.length ? {} : { select: [this.parentPk] }),
-      ctx: this.parentReadContext(actorId),
+      // Copied because the upstream option is a mutable `string[]` and
+      // the bundle-level `parentSelect` is `readonly`.
+      ...(select ? { select: [...select] } : {}),
+      ctx: this.parentReadContext(actorId, req?.params ?? {}, parentId),
     });
     if (!parent) {
       throw new NotFoundException(
@@ -120,6 +150,7 @@ export abstract class PathScopeGuard implements CanActivate {
     ownerColumn: string,
     parentPk: string = 'id',
     parentHooks: readonly Type[] = [],
+    parentSelect?: readonly string[],
   ): Type<PathScopeGuard> {
     return getPathScopeGuardSubclass(
       parentParam,
@@ -127,23 +158,60 @@ export abstract class PathScopeGuard implements CanActivate {
       ownerColumn,
       parentPk,
       parentHooks,
+      parentSelect,
     );
   }
 
   /**
-   * Detached per-call context carrying the parent's hooks and the actor.
+   * Detached per-call context carrying the parent's hooks, the actor,
+   * and a CRUD context shaped like the parent's own read route.
    * Returns `undefined` when the parent declares no hooks so the
    * hook-free path keeps its previous (context-less) behaviour.
    */
-  private parentReadContext(actorId: string): AppContextHost | undefined {
+  private parentReadContext(
+    actorId: string,
+    routeParams: Record<string, unknown>,
+    parentId: string,
+  ): PlainLiteralObject | undefined {
     if (!this.parentHooks.length) return undefined;
 
-    const ctx = new AppContextHost();
-    ctx.defineOverlay(HooksCtx, {
+    const host = new AppContextHost();
+    host.defineOverlay(HooksCtx, {
       hooks: this.parentHooks.map((hook) => ({ hook, type: RepoHook.KEY })),
     });
-    ctx.defineOverlay(ActorCtx, { id: actorId, type: 'user' });
-    return ctx;
+    host.defineOverlay(ActorCtx, { id: actorId, type: 'user' });
+
+    // `id` is overwritten rather than merged: on a nested route the raw
+    // `id` param is the CHILD's, and a parent hook reading `params.id`
+    // means the row it is filtering. The other route params are kept as
+    // they are — that is what lets a grandchild's guard replay the
+    // child's `PathScopeHook` and still scope by `:parentId`.
+    const crudContext: CrudContextInterface = {
+      entity: this.parentEntityKey,
+      operation: Operation.Read,
+      action: ActionEnum.READ,
+      params: { ...routeParams, id: parentId },
+      query: {
+        fields: [],
+        search: undefined,
+        filter: [],
+        or: [],
+        sort: [],
+        limit: undefined,
+        offset: undefined,
+        page: undefined,
+        cache: undefined,
+        includeDeleted: undefined,
+      },
+      options: {},
+    };
+    host.defineOverlay(CrudCtx, crudContext);
+
+    // Materialise the overlay so `entity` / `operation` / `params` are own
+    // properties on the object handed to the repository — that is the
+    // shape `getCrudContext()` narrows, and the shape the CRUD pipeline
+    // itself passes down.
+    return host.with(CrudCtx);
   }
 }
 
@@ -155,6 +223,7 @@ function getPathScopeGuardSubclass(
   ownerColumn: string,
   parentPk: string,
   parentHooks: readonly Type[],
+  parentSelect: readonly string[] | undefined,
 ): Type<PathScopeGuard> {
   // JSON.stringify over the tuple, not a `::`-joined string: delimiter
   // joining collides whenever a component can contain the delimiter, and
@@ -167,6 +236,7 @@ function getPathScopeGuardSubclass(
     ownerColumn,
     parentPk,
     parentHooks.map(hookCacheId),
+    parentSelect ?? null,
   ]);
   const existing = pathScopeGuardCache.get(cacheKey);
   if (existing) return existing;
@@ -180,6 +250,7 @@ function getPathScopeGuardSubclass(
       this.ownerColumn = ownerColumn;
       this.parentPk = parentPk;
       this.parentHooks = parentHooks;
+      this.parentSelect = parentSelect;
       this.parentRepo = parentRepo;
     }
   };

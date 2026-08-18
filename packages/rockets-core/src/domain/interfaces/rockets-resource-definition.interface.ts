@@ -598,6 +598,21 @@ export interface RocketsSubResourceDefinition<
    */
   readonly parentPk?: string;
   /**
+   * Column projection for the guard's parent lookup.
+   *
+   * The guard reads the parent once per nested request. With no parent
+   * hooks it reads the primary key only. With parent hooks it reads the
+   * FULL row — including eager relations — because an `afterFindOne`
+   * hook may inspect a column a narrow projection would omit, and
+   * nothing declares which columns a hook reads.
+   *
+   * Set this when you know: `parentSelect: ['id', 'expiresAt']` restores
+   * a narrow read for a parent whose hooks only need those columns.
+   * Getting it wrong makes the hook decide on `undefined`, so leave it
+   * unset unless the extra columns actually cost you.
+   */
+  readonly parentSelect?: readonly string[];
+  /**
    * URL segment override. The `subResources` object key (constrained to
    * `keyof Parent`) drives type-safety; this field decouples the URL
    * shape from that name when they need to differ.
