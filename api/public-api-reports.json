@@ -2533,7 +2533,7 @@
         "name": "PathScopeGuard",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare abstract class PathScopeGuard implements CanActivate {\n    protected parentParam: string;\n    protected parentEntityKey: string;\n    protected ownerColumn: string;\n    protected parentPk: string;\n    protected parentRepo: RepositoryInterface<Record<string, unknown>>;\n    canActivate(context: ExecutionContext): Promise<boolean>;\n    static for(parentParam: string, parentEntityKey: string, ownerColumn: string, parentPk?: string): Type<PathScopeGuard>;\n}"
+        "signature": "export declare abstract class PathScopeGuard implements CanActivate {\n    protected parentParam: string;\n    protected parentEntityKey: string;\n    protected ownerColumn: string;\n    protected parentPk: string;\n    protected parentHooks: readonly Type[];\n    protected parentRepo: RepositoryInterface<Record<string, unknown>>;\n    canActivate(context: ExecutionContext): Promise<boolean>;\n    static for(parentParam: string, parentEntityKey: string, ownerColumn: string, parentPk?: string, parentHooks?: readonly Type[]): Type<PathScopeGuard>;\n    private parentReadContext;\n}"
       },
       {
         "name": "PathScopeHook",
