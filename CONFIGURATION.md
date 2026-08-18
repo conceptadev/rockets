@@ -993,22 +993,38 @@ const AuditHook = defineHook<OrderEntity>(OrderEntity, {
 });
 ```
 
-Inside a CQRS handler or a service reached from a controller, take the
-CRUD context the pipeline already built:
+Inside a CQRS handler, the context is `query.context` — the same
+`AppContextHost` the pipeline built:
 
 ```ts
-@QueryHandler(MyQuery)
-export class MyHandler {
-  constructor(
-    @InjectDynamicRepository('order')
-    private readonly orders: RepositoryInterface<OrderEntity>,
-  ) {}
+import { CrudQueryHandlerBase, type CrudQueryInterface } from '@concepta/rockets-core';
+import { CrudListQuery } from '@concepta/nestjs-crud';
 
-  async execute(query: MyQuery) {
-    return this.orders.find({ where: …, ctx: query.crudContext });
+@Injectable()
+export class OrderListHandler extends CrudQueryHandlerBase<OrderEntity> {
+  constructor(
+    @InjectDynamicRepository(OrderEntity)
+    private readonly orders: RepositoryInterface<OrderEntity>,
+    @InjectCrudAdapter(OrderEntity) crudAdapter: CrudAdapter<OrderEntity>,
+  ) {
+    super(crudAdapter);
+  }
+
+  async execute(query: CrudQueryInterface<OrderEntity>) {
+    const { context } = query as CrudListQuery<OrderEntity>;
+    // Same context the adapter itself passes down.
+    const recent = await this.orders.find({ where: …, ctx: context });
+    return this.crudAdapter.list(context);
   }
 }
 ```
+
+**Do not spread the context into a new object.** It is an
+`AppContextHost` Proxy carrying overlay accessors; `{ ...context }`
+strips them and the next `AppContextHost.from(...)` inside the repository
+adapter throws `Expected AppContextHost or nullish value, got object`.
+Mutate it in place, as `PetListHandler` in `examples/sample-server-auth`
+does.
 
 #### CRUD `transactional: true` vs manual `TransactionScope`
 
@@ -1019,17 +1035,26 @@ Everything else — a custom service, a guard, a background job — has to
 open its own scope:
 
 ```ts
+import { type PlainLiteralObject } from '@nestjs/common';
 import { TransactionScope } from '@concepta/nestjs-repository';
 
 @Injectable()
 export class TransferService {
   constructor(
     private readonly trx: TransactionScope,
-    @InjectDynamicRepository('account')
+    @InjectDynamicRepository(AccountEntity)
     private readonly accounts: RepositoryInterface<AccountEntity>,
   ) {}
 
-  async transfer(ctx: unknown, from: string, to: string, amount: number) {
+  // `PlainLiteralObject` is what `TransactionScope.run` and the
+  // repository's `ctx` option both accept; a `RocketsCrudContext` from
+  // the pipeline satisfies it.
+  async transfer(
+    ctx: PlainLiteralObject,
+    from: string,
+    to: string,
+    amount: number,
+  ) {
     // `REQUIRED` starts one if none is active; the default `SUPPORTS`
     // would silently run unprotected outside a request.
     return this.trx.run(

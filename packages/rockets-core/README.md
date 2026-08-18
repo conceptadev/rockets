@@ -284,6 +284,7 @@ The string key is derived from the entity name (`PetEntity` → `'pet'`). Pass t
 class for the recommended form, or an explicit string for namespaced keys.
 
 ```typescript
+import { type PlainLiteralObject } from '@nestjs/common';
 import {
   InjectDynamicRepository,
   RepositoryInterface,
@@ -297,7 +298,10 @@ export class PetService {
     private readonly pets: RepositoryInterface<PetEntity>,
   ) {}
 
-  byOwner(ownerId: string, ctx: unknown) {
+  // `ctx` is `PlainLiteralObject` — what the repository's `ctx` option
+  // accepts. A `RocketsCrudContext` from a hook or a CQRS handler
+  // satisfies it; so does the context `TransactionScope.run` hands back.
+  byOwner(ownerId: string, ctx: PlainLiteralObject) {
     return this.pets.find({
       where: Where.eq<PetEntity>('userId', ownerId),
       // Always forward `ctx`. See below — omitting it is silent.
@@ -314,10 +318,13 @@ disabled** and **outside the surrounding operation's transaction**.
 Neither is a type error and neither shows up in a passing test — it is
 the defect class behind issue #45.
 
-Take the context from wherever you are: a hook's second argument, the
-CRUD context a CQRS handler receives, or the scope you opened yourself
-with `TransactionScope.run`. `CONFIGURATION.md` §8a has the full seam,
-including the `SUPPORTS`-by-default trap and an audit `grep`.
+Take the context from wherever you are: a hook's second argument (typed
+`EntityHookContext`), `query.context` in a CQRS handler, or the `txCtx`
+`TransactionScope.run` hands its callback. All three satisfy the
+repository's `ctx?: PlainLiteralObject`. Never spread it into a new
+object — it is an `AppContextHost` Proxy and spreading strips the overlay
+accessors. `CONFIGURATION.md` §8a has the full seam, including the
+`SUPPORTS`-by-default trap and an audit `grep`.
 
 ### Read the authenticated user inside a handler
 
