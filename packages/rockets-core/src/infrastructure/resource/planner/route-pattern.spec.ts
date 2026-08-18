@@ -41,4 +41,24 @@ describe('route-pattern', () => {
   it('returns unknown for complex mixed segments instead of guessing', () => {
     expect(overlaps('files/file-:id', 'files/file-a')).toBe('unknown');
   });
+
+  // Returning `true` at the first wildcard dropped every remaining
+  // segment, so a mid-route wildcard reported overlaps that
+  // `path-to-regexp` disagrees with: `/a/*rest/x` does not match
+  // `/a/y/z`. A false positive here rejects a valid configuration.
+  it('is suffix-aware for a mid-route wildcard', () => {
+    expect(overlaps('a/*rest/x', 'a/y/z')).toBe(false);
+  });
+
+  it('still overlaps when the suffix after the wildcard lines up', () => {
+    expect(overlaps('a/*rest/x', 'a/y/x')).toBe(true);
+    expect(overlaps('a/*rest/x', 'a/y/z/x')).toBe(true);
+  });
+
+  // A match that needs the wildcard to absorb ZERO segments depends on
+  // router semantics that vary by version, so it is reported as
+  // unproven rather than asserted either way.
+  it('reports a zero-length wildcard match as unproven', () => {
+    expect(overlaps('a/*rest', 'a')).toBe('unknown');
+  });
 });

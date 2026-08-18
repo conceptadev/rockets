@@ -50,10 +50,41 @@ function isDynamicModule(entry: object): entry is DynamicModule {
   return 'module' in entry;
 }
 
-function addModuleClassExports(
+/**
+ * Whether a class carries `@Module()` metadata. Used to decide whether an
+ * export entry is a token or a re-exported module whose own exports must
+ * be walked.
+ */
+function isModuleClass(value: Type<unknown>): boolean {
+  return (
+    Reflect.getMetadata(MODULE_METADATA.EXPORTS, value) !== undefined ||
+    Reflect.getMetadata(MODULE_METADATA.PROVIDERS, value) !== undefined ||
+    Reflect.getMetadata(MODULE_METADATA.IMPORTS, value) !== undefined ||
+    Reflect.getMetadata(MODULE_METADATA.CONTROLLERS, value) !== undefined
+  );
+}
+
+/**
+ * Walks a module's `exports` and records every token it makes available.
+ *
+ * Nest re-exports transitively: `exports: [InnerModule]` publishes
+ * everything `InnerModule` itself exports. Reading only direct entries
+ * missed that, so a handler reachable through `Outer → Inner` looked
+ * unsupplied, was auto-registered locally, and shadowed the imported
+ * provider — with dependencies private to `InnerModule` the app then
+ * failed to bootstrap at all.
+ *
+ * `visited` guards the mutually-re-exporting case; Nest tolerates it and
+ * an unguarded walk would not.
+ */
+function addModuleExports(
   moduleClass: Type<unknown>,
   tokens: Set<unknown>,
+  visited: Set<unknown>,
 ): void {
+  if (visited.has(moduleClass)) return;
+  visited.add(moduleClass);
+
   const exported: unknown = Reflect.getMetadata(
     MODULE_METADATA.EXPORTS,
     moduleClass,
@@ -61,8 +92,43 @@ function addModuleClassExports(
   if (!Array.isArray(exported)) {
     return;
   }
-  for (const item of exported) {
-    tokens.add(exportToken(item));
+  addExportEntries(exported, tokens, visited);
+}
+
+/**
+ * Records each export entry as a token, and recurses when the entry is
+ * itself a module (class or `DynamicModule`).
+ *
+ * A class entry is added as a token AND recursed into when it carries
+ * module metadata: nothing injects a module class as a handler, so the
+ * extra token is inert, and this avoids having to decide the ambiguous
+ * "is this class a provider or a module" question in one direction only.
+ */
+function addExportEntries(
+  entries: readonly unknown[],
+  tokens: Set<unknown>,
+  visited: Set<unknown>,
+): void {
+  for (const raw of entries) {
+    const entry = unwrapImportEntry(raw);
+    if (entry === undefined || entry === null) continue;
+
+    if (typeof entry === 'function') {
+      tokens.add(entry);
+      if (isModuleClass(entry as Type<unknown>)) {
+        addModuleExports(entry as Type<unknown>, tokens, visited);
+      }
+      continue;
+    }
+
+    if (typeof entry === 'object' && isDynamicModule(entry)) {
+      if (visited.has(entry)) continue;
+      visited.add(entry);
+      addExportEntries(entry.exports ?? [], tokens, visited);
+      continue;
+    }
+
+    tokens.add(exportToken(entry));
   }
 }
 
@@ -79,19 +145,20 @@ function collectImportedExportTokens(
   if (imports === undefined) {
     return tokens;
   }
+  const visited = new Set<unknown>();
   for (const raw of imports) {
     const entry = unwrapImportEntry(raw);
     if (entry === undefined || entry === null) {
       continue;
     }
     if (typeof entry === 'function') {
-      addModuleClassExports(entry as Type<unknown>, tokens);
+      addModuleExports(entry as Type<unknown>, tokens, visited);
       continue;
     }
     if (typeof entry === 'object' && isDynamicModule(entry)) {
-      for (const exported of entry.exports ?? []) {
-        tokens.add(exportToken(exported));
-      }
+      if (visited.has(entry)) continue;
+      visited.add(entry);
+      addExportEntries(entry.exports ?? [], tokens, visited);
     }
   }
   return tokens;

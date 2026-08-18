@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
-import { Module } from '@nestjs/common';
+import { Module, Version } from '@nestjs/common';
 import { Operation } from '@concepta/nestjs-core';
 
 import { ResourceKind } from '../../domain/interfaces/resource-kind.enum';
@@ -644,5 +644,246 @@ describe('operationResource (zod)', () => {
         operationBundles: [ops],
       }),
     ).toThrow(/duplicate route GET/);
+  });
+});
+
+/**
+ * Regressions for the review findings on the operation-resource surface:
+ * the documented `{ useClass }` form, transitive module re-exports,
+ * operation-id / DTO-name uniqueness, and per-operation route
+ * dimensions.
+ */
+describe('operation resource — review regressions', () => {
+  class UseClassHandler {
+    // Instance-field `handle` — the shape no runtime check can tell apart
+    // from a plain function, which is why `{ useClass }` exists.
+    handle = () => ({ ok: true });
+  }
+
+  it('accepts the documented { useClass } handler on the zod path', () => {
+    expect(() =>
+      operationResource({
+        path: 'api/tagged',
+        operations: (op) => ({
+          run: op.read({
+            output: z.object({ ok: z.boolean() }),
+            handler: { useClass: UseClassHandler },
+          }),
+        }),
+      }),
+    ).not.toThrow();
+  });
+
+  it('registers the { useClass } target as a provider', () => {
+    const bundle = operationResource({
+      path: 'api/tagged-provider',
+      operations: (op) => ({
+        run: op.read({
+          output: z.object({ ok: z.boolean() }),
+          handler: { useClass: UseClassHandler },
+        }),
+      }),
+    });
+
+    expect(bundle.providers).toContain(UseClassHandler);
+  });
+
+  it('rejects a handler that is neither function, class nor { useClass }', () => {
+    expect(() =>
+      operationResource({
+        path: 'api/bad-handler',
+        operations: (op) => ({
+          run: op.read({
+            output: z.object({ ok: z.boolean() }),
+            // Deliberately malformed: the definition must fail fast
+            // rather than produce a controller that throws per request.
+            handler: { nope: true } as never,
+          }),
+        }),
+      }),
+    ).toThrow(/must be a function, an injectable class, or/);
+  });
+
+  // Nest re-exports transitively: `exports: [InnerModule]` publishes
+  // everything Inner exports. Reading only direct entries made the
+  // handler look unsupplied, so it was registered locally — shadowing
+  // the imported provider and losing its module-private dependencies.
+  it('sees a handler exported through a re-exported module', () => {
+    class TransitiveHandler {
+      handle() {
+        return { ok: true };
+      }
+    }
+
+    @Module({
+      providers: [TransitiveHandler],
+      exports: [TransitiveHandler],
+    })
+    class InnerModule {}
+
+    @Module({ imports: [InnerModule], exports: [InnerModule] })
+    class OuterModule {}
+
+    const bundle = operationResource({
+      path: 'api/transitive',
+      imports: [OuterModule],
+      operations: (op) => ({
+        run: op.read({
+          output: z.object({ ok: z.boolean() }),
+          handler: TransitiveHandler,
+        }),
+      }),
+    });
+
+    expect(bundle.providers).not.toContain(TransitiveHandler);
+  });
+
+  it('sees a handler re-exported through a dynamic module', () => {
+    class DynamicHandler {
+      handle() {
+        return { ok: true };
+      }
+    }
+
+    @Module({ providers: [DynamicHandler], exports: [DynamicHandler] })
+    class InnerDynamicModule {}
+
+    const bundle = operationResource({
+      path: 'api/transitive-dynamic',
+      imports: [
+        {
+          module: class OuterDynamicModule {},
+          imports: [InnerDynamicModule],
+          exports: [InnerDynamicModule],
+        },
+      ],
+      operations: (op) => ({
+        run: op.read({
+          output: z.object({ ok: z.boolean() }),
+          handler: DynamicHandler,
+        }),
+      }),
+    });
+
+    expect(bundle.providers).not.toContain(DynamicHandler);
+  });
+
+  // Same base path, same method, same key — distinct only by explicit
+  // path. Both used to receive one operation ID and one DTO name, so
+  // Swagger pointed both routes at a single component.
+  it('discriminates operation ids and DTO names by explicit path', () => {
+    const build = (path: string) =>
+      operationResource({
+        path: 'same-base',
+        operations: (op) => ({
+          action: op.read({
+            path,
+            output: z.object({ value: z.string() }),
+            handler: () => ({ value: path }),
+          }),
+        }),
+      });
+
+    const one = build('one');
+    const two = build('two');
+
+    const oneDto = one.definition.operations.action.outputDto?.name;
+    const twoDto = two.definition.operations.action.outputDto?.name;
+    expect(oneDto).toBeDefined();
+    expect(oneDto).not.toBe(twoDto);
+  });
+
+  it('keeps the short name when the path is just the key', () => {
+    const bundle = operationResource({
+      path: 'plain',
+      operations: (op) => ({
+        action: op.read({
+          output: z.object({ value: z.string() }),
+          handler: () => ({ value: 'x' }),
+        }),
+      }),
+    });
+
+    expect(bundle.definition.operations.action.outputDto?.name).toBe(
+      'Plain_Get_ActionOutput',
+    );
+  });
+});
+
+/**
+ * A CRUD route on version 1 and an operation route on version 2 share a
+ * METHOD and a path but are routed separately by Nest. The collision
+ * validator discarded operation-level dimensions, so it rejected a
+ * configuration that works.
+ */
+describe('operation resource — route dimensions', () => {
+  class VersionedEntity {
+    id!: string;
+  }
+
+  it('accepts a versioned operation beside a same-path v1 CRUD route', () => {
+    const crudV1 = {
+      crud: {
+        controller: {
+          class: VersionedEntity,
+          path: 'widgets',
+          version: '1',
+        },
+        operations: [{ operation: Operation.List }],
+      },
+    };
+
+    const ops = operationResource({
+      path: 'widgets',
+      operations: (op) => ({
+        list: op.read({
+          path: '',
+          // Nest's `Version` is a METHOD decorator (it always writes to
+          // `descriptor.value`), so per-operation `decorators` is where
+          // it belongs. The planner reads it back off the generated
+          // controller's handler.
+          decorators: [Version('2')],
+          output: z.object({ ok: z.boolean() }),
+          handler: () => ({ ok: true }),
+        }),
+      }),
+    });
+
+    expect(() =>
+      validateRouteCollisions({
+        generatedResources: [],
+        manualResources: [crudV1],
+        operationBundles: [ops],
+      }),
+    ).not.toThrow();
+  });
+
+  it('still rejects two unversioned routes on the same path', () => {
+    const crud = defineResource<VersionedEntity>({
+      key: 'widget',
+      entity: VersionedEntity,
+      path: 'widgets',
+      tags: ['Widgets'],
+      operations: { list: {} },
+    });
+
+    const ops = operationResource({
+      path: 'widgets',
+      operations: (op) => ({
+        list: op.read({
+          path: '',
+          output: z.object({ ok: z.boolean() }),
+          handler: () => ({ ok: true }),
+        }),
+      }),
+    });
+
+    expect(() =>
+      validateRouteCollisions({
+        generatedResources: [crud],
+        manualResources: [],
+        operationBundles: [ops],
+      }),
+    ).toThrow(/duplicate route/i);
   });
 });

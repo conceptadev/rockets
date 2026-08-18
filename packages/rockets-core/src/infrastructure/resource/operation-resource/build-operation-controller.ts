@@ -289,11 +289,41 @@ function controllerClassName(path: string): string {
   return `OperationResource_${slug || 'root'}`;
 }
 
+/**
+ * Stable, globally unique identifier for one generated route.
+ *
+ * `controllerName + method + key` is NOT unique for configurations the
+ * planner accepts: two bundles on the same base path can each declare a
+ * `GET` operation keyed `action` with different explicit `path`s
+ * (`one` / `two`). Both routes are legal and distinct, but they produced
+ * the same operation ID and the same generated DTO names, so Swagger
+ * pointed both at one component and the second schema overwrote the
+ * first.
+ *
+ * The operation's own path is the discriminator that makes it unique —
+ * the planner already rejects duplicate `METHOD + full path`. It is
+ * appended only when it differs from the key, so the common case
+ * (`path` defaulting to `key`) keeps its short, readable name.
+ */
 function operationId(
   controllerName: string,
   operation: CompiledOperationDescriptor,
 ): string {
-  return `${controllerName}_${operation.method.toLowerCase()}_${operation.key}`;
+  return `${controllerName}_${operation.method.toLowerCase()}_${operationDiscriminator(
+    operation.key,
+    operation.path,
+  )}`;
+}
+
+/**
+ * `key`, or `key_path-slug` when an explicit path makes two operations
+ * with the same key distinct. Shared with the zod DTO namer so IDs and
+ * component names stay in step.
+ */
+export function operationDiscriminator(key: string, path: string): string {
+  const pathSlug = path.replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_|_$/g, '');
+  if (pathSlug === '' || pathSlug === key) return key;
+  return `${key}_${pathSlug}`;
 }
 
 /**
@@ -306,6 +336,19 @@ function operationId(
  */
 export function buildOperationController(
   definition: OperationResourceDefinition,
+  /**
+   * Handler tokens registered on the generated module itself — either
+   * auto-registered or listed in `providers`.
+   *
+   * Drives the resolution mode. A locally-registered handler resolves
+   * `strict`, which is what keeps two operation resources sharing a
+   * handler CLASS from resolving each other's instance. A handler
+   * supplied by an imported module has no local provider to be strict
+   * about, so it resolves through the module's injector — there is
+   * exactly one provider for that token reachable from here, in the
+   * module that owns it.
+   */
+  locallyProvided: ReadonlySet<unknown> = new Set(),
 ): Type<unknown> {
   if (definition.public === true) {
     for (const operation of Object.values(definition.operations)) {
@@ -379,6 +422,7 @@ export function buildOperationController(
       uniqueName,
       paramsDto,
       bearerAuth,
+      locallyProvided,
     );
   }
 
@@ -391,6 +435,7 @@ function attachOperationMethod(
   controllerName: string,
   paramsDto: Type<object> | undefined,
   controllerBearerAuth: boolean,
+  locallyProvided: ReadonlySet<unknown>,
 ): void {
   const methodName = operation.key;
   const http = METHOD_DECORATOR[operation.method];
@@ -434,7 +479,7 @@ function attachOperationMethod(
     if (handlerClass !== undefined) {
       const contextId = ContextIdFactory.getByRequest(request);
       const instance = await this.moduleRef.resolve(handlerClass, contextId, {
-        strict: true,
+        strict: locallyProvided.has(handlerClass),
       });
       result = await instance.handle(ctx);
     } else if (isHandlerFunction(operation.handler)) {

@@ -59,13 +59,24 @@ export function defineOperationResource(
     }
   }
 
-  const controller = buildOperationController(definition);
   const explicitProviders: readonly Provider[] = definition.providers ?? [];
   const handlerProviders = collectHandlerProviders(
     operations,
     explicitProviders,
     definition.imports,
   );
+
+  // Tokens this module registers itself. Anything else a handler
+  // resolves to comes from an imported module, where a strict resolve
+  // would not find it.
+  const locallyProvided = new Set<unknown>([
+    ...handlerProviders,
+    ...explicitProviders.map((provider) =>
+      typeof provider === 'function' ? provider : provider.provide,
+    ),
+  ]);
+
+  const controller = buildOperationController(definition, locallyProvided);
 
   return {
     kind: ResourceKind.Operation,

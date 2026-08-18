@@ -3,6 +3,7 @@ import {
   Inject,
   INestApplication,
   Injectable,
+  Module,
   SetMetadata,
   Scope,
   UnauthorizedException,
@@ -333,6 +334,42 @@ interface OpenApiOperation {
   readonly security?: ReadonlyArray<Record<string, readonly string[]>>;
 }
 
+/** Owned by `InnerModule` and never exported — only its handler sees it. */
+const INNER_SECRET = Symbol('INNER_SECRET');
+
+@Injectable()
+class ReExportedHandler {
+  constructor(@Inject(INNER_SECRET) private readonly secret: string) {}
+
+  handle() {
+    return { value: this.secret };
+  }
+}
+
+@Module({
+  providers: [
+    { provide: INNER_SECRET, useValue: 'inner-secret' },
+    ReExportedHandler,
+  ],
+  exports: [ReExportedHandler],
+})
+class InnerModule {}
+
+@Module({ imports: [InnerModule], exports: [InnerModule] })
+class OuterModule {}
+
+const reExportedOps = operationResource({
+  path: 're-exported',
+  public: true,
+  imports: [OuterModule],
+  operations: (op) => ({
+    value: op.read({
+      output: z.object({ value: z.string() }),
+      handler: ReExportedHandler,
+    }),
+  }),
+});
+
 describe('operationResource e2e (issue #43 v1)', () => {
   let app: INestApplication;
   let openApiPaths: Record<string, Record<string, OpenApiOperation>>;
@@ -568,5 +605,51 @@ describe('operationResource e2e (issue #43 v1)', () => {
     expect(
       Reflect.getMetadata(OPS_MARK, securedOps.controller.prototype.shout),
     ).toBe(true);
+  });
+});
+
+/**
+ * Bootstrap regression for the transitive module re-export finding.
+ *
+ * `OuterModule` imports and re-exports `InnerModule`, which owns both the
+ * handler and a dependency PRIVATE to itself. Reading only direct export
+ * entries made the handler look unsupplied, so it was auto-registered in
+ * the generated operation module — where its private dependency does not
+ * exist. The app then failed to boot with "Nest can't resolve
+ * dependencies".
+ *
+ * Asserted by booting, not by inspecting providers: the whole point is
+ * that the container can build the graph.
+ */
+describe('operationResource — handler behind a re-exported module (e2e)', () => {
+  let app: INestApplication;
+
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        RocketsCoreModule.forRoot({
+          auth: defineAuthAdapter(SimpleAuthProvider),
+          providers: [SimpleAuthProvider],
+          resources: [reExportedOps],
+          global: true,
+        }),
+      ],
+      providers: [{ provide: APP_GUARD, useClass: AuthServerGuard }],
+    }).compile();
+
+    app = moduleRef.createNestApplication();
+    await app.init();
+  });
+
+  afterAll(async () => {
+    if (app) await app.close();
+  });
+
+  it('resolves the handler from the owning module, private deps and all', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/re-exported/value')
+      .expect(200);
+
+    expect(res.body).toEqual({ value: 'inner-secret' });
   });
 });

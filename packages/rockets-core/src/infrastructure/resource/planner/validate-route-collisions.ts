@@ -9,6 +9,7 @@ import {
   structuredRoutePatternsMayOverlap,
   type StructuredRoutePattern,
 } from './route-pattern';
+import { HOST_METADATA, VERSION_METADATA } from '@nestjs/common/constants';
 
 /**
  * Mirrors `@concepta/nestjs-crud` route defaults
@@ -164,17 +165,46 @@ function collectCrudConfigRoutes(
   return claims;
 }
 
+/**
+ * Route claims for one operation resource.
+ *
+ * `host` and `version` are read off the GENERATED controller rather than
+ * assumed absent: an operation resource can carry arbitrary class and
+ * method decorators, so `decorators: [Version('2')]` on an operation is a
+ * legal way to sit beside a v1 CRUD route on the same path. Treating
+ * those routes as a collision rejected a configuration Nest routes
+ * perfectly well.
+ *
+ * Method-level version wins over the controller's, matching Nest.
+ */
 function collectOperationRoutes(bundle: OperationResource): RouteClaim[] {
   const claims: RouteClaim[] = [];
   const base = bundle.definition.path;
+  const controller = bundle.controller;
+  const controllerHost: unknown = Reflect.getMetadata(
+    HOST_METADATA,
+    controller,
+  );
+  const controllerVersion: unknown = Reflect.getMetadata(
+    VERSION_METADATA,
+    controller,
+  );
+  const prototype = controller.prototype as Record<string, unknown>;
+
   for (const operation of Object.values(bundle.definition.operations)) {
     const displayPath = joinPath(base, operation.path);
+    const handler = prototype[operation.key];
+    const methodVersion: unknown =
+      typeof handler === 'function'
+        ? Reflect.getMetadata(VERSION_METADATA, handler)
+        : undefined;
+
     claims.push({
       method: operation.method,
       displayPath,
       pattern: parseStructuredRoutePattern(displayPath),
-      host: undefined,
-      version: undefined,
+      host: controllerHost as RouteClaim['host'],
+      version: methodVersion ?? controllerVersion,
       source: `operationResource("${base}").${operation.key}`,
     });
   }

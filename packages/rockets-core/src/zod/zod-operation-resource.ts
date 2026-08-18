@@ -12,6 +12,7 @@ import type {
 import { defineOperationResource } from '../infrastructure/resource/define-operation-resource';
 import { assertValidOperationKey } from '../infrastructure/resource/operation-resource/operation-key';
 import { compileDtoClass } from './zod-dto';
+import { operationDiscriminator } from '../infrastructure/resource/operation-resource/build-operation-controller';
 
 type InferIn<TInput> = [TInput] extends [z.ZodObject]
   ? z.output<TInput>
@@ -314,12 +315,25 @@ function assertOperationHandler(
   resourcePath: string,
   key: string,
 ): asserts handler is CompiledOperationDescriptor['handler'] {
-  if (typeof handler !== 'function') {
-    throw new Error(
-      `operationResource "${resourcePath}": operation "${key}" handler must be ` +
-        `a function or injectable class`,
-    );
+  if (typeof handler === 'function') return;
+
+  // `{ useClass }` is part of `OperationHandlerRef` and is the documented
+  // way to hand over a class whose `handle` is an instance field (which
+  // no runtime check can tell apart from a plain function). Rejecting
+  // every object here made the documented form compile and then throw.
+  if (
+    typeof handler === 'object' &&
+    handler !== null &&
+    'useClass' in handler &&
+    typeof (handler as { useClass: unknown }).useClass === 'function'
+  ) {
+    return;
   }
+
+  throw new Error(
+    `operationResource "${resourcePath}": operation "${key}" handler must be ` +
+      `a function, an injectable class, or { useClass: Handler }`,
+  );
 }
 
 function compileOperation(
@@ -332,12 +346,18 @@ function compileOperation(
   // path=key by default; explicit `path: ''` keeps a root mount (?? not ||).
   const path = pending.path ?? key;
 
+  // Same discriminator the generated controller uses for operation IDs:
+  // two bundles on one base path can declare the same method+key with
+  // different explicit paths, and without it both DTOs would claim one
+  // OpenAPI component name.
+  const discriminator = operationDiscriminator(key, path);
+
   let inputDto: Type<object> | undefined;
   if (pending.input !== undefined) {
     inputDto = compileDtoClass(
       pending.input,
       `${pascal(resourcePath)}_${pascal(method.toLowerCase())}_${pascal(
-        key,
+        discriminator,
       )}Input`,
     );
   }
@@ -350,7 +370,7 @@ function compileOperation(
     outputDto = compileOperationDto(
       pending.output,
       `${pascal(resourcePath)}_${pascal(method.toLowerCase())}_${pascal(
-        key,
+        discriminator,
       )}Output`,
     );
   }

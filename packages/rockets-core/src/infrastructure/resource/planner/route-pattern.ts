@@ -123,30 +123,114 @@ function atomsToSegment(atoms: readonly SegmentAtom[]): Segment {
   return { kind: atom.kind };
 }
 
+/**
+ * Whether two segment lists can describe the same concrete path.
+ *
+ * Wildcards make this a matching problem, not a positional walk: the
+ * previous version returned `true` at the first wildcard and dropped
+ * every remaining segment, so `a/*rest/x` was reported as overlapping
+ * `a/y/z` even though the suffix `x` can never line up with `z`. A
+ * false positive here rejects a valid configuration at boot.
+ *
+ * A wildcard is matched against zero-or-more segments on the other side,
+ * and the suffix after it still has to align. The zero-length case is
+ * where the framework's own semantics are ambiguous (`*name` matching
+ * zero segments depends on the router version), so a match that relies
+ * on it returns `'unknown'` — which the collision validator treats as
+ * "not proven", i.e. accepts the routes.
+ */
 function segmentListsMayOverlap(
   a: readonly Segment[],
   b: readonly Segment[],
 ): RoutePatternOverlap {
-  let unknown = false;
-  const max = Math.max(a.length, b.length);
-  for (let index = 0; index < max; index += 1) {
-    const left = a[index];
-    const right = b[index];
-    if (left === undefined || right === undefined) {
-      return false;
+  const memo = new Map<string, RoutePatternOverlap>();
+
+  const walk = (i: number, j: number): RoutePatternOverlap => {
+    const cacheKey = `${i}:${j}`;
+    const cached = memo.get(cacheKey);
+    if (cached !== undefined) return cached;
+    const result = compute(i, j);
+    memo.set(cacheKey, result);
+    return result;
+  };
+
+  /**
+   * A wildcard absorbing `k >= 1` segments is a definite match. Absorbing
+   * zero depends on router semantics that vary by version, so a match
+   * that can ONLY be reached that way is downgraded to `'unknown'` —
+   * which the collision validator reads as "not proven" and accepts.
+   */
+  const throughWildcard = (
+    restIndex: number,
+    otherIndex: number,
+    otherLength: number,
+    step: (consumed: number) => RoutePatternOverlap,
+  ): RoutePatternOverlap => {
+    let accumulated: RoutePatternOverlap = false;
+    for (
+      let consumed = 1;
+      otherIndex + consumed <= otherLength;
+      consumed += 1
+    ) {
+      accumulated = combine(accumulated, step(consumed));
+      if (accumulated === true) return true;
     }
-    const overlap = segmentsMayOverlap(left, right);
-    if (overlap === false) {
-      return false;
+    void restIndex;
+    return combine(accumulated, downgrade(step(0)));
+  };
+
+  const compute = (i: number, j: number): RoutePatternOverlap => {
+    const aDone = i >= a.length;
+    const bDone = j >= b.length;
+    if (aDone && bDone) return true;
+
+    if (!aDone && !bDone) {
+      const left = a[i];
+      const right = b[j];
+      if (left === undefined || right === undefined) return false;
+
+      if (left.kind === 'wildcard') {
+        return throughWildcard(i + 1, j, b.length, (consumed) =>
+          walk(i + 1, j + consumed),
+        );
+      }
+      if (right.kind === 'wildcard') {
+        return throughWildcard(j + 1, i, a.length, (consumed) =>
+          walk(i + consumed, j + 1),
+        );
+      }
+
+      const here = segmentsMayOverlap(left, right);
+      if (here === false) return false;
+      const rest = walk(i + 1, j + 1);
+      if (rest === false) return false;
+      return here === 'unknown' || rest === 'unknown' ? 'unknown' : true;
     }
-    if (overlap === 'unknown') {
-      unknown = true;
-    }
-    if (left.kind === 'wildcard' || right.kind === 'wildcard') {
-      return true;
-    }
-  }
-  return unknown ? 'unknown' : true;
+
+    // Exactly one side has segments left. It can still match only if
+    // every one of them is a wildcard absorbing nothing — the ambiguous
+    // zero-length case, so unproven rather than asserted.
+    const rest = aDone ? b.slice(j) : a.slice(i);
+    const allWildcards = rest.every((segment) => segment.kind === 'wildcard');
+    return allWildcards ? 'unknown' : false;
+  };
+
+  return walk(0, 0);
+}
+
+/** `true` beats `'unknown'` beats `false`. */
+function combine(
+  left: RoutePatternOverlap,
+  right: RoutePatternOverlap,
+): RoutePatternOverlap {
+  if (left === true || right === true) return true;
+  if (left === 'unknown' || right === 'unknown') return 'unknown';
+  return false;
+}
+
+/** A proven match that relies on a zero-length wildcard is not proven. */
+function downgrade(value: RoutePatternOverlap): RoutePatternOverlap {
+  return value === true ? 'unknown' : value;
 }
 
 function segmentsMayOverlap(a: Segment, b: Segment): RoutePatternOverlap {
