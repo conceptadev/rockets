@@ -130,12 +130,30 @@ const noteResource = defineResource<NoteEntity>({
 
 /** An app envelope that shares no keys with the Rockets default. */
 class TicketEnvelopeSerializer implements RocketsErrorSerializerInterface {
-  serialize({ statusCode, errorCode, message }: RocketsErrorContext): unknown {
+  serialize({ statusCode, errorCode, message }: RocketsErrorContext) {
     return {
       ok: false,
       error: { kind: errorCode, detail: message },
       http: statusCode,
     };
+  }
+}
+
+/**
+ * The pattern the docs recommend. It only compiles because `serialize`
+ * returns an object type — a spread of `unknown` is a type error, so
+ * this class IS the regression test for that signature.
+ */
+class ExtendedEnvelopeSerializer implements RocketsErrorSerializerInterface {
+  serialize(context: RocketsErrorContext) {
+    return { ...defaultErrorSerializer.serialize(context), traceId: 'trace-1' };
+  }
+}
+
+/** Returns nothing — the filter must not send an empty body. */
+class BrokenSerializer implements RocketsErrorSerializerInterface {
+  serialize(): never {
+    return undefined as never;
   }
 }
 
@@ -229,6 +247,68 @@ describe('custom error envelope via ROCKETS_ERROR_SERIALIZER_TOKEN (e2e)', () =>
   });
 });
 
+describe('an envelope that extends the default (e2e)', () => {
+  let app: INestApplication;
+
+  beforeAll(async () => {
+    app = await bootstrap(new ExtendedEnvelopeSerializer());
+    await request(app.getHttpServer())
+      .post('/notes')
+      .set('Authorization', 'Bearer u1')
+      .send({ ref: 'taken' })
+      .expect(201);
+  });
+
+  afterAll(async () => {
+    if (app) await app.close();
+  });
+
+  it('keeps the default keys and adds its own', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/notes')
+      .set('Authorization', 'Bearer u1')
+      .send({ ref: 'taken' })
+      .expect(409);
+
+    expect(Object.keys(res.body).sort()).toEqual([
+      'errorCode',
+      'message',
+      'statusCode',
+      'timestamp',
+      'traceId',
+    ]);
+    expect(res.body.traceId).toBe('trace-1');
+  });
+});
+
+describe('a serializer that returns nothing (e2e)', () => {
+  let app: INestApplication;
+
+  beforeAll(async () => {
+    app = await bootstrap(new BrokenSerializer());
+    await request(app.getHttpServer())
+      .post('/notes')
+      .set('Authorization', 'Bearer u1')
+      .send({ ref: 'taken' })
+      .expect(201);
+  });
+
+  afterAll(async () => {
+    if (app) await app.close();
+  });
+
+  it('falls back to the default body instead of replying empty', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/notes')
+      .set('Authorization', 'Bearer u1')
+      .send({ ref: 'taken' })
+      .expect(409);
+
+    expect(res.body.statusCode).toBe(409);
+    expect(res.body.errorCode).toBeDefined();
+  });
+});
+
 describe('default error envelope is unchanged (e2e)', () => {
   let app: INestApplication;
 
@@ -262,13 +342,15 @@ describe('default error envelope is unchanged (e2e)', () => {
   });
 
   it('exports the default serializer so an envelope can extend it', () => {
+    // No cast: `serialize` returns an object type, which is what makes
+    // the documented `{ ...default.serialize(ctx), traceId }` pattern
+    // compile at all.
     const body = defaultErrorSerializer.serialize({
       statusCode: 418,
       errorCode: 'TEAPOT',
       message: 'short and stout',
-      exception: new ConflictException(),
       originalException: new Error('wrapped by the repository membrane'),
-    }) as Record<string, unknown>;
+    });
 
     expect(body.statusCode).toBe(418);
     expect(body.errorCode).toBe('TEAPOT');

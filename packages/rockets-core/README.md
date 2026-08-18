@@ -358,7 +358,7 @@ import {
 class TraceEnvelope implements RocketsErrorSerializerInterface {
   serialize(context: RocketsErrorContext) {
     // Extend the default rather than restating its keys.
-    return { ...(defaultErrorSerializer.serialize(context) as object), traceId };
+    return { ...defaultErrorSerializer.serialize(context), traceId };
   }
 }
 
@@ -379,9 +379,9 @@ providers: [
 The serializer decides the **body only**. The status code, the domain
 exception → 4xx mapping and the unwrap chain stay in the filter, because
 those are the parts apps kept getting wrong. `RocketsErrorContext` also
-carries `exception` (post-unwrap) and `originalException` (as thrown) for
-correlation IDs and logging. Need more than the body? The unwrap helpers
-are `protected`, so a subclass can reuse them.
+carries `originalException` — the exception as thrown, before unwrapping,
+for correlation IDs and structured logs. Need more than the body? The
+unwrap helpers are `protected`, so a subclass can reuse them.
 
 ### Zod-first resources (`@concepta/rockets-core/zod`)
 
