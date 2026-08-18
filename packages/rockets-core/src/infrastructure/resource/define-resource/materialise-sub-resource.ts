@@ -1,4 +1,4 @@
-import type { PlainLiteralObject, Provider } from '@nestjs/common';
+import type { PlainLiteralObject, Provider, Type } from '@nestjs/common';
 import { UseGuards } from '@nestjs/common';
 import { ApiParam } from '@nestjs/swagger';
 import type {
@@ -24,6 +24,13 @@ export function materialiseSubResource(args: {
   readonly parentPath: string | readonly string[];
   readonly parentTags: readonly string[];
   readonly parentPersistenceModule: RepositoryModuleInterface | undefined;
+  /**
+   * Parent resource's entity hooks. Handed to `PathScopeGuard` so the
+   * parent lookup a nested route performs is filtered by the same hooks
+   * the parent's own routes run — a parent hidden by a retention or
+   * tenant hook must not be reachable through its children.
+   */
+  readonly parentHooks: readonly Type[] | undefined;
   readonly segment: string;
   readonly sub: RocketsSubResourceDefinition;
 }): CrudResource {
@@ -32,6 +39,7 @@ export function materialiseSubResource(args: {
     parentPath,
     parentTags,
     parentPersistenceModule,
+    parentHooks,
     segment,
     sub,
   } = args;
@@ -122,6 +130,7 @@ export function materialiseSubResource(args: {
         parentKey,
         ownerColumn,
         sub.parentPk ?? 'id',
+        parentHooks ?? [],
       )
     : undefined;
 

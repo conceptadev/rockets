@@ -252,7 +252,22 @@ before running the full e2e suite.
   `@concepta/nestjs-repository-typeorm` upstream, with no hard
   `dependency` on either anywhere in the chain. A unit test now pins that
   so it cannot regress into a hard dependency.
-
+- **Sub-resource path scoping ignored the parent's own read hooks (issue #45).**
+  `PathScopeGuard` looked the parent up without a repository `ctx`, which
+  disabled every hook on that call. A parent hidden by one of its own
+  `beforeFindOne` / `afterFindOne` hooks (soft expiry, retention, tenant
+  scope) stayed fully reachable through its children: `GET`, `POST` and
+  `DELETE` on the nested route all succeeded where the parent's own routes
+  returned `404`. The guard now replays the parent resource's `hooks` on a
+  detached context carrying the actor, and reads the full parent row (instead
+  of a primary-key-only projection) whenever the parent declares hooks, so an
+  `afterFindOne` hook can inspect the columns it needs. Behaviour is unchanged
+  for parents with no hooks. `PathScopeGuard.for()` takes an optional fifth
+  `parentHooks` argument; `defineResource` passes it automatically.
+  Documented in `CONFIGURATION.md` §5 ("Which parent-side hooks run during
+  path scoping"). Guard lookups still run before the operation transaction —
+  Nest executes guards ahead of interceptors — which is now stated rather
+  than implied.
 - `RocketsCoreExceptionsFilter` logs through Nest's `Logger` instead of
   `console.error`, on every 5xx — whether traces are printed is the
   consuming app's log-level decision, no longer gated on `NODE_ENV`

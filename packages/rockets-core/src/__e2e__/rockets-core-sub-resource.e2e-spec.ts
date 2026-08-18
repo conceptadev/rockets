@@ -11,6 +11,9 @@
  *     create response does NOT carry the eager relation.
  *  5. Hard delete + soft delete on both top-level and sub-resource.
  *  6. List / read on both, with and without relation joins.
+ *  7. A parent hidden by one of the PARENT's own read hooks hides its
+ *     whole sub-resource (regression for #45 — the guard's parent lookup
+ *     used to run with hooks disabled).
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import {
@@ -32,7 +35,13 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
-import { getDynamicRepositoryToken } from '@concepta/nestjs-repository';
+import {
+  getDynamicRepositoryToken,
+  RepositoryInterface,
+  Where,
+  type RepositoryFindOneOptions,
+  type RepositoryFindOptions,
+} from '@concepta/nestjs-repository';
 import { Expose, Type } from 'class-transformer';
 import { IsOptional, IsString, IsUUID } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -50,6 +59,10 @@ import { defineResource } from '../infrastructure/resource/define-resource';
 import { defineSubResource } from '../infrastructure/resource/define-sub-resource';
 import { AfterCreateReloadHook } from '../infrastructure/hooks/after-create-reload.hook';
 import { OwnerStampHook } from '../infrastructure/hooks/owner-stamp.hook';
+import {
+  EntityHook,
+  PassthroughEntityHookBase,
+} from '../infrastructure/hooks/entity-hook';
 import { defineAuthAdapter } from '../infrastructure/auth/define-auth-adapter';
 
 // ── Auth fixture ──
@@ -79,6 +92,7 @@ class ParentEntity {
   @Column({ type: 'varchar' }) name!: string;
   @Column({ type: 'varchar' }) userId!: string;
   @Column({ type: 'uuid', nullable: true }) categoryId?: string;
+  @Column({ type: 'boolean', default: false }) retired!: boolean;
   @ManyToOne(() => CategoryEntity, { eager: true, nullable: true })
   @JoinColumn({ name: 'categoryId' })
   category?: CategoryEntity;
@@ -197,6 +211,41 @@ const metaToken = getDynamicRepositoryToken(USER_METADATA_MODULE_ENTITY_KEY);
 })
 class MetaModule {}
 
+// ── Parent retention hook ──
+
+/**
+ * Models the field case from #45: retention expressed as non-existence.
+ * A retired parent is invisible to every read of the parent resource —
+ * and therefore must be invisible to its sub-resources too.
+ */
+@EntityHook({ entity: ParentEntity })
+@Injectable()
+class ParentRetentionHook extends PassthroughEntityHookBase<ParentEntity> {
+  override beforeFindOne(
+    options: RepositoryFindOneOptions<ParentEntity>,
+  ): RepositoryFindOneOptions<ParentEntity> {
+    return this.live(options);
+  }
+
+  override beforeFindAndCount(
+    options: RepositoryFindOptions<ParentEntity>,
+  ): RepositoryFindOptions<ParentEntity> {
+    return this.live(options);
+  }
+
+  private live<
+    T extends
+      | RepositoryFindOptions<ParentEntity>
+      | RepositoryFindOneOptions<ParentEntity>,
+  >(options: T): T {
+    const clause = Where.eq<ParentEntity>('retired', false);
+    return {
+      ...options,
+      where: options.where ? Where.and(options.where, clause) : clause,
+    };
+  }
+}
+
 // ── Resources ──
 
 const ParentOwnerStamp = OwnerStampHook.for(ParentEntity);
@@ -210,7 +259,11 @@ const parentResource = defineResource<ParentEntity>({
   // Manual AfterCreateReloadHook on a top-level resource with eager
   // relation — the hook is auto-only for sub-resources; top-level
   // resources opt in by adding it themselves.
-  hooks: [ParentOwnerStamp, AfterCreateReloadHook.for(ParentEntity)],
+  hooks: [
+    ParentOwnerStamp,
+    ParentRetentionHook,
+    AfterCreateReloadHook.for(ParentEntity),
+  ],
   relations: (rel) => [rel(CategoryEntity, 'category')],
   operations: {
     list: { output: ParentResponseDto },
@@ -341,6 +394,22 @@ describe('RocketsCoreModule + defineSubResource + AfterCreateReloadHook (e2e)', 
   afterAll(async () => {
     if (app) await app.close();
   });
+
+  /**
+   * Retires a parent through the dynamic repository rather than an HTTP
+   * route: the parent resource exposes no update operation, and the
+   * point of the test is the READ path, not how the flag is set.
+   */
+  async function retireParent(id: string): Promise<void> {
+    const repo = app.get<RepositoryInterface<ParentEntity>>(
+      getDynamicRepositoryToken('parent'),
+    );
+    const parent = await repo.findOne({
+      where: Where.eq<ParentEntity>('id', id),
+    });
+    if (!parent) throw new Error(`parent ${id} not found`);
+    await repo.update(parent, { retired: true });
+  }
 
   // ── Top-level: WITH eager relation + manual reload hook ──
 
@@ -538,6 +607,76 @@ describe('RocketsCoreModule + defineSubResource + AfterCreateReloadHook (e2e)', 
       // TypeORM `save()` returns persisted columns only — no eager
       // load happens because we opted out of the reload hook.
       expect(res.body.category).toBeUndefined();
+    });
+  });
+  // ── Sub-resource: parent hidden by a PARENT read hook (#45) ──
+
+  describe('parent hidden by its own read hook hides the sub-resource', () => {
+    let parentId: string;
+    let childId: string;
+
+    beforeAll(async () => {
+      const parent = await request(app.getHttpServer())
+        .post('/parents')
+        .set('Authorization', 'Bearer u1')
+        .send({ name: 'to-be-retired', categoryId: categoryAId })
+        .expect(201);
+      parentId = parent.body.id;
+
+      const child = await request(app.getHttpServer())
+        .post(`/parents/${parentId}/children`)
+        .set('Authorization', 'Bearer u1')
+        .send({ title: 'child-of-retired', categoryId: categoryAId })
+        .expect(201);
+      childId = child.body.id;
+    });
+
+    it('the sub-resource is reachable while the parent is live', async () => {
+      await request(app.getHttpServer())
+        .get(`/parents/${parentId}/children`)
+        .set('Authorization', 'Bearer u1')
+        .expect(200);
+    });
+
+    it('retiring the parent hides it from its own routes', async () => {
+      await retireParent(parentId);
+
+      await request(app.getHttpServer())
+        .get(`/parents/${parentId}`)
+        .set('Authorization', 'Bearer u1')
+        .expect(404);
+    });
+
+    // Regression for #45: the guard's parent lookup used to omit `ctx`,
+    // so it ran with every parent hook disabled and a retired parent
+    // still served (and minted) child rows.
+    it('list on the sub-resource of a retired parent is 404', async () => {
+      await request(app.getHttpServer())
+        .get(`/parents/${parentId}/children`)
+        .set('Authorization', 'Bearer u1')
+        .expect(404);
+    });
+
+    it('create on the sub-resource of a retired parent is 404', async () => {
+      await request(app.getHttpServer())
+        .post(`/parents/${parentId}/children`)
+        .set('Authorization', 'Bearer u1')
+        .send({ title: 'should-not-exist', categoryId: categoryAId })
+        .expect(404);
+    });
+
+    it('read on the sub-resource of a retired parent is 404', async () => {
+      await request(app.getHttpServer())
+        .get(`/parents/${parentId}/children/${childId}`)
+        .set('Authorization', 'Bearer u1')
+        .expect(404);
+    });
+
+    it('delete on the sub-resource of a retired parent is 404', async () => {
+      await request(app.getHttpServer())
+        .delete(`/parents/${parentId}/children/${childId}`)
+        .set('Authorization', 'Bearer u1')
+        .expect(404);
     });
   });
 });

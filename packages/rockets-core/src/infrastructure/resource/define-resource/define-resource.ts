@@ -208,6 +208,7 @@ export function defineResource<E extends PlainLiteralObject>(
         parentPath: path,
         parentTags: tags,
         parentPersistenceModule: repository,
+        parentHooks: hooks,
         segment,
         sub,
       });

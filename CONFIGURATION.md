@@ -366,6 +366,30 @@ petTags: defineSubResource({          // key 'petTags' must be a PetEntity relat
 | `reloadAfterCreate` | `boolean` | no | `false` |
 | *(inherited)* | `dto`, `operations`, `relations`, `hooks`, `handlers`, `providers`, `subResources`… | no | — |
 
+### Which parent-side hooks run during path scoping
+
+`PathScopeGuard` performs one parent lookup per nested request, and that
+lookup runs the **parent resource's own `hooks`** — the classes declared in
+the parent's `defineResource({ hooks })`. A parent that its own routes
+cannot see (soft expiry, retention, tenant scope expressed as a
+`beforeFindOne` / `afterFindOne` filter) is a `404` on every nested route
+too, not just on the parent's routes.
+
+Constraints worth knowing:
+
+- The hooks run on a **detached context**: the actor overlay is present,
+  but the request's own hook set and the operation transaction are not.
+  Guards execute before Nest interceptors, so no transaction exists yet
+  — the lookup is a pre-check, never a participant in the operation's
+  transaction.
+- The parent's hooks are entity-scoped by `@EntityHook({ entity })`, so
+  hooks bound to a different entity never fire on this lookup.
+- When the parent declares no hooks, the lookup keeps its primary-key-only
+  projection. When it does, the full parent row is read so an
+  `afterFindOne` hook can inspect columns a narrowed projection would omit.
+- Sub-resource hooks (`PathScopeHook`, the child's own `hooks`) are
+  unaffected — they still attach normally to the child's controller.
+
 ---
 
 ## 6a. `operationResource()` — typed non-CRUD endpoints (issue #43 / #50)
