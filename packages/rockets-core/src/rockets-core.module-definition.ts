@@ -90,6 +90,8 @@ function definitionTransform(
     resources: extras.resources ?? [],
     repository: extras.repository,
     userMetadata: extras.userMetadata,
+    accessControl: extras.accessControl !== undefined,
+    enforceGrants: extras.accessControl?.enforceGrants === true,
   });
 
   return {
@@ -168,7 +170,17 @@ function createCoreImports(
   // Access control is opt-in: no `accessControl` config → no ACL module,
   // guard, or provider is registered at all.
   if (extras.accessControl) {
-    imports.push(buildAccessControlImport(extras.accessControl));
+    // Bundle-declared `acl.query` services are merged with any the app
+    // listed itself, so a resource cannot declare a query service and
+    // then 500 at request time because nobody registered it. They must
+    // land on `AccessControlModule` specifically: the upstream guard
+    // strict-resolves from its own host module.
+    imports.push(
+      buildAccessControlImport(
+        extras.accessControl,
+        plan.accessControlQueryServices,
+      ),
+    );
   }
 
   return imports;

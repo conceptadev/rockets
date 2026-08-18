@@ -1,4 +1,9 @@
 import type { Provider, Type } from '@nestjs/common';
+import { Operation } from '@concepta/nestjs-core';
+import {
+  AccessControlQuery,
+  type CanAccess,
+} from '@concepta/nestjs-access-control';
 
 import { ResourceKind } from '../../domain/interfaces/resource-kind.enum';
 import type {
@@ -10,6 +15,26 @@ import { buildOperationController } from './operation-resource/build-operation-c
 import { collectHandlerProviders } from './operation-resource/collect-handler-providers';
 import { getHandlerClass } from './operation-resource/is-handler-class';
 import { assertValidOperationKey } from './operation-resource/operation-key';
+import { resolveOperationAcl } from './define-resource/build-acl';
+import type { ResourceAclPlan } from '../../domain/interfaces/resource-acl.interface';
+import type { OperationHttpMethod } from '../../domain/interfaces/operation-resource.interface';
+import type { ResourceOperationName } from '../../domain/interfaces/rockets-resource-definition.interface';
+
+/** HTTP methods an operation resource treats as reads. */
+const READ_LIKE_METHODS: ReadonlySet<OperationHttpMethod> = new Set(['GET']);
+
+/**
+ * CRUD operation whose implied action matches this HTTP method. Only
+ * consulted when the operation declares no explicit `acl`, which the
+ * write path forbids — so in practice this maps `GET` → read and
+ * `DELETE` → delete.
+ */
+function defaultOperationFor(
+  method: OperationHttpMethod,
+): ResourceOperationName {
+  if (method === 'DELETE') return Operation.Delete;
+  return Operation.Read;
+}
 
 /**
  * Build an {@link OperationResource} for `RocketsCoreModule`'s `resources[]`.
@@ -48,6 +73,67 @@ export function defineOperationResource(
       );
     }
   }
+
+  // Access control is resolved here, before the controller is built, so
+  // the grant decorators can be stamped on the route methods and the
+  // `CanAccess` classes can travel on the bundle for the planner to
+  // register with `AccessControlModule`.
+  const aclDecorators: Record<string, MethodDecorator[]> = {};
+  const operationQueries: Type<CanAccess>[] = [];
+  const ungrantedOperations: string[] = [];
+
+  for (const [key, operation] of Object.entries(operations)) {
+    // A non-CRUD write has no inferable action — `POST /pets/:id/transfer`
+    // is an update, not a create — so `op.write` must say which.
+    if (
+      definition.acl !== undefined &&
+      operation.acl === undefined &&
+      !READ_LIKE_METHODS.has(operation.method) &&
+      operation.method !== 'DELETE'
+    ) {
+      throw new Error(
+        `defineOperationResource("${definition.path}"): operation "${key}" ` +
+          `writes but declares no \`acl\` action. A write's HTTP verb does ` +
+          `not imply a CRUD action — declare one, or \`acl: false\` to leave ` +
+          `the route granted by nothing.`,
+      );
+    }
+
+    const binding = resolveOperationAcl({
+      label: key,
+      operation: defaultOperationFor(operation.method),
+      resourceAcl: definition.acl,
+      operationAcl: operation.acl,
+      resourceKey: `operationResource("${definition.path}")`,
+    });
+
+    const decorators: MethodDecorator[] = [];
+    if (binding.grant) decorators.push(binding.grant);
+    if (binding.query) {
+      operationQueries.push(binding.query);
+      decorators.push(
+        AccessControlQuery({ service: binding.query }) as MethodDecorator,
+      );
+    }
+    if (decorators.length) aclDecorators[key] = decorators;
+
+    const isPublic = operation.public ?? definition.public ?? false;
+    if (!isPublic && definition.acl === undefined && operation.acl !== false) {
+      ungrantedOperations.push(key);
+    }
+  }
+
+  const acl: ResourceAclPlan = {
+    queryServices: [
+      ...new Set([
+        ...(definition.acl?.query ? [definition.acl.query] : []),
+        ...operationQueries,
+      ]),
+    ],
+    ungrantedOperations,
+    declared: definition.acl !== undefined,
+    label: `operationResource("${definition.path}")`,
+  };
 
   const explicitProviders: readonly Provider[] = definition.providers ?? [];
   const handlerProviders = collectHandlerProviders(
@@ -90,10 +176,15 @@ export function defineOperationResource(
     aliasProviders.push({ provide: alias, useExisting: handlerClass });
   }
 
-  const controller = buildOperationController(definition, handlerAliases);
+  const controller = buildOperationController(
+    definition,
+    handlerAliases,
+    aclDecorators,
+  );
 
   return {
     kind: ResourceKind.Operation,
+    acl,
     definition,
     controller,
     providers: [...explicitProviders, ...handlerProviders, ...aliasProviders],

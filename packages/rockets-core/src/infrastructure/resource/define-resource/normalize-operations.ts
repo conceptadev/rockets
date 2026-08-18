@@ -115,6 +115,7 @@ export function normalizeOperationsInput(
     const next: InternalOperationOverride = operationOverrides[op]
       ? { ...operationOverrides[op] }
       : {};
+    if (cfg.acl !== undefined) next.acl = cfg.acl;
     if (cfg.path !== undefined) next.path = cfg.path;
     if (cfg.methodName !== undefined) next.methodName = cfg.methodName;
     if (cfg.transactional !== undefined) next.transactional = cfg.transactional;

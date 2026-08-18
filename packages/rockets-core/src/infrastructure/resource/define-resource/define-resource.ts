@@ -1,4 +1,12 @@
-import { applyDecorators, type PlainLiteralObject } from '@nestjs/common';
+import {
+  applyDecorators,
+  type PlainLiteralObject,
+  type Type,
+} from '@nestjs/common';
+import {
+  AccessControlQuery,
+  type CanAccess,
+} from '@concepta/nestjs-access-control';
 
 import {
   CrudOperationResolver,
@@ -10,7 +18,10 @@ import type { RepositoryProviderOptions } from '@concepta/nestjs-repository';
 import type { RocketsResourceConfig } from '../../../domain/interfaces/rockets-resource.interface';
 import type { RocketsResourceDefinition } from '../../../domain/interfaces/rockets-resource-definition.interface';
 import type { CrudResource } from '../../../domain/interfaces/rockets-resource-bundle.interface';
-import type { RocketsSubResourceDefinition } from '../../../domain/interfaces/rockets-resource-definition.interface';
+import type {
+  ResourceOperationName,
+  RocketsSubResourceDefinition,
+} from '../../../domain/interfaces/rockets-resource-definition.interface';
 import { ResourceKind } from '../../../domain/interfaces/resource-kind.enum';
 import {
   DEFAULT_OPERATIONS,
@@ -29,6 +40,12 @@ import { buildPersistenceRelations } from './build-persistence-relations';
 import { buildOperation, mergeProviders } from './build-operation';
 import { materialiseSubResource } from './materialise-sub-resource';
 import type { CrudRequestConfig } from '../../crud-compat';
+import {
+  buildAclControllerDecorators,
+  buildAclPlan,
+  resolveOperationAcl,
+  withAclDecorators,
+} from './build-acl';
 import { deriveEntityKey } from '../../../common';
 
 type CrudDecorator = ReturnType<typeof applyDecorators>;
@@ -121,6 +138,7 @@ export function defineResource<E extends PlainLiteralObject>(
     providers = [],
     autoRegisterHandlers = true,
     decorators: extraClassDecorators,
+    acl,
     public: isPublic = false,
     request: controllerRequest,
   } = definition;
@@ -147,7 +165,10 @@ export function defineResource<E extends PlainLiteralObject>(
     tags,
     bearerAuth,
     hooks,
-    extra: extraClassDecorators,
+    extra: [
+      ...buildAclControllerDecorators(acl),
+      ...(extraClassDecorators ?? []),
+    ],
   });
 
   const controller: CrudControllerOptionsInterface<PlainLiteralObject> & {
@@ -163,12 +184,39 @@ export function defineResource<E extends PlainLiteralObject>(
 
   const controllerJoins = buildControllerJoins(relations);
 
+  // Access control is materialised here rather than inside
+  // `buildOperation` so the collected `CanAccess` services can travel on
+  // the bundle: the planner registers them with `AccessControlModule`,
+  // which is the DI scope the upstream guard strict-resolves from.
+  const operationQueries: Type<CanAccess>[] = [];
+  const aclDecorators: Partial<
+    Record<ResourceOperationName, readonly MethodDecorator[]>
+  > = {};
+  for (const op of operations) {
+    const binding = resolveOperationAcl({
+      label: op,
+      operation: op,
+      resourceAcl: acl,
+      operationAcl: operationOverrides[op]?.acl,
+      resourceKey: key,
+    });
+    if (binding.query) operationQueries.push(binding.query);
+    const decorators: MethodDecorator[] = [];
+    if (binding.grant) decorators.push(binding.grant);
+    if (binding.query) {
+      decorators.push(
+        AccessControlQuery({ service: binding.query }) as MethodDecorator,
+      );
+    }
+    if (decorators.length) aclDecorators[op] = decorators;
+  }
+
   const ops: CrudOperationOptions<PlainLiteralObject>[] = operations.map((op) =>
     buildOperation(op, {
       dto,
       joins: controllerJoins,
       handlers,
-      override: operationOverrides[op],
+      override: withAclDecorators(operationOverrides[op], aclDecorators[op]),
     }),
   );
 
@@ -218,8 +266,20 @@ export function defineResource<E extends PlainLiteralObject>(
     }
   }
 
+  const aclPlan = buildAclPlan({
+    resourceKey: key,
+    isPublic,
+    resourceAcl: acl,
+    operations,
+    operationAcls: Object.fromEntries(
+      operations.map((op) => [op, operationOverrides[op]?.acl]),
+    ),
+    operationQueries,
+  });
+
   const bundle: CrudResource<E> = {
     kind: ResourceKind.Crud,
+    acl: aclPlan,
     core,
     persistence: {
       ...(repository ? { module: repository } : {}),

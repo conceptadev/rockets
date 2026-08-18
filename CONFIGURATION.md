@@ -530,6 +530,94 @@ with precompiled DTO classes.
 
 ---
 
+## 5a. `acl` — access control on resources and operations (issue #51)
+
+Upstream's check-access handler returns `true` for any route with **no
+grant metadata**. A forgotten `AccessControl*` decorator is therefore not
+a broken route — it is an *open* one, authenticated but ungranted, and no
+test notices. `acl` moves that from a per-route chore to a bundle-level
+declaration the framework materialises and validates.
+
+Rules stay app-owned. This wires decorators and registers query services;
+it does not generate `acRules`, and possession (`own` vs `any`) is still
+decided by your `CanAccess` service.
+
+```ts
+defineResource({
+  entity: PetEntity,
+  path: 'pets',
+  acl: { resource: 'pet', query: PetAccessQueryService },
+  operations: {
+    list: {},                 // → read
+    read: {},                 // → read
+    create: {},               // → create
+    update: {},               // → update
+    delete: {},               // → delete
+    // restore: { acl: false } // authenticated, deliberately ungranted
+  },
+});
+```
+
+Action per operation: `list`/`read` → **read**, `create` → **create**,
+`update`/`replace` → **update**, `delete`/`restore` → **delete**.
+(`AccessControlReadMany` and `AccessControlReadOne` emit the same grant
+upstream, so there is one action per verb, not one per decorator.)
+
+### `operationResource`
+
+A non-CRUD write's HTTP verb says nothing about intent —
+`POST /pets/:id/transfer` is an update, not a create — so `op.write` has
+**no default** and must declare one:
+
+```ts
+operationResource({
+  path: 'pets/:petId',
+  acl: { resource: 'pet', query: PetAccessQueryService },
+  operations: (op) => ({
+    transfer: op.write({ acl: 'update', input: …, output: …, handler: … }),
+    stats:    op.read({ /* infers read */ output: …, handler: … }),
+  }),
+});
+```
+
+### Boot-time rules
+
+| Condition | Result |
+|---|---|
+| Bundle declares `acl`, app configures no root `accessControl` | **throw** |
+| `operations.X.acl` action with no resource-level `acl` | **throw** |
+| `op.write` with no `acl` on an ACL-enabled operation resource | **throw** |
+| `accessControl.enforceGrants: true` and an authenticated op carries no grant | **throw** |
+| `accessControl.enforceGrants: true` with no root `accessControl` | **throw** |
+
+`acl.query` services are collected across every bundle and merged into
+`AccessControlModule.forRoot({ queryServices })` — they must land on that
+module specifically, because the upstream guard strict-resolves from its
+own host module. You no longer declare a query service and then 500 at
+request time because nobody registered it.
+
+### `enforceGrants` is opt-in, and why
+
+`enforceGrants` is the secure-by-default switch: with it on, an
+authenticated route with no grant fails the boot instead of serving.
+It defaults to **off** because core cannot tell whether a hand-written
+`AccessControl*` entry in a resource's `decorators` guards a route
+without applying that opaque decorator list a second time — and applying
+a consumer's decorators twice is not something a framework may do. Apps
+that have migrated to `acl` should turn it on; apps still using manual
+grants must not.
+
+For the same reason, `acl` and a manual `AccessControl*` decorator on the
+same operation are **not** detected and rejected — they are documented as
+mutually exclusive. Upstream's grant metadata is a `SetMetadata` write, so
+combining them means one silently wins. Use one or the other per bundle.
+
+Note that `acl.query` binds at **class** level, so the service is consulted
+on every route of the resource, including collection routes that have no
+row to own. Return early there.
+
+---
+
 ## 6. `defineModuleResource()` — persistence rows + custom Nest slice
 
 Use when you need entity keys and/or **hand-written** controllers/services/CQRS

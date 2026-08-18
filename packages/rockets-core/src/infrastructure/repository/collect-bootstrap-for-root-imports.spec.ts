@@ -35,6 +35,7 @@ describe('collectBootstrapForRootImports', () => {
         },
       ],
       nestModules: [],
+      accessControlQueryServices: [],
     };
 
     expect(collectBootstrapForRootImports(plan)).toEqual([]);
@@ -57,6 +58,7 @@ describe('collectBootstrapForRootImports', () => {
         },
       ],
       nestModules: [],
+      accessControlQueryServices: [],
     };
 
     const imports = collectBootstrapForRootImports(plan);
@@ -82,6 +84,7 @@ describe('collectBootstrapForRootImports', () => {
         },
       ],
       nestModules: [],
+      accessControlQueryServices: [],
     };
 
     collectBootstrapForRootImports(plan);

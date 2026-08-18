@@ -15,6 +15,30 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
   `output` required (schema or `false`); optional resource-level `params` zod;
   cross-resource `METHOD+path` collisions fail in `buildAppRegistrationPlan`.
   See `CONFIGURATION.md` §6a and `examples/sample-server` `petTransferFeature`.
+- **First-class access control on resources and operations (issue #51).**
+  `defineResource`, `zodResource` and `operationResource` accept
+  `acl: { resource, query }`, and each operation accepts `acl` to override
+  the action or opt out with `false`. The framework materialises the
+  upstream `AccessControlGrant` / `AccessControlQuery` decorators, and
+  collects every `acl.query` service into
+  `AccessControlModule.forRoot({ queryServices })` — the module the
+  upstream guard strict-resolves from, so a declared service can no
+  longer 500 at request time because nobody registered it.
+
+  This closes a real hole rather than adding sugar: upstream's
+  check-access handler returns `true` for any route with no grant
+  metadata, so a forgotten decorator is an authenticated-but-open route
+  that no test notices. `accessControl.enforceGrants: true` turns that
+  into a boot failure. It is opt-in because core cannot tell whether a
+  hand-written `AccessControl*` entry in a resource's `decorators` guards
+  a route without applying that opaque decorator list a second time —
+  documented in `CONFIGURATION.md` §5a along with the reason `acl` and
+  manual grant decorators are mutually exclusive rather than merged.
+
+  A non-CRUD write must name its action: `POST /pets/:id/transfer` is an
+  update, not a create, so `op.write` has no default and throws without
+  one. Rules stay app-owned — this wires decorators and registrations, it
+  does not generate `acRules` or decide possession.
 - **Per-operation `input` / `output` on `zodResource` / `zodSubResource`
   (issue #57).** The zod path had a single schema-derived projection, so
   an app chose between controlled projection and automatic OpenAPI. Each
