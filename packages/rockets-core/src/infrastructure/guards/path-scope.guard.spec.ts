@@ -229,6 +229,45 @@ describe('PathScopeGuard.canActivate', () => {
     });
   });
 
+  // A parent that declares a non-`id` primary has hooks reading that
+  // key; writing `id` would leave a scoping hook looking at a key that
+  // is never set, which means unscoped rather than merely broken.
+  it("binds the parent's own primary param name, not a hardcoded `id`", async () => {
+    const Sub = PathScopeGuard.for(
+      'petId',
+      'pet',
+      'userId',
+      'id',
+      [FakeParentHook],
+      undefined,
+      'code',
+    );
+    const repoToken = getDynamicRepositoryToken('pet');
+    const repo = new FakeParentRepo(parentRows);
+    const moduleRef = await Test.createTestingModule({
+      providers: [{ provide: repoToken, useValue: repo }, FakeParentHook, Sub],
+    }).compile();
+    const guard = moduleRef.get<PathScopeGuard>(Sub);
+
+    await expect(
+      guard.canActivate(
+        buildExecutionContext({
+          user: { id: 'u1' },
+          params: { petId: 'p1', id: 'some-child' },
+        }),
+      ),
+    ).resolves.toBe(true);
+
+    const crudCtx = getCrudContext(
+      repo.lastOptions?.ctx as PlainLiteralObject | undefined,
+    );
+    expect(crudCtx?.params).toEqual({
+      petId: 'p1',
+      id: 'some-child',
+      code: 'p1',
+    });
+  });
+
   it('honours an explicit parentSelect over the hook-driven full read', async () => {
     const { guard, repo } = await buildGuard(
       [FakeParentHook],

@@ -87,6 +87,8 @@ export abstract class PathScopeGuard implements CanActivate {
   protected parentHooks: readonly Type[] = [];
   /** Explicit projection for the parent lookup (see `parentSelect`). */
   protected parentSelect: readonly string[] | undefined = undefined;
+  /** Route param name the parent's own routes use for its primary key. */
+  protected parentPrimaryParam = 'id';
   protected parentRepo!: RepositoryInterface<Record<string, unknown>>;
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -151,6 +153,7 @@ export abstract class PathScopeGuard implements CanActivate {
     parentPk: string = 'id',
     parentHooks: readonly Type[] = [],
     parentSelect?: readonly string[],
+    parentPrimaryParam: string = 'id',
   ): Type<PathScopeGuard> {
     return getPathScopeGuardSubclass(
       parentParam,
@@ -159,6 +162,7 @@ export abstract class PathScopeGuard implements CanActivate {
       parentPk,
       parentHooks,
       parentSelect,
+      parentPrimaryParam,
     );
   }
 
@@ -181,16 +185,18 @@ export abstract class PathScopeGuard implements CanActivate {
     });
     host.defineOverlay(ActorCtx, { id: actorId, type: 'user' });
 
-    // `id` is overwritten rather than merged: on a nested route the raw
-    // `id` param is the CHILD's, and a parent hook reading `params.id`
-    // means the row it is filtering. The other route params are kept as
-    // they are — that is what lets a grandchild's guard replay the
-    // child's `PathScopeHook` and still scope by `:parentId`.
+    // The parent's own primary param is overwritten rather than merged:
+    // on a nested route the raw `id` is the CHILD's, and a parent hook
+    // reading it means the row being filtered. It is the parent's
+    // param NAME, not a hardcoded `id`, so a resource that declares a
+    // different primary still sees its hooks fire. The other route
+    // params are kept as they are — that is what lets a grandchild's
+    // guard replay the child's `PathScopeHook` and scope by `:parentId`.
     const crudContext: CrudContextInterface = {
       entity: this.parentEntityKey,
       operation: Operation.Read,
       action: ActionEnum.READ,
-      params: { ...routeParams, id: parentId },
+      params: { ...routeParams, [this.parentPrimaryParam]: parentId },
       query: {
         fields: [],
         search: undefined,
@@ -224,6 +230,7 @@ function getPathScopeGuardSubclass(
   parentPk: string,
   parentHooks: readonly Type[],
   parentSelect: readonly string[] | undefined,
+  parentPrimaryParam: string,
 ): Type<PathScopeGuard> {
   // JSON.stringify over the tuple, not a `::`-joined string: delimiter
   // joining collides whenever a component can contain the delimiter, and
@@ -237,6 +244,7 @@ function getPathScopeGuardSubclass(
     parentPk,
     parentHooks.map(hookCacheId),
     parentSelect ?? null,
+    parentPrimaryParam,
   ]);
   const existing = pathScopeGuardCache.get(cacheKey);
   if (existing) return existing;
@@ -251,6 +259,7 @@ function getPathScopeGuardSubclass(
       this.parentPk = parentPk;
       this.parentHooks = parentHooks;
       this.parentSelect = parentSelect;
+      this.parentPrimaryParam = parentPrimaryParam;
       this.parentRepo = parentRepo;
     }
   };

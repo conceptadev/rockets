@@ -31,6 +31,13 @@ export function materialiseSubResource(args: {
    * tenant hook must not be reachable through its children.
    */
   readonly parentHooks: readonly Type[] | undefined;
+  /**
+   * Route param name carrying the parent's primary key on the parent's
+   * OWN routes (`:id` unless the parent declared a different primary in
+   * `request.params`). The guard binds it in the replay context so a
+   * parent hook reading `params.<primary>` sees the row being looked up.
+   */
+  readonly parentPrimaryParam: string;
   readonly segment: string;
   readonly sub: RocketsSubResourceDefinition;
 }): CrudResource {
@@ -40,6 +47,7 @@ export function materialiseSubResource(args: {
     parentTags,
     parentPersistenceModule,
     parentHooks,
+    parentPrimaryParam,
     segment,
     sub,
   } = args;
@@ -92,10 +100,12 @@ export function materialiseSubResource(args: {
       // Ancestor params first: at three levels or more the parent path
       // already carries its own `:param`, and the upstream query parser
       // throws (`Error on crud context processing` → 500) on a route
-      // param it has no config for. Declared `disabled: true` so they
-      // are validated but NOT turned into route filters — only the
-      // immediate parent's param is a FK column on this entity; a
+      // param it has no config for. `disabled: true` because only the
+      // immediate parent's param is a FK column on this entity — a
       // grandparent's would filter on a column that does not exist.
+      // Note the parser gates its whole branch on `disabled !== true`,
+      // so a disabled param is neither filtered NOR format-validated;
+      // the ancestor's own guard is what checks it.
       ...ancestorParams(parentPath, parentParam),
       [parentParam]: { field: parentParam, type: 'uuid' },
       ...userControllerParams,
@@ -140,6 +150,7 @@ export function materialiseSubResource(args: {
         sub.parentPk ?? 'id',
         parentHooks ?? [],
         sub.parentSelect,
+        parentPrimaryParam,
       )
     : undefined;
 
