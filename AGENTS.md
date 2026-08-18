@@ -171,6 +171,19 @@ the user has already had to fix more than once.
       required** (schema or `false`); path defaults to the key; optional
       resource `params` for path validation. See `CONFIGURATION.md` §6a.
 
+16. **Every repository call forwards `ctx`.** A call that omits it runs
+    with **all entity hooks disabled** and **outside the surrounding
+    operation's transaction**. Neither is a type error and neither shows
+    up in a passing test — this is the defect class behind issue #45,
+    where a guard's parent lookup ran hook-free for a whole development
+    cycle behind a green suite. Take the context from where you are: a
+    hook's second argument, the CRUD context a CQRS handler receives, or
+    the scope you opened with `TransactionScope.run` (whose default
+    propagation is `SUPPORTS`, i.e. *no* transaction outside a request —
+    pass `REQUIRED` when you mean it). `transactional: true` exists only
+    on CRUD and operation-resource operations; anything else opens its
+    own scope. Full seam with examples: `CONFIGURATION.md` §8a.
+
 ## How to work with the project owner
 
 When replying to the project owner or maintainer:

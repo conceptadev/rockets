@@ -297,11 +297,27 @@ export class PetService {
     private readonly pets: RepositoryInterface<PetEntity>,
   ) {}
 
-  byOwner(ownerId: string) {
-    return this.pets.find({ where: Where.eq<PetEntity>('userId', ownerId) });
+  byOwner(ownerId: string, ctx: unknown) {
+    return this.pets.find({
+      where: Where.eq<PetEntity>('userId', ownerId),
+      // Always forward `ctx`. See below — omitting it is silent.
+      ctx,
+    });
   }
 }
 ```
+
+#### Always pass `ctx`
+
+A repository call that omits `ctx` runs with **all entity hooks
+disabled** and **outside the surrounding operation's transaction**.
+Neither is a type error and neither shows up in a passing test — it is
+the defect class behind issue #45.
+
+Take the context from wherever you are: a hook's second argument, the
+CRUD context a CQRS handler receives, or the scope you opened yourself
+with `TransactionScope.run`. `CONFIGURATION.md` §8a has the full seam,
+including the `SUPPORTS`-by-default trap and an audit `grep`.
 
 ### Read the authenticated user inside a handler
 
