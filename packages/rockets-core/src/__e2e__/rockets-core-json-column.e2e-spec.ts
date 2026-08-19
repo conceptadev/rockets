@@ -18,8 +18,7 @@ import {
   Module,
   UnauthorizedException,
 } from '@nestjs/common';
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-import type { CallHandler, ExecutionContext } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
@@ -69,6 +68,27 @@ class PetEntity {
   profile?: Record<string, unknown>;
   @Column({ type: 'simple-json', nullable: true })
   tags?: unknown[];
+  /** Nested projection target — NOT free-form. */
+  @Column({ type: 'simple-json', nullable: true })
+  vet?: Record<string, unknown>;
+  /**
+   * Server-owned column, deliberately absent from every input DTO.
+   * A vacuous whitelist test uses a key the entity does not have —
+   * TypeORM drops that for free and proves nothing. This is a real
+   * column, so only the whitelist can keep a client from setting it.
+   */
+  @Column({ type: 'varchar', nullable: true })
+  internalRank?: string;
+}
+
+/**
+ * Declared with `@Type()`, so a nested projection must still apply:
+ * `clinic` survives, `internalNotes` does not. This is the half of the
+ * contract that dropping `strategy: 'excludeAll'` could have silently
+ * widened.
+ */
+class VetDto {
+  @Expose() @IsString() @ApiProperty() clinic!: string;
 }
 
 class PetCreateDto {
@@ -85,6 +105,11 @@ class PetCreateDto {
   @Type(() => String)
   @ApiPropertyOptional({ type: [String], isArray: true })
   tags?: unknown[];
+  @Expose()
+  @IsOptional()
+  @Type(() => VetDto)
+  @ApiPropertyOptional({ type: VetDto })
+  vet?: VetDto;
 }
 
 class PetResponseDto {
@@ -142,8 +167,6 @@ class ProbeCreateHandler extends CrudCommandHandlerBase<PetEntity> {
 
   async execute(command: CrudCommandInterface<PetEntity>) {
     const c = command as unknown as { context: unknown; dto?: unknown };
-    // eslint-disable-next-line no-console
-    console.log('CMD dto =', JSON.stringify(c.dto));
     return this.crudAdapter.create(
       c.context as never,
       c.dto as never,
@@ -228,22 +251,7 @@ describe('class-DTO responses keep free-form JSON columns (e2e)', () => {
           global: true,
         }),
       ],
-      providers: [
-        { provide: APP_GUARD, useClass: AuthServerGuard },
-        {
-          provide: APP_INTERCEPTOR,
-          useValue: {
-            intercept(ctx: ExecutionContext, next: CallHandler) {
-              const req = ctx.switchToHttp().getRequest<{ body?: unknown }>();
-              if (req?.body && typeof req.body === 'object') {
-                // eslint-disable-next-line no-console
-                console.log('RAWBODY', JSON.stringify(req.body));
-              }
-              return next.handle();
-            },
-          },
-        },
-      ],
+      providers: [{ provide: APP_GUARD, useClass: AuthServerGuard }],
     }).compile();
 
     app = moduleRef.createNestApplication();
@@ -271,21 +279,6 @@ describe('class-DTO responses keep free-form JSON columns (e2e)', () => {
     expect(created.body.profile).toEqual(PROFILE);
   });
 
-  it('DIRECT REPO write/read round-trip', async () => {
-    const repo = app.get<{
-      create: (e: unknown, o?: unknown) => Promise<PetEntity>;
-      findOne: (o: unknown) => Promise<PetEntity | null>;
-    }>(getDynamicRepositoryToken('pet'));
-    const saved = await repo.create({ name: 'Direct', profile: PROFILE });
-    // eslint-disable-next-line no-console
-    console.log('DIRECT saved.profile =', JSON.stringify(saved.profile));
-    const back = await repo.findOne({
-      where: Where.eq<PetEntity>('id', saved.id),
-    });
-    // eslint-disable-next-line no-console
-    console.log('DIRECT read.profile  =', JSON.stringify(back?.profile));
-  });
-
   it('persists the blob (the write side was never the problem)', async () => {
     const repo = app.get<{
       findOne: (o: unknown) => Promise<PetEntity | null>;
@@ -293,9 +286,55 @@ describe('class-DTO responses keep free-form JSON columns (e2e)', () => {
     const row = await repo.findOne({
       where: Where.eq<PetEntity>('id', petId),
     });
-    // eslint-disable-next-line no-console
-    console.log('STORED', JSON.stringify(row?.profile));
     expect(row?.profile).toEqual(PROFILE);
+  });
+
+  // ── The request side must NOT have been widened (#68) ──
+  //
+  // The fix relaxes the module's outbound transform options. That is
+  // only safe if nothing on the way IN got looser with it. These pin
+  // the request side independently, so a future edit to the transform
+  // options cannot quietly open mass assignment: without them the
+  // change reads as "relaxed serialization until something leaks".
+
+  it('still drops an undeclared top-level key on the way in', async () => {
+    const created = await request(app.getHttpServer())
+      .post('/pets')
+      .set('Authorization', 'Bearer u1')
+      .send({ name: 'Whitelist', profile: PROFILE, internalRank: 'platinum' })
+      .expect(201);
+
+    const repo = app.get<{
+      findOne: (o: unknown) => Promise<PetEntity | null>;
+    }>(getDynamicRepositoryToken('pet'));
+    const row = await repo.findOne({
+      where: Where.eq<PetEntity>('id', created.body.id),
+    });
+
+    // Asserted on the ROW, not the response: a key stripped only on the
+    // way out would still have been written.
+    expect(row?.internalRank).toBeNull();
+    expect(row?.profile).toEqual(PROFILE);
+  });
+
+  it('still projects a nested @Type() property to the child exposed fields', async () => {
+    const created = await request(app.getHttpServer())
+      .post('/pets')
+      .set('Authorization', 'Bearer u1')
+      .send({
+        name: 'Nested',
+        vet: { clinic: 'North Road', internalNotes: 'do not disclose' },
+      })
+      .expect(201);
+
+    const repo = app.get<{
+      findOne: (o: unknown) => Promise<PetEntity | null>;
+    }>(getDynamicRepositoryToken('pet'));
+    const row = await repo.findOne({
+      where: Where.eq<PetEntity>('id', created.body.id),
+    });
+
+    expect(row?.vet).toEqual({ clinic: 'North Road' });
   });
 
   it('returns the blob intact on create', async () => {

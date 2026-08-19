@@ -2,44 +2,29 @@ import type { ClassTransformOptions } from 'class-transformer';
 import { Transform } from 'class-transformer';
 
 /**
- * Transform options for the request-body ValidationPipe.
- *
- * This is where the free-form JSON loss actually happens (#68). The
- * upstream default pipe options carry `strategy: 'excludeAll'`, and
- * `excludeAll` is RECURSIVE: transforming the request body into the
- * create DTO walks into a plain-object property, finds no `@Expose`
- * metadata for its keys, and yields `{}`. The blob is destroyed before
- * the row is written — the database stores `{}`, so no response-side
- * change can bring it back.
- *
- * `excludeExtraneousValues: true` alone does the job the whitelist is
- * actually for: an undeclared top-level key is still dropped, and a
- * nested property typed with `@Type(() => ChildDto)` is still projected
- * to the child's exposed fields. Only the free-form case differs.
- */
-export const ROCKETS_VALIDATION_TRANSFORM_OPTIONS: ClassTransformOptions = {
-  excludeExtraneousValues: true,
-  excludePrefixes: ['_', '__'],
-};
-
-/**
- * Inbound transform options for the CRUD serialize interceptor.
+ * Options for the CRUD serialize interceptor's `toInstance` step — the
+ * one that builds the RESPONSE DTO from the entity. Despite the name,
+ * this governs the outbound projection, not request parsing.
  *
  * Upstream pairs `strategy: 'excludeAll'` with
  * `excludeExtraneousValues: true`. This deliberately omits the first,
  * because the two are not equivalent and only one of them is needed:
  *
- * | option | free-form blob | undeclared key |
+ * | option | free-form blob | column the DTO omits |
  * |---|---|---|
  * | `excludeExtraneousValues` | preserved | dropped |
  * | `strategy: 'excludeAll'` | **`{}`** | dropped |
  *
  * `excludeAll` is recursive: it walks into a plain-object property,
  * finds no per-key `@Expose`, and yields `{}`. `excludeExtraneousValues`
- * alone still drops an undeclared top-level key AND still projects a
- * nested `@Type(() => ChildDto)` property to the child's exposed fields
- * — verified against both — so the whitelist is intact and free-form
- * JSON survives.
+ * alone still drops a column the response DTO does not declare, which is
+ * what makes the DTO a projection.
+ *
+ * Verified by flipping this flag: the projection test in
+ * `rockets-core-json-column.e2e-spec.ts` fails, and only that one.
+ * Request-side mass assignment is NOT governed here — it comes from the
+ * ValidationPipe's `whitelist: true`, and stays closed with this flag
+ * off. Do not treat this constant as an inbound security control.
  *
  * Both sets are passed to `CrudModule.forRoot` because the settings
  * provider REPLACES the default object rather than merging into it
@@ -57,14 +42,21 @@ export const ROCKETS_TO_PLAIN_OPTIONS: ClassTransformOptions = {
 };
 
 /**
- * Marks a response-DTO property as a free-form JSON value that must be
- * passed through untouched.
+ * Marks a DTO property as a free-form JSON value that must be passed
+ * through untouched.
+ *
+ * Declare it on the INPUT DTO: that is where the value is destroyed.
+ * The request-body pipe runs with the upstream `strategy: 'excludeAll'`
+ * defaults, so an unmarked blob reaches the repository as `{}` and the
+ * row is written empty — after which no response-side option can
+ * recover it. Marking the response DTO as well is harmless and keeps
+ * the two declarations symmetric.
  *
  * ## Why this is needed
  *
- * The inbound whitelist (`excludeAll` + `excludeExtraneousValues`) is
- * what makes a response DTO a projection, and it is not negotiable. But
- * `plainToInstance` applies it RECURSIVELY: it walks into the value of a
+ * The whitelist (`excludeAll` + `excludeExtraneousValues`) is what makes
+ * a DTO a projection, and it is not negotiable. But `plainToInstance`
+ * applies it RECURSIVELY: it walks into the value of a
  * plain-object property, finds no `@Expose` metadata for its keys, and
  * yields `{}`. A settings blob, a flexible profile or a widget config is
  * therefore emptied before serialization even begins — which is why
