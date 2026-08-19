@@ -357,6 +357,38 @@ before running the full e2e suite.
   `@concepta/nestjs-repository-typeorm` upstream, with no hard
   `dependency` on either anywhere in the chain. A unit test now pins that
   so it cannot regress into a hard dependency.
+- **Free-form JSON columns were destroyed on the WRITE path (issue #68).**
+  The report described this as a response-serialization problem
+  ("persisted correctly, the response strips it"). It is not: the blob
+  never reached the database. Bisecting one request — raw body at a
+  global interceptor, the DTO at the CQRS command, the payload at a
+  `beforeCreate` hook, and the stored row read back — showed the body
+  arriving intact and already `{}` by the time the command was built,
+  while writing the same blob straight through the repository
+  round-tripped perfectly. Every response-side change therefore had no
+  effect, because there was nothing left to return.
+
+  The destructive option is `strategy: 'excludeAll'`, not
+  `excludeExtraneousValues`. `excludeAll` is recursive: it walks into a
+  plain-object property, finds no per-key `@Expose`, and yields `{}`.
+  `excludeExtraneousValues: true` alone still drops undeclared top-level
+  keys and still projects nested `@Type(() => ChildDto)` properties, so
+  the whitelist that makes a response DTO a projection is intact without
+  it — verified against both cases.
+
+  Two changes: the CRUD serialize interceptor now runs with
+  `excludeExtraneousValues` only inbound and `exposeAll` outbound
+  (`ROCKETS_TO_INSTANCE_OPTIONS` / `ROCKETS_TO_PLAIN_OPTIONS`, both
+  passed because the settings provider replaces rather than merges), and
+  `@FreeFormJson()` marks a property on an **input** DTO so the request
+  body survives the ValidationPipe, whose transform options are not
+  reachable through the resource config.
+
+  The zod path was never affected: it compiles DTOs from the schema, so
+  it already applies the equivalent passthrough for
+  `ZodRecord`/`ZodUnknown`/`ZodAny`. A raw `z.record()` is absent from
+  zod responses by the deliberate opt-in rule, not by this bug — declare
+  `dto: { response: true }` on the field.
 - **Sub-resource path scoping ignored the parent's own read hooks (issue #45).**
   `PathScopeGuard` looked the parent up without a repository `ctx`, which
   disabled every hook on that call. A parent hidden by one of its own

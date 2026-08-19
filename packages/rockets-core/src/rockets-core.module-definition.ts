@@ -10,6 +10,10 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { ConfigModule } from '@nestjs/config';
 import { RepositoryModule } from '@concepta/nestjs-repository';
 import { CrudModule } from '@concepta/nestjs-crud';
+import {
+  ROCKETS_TO_INSTANCE_OPTIONS,
+  ROCKETS_TO_PLAIN_OPTIONS,
+} from './infrastructure/crud-serialization';
 import { AuthUserContextOverlay } from '@concepta/nestjs-authentication';
 import type { RocketsResourceConfig } from './domain/interfaces/rockets-resource.interface';
 import { collectBootstrapForRootImports } from './infrastructure/repository/collect-bootstrap-for-root-imports';
@@ -144,7 +148,18 @@ function createCoreImports(
   // without CRUD metadata (nestjs-crud `5249672`), so mixed CRUD + custom
   // controllers share one `CrudModule.forRoot()` safely.
   if (plan.crudResources.length) {
-    imports.push(CrudModule.forRoot({}));
+    imports.push(
+      CrudModule.forRoot({
+        // Outbound only; `toInstanceOptions` keeps the upstream whitelist.
+        // See `crud-serialization.ts`.
+        settings: {
+          serialization: {
+            toInstanceOptions: ROCKETS_TO_INSTANCE_OPTIONS,
+            toPlainOptions: ROCKETS_TO_PLAIN_OPTIONS,
+          },
+        },
+      }),
+    );
     for (const resource of plan.crudResources) {
       imports.push(CrudModule.forFeature(resource));
     }
