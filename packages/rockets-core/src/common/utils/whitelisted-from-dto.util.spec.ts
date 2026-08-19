@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { BadRequestException } from '@nestjs/common';
+import type { StandardSchemaV1 } from '@standard-schema/spec';
 import {
   IsEmail,
   IsNotEmpty,
@@ -84,5 +85,38 @@ describe('whitelistedFromDto', () => {
       userId: 'b9378e1f-4274-4315-8bf9-baa6ce948100',
     });
     expect(ok).toEqual({ userId: 'b9378e1f-4274-4315-8bf9-baa6ce948100' });
+  });
+
+  it('accepts callable Standard Schema implementations', async () => {
+    const callableSchema: StandardSchemaV1<unknown, { name: string }> &
+      (() => void) = Object.assign(() => undefined, {
+      '~standard': {
+        validate(value: unknown) {
+          if (
+            typeof value === 'object' &&
+            value !== null &&
+            'name' in value &&
+            typeof value.name === 'string'
+          ) {
+            return { value: { name: value.name.trim() } };
+          }
+
+          return { issues: [{ message: 'Expected a name.' }] };
+        },
+        vendor: 'callable-test',
+        version: 1 as const,
+      },
+    });
+
+    class CallableSchemaDto {
+      static readonly schema = callableSchema;
+    }
+
+    await expect(
+      whitelistedFromDto(CallableSchemaDto, {
+        extra: 'strip me',
+        name: '  Ada  ',
+      }),
+    ).resolves.toEqual({ name: 'Ada' });
   });
 });

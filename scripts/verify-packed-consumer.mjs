@@ -114,6 +114,12 @@ try {
     ['@concepta/rockets-adapter-firebase', 'FirebaseAuthModule'],
     ['@concepta/rockets-auth', 'RocketsAuthModule'],
     ['@concepta/rockets-core', 'RocketsCoreModule'],
+    ['@concepta/rockets-core/standard-schema', 'StandardSchemaModule'],
+    ['@concepta/rockets-core/standard-schema', 'createStandardSchemaDto'],
+    [
+      '@concepta/rockets-core/standard-schema/swagger',
+      'ApiStandardSchemaResponse',
+    ],
     ['@concepta/rockets-core/zod', 'compileDtoClass'],
     ['@concepta/rockets-core/zod', 'namedZodDto'],
     ['@concepta/rockets-repository-firestore', 'FirestoreRepositoryModule'],
@@ -169,6 +175,12 @@ import {
   type RocketsAuthOptionsExtrasInterface,
 } from '@concepta/rockets-auth';
 import { RocketsCoreModule } from '@concepta/rockets-core';
+import {
+  StandardSchemaModule,
+  createStandardSchemaDto,
+  createStandardSchemaResponseDto,
+} from '@concepta/rockets-core/standard-schema';
+import { ApiStandardSchemaResponse } from '@concepta/rockets-core/standard-schema/swagger';
 import { compileDtoClass, namedZodDto } from '@concepta/rockets-core/zod';
 import { FirestoreRepositoryModule } from '@concepta/rockets-repository-firestore';
 import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
@@ -182,6 +194,8 @@ export const publicPackageSymbols = [
   RocketsAuthRecoveryController,
   RocketsAuthTokenController,
   RocketsCoreModule,
+  StandardSchemaModule,
+  ApiStandardSchemaResponse,
   TypeOrmRepositoryModule,
   typeOrmZodEntityCompiler,
 ];
@@ -203,6 +217,12 @@ export const NamedConsumerDto = namedZodDto<{ id: string }>(
   z.object({ id: z.string() }),
   'NamedConsumerDto',
 );
+export class StandardConsumerDto extends createStandardSchemaDto(
+  z.object({ id: z.string() }),
+) {}
+export class StandardConsumerResponseDto extends createStandardSchemaResponseDto(
+  z.object({ id: z.string() }),
+) {}
 
 @Injectable()
 class ConsumerAuthAdapter implements AuthAdapterInterface {
@@ -213,6 +233,7 @@ class ConsumerAuthAdapter implements AuthAdapterInterface {
 
 @Module({
   imports: [
+    StandardSchemaModule.forRoot(),
     RocketsModule.forRoot({
       settings: {},
       auth: defineAuthAdapter(ConsumerAuthAdapter),

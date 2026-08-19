@@ -1,28 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
+import type { StandardSchemaV1 } from '@standard-schema/spec';
 
-export interface StandardSchemaV1<Output = unknown> {
-  readonly '~standard': {
-    readonly version: 1;
-    readonly validate: (
-      value: unknown,
-      options?: Record<string, unknown>,
-    ) => StandardResult<Output> | Promise<StandardResult<Output>>;
-  };
-}
-
-interface StandardPathSegment {
-  readonly key: PropertyKey;
-}
-
-interface StandardIssue {
-  readonly path?: ReadonlyArray<PropertyKey | StandardPathSegment>;
-  readonly message: string;
-}
-
-interface StandardResult<Output = unknown> {
-  readonly value?: Output;
-  readonly issues?: ReadonlyArray<StandardIssue>;
-}
+import { isStandardSchema } from '../../standard-schema/schema';
 
 export function getStandardSchema(type: unknown): StandardSchemaV1 | undefined {
   if (!type || (typeof type !== 'function' && typeof type !== 'object')) {
@@ -30,23 +9,11 @@ export function getStandardSchema(type: unknown): StandardSchemaV1 | undefined {
   }
 
   const schema = Reflect.get(type, 'schema');
-  if (typeof schema !== 'object' || schema === null) {
-    return undefined;
-  }
-
-  const standard = Reflect.get(schema, '~standard');
-  if (typeof standard !== 'object' || standard === null) {
-    return undefined;
-  }
-
-  return Reflect.get(standard, 'version') === 1 &&
-    typeof Reflect.get(standard, 'validate') === 'function'
-    ? (schema as StandardSchemaV1)
-    : undefined;
+  return isStandardSchema(schema) ? schema : undefined;
 }
 
 export function standardSchemaIssuesToMessages(
-  issues: ReadonlyArray<StandardIssue>,
+  issues: ReadonlyArray<StandardSchemaV1.Issue>,
 ): string[] {
   return issues.map((issue) => {
     const field = Array.isArray(issue.path)
@@ -57,7 +24,7 @@ export function standardSchemaIssuesToMessages(
 }
 
 export function standardSchemaBadRequest(
-  issues: ReadonlyArray<StandardIssue>,
+  issues: ReadonlyArray<StandardSchemaV1.Issue>,
 ): BadRequestException {
   const messages = standardSchemaIssuesToMessages(issues);
   return new BadRequestException({
@@ -68,7 +35,7 @@ export function standardSchemaBadRequest(
 }
 
 function pathSegmentToString(
-  segment: PropertyKey | StandardPathSegment,
+  segment: PropertyKey | StandardSchemaV1.PathSegment,
 ): string {
   if (typeof segment === 'object' && segment !== null) {
     return String(segment.key);

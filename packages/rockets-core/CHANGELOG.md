@@ -9,6 +9,12 @@
 
 ### Added
 
+- `@concepta/rockets-core/standard-schema` and
+  `@concepta/rockets-core/standard-schema/swagger` subpaths for vendor-neutral
+  request DTO validation, response serialization, and OpenAPI metadata in
+  hand-written Nest controllers.
+- Request and response DTO carrier factories, an opt-in global module, native
+  response decorators, stable runtime guards, and Swagger array conversion.
 - `compileDtoClass` and `namedZodDto` are exported from the public
   `@concepta/rockets-core/zod` subpath.
 - `AuthBootstrapContributions`, allowing an auth integration to carry its owned
@@ -18,6 +24,8 @@
 
 ### Changed
 
+- The existing generated-CRUD Standard Schema request bridge now uses the
+  official `@standard-schema/spec` contract instead of a local partial copy.
 - Core always provides the auth-adapter collection token, including for an
   empty chain, so metadata-free and guard-disabled compositions still boot.
 - `AuthServerGuard` recognizes the upstream class-level public-route sentinel.

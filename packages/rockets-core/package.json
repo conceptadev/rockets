@@ -8,6 +8,12 @@
   "types": "dist/index.d.ts",
   "typesVersions": {
     "*": {
+      "standard-schema": [
+        "dist/standard-schema/index.d.ts"
+      ],
+      "standard-schema/swagger": [
+        "dist/standard-schema/swagger/index.d.ts"
+      ],
       "zod": [
         "dist/zod/index.d.ts"
       ]
@@ -18,6 +24,16 @@
       "types": "./dist/index.d.ts",
       "require": "./dist/index.js",
       "import": "./dist/index.js"
+    },
+    "./standard-schema": {
+      "types": "./dist/standard-schema/index.d.ts",
+      "require": "./dist/standard-schema/index.js",
+      "import": "./dist/standard-schema/index.js"
+    },
+    "./standard-schema/swagger": {
+      "types": "./dist/standard-schema/swagger/index.d.ts",
+      "require": "./dist/standard-schema/swagger/index.js",
+      "import": "./dist/standard-schema/swagger/index.js"
     },
     "./zod": {
       "types": "./dist/zod/index.d.ts",
@@ -64,6 +80,7 @@
     "@nestjs/core": "12.0.0-alpha.5",
     "@nestjs/cqrs": "^11.0.0",
     "@nestjs/swagger": "12.0.0-alpha.2",
+    "@standard-schema/spec": "1.1.0",
     "pluralize": "^8.0.0"
   },
   "devDependencies": {
@@ -107,7 +124,8 @@
     "zod",
     "dependency-injection",
     "backend",
-    "api"
+    "api",
+    "standard-schema"
   ],
   "stableVersion": "0.0.1-dev.0"
 }
