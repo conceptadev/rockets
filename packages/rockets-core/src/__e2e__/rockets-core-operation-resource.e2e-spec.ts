@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import type { DynamicModule } from '@nestjs/common';
 import {
   Inject,
   INestApplication,
@@ -358,6 +359,53 @@ class InnerModule {}
 @Module({ imports: [InnerModule], exports: [InnerModule] })
 class OuterModule {}
 
+/**
+ * The canonical dynamic-module host: `@Module({})` + `static forRoot()`.
+ * `@Module({})` writes ZERO metadata (the decorator only defines keys
+ * present in the object), so a re-exported host class is invisible to a
+ * metadata-based module check — and every `@concepta/nestjs-*` module is
+ * shaped this way.
+ */
+const DYNAMIC_SECRET = Symbol('DYNAMIC_SECRET');
+
+@Injectable()
+class DynamicHostHandler {
+  constructor(@Inject(DYNAMIC_SECRET) private readonly secret: string) {}
+
+  handle() {
+    return { value: this.secret };
+  }
+}
+
+@Module({})
+class BillingModule {
+  static forRoot(): DynamicModule {
+    return {
+      module: BillingModule,
+      providers: [
+        { provide: DYNAMIC_SECRET, useValue: 'billing-secret' },
+        DynamicHostHandler,
+      ],
+      exports: [DynamicHostHandler],
+    };
+  }
+}
+
+@Module({ imports: [BillingModule.forRoot()], exports: [BillingModule] })
+class PlatformModule {}
+
+const dynamicHostOps = operationResource({
+  path: 'platform',
+  public: true,
+  imports: [PlatformModule],
+  operations: (op) => ({
+    value: op.read({
+      output: z.object({ value: z.string() }),
+      handler: DynamicHostHandler,
+    }),
+  }),
+});
+
 const reExportedOps = operationResource({
   path: 're-exported',
   public: true,
@@ -651,5 +699,43 @@ describe('operationResource — handler behind a re-exported module (e2e)', () =
       .expect(200);
 
     expect(res.body).toEqual({ value: 'inner-secret' });
+  });
+});
+
+/**
+ * Same shape as the re-exported-module case above, but the inner module
+ * is a DYNAMIC module host. Its dependency is private to that module, so
+ * auto-registering the handler locally makes the app fail to boot.
+ */
+describe('operationResource — handler behind a re-exported dynamic module (e2e)', () => {
+  let app: INestApplication;
+
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        RocketsCoreModule.forRoot({
+          auth: defineAuthAdapter(SimpleAuthProvider),
+          providers: [SimpleAuthProvider],
+          resources: [dynamicHostOps],
+          global: true,
+        }),
+      ],
+      providers: [{ provide: APP_GUARD, useClass: AuthServerGuard }],
+    }).compile();
+
+    app = moduleRef.createNestApplication();
+    await app.init();
+  });
+
+  afterAll(async () => {
+    if (app) await app.close();
+  });
+
+  it('boots and resolves the handler from the dynamic module', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/platform/value')
+      .expect(200);
+
+    expect(res.body).toEqual({ value: 'billing-secret' });
   });
 });

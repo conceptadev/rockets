@@ -337,18 +337,21 @@ export function operationDiscriminator(key: string, path: string): string {
 export function buildOperationController(
   definition: OperationResourceDefinition,
   /**
-   * Handler tokens registered on the generated module itself — either
-   * auto-registered or listed in `providers`.
+   * Local alias token per handler class this module does NOT register
+   * itself (i.e. one supplied by an imported module).
    *
-   * Drives the resolution mode. A locally-registered handler resolves
-   * `strict`, which is what keeps two operation resources sharing a
-   * handler CLASS from resolving each other's instance. A handler
-   * supplied by an imported module has no local provider to be strict
-   * about, so it resolves through the module's injector — there is
-   * exactly one provider for that token reachable from here, in the
-   * module that owns it.
+   * Every resolve stays `strict`. The alias is a local
+   * `{ provide: alias, useExisting: HandlerClass }`, so `useExisting`
+   * walks normal DI — imports honoured — while the token the route asks
+   * for belongs to this module alone.
+   *
+   * A non-strict resolve is NOT an alternative: Nest's
+   * `instanceLinksHost` returns `links[links.length - 1]` when given no
+   * module id, i.e. the last module scanned app-wide with no relation to
+   * the import graph. With one handler class exported by two modules,
+   * both operation resources would silently share one instance.
    */
-  locallyProvided: ReadonlySet<unknown> = new Set(),
+  handlerAliases: ReadonlyMap<unknown, symbol> = new Map(),
 ): Type<unknown> {
   if (definition.public === true) {
     for (const operation of Object.values(definition.operations)) {
@@ -422,7 +425,7 @@ export function buildOperationController(
       uniqueName,
       paramsDto,
       bearerAuth,
-      locallyProvided,
+      handlerAliases,
     );
   }
 
@@ -435,7 +438,7 @@ function attachOperationMethod(
   controllerName: string,
   paramsDto: Type<object> | undefined,
   controllerBearerAuth: boolean,
-  locallyProvided: ReadonlySet<unknown>,
+  handlerAliases: ReadonlyMap<unknown, symbol>,
 ): void {
   const methodName = operation.key;
   const http = METHOD_DECORATOR[operation.method];
@@ -478,9 +481,12 @@ function attachOperationMethod(
     const handlerClass = getHandlerClass(operation.handler);
     if (handlerClass !== undefined) {
       const contextId = ContextIdFactory.getByRequest(request);
-      const instance = await this.moduleRef.resolve(handlerClass, contextId, {
-        strict: locallyProvided.has(handlerClass),
-      });
+      // Always strict: either the class is registered here, or a local
+      // alias for it is. Never a global scan.
+      const token: unknown = handlerAliases.get(handlerClass) ?? handlerClass;
+      const instance = await this.moduleRef.resolve<{
+        handle: (ctx: OperationContext<unknown, object>) => unknown;
+      }>(token as never, contextId, { strict: true });
       result = await instance.handle(ctx);
     } else if (isHandlerFunction(operation.handler)) {
       const handler: OperationHandlerFn<unknown, unknown, object> =

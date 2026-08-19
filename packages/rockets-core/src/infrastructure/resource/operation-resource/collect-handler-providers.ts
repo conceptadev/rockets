@@ -51,9 +51,14 @@ function isDynamicModule(entry: object): entry is DynamicModule {
 }
 
 /**
- * Whether a class carries `@Module()` metadata. Used to decide whether an
- * export entry is a token or a re-exported module whose own exports must
- * be walked.
+ * Whether a class carries `@Module()` metadata.
+ *
+ * Deliberately NOT sufficient on its own: `@Module()` only defines the
+ * keys present in the object it is given, so the canonical dynamic-module
+ * host — `@Module({}) class X { static forRoot(): DynamicModule }`, the
+ * shape of every `@concepta/nestjs-*` module — carries **no metadata at
+ * all** and is invisible here. `resolveReExportedDynamicModule` covers
+ * that case.
  */
 function isModuleClass(value: Type<unknown>): boolean {
   return (
@@ -62,6 +67,33 @@ function isModuleClass(value: Type<unknown>): boolean {
     Reflect.getMetadata(MODULE_METADATA.IMPORTS, value) !== undefined ||
     Reflect.getMetadata(MODULE_METADATA.CONTROLLERS, value) !== undefined
   );
+}
+
+/**
+ * Finds the `DynamicModule` a metadata-less exported class stands for.
+ *
+ * `@Module({ imports: [Billing.forRoot()], exports: [Billing] })` is the
+ * standard way to re-export configured infrastructure: the export entry
+ * is the bare host CLASS, while the exports that matter live on the
+ * `DynamicModule` sitting in `imports`. Matching them up is what makes
+ * `Platform → Billing.forRoot()` reachable.
+ */
+function resolveReExportedDynamicModule(
+  entry: Type<unknown>,
+  hostImports: readonly unknown[],
+): DynamicModule | undefined {
+  for (const raw of hostImports) {
+    const imported = unwrapImportEntry(raw);
+    if (
+      typeof imported === 'object' &&
+      imported !== null &&
+      isDynamicModule(imported) &&
+      imported.module === entry
+    ) {
+      return imported;
+    }
+  }
+  return undefined;
 }
 
 /**
@@ -92,7 +124,18 @@ function addModuleExports(
   if (!Array.isArray(exported)) {
     return;
   }
-  addExportEntries(exported, tokens, visited);
+  // This module's own imports, so a metadata-less exported class can be
+  // matched against the `DynamicModule` it stands for.
+  const imported: unknown = Reflect.getMetadata(
+    MODULE_METADATA.IMPORTS,
+    moduleClass,
+  );
+  addExportEntries(
+    exported,
+    tokens,
+    visited,
+    Array.isArray(imported) ? imported : [],
+  );
 }
 
 /**
@@ -108,6 +151,7 @@ function addExportEntries(
   entries: readonly unknown[],
   tokens: Set<unknown>,
   visited: Set<unknown>,
+  hostImports: readonly unknown[] = [],
 ): void {
   for (const raw of entries) {
     const entry = unwrapImportEntry(raw);
@@ -115,8 +159,17 @@ function addExportEntries(
 
     if (typeof entry === 'function') {
       tokens.add(entry);
-      if (isModuleClass(entry as Type<unknown>)) {
-        addModuleExports(entry as Type<unknown>, tokens, visited);
+      const moduleClass = entry as Type<unknown>;
+      if (isModuleClass(moduleClass)) {
+        addModuleExports(moduleClass, tokens, visited);
+        continue;
+      }
+      // Metadata-less class: either a plain provider, or the host of a
+      // re-exported dynamic module. Only the latter matches an import.
+      const dynamic = resolveReExportedDynamicModule(moduleClass, hostImports);
+      if (dynamic !== undefined && !visited.has(dynamic)) {
+        visited.add(dynamic);
+        addExportEntries(dynamic.exports ?? [], tokens, visited);
       }
       continue;
     }

@@ -1,12 +1,14 @@
-import type { Provider } from '@nestjs/common';
+import type { Provider, Type } from '@nestjs/common';
 
 import { ResourceKind } from '../../domain/interfaces/resource-kind.enum';
 import type {
+  OperationHandler,
   OperationResource,
   OperationResourceDefinition,
 } from '../../domain/interfaces/operation-resource.interface';
 import { buildOperationController } from './operation-resource/build-operation-controller';
 import { collectHandlerProviders } from './operation-resource/collect-handler-providers';
+import { getHandlerClass } from './operation-resource/is-handler-class';
 import { assertValidOperationKey } from './operation-resource/operation-key';
 
 /**
@@ -66,9 +68,6 @@ export function defineOperationResource(
     definition.imports,
   );
 
-  // Tokens this module registers itself. Anything else a handler
-  // resolves to comes from an imported module, where a strict resolve
-  // would not find it.
   const locallyProvided = new Set<unknown>([
     ...handlerProviders,
     ...explicitProviders.map((provider) =>
@@ -76,13 +75,40 @@ export function defineOperationResource(
     ),
   ]);
 
-  const controller = buildOperationController(definition, locallyProvided);
+  // A handler supplied by an imported module has no local provider, so a
+  // strict `moduleRef` resolve cannot find it — and a NON-strict resolve
+  // is not the answer: Nest's `instanceLinksHost` returns
+  // `links[links.length - 1]` when no module id is given, i.e. the last
+  // module scanned app-wide, unrelated to this module's imports. With the
+  // same handler class exported by two modules, both operation resources
+  // would silently share one instance.
+  //
+  // Registering a local ALIAS instead keeps resolution inside normal DI:
+  // `useExisting` resolves the class through this module's injector
+  // (imports honoured, no global scan), while the alias token itself is
+  // local, so the route can resolve it strictly and unambiguously.
+  const handlerAliases = new Map<Type<OperationHandler>, symbol>();
+  const aliasProviders: Provider[] = [];
+  for (const operation of Object.values(operations)) {
+    const handlerClass = getHandlerClass(operation.handler);
+    if (handlerClass === undefined) continue;
+    if (locallyProvided.has(handlerClass)) continue;
+    if (handlerAliases.has(handlerClass)) continue;
+
+    const alias = Symbol(
+      `RocketsOperationHandler(${handlerClass.name || 'anonymous'})`,
+    );
+    handlerAliases.set(handlerClass, alias);
+    aliasProviders.push({ provide: alias, useExisting: handlerClass });
+  }
+
+  const controller = buildOperationController(definition, handlerAliases);
 
   return {
     kind: ResourceKind.Operation,
     definition,
     controller,
-    providers: [...explicitProviders, ...handlerProviders],
+    providers: [...explicitProviders, ...handlerProviders, ...aliasProviders],
     imports: definition.imports,
     exports: definition.exports,
   };

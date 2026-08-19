@@ -10,6 +10,8 @@ import {
   type StructuredRoutePattern,
 } from './route-pattern';
 import { HOST_METADATA, VERSION_METADATA } from '@nestjs/common/constants';
+import { operationDiscriminator } from '../operation-resource/build-operation-controller';
+import { VERSION_NEUTRAL } from '@nestjs/common';
 
 /**
  * Mirrors `@concepta/nestjs-crud` route defaults
@@ -92,8 +94,30 @@ function normalizeDimension(value: unknown): string {
   return String(value);
 }
 
+/**
+ * Whether a routing dimension (`host` / `version`) can be proven to keep
+ * two routes apart.
+ *
+ * Mirrors the `'unknown'` discipline of the route-pattern comparison: a
+ * dimension separates routes only when literal values are provably
+ * different. Anything this cannot decide counts as overlapping, because
+ * the cost of guessing wrong here is a MISSED collision — two routes
+ * silently last-wins at runtime — while the cost of over-reporting is a
+ * boot error the author can resolve explicitly.
+ */
 function dimensionsMayOverlap(a: unknown, b: unknown): boolean {
   if (a === undefined || b === undefined) {
+    return true;
+  }
+  // `VERSION_NEUTRAL` matches every version in Nest. Stringifying it
+  // would compare a symbol description against '1' and wrongly report
+  // the routes as disjoint.
+  if (isVersionNeutral(a) || isVersionNeutral(b)) {
+    return true;
+  }
+  // A RegExp or a pattern host (`:sub.example.com`, `*.example.com`)
+  // cannot be compared by equality — Nest matches them structurally.
+  if (isUndecidableDimension(a) || isUndecidableDimension(b)) {
     return true;
   }
   const left = new Set(
@@ -103,6 +127,23 @@ function dimensionsMayOverlap(a: unknown, b: unknown): boolean {
     ? b.map(normalizeDimension)
     : [normalizeDimension(b)];
   return right.some((value) => left.has(value));
+}
+
+function isVersionNeutral(value: unknown): boolean {
+  if (value === VERSION_NEUTRAL) return true;
+  return (
+    Array.isArray(value) && value.some((entry) => entry === VERSION_NEUTRAL)
+  );
+}
+
+/** RegExp hosts and host patterns Nest matches structurally, not by value. */
+function isUndecidableDimension(value: unknown): boolean {
+  const entries = Array.isArray(value) ? value : [value];
+  return entries.some(
+    (entry) =>
+      entry instanceof RegExp ||
+      (typeof entry === 'string' && /[:*]/.test(entry)),
+  );
 }
 
 function claimsMayOverlap(a: RouteClaim, b: RouteClaim): boolean {
@@ -219,11 +260,62 @@ function collectOperationRoutes(bundle: OperationResource): RouteClaim[] {
  * represented in `resources[]`; global prefix, Nest versioning strategy, and
  * hand-written controllers belong to the post-boot registered-route validator.
  */
+/**
+ * Rejects two operations that would produce the same OpenAPI
+ * `operationId` — and therefore, on the zod path, the same generated DTO
+ * component names.
+ *
+ * `operationDiscriminator` slugifies non-alphanumerics to `_`, which is
+ * NOT injective: `{ key: 'run', path: 'a' }` and `{ key: 'run_a' }` both
+ * yield `run_a`, as do paths `a/b` and `a-b`. Those routes are distinct,
+ * so the path check above passes, and the second Swagger component then
+ * silently overwrites the first.
+ *
+ * Asserting uniqueness directly is total, where making the slug
+ * injective would be a guess. The discriminator stays a readability
+ * optimisation rather than something correctness depends on.
+ */
+function validateOperationIdUniqueness(
+  operationBundles: ReadonlyArray<OperationResource>,
+): void {
+  const seen = new Map<string, string>();
+  for (const bundle of operationBundles) {
+    const base = bundle.definition.path;
+    const controllerName = controllerClassNameFor(base);
+    for (const operation of Object.values(bundle.definition.operations)) {
+      const id = `${controllerName}_${operation.method.toLowerCase()}_${operationDiscriminator(
+        operation.key,
+        operation.path,
+      )}`;
+      const source = `operationResource("${base}").${operation.key}`;
+      const prior = seen.get(id);
+      if (prior !== undefined) {
+        throw new Error(
+          `buildAppRegistrationPlan: operation id "${id}" is claimed by ` +
+            `${prior} and ${source}. The two produce the same OpenAPI ` +
+            `operationId and the same generated DTO names, so one schema ` +
+            `would overwrite the other. Rename one operation key or give ` +
+            `it an explicit path that does not slugify to the same value.`,
+        );
+      }
+      seen.set(id, source);
+    }
+  }
+}
+
+/** Mirrors `controllerClassName` in the operation-resource builder. */
+function controllerClassNameFor(path: string): string {
+  const slug = path.replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_|_$/g, '');
+  return `OperationResource_${slug || 'root'}`;
+}
+
 export function validateStructuredRouteCollisions(args: {
   readonly generatedResources: ReadonlyArray<CrudResource>;
   readonly manualResources: ReadonlyArray<RocketsResourceConfig>;
   readonly operationBundles: ReadonlyArray<OperationResource>;
 }): void {
+  validateOperationIdUniqueness(args.operationBundles);
+
   if (args.operationBundles.length === 0) {
     return;
   }

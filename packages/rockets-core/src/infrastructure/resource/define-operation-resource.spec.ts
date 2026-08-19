@@ -162,7 +162,16 @@ describe('defineOperationResource', () => {
       },
     });
 
-    expect(bundle.providers).toEqual([]);
+    // The handler CLASS is not re-registered — that is what would shadow
+    // the imported provider. What IS registered is a local alias
+    // (`{ provide: Symbol, useExisting: ImportedHandler }`) so the route
+    // can resolve strictly instead of falling back to a global,
+    // last-wins scan.
+    expect(bundle.providers).not.toContain(ImportedHandler);
+    expect(bundle.providers).toHaveLength(1);
+    expect(bundle.providers[0]).toMatchObject({
+      useExisting: ImportedHandler,
+    });
     expect(bundle.imports).toEqual([HandlerHostModule]);
   });
 
@@ -197,7 +206,9 @@ describe('defineOperationResource', () => {
       },
     });
 
-    expect(bundle.providers).toEqual([]);
+    // As above: an alias, never the class itself.
+    expect(bundle.providers).not.toContain(DynHandler);
+    expect(bundle.providers[0]).toMatchObject({ useExisting: DynHandler });
   });
 });
 
@@ -885,5 +896,93 @@ describe('operation resource — route dimensions', () => {
         operationBundles: [ops],
       }),
     ).toThrow(/duplicate route/i);
+  });
+});
+
+/**
+ * The path slug is not injective — `{ key: 'run', path: 'a' }` and
+ * `{ key: 'run_a' }` collapse to the same discriminator, as do paths
+ * `a/b` and `a-b`. Those routes are distinct so the path check passes,
+ * and the second OpenAPI component would silently overwrite the first.
+ */
+describe('operation id uniqueness', () => {
+  it('rejects two operations whose discriminators collide', () => {
+    const bundle = operationResource({
+      path: 'jobs',
+      operations: (op) => ({
+        run: op.read({
+          path: 'a',
+          output: z.object({ value: z.string() }),
+          handler: () => ({ value: 'a' }),
+        }),
+        run_a: op.read({
+          output: z.object({ value: z.string() }),
+          handler: () => ({ value: 'b' }),
+        }),
+      }),
+    });
+
+    expect(() =>
+      validateRouteCollisions({
+        generatedResources: [],
+        manualResources: [],
+        operationBundles: [bundle],
+      }),
+    ).toThrow(/operation id "OperationResource_jobs_get_run_a" is claimed by/);
+  });
+
+  it('rejects the same collision across two bundles', () => {
+    const one = operationResource({
+      path: 'same',
+      operations: (op) => ({
+        act: op.read({
+          path: 'a/b',
+          output: z.object({ v: z.string() }),
+          handler: () => ({ v: '1' }),
+        }),
+      }),
+    });
+    const two = operationResource({
+      path: 'same',
+      operations: (op) => ({
+        act: op.read({
+          path: 'a-b',
+          output: z.object({ v: z.string() }),
+          handler: () => ({ v: '2' }),
+        }),
+      }),
+    });
+
+    expect(() =>
+      validateRouteCollisions({
+        generatedResources: [],
+        manualResources: [],
+        operationBundles: [one, two],
+      }),
+    ).toThrow(/operation id .* is claimed by/);
+  });
+
+  it('accepts distinct operations', () => {
+    const bundle = operationResource({
+      path: 'jobs',
+      operations: (op) => ({
+        start: op.read({
+          output: z.object({ v: z.string() }),
+          handler: () => ({ v: '1' }),
+        }),
+        stop: op.read({
+          output: z.object({ v: z.string() }),
+          handler: () => ({ v: '2' }),
+        }),
+      }),
+    });
+
+    expect(() =>
+      validateRouteCollisions({
+        generatedResources: [],
+        manualResources: [],
+        operationBundles: [bundle],
+      }),
+    ).not.toThrow();
   });
 });
