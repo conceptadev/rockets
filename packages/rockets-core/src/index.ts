@@ -18,6 +18,23 @@ export {
   ROCKETS_DISABLE_GUARDS_TOKEN,
 } from './rockets-core.constants';
 export { AuthServerGuard } from './infrastructure/guards/auth-server.guard';
+
+// Route policy audit — reports what is actually enforced on every
+// discovered route, and fails the boot when the declared policy is not
+// met. Opt-in via `RocketsCoreModule.forRoot({ routePolicy })`.
+export {
+  RouteAuditService,
+  ROCKETS_ROUTE_POLICY_TOKEN,
+  collectRouteAudit,
+  evaluateRoutePolicy,
+  formatPolicyViolations,
+  type ControllerScan,
+  type RouteAuditEntry,
+  type RouteAuditReport,
+  type RouteAuthState,
+  type RoutePolicy,
+  type RoutePolicyViolation,
+} from './infrastructure/audit';
 export { PathScopeGuard } from './infrastructure/guards/path-scope.guard';
 
 // Decorators
