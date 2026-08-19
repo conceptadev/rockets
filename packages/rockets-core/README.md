@@ -362,6 +362,39 @@ export class HealthController {
 }
 ```
 
+### Free-form JSON columns on class DTOs
+
+A settings blob, a flexible profile or a widget config has no fixed
+shape, so no per-key `@Expose` is possible. The request-body
+`ValidationPipe` transforms with `strategy: 'excludeAll'`, which is
+recursive — it walks into the property, finds no `@Expose` metadata for
+its keys, and yields `{}` **before the row is written**. Mark the
+property on the **input** DTO:
+
+```typescript
+import { FreeFormJson } from '@concepta/rockets-core';
+
+class PetCreateDto {
+  @Expose() @IsString() @ApiProperty() name!: string;
+
+  @Expose()
+  @FreeFormJson()
+  @IsOptional()
+  @IsObject()
+  @ApiPropertyOptional({ type: 'object', additionalProperties: true })
+  profile?: Record<string, unknown>;
+}
+```
+
+Only the input DTO needs it — once the value is stored, the outbound
+options carry it through. Arrays are unaffected.
+
+The zod path needs no equivalent: it compiles DTOs from the schema and
+applies the same passthrough for `z.record()` / `z.unknown()` / `z.any()`
+itself. Such a field is still absent from zod **responses** until it opts
+in (`dto: { response: true }`) — that is the deliberate response
+whitelist, not this bug.
+
 ### Customise the error envelope
 
 `RocketsCoreExceptionsFilter` replies with
