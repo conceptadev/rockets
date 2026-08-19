@@ -236,6 +236,23 @@ before running the full e2e suite.
 
 ### Fixed
 
+- **Duplicate `typeorm` copies now fail with an actionable error
+  (issue #70).** `@nestjs/typeorm` uses the `DataSource` **class object
+  itself** as its default DI token, so a second copy of `typeorm`
+  registers the provider under one token and looks it up under another —
+  surfacing only as `Nest could not find DataSource element`, with
+  nothing pointing at the cause. `defineTypeOrmRepository().forRoot()`
+  now compares the `DataSource` it resolved against the token
+  `@nestjs/typeorm` will use and, on a mismatch, names the loaded copies
+  and the dedupe command. Exported as `assertSingleTypeOrmInstance()` /
+  `hasSingleTypeOrmInstance()` for apps that want to fail earlier.
+
+  The dependency half of that issue was already satisfied — `typeorm` and
+  `@nestjs/typeorm` are peer dependencies in this package and in
+  `@concepta/nestjs-repository-typeorm` upstream, with no hard
+  `dependency` on either anywhere in the chain. A unit test now pins that
+  so it cannot regress into a hard dependency.
+
 - `RocketsCoreExceptionsFilter` logs through Nest's `Logger` instead of
   `console.error`, on every 5xx — whether traces are printed is the
   consuming app's log-level decision, no longer gated on `NODE_ENV`
