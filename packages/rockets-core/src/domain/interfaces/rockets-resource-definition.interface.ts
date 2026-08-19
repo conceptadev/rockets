@@ -545,12 +545,19 @@ export interface RocketsResourceDefinition<E extends PlainLiteralObject> {
   /**
    * Access control for this resource.
    *
-   * Declaring it makes the generated controller carry
-   * `AccessControlQuery({ service: acl.query })` and every operation
-   * carry an `AccessControlGrant` for the action it implies —
-   * `list`/`read` → read, `create` → create, `update`/`replace` →
-   * update, `delete`/`restore` → delete. Per-operation `acl` overrides
-   * the action or opts out with `false`.
+   * Declaring it makes every operation carry an `AccessControlGrant`
+   * for the action it implies — `list`/`read` → read, `create` →
+   * create, `update`/`replace` → update, `delete`/`restore` → delete —
+   * plus an `AccessControlQuery` naming the `CanAccess` service for
+   * that route. Per-operation `acl` overrides the action, the query
+   * service, or opts out with `false`.
+   *
+   * Both decorators are stamped per ROUTE, never on the controller
+   * class. Upstream merges query metadata with
+   * `getAllAndMerge([getClass(), getHandler()])` and breaks on the
+   * first service returning `true`, class-first — so a class-level
+   * default plus a method-level override would be an OR in which the
+   * permissive one wins and an operation could never tighten.
    *
    * Rules stay app-owned: this wires the decorators, it does not
    * generate `acRules` or decide possession (`own` vs `any`). Ownership
