@@ -64,7 +64,7 @@ import {
   type EntityHookContext,
   PassthroughEntityHookBase,
 } from '../infrastructure/hooks/entity-hook';
-import { getCrudContext } from '../utils/get-actor.helper';
+import { getActor, getCrudContext } from '../utils/get-actor.helper';
 import { defineAuthAdapter } from '../infrastructure/auth/define-auth-adapter';
 
 // ── Auth fixture ──
@@ -280,6 +280,41 @@ class ParentRetentionHook extends PassthroughEntityHookBase<ParentEntity> {
   }
 }
 
+/**
+ * Second half of #45: a parent hook gated on the ACTOR, not on the CRUD
+ * context.
+ *
+ * The guard runs BEFORE `ActorOverlay` (an `APP_INTERCEPTOR`), so the
+ * request's own actor overlay does not exist yet when the parent lookup
+ * happens. The guard therefore defines `ActorCtx` on its detached host —
+ * and `host.with(CrudCtx)` must keep that reachable through the
+ * prototype chain, or every owner-scoped parent hook silently loses the
+ * actor exactly where the fix claimed to restore it.
+ *
+ * Fails CLOSED on a missing actor (impossible clause) rather than
+ * passing through: an actor-scoped read that cannot identify the actor
+ * must return nothing, never everything. That is what makes this test
+ * decisive — drop `defineOverlay(ActorCtx, ...)` from the guard and the
+ * sub-resource routes 404.
+ */
+@EntityHook({ entity: ParentEntity })
+@Injectable()
+class ParentActorScopeHook extends PassthroughEntityHookBase<ParentEntity> {
+  override beforeFindOne(
+    options: RepositoryFindOneOptions<ParentEntity>,
+    ctx?: EntityHookContext,
+  ): RepositoryFindOneOptions<ParentEntity> {
+    const actor = getActor(ctx);
+    const clause = actor?.id
+      ? Where.eq<ParentEntity>('userId', actor.id)
+      : Where.eq<ParentEntity>('id', '__no_actor__');
+    return {
+      ...options,
+      where: options.where ? Where.and(options.where, clause) : clause,
+    };
+  }
+}
+
 // ── Resources ──
 
 const ParentOwnerStamp = OwnerStampHook.for(ParentEntity);
@@ -296,6 +331,7 @@ const parentResource = defineResource<ParentEntity>({
   hooks: [
     ParentOwnerStamp,
     ParentRetentionHook,
+    ParentActorScopeHook,
     AfterCreateReloadHook.for(ParentEntity),
   ],
   relations: (rel) => [rel(CategoryEntity, 'category')],
@@ -744,6 +780,38 @@ describe('RocketsCoreModule + defineSubResource + AfterCreateReloadHook (e2e)', 
         .expect(404);
     });
   });
+  // ── Sub-resource: parent hook gated on the ACTOR (#45) ──
+
+  describe('the guard replay carries the actor to parent hooks', () => {
+    let parentId: string;
+
+    beforeAll(async () => {
+      const parent = await request(app.getHttpServer())
+        .post('/parents')
+        .set('Authorization', 'Bearer u1')
+        .send({ name: 'actor-scoped-parent' })
+        .expect(201);
+      parentId = parent.body.id;
+    });
+
+    // `ParentActorScopeHook` fails closed without an actor, so a 200
+    // here is only reachable if the guard's detached context exposed
+    // one. Guards run before `ActorOverlay`, so this cannot come from
+    // the request's own overlay.
+    it('an actor-scoped parent hook resolves the actor during the lookup', async () => {
+      await request(app.getHttpServer())
+        .post(`/parents/${parentId}/children`)
+        .set('Authorization', 'Bearer u1')
+        .send({ title: 'actor-scoped-child', categoryId: categoryAId })
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .get(`/parents/${parentId}/children`)
+        .set('Authorization', 'Bearer u1')
+        .expect(200);
+    });
+  });
+
   // ── Three-level nesting: the middle resource's own scope hook (#45) ──
 
   describe('grandchild routes stay scoped to the addressed middle row', () => {
