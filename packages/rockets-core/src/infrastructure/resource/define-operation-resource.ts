@@ -38,25 +38,13 @@ export function defineOperationResource(
         `defineOperationResource("${definition.path}"): operation key "${key}" does not match descriptor.key "${operation.key}"`,
       );
     }
-    const hasOutput = operation.outputDto !== undefined;
-    const optedOut = operation.outputDisabled === true;
-    if (!hasOutput && !optedOut) {
+    // "declared neither" and "declared both" are no longer expressible —
+    // `output: Type | false` is required and closed. Only the genuine
+    // rule is left.
+    if (operation.status === 204 && operation.output !== false) {
       throw new Error(
         `defineOperationResource("${definition.path}"): operation "${key}" ` +
-          `must declare outputDto or outputDisabled: true — omitting both ` +
-          `allows response leakage`,
-      );
-    }
-    if (hasOutput && optedOut) {
-      throw new Error(
-        `defineOperationResource("${definition.path}"): operation "${key}" ` +
-          `cannot set both outputDto and outputDisabled`,
-      );
-    }
-    if (operation.status === 204 && hasOutput) {
-      throw new Error(
-        `defineOperationResource("${definition.path}"): operation "${key}" ` +
-          `sets status 204 with outputDto — 204 responses have no body`,
+          `sets status 204 with an output DTO — 204 responses have no body`,
       );
     }
   }

@@ -2293,7 +2293,7 @@
         "name": "CompiledOperationDescriptor",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface CompiledOperationDescriptor {\n    readonly key: string;\n    readonly method: OperationHttpMethod;\n    readonly path: string;\n    readonly status: number;\n    readonly summary?: string;\n    readonly public?: boolean;\n    readonly transactional?: boolean;\n    readonly inputDto?: Type<object>;\n    readonly outputDto?: Type<object>;\n    readonly outputDisabled?: boolean;\n    readonly handler: OperationHandlerRef;\n    readonly decorators?: readonly MethodDecorator[];\n}"
+        "signature": "export interface CompiledOperationDescriptor {\n    readonly key: string;\n    readonly method: OperationHttpMethod;\n    readonly path: string;\n    readonly status: number;\n    readonly summary?: string;\n    readonly public?: boolean;\n    readonly transactional?: boolean;\n    readonly inputDto?: Type<object>;\n    readonly output: Type<object> | false;\n    readonly handler: OperationHandlerRef;\n    readonly decorators?: readonly MethodDecorator[];\n}"
       },
       {
         "name": "CreateOneInterface",
@@ -3130,12 +3130,6 @@
         "kind": "type",
         "runtime": false,
         "signature": "export type PathParams<S extends string> = string extends S ? Record<string, string> : S extends `${string}:${infer Param}/${infer Rest}` ? {\n    [K in Param | keyof PathParams<`/${Rest}`>]: string;\n} : S extends `${string}:${infer Param}` ? {\n    [K in Param]: string;\n} : {};"
-      },
-      {
-        "name": "PendingBuilder",
-        "kind": "type",
-        "runtime": false,
-        "signature": "export type PendingBuilder = 'read' | 'write' | 'delete';"
       },
       {
         "name": "PendingOperation",
@@ -4180,7 +4174,7 @@
       {
         "name": "CompiledOperationDescriptor",
         "kind": "interface",
-        "signature": "export interface CompiledOperationDescriptor {\n    readonly key: string;\n    readonly method: OperationHttpMethod;\n    readonly path: string;\n    readonly status: number;\n    readonly summary?: string;\n    readonly public?: boolean;\n    readonly transactional?: boolean;\n    readonly inputDto?: Type<object>;\n    readonly outputDto?: Type<object>;\n    readonly outputDisabled?: boolean;\n    readonly handler: OperationHandlerRef;\n    readonly decorators?: readonly MethodDecorator[];\n}",
+        "signature": "export interface CompiledOperationDescriptor {\n    readonly key: string;\n    readonly method: OperationHttpMethod;\n    readonly path: string;\n    readonly status: number;\n    readonly summary?: string;\n    readonly public?: boolean;\n    readonly transactional?: boolean;\n    readonly inputDto?: Type<object>;\n    readonly output: Type<object> | false;\n    readonly handler: OperationHandlerRef;\n    readonly decorators?: readonly MethodDecorator[];\n}",
         "referencedBy": [
           "OperationResourceInput",
           "ZodOperationResource"
@@ -4559,6 +4553,15 @@
           "ZodRestoreOperationConfig",
           "ZodSubResourceDefinition",
           "zodSubResource"
+        ]
+      },
+      {
+        "name": "PendingBuilder",
+        "kind": "type",
+        "signature": "export type PendingBuilder = 'read' | 'write' | 'delete';",
+        "referencedBy": [
+          "OperationRecord",
+          "PendingOperation"
         ]
       },
       {

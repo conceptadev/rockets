@@ -362,12 +362,11 @@ function compileOperation(
     );
   }
 
-  let outputDto: Type<object> | undefined;
-  let outputDisabled = false;
+  let output: Type<object> | false;
   if (pending.output === false) {
-    outputDisabled = true;
+    output = false;
   } else {
-    outputDto = compileOperationDto(
+    output = compileOperationDto(
       pending.output,
       `${pascal(resourcePath)}_${pascal(method.toLowerCase())}_${pascal(
         discriminator,
@@ -375,7 +374,7 @@ function compileOperation(
     );
   }
 
-  if (status === 204 && outputDto !== undefined) {
+  if (status === 204 && output !== false) {
     throw new Error(
       `operationResource "${resourcePath}": operation "${key}" sets status 204 ` +
         `with an output schema — 204 responses have no body. Use output: false ` +
@@ -394,8 +393,7 @@ function compileOperation(
     public: pending.public,
     transactional: pending.transactional,
     inputDto,
-    outputDto,
-    outputDisabled,
+    output,
     handler: pending.handler,
     decorators: pending.decorators,
   };

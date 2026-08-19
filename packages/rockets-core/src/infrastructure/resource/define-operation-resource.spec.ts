@@ -4,6 +4,7 @@ import { Module, Version } from '@nestjs/common';
 import { Operation } from '@concepta/nestjs-core';
 
 import { ResourceKind } from '../../domain/interfaces/resource-kind.enum';
+import type { CompiledOperationDescriptor } from '../../domain/interfaces/operation-resource.interface';
 import {
   buildAppRegistrationPlan,
   isCrudResource,
@@ -17,6 +18,11 @@ import {
 import { validateRouteCollisions } from './planner/validate-route-collisions';
 import { operationResource } from '../../zod/zod-operation-resource';
 import { compileDtoClass } from '../../zod/zod-dto';
+
+/** Name of a compiled output DTO, or `undefined` when the op opted out. */
+function outputDtoName(output: CompiledOperationDescriptor['output']) {
+  return output === false ? undefined : output.name;
+}
 
 describe('defineOperationResource', () => {
   it('builds an OperationResource with a generated controller', () => {
@@ -36,7 +42,7 @@ describe('defineOperationResource', () => {
           path: '',
           status: 200,
           inputDto: Input,
-          outputDto: Output,
+          output: Output,
           handler: ({ input }) => {
             if (
               typeof input !== 'object' ||
@@ -64,11 +70,17 @@ describe('defineOperationResource', () => {
     ).toThrow(/at least one operation/);
   });
 
-  it('rejects ops without outputDto or outputDisabled', () => {
-    expect(() =>
+  // Omitting the response contract is no longer a runtime error — it is
+  // unrepresentable. `output: Type | false` is required, so the compiler
+  // rejects it. `@ts-expect-error` pins that: if the field ever became
+  // optional again, this line would stop erroring and the test fails.
+  it('makes an omitted response contract a compile error', () => {
+    const build = () =>
       defineOperationResource({
         path: 'api/leak',
         operations: {
+          // @ts-expect-error `output` is required — omitting it would
+          // allow a response to leak.
           ping: {
             key: 'ping',
             method: 'GET',
@@ -77,8 +89,9 @@ describe('defineOperationResource', () => {
             handler: () => ({ ok: true }),
           },
         },
-      }),
-    ).toThrow(/outputDto or outputDisabled/);
+      });
+    // Still constructs at runtime; the guarantee is the type, not a throw.
+    expect(typeof build).toBe('function');
   });
 
   it('rejects status 204 with outputDto', () => {
@@ -95,7 +108,7 @@ describe('defineOperationResource', () => {
             method: 'DELETE',
             path: '',
             status: 204,
-            outputDto: Output,
+            output: Output,
             handler: () => ({ ok: true }),
           },
         },
@@ -121,7 +134,7 @@ describe('defineOperationResource', () => {
           method: 'GET',
           path: '',
           status: 200,
-          outputDisabled: true,
+          output: false,
           handler: EchoHandler,
         },
       },
@@ -156,7 +169,7 @@ describe('defineOperationResource', () => {
           method: 'GET',
           path: '',
           status: 200,
-          outputDisabled: true,
+          output: false,
           handler: ImportedHandler,
         },
       },
@@ -200,7 +213,7 @@ describe('defineOperationResource', () => {
           method: 'GET',
           path: '',
           status: 200,
-          outputDisabled: true,
+          output: false,
           handler: DynHandler,
         },
       },
@@ -244,7 +257,7 @@ describe('operationResource (zod)', () => {
     expect(bundle.definition.operations.shout.path).toBe('shout');
     expect(bundle.definition.operations.shout.status).toBe(201);
     expect(bundle.definition.operations.shout.inputDto).toBeDefined();
-    expect(bundle.definition.operations.shout.outputDto).toBeDefined();
+    expect(bundle.definition.operations.shout.output).toBeDefined();
   });
 
   it('defaults operation path to the key', () => {
@@ -360,8 +373,7 @@ describe('operationResource (zod)', () => {
         }),
       }),
     });
-    expect(bundle.definition.operations.clear.outputDisabled).toBe(true);
-    expect(bundle.definition.operations.clear.outputDto).toBeUndefined();
+    expect(bundle.definition.operations.clear.output).toBe(false);
   });
 
   it('compiles delete (query-sourced) and write PUT', () => {
@@ -458,7 +470,7 @@ describe('operationResource (zod)', () => {
             path: '',
             status: 200,
             public: false,
-            outputDisabled: true,
+            output: false,
             handler: () => ({ ok: true }),
           },
         },
@@ -478,7 +490,7 @@ describe('operationResource (zod)', () => {
             path: '',
             status: 200,
             inputDto: BareDto,
-            outputDisabled: true,
+            output: false,
             handler: () => ({ ok: true }),
           },
         },
@@ -496,7 +508,7 @@ describe('operationResource (zod)', () => {
             method: 'GET',
             path: 'x',
             status: 200,
-            outputDisabled: true,
+            output: false,
             handler: () => ({ ok: true }),
           },
           b: {
@@ -504,7 +516,7 @@ describe('operationResource (zod)', () => {
             method: 'GET',
             path: 'x',
             status: 200,
-            outputDisabled: true,
+            output: false,
             handler: () => ({ ok: true }),
           },
         },
@@ -522,7 +534,7 @@ describe('operationResource (zod)', () => {
             method: 'GET',
             path: '',
             status: 200,
-            outputDisabled: true,
+            output: false,
             handler: () => undefined,
           },
         },
@@ -538,7 +550,7 @@ describe('operationResource (zod)', () => {
             method: 'GET',
             path: '',
             status: 200,
-            outputDisabled: true,
+            output: false,
             handler: () => undefined,
           },
         },
@@ -798,8 +810,8 @@ describe('operation resource — review regressions', () => {
     const one = build('one');
     const two = build('two');
 
-    const oneDto = one.definition.operations.action.outputDto?.name;
-    const twoDto = two.definition.operations.action.outputDto?.name;
+    const oneDto = outputDtoName(one.definition.operations.action.output);
+    const twoDto = outputDtoName(two.definition.operations.action.output);
     expect(oneDto).toBeDefined();
     expect(oneDto).not.toBe(twoDto);
   });
@@ -815,7 +827,7 @@ describe('operation resource — review regressions', () => {
       }),
     });
 
-    expect(bundle.definition.operations.action.outputDto?.name).toBe(
+    expect(outputDtoName(bundle.definition.operations.action.output)).toBe(
       'Plain_Get_ActionOutput',
     );
   });

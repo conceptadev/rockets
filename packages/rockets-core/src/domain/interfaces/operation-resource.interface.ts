@@ -88,9 +88,9 @@ export type OperationHandlerRef<
  * HTTP method is the source of truth for input sourcing (GET/DELETE → query,
  * POST/PUT/PATCH → body). There is no separate `kind` field.
  *
- * Response contract: either `outputDto` (whitelist + OpenAPI) or
- * `outputDisabled: true` (explicit opt-out). Omitting both is rejected at
- * define/boot time so responses cannot silently leak.
+ * Response contract: `output` is either the DTO to whitelist and
+ * document against, or `false` to opt out explicitly. It is required, so
+ * a response cannot silently leak by omission.
  */
 export interface CompiledOperationDescriptor {
   readonly key: string;
@@ -101,9 +101,18 @@ export interface CompiledOperationDescriptor {
   readonly public?: boolean;
   readonly transactional?: boolean;
   readonly inputDto?: Type<object>;
-  readonly outputDto?: Type<object>;
-  /** Explicit opt-out of output whitelist / response OpenAPI schema. */
-  readonly outputDisabled?: boolean;
+  /**
+   * Response contract: the DTO to whitelist and document against, or
+   * `false` to opt out explicitly.
+   *
+   * One field, because it is one decision. Modelling it as an optional
+   * DTO plus an optional `disabled` flag permits two states that mean
+   * nothing — both set, and neither set — which then have to be rejected
+   * at definition time. Required and closed, those states cannot be
+   * written, so there is nothing to reject. Mirrors the authoring layer,
+   * where `output` has always been `schema | false`.
+   */
+  readonly output: Type<object> | false;
   readonly handler: OperationHandlerRef;
   readonly decorators?: readonly MethodDecorator[];
 }

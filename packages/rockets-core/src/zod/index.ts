@@ -46,7 +46,6 @@ export type {
   OperationRecord,
   OperationResourceInput,
   PathParams,
-  PendingBuilder,
   PendingOperation,
   ReadBuilderConfig,
   WriteBuilderConfig,

@@ -82,13 +82,12 @@ function outputValidationError(
   detail: unknown,
 ): InternalServerErrorException {
   logger.error(
-    `Operation "${label}" returned a value that failed outputDto validation`,
+    `Operation "${label}" returned a value that failed output validation`,
     detail === undefined ? undefined : JSON.stringify(detail),
   );
   return new InternalServerErrorException({
     statusCode: 500,
-    message:
-      'Operation handler returned a value that failed outputDto validation',
+    message: 'Operation handler returned a value that failed output validation',
     error: 'Internal Server Error',
   });
 }
@@ -373,8 +372,8 @@ export function buildOperationController(
       `"${definition.path}" op "${operation.key}" inputDto`,
     );
     assertValidatableDto(
-      operation.outputDto,
-      `"${definition.path}" op "${operation.key}" outputDto`,
+      operation.output === false ? undefined : operation.output,
+      `"${definition.path}" op "${operation.key}" output`,
     );
     assertValidatableDto(
       definition.paramsDto,
@@ -496,10 +495,10 @@ function attachOperationMethod(
       throw new Error(`operationResource: invalid handler for "${label}"`);
     }
 
-    if (operation.outputDisabled === true) {
+    if (operation.output === false) {
       return result;
     }
-    return applyOutputDto(operation.outputDto, result, label);
+    return applyOutputDto(operation.output, result, label);
   }
 
   Object.defineProperty(routeHandler, 'name', { value: methodName });
@@ -526,9 +525,9 @@ function attachOperationMethod(
   if (operation.transactional === true) {
     decorators.push(Transactional());
   }
-  if (operation.outputDto) {
+  if (operation.output !== false) {
     decorators.push(
-      ApiResponse({ status: operation.status, type: operation.outputDto }),
+      ApiResponse({ status: operation.status, type: operation.output }),
     );
   } else {
     decorators.push(ApiResponse({ status: operation.status }));

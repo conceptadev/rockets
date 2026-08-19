@@ -302,7 +302,7 @@ const lowerLevelOps = defineOperationResource({
       path: '',
       status: 200,
       inputDto: LowerInputDto,
-      outputDto: LowerOutputDto,
+      output: LowerOutputDto,
       handler: ({ input }) => input,
     },
     primitive: {
@@ -310,7 +310,7 @@ const lowerLevelOps = defineOperationResource({
       method: 'GET',
       path: 'primitive',
       status: 200,
-      outputDto: LowerOutputDto,
+      output: LowerOutputDto,
       handler: () => 'not-an-object',
     },
   },
