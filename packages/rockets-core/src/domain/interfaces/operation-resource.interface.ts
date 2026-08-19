@@ -2,6 +2,11 @@ import type { DynamicModule, Provider, Type } from '@nestjs/common';
 
 import type { AuthorizedUser } from './auth-user.interface';
 import type { ResourceKind } from './resource-kind.enum';
+import type {
+  OperationAclConfig,
+  ResourceAclConfig,
+  ResourceAclPlan,
+} from './resource-acl.interface';
 
 /** HTTP methods supported by operation resources (v1). */
 export type OperationHttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -99,6 +104,16 @@ export interface CompiledOperationDescriptor {
   readonly status: number;
   readonly summary?: string;
   readonly public?: boolean;
+  /**
+   * Access control for this operation.
+   *
+   * Unlike CRUD there is no action to infer — a non-CRUD route's verb
+   * says nothing about intent (`POST /pets/:id/transfer` is an update,
+   * not a create). `op.read` and `op.delete` default to `read` and
+   * `delete`; `op.write` has no default and MUST declare one, or opt out
+   * with `false`.
+   */
+  readonly acl?: OperationAclConfig;
   readonly transactional?: boolean;
   readonly inputDto?: Type<object>;
   /**
@@ -122,6 +137,12 @@ export interface OperationResourceDefinition {
   readonly tags?: readonly string[];
   readonly public?: boolean;
   /**
+   * Access control for the generated controller. See
+   * {@link ResourceAclConfig}. Required before any operation may declare
+   * an `acl` action — the action needs a resource name to grant against.
+   */
+  readonly acl?: ResourceAclConfig;
+  /**
    * Optional compiled DTO for path params (from zod `params` on
    * `operationResource`). Validated at request time → 400 on failure.
    */
@@ -140,6 +161,8 @@ export interface OperationResourceDefinition {
  */
 export interface OperationResource {
   readonly kind: ResourceKind.Operation;
+  /** See {@link CrudResource.acl} — same contract, same planner. */
+  readonly acl: ResourceAclPlan;
   readonly definition: OperationResourceDefinition;
   readonly controller: Type<unknown>;
   readonly providers: ReadonlyArray<Provider>;

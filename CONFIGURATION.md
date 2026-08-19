@@ -360,11 +360,69 @@ petTags: defineSubResource({          // key 'petTags' must be a PetEntity relat
 | `entity` | `Type<E> \| (() => Type<E>)` | **yes** | — (thunk allowed for circular imports) |
 | `parentKey` | `string` | no | `${parentEntityKey}Id` (e.g. `petId`) — URL param **and** FK column |
 | `parentPk` | `string` | no | `'id'` — parent PK column the guard looks up |
+| `parentSelect` | `readonly string[]` | no | projection for the guard's parent lookup (default: pk only, or the full row when the parent has hooks) |
 | `segment` | `string` | no | `kebab-case(mapKey)` — URL segment |
 | `owner` | `string \| false` | no | `'userId'` — ownership column; `false` drops the guard (public) |
 | `scope` | `boolean` | no | `true` — master switch (FK filter/stamp + guard); `false` = unscoped |
 | `reloadAfterCreate` | `boolean` | no | `false` |
 | *(inherited)* | `dto`, `operations`, `relations`, `hooks`, `handlers`, `providers`, `subResources`… | no | — |
+
+### Which parent-side hooks run during path scoping
+
+`PathScopeGuard` performs one parent lookup per nested request, and that
+lookup runs the **parent resource's own `hooks`** — the classes declared in
+the parent's `defineResource({ hooks })`. A parent that its own routes
+cannot see (soft expiry, retention, tenant scope expressed as a
+`beforeFindOne` / `afterFindOne` filter) is a `404` on every nested route
+too, not just on the parent's routes.
+
+**What the replay context carries.** The lookup is presented to those
+hooks as the parent's OWN read: `getCrudContext(ctx)` returns a context
+with `entity` = the parent's key, `operation: Read`, and `params` = the
+request's route params with `id` bound to the parent row being looked up.
+A hook gated on `if (!getCrudContext(ctx)) return options;` — the shape
+this codebase documents — therefore filters here exactly as it does on the
+parent's own routes. That also makes three-level nesting behave: a
+grandchild's guard replays the middle resource's `PathScopeHook`, which
+needs `params[:parentId]` to bind the middle row to ITS parent.
+
+The parent's primary param is bound by NAME, taken from the parent's own
+`request.params` (default `id`) — a resource that declares a different
+primary still sees its hooks fire.
+
+**What it deliberately does not carry:**
+
+- **No transaction.** Nest runs guards ahead of interceptors, so no
+  operation transaction exists when the guard runs. The lookup is a
+  pre-check, never a participant. See §12 and issue #60 for the wider
+  `ctx` / `TransactionScope` seam.
+- **No `query`.** The guard applies no filter, sort or pagination of its
+  own, so the parsed query is empty rather than the child route's.
+- **Not the request's `AppContextHost`.** `defineOverlay` is
+  first-write-wins and the hook overlay interceptor has not run yet;
+  writing to the request here would pin the parent's hooks for the whole
+  request and the child's own hooks would never attach.
+
+Other constraints worth knowing:
+
+- The parent's hooks are entity-scoped by `@EntityHook({ entity })`, so
+  hooks bound to a different entity never fire on this lookup.
+- **A parent hook that throws now surfaces on nested routes.** It did not
+  fire here before. A `Before*` hook that throws an `HttpException` is
+  wrapped by the upstream membrane and reaches the client as a `500` —
+  throw a `RepositoryQueryException` with an `httpStatus` instead when the
+  status matters.
+- **Projection cost.** With no parent hooks the lookup reads the primary
+  key only. With hooks it reads the FULL parent row — including eager
+  relations — because an `afterFindOne` hook may inspect a column a
+  narrow projection would omit, and nothing declares which columns a hook
+  reads. Set `parentSelect: ['id', 'expiresAt']` on the sub-resource when
+  you know what your hooks need.
+- **`owner: false` drops the guard entirely**, and with it the parent-hook
+  replay. A sub-resource that opts out of the ownership check also opts
+  out of parent-side visibility.
+- Sub-resource hooks (`PathScopeHook`, the child's own `hooks`) are
+  unaffected — they still attach normally to the child's controller.
 
 ---
 
@@ -469,6 +527,148 @@ follow-ups on issue #43.
 
 Lower-level escape hatch: `defineOperationResource({ path, operations: {…} })`
 with precompiled DTO classes.
+
+---
+
+## 5a. `acl` — access control on resources and operations (issue #51)
+
+Upstream's check-access handler returns `true` for any route with **no
+grant metadata**. A forgotten `AccessControl*` decorator is therefore not
+a broken route — it is an *open* one, authenticated but ungranted, and no
+test notices. `acl` moves that from a per-route chore to a bundle-level
+declaration the framework materialises and validates.
+
+Rules stay app-owned. This wires decorators and registers query services;
+it does not generate `acRules`, and possession (`own` vs `any`) is still
+decided by your `CanAccess` service.
+
+```ts
+defineResource({
+  entity: PetEntity,
+  path: 'pets',
+  acl: { resource: 'pet', query: PetAccessQueryService },
+  operations: {
+    list: {},                 // → read
+    read: {},                 // → read
+    create: {},               // → create
+    update: {},               // → update
+    delete: {},               // → delete
+    // restore: { acl: false } // authenticated, deliberately ungranted
+  },
+});
+```
+
+Action per operation: `list`/`read` → **read**, `create` → **create**,
+`update`/`replace` → **update**, `delete`/`restore` → **delete**.
+(`AccessControlReadMany` and `AccessControlReadOne` emit the same grant
+upstream, so there is one action per verb, not one per decorator.)
+
+### `operationResource`
+
+A non-CRUD write's HTTP verb says nothing about intent —
+`POST /pets/:id/transfer` is an update, not a create — so `op.write` has
+**no default** and must declare one:
+
+```ts
+operationResource({
+  path: 'pets/:petId',
+  acl: { resource: 'pet', query: PetAccessQueryService },
+  operations: (op) => ({
+    transfer: op.write({ acl: 'update', input: …, output: …, handler: … }),
+    stats:    op.read({ /* infers read */ output: …, handler: … }),
+  }),
+});
+```
+
+### Boot-time rules
+
+| Condition | Result |
+|---|---|
+| Bundle declares `acl`, app configures no root `accessControl` | **throw** |
+| `operations.X.acl` action with no resource-level `acl` | **throw** |
+| `op.write` with no `acl` on an ACL-enabled operation resource | **throw** |
+| `public: true` on an operation that also carries a grant | **throw** |
+| `accessControl.enforceGrants: true` and a **generated** authenticated op carries no grant | **throw** |
+| `accessControl.enforceGrants: true` with no root `accessControl` | **throw** |
+
+`acl.query` services are collected across every bundle and merged into
+`AccessControlModule.forRoot({ queryServices })` — they must land on that
+module specifically, because the upstream guard strict-resolves from its
+own host module. You no longer declare a query service and then 500 at
+request time because nobody registered it.
+
+### One `CanAccess` per route, and why `query` really overrides
+
+The service is stamped on the **route**, never on the controller: the
+operation's own `query` when it declares one, otherwise the
+resource-level default.
+
+That is not a style choice. Upstream reads query metadata with
+`getAllAndMerge([getClass(), getHandler()])` and then loops the resulting
+services, **breaking on the first one that returns `true`** — class-level
+first. A class-level default plus a method-level "override" is therefore
+an OR in which the *permissive* service wins, and an operation could
+never tighten. Stamping exactly one entry per route is what makes
+`acl: { action, query }` mean what it says.
+
+A consequence worth knowing: a resource-level `query` is consulted on
+**every** route of the resource, including collection routes that have no
+row to own. Return early there (`if (!params.id) return true`).
+
+### Sub-resources do not inherit `acl`
+
+A sub-resource is a different resource in your `acRules`. It declares its
+own `acl: { resource: 'widget-note' }`; nothing is taken from the parent's
+`acl.resource`. If it declares none, it has no grants — and shows up in
+the `enforceGrants` report under its own key.
+
+### `enforceGrants` — scope and why it is opt-in
+
+With it on, a route the planner generates that is authenticated and
+carries no grant fails the boot instead of serving.
+
+**It covers exactly what the planner generates:** CRUD bundles (including
+sub-resources, which are flattened recursively) and operation resources.
+It does **not** cover:
+
+- `defineModuleResource({ module: { controllers } })` controllers
+- hand-built `RocketsResourceConfig` entries
+- controllers owned by other packages — `MeController` in
+  `rockets-server`, every `rockets-server-auth` controller
+
+Those routes never reach the planner, so a passing boot says nothing
+about them. Treat `enforceGrants` as "the generated surface is covered",
+not "the app is covered".
+
+It defaults to **off** because a hand-written `AccessControl*` entry in a
+bundle's `decorators` cannot be detected **at plan time**: the CRUD
+controller is built downstream of the planner, so the grant metadata does
+not exist yet, and the only way to read it early would be to apply the
+consumer's opaque decorator list a second time. Turning the default on
+would reject every working manual-grant app. A bootstrap-time sweep over
+discovered routes would close both this and the scope gap above.
+
+For the same reason, `acl` plus a manual `AccessControl*` decorator on the
+same operation is **not** detected and rejected — they are documented as
+mutually exclusive. Upstream's grant metadata is a `SetMetadata` write, so
+combining them means one silently wins. Use one or the other per bundle.
+
+### `public` and `acl` do not mix
+
+A public route carries no authenticated user, so role resolution yields
+nothing and every grant check fails — the route would 403 for everyone.
+Declaring both on the same operation throws at definition time. Opt the
+operation out with `acl: false` if a public resource needs one ungranted
+route.
+
+### `rockets-server-auth` registers its own `AccessControlModule`
+
+`defineRocketsAuth` wires access control through its own
+`buildAccessControlImport` call, which does not receive the collected
+query services. In an app composing auth **and** `RocketsCoreModule` with
+`accessControl` on both, `acl.query` auto-registration applies to the
+core registration only — list auth-side services in that module's
+`queryServices` explicitly.
 
 ---
 
@@ -751,6 +951,146 @@ core/server change**. Per-entry repository overrides can be declared on any of:
 - `userMetadata.repository` — override for the metadata table
 
 Each falls back to the root `repository` adapter when omitted.
+
+### 8a. `ctx` and transactions — the seam you must not miss (issue #60)
+
+Every `RepositoryInterface` method takes an options `ctx`. It is optional
+in the type system and load-bearing at runtime. **A repository call that
+omits it silently does two things you almost never intend:**
+
+1. it runs with **all entity hooks disabled**, and
+2. it commits **outside** the surrounding operation's transaction.
+
+Neither is a type error. Neither shows up in a passing test. This is the
+root of issue #45, where a guard's parent lookup ran hook-free for a
+whole development cycle behind a green suite.
+
+The chain, in the installed packages:
+
+```text
+RepositoryAdapter.entityCtx(ctx)      // returns undefined when ctx is undefined
+  → HookResolverService.execute(...)  // early-returns when ctx.hooks is empty
+  → TransactionManager                // never consulted, so no ambient transaction
+```
+
+#### Rule: forward `ctx` from wherever you got it
+
+Inside a hook, the context is the hook's second argument:
+
+```ts
+const AuditHook = defineHook<OrderEntity>(OrderEntity, {
+  async beforeCreate(payload, ctx, { repo }) {
+    // `ctx` — not omitted. Without it this read skips every hook on
+    // `order` AND runs outside the operation's transaction, so a
+    // rollback leaves it committed.
+    const existing = await repo.findOne({
+      where: Where.eq<OrderEntity>('ref', payload.ref),
+      ctx,
+    });
+    if (existing) throw new ConflictException('duplicate ref');
+    return payload;
+  },
+});
+```
+
+Inside a CQRS handler, the context is `query.context` — the same
+`AppContextHost` the pipeline built:
+
+```ts
+import { CrudQueryHandlerBase, type CrudQueryInterface } from '@concepta/rockets-core';
+import { CrudListQuery } from '@concepta/nestjs-crud';
+
+@Injectable()
+export class OrderListHandler extends CrudQueryHandlerBase<OrderEntity> {
+  constructor(
+    @InjectDynamicRepository(OrderEntity)
+    private readonly orders: RepositoryInterface<OrderEntity>,
+    @InjectCrudAdapter(OrderEntity) crudAdapter: CrudAdapter<OrderEntity>,
+  ) {
+    super(crudAdapter);
+  }
+
+  async execute(query: CrudQueryInterface<OrderEntity>) {
+    const { context } = query as CrudListQuery<OrderEntity>;
+    // Same context the adapter itself passes down.
+    const recent = await this.orders.find({ where: …, ctx: context });
+    return this.crudAdapter.list(context);
+  }
+}
+```
+
+**Do not spread the context into a new object.** It is an
+`AppContextHost` Proxy carrying overlay accessors; `{ ...context }`
+strips them and the next `AppContextHost.from(...)` inside the repository
+adapter throws `Expected AppContextHost or nullish value, got object`.
+Mutate it in place, as `PetListHandler` in `examples/sample-server-auth`
+does.
+
+#### CRUD `transactional: true` vs manual `TransactionScope`
+
+`transactional: true` exists on **CRUD operations only**
+(`operations.X.transactional`) and on `operationResource` operations. It
+wraps the handler in `TransactionScope.run` with `SUPPORTS` propagation.
+Everything else — a custom service, a guard, a background job — has to
+open its own scope:
+
+```ts
+import { type PlainLiteralObject } from '@nestjs/common';
+import { TransactionScope } from '@concepta/nestjs-repository';
+
+@Injectable()
+export class TransferService {
+  constructor(
+    private readonly trx: TransactionScope,
+    @InjectDynamicRepository(AccountEntity)
+    private readonly accounts: RepositoryInterface<AccountEntity>,
+  ) {}
+
+  // `PlainLiteralObject` is what `TransactionScope.run` and the
+  // repository's `ctx` option both accept; a `RocketsCrudContext` from
+  // the pipeline satisfies it.
+  async transfer(
+    ctx: PlainLiteralObject,
+    from: string,
+    to: string,
+    amount: number,
+  ) {
+    // `REQUIRED` starts one if none is active; the default `SUPPORTS`
+    // would silently run unprotected outside a request.
+    return this.trx.run(
+      ctx,
+      async (txCtx) => {
+        const debit = await this.accounts.findOne({ where: …, ctx: txCtx });
+        // …every call inside gets `txCtx`, or it escapes the transaction.
+        await this.accounts.update(debit, { balance: … }, { ctx: txCtx });
+      },
+      { propagation: 'REQUIRED' },
+    );
+  }
+}
+```
+
+Two traps worth naming:
+
+- **`SUPPORTS` is the default propagation.** A scope opened without
+  `propagation: 'REQUIRED'` inside a non-transactional entry point runs
+  with no transaction at all, and nothing warns.
+- **Guards run before interceptors.** A guard cannot participate in the
+  operation's transaction, because the transaction interceptor has not
+  run yet. `PathScopeGuard` is deliberately a pre-check for this reason
+  (§5).
+
+#### Auditing an app for the omission
+
+The sweep that found the real defect behind #45:
+
+```bash
+grep -rnE '\.(findOne|find|count|findAndCount|create|update|delete)\(\{' src \
+  | grep -v 'ctx'
+```
+
+Every hit is a call to read: either it is deliberately outside the
+request (a startup task, a job with its own scope) or it is a defect.
 
 ---
 

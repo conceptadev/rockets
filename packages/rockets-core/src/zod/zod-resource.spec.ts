@@ -64,3 +64,103 @@ describe('zodResource owner-scope auto-wire (HIGH CWE-863)', () => {
     expect(hooks.some(isScope)).toBe(false);
   });
 });
+
+/**
+ * Per-operation `input` / `output` (issue #57). The behavioural half is
+ * pinned by `rockets-core-zod-operation-io.e2e-spec.ts`; these cover the
+ * boot-time rejections, which exist so an override core cannot honour
+ * fails loudly instead of being dropped on the wire.
+ */
+describe('zodResource per-operation input/output validation', () => {
+  const compiler: SchemaEntityCompiler = {
+    compileEntity: (_schema, options) => {
+      class GeneratedEntity {}
+      Object.defineProperty(GeneratedEntity, 'name', { value: options.name });
+      return GeneratedEntity as Type<PlainLiteralObject>;
+    },
+  };
+
+  const schema = z.object({
+    id: f.pk(),
+    name: f.string(),
+    dateDeleted: f.deletedAt(),
+  });
+
+  const build =
+    (operations: Parameters<typeof zodResource>[0]['operations']) => () =>
+      zodResource({
+        name: 'Pet',
+        schema,
+        entityCompiler: compiler,
+        operations,
+      });
+
+  it('accepts input on create and output on read', () => {
+    expect(
+      build({
+        read: { output: z.object({ id: z.uuid() }) },
+        create: { input: z.object({ name: z.string() }) },
+      }),
+    ).not.toThrow();
+  });
+
+  it('rejects input on an operation with no request body', () => {
+    expect(
+      build({ list: { input: z.object({ name: z.string() }) } }),
+    ).toThrowError(/has no request body/);
+  });
+
+  it('rejects input on read even though read has a path param', () => {
+    expect(
+      build({ read: { input: z.object({ name: z.string() }) } }),
+    ).toThrowError(/Only create\/update\/replace/);
+  });
+
+  it('rejects output on a delete that answers 204', () => {
+    expect(
+      build({
+        read: true,
+        delete: { soft: true, output: z.object({ id: z.uuid() }) },
+      }),
+    ).toThrowError(/returnDeleted/);
+  });
+
+  it('accepts output on a soft delete that returns the deleted row', () => {
+    expect(
+      build({
+        read: true,
+        delete: {
+          soft: true,
+          returnDeleted: true,
+          output: z.object({ id: z.uuid() }),
+        },
+      }),
+    ).not.toThrow();
+  });
+
+  // Upstream `CrudDelete` sets `HttpStatus.OK` from `returnDeleted`
+  // alone and the adapter returns the removed row on a hard delete too
+  // (`crud-delete.decorator.js`, `crud.adapter.js`) — requiring
+  // `soft: true` here would reject a config that works.
+  it('accepts output on a HARD delete that returns the deleted row', () => {
+    expect(
+      build({
+        read: true,
+        delete: {
+          returnDeleted: true,
+          output: z.object({ id: z.uuid() }),
+        },
+      }),
+    ).not.toThrow();
+  });
+
+  it('rejects output on a restore that answers 204', () => {
+    expect(
+      build({
+        read: true,
+        delete: { soft: true },
+        restore: { output: z.object({ id: z.uuid() }) },
+      }),
+    ).toThrowError(/returnRestored/);
+  });
+});

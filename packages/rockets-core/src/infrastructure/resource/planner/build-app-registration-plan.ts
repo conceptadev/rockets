@@ -13,6 +13,7 @@ import { materialiseModuleResource } from './materialise-module-resource';
 import { materialiseOperationResource } from './materialise-operation-resource';
 import { validateResourceRelations } from './validate-relations';
 import { validateStructuredRouteCollisions } from './validate-route-collisions';
+import { planAccessControl } from './validate-access-control';
 
 /**
  * Plan everything a `RocketsCoreModule` boot needs from the user's
@@ -31,6 +32,14 @@ export function buildAppRegistrationPlan(args: {
   readonly resources: ReadonlyArray<ResourceInput>;
   readonly repository?: RepositoryModuleInterface;
   readonly userMetadata?: RocketsUserMetadataConfig;
+  /** Whether the app configured root `accessControl`. */
+  readonly accessControl?: boolean;
+  /**
+   * Whether every route this planner GENERATES must carry an ACL grant.
+   * Module-resource, manual and package-owned controllers are outside
+   * what the planner can see — see `planAccessControl`.
+   */
+  readonly enforceGrants?: boolean;
 }): AppRegistrationPlan {
   if (args.userMetadata) {
     validateRocketsUserMetadataConfig(args.userMetadata);
@@ -74,9 +83,19 @@ export function buildAppRegistrationPlan(args: {
     ...manualResources,
   ];
 
+  const accessControlQueryServices = planAccessControl({
+    plans: [
+      ...generatedResources.map((resource) => resource.acl),
+      ...operationBundles.map((bundle) => bundle.acl),
+    ],
+    configured: args.accessControl === true,
+    enforceGrants: args.enforceGrants === true,
+  });
+
   return {
     crudResources,
     entityRegistrations,
     nestModules,
+    accessControlQueryServices,
   };
 }

@@ -88,6 +88,14 @@ export {
   RocketsCoreExceptionsFilter,
   ERROR_MESSAGE_FALLBACK,
 } from './infrastructure/filters/exceptions.filter';
+export {
+  ROCKETS_ERROR_SERIALIZER_TOKEN,
+  defaultErrorSerializer,
+} from './infrastructure/filters/error-serializer';
+export type {
+  RocketsErrorContext,
+  RocketsErrorSerializerInterface,
+} from './infrastructure/filters/error-serializer';
 
 // Repository persistence interfaces
 export type { RepositoryPersistenceConfig } from './domain/interfaces/repository-persistence.interface';
@@ -118,6 +126,12 @@ export type {
   ModuleResourceEntityEntry,
 } from './domain/interfaces/module-resource.interface';
 export { ResourceKind } from './domain/interfaces/resource-kind.enum';
+export type {
+  OperationAclConfig,
+  ResourceAclAction,
+  ResourceAclConfig,
+  ResourceAclPlan,
+} from './domain/interfaces/resource-acl.interface';
 export {
   defineModuleResource,
   isModuleResource,

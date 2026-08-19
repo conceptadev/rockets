@@ -15,6 +15,76 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
   `output` required (schema or `false`); optional resource-level `params` zod;
   cross-resource `METHOD+path` collisions fail in `buildAppRegistrationPlan`.
   See `CONFIGURATION.md` §6a and `examples/sample-server` `petTransferFeature`.
+- **First-class access control on resources and operations (issue #51).**
+  `defineResource`, `zodResource` and `operationResource` accept
+  `acl: { resource, query }`, and each operation accepts `acl` to override
+  the action or opt out with `false`. The framework materialises the
+  upstream `AccessControlGrant` / `AccessControlQuery` decorators, and
+  collects every `acl.query` service into
+  `AccessControlModule.forRoot({ queryServices })` — the module the
+  upstream guard strict-resolves from, so a declared service can no
+  longer 500 at request time because nobody registered it.
+
+  This closes a real hole rather than adding sugar: upstream's
+  check-access handler returns `true` for any route with no grant
+  metadata, so a forgotten decorator is an authenticated-but-open route
+  that no test notices. `accessControl.enforceGrants: true` turns that
+  into a boot failure — **for the routes the planner generates**: CRUD
+  bundles (sub-resources included) and operation resources.
+  `defineModuleResource` controllers, hand-built resource configs and
+  controllers owned by other packages (`MeController`, the
+  rockets-server-auth controllers) are never seen by the planner, so a
+  passing boot is not a statement about them. It is opt-in because a
+  hand-written `AccessControl*` entry in a bundle's `decorators` cannot
+  be detected at plan time — the CRUD controller is built downstream, so
+  the metadata does not exist yet. Both limits, and the reason `acl` and
+  manual grant decorators are mutually exclusive rather than merged, are
+  in `CONFIGURATION.md` §5a.
+
+  The `CanAccess` service is stamped per ROUTE, never on the controller.
+  Upstream merges query metadata across class and handler and breaks on
+  the first service returning `true`, class-level first — so a
+  class-level default plus a method-level override is an OR in which the
+  permissive service wins, and an operation could never tighten. One
+  entry per route is what makes `acl: { action, query }` an override.
+
+  A non-CRUD write must name its action: `POST /pets/:id/transfer` is an
+  update, not a create, so `op.write` has no default and throws without
+  one. `public: true` together with a grant also throws — a public route
+  has no user to resolve roles from, so the grant could only ever 403.
+  Sub-resources do not inherit the parent's `acl.resource`; they declare
+  their own. Rules stay app-owned — this wires decorators and
+  registrations, it does not generate `acRules` or decide possession.
+
+  **Type-level breaking change:** `CrudResource` and `OperationResource`
+  gained a required `acl` field. Bundles built by `defineResource` /
+  `defineSubResource` / `defineOperationResource` are unaffected; a
+  hand-constructed bundle object must add it.
+- **Per-operation `input` / `output` on `zodResource` / `zodSubResource`
+  (issue #57).** The zod path had a single schema-derived projection, so
+  an app chose between controlled projection and automatic OpenAPI. Each
+  CRUD operation now takes its own `input` / `output` **schema**, compiled
+  through the same pipeline as the derived DTOs (Standard Schema
+  validation + named OpenAPI components `<Name><Op>InputDto` /
+  `<Name><Op>OutputDto`). Overrides replace the projection rather than
+  merging with it. `input` on an operation with no request body, and
+  `output` on a `delete`/`restore` that answers `204`, throw at definition
+  time instead of being dropped on the wire. Documented in the core
+  README (Zod-first resources → "Per-operation `input` / `output`").
+- **Pluggable error envelope (issue #55).** `RocketsCoreExceptionsFilter`
+  hardcoded `{ statusCode, errorCode, message, timestamp }` and kept its
+  unwrap helpers private, so an app with its own envelope re-implemented
+  the whole filter — and had to preserve the `context.originalError`
+  chain while doing it, because missing it turns every hook `409` into a
+  `500`. The body shape is now a strategy:
+  `RocketsErrorSerializerInterface`, passed as the filter's second
+  constructor argument or provided under
+  `ROCKETS_ERROR_SERIALIZER_TOKEN` when the filter is registered through
+  Nest. `defaultErrorSerializer` is exported so a custom envelope can
+  extend it. Status resolution, the domain-exception → 4xx mapping and
+  the unwrap chain stay in the filter deliberately; the two unwrap
+  helpers became `protected` for subclasses that need more than the body.
+  Default output is unchanged.
 - Firestore adapter transactions (issue #44 P1-1): `runInFirestoreTransaction` /
   `FirestoreRepository.transaction` (callback-scoped, retry-safe),
   `FIRESTORE_BACKEND` DI export, `transactionFactories` + `options.ctx`
@@ -33,6 +103,29 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Changed
 
+- **Per-operation `output` now actually reaches the route (issue #57).**
+  `defineResource` accepted `operations.<op>.output` but upstream reads
+  `response.resource` / `response.paginated` from the CONTROLLER only —
+  `CrudList` / `CrudRead` / … consume nothing but `response.serialization`
+  from their per-operation options. An `output` that differed from the
+  resource default was therefore accepted, documented nowhere, and
+  serialized with the resource-level DTO. Both metadata keys are declared
+  `MethodAndClass` upstream and resolve method-first, so `buildOperation`
+  now stamps them on the route; a `list` override additionally derives its
+  matching paginated wrapper. The guard that forced
+  `operations.read.output` and `operations.list.output` to be identical
+  existed only because of this gap and is gone — `read.output` is the
+  resource-level fallback when `dto.response` is not declared.
+
+  **Upgrade-visible.** A resource that already declared
+  `operations.create.output` (or `update` / `replace` / `delete`) with a
+  DTO different from its resource-level response was silently serializing
+  the resource-level one; that route's response body now changes to the
+  declared DTO. Nothing errors — check any per-operation `output` you
+  have before upgrading. `operations.list.paginated` declared without an
+  `output` was likewise dropped and now takes effect; declaring it on any
+  operation other than `list` throws, since nothing else serializes a
+  collection.
 - CI: `ci-pr-test` and `release-readiness` no longer filter on a `main` base,
   so stacked pull requests are gated (including the Firestore emulator suite).
 
@@ -49,6 +142,18 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
   overlay via `CrudModule.forRootAsync` beside hand-written controllers.
 
 ### Documentation
+
+- **The non-CRUD transaction seam is documented (issue #60).**
+  `CONFIGURATION.md` §8a explains what a repository call without `ctx`
+  actually does — runs hook-free AND outside the operation's transaction
+  — with the adapter/resolver chain that causes it, copy-paste examples
+  for hooks, CQRS handlers and custom services, the
+  `SUPPORTS`-by-default propagation trap, why a guard cannot join the
+  operation's transaction, and the `grep` sweep that found the original
+  defect. Cross-linked from the core README's dynamic-repository how-to —
+  whose own example omitted `ctx`, teaching the anti-pattern — and from
+  `AGENTS.md` rule 13a. Root cause of #45; cost the field report ~45
+  minutes of source spelunking.
 
 - `SECURITY.md` and sample READMEs no longer claim an npm `alpha` channel that
   is not published yet.
@@ -252,7 +357,86 @@ before running the full e2e suite.
   `@concepta/nestjs-repository-typeorm` upstream, with no hard
   `dependency` on either anywhere in the chain. A unit test now pins that
   so it cannot regress into a hard dependency.
+- **Free-form JSON columns were destroyed on the WRITE path (issue #68).**
+  The report described this as a response-serialization problem
+  ("persisted correctly, the response strips it"). It is not: the blob
+  never reached the database. Bisecting one request — raw body at a
+  global interceptor, the DTO at the CQRS command, the payload at a
+  `beforeCreate` hook, and the stored row read back — showed the body
+  arriving intact and already `{}` by the time the command was built,
+  while writing the same blob straight through the repository
+  round-tripped perfectly. Every response-side change therefore had no
+  effect, because there was nothing left to return.
 
+  The destructive option is `strategy: 'excludeAll'`, not
+  `excludeExtraneousValues`. `excludeAll` is recursive: it walks into a
+  plain-object property, finds no per-key `@Expose`, and yields `{}`.
+  `excludeExtraneousValues: true` alone still drops undeclared top-level
+  keys and still projects nested `@Type(() => ChildDto)` properties, so
+  the whitelist that makes a response DTO a projection is intact without
+  it — verified against both cases.
+
+  Two changes: the CRUD serialize interceptor now runs with
+  `excludeExtraneousValues` only inbound and `exposeAll` outbound
+  (`ROCKETS_TO_INSTANCE_OPTIONS` / `ROCKETS_TO_PLAIN_OPTIONS`, both
+  passed because the settings provider replaces rather than merges), and
+  `@FreeFormJson()` marks a property on an **input** DTO so the request
+  body survives the ValidationPipe, whose transform options are not
+  reachable through the resource config.
+
+  The zod path was never affected: it compiles DTOs from the schema, so
+  it already applies the equivalent passthrough for
+  `ZodRecord`/`ZodUnknown`/`ZodAny`. A raw `z.record()` is absent from
+  zod responses by the deliberate opt-in rule, not by this bug — declare
+  `dto: { response: true }` on the field.
+- **Sub-resource path scoping ignored the parent's own read hooks (issue #45).**
+  `PathScopeGuard` looked the parent up without a repository `ctx`, which
+  disabled every hook on that call. A parent hidden by one of its own
+  `beforeFindOne` / `afterFindOne` hooks (soft expiry, retention, tenant
+  scope) stayed fully reachable through its children: `GET`, `POST` and
+  `DELETE` on the nested route all succeeded where the parent's own routes
+  returned `404`. The guard now replays the parent resource's `hooks` on a
+  detached context that presents the lookup as the parent's OWN read —
+  `entity`, `operation: Read`, and the request's route params with `id`
+  bound to the row being looked up. The CRUD context is load-bearing, not
+  decoration: a hook gated on `getCrudContext(ctx)` (the shape this
+  codebase documents) fails OPEN without it, and so does the framework's
+  own `PathScopeHook` when a grandchild's guard replays it.
+  `PathScopeGuard.for()` takes optional fifth/sixth `parentHooks` /
+  `parentSelect` arguments; `defineResource` passes them automatically.
+  Documented in `CONFIGURATION.md` §5 ("Which parent-side hooks run during
+  path scoping").
+
+  Three consequences are called out there and are worth reading before
+  upgrading: a parent hook that **throws** now surfaces on nested routes
+  (it never fired there before, and a `Before*` throw reaches the client
+  as a `500` through the upstream membrane); the lookup reads the **full
+  parent row including eager relations** whenever the parent declares
+  hooks, with the new `parentSelect` on `defineSubResource` as the
+  opt-out; and `owner: false` drops the guard entirely, so a sub-resource
+  that opts out of the ownership check also opts out of parent-side
+  visibility. Guard lookups still run before the operation transaction —
+  Nest executes guards ahead of interceptors — which is now stated rather
+  than implied.
+- **`AfterCreateReloadHook` reloaded outside the create's transaction.**
+  It called `findOne` with no `ctx`, so `getRepo(ctx)` on the TypeORM
+  adapter returned the DEFAULT repository instead of the transaction's —
+  a different `EntityManager`. Under `transactional: true` the row is
+  still uncommitted, so on any driver that gives a transaction its own
+  connection (Postgres, MySQL) the reload found nothing and the eager
+  relation silently vanished from the create response. In-memory SQLite
+  shares one connection, which is why the existing e2e suite could not
+  see it. The hook now forwards its `ctx`, which also means the reload
+  runs the entity's own read hooks — so the create response shows what a
+  read would show, and a column a read hook hides no longer reappears on
+  the way out of a create.
+- **Three-level (and deeper) sub-resource nesting returned `500`.** The
+  composed `request.params` for a nested sub-resource declared only its
+  own `id` and its immediate parent's param, so the upstream query parser
+  rejected the grandparent's `:param` with "Error on crud context
+  processing". Ancestor params are now declared `disabled: true` —
+  validated as route params, but not turned into filters, since only the
+  immediate parent's param is a FK column on the entity.
 - `RocketsCoreExceptionsFilter` logs through Nest's `Logger` instead of
   `console.error`, on every 5xx — whether traces are printed is the
   consuming app's log-level decision, no longer gated on `NODE_ENV`

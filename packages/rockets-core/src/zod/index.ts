@@ -62,6 +62,7 @@ export type {
 export type {
   ZodCrudOperation,
   ZodOperationConfig,
+  ZodOperationSchemas,
   ZodDeleteOperationConfig,
   ZodRestoreOperationConfig,
   ZodResourceOperations,

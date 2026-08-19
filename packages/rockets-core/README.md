@@ -284,6 +284,7 @@ The string key is derived from the entity name (`PetEntity` → `'pet'`). Pass t
 class for the recommended form, or an explicit string for namespaced keys.
 
 ```typescript
+import { type PlainLiteralObject } from '@nestjs/common';
 import {
   InjectDynamicRepository,
   RepositoryInterface,
@@ -297,11 +298,33 @@ export class PetService {
     private readonly pets: RepositoryInterface<PetEntity>,
   ) {}
 
-  byOwner(ownerId: string) {
-    return this.pets.find({ where: Where.eq<PetEntity>('userId', ownerId) });
+  // `ctx` is `PlainLiteralObject` — what the repository's `ctx` option
+  // accepts. A `RocketsCrudContext` from a hook or a CQRS handler
+  // satisfies it; so does the context `TransactionScope.run` hands back.
+  byOwner(ownerId: string, ctx: PlainLiteralObject) {
+    return this.pets.find({
+      where: Where.eq<PetEntity>('userId', ownerId),
+      // Always forward `ctx`. See below — omitting it is silent.
+      ctx,
+    });
   }
 }
 ```
+
+#### Always pass `ctx`
+
+A repository call that omits `ctx` runs with **all entity hooks
+disabled** and **outside the surrounding operation's transaction**.
+Neither is a type error and neither shows up in a passing test — it is
+the defect class behind issue #45.
+
+Take the context from wherever you are: a hook's second argument (typed
+`EntityHookContext`), `query.context` in a CQRS handler, or the `txCtx`
+`TransactionScope.run` hands its callback. All three satisfy the
+repository's `ctx?: PlainLiteralObject`. Never spread it into a new
+object — it is an `AppContextHost` Proxy and spreading strips the overlay
+accessors. `CONFIGURATION.md` §8a has the full seam, including the
+`SUPPORTS`-by-default trap and an audit `grep`.
 
 ### Read the authenticated user inside a handler
 
@@ -338,6 +361,83 @@ export class HealthController {
   }
 }
 ```
+
+### Free-form JSON columns on class DTOs
+
+A settings blob, a flexible profile or a widget config has no fixed
+shape, so no per-key `@Expose` is possible. The request-body
+`ValidationPipe` transforms with `strategy: 'excludeAll'`, which is
+recursive — it walks into the property, finds no `@Expose` metadata for
+its keys, and yields `{}` **before the row is written**. Mark the
+property on the **input** DTO:
+
+```typescript
+import { FreeFormJson } from '@concepta/rockets-core';
+
+class PetCreateDto {
+  @Expose() @IsString() @ApiProperty() name!: string;
+
+  @Expose()
+  @FreeFormJson()
+  @IsOptional()
+  @IsObject()
+  @ApiPropertyOptional({ type: 'object', additionalProperties: true })
+  profile?: Record<string, unknown>;
+}
+```
+
+Only the input DTO needs it — once the value is stored, the outbound
+options carry it through. Arrays are unaffected.
+
+The zod path needs no equivalent: it compiles DTOs from the schema and
+applies the same passthrough for `z.record()` / `z.unknown()` / `z.any()`
+itself. Such a field is still absent from zod **responses** until it opts
+in (`dto: { response: true }`) — that is the deliberate response
+whitelist, not this bug.
+
+### Customise the error envelope
+
+`RocketsCoreExceptionsFilter` replies with
+`{ statusCode, errorCode, message, timestamp }`. To ship a different
+shape, provide a serializer instead of forking the filter — the fork is
+what used to cost apps the `context.originalError` unwrap chain, and
+without that chain every hook `409` becomes a `500`.
+
+```typescript
+import {
+  RocketsCoreExceptionsFilter,
+  defaultErrorSerializer,
+  type RocketsErrorContext,
+  type RocketsErrorSerializerInterface,
+} from '@concepta/rockets-core';
+
+class TraceEnvelope implements RocketsErrorSerializerInterface {
+  serialize(context: RocketsErrorContext) {
+    // Extend the default rather than restating its keys.
+    return { ...defaultErrorSerializer.serialize(context), traceId };
+  }
+}
+
+app.useGlobalFilters(
+  new RocketsCoreExceptionsFilter(httpAdapterHost, new TraceEnvelope()),
+);
+```
+
+Registering the filter through Nest instead? Provide the token:
+
+```typescript
+providers: [
+  { provide: APP_FILTER, useClass: RocketsCoreExceptionsFilter },
+  { provide: ROCKETS_ERROR_SERIALIZER_TOKEN, useClass: TraceEnvelope },
+]
+```
+
+The serializer decides the **body only**. The status code, the domain
+exception → 4xx mapping and the unwrap chain stay in the filter, because
+those are the parts apps kept getting wrong. `RocketsErrorContext` also
+carries `originalException` — the exception as thrown, before unwrapping,
+for correlation IDs and structured logs. Need more than the body? The
+unwrap helpers are `protected`, so a subclass can reuse them.
 
 ### Zod-first resources (`@concepta/rockets-core/zod`)
 
@@ -388,6 +488,42 @@ See `examples/sample-server/src/zod-bindings.ts` for the canonical wiring.
 Eager `compileEntity` in `*.schema.ts` is only for import-cycle breaks
 (`@EntityHook`, inverse `@OneToMany`). Default: let
 `zodResource({ schema })` compile.
+
+#### Per-operation `input` / `output`
+
+Each CRUD operation can override the request body and the response
+projection with its own schema, exactly as the class path does with DTO
+classes. Omit them and the operation keeps the schema-derived projection.
+
+```ts
+zodResource({
+  name: 'Article',
+  schema: articleSchema,
+  operations: {
+    // A thinner card projection for the collection route.
+    list: { output: z.object({ id: z.uuid(), title: z.string() }) },
+    read: true,
+    // `slug` is derived server-side, so it is not part of this body.
+    create: { input: z.object({ title: z.string(), body: z.string() }) },
+  },
+});
+```
+
+Rules worth knowing:
+
+- An override **replaces** the projection; it is not merged with it. A
+  field hidden by `dto: { response: false }` is exposed again if the
+  override declares it — the same explicit opt-in the class path has.
+- Generated components are named `<Name><Op>InputDto` /
+  `<Name><Op>OutputDto`, and a `list` override gets a matching paginated
+  wrapper automatically.
+- `input` is rejected on operations with no request body, and `output`
+  is rejected on `delete` / `restore` unless `returnDeleted` /
+  `returnRestored` makes the route answer with a body. Both fail at
+  definition time rather than being dropped silently on the wire.
+  `returnDeleted` applies to a **hard** delete too — upstream sets the
+  status from that flag alone, so `delete: { returnDeleted: true }` with
+  an `output` is a valid shape without `soft: true`.
 
 #### Capability matrix (meta → layers)
 

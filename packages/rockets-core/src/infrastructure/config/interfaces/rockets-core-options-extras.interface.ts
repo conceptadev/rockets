@@ -21,7 +21,36 @@ import type { AbstractGetUserMetadataHandler } from '../../../application/querie
  */
 export type RocketsAccessControlConfig = AccessControlOptionsInterface & {
   readonly imports?: DynamicModule['imports'];
+  /**
+   * Extra `CanAccess` providers. Services declared through a bundle's
+   * `acl.query` are collected and merged in automatically — this stays
+   * for services no bundle declares (shared policies, factory
+   * providers).
+   */
   readonly queryServices?: Provider<CanAccess>[];
+  /**
+   * Reject at boot any **generated** authenticated route that carries no
+   * ACL grant.
+   *
+   * Upstream's check-access handler returns `true` for a route with no
+   * grant metadata, so a forgotten decorator is an open route no test
+   * notices. Turning this on makes that a boot failure instead.
+   *
+   * **Scope.** Covers CRUD bundles (including sub-resources) and
+   * operation resources — everything the planner generates. Does NOT
+   * cover `defineModuleResource` controllers, hand-built
+   * `RocketsResourceConfig` entries, or controllers owned by other
+   * packages (`MeController`, the rockets-server-auth controllers). Those
+   * routes never reach the planner, so a passing boot is not a statement
+   * about them.
+   *
+   * Off by default. A hand-written `AccessControl*` entry in a bundle's
+   * `decorators` cannot be detected at plan time — the CRUD controller is
+   * built downstream, so the metadata does not exist yet. Apps that have
+   * migrated to `acl` should turn it on; apps still using manual grants
+   * must not.
+   */
+  readonly enforceGrants?: boolean;
 };
 
 export interface RocketsCoreOptionsExtrasInterface

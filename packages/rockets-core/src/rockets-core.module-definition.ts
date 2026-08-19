@@ -10,6 +10,10 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { ConfigModule } from '@nestjs/config';
 import { RepositoryModule } from '@concepta/nestjs-repository';
 import { CrudModule } from '@concepta/nestjs-crud';
+import {
+  ROCKETS_TO_INSTANCE_OPTIONS,
+  ROCKETS_TO_PLAIN_OPTIONS,
+} from './infrastructure/crud-serialization';
 import { AuthUserContextOverlay } from '@concepta/nestjs-authentication';
 import type { RocketsResourceConfig } from './domain/interfaces/rockets-resource.interface';
 import { collectBootstrapForRootImports } from './infrastructure/repository/collect-bootstrap-for-root-imports';
@@ -90,6 +94,8 @@ function definitionTransform(
     resources: extras.resources ?? [],
     repository: extras.repository,
     userMetadata: extras.userMetadata,
+    accessControl: extras.accessControl !== undefined,
+    enforceGrants: extras.accessControl?.enforceGrants === true,
   });
 
   return {
@@ -142,7 +148,18 @@ function createCoreImports(
   // without CRUD metadata (nestjs-crud `5249672`), so mixed CRUD + custom
   // controllers share one `CrudModule.forRoot()` safely.
   if (plan.crudResources.length) {
-    imports.push(CrudModule.forRoot({}));
+    imports.push(
+      CrudModule.forRoot({
+        // Outbound only; `toInstanceOptions` keeps the upstream whitelist.
+        // See `crud-serialization.ts`.
+        settings: {
+          serialization: {
+            toInstanceOptions: ROCKETS_TO_INSTANCE_OPTIONS,
+            toPlainOptions: ROCKETS_TO_PLAIN_OPTIONS,
+          },
+        },
+      }),
+    );
     for (const resource of plan.crudResources) {
       imports.push(CrudModule.forFeature(resource));
     }
@@ -168,7 +185,17 @@ function createCoreImports(
   // Access control is opt-in: no `accessControl` config → no ACL module,
   // guard, or provider is registered at all.
   if (extras.accessControl) {
-    imports.push(buildAccessControlImport(extras.accessControl));
+    // Bundle-declared `acl.query` services are merged with any the app
+    // listed itself, so a resource cannot declare a query service and
+    // then 500 at request time because nobody registered it. They must
+    // land on `AccessControlModule` specifically: the upstream guard
+    // strict-resolves from its own host module.
+    imports.push(
+      buildAccessControlImport(
+        extras.accessControl,
+        plan.accessControlQueryServices,
+      ),
+    );
   }
 
   return imports;

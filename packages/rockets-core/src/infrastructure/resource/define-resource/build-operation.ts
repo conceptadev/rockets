@@ -2,6 +2,8 @@ import type { PlainLiteralObject, Provider } from '@nestjs/common';
 import { applyDecorators } from '@nestjs/common';
 import { Operation, UseHooks } from '@concepta/nestjs-core';
 import {
+  CrudResponsePaginated,
+  CrudResponseResource,
   CrudListQuery,
   CrudReadQuery,
   CrudCreateCommand,
@@ -146,6 +148,24 @@ function buildOperationDecorators(args: {
   override: InternalOperationOverride;
 }): CrudDecorator[] {
   const decorators: CrudDecorator[] = [];
+
+  // Upstream reads `response.resource` / `response.paginated` from the
+  // CONTROLLER only — `CrudList`/`CrudRead`/… consume nothing but
+  // `response.serialization` from their per-operation options. Both
+  // metadata keys are declared `MethodAndClass`, and the serialize
+  // interceptor and the OpenAPI builder both resolve method-first, so
+  // stamping them on the route is what actually makes a per-operation
+  // `output` take effect. Without this the override is accepted,
+  // documented nowhere, and silently serialized with the resource-level
+  // DTO.
+  const resource = args.override.response?.resource;
+  if (resource !== undefined) {
+    decorators.push(applyDecorators(CrudResponseResource(resource)));
+  }
+  const paginated = args.override.response?.paginated;
+  if (paginated !== undefined) {
+    decorators.push(applyDecorators(CrudResponsePaginated(paginated)));
+  }
 
   if (
     args.joins?.length &&

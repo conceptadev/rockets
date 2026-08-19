@@ -351,6 +351,7 @@ export function buildOperationController(
    * both operation resources would silently share one instance.
    */
   handlerAliases: ReadonlyMap<unknown, symbol> = new Map(),
+  aclDecorators: Readonly<Record<string, readonly MethodDecorator[]>> = {},
 ): Type<unknown> {
   if (definition.public === true) {
     for (const operation of Object.values(definition.operations)) {
@@ -425,6 +426,7 @@ export function buildOperationController(
       paramsDto,
       bearerAuth,
       handlerAliases,
+      aclDecorators[operation.key],
     );
   }
 
@@ -438,6 +440,7 @@ function attachOperationMethod(
   paramsDto: Type<object> | undefined,
   controllerBearerAuth: boolean,
   handlerAliases: ReadonlyMap<unknown, symbol>,
+  aclDecorators: readonly MethodDecorator[] | undefined,
 ): void {
   const methodName = operation.key;
   const http = METHOD_DECORATOR[operation.method];
@@ -536,6 +539,9 @@ function attachOperationMethod(
   appendInputOpenApiDecorators(decorators, operation);
   if (operation.decorators?.length) {
     decorators.push(...operation.decorators);
+  }
+  if (aclDecorators?.length) {
+    decorators.push(...aclDecorators);
   }
 
   const descriptor = Object.getOwnPropertyDescriptor(proto, methodName);
