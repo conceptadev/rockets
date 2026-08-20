@@ -15,7 +15,9 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import {
+  BadRequestException,
   ConflictException,
+  InternalServerErrorException,
   Global,
   INestApplication,
   Injectable,
@@ -44,11 +46,15 @@ import { AuthServerGuard } from '../infrastructure/guards/auth-server.guard';
 import { RocketsCoreExceptionsFilter } from '../infrastructure/filters/exceptions.filter';
 import {
   defaultErrorSerializer,
+  detailedErrorSerializer,
   ROCKETS_ERROR_SERIALIZER_TOKEN,
   type RocketsErrorContext,
   type RocketsErrorSerializerInterface,
 } from '../infrastructure/filters/error-serializer';
 import { defineResource } from '../infrastructure/resource/define-resource';
+import { RuntimeException } from '@concepta/nestjs-core';
+import { attachErrorDetails } from '../common/utils/validation-error-details.util';
+import { baseEntity, f, zodResource } from '../zod';
 import { defineAuthAdapter } from '../infrastructure/auth/define-auth-adapter';
 import { defineHook } from '../infrastructure/hooks/define-hook';
 
@@ -111,6 +117,48 @@ const NoteUniqueHook = defineHook<NoteEntity>(NoteEntity, {
       where: Where.eq<NoteEntity>('ref', ref),
       ctx,
     });
+    // Details attached INSIDE the repository membrane, after an await —
+    // the same shape as the Conflict below, which is the path the
+    // upstream wrap chain preserves `originalError` on. This exception
+    // gets wrapped before the filter unwraps it: the spot where the
+    // symbol could silently disappear if a wrapper ever cloned instead
+    // of referencing. The e2e pins that it survives.
+    if (ref === 'forbidden-ref') {
+      throw attachErrorDetails(
+        new BadRequestException({
+          statusCode: 400,
+          message: 'ref "forbidden-ref" is reserved',
+          error: 'Bad Request',
+        }),
+        [{ path: ['ref'], message: 'this ref is reserved' }],
+      );
+    }
+    // The NON-HttpException carrier: the documented hook guidance is to
+    // throw a RuntimeException subclass with an httpStatus. Details on
+    // this shape are only reachable because the filter reads the symbol
+    // for EVERY exception type — revert that hoist and this route loses
+    // its details while the BadRequest one above keeps them.
+    if (ref === 'runtime-ref') {
+      const runtime = new RuntimeException({
+        message: 'ref "runtime-ref" is rejected',
+        safeMessage: 'ref "runtime-ref" is rejected',
+        httpStatus: 400,
+      });
+      throw attachErrorDetails(runtime, [
+        { path: ['ref'], message: 'runtime-rejected' },
+      ]);
+    }
+    if (ref === 'explode-ref') {
+      // An HttpException(500) with attached details: the unwrap FINDS
+      // this one, so the details are readable — which is exactly what
+      // makes the 5xx gate load-bearing. A plain Error would bury the
+      // symbol under wrappers nothing reads, and a test against it
+      // passes with the gate deleted (it did — caught by mutation).
+      throw attachErrorDetails(
+        new InternalServerErrorException('internal: dsn=secret://x'),
+        [{ path: ['ref'], message: 'internal detail that must not leak' }],
+      );
+    }
     if (existing) throw new ConflictException(`ref "${ref}" is already taken`);
     return payload;
   },
@@ -126,6 +174,27 @@ const noteResource = defineResource<NoteEntity>({
     read: { output: NoteResponseDto },
     create: { input: NoteCreateDto, output: NoteResponseDto },
   },
+});
+
+@Entity('envelope_zotes')
+class ZoteEntity {
+  @PrimaryGeneratedColumn('uuid') id!: string;
+  @Column({ type: 'varchar' }) label!: string;
+}
+
+/**
+ * Zod-path sibling of the notes resource: its 400s come from
+ * `standardSchemaBadRequest` — the producer #55 asked to make
+ * machine-readable — where the class-validator CRUD path's 400s are
+ * minted by the upstream pipe and carry messages only.
+ */
+const zoteResource = zodResource({
+  name: 'Zote',
+  schema: baseEntity({ label: f.string() }),
+  entity: ZoteEntity,
+  path: 'zotes',
+  tags: ['Zotes'],
+  operations: { create: true, read: true },
 });
 
 /** An app envelope that shares no keys with the Rockets default. */
@@ -165,7 +234,7 @@ async function bootstrap(
       TypeOrmModule.forRoot({
         type: 'sqlite',
         database: ':memory:',
-        entities: [NoteEntity],
+        entities: [NoteEntity, ZoteEntity],
         synchronize: true,
         dropSchema: true,
       }),
@@ -174,7 +243,7 @@ async function bootstrap(
         auth: defineAuthAdapter(StubAuthAdapter),
         providers: [StubAuthAdapter],
         repository: TypeOrmRepositoryModule,
-        resources: [noteResource],
+        resources: [noteResource, zoteResource],
         global: true,
       }),
     ],
@@ -185,6 +254,34 @@ async function bootstrap(
         ? [{ provide: ROCKETS_ERROR_SERIALIZER_TOKEN, useValue: serializer }]
         : []),
     ],
+  }).compile();
+
+  const app = moduleRef.createNestApplication();
+  await app.init();
+  return app;
+}
+
+/** Same app, NO exception filter — Nest's default replies. */
+async function bootstrapWithoutFilter(): Promise<INestApplication> {
+  const moduleRef = await Test.createTestingModule({
+    imports: [
+      TypeOrmModule.forRoot({
+        type: 'sqlite',
+        database: ':memory:',
+        entities: [NoteEntity, ZoteEntity],
+        synchronize: true,
+        dropSchema: true,
+      }),
+      MetaModule,
+      RocketsCoreModule.forRoot({
+        auth: defineAuthAdapter(StubAuthAdapter),
+        providers: [StubAuthAdapter],
+        repository: TypeOrmRepositoryModule,
+        resources: [noteResource, zoteResource],
+        global: true,
+      }),
+    ],
+    providers: [{ provide: APP_GUARD, useClass: AuthServerGuard }],
   }).compile();
 
   const app = moduleRef.createNestApplication();
@@ -355,5 +452,172 @@ describe('default error envelope is unchanged (e2e)', () => {
     expect(body.statusCode).toBe(418);
     expect(body.errorCode).toBe('TEAPOT');
     expect(typeof body.timestamp).toBe('string');
+  });
+});
+// ── #55 residuals: structured details + the request in the context ──
+
+describe('structured error details and request context (e2e)', () => {
+  let app: INestApplication;
+  /** What the serializer saw, captured per request for assertions. */
+  const seen: { ctx?: RocketsErrorContext } = {};
+  // Read through a call: TS control-flow narrows `seen.ctx` to the
+  // literal `undefined` written before the request, blind to the
+  // serializer's assignment inside the awaited call.
+  const captured = (): RocketsErrorContext | undefined => seen.ctx;
+
+  class CapturingSerializer implements RocketsErrorSerializerInterface {
+    serialize(context: RocketsErrorContext) {
+      seen.ctx = context;
+      return {
+        ...detailedErrorSerializer.serialize(context),
+        requestId: String(context.request?.headers['x-request-id'] ?? ''),
+      };
+    }
+  }
+
+  beforeAll(async () => {
+    app = await bootstrap(new CapturingSerializer());
+  });
+
+  afterAll(async () => {
+    if (app) await app.close();
+  });
+
+  // The field report's exact complaint: apps had to PARSE the flattened
+  // "field: message" strings. `details` is the machine-readable channel
+  // — path as an ARRAY (index 0 and key "0" differ), message verbatim.
+  it('a zod validation 400 carries structured details', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/zotes')
+      .set('Authorization', 'Bearer u1')
+      .set('x-request-id', 'req-9')
+      .send({})
+      .expect(400);
+
+    expect(res.body.details).toEqual([
+      expect.objectContaining({ path: ['label'] }),
+    ]);
+    // And the serializer could build a correlation id without forking
+    // the filter — the #55(b) half.
+    expect(res.body.requestId).toBe('req-9');
+  });
+
+  it('hands the serializer the typed request facade', async () => {
+    seen.ctx = undefined;
+    await request(app.getHttpServer())
+      .post('/notes')
+      .set('Authorization', 'Bearer u1')
+      .set('x-request-id', 'req-10')
+      .send({})
+      .expect(400);
+
+    expect(captured()?.request?.headers['x-request-id']).toBe('req-10');
+    expect(captured()?.request?.raw).toBeDefined();
+  });
+
+  it('details on a RuntimeException carrier reach the serializer (the hoist)', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/notes')
+      .set('Authorization', 'Bearer u1')
+      .send({ ref: 'runtime-ref' })
+      .expect(400);
+
+    expect(res.body.details).toEqual([
+      { path: ['ref'], message: 'runtime-rejected' },
+    ]);
+  });
+
+  // A 5xx must mask details exactly as it masks message: an attached
+  // finding quoting an internal error is not client-safe.
+  it('a 5xx never emits details', async () => {
+    seen.ctx = undefined;
+    const res = await request(app.getHttpServer())
+      .post('/notes')
+      .set('Authorization', 'Bearer u1')
+      .send({ ref: 'explode-ref' })
+      .expect(500);
+    expect(res.body.details).toBeUndefined();
+    expect(captured()?.details).toBeUndefined();
+  });
+
+  // F4 from review: every other producer throws BEFORE the repository
+  // membrane, so unwrapped === raw in all of them and the two-operand
+  // read was undiscriminated. This one is wrapped and unwrapped.
+  it('details survive the repository wrap/unwrap chain', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/notes')
+      .set('Authorization', 'Bearer u1')
+      .send({ ref: 'forbidden-ref' })
+      .expect(400);
+
+    expect(res.body.details).toEqual([
+      { path: ['ref'], message: 'this ref is reserved' },
+    ]);
+  });
+
+  it('a non-validation error carries no details', async () => {
+    await request(app.getHttpServer())
+      .post('/notes')
+      .set('Authorization', 'Bearer u1')
+      .send({ ref: 'dup' })
+      .expect(201);
+    seen.ctx = undefined;
+    const res = await request(app.getHttpServer())
+      .post('/notes')
+      .set('Authorization', 'Bearer u1')
+      .send({ ref: 'dup' })
+      .expect(409);
+
+    expect(res.body.details).toBeUndefined();
+    expect(captured()?.details).toBeUndefined();
+  });
+
+  it('the default envelope stays byte-shape identical without opt-in', async () => {
+    const plain = await bootstrap(undefined);
+    // The details-BEARING route, deliberately: asserting on a route
+    // whose 400 can never carry details would stay green even if the
+    // default serializer started spreading them — decoration, not
+    // proof. Caught in review.
+    const res = await request(plain.getHttpServer())
+      .post('/zotes')
+      .set('Authorization', 'Bearer u1')
+      .send({})
+      .expect(400);
+    await plain.close();
+
+    expect(Object.keys(res.body).sort()).toEqual([
+      'errorCode',
+      'message',
+      'statusCode',
+      'timestamp',
+    ]);
+  });
+
+  // The symbol carrier's whole point: an app that never registered the
+  // Rockets filter must see the body Nest has always produced. An
+  // earlier revision rode `details` on the exception PAYLOAD, which
+  // Nest's default filter replies with verbatim — every no-filter app's
+  // 400 changed shape with no opt-in.
+  it('an app WITHOUT the Rockets filter sees the unchanged Nest body', async () => {
+    const bare = await bootstrapWithoutFilter();
+    const res = await request(bare.getHttpServer())
+      .post('/zotes')
+      .set('Authorization', 'Bearer u1')
+      .send({})
+      .expect(400);
+    await bare.close();
+
+    expect(Object.keys(res.body).sort()).toEqual([
+      'error',
+      'message',
+      'statusCode',
+    ]);
+  });
+
+  it('builds the request facade even on a pre-routing 401', async () => {
+    seen.ctx = undefined;
+    await request(app.getHttpServer()).post('/zotes').send({}).expect(401);
+    expect(captured()?.request?.headers).toBeDefined();
+    expect(captured()?.request?.params).toEqual({});
   });
 });

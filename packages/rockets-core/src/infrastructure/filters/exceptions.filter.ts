@@ -15,7 +15,14 @@ import {
 } from '@nestjs/common';
 import { isObject } from '@nestjs/common/utils/shared.utils';
 import { HttpAdapterHost } from '@nestjs/core';
+import type { OperationRequest } from '../../domain/interfaces/operation-resource.interface';
 import {
+  classValidatorErrorsToDetails,
+  readErrorDetails,
+} from '../../common/utils/validation-error-details.util';
+import {
+  type RocketsErrorContext,
+  type RocketsErrorDetail,
   defaultErrorSerializer,
   ROCKETS_ERROR_SERIALIZER_TOKEN,
   type RocketsErrorSerializerInterface,
@@ -103,6 +110,7 @@ export class RocketsCoreExceptionsFilter implements ExceptionFilter {
   catch(rawException: ExceptionInterface, host: ArgumentsHost): void {
     const { httpAdapter } = this.httpAdapterHost;
     const ctx = host.switchToHttp();
+    const request: unknown = ctx.getRequest();
 
     // Unwrap nested `context.originalError` chains. Repository / CRUD
     // adapters wrap underlying errors as `ModelQueryException` →
@@ -123,6 +131,13 @@ export class RocketsCoreExceptionsFilter implements ExceptionFilter {
     let errorCode = 'ERROR_CODE_UNKNOWN';
     let statusCode = 500;
     let message: unknown = ERROR_MESSAGE_FALLBACK;
+    // Read for EVERY exception type, not only HttpException: the
+    // documented hook guidance is to throw RepositoryQueryException
+    // with an httpStatus, and a consumer following it would otherwise
+    // attach details this filter silently drops. Unwrapped first, raw
+    // second, so a wrapped hook 400 keeps its findings.
+    let details: readonly RocketsErrorDetail[] | undefined =
+      readErrorDetails(exception) ?? readErrorDetails(rawException);
 
     if (exception instanceof HttpException) {
       statusCode = exception.getStatus();
@@ -152,6 +167,9 @@ export class RocketsCoreExceptionsFilter implements ExceptionFilter {
       isValidationErrorList(exception.context?.validationErrors)
     ) {
       message = flattenValidationErrors(exception.context.validationErrors);
+      details = classValidatorErrorsToDetails(
+        exception.context.validationErrors,
+      );
       statusCode = 400;
     }
 
@@ -178,23 +196,29 @@ export class RocketsCoreExceptionsFilter implements ExceptionFilter {
       }
     }
 
-    const serialized = this.serializer.serialize({
+    // Same invariant as the message masking above: a 5xx is an internal
+    // failure and its content is not client-safe. `details` is a sibling
+    // channel of `message` and obeys the same rule — an attached finding
+    // that quotes an internal error must not ride around the mask.
+    if (statusCode >= 500) {
+      details = undefined;
+    }
+
+    const context: RocketsErrorContext = {
       statusCode,
       errorCode,
       message,
       originalException: rawException,
-    });
+      ...(details && details.length > 0 ? { details } : {}),
+      request: toErrorRequest(request),
+    };
+    const serialized = this.serializer.serialize(context);
     // A serializer that returns nothing would otherwise send an empty
     // body with a correct status — a client sees a 409 it cannot read.
     // Fall back rather than fail a second time inside the error path.
     const responseBody =
       serialized === null || serialized === undefined
-        ? defaultErrorSerializer.serialize({
-            statusCode,
-            errorCode,
-            message,
-            originalException: rawException,
-          })
+        ? defaultErrorSerializer.serialize(context)
         : serialized;
 
     httpAdapter.reply(ctx.getResponse(), responseBody, statusCode);
@@ -264,4 +288,36 @@ export class RocketsCoreExceptionsFilter implements ExceptionFilter {
     }
     return candidate;
   }
+}
+
+/**
+ * The request in the same transport-agnostic shape operation handlers
+ * receive: typed `headers`/`params`/`query`, `raw` as the escape hatch.
+ * Built defensively — the filter also fires for errors thrown before
+ * routing, where params/query may not exist yet.
+ */
+function toErrorRequest(request: unknown): OperationRequest {
+  const source: object = isObject(request) ? request : {};
+  return {
+    headers: recordOrEmpty(
+      Reflect.get(source, 'headers'),
+    ) as OperationRequest['headers'],
+    params: recordOrEmpty(
+      Reflect.get(source, 'params'),
+    ) as OperationRequest['params'],
+    query: recordOrEmpty(
+      Reflect.get(source, 'query'),
+    ) as OperationRequest['query'],
+    raw: request,
+  };
+}
+
+function recordOrEmpty(value: unknown): Record<string, unknown> {
+  // `isObject` narrows only to `object`. The wider invariant the
+  // callers' casts assert: on every supported adapter these maps carry
+  // string keys with string / string[] values (headers, params) or
+  // parsed primitives (query) — Express and Fastify both guarantee it.
+  // TypeScript cannot check value types through `unknown`, so the
+  // guarantee is the adapters' contract, restated here on purpose.
+  return isObject(value) ? (value as Record<string, unknown>) : {};
 }
