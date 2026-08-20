@@ -7,6 +7,11 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Added
 
+- First-class Standard Schema support for hand-written core controllers via
+  `@concepta/rockets-core/standard-schema`, with typed request/response DTO
+  carriers, opt-in native Nest validation and serialization, plus a dedicated
+  Swagger subpath. Existing generated CRUD/Zod serialization remains
+  unchanged.
 - Firestore adapter transactions (issue #44 P1-1): `runInFirestoreTransaction` /
   `FirestoreRepository.transaction` (callback-scoped, retry-safe),
   `FIRESTORE_BACKEND` DI export, `transactionFactories` + `options.ctx`

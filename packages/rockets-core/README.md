@@ -33,6 +33,8 @@ and re-exports the symbols apps need (`InjectDynamicRepository`,
   sub-resources.
 - A typed actor overlay so handlers can read the authenticated user without
   parameter drilling.
+- Opt-in, vendor-neutral Standard Schema DTOs for hand-written Nest
+  controllers.
 
 ### When to use this package
 
@@ -299,6 +301,76 @@ export class HealthController {
   }
 }
 ```
+
+### Standard Schema DTOs (`@concepta/rockets-core/standard-schema`)
+
+The Standard Schema subpath turns any
+[Standard Schema V1](https://standardschema.dev/) implementation into Nest
+request and response DTO classes. It uses Nest 12's native Standard Schema
+validation and serialization, while keeping the main core entry point free of
+schema-library runtime dependencies.
+
+Register the integration explicitly in the module that owns your hand-written
+controllers:
+
+```typescript
+import { Module } from '@nestjs/common';
+import { StandardSchemaModule } from '@concepta/rockets-core/standard-schema';
+
+@Module({
+  imports: [StandardSchemaModule.forRoot()],
+})
+export class ApiModule {}
+```
+
+Create concrete DTO classes so Nest can discover the request schema from its
+runtime parameter metadata. Request DTO instances use the schema's parsed
+output type; response DTO instances use the value accepted by the schema
+before it is serialized:
+
+```typescript
+import { Body, Controller, Post } from '@nestjs/common';
+import {
+  createStandardSchemaDto,
+  createStandardSchemaResponseDto,
+} from '@concepta/rockets-core/standard-schema';
+import { ApiStandardSchemaResponse } from '@concepta/rockets-core/standard-schema/swagger';
+import { z } from 'zod';
+
+const createPetSchema = z.object({ name: z.string().trim().min(1) });
+const petResponseSchema = z.object({ id: z.string(), name: z.string() });
+
+class CreatePetDto extends createStandardSchemaDto(createPetSchema) {}
+class PetResponseDto extends createStandardSchemaResponseDto(
+  petResponseSchema,
+) {}
+
+@Controller('pets')
+export class PetController {
+  @Post()
+  @ApiStandardSchemaResponse(PetResponseDto, { status: 201 })
+  create(@Body() body: CreatePetDto): PetResponseDto {
+    return { id: 'pet-1', name: body.name };
+  }
+}
+```
+
+`ApiStandardSchemaResponse` combines runtime response serialization with
+Swagger response metadata. Schemas must expose the Standard JSON Schema
+capability, or the Swagger document factory must receive a compatible custom
+converter. Wrap custom converters with `withStandardSchemaResponseArrays`
+when an `isArray: true` response must retain its array shape on the current
+Swagger alpha.
+
+The DTO-aware pipe can infer request validation from `@Body()`, `@Query()`, and
+whole-object `@Param()` types. To include that request schema in generated
+OpenAPI today, also attach it explicitly (for example,
+`@Body({ schema: CreatePetDto.schema })`).
+
+This first-class adapter complements the existing generated CRUD path; it does
+not replace `zodResource` request validation or class-transformer response
+projection. Generated resources carry different runtime metadata and preserve
+computed fields, persistence codecs, and fail-closed field exposure.
 
 ### Zod-first resources (`@concepta/rockets-core/zod`)
 
