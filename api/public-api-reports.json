@@ -3493,7 +3493,7 @@
         "name": "ZodOperationSchemas",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface ZodOperationSchemas {\n    readonly input?: z.ZodObject;\n    readonly output?: z.ZodObject;\n}"
+        "signature": "export interface ZodOperationSchemas {\n    readonly input?: z.ZodObject;\n    readonly output?: z.ZodObject;\n    readonly strictInput?: boolean;\n}"
       },
       {
         "name": "ZodResourceDefinition",
