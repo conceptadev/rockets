@@ -5,7 +5,7 @@ import {
   Provider,
   Type,
 } from '@nestjs/common';
-import { APP_INTERCEPTOR, Reflector } from '@nestjs/core';
+import { APP_INTERCEPTOR, DiscoveryModule, Reflector } from '@nestjs/core';
 import { CqrsModule } from '@nestjs/cqrs';
 import { ConfigModule } from '@nestjs/config';
 import { RepositoryModule } from '@concepta/nestjs-repository';
@@ -33,6 +33,10 @@ import { RocketsCoreOptionsExtrasInterface } from './infrastructure/config/inter
 import { RocketsCoreSettingsInterface } from './infrastructure/config/interfaces/rockets-core-settings.interface';
 import { rocketsCoreDefaultConfig } from './infrastructure/config/rockets-core-options-default.config';
 import { AuthServerGuard } from './infrastructure/guards/auth-server.guard';
+import {
+  RouteAuditService,
+  ROCKETS_ROUTE_POLICY_TOKEN,
+} from './infrastructure/audit';
 import { ActorOverlay } from './infrastructure/interceptors/actor.overlay';
 import { ZodBodyValidationInterceptor } from './infrastructure/interceptors/zod-body-validation.interceptor';
 import { UpsertUserMetadataHandler } from './application/commands/handlers/upsert-user-metadata.handler';
@@ -198,6 +202,12 @@ function createCoreImports(
     );
   }
 
+  // `RouteAuditService` injects DiscoveryService/MetadataScanner, which
+  // only exist once DiscoveryModule is imported.
+  if (extras.routePolicy) {
+    imports.push(DiscoveryModule);
+  }
+
   return imports;
 }
 
@@ -247,8 +257,20 @@ function createCoreProviders(options: {
     userMetadataProviders.push(getUserMetadata);
   }
 
+  // Route policy is opt-in. Declaring one registers the bootstrap audit;
+  // omitting it registers nothing, so an app that never asked for the
+  // check pays no discovery cost at boot.
+  const routePolicy = options.extras?.routePolicy;
+  const routeAuditProviders: Provider[] = routePolicy
+    ? [
+        RouteAuditService,
+        { provide: ROCKETS_ROUTE_POLICY_TOKEN, useValue: routePolicy },
+      ]
+    : [];
+
   return [
     ...providers,
+    ...routeAuditProviders,
     AuthServerGuard,
     // Makes the authenticated user available to the CRUD system (`@AuthUser()` in upstream v8).
     // (When you use the full auth module, that module may register the same thing — don’t double up.)

@@ -7,6 +7,20 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Added
 
+- **Route policy audit (`routePolicy`).** `RocketsCoreModule.forRoot`
+  accepts `routePolicy: { requireAuth, requireAcl, requireAclQuery, allow,
+  allowControllers }`, checked at bootstrap over every discovered
+  controller — generated CRUD, operation and module resources, hand-built
+  configs, and controllers owned by other packages. A violation fails the
+  boot and lists every offending route at once. Closes the coverage gap
+  `planAccessControl` documents: the planner only sees what it generates
+  and runs before controllers exist, so a hand-written `AccessControlGrant`
+  in a bundle's `decorators: []` is invisible to it. Without a policy
+  nothing is registered; with one, `RouteAuditService.audit()` returns the
+  full table for a CI artifact. An app with no global guard reports every
+  route as `unguarded-app` rather than `guarded`, so the report cannot
+  claim protection the app does not have.
+
 - **`operationResource` / `defineOperationResource` (issues #43 / #50).** Typed
   non-CRUD HTTP endpoints beside CRUD: Zod `input`/`output` → DTO + OpenAPI,
   generated Nest controller, auth/`public`, optional `transactional`, function

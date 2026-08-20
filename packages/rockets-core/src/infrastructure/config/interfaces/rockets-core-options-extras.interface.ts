@@ -6,6 +6,7 @@ import type {
 import type { RepositoryModuleInterface } from '@concepta/nestjs-repository';
 import type { ResourceInput } from '../../resource/aggregate-resources';
 import type { AuthBootstrap } from '../../../domain/interfaces/auth-bootstrap.interface';
+import type { RoutePolicy } from '../../audit/route-audit.types';
 import type { RepositoryBootstrap } from '../../../domain/interfaces/repository-bootstrap.interface';
 import type { RocketsUserMetadataConfig } from '../../../domain/interfaces/rockets-user-metadata-config.interface';
 import type { AbstractUpsertUserMetadataHandler } from '../../../application/commands/handlers/abstract-upsert-user-metadata.handler';
@@ -116,4 +117,19 @@ export interface RocketsCoreOptionsExtrasInterface
    * module, guard, or provider is registered at all.
    */
   readonly accessControl?: RocketsAccessControlConfig;
+
+  /**
+   * What the app asserts about every HTTP route Nest ends up with.
+   *
+   * Checked at bootstrap, not at plan time, and therefore over EVERY
+   * discovered controller — module resources, hand-built configs, and
+   * controllers owned by other packages (`MeController`, every
+   * rockets-server-auth route) included. That is the coverage gap
+   * `planAccessControl` documents and cannot close from where it runs.
+   *
+   * Omit it and nothing is enforced; the report is still available by
+   * injecting `RouteAuditService` and calling `audit()`, so a team can
+   * see where it stands before committing to a rule.
+   */
+  readonly routePolicy?: RoutePolicy;
 }

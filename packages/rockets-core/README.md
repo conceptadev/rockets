@@ -651,6 +651,64 @@ class PetController {
 }
 ```
 
+### Assert what every route enforces (`routePolicy`)
+
+Declare what must be true of every HTTP route the application ends up
+with. The check runs at bootstrap, so it covers **every** discovered
+controller — generated CRUD, operation resources, module resources,
+hand-built configs, and controllers owned by other packages such as
+`MeController` or the `rockets-server-auth` routes.
+
+```typescript
+RocketsCoreModule.forRoot({
+  // ...
+  accessControl: { settings: { rules: acRules } },
+  routePolicy: {
+    requireAuth: true,
+    requireAcl: true,
+    requireAclQuery: true,
+    allow: ['GET /health'],
+  },
+});
+```
+
+A violation stops the boot and names every offending route at once:
+
+```text
+Rockets route policy rejected 2 routes:
+  - [requireAcl] GET /invoices/summary: InvoiceController.summary carries no
+    AccessControlGrant. Upstream returns true for a route with no grant
+    metadata, so this route is authenticated but open. ...
+```
+
+| Rule | Fails when |
+| --- | --- |
+| `requireAuth` | a route is `AuthPublic`, or the app registers no global guard at all |
+| `requireAcl` | an authenticated route carries no `AccessControlGrant` |
+| `requireAclQuery` | a granted route names no `CanAccess` service, so `own` possession widens to every row |
+
+Exemptions are explicit — `allow` takes route ids, `allowControllers`
+takes classes — because an exemption that silently widens as routes are
+added is the failure this whole check exists to remove.
+
+**Why bootstrap and not plan time.** `buildAppRegistrationPlan` already
+rejects route collisions and ungranted operations, but it only sees what
+it generates and it runs before controllers are built, so a hand-written
+`AccessControlGrant` inside a bundle's `decorators: []` is invisible to
+it. This closes that gap, and its own documentation says so.
+
+**Reporting without enforcing.** Omit `routePolicy` and nothing is
+registered. Declare one and `RouteAuditService` becomes injectable, so
+`audit()` gives you the full table for a CI artifact:
+
+```typescript
+const { routes, globalGuards } = app.get(RouteAuditService).audit();
+```
+
+Route ids are `METHOD /controller/handler` paths. Global prefix and Nest
+versioning are applied by the HTTP adapter after this runs, so ids stay
+stable against those settings rather than matching the wire path.
+
 ---
 
 ## 4. Reference
