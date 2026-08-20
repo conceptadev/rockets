@@ -18,10 +18,17 @@
   or `false`); optional `params` zod validates path params; cross-resource
   route collisions fail in `buildAppRegistrationPlan`. OpenAPI query field types
   come from Zod (`z.toJSONSchema`). Wired through
-  `resources[]` as `ResourceKind.Operation`. **v1 does not wire ACL grants** —
-  authenticated ops are open to any authenticated user unless you pass method
-  `decorators` (e.g. access-control grants). Cursor / SSE / binary / raw JSON /
+  `resources[]` as `ResourceKind.Operation`. Operation resources accept
+  `acl` at resource and operation level (issue #51); an op with neither
+  `acl` nor a manual grant decorator is open to any authenticated user.
+  Cursor / SSE / binary / raw JSON /
   idempotency / external-client scaffolds remain follow-ups.
+- `@concepta/rockets-core/standard-schema` and
+  `@concepta/rockets-core/standard-schema/swagger` subpaths for vendor-neutral
+  request DTO validation, response serialization, and OpenAPI metadata in
+  hand-written Nest controllers.
+- Request and response DTO carrier factories, an opt-in global module, native
+  response decorators, stable runtime guards, and Swagger array conversion.
 - `compileDtoClass` and `namedZodDto` are exported from the public
   `@concepta/rockets-core/zod` subpath.
 - `AuthBootstrapContributions`, allowing an auth integration to carry its owned
@@ -31,6 +38,8 @@
 
 ### Changed
 
+- The existing generated-CRUD Standard Schema request bridge now uses the
+  official `@standard-schema/spec` contract instead of a local partial copy.
 - Core always provides the auth-adapter collection token, including for an
   empty chain, so metadata-free and guard-disabled compositions still boot.
 - `AuthServerGuard` recognizes the upstream class-level public-route sentinel.

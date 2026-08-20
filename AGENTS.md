@@ -232,6 +232,10 @@ of it.
   `zod` + `nestjs-zod` are **optional peers** and the main entry stays
   zod-free, so non-zod consumers pay nothing. The zod layer is still ORM-free:
   entity generation is delegated to a `SchemaEntityCompiler` adapter.
+  Hand-written controllers can use the vendor-neutral, opt-in
+  `@concepta/rockets-core/standard-schema` and `/standard-schema/swagger`
+  subpaths; generated CRUD resources keep their dedicated validation and
+  class-transformer serialization path.
   Imported by both server and auth.
 - `packages/rockets-repository-typeorm`
   (`@concepta/rockets-repository-typeorm`): TypeORM implementation of the

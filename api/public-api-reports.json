@@ -3214,6 +3214,130 @@
         "signature": "export declare function whitelistedFromDto<T extends Record<string, unknown> = Record<string, unknown>>(dtoClass: Type<unknown>, data: object): Promise<T>;"
       }
     ],
+    "@concepta/rockets-core/standard-schema": [
+      {
+        "name": "STANDARD_SCHEMA_DTO",
+        "kind": "value",
+        "runtime": true,
+        "signature": "STANDARD_SCHEMA_DTO: unique symbol"
+      },
+      {
+        "name": "STANDARD_SCHEMA_RESPONSE_DTO",
+        "kind": "value",
+        "runtime": true,
+        "signature": "STANDARD_SCHEMA_RESPONSE_DTO: unique symbol"
+      },
+      {
+        "name": "StandardSchemaDtoClass",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface StandardSchemaDtoClass<Schema extends StandardSchemaV1<unknown, object> = StandardSchemaV1<unknown, object>> {\n    new (): StandardSchemaV1.InferOutput<Schema>;\n    readonly [STANDARD_SCHEMA_DTO]: true;\n    readonly schema: Schema;\n}"
+      },
+      {
+        "name": "StandardSchemaDtoValidationPipe",
+        "kind": "class",
+        "runtime": true,
+        "signature": "export declare class StandardSchemaDtoValidationPipe extends StandardSchemaValidationPipe {\n    transform<T = unknown>(value: T, metadata: ArgumentMetadata): Promise<T>;\n}"
+      },
+      {
+        "name": "StandardSchemaModule",
+        "kind": "class",
+        "runtime": true,
+        "signature": "export declare class StandardSchemaModule {\n    static forRoot(options?: StandardSchemaModuleOptions): DynamicModule;\n}"
+      },
+      {
+        "name": "StandardSchemaModuleOptions",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface StandardSchemaModuleOptions {\n    validation?: false | StandardSchemaValidationPipeOptions;\n    serialization?: false | StandardSchemaSerializerInterceptorOptions;\n}"
+      },
+      {
+        "name": "StandardSchemaResponse",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function StandardSchemaResponse(source: StandardSchemaResponseSource, options?: StandardSchemaResponseOptions): ClassDecorator & MethodDecorator;"
+      },
+      {
+        "name": "StandardSchemaResponseDtoClass",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface StandardSchemaResponseDtoClass<Schema extends StandardSchemaV1<object, unknown> = StandardSchemaV1<object, unknown>> {\n    new (): StandardSchemaV1.InferInput<Schema>;\n    readonly [STANDARD_SCHEMA_RESPONSE_DTO]: true;\n    readonly schema: Schema;\n}"
+      },
+      {
+        "name": "StandardSchemaResponseOptions",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface StandardSchemaResponseOptions {\n    validateOptions?: StandardSchemaV1.Options;\n}"
+      },
+      {
+        "name": "StandardSchemaResponseSource",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type StandardSchemaResponseSource = StandardSchemaV1 | StandardSchemaResponseDtoClass;"
+      },
+      {
+        "name": "StandardSchemaSource",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type StandardSchemaSource = StandardSchemaV1 | StandardSchemaDtoClass | StandardSchemaResponseDtoClass;"
+      },
+      {
+        "name": "createStandardSchemaDto",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function createStandardSchemaDto<const Schema extends StandardSchemaV1<unknown, object>>(schema: Schema & (Extract<StandardSchemaV1.InferOutput<Schema>, readonly unknown[]> extends never ? unknown : never)): StandardSchemaDtoClass<Schema>;"
+      },
+      {
+        "name": "createStandardSchemaResponseDto",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function createStandardSchemaResponseDto<const Schema extends StandardSchemaV1<object, unknown>>(schema: Schema & (Extract<StandardSchemaV1.InferInput<Schema>, readonly unknown[]> extends never ? unknown : never)): StandardSchemaResponseDtoClass<Schema>;"
+      },
+      {
+        "name": "getStandardSchema",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function getStandardSchema<Schema extends StandardSchemaV1<unknown, object>>(source: StandardSchemaDtoClass<Schema>): Schema;\nexport declare function getStandardSchema<Schema extends StandardSchemaV1<object, unknown>>(source: StandardSchemaResponseDtoClass<Schema>): Schema;\nexport declare function getStandardSchema<Schema extends StandardSchemaV1>(source: Schema): Schema;\nexport declare function getStandardSchema(source: StandardSchemaSource): StandardSchemaV1;"
+      },
+      {
+        "name": "isStandardSchema",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function isStandardSchema(value: unknown): value is StandardSchemaV1;"
+      },
+      {
+        "name": "isStandardSchemaDto",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function isStandardSchemaDto(value: unknown): value is StandardSchemaDtoClass;"
+      },
+      {
+        "name": "isStandardSchemaResponseDto",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function isStandardSchemaResponseDto(value: unknown): value is StandardSchemaResponseDtoClass;"
+      }
+    ],
+    "@concepta/rockets-core/standard-schema/swagger": [
+      {
+        "name": "ApiStandardSchemaResponse",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function ApiStandardSchemaResponse(source: StandardSchemaResponseSource, options?: ApiStandardSchemaResponseOptions): ClassDecorator & MethodDecorator;"
+      },
+      {
+        "name": "ApiStandardSchemaResponseOptions",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type ApiStandardSchemaResponseOptions = DistributiveOmit<ApiResponseMetadata, 'standardSchema' | 'type'> & StandardSchemaResponseOptions;"
+      },
+      {
+        "name": "withStandardSchemaResponseArrays",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function withStandardSchemaResponseArrays(converter: StandardSchemaConverter): StandardSchemaConverter;"
+      }
+    ],
     "@concepta/rockets-core/zod": [
       {
         "name": "BoundBuilders",
@@ -4248,6 +4372,41 @@
         "signature": "export type SwaggerUiOptions = Omit<typeof SWAGGER_UI_OPTIONS_TYPE, 'global'>;",
         "referencedBy": [
           "SwaggerUiModule"
+        ]
+      }
+    ],
+    "@concepta/rockets-core/standard-schema": [],
+    "@concepta/rockets-core/standard-schema/swagger": [
+      {
+        "name": "DistributiveOmit",
+        "kind": "type",
+        "signature": "type DistributiveOmit<T, Keys extends PropertyKey> = T extends unknown ? Omit<T, Keys> : never;",
+        "referencedBy": [
+          "ApiStandardSchemaResponseOptions"
+        ]
+      },
+      {
+        "name": "StandardSchemaResponseDtoClass",
+        "kind": "interface",
+        "signature": "export interface StandardSchemaResponseDtoClass<Schema extends StandardSchemaV1<object, unknown> = StandardSchemaV1<object, unknown>> {\n    new (): StandardSchemaV1.InferInput<Schema>;\n    readonly [STANDARD_SCHEMA_RESPONSE_DTO]: true;\n    readonly schema: Schema;\n}",
+        "referencedBy": [
+          "ApiStandardSchemaResponse"
+        ]
+      },
+      {
+        "name": "StandardSchemaResponseOptions",
+        "kind": "interface",
+        "signature": "export interface StandardSchemaResponseOptions {\n    validateOptions?: StandardSchemaV1.Options;\n}",
+        "referencedBy": [
+          "ApiStandardSchemaResponseOptions"
+        ]
+      },
+      {
+        "name": "StandardSchemaResponseSource",
+        "kind": "type",
+        "signature": "export type StandardSchemaResponseSource = StandardSchemaV1 | StandardSchemaResponseDtoClass;",
+        "referencedBy": [
+          "ApiStandardSchemaResponse"
         ]
       }
     ],

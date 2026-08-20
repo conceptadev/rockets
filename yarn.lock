@@ -986,6 +986,7 @@ __metadata:
     "@nestjs/swagger": "npm:12.0.0-alpha.2"
     "@nestjs/testing": "npm:12.0.0-alpha.5"
     "@nestjs/typeorm": "npm:11.0.3"
+    "@standard-schema/spec": "npm:1.1.0"
     "@types/pluralize": "npm:^0.0.33"
     accesscontrol: "npm:^2.2.1"
     nestjs-zod: "npm:^5.4.0"
