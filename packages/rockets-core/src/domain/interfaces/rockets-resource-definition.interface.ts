@@ -211,10 +211,23 @@ export interface ResourceOperationConfig {
    * ungranted. Requires resource-level `acl` — an action needs a
    * resource name to grant against.
    *
-   * Declaring this AND a manual `AccessControl*` entry in `decorators`
-   * is rejected at definition time: upstream merges grant metadata, so
-   * a silent union of the two is exactly the ambiguity that leaves a
-   * route open in production.
+   * Do NOT combine this with a manual `AccessControl*` entry in
+   * `decorators` on the same operation. Upstream's grant metadata is a
+   * plain `SetMetadata` write read with `reflector.get(...)`, so the two
+   * do not merge — one wins.
+   *
+   * **Which one is deterministic, and it is not yours.** The generated
+   * route applies `decorators` first and the `acl`-derived grant last,
+   * so `acl` overwrites a hand-written `AccessControlGrant`. A manual
+   * grant that was deliberately TIGHTER than the inferred action is
+   * therefore lost without a warning.
+   *
+   * The combination is **not** detected today. It is decidable — the
+   * route builder owns the single `applyDecorators` call and could read
+   * the metadata back between the two pushes, with no re-application of
+   * consumer code — but that check is not implemented. Documenting the
+   * gap beats claiming a guard that does not exist, on an access-control
+   * surface most of all. See `CONFIGURATION.md` §5a.
    */
   readonly acl?: OperationAclConfig;
   /** Request input (body) DTO. Maps to `request.body`. Falls back to `definition.dto.{create,update,replace}`. */

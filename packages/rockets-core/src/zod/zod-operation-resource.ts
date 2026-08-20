@@ -11,8 +11,11 @@ import type {
 } from '../domain/interfaces/operation-resource.interface';
 import { defineOperationResource } from '../infrastructure/resource/define-operation-resource';
 import { assertValidOperationKey } from '../infrastructure/resource/operation-resource/operation-key';
-import { compileDtoClass } from './zod-dto';
-import { operationDiscriminator } from '../infrastructure/resource/operation-resource/build-operation-controller';
+import { compileDtoClass, nameGeneratedDto } from './zod-dto';
+import {
+  operationDtoBaseName,
+  operationResourceParamsDtoName,
+} from '../infrastructure/resource/operation-resource/build-operation-controller';
 import type {
   OperationAclConfig,
   ResourceAclConfig,
@@ -317,9 +320,10 @@ function compileOperationDto(schema: z.ZodType, name: string): Type<object> {
     return compileDtoClass(schema, name);
   }
   if (schema instanceof z.ZodArray) {
-    const cls = createZodDto(schema);
-    Object.defineProperty(cls, 'name', { value: name });
-    return cls;
+    // Same naming + branding path as the object branch: an array output
+    // occupies an OpenAPI component exactly like an object one, so it
+    // has to be visible to the uniqueness assertion.
+    return nameGeneratedDto(createZodDto(schema), name);
   }
   throw new Error(
     `operationResource DTO "${name}": expected z.object(...) or z.array(...), ` +
@@ -363,32 +367,29 @@ function compileOperation(
   // path=key by default; explicit `path: ''` keeps a root mount (?? not ||).
   const path = pending.path ?? key;
 
-  // Same discriminator the generated controller uses for operation IDs:
   // two bundles on one base path can declare the same method+key with
   // different explicit paths, and without it both DTOs would claim one
   // OpenAPI component name.
-  const discriminator = operationDiscriminator(key, path);
+
+  // One canonical namer, shared with the planner's uniqueness check, so
+  // component names cannot drift from the ids that are validated.
+  const dtoBaseName = operationDtoBaseName({
+    resourcePath,
+    method,
+    key,
+    path,
+  });
 
   let inputDto: Type<object> | undefined;
   if (pending.input !== undefined) {
-    inputDto = compileDtoClass(
-      pending.input,
-      `${pascal(resourcePath)}_${pascal(method.toLowerCase())}_${pascal(
-        discriminator,
-      )}Input`,
-    );
+    inputDto = compileDtoClass(pending.input, `${dtoBaseName}Input`);
   }
 
   let output: Type<object> | false;
   if (pending.output === false) {
     output = false;
   } else {
-    output = compileOperationDto(
-      pending.output,
-      `${pascal(resourcePath)}_${pascal(method.toLowerCase())}_${pascal(
-        discriminator,
-      )}Output`,
-    );
+    output = compileOperationDto(pending.output, `${dtoBaseName}Output`);
   }
 
   if (status === 204 && output !== false) {
@@ -415,14 +416,6 @@ function compileOperation(
     handler: pending.handler,
     decorators: pending.decorators,
   };
-}
-
-function pascal(value: string): string {
-  return value
-    .split(/[^a-zA-Z0-9]+/)
-    .filter((part) => part.length > 0)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join('');
 }
 
 function toPendingRead<
@@ -531,7 +524,10 @@ export function operationResource<
   let paramsDto: Type<object> | undefined;
   if (input.params !== undefined) {
     assertParamsSchemaMatchesPath(input.path, input.params);
-    paramsDto = compileDtoClass(input.params, `${pascal(input.path)}_Params`);
+    paramsDto = compileDtoClass(
+      input.params,
+      operationResourceParamsDtoName(input.path),
+    );
   }
 
   const operations: Record<string, CompiledOperationDescriptor> = {};

@@ -998,3 +998,105 @@ describe('operation id uniqueness', () => {
     ).not.toThrow();
   });
 });
+
+describe('generated OpenAPI component names', () => {
+  const runResource = (path: string) =>
+    operationResource({
+      path,
+      operations: (op) => ({
+        run: op.read({
+          output: z.object({ ok: z.boolean() }),
+          handler: () => ({ ok: true }),
+        }),
+      }),
+    });
+
+  // Leo's repro: the id namer slugs punctuation to `_` while the DTO
+  // namer pascal-cases, so these two get DISTINCT operation ids and ONE
+  // component name. The path and id checks both pass and the second
+  // schema silently overwrites the first in the generated document.
+  it('rejects two resources whose generated DTO names collide', () => {
+    expect(() =>
+      validateRouteCollisions({
+        generatedResources: [],
+        manualResources: [],
+        operationBundles: [runResource('foo-bar'), runResource('fooBar')],
+      }),
+    ).toThrow(/generated DTO name "FooBar_Get_RunOutput"/);
+  });
+
+  // `output: z.array(...)` is the documented shape for a list endpoint
+  // and takes a different branch of the DTO compiler. Branding only the
+  // object branch left the most common output invisible to this check.
+  it('rejects colliding names for array outputs too', () => {
+    const listResource = (path: string) =>
+      operationResource({
+        path,
+        operations: (op) => ({
+          run: op.read({
+            output: z.array(z.object({ id: z.string() })),
+            handler: () => [{ id: 'a' }],
+          }),
+        }),
+      });
+
+    expect(() =>
+      validateRouteCollisions({
+        generatedResources: [],
+        manualResources: [],
+        operationBundles: [listResource('foo-bar'), listResource('fooBar')],
+      }),
+    ).toThrow(/generated DTO name "FooBar_Get_RunOutput"/);
+  });
+
+  // One compiled DTO reused across operations is one class and one
+  // component. Comparing names instead of identity rejected it, which
+  // is a worse failure than the collision being prevented: it refuses a
+  // configuration that works.
+  it('accepts one generated DTO reused across two operations', () => {
+    const shared = compileDtoClass(
+      z.object({ id: z.string() }),
+      'SharedPetDto',
+    );
+    const bundle = defineOperationResource({
+      path: 'pets',
+      public: true,
+      operations: {
+        featured: {
+          key: 'featured',
+          method: 'GET',
+          path: 'featured',
+          status: 200,
+          output: shared,
+          handler: () => ({ id: 'a' }),
+        },
+        mascot: {
+          key: 'mascot',
+          method: 'GET',
+          path: 'mascot',
+          status: 200,
+          output: shared,
+          handler: () => ({ id: 'b' }),
+        },
+      },
+    });
+
+    expect(() =>
+      validateRouteCollisions({
+        generatedResources: [],
+        manualResources: [],
+        operationBundles: [bundle],
+      }),
+    ).not.toThrow();
+  });
+
+  it('accepts resources whose names differ by more than punctuation', () => {
+    expect(() =>
+      validateRouteCollisions({
+        generatedResources: [],
+        manualResources: [],
+        operationBundles: [runResource('foo-bar'), runResource('baz')],
+      }),
+    ).not.toThrow();
+  });
+});

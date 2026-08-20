@@ -511,16 +511,32 @@ Class handlers can be passed as `handler: TransferHttpHandler` or explicitly as
 
 **Auth / ACL.** Resource `public: true` opens the whole controller. On a secured
 resource, mark individual ops with `public: true`. Setting `public: false` on
-an op under a public resource is rejected at boot. **v1 does not wire ACL
-grants** — authenticated routes are open to any authenticated user unless you
-pass method `decorators` (e.g. access-control grants). Omitting `input` means
-the raw body/query reaches the handler unvalidated.
+an op under a public resource is rejected at boot. Operation resources accept
+`acl` at resource and operation level like CRUD resources do — see §5a; an
+operation with neither `acl` nor a manual grant decorator is open to any
+authenticated user, because upstream's check-access handler returns `true`
+when no grant metadata exists. Omitting `input` means the raw body/query
+reaches the handler unvalidated.
 
 **Validation.** Responses are whitelisted against `output` when present;
 handler/`output` mismatches return **500** (server bug), not 400. Query-string
 inputs are strings — use `z.coerce.number()` / `z.coerce.boolean()` when needed.
 `output` accepts `z.object(...)` or `z.array(...)`. Duplicate `method`+`path`
 pairs inside one resource fail at boot.
+
+When an operation declares `input`, the request payload must be a plain JSON
+object. An array, a scalar, or a non-plain object (a `Buffer` from a raw body
+parser, for instance) returns **400** rather than being narrowed to `{}` —
+substituting a valid value for an invalid one is not something a validation
+boundary should do quietly. A MISSING body is still `{}`, so a `POST` with no
+payload against an all-optional `input` stays legal.
+
+Two generated DTOs that would claim the same OpenAPI component name fail at
+boot. The name is derived from the resource path, the method, the operation key
+and the operation's own path, and that transform folds punctuation and
+casing together — `foo-bar` and
+`fooBar` both yield `FooBar`. One compiled DTO reused across several
+operations is fine: the check compares class identity, not names.
 
 Cursor, SSE, binary, raw JSON, idempotency, and external-client scaffolds are
 follow-ups on issue #43.
@@ -648,10 +664,20 @@ consumer's opaque decorator list a second time. Turning the default on
 would reject every working manual-grant app. A bootstrap-time sweep over
 discovered routes would close both this and the scope gap above.
 
-For the same reason, `acl` plus a manual `AccessControl*` decorator on the
-same operation is **not** detected and rejected — they are documented as
-mutually exclusive. Upstream's grant metadata is a `SetMetadata` write, so
-combining them means one silently wins. Use one or the other per bundle.
+`acl` plus a manual `AccessControl*` decorator on the same operation is
+**not** detected either, but for a different reason, and the outcome is
+not a coin flip. Upstream's grant metadata is a plain `SetMetadata` write
+read with `reflector.get(...)`, so the two never merge — the last write
+wins. The generated route applies the operation's own `decorators` first
+and the `acl`-derived grant last, so **`acl` overwrites a hand-written
+`AccessControlGrant`**, and a manual grant deliberately tighter than the
+inferred action is discarded silently.
+
+For operation resources this is decidable: the route builder owns the
+single `applyDecorators` call and could read the metadata back between
+the two pushes, with no re-application of consumer code. It is simply not
+implemented. For CRUD resources the plan-time argument above still holds.
+Either way: use one or the other per bundle.
 
 ### `public` and `acl` do not mix
 

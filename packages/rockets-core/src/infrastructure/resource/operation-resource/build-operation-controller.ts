@@ -117,6 +117,21 @@ function assertValidatableDto(
   }
 }
 
+/**
+ * Validates the request payload against the declared input DTO.
+ *
+ * A non-record payload is REJECTED rather than coerced. Coercing it to
+ * `{}` made `POST []` against `z.object({ note: z.string().optional() })`
+ * return 200 with an empty input — zod itself rejects the array, and the
+ * same coercion let any array or scalar pass an all-optional
+ * class-validator DTO. Silently substituting a valid value for an
+ * invalid one is the failure shape to avoid on a validation boundary.
+ *
+ * A MISSING body still becomes `{}`: `POST` with no payload against an
+ * all-optional DTO is legal, and a DTO with required fields still fails
+ * validation one line later, with the field-level message rather than a
+ * generic shape error.
+ */
 async function applyInputDto(
   dto: Type<object> | undefined,
   value: unknown,
@@ -124,11 +139,45 @@ async function applyInputDto(
   if (dto === undefined) {
     return value;
   }
-  const data =
-    value !== null && typeof value === 'object' && !Array.isArray(value)
-      ? (value as object)
-      : {};
-  return validateAndWhitelistDto(dto, data, false);
+  if (value === undefined) {
+    return validateAndWhitelistDto(dto, {}, false);
+  }
+  if (!isPlainRecord(value)) {
+    throw new BadRequestException({
+      statusCode: 400,
+      message: `Expected a JSON object body, received ${describePayload(
+        value,
+      )}`,
+      error: 'Bad Request',
+    });
+  }
+  return validateAndWhitelistDto(dto, value, false);
+}
+
+/**
+ * Whether a value is a plain JSON object.
+ *
+ * Prototype-checked rather than `typeof value === 'object'`. A `Buffer`
+ * from a raw body parser is an object and is not an array, so the looser
+ * test let it through to be whitelisted down to `{}` — the same silent
+ * substitution the array case is rejected for. `Date`, `Map` and class
+ * instances fall out for the same reason; none of them survive a JSON
+ * round trip, so nothing a JSON client can send is lost.
+ */
+function isPlainRecord(value: unknown): value is object {
+  if (value === null || typeof value !== 'object') return false;
+  const proto: unknown = Object.getPrototypeOf(value);
+  return proto === Object.prototype || proto === null;
+}
+
+function describePayload(value: unknown): string {
+  if (value === null) return 'null';
+  if (Array.isArray(value)) return 'an array';
+  if (typeof value === 'object') {
+    const name: unknown = value.constructor?.name;
+    return typeof name === 'string' ? `a ${name}` : 'a non-plain object';
+  }
+  return `a ${typeof value}`;
 }
 
 /**
@@ -323,6 +372,67 @@ export function operationDiscriminator(key: string, path: string): string {
   const pathSlug = path.replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_|_$/g, '');
   if (pathSlug === '' || pathSlug === key) return key;
   return `${key}_${pathSlug}`;
+}
+
+/**
+ * Base name for an operation's generated request/response DTO classes,
+ * which become OpenAPI component names.
+ *
+ * Shared with the planner so the uniqueness assertion checks the SAME
+ * string the zod compiler stamps. Two namers drifting apart is what let
+ * `foo-bar` and `fooBar` get distinct operation ids and one component
+ * name: the ids keyed off an underscore slug, the DTOs off a pascal
+ * transform that folds both spellings together.
+ *
+ * `pascal` stays lossy on purpose. Making it injective would be a guess
+ * about which characters matter; asserting the result is unique is
+ * total. Same reasoning as `validateOperationIdUniqueness` — the
+ * transform is a readability optimisation, never the thing correctness
+ * rests on.
+ */
+export function operationDtoBaseName(args: {
+  readonly resourcePath: string;
+  readonly method: string;
+  readonly key: string;
+  readonly path: string;
+}): string {
+  return `${pascalSegment(args.resourcePath)}_${pascalSegment(
+    args.method.toLowerCase(),
+  )}_${pascalSegment(operationDiscriminator(args.key, args.path))}`;
+}
+
+/**
+ * Marks a DTO class whose NAME Rockets minted, as opposed to one the
+ * consumer supplied.
+ *
+ * The distinction matters for the OpenAPI component-uniqueness check:
+ * a consumer may legitimately reuse one hand-written DTO across several
+ * operations, so asserting global name uniqueness over every DTO would
+ * reject valid apps. A generated name colliding, on the other hand, is
+ * always a bug — two schemas would claim one component and the second
+ * silently overwrites the first.
+ *
+ * `Symbol.for` so two copies of the package still recognise each
+ * other's brands.
+ */
+export const ROCKETS_GENERATED_DTO_NAME = Symbol.for(
+  '@concepta/rockets-core/generated-dto-name',
+);
+
+/**
+ * Component name for a resource's shared path-params DTO. Same lossy
+ * transform, same uniqueness assertion covering it.
+ */
+export function operationResourceParamsDtoName(resourcePath: string): string {
+  return `${pascalSegment(resourcePath)}_Params`;
+}
+
+function pascalSegment(value: string): string {
+  return value
+    .split(/[^a-zA-Z0-9]+/)
+    .filter((part) => part.length > 0)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('');
 }
 
 /**

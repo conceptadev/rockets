@@ -11,8 +11,13 @@ import {
 } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { APP_GUARD } from '@nestjs/core';
-import { ApiProperty, DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import {
+  ApiProperty,
+  ApiPropertyOptional,
+  DocumentBuilder,
+  SwaggerModule,
+} from '@nestjs/swagger';
+import { IsOptional, IsString } from 'class-validator';
 import { z } from 'zod';
 import request from 'supertest';
 
@@ -89,6 +94,18 @@ class LowerInputDto {
   name!: string;
 }
 
+/**
+ * All-optional on purpose. A required field would 400 on its own, so it
+ * could not show that a non-record body was being coerced to `{}` and
+ * accepted.
+ */
+class LowerOptionalInputDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  note?: string;
+}
+
 class LowerOutputDto {
   @ApiProperty()
   @IsString()
@@ -133,6 +150,13 @@ const publicOps = operationResource({
       }),
       output: z.object({ term: z.string(), take: z.number().optional() }),
       handler: ({ input }) => ({ term: input.term, take: input.take }),
+    }),
+    optionalBody: op.write({
+      method: 'POST',
+      path: 'optional-body',
+      input: z.object({ note: z.string().optional() }),
+      output: z.object({ ok: z.boolean() }),
+      handler: () => ({ ok: true }),
     }),
     accepted: op.write({
       status: 202,
@@ -305,6 +329,15 @@ const lowerLevelOps = defineOperationResource({
       output: LowerOutputDto,
       handler: ({ input }) => input,
     },
+    optional: {
+      key: 'optional',
+      method: 'POST',
+      path: 'optional',
+      status: 200,
+      inputDto: LowerOptionalInputDto,
+      output: LowerOutputDto,
+      handler: () => ({ name: 'ok' }),
+    },
     primitive: {
       key: 'primitive',
       method: 'GET',
@@ -393,6 +426,170 @@ class BillingModule {
 
 @Module({ imports: [BillingModule.forRoot()], exports: [BillingModule] })
 class PlatformModule {}
+
+/**
+ * The mirror-image shape: exports declared STATICALLY on the host class,
+ * `forRoot()` returning no `exports` of its own, and the dynamic module
+ * imported DIRECTLY rather than re-exported.
+ *
+ * Reading only the dynamic half concluded the handler was unsupplied,
+ * registered a second copy locally, and that copy could not resolve
+ * `STATIC_SECRET` — which is private to `StaticHostModule`.
+ */
+const STATIC_SECRET = Symbol('STATIC_SECRET');
+
+@Injectable()
+class StaticHostHandler {
+  constructor(@Inject(STATIC_SECRET) private readonly secret: string) {}
+
+  handle() {
+    return { value: this.secret };
+  }
+}
+
+@Module({
+  providers: [
+    { provide: STATIC_SECRET, useValue: 'static-secret' },
+    StaticHostHandler,
+  ],
+  exports: [StaticHostHandler],
+})
+class StaticHostModule {
+  static forRoot(): DynamicModule {
+    return { module: StaticHostModule };
+  }
+}
+
+/**
+ * The case both previous fixes missed: a host that populates BOTH
+ * halves — static `@Module` metadata AND dynamic `forRoot()` exports —
+ * reached through a re-export.
+ *
+ * The re-export branch returned after reading the static half, so the
+ * handler published only by `forRoot()` was auto-registered locally and
+ * could not resolve `HYBRID_SECRET`. Nest's own scanner unions the two
+ * (`reflectExports`); this pins that we do the same.
+ */
+const HYBRID_SECRET = Symbol('HYBRID_SECRET');
+
+@Injectable()
+class HybridStaticService {
+  readonly label = 'static-half';
+}
+
+@Injectable()
+class HybridHandler {
+  constructor(@Inject(HYBRID_SECRET) private readonly secret: string) {}
+
+  handle() {
+    return { value: this.secret };
+  }
+}
+
+@Module({
+  providers: [HybridStaticService],
+  exports: [HybridStaticService],
+})
+class HybridHostModule {
+  static forRoot(): DynamicModule {
+    return {
+      module: HybridHostModule,
+      providers: [
+        { provide: HYBRID_SECRET, useValue: 'hybrid-secret' },
+        HybridHandler,
+      ],
+      exports: [HybridHandler],
+    };
+  }
+}
+
+@Module({
+  imports: [HybridHostModule.forRoot()],
+  exports: [HybridHostModule],
+})
+class HybridWrapperModule {}
+
+/**
+ * Case B: a wrapper whose `forRoot()` returns `imports` AND re-exports
+ * the metadata-less host it imported.
+ *
+ * The exports entry is the bare `NestedHostModule` CLASS; the module it
+ * stands for lives in the WRAPPER's dynamic `imports`. Resolving that
+ * needs the wrapper's own import list, which the export walk was not
+ * given — so the handler was auto-registered locally and could not
+ * resolve `NESTED_SECRET`.
+ */
+const NESTED_SECRET = Symbol('NESTED_SECRET');
+
+@Injectable()
+class NestedHandler {
+  constructor(@Inject(NESTED_SECRET) private readonly secret: string) {}
+
+  handle() {
+    return { value: this.secret };
+  }
+}
+
+@Module({})
+class NestedHostModule {
+  static forRoot(): DynamicModule {
+    return {
+      module: NestedHostModule,
+      providers: [
+        { provide: NESTED_SECRET, useValue: 'nested-secret' },
+        NestedHandler,
+      ],
+      exports: [NestedHandler],
+    };
+  }
+}
+
+@Module({})
+class NestedWrapperModule {
+  static forRoot(): DynamicModule {
+    return {
+      module: NestedWrapperModule,
+      imports: [NestedHostModule.forRoot()],
+      exports: [NestedHostModule],
+    };
+  }
+}
+
+const nestedHostOps = operationResource({
+  path: 'nested-host',
+  public: true,
+  imports: [NestedWrapperModule.forRoot()],
+  operations: (op) => ({
+    read: op.read({
+      output: z.object({ value: z.string() }),
+      handler: NestedHandler,
+    }),
+  }),
+});
+
+const hybridHostOps = operationResource({
+  path: 'hybrid-host',
+  public: true,
+  imports: [HybridWrapperModule],
+  operations: (op) => ({
+    read: op.read({
+      output: z.object({ value: z.string() }),
+      handler: HybridHandler,
+    }),
+  }),
+});
+
+const staticHostOps = operationResource({
+  path: 'static-host',
+  public: true,
+  imports: [StaticHostModule.forRoot()],
+  operations: (op) => ({
+    read: op.read({
+      output: z.object({ value: z.string() }),
+      handler: StaticHostHandler,
+    }),
+  }),
+});
 
 const dynamicHostOps = operationResource({
   path: 'platform',
@@ -608,6 +805,42 @@ describe('operationResource e2e (issue #43 v1)', () => {
       .expect({ name: 'ok' });
   });
 
+  // Coercing a non-record body to `{}` let an array pass an all-optional
+  // DTO on both authoring paths: zod itself rejects the array, and the
+  // class path never saw one. Substituting a valid value for an invalid
+  // one on a validation boundary is the shape being removed here.
+  it('rejects a non-object body on the zod path', async () => {
+    // Asserted on OUR message, not just the status. A scalar body is
+    // rejected by body-parser before reaching this code, so a bare
+    // `.expect(400)` would pass with the fix reverted and prove nothing.
+    const rejected = await request(app.getHttpServer())
+      .post('/ops/optional-body')
+      .send([])
+      .expect(400);
+    expect(rejected.body.message).toMatch(/Expected a JSON object body/);
+    // The legitimate shapes still pass.
+    await request(app.getHttpServer())
+      .post('/ops/optional-body')
+      .send({})
+      .expect(200);
+    await request(app.getHttpServer())
+      .post('/ops/optional-body')
+      .send({ note: 'hi' })
+      .expect(200);
+  });
+
+  it('rejects a non-object body on the lower-level class path', async () => {
+    const rejected = await request(app.getHttpServer())
+      .post('/lower/optional')
+      .send([])
+      .expect(400);
+    expect(rejected.body.message).toMatch(/Expected a JSON object body/);
+    await request(app.getHttpServer())
+      .post('/lower/optional')
+      .send({})
+      .expect(200);
+  });
+
   it('rejects lower-level class-validator primitive output', async () => {
     await request(app.getHttpServer()).get('/lower/primitive').expect(500);
   });
@@ -737,5 +970,119 @@ describe('operationResource — handler behind a re-exported dynamic module (e2e
       .expect(200);
 
     expect(res.body).toEqual({ value: 'billing-secret' });
+  });
+});
+
+/**
+ * The direct-import twin of the block above: `forRoot()` returns no
+ * `exports`, so everything the module publishes lives in the STATIC
+ * `@Module` metadata on its host class. Reading only the dynamic half
+ * auto-registered a second handler copy that could not resolve
+ * `STATIC_SECRET`, and the app failed to boot.
+ */
+describe('operationResource — handler behind a directly imported forRoot() (e2e)', () => {
+  let app: INestApplication;
+
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        RocketsCoreModule.forRoot({
+          auth: defineAuthAdapter(SimpleAuthProvider),
+          providers: [SimpleAuthProvider],
+          resources: [staticHostOps],
+          global: true,
+        }),
+      ],
+      providers: [{ provide: APP_GUARD, useClass: AuthServerGuard }],
+    }).compile();
+
+    app = moduleRef.createNestApplication();
+    await app.init();
+  });
+
+  afterAll(async () => {
+    if (app) await app.close();
+  });
+
+  it('boots and resolves the handler the host class exports statically', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/static-host/read')
+      .expect(200);
+
+    expect(res.body).toEqual({ value: 'static-secret' });
+  });
+});
+
+/**
+ * Host with static AND dynamic exports, reached through a re-export.
+ * Fixing only the direct-import path left this half broken.
+ */
+describe('operationResource — handler behind a hybrid re-exported host (e2e)', () => {
+  let app: INestApplication;
+
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        RocketsCoreModule.forRoot({
+          auth: defineAuthAdapter(SimpleAuthProvider),
+          providers: [SimpleAuthProvider],
+          resources: [hybridHostOps],
+          global: true,
+        }),
+      ],
+      providers: [{ provide: APP_GUARD, useClass: AuthServerGuard }],
+    }).compile();
+
+    app = moduleRef.createNestApplication();
+    await app.init();
+  });
+
+  afterAll(async () => {
+    if (app) await app.close();
+  });
+
+  it('resolves a handler published only by the dynamic half', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/hybrid-host/read')
+      .expect(200);
+
+    expect(res.body).toEqual({ value: 'hybrid-secret' });
+  });
+});
+
+/**
+ * Dynamic wrapper re-exporting a dynamically imported host. The export
+ * walk needs the WRAPPER's own imports to resolve the bare class entry.
+ */
+describe('operationResource — handler behind a dynamic wrapper re-export (e2e)', () => {
+  let app: INestApplication;
+
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        RocketsCoreModule.forRoot({
+          auth: defineAuthAdapter(SimpleAuthProvider),
+          providers: [SimpleAuthProvider],
+          resources: [nestedHostOps],
+          global: true,
+        }),
+      ],
+      providers: [{ provide: APP_GUARD, useClass: AuthServerGuard }],
+    }).compile();
+
+    app = moduleRef.createNestApplication();
+    await app.init();
+  });
+
+  afterAll(async () => {
+    if (app) await app.close();
+  });
+
+  it('resolves through a dynamic wrapper that re-exports its dynamic import', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/nested-host/read')
+      .expect(200);
+
+    expect(res.body).toEqual({ value: 'nested-secret' });
   });
 });

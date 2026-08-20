@@ -160,12 +160,19 @@ function addExportEntries(
     if (typeof entry === 'function') {
       tokens.add(entry);
       const moduleClass = entry as Type<unknown>;
+
+      // Both halves, never one. Nest's scanner unions a module's static
+      // `@Module` exports with the dynamic ones its factory returned
+      // (`reflectExports`), and a configured module routinely populates
+      // both: static metadata for what it always publishes, dynamic for
+      // what `forRoot()` adds. Returning after the static half left the
+      // dynamic exports unseen, so a handler published only by
+      // `forRoot()` was auto-registered locally and its module-private
+      // dependencies became unresolvable — the same boot failure the
+      // direct-import path was fixed for.
       if (isModuleClass(moduleClass)) {
         addModuleExports(moduleClass, tokens, visited);
-        continue;
       }
-      // Metadata-less class: either a plain provider, or the host of a
-      // re-exported dynamic module. Only the latter matches an import.
       const dynamic = resolveReExportedDynamicModule(moduleClass, hostImports);
       if (dynamic !== undefined && !visited.has(dynamic)) {
         visited.add(dynamic);
@@ -177,7 +184,7 @@ function addExportEntries(
     if (typeof entry === 'object' && isDynamicModule(entry)) {
       if (visited.has(entry)) continue;
       visited.add(entry);
-      addExportEntries(entry.exports ?? [], tokens, visited);
+      addDynamicModuleExports(entry, tokens, visited);
       continue;
     }
 
@@ -211,10 +218,57 @@ function collectImportedExportTokens(
     if (typeof entry === 'object' && isDynamicModule(entry)) {
       if (visited.has(entry)) continue;
       visited.add(entry);
-      addExportEntries(entry.exports ?? [], tokens, visited);
+      addDynamicModuleExports(entry, tokens, visited);
     }
   }
   return tokens;
+}
+
+/**
+ * A `DynamicModule`'s exports are the union of what the call returned
+ * and what its host class declares statically.
+ *
+ * Nest merges the two, and the common configured-module shape puts them
+ * in the STATIC half:
+ *
+ * ```ts
+ * @Module({ providers: [Handler], exports: [Handler] })
+ * class Host { static forRoot(): DynamicModule { return { module: Host } } }
+ * ```
+ *
+ * `Host.forRoot()` carries no `exports` of its own, so reading only the
+ * dynamic half concluded the handler was unsupplied, auto-registered it
+ * locally, and the copy in `RocketsOperationResource` then failed to
+ * resolve a dependency private to `Host`.
+ *
+ * This is the direct-import twin of `resolveReExportedDynamicModule`,
+ * which covers the same class reached through a re-export instead.
+ */
+function addDynamicModuleExports(
+  entry: DynamicModule,
+  tokens: Set<unknown>,
+  visited: Set<unknown>,
+): void {
+  // The dynamic module's OWN imports are the host-import list for its
+  // exports. Nest unions static and dynamic imports the same way it
+  // unions exports (`@nestjs/core/scanner.js:55-57` and `:151-155`), so
+  // a wrapper returning `{ imports: [Inner.forRoot()], exports: [Inner] }`
+  // publishes `Inner`'s exports. Passing no host imports left that entry
+  // unresolvable: `Inner` is a metadata-less class, nothing matched it,
+  // and the handler was registered a second time locally — a boot
+  // failure when its dependencies are module-private, and a silent
+  // duplicate instance when they are not.
+  addExportEntries(
+    entry.exports ?? [],
+    tokens,
+    visited,
+    Array.isArray(entry.imports) ? entry.imports : [],
+  );
+
+  const host: unknown = entry.module;
+  if (typeof host === 'function') {
+    addModuleExports(host as Type<unknown>, tokens, visited);
+  }
 }
 
 /**

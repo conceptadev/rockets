@@ -204,6 +204,12 @@ Optional resource-level `params` validates `:path` params. Full rules:
 [CONFIGURATION.md §6a](../../CONFIGURATION.md#6a-operationresource--typed-non-crud-endpoints-issue-43--50).
 Class handlers may be passed directly or as `{ useClass: Handler }`; explicit
 resource providers for the same token take precedence over auto-registration.
+
+With an `input` declared, the request payload must be a plain JSON object —
+an array, a scalar, or a `Buffer` returns `400` rather than being narrowed to
+`{}`. A missing body is still `{}`, so a `POST` with no payload against an
+all-optional `input` stays legal.
+
 Planner collision checks only cover Rockets-owned structured routes. For a
 real adapter audit after global prefix/versioning/manual controllers are
 registered, call `validateRegisteredRoutes(app)` after `app.init()`.

@@ -103,6 +103,25 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Changed
 
+- **`operationResource` rejects a non-object request payload (issue #43).**
+  With an `input` declared, an array, a scalar, or a non-plain object now
+  returns `400` instead of being narrowed to `{}`. `POST []` against
+  `z.object({ note: z.string().optional() })` previously returned `200`
+  with an empty input, and the same narrowing bypassed an all-optional
+  class-validator DTO. A missing body still becomes `{}`, so a `POST`
+  with no payload against an all-optional input is unchanged.
+- **Two generated DTOs claiming one OpenAPI component name fail at
+  boot.** Operation ids keyed off an underscore slug while DTO names
+  pascal-cased, so `foo-bar` and `fooBar` received distinct ids and one
+  component name — the second schema silently replaced the first in the
+  generated document. Both now derive from one namer, and the planner
+  asserts the result. The check compares class identity, so reusing one
+  compiled DTO across several operations stays legal.
+- **A directly imported `DynamicModule` no longer loses its host class's
+  static exports**, and a re-exported host no longer loses its dynamic
+  ones. Nest's scanner unions the two halves; only one was modelled, on
+  each path, so a handler published by the other half was re-registered
+  locally and could not resolve its module-private dependencies.
 - **Per-operation `output` now actually reaches the route (issue #57).**
   `defineResource` accepted `operations.<op>.output` but upstream reads
   `response.resource` / `response.paginated` from the CONTROLLER only —
