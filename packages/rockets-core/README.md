@@ -666,7 +666,6 @@ RocketsCoreModule.forRoot({
   routePolicy: {
     requireAuth: true,
     requireAcl: true,
-    requireAclQuery: true,
     allow: ['GET /health'],
   },
 });
@@ -683,13 +682,28 @@ Rockets route policy rejected 2 routes:
 
 | Rule | Fails when |
 | --- | --- |
-| `requireAuth` | a route is `AuthPublic`, or the app registers no global guard at all |
+| `requireAuth` | a route is `AuthPublic`, or no global guard is recognised as an AUTHENTICATION guard |
 | `requireAcl` | an authenticated route carries no `AccessControlGrant` |
-| `requireAclQuery` | a granted route names no `CanAccess` service, so `own` possession widens to every row |
+| `requireAclQuery` | a granted route names no `CanAccess` service, so `own` possession widens to every row — declare it only once every resource's `acl` names a `query` service |
+
+"Recognised" is deliberate: `AuthServerGuard` counts automatically; any
+other guard that authenticates your app must be listed in
+`routePolicy.authGuards`. The audit refuses to assume that the mere
+presence of a global guard means authentication — a throttler, an ACL
+guard, or upstream access-control's disabled-guard factory (registered
+unconditionally, resolving to `null` under `appGuard: false`) are global
+guards that authenticate nothing, and counting them would report an
+unauthenticated app as protected.
 
 Exemptions are explicit — `allow` takes route ids, `allowControllers`
-takes classes — because an exemption that silently widens as routes are
-added is the failure this whole check exists to remove.
+takes classes (matched by identity, so a same-named class from another
+package is not exempted with it) — because an exemption that silently
+widens as routes are added is the failure this whole check exists to
+remove. Two properties keep the list honest: an `allow` entry exempts
+its route from EVERY declared rule, not just the one it was added for;
+and, while at least one rule is declared, an entry matching no
+discovered route fails the boot as `staleAllow`, so the list cannot rot
+where it matters.
 
 **Why bootstrap and not plan time.** `buildAppRegistrationPlan` already
 rejects route collisions and ungranted operations, but it only sees what
@@ -702,12 +716,30 @@ registered. Declare one and `RouteAuditService` becomes injectable, so
 `audit()` gives you the full table for a CI artifact:
 
 ```typescript
-const { routes, globalGuards } = app.get(RouteAuditService).audit();
+const { routes, globalGuards, authGuards } = app.get(RouteAuditService).audit();
 ```
+
+`authGuards` — not `globalGuards` — is what decides `guarded`.
 
 Route ids are `METHOD /controller/handler` paths. Global prefix and Nest
 versioning are applied by the HTTP adapter after this runs, so ids stay
-stable against those settings rather than matching the wire path.
+stable against those settings rather than matching the wire path. A
+controller or handler declared with an array of paths produces one row
+per combination.
+
+Apps composed through `@concepta/rockets` pass the same option as
+`RocketsModule.forRoot({ routePolicy })`. The `AuthServerGuard` that
+module registers is recognised automatically, and an auth bootstrap that
+swaps the global guard (`defineRocketsAuth` installs upstream
+`JwtGuard`) contributes its guard class through the same composition —
+no `authGuards` declaration needed for either. `authGuards` remains for
+guards nothing declares: a hand-registered `APP_GUARD` class of your
+own.
+
+`allow` entries are staleness-checked only while at least one rule is
+declared; a recognition-only policy polices nothing. Routes removed
+conditionally (`disableController`) live in the same options object as
+the policy — keep the two consistent per environment.
 
 ---
 

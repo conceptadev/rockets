@@ -6,70 +6,34 @@ import {
 /**
  * The metadata keys upstream's ACL decorators write under.
  *
- * Derived by applying each decorator to a throwaway class and reading
- * back which key changed, rather than copying
- * `ACCESS_CONTROL_MODULE_GRANT_METADATA` — those constants exist but are
- * not in the package's export map, and a hardcoded copy would drift
- * silently on an upstream rename. The audit would then report every
- * route as ungranted, which is a lie in exactly the direction this
- * module exists to prevent.
+ * Nest's `SetMetadata` attaches the key it writes to as `KEY` on the
+ * decorator it returns, and both upstream decorators are bare
+ * `SetMetadata` calls — so `AccessControlGrant().KEY` IS the key, typed,
+ * public, and drift-proof. An earlier revision derived the keys by
+ * applying the decorators to a throwaway class and diffing
+ * `Reflect.getMetadataKeys`; 75 lines doing what one property read does.
  *
- * Resolved once at module load; the decorators are pure `SetMetadata`
- * calls, so probing is free and has no side effects beyond the probe.
+ * Resolved lazily and asserted loudly. Lazily, because this module is
+ * reachable from the package's main barrel and a module-load throw would
+ * break every consumer, including apps that never declared a policy.
+ * Loudly, because the failure direction of a missing key is the one this
+ * audit exists to remove: `readGrantField` would return `null` for every
+ * route, `aclAction` would always be empty, and a policy declaring only
+ * `requireAclQuery` would boot green while checking nothing.
  */
-function probeKey(
-  decorate: (target: NewableFunction) => void,
-  matches: (value: unknown) => boolean,
-): string | undefined {
-  class Probe {}
-  decorate(Probe);
+export function aclMetadataKeys(): { grant: string; query: string } {
+  const grant: unknown = AccessControlGrant().KEY;
+  const query: unknown = AccessControlQuery().KEY;
 
-  for (const key of Reflect.getMetadataKeys(Probe)) {
-    if (typeof key !== 'string') continue;
-    if (matches(Reflect.getMetadata(key, Probe))) return key;
+  if (typeof grant !== 'string' || typeof query !== 'string') {
+    throw new Error(
+      'RouteAuditService: could not resolve the ACL metadata keys from ' +
+        '@concepta/nestjs-access-control — AccessControlGrant().KEY / ' +
+        'AccessControlQuery().KEY did not return strings. The upstream ' +
+        'decorator contract changed; the audit cannot read grants and ' +
+        'refuses to report every route as ungranted-by-default.',
+    );
   }
-  return undefined;
-}
 
-const GRANT_SENTINEL = '__rockets_audit_probe_grant__';
-
-export const ACL_GRANT_METADATA_KEY = probeKey(
-  (target) => {
-    // The decorator's own typing expects real grant objects; the probe
-    // only needs a value it can recognise coming back out.
-    const grant = { action: GRANT_SENTINEL } as unknown as Parameters<
-      typeof AccessControlGrant
-    >[0];
-    AccessControlGrant(grant)(target);
-  },
-  (value) =>
-    Array.isArray(value) &&
-    value.some(
-      (entry) =>
-        typeof entry === 'object' &&
-        entry !== null &&
-        Reflect.get(entry, 'action') === GRANT_SENTINEL,
-    ),
-);
-
-class QueryProbeService {}
-
-export const ACL_QUERY_METADATA_KEY = probeKey(
-  (target) => {
-    const query = {
-      service: QueryProbeService,
-    } as unknown as Parameters<typeof AccessControlQuery>[0];
-    AccessControlQuery(query)(target);
-  },
-  (value) => containsQueryProbe(value),
-);
-
-function containsQueryProbe(value: unknown): boolean {
-  const entries = Array.isArray(value) ? value : [value];
-  return entries.some(
-    (entry) =>
-      typeof entry === 'object' &&
-      entry !== null &&
-      Reflect.get(entry, 'service') === QueryProbeService,
-  );
+  return { grant, query };
 }

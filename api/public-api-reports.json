@@ -457,7 +457,7 @@
         "name": "RocketsOptionsExtrasInterface",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RocketsOptionsExtrasInterface extends Pick<DynamicModule, 'global' | 'controllers'> {\n    enableGlobalGuard?: boolean;\n    disableController?: DisableControllerOptionsInterface;\n    auth?: RocketsAuthOption;\n    userMetadata?: RocketsUserMetadataConfig;\n    repository?: RepositoryModuleInterface | RepositoryBootstrap;\n    handlers?: {\n        upsertUserMetadata?: Type<AbstractUpsertUserMetadataHandler>;\n        getUserMetadata?: Type<AbstractGetUserMetadataHandler>;\n    };\n    resources?: ReadonlyArray<ResourceInput>;\n    accessControl?: RocketsAccessControlConfig;\n}"
+        "signature": "export interface RocketsOptionsExtrasInterface extends Pick<DynamicModule, 'global' | 'controllers'> {\n    enableGlobalGuard?: boolean;\n    disableController?: DisableControllerOptionsInterface;\n    auth?: RocketsAuthOption;\n    userMetadata?: RocketsUserMetadataConfig;\n    repository?: RepositoryModuleInterface | RepositoryBootstrap;\n    handlers?: {\n        upsertUserMetadata?: Type<AbstractUpsertUserMetadataHandler>;\n        getUserMetadata?: Type<AbstractGetUserMetadataHandler>;\n    };\n    resources?: ReadonlyArray<ResourceInput>;\n    accessControl?: RocketsAccessControlConfig;\n    routePolicy?: RoutePolicy;\n}"
       },
       {
         "name": "RocketsOptionsInterface",
@@ -2167,7 +2167,7 @@
         "name": "AuthBootstrapContributions",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface AuthBootstrapContributions {\n    readonly enableGlobalGuard?: boolean;\n    readonly providesAppGuard?: boolean;\n}"
+        "signature": "export interface AuthBootstrapContributions {\n    readonly enableGlobalGuard?: boolean;\n    readonly providesAppGuard?: boolean;\n    readonly authGuards?: readonly Type<unknown>[];\n}"
       },
       {
         "name": "AuthBootstrapIdentity",
@@ -2815,19 +2815,19 @@
         "name": "RouteAuditEntry",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RouteAuditEntry {\n    readonly id: string;\n    readonly method: string;\n    readonly path: string;\n    readonly controller: string;\n    readonly handler: string;\n    readonly authentication: RouteAuthState;\n    readonly aclAction: string | null;\n    readonly aclResource: string | null;\n    readonly aclQuery: string | null;\n}"
+        "signature": "export interface RouteAuditEntry {\n    readonly id: string;\n    readonly method: string;\n    readonly path: string;\n    readonly controller: string;\n    readonly controllerRef: Type<unknown>;\n    readonly handler: string;\n    readonly authentication: RouteAuthState;\n    readonly aclAction: string | null;\n    readonly aclResource: string | null;\n    readonly aclQuery: string | null;\n}"
       },
       {
         "name": "RouteAuditReport",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RouteAuditReport {\n    readonly routes: readonly RouteAuditEntry[];\n    readonly globalGuards: readonly string[];\n}"
+        "signature": "export interface RouteAuditReport {\n    readonly routes: readonly RouteAuditEntry[];\n    readonly globalGuards: readonly string[];\n    readonly authGuards: readonly string[];\n}"
       },
       {
         "name": "RouteAuditService",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class RouteAuditService {\n    private readonly discoveryService;\n    private readonly metadataScanner;\n    private readonly policy?;\n    constructor(discoveryService: DiscoveryService, metadataScanner: MetadataScanner, policy?: RoutePolicy | undefined);\n    onApplicationBootstrap(): void;\n    audit(): RouteAuditReport;\n    private scanControllers;\n    private globalGuardNames;\n}"
+        "signature": "export declare class RouteAuditService {\n    private readonly discoveryService;\n    private readonly metadataScanner;\n    private readonly applicationConfig;\n    private readonly policy?;\n    constructor(discoveryService: DiscoveryService, metadataScanner: MetadataScanner, applicationConfig: ApplicationConfig, policy?: RoutePolicy | undefined);\n    onApplicationBootstrap(): void;\n    audit(): RouteAuditReport;\n    private scanControllers;\n    private resolveGlobalGuards;\n}"
       },
       {
         "name": "RouteAuthState",
@@ -2845,13 +2845,13 @@
         "name": "RoutePolicy",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RoutePolicy {\n    readonly requireAuth?: boolean;\n    readonly requireAcl?: boolean;\n    readonly requireAclQuery?: boolean;\n    readonly allow?: readonly string[];\n    readonly allowControllers?: readonly Type<unknown>[];\n}"
+        "signature": "export interface RoutePolicy {\n    readonly requireAuth?: boolean;\n    readonly requireAcl?: boolean;\n    readonly requireAclQuery?: boolean;\n    readonly allow?: readonly string[];\n    readonly allowControllers?: readonly Type<unknown>[];\n    readonly authGuards?: readonly Type<unknown>[];\n}"
       },
       {
         "name": "RoutePolicyViolation",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RoutePolicyViolation {\n    readonly routeId: string;\n    readonly rule: 'requireAuth' | 'requireAcl' | 'requireAclQuery';\n    readonly detail: string;\n}"
+        "signature": "export interface RoutePolicyViolation {\n    readonly routeId: string;\n    readonly rule: 'requireAuth' | 'requireAcl' | 'requireAclQuery' | 'staleAllow';\n    readonly detail: string;\n}"
       },
       {
         "name": "SchemaEntityCompiler",
@@ -3019,7 +3019,7 @@
         "name": "collectRouteAudit",
         "kind": "function",
         "runtime": true,
-        "signature": "export declare function collectRouteAudit(args: {\n    readonly controllers: readonly ControllerScan[];\n    readonly globalGuards: readonly string[];\n}): RouteAuditReport;"
+        "signature": "export declare function collectRouteAudit(args: {\n    readonly controllers: readonly ControllerScan[];\n    readonly globalGuards: readonly string[];\n    readonly authGuards: readonly string[];\n}): RouteAuditReport;"
       },
       {
         "name": "createBoundRelation",

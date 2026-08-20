@@ -1,10 +1,8 @@
 import { RequestMethod, type Type } from '@nestjs/common';
 import { METHOD_METADATA, PATH_METADATA } from '@nestjs/common/constants';
-import {
-  ACL_GRANT_METADATA_KEY,
-  ACL_QUERY_METADATA_KEY,
-} from './acl-metadata-keys';
+
 import { ROCKETS_DISABLE_GUARDS_TOKEN } from '../../rockets-core.constants';
+import { aclMetadataKeys } from './acl-metadata-keys';
 import type {
   RouteAuditEntry,
   RouteAuthState,
@@ -33,23 +31,33 @@ const METHOD_NAMES: Readonly<Record<number, string>> = {
  * Builds the route report from already-discovered controllers.
  *
  * Pure on purpose: the Nest-facing service supplies the controller list
- * and the global guard names, so every judgement this makes is testable
+ * and the guard summary, so every judgement this makes is testable
  * without booting an application.
  *
  * The authentication state mirrors `AuthServerGuard` exactly — same
  * metadata key, same `true | 'classLevel'` sentinel handling. A report
  * that decided "public" by its own rules would be a second source of
  * truth, and the point of this audit is that there is only one.
+ *
+ * `authGuardPresent` — not "some global guard exists" — is what decides
+ * `guarded`. A `ThrottlerGuard`, an ACL guard, or upstream
+ * access-control's disabled-guard factory (which registers `APP_GUARD`
+ * unconditionally and resolves to `null` when `appGuard: false`) do not
+ * authenticate anything, and counting them once reported an app with
+ * ZERO authentication as fully guarded.
  */
 export function collectRouteAudit(args: {
   readonly controllers: readonly ControllerScan[];
+  /** Every resolved global guard, for the report. */
   readonly globalGuards: readonly string[];
+  /** Names of the guards recognised as AUTHENTICATION guards. */
+  readonly authGuards: readonly string[];
 }): RouteAuditReport {
-  const appIsUnguarded = args.globalGuards.length === 0;
+  const appIsUnguarded = args.authGuards.length === 0;
   const routes: RouteAuditEntry[] = [];
 
   for (const { controller, methodNames } of args.controllers) {
-    const basePath = readPath(controller);
+    const basePaths = readPaths(controller);
     const classPublic = readPublic(controller);
 
     for (const methodName of methodNames) {
@@ -59,34 +67,48 @@ export function collectRouteAudit(args: {
       const httpMethod = readHttpMethod(handler);
       if (httpMethod === undefined) continue;
 
-      const path = joinPath(basePath, readPath(handler));
       const method = METHOD_NAMES[httpMethod] ?? String(httpMethod);
+      const authentication = resolveAuth(
+        readPublic(handler),
+        classPublic,
+        appIsUnguarded,
+      );
 
-      routes.push({
-        id: `${method} /${path}`,
-        method,
-        path: `/${path}`,
-        controller: controller.name,
-        handler: methodName,
-        authentication: resolveAuth(
-          readPublic(handler),
-          classPublic,
-          appIsUnguarded,
-        ),
-        aclAction: readGrantField(handler, 'action'),
-        aclResource: readGrantField(handler, 'resource'),
-        aclQuery: readQueryService(handler),
-      });
+      // A controller or handler declared with an ARRAY of paths
+      // registers one wire route per combination; the report carries
+      // one row per combination too, or the table understates the
+      // surface it exists to describe.
+      for (const base of basePaths) {
+        for (const segment of readPaths(handler)) {
+          const path = joinPath(base, segment);
+          routes.push({
+            id: `${method} /${path}`,
+            method,
+            path: `/${path}`,
+            controller: controller.name,
+            controllerRef: controller,
+            handler: methodName,
+            authentication,
+            aclAction: readGrantField(handler, 'action'),
+            aclResource: readGrantField(handler, 'resource'),
+            aclQuery: readQueryService(handler),
+          });
+        }
+      }
     }
   }
 
-  return { routes, globalGuards: args.globalGuards };
+  return {
+    routes,
+    globalGuards: args.globalGuards,
+    authGuards: args.authGuards,
+  };
 }
 
 /**
- * An app with no global guard cannot authenticate anything, so no route
- * is reported `guarded` — an explicit `AuthPublic` still reads as the
- * author's intent and is preserved.
+ * An app with no AUTHENTICATION guard cannot authenticate anything, so
+ * no route is reported `guarded` — an explicit `AuthPublic` still reads
+ * as the author's intent and is preserved.
  */
 function resolveAuth(
   handlerPublic: unknown,
@@ -128,25 +150,25 @@ function readHttpMethod(handler: object): number | undefined {
   return typeof value === 'number' ? value : undefined;
 }
 
-function readPath(target: object): string {
+/** All declared paths — a string, an array of strings, or none. */
+function readPaths(target: object): string[] {
   const value: unknown = Reflect.getMetadata(PATH_METADATA, target);
-  // A controller or handler declared with an array of paths registers
-  // several routes; the first is reported so one entry stays one id.
-  const raw = Array.isArray(value) ? value[0] : value;
-  return typeof raw === 'string' ? trimSlashes(raw) : '';
+  const raw = Array.isArray(value) ? value : [value];
+  const paths = raw
+    .filter((entry): entry is string => typeof entry === 'string')
+    .map(trimSlashes);
+  return paths.length > 0 ? paths : [''];
 }
 
 /**
  * Reads one field from the grant metadata.
  *
  * Upstream stores an array — a handler can carry several grants — and
- * the shapes differ per decorator (`AccessControlCreateOne` and friends
- * each build their own). Only fields that are actually present are
+ * the shapes differ per decorator. Only fields actually present are
  * reported; anything else stays `null` rather than being invented.
  */
 function readGrantField(handler: object, field: string): string | null {
-  if (ACL_GRANT_METADATA_KEY === undefined) return null;
-  const value: unknown = Reflect.getMetadata(ACL_GRANT_METADATA_KEY, handler);
+  const value: unknown = Reflect.getMetadata(aclMetadataKeys().grant, handler);
   const grants = Array.isArray(value)
     ? value
     : value === undefined
@@ -162,8 +184,7 @@ function readGrantField(handler: object, field: string): string | null {
 }
 
 function readQueryService(handler: object): string | null {
-  if (ACL_QUERY_METADATA_KEY === undefined) return null;
-  const value: unknown = Reflect.getMetadata(ACL_QUERY_METADATA_KEY, handler);
+  const value: unknown = Reflect.getMetadata(aclMetadataKeys().query, handler);
   const entries = Array.isArray(value)
     ? value
     : value === undefined

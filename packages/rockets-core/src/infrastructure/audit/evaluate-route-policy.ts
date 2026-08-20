@@ -18,38 +18,76 @@ export function evaluateRoutePolicy(
   policy: RoutePolicy,
 ): readonly RoutePolicyViolation[] {
   const allowedIds = new Set(policy.allow ?? []);
-  const allowedControllers = new Set(
-    (policy.allowControllers ?? []).map((controller) => controller.name),
-  );
+  const allowedControllers = new Set(policy.allowControllers ?? []);
   const violations: RoutePolicyViolation[] = [];
 
-  // An unguarded app is reported ONCE, before any per-route rule runs,
-  // and short-circuits the rest.
+  // An app with no AUTHENTICATION guard is reported ONCE, before any
+  // per-route rule runs, and short-circuits the rest.
   //
-  // Both halves matter. Without the short-circuit, `requireAuth` repeats
-  // the same app-wide cause on every route and buries it. Without the
-  // check running for EVERY rule, `requireAcl` and `requireAclQuery` go
-  // silent instead: they gate on `authentication === 'guarded'`, and on
-  // an unguarded app no route is, so declaring `requireAcl` alone would
-  // boot clean with nothing enforced — this module committing the exact
-  // failure it exists to catch.
+  // Both halves matter. Without the short-circuit, `requireAuth`
+  // repeats the same app-wide cause on every route and buries it.
+  // Without the check running for EVERY rule, `requireAcl` and
+  // `requireAclQuery` go silent instead: they gate on
+  // `authentication === 'guarded'`, and on an unguarded app no route
+  // is, so declaring `requireAcl` alone would boot clean with nothing
+  // enforced — this module committing the exact failure it exists to
+  // catch.
   const declaredRules = ruleNames(policy);
-  if (declaredRules.length > 0 && report.globalGuards.length === 0) {
+  if (declaredRules.length > 0 && report.authGuards.length === 0) {
+    const guardsNote =
+      report.globalGuards.length > 0
+        ? `Global guards exist (${report.globalGuards.join(', ')}) but none ` +
+          'is recognised as an AUTHENTICATION guard — a throttler or an ' +
+          'ACL guard authorises or shapes traffic, it does not establish ' +
+          'who the caller is. If an integration-owned guard authenticates ' +
+          'this app, list it in `routePolicy.authGuards`. '
+        : 'The application registers no global guard, so nothing ' +
+          'authenticates any route. ';
     return [
       {
         routeId: '*',
         rule: declaredRules[0],
         detail:
-          'the application registers no global guard, so nothing authenticates ' +
-          `any route and ${declaredRules.join(', ')} cannot be satisfied. ` +
-          'Compose `@concepta/rockets` (which registers one unless ' +
-          '`enableGlobalGuard: false`), or provide APP_GUARD yourself.',
+          guardsNote +
+          `${declaredRules.join(', ')} cannot be satisfied. If an ` +
+          'integration owns the guard (`defineRocketsAuth`, a custom ' +
+          'APP_GUARD), its class must be recognised — integrations ' +
+          'contribute theirs automatically, anything else goes in ' +
+          '`routePolicy.authGuards`. Otherwise compose `@concepta/rockets` ' +
+          'or provide APP_GUARD yourself.',
       },
     ];
   }
 
+  // Stale `allow` ids fail the boot: an entry matching no route is
+  // either a typo or a leftover from a removed route, and a list that
+  // rots silently stops meaning anything. Two deliberate limits:
+  // `allowControllers` is not staleness-checked (a class can be
+  // conditionally composed and legitimately absent), and a policy
+  // declaring NO rules polices nothing — recognition-only policies are
+  // passive, and aborting a boot over hygiene when nothing is enforced
+  // would make the audit the incident. Routes removed conditionally
+  // (`disableController`) live in the same options object as the
+  // policy: keep the two consistent per environment.
+  const routeIds = new Set(report.routes.map((route) => route.id));
+  for (const id of declaredRules.length > 0 ? allowedIds : []) {
+    if (!routeIds.has(id)) {
+      violations.push({
+        routeId: id,
+        rule: 'staleAllow',
+        detail:
+          'this `allow` entry matches no discovered route. Remove it, or ' +
+          'fix the id — route ids are `METHOD /path` before global prefix ' +
+          'and versioning are applied.',
+      });
+    }
+  }
+
   for (const route of report.routes) {
-    if (allowedIds.has(route.id) || allowedControllers.has(route.controller)) {
+    if (
+      allowedIds.has(route.id) ||
+      allowedControllers.has(route.controllerRef)
+    ) {
       continue;
     }
 
@@ -59,9 +97,6 @@ export function evaluateRoutePolicy(
 
     // ACL is only meaningful where a caller identity exists, so a route
     // the author deliberately opened is not also asked to authorise.
-    // `unguarded-app` is NOT treated as deliberate — it is the app-wide
-    // failure `requireAuth` already reports, and repeating it per route
-    // as a missing grant would bury the real cause.
     const authenticated = route.authentication === 'guarded';
 
     if (policy.requireAcl === true && authenticated && !route.aclAction) {

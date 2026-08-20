@@ -259,7 +259,10 @@ function createCoreProviders(options: {
 
   // Route policy is opt-in. Declaring one registers the bootstrap audit;
   // omitting it registers nothing, so an app that never asked for the
-  // check pays no discovery cost at boot.
+  // check pays no discovery cost at boot. Contribution-carrying
+  // bootstraps never reach here (core rejects them above), so guard
+  // classes contributed by `providesAppGuard` integrations are merged
+  // into the policy by the SERVER composition before forwarding.
   const routePolicy = options.extras?.routePolicy;
   const routeAuditProviders: Provider[] = routePolicy
     ? [

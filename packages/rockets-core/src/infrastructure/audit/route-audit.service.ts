@@ -1,6 +1,11 @@
 import { Inject, Injectable, Optional, type Type } from '@nestjs/common';
-import { APP_GUARD, DiscoveryService, MetadataScanner } from '@nestjs/core';
+import {
+  ApplicationConfig,
+  DiscoveryService,
+  MetadataScanner,
+} from '@nestjs/core';
 
+import { AuthServerGuard } from '../guards/auth-server.guard';
 import { collectRouteAudit, type ControllerScan } from './collect-route-audit';
 import {
   evaluateRoutePolicy,
@@ -31,6 +36,7 @@ export class RouteAuditService {
   constructor(
     private readonly discoveryService: DiscoveryService,
     private readonly metadataScanner: MetadataScanner,
+    private readonly applicationConfig: ApplicationConfig,
     @Optional()
     @Inject(ROCKETS_ROUTE_POLICY_TOKEN)
     private readonly policy?: RoutePolicy,
@@ -52,9 +58,13 @@ export class RouteAuditService {
    * separate so a team can look before it commits to a rule.
    */
   audit(): RouteAuditReport {
+    const guards = this.resolveGlobalGuards();
     return collectRouteAudit({
       controllers: this.scanControllers(),
-      globalGuards: this.globalGuardNames(),
+      globalGuards: guards.map((guard) => guard.name),
+      authGuards: guards
+        .filter((guard) => guard.isAuth)
+        .map((guard) => guard.name),
     });
   }
 
@@ -78,34 +88,75 @@ export class RouteAuditService {
   }
 
   /**
-   * Names of the app's global guards.
+   * Every global guard, resolved, with an authentication classification.
    *
-   * Read through `DiscoveryService` rather than `ApplicationConfig`:
-   * the latter holds the resolved instances but is not in
-   * `@nestjs/core`'s export map, and reaching past a package's exports
-   * for a diagnostic is not worth the coupling.
+   * Read from `ApplicationConfig` — public via `@nestjs/core`'s
+   * `export * from './application-config.js'` — because it holds what
+   * actually runs, where the provider list does not:
    *
-   * The token is matched by PREFIX, not equality. Nest appends a uuid
-   * to each global-enhancer token (`APP_GUARD (UUID: 392c3b38...)`) so
-   * that several `APP_GUARD` providers can coexist, which an equality
-   * check silently misses — and missing it would report a guarded app
-   * as unguarded, the one direction this service must never get wrong.
+   * - `getGlobalGuards()` returns resolved INSTANCES, so a factory that
+   *   resolved to `null` disappears with `filter`. Upstream
+   *   access-control registers an `APP_GUARD` factory unconditionally
+   *   and resolves it to `null` when `appGuard: false`; counting that
+   *   wrapper reported an app with zero authentication as guarded.
+   * - `getGlobalRequestGuards()` carries request/transient-scoped
+   *   guards, which Nest routes to `injectables` — invisible to
+   *   `DiscoveryService.getProviders()`. Missing them hard-failed a
+   *   correctly guarded app.
+   *
+   * "Is authentication" is decided by class identity — `AuthServerGuard`
+   * or anything in `policy.authGuards` — never by "some guard exists".
+   * A throttler or an ACL guard is a global guard that authenticates
+   * nothing.
    */
-  private globalGuardNames(): string[] {
-    const names: string[] = [];
+  private resolveGlobalGuards(): Array<{
+    readonly name: string;
+    readonly isAuth: boolean;
+  }> {
+    const recognised = this.policy?.authGuards ?? [];
+    const result: Array<{ name: string; isAuth: boolean }> = [];
 
-    for (const wrapper of this.discoveryService.getProviders()) {
-      const token: unknown = wrapper.token;
-      if (typeof token !== 'string' || !token.startsWith(APP_GUARD)) continue;
-
-      const metatype: unknown = wrapper.metatype;
-      names.push(
-        typeof metatype === 'function' && metatype.name
-          ? metatype.name
-          : APP_GUARD,
-      );
+    for (const instance of this.applicationConfig.getGlobalGuards()) {
+      if (instance === null || instance === undefined) continue;
+      const ctor = (instance as object).constructor;
+      result.push({
+        name: typeof ctor === 'function' && ctor.name ? ctor.name : 'APP_GUARD',
+        isAuth:
+          instance instanceof AuthServerGuard ||
+          recognised.some((type) => instance instanceof type),
+      });
     }
 
-    return names;
+    for (const wrapper of this.applicationConfig.getGlobalRequestGuards()) {
+      const metatype: unknown = wrapper.metatype;
+      const isClass = typeof metatype === 'function';
+      result.push({
+        name: isClass && metatype.name ? metatype.name : 'APP_GUARD(request)',
+        // Same subclass semantics as the singleton branch: `instanceof`
+        // is unavailable without an instance, so walk the prototype
+        // chain instead. A factory-built request-scoped guard has no
+        // usable metatype and stays unrecognised — fail closed. The
+        // `isClass` guard is the runtime fact that makes the `Type`
+        // cast safe: `typeof metatype === 'function'` only narrows to
+        // `Function`, which cannot express "constructible class".
+        isAuth:
+          isClass &&
+          isOrExtends(metatype as Type<unknown>, [
+            AuthServerGuard,
+            ...recognised,
+          ]),
+      });
+    }
+
+    return result;
   }
+}
+
+function isOrExtends(
+  candidate: Type<unknown>,
+  types: ReadonlyArray<Type<unknown>>,
+): boolean {
+  return types.some(
+    (type) => candidate === type || candidate.prototype instanceof type,
+  );
 }

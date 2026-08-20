@@ -1,5 +1,6 @@
 import { DynamicModule, Type } from '@nestjs/common';
 import type {
+  RoutePolicy,
   AbstractUpsertUserMetadataHandler,
   AbstractGetUserMetadataHandler,
   AuthBootstrap,
@@ -74,4 +75,17 @@ export interface RocketsOptionsExtrasInterface
    * service, guard, query services); when omitted, no ACL wiring exists.
    */
   accessControl?: RocketsAccessControlConfig;
+  /**
+   * Route policy audit, forwarded to `RocketsCoreModule` verbatim.
+   *
+   * Declared here because the audit's whole point is coverage of
+   * controllers the app did not write — `MeController` included — and
+   * those only exist in apps composed through THIS module, where the
+   * consumer never touches `RocketsCoreModule.forRoot` directly.
+   *
+   * `AuthServerGuard` (which this module registers as the global guard
+   * unless `enableGlobalGuard: false`) is recognised as authentication
+   * automatically; integration-owned guards go in `authGuards`.
+   */
+  routePolicy?: RoutePolicy;
 }

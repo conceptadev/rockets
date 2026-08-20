@@ -1,49 +1,23 @@
 import { describe, expect, it } from 'vitest';
+import type { Type } from '@nestjs/common';
 import {
   AccessControlGrant,
-  AccessControlQuery,
   type CanAccess,
+  AccessControlQuery,
 } from '@concepta/nestjs-access-control';
 import { ActionEnum } from '@concepta/nestjs-core';
 
-import {
-  ACL_GRANT_METADATA_KEY,
-  ACL_QUERY_METADATA_KEY,
-} from './acl-metadata-keys';
+import { aclMetadataKeys } from './acl-metadata-keys';
 
 /**
- * The probe is the load-bearing assumption of the whole audit: if it
- * resolves nothing, every route reports as ungranted and the report
- * lies in the permissive direction. These pin it against the real
- * decorators rather than against a remembered constant name.
+ * The keys are the load-bearing assumption of the whole audit: resolve
+ * the wrong ones and every route reads as ungranted — the permissive
+ * direction. One read-back test against the REAL decorators pins that
+ * `SetMetadata`'s `KEY` and what the decorator writes stay the same
+ * thing.
  */
-describe('ACL metadata key probing', () => {
-  it('resolves both keys from the public decorators', () => {
-    expect(ACL_GRANT_METADATA_KEY).toBeTypeOf('string');
-    expect(ACL_QUERY_METADATA_KEY).toBeTypeOf('string');
-  });
-
-  it('reads back a grant written by the real decorator', () => {
-    class Target {
-      handler(): void {}
-    }
-    AccessControlGrant({
-      action: ActionEnum.READ,
-      resource: 'invoice',
-    })(Target.prototype, 'handler', {
-      value: Target.prototype.handler,
-    });
-
-    const stored: unknown = Reflect.getMetadata(
-      ACL_GRANT_METADATA_KEY as string,
-      Target.prototype.handler,
-    );
-
-    expect(Array.isArray(stored)).toBe(true);
-    expect(stored).toEqual([{ action: ActionEnum.READ, resource: 'invoice' }]);
-  });
-
-  it('reads back a query service written by the real decorator', () => {
+describe('ACL metadata keys', () => {
+  it('reads back what the real decorators write, under the resolved keys', () => {
     class InvoiceCanAccess {
       async canAccess(): Promise<boolean> {
         return true;
@@ -52,17 +26,26 @@ describe('ACL metadata key probing', () => {
     class Target {
       handler(): void {}
     }
+    AccessControlGrant({ action: ActionEnum.READ, resource: 'invoice' })(
+      Target.prototype,
+      'handler',
+      { value: Target.prototype.handler },
+    );
     AccessControlQuery({
-      service: InvoiceCanAccess as unknown as new () => CanAccess,
+      service: InvoiceCanAccess as unknown as Type<CanAccess>,
     })(Target.prototype, 'handler', { value: Target.prototype.handler });
 
-    const stored: unknown = Reflect.getMetadata(
-      ACL_QUERY_METADATA_KEY as string,
+    const keys = aclMetadataKeys();
+
+    expect(Reflect.getMetadata(keys.grant, Target.prototype.handler)).toEqual([
+      { action: ActionEnum.READ, resource: 'invoice' },
+    ]);
+
+    const query: unknown = Reflect.getMetadata(
+      keys.query,
       Target.prototype.handler,
     );
-
-    expect(JSON.stringify(stored)).toContain('');
-    const entries = Array.isArray(stored) ? stored : [stored];
+    const entries = Array.isArray(query) ? query : [query];
     expect(
       entries.some(
         (entry) =>

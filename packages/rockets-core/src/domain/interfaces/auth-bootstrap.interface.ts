@@ -28,7 +28,8 @@ export interface AuthBootstrapIdentity {
  * composition. Explicit options on `RocketsModule` take precedence.
  *
  * Resolved by `@concepta/rockets` (`createServer` / `RocketsModule`);
- * `RocketsCoreModule` does not read them.
+ * `RocketsCoreModule` reads only `authGuards` (for the route audit);
+ * the rest is consumed by the server composition.
  */
 export interface AuthBootstrapContributions {
   /**
@@ -44,6 +45,21 @@ export interface AuthBootstrapContributions {
    * swap rather than leaving the app unguarded.
    */
   readonly providesAppGuard?: boolean;
+  /**
+   * The guard CLASSES this integration's `APP_GUARD` may resolve to,
+   * so the route audit can recognise them as authentication.
+   *
+   * `providesAppGuard` declares THAT the integration owns the guard;
+   * this declares WHICH class runs, which is what
+   * `routePolicy` classification needs — without it, a
+   * `defineRocketsAuth` composition reports every route as
+   * `unguarded-app` and any declared rule aborts the boot. Consumed by
+   * the route audit only; listing a non-authenticating class here (an
+   * ACL guard) would recreate the permissive lie the audit exists to
+   * remove, so contribute strictly the classes that establish caller
+   * identity.
+   */
+  readonly authGuards?: readonly Type<unknown>[];
 }
 
 /**

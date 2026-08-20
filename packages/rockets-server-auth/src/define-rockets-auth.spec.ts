@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { CanActivate } from '@nestjs/common';
 import type { RepositoryModuleInterface } from '@concepta/nestjs-repository';
 import { createServer } from '@concepta/rockets';
+import { JwtGuard } from '@concepta/nestjs-authentication';
 
 import {
   defineRocketsAuth,
@@ -114,5 +115,33 @@ describe('defineRocketsAuth', () => {
     expect(() => createServer({ auth: halfConfigured })).toThrow(
       /providesAppGuard|enableGlobalGuard/,
     );
+  });
+});
+
+describe('defineRocketsAuth — contributed auth guards', () => {
+  it('contributes upstream JwtGuard by default', () => {
+    const bootstrap = defineRocketsAuth(input());
+    expect(bootstrap.contributes?.authGuards).toEqual([JwtGuard]);
+  });
+
+  it('contributes the constructor of a custom appGuard instance', () => {
+    class CustomGuard implements CanActivate {
+      canActivate(): boolean {
+        return true;
+      }
+    }
+    const bootstrap = defineRocketsAuth({
+      ...input(),
+      auth: { appGuard: new CustomGuard() },
+    });
+    expect(bootstrap.contributes?.authGuards).toEqual([CustomGuard]);
+  });
+
+  it('contributes nothing when the upstream guard is disabled', () => {
+    const bootstrap = defineRocketsAuth({
+      ...input({ enableGlobalGuard: true }),
+      auth: { appGuard: false },
+    });
+    expect(bootstrap.contributes?.authGuards).toEqual([]);
   });
 });

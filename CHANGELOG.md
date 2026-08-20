@@ -17,9 +17,14 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
   and runs before controllers exist, so a hand-written `AccessControlGrant`
   in a bundle's `decorators: []` is invisible to it. Without a policy
   nothing is registered; with one, `RouteAuditService.audit()` returns the
-  full table for a CI artifact. An app with no global guard reports every
-  route as `unguarded-app` rather than `guarded`, so the report cannot
-  claim protection the app does not have.
+  full table for a CI artifact. A route is `guarded` only when a global
+  guard RECOGNISED as authentication is present — `AuthServerGuard`, or
+  classes listed in `routePolicy.authGuards`; resolved instances are read
+  from `ApplicationConfig`, so a guard factory resolving to `null` (as
+  upstream access-control registers under `appGuard: false`) and
+  request-scoped guards are classified correctly, and an app whose only
+  global guard authenticates nothing cannot be reported as protected.
+  Forwarded through `RocketsModule.forRoot({ routePolicy })`.
 
 - **`operationResource` / `defineOperationResource` (issues #43 / #50).** Typed
   non-CRUD HTTP endpoints beside CRUD: Zod `input`/`output` → DTO + OpenAPI,

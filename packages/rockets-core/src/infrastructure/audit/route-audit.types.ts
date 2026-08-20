@@ -29,6 +29,13 @@ export interface RouteAuditEntry {
    */
   readonly path: string;
   readonly controller: string;
+  /**
+   * The controller class itself, for identity-based exemption matching.
+   * `JSON.stringify` omits function-valued keys, so a serialised report
+   * simply has no `controllerRef` — match on `controller` + `id` in a
+   * CI artifact; identity matters only in-process.
+   */
+  readonly controllerRef: Type<unknown>;
   readonly handler: string;
   readonly authentication: RouteAuthState;
   /** Action granted by `AccessControlGrant`, or `null` when ungranted. */
@@ -41,14 +48,26 @@ export interface RouteAuditEntry {
 
 export interface RouteAuditReport {
   readonly routes: readonly RouteAuditEntry[];
-  /** Whether any global guard is registered at all. */
+  /** Every resolved global guard (application and request scoped). */
   readonly globalGuards: readonly string[];
+  /**
+   * The subset recognised as AUTHENTICATION guards — `AuthServerGuard`
+   * plus anything listed in `RoutePolicy.authGuards`. This, not
+   * `globalGuards`, is what decides `guarded`: an app whose only global
+   * guard is a throttler or a disabled ACL factory authenticates
+   * nothing.
+   */
+  readonly authGuards: readonly string[];
 }
 
 /** A single way a route failed the declared policy. */
 export interface RoutePolicyViolation {
   readonly routeId: string;
-  readonly rule: 'requireAuth' | 'requireAcl' | 'requireAclQuery';
+  readonly rule:
+    | 'requireAuth'
+    | 'requireAcl'
+    | 'requireAclQuery'
+    | 'staleAllow';
   readonly detail: string;
 }
 
@@ -67,11 +86,16 @@ export interface RoutePolicy {
   /** Every granted route must also name a `CanAccess` query service. */
   readonly requireAclQuery?: boolean;
   /**
-   * Route ids exempt from every rule, e.g. `['GET /health']`.
+   * Route ids exempt from EVERY declared rule, e.g. `['GET /health']`.
    *
    * Deliberately an explicit id list rather than a pattern: an exemption
    * that silently widens as routes are added is the failure this whole
-   * audit exists to remove.
+   * audit exists to remove. Two limits to know: an entry exempts the
+   * route from all rules, not the one it was added for; and, while at
+   * least one rule is declared, an entry matching NO discovered route
+   * fails the boot as `staleAllow`, so the list cannot rot where it
+   * matters. A recognition-only policy polices nothing, staleness
+   * included.
    */
   readonly allow?: readonly string[];
   /**
@@ -82,4 +106,13 @@ export interface RoutePolicy {
    * listing every route id would drift as that package changes.
    */
   readonly allowControllers?: readonly Type<unknown>[];
+  /**
+   * Guard classes recognised as AUTHENTICATION guards, besides
+   * `AuthServerGuard`. Compose-your-own-auth apps (an integration-owned
+   * JWT guard, for instance) list theirs here; without it the audit
+   * reports the app unguarded, because it refuses to assume that any
+   * global guard authenticates. Matched by class identity against
+   * resolved instances (`instanceof`) and request-scoped wrappers.
+   */
+  readonly authGuards?: readonly Type<unknown>[];
 }
