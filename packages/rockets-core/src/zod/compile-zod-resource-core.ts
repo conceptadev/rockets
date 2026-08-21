@@ -50,14 +50,11 @@ export function compileZodCore(input: ZodCoreInput): CompiledZodCore {
   // Declaring an override on an operation left out of `operations` is
   // not reachable: any config object enables its operation.
   const overrides = resolveOperationOverrides(name, ops);
-  const overrideDto = (
-    op: ZodCrudOperation,
-    kind: 'Output',
-  ): Type<object> | undefined => {
+  const overrideDto = (op: ZodCrudOperation): Type<object> | undefined => {
     const schema = overrides[op]?.output;
     return schema === undefined
       ? undefined
-      : compileDtoClass(schema, `${name}${pascal(op)}${kind}Dto`);
+      : compileDtoClass(schema, `${name}${pascal(op)}OutputDto`);
   };
 
   const ownerColumns = resolveOwnerColumns(schema, name, input.owner);
@@ -144,7 +141,7 @@ export function compileZodCore(input: ZodCoreInput): CompiledZodCore {
   // Per-operation response override; falls back to the single projected
   // response DTO the whole resource shares.
   const responseFor = (op: ZodCrudOperation): Type<object> =>
-    overrideDto(op, 'Output') ?? response;
+    overrideDto(op) ?? response;
 
   const operations: ResourceOperationsObject = {
     ...(enabled('list')
@@ -250,7 +247,9 @@ function resolveOperationOverrides(
           'which has no request body. Only create/update/replace accept one.',
       );
     }
-    if (strictInput !== undefined && !BODY_OPERATIONS.has(op)) {
+    // Only `true` is rejected: an explicit `strictInput: false` (e.g. a
+    // computed flag) is a no-op opt-out, not a config mistake.
+    if (strictInput === true && !BODY_OPERATIONS.has(op)) {
       throw new Error(
         `[zodResource] "${name}" declares \`strictInput\` on "${op}", ` +
           'which has no request body to be strict about. Only ' +

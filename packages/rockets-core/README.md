@@ -613,9 +613,14 @@ Rules worth knowing:
   overwritten. The OpenAPI schema gains `additionalProperties: false`
   once the document passes through `nestjs-zod`'s `cleanupOpenApiDoc`
   (see `examples/sample-server/src/main.ts`); a raw document does not
-  show it. On an override, `input: z.object({...}).strict()` is the
-  equivalent spelling. Opt-in per operation — stripping stays the
-  default. Only valid on `create` / `update` / `replace`.
+  show it. Core's own `SwaggerUiModule` does **not** run that cleanup —
+  the main entry stays zod-free — so the app's bootstrap must call it,
+  or generated clients will not learn the strict contract and only find
+  out via `400` at runtime. The runtime rejection itself needs no
+  cleanup; only the documented schema does. On an override,
+  `input: z.object({...}).strict()` is the equivalent spelling. Opt-in
+  per operation — stripping stays the default. Only valid on
+  `create` / `update` / `replace`.
 
 #### Capability matrix (meta → layers)
 

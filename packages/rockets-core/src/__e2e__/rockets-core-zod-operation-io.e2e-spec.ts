@@ -211,7 +211,7 @@ const articleResource = zodResource({
         // Narrower than the derived projection: `authorNote` must not
         // appear on the collection route.
         list: { output: z.object({ id: z.uuid(), text: z.string() }) },
-        create: { input: z.object({ text: z.string() }) },
+        create: { input: z.object({ text: z.string() }), strictInput: true },
       },
     }),
   },
@@ -282,9 +282,12 @@ class StrictEchoEntity {
   @Column({ type: 'varchar', nullable: true }) meta?: string;
 }
 
+// `nullish`, not `optional`: the nullable column echoes back as
+// `meta: null`, which must round-trip through the input schema so the
+// strict-replace test's 400 is attributable to `.strict()` alone.
 const strictEchoSchema = baseEntity({
   label: f.string(),
-  meta: f.string().optional(),
+  meta: f.string().nullish(),
 });
 
 const strictEchoResource = zodResource({
@@ -550,6 +553,12 @@ describe('zodResource per-operation input/output (e2e)', () => {
         { additionalProperties?: unknown }
       >;
       expect(schemas.StrictCreateDto?.additionalProperties).toBe(false);
+      // The flag must reach BOTH input sources: the derived projection
+      // above and an `input` override (a strict `.strict()` applied to
+      // the schema the author supplied).
+      expect(schemas.StrictEchoCreateInputDto?.additionalProperties).toBe(
+        false,
+      );
       // A non-strict DTO must NOT gain the keyword — the flag stays
       // per-operation, not document-wide.
       expect(schemas.DerivedCreateDto?.additionalProperties).toBeUndefined();
@@ -592,6 +601,19 @@ describe('zodResource per-operation input/output (e2e)', () => {
 
       const [first] = res.body.data;
       expect(Object.keys(first).sort()).toEqual(['id', 'text']);
+    });
+
+    // `compileZodCore` has two callers; `zodResource` alone passing does
+    // not prove `zodSubResource` applies `strictInput` too.
+    it('applies strictInput on the sub-resource create', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/articles/${articleId}/comments`)
+        .set('Authorization', 'Bearer u1')
+        .send({ text: 'ok', smuggled: true })
+        .expect(400);
+      expect(JSON.stringify(res.body.message)).toMatch(
+        /Unrecognized key.*smuggled/,
+      );
     });
 
     it('registers the sub-resource override components', () => {
@@ -701,17 +723,21 @@ describe('zodResource per-operation input/output (e2e)', () => {
         .send({ label: 'echo' })
         .expect(201);
 
+      // The echoed row carries `meta: null` (nullable column) — the
+      // schema's `nullish` accepts it, so the 400 below can only come
+      // from `.strict()` naming the server-owned keys.
       const row = await request(app.getHttpServer())
         .get(`/strict-echoes/${created.body.id}`)
         .set('Authorization', 'Bearer u1')
         .expect(200);
+      expect(row.body).toMatchObject({ label: 'echo', meta: null });
 
       const res = await request(app.getHttpServer())
         .put(`/strict-echoes/${created.body.id}`)
         .set('Authorization', 'Bearer u1')
         .send(row.body)
         .expect(400);
-      expect(JSON.stringify(res.body.message)).toMatch(/id/);
+      expect(JSON.stringify(res.body.message)).toMatch(/Unrecognized key.*id/);
     });
 
     it('applies strict to the derived partial update projection', async () => {
