@@ -10,6 +10,9 @@ import { SchemaEntityCompiler } from './schema-entity-compiler.interface';
  * resource layers (e.g. the zod layer) resolve the compiler from the same
  * `repository` option that selects the adapter, keeping entity generation
  * adapter-owned — see {@link SchemaEntityCompiler} for the contract.
+ *
+ * Kept here (not in `rockets-repository`) so that package stays byte-identical
+ * to upstream `@concepta/rockets-repository`.
  */
 export interface RocketsRepositoryModuleInterface
   extends RepositoryModuleInterface {

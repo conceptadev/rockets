@@ -1,8 +1,16 @@
 /**
+ * e2e regression cover for the three round-2 HIGH findings.
+ *
  * Persistence uses handwritten TypeORM entities so this suite does not
  * depend on `@concepta/rockets-repository-typeorm/zod` resolving the
  * same zod registry as local `src/zod` (dist vs src WeakMap split).
  * Schema → DTO projection still goes through `zodResource`.
+ *
+ * 1. CWE-863 — `zodResource` + `f.owner()` must auto-scope list/read
+ * 2. CWE-200 — non-base fields need `dto.response:true` to appear
+ * 3. CWE-284 — PathScopeGuard must block cross-owner nested access.
+ *    Asserted over HTTP (u2 gets 404 on u1's children), not by
+ *    inspecting a metadata mirror that the builder sets itself.
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import {
@@ -109,6 +117,7 @@ const noteRefShape = z.object({
 
 const noteSchema = baseEntity({
   title: f.string(),
+  /** Write-only — must stay out of the response DTO (HIGH CWE-200). */
   internalNote: f.string({ dto: { response: false } }),
   userId: f.owner(),
   refs: f

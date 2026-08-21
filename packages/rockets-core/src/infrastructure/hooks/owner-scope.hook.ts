@@ -94,7 +94,7 @@ export class OwnerScopeHook<
    * `<E extends OwnedEntity>` for the default `userId`, or
    * `<E extends { readonly [K]: string }>` for a custom column.
    *
-   * The factory caches per `(entity, column)` so two resources
+   * The factory caches per `(entityKey, column)` so two resources
    * binding the same pair receive the same NestJS provider token.
    */
   static for<E extends OwnedEntity>(entity: Type<E>): Type<OwnerScopeHook<E>>;

@@ -6,6 +6,18 @@ import {
   Logger,
 } from '@nestjs/common';
 
+/**
+ * Access Control Service Implementation
+ *
+ * Implements AccessControlServiceInterface to provide user and role information
+ * to the AccessControlGuard for permission checking.
+ *
+ * This service extracts the authenticated user from the request and
+ * returns their roles for access control evaluation. The roles are populated
+ * by the authentication provider (RocketsJwtAuthAdapter) during token validation.
+ *
+ * Note: All users are expected to have at least one role assigned during signup.
+ */
 @Injectable()
 export class ACService implements AccessControlServiceInterface {
   private readonly logger = new Logger(ACService.name);

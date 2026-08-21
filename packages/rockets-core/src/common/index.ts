@@ -35,7 +35,7 @@ export { InjectDynamicRepository } from './repository/inject-dynamic-repository.
 // Crud extensions (entity-class adapter wrapper)
 export { InjectCrudAdapter } from './crud/inject-crud-adapter.decorator';
 
-// Crud base classes — public names alias upstream Crud*BaseHandler
+// Crud base classes not yet exported from @concepta/nestjs-crud index
 export {
   CrudCommandBaseHandler as CrudCommandHandlerBase,
   CrudQueryBaseHandler as CrudQueryHandlerBase,

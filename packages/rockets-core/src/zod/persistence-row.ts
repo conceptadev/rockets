@@ -17,7 +17,7 @@ type CoerceIsoDateTime<V> = V extends string
   ? Date | null | undefined
   : V;
 
-/** PersistenceRow cannot inspect zod datetime kinds; these keys load as Date. */
+/** Field names that the TypeORM compiler maps to datetime columns. */
 type PersistenceDateTimeKey =
   | 'dateCreated'
   | 'dateUpdated'

@@ -2,6 +2,18 @@ import { z } from 'zod';
 import { auditableEntity, f } from '@concepta/rockets-core/zod';
 import { defineUserMetadata } from './zod-bindings';
 
+/**
+ * Zod source of truth for user metadata (replaces the handwritten
+ * `entities/user-metadata.entity.ts` + `dto/user-metadata.dto.ts`).
+ * `defineUserMetadata` compiles it into the `{ entity, createDto,
+ * updateDto, responseDto }` quad the `userMetadata` config slot expects:
+ *
+ * - the base fields (`id`, `userId`, timestamps, `version`) are the
+ *   `BaseUserMetadataEntityInterface` contract — required by the helper;
+ * - `create` omits server-managed fields → `userId` + the four profile
+ *   fields; `update` keeps `id` required and the profile fields optional
+ *   (`userId` immutable); `response` is the full row.
+ */
 export const userMetadataSchema = auditableEntity({
   userId: f.string({ max: 255, example: 'user-123' }),
   firstName: f

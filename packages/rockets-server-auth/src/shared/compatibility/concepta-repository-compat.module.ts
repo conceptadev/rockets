@@ -1,8 +1,10 @@
 import { Global, Module } from '@nestjs/common';
 
 /**
- * No-op. `RepositoryModule.forRoot` already exports `TransactionScope`.
- * Drop this module once callers stop importing it.
+ * Compat shim — previously bridged the conceptadev rockets-repository TransactionScope
+ * to the concepta nestjs-repository token. Now that both come from the same package,
+ * the bridge is a no-op: RepositoryModule.forRoot(...) already provides and exports
+ * TransactionScope globally.
  */
 @Global()
 @Module({})

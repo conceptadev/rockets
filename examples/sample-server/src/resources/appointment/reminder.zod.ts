@@ -2,7 +2,18 @@ import { zodResource } from '../../zod-bindings';
 import { Reminder, reminderSchema } from './reminder.schema';
 import { ReminderOwnerScopeHook } from './reminder-owner-scope.hook';
 
-/** Reminder rows are created by `AppointmentCreateHandler`; these routes are list/read only. */
+/**
+ * Read-only — reminder lifecycle is owned by `AppointmentCreateHandler`
+ * and future workflows (mark-sent, reschedule), not direct CRUD.
+ *
+ * Fully zod-driven twin of the old `reminder.resource.ts`: the response
+ * DTO comes from `reminderSchema`, the entity is the generated
+ * `ReminderEntity` (compiled in reminder.schema.ts and reused here via
+ * the schema registry — no `entity:` override), the cross-resource
+ * relation to appointments comes from the `relation` meta on
+ * `appointmentId`, and the owner-scope hook passes straight through to
+ * `defineResource`.
+ */
 export const reminderZodResource = zodResource({
   name: 'Reminder',
   schema: reminderSchema,

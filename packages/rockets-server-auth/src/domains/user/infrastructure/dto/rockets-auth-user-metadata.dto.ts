@@ -2,7 +2,13 @@ import { Exclude, Expose } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 /**
- * Base metadata DTO. App-specific fields belong on a subclass.
+ * Rockets Auth User Metadata DTO (Base)
+ *
+ * Contains only core metadata fields.
+ * Implementation-specific fields (firstName, lastName, bio, etc.)
+ * should be defined in extending classes.
+ *
+ * Follows the same pattern as rockets-server's base UserMetadataDto
  */
 @Exclude()
 export class RocketsAuthUserMetadataDto {
