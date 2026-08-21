@@ -378,6 +378,35 @@ describe('guard classification (e2e)', () => {
   });
 
   // An allow list that can rot silently stops meaning anything.
+  // Upstream enforces AccessControlQuery via getAllAndMerge([class,
+  // handler]) — a CLASS-level query is real enforcement. Auditing only
+  // the handler reported it null and requireAclQuery aborted a
+  // correctly-enforced app.
+  it('recognises a class-level AccessControlQuery', async () => {
+    @Controller('class-query')
+    @ApiTags('ClassQuery')
+    @AccessControlQuery({
+      service: InvoiceCanAccess as unknown as Type<CanAccess>,
+    })
+    class ClassQueryController {
+      @Get()
+      @ApiOkResponse({ description: 'probe' })
+      @AccessControlGrant({ action: ActionEnum.READ, resource: 'invoice' })
+      list(): void {}
+    }
+
+    const app = await bootWith({
+      providers: [{ provide: APP_GUARD, useClass: AllowAllGuard }],
+      policy: { requireAclQuery: true, authGuards: [AllowAllGuard] },
+      controllers: [ClassQueryController],
+    });
+    const report = app.get(RouteAuditService).audit();
+    await app.close();
+    expect(
+      report.routes.find((r) => r.id === 'GET /class-query')?.aclQuery,
+    ).toBe('InvoiceCanAccess');
+  });
+
   it('fails the boot on a stale allow entry', async () => {
     await expect(
       bootWith({

@@ -1100,3 +1100,121 @@ describe('generated OpenAPI component names', () => {
     ).not.toThrow();
   });
 });
+// The early-return this pins the removal of: an operation-FREE app with
+// two CRUD bundles on one route booted clean, and the collision only
+// surfaced when an unrelated operation resource joined the app later.
+describe('CRUD-vs-CRUD collisions with zero operation bundles', () => {
+  it('throws without any operation resource present', () => {
+    class ThingEntity {
+      id!: string;
+    }
+    const crud = (key: string) =>
+      defineResource({
+        key,
+        entity: ThingEntity,
+        path: 'things',
+        operations: [Operation.List],
+      });
+
+    expect(() =>
+      validateRouteCollisions({
+        generatedResources: [crud('thing-a'), crud('thing-b')],
+        manualResources: [],
+        operationBundles: [],
+      }),
+    ).toThrow(/duplicate route|overlapping/i);
+  });
+});
+// A forwardRef whose factory THROWS (the TDZ circular-import case) made
+// its module invisible; a handler it might export was silently
+// auto-registered as a duplicate. Refusal must be loud and ownership
+// explicit.
+describe('uninspectable forwardRef imports', () => {
+  const throwingRef = {
+    forwardRef: () => {
+      throw new ReferenceError('TDZ');
+    },
+  };
+
+  it('refuses to auto-register a handler next to an uninspectable forwardRef', () => {
+    class CycleHandler {
+      handle() {
+        return { ok: true };
+      }
+    }
+    expect(() =>
+      defineOperationResource({
+        path: 'cycle-probe',
+        public: true,
+        imports: [throwingRef as never],
+        operations: {
+          read: {
+            key: 'read',
+            method: 'GET',
+            path: '',
+            status: 200,
+            output: false,
+            handler: CycleHandler,
+          },
+        },
+      }),
+    ).toThrow(/cannot be\s+inspected at definition time/);
+  });
+
+  // One frame down: the throwing ref inside a module's EXPORTS — the
+  // circular re-export idiom — was still swallowed after the top-level
+  // fix. Same defect, sibling frame.
+  it('refuses when the throwing forwardRef hides inside a re-export', () => {
+    class CycleHandler {
+      handle() {
+        return { ok: true };
+      }
+    }
+    @Module({ exports: [throwingRef as never] })
+    class WrapperModule {}
+
+    expect(() =>
+      defineOperationResource({
+        path: 'cycle-nested-probe',
+        public: true,
+        imports: [WrapperModule],
+        operations: {
+          read: {
+            key: 'read',
+            method: 'GET',
+            path: '',
+            status: 200,
+            output: false,
+            handler: CycleHandler,
+          },
+        },
+      }),
+    ).toThrow(/cannot be\s+inspected at definition time/);
+  });
+
+  it('accepts the same shape when the handler is explicitly provided', () => {
+    class CycleHandler {
+      handle() {
+        return { ok: true };
+      }
+    }
+    expect(() =>
+      defineOperationResource({
+        path: 'cycle-probe-ok',
+        public: true,
+        imports: [throwingRef as never],
+        providers: [CycleHandler],
+        operations: {
+          read: {
+            key: 'read',
+            method: 'GET',
+            path: '',
+            status: 200,
+            output: false,
+            handler: CycleHandler,
+          },
+        },
+      }),
+    ).not.toThrow();
+  });
+});

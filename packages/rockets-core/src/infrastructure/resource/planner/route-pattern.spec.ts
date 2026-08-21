@@ -61,4 +61,16 @@ describe('route-pattern', () => {
   it('reports a zero-length wildcard match as unproven', () => {
     expect(overlaps('a/*rest', 'a')).toBe('unknown');
   });
+
+  // Express routes case-insensitively by default: `pets/Stats` and
+  // `pets/stats` are one wire route, and calling them disjoint let the
+  // second handler ship silently unreachable.
+  it('treats segments differing only by case as overlapping', () => {
+    expect(
+      structuredRoutePatternsMayOverlap(
+        parseStructuredRoutePattern('pets/Stats'),
+        parseStructuredRoutePattern('pets/stats'),
+      ),
+    ).toBe(true);
+  });
 });

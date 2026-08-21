@@ -45,6 +45,12 @@ export interface RocketsErrorContext {
    * `Error` from third-party code. Narrow it before reading anything off
    * it.
    *
+   * NEVER spread or serialize this into the response body. The
+   * documented pattern is "spread the default and add" — one careless
+   * `...context` instead of `...defaultErrorSerializer.serialize(context)`
+   * puts a stack trace (and whatever the exception carries) on the
+   * wire. Read specific fields off it; emit none of it.
+   *
    * The POST-unwrap exception is deliberately absent. Interpreting it
    * requires knowing the unwrap semantics the filter keeps to itself,
    * and everything it would be read for — status, code, message — is

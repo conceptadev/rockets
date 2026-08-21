@@ -60,7 +60,20 @@ export abstract class AfterCreateReloadHook<
       ctx,
     })) as E | null;
     if (!reloaded) return created;
-    Object.assign(created as Record<string, unknown>, reloaded);
+    // Assign alone cannot REMOVE a key: a column a read hook deleted
+    // from `reloaded` (the whole point of reloading through the read
+    // path) stayed on `created` from the raw save() result — the hidden
+    // column leaked exactly on the create response the docstring
+    // promises it will not. Drop keys the read view does not carry,
+    // then merge; `created`'s object identity is preserved for the
+    // callers holding the reference.
+    const record = created as Record<string, unknown>;
+    for (const key of Object.keys(record)) {
+      if (!(key in reloaded)) {
+        delete record[key];
+      }
+    }
+    Object.assign(record, reloaded);
     return created;
   }
 

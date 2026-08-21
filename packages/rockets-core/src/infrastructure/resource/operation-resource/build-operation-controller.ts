@@ -8,6 +8,10 @@
  * ApiTags is applied immediately below from definition.tags (with a default).
  */
 import {
+  AccessControlGrant,
+  AccessControlQuery,
+} from '@concepta/nestjs-access-control';
+import {
   applyDecorators,
   BadRequestException,
   Body,
@@ -39,7 +43,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
-import { getMetadataStorage, validate } from 'class-validator';
+import {
+  getMetadataStorage,
+  validate,
+  type ValidationError,
+} from 'class-validator';
 
 import { AuthUser } from '../../../common/auth/auth-user.decorator';
 import type { AuthorizedUser } from '../../../domain/interfaces/auth-user.interface';
@@ -203,6 +211,23 @@ async function resolveOperationParams(
   return { ...params, ...(validated as Record<string, unknown>) };
 }
 
+function flattenConstraintMessages(
+  errors: readonly ValidationError[],
+  prefix = '',
+): string[] {
+  const messages: string[] = [];
+  for (const error of errors) {
+    const path = prefix ? `${prefix}.${error.property}` : error.property;
+    for (const message of Object.values(error.constraints ?? {})) {
+      messages.push(prefix ? `${path}: ${String(message)}` : String(message));
+    }
+    if (error.children && error.children.length > 0) {
+      messages.push(...flattenConstraintMessages(error.children, path));
+    }
+  }
+  return messages;
+}
+
 async function validateAndWhitelistDto(
   dto: Type<object>,
   data: object,
@@ -229,7 +254,10 @@ async function validateAndWhitelistDto(
   if (errors.length) {
     throw new BadRequestException({
       statusCode: 400,
-      message: errors.flatMap((e) => Object.values(e.constraints ?? {})),
+      // Recursive: a @ValidateNested failure carries its constraints in
+      // `children`, not on the root — flattening only the top level
+      // produced a 400 with `message: []`, telling the client nothing.
+      message: flattenConstraintMessages(errors),
       error: 'Bad Request',
     });
   }
@@ -490,7 +518,9 @@ export function buildOperationController(
       definition.paramsDto,
       `"${definition.path}" paramsDto`,
     );
-    const routeKey = `${operation.method}:${operation.path}`;
+    // Lowercased: Express matches case-insensitively by default, so
+    // two ops differing only in path casing are one wire route.
+    const routeKey = `${operation.method}:${operation.path.toLowerCase()}`;
     if (routeKeys.has(routeKey)) {
       throw new Error(
         `operationResource "${definition.path}": duplicate route ` +
@@ -593,6 +623,14 @@ function attachOperationMethod(
     const handlerClass = getHandlerClass(operation.handler);
     if (handlerClass !== undefined) {
       const contextId = ContextIdFactory.getByRequest(request);
+      // Register the REQUEST under the context id before resolving:
+      // this controller is statically scoped, so the request carries no
+      // context id of its own and `getByRequest` mints a fresh one —
+      // without registration, a handler (or any dependency in its
+      // subtree) injecting `REQUEST` received `undefined` and 500'd on
+      // every call, though the same class works fine as an ordinary
+      // controller dependency.
+      this.moduleRef.registerRequestByContextId(request, contextId);
       // Always strict: either the class is registered here, or a local
       // alias for it is. Never a global scan.
       const token: unknown = handlerAliases.get(handlerClass) ?? handlerClass;
@@ -650,9 +688,6 @@ function attachOperationMethod(
   if (operation.decorators?.length) {
     decorators.push(...operation.decorators);
   }
-  if (aclDecorators?.length) {
-    decorators.push(...aclDecorators);
-  }
 
   const descriptor = Object.getOwnPropertyDescriptor(proto, methodName);
   if (descriptor === undefined) {
@@ -661,6 +696,43 @@ function attachOperationMethod(
     );
   }
   applyDecorators(...decorators)(proto, methodName, descriptor);
+
+  // The acl-derived grant is applied in a SECOND pass so the consumer's
+  // decorators are readable in between. Upstream's grant metadata is a
+  // plain SetMetadata — last write wins, no merge — so applying `acl`
+  // after a hand-written AccessControlGrant silently REPLACED it: a
+  // grant deliberately tighter than the inferred action was discarded,
+  // and the route audit reported only the survivor. Two validators, one
+  // slot, no defined winner → fail at definition time naming both.
+  // (CRUD resources cannot do this — their controller is built
+  // downstream of the planner — which is why their docs state the
+  // limitation instead.)
+  if (aclDecorators?.length && descriptor.value !== undefined) {
+    // BOTH keys, not just the grant: `acl.query` pushes an
+    // AccessControlQuery into the same second-pass array, and a manual
+    // AccessControlQuery — a deliberately TIGHTER row filter — was
+    // still silently replaced when only the grant key was read back.
+    // Same defect, sibling slot.
+    const grantKey = AccessControlGrant().KEY;
+    const queryKey = AccessControlQuery().KEY;
+    const manualGrant: unknown =
+      (typeof grantKey === 'string'
+        ? Reflect.getMetadata(grantKey, descriptor.value)
+        : undefined) ??
+      (typeof queryKey === 'string'
+        ? Reflect.getMetadata(queryKey, descriptor.value)
+        : undefined);
+    if (manualGrant !== undefined) {
+      throw new Error(
+        `operationResource: operation "${operation.key}" declares \`acl\` ` +
+          'AND carries a hand-written AccessControl* decorator. Grant ' +
+          'metadata is last-write-wins — one would silently replace the ' +
+          'other. Use `acl` (and its per-operation overrides) OR manual ' +
+          'decorators on this operation, not both.',
+      );
+    }
+    applyDecorators(...aclDecorators)(proto, methodName, descriptor);
+  }
   if (operation.public === true && descriptor.value !== undefined) {
     Reflect.defineMetadata(
       SWAGGER_API_SECURITY_METADATA,

@@ -20,17 +20,28 @@ import { Transform } from 'class-transformer';
  * alone still drops a column the response DTO does not declare, which is
  * what makes the DTO a projection.
  *
- * Verified by flipping this flag: the projection test in
- * `rockets-core-json-column.e2e-spec.ts` fails, and only that one.
+ * `strategy: 'excludeAll'` is LOAD-BEARING for nested safety: without
+ * it, an `@Expose()`d relation with no `@Type()` — the common
+ * hand-written class-DTO shape, since `@ApiProperty({ type })` writes
+ * no class-transformer metadata — emits the FULL child row verbatim
+ * (`owner: { passwordHash: ... }`) where the projection yields `{}`.
+ * Blast radius, measured: the leak needs PLAIN-OBJECT rows — Firestore
+ * and other plain adapters, JSON columns, handler-returned data, raw
+ * queries. A TypeORM-hydrated entity instance infers its own class as
+ * the nested target and empties either way. An earlier revision
+ * dropped the strategy to serve free-form JSON columns and shipped the
+ * plain-row leak; clean-room review caught it. Blob columns opt out per property with
+ * `@FreeFormJson` — on the RESPONSE DTO too, not only the input.
  * Request-side mass assignment is NOT governed here — it comes from the
- * ValidationPipe's `whitelist: true`, and stays closed with this flag
- * off. Do not treat this constant as an inbound security control.
+ * ValidationPipe's `whitelist: true`. Do not treat this constant as an
+ * inbound security control.
  *
  * Both sets are passed to `CrudModule.forRoot` because the settings
  * provider REPLACES the default object rather than merging into it
  * (`createSettingsProvider`: `effectiveSettings ?? defaultSettings`).
  */
 export const ROCKETS_TO_INSTANCE_OPTIONS: ClassTransformOptions = {
+  strategy: 'excludeAll',
   excludeExtraneousValues: true,
   excludePrefixes: ['_', '__'],
 };
@@ -90,6 +101,10 @@ export const ROCKETS_TO_PLAIN_OPTIONS: ClassTransformOptions = {
  *   profile?: Record<string, unknown>;
  * }
  * ```
+ *
+ * Applies to arrays of plain objects too: without the marker,
+ * `excludeAll` projects each element to `{}` (`[{}]`), same mechanism
+ * as the scalar case.
  */
 export function FreeFormJson(): PropertyDecorator {
   return (target, propertyKey) => {
