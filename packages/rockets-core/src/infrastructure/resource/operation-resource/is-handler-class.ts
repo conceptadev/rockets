@@ -18,6 +18,15 @@ function isClassRef(
   );
 }
 
+/**
+ * Recognises native `class` syntax only — `Function.prototype.toString`
+ * prefix check. A class DOWNLEVELLED below ES2015 (or a handler defined
+ * as an instance arrow field) is not recognised and falls through to
+ * the function path, which invokes it without `new`. This repo compiles
+ * to ES2021+, so the limit bites only consumers shipping transpiled
+ * handler classes; the `{ useClass: Handler }` form is the unambiguous
+ * spelling for those.
+ */
 function isEsClass(handler: Function): boolean {
   return Function.prototype.toString.call(handler).startsWith('class ');
 }

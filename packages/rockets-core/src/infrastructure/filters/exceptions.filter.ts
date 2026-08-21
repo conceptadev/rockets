@@ -1,3 +1,4 @@
+import { PlainLiteralObject } from '@nestjs/common';
 import { inspect } from 'node:util';
 import {
   ExceptionInterface,
@@ -178,12 +179,28 @@ export class RocketsCoreExceptionsFilter implements ExceptionFilter {
       }
     }
 
-    const serialized = this.serializer.serialize({
-      statusCode,
-      errorCode,
-      message,
-      originalException: rawException,
-    });
+    // A serializer that THROWS is caught, not propagated: an unhandled
+    // exception inside the exception filter replaces the resolved
+    // status and envelope with the adapter's bare 500 — a serializer
+    // bug silently rewriting every error response, routine 404s
+    // included. Same rationale as the null-return fallback below.
+    let serialized: PlainLiteralObject | null;
+    try {
+      serialized = this.serializer.serialize({
+        statusCode,
+        errorCode,
+        message,
+        originalException: rawException,
+      });
+    } catch (serializerError) {
+      this.logger.error(
+        'Error serializer threw; falling back to the default envelope',
+        serializerError instanceof Error
+          ? serializerError.stack
+          : inspect(serializerError),
+      );
+      serialized = null;
+    }
     // A serializer that returns nothing would otherwise send an empty
     // body with a correct status — a client sees a 409 it cannot read.
     // Fall back rather than fail a second time inside the error path.

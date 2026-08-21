@@ -1,4 +1,8 @@
 import { parse, type Token } from 'path-to-regexp';
+// Version discipline: a RANGE (^8.4.2), matching @nestjs/core's own
+// dependency, so npm keeps ONE copy — an exact pin guarantees a second
+// copy the day Nest bumps, and two grammars is worse than semver-minor
+// drift within the library the router itself trusts.
 
 export type RoutePatternOverlap = boolean | 'unknown';
 
@@ -243,5 +247,11 @@ function segmentsMayOverlap(a: Segment, b: Segment): RoutePatternOverlap {
   if (a.kind === 'param' || b.kind === 'param') {
     return true;
   }
-  return a.value === b.value;
+  // Case-insensitive: Express's router matches paths with
+  // `caseSensitive: false` by default, so `pets/Stats` and `pets/stats`
+  // are ONE route on the wire. A case-sensitive comparison here
+  // declared them disjoint and the app booted with the second handler
+  // silently unreachable — the exact last-wins failure this validator
+  // exists to reject.
+  return a.value.toLowerCase() === b.value.toLowerCase();
 }

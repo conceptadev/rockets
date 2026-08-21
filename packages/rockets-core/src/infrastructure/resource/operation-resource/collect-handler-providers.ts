@@ -30,6 +30,16 @@ function exportToken(value: unknown): unknown {
   return value;
 }
 
+/**
+ * Sentinel for a `forwardRef` whose factory THROWS at definition time —
+ * the TDZ circular-import case forwardRef exists for. Its exports are
+ * unknowable here; swallowing the throw and returning `undefined` made
+ * the module invisible, so a handler it exports was silently
+ * auto-registered as a duplicate — the exact defect this file's docs
+ * promise the export walk prevents.
+ */
+export const UNINSPECTABLE_IMPORT = Symbol('UNINSPECTABLE_IMPORT');
+
 function unwrapImportEntry(entry: unknown): unknown {
   if (
     typeof entry === 'object' &&
@@ -40,7 +50,7 @@ function unwrapImportEntry(entry: unknown): unknown {
     try {
       return (entry as ForwardReference).forwardRef();
     } catch {
-      return undefined;
+      return UNINSPECTABLE_IMPORT;
     }
   }
   return entry;
@@ -155,6 +165,14 @@ function addExportEntries(
 ): void {
   for (const raw of entries) {
     const entry = unwrapImportEntry(raw);
+    // A throwing forwardRef inside `exports: [...]` (the circular
+    // re-export idiom) is as unknowable as one in `imports` — the
+    // first revision handled only the top-level loop, and the exact
+    // silent-duplicate defect survived one frame down.
+    if (entry === UNINSPECTABLE_IMPORT) {
+      tokens.add(UNINSPECTABLE_IMPORT);
+      continue;
+    }
     if (entry === undefined || entry === null) continue;
 
     if (typeof entry === 'function') {
@@ -208,6 +226,10 @@ function collectImportedExportTokens(
   const visited = new Set<unknown>();
   for (const raw of imports) {
     const entry = unwrapImportEntry(raw);
+    if (entry === UNINSPECTABLE_IMPORT) {
+      tokens.add(UNINSPECTABLE_IMPORT);
+      continue;
+    }
     if (entry === undefined || entry === null) {
       continue;
     }
@@ -281,10 +303,12 @@ export function collectHandlerProviders(
   imports: OperationResourceDefinition['imports'],
 ): Provider[] {
   const providers: Provider[] = [];
+  const importedTokens = collectImportedExportTokens(imports);
   const suppliedTokens = new Set<unknown>([
     ...explicitProviders.map(providerToken),
-    ...collectImportedExportTokens(imports),
+    ...importedTokens,
   ]);
+  const hasUninspectableImport = importedTokens.has(UNINSPECTABLE_IMPORT);
   const seen = new Set<Type<OperationHandler>>();
   for (const operation of Object.values(operations)) {
     const handlerClass = getHandlerClass(operation.handler);
@@ -293,6 +317,22 @@ export function collectHandlerProviders(
     }
     if (suppliedTokens.has(handlerClass) || seen.has(handlerClass)) {
       continue;
+    }
+    // A throwing forwardRef makes the auto-register decision a coin
+    // flip: the invisible module may export this very handler, and
+    // registering a second copy silently shadows it (or fails the boot
+    // on its module-private deps). Refuse loudly instead — explicit
+    // beats a duplicate nobody asked for.
+    if (hasUninspectableImport) {
+      throw new Error(
+        `operationResource: handler "${handlerClass.name}" would be ` +
+          'auto-registered, but an imported `forwardRef` cannot be ' +
+          'inspected at definition time (its factory throws — the ' +
+          'circular-import case). If that module supplies the handler, ' +
+          'nothing is needed once the cycle resolves; otherwise list the ' +
+          "handler explicitly in this resource's `providers` to make " +
+          'ownership unambiguous.',
+      );
     }
     seen.add(handlerClass);
     providers.push(handlerClass);
