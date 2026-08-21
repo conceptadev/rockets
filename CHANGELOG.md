@@ -7,6 +7,32 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Added
 
+- **Schema DTOs survive class-validator whitelist pipes (issue #83).**
+  Three pieces. `StandardSchemaDtoValidationPipe` now recognises any
+  class carrying a Standard Schema as its static `schema` — bare
+  `nestjs-zod` DTOs included, not only Rockets-branded ones.
+  `allowStandardSchemaKeys(dto)` stamps `@Allow()` per declared key so a
+  schema DTO survives ANY `ValidationPipe({ whitelist: true })` (Rockets'
+  own `compileDtoClass` output ships stamped). And
+  `StandardSchemaAwareValidationPipe` is Nest's `ValidationPipe` that
+  VALIDATES schema-carrying metatypes with their own schema instead of
+  emptying them to `{}` — standalone-safe (register exactly one schema
+  validator per route: pairing double-parses, and a transforming schema
+  is not idempotent), forwarding `transform` / `errorHttpStatusCode` so
+  both DTO kinds fail alike, and rejecting loudly the ambiguous
+  both-schema-and-constraints shape. The
+  trap itself is pinned by a test: unstamped DTO + plain whitelist pipe
+  still yields `{}`, so the docs' claim about the hazard stays honest.
+  One predicate defines carrier recognition (`getCarriedStandardSchema`),
+  imported everywhere directly — the tolerant same-named alias in
+  `common/utils` is gone. Behaviour note for existing consumers:
+  generated zod DTOs previously carried zero class-validator metadata,
+  so a pipe with `forbidUnknownValues` rejected them outright; stamped,
+  they are now accepted. The stamp is SURVIVAL, not validation — the
+  body is only checked when a schema pipe (`StandardSchemaModule` or
+  the aware pipe) is registered; without one, a route that used to 400
+  on these DTOs now accepts the raw body. A visible change either way.
+
 - **Route policy audit (`routePolicy`).** `RocketsCoreModule.forRoot`
   accepts `routePolicy: { requireAuth, requireAcl, requireAclQuery, allow,
   allowControllers }`, checked at bootstrap over every discovered

@@ -2,7 +2,7 @@ import { BadRequestException, type Type } from '@nestjs/common';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import {
-  getStandardSchema,
+  getCarriedStandardSchema,
   standardSchemaBadRequest,
 } from './standard-schema.util';
 
@@ -25,7 +25,7 @@ import {
 export async function whitelistedFromDto<
   T extends Record<string, unknown> = Record<string, unknown>,
 >(dtoClass: Type<unknown>, data: object): Promise<T> {
-  const standard = getStandardSchema(dtoClass);
+  const standard = getCarriedStandardSchema(dtoClass);
   if (standard) {
     const result = await standard['~standard'].validate(data);
     if (result.issues !== undefined) {
