@@ -714,6 +714,121 @@ const threeLevelOps = operationResource({
   }),
 });
 
+/**
+ * Nest merges a dynamic module host's static and dynamic metadata before
+ * resolving re-exports. These two fixtures pin both cross-half combinations:
+ * static imports + dynamic exports, and dynamic imports + static exports.
+ */
+const STATIC_IMPORT_DYNAMIC_EXPORT_SECRET = Symbol(
+  'STATIC_IMPORT_DYNAMIC_EXPORT_SECRET',
+);
+
+@Injectable()
+class StaticImportDynamicExportHandler {
+  constructor(
+    @Inject(STATIC_IMPORT_DYNAMIC_EXPORT_SECRET)
+    private readonly secret: string,
+  ) {}
+
+  handle() {
+    return { value: this.secret };
+  }
+}
+
+@Module({})
+class StaticImportDynamicExportHostModule {
+  static forRoot(): DynamicModule {
+    return {
+      module: StaticImportDynamicExportHostModule,
+      providers: [
+        {
+          provide: STATIC_IMPORT_DYNAMIC_EXPORT_SECRET,
+          useValue: 'static-import-dynamic-export',
+        },
+        StaticImportDynamicExportHandler,
+      ],
+      exports: [StaticImportDynamicExportHandler],
+    };
+  }
+}
+
+@Module({ imports: [StaticImportDynamicExportHostModule.forRoot()] })
+class StaticImportDynamicExportWrapperModule {
+  static forRoot(): DynamicModule {
+    return {
+      module: StaticImportDynamicExportWrapperModule,
+      exports: [StaticImportDynamicExportHostModule],
+    };
+  }
+}
+
+const staticImportDynamicExportOps = operationResource({
+  path: 'static-import-dynamic-export',
+  public: true,
+  imports: [StaticImportDynamicExportWrapperModule.forRoot()],
+  operations: (op) => ({
+    read: op.read({
+      output: z.object({ value: z.string() }),
+      handler: StaticImportDynamicExportHandler,
+    }),
+  }),
+});
+
+const DYNAMIC_IMPORT_STATIC_EXPORT_SECRET = Symbol(
+  'DYNAMIC_IMPORT_STATIC_EXPORT_SECRET',
+);
+
+@Injectable()
+class DynamicImportStaticExportHandler {
+  constructor(
+    @Inject(DYNAMIC_IMPORT_STATIC_EXPORT_SECRET)
+    private readonly secret: string,
+  ) {}
+
+  handle() {
+    return { value: this.secret };
+  }
+}
+
+@Module({})
+class DynamicImportStaticExportHostModule {
+  static forRoot(): DynamicModule {
+    return {
+      module: DynamicImportStaticExportHostModule,
+      providers: [
+        {
+          provide: DYNAMIC_IMPORT_STATIC_EXPORT_SECRET,
+          useValue: 'dynamic-import-static-export',
+        },
+        DynamicImportStaticExportHandler,
+      ],
+      exports: [DynamicImportStaticExportHandler],
+    };
+  }
+}
+
+@Module({ exports: [DynamicImportStaticExportHostModule] })
+class DynamicImportStaticExportWrapperModule {
+  static forRoot(): DynamicModule {
+    return {
+      module: DynamicImportStaticExportWrapperModule,
+      imports: [DynamicImportStaticExportHostModule.forRoot()],
+    };
+  }
+}
+
+const dynamicImportStaticExportOps = operationResource({
+  path: 'dynamic-import-static-export',
+  public: true,
+  imports: [DynamicImportStaticExportWrapperModule.forRoot()],
+  operations: (op) => ({
+    read: op.read({
+      output: z.object({ value: z.string() }),
+      handler: DynamicImportStaticExportHandler,
+    }),
+  }),
+});
+
 const dynamicHostOps = operationResource({
   path: 'platform',
   public: true,
@@ -1279,5 +1394,57 @@ describe('operationResource — handler three re-export levels deep (e2e)', () =
       .get('/three-level/read')
       .expect(200);
     expect(res.body).toEqual({ value: 'three-level-secret' });
+  });
+});
+
+describe('operationResource — static/dynamic metadata union (e2e)', () => {
+  it('resolves a dynamic export through a static import', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        RocketsCoreModule.forRoot({
+          auth: defineAuthAdapter(SimpleAuthProvider),
+          providers: [SimpleAuthProvider],
+          resources: [staticImportDynamicExportOps],
+          global: true,
+        }),
+      ],
+      providers: [{ provide: APP_GUARD, useClass: AuthServerGuard }],
+    }).compile();
+    const app = moduleRef.createNestApplication();
+
+    try {
+      await app.init();
+      const res = await request(app.getHttpServer())
+        .get('/static-import-dynamic-export/read')
+        .expect(200);
+      expect(res.body).toEqual({ value: 'static-import-dynamic-export' });
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('resolves a static export through a dynamic import', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        RocketsCoreModule.forRoot({
+          auth: defineAuthAdapter(SimpleAuthProvider),
+          providers: [SimpleAuthProvider],
+          resources: [dynamicImportStaticExportOps],
+          global: true,
+        }),
+      ],
+      providers: [{ provide: APP_GUARD, useClass: AuthServerGuard }],
+    }).compile();
+    const app = moduleRef.createNestApplication();
+
+    try {
+      await app.init();
+      const res = await request(app.getHttpServer())
+        .get('/dynamic-import-static-export/read')
+        .expect(200);
+      expect(res.body).toEqual({ value: 'dynamic-import-static-export' });
+    } finally {
+      await app.close();
+    }
   });
 });
