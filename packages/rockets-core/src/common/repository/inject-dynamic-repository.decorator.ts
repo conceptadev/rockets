@@ -12,9 +12,6 @@ import { resolveEntityKey } from '../utils/resolve-entity-key.util';
  * `*_ENTITY_KEY` constant. String form is the escape hatch for namespaced or
  * non-derived keys (e.g. `'billing/invoice'`).
  *
- * Delegates to the upstream-parity string-only `InjectDynamicRepository` from
- * `@concepta/rockets-repository`, resolving the class to its key first.
- *
  * @example
  * ```ts
  * constructor(

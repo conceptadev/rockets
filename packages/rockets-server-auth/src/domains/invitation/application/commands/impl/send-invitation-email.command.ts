@@ -37,13 +37,7 @@ export class SendInvitationEmailCommand
   }
 }
 
-/**
- * Command to send an "invitation accepted" confirmation email.
- *
- * Implements the v8 `SendAcceptedNotificationCommandInterface` required by
- * `InvitationNotificationPort` so it can be passed as
- * `ports.notification.sendAcceptedCommand`.
- */
+/** Wired as `ports.notification.sendAcceptedCommand`. */
 export class SendAcceptedEmailCommand
   implements SendAcceptedNotificationCommandInterface
 {

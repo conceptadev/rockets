@@ -11,29 +11,6 @@ import { PetCreateHandler } from './pet-create.handler';
 
 const PetAuditLogHook = AuditLogHook.for(PetEntity);
 
-/**
- * Fully zod-driven: entity, DTO projections and relations all come from
- * `petSchema` (pet.schema.ts) — see the mapping table there.
- *
- * Hook stack and what each one owns:
- *
- * - `OwnerStampHook` — auto-wired by the zod layer from `owner: 'userId'`
- *   below; `beforeCreate`/`beforeUpdate` stamp `userId` from the actor and
- *   reject spoofing. (Opt out with `ownerStamp: false`.)
- * - {@link PetOwnerOrSharedHook} — `beforeFindAndCount` / `beforeFindOne`
- *   broaden read scope to "owner OR shared user" while keeping writes
- *   strict-owner.
- * - {@link PetUniqueRefHook} — `beforeCreate` rejects duplicate
- *   `uniqueRef` with `409 Conflict` (no custom create handler).
- * - {@link AuditLogHook} — `afterCreate` / `afterUpdate` / `afterSoftDelete`
- *   write to the audit trail.
- * - {@link PetCreatedEventHook} — `afterCreate` publishes
- *   `PetCreatedEvent` for downstream listeners (welcome email).
- *
- * Pet ↔ Tag many-to-many stays exposed as the zod sub-resource at
- * `/pets/:petId/tags`. The vaccination/junction relation entries come
- * from the `relation` meta on the schema (`include: 'default'`).
- */
 export const petResource = zodResource({
   name: 'Pet',
   schema: petSchema,

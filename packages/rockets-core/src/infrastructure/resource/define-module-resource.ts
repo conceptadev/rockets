@@ -8,35 +8,6 @@ import type {
 import { ResourceKind } from '../../domain/interfaces/resource-kind.enum';
 import { resolveEntityKey } from '../../common';
 
-/**
- * Normalise a class shorthand or full entry into the canonical
- * {@link ModuleResourceEntityEntry} shape.
- *
- * Internal helper for {@link defineModuleResource}. Not exported from
- * the package barrel because every consumer reaches the same behaviour
- * through `defineModuleResource()`.
- *
- * @example
- * Input → output:
- *
- * ```ts
- * // Class shorthand → derives the key
- * normaliseModuleResourceEntity(UserEntity)
- * // → { key: 'user', entity: UserEntity }
- *
- * // Full entry → passes through unchanged
- * normaliseModuleResourceEntity({ key: 'audit', entity: AuditEntity })
- * // → { key: 'audit', entity: AuditEntity }
- *
- * // RepositoryBootstrap override without explicit key → key derived from entity
- * normaliseModuleResourceEntity({
- *   entity: AnalyticsEntity,
- *   repository: defineFirestoreRepository(),
- *   collection: 'analytics_events',
- * })
- * // → { key: 'analytics', entity: AnalyticsEntity, repository: <bootstrap>, collection: 'analytics_events' }
- * ```
- */
 function normaliseModuleResourceEntity(
   input: ModuleResourceEntityInput,
 ): ModuleResourceEntityEntry {

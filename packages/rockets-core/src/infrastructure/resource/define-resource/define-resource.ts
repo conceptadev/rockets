@@ -88,7 +88,7 @@ type CrudDecorator = ReturnType<typeof applyDecorators>;
  *     providers: [],
  *   },
  *   persistence: {
- *     module: TypeOrmRepositoryModule,    // default
+ *     // module omitted — aggregator uses RocketsCoreModule's root repository adapter
  *     entity: { key: 'pet', entity: PetEntity, relations: [] },
  *   },
  *   meta: { key: 'pet', entityClass: PetEntity, relations: [] },

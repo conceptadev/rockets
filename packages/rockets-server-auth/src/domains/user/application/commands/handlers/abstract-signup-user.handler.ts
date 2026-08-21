@@ -3,14 +3,10 @@ import { SignupUserCommand } from '../impl/signup-user.command';
 import { RocketsAuthUserEntityInterface } from '../../../interfaces/rockets-auth-user-entity.interface';
 
 /**
- * Abstract base class for signup command handlers.
- *
  * Carries `@CommandHandler(SignupUserCommand)` so subclasses inherit
- * the CQRS metadata via the prototype chain — no decorator needed
- * on the concrete class.
+ * CQRS metadata via the prototype chain — no decorator on the concrete class.
  *
- * To customise signup logic, extend this class and register the
- * subclass via `RocketsAuthModule.forRoot({ userCrud: { signupHandler } })`.
+ * Register via `RocketsAuthModule.forRoot({ userCrud: { handlers: { signupHandler } } })`.
  */
 @CommandHandler(SignupUserCommand)
 export abstract class AbstractSignupUserHandler

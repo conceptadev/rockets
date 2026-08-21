@@ -1,10 +1,3 @@
-// Role Domain Public API
-//
-// Phase 2 (2026-04-29): removed v7 `RoleRepositoryCrudAdapter`. Admin role
-// CRUD now resolves the repository via the dynamic-repository token by way
-// of `CrudModule.forFeature` + the `entity` key. Hand-built admin user-roles
-// controller is factory-built (see `gateways/http/factories/`).
-
 // Gateway controller factory
 export { buildAdminUserRolesController } from './gateways/http/factories/build-admin-user-roles-controller';
 

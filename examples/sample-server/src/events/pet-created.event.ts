@@ -1,11 +1,4 @@
-/**
- * Pure data carrier — no logic, no services. Listeners read `petId` /
- * `ownerId` and do their own side effects.
- *
- * Convention: events describe what happened, not what to do. A consumer
- * that needs a side effect subscribes via `@EventsHandler(PetCreatedEvent)`
- * — see `NotifyOnPetCreatedListener`.
- */
+/** Domain event: what happened. Side effects belong in `@EventsHandler` listeners. */
 export class PetCreatedEvent {
   constructor(
     public readonly petId: string,

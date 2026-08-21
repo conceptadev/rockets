@@ -6,27 +6,15 @@ import {
   Logger,
 } from '@nestjs/common';
 
-/**
- * Access Control Service Implementation Fixture
- *
- * Implements AccessControlServiceInterface to provide user and role information
- * to the AccessControlGuard for permission checking.
- */
 @Injectable()
 export class ACServiceFixture implements AccessControlServiceInterface {
   private readonly logger = new Logger(ACServiceFixture.name);
 
-  /**
-   * Get the authenticated user from the execution context
-   */
   async getUser<T>(context: ExecutionContext): Promise<T> {
     const request = context.switchToHttp().getRequest();
     return request.user as T;
   }
 
-  /**
-   * Get the roles of the authenticated user
-   */
   async getUserRoles(context: ExecutionContext): Promise<string | string[]> {
     const request = context.switchToHttp().getRequest();
     const endpoint = `${request.method} ${request.url}`;

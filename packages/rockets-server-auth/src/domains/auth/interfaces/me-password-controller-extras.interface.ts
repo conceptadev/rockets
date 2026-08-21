@@ -1,26 +1,15 @@
-/**
- * Decorator factory shape — anything compatible with `@SetMetadata`,
- * `@UseGuards`, `@Throttle`, `@ApiTags`, custom decorators, etc.
- *
- * `ClassDecorator` is applied to the controller class itself.
- * `MethodDecorator` is applied to a specific route handler.
- */
 export type RocketsAuthClassDecorator = ClassDecorator;
 export type RocketsAuthMethodDecorator = MethodDecorator;
 
-/**
- * Per-route extras for the `MePassword` gateway controller.
- *
- * Today the controller exposes a single route, `changePassword`. New routes
- * MUST add a key here with their own `decorators`, optional `useHandler`,
- * etc. — never silently grow the controller without updating the extras
- * surface.
- */
 export interface MePasswordRouteExtras {
   /** Method decorators applied to the route (Throttle, ApiResponse, etc.). */
   decorators?: RocketsAuthMethodDecorator[];
 }
 
+/**
+ * Extra decorators for MePassword. `routes` keys must match handler names;
+ * a new route cannot take extras until it has a key here.
+ */
 export interface MePasswordControllerExtras {
   /** Class-level decorators (UseGuards, ApiTags, custom metadata). */
   classDecorators?: RocketsAuthClassDecorator[];

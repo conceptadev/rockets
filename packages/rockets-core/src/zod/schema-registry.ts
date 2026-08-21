@@ -38,10 +38,6 @@ export function getRegisteredEntity(
   return schemaEntities.get(schema);
 }
 
-/**
- * True for class constructors / functions — the only non-schema shape a
- * relation target thunk may produce.
- */
 function isEntityClass(value: unknown): value is Type<PlainLiteralObject> {
   return typeof value === 'function';
 }

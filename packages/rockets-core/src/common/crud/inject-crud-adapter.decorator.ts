@@ -12,9 +12,6 @@ import { resolveEntityKey } from '../utils/resolve-entity-key.util';
  * `*_ENTITY_KEY` constant. String form is the escape hatch for namespaced or
  * non-derived keys.
  *
- * Delegates to the upstream-parity string-only `InjectCrudAdapter` from
- * `@concepta/rockets-crud`, resolving the class to its key first.
- *
  * @example
  * ```ts
  * constructor(

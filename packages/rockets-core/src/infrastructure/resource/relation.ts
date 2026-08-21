@@ -79,16 +79,9 @@ export function createBoundRelation<S extends object>(
 }
 
 /**
- * Resolve the target class of a relation entry, calling the lazy thunk
- * exactly once. Used internally by `buildAppRegistrationPlan` and
- * `defineResource` when they need the concrete class without forcing
- * every caller to re-implement the class-vs-thunk discriminator.
- *
- * The thunk form must be an **arrow function** (`() => Class`) — the
- * same convention TypeORM uses for `@OneToMany(() => Entity, ...)`.
- * Arrow functions are the only `function`-typed values whose `prototype`
- * is `undefined`, which makes them trivially distinguishable from class
- * constructors at runtime without `Function.prototype.toString` parsing.
+ * Returns the target entity class, invoking a lazy thunk when `target`
+ * is `() => Class`. Thunks must be arrow functions — same convention as
+ * TypeORM `@OneToMany(() => Entity, ...)`.
  */
 export function resolveRelationTarget(
   entry: ResourceRelationEntry,

@@ -77,7 +77,8 @@ export interface RocketsSubResourceInput<E extends PlainLiteralObject>
  * `defineResource({ subResources: { ... } })` map.
  *
  * The returned value is opaque — pass it as the value in the parent's
- * `subResources` object, keyed by the URL segment you want appended.
+ * `subResources` object, keyed by the parent relation property. URL
+ * segment defaults to kebab-case of that key; override with `segment`.
  *
  * The parent's `defineResource()` materialises this spec into a full
  * `CrudResource` with composed path, params, and auto-injected

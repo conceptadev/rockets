@@ -1,14 +1,3 @@
-/**
- * E2E test for the top-level `repository` adapter and feature-bundle
- * persistence wiring on `RocketsCoreModule`.
- *
- * Validates that:
- *  - `extras.repository` registers the user-metadata entity through
- *    `RepositoryModule.forFeature`.
- *  - `defineModuleResource({ entities: [...] })` rows are folded into the
- *    same registration plan as CRUD bundles.
- *  - CQRS handlers can resolve the registered repositories.
- */
 import { describe, it, expect, afterAll } from 'vitest';
 import {
   Global,
