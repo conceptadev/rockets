@@ -38,7 +38,10 @@ import { RocketsCoreModule } from '../rockets-core.module';
 import { USER_METADATA_MODULE_ENTITY_KEY } from '../rockets-core.constants';
 import { AuthServerGuard } from '../infrastructure/guards/auth-server.guard';
 import { defineResource } from '../infrastructure/resource/define-resource';
-import { FreeFormJson } from '../infrastructure/crud-serialization';
+// FreeFormJson via the ROOT barrel — the README example imports from
+// the package root, and round 4 caught the symbol missing there while
+// this spec reached it by deep import, hiding the drift.
+import { FreeFormJson } from '../index';
 import { f, rocketsFieldMeta, zodResource } from '../zod';
 import { z } from 'zod';
 import { defineAuthAdapter } from '../infrastructure/auth/define-auth-adapter';

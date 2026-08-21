@@ -44,6 +44,7 @@ import type {
 } from '../domain/interfaces/auth-adapter.interface';
 import {
   RouteAuditService,
+  type RouteAuditReport,
   ROCKETS_ROUTE_POLICY_TOKEN,
   type RoutePolicy,
 } from '../infrastructure/audit';
@@ -377,6 +378,93 @@ describe('guard classification (e2e)', () => {
     ).toBe('public-class');
   });
 
+  // Review round 4: a public v1 and a guarded v2 of the same
+  // METHOD+path are different wire routes; one unqualified id collapsed
+  // them and a single allow entry exempted BOTH.
+  it('qualifies route ids by version, so allow cannot widen across versions', async () => {
+    @Controller({ path: 'widgets', version: '1' })
+    @ApiTags('WidgetsV1')
+    @AuthPublic({ classLevel: true })
+    class WidgetsV1Controller {
+      @Get()
+      @ApiOkResponse({ description: 'v1 public' })
+      list(): void {}
+    }
+    @Controller({ path: 'widgets', version: '2' })
+    @ApiTags('WidgetsV2')
+    class WidgetsV2Controller {
+      @Get()
+      @ApiOkResponse({ description: 'v2 guarded' })
+      list(): void {}
+    }
+
+    const app = await bootWith({
+      providers: [{ provide: APP_GUARD, useClass: AllowAllGuard }],
+      policy: { authGuards: [AllowAllGuard] },
+      controllers: [WidgetsV1Controller, WidgetsV2Controller],
+    });
+    const report = app.get(RouteAuditService).audit();
+    await app.close();
+
+    const ids = report.routes.map((r) => r.id).sort();
+    expect(ids).toEqual(['GET /widgets [v1]', 'GET /widgets [v2]']);
+
+    // The unqualified id matches NOTHING now — loud, not silently wide.
+    await expect(
+      bootWith({
+        providers: [{ provide: APP_GUARD, useClass: AllowAllGuard }],
+        policy: {
+          requireAuth: true,
+          authGuards: [AllowAllGuard],
+          allow: ['GET /widgets'],
+        },
+        controllers: [WidgetsV1Controller, WidgetsV2Controller],
+      }),
+    ).rejects.toThrow(/staleAllow/);
+
+    // The qualified id exempts exactly the public v1; the guarded v2
+    // stays enforced and the app boots.
+    const ok = await bootWith({
+      providers: [{ provide: APP_GUARD, useClass: AllowAllGuard }],
+      policy: {
+        requireAuth: true,
+        authGuards: [AllowAllGuard],
+        allow: ['GET /widgets [v1]', 'GET /health'],
+      },
+      controllers: [WidgetsV1Controller, WidgetsV2Controller, HealthController],
+    });
+    await ok.close();
+  });
+
+  it('fails closed when one allow id still matches more than one route', async () => {
+    @Controller('twins')
+    @ApiTags('TwinsA')
+    class TwinAController {
+      @Get()
+      @ApiOkResponse({ description: 'twin a' })
+      list(): void {}
+    }
+    @Controller('twins')
+    @ApiTags('TwinsB')
+    class TwinBController {
+      @Get()
+      @ApiOkResponse({ description: 'twin b' })
+      list(): void {}
+    }
+
+    await expect(
+      bootWith({
+        providers: [{ provide: APP_GUARD, useClass: AllowAllGuard }],
+        policy: {
+          requireAuth: true,
+          authGuards: [AllowAllGuard],
+          allow: ['GET /twins', 'GET /health'],
+        },
+        controllers: [TwinAController, TwinBController, HealthController],
+      }),
+    ).rejects.toThrow(/MORE THAN ONE discovered route/);
+  });
+
   // An allow list that can rot silently stops meaning anything.
   // Upstream enforces AccessControlQuery via getAllAndMerge([class,
   // handler]) — a CLASS-level query is real enforcement. Auditing only
@@ -456,6 +544,46 @@ describe('routePolicy through RocketsCoreModule (e2e)', () => {
     // asked for the check pays no discovery cost.
     expect(() => app.get(RouteAuditService)).toThrow();
     await app.close();
+  });
+
+  // Round 4: registered-but-unexported satisfies `app.get()` and fails
+  // real DI — a consumer module's `inject: [RouteAuditService]` could
+  // not resolve, though the docs promise injection.
+  it('is injectable from a CONSUMER module factory, not only app.get', async () => {
+    const AUDIT_PROBE = Symbol('AUDIT_PROBE');
+
+    @Module({
+      providers: [
+        {
+          provide: AUDIT_PROBE,
+          inject: [RouteAuditService],
+          // Injection is the thing under test; the report is read AFTER
+          // init (global guards are not resolved at factory time).
+          useFactory: (audit: RouteAuditService) => () => audit.audit(),
+        },
+      ],
+    })
+    class ConsumerModule {}
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        RocketsCoreModule.forRoot({
+          auth: defineAuthAdapter(NoopAuthAdapter),
+          providers: [NoopAuthAdapter],
+          routePolicy: { authGuards: [AllowAllGuard] },
+          global: true,
+        }),
+        ConsumerModule,
+      ],
+      controllers: [HealthController],
+      providers: [{ provide: APP_GUARD, useClass: AllowAllGuard }],
+    }).compile();
+    const app = moduleRef.createNestApplication();
+    await app.init();
+    const probe = app.get<() => RouteAuditReport>(AUDIT_PROBE);
+    const report = probe();
+    await app.close();
+    expect(report).toMatchObject({ authGuards: ['AllowAllGuard'] });
   });
 
   it('boots when the policy is satisfied, and the report is injectable', async () => {

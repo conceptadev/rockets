@@ -108,7 +108,7 @@ function definitionTransform(
     imports: [...defImports, ...createCoreImports(extras, plan)],
     controllers: [],
     providers: createCoreProviders({ providers, extras, plan }),
-    exports: createCoreExports({ exports: defExports, plan }),
+    exports: createCoreExports({ exports: defExports, plan, extras }),
   };
 }
 
@@ -294,6 +294,7 @@ function createCoreProviders(options: {
 function createCoreExports(options: {
   exports: DynamicModule['exports'];
   plan: AppRegistrationPlan;
+  extras?: RocketsCoreOptionsExtrasInterface;
 }): DynamicModule['exports'] {
   const exports: NonNullable<DynamicModule['exports']> = [
     ...(options.exports ?? []),
@@ -303,6 +304,14 @@ function createCoreExports(options: {
     ROCKETS_CORE_SETTINGS_TOKEN,
     AuthServerGuard,
   ];
+
+  // Same condition as the provider registration: the docs promise the
+  // service is INJECTABLE when a policy is declared, and a registered
+  // but unexported provider only satisfies `app.get()` — a consumer
+  // module's `inject: [RouteAuditService]` failed DI (review round 4).
+  if (options.extras?.routePolicy) {
+    exports.push(RouteAuditService);
+  }
 
   // Re-export per-resource providers (custom handlers, hooks) so the rest of the
   // app can inject them without importing every feature module twice.

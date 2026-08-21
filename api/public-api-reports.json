@@ -2410,6 +2410,12 @@
         "signature": "export interface ErrorDetails {\n    errorMessage: string;\n    errorStack?: string;\n}"
       },
       {
+        "name": "FreeFormJson",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function FreeFormJson(): PropertyDecorator;"
+      },
+      {
         "name": "GetUserMetadataHandler",
         "kind": "class",
         "runtime": true,
@@ -2576,6 +2582,18 @@
         "kind": "value",
         "runtime": true,
         "signature": "ROCKETS_ROUTE_POLICY_TOKEN: unique symbol"
+      },
+      {
+        "name": "ROCKETS_TO_INSTANCE_OPTIONS",
+        "kind": "value",
+        "runtime": true,
+        "signature": "ROCKETS_TO_INSTANCE_OPTIONS: ClassTransformOptions"
+      },
+      {
+        "name": "ROCKETS_TO_PLAIN_OPTIONS",
+        "kind": "value",
+        "runtime": true,
+        "signature": "ROCKETS_TO_PLAIN_OPTIONS: ClassTransformOptions"
       },
       {
         "name": "RegisteredRoute",
