@@ -72,7 +72,7 @@ function shapeKeys(schema: StandardSchemaV1): readonly string[] | undefined {
     typeof def === 'object' && def !== null
       ? Reflect.get(def, 'catchall')
       : undefined;
-  if (catchall !== undefined && catchall !== null) {
+  if (catchall !== undefined && catchall !== null && !isNeverSchema(catchall)) {
     throw new Error(
       'allowStandardSchemaKeys: this schema is OPEN (catchall/passthrough) ' +
         '— it declares arbitrary extra keys valid, and a key stamp would ' +
@@ -82,4 +82,16 @@ function shapeKeys(schema: StandardSchemaV1): readonly string[] | undefined {
     );
   }
   return Object.keys(shape);
+}
+
+function isNeverSchema(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const def: unknown = Reflect.get(value, 'def');
+  return (
+    typeof def === 'object' &&
+    def !== null &&
+    Reflect.get(def, 'type') === 'never'
+  );
 }

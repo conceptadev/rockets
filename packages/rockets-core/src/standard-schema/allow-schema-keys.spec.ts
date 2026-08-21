@@ -18,6 +18,17 @@ describe('allowStandardSchemaKeys', () => {
     expect(stamped).toEqual(['whitelistValidation:a', 'whitelistValidation:b']);
   });
 
+  it('stamps strict object schemas as closed schemas', () => {
+    class StrictDto extends createZodDto(
+      z.object({ a: z.string() }).strict(),
+    ) {}
+    allowStandardSchemaKeys(StrictDto);
+    const stamped = getMetadataStorage()
+      .getTargetValidationMetadatas(StrictDto, '', false, false)
+      .map((m) => `${m.type}:${m.propertyName}`);
+    expect(stamped).toEqual(['whitelistValidation:a']);
+  });
+
   it('throws on a class carrying no Standard Schema', () => {
     class NotADto {}
     expect(() => allowStandardSchemaKeys(NotADto)).toThrow(
