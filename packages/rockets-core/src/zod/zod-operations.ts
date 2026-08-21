@@ -43,6 +43,43 @@ export interface ZodOperationSchemas {
    * they answer `204` and the override would be silently dropped.
    */
   readonly output?: z.ZodObject;
+  /**
+   * Reject unknown body keys with `400` instead of silently stripping
+   * them (issue #79).
+   *
+   * A plain `z.object` drops undeclared keys during parse, so a client
+   * sending `{ "modelId": "x", "unexpected": 1 }` gets `201` and the
+   * extra key vanishes — the client believes a strict API accepted it.
+   * With `strictInput: true` the effective input schema (the derived
+   * projection, or the `input` override) is compiled with `.strict()`,
+   * unknown keys become validation issues, and the response is `400`
+   * naming the offending keys in the message.
+   *
+   * Know exactly what you are buying:
+   *
+   * - **Top-level only.** zod's `.strict()` does not recurse: an
+   *   unknown key inside a nested object is still stripped silently.
+   * - **Declared-but-projected fields are REJECTED, not ignored.**
+   *   `id`, `dateCreated`/`dateUpdated`, `version`, owner columns and
+   *   `dto: { create: false }` fields are not in the input projection,
+   *   so echoing a fetched row back into a strict `replace` is `400`.
+   *   For owner columns that is a feature — a spoof attempt is named
+   *   instead of silently overwritten — but a read-modify-write client
+   *   must strip server-owned keys first.
+   * - **OpenAPI:** the schema gains `additionalProperties: false` only
+   *   once the document passes through `nestjs-zod`'s
+   *   `cleanupOpenApiDoc` (which lifts the per-property marker); a raw
+   *   `SwaggerModule.createDocument` does not show it.
+   * - On an `input` override, `input: z.object({...}).strict()` is the
+   *   equivalent spelling; this flag exists for the DERIVED projection,
+   *   which an app cannot otherwise reach.
+   *
+   * Opt-in per operation, not a resource default: stripping is the
+   * long-standing generated-CRUD contract, and flipping it under
+   * existing consumers would turn tolerated clients into broken ones.
+   * Only valid on operations that HAVE a request body.
+   */
+  readonly strictInput?: boolean;
 }
 
 /**
@@ -129,7 +166,12 @@ export function zodOpConfig<T extends ZodOperationConfig>(
   // `input` / `output` are zod schemas on this path; the compiler turns
   // them into DTO classes and re-attaches them. Dropping them here keeps
   // a schema from reaching core where a `Type` is expected.
-  const { input: _input, output: _output, ...config } = opConfig(value);
+  const {
+    input: _input,
+    output: _output,
+    strictInput: _strictInput,
+    ...config
+  } = opConfig(value);
   return {
     ...config,
     responseOverride: {
