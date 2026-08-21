@@ -27,12 +27,14 @@ and re-exports the symbols apps need (`InjectDynamicRepository`,
 - An auth contract (`AuthAdapterInterface`) and a global guard that runs
   adapters in a chain.
 - A resource planner (`buildAppRegistrationPlan`) that turns a list of feature
-  bundles into Nest imports, dynamic repository registrations, and CRUD
-  controllers.
+  bundles into Nest imports, dynamic repository registrations, and CRUD /
+  operation controllers.
 - Reusable repository hooks for owner scoping, audit, and path-scoped
   sub-resources.
 - A typed actor overlay so handlers can read the authenticated user without
   parameter drilling.
+- A zod-first layer at `@concepta/rockets-core/zod` (`zodResource`,
+  `operationResource`, …) for schema-driven CRUD and typed non-CRUD HTTP.
 - Opt-in, vendor-neutral Standard Schema DTOs for hand-written Nest
   controllers.
 
@@ -171,6 +173,49 @@ export const billingFeature = defineModuleResource({
 `RocketsCoreModule` is global, so anything in `exports` is visible app-wide.
 Export the minimum to avoid name collisions across bundles.
 
+### Add typed non-CRUD endpoints (`operationResource`)
+
+For RPC-style routes without a hand-written controller, use
+`operationResource` from `@concepta/rockets-core/zod` (or
+`defineOperationResource` on the main entry with precompiled DTOs):
+
+```typescript
+import { operationResource } from '@concepta/rockets-core/zod';
+import { z } from 'zod';
+
+export const ops = operationResource({
+  path: 'ops',
+  public: true,
+  operations: (op) => ({
+    ping: op.read({
+      path: '',
+      output: z.object({ ok: z.boolean() }),
+      handler: () => ({ ok: true }),
+    }),
+    shout: op.write({
+      input: z.object({ text: z.string().min(1) }),
+      output: z.object({ text: z.string() }),
+      handler: ({ input }) => ({ text: input.text.toUpperCase() }),
+    }),
+  }),
+});
+```
+
+`output` is required (schema or `false`). Path defaults to the operation key.
+Optional resource-level `params` validates `:path` params. Full rules:
+[CONFIGURATION.md §6a](../../CONFIGURATION.md#6a-operationresource--typed-non-crud-endpoints-issue-43--50).
+Class handlers may be passed directly or as `{ useClass: Handler }`; explicit
+resource providers for the same token take precedence over auto-registration.
+
+With an `input` declared, the request payload must be a plain JSON object —
+an array, a scalar, or a `Buffer` returns `400` rather than being narrowed to
+`{}`. A missing body is still `{}`, so a `POST` with no payload against an
+all-optional `input` stays legal.
+
+Planner collision checks only cover Rockets-owned structured routes. For a
+real adapter audit after global prefix/versioning/manual controllers are
+registered, call `validateRegisteredRoutes(app)` after `app.init()`.
+
 ### Scope rows to the authenticated user
 
 `OwnerStampHook` writes `userId` on create/update and rejects spoofing.
@@ -247,6 +292,7 @@ The string key is derived from the entity name (`PetEntity` → `'pet'`). Pass t
 class for the recommended form, or an explicit string for namespaced keys.
 
 ```typescript
+import { type PlainLiteralObject } from '@nestjs/common';
 import {
   InjectDynamicRepository,
   RepositoryInterface,
@@ -260,11 +306,33 @@ export class PetService {
     private readonly pets: RepositoryInterface<PetEntity>,
   ) {}
 
-  byOwner(ownerId: string) {
-    return this.pets.find({ where: Where.eq<PetEntity>('userId', ownerId) });
+  // `ctx` is `PlainLiteralObject` — what the repository's `ctx` option
+  // accepts. A `RocketsCrudContext` from a hook or a CQRS handler
+  // satisfies it; so does the context `TransactionScope.run` hands back.
+  byOwner(ownerId: string, ctx: PlainLiteralObject) {
+    return this.pets.find({
+      where: Where.eq<PetEntity>('userId', ownerId),
+      // Always forward `ctx`. See below — omitting it is silent.
+      ctx,
+    });
   }
 }
 ```
+
+#### Always pass `ctx`
+
+A repository call that omits `ctx` runs with **all entity hooks
+disabled** and **outside the surrounding operation's transaction**.
+Neither is a type error and neither shows up in a passing test — it is
+the defect class behind issue #45.
+
+Take the context from wherever you are: a hook's second argument (typed
+`EntityHookContext`), `query.context` in a CQRS handler, or the `txCtx`
+`TransactionScope.run` hands its callback. All three satisfy the
+repository's `ctx?: PlainLiteralObject`. Never spread it into a new
+object — it is an `AppContextHost` Proxy and spreading strips the overlay
+accessors. `CONFIGURATION.md` §8a has the full seam, including the
+`SUPPORTS`-by-default trap and an audit `grep`.
 
 ### Read the authenticated user inside a handler
 
@@ -301,6 +369,83 @@ export class HealthController {
   }
 }
 ```
+
+### Free-form JSON columns on class DTOs
+
+A settings blob, a flexible profile or a widget config has no fixed
+shape, so no per-key `@Expose` is possible. The request-body
+`ValidationPipe` transforms with `strategy: 'excludeAll'`, which is
+recursive — it walks into the property, finds no `@Expose` metadata for
+its keys, and yields `{}` **before the row is written**. Mark the
+property on the **input** DTO:
+
+```typescript
+import { FreeFormJson } from '@concepta/rockets-core';
+
+class PetCreateDto {
+  @Expose() @IsString() @ApiProperty() name!: string;
+
+  @Expose()
+  @FreeFormJson()
+  @IsOptional()
+  @IsObject()
+  @ApiPropertyOptional({ type: 'object', additionalProperties: true })
+  profile?: Record<string, unknown>;
+}
+```
+
+Only the input DTO needs it — once the value is stored, the outbound
+options carry it through. Arrays are unaffected.
+
+The zod path needs no equivalent: it compiles DTOs from the schema and
+applies the same passthrough for `z.record()` / `z.unknown()` / `z.any()`
+itself. Such a field is still absent from zod **responses** until it opts
+in (`dto: { response: true }`) — that is the deliberate response
+whitelist, not this bug.
+
+### Customise the error envelope
+
+`RocketsCoreExceptionsFilter` replies with
+`{ statusCode, errorCode, message, timestamp }`. To ship a different
+shape, provide a serializer instead of forking the filter — the fork is
+what used to cost apps the `context.originalError` unwrap chain, and
+without that chain every hook `409` becomes a `500`.
+
+```typescript
+import {
+  RocketsCoreExceptionsFilter,
+  defaultErrorSerializer,
+  type RocketsErrorContext,
+  type RocketsErrorSerializerInterface,
+} from '@concepta/rockets-core';
+
+class TraceEnvelope implements RocketsErrorSerializerInterface {
+  serialize(context: RocketsErrorContext) {
+    // Extend the default rather than restating its keys.
+    return { ...defaultErrorSerializer.serialize(context), traceId };
+  }
+}
+
+app.useGlobalFilters(
+  new RocketsCoreExceptionsFilter(httpAdapterHost, new TraceEnvelope()),
+);
+```
+
+Registering the filter through Nest instead? Provide the token:
+
+```typescript
+providers: [
+  { provide: APP_FILTER, useClass: RocketsCoreExceptionsFilter },
+  { provide: ROCKETS_ERROR_SERIALIZER_TOKEN, useClass: TraceEnvelope },
+]
+```
+
+The serializer decides the **body only**. The status code, the domain
+exception → 4xx mapping and the unwrap chain stay in the filter, because
+those are the parts apps kept getting wrong. `RocketsErrorContext` also
+carries `originalException` — the exception as thrown, before unwrapping,
+for correlation IDs and structured logs. Need more than the body? The
+unwrap helpers are `protected`, so a subclass can reuse them.
 
 ### Standard Schema DTOs (`@concepta/rockets-core/standard-schema`)
 
@@ -376,10 +521,11 @@ computed fields, persistence codecs, and fail-closed field exposure.
 
 The zod-first resource layer ships as the subpath export
 `@concepta/rockets-core/zod` (`zodResource`, `zodSubResource`,
-`bindZodResources`, the `f.*` field helpers, `defineZodUserMetadata`,
-`rocketsFieldMeta`, `rocketsEntityMeta`). `zod` and `nestjs-zod` are
-**optional peerDependencies** of core — the main `@concepta/rockets-core`
-entry stays zod-free, so apps that skip the subpath never install them.
+`operationResource`, `bindZodResources`, the `f.*` field helpers,
+`defineZodUserMetadata`, `rocketsFieldMeta`, `rocketsEntityMeta`). `zod` and
+`nestjs-zod` are **optional peerDependencies** of core — the main
+`@concepta/rockets-core` entry stays zod-free, so apps that skip the subpath
+never install them.
 
 Entity generation is delegated to a `SchemaEntityCompiler`. The TypeORM
 implementation lives at `@concepta/rockets-repository-typeorm/zod`; bind it
@@ -420,6 +566,42 @@ See `examples/sample-server/src/zod-bindings.ts` for the canonical wiring.
 Eager `compileEntity` in `*.schema.ts` is only for import-cycle breaks
 (`@EntityHook`, inverse `@OneToMany`). Default: let
 `zodResource({ schema })` compile.
+
+#### Per-operation `input` / `output`
+
+Each CRUD operation can override the request body and the response
+projection with its own schema, exactly as the class path does with DTO
+classes. Omit them and the operation keeps the schema-derived projection.
+
+```ts
+zodResource({
+  name: 'Article',
+  schema: articleSchema,
+  operations: {
+    // A thinner card projection for the collection route.
+    list: { output: z.object({ id: z.uuid(), title: z.string() }) },
+    read: true,
+    // `slug` is derived server-side, so it is not part of this body.
+    create: { input: z.object({ title: z.string(), body: z.string() }) },
+  },
+});
+```
+
+Rules worth knowing:
+
+- An override **replaces** the projection; it is not merged with it. A
+  field hidden by `dto: { response: false }` is exposed again if the
+  override declares it — the same explicit opt-in the class path has.
+- Generated components are named `<Name><Op>InputDto` /
+  `<Name><Op>OutputDto`, and a `list` override gets a matching paginated
+  wrapper automatically.
+- `input` is rejected on operations with no request body, and `output`
+  is rejected on `delete` / `restore` unless `returnDeleted` /
+  `returnRestored` makes the route answer with a body. Both fail at
+  definition time rather than being dropped silently on the wire.
+  `returnDeleted` applies to a **hard** delete too — upstream sets the
+  status from that flag alone, so `delete: { returnDeleted: true }` with
+  an `output` is a valid shape without `soft: true`.
 
 #### Capability matrix (meta → layers)
 
@@ -541,6 +723,96 @@ class PetController {
 }
 ```
 
+### Assert what every route enforces (`routePolicy`)
+
+Declare what must be true of every HTTP route the application ends up
+with. The check runs at bootstrap, so it covers **every** discovered
+controller — generated CRUD, operation resources, module resources,
+hand-built configs, and controllers owned by other packages such as
+`MeController` or the `rockets-server-auth` routes.
+
+```typescript
+RocketsCoreModule.forRoot({
+  // ...
+  accessControl: { settings: { rules: acRules } },
+  routePolicy: {
+    requireAuth: true,
+    requireAcl: true,
+    allow: ['GET /health'],
+  },
+});
+```
+
+A violation stops the boot and names every offending route at once:
+
+```text
+Rockets route policy rejected 2 routes:
+  - [requireAcl] GET /invoices/summary: InvoiceController.summary carries no
+    AccessControlGrant. Upstream returns true for a route with no grant
+    metadata, so this route is authenticated but open. ...
+```
+
+| Rule | Fails when |
+| --- | --- |
+| `requireAuth` | a route is `AuthPublic`, or no global guard is recognised as an AUTHENTICATION guard |
+| `requireAcl` | an authenticated route carries no `AccessControlGrant` |
+| `requireAclQuery` | a granted route names no `CanAccess` service, so `own` possession widens to every row — declare it only once every resource's `acl` names a `query` service |
+
+"Recognised" is deliberate: `AuthServerGuard` counts automatically; any
+other guard that authenticates your app must be listed in
+`routePolicy.authGuards`. The audit refuses to assume that the mere
+presence of a global guard means authentication — a throttler, an ACL
+guard, or upstream access-control's disabled-guard factory (registered
+unconditionally, resolving to `null` under `appGuard: false`) are global
+guards that authenticate nothing, and counting them would report an
+unauthenticated app as protected.
+
+Exemptions are explicit — `allow` takes route ids, `allowControllers`
+takes classes (matched by identity, so a same-named class from another
+package is not exempted with it) — because an exemption that silently
+widens as routes are added is the failure this whole check exists to
+remove. Two properties keep the list honest: an `allow` entry exempts
+its route from EVERY declared rule, not just the one it was added for;
+and, while at least one rule is declared, an entry matching no
+discovered route fails the boot as `staleAllow`, so the list cannot rot
+where it matters.
+
+**Why bootstrap and not plan time.** `buildAppRegistrationPlan` already
+rejects route collisions and ungranted operations, but it only sees what
+it generates and it runs before controllers are built, so a hand-written
+`AccessControlGrant` inside a bundle's `decorators: []` is invisible to
+it. This closes that gap, and its own documentation says so.
+
+**Reporting without enforcing.** Omit `routePolicy` and nothing is
+registered. Declare one and `RouteAuditService` becomes injectable, so
+`audit()` gives you the full table for a CI artifact:
+
+```typescript
+const { routes, globalGuards, authGuards } = app.get(RouteAuditService).audit();
+```
+
+`authGuards` — not `globalGuards` — is what decides `guarded`.
+
+Route ids are `METHOD /controller/handler` paths. Global prefix and Nest
+versioning are applied by the HTTP adapter after this runs, so ids stay
+stable against those settings rather than matching the wire path. A
+controller or handler declared with an array of paths produces one row
+per combination.
+
+Apps composed through `@concepta/rockets` pass the same option as
+`RocketsModule.forRoot({ routePolicy })`. The `AuthServerGuard` that
+module registers is recognised automatically, and an auth bootstrap that
+swaps the global guard (`defineRocketsAuth` installs upstream
+`JwtGuard`) contributes its guard class through the same composition —
+no `authGuards` declaration needed for either. `authGuards` remains for
+guards nothing declares: a hand-registered `APP_GUARD` class of your
+own.
+
+`allow` entries are staleness-checked only while at least one rule is
+declared; a recognition-only policy polices nothing. Routes removed
+conditionally (`disableController`) live in the same options object as
+the policy — keep the two consistent per environment.
+
 ---
 
 ## 4. Reference
@@ -607,6 +879,8 @@ stop, throw.
 | `defineResource(input)`                                 | CRUD bundle: entity + DTOs + operations + hooks → auto-controller.     |
 | `defineModuleResource(input)`                           | Non-CRUD bundle: entities + Nest module slice.                         |
 | `defineSubResource(input)`                              | Nested resource (e.g. `/pets/:petId/tags`) with path-scope guard.      |
+| `defineOperationResource(input)`                        | Typed non-CRUD endpoints with a generated controller (issue #43).      |
+| `operationResource` + `op.read`/`op.write`/`op.delete`  | Zod-first builders for `defineOperationResource` (issue #50).          |
 | `relation(target, prop, opts?)`                         | Type-safe cross-resource relation.                                     |
 | `extractBearerToken(request)`                           | RFC 7235 Bearer parser for adapter implementations.                    |
 | `getActor(ctx)`                                         | Read authenticated user from a CRUD context.                           |

@@ -60,6 +60,11 @@ export function zodResource(
   const resource = defineResource<PlainLiteralObject>({
     ...passthrough,
     entity: core.entity,
+    // The resource-level response is the schema-derived projection even
+    // when an operation overrides its own `output`. Declaring it here
+    // (rather than letting core infer it from `read`/`list`) is what
+    // lets those two differ.
+    dto: { response: core.dtos.response },
     operations: core.operations,
     relations: mergeRelations(passthrough.relations, core.relations),
     hooks: applyOwnerHooks(
@@ -109,6 +114,9 @@ export function zodSubResource(
   const sub = defineSubResource({
     ...passthrough,
     entity: core.entity,
+    // See `zodResource` — the derived projection stays the resource-level
+    // response so per-operation `output` overrides can differ from it.
+    dto: { response: core.dtos.response },
     operations: core.operations,
     relations: mergeRelations(passthrough.relations, core.relations),
     hooks: applyOwnerHooks(

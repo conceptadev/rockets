@@ -141,6 +141,16 @@ dist
 #Ignore cursor AI rules
 .cursor/rules/codacy.mdc
 
+# Codacy CLI's resolved pattern set — generated, not authored. Two
+# 196KB byte-identical files carrying `source: auto` and a null
+# repositoryId, i.e. the CLI's own default rather than a decision this
+# repo made. The decision that IS ours is the tracked
+# `.codacy/codacy.yaml` (runtimes + tool versions); these regenerate
+# from it. `.codacy/.gitignore` cannot hold this — it ignores itself
+# and is never committed, so it only works on one machine.
+.codacy/codacy.config.json
+.codacy/codacy.config.baseline.json
+
 # Editor / OS / backup leftovers — never commit these
 *.bak
 *.orig

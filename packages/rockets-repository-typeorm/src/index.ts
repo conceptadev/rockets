@@ -5,3 +5,8 @@
 // `SchemaEntityCompiler` — lives at the `/zod` subpath, not here.
 export * from '@concepta/nestjs-repository-typeorm';
 export { defineTypeOrmRepository } from './define-typeorm-repository';
+export {
+  assertSingleTypeOrmInstance,
+  hasSingleTypeOrmInstance,
+  resolvedTypeOrmRoots,
+} from './assert-single-typeorm';

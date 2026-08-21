@@ -1,7 +1,9 @@
 import type { RocketsResourceConfig } from '../../../domain/interfaces/rockets-resource.interface';
 import type { CrudResource } from '../../../domain/interfaces/rockets-resource-bundle.interface';
 import type { ModuleResource } from '../../../domain/interfaces/module-resource.interface';
+import type { OperationResource } from '../../../domain/interfaces/operation-resource.interface';
 import { isModuleResource } from '../define-module-resource';
+import { isOperationResource } from '../define-operation-resource';
 import {
   isCrudResource,
   type ResourceInput,
@@ -13,6 +15,7 @@ export function sortResourceInputs(
 ): SortedResourceInputs {
   const generatedResources: CrudResource[] = [];
   const moduleBundles: ModuleResource[] = [];
+  const operationBundles: OperationResource[] = [];
   const manualResources: RocketsResourceConfig[] = [];
 
   const collectGenerated = (bundle: CrudResource): void => {
@@ -27,10 +30,17 @@ export function sortResourceInputs(
       collectGenerated(definition);
     } else if (isModuleResource(definition)) {
       moduleBundles.push(definition);
+    } else if (isOperationResource(definition)) {
+      operationBundles.push(definition);
     } else {
       manualResources.push(definition);
     }
   }
 
-  return { generatedResources, moduleBundles, manualResources };
+  return {
+    generatedResources,
+    moduleBundles,
+    operationBundles,
+    manualResources,
+  };
 }

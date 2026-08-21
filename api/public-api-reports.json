@@ -55,7 +55,7 @@
         "name": "AppRegistrationPlan",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface AppRegistrationPlan {\n    readonly crudResources: ReadonlyArray<RocketsResourceConfig>;\n    readonly entityRegistrations: ReadonlyArray<RepositoryPersistenceConfig>;\n    readonly nestModules: ReadonlyArray<DynamicModule>;\n}"
+        "signature": "export interface AppRegistrationPlan {\n    readonly crudResources: ReadonlyArray<RocketsResourceConfig>;\n    readonly entityRegistrations: ReadonlyArray<RepositoryPersistenceConfig>;\n    readonly nestModules: ReadonlyArray<DynamicModule>;\n    readonly accessControlQueryServices: ReadonlyArray<Type<CanAccess>>;\n}"
       },
       {
         "name": "AuthAdapterInterface",
@@ -163,7 +163,7 @@
         "name": "CrudResource",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface CrudResource<E extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Crud;\n    readonly core: RocketsResourceConfig;\n    readonly persistence: {\n        readonly module?: RepositoryModuleInterface;\n        readonly entity: RepositoryProviderOptions<E>;\n    };\n    readonly meta: {\n        readonly key: string;\n        readonly entityClass: new () => E;\n        readonly relations: ReadonlyArray<ResourceRelationEntry<E>>;\n    };\n    readonly subResources?: ReadonlyArray<CrudResource<PlainLiteralObject>>;\n}"
+        "signature": "export interface CrudResource<E extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Crud;\n    readonly acl: ResourceAclPlan;\n    readonly core: RocketsResourceConfig;\n    readonly persistence: {\n        readonly module?: RepositoryModuleInterface;\n        readonly entity: RepositoryProviderOptions<E>;\n    };\n    readonly meta: {\n        readonly key: string;\n        readonly entityClass: new () => E;\n        readonly relations: ReadonlyArray<ResourceRelationEntry<E>>;\n    };\n    readonly subResources?: ReadonlyArray<CrudResource<PlainLiteralObject>>;\n}"
       },
       {
         "name": "Ctx",
@@ -223,7 +223,7 @@
         "name": "ExceptionsFilter",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class RocketsCoreExceptionsFilter implements ExceptionFilter {\n    private readonly httpAdapterHost;\n    private readonly logger;\n    constructor(httpAdapterHost: HttpAdapterHost);\n    catch(rawException: ExceptionInterface, host: ArgumentsHost): void;\n    private unwrapToHttpException;\n    private unwrapToClientRuntimeException;\n}"
+        "signature": "export declare class RocketsCoreExceptionsFilter implements ExceptionFilter {\n    private readonly httpAdapterHost;\n    private readonly logger;\n    private readonly serializer;\n    constructor(httpAdapterHost: HttpAdapterHost, serializer?: RocketsErrorSerializerInterface);\n    catch(rawException: ExceptionInterface, host: ArgumentsHost): void;\n    protected unwrapToHttpException(exception: unknown): HttpException | undefined;\n    protected unwrapToClientRuntimeException(exception: unknown): RuntimeException | undefined;\n}"
       },
       {
         "name": "GetUserMetadataHandler",
@@ -355,19 +355,19 @@
         "name": "ResourceInput",
         "kind": "type",
         "runtime": false,
-        "signature": "export type ResourceInput<E extends PlainLiteralObject = PlainLiteralObject> = CrudResource<E> | ModuleResource | RocketsResourceConfig;"
+        "signature": "export type ResourceInput<E extends PlainLiteralObject = PlainLiteralObject> = CrudResource<E> | ModuleResource | OperationResource | RocketsResourceConfig;"
       },
       {
         "name": "ResourceKind",
         "kind": "enum",
         "runtime": true,
-        "signature": "export declare enum ResourceKind {\n    Crud = \"crud\",\n    Module = \"module\",\n    Sub = \"sub\"\n}"
+        "signature": "export declare enum ResourceKind {\n    Crud = \"crud\",\n    Module = \"module\",\n    Sub = \"sub\",\n    Operation = \"operation\"\n}"
       },
       {
         "name": "ResourceOperationConfig",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface ResourceOperationConfig {\n    readonly input?: Type;\n    readonly output?: Type;\n    readonly paginated?: Type;\n    readonly handler?: Type;\n    readonly hooks?: readonly RocketsEntityHookForResource<PlainLiteralObject>[];\n    readonly decorators?: readonly (MethodDecorator | ClassDecorator)[];\n    readonly path?: string | string[];\n    readonly methodName?: string;\n    readonly transactional?: boolean;\n    readonly requestOverride?: CrudRequestConfig<PlainLiteralObject>;\n    readonly responseOverride?: CrudResponseConfig;\n}"
+        "signature": "export interface ResourceOperationConfig {\n    readonly acl?: OperationAclConfig;\n    readonly input?: Type;\n    readonly output?: Type;\n    readonly paginated?: Type;\n    readonly handler?: Type;\n    readonly hooks?: readonly RocketsEntityHookForResource<PlainLiteralObject>[];\n    readonly decorators?: readonly (MethodDecorator | ClassDecorator)[];\n    readonly path?: string | string[];\n    readonly methodName?: string;\n    readonly transactional?: boolean;\n    readonly requestOverride?: CrudRequestConfig<PlainLiteralObject>;\n    readonly responseOverride?: CrudResponseConfig;\n}"
       },
       {
         "name": "ResourceOperationName",
@@ -409,7 +409,7 @@
         "name": "RocketsCoreExceptionsFilter",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class RocketsCoreExceptionsFilter implements ExceptionFilter {\n    private readonly httpAdapterHost;\n    private readonly logger;\n    constructor(httpAdapterHost: HttpAdapterHost);\n    catch(rawException: ExceptionInterface, host: ArgumentsHost): void;\n    private unwrapToHttpException;\n    private unwrapToClientRuntimeException;\n}"
+        "signature": "export declare class RocketsCoreExceptionsFilter implements ExceptionFilter {\n    private readonly httpAdapterHost;\n    private readonly logger;\n    private readonly serializer;\n    constructor(httpAdapterHost: HttpAdapterHost, serializer?: RocketsErrorSerializerInterface);\n    catch(rawException: ExceptionInterface, host: ArgumentsHost): void;\n    protected unwrapToHttpException(exception: unknown): HttpException | undefined;\n    protected unwrapToClientRuntimeException(exception: unknown): RuntimeException | undefined;\n}"
       },
       {
         "name": "RocketsCoreModule",
@@ -421,7 +421,7 @@
         "name": "RocketsCoreOptionsExtrasInterface",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RocketsCoreOptionsExtrasInterface extends Pick<DynamicModule, 'global'> {\n    readonly auth?: AuthBootstrap | ReadonlyArray<AuthBootstrap>;\n    readonly userMetadata?: RocketsUserMetadataConfig;\n    readonly repository?: RepositoryModuleInterface | RepositoryBootstrap;\n    readonly providers?: Provider[];\n    readonly resources?: ReadonlyArray<ResourceInput>;\n    readonly handlers?: {\n        readonly upsertUserMetadata?: Type<AbstractUpsertUserMetadataHandler>;\n        readonly getUserMetadata?: Type<AbstractGetUserMetadataHandler>;\n    };\n    readonly accessControl?: RocketsAccessControlConfig;\n}"
+        "signature": "export interface RocketsCoreOptionsExtrasInterface extends Pick<DynamicModule, 'global'> {\n    readonly auth?: AuthBootstrap | ReadonlyArray<AuthBootstrap>;\n    readonly userMetadata?: RocketsUserMetadataConfig;\n    readonly repository?: RepositoryModuleInterface | RepositoryBootstrap;\n    readonly providers?: Provider[];\n    readonly resources?: ReadonlyArray<ResourceInput>;\n    readonly handlers?: {\n        readonly upsertUserMetadata?: Type<AbstractUpsertUserMetadataHandler>;\n        readonly getUserMetadata?: Type<AbstractGetUserMetadataHandler>;\n    };\n    readonly accessControl?: RocketsAccessControlConfig;\n    readonly routePolicy?: RoutePolicy;\n}"
       },
       {
         "name": "RocketsCoreOptionsInterface",
@@ -457,7 +457,7 @@
         "name": "RocketsOptionsExtrasInterface",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RocketsOptionsExtrasInterface extends Pick<DynamicModule, 'global' | 'controllers'> {\n    enableGlobalGuard?: boolean;\n    disableController?: DisableControllerOptionsInterface;\n    auth?: RocketsAuthOption;\n    userMetadata?: RocketsUserMetadataConfig;\n    repository?: RepositoryModuleInterface | RepositoryBootstrap;\n    handlers?: {\n        upsertUserMetadata?: Type<AbstractUpsertUserMetadataHandler>;\n        getUserMetadata?: Type<AbstractGetUserMetadataHandler>;\n    };\n    resources?: ReadonlyArray<ResourceInput>;\n    accessControl?: RocketsAccessControlConfig;\n}"
+        "signature": "export interface RocketsOptionsExtrasInterface extends Pick<DynamicModule, 'global' | 'controllers'> {\n    enableGlobalGuard?: boolean;\n    disableController?: DisableControllerOptionsInterface;\n    auth?: RocketsAuthOption;\n    userMetadata?: RocketsUserMetadataConfig;\n    repository?: RepositoryModuleInterface | RepositoryBootstrap;\n    handlers?: {\n        upsertUserMetadata?: Type<AbstractUpsertUserMetadataHandler>;\n        getUserMetadata?: Type<AbstractGetUserMetadataHandler>;\n    };\n    resources?: ReadonlyArray<ResourceInput>;\n    accessControl?: RocketsAccessControlConfig;\n    routePolicy?: RoutePolicy;\n}"
       },
       {
         "name": "RocketsOptionsInterface",
@@ -475,13 +475,13 @@
         "name": "RocketsResourceDefinition",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RocketsResourceDefinition<E extends PlainLiteralObject> {\n    readonly key?: string;\n    readonly entity: Type<E>;\n    readonly path?: string | string[];\n    readonly tags?: readonly string[];\n    readonly dto?: ResourceDtoConfig;\n    readonly operations?: readonly ResourceOperationName[] | ResourceOperationsObject;\n    readonly relations?: ReadonlyArray<ResourceRelationEntry<E>> | ((relation: BoundRelation<E>) => ReadonlyArray<ResourceRelationEntry<E>>);\n    readonly repository?: RocketsRepositoryModuleInterface;\n    readonly hooks?: readonly RocketsEntityHookForResource<E>[];\n    readonly handlers?: ResourceHandlerOverrides;\n    readonly providers?: readonly Provider[];\n    readonly autoRegisterHandlers?: boolean;\n    readonly decorators?: readonly ClassDecorator[];\n    readonly request?: CrudRequestConfig<PlainLiteralObject>;\n    readonly public?: boolean;\n    readonly subResources?: Readonly<{\n        readonly [K in Extract<keyof E, string>]?: SubResourceForKey<E, K>;\n    }>;\n}"
+        "signature": "export interface RocketsResourceDefinition<E extends PlainLiteralObject> {\n    readonly key?: string;\n    readonly entity: Type<E>;\n    readonly path?: string | string[];\n    readonly tags?: readonly string[];\n    readonly dto?: ResourceDtoConfig;\n    readonly operations?: readonly ResourceOperationName[] | ResourceOperationsObject;\n    readonly relations?: ReadonlyArray<ResourceRelationEntry<E>> | ((relation: BoundRelation<E>) => ReadonlyArray<ResourceRelationEntry<E>>);\n    readonly repository?: RocketsRepositoryModuleInterface;\n    readonly hooks?: readonly RocketsEntityHookForResource<E>[];\n    readonly handlers?: ResourceHandlerOverrides;\n    readonly providers?: readonly Provider[];\n    readonly autoRegisterHandlers?: boolean;\n    readonly decorators?: readonly ClassDecorator[];\n    readonly request?: CrudRequestConfig<PlainLiteralObject>;\n    readonly public?: boolean;\n    readonly acl?: ResourceAclConfig;\n    readonly subResources?: Readonly<{\n        readonly [K in Extract<keyof E, string>]?: SubResourceForKey<E, K>;\n    }>;\n}"
       },
       {
         "name": "RocketsSubResourceDefinition",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RocketsSubResourceDefinition<Sub extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Sub;\n    readonly __sub: {\n        readonly in: (x: Sub) => void;\n        readonly out: () => Sub;\n    };\n    readonly parentKey?: string;\n    readonly parentPk?: string;\n    readonly segment?: string;\n    readonly owner?: string | false;\n    readonly scope?: boolean;\n    readonly reloadAfterCreate?: boolean;\n    readonly definition: Omit<RocketsResourceDefinition<PlainLiteralObject>, 'path' | 'tags'> & {\n        readonly tags?: readonly string[];\n    };\n}"
+        "signature": "export interface RocketsSubResourceDefinition<Sub extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Sub;\n    readonly __sub: {\n        readonly in: (x: Sub) => void;\n        readonly out: () => Sub;\n    };\n    readonly parentKey?: string;\n    readonly parentPk?: string;\n    readonly parentSelect?: readonly string[];\n    readonly segment?: string;\n    readonly owner?: string | false;\n    readonly scope?: boolean;\n    readonly reloadAfterCreate?: boolean;\n    readonly definition: Omit<RocketsResourceDefinition<PlainLiteralObject>, 'path' | 'tags'> & {\n        readonly tags?: readonly string[];\n    };\n}"
       },
       {
         "name": "RocketsSubResourceInput",
@@ -631,7 +631,7 @@
         "name": "buildAppRegistrationPlan",
         "kind": "function",
         "runtime": true,
-        "signature": "export declare function buildAppRegistrationPlan(args: {\n    readonly resources: ReadonlyArray<ResourceInput>;\n    readonly repository?: RepositoryModuleInterface;\n    readonly userMetadata?: RocketsUserMetadataConfig;\n}): AppRegistrationPlan;"
+        "signature": "export declare function buildAppRegistrationPlan(args: {\n    readonly resources: ReadonlyArray<ResourceInput>;\n    readonly repository?: RepositoryModuleInterface;\n    readonly userMetadata?: RocketsUserMetadataConfig;\n    readonly accessControl?: boolean;\n    readonly enforceGrants?: boolean;\n}): AppRegistrationPlan;"
       },
       {
         "name": "createBoundRelation",
@@ -2125,7 +2125,7 @@
         "name": "AfterCreateReloadHook",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare abstract class AfterCreateReloadHook<E extends PlainLiteralObject> extends PassthroughEntityHookBase<E> {\n    protected repo: RepositoryInterface<E>;\n    afterCreate(created: E): Promise<E>;\n    static for<E extends PlainLiteralObject>(entity: Type<E>): Type<AfterCreateReloadHook<E>>;\n}"
+        "signature": "export declare abstract class AfterCreateReloadHook<E extends PlainLiteralObject> extends PassthroughEntityHookBase<E> {\n    protected repo: RepositoryInterface<E>;\n    afterCreate(created: E, ctx?: EntityHookContext): Promise<E>;\n    static for<E extends PlainLiteralObject>(entity: Type<E>): Type<AfterCreateReloadHook<E>>;\n}"
       },
       {
         "name": "AppContextHost",
@@ -2143,7 +2143,7 @@
         "name": "AppRegistrationPlan",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface AppRegistrationPlan {\n    readonly crudResources: ReadonlyArray<RocketsResourceConfig>;\n    readonly entityRegistrations: ReadonlyArray<RepositoryPersistenceConfig>;\n    readonly nestModules: ReadonlyArray<DynamicModule>;\n}"
+        "signature": "export interface AppRegistrationPlan {\n    readonly crudResources: ReadonlyArray<RocketsResourceConfig>;\n    readonly entityRegistrations: ReadonlyArray<RepositoryPersistenceConfig>;\n    readonly nestModules: ReadonlyArray<DynamicModule>;\n    readonly accessControlQueryServices: ReadonlyArray<Type<CanAccess>>;\n}"
       },
       {
         "name": "AuthAdapterInterface",
@@ -2167,7 +2167,7 @@
         "name": "AuthBootstrapContributions",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface AuthBootstrapContributions {\n    readonly enableGlobalGuard?: boolean;\n    readonly providesAppGuard?: boolean;\n}"
+        "signature": "export interface AuthBootstrapContributions {\n    readonly enableGlobalGuard?: boolean;\n    readonly providesAppGuard?: boolean;\n    readonly authGuards?: readonly Type<unknown>[];\n}"
       },
       {
         "name": "AuthBootstrapIdentity",
@@ -2290,6 +2290,18 @@
         "signature": "export interface ByIdInterface<T = ReferenceId, U = ReferenceIdInterface> {\n    byId: (id: T) => Promise<U | null>;\n}"
       },
       {
+        "name": "CompiledOperationDescriptor",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface CompiledOperationDescriptor {\n    readonly key: string;\n    readonly method: OperationHttpMethod;\n    readonly path: string;\n    readonly status: number;\n    readonly summary?: string;\n    readonly public?: boolean;\n    readonly acl?: OperationAclConfig;\n    readonly transactional?: boolean;\n    readonly inputDto?: Type<object>;\n    readonly output: Type<object> | false;\n    readonly handler: OperationHandlerRef;\n    readonly decorators?: readonly MethodDecorator[];\n}"
+      },
+      {
+        "name": "ControllerScan",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface ControllerScan {\n    readonly controller: Type<unknown>;\n    readonly methodNames: readonly string[];\n}"
+      },
+      {
         "name": "CreateOneInterface",
         "kind": "interface",
         "runtime": false,
@@ -2323,7 +2335,7 @@
         "name": "CrudResource",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface CrudResource<E extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Crud;\n    readonly core: RocketsResourceConfig;\n    readonly persistence: {\n        readonly module?: RepositoryModuleInterface;\n        readonly entity: RepositoryProviderOptions<E>;\n    };\n    readonly meta: {\n        readonly key: string;\n        readonly entityClass: new () => E;\n        readonly relations: ReadonlyArray<ResourceRelationEntry<E>>;\n    };\n    readonly subResources?: ReadonlyArray<CrudResource<PlainLiteralObject>>;\n}"
+        "signature": "export interface CrudResource<E extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Crud;\n    readonly acl: ResourceAclPlan;\n    readonly core: RocketsResourceConfig;\n    readonly persistence: {\n        readonly module?: RepositoryModuleInterface;\n        readonly entity: RepositoryProviderOptions<E>;\n    };\n    readonly meta: {\n        readonly key: string;\n        readonly entityClass: new () => E;\n        readonly relations: ReadonlyArray<ResourceRelationEntry<E>>;\n    };\n    readonly subResources?: ReadonlyArray<CrudResource<PlainLiteralObject>>;\n}"
       },
       {
         "name": "DEFAULT_OWNER_COLUMN",
@@ -2398,6 +2410,12 @@
         "signature": "export interface ErrorDetails {\n    errorMessage: string;\n    errorStack?: string;\n}"
       },
       {
+        "name": "FreeFormJson",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function FreeFormJson(): PropertyDecorator;"
+      },
+      {
         "name": "GetUserMetadataHandler",
         "kind": "class",
         "runtime": true,
@@ -2434,6 +2452,72 @@
         "signature": "export interface ModuleResourceEntityEntry {\n    readonly key: string;\n    readonly entity: Type<PlainLiteralObject>;\n    readonly repository?: RepositoryModuleInterface;\n    readonly collection?: string;\n}"
       },
       {
+        "name": "OperationAclConfig",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type OperationAclConfig = false | ResourceAclAction | {\n    readonly action: ResourceAclAction;\n    readonly query?: Type<CanAccess>;\n};"
+      },
+      {
+        "name": "OperationContext",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface OperationContext<I = unknown, P extends object = Record<string, string>> {\n    readonly input: I;\n    readonly params: Readonly<P>;\n    readonly query: Readonly<Record<string, unknown>>;\n    readonly request: OperationRequest;\n    readonly response: OperationResponse;\n    readonly user: AuthorizedUser | undefined;\n}"
+      },
+      {
+        "name": "OperationHandler",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface OperationHandler<I = unknown, O = unknown, P extends object = Record<string, string>> {\n    handle(ctx: OperationContext<I, P>): Promise<O> | O;\n}"
+      },
+      {
+        "name": "OperationHandlerClassRef",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface OperationHandlerClassRef<I = unknown, O = unknown, P extends object = Record<string, string>> {\n    readonly useClass: Type<OperationHandler<I, O, P>>;\n}"
+      },
+      {
+        "name": "OperationHandlerFn",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type OperationHandlerFn<I = unknown, O = unknown, P extends object = Record<string, string>> = (ctx: OperationContext<I, P>) => Promise<O> | O;"
+      },
+      {
+        "name": "OperationHandlerRef",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type OperationHandlerRef<I = unknown, O = unknown, P extends object = Record<string, string>> = OperationHandlerFn<I, O, P> | Type<OperationHandler<I, O, P>> | OperationHandlerClassRef<I, O, P>;"
+      },
+      {
+        "name": "OperationHttpMethod",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type OperationHttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';"
+      },
+      {
+        "name": "OperationRequest",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface OperationRequest {\n    readonly headers: Readonly<Record<string, string | string[] | undefined>>;\n    readonly params: Readonly<Record<string, string>>;\n    readonly query: Readonly<Record<string, unknown>>;\n    readonly raw: unknown;\n}"
+      },
+      {
+        "name": "OperationResource",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface OperationResource {\n    readonly kind: ResourceKind.Operation;\n    readonly acl: ResourceAclPlan;\n    readonly definition: OperationResourceDefinition;\n    readonly controller: Type<unknown>;\n    readonly providers: ReadonlyArray<Provider>;\n    readonly imports?: NonNullable<DynamicModule['imports']>;\n    readonly exports?: NonNullable<DynamicModule['exports']>;\n}"
+      },
+      {
+        "name": "OperationResourceDefinition",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface OperationResourceDefinition {\n    readonly path: string;\n    readonly tags?: readonly string[];\n    readonly public?: boolean;\n    readonly acl?: ResourceAclConfig;\n    readonly paramsDto?: Type<object>;\n    readonly operations: Readonly<Record<string, CompiledOperationDescriptor>>;\n    readonly imports?: NonNullable<DynamicModule['imports']>;\n    readonly providers?: ReadonlyArray<Provider>;\n    readonly exports?: NonNullable<DynamicModule['exports']>;\n    readonly decorators?: readonly ClassDecorator[];\n}"
+      },
+      {
+        "name": "OperationResponse",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface OperationResponse {\n    readonly raw: unknown;\n}"
+      },
+      {
         "name": "OwnedEntity",
         "kind": "interface",
         "runtime": false,
@@ -2467,7 +2551,7 @@
         "name": "PathScopeGuard",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare abstract class PathScopeGuard implements CanActivate {\n    protected parentParam: string;\n    protected parentEntityKey: string;\n    protected ownerColumn: string;\n    protected parentPk: string;\n    protected parentRepo: RepositoryInterface<Record<string, unknown>>;\n    canActivate(context: ExecutionContext): Promise<boolean>;\n    static for(parentParam: string, parentEntityKey: string, ownerColumn: string, parentPk?: string): Type<PathScopeGuard>;\n}"
+        "signature": "export declare abstract class PathScopeGuard implements CanActivate {\n    protected parentParam: string;\n    protected parentEntityKey: string;\n    protected ownerColumn: string;\n    protected parentPk: string;\n    protected parentHooks: readonly Type[];\n    protected parentSelect: readonly string[] | undefined;\n    protected parentPrimaryParam: string;\n    protected parentRepo: RepositoryInterface<Record<string, unknown>>;\n    canActivate(context: ExecutionContext): Promise<boolean>;\n    static for(parentParam: string, parentEntityKey: string, ownerColumn: string, parentPk?: string, parentHooks?: readonly Type[], parentSelect?: readonly string[], parentPrimaryParam?: string): Type<PathScopeGuard>;\n    private parentReadContext;\n}"
       },
       {
         "name": "PathScopeHook",
@@ -2486,6 +2570,42 @@
         "kind": "value",
         "runtime": true,
         "signature": "ROCKETS_DISABLE_GUARDS_TOKEN = \"AUTHENTICATION_MODULE_DISABLE_GUARDS_TOKEN\""
+      },
+      {
+        "name": "ROCKETS_ERROR_SERIALIZER_TOKEN",
+        "kind": "value",
+        "runtime": true,
+        "signature": "ROCKETS_ERROR_SERIALIZER_TOKEN: unique symbol"
+      },
+      {
+        "name": "ROCKETS_ROUTE_POLICY_TOKEN",
+        "kind": "value",
+        "runtime": true,
+        "signature": "ROCKETS_ROUTE_POLICY_TOKEN: unique symbol"
+      },
+      {
+        "name": "ROCKETS_TO_INSTANCE_OPTIONS",
+        "kind": "value",
+        "runtime": true,
+        "signature": "ROCKETS_TO_INSTANCE_OPTIONS: ClassTransformOptions"
+      },
+      {
+        "name": "ROCKETS_TO_PLAIN_OPTIONS",
+        "kind": "value",
+        "runtime": true,
+        "signature": "ROCKETS_TO_PLAIN_OPTIONS: ClassTransformOptions"
+      },
+      {
+        "name": "RegisteredRoute",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface RegisteredRoute {\n    readonly method: string;\n    readonly path: string;\n    readonly source?: string;\n}"
+      },
+      {
+        "name": "RegisteredRouteCollision",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface RegisteredRouteCollision {\n    readonly route: RegisteredRoute;\n    readonly prior: RegisteredRoute;\n}"
       },
       {
         "name": "RelationOptions",
@@ -2530,6 +2650,24 @@
         "signature": "export type RepositoryPersistenceConfig = Parameters<typeof RepositoryModule.forFeature>[0];"
       },
       {
+        "name": "ResourceAclAction",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type ResourceAclAction = 'create' | 'read' | 'update' | 'delete';"
+      },
+      {
+        "name": "ResourceAclConfig",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface ResourceAclConfig {\n    readonly resource: string;\n    readonly query?: Type<CanAccess>;\n}"
+      },
+      {
+        "name": "ResourceAclPlan",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface ResourceAclPlan {\n    readonly queryServices: ReadonlyArray<Type<CanAccess>>;\n    readonly ungrantedOperations: readonly string[];\n    readonly declared: boolean;\n    readonly label: string;\n}"
+      },
+      {
         "name": "ResourceDeleteOperationConfig",
         "kind": "interface",
         "runtime": false,
@@ -2551,19 +2689,19 @@
         "name": "ResourceInput",
         "kind": "type",
         "runtime": false,
-        "signature": "export type ResourceInput<E extends PlainLiteralObject = PlainLiteralObject> = CrudResource<E> | ModuleResource | RocketsResourceConfig;"
+        "signature": "export type ResourceInput<E extends PlainLiteralObject = PlainLiteralObject> = CrudResource<E> | ModuleResource | OperationResource | RocketsResourceConfig;"
       },
       {
         "name": "ResourceKind",
         "kind": "enum",
         "runtime": true,
-        "signature": "export declare enum ResourceKind {\n    Crud = \"crud\",\n    Module = \"module\",\n    Sub = \"sub\"\n}"
+        "signature": "export declare enum ResourceKind {\n    Crud = \"crud\",\n    Module = \"module\",\n    Sub = \"sub\",\n    Operation = \"operation\"\n}"
       },
       {
         "name": "ResourceOperationConfig",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface ResourceOperationConfig {\n    readonly input?: Type;\n    readonly output?: Type;\n    readonly paginated?: Type;\n    readonly handler?: Type;\n    readonly hooks?: readonly RocketsEntityHookForResource<PlainLiteralObject>[];\n    readonly decorators?: readonly (MethodDecorator | ClassDecorator)[];\n    readonly path?: string | string[];\n    readonly methodName?: string;\n    readonly transactional?: boolean;\n    readonly requestOverride?: CrudRequestConfig<PlainLiteralObject>;\n    readonly responseOverride?: CrudResponseConfig;\n}"
+        "signature": "export interface ResourceOperationConfig {\n    readonly acl?: OperationAclConfig;\n    readonly input?: Type;\n    readonly output?: Type;\n    readonly paginated?: Type;\n    readonly handler?: Type;\n    readonly hooks?: readonly RocketsEntityHookForResource<PlainLiteralObject>[];\n    readonly decorators?: readonly (MethodDecorator | ClassDecorator)[];\n    readonly path?: string | string[];\n    readonly methodName?: string;\n    readonly transactional?: boolean;\n    readonly requestOverride?: CrudRequestConfig<PlainLiteralObject>;\n    readonly responseOverride?: CrudResponseConfig;\n}"
       },
       {
         "name": "ResourceOperationName",
@@ -2593,13 +2731,13 @@
         "name": "RocketsAccessControlConfig",
         "kind": "type",
         "runtime": false,
-        "signature": "export type RocketsAccessControlConfig = AccessControlOptionsInterface & {\n    readonly imports?: DynamicModule['imports'];\n    readonly queryServices?: Provider<CanAccess>[];\n};"
+        "signature": "export type RocketsAccessControlConfig = AccessControlOptionsInterface & {\n    readonly imports?: DynamicModule['imports'];\n    readonly queryServices?: Provider<CanAccess>[];\n    readonly enforceGrants?: boolean;\n};"
       },
       {
         "name": "RocketsCoreExceptionsFilter",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class RocketsCoreExceptionsFilter implements ExceptionFilter {\n    private readonly httpAdapterHost;\n    private readonly logger;\n    constructor(httpAdapterHost: HttpAdapterHost);\n    catch(rawException: ExceptionInterface, host: ArgumentsHost): void;\n    private unwrapToHttpException;\n    private unwrapToClientRuntimeException;\n}"
+        "signature": "export declare class RocketsCoreExceptionsFilter implements ExceptionFilter {\n    private readonly httpAdapterHost;\n    private readonly logger;\n    private readonly serializer;\n    constructor(httpAdapterHost: HttpAdapterHost, serializer?: RocketsErrorSerializerInterface);\n    catch(rawException: ExceptionInterface, host: ArgumentsHost): void;\n    protected unwrapToHttpException(exception: unknown): HttpException | undefined;\n    protected unwrapToClientRuntimeException(exception: unknown): RuntimeException | undefined;\n}"
       },
       {
         "name": "RocketsCoreModule",
@@ -2611,7 +2749,7 @@
         "name": "RocketsCoreOptionsExtrasInterface",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RocketsCoreOptionsExtrasInterface extends Pick<DynamicModule, 'global'> {\n    readonly auth?: AuthBootstrap | ReadonlyArray<AuthBootstrap>;\n    readonly userMetadata?: RocketsUserMetadataConfig;\n    readonly repository?: RepositoryModuleInterface | RepositoryBootstrap;\n    readonly providers?: Provider[];\n    readonly resources?: ReadonlyArray<ResourceInput>;\n    readonly handlers?: {\n        readonly upsertUserMetadata?: Type<AbstractUpsertUserMetadataHandler>;\n        readonly getUserMetadata?: Type<AbstractGetUserMetadataHandler>;\n    };\n    readonly accessControl?: RocketsAccessControlConfig;\n}"
+        "signature": "export interface RocketsCoreOptionsExtrasInterface extends Pick<DynamicModule, 'global'> {\n    readonly auth?: AuthBootstrap | ReadonlyArray<AuthBootstrap>;\n    readonly userMetadata?: RocketsUserMetadataConfig;\n    readonly repository?: RepositoryModuleInterface | RepositoryBootstrap;\n    readonly providers?: Provider[];\n    readonly resources?: ReadonlyArray<ResourceInput>;\n    readonly handlers?: {\n        readonly upsertUserMetadata?: Type<AbstractUpsertUserMetadataHandler>;\n        readonly getUserMetadata?: Type<AbstractGetUserMetadataHandler>;\n    };\n    readonly accessControl?: RocketsAccessControlConfig;\n    readonly routePolicy?: RoutePolicy;\n}"
       },
       {
         "name": "RocketsCoreOptionsInterface",
@@ -2638,6 +2776,18 @@
         "signature": "export type RocketsEntityHookForResource<E extends PlainLiteralObject> = Type<EntityHookBase<E>> | Type<PassthroughEntityHookBase<E>>;"
       },
       {
+        "name": "RocketsErrorContext",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface RocketsErrorContext {\n    readonly statusCode: number;\n    readonly errorCode: string;\n    readonly message: unknown;\n    readonly originalException: unknown;\n}"
+      },
+      {
+        "name": "RocketsErrorSerializerInterface",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface RocketsErrorSerializerInterface {\n    serialize(context: RocketsErrorContext): PlainLiteralObject;\n}"
+      },
+      {
         "name": "RocketsRepositoryModuleInterface",
         "kind": "interface",
         "runtime": false,
@@ -2653,13 +2803,13 @@
         "name": "RocketsResourceDefinition",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RocketsResourceDefinition<E extends PlainLiteralObject> {\n    readonly key?: string;\n    readonly entity: Type<E>;\n    readonly path?: string | string[];\n    readonly tags?: readonly string[];\n    readonly dto?: ResourceDtoConfig;\n    readonly operations?: readonly ResourceOperationName[] | ResourceOperationsObject;\n    readonly relations?: ReadonlyArray<ResourceRelationEntry<E>> | ((relation: BoundRelation<E>) => ReadonlyArray<ResourceRelationEntry<E>>);\n    readonly repository?: RocketsRepositoryModuleInterface;\n    readonly hooks?: readonly RocketsEntityHookForResource<E>[];\n    readonly handlers?: ResourceHandlerOverrides;\n    readonly providers?: readonly Provider[];\n    readonly autoRegisterHandlers?: boolean;\n    readonly decorators?: readonly ClassDecorator[];\n    readonly request?: CrudRequestConfig<PlainLiteralObject>;\n    readonly public?: boolean;\n    readonly subResources?: Readonly<{\n        readonly [K in Extract<keyof E, string>]?: SubResourceForKey<E, K>;\n    }>;\n}"
+        "signature": "export interface RocketsResourceDefinition<E extends PlainLiteralObject> {\n    readonly key?: string;\n    readonly entity: Type<E>;\n    readonly path?: string | string[];\n    readonly tags?: readonly string[];\n    readonly dto?: ResourceDtoConfig;\n    readonly operations?: readonly ResourceOperationName[] | ResourceOperationsObject;\n    readonly relations?: ReadonlyArray<ResourceRelationEntry<E>> | ((relation: BoundRelation<E>) => ReadonlyArray<ResourceRelationEntry<E>>);\n    readonly repository?: RocketsRepositoryModuleInterface;\n    readonly hooks?: readonly RocketsEntityHookForResource<E>[];\n    readonly handlers?: ResourceHandlerOverrides;\n    readonly providers?: readonly Provider[];\n    readonly autoRegisterHandlers?: boolean;\n    readonly decorators?: readonly ClassDecorator[];\n    readonly request?: CrudRequestConfig<PlainLiteralObject>;\n    readonly public?: boolean;\n    readonly acl?: ResourceAclConfig;\n    readonly subResources?: Readonly<{\n        readonly [K in Extract<keyof E, string>]?: SubResourceForKey<E, K>;\n    }>;\n}"
       },
       {
         "name": "RocketsSubResourceDefinition",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RocketsSubResourceDefinition<Sub extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Sub;\n    readonly __sub: {\n        readonly in: (x: Sub) => void;\n        readonly out: () => Sub;\n    };\n    readonly parentKey?: string;\n    readonly parentPk?: string;\n    readonly segment?: string;\n    readonly owner?: string | false;\n    readonly scope?: boolean;\n    readonly reloadAfterCreate?: boolean;\n    readonly definition: Omit<RocketsResourceDefinition<PlainLiteralObject>, 'path' | 'tags'> & {\n        readonly tags?: readonly string[];\n    };\n}"
+        "signature": "export interface RocketsSubResourceDefinition<Sub extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Sub;\n    readonly __sub: {\n        readonly in: (x: Sub) => void;\n        readonly out: () => Sub;\n    };\n    readonly parentKey?: string;\n    readonly parentPk?: string;\n    readonly parentSelect?: readonly string[];\n    readonly segment?: string;\n    readonly owner?: string | false;\n    readonly scope?: boolean;\n    readonly reloadAfterCreate?: boolean;\n    readonly definition: Omit<RocketsResourceDefinition<PlainLiteralObject>, 'path' | 'tags'> & {\n        readonly tags?: readonly string[];\n    };\n}"
       },
       {
         "name": "RocketsSubResourceInput",
@@ -2678,6 +2828,48 @@
         "kind": "class",
         "runtime": true,
         "signature": "export declare class RoleNameDto {\n    name: string;\n}"
+      },
+      {
+        "name": "RouteAuditEntry",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface RouteAuditEntry {\n    readonly id: string;\n    readonly method: string;\n    readonly path: string;\n    readonly controller: string;\n    readonly controllerRef: Type<unknown>;\n    readonly handler: string;\n    readonly authentication: RouteAuthState;\n    readonly aclAction: string | null;\n    readonly aclResource: string | null;\n    readonly aclQuery: string | null;\n}"
+      },
+      {
+        "name": "RouteAuditReport",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface RouteAuditReport {\n    readonly routes: readonly RouteAuditEntry[];\n    readonly globalGuards: readonly string[];\n    readonly authGuards: readonly string[];\n}"
+      },
+      {
+        "name": "RouteAuditService",
+        "kind": "class",
+        "runtime": true,
+        "signature": "export declare class RouteAuditService {\n    private readonly discoveryService;\n    private readonly metadataScanner;\n    private readonly applicationConfig;\n    private readonly policy?;\n    constructor(discoveryService: DiscoveryService, metadataScanner: MetadataScanner, applicationConfig: ApplicationConfig, policy?: RoutePolicy | undefined);\n    onApplicationBootstrap(): void;\n    audit(): RouteAuditReport;\n    private scanControllers;\n    private resolveGlobalGuards;\n}"
+      },
+      {
+        "name": "RouteAuthState",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type RouteAuthState = 'guarded' | 'public' | 'public-class' | 'unguarded-app';"
+      },
+      {
+        "name": "RouteInspectionTarget",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface RouteInspectionTarget {\n    readonly getHttpAdapter: () => {\n        readonly getInstance: () => unknown;\n    };\n}"
+      },
+      {
+        "name": "RoutePolicy",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface RoutePolicy {\n    readonly requireAuth?: boolean;\n    readonly requireAcl?: boolean;\n    readonly requireAclQuery?: boolean;\n    readonly allow?: readonly string[];\n    readonly allowControllers?: readonly Type<unknown>[];\n    readonly authGuards?: readonly Type<unknown>[];\n}"
+      },
+      {
+        "name": "RoutePolicyViolation",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface RoutePolicyViolation {\n    readonly routeId: string;\n    readonly rule: 'requireAuth' | 'requireAcl' | 'requireAclQuery' | 'staleAllow';\n    readonly detail: string;\n}"
       },
       {
         "name": "SchemaEntityCompiler",
@@ -2827,13 +3019,25 @@
         "name": "buildAccessControlImport",
         "kind": "function",
         "runtime": true,
-        "signature": "export declare function buildAccessControlImport(config: RocketsAccessControlConfig): DynamicModule;"
+        "signature": "export declare function buildAccessControlImport(config: RocketsAccessControlConfig, collectedQueryServices?: ReadonlyArray<Type<CanAccess>>): DynamicModule;"
       },
       {
         "name": "buildAppRegistrationPlan",
         "kind": "function",
         "runtime": true,
-        "signature": "export declare function buildAppRegistrationPlan(args: {\n    readonly resources: ReadonlyArray<ResourceInput>;\n    readonly repository?: RepositoryModuleInterface;\n    readonly userMetadata?: RocketsUserMetadataConfig;\n}): AppRegistrationPlan;"
+        "signature": "export declare function buildAppRegistrationPlan(args: {\n    readonly resources: ReadonlyArray<ResourceInput>;\n    readonly repository?: RepositoryModuleInterface;\n    readonly userMetadata?: RocketsUserMetadataConfig;\n    readonly accessControl?: boolean;\n    readonly enforceGrants?: boolean;\n}): AppRegistrationPlan;"
+      },
+      {
+        "name": "collectRegisteredRoutes",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function collectRegisteredRoutes(app: RouteInspectionTarget): RegisteredRoute[];"
+      },
+      {
+        "name": "collectRouteAudit",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function collectRouteAudit(args: {\n    readonly controllers: readonly ControllerScan[];\n    readonly globalGuards: readonly string[];\n    readonly authGuards: readonly string[];\n}): RouteAuditReport;"
       },
       {
         "name": "createBoundRelation",
@@ -2846,6 +3050,12 @@
         "kind": "function",
         "runtime": true,
         "signature": "export declare function createPaginatedDto<TResource>(resourceDto: Type<TResource>, className?: string): Type;"
+      },
+      {
+        "name": "defaultErrorSerializer",
+        "kind": "value",
+        "runtime": true,
+        "signature": "defaultErrorSerializer: RocketsErrorSerializerInterface"
       },
       {
         "name": "defaultParentParam",
@@ -2872,6 +3082,12 @@
         "signature": "export declare function defineModuleResource(input: DefineModuleResourceInput): ModuleResource;"
       },
       {
+        "name": "defineOperationResource",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function defineOperationResource(definition: OperationResourceDefinition): OperationResource;"
+      },
+      {
         "name": "defineResource",
         "kind": "function",
         "runtime": true,
@@ -2890,10 +3106,28 @@
         "signature": "export declare function deriveEntityKey(cls: Type<PlainLiteralObject>): string;"
       },
       {
+        "name": "evaluateRoutePolicy",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function evaluateRoutePolicy(report: RouteAuditReport, policy: RoutePolicy): readonly RoutePolicyViolation[];"
+      },
+      {
         "name": "extractBearerToken",
         "kind": "function",
         "runtime": true,
         "signature": "export declare function extractBearerToken(request: AuthRequest): string | null;"
+      },
+      {
+        "name": "findRegisteredRouteCollisions",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function findRegisteredRouteCollisions(routes: readonly RegisteredRoute[]): RegisteredRouteCollision[];"
+      },
+      {
+        "name": "formatPolicyViolations",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function formatPolicyViolations(violations: readonly RoutePolicyViolation[]): string;"
       },
       {
         "name": "getActor",
@@ -2938,6 +3172,12 @@
         "signature": "export declare function isModuleResource(value: unknown): value is ModuleResource;"
       },
       {
+        "name": "isOperationResource",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function isOperationResource(value: unknown): value is OperationResource;"
+      },
+      {
         "name": "isRepositoryBootstrap",
         "kind": "function",
         "runtime": true,
@@ -2978,6 +3218,12 @@
         "kind": "function",
         "runtime": true,
         "signature": "export declare function stripUndefined<T extends object>(input: T): Partial<T>;"
+      },
+      {
+        "name": "validateRegisteredRoutes",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function validateRegisteredRoutes(appOrRoutes: RouteInspectionTarget | readonly RegisteredRoute[]): void;"
       },
       {
         "name": "whitelistedFromDto",
@@ -3112,10 +3358,52 @@
     ],
     "@concepta/rockets-core/zod": [
       {
+        "name": "BoundBuilders",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface BoundBuilders<TBase extends string, TParamsSchema extends z.ZodObject | undefined = undefined> {\n    read<TInput extends z.ZodObject | undefined = undefined, TOutput extends OperationOutputConfig = OperationOutputSchema, const TOpPath extends string = ''>(config: ReadBuilderConfig<TInput, TOutput, EffectiveParams<TBase, TOpPath, TParamsSchema>, TOpPath>): PendingOperation<InferIn<TInput>, InferOut<TOutput>, EffectiveParams<TBase, TOpPath, TParamsSchema>>;\n    write<TInput extends z.ZodObject | undefined = undefined, TOutput extends OperationOutputConfig = OperationOutputSchema, const TOpPath extends string = ''>(config: WriteBuilderConfig<TInput, TOutput, EffectiveParams<TBase, TOpPath, TParamsSchema>, TOpPath>): PendingOperation<InferIn<TInput>, InferOut<TOutput>, EffectiveParams<TBase, TOpPath, TParamsSchema>>;\n    delete<TInput extends z.ZodObject | undefined = undefined, TOutput extends OperationOutputConfig = OperationOutputSchema, const TOpPath extends string = ''>(config: DeleteBuilderConfig<TInput, TOutput, EffectiveParams<TBase, TOpPath, TParamsSchema>, TOpPath>): PendingOperation<InferIn<TInput>, InferOut<TOutput>, EffectiveParams<TBase, TOpPath, TParamsSchema>>;\n}"
+      },
+      {
+        "name": "DeleteBuilderConfig",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type DeleteBuilderConfig<TInput extends z.ZodObject | undefined = undefined, TOutput extends OperationOutputConfig = OperationOutputSchema, TParams extends object = object, TOpPath extends string = ''> = SharedBuilderFields<TInput, TOutput, TParams> & {\n    readonly method?: DeleteMethod;\n    readonly path?: TOpPath;\n};"
+      },
+      {
+        "name": "OperationRecord",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type OperationRecord = {\n    readonly [key: string]: {\n        readonly builder: PendingBuilder;\n        readonly method: OperationHttpMethod;\n        readonly path: string | undefined;\n        readonly status: number | undefined;\n        readonly summary: string | undefined;\n        readonly public: boolean | undefined;\n        readonly acl: OperationAclConfig | undefined;\n        readonly transactional: boolean | undefined;\n        readonly input: z.ZodObject | undefined;\n        readonly output: OperationOutputConfig;\n        readonly handler: unknown;\n        readonly decorators: readonly MethodDecorator[] | undefined;\n    };\n};"
+      },
+      {
+        "name": "OperationResourceInput",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface OperationResourceInput<TBase extends string, TOps extends OperationRecord, TParamsSchema extends z.ZodObject | undefined = undefined> {\n    readonly path: TBase;\n    readonly tags?: readonly string[];\n    readonly public?: boolean;\n    readonly acl?: ResourceAclConfig;\n    readonly params?: TParamsSchema;\n    readonly operations: (op: BoundBuilders<TBase, TParamsSchema>) => TOps;\n    readonly imports?: OperationResourceDefinition['imports'];\n    readonly providers?: OperationResourceDefinition['providers'];\n    readonly exports?: OperationResourceDefinition['exports'];\n    readonly decorators?: OperationResourceDefinition['decorators'];\n}"
+      },
+      {
+        "name": "PathParams",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type PathParams<S extends string> = string extends S ? Record<string, string> : S extends `${string}:${infer Param}/${infer Rest}` ? {\n    [K in Param | keyof PathParams<`/${Rest}`>]: string;\n} : S extends `${string}:${infer Param}` ? {\n    [K in Param]: string;\n} : {};"
+      },
+      {
+        "name": "PendingOperation",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface PendingOperation<TInput = unknown, TOutput = unknown, TParams extends object = object> {\n    readonly builder: PendingBuilder;\n    readonly method: OperationHttpMethod;\n    readonly path: string | undefined;\n    readonly status: number | undefined;\n    readonly summary: string | undefined;\n    readonly public: boolean | undefined;\n    readonly acl: OperationAclConfig | undefined;\n    readonly transactional: boolean | undefined;\n    readonly input: z.ZodObject | undefined;\n    readonly output: OperationOutputConfig;\n    readonly handler: OperationHandlerRef<TInput, TOutput, TParams>;\n    readonly decorators: readonly MethodDecorator[] | undefined;\n}"
+      },
+      {
         "name": "PersistenceRow",
         "kind": "type",
         "runtime": false,
         "signature": "export type PersistenceRow<T> = T extends Record<string, unknown> ? {\n    [K in keyof T]: K extends PersistenceDateTimeKey ? CoerceIsoDateTime<T[K]> : TransformPersistenceValue<T[K]>;\n} : T;"
+      },
+      {
+        "name": "ReadBuilderConfig",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type ReadBuilderConfig<TInput extends z.ZodObject | undefined = undefined, TOutput extends OperationOutputConfig = OperationOutputSchema, TParams extends object = object, TOpPath extends string = ''> = SharedBuilderFields<TInput, TOutput, TParams> & {\n    readonly method?: ReadMethod;\n    readonly path?: TOpPath;\n};"
       },
       {
         "name": "RocketsDbFieldMeta",
@@ -3172,6 +3460,12 @@
         "signature": "export type WireRow<S extends z.ZodObject> = z.output<S>;"
       },
       {
+        "name": "WriteBuilderConfig",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type WriteBuilderConfig<TInput extends z.ZodObject | undefined = undefined, TOutput extends OperationOutputConfig = OperationOutputSchema, TParams extends object = object, TOpPath extends string = ''> = SharedBuilderFields<TInput, TOutput, TParams> & {\n    readonly method?: WriteMethod;\n    readonly path?: TOpPath;\n};"
+      },
+      {
         "name": "ZodCrudOperation",
         "kind": "type",
         "runtime": false,
@@ -3181,7 +3475,7 @@
         "name": "ZodDeleteOperationConfig",
         "kind": "type",
         "runtime": false,
-        "signature": "export type ZodDeleteOperationConfig = Omit<ResourceDeleteOperationConfig, 'input' | 'output'>;"
+        "signature": "export type ZodDeleteOperationConfig = Omit<ResourceDeleteOperationConfig, 'input' | 'output'> & ZodOperationSchemas;"
       },
       {
         "name": "ZodModuleResourceEntityDefinition",
@@ -3205,7 +3499,19 @@
         "name": "ZodOperationConfig",
         "kind": "type",
         "runtime": false,
-        "signature": "export type ZodOperationConfig = Omit<ResourceOperationConfig, 'input' | 'output'>;"
+        "signature": "export type ZodOperationConfig = Omit<ResourceOperationConfig, 'input' | 'output'> & ZodOperationSchemas;"
+      },
+      {
+        "name": "ZodOperationResource",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type ZodOperationResource<TOps extends OperationRecord> = OperationResource & {\n    readonly authored: TOps;\n};"
+      },
+      {
+        "name": "ZodOperationSchemas",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface ZodOperationSchemas {\n    readonly input?: z.ZodObject;\n    readonly output?: z.ZodObject;\n}"
       },
       {
         "name": "ZodResourceDefinition",
@@ -3235,7 +3541,7 @@
         "name": "ZodRestoreOperationConfig",
         "kind": "type",
         "runtime": false,
-        "signature": "export type ZodRestoreOperationConfig = Omit<ResourceRestoreOperationConfig, 'input' | 'output'>;"
+        "signature": "export type ZodRestoreOperationConfig = Omit<ResourceRestoreOperationConfig, 'input' | 'output'> & ZodOperationSchemas;"
       },
       {
         "name": "ZodSubResourceDefinition",
@@ -3292,6 +3598,12 @@
         "signature": "export declare function defineZodUserMetadata(schema: z.ZodObject, options?: ZodUserMetadataOptions): RocketsUserMetadataConfig;"
       },
       {
+        "name": "extractPathParamNames",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function extractPathParamNames(path: string): string[];"
+      },
+      {
         "name": "f",
         "kind": "value",
         "runtime": true,
@@ -3314,6 +3626,12 @@
         "kind": "function",
         "runtime": true,
         "signature": "export declare function namedZodDto<T>(schema: z.ZodObject, name: string): Type<T>;"
+      },
+      {
+        "name": "operationResource",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function operationResource<const TBase extends string, TOps extends OperationRecord, TParamsSchema extends z.ZodObject | undefined = undefined>(input: OperationResourceInput<TBase, TOps, TParamsSchema>): ZodOperationResource<TOps>;"
       },
       {
         "name": "readEntityMeta",
@@ -3704,10 +4022,28 @@
         "signature": "export declare class TypeOrmTransactionFactory implements TransactionFactoryInterface {\n    private readonly dataSource;\n    constructor(dataSource: DataSource);\n    create(): TransactionInterface;\n}"
       },
       {
+        "name": "assertSingleTypeOrmInstance",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function assertSingleTypeOrmInstance(): void;"
+      },
+      {
         "name": "defineTypeOrmRepository",
         "kind": "function",
         "runtime": true,
         "signature": "export declare function defineTypeOrmRepository<Connection extends TypeOrmModuleOptions>(connection: Connection): RepositoryBootstrap;"
+      },
+      {
+        "name": "hasSingleTypeOrmInstance",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function hasSingleTypeOrmInstance(): boolean;"
+      },
+      {
+        "name": "resolvedTypeOrmRoots",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function resolvedTypeOrmRoots(): string[];"
       }
     ],
     "@concepta/rockets-repository-typeorm/zod": [
@@ -4094,6 +4430,19 @@
     ],
     "@concepta/rockets-core/zod": [
       {
+        "name": "AuthorizedUser",
+        "kind": "interface",
+        "signature": "export interface AuthorizedUser {\n    id: string;\n    sub: string;\n    email?: string;\n    userRoles?: {\n        role: {\n            name: string;\n        };\n    }[];\n    claims?: Record<string, unknown>;\n}",
+        "referencedBy": [
+          "DeleteBuilderConfig",
+          "OperationResourceInput",
+          "PendingOperation",
+          "ReadBuilderConfig",
+          "WriteBuilderConfig",
+          "ZodOperationResource"
+        ]
+      },
+      {
         "name": "BoolOpts",
         "kind": "interface",
         "signature": "interface BoolOpts extends FieldOpts {\n    readonly default?: boolean;\n}",
@@ -4120,6 +4469,15 @@
         ]
       },
       {
+        "name": "CompiledOperationDescriptor",
+        "kind": "interface",
+        "signature": "export interface CompiledOperationDescriptor {\n    readonly key: string;\n    readonly method: OperationHttpMethod;\n    readonly path: string;\n    readonly status: number;\n    readonly summary?: string;\n    readonly public?: boolean;\n    readonly acl?: OperationAclConfig;\n    readonly transactional?: boolean;\n    readonly inputDto?: Type<object>;\n    readonly output: Type<object> | false;\n    readonly handler: OperationHandlerRef;\n    readonly decorators?: readonly MethodDecorator[];\n}",
+        "referencedBy": [
+          "OperationResourceInput",
+          "ZodOperationResource"
+        ]
+      },
+      {
         "name": "ComputeResult",
         "kind": "type",
         "signature": "type ComputeResult<T> = T extends string ? string | Date : T extends ReadonlyArray<infer E> ? ReadonlyArray<ComputeResult<E>> : T extends object ? {\n    readonly [K in keyof T]: ComputeResult<T[K]>;\n} : T;",
@@ -4130,7 +4488,7 @@
       {
         "name": "CrudResource",
         "kind": "interface",
-        "signature": "export interface CrudResource<E extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Crud;\n    readonly core: RocketsResourceConfig;\n    readonly persistence: {\n        readonly module?: RepositoryModuleInterface;\n        readonly entity: RepositoryProviderOptions<E>;\n    };\n    readonly meta: {\n        readonly key: string;\n        readonly entityClass: new () => E;\n        readonly relations: ReadonlyArray<ResourceRelationEntry<E>>;\n    };\n    readonly subResources?: ReadonlyArray<CrudResource<PlainLiteralObject>>;\n}",
+        "signature": "export interface CrudResource<E extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Crud;\n    readonly acl: ResourceAclPlan;\n    readonly core: RocketsResourceConfig;\n    readonly persistence: {\n        readonly module?: RepositoryModuleInterface;\n        readonly entity: RepositoryProviderOptions<E>;\n    };\n    readonly meta: {\n        readonly key: string;\n        readonly entityClass: new () => E;\n        readonly relations: ReadonlyArray<ResourceRelationEntry<E>>;\n    };\n    readonly subResources?: ReadonlyArray<CrudResource<PlainLiteralObject>>;\n}",
         "referencedBy": [
           "zodResource"
         ]
@@ -4141,6 +4499,22 @@
         "signature": "export interface DefineModuleResourceInput {\n    readonly entities?: ReadonlyArray<ModuleResourceEntityInput>;\n    readonly imports?: NonNullable<DynamicModule['imports']>;\n    readonly controllers?: NonNullable<DynamicModule['controllers']>;\n    readonly providers?: ReadonlyArray<Provider>;\n    readonly exports?: NonNullable<DynamicModule['exports']>;\n}",
         "referencedBy": [
           "ZodModuleResourceInput"
+        ]
+      },
+      {
+        "name": "DeleteMethod",
+        "kind": "type",
+        "signature": "type DeleteMethod = 'DELETE';",
+        "referencedBy": [
+          "DeleteBuilderConfig"
+        ]
+      },
+      {
+        "name": "EffectiveParams",
+        "kind": "type",
+        "signature": "type EffectiveParams<TBase extends string, TOpPath extends string, TParamsSchema extends z.ZodObject | undefined> = MergeParams<PathParams<TBase>, MergeParams<PathParams<TOpPath>, ParamsFromSchema<TParamsSchema>>>;",
+        "referencedBy": [
+          "BoundBuilders"
         ]
       },
       {
@@ -4223,11 +4597,41 @@
         ]
       },
       {
+        "name": "InferIn",
+        "kind": "type",
+        "signature": "type InferIn<TInput> = [\n    TInput\n] extends [\n    z.ZodObject\n] ? z.output<TInput> : unknown;",
+        "referencedBy": [
+          "BoundBuilders",
+          "DeleteBuilderConfig",
+          "ReadBuilderConfig",
+          "WriteBuilderConfig"
+        ]
+      },
+      {
+        "name": "InferOut",
+        "kind": "type",
+        "signature": "type InferOut<TOutput> = [\n    TOutput\n] extends [\n    false\n] ? void : [\n    TOutput\n] extends [\n    z.ZodType\n] ? z.output<TOutput> : unknown;",
+        "referencedBy": [
+          "BoundBuilders",
+          "DeleteBuilderConfig",
+          "ReadBuilderConfig",
+          "WriteBuilderConfig"
+        ]
+      },
+      {
         "name": "IntOpts",
         "kind": "interface",
         "signature": "interface IntOpts extends FieldOpts {\n    readonly min?: number;\n    readonly max?: number;\n    readonly default?: number;\n}",
         "referencedBy": [
           "f"
+        ]
+      },
+      {
+        "name": "MergeParams",
+        "kind": "type",
+        "signature": "type MergeParams<A, B> = Omit<A, keyof B> & B;",
+        "referencedBy": [
+          "BoundBuilders"
         ]
       },
       {
@@ -4267,6 +4671,171 @@
         ]
       },
       {
+        "name": "OperationAclConfig",
+        "kind": "type",
+        "signature": "export type OperationAclConfig = false | ResourceAclAction | {\n    readonly action: ResourceAclAction;\n    readonly query?: Type<CanAccess>;\n};",
+        "referencedBy": [
+          "DeleteBuilderConfig",
+          "OperationRecord",
+          "OperationResourceInput",
+          "PendingOperation",
+          "ReadBuilderConfig",
+          "WriteBuilderConfig",
+          "ZodDeleteOperationConfig",
+          "ZodOperationConfig",
+          "ZodOperationResource",
+          "ZodResourceDefinition",
+          "ZodRestoreOperationConfig",
+          "ZodSubResourceDefinition",
+          "zodSubResource"
+        ]
+      },
+      {
+        "name": "OperationContext",
+        "kind": "interface",
+        "signature": "export interface OperationContext<I = unknown, P extends object = Record<string, string>> {\n    readonly input: I;\n    readonly params: Readonly<P>;\n    readonly query: Readonly<Record<string, unknown>>;\n    readonly request: OperationRequest;\n    readonly response: OperationResponse;\n    readonly user: AuthorizedUser | undefined;\n}",
+        "referencedBy": [
+          "DeleteBuilderConfig",
+          "OperationResourceInput",
+          "PendingOperation",
+          "ReadBuilderConfig",
+          "WriteBuilderConfig",
+          "ZodOperationResource"
+        ]
+      },
+      {
+        "name": "OperationHandler",
+        "kind": "interface",
+        "signature": "export interface OperationHandler<I = unknown, O = unknown, P extends object = Record<string, string>> {\n    handle(ctx: OperationContext<I, P>): Promise<O> | O;\n}",
+        "referencedBy": [
+          "DeleteBuilderConfig",
+          "OperationResourceInput",
+          "PendingOperation",
+          "ReadBuilderConfig",
+          "WriteBuilderConfig",
+          "ZodOperationResource"
+        ]
+      },
+      {
+        "name": "OperationHandlerClassRef",
+        "kind": "interface",
+        "signature": "export interface OperationHandlerClassRef<I = unknown, O = unknown, P extends object = Record<string, string>> {\n    readonly useClass: Type<OperationHandler<I, O, P>>;\n}",
+        "referencedBy": [
+          "DeleteBuilderConfig",
+          "OperationResourceInput",
+          "PendingOperation",
+          "ReadBuilderConfig",
+          "WriteBuilderConfig",
+          "ZodOperationResource"
+        ]
+      },
+      {
+        "name": "OperationHandlerFn",
+        "kind": "type",
+        "signature": "export type OperationHandlerFn<I = unknown, O = unknown, P extends object = Record<string, string>> = (ctx: OperationContext<I, P>) => Promise<O> | O;",
+        "referencedBy": [
+          "DeleteBuilderConfig",
+          "OperationResourceInput",
+          "PendingOperation",
+          "ReadBuilderConfig",
+          "WriteBuilderConfig",
+          "ZodOperationResource"
+        ]
+      },
+      {
+        "name": "OperationHandlerRef",
+        "kind": "type",
+        "signature": "export type OperationHandlerRef<I = unknown, O = unknown, P extends object = Record<string, string>> = OperationHandlerFn<I, O, P> | Type<OperationHandler<I, O, P>> | OperationHandlerClassRef<I, O, P>;",
+        "referencedBy": [
+          "DeleteBuilderConfig",
+          "OperationResourceInput",
+          "PendingOperation",
+          "ReadBuilderConfig",
+          "WriteBuilderConfig",
+          "ZodOperationResource"
+        ]
+      },
+      {
+        "name": "OperationHttpMethod",
+        "kind": "type",
+        "signature": "export type OperationHttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';",
+        "referencedBy": [
+          "OperationRecord",
+          "OperationResourceInput",
+          "PendingOperation",
+          "ZodOperationResource"
+        ]
+      },
+      {
+        "name": "OperationOutputConfig",
+        "kind": "type",
+        "signature": "type OperationOutputConfig = OperationOutputSchema | false;",
+        "referencedBy": [
+          "BoundBuilders",
+          "DeleteBuilderConfig",
+          "OperationRecord",
+          "PendingOperation",
+          "ReadBuilderConfig",
+          "WriteBuilderConfig"
+        ]
+      },
+      {
+        "name": "OperationOutputSchema",
+        "kind": "type",
+        "signature": "type OperationOutputSchema = z.ZodObject | z.ZodArray;",
+        "referencedBy": [
+          "BoundBuilders",
+          "DeleteBuilderConfig",
+          "OperationRecord",
+          "PendingOperation",
+          "ReadBuilderConfig",
+          "WriteBuilderConfig"
+        ]
+      },
+      {
+        "name": "OperationRequest",
+        "kind": "interface",
+        "signature": "export interface OperationRequest {\n    readonly headers: Readonly<Record<string, string | string[] | undefined>>;\n    readonly params: Readonly<Record<string, string>>;\n    readonly query: Readonly<Record<string, unknown>>;\n    readonly raw: unknown;\n}",
+        "referencedBy": [
+          "DeleteBuilderConfig",
+          "OperationResourceInput",
+          "PendingOperation",
+          "ReadBuilderConfig",
+          "WriteBuilderConfig",
+          "ZodOperationResource"
+        ]
+      },
+      {
+        "name": "OperationResource",
+        "kind": "interface",
+        "signature": "export interface OperationResource {\n    readonly kind: ResourceKind.Operation;\n    readonly acl: ResourceAclPlan;\n    readonly definition: OperationResourceDefinition;\n    readonly controller: Type<unknown>;\n    readonly providers: ReadonlyArray<Provider>;\n    readonly imports?: NonNullable<DynamicModule['imports']>;\n    readonly exports?: NonNullable<DynamicModule['exports']>;\n}",
+        "referencedBy": [
+          "ZodOperationResource"
+        ]
+      },
+      {
+        "name": "OperationResourceDefinition",
+        "kind": "interface",
+        "signature": "export interface OperationResourceDefinition {\n    readonly path: string;\n    readonly tags?: readonly string[];\n    readonly public?: boolean;\n    readonly acl?: ResourceAclConfig;\n    readonly paramsDto?: Type<object>;\n    readonly operations: Readonly<Record<string, CompiledOperationDescriptor>>;\n    readonly imports?: NonNullable<DynamicModule['imports']>;\n    readonly providers?: ReadonlyArray<Provider>;\n    readonly exports?: NonNullable<DynamicModule['exports']>;\n    readonly decorators?: readonly ClassDecorator[];\n}",
+        "referencedBy": [
+          "OperationResourceInput",
+          "ZodOperationResource"
+        ]
+      },
+      {
+        "name": "OperationResponse",
+        "kind": "interface",
+        "signature": "export interface OperationResponse {\n    readonly raw: unknown;\n}",
+        "referencedBy": [
+          "DeleteBuilderConfig",
+          "OperationResourceInput",
+          "PendingOperation",
+          "ReadBuilderConfig",
+          "WriteBuilderConfig",
+          "ZodOperationResource"
+        ]
+      },
+      {
         "name": "OwnerOpts",
         "kind": "interface",
         "signature": "interface OwnerOpts {\n    readonly dto?: Pick<RocketsDtoFieldMeta, 'response'>;\n}",
@@ -4283,6 +4852,14 @@
         ]
       },
       {
+        "name": "ParamsFromSchema",
+        "kind": "type",
+        "signature": "type ParamsFromSchema<TParamsSchema extends z.ZodObject | undefined> = [\n    TParamsSchema\n] extends [\n    z.ZodObject\n] ? z.output<TParamsSchema> : {};",
+        "referencedBy": [
+          "BoundBuilders"
+        ]
+      },
+      {
         "name": "PassthroughEntityHookBase",
         "kind": "class",
         "signature": "export declare abstract class PassthroughEntityHookBase<E extends PlainLiteralObject> extends EntityHookBase<E> {\n    beforeFindOne(options: RepositoryFindOneOptions<E>, _ctx?: EntityHookContext): RepositoryFindOneOptions<E> | Promise<RepositoryFindOneOptions<E>>;\n    afterFindOne(entity: E | null, _ctx?: EntityHookContext): (E | null) | Promise<E | null>;\n    beforeFindAndCount(options: RepositoryFindOptions<E>, _ctx?: EntityHookContext): RepositoryFindOptions<E> | Promise<RepositoryFindOptions<E>>;\n    afterFindAndCount(result: {\n        data: E[];\n        total: number;\n    }, _ctx?: EntityHookContext): {\n        data: E[];\n        total: number;\n    } | Promise<{\n        data: E[];\n        total: number;\n    }>;\n    beforeCreate(payload: E, _ctx?: EntityHookContext): E | Promise<E>;\n    afterCreate(entity: E, _ctx?: EntityHookContext): E | Promise<E>;\n    beforeUpdate(payload: E, _ctx?: EntityHookContext): E | Promise<E>;\n    afterUpdate(entity: E, _ctx?: EntityHookContext): E | Promise<E>;\n    beforeDelete(entity: E, _ctx?: EntityHookContext): E | Promise<E>;\n    afterDelete(entity: E, _ctx?: EntityHookContext): E | Promise<E>;\n    beforeSoftDelete(entity: E, _ctx?: EntityHookContext): E | Promise<E>;\n    afterSoftDelete(entity: E, _ctx?: EntityHookContext): E | Promise<E>;\n    beforeRestore(entity: E, _ctx?: EntityHookContext): E | Promise<E>;\n    afterRestore(entity: E, _ctx?: EntityHookContext): E | Promise<E>;\n}",
@@ -4296,11 +4873,28 @@
         ]
       },
       {
+        "name": "PendingBuilder",
+        "kind": "type",
+        "signature": "export type PendingBuilder = 'read' | 'write' | 'delete';",
+        "referencedBy": [
+          "OperationRecord",
+          "PendingOperation"
+        ]
+      },
+      {
         "name": "PersistenceDateTimeKey",
         "kind": "type",
         "signature": "type PersistenceDateTimeKey = 'dateCreated' | 'dateUpdated' | 'dateDeleted' | 'sendAt';",
         "referencedBy": [
           "PersistenceRow"
+        ]
+      },
+      {
+        "name": "ReadMethod",
+        "kind": "type",
+        "signature": "type ReadMethod = 'GET';",
+        "referencedBy": [
+          "ReadBuilderConfig"
         ]
       },
       {
@@ -4311,6 +4905,47 @@
           "ZodResourceDefinition",
           "ZodSubResourceDefinition",
           "zodSubResource"
+        ]
+      },
+      {
+        "name": "ResourceAclAction",
+        "kind": "type",
+        "signature": "export type ResourceAclAction = 'create' | 'read' | 'update' | 'delete';",
+        "referencedBy": [
+          "DeleteBuilderConfig",
+          "OperationRecord",
+          "OperationResourceInput",
+          "PendingOperation",
+          "ReadBuilderConfig",
+          "WriteBuilderConfig",
+          "ZodDeleteOperationConfig",
+          "ZodOperationConfig",
+          "ZodOperationResource",
+          "ZodResourceDefinition",
+          "ZodRestoreOperationConfig",
+          "ZodSubResourceDefinition",
+          "zodSubResource"
+        ]
+      },
+      {
+        "name": "ResourceAclConfig",
+        "kind": "interface",
+        "signature": "export interface ResourceAclConfig {\n    readonly resource: string;\n    readonly query?: Type<CanAccess>;\n}",
+        "referencedBy": [
+          "OperationResourceInput",
+          "ZodOperationResource",
+          "ZodResourceDefinition",
+          "ZodSubResourceDefinition",
+          "zodSubResource"
+        ]
+      },
+      {
+        "name": "ResourceAclPlan",
+        "kind": "interface",
+        "signature": "export interface ResourceAclPlan {\n    readonly queryServices: ReadonlyArray<Type<CanAccess>>;\n    readonly ungrantedOperations: readonly string[];\n    readonly declared: boolean;\n    readonly label: string;\n}",
+        "referencedBy": [
+          "ZodOperationResource",
+          "zodResource"
         ]
       },
       {
@@ -4347,8 +4982,9 @@
       {
         "name": "ResourceKind",
         "kind": "enum",
-        "signature": "export declare enum ResourceKind {\n    Crud = \"crud\",\n    Module = \"module\",\n    Sub = \"sub\"\n}",
+        "signature": "export declare enum ResourceKind {\n    Crud = \"crud\",\n    Module = \"module\",\n    Sub = \"sub\",\n    Operation = \"operation\"\n}",
         "referencedBy": [
+          "ZodOperationResource",
           "ZodResourceDefinition",
           "ZodSubResourceDefinition",
           "zodModuleResource",
@@ -4359,7 +4995,7 @@
       {
         "name": "ResourceOperationConfig",
         "kind": "interface",
-        "signature": "export interface ResourceOperationConfig {\n    readonly input?: Type;\n    readonly output?: Type;\n    readonly paginated?: Type;\n    readonly handler?: Type;\n    readonly hooks?: readonly RocketsEntityHookForResource<PlainLiteralObject>[];\n    readonly decorators?: readonly (MethodDecorator | ClassDecorator)[];\n    readonly path?: string | string[];\n    readonly methodName?: string;\n    readonly transactional?: boolean;\n    readonly requestOverride?: CrudRequestConfig<PlainLiteralObject>;\n    readonly responseOverride?: CrudResponseConfig;\n}",
+        "signature": "export interface ResourceOperationConfig {\n    readonly acl?: OperationAclConfig;\n    readonly input?: Type;\n    readonly output?: Type;\n    readonly paginated?: Type;\n    readonly handler?: Type;\n    readonly hooks?: readonly RocketsEntityHookForResource<PlainLiteralObject>[];\n    readonly decorators?: readonly (MethodDecorator | ClassDecorator)[];\n    readonly path?: string | string[];\n    readonly methodName?: string;\n    readonly transactional?: boolean;\n    readonly requestOverride?: CrudRequestConfig<PlainLiteralObject>;\n    readonly responseOverride?: CrudResponseConfig;\n}",
         "referencedBy": [
           "ZodDeleteOperationConfig",
           "ZodOperationConfig",
@@ -4462,7 +5098,7 @@
       {
         "name": "RocketsResourceDefinition",
         "kind": "interface",
-        "signature": "export interface RocketsResourceDefinition<E extends PlainLiteralObject> {\n    readonly key?: string;\n    readonly entity: Type<E>;\n    readonly path?: string | string[];\n    readonly tags?: readonly string[];\n    readonly dto?: ResourceDtoConfig;\n    readonly operations?: readonly ResourceOperationName[] | ResourceOperationsObject;\n    readonly relations?: ReadonlyArray<ResourceRelationEntry<E>> | ((relation: BoundRelation<E>) => ReadonlyArray<ResourceRelationEntry<E>>);\n    readonly repository?: RocketsRepositoryModuleInterface;\n    readonly hooks?: readonly RocketsEntityHookForResource<E>[];\n    readonly handlers?: ResourceHandlerOverrides;\n    readonly providers?: readonly Provider[];\n    readonly autoRegisterHandlers?: boolean;\n    readonly decorators?: readonly ClassDecorator[];\n    readonly request?: CrudRequestConfig<PlainLiteralObject>;\n    readonly public?: boolean;\n    readonly subResources?: Readonly<{\n        readonly [K in Extract<keyof E, string>]?: SubResourceForKey<E, K>;\n    }>;\n}",
+        "signature": "export interface RocketsResourceDefinition<E extends PlainLiteralObject> {\n    readonly key?: string;\n    readonly entity: Type<E>;\n    readonly path?: string | string[];\n    readonly tags?: readonly string[];\n    readonly dto?: ResourceDtoConfig;\n    readonly operations?: readonly ResourceOperationName[] | ResourceOperationsObject;\n    readonly relations?: ReadonlyArray<ResourceRelationEntry<E>> | ((relation: BoundRelation<E>) => ReadonlyArray<ResourceRelationEntry<E>>);\n    readonly repository?: RocketsRepositoryModuleInterface;\n    readonly hooks?: readonly RocketsEntityHookForResource<E>[];\n    readonly handlers?: ResourceHandlerOverrides;\n    readonly providers?: readonly Provider[];\n    readonly autoRegisterHandlers?: boolean;\n    readonly decorators?: readonly ClassDecorator[];\n    readonly request?: CrudRequestConfig<PlainLiteralObject>;\n    readonly public?: boolean;\n    readonly acl?: ResourceAclConfig;\n    readonly subResources?: Readonly<{\n        readonly [K in Extract<keyof E, string>]?: SubResourceForKey<E, K>;\n    }>;\n}",
         "referencedBy": [
           "ZodResourceDefinition",
           "ZodSubResourceDefinition",
@@ -4472,7 +5108,7 @@
       {
         "name": "RocketsSubResourceDefinition",
         "kind": "interface",
-        "signature": "export interface RocketsSubResourceDefinition<Sub extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Sub;\n    readonly __sub: {\n        readonly in: (x: Sub) => void;\n        readonly out: () => Sub;\n    };\n    readonly parentKey?: string;\n    readonly parentPk?: string;\n    readonly segment?: string;\n    readonly owner?: string | false;\n    readonly scope?: boolean;\n    readonly reloadAfterCreate?: boolean;\n    readonly definition: Omit<RocketsResourceDefinition<PlainLiteralObject>, 'path' | 'tags'> & {\n        readonly tags?: readonly string[];\n    };\n}",
+        "signature": "export interface RocketsSubResourceDefinition<Sub extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Sub;\n    readonly __sub: {\n        readonly in: (x: Sub) => void;\n        readonly out: () => Sub;\n    };\n    readonly parentKey?: string;\n    readonly parentPk?: string;\n    readonly parentSelect?: readonly string[];\n    readonly segment?: string;\n    readonly owner?: string | false;\n    readonly scope?: boolean;\n    readonly reloadAfterCreate?: boolean;\n    readonly definition: Omit<RocketsResourceDefinition<PlainLiteralObject>, 'path' | 'tags'> & {\n        readonly tags?: readonly string[];\n    };\n}",
         "referencedBy": [
           "ZodResourceDefinition",
           "ZodSubResourceDefinition",
@@ -4525,6 +5161,16 @@
           "bindZodResources",
           "defineZodUserMetadata",
           "zodSubResource"
+        ]
+      },
+      {
+        "name": "SharedBuilderFields",
+        "kind": "interface",
+        "signature": "interface SharedBuilderFields<TInput extends z.ZodObject | undefined, TOutput extends OperationOutputConfig, TParams extends object> {\n    readonly status?: number;\n    readonly summary?: string;\n    readonly public?: boolean;\n    readonly acl?: OperationAclConfig;\n    readonly transactional?: boolean;\n    readonly input?: TInput;\n    readonly output: TOutput;\n    readonly handler: OperationHandlerRef<InferIn<TInput>, InferOut<TOutput>, TParams>;\n    readonly decorators?: readonly MethodDecorator[];\n}",
+        "referencedBy": [
+          "DeleteBuilderConfig",
+          "ReadBuilderConfig",
+          "WriteBuilderConfig"
         ]
       },
       {
@@ -4581,6 +5227,14 @@
           "ZodUserMetadataOptions",
           "bindZodResources",
           "defineZodUserMetadata"
+        ]
+      },
+      {
+        "name": "WriteMethod",
+        "kind": "type",
+        "signature": "type WriteMethod = 'POST' | 'PUT' | 'PATCH';",
+        "referencedBy": [
+          "WriteBuilderConfig"
         ]
       },
       {

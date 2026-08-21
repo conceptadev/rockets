@@ -33,6 +33,7 @@ classify the request and hand off to the most specific skill, then get out of th
 | Build fails (TS/Nest/TypeORM/@concepta errors) | **rockets-sdk-config:rockets-build-resolver** |
 | Architecture/package-choice decision, plan before coding | **rockets-sdk-config:rockets-architect** / **rockets-planner** |
 | Custom (non-CRUD) business logic, model services vs raw repo | **rockets-sdk-config:rockets-custom-code** |
+| Typed non-CRUD HTTP (`operationResource` / issue #43/#50) | Proceed in-repo: `@concepta/rockets-core/zod` + `CONFIGURATION.md` §6a — no dedicated skill yet |
 | Implement a whole project from a PRD/spec | **rockets-sdk-config:rockets-from-doc** |
 
 ## Hard rules (apply regardless of route)

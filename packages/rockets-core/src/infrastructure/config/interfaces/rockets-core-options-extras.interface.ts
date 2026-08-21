@@ -6,6 +6,7 @@ import type {
 import type { RepositoryModuleInterface } from '@concepta/nestjs-repository';
 import type { ResourceInput } from '../../resource/aggregate-resources';
 import type { AuthBootstrap } from '../../../domain/interfaces/auth-bootstrap.interface';
+import type { RoutePolicy } from '../../audit/route-audit.types';
 import type { RepositoryBootstrap } from '../../../domain/interfaces/repository-bootstrap.interface';
 import type { RocketsUserMetadataConfig } from '../../../domain/interfaces/rockets-user-metadata-config.interface';
 import type { AbstractUpsertUserMetadataHandler } from '../../../application/commands/handlers/abstract-upsert-user-metadata.handler';
@@ -21,7 +22,36 @@ import type { AbstractGetUserMetadataHandler } from '../../../application/querie
  */
 export type RocketsAccessControlConfig = AccessControlOptionsInterface & {
   readonly imports?: DynamicModule['imports'];
+  /**
+   * Extra `CanAccess` providers. Services declared through a bundle's
+   * `acl.query` are collected and merged in automatically — this stays
+   * for services no bundle declares (shared policies, factory
+   * providers).
+   */
   readonly queryServices?: Provider<CanAccess>[];
+  /**
+   * Reject at boot any **generated** authenticated route that carries no
+   * ACL grant.
+   *
+   * Upstream's check-access handler returns `true` for a route with no
+   * grant metadata, so a forgotten decorator is an open route no test
+   * notices. Turning this on makes that a boot failure instead.
+   *
+   * **Scope.** Covers CRUD bundles (including sub-resources) and
+   * operation resources — everything the planner generates. Does NOT
+   * cover `defineModuleResource` controllers, hand-built
+   * `RocketsResourceConfig` entries, or controllers owned by other
+   * packages (`MeController`, the rockets-server-auth controllers). Those
+   * routes never reach the planner, so a passing boot is not a statement
+   * about them.
+   *
+   * Off by default. A hand-written `AccessControl*` entry in a bundle's
+   * `decorators` cannot be detected at plan time — the CRUD controller is
+   * built downstream, so the metadata does not exist yet. Apps that have
+   * migrated to `acl` should turn it on; apps still using manual grants
+   * must not.
+   */
+  readonly enforceGrants?: boolean;
 };
 
 export interface RocketsCoreOptionsExtrasInterface
@@ -64,6 +94,9 @@ export interface RocketsCoreOptionsExtrasInterface
    * Accepts a mix of:
    * - `defineResource()` — CRUD-shaped surfaces (auto-generated controller
    *   + persistence row).
+   * - `defineSubResource()` — nested CRUD under a parent path param.
+   * - `defineOperationResource()` / `operationResource()` — typed non-CRUD
+   *   HTTP endpoints (generated controller; no entity row).
    * - `defineModuleResource()` — non-CRUD features that contribute
    *   persistence rows and/or a Nest module slice
    *   (controllers/providers/exports/imports).
@@ -84,4 +117,19 @@ export interface RocketsCoreOptionsExtrasInterface
    * module, guard, or provider is registered at all.
    */
   readonly accessControl?: RocketsAccessControlConfig;
+
+  /**
+   * What the app asserts about every HTTP route Nest ends up with.
+   *
+   * Checked at bootstrap, not at plan time, and therefore over EVERY
+   * discovered controller — module resources, hand-built configs, and
+   * controllers owned by other packages (`MeController`, every
+   * rockets-server-auth route) included. That is the coverage gap
+   * `planAccessControl` documents and cannot close from where it runs.
+   *
+   * Omit it and nothing is enforced; the report is still available by
+   * injecting `RouteAuditService` and calling `audit()`, so a team can
+   * see where it stands before committing to a rule.
+   */
+  readonly routePolicy?: RoutePolicy;
 }

@@ -116,10 +116,11 @@ module.exports = {
             selector:
               "Decorator[expression.callee.name='Controller'], Decorator[expression.callee.name='UseGuards'][expression.arguments.0.name=/Jwt/]",
             message:
-              "rockets-core hosts shared infrastructure only. Controllers " +
+              'rockets-core hosts shared infrastructure only. Controllers ' +
               'and JWT-bound guards belong in rockets-server or ' +
-              'rockets-server-auth. See ' +
-              '.claude/rules/rockets-core-architecture.md (rule #1).',
+              'rockets-server-auth. Exception: generated operationResource ' +
+              'controllers (issue #43; see CONFIGURATION.md §6a) — use a ' +
+              'file-level eslint-disable for that adapter only.',
           },
         ],
         'no-restricted-imports': [

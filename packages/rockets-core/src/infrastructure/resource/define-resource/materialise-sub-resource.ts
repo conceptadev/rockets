@@ -1,4 +1,4 @@
-import type { PlainLiteralObject, Provider } from '@nestjs/common';
+import type { PlainLiteralObject, Provider, Type } from '@nestjs/common';
 import { UseGuards } from '@nestjs/common';
 import { ApiParam } from '@nestjs/swagger';
 import type {
@@ -24,6 +24,20 @@ export function materialiseSubResource(args: {
   readonly parentPath: string | readonly string[];
   readonly parentTags: readonly string[];
   readonly parentPersistenceModule: RepositoryModuleInterface | undefined;
+  /**
+   * Parent resource's entity hooks. Handed to `PathScopeGuard` so the
+   * parent lookup a nested route performs is filtered by the same hooks
+   * the parent's own routes run — a parent hidden by a retention or
+   * tenant hook must not be reachable through its children.
+   */
+  readonly parentHooks: readonly Type[] | undefined;
+  /**
+   * Route param name carrying the parent's primary key on the parent's
+   * OWN routes (`:id` unless the parent declared a different primary in
+   * `request.params`). The guard binds it in the replay context so a
+   * parent hook reading `params.<primary>` sees the row being looked up.
+   */
+  readonly parentPrimaryParam: string;
   readonly segment: string;
   readonly sub: RocketsSubResourceDefinition;
 }): CrudResource {
@@ -32,6 +46,8 @@ export function materialiseSubResource(args: {
     parentPath,
     parentTags,
     parentPersistenceModule,
+    parentHooks,
+    parentPrimaryParam,
     segment,
     sub,
   } = args;
@@ -81,6 +97,16 @@ export function materialiseSubResource(args: {
     ...def.request,
     params: {
       id: { field: 'id', type: 'uuid', primary: true },
+      // Ancestor params first: at three levels or more the parent path
+      // already carries its own `:param`, and the upstream query parser
+      // throws (`Error on crud context processing` → 500) on a route
+      // param it has no config for. `disabled: true` because only the
+      // immediate parent's param is a FK column on this entity — a
+      // grandparent's would filter on a column that does not exist.
+      // Note the parser gates its whole branch on `disabled !== true`,
+      // so a disabled param is neither filtered NOR format-validated;
+      // the ancestor's own guard is what checks it.
+      ...ancestorParams(parentPath, parentParam),
       [parentParam]: { field: parentParam, type: 'uuid' },
       ...userControllerParams,
     },
@@ -122,6 +148,9 @@ export function materialiseSubResource(args: {
         parentKey,
         ownerColumn,
         sub.parentPk ?? 'id',
+        parentHooks ?? [],
+        sub.parentSelect,
+        parentPrimaryParam,
       )
     : undefined;
 
@@ -173,6 +202,33 @@ export function materialiseSubResource(args: {
   }
 
   return bundle;
+}
+
+/**
+ * Route params contributed by ancestors of this sub-resource — every
+ * `:name` already present in the parent's path. Empty for a two-level
+ * nest, since a top-level parent path carries no params.
+ */
+function ancestorParams(
+  parentPath: string | readonly string[],
+  parentParam: string,
+): Record<string, CrudParamOptionInterface<PlainLiteralObject>> {
+  const paths = Array.isArray(parentPath)
+    ? (parentPath as readonly string[])
+    : [parentPath as string];
+
+  const params: Record<
+    string,
+    CrudParamOptionInterface<PlainLiteralObject>
+  > = {};
+  for (const path of paths) {
+    for (const match of path.matchAll(/:([A-Za-z0-9_]+)/g)) {
+      const name = match[1];
+      if (name === parentParam) continue;
+      params[name] = { field: name, type: 'uuid', disabled: true };
+    }
+  }
+  return params;
 }
 
 function composeSubResourceOperationsDecorators(
