@@ -649,6 +649,71 @@ const requestReadingOps = operationResource({
   }),
 });
 
+/**
+ * Leo's round-4 chain: three levels of wrappers, each re-exporting the
+ * BARE host class of the next dynamic module. Every prior fix patched
+ * one descent site; the walk now uses one descent function everywhere,
+ * so the module-private symbol at level three resolves.
+ */
+const THREE_LEVEL_SECRET = Symbol('THREE_LEVEL_SECRET');
+
+@Injectable()
+class PaymentsHandler {
+  constructor(@Inject(THREE_LEVEL_SECRET) private readonly secret: string) {}
+
+  handle() {
+    return { value: this.secret };
+  }
+}
+
+@Module({})
+class PaymentsModule {
+  static forRoot(): DynamicModule {
+    return {
+      module: PaymentsModule,
+      providers: [
+        { provide: THREE_LEVEL_SECRET, useValue: 'three-level-secret' },
+        PaymentsHandler,
+      ],
+      exports: [PaymentsHandler],
+    };
+  }
+}
+
+@Module({})
+class BillingWrapperModule {
+  static forRoot(): DynamicModule {
+    return {
+      module: BillingWrapperModule,
+      imports: [PaymentsModule.forRoot()],
+      exports: [PaymentsModule],
+    };
+  }
+}
+
+@Module({})
+class PlatformWrapperModule {
+  static forRoot(): DynamicModule {
+    return {
+      module: PlatformWrapperModule,
+      imports: [BillingWrapperModule.forRoot()],
+      exports: [BillingWrapperModule],
+    };
+  }
+}
+
+const threeLevelOps = operationResource({
+  path: 'three-level',
+  public: true,
+  imports: [PlatformWrapperModule.forRoot()],
+  operations: (op) => ({
+    read: op.read({
+      output: z.object({ value: z.string() }),
+      handler: PaymentsHandler,
+    }),
+  }),
+});
+
 const dynamicHostOps = operationResource({
   path: 'platform',
   public: true,
@@ -1184,5 +1249,35 @@ describe('operationResource — handler injecting REQUEST (e2e)', () => {
       .set('x-probe', 'probe-7')
       .expect(200);
     expect(res.body).toEqual({ seen: 'probe-7' });
+  });
+});
+describe('operationResource — handler three re-export levels deep (e2e)', () => {
+  let app: INestApplication;
+
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        RocketsCoreModule.forRoot({
+          auth: defineAuthAdapter(SimpleAuthProvider),
+          providers: [SimpleAuthProvider],
+          resources: [threeLevelOps],
+          global: true,
+        }),
+      ],
+      providers: [{ provide: APP_GUARD, useClass: AuthServerGuard }],
+    }).compile();
+    app = moduleRef.createNestApplication();
+    await app.init();
+  });
+
+  afterAll(async () => {
+    if (app) await app.close();
+  });
+
+  it('resolves through Platform → Billing → Payments', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/three-level/read')
+      .expect(200);
+    expect(res.body).toEqual({ value: 'three-level-secret' });
   });
 });

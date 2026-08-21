@@ -19,6 +19,15 @@ export {
 } from './rockets-core.constants';
 export { AuthServerGuard } from './infrastructure/guards/auth-server.guard';
 
+// CRUD serialization: free-form JSON opt-out (documented in the README's
+// JSON-column guide; was reachable only by deep import, which the packed
+// consumer cannot do — review round 4).
+export {
+  FreeFormJson,
+  ROCKETS_TO_INSTANCE_OPTIONS,
+  ROCKETS_TO_PLAIN_OPTIONS,
+} from './infrastructure/crud-serialization';
+
 // Route policy audit — reports what is actually enforced on every
 // discovered route, and fails the boot when the declared policy is not
 // met. Opt-in via `RocketsCoreModule.forRoot({ routePolicy })`.

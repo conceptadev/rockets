@@ -384,6 +384,19 @@ before running the full e2e suite.
 
 ### Fixed
 
+- **Round-4 review findings.** The module-export walk descends dynamic
+  modules through ONE function at every call site — three prior fixes
+  each patched one site, and a three-level re-export chain
+  (Platform → Billing → Payments) still failed at the depth the
+  unpatched site reached. Route-audit ids carry version/host qualifiers
+  (`GET /widgets [v1]`), so one `allow` entry can no longer exempt a
+  public v1 AND a guarded v2 of the same path; an entry matching more
+  than one route fails closed. `RouteAuditService` is EXPORTED under the
+  same `routePolicy` condition that registers it — registered-but-
+  unexported satisfied `app.get()` and failed real consumer DI.
+  `FreeFormJson` (and the serialization option constants) are exported
+  from the package root the README documents; the e2e now imports them
+  through the root barrel so the example cannot drift again.
 - **Nested relation leak closed (adversarial review).** The outbound
   serialization options had dropped upstream's `strategy: 'excludeAll'`
   to serve free-form JSON columns — which made an `@Expose()`d relation
