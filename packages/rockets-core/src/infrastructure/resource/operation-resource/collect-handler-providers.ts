@@ -127,25 +127,21 @@ function addModuleExports(
   if (visited.has(moduleClass)) return;
   visited.add(moduleClass);
 
-  const exported: unknown = Reflect.getMetadata(
-    MODULE_METADATA.EXPORTS,
-    moduleClass,
-  );
-  if (!Array.isArray(exported)) {
-    return;
-  }
+  const exported = readModuleMetadata(moduleClass, MODULE_METADATA.EXPORTS);
+  if (exported.length === 0) return;
+
   // This module's own imports, so a metadata-less exported class can be
   // matched against the `DynamicModule` it stands for.
-  const imported: unknown = Reflect.getMetadata(
-    MODULE_METADATA.IMPORTS,
-    moduleClass,
-  );
-  addExportEntries(
-    exported,
-    tokens,
-    visited,
-    Array.isArray(imported) ? imported : [],
-  );
+  const imported = readModuleMetadata(moduleClass, MODULE_METADATA.IMPORTS);
+  addExportEntries(exported, tokens, visited, imported);
+}
+
+function readModuleMetadata(
+  moduleClass: Type<unknown>,
+  metadataKey: string,
+): readonly unknown[] {
+  const value: unknown = Reflect.getMetadata(metadataKey, moduleClass);
+  return Array.isArray(value) ? value : [];
 }
 
 /**
@@ -254,8 +250,8 @@ function collectImportedExportTokens(
 }
 
 /**
- * A `DynamicModule`'s exports are the union of what the call returned
- * and what its host class declares statically.
+ * A `DynamicModule`'s imports and exports are each the union of what the
+ * call returned and what its host class declares statically.
  *
  * Nest merges the two, and the common configured-module shape puts them
  * in the STATIC half:
@@ -278,26 +274,21 @@ function addDynamicModuleExports(
   tokens: Set<unknown>,
   visited: Set<unknown>,
 ): void {
-  // The dynamic module's OWN imports are the host-import list for its
-  // exports. Nest unions static and dynamic imports the same way it
-  // unions exports (`@nestjs/core/scanner.js:55-57` and `:151-155`), so
-  // a wrapper returning `{ imports: [Inner.forRoot()], exports: [Inner] }`
-  // publishes `Inner`'s exports. Passing no host imports left that entry
-  // unresolvable: `Inner` is a metadata-less class, nothing matched it,
-  // and the handler was registered a second time locally — a boot
-  // failure when its dependencies are module-private, and a silent
-  // duplicate instance when they are not.
+  const host = entry.module;
+  visited.add(host);
+  const staticImports = readModuleMetadata(host, MODULE_METADATA.IMPORTS);
+  const staticExports = readModuleMetadata(host, MODULE_METADATA.EXPORTS);
+
+  // Match Nest's scanner: static metadata comes first, followed by the
+  // dynamic metadata returned by forRoot/register. Keeping the two halves
+  // separate misses valid cross-half re-exports and duplicates their handlers
+  // in the generated operation module.
   addExportEntries(
-    entry.exports ?? [],
+    [...staticExports, ...(entry.exports ?? [])],
     tokens,
     visited,
-    Array.isArray(entry.imports) ? entry.imports : [],
+    [...staticImports, ...(entry.imports ?? [])],
   );
-
-  const host: unknown = entry.module;
-  if (typeof host === 'function') {
-    addModuleExports(host as Type<unknown>, tokens, visited);
-  }
 }
 
 /**
