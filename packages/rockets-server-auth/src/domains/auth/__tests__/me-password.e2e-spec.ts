@@ -30,7 +30,6 @@ describe('MePassword (e2e) — Phase 1 (auth) — change-password flow', () => {
     applyRocketsAuthE2eAppGlobals(app);
     await app.init();
 
-    // Sign up the user once
     const signupRes = await request(app.getHttpServer())
       .post('/signup')
       .send(credentials)

@@ -10,9 +10,6 @@ import {
 
 import { UserFixture } from './user.entity.fixture';
 
-/**
- * User UserMetadata Entity Fixture
- */
 @Entity()
 export class UserMetadataEntityFixture {
   @PrimaryGeneratedColumn('uuid')

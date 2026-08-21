@@ -1,8 +1,3 @@
-/**
- * Base userMetadata entity interface.
- * All userMetadata entities must implement this.
- * Clients can extend this with their own fields.
- */
 export interface BaseUserMetadataEntityInterface {
   id: string;
   userId: string;

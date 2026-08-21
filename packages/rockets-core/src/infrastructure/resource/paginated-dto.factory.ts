@@ -42,7 +42,6 @@ export function createPaginatedDto<TResource>(
     },
   }[name] as Type;
 
-  // Apply decorators programmatically — equivalent to hand-writing them.
   ApiProperty({ type: [resourceDto] })(generated.prototype, 'data');
   Expose()(generated.prototype, 'data');
   TypeTransform(() => resourceDto)(generated.prototype, 'data');

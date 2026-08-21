@@ -68,7 +68,6 @@ class MockAuthAdapter implements AuthAdapterInterface {
   }
 }
 
-/** In-memory Map-based repository for userMetadata */
 class InMemoryMetadataRepo {
   private store = new Map<string, Record<string, unknown>>();
   private counter = 0;
