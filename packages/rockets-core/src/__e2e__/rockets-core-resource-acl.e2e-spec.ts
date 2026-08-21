@@ -28,7 +28,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { getDynamicRepositoryToken } from '@concepta/nestjs-repository';
+import { ActionEnum } from '@concepta/nestjs-core';
 import {
+  AccessControlGrant,
+  AccessControlQuery,
   AccessControlReadMany,
   type AccessControlContextInterface,
   type AccessControlServiceInterface,
@@ -597,5 +600,85 @@ describe('declarative resource acl — boot failures', () => {
         accessControl: true,
       }),
     ).not.toThrow();
+  });
+});
+// ── acl + manual AccessControl* on ONE operation: refused, not clobbered ──
+//
+// Grant metadata is last-write-wins. The generated route used to apply
+// the consumer's decorators first and the acl-derived grant last, so a
+// hand-written grant — possibly TIGHTER than the inferred action —
+// was silently replaced and the route audit reported only the
+// survivor. For operation resources the builder owns the single
+// decorator application, so this is decidable at definition time.
+
+describe('acl + manual grant is refused at definition time', () => {
+  // The sibling slot: a manual AccessControlQuery — a deliberately
+  // TIGHTER row filter — was still silently replaced when only the
+  // grant key was read back.
+  it('throws on a manual AccessControlQuery too', () => {
+    expect(() =>
+      operationResource({
+        path: 'clobber-query-probe',
+        acl: { resource: 'widget', query: WidgetAccessQueryService },
+        operations: (op) => ({
+          run: op.read({
+            acl: 'read',
+            output: z.object({ ok: z.boolean() }),
+            handler: () => ({ ok: true }),
+            decorators: [
+              AccessControlQuery({
+                service: StrictQueryService,
+              }) as MethodDecorator,
+            ],
+          }),
+        }),
+      }),
+    ).toThrow(/declares `acl` AND carries a hand-written/);
+  });
+
+  // acl: false is a recorded opt-out — manual decorators are then the
+  // ONLY writer, no ambiguity, must not throw.
+  it('does not throw when the operation opts out with acl: false', () => {
+    expect(() =>
+      operationResource({
+        path: 'optout-probe',
+        acl: { resource: 'widget' },
+        operations: (op) => ({
+          run: op.read({
+            acl: false,
+            output: z.object({ ok: z.boolean() }),
+            handler: () => ({ ok: true }),
+            decorators: [
+              AccessControlGrant({
+                resource: 'widget',
+                action: ActionEnum.READ,
+              }) as MethodDecorator,
+            ],
+          }),
+        }),
+      }),
+    ).not.toThrow();
+  });
+
+  it('throws naming the operation', () => {
+    expect(() =>
+      operationResource({
+        path: 'clobber-probe',
+        acl: { resource: 'widget' },
+        operations: (op) => ({
+          run: op.read({
+            acl: 'read',
+            output: z.object({ ok: z.boolean() }),
+            handler: () => ({ ok: true }),
+            decorators: [
+              AccessControlGrant({
+                resource: 'widget',
+                action: ActionEnum.DELETE,
+              }) as MethodDecorator,
+            ],
+          }),
+        }),
+      }),
+    ).toThrow(/declares `acl` AND carries a hand-written/);
   });
 });

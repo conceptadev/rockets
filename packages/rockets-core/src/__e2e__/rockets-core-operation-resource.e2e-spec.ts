@@ -10,14 +10,15 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, REQUEST } from '@nestjs/core';
 import {
   ApiProperty,
   ApiPropertyOptional,
   DocumentBuilder,
   SwaggerModule,
 } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 import { z } from 'zod';
 import request from 'supertest';
 
@@ -104,6 +105,24 @@ class LowerOptionalInputDto {
   @IsOptional()
   @IsString()
   note?: string;
+}
+
+class LowerChildDto {
+  @ApiProperty()
+  @IsString()
+  street!: string;
+}
+
+/** Nested class-validator shape: constraints live in error.children. */
+class LowerNestedInputDto {
+  @ApiProperty()
+  @IsString()
+  name!: string;
+
+  @ApiProperty({ type: LowerChildDto })
+  @ValidateNested()
+  @Type(() => LowerChildDto)
+  child!: LowerChildDto;
 }
 
 class LowerOutputDto {
@@ -328,6 +347,15 @@ const lowerLevelOps = defineOperationResource({
       inputDto: LowerInputDto,
       output: LowerOutputDto,
       handler: ({ input }) => input,
+    },
+    nested: {
+      key: 'nested',
+      method: 'POST',
+      path: 'nested',
+      status: 200,
+      inputDto: LowerNestedInputDto,
+      output: LowerOutputDto,
+      handler: () => ({ name: 'ok' }),
     },
     optional: {
       key: 'optional',
@@ -591,6 +619,36 @@ const staticHostOps = operationResource({
   }),
 });
 
+/**
+ * A handler whose subtree injects REQUEST: without
+ * `registerRequestByContextId`, the minted context id carried no
+ * request payload and `this.request` was undefined — a 500 on every
+ * call, though the identical class works as a plain controller dep.
+ */
+@Injectable({ scope: Scope.REQUEST })
+class RequestReadingHandler {
+  constructor(
+    @Inject(REQUEST)
+    private readonly request: { headers?: Record<string, unknown> },
+  ) {}
+
+  handle() {
+    return { seen: String(this.request?.headers?.['x-probe'] ?? '') };
+  }
+}
+
+const requestReadingOps = operationResource({
+  path: 'request-reading',
+  public: true,
+  providers: [RequestReadingHandler],
+  operations: (op) => ({
+    read: op.read({
+      output: z.object({ seen: z.string() }),
+      handler: RequestReadingHandler,
+    }),
+  }),
+});
+
 const dynamicHostOps = operationResource({
   path: 'platform',
   public: true,
@@ -841,6 +899,17 @@ describe('operationResource e2e (issue #43 v1)', () => {
       .expect(200);
   });
 
+  // A @ValidateNested failure carries its constraints in children, not
+  // on the root error. Flattening only the top level answered 400 with
+  // `message: []` — a rejection that names nothing.
+  it('names the nested field in a class-validator 400', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/lower/nested')
+      .send({ name: 'ok', child: {} })
+      .expect(400);
+    expect(JSON.stringify(res.body.message)).toMatch(/child\.street/);
+  });
+
   it('rejects lower-level class-validator primitive output', async () => {
     await request(app.getHttpServer()).get('/lower/primitive').expect(500);
   });
@@ -1084,5 +1153,36 @@ describe('operationResource — handler behind a dynamic wrapper re-export (e2e)
       .expect(200);
 
     expect(res.body).toEqual({ value: 'nested-secret' });
+  });
+});
+describe('operationResource — handler injecting REQUEST (e2e)', () => {
+  let app: INestApplication;
+
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        RocketsCoreModule.forRoot({
+          auth: defineAuthAdapter(SimpleAuthProvider),
+          providers: [SimpleAuthProvider],
+          resources: [requestReadingOps],
+          global: true,
+        }),
+      ],
+      providers: [{ provide: APP_GUARD, useClass: AuthServerGuard }],
+    }).compile();
+    app = moduleRef.createNestApplication();
+    await app.init();
+  });
+
+  afterAll(async () => {
+    if (app) await app.close();
+  });
+
+  it('resolves REQUEST inside the handler subtree', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/request-reading/read')
+      .set('x-probe', 'probe-7')
+      .expect(200);
+    expect(res.body).toEqual({ seen: 'probe-7' });
   });
 });

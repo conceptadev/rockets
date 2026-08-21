@@ -89,9 +89,16 @@ export function collectRouteAudit(args: {
             controllerRef: controller,
             handler: methodName,
             authentication,
+            // Grants mirror enforcement exactly: upstream reads them
+            // with `reflector.get(..., getHandler())` — handler ONLY.
             aclAction: readGrantField(handler, 'action'),
             aclResource: readGrantField(handler, 'resource'),
-            aclQuery: readQueryService(handler),
+            // Queries do NOT: upstream merges `[class, handler]`
+            // (`check-access.handler.js:68`), so a class-level
+            // AccessControlQuery is enforced at runtime — auditing only
+            // the handler reported it null and `requireAclQuery`
+            // aborted the boot of a correctly-enforced app.
+            aclQuery: readQueryService(handler) ?? readQueryService(controller),
           });
         }
       }

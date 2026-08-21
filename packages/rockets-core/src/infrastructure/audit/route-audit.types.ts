@@ -42,7 +42,12 @@ export interface RouteAuditEntry {
   readonly aclAction: string | null;
   /** Resource named by the grant, when the grant declares one. */
   readonly aclResource: string | null;
-  /** `CanAccess` service name resolving `own` possession, or `null`. */
+  /**
+   * `CanAccess` service name resolving `own` possession, or `null`.
+   * Reports the NEAREST declaration (handler over class); upstream runs
+   * every declared service, so a route carrying both is enforced by
+   * both while this names one.
+   */
   readonly aclQuery: string | null;
 }
 

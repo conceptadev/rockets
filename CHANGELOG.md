@@ -400,6 +400,42 @@ before running the full e2e suite.
 
 ### Fixed
 
+- **Nested relation leak closed (adversarial review).** The outbound
+  serialization options had dropped upstream's `strategy: 'excludeAll'`
+  to serve free-form JSON columns — which made an `@Expose()`d relation
+  without `@Type()` emit the FULL child row (`owner.passwordHash`)
+  where the projection previously yielded `{}` — reachable wherever
+  rows are PLAIN objects (Firestore and other plain adapters, JSON
+  columns, handler-returned data); TypeORM-hydrated instances emptied
+  either way. The strategy is
+  restored; `@FreeFormJson` is required on the RESPONSE DTO as well as
+  the input, and the leak is pinned by tests that fail if the strategy
+  is ever dropped again.
+- **`acl` + a manual `AccessControl*` decorator on one operation now
+  fails at definition time** (operation resources; CRUD keeps the
+  documented plan-time limitation). Grant metadata is last-write-wins,
+  so the combination silently REPLACED a possibly tighter hand-written
+  grant.
+- **The route audit recognises class-level `AccessControlQuery`** —
+  upstream enforces it via `getAllAndMerge([class, handler])`, and
+  auditing only the handler aborted the boot of correctly-enforced apps
+  under `requireAclQuery`.
+- **CRUD-vs-CRUD route collisions are checked in operation-free apps**
+  — an early return had gated the whole check on "any operation bundle
+  exists", so two CRUD bundles claiming one route booted clean until an
+  unrelated operation resource joined the app.
+- A throwing custom error serializer falls back to the default envelope
+  instead of replacing every error response with the adapter's bare 500.
+- Nested class-validator failures on operation inputs name the failing
+  field (`child.street: ...`) instead of answering `message: []`.
+- Hidden-by-read-hook columns no longer reappear on create responses
+  (`AfterCreateReloadHook` now drops keys the read view removed).
+- Route-collision analysis matches Express's case-insensitive routing;
+  handlers with request-scoped dependencies resolve `REQUEST` correctly;
+  an uninspectable (throwing) `forwardRef` import refuses handler
+  auto-registration loudly instead of risking a silent duplicate;
+  `path-to-regexp` is pinned exactly to the router's own version.
+
 - **Duplicate `typeorm` copies now fail with an actionable error
   (issue #70).** `@nestjs/typeorm` uses the `DataSource` **class object
   itself** as its default DI token, so a second copy of `typeorm`

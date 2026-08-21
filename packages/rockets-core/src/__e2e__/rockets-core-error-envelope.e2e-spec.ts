@@ -621,3 +621,44 @@ describe('structured error details and request context (e2e)', () => {
     expect(captured()?.request?.params).toEqual({});
   });
 });
+
+/**
+ * A serializer that THROWS must not replace every error response with
+ * the adapter's bare 500: the filter falls back to the default
+ * envelope, same as the null-return case. Without the guard, a
+ * serializer bug rewrites even a routine hook 409 into an unreadable
+ * 500 — a second failure inside the error path.
+ */
+describe('a serializer that throws (e2e)', () => {
+  let app: INestApplication;
+
+  beforeAll(async () => {
+    class ThrowingSerializer implements RocketsErrorSerializerInterface {
+      serialize(): PlainLiteralObject {
+        throw new Error('serializer bug');
+      }
+    }
+    app = await bootstrap(new ThrowingSerializer());
+  });
+
+  afterAll(async () => {
+    if (app) await app.close();
+  });
+
+  it('falls back to the default envelope and keeps the resolved status', async () => {
+    await request(app.getHttpServer())
+      .post('/notes')
+      .set('Authorization', 'Bearer u1')
+      .send({ ref: 'dup-throw' })
+      .expect(201);
+    const res = await request(app.getHttpServer())
+      .post('/notes')
+      .set('Authorization', 'Bearer u1')
+      .send({ ref: 'dup-throw' })
+      .expect(409);
+
+    expect(res.body).toMatchObject({ statusCode: 409 });
+    expect(typeof res.body.errorCode).toBe('string');
+    expect(typeof res.body.timestamp).toBe('string');
+  });
+});
