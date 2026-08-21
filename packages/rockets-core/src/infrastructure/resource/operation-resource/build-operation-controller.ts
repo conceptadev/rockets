@@ -7,6 +7,7 @@
 /* eslint-disable @darraghor/nestjs-typed/controllers-should-supply-api-tags --
  * ApiTags is applied immediately below from definition.tags (with a default).
  */
+import { classValidatorErrorsToDetails } from '../../../common/utils/validation-error-details.util';
 import {
   AccessControlGrant,
   AccessControlQuery,
@@ -211,21 +212,20 @@ async function resolveOperationParams(
   return { ...params, ...(validated as Record<string, unknown>) };
 }
 
+/**
+ * Message-shaped view of the SHARED recursive producer — one walker of
+ * the class-validator error tree, not two. `classValidatorErrorsToDetails`
+ * (issue #55) is the single implementation; this maps its structured
+ * details to the flattened strings this 400 body has always carried.
+ */
 function flattenConstraintMessages(
   errors: readonly ValidationError[],
-  prefix = '',
 ): string[] {
-  const messages: string[] = [];
-  for (const error of errors) {
-    const path = prefix ? `${prefix}.${error.property}` : error.property;
-    for (const message of Object.values(error.constraints ?? {})) {
-      messages.push(prefix ? `${path}: ${String(message)}` : String(message));
-    }
-    if (error.children && error.children.length > 0) {
-      messages.push(...flattenConstraintMessages(error.children, path));
-    }
-  }
-  return messages;
+  return classValidatorErrorsToDetails(errors).map((detail) =>
+    detail.path.length > 1
+      ? `${detail.path.join('.')}: ${detail.message}`
+      : detail.message,
+  );
 }
 
 async function validateAndWhitelistDto(

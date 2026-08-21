@@ -447,6 +447,39 @@ carries `originalException` — the exception as thrown, before unwrapping,
 for correlation IDs and structured logs. Need more than the body? The
 unwrap helpers are `protected`, so a subclass can reuse them.
 
+Validation `400`s produced by Rockets carry structured `details` on the
+serializer context — `path` as an ARRAY of segments, `message` verbatim,
+one entry per unrecognized strict key. Numeric segments (array index
+`0`) are emitted by the zod producer; the class-validator producers
+report array children as string keys (`"0"`), because that is what
+class-validator itself exposes. Details ride the exception under a
+symbol, never inside the response payload, so an app without the
+Rockets filter sees the exact Nest body it always did. The default
+envelope is unchanged; opt in with the exported
+`detailedErrorSerializer`, or read `context.details` in your own.
+`context.request` carries the request in the same typed shape operation
+handlers receive (`headers` / `params` / `query` / `raw`) — treat `raw`
+like `OperationRequest.raw`: an escape hatch, never something to
+`JSON.stringify` (circular on Express). Reach, stated plainly: this
+flows through `RocketsCoreExceptionsFilter` (core / server apps);
+`@concepta/rockets-auth` apps use a compatibility filter without a
+serializer seam and get none of it yet (#87). A `400` minted by the
+upstream class-validator pipe carries messages only.
+
+Three helpers are exported for app code. `attachErrorDetails(exception,
+details)` puts findings on YOUR exception (a hook rejecting a write, a
+guard) so they flow to the serializer like Rockets' own — it no-ops on
+an empty list and on a frozen exception, and never touches the response
+payload. `readErrorDetails(exception)` is the validated read (malformed
+entries are rejected, not laundered into the typed contract).
+`classValidatorErrorsToDetails(errors)` converts a class-validator error
+tree, children included, into detail entries. Opting the default body
+in is one provider:
+
+```typescript
+{ provide: ROCKETS_ERROR_SERIALIZER_TOKEN, useValue: detailedErrorSerializer }
+```
+
 ### Standard Schema DTOs (`@concepta/rockets-core/standard-schema`)
 
 The Standard Schema subpath turns any

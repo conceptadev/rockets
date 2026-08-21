@@ -117,10 +117,17 @@ export {
 export {
   ROCKETS_ERROR_SERIALIZER_TOKEN,
   defaultErrorSerializer,
+  detailedErrorSerializer,
 } from './infrastructure/filters/error-serializer';
+export {
+  attachErrorDetails,
+  readErrorDetails,
+  classValidatorErrorsToDetails,
+} from './common/utils/validation-error-details.util';
 export type {
   RocketsErrorContext,
   RocketsErrorSerializerInterface,
+  RocketsErrorDetail,
 } from './infrastructure/filters/error-serializer';
 
 // Repository persistence interfaces
