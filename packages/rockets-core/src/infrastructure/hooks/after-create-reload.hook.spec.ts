@@ -143,4 +143,27 @@ describe('AfterCreateReloadHook.afterCreate', () => {
 
     expect(repo.lastOptions?.ctx).toBe(ctx);
   });
+
+  it('drops a column the read view hid — hidden columns do not reappear on create', async () => {
+    // The docstring promise this pins: `created` (raw save() result)
+    // carries `secret`; the reloaded read view — where a read hook
+    // deleted it — does not. Assign alone cannot remove a key, so the
+    // hidden column leaked on exactly the response the reload exists to
+    // sanitise.
+    const { hook } = await buildHook([{ id: 'w1', name: 'clean' }]);
+    const created = {
+      id: 'w1',
+      name: 'raw',
+      secret: 'MUST-NOT-REAPPEAR',
+    } as unknown as FakeWidget;
+
+    const out = (await hook.afterCreate(created)) as unknown as Record<
+      string,
+      unknown
+    >;
+
+    expect(out.name).toBe('clean');
+    expect('secret' in out).toBe(false);
+    expect(out as unknown).toBe(created);
+  });
 });

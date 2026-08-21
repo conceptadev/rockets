@@ -394,10 +394,12 @@ export function validateStructuredRouteCollisions(args: {
   validateOperationIdUniqueness(args.operationBundles);
   validateGeneratedDtoNameUniqueness(args.operationBundles);
 
-  if (args.operationBundles.length === 0) {
-    return;
-  }
-
+  // No early return on an operation-free app: the check covers
+  // CRUD-vs-CRUD and CRUD-vs-sub-resource collisions too, and gating it
+  // on "any operation bundle exists" meant two CRUD bundles claiming
+  // one route booted clean — until an UNRELATED operation resource was
+  // added elsewhere and the pre-existing overlap surfaced as a boot
+  // failure that looked caused by the new code.
   const claims: RouteClaim[] = [];
 
   for (const resource of args.generatedResources) {

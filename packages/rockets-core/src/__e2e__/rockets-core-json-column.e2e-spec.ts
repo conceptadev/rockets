@@ -367,17 +367,21 @@ describe('class-DTO responses keep free-form JSON columns (e2e)', () => {
     expect(rex?.profile).toEqual(PROFILE);
   });
 
-  it('an unmarked RESPONSE property still serializes — only input needs the marker', async () => {
-    // The loss is inbound: once the value survives into the row, the
-    // outbound options carry it through whether or not the response DTO
-    // declares it free-form. Pins where the marker is actually required.
+  it('an UNMARKED response property projects to empty — the marker is required on both sides', async () => {
+    // The first revision asserted the opposite ("only input needs the
+    // marker") — which required dropping `strategy: 'excludeAll'`
+    // globally, and THAT emitted every `@Expose`d nested relation
+    // without `@Type()` verbatim: `owner: { passwordHash }` where the
+    // projection previously yielded `{}`. Clean-room review caught the
+    // leak. The safe contract: free-form values need `@FreeFormJson` on
+    // the response DTO too; an unmarked object projects to `{}`.
     const res = await request(app.getHttpServer())
       .patch(`/pets/${petId}`)
       .set('Authorization', 'Bearer u1')
       .send({ name: 'Rex' })
       .expect(200);
 
-    expect(res.body.profile).toEqual(PROFILE);
+    expect(res.body.profile).toEqual({});
   });
 
   it('still strips a column the response DTO does not declare', async () => {
