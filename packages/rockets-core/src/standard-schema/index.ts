@@ -1,6 +1,9 @@
 export { createStandardSchemaDto } from './create-standard-schema-dto';
 export { createStandardSchemaResponseDto } from './create-standard-schema-response-dto';
+export { allowStandardSchemaKeys } from './allow-schema-keys';
+export { StandardSchemaAwareValidationPipe } from './standard-schema-aware-validation.pipe';
 export {
+  getCarriedStandardSchema,
   getStandardSchema,
   isStandardSchema,
   isStandardSchemaDto,

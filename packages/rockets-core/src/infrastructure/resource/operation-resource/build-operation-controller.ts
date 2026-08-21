@@ -52,7 +52,7 @@ import type {
   OperationResourceDefinition,
 } from '../../../domain/interfaces/operation-resource.interface';
 import {
-  getStandardSchema,
+  getCarriedStandardSchema,
   standardSchemaBadRequest,
 } from '../../../common/utils/standard-schema.util';
 import { getHandlerClass, isHandlerFunction } from './is-handler-class';
@@ -99,7 +99,7 @@ function assertValidatableDto(
   if (dto === undefined) {
     return;
   }
-  if (getStandardSchema(dto)) {
+  if (getCarriedStandardSchema(dto)) {
     return;
   }
   const metas = getMetadataStorage().getTargetValidationMetadatas(
@@ -208,7 +208,7 @@ async function validateAndWhitelistDto(
   data: object,
   skipMissingProperties: boolean,
 ): Promise<unknown> {
-  const standard = getStandardSchema(dto);
+  const standard = getCarriedStandardSchema(dto);
   if (standard) {
     const result = await standard['~standard'].validate(data);
     if (result.issues !== undefined) {
@@ -253,7 +253,7 @@ async function applyOutputDto(
     throw outputValidationError(label, `handler returned ${String(value)}`);
   }
 
-  const standard = getStandardSchema(dto);
+  const standard = getCarriedStandardSchema(dto);
   if (standard) {
     const result = await standard['~standard'].validate(value);
     if (result.issues !== undefined) {

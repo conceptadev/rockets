@@ -64,6 +64,32 @@ export function isStandardSchema(value: unknown): value is StandardSchemaV1 {
   );
 }
 
+/**
+ * Returns the Standard Schema a class CARRIES as its static `schema`,
+ * branded or not — `undefined` otherwise.
+ *
+ * This is the widest recognition this subpath performs, and it is the
+ * ONE place that defines it (issue #83) — every internal call site
+ * imports THIS function. The brand-gated, throwing `getStandardSchema`
+ * below serves the branded-DTO factories only; a fix written against
+ * the wrong predicate imports fine and misbehaves at runtime, which is
+ * why there is no tolerant same-named alias anywhere else.
+ *
+ * Recognition is deliberately wider than the brand: `nestjs-zod`'s
+ * `createZodDto` classes (and anything else exposing a conforming
+ * static `schema`) validate identically through Nest's native pipe, and
+ * a brand-only pipe silently skipped them — the #83 field report.
+ */
+export function getCarriedStandardSchema(
+  value: unknown,
+): StandardSchemaV1 | undefined {
+  if (!value || (typeof value !== 'function' && typeof value !== 'object')) {
+    return undefined;
+  }
+  const schema: unknown = Reflect.get(value, 'schema');
+  return isStandardSchema(schema) ? schema : undefined;
+}
+
 /** Returns whether a value is a branded Standard Schema DTO class. */
 export function isStandardSchemaDto(
   value: unknown,
