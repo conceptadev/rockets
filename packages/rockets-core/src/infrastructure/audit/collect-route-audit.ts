@@ -1,5 +1,10 @@
 import { RequestMethod, type Type } from '@nestjs/common';
-import { METHOD_METADATA, PATH_METADATA } from '@nestjs/common/constants';
+import {
+  HOST_METADATA,
+  METHOD_METADATA,
+  PATH_METADATA,
+  VERSION_METADATA,
+} from '@nestjs/common/constants';
 
 import { ROCKETS_DISABLE_GUARDS_TOKEN } from '../../rockets-core.constants';
 import { aclMetadataKeys } from './acl-metadata-keys';
@@ -78,11 +83,23 @@ export function collectRouteAudit(args: {
       // registers one wire route per combination; the report carries
       // one row per combination too, or the table understates the
       // surface it exists to describe.
+      // Version and host are REAL routing dimensions: a public v1 and a
+      // guarded v2 of the same METHOD+path are different wire routes,
+      // and collapsing them to one id let a single `allow` entry exempt
+      // BOTH — the silently-widening exemption the docs forbid (review
+      // round 4). The qualifier is part of the identity whenever the
+      // dimension is declared.
+      const version = readVersion(handler) ?? readVersion(controller);
+      const host = readHost(controller);
+      const qualifier =
+        (version !== undefined ? ` [v${version}]` : '') +
+        (host !== undefined ? ` [host:${host}]` : '');
+
       for (const base of basePaths) {
         for (const segment of readPaths(handler)) {
           const path = joinPath(base, segment);
           routes.push({
-            id: `${method} /${path}`,
+            id: `${method} /${path}${qualifier}`,
             method,
             path: `/${path}`,
             controller: controller.name,
@@ -134,6 +151,24 @@ function resolveAuth(
  */
 function isPublic(value: unknown): boolean {
   return value === true || value === 'classLevel';
+}
+
+/** Declared Nest version(s), joined deterministically; undefined when none. */
+function readVersion(target: object): string | undefined {
+  const value: unknown = Reflect.getMetadata(VERSION_METADATA, target);
+  if (value === undefined) return undefined;
+  const list = Array.isArray(value) ? value : [value];
+  const parts = list.map((entry) =>
+    typeof entry === 'symbol' ? 'neutral' : String(entry),
+  );
+  return parts.length > 0 ? parts.sort().join(',') : undefined;
+}
+
+function readHost(target: object): string | undefined {
+  const value: unknown = Reflect.getMetadata(HOST_METADATA, target);
+  if (value === undefined) return undefined;
+  const list = Array.isArray(value) ? value : [value];
+  return list.map(String).sort().join(',') || undefined;
 }
 
 function readPublic(target: object): unknown {

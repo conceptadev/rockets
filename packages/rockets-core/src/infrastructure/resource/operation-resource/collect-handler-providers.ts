@@ -194,7 +194,14 @@ function addExportEntries(
       const dynamic = resolveReExportedDynamicModule(moduleClass, hostImports);
       if (dynamic !== undefined && !visited.has(dynamic)) {
         visited.add(dynamic);
-        addExportEntries(dynamic.exports ?? [], tokens, visited);
+        // ONE descent function everywhere. Three prior fixes each
+        // patched one call site and left this one walking exports
+        // WITHOUT the module's imports — so a three-level chain
+        // (Platform → Billing → Payments, each re-exporting the bare
+        // host class) broke at the level this call reached: Payments
+        // never matched, its handler was re-registered locally, and
+        // its module-private symbol failed the boot (review round 4).
+        addDynamicModuleExports(dynamic, tokens, visited);
       }
       continue;
     }

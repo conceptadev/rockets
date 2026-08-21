@@ -69,9 +69,29 @@ export function evaluateRoutePolicy(
   // would make the audit the incident. Routes removed conditionally
   // (`disableController`) live in the same options object as the
   // policy: keep the two consistent per environment.
-  const routeIds = new Set(report.routes.map((route) => route.id));
+  const idCounts = new Map<string, number>();
+  for (const route of report.routes) {
+    idCounts.set(route.id, (idCounts.get(route.id) ?? 0) + 1);
+  }
   for (const id of declaredRules.length > 0 ? allowedIds : []) {
-    if (!routeIds.has(id)) {
+    // An allow id matching MORE THAN ONE discovered route is ambiguous
+    // — version/host qualifiers make distinct wire routes distinct ids,
+    // but if two rows still collapse (same method, path, and declared
+    // dimensions), a single entry would exempt them all: the
+    // silently-widening exemption this design forbids. Fail closed.
+    if ((idCounts.get(id) ?? 0) > 1) {
+      violations.push({
+        routeId: id,
+        rule: 'staleAllow',
+        detail:
+          'this `allow` entry matches MORE THAN ONE discovered route — an ' +
+          'exemption must name exactly one. Disambiguate the routes ' +
+          '(version/host qualifiers appear in the id when declared) or ' +
+          'exempt by class via `allowControllers`.',
+      });
+      continue;
+    }
+    if (!idCounts.has(id)) {
       violations.push({
         routeId: id,
         rule: 'staleAllow',
