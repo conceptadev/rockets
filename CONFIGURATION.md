@@ -696,6 +696,62 @@ query services. In an app composing auth **and** `RocketsCoreModule` with
 core registration only — list auth-side services in that module's
 `queryServices` explicitly.
 
+## 5b. `TenantScopeHook` — fail-closed tenant row scoping (issue #69)
+
+Complements `acl` from §5a: `acl` decides which ACTIONS an actor may
+perform (`read`, `create`, …); this decides which ROWS an action can
+touch. `acl` alone lets an actor authorized to `read` see every OTHER
+tenant's rows on `GET /pets` — there is nothing in the grant that says
+"only this tenant's."
+
+`OwnerScopeHook` (§3, "Scope rows to the authenticated user" in the
+README) already solves the SINGLE-owner case: a column equals
+`actor.id`. `TenantScopeHook` is for an actor who belongs to a set of
+tenants resolved at request time — and, unlike `OwnerScopeHook`, is
+**fail-closed**: `OwnerScopeHook` deliberately leaves options unchanged
+when there is no actor (an unauthenticated request on a protected route
+already failed upstream, so a public route reaching the hook should not
+be scoped). `TenantScopeHook` disagrees on purpose — no actor, or a
+`resolve` that returns `[]`, both produce a WHERE clause matching NOTHING,
+never an unfiltered query. This is the fail-open gap #69 exists to close:
+"no actor / no resolved scope → empty set, never a full dump."
+
+```ts
+import { TenantScopeHook } from '@concepta/rockets-core';
+
+defineResource({
+  entity: PetEntity,
+  hooks: [
+    TenantScopeHook.for(PetEntity, {
+      tenantKey: 'shelterId',
+      resolve: (actor) => shelterIdsFor(actor), // [] when the actor owns none
+    }),
+  ],
+});
+```
+
+Coverage: `list` (`beforeFindAndCount`) and `read`/`update`/`delete`
+(`beforeFindOne`) — the same lifecycle keys `OwnerScopeHook` hooks.
+`create` is not scoped here; stamp the tenant column on writes the same
+way `OwnerStampHook` stamps ownership. A row outside the resolved set is
+excluded by the query itself, so it surfaces as `404` (never found), not
+`403` — confirming a row EXISTS to an actor who cannot see it is its own
+leak.
+
+The empty-set case is deliberately NOT expressed as `Where.in(tenantKey,
+[])`: several SQL engines (TypeORM's own `In([])` historically included)
+do not reliably treat an empty IN-list as "match nothing." Instead it
+composes `Where.isNull(tenantKey)` AND `Where.notNull(tenantKey)` — a
+contradiction no backend can satisfy, expressed with the same portable
+`Where` DSL rather than a raw per-adapter escape hatch.
+
+`TenantScopeHook.for()` is intentionally NOT cached per `(entity,
+tenantKey)` the way `OwnerScopeHook.for()` is — two calls could
+legitimately carry different resolvers (different tenant semantics for
+the same column across two resources), and caching by that key would
+silently keep whichever resolver arrived first. Call it once per
+resource.
+
 ---
 
 ## 6. `defineModuleResource()` — persistence rows + custom Nest slice

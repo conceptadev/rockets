@@ -7,6 +7,22 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Added
 
+- **`TenantScopeHook` — fail-closed row scoping by resolved tenant set
+  (issue #69).** Complements `acl` (#51): `acl` decides which actions an
+  actor may perform, this decides which rows. `TenantScopeHook.for(entity,
+  { tenantKey, resolve })` scopes `list`/`read`/`update`/`delete` to rows
+  whose `tenantKey` is in `resolve(actor)`'s result — and, unlike
+  `OwnerScopeHook` (which deliberately no-ops with no actor, reasoning an
+  unauthenticated request on a protected route already failed upstream),
+  this is fail-closed on purpose: no actor, or a `resolve` returning `[]`,
+  both produce a WHERE clause matching nothing, never an unfiltered
+  query — the fail-open gap the issue exists to close. A row outside the
+  resolved set 404s (never found by the query), not 403. The empty-set
+  case is a `Where.isNull(tenantKey)` AND `Where.notNull(tenantKey)`
+  contradiction rather than `Where.in(tenantKey, [])` — several SQL
+  engines, TypeORM's own `In([])` historically included, do not reliably
+  treat an empty IN-list as "match nothing." See `CONFIGURATION.md` §5b.
+
 - **`strictInput` on zodResource body operations (issue #79).** Opt-in
   per-op flag that rejects unknown **top-level** JSON keys with `400`
   naming the offending keys, instead of the default silent stripping

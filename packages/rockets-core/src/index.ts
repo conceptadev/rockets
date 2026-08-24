@@ -108,6 +108,11 @@ export {
   type OwnerStampHookOptions,
 } from './infrastructure/hooks/owner-stamp.hook';
 export { AfterCreateReloadHook } from './infrastructure/hooks/after-create-reload.hook';
+export {
+  TenantScopeHook,
+  type TenantIdsResolver,
+  type TenantScopeOptions,
+} from './infrastructure/hooks/tenant-scope.hook';
 
 // Exceptions filter
 export {

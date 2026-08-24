@@ -2914,6 +2914,24 @@
         "signature": "export interface SwaggerUiSettingsInterface {\n    path: string;\n    documentOptions?: SwaggerDocumentOptions;\n    customOptions?: SwaggerCustomOptions;\n    title?: string;\n    description?: string;\n    version?: string;\n    termsOfService?: string;\n    contact?: {\n        name: string;\n        url: string;\n        email: string;\n    };\n    license?: {\n        name: string;\n        url: string;\n    };\n    basePath?: string;\n}"
       },
       {
+        "name": "TenantIdsResolver",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type TenantIdsResolver = (actor: Actor) => readonly string[] | Promise<readonly string[]>;"
+      },
+      {
+        "name": "TenantScopeHook",
+        "kind": "class",
+        "runtime": true,
+        "signature": "export declare abstract class TenantScopeHook<E extends PlainLiteralObject> extends PassthroughEntityHookBase<E> {\n    protected abstract readonly tenantKey: keyof E & string;\n    protected abstract readonly resolveTenantIds: TenantIdsResolver;\n    beforeFindAndCount(options: RepositoryFindOptions<E>, ctx?: EntityHookContext): Promise<RepositoryFindOptions<E>>;\n    beforeFindOne(options: RepositoryFindOneOptions<E>, ctx?: EntityHookContext): Promise<RepositoryFindOneOptions<E>>;\n    static for<E extends PlainLiteralObject>(entity: Type<E>, options: TenantScopeOptions<E>): Type<TenantScopeHook<E>>;\n    private withTenantFilter;\n}"
+      },
+      {
+        "name": "TenantScopeOptions",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface TenantScopeOptions<E extends PlainLiteralObject> {\n    readonly tenantKey: keyof E & string;\n    readonly resolve: TenantIdsResolver;\n}"
+      },
+      {
         "name": "USER_METADATA_MODULE_ENTITY_KEY",
         "kind": "value",
         "runtime": true,
