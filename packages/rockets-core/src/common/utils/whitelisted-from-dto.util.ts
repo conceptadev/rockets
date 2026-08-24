@@ -1,8 +1,12 @@
+import {
+  attachErrorDetails,
+  classValidatorErrorsToDetails,
+} from './validation-error-details.util';
 import { BadRequestException, type Type } from '@nestjs/common';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import {
-  getStandardSchema,
+  getCarriedStandardSchema,
   standardSchemaBadRequest,
 } from './standard-schema.util';
 
@@ -25,7 +29,7 @@ import {
 export async function whitelistedFromDto<
   T extends Record<string, unknown> = Record<string, unknown>,
 >(dtoClass: Type<unknown>, data: object): Promise<T> {
-  const standard = getStandardSchema(dtoClass);
+  const standard = getCarriedStandardSchema(dtoClass);
   if (standard) {
     const result = await standard['~standard'].validate(data);
     if (result.issues !== undefined) {
@@ -44,11 +48,14 @@ export async function whitelistedFromDto<
     skipMissingProperties: true,
   });
   if (errors.length) {
-    throw new BadRequestException({
-      statusCode: 400,
-      message: errors.flatMap((e) => Object.values(e.constraints ?? {})),
-      error: 'Bad Request',
-    });
+    throw attachErrorDetails(
+      new BadRequestException({
+        statusCode: 400,
+        message: errors.flatMap((e) => Object.values(e.constraints ?? {})),
+        error: 'Bad Request',
+      }),
+      classValidatorErrorsToDetails(errors),
+    );
   }
   return instanceToPlain(instance as object) as T;
 }

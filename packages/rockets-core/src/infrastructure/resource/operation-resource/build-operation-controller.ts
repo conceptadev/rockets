@@ -8,6 +8,10 @@
  * ApiTags is applied immediately below from definition.tags (with a default).
  */
 import {
+  attachErrorDetails,
+  classValidatorErrorsToDetails,
+} from '../../../common/utils/validation-error-details.util';
+import {
   AccessControlGrant,
   AccessControlQuery,
 } from '@concepta/nestjs-access-control';
@@ -43,11 +47,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
-import {
-  getMetadataStorage,
-  validate,
-  type ValidationError,
-} from 'class-validator';
+import { getMetadataStorage, validate } from 'class-validator';
 
 import { AuthUser } from '../../../common/auth/auth-user.decorator';
 import type { AuthorizedUser } from '../../../domain/interfaces/auth-user.interface';
@@ -60,7 +60,7 @@ import type {
   OperationResourceDefinition,
 } from '../../../domain/interfaces/operation-resource.interface';
 import {
-  getStandardSchema,
+  getCarriedStandardSchema,
   standardSchemaBadRequest,
 } from '../../../common/utils/standard-schema.util';
 import { getHandlerClass, isHandlerFunction } from './is-handler-class';
@@ -107,7 +107,7 @@ function assertValidatableDto(
   if (dto === undefined) {
     return;
   }
-  if (getStandardSchema(dto)) {
+  if (getCarriedStandardSchema(dto)) {
     return;
   }
   const metas = getMetadataStorage().getTargetValidationMetadatas(
@@ -151,13 +151,19 @@ async function applyInputDto(
     return validateAndWhitelistDto(dto, {}, false);
   }
   if (!isPlainRecord(value)) {
-    throw new BadRequestException({
-      statusCode: 400,
-      message: `Expected a JSON object body, received ${describePayload(
-        value,
-      )}`,
-      error: 'Bad Request',
-    });
+    const message = `Expected a JSON object body, received ${describePayload(
+      value,
+    )}`;
+    // Same details channel as every other 400 this file mints — a
+    // whole-body failure addresses the root, so the path is empty.
+    throw attachErrorDetails(
+      new BadRequestException({
+        statusCode: 400,
+        message,
+        error: 'Bad Request',
+      }),
+      [{ path: [], message }],
+    );
   }
   return validateAndWhitelistDto(dto, value, false);
 }
@@ -211,21 +217,20 @@ async function resolveOperationParams(
   return { ...params, ...(validated as Record<string, unknown>) };
 }
 
+/**
+ * Message-shaped view of the SHARED recursive producer — one walker of
+ * the class-validator error tree, not two. `classValidatorErrorsToDetails`
+ * (issue #55) is the single implementation; this maps its structured
+ * details to the flattened strings this 400 body has always carried.
+ */
 function flattenConstraintMessages(
-  errors: readonly ValidationError[],
-  prefix = '',
+  details: ReturnType<typeof classValidatorErrorsToDetails>,
 ): string[] {
-  const messages: string[] = [];
-  for (const error of errors) {
-    const path = prefix ? `${prefix}.${error.property}` : error.property;
-    for (const message of Object.values(error.constraints ?? {})) {
-      messages.push(prefix ? `${path}: ${String(message)}` : String(message));
-    }
-    if (error.children && error.children.length > 0) {
-      messages.push(...flattenConstraintMessages(error.children, path));
-    }
-  }
-  return messages;
+  return details.map((detail) =>
+    detail.path.length > 1
+      ? `${detail.path.join('.')}: ${detail.message}`
+      : detail.message,
+  );
 }
 
 async function validateAndWhitelistDto(
@@ -233,7 +238,7 @@ async function validateAndWhitelistDto(
   data: object,
   skipMissingProperties: boolean,
 ): Promise<unknown> {
-  const standard = getStandardSchema(dto);
+  const standard = getCarriedStandardSchema(dto);
   if (standard) {
     const result = await standard['~standard'].validate(data);
     if (result.issues !== undefined) {
@@ -252,14 +257,18 @@ async function validateAndWhitelistDto(
     skipMissingProperties,
   });
   if (errors.length) {
-    throw new BadRequestException({
-      statusCode: 400,
-      // Recursive: a @ValidateNested failure carries its constraints in
-      // `children`, not on the root — flattening only the top level
-      // produced a 400 with `message: []`, telling the client nothing.
-      message: flattenConstraintMessages(errors),
-      error: 'Bad Request',
-    });
+    const details = classValidatorErrorsToDetails(errors);
+    throw attachErrorDetails(
+      new BadRequestException({
+        statusCode: 400,
+        // Recursive: a @ValidateNested failure carries its constraints in
+        // `children`, not on the root — flattening only the top level
+        // produced a 400 with `message: []`, telling the client nothing.
+        message: flattenConstraintMessages(details),
+        error: 'Bad Request',
+      }),
+      details,
+    );
   }
   return instanceToPlain(instance as object);
 }
@@ -281,7 +290,7 @@ async function applyOutputDto(
     throw outputValidationError(label, `handler returned ${String(value)}`);
   }
 
-  const standard = getStandardSchema(dto);
+  const standard = getCarriedStandardSchema(dto);
   if (standard) {
     const result = await standard['~standard'].validate(value);
     if (result.issues !== undefined) {

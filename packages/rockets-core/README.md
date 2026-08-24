@@ -447,6 +447,45 @@ carries `originalException` — the exception as thrown, before unwrapping,
 for correlation IDs and structured logs. Need more than the body? The
 unwrap helpers are `protected`, so a subclass can reuse them.
 
+Validation `400`s produced by Rockets carry structured `details` on the
+serializer context — `path` as an ARRAY of segments, `message` verbatim,
+one entry per unrecognized strict key. Numeric segments (array index
+`0`) are emitted by the zod producer; the class-validator producers
+report array children as string keys (`"0"`), because that is what
+class-validator itself exposes. Details ride the exception under a
+symbol, never inside the response payload, so an app without the
+Rockets filter sees the exact Nest body it always did. The default
+envelope is unchanged; opt in with the exported
+`detailedErrorSerializer`, or read `context.details` in your own.
+`context.request` carries the request in the same typed shape operation
+handlers receive (`headers` / `params` / `query` / `raw`) — treat `raw`
+like `OperationRequest.raw`: an escape hatch, never something to
+`JSON.stringify` (circular on Express). `headers` includes whatever the
+client sent — `authorization` and `cookie` too — so never log or echo
+the whole context from a serializer; read the specific fields you need.
+Reach, stated plainly: this
+flows through `RocketsCoreExceptionsFilter` (core / server apps);
+`@concepta/rockets-auth` apps use a compatibility filter without a
+serializer seam and get none of it yet (#87). A `400` minted by the
+upstream class-validator pipe carries messages only.
+
+Three helpers are exported for app code. `attachErrorDetails(exception,
+details)` puts findings on YOUR exception (a hook rejecting a write, a
+guard) so they flow to the serializer like Rockets' own — it no-ops on
+an empty list and on a frozen exception, and never touches the response
+payload. `readErrorDetails(exception)` is the validated read — a carried list
+with ANY malformed entry is dropped as a whole, not partially laundered
+into the typed contract. `classValidatorErrorsToDetails(errors)`
+converts a class-validator error tree, children included, into detail
+entries, and `standardSchemaIssuesToDetails(issues)` does the same for
+Standard Schema issues — the pair to reach for when supplying your own
+`exceptionFactory`. Opting the default body
+in is one provider:
+
+```typescript
+{ provide: ROCKETS_ERROR_SERIALIZER_TOKEN, useValue: detailedErrorSerializer }
+```
+
 ### Standard Schema DTOs (`@concepta/rockets-core/standard-schema`)
 
 The Standard Schema subpath turns any
@@ -476,6 +515,7 @@ before it is serialized:
 ```typescript
 import { Body, Controller, Post } from '@nestjs/common';
 import {
+  allowStandardSchemaKeys,
   createStandardSchemaDto,
   createStandardSchemaResponseDto,
 } from '@concepta/rockets-core/standard-schema';
@@ -486,6 +526,8 @@ const createPetSchema = z.object({ name: z.string().trim().min(1) });
 const petResponseSchema = z.object({ id: z.string(), name: z.string() });
 
 class CreatePetDto extends createStandardSchemaDto(createPetSchema) {}
+allowStandardSchemaKeys(CreatePetDto);
+
 class PetResponseDto extends createStandardSchemaResponseDto(
   petResponseSchema,
 ) {}
@@ -506,6 +548,57 @@ capability, or the Swagger document factory must receive a compatible custom
 converter. Wrap custom converters with `withStandardSchemaResponseArrays`
 when an `isArray: true` response must retain its array shape on the current
 Swagger alpha.
+
+Prefer `operationResource` for a hand-written JSON endpoint — the
+generated path validates internally and none of the pipe hazards below
+apply to it. This subpath exists for surfaces the generators cannot
+produce yet (streaming, SSE, file routes — #52, #86).
+
+**The whitelist trap (issue #83).** A schema-carrying DTO has no
+class-validator metadata, so a global
+`ValidationPipe({ whitelist: true })` — yours or any library's — strips
+every property AFTER the schema already validated the body: the handler
+receives `{}` with a success status. Two escapes, pick per situation:
+
+- **Escape 0 — no DTO metatype at all.** `@Body({ schema: MyDto.schema })
+  dto: MyBodyType` with a TYPE alias: the alias emits `Object` into the
+  reflected param types, which every whitelist pipe skips, and the route
+  metadata carries the schema explicitly. `examples/sample-server` uses
+  this idiom today. Safe, but easy to break by switching the annotation
+  to a class.
+- `allowStandardSchemaKeys(MyDto)` stamps `@Allow()` on each declared
+  key, so the DTO survives ANYONE's whitelist pipe. The stamp is
+  SURVIVAL, not validation: the body is only checked where a schema
+  pipe is registered — without one, the raw body reaches the handler. Rockets'
+  `compileDtoClass` output ships stamped. Limits, stated: only closed
+  object schemas can be stamped — unions, intersections, non-object
+  schemas have no introspectable key set (pass `keys` explicitly if the
+  top-level keys really are fixed), and an OPEN object
+  (`catchall`/`passthrough`) is refused outright, because a stamp would
+  let the whitelist strip keys the schema itself declares valid.
+- `StandardSchemaAwareValidationPipe` is Nest's `ValidationPipe` that
+  VALIDATES schema-carrying metatypes with their schema — standalone
+  use is safe and unknown keys are stripped by the schema itself.
+  Register EXACTLY ONE schema validator per route: pairing it with
+  `StandardSchemaModule` parses twice, and a transforming schema
+  (`z.coerce`, `.transform()`) is not idempotent — the second parse
+  corrupts or rejects the first's output. `transform` and
+  `errorHttpStatusCode` apply to both DTO kinds; `whitelist` /
+  `forbidNonWhitelisted` / `exceptionFactory` affect class-validator
+  DTOs only. It rejects, loudly, a DTO carrying BOTH a schema and
+  class-validator constraints — two validators with no defined winner.
+  It protects only apps that use it; the stamp protects against pipes
+  you do not control. Generated DTOs from OPEN schemas carry declared
+  keys only — reused under a foreign whitelist pipe, catchall keys are
+  stripped there.
+- Two lookups with opposite contracts, on purpose:
+  `getCarriedStandardSchema` answers "does this class carry a schema?"
+  (`undefined` when not); `getStandardSchema` serves the branded DTO
+  factories and THROWS on anything else.
+
+The DTO pipe recognises any class whose static `schema` is a Standard
+Schema — bare `nestjs-zod` `createZodDto` classes included, not only
+Rockets-branded ones.
 
 The DTO-aware pipe can infer request validation from `@Body()`, `@Query()`, and
 whole-object `@Param()` types. To include that request schema in generated
