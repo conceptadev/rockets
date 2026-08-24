@@ -32,7 +32,7 @@ export interface RocketsAuthRepositoryPersistenceEntities {
 }
 
 /**
- * Persistence for {@link DefineRocketsAuthInput.persistence}.
+ * Persistence for {@link DefineRocketsAuthInput} `persistence`.
  *
  * `defineRocketsAuth` maps these classes to canonical keys and contributes
  * planner rows (plus `OtpModule.forFeature` when `userOtp` is set).
