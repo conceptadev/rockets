@@ -1,3 +1,7 @@
+import {
+  attachErrorDetails,
+  classValidatorErrorsToDetails,
+} from './validation-error-details.util';
 import { BadRequestException, type Type } from '@nestjs/common';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
@@ -44,11 +48,14 @@ export async function whitelistedFromDto<
     skipMissingProperties: true,
   });
   if (errors.length) {
-    throw new BadRequestException({
-      statusCode: 400,
-      message: errors.flatMap((e) => Object.values(e.constraints ?? {})),
-      error: 'Bad Request',
-    });
+    throw attachErrorDetails(
+      new BadRequestException({
+        statusCode: 400,
+        message: errors.flatMap((e) => Object.values(e.constraints ?? {})),
+        error: 'Bad Request',
+      }),
+      classValidatorErrorsToDetails(errors),
+    );
   }
   return instanceToPlain(instance as object) as T;
 }

@@ -20,7 +20,9 @@ export interface StandardSchemaModuleOptions {
 export class StandardSchemaModule {
   /**
    * Registers the DTO-aware request pipe and Nest's native Standard Schema
-   * serializer as global application enhancers.
+   * serializer as global application enhancers. The details-attaching
+   * exception factory is the pipe's own default — the module forwards the
+   * caller's options verbatim.
    */
   static forRoot(options: StandardSchemaModuleOptions = {}): DynamicModule {
     const providers: Provider[] = [];

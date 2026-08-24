@@ -1,5 +1,10 @@
 import type { PlainLiteralObject } from '@nestjs/common';
 
+import type { OperationRequest } from '../../domain/interfaces/operation-resource.interface';
+import type { RocketsErrorDetail } from '../../domain/interfaces/error-detail.interface';
+
+export type { RocketsErrorDetail } from '../../domain/interfaces/error-detail.interface';
+
 /**
  * DI token for a {@link RocketsErrorSerializerInterface}.
  *
@@ -57,6 +62,24 @@ export interface RocketsErrorContext {
    * already resolved above.
    */
   readonly originalException: unknown;
+  /**
+   * Structured findings behind a validation `400`, when the failure has
+   * them — zod issues, class-validator constraints, unrecognized strict
+   * keys (one entry per key). Absent on non-validation errors. The
+   * human-readable `message` above stays untouched; this is the field a
+   * client branches on instead of parsing strings.
+   */
+  readonly details?: readonly RocketsErrorDetail[];
+  /**
+   * The request being answered, in the same transport-agnostic shape
+   * `operationResource` handlers already receive — typed `headers` /
+   * `params` / `query`, `raw` as the documented escape hatch. This is
+   * what a serializer builds a correlation id from without forking the
+   * filter. A serializer returns a BODY only — there is no response
+   * seam here, so setting headers (e.g. `Retry-After`) still requires
+   * the app's own filter or interceptor.
+   */
+  readonly request?: OperationRequest;
 }
 
 /**
@@ -101,6 +124,22 @@ export const defaultErrorSerializer: RocketsErrorSerializerInterface = {
       errorCode,
       message,
       timestamp: new Date().toISOString(),
+    };
+  },
+};
+
+/**
+ * The default envelope plus `details` when the error carries them.
+ * Split from {@link defaultErrorSerializer} deliberately: adding a key
+ * to the default would change every existing response body shape;
+ * opting in keeps the long-standing envelope byte-identical for apps
+ * that never asked.
+ */
+export const detailedErrorSerializer: RocketsErrorSerializerInterface = {
+  serialize(context: RocketsErrorContext): PlainLiteralObject {
+    return {
+      ...defaultErrorSerializer.serialize(context),
+      ...(context.details ? { details: context.details } : {}),
     };
   },
 };

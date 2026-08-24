@@ -2779,7 +2779,13 @@
         "name": "RocketsErrorContext",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RocketsErrorContext {\n    readonly statusCode: number;\n    readonly errorCode: string;\n    readonly message: unknown;\n    readonly originalException: unknown;\n}"
+        "signature": "export interface RocketsErrorContext {\n    readonly statusCode: number;\n    readonly errorCode: string;\n    readonly message: unknown;\n    readonly originalException: unknown;\n    readonly details?: readonly RocketsErrorDetail[];\n    readonly request?: OperationRequest;\n}"
+      },
+      {
+        "name": "RocketsErrorDetail",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface RocketsErrorDetail {\n    readonly path: readonly (string | number)[];\n    readonly message: string;\n}"
       },
       {
         "name": "RocketsErrorSerializerInterface",
@@ -3016,6 +3022,12 @@
         "signature": "export interface WithActor {\n    readonly actor?: Actor;\n}"
       },
       {
+        "name": "attachErrorDetails",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function attachErrorDetails<T extends object>(exception: T, details: readonly RocketsErrorDetail[]): T;"
+      },
+      {
         "name": "buildAccessControlImport",
         "kind": "function",
         "runtime": true,
@@ -3026,6 +3038,12 @@
         "kind": "function",
         "runtime": true,
         "signature": "export declare function buildAppRegistrationPlan(args: {\n    readonly resources: ReadonlyArray<ResourceInput>;\n    readonly repository?: RepositoryModuleInterface;\n    readonly userMetadata?: RocketsUserMetadataConfig;\n    readonly accessControl?: boolean;\n    readonly enforceGrants?: boolean;\n}): AppRegistrationPlan;"
+      },
+      {
+        "name": "classValidatorErrorsToDetails",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function classValidatorErrorsToDetails(errors: readonly ValidationErrorLike[], parents?: readonly (string | number)[]): RocketsErrorDetail[];"
       },
       {
         "name": "collectRegisteredRoutes",
@@ -3104,6 +3122,12 @@
         "kind": "function",
         "runtime": true,
         "signature": "export declare function deriveEntityKey(cls: Type<PlainLiteralObject>): string;"
+      },
+      {
+        "name": "detailedErrorSerializer",
+        "kind": "value",
+        "runtime": true,
+        "signature": "detailedErrorSerializer: RocketsErrorSerializerInterface"
       },
       {
         "name": "evaluateRoutePolicy",
@@ -3196,6 +3220,12 @@
         "signature": "export declare function logAndGetErrorDetails(error: unknown, logger: Logger, customMessage: string, context?: Record<string, unknown>): ErrorDetails;"
       },
       {
+        "name": "readErrorDetails",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function readErrorDetails(exception: unknown): readonly RocketsErrorDetail[] | undefined;"
+      },
+      {
         "name": "relation",
         "kind": "function",
         "runtime": true,
@@ -3212,6 +3242,12 @@
         "kind": "function",
         "runtime": true,
         "signature": "export declare function resolveRelationTarget(entry: ResourceRelationEntry): EntityConstructor;"
+      },
+      {
+        "name": "standardSchemaIssuesToDetails",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function standardSchemaIssuesToDetails(issues: ReadonlyArray<StandardSchemaV1.Issue>): Array<{\n    path: (string | number)[];\n    message: string;\n}>;"
       },
       {
         "name": "stripUndefined",
@@ -3261,7 +3297,7 @@
         "name": "StandardSchemaDtoValidationPipe",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class StandardSchemaDtoValidationPipe extends StandardSchemaValidationPipe {\n    transform<T = unknown>(value: T, metadata: ArgumentMetadata): Promise<T>;\n}"
+        "signature": "export declare class StandardSchemaDtoValidationPipe extends StandardSchemaValidationPipe {\n    constructor(options?: StandardSchemaValidationPipeOptions);\n    transform<T = unknown>(value: T, metadata: ArgumentMetadata): Promise<T>;\n}"
       },
       {
         "name": "StandardSchemaModule",
@@ -4408,6 +4444,14 @@
         "signature": "export type SwaggerUiOptions = Omit<typeof SWAGGER_UI_OPTIONS_TYPE, 'global'>;",
         "referencedBy": [
           "SwaggerUiModule"
+        ]
+      },
+      {
+        "name": "ValidationErrorLike",
+        "kind": "interface",
+        "signature": "export interface ValidationErrorLike {\n    readonly property: string;\n    readonly constraints?: Readonly<Record<string, string>>;\n    readonly children?: readonly ValidationErrorLike[];\n}",
+        "referencedBy": [
+          "classValidatorErrorsToDetails"
         ]
       }
     ],

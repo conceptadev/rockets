@@ -15,6 +15,7 @@ import {
   ApiTags,
   SwaggerModule,
 } from '@nestjs/swagger';
+import { APP_FILTER } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import request from 'supertest';
@@ -28,6 +29,11 @@ import {
   StandardSchemaResponse,
 } from '@concepta/rockets-core/standard-schema';
 import { ApiStandardSchemaResponse } from '@concepta/rockets-core/standard-schema/swagger';
+import { RocketsCoreExceptionsFilter } from '../infrastructure/filters/exceptions.filter';
+import {
+  detailedErrorSerializer,
+  ROCKETS_ERROR_SERIALIZER_TOKEN,
+} from '../infrastructure/filters/error-serializer';
 
 let requestValidationCount = 0;
 let responseValidationCount = 0;
@@ -207,6 +213,13 @@ describe('@concepta/rockets-core/standard-schema', () => {
     const testingModule = await Test.createTestingModule({
       imports: [StandardSchemaModule.forRoot()],
       controllers: [ProductsController],
+      providers: [
+        { provide: APP_FILTER, useClass: RocketsCoreExceptionsFilter },
+        {
+          provide: ROCKETS_ERROR_SERIALIZER_TOKEN,
+          useValue: detailedErrorSerializer,
+        },
+      ],
     }).compile();
 
     app = testingModule.createNestApplication({ logger: false });
@@ -276,16 +289,17 @@ describe('@concepta/rockets-core/standard-schema', () => {
     expect(response.body.id).toBe(7);
   });
 
-  it('keeps Nest native request and response failure semantics', async () => {
+  it('keeps request failure status and attaches structured details', async () => {
     const invalidRequest = await request(app.getHttpServer())
       .post('/standard-schema/products')
       .send({ name: '', price: -1 })
       .expect(400);
 
-    expect(invalidRequest.body).toMatchObject({
-      error: 'Bad Request',
-      statusCode: 400,
-    });
+    expect(invalidRequest.body.statusCode).toBe(400);
+    expect(invalidRequest.body.details).toEqual([
+      expect.objectContaining({ path: ['name'] }),
+      expect.objectContaining({ path: ['price'] }),
+    ]);
     await request(app.getHttpServer())
       .get('/standard-schema/products/broken')
       .expect(500);
@@ -353,5 +367,42 @@ describe('@concepta/rockets-core/standard-schema', () => {
       },
       description: 'Products returned.',
     });
+  });
+});
+
+// The details channel rides the exception under a symbol — an app that
+// does NOT register the Rockets filter must see Nest's native 400 body,
+// byte-shape unchanged. This is the regression guard for
+// `defaultExceptionFactory` replacing Nest's own: the message parity is
+// asserted here, not inferred from reading Nest's source.
+describe('@concepta/rockets-core/standard-schema without the Rockets filter', () => {
+  let app: INestApplication;
+
+  beforeAll(async () => {
+    const testingModule = await Test.createTestingModule({
+      imports: [StandardSchemaModule.forRoot()],
+      controllers: [ProductsController],
+    }).compile();
+
+    app = testingModule.createNestApplication({ logger: false });
+    await app.init();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('keeps Nest native request failure semantics', async () => {
+    const invalidRequest = await request(app.getHttpServer())
+      .post('/standard-schema/products')
+      .send({ name: '', price: -1 })
+      .expect(400);
+
+    expect(invalidRequest.body).toMatchObject({
+      error: 'Bad Request',
+      statusCode: 400,
+    });
+    expect(invalidRequest.body).not.toHaveProperty('details');
+    expect(Array.isArray(invalidRequest.body.message)).toBe(true);
   });
 });

@@ -10,7 +10,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { APP_GUARD, REQUEST } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, REQUEST } from '@nestjs/core';
 import {
   ApiProperty,
   ApiPropertyOptional,
@@ -34,6 +34,11 @@ import { defineAuthAdapter } from '../infrastructure/auth/define-auth-adapter';
 import { defineOperationResource } from '../infrastructure/resource/define-operation-resource';
 import { operationResource } from '../zod/zod-operation-resource';
 import type { OperationContext } from '../domain/interfaces/operation-resource.interface';
+import { RocketsCoreExceptionsFilter } from '../infrastructure/filters/exceptions.filter';
+import {
+  detailedErrorSerializer,
+  ROCKETS_ERROR_SERIALIZER_TOKEN,
+} from '../infrastructure/filters/error-serializer';
 
 const OPS_MARK = 'ops:mark';
 const LOCAL_VALUE = 'operation-resource-local-value';
@@ -877,7 +882,14 @@ describe('operationResource e2e (issue #43 v1)', () => {
           global: true,
         }),
       ],
-      providers: [{ provide: APP_GUARD, useClass: AuthServerGuard }],
+      providers: [
+        { provide: APP_GUARD, useClass: AuthServerGuard },
+        { provide: APP_FILTER, useClass: RocketsCoreExceptionsFilter },
+        {
+          provide: ROCKETS_ERROR_SERIALIZER_TOKEN,
+          useValue: detailedErrorSerializer,
+        },
+      ],
     }).compile();
 
     app = moduleRef.createNestApplication();
@@ -1088,6 +1100,9 @@ describe('operationResource e2e (issue #43 v1)', () => {
       .send({ name: 'ok', child: {} })
       .expect(400);
     expect(JSON.stringify(res.body.message)).toMatch(/child\.street/);
+    expect(res.body.details).toEqual([
+      { path: ['child', 'street'], message: 'street must be a string' },
+    ]);
   });
 
   it('rejects lower-level class-validator primitive output', async () => {

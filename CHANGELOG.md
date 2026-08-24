@@ -7,6 +7,24 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Added
 
+- **Structured `details` and typed `request` on the error serializer
+  context (issue #55 residuals).** Validation `400`s minted by Rockets
+  now hand the serializer `details: [{ path, message }]` — path as an
+  array of segments, one entry per unrecognized strict key — and every
+  error passing through `RocketsCoreExceptionsFilter` hands it `request`
+  in the same typed shape operation handlers receive, so a correlation
+  id in the body no longer requires forking the filter (serializers
+  return a body only — response headers such as `Retry-After` remain
+  out of reach until a response seam exists). Details ride
+  the exception under a symbol, never the response payload — an app
+  without the filter sees the unchanged Nest body (pinned by a test).
+  The default envelope body is byte-shape unchanged;
+  `detailedErrorSerializer` is the one-line opt-in that appends
+  `details`. `400`s minted by the upstream class-validator pipe carry
+  messages only, and `@concepta/rockets-auth` apps are out of reach
+  until their compatibility filter gains the seam (#87) — limits stated
+  rather than papered over.
+
 - **Schema DTOs survive class-validator whitelist pipes (issue #83).**
   Three pieces. `StandardSchemaDtoValidationPipe` now recognises any
   class carrying a Standard Schema as its static `schema` — bare
