@@ -7,6 +7,17 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Added
 
+- **Per-route rate limiting (issue #56).** `@RateLimit({ limit, windowMs })`
+  marks a route; `RateLimitGuard` enforces it — a route without the
+  decorator is untouched. Allowed requests get `X-RateLimit-Limit` /
+  `X-RateLimit-Remaining` headers; over-limit requests get `429` with
+  `Retry-After`; a broken store fails **closed** (`503`), never lets a
+  request through unlimited. Ships one reference adapter,
+  `InMemoryRateLimitStore` (single-process — a real multi-instance
+  deployment needs a shared backend behind `RateLimitStoreInterface`,
+  documented with a real-database e2e proof of correct `ctx` /
+  `TransactionScope` forwarding in `CONFIGURATION.md` §7c).
+
 - **`strictInput` on zodResource body operations (issue #79).** Opt-in
   per-op flag that rejects unknown **top-level** JSON keys with `400`
   naming the offending keys, instead of the default silent stripping

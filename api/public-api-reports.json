@@ -2428,6 +2428,12 @@
         "signature": "export declare class GetUserMetadataQuery {\n    readonly userId: string;\n    constructor(userId: string);\n}"
       },
       {
+        "name": "InMemoryRateLimitStore",
+        "kind": "class",
+        "runtime": true,
+        "signature": "export declare class InMemoryRateLimitStore implements RateLimitStoreInterface {\n    private readonly windows;\n    consume(key: string, limit: number, windowMs: number): Promise<RateLimitResult>;\n}"
+      },
+      {
         "name": "InjectCrudAdapter",
         "kind": "function",
         "runtime": true,
@@ -2560,6 +2566,12 @@
         "signature": "export declare class PathScopeHook<E extends PlainLiteralObject> extends PassthroughEntityHookBase<E> {\n    protected readonly paramName: string;\n    protected readonly fkColumn: string;\n    beforeFindAndCount(options: RepositoryFindOptions<E>, ctx?: EntityHookContext): RepositoryFindOptions<E>;\n    beforeFindOne(options: RepositoryFindOneOptions<E>, ctx?: EntityHookContext): RepositoryFindOneOptions<E>;\n    beforeCreate(payload: E, ctx?: EntityHookContext): E;\n    static for<E extends PlainLiteralObject>(entity: Type<E>, paramName: string, fkColumn: string): Type<PathScopeHook<E>>;\n    private scope;\n    private optionalParamValue;\n}"
       },
       {
+        "name": "RATE_LIMIT_STORE_TOKEN",
+        "kind": "value",
+        "runtime": true,
+        "signature": "RATE_LIMIT_STORE_TOKEN: unique symbol"
+      },
+      {
         "name": "ROCKETS_CORE_SETTINGS_TOKEN",
         "kind": "value",
         "runtime": true,
@@ -2578,6 +2590,12 @@
         "signature": "ROCKETS_ERROR_SERIALIZER_TOKEN: unique symbol"
       },
       {
+        "name": "ROCKETS_RATE_LIMIT_TOKEN",
+        "kind": "value",
+        "runtime": true,
+        "signature": "ROCKETS_RATE_LIMIT_TOKEN: unique symbol"
+      },
+      {
         "name": "ROCKETS_ROUTE_POLICY_TOKEN",
         "kind": "value",
         "runtime": true,
@@ -2594,6 +2612,36 @@
         "kind": "value",
         "runtime": true,
         "signature": "ROCKETS_TO_PLAIN_OPTIONS: ClassTransformOptions"
+      },
+      {
+        "name": "RateLimit",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function RateLimit(options: RateLimitOptions): CustomDecorator<typeof ROCKETS_RATE_LIMIT_TOKEN>;"
+      },
+      {
+        "name": "RateLimitGuard",
+        "kind": "class",
+        "runtime": true,
+        "signature": "export declare class RateLimitGuard implements CanActivate {\n    private readonly reflector;\n    private readonly store;\n    private readonly logger;\n    constructor(reflector: Reflector, store: RateLimitStoreInterface);\n    canActivate(context: ExecutionContext): Promise<boolean>;\n}"
+      },
+      {
+        "name": "RateLimitOptions",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface RateLimitOptions {\n    readonly limit: number;\n    readonly windowMs: number;\n    readonly key?: (context: ExecutionContext) => string;\n}"
+      },
+      {
+        "name": "RateLimitResult",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface RateLimitResult {\n    readonly allowed: boolean;\n    readonly limit: number;\n    readonly remaining: number;\n    readonly resetAt: number;\n}"
+      },
+      {
+        "name": "RateLimitStoreInterface",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface RateLimitStoreInterface {\n    consume(key: string, limit: number, windowMs: number): Promise<RateLimitResult>;\n}"
       },
       {
         "name": "RegisteredRoute",

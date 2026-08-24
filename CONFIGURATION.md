@@ -936,6 +936,106 @@ an overly broad setting lets callers spoof addresses and evade the limit.
 
 ---
 
+## 7c. `RateLimitGuard` — per-route request limits (issue #56)
+
+A route-scoped rate limiter, separate from auth's own login throttling
+(§7b above). `@RateLimit()` is a plain method decorator; a route without
+it is never touched by `RateLimitGuard` — the guard is a no-op unless a
+route opts in.
+
+### Minimum
+
+```ts
+import { APP_GUARD } from '@nestjs/core';
+import {
+  RateLimit,
+  RateLimitGuard,
+  RATE_LIMIT_STORE_TOKEN,
+  InMemoryRateLimitStore,
+} from '@concepta/rockets-core';
+
+@Controller('reports')
+class ReportsController {
+  @Get()
+  @RateLimit({ limit: 10, windowMs: 60_000 }) // 10 requests / minute
+  list() {
+    /* … */
+  }
+}
+
+@Module({
+  providers: [
+    { provide: APP_GUARD, useClass: RateLimitGuard },
+    { provide: RATE_LIMIT_STORE_TOKEN, useClass: InMemoryRateLimitStore },
+  ],
+})
+class AppModule {}
+```
+
+On an allowed request the guard sets `X-RateLimit-Limit` and
+`X-RateLimit-Remaining`. Once the limit is hit it rejects with `429` and
+a `Retry-After` header instead of letting the request through.
+
+### Field reference
+
+| Field       | Required | Meaning                                                             |
+| ----------- | -------- | -------------------------------------------------------------------- |
+| `limit`     | yes      | Max requests allowed inside one window.                              |
+| `windowMs`  | yes      | Window length in milliseconds (fixed window, not sliding).           |
+| `key`       | no       | `(context) => string` to key by tenant/user/API key instead of the default `ip:METHOD:route`. |
+
+### Store: in-memory vs a real backend
+
+`InMemoryRateLimitStore` (single process, in-memory) is what core ships
+for tests and samples. It is **not** correct behind more than one
+instance — each process tracks its own count, so N instances behind a
+load balancer effectively multiply the configured limit by N.
+
+A production, multi-instance deployment needs a shared backend behind
+the same `RateLimitStoreInterface` port (one method: `consume(key,
+limit, windowMs)`). The dynamic-repository / `TransactionScope` pattern
+from §8a is the reference shape — same `ctx`-forwarding rule applies
+here as everywhere else a store does its own read-then-write:
+
+```ts
+@Injectable()
+class SqlRateLimitStore implements RateLimitStoreInterface {
+  constructor(
+    @InjectDynamicRepository('rateLimitCounter')
+    private readonly repo: RepositoryInterface<RateLimitCounterEntity>,
+    private readonly txScope: TransactionScope,
+  ) {}
+
+  async consume(key: string, limit: number, windowMs: number) {
+    const ctx = AppContextHost.from(); // guards run before interceptors — no incoming ctx to join
+    return this.txScope.run(
+      ctx,
+      async () => {
+        /* findOne → create/update the counter row, all forwarding { ctx } */
+      },
+      { propagation: 'MANDATORY' }, // fail-closed if no transaction adapter is registered
+    );
+  }
+}
+```
+
+Register the entity and store through `defineModuleResource` (rule 4),
+not a bare `TypeOrmModule.forFeature()` — `TransactionScope` and the
+dynamic-repository token are only wired by going through
+`RocketsCoreModule`'s own composition. A working, real-database version
+of this (SQLite, real HTTP requests, real transaction commit) is the e2e
+proof at `packages/rockets-core/src/__e2e__/rockets-core-rate-limit.e2e-spec.ts`.
+
+### Failure mode is fail-closed
+
+If the store throws (backend down, network error), `RateLimitGuard`
+rejects the request with `503`, never lets it through unlimited. A store
+that wants fail-open behavior must swallow its own errors and return
+`{ allowed: true, ... }` — that is an explicit choice on the adapter,
+never the guard's default.
+
+---
+
 ## 8. Repository (root adapter) — database-agnostic
 
 The `repository` field is the default persistence adapter. Core only knows two

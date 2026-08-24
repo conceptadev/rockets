@@ -925,6 +925,47 @@ declared; a recognition-only policy polices nothing. Routes removed
 conditionally (`disableController`) live in the same options object as
 the policy — keep the two consistent per environment.
 
+### Rate-limit a route
+
+`@RateLimit()` marks one route; `RateLimitGuard` enforces it. A route
+without the decorator is never touched by the guard.
+
+```typescript
+import { APP_GUARD } from '@nestjs/core';
+import {
+  RateLimit,
+  RateLimitGuard,
+  RATE_LIMIT_STORE_TOKEN,
+  InMemoryRateLimitStore,
+} from '@concepta/rockets-core';
+
+@Controller('reports')
+class ReportsController {
+  @Get()
+  @RateLimit({ limit: 10, windowMs: 60_000 })
+  list() {
+    /* … */
+  }
+}
+
+@Module({
+  providers: [
+    { provide: APP_GUARD, useClass: RateLimitGuard },
+    { provide: RATE_LIMIT_STORE_TOKEN, useClass: InMemoryRateLimitStore },
+  ],
+})
+class AppModule {}
+```
+
+`InMemoryRateLimitStore` is the reference adapter — correct for tests
+and single-process apps, not for more than one instance (each process
+would track its own count). A real multi-instance deployment needs a
+shared backend behind `RateLimitStoreInterface`; see `CONFIGURATION.md`
+§7c for the dynamic-repository / `TransactionScope` version and its e2e
+proof. On over-limit the guard rejects with `429` and `Retry-After`; on
+a store failure it fails **closed** (`503`), never lets the request
+through unlimited.
+
 ---
 
 ## 4. Reference
