@@ -8,7 +8,7 @@ import { Reflector } from '@nestjs/core';
 import type { Observable } from 'rxjs';
 import { CrudValidate } from '@concepta/nestjs-crud';
 import {
-  getStandardSchema,
+  getCarriedStandardSchema,
   standardSchemaBadRequest,
 } from '../../common/utils/standard-schema.util';
 
@@ -38,7 +38,7 @@ export class ZodBodyValidationInterceptor implements NestInterceptor {
       { expectedType?: unknown } | undefined
     >(CrudValidate.KEY as string, [handler, target]);
 
-    const standardSchema = getStandardSchema(validation?.expectedType);
+    const standardSchema = getCarriedStandardSchema(validation?.expectedType);
     if (!standardSchema) {
       return next.handle();
     }

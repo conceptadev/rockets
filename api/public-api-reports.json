@@ -3282,6 +3282,12 @@
         "signature": "STANDARD_SCHEMA_RESPONSE_DTO: unique symbol"
       },
       {
+        "name": "StandardSchemaAwareValidationPipe",
+        "kind": "class",
+        "runtime": true,
+        "signature": "export declare class StandardSchemaAwareValidationPipe extends ValidationPipe {\n    private readonly schemaPipe;\n    constructor(options?: ValidationPipeOptions);\n    transform(value: unknown, metadata: ArgumentMetadata): Promise<unknown>;\n}"
+      },
+      {
         "name": "StandardSchemaDtoClass",
         "kind": "interface",
         "runtime": false,
@@ -3336,6 +3342,12 @@
         "signature": "export type StandardSchemaSource = StandardSchemaV1 | StandardSchemaDtoClass | StandardSchemaResponseDtoClass;"
       },
       {
+        "name": "allowStandardSchemaKeys",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function allowStandardSchemaKeys<T extends Type<object>>(dto: T, keys?: readonly string[]): T;"
+      },
+      {
         "name": "createStandardSchemaDto",
         "kind": "function",
         "runtime": true,
@@ -3346,6 +3358,12 @@
         "kind": "function",
         "runtime": true,
         "signature": "export declare function createStandardSchemaResponseDto<const Schema extends StandardSchemaV1<object, unknown>>(schema: Schema & (Extract<StandardSchemaV1.InferInput<Schema>, readonly unknown[]> extends never ? unknown : never)): StandardSchemaResponseDtoClass<Schema>;"
+      },
+      {
+        "name": "getCarriedStandardSchema",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function getCarriedStandardSchema(value: unknown): StandardSchemaV1 | undefined;"
       },
       {
         "name": "getStandardSchema",

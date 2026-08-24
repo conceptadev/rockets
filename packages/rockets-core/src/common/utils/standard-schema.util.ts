@@ -1,17 +1,9 @@
 import { BadRequestException } from '@nestjs/common';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 
-import { isStandardSchema } from '../../standard-schema/schema';
 import { attachErrorDetails } from './validation-error-details.util';
 
-export function getStandardSchema(type: unknown): StandardSchemaV1 | undefined {
-  if (!type || (typeof type !== 'function' && typeof type !== 'object')) {
-    return undefined;
-  }
-
-  const schema = Reflect.get(type, 'schema');
-  return isStandardSchema(schema) ? schema : undefined;
-}
+export { getCarriedStandardSchema } from '../../standard-schema/schema';
 
 export function standardSchemaIssuesToMessages(
   issues: ReadonlyArray<StandardSchemaV1.Issue>,

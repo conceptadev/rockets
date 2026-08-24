@@ -10,7 +10,7 @@ import type { StandardSchemaV1 } from '@standard-schema/spec';
 
 import { standardSchemaIssuesToDetails } from '../common/utils/standard-schema.util';
 import { attachErrorDetails } from '../common/utils/validation-error-details.util';
-import { isStandardSchemaDto } from './schema';
+import { getCarriedStandardSchema } from './schema';
 
 /**
  * Adds DTO-carried schemas to Nest argument metadata, then delegates parsing
@@ -22,6 +22,12 @@ import { isStandardSchemaDto } from './schema';
  * so a directly-constructed instance must produce the same structured
  * `details` as the module-registered one. A caller-supplied
  * `exceptionFactory` still wins.
+ *
+ * Recognition is by CARRIER, not by brand (issue #83): a bare
+ * `nestjs-zod` `createZodDto` class validates identically to a
+ * Rockets-branded one, and the brand-only check silently skipped it —
+ * the consumer believed the pipe validated a DTO it never looked at.
+ * Explicit route metadata (`metadata.schema`) still wins.
  */
 @Injectable()
 export class StandardSchemaDtoValidationPipe extends StandardSchemaValidationPipe {
@@ -39,10 +45,7 @@ export class StandardSchemaDtoValidationPipe extends StandardSchemaValidationPip
     metadata: ArgumentMetadata,
   ): Promise<T> {
     const schema =
-      metadata.schema ??
-      (isStandardSchemaDto(metadata.metatype)
-        ? metadata.metatype.schema
-        : undefined);
+      metadata.schema ?? getCarriedStandardSchema(metadata.metatype);
 
     return super.transform(value, {
       ...metadata,
