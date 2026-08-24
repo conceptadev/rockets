@@ -11,13 +11,36 @@ export type { AuthorizedUser } from './domain/interfaces/auth-user.interface';
 
 // Auth helpers
 export { extractBearerToken } from './infrastructure/auth/extract-bearer-token';
+export {
+  parseCookies,
+  extractCookie,
+} from './infrastructure/auth/parse-cookies';
+export {
+  generateCsrfToken,
+  verifyCsrfToken,
+} from './infrastructure/auth/csrf-token';
 
 // Auth tokens & guard
 export {
   AUTH_ADAPTERS_TOKEN,
   ROCKETS_DISABLE_GUARDS_TOKEN,
+  CSRF_GUARD_OPTIONS_TOKEN,
 } from './rockets-core.constants';
 export { AuthServerGuard } from './infrastructure/guards/auth-server.guard';
+// Session-cookie route policy + CSRF (issue #58). `AuthSession()` is the
+// "session" leg of the ternary public | internal | session policy —
+// `AuthPublic()` is "public", no decorator is "internal". `CsrfGuard`
+// no-ops on every route that is not `@AuthSession()`.
+export {
+  AuthSession,
+  ROCKETS_AUTH_SESSION_TOKEN,
+  type AuthSessionMetadata,
+  type AuthSessionOptions,
+} from './decorators/auth-session.decorator';
+export {
+  CsrfGuard,
+  type CsrfGuardOptions,
+} from './infrastructure/guards/csrf.guard';
 
 // CRUD serialization: free-form JSON opt-out (documented in the README's
 // JSON-column guide; was reachable only by deep import, which the packed

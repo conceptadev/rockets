@@ -7,6 +7,27 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Added
 
+- **Session-cookie auth, CSRF, and the ternary route policy (issue
+  #58).** `AuthSession()` marks a route session-cookie authenticated —
+  the third leg alongside `AuthPublic()` ("public") and no decorator
+  ("internal"). `CsrfGuard` enforces the CSRF double-submit check
+  (`x-csrf-token` header must equal `HMAC(secret, sessionCookieValue)`)
+  on `POST`/`PUT`/`PATCH`/`DELETE` to `@AuthSession()` routes; it
+  no-ops on every other route, so a bearer-only app that registers it
+  anyway sees no behavior change. `generateCsrfToken` /
+  `verifyCsrfToken` (timing-safe) and `parseCookies` / `extractCookie`
+  are the supporting primitives. `RouteAuditEntry` gained
+  `sessionAuth: boolean`; declaring `AuthPublic` and `AuthSession` on
+  the same handler throws at route-audit collection time — a public
+  route has no session to protect. `@concepta/rockets-adapter-firebase`
+  gained the session-cookie capability the field report (#46) found
+  missing: `FirebaseSessionCookieAdapter` (the session counterpart to
+  `FirebaseAuthAdapter`, coexisting in the same `auth` chain) and
+  `FirebaseSessionCookieVerifierInterface` (`verifySessionCookie` /
+  `createSessionCookie`) as a SEPARATE interface from the bearer-only
+  `FirebaseTokenVerifierInterface`, so an existing bearer-only custom
+  verifier does not break at compile time. See `CONFIGURATION.md` §7c.
+
 - **`strictInput` on zodResource body operations (issue #79).** Opt-in
   per-op flag that rejects unknown **top-level** JSON keys with `400`
   naming the offending keys, instead of the default silent stripping

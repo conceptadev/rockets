@@ -18,6 +18,7 @@ function report(overrides: Partial<RouteAuditReport>): RouteAuditReport {
         controllerRef: ProbeController,
         handler: 'list',
         authentication: 'guarded',
+        sessionAuth: false,
         aclAction: null,
         aclResource: null,
         aclQuery: null,

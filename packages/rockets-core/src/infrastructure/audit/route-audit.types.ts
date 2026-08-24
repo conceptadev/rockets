@@ -38,6 +38,18 @@ export interface RouteAuditEntry {
   readonly controllerRef: Type<unknown>;
   readonly handler: string;
   readonly authentication: RouteAuthState;
+  /**
+   * Whether `@AuthSession()` marks this route session-cookie
+   * authenticated (issue #58's ternary `public | internal | session`
+   * policy) — `false` for an "internal" bearer-style route. Orthogonal
+   * to `authentication`: a session route is still `guarded` (the normal
+   * adapter chain authenticates it); this only reports whether `CsrfGuard`
+   * additionally applies to it. `@AuthPublic` and `@AuthSession` on the
+   * SAME handler is a contradiction — a public route has no session to
+   * protect — and `collectRouteAudit` throws rather than resolve it for
+   * you, the same rule `public` + a grant follows in `acl` (#51).
+   */
+  readonly sessionAuth: boolean;
   /** Action granted by `AccessControlGrant`, or `null` when ungranted. */
   readonly aclAction: string | null;
   /** Resource named by the grant, when the grant declares one. */

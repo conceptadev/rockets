@@ -41,4 +41,21 @@ export interface FirebaseAuthModuleOptions
    * — only enable for high-security flows.
    */
   readonly checkRevoked?: boolean;
+  /**
+   * Opts into session-cookie auth (issue #58): when set,
+   * `FirebaseAuthModule` additionally registers `FirebaseSessionCookieAdapter`
+   * in the exported provider set (add it to the app's own `auth` chain
+   * alongside — or instead of — the bearer `FirebaseAuthAdapter`).
+   * Omit this to keep a bearer-only app completely unaffected — no
+   * session adapter is registered, no session-cookie code path runs.
+   */
+  readonly sessionCookie?: FirebaseSessionCookieConfig;
+}
+
+export interface FirebaseSessionCookieConfig {
+  /**
+   * Cookie name the adapter reads. Defaults to `'__session'` — the
+   * name Firebase Hosting's own reverse proxy also recognises.
+   */
+  readonly cookieName?: string;
 }

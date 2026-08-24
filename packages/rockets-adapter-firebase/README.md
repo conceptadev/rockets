@@ -176,6 +176,51 @@ FirebaseAuthModule.forRootAsync({
 `useClass` and `useExisting` are also supported via a
 `FirebaseAuthModuleOptionsFactory` implementation.
 
+### Session-cookie auth + CSRF (browser sessions, issue #58)
+
+For a browser session held as a cookie instead of a re-sent bearer
+token, use `FirebaseSessionCookieAdapter` alongside (not instead of)
+`FirebaseAuthAdapter` — each matches only the credential it owns:
+
+```typescript
+import {
+  FirebaseAuthAdapter,
+  FirebaseSessionCookieAdapter,
+} from '@concepta/rockets-adapter-firebase';
+import { defineAuthAdapter } from '@concepta/rockets-core';
+
+FirebaseAuthModule.forRoot({
+  firebaseApp,
+  sessionCookie: { cookieName: '__session' }, // omit to skip session auth entirely
+});
+
+RocketsModule.forRoot({
+  auth: [
+    defineAuthAdapter(FirebaseAuthAdapter),
+    defineAuthAdapter(FirebaseSessionCookieAdapter),
+  ],
+});
+```
+
+Mint the cookie once, right after the client verifies its ID token:
+
+```typescript
+@Inject(FIREBASE_TOKEN_VERIFIER_TOKEN)
+private readonly verifier: FirebaseSessionCookieVerifierInterface;
+
+const cookie = await this.verifier.createSessionCookie(idToken, {
+  expiresIn: 14 * 24 * 60 * 60 * 1000, // Firebase caps this at 14 days
+});
+// set `cookie` as an httpOnly, Secure cookie on the response
+```
+
+`FirebaseSessionCookieAdapter` is ALWAYS registered as a provider, same
+as `FirebaseAuthAdapter` — a bearer-only app that never adds it to its
+own `auth` array sees no behavior change. State-changing requests to a
+session route still need CSRF protection: pair this with `@AuthSession()`
+and `CsrfGuard` from `@concepta/rockets-core` — full pattern in
+[CONFIGURATION.md §7c](../../CONFIGURATION.md#7c-session-cookie-auth-csrf-and-the-ternary-route-policy-issue-58).
+
 ### Read the user inside a handler
 
 The adapter writes the `AuthorizedUser` onto the request the same way every
@@ -219,6 +264,7 @@ export class ProfileController {
 | Symbol | Purpose |
 |---|---|
 | `FirebaseAuthAdapter` | Implements `AuthAdapterInterface`. Returns `{ matched: false }` for non-Bearer requests; otherwise verifies and resolves the user. |
+| `FirebaseSessionCookieAdapter` | Implements `AuthAdapterInterface` over a session cookie instead of a bearer header (issue #58). Returns `{ matched: false }` when the configured cookie is absent. Always registered as a provider — an app opts in by adding it to its own `auth` chain. |
 
 ### Options
 
@@ -229,6 +275,7 @@ export class ProfileController {
 | `userResolver` | `Type<FirebaseUserResolverInterface>` | optional | Custom resolver. Default uses claims from the token only. |
 | `checkRevoked` | `boolean` (default `false`) | optional | Ask Firebase whether the token was revoked on every request. |
 | `imports` | `ModuleMetadata['imports']` | optional | Imports the module pulls in (typical use: a `ConfigModule`). |
+| `sessionCookie` | `FirebaseSessionCookieConfig` | optional | Opts into session-cookie auth (issue #58). Omit to leave `FirebaseSessionCookieAdapter` unused (still registered as a provider, but reading the default `'__session'` cookie name — harmless if never added to `auth`). |
 
 ### Interfaces
 
@@ -236,6 +283,9 @@ export class ProfileController {
 |---|---|
 | `FirebaseTokenVerifierInterface` | Contract for token verifiers. `verifyIdToken(token, options?)`. |
 | `FirebaseVerifyOptions` | `{ checkRevoked?: boolean }` passed to the verifier. |
+| `FirebaseSessionCookieVerifierInterface` | Session-cookie capability (issue #58) — a SEPARATE interface from the bearer one, so a bearer-only custom `verifier` is not forced to implement it. `verifySessionCookie(cookie, options?)`, `createSessionCookie(idToken, { expiresIn })`. |
+| `FirebaseSessionCookieOptions` | `{ expiresIn: number }` (ms) passed to `createSessionCookie`. |
+| `FirebaseSessionCookieConfig` | `{ cookieName?: string }` module option — defaults to `'__session'`. |
 | `FirebaseUserResolverInterface` | Contract for user resolvers. `resolve(decoded) → AuthorizedUser`. |
 | `FirebaseDecodedTokenInterface` | Minimal shape of a verified Firebase token (`uid`, `sub`, `email?`, `email_verified?`, `name?`, custom claims). |
 | `FirebaseAuthModuleOptions` | Options shape for `forRoot`. |
@@ -246,7 +296,7 @@ export class ProfileController {
 
 | Class | Purpose |
 |---|---|
-| `FirebaseTokenVerifierService` | Default verifier that wraps `admin.auth().verifyIdToken()`. Constructor takes the firebase-admin app. |
+| `FirebaseTokenVerifierService` | Default verifier that wraps `admin.auth()`. Implements BOTH `FirebaseTokenVerifierInterface` and `FirebaseSessionCookieVerifierInterface`. Constructor takes the firebase-admin app. |
 | `DefaultFirebaseUserResolverService` | Default resolver. Reads `uid`, `email`, `roles[]` custom claim. |
 
 ### Exceptions
@@ -257,6 +307,8 @@ export class ProfileController {
 | `FirebaseTokenInvalidException` | Bad signature, expired, wrong audience, empty token. |
 | `FirebaseTokenRevokedException` | `auth/id-token-revoked` returned by the SDK with `checkRevoked: true`. |
 | `FirebaseTokenMissingSubjectException` | Verified token has no `uid` claim. |
+| `FirebaseSessionCookieInvalidException` | Session-cookie counterpart of `FirebaseTokenInvalidException` (issue #58). |
+| `FirebaseSessionCookieRevokedException` | `auth/session-cookie-revoked` with `checkRevoked: true`. |
 
 ### Tokens
 
@@ -264,6 +316,7 @@ export class ProfileController {
 |---|---|
 | `FIREBASE_AUTH_MODULE_OPTIONS_TOKEN` | Override the options provider in advanced wiring. |
 | `FIREBASE_TOKEN_VERIFIER_TOKEN` | Replace the verifier in tests or for token caching. |
+| `FIREBASE_SESSION_COOKIE_VERIFIER_TOKEN` | Resolves the SAME instance as `FIREBASE_TOKEN_VERIFIER_TOKEN`, typed for the session-cookie capability (issue #58). |
 | `FIREBASE_USER_RESOLVER_TOKEN` | Replace the user resolver. |
 
 ### Failure mapping
