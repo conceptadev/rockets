@@ -7,7 +7,10 @@
 /* eslint-disable @darraghor/nestjs-typed/controllers-should-supply-api-tags --
  * ApiTags is applied immediately below from definition.tags (with a default).
  */
-import { classValidatorErrorsToDetails } from '../../../common/utils/validation-error-details.util';
+import {
+  attachErrorDetails,
+  classValidatorErrorsToDetails,
+} from '../../../common/utils/validation-error-details.util';
 import {
   AccessControlGrant,
   AccessControlQuery,
@@ -44,11 +47,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
-import {
-  getMetadataStorage,
-  validate,
-  type ValidationError,
-} from 'class-validator';
+import { getMetadataStorage, validate } from 'class-validator';
 
 import { AuthUser } from '../../../common/auth/auth-user.decorator';
 import type { AuthorizedUser } from '../../../domain/interfaces/auth-user.interface';
@@ -219,9 +218,9 @@ async function resolveOperationParams(
  * details to the flattened strings this 400 body has always carried.
  */
 function flattenConstraintMessages(
-  errors: readonly ValidationError[],
+  details: ReturnType<typeof classValidatorErrorsToDetails>,
 ): string[] {
-  return classValidatorErrorsToDetails(errors).map((detail) =>
+  return details.map((detail) =>
     detail.path.length > 1
       ? `${detail.path.join('.')}: ${detail.message}`
       : detail.message,
@@ -252,14 +251,18 @@ async function validateAndWhitelistDto(
     skipMissingProperties,
   });
   if (errors.length) {
-    throw new BadRequestException({
-      statusCode: 400,
-      // Recursive: a @ValidateNested failure carries its constraints in
-      // `children`, not on the root — flattening only the top level
-      // produced a 400 with `message: []`, telling the client nothing.
-      message: flattenConstraintMessages(errors),
-      error: 'Bad Request',
-    });
+    const details = classValidatorErrorsToDetails(errors);
+    throw attachErrorDetails(
+      new BadRequestException({
+        statusCode: 400,
+        // Recursive: a @ValidateNested failure carries its constraints in
+        // `children`, not on the root — flattening only the top level
+        // produced a 400 with `message: []`, telling the client nothing.
+        message: flattenConstraintMessages(details),
+        error: 'Bad Request',
+      }),
+      details,
+    );
   }
   return instanceToPlain(instance as object);
 }
