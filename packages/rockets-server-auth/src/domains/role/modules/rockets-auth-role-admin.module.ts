@@ -35,11 +35,6 @@ function operationExtraDecorators(
   return { extraDecorators: [applyDecorators(...decorators)] };
 }
 
-/**
- * Build the operations array for the admin/roles CRUD resource. Each
- * operation honors per-route extras (`decorators`, `handler`) supplied by
- * the consumer.
- */
 function buildOperations(
   createDto: Type<object>,
   updateDto: Type<object>,
