@@ -50,14 +50,11 @@ export function compileZodCore(input: ZodCoreInput): CompiledZodCore {
   // Declaring an override on an operation left out of `operations` is
   // not reachable: any config object enables its operation.
   const overrides = resolveOperationOverrides(name, ops);
-  const overrideDto = (
-    op: ZodCrudOperation,
-    kind: 'Input' | 'Output',
-  ): Type<object> | undefined => {
-    const schema = overrides[op]?.[kind === 'Input' ? 'input' : 'output'];
+  const overrideDto = (op: ZodCrudOperation): Type<object> | undefined => {
+    const schema = overrides[op]?.output;
     return schema === undefined
       ? undefined
-      : compileDtoClass(schema, `${name}${pascal(op)}${kind}Dto`);
+      : compileDtoClass(schema, `${name}${pascal(op)}OutputDto`);
   };
 
   const ownerColumns = resolveOwnerColumns(schema, name, input.owner);
@@ -117,23 +114,34 @@ export function compileZodCore(input: ZodCoreInput): CompiledZodCore {
     `${name}ResponseDto`,
     responseNested,
   );
-  const create = enabled('create')
-    ? overrideDto('create', 'Input') ??
-      compileDtoClass(z.object(projections.create), `${name}CreateDto`)
-    : undefined;
-  const update = enabled('update')
-    ? overrideDto('update', 'Input') ??
-      compileDtoClass(z.object(projections.update), `${name}UpdateDto`)
-    : undefined;
-  const replace = enabled('replace')
-    ? overrideDto('replace', 'Input') ??
-      compileDtoClass(z.object(projections.create), `${name}ReplaceDto`)
-    : undefined;
+  // One path for every request-body DTO: pick the schema (override wins
+  // over the derived projection), then apply `strictInput` to WHICHEVER
+  // won — a flag that only worked on one of the two sources would be
+  // the half-fix this repo keeps re-learning to avoid.
+  const inputDto = (
+    op: 'create' | 'update' | 'replace',
+    fallback: Record<string, z.ZodType>,
+    derivedName: string,
+  ): Type<object> | undefined => {
+    if (!enabled(op)) return undefined;
+    const override = overrides[op]?.input;
+    const schema = override ?? z.object(fallback);
+    const effective =
+      overrides[op]?.strictInput === true ? schema.strict() : schema;
+    return compileDtoClass(
+      effective,
+      override !== undefined ? `${name}${pascal(op)}InputDto` : derivedName,
+    );
+  };
+
+  const create = inputDto('create', projections.create, `${name}CreateDto`);
+  const update = inputDto('update', projections.update, `${name}UpdateDto`);
+  const replace = inputDto('replace', projections.create, `${name}ReplaceDto`);
 
   // Per-operation response override; falls back to the single projected
   // response DTO the whole resource shares.
   const responseFor = (op: ZodCrudOperation): Type<object> =>
-    overrideDto(op, 'Output') ?? response;
+    overrideDto(op) ?? response;
 
   const operations: ResourceOperationsObject = {
     ...(enabled('list')
@@ -225,13 +233,27 @@ function resolveOperationOverrides(
 
   for (const op of ALL_OPERATIONS) {
     const config = opConfig(ops[op]);
-    const { input, output } = config;
-    if (input === undefined && output === undefined) continue;
+    const { input, output, strictInput } = config;
+    if (
+      input === undefined &&
+      output === undefined &&
+      strictInput === undefined
+    )
+      continue;
 
     if (input !== undefined && !BODY_OPERATIONS.has(op)) {
       throw new Error(
         `[zodResource] "${name}" declares an \`input\` schema on "${op}", ` +
           'which has no request body. Only create/update/replace accept one.',
+      );
+    }
+    // Only `true` is rejected: an explicit `strictInput: false` (e.g. a
+    // computed flag) is a no-op opt-out, not a config mistake.
+    if (strictInput === true && !BODY_OPERATIONS.has(op)) {
+      throw new Error(
+        `[zodResource] "${name}" declares \`strictInput\` on "${op}", ` +
+          'which has no request body to be strict about. Only ' +
+          'create/update/replace accept it.',
       );
     }
     // `returnDeleted` alone decides the status: upstream `CrudDelete`
@@ -262,7 +284,7 @@ function resolveOperationOverrides(
       }
     }
 
-    resolved[op] = { input, output };
+    resolved[op] = { input, output, strictInput };
   }
 
   return resolved;

@@ -695,6 +695,25 @@ Rules worth knowing:
   `returnDeleted` applies to a **hard** delete too — upstream sets the
   status from that flag alone, so `delete: { returnDeleted: true }` with
   an `output` is a valid shape without `soft: true`.
+- `strictInput: true` rejects unknown **top-level** body keys with `400`
+  (naming the keys) instead of silently stripping them (issue #79). It
+  applies to whichever input schema is in effect — the derived
+  projection or an `input` override. Nested objects still strip: zod's
+  `.strict()` does not recurse. Server-owned fields the projection
+  excludes (`id`, timestamps, `version`, owner columns) are _rejected_
+  under strict, so a client cannot echo a fetched row back into
+  `replace` — an owner-column spoof gets named instead of silently
+  overwritten. The OpenAPI schema gains `additionalProperties: false`
+  once the document passes through `nestjs-zod`'s `cleanupOpenApiDoc`
+  (see `examples/sample-server/src/main.ts`); a raw document does not
+  show it. Core's own `SwaggerUiModule` does **not** run that cleanup —
+  the main entry stays zod-free — so the app's bootstrap must call it,
+  or generated clients will not learn the strict contract and only find
+  out via `400` at runtime. The runtime rejection itself needs no
+  cleanup; only the documented schema does. On an override,
+  `input: z.object({...}).strict()` is the equivalent spelling. Opt-in
+  per operation — stripping stays the default. Only valid on
+  `create` / `update` / `replace`.
 
 #### Capability matrix (meta → layers)
 

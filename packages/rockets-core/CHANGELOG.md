@@ -9,6 +9,10 @@
 
 ### Added
 
+- **`strictInput` on zodResource body operations (issue #79).** Opt-in per-op
+  flag that rejects unknown top-level JSON keys with `400` instead of silently
+  stripping them. It applies to the derived input projection or an `input`
+  override, and is only valid on `create`, `update`, and `replace`.
 - **`operationResource` (issue #43 / #50).** Typed non-CRUD endpoints beside
   `zodResource`: Zod input/output → DTO + OpenAPI, generated Nest controller,
   auth/`public`, optional `transactional`, function or injectable `handle`

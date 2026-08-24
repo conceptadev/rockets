@@ -7,6 +7,18 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Added
 
+- **`strictInput` on zodResource body operations (issue #79).** Opt-in
+  per-op flag that rejects unknown **top-level** JSON keys with `400`
+  naming the offending keys, instead of the default silent stripping
+  (nested objects still strip — zod's `.strict()` does not recurse). It
+  applies to whichever input schema is in effect — the derived create /
+  update projection or an `input` override. Fields the projection
+  excludes (`id`, timestamps, `version`, owner columns) are rejected
+  under strict, so read-modify-write clients must strip server-owned
+  keys. With `nestjs-zod`'s `cleanupOpenApiDoc` applied to the document,
+  the schema gains `additionalProperties: false`. Declaring the flag on
+  an operation with no request body fails at definition time.
+
 - **Structured `details` and typed `request` on the error serializer
   context (issue #55 residuals).** Validation `400`s minted by Rockets
   now hand the serializer `details: [{ path, message }]` — path as an

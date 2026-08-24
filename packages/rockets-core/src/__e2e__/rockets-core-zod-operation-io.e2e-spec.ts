@@ -40,6 +40,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { cleanupOpenApiDoc } from 'nestjs-zod';
 import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
 import { getDynamicRepositoryToken } from '@concepta/nestjs-repository';
 import request from 'supertest';
@@ -210,7 +211,7 @@ const articleResource = zodResource({
         // Narrower than the derived projection: `authorNote` must not
         // appear on the collection route.
         list: { output: z.object({ id: z.uuid(), text: z.string() }) },
-        create: { input: z.object({ text: z.string() }) },
+        create: { input: z.object({ text: z.string() }), strictInput: true },
       },
     }),
   },
@@ -228,6 +229,89 @@ const derivedResource = zodResource({
   path: 'deriveds',
   tags: ['Deriveds'],
   operations: ['list', 'read', 'create'],
+});
+
+// ── strictInput (issue #79): unknown keys become 400, not silence ──
+
+@Entity('io_strict')
+class StrictEntity {
+  @PrimaryGeneratedColumn('uuid') id!: string;
+  @Column({ type: 'varchar' }) label!: string;
+  @Column({ type: 'varchar', nullable: true }) note?: string;
+}
+
+const strictSchema = baseEntity({
+  label: f.string(),
+  note: f.string().optional(),
+});
+
+const strictResource = zodResource({
+  name: 'Strict',
+  schema: strictSchema,
+  entity: StrictEntity,
+  path: 'stricts',
+  tags: ['Stricts'],
+  operations: {
+    list: true,
+    read: true,
+    // Derived projection + strictInput: the flag must work without an
+    // `input` override, or every strict consumer re-declares the schema
+    // the projection already derived — the duplication #79 files against.
+    create: { strictInput: true },
+    // Override + strictInput: the flag applies to WHICHEVER schema wins.
+    update: {
+      input: z.object({ label: z.string() }),
+      strictInput: true,
+    },
+    // Replace deliberately NOT strict: the default keeps stripping, so
+    // one resource can mix both contracts and the flag stays per-op.
+    replace: true,
+  },
+});
+
+/**
+ * The shapes the first fixture leaves open: strict REPLACE (shares the
+ * create projection — the echo-back case), strict derived UPDATE (the
+ * partial projection), and a nested override pinning that `.strict()`
+ * is top-level only.
+ */
+@Entity('io_strict_echo')
+class StrictEchoEntity {
+  @PrimaryGeneratedColumn('uuid') id!: string;
+  @Column({ type: 'varchar' }) label!: string;
+  @Column({ type: 'varchar', nullable: true }) meta?: string;
+}
+
+// `nullish`, not `optional`: the nullable column echoes back as
+// `meta: null`, which must round-trip through the input schema so the
+// strict-replace test's 400 is attributable to `.strict()` alone.
+const strictEchoSchema = baseEntity({
+  label: f.string(),
+  meta: f.string().nullish(),
+});
+
+const strictEchoResource = zodResource({
+  name: 'StrictEcho',
+  schema: strictEchoSchema,
+  entity: StrictEchoEntity,
+  path: 'strict-echoes',
+  tags: ['StrictEchoes'],
+  operations: {
+    read: true,
+    create: {
+      // Nested object in an override under strict: zod's `.strict()`
+      // applies to the TOP level only — `bogus` inside `nested` is
+      // stripped, not rejected. Pinned so the doc's "top-level only"
+      // caveat is a tested fact, not a guess.
+      input: z.object({
+        label: z.string(),
+        nested: z.object({ a: z.string() }).optional(),
+      }),
+      strictInput: true,
+    },
+    update: { strictInput: true },
+    replace: { strictInput: true },
+  },
 });
 
 // ── Class-path resource (same feature, DTO classes instead of schemas) ──
@@ -274,7 +358,14 @@ describe('zodResource per-operation input/output (e2e)', () => {
         TypeOrmModule.forRoot({
           type: 'sqlite',
           database: ':memory:',
-          entities: [ArticleEntity, CommentEntity, DerivedEntity, WidgetEntity],
+          entities: [
+            ArticleEntity,
+            CommentEntity,
+            DerivedEntity,
+            WidgetEntity,
+            StrictEntity,
+            StrictEchoEntity,
+          ],
           synchronize: true,
           dropSchema: true,
         }),
@@ -283,7 +374,13 @@ describe('zodResource per-operation input/output (e2e)', () => {
           auth: defineAuthAdapter(StubAuthAdapter),
           providers: [StubAuthAdapter],
           repository: TypeOrmRepositoryModule,
-          resources: [articleResource, derivedResource, widgetResource],
+          resources: [
+            articleResource,
+            derivedResource,
+            widgetResource,
+            strictResource,
+            strictEchoResource,
+          ],
           global: true,
         }),
       ],
@@ -437,6 +534,36 @@ describe('zodResource per-operation input/output (e2e)', () => {
   });
 
   describe('OpenAPI', () => {
+    // F1 from review: the "additionalProperties: false" claim is only
+    // true AFTER `cleanupOpenApiDoc` lifts nestjs-zod's per-property
+    // marker onto the object schema. Core's SwaggerUiService does not
+    // call it, so the docs must name the step — and this asserts both
+    // halves: the marker exists raw, and the cleanup produces the real
+    // keyword. If either half changes upstream, this fails loudly.
+    it('strict DTOs gain additionalProperties: false once the document is cleaned', () => {
+      const rawDoc = SwaggerModule.createDocument(
+        app,
+        new DocumentBuilder().setTitle('io').build(),
+      );
+      const cleaned = cleanupOpenApiDoc(
+        rawDoc as Parameters<typeof cleanupOpenApiDoc>[0],
+      );
+      const schemas = (cleaned.components?.schemas ?? {}) as Record<
+        string,
+        { additionalProperties?: unknown }
+      >;
+      expect(schemas.StrictCreateDto?.additionalProperties).toBe(false);
+      // The flag must reach BOTH input sources: the derived projection
+      // above and an `input` override (a strict `.strict()` applied to
+      // the schema the author supplied).
+      expect(schemas.StrictEchoCreateInputDto?.additionalProperties).toBe(
+        false,
+      );
+      // A non-strict DTO must NOT gain the keyword — the flag stays
+      // per-operation, not document-wide.
+      expect(schemas.DerivedCreateDto?.additionalProperties).toBeUndefined();
+    });
+
     it('registers the override DTOs as named components', () => {
       expect(components).toHaveProperty('ArticleCreateInputDto');
       expect(components).toHaveProperty('ArticleListOutputDto');
@@ -474,6 +601,19 @@ describe('zodResource per-operation input/output (e2e)', () => {
 
       const [first] = res.body.data;
       expect(Object.keys(first).sort()).toEqual(['id', 'text']);
+    });
+
+    // `compileZodCore` has two callers; `zodResource` alone passing does
+    // not prove `zodSubResource` applies `strictInput` too.
+    it('applies strictInput on the sub-resource create', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/articles/${articleId}/comments`)
+        .set('Authorization', 'Bearer u1')
+        .send({ text: 'ok', smuggled: true })
+        .expect(400);
+      expect(JSON.stringify(res.body.message)).toMatch(
+        /Unrecognized key.*smuggled/,
+      );
     });
 
     it('registers the sub-resource override components', () => {
@@ -518,6 +658,131 @@ describe('zodResource per-operation input/output (e2e)', () => {
         properties: Record<string, unknown>;
       };
       expect(Object.keys(card.properties).sort()).toEqual(['id', 'name']);
+    });
+  });
+
+  describe('strictInput — unknown create keys are rejected, not stripped (#79)', () => {
+    it('400s the exact repro: a declared key plus an unknown one', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/stricts')
+        .set('Authorization', 'Bearer u1')
+        .send({ label: 'x', unexpected: 1 })
+        .expect(400);
+
+      // The field map names the offending key — a bare 400 would also be
+      // satisfied by a missing-required error and prove nothing.
+      expect(JSON.stringify(res.body.message)).toMatch(/unexpected/);
+    });
+
+    it('still accepts a body with only declared keys', async () => {
+      await request(app.getHttpServer())
+        .post('/stricts')
+        .set('Authorization', 'Bearer u1')
+        .send({ label: 'clean', note: 'fine' })
+        .expect(201);
+    });
+
+    it('applies to an input override on the same resource', async () => {
+      const created = await request(app.getHttpServer())
+        .post('/stricts')
+        .set('Authorization', 'Bearer u1')
+        .send({ label: 'target' })
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .patch(`/stricts/${created.body.id}`)
+        .set('Authorization', 'Bearer u1')
+        .send({ label: 'renamed', sneaky: true })
+        .expect(400);
+    });
+
+    it('a non-strict op on the same resource keeps the stripping default', async () => {
+      const created = await request(app.getHttpServer())
+        .post('/stricts')
+        .set('Authorization', 'Bearer u1')
+        .send({ label: 'loose' })
+        .expect(201);
+
+      const res = await request(app.getHttpServer())
+        .put(`/stricts/${created.body.id}`)
+        .set('Authorization', 'Bearer u1')
+        .send({ label: 'replaced', extra: 'dropped' })
+        .expect(200);
+      expect(res.body).not.toHaveProperty('extra');
+    });
+
+    // F2 from review: strict rejects keys the SCHEMA declares but the
+    // projection excludes. The idiomatic read-modify-write — GET a row,
+    // PUT it back — now 400s, because `id`/`dateCreated`/`dateUpdated`
+    // are response-only. Runtime-proved, not inferred from the
+    // projection code.
+    it('rejects an echoed-back row on strict replace (server-owned keys)', async () => {
+      const created = await request(app.getHttpServer())
+        .post('/strict-echoes')
+        .set('Authorization', 'Bearer u1')
+        .send({ label: 'echo' })
+        .expect(201);
+
+      // The echoed row carries `meta: null` (nullable column) — the
+      // schema's `nullish` accepts it, so the 400 below can only come
+      // from `.strict()` naming the server-owned keys.
+      const row = await request(app.getHttpServer())
+        .get(`/strict-echoes/${created.body.id}`)
+        .set('Authorization', 'Bearer u1')
+        .expect(200);
+      expect(row.body).toMatchObject({ label: 'echo', meta: null });
+
+      const res = await request(app.getHttpServer())
+        .put(`/strict-echoes/${created.body.id}`)
+        .set('Authorization', 'Bearer u1')
+        .send(row.body)
+        .expect(400);
+      expect(JSON.stringify(res.body.message)).toMatch(/Unrecognized key.*id/);
+    });
+
+    it('applies strict to the derived partial update projection', async () => {
+      const created = await request(app.getHttpServer())
+        .post('/strict-echoes')
+        .set('Authorization', 'Bearer u1')
+        .send({ label: 'patchme' })
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .patch(`/strict-echoes/${created.body.id}`)
+        .set('Authorization', 'Bearer u1')
+        .send({ label: 'renamed', sneaky: 1 })
+        .expect(400);
+
+      await request(app.getHttpServer())
+        .patch(`/strict-echoes/${created.body.id}`)
+        .set('Authorization', 'Bearer u1')
+        .send({ label: 'renamed' })
+        .expect(200);
+    });
+
+    // Zod's `.strict()` is TOP-LEVEL only: an unknown key inside a
+    // nested object is stripped, not rejected. This pins the documented
+    // caveat; if zod ever goes deep-strict, this test says so loudly.
+    it('does not reject unknown keys inside nested objects (top-level only)', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/strict-echoes')
+        .set('Authorization', 'Bearer u1')
+        .send({ label: 'nested', nested: { a: 'ok', bogus: 1 } })
+        .expect(201);
+      expect(res.body).toBeDefined();
+    });
+
+    it('rejects strictInput on an operation with no request body', () => {
+      expect(() =>
+        zodResource({
+          name: 'StrictMisuse',
+          schema: strictSchema,
+          entity: StrictEntity,
+          path: 'strict-misuse',
+          tags: ['StrictMisuse'],
+          operations: { list: true, read: { strictInput: true } },
+        }),
+      ).toThrow(/strictInput.*"read".*no request body/);
     });
   });
 });
