@@ -1,5 +1,4 @@
 import { vi } from 'vitest';
-import { RocketsAuthExceptionsFilter } from '../../shared/compatibility/rockets-auth-exceptions.filter';
 import { EmailSendInterface } from '@concepta/nestjs-common';
 import type { AuthenticationStrategiesSettingsInterface } from '@concepta/nestjs-authentication';
 import { EventModule } from '@concepta/nestjs-event';
@@ -16,7 +15,11 @@ import { HttpAdapterHost } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RocketsModule } from '@concepta/rockets';
-import type { AuthBootstrap } from '@concepta/rockets-core';
+import {
+  RocketsCoreExceptionsFilter,
+  type AuthBootstrap,
+  type RocketsErrorSerializerInterface,
+} from '@concepta/rockets-core';
 import { ormConfig } from '../../__fixtures__/ormconfig.fixture';
 import { InvitationEntityFixture } from '../../__fixtures__/invitation/invitation.entity.fixture';
 import { UserOtpEntityFixture } from '../../__fixtures__/user/user-otp-entity.fixture';
@@ -262,9 +265,14 @@ export async function createRocketsAuthStandardE2eTestingModule(
   }).compile();
 }
 
-export function applyRocketsAuthE2eAppGlobals(app: INestApplication): void {
-  const exceptionsFilter = app.get(HttpAdapterHost);
-  app.useGlobalFilters(new RocketsAuthExceptionsFilter(exceptionsFilter));
+export function applyRocketsAuthE2eAppGlobals(
+  app: INestApplication,
+  serializer?: RocketsErrorSerializerInterface,
+): void {
+  const httpAdapterHost = app.get(HttpAdapterHost);
+  app.useGlobalFilters(
+    new RocketsCoreExceptionsFilter(httpAdapterHost, serializer),
+  );
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,

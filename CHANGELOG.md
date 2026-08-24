@@ -7,6 +7,15 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Added
 
+- **Auth apps now get the same error details as core/server apps (issue #87).**
+  `rockets-server-auth`'s internal compatibility filter never read the
+  structured `details` a validation error carries and had no way to plug
+  in a custom serializer — so an app built only on `rockets-server-auth`
+  missed out on the error-details feature (#55) that core/server apps
+  already had. That filter is gone; auth apps now use the same
+  `RocketsCoreExceptionsFilter` as everyone else, so `details` reach them
+  too. (The removed filter was internal-only — it was never part of the
+  package's public exports.)
 - **`strictInput` on zodResource body operations (issue #79).** Opt-in
   per-op flag that rejects unknown **top-level** JSON keys with `400`
   naming the offending keys, instead of the default silent stripping
