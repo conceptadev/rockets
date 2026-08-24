@@ -476,6 +476,7 @@ before it is serialized:
 ```typescript
 import { Body, Controller, Post } from '@nestjs/common';
 import {
+  allowStandardSchemaKeys,
   createStandardSchemaDto,
   createStandardSchemaResponseDto,
 } from '@concepta/rockets-core/standard-schema';
@@ -486,6 +487,8 @@ const createPetSchema = z.object({ name: z.string().trim().min(1) });
 const petResponseSchema = z.object({ id: z.string(), name: z.string() });
 
 class CreatePetDto extends createStandardSchemaDto(createPetSchema) {}
+allowStandardSchemaKeys(CreatePetDto);
+
 class PetResponseDto extends createStandardSchemaResponseDto(
   petResponseSchema,
 ) {}
@@ -506,6 +509,57 @@ capability, or the Swagger document factory must receive a compatible custom
 converter. Wrap custom converters with `withStandardSchemaResponseArrays`
 when an `isArray: true` response must retain its array shape on the current
 Swagger alpha.
+
+Prefer `operationResource` for a hand-written JSON endpoint — the
+generated path validates internally and none of the pipe hazards below
+apply to it. This subpath exists for surfaces the generators cannot
+produce yet (streaming, SSE, file routes — #52, #86).
+
+**The whitelist trap (issue #83).** A schema-carrying DTO has no
+class-validator metadata, so a global
+`ValidationPipe({ whitelist: true })` — yours or any library's — strips
+every property AFTER the schema already validated the body: the handler
+receives `{}` with a success status. Two escapes, pick per situation:
+
+- **Escape 0 — no DTO metatype at all.** `@Body({ schema: MyDto.schema })
+  dto: MyBodyType` with a TYPE alias: the alias emits `Object` into the
+  reflected param types, which every whitelist pipe skips, and the route
+  metadata carries the schema explicitly. `examples/sample-server` uses
+  this idiom today. Safe, but easy to break by switching the annotation
+  to a class.
+- `allowStandardSchemaKeys(MyDto)` stamps `@Allow()` on each declared
+  key, so the DTO survives ANYONE's whitelist pipe. The stamp is
+  SURVIVAL, not validation: the body is only checked where a schema
+  pipe is registered — without one, the raw body reaches the handler. Rockets'
+  `compileDtoClass` output ships stamped. Limits, stated: only closed
+  object schemas can be stamped — unions, intersections, non-object
+  schemas have no introspectable key set (pass `keys` explicitly if the
+  top-level keys really are fixed), and an OPEN object
+  (`catchall`/`passthrough`) is refused outright, because a stamp would
+  let the whitelist strip keys the schema itself declares valid.
+- `StandardSchemaAwareValidationPipe` is Nest's `ValidationPipe` that
+  VALIDATES schema-carrying metatypes with their schema — standalone
+  use is safe and unknown keys are stripped by the schema itself.
+  Register EXACTLY ONE schema validator per route: pairing it with
+  `StandardSchemaModule` parses twice, and a transforming schema
+  (`z.coerce`, `.transform()`) is not idempotent — the second parse
+  corrupts or rejects the first's output. `transform` and
+  `errorHttpStatusCode` apply to both DTO kinds; `whitelist` /
+  `forbidNonWhitelisted` / `exceptionFactory` affect class-validator
+  DTOs only. It rejects, loudly, a DTO carrying BOTH a schema and
+  class-validator constraints — two validators with no defined winner.
+  It protects only apps that use it; the stamp protects against pipes
+  you do not control. Generated DTOs from OPEN schemas carry declared
+  keys only — reused under a foreign whitelist pipe, catchall keys are
+  stripped there.
+- Two lookups with opposite contracts, on purpose:
+  `getCarriedStandardSchema` answers "does this class carry a schema?"
+  (`undefined` when not); `getStandardSchema` serves the branded DTO
+  factories and THROWS on anything else.
+
+The DTO pipe recognises any class whose static `schema` is a Standard
+Schema — bare `nestjs-zod` `createZodDto` classes included, not only
+Rockets-branded ones.
 
 The DTO-aware pipe can infer request validation from `@Body()`, `@Query()`, and
 whole-object `@Param()` types. To include that request schema in generated
