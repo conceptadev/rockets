@@ -74,8 +74,10 @@ export interface RocketsErrorContext {
    * The request being answered, in the same transport-agnostic shape
    * `operationResource` handlers already receive — typed `headers` /
    * `params` / `query`, `raw` as the documented escape hatch. This is
-   * what a serializer builds a correlation id or a `Retry-After` from
-   * without forking the filter.
+   * what a serializer builds a correlation id from without forking the
+   * filter. A serializer returns a BODY only — there is no response
+   * seam here, so setting headers (e.g. `Retry-After`) still requires
+   * the app's own filter or interceptor.
    */
   readonly request?: OperationRequest;
 }

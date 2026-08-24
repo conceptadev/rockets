@@ -460,7 +460,10 @@ envelope is unchanged; opt in with the exported
 `context.request` carries the request in the same typed shape operation
 handlers receive (`headers` / `params` / `query` / `raw`) — treat `raw`
 like `OperationRequest.raw`: an escape hatch, never something to
-`JSON.stringify` (circular on Express). Reach, stated plainly: this
+`JSON.stringify` (circular on Express). `headers` includes whatever the
+client sent — `authorization` and `cookie` too — so never log or echo
+the whole context from a serializer; read the specific fields you need.
+Reach, stated plainly: this
 flows through `RocketsCoreExceptionsFilter` (core / server apps);
 `@concepta/rockets-auth` apps use a compatibility filter without a
 serializer seam and get none of it yet (#87). A `400` minted by the
@@ -470,10 +473,13 @@ Three helpers are exported for app code. `attachErrorDetails(exception,
 details)` puts findings on YOUR exception (a hook rejecting a write, a
 guard) so they flow to the serializer like Rockets' own — it no-ops on
 an empty list and on a frozen exception, and never touches the response
-payload. `readErrorDetails(exception)` is the validated read (malformed
-entries are rejected, not laundered into the typed contract).
-`classValidatorErrorsToDetails(errors)` converts a class-validator error
-tree, children included, into detail entries. Opting the default body
+payload. `readErrorDetails(exception)` is the validated read — a carried list
+with ANY malformed entry is dropped as a whole, not partially laundered
+into the typed contract. `classValidatorErrorsToDetails(errors)`
+converts a class-validator error tree, children included, into detail
+entries, and `standardSchemaIssuesToDetails(issues)` does the same for
+Standard Schema issues — the pair to reach for when supplying your own
+`exceptionFactory`. Opting the default body
 in is one provider:
 
 ```typescript

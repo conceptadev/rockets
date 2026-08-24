@@ -124,6 +124,7 @@ export {
   readErrorDetails,
   classValidatorErrorsToDetails,
 } from './common/utils/validation-error-details.util';
+export { standardSchemaIssuesToDetails } from './common/utils/standard-schema.util';
 export type {
   RocketsErrorContext,
   RocketsErrorSerializerInterface,

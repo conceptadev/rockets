@@ -6,6 +6,10 @@ import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { RuntimeException } from '@concepta/nestjs-core';
 import request from 'supertest';
 import { ExceptionsFilter, ERROR_MESSAGE_FALLBACK } from './exceptions.filter';
+import {
+  attachErrorDetails,
+  detailedErrorSerializer,
+} from '@concepta/rockets-core';
 
 class TestRuntimeException extends RuntimeException {
   constructor(
@@ -104,6 +108,32 @@ class TestErrorController {
         },
       ],
     };
+    throw err;
+  }
+
+  @Get('validation-errors-attached')
+  @ApiOkResponse({ description: 'Always throws — test route' })
+  validationErrorsAttached(): never {
+    // Both channels on one exception: a symbol payload from
+    // attachErrorDetails AND context.validationErrors. The filter must
+    // keep the app's explicit attachment, not clobber it with the
+    // derived class-validator details.
+    const err = new TestRuntimeException(
+      { message: 'Validation failed' },
+      'VALIDATION_ERR',
+    );
+    err.context = {
+      ...err.context,
+      validationErrors: [
+        {
+          property: 'name',
+          constraints: { isNotEmpty: 'name should not be empty' },
+        },
+      ],
+    };
+    attachErrorDetails(err, [
+      { path: ['name'], message: 'app-attached finding' },
+    ]);
     throw err;
   }
 
@@ -215,5 +245,64 @@ describe('ExceptionsFilter (e2e)', () => {
     expect(response.body.statusCode).toBe(500);
     expect(response.body.errorCode).toBe('ERROR_CODE_UNKNOWN');
     expect(response.body.message).toBe(ERROR_MESSAGE_FALLBACK);
+  });
+});
+
+describe('ExceptionsFilter with detailedErrorSerializer (e2e)', () => {
+  let app: INestApplication;
+
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({
+      controllers: [TestErrorController],
+    }).compile();
+
+    app = moduleRef.createNestApplication();
+
+    const httpAdapterHost = app.get(HttpAdapterHost);
+    app.useGlobalFilters(
+      new ExceptionsFilter(httpAdapterHost, detailedErrorSerializer),
+    );
+
+    await app.init();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  // The filter's context.validationErrors → details derivation has no
+  // other observer: the default serializer never emits details, so
+  // without this test the whole derivation could be deleted and the
+  // suite would stay green.
+  it('derives details from context.validationErrors', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/test-errors/validation-errors')
+      .expect(400);
+
+    expect(response.body.details).toEqual([
+      { path: ['name'], message: 'name should not be empty' },
+    ]);
+  });
+
+  it('keeps app-attached details over the derived ones', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/test-errors/validation-errors-attached')
+      .expect(400);
+
+    expect(response.body.details).toEqual([
+      { path: ['name'], message: 'app-attached finding' },
+    ]);
+    // The message channel still flattens the validation errors.
+    expect(response.body.message).toEqual(
+      expect.arrayContaining(['name should not be empty']),
+    );
+  });
+
+  it('masks details on a 5xx', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/test-errors/runtime-500-with-safe')
+      .expect(500);
+
+    expect(response.body.details).toBeUndefined();
   });
 });

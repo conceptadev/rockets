@@ -12,8 +12,10 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
   now hand the serializer `details: [{ path, message }]` — path as an
   array of segments, one entry per unrecognized strict key — and every
   error passing through `RocketsCoreExceptionsFilter` hands it `request`
-  in the same typed shape operation handlers receive, so correlation ids
-  and `Retry-After` no longer require forking the filter. Details ride
+  in the same typed shape operation handlers receive, so a correlation
+  id in the body no longer requires forking the filter (serializers
+  return a body only — response headers such as `Retry-After` remain
+  out of reach until a response seam exists). Details ride
   the exception under a symbol, never the response payload — an app
   without the filter sees the unchanged Nest body (pinned by a test).
   The default envelope body is byte-shape unchanged;

@@ -168,7 +168,11 @@ export class RocketsCoreExceptionsFilter implements ExceptionFilter {
       isValidationErrorList(exception.context?.validationErrors)
     ) {
       message = flattenValidationErrors(exception.context.validationErrors);
-      details = classValidatorErrorsToDetails(
+      // App-attached details win: an exception can carry BOTH a symbol
+      // payload (attachErrorDetails) and `context.validationErrors`, and
+      // deriving over the explicit attachment would silently discard the
+      // app's findings.
+      details ??= classValidatorErrorsToDetails(
         exception.context.validationErrors,
       );
       statusCode = 400;

@@ -3,6 +3,7 @@ import type { StandardSchemaV1 } from '@standard-schema/spec';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 
+import { readErrorDetails } from '../common/utils/validation-error-details.util';
 import { createStandardSchemaDto } from './create-standard-schema-dto';
 import { StandardSchemaDtoValidationPipe } from './standard-schema-dto-validation.pipe';
 
@@ -86,6 +87,37 @@ describe(StandardSchemaDtoValidationPipe.name, () => {
     await expect(
       pipe.transform({ name: '', price: -1 }, bodyMetadata),
     ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  // The details factory is the PIPE's default, not the module's: a
+  // directly-constructed instance (`@UsePipes(new ...())`) must carry
+  // structured details too, not only the module-registered one.
+  it('attaches structured details when constructed directly', async () => {
+    const pipe = new StandardSchemaDtoValidationPipe();
+
+    const thrown = await pipe
+      .transform({ name: '', price: -1 }, bodyMetadata)
+      .then(
+        () => undefined,
+        (error: unknown) => error,
+      );
+
+    expect(thrown).toBeInstanceOf(BadRequestException);
+    expect(readErrorDetails(thrown as object)).toEqual([
+      expect.objectContaining({ path: ['name'] }),
+      expect.objectContaining({ path: ['price'] }),
+    ]);
+  });
+
+  it('lets a caller-supplied exceptionFactory win over the default', async () => {
+    class CustomError extends Error {}
+    const pipe = new StandardSchemaDtoValidationPipe({
+      exceptionFactory: () => new CustomError('custom'),
+    });
+
+    await expect(
+      pipe.transform({ name: '', price: -1 }, bodyMetadata),
+    ).rejects.toBeInstanceOf(CustomError);
   });
 
   it('passes values without an explicit or DTO-carried schema through', async () => {

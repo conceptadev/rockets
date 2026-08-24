@@ -3244,6 +3244,12 @@
         "signature": "export declare function resolveRelationTarget(entry: ResourceRelationEntry): EntityConstructor;"
       },
       {
+        "name": "standardSchemaIssuesToDetails",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function standardSchemaIssuesToDetails(issues: ReadonlyArray<StandardSchemaV1.Issue>): Array<{\n    path: (string | number)[];\n    message: string;\n}>;"
+      },
+      {
         "name": "stripUndefined",
         "kind": "function",
         "runtime": true,
@@ -3285,7 +3291,7 @@
         "name": "StandardSchemaDtoValidationPipe",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class StandardSchemaDtoValidationPipe extends StandardSchemaValidationPipe {\n    transform<T = unknown>(value: T, metadata: ArgumentMetadata): Promise<T>;\n}"
+        "signature": "export declare class StandardSchemaDtoValidationPipe extends StandardSchemaValidationPipe {\n    constructor(options?: StandardSchemaValidationPipeOptions);\n    transform<T = unknown>(value: T, metadata: ArgumentMetadata): Promise<T>;\n}"
       },
       {
         "name": "StandardSchemaModule",

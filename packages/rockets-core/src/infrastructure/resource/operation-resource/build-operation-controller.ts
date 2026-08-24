@@ -151,13 +151,19 @@ async function applyInputDto(
     return validateAndWhitelistDto(dto, {}, false);
   }
   if (!isPlainRecord(value)) {
-    throw new BadRequestException({
-      statusCode: 400,
-      message: `Expected a JSON object body, received ${describePayload(
-        value,
-      )}`,
-      error: 'Bad Request',
-    });
+    const message = `Expected a JSON object body, received ${describePayload(
+      value,
+    )}`;
+    // Same details channel as every other 400 this file mints — a
+    // whole-body failure addresses the root, so the path is empty.
+    throw attachErrorDetails(
+      new BadRequestException({
+        statusCode: 400,
+        message,
+        error: 'Bad Request',
+      }),
+      [{ path: [], message }],
+    );
   }
   return validateAndWhitelistDto(dto, value, false);
 }

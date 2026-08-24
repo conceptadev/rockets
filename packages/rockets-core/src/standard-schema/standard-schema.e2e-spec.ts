@@ -369,3 +369,40 @@ describe('@concepta/rockets-core/standard-schema', () => {
     });
   });
 });
+
+// The details channel rides the exception under a symbol — an app that
+// does NOT register the Rockets filter must see Nest's native 400 body,
+// byte-shape unchanged. This is the regression guard for
+// `defaultExceptionFactory` replacing Nest's own: the message parity is
+// asserted here, not inferred from reading Nest's source.
+describe('@concepta/rockets-core/standard-schema without the Rockets filter', () => {
+  let app: INestApplication;
+
+  beforeAll(async () => {
+    const testingModule = await Test.createTestingModule({
+      imports: [StandardSchemaModule.forRoot()],
+      controllers: [ProductsController],
+    }).compile();
+
+    app = testingModule.createNestApplication({ logger: false });
+    await app.init();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('keeps Nest native request failure semantics', async () => {
+    const invalidRequest = await request(app.getHttpServer())
+      .post('/standard-schema/products')
+      .send({ name: '', price: -1 })
+      .expect(400);
+
+    expect(invalidRequest.body).toMatchObject({
+      error: 'Bad Request',
+      statusCode: 400,
+    });
+    expect(invalidRequest.body).not.toHaveProperty('details');
+    expect(Array.isArray(invalidRequest.body.message)).toBe(true);
+  });
+});
