@@ -10,13 +10,6 @@ import {
 } from 'class-validator';
 import { RocketsAuthUserMetadataDto } from '../../../domains/user/infrastructure/dto/rockets-auth-user-metadata.dto';
 
-/**
- * Rockets Auth User Metadata DTO Fixture
- *
- * Extends the base RocketsAuthUserMetadataDto with implementation-specific fields
- * for testing purposes. This demonstrates how implementations can add custom
- * metadata fields with validation.
- */
 export class RocketsAuthUserMetadataFixtureDto extends RocketsAuthUserMetadataDto {
   [key: string]: unknown;
   @ApiPropertyOptional({

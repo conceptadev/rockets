@@ -54,10 +54,6 @@ export interface UserMetadataConfigInterface<
    * Must extend RocketsAuthUserMetadataCreatableInterface.
    */
   createDto: new () => TCreateDto;
-  /**
-   * UserMetadata update DTO class
-   * Must extend RocketsAuthUserMetadataEntityInterface
-   */
   updateDto: new () => TUpdateDto;
 }
 
@@ -72,17 +68,7 @@ export interface UserCrudOptionsExtrasInterface {
   imports?: DynamicModule['imports'];
   path?: string;
   model?: Type;
-
-  /**
-   * TypeORM entity class.
-   * Used by admin module for CrudAdapter registration.
-   */
   entity?: Type;
-  /**
-   * UserMetadata configuration
-   *
-   * Provides adapter, entity, and DTO classes for user metadata.
-   */
   userMetadataConfig?: UserMetadataConfigInterface;
   dto?: {
     createOne?: Type<RocketsAuthUserCreatableInterface>;
