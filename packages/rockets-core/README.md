@@ -476,6 +476,7 @@ before it is serialized:
 ```typescript
 import { Body, Controller, Post } from '@nestjs/common';
 import {
+  allowStandardSchemaKeys,
   createStandardSchemaDto,
   createStandardSchemaResponseDto,
 } from '@concepta/rockets-core/standard-schema';
@@ -486,6 +487,8 @@ const createPetSchema = z.object({ name: z.string().trim().min(1) });
 const petResponseSchema = z.object({ id: z.string(), name: z.string() });
 
 class CreatePetDto extends createStandardSchemaDto(createPetSchema) {}
+allowStandardSchemaKeys(CreatePetDto);
+
 class PetResponseDto extends createStandardSchemaResponseDto(
   petResponseSchema,
 ) {}
