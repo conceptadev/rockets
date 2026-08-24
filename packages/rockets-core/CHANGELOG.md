@@ -9,6 +9,20 @@
 
 ### Added
 
+- **`operationResource` (issue #43 / #50).** Typed non-CRUD endpoints beside
+  `zodResource`: Zod input/output → DTO + OpenAPI, generated Nest controller,
+  auth/`public`, optional `transactional`, function or injectable `handle`
+  handlers. Authoring surface: callback `operations(op)` with `op.read` /
+  `op.write` / `op.delete` (method-constrained); path defaults to the operation
+  key; `ctx.params` typed from base + op path. **`output` is required** (schema
+  or `false`); optional `params` zod validates path params; cross-resource
+  route collisions fail in `buildAppRegistrationPlan`. OpenAPI query field types
+  come from Zod (`z.toJSONSchema`). Wired through
+  `resources[]` as `ResourceKind.Operation`. Operation resources accept
+  `acl` at resource and operation level (issue #51); an op with neither
+  `acl` nor a manual grant decorator is open to any authenticated user.
+  Cursor / SSE / binary / raw JSON /
+  idempotency / external-client scaffolds remain follow-ups.
 - `@concepta/rockets-core/standard-schema` and
   `@concepta/rockets-core/standard-schema/swagger` subpaths for vendor-neutral
   request DTO validation, response serialization, and OpenAPI metadata in

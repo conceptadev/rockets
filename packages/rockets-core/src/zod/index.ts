@@ -36,6 +36,21 @@ export {
 export { createdEntity, baseEntity, auditableEntity } from './base-entity';
 export { zodResource, zodSubResource, bindZodResources } from './zod-resource';
 export { zodModuleResource } from './zod-module-resource';
+export {
+  operationResource,
+  extractPathParamNames,
+} from './zod-operation-resource';
+export type {
+  BoundBuilders,
+  DeleteBuilderConfig,
+  OperationRecord,
+  OperationResourceInput,
+  PathParams,
+  PendingOperation,
+  ReadBuilderConfig,
+  WriteBuilderConfig,
+  ZodOperationResource,
+} from './zod-operation-resource';
 export { defineZodUserMetadata } from './zod-user-metadata';
 export { compileDtoClass, namedZodDto } from './zod-dto';
 export type {
@@ -47,6 +62,7 @@ export type {
 export type {
   ZodCrudOperation,
   ZodOperationConfig,
+  ZodOperationSchemas,
   ZodDeleteOperationConfig,
   ZodRestoreOperationConfig,
   ZodResourceOperations,

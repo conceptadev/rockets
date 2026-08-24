@@ -10,7 +10,8 @@
 ## 0. Mental model (read this first)
 
 You never hand NestJS a tree of modules. You write **declarative bundles**
-(`defineResource`, `defineSubResource`, `defineModuleResource`) and a few
+(`defineResource`, `defineSubResource`, `defineModuleResource`,
+`operationResource` / `defineOperationResource`) and a few
 top-level fields (`repository`, `userMetadata`, `auth`), pass them to
 `createServer({...})`, and the module-definition transform converts that into a
 single global `DynamicModule` (controllers, providers, repository tokens, CQRS
@@ -23,6 +24,7 @@ flowchart LR
     R["defineResource()"]
     S["defineSubResource()"]
     M["defineModuleResource()"]
+    O["operationResource() / defineOperationResource()"]
     OPT["repository / userMetadata / auth / swagger"]
   end
   YOU --> CREATE["createServer( ... )"]
@@ -133,9 +135,11 @@ interface AppRegistrationPlan {
 }
 ```
 
-> The plan carries **no controllers and no CQRS list**. Controllers come from
-> imported `CrudModule.forFeature` / module slices. CQRS handlers are
-> re-extracted later from `crudResources[].crud.operations[].queryHandler/commandHandler`.
+> The plan carries **no hand-written controllers and no CQRS list** by default.
+> Controllers come from CRUD materialisation and from `operationResource`
+> generated adapters. CQRS handlers come from imported
+> `CrudModule.forFeature` / module slices and are re-extracted later from
+> `crudResources[].crud.operations[].queryHandler/commandHandler`.
 
 ### 2.2 Pipeline
 
@@ -356,11 +360,341 @@ petTags: defineSubResource({          // key 'petTags' must be a PetEntity relat
 | `entity` | `Type<E> \| (() => Type<E>)` | **yes** | — (thunk allowed for circular imports) |
 | `parentKey` | `string` | no | `${parentEntityKey}Id` (e.g. `petId`) — URL param **and** FK column |
 | `parentPk` | `string` | no | `'id'` — parent PK column the guard looks up |
+| `parentSelect` | `readonly string[]` | no | projection for the guard's parent lookup (default: pk only, or the full row when the parent has hooks) |
 | `segment` | `string` | no | `kebab-case(mapKey)` — URL segment |
 | `owner` | `string \| false` | no | `'userId'` — ownership column; `false` drops the guard (public) |
 | `scope` | `boolean` | no | `true` — master switch (FK filter/stamp + guard); `false` = unscoped |
 | `reloadAfterCreate` | `boolean` | no | `false` |
 | *(inherited)* | `dto`, `operations`, `relations`, `hooks`, `handlers`, `providers`, `subResources`… | no | — |
+
+### Which parent-side hooks run during path scoping
+
+`PathScopeGuard` performs one parent lookup per nested request, and that
+lookup runs the **parent resource's own `hooks`** — the classes declared in
+the parent's `defineResource({ hooks })`. A parent that its own routes
+cannot see (soft expiry, retention, tenant scope expressed as a
+`beforeFindOne` / `afterFindOne` filter) is a `404` on every nested route
+too, not just on the parent's routes.
+
+**What the replay context carries.** The lookup is presented to those
+hooks as the parent's OWN read: `getCrudContext(ctx)` returns a context
+with `entity` = the parent's key, `operation: Read`, and `params` = the
+request's route params with `id` bound to the parent row being looked up.
+A hook gated on `if (!getCrudContext(ctx)) return options;` — the shape
+this codebase documents — therefore filters here exactly as it does on the
+parent's own routes. That also makes three-level nesting behave: a
+grandchild's guard replays the middle resource's `PathScopeHook`, which
+needs `params[:parentId]` to bind the middle row to ITS parent.
+
+The parent's primary param is bound by NAME, taken from the parent's own
+`request.params` (default `id`) — a resource that declares a different
+primary still sees its hooks fire.
+
+**What it deliberately does not carry:**
+
+- **No transaction.** Nest runs guards ahead of interceptors, so no
+  operation transaction exists when the guard runs. The lookup is a
+  pre-check, never a participant. See §12 and issue #60 for the wider
+  `ctx` / `TransactionScope` seam.
+- **No `query`.** The guard applies no filter, sort or pagination of its
+  own, so the parsed query is empty rather than the child route's.
+- **Not the request's `AppContextHost`.** `defineOverlay` is
+  first-write-wins and the hook overlay interceptor has not run yet;
+  writing to the request here would pin the parent's hooks for the whole
+  request and the child's own hooks would never attach.
+
+Other constraints worth knowing:
+
+- The parent's hooks are entity-scoped by `@EntityHook({ entity })`, so
+  hooks bound to a different entity never fire on this lookup.
+- **A parent hook that throws now surfaces on nested routes.** It did not
+  fire here before. A `Before*` hook that throws an `HttpException` is
+  wrapped by the upstream membrane and reaches the client as a `500` —
+  throw a `RepositoryQueryException` with an `httpStatus` instead when the
+  status matters.
+- **Projection cost.** With no parent hooks the lookup reads the primary
+  key only. With hooks it reads the FULL parent row — including eager
+  relations — because an `afterFindOne` hook may inspect a column a
+  narrow projection would omit, and nothing declares which columns a hook
+  reads. Set `parentSelect: ['id', 'expiresAt']` on the sub-resource when
+  you know what your hooks need.
+- **`owner: false` drops the guard entirely**, and with it the parent-hook
+  replay. A sub-resource that opts out of the ownership check also opts
+  out of parent-side visibility.
+- Sub-resource hooks (`PathScopeHook`, the child's own `hooks`) are
+  unaffected — they still attach normally to the child's controller.
+
+---
+
+## 6a. `operationResource()` — typed non-CRUD endpoints (issue #43 / #50)
+
+Use when you need **RPC-style** routes beside CRUD — health checks, actions,
+reports — without hand-rolling a Nest controller. Zod `input` / `output`
+compile to DTO classes (OpenAPI + Standard Schema whitelist). Wire the bundle
+into `resources[]` like any other resource.
+
+```ts
+import { operationResource } from '@concepta/rockets-core/zod';
+import { z } from 'zod';
+
+export const ops = operationResource({
+  path: 'ops',
+  tags: ['Ops'],
+  public: true, // class-level @AuthPublic; individual ops cannot be more private
+  operations: (op) => ({
+    ping: op.read({
+      path: '', // root mount → GET /ops (default path is the operation key)
+      output: z.object({ ok: z.boolean() }),
+      handler: () => ({ ok: true }),
+    }),
+    shout: op.write({
+      status: 201, // default is 200
+      input: z.object({ text: z.string().min(1) }),
+      output: z.object({ text: z.string() }),
+      handler: ({ input }) => ({ text: input.text.toUpperCase() }),
+    }),
+    list: op.read({
+      path: 'items', // GET /ops/items (or rename the key to `items` and omit path)
+      output: z.array(z.object({ id: z.string() })),
+      handler: () => [{ id: '1' }],
+    }),
+    // output: false opts out of response whitelist (explicit)
+    purge: op.delete({
+      status: 204,
+      output: false,
+      handler: () => undefined,
+    }),
+  }),
+});
+
+// Path params: resource `params` must list every :name on `path`.
+// Nested op segments (e.g. key `transfer` → /pets/:petId/transfer) stay in ctx.params.
+export const petTransfer = operationResource({
+  path: 'pets/:petId',
+  params: z.object({ petId: z.uuid() }),
+  operations: (op) => ({
+    transfer: op.write({
+      input: z.object({ newOwnerId: z.uuid() }),
+      output: z.object({ id: z.string(), userId: z.string() }),
+      handler: TransferHttpHandler, // injectable class with handle(ctx)
+    }),
+  }),
+});
+```
+
+| Builder | Allowed methods | Default method | Default status |
+|---|---|---|---|
+| `op.read()` | `GET` | `GET` | `200` |
+| `op.write()` | `POST` / `PUT` / `PATCH` | `POST` | `200` (set `status: 201` when creating) |
+| `op.delete()` | `DELETE` | `DELETE` | `200` |
+
+**Authoring rules (#50).** `operations` is a **callback** so base-path
+`:params` type `ctx.params`. Operation path defaults to the **key verbatim**
+(not kebab-cased); use `path: ''` for a root-mounted route. Input sourcing
+follows HTTP method (`GET`/`DELETE` → query; body otherwise). **`output` is
+required** — pass a schema (whitelist + OpenAPI) or `output: false` (explicit
+opt-out). Optional resource-level `params: z.object({...})` validates named path
+params at request time (400). Keys must be `:params` on the resource `path`;
+extra Nest params from an operation path (not in the schema) are preserved.
+Structured cross-resource route collisions with CRUD/Sub fail in
+`buildAppRegistrationPlan` (not silently at runtime). This planner check is
+limited to Rockets-owned resource declarations; use
+`validateRegisteredRoutes(app)` after `app.init()` when you need to audit the
+actual Nest adapter routes with global prefix, versioning, and hand-written
+controllers applied. Status `204` with an output schema is rejected at define
+time. The return value exposes `authored` (typed pending ops) for inference
+consumers; function handlers get full `ctx` typing — injectable class `handle`
+methods do not (TypeScript method bivariance).
+Class handlers can be passed as `handler: TransferHttpHandler` or explicitly as
+`handler: { useClass: TransferHttpHandler }`; a matching local provider in
+`providers` wins over auto-registration.
+
+**Auth / ACL.** Resource `public: true` opens the whole controller. On a secured
+resource, mark individual ops with `public: true`. Setting `public: false` on
+an op under a public resource is rejected at boot. Operation resources accept
+`acl` at resource and operation level like CRUD resources do — see §5a; an
+operation with neither `acl` nor a manual grant decorator is open to any
+authenticated user, because upstream's check-access handler returns `true`
+when no grant metadata exists. Omitting `input` means the raw body/query
+reaches the handler unvalidated.
+
+**Validation.** Responses are whitelisted against `output` when present;
+handler/`output` mismatches return **500** (server bug), not 400. Query-string
+inputs are strings — use `z.coerce.number()` / `z.coerce.boolean()` when needed.
+`output` accepts `z.object(...)` or `z.array(...)`. Duplicate `method`+`path`
+pairs inside one resource fail at boot.
+
+When an operation declares `input`, the request payload must be a plain JSON
+object. An array, a scalar, or a non-plain object (a `Buffer` from a raw body
+parser, for instance) returns **400** rather than being narrowed to `{}` —
+substituting a valid value for an invalid one is not something a validation
+boundary should do quietly. A MISSING body is still `{}`, so a `POST` with no
+payload against an all-optional `input` stays legal.
+
+Two generated DTOs that would claim the same OpenAPI component name fail at
+boot. The name is derived from the resource path, the method, the operation key
+and the operation's own path, and that transform folds punctuation and
+casing together — `foo-bar` and
+`fooBar` both yield `FooBar`. One compiled DTO reused across several
+operations is fine: the check compares class identity, not names.
+
+Cursor, SSE, binary, raw JSON, idempotency, and external-client scaffolds are
+follow-ups on issue #43.
+
+Lower-level escape hatch: `defineOperationResource({ path, operations: {…} })`
+with precompiled DTO classes.
+
+---
+
+## 5a. `acl` — access control on resources and operations (issue #51)
+
+Upstream's check-access handler returns `true` for any route with **no
+grant metadata**. A forgotten `AccessControl*` decorator is therefore not
+a broken route — it is an *open* one, authenticated but ungranted, and no
+test notices. `acl` moves that from a per-route chore to a bundle-level
+declaration the framework materialises and validates.
+
+Rules stay app-owned. This wires decorators and registers query services;
+it does not generate `acRules`, and possession (`own` vs `any`) is still
+decided by your `CanAccess` service.
+
+```ts
+defineResource({
+  entity: PetEntity,
+  path: 'pets',
+  acl: { resource: 'pet', query: PetAccessQueryService },
+  operations: {
+    list: {},                 // → read
+    read: {},                 // → read
+    create: {},               // → create
+    update: {},               // → update
+    delete: {},               // → delete
+    // restore: { acl: false } // authenticated, deliberately ungranted
+  },
+});
+```
+
+Action per operation: `list`/`read` → **read**, `create` → **create**,
+`update`/`replace` → **update**, `delete`/`restore` → **delete**.
+(`AccessControlReadMany` and `AccessControlReadOne` emit the same grant
+upstream, so there is one action per verb, not one per decorator.)
+
+### `operationResource`
+
+A non-CRUD write's HTTP verb says nothing about intent —
+`POST /pets/:id/transfer` is an update, not a create — so `op.write` has
+**no default** and must declare one:
+
+```ts
+operationResource({
+  path: 'pets/:petId',
+  acl: { resource: 'pet', query: PetAccessQueryService },
+  operations: (op) => ({
+    transfer: op.write({ acl: 'update', input: …, output: …, handler: … }),
+    stats:    op.read({ /* infers read */ output: …, handler: … }),
+  }),
+});
+```
+
+### Boot-time rules
+
+| Condition | Result |
+|---|---|
+| Bundle declares `acl`, app configures no root `accessControl` | **throw** |
+| `operations.X.acl` action with no resource-level `acl` | **throw** |
+| `op.write` with no `acl` on an ACL-enabled operation resource | **throw** |
+| `public: true` on an operation that also carries a grant | **throw** |
+| `accessControl.enforceGrants: true` and a **generated** authenticated op carries no grant | **throw** |
+| `accessControl.enforceGrants: true` with no root `accessControl` | **throw** |
+
+`acl.query` services are collected across every bundle and merged into
+`AccessControlModule.forRoot({ queryServices })` — they must land on that
+module specifically, because the upstream guard strict-resolves from its
+own host module. You no longer declare a query service and then 500 at
+request time because nobody registered it.
+
+### One `CanAccess` per route, and why `query` really overrides
+
+The service is stamped on the **route**, never on the controller: the
+operation's own `query` when it declares one, otherwise the
+resource-level default.
+
+That is not a style choice. Upstream reads query metadata with
+`getAllAndMerge([getClass(), getHandler()])` and then loops the resulting
+services, **breaking on the first one that returns `true`** — class-level
+first. A class-level default plus a method-level "override" is therefore
+an OR in which the *permissive* service wins, and an operation could
+never tighten. Stamping exactly one entry per route is what makes
+`acl: { action, query }` mean what it says.
+
+A consequence worth knowing: a resource-level `query` is consulted on
+**every** route of the resource, including collection routes that have no
+row to own. Return early there (`if (!params.id) return true`).
+
+### Sub-resources do not inherit `acl`
+
+A sub-resource is a different resource in your `acRules`. It declares its
+own `acl: { resource: 'widget-note' }`; nothing is taken from the parent's
+`acl.resource`. If it declares none, it has no grants — and shows up in
+the `enforceGrants` report under its own key.
+
+### `enforceGrants` — scope and why it is opt-in
+
+With it on, a route the planner generates that is authenticated and
+carries no grant fails the boot instead of serving.
+
+**It covers exactly what the planner generates:** CRUD bundles (including
+sub-resources, which are flattened recursively) and operation resources.
+It does **not** cover:
+
+- `defineModuleResource({ module: { controllers } })` controllers
+- hand-built `RocketsResourceConfig` entries
+- controllers owned by other packages — `MeController` in
+  `rockets-server`, every `rockets-server-auth` controller
+
+Those routes never reach the planner, so a passing boot says nothing
+about them. Treat `enforceGrants` as "the generated surface is covered",
+not "the app is covered".
+
+It defaults to **off** because a hand-written `AccessControl*` entry in a
+bundle's `decorators` cannot be detected **at plan time**: the CRUD
+controller is built downstream of the planner, so the grant metadata does
+not exist yet, and the only way to read it early would be to apply the
+consumer's opaque decorator list a second time. Turning the default on
+would reject every working manual-grant app. A bootstrap-time sweep over
+discovered routes would close both this and the scope gap above.
+
+`acl` plus a manual `AccessControl*` decorator on the same operation is
+**not** detected either, but for a different reason, and the outcome is
+not a coin flip. Upstream's grant metadata is a plain `SetMetadata` write
+read with `reflector.get(...)`, so the two never merge — the last write
+wins. The generated route applies the operation's own `decorators` first
+and the `acl`-derived grant last, so **`acl` overwrites a hand-written
+`AccessControlGrant`**, and a manual grant deliberately tighter than the
+inferred action is discarded silently.
+
+For operation resources this is decidable: the route builder owns the
+single `applyDecorators` call and could read the metadata back between
+the two pushes, with no re-application of consumer code. It is simply not
+implemented. For CRUD resources the plan-time argument above still holds.
+Either way: use one or the other per bundle.
+
+### `public` and `acl` do not mix
+
+A public route carries no authenticated user, so role resolution yields
+nothing and every grant check fails — the route would 403 for everyone.
+Declaring both on the same operation throws at definition time. Opt the
+operation out with `acl: false` if a public resource needs one ungranted
+route.
+
+### `rockets-server-auth` registers its own `AccessControlModule`
+
+`defineRocketsAuth` wires access control through its own
+`buildAccessControlImport` call, which does not receive the collected
+query services. In an app composing auth **and** `RocketsCoreModule` with
+`accessControl` on both, `acl.query` auto-registration applies to the
+core registration only — list auth-side services in that module's
+`queryServices` explicitly.
 
 ---
 
@@ -379,13 +713,17 @@ export const sampleAuthUserResource = defineModuleResource({
 });
 ```
 
-### CQRS-only (`entities: []`) — consumes a repo another bundle registered
+### CQRS-only (`entities: []`) — no new table; hand-written Nest slice
+
+Use this when you need CQRS handlers / services **without** a generated HTTP
+surface. For typed HTTP actions over CQRS (no hand-written controller), prefer
+[`operationResource`](#6a-operationresource--typed-non-crud-endpoints-issue-43--50)
+instead — see `examples/sample-server` `petTransferFeature`.
 
 ```ts
-export const petTransferFeature = defineModuleResource({
+export const orderWorkflowFeature = defineModuleResource({
   imports: [CqrsModule],
-  controllers: [PetTransferController],
-  providers: [TransferPetOwnershipHandler],
+  providers: [PlaceOrderHandler, OrderPlacedListener],
 });
 ```
 
@@ -640,6 +978,146 @@ core/server change**. Per-entry repository overrides can be declared on any of:
 
 Each falls back to the root `repository` adapter when omitted.
 
+### 8a. `ctx` and transactions — the seam you must not miss (issue #60)
+
+Every `RepositoryInterface` method takes an options `ctx`. It is optional
+in the type system and load-bearing at runtime. **A repository call that
+omits it silently does two things you almost never intend:**
+
+1. it runs with **all entity hooks disabled**, and
+2. it commits **outside** the surrounding operation's transaction.
+
+Neither is a type error. Neither shows up in a passing test. This is the
+root of issue #45, where a guard's parent lookup ran hook-free for a
+whole development cycle behind a green suite.
+
+The chain, in the installed packages:
+
+```text
+RepositoryAdapter.entityCtx(ctx)      // returns undefined when ctx is undefined
+  → HookResolverService.execute(...)  // early-returns when ctx.hooks is empty
+  → TransactionManager                // never consulted, so no ambient transaction
+```
+
+#### Rule: forward `ctx` from wherever you got it
+
+Inside a hook, the context is the hook's second argument:
+
+```ts
+const AuditHook = defineHook<OrderEntity>(OrderEntity, {
+  async beforeCreate(payload, ctx, { repo }) {
+    // `ctx` — not omitted. Without it this read skips every hook on
+    // `order` AND runs outside the operation's transaction, so a
+    // rollback leaves it committed.
+    const existing = await repo.findOne({
+      where: Where.eq<OrderEntity>('ref', payload.ref),
+      ctx,
+    });
+    if (existing) throw new ConflictException('duplicate ref');
+    return payload;
+  },
+});
+```
+
+Inside a CQRS handler, the context is `query.context` — the same
+`AppContextHost` the pipeline built:
+
+```ts
+import { CrudQueryHandlerBase, type CrudQueryInterface } from '@concepta/rockets-core';
+import { CrudListQuery } from '@concepta/nestjs-crud';
+
+@Injectable()
+export class OrderListHandler extends CrudQueryHandlerBase<OrderEntity> {
+  constructor(
+    @InjectDynamicRepository(OrderEntity)
+    private readonly orders: RepositoryInterface<OrderEntity>,
+    @InjectCrudAdapter(OrderEntity) crudAdapter: CrudAdapter<OrderEntity>,
+  ) {
+    super(crudAdapter);
+  }
+
+  async execute(query: CrudQueryInterface<OrderEntity>) {
+    const { context } = query as CrudListQuery<OrderEntity>;
+    // Same context the adapter itself passes down.
+    const recent = await this.orders.find({ where: …, ctx: context });
+    return this.crudAdapter.list(context);
+  }
+}
+```
+
+**Do not spread the context into a new object.** It is an
+`AppContextHost` Proxy carrying overlay accessors; `{ ...context }`
+strips them and the next `AppContextHost.from(...)` inside the repository
+adapter throws `Expected AppContextHost or nullish value, got object`.
+Mutate it in place, as `PetListHandler` in `examples/sample-server-auth`
+does.
+
+#### CRUD `transactional: true` vs manual `TransactionScope`
+
+`transactional: true` exists on **CRUD operations only**
+(`operations.X.transactional`) and on `operationResource` operations. It
+wraps the handler in `TransactionScope.run` with `SUPPORTS` propagation.
+Everything else — a custom service, a guard, a background job — has to
+open its own scope:
+
+```ts
+import { type PlainLiteralObject } from '@nestjs/common';
+import { TransactionScope } from '@concepta/nestjs-repository';
+
+@Injectable()
+export class TransferService {
+  constructor(
+    private readonly trx: TransactionScope,
+    @InjectDynamicRepository(AccountEntity)
+    private readonly accounts: RepositoryInterface<AccountEntity>,
+  ) {}
+
+  // `PlainLiteralObject` is what `TransactionScope.run` and the
+  // repository's `ctx` option both accept; a `RocketsCrudContext` from
+  // the pipeline satisfies it.
+  async transfer(
+    ctx: PlainLiteralObject,
+    from: string,
+    to: string,
+    amount: number,
+  ) {
+    // `REQUIRED` starts one if none is active; the default `SUPPORTS`
+    // would silently run unprotected outside a request.
+    return this.trx.run(
+      ctx,
+      async (txCtx) => {
+        const debit = await this.accounts.findOne({ where: …, ctx: txCtx });
+        // …every call inside gets `txCtx`, or it escapes the transaction.
+        await this.accounts.update(debit, { balance: … }, { ctx: txCtx });
+      },
+      { propagation: 'REQUIRED' },
+    );
+  }
+}
+```
+
+Two traps worth naming:
+
+- **`SUPPORTS` is the default propagation.** A scope opened without
+  `propagation: 'REQUIRED'` inside a non-transactional entry point runs
+  with no transaction at all, and nothing warns.
+- **Guards run before interceptors.** A guard cannot participate in the
+  operation's transaction, because the transaction interceptor has not
+  run yet. `PathScopeGuard` is deliberately a pre-check for this reason
+  (§5).
+
+#### Auditing an app for the omission
+
+The sweep that found the real defect behind #45:
+
+```bash
+grep -rnE '\.(findOne|find|count|findAndCount|create|update|delete)\(\{' src \
+  | grep -v 'ctx'
+```
+
+Every hit is a call to read: either it is deliberately outside the
+request (a startup task, a job with its own scope) or it is a defect.
+
 ---
 
 ## 9. userMetadata
@@ -675,8 +1153,9 @@ flowchart TD
   Q2 -- yes --> SUB["defineSubResource()\n(in parent.subResources)"]
   Q2 -- no  --> RES["defineResource()\n(in resources[])"]
   Q1 -- no --> Q3{"Need a table / repo key,\nor custom Nest wiring?"}
+  Q3 -- "typed HTTP RPC (Zod in/out)" --> OPS["operationResource() / defineOperationResource()"]
   Q3 -- "table only" --> MOD1["defineModuleResource({ entities:[X] })"]
-  Q3 -- "CQRS/services, no table" --> MOD2["defineModuleResource({ entities:[], imports/providers })"]
+  Q3 -- "CQRS/services, no HTTP gen" --> MOD2["defineModuleResource({ entities:[], imports/providers })"]
   Q3 -- "custom controller + table" --> MOD3["defineModuleResource({ entities, controllers, providers, exports })"]
 ```
 
@@ -684,8 +1163,9 @@ flowchart TD
 |---|---|
 | Standard CRUD HTTP surface (`/pets`) | `defineResource` |
 | Child route keyed by a parent relation (`/pets/:petId/tags`) | `defineSubResource` |
+| Typed non-CRUD HTTP (`POST /pets/:petId/transfer`, `/ops/shout`) | `operationResource` / `defineOperationResource` |
 | Register an entity for `@InjectDynamicRepository` | `defineModuleResource({ entities:[X] })` |
-| Pure CQRS/workflow, no new table | `defineModuleResource({ entities:[] })` |
+| CQRS/workflow providers, no generated routes | `defineModuleResource({ entities:[] })` |
 | Hand-written controller + services | `defineModuleResource({ controllers, providers })` |
 | One table on a different DB | `defineModuleResource` entity row `{ entity, repository }` |
 
@@ -837,12 +1317,28 @@ petTags: defineSubResource({
 
 // ── defineModuleResource ──
 defineModuleResource({ entities: [AuditLogEntity] });
-defineModuleResource({ imports: [CqrsModule], controllers: [PetTransferController], providers: [TransferPetOwnershipHandler] });
+defineModuleResource({
+  imports: [CqrsModule],
+  providers: [PlaceOrderHandler], // CQRS-only — no generated HTTP
+});
 defineModuleResource({
   entities: [GithubConnectionEntity, { entity: SessionEntity, repository: firestoreRepo }],
   controllers: [GithubController],
   providers: [GithubService, githubApiClientProvider()],
   exports: [GithubService, GITHUB_API_CLIENT],         // public surface — collision risk
+});
+
+// ── operationResource (typed non-CRUD HTTP; prefer over hand-written controllers) ──
+operationResource({
+  path: 'pets/:petId',
+  params: z.object({ petId: z.uuid() }),
+  operations: (op) => ({
+    transfer: op.write({
+      input: z.object({ newOwnerId: z.uuid() }),
+      output: z.object({ id: z.string(), userId: z.string() }),
+      handler: TransferHttpHandler,
+    }),
+  }),
 });
 
 // ── relation: bound canonical form ──

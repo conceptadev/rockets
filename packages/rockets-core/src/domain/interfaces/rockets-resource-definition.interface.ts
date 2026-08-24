@@ -8,6 +8,10 @@ import type {
   CrudResponseConfig,
 } from '../../infrastructure/crud-compat';
 import type { WhereCondition } from '@concepta/nestjs-repository';
+import type {
+  OperationAclConfig,
+  ResourceAclConfig,
+} from './resource-acl.interface';
 
 /**
  * Names of CRUD operations supported by the declarative resource definition.
@@ -196,6 +200,34 @@ export interface ResourceHandlerOverrides {
  * default command/query class.
  */
 export interface ResourceOperationConfig {
+  /**
+   * Access control for this route.
+   *
+   * Omit to inherit the action implied by the operation (`list`/`read` →
+   * read, `create` → create, `update`/`replace` → update,
+   * `delete`/`restore` → delete). `false` marks the route deliberately
+   * ungranted. Requires resource-level `acl` — an action needs a
+   * resource name to grant against.
+   *
+   * Do NOT combine this with a manual `AccessControl*` entry in
+   * `decorators` on the same operation. Upstream's grant metadata is a
+   * plain `SetMetadata` write read with `reflector.get(...)`, so the two
+   * do not merge — one wins.
+   *
+   * **Which one is deterministic, and it is not yours.** The generated
+   * route applies `decorators` first and the `acl`-derived grant last,
+   * so `acl` overwrites a hand-written `AccessControlGrant`. A manual
+   * grant that was deliberately TIGHTER than the inferred action is
+   * therefore lost without a warning.
+   *
+   * The combination is **not** detected today. It is decidable — the
+   * route builder owns the single `applyDecorators` call and could read
+   * the metadata back between the two pushes, with no re-application of
+   * consumer code — but that check is not implemented. Documenting the
+   * gap beats claiming a guard that does not exist, on an access-control
+   * surface most of all. See `CONFIGURATION.md` §5a.
+   */
+  readonly acl?: OperationAclConfig;
   /** Request input (body) DTO. Maps to `request.body`. Falls back to `definition.dto.{create,update,replace}`. */
   readonly input?: Type;
   /** Single-item output (response) DTO. Maps to `response.resource`. Falls back to `definition.dto.response`. */
@@ -244,9 +276,11 @@ export interface ResourceDeleteOperationConfig extends ResourceOperationConfig {
   /** Soft delete vs hard delete. Default: `false` (hard). */
   readonly soft?: boolean;
   /**
-   * When `true`, the response is `200 OK` with the soft-deleted entity body
-   * (including the `dateDeleted` timestamp). Default: `false`, which keeps
-   * the response at `204 No Content`. Only meaningful when `soft: true`.
+   * When `true`, the response is `200 OK` with the deleted entity body
+   * (including the `dateDeleted` timestamp on a soft delete). Default:
+   * `false`, which keeps the response at `204 No Content`. Applies to
+   * hard deletes too — upstream sets the status from this flag alone and
+   * the adapter returns the removed row either way.
    */
   readonly returnDeleted?: boolean;
 }
@@ -520,6 +554,32 @@ export interface RocketsResourceDefinition<E extends PlainLiteralObject> {
    */
   readonly public?: boolean;
   /**
+   * Access control for this resource.
+   *
+   * Declaring it makes every operation carry an `AccessControlGrant`
+   * for the action it implies — `list`/`read` → read, `create` →
+   * create, `update`/`replace` → update, `delete`/`restore` → delete —
+   * plus an `AccessControlQuery` naming the `CanAccess` service for
+   * that route. Per-operation `acl` overrides the action, the query
+   * service, or opts out with `false`.
+   *
+   * Both decorators are stamped per ROUTE, never on the controller
+   * class. Upstream merges query metadata with
+   * `getAllAndMerge([getClass(), getHandler()])` and breaks on the
+   * first service returning `true`, class-first — so a class-level
+   * default plus a method-level override would be an OR in which the
+   * permissive one wins and an operation could never tighten.
+   *
+   * Rules stay app-owned: this wires the decorators, it does not
+   * generate `acRules` or decide possession (`own` vs `any`). Ownership
+   * still lives in the `CanAccess` query service.
+   *
+   * A bundle that declares `acl` while the app configures no root
+   * `accessControl` fails at boot, as does an authenticated operation
+   * left without a grant.
+   */
+  readonly acl?: ResourceAclConfig;
+  /**
    * Sub-resources nested under this resource's URL.
    *
    * **Keys are constrained to relation properties on the parent entity
@@ -595,6 +655,21 @@ export interface RocketsSubResourceDefinition<
    * guard. Default: `'id'`.
    */
   readonly parentPk?: string;
+  /**
+   * Column projection for the guard's parent lookup.
+   *
+   * The guard reads the parent once per nested request. With no parent
+   * hooks it reads the primary key only. With parent hooks it reads the
+   * FULL row — including eager relations — because an `afterFindOne`
+   * hook may inspect a column a narrow projection would omit, and
+   * nothing declares which columns a hook reads.
+   *
+   * Set this when you know: `parentSelect: ['id', 'expiresAt']` restores
+   * a narrow read for a parent whose hooks only need those columns.
+   * Getting it wrong makes the hook decide on `undefined`, so leave it
+   * unset unless the extra columns actually cost you.
+   */
+  readonly parentSelect?: readonly string[];
   /**
    * URL segment override. The `subResources` object key (constrained to
    * `keyof Parent`) drives type-safety; this field decouples the URL

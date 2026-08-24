@@ -1,3 +1,4 @@
+import { JwtGuard } from '@concepta/nestjs-authentication';
 import { DynamicModule } from '@nestjs/common';
 import type { PlainLiteralObject, Type } from '@nestjs/common';
 import { FEDERATED_MODULE_DEFAULT_ENTITY_KEY } from '@concepta/nestjs-federated';
@@ -189,6 +190,20 @@ export function defineRocketsAuth(
       // composition invariant reject the half-configured state where
       // neither guard would run.
       providesAppGuard: normalizedInput.auth?.appGuard !== false,
+      // WHICH class that guard is, so the route audit can classify it
+      // as authentication. A custom `auth.appGuard` instance is
+      // recognised by its constructor; the default is upstream
+      // `JwtGuard`. Without this, a policy-declaring app built on this
+      // composition reports every route unguarded and refuses to boot.
+      authGuards:
+        normalizedInput.auth?.appGuard === false
+          ? []
+          : [
+              typeof configuredUpstreamGuard === 'object' &&
+              configuredUpstreamGuard !== null
+                ? (configuredUpstreamGuard.constructor as Type<unknown>)
+                : JwtGuard,
+            ],
     },
   };
 }

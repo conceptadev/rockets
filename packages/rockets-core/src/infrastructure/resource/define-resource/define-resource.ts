@@ -1,4 +1,12 @@
-import { applyDecorators, type PlainLiteralObject } from '@nestjs/common';
+import {
+  applyDecorators,
+  type PlainLiteralObject,
+  type Type,
+} from '@nestjs/common';
+import {
+  AccessControlQuery,
+  type CanAccess,
+} from '@concepta/nestjs-access-control';
 
 import {
   CrudOperationResolver,
@@ -10,7 +18,10 @@ import type { RepositoryProviderOptions } from '@concepta/nestjs-repository';
 import type { RocketsResourceConfig } from '../../../domain/interfaces/rockets-resource.interface';
 import type { RocketsResourceDefinition } from '../../../domain/interfaces/rockets-resource-definition.interface';
 import type { CrudResource } from '../../../domain/interfaces/rockets-resource-bundle.interface';
-import type { RocketsSubResourceDefinition } from '../../../domain/interfaces/rockets-resource-definition.interface';
+import type {
+  ResourceOperationName,
+  RocketsSubResourceDefinition,
+} from '../../../domain/interfaces/rockets-resource-definition.interface';
 import { ResourceKind } from '../../../domain/interfaces/resource-kind.enum';
 import {
   DEFAULT_OPERATIONS,
@@ -28,6 +39,12 @@ import {
 import { buildPersistenceRelations } from './build-persistence-relations';
 import { buildOperation, mergeProviders } from './build-operation';
 import { materialiseSubResource } from './materialise-sub-resource';
+import type { CrudRequestConfig } from '../../crud-compat';
+import {
+  buildAclPlan,
+  resolveOperationAcl,
+  withAclDecorators,
+} from './build-acl';
 import { deriveEntityKey } from '../../../common';
 
 type CrudDecorator = ReturnType<typeof applyDecorators>;
@@ -120,6 +137,7 @@ export function defineResource<E extends PlainLiteralObject>(
     providers = [],
     autoRegisterHandlers = true,
     decorators: extraClassDecorators,
+    acl,
     public: isPublic = false,
     request: controllerRequest,
   } = definition;
@@ -162,12 +180,40 @@ export function defineResource<E extends PlainLiteralObject>(
 
   const controllerJoins = buildControllerJoins(relations);
 
+  // Access control is materialised here rather than inside
+  // `buildOperation` so the collected `CanAccess` services can travel on
+  // the bundle: the planner registers them with `AccessControlModule`,
+  // which is the DI scope the upstream guard strict-resolves from.
+  const operationQueries: Type<CanAccess>[] = [];
+  const aclDecorators: Partial<
+    Record<ResourceOperationName, readonly MethodDecorator[]>
+  > = {};
+  for (const op of operations) {
+    const binding = resolveOperationAcl({
+      label: op,
+      operation: op,
+      resourceAcl: acl,
+      operationAcl: operationOverrides[op]?.acl,
+      resourceKey: key,
+      isPublic,
+    });
+    if (binding.query) operationQueries.push(binding.query);
+    const decorators: MethodDecorator[] = [];
+    if (binding.grant) decorators.push(binding.grant);
+    if (binding.query) {
+      decorators.push(
+        AccessControlQuery({ service: binding.query }) as MethodDecorator,
+      );
+    }
+    if (decorators.length) aclDecorators[op] = decorators;
+  }
+
   const ops: CrudOperationOptions<PlainLiteralObject>[] = operations.map((op) =>
     buildOperation(op, {
       dto,
       joins: controllerJoins,
       handlers,
-      override: operationOverrides[op],
+      override: withAclDecorators(operationOverrides[op], aclDecorators[op]),
     }),
   );
 
@@ -208,6 +254,8 @@ export function defineResource<E extends PlainLiteralObject>(
         parentPath: path,
         parentTags: tags,
         parentPersistenceModule: repository,
+        parentHooks: hooks,
+        parentPrimaryParam: primaryParamName(controllerRequest),
         segment,
         sub,
       });
@@ -215,8 +263,20 @@ export function defineResource<E extends PlainLiteralObject>(
     }
   }
 
+  const aclPlan = buildAclPlan({
+    resourceKey: key,
+    isPublic,
+    resourceAcl: acl,
+    operations,
+    operationAcls: Object.fromEntries(
+      operations.map((op) => [op, operationOverrides[op]?.acl]),
+    ),
+    operationQueries,
+  });
+
   const bundle: CrudResource<E> = {
     kind: ResourceKind.Crud,
+    acl: aclPlan,
     core,
     persistence: {
       ...(repository ? { module: repository } : {}),
@@ -231,4 +291,25 @@ export function defineResource<E extends PlainLiteralObject>(
   };
 
   return bundle;
+}
+
+/**
+ * Route param name the parent's own routes use for its primary key.
+ *
+ * Defaults to `'id'` — the shape `defineResource` generates when the
+ * consumer declares no `request.params`. A resource that overrides the
+ * primary (`request: { params: { code: { field: 'code', primary: true } } }`)
+ * has hooks reading `params.code`, so a sub-resource guard that hardcoded
+ * `id` would leave those hooks looking at a key that is never set: a
+ * scoping hook silently becomes a no-op, which means unscoped.
+ */
+function primaryParamName(
+  request: CrudRequestConfig<PlainLiteralObject> | undefined,
+): string {
+  const params = request?.params;
+  if (!params) return 'id';
+  for (const [name, option] of Object.entries(params)) {
+    if (option?.primary === true) return name;
+  }
+  return 'id';
 }

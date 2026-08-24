@@ -8,6 +8,51 @@ import {
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 import { asClassicSchema, unwrapField } from './field-meta';
+import { attachOperationDtoOpenApiFields } from '../infrastructure/resource/operation-resource/openapi-dto-metadata';
+import { ROCKETS_GENERATED_DTO_NAME } from '../infrastructure/resource/operation-resource/build-operation-controller';
+
+type ZodShapeField = z.ZodType;
+
+function isOptionalZodField(field: ZodShapeField): boolean {
+  if (typeof field.isOptional === 'function') {
+    return field.isOptional();
+  }
+  const def = (field as { def?: { type?: string } }).def;
+  return def?.type === 'optional' || def?.type === 'default';
+}
+
+function openApiSchemaFromZodField(
+  field: ZodShapeField,
+): Record<string, unknown> {
+  try {
+    const json = z.toJSONSchema(field) as Record<string, unknown>;
+    const { $schema: _schema, ...rest } = json;
+    return rest;
+  } catch {
+    return { type: 'string' };
+  }
+}
+
+/**
+ * Names a freshly created DTO class and marks the name as Rockets-minted.
+ *
+ * Every path that mints a DTO name must go through here. `compileDtoClass`
+ * did and the `z.array` branch of `compileOperationDto` did not, so array
+ * outputs — the documented shape for a list endpoint — stayed invisible to
+ * the component-uniqueness assertion and reproduced the collision the
+ * assertion exists to stop.
+ */
+export function nameGeneratedDto<T extends object>(
+  cls: Type<T>,
+  name: string,
+): Type<T> {
+  Object.defineProperty(cls, 'name', { value: name });
+  Object.defineProperty(cls, ROCKETS_GENERATED_DTO_NAME, {
+    value: true,
+    enumerable: false,
+  });
+  return cls;
+}
 
 /**
  * DTO classes come straight from `nestjs-zod`'s `createZodDto` — no
@@ -31,8 +76,7 @@ export function compileDtoClass(
   name: string,
   nested?: Readonly<Record<string, Type<object>>>,
 ): Type<object> {
-  const cls = createZodDto(schema);
-  Object.defineProperty(cls, 'name', { value: name });
+  const cls = nameGeneratedDto(createZodDto(schema), name);
   Exclude()(cls);
   const proto: object = cls.prototype;
   for (const [key, field] of Object.entries(schema.shape)) {
@@ -70,6 +114,14 @@ export function compileDtoClass(
       Transform(raw, { toPlainOnly: true })(proto, key);
     }
   }
+  attachOperationDtoOpenApiFields(
+    cls,
+    Object.entries(schema.shape).map(([fieldName, field]) => ({
+      name: fieldName,
+      required: !isOptionalZodField(field),
+      schema: openApiSchemaFromZodField(field),
+    })),
+  );
   return cls;
 }
 
@@ -119,8 +171,7 @@ function stripToDeclaredShape(schema: z.ZodType, value: unknown): unknown {
 }
 
 export function namedZodDto<T>(schema: z.ZodObject, name: string): Type<T> {
-  const cls = createZodDto(schema);
-  Object.defineProperty(cls, 'name', { value: name });
+  const cls = nameGeneratedDto(createZodDto(schema), name);
   // `createZodDto` returns the same runtime constructor described by `Type<T>`;
   // only its generic instance type remains tied to the concrete schema. The
   // caller's `T` is the structurally matching public DTO contract, so this cast

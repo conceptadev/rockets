@@ -18,6 +18,32 @@ export {
   ROCKETS_DISABLE_GUARDS_TOKEN,
 } from './rockets-core.constants';
 export { AuthServerGuard } from './infrastructure/guards/auth-server.guard';
+
+// CRUD serialization: free-form JSON opt-out (documented in the README's
+// JSON-column guide; was reachable only by deep import, which the packed
+// consumer cannot do — review round 4).
+export {
+  FreeFormJson,
+  ROCKETS_TO_INSTANCE_OPTIONS,
+  ROCKETS_TO_PLAIN_OPTIONS,
+} from './infrastructure/crud-serialization';
+
+// Route policy audit — reports what is actually enforced on every
+// discovered route, and fails the boot when the declared policy is not
+// met. Opt-in via `RocketsCoreModule.forRoot({ routePolicy })`.
+export {
+  RouteAuditService,
+  ROCKETS_ROUTE_POLICY_TOKEN,
+  collectRouteAudit,
+  evaluateRoutePolicy,
+  formatPolicyViolations,
+  type ControllerScan,
+  type RouteAuditEntry,
+  type RouteAuditReport,
+  type RouteAuthState,
+  type RoutePolicy,
+  type RoutePolicyViolation,
+} from './infrastructure/audit';
 export { PathScopeGuard } from './infrastructure/guards/path-scope.guard';
 
 // Decorators
@@ -88,6 +114,14 @@ export {
   RocketsCoreExceptionsFilter,
   ERROR_MESSAGE_FALLBACK,
 } from './infrastructure/filters/exceptions.filter';
+export {
+  ROCKETS_ERROR_SERIALIZER_TOKEN,
+  defaultErrorSerializer,
+} from './infrastructure/filters/error-serializer';
+export type {
+  RocketsErrorContext,
+  RocketsErrorSerializerInterface,
+} from './infrastructure/filters/error-serializer';
 
 // Repository persistence interfaces
 export type { RepositoryPersistenceConfig } from './domain/interfaces/repository-persistence.interface';
@@ -118,11 +152,36 @@ export type {
   ModuleResourceEntityEntry,
 } from './domain/interfaces/module-resource.interface';
 export { ResourceKind } from './domain/interfaces/resource-kind.enum';
+export type {
+  OperationAclConfig,
+  ResourceAclAction,
+  ResourceAclConfig,
+  ResourceAclPlan,
+} from './domain/interfaces/resource-acl.interface';
 export {
   defineModuleResource,
   isModuleResource,
 } from './infrastructure/resource/define-module-resource';
 export type { DefineModuleResourceInput } from './infrastructure/resource/define-module-resource';
+
+// Operation resource (typed non-CRUD endpoints)
+export type {
+  OperationResource,
+  OperationResourceDefinition,
+  OperationContext,
+  OperationRequest,
+  OperationResponse,
+  OperationHandler,
+  OperationHandlerClassRef,
+  OperationHandlerFn,
+  OperationHandlerRef,
+  CompiledOperationDescriptor,
+  OperationHttpMethod,
+} from './domain/interfaces/operation-resource.interface';
+export {
+  defineOperationResource,
+  isOperationResource,
+} from './infrastructure/resource/define-operation-resource';
 
 // Auth bootstrap (light / external auth wiring)
 export type {
@@ -132,6 +191,16 @@ export type {
 } from './domain/interfaces/auth-bootstrap.interface';
 export { defineAuthAdapter } from './infrastructure/auth/define-auth-adapter';
 export type { DefineAuthAdapterOptions } from './infrastructure/auth/define-auth-adapter';
+export {
+  collectRegisteredRoutes,
+  findRegisteredRouteCollisions,
+  validateRegisteredRoutes,
+} from './infrastructure/routing/validate-registered-routes';
+export type {
+  RegisteredRoute,
+  RegisteredRouteCollision,
+  RouteInspectionTarget,
+} from './infrastructure/routing/validate-registered-routes';
 
 // Resource config & definition API
 export type { RocketsResourceConfig } from './domain/interfaces/rockets-resource.interface';

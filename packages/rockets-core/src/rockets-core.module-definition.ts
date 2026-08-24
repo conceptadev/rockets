@@ -5,11 +5,15 @@ import {
   Provider,
   Type,
 } from '@nestjs/common';
-import { APP_INTERCEPTOR, Reflector } from '@nestjs/core';
+import { APP_INTERCEPTOR, DiscoveryModule, Reflector } from '@nestjs/core';
 import { CqrsModule } from '@nestjs/cqrs';
 import { ConfigModule } from '@nestjs/config';
 import { RepositoryModule } from '@concepta/nestjs-repository';
 import { CrudModule } from '@concepta/nestjs-crud';
+import {
+  ROCKETS_TO_INSTANCE_OPTIONS,
+  ROCKETS_TO_PLAIN_OPTIONS,
+} from './infrastructure/crud-serialization';
 import { AuthUserContextOverlay } from '@concepta/nestjs-authentication';
 import type { RocketsResourceConfig } from './domain/interfaces/rockets-resource.interface';
 import { collectBootstrapForRootImports } from './infrastructure/repository/collect-bootstrap-for-root-imports';
@@ -29,6 +33,10 @@ import { RocketsCoreOptionsExtrasInterface } from './infrastructure/config/inter
 import { RocketsCoreSettingsInterface } from './infrastructure/config/interfaces/rockets-core-settings.interface';
 import { rocketsCoreDefaultConfig } from './infrastructure/config/rockets-core-options-default.config';
 import { AuthServerGuard } from './infrastructure/guards/auth-server.guard';
+import {
+  RouteAuditService,
+  ROCKETS_ROUTE_POLICY_TOKEN,
+} from './infrastructure/audit';
 import { ActorOverlay } from './infrastructure/interceptors/actor.overlay';
 import { ZodBodyValidationInterceptor } from './infrastructure/interceptors/zod-body-validation.interceptor';
 import { UpsertUserMetadataHandler } from './application/commands/handlers/upsert-user-metadata.handler';
@@ -90,6 +98,8 @@ function definitionTransform(
     resources: extras.resources ?? [],
     repository: extras.repository,
     userMetadata: extras.userMetadata,
+    accessControl: extras.accessControl !== undefined,
+    enforceGrants: extras.accessControl?.enforceGrants === true,
   });
 
   return {
@@ -98,7 +108,7 @@ function definitionTransform(
     imports: [...defImports, ...createCoreImports(extras, plan)],
     controllers: [],
     providers: createCoreProviders({ providers, extras, plan }),
-    exports: createCoreExports({ exports: defExports, plan }),
+    exports: createCoreExports({ exports: defExports, plan, extras }),
   };
 }
 
@@ -142,7 +152,18 @@ function createCoreImports(
   // without CRUD metadata (nestjs-crud `5249672`), so mixed CRUD + custom
   // controllers share one `CrudModule.forRoot()` safely.
   if (plan.crudResources.length) {
-    imports.push(CrudModule.forRoot({}));
+    imports.push(
+      CrudModule.forRoot({
+        // Outbound only; `toInstanceOptions` keeps the upstream whitelist.
+        // See `crud-serialization.ts`.
+        settings: {
+          serialization: {
+            toInstanceOptions: ROCKETS_TO_INSTANCE_OPTIONS,
+            toPlainOptions: ROCKETS_TO_PLAIN_OPTIONS,
+          },
+        },
+      }),
+    );
     for (const resource of plan.crudResources) {
       imports.push(CrudModule.forFeature(resource));
     }
@@ -168,7 +189,23 @@ function createCoreImports(
   // Access control is opt-in: no `accessControl` config → no ACL module,
   // guard, or provider is registered at all.
   if (extras.accessControl) {
-    imports.push(buildAccessControlImport(extras.accessControl));
+    // Bundle-declared `acl.query` services are merged with any the app
+    // listed itself, so a resource cannot declare a query service and
+    // then 500 at request time because nobody registered it. They must
+    // land on `AccessControlModule` specifically: the upstream guard
+    // strict-resolves from its own host module.
+    imports.push(
+      buildAccessControlImport(
+        extras.accessControl,
+        plan.accessControlQueryServices,
+      ),
+    );
+  }
+
+  // `RouteAuditService` injects DiscoveryService/MetadataScanner, which
+  // only exist once DiscoveryModule is imported.
+  if (extras.routePolicy) {
+    imports.push(DiscoveryModule);
   }
 
   return imports;
@@ -220,8 +257,23 @@ function createCoreProviders(options: {
     userMetadataProviders.push(getUserMetadata);
   }
 
+  // Route policy is opt-in. Declaring one registers the bootstrap audit;
+  // omitting it registers nothing, so an app that never asked for the
+  // check pays no discovery cost at boot. Contribution-carrying
+  // bootstraps never reach here (core rejects them above), so guard
+  // classes contributed by `providesAppGuard` integrations are merged
+  // into the policy by the SERVER composition before forwarding.
+  const routePolicy = options.extras?.routePolicy;
+  const routeAuditProviders: Provider[] = routePolicy
+    ? [
+        RouteAuditService,
+        { provide: ROCKETS_ROUTE_POLICY_TOKEN, useValue: routePolicy },
+      ]
+    : [];
+
   return [
     ...providers,
+    ...routeAuditProviders,
     AuthServerGuard,
     // Makes the authenticated user available to the CRUD system (`@AuthUser()` in upstream v8).
     // (When you use the full auth module, that module may register the same thing — don’t double up.)
@@ -242,6 +294,7 @@ function createCoreProviders(options: {
 function createCoreExports(options: {
   exports: DynamicModule['exports'];
   plan: AppRegistrationPlan;
+  extras?: RocketsCoreOptionsExtrasInterface;
 }): DynamicModule['exports'] {
   const exports: NonNullable<DynamicModule['exports']> = [
     ...(options.exports ?? []),
@@ -251,6 +304,14 @@ function createCoreExports(options: {
     ROCKETS_CORE_SETTINGS_TOKEN,
     AuthServerGuard,
   ];
+
+  // Same condition as the provider registration: the docs promise the
+  // service is INJECTABLE when a policy is declared, and a registered
+  // but unexported provider only satisfies `app.get()` — a consumer
+  // module's `inject: [RouteAuditService]` failed DI (review round 4).
+  if (options.extras?.routePolicy) {
+    exports.push(RouteAuditService);
+  }
 
   // Re-export per-resource providers (custom handlers, hooks) so the rest of the
   // app can inject them without importing every feature module twice.

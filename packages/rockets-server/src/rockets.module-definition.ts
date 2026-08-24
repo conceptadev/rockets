@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import type {
+  RoutePolicy,
   AuthBootstrap,
   AuthBootstrapContributions,
   AuthBootstrapIdentity,
@@ -89,6 +90,33 @@ function resolveSingleContribution<
 
 // Composition is the only consumer of identity/contributes; core refuses
 // bootstraps that still carry them, so strip before handing down.
+/**
+ * Merges guard classes contributed by `providesAppGuard` integrations
+ * into the route policy's `authGuards`.
+ *
+ * This is the only place it can happen: contributions are resolved by
+ * THIS composition and stripped before bootstraps reach core (core
+ * rejects contribution-carrying bootstraps outright). Without the
+ * merge, a `defineRocketsAuth` composition — whose global guard is
+ * upstream `JwtGuard`, not `AuthServerGuard` — reports every route as
+ * `unguarded-app` and any declared rule aborts the boot, on the exact
+ * routes the audit's documentation promises to cover.
+ */
+function mergeContributedAuthGuards(
+  routePolicy: RoutePolicy | undefined,
+  auth: readonly AuthBootstrap[],
+): RoutePolicy | undefined {
+  if (!routePolicy) return undefined;
+  const contributed = auth.flatMap(
+    (bootstrap) => bootstrap.contributes?.authGuards ?? [],
+  );
+  if (contributed.length === 0) return routePolicy;
+  return {
+    ...routePolicy,
+    authGuards: [...contributed, ...(routePolicy.authGuards ?? [])],
+  };
+}
+
 function toCoreAuthBootstrap({
   identity: _identity,
   contributes: _contributes,
@@ -289,6 +317,10 @@ export function createRocketsImports(options: {
       resources: composition.resources,
       handlers: options.extras?.handlers,
       accessControl: options.extras?.accessControl,
+      routePolicy: mergeContributedAuthGuards(
+        options.extras?.routePolicy,
+        composition.auth,
+      ),
       global: true,
     }),
   ];

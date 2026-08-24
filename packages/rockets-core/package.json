@@ -81,6 +81,7 @@
     "@nestjs/cqrs": "^11.0.0",
     "@nestjs/swagger": "12.0.0-alpha.2",
     "@standard-schema/spec": "1.1.0",
+    "path-to-regexp": "^8.4.2",
     "pluralize": "^8.0.0"
   },
   "devDependencies": {

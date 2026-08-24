@@ -1,7 +1,11 @@
 import { Injectable, type PlainLiteralObject, type Type } from '@nestjs/common';
 import { type RepositoryInterface, Where } from '@concepta/nestjs-repository';
 
-import { EntityHook, PassthroughEntityHookBase } from './entity-hook';
+import {
+  EntityHook,
+  type EntityHookContext,
+  PassthroughEntityHookBase,
+} from './entity-hook';
 import { deriveEntityKey } from '../../common';
 import { InjectDynamicRepository } from '../../common';
 
@@ -25,6 +29,21 @@ import { InjectDynamicRepository } from '../../common';
  *
  * Trade-off: each create triggers an extra DB read. Use only on resources
  * whose entities declare eager relations that consumers depend on.
+ *
+ * The reload forwards the hook's `ctx`, which matters twice:
+ *
+ * - **Transaction.** `getRepo(ctx)` on the TypeORM adapter returns the
+ *   transaction's repository only when the context carries `TrxCtx`;
+ *   otherwise it returns the default one, backed by a different
+ *   `EntityManager`. Under `transactional: true` the row is still
+ *   uncommitted, so on any driver that hands transactions a dedicated
+ *   connection (Postgres, MySQL) the reload finds nothing and the eager
+ *   relation silently vanishes from the create response. It happens to
+ *   work on in-memory SQLite because the transaction shares the one
+ *   connection — which is exactly why no e2e here can catch it.
+ * - **Hooks.** The reload now runs the entity's own read hooks, so the
+ *   create response shows what a read would show. A column a read hook
+ *   hides no longer reappears on the way out of a create.
  */
 @EntityHook()
 @Injectable()
@@ -33,14 +52,28 @@ export abstract class AfterCreateReloadHook<
 > extends PassthroughEntityHookBase<E> {
   protected repo!: RepositoryInterface<E>;
 
-  override async afterCreate(created: E): Promise<E> {
+  override async afterCreate(created: E, ctx?: EntityHookContext): Promise<E> {
     const id = (created as { id?: unknown }).id;
     if (typeof id !== 'string' || id.length === 0) return created;
     const reloaded = (await this.repo.findOne({
       where: Where.eq<E>('id' as keyof E & string, id),
+      ctx,
     })) as E | null;
     if (!reloaded) return created;
-    Object.assign(created as Record<string, unknown>, reloaded);
+    // Assign alone cannot REMOVE a key: a column a read hook deleted
+    // from `reloaded` (the whole point of reloading through the read
+    // path) stayed on `created` from the raw save() result — the hidden
+    // column leaked exactly on the create response the docstring
+    // promises it will not. Drop keys the read view does not carry,
+    // then merge; `created`'s object identity is preserved for the
+    // callers holding the reference.
+    const record = created as Record<string, unknown>;
+    for (const key of Object.keys(record)) {
+      if (!(key in reloaded)) {
+        delete record[key];
+      }
+    }
+    Object.assign(record, reloaded);
     return created;
   }
 

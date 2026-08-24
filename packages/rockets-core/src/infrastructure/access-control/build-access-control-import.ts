@@ -1,5 +1,8 @@
-import { DynamicModule } from '@nestjs/common';
-import { AccessControlModule } from '@concepta/nestjs-access-control';
+import { DynamicModule, type Provider, type Type } from '@nestjs/common';
+import {
+  AccessControlModule,
+  type CanAccess,
+} from '@concepta/nestjs-access-control';
 import { RocketsAccessControlConfig } from '../config/interfaces/rockets-core-options-extras.interface';
 
 /**
@@ -20,8 +23,32 @@ import { RocketsAccessControlConfig } from '../config/interfaces/rockets-core-op
  * the guard in the controller's module scope, where queryServices are NOT
  * registered, and every request would 500 with `UnknownElementException`.
  */
+/** Injection token a provider registers under. */
+function providerToken(provider: Provider<CanAccess>): unknown {
+  return typeof provider === 'function' ? provider : provider.provide;
+}
+
 export function buildAccessControlImport(
   config: RocketsAccessControlConfig,
+  collectedQueryServices: ReadonlyArray<Type<CanAccess>> = [],
 ): DynamicModule {
-  return AccessControlModule.forRoot({ ...config });
+  // `enforceGrants` is a Rockets planner flag, not an upstream option —
+  // forwarding it would land an unknown key in the upstream config.
+  const { enforceGrants: _enforceGrants, ...upstream } = config;
+
+  const declared = upstream.queryServices ?? [];
+  // Compared by TOKEN, not by provider object. An app registering
+  // `{ provide: OwnerCanAccess, useClass: TestOwnerCanAccess }` would not
+  // match the bare class, so appending it would shadow that deliberate
+  // `useClass` — in Nest the last provider for a token wins.
+  const declaredTokens = new Set(declared.map(providerToken));
+  const merged = [
+    ...declared,
+    ...collectedQueryServices.filter((service) => !declaredTokens.has(service)),
+  ];
+
+  return AccessControlModule.forRoot({
+    ...upstream,
+    ...(merged.length ? { queryServices: merged } : {}),
+  });
 }

@@ -9,6 +9,13 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Documentation
+
+- Document `operationResource` / `defineOperationResource` as first-class
+  `resources[]` bundles (import from `@concepta/rockets-core` /
+  `@concepta/rockets-core/zod`; not yet on the curated `@concepta/rockets`
+  facade). See root `CONFIGURATION.md` §6a.
+
 ### Release preparation
 
 - Package manifest set to `1.0.0-alpha.8`; registry publication is

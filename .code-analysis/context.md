@@ -169,9 +169,10 @@ so a feature added to one runs identically on the other.
 | **Motor / engine** | The upstream `@concepta/nestjs-*` stack. Rockets calls it; does not replace it. |
 | **Composition** | What Rockets owns: turning options into Nest modules. |
 | **Resource** | A feature described as config. `defineResource()` = CRUD-shaped, auto-contributes its entity row. |
-| **Module resource** | `defineModuleResource({ entities, module })` — a non-CRUD Nest slice; `entities: []` is valid for CQRS-only workflows. |
+| **Module resource** | `defineModuleResource({ entities, module })` — a non-CRUD Nest slice; `entities: []` is valid for CQRS-only workflows without generated HTTP. |
 | **Sub-resource** | `defineSubResource()` — nested CRUD (`/pets/:petId/tags`), scoped via `PathScopeHook` + `PathScopeGuard` (parent-ownership check, 404 on miss). |
-| **Planner** | `buildAppRegistrationPlan({ resources, repository, userMetadata })` → `{ crudResources, entityRegistrations, nestModules }`. Where "one options object" becomes Nest modules. |
+| **Operation resource** | `operationResource()` / `defineOperationResource()` — typed non-CRUD HTTP (generated controller; Zod `input`/`output`; `op.read`/`op.write`/`op.delete`). |
+| **Planner** | `buildAppRegistrationPlan({ resources, repository, userMetadata })` → `{ crudResources, entityRegistrations, nestModules }`. Where "one options object" becomes Nest modules. Includes cross-resource route collision checks for operation + CRUD paths. |
 | **Auth adapter** | `AuthAdapterInterface.authenticate()` → `{matched:false}` (try next) \| `{matched:true,user}` (stop) \| `{matched:true,error}` (stop + throw). |
 | **Auth chain** | `AuthServerGuard` iterating `auth: [...]`. No silent credential passthrough. |
 | **AuthorizedUser** | `{ id, sub, email?, userRoles?, claims? }`. Read via `@AuthUser()` or `getActor(ctx)` in CQRS handlers. |
@@ -180,7 +181,7 @@ so a feature added to one runs identically on the other.
 | **Repository adapter** | Concrete backend (TypeORM / Firestore) selected in module options. One root `repository`, per-entity override allowed. |
 | **User metadata** | `userMetadata` config — profile row keyed by auth id, exposed on `/me`. |
 | **Hooks** | Core's own `EntityHook` / `defineHook`, built on `@concepta/nestjs-repository`'s `RepoHook` + `Before*`/`After*` decorators. Owner/path scoping ships as hooks. Throwing a bare `Error` — or even an `HttpException` — from a hook surfaces as **500**; throw domain exceptions from `@concepta/nestjs-common` so filters map them to 4xx. |
-| **Zod resource** | `zodResource()` / `zodSubResource()` at the `/zod` subpath — schema-first path. |
+| **Zod resource** | `zodResource()` / `zodSubResource()` / `operationResource()` at the `/zod` subpath — schema-first path. |
 | **SchemaEntityCompiler** | Adapter contract that keeps the zod layer **ORM-free** by delegating entity generation. |
 | **Micro app** | One Rockets deployment owning one domain, trusting shared identity. |
 | **Stargate** | External workflow platform that orchestrates and provisions micro apps. Not in this repo. |
@@ -193,8 +194,9 @@ so a feature added to one runs identically on the other.
   infrastructure. Auth abstraction (`AuthAdapterInterface`, `AuthServerGuard`),
   CQRS handlers, declarative resources + planner, root `repository` +
   `userMetadata` config, Swagger registration, opt-in `accessControl`, shared
-  decorators/utils, and the zod-first layer at the `/zod` subpath. Imported by
-  both server and auth. Registered `global: true`.
+  decorators/utils, and the zod-first layer at the `/zod` subpath
+  (`zodResource`, `operationResource`, …). Imported by both server and auth.
+  Registered `global: true`.
 - **`rockets-server`** (`@bitwild/rockets`, ~5.4k LOC) — Path A presentation +
   composition. `MeController`, `APP_GUARD` opt-in, `auth` chain.
 - **`rockets-server-auth`** (`@bitwild/rockets-auth`, ~9.9k LOC) — Path B built-in

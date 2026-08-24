@@ -10,7 +10,10 @@ import { buildEntityRegistry } from './entity-registry';
 import { buildRepositoryPlan } from './repository-plan';
 import { sortResourceInputs } from './sort-resource-inputs';
 import { materialiseModuleResource } from './materialise-module-resource';
+import { materialiseOperationResource } from './materialise-operation-resource';
 import { validateResourceRelations } from './validate-relations';
+import { validateStructuredRouteCollisions } from './validate-route-collisions';
+import { planAccessControl } from './validate-access-control';
 
 /**
  * Plan everything a `RocketsCoreModule` boot needs from the user's
@@ -18,32 +21,36 @@ import { validateResourceRelations } from './validate-relations';
  * the optional `userMetadata` config.
  *
  * Pipeline:
- *   1. Sort inputs (CRUD / module-resource / manual).
+ *   1. Sort inputs (CRUD / module-resource / operation-resource / manual).
  *   2. Build entity registry (dedupe + relation targets).
  *   3. Group repository rows per adapter (strict — adapter required).
  *   4. Validate CRUD relations against the registry.
- *   5. Materialise module-resource Nest slices.
- *
- * @example
- * ```ts
- * buildAppRegistrationPlan({
- *   resources: [petResource, profileFeature],
- *   repository: TypeOrmRepositoryModule,
- *   userMetadata: { entity: UserMetadataEntity, ... },
- * })
- * ```
+ *   5. Reject cross-resource METHOD+path collisions (CRUD/Sub/Operation).
+ *   6. Materialise module-resource and operation-resource Nest slices.
  */
 export function buildAppRegistrationPlan(args: {
   readonly resources: ReadonlyArray<ResourceInput>;
   readonly repository?: RepositoryModuleInterface;
   readonly userMetadata?: RocketsUserMetadataConfig;
+  /** Whether the app configured root `accessControl`. */
+  readonly accessControl?: boolean;
+  /**
+   * Whether every route this planner GENERATES must carry an ACL grant.
+   * Module-resource, manual and package-owned controllers are outside
+   * what the planner can see — see `planAccessControl`.
+   */
+  readonly enforceGrants?: boolean;
 }): AppRegistrationPlan {
   if (args.userMetadata) {
     validateRocketsUserMetadataConfig(args.userMetadata);
   }
 
-  const { generatedResources, moduleBundles, manualResources } =
-    sortResourceInputs(args.resources);
+  const {
+    generatedResources,
+    moduleBundles,
+    operationBundles,
+    manualResources,
+  } = sortResourceInputs(args.resources);
 
   const entityRegistry = buildEntityRegistry(
     generatedResources,
@@ -60,16 +67,35 @@ export function buildAppRegistrationPlan(args: {
 
   validateResourceRelations(generatedResources, entityRegistry);
 
-  const nestModules = moduleBundles.map(materialiseModuleResource);
+  validateStructuredRouteCollisions({
+    generatedResources,
+    manualResources,
+    operationBundles,
+  });
+
+  const nestModules = [
+    ...moduleBundles.map(materialiseModuleResource),
+    ...operationBundles.map(materialiseOperationResource),
+  ];
 
   const crudResources: RocketsResourceConfig[] = [
     ...generatedResources.map((resource) => resource.core),
     ...manualResources,
   ];
 
+  const accessControlQueryServices = planAccessControl({
+    plans: [
+      ...generatedResources.map((resource) => resource.acl),
+      ...operationBundles.map((bundle) => bundle.acl),
+    ],
+    configured: args.accessControl === true,
+    enforceGrants: args.enforceGrants === true,
+  });
+
   return {
     crudResources,
     entityRegistrations,
     nestModules,
+    accessControlQueryServices,
   };
 }

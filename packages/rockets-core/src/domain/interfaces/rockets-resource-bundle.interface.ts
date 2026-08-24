@@ -6,6 +6,7 @@ import type {
 import type { RocketsResourceConfig } from './rockets-resource.interface';
 import type { ResourceRelationEntry } from './rockets-resource-definition.interface';
 import type { ResourceKind } from './resource-kind.enum';
+import type { ResourceAclPlan } from './resource-acl.interface';
 
 /**
  * The object returned by `defineResource()`.
@@ -19,6 +20,12 @@ export interface CrudResource<
   E extends PlainLiteralObject = PlainLiteralObject,
 > {
   readonly kind: ResourceKind.Crud;
+  /**
+   * Access-control summary consumed by `buildAppRegistrationPlan`: the
+   * `CanAccess` services to register with `AccessControlModule`, and the
+   * authenticated operations left without a grant.
+   */
+  readonly acl: ResourceAclPlan;
   /** What `CrudModule` uses to build endpoints + CQRS operation wiring. */
   readonly core: RocketsResourceConfig;
   /**

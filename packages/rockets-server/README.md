@@ -52,9 +52,11 @@ What it adds on top of core:
   `forRoot()` when the adapter needs its own Nest module slice.
 
 The common application surface (`defineResource`, `defineModuleResource`,
-owner hooks, dynamic repositories, and Swagger service) is re-exported from
-core. The facade is intentionally curated; advanced core-only seams stay on
-`@concepta/rockets-core`.
+`defineSubResource`, owner hooks, dynamic repositories, and Swagger service)
+is re-exported from core. Typed non-CRUD HTTP uses `operationResource` from
+`@concepta/rockets-core/zod` (or `defineOperationResource` from
+`@concepta/rockets-core`). The facade is intentionally curated; advanced
+core-only seams stay on `@concepta/rockets-core`.
 
 ### When to use this package
 
@@ -384,7 +386,7 @@ definition asynchronously.
 | `auth`              | `AuthBootstrap \| ReadonlyArray<AuthBootstrap>`    | yes                       | From `defineFirebaseAuth()`, `defineRocketsAuth()`, or app-local helpers. Integrations may contribute owned defaults.    |
 | `userMetadata`      | `RocketsUserMetadataConfig`                        | optional                  | When present, mounts `/me` and its metadata handlers. Explicit configuration overrides an auth contribution.            |
 | `repository`        | `RepositoryModuleInterface \| RepositoryBootstrap` | optional                  | Default persistence adapter forwarded to core. Omit if the auth integration registers everything.                        |
-| `resources`         | `ReadonlyArray<ResourceInput>`                     | optional                  | Bundles from `defineResource` / `defineModuleResource` / hand-built `RocketsResourceConfig`.                             |
+| `resources`         | `ReadonlyArray<ResourceInput>`                     | optional                  | Bundles from `defineResource` / `defineModuleResource` / `defineSubResource` / `defineOperationResource` / `operationResource` / hand-built `RocketsResourceConfig`. |
 | `enableGlobalGuard` | `boolean` (default `true`)                         | optional                  | Set `false` to skip the `APP_GUARD: AuthServerGuard` provider.                                                           |
 | `disableController` | `{ me?: boolean }`                                 | optional                  | Drop `MeController` (or other built-ins added later).                                                                    |
 | `handlers`          | `{ upsertUserMetadata?, getUserMetadata? }`        | optional                  | Override the default CQRS handlers for the metadata table.                                                               |
@@ -434,6 +436,9 @@ Everything most external-auth apps need:
 This is an explicit facade, not an `export *` compatibility promise. Import
 the following advanced seams from `@concepta/rockets-core` directly:
 
+- Operation resources: `defineOperationResource`, `isOperationResource`, and
+  types such as `OperationResource` / `OperationResourceDefinition`. Prefer
+  `operationResource` from `@concepta/rockets-core/zod` for Zod authoring.
 - Context/CRUD internals: `ActorOverlay`, `AppContextHost`, `AppContextLike`,
   `AuthUserCtx`, `AuthUserContextOverlay`, `getAppContext`,
   `CrudCommandHandlerBase`, `CrudQueryHandlerBase`, `CrudCommandInterface`,
