@@ -7,6 +7,39 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Added
 
+- **`operationResource` request deadline and disconnect signal (issue
+  #78).** Every operation now carries `ctx.signal: AbortSignal`, exposed
+  via an optional `deadlineMs` on the operation descriptor. Elapsing the
+  deadline aborts the signal and resolves `504 Gateway Timeout`; a client
+  disconnecting before the handler settles aborts it too, though nothing
+  is written back since the socket is already gone. A handler passes
+  `ctx.signal` through to whatever does the actual waiting to stop wasted
+  work; one that never reads it keeps running in the background after the
+  timeout response is sent — the deadline bounds what the CLIENT waits
+  for, not the work itself. Scoped to `operationResource` in this pass;
+  CRUD command handlers have the same gap and are not covered. See
+  `CONFIGURATION.md` §6b. **Type-level breaking change:** `OperationContext`
+  gained a required `signal` field — a hand-constructed context (e.g. a
+  unit test mocking one instead of reading it from a route) needs to add
+  it; the framework-constructed context every route receives already does.
+
+- **File storage seam — presigned upload/download URLs (issue #86).**
+  `FileStorageServiceInterface` (`getUploadUrl` / `getDownloadUrl`),
+  exported under `FILE_STORAGE_SERVICE_TOKEN`. Deliberately not a
+  multipart/Multer primitive: parsing `multipart/form-data` in the Nest
+  process needs different libraries on Express vs Fastify, breaking the
+  adapter-agnostic contract the rest of the package holds. The
+  presigned-URL pattern sidesteps that — the client uploads/downloads
+  directly against the storage backend, so this Nest app never touches
+  the bytes, and the seam works unmodified on either HTTP adapter. Core
+  ships no concrete implementation (no storage SDK is a core dependency,
+  same rule as the ORM-agnostic repository contract); an app provides
+  one — S3, GCS, or a local-dev equivalent — as an ordinary DI provider.
+  No new `operationResource` builder: `op.write` / `op.read` already
+  express the shape, demonstrated with size/mime-type limits enforced by
+  the input schema itself, before the storage backend is ever called.
+  See `CONFIGURATION.md` §6c.
+
 - **`strictInput` on zodResource body operations (issue #79).** Opt-in
   per-op flag that rejects unknown **top-level** JSON keys with `400`
   naming the offending keys, instead of the default silent stripping

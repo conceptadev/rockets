@@ -172,6 +172,13 @@ export {
 } from './infrastructure/resource/define-module-resource';
 export type { DefineModuleResourceInput } from './infrastructure/resource/define-module-resource';
 
+// File storage seam — presigned upload/download URLs (issue #86)
+export {
+  FILE_STORAGE_SERVICE_TOKEN,
+  type FileStorageDescriptor,
+  type FileStorageServiceInterface,
+} from './domain/interfaces/file-storage.interface';
+
 // Operation resource (typed non-CRUD endpoints)
 export type {
   OperationResource,

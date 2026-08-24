@@ -216,6 +216,15 @@ Planner collision checks only cover Rockets-owned structured routes. For a
 real adapter audit after global prefix/versioning/manual controllers are
 registered, call `validateRegisteredRoutes(app)` after `app.init()`.
 
+Every operation also carries `ctx.signal: AbortSignal` — pass it to
+whatever does the actual waiting (a `fetch`, a query) and it fires when
+`deadlineMs` elapses (`504 Gateway Timeout`) or the client disconnects.
+File upload/download has no dedicated builder either, but the same
+`op.write` / `op.read` shapes cover it via a presigned-URL storage seam
+(`FileStorageServiceInterface`) — the client uploads directly to the
+storage backend, so this Nest app never parses a multipart body. Both:
+[CONFIGURATION.md §6b/§6c](../../CONFIGURATION.md#6b-request-deadline-and-disconnect-signal-issue-78).
+
 ### Scope rows to the authenticated user
 
 `OwnerStampHook` writes `userId` on create/update and rejects spoofing.

@@ -55,6 +55,15 @@ export interface OperationContext<
   readonly request: OperationRequest;
   readonly response: OperationResponse;
   readonly user: AuthorizedUser | undefined;
+  /**
+   * Fires when the operation's `deadlineMs` elapses (issue #78) or the
+   * client disconnects before the handler settles. A handler that runs
+   * downstream work — a fetch, a long query — should pass this through so
+   * that work is cancelled instead of running to completion after nobody
+   * is listening. Reading `signal.aborted` from inside a manual loop works
+   * too. Cooperative only: nothing here forces a handler to stop.
+   */
+  readonly signal: AbortSignal;
 }
 
 export interface OperationHandler<
@@ -115,6 +124,15 @@ export interface CompiledOperationDescriptor {
    */
   readonly acl?: OperationAclConfig;
   readonly transactional?: boolean;
+  /**
+   * Milliseconds before this operation's `ctx.signal` aborts and the
+   * response resolves `504 Gateway Timeout` — the operation's own
+   * request/response cycle, not a per-downstream-call budget (issue
+   * #78). Absent means no deadline. A handler that ignores `ctx.signal`
+   * keeps running in the background after the timeout response is sent;
+   * the deadline stops the CLIENT from waiting, not the work itself.
+   */
+  readonly deadlineMs?: number;
   readonly inputDto?: Type<object>;
   /**
    * Response contract: the DTO to whitelist and document against, or

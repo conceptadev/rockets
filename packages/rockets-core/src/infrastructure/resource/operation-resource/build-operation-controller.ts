@@ -22,6 +22,7 @@ import {
   Controller,
   Delete,
   Get,
+  GatewayTimeoutException,
   HttpCode,
   InternalServerErrorException,
   Logger,
@@ -98,6 +99,89 @@ function outputValidationError(
     message: 'Operation handler returned a value that failed output validation',
     error: 'Internal Server Error',
   });
+}
+
+/**
+ * Structural view of the native request — Node's `IncomingMessage` is an
+ * `EventEmitter`, so `close` fires on client disconnect on every supported
+ * adapter (Express and Fastify both wrap it). Declared narrowly rather than
+ * importing `http.IncomingMessage` to keep this transport-agnostic.
+ */
+interface DisconnectableRequest {
+  readonly on?: (event: 'close', listener: () => void) => unknown;
+  readonly off?: (event: 'close', listener: () => void) => unknown;
+}
+
+interface DeadlineGuard {
+  readonly signal: AbortSignal;
+  /**
+   * Races `promise` against the deadline/disconnect abort — whichever
+   * settles first wins, exactly like `Promise.race`.
+   */
+  race<T>(promise: Promise<T> | T): Promise<T>;
+  dispose(): void;
+}
+
+/**
+ * Issue #78: bounds one operation's own request/response cycle, not a
+ * per-downstream-call budget. `deadlineMs` elapsing aborts `signal` and
+ * resolves the request `504 Gateway Timeout`; a client disconnect aborts
+ * `signal` too, but nothing is written back — the socket is already gone,
+ * so the only point of aborting is to let a cooperative handler stop
+ * wasted work.
+ */
+function createDeadlineGuard(
+  deadlineMs: number | undefined,
+  request: unknown,
+  label: string,
+): DeadlineGuard {
+  const controller = new AbortController();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let timedOut = false;
+
+  if (deadlineMs !== undefined) {
+    timer = setTimeout(() => {
+      timedOut = true;
+      controller.abort(
+        new GatewayTimeoutException(
+          `Operation "${label}" exceeded its ${deadlineMs}ms deadline`,
+        ),
+      );
+      // Unref so a pending deadline never keeps the process alive on its
+      // own — same reasoning as any other background timer in a server.
+    }, deadlineMs);
+    (timer as unknown as { unref?: () => void }).unref?.();
+  }
+
+  const req = request as DisconnectableRequest;
+  const onClose = (): void => {
+    // A deadline that already fired owns the abort reason — a disconnect
+    // arriving after does not need to (and should not) overwrite it.
+    if (!timedOut) {
+      controller.abort(new Error(`Operation "${label}": client disconnected`));
+    }
+  };
+  req.on?.('close', onClose);
+
+  // `Promise.race` attaches a handler to every input promise regardless
+  // of which settles first, so the loser here is never an unhandled
+  // rejection — this is the same mechanism Promise.race itself relies on.
+  const abortedPromise = new Promise<never>((_resolve, reject) => {
+    controller.signal.addEventListener('abort', () => {
+      reject(controller.signal.reason as unknown);
+    });
+  });
+
+  return {
+    signal: controller.signal,
+    race<T>(promise: Promise<T> | T): Promise<T> {
+      return Promise.race([promise, abortedPromise]);
+    },
+    dispose(): void {
+      if (timer !== undefined) clearTimeout(timer);
+      req.off?.('close', onClose);
+    },
+  };
 }
 
 function assertValidatableDto(
@@ -619,6 +703,8 @@ function attachOperationMethod(
       raw: request,
     };
 
+    const deadline = createDeadlineGuard(operation.deadlineMs, request, label);
+
     const ctx: OperationContext<unknown, object> = {
       input,
       params: validatedParams,
@@ -626,39 +712,44 @@ function attachOperationMethod(
       request: operationRequest,
       response: { raw: response },
       user,
+      signal: deadline.signal,
     };
 
-    let result: unknown;
-    const handlerClass = getHandlerClass(operation.handler);
-    if (handlerClass !== undefined) {
-      const contextId = ContextIdFactory.getByRequest(request);
-      // Register the REQUEST under the context id before resolving:
-      // this controller is statically scoped, so the request carries no
-      // context id of its own and `getByRequest` mints a fresh one —
-      // without registration, a handler (or any dependency in its
-      // subtree) injecting `REQUEST` received `undefined` and 500'd on
-      // every call, though the same class works fine as an ordinary
-      // controller dependency.
-      this.moduleRef.registerRequestByContextId(request, contextId);
-      // Always strict: either the class is registered here, or a local
-      // alias for it is. Never a global scan.
-      const token: unknown = handlerAliases.get(handlerClass) ?? handlerClass;
-      const instance = await this.moduleRef.resolve<{
-        handle: (ctx: OperationContext<unknown, object>) => unknown;
-      }>(token as never, contextId, { strict: true });
-      result = await instance.handle(ctx);
-    } else if (isHandlerFunction(operation.handler)) {
-      const handler: OperationHandlerFn<unknown, unknown, object> =
-        operation.handler;
-      result = await handler(ctx);
-    } else {
-      throw new Error(`operationResource: invalid handler for "${label}"`);
-    }
+    try {
+      let result: unknown;
+      const handlerClass = getHandlerClass(operation.handler);
+      if (handlerClass !== undefined) {
+        const contextId = ContextIdFactory.getByRequest(request);
+        // Register the REQUEST under the context id before resolving:
+        // this controller is statically scoped, so the request carries no
+        // context id of its own and `getByRequest` mints a fresh one —
+        // without registration, a handler (or any dependency in its
+        // subtree) injecting `REQUEST` received `undefined` and 500'd on
+        // every call, though the same class works fine as an ordinary
+        // controller dependency.
+        this.moduleRef.registerRequestByContextId(request, contextId);
+        // Always strict: either the class is registered here, or a local
+        // alias for it is. Never a global scan.
+        const token: unknown = handlerAliases.get(handlerClass) ?? handlerClass;
+        const instance = await this.moduleRef.resolve<{
+          handle: (ctx: OperationContext<unknown, object>) => unknown;
+        }>(token as never, contextId, { strict: true });
+        result = await deadline.race(instance.handle(ctx));
+      } else if (isHandlerFunction(operation.handler)) {
+        const handler: OperationHandlerFn<unknown, unknown, object> =
+          operation.handler;
+        result = await deadline.race(handler(ctx));
+      } else {
+        throw new Error(`operationResource: invalid handler for "${label}"`);
+      }
 
-    if (operation.output === false) {
-      return result;
+      if (operation.output === false) {
+        return result;
+      }
+      return await applyOutputDto(operation.output, result, label);
+    } finally {
+      deadline.dispose();
     }
-    return applyOutputDto(operation.output, result, label);
   }
 
   Object.defineProperty(routeHandler, 'name', { value: methodName });

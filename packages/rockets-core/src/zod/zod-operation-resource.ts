@@ -82,6 +82,8 @@ interface SharedBuilderFields<
    */
   readonly acl?: OperationAclConfig;
   readonly transactional?: boolean;
+  /** See {@link CompiledOperationDescriptor.deadlineMs} (issue #78). */
+  readonly deadlineMs?: number;
   readonly input?: TInput;
   /** Required: schema to whitelist, or `false` to opt out explicitly. */
   readonly output: TOutput;
@@ -142,6 +144,7 @@ export interface PendingOperation<
   readonly public: boolean | undefined;
   readonly acl: OperationAclConfig | undefined;
   readonly transactional: boolean | undefined;
+  readonly deadlineMs: number | undefined;
   readonly input: z.ZodObject | undefined;
   readonly output: OperationOutputConfig;
   readonly handler: OperationHandlerRef<TInput, TOutput, TParams>;
@@ -163,6 +166,7 @@ export type OperationRecord = {
     readonly public: boolean | undefined;
     readonly acl: OperationAclConfig | undefined;
     readonly transactional: boolean | undefined;
+    readonly deadlineMs: number | undefined;
     readonly input: z.ZodObject | undefined;
     readonly output: OperationOutputConfig;
     readonly handler: unknown;
@@ -411,6 +415,7 @@ function compileOperation(
     public: pending.public,
     acl: pending.acl,
     transactional: pending.transactional,
+    deadlineMs: pending.deadlineMs,
     inputDto,
     output,
     handler: pending.handler,
@@ -435,6 +440,7 @@ function toPendingRead<
     public: config.public,
     acl: config.acl,
     transactional: config.transactional,
+    deadlineMs: config.deadlineMs,
     input: config.input,
     output: config.output,
     handler: config.handler,
@@ -459,6 +465,7 @@ function toPendingWrite<
     public: config.public,
     acl: config.acl,
     transactional: config.transactional,
+    deadlineMs: config.deadlineMs,
     input: config.input,
     output: config.output,
     handler: config.handler,
@@ -483,6 +490,7 @@ function toPendingDelete<
     public: config.public,
     acl: config.acl,
     transactional: config.transactional,
+    deadlineMs: config.deadlineMs,
     input: config.input,
     output: config.output,
     handler: config.handler,

@@ -696,6 +696,124 @@ query services. In an app composing auth **and** `RocketsCoreModule` with
 core registration only — list auth-side services in that module's
 `queryServices` explicitly.
 
+### 6b. Request deadline and disconnect signal (issue #78)
+
+Every operation carries `ctx.signal: AbortSignal`. It fires in two cases:
+
+- The operation declares `deadlineMs` and that much time elapses. The
+  client then gets `504 Gateway Timeout` — `ctx.signal` firing does not
+  stop the handler by itself, it just stops the client from waiting on it.
+- The client disconnects before the handler settles. Nothing is written
+  back (the socket is already gone); the only point of the signal firing
+  here is to let a cooperative handler stop wasted work.
+
+```ts
+export const ops = operationResource({
+  path: 'reports',
+  operations: (op) => ({
+    generate: op.write({
+      deadlineMs: 30_000,
+      input: z.object({ reportId: z.string() }),
+      output: z.object({ url: z.string() }),
+      handler: async (ctx) => {
+        // Passed straight through to whatever does the actual waiting —
+        // a fetch, a query builder that accepts an AbortSignal, a manual
+        // race against ctx.signal like the deadline e2e spec does.
+        const result = await generateReport(ctx.input.reportId, {
+          signal: ctx.signal,
+        });
+        return { url: result.url };
+      },
+    }),
+  }),
+});
+```
+
+A handler that never reads `ctx.signal` keeps running in the background
+after the 504 is sent — the deadline bounds what the CLIENT waits for,
+not the work itself. `deadlineMs` is absent by default (no deadline).
+Scope, stated plainly: this covers `operationResource` operations only.
+CRUD command handlers have the same gap (a long-running create, e.g. PDF
+generation) and are not covered in this pass.
+
+### 6c. File storage seam — presigned upload/download URLs (issue #86)
+
+There is no first-class `multipart/form-data` upload on `operationResource`
+— by design, not oversight. Parsing a multipart body IN the Nest process
+needs `multer` on Express and a different library on Fastify, which is
+exactly the adapter coupling the rest of this package avoids (same
+reasoning as the ORM-agnostic repository contract). The seam that stays
+adapter-agnostic for free is the **presigned-URL pattern**: the operation
+mints a URL, the CLIENT uploads or downloads directly against the storage
+backend, and this Nest app never sees the bytes.
+
+`FileStorageServiceInterface` (`getUploadUrl` / `getDownloadUrl`) is the
+seam core exports under `FILE_STORAGE_SERVICE_TOKEN` — provide an S3, GCS,
+or other implementation as an ordinary DI provider. Core ships none: no
+storage SDK is a core dependency, the same rule that keeps the zod layer
+ORM-free.
+
+```ts
+import {
+  FILE_STORAGE_SERVICE_TOKEN,
+  type FileStorageServiceInterface,
+  type OperationContext,
+} from '@concepta/rockets-core';
+import { operationResource } from '@concepta/rockets-core/zod';
+import { Inject, Injectable } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
+import { z } from 'zod';
+
+const ALLOWED_MIME = ['image/png', 'image/jpeg', 'application/pdf'] as const;
+
+// A handler CLASS, not a function — `ctx` carries no DI resolver, so the
+// storage service comes in through the constructor like any provider.
+@Injectable()
+class CreateUploadHandler {
+  constructor(
+    @Inject(FILE_STORAGE_SERVICE_TOKEN)
+    private readonly storage: FileStorageServiceInterface,
+  ) {}
+
+  async handle(
+    ctx: OperationContext<{ mimeType: string; size: number }>,
+  ) {
+    const key = `uploads/${randomUUID()}`;
+    const uploadUrl = await this.storage.getUploadUrl({
+      key,
+      mimeType: ctx.input.mimeType,
+      size: ctx.input.size,
+    });
+    // Persist { key, mimeType, size, ownerId: ctx.user?.id } here — the
+    // download op below looks the row up by id and calls getDownloadUrl.
+    return { key, uploadUrl };
+  }
+}
+
+export const uploads = operationResource({
+  path: 'uploads',
+  operations: (op) => ({
+    // Size/mime-type limits are the schema itself — an oversized or
+    // disallowed upload 400s BEFORE the storage backend is ever called.
+    create: op.write({
+      status: 201,
+      input: z.object({
+        mimeType: z.enum(ALLOWED_MIME),
+        size: z.number().int().positive().max(5_000_000),
+      }),
+      output: z.object({ key: z.string(), uploadUrl: z.string() }),
+      handler: CreateUploadHandler,
+    }),
+  }),
+});
+```
+
+There is no dedicated `op.upload(...)` builder — `op.write` /
+`op.read` already express this shape, and no operationResource change is
+required to use the seam. Non-goals for this pass, matching the issue:
+resumable/chunked uploads, virus scanning, and image processing are all
+app- or adapter-owned concerns the seam does not preclude.
+
 ---
 
 ## 6. `defineModuleResource()` — persistence rows + custom Nest slice
