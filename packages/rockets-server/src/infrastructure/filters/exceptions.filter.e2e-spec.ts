@@ -27,13 +27,19 @@ class TestErrorController {
   @Get('runtime-500-with-safe')
   @ApiOkResponse({ description: 'Always throws — test route' })
   runtimeSafe500(): never {
-    throw new TestRuntimeException(
-      {
-        message: 'Internal error detail',
-        httpStatus: 500,
-        safeMessage: 'Something went wrong',
-      },
-      'RUNTIME_500_SAFE',
+    // Details attached on purpose: this is what makes the masking
+    // assertion load-bearing. Without attachErrorDetails here,
+    // `details` is undefined regardless of whether the 5xx mask runs.
+    throw attachErrorDetails(
+      new TestRuntimeException(
+        {
+          message: 'Internal error detail',
+          httpStatus: 500,
+          safeMessage: 'Something went wrong',
+        },
+        'RUNTIME_500_SAFE',
+      ),
+      [{ path: ['ref'], message: 'internal detail that must not leak' }],
     );
   }
 
@@ -299,6 +305,8 @@ describe('ExceptionsFilter with detailedErrorSerializer (e2e)', () => {
   });
 
   it('masks details on a 5xx', async () => {
+    // runtimeSafe500 attaches details via attachErrorDetails — this
+    // assertion only proves masking because there is something to mask.
     const response = await request(app.getHttpServer())
       .get('/test-errors/runtime-500-with-safe')
       .expect(500);
