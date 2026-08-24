@@ -216,6 +216,14 @@ Planner collision checks only cover Rockets-owned structured routes. For a
 real adapter audit after global prefix/versioning/manual controllers are
 registered, call `validateRegisteredRoutes(app)` after `app.init()`.
 
+Two more patterns build on `operationResource` without changing it:
+background jobs (`JobDispatchServiceInterface` — dedupe, lease, at-least-once
+delivery, a `202` + job id op with a worker claiming separately) and
+idempotent writes / inbound webhooks (`IdempotencyStoreInterface` +
+`verifyWebhookSignature`, the latter reading `req.rawBody` off Nest's own
+`rawBody: true` app option). Both:
+[CONFIGURATION.md §6d/§6e](../../CONFIGURATION.md#6d-background-job-dispatch-issue-53).
+
 ### Scope rows to the authenticated user
 
 `OwnerStampHook` writes `userId` on create/update and rejects spoofing.

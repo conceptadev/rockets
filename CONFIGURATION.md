@@ -696,6 +696,191 @@ query services. In an app composing auth **and** `RocketsCoreModule` with
 core registration only — list auth-side services in that module's
 `queryServices` explicitly.
 
+### 6d. Background job dispatch (issue #53)
+
+`JobDispatchServiceInterface` (`enqueue` / `claim` / `heartbeat` /
+`complete` / `fail`) under `JOB_DISPATCH_SERVICE_TOKEN` — named tasks
+with dedupe, lease-based claiming, and at-least-once delivery, so apps
+stop reimplementing this over `@InjectDynamicRepository` for every
+product. Core ships one adapter, `InProcessJobDispatchService`
+(in-memory, single-process) for tests and samples; a production app
+implements the same interface against Cloud Tasks, Bull, SQS, or
+whatever it already runs — no queue vendor is a core dependency, the
+same rule as the storage SDK for the file upload seam.
+
+The common shape is an `operationResource` write op that enqueues and
+returns immediately (`202` + job id), with a worker claiming jobs
+elsewhere — a worker is not a route, so `claim`/`heartbeat`/`complete`
+are called from wherever the app runs its background process, not from
+generated HTTP code:
+
+```ts
+import {
+  JOB_DISPATCH_SERVICE_TOKEN,
+  type JobDispatchServiceInterface,
+  type OperationContext,
+} from '@concepta/rockets-core';
+import { operationResource } from '@concepta/rockets-core/zod';
+import { Inject, Injectable } from '@nestjs/common';
+import { z } from 'zod';
+
+@Injectable()
+class GenerateReportHandler {
+  constructor(
+    @Inject(JOB_DISPATCH_SERVICE_TOKEN)
+    private readonly jobs: JobDispatchServiceInterface,
+  ) {}
+
+  async handle(ctx: OperationContext<{ reportId: string }>) {
+    // dedupeKey: a repeat request for the SAME report while a job is
+    // still pending returns the EXISTING job id instead of a new one.
+    const { jobId } = await this.jobs.enqueue(
+      'generate-report',
+      { reportId: ctx.input.reportId },
+      { dedupeKey: `report:${ctx.input.reportId}` },
+    );
+    return { jobId };
+  }
+}
+
+export const reports = operationResource({
+  path: 'reports',
+  operations: (op) => ({
+    generate: op.write({
+      status: 202,
+      input: z.object({ reportId: z.string() }),
+      output: z.object({ jobId: z.string() }),
+      handler: GenerateReportHandler,
+    }),
+  }),
+});
+```
+
+`claim` hands back a job with an `attempt` count — `1` on first
+delivery, incremented on every redelivery after an expired lease. A
+handler doing real work should `heartbeat` periodically so another
+worker does not treat it as abandoned mid-flight, and MUST forward `ctx`
+/ open its own `TransactionScope` when touching repositories, the same
+rule as everywhere else (#45) — `claim` handing back a job says nothing
+about transactions on its own.
+
+### 6e. Idempotency keys and inbound webhooks (issue #59)
+
+**Idempotent writes.** `IdempotencyStoreInterface` (`get` / `set`) under
+`IDEMPOTENCY_STORE_TOKEN`, plus `hashIdempotentRequest(value)` — a
+stable hash (sorted keys, so field order in the JSON body does not
+matter) used to detect a reused key with a DIFFERENT body. There is no
+`idempotency` option on `op.write` — this is a documented pattern over
+existing primitives, the same shape as the file upload seam: a handler
+CLASS checks the store BEFORE doing the real work, and stores the result
+after.
+
+```ts
+import {
+  IDEMPOTENCY_STORE_TOKEN,
+  type IdempotencyStoreInterface,
+  type OperationContext,
+  hashIdempotentRequest,
+} from '@concepta/rockets-core';
+import { ConflictException, Inject, Injectable } from '@nestjs/common';
+
+@Injectable()
+class CreateOrderHandler {
+  constructor(
+    @Inject(IDEMPOTENCY_STORE_TOKEN)
+    private readonly store: IdempotencyStoreInterface,
+  ) {}
+
+  async handle(ctx: OperationContext<{ sku: string; qty: number }>) {
+    const key = ctx.request.headers['idempotency-key'];
+    const idempotencyKey = Array.isArray(key) ? key[0] : key;
+    const requestHash = hashIdempotentRequest(ctx.input);
+
+    if (idempotencyKey !== undefined) {
+      const existing = await this.store.get(idempotencyKey);
+      if (existing !== undefined) {
+        if (existing.requestHash !== requestHash) {
+          // Same key, different body — a client error, not a replay.
+          throw new ConflictException(
+            `Idempotency-Key "${idempotencyKey}" was already used with a different request body`,
+          );
+        }
+        return existing.body; // replay — the handler never re-runs
+      }
+    }
+
+    const order = await createOrder(ctx.input); // the real work
+
+    if (idempotencyKey !== undefined) {
+      await this.store.set(
+        idempotencyKey,
+        { status: 201, body: order, requestHash },
+        10 * 60_000, // ttlMs
+      );
+    }
+    return order;
+  }
+}
+```
+
+Core ships `InMemoryIdempotencyStore` for tests and samples — it is
+per-process, so a multi-instance deployment needs a shared backend (a
+dynamic-repository table, Redis) behind the same interface, the two
+instances would otherwise each accept the "first" request under a given
+key.
+
+**Inbound webhooks.** The signature a provider sends is computed over
+the EXACT bytes it sent — the parsed-then-reserialized JSON body is not
+guaranteed byte-identical, so verifying against `ctx.input` breaks
+signatures unpredictably. Pass `rawBody: true` to `NestFactory.create`
+(this is a NestJS option, not a Rockets one) and it attaches the raw
+bytes as `req.rawBody`, reachable through the same escape hatch every
+operation already has:
+
+```ts
+// main.ts
+const app = await NestFactory.create(AppModule, { rawBody: true });
+```
+
+```ts
+import { verifyWebhookSignature } from '@concepta/rockets-core';
+import { UnauthorizedException, Injectable } from '@nestjs/common';
+
+@Injectable()
+class StripeWebhookHandler {
+  handle(ctx: OperationContext<{ event: string }>) {
+    const raw = ctx.request.raw as { rawBody?: Buffer };
+    const signature = ctx.request.headers['x-webhook-signature'];
+    const sig = Array.isArray(signature) ? signature[0] : signature;
+    if (sig === undefined || raw.rawBody === undefined) {
+      throw new UnauthorizedException('missing signature');
+    }
+    const valid = verifyWebhookSignature({
+      payload: raw.rawBody,
+      signature: sig,
+      secret: process.env.WEBHOOK_SECRET!,
+    });
+    if (!valid) throw new UnauthorizedException('invalid signature');
+    // … handle the event
+    return { received: true };
+  }
+}
+```
+
+Mark the route `public: true` (or `acl: false`) — signature verification
+IS the auth for a webhook; the normal bearer-token guard has nothing to
+check against a provider that authenticates by HMAC instead. Combine
+with the idempotency pattern above keyed off the provider's own delivery
+id (`x-request-id`, `Stripe-Signature`'s embedded id, …) when a provider
+is known to redeliver.
+
+`verifyWebhookSignature` is timing-safe (`crypto.timingSafeEqual`) on
+purpose — a naive string `===` compare leaks how many leading bytes
+matched through response-time variance, a real way to forge a signature
+byte-by-byte. It covers the one thing every HMAC-signing provider needs
+(GitHub, Stripe, and most others sign the same way); a vendor-specific
+webhook pack (parsing Stripe's own event types, say) stays app code.
+
 ---
 
 ## 6. `defineModuleResource()` — persistence rows + custom Nest slice

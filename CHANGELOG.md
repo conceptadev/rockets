@@ -7,6 +7,35 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Added
 
+- **Background job dispatch port (issue #53).**
+  `JobDispatchServiceInterface` (`enqueue` / `claim` / `heartbeat` /
+  `complete` / `fail`) under `JOB_DISPATCH_SERVICE_TOKEN` — named tasks
+  with dedupe (a repeat `enqueue` under the same `dedupeKey` while a job
+  is still active returns the existing job instead of a new one),
+  lease-based claiming, and at-least-once delivery (an expired lease
+  makes a job claimable again with `attempt` incremented, so a crashed
+  worker's job gets redelivered). `InProcessJobDispatchService` ships as
+  the in-memory reference adapter for tests/samples; no queue vendor is
+  a core dependency, matching the storage-SDK-free rule for the file
+  upload seam. Common shape: an `operationResource` write op enqueues
+  and returns `202` + job id immediately, a worker calls
+  `claim`/`heartbeat`/`complete` separately. See `CONFIGURATION.md` §6d.
+
+- **Idempotency keys and inbound webhook signature verification (issue
+  #59).** `IdempotencyStoreInterface` (`get`/`set`) under
+  `IDEMPOTENCY_STORE_TOKEN` plus `hashIdempotentRequest` (a
+  key-order-stable hash used to detect a reused idempotency key with a
+  DIFFERENT request body — a client error, not a replay).
+  `InMemoryIdempotencyStore` ships as the reference adapter. No new
+  `operationResource` option: a handler CLASS checks the store before
+  doing the real work and replays the cached result on a match, the
+  same documented-pattern shape as the file upload seam.
+  `verifyWebhookSignature` is a timing-safe HMAC compare
+  (`crypto.timingSafeEqual`) against the RAW request body — read via
+  Nest's own `rawBody: true` app option, since a parsed-then-reserialized
+  JSON body is not guaranteed byte-identical to what a provider signed.
+  See `CONFIGURATION.md` §6e.
+
 - **`strictInput` on zodResource body operations (issue #79).** Opt-in
   per-op flag that rejects unknown **top-level** JSON keys with `400`
   naming the offending keys, instead of the default silent stripping
