@@ -1081,26 +1081,32 @@ export class TransferService {
     to: string,
     amount: number,
   ) {
-    // `REQUIRED` starts one if none is active; the default `SUPPORTS`
-    // would silently run unprotected outside a request.
-    return this.trx.run(
-      ctx,
-      async (txCtx) => {
-        const debit = await this.accounts.findOne({ where: …, ctx: txCtx });
-        // …every call inside gets `txCtx`, or it escapes the transaction.
-        await this.accounts.update(debit, { balance: … }, { ctx: txCtx });
-      },
-      { propagation: 'REQUIRED' },
-    );
+    // `run()` always opens (or joins, if already nested) a transaction
+    // around the callback — that part happens regardless of
+    // `propagation`. The default `SUPPORTS` is enough here.
+    return this.trx.run(ctx, async (txCtx) => {
+      const debit = await this.accounts.findOne({ where: …, ctx: txCtx });
+      // …every call inside gets `txCtx`, or it escapes the transaction.
+      await this.accounts.update(debit, { balance: … }, { ctx: txCtx });
+    });
   }
 }
 ```
 
 Two traps worth naming:
 
-- **`SUPPORTS` is the default propagation.** A scope opened without
-  `propagation: 'REQUIRED'` inside a non-transactional entry point runs
-  with no transaction at all, and nothing warns.
+- **`propagation` is not "start a transaction or not."** The installed
+  `PropagationBehavior` is `'SUPPORTS' | 'MANDATORY'` — there is no
+  `'REQUIRED'`. Both values open or join a transaction around the
+  callback identically; the only difference is what happens when this
+  app has **no transaction-capable adapter registered at all**
+  (`registry.count === 0`): `MANDATORY` throws
+  `TransactionRequiredException`, the default `SUPPORTS` proceeds
+  anyway. Neither value controls whether an *active* transaction exists
+  — `run()` always provides one to `txCtx`. The actual way to run
+  without a transaction is to **not** route the call through
+  `TransactionScope.run` at all (or call the repository without `ctx`,
+  per the rule above — hooks are then disabled too).
 - **Guards run before interceptors.** A guard cannot participate in the
   operation's transaction, because the transaction interceptor has not
   run yet. `PathScopeGuard` is deliberately a pre-check for this reason
