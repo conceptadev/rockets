@@ -60,7 +60,7 @@ export interface SchemaEntityCompilerOptions {
  * `@concepta/rockets-core/zod`.
  *
  * Wire it up by exposing the compiler on the adapter's
- * {@link RepositoryModuleInterface.entityCompiler} so schema layers can
+ * {@link RocketsRepositoryModuleInterface.entityCompiler} so schema layers can
  * resolve it from the same `repository` option that selects the
  * adapter.
  */

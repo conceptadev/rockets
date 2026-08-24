@@ -27,9 +27,6 @@ export type InvitationAcceptedEventHandler = Type<
   IEventHandler<InvitationAcceptedEvent>
 >;
 
-/**
- * Options interface for Invitation Acceptance Module
- */
 export interface InvitationAcceptanceOptionsInterface {
   userCrud?: UserCrudOptionsExtrasInterface;
   /** Override {@link InvitationUserAcceptanceListener} with your own CQRS event handler. */

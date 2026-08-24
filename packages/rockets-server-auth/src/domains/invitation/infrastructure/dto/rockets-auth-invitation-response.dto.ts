@@ -5,9 +5,6 @@ import {
 } from '@nestjs/swagger';
 import { RocketsAuthInvitationDto } from './rockets-auth-invitation.dto';
 
-/**
- * Email status information for invitation response
- */
 export class InvitationEmailStatusDto {
   @ApiProperty({
     description: 'Whether the invitation email was sent successfully',

@@ -1,16 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, MinLength } from 'class-validator';
 
-/**
- * DTO for authenticated password change
- *
- * Used when a logged-in user wants to change their own password.
- * Requires the current password for verification before allowing the change.
- */
 export class RocketsAuthChangePasswordDto {
-  /**
-   * The user's current password for verification
-   */
   @IsNotEmpty()
   @IsString()
   @ApiProperty({
@@ -21,9 +12,6 @@ export class RocketsAuthChangePasswordDto {
   })
   currentPassword!: string;
 
-  /**
-   * The new password to set
-   */
   @IsNotEmpty()
   @IsString()
   @MinLength(8)

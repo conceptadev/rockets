@@ -52,7 +52,6 @@ interface RepositoryInterface<Entity extends PlainLiteralObject> {
   remove(entity: Entity): Promise<Entity>;
 }
 
-// Query operator interface for SQLite
 interface QueryOperator<T = unknown> {
   $gt?: T;
   $gte?: T;
@@ -86,7 +85,6 @@ type WhereClause = Record<string, unknown | QueryOperator>;
 // Order clause type
 type OrderClause = Record<string, 'ASC' | 'DESC'>;
 
-// Decorator metadata keys for future extensibility
 const COLUMN_METADATA_KEY = Symbol('column_metadata');
 const TABLE_METADATA_KEY = Symbol('table_metadata');
 
