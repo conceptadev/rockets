@@ -66,7 +66,6 @@ export class ACService implements AccessControlServiceInterface {
       `[AccessControl] User ${jwtUser.id} has roles: ${JSON.stringify(roles)}`,
     );
 
-    // Return roles from JWT user object (populated by RocketsJwtAuthAdapter)
     return roles;
   }
 }

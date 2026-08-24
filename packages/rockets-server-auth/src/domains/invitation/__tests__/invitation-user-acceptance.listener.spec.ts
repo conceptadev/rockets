@@ -147,7 +147,6 @@ describe('InvitationUserAcceptanceListener', () => {
           provide: TransactionScope,
           useValue: txScopeMock,
         },
-        // Provide the listener via the factory (simulating the module definition)
         {
           provide: RAW_INVITATION_ACCEPTANCE_OPTIONS_TOKEN,
           useValue: {}, // Empty options for testing

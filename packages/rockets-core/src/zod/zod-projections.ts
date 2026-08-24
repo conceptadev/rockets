@@ -20,10 +20,6 @@ export interface SchemaProjections {
   readonly relations: ReadonlyArray<ResourceRelationEntry<PlainLiteralObject>>;
 }
 
-/**
- * Split the schema into create/update/response DTO projections and
- * relation entries derived from field metadata.
- */
 export function projectSchema(
   resourceName: string,
   schema: z.ZodObject,

@@ -10,7 +10,7 @@ import { RocketsAuthUserEntityInterface } from '../../../interfaces/rockets-auth
  * on the concrete class.
  *
  * To customise signup logic, extend this class and register the
- * subclass via `RocketsAuthModule.forRoot({ userCrud: { signupHandler } })`.
+ * subclass via `RocketsAuthModule.forRoot({ userCrud: { handlers: { signupHandler } } })`.
  */
 @CommandHandler(SignupUserCommand)
 export abstract class AbstractSignupUserHandler

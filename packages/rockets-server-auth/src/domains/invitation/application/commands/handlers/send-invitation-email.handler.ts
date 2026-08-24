@@ -10,9 +10,6 @@ import {
 import { ROCKETS_AUTH_MODULE_OPTIONS_DEFAULT_SETTINGS_TOKEN } from '../../../../../shared/constants/rockets-auth.constants';
 import type { RocketsAuthSettingsInterface } from '../../../../../shared/interfaces/rockets-auth-settings.interface';
 
-/**
- * Resolve the user's email from the invitation's userId.
- */
 async function resolveUserEmail(
   queryBus: QueryBus,
   ctx: PlainLiteralObject,

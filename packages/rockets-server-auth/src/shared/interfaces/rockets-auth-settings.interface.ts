@@ -1,8 +1,5 @@
 import { RocketsAuthUserOtpSettingsInterface } from '../../domains/otp/interfaces/rockets-auth-user-otp-settings.interface';
 
-/**
- * Rockets Server settings interface
- */
 export interface RocketsAuthSettingsInterface {
   role: {
     adminRoleName: string;
@@ -29,8 +26,5 @@ export interface RocketsAuthSettingsInterface {
       };
     };
   };
-  /**
-   * OTP settings for user-scoped OTP
-   */
   otp: RocketsAuthUserOtpSettingsInterface;
 }

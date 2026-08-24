@@ -192,10 +192,8 @@ export interface ResourceHandlerOverrides {
  *
  * Co-locates everything the consumer can override for a single operation:
  * request input DTO, output DTO, custom command/query handler, op-specific
- * hooks, route path/method-name, transactional behavior, and any extra
- * decorators. Keeping it in one block per operation is the AI-friendly,
- * grep-friendly shape — no need to cross-reference `dto`, `handlers`, and
- * `overrides.operations` to understand "what does POST do".
+ * hooks, route path/method-name, transactional behavior, and extra
+ * decorators so those knobs are not split across `dto` and `handlers`.
  *
  * Every field is optional. Missing values fall back to the resource-level
  * `dto` (for `input` / `output` / `paginated`) and to the framework's
@@ -434,8 +432,8 @@ export interface RocketsResourceDefinition<E extends PlainLiteralObject> {
    * ```
    *
    * 2. **Operation array (low-level escape hatch).** Lists which operations
-   *    to enable; per-op DTO/handler/decorator config must come from
-   *    `dto`, `handlers`, and `overrides.operations` separately.
+   *    to enable; per-op DTO and handler config come from `dto` and
+   *    `handlers`.
    *
    * ```ts
    * operations: [Operation.List, Operation.Read, Operation.Create]
@@ -538,8 +536,8 @@ export interface RocketsResourceDefinition<E extends PlainLiteralObject> {
    *   `:id` (sub-resources auto-compose this for you).
    * - the primary key is not `id` or not a uuid.
    *
-   * Per-operation `operations.X.request` (escape hatch on
-   * {@link ResourceOperationConfig.request}) takes precedence over this
+   * Per-operation `operations.X.requestOverride` (escape hatch on
+   * {@link ResourceOperationConfig.requestOverride}) takes precedence over this
    * controller-level default.
    */
   readonly request?: CrudRequestConfig<PlainLiteralObject>;
