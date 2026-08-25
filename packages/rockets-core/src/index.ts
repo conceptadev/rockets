@@ -367,6 +367,9 @@ export {
 export { InMemoryIdempotencyStore } from './infrastructure/idempotency/in-memory-idempotency-store.service';
 export { hashIdempotentRequest } from './infrastructure/idempotency/hash-idempotent-request';
 export {
+  createWebhookSignatureVerifier,
   verifyWebhookSignature,
   type VerifyWebhookSignatureOptions,
+  type WebhookSignatureVerifier,
+  type WebhookSignatureVerifierOptions,
 } from './infrastructure/webhooks/verify-webhook-signature';

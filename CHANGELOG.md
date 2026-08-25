@@ -34,6 +34,17 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
   (`crypto.timingSafeEqual`) against the RAW request body — read via
   Nest's own `rawBody: true` app option, since a parsed-then-reserialized
   JSON body is not guaranteed byte-identical to what a provider signed.
+  `createWebhookSignatureVerifier` binds the secret once and validates
+  it EAGERLY, so it belongs in a provider factory: an unset
+  `WEBHOOK_SECRET` or a misspelled algorithm then fails the boot instead
+  of 401-ing every legitimate delivery in production.
+  The documented idempotency pattern scopes the store key by the
+  authenticated principal (`` `${userId}:${key}` ``) and replays the
+  STORED status, not the operation's declared one. The store is
+  documented as at-least-once: `get`/`set` has no atomic reserve, so
+  concurrent first-writers under one key both run (7 of 20 measured) —
+  it de-duplicates sequential retries, and an atomic reserve on the port
+  remains an open design question.
   See `CONFIGURATION.md` §6e.
 
 - **`strictInput` on zodResource body operations (issue #79).** Opt-in
@@ -468,6 +479,48 @@ before running the full e2e suite.
   e2e coverage (cross-owner nested access returns 404).
 
 ### Fixed
+
+- **`hashIdempotentRequest` collapsed non-JSON values, replaying the
+  WRONG response (issue #59 follow-up).** The walker's generic-object
+  branch read `Object.keys(value)`, which is `[]` for a `Date` — so
+  every date serialised to `{}` and two requests differing only by a
+  date hashed IDENTICALLY. The documented pattern hashes `ctx.input`,
+  i.e. the post-validation value, where a `z.coerce.date()` field is a
+  real `Date`, so a second request under the same idempotency key with
+  a different date replayed the first request's stored response instead
+  of conflicting. `Map`, `Set` and any class instance with no own
+  enumerable keys collapsed the same way, and an undefined-valued key
+  (which JSON drops on the wire) hashed differently from its absence,
+  409-ing a legitimate retry. The walker now honours `toJSON()` first,
+  handles `Map`/`Set`/`bigint` explicitly, ignores undefined-valued keys
+  like JSON does, and THROWS — naming the offending path — on anything
+  it cannot represent faithfully, rather than emitting a placeholder.
+  `toJSON` output is TAGGED with the constructor name (a `Date` and the
+  ISO string of that date no longer collide), and the walk is bounded by
+  a depth cap and a cycle guard, so a deeply nested or self-referencing
+  body raises the same named error instead of a `RangeError` 500.
+
+- **A valid webhook signature with garbage appended was ACCEPTED.**
+  `Buffer.from(x, 'hex')` decodes greedily and stops at the first
+  invalid pair, so `<digest> + "ZZZZ"` decoded to exactly the digest's
+  bytes, passed the length guard, and verified true. Not forgeable — an
+  attacker still needs the real digest — but a signature with infinitely
+  many valid spellings is malleable, and anything keyed on the header
+  value inherits that. The header's shape is now validated before
+  decoding.
+
+- **Webhook signature verification swallowed configuration faults.** The
+  `try/catch` around the digest documented an impossible condition
+  (`Buffer.from(x, 'hex')` does not throw — it truncates, and the length
+  guard is what rejects a malformed header) while silently turning the
+  faults `createHmac` DOES throw on — an empty/missing secret, an
+  unsupported algorithm — into `false`, i.e. a permanent 401 with
+  nothing in the logs. Those now throw; only bad signatures return
+  `false`. `secret` widened to `string | undefined` on both option types
+  so `process.env.X` can be passed straight through instead of through a
+  `!` the type system cannot check (source-compatible for existing
+  callers). A `Buffer` secret — reachable only via a cast — now throws
+  where it previously verified.
 
 - **Round-4 review findings.** The module-export walk now merges each
   dynamic host's static and dynamic imports and exports before descending,

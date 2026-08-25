@@ -3079,7 +3079,19 @@
         "name": "VerifyWebhookSignatureOptions",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface VerifyWebhookSignatureOptions {\n    readonly payload: Buffer | string;\n    readonly signature: string;\n    readonly secret: string;\n    readonly algorithm?: string;\n    readonly prefix?: string;\n}"
+        "signature": "export interface VerifyWebhookSignatureOptions {\n    readonly payload: Buffer | string;\n    readonly signature: string;\n    readonly secret: string | undefined;\n    readonly algorithm?: string;\n    readonly prefix?: string;\n}"
+      },
+      {
+        "name": "WebhookSignatureVerifier",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type WebhookSignatureVerifier = (payload: Buffer | string, signature: string) => boolean;"
+      },
+      {
+        "name": "WebhookSignatureVerifierOptions",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface WebhookSignatureVerifierOptions {\n    readonly secret: string | undefined;\n    readonly algorithm?: string;\n    readonly prefix?: string;\n}"
       },
       {
         "name": "Where",
@@ -3140,6 +3152,12 @@
         "kind": "function",
         "runtime": true,
         "signature": "export declare function createPaginatedDto<TResource>(resourceDto: Type<TResource>, className?: string): Type;"
+      },
+      {
+        "name": "createWebhookSignatureVerifier",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function createWebhookSignatureVerifier(options: WebhookSignatureVerifierOptions): WebhookSignatureVerifier;"
       },
       {
         "name": "defaultErrorSerializer",

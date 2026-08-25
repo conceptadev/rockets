@@ -220,8 +220,12 @@ Two more patterns build on `operationResource` without changing it:
 background jobs (`JobDispatchServiceInterface` — dedupe, lease, at-least-once
 delivery, a `202` + job id op with a worker claiming separately) and
 idempotent writes / inbound webhooks (`IdempotencyStoreInterface` +
-`verifyWebhookSignature`, the latter reading `req.rawBody` off Nest's own
-`rawBody: true` app option). Both:
+`createWebhookSignatureVerifier` / `verifyWebhookSignature`, the latter
+reading `req.rawBody` off Nest's own `rawBody: true` app option). Scope the
+idempotency key by the authenticated principal — the header value is
+client-chosen, so a raw key leaks one user's stored response to another.
+The store de-duplicates sequential retries; it is at-least-once, not
+exactly-once, under a concurrent burst. Both:
 [CONFIGURATION.md §6d/§6e](../../CONFIGURATION.md#6d-background-job-dispatch-issue-53).
 
 ### Scope rows to the authenticated user

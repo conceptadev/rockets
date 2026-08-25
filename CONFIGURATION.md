@@ -775,6 +775,23 @@ existing primitives, the same shape as the file upload seam: a handler
 CLASS checks the store BEFORE doing the real work, and stores the result
 after.
 
+> ⚠ **Scope the key by the authenticated principal.** `Idempotency-Key`
+> is a string the CLIENT picks, and two tenants routinely pick the same
+> one (`order-1`, a local row id, a retry counter). On any route that
+> requires auth, keying the store on the raw header value is a
+> cross-tenant leak, not a replay: user B sending
+> `Idempotency-Key: order-abc` gets back user A's stored response body.
+> Namespace it with the principal the guard resolved —
+> `` `${ctx.user.id}:${idempotencyKey}` `` — and with the tenant too in a
+> multi-tenant app. Only a genuinely public operation (an inbound
+> webhook keyed off the provider's own delivery id) may use the raw
+> value, and there the PROVIDER, not a client, chooses it.
+>
+> Use a separator the id cannot contain (or length-prefix the parts):
+> with a plain `:` and an id that may hold one — an external IdP `sub`,
+> a tenant slug — `("a:b", "c")` and `("a", "b:c")` produce the same
+> key, reintroducing the very leak the scoping prevents.
+
 ```ts
 import {
   IDEMPOTENCY_STORE_TOKEN,
@@ -782,7 +799,12 @@ import {
   type OperationContext,
   hashIdempotentRequest,
 } from '@concepta/rockets-core';
-import { ConflictException, Inject, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 
 @Injectable()
 class CreateOrderHandler {
@@ -792,29 +814,45 @@ class CreateOrderHandler {
   ) {}
 
   async handle(ctx: OperationContext<{ sku: string; qty: number }>) {
-    const key = ctx.request.headers['idempotency-key'];
-    const idempotencyKey = Array.isArray(key) ? key[0] : key;
+    if (ctx.user === undefined) throw new UnauthorizedException();
+    const header = ctx.request.headers['idempotency-key'];
+    const rawKey = Array.isArray(header) ? header[0] : header;
+    // Scoped by the principal — NEVER the raw client-chosen value.
+    const key = rawKey === undefined ? undefined : `${ctx.user.id}:${rawKey}`;
     const requestHash = hashIdempotentRequest(ctx.input);
 
-    if (idempotencyKey !== undefined) {
-      const existing = await this.store.get(idempotencyKey);
+    if (key !== undefined) {
+      const existing = await this.store.get(key);
       if (existing !== undefined) {
         if (existing.requestHash !== requestHash) {
           // Same key, different body — a client error, not a replay.
           throw new ConflictException(
-            `Idempotency-Key "${idempotencyKey}" was already used with a different request body`,
+            `Idempotency-Key "${rawKey}" was already used with a different request body`,
           );
         }
+        // Verbatim includes the STATUS the original request answered
+        // with. Nest applies the operation's declared status BEFORE the
+        // handler runs and does not re-apply it afterwards, so the
+        // response escape hatch is what restores the stored one. That
+        // ordering is Nest behaviour, not a Rockets guarantee — the
+        // 202-replay e2e is the tripwire on a @nestjs/core bump. A
+        // status the op does not declare is also absent from its
+        // OpenAPI responses; add an `ApiResponse` decorator for it.
+        (ctx.response.raw as { status(code: number): unknown }).status(
+          existing.status,
+        );
         return existing.body; // replay — the handler never re-runs
       }
     }
 
     const order = await createOrder(ctx.input); // the real work
+    const status = order.queued ? 202 : 201;
+    (ctx.response.raw as { status(code: number): unknown }).status(status);
 
-    if (idempotencyKey !== undefined) {
+    if (key !== undefined) {
       await this.store.set(
-        idempotencyKey,
-        { status: 201, body: order, requestHash },
+        key,
+        { status, body: order, requestHash },
         10 * 60_000, // ttlMs
       );
     }
@@ -823,11 +861,36 @@ class CreateOrderHandler {
 }
 ```
 
+`hashIdempotentRequest` hashes the POST-validation value, so it handles
+more than plain JSON: `Date` (a `z.coerce.date()` field is a real
+`Date` by the time a handler sees it), `Map`, `Set`, `bigint`, and
+anything exposing `toJSON()`. A value it cannot represent faithfully — a
+class instance with no `toJSON()`, a function, `NaN`, a cycle, or
+nesting past 200 deep — makes it THROW rather than hash a placeholder:
+two different requests collapsing to the same hash means one replays the
+other's stored response. On the `operationResource` path `ctx.input` is
+always plain (validation returns `instanceToPlain`), so those throws are
+unreachable from HTTP input; a handler that hashes something else owns
+the decision of whether the failure is a `400` (the client sent it) or a
+`500` (the handler built it), and should catch accordingly.
+
+> **At-least-once, not exactly-once.** `get`/`set` is not atomic, so two
+> requests that both miss before either stores BOTH run the handler —
+> 7 executions for 20 concurrent same-key requests, measured. This
+> de-duplicates SEQUENTIAL retries (a client re-sending after a
+> timeout), which is the common case; it does not serialise a concurrent
+> burst. Where double execution is unacceptable, make the handler's own
+> work idempotent. An atomic reserve on the port is an open design
+> question, not something a store implementation can add behind the
+> current contract.
+
 Core ships `InMemoryIdempotencyStore` for tests and samples — it is
 per-process, so a multi-instance deployment needs a shared backend (a
 dynamic-repository table, Redis) behind the same interface, the two
 instances would otherwise each accept the "first" request under a given
-key.
+key. It also only evicts an expired entry when that same key is read
+again, so a persisted implementation should bound key length and expire
+server-side rather than copy it verbatim.
 
 **Inbound webhooks.** The signature a provider sends is computed over
 the EXACT bytes it sent — the parsed-then-reserialized JSON body is not
@@ -842,12 +905,40 @@ operation already has:
 const app = await NestFactory.create(AppModule, { rawBody: true });
 ```
 
+Bind the secret ONCE, in a provider, with
+`createWebhookSignatureVerifier` — it validates the secret and algorithm
+eagerly, so an unset `WEBHOOK_SECRET` or a misspelled algorithm fails
+the BOOT with a message naming the problem. Reading
+`process.env.WEBHOOK_SECRET!` inline instead pushes that fault to
+request time, where it used to surface as a silent, permanent 401 on
+every legitimate delivery:
+
 ```ts
-import { verifyWebhookSignature } from '@concepta/rockets-core';
-import { UnauthorizedException, Injectable } from '@nestjs/common';
+import {
+  createWebhookSignatureVerifier,
+  type WebhookSignatureVerifier,
+} from '@concepta/rockets-core';
+
+export const WEBHOOK_VERIFIER = Symbol.for('app/webhook-verifier');
+
+// In the resource's `providers` — throws at module init, not in prod.
+const webhookVerifierProvider = {
+  provide: WEBHOOK_VERIFIER,
+  useFactory: () =>
+    createWebhookSignatureVerifier({ secret: process.env.WEBHOOK_SECRET }),
+};
+```
+
+```ts
+import { UnauthorizedException, Inject, Injectable } from '@nestjs/common';
 
 @Injectable()
 class StripeWebhookHandler {
+  constructor(
+    @Inject(WEBHOOK_VERIFIER)
+    private readonly verify: WebhookSignatureVerifier,
+  ) {}
+
   handle(ctx: OperationContext<{ event: string }>) {
     const raw = ctx.request.raw as { rawBody?: Buffer };
     const signature = ctx.request.headers['x-webhook-signature'];
@@ -855,17 +946,21 @@ class StripeWebhookHandler {
     if (sig === undefined || raw.rawBody === undefined) {
       throw new UnauthorizedException('missing signature');
     }
-    const valid = verifyWebhookSignature({
-      payload: raw.rawBody,
-      signature: sig,
-      secret: process.env.WEBHOOK_SECRET!,
-    });
-    if (!valid) throw new UnauthorizedException('invalid signature');
+    if (!this.verify(raw.rawBody, sig)) {
+      throw new UnauthorizedException('invalid signature');
+    }
     // … handle the event
     return { received: true };
   }
 }
 ```
+
+`verifyWebhookSignature` is the same check without the binding, for a
+call site that already holds a validated secret. Both return `false` for
+every bad SIGNATURE (a malformed header decodes to a short buffer and
+fails the length guard) and THROW for a bad CONFIG — an empty/missing
+secret or an unsupported algorithm is a deployment fault, and answering
+it with "not a match" hides it behind a 401 forever.
 
 Mark the route `public: true` (or `acl: false`) — signature verification
 IS the auth for a webhook; the normal bearer-token guard has nothing to
