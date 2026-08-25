@@ -16,6 +16,7 @@ import { FirestoreRepositoryModule } from '../firestore-repository.module';
 import { FirestoreTransaction } from '../transaction/firestore-transaction';
 import { FirestoreTransactionRetryUnsupportedException } from '../exceptions/firestore-transaction-retry-unsupported.exception';
 import { runInFirestoreTransaction } from '../transaction/run-in-firestore-transaction';
+import { resolveFirestoreTransactionKey } from '../utils/firestore-repository.util';
 import type { FirestoreBackend } from '../interfaces/firestore-backend.interface';
 import type { FirestoreTransactionHandle } from '../interfaces/firestore-transaction-handle.interface';
 import { FirestoreDuplicateIdException } from '../exceptions/firestore-duplicate-id.exception';
@@ -532,6 +533,71 @@ describe('Firestore transactions (P1-1)', () => {
     await expect(
       scope.run({}, async () => 'ok', { propagation: 'MANDATORY' }),
     ).rejects.toThrow();
+  });
+
+  // Pins CONFIGURATION.md §8a: the default SUPPORTS fails *open*. The
+  // callback is not rejected at the propagation check, and `txCtx.trx`
+  // existing does not mean a transaction is active — it is a manager
+  // holding zero transactions, so a throw rolls back nothing.
+  it('propagation SUPPORTS runs unprotected when no factory is registered', async () => {
+    const empty = await Test.createTestingModule({
+      imports: [RepositoryModule.forRoot({})],
+    }).compile();
+    const scope = empty.get(TransactionScope);
+
+    const key = resolveFirestoreTransactionKey(backend);
+    let callbackRan = false;
+    let isSupported: boolean | undefined;
+    let activeTransaction: unknown;
+
+    await expect(
+      scope.run({}, async (txCtx) => {
+        callbackRan = true;
+        isSupported = txCtx.trx.isSupported;
+        activeTransaction = txCtx.trx.get(key);
+        throw new Error('abort');
+      }),
+    ).rejects.toThrow('abort');
+
+    expect(callbackRan).toBe(true);
+    expect(isSupported).toBe(false);
+    expect(activeTransaction).toBeNull();
+  });
+
+  // Pins CONFIGURATION.md §8a: `run()` itself starts no transaction.
+  // The concrete adapter starts one lazily, on the first repository call
+  // that forwards `txCtx`.
+  it('TransactionScope.run starts no transaction until a repo call forwards txCtx', async () => {
+    const wired = await Test.createTestingModule({
+      imports: [
+        RepositoryModule.forRoot({}),
+        RepositoryModule.forFeature({
+          module: firestoreModuleFor(backend, 'accounts-lazy-start'),
+          entities: [{ key: 'account', entity: AccountEntity }],
+        }),
+      ],
+    }).compile();
+
+    const repo = wired.get<RepositoryInterface<AccountEntity>>(
+      getDynamicRepositoryToken('account'),
+    );
+    const scope = wired.get(TransactionScope);
+    const key = resolveFirestoreTransactionKey(backend);
+    const runTransaction = vi.spyOn(backend, 'runTransaction');
+
+    // A transaction-capable adapter IS registered, so `isSupported` is
+    // true — yet entering the scope without a repo call starts nothing.
+    await scope.run({}, async (txCtx) => {
+      expect(txCtx.trx.isSupported).toBe(true);
+      expect(txCtx.trx.get(key)).toBeNull();
+    });
+    expect(runTransaction).not.toHaveBeenCalled();
+
+    // The first repo call forwarding `txCtx` is what actually starts it.
+    await scope.run({}, async (txCtx) => {
+      await repo.create({ id: 'lazy', balance: 1 }, { ctx: txCtx });
+    });
+    expect(runTransaction).toHaveBeenCalledTimes(1);
   });
 
   it('soft-deletable upsert before a write succeeds inside a transaction', async () => {

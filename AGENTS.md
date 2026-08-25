@@ -178,14 +178,18 @@ the user has already had to fix more than once.
     where a guard's parent lookup ran hook-free for a whole development
     cycle behind a green suite. Take the context from where you are: a
     hook's second argument, the CRUD context a CQRS handler receives, or
-    the scope you opened with `TransactionScope.run` (`run()` always
-    opens or joins a transaction around the callback — that part is not
-    optional; `propagation` only controls whether a missing
-    transaction-capable adapter is fatal: `MANDATORY` throws
-    `TransactionRequiredException`, the default `SUPPORTS` proceeds
-    anyway). `transactional: true` exists only on CRUD and
-    operation-resource operations; anything else opens its own scope.
-    Full seam with examples: `CONFIGURATION.md` §8a.
+    the scope you opened with `TransactionScope.run` — which **starts no
+    transaction by itself**: it installs a `TransactionManager` on
+    `txCtx`, and the adapter starts the real transaction lazily on the
+    first repository call that forwards `txCtx`, and only when a
+    transaction-capable adapter is registered. `propagation` is
+    `'SUPPORTS' | 'MANDATORY'`; there is no `'REQUIRED'`. When none is
+    registered the default `SUPPORTS` runs the callback unprotected and
+    nothing warns, while `MANDATORY` throws
+    `TransactionRequiredException` — use it when running without a
+    transaction is worse than failing. `transactional: true` exists only
+    on CRUD and operation-resource operations; anything else opens its
+    own scope. Full seam with examples: `CONFIGURATION.md` §8a.
 
 ## How to work with the project owner
 

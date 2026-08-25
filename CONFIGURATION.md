@@ -1081,32 +1081,54 @@ export class TransferService {
     to: string,
     amount: number,
   ) {
-    // `run()` always opens (or joins, if already nested) a transaction
-    // around the callback — that part happens regardless of
-    // `propagation`. The default `SUPPORTS` is enough here.
-    return this.trx.run(ctx, async (txCtx) => {
-      const debit = await this.accounts.findOne({ where: …, ctx: txCtx });
-      // …every call inside gets `txCtx`, or it escapes the transaction.
-      await this.accounts.update(debit, { balance: … }, { ctx: txCtx });
-    });
+    // Money movement must fail closed. `MANDATORY` throws
+    // `TransactionRequiredException` up front if this app has no
+    // transaction-capable adapter registered; the default `SUPPORTS`
+    // would debit and credit unprotected instead.
+    return this.trx.run(
+      ctx,
+      async (txCtx) => {
+        const debit = await this.accounts.findOne({ where: …, ctx: txCtx });
+        // …every call inside gets `txCtx`, or it escapes the transaction.
+        await this.accounts.update(debit, { balance: … }, { ctx: txCtx });
+      },
+      { propagation: 'MANDATORY' },
+    );
   }
 }
 ```
 
+#### What `propagation` actually controls
+
+The installed `PropagationBehavior` is `'SUPPORTS' | 'MANDATORY'` — there
+is no `'REQUIRED'`. **Neither value starts a transaction.** What `run()`
+does is install a `TransactionManager` on `txCtx.trx`, then commit or roll
+back whatever that manager ended up holding. The *concrete adapter* is
+what starts a real transaction, lazily — on the first repository call that
+forwards `txCtx`, and only when `trx.isSupported`, which is just
+`registry.count > 0` (at least one transaction-capable adapter is
+registered). Enter `run()` and make no repository call, and the manager
+holds nothing: no transaction is created, and the commit/rollback at the
+end is a no-op over an empty set.
+
+So `txCtx.trx` existing does **not** mean a transaction is active. It is a
+manager that may be holding zero transactions. What `propagation` decides
+is only what happens when `trx.isSupported` is `false`: `MANDATORY` throws
+`TransactionRequiredException` before the callback runs, while the default
+`SUPPORTS` runs the callback anyway, unprotected.
+
 Two traps worth naming:
 
-- **`propagation` is not "start a transaction or not."** The installed
-  `PropagationBehavior` is `'SUPPORTS' | 'MANDATORY'` — there is no
-  `'REQUIRED'`. Both values open or join a transaction around the
-  callback identically; the only difference is what happens when this
-  app has **no transaction-capable adapter registered at all**
-  (`registry.count === 0`): `MANDATORY` throws
-  `TransactionRequiredException`, the default `SUPPORTS` proceeds
-  anyway. Neither value controls whether an *active* transaction exists
-  — `run()` always provides one to `txCtx`. The actual way to run
-  without a transaction is to **not** route the call through
-  `TransactionScope.run` at all (or call the repository without `ctx`,
-  per the rule above — hooks are then disabled too).
+- **`SUPPORTS` fails open, and nothing warns.** With no
+  transaction-capable adapter registered, a `SUPPORTS` scope still runs
+  its callback, `txCtx.trx.isSupported` is `false`, and every repository
+  call inside quietly takes its non-transactional path —
+  `TypeOrmRepository.getRepo` returns the plain untransacted repository,
+  and `FirestoreRepository` resolves a `null` transaction handle. Each
+  write lands on its own and a later throw rolls back nothing, because
+  nothing was ever wrapped. Forwarding `ctx` correctly does not save you
+  here. Pass `propagation: 'MANDATORY'` whenever running unprotected is
+  worse than failing.
 - **Guards run before interceptors.** A guard cannot participate in the
   operation's transaction, because the transaction interceptor has not
   run yet. `PathScopeGuard` is deliberately a pre-check for this reason
