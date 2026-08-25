@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
-import { Module, Version } from '@nestjs/common';
+import { Module, Post, Sse, Version } from '@nestjs/common';
 import { Operation } from '@concepta/nestjs-core';
+import { Transactional } from '@concepta/nestjs-repository';
+import { EMPTY } from 'rxjs';
 
 import { ResourceKind } from '../../domain/interfaces/resource-kind.enum';
 import type { CompiledOperationDescriptor } from '../../domain/interfaces/operation-resource.interface';
@@ -399,6 +401,129 @@ describe('operationResource (zod)', () => {
     expect(bundle.definition.operations.remove.path).toBe('remove');
     expect(bundle.definition.operations.replace.method).toBe('PUT');
     expect(bundle.definition.operations.replace.path).toBe('replace');
+  });
+
+  /**
+   * The GET-only invariant of `op.sse()` used to be a comment. Nest's
+   * route decorators are unmerged `Reflect.defineMetadata` writes and
+   * `applyDecorators` runs in order, so a consumer decorator appended
+   * after `@Sse()` silently won the `METHOD_METADATA` slot while
+   * `SSE_METADATA` stayed `true` — a POST route in SSE response mode,
+   * invisible to every route check because they read the DECLARED
+   * method. These assert the definition-time throw on the FINAL
+   * registered metadata, which is what closes every authoring path.
+   */
+  describe('op.sse() route-shape enforcement', () => {
+    it('accepts a plain SSE operation', () => {
+      expect(() =>
+        operationResource({
+          path: 'api/stream-ok',
+          public: true,
+          operations: (op) => ({
+            ticks: op.sse({ handler: () => EMPTY }),
+          }),
+        }),
+      ).not.toThrow();
+    });
+
+    it('defaults an SSE operation to GET', () => {
+      const bundle = operationResource({
+        path: 'api/stream-method',
+        public: true,
+        operations: (op) => ({
+          ticks: op.sse({ handler: () => EMPTY }),
+        }),
+      });
+      expect(bundle.definition.operations.ticks.method).toBe('GET');
+      expect(bundle.definition.operations.ticks.responseMode).toBe('sse');
+    });
+
+    it('rejects a consumer decorator that overwrites the SSE route method', () => {
+      expect(() =>
+        operationResource({
+          path: 'api/stream-post',
+          public: true,
+          operations: (op) => ({
+            ticks: op.sse({
+              decorators: [Post('x')],
+              handler: () => EMPTY,
+            }),
+          }),
+        }),
+      ).toThrow(/must be GET/);
+    });
+
+    it('rejects Transactional() on an SSE operation', () => {
+      expect(() =>
+        operationResource({
+          path: 'api/stream-tx',
+          public: true,
+          operations: (op) => ({
+            ticks: op.sse({
+              decorators: [Transactional()],
+              handler: () => EMPTY,
+            }),
+          }),
+        }),
+      ).toThrow(/silent no-op/);
+    });
+
+    it('rejects @Sse() applied to a non-SSE operation', () => {
+      expect(() =>
+        operationResource({
+          path: 'api/stream-smuggled',
+          public: true,
+          operations: (op) => ({
+            ticks: op.read({
+              output: false,
+              decorators: [Sse('x')],
+              handler: () => undefined,
+            }),
+          }),
+        }),
+      ).toThrow(/not declared with `op.sse\(\)`/);
+    });
+
+    it('rejects a hand-built non-GET descriptor in SSE response mode', () => {
+      expect(() =>
+        defineOperationResource({
+          path: 'api/stream-raw',
+          public: true,
+          operations: {
+            ticks: {
+              key: 'ticks',
+              method: 'POST',
+              path: '',
+              status: 200,
+              output: false,
+              responseMode: 'sse',
+              handler: () => EMPTY,
+            },
+          },
+        }),
+      ).toThrow(/must be GET/);
+    });
+
+    it('rejects a hand-built SSE descriptor declaring transactional', () => {
+      expect(() =>
+        defineOperationResource({
+          path: 'api/stream-raw-tx',
+          public: true,
+          operations: {
+            ticks: {
+              key: 'ticks',
+              method: 'GET',
+              path: '',
+              status: 200,
+              output: false,
+              transactional: true,
+              responseMode: 'sse',
+              handler: () => EMPTY,
+            },
+          },
+        }),
+      ).toThrow(/silent no-op/);
+    });
   });
 
   it('registers through buildAppRegistrationPlan as a nest module', () => {

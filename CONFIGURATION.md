@@ -577,6 +577,14 @@ export const notifications = operationResource({
 });
 ```
 
+That `return unsubscribe` is not optional decoration. Nest unsubscribes
+the Observable when the client disconnects, but an Observable with no
+teardown has nothing to unsubscribe *from* — whatever the factory
+started (a timer, a listener, a subscription) outlives the connection,
+once per request. A hand-built `new Observable(...)` must return a
+teardown function, or complete; an operator-built stream (`interval`,
+`fromEvent`, a Subject's `asObservable()`) already carries one.
+
 ### What's shared with every other operation, and what's not
 
 One `responseMode` seam in the generated controller
@@ -593,17 +601,69 @@ Two things `op.sse()` does not expose, deliberately: `output` (the
 response body IS the event stream, never a whitelisted JSON value) and
 `transactional` (holding a database transaction open across a
 connection that may run indefinitely is not something to make one flag
-away). The generated route is always method `GET` — the only method a
-browser's native `EventSource` can issue.
+away).
+
+### The route is GET-only, and that is enforced, not asserted
+
+An SSE route is always registered as `GET` — the only method a
+browser's native `EventSource` can issue. That is checked at definition
+time (app boot), not merely documented, because it is reachable
+otherwise: Nest's route decorators are unmerged `Reflect.defineMetadata`
+writes and `applyDecorators` runs its list **in order**, so a consumer
+`decorators: [Post('x')]` — appended after the framework's `@Sse()` —
+used to overwrite the method while the SSE response mode stayed on. The
+result was a POST route serving an event stream: unusable by any real
+client, and invisible to the duplicate-route and planner collision
+checks, which read the *declared* method.
+
+After every decorator has run, the generated controller reads the
+metadata back and **throws** if:
+
+| Situation | Why it is rejected |
+|---|---|
+| an SSE op registers as anything but `GET` | a decorator overwrote `@Sse()`'s method |
+| an SSE op *declares* a non-`GET` method | `@Sse()` still registers GET, so route audits would file the route under the wrong method (reachable via `defineOperationResource`) |
+| an SSE op lost its `@Sse()` metadata | the route would return a raw Observable as a JSON body |
+| a non-SSE op carries `@Sse()` | core would still run the JSON output-DTO step over the Observable |
+| an SSE op carries `Transactional()` | see below |
+
+`Transactional()` on an SSE operation is rejected rather than allowed
+to be a silent no-op: the handler returns its Observable immediately,
+so the transaction the interceptor opens commits before a single event
+is emitted. If a specific emission needs a transaction, open one inside
+the stream with `TransactionScope.run` (§8a).
 
 ### Error after the stream has started
 
 Once the first event is written, headers are already sent — a later
-handler error can no longer become an HTTP status code. Let the
-Observable **error**; Nest ends the connection. Design handlers so a
-mid-stream failure is something the client can detect (a reconnect, a
-final sentinel event) rather than something the server can still turn
-into a status code.
+handler error can no longer become an HTTP status code, and it never
+reaches `RocketsCoreExceptionsFilter`. Nest's own SSE response
+controller writes `{ type: 'error', data: err.message }` onto the open
+connection instead.
+
+Core therefore masks that error **before Nest sees it**, with the same
+decision the exceptions filter makes for a JSON response:
+
+| Thrown from the stream | What the client receives |
+|---|---|
+| an `HttpException` | its own message, at any status — author-chosen, exactly as in a JSON response |
+| a `RuntimeException` with a `safeMessage` | that `safeMessage` |
+| a `RuntimeException` at 5xx without one | `Internal Server Error` |
+| anything else (a plain `Error`, a driver failure) | `Internal Server Error` |
+
+The real error is logged server-side in every masked case. Without this,
+a `public: true` stream — a first-class pattern here — could hand an
+anonymous client an internal error message verbatim.
+
+**If a handler wants a specific, safe-to-leak mid-stream message**, say
+so explicitly: throw an `HttpException` (or a `RuntimeException` with a
+`safeMessage`) rather than a bare `Error`. A bare `Error`'s message is
+treated as internal, because that is the only assumption that is safe by
+default.
+
+Beyond the message: design handlers so a mid-stream failure is something
+the client can *detect* (a reconnect, a final sentinel event) rather than
+something the server can still turn into a status code.
 
 ### Not in this PR: Range / partial content
 

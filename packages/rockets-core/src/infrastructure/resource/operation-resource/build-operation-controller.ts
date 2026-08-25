@@ -15,6 +15,7 @@ import {
   AccessControlGrant,
   AccessControlQuery,
 } from '@concepta/nestjs-access-control';
+import { inspect } from 'node:util';
 import {
   applyDecorators,
   BadRequestException,
@@ -23,6 +24,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpException,
   InternalServerErrorException,
   Logger,
   Param,
@@ -31,12 +33,23 @@ import {
   Put,
   Query,
   Req,
+  RequestMethod,
   Res,
   Sse,
   Type,
 } from '@nestjs/common';
+import {
+  INTERCEPTORS_METADATA,
+  METHOD_METADATA,
+  SSE_METADATA,
+} from '@nestjs/common/constants';
+import { RuntimeException } from '@concepta/nestjs-core';
 import { ContextIdFactory, ModuleRef } from '@nestjs/core';
-import { Transactional } from '@concepta/nestjs-repository';
+import {
+  Transactional,
+  TransactionInterceptor,
+} from '@concepta/nestjs-repository';
+import { catchError, isObservable, throwError, type Observable } from 'rxjs';
 import { AuthPublic } from '@concepta/nestjs-authentication';
 import {
   ApiBearerAuth,
@@ -64,6 +77,7 @@ import {
   getCarriedStandardSchema,
   standardSchemaBadRequest,
 } from '../../../common/utils/standard-schema.util';
+import { ERROR_MESSAGE_FALLBACK } from '../../filters/exceptions.filter';
 import { getHandlerClass, isHandlerFunction } from './is-handler-class';
 import { readOperationDtoOpenApiFields } from './openapi-dto-metadata';
 
@@ -312,6 +326,90 @@ async function applyOutputDto(
     }
     throw error;
   }
+}
+
+/**
+ * Wrap an SSE handler's stream so a MID-STREAM failure is masked the
+ * same way {@link RocketsCoreExceptionsFilter} masks a 5xx JSON body.
+ *
+ * SSE errors never reach that filter — that is the root cause, not an
+ * oversight. Once the first event is written the headers are committed,
+ * so Nest's own SSE response controller can no longer turn a failure
+ * into a status code; it writes `{ type: 'error', data: err.message }`
+ * straight onto the open connection (see `router-response-controller`'s
+ * `catchError`, which rethrows only while `!stream.headersCommitted`).
+ * The raw message of whatever the handler threw — a driver error naming
+ * a host, a connection string, an internal id — therefore reached the
+ * client, and `public: true` SSE is a first-class documented pattern, so
+ * that client can be anonymous.
+ *
+ * Masking happens in the handler, BEFORE Nest sees the error, so it
+ * covers both sides of that commit boundary: pre-commit the replacement
+ * is still an `HttpException` and the filter renders it with the right
+ * status; post-commit its `.message` is what lands on the wire.
+ */
+function maskSseStreamErrors(
+  result: unknown,
+  label: string,
+): Observable<unknown> {
+  if (!isObservable(result)) {
+    // Nest would reject this too (`assertObservable`), but with a bare
+    // `ReferenceError` after the route has already been entered. Failing
+    // here keeps it a normal 500 through the exceptions filter.
+    throw outputValidationError(
+      label,
+      'SSE handler did not return an Observable',
+    );
+  }
+  return result.pipe(
+    catchError((error: unknown) =>
+      throwError(() => toClientSafeStreamError(error, label)),
+    ),
+  );
+}
+
+/**
+ * The SAME safe/unsafe decision {@link RocketsCoreExceptionsFilter}
+ * makes, restated on the streaming path because that path cannot reach
+ * the filter:
+ *
+ * - `HttpException` — the body is author-chosen and the filter puts it
+ *   on the wire at ANY status, so the stream may too. Passed through
+ *   untouched, which also preserves its status for the pre-commit case.
+ * - `RuntimeException` — `safeMessage` is the author's opt-in
+ *   client-visible text. At 5xx it is the ONLY thing allowed out
+ *   (`safeMessage ?? ERROR_MESSAGE_FALLBACK`), exactly as in the filter.
+ * - anything else (a plain `Error`, a driver failure) — a 500 with no
+ *   declared safe text. The filter would send `ERROR_MESSAGE_FALLBACK`;
+ *   so does this. The real error is logged server-side instead.
+ */
+function toClientSafeStreamError(error: unknown, label: string): unknown {
+  if (error instanceof HttpException) {
+    return error;
+  }
+  if (error instanceof RuntimeException) {
+    const status = error.httpStatus ?? 500;
+    if (status < 500) {
+      return new HttpException(error.safeMessage ?? error.message, status);
+    }
+    logStreamFailure(label, error);
+    return new HttpException(
+      error.safeMessage ?? ERROR_MESSAGE_FALLBACK,
+      status,
+    );
+  }
+  logStreamFailure(label, error);
+  return new InternalServerErrorException(ERROR_MESSAGE_FALLBACK);
+}
+
+function logStreamFailure(label: string, error: unknown): void {
+  // Same channel and same reasoning as the filter's 'Unhandled 5xx':
+  // through Nest's Logger, at every 5xx, with `inspect` so a stack-less
+  // non-Error does not log as '[object Object]'.
+  logger.error(
+    `SSE operation "${label}" stream errored`,
+    error instanceof Error ? error.stack ?? error.message : inspect(error),
+  );
 }
 
 function appendParamsOpenApiDecorators(
@@ -583,6 +681,136 @@ export function buildOperationController(
   return OperationResourceController;
 }
 
+/**
+ * Enforce the SSE route invariants on the FINAL registered metadata,
+ * after every decorator — framework and consumer — has run.
+ *
+ * `applyDecorators` runs its list IN ORDER, and Nest's route decorators
+ * are plain `Reflect.defineMetadata` writes with no merge: last write
+ * wins. `@Sse(path)` writes `METHOD_METADATA = GET` *and*
+ * `SSE_METADATA = true`; a consumer's `decorators: [Post('x')]`, pushed
+ * onto the end of the same array, overwrote only the first of those.
+ * The result was a POST route still in SSE response mode — a state Nest
+ * has no legitimate way to reach, unusable by any `EventSource`, and
+ * INVISIBLE to both the duplicate-route check above and the planner's
+ * cross-resource collision check, because both read `operation.method`
+ * rather than what actually got registered.
+ *
+ * Reading the metadata back in a second pass is the same technique the
+ * `acl` / hand-written `AccessControlGrant` collision check below uses,
+ * for the same reason: two writers, one metadata slot, no defined
+ * winner → fail at definition time rather than ship a broken route.
+ * Checking the final STATE also closes the other door — a hand-crafted
+ * `PendingOperation` or a `defineOperationResource` descriptor pairing
+ * `method: 'POST'` with `responseMode: 'sse'` lands here too.
+ */
+function assertSseRouteShape(
+  operation: CompiledOperationDescriptor,
+  handler: object,
+  label: string,
+): void {
+  const declaredSse = operation.responseMode === 'sse';
+  const registeredSse: unknown = Reflect.getMetadata(SSE_METADATA, handler);
+  const isSseRoute = registeredSse === true;
+
+  if (isSseRoute && !declaredSse) {
+    throw new Error(
+      `operationResource: operation "${operation.key}" carries an @Sse() ` +
+        `decorator but was not declared with \`op.sse()\` (responseMode ` +
+        `"sse"). Core would still run the JSON output-DTO step over the ` +
+        `handler's Observable. Use \`op.sse()\` instead of applying @Sse() ` +
+        `through \`decorators\`.`,
+    );
+  }
+  if (!declaredSse) {
+    return;
+  }
+  if (!isSseRoute) {
+    throw new Error(
+      `operationResource: SSE operation "${operation.key}" lost its @Sse() ` +
+        `metadata — a decorator in \`decorators\` overwrote it. The route ` +
+        `would return a raw Observable as a JSON body.`,
+    );
+  }
+
+  // The DECLARED method, checked separately from the registered one
+  // because they are read by different consumers. `@Sse()` always
+  // registers GET, so a descriptor declaring `method: 'POST'` with
+  // `responseMode: 'sse'` produces a working GET route that the
+  // duplicate-route check above and the planner's cross-resource
+  // collision check both file under POST — a real route no route audit
+  // can see. Reachable only through `defineOperationResource` or a
+  // hand-built pending; `op.sse()` goes through `defaultMethod('sse')`.
+  if (operation.method !== 'GET') {
+    throw new Error(
+      `operationResource: SSE operation "${operation.key}" declares method ` +
+        `${operation.method}, but an SSE route must be GET — @Sse() always ` +
+        `registers GET, so route collision checks would file this route ` +
+        `under ${operation.method} while it serves GET "${operation.path}".`,
+    );
+  }
+
+  const registeredMethod: unknown = Reflect.getMetadata(
+    METHOD_METADATA,
+    handler,
+  );
+  if (registeredMethod !== RequestMethod.GET) {
+    throw new Error(
+      `operationResource: SSE operation "${operation.key}" registers as ` +
+        `method ${describeRequestMethod(registeredMethod)}, but an SSE route ` +
+        `must be GET — the only method a browser's EventSource can issue. A ` +
+        `route decorator in \`decorators\` (or a \`method\` on a hand-built ` +
+        `operation descriptor) overwrote @Sse()'s method while leaving the ` +
+        `stream response mode in place. Route collision checks still see ` +
+        `GET "${operation.path}", so this would not surface anywhere else.`,
+    );
+  }
+
+  if (hasTransactionInterceptor(handler)) {
+    throw new Error(
+      `operationResource: SSE operation "${operation.key}" combines ` +
+        `\`responseMode: "sse"\` with Transactional(). The handler returns ` +
+        `its Observable immediately, so the transaction the interceptor ` +
+        `opens commits before a single event is emitted — a silent no-op, ` +
+        `not the guarantee the decorator reads as. Open a transaction ` +
+        `inside the stream (TransactionScope.run) if a specific emission ` +
+        `needs one. (${label})`,
+    );
+  }
+}
+
+/**
+ * Whether `Transactional()` reached this route.
+ *
+ * Detected through the interceptor CLASS it registers rather than its
+ * metadata key: upstream exports `TransactionInterceptor` and
+ * `Transactional`, but not the `TRANSACTIONAL_KEY` symbol the decorator
+ * writes, so the class reference is the only public identity available.
+ * `Transactional(false)` — the opt-OUT — registers no interceptor and is
+ * correctly not flagged.
+ */
+function hasTransactionInterceptor(handler: object): boolean {
+  const interceptors: unknown = Reflect.getMetadata(
+    INTERCEPTORS_METADATA,
+    handler,
+  );
+  if (!Array.isArray(interceptors)) {
+    return false;
+  }
+  return interceptors.some(
+    (interceptor: unknown) =>
+      interceptor === TransactionInterceptor ||
+      interceptor instanceof TransactionInterceptor,
+  );
+}
+
+function describeRequestMethod(value: unknown): string {
+  const name = Object.entries(RequestMethod).find(
+    ([, enumValue]) => enumValue === value,
+  )?.[0];
+  return name ?? String(value);
+}
+
 function attachOperationMethod(
   controllerClass: Type<unknown>,
   operation: CompiledOperationDescriptor,
@@ -659,6 +887,9 @@ function attachOperationMethod(
       throw new Error(`operationResource: invalid handler for "${label}"`);
     }
 
+    if (isSse) {
+      return maskSseStreamErrors(result, label);
+    }
     if (operation.output === false) {
       return result;
     }
@@ -763,6 +994,12 @@ function attachOperationMethod(
       [{}],
       descriptor.value,
     );
+  }
+  // LAST, after every decorator has written: the invariants below are
+  // about the metadata that actually got registered, not the metadata
+  // this file intended to register.
+  if (descriptor.value !== undefined) {
+    assertSseRouteShape(operation, descriptor.value as object, label);
   }
   Object.defineProperty(proto, methodName, descriptor);
 

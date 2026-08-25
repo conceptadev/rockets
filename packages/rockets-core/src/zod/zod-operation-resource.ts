@@ -348,7 +348,13 @@ function defaultMethod(
   if (configured !== undefined) {
     return configured;
   }
-  if (builder === 'read') {
+  // `sse` is listed EXPLICITLY, not left to fall through. Without this
+  // case an SSE operation reaching `defaultMethod` with no configured
+  // method silently defaulted to `POST` — a method no `EventSource` can
+  // issue, and one the generated controller now rejects outright. The
+  // GET-only invariant used to survive only because `toPendingSse`
+  // happened to hardcode `'GET'` at its single call site.
+  if (builder === 'read' || builder === 'sse') {
     return 'GET';
   }
   if (builder === 'delete') {
@@ -546,7 +552,11 @@ function toPendingSse<
 ): PendingOperation<InferIn<TInput>, Observable<MessageEvent>, TParams> {
   return {
     builder: 'sse',
-    method: 'GET',
+    // Through `defaultMethod`, not a literal: one place decides an SSE
+    // operation's method, and `assertSseRouteShape` in the generated
+    // controller enforces the same invariant on the FINAL registered
+    // metadata regardless of which authoring path produced the pending.
+    method: defaultMethod('sse', undefined),
     path: config.path,
     status: undefined,
     summary: config.summary,

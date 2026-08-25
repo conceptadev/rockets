@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
+  BadRequestException,
   INestApplication,
   Injectable,
   UnauthorizedException,
@@ -65,6 +66,53 @@ function ticks(count: number): Observable<MessageEvent> {
   });
 }
 
+/**
+ * A connection string is the shape of internal detail that must never
+ * reach a client. Nest's SSE response controller writes `err.message`
+ * verbatim onto a committed stream, so before the mask this string went
+ * straight to an ANONYMOUS caller of a `public: true` route.
+ */
+const INTERNAL_SECRET = 'postgres://svc:hunter2@db.internal:5432/records';
+
+/** One event (committing the headers), then a raw internal failure. */
+function tickThenInternalError(): Observable<MessageEvent> {
+  return new Observable<MessageEvent>((subscriber) => {
+    subscriber.next({ data: { seq: 1 } });
+    subscriber.error(new Error(`connect failed: ${INTERNAL_SECRET}`));
+  });
+}
+
+/** One event, then a failure the AUTHOR chose to make client-visible. */
+function tickThenClientError(): Observable<MessageEvent> {
+  return new Observable<MessageEvent>((subscriber) => {
+    subscriber.next({ data: { seq: 1 } });
+    subscriber.error(new BadRequestException('channel closed by peer'));
+  });
+}
+
+/**
+ * Every SSE frame as `{ event, data }`, with `data` left as RAW text.
+ * Deliberately not `ssePayloads`: an error frame's data is a bare
+ * message, not JSON, and this assertion is about the exact bytes that
+ * reached the client.
+ */
+function sseFrames(body: string): Array<{ event: string; data: string }> {
+  return body
+    .split('\n\n')
+    .filter((frame) => frame.trim().length > 0)
+    .map((frame) => {
+      const lines = frame.split('\n');
+      const type = lines.find((line) => line.startsWith('event: '));
+      return {
+        event: type === undefined ? 'message' : type.slice('event: '.length),
+        data: lines
+          .filter((line) => line.startsWith('data: '))
+          .map((line) => line.slice('data: '.length))
+          .join('\n'),
+      };
+    });
+}
+
 const sseOps = operationResource({
   path: 'sse',
   operations: (op) => ({
@@ -72,6 +120,16 @@ const sseOps = operationResource({
       path: 'public',
       public: true,
       handler: () => ticks(3),
+    }),
+    internalFailure: op.sse({
+      path: 'internal-failure',
+      public: true,
+      handler: () => tickThenInternalError(),
+    }),
+    clientFailure: op.sse({
+      path: 'client-failure',
+      public: true,
+      handler: () => tickThenClientError(),
     }),
     securedTicks: op.sse({
       path: 'secured',
@@ -135,6 +193,38 @@ describe('operationResource SSE (e2e, issue #52)', () => {
 
     expect(res.headers['content-type']).toContain('text/event-stream');
     expect(ssePayloads(res.text)).toEqual([{ seq: 1 }, { seq: 2 }]);
+  });
+
+  it('masks a mid-stream internal failure instead of writing it to the wire', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/sse/internal-failure')
+      .expect(200);
+
+    // The whole raw body, not just the parsed frames: nothing anywhere
+    // on this connection may quote the internal detail.
+    expect(res.text).not.toContain(INTERNAL_SECRET);
+    expect(res.text).not.toContain('hunter2');
+    expect(res.text).not.toContain('connect failed');
+
+    // The event that got through BEFORE the failure still arrives — a
+    // mask on the error, not a blackout of the stream — and the failure
+    // carries the same generic text a 5xx JSON response would.
+    const [tick, failure] = sseFrames(res.text);
+    expect(tick).toEqual({ event: 'message', data: '{"seq":1}' });
+    expect(failure).toEqual({ event: 'error', data: 'Internal Server Error' });
+  });
+
+  it('keeps an author-chosen 4xx message on a mid-stream failure', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/sse/client-failure')
+      .expect(200);
+
+    // An HttpException body is author-chosen and the exceptions filter
+    // puts it on the wire at any status; the stream matches that, so the
+    // mask is not a blanket blackout of every mid-stream failure.
+    const [tick, failure] = sseFrames(res.text);
+    expect(tick).toEqual({ event: 'message', data: '{"seq":1}' });
+    expect(failure).toEqual({ event: 'error', data: 'channel closed by peer' });
   });
 
   it('validates query input the same way a JSON operation does', async () => {

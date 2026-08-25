@@ -225,7 +225,8 @@ validation as any other operation — the handler just returns an
 
 ```typescript
 import { operationResource } from '@concepta/rockets-core/zod';
-import { Observable } from 'rxjs';
+import { interval, map } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { MessageEvent } from '@nestjs/common';
 
 export const notifications = operationResource({
@@ -233,18 +234,22 @@ export const notifications = operationResource({
   operations: (op) => ({
     stream: op.sse({
       handler: (): Observable<MessageEvent> =>
-        new Observable((subscriber) => {
-          subscriber.next({ data: { hello: 'world' } });
-        }),
+        // Every stream needs a teardown path. `interval` unsubscribes
+        // its timer when the client disconnects; a hand-built
+        // `new Observable(...)` must RETURN an unsubscribe function, or
+        // the subscription outlives the connection.
+        interval(1000).pipe(map((n) => ({ data: { tick: n } }))),
     }),
   }),
 });
 ```
 
 Guards, ACL and input validation run BEFORE the stream opens — a
-rejected request looks like a normal JSON error response. Full rules
-(including what's deliberately not exposed, and why HTTP Range is a
-separate follow-up): [CONFIGURATION.md
+rejected request looks like a normal JSON error response. The route is
+GET-only and that is enforced at definition time, and a mid-stream
+failure is masked the same way a 5xx JSON body is. Full rules (plus the
+teardown-carrying long-form example, and why HTTP Range is a separate
+follow-up): [CONFIGURATION.md
 §6c](../../CONFIGURATION.md#6c-opsse--server-sent-events-issue-52-v1).
 
 ### Scope rows to the authenticated user
