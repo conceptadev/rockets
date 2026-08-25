@@ -16,8 +16,8 @@ interface Window {
  * tests and samples; a multi-instance deployment needs a shared backend
  * (a dynamic-repository table, Redis) behind the same interface — two
  * instances would each track their own count, doubling the effective
- * limit. See `CONFIGURATION.md` §7c for the dynamic-repository /
- * `TransactionScope` pattern.
+ * limit. See `CONFIGURATION.md` §7c for a shared-backend store, the
+ * backends it suits, and why it is deliberately not transactional.
  */
 @Injectable()
 export class InMemoryRateLimitStore implements RateLimitStoreInterface {

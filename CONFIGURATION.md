@@ -976,6 +976,65 @@ On an allowed request the guard sets `X-RateLimit-Limit` and
 `X-RateLimit-Remaining`. Once the limit is hit it rejects with `429` and
 a `Retry-After` header instead of letting the request through.
 
+### Guard order decides what the limiter can even see
+
+Nest runs global guards in registration order and short-circuits on the
+first one that rejects. So a guard registered **before** `RateLimitGuard`
+gets to reject a request before the limiter ever counts it.
+
+That matters for brute-force protection. If an authentication guard runs
+first, an unauthenticated request to a protected route is rejected with
+`401` and consumes **zero** rate-limit budget — an attacker can hammer
+that route indefinitely without `RateLimitGuard` noticing. The limiter
+only sees requests that survived every guard ahead of it.
+
+The common case — throttling a public, unauthenticated route such as
+login, signup, or password recovery — is unaffected either way: those
+routes are `@AuthPublic` (or in an app with no global auth guard at
+all), so the request reaches the limiter regardless of order. Registering
+the limiter first is still the safer default:
+
+```ts
+@Module({
+  providers: [
+    // First: counts every request, including ones a later guard rejects.
+    { provide: APP_GUARD, useClass: RateLimitGuard },
+    // Then authentication.
+    { provide: APP_GUARD, useClass: AuthServerGuard },
+    { provide: RATE_LIMIT_STORE_TOKEN, useClass: InMemoryRateLimitStore },
+  ],
+})
+class AppModule {}
+```
+
+Ordering it first has a cost worth knowing: the limiter then counts
+requests by IP before it knows who is calling, so a `key` callback that
+reads `request.user` will not have one. Pick per route — key by IP for
+the pre-auth position, key by user/tenant only for routes where an auth
+guard has already run.
+
+### The default key trusts `request.ip`
+
+The default key is `ip:METHOD:route`, taken from Express's resolved
+`request.ip`. An application behind a trusted reverse proxy must
+configure `trust proxy` in the host bootstrap, or every caller collapses
+into the proxy's single IP bucket:
+
+```ts
+import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
+
+const app = await NestFactory.create<NestExpressApplication>(AppModule);
+app.set('trust proxy', ['loopback', 'linklocal', 'uniquelocal']);
+```
+
+Choose the trusted proxy value for the deployment topology; Rockets does
+not enable it automatically. Trusting unverified forwarding headers lets
+clients spoof their address and evade the limit entirely — an overly
+broad setting is worse than none. Where the caller is authenticated and
+a stable identity is available, a `key` callback keyed on user or tenant
+avoids the question altogether.
+
 ### Field reference
 
 | Field       | Required | Meaning                                                             |
@@ -993,38 +1052,163 @@ load balancer effectively multiply the configured limit by N.
 
 A production, multi-instance deployment needs a shared backend behind
 the same `RateLimitStoreInterface` port (one method: `consume(key,
-limit, windowMs)`). The dynamic-repository / `TransactionScope` pattern
-from §8a is the reference shape — same `ctx`-forwarding rule applies
-here as everywhere else a store does its own read-then-write:
+limit, windowMs)`).
+
+**Do not write that store as a read-increment-write over a counter row
+through the base contract.** It is the obvious shape and it does not
+work. Two concurrent requests both read the same pre-increment count and
+one of the two increments is lost, so the limiter under-counts exactly
+when it matters; wrapping the read-and-write in a transaction per
+request does not fix it either — it serialises the limiter into the
+request path and, on a single-writer store, overlapping transactions
+collide outright. The base contract cannot express the alternative:
+`RepositoryInterface` has no atomic increment, `upsert()` only conflicts
+on the primary key and overwrites with literal values, and `findOne()`
+has no pessimistic-lock option.
+
+That is a statement about the **portable** contract, not about every
+backend. Where an adapter offers a native atomic primitive, a counter
+row is the better design and you should use it — Firestore's adapter
+ships `increment()` and `updateWithPrecondition()` (compare-and-set),
+and any SQL backend can express `UPDATE … SET count = count + 1`.
+Reaching for those ties the store to one backend, which is a fine
+trade for an application and not one core can make for you.
+
+What IS expressible atomically is **appending one row per attempt** and
+recovering the attempt's position in the window from its own generated
+id. One INSERT can never be lost, and no request has to hold a
+transaction:
 
 ```ts
+@Entity('rate_limit_events')
+@Index(['key', 'at'])
+class RateLimitEventEntity {
+  @PrimaryGeneratedColumn() id!: number;
+  @Column({ type: 'varchar' }) key!: string;
+  @Column({ type: 'bigint' }) at!: number;
+}
+
 @Injectable()
 class SqlRateLimitStore implements RateLimitStoreInterface {
   constructor(
-    @InjectDynamicRepository('rateLimitCounter')
-    private readonly repo: RepositoryInterface<RateLimitCounterEntity>,
-    private readonly txScope: TransactionScope,
+    @InjectDynamicRepository('rateLimitEvent')
+    private readonly events: RepositoryInterface<RateLimitEventEntity>,
   ) {}
 
   async consume(key: string, limit: number, windowMs: number) {
-    const ctx = AppContextHost.from(); // guards run before interceptors — no incoming ctx to join
-    return this.txScope.run(
+    // Guards run before interceptors, so there is no ambient request ctx
+    // to join. `ctx` is still forwarded to every call below because
+    // omitting it also disables entity hooks (§8a, rule 16) — this store
+    // declares none, so nothing here breaks without it, but a call that
+    // silently opts out of the hook pipeline is the habit #45 came from.
+    const ctx = AppContextHost.from();
+
+    const now = Date.now();
+    const windowStart = Math.floor(now / windowMs) * windowMs;
+
+    // Atomic. Two concurrent attempts cannot collapse into one count.
+    const event = await this.events.create({ key, at: now }, { ctx });
+
+    // This attempt's rank in the window. `id <= event.id` gives each
+    // attempt its own rank instead of letting concurrent attempts read
+    // one shared pre-increment value. How exact that rank is depends on
+    // the backend — see the caveats below.
+    const count = await this.events.count({
+      where: Where.and(
+        Where.eq<RateLimitEventEntity>('key', key),
+        Where.gte<RateLimitEventEntity>('at', windowStart),
+        Where.lte<RateLimitEventEntity>('id', event.id),
+      ),
       ctx,
-      async () => {
-        /* findOne → create/update the counter row, all forwarding { ctx } */
-      },
-      { propagation: 'MANDATORY' }, // fail-closed if no transaction adapter is registered
-    );
+    });
+
+    return {
+      allowed: count <= limit,
+      limit,
+      remaining: Math.max(0, limit - count),
+      resetAt: windowStart + windowMs,
+    };
   }
 }
 ```
 
+#### What this shape requires, and what it costs
+
+Read all of this before copying it. The design has real limits and they
+are not all visible from the code.
+
+- **It requires a backend whose generated ids are monotonic and
+  comparable.** The rank depends on `id <= event.id` meaning "was
+  allocated before mine". A SQL auto-increment / identity / sequence
+  column satisfies that. **A store that generates random ids does
+  not** — the Firestore adapter allocates `randomUUID()`, so `lte` over
+  those strings selects an arbitrary subset and the rank is noise. This
+  shape is for SQL-shaped backends; on Firestore use a counter document
+  with the adapter's native `increment()` instead.
+- **"Exact" is a property of single-writer backends, not of the
+  algorithm.** On a serialized-writer store (SQLite, and what the e2e
+  proves) each INSERT commits before the next begins, so N concurrent
+  attempts get N distinct ranks and exactly `limit` are admitted. On
+  Postgres or MySQL with a connection pool, a lower id can still be
+  uncommitted when a later attempt runs its `COUNT` — two attempts then
+  see the same rank and both are admitted. Over-admission is bounded by
+  the number of requests genuinely in flight at once, not by a
+  constant. The limiter never admits **fewer** than `limit` and never
+  loses an attempt from the total; that is the contract the port asks
+  for, and it is weaker than "exact".
+- **The counter is deliberately not transactional.** A rate-limit
+  attempt must be committed independently of the request that made it.
+  If the counter joined the request's transaction, any request that
+  later failed would roll back its own attempt and refund the caller's
+  budget — precisely what an abuser wants. This is the one place where
+  standing outside the surrounding transaction is the correct choice
+  rather than the §8a defect.
+- **The `COUNT` is O(rows in the window), not constant.** The
+  `['key', 'at']` index changes the constant, not the order, so cost per
+  request grows with the traffic already absorbed in that window. Worse,
+  every **rejected** request still commits a row, so unauthenticated
+  traffic converts directly into writes on your primary database, and an
+  IP-keyed limiter facing IPv6 rotation produces unboundedly many
+  distinct keys. **For a route that faces real hostile volume, put the
+  limiter on Redis** (`INCR` + `EXPIRE` is O(1), expires itself, and
+  keeps the traffic off your database) behind the same
+  `RateLimitStoreInterface`. This shape is right for moderate volume and
+  for keeping one dependency.
+- **Rows accumulate and must be pruned.** Delete rows older than the
+  longest configured window on a schedule, or use a TTL index /
+  partition drop where the backend has one.
+- **The window is anchored on aligned buckets**, not on the key's first
+  request the way `InMemoryRateLimitStore` anchors it. Two consequences:
+  a fixed window admits up to `2 x limit` across a bucket boundary (the
+  last `limit` of one bucket and the first `limit` of the next, back to
+  back), and because `Date.now()` is read on each instance, clock skew
+  between instances shifts their boundaries apart. Use a database-side
+  timestamp if that matters to you.
+
 Register the entity and store through `defineModuleResource` (rule 4),
-not a bare `TypeOrmModule.forFeature()` — `TransactionScope` and the
-dynamic-repository token are only wired by going through
-`RocketsCoreModule`'s own composition. A working, real-database version
-of this (SQLite, real HTTP requests, real transaction commit) is the e2e
-proof at `packages/rockets-core/src/__e2e__/rockets-core-rate-limit.e2e-spec.ts`.
+not a bare `TypeOrmModule.forFeature()` — the dynamic-repository token
+is only wired by going through `RocketsCoreModule`'s own composition.
+
+This is independent of `rockets-server-auth`'s own coarse login
+throttling (§7b). An app using both has two limiters on `/auth/login`
+with separate stores and separate keys; that is additive, not
+redundant, and worth being deliberate about.
+
+#### What the e2e actually proves
+
+`packages/rockets-core/src/__e2e__/rockets-core-rate-limit.e2e-spec.ts`
+runs this against real SQLite over real HTTP:
+
+- 10 concurrent requests at a `limit: 2` route yield exactly 2x`200`,
+  8x`429`, zero `503`, and 10 persisted attempt rows. **On SQLite** —
+  that is the single-writer case above, not evidence for Postgres.
+- Budget refills: a short-window route admits `limit`, rejects, and
+  admits again once the bucket rolls over. Without that test a store
+  that banned a key permanently would pass everything else.
+- The §8a seam is pinned separately: a probe store that writes and then
+  throws inside a `TransactionScope` leaves **no** row when `ctx` is
+  forwarded and **one** row when it is omitted — both directions
+  asserted, so neither assertion can pass vacuously.
 
 ### Failure mode is fail-closed
 
@@ -1181,8 +1365,9 @@ export class TransferService {
     to: string,
     amount: number,
   ) {
-    // `REQUIRED` starts one if none is active; the default `SUPPORTS`
-    // would silently run unprotected outside a request.
+    // `MANDATORY` fails closed when no transaction adapter is
+    // registered; the default `SUPPORTS` would silently run
+    // unprotected outside a request.
     return this.trx.run(
       ctx,
       async (txCtx) => {
@@ -1190,7 +1375,7 @@ export class TransferService {
         // …every call inside gets `txCtx`, or it escapes the transaction.
         await this.accounts.update(debit, { balance: … }, { ctx: txCtx });
       },
-      { propagation: 'REQUIRED' },
+      { propagation: 'MANDATORY' },
     );
   }
 }
@@ -1198,9 +1383,10 @@ export class TransferService {
 
 Two traps worth naming:
 
-- **`SUPPORTS` is the default propagation.** A scope opened without
-  `propagation: 'REQUIRED'` inside a non-transactional entry point runs
-  with no transaction at all, and nothing warns.
+- **`SUPPORTS` is the default propagation.** `PropagationBehavior` is
+  `'SUPPORTS' | 'MANDATORY'` — there is no `'REQUIRED'`. A scope opened
+  without `propagation: 'MANDATORY'` in an app with no transaction
+  adapter registered runs with no transaction at all, and nothing warns.
 - **Guards run before interceptors.** A guard cannot participate in the
   operation's transaction, because the transaction interceptor has not
   run yet. `PathScopeGuard` is deliberately a pre-check for this reason

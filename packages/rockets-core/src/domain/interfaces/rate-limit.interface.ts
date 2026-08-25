@@ -17,10 +17,10 @@ export interface RateLimitResult {
  * Core ships one adapter, `InMemoryRateLimitStore`, for tests and
  * samples — in-memory, single-process. A production, multi-instance
  * deployment needs a shared backend (a dynamic-repository table, Redis)
- * behind the same interface; the dynamic-repository / `TransactionScope`
- * pattern is documented, with a real e2e proving correct `ctx` /
- * transaction forwarding (the #45 regression class this port exists to
- * not repeat), in `CONFIGURATION.md` §7c.
+ * behind the same interface; `CONFIGURATION.md` §7c documents one, with
+ * an e2e that fires 10 concurrent requests at a real database and
+ * asserts the admitted/rejected split and the persisted attempt count
+ * exactly.
  *
  * Deliberately NOT a decision about what happens on a store failure —
  * `consume` throwing is exactly that failure, and `RateLimitGuard`
@@ -31,11 +31,27 @@ export interface RateLimitResult {
  */
 export interface RateLimitStoreInterface {
   /**
-   * Atomically increments the counter for `key` within a fixed window
-   * of `windowMs` and reports whether this request stays within
-   * `limit`. Two different `(limit, windowMs)` pairs for the SAME `key`
-   * are the caller's contract to keep consistent — the store does not
-   * validate that policy stays constant across calls.
+   * Records one attempt against `key` inside a fixed window of
+   * `windowMs` and reports whether this attempt stays within `limit`.
+   *
+   * **The contract an implementation must meet is that no attempt is
+   * ever lost.** Concurrent calls for the same `key` must each be
+   * counted; a naive read-increment-write over a shared backend does
+   * NOT satisfy this, because two overlapping calls read the same
+   * pre-increment value and one of the two increments disappears — the
+   * attacker's requests are then invisible to the limiter rather than
+   * merely rejected. `CONFIGURATION.md` §7c shows a store that meets it
+   * by appending one row per attempt instead of mutating a counter.
+   *
+   * What the port deliberately does NOT promise is a globally
+   * linearizable count. Across instances an attempt may be counted a
+   * moment after a concurrent one, so a burst can admit slightly more
+   * than `limit` — it must never admit fewer, and must never drop an
+   * attempt from the total.
+   *
+   * Two different `(limit, windowMs)` pairs for the SAME `key` are the
+   * caller's contract to keep consistent — the store does not validate
+   * that policy stays constant across calls.
    */
   consume(
     key: string,

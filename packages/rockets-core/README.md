@@ -961,10 +961,30 @@ class AppModule {}
 and single-process apps, not for more than one instance (each process
 would track its own count). A real multi-instance deployment needs a
 shared backend behind `RateLimitStoreInterface`; see `CONFIGURATION.md`
-§7c for the dynamic-repository / `TransactionScope` version and its e2e
-proof. On over-limit the guard rejects with `429` and `Retry-After`; on
-a store failure it fails **closed** (`503`), never lets the request
-through unlimited.
+§7c for a dynamic-repository store that never loses a concurrent
+attempt, why the obvious read-increment-write counter row does, and the
+limits of that shape — it needs a backend with monotonic generated ids,
+its `COUNT` is O(rows in the window), and a route facing real hostile
+volume wants Redis rather than your primary database. On over-limit the
+guard rejects with `429` and `Retry-After`; on a store failure it fails
+**closed** (`503`), never lets the request through unlimited.
+
+Two things to get right when registering it:
+
+- **Guard order.** Nest short-circuits on the first global guard that
+  rejects, so a guard registered before `RateLimitGuard` hides traffic
+  from it — an unauthenticated request to a protected route is rejected
+  by the auth guard and consumes zero rate-limit budget. Register
+  `RateLimitGuard` first if you want it to count every request. Public
+  routes (login, signup, recovery), the usual target, are unaffected
+  either way.
+- **`request.ip` behind a proxy.** The default key is
+  `ip:METHOD:route`. An app behind a reverse proxy must set
+  `app.set('trust proxy', ['loopback', 'linklocal', 'uniquelocal'])`
+  (or whatever matches its topology) in the host bootstrap, or all
+  callers collapse into the proxy's single IP bucket. Rockets does not
+  enable it automatically — trusting unverified forwarding headers lets
+  clients spoof their address and evade the limit.
 
 ---
 
