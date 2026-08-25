@@ -1,0 +1,4396 @@
+{
+  "components": {
+    "schemas": {
+      "AppointmentCreateDto": {
+        "properties": {
+          "date": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "petId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reminderSendAt": {
+            "description": "When to send the reminder (must be before `date`).",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "petId",
+          "date",
+          "reminderSendAt"
+        ],
+        "type": "object"
+      },
+      "AppointmentResponseDto": {
+        "properties": {
+          "date": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "dateCreated": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "petId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reminders": {
+            "items": {
+              "$ref": "#/components/schemas/ReminderResponseDto"
+            },
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "confirmed",
+              "cancelled"
+            ],
+            "type": "string"
+          },
+          "userId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "petId",
+          "userId",
+          "date",
+          "status",
+          "dateCreated"
+        ],
+        "type": "object"
+      },
+      "AppointmentResponseDtoPaginatedDto": {
+        "properties": {
+          "count": {
+            "description": "Count of all records",
+            "type": "number"
+          },
+          "data": {
+            "description": "The list of records for current page",
+            "items": {
+              "$ref": "#/components/schemas/AppointmentResponseDto"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "description": "Limit number of items",
+            "type": "number"
+          },
+          "page": {
+            "description": "Current page number",
+            "type": "number"
+          },
+          "pageCount": {
+            "description": "Total number of pages",
+            "type": "number"
+          },
+          "total": {
+            "description": "Count of records on current page",
+            "type": "number"
+          }
+        },
+        "required": [
+          "data",
+          "limit",
+          "count",
+          "total",
+          "page",
+          "pageCount"
+        ],
+        "type": "object"
+      },
+      "AuthorCreateDto": {
+        "properties": {
+          "name": {
+            "example": "Machado de Assis",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "AuthorResponseDto": {
+        "properties": {
+          "dateCreated": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+            "type": "string"
+          },
+          "dateUpdated": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "name": {
+            "example": "Machado de Assis",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "dateCreated",
+          "dateUpdated"
+        ],
+        "type": "object"
+      },
+      "AuthorResponseDtoPaginatedDto": {
+        "properties": {
+          "count": {
+            "description": "Count of all records",
+            "type": "number"
+          },
+          "data": {
+            "description": "The list of records for current page",
+            "items": {
+              "$ref": "#/components/schemas/AuthorResponseDto"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "description": "Limit number of items",
+            "type": "number"
+          },
+          "page": {
+            "description": "Current page number",
+            "type": "number"
+          },
+          "pageCount": {
+            "description": "Total number of pages",
+            "type": "number"
+          },
+          "total": {
+            "description": "Count of records on current page",
+            "type": "number"
+          }
+        },
+        "required": [
+          "data",
+          "limit",
+          "count",
+          "total",
+          "page",
+          "pageCount"
+        ],
+        "type": "object"
+      },
+      "AuthorUpdateDto": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "name": {
+            "example": "Machado de Assis",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BookCreateDto": {
+        "properties": {
+          "authorId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "internalNote": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "isbn": {
+            "example": "9788535914061",
+            "maxLength": 20,
+            "type": "string"
+          },
+          "title": {
+            "example": "Dom Casmurro",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "isbn",
+          "authorId"
+        ],
+        "type": "object"
+      },
+      "BookReplaceDto": {
+        "properties": {
+          "authorId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "internalNote": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "isbn": {
+            "example": "9788535914061",
+            "maxLength": 20,
+            "type": "string"
+          },
+          "title": {
+            "example": "Dom Casmurro",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "isbn",
+          "authorId"
+        ],
+        "type": "object"
+      },
+      "BookResponseDto": {
+        "properties": {
+          "author": {
+            "properties": {
+              "dateCreated": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+                "type": "string"
+              },
+              "dateUpdated": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+                "type": "string"
+              },
+              "id": {
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "type": "string"
+              },
+              "name": {
+                "example": "Machado de Assis",
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "dateCreated",
+              "dateUpdated"
+            ],
+            "type": "object"
+          },
+          "authorId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "dateCreated": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+            "type": "string"
+          },
+          "dateDeleted": {
+            "format": "date-time",
+            "nullable": true,
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+            "type": "string"
+          },
+          "dateUpdated": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "isbn": {
+            "example": "9788535914061",
+            "maxLength": 20,
+            "type": "string"
+          },
+          "title": {
+            "example": "Dom Casmurro",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "isbn",
+          "authorId",
+          "dateCreated",
+          "dateUpdated"
+        ],
+        "type": "object"
+      },
+      "BookResponseDtoPaginatedDto": {
+        "properties": {
+          "count": {
+            "description": "Count of all records",
+            "type": "number"
+          },
+          "data": {
+            "description": "The list of records for current page",
+            "items": {
+              "$ref": "#/components/schemas/BookResponseDto"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "description": "Limit number of items",
+            "type": "number"
+          },
+          "page": {
+            "description": "Current page number",
+            "type": "number"
+          },
+          "pageCount": {
+            "description": "Total number of pages",
+            "type": "number"
+          },
+          "total": {
+            "description": "Count of records on current page",
+            "type": "number"
+          }
+        },
+        "required": [
+          "data",
+          "limit",
+          "count",
+          "total",
+          "page",
+          "pageCount"
+        ],
+        "type": "object"
+      },
+      "BookUpdateDto": {
+        "properties": {
+          "authorId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "internalNote": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "title": {
+            "example": "Dom Casmurro",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LoginResponseDto": {
+        "properties": {
+          "accessToken": {
+            "description": "Signed JWT — pass as Bearer token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "accessToken"
+        ],
+        "type": "object"
+      },
+      "PetCreateDto": {
+        "properties": {
+          "age": {
+            "maximum": 50,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "breed": {
+            "example": "Labrador",
+            "maxLength": 255,
+            "type": "string"
+          },
+          "color": {
+            "example": "golden",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "example": "Buddy",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "species": {
+            "example": "dog",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "status": {
+            "default": "active",
+            "enum": [
+              "active",
+              "inactive"
+            ],
+            "type": "string"
+          },
+          "uniqueRef": {
+            "maxLength": 64,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "species",
+          "age"
+        ],
+        "type": "object"
+      },
+      "PetResponseDto": {
+        "properties": {
+          "age": {
+            "maximum": 50,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "breed": {
+            "example": "Labrador",
+            "maxLength": 255,
+            "type": "string"
+          },
+          "color": {
+            "example": "golden",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "dateCreated": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+            "type": "string"
+          },
+          "dateDeleted": {
+            "format": "date-time",
+            "nullable": true,
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+            "type": "string"
+          },
+          "dateUpdated": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "name": {
+            "example": "Buddy",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "species": {
+            "example": "dog",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "status": {
+            "default": "active",
+            "enum": [
+              "active",
+              "inactive"
+            ],
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "properties": {
+                "color": {
+                  "example": "#ff0000",
+                  "maxLength": 20,
+                  "type": "string"
+                },
+                "dateCreated": {
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+                  "type": "string"
+                },
+                "dateUpdated": {
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+                  "type": "string"
+                },
+                "id": {
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                  "type": "string"
+                },
+                "name": {
+                  "example": "vaccinated",
+                  "maxLength": 100,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "dateCreated",
+                "dateUpdated"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "uniqueRef": {
+            "maxLength": 64,
+            "nullable": true,
+            "type": "string"
+          },
+          "userId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "vaccinations": {
+            "items": {
+              "properties": {
+                "dateAdministered": {
+                  "example": "2024-01-15",
+                  "type": "string"
+                },
+                "dateExpires": {
+                  "example": "2025-01-15",
+                  "type": "string"
+                },
+                "id": {
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                  "type": "string"
+                },
+                "name": {
+                  "example": "Rabies",
+                  "type": "string"
+                },
+                "petId": {
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "dateAdministered",
+                "petId"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "version": {
+            "default": 1,
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "species",
+          "age",
+          "userId",
+          "dateCreated",
+          "dateUpdated"
+        ],
+        "type": "object"
+      },
+      "PetResponseDtoPaginatedDto": {
+        "properties": {
+          "count": {
+            "description": "Count of all records",
+            "type": "number"
+          },
+          "data": {
+            "description": "The list of records for current page",
+            "items": {
+              "$ref": "#/components/schemas/PetResponseDto"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "description": "Limit number of items",
+            "type": "number"
+          },
+          "page": {
+            "description": "Current page number",
+            "type": "number"
+          },
+          "pageCount": {
+            "description": "Total number of pages",
+            "type": "number"
+          },
+          "total": {
+            "description": "Count of records on current page",
+            "type": "number"
+          }
+        },
+        "required": [
+          "data",
+          "limit",
+          "count",
+          "total",
+          "page",
+          "pageCount"
+        ],
+        "type": "object"
+      },
+      "PetShareCreateDto": {
+        "properties": {
+          "permission": {
+            "enum": [
+              "read"
+            ],
+            "type": "string"
+          },
+          "userId": {
+            "description": "ID of the user the pet is being shared with.",
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "userId"
+        ],
+        "type": "object"
+      },
+      "PetTagCreateDto": {
+        "properties": {
+          "tagId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tagId"
+        ],
+        "type": "object"
+      },
+      "PetTagResponseDto": {
+        "properties": {
+          "dateCreated": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "petId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "tag": {
+            "properties": {
+              "color": {
+                "example": "#ff0000",
+                "maxLength": 20,
+                "type": "string"
+              },
+              "dateCreated": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+                "type": "string"
+              },
+              "dateUpdated": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+                "type": "string"
+              },
+              "id": {
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "type": "string"
+              },
+              "name": {
+                "example": "vaccinated",
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "dateCreated",
+              "dateUpdated"
+            ],
+            "type": "object"
+          },
+          "tagId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "petId",
+          "tagId",
+          "dateCreated"
+        ],
+        "type": "object"
+      },
+      "PetTagResponseDtoPaginatedDto": {
+        "properties": {
+          "count": {
+            "description": "Count of all records",
+            "type": "number"
+          },
+          "data": {
+            "description": "The list of records for current page",
+            "items": {
+              "$ref": "#/components/schemas/PetTagResponseDto"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "description": "Limit number of items",
+            "type": "number"
+          },
+          "page": {
+            "description": "Current page number",
+            "type": "number"
+          },
+          "pageCount": {
+            "description": "Total number of pages",
+            "type": "number"
+          },
+          "total": {
+            "description": "Count of records on current page",
+            "type": "number"
+          }
+        },
+        "required": [
+          "data",
+          "limit",
+          "count",
+          "total",
+          "page",
+          "pageCount"
+        ],
+        "type": "object"
+      },
+      "PetUpdateDto": {
+        "properties": {
+          "age": {
+            "maximum": 50,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "breed": {
+            "example": "Labrador",
+            "maxLength": 255,
+            "type": "string"
+          },
+          "color": {
+            "example": "golden",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "name": {
+            "example": "Buddy",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "species": {
+            "example": "dog",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "status": {
+            "default": "active",
+            "enum": [
+              "active",
+              "inactive"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PetVaccinationCreateDto": {
+        "properties": {
+          "dateAdministered": {
+            "example": "2024-01-15",
+            "type": "string"
+          },
+          "dateExpires": {
+            "example": "2025-01-15",
+            "type": "string"
+          },
+          "name": {
+            "example": "Rabies",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "petId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "dateAdministered",
+          "petId"
+        ],
+        "type": "object"
+      },
+      "PetVaccinationResponseDto": {
+        "properties": {
+          "dateAdministered": {
+            "example": "2024-01-15",
+            "type": "string"
+          },
+          "dateExpires": {
+            "example": "2025-01-15",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "name": {
+            "example": "Rabies",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "petId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "dateAdministered",
+          "petId"
+        ],
+        "type": "object"
+      },
+      "PetVaccinationResponseDtoPaginatedDto": {
+        "properties": {
+          "count": {
+            "description": "Count of all records",
+            "type": "number"
+          },
+          "data": {
+            "description": "The list of records for current page",
+            "items": {
+              "$ref": "#/components/schemas/PetVaccinationResponseDto"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "description": "Limit number of items",
+            "type": "number"
+          },
+          "page": {
+            "description": "Current page number",
+            "type": "number"
+          },
+          "pageCount": {
+            "description": "Total number of pages",
+            "type": "number"
+          },
+          "total": {
+            "description": "Count of records on current page",
+            "type": "number"
+          }
+        },
+        "required": [
+          "data",
+          "limit",
+          "count",
+          "total",
+          "page",
+          "pageCount"
+        ],
+        "type": "object"
+      },
+      "PetsPetId_Post_TransferInput": {
+        "properties": {
+          "newOwnerId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "newOwnerId"
+        ],
+        "type": "object"
+      },
+      "PetsPetId_Post_TransferOutput": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "userId"
+        ],
+        "type": "object"
+      },
+      "ReminderResponseDto": {
+        "properties": {
+          "appointmentId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "dateCreated": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "sendAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+            "type": "string"
+          },
+          "sent": {
+            "default": false,
+            "description": "Whether the reminder was dispatched",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "appointmentId",
+          "sendAt",
+          "dateCreated"
+        ],
+        "type": "object"
+      },
+      "ReminderResponseDtoPaginatedDto": {
+        "properties": {
+          "count": {
+            "description": "Count of all records",
+            "type": "number"
+          },
+          "data": {
+            "description": "The list of records for current page",
+            "items": {
+              "$ref": "#/components/schemas/ReminderResponseDto"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "description": "Limit number of items",
+            "type": "number"
+          },
+          "page": {
+            "description": "Current page number",
+            "type": "number"
+          },
+          "pageCount": {
+            "description": "Total number of pages",
+            "type": "number"
+          },
+          "total": {
+            "description": "Count of records on current page",
+            "type": "number"
+          }
+        },
+        "required": [
+          "data",
+          "limit",
+          "count",
+          "total",
+          "page",
+          "pageCount"
+        ],
+        "type": "object"
+      },
+      "RoleNameDto": {
+        "properties": {
+          "name": {
+            "description": "Role name",
+            "example": "admin",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "SignupResponseDto": {
+        "properties": {
+          "accessToken": {
+            "description": "Signed JWT — pass as Bearer token",
+            "type": "string"
+          },
+          "email": {
+            "example": "user@example.com",
+            "type": "string"
+          },
+          "id": {
+            "description": "Generated UUID for the new account",
+            "type": "string"
+          },
+          "name": {
+            "example": "John Doe",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "user",
+              "admin"
+            ],
+            "example": "user",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "role",
+          "accessToken"
+        ],
+        "type": "object"
+      },
+      "TagCreateDto": {
+        "properties": {
+          "color": {
+            "example": "#ff0000",
+            "maxLength": 20,
+            "type": "string"
+          },
+          "name": {
+            "example": "vaccinated",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "TagResponseDto": {
+        "properties": {
+          "color": {
+            "example": "#ff0000",
+            "maxLength": 20,
+            "type": "string"
+          },
+          "dateCreated": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+            "type": "string"
+          },
+          "dateUpdated": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "name": {
+            "example": "vaccinated",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "dateCreated",
+          "dateUpdated"
+        ],
+        "type": "object"
+      },
+      "TagResponseDtoPaginatedDto": {
+        "properties": {
+          "count": {
+            "description": "Count of all records",
+            "type": "number"
+          },
+          "data": {
+            "description": "The list of records for current page",
+            "items": {
+              "$ref": "#/components/schemas/TagResponseDto"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "description": "Limit number of items",
+            "type": "number"
+          },
+          "page": {
+            "description": "Current page number",
+            "type": "number"
+          },
+          "pageCount": {
+            "description": "Total number of pages",
+            "type": "number"
+          },
+          "total": {
+            "description": "Count of records on current page",
+            "type": "number"
+          }
+        },
+        "required": [
+          "data",
+          "limit",
+          "count",
+          "total",
+          "page",
+          "pageCount"
+        ],
+        "type": "object"
+      },
+      "TagUpdateDto": {
+        "properties": {
+          "color": {
+            "example": "#ff0000",
+            "maxLength": 20,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "name": {
+            "example": "vaccinated",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UserMetadataUpdateDto": {
+        "properties": {
+          "bio": {
+            "description": "User bio",
+            "maxLength": 500,
+            "type": "string"
+          },
+          "firstName": {
+            "description": "User first name",
+            "example": "John",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "lastName": {
+            "description": "User last name",
+            "example": "Doe",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "username": {
+            "description": "Username",
+            "example": "johndoe",
+            "maxLength": 50,
+            "minLength": 3,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UserResponseDto": {
+        "properties": {
+          "claims": {
+            "description": "User claims from auth provider",
+            "example": {
+              "aud": "app",
+              "iss": "auth-provider"
+            },
+            "type": "object"
+          },
+          "email": {
+            "description": "User email from auth provider",
+            "example": "user@example.com",
+            "type": "string"
+          },
+          "id": {
+            "description": "User ID from auth provider",
+            "example": "user-123",
+            "type": "string"
+          },
+          "sub": {
+            "description": "User subject from auth provider",
+            "example": "user-123",
+            "type": "string"
+          },
+          "userMetadata": {
+            "description": "UserMetadata data - structure is defined dynamically",
+            "type": "object"
+          },
+          "userRoles": {
+            "description": "User roles from auth provider",
+            "example": [
+              {
+                "role": {
+                  "name": "user"
+                }
+              },
+              {
+                "role": {
+                  "name": "admin"
+                }
+              }
+            ],
+            "items": {
+              "$ref": "#/components/schemas/UserRoleItemDto"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "sub"
+        ],
+        "type": "object"
+      },
+      "UserRoleItemDto": {
+        "properties": {
+          "role": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RoleNameDto"
+              }
+            ],
+            "description": "Role object"
+          }
+        },
+        "required": [
+          "role"
+        ],
+        "type": "object"
+      },
+      "UserUpdateDto": {
+        "properties": {
+          "userMetadata": {
+            "description": "UserMetadata data to update - structure is defined dynamically",
+            "type": "object"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "bearer": {
+        "bearerFormat": "JWT",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "contact": {
+      "email": "",
+      "name": "",
+      "url": ""
+    },
+    "description": "API Documentation",
+    "license": {
+      "name": "",
+      "url": ""
+    },
+    "title": "API",
+    "version": "0.0.0"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/admin/audit-logs": {
+      "get": {
+        "operationId": "AuditLogController_list",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "resource",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "resourceId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "action",
+            "required": false,
+            "schema": {
+              "enum": [
+                "create",
+                "update",
+                "delete",
+                "soft_delete",
+                "restore"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List audit rows (admin only)",
+        "tags": [
+          "Audit"
+        ]
+      }
+    },
+    "/admin/pets": {
+      "get": {
+        "operationId": "AdminPetController_list",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "withDeleted",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List every pet in the system (admin only, owner scope bypassed)",
+        "tags": [
+          "Admin Pets"
+        ]
+      }
+    },
+    "/admin/pets/{id}": {
+      "get": {
+        "operationId": "AdminPetController_read",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "withDeleted",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Read any pet by id (admin only)",
+        "tags": [
+          "Admin Pets"
+        ]
+      }
+    },
+    "/admin/pets/{id}/force-restore": {
+      "patch": {
+        "operationId": "AdminPetController_forceRestore",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Force-restore any pet regardless of owner (admin only)",
+        "tags": [
+          "Admin Pets"
+        ]
+      }
+    },
+    "/admin/pets/{id}/hard": {
+      "delete": {
+        "operationId": "AdminPetController_hardDelete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Hard-delete any pet (admin only, bypasses soft-delete)",
+        "tags": [
+          "Admin Pets"
+        ]
+      }
+    },
+    "/appointments": {
+      "get": {
+        "operationId": "appointment_list",
+        "parameters": [
+          {
+            "description": "Selects resource fields. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": false,
+            "in": "query",
+            "name": "select",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds search condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "s",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Adds filter condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds OR condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "or",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds sort by field. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Limit amount of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Offset amount of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page portion of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Reset cache (if was enabled). <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "cache",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Include deleted. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "includeDeleted",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppointmentResponseDtoPaginatedDto"
+                }
+              }
+            },
+            "description": "list AppointmentResponseDto as paginated response."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Appointments"
+        ]
+      },
+      "post": {
+        "operationId": "appointment_create",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentCreateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppointmentResponseDto"
+                }
+              }
+            },
+            "description": "create AppointmentResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Appointments"
+        ]
+      }
+    },
+    "/appointments/{id}": {
+      "delete": {
+        "operationId": "appointment_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "delete AppointmentResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Appointments"
+        ]
+      },
+      "get": {
+        "operationId": "appointment_read",
+        "parameters": [
+          {
+            "description": "Selects resource fields. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": false,
+            "in": "query",
+            "name": "select",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Reset cache (if was enabled). <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "cache",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Include deleted. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "includeDeleted",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppointmentResponseDto"
+                }
+              }
+            },
+            "description": "read AppointmentResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Appointments"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "email": {
+                    "format": "email",
+                    "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                    "type": "string"
+                  },
+                  "password": {
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDto"
+                }
+              }
+            },
+            "description": "Returns JWT"
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        },
+        "summary": "Login with email and password",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/signup": {
+      "post": {
+        "operationId": "AuthController_signup",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "email": {
+                    "format": "email",
+                    "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                    "type": "string"
+                  },
+                  "name": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "password": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "role": {
+                    "enum": [
+                      "user",
+                      "admin"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignupResponseDto"
+                }
+              }
+            },
+            "description": "Account created, returns JWT"
+          },
+          "409": {
+            "description": "Email is already registered"
+          }
+        },
+        "summary": "Create a new account",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/authors": {
+      "get": {
+        "operationId": "author_list",
+        "parameters": [
+          {
+            "description": "Selects resource fields. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": false,
+            "in": "query",
+            "name": "select",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds search condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "s",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Adds filter condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds OR condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "or",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds sort by field. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Limit amount of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Offset amount of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page portion of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Reset cache (if was enabled). <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "cache",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Include deleted. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "includeDeleted",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthorResponseDtoPaginatedDto"
+                }
+              }
+            },
+            "description": "list AuthorResponseDto as paginated response."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Authors"
+        ]
+      },
+      "post": {
+        "operationId": "author_create",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorCreateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthorResponseDto"
+                }
+              }
+            },
+            "description": "create AuthorResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Authors"
+        ]
+      }
+    },
+    "/authors/{id}": {
+      "delete": {
+        "operationId": "author_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "delete AuthorResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Authors"
+        ]
+      },
+      "get": {
+        "operationId": "author_read",
+        "parameters": [
+          {
+            "description": "Selects resource fields. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": false,
+            "in": "query",
+            "name": "select",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Reset cache (if was enabled). <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "cache",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Include deleted. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "includeDeleted",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthorResponseDto"
+                }
+              }
+            },
+            "description": "read AuthorResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Authors"
+        ]
+      },
+      "patch": {
+        "operationId": "author_update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorUpdateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthorResponseDto"
+                }
+              }
+            },
+            "description": "update AuthorResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Authors"
+        ]
+      }
+    },
+    "/books": {
+      "get": {
+        "operationId": "book_list",
+        "parameters": [
+          {
+            "description": "Selects resource fields. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": false,
+            "in": "query",
+            "name": "select",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds search condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "s",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Adds filter condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds OR condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "or",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds sort by field. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Limit amount of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Offset amount of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page portion of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Reset cache (if was enabled). <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "cache",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Include deleted. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "includeDeleted",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookResponseDtoPaginatedDto"
+                }
+              }
+            },
+            "description": "list BookResponseDto as paginated response."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Books"
+        ]
+      },
+      "post": {
+        "operationId": "book_create",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookCreateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookResponseDto"
+                }
+              }
+            },
+            "description": "create BookResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Books"
+        ]
+      }
+    },
+    "/books/restore/{id}": {
+      "patch": {
+        "operationId": "book_restore",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookResponseDto"
+                }
+              }
+            },
+            "description": "restore BookResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Books"
+        ]
+      }
+    },
+    "/books/{id}": {
+      "delete": {
+        "operationId": "book_softDelete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookResponseDto"
+                }
+              }
+            },
+            "description": "softDelete BookResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Books"
+        ]
+      },
+      "get": {
+        "operationId": "book_read",
+        "parameters": [
+          {
+            "description": "Selects resource fields. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": false,
+            "in": "query",
+            "name": "select",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Reset cache (if was enabled). <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "cache",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Include deleted. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "includeDeleted",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookResponseDto"
+                }
+              }
+            },
+            "description": "read BookResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Books"
+        ]
+      },
+      "patch": {
+        "operationId": "book_update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookUpdateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookResponseDto"
+                }
+              }
+            },
+            "description": "update BookResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Books"
+        ]
+      },
+      "put": {
+        "operationId": "book_replace",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookReplaceDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookResponseDto"
+                }
+              }
+            },
+            "description": "replace BookResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Books"
+        ]
+      }
+    },
+    "/me": {
+      "get": {
+        "description": "Returns authenticated user data along with userMetadata data",
+        "operationId": "MeController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            },
+            "description": "User information retrieved successfully"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get current user information",
+        "tags": [
+          "user"
+        ]
+      },
+      "patch": {
+        "description": "Creates or updates user userMetadata data",
+        "operationId": "MeController_updateUser",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "userMetadata": {
+                    "$ref": "#/components/schemas/UserMetadataUpdateDto"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            },
+            "description": "User userMetadata updated successfully"
+          },
+          "400": {
+            "description": "Bad Request - Invalid userMetadata format"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update user userMetadata data",
+        "tags": [
+          "user"
+        ]
+      }
+    },
+    "/pet-vaccinations": {
+      "get": {
+        "operationId": "petVaccination_list",
+        "parameters": [
+          {
+            "description": "Selects resource fields. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": false,
+            "in": "query",
+            "name": "select",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds search condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "s",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Adds filter condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds OR condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "or",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds sort by field. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Limit amount of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Offset amount of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page portion of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Reset cache (if was enabled). <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "cache",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Include deleted. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "includeDeleted",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetVaccinationResponseDtoPaginatedDto"
+                }
+              }
+            },
+            "description": "list PetVaccinationResponseDto as paginated response."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pet Vaccinations"
+        ]
+      },
+      "post": {
+        "operationId": "petVaccination_create",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PetVaccinationCreateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetVaccinationResponseDto"
+                }
+              }
+            },
+            "description": "create PetVaccinationResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pet Vaccinations"
+        ]
+      }
+    },
+    "/pet-vaccinations/{id}": {
+      "delete": {
+        "operationId": "petVaccination_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "delete PetVaccinationResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pet Vaccinations"
+        ]
+      },
+      "get": {
+        "operationId": "petVaccination_read",
+        "parameters": [
+          {
+            "description": "Selects resource fields. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": false,
+            "in": "query",
+            "name": "select",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Reset cache (if was enabled). <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "cache",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Include deleted. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "includeDeleted",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetVaccinationResponseDto"
+                }
+              }
+            },
+            "description": "read PetVaccinationResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pet Vaccinations"
+        ]
+      }
+    },
+    "/pets": {
+      "get": {
+        "operationId": "pet_list",
+        "parameters": [
+          {
+            "description": "Selects resource fields. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": false,
+            "in": "query",
+            "name": "select",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds search condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "s",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Adds filter condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds OR condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "or",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds sort by field. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Limit amount of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Offset amount of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page portion of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Reset cache (if was enabled). <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "cache",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Include deleted. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "includeDeleted",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetResponseDtoPaginatedDto"
+                }
+              }
+            },
+            "description": "list PetResponseDto as paginated response."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pets"
+        ]
+      },
+      "post": {
+        "operationId": "pet_create",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PetCreateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetResponseDto"
+                }
+              }
+            },
+            "description": "create PetResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pets"
+        ]
+      }
+    },
+    "/pets/restore/{id}": {
+      "patch": {
+        "operationId": "pet_restore",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetResponseDto"
+                }
+              }
+            },
+            "description": "restore PetResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pets"
+        ]
+      }
+    },
+    "/pets/{id}": {
+      "delete": {
+        "operationId": "pet_softDelete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetResponseDto"
+                }
+              }
+            },
+            "description": "softDelete PetResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pets"
+        ]
+      },
+      "get": {
+        "operationId": "pet_read",
+        "parameters": [
+          {
+            "description": "Selects resource fields. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": false,
+            "in": "query",
+            "name": "select",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Reset cache (if was enabled). <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "cache",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Include deleted. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "includeDeleted",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetResponseDto"
+                }
+              }
+            },
+            "description": "read PetResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pets"
+        ]
+      },
+      "patch": {
+        "operationId": "pet_update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PetUpdateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetResponseDto"
+                }
+              }
+            },
+            "description": "update PetResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pets"
+        ]
+      }
+    },
+    "/pets/{petId}/share": {
+      "get": {
+        "operationId": "PetShareController_list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "petId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Pet not found or not owned by you"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List shares for a pet (owner only)",
+        "tags": [
+          "Pet shares"
+        ]
+      },
+      "post": {
+        "operationId": "PetShareController_share",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "petId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PetShareCreateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "Pet not found or not owned by you"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Share a pet with another user (owner only)",
+        "tags": [
+          "Pet shares"
+        ]
+      }
+    },
+    "/pets/{petId}/share/{userId}": {
+      "delete": {
+        "operationId": "PetShareController_revoke",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "petId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Pet not found, not owned by you, or share does not exist"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Revoke a pet share (owner only)",
+        "tags": [
+          "Pet shares"
+        ]
+      }
+    },
+    "/pets/{petId}/tags": {
+      "get": {
+        "operationId": "petTag_list",
+        "parameters": [
+          {
+            "description": "Parent pet id (URL path).",
+            "in": "path",
+            "name": "petId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Selects resource fields. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": false,
+            "in": "query",
+            "name": "select",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds search condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "s",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Adds filter condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds OR condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "or",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds sort by field. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Limit amount of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Offset amount of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page portion of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Reset cache (if was enabled). <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "cache",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Include deleted. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "includeDeleted",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetTagResponseDtoPaginatedDto"
+                }
+              }
+            },
+            "description": "list PetTagResponseDto as paginated response."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pet Tags"
+        ]
+      },
+      "post": {
+        "operationId": "petTag_create",
+        "parameters": [
+          {
+            "description": "Parent pet id (URL path).",
+            "in": "path",
+            "name": "petId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PetTagCreateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetTagResponseDto"
+                }
+              }
+            },
+            "description": "create PetTagResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pet Tags"
+        ]
+      }
+    },
+    "/pets/{petId}/tags/{id}": {
+      "delete": {
+        "operationId": "petTag_delete",
+        "parameters": [
+          {
+            "description": "Parent pet id (URL path).",
+            "in": "path",
+            "name": "petId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "delete PetTagResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pet Tags"
+        ]
+      },
+      "get": {
+        "operationId": "petTag_read",
+        "parameters": [
+          {
+            "description": "Parent pet id (URL path).",
+            "in": "path",
+            "name": "petId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Selects resource fields. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": false,
+            "in": "query",
+            "name": "select",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Reset cache (if was enabled). <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "cache",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Include deleted. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "includeDeleted",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetTagResponseDto"
+                }
+              }
+            },
+            "description": "read PetTagResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pet Tags"
+        ]
+      }
+    },
+    "/pets/{petId}/transfer": {
+      "post": {
+        "operationId": "OperationResource_pets_petId_post_transfer",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "petId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PetsPetId_Post_TransferInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetsPetId_Post_TransferOutput"
+                }
+              }
+            },
+            "description": ""
+          },
+          "404": {
+            "description": "Pet not found, not owned by you, or target user does not exist"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Transfer pet ownership to another user (owner only)",
+        "tags": [
+          "Pet transfer"
+        ]
+      }
+    },
+    "/reminders": {
+      "get": {
+        "operationId": "reminder_list",
+        "parameters": [
+          {
+            "description": "Selects resource fields. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": false,
+            "in": "query",
+            "name": "select",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds search condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "s",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Adds filter condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds OR condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "or",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds sort by field. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Limit amount of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Offset amount of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page portion of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Reset cache (if was enabled). <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "cache",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Include deleted. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "includeDeleted",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReminderResponseDtoPaginatedDto"
+                }
+              }
+            },
+            "description": "list ReminderResponseDto as paginated response."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Reminders"
+        ]
+      }
+    },
+    "/reminders/{id}": {
+      "get": {
+        "operationId": "reminder_read",
+        "parameters": [
+          {
+            "description": "Selects resource fields. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": false,
+            "in": "query",
+            "name": "select",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Reset cache (if was enabled). <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "cache",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Include deleted. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "includeDeleted",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReminderResponseDto"
+                }
+              }
+            },
+            "description": "read ReminderResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Reminders"
+        ]
+      }
+    },
+    "/tags": {
+      "get": {
+        "operationId": "tag_list",
+        "parameters": [
+          {
+            "description": "Selects resource fields. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": false,
+            "in": "query",
+            "name": "select",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds search condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "s",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Adds filter condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds OR condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "or",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds sort by field. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Limit amount of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Offset amount of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page portion of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Reset cache (if was enabled). <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "cache",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Include deleted. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "includeDeleted",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagResponseDtoPaginatedDto"
+                }
+              }
+            },
+            "description": "list TagResponseDto as paginated response."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Tags"
+        ]
+      },
+      "post": {
+        "operationId": "tag_create",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TagCreateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagResponseDto"
+                }
+              }
+            },
+            "description": "create TagResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Tags"
+        ]
+      }
+    },
+    "/tags/{id}": {
+      "get": {
+        "operationId": "tag_read",
+        "parameters": [
+          {
+            "description": "Selects resource fields. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": false,
+            "in": "query",
+            "name": "select",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Reset cache (if was enabled). <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "cache",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Include deleted. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "includeDeleted",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagResponseDto"
+                }
+              }
+            },
+            "description": "read TagResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Tags"
+        ]
+      },
+      "patch": {
+        "operationId": "tag_update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TagUpdateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagResponseDto"
+                }
+              }
+            },
+            "description": "update TagResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Tags"
+        ]
+      }
+    }
+  },
+  "servers": [],
+  "tags": []
+}

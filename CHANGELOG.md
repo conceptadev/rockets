@@ -89,6 +89,36 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
   upstream membrane wraps hook throws in `RepositoryQueryException`, and
   without the filter the (still-rejected) write reports `500`.
 
+- **Pinned OpenAPI contract export (issue #54).** Both example apps now commit
+  a `contract.json` — the exact OpenAPI document each one serves — with an e2e
+  spec (`test/openapi-contract-export.e2e-spec.ts`) that regenerates it under
+  `CONTRACT_UPDATE=1` and otherwise diffs it byte-for-byte, so an unintended
+  wire-contract change fails on the PR instead of shipping silently.
+  `examples/sample-server` covers the zod half of the acceptance criteria
+  (`zodResource` CRUD, `zodSubResource`, `operationResource` ops);
+  `examples/sample-server-auth` covers the class-based `defineResource` +
+  built-in auth surface. Regenerate with `yarn sample:contract:export` /
+  `yarn sample-auth:contract:export`, verify with the matching
+  `contract:check` scripts — each builds the workspace and the example first,
+  so a contract can't be pinned from stale `dist`. No new CI workflow was
+  needed: `release-readiness.yml`'s `release-gates` job already runs
+  `samples:test:e2e` on every PR, so drift is visible before merge (that job
+  is not a GitHub *required* status check — `main` has no branch protection —
+  so it reports rather than blocks). The artifact is serialized with canonical
+  (sorted) key order: `SwaggerModule`'s property-assignment order is not
+  stable across toolchains (an enum query parameter emits `{"type","enum"}`
+  under vitest/swc and `{"enum","type"}` under ts-node/tsc), so a raw
+  `JSON.stringify` pin would report drift on an unchanged API. See
+  `CONFIGURATION.md` §6b.
+
+- **`SwaggerUiService.createDocument(app, documentOptions?)`.** Builds the
+  OpenAPI document without mounting the UI, and `setup()` now routes through
+  it — so an exported contract artifact is the served document by
+  construction. Each example app wraps its real document-building steps
+  (`extraModels`, the PATCH `/me` patch, nestjs-zod `cleanupOpenApiDoc`) in a
+  single `src/swagger/create-openapi-document.ts` helper that `main.ts` and
+  the contract specs share, instead of each re-deriving the bootstrap.
+
 - **Per-route rate limiting (issue #56).** `@RateLimit({ limit, windowMs })`
   marks a route; `RateLimitGuard` enforces it — a route without the
   decorator is untouched. Allowed requests get `X-RateLimit-Limit` /

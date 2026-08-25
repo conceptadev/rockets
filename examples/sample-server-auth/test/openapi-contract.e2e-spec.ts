@@ -1,12 +1,11 @@
 import SwaggerParser from '@apidevtools/swagger-parser';
 import { INestApplication } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { SwaggerModule } from '@nestjs/swagger';
-import { SwaggerUiService } from '@concepta/rockets-core';
 import type { OpenAPIV3 } from 'openapi-types';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { AppModule } from '../src/app.module';
+import { createSampleServerAuthOpenApiDocument } from '../src/swagger/create-openapi-document';
 
 const HTTP_METHODS = [
   'get',
@@ -112,12 +111,14 @@ describe('sample-server-auth OpenAPI contract', () => {
     app = await NestFactory.create(AppModule, { logger: false });
     await app.init();
 
-    const swagger = app.get(SwaggerUiService);
-    swagger.builder().addBearerAuth();
-    document = SwaggerModule.createDocument(
+    // Same helper `main.ts` and the contract-export spec use: the structural
+    // assertions below hold against the served document, not a lookalike.
+    // `OpenAPIObject` (@nestjs/swagger) and `OpenAPIV3.Document`
+    // (openapi-types) describe the same OpenAPI 3 payload in two vocabularies;
+    // this app emits 3.x, so the runtime value satisfies both.
+    document = createSampleServerAuthOpenApiDocument(
       app,
-      swagger.builder().build(),
-    ) as OpenAPIV3.Document;
+    ) as unknown as OpenAPIV3.Document;
     dereferencedDocument = (await SwaggerParser.dereference(
       structuredClone(document),
     )) as OpenAPIV3.Document;

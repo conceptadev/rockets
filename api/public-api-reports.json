@@ -517,7 +517,7 @@
         "name": "SwaggerUiService",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class SwaggerUiService {\n    protected readonly settings: SwaggerUiSettingsInterface;\n    protected readonly documentBuilder: DocumentBuilder;\n    constructor(settings: SwaggerUiSettingsInterface, documentBuilder: DocumentBuilder);\n    builder(): DocumentBuilder;\n    setup(app: INestApplication): void;\n}"
+        "signature": "export declare class SwaggerUiService {\n    protected readonly settings: SwaggerUiSettingsInterface;\n    protected readonly documentBuilder: DocumentBuilder;\n    constructor(settings: SwaggerUiSettingsInterface, documentBuilder: DocumentBuilder);\n    builder(): DocumentBuilder;\n    createDocument(app: INestApplication, documentOptions?: SwaggerDocumentOptions): OpenAPIObject;\n    setup(app: INestApplication): void;\n}"
       },
       {
         "name": "USER_METADATA_MODULE_ENTITY_KEY",
@@ -3127,7 +3127,7 @@
         "name": "SwaggerUiService",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class SwaggerUiService {\n    protected readonly settings: SwaggerUiSettingsInterface;\n    protected readonly documentBuilder: DocumentBuilder;\n    constructor(settings: SwaggerUiSettingsInterface, documentBuilder: DocumentBuilder);\n    builder(): DocumentBuilder;\n    setup(app: INestApplication): void;\n}"
+        "signature": "export declare class SwaggerUiService {\n    protected readonly settings: SwaggerUiSettingsInterface;\n    protected readonly documentBuilder: DocumentBuilder;\n    constructor(settings: SwaggerUiSettingsInterface, documentBuilder: DocumentBuilder);\n    builder(): DocumentBuilder;\n    createDocument(app: INestApplication, documentOptions?: SwaggerDocumentOptions): OpenAPIObject;\n    setup(app: INestApplication): void;\n}"
       },
       {
         "name": "SwaggerUiSettingsInterface",

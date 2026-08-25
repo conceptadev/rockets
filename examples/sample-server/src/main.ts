@@ -2,14 +2,11 @@ import 'reflect-metadata';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { StandardSchemaValidationPipe, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule } from '@nestjs/swagger';
-import { cleanupOpenApiDoc } from 'nestjs-zod';
 import { server } from './app.module';
 import { ExceptionsFilter } from '@concepta/rockets';
 
 import helmet from 'helmet';
-import { UserMetadataUpdateDto } from './user-metadata.schema';
-import { patchMePatchOpenApi } from './swagger/patch-me-openapi';
-import { SwaggerUiService } from '@concepta/rockets-core';
+import { createSampleServerOpenApiDocument } from './swagger/create-openapi-document';
 
 async function bootstrap() {
   const app = await NestFactory.create(server);
@@ -26,21 +23,10 @@ async function bootstrap() {
     new ValidationPipe({ transform: true, whitelist: true }),
   );
 
-  const swaggerUiService = app.get(SwaggerUiService);
-  swaggerUiService.builder().addBearerAuth();
-
   const swaggerPath = process.env.SWAGGER_UI_PATH ?? 'api';
-  const document = SwaggerModule.createDocument(
-    app,
-    swaggerUiService.builder().build(),
-    {
-      extraModels: [UserMetadataUpdateDto],
-    },
-  );
-  patchMePatchOpenApi(document, UserMetadataUpdateDto);
-  // nestjs-zod DTOs leave internal markers in the raw document; cleanup
-  // only rewrites schemas generated from zod DTOs.
-  SwaggerModule.setup(swaggerPath, app, cleanupOpenApiDoc(document));
+  // Same builder call the contract-export spec uses, so the pinned
+  // `contract.json` is by construction the document served here.
+  SwaggerModule.setup(swaggerPath, app, createSampleServerOpenApiDocument(app));
 
   const httpAdapterHost = app.get(HttpAdapterHost);
   app.useGlobalFilters(new ExceptionsFilter(httpAdapterHost));
