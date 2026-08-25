@@ -463,11 +463,14 @@ like `OperationRequest.raw`: an escape hatch, never something to
 `JSON.stringify` (circular on Express). `headers` includes whatever the
 client sent — `authorization` and `cookie` too — so never log or echo
 the whole context from a serializer; read the specific fields you need.
-Reach, stated plainly: this flows through `RocketsCoreExceptionsFilter`
-— core, server, and `@concepta/rockets-auth` apps alike, since auth
-composes on top of core and shares the same filter (#87 closed the
-compatibility-filter gap that used to leave auth apps without a
-serializer seam). A `400` minted by the upstream class-validator pipe
+Reach, stated plainly: this flows through `RocketsCoreExceptionsFilter`,
+and reach is per APP, not per package — nothing is inherited by
+composition. Every app registers the filter itself, whether by
+`app.useGlobalFilters(...)` or an `APP_FILTER` provider, importing it
+from `@concepta/rockets-core` or as `ExceptionsFilter` from
+`@concepta/rockets`. Do that and the seam is yours, on core, server and
+`@concepta/rockets-auth` alike; skip it and no Rockets package supplies
+one for you. A `400` minted by the upstream class-validator pipe
 carries messages only.
 
 Three helpers are exported for app code. `attachErrorDetails(exception,
