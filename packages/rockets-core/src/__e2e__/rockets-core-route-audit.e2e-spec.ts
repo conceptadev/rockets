@@ -48,6 +48,9 @@ import {
   ROCKETS_ROUTE_POLICY_TOKEN,
   type RoutePolicy,
 } from '../infrastructure/audit';
+import { AuthSession } from '../decorators/auth-session.decorator';
+import { CsrfGuard } from '../infrastructure/guards/csrf.guard';
+import { CSRF_GUARD_OPTIONS_TOKEN } from '../rockets-core.constants';
 
 @Injectable()
 class AllowAllGuard {
@@ -681,5 +684,252 @@ describe('routePolicy over a generated operation resource (e2e)', () => {
       authentication: 'guarded',
       aclAction: null,
     });
+  });
+});
+
+/**
+ * `requireCsrf` — the rule that makes `@AuthSession()` mean something.
+ *
+ * `sessionAuth` shipped as a report-only field, so an app could decorate
+ * every cookie-authenticated write `@AuthSession()`, register no
+ * `CsrfGuard`, and boot perfectly clean while serving those writes with
+ * no CSRF check anywhere. The decorator is inert metadata until a guard
+ * reads it, and nothing verified a guard existed.
+ *
+ * Booted for real rather than unit-tested because the whole question is
+ * whether the guard is registered in the RUNNING app, and because
+ * recognition is by class identity — a hand-built report cannot fail the
+ * way a real `ApplicationConfig` sweep can.
+ */
+describe('route policy — requireCsrf (e2e)', () => {
+  @Controller('sessions')
+  @ApiTags('Sessions')
+  class SessionWriteController {
+    @Post()
+    @ApiOkResponse({ description: 'Cookie-authenticated write' })
+    @AuthSession()
+    save(): void {}
+  }
+
+  const csrfOptions = {
+    secret: 'route-audit-csrf-secret-0123456789abcdef',
+    sessionCookieName: '__session',
+  };
+
+  async function bootCsrf(args: {
+    readonly withCsrfGuard: boolean;
+    readonly policy?: RoutePolicy;
+  }) {
+    const policy: RoutePolicy | undefined = args.policy
+      ? { authGuards: [AllowAllGuard], ...args.policy }
+      : args.policy;
+
+    @Module({
+      imports: [DiscoveryModule],
+      controllers: [SessionWriteController],
+      providers: [
+        RouteAuditService,
+        { provide: APP_GUARD, useClass: AllowAllGuard },
+        ...(args.withCsrfGuard
+          ? [
+              { provide: APP_GUARD, useClass: CsrfGuard },
+              { provide: CSRF_GUARD_OPTIONS_TOKEN, useValue: csrfOptions },
+            ]
+          : []),
+        ...(policy
+          ? [{ provide: ROCKETS_ROUTE_POLICY_TOKEN, useValue: policy }]
+          : []),
+      ],
+    })
+    class CsrfTestModule {}
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [CsrfTestModule],
+    }).compile();
+    const app = moduleRef.createNestApplication();
+    await app.init();
+    return app;
+  }
+
+  it('reports sessionAuth and recognises a registered CsrfGuard', async () => {
+    const app = await bootCsrf({ withCsrfGuard: true, policy: {} });
+    const report = app.get(RouteAuditService).audit();
+    await app.close();
+
+    expect(report.csrfGuards).toEqual(['CsrfGuard']);
+    const byId = Object.fromEntries(report.routes.map((r) => [r.id, r]));
+    expect(byId['POST /sessions']).toMatchObject({ sessionAuth: true });
+  });
+
+  it('reports no CSRF guard when none is registered', async () => {
+    const app = await bootCsrf({ withCsrfGuard: false, policy: {} });
+    const report = app.get(RouteAuditService).audit();
+    await app.close();
+
+    expect(report.csrfGuards).toEqual([]);
+  });
+
+  // The falsifying case: this boot MUST fail. Before `requireCsrf`
+  // existed it succeeded, and the app served unprotected cookie writes.
+  it('fails the boot on an @AuthSession() route with no CSRF guard', async () => {
+    await expect(
+      bootCsrf({ withCsrfGuard: false, policy: { requireCsrf: true } }),
+    ).rejects.toThrow(/requireCsrf/);
+  });
+
+  it('boots when the CSRF guard is registered', async () => {
+    const app = await bootCsrf({
+      withCsrfGuard: true,
+      policy: { requireCsrf: true },
+    });
+    expect(app.get(RouteAuditService).audit().csrfGuards).toEqual([
+      'CsrfGuard',
+    ]);
+    await app.close();
+  });
+
+  // Without the rule declared the same app boots — the opt-in shape
+  // §7c now documents honestly, rather than as always-on protection.
+  it('boots without the rule declared, even with no CSRF guard', async () => {
+    const app = await bootCsrf({ withCsrfGuard: false, policy: {} });
+    await app.close();
+  });
+
+  // `@AuthSession({ classLevel: true })` stores the `'classLevel'`
+  // sentinel rather than `true`, the same shape `AuthPublic` uses. Both
+  // `collectRouteAudit`'s `isSession` and `CsrfGuard` test for it — if
+  // either tested only `=== true`, class-level session routes would be
+  // invisible to `requireCsrf` and silently unprotected.
+  it('fails the boot for a CLASS-level @AuthSession() controller too', async () => {
+    @Controller('bulk-sessions')
+    @ApiTags('Sessions')
+    @AuthSession({ classLevel: true })
+    class ClassLevelSessionController {
+      @Post()
+      @ApiOkResponse({ description: 'Cookie-authenticated write' })
+      save(): void {}
+    }
+
+    async function bootClassLevel(withCsrfGuard: boolean) {
+      @Module({
+        imports: [DiscoveryModule],
+        controllers: [ClassLevelSessionController],
+        providers: [
+          RouteAuditService,
+          { provide: APP_GUARD, useClass: AllowAllGuard },
+          ...(withCsrfGuard
+            ? [
+                { provide: APP_GUARD, useClass: CsrfGuard },
+                { provide: CSRF_GUARD_OPTIONS_TOKEN, useValue: csrfOptions },
+              ]
+            : []),
+          {
+            provide: ROCKETS_ROUTE_POLICY_TOKEN,
+            useValue: {
+              authGuards: [AllowAllGuard],
+              requireCsrf: true,
+            } satisfies RoutePolicy,
+          },
+        ],
+      })
+      class ClassLevelModule {}
+
+      const moduleRef = await Test.createTestingModule({
+        imports: [ClassLevelModule],
+      }).compile();
+      const app = moduleRef.createNestApplication();
+      await app.init();
+      return app;
+    }
+
+    await expect(bootClassLevel(false)).rejects.toThrow(/requireCsrf/);
+
+    const app = await bootClassLevel(true);
+    const byId = Object.fromEntries(
+      app
+        .get(RouteAuditService)
+        .audit()
+        .routes.map((r) => [r.id, r]),
+    );
+    expect(byId['POST /bulk-sessions']).toMatchObject({ sessionAuth: true });
+    await app.close();
+  });
+
+  // Request-scoped guards live in `getGlobalRequestGuards()` and are
+  // classified by prototype chain, not `instanceof` — a separate branch
+  // from the singleton one every other test here exercises.
+  it('recognises a request-scoped CSRF guard', async () => {
+    @Injectable({ scope: Scope.REQUEST })
+    class RequestScopedCsrfGuard extends CsrfGuard {}
+
+    @Module({
+      imports: [DiscoveryModule],
+      controllers: [SessionWriteController],
+      providers: [
+        RouteAuditService,
+        { provide: APP_GUARD, useClass: AllowAllGuard },
+        { provide: APP_GUARD, useClass: RequestScopedCsrfGuard },
+        { provide: CSRF_GUARD_OPTIONS_TOKEN, useValue: csrfOptions },
+        {
+          provide: ROCKETS_ROUTE_POLICY_TOKEN,
+          useValue: {
+            authGuards: [AllowAllGuard],
+            requireCsrf: true,
+          } satisfies RoutePolicy,
+        },
+      ],
+    })
+    class RequestScopedModule {}
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [RequestScopedModule],
+    }).compile();
+    const app = moduleRef.createNestApplication();
+    await app.init();
+
+    // Boots (the rule is satisfied) AND the subclass is recognised.
+    expect(app.get(RouteAuditService).audit().csrfGuards).toEqual([
+      'RequestScopedCsrfGuard',
+    ]);
+    await app.close();
+  });
+
+  it('recognises an app-owned CSRF guard named in the policy', async () => {
+    @Injectable()
+    class HomegrownCsrfGuard {
+      canActivate(): boolean {
+        return true;
+      }
+    }
+
+    @Module({
+      imports: [DiscoveryModule],
+      controllers: [SessionWriteController],
+      providers: [
+        RouteAuditService,
+        { provide: APP_GUARD, useClass: AllowAllGuard },
+        { provide: APP_GUARD, useClass: HomegrownCsrfGuard },
+        {
+          provide: ROCKETS_ROUTE_POLICY_TOKEN,
+          useValue: {
+            authGuards: [AllowAllGuard],
+            csrfGuards: [HomegrownCsrfGuard],
+            requireCsrf: true,
+          } satisfies RoutePolicy,
+        },
+      ],
+    })
+    class HomegrownModule {}
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [HomegrownModule],
+    }).compile();
+    const app = moduleRef.createNestApplication();
+    await app.init();
+
+    expect(app.get(RouteAuditService).audit().csrfGuards).toEqual([
+      'HomegrownCsrfGuard',
+    ]);
+    await app.close();
   });
 });

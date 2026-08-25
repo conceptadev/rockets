@@ -15,3 +15,9 @@ export const ROCKETS_DISABLE_GUARDS_TOKEN =
 export const USER_METADATA_MODULE_ENTITY_KEY = 'userMetadata';
 
 export const USER_MODULE_USER_ENTITY_KEY = 'user';
+
+/**
+ * DI token for {@link CsrfGuardOptions} — an app provides this only when
+ * it registers `CsrfGuard` (issue #58).
+ */
+export const CSRF_GUARD_OPTIONS_TOKEN = Symbol('ROCKETS_CSRF_GUARD_OPTIONS');
