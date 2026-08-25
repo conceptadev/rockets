@@ -538,9 +538,10 @@ casing together — `foo-bar` and
 `fooBar` both yield `FooBar`. One compiled DTO reused across several
 operations is fine: the check compares class identity, not names.
 
-Cursor, SSE, binary, raw JSON, and idempotency are follow-ups on issue #43.
-The OpenAPI contract-export scaffold below (§6b) is that follow-up's answer
-for external clients.
+Cursor, binary, raw JSON, and idempotency are follow-ups on issue #43.
+SSE now has a first-class builder (§6c below); Range/partial content is
+issue #52's still-open half. The OpenAPI contract-export scaffold (§6b)
+is that follow-up's answer for external clients.
 
 Lower-level escape hatch: `defineOperationResource({ path, operations: {…} })`
 with precompiled DTO classes.
@@ -657,7 +658,7 @@ Nothing here blocks adding one later against the same `contract.json`.
 
 No new workflow step was needed: `release-readiness.yml`'s `release-gates`
 job already runs `yarn samples:test:e2e` (→ `sample:test:e2e` and
-`sample-auth:test:e2e`) on every pull request, and vitest picks up both new
+`sample-auth:test:e2e`) on every PR, and vitest picks up both new
 spec files automatically. Contract drift therefore shows up as a **failing
 job on the PR before merge**.
 
@@ -666,6 +667,160 @@ GitHub *required status check* — `main` has no branch protection today, so
 the job reports, it does not block. Making drift merge-blocking is a
 repository-admin change (enable branch protection on `main` and mark
 `release-gates` required), not something this scaffold can do on its own.
+
+## 6c. `op.sse()` — Server-Sent Events (issue #52, v1)
+
+A Server-Sent-Events operation looks like any other `operationResource`
+op — same resource, same auth/`public`/`acl`, same query-param
+validation — except the handler returns an `Observable<MessageEvent>`
+instead of a JSON value, and there is no `output` to declare:
+
+```ts
+import { operationResource } from '@concepta/rockets-core/zod';
+import { Observable } from 'rxjs';
+import type { MessageEvent } from '@nestjs/common';
+import { z } from 'zod';
+
+export const notifications = operationResource({
+  path: 'notifications',
+  operations: (op) => ({
+    stream: op.sse({
+      input: z.object({ channel: z.string() }),
+      handler: (ctx): Observable<MessageEvent> =>
+        new Observable((subscriber) => {
+          const unsubscribe = subscribeToChannel(ctx.input.channel, (msg) =>
+            subscriber.next({ data: msg }),
+          );
+          return unsubscribe; // teardown when the client disconnects
+        }),
+    }),
+  }),
+});
+```
+
+That `return unsubscribe` is not optional decoration. Nest unsubscribes
+the Observable when the client disconnects, but an Observable with no
+teardown has nothing to unsubscribe *from* — whatever the factory
+started (a timer, a listener, a subscription) outlives the connection,
+once per request. A hand-built `new Observable(...)` must return a
+teardown function, or complete; an operator-built stream (`interval`,
+`fromEvent`, a Subject's `asObservable()`) already carries one.
+
+### What's shared with every other operation, and what's not
+
+One `responseMode` seam in the generated controller
+(`build-operation-controller.ts`) is the entire difference: it applies
+Nest's native `@Sse()` instead of `@Get()` and skips the JSON
+output-DTO step. Everything upstream — guards, `public`/`acl`, query
+validation, the exceptions filter for a REJECTED request — is the exact
+same pipeline every other operation goes through, because it all runs
+**before** the stream starts. A `401`/`400`/`403` on an SSE route looks
+like a normal JSON error response; only a request that gets past all of
+that opens the stream.
+
+Two things `op.sse()` does not expose, deliberately: `output` (the
+response body IS the event stream, never a whitelisted JSON value) and
+`transactional` (holding a database transaction open across a
+connection that may run indefinitely is not something to make one flag
+away).
+
+### The registered route must match the declared route
+
+Nest's route decorators are unmerged `Reflect.defineMetadata` writes and
+`applyDecorators` runs its list **in order**, so a route decorator
+appended through `operation.decorators` silently takes over the method
+slot, the path slot, or both — `@Sse()` and `@Get()`/`@Post()` all write
+`METHOD_METADATA` *and* `PATH_METADATA`.
+
+That matters beyond SSE. Every other route protection here reads the
+**declared** `method`/`path`: the duplicate-route check and the
+planner's cross-resource collision validator. A hijacked route is
+therefore not merely wrong, it is *invisible* — the app serves an
+address no audit knows about.
+
+So after every decorator has run, the generated controller reads the
+metadata back and **throws at definition time** when the registration
+disagrees with the declaration, for **every** operation:
+
+| Situation | Why it is rejected |
+|---|---|
+| registered method ≠ declared method | a `decorators` entry overwrote the generated route decorator |
+| registered path ≠ declared path | same, on the sibling slot — `op.sse({ path: 'a', decorators: [Get('b')] })` keeps a legal method and moves only the address |
+
+On top of that, SSE-specific rules:
+
+| Situation | Why it is rejected |
+|---|---|
+| an SSE op *declares* a non-`GET` method | `@Sse()` always registers GET, so route audits would file the route under the wrong method (reachable via `defineOperationResource`) |
+| a non-SSE op carries `@Sse()` | core would still run the JSON output-DTO step over the Observable |
+| an SSE op declares an `output` DTO | there is no JSON body to whitelist; the DTO would be silently ignored |
+| an SSE op carries `Transactional()`, on the operation **or on the resource** | see below |
+
+An SSE route is therefore always `GET` — the only method a browser's
+native `EventSource` can issue.
+
+`Transactional()` on an SSE operation is rejected rather than allowed
+to be a silent no-op: the handler returns its Observable immediately,
+so the transaction the interceptor opens commits before a single event
+is emitted. Resource-level `decorators: [Transactional()]` reaches every
+route on the generated controller, so it is caught the same way. If a
+specific emission needs a transaction, open one inside the stream with
+`TransactionScope.run` (§8a).
+
+### Error after the stream has started
+
+Once the first event is written, headers are already sent — a later
+handler error can no longer become an HTTP status code, and it never
+reaches `RocketsCoreExceptionsFilter`. Nest's own SSE response
+controller writes `{ type: 'error', data: err.message }` onto the open
+connection instead.
+
+Core therefore masks that error **before Nest sees it**, using the
+filter's own exported chain walkers and then the same decision it makes
+for a JSON response.
+
+Unwrapping first is the load-bearing part. The repository/CRUD layers
+wrap a hook's `HttpException` as a `RepositoryQueryException`, which
+extends `RuntimeException` and carries **no** `httpStatus` — judged at
+the top level, a hook's `403` looks like an unclassified 5xx. The filter
+never judges at the top level; it walks `context.originalError` first,
+and so does this path:
+
+| Thrown from the stream (after unwrapping) | What the client receives |
+|---|---|
+| an `HttpException` | its own message, at any status — author-chosen, exactly as in a JSON response |
+| a `RuntimeException` with a `safeMessage` | that `safeMessage` |
+| a `RuntimeException` at 5xx without one | `Internal Server Error` |
+| anything else (a plain `Error`, a driver failure) | `Internal Server Error` |
+
+The real error is logged server-side in every masked case, and 5xx
+`HttpException`s are logged too even though their message passes
+through. Without this, a `public: true` stream — a first-class pattern
+here — could hand an anonymous client an internal error verbatim.
+
+Because the unwrapped exception itself is what travels (rather than a
+rebuilt one), a failure raised **before the first event** still reaches
+the exceptions filter and still resolves the status it always did: a
+wrapped `403` is a `403`, not a `500`.
+
+**If a handler wants a specific, safe-to-leak mid-stream message**, say
+so explicitly: throw an `HttpException` (or a `RuntimeException` with a
+`safeMessage`) rather than a bare `Error`. A bare `Error`'s message is
+treated as internal, because that is the only assumption that is safe by
+default.
+
+Beyond the message: design handlers so a mid-stream failure is something
+the client can *detect* (a reconnect, a final sentinel event) rather than
+something the server can still turn into a status code.
+
+### Not in this PR: Range / partial content
+
+Issue #52 also asks for HTTP Range support (byte-range media/file
+responses, `206 Partial Content`). It needs new plumbing with no
+existing precedent here — manual `Content-Range`/`Accept-Ranges`
+handling, non-passthrough `@Res()`, `416` on an invalid range — and
+deserves its own review surface rather than riding in behind SSE.
+Tracked as a follow-up.
 
 ---
 

@@ -89,6 +89,46 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
   upstream membrane wraps hook throws in `RepositoryQueryException`, and
   without the filter the (still-rejected) write reports `500`.
 
+- **`op.sse()` — Server-Sent Events on `operationResource` (issue #52,
+  v1).** A new builder alongside `op.read`/`op.write`/`op.delete`: same
+  resource, same auth/`public`/`acl`, same query-param validation, but
+  the handler returns an `Observable<MessageEvent>` and there is no
+  `output` to declare — the response body IS the stream. One
+  `responseMode` seam in the generated controller applies Nest's native
+  `@Sse()` instead of `@Get()` and skips the JSON output-DTO step;
+  everything upstream (guards, ACL, input validation) is the exact same
+  pipeline every other operation runs — a throw there happens before the
+  SSE response controller is reached, so no headers are sent and the
+  client gets an ordinary JSON error. That ordering is a property of
+  Nest's router, not of a test; the e2e covering it (an unauthenticated
+  request getting a `401` with no `text/event-stream` response) is a
+  regression net over this seam, not an independent proof that the
+  handler never runs. Neither `output` nor `transactional` is exposed on
+  this builder — a never-completing connection is not something to hold
+  a database transaction open across. **Every** generated operation now
+  has its registered route metadata read back after all decorators have
+  run and compared against the declared `method`/`path`, throwing at
+  definition time when they disagree; SSE adds its own rules on top
+  (`GET`-only, no `output` DTO, no `Transactional()` — on the operation
+  or the resource — and no `@Sse()` smuggled onto a JSON op). Without
+  that read-back, `decorators: [Post('x')]` won the `METHOD_METADATA`
+  slot (`applyDecorators` runs in order, last write wins) and produced a
+  POST route still in SSE response mode, while `decorators: [Get('b')]`
+  moved only the path — both invisible to the duplicate-route and
+  planner collision checks, which read the declared values. A mid-stream
+  failure is masked the way `RocketsCoreExceptionsFilter` masks a 5xx
+  JSON body, over the same **unwrapped** exception (the filter's chain
+  walkers are now exported and shared, so a hook's `403` wrapped in a
+  `RepositoryQueryException` is still a `403` and not a masked `500`):
+  `HttpException` and `safeMessage` text pass through, anything else
+  becomes `Internal Server Error` with the real error logged
+  server-side. This is needed because once headers are committed Nest
+  writes `err.message` straight to the wire and never reaches that
+  filter. HTTP Range/partial-content support
+  (the rest of issue #52) needs genuinely new plumbing with no precedent
+  in this codebase and is a deliberate follow-up, not part of this PR
+  (issue #101). See `CONFIGURATION.md` §6c.
+
 - **Pinned OpenAPI contract export (issue #54).** Both example apps now commit
   a `contract.json` — the exact OpenAPI document each one serves — with an e2e
   spec (`test/openapi-contract-export.e2e-spec.ts`) that regenerates it under

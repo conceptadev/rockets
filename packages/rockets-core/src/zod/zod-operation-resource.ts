@@ -1,5 +1,6 @@
-import type { Type } from '@nestjs/common';
+import type { MessageEvent, Type } from '@nestjs/common';
 import { createZodDto } from 'nestjs-zod';
+import type { Observable } from 'rxjs';
 import { z } from 'zod';
 
 import type {
@@ -123,7 +124,37 @@ export type DeleteBuilderConfig<
   readonly path?: TOpPath;
 };
 
-export type PendingBuilder = 'read' | 'write' | 'delete';
+export type PendingBuilder = 'read' | 'write' | 'delete' | 'sse';
+
+/**
+ * `op.sse()` config (issue #52). No `output` — the response body IS the
+ * event stream, never a whitelisted JSON value — and no `transactional`,
+ * since holding a database transaction open across a connection that may
+ * never complete is not something core should make easy to reach for.
+ * `handler` returns an `Observable<MessageEvent>`; Nest owns writing each
+ * emitted event to the connection as it arrives.
+ */
+export interface SseBuilderConfig<
+  TInput extends z.ZodObject | undefined = undefined,
+  TParams extends object = object,
+  TOpPath extends string = '',
+> {
+  readonly path?: TOpPath;
+  readonly summary?: string;
+  readonly public?: boolean;
+  /**
+   * Access control for this route. Always method `GET`, so — like
+   * `op.read` — the inferred default action is `read`.
+   */
+  readonly acl?: OperationAclConfig;
+  readonly input?: TInput;
+  readonly handler: OperationHandlerRef<
+    InferIn<TInput>,
+    Observable<MessageEvent>,
+    TParams
+  >;
+  readonly decorators?: readonly MethodDecorator[];
+}
 
 /**
  * Pending operation produced by `op.read` / `op.write` / `op.delete`.
@@ -224,6 +255,21 @@ export interface BoundBuilders<
     InferOut<TOutput>,
     EffectiveParams<TBase, TOpPath, TParamsSchema>
   >;
+
+  sse<
+    TInput extends z.ZodObject | undefined = undefined,
+    const TOpPath extends string = '',
+  >(
+    config: SseBuilderConfig<
+      TInput,
+      EffectiveParams<TBase, TOpPath, TParamsSchema>,
+      TOpPath
+    >,
+  ): PendingOperation<
+    InferIn<TInput>,
+    Observable<MessageEvent>,
+    EffectiveParams<TBase, TOpPath, TParamsSchema>
+  >;
 }
 
 export interface OperationResourceInput<
@@ -302,7 +348,13 @@ function defaultMethod(
   if (configured !== undefined) {
     return configured;
   }
-  if (builder === 'read') {
+  // `sse` is listed EXPLICITLY, not left to fall through. Without this
+  // case an SSE operation reaching `defaultMethod` with no configured
+  // method silently defaulted to `POST` — a method no `EventSource` can
+  // issue, and one the generated controller now rejects outright. The
+  // GET-only invariant used to survive only because `toPendingSse`
+  // happened to hardcode `'GET'` at its single call site.
+  if (builder === 'read' || builder === 'sse') {
     return 'GET';
   }
   if (builder === 'delete') {
@@ -415,6 +467,7 @@ function compileOperation(
     output,
     handler: pending.handler,
     decorators: pending.decorators,
+    responseMode: pending.builder === 'sse' ? 'sse' : undefined,
   };
 }
 
@@ -490,6 +543,33 @@ function toPendingDelete<
   };
 }
 
+function toPendingSse<
+  TInput extends z.ZodObject | undefined,
+  TParams extends object,
+  TOpPath extends string,
+>(
+  config: SseBuilderConfig<TInput, TParams, TOpPath>,
+): PendingOperation<InferIn<TInput>, Observable<MessageEvent>, TParams> {
+  return {
+    builder: 'sse',
+    // Through `defaultMethod`, not a literal: one place decides an SSE
+    // operation's method, and `assertSseRouteShape` in the generated
+    // controller enforces the same invariant on the FINAL registered
+    // metadata regardless of which authoring path produced the pending.
+    method: defaultMethod('sse', undefined),
+    path: config.path,
+    status: undefined,
+    summary: config.summary,
+    public: config.public,
+    acl: config.acl,
+    transactional: undefined,
+    input: config.input,
+    output: false,
+    handler: config.handler,
+    decorators: config.decorators,
+  };
+}
+
 function createBoundBuilders<
   TBase extends string,
   TParamsSchema extends z.ZodObject | undefined,
@@ -498,6 +578,7 @@ function createBoundBuilders<
     read: toPendingRead,
     write: toPendingWrite,
     delete: toPendingDelete,
+    sse: toPendingSse,
   };
 }
 

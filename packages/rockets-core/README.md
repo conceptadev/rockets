@@ -216,6 +216,42 @@ Planner collision checks only cover Rockets-owned structured routes. For a
 real adapter audit after global prefix/versioning/manual controllers are
 registered, call `validateRegisteredRoutes(app)` after `app.init()`.
 
+### Stream Server-Sent Events (`op.sse`)
+
+`op.sse()` is the same resource, same auth/`public`/`acl`, same query
+validation as any other operation — the handler just returns an
+`Observable<MessageEvent>` instead of a JSON value, and there is no
+`output` to declare:
+
+```typescript
+import { operationResource } from '@concepta/rockets-core/zod';
+import { interval, map } from 'rxjs';
+import type { Observable } from 'rxjs';
+import type { MessageEvent } from '@nestjs/common';
+
+export const notifications = operationResource({
+  path: 'notifications',
+  operations: (op) => ({
+    stream: op.sse({
+      handler: (): Observable<MessageEvent> =>
+        // Every stream needs a teardown path. `interval` unsubscribes
+        // its timer when the client disconnects; a hand-built
+        // `new Observable(...)` must RETURN an unsubscribe function, or
+        // the subscription outlives the connection.
+        interval(1000).pipe(map((n) => ({ data: { tick: n } }))),
+    }),
+  }),
+});
+```
+
+Guards, ACL and input validation run BEFORE the stream opens — a
+rejected request looks like a normal JSON error response. The route is
+GET-only and that is enforced at definition time, and a mid-stream
+failure is masked the same way a 5xx JSON body is. Full rules (plus the
+teardown-carrying long-form example, and why HTTP Range is a separate
+follow-up): [CONFIGURATION.md
+§6c](../../CONFIGURATION.md#6c-opsse--server-sent-events-issue-52-v1).
+
 Two more patterns build on `operationResource` without changing it:
 background jobs (`JobDispatchServiceInterface` — dedupe, lease, at-least-once
 delivery, a `202` + job id op with a worker claiming separately) and

@@ -48,6 +48,7 @@ export type {
   PathParams,
   PendingOperation,
   ReadBuilderConfig,
+  SseBuilderConfig,
   WriteBuilderConfig,
   ZodOperationResource,
 } from './zod-operation-resource';

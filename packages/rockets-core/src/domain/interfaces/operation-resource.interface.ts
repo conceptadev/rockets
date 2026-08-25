@@ -130,6 +130,19 @@ export interface CompiledOperationDescriptor {
   readonly output: Type<object> | false;
   readonly handler: OperationHandlerRef;
   readonly decorators?: readonly MethodDecorator[];
+  /**
+   * Transport mode for the response. Absent (the default) means the
+   * ordinary JSON request/response cycle every other operation uses.
+   * `'sse'` (issue #52) marks a Server-Sent-Events endpoint: the
+   * generated method uses Nest's native `@Sse()` instead of `@Get()`,
+   * and the handler returns an `Observable<MessageEvent>` that core
+   * hands straight to Nest's own streaming response controller —
+   * `output` is always `false` for these operations, so the normal
+   * output-DTO whitelist step never runs. Only `op.sse()` produces this;
+   * `output`/`transactional` are not exposed on that builder because
+   * neither makes sense against a long-lived, never-completing response.
+   */
+  readonly responseMode?: 'sse';
 }
 
 export interface OperationResourceDefinition {
