@@ -1,0 +1,3802 @@
+{
+  "components": {
+    "schemas": {
+      "AdminAssignUserRoleDto": {
+        "properties": {
+          "roleId": {
+            "description": "Role ID to assign to the user",
+            "example": "08a82592-714e-4da0-ace5-45ed3b4eb795",
+            "type": "string"
+          }
+        },
+        "required": [
+          "roleId"
+        ],
+        "type": "object"
+      },
+      "AdminRolesPaginatedDto": {
+        "properties": {
+          "count": {
+            "description": "Count of all records",
+            "type": "number"
+          },
+          "data": {
+            "description": "Array of Roles",
+            "items": {
+              "$ref": "#/components/schemas/RoleDto"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "description": "Limit number of items",
+            "type": "number"
+          },
+          "page": {
+            "description": "Current page number",
+            "type": "number"
+          },
+          "pageCount": {
+            "description": "Total number of pages",
+            "type": "number"
+          },
+          "total": {
+            "description": "Count of records on current page",
+            "type": "number"
+          }
+        },
+        "required": [
+          "data",
+          "limit",
+          "count",
+          "total",
+          "page",
+          "pageCount"
+        ],
+        "type": "object"
+      },
+      "AdminUsersPaginatedDto": {
+        "properties": {
+          "count": {
+            "description": "Count of all records",
+            "type": "number"
+          },
+          "data": {
+            "description": "Array of Users",
+            "items": {
+              "$ref": "#/components/schemas/UserDto"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "description": "Limit number of items",
+            "type": "number"
+          },
+          "page": {
+            "description": "Current page number",
+            "type": "number"
+          },
+          "pageCount": {
+            "description": "Total number of pages",
+            "type": "number"
+          },
+          "total": {
+            "description": "Count of records on current page",
+            "type": "number"
+          }
+        },
+        "required": [
+          "data",
+          "limit",
+          "count",
+          "total",
+          "page",
+          "pageCount"
+        ],
+        "type": "object"
+      },
+      "AuthenticationResponseDto": {
+        "properties": {
+          "accessToken": {
+            "description": "JWT access token to use for request authorization.",
+            "type": "string"
+          },
+          "refreshToken": {
+            "description": "JWT refresh token to use for obtaining a new access token.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "accessToken",
+          "refreshToken"
+        ],
+        "type": "object"
+      },
+      "CrudInvalidResponseDto": {
+        "properties": {},
+        "type": "object"
+      },
+      "CrudResponsePaginatedDto": {
+        "properties": {
+          "count": {
+            "description": "Count of all records",
+            "type": "number"
+          },
+          "data": {
+            "description": "The list of records for current page",
+            "items": {
+              "$ref": "#/components/schemas/CrudInvalidResponseDto"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "description": "Limit number of items",
+            "type": "number"
+          },
+          "page": {
+            "description": "Current page number",
+            "type": "number"
+          },
+          "pageCount": {
+            "description": "Total number of pages",
+            "type": "number"
+          },
+          "total": {
+            "description": "Count of records on current page",
+            "type": "number"
+          }
+        },
+        "required": [
+          "data",
+          "limit",
+          "count",
+          "total",
+          "page",
+          "pageCount"
+        ],
+        "type": "object"
+      },
+      "LocalLoginDto": {
+        "properties": {
+          "password": {
+            "description": "Password",
+            "type": "string"
+          },
+          "username": {
+            "description": "Username",
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ],
+        "type": "object"
+      },
+      "PetAppointmentCreateDto": {
+        "properties": {
+          "appointmentDate": {
+            "description": "Appointment date and time",
+            "example": "2023-01-15T14:00:00.000Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "appointmentType": {
+            "description": "Type of appointment",
+            "example": "checkup",
+            "type": "string"
+          },
+          "diagnosis": {
+            "description": "Diagnosis from the appointment",
+            "type": "string"
+          },
+          "notes": {
+            "description": "Additional notes",
+            "type": "string"
+          },
+          "petId": {
+            "description": "Pet ID",
+            "example": "pet-123",
+            "type": "string"
+          },
+          "reason": {
+            "description": "Reason for appointment",
+            "example": "Annual checkup",
+            "type": "string"
+          },
+          "status": {
+            "description": "Appointment status",
+            "enum": [
+              "scheduled",
+              "completed",
+              "cancelled",
+              "no_show"
+            ],
+            "example": "scheduled",
+            "type": "string"
+          },
+          "treatment": {
+            "description": "Treatment provided",
+            "type": "string"
+          },
+          "veterinarian": {
+            "description": "Veterinarian name",
+            "example": "Dr. Smith",
+            "type": "string"
+          }
+        },
+        "required": [
+          "petId",
+          "appointmentDate",
+          "appointmentType",
+          "veterinarian",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "PetAppointmentDto": {
+        "properties": {
+          "appointmentDate": {
+            "description": "Appointment date and time",
+            "example": "2023-01-15T14:00:00.000Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "appointmentType": {
+            "description": "Type of appointment",
+            "example": "checkup",
+            "type": "string"
+          },
+          "dateCreated": {
+            "description": "Date created",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dateDeleted": {
+            "description": "Date deleted (soft delete)",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dateUpdated": {
+            "description": "Date updated",
+            "format": "date-time",
+            "type": "string"
+          },
+          "diagnosis": {
+            "description": "Diagnosis from the appointment",
+            "type": "string"
+          },
+          "id": {
+            "description": "Appointment unique identifier",
+            "example": "appt-123",
+            "type": "string"
+          },
+          "notes": {
+            "description": "Additional notes",
+            "type": "string"
+          },
+          "petId": {
+            "description": "Pet ID",
+            "example": "pet-123",
+            "type": "string"
+          },
+          "reason": {
+            "description": "Reason for appointment",
+            "example": "Annual checkup",
+            "type": "string"
+          },
+          "status": {
+            "description": "Appointment status",
+            "enum": [
+              "scheduled",
+              "completed",
+              "cancelled",
+              "no_show"
+            ],
+            "example": "scheduled",
+            "type": "string"
+          },
+          "treatment": {
+            "description": "Treatment provided",
+            "type": "string"
+          },
+          "version": {
+            "description": "Version for optimistic locking",
+            "example": 1,
+            "type": "number"
+          },
+          "veterinarian": {
+            "description": "Veterinarian name",
+            "example": "Dr. Smith",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "petId",
+          "appointmentDate",
+          "appointmentType",
+          "veterinarian",
+          "status",
+          "reason",
+          "dateCreated",
+          "dateUpdated",
+          "version"
+        ],
+        "type": "object"
+      },
+      "PetAppointmentDtoPaginatedDto": {
+        "properties": {
+          "count": {
+            "description": "Count of all records",
+            "type": "number"
+          },
+          "data": {
+            "description": "The list of records for current page",
+            "items": {
+              "$ref": "#/components/schemas/PetAppointmentDto"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "description": "Limit number of items",
+            "type": "number"
+          },
+          "page": {
+            "description": "Current page number",
+            "type": "number"
+          },
+          "pageCount": {
+            "description": "Total number of pages",
+            "type": "number"
+          },
+          "total": {
+            "description": "Count of records on current page",
+            "type": "number"
+          }
+        },
+        "required": [
+          "data",
+          "limit",
+          "count",
+          "total",
+          "page",
+          "pageCount"
+        ],
+        "type": "object"
+      },
+      "PetAppointmentUpdateDto": {
+        "properties": {
+          "appointmentDate": {
+            "description": "Appointment date and time",
+            "example": "2023-01-15T14:00:00.000Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "appointmentType": {
+            "description": "Type of appointment",
+            "example": "checkup",
+            "type": "string"
+          },
+          "diagnosis": {
+            "description": "Diagnosis from the appointment",
+            "type": "string"
+          },
+          "id": {
+            "description": "Appointment ID",
+            "example": "appt-123",
+            "type": "string"
+          },
+          "notes": {
+            "description": "Additional notes",
+            "type": "string"
+          },
+          "reason": {
+            "description": "Reason for appointment",
+            "example": "Annual checkup",
+            "type": "string"
+          },
+          "status": {
+            "description": "Appointment status",
+            "enum": [
+              "scheduled",
+              "completed",
+              "cancelled",
+              "no_show"
+            ],
+            "example": "completed",
+            "type": "string"
+          },
+          "treatment": {
+            "description": "Treatment provided",
+            "type": "string"
+          },
+          "veterinarian": {
+            "description": "Veterinarian name",
+            "example": "Dr. Smith",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "PetCreateDto": {
+        "properties": {
+          "age": {
+            "description": "Pet age in years",
+            "example": 3,
+            "maximum": 50,
+            "minimum": 0,
+            "type": "number"
+          },
+          "breed": {
+            "description": "Pet breed",
+            "example": "Golden Retriever",
+            "maxLength": 255,
+            "type": "string"
+          },
+          "color": {
+            "description": "Pet color",
+            "example": "golden",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "description": {
+            "description": "Pet description",
+            "example": "A friendly dog",
+            "type": "string"
+          },
+          "name": {
+            "description": "Pet name",
+            "example": "Buddy",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "species": {
+            "description": "Pet species",
+            "example": "dog",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "status": {
+            "description": "Pet status",
+            "enum": [
+              "active",
+              "inactive"
+            ],
+            "example": "active",
+            "type": "string"
+          },
+          "userId": {
+            "description": "Owner user id (PetCreateHandler may override from auth)",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "species",
+          "age",
+          "status",
+          "userId"
+        ],
+        "type": "object"
+      },
+      "PetResponseDto": {
+        "properties": {
+          "age": {
+            "description": "Pet age",
+            "example": 3,
+            "type": "number"
+          },
+          "appointments": {
+            "description": "Pet appointments",
+            "items": {
+              "$ref": "#/components/schemas/PetAppointmentDto"
+            },
+            "type": "array"
+          },
+          "breed": {
+            "description": "Pet breed",
+            "example": "Golden Retriever",
+            "type": "string"
+          },
+          "color": {
+            "description": "Pet color",
+            "example": "golden",
+            "type": "string"
+          },
+          "dateCreated": {
+            "description": "Creation date",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dateDeleted": {
+            "description": "Deletion date",
+            "type": "object"
+          },
+          "dateUpdated": {
+            "description": "Update date",
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "description": "Pet description",
+            "type": "string"
+          },
+          "id": {
+            "description": "Pet unique identifier",
+            "example": "pet-123",
+            "type": "string"
+          },
+          "name": {
+            "description": "Pet name",
+            "example": "Buddy",
+            "type": "string"
+          },
+          "species": {
+            "description": "Pet species",
+            "example": "dog",
+            "type": "string"
+          },
+          "status": {
+            "description": "Pet status",
+            "enum": [
+              "active",
+              "inactive"
+            ],
+            "type": "string"
+          },
+          "userId": {
+            "description": "User ID",
+            "example": "user-123",
+            "type": "string"
+          },
+          "vaccinations": {
+            "description": "Pet vaccinations",
+            "items": {
+              "$ref": "#/components/schemas/PetVaccinationDto"
+            },
+            "type": "array"
+          },
+          "version": {
+            "description": "Version number",
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "species",
+          "age",
+          "status",
+          "userId",
+          "dateCreated",
+          "dateUpdated",
+          "version"
+        ],
+        "type": "object"
+      },
+      "PetResponseDtoPaginatedDto": {
+        "properties": {
+          "count": {
+            "description": "Count of all records",
+            "type": "number"
+          },
+          "data": {
+            "description": "The list of records for current page",
+            "items": {
+              "$ref": "#/components/schemas/PetResponseDto"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "description": "Limit number of items",
+            "type": "number"
+          },
+          "page": {
+            "description": "Current page number",
+            "type": "number"
+          },
+          "pageCount": {
+            "description": "Total number of pages",
+            "type": "number"
+          },
+          "total": {
+            "description": "Count of records on current page",
+            "type": "number"
+          }
+        },
+        "required": [
+          "data",
+          "limit",
+          "count",
+          "total",
+          "page",
+          "pageCount"
+        ],
+        "type": "object"
+      },
+      "PetUpdateDto": {
+        "properties": {
+          "age": {
+            "description": "Pet age",
+            "example": 3,
+            "maximum": 50,
+            "minimum": 0,
+            "type": "number"
+          },
+          "breed": {
+            "description": "Pet breed",
+            "example": "Golden Retriever",
+            "maxLength": 255,
+            "type": "string"
+          },
+          "color": {
+            "description": "Pet color",
+            "example": "golden",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "description": {
+            "description": "Pet description",
+            "type": "string"
+          },
+          "id": {
+            "description": "Pet ID",
+            "example": "pet-123",
+            "type": "string"
+          },
+          "name": {
+            "description": "Pet name",
+            "example": "Buddy",
+            "maxLength": 255,
+            "type": "string"
+          },
+          "species": {
+            "description": "Pet species",
+            "example": "dog",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "status": {
+            "description": "Pet status",
+            "enum": [
+              "active",
+              "inactive"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "PetVaccinationCreateDto": {
+        "properties": {
+          "administeredDate": {
+            "description": "Date vaccine was administered",
+            "example": "2023-01-15T10:00:00.000Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "batchNumber": {
+            "description": "Vaccine batch number",
+            "example": "BATCH-2023-001",
+            "type": "string"
+          },
+          "nextDueDate": {
+            "description": "Next due date for this vaccine",
+            "example": "2024-01-15T10:00:00.000Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "notes": {
+            "description": "Additional notes",
+            "type": "string"
+          },
+          "petId": {
+            "description": "Pet ID",
+            "example": "pet-123",
+            "type": "string"
+          },
+          "vaccineName": {
+            "description": "Vaccine name",
+            "example": "Rabies",
+            "type": "string"
+          },
+          "veterinarian": {
+            "description": "Veterinarian who administered the vaccine",
+            "example": "Dr. Smith",
+            "type": "string"
+          }
+        },
+        "required": [
+          "petId",
+          "vaccineName",
+          "administeredDate",
+          "veterinarian"
+        ],
+        "type": "object"
+      },
+      "PetVaccinationDto": {
+        "properties": {
+          "administeredDate": {
+            "description": "Date vaccine was administered",
+            "example": "2023-01-15T10:00:00.000Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "batchNumber": {
+            "description": "Vaccine batch number",
+            "example": "BATCH-2023-001",
+            "type": "string"
+          },
+          "dateCreated": {
+            "description": "Date created",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dateDeleted": {
+            "description": "Date deleted (soft delete)",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dateUpdated": {
+            "description": "Date updated",
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "description": "Vaccination unique identifier",
+            "example": "vacc-123",
+            "type": "string"
+          },
+          "nextDueDate": {
+            "description": "Next due date for this vaccine",
+            "example": "2024-01-15T10:00:00.000Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "notes": {
+            "description": "Additional notes",
+            "type": "string"
+          },
+          "petId": {
+            "description": "Pet ID",
+            "example": "pet-123",
+            "type": "string"
+          },
+          "vaccineName": {
+            "description": "Vaccine name",
+            "example": "Rabies",
+            "type": "string"
+          },
+          "version": {
+            "description": "Version for optimistic locking",
+            "example": 1,
+            "type": "number"
+          },
+          "veterinarian": {
+            "description": "Veterinarian who administered the vaccine",
+            "example": "Dr. Smith",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "petId",
+          "vaccineName",
+          "administeredDate",
+          "veterinarian",
+          "dateCreated",
+          "dateUpdated",
+          "version"
+        ],
+        "type": "object"
+      },
+      "PetVaccinationDtoPaginatedDto": {
+        "properties": {
+          "count": {
+            "description": "Count of all records",
+            "type": "number"
+          },
+          "data": {
+            "description": "The list of records for current page",
+            "items": {
+              "$ref": "#/components/schemas/PetVaccinationDto"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "description": "Limit number of items",
+            "type": "number"
+          },
+          "page": {
+            "description": "Current page number",
+            "type": "number"
+          },
+          "pageCount": {
+            "description": "Total number of pages",
+            "type": "number"
+          },
+          "total": {
+            "description": "Count of records on current page",
+            "type": "number"
+          }
+        },
+        "required": [
+          "data",
+          "limit",
+          "count",
+          "total",
+          "page",
+          "pageCount"
+        ],
+        "type": "object"
+      },
+      "PetVaccinationUpdateDto": {
+        "properties": {
+          "administeredDate": {
+            "description": "Date vaccine was administered",
+            "example": "2023-01-15T10:00:00.000Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "batchNumber": {
+            "description": "Vaccine batch number",
+            "example": "BATCH-2023-001",
+            "type": "string"
+          },
+          "id": {
+            "description": "Vaccination ID",
+            "example": "vacc-123",
+            "type": "string"
+          },
+          "nextDueDate": {
+            "description": "Next due date for this vaccine",
+            "example": "2024-01-15T10:00:00.000Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "notes": {
+            "description": "Additional notes",
+            "type": "string"
+          },
+          "vaccineName": {
+            "description": "Vaccine name",
+            "example": "Rabies",
+            "type": "string"
+          },
+          "veterinarian": {
+            "description": "Veterinarian who administered the vaccine",
+            "example": "Dr. Smith",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "RecoveryRecoverLoginDto": {
+        "properties": {
+          "email": {
+            "description": "Recover email login by providing an email that will receive an username",
+            "title": "user email",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "type": "object"
+      },
+      "RecoveryRecoverPasswordDto": {
+        "properties": {
+          "email": {
+            "description": "Recover email password by providing an email that will receive a password reset link",
+            "title": "user email",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "type": "object"
+      },
+      "RecoveryUpdatePasswordDto": {
+        "properties": {
+          "newPassword": {
+            "description": "New password account",
+            "title": "account new password",
+            "type": "string"
+          },
+          "passcode": {
+            "description": "Passcode used to reset account password",
+            "title": "account reset passcode",
+            "type": "string"
+          }
+        },
+        "required": [
+          "passcode",
+          "newPassword"
+        ],
+        "type": "object"
+      },
+      "RecoveryValidatePasscodeDto": {
+        "properties": {
+          "passcode": {
+            "description": "User passcode used to verify if it valid or not.",
+            "title": "User passcode",
+            "type": "string"
+          }
+        },
+        "required": [
+          "passcode"
+        ],
+        "type": "object"
+      },
+      "RefreshDto": {
+        "properties": {
+          "refreshToken": {
+            "description": "JWT access token to use for request authorization.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "refreshToken"
+        ],
+        "type": "object"
+      },
+      "RocketsAuthChangePasswordDto": {
+        "properties": {
+          "currentPassword": {
+            "description": "The user current password for verification",
+            "example": "CurrentP@ssw0rd",
+            "title": "Current Password",
+            "type": "string"
+          },
+          "newPassword": {
+            "description": "The new password to set (minimum 8 characters)",
+            "example": "NewSecureP@ssw0rd",
+            "minLength": 8,
+            "title": "New Password",
+            "type": "string"
+          }
+        },
+        "required": [
+          "currentPassword",
+          "newPassword"
+        ],
+        "type": "object"
+      },
+      "RocketsAuthInvitationAcceptDto": {
+        "properties": {
+          "passcode": {
+            "description": "Passcode used to activate account",
+            "title": "Passcode",
+            "type": "string"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "description": "Optional payload passed to the accepting module to complete activation (e.g. new password). Intentionally untyped to support varying module requirements.",
+            "title": "Payload",
+            "type": "object"
+          }
+        },
+        "required": [
+          "passcode"
+        ],
+        "type": "object"
+      },
+      "RocketsAuthInvitationCreateDto": {
+        "properties": {
+          "category": {
+            "description": "Category of invitation",
+            "type": "string"
+          },
+          "constraints": {
+            "additionalProperties": true,
+            "description": "Constraints payload for the invitation",
+            "type": "object"
+          },
+          "email": {
+            "description": "Email that the invitation will be sent to",
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "email"
+        ],
+        "type": "object"
+      },
+      "RocketsAuthInvitationResponseDto": {
+        "properties": {
+          "active": {
+            "description": "True if Invitation is active",
+            "type": "boolean"
+          },
+          "category": {
+            "description": "Category of invitation",
+            "type": "string"
+          },
+          "code": {
+            "description": "Code claim invitation",
+            "type": "string"
+          },
+          "constraints": {
+            "additionalProperties": true,
+            "description": "Constraints payload for the invitation",
+            "type": "object"
+          },
+          "dateAccepted": {
+            "description": "Date the invitation was accepted",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dateCreated": {
+            "description": "Date created",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dateDeleted": {
+            "description": "Date deleted",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dateRevoked": {
+            "description": "Date the invitation was revoked",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dateUpdated": {
+            "description": "Date updated",
+            "format": "date-time",
+            "type": "string"
+          },
+          "emailError": {
+            "description": "Error message if email sending failed. Use POST /admin/invitations/:code/reattempt to retry.",
+            "example": "SMTP connection timeout",
+            "type": "string"
+          },
+          "emailSent": {
+            "description": "Whether the invitation email was sent successfully",
+            "example": true,
+            "type": "boolean"
+          },
+          "id": {
+            "description": "Unique identifier",
+            "type": "string"
+          },
+          "userId": {
+            "description": "The invited user ID.",
+            "type": "string"
+          },
+          "version": {
+            "description": "Version",
+            "type": "number"
+          }
+        },
+        "required": [
+          "dateCreated",
+          "dateUpdated",
+          "dateDeleted",
+          "id",
+          "version",
+          "active",
+          "code",
+          "category",
+          "constraints",
+          "userId",
+          "dateAccepted",
+          "dateRevoked",
+          "emailSent"
+        ],
+        "type": "object"
+      },
+      "RocketsAuthInvitationRevokeDto": {
+        "properties": {
+          "category": {
+            "description": "Category of invitations to revoke (implementation-specific, e.g., \"user\", \"admin\")",
+            "example": "user",
+            "type": "string"
+          },
+          "email": {
+            "description": "Email address to revoke invitations for",
+            "example": "user@example.com",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "category"
+        ],
+        "type": "object"
+      },
+      "RocketsAuthOtpConfirmDto": {
+        "properties": {
+          "email": {
+            "description": "Email associated with the OTP",
+            "example": "user@example.com",
+            "type": "string"
+          },
+          "passcode": {
+            "description": "OTP passcode to verify",
+            "example": "123456",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "passcode"
+        ],
+        "type": "object"
+      },
+      "RocketsAuthOtpSendDto": {
+        "properties": {
+          "email": {
+            "description": "Email to send OTP to",
+            "example": "user@example.com",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "type": "object"
+      },
+      "RoleCreateDto": {
+        "properties": {
+          "description": {
+            "description": "Description of the role",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "description"
+        ],
+        "type": "object"
+      },
+      "RoleDto": {
+        "properties": {
+          "dateCreated": {
+            "description": "Date created",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dateDeleted": {
+            "description": "Date deleted",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dateUpdated": {
+            "description": "Date updated",
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "description": "Description of the role",
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the role",
+            "type": "string"
+          },
+          "version": {
+            "description": "Version",
+            "type": "number"
+          }
+        },
+        "required": [
+          "dateCreated",
+          "dateUpdated",
+          "dateDeleted",
+          "id",
+          "version",
+          "name",
+          "description"
+        ],
+        "type": "object"
+      },
+      "RoleNameDto": {
+        "properties": {
+          "name": {
+            "description": "Role name",
+            "example": "admin",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "RoleUpdateDto": {
+        "properties": {
+          "description": {
+            "description": "Description of the role",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the role",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SampleUserUpdateDto": {
+        "properties": {
+          "active": {
+            "description": "Active",
+            "type": "boolean"
+          },
+          "email": {
+            "description": "Email",
+            "type": "string"
+          },
+          "userMetadata": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserMetadataDto"
+              }
+            ],
+            "description": "User metadata"
+          },
+          "username": {
+            "description": "Username",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UserCreateDto": {
+        "properties": {
+          "active": {
+            "description": "Active",
+            "type": "boolean"
+          },
+          "email": {
+            "description": "Email",
+            "type": "string"
+          },
+          "password": {
+            "description": "Plain text password to set",
+            "type": "string"
+          },
+          "userMetadata": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserMetadataDto"
+              }
+            ],
+            "description": "User metadata"
+          },
+          "username": {
+            "description": "Username",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "username",
+          "active",
+          "password"
+        ],
+        "type": "object"
+      },
+      "UserDto": {
+        "properties": {
+          "active": {
+            "description": "Active",
+            "type": "boolean"
+          },
+          "dateCreated": {
+            "description": "Date created",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dateDeleted": {
+            "description": "Date deleted",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dateUpdated": {
+            "description": "Date updated",
+            "format": "date-time",
+            "type": "string"
+          },
+          "email": {
+            "description": "Email",
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier",
+            "type": "string"
+          },
+          "userMetadata": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserMetadataDto"
+              }
+            ],
+            "description": "User metadata"
+          },
+          "username": {
+            "description": "Username",
+            "type": "string"
+          },
+          "version": {
+            "description": "Version",
+            "type": "number"
+          }
+        },
+        "required": [
+          "dateCreated",
+          "dateUpdated",
+          "dateDeleted",
+          "id",
+          "version",
+          "email",
+          "username",
+          "active"
+        ],
+        "type": "object"
+      },
+      "UserMetadataDto": {
+        "properties": {
+          "bio": {
+            "description": "User bio",
+            "example": "Software developer passionate about clean code",
+            "type": "string"
+          },
+          "dateCreated": {
+            "description": "Date created",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dateDeleted": {
+            "description": "Date deleted",
+            "type": "object"
+          },
+          "dateUpdated": {
+            "description": "Date updated",
+            "format": "date-time",
+            "type": "string"
+          },
+          "firstName": {
+            "description": "User first name",
+            "example": "John",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "id": {
+            "description": "Metadata ID",
+            "type": "string"
+          },
+          "lastName": {
+            "description": "User last name",
+            "example": "Doe",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "userId": {
+            "description": "User ID",
+            "type": "string"
+          },
+          "username": {
+            "description": "Username",
+            "example": "johndoe",
+            "maxLength": 50,
+            "type": "string"
+          },
+          "version": {
+            "description": "Version",
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "dateCreated",
+          "dateUpdated",
+          "version"
+        ],
+        "type": "object"
+      },
+      "UserResponseDto": {
+        "properties": {
+          "claims": {
+            "description": "User claims from auth provider",
+            "example": {
+              "aud": "app",
+              "iss": "auth-provider"
+            },
+            "type": "object"
+          },
+          "email": {
+            "description": "User email from auth provider",
+            "example": "user@example.com",
+            "type": "string"
+          },
+          "id": {
+            "description": "User ID from auth provider",
+            "example": "user-123",
+            "type": "string"
+          },
+          "sub": {
+            "description": "User subject from auth provider",
+            "example": "user-123",
+            "type": "string"
+          },
+          "userMetadata": {
+            "description": "UserMetadata data - structure is defined dynamically",
+            "type": "object"
+          },
+          "userRoles": {
+            "description": "User roles from auth provider",
+            "example": [
+              {
+                "role": {
+                  "name": "user"
+                }
+              },
+              {
+                "role": {
+                  "name": "admin"
+                }
+              }
+            ],
+            "items": {
+              "$ref": "#/components/schemas/UserRoleItemDto"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "sub"
+        ],
+        "type": "object"
+      },
+      "UserRoleItemDto": {
+        "properties": {
+          "role": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RoleNameDto"
+              }
+            ],
+            "description": "Role object"
+          }
+        },
+        "required": [
+          "role"
+        ],
+        "type": "object"
+      },
+      "UserUpdateDto": {
+        "properties": {
+          "userMetadata": {
+            "description": "UserMetadata data to update - structure is defined dynamically",
+            "type": "object"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "bearer": {
+        "bearerFormat": "JWT",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "contact": {
+      "email": "",
+      "name": "",
+      "url": ""
+    },
+    "description": "API Documentation",
+    "license": {
+      "name": "",
+      "url": ""
+    },
+    "title": "API",
+    "version": "0.0.0"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/admin/invitations": {
+      "post": {
+        "description": "Creates a new user invitation and sends an email with OTP for acceptance. If email sending fails, the invitation is still returned. Check emailSent field and use POST /admin/invitations/:code/reattempt to retry.",
+        "operationId": "InvitationController_create",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RocketsAuthInvitationCreateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RocketsAuthInvitationResponseDto"
+                }
+              }
+            },
+            "description": "Invitation created. Check emailSent field to verify if email was sent successfully."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create and send invitation (Admin only)",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/invitations/revoke": {
+      "post": {
+        "description": "Revoke all active invitations for a specific email and category",
+        "operationId": "InvitationRevocationController_revoke",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RocketsAuthInvitationRevokeDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Invitations revoked successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Revoke invitations (Admin only)",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/invitations/{code}/reattempt": {
+      "post": {
+        "description": "Generates a new OTP and re-sends the invitation email",
+        "operationId": "InvitationReattemptController_reattempt",
+        "parameters": [
+          {
+            "description": "Invitation code",
+            "in": "path",
+            "name": "code",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Invitation email re-sent successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Re-send invitation email (Admin only)",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/roles": {
+      "get": {
+        "operationId": "role_list",
+        "parameters": [
+          {
+            "description": "Selects resource fields. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": false,
+            "in": "query",
+            "name": "select",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds search condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "s",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Adds filter condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds OR condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "or",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds sort by field. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Limit amount of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Offset amount of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page portion of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Reset cache (if was enabled). <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "cache",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Include deleted. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "includeDeleted",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminRolesPaginatedDto"
+                }
+              }
+            },
+            "description": "list RoleDto as paginated response."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "admin"
+        ]
+      },
+      "post": {
+        "operationId": "role_create",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleCreateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleDto"
+                }
+              }
+            },
+            "description": "create RoleDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/roles/{id}": {
+      "delete": {
+        "operationId": "role_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "delete RoleDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "admin"
+        ]
+      },
+      "get": {
+        "operationId": "role_read",
+        "parameters": [
+          {
+            "description": "Selects resource fields. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": false,
+            "in": "query",
+            "name": "select",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Reset cache (if was enabled). <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "cache",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Include deleted. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "includeDeleted",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleDto"
+                }
+              }
+            },
+            "description": "read RoleDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "admin"
+        ]
+      },
+      "patch": {
+        "description": "Updates role information",
+        "operationId": "role_update",
+        "parameters": [
+          {
+            "description": "Role id",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleUpdateDto"
+              }
+            }
+          },
+          "description": "Role information to update",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleDto"
+                }
+              }
+            },
+            "description": "Role updated successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update role",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/users": {
+      "get": {
+        "operationId": "user_list",
+        "parameters": [
+          {
+            "description": "Selects resource fields. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": false,
+            "in": "query",
+            "name": "select",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds search condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "s",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Adds filter condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds OR condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "or",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds sort by field. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Limit amount of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Offset amount of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page portion of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Reset cache (if was enabled). <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "cache",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Include deleted. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "includeDeleted",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUsersPaginatedDto"
+                }
+              }
+            },
+            "description": "list UserDto as paginated response."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/users/{id}": {
+      "delete": {
+        "operationId": "user_delete",
+        "parameters": [
+          {
+            "description": "User id",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "delete UserDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "admin"
+        ]
+      },
+      "get": {
+        "operationId": "user_read",
+        "parameters": [
+          {
+            "description": "Selects resource fields. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": false,
+            "in": "query",
+            "name": "select",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Reset cache (if was enabled). <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "cache",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Include deleted. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "includeDeleted",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            },
+            "description": "read UserDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "admin"
+        ]
+      },
+      "patch": {
+        "operationId": "user_update",
+        "parameters": [
+          {
+            "description": "User id",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SampleUserUpdateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            },
+            "description": "update UserDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/users/{userId}/roles": {
+      "get": {
+        "operationId": "AdminUserRolesController_list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Roles for the user"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List roles assigned to a user",
+        "tags": [
+          "admin"
+        ]
+      },
+      "post": {
+        "operationId": "AdminUserRolesController_assign",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminAssignUserRoleDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Role assigned"
+          },
+          "400": {
+            "description": "Invalid payload"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Assign a role to a user",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/invitation-acceptance/{code}": {
+      "patch": {
+        "description": "Accept an invitation by providing the code and OTP passcode. Include user data in the payload.",
+        "operationId": "InvitationAcceptanceController_accept",
+        "parameters": [
+          {
+            "description": "Invitation code from email",
+            "in": "path",
+            "name": "code",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RocketsAuthInvitationAcceptDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Invitation accepted successfully"
+          }
+        },
+        "summary": "Accept invitation (Public with OTP)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/me": {
+      "get": {
+        "description": "Returns authenticated user data along with userMetadata data",
+        "operationId": "MeController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            },
+            "description": "User information retrieved successfully"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get current user information",
+        "tags": [
+          "user"
+        ]
+      },
+      "patch": {
+        "description": "Creates or updates user userMetadata data",
+        "operationId": "MeController_updateUser",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            },
+            "description": "User userMetadata updated successfully"
+          },
+          "400": {
+            "description": "Bad Request - Invalid userMetadata format"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update user userMetadata data",
+        "tags": [
+          "user"
+        ]
+      }
+    },
+    "/me/password": {
+      "patch": {
+        "description": "Allows authenticated user to change their own password by providing current and new password",
+        "operationId": "changeMyPassword",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "standard": {
+                  "summary": "Standard password change",
+                  "value": {
+                    "currentPassword": "CurrentP@ssw0rd",
+                    "newPassword": "NewSecureP@ssw0rd"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/RocketsAuthChangePasswordDto"
+              }
+            }
+          },
+          "description": "Current and new password",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Password changed successfully"
+          },
+          "400": {
+            "description": "New password does not meet requirements"
+          },
+          "401": {
+            "description": "Invalid current password or authentication token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change password",
+        "tags": [
+          "Me"
+        ]
+      }
+    },
+    "/otp": {
+      "patch": {
+        "description": "Validates the OTP passcode for the specified email and returns authentication tokens on success",
+        "operationId": "RocketsAuthOtpController_confirmOtp",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "standard": {
+                  "summary": "Standard OTP confirmation",
+                  "value": {
+                    "email": "user@example.com",
+                    "passcode": "123456"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/RocketsAuthOtpConfirmDto"
+              }
+            }
+          },
+          "description": "Email and passcode for OTP verification",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthenticationResponseDto"
+                }
+              }
+            },
+            "description": "OTP confirmed successfully, authentication tokens provided"
+          },
+          "400": {
+            "description": "Invalid email format or missing required fields"
+          },
+          "401": {
+            "description": "Invalid OTP or expired passcode"
+          }
+        },
+        "summary": "Confirm OTP for a given email and passcode",
+        "tags": [
+          "Authentication"
+        ]
+      },
+      "post": {
+        "description": "Generates a one-time passcode and sends it to the specified email address",
+        "operationId": "RocketsAuthOtpController_sendOtp",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "standard": {
+                  "summary": "Standard OTP request",
+                  "value": {
+                    "email": "user@example.com"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/RocketsAuthOtpSendDto"
+              }
+            }
+          },
+          "description": "Email to receive the OTP",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OTP sent successfully"
+          },
+          "400": {
+            "description": "Invalid email format"
+          }
+        },
+        "summary": "Send OTP to the provided email",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/pet-appointments": {
+      "get": {
+        "operationId": "petAppointment_list",
+        "parameters": [
+          {
+            "description": "Selects resource fields. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": false,
+            "in": "query",
+            "name": "select",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds search condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "s",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Adds filter condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds OR condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "or",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds sort by field. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Limit amount of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Offset amount of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page portion of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Reset cache (if was enabled). <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "cache",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Include deleted. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "includeDeleted",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetAppointmentDtoPaginatedDto"
+                }
+              }
+            },
+            "description": "list PetAppointmentDto as paginated response."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pet Appointments"
+        ]
+      },
+      "post": {
+        "operationId": "petAppointment_create",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PetAppointmentCreateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetAppointmentDto"
+                }
+              }
+            },
+            "description": "create PetAppointmentDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pet Appointments"
+        ]
+      }
+    },
+    "/pet-appointments/{id}": {
+      "delete": {
+        "operationId": "petAppointment_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "delete PetAppointmentDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pet Appointments"
+        ]
+      },
+      "get": {
+        "operationId": "petAppointment_read",
+        "parameters": [
+          {
+            "description": "Selects resource fields. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": false,
+            "in": "query",
+            "name": "select",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Reset cache (if was enabled). <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "cache",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Include deleted. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "includeDeleted",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetAppointmentDto"
+                }
+              }
+            },
+            "description": "read PetAppointmentDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pet Appointments"
+        ]
+      },
+      "patch": {
+        "operationId": "petAppointment_update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PetAppointmentUpdateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetAppointmentDto"
+                }
+              }
+            },
+            "description": "update PetAppointmentDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pet Appointments"
+        ]
+      }
+    },
+    "/pet-vaccinations": {
+      "get": {
+        "operationId": "petVaccination_list",
+        "parameters": [
+          {
+            "description": "Selects resource fields. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": false,
+            "in": "query",
+            "name": "select",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds search condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "s",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Adds filter condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds OR condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "or",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds sort by field. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Limit amount of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Offset amount of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page portion of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Reset cache (if was enabled). <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "cache",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Include deleted. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "includeDeleted",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetVaccinationDtoPaginatedDto"
+                }
+              }
+            },
+            "description": "list PetVaccinationDto as paginated response."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pet Vaccinations"
+        ]
+      },
+      "post": {
+        "operationId": "petVaccination_create",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PetVaccinationCreateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetVaccinationDto"
+                }
+              }
+            },
+            "description": "create PetVaccinationDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pet Vaccinations"
+        ]
+      }
+    },
+    "/pet-vaccinations/{id}": {
+      "delete": {
+        "operationId": "petVaccination_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "delete PetVaccinationDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pet Vaccinations"
+        ]
+      },
+      "get": {
+        "operationId": "petVaccination_read",
+        "parameters": [
+          {
+            "description": "Selects resource fields. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": false,
+            "in": "query",
+            "name": "select",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Reset cache (if was enabled). <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "cache",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Include deleted. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "includeDeleted",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetVaccinationDto"
+                }
+              }
+            },
+            "description": "read PetVaccinationDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pet Vaccinations"
+        ]
+      },
+      "patch": {
+        "operationId": "petVaccination_update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PetVaccinationUpdateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetVaccinationDto"
+                }
+              }
+            },
+            "description": "update PetVaccinationDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pet Vaccinations"
+        ]
+      }
+    },
+    "/pets": {
+      "get": {
+        "operationId": "pet_list",
+        "parameters": [
+          {
+            "description": "Selects resource fields. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": false,
+            "in": "query",
+            "name": "select",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds search condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "s",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Adds filter condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds OR condition. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "or",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Adds sort by field. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": true,
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Limit amount of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Offset amount of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page portion of resources. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Reset cache (if was enabled). <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "cache",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Include deleted. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "includeDeleted",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetResponseDtoPaginatedDto"
+                }
+              }
+            },
+            "description": "list PetResponseDto as paginated response."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pets",
+          "Pets"
+        ]
+      },
+      "post": {
+        "operationId": "pet_create",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PetCreateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetResponseDto"
+                }
+              }
+            },
+            "description": "create PetResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pets",
+          "Pets"
+        ]
+      }
+    },
+    "/pets/{id}": {
+      "delete": {
+        "operationId": "pet_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "delete PetResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pets",
+          "Pets"
+        ]
+      },
+      "get": {
+        "operationId": "pet_read",
+        "parameters": [
+          {
+            "description": "Selects resource fields. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "explode": false,
+            "in": "query",
+            "name": "select",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Reset cache (if was enabled). <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "cache",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Include deleted. <a href=\"https://www.npmjs.com/package/@concepta/nestjs-crud#query-string-parameters\" target=\"_blank\">Docs</a>",
+            "in": "query",
+            "name": "includeDeleted",
+            "required": false,
+            "schema": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetResponseDto"
+                }
+              }
+            },
+            "description": "read PetResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pets",
+          "Pets"
+        ]
+      },
+      "patch": {
+        "operationId": "pet_update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PetUpdateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetResponseDto"
+                }
+              }
+            },
+            "description": "update PetResponseDto"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pets",
+          "Pets"
+        ]
+      }
+    },
+    "/recovery/login": {
+      "post": {
+        "description": "Sends the username associated with an email address when an account exists.",
+        "operationId": "RocketsAuthRecoveryController_recoverLogin",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecoveryRecoverLoginDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The request was accepted, whether or not the email belongs to an account."
+          },
+          "400": {
+            "description": "Invalid email format"
+          }
+        },
+        "summary": "Recover username",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/recovery/passcode": {
+      "post": {
+        "description": "Checks whether a recovery code is valid and unexpired.",
+        "operationId": "RocketsAuthRecoveryController_validatePasscode",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecoveryValidatePasscodeDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Passcode is valid"
+          },
+          "400": {
+            "description": "Passcode is invalid or expired"
+          }
+        },
+        "summary": "Validate recovery passcode",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/recovery/password": {
+      "patch": {
+        "description": "Updates an account password using a valid recovery code.",
+        "operationId": "RocketsAuthRecoveryController_updatePassword",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecoveryUpdatePasswordDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Password updated successfully"
+          },
+          "400": {
+            "description": "Passcode is invalid or expired, or password is invalid"
+          }
+        },
+        "summary": "Reset password",
+        "tags": [
+          "Authentication"
+        ]
+      },
+      "post": {
+        "description": "Sends a password-recovery code when the supplied account exists.",
+        "operationId": "RocketsAuthRecoveryController_recoverPassword",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecoveryRecoverPasswordDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The request was accepted, whether or not the email belongs to an account."
+          },
+          "400": {
+            "description": "Invalid email format"
+          }
+        },
+        "summary": "Request password reset",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/signup": {
+      "post": {
+        "description": "Registers a new user in the system with email, username, password and optional metadata",
+        "operationId": "user_create",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "standard": {
+                  "summary": "Standard user registration",
+                  "value": {
+                    "active": true,
+                    "email": "user@example.com",
+                    "password": "StrongP@ssw0rd",
+                    "username": "user@example.com"
+                  }
+                },
+                "withMetadata": {
+                  "summary": "User registration with metadata",
+                  "value": {
+                    "active": true,
+                    "email": "user@example.com",
+                    "password": "StrongP@ssw0rd",
+                    "userMetadata": {
+                      "firstName": "John",
+                      "lastName": "Doe",
+                      "phone": "+1234567890"
+                    },
+                    "username": "user@example.com"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/UserCreateDto"
+              }
+            }
+          },
+          "description": "User registration information",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            },
+            "description": "User created successfully"
+          }
+        },
+        "summary": "Create a new user account",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/token/password": {
+      "post": {
+        "description": "Validates credentials with the local strategy and returns access and refresh JWTs.",
+        "operationId": "RocketsAuthTokenController_loginWithPassword",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "standard": {
+                  "summary": "Username + password",
+                  "value": {
+                    "password": "StrongP@ssw0rd",
+                    "username": "user@example.com"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/LocalLoginDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthenticationResponseDto"
+                }
+              }
+            },
+            "description": "Tokens issued"
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        },
+        "summary": "Issue tokens with username and password",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/token/refresh": {
+      "post": {
+        "description": "Accepts a refresh token (body.refreshToken), validates it, and returns a new token pair.",
+        "operationId": "RocketsAuthTokenController_refreshTokens",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "standard": {
+                  "summary": "Refresh JWT from prior login",
+                  "value": {
+                    "refreshToken": "<jwt>"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/RefreshDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthenticationResponseDto"
+                }
+              }
+            },
+            "description": "Tokens issued"
+          },
+          "401": {
+            "description": "Invalid or expired refresh token"
+          }
+        },
+        "summary": "Refresh access token",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    }
+  },
+  "servers": [],
+  "tags": []
+}

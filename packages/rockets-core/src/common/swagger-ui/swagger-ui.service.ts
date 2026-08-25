@@ -1,5 +1,10 @@
 import { Inject, INestApplication, Injectable } from '@nestjs/common';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import {
+  DocumentBuilder,
+  OpenAPIObject,
+  SwaggerDocumentOptions,
+  SwaggerModule,
+} from '@nestjs/swagger';
 
 import { SwaggerUiSettingsInterface } from './interfaces/swagger-ui-settings.interface';
 import {
@@ -20,17 +25,37 @@ export class SwaggerUiService {
     return this.documentBuilder;
   }
 
-  setup(app: INestApplication): void {
-    const document = SwaggerModule.createDocument(
+  /**
+   * Builds the OpenAPI document without mounting the UI.
+   *
+   * This is the single seam every document consumer must go through —
+   * `setup()` below, and anything that needs the document itself (a pinned
+   * `contract.json` artifact, a structural test, an offline export). Building
+   * a document by hand from `builder().build()` instead re-implements the
+   * argument list and silently drifts from what the app serves the moment
+   * `documentOptions` changes.
+   *
+   * @param app - Nest application to scan for routes.
+   * @param documentOptions - Overrides the configured
+   * `settings.documentOptions` when provided; apps that need per-call
+   * `extraModels` pass them here.
+   */
+  createDocument(
+    app: INestApplication,
+    documentOptions?: SwaggerDocumentOptions,
+  ): OpenAPIObject {
+    return SwaggerModule.createDocument(
       app,
       this.documentBuilder.build(),
-      this.settings?.documentOptions,
+      documentOptions ?? this.settings?.documentOptions,
     );
+  }
 
+  setup(app: INestApplication): void {
     SwaggerModule.setup(
       this.settings.path,
       app,
-      document,
+      this.createDocument(app),
       this.settings?.customOptions,
     );
   }

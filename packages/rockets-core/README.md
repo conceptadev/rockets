@@ -1065,6 +1065,97 @@ declared; a recognition-only policy polices nothing. Routes removed
 conditionally (`disableController`) live in the same options object as
 the policy — keep the two consistent per environment.
 
+### Export a stable OpenAPI contract
+
+`SwaggerUiService.createDocument(app)` returns the exact OpenAPI document
+`SwaggerUiService.setup(app)` mounts — `setup()` calls it internally, so the
+two cannot drift. Use it to pin the wire contract as a committed artifact:
+
+```typescript
+const document = app.get(SwaggerUiService).createDocument(app);
+
+// Per-call document options (e.g. `extraModels`) override the configured
+// `settings.documentOptions`:
+const withExtras = app
+  .get(SwaggerUiService)
+  .createDocument(app, { extraModels: [UserMetadataUpdateDto] });
+```
+
+Do not rebuild the document from `builder().build()` by hand. An app that
+post-processes its document — `examples/sample-server` adds `extraModels`, a
+PATCH `/me` request-body patch and the nestjs-zod `cleanupOpenApiDoc` pass —
+would pin something it never serves. Wrap the real steps once in a
+`createOpenApiDocument(app)` helper and call it from both `main.ts` and the
+contract spec.
+
+Both example apps ship the reference version — an e2e spec that regenerates
+or diffs `contract.json` against that document on every CI samples run.
+`examples/sample-server` covers zod CRUD resources, zod sub-resources and
+`operationResource` ops; `examples/sample-server-auth` covers the class-based
+`defineResource` + built-in auth surface. See `CONFIGURATION.md` §6b for the
+full pattern and the regeneration workflow.
+
+### Rate-limit a route
+
+`@RateLimit()` marks one route; `RateLimitGuard` enforces it. A route
+without the decorator is never touched by the guard.
+
+```typescript
+import { APP_GUARD } from '@nestjs/core';
+import {
+  RateLimit,
+  RateLimitGuard,
+  RATE_LIMIT_STORE_TOKEN,
+  InMemoryRateLimitStore,
+} from '@concepta/rockets-core';
+
+@Controller('reports')
+class ReportsController {
+  @Get()
+  @RateLimit({ limit: 10, windowMs: 60_000 })
+  list() {
+    /* … */
+  }
+}
+
+@Module({
+  providers: [
+    { provide: APP_GUARD, useClass: RateLimitGuard },
+    { provide: RATE_LIMIT_STORE_TOKEN, useClass: InMemoryRateLimitStore },
+  ],
+})
+class AppModule {}
+```
+
+`InMemoryRateLimitStore` is the reference adapter — correct for tests
+and single-process apps, not for more than one instance (each process
+would track its own count). A real multi-instance deployment needs a
+shared backend behind `RateLimitStoreInterface`; see `CONFIGURATION.md`
+§7c for a dynamic-repository store that never loses a concurrent
+attempt, why the obvious read-increment-write counter row does, and the
+limits of that shape — it needs a backend with monotonic generated ids,
+its `COUNT` is O(rows in the window), and a route facing real hostile
+volume wants Redis rather than your primary database. On over-limit the
+guard rejects with `429` and `Retry-After`; on a store failure it fails
+**closed** (`503`), never lets the request through unlimited.
+
+Two things to get right when registering it:
+
+- **Guard order.** Nest short-circuits on the first global guard that
+  rejects, so a guard registered before `RateLimitGuard` hides traffic
+  from it — an unauthenticated request to a protected route is rejected
+  by the auth guard and consumes zero rate-limit budget. Register
+  `RateLimitGuard` first if you want it to count every request. Public
+  routes (login, signup, recovery), the usual target, are unaffected
+  either way.
+- **`request.ip` behind a proxy.** The default key is
+  `ip:METHOD:route`. An app behind a reverse proxy must set
+  `app.set('trust proxy', ['loopback', 'linklocal', 'uniquelocal'])`
+  (or whatever matches its topology) in the host bootstrap, or all
+  callers collapse into the proxy's single IP bucket. Rockets does not
+  enable it automatically — trusting unverified forwarding headers lets
+  clients spoof their address and evade the limit.
+
 ---
 
 ## 4. Reference

@@ -538,14 +538,135 @@ casing together — `foo-bar` and
 `fooBar` both yield `FooBar`. One compiled DTO reused across several
 operations is fine: the check compares class identity, not names.
 
-Cursor, binary, raw JSON, idempotency, and external-client scaffolds are
-follow-ups on issue #43. SSE now has a first-class builder (§6c below);
-Range/partial content is issue #52's still-open half.
+Cursor, binary, raw JSON, and idempotency are follow-ups on issue #43.
+SSE now has a first-class builder (§6c below); Range/partial content is
+issue #52's still-open half. The OpenAPI contract-export scaffold (§6b)
+is that follow-up's answer for external clients.
 
 Lower-level escape hatch: `defineOperationResource({ path, operations: {…} })`
 with precompiled DTO classes.
 
 ---
+
+## 6b. Exporting a stable OpenAPI contract (issue #54)
+
+`SwaggerUiService` already builds one OpenAPI document from whatever CRUD
+zod resources and `operationResource` ops an app registers — the same
+document `swagger`/`swagger-ui` serves. The gap issue #54 closes is not
+generating that document; it is **pinning it**, so an unintended change to
+the wire contract fails CI instead of only showing up as a diff nobody
+reviewed.
+
+### The pattern
+
+A vitest e2e spec boots the app, builds the document **through the app's own
+document-building code path**, and either regenerates a committed
+`contract.json` (opt-in, via an env var) or diffs the fresh document against
+it byte-for-byte:
+
+```ts
+const document = createSampleServerOpenApiDocument(app);
+const generated = stableContractJson(document);
+
+if (process.env.CONTRACT_UPDATE === '1') {
+  writeFileSync(contractPath, generated);
+} else {
+  expect(generated).toBe(readFileSync(contractPath, 'utf8'));
+}
+```
+
+That helper is the important part. A document rebuilt from a bare
+`SwaggerModule.createDocument(app, builder.build())` is **not** what a real
+app serves: `examples/sample-server` also passes `extraModels`, patches the
+PATCH `/me` request body, and runs the nestjs-zod `cleanupOpenApiDoc` pass.
+Pinning the simplified document would pin a contract nobody is served.
+
+So each app owns one `src/swagger/create-openapi-document.ts` that `main.ts`
+and its contract spec both call, and rockets-core exposes the shared seam
+underneath it:
+
+```ts
+// packages/rockets-core — builds the document `setup()` serves, no UI mount
+swaggerUiService.createDocument(app, { extraModels: [UserMetadataUpdateDto] });
+```
+
+`SwaggerUiService.setup()` now routes through `createDocument()` too, so
+"the pinned document" and "the served document" are the same call by
+construction rather than by convention.
+
+### The two pinned artifacts
+
+Both example apps pin a contract, because they cover different halves of
+issue #54's acceptance criteria:
+
+| App | Contract | Covers |
+|---|---|---|
+| `examples/sample-server` | `examples/sample-server/contract.json` | zod CRUD (`zodResource`), zod sub-resources (`zodSubResource`), `operationResource` non-CRUD ops, plus class-based `defineResource` in the same document |
+| `examples/sample-server-auth` | `examples/sample-server-auth/contract.json` | class-based `defineResource` + the full built-in auth surface |
+
+Regenerate after an intentional API change:
+
+```bash
+yarn sample:contract:export        # writes examples/sample-server/contract.json
+yarn sample:contract:check         # verifies it's pinned
+yarn sample-auth:contract:export   # writes examples/sample-server-auth/contract.json
+yarn sample-auth:contract:check    # verifies it's pinned
+```
+
+Each `contract:*` script builds the workspace packages and the example first
+(`contract:build`), so a regeneration can never pin a document generated
+from stale `dist`.
+
+### Canonical key order
+
+`stableContractJson` sorts object keys before serializing (array order is
+preserved — it *is* significant in `required`, `enum`, `parameters`,
+`allOf`). This is not cosmetic. `SwaggerModule` assigns schema properties in
+whatever order its code path happens to take, and that order is **not stable
+across toolchains**: the `/admin/audit-logs` enum query parameter serializes
+as `{"type","enum"}` when the app runs under vitest/swc and `{"enum","type"}`
+under ts-node/tsc. A raw `JSON.stringify` pin reports drift on a document
+whose API did not change. Sorting first makes the check answer the question
+it is actually asking.
+
+Verified end to end: booting `examples/sample-server` with `yarn sample:once`
+and canonicalizing what `GET /api-json` returns reproduces
+`examples/sample-server/contract.json` exactly.
+
+### What is deliberately not pinned
+
+The OpenAPI `info` block is per-deployment configuration —
+`SWAGGER_UI_TITLE`, `SWAGGER_UI_VERSION`, `SWAGGER_UI_DESCRIPTION`,
+`SWAGGER_UI_CONTACT_*`, `SWAGGER_UI_LICENSE_*` all feed it. Both contract
+specs clear every `SWAGGER_UI_*` variable before booting, so the pinned
+`info` block is always the built-in default. Without that, anyone with one of
+those exported in their shell gets a drift failure that is not drift.
+
+### Why this, not a typed client
+
+Issue #54 asked for one v1 deliverable, not both a contract artifact and a
+generated client. A `contract.json` export needed no new dependency — the
+document-building and structural-validation logic
+(`test/openapi-contract.e2e-spec.ts`, `@apidevtools/swagger-parser`)
+already existed and were already proven; the only new work was pinning the
+artifact and wiring the drift check. A typed client would mean adopting a
+new codegen tool with no existing precedent in this repo — a bigger, riskier
+v1 for an issue whose own acceptance criteria says not to boil the ocean.
+Nothing here blocks adding one later against the same `contract.json`.
+
+### CI
+
+No new workflow step was needed: `release-readiness.yml`'s `release-gates`
+job already runs `yarn samples:test:e2e` (→ `sample:test:e2e` and
+`sample-auth:test:e2e`) on every PR, and vitest picks up both new
+spec files automatically. Contract drift therefore shows up as a **failing
+job on the PR before merge**.
+
+Be precise about what that buys you: `release-gates` is not configured as a
+GitHub *required status check* — `main` has no branch protection today, so
+the job reports, it does not block. Making drift merge-blocking is a
+repository-admin change (enable branch protection on `main` and mark
+`release-gates` required), not something this scaffold can do on its own.
 
 ## 6c. `op.sse()` — Server-Sent Events (issue #52, v1)
 
@@ -1686,6 +1807,290 @@ territory.
 
 ---
 
+## 7c. `RateLimitGuard` — per-route request limits (issue #56)
+
+A route-scoped rate limiter, separate from auth's own login throttling
+(§7b above). `@RateLimit()` is a plain method decorator; a route without
+it is never touched by `RateLimitGuard` — the guard is a no-op unless a
+route opts in.
+
+### Minimum
+
+```ts
+import { APP_GUARD } from '@nestjs/core';
+import {
+  RateLimit,
+  RateLimitGuard,
+  RATE_LIMIT_STORE_TOKEN,
+  InMemoryRateLimitStore,
+} from '@concepta/rockets-core';
+
+@Controller('reports')
+class ReportsController {
+  @Get()
+  @RateLimit({ limit: 10, windowMs: 60_000 }) // 10 requests / minute
+  list() {
+    /* … */
+  }
+}
+
+@Module({
+  providers: [
+    { provide: APP_GUARD, useClass: RateLimitGuard },
+    { provide: RATE_LIMIT_STORE_TOKEN, useClass: InMemoryRateLimitStore },
+  ],
+})
+class AppModule {}
+```
+
+On an allowed request the guard sets `X-RateLimit-Limit` and
+`X-RateLimit-Remaining`. Once the limit is hit it rejects with `429` and
+a `Retry-After` header instead of letting the request through.
+
+### Guard order decides what the limiter can even see
+
+Nest runs global guards in registration order and short-circuits on the
+first one that rejects. So a guard registered **before** `RateLimitGuard`
+gets to reject a request before the limiter ever counts it.
+
+That matters for brute-force protection. If an authentication guard runs
+first, an unauthenticated request to a protected route is rejected with
+`401` and consumes **zero** rate-limit budget — an attacker can hammer
+that route indefinitely without `RateLimitGuard` noticing. The limiter
+only sees requests that survived every guard ahead of it.
+
+The common case — throttling a public, unauthenticated route such as
+login, signup, or password recovery — is unaffected either way: those
+routes are `@AuthPublic` (or in an app with no global auth guard at
+all), so the request reaches the limiter regardless of order. Registering
+the limiter first is still the safer default:
+
+```ts
+@Module({
+  providers: [
+    // First: counts every request, including ones a later guard rejects.
+    { provide: APP_GUARD, useClass: RateLimitGuard },
+    // Then authentication.
+    { provide: APP_GUARD, useClass: AuthServerGuard },
+    { provide: RATE_LIMIT_STORE_TOKEN, useClass: InMemoryRateLimitStore },
+  ],
+})
+class AppModule {}
+```
+
+Ordering it first has a cost worth knowing: the limiter then counts
+requests by IP before it knows who is calling, so a `key` callback that
+reads `request.user` will not have one. Pick per route — key by IP for
+the pre-auth position, key by user/tenant only for routes where an auth
+guard has already run.
+
+### The default key trusts `request.ip`
+
+The default key is `ip:METHOD:route`, taken from Express's resolved
+`request.ip`. An application behind a trusted reverse proxy must
+configure `trust proxy` in the host bootstrap, or every caller collapses
+into the proxy's single IP bucket:
+
+```ts
+import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
+
+const app = await NestFactory.create<NestExpressApplication>(AppModule);
+app.set('trust proxy', ['loopback', 'linklocal', 'uniquelocal']);
+```
+
+Choose the trusted proxy value for the deployment topology; Rockets does
+not enable it automatically. Trusting unverified forwarding headers lets
+clients spoof their address and evade the limit entirely — an overly
+broad setting is worse than none. Where the caller is authenticated and
+a stable identity is available, a `key` callback keyed on user or tenant
+avoids the question altogether.
+
+### Field reference
+
+| Field       | Required | Meaning                                                             |
+| ----------- | -------- | -------------------------------------------------------------------- |
+| `limit`     | yes      | Max requests allowed inside one window.                              |
+| `windowMs`  | yes      | Window length in milliseconds (fixed window, not sliding).           |
+| `key`       | no       | `(context) => string` to key by tenant/user/API key instead of the default `ip:METHOD:route`. |
+
+### Store: in-memory vs a real backend
+
+`InMemoryRateLimitStore` (single process, in-memory) is what core ships
+for tests and samples. It is **not** correct behind more than one
+instance — each process tracks its own count, so N instances behind a
+load balancer effectively multiply the configured limit by N.
+
+A production, multi-instance deployment needs a shared backend behind
+the same `RateLimitStoreInterface` port (one method: `consume(key,
+limit, windowMs)`).
+
+**Do not write that store as a read-increment-write over a counter row
+through the base contract.** It is the obvious shape and it does not
+work. Two concurrent requests both read the same pre-increment count and
+one of the two increments is lost, so the limiter under-counts exactly
+when it matters; wrapping the read-and-write in a transaction per
+request does not fix it either — it serialises the limiter into the
+request path and, on a single-writer store, overlapping transactions
+collide outright. The base contract cannot express the alternative:
+`RepositoryInterface` has no atomic increment, `upsert()` only conflicts
+on the primary key and overwrites with literal values, and `findOne()`
+has no pessimistic-lock option.
+
+That is a statement about the **portable** contract, not about every
+backend. Where an adapter offers a native atomic primitive, a counter
+row is the better design and you should use it — Firestore's adapter
+ships `increment()` and `updateWithPrecondition()` (compare-and-set),
+and any SQL backend can express `UPDATE … SET count = count + 1`.
+Reaching for those ties the store to one backend, which is a fine
+trade for an application and not one core can make for you.
+
+What IS expressible atomically is **appending one row per attempt** and
+recovering the attempt's position in the window from its own generated
+id. One INSERT can never be lost, and no request has to hold a
+transaction:
+
+```ts
+@Entity('rate_limit_events')
+@Index(['key', 'at'])
+class RateLimitEventEntity {
+  @PrimaryGeneratedColumn() id!: number;
+  @Column({ type: 'varchar' }) key!: string;
+  @Column({ type: 'bigint' }) at!: number;
+}
+
+@Injectable()
+class SqlRateLimitStore implements RateLimitStoreInterface {
+  constructor(
+    @InjectDynamicRepository('rateLimitEvent')
+    private readonly events: RepositoryInterface<RateLimitEventEntity>,
+  ) {}
+
+  async consume(key: string, limit: number, windowMs: number) {
+    // Guards run before interceptors, so there is no ambient request ctx
+    // to join. `ctx` is still forwarded to every call below because
+    // omitting it also disables entity hooks (§8a, rule 16) — this store
+    // declares none, so nothing here breaks without it, but a call that
+    // silently opts out of the hook pipeline is the habit #45 came from.
+    const ctx = AppContextHost.from();
+
+    const now = Date.now();
+    const windowStart = Math.floor(now / windowMs) * windowMs;
+
+    // Atomic. Two concurrent attempts cannot collapse into one count.
+    const event = await this.events.create({ key, at: now }, { ctx });
+
+    // This attempt's rank in the window. `id <= event.id` gives each
+    // attempt its own rank instead of letting concurrent attempts read
+    // one shared pre-increment value. How exact that rank is depends on
+    // the backend — see the caveats below.
+    const count = await this.events.count({
+      where: Where.and(
+        Where.eq<RateLimitEventEntity>('key', key),
+        Where.gte<RateLimitEventEntity>('at', windowStart),
+        Where.lte<RateLimitEventEntity>('id', event.id),
+      ),
+      ctx,
+    });
+
+    return {
+      allowed: count <= limit,
+      limit,
+      remaining: Math.max(0, limit - count),
+      resetAt: windowStart + windowMs,
+    };
+  }
+}
+```
+
+#### What this shape requires, and what it costs
+
+Read all of this before copying it. The design has real limits and they
+are not all visible from the code.
+
+- **It requires a backend whose generated ids are monotonic and
+  comparable.** The rank depends on `id <= event.id` meaning "was
+  allocated before mine". A SQL auto-increment / identity / sequence
+  column satisfies that. **A store that generates random ids does
+  not** — the Firestore adapter allocates `randomUUID()`, so `lte` over
+  those strings selects an arbitrary subset and the rank is noise. This
+  shape is for SQL-shaped backends; on Firestore use a counter document
+  with the adapter's native `increment()` instead.
+- **"Exact" is a property of single-writer backends, not of the
+  algorithm.** On a serialized-writer store (SQLite, and what the e2e
+  proves) each INSERT commits before the next begins, so N concurrent
+  attempts get N distinct ranks and exactly `limit` are admitted. On
+  Postgres or MySQL with a connection pool, a lower id can still be
+  uncommitted when a later attempt runs its `COUNT` — two attempts then
+  see the same rank and both are admitted. Over-admission is bounded by
+  the number of requests genuinely in flight at once, not by a
+  constant. The limiter never admits **fewer** than `limit` and never
+  loses an attempt from the total; that is the contract the port asks
+  for, and it is weaker than "exact".
+- **The counter is deliberately not transactional.** A rate-limit
+  attempt must be committed independently of the request that made it.
+  If the counter joined the request's transaction, any request that
+  later failed would roll back its own attempt and refund the caller's
+  budget — precisely what an abuser wants. This is the one place where
+  standing outside the surrounding transaction is the correct choice
+  rather than the §8a defect.
+- **The `COUNT` is O(rows in the window), not constant.** The
+  `['key', 'at']` index changes the constant, not the order, so cost per
+  request grows with the traffic already absorbed in that window. Worse,
+  every **rejected** request still commits a row, so unauthenticated
+  traffic converts directly into writes on your primary database, and an
+  IP-keyed limiter facing IPv6 rotation produces unboundedly many
+  distinct keys. **For a route that faces real hostile volume, put the
+  limiter on Redis** (`INCR` + `EXPIRE` is O(1), expires itself, and
+  keeps the traffic off your database) behind the same
+  `RateLimitStoreInterface`. This shape is right for moderate volume and
+  for keeping one dependency.
+- **Rows accumulate and must be pruned.** Delete rows older than the
+  longest configured window on a schedule, or use a TTL index /
+  partition drop where the backend has one.
+- **The window is anchored on aligned buckets**, not on the key's first
+  request the way `InMemoryRateLimitStore` anchors it. Two consequences:
+  a fixed window admits up to `2 x limit` across a bucket boundary (the
+  last `limit` of one bucket and the first `limit` of the next, back to
+  back), and because `Date.now()` is read on each instance, clock skew
+  between instances shifts their boundaries apart. Use a database-side
+  timestamp if that matters to you.
+
+Register the entity and store through `defineModuleResource` (rule 4),
+not a bare `TypeOrmModule.forFeature()` — the dynamic-repository token
+is only wired by going through `RocketsCoreModule`'s own composition.
+
+This is independent of `rockets-server-auth`'s own coarse login
+throttling (§7b). An app using both has two limiters on `/auth/login`
+with separate stores and separate keys; that is additive, not
+redundant, and worth being deliberate about.
+
+#### What the e2e actually proves
+
+`packages/rockets-core/src/__e2e__/rockets-core-rate-limit.e2e-spec.ts`
+runs this against real SQLite over real HTTP:
+
+- 10 concurrent requests at a `limit: 2` route yield exactly 2x`200`,
+  8x`429`, zero `503`, and 10 persisted attempt rows. **On SQLite** —
+  that is the single-writer case above, not evidence for Postgres.
+- Budget refills: a short-window route admits `limit`, rejects, and
+  admits again once the bucket rolls over. Without that test a store
+  that banned a key permanently would pass everything else.
+- The §8a seam is pinned separately: a probe store that writes and then
+  throws inside a `TransactionScope` leaves **no** row when `ctx` is
+  forwarded and **one** row when it is omitted — both directions
+  asserted, so neither assertion can pass vacuously.
+
+### Failure mode is fail-closed
+
+If the store throws (backend down, network error), `RateLimitGuard`
+rejects the request with `503`, never lets it through unlimited. A store
+that wants fail-open behavior must swallow its own errors and return
+`{ allowed: true, ... }` — that is an explicit choice on the adapter,
+never the guard's default.
+
+---
+
 ## 8. Repository (root adapter) — database-agnostic
 
 The `repository` field is the default persistence adapter. Core only knows two
@@ -1919,6 +2324,7 @@ Traps worth naming:
   read-modify-write there, use `FirestoreRepository.transaction()` /
   `runInFirestoreTransaction` so the body runs inside the retryable
   callback. See `packages/rockets-repository-firestore/README.md`.
+
 - **Guards run before interceptors.** A guard cannot participate in the
   operation's transaction, because the transaction interceptor has not
   run yet. `PathScopeGuard` is deliberately a pre-check for this reason
