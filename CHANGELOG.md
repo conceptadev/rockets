@@ -33,9 +33,11 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
   The default envelope body is byte-shape unchanged;
   `detailedErrorSerializer` is the one-line opt-in that appends
   `details`. `400`s minted by the upstream class-validator pipe carry
-  messages only, and `@concepta/rockets-auth` apps are out of reach
-  until their compatibility filter gains the seam (#87) — limits stated
-  rather than papered over.
+  messages only — the one limit, stated rather than papered over. Reach
+  is per APP, not per package: any app that registers
+  `RocketsCoreExceptionsFilter` gets the seam, `@concepta/rockets-auth`
+  apps included (`examples/sample-server-auth` already does, via
+  `@concepta/rockets`' `ExceptionsFilter` re-export).
 
 - **Schema DTOs survive class-validator whitelist pipes (issue #83).**
   Three pieces. `StandardSchemaDtoValidationPipe` now recognises any
@@ -230,6 +232,56 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Removed
 
+- **`RocketsAuthExceptionsFilter` — dead code, and the auth e2e helper
+  was its only caller (issue #87).** No application's behaviour changes.
+  The filter was never in `rockets-server-auth`'s `src/index.ts` and the
+  package's `exports` map has no deep-import subpath (only `.` and
+  `./package.json`), so no consumer could import it;
+  a repo-wide sweep found zero references outside
+  `__e2e__/helpers/rockets-auth-e2e-app.factory.ts`. Its own
+  `RuntimeException` branch was unreachable too — a double import made
+  both `instanceof` checks resolve to the same class — and the reachable
+  half duplicated upstream's filter. So the real defect was in the
+  TESTS: the auth e2e app ran a filter no real app ran, which is why
+  `details` (#55) looked unreachable from auth. The helper now
+  registers `RocketsCoreExceptionsFilter` — what
+  `examples/sample-server-auth` and every other consumer already use —
+  and takes an optional serializer, so the suite exercises the
+  production path. `rockets-auth-error-details.e2e-spec.ts` pins it:
+  `details` reach an auth-composed app under
+  `detailedErrorSerializer`, the default envelope stays byte-shape
+  identical (all four keys asserted), and a 5xx still masks them —
+  proven on a synthetic route AND on `PATCH /me`, whose
+  `whitelistedFromDto` call is the one production site that mints
+  details on a route a consumer actually calls.
+
+  **Two limitations found while writing that coverage.** Stated rather
+  than papered over; neither is introduced by this change.
+
+  *Invitation acceptance swallows errors.* The other production minter
+  — the invitation-acceptance listener — cannot surface details, or any
+  error, over HTTP. Its event is published from an `onCommit` callback
+  flushed with `Promise.allSettled`, `AggregateRoot.commit()` is a
+  synchronous `void`, `EventBus.bind` swallows handler exceptions, and
+  the listener catches to honour the event-listener contract.
+  `PATCH /invitation-acceptance/:code` therefore returns `200` whenever
+  metadata validation throws — for ANY reason, not only a bad payload —
+  leaving the metadata unwritten with only a log line. Three of those
+  four barriers are upstream.
+
+  *`PATCH /me` is unusable with an undecorated metadata DTO (issue
+  #103).* `whitelistedFromDto` validates with `forbidUnknownValues:
+  true`, and class-validator rejects a target carrying no validator
+  metadata outright. `RocketsAuthUserMetadataDto` — the documented base
+  extension point, and the auth e2e helper's default — has `@Expose()`
+  / `@ApiProperty()` but no constraints, so `MeController.updateUser`
+  returns `400 "an unknown value was passed to the validate function"`
+  for EVERY payload, `{}` included. Every existing `/me` spec in
+  `rockets-server` supplies a decorated DTO, and `rockets-server-auth`
+  had no `PATCH /me` coverage at all, which is why a green suite hid
+  it. Now pinned by a regression test asserting the broken behaviour;
+  the fix is a semantic decision on a shared core util and is tracked
+  separately.
 - **`SafeCrudContextInterceptor`** — upstream `@concepta/nestjs-crud`
   `CrudContextOverlay.attach()` already no-ops on non-CRUD handlers
   (`5249672`, shipped in `8.0.0-alpha.8`). Core and auth now use
