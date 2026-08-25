@@ -1361,8 +1361,13 @@ export class TransferService {
     to: string,
     amount: number,
   ) {
-    // `REQUIRED` starts one if none is active; the default `SUPPORTS`
-    // would silently run unprotected outside a request.
+    // Money movement should fail closed, so `MANDATORY` rather than the
+    // fail-open default. Read its real (narrow) guarantee below — it
+    // asserts that *some* transaction factory is registered, not that one
+    // exists for `AccountEntity`'s store.
+    // On Firestore, a contended debit/credit belongs in
+    // `FirestoreRepository.transaction()` instead — see the trap on
+    // adapter differences below.
     return this.trx.run(
       ctx,
       async (txCtx) => {
@@ -1370,17 +1375,80 @@ export class TransferService {
         // …every call inside gets `txCtx`, or it escapes the transaction.
         await this.accounts.update(debit, { balance: … }, { ctx: txCtx });
       },
-      { propagation: 'REQUIRED' },
+      { propagation: 'MANDATORY' },
     );
   }
 }
 ```
 
-Two traps worth naming:
+#### What `run()` and `propagation` actually do
 
-- **`SUPPORTS` is the default propagation.** A scope opened without
-  `propagation: 'REQUIRED'` inside a non-transactional entry point runs
-  with no transaction at all, and nothing warns.
+The installed `PropagationBehavior` is `'SUPPORTS' | 'MANDATORY'` — there
+is no `'REQUIRED'`. **Neither value starts a transaction.**
+
+The **outermost** `run()` installs a `TransactionManager` on `txCtx.trx`
+and owns the boundary: after the callback it commits — or, with
+`readOnly`, rolls back — whatever that manager ended up holding. A
+**nested** `run()`, meaning one whose `ctx` already carries the overlay,
+*joins* the outer manager and returns the callback's result directly. It
+commits nothing and rolls back nothing, and its own `readOnly` and
+`timeout` are ignored; the outer scope decides both. `propagation` is
+still checked when nested.
+
+Either way the transaction itself is started by the **concrete adapter**,
+lazily — on the first repository call that forwards `txCtx`, and only when
+`trx.isSupported`. Enter `run()`, make no repository call, and no
+transaction is ever created: the commit at the end is a no-op over an
+empty set (though any `trx.onCommit(...)` callbacks still fire). So
+`txCtx.trx` existing does **not** mean a transaction is active — it is a
+manager that may be holding zero.
+
+`trx.isSupported` is just `registry.count > 0`: "at least one transaction
+factory is registered **somewhere** in this app." That is the whole of
+what `MANDATORY` asserts. When it is `false`, `MANDATORY` throws
+`TransactionRequiredException` before the callback runs and the default
+`SUPPORTS` runs the callback unprotected.
+
+Traps worth naming:
+
+- **A nested scope does not own the boundary.** Any scope opened
+  underneath `transactional: true` (or inside another `run()`) is nested.
+  The sharpest edge: `runReadOnly` nested inside a writing operation does
+  **not** roll back — it joins the outer manager, and the outer scope
+  commits its writes. A nested `timeout` is likewise ignored.
+- **`SUPPORTS` fails open, and nothing warns.** With no transaction
+  factory registered, a `SUPPORTS` scope still runs its callback,
+  `isSupported` is `false`, and repository calls quietly take their
+  non-transactional path — `TypeOrmRepository.getRepo` returns the plain
+  untransacted repository; `FirestoreRepository` resolves a `null`
+  handle unless an ambient `runInFirestoreTransaction` is already open,
+  which it checks first. Each write lands on its own and a later throw
+  rolls back nothing. Forwarding `ctx` correctly does not save you.
+  Note this is a **mis-wiring** trap, not an everyday one: both shipped
+  adapters register a transaction factory from `forFeature`, so any app
+  with a registered entity has `isSupported === true`. It bites with a
+  custom adapter that contributes no factories.
+- **`MANDATORY` is not a per-store guarantee.** Because `isSupported` is a
+  global count, `MANDATORY` passes as soon as *any* factory exists — even
+  if none is registered for the store you are about to write. In a
+  multi-datasource app (or with a per-entity `repository` override, §8)
+  the scope is admitted and the first repository call then throws a raw
+  `Error: No transaction factory registered for key "…"` — not
+  `TransactionRequiredException`, and not an HTTP-shaped failure.
+- **`noRollbackFor` is accepted and silently dropped.** It exists on
+  `TransactionalOptions` — the bag `@Transactional()` and
+  `transactional: true` take — and the decorator dutifully stores it in
+  metadata. But `TransactionalRunner` forwards only `propagation`,
+  `readOnly` and `timeout` to `TransactionScope.run`, whose own
+  `TransactionRunOptions` does not declare `noRollbackFor` at all. It is
+  read by nothing: **any** throw rolls the scope back.
+- **Adapters differ on contention.** `TransactionScope.run` is fine for
+  uncontended multi-write units, but on Firestore it uses an imperative
+  bridge that **refuses** an SDK retry
+  (`FIRESTORE_TRANSACTION_RETRY_UNSUPPORTED`). For contended
+  read-modify-write there, use `FirestoreRepository.transaction()` /
+  `runInFirestoreTransaction` so the body runs inside the retryable
+  callback. See `packages/rockets-repository-firestore/README.md`.
 - **Guards run before interceptors.** A guard cannot participate in the
   operation's transaction, because the transaction interceptor has not
   run yet. `PathScopeGuard` is deliberately a pre-check for this reason
