@@ -1,8 +1,10 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import http from 'node:http';
 import {
+  Inject,
   Injectable,
   INestApplication,
+  Scope,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
@@ -40,6 +42,17 @@ const observed = {
   cooperativeAborted: false,
   disconnectSignalAborted: false,
 };
+
+const SLOW_DEP = 'SLOW_DEP';
+
+@Injectable()
+class SlowDiHandler {
+  constructor(@Inject(SLOW_DEP) private readonly dep: string) {}
+
+  handle(): { ok: boolean } {
+    return { ok: this.dep === 'slow' };
+  }
+}
 
 const deadlineOps = operationResource({
   path: 'deadline-ops',
@@ -94,14 +107,56 @@ const deadlineOps = operationResource({
           setTimeout(() => resolve({ ok: true }), 300);
         }),
     }),
+    // Class handler with a slow request-scoped dependency, so
+    // `moduleRef.resolve()` genuinely spans real time — the exact window
+    // between guard creation and `deadline.race(...)` where the abort
+    // promise can settle before anything has attached a handler to it.
+    slowDiDeadline: op.read({
+      path: 'slow-di-deadline',
+      deadlineMs: 10,
+      output: z.object({ ok: z.boolean() }),
+      handler: SlowDiHandler,
+    }),
+    slowDiDisconnect: op.read({
+      path: 'slow-di-disconnect',
+      output: z.object({ ok: z.boolean() }),
+      handler: SlowDiHandler,
+    }),
   }),
+  providers: [
+    SlowDiHandler,
+    {
+      provide: SLOW_DEP,
+      scope: Scope.REQUEST,
+      useFactory: async () => {
+        // Real elapsed time, deliberately longer than slowDiDeadline's
+        // 10ms — this is what makes `moduleRef.resolve()` in
+        // `routeHandler` span the window between guard creation and
+        // `deadline.race(...)` for real, not just in theory.
+        await new Promise((resolve) => setTimeout(resolve, 60));
+        return 'slow';
+      },
+    },
+  ],
 });
 
 describe('operationResource deadline / disconnect signal (e2e, issue #78)', () => {
   let app: INestApplication;
   let baseUrl: string;
 
+  // `createDeadlineGuard`'s abort promise can settle before `race()` is
+  // ever called — while `routeHandler` is still awaiting a slow
+  // `moduleRef.resolve()`. Left unhandled, that crashes the WHOLE
+  // process on Node's default `--unhandled-rejections=throw`, not just
+  // the one request. A vitest assertion failure would not show that;
+  // only capturing the process-level event does.
+  const unhandledRejections: unknown[] = [];
+  const onUnhandledRejection = (reason: unknown): void => {
+    unhandledRejections.push(reason);
+  };
+
   beforeAll(async () => {
+    process.on('unhandledRejection', onUnhandledRejection);
     const moduleRef = await Test.createTestingModule({
       imports: [
         RocketsCoreModule.forRoot({
@@ -125,7 +180,12 @@ describe('operationResource deadline / disconnect signal (e2e, issue #78)', () =
   });
 
   afterAll(async () => {
+    process.off('unhandledRejection', onUnhandledRejection);
     if (app) await app.close();
+  });
+
+  afterEach(() => {
+    expect(unhandledRejections).toEqual([]);
   });
 
   it('resolves 504 when the handler outruns deadlineMs, ignoring the signal', async () => {
@@ -176,5 +236,31 @@ describe('operationResource deadline / disconnect signal (e2e, issue #78)', () =
     // client already gave up, so there is no response to assert on.
     await new Promise((resolve) => setTimeout(resolve, 100));
     expect(observed.disconnectSignalAborted).toBe(true);
+  });
+
+  it("resolves 504 (not a crash, not a silent 200) when a class handler's slow DI resolution outruns the deadline", async () => {
+    const res = await request(app.getHttpServer())
+      .get('/deadline-ops/slow-di-deadline')
+      .expect(504);
+
+    expect(res.body.statusCode).toBe(504);
+  });
+
+  it('does not crash the process when the client disconnects while a class handler is still resolving its dependencies', async () => {
+    await new Promise<void>((resolve, reject) => {
+      const req = http.get(`${baseUrl}/deadline-ops/slow-di-disconnect`, () => {
+        reject(new Error('expected the connection to be destroyed first'));
+      });
+      req.on('error', () => resolve());
+      // 5ms: well inside the 60ms slow-DI window, well before
+      // `moduleRef.resolve()` returns and `deadline.race(...)` is
+      // reached — the exact window the crash lived in.
+      setTimeout(() => req.destroy(), 5);
+    });
+
+    // Give the in-flight DI resolution (and the app) time to actually
+    // finish so a would-be unhandled rejection has a chance to surface
+    // before this test (and the afterEach assertion) ends.
+    await new Promise((resolve) => setTimeout(resolve, 100));
   });
 });

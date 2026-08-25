@@ -705,7 +705,9 @@ Every operation carries `ctx.signal: AbortSignal`. It fires in two cases:
   stop the handler by itself, it just stops the client from waiting on it.
 - The client disconnects before the handler settles. Nothing is written
   back (the socket is already gone); the only point of the signal firing
-  here is to let a cooperative handler stop wasted work.
+  here is to let a cooperative handler stop wasted work. This is not an
+  application error, so it never reaches the exceptions filter — no 5xx,
+  no error log — even for a handler that never reads `ctx.signal`.
 
 ```ts
 export const ops = operationResource({

@@ -123,6 +123,16 @@ interface DeadlineGuard {
 }
 
 /**
+ * Marks an abort caused by the CLIENT going away, as opposed to the
+ * deadline elapsing. `routeHandler` uses this to skip the normal
+ * response/exception-filter path entirely — the socket is already
+ * gone, so there is nothing useful to write back and no application
+ * error occurred. Not exported: an internal signal between
+ * `createDeadlineGuard` and `routeHandler` in this file only.
+ */
+class OperationClientDisconnectedError extends Error {}
+
+/**
  * Issue #78: bounds one operation's own request/response cycle, not a
  * per-downstream-call budget. `deadlineMs` elapsing aborts `signal` and
  * resolves the request `504 Gateway Timeout`; a client disconnect aborts
@@ -158,23 +168,51 @@ function createDeadlineGuard(
     // A deadline that already fired owns the abort reason — a disconnect
     // arriving after does not need to (and should not) overwrite it.
     if (!timedOut) {
-      controller.abort(new Error(`Operation "${label}": client disconnected`));
+      controller.abort(
+        new OperationClientDisconnectedError(
+          `Operation "${label}": client disconnected`,
+        ),
+      );
     }
   };
   req.on?.('close', onClose);
 
-  // `Promise.race` attaches a handler to every input promise regardless
-  // of which settles first, so the loser here is never an unhandled
-  // rejection — this is the same mechanism Promise.race itself relies on.
   const abortedPromise = new Promise<never>((_resolve, reject) => {
     controller.signal.addEventListener('abort', () => {
       reject(controller.signal.reason as unknown);
     });
   });
+  // `abortedPromise` can reject before `race()` is ever called — e.g.
+  // while `routeHandler` is still `await`ing DI resolution, well before
+  // it reaches `deadline.race(...)`. Without a handler attached from the
+  // moment it exists, that is an unhandled rejection, and Node's default
+  // `--unhandled-rejections=throw` (Node ≥15) kills the whole process on
+  // a single slow/cancelled request — confirmed by reproduction. A
+  // permanent no-op catch keeps this promise "handled" unconditionally;
+  // `race()` below still observes the SAME rejection through its own
+  // `Promise.race` call, so behavior for callers is unchanged.
+  abortedPromise.catch(() => undefined);
 
   return {
     signal: controller.signal,
     race<T>(promise: Promise<T> | T): Promise<T> {
+      // If the deadline/disconnect already fired by the time `race()`
+      // is called (the same slow-DI window above), do not hand this to
+      // `Promise.race`: when BOTH inputs are already-settled promises,
+      // `Promise.race` resolves to whichever settles its `.then()`
+      // microtask FIRST, which for two already-settled promises is
+      // decided by ARRAY ORDER, not by which rejected/resolved first in
+      // wall-clock time. `promise` here is passed first, so an
+      // already-fulfilled handler result would silently beat an
+      // earlier-rejected deadline — confirmed by reproduction (a
+      // handler with a slow DI subtree returned 200 well past its
+      // configured `deadlineMs`, instead of 504). Rejecting immediately
+      // here removes the ambiguity entirely.
+      if (controller.signal.aborted) {
+        return Promise.reject(
+          controller.signal.reason as unknown,
+        ) as Promise<T>;
+      }
       return Promise.race([promise, abortedPromise]);
     },
     dispose(): void {
@@ -747,6 +785,16 @@ function attachOperationMethod(
         return result;
       }
       return await applyOutputDto(operation.output, result, label);
+    } catch (error) {
+      // The socket is already gone — there is nothing to write back and
+      // no application error occurred, so this must not reach the
+      // exceptions filter as a logged 5xx. A handler that never checked
+      // `ctx.signal` simply loses whatever it was doing, same as if the
+      // process had been killed mid-request.
+      if (error instanceof OperationClientDisconnectedError) {
+        return undefined;
+      }
+      throw error;
     } finally {
       deadline.dispose();
     }

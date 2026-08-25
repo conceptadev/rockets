@@ -12,7 +12,8 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
   via an optional `deadlineMs` on the operation descriptor. Elapsing the
   deadline aborts the signal and resolves `504 Gateway Timeout`; a client
   disconnecting before the handler settles aborts it too, though nothing
-  is written back since the socket is already gone. A handler passes
+  is written back since the socket is already gone, and it is never
+  surfaced as an application error (no 5xx, no error log). A handler passes
   `ctx.signal` through to whatever does the actual waiting to stop wasted
   work; one that never reads it keeps running in the background after the
   timeout response is sent — the deadline bounds what the CLIENT waits
