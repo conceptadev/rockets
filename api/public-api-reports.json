@@ -163,7 +163,7 @@
         "name": "CrudResource",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface CrudResource<E extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Crud;\n    readonly acl: ResourceAclPlan;\n    readonly core: RocketsResourceConfig;\n    readonly persistence: {\n        readonly module?: RepositoryModuleInterface;\n        readonly entity: RepositoryProviderOptions<E>;\n    };\n    readonly meta: {\n        readonly key: string;\n        readonly entityClass: new () => E;\n        readonly relations: ReadonlyArray<ResourceRelationEntry<E>>;\n    };\n    readonly subResources?: ReadonlyArray<CrudResource<PlainLiteralObject>>;\n}"
+        "signature": "export interface CrudResource<E extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Crud;\n    readonly acl: ResourceAclPlan;\n    readonly core: RocketsResourceConfig;\n    readonly persistence: {\n        readonly module?: RepositoryModuleInterface;\n        readonly entity: RepositoryProviderOptions<E>;\n    };\n    readonly meta: {\n        readonly key: string;\n        readonly entityClass: new () => E;\n        readonly relations: ReadonlyArray<ResourceRelationEntry<E>>;\n        readonly hooks: ReadonlyArray<Type>;\n    };\n    readonly subResources?: ReadonlyArray<CrudResource<PlainLiteralObject>>;\n}"
       },
       {
         "name": "Ctx",
@@ -2335,7 +2335,7 @@
         "name": "CrudResource",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface CrudResource<E extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Crud;\n    readonly acl: ResourceAclPlan;\n    readonly core: RocketsResourceConfig;\n    readonly persistence: {\n        readonly module?: RepositoryModuleInterface;\n        readonly entity: RepositoryProviderOptions<E>;\n    };\n    readonly meta: {\n        readonly key: string;\n        readonly entityClass: new () => E;\n        readonly relations: ReadonlyArray<ResourceRelationEntry<E>>;\n    };\n    readonly subResources?: ReadonlyArray<CrudResource<PlainLiteralObject>>;\n}"
+        "signature": "export interface CrudResource<E extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Crud;\n    readonly acl: ResourceAclPlan;\n    readonly core: RocketsResourceConfig;\n    readonly persistence: {\n        readonly module?: RepositoryModuleInterface;\n        readonly entity: RepositoryProviderOptions<E>;\n    };\n    readonly meta: {\n        readonly key: string;\n        readonly entityClass: new () => E;\n        readonly relations: ReadonlyArray<ResourceRelationEntry<E>>;\n        readonly hooks: ReadonlyArray<Type>;\n    };\n    readonly subResources?: ReadonlyArray<CrudResource<PlainLiteralObject>>;\n}"
       },
       {
         "name": "DEFAULT_OWNER_COLUMN",
@@ -2380,6 +2380,12 @@
         "signature": "export declare abstract class EntityHookBase<E extends PlainLiteralObject> {\n    abstract beforeFindOne(options: RepositoryFindOneOptions<E>, ctx?: EntityHookContext): RepositoryFindOneOptions<E> | Promise<RepositoryFindOneOptions<E>>;\n    abstract afterFindOne(entity: E | null, ctx?: EntityHookContext): (E | null) | Promise<E | null>;\n    abstract beforeFindAndCount(options: RepositoryFindOptions<E>, ctx?: EntityHookContext): RepositoryFindOptions<E> | Promise<RepositoryFindOptions<E>>;\n    abstract afterFindAndCount(result: {\n        data: E[];\n        total: number;\n    }, ctx?: EntityHookContext): {\n        data: E[];\n        total: number;\n    } | Promise<{\n        data: E[];\n        total: number;\n    }>;\n    abstract beforeCreate(payload: E, ctx?: EntityHookContext): E | Promise<E>;\n    abstract afterCreate(entity: E, ctx?: EntityHookContext): E | Promise<E>;\n    abstract beforeUpdate(payload: E, ctx?: EntityHookContext): E | Promise<E>;\n    abstract afterUpdate(entity: E, ctx?: EntityHookContext): E | Promise<E>;\n    abstract beforeDelete(entity: E, ctx?: EntityHookContext): E | Promise<E>;\n    abstract afterDelete(entity: E, ctx?: EntityHookContext): E | Promise<E>;\n    abstract beforeSoftDelete(entity: E, ctx?: EntityHookContext): E | Promise<E>;\n    abstract afterSoftDelete(entity: E, ctx?: EntityHookContext): E | Promise<E>;\n    abstract beforeRestore(entity: E, ctx?: EntityHookContext): E | Promise<E>;\n    abstract afterRestore(entity: E, ctx?: EntityHookContext): E | Promise<E>;\n}"
       },
       {
+        "name": "EntityHookBinding",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface EntityHookBinding {\n    readonly entity: Type<PlainLiteralObject>;\n    readonly entityKey: string;\n}"
+      },
+      {
         "name": "EntityHookContext",
         "kind": "type",
         "runtime": false,
@@ -2396,6 +2402,12 @@
         "kind": "type",
         "runtime": false,
         "signature": "export type EntityHookLifecycleKey = keyof typeof LIFECYCLE_DECORATORS;"
+      },
+      {
+        "name": "EntityHookOptions",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface EntityHookOptions<E extends PlainLiteralObject = PlainLiteralObject> {\n    readonly entity?: Type<E>;\n    readonly entityKey?: string;\n}"
       },
       {
         "name": "EntityHookTools",
@@ -2929,7 +2941,13 @@
         "name": "TenantScopeOptions",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface TenantScopeOptions<E extends PlainLiteralObject> {\n    readonly tenantKey: keyof E & string;\n    readonly resolve: TenantIdsResolver;\n}"
+        "signature": "export interface TenantScopeOptions<E extends PlainLiteralObject> {\n    readonly tenantKey: keyof E & string;\n    readonly resolve: TenantIdsResolver;\n    readonly entityKey?: string;\n}"
+      },
+      {
+        "name": "TenantStampHook",
+        "kind": "class",
+        "runtime": true,
+        "signature": "export declare abstract class TenantStampHook<E extends PlainLiteralObject> extends PassthroughEntityHookBase<E> {\n    protected abstract readonly tenantKey: keyof E & string;\n    protected abstract readonly resolveTenantIds: TenantScopeOptions<E>['resolve'];\n    beforeCreate(payload: E, ctx?: EntityHookContext): Promise<E>;\n    beforeUpdate(payload: E, ctx?: EntityHookContext): Promise<E>;\n    static for<E extends PlainLiteralObject>(entity: Type<E>, options: TenantScopeOptions<E>): Type<TenantStampHook<E>>;\n    private enforceTenant;\n}"
       },
       {
         "name": "USER_METADATA_MODULE_ENTITY_KEY",
@@ -3194,6 +3212,12 @@
         "kind": "function",
         "runtime": true,
         "signature": "export declare function getDynamicRepositoryToken(key: string): string;"
+      },
+      {
+        "name": "getEntityHookBinding",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function getEntityHookBinding(hook: Type<PlainLiteralObject> | Function): EntityHookBinding | undefined;"
       },
       {
         "name": "getErrorDetails",
@@ -4401,14 +4425,6 @@
         ]
       },
       {
-        "name": "EntityHookOptions",
-        "kind": "interface",
-        "signature": "export interface EntityHookOptions<E extends PlainLiteralObject = PlainLiteralObject> {\n    readonly entity?: Type<E>;\n}",
-        "referencedBy": [
-          "EntityHook"
-        ]
-      },
-      {
         "name": "ModuleResourceEntityEntryInput",
         "kind": "interface",
         "signature": "export interface ModuleResourceEntityEntryInput {\n    readonly key?: string;\n    readonly entity: Type<PlainLiteralObject>;\n    readonly repository?: RepositoryModuleInterface;\n    readonly collection?: string;\n}",
@@ -4568,7 +4584,7 @@
       {
         "name": "CrudResource",
         "kind": "interface",
-        "signature": "export interface CrudResource<E extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Crud;\n    readonly acl: ResourceAclPlan;\n    readonly core: RocketsResourceConfig;\n    readonly persistence: {\n        readonly module?: RepositoryModuleInterface;\n        readonly entity: RepositoryProviderOptions<E>;\n    };\n    readonly meta: {\n        readonly key: string;\n        readonly entityClass: new () => E;\n        readonly relations: ReadonlyArray<ResourceRelationEntry<E>>;\n    };\n    readonly subResources?: ReadonlyArray<CrudResource<PlainLiteralObject>>;\n}",
+        "signature": "export interface CrudResource<E extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Crud;\n    readonly acl: ResourceAclPlan;\n    readonly core: RocketsResourceConfig;\n    readonly persistence: {\n        readonly module?: RepositoryModuleInterface;\n        readonly entity: RepositoryProviderOptions<E>;\n    };\n    readonly meta: {\n        readonly key: string;\n        readonly entityClass: new () => E;\n        readonly relations: ReadonlyArray<ResourceRelationEntry<E>>;\n        readonly hooks: ReadonlyArray<Type>;\n    };\n    readonly subResources?: ReadonlyArray<CrudResource<PlainLiteralObject>>;\n}",
         "referencedBy": [
           "zodResource"
         ]

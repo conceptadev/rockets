@@ -26,6 +26,17 @@ export interface TenantScopeOptions<E extends PlainLiteralObject> {
    * design (see class doc).
    */
   readonly resolve: TenantIdsResolver;
+  /**
+   * The persistence key to match on, when the resource registers the
+   * entity under a `key` other than `deriveEntityKey(entity)`. Defaults
+   * to the derived key.
+   *
+   * A mismatch does not need to be caught by hand: the planner's
+   * `validateEntityHookBindings` fails the boot and names the key the
+   * entity is actually registered under. Set this only to match a
+   * deliberate custom `key`.
+   */
+  readonly entityKey?: string;
 }
 
 /**
@@ -52,28 +63,47 @@ export interface TenantScopeOptions<E extends PlainLiteralObject> {
  *
  * ## Coverage
  *
- * | Operation | Repository call    | Hook fired            |
- * | --------- | ------------------ | ---------------------- |
- * | List      | `findAndCount`     | `beforeFindAndCount`  |
- * | Read      | `findOne`          | `beforeFindOne`       |
- * | Update    | `findOne` + update | `beforeFindOne`       |
- * | Delete    | `findOne` + delete | `beforeFindOne`       |
+ * | Operation | Repository call    | Hook fired           | Scopes           |
+ * | --------- | ------------------ | -------------------- | ---------------- |
+ * | List      | `findAndCount`     | `beforeFindAndCount` | the whole result |
+ * | Read      | `findOne`          | `beforeFindOne`      | the whole result |
+ * | Update    | `findOne` + update | `beforeFindOne`      | the lookup ONLY  |
+ * | Delete    | `findOne` + delete | `beforeFindOne`      | the lookup ONLY  |
+ * | Create    | (no `find`)        | none                 | nothing          |
  *
  * A row outside the resolved set is excluded by the query itself, so it
  * surfaces as 404 (never found), not 403 — deliberately: confirming a
- * row EXISTS to an actor who cannot see it is its own leak. Create is
- * not scoped here; stamp the tenant column on writes the same way
- * `OwnerStampHook` stamps ownership.
+ * row EXISTS to an actor who cannot see it is its own leak.
+ *
+ * ## This hook does NOT protect the tenant column on writes
+ *
+ * It rewrites `where` clauses and nothing else. On its own:
+ *
+ * - `POST` with a foreign tenant id creates a row in another tenant —
+ *   `create` issues no `find`, so no lifecycle key here fires at all.
+ * - `PATCH`/`PUT` with a foreign tenant id MOVES the row out of the
+ *   actor's tenant. `beforeFindOne` correctly scopes the lookup, but
+ *   nothing inspects the update PAYLOAD, so the write lands.
+ *
+ * Pair it with {@link TenantStampHook}, which enforces the same resolved
+ * set on `beforeCreate`/`beforeUpdate`. `OwnerStampHook` is **not** a
+ * substitute: it stamps `actor.id`, and an actor's user id is not one of
+ * their tenant ids — aiming it at a tenant column corrupts the column.
  *
  * @example
  * ```ts
+ * // Declare the scope once and give it to BOTH hooks — a read-side and a
+ * // write-side resolver that disagree is the bug this pairing prevents.
+ * const shelterScope = {
+ *   tenantKey: 'shelterId' as const,
+ *   resolve: (actor: Actor) => shelterIdsFor(actor), // [] when the actor owns none
+ * };
+ *
  * defineResource({
  *   entity: PetEntity,
  *   hooks: [
- *     TenantScopeHook.for<PetEntity>(PetEntity, {
- *       tenantKey: 'shelterId',
- *       resolve: (actor) => shelterIdsFor(actor), // [] when the actor owns none
- *     }),
+ *     TenantScopeHook.for<PetEntity>(PetEntity, shelterScope),
+ *     TenantStampHook.for<PetEntity>(PetEntity, shelterScope),
  *   ],
  * });
  * ```
@@ -127,7 +157,10 @@ export abstract class TenantScopeHook<
     // Same reasoning as `OwnerScopeHook`: without an entity-scoped spec
     // this fires on every entity in the request, including writes made
     // by sibling hooks — silently scoping the wrong table.
-    EntityHook({ entity })(ctor);
+    EntityHook({
+      entity,
+      ...(options.entityKey ? { entityKey: options.entityKey } : {}),
+    })(ctor);
     Injectable()(ctor);
     return ctor;
   }

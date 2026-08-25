@@ -23,6 +23,32 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
   engines, TypeORM's own `In([])` historically included, do not reliably
   treat an empty IN-list as "match nothing." See `CONFIGURATION.md` §5b.
 
+  `TenantScopeHook` rewrites `where` clauses and nothing else, so it does
+  NOT constrain the tenant column on writes: `POST` issues no `find` at
+  all, and `PATCH`/`PUT` scope the lookup but never inspect the update
+  payload — a body carrying another tenant's id moves the row out of the
+  actor's tenant. An earlier revision of this entry (and of
+  `CONFIGURATION.md` §5b) told readers to close that by stamping "the same
+  way `OwnerStampHook` stamps ownership." That advice was **wrong**:
+  `OwnerStampHook` stamps `actor.id`, and an actor's user id is not one of
+  their tenant ids, so following it writes the wrong value into the column.
+
+- **`TenantStampHook` — the write-side half of tenant scoping.**
+  `TenantStampHook.for(entity, { tenantKey, resolve })` enforces the same
+  resolved set on `beforeCreate`/`beforeUpdate`. A payload value inside
+  the set passes; a value outside it is **rejected with `403`, never
+  silently rewritten** (the opposite of `OwnerStampHook`, deliberately —
+  there is one legal owner id but there can be several legal tenant ids,
+  so silently picking one would persist the row somewhere the caller never
+  asked for). An omitted value is stamped on `create` when the actor
+  resolves to exactly one tenant, `403`s when they resolve to none, and
+  `400`s as ambiguous when they resolve to several; on `update` it is left
+  absent, since the scoped `findOne` already proved the row is in range.
+  Pass the SAME resolver to both hooks. Like `OwnerStampHook`, the 4xx
+  statuses require `RocketsCoreExceptionsFilter` to be registered — the
+  upstream membrane wraps hook throws in `RepositoryQueryException`, and
+  without the filter the (still-rejected) write reports `500`.
+
 - **`strictInput` on zodResource body operations (issue #79).** Opt-in
   per-op flag that rejects unknown **top-level** JSON keys with `400`
   naming the offending keys, instead of the default silent stripping
@@ -455,6 +481,31 @@ before running the full e2e suite.
   e2e coverage (cross-owner nested access returns 404).
 
 ### Fixed
+
+- **Entity hooks bound to a key no resource registers now fail the boot
+  (issue #69 review).** `@EntityHook({ entity })` bakes
+  `deriveEntityKey(entity)` into its spec, while the repository adapter
+  stamps the resource's REGISTRATION `key` onto the hook context — and
+  matching is an exact string compare. `defineResource({ entity:
+  PetEntity, key: 'pets' })` therefore registered the entity as `pets`
+  while a hook on that same resource matched `pet`: the hook silently
+  never fired, nothing warned, the app booted clean, and for
+  `TenantScopeHook`/`OwnerScopeHook` that is a total fail-OPEN — every
+  actor sees every tenant's rows. `buildAppRegistrationPlan` now runs
+  `validateEntityHookBindings`, which rejects the mismatch at boot naming
+  the hook, both keys, and both remedies; a hook bound to an entity no
+  bundle registers is rejected too. Sibling helpers (`defineHook`,
+  `AfterCreateReloadHook`) already failed loudly on the same mismatch via
+  an unresolvable `@InjectDynamicRepository` token — scoping hooks have no
+  such dependency, which is exactly why they needed this. For a resource
+  that must keep a custom `key`, `EntityHookOptions` (and
+  `TenantScopeOptions`) gained `entityKey` to bind the hook to the key in
+  use. Scope: generated CRUD bundles — resource-level `hooks`,
+  per-operation `operations[op].hooks`, and sub-resources. Hooks
+  registered as bare providers on a `defineModuleResource` slice, or
+  applied by a hand-written `@UseHooks`, are outside what the planner
+  sees. `CrudResource.meta` gained `hooks` to carry them to the planner,
+  and `getEntityHookBinding(hookClass)` is exported for the same purpose.
 
 - **Round-4 review findings.** The module-export walk now merges each
   dynamic host's static and dynamic imports and exports before descending,

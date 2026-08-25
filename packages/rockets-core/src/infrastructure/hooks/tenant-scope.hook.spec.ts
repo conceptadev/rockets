@@ -1,7 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import type { PlainLiteralObject } from '@nestjs/common';
 import type { OverlayRef } from '@concepta/nestjs-core';
+import { Where } from '@concepta/nestjs-repository';
 import { TenantScopeHook } from './tenant-scope.hook';
+import { getEntityHookBinding } from './entity-hook';
 import { ActorCtx } from '../interceptors/actor.overlay';
 import type { EntityHookContext } from './entity-hook';
 
@@ -16,6 +18,24 @@ class PetEntity {
   name!: string;
   shelterId!: string;
 }
+
+/**
+ * The exact clause the hook must emit when the actor resolves to no
+ * tenant: a `NULL AND NOT NULL` contradiction on the tenant column.
+ *
+ * Asserted by VALUE, not by `toBeDefined()`. The distinction matters: the
+ * fail-OPEN alternative the hook's own doc argues against —
+ * `Where.in(tenantKey, [])` — is also "defined", so a presence check
+ * cannot tell the safe clause from the unsafe one. Every assertion below
+ * that involves the deny path compares full structure for that reason.
+ */
+const denyAll = Where.and(
+  Where.isNull<Pet>('shelterId'),
+  Where.notNull<Pet>('shelterId'),
+);
+
+/** The shape that must NEVER be produced — see {@link denyAll}. */
+const failOpenEmptyIn = Where.in<Pet>('shelterId', []);
 
 function fakeCtx(
   args: { actor?: { id: string; type: 'user' } } = {},
@@ -59,8 +79,33 @@ describe('TenantScopeHook.for() factory', () => {
     expect(A).not.toBe(B);
   });
 
+  describe('entity binding', () => {
+    it('binds to the derived entity key by default', () => {
+      const Hook = TenantScopeHook.for<Pet>(PetEntity, {
+        tenantKey: 'shelterId',
+        resolve: () => ['s1'],
+      });
+      expect(getEntityHookBinding(Hook)).toEqual({
+        entity: PetEntity,
+        entityKey: 'pet',
+      });
+    });
+
+    it('binds to an explicit entityKey when the resource uses a custom key', () => {
+      const Hook = TenantScopeHook.for<Pet>(PetEntity, {
+        tenantKey: 'shelterId',
+        resolve: () => ['s1'],
+        entityKey: 'pets',
+      });
+      expect(getEntityHookBinding(Hook)).toEqual({
+        entity: PetEntity,
+        entityKey: 'pets',
+      });
+    });
+  });
+
   describe('runtime behaviour — fail-closed', () => {
-    it("no actor: produces a where clause (deny), unlike OwnerScopeHook's no-op", async () => {
+    it('no actor: emits the NULL-AND-NOT-NULL contradiction, not an empty IN', async () => {
       const Hook = TenantScopeHook.for<Pet>(PetEntity, {
         tenantKey: 'shelterId',
         resolve: () => ['s1'],
@@ -68,13 +113,13 @@ describe('TenantScopeHook.for() factory', () => {
       const instance = new Hook();
       const original = {};
       const result = await instance.beforeFindOne(original);
-      // Unlike OwnerScopeHook: NOT the same reference, and a where clause
-      // IS present — this is the fail-closed divergence the class exists for.
+
       expect(result).not.toBe(original);
-      expect((result as PlainLiteralObject).where).toBeDefined();
+      expect(result.where).toEqual(denyAll);
+      expect(result.where).not.toEqual(failOpenEmptyIn);
     });
 
-    it('resolve() returning an empty array denies just like no actor', async () => {
+    it('resolve() returning an empty array denies with the same clause as no actor', async () => {
       const Hook = TenantScopeHook.for<Pet>(PetEntity, {
         tenantKey: 'shelterId',
         resolve: () => [],
@@ -82,10 +127,25 @@ describe('TenantScopeHook.for() factory', () => {
       const instance = new Hook();
       const ctx = fakeCtx({ actor: { id: 'u1', type: 'user' } });
       const result = await instance.beforeFindOne({}, ctx);
-      expect((result as PlainLiteralObject).where).toBeDefined();
+
+      expect(result.where).toEqual(denyAll);
+      expect(result.where).not.toEqual(failOpenEmptyIn);
     });
 
-    it('an async resolve() is awaited', async () => {
+    it('the deny clause AND-composes with an existing where instead of replacing it', async () => {
+      const Hook = TenantScopeHook.for<Pet>(PetEntity, {
+        tenantKey: 'shelterId',
+        resolve: () => [],
+      });
+      const instance = new Hook();
+      const ctx = fakeCtx({ actor: { id: 'u1', type: 'user' } });
+      const existing = Where.eq<Pet>('name', 'Rex');
+      const result = await instance.beforeFindOne({ where: existing }, ctx);
+
+      expect(result.where).toEqual(Where.and(existing, denyAll));
+    });
+
+    it('an async resolve() is awaited (not left as a pending Promise in the clause)', async () => {
       const Hook = TenantScopeHook.for<Pet>(PetEntity, {
         tenantKey: 'shelterId',
         resolve: async () => {
@@ -96,12 +156,13 @@ describe('TenantScopeHook.for() factory', () => {
       const instance = new Hook();
       const ctx = fakeCtx({ actor: { id: 'u1', type: 'user' } });
       const result = await instance.beforeFindOne({}, ctx);
-      expect((result as PlainLiteralObject).where).toBeDefined();
+
+      expect(result.where).toEqual(Where.in<Pet>('shelterId', ['s1', 's2']));
     });
   });
 
   describe('runtime behaviour — resolved scope', () => {
-    it('beforeFindOne applies a scoped clause when resolve() returns ids', async () => {
+    it('beforeFindOne emits IN over exactly the resolved ids', async () => {
       const Hook = TenantScopeHook.for<Pet>(PetEntity, {
         tenantKey: 'shelterId',
         resolve: () => ['s1', 's2'],
@@ -109,10 +170,11 @@ describe('TenantScopeHook.for() factory', () => {
       const instance = new Hook();
       const ctx = fakeCtx({ actor: { id: 'u1', type: 'user' } });
       const result = await instance.beforeFindOne({}, ctx);
-      expect((result as PlainLiteralObject).where).toBeDefined();
+
+      expect(result.where).toEqual(Where.in<Pet>('shelterId', ['s1', 's2']));
     });
 
-    it('beforeFindAndCount applies the same clause shape', async () => {
+    it('beforeFindAndCount emits the same clause as beforeFindOne', async () => {
       const Hook = TenantScopeHook.for<Pet>(PetEntity, {
         tenantKey: 'shelterId',
         resolve: () => ['s1'],
@@ -120,7 +182,8 @@ describe('TenantScopeHook.for() factory', () => {
       const instance = new Hook();
       const ctx = fakeCtx({ actor: { id: 'u1', type: 'user' } });
       const result = await instance.beforeFindAndCount({}, ctx);
-      expect((result as PlainLiteralObject).where).toBeDefined();
+
+      expect(result.where).toEqual(Where.in<Pet>('shelterId', ['s1']));
     });
 
     it('AND-composes with a pre-existing where clause (no neutering)', async () => {
@@ -130,13 +193,31 @@ describe('TenantScopeHook.for() factory', () => {
       });
       const instance = new Hook();
       const ctx = fakeCtx({ actor: { id: 'u1', type: 'user' } });
-      const original = { where: { foo: 'bar' } } as PlainLiteralObject;
-      const result = (await instance.beforeFindOne(
-        original as unknown as never,
-        ctx,
-      )) as PlainLiteralObject;
-      expect(result.where).toBeDefined();
+      const existing = Where.eq<Pet>('name', 'Rex');
+      const original = { where: existing };
+      const result = await instance.beforeFindOne(original, ctx);
+
       expect(result).not.toBe(original);
+      expect(result.where).toEqual(
+        Where.and(existing, Where.in<Pet>('shelterId', ['s1'])),
+      );
+    });
+
+    it('scopes the configured column, not a hardcoded one', async () => {
+      interface Doc extends PlainLiteralObject {
+        readonly orgId: string;
+      }
+      class DocEntity {
+        orgId!: string;
+      }
+      const Hook = TenantScopeHook.for<Doc>(DocEntity, {
+        tenantKey: 'orgId',
+        resolve: () => ['o1'],
+      });
+      const ctx = fakeCtx({ actor: { id: 'u1', type: 'user' } });
+      const result = await new Hook().beforeFindOne({}, ctx);
+
+      expect(result.where).toEqual(Where.in<Doc>('orgId', ['o1']));
     });
 
     it('different resolved sets produce different clauses', async () => {
@@ -151,7 +232,22 @@ describe('TenantScopeHook.for() factory', () => {
       const ctx = fakeCtx({ actor: { id: 'u1', type: 'user' } });
       const a = await new HookA().beforeFindOne({}, ctx);
       const b = await new HookB().beforeFindOne({}, ctx);
-      expect(JSON.stringify(a)).not.toBe(JSON.stringify(b));
+
+      expect(a.where).toEqual(Where.in<Pet>('shelterId', ['s1']));
+      expect(b.where).toEqual(Where.in<Pet>('shelterId', ['s2']));
+    });
+
+    it('does not mutate the resolved array into the clause by reference', async () => {
+      const resolved = ['s1'];
+      const Hook = TenantScopeHook.for<Pet>(PetEntity, {
+        tenantKey: 'shelterId',
+        resolve: () => resolved,
+      });
+      const ctx = fakeCtx({ actor: { id: 'u1', type: 'user' } });
+      const result = await new Hook().beforeFindOne({}, ctx);
+
+      resolved.push('s2');
+      expect(result.where).toEqual(Where.in<Pet>('shelterId', ['s1']));
     });
   });
 });
