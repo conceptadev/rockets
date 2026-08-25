@@ -7,6 +7,23 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Added
 
+- **`op.sse()` — Server-Sent Events on `operationResource` (issue #52,
+  v1).** A new builder alongside `op.read`/`op.write`/`op.delete`: same
+  resource, same auth/`public`/`acl`, same query-param validation, but
+  the handler returns an `Observable<MessageEvent>` and there is no
+  `output` to declare — the response body IS the stream. One
+  `responseMode` seam in the generated controller applies Nest's native
+  `@Sse()` instead of `@Get()` and skips the JSON output-DTO step;
+  everything upstream (guards, ACL, input validation) is the exact same
+  pipeline every other operation runs, proven by an e2e asserting a
+  `401` on an unauthenticated request never opens the stream. Neither
+  `output` nor `transactional` is exposed on this builder — a
+  never-completing connection is not something to hold a database
+  transaction open across. HTTP Range/partial-content support (the rest
+  of issue #52) needs genuinely new plumbing with no precedent in this
+  codebase and is a deliberate follow-up, not part of this PR. See
+  `CONFIGURATION.md` §6c.
+
 - **`strictInput` on zodResource body operations (issue #79).** Opt-in
   per-op flag that rejects unknown **top-level** JSON keys with `400`
   naming the offending keys, instead of the default silent stripping

@@ -32,6 +32,7 @@ import {
   Query,
   Req,
   Res,
+  Sse,
   Type,
 } from '@nestjs/common';
 import { ContextIdFactory, ModuleRef } from '@nestjs/core';
@@ -592,7 +593,10 @@ function attachOperationMethod(
   aclDecorators: readonly MethodDecorator[] | undefined,
 ): void {
   const methodName = operation.key;
-  const http = METHOD_DECORATOR[operation.method];
+  const isSse = operation.responseMode === 'sse';
+  const routeDecorator = isSse
+    ? Sse(operation.path)
+    : METHOD_DECORATOR[operation.method](operation.path);
 
   const label = `${controllerName}.${methodName}`;
 
@@ -669,7 +673,7 @@ function attachOperationMethod(
   const decorators: Array<
     ClassDecorator | MethodDecorator | PropertyDecorator
   > = [
-    http(operation.path),
+    routeDecorator,
     HttpCode(operation.status),
     ApiOperation({
       summary: operation.summary ?? methodName,
@@ -685,7 +689,18 @@ function attachOperationMethod(
   if (operation.transactional === true) {
     decorators.push(Transactional());
   }
-  if (operation.output !== false) {
+  if (isSse) {
+    // Framing (the event stream itself) is not representable in OpenAPI
+    // — documented as a stated non-goal, not a silent gap.
+    decorators.push(
+      ApiResponse({
+        status: operation.status,
+        description:
+          'Server-Sent Events stream (text/event-stream) — not ' +
+          'represented in the OpenAPI schema.',
+      }),
+    );
+  } else if (operation.output !== false) {
     decorators.push(
       ApiResponse({ status: operation.status, type: operation.output }),
     );

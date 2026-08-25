@@ -2293,7 +2293,7 @@
         "name": "CompiledOperationDescriptor",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface CompiledOperationDescriptor {\n    readonly key: string;\n    readonly method: OperationHttpMethod;\n    readonly path: string;\n    readonly status: number;\n    readonly summary?: string;\n    readonly public?: boolean;\n    readonly acl?: OperationAclConfig;\n    readonly transactional?: boolean;\n    readonly inputDto?: Type<object>;\n    readonly output: Type<object> | false;\n    readonly handler: OperationHandlerRef;\n    readonly decorators?: readonly MethodDecorator[];\n}"
+        "signature": "export interface CompiledOperationDescriptor {\n    readonly key: string;\n    readonly method: OperationHttpMethod;\n    readonly path: string;\n    readonly status: number;\n    readonly summary?: string;\n    readonly public?: boolean;\n    readonly acl?: OperationAclConfig;\n    readonly transactional?: boolean;\n    readonly inputDto?: Type<object>;\n    readonly output: Type<object> | false;\n    readonly handler: OperationHandlerRef;\n    readonly decorators?: readonly MethodDecorator[];\n    readonly responseMode?: 'sse';\n}"
       },
       {
         "name": "ControllerScan",
@@ -3415,7 +3415,7 @@
         "name": "BoundBuilders",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface BoundBuilders<TBase extends string, TParamsSchema extends z.ZodObject | undefined = undefined> {\n    read<TInput extends z.ZodObject | undefined = undefined, TOutput extends OperationOutputConfig = OperationOutputSchema, const TOpPath extends string = ''>(config: ReadBuilderConfig<TInput, TOutput, EffectiveParams<TBase, TOpPath, TParamsSchema>, TOpPath>): PendingOperation<InferIn<TInput>, InferOut<TOutput>, EffectiveParams<TBase, TOpPath, TParamsSchema>>;\n    write<TInput extends z.ZodObject | undefined = undefined, TOutput extends OperationOutputConfig = OperationOutputSchema, const TOpPath extends string = ''>(config: WriteBuilderConfig<TInput, TOutput, EffectiveParams<TBase, TOpPath, TParamsSchema>, TOpPath>): PendingOperation<InferIn<TInput>, InferOut<TOutput>, EffectiveParams<TBase, TOpPath, TParamsSchema>>;\n    delete<TInput extends z.ZodObject | undefined = undefined, TOutput extends OperationOutputConfig = OperationOutputSchema, const TOpPath extends string = ''>(config: DeleteBuilderConfig<TInput, TOutput, EffectiveParams<TBase, TOpPath, TParamsSchema>, TOpPath>): PendingOperation<InferIn<TInput>, InferOut<TOutput>, EffectiveParams<TBase, TOpPath, TParamsSchema>>;\n}"
+        "signature": "export interface BoundBuilders<TBase extends string, TParamsSchema extends z.ZodObject | undefined = undefined> {\n    read<TInput extends z.ZodObject | undefined = undefined, TOutput extends OperationOutputConfig = OperationOutputSchema, const TOpPath extends string = ''>(config: ReadBuilderConfig<TInput, TOutput, EffectiveParams<TBase, TOpPath, TParamsSchema>, TOpPath>): PendingOperation<InferIn<TInput>, InferOut<TOutput>, EffectiveParams<TBase, TOpPath, TParamsSchema>>;\n    write<TInput extends z.ZodObject | undefined = undefined, TOutput extends OperationOutputConfig = OperationOutputSchema, const TOpPath extends string = ''>(config: WriteBuilderConfig<TInput, TOutput, EffectiveParams<TBase, TOpPath, TParamsSchema>, TOpPath>): PendingOperation<InferIn<TInput>, InferOut<TOutput>, EffectiveParams<TBase, TOpPath, TParamsSchema>>;\n    delete<TInput extends z.ZodObject | undefined = undefined, TOutput extends OperationOutputConfig = OperationOutputSchema, const TOpPath extends string = ''>(config: DeleteBuilderConfig<TInput, TOutput, EffectiveParams<TBase, TOpPath, TParamsSchema>, TOpPath>): PendingOperation<InferIn<TInput>, InferOut<TOutput>, EffectiveParams<TBase, TOpPath, TParamsSchema>>;\n    sse<TInput extends z.ZodObject | undefined = undefined, const TOpPath extends string = ''>(config: SseBuilderConfig<TInput, EffectiveParams<TBase, TOpPath, TParamsSchema>, TOpPath>): PendingOperation<InferIn<TInput>, Observable<MessageEvent>, EffectiveParams<TBase, TOpPath, TParamsSchema>>;\n}"
       },
       {
         "name": "DeleteBuilderConfig",
@@ -3500,6 +3500,12 @@
         "kind": "type",
         "runtime": false,
         "signature": "export type SchemaPersistenceRow<S extends z.ZodObject> = PersistenceRow<WireRow<S>>;"
+      },
+      {
+        "name": "SseBuilderConfig",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface SseBuilderConfig<TInput extends z.ZodObject | undefined = undefined, TParams extends object = object, TOpPath extends string = ''> {\n    readonly path?: TOpPath;\n    readonly summary?: string;\n    readonly public?: boolean;\n    readonly acl?: OperationAclConfig;\n    readonly input?: TInput;\n    readonly handler: OperationHandlerRef<InferIn<TInput>, Observable<MessageEvent>, TParams>;\n    readonly decorators?: readonly MethodDecorator[];\n}"
       },
       {
         "name": "UnwrappedField",
@@ -4500,6 +4506,7 @@
           "OperationResourceInput",
           "PendingOperation",
           "ReadBuilderConfig",
+          "SseBuilderConfig",
           "WriteBuilderConfig",
           "ZodOperationResource"
         ]
@@ -4533,7 +4540,7 @@
       {
         "name": "CompiledOperationDescriptor",
         "kind": "interface",
-        "signature": "export interface CompiledOperationDescriptor {\n    readonly key: string;\n    readonly method: OperationHttpMethod;\n    readonly path: string;\n    readonly status: number;\n    readonly summary?: string;\n    readonly public?: boolean;\n    readonly acl?: OperationAclConfig;\n    readonly transactional?: boolean;\n    readonly inputDto?: Type<object>;\n    readonly output: Type<object> | false;\n    readonly handler: OperationHandlerRef;\n    readonly decorators?: readonly MethodDecorator[];\n}",
+        "signature": "export interface CompiledOperationDescriptor {\n    readonly key: string;\n    readonly method: OperationHttpMethod;\n    readonly path: string;\n    readonly status: number;\n    readonly summary?: string;\n    readonly public?: boolean;\n    readonly acl?: OperationAclConfig;\n    readonly transactional?: boolean;\n    readonly inputDto?: Type<object>;\n    readonly output: Type<object> | false;\n    readonly handler: OperationHandlerRef;\n    readonly decorators?: readonly MethodDecorator[];\n    readonly responseMode?: 'sse';\n}",
         "referencedBy": [
           "OperationResourceInput",
           "ZodOperationResource"
@@ -4666,6 +4673,7 @@
           "BoundBuilders",
           "DeleteBuilderConfig",
           "ReadBuilderConfig",
+          "SseBuilderConfig",
           "WriteBuilderConfig"
         ]
       },
@@ -4742,6 +4750,7 @@
           "OperationResourceInput",
           "PendingOperation",
           "ReadBuilderConfig",
+          "SseBuilderConfig",
           "WriteBuilderConfig",
           "ZodDeleteOperationConfig",
           "ZodOperationConfig",
@@ -4761,6 +4770,7 @@
           "OperationResourceInput",
           "PendingOperation",
           "ReadBuilderConfig",
+          "SseBuilderConfig",
           "WriteBuilderConfig",
           "ZodOperationResource"
         ]
@@ -4774,6 +4784,7 @@
           "OperationResourceInput",
           "PendingOperation",
           "ReadBuilderConfig",
+          "SseBuilderConfig",
           "WriteBuilderConfig",
           "ZodOperationResource"
         ]
@@ -4787,6 +4798,7 @@
           "OperationResourceInput",
           "PendingOperation",
           "ReadBuilderConfig",
+          "SseBuilderConfig",
           "WriteBuilderConfig",
           "ZodOperationResource"
         ]
@@ -4800,6 +4812,7 @@
           "OperationResourceInput",
           "PendingOperation",
           "ReadBuilderConfig",
+          "SseBuilderConfig",
           "WriteBuilderConfig",
           "ZodOperationResource"
         ]
@@ -4813,6 +4826,7 @@
           "OperationResourceInput",
           "PendingOperation",
           "ReadBuilderConfig",
+          "SseBuilderConfig",
           "WriteBuilderConfig",
           "ZodOperationResource"
         ]
@@ -4863,6 +4877,7 @@
           "OperationResourceInput",
           "PendingOperation",
           "ReadBuilderConfig",
+          "SseBuilderConfig",
           "WriteBuilderConfig",
           "ZodOperationResource"
         ]
@@ -4893,6 +4908,7 @@
           "OperationResourceInput",
           "PendingOperation",
           "ReadBuilderConfig",
+          "SseBuilderConfig",
           "WriteBuilderConfig",
           "ZodOperationResource"
         ]
@@ -4937,7 +4953,7 @@
       {
         "name": "PendingBuilder",
         "kind": "type",
-        "signature": "export type PendingBuilder = 'read' | 'write' | 'delete';",
+        "signature": "export type PendingBuilder = 'read' | 'write' | 'delete' | 'sse';",
         "referencedBy": [
           "OperationRecord",
           "PendingOperation"
@@ -4979,6 +4995,7 @@
           "OperationResourceInput",
           "PendingOperation",
           "ReadBuilderConfig",
+          "SseBuilderConfig",
           "WriteBuilderConfig",
           "ZodDeleteOperationConfig",
           "ZodOperationConfig",

@@ -538,11 +538,81 @@ casing together — `foo-bar` and
 `fooBar` both yield `FooBar`. One compiled DTO reused across several
 operations is fine: the check compares class identity, not names.
 
-Cursor, SSE, binary, raw JSON, idempotency, and external-client scaffolds are
-follow-ups on issue #43.
+Cursor, binary, raw JSON, idempotency, and external-client scaffolds are
+follow-ups on issue #43. SSE now has a first-class builder (§6c below);
+Range/partial content is issue #52's still-open half.
 
 Lower-level escape hatch: `defineOperationResource({ path, operations: {…} })`
 with precompiled DTO classes.
+
+---
+
+## 6c. `op.sse()` — Server-Sent Events (issue #52, v1)
+
+A Server-Sent-Events operation looks like any other `operationResource`
+op — same resource, same auth/`public`/`acl`, same query-param
+validation — except the handler returns an `Observable<MessageEvent>`
+instead of a JSON value, and there is no `output` to declare:
+
+```ts
+import { operationResource } from '@concepta/rockets-core/zod';
+import { Observable } from 'rxjs';
+import type { MessageEvent } from '@nestjs/common';
+import { z } from 'zod';
+
+export const notifications = operationResource({
+  path: 'notifications',
+  operations: (op) => ({
+    stream: op.sse({
+      input: z.object({ channel: z.string() }),
+      handler: (ctx): Observable<MessageEvent> =>
+        new Observable((subscriber) => {
+          const unsubscribe = subscribeToChannel(ctx.input.channel, (msg) =>
+            subscriber.next({ data: msg }),
+          );
+          return unsubscribe; // teardown when the client disconnects
+        }),
+    }),
+  }),
+});
+```
+
+### What's shared with every other operation, and what's not
+
+One `responseMode` seam in the generated controller
+(`build-operation-controller.ts`) is the entire difference: it applies
+Nest's native `@Sse()` instead of `@Get()` and skips the JSON
+output-DTO step. Everything upstream — guards, `public`/`acl`, query
+validation, the exceptions filter for a REJECTED request — is the exact
+same pipeline every other operation goes through, because it all runs
+**before** the stream starts. A `401`/`400`/`403` on an SSE route looks
+like a normal JSON error response; only a request that gets past all of
+that opens the stream.
+
+Two things `op.sse()` does not expose, deliberately: `output` (the
+response body IS the event stream, never a whitelisted JSON value) and
+`transactional` (holding a database transaction open across a
+connection that may run indefinitely is not something to make one flag
+away). The generated route is always method `GET` — the only method a
+browser's native `EventSource` can issue.
+
+### Error after the stream has started
+
+Once the first event is written, headers are already sent — a later
+handler error can no longer become an HTTP status code. Let the
+Observable **error**; Nest ends the connection. Design handlers so a
+mid-stream failure is something the client can detect (a reconnect, a
+final sentinel event) rather than something the server can still turn
+into a status code.
+
+### Not in this PR: Range / partial content
+
+Issue #52 also asks for HTTP Range support (byte-range media/file
+responses, `206 Partial Content`). It needs new plumbing with no
+existing precedent here — manual `Content-Range`/`Accept-Ranges`
+handling, non-passthrough `@Res()`, `416` on an invalid range — and
+deserves its own review surface rather than riding in behind SSE.
+Tracked as a follow-up.
 
 ---
 
