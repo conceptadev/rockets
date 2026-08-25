@@ -346,3 +346,30 @@ export {
   USER_MODULE_USER_ENTITY_KEY,
   ROCKETS_CORE_SETTINGS_TOKEN,
 } from './rockets-core.constants';
+
+// Job dispatch port — dedupe, lease, at-least-once (issue #53)
+export {
+  JOB_DISPATCH_SERVICE_TOKEN,
+  type ClaimedJob,
+  type EnqueueResult,
+  type JobDispatchOptions,
+  type JobDispatchServiceInterface,
+  type JobFailOptions,
+} from './domain/interfaces/job-dispatch.interface';
+export { InProcessJobDispatchService } from './infrastructure/jobs/in-process-job-dispatch.service';
+
+// Idempotency keys + webhook signature verification (issue #59)
+export {
+  IDEMPOTENCY_STORE_TOKEN,
+  type IdempotencyStoreInterface,
+  type StoredIdempotentResponse,
+} from './domain/interfaces/idempotency.interface';
+export { InMemoryIdempotencyStore } from './infrastructure/idempotency/in-memory-idempotency-store.service';
+export { hashIdempotentRequest } from './infrastructure/idempotency/hash-idempotent-request';
+export {
+  createWebhookSignatureVerifier,
+  verifyWebhookSignature,
+  type VerifyWebhookSignatureOptions,
+  type WebhookSignatureVerifier,
+  type WebhookSignatureVerifierOptions,
+} from './infrastructure/webhooks/verify-webhook-signature';

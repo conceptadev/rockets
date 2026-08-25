@@ -2290,6 +2290,12 @@
         "signature": "export interface ByIdInterface<T = ReferenceId, U = ReferenceIdInterface> {\n    byId: (id: T) => Promise<U | null>;\n}"
       },
       {
+        "name": "ClaimedJob",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface ClaimedJob<T = unknown> {\n    readonly jobId: string;\n    readonly name: string;\n    readonly payload: T;\n    readonly attempt: number;\n}"
+      },
+      {
         "name": "CompiledOperationDescriptor",
         "kind": "interface",
         "runtime": false,
@@ -2362,6 +2368,12 @@
         "signature": "ERROR_MESSAGE_FALLBACK = \"Internal Server Error\""
       },
       {
+        "name": "EnqueueResult",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface EnqueueResult {\n    readonly jobId: string;\n    readonly deduped: boolean;\n}"
+      },
+      {
         "name": "EntityConstructor",
         "kind": "type",
         "runtime": false,
@@ -2428,6 +2440,30 @@
         "signature": "export declare class GetUserMetadataQuery {\n    readonly userId: string;\n    constructor(userId: string);\n}"
       },
       {
+        "name": "IDEMPOTENCY_STORE_TOKEN",
+        "kind": "value",
+        "runtime": true,
+        "signature": "IDEMPOTENCY_STORE_TOKEN: unique symbol"
+      },
+      {
+        "name": "IdempotencyStoreInterface",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface IdempotencyStoreInterface {\n    get(key: string): Promise<StoredIdempotentResponse | undefined>;\n    set(key: string, response: StoredIdempotentResponse, ttlMs: number): Promise<void>;\n}"
+      },
+      {
+        "name": "InMemoryIdempotencyStore",
+        "kind": "class",
+        "runtime": true,
+        "signature": "export declare class InMemoryIdempotencyStore implements IdempotencyStoreInterface {\n    private readonly entries;\n    get(key: string): Promise<StoredIdempotentResponse | undefined>;\n    set(key: string, response: StoredIdempotentResponse, ttlMs: number): Promise<void>;\n}"
+      },
+      {
+        "name": "InProcessJobDispatchService",
+        "kind": "class",
+        "runtime": true,
+        "signature": "export declare class InProcessJobDispatchService implements JobDispatchServiceInterface {\n    private readonly jobs;\n    private readonly dedupeIndex;\n    enqueue(name: string, payload: unknown, opts?: JobDispatchOptions): Promise<EnqueueResult>;\n    claim(names?: readonly string[]): Promise<ClaimedJob | undefined>;\n    heartbeat(jobId: string, leaseMs?: number): Promise<void>;\n    complete(jobId: string): Promise<void>;\n    fail(jobId: string, opts?: JobFailOptions): Promise<void>;\n    private activeJobForDedupeKey;\n    private releaseDedupeKey;\n    private requireJob;\n    private requireClaimed;\n}"
+      },
+      {
         "name": "InjectCrudAdapter",
         "kind": "function",
         "runtime": true,
@@ -2438,6 +2474,30 @@
         "kind": "function",
         "runtime": true,
         "signature": "export declare function InjectDynamicRepository(keyOrClass: string | Type<PlainLiteralObject>): PropertyDecorator & ParameterDecorator;"
+      },
+      {
+        "name": "JOB_DISPATCH_SERVICE_TOKEN",
+        "kind": "value",
+        "runtime": true,
+        "signature": "JOB_DISPATCH_SERVICE_TOKEN: unique symbol"
+      },
+      {
+        "name": "JobDispatchOptions",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface JobDispatchOptions {\n    readonly dedupeKey?: string;\n    readonly leaseMs?: number;\n}"
+      },
+      {
+        "name": "JobDispatchServiceInterface",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface JobDispatchServiceInterface {\n    enqueue(name: string, payload: unknown, opts?: JobDispatchOptions): Promise<EnqueueResult>;\n    claim(names?: readonly string[]): Promise<ClaimedJob | undefined>;\n    heartbeat(jobId: string, leaseMs?: number): Promise<void>;\n    complete(jobId: string): Promise<void>;\n    fail(jobId: string, opts?: JobFailOptions): Promise<void>;\n}"
+      },
+      {
+        "name": "JobFailOptions",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface JobFailOptions {\n    readonly retry?: boolean;\n}"
       },
       {
         "name": "ModuleResource",
@@ -2890,6 +2950,12 @@
         "signature": "export interface SchemaEntityCompilerOptions {\n    readonly name: string;\n    readonly table: string;\n}"
       },
       {
+        "name": "StoredIdempotentResponse",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface StoredIdempotentResponse {\n    readonly status: number;\n    readonly body: unknown;\n    readonly requestHash: string;\n}"
+      },
+      {
         "name": "SwaggerUiModule",
         "kind": "class",
         "runtime": true,
@@ -3010,6 +3076,24 @@
         "signature": "export declare class UserUpdateDto {\n    userMetadata?: Record<string, unknown>;\n}"
       },
       {
+        "name": "VerifyWebhookSignatureOptions",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface VerifyWebhookSignatureOptions {\n    readonly payload: Buffer | string;\n    readonly signature: string;\n    readonly secret: string | undefined;\n    readonly algorithm?: string;\n    readonly prefix?: string;\n}"
+      },
+      {
+        "name": "WebhookSignatureVerifier",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type WebhookSignatureVerifier = (payload: Buffer | string, signature: string) => boolean;"
+      },
+      {
+        "name": "WebhookSignatureVerifierOptions",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface WebhookSignatureVerifierOptions {\n    readonly secret: string | undefined;\n    readonly algorithm?: string;\n    readonly prefix?: string;\n}"
+      },
+      {
         "name": "Where",
         "kind": "class",
         "runtime": true,
@@ -3068,6 +3152,12 @@
         "kind": "function",
         "runtime": true,
         "signature": "export declare function createPaginatedDto<TResource>(resourceDto: Type<TResource>, className?: string): Type;"
+      },
+      {
+        "name": "createWebhookSignatureVerifier",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function createWebhookSignatureVerifier(options: WebhookSignatureVerifierOptions): WebhookSignatureVerifier;"
       },
       {
         "name": "defaultErrorSerializer",
@@ -3184,6 +3274,12 @@
         "signature": "export declare function getErrorDetails(error: unknown): ErrorDetails;"
       },
       {
+        "name": "hashIdempotentRequest",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function hashIdempotentRequest(value: unknown): string;"
+      },
+      {
         "name": "isCrudResource",
         "kind": "function",
         "runtime": true,
@@ -3260,6 +3356,12 @@
         "kind": "function",
         "runtime": true,
         "signature": "export declare function validateRegisteredRoutes(appOrRoutes: RouteInspectionTarget | readonly RegisteredRoute[]): void;"
+      },
+      {
+        "name": "verifyWebhookSignature",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function verifyWebhookSignature(options: VerifyWebhookSignatureOptions): boolean;"
       },
       {
         "name": "whitelistedFromDto",
