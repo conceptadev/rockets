@@ -538,11 +538,73 @@ casing together — `foo-bar` and
 `fooBar` both yield `FooBar`. One compiled DTO reused across several
 operations is fine: the check compares class identity, not names.
 
-Cursor, SSE, binary, raw JSON, idempotency, and external-client scaffolds are
-follow-ups on issue #43.
+Cursor, SSE, binary, raw JSON, and idempotency are follow-ups on issue #43.
+The OpenAPI contract-export scaffold below (§6b) is that follow-up's answer
+for external clients.
 
 Lower-level escape hatch: `defineOperationResource({ path, operations: {…} })`
 with precompiled DTO classes.
+
+---
+
+## 6b. Exporting a stable OpenAPI contract (issue #54)
+
+`SwaggerUiService` already builds one OpenAPI document from whatever CRUD
+zod resources and `operationResource` ops an app registers — the same
+document `swagger`/`swagger-ui` serves. The gap issue #54 closes is not
+generating that document; it is **pinning it**, so an unintended change to
+the wire contract fails CI instead of only showing up as a diff nobody
+reviewed.
+
+### The pattern
+
+A vitest e2e spec boots the app, builds the document exactly like the UI
+does, and either regenerates a committed `contract.json` (opt-in, via an
+env var) or diffs the fresh document against it byte-for-byte:
+
+```ts
+const document = SwaggerModule.createDocument(
+  app,
+  app.get(SwaggerUiService).builder().build(),
+);
+const generated = `${JSON.stringify(document, null, 2)}\n`;
+
+if (process.env.CONTRACT_UPDATE === '1') {
+  writeFileSync(contractPath, generated);
+} else {
+  expect(generated).toBe(readFileSync(contractPath, 'utf8'));
+}
+```
+
+`examples/sample-server-auth` ships the reference copy:
+`test/openapi-contract-export.e2e-spec.ts` writes/checks
+`examples/sample-server-auth/contract.json`. Regenerate it after an
+intentional API change:
+
+```bash
+CONTRACT_UPDATE=1 yarn sample-auth:contract:export   # writes contract.json
+yarn sample-auth:contract:check                      # verifies it's pinned
+```
+
+### Why this, not a typed client
+
+Issue #54 asked for one v1 deliverable, not both a contract artifact and a
+generated client. A `contract.json` export needed no new dependency — the
+document-building and structural-validation logic
+(`test/openapi-contract.e2e-spec.ts`, `@apidevtools/swagger-parser`)
+already existed and were already proven; the only new work was pinning the
+artifact and wiring the drift check. A typed client would mean adopting a
+new codegen tool with no existing precedent in this repo — a bigger, riskier
+v1 for an issue whose own acceptance criteria says not to boil the ocean.
+Nothing here blocks adding one later against the same `contract.json`.
+
+### CI
+
+No new workflow step was needed: `release-readiness.yml` already runs
+`yarn samples:test:e2e` (→ `sample-auth:test:e2e`) on every pull request,
+which picks up the new spec file automatically — a required status check
+(`release-gates`) fails if `contract.json` drifts from what the app
+actually serves.
 
 ---
 

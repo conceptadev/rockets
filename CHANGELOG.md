@@ -7,6 +7,16 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Added
 
+- **Pinned OpenAPI contract export (issue #54).** `examples/sample-server-auth`
+  now commits `contract.json` — the exact OpenAPI document `SwaggerUiService`
+  builds — and a new e2e spec (`test/openapi-contract-export.e2e-spec.ts`)
+  fails CI the moment that document drifts from the committed copy, so an
+  unintended API change is caught instead of shipping silently. Regenerate
+  after an intentional change with `CONTRACT_UPDATE=1 yarn
+  sample-auth:contract:export`, verify with `yarn sample-auth:contract:check`.
+  No new CI workflow was needed — the existing `release-readiness.yml` gate
+  already runs this app's e2e suite on every PR. See `CONFIGURATION.md` §6b.
+
 - **`strictInput` on zodResource body operations (issue #79).** Opt-in
   per-op flag that rejects unknown **top-level** JSON keys with `400`
   naming the offending keys, instead of the default silent stripping

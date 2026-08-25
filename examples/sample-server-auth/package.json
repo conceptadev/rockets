@@ -9,7 +9,9 @@
     "build": "cd ../.. && ./node_modules/.bin/tsc -p examples/sample-server-auth/tsconfig.json",
     "lint": "cd ../.. && eslint \"examples/sample-server-auth/{src,test}/**/*.{ts,js}\"",
     "pretest:e2e": "cd ../.. && yarn workspace @concepta/rockets build && yarn workspace @concepta/rockets-auth build && ./node_modules/.bin/tsc -p examples/sample-server-auth/tsconfig.json",
-    "test:e2e": "vitest run --config vitest.e2e.config.mts"
+    "test:e2e": "vitest run --config vitest.e2e.config.mts",
+    "contract:export": "CONTRACT_UPDATE=1 vitest run --config vitest.e2e.config.mts test/openapi-contract-export.e2e-spec.ts",
+    "contract:check": "vitest run --config vitest.e2e.config.mts test/openapi-contract-export.e2e-spec.ts"
   },
   "dependencies": {
     "@concepta/nestjs-access-control": "8.0.0-alpha.8",

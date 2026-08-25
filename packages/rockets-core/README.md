@@ -925,6 +925,24 @@ declared; a recognition-only policy polices nothing. Routes removed
 conditionally (`disableController`) live in the same options object as
 the policy — keep the two consistent per environment.
 
+### Export a stable OpenAPI contract
+
+`SwaggerUiService` builds the same OpenAPI document your app's Swagger UI
+serves. Pin it as a committed artifact so an unintended change to the wire
+contract fails CI instead of drifting unnoticed:
+
+```typescript
+const document = SwaggerModule.createDocument(
+  app,
+  app.get(SwaggerUiService).builder().build(),
+);
+```
+
+`examples/sample-server-auth` ships the reference version — one e2e spec
+that regenerates or diffs `contract.json` against that document, gated by
+the existing CI e2e run for that app. See `CONFIGURATION.md` §6b for the
+full pattern and the `CONTRACT_UPDATE=1` regeneration workflow.
+
 ---
 
 ## 4. Reference
