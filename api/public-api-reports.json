@@ -163,7 +163,7 @@
         "name": "CrudResource",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface CrudResource<E extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Crud;\n    readonly acl: ResourceAclPlan;\n    readonly core: RocketsResourceConfig;\n    readonly persistence: {\n        readonly module?: RepositoryModuleInterface;\n        readonly entity: RepositoryProviderOptions<E>;\n    };\n    readonly meta: {\n        readonly key: string;\n        readonly entityClass: new () => E;\n        readonly relations: ReadonlyArray<ResourceRelationEntry<E>>;\n    };\n    readonly subResources?: ReadonlyArray<CrudResource<PlainLiteralObject>>;\n}"
+        "signature": "export interface CrudResource<E extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Crud;\n    readonly acl: ResourceAclPlan;\n    readonly core: RocketsResourceConfig;\n    readonly persistence: {\n        readonly module?: RepositoryModuleInterface;\n        readonly entity: RepositoryProviderOptions<E>;\n    };\n    readonly meta: {\n        readonly key: string;\n        readonly entityClass: new () => E;\n        readonly relations: ReadonlyArray<ResourceRelationEntry<E>>;\n        readonly hooks: ReadonlyArray<Type>;\n    };\n    readonly subResources?: ReadonlyArray<CrudResource<PlainLiteralObject>>;\n}"
       },
       {
         "name": "Ctx",
@@ -2290,6 +2290,12 @@
         "signature": "export interface ByIdInterface<T = ReferenceId, U = ReferenceIdInterface> {\n    byId: (id: T) => Promise<U | null>;\n}"
       },
       {
+        "name": "ClaimedJob",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface ClaimedJob<T = unknown> {\n    readonly jobId: string;\n    readonly name: string;\n    readonly payload: T;\n    readonly attempt: number;\n}"
+      },
+      {
         "name": "CompiledOperationDescriptor",
         "kind": "interface",
         "runtime": false,
@@ -2335,7 +2341,7 @@
         "name": "CrudResource",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface CrudResource<E extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Crud;\n    readonly acl: ResourceAclPlan;\n    readonly core: RocketsResourceConfig;\n    readonly persistence: {\n        readonly module?: RepositoryModuleInterface;\n        readonly entity: RepositoryProviderOptions<E>;\n    };\n    readonly meta: {\n        readonly key: string;\n        readonly entityClass: new () => E;\n        readonly relations: ReadonlyArray<ResourceRelationEntry<E>>;\n    };\n    readonly subResources?: ReadonlyArray<CrudResource<PlainLiteralObject>>;\n}"
+        "signature": "export interface CrudResource<E extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Crud;\n    readonly acl: ResourceAclPlan;\n    readonly core: RocketsResourceConfig;\n    readonly persistence: {\n        readonly module?: RepositoryModuleInterface;\n        readonly entity: RepositoryProviderOptions<E>;\n    };\n    readonly meta: {\n        readonly key: string;\n        readonly entityClass: new () => E;\n        readonly relations: ReadonlyArray<ResourceRelationEntry<E>>;\n        readonly hooks: ReadonlyArray<Type>;\n    };\n    readonly subResources?: ReadonlyArray<CrudResource<PlainLiteralObject>>;\n}"
       },
       {
         "name": "DEFAULT_OWNER_COLUMN",
@@ -2362,6 +2368,12 @@
         "signature": "ERROR_MESSAGE_FALLBACK = \"Internal Server Error\""
       },
       {
+        "name": "EnqueueResult",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface EnqueueResult {\n    readonly jobId: string;\n    readonly deduped: boolean;\n}"
+      },
+      {
         "name": "EntityConstructor",
         "kind": "type",
         "runtime": false,
@@ -2380,6 +2392,12 @@
         "signature": "export declare abstract class EntityHookBase<E extends PlainLiteralObject> {\n    abstract beforeFindOne(options: RepositoryFindOneOptions<E>, ctx?: EntityHookContext): RepositoryFindOneOptions<E> | Promise<RepositoryFindOneOptions<E>>;\n    abstract afterFindOne(entity: E | null, ctx?: EntityHookContext): (E | null) | Promise<E | null>;\n    abstract beforeFindAndCount(options: RepositoryFindOptions<E>, ctx?: EntityHookContext): RepositoryFindOptions<E> | Promise<RepositoryFindOptions<E>>;\n    abstract afterFindAndCount(result: {\n        data: E[];\n        total: number;\n    }, ctx?: EntityHookContext): {\n        data: E[];\n        total: number;\n    } | Promise<{\n        data: E[];\n        total: number;\n    }>;\n    abstract beforeCreate(payload: E, ctx?: EntityHookContext): E | Promise<E>;\n    abstract afterCreate(entity: E, ctx?: EntityHookContext): E | Promise<E>;\n    abstract beforeUpdate(payload: E, ctx?: EntityHookContext): E | Promise<E>;\n    abstract afterUpdate(entity: E, ctx?: EntityHookContext): E | Promise<E>;\n    abstract beforeDelete(entity: E, ctx?: EntityHookContext): E | Promise<E>;\n    abstract afterDelete(entity: E, ctx?: EntityHookContext): E | Promise<E>;\n    abstract beforeSoftDelete(entity: E, ctx?: EntityHookContext): E | Promise<E>;\n    abstract afterSoftDelete(entity: E, ctx?: EntityHookContext): E | Promise<E>;\n    abstract beforeRestore(entity: E, ctx?: EntityHookContext): E | Promise<E>;\n    abstract afterRestore(entity: E, ctx?: EntityHookContext): E | Promise<E>;\n}"
       },
       {
+        "name": "EntityHookBinding",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface EntityHookBinding {\n    readonly entity: Type<PlainLiteralObject>;\n    readonly entityKey: string;\n}"
+      },
+      {
         "name": "EntityHookContext",
         "kind": "type",
         "runtime": false,
@@ -2396,6 +2414,12 @@
         "kind": "type",
         "runtime": false,
         "signature": "export type EntityHookLifecycleKey = keyof typeof LIFECYCLE_DECORATORS;"
+      },
+      {
+        "name": "EntityHookOptions",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface EntityHookOptions<E extends PlainLiteralObject = PlainLiteralObject> {\n    readonly entity?: Type<E>;\n    readonly entityKey?: string;\n}"
       },
       {
         "name": "EntityHookTools",
@@ -2428,6 +2452,30 @@
         "signature": "export declare class GetUserMetadataQuery {\n    readonly userId: string;\n    constructor(userId: string);\n}"
       },
       {
+        "name": "IDEMPOTENCY_STORE_TOKEN",
+        "kind": "value",
+        "runtime": true,
+        "signature": "IDEMPOTENCY_STORE_TOKEN: unique symbol"
+      },
+      {
+        "name": "IdempotencyStoreInterface",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface IdempotencyStoreInterface {\n    get(key: string): Promise<StoredIdempotentResponse | undefined>;\n    set(key: string, response: StoredIdempotentResponse, ttlMs: number): Promise<void>;\n}"
+      },
+      {
+        "name": "InMemoryIdempotencyStore",
+        "kind": "class",
+        "runtime": true,
+        "signature": "export declare class InMemoryIdempotencyStore implements IdempotencyStoreInterface {\n    private readonly entries;\n    get(key: string): Promise<StoredIdempotentResponse | undefined>;\n    set(key: string, response: StoredIdempotentResponse, ttlMs: number): Promise<void>;\n}"
+      },
+      {
+        "name": "InProcessJobDispatchService",
+        "kind": "class",
+        "runtime": true,
+        "signature": "export declare class InProcessJobDispatchService implements JobDispatchServiceInterface {\n    private readonly jobs;\n    private readonly dedupeIndex;\n    enqueue(name: string, payload: unknown, opts?: JobDispatchOptions): Promise<EnqueueResult>;\n    claim(names?: readonly string[]): Promise<ClaimedJob | undefined>;\n    heartbeat(jobId: string, leaseMs?: number): Promise<void>;\n    complete(jobId: string): Promise<void>;\n    fail(jobId: string, opts?: JobFailOptions): Promise<void>;\n    private activeJobForDedupeKey;\n    private releaseDedupeKey;\n    private requireJob;\n    private requireClaimed;\n}"
+      },
+      {
         "name": "InjectCrudAdapter",
         "kind": "function",
         "runtime": true,
@@ -2438,6 +2486,30 @@
         "kind": "function",
         "runtime": true,
         "signature": "export declare function InjectDynamicRepository(keyOrClass: string | Type<PlainLiteralObject>): PropertyDecorator & ParameterDecorator;"
+      },
+      {
+        "name": "JOB_DISPATCH_SERVICE_TOKEN",
+        "kind": "value",
+        "runtime": true,
+        "signature": "JOB_DISPATCH_SERVICE_TOKEN: unique symbol"
+      },
+      {
+        "name": "JobDispatchOptions",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface JobDispatchOptions {\n    readonly dedupeKey?: string;\n    readonly leaseMs?: number;\n}"
+      },
+      {
+        "name": "JobDispatchServiceInterface",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface JobDispatchServiceInterface {\n    enqueue(name: string, payload: unknown, opts?: JobDispatchOptions): Promise<EnqueueResult>;\n    claim(names?: readonly string[]): Promise<ClaimedJob | undefined>;\n    heartbeat(jobId: string, leaseMs?: number): Promise<void>;\n    complete(jobId: string): Promise<void>;\n    fail(jobId: string, opts?: JobFailOptions): Promise<void>;\n}"
+      },
+      {
+        "name": "JobFailOptions",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface JobFailOptions {\n    readonly retry?: boolean;\n}"
       },
       {
         "name": "ModuleResource",
@@ -2890,6 +2962,12 @@
         "signature": "export interface SchemaEntityCompilerOptions {\n    readonly name: string;\n    readonly table: string;\n}"
       },
       {
+        "name": "StoredIdempotentResponse",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface StoredIdempotentResponse {\n    readonly status: number;\n    readonly body: unknown;\n    readonly requestHash: string;\n}"
+      },
+      {
         "name": "SwaggerUiModule",
         "kind": "class",
         "runtime": true,
@@ -2912,6 +2990,30 @@
         "kind": "interface",
         "runtime": false,
         "signature": "export interface SwaggerUiSettingsInterface {\n    path: string;\n    documentOptions?: SwaggerDocumentOptions;\n    customOptions?: SwaggerCustomOptions;\n    title?: string;\n    description?: string;\n    version?: string;\n    termsOfService?: string;\n    contact?: {\n        name: string;\n        url: string;\n        email: string;\n    };\n    license?: {\n        name: string;\n        url: string;\n    };\n    basePath?: string;\n}"
+      },
+      {
+        "name": "TenantIdsResolver",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type TenantIdsResolver = (actor: Actor) => readonly string[] | Promise<readonly string[]>;"
+      },
+      {
+        "name": "TenantScopeHook",
+        "kind": "class",
+        "runtime": true,
+        "signature": "export declare abstract class TenantScopeHook<E extends PlainLiteralObject> extends PassthroughEntityHookBase<E> {\n    protected abstract readonly tenantKey: keyof E & string;\n    protected abstract readonly resolveTenantIds: TenantIdsResolver;\n    beforeFindAndCount(options: RepositoryFindOptions<E>, ctx?: EntityHookContext): Promise<RepositoryFindOptions<E>>;\n    beforeFindOne(options: RepositoryFindOneOptions<E>, ctx?: EntityHookContext): Promise<RepositoryFindOneOptions<E>>;\n    static for<E extends PlainLiteralObject>(entity: Type<E>, options: TenantScopeOptions<E>): Type<TenantScopeHook<E>>;\n    private withTenantFilter;\n}"
+      },
+      {
+        "name": "TenantScopeOptions",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface TenantScopeOptions<E extends PlainLiteralObject> {\n    readonly tenantKey: keyof E & string;\n    readonly resolve: TenantIdsResolver;\n    readonly entityKey?: string;\n}"
+      },
+      {
+        "name": "TenantStampHook",
+        "kind": "class",
+        "runtime": true,
+        "signature": "export declare abstract class TenantStampHook<E extends PlainLiteralObject> extends PassthroughEntityHookBase<E> {\n    protected abstract readonly tenantKey: keyof E & string;\n    protected abstract readonly resolveTenantIds: TenantScopeOptions<E>['resolve'];\n    beforeCreate(payload: E, ctx?: EntityHookContext): Promise<E>;\n    beforeUpdate(payload: E, ctx?: EntityHookContext): Promise<E>;\n    static for<E extends PlainLiteralObject>(entity: Type<E>, options: TenantScopeOptions<E>): Type<TenantStampHook<E>>;\n    private enforceTenant;\n}"
       },
       {
         "name": "USER_METADATA_MODULE_ENTITY_KEY",
@@ -3010,6 +3112,24 @@
         "signature": "export declare class UserUpdateDto {\n    userMetadata?: Record<string, unknown>;\n}"
       },
       {
+        "name": "VerifyWebhookSignatureOptions",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface VerifyWebhookSignatureOptions {\n    readonly payload: Buffer | string;\n    readonly signature: string;\n    readonly secret: string | undefined;\n    readonly algorithm?: string;\n    readonly prefix?: string;\n}"
+      },
+      {
+        "name": "WebhookSignatureVerifier",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type WebhookSignatureVerifier = (payload: Buffer | string, signature: string) => boolean;"
+      },
+      {
+        "name": "WebhookSignatureVerifierOptions",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface WebhookSignatureVerifierOptions {\n    readonly secret: string | undefined;\n    readonly algorithm?: string;\n    readonly prefix?: string;\n}"
+      },
+      {
         "name": "Where",
         "kind": "class",
         "runtime": true,
@@ -3068,6 +3188,12 @@
         "kind": "function",
         "runtime": true,
         "signature": "export declare function createPaginatedDto<TResource>(resourceDto: Type<TResource>, className?: string): Type;"
+      },
+      {
+        "name": "createWebhookSignatureVerifier",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function createWebhookSignatureVerifier(options: WebhookSignatureVerifierOptions): WebhookSignatureVerifier;"
       },
       {
         "name": "defaultErrorSerializer",
@@ -3178,10 +3304,22 @@
         "signature": "export declare function getDynamicRepositoryToken(key: string): string;"
       },
       {
+        "name": "getEntityHookBinding",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function getEntityHookBinding(hook: Type<PlainLiteralObject> | Function): EntityHookBinding | undefined;"
+      },
+      {
         "name": "getErrorDetails",
         "kind": "function",
         "runtime": true,
         "signature": "export declare function getErrorDetails(error: unknown): ErrorDetails;"
+      },
+      {
+        "name": "hashIdempotentRequest",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function hashIdempotentRequest(value: unknown): string;"
       },
       {
         "name": "isCrudResource",
@@ -3260,6 +3398,12 @@
         "kind": "function",
         "runtime": true,
         "signature": "export declare function validateRegisteredRoutes(appOrRoutes: RouteInspectionTarget | readonly RegisteredRoute[]): void;"
+      },
+      {
+        "name": "verifyWebhookSignature",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function verifyWebhookSignature(options: VerifyWebhookSignatureOptions): boolean;"
       },
       {
         "name": "whitelistedFromDto",
@@ -4383,14 +4527,6 @@
         ]
       },
       {
-        "name": "EntityHookOptions",
-        "kind": "interface",
-        "signature": "export interface EntityHookOptions<E extends PlainLiteralObject = PlainLiteralObject> {\n    readonly entity?: Type<E>;\n}",
-        "referencedBy": [
-          "EntityHook"
-        ]
-      },
-      {
         "name": "ModuleResourceEntityEntryInput",
         "kind": "interface",
         "signature": "export interface ModuleResourceEntityEntryInput {\n    readonly key?: string;\n    readonly entity: Type<PlainLiteralObject>;\n    readonly repository?: RepositoryModuleInterface;\n    readonly collection?: string;\n}",
@@ -4550,7 +4686,7 @@
       {
         "name": "CrudResource",
         "kind": "interface",
-        "signature": "export interface CrudResource<E extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Crud;\n    readonly acl: ResourceAclPlan;\n    readonly core: RocketsResourceConfig;\n    readonly persistence: {\n        readonly module?: RepositoryModuleInterface;\n        readonly entity: RepositoryProviderOptions<E>;\n    };\n    readonly meta: {\n        readonly key: string;\n        readonly entityClass: new () => E;\n        readonly relations: ReadonlyArray<ResourceRelationEntry<E>>;\n    };\n    readonly subResources?: ReadonlyArray<CrudResource<PlainLiteralObject>>;\n}",
+        "signature": "export interface CrudResource<E extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Crud;\n    readonly acl: ResourceAclPlan;\n    readonly core: RocketsResourceConfig;\n    readonly persistence: {\n        readonly module?: RepositoryModuleInterface;\n        readonly entity: RepositoryProviderOptions<E>;\n    };\n    readonly meta: {\n        readonly key: string;\n        readonly entityClass: new () => E;\n        readonly relations: ReadonlyArray<ResourceRelationEntry<E>>;\n        readonly hooks: ReadonlyArray<Type>;\n    };\n    readonly subResources?: ReadonlyArray<CrudResource<PlainLiteralObject>>;\n}",
         "referencedBy": [
           "zodResource"
         ]

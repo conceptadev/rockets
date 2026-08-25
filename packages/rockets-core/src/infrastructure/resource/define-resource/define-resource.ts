@@ -46,6 +46,7 @@ import {
   withAclDecorators,
 } from './build-acl';
 import { deriveEntityKey } from '../../../common';
+import type { InternalOperationOverride } from './internal-operation.types';
 
 type CrudDecorator = ReturnType<typeof applyDecorators>;
 
@@ -286,11 +287,40 @@ export function defineResource<E extends PlainLiteralObject>(
       key,
       entityClass: entity,
       relations: relations ?? [],
+      hooks: collectResourceHooks(hooks, operations, operationOverrides),
     },
     ...(subResourceBundles.length ? { subResources: subResourceBundles } : {}),
   };
 
   return bundle;
+}
+
+/**
+ * Every hook class this resource wires, de-duplicated: the resource-level
+ * `hooks` (registered as providers AND applied as a class-level
+ * `@UseHooks`) plus each `operations[op].hooks` override (applied as a
+ * method-level `@UseHooks`).
+ *
+ * Collected here rather than recovered from `core.providers` at plan time
+ * for two reasons: per-operation hooks never reach `mergeProviders`, and a
+ * provider list cannot be told apart from CQRS handlers and consumer
+ * providers without guessing. Sub-resources need no special case —
+ * `materialiseSubResource` composes its hooks and calls `defineResource`,
+ * so the sub-bundle's own `meta.hooks` is populated by this same path.
+ */
+function collectResourceHooks(
+  resourceHooks: readonly Type[] | undefined,
+  operations: readonly ResourceOperationName[],
+  operationOverrides: Partial<
+    Record<ResourceOperationName, InternalOperationOverride>
+  >,
+): ReadonlyArray<Type> {
+  const seen = new Set<Type>();
+  for (const hook of resourceHooks ?? []) seen.add(hook);
+  for (const op of operations) {
+    for (const hook of operationOverrides[op]?.hooks ?? []) seen.add(hook);
+  }
+  return [...seen];
 }
 
 /**

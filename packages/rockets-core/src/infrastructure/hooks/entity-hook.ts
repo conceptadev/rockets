@@ -150,6 +150,64 @@ export interface EntityHookOptions<
   E extends PlainLiteralObject = PlainLiteralObject,
 > {
   readonly entity?: Type<E>;
+  /**
+   * The persistence key the hook's spec matches on, when the resource
+   * registers `entity` under a key that is NOT
+   * `deriveEntityKey(entity)`.
+   *
+   * Entity-hook matching upstream is a raw string compare of the running
+   * operation's entity key against the key baked into the hook's spec.
+   * `defineResource({ entity: PetEntity, key: 'pets' })` is legal and
+   * registers the entity as `'pets'`, while `deriveEntityKey(PetEntity)`
+   * is `'pet'` — a hook bound by the derived key would then never fire.
+   * For a security hook (`TenantScopeHook`, `OwnerScopeHook`) that is a
+   * silent, total fail-OPEN.
+   *
+   * Leaving this unset is the normal case: the planner's
+   * `validateEntityHookBindings` rejects a mismatch at BOOT with the
+   * actual registered key, so a wrong binding can never reach
+   * production silently. Set it only to deliberately match a custom
+   * resource `key`.
+   */
+  readonly entityKey?: string;
+}
+
+/**
+ * What entity (class + persistence key) an `@EntityHook({ entity })`
+ * class is bound to, recorded at decoration time so the planner can
+ * verify the binding against the app's entity registry BEFORE boot
+ * completes.
+ */
+export interface EntityHookBinding {
+  readonly entity: Type<PlainLiteralObject>;
+  readonly entityKey: string;
+}
+
+const ENTITY_HOOK_BINDING = Symbol('rockets:entity-hook-binding');
+
+/**
+ * Read back the entity binding {@link EntityHook} stamped on a hook
+ * class, or `undefined` for a deliberately unbound (multi-entity) hook.
+ *
+ * Reads **own** metadata only: a class that was not itself decorated
+ * with `@EntityHook({ entity })` has no binding of its own, and
+ * inheriting its base class's binding would report a spec the upstream
+ * hook resolver never actually applied to it.
+ */
+export function getEntityHookBinding(
+  hook: Type<PlainLiteralObject> | Function,
+): EntityHookBinding | undefined {
+  const binding: unknown = Reflect.getOwnMetadata(ENTITY_HOOK_BINDING, hook);
+  return isEntityHookBinding(binding) ? binding : undefined;
+}
+
+function isEntityHookBinding(value: unknown): value is EntityHookBinding {
+  if (typeof value !== 'object' || value === null) return false;
+  const candidate = value as Partial<EntityHookBinding>;
+  return (
+    typeof candidate.entity === 'function' &&
+    typeof candidate.entityKey === 'string'
+  );
 }
 
 /**
@@ -239,9 +297,18 @@ export function EntityHook<E extends PlainLiteralObject = PlainLiteralObject>(
     //    at a different entity (and therefore never self-recurses).
     //    MUST run before `RepoHook()(target)` because the latter calls
     //    `scanHookMethods()` which captures the class spec.
+    //    `options.entityKey` overrides the derived key for resources that
+    //    register the entity under a custom `key`; the binding is recorded
+    //    so `validateEntityHookBindings` can reject a mismatch at boot
+    //    instead of letting the hook silently never fire.
     if (options?.entity) {
-      const entityKey = deriveEntityKey(options.entity);
+      const entityKey = options.entityKey ?? deriveEntityKey(options.entity);
       Specification(RepoSpec.isEntity(entityKey))(target);
+      Reflect.defineMetadata(
+        ENTITY_HOOK_BINDING,
+        { entity: options.entity, entityKey } satisfies EntityHookBinding,
+        target,
+      );
     }
 
     // 4. Class-level registration. `RepoHook()` runs `scanHookMethods()`

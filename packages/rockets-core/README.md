@@ -216,6 +216,18 @@ Planner collision checks only cover Rockets-owned structured routes. For a
 real adapter audit after global prefix/versioning/manual controllers are
 registered, call `validateRegisteredRoutes(app)` after `app.init()`.
 
+Two more patterns build on `operationResource` without changing it:
+background jobs (`JobDispatchServiceInterface` — dedupe, lease, at-least-once
+delivery, a `202` + job id op with a worker claiming separately) and
+idempotent writes / inbound webhooks (`IdempotencyStoreInterface` +
+`createWebhookSignatureVerifier` / `verifyWebhookSignature`, the latter
+reading `req.rawBody` off Nest's own `rawBody: true` app option). Scope the
+idempotency key by the authenticated principal — the header value is
+client-chosen, so a raw key leaks one user's stored response to another.
+The store de-duplicates sequential retries; it is at-least-once, not
+exactly-once, under a concurrent burst. Both:
+[CONFIGURATION.md §6d/§6e](../../CONFIGURATION.md#6d-background-job-dispatch-issue-53).
+
 ### Scope rows to the authenticated user
 
 `OwnerStampHook` writes `userId` on create/update and rejects spoofing.
@@ -233,6 +245,47 @@ defineResource({
 
 The hooks run at the repository layer, so direct (non-HTTP) calls are scoped
 too.
+
+### Scope rows to a multi-tenant set (`TenantScopeHook`)
+
+`OwnerScopeHook` compares a column to `actor.id` — one owner, one id.
+`TenantScopeHook` is for the wider case: an actor who belongs to a
+RESOLVED SET of tenants (a `resolve(actor)` callback you supply, e.g. a
+shelter-membership lookup) and, critically, is **fail-closed**: no actor,
+or a `resolve` that returns `[]`, both produce zero rows — never an
+unfiltered query. It complements `acl` (issue #51): `acl` decides which
+ACTIONS an actor may perform, this decides which ROWS.
+
+```typescript
+import { TenantScopeHook, TenantStampHook } from '@concepta/rockets-core';
+
+const shelterScope = {
+  tenantKey: 'shelterId' as const,
+  resolve: (actor) => shelterIdsFor(actor), // [] when the actor owns none
+};
+
+defineResource({
+  entity: PetEntity,
+  hooks: [
+    TenantScopeHook.for(PetEntity, shelterScope),
+    TenantStampHook.for(PetEntity, shelterScope),
+  ],
+});
+```
+
+A row outside the resolved set 404s (not 403) — the query excludes it
+entirely, so confirming it exists is never on the table.
+
+**Wire both hooks.** `TenantScopeHook` rewrites `where` clauses only, so on
+its own it does not stop a `POST`/`PATCH` writing another tenant's id into
+the tenant column — a `PATCH` can move the actor's own row out of their
+tenant. `TenantStampHook` enforces the same resolved set on
+`beforeCreate`/`beforeUpdate`, rejecting (never silently rewriting) a value
+outside it. `OwnerStampHook` does **not** cover this: it stamps `actor.id`,
+which is not a tenant id.
+
+Full rules:
+[CONFIGURATION.md §5b](../../CONFIGURATION.md#5b-tenantscopehook--fail-closed-tenant-row-scoping-issue-69).
 
 ### Functional entity hooks (`defineHook`)
 
@@ -331,8 +384,9 @@ Take the context from wherever you are: a hook's second argument (typed
 `TransactionScope.run` hands its callback. All three satisfy the
 repository's `ctx?: PlainLiteralObject`. Never spread it into a new
 object — it is an `AppContextHost` Proxy and spreading strips the overlay
-accessors. `CONFIGURATION.md` §8a has the full seam, including the
-`SUPPORTS`-by-default trap and an audit `grep`.
+accessors. `CONFIGURATION.md` §8a has the full seam, including what
+`propagation` does and does not control, the nested-scope boundary, and
+an audit `grep`.
 
 ### Read the authenticated user inside a handler
 
@@ -463,11 +517,15 @@ like `OperationRequest.raw`: an escape hatch, never something to
 `JSON.stringify` (circular on Express). `headers` includes whatever the
 client sent — `authorization` and `cookie` too — so never log or echo
 the whole context from a serializer; read the specific fields you need.
-Reach, stated plainly: this
-flows through `RocketsCoreExceptionsFilter` (core / server apps);
-`@concepta/rockets-auth` apps use a compatibility filter without a
-serializer seam and get none of it yet (#87). A `400` minted by the
-upstream class-validator pipe carries messages only.
+Reach, stated plainly: this flows through `RocketsCoreExceptionsFilter`,
+and reach is per APP, not per package — nothing is inherited by
+composition. Every app registers the filter itself, whether by
+`app.useGlobalFilters(...)` or an `APP_FILTER` provider, importing it
+from `@concepta/rockets-core` or as `ExceptionsFilter` from
+`@concepta/rockets`. Do that and the seam is yours, on core, server and
+`@concepta/rockets-auth` alike; skip it and no Rockets package supplies
+one for you. A `400` minted by the upstream class-validator pipe
+carries messages only.
 
 Three helpers are exported for app code. `attachErrorDetails(exception,
 details)` puts findings on YOUR exception (a hook rejecting a write, a
