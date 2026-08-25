@@ -316,6 +316,28 @@ An explicit upstream app guard together with
 `rocketsDefaults.enableGlobalGuard: true` is rejected. Nest global guards are
 cumulative, so two authentication guards cannot model adapter fallback.
 
+### Register the error-envelope filter
+
+Rockets does **not** install an exception filter for you, and nothing is
+inherited by composing auth on top of core — reach is per app. Without a
+registration, errors get Nest's default body: no `errorCode`, no domain
+exception unwrap chain (so a hook `409` surfaces as a `500`), and no
+structured `details`.
+
+```typescript
+import { HttpAdapterHost } from '@nestjs/core';
+import { RocketsCoreExceptionsFilter } from '@concepta/rockets-core';
+
+app.useGlobalFilters(new RocketsCoreExceptionsFilter(app.get(HttpAdapterHost)));
+```
+
+`@concepta/rockets` re-exports the same class as `ExceptionsFilter`; use
+whichever package the application already depends on. To opt into
+structured validation `details`, pass `detailedErrorSerializer` as the
+second argument — the default envelope stays byte-shape unchanged.
+Envelope customisation is documented in `@concepta/rockets-core`'s
+README ("Customise the error envelope").
+
 ### Proxy-aware throttling
 
 Rockets keys its coarse limiter from `request.ip`. Express applications behind
