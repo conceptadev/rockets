@@ -191,7 +191,10 @@ import { defineAuthAdapter } from '@concepta/rockets-core';
 
 FirebaseAuthModule.forRoot({
   firebaseApp,
-  sessionCookie: { cookieName: '__session' }, // omit to skip session auth entirely
+  sessionCookie: {
+    cookieName: '__session', // omit `sessionCookie` to skip session auth entirely
+    // checkRevoked defaults to TRUE for session cookies — see below.
+  },
 });
 
 RocketsModule.forRoot({
@@ -220,6 +223,16 @@ own `auth` array sees no behavior change. State-changing requests to a
 session route still need CSRF protection: pair this with `@AuthSession()`
 and `CsrfGuard` from `@concepta/rockets-core` — full pattern in
 [CONFIGURATION.md §7c](../../CONFIGURATION.md#7c-session-cookie-auth-csrf-and-the-ternary-route-policy-issue-58).
+
+**`sessionCookie.checkRevoked` defaults to `true`**, the opposite of the
+bearer `checkRevoked` (`false`). Different credentials, different blast
+radii: an ID token expires in an hour, but the session cookie above
+lives for 14 days, and skipping the revocation lookup — the same check
+that catches a DISABLED user — means signing out all devices, disabling
+the account, or rotating credentials after a breach does nothing to an
+attacker holding the cookie for two weeks. Each verified request costs
+a Firebase round-trip; set `checkRevoked: false` only with a deliberate
+reason, such as a short `expiresIn` or revocation enforced elsewhere.
 
 ### Read the user inside a handler
 
@@ -275,7 +288,7 @@ export class ProfileController {
 | `userResolver` | `Type<FirebaseUserResolverInterface>` | optional | Custom resolver. Default uses claims from the token only. |
 | `checkRevoked` | `boolean` (default `false`) | optional | Ask Firebase whether the token was revoked on every request. |
 | `imports` | `ModuleMetadata['imports']` | optional | Imports the module pulls in (typical use: a `ConfigModule`). |
-| `sessionCookie` | `FirebaseSessionCookieConfig` | optional | Opts into session-cookie auth (issue #58). Omit to leave `FirebaseSessionCookieAdapter` unused (still registered as a provider, but reading the default `'__session'` cookie name — harmless if never added to `auth`). |
+| `sessionCookie` | `FirebaseSessionCookieConfig` | optional | Opts into session-cookie auth (issue #58): `cookieName` (default `'__session'`) and `checkRevoked` (default **`true`** — unlike the bearer `checkRevoked`, because a session cookie lives up to 14 days). Omit to leave `FirebaseSessionCookieAdapter` unused (still registered as a provider — harmless if never added to `auth`). |
 
 ### Interfaces
 
@@ -308,7 +321,7 @@ export class ProfileController {
 | `FirebaseTokenRevokedException` | `auth/id-token-revoked` returned by the SDK with `checkRevoked: true`. |
 | `FirebaseTokenMissingSubjectException` | Verified token has no `uid` claim. |
 | `FirebaseSessionCookieInvalidException` | Session-cookie counterpart of `FirebaseTokenInvalidException` (issue #58). |
-| `FirebaseSessionCookieRevokedException` | `auth/session-cookie-revoked` with `checkRevoked: true`. |
+| `FirebaseSessionCookieRevokedException` | `auth/session-cookie-revoked` **or** `auth/user-disabled` — both come from the revocation lookup, which `sessionCookie.checkRevoked` runs by default. |
 
 ### Tokens
 
@@ -328,6 +341,17 @@ export class ProfileController {
 | `auth/id-token-revoked` | `{ matched: true, error: FirebaseTokenRevokedException }` |
 | Token has no `uid` | `{ matched: true, error: FirebaseTokenMissingSubjectException }` |
 | User resolver throws | `{ matched: true, error: FirebaseAuthException }` |
+| No session cookie on the request | `{ matched: false }` |
+| `auth/session-cookie-revoked` or `auth/user-disabled` | `{ matched: true, error: FirebaseSessionCookieRevokedException }` |
+| Any other session-cookie verify failure | `{ matched: true, error: FirebaseSessionCookieInvalidException }` |
+
+Note the availability trade-off `checkRevoked: true` brings: every
+verified session request calls Firebase, so a Firebase Auth outage or a
+quota error surfaces as `FirebaseSessionCookieInvalidException` — a
+`401` indistinguishable from a genuinely bad cookie, and effectively a
+forced logout for all cookie-authenticated users until it recovers. It
+fails CLOSED, which is the right direction for a credential check, but
+size your quota and alerting accordingly.
 
 ---
 

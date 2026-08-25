@@ -58,4 +58,25 @@ export interface FirebaseSessionCookieConfig {
    * name Firebase Hosting's own reverse proxy also recognises.
    */
   readonly cookieName?: string;
+  /**
+   * Whether every request asks Firebase if the session cookie has been
+   * revoked — which is also the check that catches a DISABLED user.
+   *
+   * **Defaults to `true`, deliberately unlike the bearer
+   * `checkRevoked` above.** The two credentials have different blast
+   * radii, so they get different defaults rather than one default
+   * applied for symmetry: a Firebase ID token expires in an hour, so a
+   * revocation missed by a bearer request is wrong for at most that
+   * long, and paying a network round-trip per request to shrink an hour
+   * is a real cost for a small win. A session cookie lives up to
+   * **14 days**. Defaulting it to `false` means "signed out on all
+   * devices", "account disabled", and "credentials rotated after a
+   * breach" do nothing to an attacker holding the cookie, for two
+   * weeks. That is not a default anyone would knowingly choose, so it
+   * is not the one they get by omission.
+   *
+   * Set it to `false` only with a deliberate reason — a short
+   * `expiresIn` at mint time, or revocation enforced elsewhere.
+   */
+  readonly checkRevoked?: boolean;
 }

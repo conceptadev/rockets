@@ -6,6 +6,7 @@ import {
 } from '@nestjs/core';
 
 import { AuthServerGuard } from '../guards/auth-server.guard';
+import { CsrfGuard } from '../guards/csrf.guard';
 import { collectRouteAudit, type ControllerScan } from './collect-route-audit';
 import {
   evaluateRoutePolicy,
@@ -65,6 +66,9 @@ export class RouteAuditService {
       authGuards: guards
         .filter((guard) => guard.isAuth)
         .map((guard) => guard.name),
+      csrfGuards: guards
+        .filter((guard) => guard.isCsrf)
+        .map((guard) => guard.name),
     });
   }
 
@@ -112,9 +116,12 @@ export class RouteAuditService {
   private resolveGlobalGuards(): Array<{
     readonly name: string;
     readonly isAuth: boolean;
+    readonly isCsrf: boolean;
   }> {
     const recognised = this.policy?.authGuards ?? [];
-    const result: Array<{ name: string; isAuth: boolean }> = [];
+    const recognisedCsrf = this.policy?.csrfGuards ?? [];
+    const result: Array<{ name: string; isAuth: boolean; isCsrf: boolean }> =
+      [];
 
     for (const instance of this.applicationConfig.getGlobalGuards()) {
       if (instance === null || instance === undefined) continue;
@@ -124,6 +131,9 @@ export class RouteAuditService {
         isAuth:
           instance instanceof AuthServerGuard ||
           recognised.some((type) => instance instanceof type),
+        isCsrf:
+          instance instanceof CsrfGuard ||
+          recognisedCsrf.some((type) => instance instanceof type),
       });
     }
 
@@ -144,6 +154,12 @@ export class RouteAuditService {
           isOrExtends(metatype as Type<unknown>, [
             AuthServerGuard,
             ...recognised,
+          ]),
+        isCsrf:
+          isClass &&
+          isOrExtends(metatype as Type<unknown>, [
+            CsrfGuard,
+            ...recognisedCsrf,
           ]),
       });
     }

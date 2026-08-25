@@ -399,8 +399,21 @@ providers: [
 ```
 
 `CsrfGuard` no-ops on every route that is not `AuthSession()` — a
-bearer-only app that registers it anyway sees no behavior change. Full
-pattern (cookie minting, token generation, the double-submit design):
+bearer-only app that registers it anyway sees no behavior change.
+
+Two things to know before shipping it:
+
+- **`secret` is validated at boot**: non-empty and at least 32
+  characters (`MIN_CSRF_SECRET_LENGTH`). The `process.env.CSRF_SECRET!`
+  above throws at startup if that variable is unset, which is the point
+  — it used to reach production and fail on the first protected write.
+- **`@AuthSession()` enforces nothing on its own.** The decorator is
+  metadata; `CsrfGuard` is what reads it. To have the boot verify a CSRF
+  guard actually exists for your session routes, declare
+  `routePolicy: { requireCsrf: true }`.
+
+Full pattern (cookie minting, token generation, the double-submit
+design, `requireCsrf`):
 [CONFIGURATION.md §7c](../../CONFIGURATION.md#7c-session-cookie-auth-csrf-and-the-ternary-route-policy-issue-58).
 
 ### Free-form JSON columns on class DTOs
@@ -1042,7 +1055,7 @@ stop, throw.
 | `@AuthSession()`                                        | Marks a route session-cookie authenticated + CSRF-protected (#58).     |
 | `CsrfGuard`                                             | Enforces CSRF on `@AuthSession()` routes; no-ops elsewhere (#58).      |
 | `generateCsrfToken` / `verifyCsrfToken`                 | Signed double-submit CSRF token mint/verify (#58).                     |
-| `parseCookies(header)` / `extractCookie(request, name)` | Parse the raw `Cookie` header (#58).                                   |
+| `parseCookies(header)` / `extractCookie(request, name)` | Parse the raw `Cookie` header; duplicates are first-wins (#58).        |
 
 ---
 

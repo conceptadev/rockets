@@ -837,13 +837,13 @@
         "name": "FirebaseSessionCookieAdapter",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class FirebaseSessionCookieAdapter implements AuthAdapterInterface {\n    private readonly verifier;\n    private readonly userResolver;\n    private readonly logger;\n    private readonly cookieName;\n    constructor(verifier: FirebaseSessionCookieVerifierInterface, userResolver: FirebaseUserResolverInterface, options: FirebaseAuthModuleOptions);\n    authenticate(request: AuthRequest): Promise<AuthAttemptResult>;\n    private validateCookie;\n    private verifyOrThrow;\n}"
+        "signature": "export declare class FirebaseSessionCookieAdapter implements AuthAdapterInterface {\n    private readonly verifier;\n    private readonly userResolver;\n    private readonly logger;\n    private readonly cookieName;\n    private readonly checkRevoked;\n    constructor(verifier: FirebaseSessionCookieVerifierInterface, userResolver: FirebaseUserResolverInterface, options: FirebaseAuthModuleOptions);\n    authenticate(request: AuthRequest): Promise<AuthAttemptResult>;\n    private validateCookie;\n    private verifyOrThrow;\n}"
       },
       {
         "name": "FirebaseSessionCookieConfig",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface FirebaseSessionCookieConfig {\n    readonly cookieName?: string;\n}"
+        "signature": "export interface FirebaseSessionCookieConfig {\n    readonly cookieName?: string;\n    readonly checkRevoked?: boolean;\n}"
       },
       {
         "name": "FirebaseSessionCookieInvalidException",
@@ -2413,7 +2413,7 @@
         "name": "CsrfGuard",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class CsrfGuard implements CanActivate {\n    private readonly reflector;\n    private readonly options;\n    constructor(reflector: Reflector, options: CsrfGuardOptions);\n    canActivate(context: ExecutionContext): boolean;\n}"
+        "signature": "export declare class CsrfGuard implements CanActivate {\n    private readonly reflector;\n    private readonly options;\n    private readonly headerName;\n    private readonly headerLookup;\n    constructor(reflector: Reflector, options: CsrfGuardOptions);\n    canActivate(context: ExecutionContext): boolean;\n}"
       },
       {
         "name": "CsrfGuardOptions",
@@ -2522,6 +2522,12 @@
         "kind": "function",
         "runtime": true,
         "signature": "export declare function InjectDynamicRepository(keyOrClass: string | Type<PlainLiteralObject>): PropertyDecorator & ParameterDecorator;"
+      },
+      {
+        "name": "MIN_CSRF_SECRET_LENGTH",
+        "kind": "value",
+        "runtime": true,
+        "signature": "MIN_CSRF_SECRET_LENGTH = 32"
       },
       {
         "name": "ModuleResource",
@@ -2935,7 +2941,7 @@
         "name": "RouteAuditReport",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RouteAuditReport {\n    readonly routes: readonly RouteAuditEntry[];\n    readonly globalGuards: readonly string[];\n    readonly authGuards: readonly string[];\n}"
+        "signature": "export interface RouteAuditReport {\n    readonly routes: readonly RouteAuditEntry[];\n    readonly globalGuards: readonly string[];\n    readonly authGuards: readonly string[];\n    readonly csrfGuards: readonly string[];\n}"
       },
       {
         "name": "RouteAuditService",
@@ -2959,13 +2965,13 @@
         "name": "RoutePolicy",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RoutePolicy {\n    readonly requireAuth?: boolean;\n    readonly requireAcl?: boolean;\n    readonly requireAclQuery?: boolean;\n    readonly allow?: readonly string[];\n    readonly allowControllers?: readonly Type<unknown>[];\n    readonly authGuards?: readonly Type<unknown>[];\n}"
+        "signature": "export interface RoutePolicy {\n    readonly requireAuth?: boolean;\n    readonly requireAcl?: boolean;\n    readonly requireAclQuery?: boolean;\n    readonly requireCsrf?: boolean;\n    readonly allow?: readonly string[];\n    readonly allowControllers?: readonly Type<unknown>[];\n    readonly authGuards?: readonly Type<unknown>[];\n    readonly csrfGuards?: readonly Type<unknown>[];\n}"
       },
       {
         "name": "RoutePolicyViolation",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RoutePolicyViolation {\n    readonly routeId: string;\n    readonly rule: 'requireAuth' | 'requireAcl' | 'requireAclQuery' | 'staleAllow';\n    readonly detail: string;\n}"
+        "signature": "export interface RoutePolicyViolation {\n    readonly routeId: string;\n    readonly rule: 'requireAuth' | 'requireAcl' | 'requireAclQuery' | 'requireCsrf' | 'staleAllow';\n    readonly detail: string;\n}"
       },
       {
         "name": "SchemaEntityCompiler",
@@ -3145,7 +3151,7 @@
         "name": "collectRouteAudit",
         "kind": "function",
         "runtime": true,
-        "signature": "export declare function collectRouteAudit(args: {\n    readonly controllers: readonly ControllerScan[];\n    readonly globalGuards: readonly string[];\n    readonly authGuards: readonly string[];\n}): RouteAuditReport;"
+        "signature": "export declare function collectRouteAudit(args: {\n    readonly controllers: readonly ControllerScan[];\n    readonly globalGuards: readonly string[];\n    readonly authGuards: readonly string[];\n    readonly csrfGuards?: readonly string[];\n}): RouteAuditReport;"
       },
       {
         "name": "createBoundRelation",

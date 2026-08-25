@@ -38,6 +38,68 @@ describe('parseCookies', () => {
   it('joins an array header with "; " before parsing', () => {
     expect(parseCookies(['a=1', 'b=2'])).toEqual({ a: '1', b: '2' });
   });
+
+  // Duplicate names are FIRST-wins, matching the `cookie` npm package
+  // every other Node cookie reader is built on:
+  //   cookie.parse('__session=attacker; __session=victim')
+  //     -> { __session: 'attacker' }
+  // A last-wins parser here made this guard and any other cookie-reading
+  // layer in the same stack resolve one request to two different
+  // sessions, which is what cookie tossing from a sibling subdomain
+  // exploits. Flip the `if (name in cookies) continue` and this goes red.
+  it('resolves a duplicate cookie name to the FIRST occurrence', () => {
+    expect(parseCookies('__session=first; __session=second')).toEqual({
+      __session: 'first',
+    });
+  });
+
+  it('keeps first-wins across an array header too', () => {
+    expect(parseCookies(['__session=first', '__session=second'])).toEqual({
+      __session: 'first',
+    });
+  });
+
+  it('first-wins does not swallow other cookies around the duplicate', () => {
+    expect(parseCookies('a=1; __session=first; b=2; __session=second')).toEqual(
+      {
+        a: '1',
+        __session: 'first',
+        b: '2',
+      },
+    );
+  });
+
+  // The map is null-prototype, so a cookie whose NAME collides with an
+  // Object.prototype key is data like any other — with a plain `{}` the
+  // first-wins `in` check would see inherited `toString` and drop the
+  // real cookie, and `__proto__` would not survive assignment at all.
+  it('handles cookie names that collide with Object.prototype keys', () => {
+    expect(parseCookies('toString=1; __session=ok')).toEqual({
+      toString: '1',
+      __session: 'ok',
+    });
+    const parsed = parseCookies('__proto__=polluted; __session=ok');
+    expect(parsed['__proto__']).toBe('polluted');
+    expect(parsed['__session']).toBe('ok');
+    // Nothing leaked onto the real Object prototype.
+    expect({}.constructor).toBe(Object);
+  });
+
+  // EVERY return path, not just the parsing one. The no-header early
+  // return used to hand back a plain `{}`, so `cookies['constructor']`
+  // was a Function and `extractCookie` — declared `string | null` —
+  // could return one for a request with no Cookie header at all.
+  it('returns a null-prototype map on every path, including no header', () => {
+    for (const parsed of [
+      parseCookies(undefined),
+      parseCookies(''),
+      parseCookies('a=1'),
+    ]) {
+      expect(Object.getPrototypeOf(parsed)).toBeNull();
+      expect(parsed['constructor']).toBeUndefined();
+      expect(parsed['toString']).toBeUndefined();
+    }
+  });
 });
 
 describe('extractCookie', () => {
@@ -65,5 +127,16 @@ describe('extractCookie', () => {
     expect(extractCookie(request('__session=abc123'), '__session')).toBe(
       'abc123',
     );
+  });
+
+  // The signature says `string | null`. With a plain-object cookie map
+  // this returned `Object.prototype.constructor` — a Function — for a
+  // request carrying no Cookie header, which a caller would then have
+  // treated as a session value.
+  it('returns null, never an inherited Object.prototype member', () => {
+    for (const name of ['constructor', 'toString', 'hasOwnProperty']) {
+      expect(extractCookie(request(undefined), name)).toBeNull();
+      expect(extractCookie(request('__session=abc'), name)).toBeNull();
+    }
   });
 });

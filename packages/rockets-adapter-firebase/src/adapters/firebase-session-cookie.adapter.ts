@@ -49,6 +49,7 @@ export const DEFAULT_SESSION_COOKIE_NAME = '__session';
 export class FirebaseSessionCookieAdapter implements AuthAdapterInterface {
   private readonly logger = new Logger(FirebaseSessionCookieAdapter.name);
   private readonly cookieName: string;
+  private readonly checkRevoked: boolean;
 
   constructor(
     @Inject(FIREBASE_SESSION_COOKIE_VERIFIER_TOKEN)
@@ -60,6 +61,13 @@ export class FirebaseSessionCookieAdapter implements AuthAdapterInterface {
   ) {
     this.cookieName =
       options.sessionCookie?.cookieName ?? DEFAULT_SESSION_COOKIE_NAME;
+    // Defaults to TRUE, unlike the bearer adapter's `checkRevoked`
+    // (which defaults to false). Not an oversight and not symmetry for
+    // its own sake: a session cookie is valid for up to 14 days where an
+    // ID token expires in an hour, so skipping the revocation check —
+    // the same call that catches a disabled user — leaves a revoked
+    // session working for two weeks. See `FirebaseSessionCookieConfig`.
+    this.checkRevoked = options.sessionCookie?.checkRevoked ?? true;
   }
 
   async authenticate(request: AuthRequest): Promise<AuthAttemptResult> {
@@ -109,11 +117,20 @@ export class FirebaseSessionCookieAdapter implements AuthAdapterInterface {
 
   private async verifyOrThrow(cookie: string) {
     try {
-      return await this.verifier.verifySessionCookie(cookie);
+      return await this.verifier.verifySessionCookie(cookie, {
+        checkRevoked: this.checkRevoked,
+      });
     } catch (error) {
       const code = readFirebaseErrorCode(error);
-      if (code === 'auth/session-cookie-revoked') {
-        this.logger.warn('Firebase session cookie rejected: revoked');
+      if (
+        code === 'auth/session-cookie-revoked' ||
+        // firebase-admin reports a DISABLED user under its own code from
+        // the same revocation lookup. Both mean "this session must stop
+        // working now", so both map to the revoked exception rather than
+        // the generic invalid one.
+        code === 'auth/user-disabled'
+      ) {
+        this.logger.warn(`Firebase session cookie rejected: ${code}`);
         throw new FirebaseSessionCookieRevokedException(error);
       }
       const detail = error instanceof Error ? error.message : String(error);

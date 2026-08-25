@@ -21,23 +21,33 @@ export function generateCsrfToken(
 }
 
 /**
+ * The only shape `generateCsrfToken` ever mints: HMAC-SHA256 rendered as
+ * hex, so exactly 64 hex characters and nothing else.
+ */
+const CSRF_TOKEN_PATTERN = /^[0-9a-f]{64}$/i;
+
+/**
  * Verifies a CSRF token against the session value it should have been
  * derived from. Timing-safe: a naive `===` compare leaks how many
  * leading hex characters matched through response-time variance.
+ *
+ * The shape check is NOT decoration. `Buffer.from(s, 'hex')` does not
+ * throw on malformed input — it decodes the leading valid pairs and
+ * silently stops at the first character that is not hex. A token of
+ * "64 correct hex chars + arbitrary garbage" therefore decoded to the
+ * exact expected bytes and verified as VALID, accepting a token this
+ * function never minted. Rejecting anything that is not precisely the
+ * minted shape, before decoding, is what makes the contract true.
  */
 export function verifyCsrfToken(
   token: string,
   sessionValue: string,
   secret: string,
 ): boolean {
-  let provided: Buffer;
-  let expected: Buffer;
-  try {
-    provided = Buffer.from(token, 'hex');
-    expected = Buffer.from(generateCsrfToken(sessionValue, secret), 'hex');
-  } catch {
-    return false;
-  }
+  if (!CSRF_TOKEN_PATTERN.test(token)) return false;
+
+  const provided = Buffer.from(token, 'hex');
+  const expected = Buffer.from(generateCsrfToken(sessionValue, secret), 'hex');
   if (provided.length !== expected.length) return false;
   return timingSafeEqual(provided, expected);
 }

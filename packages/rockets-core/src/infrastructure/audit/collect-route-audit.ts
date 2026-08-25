@@ -58,6 +58,8 @@ export function collectRouteAudit(args: {
   readonly globalGuards: readonly string[];
   /** Names of the guards recognised as AUTHENTICATION guards. */
   readonly authGuards: readonly string[];
+  /** Names of the guards recognised as CSRF guards, for `requireCsrf`. */
+  readonly csrfGuards?: readonly string[];
 }): RouteAuditReport {
   const appIsUnguarded = args.authGuards.length === 0;
   const routes: RouteAuditEntry[] = [];
@@ -142,6 +144,7 @@ export function collectRouteAudit(args: {
     routes,
     globalGuards: args.globalGuards,
     authGuards: args.authGuards,
+    csrfGuards: args.csrfGuards ?? [],
   };
 }
 

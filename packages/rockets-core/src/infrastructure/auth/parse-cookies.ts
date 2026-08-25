@@ -10,19 +10,39 @@ import type { AuthRequest } from '../../domain/interfaces/auth-adapter.interface
  * Malformed segments (no `=`, an empty name) are skipped rather than
  * thrown on — a stray non-cookie value ahead of the one an adapter wants
  * should not 500 the request.
+ *
+ * **Duplicate names resolve FIRST-wins**, matching the `cookie` npm
+ * package that Express, Fastify, and effectively every other Node cookie
+ * reader is built on (`cookie.parse('a=1; a=2')` → `{ a: '1' }`). This
+ * is a security property, not a style choice: an attacker who can plant
+ * a second `__session` cookie — cookie tossing from a sibling subdomain,
+ * or a more specific path scope — makes a last-wins parser disagree with
+ * every first-wins layer in the same stack about WHICH session is
+ * authenticated. Two layers of one app resolving the same request to two
+ * different users is the bug; agreeing with the ecosystem removes it.
  */
 export function parseCookies(
   header: string | readonly string[] | undefined,
 ): Readonly<Record<string, string>> {
-  if (header === undefined) return {};
+  // Null-prototype on EVERY return path, the empty one included. A
+  // plain `{}` here would make `parseCookies(undefined)['constructor']`
+  // a Function, so `extractCookie` — declared `string | null` — could
+  // hand a callers a function for a request that carried no Cookie
+  // header at all.
+  if (header === undefined) return Object.create(null);
   const raw = Array.isArray(header) ? header.join('; ') : (header as string);
 
-  const cookies: Record<string, string> = {};
+  // Same reason: cookie names come straight off the wire, and a plain
+  // `{}` both inherits `Object.prototype` keys (breaking the first-wins
+  // `in` check for a cookie named `toString`) and swallows a cookie
+  // literally named `__proto__` on assignment.
+  const cookies: Record<string, string> = Object.create(null);
   for (const part of raw.split(';')) {
     const eq = part.indexOf('=');
     if (eq === -1) continue;
     const name = part.slice(0, eq).trim();
     if (name.length === 0) continue;
+    if (name in cookies) continue;
     const rawValue = part.slice(eq + 1).trim();
     try {
       cookies[name] = decodeURIComponent(rawValue);

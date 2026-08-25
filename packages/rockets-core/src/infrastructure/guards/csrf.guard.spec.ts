@@ -5,8 +5,9 @@ import { CsrfGuard, type CsrfGuardOptions } from './csrf.guard';
 import { AuthSession } from '../../decorators/auth-session.decorator';
 import { generateCsrfToken } from '../auth/csrf-token';
 
+// 32+ chars: the guard refuses to boot below MIN_CSRF_SECRET_LENGTH.
 const OPTIONS: CsrfGuardOptions = {
-  secret: 'test-secret',
+  secret: 'test-secret-0123456789abcdef0123456789',
   sessionCookieName: '__session',
 };
 
@@ -131,5 +132,80 @@ describe('CsrfGuard', () => {
     } as unknown as ExecutionContext;
 
     expect(customGuard.canActivate(ctx)).toBe(true);
+  });
+
+  // Node lower-cases every inbound header name, so a request never
+  // carries an `X-CSRF-Token` key — only `x-csrf-token`. Reading
+  // `headers[headerName]` verbatim meant this extremely common naming
+  // convention rejected EVERY state-changing session request. The e2e
+  // suite proves the same thing through real supertest headers; this
+  // pins the guard's own normalisation.
+  it('matches a mixed-case headerName against the lower-cased request header', () => {
+    const customGuard = new CsrfGuard(new Reflector(), {
+      ...OPTIONS,
+      headerName: 'X-CSRF-Token',
+    });
+    const token = generateCsrfToken('sess-1', OPTIONS.secret);
+
+    class Handler3 {
+      method() {}
+    }
+    const handler = Handler3.prototype.method;
+    AuthSession()(Handler3, 'method', {
+      value: handler,
+      writable: true,
+      enumerable: false,
+      configurable: true,
+    });
+    const ctx = {
+      getHandler: () => handler,
+      getClass: () => Handler3,
+      switchToHttp: () => ({
+        getRequest: () => ({
+          method: 'POST',
+          // As Node delivers it: lower-cased.
+          headers: { cookie: '__session=sess-1', 'x-csrf-token': token },
+        }),
+      }),
+    } as unknown as ExecutionContext;
+
+    expect(customGuard.canActivate(ctx)).toBe(true);
+  });
+});
+
+// Misconfiguration must abort the BOOT, not surface as a 500 on the
+// first protected write (`secret: undefined`) or as a silently
+// worthless HMAC that never fails at all (`secret: ''`).
+describe('CsrfGuard — configuration is validated at construction', () => {
+  function build(options: Partial<CsrfGuardOptions>): () => CsrfGuard {
+    return () =>
+      new CsrfGuard(new Reflector(), {
+        ...OPTIONS,
+        ...options,
+      } as CsrfGuardOptions);
+  }
+
+  it('throws on a missing secret', () => {
+    expect(build({ secret: undefined as unknown as string })).toThrow(
+      /`secret` is required/,
+    );
+  });
+
+  it('throws on an empty secret', () => {
+    expect(build({ secret: '' })).toThrow(/`secret` is required/);
+  });
+
+  it('throws on a secret shorter than the minimum', () => {
+    expect(build({ secret: 'short-secret' })).toThrow(/at least 32/);
+  });
+
+  it('throws on a missing sessionCookieName', () => {
+    expect(
+      build({ sessionCookieName: undefined as unknown as string }),
+    ).toThrow(/`sessionCookieName` is required/);
+  });
+
+  it('accepts a secret at exactly the minimum length', () => {
+    expect(build({ secret: 'a'.repeat(32) })).not.toThrow();
   });
 });

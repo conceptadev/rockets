@@ -40,6 +40,9 @@ export {
 export {
   CsrfGuard,
   type CsrfGuardOptions,
+  // The boot-time minimum the guard enforces on `secret` — exported so
+  // an app can validate its own configuration against the same number.
+  MIN_CSRF_SECRET_LENGTH,
 } from './infrastructure/guards/csrf.guard';
 
 // CRUD serialization: free-form JSON opt-out (documented in the README's

@@ -26,9 +26,92 @@ function report(overrides: Partial<RouteAuditReport>): RouteAuditReport {
     ],
     globalGuards: ['SomeAuthGuard'],
     authGuards: ['SomeAuthGuard'],
+    csrfGuards: [],
     ...overrides,
   };
 }
+
+/** The same report with its single route marked `@AuthSession()`. */
+function sessionReport(overrides: Partial<RouteAuditReport>): RouteAuditReport {
+  const base = report(overrides);
+  return {
+    ...base,
+    routes: base.routes.map((route) => ({ ...route, sessionAuth: true })),
+  };
+}
+
+// `sessionAuth` shipped as a REPORT-ONLY field: nothing read it, so an
+// app could decorate every session route `@AuthSession()`, register no
+// CsrfGuard, and boot clean serving cookie-authenticated writes with no
+// CSRF check anywhere. `requireCsrf` is what closes that.
+describe('evaluateRoutePolicy — requireCsrf', () => {
+  it('fails a session route when the app registers no CSRF guard', () => {
+    const violations = evaluateRoutePolicy(sessionReport({}), {
+      requireCsrf: true,
+    });
+    expect(violations).toEqual([
+      expect.objectContaining({ rule: 'requireCsrf', routeId: '*' }),
+    ]);
+    // The failing routes are still named, or the fix is unlocatable.
+    expect(violations[0].detail).toContain('GET /things');
+  });
+
+  // One missing global guard is ONE cause. Reporting it per route
+  // buries it under repetition — the same reasoning as the
+  // unguarded-app short-circuit at the top of the evaluator.
+  it('reports the missing guard ONCE, not once per session route', () => {
+    const base = report({});
+    const many = {
+      ...base,
+      routes: Array.from({ length: 12 }, (_, i) => ({
+        ...base.routes[0],
+        id: `POST /thing-${i}`,
+        sessionAuth: true,
+      })),
+    };
+
+    const violations = evaluateRoutePolicy(many, { requireCsrf: true });
+    expect(violations).toHaveLength(1);
+    expect(violations[0].detail).toContain('12 routes are @AuthSession()');
+    expect(violations[0].detail).toContain('+7 more');
+  });
+
+  it('passes when a CSRF guard is registered', () => {
+    const violations = evaluateRoutePolicy(
+      sessionReport({ csrfGuards: ['CsrfGuard'] }),
+      { requireCsrf: true },
+    );
+    expect(violations).toEqual([]);
+  });
+
+  it('ignores routes that are not @AuthSession()', () => {
+    const violations = evaluateRoutePolicy(report({}), { requireCsrf: true });
+    expect(violations).toEqual([]);
+  });
+
+  it('does nothing unless the rule is declared', () => {
+    const violations = evaluateRoutePolicy(sessionReport({}), {});
+    expect(violations).toEqual([]);
+  });
+
+  it('honours an `allow` exemption, like every other rule', () => {
+    const violations = evaluateRoutePolicy(sessionReport({}), {
+      requireCsrf: true,
+      allow: ['GET /things'],
+    });
+    expect(violations).toEqual([]);
+  });
+
+  it('participates in the unguarded-app short-circuit', () => {
+    const violations = evaluateRoutePolicy(
+      sessionReport({ authGuards: [], globalGuards: [] }),
+      { requireCsrf: true },
+    );
+    expect(violations).toEqual([
+      expect.objectContaining({ rule: 'requireCsrf', routeId: '*' }),
+    ]);
+  });
+});
 
 describe('evaluateRoutePolicy — the staleAllow gate', () => {
   it('flags a stale allow entry while a rule is declared', () => {

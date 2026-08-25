@@ -53,6 +53,41 @@ class StubVerifier implements FirebaseSessionCookieVerifierInterface {
   }
 }
 
+/**
+ * A stub that actually HONOURS `checkRevoked`, unlike one that accepts
+ * the option and ignores it — the shape that let a test "prove"
+ * revocation handling while the adapter passed no options at all.
+ * Stands in for firebase-admin, which raises
+ * `auth/session-cookie-revoked` (or `auth/user-disabled`) from the very
+ * lookup that `checkRevoked: false` skips.
+ */
+class RevocationAwareVerifier
+  implements FirebaseSessionCookieVerifierInterface
+{
+  readonly calls: (FirebaseVerifyOptions | undefined)[] = [];
+
+  constructor(private readonly revokedCode: string) {}
+
+  async verifySessionCookie(
+    _cookie: string,
+    options?: FirebaseVerifyOptions,
+  ): Promise<FirebaseDecodedTokenInterface> {
+    this.calls.push(options);
+    if (options?.checkRevoked === true) {
+      throw Object.assign(new Error('session revoked'), {
+        code: this.revokedCode,
+      });
+    }
+    // Without the revocation lookup the cookie's signature and expiry
+    // still check out — which is exactly why the bug was invisible.
+    return { uid: 'revoked-user', sub: 'revoked-user' };
+  }
+
+  async createSessionCookie(): Promise<string> {
+    throw new Error('not used by this adapter');
+  }
+}
+
 class ExplodingResolver implements FirebaseUserResolverInterface {
   async resolve(): Promise<never> {
     throw new Error('local user lookup failed');
@@ -192,6 +227,131 @@ describe(FirebaseSessionCookieAdapter.name, () => {
           FirebaseSessionCookieInvalidException,
         );
       }
+    });
+  });
+
+  /**
+   * The adapter called `verifySessionCookie(cookie)` with NO options,
+   * and `FirebaseTokenVerifierService` defaults `checkRevoked` to false
+   * internally — so firebase-admin never performed the revocation
+   * lookup and a revoked or disabled user's session cookie kept working
+   * for its full lifetime (up to 14 days).
+   */
+  describe('revocation checking', () => {
+    it('forwards checkRevoked: true by default — a session cookie is a 14-day credential', async () => {
+      const verifySessionCookie = vi
+        .fn()
+        .mockResolvedValue({ uid: 'user-1', sub: 'user-1' });
+
+      const adapter = await makeAdapter({
+        verifier: {
+          verifySessionCookie,
+          createSessionCookie: vi.fn(),
+        },
+      });
+
+      await adapter.authenticate(makeRequest('__session=cookie-value'));
+
+      expect(verifySessionCookie).toHaveBeenCalledWith('cookie-value', {
+        checkRevoked: true,
+      });
+    });
+
+    it('honours an explicit sessionCookie.checkRevoked: false opt-out', async () => {
+      const verifySessionCookie = vi
+        .fn()
+        .mockResolvedValue({ uid: 'user-1', sub: 'user-1' });
+
+      const adapter = await makeAdapter({
+        verifier: {
+          verifySessionCookie,
+          createSessionCookie: vi.fn(),
+        },
+        options: { sessionCookie: { checkRevoked: false } },
+      });
+
+      await adapter.authenticate(makeRequest('__session=cookie-value'));
+
+      expect(verifySessionCookie).toHaveBeenCalledWith('cookie-value', {
+        checkRevoked: false,
+      });
+    });
+
+    // Behavioural, not a call-shape assertion: this verifier only fails
+    // when the revocation lookup actually happens. Revert the adapter to
+    // `verifySessionCookie(cookie)` and it authenticates the revoked
+    // user successfully instead.
+    it('REJECTS a revoked session cookie', async () => {
+      const verifier = new RevocationAwareVerifier(
+        'auth/session-cookie-revoked',
+      );
+      const adapter = await makeAdapter({ verifier });
+
+      const result = await adapter.authenticate(
+        makeRequest('__session=revoked-but-well-formed'),
+      );
+
+      // Unconditional. `AuthAttemptResult` is a union of
+      // `{matched,user}` and `{matched,error}`, so `toMatchObject({
+      // matched: true })` alone is satisfied by BOTH arms and an
+      // `if ('error' in result)` narrowing quietly skips its assertion
+      // when the adapter returns the wrong one.
+      expect('error' in result).toBe(true);
+      expect('user' in result).toBe(false);
+      if ('error' in result) {
+        expect(result.error).toBeInstanceOf(
+          FirebaseSessionCookieRevokedException,
+        );
+      }
+      expect(verifier.calls).toEqual([{ checkRevoked: true }]);
+    });
+
+    // Same underlying lookup, different firebase-admin code: a disabled
+    // account's still-valid session cookie must stop working too.
+    it('REJECTS a disabled user’s session cookie', async () => {
+      const verifier = new RevocationAwareVerifier('auth/user-disabled');
+      const adapter = await makeAdapter({ verifier });
+
+      const result = await adapter.authenticate(
+        makeRequest('__session=disabled-user'),
+      );
+
+      expect('error' in result).toBe(true);
+      expect('user' in result).toBe(false);
+      if ('error' in result) {
+        expect(result.error).toBeInstanceOf(
+          FirebaseSessionCookieRevokedException,
+        );
+      }
+    });
+
+    // The other half of the proof: with the opt-out the SAME verifier
+    // lets the same revoked cookie through. If this passed while the
+    // test above also passed under a no-options adapter, neither would
+    // be testing anything.
+    it('accepts that same revoked cookie once checkRevoked is opted out', async () => {
+      const verifier = new RevocationAwareVerifier(
+        'auth/session-cookie-revoked',
+      );
+      const adapter = await makeAdapter({
+        verifier,
+        options: { sessionCookie: { checkRevoked: false } },
+      });
+
+      const result = await adapter.authenticate(
+        makeRequest('__session=revoked-but-well-formed'),
+      );
+
+      // Unconditional, and this is the assertion that makes the PAIR
+      // mean something: if the adapter stopped forwarding the option,
+      // this verifier would reject here too and both this test and the
+      // REJECTS one above would pass while proving nothing.
+      expect('user' in result).toBe(true);
+      expect('error' in result).toBe(false);
+      if ('user' in result) {
+        expect(result.user.id).toBe('revoked-user');
+      }
+      expect(verifier.calls).toEqual([{ checkRevoked: false }]);
     });
   });
 
