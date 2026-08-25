@@ -38,6 +38,18 @@ export interface RouteAuditEntry {
   readonly controllerRef: Type<unknown>;
   readonly handler: string;
   readonly authentication: RouteAuthState;
+  /**
+   * Whether `@AuthSession()` marks this route session-cookie
+   * authenticated (issue #58's ternary `public | internal | session`
+   * policy) — `false` for an "internal" bearer-style route. Orthogonal
+   * to `authentication`: a session route is still `guarded` (the normal
+   * adapter chain authenticates it); this only reports whether `CsrfGuard`
+   * additionally applies to it. `@AuthPublic` and `@AuthSession` on the
+   * SAME handler is a contradiction — a public route has no session to
+   * protect — and `collectRouteAudit` throws rather than resolve it for
+   * you, the same rule `public` + a grant follows in `acl` (#51).
+   */
+  readonly sessionAuth: boolean;
   /** Action granted by `AccessControlGrant`, or `null` when ungranted. */
   readonly aclAction: string | null;
   /** Resource named by the grant, when the grant declares one. */
@@ -63,6 +75,14 @@ export interface RouteAuditReport {
    * nothing.
    */
   readonly authGuards: readonly string[];
+  /**
+   * The subset recognised as CSRF guards — `CsrfGuard` plus anything
+   * listed in `RoutePolicy.csrfGuards`. `requireCsrf` reads this: a
+   * `sessionAuth` route in an app that registered no CSRF guard is a
+   * cookie-authenticated write with nothing between it and a cross-site
+   * form post.
+   */
+  readonly csrfGuards: readonly string[];
 }
 
 /** A single way a route failed the declared policy. */
@@ -72,6 +92,7 @@ export interface RoutePolicyViolation {
     | 'requireAuth'
     | 'requireAcl'
     | 'requireAclQuery'
+    | 'requireCsrf'
     | 'staleAllow';
   readonly detail: string;
 }
@@ -90,6 +111,21 @@ export interface RoutePolicy {
   readonly requireAcl?: boolean;
   /** Every granted route must also name a `CanAccess` query service. */
   readonly requireAclQuery?: boolean;
+  /**
+   * Every `@AuthSession()` route must be covered by a registered CSRF
+   * guard.
+   *
+   * CSRF protection is opt-in through independent doors that all fail
+   * OPEN: an app can decorate routes `@AuthSession()` and never register
+   * `CsrfGuard`, and nothing anywhere complains — the decorator is inert
+   * metadata without a guard reading it. This rule closes the one gap a
+   * boot check can close: it fails the boot when a route declares it
+   * needs CSRF protection and the app registered nothing that provides
+   * it. It does NOT (and cannot) verify the opposite direction — that
+   * every route which SHOULD be `@AuthSession()` is decorated. Marking
+   * a session route is still the author's call.
+   */
+  readonly requireCsrf?: boolean;
   /**
    * Route ids exempt from EVERY declared rule, e.g. `['GET /health']`.
    *
@@ -120,4 +156,13 @@ export interface RoutePolicy {
    * resolved instances (`instanceof`) and request-scoped wrappers.
    */
   readonly authGuards?: readonly Type<unknown>[];
+  /**
+   * Guard classes recognised as CSRF guards, besides `CsrfGuard`. An app
+   * enforcing the double-submit check with its own guard lists it here;
+   * without it `requireCsrf` reports the app unprotected, because — as
+   * with `authGuards` — the audit refuses to assume that an unrecognised
+   * global guard does the job. Matched by class identity
+   * (`instanceof`) and, for request-scoped wrappers, by prototype chain.
+   */
+  readonly csrfGuards?: readonly Type<unknown>[];
 }

@@ -460,6 +460,52 @@ export class HealthController {
 }
 ```
 
+### Session-cookie routes and CSRF (issue #58)
+
+`AuthPublic` (above) and `AuthSession` are the other two legs of a
+ternary route policy: `public` (no auth), `internal` (the default — no
+decorator, whatever adapter matches), `session` (`AuthSession()` —
+cookie-authenticated AND CSRF-protected on state-changing requests).
+
+```typescript
+import { AuthSession, CsrfGuard, CSRF_GUARD_OPTIONS_TOKEN } from '@concepta/rockets-core';
+
+@Controller('profile')
+export class ProfileController {
+  @Post()
+  @AuthSession()
+  update(@Body() dto: UpdateProfileDto) { … }
+}
+
+// app.module.ts
+providers: [
+  { provide: APP_GUARD, useClass: AuthServerGuard },
+  { provide: APP_GUARD, useClass: CsrfGuard },
+  {
+    provide: CSRF_GUARD_OPTIONS_TOKEN,
+    useValue: { secret: process.env.CSRF_SECRET!, sessionCookieName: '__session' },
+  },
+],
+```
+
+`CsrfGuard` no-ops on every route that is not `AuthSession()` — a
+bearer-only app that registers it anyway sees no behavior change.
+
+Two things to know before shipping it:
+
+- **`secret` is validated at boot**: non-empty and at least 32
+  characters (`MIN_CSRF_SECRET_LENGTH`). The `process.env.CSRF_SECRET!`
+  above throws at startup if that variable is unset, which is the point
+  — it used to reach production and fail on the first protected write.
+- **`@AuthSession()` enforces nothing on its own.** The decorator is
+  metadata; `CsrfGuard` is what reads it. To have the boot verify a CSRF
+  guard actually exists for your session routes, declare
+  `routePolicy: { requireCsrf: true }`.
+
+Full pattern (cookie minting, token generation, the double-submit
+design, `requireCsrf`):
+[CONFIGURATION.md §7c](../../CONFIGURATION.md#7c-session-cookie-auth-csrf-and-the-ternary-route-policy-issue-58).
+
 ### Free-form JSON columns on class DTOs
 
 A settings blob, a flexible profile or a widget config has no fixed
@@ -1100,6 +1146,10 @@ stop, throw.
 | `AuthServerGuard`                                       | Bearer-token / multi-adapter guard. Opt-in via `APP_GUARD`.            |
 | `@AuthPublic()`                                         | Decorator to skip the global guard on a route.                         |
 | `AUTH_ADAPTERS_TOKEN`                                   | Inject the configured adapter chain.                                   |
+| `@AuthSession()`                                        | Marks a route session-cookie authenticated + CSRF-protected (#58).     |
+| `CsrfGuard`                                             | Enforces CSRF on `@AuthSession()` routes; no-ops elsewhere (#58).      |
+| `generateCsrfToken` / `verifyCsrfToken`                 | Signed double-submit CSRF token mint/verify (#58).                     |
+| `parseCookies(header)` / `extractCookie(request, name)` | Parse the raw `Cookie` header; duplicates are first-wins (#58).        |
 
 ---
 

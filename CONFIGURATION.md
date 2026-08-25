@@ -1501,6 +1501,189 @@ Rockets intentionally does not trust forwarded headers on the host's behalf.
 Without that setting, clients can collapse into the proxy's single IP bucket;
 an overly broad setting lets callers spoof addresses and evade the limit.
 
+### 7c. Session-cookie auth, CSRF, and the ternary route policy (issue #58)
+
+For apps whose identity is EXTERNAL (Firebase, Auth0, Clerk, …) but whose
+browser session is a COOKIE rather than a re-sent bearer token. Three
+pieces, all opt-in — a bearer-only app that touches none of them sees no
+behavior change.
+
+**1. `public | internal | session` — the ternary route policy.** `public`
+is `AuthPublic()` (unchanged). `internal` is the default: no decorator,
+authenticated by whatever `AuthAdapterInterface` matches (bearer, API
+key, …). `session` is `AuthSession()` — new — marking a route as
+session-cookie authenticated. This does NOT change how
+`AuthServerGuard` authenticates the route (a session-cookie adapter in
+the normal `auth` chain does that, like any other adapter); it drives
+`CsrfGuard` instead. `RouteAuditEntry.sessionAuth` reports which routes
+are marked, alongside the existing `authentication` state.
+
+Declaring `AuthPublic` and `AuthSession` on the same handler throws — a
+public route has no session to protect — but read the scope exactly:
+that throw lives inside `collectRouteAudit`, and `RouteAuditService`
+only runs the audit at bootstrap **when a `routePolicy` is declared**.
+An app that declares no `routePolicy` never collects the audit, so the
+contradiction is not detected. It is an opt-in check, not an always-on
+guarantee. The same is true of `requireCsrf` below. To get either, give
+the app a `routePolicy` — a recognition-only `routePolicy: {}` is enough
+to run the collection and its contradiction check.
+
+**2. `CsrfGuard` — the CSRF half.** Register it ALONGSIDE
+`AuthServerGuard`, not instead of it:
+
+```ts
+providers: [
+  { provide: APP_GUARD, useClass: AuthServerGuard },
+  { provide: APP_GUARD, useClass: CsrfGuard },
+  {
+    provide: CSRF_GUARD_OPTIONS_TOKEN,
+    useValue: { secret: process.env.CSRF_SECRET!, sessionCookieName: '__session' },
+  },
+],
+```
+
+`CsrfGuard` no-ops on every route that is not `AuthSession()` — a
+bearer-only app that registers it anyway gets zero behavior change. On a
+session route, `GET`/`HEAD`/`OPTIONS` are exempt (CSRF is a state-change
+attack; a safe method has nothing to protect); `POST`/`PUT`/`PATCH`/
+`DELETE` require a header (`x-csrf-token` by default) matching
+`generateCsrfToken(sessionCookieValue, secret)` — the signed
+double-submit pattern: the token is `HMAC(secret, sessionCookieValue)`,
+so it needs no server-side token store, and an attacker who can set an
+unrelated cookie on a sibling subdomain cannot forge it (they would need
+the session cookie's actual value, which cross-site JS cannot read).
+Mint it once, alongside the session cookie itself, and hand it to the
+client in a non-httpOnly cookie or a response field — the client must be
+able to READ it and echo it back in the header, which is the entire
+point of double-submit. `parseCookies` / `extractCookie` read the raw
+`Cookie` header the same way `extractBearerToken` reads `Authorization`;
+duplicate cookie names resolve **first-wins**, matching the `cookie` npm
+package the rest of the Node ecosystem uses, so this guard and any other
+cookie reader in the stack cannot disagree about which session a request
+carries.
+
+Three details that are enforced rather than advisory:
+
+- **`secret` is validated in the guard's constructor**, so a
+  misconfigured deployment fails at BOOT. It must be a non-empty string
+  of at least 32 characters (`MIN_CSRF_SECRET_LENGTH`) — an unset secret
+  used to surface as a 500 on the first protected write, and an empty
+  one silently produced a working-but-forgeable HMAC that never failed
+  at all. Generate one with `openssl rand -hex 32`. `sessionCookieName`
+  is required for the same reason. Note this is a length **floor**, not
+  an entropy check (`'a'.repeat(32)` passes), and it lives on the guard:
+  the exported `generateCsrfToken` / `verifyCsrfToken` primitives
+  validate nothing, so a hand-written middleware using them directly is
+  responsible for its own secret hygiene.
+- **`headerName` is case-insensitive.** Node lower-cases every inbound
+  header name, so `'X-CSRF-Token'` and `'x-csrf-token'` configure the
+  same header and either works.
+- **Tokens must be exactly the minted shape** — 64 hex characters.
+  `Buffer.from(s, 'hex')` truncates at the first non-hex character
+  instead of throwing, so `verifyCsrfToken` checks the shape before
+  decoding rather than accepting a valid prefix with anything appended.
+
+**`requireCsrf` — making `@AuthSession()` enforce something.** The
+decorator is inert metadata until a guard reads it: an app can mark every
+cookie-authenticated write `@AuthSession()`, never register `CsrfGuard`,
+and boot perfectly clean with no CSRF check anywhere. Declaring
+`requireCsrf` in the route policy fails the boot when any `sessionAuth`
+route exists and no CSRF guard is registered:
+
+```ts
+routePolicy: {
+  requireCsrf: true,
+  // Only if you enforce the double-submit check with your own guard;
+  // `CsrfGuard` is recognised by identity without this. The guard must
+  // be registered GLOBALLY either way — see below.
+  csrfGuards: [MyCsrfGuard],
+}
+```
+
+Be precise about what that buys, because the limits are all
+fail-open-shaped:
+
+- It verifies a guard EXISTS for the routes that declare they need one.
+  It cannot verify the other direction — that every route which *should*
+  be `@AuthSession()` is decorated — because nothing in the metadata
+  says which routes are cookie-authenticated. Marking session routes is
+  still the author's call, and CSRF protection remains opt-in overall.
+- It only sees **global** guards (`APP_GUARD`, including request-scoped
+  ones). A `@UseGuards(MyCsrfGuard)` on a controller is invisible to the
+  audit, so listing that class in `csrfGuards` will not satisfy the
+  rule — it fails the boot anyway. That is fail-closed, but it means
+  `csrfGuards` is for guards you register globally, not a way to
+  register controller-scoped ones.
+- `allow` and `allowControllers` exempt a route from **every** declared
+  rule, `requireCsrf` included. An `allow` list originally written for
+  `requireAuth` or `requireAcl` silently waives CSRF for those same
+  routes the moment you turn `requireCsrf` on. Re-read the list when you
+  add the rule.
+- Like every rule here, it runs only when the app declares a
+  `routePolicy` at all (see the note above).
+
+**3. `@concepta/rockets-adapter-firebase` — session-cookie capability.**
+The field report (#46) found `rockets-adapter-firebase` exposed
+`verifyIdToken` only — no session-cookie verification, no cookie
+minting. `FirebaseSessionCookieAdapter` is the "session" counterpart to
+`FirebaseAuthAdapter`; both can be registered in the SAME `auth` chain,
+each matching only the credential it owns:
+
+```ts
+import {
+  FirebaseAuthAdapter,
+  FirebaseAuthModule,
+  FirebaseSessionCookieAdapter,
+} from '@concepta/rockets-adapter-firebase';
+import { AuthSession, CsrfGuard, CSRF_GUARD_OPTIONS_TOKEN } from '@concepta/rockets-core';
+
+// module options — sessionCookie is what makes FirebaseSessionCookieAdapter
+// read the right cookie name; it is ALWAYS registered as a provider (same
+// as FirebaseAuthAdapter), so an app opts in by adding it to `auth` below.
+FirebaseAuthModule.forRoot({
+  firebaseApp,
+  sessionCookie: {
+    cookieName: '__session',
+    // checkRevoked defaults to TRUE here — see below.
+  },
+});
+
+RocketsModule.forRoot({
+  auth: [
+    defineAuthAdapter(FirebaseAuthAdapter), // bearer — mobile clients, service calls
+    defineAuthAdapter(FirebaseSessionCookieAdapter), // cookie — browser sessions
+  ],
+});
+```
+
+Minting the cookie itself is the client's ID-token-for-cookie exchange,
+once at sign-in — `FirebaseTokenVerifierInterface`'s session-cookie
+capability (`FirebaseSessionCookieVerifierInterface`,
+`createSessionCookie` / `verifySessionCookie`) is a SEPARATE interface
+from the bearer-only `FirebaseTokenVerifierInterface`, deliberately: a
+bearer-only custom `verifier` today implements only the base interface,
+and forcing session methods onto it would break every existing
+bearer-only verifier at compile time. The default
+`FirebaseTokenVerifierService` implements both.
+
+**`sessionCookie.checkRevoked` defaults to `true`** — deliberately the
+opposite of the bearer `checkRevoked`, which defaults to `false`. The
+two credentials have different blast radii and so get different
+defaults rather than one applied for symmetry. A Firebase ID token
+expires in an hour, so a missed revocation is wrong for at most that
+long and a per-request round-trip is a real cost for a small win. A
+session cookie lives up to **14 days**: without the check — which is
+also what catches a DISABLED user — "sign out all devices", "disable
+account", and "rotate credentials after a breach" do nothing to an
+attacker holding the cookie, for two weeks. Set it to `false` only with
+a deliberate reason, such as a short `expiresIn` at mint time or
+revocation enforced elsewhere. Both `auth/session-cookie-revoked` and
+`auth/user-disabled` map to `FirebaseSessionCookieRevokedException`.
+
+**Non-goals** (this issue does not attempt): replacing the IdP, or a
+built-in Path B signup/login cookie stack — that is `rockets-server-auth`'s
+territory.
+
 ---
 
 ## 8. Repository (root adapter) — database-agnostic

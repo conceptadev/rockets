@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common/constants';
 
 import { ROCKETS_DISABLE_GUARDS_TOKEN } from '../../rockets-core.constants';
+import { ROCKETS_AUTH_SESSION_TOKEN } from '../../decorators/auth-session.decorator';
 import { aclMetadataKeys } from './acl-metadata-keys';
 import type {
   RouteAuditEntry,
@@ -57,6 +58,8 @@ export function collectRouteAudit(args: {
   readonly globalGuards: readonly string[];
   /** Names of the guards recognised as AUTHENTICATION guards. */
   readonly authGuards: readonly string[];
+  /** Names of the guards recognised as CSRF guards, for `requireCsrf`. */
+  readonly csrfGuards?: readonly string[];
 }): RouteAuditReport {
   const appIsUnguarded = args.authGuards.length === 0;
   const routes: RouteAuditEntry[] = [];
@@ -78,6 +81,20 @@ export function collectRouteAudit(args: {
         classPublic,
         appIsUnguarded,
       );
+      const sessionAuth = isSession(
+        readSession(handler),
+        readSession(controller),
+      );
+      if (
+        sessionAuth &&
+        (authentication === 'public' || authentication === 'public-class')
+      ) {
+        throw new Error(
+          `${controller.name}.${methodName}: declares both @AuthPublic ` +
+            `and @AuthSession — a public route has no session to protect. ` +
+            `Pick one.`,
+        );
+      }
 
       // A controller or handler declared with an ARRAY of paths
       // registers one wire route per combination; the report carries
@@ -106,6 +123,7 @@ export function collectRouteAudit(args: {
             controllerRef: controller,
             handler: methodName,
             authentication,
+            sessionAuth,
             // Grants mirror enforcement exactly: upstream reads them
             // with `reflector.get(..., getHandler())` — handler ONLY.
             aclAction: readGrantField(handler, 'action'),
@@ -126,6 +144,7 @@ export function collectRouteAudit(args: {
     routes,
     globalGuards: args.globalGuards,
     authGuards: args.authGuards,
+    csrfGuards: args.csrfGuards ?? [],
   };
 }
 
@@ -151,6 +170,20 @@ function resolveAuth(
  */
 function isPublic(value: unknown): boolean {
   return value === true || value === 'classLevel';
+}
+
+function readSession(target: object): unknown {
+  return Reflect.getMetadata(ROCKETS_AUTH_SESSION_TOKEN, target);
+}
+
+/** Same `true | 'classLevel'` sentinel shape as `isPublic`. */
+function isSession(handlerValue: unknown, classValue: unknown): boolean {
+  return (
+    handlerValue === true ||
+    handlerValue === 'classLevel' ||
+    classValue === true ||
+    classValue === 'classLevel'
+  );
 }
 
 /** Declared Nest version(s), joined deterministically; undefined when none. */

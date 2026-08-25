@@ -17,3 +17,21 @@ export class FirebaseTokenMissingSubjectException extends FirebaseAuthException 
     super('Firebase ID token is missing the `sub`/`uid` claim');
   }
 }
+
+/**
+ * Session-cookie counterparts (issue #58) — same failure semantics as
+ * the ID-token exceptions above, worded for the cookie flow so a
+ * verification failure log doesn't say "ID token" for a request that
+ * never carried one.
+ */
+export class FirebaseSessionCookieInvalidException extends FirebaseAuthException {
+  constructor(cause?: unknown) {
+    super('Firebase session cookie is invalid or expired', cause);
+  }
+}
+
+export class FirebaseSessionCookieRevokedException extends FirebaseAuthException {
+  constructor(cause?: unknown) {
+    super('Firebase session cookie has been revoked', cause);
+  }
+}

@@ -103,6 +103,48 @@ export function evaluateRoutePolicy(
     }
   }
 
+  // A `@AuthSession()` route says "a browser cookie authenticates this,
+  // so a cross-site POST carries the credential automatically". The
+  // decorator alone enforces NOTHING: `CsrfGuard` is what reads it, and
+  // an app can decorate every session route and never register the
+  // guard. That combination boots clean and serves forgeable writes.
+  //
+  // Reported ONCE for the whole app, not per route, for the same reason
+  // the missing-auth-guard case above is: the cause is a single missing
+  // global guard, and repeating it on 200 session routes buries it. The
+  // routes are named in the message so the fix is still locatable.
+  if (policy.requireCsrf === true && report.csrfGuards.length === 0) {
+    const sessionRoutes = report.routes.filter(
+      (route) =>
+        route.sessionAuth &&
+        !allowedIds.has(route.id) &&
+        !allowedControllers.has(route.controllerRef),
+    );
+    if (sessionRoutes.length > 0) {
+      const named = sessionRoutes
+        .slice(0, 5)
+        .map((route) => route.id)
+        .join(', ');
+      const rest =
+        sessionRoutes.length > 5 ? ` (+${sessionRoutes.length - 5} more)` : '';
+      violations.push({
+        routeId: '*',
+        rule: 'requireCsrf',
+        detail:
+          `${sessionRoutes.length} route` +
+          `${sessionRoutes.length === 1 ? ' is' : 's are'} @AuthSession() ` +
+          `— ${named}${rest} — but the application registers no CSRF ` +
+          'guard, so the decorator enforces nothing and a cross-site ' +
+          'request carries the session cookie by itself. Register ' +
+          '`CsrfGuard` GLOBALLY (an APP_GUARD alongside the authentication ' +
+          'guard, with `CSRF_GUARD_OPTIONS_TOKEN`); if your own guard does ' +
+          'the job, register it globally too and name it in ' +
+          '`routePolicy.csrfGuards`. Otherwise drop @AuthSession() from ' +
+          'routes that are not cookie-authenticated.',
+      });
+    }
+  }
+
   for (const route of report.routes) {
     if (
       allowedIds.has(route.id) ||
@@ -157,6 +199,7 @@ function ruleNames(policy: RoutePolicy): RoutePolicyViolation['rule'][] {
   if (policy.requireAuth === true) names.push('requireAuth');
   if (policy.requireAcl === true) names.push('requireAcl');
   if (policy.requireAclQuery === true) names.push('requireAclQuery');
+  if (policy.requireCsrf === true) names.push('requireCsrf');
   return names;
 }
 
