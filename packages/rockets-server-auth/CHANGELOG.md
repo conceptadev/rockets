@@ -78,6 +78,14 @@ and this project adheres to
 
 ### Removed
 
+- `RocketsAuthExceptionsFilter` (issue #87). Internal-only and never
+  exported from `src/index.ts`, so no consumer could import it and no
+  application's behaviour changes — apps register
+  `RocketsCoreExceptionsFilter` themselves (as
+  `examples/sample-server-auth` already did) and are unaffected. Its sole
+  caller was this package's own e2e app helper, which now registers
+  `RocketsCoreExceptionsFilter` so the suite exercises the production
+  path, and accepts an optional error serializer.
 - `RocketsAuthUserMetadataCreateDtoInterface`, an unused pre-1.0 alias. Use
   `RocketsAuthUserMetadataCreatableInterface` instead.
 - The nonfunctional `rockets-auth-swagger` manifest entry. Applications
