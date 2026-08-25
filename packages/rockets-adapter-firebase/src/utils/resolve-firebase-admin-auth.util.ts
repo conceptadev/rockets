@@ -7,6 +7,19 @@ export interface FirebaseAdminAuth {
     token: string,
     checkRevoked?: boolean,
   ): Promise<Record<string, unknown> & { uid: string }>;
+  /**
+   * Session-cookie capability (issue #58) — same shape as
+   * `verifyIdToken`, narrowed the same way rather than pulling the full
+   * `firebase-admin` `Auth` type.
+   */
+  verifySessionCookie(
+    sessionCookie: string,
+    checkRevoked?: boolean,
+  ): Promise<Record<string, unknown> & { uid: string }>;
+  createSessionCookie(
+    idToken: string,
+    sessionCookieOptions: { expiresIn: number },
+  ): Promise<string>;
 }
 
 interface FirebaseAdminAppLegacy {

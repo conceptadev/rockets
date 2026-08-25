@@ -750,6 +750,12 @@
     ],
     "@concepta/rockets-adapter-firebase": [
       {
+        "name": "DEFAULT_SESSION_COOKIE_NAME",
+        "kind": "value",
+        "runtime": true,
+        "signature": "DEFAULT_SESSION_COOKIE_NAME = \"__session\""
+      },
+      {
         "name": "DefaultFirebaseUserResolverService",
         "kind": "class",
         "runtime": true,
@@ -766,6 +772,12 @@
         "kind": "value",
         "runtime": true,
         "signature": "FIREBASE_AUTH_MODULE_OPTIONS_TOKEN: unique symbol"
+      },
+      {
+        "name": "FIREBASE_SESSION_COOKIE_VERIFIER_TOKEN",
+        "kind": "value",
+        "runtime": true,
+        "signature": "FIREBASE_SESSION_COOKIE_VERIFIER_TOKEN: unique symbol"
       },
       {
         "name": "FIREBASE_TOKEN_VERIFIER_TOKEN",
@@ -807,7 +819,7 @@
         "name": "FirebaseAuthModuleOptions",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface FirebaseAuthModuleOptions extends Pick<ModuleMetadata, 'imports'> {\n    readonly firebaseApp?: unknown;\n    readonly verifier?: Type<FirebaseTokenVerifierInterface>;\n    readonly userResolver?: Type<FirebaseUserResolverInterface>;\n    readonly checkRevoked?: boolean;\n}"
+        "signature": "export interface FirebaseAuthModuleOptions extends Pick<ModuleMetadata, 'imports'> {\n    readonly firebaseApp?: unknown;\n    readonly verifier?: Type<FirebaseTokenVerifierInterface>;\n    readonly userResolver?: Type<FirebaseUserResolverInterface>;\n    readonly checkRevoked?: boolean;\n    readonly sessionCookie?: FirebaseSessionCookieConfig;\n}"
       },
       {
         "name": "FirebaseAuthModuleOptionsFactory",
@@ -820,6 +832,42 @@
         "kind": "interface",
         "runtime": false,
         "signature": "export interface FirebaseDecodedTokenInterface {\n    readonly uid: string;\n    readonly sub: string;\n    readonly email?: string;\n    readonly email_verified?: boolean;\n    readonly name?: string;\n    readonly [claim: string]: unknown;\n}"
+      },
+      {
+        "name": "FirebaseSessionCookieAdapter",
+        "kind": "class",
+        "runtime": true,
+        "signature": "export declare class FirebaseSessionCookieAdapter implements AuthAdapterInterface {\n    private readonly verifier;\n    private readonly userResolver;\n    private readonly logger;\n    private readonly cookieName;\n    private readonly checkRevoked;\n    constructor(verifier: FirebaseSessionCookieVerifierInterface, userResolver: FirebaseUserResolverInterface, options: FirebaseAuthModuleOptions);\n    authenticate(request: AuthRequest): Promise<AuthAttemptResult>;\n    private validateCookie;\n    private verifyOrThrow;\n}"
+      },
+      {
+        "name": "FirebaseSessionCookieConfig",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface FirebaseSessionCookieConfig {\n    readonly cookieName?: string;\n    readonly checkRevoked?: boolean;\n}"
+      },
+      {
+        "name": "FirebaseSessionCookieInvalidException",
+        "kind": "class",
+        "runtime": true,
+        "signature": "export declare class FirebaseSessionCookieInvalidException extends FirebaseAuthException {\n    constructor(cause?: unknown);\n}"
+      },
+      {
+        "name": "FirebaseSessionCookieOptions",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface FirebaseSessionCookieOptions {\n    readonly expiresIn: number;\n}"
+      },
+      {
+        "name": "FirebaseSessionCookieRevokedException",
+        "kind": "class",
+        "runtime": true,
+        "signature": "export declare class FirebaseSessionCookieRevokedException extends FirebaseAuthException {\n    constructor(cause?: unknown);\n}"
+      },
+      {
+        "name": "FirebaseSessionCookieVerifierInterface",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface FirebaseSessionCookieVerifierInterface {\n    verifySessionCookie(sessionCookie: string, options?: FirebaseVerifyOptions): Promise<FirebaseDecodedTokenInterface>;\n    createSessionCookie(idToken: string, options: FirebaseSessionCookieOptions): Promise<string>;\n}"
       },
       {
         "name": "FirebaseTokenInvalidException",
@@ -849,7 +897,7 @@
         "name": "FirebaseTokenVerifierService",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class FirebaseTokenVerifierService implements FirebaseTokenVerifierInterface {\n    private readonly firebaseApp;\n    constructor(firebaseApp: unknown);\n    verifyIdToken(token: string, options?: FirebaseVerifyOptions): Promise<FirebaseDecodedTokenInterface>;\n}"
+        "signature": "export declare class FirebaseTokenVerifierService implements FirebaseTokenVerifierInterface, FirebaseSessionCookieVerifierInterface {\n    private readonly firebaseApp;\n    constructor(firebaseApp: unknown);\n    verifyIdToken(token: string, options?: FirebaseVerifyOptions): Promise<FirebaseDecodedTokenInterface>;\n    verifySessionCookie(sessionCookie: string, options?: FirebaseVerifyOptions): Promise<FirebaseDecodedTokenInterface>;\n    createSessionCookie(idToken: string, options: FirebaseSessionCookieOptions): Promise<string>;\n}"
       },
       {
         "name": "FirebaseUserResolverInterface",
@@ -2206,6 +2254,24 @@
         "signature": "export declare class AuthServerGuard implements CanActivate {\n    private readonly adapters;\n    private readonly reflector;\n    private readonly logger;\n    constructor(adapters: ReadonlyArray<AuthAdapterInterface>, reflector: Reflector);\n    canActivate(context: ExecutionContext): Promise<boolean>;\n}"
       },
       {
+        "name": "AuthSession",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function AuthSession(options?: AuthSessionOptions): CustomDecorator<typeof ROCKETS_AUTH_SESSION_TOKEN>;"
+      },
+      {
+        "name": "AuthSessionMetadata",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type AuthSessionMetadata = true | 'classLevel';"
+      },
+      {
+        "name": "AuthSessionOptions",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface AuthSessionOptions {\n    readonly classLevel?: boolean;\n}"
+      },
+      {
         "name": "AuthUser",
         "kind": "value",
         "runtime": true,
@@ -2290,6 +2356,12 @@
         "signature": "export interface ByIdInterface<T = ReferenceId, U = ReferenceIdInterface> {\n    byId: (id: T) => Promise<U | null>;\n}"
       },
       {
+        "name": "CSRF_GUARD_OPTIONS_TOKEN",
+        "kind": "value",
+        "runtime": true,
+        "signature": "CSRF_GUARD_OPTIONS_TOKEN: unique symbol"
+      },
+      {
         "name": "ClaimedJob",
         "kind": "interface",
         "runtime": false,
@@ -2342,6 +2414,18 @@
         "kind": "interface",
         "runtime": false,
         "signature": "export interface CrudResource<E extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Crud;\n    readonly acl: ResourceAclPlan;\n    readonly core: RocketsResourceConfig;\n    readonly persistence: {\n        readonly module?: RepositoryModuleInterface;\n        readonly entity: RepositoryProviderOptions<E>;\n    };\n    readonly meta: {\n        readonly key: string;\n        readonly entityClass: new () => E;\n        readonly relations: ReadonlyArray<ResourceRelationEntry<E>>;\n        readonly hooks: ReadonlyArray<Type>;\n    };\n    readonly subResources?: ReadonlyArray<CrudResource<PlainLiteralObject>>;\n}"
+      },
+      {
+        "name": "CsrfGuard",
+        "kind": "class",
+        "runtime": true,
+        "signature": "export declare class CsrfGuard implements CanActivate {\n    private readonly reflector;\n    private readonly options;\n    private readonly headerName;\n    private readonly headerLookup;\n    constructor(reflector: Reflector, options: CsrfGuardOptions);\n    canActivate(context: ExecutionContext): boolean;\n}"
+      },
+      {
+        "name": "CsrfGuardOptions",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface CsrfGuardOptions {\n    readonly secret: string;\n    readonly sessionCookieName: string;\n    readonly headerName?: string;\n}"
       },
       {
         "name": "DEFAULT_OWNER_COLUMN",
@@ -2518,6 +2602,12 @@
         "signature": "export interface JobFailOptions {\n    readonly retry?: boolean;\n}"
       },
       {
+        "name": "MIN_CSRF_SECRET_LENGTH",
+        "kind": "value",
+        "runtime": true,
+        "signature": "MIN_CSRF_SECRET_LENGTH = 32"
+      },
+      {
         "name": "ModuleResource",
         "kind": "interface",
         "runtime": false,
@@ -2642,6 +2732,12 @@
         "kind": "value",
         "runtime": true,
         "signature": "RATE_LIMIT_STORE_TOKEN: unique symbol"
+      },
+      {
+        "name": "ROCKETS_AUTH_SESSION_TOKEN",
+        "kind": "value",
+        "runtime": true,
+        "signature": "ROCKETS_AUTH_SESSION_TOKEN: unique symbol"
       },
       {
         "name": "ROCKETS_CORE_SETTINGS_TOKEN",
@@ -2959,13 +3055,13 @@
         "name": "RouteAuditEntry",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RouteAuditEntry {\n    readonly id: string;\n    readonly method: string;\n    readonly path: string;\n    readonly controller: string;\n    readonly controllerRef: Type<unknown>;\n    readonly handler: string;\n    readonly authentication: RouteAuthState;\n    readonly aclAction: string | null;\n    readonly aclResource: string | null;\n    readonly aclQuery: string | null;\n}"
+        "signature": "export interface RouteAuditEntry {\n    readonly id: string;\n    readonly method: string;\n    readonly path: string;\n    readonly controller: string;\n    readonly controllerRef: Type<unknown>;\n    readonly handler: string;\n    readonly authentication: RouteAuthState;\n    readonly sessionAuth: boolean;\n    readonly aclAction: string | null;\n    readonly aclResource: string | null;\n    readonly aclQuery: string | null;\n}"
       },
       {
         "name": "RouteAuditReport",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RouteAuditReport {\n    readonly routes: readonly RouteAuditEntry[];\n    readonly globalGuards: readonly string[];\n    readonly authGuards: readonly string[];\n}"
+        "signature": "export interface RouteAuditReport {\n    readonly routes: readonly RouteAuditEntry[];\n    readonly globalGuards: readonly string[];\n    readonly authGuards: readonly string[];\n    readonly csrfGuards: readonly string[];\n}"
       },
       {
         "name": "RouteAuditService",
@@ -2989,13 +3085,13 @@
         "name": "RoutePolicy",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RoutePolicy {\n    readonly requireAuth?: boolean;\n    readonly requireAcl?: boolean;\n    readonly requireAclQuery?: boolean;\n    readonly allow?: readonly string[];\n    readonly allowControllers?: readonly Type<unknown>[];\n    readonly authGuards?: readonly Type<unknown>[];\n}"
+        "signature": "export interface RoutePolicy {\n    readonly requireAuth?: boolean;\n    readonly requireAcl?: boolean;\n    readonly requireAclQuery?: boolean;\n    readonly requireCsrf?: boolean;\n    readonly allow?: readonly string[];\n    readonly allowControllers?: readonly Type<unknown>[];\n    readonly authGuards?: readonly Type<unknown>[];\n    readonly csrfGuards?: readonly Type<unknown>[];\n}"
       },
       {
         "name": "RoutePolicyViolation",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RoutePolicyViolation {\n    readonly routeId: string;\n    readonly rule: 'requireAuth' | 'requireAcl' | 'requireAclQuery' | 'staleAllow';\n    readonly detail: string;\n}"
+        "signature": "export interface RoutePolicyViolation {\n    readonly routeId: string;\n    readonly rule: 'requireAuth' | 'requireAcl' | 'requireAclQuery' | 'requireCsrf' | 'staleAllow';\n    readonly detail: string;\n}"
       },
       {
         "name": "SchemaEntityCompiler",
@@ -3223,7 +3319,7 @@
         "name": "collectRouteAudit",
         "kind": "function",
         "runtime": true,
-        "signature": "export declare function collectRouteAudit(args: {\n    readonly controllers: readonly ControllerScan[];\n    readonly globalGuards: readonly string[];\n    readonly authGuards: readonly string[];\n}): RouteAuditReport;"
+        "signature": "export declare function collectRouteAudit(args: {\n    readonly controllers: readonly ControllerScan[];\n    readonly globalGuards: readonly string[];\n    readonly authGuards: readonly string[];\n    readonly csrfGuards?: readonly string[];\n}): RouteAuditReport;"
       },
       {
         "name": "createBoundRelation",
@@ -3316,6 +3412,12 @@
         "signature": "export declare function extractBearerToken(request: AuthRequest): string | null;"
       },
       {
+        "name": "extractCookie",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function extractCookie(request: AuthRequest, name: string): string | null;"
+      },
+      {
         "name": "findRegisteredRouteCollisions",
         "kind": "function",
         "runtime": true,
@@ -3326,6 +3428,12 @@
         "kind": "function",
         "runtime": true,
         "signature": "export declare function formatPolicyViolations(violations: readonly RoutePolicyViolation[]): string;"
+      },
+      {
+        "name": "generateCsrfToken",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function generateCsrfToken(sessionValue: string, secret: string): string;"
       },
       {
         "name": "getActor",
@@ -3406,6 +3514,12 @@
         "signature": "export declare function logAndGetErrorDetails(error: unknown, logger: Logger, customMessage: string, context?: Record<string, unknown>): ErrorDetails;"
       },
       {
+        "name": "parseCookies",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function parseCookies(header: string | readonly string[] | undefined): Readonly<Record<string, string>>;"
+      },
+      {
         "name": "readErrorDetails",
         "kind": "function",
         "runtime": true,
@@ -3446,6 +3560,12 @@
         "kind": "function",
         "runtime": true,
         "signature": "export declare function validateRegisteredRoutes(appOrRoutes: RouteInspectionTarget | readonly RegisteredRoute[]): void;"
+      },
+      {
+        "name": "verifyCsrfToken",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function verifyCsrfToken(token: string, sessionValue: string, secret: string): boolean;"
       },
       {
         "name": "verifyWebhookSignature",
