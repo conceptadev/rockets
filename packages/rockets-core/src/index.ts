@@ -382,6 +382,20 @@ export {
   ROCKETS_CORE_SETTINGS_TOKEN,
 } from './rockets-core.constants';
 
+// Rate limiting — policy → route port (issue #56)
+export {
+  RateLimit,
+  ROCKETS_RATE_LIMIT_TOKEN,
+  type RateLimitOptions,
+} from './decorators/rate-limit.decorator';
+export {
+  RATE_LIMIT_STORE_TOKEN,
+  type RateLimitResult,
+  type RateLimitStoreInterface,
+} from './domain/interfaces/rate-limit.interface';
+export { RateLimitGuard } from './infrastructure/guards/rate-limit.guard';
+export { InMemoryRateLimitStore } from './infrastructure/rate-limit/in-memory-rate-limit-store.service';
+
 // Job dispatch port — dedupe, lease, at-least-once (issue #53)
 export {
   JOB_DISPATCH_SERVICE_TOKEN,
