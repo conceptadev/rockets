@@ -331,8 +331,9 @@ Take the context from wherever you are: a hook's second argument (typed
 `TransactionScope.run` hands its callback. All three satisfy the
 repository's `ctx?: PlainLiteralObject`. Never spread it into a new
 object — it is an `AppContextHost` Proxy and spreading strips the overlay
-accessors. `CONFIGURATION.md` §8a has the full seam, including the
-`SUPPORTS`-by-default trap and an audit `grep`.
+accessors. `CONFIGURATION.md` §8a has the full seam, including what
+`propagation` does and does not control, the nested-scope boundary, and
+an audit `grep`.
 
 ### Read the authenticated user inside a handler
 
