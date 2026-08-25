@@ -137,6 +137,8 @@
     "sample:debug": "yarn workspace sample-server start:debug",
     "sample:build": "yarn workspace sample-server build",
     "sample:test:e2e": "yarn workspace sample-server test:e2e",
+    "sample:contract:export": "yarn workspace sample-server contract:export",
+    "sample:contract:check": "yarn workspace sample-server contract:check",
     "sample-auth:start": "yarn workspace sample-server-auth start",
     "sample-auth:dev": "yarn workspace sample-server-auth start:dev",
     "sample-auth:debug": "yarn workspace sample-server-auth start:debug",

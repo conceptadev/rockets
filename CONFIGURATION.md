@@ -558,16 +558,14 @@ reviewed.
 
 ### The pattern
 
-A vitest e2e spec boots the app, builds the document exactly like the UI
-does, and either regenerates a committed `contract.json` (opt-in, via an
-env var) or diffs the fresh document against it byte-for-byte:
+A vitest e2e spec boots the app, builds the document **through the app's own
+document-building code path**, and either regenerates a committed
+`contract.json` (opt-in, via an env var) or diffs the fresh document against
+it byte-for-byte:
 
 ```ts
-const document = SwaggerModule.createDocument(
-  app,
-  app.get(SwaggerUiService).builder().build(),
-);
-const generated = `${JSON.stringify(document, null, 2)}\n`;
+const document = createSampleServerOpenApiDocument(app);
+const generated = stableContractJson(document);
 
 if (process.env.CONTRACT_UPDATE === '1') {
   writeFileSync(contractPath, generated);
@@ -576,15 +574,72 @@ if (process.env.CONTRACT_UPDATE === '1') {
 }
 ```
 
-`examples/sample-server-auth` ships the reference copy:
-`test/openapi-contract-export.e2e-spec.ts` writes/checks
-`examples/sample-server-auth/contract.json`. Regenerate it after an
-intentional API change:
+That helper is the important part. A document rebuilt from a bare
+`SwaggerModule.createDocument(app, builder.build())` is **not** what a real
+app serves: `examples/sample-server` also passes `extraModels`, patches the
+PATCH `/me` request body, and runs the nestjs-zod `cleanupOpenApiDoc` pass.
+Pinning the simplified document would pin a contract nobody is served.
+
+So each app owns one `src/swagger/create-openapi-document.ts` that `main.ts`
+and its contract spec both call, and rockets-core exposes the shared seam
+underneath it:
+
+```ts
+// packages/rockets-core — builds the document `setup()` serves, no UI mount
+swaggerUiService.createDocument(app, { extraModels: [UserMetadataUpdateDto] });
+```
+
+`SwaggerUiService.setup()` now routes through `createDocument()` too, so
+"the pinned document" and "the served document" are the same call by
+construction rather than by convention.
+
+### The two pinned artifacts
+
+Both example apps pin a contract, because they cover different halves of
+issue #54's acceptance criteria:
+
+| App | Contract | Covers |
+|---|---|---|
+| `examples/sample-server` | `examples/sample-server/contract.json` | zod CRUD (`zodResource`), zod sub-resources (`zodSubResource`), `operationResource` non-CRUD ops, plus class-based `defineResource` in the same document |
+| `examples/sample-server-auth` | `examples/sample-server-auth/contract.json` | class-based `defineResource` + the full built-in auth surface |
+
+Regenerate after an intentional API change:
 
 ```bash
-CONTRACT_UPDATE=1 yarn sample-auth:contract:export   # writes contract.json
-yarn sample-auth:contract:check                      # verifies it's pinned
+yarn sample:contract:export        # writes examples/sample-server/contract.json
+yarn sample:contract:check         # verifies it's pinned
+yarn sample-auth:contract:export   # writes examples/sample-server-auth/contract.json
+yarn sample-auth:contract:check    # verifies it's pinned
 ```
+
+Each `contract:*` script builds the workspace packages and the example first
+(`contract:build`), so a regeneration can never pin a document generated
+from stale `dist`.
+
+### Canonical key order
+
+`stableContractJson` sorts object keys before serializing (array order is
+preserved — it *is* significant in `required`, `enum`, `parameters`,
+`allOf`). This is not cosmetic. `SwaggerModule` assigns schema properties in
+whatever order its code path happens to take, and that order is **not stable
+across toolchains**: the `/admin/audit-logs` enum query parameter serializes
+as `{"type","enum"}` when the app runs under vitest/swc and `{"enum","type"}`
+under ts-node/tsc. A raw `JSON.stringify` pin reports drift on a document
+whose API did not change. Sorting first makes the check answer the question
+it is actually asking.
+
+Verified end to end: booting `examples/sample-server` with `yarn sample:once`
+and canonicalizing what `GET /api-json` returns reproduces
+`examples/sample-server/contract.json` exactly.
+
+### What is deliberately not pinned
+
+The OpenAPI `info` block is per-deployment configuration —
+`SWAGGER_UI_TITLE`, `SWAGGER_UI_VERSION`, `SWAGGER_UI_DESCRIPTION`,
+`SWAGGER_UI_CONTACT_*`, `SWAGGER_UI_LICENSE_*` all feed it. Both contract
+specs clear every `SWAGGER_UI_*` variable before booting, so the pinned
+`info` block is always the built-in default. Without that, anyone with one of
+those exported in their shell gets a drift failure that is not drift.
 
 ### Why this, not a typed client
 
@@ -600,11 +655,17 @@ Nothing here blocks adding one later against the same `contract.json`.
 
 ### CI
 
-No new workflow step was needed: `release-readiness.yml` already runs
-`yarn samples:test:e2e` (→ `sample-auth:test:e2e`) on every pull request,
-which picks up the new spec file automatically — a required status check
-(`release-gates`) fails if `contract.json` drifts from what the app
-actually serves.
+No new workflow step was needed: `release-readiness.yml`'s `release-gates`
+job already runs `yarn samples:test:e2e` (→ `sample:test:e2e` and
+`sample-auth:test:e2e`) on every pull request, and vitest picks up both new
+spec files automatically. Contract drift therefore shows up as a **failing
+job on the PR before merge**.
+
+Be precise about what that buys you: `release-gates` is not configured as a
+GitHub *required status check* — `main` has no branch protection today, so
+the job reports, it does not block. Making drift merge-blocking is a
+repository-admin change (enable branch protection on `main` and mark
+`release-gates` required), not something this scaffold can do on its own.
 
 ---
 

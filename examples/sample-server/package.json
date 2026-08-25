@@ -7,7 +7,10 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "build": "tsc -p tsconfig.json",
-    "test:e2e": "vitest run --config vitest.e2e.config.mts"
+    "test:e2e": "vitest run --config vitest.e2e.config.mts",
+    "contract:build": "cd ../.. && yarn build && yarn sample:build",
+    "contract:export": "yarn contract:build && CONTRACT_UPDATE=1 vitest run --config vitest.e2e.config.mts test/openapi-contract-export.e2e-spec.ts",
+    "contract:check": "yarn contract:build && vitest run --config vitest.e2e.config.mts test/openapi-contract-export.e2e-spec.ts"
   },
   "dependencies": {
     "@concepta/nestjs-core": "8.0.0-alpha.8",

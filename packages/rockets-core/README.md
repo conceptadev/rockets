@@ -927,21 +927,33 @@ the policy — keep the two consistent per environment.
 
 ### Export a stable OpenAPI contract
 
-`SwaggerUiService` builds the same OpenAPI document your app's Swagger UI
-serves. Pin it as a committed artifact so an unintended change to the wire
-contract fails CI instead of drifting unnoticed:
+`SwaggerUiService.createDocument(app)` returns the exact OpenAPI document
+`SwaggerUiService.setup(app)` mounts — `setup()` calls it internally, so the
+two cannot drift. Use it to pin the wire contract as a committed artifact:
 
 ```typescript
-const document = SwaggerModule.createDocument(
-  app,
-  app.get(SwaggerUiService).builder().build(),
-);
+const document = app.get(SwaggerUiService).createDocument(app);
+
+// Per-call document options (e.g. `extraModels`) override the configured
+// `settings.documentOptions`:
+const withExtras = app
+  .get(SwaggerUiService)
+  .createDocument(app, { extraModels: [UserMetadataUpdateDto] });
 ```
 
-`examples/sample-server-auth` ships the reference version — one e2e spec
-that regenerates or diffs `contract.json` against that document, gated by
-the existing CI e2e run for that app. See `CONFIGURATION.md` §6b for the
-full pattern and the `CONTRACT_UPDATE=1` regeneration workflow.
+Do not rebuild the document from `builder().build()` by hand. An app that
+post-processes its document — `examples/sample-server` adds `extraModels`, a
+PATCH `/me` request-body patch and the nestjs-zod `cleanupOpenApiDoc` pass —
+would pin something it never serves. Wrap the real steps once in a
+`createOpenApiDocument(app)` helper and call it from both `main.ts` and the
+contract spec.
+
+Both example apps ship the reference version — an e2e spec that regenerates
+or diffs `contract.json` against that document on every CI samples run.
+`examples/sample-server` covers zod CRUD resources, zod sub-resources and
+`operationResource` ops; `examples/sample-server-auth` covers the class-based
+`defineResource` + built-in auth surface. See `CONFIGURATION.md` §6b for the
+full pattern and the regeneration workflow.
 
 ---
 
