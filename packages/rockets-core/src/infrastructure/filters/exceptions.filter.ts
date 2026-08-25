@@ -32,6 +32,66 @@ import {
 export const ERROR_MESSAGE_FALLBACK = 'Internal Server Error';
 
 /**
+ * Walk the `context.originalError` chain and return the first
+ * `HttpException` encountered, or `undefined` when the chain holds none
+ * (or when the only one IS the exception passed in — the caller already
+ * has it).
+ *
+ * Module-level so the SSE streaming path can run the SAME unwrap: an
+ * error raised inside an `op.sse()` Observable never reaches this
+ * filter once the response headers are committed, and re-deriving the
+ * chain walk there would be a second implementation free to drift from
+ * this one. {@link RocketsCoreExceptionsFilter.unwrapToHttpException}
+ * delegates here so subclasses can still override the seam.
+ */
+export function unwrapToHttpException(
+  exception: unknown,
+): HttpException | undefined {
+  let current: unknown = exception;
+  const seen = new Set<unknown>();
+  while (current && !seen.has(current)) {
+    seen.add(current);
+    if (current instanceof HttpException) {
+      return current === exception ? undefined : current;
+    }
+    const next = (current as { context?: { originalError?: unknown } })?.context
+      ?.originalError;
+    if (!next || next === current) break;
+    current = next;
+  }
+  return undefined;
+}
+
+/**
+ * Walk the chain for the innermost `RuntimeException` carrying a 4xx
+ * `httpStatus`. Shared with the SSE path for the same reason as
+ * {@link unwrapToHttpException}.
+ */
+export function unwrapToClientRuntimeException(
+  exception: unknown,
+): RuntimeException | undefined {
+  let current: unknown = exception;
+  let candidate: RuntimeException | undefined;
+  const seen = new Set<unknown>();
+  while (current && !seen.has(current)) {
+    seen.add(current);
+    if (
+      current instanceof RuntimeException &&
+      current.httpStatus !== undefined &&
+      current.httpStatus < 500 &&
+      current !== exception
+    ) {
+      candidate = current;
+    }
+    const next = (current as { context?: { originalError?: unknown } })?.context
+      ?.originalError;
+    if (!next || next === current) break;
+    current = next;
+  }
+  return candidate;
+}
+
+/**
  * Structural shape of a `class-validator` `ValidationError`. Declared
  * locally on purpose: the filter only reads these three fields, and
  * depending on `class-validator` types here would couple the core
@@ -264,19 +324,7 @@ export class RocketsCoreExceptionsFilter implements ExceptionFilter {
   protected unwrapToHttpException(
     exception: unknown,
   ): HttpException | undefined {
-    let current: unknown = exception;
-    const seen = new Set<unknown>();
-    while (current && !seen.has(current)) {
-      seen.add(current);
-      if (current instanceof HttpException) {
-        return current === exception ? undefined : current;
-      }
-      const next = (current as { context?: { originalError?: unknown } })
-        ?.context?.originalError;
-      if (!next || next === current) break;
-      current = next;
-    }
-    return undefined;
+    return unwrapToHttpException(exception);
   }
 
   /**
@@ -289,25 +337,7 @@ export class RocketsCoreExceptionsFilter implements ExceptionFilter {
   protected unwrapToClientRuntimeException(
     exception: unknown,
   ): RuntimeException | undefined {
-    let current: unknown = exception;
-    let candidate: RuntimeException | undefined;
-    const seen = new Set<unknown>();
-    while (current && !seen.has(current)) {
-      seen.add(current);
-      if (
-        current instanceof RuntimeException &&
-        current.httpStatus !== undefined &&
-        current.httpStatus < 500 &&
-        current !== exception
-      ) {
-        candidate = current;
-      }
-      const next = (current as { context?: { originalError?: unknown } })
-        ?.context?.originalError;
-      if (!next || next === current) break;
-      current = next;
-    }
-    return candidate;
+    return unwrapToClientRuntimeException(exception);
   }
 }
 

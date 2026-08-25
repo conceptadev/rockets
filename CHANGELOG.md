@@ -23,21 +23,26 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
   regression net over this seam, not an independent proof that the
   handler never runs. Neither `output` nor `transactional` is exposed on
   this builder — a never-completing connection is not something to hold
-  a database transaction open across. The generated route is GET-only
-  and **enforced** at definition time: after every decorator has run,
-  the controller reads the route metadata back and throws if an SSE
-  operation registers (or declares) a non-`GET` method, lost its
-  `@Sse()`, smuggled `@Sse()` onto a JSON operation, or carries
-  `Transactional()`. Without that read-back, `decorators: [Post('x')]`
-  won the `METHOD_METADATA` slot (`applyDecorators` runs in order, last
-  write wins) and produced a POST route still in SSE response mode —
-  invisible to the duplicate-route and planner collision checks, which
-  read the declared method. A mid-stream failure is masked exactly as
-  `RocketsCoreExceptionsFilter` masks a 5xx JSON body — `HttpException`
-  and `safeMessage` text pass through, anything else becomes
-  `Internal Server Error` with the real error logged server-side — since
-  once headers are committed Nest writes `err.message` straight to the
-  wire and never reaches that filter. HTTP Range/partial-content support
+  a database transaction open across. **Every** generated operation now
+  has its registered route metadata read back after all decorators have
+  run and compared against the declared `method`/`path`, throwing at
+  definition time when they disagree; SSE adds its own rules on top
+  (`GET`-only, no `output` DTO, no `Transactional()` — on the operation
+  or the resource — and no `@Sse()` smuggled onto a JSON op). Without
+  that read-back, `decorators: [Post('x')]` won the `METHOD_METADATA`
+  slot (`applyDecorators` runs in order, last write wins) and produced a
+  POST route still in SSE response mode, while `decorators: [Get('b')]`
+  moved only the path — both invisible to the duplicate-route and
+  planner collision checks, which read the declared values. A mid-stream
+  failure is masked the way `RocketsCoreExceptionsFilter` masks a 5xx
+  JSON body, over the same **unwrapped** exception (the filter's chain
+  walkers are now exported and shared, so a hook's `403` wrapped in a
+  `RepositoryQueryException` is still a `403` and not a masked `500`):
+  `HttpException` and `safeMessage` text pass through, anything else
+  becomes `Internal Server Error` with the real error logged
+  server-side. This is needed because once headers are committed Nest
+  writes `err.message` straight to the wire and never reaches that
+  filter. HTTP Range/partial-content support
   (the rest of issue #52) needs genuinely new plumbing with no precedent
   in this codebase and is a deliberate follow-up, not part of this PR
   (issue #101). See `CONFIGURATION.md` §6c.

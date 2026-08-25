@@ -603,35 +603,48 @@ response body IS the event stream, never a whitelisted JSON value) and
 connection that may run indefinitely is not something to make one flag
 away).
 
-### The route is GET-only, and that is enforced, not asserted
+### The registered route must match the declared route
 
-An SSE route is always registered as `GET` — the only method a
-browser's native `EventSource` can issue. That is checked at definition
-time (app boot), not merely documented, because it is reachable
-otherwise: Nest's route decorators are unmerged `Reflect.defineMetadata`
-writes and `applyDecorators` runs its list **in order**, so a consumer
-`decorators: [Post('x')]` — appended after the framework's `@Sse()` —
-used to overwrite the method while the SSE response mode stayed on. The
-result was a POST route serving an event stream: unusable by any real
-client, and invisible to the duplicate-route and planner collision
-checks, which read the *declared* method.
+Nest's route decorators are unmerged `Reflect.defineMetadata` writes and
+`applyDecorators` runs its list **in order**, so a route decorator
+appended through `operation.decorators` silently takes over the method
+slot, the path slot, or both — `@Sse()` and `@Get()`/`@Post()` all write
+`METHOD_METADATA` *and* `PATH_METADATA`.
 
-After every decorator has run, the generated controller reads the
-metadata back and **throws** if:
+That matters beyond SSE. Every other route protection here reads the
+**declared** `method`/`path`: the duplicate-route check and the
+planner's cross-resource collision validator. A hijacked route is
+therefore not merely wrong, it is *invisible* — the app serves an
+address no audit knows about.
+
+So after every decorator has run, the generated controller reads the
+metadata back and **throws at definition time** when the registration
+disagrees with the declaration, for **every** operation:
 
 | Situation | Why it is rejected |
 |---|---|
-| an SSE op registers as anything but `GET` | a decorator overwrote `@Sse()`'s method |
-| an SSE op *declares* a non-`GET` method | `@Sse()` still registers GET, so route audits would file the route under the wrong method (reachable via `defineOperationResource`) |
-| an SSE op lost its `@Sse()` metadata | the route would return a raw Observable as a JSON body |
+| registered method ≠ declared method | a `decorators` entry overwrote the generated route decorator |
+| registered path ≠ declared path | same, on the sibling slot — `op.sse({ path: 'a', decorators: [Get('b')] })` keeps a legal method and moves only the address |
+
+On top of that, SSE-specific rules:
+
+| Situation | Why it is rejected |
+|---|---|
+| an SSE op *declares* a non-`GET` method | `@Sse()` always registers GET, so route audits would file the route under the wrong method (reachable via `defineOperationResource`) |
 | a non-SSE op carries `@Sse()` | core would still run the JSON output-DTO step over the Observable |
-| an SSE op carries `Transactional()` | see below |
+| an SSE op declares an `output` DTO | there is no JSON body to whitelist; the DTO would be silently ignored |
+| an SSE op carries `Transactional()`, on the operation **or on the resource** | see below |
+
+An SSE route is therefore always `GET` — the only method a browser's
+native `EventSource` can issue.
 
 `Transactional()` on an SSE operation is rejected rather than allowed
 to be a silent no-op: the handler returns its Observable immediately,
 so the transaction the interceptor opens commits before a single event
-is emitted. If a specific emission needs a transaction, open one inside
-the stream with `TransactionScope.run` (§8a).
+is emitted. Resource-level `decorators: [Transactional()]` reaches every
+route on the generated controller, so it is caught the same way. If a
+specific emission needs a transaction, open one inside the stream with
+`TransactionScope.run` (§8a).
 
 ### Error after the stream has started
 
@@ -641,19 +654,33 @@ reaches `RocketsCoreExceptionsFilter`. Nest's own SSE response
 controller writes `{ type: 'error', data: err.message }` onto the open
 connection instead.
 
-Core therefore masks that error **before Nest sees it**, with the same
-decision the exceptions filter makes for a JSON response:
+Core therefore masks that error **before Nest sees it**, using the
+filter's own exported chain walkers and then the same decision it makes
+for a JSON response.
 
-| Thrown from the stream | What the client receives |
+Unwrapping first is the load-bearing part. The repository/CRUD layers
+wrap a hook's `HttpException` as a `RepositoryQueryException`, which
+extends `RuntimeException` and carries **no** `httpStatus` — judged at
+the top level, a hook's `403` looks like an unclassified 5xx. The filter
+never judges at the top level; it walks `context.originalError` first,
+and so does this path:
+
+| Thrown from the stream (after unwrapping) | What the client receives |
 |---|---|
 | an `HttpException` | its own message, at any status — author-chosen, exactly as in a JSON response |
 | a `RuntimeException` with a `safeMessage` | that `safeMessage` |
 | a `RuntimeException` at 5xx without one | `Internal Server Error` |
 | anything else (a plain `Error`, a driver failure) | `Internal Server Error` |
 
-The real error is logged server-side in every masked case. Without this,
-a `public: true` stream — a first-class pattern here — could hand an
-anonymous client an internal error message verbatim.
+The real error is logged server-side in every masked case, and 5xx
+`HttpException`s are logged too even though their message passes
+through. Without this, a `public: true` stream — a first-class pattern
+here — could hand an anonymous client an internal error verbatim.
+
+Because the unwrapped exception itself is what travels (rather than a
+rebuilt one), a failure raised **before the first event** still reaches
+the exceptions filter and still resolves the status it always did: a
+wrapped `403` is a `403`, not a `500`.
 
 **If a handler wants a specific, safe-to-leak mid-stream message**, say
 so explicitly: throw an `HttpException` (or a `RuntimeException` with a

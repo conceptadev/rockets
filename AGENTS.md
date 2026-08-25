@@ -182,7 +182,12 @@ the user has already had to fix more than once.
     propagation is `SUPPORTS`, i.e. *no* transaction outside a request —
     pass `REQUIRED` when you mean it). `transactional: true` exists only
     on CRUD and operation-resource operations; anything else opens its
-    own scope. Full seam with examples: `CONFIGURATION.md` §8a.
+    own scope. One exception: an `op.sse()` operation REJECTS
+    `Transactional()` at definition time (on the operation or on the
+    resource) — the handler returns its Observable immediately, so the
+    transaction would commit before any event is emitted. Open one
+    inside the stream instead. Full seam with examples:
+    `CONFIGURATION.md` §8a; SSE specifics in §6c.
 
 ## How to work with the project owner
 
