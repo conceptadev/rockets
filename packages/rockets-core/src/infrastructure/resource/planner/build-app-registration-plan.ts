@@ -12,6 +12,7 @@ import { sortResourceInputs } from './sort-resource-inputs';
 import { materialiseModuleResource } from './materialise-module-resource';
 import { materialiseOperationResource } from './materialise-operation-resource';
 import { validateResourceRelations } from './validate-relations';
+import { validateEntityHookBindings } from './validate-entity-hook-bindings';
 import { validateStructuredRouteCollisions } from './validate-route-collisions';
 import { planAccessControl } from './validate-access-control';
 
@@ -25,8 +26,9 @@ import { planAccessControl } from './validate-access-control';
  *   2. Build entity registry (dedupe + relation targets).
  *   3. Group repository rows per adapter (strict — adapter required).
  *   4. Validate CRUD relations against the registry.
- *   5. Reject cross-resource METHOD+path collisions (CRUD/Sub/Operation).
- *   6. Materialise module-resource and operation-resource Nest slices.
+ *   5. Reject entity hooks bound to a key the registry does not use.
+ *   6. Reject cross-resource METHOD+path collisions (CRUD/Sub/Operation).
+ *   7. Materialise module-resource and operation-resource Nest slices.
  */
 export function buildAppRegistrationPlan(args: {
   readonly resources: ReadonlyArray<ResourceInput>;
@@ -66,6 +68,8 @@ export function buildAppRegistrationPlan(args: {
   });
 
   validateResourceRelations(generatedResources, entityRegistry);
+
+  validateEntityHookBindings(generatedResources, entityRegistry);
 
   validateStructuredRouteCollisions({
     generatedResources,

@@ -7,6 +7,88 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Added
 
+- **Background job dispatch port (issue #53).**
+  `JobDispatchServiceInterface` (`enqueue` / `claim` / `heartbeat` /
+  `complete` / `fail`) under `JOB_DISPATCH_SERVICE_TOKEN` — named tasks
+  with dedupe (a repeat `enqueue` under the same `dedupeKey` while a job
+  is still active returns the existing job instead of a new one),
+  lease-based claiming, and at-least-once delivery (an expired lease
+  makes a job claimable again with `attempt` incremented, so a crashed
+  worker's job gets redelivered). `InProcessJobDispatchService` ships as
+  the in-memory reference adapter for tests/samples; no queue vendor is
+  a core dependency, matching the storage-SDK-free rule for the file
+  upload seam. Common shape: an `operationResource` write op enqueues
+  and returns `202` + job id immediately, a worker calls
+  `claim`/`heartbeat`/`complete` separately. See `CONFIGURATION.md` §6d.
+
+- **Idempotency keys and inbound webhook signature verification (issue
+  #59).** `IdempotencyStoreInterface` (`get`/`set`) under
+  `IDEMPOTENCY_STORE_TOKEN` plus `hashIdempotentRequest` (a
+  key-order-stable hash used to detect a reused idempotency key with a
+  DIFFERENT request body — a client error, not a replay).
+  `InMemoryIdempotencyStore` ships as the reference adapter. No new
+  `operationResource` option: a handler CLASS checks the store before
+  doing the real work and replays the cached result on a match, the
+  same documented-pattern shape as the file upload seam.
+  `verifyWebhookSignature` is a timing-safe HMAC compare
+  (`crypto.timingSafeEqual`) against the RAW request body — read via
+  Nest's own `rawBody: true` app option, since a parsed-then-reserialized
+  JSON body is not guaranteed byte-identical to what a provider signed.
+  `createWebhookSignatureVerifier` binds the secret once and validates
+  it EAGERLY, so it belongs in a provider factory: an unset
+  `WEBHOOK_SECRET` or a misspelled algorithm then fails the boot instead
+  of 401-ing every legitimate delivery in production.
+  The documented idempotency pattern scopes the store key by the
+  authenticated principal (`` `${userId}:${key}` ``) and replays the
+  STORED status, not the operation's declared one. The store is
+  documented as at-least-once: `get`/`set` has no atomic reserve, so
+  concurrent first-writers under one key both run (7 of 20 measured) —
+  it de-duplicates sequential retries, and an atomic reserve on the port
+  remains an open design question.
+  See `CONFIGURATION.md` §6e.
+
+- **`TenantScopeHook` — fail-closed row scoping by resolved tenant set
+  (issue #69).** Complements `acl` (#51): `acl` decides which actions an
+  actor may perform, this decides which rows. `TenantScopeHook.for(entity,
+  { tenantKey, resolve })` scopes `list`/`read`/`update`/`delete` to rows
+  whose `tenantKey` is in `resolve(actor)`'s result — and, unlike
+  `OwnerScopeHook` (which deliberately no-ops with no actor, reasoning an
+  unauthenticated request on a protected route already failed upstream),
+  this is fail-closed on purpose: no actor, or a `resolve` returning `[]`,
+  both produce a WHERE clause matching nothing, never an unfiltered
+  query — the fail-open gap the issue exists to close. A row outside the
+  resolved set 404s (never found by the query), not 403. The empty-set
+  case is a `Where.isNull(tenantKey)` AND `Where.notNull(tenantKey)`
+  contradiction rather than `Where.in(tenantKey, [])` — several SQL
+  engines, TypeORM's own `In([])` historically included, do not reliably
+  treat an empty IN-list as "match nothing." See `CONFIGURATION.md` §5b.
+
+  `TenantScopeHook` rewrites `where` clauses and nothing else, so it does
+  NOT constrain the tenant column on writes: `POST` issues no `find` at
+  all, and `PATCH`/`PUT` scope the lookup but never inspect the update
+  payload — a body carrying another tenant's id moves the row out of the
+  actor's tenant. An earlier revision of this entry (and of
+  `CONFIGURATION.md` §5b) told readers to close that by stamping "the same
+  way `OwnerStampHook` stamps ownership." That advice was **wrong**:
+  `OwnerStampHook` stamps `actor.id`, and an actor's user id is not one of
+  their tenant ids, so following it writes the wrong value into the column.
+
+- **`TenantStampHook` — the write-side half of tenant scoping.**
+  `TenantStampHook.for(entity, { tenantKey, resolve })` enforces the same
+  resolved set on `beforeCreate`/`beforeUpdate`. A payload value inside
+  the set passes; a value outside it is **rejected with `403`, never
+  silently rewritten** (the opposite of `OwnerStampHook`, deliberately —
+  there is one legal owner id but there can be several legal tenant ids,
+  so silently picking one would persist the row somewhere the caller never
+  asked for). An omitted value is stamped on `create` when the actor
+  resolves to exactly one tenant, `403`s when they resolve to none, and
+  `400`s as ambiguous when they resolve to several; on `update` it is left
+  absent, since the scoped `findOne` already proved the row is in range.
+  Pass the SAME resolver to both hooks. Like `OwnerStampHook`, the 4xx
+  statuses require `RocketsCoreExceptionsFilter` to be registered — the
+  upstream membrane wraps hook throws in `RepositoryQueryException`, and
+  without the filter the (still-rejected) write reports `500`.
+
 - **Session-cookie auth, CSRF, and the ternary route policy (issue
   #58).** `AuthSession()` marks a route session-cookie authenticated —
   the third leg alongside `AuthPublic()` ("public") and no decorator
@@ -103,9 +185,11 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
   The default envelope body is byte-shape unchanged;
   `detailedErrorSerializer` is the one-line opt-in that appends
   `details`. `400`s minted by the upstream class-validator pipe carry
-  messages only, and `@concepta/rockets-auth` apps are out of reach
-  until their compatibility filter gains the seam (#87) — limits stated
-  rather than papered over.
+  messages only — the one limit, stated rather than papered over. Reach
+  is per APP, not per package: any app that registers
+  `RocketsCoreExceptionsFilter` gets the seam, `@concepta/rockets-auth`
+  apps included (`examples/sample-server-auth` already does, via
+  `@concepta/rockets`' `ExceptionsFilter` re-export).
 
 - **Schema DTOs survive class-validator whitelist pipes (issue #83).**
   Three pieces. `StandardSchemaDtoValidationPipe` now recognises any
@@ -300,6 +384,56 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Removed
 
+- **`RocketsAuthExceptionsFilter` — dead code, and the auth e2e helper
+  was its only caller (issue #87).** No application's behaviour changes.
+  The filter was never in `rockets-server-auth`'s `src/index.ts` and the
+  package's `exports` map has no deep-import subpath (only `.` and
+  `./package.json`), so no consumer could import it;
+  a repo-wide sweep found zero references outside
+  `__e2e__/helpers/rockets-auth-e2e-app.factory.ts`. Its own
+  `RuntimeException` branch was unreachable too — a double import made
+  both `instanceof` checks resolve to the same class — and the reachable
+  half duplicated upstream's filter. So the real defect was in the
+  TESTS: the auth e2e app ran a filter no real app ran, which is why
+  `details` (#55) looked unreachable from auth. The helper now
+  registers `RocketsCoreExceptionsFilter` — what
+  `examples/sample-server-auth` and every other consumer already use —
+  and takes an optional serializer, so the suite exercises the
+  production path. `rockets-auth-error-details.e2e-spec.ts` pins it:
+  `details` reach an auth-composed app under
+  `detailedErrorSerializer`, the default envelope stays byte-shape
+  identical (all four keys asserted), and a 5xx still masks them —
+  proven on a synthetic route AND on `PATCH /me`, whose
+  `whitelistedFromDto` call is the one production site that mints
+  details on a route a consumer actually calls.
+
+  **Two limitations found while writing that coverage.** Stated rather
+  than papered over; neither is introduced by this change.
+
+  *Invitation acceptance swallows errors.* The other production minter
+  — the invitation-acceptance listener — cannot surface details, or any
+  error, over HTTP. Its event is published from an `onCommit` callback
+  flushed with `Promise.allSettled`, `AggregateRoot.commit()` is a
+  synchronous `void`, `EventBus.bind` swallows handler exceptions, and
+  the listener catches to honour the event-listener contract.
+  `PATCH /invitation-acceptance/:code` therefore returns `200` whenever
+  metadata validation throws — for ANY reason, not only a bad payload —
+  leaving the metadata unwritten with only a log line. Three of those
+  four barriers are upstream.
+
+  *`PATCH /me` is unusable with an undecorated metadata DTO (issue
+  #103).* `whitelistedFromDto` validates with `forbidUnknownValues:
+  true`, and class-validator rejects a target carrying no validator
+  metadata outright. `RocketsAuthUserMetadataDto` — the documented base
+  extension point, and the auth e2e helper's default — has `@Expose()`
+  / `@ApiProperty()` but no constraints, so `MeController.updateUser`
+  returns `400 "an unknown value was passed to the validate function"`
+  for EVERY payload, `{}` included. Every existing `/me` spec in
+  `rockets-server` supplies a decorated DTO, and `rockets-server-auth`
+  had no `PATCH /me` coverage at all, which is why a green suite hid
+  it. Now pinned by a regression test asserting the broken behaviour;
+  the fix is a semantic decision on a shared core util and is tracked
+  separately.
 - **`SafeCrudContextInterceptor`** — upstream `@concepta/nestjs-crud`
   `CrudContextOverlay.attach()` already no-ops on non-CRUD handlers
   (`5249672`, shipped in `8.0.0-alpha.8`). Core and auth now use
@@ -316,12 +450,14 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
   `CONFIGURATION.md` §8a explains what a repository call without `ctx`
   actually does — runs hook-free AND outside the operation's transaction
   — with the adapter/resolver chain that causes it, copy-paste examples
-  for hooks, CQRS handlers and custom services, the
-  `SUPPORTS`-by-default propagation trap, why a guard cannot join the
-  operation's transaction, and the `grep` sweep that found the original
-  defect. Cross-linked from the core README's dynamic-repository how-to —
+  for hooks, CQRS handlers and custom services, what `propagation` does
+  and does not control (`run()` starts no transaction by itself, and the
+  default `SUPPORTS` fails open when no transaction-capable adapter is
+  registered), why a guard cannot join the operation's transaction, and
+  the `grep` sweep that found the original defect. Cross-linked from the
+  core README's dynamic-repository how-to —
   whose own example omitted `ctx`, teaching the anti-pattern — and from
-  `AGENTS.md` rule 13a. Root cause of #45; cost the field report ~45
+  `AGENTS.md` rule 16. Root cause of #45; cost the field report ~45
   minutes of source spelunking.
 
 - `SECURITY.md` and sample READMEs no longer claim an npm `alpha` channel that
@@ -509,6 +645,73 @@ before running the full e2e suite.
   e2e coverage (cross-owner nested access returns 404).
 
 ### Fixed
+
+- **Entity hooks bound to a key no resource registers now fail the boot
+  (issue #69 review).** `@EntityHook({ entity })` bakes
+  `deriveEntityKey(entity)` into its spec, while the repository adapter
+  stamps the resource's REGISTRATION `key` onto the hook context — and
+  matching is an exact string compare. `defineResource({ entity:
+  PetEntity, key: 'pets' })` therefore registered the entity as `pets`
+  while a hook on that same resource matched `pet`: the hook silently
+  never fired, nothing warned, the app booted clean, and for
+  `TenantScopeHook`/`OwnerScopeHook` that is a total fail-OPEN — every
+  actor sees every tenant's rows. `buildAppRegistrationPlan` now runs
+  `validateEntityHookBindings`, which rejects the mismatch at boot naming
+  the hook, both keys, and both remedies; a hook bound to an entity no
+  bundle registers is rejected too. Sibling helpers (`defineHook`,
+  `AfterCreateReloadHook`) already failed loudly on the same mismatch via
+  an unresolvable `@InjectDynamicRepository` token — scoping hooks have no
+  such dependency, which is exactly why they needed this. For a resource
+  that must keep a custom `key`, `EntityHookOptions` (and
+  `TenantScopeOptions`) gained `entityKey` to bind the hook to the key in
+  use. Scope: generated CRUD bundles — resource-level `hooks`,
+  per-operation `operations[op].hooks`, and sub-resources. Hooks
+  registered as bare providers on a `defineModuleResource` slice, or
+  applied by a hand-written `@UseHooks`, are outside what the planner
+  sees. `CrudResource.meta` gained `hooks` to carry them to the planner,
+  and `getEntityHookBinding(hookClass)` is exported for the same purpose.
+
+- **`hashIdempotentRequest` collapsed non-JSON values, replaying the
+  WRONG response (issue #59 follow-up).** The walker's generic-object
+  branch read `Object.keys(value)`, which is `[]` for a `Date` — so
+  every date serialised to `{}` and two requests differing only by a
+  date hashed IDENTICALLY. The documented pattern hashes `ctx.input`,
+  i.e. the post-validation value, where a `z.coerce.date()` field is a
+  real `Date`, so a second request under the same idempotency key with
+  a different date replayed the first request's stored response instead
+  of conflicting. `Map`, `Set` and any class instance with no own
+  enumerable keys collapsed the same way, and an undefined-valued key
+  (which JSON drops on the wire) hashed differently from its absence,
+  409-ing a legitimate retry. The walker now honours `toJSON()` first,
+  handles `Map`/`Set`/`bigint` explicitly, ignores undefined-valued keys
+  like JSON does, and THROWS — naming the offending path — on anything
+  it cannot represent faithfully, rather than emitting a placeholder.
+  `toJSON` output is TAGGED with the constructor name (a `Date` and the
+  ISO string of that date no longer collide), and the walk is bounded by
+  a depth cap and a cycle guard, so a deeply nested or self-referencing
+  body raises the same named error instead of a `RangeError` 500.
+
+- **A valid webhook signature with garbage appended was ACCEPTED.**
+  `Buffer.from(x, 'hex')` decodes greedily and stops at the first
+  invalid pair, so `<digest> + "ZZZZ"` decoded to exactly the digest's
+  bytes, passed the length guard, and verified true. Not forgeable — an
+  attacker still needs the real digest — but a signature with infinitely
+  many valid spellings is malleable, and anything keyed on the header
+  value inherits that. The header's shape is now validated before
+  decoding.
+
+- **Webhook signature verification swallowed configuration faults.** The
+  `try/catch` around the digest documented an impossible condition
+  (`Buffer.from(x, 'hex')` does not throw — it truncates, and the length
+  guard is what rejects a malformed header) while silently turning the
+  faults `createHmac` DOES throw on — an empty/missing secret, an
+  unsupported algorithm — into `false`, i.e. a permanent 401 with
+  nothing in the logs. Those now throw; only bad signatures return
+  `false`. `secret` widened to `string | undefined` on both option types
+  so `process.env.X` can be passed straight through instead of through a
+  `!` the type system cannot check (source-compatible for existing
+  callers). A `Buffer` secret — reachable only via a cast — now throws
+  where it previously verified.
 
 - **Round-4 review findings.** The module-export walk now merges each
   dynamic host's static and dynamic imports and exports before descending,
