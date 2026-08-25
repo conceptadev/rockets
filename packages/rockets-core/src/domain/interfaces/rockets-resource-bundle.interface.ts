@@ -1,4 +1,4 @@
-import type { PlainLiteralObject } from '@nestjs/common';
+import type { PlainLiteralObject, Type } from '@nestjs/common';
 import type {
   RepositoryModuleInterface,
   RepositoryProviderOptions,
@@ -49,6 +49,18 @@ export interface CrudResource<
     readonly key: string;
     readonly entityClass: new () => E;
     readonly relations: ReadonlyArray<ResourceRelationEntry<E>>;
+    /**
+     * Every entity hook this resource wires — resource-level `hooks` plus
+     * per-operation `operations[op].hooks`, and (on a sub-resource) the
+     * parent hooks it inherits.
+     *
+     * Carried on `meta` for the same reason `relations` is: startup
+     * validation. `validateEntityHookBindings` checks each hook's
+     * `@EntityHook({ entity })` binding against the entity registry, so a
+     * hook bound to a key no resource registers fails the boot instead of
+     * silently never firing.
+     */
+    readonly hooks: ReadonlyArray<Type>;
   };
   /**
    * Bundles materialised from `defineResource({ subResources: { … } })`.

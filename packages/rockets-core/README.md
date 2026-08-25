@@ -246,6 +246,47 @@ defineResource({
 The hooks run at the repository layer, so direct (non-HTTP) calls are scoped
 too.
 
+### Scope rows to a multi-tenant set (`TenantScopeHook`)
+
+`OwnerScopeHook` compares a column to `actor.id` — one owner, one id.
+`TenantScopeHook` is for the wider case: an actor who belongs to a
+RESOLVED SET of tenants (a `resolve(actor)` callback you supply, e.g. a
+shelter-membership lookup) and, critically, is **fail-closed**: no actor,
+or a `resolve` that returns `[]`, both produce zero rows — never an
+unfiltered query. It complements `acl` (issue #51): `acl` decides which
+ACTIONS an actor may perform, this decides which ROWS.
+
+```typescript
+import { TenantScopeHook, TenantStampHook } from '@concepta/rockets-core';
+
+const shelterScope = {
+  tenantKey: 'shelterId' as const,
+  resolve: (actor) => shelterIdsFor(actor), // [] when the actor owns none
+};
+
+defineResource({
+  entity: PetEntity,
+  hooks: [
+    TenantScopeHook.for(PetEntity, shelterScope),
+    TenantStampHook.for(PetEntity, shelterScope),
+  ],
+});
+```
+
+A row outside the resolved set 404s (not 403) — the query excludes it
+entirely, so confirming it exists is never on the table.
+
+**Wire both hooks.** `TenantScopeHook` rewrites `where` clauses only, so on
+its own it does not stop a `POST`/`PATCH` writing another tenant's id into
+the tenant column — a `PATCH` can move the actor's own row out of their
+tenant. `TenantStampHook` enforces the same resolved set on
+`beforeCreate`/`beforeUpdate`, rejecting (never silently rewriting) a value
+outside it. `OwnerStampHook` does **not** cover this: it stamps `actor.id`,
+which is not a tenant id.
+
+Full rules:
+[CONFIGURATION.md §5b](../../CONFIGURATION.md#5b-tenantscopehook--fail-closed-tenant-row-scoping-issue-69).
+
 ### Functional entity hooks (`defineHook`)
 
 For validation, normalization, or uniqueness checks without a Nest `@Injectable`

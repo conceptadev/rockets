@@ -81,10 +81,13 @@ export {
   EntityHook,
   EntityHookBase,
   PassthroughEntityHookBase,
+  getEntityHookBinding,
 } from './infrastructure/hooks/entity-hook';
 export type {
+  EntityHookBinding,
   EntityHookContext,
   EntityHookLifecycleKey,
+  EntityHookOptions,
   OwnedEntity,
   RocketsEntityHookForResource,
 } from './infrastructure/hooks/entity-hook';
@@ -108,6 +111,12 @@ export {
   type OwnerStampHookOptions,
 } from './infrastructure/hooks/owner-stamp.hook';
 export { AfterCreateReloadHook } from './infrastructure/hooks/after-create-reload.hook';
+export {
+  TenantScopeHook,
+  type TenantIdsResolver,
+  type TenantScopeOptions,
+} from './infrastructure/hooks/tenant-scope.hook';
+export { TenantStampHook } from './infrastructure/hooks/tenant-stamp.hook';
 
 // Exceptions filter
 export {

@@ -696,6 +696,136 @@ query services. In an app composing auth **and** `RocketsCoreModule` with
 core registration only — list auth-side services in that module's
 `queryServices` explicitly.
 
+## 5b. `TenantScopeHook` — fail-closed tenant row scoping (issue #69)
+
+Complements `acl` from §5a: `acl` decides which ACTIONS an actor may
+perform (`read`, `create`, …); this decides which ROWS an action can
+touch. `acl` alone lets an actor authorized to `read` see every OTHER
+tenant's rows on `GET /pets` — there is nothing in the grant that says
+"only this tenant's."
+
+`OwnerScopeHook` (§3, "Scope rows to the authenticated user" in the
+README) already solves the SINGLE-owner case: a column equals
+`actor.id`. `TenantScopeHook` is for an actor who belongs to a set of
+tenants resolved at request time — and, unlike `OwnerScopeHook`, is
+**fail-closed**: `OwnerScopeHook` deliberately leaves options unchanged
+when there is no actor (an unauthenticated request on a protected route
+already failed upstream, so a public route reaching the hook should not
+be scoped). `TenantScopeHook` disagrees on purpose — no actor, or a
+`resolve` that returns `[]`, both produce a WHERE clause matching NOTHING,
+never an unfiltered query. This is the fail-open gap #69 exists to close:
+"no actor / no resolved scope → empty set, never a full dump."
+
+```ts
+import { TenantScopeHook, TenantStampHook } from '@concepta/rockets-core';
+
+// One scope object, given to BOTH hooks. A read-side and a write-side
+// resolver that disagree is the bug this pairing exists to prevent.
+const shelterScope = {
+  tenantKey: 'shelterId' as const,
+  resolve: (actor) => shelterIdsFor(actor), // [] when the actor owns none
+};
+
+defineResource({
+  entity: PetEntity,
+  hooks: [
+    TenantScopeHook.for(PetEntity, shelterScope),
+    TenantStampHook.for(PetEntity, shelterScope),
+  ],
+});
+```
+
+Coverage: `list` (`beforeFindAndCount`) and `read`/`update`/`delete`
+(`beforeFindOne`) — the same lifecycle keys `OwnerScopeHook` hooks.
+A row outside the resolved set is excluded by the query itself, so it
+surfaces as `404` (never found), not `403` — confirming a row EXISTS to an
+actor who cannot see it is its own leak.
+
+### `TenantScopeHook` does NOT protect the tenant column on writes
+
+It rewrites `where` clauses and nothing else. **On its own it does not
+stop an actor writing another tenant's id into the tenant column:**
+
+- `POST /pets` with `{"shelterId":"someone-elses"}` creates a row in
+  another tenant — `create` issues no `find`, so no lifecycle key the
+  scope hook implements fires at all.
+- `PATCH /pets/:id` with `{"shelterId":"someone-elses"}` MOVES the actor's
+  own row out of their tenant. `beforeFindOne` correctly scopes the
+  lookup, but nothing inspects the update PAYLOAD, so the write lands.
+
+`TenantStampHook` is the write-side half, enforcing the SAME resolved set
+on `beforeCreate`/`beforeUpdate`:
+
+| Incoming `tenantKey` value  | Result                                      |
+| --------------------------- | ------------------------------------------- |
+| in the resolved set         | passes through unchanged                    |
+| any other value             | `403` — rejected, never silently rewritten  |
+| absent, resolved set has 1  | stamped with that id (create only)          |
+| absent, resolved set has 0  | `403`                                       |
+| absent, resolved set has 2+ | `400` — ambiguous, the caller must say which|
+| no actor in context         | `401`                                       |
+
+A forbidden value is **rejected, not overwritten** — the opposite of
+`OwnerStampHook`, deliberately. There is exactly one legal owner id
+(`actor.id`), so silently correcting it is unambiguous; there can be
+several legal tenant ids, so silently picking one would persist the row
+somewhere the caller neither asked for nor learned about. On `update` an
+absent tenant key is left absent rather than stamped, since the scoped
+`findOne` already proved the row is inside the actor's set.
+
+> **`OwnerStampHook` is not a substitute here.** It stamps `actor.id`. An
+> actor's user id is not one of their tenant ids, so aiming it at a tenant
+> column writes the wrong value and corrupts the column. Earlier revisions
+> of this section advised exactly that; it was wrong.
+
+Both stamp hooks need `RocketsCoreExceptionsFilter` registered
+(`{ provide: APP_FILTER, useClass: RocketsCoreExceptionsFilter }`). The
+upstream membrane wraps whatever a hook throws in a
+`RepositoryQueryException`, and that filter is what walks the chain back
+to the real 4xx. Without it the row is still not written, but the client
+sees a generic `500`.
+
+### Custom resource `key` — the hook binding is checked at boot
+
+`@EntityHook({ entity })` matches on `deriveEntityKey(entity)`, while the
+repository adapter stamps the resource's REGISTRATION `key` onto the hook
+context, and matching is an exact string compare. So
+
+```ts
+defineResource({ entity: PetEntity, key: 'pets', path: 'pets', hooks: [...] })
+```
+
+registers the entity as `pets` while the hook matches `pet`. That hook
+would never fire — for a scoping hook, a silent total fail-open.
+
+`buildAppRegistrationPlan` now rejects this at boot, naming the key the
+entity is actually registered under. Either drop the explicit `key`, or
+pass the key the resource uses to the hook:
+
+```ts
+TenantScopeHook.for(PetEntity, { ...shelterScope, entityKey: 'pets' });
+```
+
+The check covers generated CRUD bundles — resource-level `hooks`,
+per-operation `operations[op].hooks`, and sub-resources. Hooks registered
+as bare providers on a `defineModuleResource({ module: { providers } })`
+slice, or applied by a hand-written `@UseHooks`, are outside what the
+planner can see, so a clean boot says nothing about them.
+
+The empty-set case is deliberately NOT expressed as `Where.in(tenantKey,
+[])`: several SQL engines (TypeORM's own `In([])` historically included)
+do not reliably treat an empty IN-list as "match nothing." Instead it
+composes `Where.isNull(tenantKey)` AND `Where.notNull(tenantKey)` — a
+contradiction no backend can satisfy, expressed with the same portable
+`Where` DSL rather than a raw per-adapter escape hatch.
+
+`TenantScopeHook.for()` is intentionally NOT cached per `(entity,
+tenantKey)` the way `OwnerScopeHook.for()` is — two calls could
+legitimately carry different resolvers (different tenant semantics for
+the same column across two resources), and caching by that key would
+silently keep whichever resolver arrived first. Call it once per
+resource.
+
 ### 6d. Background job dispatch (issue #53)
 
 `JobDispatchServiceInterface` (`enqueue` / `claim` / `heartbeat` /
