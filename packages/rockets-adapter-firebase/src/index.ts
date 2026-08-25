@@ -4,6 +4,13 @@
 // Module + adapter
 export { FirebaseAuthModule } from './modules/firebase-auth.module';
 export { FirebaseAuthAdapter } from './adapters/firebase-auth.adapter';
+// Session-cookie adapter (issue #58) — the "session" leg of the ternary
+// public | internal | session route policy. Register alongside
+// FirebaseAuthAdapter and @concepta/rockets-core's CsrfGuard.
+export {
+  FirebaseSessionCookieAdapter,
+  DEFAULT_SESSION_COOKIE_NAME,
+} from './adapters/firebase-session-cookie.adapter';
 
 // Integration helper — first-class wiring for `RocketsModule.forRoot({ auth: ... })`.
 export { defineFirebaseAuth } from './integration/define-firebase-auth';
@@ -13,6 +20,7 @@ export type { DefineFirebaseAuthInput } from './integration/define-firebase-auth
 // modules without re-implementing `FirebaseAuthModule.forRoot()`.
 export {
   FIREBASE_AUTH_MODULE_OPTIONS_TOKEN,
+  FIREBASE_SESSION_COOKIE_VERIFIER_TOKEN,
   FIREBASE_TOKEN_VERIFIER_TOKEN,
   FIREBASE_USER_RESOLVER_TOKEN,
 } from './constants/firebase-auth.constants';
@@ -22,9 +30,14 @@ export type {
   FirebaseAuthModuleAsyncOptions,
   FirebaseAuthModuleOptionsFactory,
 } from './interfaces/firebase-auth-async-options.interface';
-export { FirebaseAuthModuleOptions } from './interfaces/firebase-auth-options.interface';
+export {
+  FirebaseAuthModuleOptions,
+  FirebaseSessionCookieConfig,
+} from './interfaces/firebase-auth-options.interface';
 export { FirebaseDecodedTokenInterface } from './interfaces/firebase-decoded-token.interface';
 export {
+  FirebaseSessionCookieOptions,
+  FirebaseSessionCookieVerifierInterface,
   FirebaseTokenVerifierInterface,
   FirebaseVerifyOptions,
 } from './interfaces/firebase-token-verifier.interface';
@@ -38,6 +51,8 @@ export { FirebaseTokenVerifierService } from './services/firebase-token-verifier
 // Exceptions
 export { FirebaseAuthException } from './exceptions/firebase-auth.exception';
 export {
+  FirebaseSessionCookieInvalidException,
+  FirebaseSessionCookieRevokedException,
   FirebaseTokenInvalidException,
   FirebaseTokenMissingSubjectException,
   FirebaseTokenRevokedException,

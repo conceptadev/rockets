@@ -89,6 +89,76 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
   upstream membrane wraps hook throws in `RepositoryQueryException`, and
   without the filter the (still-rejected) write reports `500`.
 
+- **Session-cookie auth, CSRF, and the ternary route policy (issue
+  #58).** `AuthSession()` marks a route session-cookie authenticated —
+  the third leg alongside `AuthPublic()` ("public") and no decorator
+  ("internal"). `CsrfGuard` enforces the CSRF double-submit check
+  (`x-csrf-token` header must equal `HMAC(secret, sessionCookieValue)`)
+  on `POST`/`PUT`/`PATCH`/`DELETE` to `@AuthSession()` routes; it
+  no-ops on every other route, so a bearer-only app that registers it
+  anyway sees no behavior change. `generateCsrfToken` /
+  `verifyCsrfToken` (timing-safe) and `parseCookies` / `extractCookie`
+  are the supporting primitives. `RouteAuditEntry` gained
+  `sessionAuth: boolean`, and the route policy gained **`requireCsrf`**,
+  which fails the boot when a `@AuthSession()` route exists and no CSRF
+  guard is registered (`CsrfGuard` by identity, or a class named in the
+  new `routePolicy.csrfGuards`) — without it the decorator is inert
+  metadata and an app can mark every session route while enforcing
+  nothing. Declaring `AuthPublic` and `AuthSession` on the same handler
+  throws at route-audit collection time — a public route has no session
+  to protect — but note both that check and `requireCsrf` run only when
+  the app declares a `routePolicy`; the audit is not collected
+  otherwise. `@concepta/rockets-adapter-firebase`
+  gained the session-cookie capability the field report (#46) found
+  missing: `FirebaseSessionCookieAdapter` (the session counterpart to
+  `FirebaseAuthAdapter`, coexisting in the same `auth` chain) and
+  `FirebaseSessionCookieVerifierInterface` (`verifySessionCookie` /
+  `createSessionCookie`) as a SEPARATE interface from the bearer-only
+  `FirebaseTokenVerifierInterface`, so an existing bearer-only custom
+  verifier does not break at compile time. See `CONFIGURATION.md` §7c.
+
+  **Security review follow-ups, folded into the same change (all with
+  falsifying tests — each fix was reverted to confirm its test goes red):**
+
+  - `FirebaseSessionCookieAdapter` now forwards `checkRevoked` to
+    `verifySessionCookie`, and `sessionCookie.checkRevoked` **defaults
+    to `true`** — deliberately unlike the bearer `checkRevoked`
+    (`false`). It previously passed no options, so the underlying
+    firebase-admin revocation lookup never ran and a revoked session
+    cookie — or a disabled user's — kept working for its full 14-day
+    lifetime. `auth/user-disabled` now maps to
+    `FirebaseSessionCookieRevokedException` alongside
+    `auth/session-cookie-revoked`.
+  - `verifyCsrfToken` rejects anything that is not exactly 64 hex
+    characters before decoding. `Buffer.from(s, 'hex')` truncates at
+    the first non-hex character rather than throwing, so a valid token
+    with arbitrary garbage appended decoded to the expected bytes and
+    verified as valid — a token the function had never minted. The
+    unreachable `try/catch` it relied on is gone.
+  - `CsrfGuard` validates `secret` and `sessionCookieName` in its
+    constructor, so a misconfigured deployment fails at boot rather
+    than on the first protected request (`undefined`) or never at all
+    (`''`, a legal HMAC key that produces a forgeable token). As part
+    of that guard's initial shape, `secret` must be a non-empty string
+    of at least 32 characters — the exported
+    `MIN_CSRF_SECRET_LENGTH` floor; generate one with
+    `openssl rand -hex 32`. (`CsrfGuard` is introduced by this same
+    unreleased entry, so this is the contract it ships with, not a
+    change to a released one.)
+  - `CsrfGuard` lower-cases `headerName` before reading it. Node
+    lower-cases every inbound header name, so the conventional
+    `headerName: 'X-CSRF-Token'` matched nothing and rejected every
+    state-changing session request — a guaranteed outage that failed
+    closed and so never looked like a bug.
+  - `parseCookies` resolves duplicate cookie names **first-wins**,
+    matching the `cookie` npm package and the rest of the Node
+    ecosystem; it was last-wins. An attacker able to plant a second
+    `__session` cookie (sibling-subdomain cookie tossing, a
+    path-scoped cookie) could make this parser and any other
+    cookie-reading layer in the same app disagree about who is
+    authenticated. The cookie map is also null-prototype now, so a
+    cookie named `toString` or `__proto__` is data like any other.
+
 - **`strictInput` on zodResource body operations (issue #79).** Opt-in
   per-op flag that rejects unknown **top-level** JSON keys with `400`
   naming the offending keys, instead of the default silent stripping

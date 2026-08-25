@@ -10,10 +10,12 @@ import { ModuleRef } from '@nestjs/core';
 
 import {
   FIREBASE_AUTH_MODULE_OPTIONS_TOKEN,
+  FIREBASE_SESSION_COOKIE_VERIFIER_TOKEN,
   FIREBASE_TOKEN_VERIFIER_TOKEN,
   FIREBASE_USER_RESOLVER_TOKEN,
 } from '../constants/firebase-auth.constants';
 import { FirebaseAuthAdapter } from '../adapters/firebase-auth.adapter';
+import { FirebaseSessionCookieAdapter } from '../adapters/firebase-session-cookie.adapter';
 import {
   FirebaseAuthModuleAsyncOptions,
   FirebaseAuthModuleOptionsFactory,
@@ -39,7 +41,12 @@ export class FirebaseAuthModule {
     validateOptions(options);
 
     return this.buildDynamicModule(
-      [optionsProvider(options), verifierProvider(), userResolverProvider()],
+      [
+        optionsProvider(options),
+        verifierProvider(),
+        sessionVerifierAliasProvider(),
+        userResolverProvider(),
+      ],
       options.imports ?? [],
     );
   }
@@ -49,6 +56,7 @@ export class FirebaseAuthModule {
       [
         ...asyncOptionsProviders(options),
         verifierProvider(),
+        sessionVerifierAliasProvider(),
         userResolverProvider(),
       ],
       options.imports ?? [],
@@ -63,8 +71,17 @@ export class FirebaseAuthModule {
       module: FirebaseAuthModule,
       global: true,
       imports,
-      providers: [...providers, FirebaseAuthAdapter],
-      exports: [FirebaseAuthAdapter],
+      // FirebaseSessionCookieAdapter is ALWAYS registered, same as
+      // FirebaseAuthAdapter — being injectable is not the same as being
+      // IN an app's auth chain. An app opts in by adding it to its own
+      // `RocketsModule.forRoot({ auth: [...] })` array; a bearer-only
+      // app that never does gets no behavior change (issue #58).
+      providers: [
+        ...providers,
+        FirebaseAuthAdapter,
+        FirebaseSessionCookieAdapter,
+      ],
+      exports: [FirebaseAuthAdapter, FirebaseSessionCookieAdapter],
     };
   }
 }
@@ -168,6 +185,23 @@ function verifierProvider(): Provider {
       return new FirebaseTokenVerifierService(options.firebaseApp);
     },
     inject: [ModuleRef, FIREBASE_AUTH_MODULE_OPTIONS_TOKEN],
+  };
+}
+
+/**
+ * `FirebaseSessionCookieAdapter` injects the verifier under this token
+ * purely for a narrower type — `useExisting` resolves the SAME instance
+ * `FIREBASE_TOKEN_VERIFIER_TOKEN` does, not a second one. If a custom
+ * `verifier` class is configured and does not ALSO implement
+ * `FirebaseSessionCookieVerifierInterface`, that only surfaces as a
+ * runtime error if the app both configures a custom verifier AND adds
+ * `FirebaseSessionCookieAdapter` to its own auth chain — the default
+ * `FirebaseTokenVerifierService` always implements both.
+ */
+function sessionVerifierAliasProvider(): Provider {
+  return {
+    provide: FIREBASE_SESSION_COOKIE_VERIFIER_TOKEN,
+    useExisting: FIREBASE_TOKEN_VERIFIER_TOKEN,
   };
 }
 
