@@ -593,11 +593,56 @@ describe('Firestore transactions (P1-1)', () => {
     });
     expect(runTransaction).not.toHaveBeenCalled();
 
-    // The first repo call forwarding `txCtx` is what actually starts it.
+    // The first repo call forwarding `txCtx` is what actually starts it —
+    // and it lands under the key this backend's repositories resolve to.
     await scope.run({}, async (txCtx) => {
       await repo.create({ id: 'lazy', balance: 1 }, { ctx: txCtx });
+      expect(txCtx.trx.get(key)).not.toBeNull();
     });
     expect(runTransaction).toHaveBeenCalledTimes(1);
+  });
+
+  // Pins CONFIGURATION.md §8a: a nested `run()` joins the outer manager
+  // and does NOT own the boundary. `readOnly` on the nested scope is
+  // ignored — the outer scope still commits the writes.
+  it('nested runReadOnly does not roll back — the outer scope commits', async () => {
+    const wired = await Test.createTestingModule({
+      imports: [
+        RepositoryModule.forRoot({}),
+        RepositoryModule.forFeature({
+          module: firestoreModuleFor(backend, 'accounts-nested'),
+          entities: [{ key: 'account', entity: AccountEntity }],
+        }),
+      ],
+    }).compile();
+
+    const repo = wired.get<RepositoryInterface<AccountEntity>>(
+      getDynamicRepositoryToken('account'),
+    );
+    const scope = wired.get(TransactionScope);
+
+    await repo.create({ id: 'a', balance: 100 });
+
+    let sameManager: boolean | undefined;
+
+    await scope.run({}, async (outerCtx) => {
+      // Nested: `outerCtx` already carries the overlay, so this joins
+      // rather than opening its own scope.
+      await scope.runReadOnly(outerCtx, async (innerCtx) => {
+        sameManager = innerCtx.trx === outerCtx.trx;
+        const a = await repo.findOne({
+          where: Where.eq('id', 'a'),
+          ctx: innerCtx,
+        });
+        await repo.update(a!, { balance: 7 }, { ctx: innerCtx });
+      });
+    });
+
+    expect(sameManager).toBe(true);
+    // Had `readOnly` been honored on the nested call, this would be 100.
+    expect(await repo.findOne({ where: Where.eq('id', 'a') })).toMatchObject({
+      balance: 7,
+    });
   });
 
   it('soft-deletable upsert before a write succeeds inside a transaction', async () => {
