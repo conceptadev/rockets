@@ -109,7 +109,7 @@ function findOpenObject(
       return path;
     }
   }
-  for (const [childPath, child] of childSchemas(schema, path)) {
+  for (const [childPath, child] of schemaChildren(schema, path)) {
     const found = findOpenObject(
       asClassicSchema(child, childPath),
       seen,
@@ -121,13 +121,14 @@ function findOpenObject(
 }
 
 /**
- * Every schema a node can hold, with the path label of each. Structural
+ * Every schema a node can hold, with the path label of each — the one
+ * walker every response-safety check shares. Structural
  * nodes are matched by class; everything that wraps ONE inner schema
  * (`optional`, `nullable`, `default`, `prefault`, `readonly`, `catch`,
  * `nonoptional`, `promise`, …) is read through the shared `innerType`
  * slot so a wrapper zod adds later is walked without a new case here.
  */
-function childSchemas(
+export function schemaChildren(
   schema: z.ZodType,
   path: string,
 ): Array<[string, z.core.$ZodType]> {
@@ -166,7 +167,13 @@ function childSchemas(
     return [[`${path}[*]`, schema.def.valueType]];
   }
   if (schema instanceof z.ZodPipe) {
-    return [[path, schema.def.out]];
+    // BOTH sides: `z.preprocess` puts the object on `out`, an ordinary
+    // `.transform()` puts it on `in` (and an identity transform ships
+    // whatever `in` let through).
+    return [
+      [`${path}<in`, schema.def.in],
+      [path, schema.def.out],
+    ];
   }
   if (schema instanceof z.ZodLazy) {
     return [[path, schema.unwrap()]];

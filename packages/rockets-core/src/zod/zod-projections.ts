@@ -1,6 +1,7 @@
 import type { PlainLiteralObject, Type } from '@nestjs/common';
 import { withOpenApi } from '@concepta/nestjs-core';
 import { z } from 'zod';
+import { schemaChildren } from '../common/utils/open-api-schema.util';
 import type { ResourceRelationEntry } from '../index';
 import { resolveRelationTarget } from './schema-registry';
 import {
@@ -236,10 +237,45 @@ function withHiddenFieldsRemoved(field: z.ZodType, path: string): z.ZodType {
 }
 
 /**
- * Recursive: a hidden column N levels down a computed shape stays hidden.
- * Objects, arrays and the `optional` / `nullable` wrappers around them are
- * rebuilt when something underneath changed; every other node is returned
- * as-is (identity is preserved when nothing was hidden).
+ * Does any object below this node declare a `dto: { response: false }`
+ * field? Walks every wrapper through the shared `schemaChildren` walker,
+ * with cycle protection for recursive (lazy) schemas.
+ */
+function hasHiddenDescendant(
+  schema: z.ZodType,
+  path: string,
+  seen: Set<z.ZodType> = new Set(),
+): boolean {
+  if (seen.has(schema)) return false;
+  seen.add(schema);
+  if (schema instanceof z.ZodObject) {
+    for (const [key, field] of Object.entries(schema.shape)) {
+      const fieldPath = `${path}.${key}`;
+      if (unwrapField(field, fieldPath).meta.dto?.response === false) {
+        return true;
+      }
+      if (
+        hasHiddenDescendant(asClassicSchema(field, fieldPath), fieldPath, seen)
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+  return schemaChildren(schema, path).some(([childPath, child]) =>
+    hasHiddenDescendant(asClassicSchema(child, childPath), childPath, seen),
+  );
+}
+
+/**
+ * Recursive: a hidden column N levels down a computed shape stays hidden,
+ * whatever wraps it. Every composite the projection knows how to rebuild
+ * — object, array, optional / nullable / default / catch / readonly /
+ * nonoptional, union, intersection, pipe, lazy — is rebuilt when something
+ * underneath changed (identity is preserved when nothing was hidden). A
+ * hidden field below a wrapper this cannot rebuild (discriminated union,
+ * tuple, record, map, set) fails at DEFINITION time: silently leaving it
+ * in place is how an explicitly hidden column reaches the wire.
  */
 function stripHidden(schema: z.ZodType, path: string): z.ZodType {
   if (schema instanceof z.ZodObject) {
@@ -259,6 +295,76 @@ function stripHidden(schema: z.ZodType, path: string): z.ZodType {
     const inner = asClassicSchema(schema.unwrap(), path);
     const stripped = stripHidden(inner, path);
     return stripped === inner ? schema : stripped.nullable();
+  }
+  if (schema instanceof z.ZodDefault) {
+    const inner = asClassicSchema(schema.def.innerType, path);
+    const stripped = stripHidden(inner, path);
+    return stripped === inner
+      ? schema
+      : stripped.default(schema.def.defaultValue);
+  }
+  if (schema instanceof z.ZodCatch) {
+    const inner = asClassicSchema(schema.def.innerType, path);
+    const stripped = stripHidden(inner, path);
+    return stripped === inner ? schema : stripped.catch(schema.def.catchValue);
+  }
+  if (schema instanceof z.ZodReadonly) {
+    const inner = asClassicSchema(schema.def.innerType, path);
+    const stripped = stripHidden(inner, path);
+    return stripped === inner ? schema : stripped.readonly();
+  }
+  if (schema instanceof z.ZodNonOptional) {
+    const inner = asClassicSchema(schema.def.innerType, path);
+    const stripped = stripHidden(inner, path);
+    return stripped === inner ? schema : stripped.nonoptional();
+  }
+  if (
+    schema instanceof z.ZodUnion &&
+    !(schema instanceof z.ZodDiscriminatedUnion)
+  ) {
+    const options = schema.options.map((option, index) =>
+      asClassicSchema(option, `${path}|${index}`),
+    );
+    const stripped = options.map((option, index) =>
+      stripHidden(option, `${path}|${index}`),
+    );
+    return stripped.every((option, index) => option === options[index])
+      ? schema
+      : z.union(stripped);
+  }
+  if (schema instanceof z.ZodIntersection) {
+    const left = asClassicSchema(schema.def.left, `${path}&0`);
+    const right = asClassicSchema(schema.def.right, `${path}&1`);
+    const strippedLeft = stripHidden(left, `${path}&0`);
+    const strippedRight = stripHidden(right, `${path}&1`);
+    return strippedLeft === left && strippedRight === right
+      ? schema
+      : z.intersection(strippedLeft, strippedRight);
+  }
+  if (schema instanceof z.ZodPipe) {
+    const input = asClassicSchema(schema.def.in, `${path}<in`);
+    const output = asClassicSchema(schema.def.out, path);
+    const strippedIn = stripHidden(input, `${path}<in`);
+    const strippedOut = stripHidden(output, path);
+    return strippedIn === input && strippedOut === output
+      ? schema
+      : z.pipe(strippedIn, strippedOut);
+  }
+  if (schema instanceof z.ZodLazy) {
+    if (!hasHiddenDescendant(schema, path)) return schema;
+    return z.lazy(() =>
+      stripHidden(asClassicSchema(schema.unwrap(), path), path),
+    );
+  }
+  if (hasHiddenDescendant(schema, path)) {
+    throw new Error(
+      `${path}: a field declared \`dto: { response: false }\` sits below a ` +
+        `${schema.constructor.name} wrapper the response projection cannot ` +
+        `rebuild, so it would reach the wire. Move the hidden column out of ` +
+        `this compute schema, or restructure the wrapper (object, array, ` +
+        `optional, nullable, default, catch, readonly, union, intersection, ` +
+        `pipe and lazy are rebuilt).`,
+    );
   }
   return schema;
 }

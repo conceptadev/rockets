@@ -11,7 +11,9 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [22.x]
+        # 20.19.0 is the published minimum (`engines`): the CommonJS build needs
+        # `require(esm)` for the ESM Nest 12 line, so the floor is tested, not assumed.
+        node-version: [20.19.0, 22.x]
 
     steps:
       - uses: actions/checkout@v4

@@ -923,6 +923,14 @@ before running the full e2e suite.
   wrapper used to pass and ship the whole row; every node that can hold a
   schema is walked now, and a hand-supplied paginated envelope is checked
   too, not only named.
+- **Hidden columns stay hidden through every wrapper of a computed field**
+  (union, intersection, pipe, default, catch, readonly, lazy are rebuilt;
+  a wrapper the projection cannot rebuild fails at definition time) and
+  **the fail-closed check walks both sides of a pipe** (an identity
+  `.transform()` on an open object shipped undeclared keys). Both found in
+  the PR #105 review.
+- **Node 20.19 is the minimum** — the CommonJS build loads the ESM Nest 12
+  line through `require(esm)`; `engines` says so and CI tests that floor.
 - **Hidden columns stay hidden at every depth of a computed field.** A
   `dto: { response: false }` column nested two or more levels down an
   `f.compute()` shape was still serialized.

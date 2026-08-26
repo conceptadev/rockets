@@ -285,6 +285,75 @@ describe('projectSchema response exposure', () => {
     });
   });
 
+  // PR #105 review: a union declares the hidden key on one of its options,
+  // so zod's own stripping cannot remove it — the projection must rebuild
+  // the union with the hidden field removed from every option.
+  it('strips a hidden column reached through a union / intersection / pipe at runtime', async () => {
+    const nested = z.object({
+      id: f.pk(),
+      secret: f.string({ dto: { response: false } }),
+    });
+    const fallback = z.object({ label: f.string() });
+    const row = {
+      id: '00000000-0000-4000-8000-000000000001',
+      secret: 'must-not-leak',
+    };
+    const schema = z.object({
+      id: f.pk(),
+      union: f.compute(z.union([nested, fallback]), () => row),
+      both: f.compute(
+        z.intersection(nested, z.object({ extra: f.string() })),
+        () => ({
+          ...row,
+          extra: 'e',
+        }),
+      ),
+      piped: f.compute(
+        nested.transform((value) => value),
+        () => row,
+      ),
+    });
+
+    const responseSchema = buildResponseSchema(
+      'Pet',
+      projectSchema('Pet', schema, entity, noOwner),
+    );
+    const result = await responseSchema['~standard'].validate({
+      id: '00000000-0000-4000-8000-000000000002',
+    });
+
+    expect(result.issues).toBeUndefined();
+    if (result.issues) return;
+    expect(result.value).toEqual({
+      id: '00000000-0000-4000-8000-000000000002',
+      union: { id: row.id },
+      both: { id: row.id, extra: 'e' },
+      piped: { id: row.id },
+    });
+  });
+
+  it('rejects at definition time a hidden column below a wrapper it cannot rebuild', () => {
+    const nested = z.object({
+      id: f.pk(),
+      secret: f.string({ dto: { response: false } }),
+    });
+    const inTuple = z.object({
+      id: f.pk(),
+      pair: f.compute(z.tuple([nested, nested]), () => [] as never),
+    });
+    expect(() => projectSchema('Pet', inTuple, entity, noOwner)).toThrow(
+      /cannot rebuild/,
+    );
+
+    const inRecord = z.object({
+      id: f.pk(),
+      byKey: f.compute(z.record(z.string(), nested), () => ({})),
+    });
+    expect(() => projectSchema('Pet', inRecord, entity, noOwner)).toThrow(
+      /cannot rebuild/,
+    );
+  });
+
   it('a compute value that violates its declared schema is a validation issue, not a coerced payload', async () => {
     const schema = z.object({
       id: f.pk(),

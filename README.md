@@ -264,7 +264,9 @@ access-control rules. Rockets does not pretend to write those for you.
 
 ### Prerequisites
 
-- Node 20+ (required by NestJS 12).
+- Node 20.19+ — the published packages are CommonJS and `require()` the ESM
+  `@nestjs/*` 12 / `@concepta/nestjs-*` 8 line, which needs Node's
+  `require(esm)` (20.19+ / 22.12+).
 - A package manager (yarn 4 / npm / pnpm — examples below use yarn).
 - A database adapter — TypeORM with any supported driver is the most common.
   Firestore works via `@concepta/rockets-repository-firestore`.
@@ -1059,7 +1061,9 @@ rockets/
   `testing`); satellite packages (`cqrs`, `typeorm`, `jwt`, `passport`,
   `config`, `throttler`) remain on their current stable majors until a Nest 12
   line is published.
-- **Node**: `>=20.0.0` (the minimum supported by NestJS 12).
+- **Node**: `>=20.19.0` — CommonJS build loading ESM dependencies through
+  `require(esm)`; Node 20.18 fails with `ERR_REQUIRE_ESM`. CI runs the
+  minimum (20.19) and 22.
 
 ### Common scripts (from the monorepo root)
 

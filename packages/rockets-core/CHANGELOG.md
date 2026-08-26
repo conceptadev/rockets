@@ -110,7 +110,9 @@
   overridden through `handlers`. Previously, overriding one handler also pulled
   in the other built-in, which fails to resolve the user-metadata repository
   when no metadata contract exists.
-- Node.js 20 is the minimum supported runtime.
+- Node.js 20.19 is the minimum supported runtime: the build is CommonJS and
+  loads the ESM Nest 12 / `@concepta/nestjs-*` 8 line through `require(esm)`
+  (Node 20.18 fails with `ERR_REQUIRE_ESM`; `engines` says `>=20.19.0`).
 
 ### Fixed
 
@@ -131,6 +133,18 @@
   hand-supplied paginated envelope (`dto.paginated`,
   `operations.list.paginated`) is checked as well — it was only checked
   for a name.
+- **Computed fields strip hidden columns through every wrapper (PR #105
+  review).** The projection only rebuilt objects, arrays and optional /
+  nullable; a hidden column below a union, intersection, pipe, default,
+  catch, readonly or lazy stayed declared and reached the wire
+  (`f.compute(z.union([nested, fallback]))` shipped `nested.secret`).
+  Those wrappers are rebuilt now; a hidden column below one the projection
+  cannot rebuild (discriminated union, tuple, record, map, set) fails at
+  definition time instead of leaking.
+- **`assertFailClosedResponse` walks both sides of a pipe.** An ordinary
+  `.transform()` is a pipe whose object sits on the IN side;
+  `z.object({...}).passthrough().transform(v => v)` passed the check and an
+  identity transform shipped the undeclared keys.
 - **Computed fields strip hidden columns at every depth.** A `dto:
   { response: false }` column two or more levels down a `f.compute()`
   shape (an object inside an optional object inside an array) was kept;

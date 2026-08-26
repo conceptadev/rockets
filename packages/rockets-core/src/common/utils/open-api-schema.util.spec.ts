@@ -39,6 +39,11 @@ describe('assertFailClosedResponse', () => {
     ['in prefault', open.prefault({ a: 'x' })],
     ['in nonoptional', open.optional().nonoptional()],
     ['in preprocess out side', z.preprocess((v) => v, open)],
+    // PR #105 review: an ordinary `.transform()` is a pipe whose object
+    // sits on the IN side, and an identity transform ships whatever it
+    // let through.
+    ['in transform in side', open.transform((value) => value)],
+    ['in pipe in side', z.pipe(open, z.object({ a: z.string() }))],
     ['in lazy', z.lazy(() => open)],
     ['nested object field', z.object({ inner: open })],
     ['deep: array of optional readonly', z.array(open.readonly().optional())],

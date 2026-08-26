@@ -146,7 +146,9 @@ and this project adheres to
   option or an unused handler-override alias.
 - Recovery password rotation preserves history, strength validation,
   transactions, and credential lifecycle events.
-- Node.js 20 is the minimum supported runtime.
+- Node.js 20.19 is the minimum supported runtime: the build is CommonJS and
+  loads the ESM Nest 12 / `@concepta/nestjs-*` 8 line through `require(esm)`
+  (Node 20.18 fails with `ERR_REQUIRE_ESM`; `engines` says `>=20.19.0`).
 
 ### Fixed
 

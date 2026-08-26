@@ -22,4 +22,6 @@
   `z.output<S>`.
 - `@nestjs/typeorm` is now a required peer dependency, because
   `defineTypeOrmRepository()` builds the TypeORM root module directly.
-- Node.js 20 is the minimum supported runtime.
+- Node.js 20.19 is the minimum supported runtime: the build is CommonJS and
+  loads the ESM Nest 12 / `@concepta/nestjs-*` 8 line through `require(esm)`
+  (Node 20.18 fails with `ERR_REQUIRE_ESM`; `engines` says `>=20.19.0`).
