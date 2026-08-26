@@ -4,7 +4,9 @@ import {
   HttpCode,
   Patch,
   Req,
+  StandardSchemaValidationPipe,
   UseGuards,
+  UsePipes,
 } from '@nestjs/common';
 import type { Type } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
@@ -12,22 +14,24 @@ import { Throttle } from '@nestjs/throttler';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
-  ApiBody,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { AuthUser, JwtGuard } from '@concepta/nestjs-authentication';
-import { getAppContext } from '@concepta/nestjs-core';
+import { getAppContext, rocketsSchemaValidation } from '@concepta/rockets-core';
 import type { Request } from 'express';
+import type { z } from 'zod';
 
 import { ChangeMyPasswordCommand } from '../../../application/commands/impl/change-my-password.command';
-import { RocketsAuthChangePasswordDto } from '../../../infrastructure/dto/rockets-auth-change-password.dto';
+import { rocketsAuthChangePasswordSchema } from '../../../infrastructure/schemas/rockets-auth-change-password.schema';
 import type { MePasswordControllerExtras } from '../../../interfaces/me-password-controller-extras.interface';
 import type { RocketsAuthUserInterface } from '../../../../user/interfaces/rockets-auth-user.interface';
 import { applyControllerExtras } from '../../../../../shared/utils/apply-controller-extras.helper';
 import { AuthAccountThrottlerGuard } from '../guards/auth-account-throttler.guard';
+
+type ChangePasswordBody = z.output<typeof rocketsAuthChangePasswordSchema>;
 
 /** Build the password-change controller and apply consumer decorators. */
 export function buildMePasswordController(
@@ -37,6 +41,7 @@ export function buildMePasswordController(
   @ApiTags('Me')
   @ApiBearerAuth()
   @UseGuards(JwtGuard, AuthAccountThrottlerGuard)
+  @UsePipes(new StandardSchemaValidationPipe(rocketsSchemaValidation))
   class MePasswordController {
     constructor(private readonly commandBus: CommandBus) {}
 
@@ -49,19 +54,6 @@ export function buildMePasswordController(
         'Allows authenticated user to change their own password by providing current and new password',
       operationId: 'changeMyPassword',
     })
-    @ApiBody({
-      type: RocketsAuthChangePasswordDto,
-      description: 'Current and new password',
-      examples: {
-        standard: {
-          value: {
-            currentPassword: 'CurrentP@ssw0rd',
-            newPassword: 'NewSecureP@ssw0rd',
-          },
-          summary: 'Standard password change',
-        },
-      },
-    })
     @ApiOkResponse({ description: 'Password changed successfully' })
     @ApiUnauthorizedResponse({
       description: 'Invalid current password or authentication token',
@@ -71,7 +63,8 @@ export function buildMePasswordController(
     })
     async changePassword(
       @AuthUser() user: RocketsAuthUserInterface,
-      @Body() dto: RocketsAuthChangePasswordDto,
+      @Body({ schema: rocketsAuthChangePasswordSchema })
+      body: ChangePasswordBody,
       @Req() req: Request,
     ): Promise<void> {
       const ctx = getAppContext(req);
@@ -79,8 +72,8 @@ export function buildMePasswordController(
         new ChangeMyPasswordCommand(
           ctx,
           user.id,
-          dto.currentPassword,
-          dto.newPassword,
+          body.currentPassword,
+          body.newPassword,
         ),
       );
     }

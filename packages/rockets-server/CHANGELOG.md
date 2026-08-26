@@ -34,6 +34,8 @@ and this project adheres to
 
 ### Changed
 
+- `class-validator` / `class-transformer` are no longer peers (RFC #104,
+  stage 6).
 - **`/me` on the schema engine (RFC #104, stage 4).** `MeController` is
   replaced by `buildMeController(config)` — a factory built from the app's
   `userMetadata` config (`updateSchema` / `responseSchema`). `PATCH /me`

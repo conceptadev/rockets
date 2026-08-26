@@ -176,7 +176,7 @@ Export the minimum to avoid name collisions across bundles.
 
 For RPC-style routes without a hand-written controller, use
 `operationResource` from `@concepta/rockets-core/zod` (or
-`defineOperationResource` on the main entry with precompiled DTOs):
+`defineOperationResource` on the main entry with named schemas):
 
 ```typescript
 import { operationResource } from '@concepta/rockets-core/zod';

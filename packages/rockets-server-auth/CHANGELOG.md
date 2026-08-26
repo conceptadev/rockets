@@ -59,6 +59,20 @@ and this project adheres to
 
 ### Changed
 
+- **Last class DTOs retired (RFC #104, stage 6).** `RocketsAuthChangePasswordDto`
+  → `rocketsAuthChangePasswordSchema`, `RocketsAuthOtpSendDto` →
+  `rocketsAuthOtpSendSchema`, `RocketsAuthOtpConfirmDto` →
+  `rocketsAuthOtpConfirmSchema`, `RocketsAuthInvitationRevokeDto` →
+  `rocketsAuthInvitationRevokeSchema`, the inline admin role-assignment body
+  → `rocketsAuthAdminAssignUserRoleSchema`; the invitation-acceptance
+  `payload` is validated by `rocketsAuthInvitationAcceptancePayloadSchema`
+  (was accepted unvalidated). Every hand-written route validates with its
+  own Standard Schema pipe; `class-validator` / `class-transformer` are no
+  longer peers. They remain plain **dependencies** of this package only
+  because `@concepta/nestjs-email` / `nestjs-event` (still `7.0.0-alpha.10`)
+  pull `@concepta/nestjs-common@7`, which requires both at import time —
+  the packed-consumer check fails without them. Drop them when those two
+  modules move to the alpha.9 line.
 - **Schemas instead of DTO classes (RFC #104, stage 4; upstream
   `8.0.0-alpha.9`).** The user / role / invitation DTO classes that extended
   upstream classes (`RocketsAuthUserDto`, `RocketsAuthUserCreateDto`,

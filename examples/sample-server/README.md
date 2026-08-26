@@ -106,8 +106,10 @@ controller is the reference for Nest 12's native Standard Schema path:
 a class-level `@UsePipes(new StandardSchemaValidationPipe(rocketsSchemaValidation))`
 validates each `@Body({ schema })` (zod schemas in `src/auth/auth.schema.ts`),
 and `@ApiResponse({ standardSchema })` + `StandardSchemaSerializerInterceptor`
-document and serialize the responses. There is no global
-`StandardSchemaValidationPipe` — core refuses to boot with one.
+document and serialize the responses. `src/resources/pet-share/pet-share.controller.ts`
+follows the same idiom. There is no global pipe at all: a global
+`StandardSchemaValidationPipe` is refused at boot, and nothing in the
+app depends on class-validator or class-transformer.
 
 ### Create a pet (owner-scoped resource)
 

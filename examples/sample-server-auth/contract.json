@@ -6,6 +6,7 @@
           "roleId": {
             "description": "Role ID to assign to the user",
             "example": "08a82592-714e-4da0-ace5-45ed3b4eb795",
+            "minLength": 1,
             "type": "string"
           }
         },
@@ -519,6 +520,7 @@
           "currentPassword": {
             "description": "The user current password for verification",
             "example": "CurrentP@ssw0rd",
+            "minLength": 1,
             "title": "Current Password",
             "type": "string"
           },
@@ -543,14 +545,32 @@
             "type": "string"
           },
           "payload": {
-            "additionalProperties": {},
-            "description": "Payload",
-            "type": "object"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RocketsAuthInvitationAcceptancePayloadDto"
+              }
+            ]
           }
         },
         "required": [
           "passcode"
         ],
+        "type": "object"
+      },
+      "RocketsAuthInvitationAcceptancePayloadDto": {
+        "additionalProperties": {},
+        "properties": {
+          "password": {
+            "description": "Password to set on the invited user account",
+            "minLength": 8,
+            "type": "string"
+          },
+          "userMetadata": {
+            "additionalProperties": {},
+            "description": "Optional profile metadata applied on acceptance",
+            "type": "object"
+          }
+        },
         "type": "object"
       },
       "RocketsAuthInvitationCreateDto": {
@@ -667,11 +687,14 @@
           "category": {
             "description": "Category of invitations to revoke (implementation-specific, e.g., \"user\", \"admin\")",
             "example": "user",
+            "minLength": 1,
             "type": "string"
           },
           "email": {
             "description": "Email address to revoke invitations for",
             "example": "user@example.com",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
             "type": "string"
           }
         },
@@ -686,11 +709,14 @@
           "email": {
             "description": "Email associated with the OTP",
             "example": "user@example.com",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
             "type": "string"
           },
           "passcode": {
             "description": "OTP passcode to verify",
             "example": "123456",
+            "minLength": 1,
             "type": "string"
           }
         },
@@ -705,6 +731,8 @@
           "email": {
             "description": "Email to send OTP to",
             "example": "user@example.com",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
             "type": "string"
           }
         },
@@ -1963,21 +1991,11 @@
         "requestBody": {
           "content": {
             "application/json": {
-              "examples": {
-                "standard": {
-                  "summary": "Standard password change",
-                  "value": {
-                    "currentPassword": "CurrentP@ssw0rd",
-                    "newPassword": "NewSecureP@ssw0rd"
-                  }
-                }
-              },
               "schema": {
                 "$ref": "#/components/schemas/RocketsAuthChangePasswordDto"
               }
             }
           },
-          "description": "Current and new password",
           "required": true
         },
         "responses": {
@@ -2010,21 +2028,11 @@
         "requestBody": {
           "content": {
             "application/json": {
-              "examples": {
-                "standard": {
-                  "summary": "Standard OTP confirmation",
-                  "value": {
-                    "email": "user@example.com",
-                    "passcode": "123456"
-                  }
-                }
-              },
               "schema": {
                 "$ref": "#/components/schemas/RocketsAuthOtpConfirmDto"
               }
             }
           },
-          "description": "Email and passcode for OTP verification",
           "required": true
         },
         "responses": {
@@ -2057,20 +2065,11 @@
         "requestBody": {
           "content": {
             "application/json": {
-              "examples": {
-                "standard": {
-                  "summary": "Standard OTP request",
-                  "value": {
-                    "email": "user@example.com"
-                  }
-                }
-              },
               "schema": {
                 "$ref": "#/components/schemas/RocketsAuthOtpSendDto"
               }
             }
           },
-          "description": "Email to receive the OTP",
           "required": true
         },
         "responses": {

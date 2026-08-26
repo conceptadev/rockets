@@ -55,7 +55,6 @@ export type {
   ZodOperationResource,
 } from './zod-operation-resource';
 export { defineZodUserMetadata } from './zod-user-metadata';
-export { compileDtoClass, namedZodDto } from './zod-dto';
 export type {
   ZodResourceDefinition,
   ZodSubResourceDefinition,

@@ -11,9 +11,8 @@ export { rocketsAuthInvitationSchema } from './infrastructure/schemas/rockets-au
 export { rocketsAuthInvitationCreateSchema } from './infrastructure/schemas/rockets-auth-invitation-create.schema';
 export { rocketsAuthInvitationAcceptSchema } from './infrastructure/schemas/rockets-auth-invitation-accept.schema';
 export { rocketsAuthInvitationResponseSchema } from './infrastructure/schemas/rockets-auth-invitation-response.schema';
-
-// DTOs
-export { RocketsAuthInvitationRevokeDto } from './infrastructure/dto/rockets-auth-invitation-revoke.dto';
+export { rocketsAuthInvitationAcceptancePayloadSchema } from './infrastructure/schemas/rockets-auth-invitation-acceptance-payload.schema';
+export { rocketsAuthInvitationRevokeSchema } from './infrastructure/schemas/rockets-auth-invitation-revoke.schema';
 
 // Interfaces
 export {

@@ -3,7 +3,7 @@ import { z } from 'zod';
 /**
  * Namespaced per-field metadata carried in a CUSTOM zod registry —
  * never `.meta()`. `.meta()` writes to `z.globalRegistry`, which
- * `z.toJSONSchema` (and therefore nestjs-zod's OpenAPI generation)
+ * `z.toJSONSchema` (and therefore the OpenAPI bridge)
  * merges verbatim into the JSON Schema output: a `db` namespace placed
  * there leaks into the public Swagger document. The custom registry is
  * invisible to JSON Schema generation by design.

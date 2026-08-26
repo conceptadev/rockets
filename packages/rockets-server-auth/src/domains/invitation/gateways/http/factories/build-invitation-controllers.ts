@@ -44,7 +44,7 @@ import { applyControllerExtras } from '../../../../../shared/utils/apply-control
 import { rocketsAuthInvitationAcceptSchema } from '../../../infrastructure/schemas/rockets-auth-invitation-accept.schema';
 import { rocketsAuthInvitationCreateSchema } from '../../../infrastructure/schemas/rockets-auth-invitation-create.schema';
 import { rocketsAuthInvitationResponseSchema } from '../../../infrastructure/schemas/rockets-auth-invitation-response.schema';
-import { RocketsAuthInvitationRevokeDto } from '../../../infrastructure/dto/rockets-auth-invitation-revoke.dto';
+import { rocketsAuthInvitationRevokeSchema } from '../../../infrastructure/schemas/rockets-auth-invitation-revoke.schema';
 import { RocketsAuthInvitationNotAcceptedException } from '../../../domain/exceptions/invitation.exception';
 import type {
   InvitationAcceptanceControllerExtras,
@@ -55,6 +55,7 @@ import type {
 
 type InvitationCreateBody = z.output<typeof rocketsAuthInvitationCreateSchema>;
 type InvitationAcceptBody = z.output<typeof rocketsAuthInvitationAcceptSchema>;
+type InvitationRevokeBody = z.output<typeof rocketsAuthInvitationRevokeSchema>;
 type InvitationResponse = z.output<typeof rocketsAuthInvitationResponseSchema>;
 
 /** Build `POST /admin/invitations`; the response is serialized by its schema. */
@@ -174,11 +175,7 @@ export function buildInvitationAcceptanceController(
   return InvitationAcceptanceController;
 }
 
-/**
- * Build `POST /admin/invitations/revoke`. The body is still a class DTO
- * validated by the app's global class-validator pipe; the class-level
- * Standard Schema pipe passes params without a schema through untouched.
- */
+/** Build `POST /admin/invitations/revoke`. */
 export function buildInvitationRevocationController(
   extras: InvitationRevocationControllerExtras = {},
 ): Type<unknown> {
@@ -198,12 +195,13 @@ export function buildInvitationRevocationController(
     })
     @ApiCreatedResponse({ description: 'Invitations revoked successfully' })
     async revoke(
-      @Body() dto: RocketsAuthInvitationRevokeDto,
+      @Body({ schema: rocketsAuthInvitationRevokeSchema })
+      body: InvitationRevokeBody,
       @Req() req: Request,
     ): Promise<void> {
       const ctx = getAppContext(req);
       await this.commandBus.execute(
-        new RevokeInvitationsCommand(ctx, dto.email, dto.category),
+        new RevokeInvitationsCommand(ctx, body.email, body.category),
       );
     }
   }

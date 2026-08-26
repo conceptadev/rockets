@@ -1,5 +1,4 @@
 import 'reflect-metadata';
-import { ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { ExceptionsFilter } from '@concepta/rockets';
 
@@ -17,7 +16,6 @@ async function bootstrap() {
     origin: process.env.ALLOWED_ORIGINS?.split(',') ?? '*',
     credentials: true,
   });
-  app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
 
   const swaggerUiService = app.get(SwaggerUiService);
   swaggerUiService.builder().addBearerAuth();

@@ -74,21 +74,12 @@
     "@nestjs/typeorm": "11.0.3",
     "@types/pluralize": "^0.0.33",
     "accesscontrol": "^2.2.1",
-    "nestjs-zod": "^5.4.0",
     "supertest": "^6.3.4",
     "typeorm": "^0.3.31",
     "vitest": "^4.1.10"
   },
   "peerDependencies": {
-    "class-transformer": "^0.5.1",
-    "class-validator": "^0.14.0",
-    "nestjs-zod": "^5.0.0",
     "rxjs": "^7.1.0"
-  },
-  "peerDependenciesMeta": {
-    "nestjs-zod": {
-      "optional": true
-    }
   },
   "homepage": "https://github.com/conceptadev/rockets/tree/main/packages/rockets-core#readme",
   "bugs": {

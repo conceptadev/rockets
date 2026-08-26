@@ -14,6 +14,7 @@
 
 ### Changed
 
+- `nestjs-zod` is no longer an optional peer (RFC #104, stage 6).
 - Upstream `@concepta/nestjs-repository-typeorm` `8.0.0-alpha.9` (RFC #104,
   stage 4). The zod entity compiler no longer maps `z.iso.datetime()` to a
   datetime column: an ISO-string field is a varchar; `z.date()` / `f.date()` /

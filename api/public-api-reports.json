@@ -1304,12 +1304,6 @@
         "signature": "export declare class RocketsAuthAdminModule {\n    static register(admin: UserCrudOptionsExtrasInterface): DynamicModule;\n}"
       },
       {
-        "name": "RocketsAuthChangePasswordDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class RocketsAuthChangePasswordDto {\n    currentPassword: string;\n    newPassword: string;\n}"
-      },
-      {
         "name": "RocketsAuthClassDecorator",
         "kind": "type",
         "runtime": false,
@@ -1376,12 +1370,6 @@
         "signature": "export declare class RocketsAuthInvitationNotFoundException extends RocketsAuthInvitationException {\n    constructor(options?: RuntimeExceptionOptions);\n}"
       },
       {
-        "name": "RocketsAuthInvitationRevokeDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class RocketsAuthInvitationRevokeDto {\n    email: string;\n    category: string;\n}"
-      },
-      {
         "name": "RocketsAuthInvitationRevokedException",
         "kind": "class",
         "runtime": true,
@@ -1430,12 +1418,6 @@
         "signature": "export interface RocketsAuthOptionsInterface {\n    settings: RocketsAuthSettingsInterface;\n    swagger?: SwaggerUiOptionsInterface;\n    authentication?: Omit<AuthenticationOptionsInterface, 'ports'> & {\n        ports?: Partial<AuthenticationPortsInterface>;\n    };\n    federated?: Omit<FederatedOptionsInterface, 'userPort'> & {\n        userPort?: Partial<FederatedUserPortSettings>;\n    };\n    user?: {\n        settings?: UserSettingsInterface;\n        ports?: {\n            password?: Partial<UserPasswordPortSettings>;\n        };\n    } & Omit<UserOptionsInterface, 'settings' | 'ports'>;\n    password?: PasswordOptionsInterface;\n    otp?: OtpOptionsInterface;\n    email?: Partial<EmailOptionsInterface>;\n    crud?: CrudModuleOptions;\n    role?: Partial<RoleOptionsInterface>;\n    invitation?: {\n        settings?: InvitationSettingsInterface;\n        ports?: {\n            otp?: Partial<InvitationOtpPortSettings>;\n            user?: Partial<InvitationUserPortSettings>;\n            notification?: Partial<InvitationNotificationPortSettings>;\n        };\n    };\n    services: {\n        mailerService: EmailServiceInterface;\n        userAccessQueryService?: CanAccess;\n    };\n}"
       },
       {
-        "name": "RocketsAuthOtpConfirmDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class RocketsAuthOtpConfirmDto {\n    email: string;\n    passcode: string;\n}"
-      },
-      {
         "name": "RocketsAuthOtpException",
         "kind": "class",
         "runtime": true,
@@ -1458,12 +1440,6 @@
         "kind": "class",
         "runtime": true,
         "signature": "export declare class RocketsAuthOtpPortService {\n    private readonly commandBus;\n    private readonly queryBus;\n    constructor(commandBus: CommandBus, queryBus: QueryBus);\n    create(ctx: PlainLiteralObject, params: RocketsCreateOtpParams): Promise<OtpInterface>;\n    validate(ctx: PlainLiteralObject, assignment: ReferenceAssignment, otp: Pick<OtpInterface, 'category' | 'passcode'>, deleteIfValid: boolean): Promise<AssigneeRelationInterface | null>;\n    clear(ctx: PlainLiteralObject, assignment: ReferenceAssignment, otp: Pick<OtpInterface, 'assigneeId' | 'category'>): Promise<void>;\n}"
-      },
-      {
-        "name": "RocketsAuthOtpSendDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class RocketsAuthOtpSendDto {\n    email: string;\n}"
       },
       {
         "name": "RocketsAuthOtpService",
@@ -2012,10 +1988,28 @@
         "signature": "export declare function logAndGetErrorDetails(error: unknown, logger: Logger, customMessage: string, context?: Record<string, unknown>): ErrorDetails;"
       },
       {
+        "name": "rocketsAuthAdminAssignUserRoleSchema",
+        "kind": "value",
+        "runtime": true,
+        "signature": "rocketsAuthAdminAssignUserRoleSchema: z.ZodObject<{\n    roleId: z.ZodString;\n}, z.core.$strip>"
+      },
+      {
+        "name": "rocketsAuthChangePasswordSchema",
+        "kind": "value",
+        "runtime": true,
+        "signature": "rocketsAuthChangePasswordSchema: z.ZodObject<{\n    currentPassword: z.ZodString;\n    newPassword: z.ZodString;\n}, z.core.$strip>"
+      },
+      {
         "name": "rocketsAuthInvitationAcceptSchema",
         "kind": "value",
         "runtime": true,
-        "signature": "rocketsAuthInvitationAcceptSchema: import(\"zod\").ZodObject<{\n    passcode: import(\"zod\").ZodString;\n    payload: import(\"zod\").ZodOptional<import(\"zod\").ZodRecord<import(\"zod\").ZodString, import(\"zod\").ZodUnknown>>;\n}, import(\"zod/v4/core\").$strip>"
+        "signature": "rocketsAuthInvitationAcceptSchema: import(\"zod\").ZodObject<{\n    passcode: import(\"zod\").ZodString;\n    payload: import(\"zod\").ZodOptional<import(\"zod\").ZodObject<{\n        password: import(\"zod\").ZodOptional<import(\"zod\").ZodString>;\n        userMetadata: import(\"zod\").ZodOptional<import(\"zod\").ZodRecord<import(\"zod\").ZodString, import(\"zod\").ZodUnknown>>;\n    }, import(\"zod/v4/core\").$loose>>;\n}, import(\"zod/v4/core\").$strip>"
+      },
+      {
+        "name": "rocketsAuthInvitationAcceptancePayloadSchema",
+        "kind": "value",
+        "runtime": true,
+        "signature": "rocketsAuthInvitationAcceptancePayloadSchema: z.ZodObject<{\n    password: z.ZodOptional<z.ZodString>;\n    userMetadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;\n}, z.core.$loose>"
       },
       {
         "name": "rocketsAuthInvitationCreateSchema",
@@ -2030,6 +2024,12 @@
         "signature": "rocketsAuthInvitationResponseSchema: z.ZodObject<{\n    dateCreated: z.ZodDate;\n    dateUpdated: z.ZodDate;\n    dateDeleted: z.ZodNullable<z.ZodDate>;\n    version: z.ZodNumber;\n    id: z.ZodString;\n    active: z.ZodDefault<z.ZodBoolean>;\n    code: z.ZodString;\n    category: z.ZodString;\n    constraints: z.ZodOptional<z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodUnknown>>>;\n    userId: z.ZodString;\n    dateAccepted: z.ZodNullable<z.ZodDate>;\n    dateRevoked: z.ZodNullable<z.ZodDate>;\n    emailSent: z.ZodBoolean;\n    emailError: z.ZodOptional<z.ZodString>;\n}, z.core.$strip>"
       },
       {
+        "name": "rocketsAuthInvitationRevokeSchema",
+        "kind": "value",
+        "runtime": true,
+        "signature": "rocketsAuthInvitationRevokeSchema: z.ZodObject<{\n    email: z.ZodEmail;\n    category: z.ZodString;\n}, z.core.$strip>"
+      },
+      {
         "name": "rocketsAuthInvitationSchema",
         "kind": "value",
         "runtime": true,
@@ -2040,6 +2040,18 @@
         "kind": "value",
         "runtime": true,
         "signature": "rocketsAuthOptionsDefaultConfig: {\n    provide: string;\n    useFactory: () => RocketsAuthSettingsInterface;\n}"
+      },
+      {
+        "name": "rocketsAuthOtpConfirmSchema",
+        "kind": "value",
+        "runtime": true,
+        "signature": "rocketsAuthOtpConfirmSchema: z.ZodObject<{\n    email: z.ZodEmail;\n    passcode: z.ZodString;\n}, z.core.$strip>"
+      },
+      {
+        "name": "rocketsAuthOtpSendSchema",
+        "kind": "value",
+        "runtime": true,
+        "signature": "rocketsAuthOtpSendSchema: z.ZodObject<{\n    email: z.ZodEmail;\n}, z.core.$strip>"
       },
       {
         "name": "rocketsAuthRoleCreateSchema",
@@ -2311,7 +2323,7 @@
         "name": "CompiledOperationDescriptor",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface CompiledOperationDescriptor {\n    readonly key: string;\n    readonly method: OperationHttpMethod;\n    readonly path: string;\n    readonly status: number;\n    readonly summary?: string;\n    readonly public?: boolean;\n    readonly acl?: OperationAclConfig;\n    readonly transactional?: boolean;\n    readonly inputDto?: Type<object>;\n    readonly output: Type<object> | false;\n    readonly handler: OperationHandlerRef;\n    readonly decorators?: readonly MethodDecorator[];\n    readonly responseMode?: 'sse';\n}"
+        "signature": "export interface CompiledOperationDescriptor {\n    readonly key: string;\n    readonly method: OperationHttpMethod;\n    readonly path: string;\n    readonly status: number;\n    readonly summary?: string;\n    readonly public?: boolean;\n    readonly acl?: OperationAclConfig;\n    readonly transactional?: boolean;\n    readonly inputSchema?: z.ZodType;\n    readonly output: z.ZodType | false;\n    readonly handler: OperationHandlerRef;\n    readonly decorators?: readonly MethodDecorator[];\n    readonly responseMode?: 'sse';\n}"
       },
       {
         "name": "ControllerScan",
@@ -2617,7 +2629,7 @@
         "name": "OperationResourceDefinition",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface OperationResourceDefinition {\n    readonly path: string;\n    readonly tags?: readonly string[];\n    readonly public?: boolean;\n    readonly acl?: ResourceAclConfig;\n    readonly paramsDto?: Type<object>;\n    readonly operations: Readonly<Record<string, CompiledOperationDescriptor>>;\n    readonly imports?: NonNullable<DynamicModule['imports']>;\n    readonly providers?: ReadonlyArray<Provider>;\n    readonly exports?: NonNullable<DynamicModule['exports']>;\n    readonly decorators?: readonly ClassDecorator[];\n}"
+        "signature": "export interface OperationResourceDefinition {\n    readonly path: string;\n    readonly tags?: readonly string[];\n    readonly public?: boolean;\n    readonly acl?: ResourceAclConfig;\n    readonly paramsSchema?: z.ZodObject;\n    readonly operations: Readonly<Record<string, CompiledOperationDescriptor>>;\n    readonly imports?: NonNullable<DynamicModule['imports']>;\n    readonly providers?: ReadonlyArray<Provider>;\n    readonly exports?: NonNullable<DynamicModule['exports']>;\n    readonly decorators?: readonly ClassDecorator[];\n}"
       },
       {
         "name": "OperationResponse",
@@ -3232,12 +3244,6 @@
         "signature": "export declare function buildPaginatedSchema(resource: z.ZodType, context: string): z.ZodType;"
       },
       {
-        "name": "classValidatorErrorsToDetails",
-        "kind": "function",
-        "runtime": true,
-        "signature": "export declare function classValidatorErrorsToDetails(errors: readonly ValidationErrorLike[], parents?: readonly (string | number)[]): RocketsErrorDetail[];"
-      },
-      {
         "name": "collectRegisteredRoutes",
         "kind": "function",
         "runtime": true,
@@ -3792,12 +3798,6 @@
         "signature": "export declare function buildResponseSchema(name: string, projections: Pick<SchemaProjections, 'response' | 'compute'>): z.ZodType;"
       },
       {
-        "name": "compileDtoClass",
-        "kind": "function",
-        "runtime": true,
-        "signature": "export declare function compileDtoClass(schema: z.ZodObject, name: string, nested?: Readonly<Record<string, Type<object>>>): Type<object>;"
-      },
-      {
         "name": "createdEntity",
         "kind": "function",
         "runtime": true,
@@ -3832,12 +3832,6 @@
         "kind": "function",
         "runtime": true,
         "signature": "export declare function isDbGenerated(meta: RocketsFieldMeta): boolean;"
-      },
-      {
-        "name": "namedZodDto",
-        "kind": "function",
-        "runtime": true,
-        "signature": "export declare function namedZodDto<T>(schema: z.ZodObject, name: string): Type<T>;"
       },
       {
         "name": "operationResource",
@@ -4659,14 +4653,6 @@
         "referencedBy": [
           "SwaggerUiModule"
         ]
-      },
-      {
-        "name": "ValidationErrorLike",
-        "kind": "interface",
-        "signature": "export interface ValidationErrorLike {\n    readonly property: string;\n    readonly constraints?: Readonly<Record<string, string>>;\n    readonly children?: readonly ValidationErrorLike[];\n}",
-        "referencedBy": [
-          "classValidatorErrorsToDetails"
-        ]
       }
     ],
     "@concepta/rockets-core/zod": [
@@ -4705,7 +4691,7 @@
       {
         "name": "CompiledOperationDescriptor",
         "kind": "interface",
-        "signature": "export interface CompiledOperationDescriptor {\n    readonly key: string;\n    readonly method: OperationHttpMethod;\n    readonly path: string;\n    readonly status: number;\n    readonly summary?: string;\n    readonly public?: boolean;\n    readonly acl?: OperationAclConfig;\n    readonly transactional?: boolean;\n    readonly inputDto?: Type<object>;\n    readonly output: Type<object> | false;\n    readonly handler: OperationHandlerRef;\n    readonly decorators?: readonly MethodDecorator[];\n    readonly responseMode?: 'sse';\n}",
+        "signature": "export interface CompiledOperationDescriptor {\n    readonly key: string;\n    readonly method: OperationHttpMethod;\n    readonly path: string;\n    readonly status: number;\n    readonly summary?: string;\n    readonly public?: boolean;\n    readonly acl?: OperationAclConfig;\n    readonly transactional?: boolean;\n    readonly inputSchema?: z.ZodType;\n    readonly output: z.ZodType | false;\n    readonly handler: OperationHandlerRef;\n    readonly decorators?: readonly MethodDecorator[];\n    readonly responseMode?: 'sse';\n}",
         "referencedBy": [
           "OperationResourceInput",
           "ZodOperationResource"
@@ -5051,7 +5037,7 @@
       {
         "name": "OperationResourceDefinition",
         "kind": "interface",
-        "signature": "export interface OperationResourceDefinition {\n    readonly path: string;\n    readonly tags?: readonly string[];\n    readonly public?: boolean;\n    readonly acl?: ResourceAclConfig;\n    readonly paramsDto?: Type<object>;\n    readonly operations: Readonly<Record<string, CompiledOperationDescriptor>>;\n    readonly imports?: NonNullable<DynamicModule['imports']>;\n    readonly providers?: ReadonlyArray<Provider>;\n    readonly exports?: NonNullable<DynamicModule['exports']>;\n    readonly decorators?: readonly ClassDecorator[];\n}",
+        "signature": "export interface OperationResourceDefinition {\n    readonly path: string;\n    readonly tags?: readonly string[];\n    readonly public?: boolean;\n    readonly acl?: ResourceAclConfig;\n    readonly paramsSchema?: z.ZodObject;\n    readonly operations: Readonly<Record<string, CompiledOperationDescriptor>>;\n    readonly imports?: NonNullable<DynamicModule['imports']>;\n    readonly providers?: ReadonlyArray<Provider>;\n    readonly exports?: NonNullable<DynamicModule['exports']>;\n    readonly decorators?: readonly ClassDecorator[];\n}",
         "referencedBy": [
           "OperationResourceInput",
           "ZodOperationResource"

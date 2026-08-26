@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import type { OpenAPIObject } from '@nestjs/swagger';
 import request from 'supertest';
@@ -38,7 +38,6 @@ describe('zod reminder resource (e2e)', () => {
 
   beforeAll(async () => {
     app = await NestFactory.create(AppModule, { logger: ['error'] });
-    app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
     app.useGlobalFilters(new ExceptionsFilter(app.get(HttpAdapterHost)));
     await app.init();
 

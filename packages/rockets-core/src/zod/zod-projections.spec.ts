@@ -170,7 +170,7 @@ describe('projectSchema response exposure', () => {
   /**
    * RUNTIME layer (the schema strip above is documentation): the rebuilt
    * field must keep its rocketsFieldMeta registration — losing it means
-   * compileDtoClass never installs the compute @Transform and the field
+   * the response schema never sees the compute callback and the field
    * silently vanishes from every HTTP response while OpenAPI still
    * documents it (found in PR review).
    */

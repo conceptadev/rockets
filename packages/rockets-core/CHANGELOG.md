@@ -36,6 +36,18 @@
 
 ### Changed
 
+- **Legacy validators removed (RFC #104, stage 6).** `class-validator`,
+  `class-transformer` and `nestjs-zod` are no longer peers or dependencies;
+  `compileDtoClass` / `namedZodDto` (`/zod`) are gone. The packed-consumer
+  check installs no validation library beside `zod`.
+- **`operationResource` / `defineOperationResource` on the native engine
+  (RFC #104, stage 5).** `CompiledOperationDescriptor.inputSchema` /
+  `output` and `OperationResourceDefinition.paramsSchema` are zod schemas
+  (`inputDto` / `paramsDto` gone); the generated controller validates
+  through Nest's per-route Standard Schema pipe (`operationBodySchema`
+  guards the payload shape), validates output inline, documents from the
+  schema bridge. `classValidatorErrorsToDetails` and the generated-DTO brand
+  are removed; planner component-id uniqueness covers operation schemas.
 - **Schema engine (RFC #104, stage 4).** Upstream `8.0.0-alpha.9`, Nest
   `12.0.0-alpha.6`; `zod` is a dependency of the main entry. `defineResource`
   `dto` / per-op `input` / `output` / `paginated` are named zod schemas

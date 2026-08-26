@@ -42,3 +42,4 @@ export type {
 export { rocketsAuthRoleSchema } from './infrastructure/schemas/rockets-auth-role.schema';
 export { rocketsAuthRoleCreateSchema } from './infrastructure/schemas/rockets-auth-role-create.schema';
 export { rocketsAuthRoleUpdateSchema } from './infrastructure/schemas/rockets-auth-role-update.schema';
+export { rocketsAuthAdminAssignUserRoleSchema } from './infrastructure/schemas/rockets-auth-admin-assign-user-role.schema';

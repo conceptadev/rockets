@@ -90,6 +90,8 @@
     "@types/passport-jwt": "^3.0.13",
     "@types/passport-strategy": "^0.2.38",
     "accesscontrol": "^2.2.1",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
     "jsonwebtoken": "^9.0.2",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
@@ -114,8 +116,6 @@
     "vitest": "^4.1.10"
   },
   "peerDependencies": {
-    "class-transformer": "^0.5.1",
-    "class-validator": "^0.14.0",
     "rxjs": "^7.1.0"
   },
   "stableVersion": "0.0.1-dev.0"

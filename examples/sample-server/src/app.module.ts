@@ -5,7 +5,7 @@ import { userMetadataConfig } from './user-metadata.schema';
 import { defineSampleAuth, sampleAuthUserResource } from './auth';
 import { petResource } from './resources/pet';
 import { petVaccinationResource } from './resources/pet-vaccination';
-// `/tags` is fully zod-driven (nestjs-zod DTOs + generated entity from
+// `/tags` is fully zod-driven (schemas + generated entity from
 // `tagSchema`).
 import { tagZodResource } from './resources/tag';
 // Library pair: zod resources showcasing dto field roles, the FK

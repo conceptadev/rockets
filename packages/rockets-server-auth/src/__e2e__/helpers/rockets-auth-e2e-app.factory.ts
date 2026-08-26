@@ -2,13 +2,7 @@ import { vi } from 'vitest';
 import type { AuthenticationStrategiesSettingsInterface } from '@concepta/nestjs-authentication';
 import { EventModule } from '@concepta/nestjs-event';
 import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
-import {
-  DynamicModule,
-  INestApplication,
-  Module,
-  Type,
-  ValidationPipe,
-} from '@nestjs/common';
+import { DynamicModule, INestApplication, Module, Type } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpAdapterHost } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -269,12 +263,5 @@ export function applyRocketsAuthE2eAppGlobals(
   const httpAdapterHost = app.get(HttpAdapterHost);
   app.useGlobalFilters(
     new RocketsCoreExceptionsFilter(httpAdapterHost, serializer),
-  );
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-      whitelist: true,
-      forbidUnknownValues: true,
-    }),
   );
 }

@@ -435,8 +435,9 @@ Other constraints worth knowing:
 
 Use when you need **RPC-style** routes beside CRUD — health checks, actions,
 reports — without hand-rolling a Nest controller. Zod `input` / `output`
-compile to DTO classes (OpenAPI + Standard Schema whitelist). Wire the bundle
-into `resources[]` like any other resource.
+become named OpenAPI components validated by the same per-route Standard
+Schema pipe generated CRUD uses. Wire the bundle into `resources[]` like any
+other resource.
 
 ```ts
 import { operationResource } from '@concepta/rockets-core/zod';
@@ -463,7 +464,7 @@ export const ops = operationResource({
       output: z.array(z.object({ id: z.string() })),
       handler: () => [{ id: '1' }],
     }),
-    // output: false opts out of response whitelist (explicit)
+    // output: false opts out of response validation (explicit)
     purge: op.delete({
       status: 204,
       output: false,
@@ -497,10 +498,11 @@ export const petTransfer = operationResource({
 `:params` type `ctx.params`. Operation path defaults to the **key verbatim**
 (not kebab-cased); use `path: ''` for a root-mounted route. Input sourcing
 follows HTTP method (`GET`/`DELETE` → query; body otherwise). **`output` is
-required** — pass a schema (whitelist + OpenAPI) or `output: false` (explicit
-opt-out). Optional resource-level `params: z.object({...})` validates named path
-params at request time (400). Keys must be `:params` on the resource `path`;
-extra Nest params from an operation path (not in the schema) are preserved.
+required** — pass a schema (validated + documented) or `output: false`
+(explicit opt-out). Optional resource-level `params: z.object({...})`
+validates named path params at request time (400). Keys must be `:params`
+on the resource `path`; extra Nest params from an operation path (not in
+the schema) are preserved.
 Structured cross-resource route collisions with CRUD/Sub fail in
 `buildAppRegistrationPlan` (not silently at runtime). This planner check is
 limited to Rockets-owned resource declarations; use
@@ -523,11 +525,17 @@ authenticated user, because upstream's check-access handler returns `true`
 when no grant metadata exists. Omitting `input` means the raw body/query
 reaches the handler unvalidated.
 
-**Validation.** Responses are whitelisted against `output` when present;
-handler/`output` mismatches return **500** (server bug), not 400. Query-string
-inputs are strings — use `z.coerce.number()` / `z.coerce.boolean()` when needed.
-`output` accepts `z.object(...)` or `z.array(...)`. Duplicate `method`+`path`
-pairs inside one resource fail at boot.
+**Validation.** The generated controller carries a class-level
+`StandardSchemaValidationPipe(rocketsSchemaValidation)`: the body is
+`@Body({ schema })`, the query `@Query({ schema })`, the params
+`@Param({ schema })` — a `400` carries `details[]` like every other Rockets
+route. Responses are validated against `output` when present (undeclared
+keys stripped); handler/`output` mismatches and a `null` / `undefined`
+result return **500** (server bug), not 400. Query-string inputs are strings
+— use `z.coerce.number()` / `z.coerce.boolean()` when needed. `output`
+accepts `z.object(...)` or `z.array(...)`, and must strip (no
+`.passthrough()`). Duplicate `method`+`path` pairs inside one resource fail
+at boot.
 
 When an operation declares `input`, the request payload must be a plain JSON
 object. An array, a scalar, or a non-plain object (a `Buffer` from a raw body
@@ -536,12 +544,16 @@ substituting a valid value for an invalid one is not something a validation
 boundary should do quietly. A MISSING body is still `{}`, so a `POST` with no
 payload against an all-optional `input` stays legal.
 
-Two generated DTOs that would claim the same OpenAPI component name fail at
-boot. The name is derived from the resource path, the method, the operation key
-and the operation's own path, and that transform folds punctuation and
-casing together — `foo-bar` and
-`fooBar` both yield `FooBar`. One compiled DTO reused across several
-operations is fine: the check compares class identity, not names.
+**OpenAPI.** A body input is a named component
+(`<Resource>_<Method>_<Key>Input`,
+`$ref`'d from the request body); a query input and the resource `params`
+schema are documented one parameter per property; the response `$ref`s
+`<Resource>_<Method>_<Key>Output`. Two schemas that would claim the same
+component id fail at boot. The id is derived from the resource path, the
+method, the operation key and the operation's own path, and that transform
+folds punctuation and casing together — `foo-bar` and `fooBar` both yield
+`FooBar`. One schema instance reused across several operations is fine: the
+check compares instances, not names.
 
 Cursor, binary, raw JSON, and idempotency are follow-ups on issue #43.
 SSE now has a first-class builder (§6c below); Range/partial content is
@@ -725,7 +737,7 @@ like a normal JSON error response; only a request that gets past all of
 that opens the stream.
 
 Two things `op.sse()` does not expose, deliberately: `output` (the
-response body IS the event stream, never a whitelisted JSON value) and
+response body IS the event stream, never a validated JSON value) and
 `transactional` (holding a database transaction open across a
 connection that may run indefinitely is not something to make one flag
 away).
@@ -758,8 +770,8 @@ On top of that, SSE-specific rules:
 | Situation | Why it is rejected |
 |---|---|
 | an SSE op *declares* a non-`GET` method | `@Sse()` always registers GET, so route audits would file the route under the wrong method (reachable via `defineOperationResource`) |
-| a non-SSE op carries `@Sse()` | core would still run the JSON output-DTO step over the Observable |
-| an SSE op declares an `output` DTO | there is no JSON body to whitelist; the DTO would be silently ignored |
+| a non-SSE op carries `@Sse()` | core would still run the JSON output-schema step over the Observable |
+| an SSE op declares an `output` schema | there is no JSON body to validate; the schema would be silently ignored |
 | an SSE op carries `Transactional()`, on the operation **or on the resource** | see below |
 
 An SSE route is therefore always `GET` — the only method a browser's

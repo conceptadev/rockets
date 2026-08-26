@@ -104,4 +104,20 @@ describe('OTP login (e2e)', () => {
       .send({ email: credentials.email, passcode: 'not-a-passcode' })
       .expect(401);
   });
+
+  // The app registers no global pipe: the 400 proves the controller's own
+  // Standard Schema pipe validates the body (an unknown email would
+  // otherwise be answered enumeration-safe with 2xx).
+  it('rejects a malformed email with 400 from the schema pipe', async () => {
+    const sent = await request(app.getHttpServer())
+      .post('/otp')
+      .send({ email: 'not-an-email' })
+      .expect(400);
+    expect(sent.body.errorCode).toBe('HTTP_BAD_REQUEST');
+
+    await request(app.getHttpServer())
+      .patch('/otp')
+      .send({ email: credentials.email, passcode: '' })
+      .expect(400);
+  });
 });

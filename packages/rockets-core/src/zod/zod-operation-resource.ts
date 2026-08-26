@@ -1,5 +1,5 @@
-import type { MessageEvent, Type } from '@nestjs/common';
-import { createZodDto } from 'nestjs-zod';
+import type { MessageEvent } from '@nestjs/common';
+import { withOpenApi } from '@concepta/nestjs-core';
 import type { Observable } from 'rxjs';
 import { z } from 'zod';
 
@@ -12,11 +12,9 @@ import type {
 } from '../domain/interfaces/operation-resource.interface';
 import { defineOperationResource } from '../infrastructure/resource/define-operation-resource';
 import { assertValidOperationKey } from '../infrastructure/resource/operation-resource/operation-key';
-import { compileDtoClass, nameGeneratedDto } from './zod-dto';
-import {
-  operationDtoBaseName,
-  operationResourceParamsDtoName,
-} from '../infrastructure/resource/operation-resource/build-operation-controller';
+import { operationBodySchema } from '../infrastructure/resource/operation-resource/operation-body-schema';
+import { operationDtoBaseName } from '../infrastructure/resource/operation-resource/build-operation-controller';
+import { assertFailClosedResponse } from '../common/utils/open-api-schema.util';
 import type {
   OperationAclConfig,
   ResourceAclConfig,
@@ -367,20 +365,35 @@ function defaultStatus(configured: number | undefined): number {
   return configured ?? 200;
 }
 
-function compileOperationDto(schema: z.ZodType, name: string): Type<object> {
-  if (schema instanceof z.ZodObject) {
-    return compileDtoClass(schema, name);
+/**
+ * The response schema as a NAMED component. An array output occupies a
+ * component exactly like an object one, so both get the id — and both
+ * must strip undeclared keys, since serialization is validation.
+ */
+function compileOperationOutput(
+  schema: OperationOutputSchema,
+  name: string,
+): z.ZodType {
+  const named = withOpenApi(schema, name);
+  assertFailClosedResponse(named, `operationResource output "${name}"`);
+  return named;
+}
+
+/**
+ * The request schema: a body (POST/PUT/PATCH) is a named component behind
+ * the payload-shape guard; a query (GET/DELETE) stays UNNAMED so the
+ * document expands it into one query parameter per property instead of a
+ * `$ref` no query parameter can carry.
+ */
+function compileOperationInput(
+  schema: z.ZodObject,
+  method: OperationHttpMethod,
+  name: string,
+): z.ZodType {
+  if (method === 'GET' || method === 'DELETE') {
+    return withOpenApi(schema);
   }
-  if (schema instanceof z.ZodArray) {
-    // Same naming + branding path as the object branch: an array output
-    // occupies an OpenAPI component exactly like an object one, so it
-    // has to be visible to the uniqueness assertion.
-    return nameGeneratedDto(createZodDto(schema), name);
-  }
-  throw new Error(
-    `operationResource DTO "${name}": expected z.object(...) or z.array(...), ` +
-      `got ${schema.constructor.name}`,
-  );
+  return withOpenApi(operationBodySchema(schema), name);
 }
 
 function assertOperationHandler(
@@ -432,17 +445,15 @@ function compileOperation(
     path,
   });
 
-  let inputDto: Type<object> | undefined;
-  if (pending.input !== undefined) {
-    inputDto = compileDtoClass(pending.input, `${dtoBaseName}Input`);
-  }
+  const inputSchema =
+    pending.input === undefined
+      ? undefined
+      : compileOperationInput(pending.input, method, `${dtoBaseName}Input`);
 
-  let output: Type<object> | false;
-  if (pending.output === false) {
-    output = false;
-  } else {
-    output = compileOperationDto(pending.output, `${dtoBaseName}Output`);
-  }
+  const output =
+    pending.output === false
+      ? false
+      : compileOperationOutput(pending.output, `${dtoBaseName}Output`);
 
   if (status === 204 && output !== false) {
     throw new Error(
@@ -463,7 +474,7 @@ function compileOperation(
     public: pending.public,
     acl: pending.acl,
     transactional: pending.transactional,
-    inputDto,
+    inputSchema,
     output,
     handler: pending.handler,
     decorators: pending.decorators,
@@ -602,13 +613,12 @@ export function operationResource<
   const builders = createBoundBuilders<TBase, TParamsSchema>();
   const authored = input.operations(builders);
 
-  let paramsDto: Type<object> | undefined;
+  let paramsSchema: z.ZodObject | undefined;
   if (input.params !== undefined) {
-    assertParamsSchemaMatchesPath(input.path, input.params);
-    paramsDto = compileDtoClass(
-      input.params,
-      operationResourceParamsDtoName(input.path),
-    );
+    const params: z.ZodObject = input.params;
+    assertParamsSchemaMatchesPath(input.path, params);
+    // Bridged, never named: path params are documented one by one.
+    paramsSchema = withOpenApi(params);
   }
 
   const operations: Record<string, CompiledOperationDescriptor> = {};
@@ -622,7 +632,7 @@ export function operationResource<
     tags: input.tags,
     public: input.public,
     acl: input.acl,
-    paramsDto,
+    paramsSchema,
     operations,
     imports: input.imports,
     providers: input.providers,

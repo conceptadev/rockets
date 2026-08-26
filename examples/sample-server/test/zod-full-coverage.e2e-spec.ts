@@ -4,7 +4,6 @@ import {
   Injectable,
   Module,
   PlainLiteralObject,
-  ValidationPipe,
 } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import type { OpenAPIObject } from '@nestjs/swagger';
@@ -181,7 +180,6 @@ describe('zod full defineResource coverage (e2e)', () => {
     class CoverageModule {}
 
     app = await NestFactory.create(CoverageModule, { logger: ['error'] });
-    app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
     app.useGlobalFilters(new ExceptionsFilter(app.get(HttpAdapterHost)));
     await app.init();
 

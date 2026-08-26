@@ -922,6 +922,8 @@ __metadata:
     "@types/passport-strategy": "npm:^0.2.38"
     "@types/supertest": "npm:^6.0.2"
     accesscontrol: "npm:^2.2.1"
+    class-transformer: "npm:^0.5.1"
+    class-validator: "npm:^0.14.1"
     express-serve-static-core: "npm:^0.1.1"
     jsonwebtoken: "npm:^9.0.2"
     passport: "npm:^0.7.0"
@@ -934,8 +936,6 @@ __metadata:
     vitest: "npm:^4.1.10"
     zod: "npm:^4.4.3"
   peerDependencies:
-    class-transformer: ^0.5.1
-    class-validator: ^0.14.0
     rxjs: ^7.1.0
   languageName: unknown
   linkType: soft
@@ -959,7 +959,6 @@ __metadata:
     "@standard-schema/spec": "npm:1.1.0"
     "@types/pluralize": "npm:^0.0.33"
     accesscontrol: "npm:^2.2.1"
-    nestjs-zod: "npm:^5.4.0"
     path-to-regexp: "npm:^8.4.2"
     pluralize: "npm:^8.0.0"
     supertest: "npm:^6.3.4"
@@ -967,13 +966,7 @@ __metadata:
     vitest: "npm:^4.1.10"
     zod: "npm:^4.4.3"
   peerDependencies:
-    class-transformer: ^0.5.1
-    class-validator: ^0.14.0
-    nestjs-zod: ^5.0.0
     rxjs: ^7.1.0
-  peerDependenciesMeta:
-    nestjs-zod:
-      optional: true
   languageName: unknown
   linkType: soft
 
@@ -1015,13 +1008,10 @@ __metadata:
   peerDependencies:
     "@nestjs/common": ^12.0.0-alpha.0
     "@nestjs/typeorm": ^11.0.0
-    nestjs-zod: ^5.0.0
     reflect-metadata: ^0.1.13 || ^0.2.0
     typeorm: ^0.3.0
     zod: ^4.0.0
   peerDependenciesMeta:
-    nestjs-zod:
-      optional: true
     zod:
       optional: true
   languageName: unknown
@@ -1049,8 +1039,6 @@ __metadata:
     vitest: "npm:^4.1.10"
     zod: "npm:^4.4.3"
   peerDependencies:
-    class-transformer: ^0.5.1
-    class-validator: ^0.14.0
     rxjs: ^7.1.0
   languageName: unknown
   linkType: soft
@@ -5202,11 +5190,8 @@ __metadata:
     "@swc/core": "npm:^1.15.47"
     "@types/node": "npm:^20.19.0"
     "@types/supertest": "npm:^6.0.2"
-    class-transformer: "npm:^0.5.1"
-    class-validator: "npm:^0.14.1"
     firebase-admin: "npm:^13.0.0"
     helmet: "npm:^8.0.0"
-    nestjs-zod: "npm:^5.4.0"
     reflect-metadata: "npm:^0.1.14"
     rxjs: "npm:^7.8.1"
     sqlite3: "npm:^5.1.7"
@@ -5806,13 +5791,13 @@ __metadata:
   linkType: hard
 
 "class-validator@npm:^0.14.1":
-  version: 0.14.3
-  resolution: "class-validator@npm:0.14.3"
+  version: 0.14.4
+  resolution: "class-validator@npm:0.14.4"
   dependencies:
     "@types/validator": "npm:^13.15.3"
     libphonenumber-js: "npm:^1.11.1"
-    validator: "npm:^13.15.20"
-  checksum: 10c0/6d451c359aecb04479b95034b10cca02015d3b6f34480574c618c070e12f3676cb4cdfa76bfa61353356a483ff01326e9ce3f07ef584be6c31806190117f7fa4
+    validator: "npm:^13.15.22"
+  checksum: 10c0/1d415261aad7bdd72528db76e814195ca627a9d33f159752554dbbf71b8360359d3061a8edd16ac951a9a4fb86e0495cdf8badf82ec44e2dcc187ab496f37c5a
   languageName: node
   linkType: hard
 
@@ -6248,13 +6233,6 @@ __metadata:
   version: 3.3.0
   resolution: "deepmerge@npm:3.3.0"
   checksum: 10c0/143bc6b6cd8a1216565c61c0fe38bf43fe691fb6876fb3f5727c6e323defe4e947c68fbab9957e17e837c5594a56af885c5834d23dc6cf2c41bef97090005104
-  languageName: node
-  linkType: hard
-
-"deepmerge@npm:^4.3.1":
-  version: 4.3.1
-  resolution: "deepmerge@npm:4.3.1"
-  checksum: 10c0/e53481aaf1aa2c4082b5342be6b6d8ad9dfe387bc92ce197a66dea08bd4265904a087e75e464f14d1347cf2ac8afe1e4c16b266e0561cc5df29382d3c5f80044
   languageName: node
   linkType: hard
 
@@ -9179,9 +9157,9 @@ __metadata:
   linkType: hard
 
 "libphonenumber-js@npm:^1.11.1":
-  version: 1.12.36
-  resolution: "libphonenumber-js@npm:1.12.36"
-  checksum: 10c0/1bf9e3f24aba0b4d9748642db52a698641c0746eb4e0706d13f9ae076ed18c0c9ff814323ebb130b1ad2b17d0894b7cd33463bea009fc5efac3feaeb1d17b865
+  version: 1.13.11
+  resolution: "libphonenumber-js@npm:1.13.11"
+  checksum: 10c0/1de958a7b78d281aa357a1b89be173bb5e7034b302b3921174f190e88bec611e19c891cadbf935facda261254e250bc32de00560765e689fb68a39db286765ff
   languageName: node
   linkType: hard
 
@@ -10225,23 +10203,6 @@ __metadata:
   version: 1.0.0
   resolution: "negotiator@npm:1.0.0"
   checksum: 10c0/4c559dd52669ea48e1914f9d634227c561221dd54734070791f999c52ed0ff36e437b2e07d5c1f6e32909fc625fe46491c16e4a8f0572567d4dd15c3a4fda04b
-  languageName: node
-  linkType: hard
-
-"nestjs-zod@npm:^5.4.0":
-  version: 5.4.0
-  resolution: "nestjs-zod@npm:5.4.0"
-  dependencies:
-    deepmerge: "npm:^4.3.1"
-  peerDependencies:
-    "@nestjs/common": ^10.0.0 || ^11.0.0
-    "@nestjs/swagger": ^7.4.2 || ^8.0.0 || ^11.0.0
-    rxjs: ^7.0.0
-    zod: ^3.25.0 || ^4.0.0
-  peerDependenciesMeta:
-    "@nestjs/swagger":
-      optional: true
-  checksum: 10c0/d965ec6459e7f1208336cbcf413b8c076aa55de6e0db2ac225f6a8ea99cfb2af302a8456a17c6bccec4161aac877d8d7584d0a28968ab3f6075eda565beeb374
   languageName: node
   linkType: hard
 
@@ -11523,8 +11484,6 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:^5.62.0"
     "@typescript-eslint/parser": "npm:^5.62.0"
     "@vitest/coverage-v8": "npm:^4.1.10"
-    class-transformer: "npm:^0.5.1"
-    class-validator: "npm:^0.14.1"
     eslint: "npm:^8.57.0"
     eslint-config-prettier: "npm:^8.10.0"
     eslint-plugin-import: "npm:^2.29.1"
@@ -11688,8 +11647,6 @@ __metadata:
     "@types/node": "npm:^20.19.0"
     "@types/supertest": "npm:^6.0.2"
     accesscontrol: "npm:^2.2.1"
-    class-transformer: "npm:^0.5.1"
-    class-validator: "npm:^0.14.1"
     dotenv: "npm:^16.4.5"
     helmet: "npm:^8.0.0"
     jsonwebtoken: "npm:^9.0.2"
@@ -11731,11 +11688,8 @@ __metadata:
     "@types/jsonwebtoken": "npm:^9.0.3"
     "@types/node": "npm:^20.19.0"
     "@types/supertest": "npm:^6.0.2"
-    class-transformer: "npm:^0.5.1"
-    class-validator: "npm:^0.14.1"
     helmet: "npm:^8.0.0"
     jsonwebtoken: "npm:^9.0.2"
-    nestjs-zod: "npm:^5.4.0"
     reflect-metadata: "npm:^0.1.14"
     rxjs: "npm:^7.8.1"
     sqlite3: "npm:^5.1.7"
@@ -13287,10 +13241,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"validator@npm:^13.15.20":
-  version: 13.15.26
-  resolution: "validator@npm:13.15.26"
-  checksum: 10c0/d66041685c531423f6b514d0481228503b96682fe30ed7925ad77ff3cd08c3983dc94f45e18457e44f62f89027b94a3342009d65421800ce65f6e0d2c6eaf7fc
+"validator@npm:^13.15.22":
+  version: 13.15.35
+  resolution: "validator@npm:13.15.35"
+  checksum: 10c0/1958ebcad578128d154853a2b9bf5b95e7738dcc7d1d065e50a969812272312ec379dcaf375b9d7545e04a71de6755f60f5a4b49c1405737a9c80e11da297eef
   languageName: node
   linkType: hard
 

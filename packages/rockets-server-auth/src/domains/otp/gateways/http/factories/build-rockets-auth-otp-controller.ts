@@ -4,15 +4,16 @@ import {
   Patch,
   Post,
   Req,
+  StandardSchemaValidationPipe,
   UnauthorizedException,
   UseGuards,
+  UsePipes,
 } from '@nestjs/common';
 import type { Type } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { Throttle } from '@nestjs/throttler';
 import {
   ApiBadRequestResponse,
-  ApiBody,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -25,15 +26,19 @@ import {
   type AuthenticatedResponseInterface,
 } from '@concepta/nestjs-authentication';
 import { OtpException } from '@concepta/nestjs-otp';
-import { getAppContext } from '@concepta/rockets-core';
+import { getAppContext, rocketsSchemaValidation } from '@concepta/rockets-core';
 import type { Request } from 'express';
+import type { z } from 'zod';
 
-import { RocketsAuthOtpConfirmDto } from '../../../infrastructure/dto/rockets-auth-otp-confirm.dto';
-import { RocketsAuthOtpSendDto } from '../../../infrastructure/dto/rockets-auth-otp-send.dto';
+import { rocketsAuthOtpConfirmSchema } from '../../../infrastructure/schemas/rockets-auth-otp-confirm.schema';
+import { rocketsAuthOtpSendSchema } from '../../../infrastructure/schemas/rockets-auth-otp-send.schema';
 import { RocketsAuthOtpService } from '../../../infrastructure/services/rockets-auth-otp.service';
 import type { OtpControllerExtras } from '../../../interfaces/otp-controller-extras.interface';
 import { applyControllerExtras } from '../../../../../shared/utils/apply-controller-extras.helper';
 import { AuthAccountThrottlerGuard } from '../../../../auth/gateways/http/guards/auth-account-throttler.guard';
+
+type OtpSendBody = z.output<typeof rocketsAuthOtpSendSchema>;
+type OtpConfirmBody = z.output<typeof rocketsAuthOtpConfirmSchema>;
 
 /** Build the OTP controller and apply consumer-supplied decorators. */
 export function buildRocketsAuthOtpController(
@@ -42,6 +47,7 @@ export function buildRocketsAuthOtpController(
   @Controller('otp')
   @AuthPublic({ classLevel: true })
   @UseGuards(AuthAccountThrottlerGuard)
+  @UsePipes(new StandardSchemaValidationPipe(rocketsSchemaValidation))
   @ApiTags('Authentication')
   class RocketsAuthOtpController {
     constructor(
@@ -54,42 +60,22 @@ export function buildRocketsAuthOtpController(
       description:
         'Generates a one-time passcode and sends it to the specified email address',
     })
-    @ApiBody({
-      type: RocketsAuthOtpSendDto,
-      description: 'Email to receive the OTP',
-      examples: {
-        standard: {
-          value: { email: 'user@example.com' },
-          summary: 'Standard OTP request',
-        },
-      },
-    })
     @ApiOkResponse({ description: 'OTP sent successfully' })
     @ApiBadRequestResponse({ description: 'Invalid email format' })
     @Throttle({ default: { limit: 3, ttl: 60000 } })
     @Post()
     async sendOtp(
-      @Body() dto: RocketsAuthOtpSendDto,
+      @Body({ schema: rocketsAuthOtpSendSchema }) body: OtpSendBody,
       @Req() req: Request,
     ): Promise<void> {
       const ctx = getAppContext(req);
-      return this.otpService.sendOtp(ctx, dto.email);
+      return this.otpService.sendOtp(ctx, body.email);
     }
 
     @ApiOperation({
       summary: 'Confirm OTP for a given email and passcode',
       description:
         'Validates the OTP passcode for the specified email and returns authentication tokens on success',
-    })
-    @ApiBody({
-      type: RocketsAuthOtpConfirmDto,
-      description: 'Email and passcode for OTP verification',
-      examples: {
-        standard: {
-          value: { email: 'user@example.com', passcode: '123456' },
-          summary: 'Standard OTP confirmation',
-        },
-      },
     })
     @ApiOkResponse({
       description: 'OTP confirmed successfully, authentication tokens provided',
@@ -104,15 +90,15 @@ export function buildRocketsAuthOtpController(
     @Throttle({ default: { limit: 5, ttl: 60000 } })
     @Patch()
     async confirmOtp(
-      @Body() dto: RocketsAuthOtpConfirmDto,
+      @Body({ schema: rocketsAuthOtpConfirmSchema }) body: OtpConfirmBody,
       @Req() req: Request,
     ): Promise<AuthenticatedResponseInterface> {
       const ctx = getAppContext(req);
       try {
         const user = await this.otpService.confirmOtp(
           ctx,
-          dto.email,
-          dto.passcode,
+          body.email,
+          body.passcode,
         );
         return this.commandBus.execute(
           new IssueAuthenticatedResponseCommand(ctx, user.id),

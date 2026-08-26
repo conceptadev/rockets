@@ -6,7 +6,7 @@ import { UserRole } from './user.entity';
  * Request/response schemas for the hand-written auth controller. Each one
  * is wrapped LAST with `withOpenApi(schema, id)` so the per-route
  * `StandardSchemaValidationPipe` validates the body and Swagger emits the
- * named component (`$ref`) — no DTO classes, no class-validator.
+ * named component (`$ref`) — no DTO classes.
  */
 export const signupSchema = withOpenApi(
   z.object({

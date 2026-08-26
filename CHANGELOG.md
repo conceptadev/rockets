@@ -437,6 +437,42 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Changed
 
+- **Hand-written routes on the native engine; legacy validators removed (RFC
+  #104, stage 6).** The last class DTOs are gone: `rockets-auth`'s OTP,
+  change-password, invitation revoke / acceptance-payload and admin
+  role-assignment bodies are named zod schemas validated by each
+  controller's own Standard Schema pipe (the invitation-acceptance
+  `payload` is now validated — a short password or a non-object
+  `userMetadata` is a `400`); `examples/sample-server`'s pet-share and
+  `examples/sample-code-review`'s DTOs likewise. `class-validator`,
+  `class-transformer` and `nestjs-zod` are removed from every Rockets
+  manifest (no peer, no dependency) — except that `@concepta/rockets-auth`
+  keeps `class-validator` / `class-transformer` as plain dependencies while
+  `@concepta/nestjs-email` / `nestjs-event` (7.x) pull `nestjs-common@7`,
+  which requires them at import; `compileDtoClass` / `namedZodDto` are
+  gone from `@concepta/rockets-core/zod`. Migration: delete any global
+  `ValidationPipe` you registered only for Rockets DTOs (a global
+  class-validator pipe is harmless but dead; a global
+  `StandardSchemaValidationPipe` is rejected at boot); annotate body
+  params with `z.output<typeof schema>`, never a class.
+  Also in `examples/sample-server`: the reminder and pet-share scope hooks
+  now forward `ctx` to their repository lookups (rule 16 — the lookups ran
+  hook-free and outside the operation's transaction).
+- **`operationResource` on the native engine (RFC #104, stage 5).** The
+  generated controller carries a class-level
+  `StandardSchemaValidationPipe(rocketsSchemaValidation)`; the body is
+  `@Body({ schema })` (a named `<Base>Input` component behind a payload-shape
+  guard: missing body → `{}`, array / scalar / `Buffer` → `400` naming the
+  whole body), the query `@Query({ schema })` and the resource `params`
+  `@Param({ schema })` (both documented one parameter per property; extra
+  Nest path params still reach `ctx.params`). Responses are validated
+  inline by the named `<Base>Output` schema (`null` / mismatch → `500`) and
+  documented with `ApiResponse({ standardSchema })`. Compiled descriptors
+  carry `inputSchema` / `paramsSchema` / `output` schemas instead of DTO
+  classes; component-id uniqueness across CRUD and operation resources is
+  one planner check. Removed: class-validator DTO support on
+  `defineOperationResource`, `classValidatorErrorsToDetails`, the
+  generated-DTO brand.
 - **One schema engine — upstream `@concepta/nestjs-*` `8.0.0-alpha.9`, Nest
   `12.0.0-alpha.6`, `zod` 4.4.3 (RFC #104, stage 4).** Every request body and
   every response in Rockets is now a **named zod schema**

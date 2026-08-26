@@ -11,7 +11,7 @@ const temporaryPrefix = join(tmpdir(), 'rockets-packed-consumer-');
 const temporaryRoot = mkdtempSync(temporaryPrefix);
 const tarballsRoot = join(temporaryRoot, 'tarballs');
 const consumerRoot = join(temporaryRoot, 'consumer');
-const noZodConsumerRoot = join(temporaryRoot, 'consumer-no-zod');
+const coreOnlyConsumerRoot = join(temporaryRoot, 'consumer-core-only');
 
 const consumerDependencies = [
   '@nestjs/common@12.0.0-alpha.6',
@@ -19,10 +19,7 @@ const consumerDependencies = [
   '@nestjs/platform-express@12.0.0-alpha.6',
   '@nestjs/typeorm@11.0.3',
   '@types/node@20.19.43',
-  'class-transformer@0.5.1',
-  'class-validator@0.14.3',
   'firebase-admin@13.10.0',
-  'nestjs-zod@5.4.0',
   'reflect-metadata@0.1.14',
   'rxjs@7.8.2',
   'typeorm@0.3.31',
@@ -54,7 +51,7 @@ function writeJson(path, value) {
 try {
   mkdirSync(tarballsRoot);
   mkdirSync(consumerRoot);
-  mkdirSync(noZodConsumerRoot);
+  mkdirSync(coreOnlyConsumerRoot);
 
   const workspaces = readPublicPackageManifests(repositoryRoot, {
     namePrefix: '@concepta/',
@@ -122,8 +119,8 @@ try {
     ['@concepta/rockets-adapter-firebase', 'FirebaseAuthModule'],
     ['@concepta/rockets-auth', 'RocketsAuthModule'],
     ['@concepta/rockets-core', 'RocketsCoreModule'],
-    ['@concepta/rockets-core/zod', 'compileDtoClass'],
-    ['@concepta/rockets-core/zod', 'namedZodDto'],
+    ['@concepta/rockets-core/zod', 'zodResource'],
+    ['@concepta/rockets-core/zod', 'f'],
     ['@concepta/rockets-repository-firestore', 'FirestoreRepositoryModule'],
     ['@concepta/rockets-repository-typeorm', 'TypeOrmRepositoryModule'],
     ['@concepta/rockets-repository-typeorm/zod', 'typeOrmZodEntityCompiler'],
@@ -176,8 +173,8 @@ import {
   RocketsAuthTokenController,
   type RocketsAuthOptionsExtrasInterface,
 } from '@concepta/rockets-auth';
-import { RocketsCoreModule } from '@concepta/rockets-core';
-import { compileDtoClass, namedZodDto } from '@concepta/rockets-core/zod';
+import { RocketsCoreModule, withOpenApi } from '@concepta/rockets-core';
+import { f, zodResource } from '@concepta/rockets-core/zod';
 import { FirestoreRepositoryModule } from '@concepta/rockets-repository-firestore';
 import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
 import { typeOrmZodEntityCompiler } from '@concepta/rockets-repository-typeorm/zod';
@@ -203,14 +200,11 @@ export const throttlingConfig: RocketsAuthOptionsExtrasInterface['throttling'] =
   },
 ];
 
-export const ConsumerDto = compileDtoClass(
+export const consumerSchema = withOpenApi(
   z.object({ id: z.string() }),
   'ConsumerDto',
 );
-export const NamedConsumerDto = namedZodDto<{ id: string }>(
-  z.object({ id: z.string() }),
-  'NamedConsumerDto',
-);
+export const consumerZodSurface = { f, zodResource };
 
 @Injectable()
 class ConsumerAuthAdapter implements AuthAdapterInterface {
@@ -256,8 +250,8 @@ void main().catch((error: unknown) => {
   );
   run(process.execPath, [join('dist', 'consumer.js')], consumerRoot);
 
-  writeJson(join(noZodConsumerRoot, 'package.json'), {
-    name: 'rockets-core-no-zod-consumer-smoke',
+  writeJson(join(coreOnlyConsumerRoot, 'package.json'), {
+    name: 'rockets-core-only-consumer-smoke',
     version: '0.0.0',
     private: true,
   });
@@ -273,18 +267,16 @@ void main().catch((error: unknown) => {
       coreTarball,
       '@nestjs/common@12.0.0-alpha.6',
       '@nestjs/core@12.0.0-alpha.6',
-      'class-transformer@0.5.1',
-      'class-validator@0.14.3',
       'reflect-metadata@0.1.14',
       'rxjs@7.8.2',
     ],
-    noZodConsumerRoot,
+    coreOnlyConsumerRoot,
   );
   writeFileSync(
-    join(noZodConsumerRoot, 'verify-core-no-zod.cjs'),
+    join(coreOnlyConsumerRoot, 'verify-core-only.cjs'),
     `'use strict';\nrequire('reflect-metadata');\nconst loaded = require('@concepta/rockets-core');\nif (!('RocketsCoreModule' in loaded)) throw new Error('Missing RocketsCoreModule from @concepta/rockets-core');\n`,
   );
-  run(process.execPath, ['verify-core-no-zod.cjs'], noZodConsumerRoot);
+  run(process.execPath, ['verify-core-only.cjs'], coreOnlyConsumerRoot);
 
   console.log(
     `Verified ${workspaces.length} packed public packages in a clean CJS, ESM, TypeScript, and Nest consumer.`,

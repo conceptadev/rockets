@@ -26,8 +26,8 @@ import { baseEntity, f, rocketsFieldMeta } from '@concepta/rockets-core/zod';
  */
 export const tagSchema = baseEntity({
   name: f.string({ min: 1, max: 100, example: 'vaccinated', unique: true }),
-  // zod-only rule (no class-validator equivalent): enforced at runtime by
-  // the Standard Schema pipe in rockets-crud — this is the fidelity the
+  // zod-only rule: enforced at runtime by the Standard Schema pipe in
+  // rockets-crud — this is the fidelity the
   // layer buys. Custom `.refine()` keeps the field as raw zod.
   color: z
     .string()

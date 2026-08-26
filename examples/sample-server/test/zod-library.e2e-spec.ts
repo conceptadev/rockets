@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { INestApplication, Module, ValidationPipe } from '@nestjs/common';
+import { INestApplication, Module } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import type { OpenAPIObject } from '@nestjs/swagger';
 import request from 'supertest';
@@ -50,7 +50,6 @@ describe('library zod resources (e2e)', () => {
     class LibraryModule {}
 
     app = await NestFactory.create(LibraryModule, { logger: ['error'] });
-    app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
     app.useGlobalFilters(new ExceptionsFilter(app.get(HttpAdapterHost)));
     await app.init();
 
