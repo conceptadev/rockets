@@ -5,9 +5,11 @@ import {
   LocalGuard,
   RefreshGuard,
   authenticationResponseSchema,
-  localLoginSchema,
-  refreshSchema,
 } from '@concepta/nestjs-authentication';
+import {
+  rocketsAuthLocalLoginSchema,
+  rocketsAuthRefreshSchema,
+} from '../../../infrastructure/schemas/rockets-auth-token.schema';
 import { ReferenceIdInterface } from '@concepta/nestjs-core';
 import {
   Body,
@@ -38,8 +40,8 @@ type RequestWithPassportUser = Request & {
   readonly user?: ReferenceIdInterface;
 };
 
-type LocalLoginBody = z.output<typeof localLoginSchema>;
-type RefreshBody = z.output<typeof refreshSchema>;
+type LocalLoginBody = z.output<typeof rocketsAuthLocalLoginSchema>;
+type RefreshBody = z.output<typeof rocketsAuthRefreshSchema>;
 
 /**
  * Password and refresh-token HTTP endpoints. Concepta v8 registers strategies
@@ -75,7 +77,7 @@ export class RocketsAuthTokenController {
   })
   @ApiUnauthorizedResponse({ description: 'Invalid credentials' })
   async loginWithPassword(
-    @Body({ schema: localLoginSchema }) _loginBody: LocalLoginBody,
+    @Body({ schema: rocketsAuthLocalLoginSchema }) _loginBody: LocalLoginBody,
     @Req() req: RequestWithPassportUser,
   ): Promise<AuthenticatedResponseInterface> {
     const user = req.user;
@@ -103,7 +105,7 @@ export class RocketsAuthTokenController {
   })
   @ApiUnauthorizedResponse({ description: 'Invalid or expired refresh token' })
   async refreshTokens(
-    @Body({ schema: refreshSchema }) _refreshBody: RefreshBody,
+    @Body({ schema: rocketsAuthRefreshSchema }) _refreshBody: RefreshBody,
     @Req() req: RequestWithPassportUser,
   ): Promise<AuthenticatedResponseInterface> {
     const user = req.user;

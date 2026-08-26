@@ -15,6 +15,7 @@ import {
   type CrudOperationOptions,
 } from '@concepta/nestjs-crud';
 import type { RepositoryProviderOptions } from '@concepta/nestjs-repository';
+import { RocketsCrudAdapter } from '../../crud/rockets-crud.adapter';
 import type { RocketsResourceConfig } from '../../../domain/interfaces/rockets-resource.interface';
 import type { RocketsResourceDefinition } from '../../../domain/interfaces/rockets-resource-definition.interface';
 import type { CrudResource } from '../../../domain/interfaces/rockets-resource-bundle.interface';
@@ -175,6 +176,8 @@ export function defineResource<E extends PlainLiteralObject>(
     path,
     entity: key,
     resolver: CrudOperationResolver,
+    // A body that validates to `{}` is a valid create — see the adapter.
+    adapter: RocketsCrudAdapter,
     extraDecorators,
   };
   if (response) controller.response = response;

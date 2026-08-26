@@ -11,6 +11,15 @@ and this project adheres to
 
 ### Security
 
+- Invitation acceptance validates `payload.userMetadata` with the same
+  default as signup and admin: when the app configures no
+  `userCrud.userMetadataConfig`, the base update schema (`{}`) strips every
+  client-supplied key. Previously the metadata record was forwarded
+  unvalidated on that path, and a smuggled `userId` could rewrite the
+  metadata row's owner on the update branch. The listener no longer has an
+  unvalidated branch (`InvitationAcceptanceConfig.userMetadataUpdateSchema`
+  is required).
+
 - OTP consume is the single decision point for burning passcodes:
   `RocketsValidateOtpHandler` dispatches `ConsumeOtpCommand` when
   `deleteIfValid` is true (no prior `ValidateOtpQuery`), and recovery
@@ -59,6 +68,11 @@ and this project adheres to
 
 ### Changed
 
+- **Hand-written auth request bodies keep their OpenAPI component names.**
+  `POST /token/password`, `POST /token/refresh` and the four `/recovery`
+  bodies are documented as `LocalLoginDto`, `RefreshDto` and
+  `Recovery*Dto` again (upstream ships those schemas without an id, which
+  inlined them into every route after the schema-engine change).
 - **Last class DTOs retired (RFC #104, stage 6).** `RocketsAuthChangePasswordDto`
   → `rocketsAuthChangePasswordSchema`, `RocketsAuthOtpSendDto` →
   `rocketsAuthOtpSendSchema`, `RocketsAuthOtpConfirmDto` →

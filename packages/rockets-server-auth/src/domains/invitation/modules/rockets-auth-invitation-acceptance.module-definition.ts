@@ -11,6 +11,7 @@ import { UserCrudOptionsExtrasInterface } from '../../../shared/interfaces/rocke
 import { buildInvitationAcceptanceController } from '../gateways/http/factories/build-invitation-controllers';
 import { InvitationAcceptanceControllerExtras } from '../interfaces/invitation-controller-extras.interface';
 import { InvitationUserAcceptanceListener } from '../application/listeners/invitation-user-acceptance.listener';
+import { resolveUserMetadataSchemas } from '../../user/infrastructure/schemas/rockets-auth-user-metadata.schema';
 import {
   INVITATION_ACCEPTANCE_CONFIG_TOKEN,
   InvitationAcceptanceConfig,
@@ -98,8 +99,11 @@ function createInvitationAcceptanceProviders(options: {
       useFactory: (
         opts: InvitationAcceptanceOptionsInterface,
       ): InvitationAcceptanceConfig => ({
-        userMetadataUpdateSchema:
-          opts.userCrud?.userMetadataConfig?.updateSchema,
+        // Same default as signup and admin: with no app schema the base
+        // update schema (`{}`) strips every client-supplied key.
+        userMetadataUpdateSchema: resolveUserMetadataSchemas(
+          opts.userCrud?.userMetadataConfig,
+        ).updateSchema,
       }),
     },
     ListenerClass,

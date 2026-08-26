@@ -99,6 +99,9 @@ the user has already had to fix more than once.
    adds `@SerializeOptions({ schema })` + `StandardSchemaSerializerInterceptor`.
    Never register a **global** `StandardSchemaValidationPipe` — every
    Rockets route carries its own, and core rejects a global one at boot.
+   The reverse is checked too: a `{ schema }` parameter that no
+   `StandardSchemaValidationPipe` reaches (Nest installs none for
+   `schema`) fails the boot as `requireSchemaPipe`.
 
 7. **Verify compilation after edits.** Do not declare done based on IDE
    green state alone. Run `yarn build` and the relevant type/test command;

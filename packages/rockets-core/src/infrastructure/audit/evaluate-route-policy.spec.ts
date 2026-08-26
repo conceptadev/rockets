@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { Controller } from '@nestjs/common';
 
 import { collectRouteAudit } from './collect-route-audit';
-import { evaluateRoutePolicy } from './evaluate-route-policy';
+import {
+  evaluateRoutePolicy,
+  schemaPipeViolations,
+} from './evaluate-route-policy';
 import type { RouteAuditReport } from './route-audit.types';
 
 class ProbeController {}
@@ -22,6 +25,7 @@ function report(overrides: Partial<RouteAuditReport>): RouteAuditReport {
         aclAction: null,
         aclResource: null,
         aclQuery: null,
+        unvalidatedSchemaParams: [],
       },
     ],
     globalGuards: ['SomeAuthGuard'],
@@ -163,5 +167,48 @@ describe('collectRouteAudit — path arrays', () => {
       'GET /beta/x',
       'GET /beta/y',
     ]);
+  });
+});
+
+describe('schemaPipeViolations (always on)', () => {
+  const unpiped = report({
+    routes: [
+      {
+        id: 'POST /things',
+        method: 'POST',
+        path: '/things',
+        controller: 'ProbeController',
+        controllerRef: ProbeController,
+        handler: 'create',
+        authentication: 'guarded',
+        sessionAuth: false,
+        aclAction: null,
+        aclResource: null,
+        aclQuery: null,
+        unvalidatedSchemaParams: ['body'],
+      },
+    ],
+  });
+
+  it('reports a schema parameter no pipe reaches, with no policy declared', () => {
+    const violations = schemaPipeViolations(unpiped);
+    expect(violations).toHaveLength(1);
+    expect(violations[0].rule).toBe('requireSchemaPipe');
+    expect(violations[0].routeId).toBe('POST /things');
+    expect(violations[0].detail).toContain('ProbeController.create: body');
+    expect(violations[0].detail).toContain('rocketsSchemaValidation');
+  });
+
+  it('is exempted by allow and allowControllers', () => {
+    expect(schemaPipeViolations(unpiped, { allow: ['POST /things'] })).toEqual(
+      [],
+    );
+    expect(
+      schemaPipeViolations(unpiped, { allowControllers: [ProbeController] }),
+    ).toEqual([]);
+  });
+
+  it('is silent on a validated route', () => {
+    expect(schemaPipeViolations(report({}))).toEqual([]);
   });
 });

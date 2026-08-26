@@ -2,11 +2,13 @@ import {
   AuthPublic,
   RecoveryOtpInvalidException,
   RecoveryService,
-  recoveryRecoverLoginSchema,
-  recoveryRecoverPasswordSchema,
-  recoveryUpdatePasswordSchema,
-  recoveryValidatePasscodeSchema,
 } from '@concepta/nestjs-authentication';
+import {
+  rocketsAuthRecoveryRecoverLoginSchema,
+  rocketsAuthRecoveryRecoverPasswordSchema,
+  rocketsAuthRecoveryUpdatePasswordSchema,
+  rocketsAuthRecoveryValidatePasscodeSchema,
+} from '../../../infrastructure/schemas/rockets-auth-recovery.schema';
 import {
   Body,
   Controller,
@@ -33,10 +35,16 @@ import { getAppContext, rocketsSchemaValidation } from '@concepta/rockets-core';
 import type { Request } from 'express';
 import type { z } from 'zod';
 
-type RecoverLoginBody = z.output<typeof recoveryRecoverLoginSchema>;
-type RecoverPasswordBody = z.output<typeof recoveryRecoverPasswordSchema>;
-type ValidatePasscodeBody = z.output<typeof recoveryValidatePasscodeSchema>;
-type UpdatePasswordBody = z.output<typeof recoveryUpdatePasswordSchema>;
+type RecoverLoginBody = z.output<typeof rocketsAuthRecoveryRecoverLoginSchema>;
+type RecoverPasswordBody = z.output<
+  typeof rocketsAuthRecoveryRecoverPasswordSchema
+>;
+type ValidatePasscodeBody = z.output<
+  typeof rocketsAuthRecoveryValidatePasscodeSchema
+>;
+type UpdatePasswordBody = z.output<
+  typeof rocketsAuthRecoveryUpdatePasswordSchema
+>;
 
 /** Public, enumeration-safe account recovery endpoints. */
 @Controller('recovery')
@@ -66,7 +74,8 @@ export class RocketsAuthRecoveryController {
   })
   @ApiBadRequestResponse({ description: 'Invalid email format' })
   recoverLogin(
-    @Body({ schema: recoveryRecoverLoginSchema }) body: RecoverLoginBody,
+    @Body({ schema: rocketsAuthRecoveryRecoverLoginSchema })
+    body: RecoverLoginBody,
     @Req() req: Request,
   ): void {
     const ctx = getAppContext(req);
@@ -89,7 +98,8 @@ export class RocketsAuthRecoveryController {
   })
   @ApiBadRequestResponse({ description: 'Invalid email format' })
   recoverPassword(
-    @Body({ schema: recoveryRecoverPasswordSchema }) body: RecoverPasswordBody,
+    @Body({ schema: rocketsAuthRecoveryRecoverPasswordSchema })
+    body: RecoverPasswordBody,
     @Req() req: Request,
   ): void {
     const ctx = getAppContext(req);
@@ -108,7 +118,7 @@ export class RocketsAuthRecoveryController {
   @ApiOkResponse({ description: 'Passcode is valid' })
   @ApiBadRequestResponse({ description: 'Passcode is invalid or expired' })
   async validatePasscode(
-    @Body({ schema: recoveryValidatePasscodeSchema })
+    @Body({ schema: rocketsAuthRecoveryValidatePasscodeSchema })
     body: ValidatePasscodeBody,
     @Req() req: Request,
   ): Promise<void> {
@@ -129,7 +139,8 @@ export class RocketsAuthRecoveryController {
     description: 'Passcode is invalid or expired, or password is invalid',
   })
   async updatePassword(
-    @Body({ schema: recoveryUpdatePasswordSchema }) body: UpdatePasswordBody,
+    @Body({ schema: rocketsAuthRecoveryUpdatePasswordSchema })
+    body: UpdatePasswordBody,
     @Req() req: Request,
   ): Promise<void> {
     const ctx = getAppContext(req);

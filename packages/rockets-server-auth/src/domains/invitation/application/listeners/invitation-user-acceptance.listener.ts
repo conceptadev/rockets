@@ -49,12 +49,14 @@ function toMetadataPatch(
  * Invitation User Acceptance Listener
  * Handles CQRS {@link InvitationAcceptedEvent} from `@concepta/nestjs-invitation` v8:
  * - Hashes password if provided
- * - Creates or updates user metadata (validated with the update schema if configured)
+ * - Creates or updates user metadata (always validated with the update
+ *   schema — the app's, or the base default that strips every key)
  * - Assigns role (from invitation.constraints.roleId set at creation, or default role)
  *
  * SECURITY:
  * - Role assignment is admin-controlled via invitation.constraints.roleId
- * - Only userMetadata is updatable by user (validated with the update schema)
+ * - Only userMetadata is updatable by user (validated with the update schema;
+ *   there is no unvalidated path, so a smuggled `userId` never reaches the row)
  * - User fields (active, email, username) are blocked from user updates
  */
 @Injectable()
@@ -193,15 +195,14 @@ export class InvitationUserAcceptanceListener
     const { ctx, userId, userMetadata } = options;
     if (!userMetadata || Object.keys(userMetadata).length === 0) return;
 
-    const updateSchema = this.config.userMetadataUpdateSchema;
-    let metadata: RocketsAuthUserMetadataUpdatableInterface = userMetadata;
-    if (updateSchema) {
-      // Let `validateWithSchema`'s 400 propagate — the outer `txScope.run`
-      // rolls back, and the outer catch logs.
-      metadata = toMetadataPatch(
-        await validateWithSchema(updateSchema, userMetadata),
-      );
-    }
+    // Let `validateWithSchema`'s 400 propagate — the outer `txScope.run`
+    // rolls back, and the outer catch logs.
+    const metadata = toMetadataPatch(
+      await validateWithSchema(
+        this.config.userMetadataUpdateSchema,
+        userMetadata,
+      ),
+    );
 
     await this.commandBus.execute(
       new SaveUserMetadataCommand(ctx, userId, metadata),

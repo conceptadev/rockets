@@ -193,6 +193,50 @@ export function evaluateRoutePolicy(
   return violations;
 }
 
+/**
+ * Always-on rule, independent of any declared policy: a route parameter
+ * that declares a `schema` and is reached by no
+ * `StandardSchemaValidationPipe` is documented in OpenAPI and validated
+ * by nothing. No app means that, so it is not a policy an app opts into
+ * — only the existing `allow` / `allowControllers` exemptions apply, for
+ * a route validated by a pipe of its own that the audit cannot
+ * recognise.
+ */
+export function schemaPipeViolations(
+  report: RouteAuditReport,
+  policy: RoutePolicy = {},
+): readonly RoutePolicyViolation[] {
+  const allowedIds = new Set(policy.allow ?? []);
+  const allowedControllers = new Set(policy.allowControllers ?? []);
+  const violations: RoutePolicyViolation[] = [];
+
+  for (const route of report.routes) {
+    if (route.unvalidatedSchemaParams.length === 0) continue;
+    if (
+      allowedIds.has(route.id) ||
+      allowedControllers.has(route.controllerRef)
+    ) {
+      continue;
+    }
+    const params = route.unvalidatedSchemaParams;
+    violations.push({
+      routeId: route.id,
+      rule: 'requireSchemaPipe',
+      detail:
+        `${route.controller}.${route.handler}: ${params.join(', ')} ` +
+        `declare${params.length === 1 ? 's' : ''} a schema but no ` +
+        'StandardSchemaValidationPipe reaches ' +
+        `${params.length === 1 ? 'it' : 'them'}. Nest installs no pipe for ` +
+        '`schema` — the parameter is documented in OpenAPI and validated by ' +
+        'nothing. Add @UsePipes(new StandardSchemaValidationPipe(' +
+        'rocketsSchemaValidation)) at class level, or `pipes` on the ' +
+        'parameter.',
+    });
+  }
+
+  return violations;
+}
+
 /** Which rules the app actually declared, in reporting order. */
 function ruleNames(policy: RoutePolicy): RoutePolicyViolation['rule'][] {
   const names: RoutePolicyViolation['rule'][] = [];

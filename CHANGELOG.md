@@ -437,6 +437,31 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Changed
 
+- **A route that declares a schema and validates nothing no longer boots.**
+  Nest installs no validator for `@Body/@Query/@Param({ schema })`; a
+  hand-written route missing its `StandardSchemaValidationPipe` documented
+  the body in OpenAPI and let anything through. Core's route audit now runs
+  in every app (policy or not) and fails the boot as `requireSchemaPipe`,
+  naming the controller, handler and parameter. `RouteAuditService` is
+  always registered and injectable; the policy rules stay opt-in.
+- **Hand-written auth request bodies keep their component names.** The
+  `rockets-auth` login, refresh and recovery bodies are `$ref`'d as
+  `LocalLoginDto`, `RefreshDto` and `Recovery*Dto` in the document again;
+  upstream ships those schemas without an id. Generated CRUD bodies
+  (`/signup`, admin routes) stay inline — the documented upstream gap.
+- **A create body that validates to `{}` is a valid create.** Generated
+  resources run on `RocketsCrudAdapter` (exported from core), which keeps
+  upstream's params merge and drops the bare `400` upstream's adapter
+  answered to an empty validated payload. A sub-resource whose every
+  column is server-stamped (`PathScopeHook`, `OwnerStampHook`, a consumer
+  hook minting ids) now accepts `POST {}` — the behaviour the class-DTO
+  era only delivered by accident (`class-transformer` left declared
+  fields present as `undefined`).
+- **Invitation acceptance never forwards unvalidated `userMetadata`.**
+  With no app metadata schema configured, `rockets-auth` now applies the
+  same base default as signup and admin (strip every key) instead of
+  passing the record through — a smuggled `userId` can no longer rewrite
+  the metadata row's owner.
 - **Hand-written routes on the native engine; legacy validators removed (RFC
   #104, stage 6).** The last class DTOs are gone: `rockets-auth`'s OTP,
   change-password, invitation revoke / acceptance-payload and admin
@@ -516,8 +541,10 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
     (`SchemaValidatorConflictCheck`): Rockets routes carry their own, a global
     one validates every body twice. `realtystack`: delete the
     `app.useGlobalPipes(new StandardSchemaDtoValidationPipe())` line.
-  - `@concepta/nestjs-common` is gone from the dependency graph;
-    `mapHttpStatus` (removed upstream) is vendored inside the core filter.
+  - No Rockets package imports `@concepta/nestjs-common` any more (it stays
+    in the graph at 7.x only through `@concepta/nestjs-email` /
+    `nestjs-event`); `mapHttpStatus` (removed upstream) is vendored inside
+    the core filter.
   - **Known gap (upstream):** `@concepta/nestjs-crud`'s `CrudInitApiBody`
     stamps generated CRUD request bodies as an inline `ApiBody({ schema })`,
     bypassing the document converter — `${Name}CreateDto` / `UpdateDto` /
@@ -880,6 +907,23 @@ before running the full e2e suite.
   same projection path `zodResource` uses. Previously it compiled the whole
   schema into the response DTO, so `dto: { response: false }` was silently
   ignored for userMetadata columns.
+- **`f.date()` rejects `null` and booleans instead of storing 1970.** A
+  writable date field answered `201` to `{"expiresAt": null}` and saved the
+  epoch; it is now a `400` addressed at the field. ISO strings, numeric
+  timestamps and `Date` values still coerce as before.
+- **The fail-closed response check reaches every wrapper.** An open
+  object (`.passthrough()` / `.catchall()`) hidden inside an intersection,
+  tuple, record / map / set value, `.readonly()`, `.catch()` or any other
+  wrapper used to pass and ship the whole row; every node that can hold a
+  schema is walked now, and a hand-supplied paginated envelope is checked
+  too, not only named.
+- **Hidden columns stay hidden at every depth of a computed field.** A
+  `dto: { response: false }` column nested two or more levels down an
+  `f.compute()` shape was still serialized.
+- **One OpenAPI component describes one side.** A schema used as both a
+  request body and a response is a document-build error now (zod's input
+  and output JSON Schemas differ, and last-wins documented one side with
+  the other's shape). Give the response its own `withOpenApi()` id.
 - **Computed fields respect `dto: { response: false }`.** `f.compute`
   schemas built from entity schemas no longer re-expose columns the owning
   resource hides.

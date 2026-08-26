@@ -372,6 +372,12 @@ petTags: defineSubResource({          // key 'petTags' must be a PetEntity relat
 | `reloadAfterCreate` | `boolean` | no | `false` |
 | *(inherited)* | `dto`, `operations`, `relations`, `hooks`, `handlers`, `providers`, `subResources`… | no | — |
 
+An all-server-stamped sub-resource — FK from the path, owner from the
+actor, ids and timestamps from a hook — is created with `POST {}`. The
+create input schema is the contract: a body that validates to `{}` is a
+valid create (generated resources run on `RocketsCrudAdapter`, which does
+not repeat upstream's bare `400` for an empty validated payload).
+
 ### Which parent-side hooks run during path scoping
 
 `PathScopeGuard` performs one parent lookup per nested request, and that
@@ -536,6 +542,15 @@ result return **500** (server bug), not 400. Query-string inputs are strings
 accepts `z.object(...)` or `z.array(...)`, and must strip (no
 `.passthrough()`). Duplicate `method`+`path` pairs inside one resource fail
 at boot.
+
+**Hand-written routes carry the same pipe — and the boot checks it.** Nest
+installs no pipe for `@Body/@Query/@Param({ schema })`: without a
+`StandardSchemaValidationPipe` on the parameter, the handler or the class,
+the schema is documented in OpenAPI and validated by nothing. The route
+audit (`RouteAuditService`, always registered) fails the boot with
+`requireSchemaPipe` naming the controller, handler and parameter. A route
+validated by a pipe of its own that the audit cannot recognise is exempted
+through `routePolicy.allow` / `allowControllers`.
 
 When an operation declares `input`, the request payload must be a plain JSON
 object. An array, a scalar, or a non-plain object (a `Buffer` from a raw body
@@ -1296,8 +1311,11 @@ class instance with no `toJSON()`, a function, `NaN`, a cycle, or
 nesting past 200 deep — makes it THROW rather than hash a placeholder:
 two different requests collapsing to the same hash means one replays the
 other's stored response. On the `operationResource` path `ctx.input` is
-always plain (validation returns `instanceToPlain`), so those throws are
-unreachable from HTTP input; a handler that hashes something else owns
+what the input schema produced — plain JSON values plus whatever a field
+coerces to (`f.date()` yields a `Date`, which the hasher represents
+faithfully), so those throws are unreachable from HTTP input unless a
+schema transform deliberately produces one of the unrepresentable values
+above; a handler that hashes something else owns
 the decision of whether the failure is a `400` (the client sent it) or a
 `500` (the handler built it), and should catch accordingly.
 
@@ -1663,13 +1681,11 @@ are marked, alongside the existing `authentication` state.
 
 Declaring `AuthPublic` and `AuthSession` on the same handler throws — a
 public route has no session to protect — but read the scope exactly:
-that throw lives inside `collectRouteAudit`, and `RouteAuditService`
-only runs the audit at bootstrap **when a `routePolicy` is declared**.
-An app that declares no `routePolicy` never collects the audit, so the
-contradiction is not detected. It is an opt-in check, not an always-on
-guarantee. The same is true of `requireCsrf` below. To get either, give
-the app a `routePolicy` — a recognition-only `routePolicy: {}` is enough
-to run the collection and its contradiction check.
+that throw lives inside `collectRouteAudit`, which `RouteAuditService`
+runs at every bootstrap (the service is always registered for its
+schema-pipe check, §6a), so the contradiction is detected with or without
+a `routePolicy`. The policy RULES — `requireCsrf` below included — are
+opt-in: declare a `routePolicy` to turn them on.
 
 **2. `CsrfGuard` — the CSRF half.** Register it ALONGSIDE
 `AuthServerGuard`, not instead of it:

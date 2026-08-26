@@ -305,6 +305,16 @@ export function unwrapField(field: z.ZodType, path: string): UnwrappedField {
       current = asClassicSchema(current.def.innerType, path);
       continue;
     }
+    // `guard.pipe(schema)` validates the input; `schema` is the stored
+    // type (`f.date()` narrows before `z.coerce.date()`). A `.transform()`
+    // pipe has no schema on its output side and stays opaque.
+    if (current instanceof z.ZodPipe) {
+      const out = asClassicSchema(current.def.out, path);
+      if (!(out instanceof z.ZodTransform)) {
+        current = out;
+        continue;
+      }
+    }
     break;
   }
 

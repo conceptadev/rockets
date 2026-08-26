@@ -103,6 +103,25 @@
         ],
         "type": "object"
       },
+      "LocalLoginDto": {
+        "properties": {
+          "password": {
+            "description": "Password",
+            "maxLength": 72,
+            "type": "string"
+          },
+          "username": {
+            "description": "Username",
+            "maxLength": 255,
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ],
+        "type": "object"
+      },
       "PetAppointmentDto": {
         "additionalProperties": false,
         "properties": {
@@ -512,6 +531,79 @@
           "total",
           "page",
           "pageCount"
+        ],
+        "type": "object"
+      },
+      "RecoveryRecoverLoginDto": {
+        "properties": {
+          "email": {
+            "description": "Recover email login by providing an email that will receive an username",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "type": "object"
+      },
+      "RecoveryRecoverPasswordDto": {
+        "properties": {
+          "email": {
+            "description": "Recover email password by providing an email that will receive a password reset link",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "type": "object"
+      },
+      "RecoveryUpdatePasswordDto": {
+        "properties": {
+          "newPassword": {
+            "description": "New password account",
+            "maxLength": 72,
+            "type": "string"
+          },
+          "passcode": {
+            "description": "Passcode used to reset account password",
+            "maxLength": 36,
+            "type": "string"
+          }
+        },
+        "required": [
+          "passcode",
+          "newPassword"
+        ],
+        "type": "object"
+      },
+      "RecoveryValidatePasscodeDto": {
+        "properties": {
+          "passcode": {
+            "description": "User passcode used to verify if it valid or not.",
+            "maxLength": 36,
+            "type": "string"
+          }
+        },
+        "required": [
+          "passcode"
+        ],
+        "type": "object"
+      },
+      "RefreshDto": {
+        "properties": {
+          "refreshToken": {
+            "description": "JWT refresh token to use for obtaining a new pair of tokens.",
+            "format": "jwt",
+            "type": "string"
+          }
+        },
+        "required": [
+          "refreshToken"
         ],
         "type": "object"
       },
@@ -3415,18 +3507,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "email": {
-                    "description": "Recover email login by providing an email that will receive an username",
-                    "format": "email",
-                    "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "email"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/RecoveryRecoverLoginDto"
               }
             }
           },
@@ -3455,17 +3536,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "passcode": {
-                    "description": "User passcode used to verify if it valid or not.",
-                    "maxLength": 36,
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "passcode"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/RecoveryValidatePasscodeDto"
               }
             }
           },
@@ -3494,23 +3565,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "newPassword": {
-                    "description": "New password account",
-                    "maxLength": 72,
-                    "type": "string"
-                  },
-                  "passcode": {
-                    "description": "Passcode used to reset account password",
-                    "maxLength": 36,
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "passcode",
-                  "newPassword"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/RecoveryUpdatePasswordDto"
               }
             }
           },
@@ -3537,18 +3592,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "email": {
-                    "description": "Recover email password by providing an email that will receive a password reset link",
-                    "format": "email",
-                    "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "email"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/RecoveryRecoverPasswordDto"
               }
             }
           },
@@ -3644,23 +3688,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "password": {
-                    "description": "Password",
-                    "maxLength": 72,
-                    "type": "string"
-                  },
-                  "username": {
-                    "description": "Username",
-                    "maxLength": 255,
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "username",
-                  "password"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/LocalLoginDto"
               }
             }
           },
@@ -3696,17 +3724,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "refreshToken": {
-                    "description": "JWT refresh token to use for obtaining a new pair of tokens.",
-                    "format": "jwt",
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "refreshToken"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/RefreshDto"
               }
             }
           },

@@ -102,6 +102,17 @@ class ParentEntity {
   // must satisfy `keyof Parent`. The actual joins live on the child.
   children?: ChildEntity[];
   childrenNoReload?: ChildNoReloadEntity[];
+  stamps?: StampEntity[];
+}
+
+// Every column is server-stamped (pk, FK from the path, owner from the
+// actor): the create body is legitimately `{}`.
+@Entity('stamps')
+class StampEntity {
+  @PrimaryGeneratedColumn('uuid') id!: string;
+  @Column({ type: 'uuid' }) parentId!: string;
+  @Column({ type: 'varchar' }) userId!: string;
+  @Column({ type: 'varchar', nullable: true }) note?: string | null;
 }
 
 @Entity('children')
@@ -187,6 +198,21 @@ const grandchildCreateSchema = withOpenApi(
 const grandchildResponseSchema = withOpenApi(
   z.object({ id: z.uuid(), label: z.string(), childId: z.uuid() }),
   'GrandchildResponseDto',
+);
+
+const stampCreateSchema = withOpenApi(
+  z.object({ note: z.string().optional() }),
+  'StampCreateDto',
+);
+
+const stampResponseSchema = withOpenApi(
+  z.object({
+    id: z.uuid(),
+    parentId: z.uuid(),
+    userId: z.string(),
+    note: z.string().nullable().optional(),
+  }),
+  'StampResponseDto',
 );
 
 const childResponseSchema = withOpenApi(
@@ -407,6 +433,19 @@ const parentResource = defineResource<ParentEntity>({
         create: { input: childCreateSchema, output: childResponseSchema },
       },
     }),
+    // All-server-stamped child: the create body is `{}` and the row is
+    // filled by PathScopeHook (parentId) + OwnerStampHook (userId).
+    stamps: defineSubResource<StampEntity>({
+      key: 'stamp',
+      entity: StampEntity,
+      tags: ['Stamps'],
+      owner: 'userId',
+      hooks: [OwnerStampHook.for(StampEntity)],
+      operations: {
+        list: { output: stampResponseSchema },
+        create: { input: stampCreateSchema, output: stampResponseSchema },
+      },
+    }),
   },
 });
 
@@ -461,6 +500,7 @@ describe('RocketsCoreModule + defineSubResource + AfterCreateReloadHook (e2e)', 
             ChildEntity,
             ChildNoReloadEntity,
             GrandchildEntity,
+            StampEntity,
             PlainItemEntity,
           ],
           synchronize: true,
@@ -627,6 +667,27 @@ describe('RocketsCoreModule + defineSubResource + AfterCreateReloadHook (e2e)', 
         categoryId: categoryAId,
         category: { id: categoryAId, label: 'A' },
       });
+    });
+
+    // Upstream's adapter answers a create that validates to `{}` with a
+    // bare 400; `RocketsCrudAdapter` treats the validated body as the
+    // contract and lets the hooks fill the row.
+    it('create with an empty body on an all-server-stamped sub-resource is a 201', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/parents/${parentId}/stamps`)
+        .set('Authorization', 'Bearer u1')
+        .send({});
+      expect(res.status, JSON.stringify(res.body)).toBe(201);
+
+      expect(res.body).toMatchObject({ parentId, userId: 'u1' });
+      expect(typeof res.body.id).toBe('string');
+
+      const list = await request(app.getHttpServer())
+        .get(`/parents/${parentId}/stamps`)
+        .set('Authorization', 'Bearer u1')
+        .expect(200);
+      expect(list.body.data).toHaveLength(1);
+      expect(list.body.data[0].id).toBe(res.body.id);
     });
 
     it('list /parents/:parentId/children scopes by :parentId', async () => {

@@ -64,8 +64,12 @@ function describeValue(value: unknown): string {
  * Response schemas must STRIP undeclared keys: a `.passthrough()` /
  * `.catchall()` node anywhere in the tree would ship whatever the row
  * carries — a hidden column, a joined relation's secrets. The check walks
- * objects, arrays, wrappers, pipes (the `out` side of a `z.preprocess`)
- * and unions; a declared `z.record()` is an explicit choice and passes.
+ * every node that can hold another schema — objects, arrays, tuples,
+ * unions, intersections, record / map / set values, pipes (the `out` side
+ * of a `z.preprocess`), lazies and every single-child wrapper
+ * (`optional`, `nullable`, `default`, `readonly`, `catch`, …). A
+ * `z.record()` of primitives is an explicit choice and passes; a record
+ * whose value is an open object does not.
  */
 export function assertFailClosedResponse(
   schema: z.ZodType,
@@ -94,50 +98,74 @@ function findOpenObject(
     if (catchall !== undefined && !(catchall instanceof z.ZodNever)) {
       return path;
     }
-    for (const [key, field] of Object.entries(schema.shape)) {
-      const found = findOpenObject(
-        asClassicSchema(field, `${path}.${key}`),
-        seen,
-        `${path}.${key}`,
-      );
-      if (found !== undefined) return found;
-    }
-    return undefined;
   }
-  if (schema instanceof z.ZodArray) {
-    return findOpenObject(
-      asClassicSchema(schema.element, `${path}[]`),
+  for (const [childPath, child] of childSchemas(schema, path)) {
+    const found = findOpenObject(
+      asClassicSchema(child, childPath),
       seen,
-      `${path}[]`,
+      childPath,
     );
-  }
-  if (schema instanceof z.ZodOptional || schema instanceof z.ZodNullable) {
-    return findOpenObject(asClassicSchema(schema.unwrap(), path), seen, path);
-  }
-  if (schema instanceof z.ZodDefault) {
-    return findOpenObject(
-      asClassicSchema(schema.def.innerType, path),
-      seen,
-      path,
-    );
-  }
-  if (schema instanceof z.ZodPipe) {
-    return findOpenObject(asClassicSchema(schema.def.out, path), seen, path);
-  }
-  if (schema instanceof z.ZodLazy) {
-    return findOpenObject(asClassicSchema(schema.unwrap(), path), seen, path);
-  }
-  if (schema instanceof z.ZodUnion) {
-    for (const [index, option] of schema.options.entries()) {
-      const found = findOpenObject(
-        asClassicSchema(option, `${path}|${index}`),
-        seen,
-        `${path}|${index}`,
-      );
-      if (found !== undefined) return found;
-    }
+    if (found !== undefined) return found;
   }
   return undefined;
+}
+
+/**
+ * Every schema a node can hold, with the path label of each. Structural
+ * nodes are matched by class; everything that wraps ONE inner schema
+ * (`optional`, `nullable`, `default`, `prefault`, `readonly`, `catch`,
+ * `nonoptional`, `promise`, …) is read through the shared `innerType`
+ * slot so a wrapper zod adds later is walked without a new case here.
+ */
+function childSchemas(
+  schema: z.ZodType,
+  path: string,
+): Array<[string, z.core.$ZodType]> {
+  if (schema instanceof z.ZodObject) {
+    return Object.entries(schema.shape).map(([key, field]) => [
+      `${path}.${key}`,
+      field,
+    ]);
+  }
+  if (schema instanceof z.ZodArray) {
+    return [[`${path}[]`, schema.element]];
+  }
+  if (schema instanceof z.ZodTuple) {
+    const items: Array<[string, z.core.$ZodType]> = schema.def.items.map(
+      (item, index) => [`${path}[${index}]`, item],
+    );
+    if (schema.def.rest !== null) {
+      items.push([`${path}[...]`, schema.def.rest]);
+    }
+    return items;
+  }
+  if (schema instanceof z.ZodUnion) {
+    return schema.options.map((option, index) => [`${path}|${index}`, option]);
+  }
+  if (schema instanceof z.ZodIntersection) {
+    return [
+      [`${path}&0`, schema.def.left],
+      [`${path}&1`, schema.def.right],
+    ];
+  }
+  if (
+    schema instanceof z.ZodRecord ||
+    schema instanceof z.ZodMap ||
+    schema instanceof z.ZodSet
+  ) {
+    return [[`${path}[*]`, schema.def.valueType]];
+  }
+  if (schema instanceof z.ZodPipe) {
+    return [[path, schema.def.out]];
+  }
+  if (schema instanceof z.ZodLazy) {
+    return [[path, schema.unwrap()]];
+  }
+  const inner: unknown = Reflect.get(schema.def, 'innerType');
+  if (inner instanceof z.ZodType) {
+    return [[path, inner]];
+  }
+  return [];
 }
 
 /**

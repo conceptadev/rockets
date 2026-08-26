@@ -731,6 +731,41 @@ describe('defineResource', () => {
       ).toThrow(/not a named OpenAPI component/);
     });
 
+    // A list route serializes through the PAGINATED envelope, so an open
+    // envelope leaks exactly like an open resource schema would.
+    it('rejects a hand-supplied paginated envelope with an open object', () => {
+      const openEnvelope = withOpenApi(
+        z.looseObject({ data: z.array(widgetResponseSchema) }),
+        'WidgetOpenEnvelopeDto',
+      );
+      expect(() =>
+        defineResource({
+          key: 'widget',
+          entity: WidgetEntity,
+          path: 'widget',
+          tags: ['widget'],
+          dto: { response: widgetResponseSchema, paginated: openEnvelope },
+        }),
+      ).toThrow(/dto\.paginated: response schema has an open object/);
+
+      const openItems = withOpenApi(
+        z.object({ data: z.array(z.looseObject({ id: z.uuid() })) }),
+        'WidgetOpenItemsDto',
+      );
+      expect(() =>
+        defineResource({
+          key: 'widget',
+          entity: WidgetEntity,
+          path: 'widget',
+          tags: ['widget'],
+          dto: { response: widgetResponseSchema },
+          operations: { list: { paginated: openItems } },
+        }),
+      ).toThrow(
+        /operations\.list\.paginated: response schema has an open object/,
+      );
+    });
+
     // Every chained call after `withOpenApi()` returns a clone that drops
     // the id (and keeps a bridge bound to the OLD shape) — the document
     // would describe a schema the route no longer serializes with.

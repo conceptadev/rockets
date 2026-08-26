@@ -22,7 +22,9 @@ export function buildResponse(
     override?.paginated ??
     dto.paginated ??
     buildPaginatedSchema(resource, context);
-  assertNamedSchema(paginated, `defineResource(${resourceKey}): dto.paginated`);
+  const paginatedContext = `defineResource(${resourceKey}): dto.paginated`;
+  assertNamedSchema(paginated, paginatedContext);
+  assertFailClosedResponse(paginated, paginatedContext);
   const collection = override?.collection;
 
   const built: CrudResponseConfig = {

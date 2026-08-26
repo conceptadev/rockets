@@ -193,10 +193,9 @@ function createCoreImports(
   }
 
   // `RouteAuditService` injects DiscoveryService/MetadataScanner, which
-  // only exist once DiscoveryModule is imported.
-  if (extras.routePolicy) {
-    imports.push(DiscoveryModule);
-  }
+  // only exist once DiscoveryModule is imported. The service is always
+  // registered (its schema-pipe check needs no policy).
+  imports.push(DiscoveryModule);
 
   return imports;
 }
@@ -248,19 +247,20 @@ function createCoreProviders(options: {
     userMetadataProviders.push(getUserMetadata);
   }
 
-  // Route policy is opt-in. Declaring one registers the bootstrap audit;
-  // omitting it registers nothing, so an app that never asked for the
-  // check pays no discovery cost at boot. Contribution-carrying
-  // bootstraps never reach here (core rejects them above), so guard
-  // classes contributed by `providesAppGuard` integrations are merged
-  // into the policy by the SERVER composition before forwarding.
+  // The bootstrap audit always runs: its schema-pipe check (a parameter
+  // declaring `schema` that no StandardSchemaValidationPipe reaches) is a
+  // defect in any app. The route POLICY is opt-in — declaring one turns
+  // the policy rules on. Contribution-carrying bootstraps never reach
+  // here (core rejects them above), so guard classes contributed by
+  // `providesAppGuard` integrations are merged into the policy by the
+  // SERVER composition before forwarding.
   const routePolicy = options.extras?.routePolicy;
-  const routeAuditProviders: Provider[] = routePolicy
-    ? [
-        RouteAuditService,
-        { provide: ROCKETS_ROUTE_POLICY_TOKEN, useValue: routePolicy },
-      ]
-    : [];
+  const routeAuditProviders: Provider[] = [
+    RouteAuditService,
+    ...(routePolicy
+      ? [{ provide: ROCKETS_ROUTE_POLICY_TOKEN, useValue: routePolicy }]
+      : []),
+  ];
 
   return [
     ...providers,
@@ -295,13 +295,11 @@ function createCoreExports(options: {
     AuthServerGuard,
   ];
 
-  // Same condition as the provider registration: the docs promise the
-  // service is INJECTABLE when a policy is declared, and a registered
-  // but unexported provider only satisfies `app.get()` — a consumer
-  // module's `inject: [RouteAuditService]` failed DI (review round 4).
-  if (options.extras?.routePolicy) {
-    exports.push(RouteAuditService);
-  }
+  // The service is always registered, so it is always exported: a
+  // registered but unexported provider only satisfies `app.get()` — a
+  // consumer module's `inject: [RouteAuditService]` failed DI (review
+  // round 4).
+  exports.push(RouteAuditService);
 
   // Re-export per-resource providers (custom handlers, hooks) so the rest of the
   // app can inject them without importing every feature module twice.

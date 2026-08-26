@@ -147,10 +147,9 @@ export function normalizeOperationsInput(
             `meaningful on \`list\` — no other operation serializes a collection.`,
         );
       }
-      assertNamedSchema(
-        cfg.paginated,
-        `defineResource(${resourceKey}): operations.${label}.paginated`,
-      );
+      const paginatedContext = `defineResource(${resourceKey}): operations.${label}.paginated`;
+      assertNamedSchema(cfg.paginated, paginatedContext);
+      assertFailClosedResponse(cfg.paginated, paginatedContext);
       next.response = { ...(next.response ?? {}), paginated: cfg.paginated };
     }
     if (cfg.output !== undefined) {

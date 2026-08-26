@@ -1,10 +1,17 @@
-import { RequestMethod, type Type } from '@nestjs/common';
+import {
+  RequestMethod,
+  StandardSchemaValidationPipe,
+  type Type,
+} from '@nestjs/common';
 import {
   HOST_METADATA,
   METHOD_METADATA,
   PATH_METADATA,
+  PIPES_METADATA,
+  ROUTE_ARGS_METADATA,
   VERSION_METADATA,
 } from '@nestjs/common/constants';
+import { RouteParamtypes } from '@nestjs/common/enums/route-paramtypes.enum';
 
 import { ROCKETS_DISABLE_GUARDS_TOKEN } from '../../rockets-core.constants';
 import { ROCKETS_AUTH_SESSION_TOKEN } from '../../decorators/auth-session.decorator';
@@ -108,6 +115,11 @@ export function collectRouteAudit(args: {
       // dimension is declared.
       const version = readVersion(handler) ?? readVersion(controller);
       const host = readHost(controller);
+      const unvalidatedSchemaParams = readUnvalidatedSchemaParams(
+        controller,
+        handler,
+        methodName,
+      );
       const qualifier =
         (version !== undefined ? ` [v${version}]` : '') +
         (host !== undefined ? ` [host:${host}]` : '');
@@ -134,6 +146,7 @@ export function collectRouteAudit(args: {
             // the handler reported it null and `requireAclQuery`
             // aborted the boot of a correctly-enforced app.
             aclQuery: readQueryService(handler) ?? readQueryService(controller),
+            unvalidatedSchemaParams,
           });
         }
       }
@@ -274,6 +287,75 @@ function readQueryService(handler: object): string | null {
     }
   }
   return null;
+}
+
+/**
+ * Parameters declaring a `schema` that no `StandardSchemaValidationPipe`
+ * reaches. Nest resolves a parameter through global pipes, route pipes
+ * and param pipes and nothing else (`router-execution-context.js`,
+ * `createPipesFn`): `schema` alone installs no validator. Global pipes are
+ * not consulted here on purpose — `SchemaValidatorConflictCheck` rejects a
+ * global Standard Schema pipe, so per-route is the only place one can be.
+ */
+function readUnvalidatedSchemaParams(
+  controller: Type<unknown>,
+  handler: object,
+  methodName: string,
+): string[] {
+  // Nest keys route-argument metadata by method name on the CLASS, not
+  // on the handler function.
+  const args: unknown = Reflect.getMetadata(
+    ROUTE_ARGS_METADATA,
+    controller,
+    methodName,
+  );
+  if (typeof args !== 'object' || args === null) return [];
+
+  const routePipes = [...readPipes(controller), ...readPipes(handler)];
+  const missing: Array<{ index: number; label: string }> = [];
+
+  for (const [key, entry] of Object.entries(args)) {
+    if (typeof entry !== 'object' || entry === null) continue;
+    if (Reflect.get(entry, 'schema') === undefined) continue;
+
+    const own: unknown = Reflect.get(entry, 'pipes');
+    const paramPipes = Array.isArray(own) ? own : [];
+    if ([...routePipes, ...paramPipes].some(isStandardSchemaPipe)) continue;
+
+    const index: unknown = Reflect.get(entry, 'index');
+    const data: unknown = Reflect.get(entry, 'data');
+    missing.push({
+      index: typeof index === 'number' ? index : Number.MAX_SAFE_INTEGER,
+      label: paramLabel(key, data),
+    });
+  }
+
+  return missing.sort((a, b) => a.index - b.index).map((m) => m.label);
+}
+
+function readPipes(target: object): unknown[] {
+  const value: unknown = Reflect.getMetadata(PIPES_METADATA, target);
+  return Array.isArray(value) ? value : [];
+}
+
+/** `@UsePipes` accepts instances and classes; both count, subclasses too. */
+function isStandardSchemaPipe(pipe: unknown): boolean {
+  if (pipe instanceof StandardSchemaValidationPipe) return true;
+  return (
+    typeof pipe === 'function' &&
+    (pipe === StandardSchemaValidationPipe ||
+      pipe.prototype instanceof StandardSchemaValidationPipe)
+  );
+}
+
+/** Metadata key "3:0" reads as body; "4:1" with data "page" as query('page'). */
+function paramLabel(metadataKey: string, data: unknown): string {
+  const paramtype = Number(metadataKey.split(':')[0]);
+  const kind: unknown = RouteParamtypes[paramtype];
+  const name = typeof kind === 'string' ? kind.toLowerCase() : 'param';
+  return typeof data === 'string' && data.length > 0
+    ? `${name}('${data}')`
+    : name;
 }
 
 function joinPath(base: string, segment: string): string {

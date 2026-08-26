@@ -2920,6 +2920,12 @@
         "signature": "export interface RocketsCoreSettingsInterface {\n}"
       },
       {
+        "name": "RocketsCrudAdapter",
+        "kind": "class",
+        "runtime": true,
+        "signature": "export declare class RocketsCrudAdapter<Entity extends PlainLiteralObject> extends CrudAdapter<Entity> {\n    prepareEntityBeforeSave(dto: DeepPartial<Entity>, context: CrudContextInterface<Entity>): Entity | undefined;\n}"
+      },
+      {
         "name": "RocketsCrudContext",
         "kind": "interface",
         "runtime": false,
@@ -2989,7 +2995,7 @@
         "name": "RouteAuditEntry",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RouteAuditEntry {\n    readonly id: string;\n    readonly method: string;\n    readonly path: string;\n    readonly controller: string;\n    readonly controllerRef: Type<unknown>;\n    readonly handler: string;\n    readonly authentication: RouteAuthState;\n    readonly sessionAuth: boolean;\n    readonly aclAction: string | null;\n    readonly aclResource: string | null;\n    readonly aclQuery: string | null;\n}"
+        "signature": "export interface RouteAuditEntry {\n    readonly id: string;\n    readonly method: string;\n    readonly path: string;\n    readonly controller: string;\n    readonly controllerRef: Type<unknown>;\n    readonly handler: string;\n    readonly authentication: RouteAuthState;\n    readonly sessionAuth: boolean;\n    readonly aclAction: string | null;\n    readonly aclResource: string | null;\n    readonly aclQuery: string | null;\n    readonly unvalidatedSchemaParams: readonly string[];\n}"
       },
       {
         "name": "RouteAuditReport",
@@ -3025,7 +3031,7 @@
         "name": "RoutePolicyViolation",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RoutePolicyViolation {\n    readonly routeId: string;\n    readonly rule: 'requireAuth' | 'requireAcl' | 'requireAclQuery' | 'requireCsrf' | 'staleAllow';\n    readonly detail: string;\n}"
+        "signature": "export interface RoutePolicyViolation {\n    readonly routeId: string;\n    readonly rule: 'requireAuth' | 'requireAcl' | 'requireAclQuery' | 'requireCsrf' | 'requireSchemaPipe' | 'staleAllow';\n    readonly detail: string;\n}"
       },
       {
         "name": "SchemaEntityCompiler",
@@ -3819,7 +3825,7 @@
         "name": "f",
         "kind": "value",
         "runtime": true,
-        "signature": "f: {\n    readonly pk: () => z.ZodUUID;\n    readonly createdAt: () => z.ZodDate;\n    readonly updatedAt: () => z.ZodDate;\n    readonly deletedAt: () => z.ZodOptional<z.ZodNullable<z.ZodDate>>;\n    readonly version: () => z.ZodDefault<z.ZodInt>;\n    readonly owner: (o?: OwnerOpts) => z.ZodUUID;\n    readonly fk: (target: RocketsRelationFieldMeta[\"target\"], o?: FkOpts) => z.ZodUUID;\n    readonly hasMany: <T extends z.ZodType>(elementSchema: T, o: HasManyOpts) => z.ZodArray<T>;\n    readonly string: (o?: StringOpts) => z.ZodString | z.ZodDefault<z.ZodString>;\n    readonly int: (o?: IntOpts) => z.ZodInt | z.ZodDefault<z.ZodInt>;\n    readonly bool: (o?: BoolOpts) => z.ZodBoolean | z.ZodDefault<z.ZodBoolean>;\n    readonly date: (o?: FieldOpts) => z.ZodCoercedDate<unknown>;\n    readonly enum: <const T extends Record<string, string>>(values: T, o?: EnumOpts<T[keyof T]>) => z.ZodEnum<T> | z.ZodDefault<z.ZodEnum<T>>;\n    readonly compute: <T extends z.ZodType>(schema: T, fn: (row: Readonly<Record<string, unknown>>) => z.output<T>) => T;\n}"
+        "signature": "f: {\n    readonly pk: () => z.ZodUUID;\n    readonly createdAt: () => z.ZodDate;\n    readonly updatedAt: () => z.ZodDate;\n    readonly deletedAt: () => z.ZodOptional<z.ZodNullable<z.ZodDate>>;\n    readonly version: () => z.ZodDefault<z.ZodInt>;\n    readonly owner: (o?: OwnerOpts) => z.ZodUUID;\n    readonly fk: (target: RocketsRelationFieldMeta[\"target\"], o?: FkOpts) => z.ZodUUID;\n    readonly hasMany: <T extends z.ZodType>(elementSchema: T, o: HasManyOpts) => z.ZodArray<T>;\n    readonly string: (o?: StringOpts) => z.ZodString | z.ZodDefault<z.ZodString>;\n    readonly int: (o?: IntOpts) => z.ZodInt | z.ZodDefault<z.ZodInt>;\n    readonly bool: (o?: BoolOpts) => z.ZodBoolean | z.ZodDefault<z.ZodBoolean>;\n    readonly date: (o?: FieldOpts) => z.ZodPipe<z.ZodCustom<string | number | Date, string | number | Date>, z.ZodCoercedDate<string | number | Date>>;\n    readonly enum: <const T extends Record<string, string>>(values: T, o?: EnumOpts<T[keyof T]>) => z.ZodEnum<T> | z.ZodDefault<z.ZodEnum<T>>;\n    readonly compute: <T extends z.ZodType>(schema: T, fn: (row: Readonly<Record<string, unknown>>) => z.output<T>) => T;\n}"
       },
       {
         "name": "getRegisteredEntity",

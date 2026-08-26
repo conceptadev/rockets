@@ -36,6 +36,22 @@
 
 ### Changed
 
+- **A `{ schema }` parameter must be reached by a `StandardSchemaValidationPipe`
+  — checked at boot.** Nest installs no pipe for `@Body/@Query/@Param({ schema })`,
+  so a hand-written route that forgets `@UsePipes(new
+  StandardSchemaValidationPipe(rocketsSchemaValidation))` documents the body
+  and validates nothing. `RouteAuditService` is now always registered (and
+  exported); its `requireSchemaPipe` check runs with or without a
+  `routePolicy` and names the controller, handler and parameter. The policy
+  rules stay opt-in; `allow` / `allowControllers` exempt a route validated
+  by a pipe the audit cannot recognise. `RouteAuditEntry` gains
+  `unvalidatedSchemaParams`.
+- **`RocketsCrudAdapter` is the adapter behind every generated resource.**
+  It keeps upstream's params merge and drops the bare `400` upstream's
+  `CrudAdapter` answers to a create payload that validates to zero keys:
+  the body already passed the input schema, so `{}` is a valid create
+  whenever the schema accepts it (all-server-stamped sub-resources).
+  Exported for consumers that extend the adapter.
 - **Legacy validators removed (RFC #104, stage 6).** `class-validator`,
   `class-transformer` and `nestjs-zod` are no longer peers or dependencies;
   `compileDtoClass` / `namedZodDto` (`/zod`) are gone. The packed-consumer
@@ -91,6 +107,36 @@
   in the other built-in, which fails to resolve the user-metadata repository
   when no metadata contract exists.
 - Node.js 20 is the minimum supported runtime.
+
+### Fixed
+
+- **`f.date()` no longer coerces `null` / booleans to the epoch.** Bare
+  `z.coerce.date()` turned `null`, `false`, `true` and `0` into 1970 and
+  persisted it. `f.date()` now rejects anything that is not an ISO string,
+  a numeric timestamp (the documented trade-off) or a `Date` with a `400`
+  addressed at the field. OpenAPI still documents `string/date-time` and
+  keeps the field in `required`; `unwrapField` sees through the guard
+  pipe so column mapping and projections are unchanged.
+- **`assertFailClosedResponse` walks every wrapper.** It only knew
+  objects, arrays, optional / nullable / default, pipes, lazies and
+  unions; an open object inside an intersection, tuple, record / map /
+  set value, `.readonly()`, `.catch()` or any other single-child wrapper
+  passed the check and shipped the whole row. The walk now reads every
+  node that can hold a schema (single-child wrappers through their shared
+  `innerType` slot, so a wrapper zod adds later is covered too). The
+  hand-supplied paginated envelope (`dto.paginated`,
+  `operations.list.paginated`) is checked as well — it was only checked
+  for a name.
+- **Computed fields strip hidden columns at every depth.** A `dto:
+  { response: false }` column two or more levels down a `f.compute()`
+  shape (an object inside an optional object inside an array) was kept;
+  the strip is recursive now.
+- **One OpenAPI component, one side.** The document converter rejects a
+  schema instance documented as both a request (`@Body({ schema })`) and
+  a response (`ApiResponse({ standardSchema })`): zod's input and output
+  JSON Schemas differ by construction, and last-wins documented one side
+  with the other's shape silently. Give the response its own
+  `withOpenApi()` id.
 
 ### Removed
 

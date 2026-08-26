@@ -697,7 +697,7 @@ See `examples/sample-server/src/zod-bindings.ts` for the canonical wiring.
 |--------|---------|
 | `f.pk()` | UUID primary key |
 | `f.createdAt()` / `f.updatedAt()` / `f.deletedAt()` | Audit columns (`z.date()`) |
-| `f.date()` | Writable datetime — ISO string in, `Date` in the row, `string/date-time` in OpenAPI |
+| `f.date()` | Writable datetime — ISO string in, `Date` in the row, `string/date-time` in OpenAPI. Also accepts a numeric timestamp or a `Date` (documented trade-off); `null`, booleans and anything else are a `400`, never the epoch |
 | `f.version()` | Optimistic lock |
 | `f.owner()` | Owner stamp column |
 | `f.fk(target, opts)` | FK + `manyToOne` / `oneToOne` |
@@ -939,9 +939,13 @@ it generates and it runs before controllers are built, so a hand-written
 `AccessControlGrant` inside a bundle's `decorators: []` is invisible to
 it. This closes that gap, and its own documentation says so.
 
-**Reporting without enforcing.** Omit `routePolicy` and nothing is
-registered. Declare one and `RouteAuditService` becomes injectable, so
-`audit()` gives you the full table for a CI artifact:
+**Reporting without enforcing.** `RouteAuditService` is always registered
+and injectable — omit `routePolicy` and no policy rule is enforced, but
+`audit()` still gives you the full table for a CI artifact, and the
+always-on check still runs: a `@Body/@Query/@Param({ schema })` parameter
+that no `StandardSchemaValidationPipe` reaches fails the boot as
+`requireSchemaPipe` (Nest installs no pipe for `schema`; the parameter
+would be documented and unvalidated).
 
 ```typescript
 const { routes, globalGuards, authGuards } = app.get(RouteAuditService).audit();

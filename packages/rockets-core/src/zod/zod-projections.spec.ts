@@ -229,6 +229,62 @@ describe('projectSchema response exposure', () => {
     });
   });
 
+  /**
+   * The strip must reach a hidden column N levels down — an object inside
+   * an optional object inside an array — not only the first level.
+   */
+  it('strips a hidden column nested deep inside a compute OUTPUT', async () => {
+    const owner = z.object({
+      id: f.pk(),
+      email: f.string(),
+      passwordHash: f.string({ dto: { response: false } }),
+    });
+    const item = z.object({
+      id: f.pk(),
+      owner: owner.optional(),
+      tags: z.array(
+        z.object({
+          label: f.string(),
+          secret: f.string({ dto: { response: false } }),
+        }),
+      ),
+    });
+    const row = {
+      id: '00000000-0000-4000-8000-000000000001',
+      owner: {
+        id: '00000000-0000-4000-8000-000000000009',
+        email: 'a@b.c',
+        passwordHash: 'leak',
+      },
+      tags: [{ label: 't', secret: 'leak' }],
+    };
+    const schema = z.object({
+      id: f.pk(),
+      items: f.compute(z.array(item), () => [row]).optional(),
+    });
+
+    const responseSchema = buildResponseSchema(
+      'Pet',
+      projectSchema('Pet', schema, entity, noOwner),
+    );
+    const result = await responseSchema['~standard'].validate({
+      id: '00000000-0000-4000-8000-000000000002',
+    });
+
+    expect(result.issues).toBeUndefined();
+    if (result.issues) return;
+    expect(result.value).toEqual({
+      id: '00000000-0000-4000-8000-000000000002',
+      items: [
+        {
+          id: row.id,
+          owner: { id: row.owner.id, email: 'a@b.c' },
+          tags: [{ label: 't' }],
+        },
+      ],
+    });
+  });
+
   it('a compute value that violates its declared schema is a validation issue, not a coerced payload', async () => {
     const schema = z.object({
       id: f.pk(),

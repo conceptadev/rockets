@@ -339,6 +339,34 @@ describe('schema engine — validation, serialization, OpenAPI (e2e)', () => {
       expect(read.body.expiresAt).toBe(EXPIRES);
       expect(read.body.dateCreated).toBe(created.body.dateCreated);
     });
+
+    // Bare `z.coerce.date()` turns `null` / booleans into the epoch and
+    // persists 1970 — a validation hole, not a coercion.
+    it('f.date() rejects null and booleans with a 400 addressed at the field', async () => {
+      for (const expiresAt of [null, false, true]) {
+        const res = await post('/tags', { label: 'x', expiresAt });
+        expect(res.status, JSON.stringify(res.body)).toBe(400);
+        expect(detailPaths(res.body)).toEqual([['expiresAt']]);
+      }
+    });
+
+    it('f.date() still coerces a numeric timestamp and an ISO string', async () => {
+      const numeric = await post('/tags', {
+        label: 'numeric',
+        expiresAt: new Date(EXPIRES).getTime(),
+      });
+      expect(numeric.status, JSON.stringify(numeric.body)).toBe(201);
+      expect(numeric.body.expiresAt).toBe(EXPIRES);
+
+      const iso = await post('/tags', { label: 'iso', expiresAt: EXPIRES });
+      expect(iso.status, JSON.stringify(iso.body)).toBe(201);
+      expect(iso.body.expiresAt).toBe(EXPIRES);
+
+      for (const expiresAt of ['', '2020-13-45', [], {}]) {
+        const res = await post('/tags', { label: 'x', expiresAt });
+        expect(res.status, JSON.stringify(res.body)).toBe(400);
+      }
+    });
   });
 
   describe('(e) OpenAPI components are referenced by id', () => {

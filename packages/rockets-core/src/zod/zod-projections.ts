@@ -235,32 +235,49 @@ function withHiddenFieldsRemoved(field: z.ZodType, path: string): z.ZodType {
   return rebuilt;
 }
 
+/**
+ * Recursive: a hidden column N levels down a computed shape stays hidden.
+ * Objects, arrays and the `optional` / `nullable` wrappers around them are
+ * rebuilt when something underneath changed; every other node is returned
+ * as-is (identity is preserved when nothing was hidden).
+ */
 function stripHidden(schema: z.ZodType, path: string): z.ZodType {
   if (schema instanceof z.ZodObject) {
     return stripHiddenObject(schema, path);
   }
   if (schema instanceof z.ZodArray) {
-    const element = asClassicSchema(schema.element, path);
-    if (element instanceof z.ZodObject) {
-      const strippedElement = stripHiddenObject(element, path);
-      return strippedElement === element ? schema : z.array(strippedElement);
-    }
+    const element = asClassicSchema(schema.element, `${path}[]`);
+    const stripped = stripHidden(element, `${path}[]`);
+    return stripped === element ? schema : z.array(stripped);
+  }
+  if (schema instanceof z.ZodOptional) {
+    const inner = asClassicSchema(schema.unwrap(), path);
+    const stripped = stripHidden(inner, path);
+    return stripped === inner ? schema : stripped.optional();
+  }
+  if (schema instanceof z.ZodNullable) {
+    const inner = asClassicSchema(schema.unwrap(), path);
+    const stripped = stripHidden(inner, path);
+    return stripped === inner ? schema : stripped.nullable();
   }
   return schema;
 }
 
 function stripHiddenObject(schema: z.ZodObject, path: string): z.ZodObject {
   const shape: Record<string, z.ZodType> = {};
-  let hidAny = false;
+  let changed = false;
   for (const [key, field] of Object.entries(schema.shape)) {
-    const { meta } = unwrapField(field, `${path}.${key}`);
+    const fieldPath = `${path}.${key}`;
+    const { meta } = unwrapField(field, fieldPath);
     if (meta.dto?.response === false) {
-      hidAny = true;
+      changed = true;
       continue;
     }
-    shape[key] = field;
+    const stripped = stripHidden(asClassicSchema(field, fieldPath), fieldPath);
+    if (stripped !== field) changed = true;
+    shape[key] = stripped;
   }
-  return hidAny ? z.object(shape) : schema;
+  return changed ? z.object(shape) : schema;
 }
 
 function isBaseEntityResponseField(

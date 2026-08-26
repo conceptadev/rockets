@@ -11,12 +11,15 @@
  */
 import { describe, expect, it } from 'vitest';
 import {
+  Body,
   Controller,
   Get,
   Injectable,
   Module,
   Post,
   Scope,
+  StandardSchemaValidationPipe,
+  UsePipes,
   type Provider,
   type Type,
 } from '@nestjs/common';
@@ -51,6 +54,7 @@ import {
 import { AuthSession } from '../decorators/auth-session.decorator';
 import { CsrfGuard } from '../infrastructure/guards/csrf.guard';
 import { CSRF_GUARD_OPTIONS_TOKEN } from '../rockets-core.constants';
+import { rocketsSchemaValidation } from '../common/utils/standard-schema.util';
 
 @Injectable()
 class AllowAllGuard {
@@ -543,9 +547,11 @@ describe('routePolicy through RocketsCoreModule (e2e)', () => {
 
   it('boots and exposes the report when no policy is declared', async () => {
     const app = await bootCore();
-    // No policy means no enforcement AND no service: an app that never
-    // asked for the check pays no discovery cost.
-    expect(() => app.get(RouteAuditService)).toThrow();
+    // No policy means no policy enforcement — but the service is always
+    // registered (its schema-pipe check needs no policy), so the report
+    // is available without declaring one.
+    const report = app.get(RouteAuditService).audit();
+    expect(report.routes.map((r) => r.id)).toContain('GET /invoices');
     await app.close();
   });
 
@@ -930,6 +936,79 @@ describe('route policy — requireCsrf (e2e)', () => {
     expect(app.get(RouteAuditService).audit().csrfGuards).toEqual([
       'HomegrownCsrfGuard',
     ]);
+    await app.close();
+  });
+});
+
+// ── requireSchemaPipe: always on, no policy needed ──
+//
+// `@Body({ schema })` without a StandardSchemaValidationPipe documents the
+// body in OpenAPI and validates nothing — Nest installs no pipe for
+// `schema`. The audit catches it at boot in EVERY app, policy or not.
+
+const noteSchema = z.object({ text: z.string() });
+
+@Controller('notes-unpiped')
+@ApiTags('Notes')
+class UnpipedNotesController {
+  @Post()
+  @ApiOkResponse({ description: 'Unvalidated body probe' })
+  create(@Body({ schema: noteSchema }) body: unknown): unknown {
+    return body;
+  }
+}
+
+@Controller('notes-piped')
+@ApiTags('Notes')
+@UsePipes(new StandardSchemaValidationPipe(rocketsSchemaValidation))
+class PipedNotesController {
+  @Post()
+  @ApiOkResponse({ description: 'Validated body probe' })
+  create(@Body({ schema: noteSchema }) body: unknown): unknown {
+    return body;
+  }
+}
+
+describe('requireSchemaPipe through RocketsCoreModule (e2e)', () => {
+  const bootCoreWith = async (
+    controller: Type<unknown>,
+    policy?: RoutePolicy,
+  ) => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        RocketsCoreModule.forRoot({
+          auth: defineAuthAdapter(NoopAuthAdapter),
+          providers: [NoopAuthAdapter],
+          ...(policy ? { routePolicy: policy } : {}),
+        }),
+      ],
+      controllers: [controller],
+    }).compile();
+    const app = moduleRef.createNestApplication();
+    await app.init();
+    return app;
+  };
+
+  it('rejects the boot when a schema parameter is reached by no pipe (no policy declared)', async () => {
+    await expect(bootCoreWith(UnpipedNotesController)).rejects.toThrow(
+      /requireSchemaPipe\] POST \/notes-unpiped: UnpipedNotesController\.create: body declares a schema/,
+    );
+  });
+
+  it('boots the same route once a class-level StandardSchemaValidationPipe is present', async () => {
+    const app = await bootCoreWith(PipedNotesController);
+    const [route] = app
+      .get(RouteAuditService)
+      .audit()
+      .routes.filter((r) => r.controller === 'PipedNotesController');
+    expect(route.unvalidatedSchemaParams).toEqual([]);
+    await app.close();
+  });
+
+  it('honours allowControllers for a route validated some other way', async () => {
+    const app = await bootCoreWith(UnpipedNotesController, {
+      allowControllers: [UnpipedNotesController],
+    });
     await app.close();
   });
 });

@@ -61,6 +61,15 @@ export interface RouteAuditEntry {
    * both while this names one.
    */
   readonly aclQuery: string | null;
+  /**
+   * Route parameters that declare a Standard Schema
+   * (`@Body/@Query/@Param({ schema })`) but reach the handler through no
+   * `StandardSchemaValidationPipe` — the parameter's own `pipes`, the
+   * handler's and the controller's `@UsePipes` are all checked. Nest adds
+   * no implicit pipe for `schema`, so such a parameter is documented in
+   * OpenAPI and validated by nothing. Empty on a sound route.
+   */
+  readonly unvalidatedSchemaParams: readonly string[];
 }
 
 export interface RouteAuditReport {
@@ -93,6 +102,7 @@ export interface RoutePolicyViolation {
     | 'requireAcl'
     | 'requireAclQuery'
     | 'requireCsrf'
+    | 'requireSchemaPipe'
     | 'staleAllow';
   readonly detail: string;
 }

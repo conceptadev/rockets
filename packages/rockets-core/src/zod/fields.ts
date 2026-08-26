@@ -105,14 +105,37 @@ const deletedAt = () =>
     .nullable()
     .optional();
 
+const isDateInput = (value: unknown): value is string | number | Date =>
+  typeof value === 'string' ||
+  typeof value === 'number' ||
+  value instanceof Date;
+
 /**
  * Writable datetime column. Accepts an ISO string (or a `Date`) on the
  * way in and yields a `Date` — the row shape — so a request body, a hook
  * and a loaded row all agree. Documented as `string/date-time`; the
  * response emits the ISO string. Accepts numeric timestamps too
  * (`z.coerce.date()` semantics) — a documented trade-off, not a feature.
+ *
+ * Bare `z.coerce.date()` would also coerce `null` and booleans to the
+ * epoch (`new Date(null)` is 1970) and persist them. The input guard in
+ * front of the coercion rejects anything that is not a string, number or
+ * `Date`. It is a `z.custom` (not `z.preprocess`) on purpose: a
+ * transform is optional-in for zod, which would drop the field from the
+ * documented `required` list. The guard's `.meta()` keeps the input side
+ * documented as `string/date-time`; `unwrapField` sees through the pipe
+ * to the `ZodDate`, so column mapping and projections are unchanged.
  */
-const date = (o: FieldOpts = {}) => decorate(z.coerce.date(), o);
+const date = (o: FieldOpts = {}) =>
+  decorate(
+    z
+      .custom<string | number | Date>(isDateInput, {
+        message: 'Expected an ISO 8601 datetime string',
+      })
+      .meta({ type: 'string', format: 'date-time' })
+      .pipe(z.coerce.date()),
+    o,
+  );
 
 /** Optimistic-lock counter — excluded from create/update DTOs. */
 const version = () =>
