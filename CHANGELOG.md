@@ -1041,6 +1041,14 @@ before running the full e2e suite.
 
 ### Testing
 
+- **`examples/sample-server`: class-vs-zod parity fixtures retired (RFC
+  #104, stage 3).** `test/zod-swagger-golden.e2e-spec.ts`,
+  `test/zod-parity.e2e-spec.ts` and their hand-written control resources
+  (`__fixtures__/tag-classic-control.ts`,
+  `__fixtures__/zod-parity/author-book.control.ts`) compared a class-DTO
+  `defineResource` twin against the zod resource. With class-DTO authoring
+  retired, the twin is gone; `test/zod-library.e2e-spec.ts` keeps every
+  document and runtime assertion against the zod author/book pair alone.
 - Package e2e suites run one Jest process per spec file
   (`scripts/run-isolated-e2e.cjs`). Sharing one worker failed ~25% of full
   runs with rotating victims — cumulative process state across ~30 Nest +

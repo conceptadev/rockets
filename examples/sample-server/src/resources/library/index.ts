@@ -15,9 +15,8 @@ import { zodResource } from '../../zod-bindings';
  * - keyed `operations` form with full defineResource parity:
  *   soft delete (`dateDeleted` via `db.deletedAt`), restore, replace.
  *
- * The handwritten control twin lives in
- * `test/__fixtures__/zod-parity/author-book.control.ts`; the parity e2e
- * keeps both styles behaviorally identical.
+ * `test/zod-library.e2e-spec.ts` asserts the document and the runtime
+ * behaviour.
  */
 export const authorSchema = z.object({
   id: z

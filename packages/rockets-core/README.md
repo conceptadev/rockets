@@ -750,10 +750,10 @@ Rules worth knowing:
 | `db.unique` / `db.index` | column / class decorators | — | pet `uniqueRef` |
 | `db.column` | raw TypeORM override | — | `zod-full-coverage` decimal/json |
 | `rocketsEntityMeta.unique` / `indexes` | composite constraints | — | pet-tag, full-coverage |
-| `relation.manyToOne` | FK + `@JoinColumn` | expose nested | zod-parity author/book |
+| `relation.manyToOne` | FK + `@JoinColumn` | expose nested | zod-library author/book |
 | `relation.hasMany` | `@OneToMany`, no column | expose array | full-coverage, pet |
 | `relation.shape` | — | classic entity expose | pet vaccinations |
-| `dto.create/update/response` | — | projection | zod-parity |
+| `dto.create/update/response` | — | projection | zod-library |
 | `compute` | skipped (no column) | response only | pet `tags` |
 | `owner` | — | OwnerStampHook | pet |
 
