@@ -442,6 +442,20 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Changed
 
+- **`@nestjs/config` is no longer a Rockets dependency (RFC #104, stage 1).**
+  `rockets-core`, `rockets` and `rockets-auth` used it only for
+  `registerAs` + `ConfigModule.forFeature` to hand default settings to
+  upstream's `createSettingsProvider`; those defaults are now plain Nest
+  providers (`ROCKETS_CORE_SETTINGS_DEFAULTS_TOKEN`,
+  `SWAGGER_UI_DEFAULT_SETTINGS_TOKEN`, `ROCKETS_SERVER_SETTINGS_DEFAULTS_TOKEN`,
+  `ROCKETS_AUTH_SETTINGS_DEFAULTS_TOKEN`) registered by each module itself.
+  Nothing changes for consumers that pass `settings` or run their own
+  `ConfigModule`. Reason: the upstream `8.0.0-alpha.9` graph pins
+  `@nestjs/config@12.0.0-next.0`, which is ESM-only; a CJS `require()` of it
+  from the Rockets dist fails at runtime while `tsc` stays green. The root
+  `resolutions["@nestjs/config"]` pin is gone so upstream keeps the version
+  it declares. `RocketsModule` (server) no longer reads core's defaults
+  namespace — it registers its own empty defaults provider.
 - **`operationResource` rejects a non-object request payload (issue #43).**
   With an `input` declared, an array, a scalar, or a non-plain object now
   returns `400` instead of being narrowed to `{}`. `POST []` against

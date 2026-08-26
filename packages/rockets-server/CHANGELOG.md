@@ -34,6 +34,10 @@ and this project adheres to
 
 ### Changed
 
+- `@nestjs/config` dropped (RFC #104, stage 1). `RocketsModule` registers its
+  own default settings provider (`ROCKETS_SERVER_SETTINGS_DEFAULTS_TOKEN`)
+  instead of reading core's `registerAs` namespace. Consumers keep passing
+  `settings` as before.
 - Guard ownership is singular: the presentation layer no longer registers a
   second global auth guard when an auth integration already owns it.
 - `RocketsModule` resolves auth contributions before module registration.

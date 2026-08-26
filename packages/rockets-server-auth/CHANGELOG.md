@@ -54,6 +54,13 @@ and this project adheres to
 
 ### Changed
 
+- `@nestjs/config` dropped (RFC #104, stage 1). `RocketsAuthModule` registers
+  its default settings (roles, e-mail templates, OTP) as a plain provider
+  (`ROCKETS_AUTH_SETTINGS_DEFAULTS_TOKEN`) instead of `registerAs` +
+  `ConfigModule.forFeature`; `rocketsAuthOptionsDefaultConfig` is now that
+  provider object (`{ provide, useFactory }`), not a `registerAs` function.
+  `ConfigModule` is no longer re-exported. The package keeps `@nestjs/config`
+  only as a devDependency for the e2e `ConfigService` stub.
 - Auth `CrudModule` root registration no longer replaces upstream's
   `CrudContextOverlay` with `SafeCrudContextInterceptor` (removed from core);
   uses `CrudModule.forRootAsync` as published.

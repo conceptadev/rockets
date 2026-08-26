@@ -29,7 +29,10 @@ import { RocketsOptionsInterface } from './infrastructure/config/interfaces/rock
 import type { RocketsOptionsExtrasInterface } from './infrastructure/config/interfaces/rockets-options-extras.interface';
 import type { RocketsAuthOption } from './infrastructure/config/interfaces/rockets-options-extras.interface';
 import { RocketsSettingsInterface } from './infrastructure/config/interfaces/rockets-settings.interface';
-import { rocketsOptionsDefaultConfig } from './infrastructure/config/rockets-options-default.config';
+import {
+  ROCKETS_SERVER_SETTINGS_DEFAULTS_TOKEN,
+  rocketsOptionsDefaultConfig,
+} from './infrastructure/config/rockets-options-default.config';
 import {
   RAW_OPTIONS_TOKEN,
   ROCKETS_USER_METADATA_DTO_TOKEN,
@@ -354,7 +357,7 @@ export function createRocketsSettingsProvider(
   >({
     settingsToken: ROCKETS_CORE_SETTINGS_TOKEN,
     optionsToken: RAW_OPTIONS_TOKEN,
-    settingsKey: rocketsOptionsDefaultConfig.KEY,
+    settingsKey: ROCKETS_SERVER_SETTINGS_DEFAULTS_TOKEN,
     optionsOverrides,
   });
 }
@@ -377,6 +380,7 @@ export function createRocketsProviders(options: {
   const extrasUserMetadata = composition.userMetadata;
   const providers: Provider[] = [
     ...(options.providers ?? []),
+    rocketsOptionsDefaultConfig,
     createRocketsSettingsProvider(),
   ];
 

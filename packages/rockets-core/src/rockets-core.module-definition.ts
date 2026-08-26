@@ -7,7 +7,6 @@ import {
 } from '@nestjs/common';
 import { APP_INTERCEPTOR, DiscoveryModule, Reflector } from '@nestjs/core';
 import { CqrsModule } from '@nestjs/cqrs';
-import { ConfigModule } from '@nestjs/config';
 import { RepositoryModule } from '@concepta/nestjs-repository';
 import { CrudModule } from '@concepta/nestjs-crud';
 import {
@@ -31,7 +30,10 @@ import { RAW_OPTIONS_TOKEN } from './rockets-core.tokens';
 import { RocketsCoreOptionsInterface } from './infrastructure/config/interfaces/rockets-core-options.interface';
 import { RocketsCoreOptionsExtrasInterface } from './infrastructure/config/interfaces/rockets-core-options-extras.interface';
 import { RocketsCoreSettingsInterface } from './infrastructure/config/interfaces/rockets-core-settings.interface';
-import { rocketsCoreDefaultConfig } from './infrastructure/config/rockets-core-options-default.config';
+import {
+  ROCKETS_CORE_SETTINGS_DEFAULTS_TOKEN,
+  rocketsCoreDefaultConfig,
+} from './infrastructure/config/rockets-core-options-default.config';
 import { AuthServerGuard } from './infrastructure/guards/auth-server.guard';
 import {
   RouteAuditService,
@@ -118,7 +120,6 @@ function createCoreImports(
 ): NonNullable<DynamicModule['imports']> {
   const imports: NonNullable<DynamicModule['imports']> = [
     CqrsModule.forRoot(),
-    ConfigModule.forFeature(rocketsCoreDefaultConfig),
     // Register hooks *before* repositories, otherwise repository-level hooks
     // won’t be wired and will quietly do nothing. RocketsAppModule provides
     // the hook feature (HookResolverService) globally.
@@ -218,7 +219,7 @@ function createCoreSettingsProvider(): Provider {
   >({
     settingsToken: ROCKETS_CORE_SETTINGS_TOKEN,
     optionsToken: RAW_OPTIONS_TOKEN,
-    settingsKey: rocketsCoreDefaultConfig.KEY,
+    settingsKey: ROCKETS_CORE_SETTINGS_DEFAULTS_TOKEN,
   });
 }
 
@@ -229,6 +230,7 @@ function createCoreProviders(options: {
 }): Provider[] {
   const providers: Provider[] = [
     ...(options.providers ?? []),
+    rocketsCoreDefaultConfig,
     createCoreSettingsProvider(),
     Reflector,
   ];
@@ -298,7 +300,6 @@ function createCoreExports(options: {
 }): DynamicModule['exports'] {
   const exports: NonNullable<DynamicModule['exports']> = [
     ...(options.exports ?? []),
-    ConfigModule,
     RAW_OPTIONS_TOKEN,
     AUTH_ADAPTERS_TOKEN,
     ROCKETS_CORE_SETTINGS_TOKEN,

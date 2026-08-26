@@ -49,7 +49,6 @@
     "@concepta/nestjs-repository-typeorm": "8.0.0-alpha.8",
     "@concepta/nestjs-role": "8.0.0-alpha.8",
     "@nestjs/cqrs": "11.0.3",
-    "@nestjs/config": "4.0.4",
     "@nestjs/jwt": "11.0.2",
     "@nestjs/passport": "11.0.5",
     "@concepta/nestjs-user": "8.0.0-alpha.8",

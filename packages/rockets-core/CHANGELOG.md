@@ -42,6 +42,12 @@
 
 ### Changed
 
+- `@nestjs/config` dropped (RFC #104, stage 1). `RocketsCoreModule` and
+  `SwaggerUiModule` register their default settings as plain providers
+  (`ROCKETS_CORE_SETTINGS_DEFAULTS_TOKEN`, `SWAGGER_UI_DEFAULT_SETTINGS_TOKEN`)
+  instead of `registerAs` + `ConfigModule.forFeature`; `ConfigModule` is no
+  longer re-exported by either module. Consumers keep passing `settings` as
+  before.
 - The existing generated-CRUD Standard Schema request bridge now uses the
   official `@standard-schema/spec` contract instead of a local partial copy.
 - Core always provides the auth-adapter collection token, including for an

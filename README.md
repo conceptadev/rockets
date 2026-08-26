@@ -317,7 +317,7 @@ yarn add @concepta/rockets@alpha \
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | Other `@concepta/*`     | `rockets-core`                                                                                                        |
 | Upstream motor         | `@concepta/nestjs-{core,repository,crud,authentication,access-control}` (via `@concepta/rockets-core` re-exports)      |
-| Nest (Rockets runtime) | `@nestjs/common`, `@nestjs/core`, `@nestjs/cqrs`, `@nestjs/swagger`, `@nestjs/config`                                 |
+| Nest (Rockets runtime) | `@nestjs/common`, `@nestjs/core`, `@nestjs/cqrs`, `@nestjs/swagger`                                                   |
 
 Optional add-ons (install when you need them):
 

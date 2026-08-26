@@ -16,7 +16,6 @@ import {
   ThrottlerModule,
   type ThrottlerModuleOptions,
 } from '@nestjs/throttler';
-import { ConfigModule } from '@nestjs/config';
 import {
   AuthenticationModule,
   AuthenticationOptionsInterface,
@@ -64,7 +63,10 @@ import {
   UserModule,
 } from '@concepta/nestjs-user';
 
-import { rocketsAuthOptionsDefaultConfig } from './shared/config/rockets-auth-options-default.config';
+import {
+  ROCKETS_AUTH_SETTINGS_DEFAULTS_TOKEN,
+  rocketsAuthOptionsDefaultConfig,
+} from './shared/config/rockets-auth-options-default.config';
 import { RAW_OPTIONS_TOKEN } from './shared/constants/rockets-auth-raw-options.token';
 import { buildMePasswordController } from './domains/auth/gateways/http/factories/build-me-password-controller';
 import { RocketsAuthTokenController } from './domains/auth/gateways/http/controllers/rockets-auth-token.controller';
@@ -388,7 +390,7 @@ export function createRocketsAuthSettingsProvider(
   >({
     settingsToken: ROCKETS_AUTH_MODULE_OPTIONS_DEFAULT_SETTINGS_TOKEN,
     optionsToken: RAW_OPTIONS_TOKEN,
-    settingsKey: rocketsAuthOptionsDefaultConfig.KEY,
+    settingsKey: ROCKETS_AUTH_SETTINGS_DEFAULTS_TOKEN,
     optionsOverrides,
   });
 }
@@ -405,7 +407,6 @@ export function createRocketsAuthImports(importOptions: {
     RepositoryModule.forRoot({}),
     ConceptaRepositoryCompatModule,
     RocketsAuthPortsModule.forRoot(importOptions.extras?.ports),
-    ConfigModule.forFeature(rocketsAuthOptionsDefaultConfig),
     CrudModule.forRootAsync({
       inject: [RAW_OPTIONS_TOKEN],
       useFactory: (options: RocketsAuthOptionsInterface) => ({
@@ -630,7 +631,6 @@ export function createRocketsAuthExports(options: {
 }): DynamicModule['exports'] {
   return [
     ...(options.exports || []),
-    ConfigModule,
     RAW_OPTIONS_TOKEN,
     ROCKETS_AUTH_MODULE_OPTIONS_DEFAULT_SETTINGS_TOKEN,
     AuthenticationModule,
@@ -649,6 +649,7 @@ export function createRocketsAuthProviders(options: {
 }): Provider[] {
   const providers: Provider[] = [
     ...(options.providers ?? []),
+    rocketsAuthOptionsDefaultConfig,
     createRocketsAuthSettingsProvider(),
     RocketsAuthOtpService,
     RocketsAuthNotificationService,
