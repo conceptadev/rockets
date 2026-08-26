@@ -43,6 +43,11 @@ jobs:
       - name: Typecheck tests
         run: yarn typecheck:spec
       - name: Verify native Vitest config loading
+        # Loads `vitest.config.mts` straight into Node, which needs native
+        # TypeScript stripping (Node 22+). A repo-tooling check, not part of
+        # the published packages' floor — the 20.19.0 leg covers build,
+        # tests and the packed-consumer contract.
+        if: matrix.node-version == '22.x'
         run: yarn test:config-native
       - name: Unit tests
         run: yarn test:ci
