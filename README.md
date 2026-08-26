@@ -326,6 +326,7 @@ Optional add-ons (install when you need them):
 | `zod` + `nestjs-zod` (schema-first layer at `@concepta/rockets-core/zod`)            | Schema-first resources (`zodResource`) |
 | `@concepta/rockets-adapter-firebase`                                                 | Firebase ID tokens                     |
 | `@concepta/rockets-repository-firestore`                                             | Firestore persistence                  |
+| `@concepta/rockets-storage`                                                          | Object storage (Node 20.19+ or 22.12+) |
 | `@concepta/rockets-auth@alpha`                                                       | Built-in signup/login (Path B)         |
 
 **What you still add explicitly** (and why):
@@ -1027,6 +1028,7 @@ to 4xx — a bare `Error` in a hook often surfaces as 500.
 | `packages/rockets-core`                 | `@concepta/rockets-core`                 | Composition planner. Auth chain, `buildAppRegistrationPlan`, `defineResource` / `defineModuleResource` / `defineSubResource` / `defineOperationResource`, `defineHook`, owner/path hooks, swagger registration, shared helpers, zod layer at `@concepta/rockets-core/zod` (`zodResource`, `operationResource`, …), opt-in `accessControl`. | [README](packages/rockets-core/README.md)                 | preview |
 | `packages/rockets-repository-typeorm`   | `@concepta/rockets-repository-typeorm`   | TypeORM adapter and `defineTypeOrmRepository` bootstrap for planner-derived entity registration, plus the zod `SchemaEntityCompiler` at `@concepta/rockets-repository-typeorm/zod`.                                                                                   | [README](packages/rockets-repository-typeorm/README.md)   | preview |
 | `packages/rockets-repository-firestore` | `@concepta/rockets-repository-firestore` | Firestore adapter implementing `RepositoryAdapter`. Per-entity opt-in.                                                                                                                                                             | [README](packages/rockets-repository-firestore/README.md) | preview |
+| `packages/rockets-storage`              | `@concepta/rockets-storage`              | Provider-neutral object storage client, named NestJS stores, streaming operations, structured signed transfers, hardened provider adapters, and testing support.                                                                    | [README](packages/rockets-storage/README.md)              | preview |
 | `packages/rockets-adapter-firebase`     | `@concepta/rockets-adapter-firebase`     | Firebase Auth adapter implementing `AuthAdapterInterface`.                                                                                                                                                                         | [README](packages/rockets-adapter-firebase/README.md)     | preview |
 | `packages/rockets-server`               | `@concepta/rockets`                      | Launch-facing `createServer`, external-auth presentation, optional `/me`, default guard, and auth chain.                                                                                                                            | [README](packages/rockets-server/README.md)               | preview |
 | `packages/rockets-server-auth`          | `@concepta/rockets-auth`                 | Built-in auth: signup, login, recovery, OTP, invitations, roles, throttling, and admin user CRUD.                                                                                                                                   | [README](packages/rockets-server-auth/README.md)          | preview |
@@ -1039,6 +1041,7 @@ rockets/
 │   ├── rockets-core/                    Planner + auth wiring + shared helpers (zod layer at ./zod)
 │   ├── rockets-repository-typeorm/      TypeORM adapter + zod entity compiler (./zod)
 │   ├── rockets-repository-firestore/    Firestore adapter
+│   ├── rockets-storage/                 Provider-neutral object storage + named Nest stores
 │   ├── rockets-adapter-firebase/        Firebase auth adapter
 │   ├── rockets-server/                  External-auth presentation (@concepta/rockets)
 │   └── rockets-server-auth/             Built-in auth (@concepta/rockets-auth)
@@ -1063,6 +1066,9 @@ rockets/
   `config`, `throttler`) remain on their current stable majors until a Nest 12
   line is published.
 - **Node**: `>=20.0.0` (the minimum supported by NestJS 12).
+  `@concepta/rockets-storage` requires Node 20.19+ on the Node 20 line, or
+  Node 22.12+, so its ESM dependency graph is also available through the
+  package's synchronous `require()` conditions. Node 21 is not supported.
 
 ### Common scripts (from the monorepo root)
 

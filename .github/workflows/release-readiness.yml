@@ -19,7 +19,9 @@ jobs:
         run: corepack enable
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          # Minimum supported Node 20 runtime. Keep this pinned so the storage
+          # package's synchronous require(ESM) compatibility cannot drift.
+          node-version: 20.19.0
           cache: yarn
       - uses: actions/setup-java@v4
         with:
@@ -36,6 +38,10 @@ jobs:
         run: corepack yarn install --immutable
       - name: Build
         run: corepack yarn build
+      - name: Storage tests on Node 20.19
+        run: |
+          corepack yarn workspace @concepta/rockets-storage test
+          corepack yarn workspace @concepta/rockets-storage test:e2e
       - name: Package artifacts and clean-consumer contracts
         run: corepack yarn release:packages
       - name: Firestore emulator suite
