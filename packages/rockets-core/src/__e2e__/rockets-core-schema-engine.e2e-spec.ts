@@ -407,31 +407,73 @@ describe('schema engine — validation, serialization, OpenAPI (e2e)', () => {
     });
 
     /**
-     * Generated CRUD request bodies are documented INLINE: upstream
-     * `CrudInitApiBody` stamps `ApiBody({ schema: jsonSchema.input() })`
-     * directly, and Nest merges that explicit body over the reflected
-     * `@Body({ schema })` param, so the document converter never sees the
-     * body and no `${Name}CreateDto` component exists. What the bridge does
-     * guarantee is the shape: `strictInput` closes the body.
+     * Upstream `CrudInitApiBody` stamps generated CRUD bodies as an INLINE
+     * `ApiBody({ schema })` that Swagger merges over the reflected
+     * `@Body({ schema })` (conceptadev/nestjs-modules#467). Rockets drops
+     * that stamp wherever the route's own body schema is named, so the
+     * body is `$ref`'d and its component exists like every response.
      */
-    it('a strictInput body is documented with additionalProperties: false', () => {
+    it('generated CRUD request bodies are $ref components (create / update / replace)', () => {
       const document = app.get(SwaggerUiService).createDocument(app);
-      const body = (path: string) =>
+      const schemas = document.components?.schemas ?? {};
+      const bodyRef = (path: string, method: string) =>
         at(
           document.paths,
           path,
+          method,
+          'requestBody',
+          'content',
+          'application/json',
+          'schema',
+          '$ref',
+        );
+
+      expect(bodyRef('/tags', 'post')).toBe(
+        '#/components/schemas/TagCreateDto',
+      );
+      expect(bodyRef('/tags/{id}', 'patch')).toBe(
+        '#/components/schemas/TagUpdateDto',
+      );
+      expect(bodyRef('/tags/{id}', 'put')).toBe(
+        '#/components/schemas/TagReplaceDto',
+      );
+      expect(
+        at(document.paths, '/tags', 'post', 'requestBody', 'required'),
+      ).toBe(true);
+      for (const id of ['TagCreateDto', 'TagUpdateDto', 'TagReplaceDto']) {
+        expect(at(schemas, id, 'type')).toBe('object');
+      }
+      expect(at(schemas, 'TagCreateDto', 'required')).toEqual([
+        'label',
+        'expiresAt',
+      ]);
+    });
+
+    it('a strictInput body component is documented with additionalProperties: false', () => {
+      const document = app.get(SwaggerUiService).createDocument(app);
+      const schemas = document.components?.schemas ?? {};
+      expect(
+        at(
+          document.paths,
+          '/strict-tags',
           'post',
           'requestBody',
           'content',
           'application/json',
           'schema',
-        );
-      expect(at(body('/strict-tags'), 'additionalProperties')).toBe(false);
-      expect(at(body('/strict-tags'), 'required')).toEqual([
+          '$ref',
+        ),
+      ).toBe('#/components/schemas/StrictTagCreateDto');
+      expect(at(schemas, 'StrictTagCreateDto', 'additionalProperties')).toBe(
+        false,
+      );
+      expect(at(schemas, 'StrictTagCreateDto', 'required')).toEqual([
         'label',
         'expiresAt',
       ]);
-      expect(at(body('/tags'), 'additionalProperties')).toBeUndefined();
+      expect(
+        at(schemas, 'TagCreateDto', 'additionalProperties'),
+      ).toBeUndefined();
     });
   });
 });

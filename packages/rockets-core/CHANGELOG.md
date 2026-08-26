@@ -43,8 +43,8 @@
   and validates nothing. `RouteAuditService` is now always registered (and
   exported); its `requireSchemaPipe` check runs with or without a
   `routePolicy` and names the controller, handler and parameter. The policy
-  rules stay opt-in; `allow` / `allowControllers` exempt a route validated
-  by a pipe the audit cannot recognise. `RouteAuditEntry` gains
+  rules stay opt-in; `routePolicy.allowUnvalidatedSchema` exempts a route
+  validated by a pipe the audit cannot recognise. `RouteAuditEntry` gains
   `unvalidatedSchemaParams`.
 - **`RocketsCrudAdapter` is the adapter behind every generated resource.**
   It keeps upstream's params merge and drops the bare `400` upstream's
@@ -86,10 +86,14 @@
   Planner `validateSchemaIdUniqueness` rejects two schema instances under one
   component id. The exceptions filter vendors `mapHttpStatus` (removed
   upstream) and no longer reads `context.validationErrors` (gone upstream).
-  Known gap: upstream `CrudInitApiBody` inlines generated CRUD request
-  bodies in the document (responses are `$ref`'d) — an upstream follow-up.
-  `createDocument` lifts the `definitions` an inline body carries (nested
-  named schemas) into `components.schemas` (`liftInlineRequestBodyDefinitions`).
+  Upstream `CrudInitApiBody` stamps generated CRUD request bodies as an
+  inline `ApiBody({ schema })` that Swagger merges over the route's own
+  `@Body({ schema })` (conceptadev/nestjs-modules#467); `createDocument`
+  drops that stamp wherever the route's body schema is named
+  (`restoreNamedRequestBodies`), so create / update / replace bodies are
+  `$ref`'d to `${Name}CreateDto` / `UpdateDto` / `ReplaceDto` like every
+  response. A body that stays inline (`validation: false`, unnamed schema)
+  still gets its `definitions` lifted (`liftInlineRequestBodyDefinitions`).
 - `@nestjs/config` dropped (RFC #104, stage 1). `RocketsCoreModule` and
   `SwaggerUiModule` register their default settings as plain providers
   (`ROCKETS_CORE_SETTINGS_DEFAULTS_TOKEN`, `SWAGGER_UI_DEFAULT_SETTINGS_TOKEN`)
@@ -136,7 +140,21 @@
   a response (`ApiResponse({ standardSchema })`): zod's input and output
   JSON Schemas differ by construction, and last-wins documented one side
   with the other's shape silently. Give the response its own
-  `withOpenApi()` id.
+  `withOpenApi()` id. The same check covers NESTED named schemas: they
+  reach the document as definitions of whatever embeds them, and one
+  nested id emitted with two different shapes (reached from a request
+  and from a response) is an error instead of a last-wins merge.
+- **Hand-written responses get the fail-closed check too.** The always-on
+  route audit reads `@SerializeOptions({ schema })` on every route and
+  fails the boot as `requireClosedResponse` when that schema has an open
+  object anywhere (`.passthrough()` / `.catchall()`) — the check generated
+  resources already get at definition time. `RouteAuditEntry.openResponseSchema`
+  carries the path.
+- **`requireSchemaPipe` has its own exemption list.** `allow` /
+  `allowControllers` exempt a route from the POLICY rules; they no longer
+  switch the always-on schema-pipe check off as a side effect. A route
+  validated by a pipe the audit cannot recognise is listed in
+  `routePolicy.allowUnvalidatedSchema` (route ids).
 
 ### Removed
 

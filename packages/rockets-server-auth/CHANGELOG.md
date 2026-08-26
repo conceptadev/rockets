@@ -11,6 +11,11 @@ and this project adheres to
 
 ### Security
 
+- **User-metadata updates pin `userId` from the caller.** The update branch
+  of the metadata repository used to write the validated payload as-is, so
+  an app-supplied update schema that admits `userId` could move a row to
+  another user. Ownership now comes from the caller on both the create and
+  the update branch, whatever the schema admits.
 - Invitation acceptance validates `payload.userMetadata` with the same
   default as signup and admin: when the app configures no
   `userCrud.userMetadataConfig`, the base update schema (`{}`) strips every
@@ -73,6 +78,17 @@ and this project adheres to
   bodies are documented as `LocalLoginDto`, `RefreshDto` and
   `Recovery*Dto` again (upstream ships those schemas without an id, which
   inlined them into every route after the schema-engine change).
+- **Migration — renamed and removed OpenAPI components (RFC #104).**
+  Generated clients pick up new type names: `AuthenticationResponseDto` →
+  `AuthenticationResponse` (upstream's id); the user and role resources are
+  `RocketsAuthUserDto` / `RocketsAuthRoleDto` (were `UserDto` / `RoleDto`);
+  the admin list envelopes are `AdminUsersPaginatedDto` /
+  `AdminRolesPaginatedDto` and every other list envelope is
+  `<Resource>PaginatedDto` (the shared `CrudResponsePaginatedDto` is gone);
+  `CrudInvalidResponseDto` is gone — validation errors are the Rockets
+  error envelope with `details[]`. Generated CRUD request bodies keep their
+  ids (`UserCreateDto`, `RoleCreateDto`, …). Regenerate the client and
+  rename the imports; no wire field changed shape.
 - **Last class DTOs retired (RFC #104, stage 6).** `RocketsAuthChangePasswordDto`
   → `rocketsAuthChangePasswordSchema`, `RocketsAuthOtpSendDto` →
   `rocketsAuthOtpSendSchema`, `RocketsAuthOtpConfirmDto` →
@@ -131,6 +147,20 @@ and this project adheres to
 - Recovery password rotation preserves history, strength validation,
   transactions, and credential lifecycle events.
 - Node.js 20 is the minimum supported runtime.
+
+### Fixed
+
+- **Admin user / role update bodies are validated again.** Both admin CRUD
+  modules declared the update body at controller level; upstream stamps the
+  validation pipe from the OPERATION-level body only, so `PATCH /admin/users/:id`
+  and `PATCH /admin/roles/:id` were documented and validated by nothing. The
+  body now lives on the Update operation (and is `$ref`'d in the document as
+  `RocketsAuthUserUpdateDto` / `RocketsAuthRoleUpdateDto`).
+- **`PATCH /admin/users/:id` no longer answers 500.** `UpdateUserHandler` ran
+  upstream's update (which opens and commits its own scope) and then queried
+  the metadata on the same context, which still carried the finished
+  transaction (conceptadev/nestjs-modules#468). The handler now runs the
+  whole update in one outermost `TransactionScope`, like signup and recovery.
 
 ### Removed
 

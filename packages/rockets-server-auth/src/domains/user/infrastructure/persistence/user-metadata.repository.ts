@@ -40,8 +40,14 @@ export class UserMetadataRepository implements UserMetadataRepositoryInterface {
     data: RocketsAuthUserMetadataUpdatableInterface,
   ): Promise<RocketsAuthUserMetadataEntityInterface> {
     const existing = await this.findByUserId(ctx, userId);
+    // `userId` is pinned on BOTH branches: ownership comes from the caller,
+    // never from the payload, whatever an app-supplied update schema admits.
     if (existing) {
-      return this.repo.update(existing, dropUndefined(data), { ctx });
+      return this.repo.update(
+        existing,
+        { ...dropUndefined(data), userId },
+        { ctx },
+      );
     }
     return this.repo.create({ ...data, userId }, { ctx });
   }

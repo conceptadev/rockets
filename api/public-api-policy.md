@@ -46,6 +46,13 @@ consumer-migration obligations below apply from 1.0 onward.
   `standard-schema` subpaths) is removed rather than deprecated, and
   `class-validator` / `class-transformer` / `nestjs-zod` are no longer peers.
   Migration notes live in the root `CHANGELOG.md` (stages 1–6).
+- RFC #104 also renames OpenAPI components that generated clients depend
+  on: `AuthenticationResponseDto` → `AuthenticationResponse`, `UserDto` /
+  `RoleDto` → `RocketsAuthUserDto` / `RocketsAuthRoleDto`, one
+  `<Resource>PaginatedDto` per list instead of the shared
+  `CrudResponsePaginatedDto`, and `CrudInvalidResponseDto` removed. Wire
+  shapes are unchanged; the note for consumers is in
+  `packages/rockets-server-auth/CHANGELOG.md`.
 
 ## Updating the report
 

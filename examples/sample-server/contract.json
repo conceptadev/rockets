@@ -1,6 +1,34 @@
 {
   "components": {
     "schemas": {
+      "AppointmentCreateDto": {
+        "properties": {
+          "date": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "notes": {
+            "nullable": true,
+            "type": "string"
+          },
+          "petId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "reminderSendAt": {
+            "description": "When to send the reminder (must be before `date`).",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "petId",
+          "date",
+          "reminderSendAt"
+        ],
+        "type": "object"
+      },
       "AppointmentResponseDto": {
         "additionalProperties": false,
         "properties": {
@@ -90,6 +118,20 @@
         ],
         "type": "object"
       },
+      "AuthorCreateDto": {
+        "properties": {
+          "name": {
+            "example": "Machado de Assis",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
       "AuthorResponseDto": {
         "additionalProperties": false,
         "properties": {
@@ -156,6 +198,22 @@
         ],
         "type": "object"
       },
+      "AuthorUpdateDto": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "name": {
+            "example": "Machado de Assis",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "BookAuthorResponseDto": {
         "additionalProperties": false,
         "properties": {
@@ -184,6 +242,66 @@
           "name",
           "dateCreated",
           "dateUpdated"
+        ],
+        "type": "object"
+      },
+      "BookCreateDto": {
+        "properties": {
+          "authorId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "internalNote": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "isbn": {
+            "example": "9788535914061",
+            "maxLength": 20,
+            "type": "string"
+          },
+          "title": {
+            "example": "Dom Casmurro",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "isbn",
+          "authorId"
+        ],
+        "type": "object"
+      },
+      "BookReplaceDto": {
+        "properties": {
+          "authorId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "internalNote": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "isbn": {
+            "example": "9788535914061",
+            "maxLength": 20,
+            "type": "string"
+          },
+          "title": {
+            "example": "Dom Casmurro",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "isbn",
+          "authorId"
         ],
         "type": "object"
       },
@@ -277,6 +395,31 @@
         ],
         "type": "object"
       },
+      "BookUpdateDto": {
+        "properties": {
+          "authorId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "internalNote": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "title": {
+            "example": "Dom Casmurro",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "LoginDto": {
         "properties": {
           "email": {
@@ -305,6 +448,62 @@
         },
         "required": [
           "accessToken"
+        ],
+        "type": "object"
+      },
+      "PetCreateDto": {
+        "properties": {
+          "age": {
+            "maximum": 50,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "breed": {
+            "example": "Labrador",
+            "maxLength": 255,
+            "nullable": true,
+            "type": "string"
+          },
+          "color": {
+            "example": "golden",
+            "maxLength": 100,
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "name": {
+            "example": "Buddy",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "species": {
+            "example": "dog",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "status": {
+            "default": "active",
+            "enum": [
+              "active",
+              "inactive"
+            ],
+            "type": "string"
+          },
+          "uniqueRef": {
+            "maxLength": 64,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "species",
+          "age"
         ],
         "type": "object"
       },
@@ -539,6 +738,19 @@
         ],
         "type": "object"
       },
+      "PetTagCreateDto": {
+        "properties": {
+          "tagId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tagId"
+        ],
+        "type": "object"
+      },
       "PetTagResponseDto": {
         "additionalProperties": false,
         "properties": {
@@ -646,6 +858,87 @@
           "name",
           "dateCreated",
           "dateUpdated"
+        ],
+        "type": "object"
+      },
+      "PetUpdateDto": {
+        "properties": {
+          "age": {
+            "maximum": 50,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "breed": {
+            "example": "Labrador",
+            "maxLength": 255,
+            "nullable": true,
+            "type": "string"
+          },
+          "color": {
+            "example": "golden",
+            "maxLength": 100,
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "name": {
+            "example": "Buddy",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "species": {
+            "example": "dog",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "status": {
+            "default": "active",
+            "enum": [
+              "active",
+              "inactive"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PetVaccinationCreateDto": {
+        "properties": {
+          "dateAdministered": {
+            "example": "2024-01-15",
+            "type": "string"
+          },
+          "dateExpires": {
+            "example": "2025-01-15",
+            "nullable": true,
+            "type": "string"
+          },
+          "name": {
+            "example": "Rabies",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "petId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "dateAdministered",
+          "petId"
         ],
         "type": "object"
       },
@@ -922,6 +1215,26 @@
         ],
         "type": "object"
       },
+      "TagCreateDto": {
+        "properties": {
+          "color": {
+            "example": "#ff0000",
+            "maxLength": 20,
+            "nullable": true,
+            "type": "string"
+          },
+          "name": {
+            "example": "vaccinated",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
       "TagResponseDto": {
         "additionalProperties": false,
         "properties": {
@@ -992,6 +1305,28 @@
           "page",
           "pageCount"
         ],
+        "type": "object"
+      },
+      "TagUpdateDto": {
+        "properties": {
+          "color": {
+            "example": "#ff0000",
+            "maxLength": 20,
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "name": {
+            "example": "vaccinated",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "UserMetadataResponseDto": {
@@ -1539,32 +1874,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "date": {
-                    "format": "date-time",
-                    "type": "string"
-                  },
-                  "notes": {
-                    "nullable": true,
-                    "type": "string"
-                  },
-                  "petId": {
-                    "format": "uuid",
-                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                    "type": "string"
-                  },
-                  "reminderSendAt": {
-                    "description": "When to send the reminder (must be before `date`).",
-                    "format": "date-time",
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "petId",
-                  "date",
-                  "reminderSendAt"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/AppointmentCreateDto"
               }
             }
           },
@@ -1910,18 +2220,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "name": {
-                    "example": "Machado de Assis",
-                    "maxLength": 100,
-                    "minLength": 1,
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "name"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/AuthorCreateDto"
               }
             }
           },
@@ -2064,20 +2363,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "id": {
-                    "format": "uuid",
-                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                    "type": "string"
-                  },
-                  "name": {
-                    "example": "Machado de Assis",
-                    "maxLength": 100,
-                    "minLength": 1,
-                    "type": "string"
-                  }
-                },
-                "type": "object"
+                "$ref": "#/components/schemas/AuthorUpdateDto"
               }
             }
           },
@@ -2254,34 +2540,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "authorId": {
-                    "format": "uuid",
-                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                    "type": "string"
-                  },
-                  "internalNote": {
-                    "maxLength": 500,
-                    "type": "string"
-                  },
-                  "isbn": {
-                    "example": "9788535914061",
-                    "maxLength": 20,
-                    "type": "string"
-                  },
-                  "title": {
-                    "example": "Dom Casmurro",
-                    "maxLength": 200,
-                    "minLength": 1,
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "title",
-                  "isbn",
-                  "authorId"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/BookCreateDto"
               }
             }
           },
@@ -2467,29 +2726,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "authorId": {
-                    "format": "uuid",
-                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                    "type": "string"
-                  },
-                  "id": {
-                    "format": "uuid",
-                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                    "type": "string"
-                  },
-                  "internalNote": {
-                    "maxLength": 500,
-                    "type": "string"
-                  },
-                  "title": {
-                    "example": "Dom Casmurro",
-                    "maxLength": 200,
-                    "minLength": 1,
-                    "type": "string"
-                  }
-                },
-                "type": "object"
+                "$ref": "#/components/schemas/BookUpdateDto"
               }
             }
           },
@@ -2533,34 +2770,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "authorId": {
-                    "format": "uuid",
-                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                    "type": "string"
-                  },
-                  "internalNote": {
-                    "maxLength": 500,
-                    "type": "string"
-                  },
-                  "isbn": {
-                    "example": "9788535914061",
-                    "maxLength": 20,
-                    "type": "string"
-                  },
-                  "title": {
-                    "example": "Dom Casmurro",
-                    "maxLength": 200,
-                    "minLength": 1,
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "title",
-                  "isbn",
-                  "authorId"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/BookReplaceDto"
               }
             }
           },
@@ -2810,34 +3020,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "dateAdministered": {
-                    "example": "2024-01-15",
-                    "type": "string"
-                  },
-                  "dateExpires": {
-                    "example": "2025-01-15",
-                    "nullable": true,
-                    "type": "string"
-                  },
-                  "name": {
-                    "example": "Rabies",
-                    "maxLength": 255,
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "petId": {
-                    "format": "uuid",
-                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "name",
-                  "dateAdministered",
-                  "petId"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/PetVaccinationCreateDto"
               }
             }
           },
@@ -3113,60 +3296,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "age": {
-                    "maximum": 50,
-                    "minimum": 0,
-                    "type": "integer"
-                  },
-                  "breed": {
-                    "example": "Labrador",
-                    "maxLength": 255,
-                    "nullable": true,
-                    "type": "string"
-                  },
-                  "color": {
-                    "example": "golden",
-                    "maxLength": 100,
-                    "nullable": true,
-                    "type": "string"
-                  },
-                  "description": {
-                    "nullable": true,
-                    "type": "string"
-                  },
-                  "name": {
-                    "example": "Buddy",
-                    "maxLength": 255,
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "species": {
-                    "example": "dog",
-                    "maxLength": 100,
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "status": {
-                    "default": "active",
-                    "enum": [
-                      "active",
-                      "inactive"
-                    ],
-                    "type": "string"
-                  },
-                  "uniqueRef": {
-                    "maxLength": 64,
-                    "nullable": true,
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "name",
-                  "species",
-                  "age"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/PetCreateDto"
               }
             }
           },
@@ -3352,55 +3482,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "age": {
-                    "maximum": 50,
-                    "minimum": 0,
-                    "type": "integer"
-                  },
-                  "breed": {
-                    "example": "Labrador",
-                    "maxLength": 255,
-                    "nullable": true,
-                    "type": "string"
-                  },
-                  "color": {
-                    "example": "golden",
-                    "maxLength": 100,
-                    "nullable": true,
-                    "type": "string"
-                  },
-                  "description": {
-                    "nullable": true,
-                    "type": "string"
-                  },
-                  "id": {
-                    "format": "uuid",
-                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                    "type": "string"
-                  },
-                  "name": {
-                    "example": "Buddy",
-                    "maxLength": 255,
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "species": {
-                    "example": "dog",
-                    "maxLength": 100,
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "status": {
-                    "default": "active",
-                    "enum": [
-                      "active",
-                      "inactive"
-                    ],
-                    "type": "string"
-                  }
-                },
-                "type": "object"
+                "$ref": "#/components/schemas/PetUpdateDto"
               }
             }
           },
@@ -3722,17 +3804,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "tagId": {
-                    "format": "uuid",
-                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "tagId"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/PetTagCreateDto"
               }
             }
           },
@@ -4291,24 +4363,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "color": {
-                    "example": "#ff0000",
-                    "maxLength": 20,
-                    "nullable": true,
-                    "type": "string"
-                  },
-                  "name": {
-                    "example": "vaccinated",
-                    "maxLength": 100,
-                    "minLength": 1,
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "name"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/TagCreateDto"
               }
             }
           },
@@ -4424,26 +4479,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "color": {
-                    "example": "#ff0000",
-                    "maxLength": 20,
-                    "nullable": true,
-                    "type": "string"
-                  },
-                  "id": {
-                    "format": "uuid",
-                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                    "type": "string"
-                  },
-                  "name": {
-                    "example": "vaccinated",
-                    "maxLength": 100,
-                    "minLength": 1,
-                    "type": "string"
-                  }
-                },
-                "type": "object"
+                "$ref": "#/components/schemas/TagUpdateDto"
               }
             }
           },

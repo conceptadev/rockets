@@ -4,6 +4,7 @@ import { Controller } from '@nestjs/common';
 import { collectRouteAudit } from './collect-route-audit';
 import {
   evaluateRoutePolicy,
+  openResponseViolations,
   schemaPipeViolations,
 } from './evaluate-route-policy';
 import type { RouteAuditReport } from './route-audit.types';
@@ -26,6 +27,7 @@ function report(overrides: Partial<RouteAuditReport>): RouteAuditReport {
         aclResource: null,
         aclQuery: null,
         unvalidatedSchemaParams: [],
+        openResponseSchema: null,
       },
     ],
     globalGuards: ['SomeAuthGuard'],
@@ -186,6 +188,7 @@ describe('schemaPipeViolations (always on)', () => {
         aclResource: null,
         aclQuery: null,
         unvalidatedSchemaParams: ['body'],
+        openResponseSchema: null,
       },
     ],
   });
@@ -199,13 +202,35 @@ describe('schemaPipeViolations (always on)', () => {
     expect(violations[0].detail).toContain('rocketsSchemaValidation');
   });
 
-  it('is exempted by allow and allowControllers', () => {
-    expect(schemaPipeViolations(unpiped, { allow: ['POST /things'] })).toEqual(
-      [],
-    );
+  it('is exempted only by its own list, never by allow / allowControllers', () => {
+    expect(
+      schemaPipeViolations(unpiped, {
+        allowUnvalidatedSchema: ['POST /things'],
+      }),
+    ).toEqual([]);
+    // An `allow` written for requireAuth must not switch this check off.
+    expect(
+      schemaPipeViolations(unpiped, { allow: ['POST /things'] }),
+    ).toHaveLength(1);
     expect(
       schemaPipeViolations(unpiped, { allowControllers: [ProbeController] }),
-    ).toEqual([]);
+    ).toHaveLength(1);
+  });
+
+  it('reports an open @SerializeOptions({ schema }) as requireClosedResponse', () => {
+    const base = report({});
+    const open: RouteAuditReport = {
+      ...base,
+      routes: base.routes.map((route) => ({
+        ...route,
+        openResponseSchema: '$.items[]',
+      })),
+    };
+    const violations = openResponseViolations(open);
+    expect(violations).toHaveLength(1);
+    expect(violations[0].rule).toBe('requireClosedResponse');
+    expect(violations[0].detail).toContain('"$.items[]"');
+    expect(openResponseViolations(report({}))).toEqual([]);
   });
 
   it('is silent on a validated route', () => {

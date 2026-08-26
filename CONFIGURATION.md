@@ -550,7 +550,13 @@ the schema is documented in OpenAPI and validated by nothing. The route
 audit (`RouteAuditService`, always registered) fails the boot with
 `requireSchemaPipe` naming the controller, handler and parameter. A route
 validated by a pipe of its own that the audit cannot recognise is exempted
-through `routePolicy.allow` / `allowControllers`.
+through `routePolicy.allowUnvalidatedSchema` (route ids) — its own list,
+so an `allow` entry written for `requireAuth` never switches this check
+off as a side effect. The same audit runs the fail-closed check on a
+hand-written route's `@SerializeOptions({ schema })`: an open object
+(`.passthrough()` / `.catchall()`) anywhere in that schema fails the boot
+as `requireClosedResponse`, exactly like a generated resource's response
+schema fails at definition time.
 
 When an operation declares `input`, the request payload must be a plain JSON
 object. An array, a scalar, or a non-plain object (a `Buffer` from a raw body
@@ -1777,7 +1783,9 @@ fail-open-shaped:
   rule, `requireCsrf` included. An `allow` list originally written for
   `requireAuth` or `requireAcl` silently waives CSRF for those same
   routes the moment you turn `requireCsrf` on. Re-read the list when you
-  add the rule.
+  add the rule. The two always-on checks (`requireSchemaPipe`,
+  `requireClosedResponse`) are NOT covered by `allow`: the first has its
+  own `allowUnvalidatedSchema` list, the second has no exemption.
 - Like every rule here, it runs only when the app declares a
   `routePolicy` at all (see the note above).
 

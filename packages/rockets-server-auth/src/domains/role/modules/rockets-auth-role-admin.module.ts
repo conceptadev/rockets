@@ -41,6 +41,7 @@ function operationExtraDecorators(
 
 function buildOperations(
   createSchema: z.ZodType,
+  updateSchema: z.ZodType,
   resourceExtras: AdminRoleResourceExtras = {},
 ): CrudOperationOptions<RocketsAuthRoleEntityInterface>[] {
   const routes = resourceExtras.routes ?? {};
@@ -66,6 +67,7 @@ function buildOperations(
     },
     {
       operation: Operation.Update,
+      request: { body: updateSchema },
       api: {
         operation: {
           summary: 'Update role',
@@ -128,10 +130,9 @@ export class RocketsAuthRoleAdminModule {
             controller: {
               path: admin.path || 'admin/roles',
               entity: ROLE_CRUD_ENTITY_KEY,
-              request: {
-                body: updateSchema,
-                validation: rocketsSchemaValidation,
-              },
+              // `body` lives on the operations (see buildOperations): upstream
+              // stamps the validation pipe from the METHOD-level body only.
+              request: { validation: rocketsSchemaValidation },
               response: {
                 resource: modelSchema,
                 // Component id kept from the class-DTO era — part of the
@@ -152,7 +153,11 @@ export class RocketsAuthRoleAdminModule {
                   : []),
               ],
             },
-            operations: buildOperations(createSchema, resourceExtras),
+            operations: buildOperations(
+              createSchema,
+              updateSchema,
+              resourceExtras,
+            ),
           },
         }),
       ],

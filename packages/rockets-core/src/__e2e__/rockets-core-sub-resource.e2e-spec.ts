@@ -52,6 +52,7 @@ import type {
 } from '../domain/interfaces/auth-adapter.interface';
 import { extractBearerToken } from '../infrastructure/auth/extract-bearer-token';
 import { RocketsCoreModule } from '../rockets-core.module';
+import { SwaggerUiService } from '../common/swagger-ui/swagger-ui.service';
 import { USER_METADATA_MODULE_ENTITY_KEY } from '../rockets-core.constants';
 import { AuthServerGuard } from '../infrastructure/guards/auth-server.guard';
 import { defineResource } from '../infrastructure/resource/define-resource';
@@ -666,6 +667,21 @@ describe('RocketsCoreModule + defineSubResource + AfterCreateReloadHook (e2e)', 
         parentId,
         categoryId: categoryAId,
         category: { id: categoryAId, label: 'A' },
+      });
+    });
+
+    it('documents the sub-resource create body as a $ref to its named component', () => {
+      const document = app.get(SwaggerUiService).createDocument(app);
+      const body =
+        document.paths['/parents/{parentId}/children']?.post?.requestBody;
+      const schema =
+        body !== undefined && 'content' in body
+          ? body.content['application/json']?.schema
+          : undefined;
+      expect(schema).toEqual({ $ref: '#/components/schemas/ChildCreateDto' });
+      expect(document.components?.schemas?.ChildCreateDto).toMatchObject({
+        type: 'object',
+        required: ['title', 'categoryId'],
       });
     });
 

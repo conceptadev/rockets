@@ -85,11 +85,10 @@ describe('library zod resources (e2e)', () => {
   }
 
   /**
-   * Generated CRUD request bodies are documented inline by upstream
-   * `CrudInitApiBody` (it converts the named create/update/replace schema
-   * itself instead of leaving the `@Body({ schema })` param to the
-   * converter), so the request-side field roles are read off the path
-   * operation rather than a `#/components/schemas/Book*Dto` entry.
+   * Generated CRUD request bodies are `$ref`'d to their named component
+   * (`Book*Dto`) like every response — Rockets drops upstream's inline
+   * `ApiBody` stamp (conceptadev/nestjs-modules#467) — so the request-side
+   * field roles are read off the component the operation points at.
    */
   function requestBodyOf(
     path: string,
@@ -102,10 +101,10 @@ describe('library zod resources (e2e)', () => {
     const content = operation.requestBody.content;
     const json = isRecord(content) ? content['application/json'] : undefined;
     const schema = isRecord(json) ? json.schema : undefined;
-    if (!isRecord(schema)) {
-      throw new Error(`${method.toUpperCase()} ${path} body has no schema`);
+    if (!isRecord(schema) || typeof schema.$ref !== 'string') {
+      throw new Error(`${method.toUpperCase()} ${path} body is not a $ref`);
     }
-    return schema;
+    return schemaOf(schema.$ref.replace('#/components/schemas/', ''));
   }
 
   describe('OpenAPI document', () => {

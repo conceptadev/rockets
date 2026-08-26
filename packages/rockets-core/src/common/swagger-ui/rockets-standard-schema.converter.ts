@@ -35,6 +35,7 @@ interface ComponentClaim {
 
 export function createRocketsStandardSchemaConverter(): StandardSchemaConverter {
   const claims = new Map<string, ComponentClaim>();
+  const emitted = new Map<string, string>();
 
   return (schema, { schemaType }) => {
     if (!(schema instanceof z.ZodType)) return undefined;
@@ -73,13 +74,33 @@ export function createRocketsStandardSchemaConverter(): StandardSchemaConverter 
     if (!isRecord(raw)) return undefined;
 
     const { $defs, definitions, ...own } = raw;
+    const components: Record<string, unknown> = {
+      ...(isRecord($defs) ? $defs : {}),
+      ...(isRecord(definitions) ? definitions : {}),
+      [id]: own,
+    };
+    // Nested named schemas never re-enter this converter — they arrive
+    // as definitions of whichever schema embeds them. The same nested id
+    // reached from a request and from a response carries two different
+    // JSON Schemas (see above), and Swagger would keep whichever came
+    // last. Compare every emitted component against what the document
+    // already holds under that name.
+    for (const [name, json] of Object.entries(components)) {
+      const serialized = JSON.stringify(json);
+      const previous = emitted.get(name);
+      if (previous !== undefined && previous !== serialized) {
+        throw new Error(
+          `OpenAPI component "${name}" is emitted with two different shapes ` +
+            `in the same document (reached through "${id}" as ${schemaType}). ` +
+            `A nested named schema used on both the request and the ` +
+            `response side needs one id per side.`,
+        );
+      }
+      emitted.set(name, serialized);
+    }
     return {
       schema: { $ref: `#/components/schemas/${id}` },
-      components: {
-        ...(isRecord($defs) ? $defs : {}),
-        ...(isRecord(definitions) ? definitions : {}),
-        [id]: own,
-      },
+      components,
     };
   };
 }

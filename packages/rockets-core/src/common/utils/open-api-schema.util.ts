@@ -75,7 +75,7 @@ export function assertFailClosedResponse(
   schema: z.ZodType,
   context: string,
 ): void {
-  const open = findOpenObject(schema, new Set(), '$');
+  const open = findOpenResponseObject(schema);
   if (open !== undefined) {
     throw new Error(
       `${context}: response schema has an open object at "${open}" ` +
@@ -83,6 +83,16 @@ export function assertFailClosedResponse(
         `undeclared keys — declare the keys you want on the wire.`,
     );
   }
+}
+
+/**
+ * The path of the first open object in a response schema, or `undefined`
+ * when it strips everywhere. Non-throwing form of
+ * {@link assertFailClosedResponse} for callers that report instead of
+ * failing (the route audit).
+ */
+export function findOpenResponseObject(schema: z.ZodType): string | undefined {
+  return findOpenObject(schema, new Set(), '$');
 }
 
 function findOpenObject(

@@ -198,26 +198,22 @@ export function evaluateRoutePolicy(
  * that declares a `schema` and is reached by no
  * `StandardSchemaValidationPipe` is documented in OpenAPI and validated
  * by nothing. No app means that, so it is not a policy an app opts into
- * — only the existing `allow` / `allowControllers` exemptions apply, for
- * a route validated by a pipe of its own that the audit cannot
- * recognise.
+ * — only its own `allowUnvalidatedSchema` list exempts, for a route
+ * validated by a pipe of its own that the audit cannot recognise.
  */
 export function schemaPipeViolations(
   report: RouteAuditReport,
   policy: RoutePolicy = {},
 ): readonly RoutePolicyViolation[] {
-  const allowedIds = new Set(policy.allow ?? []);
-  const allowedControllers = new Set(policy.allowControllers ?? []);
+  // Only its own list exempts: `allow` / `allowControllers` belong to the
+  // policy rules and must not switch this always-on check off as a side
+  // effect of exempting a route from `requireAuth`.
+  const allowedIds = new Set(policy.allowUnvalidatedSchema ?? []);
   const violations: RoutePolicyViolation[] = [];
 
   for (const route of report.routes) {
     if (route.unvalidatedSchemaParams.length === 0) continue;
-    if (
-      allowedIds.has(route.id) ||
-      allowedControllers.has(route.controllerRef)
-    ) {
-      continue;
-    }
+    if (allowedIds.has(route.id)) continue;
     const params = route.unvalidatedSchemaParams;
     violations.push({
       routeId: route.id,
@@ -284,4 +280,32 @@ export function formatPolicyViolations(
     `Rockets route policy rejected ${violations.length} route` +
     `${violations.length === 1 ? '' : 's'}:\n${lines.join('\n')}`
   );
+}
+
+/**
+ * Always-on rule: a hand-written route that serializes with
+ * `@SerializeOptions({ schema })` must strip undeclared keys everywhere
+ * in that schema — serialization IS validation for it, so an open object
+ * ships whatever the row carries. Generated resources get this check at
+ * definition time (`assertFailClosedResponse`); this is the same check
+ * for the routes the planner never sees. No exemption: an open response
+ * is never validated some other way.
+ */
+export function openResponseViolations(
+  report: RouteAuditReport,
+): readonly RoutePolicyViolation[] {
+  const violations: RoutePolicyViolation[] = [];
+  for (const route of report.routes) {
+    if (route.openResponseSchema === null) continue;
+    violations.push({
+      routeId: route.id,
+      rule: 'requireClosedResponse',
+      detail:
+        `${route.controller}.${route.handler}: @SerializeOptions({ schema }) ` +
+        `has an open object at "${route.openResponseSchema}" ` +
+        '(.passthrough() / .catchall()). Response schemas must strip ' +
+        'undeclared keys — declare the keys you want on the wire.',
+    });
+  }
+  return violations;
 }

@@ -12,6 +12,10 @@ import {
   VERSION_METADATA,
 } from '@nestjs/common/constants';
 import { RouteParamtypes } from '@nestjs/common/enums/route-paramtypes.enum';
+import { CLASS_SERIALIZER_OPTIONS } from '@nestjs/common/serializer/class-serializer.constants';
+import { z } from 'zod';
+
+import { findOpenResponseObject } from '../../common/utils/open-api-schema.util';
 
 import { ROCKETS_DISABLE_GUARDS_TOKEN } from '../../rockets-core.constants';
 import { ROCKETS_AUTH_SESSION_TOKEN } from '../../decorators/auth-session.decorator';
@@ -120,6 +124,7 @@ export function collectRouteAudit(args: {
         handler,
         methodName,
       );
+      const openResponseSchema = readOpenResponseSchema(controller, handler);
       const qualifier =
         (version !== undefined ? ` [v${version}]` : '') +
         (host !== undefined ? ` [host:${host}]` : '');
@@ -136,6 +141,7 @@ export function collectRouteAudit(args: {
             handler: methodName,
             authentication,
             sessionAuth,
+            openResponseSchema,
             // Grants mirror enforcement exactly: upstream reads them
             // with `reflector.get(..., getHandler())` — handler ONLY.
             aclAction: readGrantField(handler, 'action'),
@@ -331,6 +337,25 @@ function readUnvalidatedSchemaParams(
   }
 
   return missing.sort((a, b) => a.index - b.index).map((m) => m.label);
+}
+
+/**
+ * A hand-written route serializes with `@SerializeOptions({ schema })`
+ * (handler wins over class, like Nest resolves it). Its schema gets the
+ * same fail-closed check a generated resource's response schema gets at
+ * definition time — reported here, failed at boot by the service.
+ */
+function readOpenResponseSchema(
+  controller: Type<unknown>,
+  handler: object,
+): string | null {
+  const options: unknown =
+    Reflect.getMetadata(CLASS_SERIALIZER_OPTIONS, handler) ??
+    Reflect.getMetadata(CLASS_SERIALIZER_OPTIONS, controller);
+  if (typeof options !== 'object' || options === null) return null;
+  const schema: unknown = Reflect.get(options, 'schema');
+  if (!(schema instanceof z.ZodType)) return null;
+  return findOpenResponseObject(schema) ?? null;
 }
 
 function readPipes(target: object): unknown[] {

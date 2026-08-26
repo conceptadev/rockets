@@ -70,6 +70,16 @@ export interface RouteAuditEntry {
    * OpenAPI and validated by nothing. Empty on a sound route.
    */
   readonly unvalidatedSchemaParams: readonly string[];
+  /**
+   * Path of the first OPEN object (`.passthrough()` / `.catchall()`) in
+   * the schema a hand-written route serializes with
+   * (`@SerializeOptions({ schema })` on the handler or the class), or
+   * `null` when the route declares none or it strips everywhere.
+   * Serialization IS validation for such a route, so an open object ships
+   * whatever the row carries. Generated resources are checked at
+   * definition time; this is the same check for the hand-written ones.
+   */
+  readonly openResponseSchema: string | null;
 }
 
 export interface RouteAuditReport {
@@ -103,6 +113,7 @@ export interface RoutePolicyViolation {
     | 'requireAclQuery'
     | 'requireCsrf'
     | 'requireSchemaPipe'
+    | 'requireClosedResponse'
     | 'staleAllow';
   readonly detail: string;
 }
@@ -157,6 +168,16 @@ export interface RoutePolicy {
    * listing every route id would drift as that package changes.
    */
   readonly allowControllers?: readonly Type<unknown>[];
+  /**
+   * Route ids whose `{ schema }` parameters are validated some other way
+   * (a consumer-owned pipe that is not a `StandardSchemaValidationPipe`).
+   *
+   * Its own list on purpose: `allow` / `allowControllers` exempt a route
+   * from the POLICY rules it was listed for, and an entry added for
+   * `requireAuth` must not silently switch off the always-on
+   * `requireSchemaPipe` check as well.
+   */
+  readonly allowUnvalidatedSchema?: readonly string[];
   /**
    * Guard classes recognised as AUTHENTICATION guards, besides
    * `AuthServerGuard`. Compose-your-own-auth apps (an integration-owned

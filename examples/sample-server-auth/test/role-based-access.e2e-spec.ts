@@ -355,6 +355,39 @@ describe('Role-Based Access Control (e2e)', () => {
         .expect(201);
     });
 
+    // The admin update bodies declare their schema on the OPERATION: upstream
+    // stamps the validation pipe from the method-level body only, so a
+    // controller-level body would document the route and validate nothing.
+    it('validates the admin user update body', async () => {
+      await request(app.getHttpServer())
+        .patch(`/admin/users/${managerUserId}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ active: 'not-a-boolean' })
+        .expect(400);
+
+      await request(app.getHttpServer())
+        .patch(`/admin/users/${managerUserId}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ active: true })
+        .expect(200);
+    });
+
+    it('validates the admin role update body', async () => {
+      const rolesResponse = await request(app.getHttpServer())
+        .get('/admin/roles')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+      const managerRole = rolesResponse.body.data.find(
+        (role: { name: string; id: string }) => role.name === 'manager',
+      );
+
+      await request(app.getHttpServer())
+        .patch(`/admin/roles/${managerRole.id}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ name: 123 })
+        .expect(400);
+    });
+
     it('should login as manager successfully', async () => {
       const response = await request(app.getHttpServer())
         .post('/token/password')

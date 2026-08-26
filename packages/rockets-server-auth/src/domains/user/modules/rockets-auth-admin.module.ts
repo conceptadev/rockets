@@ -68,10 +68,11 @@ export class RocketsAuthAdminModule {
               path: admin.path || 'admin/users',
               entity: USER_CRUD_ENTITY_KEY,
               resolver: CrudOperationResolver,
-              request: {
-                body: updateSchema,
-                validation: rocketsSchemaValidation,
-              },
+              // `body` lives on the operation, not here: upstream stamps the
+              // validation pipe from the METHOD-level body only, so a
+              // controller-level body documents the route and validates
+              // nothing.
+              request: { validation: rocketsSchemaValidation },
               response: {
                 resource: modelSchema,
                 // Component id kept from the class-DTO era — part of the
@@ -106,6 +107,7 @@ export class RocketsAuthAdminModule {
               },
               {
                 operation: Operation.Update,
+                request: { body: updateSchema },
                 command: CrudUpdateCommand,
                 commandHandler: UpdateHandler,
                 api: {

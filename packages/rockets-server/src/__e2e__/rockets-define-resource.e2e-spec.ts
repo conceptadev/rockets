@@ -264,17 +264,18 @@ describe('RocketsModule — defineResource() bundle (e2e)', () => {
       },
     });
 
-    // Request bodies are documented by upstream `CrudInitApiBody`, which
-    // inlines the converted JSON schema instead of routing it through the
-    // Rockets converter — so `GadgetCreateDto` is not a named component
-    // (yet). Only the presence and shape of the body are stable here.
+    // Upstream `CrudInitApiBody` inlines request bodies; core's
+    // `restoreNamedRequestBodies` drops that stamp wherever the body schema
+    // is named, so the body is `$ref`'d like every response.
     expect(document.paths['/gadgets']?.post?.requestBody).toMatchObject({
       required: true,
       content: {
         'application/json': {
-          schema: { properties: { name: { type: 'string' } } },
+          schema: { $ref: '#/components/schemas/GadgetCreateDto' },
         },
       },
     });
+    expect(document.components?.schemas).toHaveProperty('GadgetCreateDto');
+    expect(document.components?.schemas).toHaveProperty('GadgetUpdateDto');
   });
 });

@@ -942,10 +942,13 @@ it. This closes that gap, and its own documentation says so.
 **Reporting without enforcing.** `RouteAuditService` is always registered
 and injectable — omit `routePolicy` and no policy rule is enforced, but
 `audit()` still gives you the full table for a CI artifact, and the
-always-on check still runs: a `@Body/@Query/@Param({ schema })` parameter
+always-on checks still run: a `@Body/@Query/@Param({ schema })` parameter
 that no `StandardSchemaValidationPipe` reaches fails the boot as
 `requireSchemaPipe` (Nest installs no pipe for `schema`; the parameter
-would be documented and unvalidated).
+would be documented and unvalidated — exempt a route validated some other
+way through `allowUnvalidatedSchema`, not `allow`), and a hand-written
+`@SerializeOptions({ schema })` with an open object anywhere in it fails
+as `requireClosedResponse`.
 
 ```typescript
 const { routes, globalGuards, authGuards } = app.get(RouteAuditService).audit();

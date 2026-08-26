@@ -18,10 +18,11 @@ import {
   Module,
   Post,
   Scope,
+  SerializeOptions,
   StandardSchemaValidationPipe,
-  UsePipes,
   type Provider,
   type Type,
+  UsePipes,
 } from '@nestjs/common';
 import { APP_GUARD, DiscoveryModule } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
@@ -30,7 +31,7 @@ import {
   AccessControlQuery,
   type CanAccess,
 } from '@concepta/nestjs-access-control';
-import { ActionEnum } from '@concepta/nestjs-core';
+import { ActionEnum, withOpenApi } from '@concepta/nestjs-core';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 import { AuthPublic } from '../decorators/auth-public.decorator';
@@ -969,6 +970,37 @@ class PipedNotesController {
   }
 }
 
+const openNotesResponse = withOpenApi(
+  z.object({ items: z.array(z.looseObject({ text: z.string() })) }),
+  'OpenNotesResponseDto',
+);
+const closedNotesResponse = withOpenApi(
+  z.object({ items: z.array(z.object({ text: z.string() })) }),
+  'ClosedNotesResponseDto',
+);
+
+@Controller('notes-open-response')
+@ApiTags('Notes')
+class OpenResponseNotesController {
+  @Get()
+  @SerializeOptions({ schema: openNotesResponse })
+  @ApiOkResponse({ standardSchema: openNotesResponse })
+  list(): unknown {
+    return { items: [] };
+  }
+}
+
+@Controller('notes-closed-response')
+@ApiTags('Notes')
+@SerializeOptions({ schema: closedNotesResponse })
+class ClosedResponseNotesController {
+  @Get()
+  @ApiOkResponse({ standardSchema: closedNotesResponse })
+  list(): unknown {
+    return { items: [] };
+  }
+}
+
 describe('requireSchemaPipe through RocketsCoreModule (e2e)', () => {
   const bootCoreWith = async (
     controller: Type<unknown>,
@@ -1005,10 +1037,25 @@ describe('requireSchemaPipe through RocketsCoreModule (e2e)', () => {
     await app.close();
   });
 
-  it('honours allowControllers for a route validated some other way', async () => {
+  it('is exempted only by allowUnvalidatedSchema — allow / allowControllers do not switch it off', async () => {
+    await expect(
+      bootCoreWith(UnpipedNotesController, {
+        allowControllers: [UnpipedNotesController],
+      }),
+    ).rejects.toThrow(/requireSchemaPipe/);
     const app = await bootCoreWith(UnpipedNotesController, {
-      allowControllers: [UnpipedNotesController],
+      allowUnvalidatedSchema: ['POST /notes-unpiped'],
     });
+    await app.close();
+  });
+
+  // Serialization IS validation for a hand-written route: an open object
+  // in its @SerializeOptions schema ships whatever the row carries.
+  it('rejects a hand-written @SerializeOptions({ schema }) with an open object', async () => {
+    await expect(bootCoreWith(OpenResponseNotesController)).rejects.toThrow(
+      /requireClosedResponse\] GET \/notes-open-response: OpenResponseNotesController\.list: @SerializeOptions\({ schema }\) has an open object at "\$\.items\[\]"/,
+    );
+    const app = await bootCoreWith(ClosedResponseNotesController);
     await app.close();
   });
 });

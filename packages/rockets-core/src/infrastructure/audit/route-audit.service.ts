@@ -11,6 +11,7 @@ import { collectRouteAudit, type ControllerScan } from './collect-route-audit';
 import {
   evaluateRoutePolicy,
   formatPolicyViolations,
+  openResponseViolations,
   schemaPipeViolations,
 } from './evaluate-route-policy';
 import type { RouteAuditReport, RoutePolicy } from './route-audit.types';
@@ -54,6 +55,7 @@ export class RouteAuditService {
     const report = this.audit();
     const violations = [
       ...schemaPipeViolations(report, this.policy),
+      ...openResponseViolations(report),
       ...(this.policy ? evaluateRoutePolicy(report, this.policy) : []),
     ];
     if (violations.length > 0) {

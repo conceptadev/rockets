@@ -1901,7 +1901,7 @@
         "name": "UpdateUserHandler",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class UpdateUserHandler implements ICommandHandler<UpdateUserCommand> {\n    private readonly commandBus;\n    private readonly queryBus;\n    constructor(commandBus: CommandBus, queryBus: QueryBus);\n    execute(command: UpdateUserCommand): Promise<RocketsAuthUserEntityInterface>;\n}"
+        "signature": "export declare class UpdateUserHandler implements ICommandHandler<UpdateUserCommand> {\n    private readonly commandBus;\n    private readonly queryBus;\n    private readonly txScope;\n    constructor(commandBus: CommandBus, queryBus: QueryBus, txScope: TransactionScope);\n    execute(command: UpdateUserCommand): Promise<RocketsAuthUserEntityInterface>;\n}"
       },
       {
         "name": "UserException",
@@ -2995,7 +2995,7 @@
         "name": "RouteAuditEntry",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RouteAuditEntry {\n    readonly id: string;\n    readonly method: string;\n    readonly path: string;\n    readonly controller: string;\n    readonly controllerRef: Type<unknown>;\n    readonly handler: string;\n    readonly authentication: RouteAuthState;\n    readonly sessionAuth: boolean;\n    readonly aclAction: string | null;\n    readonly aclResource: string | null;\n    readonly aclQuery: string | null;\n    readonly unvalidatedSchemaParams: readonly string[];\n}"
+        "signature": "export interface RouteAuditEntry {\n    readonly id: string;\n    readonly method: string;\n    readonly path: string;\n    readonly controller: string;\n    readonly controllerRef: Type<unknown>;\n    readonly handler: string;\n    readonly authentication: RouteAuthState;\n    readonly sessionAuth: boolean;\n    readonly aclAction: string | null;\n    readonly aclResource: string | null;\n    readonly aclQuery: string | null;\n    readonly unvalidatedSchemaParams: readonly string[];\n    readonly openResponseSchema: string | null;\n}"
       },
       {
         "name": "RouteAuditReport",
@@ -3025,13 +3025,13 @@
         "name": "RoutePolicy",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RoutePolicy {\n    readonly requireAuth?: boolean;\n    readonly requireAcl?: boolean;\n    readonly requireAclQuery?: boolean;\n    readonly requireCsrf?: boolean;\n    readonly allow?: readonly string[];\n    readonly allowControllers?: readonly Type<unknown>[];\n    readonly authGuards?: readonly Type<unknown>[];\n    readonly csrfGuards?: readonly Type<unknown>[];\n}"
+        "signature": "export interface RoutePolicy {\n    readonly requireAuth?: boolean;\n    readonly requireAcl?: boolean;\n    readonly requireAclQuery?: boolean;\n    readonly requireCsrf?: boolean;\n    readonly allow?: readonly string[];\n    readonly allowControllers?: readonly Type<unknown>[];\n    readonly allowUnvalidatedSchema?: readonly string[];\n    readonly authGuards?: readonly Type<unknown>[];\n    readonly csrfGuards?: readonly Type<unknown>[];\n}"
       },
       {
         "name": "RoutePolicyViolation",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RoutePolicyViolation {\n    readonly routeId: string;\n    readonly rule: 'requireAuth' | 'requireAcl' | 'requireAclQuery' | 'requireCsrf' | 'requireSchemaPipe' | 'staleAllow';\n    readonly detail: string;\n}"
+        "signature": "export interface RoutePolicyViolation {\n    readonly routeId: string;\n    readonly rule: 'requireAuth' | 'requireAcl' | 'requireAclQuery' | 'requireCsrf' | 'requireSchemaPipe' | 'requireClosedResponse' | 'staleAllow';\n    readonly detail: string;\n}"
       },
       {
         "name": "SchemaEntityCompiler",

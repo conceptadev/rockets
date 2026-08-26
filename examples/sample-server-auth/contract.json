@@ -122,6 +122,73 @@
         ],
         "type": "object"
       },
+      "PetAppointmentCreateDto": {
+        "properties": {
+          "appointmentDate": {
+            "description": "Appointment date and time",
+            "example": "2023-01-15T14:00:00.000Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "appointmentType": {
+            "description": "Type of appointment",
+            "example": "checkup",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "diagnosis": {
+            "description": "Diagnosis from the appointment",
+            "type": "string"
+          },
+          "notes": {
+            "description": "Additional notes",
+            "type": "string"
+          },
+          "petId": {
+            "description": "Pet ID",
+            "example": "pet-123",
+            "minLength": 1,
+            "type": "string"
+          },
+          "reason": {
+            "description": "Reason for appointment",
+            "example": "Annual checkup",
+            "minLength": 1,
+            "type": "string"
+          },
+          "status": {
+            "description": "Appointment status",
+            "enum": [
+              "scheduled",
+              "completed",
+              "cancelled",
+              "no_show"
+            ],
+            "example": "scheduled",
+            "type": "string"
+          },
+          "treatment": {
+            "description": "Treatment provided",
+            "type": "string"
+          },
+          "veterinarian": {
+            "description": "Veterinarian name",
+            "example": "Dr. Smith",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "petId",
+          "appointmentDate",
+          "appointmentType",
+          "veterinarian",
+          "reason"
+        ],
+        "type": "object"
+      },
       "PetAppointmentDto": {
         "additionalProperties": false,
         "properties": {
@@ -258,6 +325,133 @@
           "total",
           "page",
           "pageCount"
+        ],
+        "type": "object"
+      },
+      "PetAppointmentUpdateDto": {
+        "properties": {
+          "appointmentDate": {
+            "description": "Appointment date and time",
+            "example": "2023-01-15T14:00:00.000Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "appointmentType": {
+            "description": "Type of appointment",
+            "example": "checkup",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "diagnosis": {
+            "description": "Diagnosis from the appointment",
+            "type": "string"
+          },
+          "id": {
+            "description": "Appointment ID",
+            "example": "appt-123",
+            "minLength": 1,
+            "type": "string"
+          },
+          "notes": {
+            "description": "Additional notes",
+            "type": "string"
+          },
+          "reason": {
+            "description": "Reason for appointment",
+            "example": "Annual checkup",
+            "minLength": 1,
+            "type": "string"
+          },
+          "status": {
+            "description": "Appointment status",
+            "enum": [
+              "scheduled",
+              "completed",
+              "cancelled",
+              "no_show"
+            ],
+            "example": "completed",
+            "type": "string"
+          },
+          "treatment": {
+            "description": "Treatment provided",
+            "type": "string"
+          },
+          "veterinarian": {
+            "description": "Veterinarian name",
+            "example": "Dr. Smith",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "PetCreateDto": {
+        "properties": {
+          "age": {
+            "description": "Pet age in years",
+            "example": 3,
+            "maximum": 50,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "breed": {
+            "description": "Pet breed",
+            "example": "Golden Retriever",
+            "maxLength": 255,
+            "type": "string"
+          },
+          "color": {
+            "description": "Pet color",
+            "example": "golden",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "description": {
+            "description": "Pet description",
+            "example": "A friendly and energetic dog",
+            "type": "string"
+          },
+          "name": {
+            "description": "Pet name",
+            "example": "Buddy",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "species": {
+            "description": "Pet species",
+            "example": "dog",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "status": {
+            "description": "Pet status",
+            "enum": [
+              "active",
+              "inactive"
+            ],
+            "example": "active",
+            "type": "string"
+          },
+          "userId": {
+            "description": "Owner user id (PetCreateHandler pins it to the caller)",
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "species",
+          "age",
+          "status",
+          "userId"
         ],
         "type": "object"
       },
@@ -410,6 +604,120 @@
         ],
         "type": "object"
       },
+      "PetUpdateDto": {
+        "properties": {
+          "age": {
+            "description": "Pet age in years",
+            "example": 3,
+            "maximum": 50,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "breed": {
+            "description": "Pet breed",
+            "example": "Golden Retriever",
+            "maxLength": 255,
+            "type": "string"
+          },
+          "color": {
+            "description": "Pet color",
+            "example": "golden",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "description": {
+            "description": "Pet description",
+            "example": "A friendly and energetic dog",
+            "type": "string"
+          },
+          "id": {
+            "description": "Pet ID",
+            "example": "pet-123",
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "description": "Pet name",
+            "example": "Buddy",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "species": {
+            "description": "Pet species",
+            "example": "dog",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "status": {
+            "description": "Pet status",
+            "enum": [
+              "active",
+              "inactive"
+            ],
+            "example": "active",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "PetVaccinationCreateDto": {
+        "properties": {
+          "administeredDate": {
+            "description": "Date vaccine was administered",
+            "example": "2023-01-15T10:00:00.000Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "batchNumber": {
+            "description": "Vaccine batch number",
+            "example": "BATCH-2023-001",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "nextDueDate": {
+            "description": "Next due date for this vaccine",
+            "example": "2024-01-15T10:00:00.000Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "notes": {
+            "description": "Additional notes",
+            "type": "string"
+          },
+          "petId": {
+            "description": "Pet ID",
+            "example": "pet-123",
+            "minLength": 1,
+            "type": "string"
+          },
+          "vaccineName": {
+            "description": "Vaccine name",
+            "example": "Rabies",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "veterinarian": {
+            "description": "Veterinarian who administered the vaccine",
+            "example": "Dr. Smith",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "petId",
+          "vaccineName",
+          "administeredDate",
+          "veterinarian"
+        ],
+        "type": "object"
+      },
       "PetVaccinationDto": {
         "additionalProperties": false,
         "properties": {
@@ -531,6 +839,56 @@
           "total",
           "page",
           "pageCount"
+        ],
+        "type": "object"
+      },
+      "PetVaccinationUpdateDto": {
+        "properties": {
+          "administeredDate": {
+            "description": "Date vaccine was administered",
+            "example": "2023-01-15T10:00:00.000Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "batchNumber": {
+            "description": "Vaccine batch number",
+            "example": "BATCH-2023-001",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "id": {
+            "description": "Vaccination ID",
+            "example": "vacc-123",
+            "minLength": 1,
+            "type": "string"
+          },
+          "nextDueDate": {
+            "description": "Next due date for this vaccine",
+            "example": "2024-01-15T10:00:00.000Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "notes": {
+            "description": "Additional notes",
+            "type": "string"
+          },
+          "vaccineName": {
+            "description": "Vaccine name",
+            "example": "Rabies",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "veterinarian": {
+            "description": "Veterinarian who administered the vaccine",
+            "example": "Dr. Smith",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
         ],
         "type": "object"
       },
@@ -833,6 +1191,23 @@
         ],
         "type": "object"
       },
+      "RocketsAuthRoleCreateDto": {
+        "properties": {
+          "description": {
+            "description": "Description of the role",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "description"
+        ],
+        "type": "object"
+      },
       "RocketsAuthRoleDto": {
         "additionalProperties": false,
         "properties": {
@@ -872,6 +1247,56 @@
           "version",
           "name",
           "description"
+        ],
+        "type": "object"
+      },
+      "RocketsAuthRoleUpdateDto": {
+        "properties": {
+          "description": {
+            "description": "Description of the role",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the role",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RocketsAuthUserCreateDto": {
+        "properties": {
+          "active": {
+            "description": "Active",
+            "type": "boolean"
+          },
+          "email": {
+            "description": "Email",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+            "type": "string"
+          },
+          "password": {
+            "description": "Plain text password to set",
+            "minLength": 8,
+            "type": "string"
+          },
+          "userMetadata": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserMetadataUpdateDto"
+              }
+            ],
+            "description": "User metadata containing additional profile information"
+          },
+          "username": {
+            "description": "Username",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "username",
+          "password"
         ],
         "type": "object"
       },
@@ -929,6 +1354,33 @@
           "username",
           "active"
         ],
+        "type": "object"
+      },
+      "RocketsAuthUserUpdateDto": {
+        "properties": {
+          "active": {
+            "description": "Active",
+            "type": "boolean"
+          },
+          "email": {
+            "description": "Email",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+            "type": "string"
+          },
+          "userMetadata": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserMetadataUpdateDto"
+              }
+            ],
+            "description": "User metadata containing additional profile information"
+          },
+          "username": {
+            "description": "Username",
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "UserMetadataDto": {
@@ -1382,21 +1834,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "description": {
-                    "description": "Description of the role",
-                    "type": "string"
-                  },
-                  "name": {
-                    "description": "Name of the role",
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "name",
-                  "description"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/RocketsAuthRoleCreateDto"
               }
             }
           },
@@ -1541,17 +1979,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "description": {
-                    "description": "Description of the role",
-                    "type": "string"
-                  },
-                  "name": {
-                    "description": "Name of the role",
-                    "type": "string"
-                  }
-                },
-                "type": "object"
+                "$ref": "#/components/schemas/RocketsAuthRoleUpdateDto"
               }
             }
           },
@@ -1838,31 +2266,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "active": {
-                    "description": "Active",
-                    "type": "boolean"
-                  },
-                  "email": {
-                    "description": "Email",
-                    "format": "email",
-                    "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
-                    "type": "string"
-                  },
-                  "userMetadata": {
-                    "allOf": [
-                      {
-                        "$ref": "#/components/schemas/UserMetadataUpdateDto"
-                      }
-                    ],
-                    "description": "User metadata containing additional profile information"
-                  },
-                  "username": {
-                    "description": "Username",
-                    "type": "string"
-                  }
-                },
-                "type": "object"
+                "$ref": "#/components/schemas/RocketsAuthUserUpdateDto"
               }
             }
           },
@@ -2326,71 +2730,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "appointmentDate": {
-                    "description": "Appointment date and time",
-                    "example": "2023-01-15T14:00:00.000Z",
-                    "format": "date-time",
-                    "type": "string"
-                  },
-                  "appointmentType": {
-                    "description": "Type of appointment",
-                    "example": "checkup",
-                    "maxLength": 100,
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "diagnosis": {
-                    "description": "Diagnosis from the appointment",
-                    "type": "string"
-                  },
-                  "notes": {
-                    "description": "Additional notes",
-                    "type": "string"
-                  },
-                  "petId": {
-                    "description": "Pet ID",
-                    "example": "pet-123",
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "reason": {
-                    "description": "Reason for appointment",
-                    "example": "Annual checkup",
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "status": {
-                    "description": "Appointment status",
-                    "enum": [
-                      "scheduled",
-                      "completed",
-                      "cancelled",
-                      "no_show"
-                    ],
-                    "example": "scheduled",
-                    "type": "string"
-                  },
-                  "treatment": {
-                    "description": "Treatment provided",
-                    "type": "string"
-                  },
-                  "veterinarian": {
-                    "description": "Veterinarian name",
-                    "example": "Dr. Smith",
-                    "maxLength": 255,
-                    "minLength": 1,
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "petId",
-                  "appointmentDate",
-                  "appointmentType",
-                  "veterinarian",
-                  "reason"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/PetAppointmentCreateDto"
               }
             }
           },
@@ -2533,67 +2873,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "appointmentDate": {
-                    "description": "Appointment date and time",
-                    "example": "2023-01-15T14:00:00.000Z",
-                    "format": "date-time",
-                    "type": "string"
-                  },
-                  "appointmentType": {
-                    "description": "Type of appointment",
-                    "example": "checkup",
-                    "maxLength": 100,
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "diagnosis": {
-                    "description": "Diagnosis from the appointment",
-                    "type": "string"
-                  },
-                  "id": {
-                    "description": "Appointment ID",
-                    "example": "appt-123",
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "notes": {
-                    "description": "Additional notes",
-                    "type": "string"
-                  },
-                  "reason": {
-                    "description": "Reason for appointment",
-                    "example": "Annual checkup",
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "status": {
-                    "description": "Appointment status",
-                    "enum": [
-                      "scheduled",
-                      "completed",
-                      "cancelled",
-                      "no_show"
-                    ],
-                    "example": "completed",
-                    "type": "string"
-                  },
-                  "treatment": {
-                    "description": "Treatment provided",
-                    "type": "string"
-                  },
-                  "veterinarian": {
-                    "description": "Veterinarian name",
-                    "example": "Dr. Smith",
-                    "maxLength": 255,
-                    "minLength": 1,
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "id"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/PetAppointmentUpdateDto"
               }
             }
           },
@@ -2770,57 +3050,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "administeredDate": {
-                    "description": "Date vaccine was administered",
-                    "example": "2023-01-15T10:00:00.000Z",
-                    "format": "date-time",
-                    "type": "string"
-                  },
-                  "batchNumber": {
-                    "description": "Vaccine batch number",
-                    "example": "BATCH-2023-001",
-                    "maxLength": 100,
-                    "type": "string"
-                  },
-                  "nextDueDate": {
-                    "description": "Next due date for this vaccine",
-                    "example": "2024-01-15T10:00:00.000Z",
-                    "format": "date-time",
-                    "type": "string"
-                  },
-                  "notes": {
-                    "description": "Additional notes",
-                    "type": "string"
-                  },
-                  "petId": {
-                    "description": "Pet ID",
-                    "example": "pet-123",
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "vaccineName": {
-                    "description": "Vaccine name",
-                    "example": "Rabies",
-                    "maxLength": 255,
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "veterinarian": {
-                    "description": "Veterinarian who administered the vaccine",
-                    "example": "Dr. Smith",
-                    "maxLength": 255,
-                    "minLength": 1,
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "petId",
-                  "vaccineName",
-                  "administeredDate",
-                  "veterinarian"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/PetVaccinationCreateDto"
               }
             }
           },
@@ -2963,54 +3193,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "administeredDate": {
-                    "description": "Date vaccine was administered",
-                    "example": "2023-01-15T10:00:00.000Z",
-                    "format": "date-time",
-                    "type": "string"
-                  },
-                  "batchNumber": {
-                    "description": "Vaccine batch number",
-                    "example": "BATCH-2023-001",
-                    "maxLength": 100,
-                    "type": "string"
-                  },
-                  "id": {
-                    "description": "Vaccination ID",
-                    "example": "vacc-123",
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "nextDueDate": {
-                    "description": "Next due date for this vaccine",
-                    "example": "2024-01-15T10:00:00.000Z",
-                    "format": "date-time",
-                    "type": "string"
-                  },
-                  "notes": {
-                    "description": "Additional notes",
-                    "type": "string"
-                  },
-                  "vaccineName": {
-                    "description": "Vaccine name",
-                    "example": "Rabies",
-                    "maxLength": 255,
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "veterinarian": {
-                    "description": "Veterinarian who administered the vaccine",
-                    "example": "Dr. Smith",
-                    "maxLength": 255,
-                    "minLength": 1,
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "id"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/PetVaccinationUpdateDto"
               }
             }
           },
@@ -3191,68 +3374,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "age": {
-                    "description": "Pet age in years",
-                    "example": 3,
-                    "maximum": 50,
-                    "minimum": 0,
-                    "type": "integer"
-                  },
-                  "breed": {
-                    "description": "Pet breed",
-                    "example": "Golden Retriever",
-                    "maxLength": 255,
-                    "type": "string"
-                  },
-                  "color": {
-                    "description": "Pet color",
-                    "example": "golden",
-                    "maxLength": 100,
-                    "type": "string"
-                  },
-                  "description": {
-                    "description": "Pet description",
-                    "example": "A friendly and energetic dog",
-                    "type": "string"
-                  },
-                  "name": {
-                    "description": "Pet name",
-                    "example": "Buddy",
-                    "maxLength": 255,
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "species": {
-                    "description": "Pet species",
-                    "example": "dog",
-                    "maxLength": 100,
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "status": {
-                    "description": "Pet status",
-                    "enum": [
-                      "active",
-                      "inactive"
-                    ],
-                    "example": "active",
-                    "type": "string"
-                  },
-                  "userId": {
-                    "description": "Owner user id (PetCreateHandler pins it to the caller)",
-                    "minLength": 1,
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "name",
-                  "species",
-                  "age",
-                  "status",
-                  "userId"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/PetCreateDto"
               }
             }
           },
@@ -3407,65 +3529,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "age": {
-                    "description": "Pet age in years",
-                    "example": 3,
-                    "maximum": 50,
-                    "minimum": 0,
-                    "type": "integer"
-                  },
-                  "breed": {
-                    "description": "Pet breed",
-                    "example": "Golden Retriever",
-                    "maxLength": 255,
-                    "type": "string"
-                  },
-                  "color": {
-                    "description": "Pet color",
-                    "example": "golden",
-                    "maxLength": 100,
-                    "type": "string"
-                  },
-                  "description": {
-                    "description": "Pet description",
-                    "example": "A friendly and energetic dog",
-                    "type": "string"
-                  },
-                  "id": {
-                    "description": "Pet ID",
-                    "example": "pet-123",
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "name": {
-                    "description": "Pet name",
-                    "example": "Buddy",
-                    "maxLength": 255,
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "species": {
-                    "description": "Pet species",
-                    "example": "dog",
-                    "maxLength": 100,
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "status": {
-                    "description": "Pet status",
-                    "enum": [
-                      "active",
-                      "inactive"
-                    ],
-                    "example": "active",
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "id"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/PetUpdateDto"
               }
             }
           },
@@ -3621,41 +3685,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "active": {
-                    "description": "Active",
-                    "type": "boolean"
-                  },
-                  "email": {
-                    "description": "Email",
-                    "format": "email",
-                    "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
-                    "type": "string"
-                  },
-                  "password": {
-                    "description": "Plain text password to set",
-                    "minLength": 8,
-                    "type": "string"
-                  },
-                  "userMetadata": {
-                    "allOf": [
-                      {
-                        "$ref": "#/components/schemas/UserMetadataUpdateDto"
-                      }
-                    ],
-                    "description": "User metadata containing additional profile information"
-                  },
-                  "username": {
-                    "description": "Username",
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "email",
-                  "username",
-                  "password"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/RocketsAuthUserCreateDto"
               }
             }
           },

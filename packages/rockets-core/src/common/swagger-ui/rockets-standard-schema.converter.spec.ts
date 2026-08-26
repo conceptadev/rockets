@@ -42,6 +42,36 @@ describe('createRocketsStandardSchemaConverter', () => {
     ).toThrow(/two different schema instances/);
   });
 
+  // Nested named schemas never reach the converter themselves — they
+  // arrive as definitions of the schema embedding them, once per side.
+  it('rejects a nested named schema reached from both sides with different shapes', () => {
+    const convert = createRocketsStandardSchemaConverter();
+    const address = withOpenApi(
+      z.object({ street: z.string(), zip: z.string().default('00000') }),
+      'AddressDto',
+    );
+    const requestSchema = withOpenApi(z.object({ address }), 'CreateOrderDto');
+    const responseSchema = withOpenApi(
+      z.object({ id: z.uuid(), address }),
+      'OrderResponseDto',
+    );
+
+    convert(requestSchema, { schemaType: 'input' });
+    expect(() => convert(responseSchema, { schemaType: 'output' })).toThrow(
+      /"AddressDto" is emitted with two different shapes/,
+    );
+  });
+
+  it('accepts a nested named schema reached twice from the same side', () => {
+    const convert = createRocketsStandardSchemaConverter();
+    const address = withOpenApi(z.object({ street: z.string() }), 'AddrDto');
+    const a = withOpenApi(z.object({ address }), 'ADto');
+    const b = withOpenApi(z.object({ home: address }), 'BDto');
+
+    convert(a, { schemaType: 'output' });
+    expect(() => convert(b, { schemaType: 'output' })).not.toThrow();
+  });
+
   it('accepts one instance asked for the same side twice', () => {
     const convert = createRocketsStandardSchemaConverter();
     const plain = withOpenApi(z.object({ n: z.string() }), 'PlainDto');

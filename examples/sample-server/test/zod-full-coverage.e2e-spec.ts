@@ -216,12 +216,18 @@ describe('zod full defineResource coverage (e2e)', () => {
 
   describe('OpenAPI document', () => {
     it('create body excludes the server-computed slug; response includes it', () => {
-      // Generated CRUD request bodies are documented inline by upstream
-      // `CrudInitApiBody`, so the create projection is read off the path.
+      // Generated CRUD request bodies are `$ref`'d to their named
+      // component; the create projection is read off `ProductzfcCreateDto`.
       const post = doc.paths['/zfc-products'].post?.requestBody as {
-        content: Record<string, { schema: { properties: Record<string, unknown> } }>;
+        content: Record<string, { schema: { $ref: string } }>;
       };
-      const create = post.content['application/json'].schema.properties;
+      expect(post.content['application/json'].schema.$ref).toBe(
+        '#/components/schemas/ProductzfcCreateDto',
+      );
+      const create = schemaOf('ProductzfcCreateDto').properties as Record<
+        string,
+        unknown
+      >;
       expect(create).not.toHaveProperty('slug');
       expect(create).toHaveProperty('price');
       expect(create).toHaveProperty('attrs');

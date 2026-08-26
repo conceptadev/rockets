@@ -447,8 +447,14 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 - **Hand-written auth request bodies keep their component names.** The
   `rockets-auth` login, refresh and recovery bodies are `$ref`'d as
   `LocalLoginDto`, `RefreshDto` and `Recovery*Dto` in the document again;
-  upstream ships those schemas without an id. Generated CRUD bodies
-  (`/signup`, admin routes) stay inline — the documented upstream gap.
+  upstream ships those schemas without an id.
+- **Generated CRUD request bodies are named components again.** Upstream
+  stamps them inline (conceptadev/nestjs-modules#467); Rockets drops that
+  stamp wherever the route's own `@Body({ schema })` is named, so
+  `PetCreateDto`, `TagUpdateDto`, `BookReplaceDto`, `RocketsAuthUserCreateDto`…
+  are back in `components.schemas` and every create / update / replace
+  body is a `$ref`, like every response. Both example contracts regenerated
+  (bodies only; nothing else moved).
 - **A create body that validates to `{}` is a valid create.** Generated
   resources run on `RocketsCrudAdapter` (exported from core), which keeps
   upstream's params merge and drops the bare `400` upstream's adapter
@@ -545,15 +551,15 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
     in the graph at 7.x only through `@concepta/nestjs-email` /
     `nestjs-event`); `mapHttpStatus` (removed upstream) is vendored inside
     the core filter.
-  - **Known gap (upstream):** `@concepta/nestjs-crud`'s `CrudInitApiBody`
-    stamps generated CRUD request bodies as an inline `ApiBody({ schema })`,
-    bypassing the document converter — `${Name}CreateDto` / `UpdateDto` /
-    `ReplaceDto` are documented inline, not as `$ref`'d components (responses
-    and hand-written `@Body({ schema })` routes are `$ref`'d). Follow-up
-    belongs upstream; the runtime contract is unaffected.
-    `SwaggerUiService.createDocument` lifts the `definitions` such an inline
-    body carries (a nested named schema) into `components.schemas` and
-    rewrites the refs, so the served document has no dangling pointer.
+  - **Upstream gap, closed on the Rockets side:** `@concepta/nestjs-crud`'s
+    `CrudInitApiBody` stamps generated CRUD request bodies as an inline
+    `ApiBody({ schema })` that bypasses the document converter
+    (conceptadev/nestjs-modules#467). `SwaggerUiService.createDocument`
+    drops that stamp wherever the route's `@Body({ schema })` is named
+    (`restoreNamedRequestBodies`), so `${Name}CreateDto` / `UpdateDto` /
+    `ReplaceDto` are `$ref`'d components like every response. A body that
+    stays inline still has its `definitions` lifted into
+    `components.schemas` so no pointer dangles.
   Authoring APIs `zodResource` / `zodSubResource` / `operationResource` / `f.*`
   / hooks / ACL are unchanged.
 - **`@nestjs/config` is no longer a Rockets dependency (RFC #104, stage 1).**
@@ -923,7 +929,26 @@ before running the full e2e suite.
 - **One OpenAPI component describes one side.** A schema used as both a
   request body and a response is a document-build error now (zod's input
   and output JSON Schemas differ, and last-wins documented one side with
-  the other's shape). Give the response its own `withOpenApi()` id.
+  the other's shape). Give the response its own `withOpenApi()` id. Nested
+  named schemas are covered too: one nested id reached from both sides
+  with two shapes is an error, not a silent merge.
+- **Hand-written responses are checked for open objects at boot.** A
+  `@SerializeOptions({ schema })` with `.passthrough()` / `.catchall()`
+  anywhere fails the boot (`requireClosedResponse`) — the check generated
+  resources already get at definition time.
+- **`requireSchemaPipe` is exempted only by its own list.** An `allow` entry
+  written for `requireAuth` no longer switches the schema-pipe check off;
+  use `routePolicy.allowUnvalidatedSchema` for a route validated by a pipe
+  the audit cannot recognise.
+- **User-metadata updates pin `userId` from the caller** (`rockets-auth`):
+  the update branch wrote the validated payload as-is, so an app-supplied
+  update schema that admits `userId` could move a row to another user.
+- **Admin `PATCH /admin/users/:id` and `/admin/roles/:id` bodies are validated
+  and the user update no longer 500s** (`rockets-auth`): the body schema
+  moved from the controller to the Update operation (upstream stamps the
+  pipe from the operation only), and the user update runs in one outermost
+  transaction scope (the metadata query used to hit the finished transaction
+  upstream leaves on the context, conceptadev/nestjs-modules#468).
 - **Computed fields respect `dto: { response: false }`.** `f.compute`
   schemas built from entity schemas no longer re-expose columns the owning
   resource hides.
