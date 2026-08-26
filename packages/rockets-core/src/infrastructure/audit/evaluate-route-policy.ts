@@ -211,9 +211,42 @@ export function schemaPipeViolations(
   const allowedIds = new Set(policy.allowUnvalidatedSchema ?? []);
   const violations: RoutePolicyViolation[] = [];
 
+  // Same over-broad-match guard as `allow`: an entry matching more than
+  // one discovered route would exempt them all from an always-on check.
+  const idCounts = new Map<string, number>();
   for (const route of report.routes) {
-    if (route.unvalidatedSchemaParams.length === 0) continue;
+    idCounts.set(route.id, (idCounts.get(route.id) ?? 0) + 1);
+  }
+  for (const id of allowedIds) {
+    if ((idCounts.get(id) ?? 0) > 1) {
+      violations.push({
+        routeId: id,
+        rule: 'staleAllow',
+        detail:
+          'this `allowUnvalidatedSchema` entry matches MORE THAN ONE ' +
+          'discovered route — an exemption must name exactly one. ' +
+          'Disambiguate the routes (version/host qualifiers appear in the ' +
+          'id when declared).',
+      });
+    }
+  }
+
+  for (const route of report.routes) {
     if (allowedIds.has(route.id)) continue;
+    if (route.unvalidatedCrudBody) {
+      violations.push({
+        routeId: route.id,
+        rule: 'requireSchemaPipe',
+        detail:
+          `${route.controller}.${route.handler}: generated CRUD body carries ` +
+          'no schema, so no StandardSchemaValidationPipe reaches it. Upstream ' +
+          'wires the pipe from the OPERATION-level `request.body` only — a ' +
+          'controller-level body documents the route and validates nothing. ' +
+          'Declare `request.body` on the operation (or list the route in ' +
+          '`allowUnvalidatedSchema` if it is validated some other way).',
+      });
+    }
+    if (route.unvalidatedSchemaParams.length === 0) continue;
     const params = route.unvalidatedSchemaParams;
     violations.push({
       routeId: route.id,

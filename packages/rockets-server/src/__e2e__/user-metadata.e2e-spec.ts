@@ -238,7 +238,7 @@ describe('RocketsModule - UserMetadata Integration (e2e)', () => {
         UpsertUserMetadataCommand,
         UserMetadataEntityInterface
       >(
-        new UpsertUserMetadataCommand('serverauth-user-1', {
+        new UpsertUserMetadataCommand({}, 'serverauth-user-1', {
           firstName: 'CommandBus',
         }),
       );
@@ -260,7 +260,7 @@ describe('RocketsModule - UserMetadata Integration (e2e)', () => {
       const result = await queryBus.execute<
         GetUserMetadataQuery,
         UserMetadataEntityInterface | null
-      >(new GetUserMetadataQuery('serverauth-user-1'));
+      >(new GetUserMetadataQuery({}, 'serverauth-user-1'));
 
       expect(result).toMatchObject({
         id: 'userMetadata-1',

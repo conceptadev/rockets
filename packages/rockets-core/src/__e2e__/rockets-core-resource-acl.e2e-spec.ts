@@ -278,7 +278,7 @@ const gadgetResource = defineResource<GadgetEntity>({
   dto: { response: widgetResponseSchema },
   operations: {
     read: {},
-    create: {},
+    create: { input: widgetCreateSchema },
     update: {
       input: widgetUpdateSchema,
       acl: { action: 'update', query: StrictQueryService },

@@ -199,7 +199,7 @@
         "name": "GetUserMetadataQuery",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class GetUserMetadataQuery {\n    readonly userId: string;\n    constructor(userId: string);\n}"
+        "signature": "export declare class GetUserMetadataQuery {\n    readonly ctx: PlainLiteralObject;\n    readonly userId: string;\n    constructor(ctx: PlainLiteralObject, userId: string);\n}"
       },
       {
         "name": "InjectDynamicRepository",
@@ -487,7 +487,7 @@
         "name": "UpsertUserMetadataCommand",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class UpsertUserMetadataCommand {\n    readonly userId: string;\n    readonly data: UserMetadataUpdatableInterface;\n    constructor(userId: string, data: UserMetadataUpdatableInterface);\n}"
+        "signature": "export declare class UpsertUserMetadataCommand {\n    readonly ctx: PlainLiteralObject;\n    readonly userId: string;\n    readonly data: UserMetadataUpdatableInterface;\n    constructor(ctx: PlainLiteralObject, userId: string, data: UserMetadataUpdatableInterface);\n}"
       },
       {
         "name": "UpsertUserMetadataHandler",
@@ -2485,7 +2485,7 @@
         "name": "GetUserMetadataQuery",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class GetUserMetadataQuery {\n    readonly userId: string;\n    constructor(userId: string);\n}"
+        "signature": "export declare class GetUserMetadataQuery {\n    readonly ctx: PlainLiteralObject;\n    readonly userId: string;\n    constructor(ctx: PlainLiteralObject, userId: string);\n}"
       },
       {
         "name": "IDEMPOTENCY_STORE_TOKEN",
@@ -2995,7 +2995,7 @@
         "name": "RouteAuditEntry",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RouteAuditEntry {\n    readonly id: string;\n    readonly method: string;\n    readonly path: string;\n    readonly controller: string;\n    readonly controllerRef: Type<unknown>;\n    readonly handler: string;\n    readonly authentication: RouteAuthState;\n    readonly sessionAuth: boolean;\n    readonly aclAction: string | null;\n    readonly aclResource: string | null;\n    readonly aclQuery: string | null;\n    readonly unvalidatedSchemaParams: readonly string[];\n    readonly openResponseSchema: string | null;\n}"
+        "signature": "export interface RouteAuditEntry {\n    readonly id: string;\n    readonly method: string;\n    readonly path: string;\n    readonly controller: string;\n    readonly controllerRef: Type<unknown>;\n    readonly handler: string;\n    readonly authentication: RouteAuthState;\n    readonly sessionAuth: boolean;\n    readonly aclAction: string | null;\n    readonly aclResource: string | null;\n    readonly aclQuery: string | null;\n    readonly unvalidatedSchemaParams: readonly string[];\n    readonly openResponseSchema: string | null;\n    readonly unvalidatedCrudBody: boolean;\n    readonly unserializedResponseSchemas: readonly string[];\n}"
       },
       {
         "name": "RouteAuditReport",
@@ -3127,7 +3127,7 @@
         "name": "UpsertUserMetadataCommand",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class UpsertUserMetadataCommand {\n    readonly userId: string;\n    readonly data: UserMetadataUpdatableInterface;\n    constructor(userId: string, data: UserMetadataUpdatableInterface);\n}"
+        "signature": "export declare class UpsertUserMetadataCommand {\n    readonly ctx: PlainLiteralObject;\n    readonly userId: string;\n    readonly data: UserMetadataUpdatableInterface;\n    constructor(ctx: PlainLiteralObject, userId: string, data: UserMetadataUpdatableInterface);\n}"
       },
       {
         "name": "UpsertUserMetadataHandler",

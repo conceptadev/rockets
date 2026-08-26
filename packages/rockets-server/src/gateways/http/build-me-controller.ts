@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Patch,
+  Req,
   SerializeOptions,
   StandardSchemaSerializerInterceptor,
   StandardSchemaValidationPipe,
@@ -17,15 +18,17 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import type { Request } from 'express';
 import type { z } from 'zod';
 import {
   AuthUser,
-  type AuthorizedUser,
+  getAppContext,
   GetUserMetadataQuery,
   rocketsSchemaValidation,
+  type AuthorizedUser,
   type RocketsUserMetadataConfig,
-  UpsertUserMetadataCommand,
   type UserMetadataEntityInterface,
+  UpsertUserMetadataCommand,
 } from '@concepta/rockets-core';
 import { meResponseSchema, meUpdateSchema } from './me.schemas';
 
@@ -72,11 +75,14 @@ export function buildMeController(
       status: 401,
       description: 'Unauthorized - Invalid or missing token',
     })
-    async me(@AuthUser() user: AuthorizedUser): Promise<object> {
+    async me(
+      @AuthUser() user: AuthorizedUser,
+      @Req() req: Request,
+    ): Promise<object> {
       const userMetadata = await this.queryBus.execute<
         GetUserMetadataQuery,
         UserMetadataEntityInterface | null
-      >(new GetUserMetadataQuery(user.id));
+      >(new GetUserMetadataQuery(getAppContext(req), user.id));
 
       return { ...user, userMetadata };
     }
@@ -102,11 +108,18 @@ export function buildMeController(
     async updateUser(
       @AuthUser() user: AuthorizedUser,
       @Body({ schema: updateSchema }) body: UpdateBody,
+      @Req() req: Request,
     ): Promise<object> {
       const userMetadata = await this.commandBus.execute<
         UpsertUserMetadataCommand,
         UserMetadataEntityInterface
-      >(new UpsertUserMetadataCommand(user.id, body.userMetadata ?? {}));
+      >(
+        new UpsertUserMetadataCommand(
+          getAppContext(req),
+          user.id,
+          body.userMetadata ?? {},
+        ),
+      );
 
       return { ...user, userMetadata };
     }

@@ -56,6 +56,12 @@ const widgetCreateSchema = withOpenApi(
   z.object({ label: z.string() }),
   'WidgetCreateDto',
 );
+// Every body operation declares its schema: an unvalidated body fails the
+// boot (`requireSchemaPipe`).
+const widgetUpdateSchema = withOpenApi(
+  z.object({ label: z.string() }).partial(),
+  'WidgetUpdateDto',
+);
 
 const widgetResponseSchema = withOpenApi(
   z.object({ id: z.uuid(), label: z.string() }),
@@ -130,6 +136,7 @@ describe('RocketsCoreModule — resources + resourcePersistence (e2e)', () => {
               dto: {
                 response: widgetResponseSchema,
                 create: widgetCreateSchema,
+                update: widgetUpdateSchema,
               },
               providers: [SimpleAuthProvider],
             }),

@@ -939,7 +939,26 @@ before running the full e2e suite.
 - **`requireSchemaPipe` is exempted only by its own list.** An `allow` entry
   written for `requireAuth` no longer switches the schema-pipe check off;
   use `routePolicy.allowUnvalidatedSchema` for a route validated by a pipe
-  the audit cannot recognise.
+  the audit cannot recognise (an entry matching more than one route fails
+  the boot, like `allow`).
+- **A generated CRUD body without a schema fails the boot.** A body declared
+  at controller level (instead of on the operation) documents the route and
+  validates nothing — the defect behind the admin update bodies; the route
+  audit now catches it structurally (`unvalidatedCrudBody`). Routes that
+  document a response with `standardSchema` but serialize through no
+  `@SerializeOptions` are listed in the audit report
+  (`unserializedResponseSchemas`), not enforced.
+- **`/me` metadata handlers forward the request context and pin `userId`**
+  (`rockets-core` / `rockets`): `UpsertUserMetadataCommand(ctx, userId,
+  data)` and `GetUserMetadataQuery(ctx, userId)` — every repository call
+  now runs with hooks on, inside the request transaction, and an
+  app-supplied update schema admitting `userId` cannot move the row.
+  Breaking for apps that override or dispatch these directly: add the
+  context (`getAppContext(req)`) as the first argument.
+- **Migration notes.** A hand-written route with BOTH an explicit
+  `@ApiBody({ schema })` and a named `@Body({ schema })` is documented from
+  the `@Body` schema now (the explicit inline body is dropped); `allow` /
+  `allowControllers` no longer exempt the schema-pipe check.
 - **User-metadata updates pin `userId` from the caller** (`rockets-auth`):
   the update branch wrote the validated payload as-is, so an app-supplied
   update schema that admits `userId` could move a row to another user.

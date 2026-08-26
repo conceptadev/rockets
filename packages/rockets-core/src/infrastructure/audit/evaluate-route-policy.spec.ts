@@ -28,6 +28,8 @@ function report(overrides: Partial<RouteAuditReport>): RouteAuditReport {
         aclQuery: null,
         unvalidatedSchemaParams: [],
         openResponseSchema: null,
+        unvalidatedCrudBody: false,
+        unserializedResponseSchemas: [],
       },
     ],
     globalGuards: ['SomeAuthGuard'],
@@ -189,6 +191,8 @@ describe('schemaPipeViolations (always on)', () => {
         aclQuery: null,
         unvalidatedSchemaParams: ['body'],
         openResponseSchema: null,
+        unvalidatedCrudBody: false,
+        unserializedResponseSchemas: [],
       },
     ],
   });
@@ -231,6 +235,39 @@ describe('schemaPipeViolations (always on)', () => {
     expect(violations[0].rule).toBe('requireClosedResponse');
     expect(violations[0].detail).toContain('"$.items[]"');
     expect(openResponseViolations(report({}))).toEqual([]);
+  });
+
+  it('reports a generated CRUD body with no schema (controller-level body)', () => {
+    const base = report({});
+    const crud: RouteAuditReport = {
+      ...base,
+      routes: base.routes.map((route) => ({
+        ...route,
+        id: 'PATCH /things/:id',
+        method: 'PATCH',
+        handler: 'update',
+        unvalidatedCrudBody: true,
+      })),
+    };
+    const violations = schemaPipeViolations(crud);
+    expect(violations).toHaveLength(1);
+    expect(violations[0].rule).toBe('requireSchemaPipe');
+    expect(violations[0].detail).toContain('OPERATION-level');
+    expect(
+      schemaPipeViolations(crud, {
+        allowUnvalidatedSchema: ['PATCH /things/:id'],
+      }),
+    ).toEqual([]);
+  });
+
+  it('rejects an allowUnvalidatedSchema entry that matches more than one route', () => {
+    const [only] = unpiped.routes;
+    const doubled: RouteAuditReport = { ...unpiped, routes: [only, only] };
+    const violations = schemaPipeViolations(doubled, {
+      allowUnvalidatedSchema: ['POST /things'],
+    });
+    expect(violations.map((v) => v.rule)).toEqual(['staleAllow']);
+    expect(violations[0].detail).toContain('MORE THAN ONE');
   });
 
   it('is silent on a validated route', () => {

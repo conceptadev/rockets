@@ -14,6 +14,8 @@ import {
 import { RouteParamtypes } from '@nestjs/common/enums/route-paramtypes.enum';
 import { CLASS_SERIALIZER_OPTIONS } from '@nestjs/common/serializer/class-serializer.constants';
 import { z } from 'zod';
+import { DECORATORS } from '@nestjs/swagger';
+import { CrudEntity } from '@concepta/nestjs-crud';
 
 import { findOpenResponseObject } from '../../common/utils/open-api-schema.util';
 
@@ -125,6 +127,15 @@ export function collectRouteAudit(args: {
         methodName,
       );
       const openResponseSchema = readOpenResponseSchema(controller, handler);
+      const unvalidatedCrudBody = readUnvalidatedCrudBody(
+        controller,
+        handler,
+        methodName,
+      );
+      const unserializedResponseSchemas = readUnserializedResponseSchemas(
+        controller,
+        handler,
+      );
       const qualifier =
         (version !== undefined ? ` [v${version}]` : '') +
         (host !== undefined ? ` [host:${host}]` : '');
@@ -142,6 +153,8 @@ export function collectRouteAudit(args: {
             authentication,
             sessionAuth,
             openResponseSchema,
+            unvalidatedCrudBody,
+            unserializedResponseSchemas,
             // Grants mirror enforcement exactly: upstream reads them
             // with `reflector.get(..., getHandler())` — handler ONLY.
             aclAction: readGrantField(handler, 'action'),
@@ -356,6 +369,87 @@ function readOpenResponseSchema(
   const schema: unknown = Reflect.get(options, 'schema');
   if (!(schema instanceof z.ZodType)) return null;
   return findOpenResponseObject(schema) ?? null;
+}
+
+/**
+ * Generated CRUD only (the controller carries upstream's entity metadata):
+ * a handler whose `@Body()` parameter has no schema. Upstream's
+ * `CrudInitValidation` reads the OPERATION-level body; a controller-level
+ * `request.body` leaves the parameter schema-less and unvalidated while
+ * `CrudInitApiBody` (class hierarchy) still documents it.
+ */
+function readUnvalidatedCrudBody(
+  controller: Type<unknown>,
+  handler: object,
+  methodName: string,
+): boolean {
+  // Upstream stamps its entity on the controller class through
+  // `CrudMetadata.createDecorator` (Nest's `ReflectableDecorator` shape:
+  // the metadata key is `decorator.KEY`). Only create / update / replace /
+  // batch handlers of a generated controller carry a `@Body()` at all, so
+  // "a body parameter without a schema" is the whole test.
+  if (Reflect.getMetadata(CrudEntity.KEY, controller) === undefined) {
+    return false;
+  }
+  const args: unknown = Reflect.getMetadata(
+    ROUTE_ARGS_METADATA,
+    controller,
+    methodName,
+  );
+  if (typeof args !== 'object' || args === null) return false;
+  const bodyPrefix = `${RouteParamtypes.BODY}:`;
+  return Object.entries(args).some(
+    ([key, entry]) =>
+      key.startsWith(bodyPrefix) &&
+      typeof entry === 'object' &&
+      entry !== null &&
+      Reflect.get(entry, 'schema') === undefined,
+  );
+}
+
+/**
+ * Statuses documented with `standardSchema` (handler entries over class
+ * entries, like Swagger merges them) on a route that serializes through no
+ * `@SerializeOptions({ schema })`.
+ */
+function readUnserializedResponseSchemas(
+  controller: Type<unknown>,
+  handler: object,
+): string[] {
+  const serializer: unknown =
+    Reflect.getMetadata(CLASS_SERIALIZER_OPTIONS, handler) ??
+    Reflect.getMetadata(CLASS_SERIALIZER_OPTIONS, controller);
+  if (
+    typeof serializer === 'object' &&
+    serializer !== null &&
+    Reflect.get(serializer, 'schema') instanceof z.ZodType
+  ) {
+    return [];
+  }
+  const classResponses: unknown = Reflect.getMetadata(
+    DECORATORS.API_RESPONSE,
+    controller,
+  );
+  const handlerResponses: unknown = Reflect.getMetadata(
+    DECORATORS.API_RESPONSE,
+    handler,
+  );
+  const merged: Record<string, unknown> = {
+    ...(typeof classResponses === 'object' && classResponses !== null
+      ? classResponses
+      : {}),
+    ...(typeof handlerResponses === 'object' && handlerResponses !== null
+      ? handlerResponses
+      : {}),
+  };
+  return Object.entries(merged)
+    .filter(
+      ([, entry]) =>
+        typeof entry === 'object' &&
+        entry !== null &&
+        Reflect.get(entry, 'standardSchema') instanceof z.ZodType,
+    )
+    .map(([status]) => status);
 }
 
 function readPipes(target: object): unknown[] {

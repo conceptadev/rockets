@@ -190,7 +190,7 @@ describe('RocketsCoreModule — top-level repository + module resources (e2e)', 
 
     const commandBus = app.get(CommandBus);
     const result = await commandBus.execute(
-      new UpsertUserMetadataCommand('test-user', { firstName: 'Test' }),
+      new UpsertUserMetadataCommand({}, 'test-user', { firstName: 'Test' }),
     );
     expect(result).toHaveProperty('userId', 'test-user');
   });
@@ -248,11 +248,11 @@ describe('RocketsCoreModule — top-level repository + module resources (e2e)', 
     const queryBus = app.get(QueryBus);
 
     await commandBus.execute(
-      new UpsertUserMetadataCommand('query-user', { bio: 'hello' }),
+      new UpsertUserMetadataCommand({}, 'query-user', { bio: 'hello' }),
     );
 
     const result = await queryBus.execute(
-      new GetUserMetadataQuery('query-user'),
+      new GetUserMetadataQuery({}, 'query-user'),
     );
     expect(result).toHaveProperty('userId', 'query-user');
   });

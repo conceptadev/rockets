@@ -126,9 +126,12 @@ describe('MeController contract (e2e)', () => {
       })
       .expect(200);
 
-    // The per-route pipe strips `role` before the command is dispatched.
+    // The per-route pipe strips `role` before the command is dispatched;
+    // the handler pins `userId` from the caller (never from the payload).
     expect(update).toHaveBeenCalledTimes(1);
-    expect(update.mock.calls[0][1]).toEqual({ notifyEmail: 'ok@example.com' });
+    const [existing, data] = update.mock.calls[0];
+    const owner = typeof existing === 'string' ? existing : existing.userId;
+    expect(data).toEqual({ notifyEmail: 'ok@example.com', userId: owner });
   });
 
   it('GET /me returns 401 when auth provider rejects token', async () => {

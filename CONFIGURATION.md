@@ -556,7 +556,14 @@ off as a side effect. The same audit runs the fail-closed check on a
 hand-written route's `@SerializeOptions({ schema })`: an open object
 (`.passthrough()` / `.catchall()`) anywhere in that schema fails the boot
 as `requireClosedResponse`, exactly like a generated resource's response
-schema fails at definition time.
+schema fails at definition time. Two more things the audit sees: a
+generated CRUD body with NO schema (a `request.body` declared at controller
+level instead of on the operation — upstream wires the pipe from the
+operation only) fails the boot under `requireSchemaPipe`; and a route that
+documents a response with `@ApiResponse({ standardSchema })` but serializes
+through no `@SerializeOptions({ schema })` is listed in
+`audit().routes[].unserializedResponseSchemas` — reported, not enforced,
+because a documentation-only contract is a legitimate (if visible) choice.
 
 When an operation declares `input`, the request payload must be a plain JSON
 object. An array, a scalar, or a non-plain object (a `Buffer` from a raw body

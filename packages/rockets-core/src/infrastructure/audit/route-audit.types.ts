@@ -80,6 +80,24 @@ export interface RouteAuditEntry {
    * definition time; this is the same check for the hand-written ones.
    */
   readonly openResponseSchema: string | null;
+  /**
+   * A GENERATED CRUD create / update / replace / batch route whose `@Body()`
+   * carries no schema. Upstream wires the validation pipe from the
+   * OPERATION-level `request.body` only; a body declared at controller
+   * level documents the route (the OpenAPI reads the class hierarchy) and
+   * validates nothing — invisible to `unvalidatedSchemaParams`, which needs
+   * a schema on the parameter to fire. The defect class behind the admin
+   * update bodies that shipped unvalidated behind a green suite.
+   */
+  readonly unvalidatedCrudBody: boolean;
+  /**
+   * Status codes this route documents with `@ApiResponse({ standardSchema })`
+   * while serializing through NO `@SerializeOptions({ schema })`: the
+   * document promises a shape nothing enforces. Reported, not enforced —
+   * a documentation-only contract is a legitimate choice, but it should be
+   * a visible one.
+   */
+  readonly unserializedResponseSchemas: readonly string[];
 }
 
 export interface RouteAuditReport {

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, type PlainLiteralObject } from '@nestjs/common';
 
 import { RepositoryInterface, Where } from '@concepta/nestjs-repository';
 import { AbstractUpsertUserMetadataHandler } from './abstract-upsert-user-metadata.handler';
@@ -25,30 +25,40 @@ export class UpsertUserMetadataHandler extends AbstractUpsertUserMetadataHandler
   async execute(
     command: UpsertUserMetadataCommand,
   ): Promise<UserMetadataEntityInterface> {
-    const { userId, data } = command;
+    const { ctx, userId, data } = command;
     this.logger.debug(`Upserting metadata for user ${userId}`);
-    return this.upsert(userId, data);
+    return this.upsert(ctx, userId, data);
   }
 
+  // Every repository call forwards `ctx` (hooks on, inside the request's
+  // transaction). `userId` is pinned from the caller on BOTH branches:
+  // ownership never comes from the payload, whatever an app-supplied
+  // update schema admits.
   private async upsert(
+    ctx: PlainLiteralObject,
     userId: string,
     data: UserMetadataUpdatableInterface,
   ): Promise<UserMetadataEntityInterface> {
     const existing = await this.repo.findOne({
       where: Where.eq<UserMetadataEntityInterface>('userId', userId),
+      ctx,
     });
 
     if (existing) {
       const definedData = stripUndefined(data);
       return this.repo.update(
         existing,
-        definedData as Partial<UserMetadataEntityInterface>,
+        { ...definedData, userId } as Partial<UserMetadataEntityInterface>,
+        { ctx },
       );
     }
 
-    return this.repo.create({
-      ...data,
-      userId,
-    } as Partial<UserMetadataEntityInterface>);
+    return this.repo.create(
+      {
+        ...data,
+        userId,
+      } as Partial<UserMetadataEntityInterface>,
+      { ctx },
+    );
   }
 }

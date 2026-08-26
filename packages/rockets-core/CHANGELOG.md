@@ -154,7 +154,35 @@
   `allowControllers` exempt a route from the POLICY rules; they no longer
   switch the always-on schema-pipe check off as a side effect. A route
   validated by a pipe the audit cannot recognise is listed in
-  `routePolicy.allowUnvalidatedSchema` (route ids).
+  `routePolicy.allowUnvalidatedSchema` (route ids). An entry matching more
+  than one discovered route fails the boot (`staleAllow`), like `allow`.
+- **A generated CRUD body without a schema fails the boot.** Upstream wires
+  the validation pipe from the OPERATION-level `request.body` only; a body
+  declared at controller level documents the route and validates nothing,
+  and no `{ schema }` on the parameter meant `requireSchemaPipe` could not
+  see it. The audit now reports it (`RouteAuditEntry.unvalidatedCrudBody`)
+  and fails the boot under the same rule — the defect class behind the
+  admin update bodies in `rockets-auth`.
+- **Report: responses documented but not serialized.**
+  `RouteAuditEntry.unserializedResponseSchemas` lists the statuses a route
+  documents with `@ApiResponse({ standardSchema })` while serializing
+  through no `@SerializeOptions({ schema })` — a documentation-only
+  contract, visible in `audit()`; not enforced.
+- **`/me` metadata handlers forward the request context (BREAKING for
+  handler overrides).** `UpsertUserMetadataCommand` and
+  `GetUserMetadataQuery` take `ctx` as their FIRST argument
+  (`new UpsertUserMetadataCommand(ctx, userId, data)`,
+  `new GetUserMetadataQuery(ctx, userId)`); the built-in handlers forward
+  it to every repository call (entity hooks run, the write joins the
+  request transaction) and pin `userId` from the caller on the update
+  branch. Apps overriding `upsertUserMetadata` / `getUserMetadata` or
+  dispatching these directly add the context (`getAppContext(req)`).
+- **Migration notes.** A hand-written route carrying BOTH an explicit
+  `@ApiBody({ schema })` and a named `@Body({ schema })` is now documented
+  from the `@Body` schema (the explicit inline body, including its
+  `description` / `examples`, is dropped) — keep one source. `allow` /
+  `allowControllers` no longer exempt `requireSchemaPipe`; use
+  `allowUnvalidatedSchema`.
 
 ### Removed
 
