@@ -133,18 +133,25 @@
   hand-supplied paginated envelope (`dto.paginated`,
   `operations.list.paginated`) is checked as well — it was only checked
   for a name.
-- **Computed fields strip hidden columns through every wrapper (PR #105
-  review).** The projection only rebuilt objects, arrays and optional /
-  nullable; a hidden column below a union, intersection, pipe, default,
-  catch, readonly or lazy stayed declared and reached the wire
-  (`f.compute(z.union([nested, fallback]))` shipped `nested.secret`).
-  Those wrappers are rebuilt now; a hidden column below one the projection
-  cannot rebuild (discriminated union, tuple, record, map, set) fails at
-  definition time instead of leaking.
-- **`assertFailClosedResponse` walks both sides of a pipe.** An ordinary
-  `.transform()` is a pipe whose object sits on the IN side;
-  `z.object({...}).passthrough().transform(v => v)` passed the check and an
-  identity transform shipped the undeclared keys.
+- **Hidden columns stay hidden through every wrapper, on every response
+  path (PR #105 review).** The projection only rebuilt objects, arrays and
+  optional / nullable, and only under `f.compute()`; a hidden column below
+  a union, intersection, pipe, readonly or lazy stayed declared and reached
+  the wire (`f.compute(z.union([nested, fallback]))` shipped
+  `nested.secret`), and a JSON column or an exposed relation whose schema
+  nested one shipped it too. Union, intersection, pipe (both sides),
+  readonly, nonoptional and lazy (memoized per instance — a recursive
+  schema no longer overflows the stack) are rebuilt on all three paths;
+  `.default()` / `.catch()` hand their payload over WITHOUT running the
+  inner schema and are therefore rejected at definition time when a hidden
+  column sits below them, like discriminated union, tuple, record, map and
+  set.
+- **`assertFailClosedResponse` walks the IN side of a transform.** An
+  ordinary `.transform()` is a pipe whose object sits on the IN side and
+  whose OUT is the transform node, which strips nothing;
+  `z.object({...}).passthrough().transform(v => v)` passed the check and
+  shipped the undeclared keys. A pipe whose OUT is a real schema
+  (`z.pipe(open, closed)`) strips on the way out and still passes.
 - **Computed fields strip hidden columns at every depth.** A `dto:
   { response: false }` column two or more levels down a `f.compute()`
   shape (an object inside an optional object inside an array) was kept;

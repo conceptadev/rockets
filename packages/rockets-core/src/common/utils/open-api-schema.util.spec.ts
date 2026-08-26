@@ -43,7 +43,6 @@ describe('assertFailClosedResponse', () => {
     // sits on the IN side, and an identity transform ships whatever it
     // let through.
     ['in transform in side', open.transform((value) => value)],
-    ['in pipe in side', z.pipe(open, z.object({ a: z.string() }))],
     ['in lazy', z.lazy(() => open)],
     ['nested object field', z.object({ inner: open })],
     ['deep: array of optional readonly', z.array(open.readonly().optional())],
@@ -68,6 +67,8 @@ describe('assertFailClosedResponse', () => {
     ['readonly closed', closed.readonly()],
     ['catch closed', closed.catch({ a: 'x' })],
     ['preprocess with closed out', z.preprocess((v) => v, closed)],
+    // The closed `out` strips on the way out; nothing from `in` leaks.
+    ['pipe from open into closed', z.pipe(open, closed)],
     [
       'recursive lazy of closed',
       z.object({

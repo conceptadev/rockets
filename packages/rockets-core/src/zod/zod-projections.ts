@@ -88,7 +88,10 @@ export function projectSchema(
     }
     if (isResponseExposed(meta)) {
       assertNotIsoDateTime(field, path);
-      response[key] = asStoredShape(field, path);
+      // A JSON column whose schema nests hidden fields strips them like a
+      // computed field does — `dto: { response: false }` holds on every
+      // response path, not only under `f.compute()`.
+      response[key] = asStoredShape(withHiddenFieldsRemoved(field, path), path);
     }
 
     if (relation !== undefined) {
@@ -164,7 +167,10 @@ function exposedResponseSchema(
     const { meta } = unwrapField(field, `${path}.${key}`);
     if (isResponseExposed(meta)) {
       assertNotIsoDateTime(field, `${path}.${key}`);
-      shape[key] = asStoredShape(field, `${path}.${key}`);
+      shape[key] = asStoredShape(
+        withHiddenFieldsRemoved(field, `${path}.${key}`),
+        `${path}.${key}`,
+      );
     }
   }
   return withOpenApi(z.object(shape), id);
@@ -268,15 +274,19 @@ function hasHiddenDescendant(
 }
 
 /**
- * Recursive: a hidden column N levels down a computed shape stays hidden,
- * whatever wraps it. Every composite the projection knows how to rebuild
- * — object, array, optional / nullable / default / catch / readonly /
- * nonoptional, union, intersection, pipe, lazy — is rebuilt when something
+ * Recursive: a hidden column N levels down stays hidden, whatever wraps
+ * it. Every composite the projection can rebuild FAITHFULLY — object,
+ * array, optional / nullable / readonly / nonoptional, union,
+ * intersection, pipe (both sides), lazy — is rebuilt when something
  * underneath changed (identity is preserved when nothing was hidden). A
- * hidden field below a wrapper this cannot rebuild (discriminated union,
- * tuple, record, map, set) fails at DEFINITION time: silently leaving it
- * in place is how an explicitly hidden column reaches the wire.
+ * hidden field below anything else fails at DEFINITION time: `.default()`
+ * / `.catch()` hand their payload over without running the inner schema,
+ * and discriminated union / tuple / record / map / set cannot be rebuilt
+ * without changing semantics — silently leaving any of them in place is
+ * how an explicitly hidden column reaches the wire.
  */
+const rebuiltLazies = new WeakMap<z.ZodLazy, z.ZodLazy>();
+
 function stripHidden(schema: z.ZodType, path: string): z.ZodType {
   if (schema instanceof z.ZodObject) {
     return stripHiddenObject(schema, path);
@@ -296,18 +306,11 @@ function stripHidden(schema: z.ZodType, path: string): z.ZodType {
     const stripped = stripHidden(inner, path);
     return stripped === inner ? schema : stripped.nullable();
   }
-  if (schema instanceof z.ZodDefault) {
-    const inner = asClassicSchema(schema.def.innerType, path);
-    const stripped = stripHidden(inner, path);
-    return stripped === inner
-      ? schema
-      : stripped.default(schema.def.defaultValue);
-  }
-  if (schema instanceof z.ZodCatch) {
-    const inner = asClassicSchema(schema.def.innerType, path);
-    const stripped = stripHidden(inner, path);
-    return stripped === inner ? schema : stripped.catch(schema.def.catchValue);
-  }
+  // NOT rebuilt: `.default(value)` / `.catch(value)` hand their payload to
+  // the caller WITHOUT running the inner schema (zod short-circuits), so a
+  // stripped inner schema would not strip the payload — a hidden column in
+  // the default value ships. They fall through to the definition-time
+  // rejection below when a hidden field sits under them.
   if (schema instanceof z.ZodReadonly) {
     const inner = asClassicSchema(schema.def.innerType, path);
     const stripped = stripHidden(inner, path);
@@ -351,19 +354,29 @@ function stripHidden(schema: z.ZodType, path: string): z.ZodType {
       : z.pipe(strippedIn, strippedOut);
   }
   if (schema instanceof z.ZodLazy) {
+    const cached = rebuiltLazies.get(schema);
+    if (cached !== undefined) return cached;
     if (!hasHiddenDescendant(schema, path)) return schema;
-    return z.lazy(() =>
+    // ONE rebuilt lazy per source instance, registered BEFORE its getter
+    // can run: a recursive schema reaches this same node again through
+    // its own getter and must get the same rebuilt instance back, or every
+    // walker's cycle protection (keyed on node identity) loops forever.
+    const rebuilt: z.ZodLazy = z.lazy(() =>
       stripHidden(asClassicSchema(schema.unwrap(), path), path),
     );
+    rebuiltLazies.set(schema, rebuilt);
+    return rebuilt;
   }
   if (hasHiddenDescendant(schema, path)) {
     throw new Error(
       `${path}: a field declared \`dto: { response: false }\` sits below a ` +
         `${schema.constructor.name} wrapper the response projection cannot ` +
-        `rebuild, so it would reach the wire. Move the hidden column out of ` +
-        `this compute schema, or restructure the wrapper (object, array, ` +
-        `optional, nullable, default, catch, readonly, union, intersection, ` +
-        `pipe and lazy are rebuilt).`,
+        `rebuild, so it would reach the wire. Rebuilt wrappers: object, ` +
+        `array, optional, nullable, readonly, nonoptional, union, ` +
+        `intersection, pipe, lazy. Not rebuilt: default / catch (their ` +
+        `payload bypasses the inner schema), discriminated union, tuple, ` +
+        `record, map, set. Move the hidden column out of this schema or ` +
+        `restructure the wrapper.`,
     );
   }
   return schema;

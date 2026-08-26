@@ -167,13 +167,17 @@ export function schemaChildren(
     return [[`${path}[*]`, schema.def.valueType]];
   }
   if (schema instanceof z.ZodPipe) {
-    // BOTH sides: `z.preprocess` puts the object on `out`, an ordinary
-    // `.transform()` puts it on `in` (and an identity transform ships
-    // whatever `in` let through).
-    return [
-      [`${path}<in`, schema.def.in],
-      [path, schema.def.out],
-    ];
+    // `z.preprocess` puts the object on `out`; an ordinary `.transform()`
+    // puts it on `in` and its `out` is the transform node, which passes
+    // whatever `in` let through. A pipe whose `out` is a real schema
+    // (`z.pipe(open, closed)`) strips on the way out, so `in` is only
+    // walked when `out` cannot strip.
+    return schema.def.out instanceof z.ZodTransform
+      ? [
+          [`${path}<in`, schema.def.in],
+          [path, schema.def.out],
+        ]
+      : [[path, schema.def.out]];
   }
   if (schema instanceof z.ZodLazy) {
     return [[path, schema.unwrap()]];

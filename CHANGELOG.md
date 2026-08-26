@@ -923,14 +923,22 @@ before running the full e2e suite.
   wrapper used to pass and ship the whole row; every node that can hold a
   schema is walked now, and a hand-supplied paginated envelope is checked
   too, not only named.
-- **Hidden columns stay hidden through every wrapper of a computed field**
-  (union, intersection, pipe, default, catch, readonly, lazy are rebuilt;
-  a wrapper the projection cannot rebuild fails at definition time) and
-  **the fail-closed check walks both sides of a pipe** (an identity
+- **Hidden columns stay hidden through every wrapper, on every response
+  path** — computed fields, JSON columns and exposed relations alike
+  (union, intersection, pipe, readonly, lazy are rebuilt; `.default()` /
+  `.catch()` bypass the inner schema and are rejected at definition time
+  with the other wrappers the projection cannot rebuild) — and **the
+  fail-closed check walks the IN side of a transform** (an identity
   `.transform()` on an open object shipped undeclared keys). Both found in
   the PR #105 review.
 - **Node 20.19 is the minimum** — the CommonJS build loads the ESM Nest 12
-  line through `require(esm)`; `engines` says so and CI tests that floor.
+  line through `require(esm)`; `engines` says so and CI runs the full suite
+  on that floor. Test runners that externalise ESM (this repo's Vitest, a
+  consumer's Jest-ESM) hit `ERR_REQUIRE_CYCLE_MODULE` on 20.19 when
+  `@nestjs/cqrs` (CommonJS) requires the still-evaluating `@nestjs/core`;
+  the fix is a setup file that preloads `@nestjs/core`
+  (`vitest.setup.preload-nest-core.mts`), and the underlying gap is
+  upstream's.
 - **Hidden columns stay hidden at every depth of a computed field.** A
   `dto: { response: false }` column nested two or more levels down an
   `f.compute()` shape was still serialized.

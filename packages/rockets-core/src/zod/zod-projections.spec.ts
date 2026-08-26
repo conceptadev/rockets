@@ -354,6 +354,114 @@ describe('projectSchema response exposure', () => {
     );
   });
 
+  // `.default(value)` / `.catch(value)` hand their payload over WITHOUT
+  // running the inner schema, so a stripped inner schema would not strip
+  // the payload — the only safe answer is to refuse at definition time.
+  it('rejects at definition time a hidden column below .default() / .catch()', () => {
+    const nested = z.object({
+      id: f.pk(),
+      secret: f.string({ dto: { response: false } }),
+    });
+    const payload = {
+      id: '00000000-0000-4000-8000-000000000001',
+      secret: 'leak',
+    };
+    for (const wrapped of [nested.default(payload), nested.catch(payload)]) {
+      const schema = z.object({
+        id: f.pk(),
+        probe: f.compute(z.object({ inner: wrapped }), () => ({
+          inner: payload,
+        })),
+      });
+      expect(() => projectSchema('Pet', schema, entity, noOwner)).toThrow(
+        /cannot rebuild/,
+      );
+    }
+  });
+
+  it('strips a hidden column inside a RECURSIVE lazy schema without looping', async () => {
+    interface Node {
+      id: string;
+      secret: string;
+      children: Node[];
+    }
+    const node: z.ZodType<Node> = z.object({
+      id: f.pk(),
+      secret: f.string({ dto: { response: false } }),
+      children: z.array(z.lazy(() => node)),
+    });
+    const row = {
+      id: '00000000-0000-4000-8000-000000000001',
+      secret: 'leak',
+      children: [
+        {
+          id: '00000000-0000-4000-8000-000000000002',
+          secret: 'leak2',
+          children: [],
+        },
+      ],
+    };
+    const schema = z.object({
+      id: f.pk(),
+      tree: f.compute(node, () => row),
+    });
+
+    const responseSchema = buildResponseSchema(
+      'Pet',
+      projectSchema('Pet', schema, entity, noOwner),
+    );
+    const result = await responseSchema['~standard'].validate({
+      id: '00000000-0000-4000-8000-000000000003',
+    });
+    expect(result.issues).toBeUndefined();
+    if (result.issues) return;
+    expect(result.value).toEqual({
+      id: '00000000-0000-4000-8000-000000000003',
+      tree: {
+        id: row.id,
+        children: [{ id: row.children[0].id, children: [] }],
+      },
+    });
+  });
+
+  // `dto: { response: false }` holds on EVERY response path, not only under
+  // `f.compute()`: a JSON column whose schema nests a hidden field, and an
+  // exposed relation whose field nests one, strip it too.
+  it('strips a hidden column nested in a plain JSON column and in an exposed relation', async () => {
+    const blob = z.object({
+      id: f.pk(),
+      secret: f.string({ dto: { response: false } }),
+    });
+    const child = z.object({
+      id: f.pk(),
+      blob: blob.register(rocketsFieldMeta, { dto: { response: true } }),
+      secret: f.string({ dto: { response: false } }),
+    });
+    const schema = z.object({
+      id: f.pk(),
+      payload: blob.register(rocketsFieldMeta, { dto: { response: true } }),
+      kids: f.hasMany(child, { expose: true, include: 'default' }),
+    });
+    const pk = '00000000-0000-4000-8000-000000000001';
+
+    const responseSchema = buildResponseSchema(
+      'Pet',
+      projectSchema('Pet', schema, entity, noOwner),
+    );
+    const result = await responseSchema['~standard'].validate({
+      id: pk,
+      payload: { id: pk, secret: 'leak' },
+      kids: [{ id: pk, blob: { id: pk, secret: 'leak' }, secret: 'leak' }],
+    });
+    expect(result.issues).toBeUndefined();
+    if (result.issues) return;
+    expect(result.value).toEqual({
+      id: pk,
+      payload: { id: pk },
+      kids: [{ id: pk, blob: { id: pk } }],
+    });
+  });
+
   it('a compute value that violates its declared schema is a validation issue, not a coerced payload', async () => {
     const schema = z.object({
       id: f.pk(),
