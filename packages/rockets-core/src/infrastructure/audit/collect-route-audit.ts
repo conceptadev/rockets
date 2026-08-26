@@ -129,7 +129,6 @@ export function collectRouteAudit(args: {
       const openResponseSchema = readOpenResponseSchema(controller, handler);
       const unvalidatedCrudBody = readUnvalidatedCrudBody(
         controller,
-        handler,
         methodName,
       );
       const unserializedResponseSchemas = readUnserializedResponseSchemas(
@@ -380,7 +379,6 @@ function readOpenResponseSchema(
  */
 function readUnvalidatedCrudBody(
   controller: Type<unknown>,
-  handler: object,
   methodName: string,
 ): boolean {
   // Upstream stamps its entity on the controller class through
