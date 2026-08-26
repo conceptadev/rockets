@@ -307,7 +307,7 @@ instructions above):
 ```bash
 yarn add @concepta/rockets@alpha \
   @concepta/rockets-repository-typeorm@alpha typeorm @nestjs/typeorm sqlite3 \
-  class-transformer class-validator reflect-metadata rxjs
+  reflect-metadata rxjs
 ```
 
 **What installs automatically** when you add `@concepta/rockets@alpha`
@@ -318,12 +318,12 @@ yarn add @concepta/rockets@alpha \
 | Other `@concepta/*`     | `rockets-core`                                                                                                        |
 | Upstream motor         | `@concepta/nestjs-{core,repository,crud,authentication,access-control}` (via `@concepta/rockets-core` re-exports)      |
 | Nest (Rockets runtime) | `@nestjs/common`, `@nestjs/core`, `@nestjs/cqrs`, `@nestjs/swagger`                                                   |
+| Schema engine          | `zod` — a dependency of `@concepta/rockets-core`; the `@concepta/rockets-core/zod` subpath needs nothing extra        |
 
 Optional add-ons (install when you need them):
 
 | Package                                                                             | When                                   |
 | ----------------------------------------------------------------------------------- | -------------------------------------- |
-| `zod` + `nestjs-zod` (schema-first layer at `@concepta/rockets-core/zod`)            | Schema-first resources (`zodResource`) |
 | `@concepta/rockets-adapter-firebase`                                                 | Firebase ID tokens                     |
 | `@concepta/rockets-repository-firestore`                                             | Firestore persistence                  |
 | `@concepta/rockets-auth@alpha`                                                       | Built-in signup/login (Path B)         |
@@ -333,7 +333,7 @@ Optional add-ons (install when you need them):
 | Package                                                                                        | Why not transitive                                                                                                                          |
 | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | `@concepta/rockets-repository-typeorm`, `typeorm`, `@nestjs/typeorm`, driver (`sqlite3`, `pg`, …) | Persistence adapter is an **app choice** — `typeorm` and the driver are peers/app deps; Firestore-only apps use the Firestore adapter instead |
-| `class-transformer`, `class-validator`, `rxjs`, `reflect-metadata`                             | **peerDependencies** — npm/yarn expect the host Nest app to provide them (install peers or enable your package manager’s peer auto-install)   |
+| `rxjs`, `reflect-metadata`                                                                     | **peerDependencies** of Rockets / Nest — npm/yarn expect the host Nest app to provide them (install peers or enable your package manager’s peer auto-install). `class-validator` / `class-transformer` are no longer required: every wire shape is a zod schema |
 
 Add `@concepta/rockets-core` **only** if you import symbols from that package
 path in app code (e.g. `OwnerStampHook` from `@concepta/rockets-core`). If
@@ -425,8 +425,9 @@ import { defineTypeOrmRepository } from '@concepta/rockets-repository-typeorm';
 import { OwnerStampHook, OwnerScopeHook } from '@concepta/rockets-core';
 import { jwtAuth } from './auth/jwt.adapter';
 import { PetEntity } from './pet/pet.entity';
-import { UserMetadataEntity } from './user/user-metadata.entity';
-import { UserMetadataCreateDto, UserMetadataUpdateDto } from './user/dto';
+// defineUserMetadata(userMetadataSchema) → { entity, updateSchema, responseSchema }
+// (see CONFIGURATION.md §9)
+import { userMetadataConfig } from './user/user-metadata.schema';
 
 const repository = defineTypeOrmRepository({
   type: 'sqlite',
@@ -437,11 +438,7 @@ const repository = defineTypeOrmRepository({
 
 export const server = createServer({
   auth: jwtAuth,
-  userMetadata: {
-    entity: UserMetadataEntity,
-    createDto: UserMetadataCreateDto,
-    updateDto: UserMetadataUpdateDto,
-  },
+  userMetadata: userMetadataConfig,
   repository,
   resources: [
     defineResource({
@@ -459,8 +456,8 @@ Run it:
 
 ```bash
 yarn nest start
-# GET    /me              (from MeController, returns user + userMetadata)
-# PATCH  /me              (updates userMetadata)
+# GET    /me              (built from userMetadata config, returns user + userMetadata)
+# PATCH  /me              (validates body.userMetadata against updateSchema, upserts)
 # GET    /pets            (owner-scoped list)
 # POST   /pets            (auto-stamps userId)
 # GET    /pets/:id        (owner-scoped read)
@@ -485,7 +482,7 @@ guard preference to the surrounding server:
 
 ```typescript
 import { Module } from '@nestjs/common';
-import { defineRocketsAuth } from '@concepta/rockets-auth';
+import { defineRocketsAuth, rocketsAuthRoleSchema } from '@concepta/rockets-auth';
 import { RocketsModule } from '@concepta/rockets';
 import { defineTypeOrmRepository } from '@concepta/rockets-repository-typeorm';
 
@@ -509,9 +506,9 @@ const rocketsAuthInput = {
     },
   },
   invitationEntity: InvitationEntity,
-  userMetadata: { entity: UserMetadataEntity, createDto, updateDto },
-  userCrud: { model: UserDto, dto: { createOne, updateOne } },
-  roleCrud: { model: RoleDto, dto: { createOne, updateOne } },
+  userMetadata: { entity: UserMetadataEntity, updateSchema, responseSchema },
+  userCrud: {}, // model / dto derived from the userMetadata schemas
+  roleCrud: { model: rocketsAuthRoleSchema },
   useFactory: () => ({
     services: { mailerService },
     authentication: {
@@ -583,7 +580,7 @@ RocketsModule.forRoot({
     }),
     defineApiKeyAuth(),
   ],
-  userMetadata: { entity, createDto, updateDto },
+  userMetadata: { entity, updateSchema, responseSchema },
   repository,
   resources: [
     defineModuleResource({ entities: [UserEntity] }),
@@ -716,7 +713,7 @@ const repository = defineTypeOrmRepository({
   imports: [
     RocketsModule.forRoot({
       repository, // connection only — no entities: [...] here
-      userMetadata: { entity: UserMetadataEntity, createDto, updateDto },
+      userMetadata: { entity: UserMetadataEntity, updateSchema, responseSchema },
       resources: [
         defineResource({ entity: PetEntity }),
         defineModuleResource({
@@ -978,7 +975,7 @@ it: one `RocketsModule.forRoot({ ... })` object is split by
 | Rockets layer               | Role                                                                                                                               |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `@concepta/rockets-core`     | **Planner and contracts**: `defineResource`, `buildAppRegistrationPlan`, `AuthServerGuard`, owner/path hooks, swagger registration |
-| `@concepta/rockets` (server) | **External-auth presentation**: `MeController`, default `APP_GUARD`, `auth` chain merge                                            |
+| `@concepta/rockets` (server) | **External-auth presentation**: the `/me` routes (`buildMeController`), default `APP_GUARD`, `auth` chain merge                    |
 | `@concepta/rockets-auth`     | **Built-in identity bundle**: `defineRocketsAuth()` with owned composition contributions                                          |
 
 **Path B uses both** `@concepta/rockets` and `@concepta/rockets-auth`:

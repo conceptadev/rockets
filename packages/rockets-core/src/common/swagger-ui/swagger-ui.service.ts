@@ -7,6 +7,8 @@ import {
 } from '@nestjs/swagger';
 
 import { SwaggerUiSettingsInterface } from './interfaces/swagger-ui-settings.interface';
+import { liftInlineRequestBodyDefinitions } from './lift-inline-definitions';
+import { createRocketsStandardSchemaConverter } from './rockets-standard-schema.converter';
 import {
   SWAGGER_UI_MODULE_DOCUMENT_BUILDER_TOKEN,
   SWAGGER_UI_MODULE_SETTINGS_TOKEN,
@@ -35,6 +37,11 @@ export class SwaggerUiService {
    * argument list and silently drifts from what the app serves the moment
    * `documentOptions` changes.
    *
+   * Every named schema (`withOpenApi(schema, id)`) becomes a `$ref` to
+   * `components/schemas/<id>` through the Rockets converter, built fresh
+   * per document; an explicit `standardSchemaConverter` in the options
+   * replaces it.
+   *
    * @param app - Nest application to scan for routes.
    * @param documentOptions - Overrides the configured
    * `settings.documentOptions` when provided; apps that need per-call
@@ -44,11 +51,20 @@ export class SwaggerUiService {
     app: INestApplication,
     documentOptions?: SwaggerDocumentOptions,
   ): OpenAPIObject {
-    return SwaggerModule.createDocument(
+    const options = documentOptions ?? this.settings?.documentOptions;
+    const document = SwaggerModule.createDocument(
       app,
       this.documentBuilder.build(),
-      documentOptions ?? this.settings?.documentOptions,
+      {
+        ...options,
+        standardSchemaConverter:
+          options?.standardSchemaConverter ??
+          createRocketsStandardSchemaConverter(),
+      },
     );
+    // Generated CRUD request bodies are stamped inline by upstream and can
+    // carry raw `definitions`; lift them so no `#/definitions/*` ref dangles.
+    return liftInlineRequestBodyDefinitions(document);
   }
 
   setup(app: INestApplication): void {

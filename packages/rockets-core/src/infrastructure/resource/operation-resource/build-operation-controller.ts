@@ -406,15 +406,9 @@ function toClientSafeStreamError(error: unknown, label: string): unknown {
     unwrapToClientRuntimeException(error) ??
     error;
 
-  if (unwrapped instanceof HttpException) {
-    // An HttpException body is author-chosen and the filter puts it on
-    // the wire at any status — including 5xx, where it is still logged.
-    if (unwrapped.getStatus() >= 500) {
-      logStreamFailure(label, error);
-    }
-    return unwrapped;
-  }
-
+  // `RuntimeException` extends `HttpException` upstream — checked first,
+  // or its `safeMessage` masking below would never run and a 5xx domain
+  // exception would write its internal `.message` to the stream.
   if (unwrapped instanceof RuntimeException) {
     const status = unwrapped.httpStatus ?? 500;
     if (status < 500) {
@@ -432,6 +426,15 @@ function toClientSafeStreamError(error: unknown, label: string): unknown {
       unwrapped.safeMessage ?? ERROR_MESSAGE_FALLBACK,
       status,
     );
+  }
+
+  if (unwrapped instanceof HttpException) {
+    // An HttpException body is author-chosen and the filter puts it on
+    // the wire at any status — including 5xx, where it is still logged.
+    if (unwrapped.getStatus() >= 500) {
+      logStreamFailure(label, error);
+    }
+    return unwrapped;
   }
 
   // A plain `Error`, a driver failure: a 500 with no declared safe text.

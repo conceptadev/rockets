@@ -3,14 +3,19 @@ import { Operation } from '@concepta/nestjs-core';
 import { CqrsModule } from '@nestjs/cqrs';
 import { CrudModule, CrudOperationResolver } from '@concepta/nestjs-crud';
 import { AuthPublic } from '@concepta/nestjs-authentication';
+import {
+  assertNamedSchema,
+  rocketsSchemaValidation,
+} from '@concepta/rockets-core';
 import { ApiTags } from '@nestjs/swagger';
 
 import { AuthAccountThrottlerGuard } from '../../auth/gateways/http/guards/auth-account-throttler.guard';
 
 import { USER_CRUD_ENTITY_KEY } from '../../../shared/constants/repository-entity-keys.constants';
 import { UserCrudOptionsExtrasInterface } from '../../../shared/interfaces/rockets-auth-options-extras.interface';
-import { RocketsAuthUserCreateDto } from '../infrastructure/dto/rockets-auth-user-create.dto';
-import { RocketsAuthUserDto } from '../infrastructure/dto/rockets-auth-user.dto';
+import { rocketsAuthUserCreateSchema } from '../infrastructure/schemas/rockets-auth-user-create.schema';
+import { rocketsAuthUserSchema } from '../infrastructure/schemas/rockets-auth-user.schema';
+import { resolveUserMetadataSchemas } from '../infrastructure/schemas/rockets-auth-user-metadata.schema';
 import { RocketsAuthUserEntityInterface } from '../interfaces/rockets-auth-user-entity.interface';
 
 // Application – Commands
@@ -23,8 +28,17 @@ import { GetUserHandler } from '../application/queries/handlers/get-user.handler
 @Module({})
 export class RocketsAuthSignUpModule {
   static register(options: UserCrudOptionsExtrasInterface): DynamicModule {
-    const ModelDto = options.model || RocketsAuthUserDto;
-    const CreateDto = options.dto?.createOne || RocketsAuthUserCreateDto;
+    const userMetadata = resolveUserMetadataSchemas(options.userMetadataConfig);
+    const modelSchema =
+      options.model ?? rocketsAuthUserSchema(userMetadata.responseSchema);
+    assertNamedSchema(modelSchema, 'RocketsAuthSignUpModule: userCrud.model');
+    const createSchema =
+      options.dto?.createOne ??
+      rocketsAuthUserCreateSchema(userMetadata.updateSchema);
+    assertNamedSchema(
+      createSchema,
+      'RocketsAuthSignUpModule: userCrud.dto.createOne',
+    );
     const SignupCommand = options.command?.signupCommand || SignupUserCommand;
     const SignupHandler = options.handlers?.signupHandler || SignupUserHandler;
 
@@ -38,8 +52,9 @@ export class RocketsAuthSignUpModule {
             controller: {
               path: options.path || 'signup',
               entity: USER_CRUD_ENTITY_KEY,
+              request: { validation: rocketsSchemaValidation },
               response: {
-                resource: ModelDto,
+                resource: modelSchema,
               },
               resolver: CrudOperationResolver,
               // Public account creation: attach the auth throttler guard so the
@@ -53,7 +68,7 @@ export class RocketsAuthSignUpModule {
             operations: [
               {
                 operation: Operation.Create,
-                request: { body: CreateDto },
+                request: { body: createSchema },
                 command: SignupCommand,
                 commandHandler: SignupHandler,
                 extraDecorators: [AuthPublic()],
@@ -63,39 +78,9 @@ export class RocketsAuthSignUpModule {
                     description:
                       'Registers a new user in the system with email, username, password and optional metadata',
                   },
-                  body: {
-                    type: CreateDto,
-                    description: 'User registration information',
-                    examples: {
-                      standard: {
-                        value: {
-                          email: 'user@example.com',
-                          username: 'user@example.com',
-                          password: 'StrongP@ssw0rd',
-                          active: true,
-                        },
-                        summary: 'Standard user registration',
-                      },
-                      withMetadata: {
-                        value: {
-                          email: 'user@example.com',
-                          username: 'user@example.com',
-                          password: 'StrongP@ssw0rd',
-                          active: true,
-                          userMetadata: {
-                            firstName: 'John',
-                            lastName: 'Doe',
-                            phone: '+1234567890',
-                          },
-                        },
-                        summary: 'User registration with metadata',
-                      },
-                    },
-                  },
                   response: {
                     status: 201,
                     description: 'User created successfully',
-                    type: ModelDto,
                   },
                 },
               },

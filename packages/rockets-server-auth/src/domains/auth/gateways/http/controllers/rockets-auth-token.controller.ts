@@ -1,12 +1,12 @@
 import {
   AuthPublic,
   AuthenticatedResponseInterface,
-  AuthenticationResponseDto,
   IssueAuthenticatedResponseCommand,
   LocalGuard,
-  LocalLoginDto,
-  RefreshDto,
   RefreshGuard,
+  authenticationResponseSchema,
+  localLoginSchema,
+  refreshSchema,
 } from '@concepta/nestjs-authentication';
 import { ReferenceIdInterface } from '@concepta/nestjs-core';
 import {
@@ -15,26 +15,31 @@ import {
   HttpCode,
   Post,
   Req,
+  StandardSchemaValidationPipe,
   UnauthorizedException,
   UseGuards,
+  UsePipes,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { Throttle } from '@nestjs/throttler';
 import {
-  ApiBody,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import type { Request } from 'express';
-import { getAppContext } from '@concepta/rockets-core';
+import type { z } from 'zod';
+import { getAppContext, rocketsSchemaValidation } from '@concepta/rockets-core';
 
 import { AuthAccountThrottlerGuard } from '../guards/auth-account-throttler.guard';
 
 type RequestWithPassportUser = Request & {
   readonly user?: ReferenceIdInterface;
 };
+
+type LocalLoginBody = z.output<typeof localLoginSchema>;
+type RefreshBody = z.output<typeof refreshSchema>;
 
 /**
  * Password and refresh-token HTTP endpoints. Concepta v8 registers strategies
@@ -43,10 +48,14 @@ type RequestWithPassportUser = Request & {
  *
  * Uses `req.user` after passport guards (not `@AuthUser()`, which resolves
  * before `AuthUserContextOverlay` runs on some Nest versions).
+ *
+ * The passport guards consume the body before the handler runs; the body
+ * params stay declared so the schema still validates and documents them.
  */
 @Controller('token')
 @AuthPublic({ classLevel: true })
 @UseGuards(AuthAccountThrottlerGuard)
+@UsePipes(new StandardSchemaValidationPipe(rocketsSchemaValidation))
 @ApiTags('Authentication')
 export class RocketsAuthTokenController {
   constructor(private readonly commandBus: CommandBus) {}
@@ -60,22 +69,13 @@ export class RocketsAuthTokenController {
     description:
       'Validates credentials with the local strategy and returns access and refresh JWTs.',
   })
-  @ApiBody({
-    type: LocalLoginDto,
-    examples: {
-      standard: {
-        value: { username: 'user@example.com', password: 'StrongP@ssw0rd' },
-        summary: 'Username + password',
-      },
-    },
-  })
   @ApiOkResponse({
     description: 'Tokens issued',
-    type: AuthenticationResponseDto,
+    standardSchema: authenticationResponseSchema,
   })
   @ApiUnauthorizedResponse({ description: 'Invalid credentials' })
   async loginWithPassword(
-    @Body() _loginBody: LocalLoginDto,
+    @Body({ schema: localLoginSchema }) _loginBody: LocalLoginBody,
     @Req() req: RequestWithPassportUser,
   ): Promise<AuthenticatedResponseInterface> {
     const user = req.user;
@@ -97,22 +97,13 @@ export class RocketsAuthTokenController {
     description:
       'Accepts a refresh token (body.refreshToken), validates it, and returns a new token pair.',
   })
-  @ApiBody({
-    type: RefreshDto,
-    examples: {
-      standard: {
-        value: { refreshToken: '<jwt>' },
-        summary: 'Refresh JWT from prior login',
-      },
-    },
-  })
   @ApiOkResponse({
     description: 'Tokens issued',
-    type: AuthenticationResponseDto,
+    standardSchema: authenticationResponseSchema,
   })
   @ApiUnauthorizedResponse({ description: 'Invalid or expired refresh token' })
   async refreshTokens(
-    @Body() _dto: RefreshDto,
+    @Body({ schema: refreshSchema }) _refreshBody: RefreshBody,
     @Req() req: RequestWithPassportUser,
   ): Promise<AuthenticatedResponseInterface> {
     const user = req.user;

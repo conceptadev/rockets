@@ -42,10 +42,9 @@ import {
   type RepositoryFindOneOptions,
   type RepositoryFindOptions,
 } from '@concepta/nestjs-repository';
-import { Expose, Type } from 'class-transformer';
-import { IsOptional, IsString, IsUUID } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { withOpenApi } from '@concepta/nestjs-core';
 import request from 'supertest';
+import { z } from 'zod';
 import type {
   AuthAdapterInterface,
   AuthAttemptResult,
@@ -147,69 +146,74 @@ class PlainItemEntity {
   @DeleteDateColumn() dateDeleted?: Date;
 }
 
-// ── DTOs ──
+// ── Schemas ──
 
-class CategoryResponseDto {
-  @Expose() @ApiProperty() id!: string;
-  @Expose() @ApiProperty() label!: string;
-}
+const categoryResponseSchema = withOpenApi(
+  z.object({ id: z.uuid(), label: z.string() }),
+  'CategoryResponseDto',
+);
 
-class CategoryCreateDto {
-  @Expose() @IsString() @ApiProperty() label!: string;
-}
+const categoryCreateSchema = withOpenApi(
+  z.object({ label: z.string() }),
+  'CategoryCreateDto',
+);
 
-class ParentCreateDto {
-  @Expose() @IsString() @ApiProperty() name!: string;
-  @Expose() @IsOptional() @IsUUID() @ApiPropertyOptional() categoryId?: string;
-}
+const parentCreateSchema = withOpenApi(
+  z.object({ name: z.string(), categoryId: z.uuid().optional() }),
+  'ParentCreateDto',
+);
 
-class ParentResponseDto {
-  @Expose() @ApiProperty() id!: string;
-  @Expose() @ApiProperty() name!: string;
-  @Expose() @ApiPropertyOptional() categoryId?: string;
-  @Expose()
-  @Type(() => CategoryResponseDto)
-  @ApiPropertyOptional({ type: () => CategoryResponseDto })
-  category?: CategoryResponseDto;
-  @Expose() @ApiPropertyOptional() dateDeleted?: string;
-}
+const parentResponseSchema = withOpenApi(
+  z.object({
+    id: z.uuid(),
+    name: z.string(),
+    categoryId: z.uuid().nullable().optional(),
+    category: categoryResponseSchema.nullable().optional(),
+    dateDeleted: z.date().nullable().optional(),
+  }),
+  'ParentResponseDto',
+);
 
-class ChildCreateDto {
-  @Expose() @IsString() @ApiProperty() title!: string;
-  @Expose() @IsUUID() @ApiProperty() categoryId!: string;
-}
+const childCreateSchema = withOpenApi(
+  z.object({ title: z.string(), categoryId: z.uuid() }),
+  'ChildCreateDto',
+);
 
-class GrandchildCreateDto {
-  @Expose() @IsString() @ApiProperty() label!: string;
-}
+const grandchildCreateSchema = withOpenApi(
+  z.object({ label: z.string() }),
+  'GrandchildCreateDto',
+);
 
-class GrandchildResponseDto {
-  @Expose() @ApiProperty() id!: string;
-  @Expose() @ApiProperty() label!: string;
-  @Expose() @ApiProperty() childId!: string;
-}
+const grandchildResponseSchema = withOpenApi(
+  z.object({ id: z.uuid(), label: z.string(), childId: z.uuid() }),
+  'GrandchildResponseDto',
+);
 
-class ChildResponseDto {
-  @Expose() @ApiProperty() id!: string;
-  @Expose() @ApiProperty() title!: string;
-  @Expose() @ApiProperty() parentId!: string;
-  @Expose() @ApiProperty() categoryId!: string;
-  @Expose()
-  @Type(() => CategoryResponseDto)
-  @ApiPropertyOptional({ type: () => CategoryResponseDto })
-  category?: CategoryResponseDto;
-  @Expose() @ApiPropertyOptional() dateDeleted?: string;
-}
+const childResponseSchema = withOpenApi(
+  z.object({
+    id: z.uuid(),
+    title: z.string(),
+    parentId: z.uuid(),
+    categoryId: z.uuid(),
+    category: categoryResponseSchema.nullable().optional(),
+    dateDeleted: z.date().nullable().optional(),
+  }),
+  'ChildResponseDto',
+);
 
-class PlainItemCreateDto {
-  @Expose() @IsString() @ApiProperty() name!: string;
-}
+const plainItemCreateSchema = withOpenApi(
+  z.object({ name: z.string() }),
+  'PlainItemCreateDto',
+);
 
-class PlainItemResponseDto {
-  @Expose() @ApiProperty() id!: string;
-  @Expose() @ApiProperty() name!: string;
-  @Expose() @ApiPropertyOptional() dateDeleted?: string;
-}
+const plainItemResponseSchema = withOpenApi(
+  z.object({
+    id: z.uuid(),
+    name: z.string(),
+    dateDeleted: z.date().nullable().optional(),
+  }),
+  'PlainItemResponseDto',
+);
 
 // ── User-metadata stub ──
 
@@ -336,14 +340,14 @@ const parentResource = defineResource<ParentEntity>({
   ],
   relations: (rel) => [rel(CategoryEntity, 'category')],
   operations: {
-    list: { output: ParentResponseDto },
-    read: { output: ParentResponseDto },
+    list: { output: parentResponseSchema },
+    read: { output: parentResponseSchema },
     // `transactional` is what exposes the reload hook's `ctx`: the row is
     // inserted inside the transaction, so a reload that does not join it
     // cannot see the row and the eager relation goes missing.
     create: {
-      input: ParentCreateDto,
-      output: ParentResponseDto,
+      input: parentCreateSchema,
+      output: parentResponseSchema,
       transactional: true,
     },
     delete: { soft: true, returnDeleted: true },
@@ -361,9 +365,9 @@ const parentResource = defineResource<ParentEntity>({
       hooks: [OwnerStampHook.for(ChildEntity)],
       relations: (rel) => [rel(CategoryEntity, 'category')],
       operations: {
-        list: { output: ChildResponseDto },
-        read: { output: ChildResponseDto },
-        create: { input: ChildCreateDto, output: ChildResponseDto },
+        list: { output: childResponseSchema },
+        read: { output: childResponseSchema },
+        create: { input: childCreateSchema, output: childResponseSchema },
         delete: { soft: true, returnDeleted: true },
       },
       // Third level. Its guard looks the CHILD up, replaying the child's
@@ -380,10 +384,10 @@ const parentResource = defineResource<ParentEntity>({
           tags: ['Grandchildren'],
           owner: 'userId',
           operations: {
-            list: { output: GrandchildResponseDto },
+            list: { output: grandchildResponseSchema },
             create: {
-              input: GrandchildCreateDto,
-              output: GrandchildResponseDto,
+              input: grandchildCreateSchema,
+              output: grandchildResponseSchema,
             },
           },
         }),
@@ -399,8 +403,8 @@ const parentResource = defineResource<ParentEntity>({
       owner: 'userId',
       relations: (rel) => [rel(CategoryEntity, 'category')],
       operations: {
-        list: { output: ChildResponseDto },
-        create: { input: ChildCreateDto, output: ChildResponseDto },
+        list: { output: childResponseSchema },
+        create: { input: childCreateSchema, output: childResponseSchema },
       },
     }),
   },
@@ -415,9 +419,9 @@ const plainItemResource = defineResource<PlainItemEntity>({
   // No eager relation, no AfterCreateReloadHook — proves the path
   // works fine without it.
   operations: {
-    list: { output: PlainItemResponseDto },
-    read: { output: PlainItemResponseDto },
-    create: { input: PlainItemCreateDto, output: PlainItemResponseDto },
+    list: { output: plainItemResponseSchema },
+    read: { output: plainItemResponseSchema },
+    create: { input: plainItemCreateSchema, output: plainItemResponseSchema },
     delete: { soft: true, returnDeleted: true },
   },
 });
@@ -432,9 +436,9 @@ const categoryResource = defineResource<CategoryEntity>({
   tags: ['Categories'],
   public: true,
   operations: {
-    list: { output: CategoryResponseDto },
-    read: { output: CategoryResponseDto },
-    create: { input: CategoryCreateDto, output: CategoryResponseDto },
+    list: { output: categoryResponseSchema },
+    read: { output: categoryResponseSchema },
+    create: { input: categoryCreateSchema, output: categoryResponseSchema },
   },
 });
 

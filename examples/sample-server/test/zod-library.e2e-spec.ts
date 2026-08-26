@@ -1,24 +1,16 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { INestApplication, Module, ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
-import {
-  DocumentBuilder,
-  OpenAPIObject,
-  SwaggerModule,
-} from '@nestjs/swagger';
-import { cleanupOpenApiDoc } from 'nestjs-zod';
+import type { OpenAPIObject } from '@nestjs/swagger';
 import request from 'supertest';
 import {
   ExceptionsFilter,
   RocketsModule,
 } from '@concepta/rockets';
 import { defineTypeOrmRepository } from '@concepta/rockets-repository-typeorm';
-import {
-  UserMetadataCreateDto,
-  UserMetadataEntity,
-  UserMetadataUpdateDto,
-} from '../src/user-metadata.schema';
+import { userMetadataConfig } from '../src/user-metadata.schema';
 import { defineSampleAuth, sampleAuthUserResource } from '../src/auth';
+import { createSampleServerOpenApiDocument } from '../src/swagger/create-openapi-document';
 import {
   authorZodResource,
   bookZodResource,
@@ -44,11 +36,7 @@ describe('library zod resources (e2e)', () => {
       imports: [
         RocketsModule.forRoot({
           auth: defineSampleAuth(),
-          userMetadata: {
-            entity: UserMetadataEntity,
-            createDto: UserMetadataCreateDto,
-            updateDto: UserMetadataUpdateDto,
-          },
+          userMetadata: userMetadataConfig,
           repository: defineTypeOrmRepository({
             type: 'sqlite',
             database: ':memory:',
@@ -66,16 +54,9 @@ describe('library zod resources (e2e)', () => {
     app.useGlobalFilters(new ExceptionsFilter(app.get(HttpAdapterHost)));
     await app.init();
 
-    doc = cleanupOpenApiDoc(
-      SwaggerModule.createDocument(
-        app,
-        new DocumentBuilder()
-          .setTitle('library')
-          .setVersion('1.0')
-          .addBearerAuth()
-          .build(),
-      ),
-    );
+    // Through the app's own builder so the Rockets converter turns every
+    // named schema into a `$ref`'d component — the document main.ts serves.
+    doc = createSampleServerOpenApiDocument(app);
 
     const signup = await request(app.getHttpServer())
       .post('/auth/signup')
@@ -104,6 +85,30 @@ describe('library zod resources (e2e)', () => {
     return schema;
   }
 
+  /**
+   * Generated CRUD request bodies are documented inline by upstream
+   * `CrudInitApiBody` (it converts the named create/update/replace schema
+   * itself instead of leaving the `@Body({ schema })` param to the
+   * converter), so the request-side field roles are read off the path
+   * operation rather than a `#/components/schemas/Book*Dto` entry.
+   */
+  function requestBodyOf(
+    path: string,
+    method: 'post' | 'patch' | 'put',
+  ): Record<string, unknown> {
+    const operation: unknown = doc.paths[path]?.[method];
+    if (!isRecord(operation) || !isRecord(operation.requestBody)) {
+      throw new Error(`${method.toUpperCase()} ${path} has no request body`);
+    }
+    const content = operation.requestBody.content;
+    const json = isRecord(content) ? content['application/json'] : undefined;
+    const schema = isRecord(json) ? json.schema : undefined;
+    if (!isRecord(schema)) {
+      throw new Error(`${method.toUpperCase()} ${path} body has no schema`);
+    }
+    return schema;
+  }
+
   describe('OpenAPI document', () => {
     it.each([
       '/authors',
@@ -115,43 +120,87 @@ describe('library zod resources (e2e)', () => {
       expect(doc.paths[path]).toBeDefined();
     });
 
+    it.each(['AuthorResponseDto', 'BookResponseDto'])(
+      '%s component is emitted',
+      (name) => {
+        expect(schemaOf(name).properties).toBeDefined();
+      },
+    );
+
     it.each([
-      'AuthorResponseDto',
-      'AuthorCreateDto',
-      'BookResponseDto',
-      'BookCreateDto',
-      'BookUpdateDto',
-      'BookReplaceDto',
-    ])('%s component is emitted', (name) => {
-      expect(schemaOf(name).properties).toBeDefined();
+      ['/authors', 'post'],
+      ['/books', 'post'],
+      ['/books/{id}', 'patch'],
+      ['/books/{id}', 'put'],
+    ] as const)('%s %s documents its request body', (path, method) => {
+      expect(requestBodyOf(path, method).properties).toBeDefined();
     });
 
-    it('BookUpdateDto excludes the create-only isbn', () => {
-      expect(schemaOf('BookUpdateDto').properties).not.toHaveProperty('isbn');
+    it('the update body excludes the create-only isbn; replace keeps it', () => {
+      expect(requestBodyOf('/books/{id}', 'patch').properties).not.toHaveProperty(
+        'isbn',
+      );
+      expect(requestBodyOf('/books/{id}', 'put').properties).toHaveProperty(
+        'isbn',
+      );
     });
 
-    it('BookResponseDto excludes the write-only internalNote; BookCreateDto keeps it', () => {
+    it('BookResponseDto excludes the write-only internalNote; the create body keeps it', () => {
       expect(schemaOf('BookResponseDto').properties).not.toHaveProperty(
         'internalNote',
       );
-      expect(schemaOf('BookCreateDto').properties).toHaveProperty(
+      expect(requestBodyOf('/books', 'post').properties).toHaveProperty(
         'internalNote',
       );
     });
 
-    it('BookResponseDto exposes the nested author projection', () => {
+    it('BookResponseDto exposes the nested author projection as a named component', () => {
       const properties = schemaOf('BookResponseDto').properties as Record<
         string,
         Record<string, unknown>
       >;
-      expect(properties.author).toMatchObject({ type: 'object' });
-      const nested = properties.author.properties as Record<string, unknown>;
+      // Single nested object: the bridge emits the `$ref` wrapped in `allOf`.
+      expect(properties.author).toEqual({
+        allOf: [{ $ref: '#/components/schemas/BookAuthorResponseDto' }],
+      });
+      const nested = schemaOf('BookAuthorResponseDto').properties as Record<
+        string,
+        Record<string, unknown>
+      >;
       expect(Object.keys(nested).sort()).toEqual([
         'dateCreated',
         'dateUpdated',
         'id',
         'name',
       ]);
+      expect(nested.dateCreated).toEqual({
+        type: 'string',
+        format: 'date-time',
+      });
+    });
+
+    it('response components are fail-closed (additionalProperties: false)', () => {
+      expect(schemaOf('BookResponseDto').additionalProperties).toBe(false);
+      expect(schemaOf('AuthorResponseDto').additionalProperties).toBe(false);
+    });
+
+    it('the paginated list references the named paginated component', () => {
+      const list = doc.paths['/books'].get?.responses['200'] as {
+        content: Record<string, { schema: unknown }>;
+      };
+      expect(list.content['application/json'].schema).toEqual({
+        $ref: '#/components/schemas/BookResponseDtoPaginatedDto',
+      });
+      const items = (
+        schemaOf('BookResponseDtoPaginatedDto').properties as Record<
+          string,
+          Record<string, unknown>
+        >
+      ).data;
+      expect(items).toEqual({
+        type: 'array',
+        items: { $ref: '#/components/schemas/BookResponseDto' },
+      });
     });
 
     it('zod field meta namespaces do not leak into the document', () => {
@@ -188,6 +237,11 @@ describe('library zod resources (e2e)', () => {
       expect(book.body.isbn).toBe('9788535914061');
       expect(book.body.authorId).toBe(author.body.id);
       expect(book.body).not.toHaveProperty('internalNote');
+      // `f.createdAt()` rows carry `Date`; the wire carries ISO strings.
+      expect(typeof book.body.dateCreated).toBe('string');
+      expect(Number.isNaN(Date.parse(book.body.dateCreated as string))).toBe(
+        false,
+      );
 
       authorId = author.body.id as string;
       bookId = book.body.id as string;

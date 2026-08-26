@@ -16,16 +16,6 @@ export {
   USER_MODULE_USER_ENTITY_KEY,
   ROCKETS_CORE_SETTINGS_TOKEN,
   RocketsCoreExceptionsFilter,
-  BaseUserDto,
-  BaseUserCreateDto,
-  BaseUserUpdateDto,
-  BaseUserMetadataDto,
-  BaseUserMetadataCreateDto,
-  BaseUserMetadataUpdateDto,
-  UserUpdateDto,
-  UserResponseDto,
-  RoleNameDto,
-  UserRoleItemDto,
   OwnerStampHook,
   OwnerScopeHook,
   InjectDynamicRepository,
@@ -100,7 +90,8 @@ export type {
   RocketsAuthOption,
 } from './infrastructure/config/interfaces/rockets-options-extras.interface';
 export { UserModule } from './user.module';
-export { MeController } from './gateways/http/me.controller';
+export { buildMeController } from './gateways/http/build-me-controller';
+export { meResponseSchema, meUpdateSchema } from './gateways/http/me.schemas';
 export {
   logAndGetErrorDetails,
   getErrorDetails,
@@ -117,7 +108,6 @@ export {
   defineModuleResource,
   isModuleResource,
   ResourceKind,
-  createPaginatedDto,
   buildAppRegistrationPlan,
   isCrudResource,
   relation,

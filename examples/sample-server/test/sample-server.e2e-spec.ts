@@ -1,9 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import {
-  INestApplication,
-  StandardSchemaValidationPipe,
-  ValidationPipe,
-} from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { HttpAdapterHost } from '@nestjs/core';
 import { ExceptionsFilter } from '@concepta/rockets';
@@ -18,10 +14,9 @@ describe('Sample Server (e2e)', () => {
 
   beforeAll(async () => {
     app = await NestFactory.create(AppModule, { logger: ['error'] });
-    app.useGlobalPipes(
-      new StandardSchemaValidationPipe(),
-      new ValidationPipe({ transform: true, whitelist: true }),
-    );
+    // Same bootstrap as main.ts: schema-validated routes carry their own
+    // per-route pipe; the class-validator pipe covers the class-DTO routes.
+    app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
     const httpAdapterHost = app.get(HttpAdapterHost);
     app.useGlobalFilters(new ExceptionsFilter(httpAdapterHost));
     await app.init();
@@ -98,6 +93,9 @@ describe('Sample Server (e2e)', () => {
 
       expect(res.body.id).toBe(userId);
       expect(res.body.email).toBe('test@example.com');
+      // No metadata row yet — the response schema serializes the absent
+      // row as an explicit `null`, not `{}`.
+      expect(res.body.userMetadata).toBeNull();
     });
 
     it('401 without token', async () => {

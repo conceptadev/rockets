@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import {
   INestApplication,
-  ValidationPipe,
   ExceptionFilter,
   Catch,
   ArgumentsHost,
@@ -81,10 +80,6 @@ describe('Role-Based Access Control (e2e)', () => {
     app = await NestFactory.create(AppModule, {
       logger: ['error', 'warn', 'log'],
     });
-
-    app.useGlobalPipes(
-      new ValidationPipe({ transform: true, whitelist: true }),
-    );
 
     const httpAdapterHost = app.get(HttpAdapterHost);
     app.useGlobalFilters(

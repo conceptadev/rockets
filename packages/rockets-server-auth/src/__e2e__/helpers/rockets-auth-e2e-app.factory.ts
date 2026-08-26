@@ -1,5 +1,4 @@
 import { vi } from 'vitest';
-import { EmailSendInterface } from '@concepta/nestjs-common';
 import type { AuthenticationStrategiesSettingsInterface } from '@concepta/nestjs-authentication';
 import { EventModule } from '@concepta/nestjs-event';
 import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
@@ -30,11 +29,12 @@ import { RoleEntityFixture } from '../../__fixtures__/role/role.entity.fixture';
 import { UserRoleEntityFixture } from '../../__fixtures__/role/user-role.entity.fixture';
 import { UserMetadataEntityFixture } from '../../__fixtures__/user/user-metadata.entity.fixture';
 import { UserPasswordHistoryEntityFixture } from '../../__fixtures__/user/user-password-history.entity.fixture';
-import { RocketsAuthUserDto } from '../../domains/user/infrastructure/dto/rockets-auth-user.dto';
-import { RocketsAuthUserMetadataDto } from '../../domains/user/infrastructure/dto/rockets-auth-user-metadata.dto';
-import { RocketsAuthUserCreateDto } from '../../domains/user/infrastructure/dto/rockets-auth-user-create.dto';
-import { RocketsAuthUserUpdateDto } from '../../domains/user/infrastructure/dto/rockets-auth-user-update.dto';
+import {
+  rocketsAuthUserMetadataResponseSchema,
+  rocketsAuthUserMetadataUpdateSchema,
+} from '../../domains/user/infrastructure/schemas/rockets-auth-user-metadata.schema';
 import { ROCKETS_AUTH_OTP_ASSIGNMENT } from '../../shared/constants/rockets-auth.constants';
+import type { EmailSendInterface } from '../../shared/email/email-send.interfaces';
 import { defineRocketsAuth } from '../../define-rockets-auth';
 import type { DefineRocketsAuthInput } from '../../define-rockets-auth';
 import {
@@ -160,18 +160,15 @@ function defaultDefineRocketsAuthInput(
     },
     userMetadata: {
       entity: UserMetadataEntityFixture,
-      createDto: RocketsAuthUserMetadataDto,
-      updateDto: RocketsAuthUserMetadataDto,
+      updateSchema: rocketsAuthUserMetadataUpdateSchema,
+      responseSchema: rocketsAuthUserMetadataResponseSchema,
     },
+    // `model` / `dto` are derived by the signup and admin modules from the
+    // userMetadata schemas above.
     userCrud: {
       imports: [
         TypeOrmModule.forFeature([UserFixture, UserMetadataEntityFixture]),
       ],
-      model: RocketsAuthUserDto,
-      dto: {
-        createOne: RocketsAuthUserCreateDto,
-        updateOne: RocketsAuthUserUpdateDto,
-      },
     },
     invitationEntity: InvitationEntityFixture,
     invitation: {},

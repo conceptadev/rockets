@@ -3,7 +3,6 @@ import { Operation } from '@concepta/nestjs-core';
 import { CqrsModule } from '@nestjs/cqrs';
 import {
   CrudModule,
-  CrudResponsePaginatedDto,
   CrudOperationResolver,
   CrudListQuery,
   CrudReadQuery,
@@ -11,11 +10,17 @@ import {
   CrudDeleteCommand,
 } from '@concepta/nestjs-crud';
 import { CrudJoin } from '@concepta/nestjs-crud';
-import { ApiBearerAuth, ApiProperty, ApiTags } from '@nestjs/swagger';
-import { Exclude, Expose, Type as TransformType } from 'class-transformer';
+import {
+  assertNamedSchema,
+  paginatedSchema,
+  rocketsSchemaValidation,
+  withOpenApi,
+} from '@concepta/rockets-core';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
-import { RocketsAuthUserUpdateDto } from '../infrastructure/dto/rockets-auth-user-update.dto';
-import { RocketsAuthUserDto } from '../infrastructure/dto/rockets-auth-user.dto';
+import { rocketsAuthUserUpdateSchema } from '../infrastructure/schemas/rockets-auth-user-update.schema';
+import { rocketsAuthUserSchema } from '../infrastructure/schemas/rockets-auth-user.schema';
+import { resolveUserMetadataSchemas } from '../infrastructure/schemas/rockets-auth-user-metadata.schema';
 import { AdminGuard } from '../../../guards/admin.guard';
 import {
   USER_CRUD_ENTITY_KEY,
@@ -23,7 +28,6 @@ import {
 } from '../../../shared/constants/repository-entity-keys.constants';
 import { UserCrudOptionsExtrasInterface } from '../../../shared/interfaces/rockets-auth-options-extras.interface';
 import { RocketsAuthUserEntityInterface } from '../interfaces/rockets-auth-user-entity.interface';
-import { RocketsAuthUserInterface } from '../interfaces/rockets-auth-user.interface';
 
 // Application – Query handlers
 import { AdminUserListHandler } from '../application/queries/handlers/admin-user-list.handler';
@@ -37,24 +41,21 @@ import { UpdateUserHandler } from '../application/commands/handlers/update-user.
 @Module({})
 export class RocketsAuthAdminModule {
   static register(admin: UserCrudOptionsExtrasInterface): DynamicModule {
-    const ModelDto = admin.model || RocketsAuthUserDto;
-    const UpdateDto = admin.dto?.updateOne || RocketsAuthUserUpdateDto;
+    const userMetadata = resolveUserMetadataSchemas(admin.userMetadataConfig);
+    const modelSchema =
+      admin.model ?? rocketsAuthUserSchema(userMetadata.responseSchema);
+    assertNamedSchema(modelSchema, 'RocketsAuthAdminModule: userCrud.model');
+    const updateSchema =
+      admin.dto?.updateOne ??
+      rocketsAuthUserUpdateSchema(userMetadata.updateSchema);
+    assertNamedSchema(
+      updateSchema,
+      'RocketsAuthAdminModule: userCrud.dto.updateOne',
+    );
     const ListHandler = admin.handlers?.adminList ?? AdminUserListHandler;
     const ReadHandler = admin.handlers?.adminRead ?? AdminUserReadHandler;
     const UpdateHandler = admin.handlers?.adminUpdate ?? AdminUpdateUserHandler;
     const DeleteHandler = admin.handlers?.adminDelete ?? AdminDeleteUserHandler;
-
-    @Exclude()
-    class AdminUsersPaginatedDto extends CrudResponsePaginatedDto<RocketsAuthUserInterface> {
-      @Expose()
-      @ApiProperty({
-        type: ModelDto,
-        isArray: true,
-        description: 'Array of Users',
-      })
-      @TransformType(() => ModelDto)
-      data: RocketsAuthUserInterface[] = [];
-    }
 
     return {
       module: RocketsAuthAdminModule,
@@ -67,9 +68,18 @@ export class RocketsAuthAdminModule {
               path: admin.path || 'admin/users',
               entity: USER_CRUD_ENTITY_KEY,
               resolver: CrudOperationResolver,
+              request: {
+                body: updateSchema,
+                validation: rocketsSchemaValidation,
+              },
               response: {
-                resource: ModelDto,
-                paginated: AdminUsersPaginatedDto,
+                resource: modelSchema,
+                // Component id kept from the class-DTO era — part of the
+                // published OpenAPI contract.
+                paginated: withOpenApi(
+                  paginatedSchema(modelSchema),
+                  'AdminUsersPaginatedDto',
+                ),
               },
               extraDecorators: [
                 ApiTags('admin'),
@@ -96,7 +106,6 @@ export class RocketsAuthAdminModule {
               },
               {
                 operation: Operation.Update,
-                request: { body: UpdateDto },
                 command: CrudUpdateCommand,
                 commandHandler: UpdateHandler,
                 api: {

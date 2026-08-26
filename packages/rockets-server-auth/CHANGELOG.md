@@ -14,11 +14,16 @@ and this project adheres to
 - OTP consume is the single decision point for burning passcodes:
   `RocketsValidateOtpHandler` dispatches `ConsumeOtpCommand` when
   `deleteIfValid` is true (no prior `ValidateOtpQuery`), and recovery
-  `updatePassword` consumes before mutating the password. A failed password
-  write after consume still leaves the proof burned (user must restart
-  recovery). DB-level single-winner under concurrent consumes still needs
-  upstream nestjs-otp locking; this closes the application validate-then-
-  consume TOCTOU only.
+  `updatePassword` consumes before mutating the password, inside ONE
+  transaction scope with the password write and the sibling-OTP cleanup —
+  a failed write rolls the consume back with it (RFC #104, stage 4: the
+  scope must be the outermost one, because once an inner outermost scope
+  commits, the request context keeps the finished transaction and every
+  later repository call on it fails). DB-level single-winner under
+  concurrent consumes still needs upstream nestjs-otp locking; this closes
+  the application validate-then-consume TOCTOU only. New e2e:
+  `domains/otp/__tests__/otp-login.e2e-spec.ts` (send → confirm → tokens →
+  passcode burned).
 
 ### Release preparation
 
@@ -54,6 +59,22 @@ and this project adheres to
 
 ### Changed
 
+- **Schemas instead of DTO classes (RFC #104, stage 4; upstream
+  `8.0.0-alpha.9`).** The user / role / invitation DTO classes that extended
+  upstream classes (`RocketsAuthUserDto`, `RocketsAuthUserCreateDto`,
+  `RocketsAuthUserUpdateDto`, `RocketsAuthRoleDto` + create/update,
+  `RocketsAuthInvitationDto` + accept/create/response,
+  `RocketsAuthUserMetadataDto`) are named zod schemas composed from the
+  upstream schemas; the admin user / role CRUD and signup modules pass
+  schemas to upstream CRUD with `rocketsSchemaValidation`; the token,
+  recovery and invitation controllers validate with `@Body({ schema })` +
+  the per-route Standard Schema pipe and document with `standardSchema`.
+  `UserCrudOptionsExtrasInterface.model` / `dto.createOne` / `dto.updateOne`
+  and the role equivalents are `z.ZodType`; `UserMetadataConfigInterface` is
+  `{ entity, updateSchema, responseSchema }`; the invitation-acceptance
+  listener validates with `validateWithSchema`. `@concepta/nestjs-common` is
+  no longer a dependency (`EmailSendInterface` is package-owned; password
+  interfaces come from `@concepta/nestjs-user` / `@concepta/nestjs-authentication`).
 - `@nestjs/config` dropped (RFC #104, stage 1). `RocketsAuthModule` registers
   its default settings (roles, e-mail templates, OTP) as a plain provider
   (`ROCKETS_AUTH_SETTINGS_DEFAULTS_TOKEN`) instead of `registerAs` +

@@ -31,10 +31,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
 import { getDynamicRepositoryToken, Where } from '@concepta/nestjs-repository';
-import { Expose } from 'class-transformer';
-import { IsString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
 import request from 'supertest';
+import { z } from 'zod';
 import type {
   AuthAdapterInterface,
   AuthAttemptResult,
@@ -53,7 +51,7 @@ import {
   type RocketsErrorSerializerInterface,
 } from '../infrastructure/filters/error-serializer';
 import { defineResource } from '../infrastructure/resource/define-resource';
-import { RuntimeException } from '@concepta/nestjs-core';
+import { RuntimeException, withOpenApi } from '@concepta/nestjs-core';
 import { attachErrorDetails } from '../common/utils/validation-error-details.util';
 import { baseEntity, f, zodResource } from '../zod';
 import { defineAuthAdapter } from '../infrastructure/auth/define-auth-adapter';
@@ -77,13 +75,14 @@ class NoteEntity {
   @Column({ type: 'varchar' }) ref!: string;
 }
 
-class NoteCreateDto {
-  @Expose() @IsString() @ApiProperty() ref!: string;
-}
-class NoteResponseDto {
-  @Expose() @ApiProperty() id!: string;
-  @Expose() @ApiProperty() ref!: string;
-}
+const noteCreateSchema = withOpenApi(
+  z.object({ ref: z.string() }),
+  'NoteCreateDto',
+);
+const noteResponseSchema = withOpenApi(
+  z.object({ id: z.uuid(), ref: z.string() }),
+  'NoteResponseDto',
+);
 
 class StubMetadataRepo {
   async findOne() {
@@ -172,8 +171,8 @@ const noteResource = defineResource<NoteEntity>({
   tags: ['Notes'],
   hooks: [NoteUniqueHook],
   operations: {
-    read: { output: NoteResponseDto },
-    create: { input: NoteCreateDto, output: NoteResponseDto },
+    read: { output: noteResponseSchema },
+    create: { input: noteCreateSchema, output: noteResponseSchema },
   },
 });
 

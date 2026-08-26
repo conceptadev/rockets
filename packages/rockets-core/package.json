@@ -54,43 +54,39 @@
     "test:e2e": "cd ../.. && ./node_modules/.bin/vitest run --project e2e-packages packages/rockets-core"
   },
   "dependencies": {
-    "@concepta/nestjs-access-control": "8.0.0-alpha.8",
-    "@concepta/nestjs-authentication": "8.0.0-alpha.8",
-    "@concepta/nestjs-core": "8.0.0-alpha.8",
-    "@concepta/nestjs-crud": "8.0.0-alpha.8",
-    "@concepta/nestjs-repository": "8.0.0-alpha.8",
-    "@nestjs/common": "12.0.0-alpha.5",
-    "@nestjs/core": "12.0.0-alpha.5",
+    "@concepta/nestjs-access-control": "8.0.0-alpha.9",
+    "@concepta/nestjs-authentication": "8.0.0-alpha.9",
+    "@concepta/nestjs-core": "8.0.0-alpha.9",
+    "@concepta/nestjs-crud": "8.0.0-alpha.9",
+    "@concepta/nestjs-repository": "8.0.0-alpha.9",
+    "@nestjs/common": "12.0.0-alpha.6",
+    "@nestjs/core": "12.0.0-alpha.6",
     "@nestjs/cqrs": "^11.0.0",
     "@nestjs/swagger": "12.0.0-alpha.2",
     "@standard-schema/spec": "1.1.0",
     "path-to-regexp": "^8.4.2",
-    "pluralize": "^8.0.0"
+    "pluralize": "^8.0.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@concepta/rockets-repository-typeorm": "workspace:^",
-    "@nestjs/testing": "12.0.0-alpha.5",
+    "@nestjs/testing": "12.0.0-alpha.6",
     "@nestjs/typeorm": "11.0.3",
     "@types/pluralize": "^0.0.33",
     "accesscontrol": "^2.2.1",
     "nestjs-zod": "^5.4.0",
     "supertest": "^6.3.4",
     "typeorm": "^0.3.31",
-    "vitest": "^4.1.10",
-    "zod": "^4.4.3"
+    "vitest": "^4.1.10"
   },
   "peerDependencies": {
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "nestjs-zod": "^5.0.0",
-    "rxjs": "^7.1.0",
-    "zod": "^4.0.0"
+    "rxjs": "^7.1.0"
   },
   "peerDependenciesMeta": {
     "nestjs-zod": {
-      "optional": true
-    },
-    "zod": {
       "optional": true
     }
   },

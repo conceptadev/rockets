@@ -20,8 +20,8 @@ import {
 } from '@nestjs/swagger';
 import {
   AuthPublic,
-  AuthenticationResponseDto,
   IssueAuthenticatedResponseCommand,
+  authenticationResponseSchema,
   type AuthenticatedResponseInterface,
 } from '@concepta/nestjs-authentication';
 import { OtpException } from '@concepta/nestjs-otp';
@@ -93,7 +93,7 @@ export function buildRocketsAuthOtpController(
     })
     @ApiOkResponse({
       description: 'OTP confirmed successfully, authentication tokens provided',
-      type: AuthenticationResponseDto,
+      standardSchema: authenticationResponseSchema,
     })
     @ApiBadRequestResponse({
       description: 'Invalid email format or missing required fields',

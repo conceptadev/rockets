@@ -1,7 +1,12 @@
 import type { RocketsUserMetadataConfig } from '../../domain/interfaces/rockets-user-metadata-config.interface';
+import {
+  assertFailClosedResponse,
+  assertNamedSchema,
+} from '../../common/utils/open-api-schema.util';
 
 /**
- * Runtime checks for `extras.userMetadata` before wiring repositories and Me DTOs.
+ * Runtime checks for `extras.userMetadata` before wiring repositories and
+ * the `/me` routes.
  */
 export function validateRocketsUserMetadataConfig(
   config: RocketsUserMetadataConfig,
@@ -11,14 +16,16 @@ export function validateRocketsUserMetadataConfig(
       'RocketsUserMetadataConfig: `entity` must be a class constructor.',
     );
   }
-  if (!config.createDto || typeof config.createDto !== 'function') {
-    throw new Error(
-      'RocketsUserMetadataConfig: `createDto` must be a class constructor.',
-    );
-  }
-  if (!config.updateDto || typeof config.updateDto !== 'function') {
-    throw new Error(
-      'RocketsUserMetadataConfig: `updateDto` must be a class constructor.',
-    );
-  }
+  assertNamedSchema(
+    config.updateSchema,
+    'RocketsUserMetadataConfig: `updateSchema`',
+  );
+  assertNamedSchema(
+    config.responseSchema,
+    'RocketsUserMetadataConfig: `responseSchema`',
+  );
+  assertFailClosedResponse(
+    config.responseSchema,
+    'RocketsUserMetadataConfig: `responseSchema`',
+  );
 }

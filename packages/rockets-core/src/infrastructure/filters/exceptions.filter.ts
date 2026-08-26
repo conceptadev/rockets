@@ -1,10 +1,7 @@
 import { PlainLiteralObject } from '@nestjs/common';
 import { inspect } from 'node:util';
-import {
-  ExceptionInterface,
-  mapHttpStatus,
-  RuntimeException,
-} from '@concepta/nestjs-core';
+import { ExceptionInterface, RuntimeException } from '@concepta/nestjs-core';
+import { mapHttpStatus } from './map-http-status.util';
 import {
   Catch,
   ArgumentsHost,
@@ -17,10 +14,7 @@ import {
 import { isObject } from '@nestjs/common/utils/shared.utils';
 import { HttpAdapterHost } from '@nestjs/core';
 import type { OperationRequest } from '../../domain/interfaces/operation-resource.interface';
-import {
-  classValidatorErrorsToDetails,
-  readErrorDetails,
-} from '../../common/utils/validation-error-details.util';
+import { readErrorDetails } from '../../common/utils/validation-error-details.util';
 import {
   type RocketsErrorContext,
   type RocketsErrorDetail,
@@ -51,7 +45,15 @@ export function unwrapToHttpException(
   const seen = new Set<unknown>();
   while (current && !seen.has(current)) {
     seen.add(current);
-    if (current instanceof HttpException) {
+    // `RuntimeException` extends `HttpException` upstream, but in this
+    // chain it is the WRAPPER (`CrudQueryException` → `RepositoryQueryException`
+    // → the hook's `ConflictException`). Matching it here would stop the
+    // walk at the outermost 500 and never reach the 409 it carries; the
+    // 4xx domain carriers are the sibling walk's job.
+    if (
+      current instanceof HttpException &&
+      !(current instanceof RuntimeException)
+    ) {
       return current === exception ? undefined : current;
     }
     const next = (current as { context?: { originalError?: unknown } })?.context
@@ -89,57 +91,6 @@ export function unwrapToClientRuntimeException(
     current = next;
   }
   return candidate;
-}
-
-/**
- * Structural shape of a `class-validator` `ValidationError`. Declared
- * locally on purpose: the filter only reads these three fields, and
- * depending on `class-validator` types here would couple the core
- * package to a validation library it does not otherwise need.
- */
-interface ValidationErrorLike {
-  readonly property: string;
-  readonly constraints?: Readonly<Record<string, string>>;
-  readonly children?: readonly ValidationErrorLike[];
-}
-
-function isValidationErrorList(
-  value: unknown,
-): value is readonly ValidationErrorLike[] {
-  return (
-    Array.isArray(value) &&
-    value.every(
-      (item) =>
-        isObject(item) &&
-        typeof (item as { property?: unknown }).property === 'string',
-    )
-  );
-}
-
-/**
- * Flatten nested validation errors into constraint messages, prefixing
- * child messages with the parent property (`address.street must be …`).
- *
- * Reimplemented rather than borrowed: the previous version reached into
- * `new ValidationPipe()['flattenValidationErrors']`, a PRIVATE Nest
- * method accessed by string index — invisible to the compiler and free
- * to disappear in any Nest patch release.
- */
-function flattenValidationErrors(
-  errors: readonly ValidationErrorLike[],
-): string[] {
-  const messages: string[] = [];
-  for (const error of errors) {
-    if (error.constraints) {
-      messages.push(...Object.values(error.constraints));
-    }
-    if (error.children && error.children.length > 0) {
-      for (const child of flattenValidationErrors(error.children)) {
-        messages.push(`${error.property}.${child}`);
-      }
-    }
-  }
-  return messages;
 }
 
 /**
@@ -200,13 +151,10 @@ export class RocketsCoreExceptionsFilter implements ExceptionFilter {
     let details: readonly RocketsErrorDetail[] | undefined =
       readErrorDetails(exception) ?? readErrorDetails(rawException);
 
-    if (exception instanceof HttpException) {
-      statusCode = exception.getStatus();
-      errorCode = mapHttpStatus(statusCode);
-
-      const res = exception.getResponse();
-      message = isObject(res) && 'message' in res ? res.message : res;
-    } else if (exception instanceof RuntimeException) {
+    // `RuntimeException` is checked FIRST: it extends `HttpException`
+    // upstream, and the generic branch would replace a domain `errorCode`
+    // with the status-derived one.
+    if (exception instanceof RuntimeException) {
       errorCode = exception.errorCode;
 
       if (exception.httpStatus) {
@@ -221,21 +169,12 @@ export class RocketsCoreExceptionsFilter implements ExceptionFilter {
         message =
           exception.message ?? exception.safeMessage ?? ERROR_MESSAGE_FALLBACK;
       }
-    }
+    } else if (exception instanceof HttpException) {
+      statusCode = exception.getStatus();
+      errorCode = mapHttpStatus(statusCode);
 
-    if (
-      !(exception instanceof HttpException) &&
-      isValidationErrorList(exception.context?.validationErrors)
-    ) {
-      message = flattenValidationErrors(exception.context.validationErrors);
-      // App-attached details win: an exception can carry BOTH a symbol
-      // payload (attachErrorDetails) and `context.validationErrors`, and
-      // deriving over the explicit attachment would silently discard the
-      // app's findings.
-      details ??= classValidatorErrorsToDetails(
-        exception.context.validationErrors,
-      );
-      statusCode = 400;
+      const res = exception.getResponse();
+      message = isObject(res) && 'message' in res ? res.message : res;
     }
 
     // Logged through Nest's Logger, not `console`, and at every 5xx —

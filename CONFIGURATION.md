@@ -36,7 +36,8 @@ flowchart LR
 ```
 
 **Two layers, one surface.** `@concepta/rockets` (server) is a thin presentation
-layer over `@concepta/rockets-core`. Server adds the `MeController`, the global
+layer over `@concepta/rockets-core`. Server adds the `/me` routes (built by
+`buildMeController` from the `userMetadata` config), the global
 guard opt-in, and the `auth` chain; core does the actual resource→module
 conversion. `createServer` is the canonical definition-first facade;
 `RocketsModule.forRoot` is the lower-level composition surface. Core's
@@ -70,7 +71,7 @@ buckets with very different lifecycles:
 | `settings` | `RocketsSettingsInterface` (empty today) | optional | — | Reserved; no fields yet. |
 | `handlers` | `{ upsertUserMetadata?, getUserMetadata? }` | optional | built-ins | Override the user-metadata CQRS handlers. |
 | `enableGlobalGuard` | `boolean` | optional | **on‡** | Register `AuthServerGuard` as `APP_GUARD` unless `=== false`. |
-| `disableController` | `{ me?: boolean }` | optional | `{}` | Disable built-in `MeController`. |
+| `disableController` | `{ me?: boolean }` | optional | `{}` | Skip the built-in `/me` controller (`buildMeController`). |
 | `controllers` | `DynamicModule['controllers']` | optional | — | Replace the auto controller set. |
 | `global` | `boolean` | optional | **forced `true`** | `forRoot` always makes the module global. |
 
@@ -109,12 +110,12 @@ flowchart TB
   sv_auth --> co_auth
   sv_h --> co_h
   sv_sw --> co_sw
-  sv_guard -. "stays in server:\nMeController + APP_GUARD" .-> SERVER
+  sv_guard -. "stays in server:\nbuildMeController + APP_GUARD" .-> SERVER
 ```
 
 **Server-only** (never reach core): `enableGlobalGuard`, `disableController`,
-`controllers`, `settings`. These drive presentation: the `MeController` and the
-`APP_GUARD` opt-in.
+`controllers`, `settings`. These drive presentation: the `/me` controller
+(`buildMeController`) and the `APP_GUARD` opt-in.
 
 ---
 
@@ -243,7 +244,9 @@ export const petResource = defineResource({
   // path  → 'pets'                 (pluralized kebab of key)
   // tags  → ['Pets']
   // operations → [List, Read, Create, Update, Delete]
-  // DTOs default to the entity shape
+  // no `dto` → no response schema → every route 500s at serialization:
+  // upstream refuses to serialize without one. Pass `dto.response`
+  // (or use `zodResource`, which derives every schema from one source).
 });
 ```
 
@@ -257,11 +260,13 @@ export const petResource = defineResource({
     relation(PetTagEntity, 'petTags'),
   ],
   hooks: [PetOwnerStamp, PetOwnerOrSharedHook, PetUniqueRefHook, PetAuditLogHook],
+  // Every schema is a NAMED zod schema: `withOpenApi(z.object({...}), 'PetResponseDto')`
+  // as the LAST call. The id is the OpenAPI component name.
   operations: {
-    list:   { output: PetResponseDto },
-    read:   { output: PetResponseDto },
-    create: { input: PetCreateDto, output: PetResponseDto },
-    update: { input: PetUpdateDto, output: PetResponseDto },
+    list:   { output: petResponseSchema },
+    read:   { output: petResponseSchema },
+    create: { input: petCreateSchema, output: petResponseSchema },
+    update: { input: petUpdateSchema, output: petResponseSchema },
     delete: { soft: true, returnDeleted: true },
     restore:{ returnRestored: true },
   },
@@ -280,7 +285,7 @@ export const petResource = defineResource({
 | | `key` | `string` | `deriveEntityKey(entity)` |
 | | `path` | `string \| string[]` | pluralized kebab of key |
 | | `tags` | `string[]` | `[humanize(key)]` |
-| **DTOs** | `dto` | `{ response?, paginated?, create?, update?, replace? }` | `{}` (resource-level fallback; prefer per-op `input`/`output`) |
+| **Schemas** | `dto` | `{ response?, paginated?, create?, update?, replace? }` — named zod schemas (`withOpenApi(schema, id)` last) | `{}` (resource-level fallback; prefer per-op `input`/`output`; `paginated` derives as `${responseId}PaginatedDto`) |
 | **Operations** | `operations` | `OperationName[] \| OperationsObject` | `[List, Read, Create, Update, Delete]` |
 | | `operations.X` | `{ input?, output?, paginated?, handler?, hooks?, decorators?, path?, transactional?, requestOverride?, responseOverride? }` (`input`→`request.body`, `output`→`response.resource`) | — |
 | | `operations.delete` | `+ { soft?, returnDeleted? }` | `soft=false` |
@@ -577,9 +582,10 @@ if (process.env.CONTRACT_UPDATE === '1') {
 
 That helper is the important part. A document rebuilt from a bare
 `SwaggerModule.createDocument(app, builder.build())` is **not** what a real
-app serves: `examples/sample-server` also passes `extraModels`, patches the
-PATCH `/me` request body, and runs the nestjs-zod `cleanupOpenApiDoc` pass.
-Pinning the simplified document would pin a contract nobody is served.
+app serves: only `SwaggerUiService.createDocument` installs the Rockets
+schema converter that turns every named schema into a
+`components/schemas/<id>` `$ref`. Pinning the bare document would pin a
+contract nobody is served.
 
 So each app owns one `src/swagger/create-openapi-document.ts` that `main.ts`
 and its contract spec both call, and rockets-core exposes the shared seam
@@ -587,7 +593,7 @@ underneath it:
 
 ```ts
 // packages/rockets-core — builds the document `setup()` serves, no UI mount
-swaggerUiService.createDocument(app, { extraModels: [UserMetadataUpdateDto] });
+swaggerUiService.createDocument(app);
 ```
 
 `SwaggerUiService.setup()` now routes through `createDocument()` too, so
@@ -927,8 +933,9 @@ It does **not** cover:
 
 - `defineModuleResource({ module: { controllers } })` controllers
 - hand-built `RocketsResourceConfig` entries
-- controllers owned by other packages — `MeController` in
-  `rockets-server`, every `rockets-server-auth` controller
+- controllers owned by other packages — the `/me` controller
+  (`buildMeController`) in `rockets-server`, every `rockets-server-auth`
+  controller
 
 Those routes never reach the planner, so a passing boot says nothing
 about them. Treat `enforceGrants` as "the generated surface is covered",
@@ -1541,7 +1548,7 @@ export function defineSampleAuth(): AuthBootstrap<SampleAuthAdapter> {
 
 RocketsModule.forRoot({
   auth: defineSampleAuth(),
-  userMetadata: { entity: UserMetadataEntity, createDto: UserMetadataCreateDto, updateDto: UserMetadataUpdateDto },
+  userMetadata: userMetadataConfig, // defineUserMetadata(userMetadataSchema) → { entity, updateSchema, responseSchema }
   repository: defineTypeOrmRepository({ type: 'sqlite', database: ':memory:', synchronize: true }),
   resources: [ sampleAuthUserResource, petResource, /* … */ ],
 });
@@ -1561,7 +1568,7 @@ an `AuthBootstrap` (adapter defaults to `RocketsJwtAuthAdapter`).
 type DefineRocketsAuthInput = RocketsAuthAsyncOptions & {
   persistence: { module: RepositoryModuleInterface; entities: { user, userCredentials, userOtp, role, userRole, federatedIdentity } };
   userMetadata: RocketsUserMetadataConfig;
-  userCrud: { model; dto: { createOne; updateOne } };   // signup/admin CRUD
+  userCrud: { model?; dto?: { createOne?; updateOne? }; handlers? };   // signup/admin CRUD — named zod schemas, derived from userMetadata when omitted
   invitationEntity?: Type;
   rocketsDefaults?: { enableGlobalGuard?: boolean };
   authAdapter?: Type<AuthAdapterInterface>;
@@ -1588,14 +1595,17 @@ const rocketsAuthInput: DefineRocketsAuthInput = {
   persistence: { module: repo, entities: { user: UserEntity, userCredentials: UserCredentialEntity,
                  userOtp: UserOtpEntity, role: RoleEntity, userRole: UserRoleEntity, federatedIdentity: FederatedEntity } },
   invitationEntity: InvitationEntity,
-  userMetadata: { entity: UserMetadataEntity, createDto: UserMetadataCreateDto, updateDto: UserMetadataUpdateDto },
+  userMetadata: userMetadataConfig, // defineUserMetadata(userMetadataSchema) → { entity, updateSchema, responseSchema }
   useFactory: () => ({
     services: { mailerService: buildSampleMailerService() },          // mailerService REQUIRED
     authentication: { ports: rocketsAuthNotificationPorts },          // recovery + verify ports
     settings: rocketsAuthRuntimeSettings,                             // role names, templates, otp
   }),
-  userCrud: { model: UserDto, dto: { createOne: UserCreateDto, updateOne: SampleUserUpdateDto } },
-  roleCrud: { model: RoleDto, dto: { createOne: RoleCreateDto, updateOne: RoleUpdateDto } },
+  // `model` / `dto` omitted: derived from `userMetadata` (`RocketsAuthUserDto`,
+  // `RocketsAuthUserCreateDto`, `RocketsAuthUserUpdateDto`). Override form:
+  // `{ model: rocketsAuthUserSchema(responseSchema), dto: { createOne: rocketsAuthUserCreateSchema(updateSchema), … } }`
+  userCrud: {},
+  roleCrud: { model: rocketsAuthRoleSchema }, // request schemas default to rocketsAuthRole{Create,Update}Schema
 };
 
 const rocketsAuth = defineRocketsAuth(rocketsAuthInput);
@@ -2310,13 +2320,10 @@ Traps worth naming:
   the scope is admitted and the first repository call then throws a raw
   `Error: No transaction factory registered for key "…"` — not
   `TransactionRequiredException`, and not an HTTP-shaped failure.
-- **`noRollbackFor` is accepted and silently dropped.** It exists on
-  `TransactionalOptions` — the bag `@Transactional()` and
-  `transactional: true` take — and the decorator dutifully stores it in
-  metadata. But `TransactionalRunner` forwards only `propagation`,
-  `readOnly` and `timeout` to `TransactionScope.run`, whose own
-  `TransactionRunOptions` does not declare `noRollbackFor` at all. It is
-  read by nothing: **any** throw rolls the scope back.
+- **Any throw rolls the scope back.** There is no `noRollbackFor`
+  (upstream `8.0.0-alpha.9` removed the option that earlier versions
+  accepted and silently ignored); catch inside the scope if a failure
+  must not abort it.
 - **Adapters differ on contention.** `TransactionScope.run` is fine for
   uncontended multi-write units, but on Firestore it uses an imperative
   bridge that **refuses** an SDK retry
@@ -2349,22 +2356,36 @@ request (a startup task, a job with its own scope) or it is a defect.
 ```ts
 interface RocketsUserMetadataConfig {
   entity: Type;                       // dynamic-repo row (key 'userMetadata') + /me route
-  createDto: Type;                    // must extend UserMetadataCreatableInterface
-  updateDto: Type;                    // must extend UserMetadataModelUpdatableInterface
-  responseDto?: Type;                 // optional /me response
+  updateSchema: z.ZodType;            // named schema of `PATCH /me` `userMetadata` (`UserMetadataUpdateDto`)
+  responseSchema: z.ZodType;          // named response projection — hidden columns never leave
   repository?: RepositoryModuleInterface; // per-entity adapter override
 }
 ```
 
-Enable the optional `/me` surface by supplying:
+Enable the optional `/me` surface by supplying the config
+`defineZodUserMetadata` (or the bound `defineUserMetadata`) compiles from
+one schema:
 
 ```ts
-userMetadata: {
-  entity: UserMetadataEntity,
-  createDto: UserMetadataCreateDto,
-  updateDto: UserMetadataUpdateDto,
-}
+export const userMetadataSchema = auditableEntity({
+  userId: f.owner(),
+  firstName: f.string({ max: 100 }),
+  bio: f.string({ max: 500, dto: { response: false } }), // stored, never on the wire
+});
+export const userMetadataConfig = defineUserMetadata(userMetadataSchema, {
+  name: 'UserMetadata',
+  table: 'userMetadata',
+});
+
+userMetadata: userMetadataConfig,
 ```
+
+`/me` is built from that config: `PATCH /me` validates
+`{ userMetadata?: UserMetadataUpdateDto }` through the per-route Standard
+Schema pipe (`400` with `details[].path = ['userMetadata', '<field>']`),
+and both routes serialize through `UserResponseDto` — `id`, `sub`,
+`email?`, `userRoles?`, `claims?` plus `userMetadata` (the response
+projection, `null` before the first `PATCH`).
 
 ---
 

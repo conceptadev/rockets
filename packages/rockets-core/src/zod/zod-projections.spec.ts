@@ -1,11 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import type { PlainLiteralObject, Type } from '@nestjs/common';
-import { plainToInstance } from 'class-transformer';
 import { z } from 'zod';
 import { rocketsFieldMeta, unwrapField } from './field-meta';
-import { compileDtoClass } from './zod-dto';
 import { f } from './fields';
 import { projectSchema } from './zod-projections';
+import { buildResponseSchema } from './zod-response-schema';
 
 describe('projectSchema response exposure', () => {
   class PetEntity {
@@ -190,14 +189,20 @@ describe('projectSchema response exposure', () => {
     expect(typeof meta.compute).toBe('function');
   });
 
-  it('strips hidden and undeclared keys from the compute OUTPUT at runtime', () => {
+  /**
+   * RUNTIME layer: `projectSchema` only decides the SHAPE; the strip of a
+   * compute output happens when the response schema built by
+   * `buildResponseSchema` validates the row (`~standard.validate`), which
+   * is exactly what upstream runs at serialization time.
+   */
+  it('strips hidden and undeclared keys from the compute OUTPUT at runtime', async () => {
     const nested = z.object({
       id: f.pk(),
       label: f.string(),
       internalNote: f.string({ dto: { response: false } }),
     });
     const row = {
-      id: '1',
+      id: '00000000-0000-4000-8000-000000000001',
       label: 'ok',
       internalNote: 'must-not-leak',
       undeclaredColumn: 'must-not-leak-either',
@@ -207,16 +212,42 @@ describe('projectSchema response exposure', () => {
       items: f.compute(z.array(nested), () => [row]).optional(),
     });
 
-    const { response } = projectSchema('Pet', schema, entity, noOwner);
-    const Dto = compileDtoClass(z.object(response), 'PetResponseDto');
-    const instance = plainToInstance(Dto, { id: '1' });
-
-    expect(instance).toMatchObject({
-      items: [{ id: '1', label: 'ok' }],
+    const responseSchema = buildResponseSchema(
+      'Pet',
+      projectSchema('Pet', schema, entity, noOwner),
+    );
+    const result = await responseSchema['~standard'].validate({
+      id: '00000000-0000-4000-8000-000000000002',
+      hiddenRowColumn: 'must-not-leak',
     });
-    const items = (instance as { items?: Record<string, unknown>[] }).items;
-    expect(items?.[0]).not.toHaveProperty('internalNote');
-    expect(items?.[0]).not.toHaveProperty('undeclaredColumn');
+
+    expect(result.issues).toBeUndefined();
+    if (result.issues) return;
+    expect(result.value).toEqual({
+      id: '00000000-0000-4000-8000-000000000002',
+      items: [{ id: row.id, label: 'ok' }],
+    });
+  });
+
+  it('a compute value that violates its declared schema is a validation issue, not a coerced payload', async () => {
+    const schema = z.object({
+      id: f.pk(),
+      // `Number('abc')` is NaN — a number at the type level that z.int()
+      // rejects at runtime.
+      count: f.compute(f.int(), (row) => Number(row.rawCount)),
+    });
+
+    const responseSchema = buildResponseSchema(
+      'Pet',
+      projectSchema('Pet', schema, entity, noOwner),
+    );
+    const result = await responseSchema['~standard'].validate({
+      id: '00000000-0000-4000-8000-000000000002',
+      rawCount: 'abc',
+    });
+
+    expect(result.issues?.length).toBeGreaterThan(0);
+    expect(result.issues?.[0]?.path).toEqual(['count']);
   });
 
   it('leaves a computed field untouched when nothing is hidden', () => {
@@ -226,6 +257,34 @@ describe('projectSchema response exposure', () => {
 
     const { response } = projectSchema('Pet', schema, entity, noOwner);
     expect(response.items).toBe(computed);
+  });
+
+  /**
+   * An optional field without a default compiles to a NULLABLE column and
+   * reads back as `null`; the response must admit what the store returns
+   * or every such row is a 500 at serialization.
+   */
+  it('admits null on an optional response field (nullable column read-back)', async () => {
+    const schema = z.object({
+      id: f.pk(),
+      nick: f.string({ max: 20 }).optional(),
+      score: f.int().default(0).optional(),
+    });
+    const response = buildResponseSchema(
+      'Pet',
+      projectSchema('Pet', schema, entity, noOwner),
+    );
+    const row = { id: '2d1c2b6e-0f0a-4f5c-9a1b-3c4d5e6f7a8b', nick: null };
+    const result = await response['~standard'].validate(row);
+    if (result.issues !== undefined) {
+      throw new Error(JSON.stringify(result.issues));
+    }
+    expect(result.value).toMatchObject({ nick: null });
+    const withDefault = await response['~standard'].validate({
+      ...row,
+      score: 3,
+    });
+    expect(withDefault.issues).toBeUndefined();
   });
 
   it('f.* can still opt out with dto.response=false', () => {

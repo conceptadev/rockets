@@ -41,13 +41,13 @@
     "test": "cd ../.. && ./node_modules/.bin/vitest run --project unit packages/rockets-repository-firestore"
   },
   "dependencies": {
-    "@concepta/nestjs-core": "8.0.0-alpha.8",
-    "@concepta/nestjs-repository": "8.0.0-alpha.8",
+    "@concepta/nestjs-core": "8.0.0-alpha.9",
+    "@concepta/nestjs-repository": "8.0.0-alpha.9",
     "@concepta/rockets-core": "workspace:^"
   },
   "devDependencies": {
-    "@nestjs/common": "12.0.0-alpha.5",
-    "@nestjs/testing": "12.0.0-alpha.5",
+    "@nestjs/common": "12.0.0-alpha.6",
+    "@nestjs/testing": "12.0.0-alpha.6",
     "firebase-admin": "^13.0.0",
     "typescript": "^5.4.0",
     "vitest": "^4.1.10"

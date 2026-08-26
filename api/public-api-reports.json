@@ -106,52 +106,16 @@
         "signature": "export interface AuthorizedUser {\n    id: string;\n    sub: string;\n    email?: string;\n    userRoles?: {\n        role: {\n            name: string;\n        };\n    }[];\n    claims?: Record<string, unknown>;\n}"
       },
       {
-        "name": "BaseUserCreateDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class BaseUserCreateDto extends BaseUserDto {\n    sub: string;\n}"
-      },
-      {
-        "name": "BaseUserDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class BaseUserDto {\n    id?: string;\n    sub?: string;\n    email?: string;\n    roles?: string[];\n    claims?: Record<string, unknown>;\n}"
-      },
-      {
         "name": "BaseUserEntityInterface",
         "kind": "interface",
         "runtime": false,
         "signature": "export interface BaseUserEntityInterface {\n    id: string;\n    sub: string;\n    email?: string;\n    roles?: string[];\n    claims?: Record<string, unknown>;\n}"
       },
       {
-        "name": "BaseUserMetadataCreateDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class BaseUserMetadataCreateDto extends BaseUserMetadataDto {\n    userId: string;\n}"
-      },
-      {
-        "name": "BaseUserMetadataDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class BaseUserMetadataDto {\n    userId?: string;\n}"
-      },
-      {
         "name": "BaseUserMetadataEntityInterface",
         "kind": "interface",
         "runtime": false,
         "signature": "export interface BaseUserMetadataEntityInterface {\n    id: string;\n    userId: string;\n    dateCreated: Date;\n    dateUpdated: Date;\n    dateDeleted: Date | null;\n    version: number;\n}"
-      },
-      {
-        "name": "BaseUserMetadataUpdateDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class BaseUserMetadataUpdateDto extends BaseUserMetadataDto {\n}"
-      },
-      {
-        "name": "BaseUserUpdateDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class BaseUserUpdateDto extends BaseUserDto {\n    userMetadata?: Record<string, unknown>;\n}"
       },
       {
         "name": "BoundRelation",
@@ -242,12 +206,6 @@
         "kind": "function",
         "runtime": true,
         "signature": "export declare function InjectDynamicRepository(keyOrClass: string | Type<PlainLiteralObject>): PropertyDecorator & ParameterDecorator;"
-      },
-      {
-        "name": "MeController",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class MeController {\n    private readonly commandBus;\n    private readonly queryBus;\n    private readonly userMetadataConfig;\n    constructor(commandBus: CommandBus, queryBus: QueryBus, userMetadataConfig: RocketsUserMetadataDtoConfig);\n    me(user: AuthorizedUser): Promise<UserResponseDto>;\n    updateUser(user: AuthorizedUser, updateData: UserUpdateDto): Promise<UserResponseDto>;\n}"
       },
       {
         "name": "ModuleResource",
@@ -343,7 +301,7 @@
         "name": "ResourceDtoConfig",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface ResourceDtoConfig {\n    readonly response?: Type;\n    readonly paginated?: Type;\n    readonly create?: Type;\n    readonly update?: Type;\n    readonly replace?: Type;\n}"
+        "signature": "export interface ResourceDtoConfig {\n    readonly response?: z.ZodType;\n    readonly paginated?: z.ZodType;\n    readonly create?: z.ZodType;\n    readonly update?: z.ZodType;\n    readonly replace?: z.ZodType;\n}"
       },
       {
         "name": "ResourceHandlerOverrides",
@@ -367,7 +325,7 @@
         "name": "ResourceOperationConfig",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface ResourceOperationConfig {\n    readonly acl?: OperationAclConfig;\n    readonly input?: Type;\n    readonly output?: Type;\n    readonly paginated?: Type;\n    readonly handler?: Type;\n    readonly hooks?: readonly RocketsEntityHookForResource<PlainLiteralObject>[];\n    readonly decorators?: readonly (MethodDecorator | ClassDecorator)[];\n    readonly path?: string | string[];\n    readonly methodName?: string;\n    readonly transactional?: boolean;\n    readonly requestOverride?: CrudRequestConfig<PlainLiteralObject>;\n    readonly responseOverride?: CrudResponseConfig;\n}"
+        "signature": "export interface ResourceOperationConfig {\n    readonly acl?: OperationAclConfig;\n    readonly input?: z.ZodType;\n    readonly output?: z.ZodType;\n    readonly paginated?: z.ZodType;\n    readonly handler?: Type;\n    readonly hooks?: readonly RocketsEntityHookForResource<PlainLiteralObject>[];\n    readonly decorators?: readonly (MethodDecorator | ClassDecorator)[];\n    readonly path?: string | string[];\n    readonly methodName?: string;\n    readonly transactional?: boolean;\n    readonly requestOverride?: CrudRequestConfig<PlainLiteralObject>;\n    readonly responseOverride?: CrudResponseConfig;\n}"
       },
       {
         "name": "ResourceOperationName",
@@ -493,13 +451,7 @@
         "name": "RocketsUserMetadataConfig",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RocketsUserMetadataConfig<TCreateDto extends UserMetadataCreatableInterface = UserMetadataCreatableInterface, TUpdateDto extends UserMetadataModelUpdatableInterface = UserMetadataModelUpdatableInterface> {\n    readonly entity: Type<PlainLiteralObject>;\n    readonly createDto: Type<TCreateDto>;\n    readonly updateDto: Type<TUpdateDto>;\n    readonly responseDto?: Type;\n    readonly repository?: RocketsRepositoryModuleInterface;\n}"
-      },
-      {
-        "name": "RoleNameDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class RoleNameDto {\n    name: string;\n}"
+        "signature": "export interface RocketsUserMetadataConfig {\n    readonly entity: Type<PlainLiteralObject>;\n    readonly updateSchema: z.ZodType;\n    readonly responseSchema: z.ZodType;\n    readonly repository?: RocketsRepositoryModuleInterface;\n}"
       },
       {
         "name": "SchemaEntityCompiler",
@@ -589,31 +541,13 @@
         "name": "UserModule",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class UserModule {\n    static register(): DynamicModule;\n}"
-      },
-      {
-        "name": "UserResponseDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class UserResponseDto {\n    id: string;\n    sub: string;\n    email?: string;\n    userRoles?: UserRoleItemDto[];\n    claims?: Record<string, unknown>;\n    userMetadata?: Record<string, unknown>;\n}"
-      },
-      {
-        "name": "UserRoleItemDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class UserRoleItemDto {\n    role: RoleNameDto;\n}"
+        "signature": "export declare class UserModule {\n    static register(userMetadata: Pick<RocketsUserMetadataConfig, 'updateSchema' | 'responseSchema'>): DynamicModule;\n}"
       },
       {
         "name": "UserUpdatableInterface",
         "kind": "interface",
         "runtime": false,
         "signature": "export interface UserUpdatableInterface {\n    userMetadata?: Record<string, unknown>;\n}"
-      },
-      {
-        "name": "UserUpdateDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class UserUpdateDto {\n    userMetadata?: Record<string, unknown>;\n}"
       },
       {
         "name": "Where",
@@ -634,16 +568,16 @@
         "signature": "export declare function buildAppRegistrationPlan(args: {\n    readonly resources: ReadonlyArray<ResourceInput>;\n    readonly repository?: RepositoryModuleInterface;\n    readonly userMetadata?: RocketsUserMetadataConfig;\n    readonly accessControl?: boolean;\n    readonly enforceGrants?: boolean;\n}): AppRegistrationPlan;"
       },
       {
+        "name": "buildMeController",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function buildMeController(config: Pick<RocketsUserMetadataConfig, 'updateSchema' | 'responseSchema'>): Type<unknown>;"
+      },
+      {
         "name": "createBoundRelation",
         "kind": "function",
         "runtime": true,
         "signature": "export declare function createBoundRelation<S extends object>(source: EntityConstructor<S>): BoundRelation<S>;"
-      },
-      {
-        "name": "createPaginatedDto",
-        "kind": "function",
-        "runtime": true,
-        "signature": "export declare function createPaginatedDto<TResource>(resourceDto: Type<TResource>, className?: string): Type;"
       },
       {
         "name": "createServer",
@@ -734,6 +668,18 @@
         "kind": "function",
         "runtime": true,
         "signature": "export declare function logAndGetErrorDetails(error: unknown, logger: Logger, customMessage: string, context?: Record<string, unknown>): ErrorDetails;"
+      },
+      {
+        "name": "meResponseSchema",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function meResponseSchema<R extends z.ZodType>(userMetadataResponse: R): z.ZodObject<{\n    id: z.ZodString;\n    sub: z.ZodString;\n    email: z.ZodOptional<z.ZodString>;\n    userRoles: z.ZodOptional<z.ZodArray<z.ZodObject<{\n        role: z.ZodObject<{\n            name: z.ZodString;\n        }, z.core.$strip>;\n    }, z.core.$strip>>>;\n    claims: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;\n    userMetadata: z.ZodNullable<R>;\n}, z.core.$strip>;"
+      },
+      {
+        "name": "meUpdateSchema",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function meUpdateSchema<U extends z.ZodType>(userMetadataUpdate: U): z.ZodObject<{\n    userMetadata: z.ZodOptional<U>;\n}, z.core.$strip>;"
       },
       {
         "name": "relation",
@@ -1091,13 +1037,13 @@
         "name": "AdminRoleResourceRouteExtras",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface AdminRoleResourceRouteExtras extends RocketsAuthRouteExtrasBase {\n    handler?: Type<unknown>;\n}"
+        "signature": "export interface AdminRoleResourceRouteExtras<THandler> extends RocketsAuthRouteExtrasBase {\n    handler?: Type<THandler>;\n}"
       },
       {
         "name": "AdminRoleResourceRoutesMap",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface AdminRoleResourceRoutesMap {\n    list?: AdminRoleResourceRouteExtras;\n    read?: AdminRoleResourceRouteExtras;\n    create?: AdminRoleResourceRouteExtras;\n    update?: AdminRoleResourceRouteExtras;\n    delete?: AdminRoleResourceRouteExtras;\n}"
+        "signature": "export interface AdminRoleResourceRoutesMap {\n    list?: AdminRoleResourceRouteExtras<CrudQueryBaseHandler<RocketsAuthRoleEntityInterface>>;\n    read?: AdminRoleResourceRouteExtras<CrudQueryBaseHandler<RocketsAuthRoleEntityInterface>>;\n    create?: AdminRoleResourceRouteExtras<CrudCommandBaseHandler<RocketsAuthRoleEntityInterface>>;\n    update?: AdminRoleResourceRouteExtras<CrudCommandBaseHandler<RocketsAuthRoleEntityInterface>>;\n    delete?: AdminRoleResourceRouteExtras<CrudCommandBaseHandler<RocketsAuthRoleEntityInterface>>;\n}"
       },
       {
         "name": "AdminUpdateUserHandler",
@@ -1241,7 +1187,7 @@
         "name": "InvitationAcceptanceDataInterface",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface InvitationAcceptanceDataInterface extends LiteralObject {\n    password?: string;\n    userMetadata?: RocketsAuthUserMetadataUpdatableInterface;\n}"
+        "signature": "export interface InvitationAcceptanceDataInterface extends Record<string, unknown> {\n    password?: string;\n    userMetadata?: RocketsAuthUserMetadataUpdatableInterface;\n}"
       },
       {
         "name": "InvitationAcceptedEventHandler",
@@ -1376,12 +1322,6 @@
         "signature": "export declare class RocketsAuthException extends RuntimeException {\n    constructor(message: string, options?: RuntimeExceptionOptions);\n}"
       },
       {
-        "name": "RocketsAuthInvitationAcceptDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class RocketsAuthInvitationAcceptDto extends InvitationAcceptInviteDto {\n}"
-      },
-      {
         "name": "RocketsAuthInvitationAcceptanceModule",
         "kind": "class",
         "runtime": true,
@@ -1394,22 +1334,10 @@
         "signature": "export declare class RocketsAuthInvitationAlreadyAcceptedException extends RocketsAuthInvitationException {\n    constructor(options?: RuntimeExceptionOptions);\n}"
       },
       {
-        "name": "RocketsAuthInvitationCreateDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class RocketsAuthInvitationCreateDto extends InvitationCreateInviteDto {\n}"
-      },
-      {
         "name": "RocketsAuthInvitationCreationFailedException",
         "kind": "class",
         "runtime": true,
         "signature": "export declare class RocketsAuthInvitationCreationFailedException extends RocketsAuthInvitationException {\n    constructor(options?: RuntimeExceptionOptions);\n}"
-      },
-      {
-        "name": "RocketsAuthInvitationDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class RocketsAuthInvitationDto extends InvitationDto {\n}"
       },
       {
         "name": "RocketsAuthInvitationException",
@@ -1446,12 +1374,6 @@
         "kind": "class",
         "runtime": true,
         "signature": "export declare class RocketsAuthInvitationNotFoundException extends RocketsAuthInvitationException {\n    constructor(options?: RuntimeExceptionOptions);\n}"
-      },
-      {
-        "name": "RocketsAuthInvitationResponseDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class RocketsAuthInvitationResponseDto extends RocketsAuthInvitationResponseDto_base {\n}"
       },
       {
         "name": "RocketsAuthInvitationRevokeDto",
@@ -1577,7 +1499,7 @@
         "name": "RocketsAuthRecoveryController",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class RocketsAuthRecoveryController {\n    private readonly recoveryService;\n    private readonly logger;\n    constructor(recoveryService: RecoveryService);\n    recoverLogin(dto: RecoveryRecoverLoginDto, req: Request): void;\n    recoverPassword(dto: RecoveryRecoverPasswordDto, req: Request): void;\n    validatePasscode(dto: RecoveryValidatePasscodeDto, req: Request): Promise<void>;\n    updatePassword(dto: RecoveryUpdatePasswordDto, req: Request): Promise<void>;\n    private dispatchEnumerationSafe;\n}"
+        "signature": "export declare class RocketsAuthRecoveryController {\n    private readonly recoveryService;\n    private readonly logger;\n    constructor(recoveryService: RecoveryService);\n    recoverLogin(body: RecoverLoginBody, req: Request): void;\n    recoverPassword(body: RecoverPasswordBody, req: Request): void;\n    validatePasscode(body: ValidatePasscodeBody, req: Request): Promise<void>;\n    updatePassword(body: UpdatePasswordBody, req: Request): Promise<void>;\n    private dispatchEnumerationSafe;\n}"
       },
       {
         "name": "RocketsAuthRepositoryPersistenceEntities",
@@ -1604,18 +1526,6 @@
         "signature": "export interface RocketsAuthRoleCreatableInterface extends RoleCreatableInterface {\n}"
       },
       {
-        "name": "RocketsAuthRoleCreateDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class RocketsAuthRoleCreateDto extends RocketsAuthRoleCreateDto_base implements RocketsAuthRoleCreatableInterface {\n}"
-      },
-      {
-        "name": "RocketsAuthRoleDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class RocketsAuthRoleDto extends RoleDto implements RocketsAuthRoleInterface {\n}"
-      },
-      {
         "name": "RocketsAuthRoleEntityInterface",
         "kind": "interface",
         "runtime": false,
@@ -1632,12 +1542,6 @@
         "kind": "interface",
         "runtime": false,
         "signature": "export interface RocketsAuthRoleUpdatableInterface extends Partial<Pick<RocketsAuthRoleCreatableInterface, 'name' | 'description'>> {\n}"
-      },
-      {
-        "name": "RocketsAuthRoleUpdateDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class RocketsAuthRoleUpdateDto extends RocketsAuthRoleUpdateDto_base implements RocketsAuthRoleUpdatableInterface {\n}"
       },
       {
         "name": "RocketsAuthSettingsInterface",
@@ -1661,7 +1565,7 @@
         "name": "RocketsAuthTokenController",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare class RocketsAuthTokenController {\n    private readonly commandBus;\n    constructor(commandBus: CommandBus);\n    loginWithPassword(_loginBody: LocalLoginDto, req: RequestWithPassportUser): Promise<AuthenticatedResponseInterface>;\n    refreshTokens(_dto: RefreshDto, req: RequestWithPassportUser): Promise<AuthenticatedResponseInterface>;\n}"
+        "signature": "export declare class RocketsAuthTokenController {\n    private readonly commandBus;\n    constructor(commandBus: CommandBus);\n    loginWithPassword(_loginBody: LocalLoginBody, req: RequestWithPassportUser): Promise<AuthenticatedResponseInterface>;\n    refreshTokens(_refreshBody: RefreshBody, req: RequestWithPassportUser): Promise<AuthenticatedResponseInterface>;\n}"
       },
       {
         "name": "RocketsAuthUserCreatableInterface",
@@ -1670,16 +1574,10 @@
         "signature": "export interface RocketsAuthUserCreatableInterface extends Pick<RocketsAuthUserInterface, 'username' | 'email'>, Partial<Pick<RocketsAuthUserInterface, 'active' | 'userMetadata'>>, PasswordPlainInterface {\n}"
       },
       {
-        "name": "RocketsAuthUserCreateDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class RocketsAuthUserCreateDto extends RocketsAuthUserCreateDto_base implements RocketsAuthUserCreatableInterface {\n}"
-      },
-      {
-        "name": "RocketsAuthUserDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class RocketsAuthUserDto extends UserDto implements RocketsAuthUserInterface {\n    userMetadata?: RocketsAuthUserMetadataDto;\n}"
+        "name": "RocketsAuthUserCreateSchema",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type RocketsAuthUserCreateSchema = ReturnType<typeof composeRocketsAuthUserCreateSchema>;"
       },
       {
         "name": "RocketsAuthUserEntityInterface",
@@ -1706,12 +1604,6 @@
         "signature": "export interface RocketsAuthUserMetadataCreatableInterface {\n    userId: string;\n}"
       },
       {
-        "name": "RocketsAuthUserMetadataDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class RocketsAuthUserMetadataDto {\n    id: string;\n    userId: string;\n    dateCreated: Date;\n    dateUpdated: Date;\n    dateDeleted?: Date | null;\n    version: number;\n}"
-      },
-      {
         "name": "RocketsAuthUserMetadataEntityInterface",
         "kind": "interface",
         "runtime": false,
@@ -1733,7 +1625,7 @@
         "name": "RocketsAuthUserMetadataModuleClass",
         "kind": "value",
         "runtime": true,
-        "signature": "RocketsAuthUserMetadataModuleClass: import(\"@nestjs/common\").ConfigurableModuleCls<UserMetadataConfigInterface<import(\"..\").RocketsAuthUserMetadataCreatableInterface, RocketsAuthUserMetadataModelUpdatableInterface>, \"register\", \"create\", Partial<UserMetadataExtrasInterface>>"
+        "signature": "RocketsAuthUserMetadataModuleClass: import(\"@nestjs/common\").ConfigurableModuleCls<UserMetadataConfigInterface, \"register\", \"create\", Partial<UserMetadataExtrasInterface>>"
       },
       {
         "name": "RocketsAuthUserMetadataOptions",
@@ -1790,16 +1682,22 @@
         "signature": "export declare class RocketsAuthUserPortService {\n    private readonly queryBus;\n    private readonly commandBus;\n    constructor(queryBus: QueryBus, commandBus: CommandBus);\n    bySubject(ctx: PlainLiteralObject, subject: ReferenceSubject): Promise<ReferenceIdInterface | null>;\n    byId(ctx: PlainLiteralObject, id: string): Promise<UserEntityInterface | null>;\n    byEmail(ctx: PlainLiteralObject, email: string): Promise<UserWithCredentials | null>;\n    byUsername(ctx: PlainLiteralObject, username: string): Promise<UserWithCredentials | null>;\n    update(ctx: PlainLiteralObject, data: Partial<UserEntityInterface> & {\n        id: string;\n    }): Promise<UserEntityInterface | null>;\n    create(ctx: PlainLiteralObject, data: Partial<UserEntityInterface>): Promise<UserEntityInterface | null>;\n    private enrichWithCredentials;\n}"
       },
       {
+        "name": "RocketsAuthUserSchema",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type RocketsAuthUserSchema = ReturnType<typeof composeRocketsAuthUserSchema>;"
+      },
+      {
         "name": "RocketsAuthUserUpdatableInterface",
         "kind": "interface",
         "runtime": false,
         "signature": "export interface RocketsAuthUserUpdatableInterface extends Partial<Pick<RocketsAuthUserCreatableInterface, 'active' | 'userMetadata'>> {\n}"
       },
       {
-        "name": "RocketsAuthUserUpdateDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class RocketsAuthUserUpdateDto extends RocketsAuthUserUpdateDto_base implements RocketsAuthUserUpdatableInterface {\n}"
+        "name": "RocketsAuthUserUpdateSchema",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type RocketsAuthUserUpdateSchema = ReturnType<typeof composeRocketsAuthUserUpdateSchema>;"
       },
       {
         "name": "RocketsClearOtpsCommand",
@@ -1979,7 +1877,7 @@
         "name": "TypedInvitationAcceptedEventPayloadInterface",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface TypedInvitationAcceptedEventPayloadInterface<TData extends LiteralObject = LiteralObject> {\n    invitation: ReferenceIdInterface & InvitationInterface;\n    data?: TData;\n}"
+        "signature": "export interface TypedInvitationAcceptedEventPayloadInterface<TData extends Record<string, unknown> = Record<string, unknown>> {\n    invitation: ReferenceIdInterface & InvitationInterface;\n    data?: TData;\n}"
       },
       {
         "name": "USER_CREDENTIALS_ENTITY_KEY",
@@ -2039,7 +1937,7 @@
         "name": "UserMetadataConfigInterface",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface UserMetadataConfigInterface<TCreateDto extends RocketsAuthUserMetadataCreatableInterface = RocketsAuthUserMetadataCreatableInterface, TUpdateDto extends RocketsAuthUserMetadataModelUpdatableInterface = RocketsAuthUserMetadataModelUpdatableInterface> {\n    imports?: DynamicModule['imports'];\n    entity: Type;\n    createDto: new () => TCreateDto;\n    updateDto: new () => TUpdateDto;\n}"
+        "signature": "export interface UserMetadataConfigInterface {\n    imports?: DynamicModule['imports'];\n    entity: Type;\n    updateSchema: z.ZodType;\n    responseSchema: z.ZodType;\n}"
       },
       {
         "name": "UserMetadataRepositoryInterface",
@@ -2114,10 +2012,88 @@
         "signature": "export declare function logAndGetErrorDetails(error: unknown, logger: Logger, customMessage: string, context?: Record<string, unknown>): ErrorDetails;"
       },
       {
+        "name": "rocketsAuthInvitationAcceptSchema",
+        "kind": "value",
+        "runtime": true,
+        "signature": "rocketsAuthInvitationAcceptSchema: import(\"zod\").ZodObject<{\n    passcode: import(\"zod\").ZodString;\n    payload: import(\"zod\").ZodOptional<import(\"zod\").ZodRecord<import(\"zod\").ZodString, import(\"zod\").ZodUnknown>>;\n}, import(\"zod/v4/core\").$strip>"
+      },
+      {
+        "name": "rocketsAuthInvitationCreateSchema",
+        "kind": "value",
+        "runtime": true,
+        "signature": "rocketsAuthInvitationCreateSchema: import(\"zod\").ZodObject<{\n    category: import(\"zod\").ZodString;\n    constraints: import(\"zod\").ZodOptional<import(\"zod\").ZodNullable<import(\"zod\").ZodRecord<import(\"zod\").ZodString, import(\"zod\").ZodUnknown>>>;\n    email: import(\"zod\").ZodString;\n}, import(\"zod/v4/core\").$strip>"
+      },
+      {
+        "name": "rocketsAuthInvitationResponseSchema",
+        "kind": "value",
+        "runtime": true,
+        "signature": "rocketsAuthInvitationResponseSchema: z.ZodObject<{\n    dateCreated: z.ZodDate;\n    dateUpdated: z.ZodDate;\n    dateDeleted: z.ZodNullable<z.ZodDate>;\n    version: z.ZodNumber;\n    id: z.ZodString;\n    active: z.ZodDefault<z.ZodBoolean>;\n    code: z.ZodString;\n    category: z.ZodString;\n    constraints: z.ZodOptional<z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodUnknown>>>;\n    userId: z.ZodString;\n    dateAccepted: z.ZodNullable<z.ZodDate>;\n    dateRevoked: z.ZodNullable<z.ZodDate>;\n    emailSent: z.ZodBoolean;\n    emailError: z.ZodOptional<z.ZodString>;\n}, z.core.$strip>"
+      },
+      {
+        "name": "rocketsAuthInvitationSchema",
+        "kind": "value",
+        "runtime": true,
+        "signature": "rocketsAuthInvitationSchema: import(\"zod\").ZodObject<{\n    dateCreated: import(\"zod\").ZodDate;\n    dateUpdated: import(\"zod\").ZodDate;\n    dateDeleted: import(\"zod\").ZodNullable<import(\"zod\").ZodDate>;\n    version: import(\"zod\").ZodNumber;\n    id: import(\"zod\").ZodString;\n    active: import(\"zod\").ZodDefault<import(\"zod\").ZodBoolean>;\n    code: import(\"zod\").ZodString;\n    category: import(\"zod\").ZodString;\n    constraints: import(\"zod\").ZodOptional<import(\"zod\").ZodNullable<import(\"zod\").ZodRecord<import(\"zod\").ZodString, import(\"zod\").ZodUnknown>>>;\n    userId: import(\"zod\").ZodString;\n    dateAccepted: import(\"zod\").ZodNullable<import(\"zod\").ZodDate>;\n    dateRevoked: import(\"zod\").ZodNullable<import(\"zod\").ZodDate>;\n}, import(\"zod/v4/core\").$strip>"
+      },
+      {
         "name": "rocketsAuthOptionsDefaultConfig",
         "kind": "value",
         "runtime": true,
         "signature": "rocketsAuthOptionsDefaultConfig: {\n    provide: string;\n    useFactory: () => RocketsAuthSettingsInterface;\n}"
+      },
+      {
+        "name": "rocketsAuthRoleCreateSchema",
+        "kind": "value",
+        "runtime": true,
+        "signature": "rocketsAuthRoleCreateSchema: import(\"zod\").ZodObject<{\n    description: import(\"zod\").ZodString;\n    name: import(\"zod\").ZodString;\n}, import(\"zod/v4/core\").$strip>"
+      },
+      {
+        "name": "rocketsAuthRoleSchema",
+        "kind": "value",
+        "runtime": true,
+        "signature": "rocketsAuthRoleSchema: import(\"zod\").ZodObject<{\n    dateCreated: import(\"zod\").ZodDate;\n    dateUpdated: import(\"zod\").ZodDate;\n    dateDeleted: import(\"zod\").ZodNullable<import(\"zod\").ZodDate>;\n    version: import(\"zod\").ZodNumber;\n    id: import(\"zod\").ZodString;\n    name: import(\"zod\").ZodString;\n    description: import(\"zod\").ZodString;\n}, import(\"zod/v4/core\").$strip>"
+      },
+      {
+        "name": "rocketsAuthRoleUpdateSchema",
+        "kind": "value",
+        "runtime": true,
+        "signature": "rocketsAuthRoleUpdateSchema: import(\"zod\").ZodObject<{\n    description: import(\"zod\").ZodOptional<import(\"zod\").ZodString>;\n    name: import(\"zod\").ZodOptional<import(\"zod\").ZodString>;\n}, import(\"zod/v4/core\").$strip>"
+      },
+      {
+        "name": "rocketsAuthUserCreateSchema",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function rocketsAuthUserCreateSchema(userMetadataUpdate: z.ZodType): RocketsAuthUserCreateSchema;"
+      },
+      {
+        "name": "rocketsAuthUserMetadataResponseSchema",
+        "kind": "value",
+        "runtime": true,
+        "signature": "rocketsAuthUserMetadataResponseSchema: z.ZodObject<{\n    id: z.ZodString;\n    userId: z.ZodString;\n    dateCreated: z.ZodDate;\n    dateUpdated: z.ZodDate;\n    dateDeleted: z.ZodNullable<z.ZodDate>;\n    version: z.ZodNumber;\n}, z.core.$strip>"
+      },
+      {
+        "name": "rocketsAuthUserMetadataSchema",
+        "kind": "value",
+        "runtime": true,
+        "signature": "rocketsAuthUserMetadataSchema: z.ZodObject<{\n    id: z.ZodString;\n    userId: z.ZodString;\n    dateCreated: z.ZodDate;\n    dateUpdated: z.ZodDate;\n    dateDeleted: z.ZodNullable<z.ZodDate>;\n    version: z.ZodNumber;\n}, z.core.$strip>"
+      },
+      {
+        "name": "rocketsAuthUserMetadataUpdateSchema",
+        "kind": "value",
+        "runtime": true,
+        "signature": "rocketsAuthUserMetadataUpdateSchema: z.ZodObject<{}, z.core.$strip>"
+      },
+      {
+        "name": "rocketsAuthUserSchema",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function rocketsAuthUserSchema(userMetadataResponse: z.ZodType): RocketsAuthUserSchema;"
+      },
+      {
+        "name": "rocketsAuthUserUpdateSchema",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function rocketsAuthUserUpdateSchema(userMetadataUpdate: z.ZodType): RocketsAuthUserUpdateSchema;"
       }
     ],
     "@concepta/rockets-core": [
@@ -2296,52 +2272,16 @@
         "signature": "export interface AuthorizedUser {\n    id: string;\n    sub: string;\n    email?: string;\n    userRoles?: {\n        role: {\n            name: string;\n        };\n    }[];\n    claims?: Record<string, unknown>;\n}"
       },
       {
-        "name": "BaseUserCreateDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class BaseUserCreateDto extends BaseUserDto {\n    sub: string;\n}"
-      },
-      {
-        "name": "BaseUserDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class BaseUserDto {\n    id?: string;\n    sub?: string;\n    email?: string;\n    roles?: string[];\n    claims?: Record<string, unknown>;\n}"
-      },
-      {
         "name": "BaseUserEntityInterface",
         "kind": "interface",
         "runtime": false,
         "signature": "export interface BaseUserEntityInterface {\n    id: string;\n    sub: string;\n    email?: string;\n    roles?: string[];\n    claims?: Record<string, unknown>;\n}"
       },
       {
-        "name": "BaseUserMetadataCreateDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class BaseUserMetadataCreateDto extends BaseUserMetadataDto {\n    userId: string;\n}"
-      },
-      {
-        "name": "BaseUserMetadataDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class BaseUserMetadataDto {\n    userId?: string;\n}"
-      },
-      {
         "name": "BaseUserMetadataEntityInterface",
         "kind": "interface",
         "runtime": false,
         "signature": "export interface BaseUserMetadataEntityInterface {\n    id: string;\n    userId: string;\n    dateCreated: Date;\n    dateUpdated: Date;\n    dateDeleted: Date | null;\n    version: number;\n}"
-      },
-      {
-        "name": "BaseUserMetadataUpdateDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class BaseUserMetadataUpdateDto extends BaseUserMetadataDto {\n}"
-      },
-      {
-        "name": "BaseUserUpdateDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class BaseUserUpdateDto extends BaseUserDto {\n    userMetadata?: Record<string, unknown>;\n}"
       },
       {
         "name": "BoundRelation",
@@ -2414,6 +2354,12 @@
         "kind": "interface",
         "runtime": false,
         "signature": "export interface CrudResource<E extends PlainLiteralObject = PlainLiteralObject> {\n    readonly kind: ResourceKind.Crud;\n    readonly acl: ResourceAclPlan;\n    readonly core: RocketsResourceConfig;\n    readonly persistence: {\n        readonly module?: RepositoryModuleInterface;\n        readonly entity: RepositoryProviderOptions<E>;\n    };\n    readonly meta: {\n        readonly key: string;\n        readonly entityClass: new () => E;\n        readonly relations: ReadonlyArray<ResourceRelationEntry<E>>;\n        readonly hooks: ReadonlyArray<Type>;\n    };\n    readonly subResources?: ReadonlyArray<CrudResource<PlainLiteralObject>>;\n}"
+      },
+      {
+        "name": "CrudSchema",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type CrudSchema<T = unknown> = z.ZodType<T>;"
       },
       {
         "name": "CsrfGuard",
@@ -2516,12 +2462,6 @@
         "kind": "interface",
         "runtime": false,
         "signature": "export interface ErrorDetails {\n    errorMessage: string;\n    errorStack?: string;\n}"
-      },
-      {
-        "name": "FreeFormJson",
-        "kind": "function",
-        "runtime": true,
-        "signature": "export declare function FreeFormJson(): PropertyDecorator;"
       },
       {
         "name": "GetUserMetadataHandler",
@@ -2770,18 +2710,6 @@
         "signature": "ROCKETS_ROUTE_POLICY_TOKEN: unique symbol"
       },
       {
-        "name": "ROCKETS_TO_INSTANCE_OPTIONS",
-        "kind": "value",
-        "runtime": true,
-        "signature": "ROCKETS_TO_INSTANCE_OPTIONS: ClassTransformOptions"
-      },
-      {
-        "name": "ROCKETS_TO_PLAIN_OPTIONS",
-        "kind": "value",
-        "runtime": true,
-        "signature": "ROCKETS_TO_PLAIN_OPTIONS: ClassTransformOptions"
-      },
-      {
         "name": "RateLimit",
         "kind": "function",
         "runtime": true,
@@ -2893,7 +2821,7 @@
         "name": "ResourceDtoConfig",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface ResourceDtoConfig {\n    readonly response?: Type;\n    readonly paginated?: Type;\n    readonly create?: Type;\n    readonly update?: Type;\n    readonly replace?: Type;\n}"
+        "signature": "export interface ResourceDtoConfig {\n    readonly response?: z.ZodType;\n    readonly paginated?: z.ZodType;\n    readonly create?: z.ZodType;\n    readonly update?: z.ZodType;\n    readonly replace?: z.ZodType;\n}"
       },
       {
         "name": "ResourceHandlerOverrides",
@@ -2917,7 +2845,7 @@
         "name": "ResourceOperationConfig",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface ResourceOperationConfig {\n    readonly acl?: OperationAclConfig;\n    readonly input?: Type;\n    readonly output?: Type;\n    readonly paginated?: Type;\n    readonly handler?: Type;\n    readonly hooks?: readonly RocketsEntityHookForResource<PlainLiteralObject>[];\n    readonly decorators?: readonly (MethodDecorator | ClassDecorator)[];\n    readonly path?: string | string[];\n    readonly methodName?: string;\n    readonly transactional?: boolean;\n    readonly requestOverride?: CrudRequestConfig<PlainLiteralObject>;\n    readonly responseOverride?: CrudResponseConfig;\n}"
+        "signature": "export interface ResourceOperationConfig {\n    readonly acl?: OperationAclConfig;\n    readonly input?: z.ZodType;\n    readonly output?: z.ZodType;\n    readonly paginated?: z.ZodType;\n    readonly handler?: Type;\n    readonly hooks?: readonly RocketsEntityHookForResource<PlainLiteralObject>[];\n    readonly decorators?: readonly (MethodDecorator | ClassDecorator)[];\n    readonly path?: string | string[];\n    readonly methodName?: string;\n    readonly transactional?: boolean;\n    readonly requestOverride?: CrudRequestConfig<PlainLiteralObject>;\n    readonly responseOverride?: CrudResponseConfig;\n}"
       },
       {
         "name": "ResourceOperationName",
@@ -3043,13 +2971,7 @@
         "name": "RocketsUserMetadataConfig",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RocketsUserMetadataConfig<TCreateDto extends UserMetadataCreatableInterface = UserMetadataCreatableInterface, TUpdateDto extends UserMetadataModelUpdatableInterface = UserMetadataModelUpdatableInterface> {\n    readonly entity: Type<PlainLiteralObject>;\n    readonly createDto: Type<TCreateDto>;\n    readonly updateDto: Type<TUpdateDto>;\n    readonly responseDto?: Type;\n    readonly repository?: RocketsRepositoryModuleInterface;\n}"
-      },
-      {
-        "name": "RoleNameDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class RoleNameDto {\n    name: string;\n}"
+        "signature": "export interface RocketsUserMetadataConfig {\n    readonly entity: Type<PlainLiteralObject>;\n    readonly updateSchema: z.ZodType;\n    readonly responseSchema: z.ZodType;\n    readonly repository?: RocketsRepositoryModuleInterface;\n}"
       },
       {
         "name": "RouteAuditEntry",
@@ -3104,6 +3026,12 @@
         "kind": "interface",
         "runtime": false,
         "signature": "export interface SchemaEntityCompilerOptions {\n    readonly name: string;\n    readonly table: string;\n}"
+      },
+      {
+        "name": "SchemaValidatorConflictCheck",
+        "kind": "class",
+        "runtime": true,
+        "signature": "export declare class SchemaValidatorConflictCheck implements OnApplicationBootstrap {\n    private readonly applicationConfig;\n    constructor(applicationConfig: ApplicationConfig);\n    onApplicationBootstrap(): void;\n}"
       },
       {
         "name": "StoredIdempotentResponse",
@@ -3232,28 +3160,10 @@
         "signature": "export interface UserModelUpdatableInterface extends UserUpdatableInterface {\n    id: string;\n}"
       },
       {
-        "name": "UserResponseDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class UserResponseDto {\n    id: string;\n    sub: string;\n    email?: string;\n    userRoles?: UserRoleItemDto[];\n    claims?: Record<string, unknown>;\n    userMetadata?: Record<string, unknown>;\n}"
-      },
-      {
-        "name": "UserRoleItemDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class UserRoleItemDto {\n    role: RoleNameDto;\n}"
-      },
-      {
         "name": "UserUpdatableInterface",
         "kind": "interface",
         "runtime": false,
         "signature": "export interface UserUpdatableInterface {\n    userMetadata?: Record<string, unknown>;\n}"
-      },
-      {
-        "name": "UserUpdateDto",
-        "kind": "class",
-        "runtime": true,
-        "signature": "export declare class UserUpdateDto {\n    userMetadata?: Record<string, unknown>;\n}"
       },
       {
         "name": "VerifyWebhookSignatureOptions",
@@ -3286,6 +3196,18 @@
         "signature": "export interface WithActor {\n    readonly actor?: Actor;\n}"
       },
       {
+        "name": "assertFailClosedResponse",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function assertFailClosedResponse(schema: z.ZodType, context: string): void;"
+      },
+      {
+        "name": "assertNamedSchema",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function assertNamedSchema(schema: unknown, context: string): asserts schema is z.ZodType;"
+      },
+      {
         "name": "attachErrorDetails",
         "kind": "function",
         "runtime": true,
@@ -3302,6 +3224,12 @@
         "kind": "function",
         "runtime": true,
         "signature": "export declare function buildAppRegistrationPlan(args: {\n    readonly resources: ReadonlyArray<ResourceInput>;\n    readonly repository?: RepositoryModuleInterface;\n    readonly userMetadata?: RocketsUserMetadataConfig;\n    readonly accessControl?: boolean;\n    readonly enforceGrants?: boolean;\n}): AppRegistrationPlan;"
+      },
+      {
+        "name": "buildPaginatedSchema",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function buildPaginatedSchema(resource: z.ZodType, context: string): z.ZodType;"
       },
       {
         "name": "classValidatorErrorsToDetails",
@@ -3322,16 +3250,22 @@
         "signature": "export declare function collectRouteAudit(args: {\n    readonly controllers: readonly ControllerScan[];\n    readonly globalGuards: readonly string[];\n    readonly authGuards: readonly string[];\n    readonly csrfGuards?: readonly string[];\n}): RouteAuditReport;"
       },
       {
+        "name": "createBatchSchema",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function createBatchSchema<T extends z.ZodType>(itemSchema: T): z.ZodObject<{\n    bulk: z.ZodArray<T>;\n}, z.core.$strip>;"
+      },
+      {
         "name": "createBoundRelation",
         "kind": "function",
         "runtime": true,
         "signature": "export declare function createBoundRelation<S extends object>(source: EntityConstructor<S>): BoundRelation<S>;"
       },
       {
-        "name": "createPaginatedDto",
+        "name": "createRocketsStandardSchemaConverter",
         "kind": "function",
         "runtime": true,
-        "signature": "export declare function createPaginatedDto<TResource>(resourceDto: Type<TResource>, className?: string): Type;"
+        "signature": "export declare function createRocketsStandardSchemaConverter(): StandardSchemaConverter;"
       },
       {
         "name": "createWebhookSignatureVerifier",
@@ -3490,6 +3424,12 @@
         "signature": "export declare function isModuleResource(value: unknown): value is ModuleResource;"
       },
       {
+        "name": "isOpenApiBridged",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function isOpenApiBridged(schema: z.ZodType): boolean;"
+      },
+      {
         "name": "isOperationResource",
         "kind": "function",
         "runtime": true,
@@ -3514,6 +3454,12 @@
         "signature": "export declare function logAndGetErrorDetails(error: unknown, logger: Logger, customMessage: string, context?: Record<string, unknown>): ErrorDetails;"
       },
       {
+        "name": "paginatedSchema",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function paginatedSchema<T extends z.ZodType>(itemSchema: T): z.ZodObject<{\n    data: z.ZodArray<T>;\n    limit: z.ZodNumber;\n    count: z.ZodNumber;\n    total: z.ZodNumber;\n    page: z.ZodNumber;\n    pageCount: z.ZodNumber;\n}, z.core.$strip>;"
+      },
+      {
         "name": "parseCookies",
         "kind": "function",
         "runtime": true,
@@ -3524,6 +3470,12 @@
         "kind": "function",
         "runtime": true,
         "signature": "export declare function readErrorDetails(exception: unknown): readonly RocketsErrorDetail[] | undefined;"
+      },
+      {
+        "name": "readSchemaId",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function readSchemaId(schema: z.ZodType): string | undefined;"
       },
       {
         "name": "relation",
@@ -3544,6 +3496,12 @@
         "signature": "export declare function resolveRelationTarget(entry: ResourceRelationEntry): EntityConstructor;"
       },
       {
+        "name": "rocketsSchemaValidation",
+        "kind": "value",
+        "runtime": true,
+        "signature": "rocketsSchemaValidation: StandardSchemaValidationPipeOptions"
+      },
+      {
         "name": "standardSchemaIssuesToDetails",
         "kind": "function",
         "runtime": true,
@@ -3562,6 +3520,12 @@
         "signature": "export declare function validateRegisteredRoutes(appOrRoutes: RouteInspectionTarget | readonly RegisteredRoute[]): void;"
       },
       {
+        "name": "validateWithSchema",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function validateWithSchema<T>(schema: StandardSchemaV1<unknown, T>, data: unknown): Promise<T>;"
+      },
+      {
         "name": "verifyCsrfToken",
         "kind": "function",
         "runtime": true,
@@ -3574,10 +3538,10 @@
         "signature": "export declare function verifyWebhookSignature(options: VerifyWebhookSignatureOptions): boolean;"
       },
       {
-        "name": "whitelistedFromDto",
+        "name": "withOpenApi",
         "kind": "function",
         "runtime": true,
-        "signature": "export declare function whitelistedFromDto<T extends Record<string, unknown> = Record<string, unknown>>(dtoClass: Type<unknown>, data: object): Promise<T>;"
+        "signature": "export declare function withOpenApi<T extends z.ZodType>(schema: T, id?: string): T;"
       }
     ],
     "@concepta/rockets-core/zod": [
@@ -3588,10 +3552,22 @@
         "signature": "export interface BoundBuilders<TBase extends string, TParamsSchema extends z.ZodObject | undefined = undefined> {\n    read<TInput extends z.ZodObject | undefined = undefined, TOutput extends OperationOutputConfig = OperationOutputSchema, const TOpPath extends string = ''>(config: ReadBuilderConfig<TInput, TOutput, EffectiveParams<TBase, TOpPath, TParamsSchema>, TOpPath>): PendingOperation<InferIn<TInput>, InferOut<TOutput>, EffectiveParams<TBase, TOpPath, TParamsSchema>>;\n    write<TInput extends z.ZodObject | undefined = undefined, TOutput extends OperationOutputConfig = OperationOutputSchema, const TOpPath extends string = ''>(config: WriteBuilderConfig<TInput, TOutput, EffectiveParams<TBase, TOpPath, TParamsSchema>, TOpPath>): PendingOperation<InferIn<TInput>, InferOut<TOutput>, EffectiveParams<TBase, TOpPath, TParamsSchema>>;\n    delete<TInput extends z.ZodObject | undefined = undefined, TOutput extends OperationOutputConfig = OperationOutputSchema, const TOpPath extends string = ''>(config: DeleteBuilderConfig<TInput, TOutput, EffectiveParams<TBase, TOpPath, TParamsSchema>, TOpPath>): PendingOperation<InferIn<TInput>, InferOut<TOutput>, EffectiveParams<TBase, TOpPath, TParamsSchema>>;\n    sse<TInput extends z.ZodObject | undefined = undefined, const TOpPath extends string = ''>(config: SseBuilderConfig<TInput, EffectiveParams<TBase, TOpPath, TParamsSchema>, TOpPath>): PendingOperation<InferIn<TInput>, Observable<MessageEvent>, EffectiveParams<TBase, TOpPath, TParamsSchema>>;\n}"
       },
       {
+        "name": "ComputeFn",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type ComputeFn = (row: Readonly<Record<string, unknown>>) => unknown;"
+      },
+      {
         "name": "DeleteBuilderConfig",
         "kind": "type",
         "runtime": false,
         "signature": "export type DeleteBuilderConfig<TInput extends z.ZodObject | undefined = undefined, TOutput extends OperationOutputConfig = OperationOutputSchema, TParams extends object = object, TOpPath extends string = ''> = SharedBuilderFields<TInput, TOutput, TParams> & {\n    readonly method?: DeleteMethod;\n    readonly path?: TOpPath;\n};"
+      },
+      {
+        "name": "JsonEncoded",
+        "kind": "type",
+        "runtime": false,
+        "signature": "export type JsonEncoded<T> = T extends Date ? string : T extends ReadonlyArray<infer U> ? JsonEncoded<U>[] : T extends object ? {\n    [K in keyof T]: JsonEncoded<T[K]>;\n} : T;"
       },
       {
         "name": "OperationRecord",
@@ -3616,12 +3592,6 @@
         "kind": "interface",
         "runtime": false,
         "signature": "export interface PendingOperation<TInput = unknown, TOutput = unknown, TParams extends object = object> {\n    readonly builder: PendingBuilder;\n    readonly method: OperationHttpMethod;\n    readonly path: string | undefined;\n    readonly status: number | undefined;\n    readonly summary: string | undefined;\n    readonly public: boolean | undefined;\n    readonly acl: OperationAclConfig | undefined;\n    readonly transactional: boolean | undefined;\n    readonly input: z.ZodObject | undefined;\n    readonly output: OperationOutputConfig;\n    readonly handler: OperationHandlerRef<TInput, TOutput, TParams>;\n    readonly decorators: readonly MethodDecorator[] | undefined;\n}"
-      },
-      {
-        "name": "PersistenceRow",
-        "kind": "type",
-        "runtime": false,
-        "signature": "export type PersistenceRow<T> = T extends Record<string, unknown> ? {\n    [K in keyof T]: K extends PersistenceDateTimeKey ? CoerceIsoDateTime<T[K]> : TransformPersistenceValue<T[K]>;\n} : T;"
       },
       {
         "name": "ReadBuilderConfig",
@@ -3669,7 +3639,13 @@
         "name": "SchemaPersistenceRow",
         "kind": "type",
         "runtime": false,
-        "signature": "export type SchemaPersistenceRow<S extends z.ZodObject> = PersistenceRow<WireRow<S>>;"
+        "signature": "export type SchemaPersistenceRow<S extends z.ZodType> = z.output<S>;"
+      },
+      {
+        "name": "SchemaProjections",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface SchemaProjections {\n    readonly create: Record<string, z.ZodType>;\n    readonly update: Record<string, z.ZodType>;\n    readonly response: Record<string, z.ZodType>;\n    readonly compute: Record<string, ComputeFn>;\n    readonly pkKey: string | undefined;\n    readonly relations: ReadonlyArray<ResourceRelationEntry<PlainLiteralObject>>;\n}"
       },
       {
         "name": "SseBuilderConfig",
@@ -3687,7 +3663,7 @@
         "name": "WireRow",
         "kind": "type",
         "runtime": false,
-        "signature": "export type WireRow<S extends z.ZodObject> = z.output<S>;"
+        "signature": "export type WireRow<S extends z.ZodType> = JsonEncoded<z.output<S>>;"
       },
       {
         "name": "WriteBuilderConfig",
@@ -3750,22 +3726,22 @@
         "signature": "export interface ZodResourceDefinition extends Omit<RocketsResourceDefinition<PlainLiteralObject>, 'entity' | 'dto' | 'operations'> {\n    readonly name: string;\n    readonly schema: z.ZodObject;\n    readonly entity?: Type<PlainLiteralObject>;\n    readonly table?: string;\n    readonly entityCompiler?: SchemaEntityCompiler;\n    readonly operations?: readonly ZodCrudOperation[] | ZodResourceOperations;\n    readonly owner?: string | ZodOwnerConfig;\n    readonly ownerStamp?: boolean;\n    readonly ownerScope?: boolean;\n}"
       },
       {
-        "name": "ZodResourceDtos",
-        "kind": "interface",
-        "runtime": false,
-        "signature": "export interface ZodResourceDtos {\n    readonly response: Type<object>;\n    readonly create?: Type<object>;\n    readonly update?: Type<object>;\n    readonly replace?: Type<object>;\n}"
-      },
-      {
         "name": "ZodResourceManifest",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface ZodResourceManifest {\n    readonly definition: ZodResourceDefinition | ZodSubResourceDefinition;\n    readonly dtos: ZodResourceDtos;\n    readonly entity: Type<PlainLiteralObject>;\n}"
+        "signature": "export interface ZodResourceManifest {\n    readonly definition: ZodResourceDefinition | ZodSubResourceDefinition;\n    readonly schemas: ZodResourceSchemas;\n    readonly entity: Type<PlainLiteralObject>;\n}"
       },
       {
         "name": "ZodResourceOperations",
         "kind": "interface",
         "runtime": false,
         "signature": "export interface ZodResourceOperations {\n    readonly list?: boolean | ZodOperationConfig;\n    readonly read?: boolean | ZodOperationConfig;\n    readonly create?: boolean | ZodOperationConfig;\n    readonly update?: boolean | ZodOperationConfig;\n    readonly replace?: boolean | ZodOperationConfig;\n    readonly delete?: boolean | ZodDeleteOperationConfig;\n    readonly restore?: boolean | ZodRestoreOperationConfig;\n}"
+      },
+      {
+        "name": "ZodResourceSchemas",
+        "kind": "interface",
+        "runtime": false,
+        "signature": "export interface ZodResourceSchemas {\n    readonly request: {\n        readonly create?: z.ZodType;\n        readonly update?: z.ZodType;\n        readonly replace?: z.ZodType;\n    };\n    readonly response: {\n        readonly resource: z.ZodType;\n        readonly paginated: z.ZodType;\n    };\n}"
       },
       {
         "name": "ZodRestoreOperationConfig",
@@ -3795,19 +3771,25 @@
         "name": "auditableEntity",
         "kind": "function",
         "runtime": true,
-        "signature": "export declare function auditableEntity<Shape extends z.ZodRawShape>(shape: Shape): z.ZodObject<{\n    id: z.ZodUUID;\n} & Shape & {\n    dateCreated: z.ZodISODateTime;\n    dateUpdated: z.ZodISODateTime;\n    dateDeleted: z.ZodOptional<z.ZodNullable<z.ZodISODateTime>>;\n    version: z.ZodDefault<z.ZodInt>;\n} extends infer T ? {\n    -readonly [P in keyof T]: T[P];\n} : never, z.core.$strip>;"
+        "signature": "export declare function auditableEntity<Shape extends z.ZodRawShape>(shape: Shape): z.ZodObject<{\n    id: z.ZodUUID;\n} & Shape & {\n    dateCreated: z.ZodDate;\n    dateUpdated: z.ZodDate;\n    dateDeleted: z.ZodOptional<z.ZodNullable<z.ZodDate>>;\n    version: z.ZodDefault<z.ZodInt>;\n} extends infer T ? {\n    -readonly [P in keyof T]: T[P];\n} : never, z.core.$strip>;"
       },
       {
         "name": "baseEntity",
         "kind": "function",
         "runtime": true,
-        "signature": "export declare function baseEntity<Shape extends z.ZodRawShape>(shape: Shape): z.ZodObject<{\n    id: z.ZodUUID;\n} & Shape & {\n    dateCreated: z.ZodISODateTime;\n    dateUpdated: z.ZodISODateTime;\n} extends infer T ? {\n    -readonly [P in keyof T]: T[P];\n} : never, z.core.$strip>;"
+        "signature": "export declare function baseEntity<Shape extends z.ZodRawShape>(shape: Shape): z.ZodObject<{\n    id: z.ZodUUID;\n} & Shape & {\n    dateCreated: z.ZodDate;\n    dateUpdated: z.ZodDate;\n} extends infer T ? {\n    -readonly [P in keyof T]: T[P];\n} : never, z.core.$strip>;"
       },
       {
         "name": "bindZodResources",
         "kind": "function",
         "runtime": true,
         "signature": "export declare function bindZodResources(defaultCompiler: SchemaEntityCompiler): {\n    zodResource: typeof zodResource;\n    zodSubResource: typeof zodSubResource;\n    zodModuleResource: typeof zodModuleResource;\n    defineUserMetadata: (schema: Parameters<typeof defineZodUserMetadata>[0], options?: Omit<ZodUserMetadataOptions, 'entityCompiler'>) => RocketsUserMetadataConfig;\n};"
+      },
+      {
+        "name": "buildResponseSchema",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function buildResponseSchema(name: string, projections: Pick<SchemaProjections, 'response' | 'compute'>): z.ZodType;"
       },
       {
         "name": "compileDtoClass",
@@ -3819,7 +3801,7 @@
         "name": "createdEntity",
         "kind": "function",
         "runtime": true,
-        "signature": "export declare function createdEntity<Shape extends z.ZodRawShape>(shape: Shape): z.ZodObject<{\n    id: z.ZodUUID;\n} & Shape & {\n    dateCreated: z.ZodISODateTime;\n} extends infer T ? {\n    -readonly [P in keyof T]: T[P];\n} : never, z.core.$strip>;"
+        "signature": "export declare function createdEntity<Shape extends z.ZodRawShape>(shape: Shape): z.ZodObject<{\n    id: z.ZodUUID;\n} & Shape & {\n    dateCreated: z.ZodDate;\n} extends infer T ? {\n    -readonly [P in keyof T]: T[P];\n} : never, z.core.$strip>;"
       },
       {
         "name": "defineZodUserMetadata",
@@ -3837,7 +3819,7 @@
         "name": "f",
         "kind": "value",
         "runtime": true,
-        "signature": "f: {\n    readonly pk: () => z.ZodUUID;\n    readonly createdAt: () => z.ZodISODateTime;\n    readonly updatedAt: () => z.ZodISODateTime;\n    readonly deletedAt: () => z.ZodOptional<z.ZodNullable<z.ZodISODateTime>>;\n    readonly version: () => z.ZodDefault<z.ZodInt>;\n    readonly owner: (o?: OwnerOpts) => z.ZodUUID;\n    readonly fk: (target: RocketsRelationFieldMeta[\"target\"], o?: FkOpts) => z.ZodUUID;\n    readonly hasMany: <T extends z.ZodType>(elementSchema: T, o: HasManyOpts) => z.ZodArray<T>;\n    readonly string: (o?: StringOpts) => z.ZodString | z.ZodDefault<z.ZodString>;\n    readonly int: (o?: IntOpts) => z.ZodInt | z.ZodDefault<z.ZodInt>;\n    readonly bool: (o?: BoolOpts) => z.ZodBoolean | z.ZodDefault<z.ZodBoolean>;\n    readonly enum: <const T extends Record<string, string>>(values: T, o?: EnumOpts<T[keyof T]>) => z.ZodEnum<T> | z.ZodDefault<z.ZodEnum<T>>;\n    readonly compute: <T extends z.ZodType>(schema: T, fn: (row: Readonly<Record<string, unknown>>) => ComputeResult<z.output<T>>) => T;\n}"
+        "signature": "f: {\n    readonly pk: () => z.ZodUUID;\n    readonly createdAt: () => z.ZodDate;\n    readonly updatedAt: () => z.ZodDate;\n    readonly deletedAt: () => z.ZodOptional<z.ZodNullable<z.ZodDate>>;\n    readonly version: () => z.ZodDefault<z.ZodInt>;\n    readonly owner: (o?: OwnerOpts) => z.ZodUUID;\n    readonly fk: (target: RocketsRelationFieldMeta[\"target\"], o?: FkOpts) => z.ZodUUID;\n    readonly hasMany: <T extends z.ZodType>(elementSchema: T, o: HasManyOpts) => z.ZodArray<T>;\n    readonly string: (o?: StringOpts) => z.ZodString | z.ZodDefault<z.ZodString>;\n    readonly int: (o?: IntOpts) => z.ZodInt | z.ZodDefault<z.ZodInt>;\n    readonly bool: (o?: BoolOpts) => z.ZodBoolean | z.ZodDefault<z.ZodBoolean>;\n    readonly date: (o?: FieldOpts) => z.ZodCoercedDate<unknown>;\n    readonly enum: <const T extends Record<string, string>>(values: T, o?: EnumOpts<T[keyof T]>) => z.ZodEnum<T> | z.ZodDefault<z.ZodEnum<T>>;\n    readonly compute: <T extends z.ZodType>(schema: T, fn: (row: Readonly<Record<string, unknown>>) => z.output<T>) => T;\n}"
       },
       {
         "name": "getRegisteredEntity",
@@ -4204,10 +4186,10 @@
         "signature": "export declare abstract class AuditPostgresEntity implements AuditInterface {\n    dateCreated: AuditDateCreated;\n    dateUpdated: AuditDateUpdated;\n    dateDeleted: AuditDateDeleted;\n    version: AuditVersion;\n}"
       },
       {
-        "name": "AuditSqlLiteEntity",
+        "name": "AuditSqliteEntity",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare abstract class AuditSqlLiteEntity implements AuditInterface {\n    dateCreated: AuditDateCreated;\n    dateUpdated: AuditDateUpdated;\n    dateDeleted: AuditDateDeleted;\n    version: AuditVersion;\n}"
+        "signature": "export declare abstract class AuditSqliteEntity implements AuditInterface {\n    dateCreated: AuditDateCreated;\n    dateUpdated: AuditDateUpdated;\n    dateDeleted: AuditDateDeleted;\n    version: AuditVersion;\n}"
       },
       {
         "name": "CommonPostgresEntity",
@@ -4219,7 +4201,7 @@
         "name": "CommonSqliteEntity",
         "kind": "class",
         "runtime": true,
-        "signature": "export declare abstract class CommonSqliteEntity extends AuditSqlLiteEntity implements ReferenceIdInterface, AuditInterface {\n    id: string;\n}"
+        "signature": "export declare abstract class CommonSqliteEntity extends AuditSqliteEntity implements ReferenceIdInterface, AuditInterface {\n    id: string;\n}"
       },
       {
         "name": "TypeOrmProviderOptionsInterface",
@@ -4306,14 +4288,6 @@
         "referencedBy": [
           "RocketsOptionsInterface"
         ]
-      },
-      {
-        "name": "RocketsUserMetadataDtoConfig",
-        "kind": "type",
-        "signature": "export type RocketsUserMetadataDtoConfig = Pick<RocketsUserMetadataConfig, 'updateDto'>;",
-        "referencedBy": [
-          "MeController"
-        ]
       }
     ],
     "@concepta/rockets-adapter-firebase": [],
@@ -4356,6 +4330,38 @@
         "signature": "type EmailRecipient = EmailAddress | EmailAddress[];",
         "referencedBy": [
           "EmailSendOptionsInterface"
+        ]
+      },
+      {
+        "name": "LocalLoginBody",
+        "kind": "type",
+        "signature": "type LocalLoginBody = z.output<typeof localLoginSchema>;",
+        "referencedBy": [
+          "RocketsAuthTokenController"
+        ]
+      },
+      {
+        "name": "RecoverLoginBody",
+        "kind": "type",
+        "signature": "type RecoverLoginBody = z.output<typeof recoveryRecoverLoginSchema>;",
+        "referencedBy": [
+          "RocketsAuthRecoveryController"
+        ]
+      },
+      {
+        "name": "RecoverPasswordBody",
+        "kind": "type",
+        "signature": "type RecoverPasswordBody = z.output<typeof recoveryRecoverPasswordSchema>;",
+        "referencedBy": [
+          "RocketsAuthRecoveryController"
+        ]
+      },
+      {
+        "name": "RefreshBody",
+        "kind": "type",
+        "signature": "type RefreshBody = z.output<typeof refreshSchema>;",
+        "referencedBy": [
+          "RocketsAuthTokenController"
         ]
       },
       {
@@ -4500,16 +4506,24 @@
       {
         "name": "RoleCrudOptionsExtrasInterface",
         "kind": "interface",
-        "signature": "export interface RoleCrudOptionsExtrasInterface {\n    imports?: DynamicModule['imports'];\n    path?: string;\n    model: Type;\n    dto?: {\n        createOne?: Type<RocketsAuthRoleCreatableInterface>;\n        updateOne?: Type<RocketsAuthRoleUpdatableInterface>;\n    };\n    controller?: RoleControllerExtras;\n}",
+        "signature": "export interface RoleCrudOptionsExtrasInterface {\n    imports?: DynamicModule['imports'];\n    path?: string;\n    model: z.ZodType;\n    dto?: {\n        createOne?: z.ZodType;\n        updateOne?: z.ZodType;\n    };\n    controller?: RoleControllerExtras;\n}",
         "referencedBy": [
           "RocketsAuthOptionsExtrasInterface",
           "RocketsAuthRoleAdminModule"
         ]
       },
       {
+        "name": "UpdatePasswordBody",
+        "kind": "type",
+        "signature": "type UpdatePasswordBody = z.output<typeof recoveryUpdatePasswordSchema>;",
+        "referencedBy": [
+          "RocketsAuthRecoveryController"
+        ]
+      },
+      {
         "name": "UserCrudOptionsExtrasInterface",
         "kind": "interface",
-        "signature": "export interface UserCrudOptionsExtrasInterface {\n    imports?: DynamicModule['imports'];\n    path?: string;\n    model?: Type;\n    entity?: Type;\n    userMetadataConfig?: UserMetadataConfigInterface;\n    dto?: {\n        createOne?: Type<RocketsAuthUserCreatableInterface>;\n        updateOne?: Type<RocketsAuthUserUpdatableInterface>;\n    };\n    command?: {\n        signupCommand?: Type<SignupUserCommand>;\n    };\n    handlers?: {\n        signupHandler?: Type<AbstractSignupUserHandler>;\n        adminList?: Type<AbstractAdminUserListHandler>;\n        adminRead?: Type<AbstractAdminUserReadHandler>;\n        adminUpdate?: Type<AbstractAdminUserUpdateHandler>;\n        adminDelete?: Type<AbstractAdminDeleteUserHandler>;\n    };\n}",
+        "signature": "export interface UserCrudOptionsExtrasInterface {\n    imports?: DynamicModule['imports'];\n    path?: string;\n    model?: z.ZodType;\n    entity?: Type;\n    userMetadataConfig?: UserMetadataConfigInterface;\n    dto?: {\n        createOne?: z.ZodType;\n        updateOne?: z.ZodType;\n    };\n    command?: {\n        signupCommand?: Type<SignupUserCommand>;\n    };\n    handlers?: {\n        signupHandler?: Type<AbstractSignupUserHandler>;\n        adminList?: Type<AbstractAdminUserListHandler>;\n        adminRead?: Type<AbstractAdminUserReadHandler>;\n        adminUpdate?: Type<AbstractAdminUserUpdateHandler>;\n        adminDelete?: Type<AbstractAdminDeleteUserHandler>;\n    };\n}",
         "referencedBy": [
           "RocketsAuthAdminModule",
           "RocketsAuthOptionsExtrasInterface",
@@ -4538,6 +4552,38 @@
         "signature": "interface UserWithCredentials extends UserEntityInterface {\n    passwordHash?: string | null;\n}",
         "referencedBy": [
           "RocketsAuthUserPortService"
+        ]
+      },
+      {
+        "name": "ValidatePasscodeBody",
+        "kind": "type",
+        "signature": "type ValidatePasscodeBody = z.output<typeof recoveryValidatePasscodeSchema>;",
+        "referencedBy": [
+          "RocketsAuthRecoveryController"
+        ]
+      },
+      {
+        "name": "composeRocketsAuthUserCreateSchema",
+        "kind": "function",
+        "signature": "declare function composeRocketsAuthUserCreateSchema(userMetadataUpdate: z.ZodType): z.ZodObject<{\n    email: z.ZodString;\n    username: z.ZodString;\n    active: z.ZodOptional<z.ZodBoolean>;\n    password: z.ZodString;\n    userMetadata: z.ZodOptional<z.ZodType<unknown, unknown, z.core.$ZodTypeInternals<unknown, unknown>>>;\n}, z.core.$strip>;",
+        "referencedBy": [
+          "RocketsAuthUserCreateSchema"
+        ]
+      },
+      {
+        "name": "composeRocketsAuthUserSchema",
+        "kind": "function",
+        "signature": "declare function composeRocketsAuthUserSchema(userMetadataResponse: z.ZodType): z.ZodObject<{\n    dateCreated: z.ZodDate;\n    dateUpdated: z.ZodDate;\n    dateDeleted: z.ZodNullable<z.ZodDate>;\n    version: z.ZodNumber;\n    id: z.ZodString;\n    email: z.ZodString;\n    username: z.ZodString;\n    active: z.ZodBoolean;\n    userMetadata: z.ZodOptional<z.ZodNullable<z.ZodType<unknown, unknown, z.core.$ZodTypeInternals<unknown, unknown>>>>;\n}, z.core.$strip>;",
+        "referencedBy": [
+          "RocketsAuthUserSchema"
+        ]
+      },
+      {
+        "name": "composeRocketsAuthUserUpdateSchema",
+        "kind": "function",
+        "signature": "declare function composeRocketsAuthUserUpdateSchema(userMetadataUpdate: z.ZodType): z.ZodObject<{\n    username: z.ZodOptional<z.ZodString>;\n    email: z.ZodOptional<z.ZodString>;\n    active: z.ZodOptional<z.ZodBoolean>;\n    userMetadata: z.ZodOptional<z.ZodType<unknown, unknown, z.core.$ZodTypeInternals<unknown, unknown>>>;\n}, z.core.$strip>;",
+        "referencedBy": [
+          "RocketsAuthUserUpdateSchema"
         ]
       }
     ],
@@ -4657,28 +4703,12 @@
         ]
       },
       {
-        "name": "CoerceIsoDateTime",
-        "kind": "type",
-        "signature": "type CoerceIsoDateTime<V> = V extends string ? Date : V extends string | null ? Date | null : V extends string | undefined ? Date | undefined : V extends string | null | undefined ? Date | null | undefined : V;",
-        "referencedBy": [
-          "PersistenceRow"
-        ]
-      },
-      {
         "name": "CompiledOperationDescriptor",
         "kind": "interface",
         "signature": "export interface CompiledOperationDescriptor {\n    readonly key: string;\n    readonly method: OperationHttpMethod;\n    readonly path: string;\n    readonly status: number;\n    readonly summary?: string;\n    readonly public?: boolean;\n    readonly acl?: OperationAclConfig;\n    readonly transactional?: boolean;\n    readonly inputDto?: Type<object>;\n    readonly output: Type<object> | false;\n    readonly handler: OperationHandlerRef;\n    readonly decorators?: readonly MethodDecorator[];\n    readonly responseMode?: 'sse';\n}",
         "referencedBy": [
           "OperationResourceInput",
           "ZodOperationResource"
-        ]
-      },
-      {
-        "name": "ComputeResult",
-        "kind": "type",
-        "signature": "type ComputeResult<T> = T extends string ? string | Date : T extends ReadonlyArray<infer E> ? ReadonlyArray<ComputeResult<E>> : T extends object ? {\n    readonly [K in keyof T]: ComputeResult<T[K]>;\n} : T;",
-        "referencedBy": [
-          "f"
         ]
       },
       {
@@ -4728,6 +4758,7 @@
         "kind": "type",
         "signature": "export type EntityConstructor<T = unknown> = (abstract new (...args: never[]) => T) & {\n    readonly name: string;\n};",
         "referencedBy": [
+          "SchemaProjections",
           "ZodResourceDefinition",
           "ZodSubResourceDefinition",
           "zodResource",
@@ -5087,14 +5118,6 @@
         ]
       },
       {
-        "name": "PersistenceDateTimeKey",
-        "kind": "type",
-        "signature": "type PersistenceDateTimeKey = 'dateCreated' | 'dateUpdated' | 'dateDeleted' | 'sendAt';",
-        "referencedBy": [
-          "PersistenceRow"
-        ]
-      },
-      {
         "name": "ReadMethod",
         "kind": "type",
         "signature": "type ReadMethod = 'GET';",
@@ -5168,7 +5191,7 @@
       {
         "name": "ResourceDtoConfig",
         "kind": "interface",
-        "signature": "export interface ResourceDtoConfig {\n    readonly response?: Type;\n    readonly paginated?: Type;\n    readonly create?: Type;\n    readonly update?: Type;\n    readonly replace?: Type;\n}",
+        "signature": "export interface ResourceDtoConfig {\n    readonly response?: z.ZodType;\n    readonly paginated?: z.ZodType;\n    readonly create?: z.ZodType;\n    readonly update?: z.ZodType;\n    readonly replace?: z.ZodType;\n}",
         "referencedBy": [
           "ZodResourceDefinition",
           "ZodSubResourceDefinition",
@@ -5201,7 +5224,7 @@
       {
         "name": "ResourceOperationConfig",
         "kind": "interface",
-        "signature": "export interface ResourceOperationConfig {\n    readonly acl?: OperationAclConfig;\n    readonly input?: Type;\n    readonly output?: Type;\n    readonly paginated?: Type;\n    readonly handler?: Type;\n    readonly hooks?: readonly RocketsEntityHookForResource<PlainLiteralObject>[];\n    readonly decorators?: readonly (MethodDecorator | ClassDecorator)[];\n    readonly path?: string | string[];\n    readonly methodName?: string;\n    readonly transactional?: boolean;\n    readonly requestOverride?: CrudRequestConfig<PlainLiteralObject>;\n    readonly responseOverride?: CrudResponseConfig;\n}",
+        "signature": "export interface ResourceOperationConfig {\n    readonly acl?: OperationAclConfig;\n    readonly input?: z.ZodType;\n    readonly output?: z.ZodType;\n    readonly paginated?: z.ZodType;\n    readonly handler?: Type;\n    readonly hooks?: readonly RocketsEntityHookForResource<PlainLiteralObject>[];\n    readonly decorators?: readonly (MethodDecorator | ClassDecorator)[];\n    readonly path?: string | string[];\n    readonly methodName?: string;\n    readonly transactional?: boolean;\n    readonly requestOverride?: CrudRequestConfig<PlainLiteralObject>;\n    readonly responseOverride?: CrudResponseConfig;\n}",
         "referencedBy": [
           "ZodDeleteOperationConfig",
           "ZodOperationConfig",
@@ -5236,6 +5259,7 @@
         "kind": "interface",
         "signature": "export interface ResourceRelationEntry<S extends object = object, T extends EntityConstructor = EntityConstructor, K extends string = string> {\n    readonly source: EntityConstructor<S>;\n    readonly target: T | (() => T);\n    readonly propertyName: K;\n    readonly federated?: boolean;\n    readonly distinctFilter?: WhereCondition<PlainLiteralObject>;\n    readonly include?: 'default' | 'never';\n}",
         "referencedBy": [
+          "SchemaProjections",
           "ZodResourceDefinition",
           "ZodSubResourceDefinition",
           "zodResource",
@@ -5332,7 +5356,7 @@
       {
         "name": "RocketsUserMetadataConfig",
         "kind": "interface",
-        "signature": "export interface RocketsUserMetadataConfig<TCreateDto extends UserMetadataCreatableInterface = UserMetadataCreatableInterface, TUpdateDto extends UserMetadataModelUpdatableInterface = UserMetadataModelUpdatableInterface> {\n    readonly entity: Type<PlainLiteralObject>;\n    readonly createDto: Type<TCreateDto>;\n    readonly updateDto: Type<TUpdateDto>;\n    readonly responseDto?: Type;\n    readonly repository?: RocketsRepositoryModuleInterface;\n}",
+        "signature": "export interface RocketsUserMetadataConfig {\n    readonly entity: Type<PlainLiteralObject>;\n    readonly updateSchema: z.ZodType;\n    readonly responseSchema: z.ZodType;\n    readonly repository?: RocketsRepositoryModuleInterface;\n}",
         "referencedBy": [
           "ZodUserMetadataOptions",
           "bindZodResources",
@@ -5395,44 +5419,6 @@
           "ZodResourceDefinition",
           "ZodSubResourceDefinition",
           "zodSubResource"
-        ]
-      },
-      {
-        "name": "TransformPersistenceValue",
-        "kind": "type",
-        "signature": "type TransformPersistenceValue<T> = T extends readonly (infer U)[] ? PersistenceRow<U>[] : T extends Record<string, unknown> ? PersistenceRow<T> : T;",
-        "referencedBy": [
-          "PersistenceRow"
-        ]
-      },
-      {
-        "name": "UserMetadataCreatableInterface",
-        "kind": "interface",
-        "signature": "export interface UserMetadataCreatableInterface {\n    userId: string;\n}",
-        "referencedBy": [
-          "ZodUserMetadataOptions",
-          "bindZodResources",
-          "defineZodUserMetadata"
-        ]
-      },
-      {
-        "name": "UserMetadataModelUpdatableInterface",
-        "kind": "interface",
-        "signature": "export interface UserMetadataModelUpdatableInterface extends UserMetadataUpdatableInterface {\n    id: string;\n}",
-        "referencedBy": [
-          "ZodUserMetadataOptions",
-          "bindZodResources",
-          "defineZodUserMetadata"
-        ]
-      },
-      {
-        "name": "UserMetadataUpdatableInterface",
-        "kind": "interface",
-        "signature": "export interface UserMetadataUpdatableInterface {\n}",
-        "referencedBy": [
-          "ZodUserMetadataOptions",
-          "bindZodResources",
-          "defineZodUserMetadata"
         ]
       },
       {

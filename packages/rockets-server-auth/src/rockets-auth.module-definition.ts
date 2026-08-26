@@ -54,8 +54,11 @@ import {
   PasswordModule,
   ValidatePasswordHistoryCommand,
 } from '@concepta/nestjs-password';
-import { RepositoryModule } from '@concepta/nestjs-repository';
-import { RoleModule } from '@concepta/nestjs-role';
+import {
+  RepositoryModule,
+  TransactionScope,
+} from '@concepta/nestjs-repository';
+import { RoleModule, RoleOptionsInterface } from '@concepta/nestjs-role';
 import {
   CreateUserCommand,
   GetUserQuery,
@@ -554,20 +557,15 @@ export function createRocketsAuthImports(importOptions: {
       }),
     }),
 
+    // Entity keys are declared on `RoleModule.forFeature` below; upstream's
+    // root options carry nothing else, so the consumer's `role` block is
+    // forwarded verbatim.
     RoleModule.forRootAsync({
       imports: [...(importOptions.extras?.role?.imports || [])],
       inject: [RAW_OPTIONS_TOKEN],
-      useFactory: (rocketsServerAuthOptions: RocketsAuthOptionsInterface) => ({
-        settings: {
-          ...rocketsServerAuthOptions.role?.settings,
-          assignments: {
-            ...rocketsServerAuthOptions.role?.settings?.assignments,
-            entityKey:
-              rocketsServerAuthOptions.role?.settings?.assignments?.entityKey ??
-              USER_ROLE_ENTITY_KEY,
-          },
-        },
-      }),
+      useFactory: (
+        rocketsServerAuthOptions: RocketsAuthOptionsInterface,
+      ): RoleOptionsInterface => ({ ...rocketsServerAuthOptions.role }),
     }),
     RoleModule.forFeature({
       roleEntityKey: ROLE_CRUD_ENTITY_KEY,
@@ -663,11 +661,12 @@ export function createRocketsAuthProviders(options: {
     RocketsValidateCurrentPasswordHandler,
     {
       provide: RecoveryService,
-      inject: [RAW_OPTIONS_TOKEN, CommandBus, QueryBus],
+      inject: [RAW_OPTIONS_TOKEN, CommandBus, QueryBus, TransactionScope],
       useFactory: (
         authOptions: RocketsAuthOptionsInterface,
         commandBus: CommandBus,
         queryBus: QueryBus,
+        txScope: TransactionScope,
       ) => {
         const ports = buildRocketsAuthenticationPorts(authOptions);
         // Must resolve to the same policy the settings factory above hands to
@@ -682,6 +681,7 @@ export function createRocketsAuthProviders(options: {
           new PasswordPort(ports.password, commandBus),
           ports.recoveryNotification,
           commandBus,
+          txScope,
         );
       },
     },

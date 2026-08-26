@@ -15,6 +15,8 @@ import {
   ROCKETS_GENERATED_DTO_NAME,
 } from '../operation-resource/build-operation-controller';
 import { VERSION_NEUTRAL } from '@nestjs/common';
+import { z } from 'zod';
+import { readSchemaId } from '../../../common/utils/open-api-schema.util';
 
 /**
  * Mirrors `@concepta/nestjs-crud` route defaults
@@ -380,6 +382,68 @@ function validateGeneratedDtoNameUniqueness(
   }
 }
 
+/**
+ * Rejects two DIFFERENT schema instances claiming one OpenAPI component
+ * id across the CRUD resources of the app.
+ *
+ * Ids are minted from resource names (`${Name}ResponseDto`, …) and by
+ * consumers on hand-written schemas; two resources named alike, or a
+ * consumer reusing a Rockets-shaped id, would put two shapes under one
+ * component and the document would silently keep the last one written.
+ * Keyed on schema IDENTITY: one schema reused as the output of several
+ * operations is one component, no conflict. The document converter
+ * repeats this check per document; catching it at plan time names the
+ * resources instead of a route.
+ */
+function validateSchemaIdUniqueness(
+  generatedResources: ReadonlyArray<CrudResource>,
+  manualResources: ReadonlyArray<RocketsResourceConfig>,
+): void {
+  const seen = new Map<
+    string,
+    { readonly schema: z.ZodType; source: string }
+  >();
+
+  const claim = (schema: unknown, source: string): void => {
+    if (!(schema instanceof z.ZodType)) return;
+    const id = readSchemaId(schema);
+    if (id === undefined) return;
+    const prior = seen.get(id);
+    if (prior !== undefined && prior.schema !== schema) {
+      throw new Error(
+        `buildAppRegistrationPlan: OpenAPI component "${id}" is claimed by ` +
+          `two different schemas — ${prior.source} and ${source}. Both would ` +
+          `occupy the same component, so one would overwrite the other. ` +
+          `Reuse one schema instance, or give one of them a distinct name.`,
+      );
+    }
+    seen.set(id, { schema, source });
+  };
+
+  const walk = (config: RocketsResourceConfig, label: string): void => {
+    const crud = config.crud;
+    const controller = crud.controller;
+    if ('class' in controller) return;
+    claim(controller.response?.resource, label);
+    claim(controller.response?.paginated, label);
+    claim(controller.request?.body, label);
+    if (!('operations' in crud) || !Array.isArray(crud.operations)) return;
+    for (const op of crud.operations) {
+      const source = `${label} (${op.operation})`;
+      claim(op.request?.body, source);
+      claim(op.response?.resource, source);
+      claim(op.response?.paginated, source);
+    }
+  };
+
+  for (const resource of generatedResources) {
+    walk(resource.core, `defineResource(${resource.meta.key})`);
+  }
+  for (const [index, config] of manualResources.entries()) {
+    walk(config, `manualResources[${index}]`);
+  }
+}
+
 /** Mirrors `controllerClassName` in the operation-resource builder. */
 function controllerClassNameFor(path: string): string {
   const slug = path.replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_|_$/g, '');
@@ -393,6 +457,7 @@ export function validateStructuredRouteCollisions(args: {
 }): void {
   validateOperationIdUniqueness(args.operationBundles);
   validateGeneratedDtoNameUniqueness(args.operationBundles);
+  validateSchemaIdUniqueness(args.generatedResources, args.manualResources);
 
   // No early return on an operation-free app: the check covers
   // CRUD-vs-CRUD and CRUD-vs-sub-resource collisions too, and gating it

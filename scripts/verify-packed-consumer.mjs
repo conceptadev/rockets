@@ -14,9 +14,9 @@ const consumerRoot = join(temporaryRoot, 'consumer');
 const noZodConsumerRoot = join(temporaryRoot, 'consumer-no-zod');
 
 const consumerDependencies = [
-  '@nestjs/common@12.0.0-alpha.5',
-  '@nestjs/core@12.0.0-alpha.5',
-  '@nestjs/platform-express@12.0.0-alpha.5',
+  '@nestjs/common@12.0.0-alpha.6',
+  '@nestjs/core@12.0.0-alpha.6',
+  '@nestjs/platform-express@12.0.0-alpha.6',
   '@nestjs/typeorm@11.0.3',
   '@types/node@20.19.43',
   'class-transformer@0.5.1',
@@ -271,8 +271,8 @@ void main().catch((error: unknown) => {
       '--no-fund',
       '--loglevel=error',
       coreTarball,
-      '@nestjs/common@12.0.0-alpha.5',
-      '@nestjs/core@12.0.0-alpha.5',
+      '@nestjs/common@12.0.0-alpha.6',
+      '@nestjs/core@12.0.0-alpha.6',
       'class-transformer@0.5.1',
       'class-validator@0.14.3',
       'reflect-metadata@0.1.14',

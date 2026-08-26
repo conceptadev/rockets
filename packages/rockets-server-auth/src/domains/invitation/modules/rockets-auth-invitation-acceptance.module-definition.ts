@@ -98,7 +98,8 @@ function createInvitationAcceptanceProviders(options: {
       useFactory: (
         opts: InvitationAcceptanceOptionsInterface,
       ): InvitationAcceptanceConfig => ({
-        userMetadataUpdateDto: opts.userCrud?.userMetadataConfig?.updateDto,
+        userMetadataUpdateSchema:
+          opts.userCrud?.userMetadataConfig?.updateSchema,
       }),
     },
     ListenerClass,

@@ -46,6 +46,7 @@ import {
   withAclDecorators,
 } from './build-acl';
 import { deriveEntityKey } from '../../../common';
+import { rocketsSchemaValidation } from '../../../common/utils/standard-schema.util';
 import type { InternalOperationOverride } from './internal-operation.types';
 
 type CrudDecorator = ReturnType<typeof applyDecorators>;
@@ -159,7 +160,7 @@ export function defineResource<E extends PlainLiteralObject>(
   const relations = resolveRelations(key, entity, relationsInput);
 
   const bearerAuth = !isPublic;
-  const response = buildResponse(dto, undefined);
+  const response = buildResponse(key, dto, undefined);
 
   const extraDecorators = buildControllerDecorators<E>({
     tags,
@@ -177,7 +178,20 @@ export function defineResource<E extends PlainLiteralObject>(
     extraDecorators,
   };
   if (response) controller.response = response;
-  if (controllerRequest) controller.request = controllerRequest;
+  // Every body on this controller validates through Nest's Standard
+  // Schema pipe with the Rockets exception factory (structured `details`,
+  // issue #55). Upstream reads controller-level `request.validation` as
+  // the fallback for every body param and spreads it over its own default
+  // factory, so setting it here covers generated routes and per-operation
+  // `requestOverride.body` alike. An explicit `validation: false` is the
+  // consumer's opt-out and is kept verbatim.
+  controller.request = {
+    ...controllerRequest,
+    validation:
+      controllerRequest?.validation === false
+        ? false
+        : { ...rocketsSchemaValidation, ...controllerRequest?.validation },
+  };
 
   const controllerJoins = buildControllerJoins(relations);
 

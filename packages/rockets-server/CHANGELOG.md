@@ -34,6 +34,19 @@ and this project adheres to
 
 ### Changed
 
+- **`/me` on the schema engine (RFC #104, stage 4).** `MeController` is
+  replaced by `buildMeController(config)` — a factory built from the app's
+  `userMetadata` config (`updateSchema` / `responseSchema`). `PATCH /me`
+  validates `{ userMetadata?: UserMetadataUpdateDto }` through the per-route
+  Standard Schema pipe (`400` with `details[].path = ['userMetadata', field]`);
+  both routes serialize through `UserResponseDto` (`meResponseSchema`), so a
+  userMetadata column hidden with `dto: { response: false }` stays hidden;
+  `userMetadata` is `null` before the first PATCH (was `{}`).
+  `UserModule.register(config)` takes the same config. Exports
+  `buildMeController`, `meUpdateSchema`, `meResponseSchema`; removes
+  `MeController`, `ROCKETS_USER_METADATA_DTO_TOKEN`, `RocketsUserMetadataDtoConfig`,
+  `createPaginatedDto` and the `UserUpdateDto` / `UserResponseDto` /
+  `RoleNameDto` / `UserRoleItemDto` re-exports.
 - `@nestjs/config` dropped (RFC #104, stage 1). `RocketsModule` registers its
   own default settings provider (`ROCKETS_SERVER_SETTINGS_DEFAULTS_TOKEN`)
   instead of reading core's `registerAs` namespace. Consumers keep passing

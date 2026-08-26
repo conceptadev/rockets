@@ -419,11 +419,6 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
   the unwrap chain stay in the filter deliberately; the two unwrap
   helpers became `protected` for subclasses that need more than the body.
   Default output is unchanged.
-- First-class Standard Schema support for hand-written core controllers via
-  `@concepta/rockets-core/standard-schema`, with typed request/response DTO
-  carriers, opt-in native Nest validation and serialization, plus a dedicated
-  Swagger subpath. Existing generated CRUD/Zod serialization remains
-  unchanged.
 - Firestore adapter transactions (issue #44 P1-1): `runInFirestoreTransaction` /
   `FirestoreRepository.transaction` (callback-scoped, retry-safe),
   `FIRESTORE_BACKEND` DI export, `transactionFactories` + `options.ctx`
@@ -442,6 +437,62 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Changed
 
+- **One schema engine — upstream `@concepta/nestjs-*` `8.0.0-alpha.9`, Nest
+  `12.0.0-alpha.6`, `zod` 4.4.3 (RFC #104, stage 4).** Every request body and
+  every response in Rockets is now a **named zod schema**
+  (`withOpenApi(schema, 'ComponentName')`, re-exported from
+  `@concepta/rockets-core`) and one engine serves generated CRUD,
+  `defineResource`, `/me` and `rockets-server-auth`:
+  - **Validation**: Nest's native per-route `StandardSchemaValidationPipe`,
+    configured with `rocketsSchemaValidation` so every `400` carries
+    structured `details[]` (issue #55) — on CRUD routes, the `/me` PATCH,
+    the auth token / recovery / invitation routes.
+  - **Serialization**: upstream serializes CRUD responses through the
+    response schema (`~standard.validate`): undeclared row columns never
+    leave, `Date` columns become ISO strings, a computed field is validated
+    against the schema that documents it. A CRUD route without a response
+    schema is a boot-visible `500`, not an unprojected leak.
+  - **OpenAPI**: from the schema's own JSON Schema bridge; `SwaggerUiService.createDocument`
+    installs a Rockets converter that `$ref`s every named schema as
+    `components/schemas/<id>` (ids keep the old DTO class names:
+    `TagResponseDto`, `TagCreateDto`, `TagResponseDtoPaginatedDto`, …).
+    Two different schema instances claiming one id fail at plan time and
+    at document time. `strictInput` emits `additionalProperties: false`
+    natively — no `cleanupOpenApiDoc`.
+  - **`defineResource`**: `dto.{response,paginated,create,update,replace}` and
+    per-operation `input` / `output` / `paginated` are named schemas
+    (`assertNamedSchema`, response fail-closed); `paginated` derives as
+    `${responseId}PaginatedDto`.
+  - **`userMetadata`** is `{ entity, updateSchema, responseSchema, repository? }`
+    — exactly what `defineZodUserMetadata` returns; `createDto` had no consumer.
+  - **`/me`** is `buildMeController(config)` (factory): PATCH validates
+    `{ userMetadata?: UserMetadataUpdateDto }`, both routes serialize through
+    `UserResponseDto` (hidden userMetadata columns stay hidden), and
+    `userMetadata` is `null` before the first PATCH (was `{}`).
+  - **Dates**: `f.createdAt()` / `f.updatedAt()` / `f.deletedAt()` are
+    `z.date()`; new `f.date()` (`z.coerce.date()`) for writable datetimes; a
+    response-exposed `z.iso.datetime()` is rejected at definition time (rows
+    carry `Date`). `WireRow<S>` is the JSON-encoded output (`JsonEncoded<T>`),
+    `SchemaPersistenceRow<S>` is `z.output<S>`.
+  - `zodResource(...).zod.schemas` (`{ request, response }`) replaces `.zod.dtos`;
+    `f.compute` returns `z.output<schema>`.
+  - A **global** `StandardSchemaValidationPipe` is rejected at boot
+    (`SchemaValidatorConflictCheck`): Rockets routes carry their own, a global
+    one validates every body twice. `realtystack`: delete the
+    `app.useGlobalPipes(new StandardSchemaDtoValidationPipe())` line.
+  - `@concepta/nestjs-common` is gone from the dependency graph;
+    `mapHttpStatus` (removed upstream) is vendored inside the core filter.
+  - **Known gap (upstream):** `@concepta/nestjs-crud`'s `CrudInitApiBody`
+    stamps generated CRUD request bodies as an inline `ApiBody({ schema })`,
+    bypassing the document converter — `${Name}CreateDto` / `UpdateDto` /
+    `ReplaceDto` are documented inline, not as `$ref`'d components (responses
+    and hand-written `@Body({ schema })` routes are `$ref`'d). Follow-up
+    belongs upstream; the runtime contract is unaffected.
+    `SwaggerUiService.createDocument` lifts the `definitions` such an inline
+    body carries (a nested named schema) into `components.schemas` and
+    rewrites the refs, so the served document has no dangling pointer.
+  Authoring APIs `zodResource` / `zodSubResource` / `operationResource` / `f.*`
+  / hooks / ACL are unchanged.
 - **`@nestjs/config` is no longer a Rockets dependency (RFC #104, stage 1).**
   `rockets-core`, `rockets` and `rockets-auth` used it only for
   `registerAs` + `ConfigModule.forFeature` to hand default settings to
@@ -503,6 +554,17 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Removed
 
+- **Class-DTO era APIs (RFC #104, stage 4).** `createPaginatedDto`,
+  `FreeFormJson`, `ROCKETS_TO_INSTANCE_OPTIONS` / `ROCKETS_TO_PLAIN_OPTIONS`
+  (the class-transformer serialization settings), `ZodBodyValidationInterceptor`,
+  `whitelistedFromDto` (→ `validateWithSchema(schema, data)`),
+  `UserUpdateDto` / `UserResponseDto` / `RoleNameDto` / `UserRoleItemDto`,
+  `PersistenceRow`, `ZodResourceDtos`, `MeController` (→ `buildMeController`),
+  `ROCKETS_USER_METADATA_DTO_TOKEN`, the unused `BaseUserDto` /
+  `BaseUserCreateDto` / `BaseUserUpdateDto` / `BaseUserMetadata*Dto` classes.
+  The TypeORM entity compiler no longer
+  maps `z.iso.datetime()` to a datetime column (an ISO string field is a
+  varchar; `z.date()` / `f.date()` are the datetime columns).
 - **`@concepta/rockets-core/standard-schema` and `/standard-schema/swagger`
   subpaths, and the #83 whitelist shim (RFC #104, stage 2).** The subpath
   (`StandardSchemaModule`, `createStandardSchemaDto`,

@@ -9,10 +9,6 @@ import { APP_INTERCEPTOR, DiscoveryModule, Reflector } from '@nestjs/core';
 import { CqrsModule } from '@nestjs/cqrs';
 import { RepositoryModule } from '@concepta/nestjs-repository';
 import { CrudModule } from '@concepta/nestjs-crud';
-import {
-  ROCKETS_TO_INSTANCE_OPTIONS,
-  ROCKETS_TO_PLAIN_OPTIONS,
-} from './infrastructure/crud-serialization';
 import { AuthUserContextOverlay } from '@concepta/nestjs-authentication';
 import type { RocketsResourceConfig } from './domain/interfaces/rockets-resource.interface';
 import { collectBootstrapForRootImports } from './infrastructure/repository/collect-bootstrap-for-root-imports';
@@ -40,7 +36,7 @@ import {
   ROCKETS_ROUTE_POLICY_TOKEN,
 } from './infrastructure/audit';
 import { ActorOverlay } from './infrastructure/interceptors/actor.overlay';
-import { ZodBodyValidationInterceptor } from './infrastructure/interceptors/zod-body-validation.interceptor';
+import { SchemaValidatorConflictCheck } from './infrastructure/validation/schema-validator-conflict.check';
 import { UpsertUserMetadataHandler } from './application/commands/handlers/upsert-user-metadata.handler';
 import { GetUserMetadataHandler } from './application/queries/handlers/get-user-metadata.handler';
 import { SwaggerUiModule } from './common';
@@ -155,14 +151,7 @@ function createCoreImports(
   if (plan.crudResources.length) {
     imports.push(
       CrudModule.forRoot({
-        // Outbound only; `toInstanceOptions` keeps the upstream whitelist.
-        // See `crud-serialization.ts`.
-        settings: {
-          serialization: {
-            toInstanceOptions: ROCKETS_TO_INSTANCE_OPTIONS,
-            toPlainOptions: ROCKETS_TO_PLAIN_OPTIONS,
-          },
-        },
+        settings: {},
       }),
     );
     for (const resource of plan.crudResources) {
@@ -282,10 +271,10 @@ function createCoreProviders(options: {
     { provide: APP_INTERCEPTOR, useClass: AuthUserContextOverlay },
     // Adds a simple “who did this?” id for repository hooks/audit (not the full user profile).
     { provide: APP_INTERCEPTOR, useClass: ActorOverlay },
-    // Validates request bodies against the zod schema when the CRUD route's DTO
-    // is a nestjs-zod DTO. NestJS ValidationPipe uses class-validator and misses
-    // zod constraints — this interceptor fills the gap without importing nestjs-zod.
-    { provide: APP_INTERCEPTOR, useClass: ZodBodyValidationInterceptor },
+    // Rejects a global StandardSchemaValidationPipe at boot: every Rockets
+    // route validates with its own per-route pipe, a global one would run
+    // each body through the schema twice.
+    SchemaValidatorConflictCheck,
     // Built-in user-metadata CQRS (override in `extras.handlers` if you need to customize storage)
     ...userMetadataProviders,
     ...(options.extras?.providers ?? []),
