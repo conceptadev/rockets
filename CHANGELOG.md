@@ -503,6 +503,25 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Removed
 
+- **`@concepta/rockets-core/standard-schema` and `/standard-schema/swagger`
+  subpaths, and the #83 whitelist shim (RFC #104, stage 2).** The subpath
+  (`StandardSchemaModule`, `createStandardSchemaDto`,
+  `createStandardSchemaResponseDto`, `allowStandardSchemaKeys`,
+  `StandardSchemaAwareValidationPipe`, `StandardSchemaDtoValidationPipe`,
+  `StandardSchemaResponse`, `ApiStandardSchemaResponse`,
+  `withStandardSchemaResponseArrays`, `getStandardSchema`, the DTO brands)
+  had no consumer in Rockets or its examples; it duplicated what Nest 12
+  ships natively (`@Body({ schema })` + `StandardSchemaValidationPipe`,
+  `@SerializeOptions({ schema })`, `ApiResponse({ standardSchema })`).
+  Generated DTOs no longer carry `@Allow()` stamps: the stamp only existed
+  to survive a foreign `ValidationPipe({ whitelist: true })`, a pipe that
+  must not sit in front of schema-validated routes at all (the engine that
+  replaces class-validator lands in the next stages).
+  `isStandardSchema` / `getCarriedStandardSchema` moved to
+  `src/common/utils/standard-schema.util.ts` (internal). Migration: import
+  the native Nest pieces instead; annotate hand-written body params with
+  the inferred type, never a class; remove any global
+  `StandardSchemaDtoValidationPipe`.
 - **`RocketsAuthExceptionsFilter` — dead code, and the auth e2e helper
   was its only caller (issue #87).** No application's behaviour changes.
   The filter was never in `rockets-server-auth`'s `src/index.ts` and the

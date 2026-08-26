@@ -3,7 +3,45 @@ import type { StandardSchemaV1 } from '@standard-schema/spec';
 
 import { attachErrorDetails } from './validation-error-details.util';
 
-export { getCarriedStandardSchema } from '../../standard-schema/schema';
+/** Returns whether a value implements Standard Schema V1. */
+export function isStandardSchema(value: unknown): value is StandardSchemaV1 {
+  if (!isObjectLike(value)) {
+    return false;
+  }
+
+  const standard = value['~standard'];
+
+  return (
+    isObjectLike(standard) &&
+    standard.version === 1 &&
+    typeof standard.validate === 'function'
+  );
+}
+
+/**
+ * Returns the Standard Schema a class CARRIES as its static `schema` —
+ * `undefined` otherwise. The ONE definition of "does this DTO carry a
+ * schema?" (issue #83): every call site imports this function, so a fix
+ * cannot be written against a narrower predicate that imports fine and
+ * misbehaves at runtime. Recognition is duck-typed on purpose — any class
+ * exposing a conforming static `schema` (`nestjs-zod`'s `createZodDto`
+ * included) validates identically through Nest's native pipe.
+ */
+export function getCarriedStandardSchema(
+  value: unknown,
+): StandardSchemaV1 | undefined {
+  if (!value || (typeof value !== 'function' && typeof value !== 'object')) {
+    return undefined;
+  }
+  const schema: unknown = Reflect.get(value, 'schema');
+  return isStandardSchema(schema) ? schema : undefined;
+}
+
+function isObjectLike(value: unknown): value is Record<PropertyKey, unknown> {
+  return (
+    (typeof value === 'object' && value !== null) || typeof value === 'function'
+  );
+}
 
 export function standardSchemaIssuesToMessages(
   issues: ReadonlyArray<StandardSchemaV1.Issue>,

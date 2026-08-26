@@ -9,7 +9,6 @@ import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 import { asClassicSchema, unwrapField } from './field-meta';
 import { attachOperationDtoOpenApiFields } from '../infrastructure/resource/operation-resource/openapi-dto-metadata';
-import { allowStandardSchemaKeys } from '../standard-schema/allow-schema-keys';
 import { ROCKETS_GENERATED_DTO_NAME } from '../infrastructure/resource/operation-resource/build-operation-controller';
 
 type ZodShapeField = z.ZodType;
@@ -77,24 +76,7 @@ export function compileDtoClass(
   name: string,
   nested?: Readonly<Record<string, Type<object>>>,
 ): Type<object> {
-  // `@Allow()` per declared key: a consumer's global
-  // `ValidationPipe({ whitelist: true })` strips every undecorated
-  // property, and these classes carry class-transformer metadata only —
-  // so a generated DTO used as a hand-written controller's param was
-  // whitelisted down to `{}` after already passing schema validation
-  // (issue #83). `Allow` asserts nothing; it just survives whitelists.
-  //
-  // Passing keys EXPLICITLY bypasses the helper's open-schema refusal,
-  // deliberately: refusing here would turn a valid generated-only
-  // resource (open schemas never meet a foreign pipe on generated
-  // routes) into a boot failure. The cost, stated in the README: a
-  // generated DTO from an OPEN schema, reused in a hand-written
-  // controller under a foreign whitelist pipe, keeps declared keys only
-  // — catchall keys are stripped there.
-  const cls = allowStandardSchemaKeys(
-    nameGeneratedDto(createZodDto(schema), name),
-    Object.keys(schema.shape),
-  );
+  const cls = nameGeneratedDto(createZodDto(schema), name);
   Exclude()(cls);
   const proto: object = cls.prototype;
   for (const [key, field] of Object.entries(schema.shape)) {

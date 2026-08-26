@@ -62,6 +62,21 @@
 
 ### Removed
 
+- **`@concepta/rockets-core/standard-schema` and `/standard-schema/swagger`
+  subpaths (RFC #104, stage 2).** `StandardSchemaModule`,
+  `createStandardSchemaDto`, `createStandardSchemaResponseDto`,
+  `allowStandardSchemaKeys`, `StandardSchemaAwareValidationPipe`,
+  `StandardSchemaDtoValidationPipe`, `StandardSchemaResponse`,
+  `ApiStandardSchemaResponse`, `withStandardSchemaResponseArrays`,
+  `getStandardSchema` and the DTO brands are gone — no consumer, and Nest
+  12 provides the same natively (`@Body({ schema })` +
+  `StandardSchemaValidationPipe`, `@SerializeOptions({ schema })`,
+  `ApiResponse({ standardSchema })`). Generated DTOs (`compileDtoClass`)
+  no longer stamp `@Allow()` on their keys (#83 shim): a foreign
+  `ValidationPipe({ whitelist: true })` must not sit in front of a
+  schema-validated route. `isStandardSchema` / `getCarriedStandardSchema`
+  now live in `src/common/utils/standard-schema.util.ts` (internal, not
+  exported).
 - **`SafeCrudContextInterceptor`** public export. Upstream
   `@concepta/nestjs-crud@8.0.0-alpha.8` already skips non-CRUD handlers in
   `CrudContextOverlay.attach()`; Rockets uses `CrudModule.forRoot` directly.
