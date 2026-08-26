@@ -4335,7 +4335,7 @@
       {
         "name": "LocalLoginBody",
         "kind": "type",
-        "signature": "type LocalLoginBody = z.output<typeof localLoginSchema>;",
+        "signature": "type LocalLoginBody = z.output<typeof rocketsAuthLocalLoginSchema>;",
         "referencedBy": [
           "RocketsAuthTokenController"
         ]
@@ -4343,7 +4343,7 @@
       {
         "name": "RecoverLoginBody",
         "kind": "type",
-        "signature": "type RecoverLoginBody = z.output<typeof recoveryRecoverLoginSchema>;",
+        "signature": "type RecoverLoginBody = z.output<typeof rocketsAuthRecoveryRecoverLoginSchema>;",
         "referencedBy": [
           "RocketsAuthRecoveryController"
         ]
@@ -4351,7 +4351,7 @@
       {
         "name": "RecoverPasswordBody",
         "kind": "type",
-        "signature": "type RecoverPasswordBody = z.output<typeof recoveryRecoverPasswordSchema>;",
+        "signature": "type RecoverPasswordBody = z.output<typeof rocketsAuthRecoveryRecoverPasswordSchema>;",
         "referencedBy": [
           "RocketsAuthRecoveryController"
         ]
@@ -4359,7 +4359,7 @@
       {
         "name": "RefreshBody",
         "kind": "type",
-        "signature": "type RefreshBody = z.output<typeof refreshSchema>;",
+        "signature": "type RefreshBody = z.output<typeof rocketsAuthRefreshSchema>;",
         "referencedBy": [
           "RocketsAuthTokenController"
         ]
@@ -4515,7 +4515,7 @@
       {
         "name": "UpdatePasswordBody",
         "kind": "type",
-        "signature": "type UpdatePasswordBody = z.output<typeof recoveryUpdatePasswordSchema>;",
+        "signature": "type UpdatePasswordBody = z.output<typeof rocketsAuthRecoveryUpdatePasswordSchema>;",
         "referencedBy": [
           "RocketsAuthRecoveryController"
         ]
@@ -4557,7 +4557,7 @@
       {
         "name": "ValidatePasscodeBody",
         "kind": "type",
-        "signature": "type ValidatePasscodeBody = z.output<typeof recoveryValidatePasscodeSchema>;",
+        "signature": "type ValidatePasscodeBody = z.output<typeof rocketsAuthRecoveryValidatePasscodeSchema>;",
         "referencedBy": [
           "RocketsAuthRecoveryController"
         ]
