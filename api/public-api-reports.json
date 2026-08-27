@@ -3226,6 +3226,12 @@
         "signature": "export declare function assertNamedSchema(schema: unknown, context: string): asserts schema is z.ZodType;"
       },
       {
+        "name": "assertNoHiddenFields",
+        "kind": "function",
+        "runtime": true,
+        "signature": "export declare function assertNoHiddenFields(schema: z.ZodType, context: string): void;"
+      },
+      {
         "name": "attachErrorDetails",
         "kind": "function",
         "runtime": true,

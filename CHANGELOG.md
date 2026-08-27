@@ -953,10 +953,13 @@ before running the full e2e suite.
   hand-written response schema (`dto.response`, `operations.*.output`,
   `userMetadata.responseSchema`) keeps the author's component id and is
   not projected, so a hidden field inside it is rejected at definition
-  time (drop it with `.omit()`). The fail-closed check walks a pipe's IN
-  side whenever its OUT passes values through (`transform`, `any`,
-  `unknown`, `custom`, also behind `optional` / `lazy` / a union member),
-  not only for transforms.
+  time (drop it with `.omit()`); `rockets-auth` runs the same check (and
+  the fail-closed one) on a consumer-supplied `userCrud.model` /
+  `roleCrud.model`, which reach upstream CRUD directly. The fail-closed
+  check walks a pipe's IN side whenever its OUT passes (some of) its input
+  through (`transform`, `any`, `unknown`, `custom`, or any composite
+  holding one of those — wrappers, unions, arrays, object properties,
+  record values, intersections, nested pipes), not only for transforms.
 - **Hidden columns stay hidden at every depth of a computed field.** A
   `dto: { response: false }` column nested two or more levels down an
   `f.compute()` shape was still serialized.

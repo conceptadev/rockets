@@ -11,7 +11,9 @@ import {
 } from '@concepta/nestjs-crud';
 import { CrudJoin } from '@concepta/nestjs-crud';
 import {
+  assertFailClosedResponse,
   assertNamedSchema,
+  assertNoHiddenFields,
   paginatedSchema,
   rocketsSchemaValidation,
   withOpenApi,
@@ -45,6 +47,14 @@ export class RocketsAuthAdminModule {
     const modelSchema =
       admin.model ?? rocketsAuthUserSchema(userMetadata.responseSchema);
     assertNamedSchema(modelSchema, 'RocketsAuthAdminModule: userCrud.model');
+    // A consumer-supplied model reaches upstream CRUD serialization
+    // directly (no `defineResource` projection): it must strip undeclared
+    // keys and carry no `dto: { response: false }` field.
+    assertFailClosedResponse(
+      modelSchema,
+      'RocketsAuthAdminModule: userCrud.model',
+    );
+    assertNoHiddenFields(modelSchema, 'RocketsAuthAdminModule: userCrud.model');
     const updateSchema =
       admin.dto?.updateOne ??
       rocketsAuthUserUpdateSchema(userMetadata.updateSchema);

@@ -6,6 +6,8 @@ import {
   type CrudResponsePaginatedInterface,
 } from '@concepta/nestjs-crud';
 import { Operation } from '@concepta/nestjs-core';
+import { withOpenApi } from '@concepta/rockets-core';
+import { f } from '@concepta/rockets-core/zod';
 import { afterEach, describe, it, expect, vi } from 'vitest';
 import { RocketsAuthRoleAdminModule } from './rockets-auth-role-admin.module';
 import { rocketsAuthRoleSchema } from '../infrastructure/schemas/rockets-auth-role.schema';
@@ -37,6 +39,20 @@ class DeleteHandler extends CommandHandlerDouble {}
 afterEach(() => vi.restoreAllMocks());
 
 describe('RocketsAuthRoleAdminModule.register', () => {
+  // A consumer-supplied `roleCrud.model` reaches upstream CRUD serialization
+  // directly: a hidden field inside it would ship on `/admin/roles`.
+  it('rejects a model that contains a dto.response=false field', () => {
+    const leaky = withOpenApi(
+      rocketsAuthRoleSchema.extend({
+        secret: f.string({ dto: { response: false } }),
+      }),
+      'LeakyRoleDto',
+    );
+    expect(() =>
+      RocketsAuthRoleAdminModule.register({ imports: [], model: leaky }),
+    ).toThrow(/hand-written response schema contains a field/);
+  });
+
   it('builds CrudModule feature with paginated admin DTO', () => {
     const dynamic = RocketsAuthRoleAdminModule.register({
       imports: [],

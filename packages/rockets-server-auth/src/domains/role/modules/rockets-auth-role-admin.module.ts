@@ -7,7 +7,9 @@ import {
 } from '@nestjs/common';
 import { Operation } from '@concepta/nestjs-core';
 import {
+  assertFailClosedResponse,
   assertNamedSchema,
+  assertNoHiddenFields,
   paginatedSchema,
   rocketsSchemaValidation,
   withOpenApi,
@@ -103,6 +105,17 @@ export class RocketsAuthRoleAdminModule {
   static register(admin: RoleCrudOptionsExtrasInterface): DynamicModule {
     const modelSchema = admin.model || rocketsAuthRoleSchema;
     assertNamedSchema(
+      modelSchema,
+      'RocketsAuthRoleAdminModule: roleCrud.model',
+    );
+    // A consumer-supplied model reaches upstream CRUD serialization
+    // directly (no `defineResource` projection): it must strip undeclared
+    // keys and carry no `dto: { response: false }` field.
+    assertFailClosedResponse(
+      modelSchema,
+      'RocketsAuthRoleAdminModule: roleCrud.model',
+    );
+    assertNoHiddenFields(
       modelSchema,
       'RocketsAuthRoleAdminModule: roleCrud.model',
     );

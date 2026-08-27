@@ -4,7 +4,9 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { CrudModule, CrudOperationResolver } from '@concepta/nestjs-crud';
 import { AuthPublic } from '@concepta/nestjs-authentication';
 import {
+  assertFailClosedResponse,
   assertNamedSchema,
+  assertNoHiddenFields,
   rocketsSchemaValidation,
 } from '@concepta/rockets-core';
 import { ApiTags } from '@nestjs/swagger';
@@ -32,6 +34,17 @@ export class RocketsAuthSignUpModule {
     const modelSchema =
       options.model ?? rocketsAuthUserSchema(userMetadata.responseSchema);
     assertNamedSchema(modelSchema, 'RocketsAuthSignUpModule: userCrud.model');
+    // A consumer-supplied model reaches upstream CRUD serialization
+    // directly (no `defineResource` projection): it must strip undeclared
+    // keys and carry no `dto: { response: false }` field.
+    assertFailClosedResponse(
+      modelSchema,
+      'RocketsAuthSignUpModule: userCrud.model',
+    );
+    assertNoHiddenFields(
+      modelSchema,
+      'RocketsAuthSignUpModule: userCrud.model',
+    );
     const createSchema =
       options.dto?.createOne ??
       rocketsAuthUserCreateSchema(userMetadata.updateSchema);

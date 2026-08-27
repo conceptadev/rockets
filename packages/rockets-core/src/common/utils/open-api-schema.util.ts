@@ -129,10 +129,10 @@ function findOpenObject(
  * slot so a wrapper zod adds later is walked without a new case here.
  */
 /**
- * An `out` side that hands its input through unchanged — a transform,
- * `any`, `unknown`, `custom`, or one of those behind a single-child
- * wrapper (`optional`, `nullable`, `readonly`, …), a lazy, or a union
- * with at least one pass-through member.
+ * An `out` side that hands (some of) its input through unchanged — a
+ * transform, `any`, `unknown`, `custom`, or any composite that holds one
+ * of those somewhere below it (wrappers, unions, arrays, object
+ * properties, record values, intersections, nested pipes).
  */
 function passesThrough(
   schema: z.ZodType,
@@ -149,16 +149,13 @@ function passesThrough(
   ) {
     return true;
   }
-  if (schema instanceof z.ZodUnion) {
-    return schema.options.some((option) =>
-      passesThrough(asClassicSchema(option, path), path, seen),
-    );
-  }
-  if (schema instanceof z.ZodLazy) {
-    return passesThrough(asClassicSchema(schema.unwrap(), path), path, seen);
-  }
-  const inner: unknown = Reflect.get(schema.def, 'innerType');
-  return inner instanceof z.ZodType ? passesThrough(inner, path, seen) : false;
+  // Any composite with a pass-through somewhere below it hands SOME of
+  // its input through (`z.object({ a: z.any() })`, `z.array(z.any())`, a
+  // record of `any`, an intersection or nested pipe ending in one) — the
+  // shared walker covers every node kind; over-flagging fails closed.
+  return schemaChildren(schema, path).some(([childPath, child]) =>
+    passesThrough(asClassicSchema(child, childPath), childPath, seen),
+  );
 }
 
 export function schemaChildren(

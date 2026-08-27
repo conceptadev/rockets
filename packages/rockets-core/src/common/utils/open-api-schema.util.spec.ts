@@ -44,6 +44,27 @@ describe('assertFailClosedResponse', () => {
     // let through.
     ['in transform in side', open.transform((value) => value)],
     ['in pipe into any', z.pipe(open, z.any())],
+    // Composites holding a pass-through below them hand SOME input through.
+    [
+      'in pipe of arrays into array(any)',
+      z.pipe(z.array(open), z.array(z.any())),
+    ],
+    [
+      'in pipe of objects into object with an any property',
+      z.pipe(z.object({ a: open }), z.object({ a: z.any() })),
+    ],
+    [
+      'in pipe into intersection of any',
+      z.pipe(open, z.intersection(z.any(), z.any())),
+    ],
+    [
+      'in pipe of records into record of any',
+      z.pipe(z.record(z.string(), open), z.record(z.string(), z.any())),
+    ],
+    [
+      'in pipe into a nested pipe of any',
+      z.pipe(open, z.pipe(z.any(), z.any())),
+    ],
     [
       'in pipe into lazy(any)',
       z.pipe(

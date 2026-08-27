@@ -154,16 +154,20 @@
   (`dto.response`, `operations.*.output`, `dto.paginated`,
   `userMetadata.responseSchema`) is not projected and keeps the author's
   component id, so a hidden field inside it is rejected at definition time
-  with a pointer at `.omit()` (`assertNoHiddenFields`). SSE operations
+  with a pointer at `.omit()` (`assertNoHiddenFields`, exported for
+  consumers that hand a schema to upstream CRUD directly — `rockets-auth`
+  runs it on `userCrud.model` / `roleCrud.model`). SSE operations
   serialize through no schema by design (`output: false`).
 - **`assertFailClosedResponse` walks the IN side of a transform.** An
   ordinary `.transform()` is a pipe whose object sits on the IN side and
   whose OUT is the transform node, which strips nothing;
   `z.object({...}).passthrough().transform(v => v)` passed the check and
   shipped the undeclared keys. The IN side is walked whenever the OUT
-  passes values through (`transform`, `any`, `unknown`, `custom`); a pipe
-  whose OUT is a real schema (`z.pipe(open, closed)`) strips on the way
-  out and still passes.
+  passes (some of) its input through — `transform`, `any`, `unknown`,
+  `custom`, or any composite holding one of those below it (wrappers,
+  unions, arrays, object properties, record values, intersections, nested
+  pipes); a pipe whose OUT is a real schema (`z.pipe(open, closed)`)
+  strips on the way out and still passes.
 - **Computed fields strip hidden columns at every depth.** A `dto:
   { response: false }` column two or more levels down a `f.compute()`
   shape (an object inside an optional object inside an array) was kept;

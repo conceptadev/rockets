@@ -11,6 +11,15 @@ and this project adheres to
 
 ### Security
 
+- **A consumer-supplied `userCrud.model` / `roleCrud.model` is checked like
+  every other response schema.** The signup and admin CRUD modules hand the
+  model straight to upstream CRUD serialization (no `defineResource`
+  projection), so it only had its component name verified; it now also has
+  to strip undeclared keys (`assertFailClosedResponse`) and carry no
+  `dto: { response: false }` field (`assertNoHiddenFields`) — a hidden
+  column in an overridden model would have shipped on `POST /signup`,
+  `/admin/users` and `/admin/roles`. Rejected at boot with a pointer at
+  `.omit()`.
 - **User-metadata updates pin `userId` from the caller.** The update branch
   of the metadata repository used to write the validated payload as-is, so
   an app-supplied update schema that admits `userId` could move a row to

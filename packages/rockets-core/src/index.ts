@@ -50,6 +50,9 @@ export {
 // through, and the document converter that turns named schemas into
 // `$ref`s.
 export { rocketsSchemaValidation } from './common/utils/standard-schema.util';
+// A hand-written response schema is not projected: a `dto: { response:
+// false }` field inside it is rejected at definition time (`.omit()` it).
+export { assertNoHiddenFields } from './zod/zod-projections';
 export {
   assertFailClosedResponse,
   assertNamedSchema,
