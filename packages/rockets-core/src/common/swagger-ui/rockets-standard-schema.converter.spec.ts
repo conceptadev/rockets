@@ -101,4 +101,108 @@ describe('createRocketsStandardSchemaConverter', () => {
       /both a request \(input\) and a response \(output\)/,
     );
   });
+  it("qualifies zod's positional anonymous definitions per component", () => {
+    const convert = createRocketsStandardSchemaConverter();
+
+    interface TreeNode {
+      name: string;
+      children: TreeNode[];
+    }
+    const node: z.ZodType<TreeNode> = z.lazy(() =>
+      z.object({ name: z.string(), children: z.array(node) }),
+    );
+    interface CatNode {
+      label: number;
+      subs: CatNode[];
+    }
+    const cat: z.ZodType<CatNode> = z.lazy(() =>
+      z.object({ label: z.number(), subs: z.array(cat) }),
+    );
+
+    // zod names the extracted inner object of each `z.lazy()` `__schema0`,
+    // restarting the counter per conversion. Unqualified, the second one
+    // collides with the first and aborts the whole document.
+    const tree = convert(withOpenApi(z.object({ root: node }), 'TreeDto'), {
+      schemaType: 'output',
+    });
+    const feline = convert(withOpenApi(z.object({ root: cat }), 'CatDto'), {
+      schemaType: 'output',
+    });
+
+    const names = [
+      ...Object.keys(tree?.components ?? {}),
+      ...Object.keys(feline?.components ?? {}),
+    ];
+    expect(names.some((n) => n.startsWith('__schema'))).toBe(false);
+    expect(new Set(names).size).toBe(names.length);
+    expect(names).toContain('TreeDtoRef0');
+    expect(names).toContain('CatDtoRef0');
+
+    // The rewrite has to reach the refs INSIDE the lifted definitions too,
+    // or the document ships a $ref to a component that no longer exists.
+    const refs = JSON.stringify([tree?.components, feline?.components]).match(
+      /#\/(?:\$defs|definitions|components\/schemas)\/[A-Za-z0-9_]+/g,
+    );
+    for (const ref of refs ?? []) {
+      const target = ref.slice(ref.lastIndexOf('/') + 1);
+      expect(target.startsWith('__schema')).toBe(false);
+      expect(names).toContain(target);
+    }
+  });
+  it('documents a named discriminated union with a tag mapping', () => {
+    const convert = createRocketsStandardSchemaConverter();
+    const circle = withOpenApi(
+      z.object({ kind: z.literal('circle'), r: z.number() }),
+      'CircleDto',
+    );
+    const rect = withOpenApi(
+      z.object({ kind: z.literal('rect'), w: z.number() }),
+      'RectDto',
+    );
+    // The union is reached under a DIFFERENT id than the one it is emitted
+    // under — the shape an operation's generated wrapper produces.
+    const shape = withOpenApi(
+      z.discriminatedUnion('kind', [circle, rect]),
+      'ShapeDto',
+    );
+    const wrapper = withOpenApi(shape, 'Op_Get_ShapeOutput');
+
+    const result = convert(wrapper, { schemaType: 'output' });
+    const shapeJson = result?.components?.['ShapeDto'] as
+      | { discriminator?: unknown }
+      | undefined;
+
+    // `mapping` is required: the implicit form matches the tag against the
+    // COMPONENT name, and 'circle' is not 'CircleDto'.
+    expect(shapeJson?.discriminator).toEqual({
+      mapping: {
+        circle: '#/components/schemas/CircleDto',
+        rect: '#/components/schemas/RectDto',
+      },
+      propertyName: 'kind',
+    });
+  });
+
+  it('leaves a union with an unnamed branch undiscriminated', () => {
+    const convert = createRocketsStandardSchemaConverter();
+    const named = withOpenApi(
+      z.object({ kind: z.literal('a'), x: z.number() }),
+      'NamedBranchDto',
+    );
+    const union = withOpenApi(
+      z.discriminatedUnion('kind', [
+        named,
+        z.object({ kind: z.literal('b'), y: z.number() }),
+      ]),
+      'PartlyNamedDto',
+    );
+
+    const result = convert(union, { schemaType: 'output' });
+    // OpenAPI only allows a discriminator over $ref branches, and a partial
+    // mapping would document one tag while silently dropping the other.
+    expect(
+      (result?.components?.['PartlyNamedDto'] as { discriminator?: unknown })
+        ?.discriminator,
+    ).toBeUndefined();
+  });
 });

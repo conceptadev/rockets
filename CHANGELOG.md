@@ -1020,6 +1020,36 @@ before running the full e2e suite.
 
 ### Fixed
 
+- **A second recursive schema no longer aborts the OpenAPI document.**
+  `z.toJSONSchema` names a definition it had to extract but cannot name —
+  the inner object of a `z.lazy()` recursion is the usual one —
+  positionally, as `__schema0`, and the counter restarts for every schema
+  converted. Two unrelated recursive schemas in one app therefore both
+  claimed `__schema0`, and the second one aborted document generation with
+  a shape-mismatch error that blamed the request/response split instead of
+  the name. The converter now qualifies those names with the owning
+  component id (`TreeDtoRef0`) and rewrites every `$ref` that pointed at
+  them, `#/$defs/…` and `#/definitions/…` included — Swagger normalises
+  those prefixes only after the converter returns, so matching just
+  `#/components/schemas/…` left the document referencing a component that
+  no longer existed. Component names stay derived from the schema that
+  owns them, so a name changes when its own schema changes and not because
+  an unrelated recursive schema was declared elsewhere.
+
+- **A discriminated union is documented as one.** `z.toJSONSchema` renders
+  `z.discriminatedUnion()` as a bare `oneOf`, dropping the tag that makes
+  it discriminated: a generated client had to try each branch in turn
+  instead of switching on the property. When every branch is named with
+  `withOpenApi()` — OpenAPI allows `discriminator` only over `$ref`
+  branches — the converter now emits `discriminator` with an explicit
+  `mapping`, which is required rather than cosmetic: the implicit form
+  matches the tag value against the COMPONENT name, and `'circle'` is not
+  `'CircleDto'`. A union with even one unnamed branch is left alone,
+  because a partial mapping would document some tags and silently drop the
+  rest. Matching is by branch set, not by component name — the same union
+  node is reached under an operation's generated wrapper id and emitted
+  under the authored response id.
+
 - **Entity hooks bound to a key no resource registers now fail the boot
   (issue #69 review).** `@EntityHook({ entity })` bakes
   `deriveEntityKey(entity)` into its spec, while the repository adapter
