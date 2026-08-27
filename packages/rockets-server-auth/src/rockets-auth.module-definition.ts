@@ -115,7 +115,6 @@ import {
   RocketsValidateCurrentPasswordHandler,
 } from './shared/authentication/rockets-validate-current-password.handler';
 import { RocketsAuthCreateOtpPortHandler } from './shared/authentication/rockets-auth-create-otp-port.handler';
-import { ConceptaRepositoryCompatModule } from './shared/compatibility/concepta-repository-compat.module';
 import { RocketsAuthRecoveryController } from './domains/auth/gateways/http/controllers/rockets-auth-recovery.controller';
 import { RocketsRecoveryService } from './domains/auth/application/services/rockets-recovery.service';
 
@@ -408,7 +407,6 @@ export function createRocketsAuthImports(importOptions: {
 
     CqrsModule.forRoot(),
     RepositoryModule.forRoot({}),
-    ConceptaRepositoryCompatModule,
     RocketsAuthPortsModule.forRoot(importOptions.extras?.ports),
     CrudModule.forRootAsync({
       inject: [RAW_OPTIONS_TOKEN],
