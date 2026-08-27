@@ -28,6 +28,7 @@ function report(overrides: Partial<RouteAuditReport>): RouteAuditReport {
         aclQuery: null,
         unvalidatedSchemaParams: [],
         openResponseSchema: null,
+        hiddenResponseField: false,
         unvalidatedCrudBody: false,
         unserializedResponseSchemas: [],
       },
@@ -191,6 +192,7 @@ describe('schemaPipeViolations (always on)', () => {
         aclQuery: null,
         unvalidatedSchemaParams: ['body'],
         openResponseSchema: null,
+        hiddenResponseField: false,
         unvalidatedCrudBody: false,
         unserializedResponseSchemas: [],
       },
@@ -219,6 +221,21 @@ describe('schemaPipeViolations (always on)', () => {
     expect(
       schemaPipeViolations(unpiped, { allowControllers: [ProbeController] }),
     ).toHaveLength(1);
+  });
+
+  it('reports a hidden field in @SerializeOptions({ schema }) as requireClosedResponse', () => {
+    const base = report({});
+    const hidden: RouteAuditReport = {
+      ...base,
+      routes: base.routes.map((route) => ({
+        ...route,
+        hiddenResponseField: true,
+      })),
+    };
+    const violations = openResponseViolations(hidden);
+    expect(violations).toHaveLength(1);
+    expect(violations[0].rule).toBe('requireClosedResponse');
+    expect(violations[0].detail).toContain('dto: { response: false }');
   });
 
   it('reports an open @SerializeOptions({ schema }) as requireClosedResponse', () => {

@@ -329,6 +329,17 @@ export function openResponseViolations(
 ): readonly RoutePolicyViolation[] {
   const violations: RoutePolicyViolation[] = [];
   for (const route of report.routes) {
+    if (route.hiddenResponseField) {
+      violations.push({
+        routeId: route.id,
+        rule: 'requireClosedResponse',
+        detail:
+          `${route.controller}.${route.handler}: @SerializeOptions({ schema }) ` +
+          'contains a field declared `dto: { response: false }`. A ' +
+          'hand-written response schema is not projected, so the column ' +
+          'would reach the wire — drop it with .omit({ field: true }).',
+      });
+    }
     if (route.openResponseSchema === null) continue;
     violations.push({
       routeId: route.id,

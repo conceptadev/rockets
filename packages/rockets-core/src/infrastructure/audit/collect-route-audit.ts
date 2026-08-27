@@ -18,6 +18,7 @@ import { DECORATORS } from '@nestjs/swagger';
 import { CrudEntity } from '@concepta/nestjs-crud';
 
 import { findOpenResponseObject } from '../../common/utils/open-api-schema.util';
+import { hasHiddenResponseField } from '../../zod/zod-projections';
 
 import { ROCKETS_DISABLE_GUARDS_TOKEN } from '../../rockets-core.constants';
 import { ROCKETS_AUTH_SESSION_TOKEN } from '../../decorators/auth-session.decorator';
@@ -127,6 +128,7 @@ export function collectRouteAudit(args: {
         methodName,
       );
       const openResponseSchema = readOpenResponseSchema(controller, handler);
+      const hiddenResponseField = readHiddenResponseField(controller, handler);
       const unvalidatedCrudBody = readUnvalidatedCrudBody(
         controller,
         methodName,
@@ -152,6 +154,7 @@ export function collectRouteAudit(args: {
             authentication,
             sessionAuth,
             openResponseSchema,
+            hiddenResponseField,
             unvalidatedCrudBody,
             unserializedResponseSchemas,
             // Grants mirror enforcement exactly: upstream reads them
@@ -357,6 +360,28 @@ function readUnvalidatedSchemaParams(
  * same fail-closed check a generated resource's response schema gets at
  * definition time — reported here, failed at boot by the service.
  */
+function readSerializerSchema(
+  controller: Type<unknown>,
+  handler: object,
+): z.ZodType | undefined {
+  const options: unknown =
+    Reflect.getMetadata(CLASS_SERIALIZER_OPTIONS, handler) ??
+    Reflect.getMetadata(CLASS_SERIALIZER_OPTIONS, controller);
+  if (typeof options !== 'object' || options === null) return undefined;
+  const schema: unknown = Reflect.get(options, 'schema');
+  return schema instanceof z.ZodType ? schema : undefined;
+}
+
+function readHiddenResponseField(
+  controller: Type<unknown>,
+  handler: object,
+): boolean {
+  const schema = readSerializerSchema(controller, handler);
+  return schema === undefined
+    ? false
+    : hasHiddenResponseField(schema, `${controller.name}.serializer`);
+}
+
 function readOpenResponseSchema(
   controller: Type<unknown>,
   handler: object,

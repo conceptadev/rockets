@@ -156,8 +156,19 @@
   component id, so a hidden field inside it is rejected at definition time
   with a pointer at `.omit()` (`assertNoHiddenFields`, exported for
   consumers that hand a schema to upstream CRUD directly — `rockets-auth`
-  runs it on `userCrud.model` / `roleCrud.model`). SSE operations
-  serialize through no schema by design (`output: false`).
+  runs it on `userCrud.model` / `roleCrud.model`). The route audit
+  applies the same rule to a hand-written route's
+  `@SerializeOptions({ schema })` (`RouteAuditEntry.hiddenResponseField`,
+  failing the boot under `requireClosedResponse`). An `op.sse()` operation
+  declares no `output` at all, so nothing is serialized — or stripped —
+  there by design.
+- **The fail-closed walker's pass-through memo caches only `true`.** A
+  memo that stored an in-progress `false` as a final answer made the
+  verdict depend on visit order and failed OPEN: the same schema reported
+  nothing when the branch that closed a cycle came first. `true` is the
+  only sound memo for a monotone predicate; termination comes from a
+  per-walk in-progress set. Regressions pin both field orders and a
+  warm-then-probe run over shared instances.
 - **`assertFailClosedResponse` walks the IN side of a transform.** An
   ordinary `.transform()` is a pipe whose object sits on the IN side and
   whose OUT is the transform node, which strips nothing;

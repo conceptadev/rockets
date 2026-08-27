@@ -2995,7 +2995,7 @@
         "name": "RouteAuditEntry",
         "kind": "interface",
         "runtime": false,
-        "signature": "export interface RouteAuditEntry {\n    readonly id: string;\n    readonly method: string;\n    readonly path: string;\n    readonly controller: string;\n    readonly controllerRef: Type<unknown>;\n    readonly handler: string;\n    readonly authentication: RouteAuthState;\n    readonly sessionAuth: boolean;\n    readonly aclAction: string | null;\n    readonly aclResource: string | null;\n    readonly aclQuery: string | null;\n    readonly unvalidatedSchemaParams: readonly string[];\n    readonly openResponseSchema: string | null;\n    readonly unvalidatedCrudBody: boolean;\n    readonly unserializedResponseSchemas: readonly string[];\n}"
+        "signature": "export interface RouteAuditEntry {\n    readonly id: string;\n    readonly method: string;\n    readonly path: string;\n    readonly controller: string;\n    readonly controllerRef: Type<unknown>;\n    readonly handler: string;\n    readonly authentication: RouteAuthState;\n    readonly sessionAuth: boolean;\n    readonly aclAction: string | null;\n    readonly aclResource: string | null;\n    readonly aclQuery: string | null;\n    readonly unvalidatedSchemaParams: readonly string[];\n    readonly openResponseSchema: string | null;\n    readonly hiddenResponseField: boolean;\n    readonly unvalidatedCrudBody: boolean;\n    readonly unserializedResponseSchemas: readonly string[];\n}"
       },
       {
         "name": "RouteAuditReport",

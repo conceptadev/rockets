@@ -134,17 +134,23 @@ function findOpenObject(
  * of those somewhere below it (wrappers, unions, arrays, object
  * properties, record values, intersections, nested pipes).
  */
-// Memoized per schema instance (schemas are immutable). The entry is set
-// to `false` BEFORE the children are visited: a cycle back to a node
-// still being decided (a recursive lazy through a pipe) reads `false`
-// and terminates — `schemaChildren` calls this for every pipe, so a
-// per-call `seen` set could not cover the mutual recursion.
-const passesThroughCache = new WeakMap<z.ZodType, boolean>();
+// Only `true` is memoized (schemas are immutable and the predicate is
+// monotone, so a `true` is always sound). A `false` decided while a
+// cycle was still open is NOT an answer — it is what a node reads about
+// itself mid-walk — so it is never cached; termination comes from the
+// per-walk `inProgress` set that `schemaChildren` threads back in for
+// the pipe branch. Caching that `false` made the verdict depend on visit
+// order and failed OPEN (found in PR review).
+const passesThroughTrue = new WeakSet<z.ZodType>();
 
-function passesThrough(schema: z.ZodType, path: string): boolean {
-  const cached = passesThroughCache.get(schema);
-  if (cached !== undefined) return cached;
-  passesThroughCache.set(schema, false);
+function passesThrough(
+  schema: z.ZodType,
+  path: string,
+  inProgress: Set<z.ZodType> = new Set(),
+): boolean {
+  if (passesThroughTrue.has(schema)) return true;
+  if (inProgress.has(schema)) return false;
+  inProgress.add(schema);
   const result =
     schema instanceof z.ZodTransform ||
     schema instanceof z.ZodAny ||
@@ -154,16 +160,18 @@ function passesThrough(schema: z.ZodType, path: string): boolean {
     // its input through (`z.object({ a: z.any() })`, `z.array(z.any())`,
     // a record of `any`, an intersection or nested pipe ending in one) —
     // the shared walker covers every node kind; over-flagging fails closed.
-    schemaChildren(schema, path).some(([childPath, child]) =>
-      passesThrough(asClassicSchema(child, childPath), childPath),
+    schemaChildren(schema, path, inProgress).some(([childPath, child]) =>
+      passesThrough(asClassicSchema(child, childPath), childPath, inProgress),
     );
-  passesThroughCache.set(schema, result);
+  inProgress.delete(schema);
+  if (result) passesThroughTrue.add(schema);
   return result;
 }
 
 export function schemaChildren(
   schema: z.ZodType,
   path: string,
+  inProgress?: Set<z.ZodType>,
 ): Array<[string, z.core.$ZodType]> {
   if (schema instanceof z.ZodObject) {
     return Object.entries(schema.shape).map(([key, field]) => [
@@ -206,7 +214,11 @@ export function schemaChildren(
     // `z.custom()`. A pipe whose `out` is a real schema
     // (`z.pipe(open, closed)`) strips on the way out, so `in` is only
     // walked when `out` passes values through.
-    return passesThrough(asClassicSchema(schema.def.out, path), path)
+    return passesThrough(
+      asClassicSchema(schema.def.out, path),
+      path,
+      inProgress,
+    )
       ? [
           [`${path}<in`, schema.def.in],
           [path, schema.def.out],

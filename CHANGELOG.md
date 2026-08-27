@@ -959,7 +959,11 @@ before running the full e2e suite.
   check walks a pipe's IN side whenever its OUT passes (some of) its input
   through (`transform`, `any`, `unknown`, `custom`, or any composite
   holding one of those — wrappers, unions, arrays, object properties,
-  record values, intersections, nested pipes), not only for transforms.
+  record values, intersections, nested pipes), not only for transforms;
+  its memo caches only `true`, so the verdict never depends on visit order
+  (an in-progress `false` stored as final had failed open). The route
+  audit also rejects a hand-written `@SerializeOptions({ schema })` that
+  declares a `dto: { response: false }` field.
 - **Hidden columns stay hidden at every depth of a computed field.** A
   `dto: { response: false }` column nested two or more levels down an
   `f.compute()` shape was still serialized.

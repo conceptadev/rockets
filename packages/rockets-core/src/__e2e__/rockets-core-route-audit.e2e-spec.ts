@@ -39,6 +39,7 @@ import { AccessControl } from 'accesscontrol';
 import type { ExecutionContext } from '@nestjs/common';
 import type { AccessControlServiceInterface } from '@concepta/nestjs-access-control';
 import { z } from 'zod';
+import { f } from '../zod/fields';
 import { operationResource } from '../zod';
 import { RocketsCoreModule } from '../rockets-core.module';
 import { defineAuthAdapter } from '../infrastructure/auth/define-auth-adapter';
@@ -990,6 +991,29 @@ class OpenResponseNotesController {
   }
 }
 
+const hiddenNotesResponse = withOpenApi(
+  z.object({
+    items: z.array(
+      z.object({
+        text: z.string(),
+        secret: f.string({ dto: { response: false } }),
+      }),
+    ),
+  }),
+  'HiddenNotesResponseDto',
+);
+
+@Controller('notes-hidden-response')
+@ApiTags('Notes')
+class HiddenResponseNotesController {
+  @Get()
+  @SerializeOptions({ schema: hiddenNotesResponse })
+  @ApiOkResponse({ standardSchema: hiddenNotesResponse })
+  list(): unknown {
+    return { items: [] };
+  }
+}
+
 @Controller('notes-closed-response')
 @ApiTags('Notes')
 @SerializeOptions({ schema: closedNotesResponse })
@@ -1051,6 +1075,12 @@ describe('requireSchemaPipe through RocketsCoreModule (e2e)', () => {
 
   // Serialization IS validation for a hand-written route: an open object
   // in its @SerializeOptions schema ships whatever the row carries.
+  it('rejects a hand-written @SerializeOptions({ schema }) with a hidden field', async () => {
+    await expect(bootCoreWith(HiddenResponseNotesController)).rejects.toThrow(
+      /requireClosedResponse\] GET \/notes-hidden-response: HiddenResponseNotesController\.list: @SerializeOptions\({ schema }\) contains a field declared/,
+    );
+  });
+
   it('rejects a hand-written @SerializeOptions({ schema }) with an open object', async () => {
     await expect(bootCoreWith(OpenResponseNotesController)).rejects.toThrow(
       /requireClosedResponse\] GET \/notes-open-response: OpenResponseNotesController\.list: @SerializeOptions\({ schema }\) has an open object at "\$\.items\[\]"/,

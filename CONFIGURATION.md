@@ -576,9 +576,10 @@ and is not rebuilt, so a hidden column inside it is rejected at definition
 time — drop it with `.omit({ column: true })` before wrapping. The two
 behaviours differ on purpose: the same entity schema handed to
 `operationResource({ output })` strips, handed to
-`defineResource({ operations: { read: { output } } })` throws. SSE
-operations serialize through no schema (`output: false`), so nothing is
-stripped there by design. One deliberate over-flag in the fail-closed check: a
+`defineResource({ operations: { read: { output } } })` throws. An
+`op.sse()` operation declares no `output` at all (§6c), so nothing is
+serialized — or stripped — there by design. One deliberate over-flag in the
+fail-closed check: a
 pipe whose OUT side holds `any` / `unknown` / `custom` / a transform anywhere
 (`z.pipe(open, z.object({ a: z.any() }))`) is rejected even when the OUT
 object would strip top-level extras — failing closed is cheaper than

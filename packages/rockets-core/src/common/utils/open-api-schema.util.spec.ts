@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { z } from 'zod';
-import { assertFailClosedResponse } from './open-api-schema.util';
+import {
+  assertFailClosedResponse,
+  findOpenResponseObject,
+} from './open-api-schema.util';
 
 const open = z.looseObject({ a: z.string() });
 const closed = z.object({ a: z.string() });
@@ -156,6 +159,41 @@ describe('assertFailClosedResponse', () => {
 
   it.each(accepted)('accepts %s', (_label, schema) => {
     expect(() => assertFailClosedResponse(schema, 'spec')).not.toThrow();
+  });
+
+  // PR #105 review: a memo that stored an in-progress `false` as final made
+  // the verdict depend on visit order and failed OPEN — the same schema
+  // reported nothing when the poisoning branch came first.
+  it('reports an open IN side regardless of field order (no cached in-progress false)', () => {
+    const build = (order: 'a-first' | 'b-first') => {
+      const A: z.ZodType = z.lazy(() => z.union([B, z.any()]));
+      const B: z.ZodType = z.object({ a: A });
+      // Fixture widening: zod's pipe typing is invariant on the OUT input
+      // type; the runtime shapes are what the walker reads.
+      const a = z.pipe(z.object({ ok: z.string() }) as z.ZodType, A);
+      const b = z.pipe(z.looseObject({ leak: z.string() }) as z.ZodType, B);
+      return order === 'a-first' ? z.object({ a, b }) : z.object({ b, a });
+    };
+    expect(findOpenResponseObject(build('a-first'))).toBe('$.b<in');
+    expect(findOpenResponseObject(build('b-first'))).toBe('$.b<in');
+  });
+
+  it('gives the same verdict after a warm-up walk over shared instances', () => {
+    const kids: z.ZodType = z.lazy(() =>
+      z.array(z.object({ id: z.string(), kids })),
+    );
+    const node = z.object({ id: z.string(), kids });
+    const withLeak = z.object({
+      node,
+      leaky: z.pipe(
+        z.looseObject({ x: z.string() }) as z.ZodType,
+        kids.transform((v) => v),
+      ),
+    });
+    const cold = findOpenResponseObject(withLeak);
+    findOpenResponseObject(node); // warm-up starting at the shared node
+    expect(findOpenResponseObject(withLeak)).toBe(cold);
+    expect(cold).toBe('$.leaky<in');
   });
 
   it('names the path of the open node', () => {

@@ -81,6 +81,15 @@ export interface RouteAuditEntry {
    */
   readonly openResponseSchema: string | null;
   /**
+   * The schema a hand-written route serializes with
+   * (`@SerializeOptions({ schema })`) declares a `dto: { response: false }`
+   * field. A hand-written schema is not projected, so the column would
+   * reach the wire — the same rule `defineResource` applies at definition
+   * time (`assertNoHiddenFields`), checked here for the routes the planner
+   * never sees. `false` when the route declares no serializer schema.
+   */
+  readonly hiddenResponseField: boolean;
+  /**
    * A GENERATED CRUD create / update / replace / batch route whose `@Body()`
    * carries no schema. Upstream wires the validation pipe from the
    * OPERATION-level `request.body` only; a body declared at controller

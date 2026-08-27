@@ -254,6 +254,14 @@ export function withHiddenFieldsRemoved(
  * it is a contradiction the author resolves: fail at definition time and
  * point at `.omit()`.
  */
+/** Non-throwing form of {@link assertNoHiddenFields} for the route audit. */
+export function hasHiddenResponseField(
+  schema: z.ZodType,
+  path: string,
+): boolean {
+  return hasHiddenDescendant(schema, path);
+}
+
 export function assertNoHiddenFields(schema: z.ZodType, context: string): void {
   if (!hasHiddenDescendant(schema, context)) return;
   throw new Error(
