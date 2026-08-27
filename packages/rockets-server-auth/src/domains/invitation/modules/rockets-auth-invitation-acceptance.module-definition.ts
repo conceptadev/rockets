@@ -21,9 +21,6 @@ export const RAW_INVITATION_ACCEPTANCE_OPTIONS_TOKEN = Symbol(
   '__ROCKETS_INVITATION_ACCEPTANCE_MODULE_RAW_OPTIONS_TOKEN__',
 );
 
-export const INVITATION_ACCEPTANCE_LISTENER_TOKEN =
-  'INVITATION_ACCEPTANCE_LISTENER';
-
 export type InvitationAcceptedEventHandler = Type<
   IEventHandler<InvitationAcceptedEvent>
 >;
@@ -75,11 +72,7 @@ function definitionTransform(
     global: extras.global,
     controllers: [buildInvitationAcceptanceController(extras.controller)],
     providers: createInvitationAcceptanceProviders({ providers, extras }),
-    exports: [
-      ...defExports,
-      RAW_INVITATION_ACCEPTANCE_OPTIONS_TOKEN,
-      INVITATION_ACCEPTANCE_LISTENER_TOKEN,
-    ],
+    exports: [...defExports, RAW_INVITATION_ACCEPTANCE_OPTIONS_TOKEN],
   };
 }
 
@@ -106,10 +99,9 @@ function createInvitationAcceptanceProviders(options: {
         ).updateSchema,
       }),
     },
+    // Never alias the listener under a second token: Nest CQRS registers an
+    // @EventsHandler once per provider wrapper holding its instance, so an
+    // alias delivers every InvitationAcceptedEvent twice.
     ListenerClass,
-    {
-      provide: INVITATION_ACCEPTANCE_LISTENER_TOKEN,
-      useExisting: ListenerClass,
-    },
   ];
 }

@@ -1,5 +1,3 @@
-import { RepositoryInterface, Where } from '@concepta/nestjs-repository';
-
 import { Injectable } from '@nestjs/common';
 import { DeepPartial } from '@concepta/nestjs-core';
 import { UserMetadataRepositoryInterface } from '../../domain/repositories/user-metadata-repository.interface';
@@ -7,7 +5,11 @@ import { RocketsAuthUserMetadataEntityInterface } from '../../interfaces/rockets
 import { RocketsAuthUserMetadataUpdatableInterface } from '../../interfaces/rockets-auth-user-metadata-updatable.interface';
 import { USER_METADATA_MODULE_ENTITY_KEY } from '../../../../shared/constants/repository-entity-keys.constants';
 import type { PlainLiteralObject } from '@nestjs/common';
-import { InjectDynamicRepository } from '@concepta/rockets-core';
+import {
+  InjectDynamicRepository,
+  RepositoryInterface,
+  Where,
+} from '@concepta/rockets-core';
 
 @Injectable()
 export class UserMetadataRepository implements UserMetadataRepositoryInterface {

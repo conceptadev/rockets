@@ -77,7 +77,7 @@ still come from core (which re-exports the `@concepta/nestjs-*` motors).
 
 ```bash
 yarn add @concepta/rockets-auth@alpha @concepta/rockets@alpha @concepta/rockets-core@alpha \
-  @nestjs/common @nestjs/core @nestjs/cqrs @nestjs/swagger @nestjs/jwt @nestjs/passport \
+  @nestjs/common @nestjs/core @nestjs/cqrs @nestjs/swagger @nestjs/passport \
   reflect-metadata rxjs
 ```
 
@@ -459,7 +459,7 @@ when you need built-in auth HTTP and `/me`.
 | `roleCrud`                          | `RoleCrudOptionsExtrasInterface`                                             | optional | Same shape, for the role admin routes.                                                                                                                                                                     |
 | `authAdapter`                       | `Type<AuthAdapterInterface>`                                                 | optional | Override the JWT adapter (e.g. inject a custom claim transformer).                                                                                                                                         |
 | `rocketsDefaults.enableGlobalGuard` | `boolean`                                                                    | optional | Override the contributed Rockets guard default (`false`; upstream JWT guard owns built-in-auth requests).                                                                                                  |
-| All other fields                    | inherited from `RocketsAuthOptionsInterface`                                 | optional | `useFactory` / `useExisting`, plus `settings`, `authentication`, `user`, `password`, `otp`, `email`, `crud`, `role`, `invitation`, `federated`, `services`, `accessControl`, `disableController`, `ports`. |
+| All other fields                    | inherited from `RocketsAuthOptionsInterface`                                 | optional | `useFactory` / `useExisting`, plus `settings`, `authentication`, `user`, `password`, `otp`, `email`, `role`, `invitation`, `federated`, `services`, `accessControl`, `disableController`, `ports`. |
 
 ### `RocketsAuthModule.forRoot(options)` — top-level options
 
@@ -467,10 +467,9 @@ when you need built-in auth HTTP and `/me`.
 | ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `settings`                                                                    | Rockets-specific settings (role names, OTP defaults, email templates).                                                                                                     |
 | `authentication`                                                              | Forwarded to `@concepta/nestjs-authentication`. Includes `settings.{jwt, strategies, mfa, guards}` and `ports.*`. Notification ports must be supplied (no silent default). |
-| `user`, `password`, `otp`, `email`, `crud`, `role`, `federated`, `invitation` | Per-module config blocks, forwarded as-is to upstream modules.                                                                                                             |
+| `user`, `password`, `otp`, `email`, `role`, `federated`, `invitation` | Per-module config blocks, forwarded as-is to upstream modules.                                                                                                             |
 | `services.mailerService`                                                      | Required mailer adapter. Use a logger fallback for dev.                                                                                                                    |
 | `services.userAccessQueryService`                                             | Optional `CanAccess` for access-control queries.                                                                                                                           |
-| `swagger`                                                                     | Forwarded to `SwaggerUiModule` from `@concepta/rockets-core`.                                                                                                              |
 
 ### Module-level extras
 
@@ -482,6 +481,12 @@ when you need built-in auth HTTP and `/me`.
 | `ports`                                                                               | `RocketsAuthPortsConfigInterface` — per-handler overrides for cross-module Command/Query plumbing.                                                                                          |
 | `auth.appGuard`                                                                       | Override the global `APP_GUARD` from `AuthenticationModule`.                                                                                                                                |
 | `auth.controller` / `otp.controller` / `invitation.controllers.*` / `role.controller` | Per-controller decorator extras (`classDecorators`, `routes[*].decorators`).                                                                                                                |
+
+Worked example of the extension points (handler override via
+`userCrud.handlers.signupHandler`, per-route decorators via
+`otp.controller.routes`, an app-owned `RocketsAuthException` subclass):
+`examples/sample-server-auth/src/modules/user/signup/` +
+`examples/sample-server-auth/test/auth-extension-points.e2e-spec.ts`.
 
 ### Domain re-exports
 
