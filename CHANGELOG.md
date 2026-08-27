@@ -932,13 +932,26 @@ before running the full e2e suite.
   `.transform()` on an open object shipped undeclared keys). Both found in
   the PR #105 review.
 - **Node 20.19 is the minimum** — the CommonJS build loads the ESM Nest 12
-  line through `require(esm)`; `engines` says so and CI runs the full suite
-  on that floor. Test runners that externalise ESM (this repo's Vitest, a
+  line through `require(esm)`; `engines` says so and CI runs the unit and
+  package e2e suites on that floor (the example apps and the packed-consumer
+  contract run on it in release-readiness). Test runners that externalise ESM
+  (this repo's Vitest, a
   consumer's Jest-ESM) hit `ERR_REQUIRE_CYCLE_MODULE` on 20.19 when
   `@nestjs/cqrs` (CommonJS) requires the still-evaluating `@nestjs/core`;
   the fix is a setup file that preloads `@nestjs/core`
   (`vitest.setup.preload-nest-core.mts`), and the underlying gap is
-  upstream's.
+  upstream's (nestjs/nest#17583 — remove the file once `@nestjs/cqrs`
+  ships ESM).
+- **Hidden columns stay hidden on the FOURTH response path too** — an
+  `operationResource` output built from an entity schema strips its
+  `dto: { response: false }` fields like computed fields, JSON columns and
+  exposed relations (e2e asserts the secret is absent from the HTTP body).
+  A top-level `.default()` on a field with a hidden column is rejected at
+  definition time instead of being silently dropped (the row would have
+  failed serialization at runtime); `.prefault()` IS rebuilt (its payload
+  runs through the inner schema). The fail-closed check walks a pipe's IN
+  side whenever its OUT passes values through (`transform`, `any`,
+  `unknown`, `custom`), not only for transforms.
 - **Hidden columns stay hidden at every depth of a computed field.** A
   `dto: { response: false }` column nested two or more levels down an
   `f.compute()` shape was still serialized.

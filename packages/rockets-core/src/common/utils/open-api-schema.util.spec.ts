@@ -43,6 +43,23 @@ describe('assertFailClosedResponse', () => {
     // sits on the IN side, and an identity transform ships whatever it
     // let through.
     ['in transform in side', open.transform((value) => value)],
+    ['in pipe into any', z.pipe(open, z.any())],
+    [
+      'in pipe into unknown',
+      // Fixture cast: zod's pipe typing is invariant on the OUT input type;
+      // the runtime shape (a pass-through OUT) is what the check reads.
+      z.pipe(open, z.unknown() as z.ZodType<unknown, z.output<typeof open>>),
+    ],
+    [
+      'in pipe into custom',
+      z.pipe(
+        open,
+        z.custom<object>(() => true) as z.ZodType<
+          object,
+          z.output<typeof open>
+        >,
+      ),
+    ],
     ['in lazy', z.lazy(() => open)],
     ['nested object field', z.object({ inner: open })],
     ['deep: array of optional readonly', z.array(open.readonly().optional())],

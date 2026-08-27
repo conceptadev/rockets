@@ -2,6 +2,7 @@ import type { MessageEvent } from '@nestjs/common';
 import { withOpenApi } from '@concepta/nestjs-core';
 import type { Observable } from 'rxjs';
 import { z } from 'zod';
+import { withHiddenFieldsRemoved } from './zod-projections';
 
 import type {
   CompiledOperationDescriptor,
@@ -374,7 +375,13 @@ function compileOperationOutput(
   schema: OperationOutputSchema,
   name: string,
 ): z.ZodType {
-  const named = withOpenApi(schema, name);
+  // `dto: { response: false }` holds here too: an operation output built
+  // from an entity schema strips its hidden columns like every other
+  // response path (computed fields, JSON columns, exposed relations).
+  const named = withOpenApi(
+    withHiddenFieldsRemoved(schema, `operationResource output "${name}"`),
+    name,
+  );
   assertFailClosedResponse(named, `operationResource output "${name}"`);
   return named;
 }

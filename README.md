@@ -1062,8 +1062,10 @@ rockets/
   `config`, `throttler`) remain on their current stable majors until a Nest 12
   line is published.
 - **Node**: `>=20.19.0` — CommonJS build loading ESM dependencies through
-  `require(esm)`; Node 20.18 fails with `ERR_REQUIRE_ESM`. CI runs the full
-  suite on the floor (20.19) and on 22. One caveat for consumers on 20.19
+  `require(esm)`; Node 20.18 fails with `ERR_REQUIRE_ESM`. CI runs the unit
+  and package e2e suites on the floor (20.19) and on 22; the example apps
+  and the packed-consumer contract run on the floor in release-readiness. One
+  caveat for consumers on 20.19
   whose test runner externalises ESM (Vitest, Jest ESM): `@nestjs/cqrs` is
   CommonJS and requires the ESM `@nestjs/core`; a require landing while the
   runner is still importing it throws `ERR_REQUIRE_CYCLE_MODULE` — preload

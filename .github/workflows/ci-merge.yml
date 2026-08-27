@@ -14,7 +14,8 @@ jobs:
       matrix:
         # 20.19.0 is the published minimum (`engines`): the CommonJS build
         # needs `require(esm)` for the ESM Nest 12 line, so the floor runs the
-        # full suite, not a subset. `@nestjs/core` is preloaded in the test
+        # unit + package e2e suites here (the example apps run in
+        # release-readiness on the same floor). `@nestjs/core` is preloaded in the test
         # runner (vitest.setup.preload-nest-core.mts) because a CommonJS
         # require of the still-evaluating ESM module throws on 20.19.
         node-version: [20.19.0, 22.x]

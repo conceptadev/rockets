@@ -145,13 +145,18 @@
   `.default()` / `.catch()` hand their payload over WITHOUT running the
   inner schema and are therefore rejected at definition time when a hidden
   column sits below them, like discriminated union, tuple, record, map and
-  set.
+  set. The same strip runs on an `operationResource` output (the fourth
+  response path); a TOP-LEVEL `.default()` on a field with a hidden column
+  is rejected at definition time rather than silently dropped;
+  `.prefault()` is rebuilt (its payload runs through the inner schema).
 - **`assertFailClosedResponse` walks the IN side of a transform.** An
   ordinary `.transform()` is a pipe whose object sits on the IN side and
   whose OUT is the transform node, which strips nothing;
   `z.object({...}).passthrough().transform(v => v)` passed the check and
-  shipped the undeclared keys. A pipe whose OUT is a real schema
-  (`z.pipe(open, closed)`) strips on the way out and still passes.
+  shipped the undeclared keys. The IN side is walked whenever the OUT
+  passes values through (`transform`, `any`, `unknown`, `custom`); a pipe
+  whose OUT is a real schema (`z.pipe(open, closed)`) strips on the way
+  out and still passes.
 - **Computed fields strip hidden columns at every depth.** A `dto:
   { response: false }` column two or more levels down a `f.compute()`
   shape (an object inside an optional object inside an array) was kept;

@@ -379,6 +379,52 @@ describe('projectSchema response exposure', () => {
     }
   });
 
+  // `unwrapField` peels a top-level `.default()` off the field; silently
+  // dropping it would turn a definition-time error into a runtime 500
+  // (the row without the key fails the rebuilt schema).
+  it('rejects at definition time a TOP-LEVEL .default() on a field with a hidden column', () => {
+    const blob = z.object({
+      id: f.pk(),
+      secret: f.string({ dto: { response: false } }),
+    });
+    const schema = z.object({
+      id: f.pk(),
+      payload: blob
+        .default({ id: '00000000-0000-4000-8000-000000000001', secret: 'x' })
+        .register(rocketsFieldMeta, { dto: { response: true } }),
+    });
+    expect(() => projectSchema('Pet', schema, entity, noOwner)).toThrow(
+      /top-level \.default\(\)/,
+    );
+  });
+
+  // Unlike `.default()`, a `.prefault()` payload runs through the inner
+  // schema, so the rebuilt inner strips it — rebuildable.
+  it('strips a hidden column through .prefault() at runtime', async () => {
+    const nested = z.object({
+      id: f.pk(),
+      secret: f.string({ dto: { response: false } }),
+    });
+    const pk = '00000000-0000-4000-8000-000000000001';
+    const schema = z.object({
+      id: f.pk(),
+      probe: f.compute(
+        z.object({ inner: nested.prefault({ id: pk, secret: 'leak' }) }),
+        // Fixture cast: the key is deliberately ABSENT so the prefault payload
+        // is what reaches the (rebuilt) inner schema.
+        () => ({} as { inner: { id: string; secret: string } }),
+      ),
+    });
+    const responseSchema = buildResponseSchema(
+      'Pet',
+      projectSchema('Pet', schema, entity, noOwner),
+    );
+    const result = await responseSchema['~standard'].validate({ id: pk });
+    expect(result.issues).toBeUndefined();
+    if (result.issues) return;
+    expect(result.value).toEqual({ id: pk, probe: { inner: { id: pk } } });
+  });
+
   it('strips a hidden column inside a RECURSIVE lazy schema without looping', async () => {
     interface Node {
       id: string;

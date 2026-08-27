@@ -227,11 +227,30 @@ function isResponseExposed(
  * Returns the field untouched when nothing is hidden, so the common case
  * keeps its exact original wrappers.
  */
-function withHiddenFieldsRemoved(field: z.ZodType, path: string): z.ZodType {
-  const { base, optional, nullable, meta } = unwrapField(field, path);
+export function withHiddenFieldsRemoved(
+  field: z.ZodType,
+  path: string,
+): z.ZodType {
+  const { base, optional, nullable, hasDefault, meta } = unwrapField(
+    field,
+    path,
+  );
   const stripped = stripHidden(base, path);
   if (stripped === base) {
     return field;
+  }
+  // `unwrapField` peels a top-level `.default()` off the field; the
+  // rebuild below re-applies only optional / nullable, and a default's
+  // payload bypasses the inner schema anyway — same rule as a nested
+  // `.default()`: reject rather than silently drop it (the row would then
+  // fail serialization at runtime instead of the author at definition).
+  if (hasDefault) {
+    throw new Error(
+      `${path}: a field declared \`dto: { response: false }\` sits below a ` +
+        `top-level .default() the response projection cannot keep — its ` +
+        `payload bypasses the inner schema. Move the hidden column out of ` +
+        `this schema or drop the default.`,
+    );
   }
   let rebuilt = stripped;
   if (nullable) rebuilt = rebuilt.nullable();
@@ -276,7 +295,7 @@ function hasHiddenDescendant(
 /**
  * Recursive: a hidden column N levels down stays hidden, whatever wraps
  * it. Every composite the projection can rebuild FAITHFULLY — object,
- * array, optional / nullable / readonly / nonoptional, union,
+ * array, optional / nullable / prefault / readonly / nonoptional, union,
  * intersection, pipe (both sides), lazy — is rebuilt when something
  * underneath changed (identity is preserved when nothing was hidden). A
  * hidden field below anything else fails at DEFINITION time: `.default()`
@@ -311,6 +330,15 @@ function stripHidden(schema: z.ZodType, path: string): z.ZodType {
   // stripped inner schema would not strip the payload — a hidden column in
   // the default value ships. They fall through to the definition-time
   // rejection below when a hidden field sits under them.
+  if (schema instanceof z.ZodPrefault) {
+    // Unlike `.default()`, a prefault payload DOES run through the inner
+    // schema, so the rebuilt inner strips it — rebuildable.
+    const inner = asClassicSchema(schema.def.innerType, path);
+    const stripped = stripHidden(inner, path);
+    return stripped === inner
+      ? schema
+      : stripped.prefault(schema.def.defaultValue);
+  }
   if (schema instanceof z.ZodReadonly) {
     const inner = asClassicSchema(schema.def.innerType, path);
     const stripped = stripHidden(inner, path);
@@ -372,7 +400,7 @@ function stripHidden(schema: z.ZodType, path: string): z.ZodType {
       `${path}: a field declared \`dto: { response: false }\` sits below a ` +
         `${schema.constructor.name} wrapper the response projection cannot ` +
         `rebuild, so it would reach the wire. Rebuilt wrappers: object, ` +
-        `array, optional, nullable, readonly, nonoptional, union, ` +
+        `array, optional, nullable, prefault, readonly, nonoptional, union, ` +
         `intersection, pipe, lazy. Not rebuilt: default / catch (their ` +
         `payload bypasses the inner schema), discriminated union, tuple, ` +
         `record, map, set. Move the hidden column out of this schema or ` +

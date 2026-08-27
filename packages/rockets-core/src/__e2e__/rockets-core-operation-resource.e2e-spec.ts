@@ -28,6 +28,7 @@ import { defineAuthAdapter } from '../infrastructure/auth/define-auth-adapter';
 import { defineOperationResource } from '../infrastructure/resource/define-operation-resource';
 import { operationBodySchema } from '../infrastructure/resource/operation-resource/operation-body-schema';
 import { operationResource } from '../zod/zod-operation-resource';
+import { f } from '../zod/fields';
 import type { OperationContext } from '../domain/interfaces/operation-resource.interface';
 import { RocketsCoreExceptionsFilter } from '../infrastructure/filters/exceptions.filter';
 import {
@@ -148,6 +149,16 @@ const publicOps = operationResource({
       summary: 'Health ping',
       output: z.object({ ok: z.boolean() }),
       handler: () => ({ ok: true, internal: true }),
+    }),
+    // `dto: { response: false }` holds on an operation output too — the
+    // fourth response path, beside computed fields, JSON columns and
+    // exposed relations.
+    secretive: op.read({
+      output: z.object({
+        id: z.string(),
+        secret: f.string({ dto: { response: false } }),
+      }),
+      handler: () => ({ id: 'a', secret: 'OP-LEAK' }),
     }),
     items: op.read({
       output: z.array(ItemSchema),
@@ -929,6 +940,14 @@ describe('operationResource e2e (issue #43 v1)', () => {
       .get('/ops/items')
       .expect(200);
     expect(res.body).toEqual([{ id: 'a' }, { id: 'b' }]);
+  });
+
+  it('strips a dto.response=false field from an operation output on the wire', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/ops/secretive')
+      .expect(200);
+    expect(res.body).toEqual({ id: 'a' });
+    expect(JSON.stringify(res.body)).not.toContain('OP-LEAK');
   });
 
   // Output failures are server bugs, never a 400: the client did not

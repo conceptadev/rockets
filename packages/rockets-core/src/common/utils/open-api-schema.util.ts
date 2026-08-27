@@ -128,6 +128,16 @@ function findOpenObject(
  * `nonoptional`, `promise`, …) is read through the shared `innerType`
  * slot so a wrapper zod adds later is walked without a new case here.
  */
+/** An `out` side that hands its input through unchanged. */
+function passesThrough(schema: z.core.$ZodType): boolean {
+  return (
+    schema instanceof z.ZodTransform ||
+    schema instanceof z.ZodAny ||
+    schema instanceof z.ZodUnknown ||
+    schema instanceof z.ZodCustom
+  );
+}
+
 export function schemaChildren(
   schema: z.ZodType,
   path: string,
@@ -169,10 +179,11 @@ export function schemaChildren(
   if (schema instanceof z.ZodPipe) {
     // `z.preprocess` puts the object on `out`; an ordinary `.transform()`
     // puts it on `in` and its `out` is the transform node, which passes
-    // whatever `in` let through. A pipe whose `out` is a real schema
+    // whatever `in` let through — as do `z.any()`, `z.unknown()` and
+    // `z.custom()`. A pipe whose `out` is a real schema
     // (`z.pipe(open, closed)`) strips on the way out, so `in` is only
-    // walked when `out` cannot strip.
-    return schema.def.out instanceof z.ZodTransform
+    // walked when `out` passes values through.
+    return passesThrough(schema.def.out)
       ? [
           [`${path}<in`, schema.def.in],
           [path, schema.def.out],

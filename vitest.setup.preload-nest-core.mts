@@ -8,5 +8,6 @@
 // makes the later synchronous require find an evaluated module. Consumers
 // whose own test runner externalises ESM the same way need the same
 // preload on Node 20.19; the gap is upstream's (a CJS package requiring
-// an ESM peer).
+// an ESM peer). Remove this file once `@nestjs/cqrs` ships ESM — tracked
+// upstream in https://github.com/nestjs/nest/issues/17583.
 await import('@nestjs/core');
