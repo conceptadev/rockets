@@ -94,6 +94,18 @@ describe('assertFailClosedResponse', () => {
       ),
     ],
     ['in lazy', z.lazy(() => open)],
+    [
+      'in a recursive lazy through a preprocess',
+      (() => {
+        const node: z.ZodType = z.lazy(() =>
+          z.preprocess(
+            (value) => value,
+            z.looseObject({ id: z.string(), children: z.array(node) }),
+          ),
+        );
+        return z.object({ root: node });
+      })(),
+    ],
     ['nested object field', z.object({ inner: open })],
     ['deep: array of optional readonly', z.array(open.readonly().optional())],
   ];
@@ -119,6 +131,19 @@ describe('assertFailClosedResponse', () => {
     ['preprocess with closed out', z.preprocess((v) => v, closed)],
     // The closed `out` strips on the way out; nothing from `in` leaks.
     ['pipe from open into closed', z.pipe(open, closed)],
+    [
+      // The cycle crosses a pipe: the walker must terminate, not overflow.
+      'recursive lazy through a preprocess of closed',
+      (() => {
+        const node: z.ZodType = z.lazy(() =>
+          z.preprocess(
+            (value) => value,
+            z.object({ id: z.string(), children: z.array(node) }),
+          ),
+        );
+        return z.object({ root: node });
+      })(),
+    ],
     [
       'recursive lazy of closed',
       z.object({

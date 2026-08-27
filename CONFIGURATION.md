@@ -565,6 +565,25 @@ through no `@SerializeOptions({ schema })` is listed in
 `audit().routes[].unserializedResponseSchemas` — reported, not enforced,
 because a documentation-only contract is a legitimate (if visible) choice.
 
+**Hidden columns and hand-written response schemas.** `dto: { response:
+false }` is honoured on every PROJECTED response path — computed fields,
+JSON columns, exposed relations and `operationResource` outputs strip the
+column (the projection rebuilds the schema). A HAND-WRITTEN response
+schema (`defineResource` `dto.response` / `operations.*.output` /
+`dto.paginated`, `userMetadata.responseSchema`, `rockets-auth`'s
+`userCrud.model` / `roleCrud.model`) keeps the component id you gave it
+and is not rebuilt, so a hidden column inside it is rejected at definition
+time — drop it with `.omit({ column: true })` before wrapping. The two
+behaviours differ on purpose: the same entity schema handed to
+`operationResource({ output })` strips, handed to
+`defineResource({ operations: { read: { output } } })` throws. SSE
+operations serialize through no schema (`output: false`), so nothing is
+stripped there by design. One deliberate over-flag in the fail-closed check: a
+pipe whose OUT side holds `any` / `unknown` / `custom` / a transform anywhere
+(`z.pipe(open, z.object({ a: z.any() }))`) is rejected even when the OUT
+object would strip top-level extras — failing closed is cheaper than
+reasoning about which keys survive.
+
 When an operation declares `input`, the request payload must be a plain JSON
 object. An array, a scalar, or a non-plain object (a `Buffer` from a raw body
 parser, for instance) returns **400** rather than being narrowed to `{}` —

@@ -501,6 +501,46 @@ describe('projectSchema response exposure', () => {
     });
   });
 
+  // The cycle crosses a pipe (`z.preprocess`): every walker — hidden
+  // detection, strip, fail-closed — must terminate, not overflow.
+  it('strips a hidden column inside a recursive lazy that crosses a preprocess', async () => {
+    interface Node {
+      id: string;
+      secret: string;
+      children: Node[];
+    }
+    const node: z.ZodType<Node> = z.lazy(() =>
+      z.preprocess(
+        (value) => value,
+        z.object({
+          id: f.pk(),
+          secret: f.string({ dto: { response: false } }),
+          children: z.array(node),
+        }),
+      ),
+    );
+    const pk = '00000000-0000-4000-8000-000000000001';
+    const schema = z.object({
+      id: f.pk(),
+      tree: f.compute(node, () => ({
+        id: pk,
+        secret: 'leak',
+        children: [{ id: pk, secret: 'leak', children: [] }],
+      })),
+    });
+    const responseSchema = buildResponseSchema(
+      'Pet',
+      projectSchema('Pet', schema, entity, noOwner),
+    );
+    const result = await responseSchema['~standard'].validate({ id: pk });
+    expect(result.issues).toBeUndefined();
+    if (result.issues) return;
+    expect(result.value).toEqual({
+      id: pk,
+      tree: { id: pk, children: [{ id: pk, children: [] }] },
+    });
+  });
+
   // `dto: { response: false }` holds on EVERY response path, not only under
   // `f.compute()`: a JSON column whose schema nests a hidden field, and an
   // exposed relation whose field nests one, strip it too.

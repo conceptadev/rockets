@@ -134,28 +134,31 @@ function findOpenObject(
  * of those somewhere below it (wrappers, unions, arrays, object
  * properties, record values, intersections, nested pipes).
  */
-function passesThrough(
-  schema: z.ZodType,
-  path: string,
-  seen: Set<z.ZodType> = new Set(),
-): boolean {
-  if (seen.has(schema)) return false;
-  seen.add(schema);
-  if (
+// Memoized per schema instance (schemas are immutable). The entry is set
+// to `false` BEFORE the children are visited: a cycle back to a node
+// still being decided (a recursive lazy through a pipe) reads `false`
+// and terminates — `schemaChildren` calls this for every pipe, so a
+// per-call `seen` set could not cover the mutual recursion.
+const passesThroughCache = new WeakMap<z.ZodType, boolean>();
+
+function passesThrough(schema: z.ZodType, path: string): boolean {
+  const cached = passesThroughCache.get(schema);
+  if (cached !== undefined) return cached;
+  passesThroughCache.set(schema, false);
+  const result =
     schema instanceof z.ZodTransform ||
     schema instanceof z.ZodAny ||
     schema instanceof z.ZodUnknown ||
-    schema instanceof z.ZodCustom
-  ) {
-    return true;
-  }
-  // Any composite with a pass-through somewhere below it hands SOME of
-  // its input through (`z.object({ a: z.any() })`, `z.array(z.any())`, a
-  // record of `any`, an intersection or nested pipe ending in one) — the
-  // shared walker covers every node kind; over-flagging fails closed.
-  return schemaChildren(schema, path).some(([childPath, child]) =>
-    passesThrough(asClassicSchema(child, childPath), childPath, seen),
-  );
+    schema instanceof z.ZodCustom ||
+    // Any composite with a pass-through somewhere below it hands SOME of
+    // its input through (`z.object({ a: z.any() })`, `z.array(z.any())`,
+    // a record of `any`, an intersection or nested pipe ending in one) —
+    // the shared walker covers every node kind; over-flagging fails closed.
+    schemaChildren(schema, path).some(([childPath, child]) =>
+      passesThrough(asClassicSchema(child, childPath), childPath),
+    );
+  passesThroughCache.set(schema, result);
+  return result;
 }
 
 export function schemaChildren(

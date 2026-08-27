@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { withOpenApi } from '@concepta/rockets-core';
+import { z } from 'zod';
 import { f } from '@concepta/rockets-core/zod';
 import { RocketsAuthSignUpModule } from './rockets-auth-signup.module';
 import { RocketsAuthAdminModule } from './rockets-auth-admin.module';
@@ -16,7 +17,24 @@ const leakyModel = withOpenApi(
   'LeakyUserDto',
 );
 
+// An open model (`.catchall()` / `.passthrough()`) would ship every column.
+const openModel = withOpenApi(
+  rocketsAuthUserSchema(rocketsAuthUserMetadataResponseSchema).catchall(
+    z.unknown(),
+  ),
+  'OpenUserDto',
+);
+
 describe('rockets-auth user CRUD modules reject a leaky model', () => {
+  it('rejects an OPEN model on signup and admin', () => {
+    expect(() =>
+      RocketsAuthSignUpModule.register({ model: openModel }),
+    ).toThrow(/open object/);
+    expect(() => RocketsAuthAdminModule.register({ model: openModel })).toThrow(
+      /open object/,
+    );
+  });
+
   it('RocketsAuthSignUpModule.register', () => {
     expect(() =>
       RocketsAuthSignUpModule.register({ model: leakyModel }),
