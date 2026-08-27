@@ -191,6 +191,7 @@ export type {
 } from '@concepta/nestjs-repository';
 export {
   RepositoryModule,
+  TransactionScope,
   Where,
   getDynamicRepositoryToken,
 } from '@concepta/nestjs-repository';
