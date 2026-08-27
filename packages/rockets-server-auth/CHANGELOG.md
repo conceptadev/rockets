@@ -82,6 +82,10 @@ and this project adheres to
 
 ### Changed
 
+- `GET /admin/users/:userId/roles` is serialized through a named schema
+  (`RocketsAuthUserRoleDto`, exported as `rocketsAuthUserRoleSchema`) and
+  documented as an array of it; it used to return the raw upstream
+  aggregates with no response contract.
 - Every repository symbol (`RepositoryInterface`, `Where`,
   `getDynamicRepositoryToken`, `RepositoryModuleInterface`,
   `TransactionScope`) is imported from `@concepta/rockets-core`; the package
