@@ -12,8 +12,16 @@ const temporaryRoot = mkdtempSync(temporaryPrefix);
 const tarballsRoot = join(temporaryRoot, 'tarballs');
 const consumerRoot = join(temporaryRoot, 'consumer');
 const noZodConsumerRoot = join(temporaryRoot, 'consumer-no-zod');
+const storageProviderConsumerRoot = join(
+  temporaryRoot,
+  'consumer-storage-provider',
+);
 
 const consumerDependencies = [
+  '@aws-sdk/client-s3@3.1103.0',
+  '@aws-sdk/lib-storage@3.1103.0',
+  '@aws-sdk/s3-presigned-post@3.1103.0',
+  '@aws-sdk/s3-request-presigner@3.1103.0',
   '@nestjs/common@12.0.0-alpha.5',
   '@nestjs/core@12.0.0-alpha.5',
   '@nestjs/platform-express@12.0.0-alpha.5',
@@ -55,6 +63,7 @@ try {
   mkdirSync(tarballsRoot);
   mkdirSync(consumerRoot);
   mkdirSync(noZodConsumerRoot);
+  mkdirSync(storageProviderConsumerRoot);
 
   const workspaces = readPublicPackageManifests(repositoryRoot, {
     namePrefix: '@concepta/',
@@ -88,6 +97,12 @@ try {
   );
   if (coreTarball === undefined) {
     throw new Error('Missing @concepta/rockets-core tarball.');
+  }
+  const storageTarball = tarballs.find((tarball) =>
+    tarball.includes('concepta-rockets-storage-'),
+  );
+  if (storageTarball === undefined) {
+    throw new Error('Missing @concepta/rockets-storage tarball.');
   }
 
   writeJson(join(consumerRoot, 'package.json'), {
@@ -133,6 +148,16 @@ try {
     ['@concepta/rockets-repository-firestore', 'FirestoreRepositoryModule'],
     ['@concepta/rockets-repository-typeorm', 'TypeOrmRepositoryModule'],
     ['@concepta/rockets-repository-typeorm/zod', 'typeOrmZodEntityCompiler'],
+    ['@concepta/rockets-storage', 'StorageModule'],
+    ['@concepta/rockets-storage/core', 'StorageClient'],
+    ['@concepta/rockets-storage/files-sdk', 'createFilesSdkDriver'],
+    ['@concepta/rockets-storage/files-sdk/fs', 'createFsStorageDriver'],
+    [
+      '@concepta/rockets-storage/files-sdk/provider',
+      'createProviderStorageDriver',
+    ],
+    ['@concepta/rockets-storage/files-sdk/s3', 'createS3StorageDriver'],
+    ['@concepta/rockets-storage/testing', 'createMemoryStorageDriver'],
   ];
 
   writeFileSync(
@@ -193,6 +218,13 @@ import { compileDtoClass, namedZodDto } from '@concepta/rockets-core/zod';
 import { FirestoreRepositoryModule } from '@concepta/rockets-repository-firestore';
 import { TypeOrmRepositoryModule } from '@concepta/rockets-repository-typeorm';
 import { typeOrmZodEntityCompiler } from '@concepta/rockets-repository-typeorm/zod';
+import { StorageModule } from '@concepta/rockets-storage';
+import { StorageClient } from '@concepta/rockets-storage/core';
+import { createFilesSdkDriver } from '@concepta/rockets-storage/files-sdk';
+import { createFsStorageDriver } from '@concepta/rockets-storage/files-sdk/fs';
+import { createProviderStorageDriver } from '@concepta/rockets-storage/files-sdk/provider';
+import { createS3StorageDriver } from '@concepta/rockets-storage/files-sdk/s3';
+import { createMemoryStorageDriver } from '@concepta/rockets-storage/testing';
 import { z } from 'zod';
 
 export const publicPackageSymbols = [
@@ -206,6 +238,13 @@ export const publicPackageSymbols = [
   ApiStandardSchemaResponse,
   TypeOrmRepositoryModule,
   typeOrmZodEntityCompiler,
+  StorageClient,
+  StorageModule,
+  createFilesSdkDriver,
+  createFsStorageDriver,
+  createProviderStorageDriver,
+  createS3StorageDriver,
+  createMemoryStorageDriver,
 ];
 
 export const throttlingConfig: RocketsAuthOptionsExtrasInterface['throttling'] = [
@@ -242,6 +281,14 @@ class ConsumerAuthAdapter implements AuthAdapterInterface {
 @Module({
   imports: [
     StandardSchemaModule.forRoot(),
+    StorageModule.forRoot({
+      stores: [
+        {
+          name: 'consumer',
+          driver: createMemoryStorageDriver(),
+        },
+      ],
+    }),
     RocketsModule.forRoot({
       settings: {},
       auth: defineAuthAdapter(ConsumerAuthAdapter),
@@ -267,12 +314,48 @@ void main().catch((error: unknown) => {
 });
 `,
   );
+  writeJson(join(consumerRoot, 'tsconfig.storage-node10.json'), {
+    compilerOptions: {
+      module: 'CommonJS',
+      moduleResolution: 'Node10',
+      target: 'ES2022',
+      strict: true,
+      noEmit: true,
+      skipLibCheck: false,
+    },
+    include: ['storage-node10.ts'],
+  });
+  writeFileSync(
+    join(consumerRoot, 'storage-node10.ts'),
+    `import { StorageModule } from '@concepta/rockets-storage';
+import type { StorageDriver } from '@concepta/rockets-storage/core';
+import type { FilesSdkDriverOptions } from '@concepta/rockets-storage/files-sdk';
+
+type LegacyStorageSurface = readonly [
+  typeof StorageModule,
+  StorageDriver,
+  FilesSdkDriverOptions<never>,
+];
+
+declare const legacyStorageSurface: LegacyStorageSurface;
+void legacyStorageSurface;
+`,
+  );
 
   run(process.execPath, ['verify-cjs.cjs'], consumerRoot);
   run(process.execPath, ['verify-esm.mjs'], consumerRoot);
   run(
     process.execPath,
     [join(consumerRoot, 'node_modules', 'typescript', 'bin', 'tsc'), '-p', '.'],
+    consumerRoot,
+  );
+  run(
+    process.execPath,
+    [
+      join(consumerRoot, 'node_modules', 'typescript', 'bin', 'tsc'),
+      '-p',
+      'tsconfig.storage-node10.json',
+    ],
     consumerRoot,
   );
   run(process.execPath, [join('dist', 'consumer.js')], consumerRoot);
@@ -307,8 +390,71 @@ void main().catch((error: unknown) => {
   );
   run(process.execPath, ['verify-core-no-zod.cjs'], noZodConsumerRoot);
 
+  writeJson(join(storageProviderConsumerRoot, 'package.json'), {
+    name: 'rockets-storage-provider-peer-minimal-smoke',
+    version: '0.0.0',
+    private: true,
+    type: 'module',
+  });
+  run(
+    'npm',
+    [
+      'install',
+      '--save-exact',
+      '--legacy-peer-deps',
+      '--no-audit',
+      '--no-fund',
+      '--loglevel=error',
+      storageTarball,
+      '@types/node@20.19.43',
+      'typescript@5.9.3',
+    ],
+    storageProviderConsumerRoot,
+  );
+  writeJson(join(storageProviderConsumerRoot, 'tsconfig.json'), {
+    compilerOptions: {
+      module: 'NodeNext',
+      moduleResolution: 'NodeNext',
+      target: 'ES2022',
+      strict: true,
+      noEmit: true,
+      skipLibCheck: false,
+    },
+    include: ['consumer.ts'],
+  });
+  writeFileSync(
+    join(storageProviderConsumerRoot, 'consumer.ts'),
+    `import {
+  createProviderStorageDriver,
+  type ProviderStorageDriverOptions,
+} from '@concepta/rockets-storage/files-sdk/provider';
+
+const options: ProviderStorageDriverOptions = {
+  provider: 'fs',
+  config: { root: './storage' },
+};
+void createProviderStorageDriver;
+void options;
+`,
+  );
+  run(
+    process.execPath,
+    [
+      join(
+        storageProviderConsumerRoot,
+        'node_modules',
+        'typescript',
+        'bin',
+        'tsc',
+      ),
+      '-p',
+      '.',
+    ],
+    storageProviderConsumerRoot,
+  );
+
   console.log(
-    `Verified ${workspaces.length} packed public packages in a clean CJS, ESM, TypeScript, and Nest consumer.`,
+    `Verified ${workspaces.length} packed public packages in clean CJS, ESM, TypeScript, Nest, legacy-resolution, and peer-minimal consumers.`,
   );
 } finally {
   if (!temporaryRoot.startsWith(temporaryPrefix)) {

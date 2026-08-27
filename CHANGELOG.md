@@ -7,6 +7,16 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Added
 
+- **Provider-neutral object storage package.** Added
+  `@concepta/rockets-storage` with a framework-neutral driver/client contract,
+  named NestJS stores, streaming and explicitly bounded reads, structured
+  signed transfers, normalized errors, exact conditional-operation
+  capabilities, hardened Files SDK filesystem/S3 wrappers, runtime provider
+  selection,
+  an in-memory test driver, and reusable provider conformance cases. The
+  package implements issue #106 and complements issue #86 without adding
+  multipart parsing or provider SDK dependencies to `rockets-core`.
+
 - **Background job dispatch port (issue #53).**
   `JobDispatchServiceInterface` (`enqueue` / `claim` / `heartbeat` /
   `complete` / `fail`) under `JOB_DISPATCH_SERVICE_TOKEN` — named tasks
