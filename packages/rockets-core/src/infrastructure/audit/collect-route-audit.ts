@@ -354,12 +354,7 @@ function readUnvalidatedSchemaParams(
   return missing.sort((a, b) => a.index - b.index).map((m) => m.label);
 }
 
-/**
- * A hand-written route serializes with `@SerializeOptions({ schema })`
- * (handler wins over class, like Nest resolves it). Its schema gets the
- * same fail-closed check a generated resource's response schema gets at
- * definition time — reported here, failed at boot by the service.
- */
+/** The zod schema a route serializes with (handler over class, as Nest resolves it). */
 function readSerializerSchema(
   controller: Type<unknown>,
   handler: object,
@@ -382,17 +377,18 @@ function readHiddenResponseField(
     : hasHiddenResponseField(schema, `${controller.name}.serializer`);
 }
 
+/**
+ * A hand-written route serializes with `@SerializeOptions({ schema })`
+ * (handler wins over class, like Nest resolves it). Its schema gets the
+ * same fail-closed check a generated resource's response schema gets at
+ * definition time — reported here, failed at boot by the service.
+ */
 function readOpenResponseSchema(
   controller: Type<unknown>,
   handler: object,
 ): string | null {
-  const options: unknown =
-    Reflect.getMetadata(CLASS_SERIALIZER_OPTIONS, handler) ??
-    Reflect.getMetadata(CLASS_SERIALIZER_OPTIONS, controller);
-  if (typeof options !== 'object' || options === null) return null;
-  const schema: unknown = Reflect.get(options, 'schema');
-  if (!(schema instanceof z.ZodType)) return null;
-  return findOpenResponseObject(schema) ?? null;
+  const schema = readSerializerSchema(controller, handler);
+  return schema === undefined ? null : findOpenResponseObject(schema) ?? null;
 }
 
 /**

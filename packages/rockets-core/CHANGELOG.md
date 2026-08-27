@@ -168,7 +168,10 @@
   nothing when the branch that closed a cycle came first. `true` is the
   only sound memo for a monotone predicate; termination comes from a
   per-walk in-progress set. Regressions pin both field orders and a
-  warm-then-probe run over shared instances.
+  warm-then-probe run over shared instances. Trade-off: without a `false`
+  memo the walk explores every simple path, so a deeply shared diamond
+  inside a pipe's OUT side is exponential in its depth — contrived for a
+  response schema, and a boot-time cost only.
 - **`assertFailClosedResponse` walks the IN side of a transform.** An
   ordinary `.transform()` is a pipe whose object sits on the IN side and
   whose OUT is the transform node, which strips nothing;

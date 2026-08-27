@@ -246,14 +246,6 @@ export function withHiddenFieldsRemoved(
   return stripped;
 }
 
-/**
- * A HAND-WRITTEN response schema (`dto.response`, `operations.*.output`,
- * `userMetadata.responseSchema`) is the author's wire declaration and
- * carries the component id the author chose — it cannot be rebuilt
- * without losing that id, so a `dto: { response: false }` field inside
- * it is a contradiction the author resolves: fail at definition time and
- * point at `.omit()`.
- */
 /** Non-throwing form of {@link assertNoHiddenFields} for the route audit. */
 export function hasHiddenResponseField(
   schema: z.ZodType,
@@ -262,6 +254,14 @@ export function hasHiddenResponseField(
   return hasHiddenDescendant(schema, path);
 }
 
+/**
+ * A HAND-WRITTEN response schema (`dto.response`, `operations.*.output`,
+ * `userMetadata.responseSchema`) is the author's wire declaration and
+ * carries the component id the author chose — it cannot be rebuilt
+ * without losing that id, so a `dto: { response: false }` field inside
+ * it is a contradiction the author resolves: fail at definition time and
+ * point at `.omit()`.
+ */
 export function assertNoHiddenFields(schema: z.ZodType, context: string): void {
   if (!hasHiddenDescendant(schema, context)) return;
   throw new Error(

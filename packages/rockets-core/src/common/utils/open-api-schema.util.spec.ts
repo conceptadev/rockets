@@ -178,22 +178,27 @@ describe('assertFailClosedResponse', () => {
     expect(findOpenResponseObject(build('b-first'))).toBe('$.b<in');
   });
 
-  it('gives the same verdict after a warm-up walk over shared instances', () => {
-    const kids: z.ZodType = z.lazy(() =>
-      z.array(z.object({ id: z.string(), kids })),
+  it('still reports an open IN side after an earlier walk over shared instances', () => {
+    // The transform sits INSIDE the cycle and is visited after `children`:
+    // a walk that starts at `node` reaches `kids` while `node` is still in
+    // progress. A memo that stored that in-progress `false` as final then
+    // hid the open IN side behind `kids` on the NEXT walk — so the warm-up
+    // must come first, on the same instances.
+    const kids: z.ZodType = z.lazy(() => z.array(node));
+    const node: z.ZodType = z.lazy(() =>
+      z.object({
+        children: kids,
+        label: z.string().transform((s) => s.trim()),
+      }),
     );
-    const node = z.object({ id: z.string(), kids });
-    const withLeak = z.object({
-      node,
-      leaky: z.pipe(
-        z.looseObject({ x: z.string() }) as z.ZodType,
-        kids.transform((v) => v),
+    findOpenResponseObject(
+      z.pipe(z.object({ ok: z.string() }) as z.ZodType, node),
+    );
+    expect(
+      findOpenResponseObject(
+        z.pipe(z.looseObject({ leak: z.string() }) as z.ZodType, kids),
       ),
-    });
-    const cold = findOpenResponseObject(withLeak);
-    findOpenResponseObject(node); // warm-up starting at the shared node
-    expect(findOpenResponseObject(withLeak)).toBe(cold);
-    expect(cold).toBe('$.leaky<in');
+    ).toBe('$<in');
   });
 
   it('names the path of the open node', () => {
