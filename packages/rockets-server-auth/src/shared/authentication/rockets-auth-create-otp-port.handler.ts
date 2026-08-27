@@ -1,3 +1,4 @@
+import { AppContextHost } from '@concepta/rockets-core';
 import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import type { AuthenticationOtpInterface } from '@concepta/nestjs-authentication';
 import type { ReferenceId } from '@concepta/nestjs-core';
@@ -7,7 +8,6 @@ import {
   type OtpCreatableInterface,
 } from '@concepta/nestjs-otp';
 
-import { resolveConceptadevAppContext } from '../compatibility/resolve-conceptadev-app-context';
 import { RocketsAuthCreateOtpPortCommand } from './rockets-auth-create-otp-port.command';
 
 /**
@@ -28,7 +28,7 @@ export class RocketsAuthCreateOtpPortHandler
   ): Promise<AuthenticationOtpInterface> {
     const aggregate: Otp = await this.commandBus.execute(
       new CreateOtpCommand(
-        resolveConceptadevAppContext(command.ctx),
+        AppContextHost.from(command.ctx),
         command.namespace,
         command.otp as OtpCreatableInterface,
         {
