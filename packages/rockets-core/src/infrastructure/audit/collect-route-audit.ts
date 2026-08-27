@@ -435,14 +435,7 @@ function readUnserializedResponseSchemas(
   controller: Type<unknown>,
   handler: object,
 ): string[] {
-  const serializer: unknown =
-    Reflect.getMetadata(CLASS_SERIALIZER_OPTIONS, handler) ??
-    Reflect.getMetadata(CLASS_SERIALIZER_OPTIONS, controller);
-  if (
-    typeof serializer === 'object' &&
-    serializer !== null &&
-    Reflect.get(serializer, 'schema') instanceof z.ZodType
-  ) {
+  if (readSerializerSchema(controller, handler) !== undefined) {
     return [];
   }
   const classResponses: unknown = Reflect.getMetadata(
