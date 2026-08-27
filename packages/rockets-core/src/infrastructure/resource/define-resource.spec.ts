@@ -15,6 +15,7 @@ import {
   type ConfigurableCrudGeneratedOptions,
 } from '@concepta/nestjs-crud';
 import { readSchemaId } from '../../common/utils/open-api-schema.util';
+import { f } from '../../zod/fields';
 import { defineResource } from './define-resource';
 import { relation } from './relation';
 import { EntityHook, PassthroughEntityHookBase } from '../hooks/entity-hook';
@@ -729,6 +730,38 @@ describe('defineResource', () => {
           dto: { response: z.object({ id: z.uuid() }) },
         }),
       ).toThrow(/not a named OpenAPI component/);
+    });
+
+    // A hand-written response schema is not projected: a field declared
+    // `dto: { response: false }` inside it would reach the wire, so it is
+    // rejected at definition time (the author drops it with `.omit()`).
+    it('rejects a hand-written response schema that contains a hidden field', () => {
+      const leaky = withOpenApi(
+        z.object({
+          id: z.uuid(),
+          secret: f.string({ dto: { response: false } }),
+        }),
+        'WidgetLeakyResponseDto',
+      );
+      expect(() =>
+        defineResource({
+          key: 'widget',
+          entity: WidgetEntity,
+          path: 'widget',
+          tags: ['widget'],
+          dto: { response: leaky },
+        }),
+      ).toThrow(/hand-written response schema contains a field/);
+      expect(() =>
+        defineResource({
+          key: 'widget',
+          entity: WidgetEntity,
+          path: 'widget',
+          tags: ['widget'],
+          dto: { response: widgetResponseSchema },
+          operations: { read: { output: leaky } },
+        }),
+      ).toThrow(/operations\.read\.output: this hand-written response schema/);
     });
 
     // A list route serializes through the PAGINATED envelope, so an open

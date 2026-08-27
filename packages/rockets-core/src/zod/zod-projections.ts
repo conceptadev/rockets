@@ -231,34 +231,38 @@ export function withHiddenFieldsRemoved(
   field: z.ZodType,
   path: string,
 ): z.ZodType {
-  const { base, optional, nullable, hasDefault, meta } = unwrapField(
-    field,
-    path,
-  );
-  const stripped = stripHidden(base, path);
-  if (stripped === base) {
+  // The FIELD is stripped, wrappers included: `stripHidden` rebuilds
+  // optional / nullable / pipe (a top-level `z.preprocess`) around a
+  // changed inner schema and rejects a top-level `.default()` / `.catch()`
+  // like a nested one — peeling wrappers first and re-applying a hand-picked
+  // subset is how a default (and then a preprocess) got silently dropped.
+  const stripped = stripHidden(field, path);
+  if (stripped === field) {
     return field;
   }
-  // `unwrapField` peels a top-level `.default()` off the field; the
-  // rebuild below re-applies only optional / nullable, and a default's
-  // payload bypasses the inner schema anyway — same rule as a nested
-  // `.default()`: reject rather than silently drop it (the row would then
-  // fail serialization at runtime instead of the author at definition).
-  if (hasDefault) {
-    throw new Error(
-      `${path}: a field declared \`dto: { response: false }\` sits below a ` +
-        `top-level .default() the response projection cannot keep — its ` +
-        `payload bypasses the inner schema. Move the hidden column out of ` +
-        `this schema or drop the default.`,
-    );
-  }
-  let rebuilt = stripped;
-  if (nullable) rebuilt = rebuilt.nullable();
-  if (optional) rebuilt = rebuilt.optional();
   // The rebuilt node is a NEW zod instance; re-registering keeps the
   // field meta readable on the response shape (`readFieldMetaDeep`).
-  rocketsFieldMeta.add(rebuilt, meta);
-  return rebuilt;
+  rocketsFieldMeta.add(stripped, unwrapField(field, path).meta);
+  return stripped;
+}
+
+/**
+ * A HAND-WRITTEN response schema (`dto.response`, `operations.*.output`,
+ * `userMetadata.responseSchema`) is the author's wire declaration and
+ * carries the component id the author chose — it cannot be rebuilt
+ * without losing that id, so a `dto: { response: false }` field inside
+ * it is a contradiction the author resolves: fail at definition time and
+ * point at `.omit()`.
+ */
+export function assertNoHiddenFields(schema: z.ZodType, context: string): void {
+  if (!hasHiddenDescendant(schema, context)) return;
+  throw new Error(
+    `${context}: this hand-written response schema contains a field ` +
+      `declared \`dto: { response: false }\`, which would reach the wire. ` +
+      `A hand-written response is not projected — drop the column with ` +
+      `.omit({ field: true }) (then wrap LAST with withOpenApi()), or let ` +
+      `the resource project it (zodResource / f.compute).`,
+  );
 }
 
 /**

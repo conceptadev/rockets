@@ -394,8 +394,39 @@ describe('projectSchema response exposure', () => {
         .register(rocketsFieldMeta, { dto: { response: true } }),
     });
     expect(() => projectSchema('Pet', schema, entity, noOwner)).toThrow(
-      /top-level \.default\(\)/,
+      /cannot rebuild/,
     );
+  });
+
+  // A top-level `z.preprocess` is a pipe around the field; the projection
+  // rebuilds it (both sides) instead of peeling it off — the same silent
+  // drop the top-level default used to suffer.
+  it('keeps a top-level z.preprocess around a field with a hidden column and strips at runtime', async () => {
+    const blob = z.object({
+      id: f.pk(),
+      secret: f.string({ dto: { response: false } }),
+    });
+    const pk = '00000000-0000-4000-8000-000000000001';
+    const schema = z.object({
+      id: f.pk(),
+      payload: z
+        .preprocess(
+          (value) => (typeof value === 'string' ? JSON.parse(value) : value),
+          blob,
+        )
+        .register(rocketsFieldMeta, { dto: { response: true } }),
+    });
+    const responseSchema = buildResponseSchema(
+      'Pet',
+      projectSchema('Pet', schema, entity, noOwner),
+    );
+    const result = await responseSchema['~standard'].validate({
+      id: pk,
+      payload: JSON.stringify({ id: pk, secret: 'leak' }),
+    });
+    expect(result.issues).toBeUndefined();
+    if (result.issues) return;
+    expect(result.value).toEqual({ id: pk, payload: { id: pk } });
   });
 
   // Unlike `.default()`, a `.prefault()` payload runs through the inner

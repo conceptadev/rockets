@@ -1,3 +1,4 @@
+import { assertNoHiddenFields } from '../../zod/zod-projections';
 import type { RocketsUserMetadataConfig } from '../../domain/interfaces/rockets-user-metadata-config.interface';
 import {
   assertFailClosedResponse,
@@ -25,6 +26,10 @@ export function validateRocketsUserMetadataConfig(
     'RocketsUserMetadataConfig: `responseSchema`',
   );
   assertFailClosedResponse(
+    config.responseSchema,
+    'RocketsUserMetadataConfig: `responseSchema`',
+  );
+  assertNoHiddenFields(
     config.responseSchema,
     'RocketsUserMetadataConfig: `responseSchema`',
   );

@@ -52,8 +52,9 @@ jobs:
       - name: Verify native Vitest config loading
         # Loads `vitest.config.mts` straight into Node, which needs native
         # TypeScript stripping (Node 22+). A repo-tooling check, not part of
-        # the published packages' floor — the 20.19.0 leg covers build,
-        # tests and the packed-consumer contract.
+        # the published packages' floor — the 20.19.0 leg covers build and
+        # the unit + package e2e suites (the packed-consumer contract runs in
+        # release-readiness on the same floor).
         if: matrix.node-version == '22.x'
         run: yarn test:config-native
       - name: Unit tests

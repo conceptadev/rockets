@@ -1,3 +1,4 @@
+import { assertNoHiddenFields } from '../../../zod/zod-projections';
 import type { CrudResponseConfig } from '../../crud-compat';
 import type { ResourceDtoConfig } from '../../../domain/interfaces/rockets-resource-definition.interface';
 import {
@@ -17,6 +18,7 @@ export function buildResponse(
   const context = `defineResource(${resourceKey}): dto.response`;
   assertNamedSchema(resource, context);
   assertFailClosedResponse(resource, context);
+  assertNoHiddenFields(resource, context);
 
   const paginated =
     override?.paginated ??
@@ -25,6 +27,7 @@ export function buildResponse(
   const paginatedContext = `defineResource(${resourceKey}): dto.paginated`;
   assertNamedSchema(paginated, paginatedContext);
   assertFailClosedResponse(paginated, paginatedContext);
+  assertNoHiddenFields(paginated, paginatedContext);
   const collection = override?.collection;
 
   const built: CrudResponseConfig = {

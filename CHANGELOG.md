@@ -948,10 +948,15 @@ before running the full e2e suite.
   exposed relations (e2e asserts the secret is absent from the HTTP body).
   A top-level `.default()` on a field with a hidden column is rejected at
   definition time instead of being silently dropped (the row would have
-  failed serialization at runtime); `.prefault()` IS rebuilt (its payload
-  runs through the inner schema). The fail-closed check walks a pipe's IN
+  failed serialization at runtime); a top-level `z.preprocess` is kept;
+  `.prefault()` IS rebuilt (its payload runs through the inner schema). A
+  hand-written response schema (`dto.response`, `operations.*.output`,
+  `userMetadata.responseSchema`) keeps the author's component id and is
+  not projected, so a hidden field inside it is rejected at definition
+  time (drop it with `.omit()`). The fail-closed check walks a pipe's IN
   side whenever its OUT passes values through (`transform`, `any`,
-  `unknown`, `custom`), not only for transforms.
+  `unknown`, `custom`, also behind `optional` / `lazy` / a union member),
+  not only for transforms.
 - **Hidden columns stay hidden at every depth of a computed field.** A
   `dto: { response: false }` column nested two or more levels down an
   `f.compute()` shape was still serialized.

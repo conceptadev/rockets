@@ -1,3 +1,4 @@
+import { assertNoHiddenFields } from '../../../zod/zod-projections';
 import type { Type } from '@nestjs/common';
 import { Operation } from '@concepta/nestjs-core';
 import type { z } from 'zod';
@@ -150,12 +151,14 @@ export function normalizeOperationsInput(
       const paginatedContext = `defineResource(${resourceKey}): operations.${label}.paginated`;
       assertNamedSchema(cfg.paginated, paginatedContext);
       assertFailClosedResponse(cfg.paginated, paginatedContext);
+      assertNoHiddenFields(cfg.paginated, paginatedContext);
       next.response = { ...(next.response ?? {}), paginated: cfg.paginated };
     }
     if (cfg.output !== undefined) {
       const context = `defineResource(${resourceKey}): operations.${label}.output`;
       assertNamedSchema(cfg.output, context);
       assertFailClosedResponse(cfg.output, context);
+      assertNoHiddenFields(cfg.output, context);
       next.response = {
         ...(next.response ?? {}),
         resource: cfg.output,

@@ -45,6 +45,18 @@ describe('assertFailClosedResponse', () => {
     ['in transform in side', open.transform((value) => value)],
     ['in pipe into any', z.pipe(open, z.any())],
     [
+      'in pipe into lazy(any)',
+      z.pipe(
+        open,
+        z.lazy(() => z.any()),
+      ),
+    ],
+    ['in pipe into any.optional()', z.pipe(open, z.any().optional())],
+    [
+      'in pipe into union([any, string])',
+      z.pipe(open, z.union([z.any(), z.string()])),
+    ],
+    [
       'in pipe into unknown',
       // Fixture cast: zod's pipe typing is invariant on the OUT input type;
       // the runtime shape (a pass-through OUT) is what the check reads.

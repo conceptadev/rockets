@@ -147,8 +147,15 @@
   column sits below them, like discriminated union, tuple, record, map and
   set. The same strip runs on an `operationResource` output (the fourth
   response path); a TOP-LEVEL `.default()` on a field with a hidden column
-  is rejected at definition time rather than silently dropped;
-  `.prefault()` is rebuilt (its payload runs through the inner schema).
+  is rejected at definition time rather than silently dropped, and a
+  top-level `z.preprocess` is kept (the field is stripped with its wrappers,
+  not peeled and partially re-applied); `.prefault()` is rebuilt (its
+  payload runs through the inner schema). A HAND-WRITTEN response schema
+  (`dto.response`, `operations.*.output`, `dto.paginated`,
+  `userMetadata.responseSchema`) is not projected and keeps the author's
+  component id, so a hidden field inside it is rejected at definition time
+  with a pointer at `.omit()` (`assertNoHiddenFields`). SSE operations
+  serialize through no schema by design (`output: false`).
 - **`assertFailClosedResponse` walks the IN side of a transform.** An
   ordinary `.transform()` is a pipe whose object sits on the IN side and
   whose OUT is the transform node, which strips nothing;

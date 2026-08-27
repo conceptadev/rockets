@@ -128,14 +128,37 @@ function findOpenObject(
  * `nonoptional`, `promise`, …) is read through the shared `innerType`
  * slot so a wrapper zod adds later is walked without a new case here.
  */
-/** An `out` side that hands its input through unchanged. */
-function passesThrough(schema: z.core.$ZodType): boolean {
-  return (
+/**
+ * An `out` side that hands its input through unchanged — a transform,
+ * `any`, `unknown`, `custom`, or one of those behind a single-child
+ * wrapper (`optional`, `nullable`, `readonly`, …), a lazy, or a union
+ * with at least one pass-through member.
+ */
+function passesThrough(
+  schema: z.ZodType,
+  path: string,
+  seen: Set<z.ZodType> = new Set(),
+): boolean {
+  if (seen.has(schema)) return false;
+  seen.add(schema);
+  if (
     schema instanceof z.ZodTransform ||
     schema instanceof z.ZodAny ||
     schema instanceof z.ZodUnknown ||
     schema instanceof z.ZodCustom
-  );
+  ) {
+    return true;
+  }
+  if (schema instanceof z.ZodUnion) {
+    return schema.options.some((option) =>
+      passesThrough(asClassicSchema(option, path), path, seen),
+    );
+  }
+  if (schema instanceof z.ZodLazy) {
+    return passesThrough(asClassicSchema(schema.unwrap(), path), path, seen);
+  }
+  const inner: unknown = Reflect.get(schema.def, 'innerType');
+  return inner instanceof z.ZodType ? passesThrough(inner, path, seen) : false;
 }
 
 export function schemaChildren(
@@ -183,7 +206,7 @@ export function schemaChildren(
     // `z.custom()`. A pipe whose `out` is a real schema
     // (`z.pipe(open, closed)`) strips on the way out, so `in` is only
     // walked when `out` passes values through.
-    return passesThrough(schema.def.out)
+    return passesThrough(asClassicSchema(schema.def.out, path), path)
       ? [
           [`${path}<in`, schema.def.in],
           [path, schema.def.out],
