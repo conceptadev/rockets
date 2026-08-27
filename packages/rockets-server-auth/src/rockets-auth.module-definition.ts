@@ -6,12 +6,9 @@ import {
   Logger,
   Provider,
 } from '@nestjs/common';
-import {
-  buildAccessControlImport,
-  SwaggerUiModule,
-} from '@concepta/rockets-core';
+import { buildAccessControlImport } from '@concepta/rockets-core';
 import { PassportModule } from '@nestjs/passport';
-import { CommandBus, CqrsModule, QueryBus } from '@nestjs/cqrs';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import {
   ThrottlerModule,
   type ThrottlerModuleOptions,
@@ -27,7 +24,6 @@ import {
   UserPort,
 } from '@concepta/nestjs-authentication';
 import { createSettingsProvider } from '@concepta/nestjs-core';
-import { CrudModule } from '@concepta/nestjs-crud';
 import { EmailModule } from '@concepta/nestjs-email';
 import {
   FederatedModule,
@@ -54,10 +50,7 @@ import {
   PasswordModule,
   ValidatePasswordHistoryCommand,
 } from '@concepta/nestjs-password';
-import {
-  RepositoryModule,
-  TransactionScope,
-} from '@concepta/nestjs-repository';
+import { TransactionScope } from '@concepta/nestjs-repository';
 import { RoleModule, RoleOptionsInterface } from '@concepta/nestjs-role';
 import {
   CreateUserCommand,
@@ -405,28 +398,12 @@ export function createRocketsAuthImports(importOptions: {
     ...(importOptions.imports || []),
     PassportModule.register({}),
 
-    CqrsModule.forRoot(),
-    RepositoryModule.forRoot({}),
     RocketsAuthPortsModule.forRoot(importOptions.extras?.ports),
-    CrudModule.forRootAsync({
-      inject: [RAW_OPTIONS_TOKEN],
-      useFactory: (options: RocketsAuthOptionsInterface) => ({
-        settings: options.crud?.settings,
-      }),
-    }),
     // Always imported: the auth controllers reference the throttler guard
     // statically, so its providers must resolve even when throttling is off.
     ThrottlerModule.forRoot(
       buildAuthThrottlers(importOptions.extras?.throttling),
     ),
-    SwaggerUiModule.registerAsync({
-      inject: [RAW_OPTIONS_TOKEN],
-      useFactory: (options: RocketsAuthOptionsInterface) => ({
-        documentBuilder: options.swagger?.documentBuilder,
-        settings: options.swagger?.settings,
-      }),
-    }),
-
     // Single v8 authentication module replaces the seven v7 packages
     // (auth-jwt, auth-local, auth-refresh, auth-recovery, auth-verify,
     // auth-router, plus standalone nestjs-jwt). The `ports` block points
@@ -631,7 +608,6 @@ export function createRocketsAuthExports(options: {
     ROCKETS_AUTH_MODULE_OPTIONS_DEFAULT_SETTINGS_TOKEN,
     AuthenticationModule,
     FederatedModule,
-    SwaggerUiModule,
     RoleModule,
     AdminGuard,
     RocketsJwtAuthAdapter,
