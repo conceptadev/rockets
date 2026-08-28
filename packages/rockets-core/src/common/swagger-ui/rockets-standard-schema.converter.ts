@@ -154,11 +154,25 @@ function collectDiscriminators(
 function qualifyAnonymousDefinitions(
   id: string,
   components: Record<string, unknown>,
+  claimed: ReadonlySet<string>,
 ): Record<string, unknown> {
   const renames = new Map<string, string>();
+  // Every name the qualified one must not land on: the other definitions
+  // lifted from this same schema, and every component the document has
+  // already emitted. An author is free to call a schema `TreeDtoRef0`, and
+  // before this check the generated name overwrote theirs inside the same
+  // batch — leaving the recursive property pointing at the author's shape
+  // with nothing raised.
+  const taken = new Set<string>([...Object.keys(components), ...claimed]);
   for (const name of Object.keys(components)) {
     if (name !== id && ANONYMOUS_DEFINITION.test(name)) {
-      renames.set(name, `${id}${name.replace(/^__schema/u, 'Ref')}`);
+      const base = `${id}${name.replace(/^__schema/u, 'Ref')}`;
+      let candidate = base;
+      for (let attempt = 2; taken.has(candidate); attempt += 1) {
+        candidate = `${base}_${attempt}`;
+      }
+      taken.add(candidate);
+      renames.set(name, candidate);
     }
   }
   if (renames.size === 0) {
@@ -244,11 +258,15 @@ export function createRocketsStandardSchemaConverter(): StandardSchemaConverter 
     if (!isRecord(raw)) return undefined;
 
     const { $defs, definitions, ...own } = raw;
-    const components = qualifyAnonymousDefinitions(id, {
-      ...(isRecord($defs) ? $defs : {}),
-      ...(isRecord(definitions) ? definitions : {}),
-      [id]: own,
-    });
+    const components = qualifyAnonymousDefinitions(
+      id,
+      {
+        ...(isRecord($defs) ? $defs : {}),
+        ...(isRecord(definitions) ? definitions : {}),
+        [id]: own,
+      },
+      new Set(emitted.keys()),
+    );
 
     // Matched by BRANCH SET, not by component name. The same union node is
     // reached under one id here and emitted under another as a lifted

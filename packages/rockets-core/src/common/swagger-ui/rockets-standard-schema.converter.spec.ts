@@ -205,4 +205,50 @@ describe('createRocketsStandardSchemaConverter', () => {
         ?.discriminator,
     ).toBeUndefined();
   });
+  it('never lands a qualified name on one an author already owns', () => {
+    const convert = createRocketsStandardSchemaConverter();
+
+    interface TreeNode {
+      name: string;
+      children: TreeNode[];
+    }
+    const node: z.ZodType<TreeNode> = z.lazy(() =>
+      z.object({ name: z.string(), children: z.array(node) }),
+    );
+
+    // The author owns the exact name the qualifier would invent for the
+    // lazy node. Both land in ONE conversion, so nothing downstream can
+    // notice the clash: before this guard the generated name overwrote the
+    // author's entry and `root` silently documented the author's shape.
+    const owned = withOpenApi(
+      z.object({ mine: z.literal('AUTHORED') }),
+      'TreeDtoRef0',
+    );
+    const tree = withOpenApi(z.object({ root: node, other: owned }), 'TreeDto');
+
+    const components =
+      convert(tree, { schemaType: 'output' })?.components ?? {};
+    const refOf = (property: string): string => {
+      const root = components['TreeDto'] as {
+        properties: Record<string, { $ref: string }>;
+      };
+      const ref = root.properties[property]!.$ref;
+      return ref.slice(ref.lastIndexOf('/') + 1);
+    };
+
+    // The author's component keeps its name AND its shape.
+    expect(components['TreeDtoRef0']).toEqual({
+      type: 'object',
+      properties: { mine: { type: 'string', enum: ['AUTHORED'] } },
+      required: ['mine'],
+      additionalProperties: false,
+    });
+    expect(refOf('other')).toBe('TreeDtoRef0');
+
+    // The recursive node took a free name and still points at itself.
+    const generated = refOf('root');
+    expect(generated).not.toBe('TreeDtoRef0');
+    expect(components[generated]).toBeDefined();
+    expect(JSON.stringify(components[generated])).toContain(generated);
+  });
 });
