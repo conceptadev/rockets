@@ -266,7 +266,7 @@ function carrierMetadataReaches(
   return false;
 }
 
-const CASES: ReadonlyArray<readonly [string, string, unknown]> = [
+const CASES: ReadonlyArray<readonly [string, string, object]> = [
   ['valid request', 'echo', { name: 'ana', age: 1 }],
   ['wrong input type', 'echo', { name: 'ana', age: '5' }],
   ['unknown key at top level', 'echo', { name: 'ana', age: 1, EVIL: 'x' }],
@@ -300,7 +300,7 @@ describe('contract declaration forms: native (A) vs carrier (B)', () => {
     await app.close();
   });
 
-  const post = async (path: string, body: unknown): Promise<string> => {
+  const post = async (path: string, body: object): Promise<string> => {
     const r = await request(app.getHttpServer()).post(path).send(body);
     return `${r.status} ${JSON.stringify(r.body)}`;
   };
