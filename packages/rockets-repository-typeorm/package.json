@@ -56,8 +56,8 @@
     "@concepta/rockets-core": "workspace:^"
   },
   "devDependencies": {
-    "@nestjs/common": "12.0.0-alpha.6",
-    "@nestjs/testing": "12.0.0-alpha.6",
+    "@nestjs/common": "12.0.1",
+    "@nestjs/testing": "12.0.1",
     "@nestjs/typeorm": "11.0.3",
     "typeorm": "^0.3.31",
     "typescript": "^5.4.0",
@@ -65,7 +65,7 @@
     "zod": "^4.4.3"
   },
   "peerDependencies": {
-    "@nestjs/common": "^12.0.0-alpha.0",
+    "@nestjs/common": "^12.0.1",
     "@nestjs/typeorm": "^11.0.0",
     "reflect-metadata": "^0.1.13 || ^0.2.0",
     "typeorm": "^0.3.0",

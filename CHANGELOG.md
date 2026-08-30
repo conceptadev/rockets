@@ -437,6 +437,18 @@ Per-package release notes live in `packages/*/CHANGELOG.md`.
 
 ### Changed
 
+- **NestJS 12 stable.** `@nestjs/common` / `core` / `platform-express` /
+  `testing` move from `12.0.0-alpha.6` to `12.0.1`, and `@nestjs/swagger` /
+  `cli` / `schematics` from their alphas to `12.0.0`. No source change was
+  needed: the public API report is byte-identical, so nothing Rockets
+  exposes shifted with the release.
+
+  `@nestjs/cqrs` deliberately stays on `11.0.3` even though `12.0.0` is
+  out. The `@concepta/nestjs-*` `8.0.0-alpha.9` packages declare
+  `@nestjs/cqrs: ^11.0.0` as a peer, so bumping it here would put every
+  consumer in an unsatisfiable peer range for a version upstream has not
+  claimed to support. It moves when upstream widens that range.
+
 - **A route that declares a schema and validates nothing no longer boots.**
   Nest installs no validator for `@Body/@Query/@Param({ schema })`; a
   hand-written route missing its `StandardSchemaValidationPipe` documented
