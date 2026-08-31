@@ -7,7 +7,7 @@ import type { ResourceKind } from './resource-kind.enum';
 import type {
   CrudRequestConfig,
   CrudResponseConfig,
-} from '../../infrastructure/crud-compat';
+} from '@concepta/nestjs-crud';
 import type { WhereCondition } from '@concepta/nestjs-repository';
 import type {
   OperationAclConfig,

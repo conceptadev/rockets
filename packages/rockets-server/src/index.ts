@@ -1,7 +1,6 @@
 // ── Re-export core contracts & tokens ──
 export {
   AUTH_ADAPTERS_TOKEN,
-  ROCKETS_DISABLE_GUARDS_TOKEN,
   AuthServerGuard,
   extractBearerToken,
   AuthPublic,

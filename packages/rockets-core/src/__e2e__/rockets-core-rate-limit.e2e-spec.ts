@@ -396,22 +396,15 @@ class CtxProbeRateLimitStore implements RateLimitStoreInterface {
 
   async consume(key: string): Promise<RateLimitResult> {
     const ctx = AppContextHost.from();
-    return this.txScope.run(
-      ctx,
-      async (txCtx) => {
-        await this.rows.create(
-          { key },
-          // The whole experiment: forwarded, this write joins the
-          // scope's transaction; omitted, it autocommits beside it.
-          this.forwardCtx ? { ctx: txCtx } : {},
-        );
-        throw new Error('probe: failing after the write, inside the scope');
-      },
-      // MANDATORY: fail-closed when this app has no transaction-capable
-      // adapter registered at all, rather than silently proceeding
-      // uncounted (CONFIGURATION.md §8a).
-      { propagation: 'MANDATORY' },
-    );
+    return this.txScope.run(ctx, async (txCtx) => {
+      await this.rows.create(
+        { key },
+        // The whole experiment: forwarded, this write joins the
+        // scope's transaction; omitted, it autocommits beside it.
+        this.forwardCtx ? { ctx: txCtx } : {},
+      );
+      throw new Error('probe: failing after the write, inside the scope');
+    });
   }
 }
 

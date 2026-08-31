@@ -1,5 +1,5 @@
 import { assertNoHiddenFields } from '../../../zod/zod-projections';
-import type { CrudResponseConfig } from '../../crud-compat';
+import type { CrudResponseConfig } from '@concepta/nestjs-crud';
 import type { ResourceDtoConfig } from '../../../domain/interfaces/rockets-resource-definition.interface';
 import {
   assertFailClosedResponse,

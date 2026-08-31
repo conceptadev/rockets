@@ -36,7 +36,6 @@ import {
   UsePipes,
 } from '@nestjs/common';
 import {
-  INTERCEPTORS_METADATA,
   METHOD_METADATA,
   PARAMTYPES_METADATA,
   PATH_METADATA,
@@ -44,10 +43,7 @@ import {
 } from '@nestjs/common/constants';
 import { RuntimeException } from '@concepta/nestjs-core';
 import { ContextIdFactory, ModuleRef } from '@nestjs/core';
-import {
-  Transactional,
-  TransactionInterceptor,
-} from '@concepta/nestjs-repository';
+import { Transactional, isTransactional } from '@concepta/nestjs-repository';
 import { catchError, isObservable, throwError, type Observable } from 'rxjs';
 import { AuthPublic } from '@concepta/nestjs-authentication';
 import {
@@ -589,11 +585,10 @@ function assertRegisteredRouteShape(
     );
   }
 
-  if (
-    declaredSse &&
-    (hasTransactionInterceptor(handler) ||
-      hasTransactionInterceptor(controllerClass))
-  ) {
+  // Handler first, then the class: a resource-level
+  // `decorators: [Transactional()]` applies to every route, and a
+  // route-level `Transactional(false)` opts that one route back out.
+  if (declaredSse && isTransactional(handler, controllerClass)) {
     throw new Error(
       `operationResource: SSE operation "${operation.key}" combines ` +
         `\`responseMode: "sse"\` with Transactional(). The handler returns ` +
@@ -617,34 +612,6 @@ function normalizeRoutePath(value: unknown): string {
     return '/';
   }
   return value.startsWith('/') ? value : `/${value}`;
-}
-
-/**
- * Whether `Transactional()` reached this route — passed either the
- * route handler or the controller class, because `UseInterceptors`
- * writes the same key on both and a resource-level
- * `decorators: [Transactional()]` applies to every route on the class.
- *
- * Detected through the interceptor CLASS it registers rather than its
- * metadata key: upstream exports `TransactionInterceptor` and
- * `Transactional`, but not the `TRANSACTIONAL_KEY` symbol the decorator
- * writes, so the class reference is the only public identity available.
- * `Transactional(false)` — the opt-OUT — registers no interceptor and is
- * correctly not flagged.
- */
-function hasTransactionInterceptor(target: object): boolean {
-  const interceptors: unknown = Reflect.getMetadata(
-    INTERCEPTORS_METADATA,
-    target,
-  );
-  if (!Array.isArray(interceptors)) {
-    return false;
-  }
-  return interceptors.some(
-    (interceptor: unknown) =>
-      interceptor === TransactionInterceptor ||
-      interceptor instanceof TransactionInterceptor,
-  );
 }
 
 function describeRequestMethod(value: unknown): string {

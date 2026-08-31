@@ -264,9 +264,9 @@ describe('RocketsModule — defineResource() bundle (e2e)', () => {
       },
     });
 
-    // Upstream `CrudInitApiBody` inlines request bodies; core's
-    // `restoreNamedRequestBodies` drops that stamp wherever the body schema
-    // is named, so the body is `$ref`'d like every response.
+    // Since nestjs-modules#467 upstream stamps the body as
+    // `ApiBody({ standardSchema })`, so it goes through the document
+    // converter and is `$ref`'d like every response.
     expect(document.paths['/gadgets']?.post?.requestBody).toMatchObject({
       required: true,
       content: {

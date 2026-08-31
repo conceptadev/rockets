@@ -16,11 +16,11 @@ import { CLASS_SERIALIZER_OPTIONS } from '@nestjs/common/serializer/class-serial
 import { z } from 'zod';
 import { DECORATORS } from '@nestjs/swagger';
 import { CrudEntity } from '@concepta/nestjs-crud';
+import { isAuthPublic } from '@concepta/nestjs-authentication';
 
 import { findOpenResponseObject } from '../../common/utils/open-api-schema.util';
 import { hasHiddenResponseField } from '../../zod/zod-projections';
 
-import { ROCKETS_DISABLE_GUARDS_TOKEN } from '../../rockets-core.constants';
 import { ROCKETS_AUTH_SESSION_TOKEN } from '../../decorators/auth-session.decorator';
 import { aclMetadataKeys } from './acl-metadata-keys';
 import type {
@@ -80,7 +80,7 @@ export function collectRouteAudit(args: {
 
   for (const { controller, methodNames } of args.controllers) {
     const basePaths = readPaths(controller);
-    const classPublic = readPublic(controller);
+    const classPublic = isAuthPublic(controller);
 
     for (const methodName of methodNames) {
       const handler = readHandler(controller, methodName);
@@ -91,7 +91,7 @@ export function collectRouteAudit(args: {
 
       const method = METHOD_NAMES[httpMethod] ?? String(httpMethod);
       const authentication = resolveAuth(
-        readPublic(handler),
+        isAuthPublic(handler),
         classPublic,
         appIsUnguarded,
       );
@@ -188,29 +188,20 @@ export function collectRouteAudit(args: {
  * as the author's intent and is preserved.
  */
 function resolveAuth(
-  handlerPublic: unknown,
-  classPublic: unknown,
+  handlerPublic: boolean,
+  classPublic: boolean,
   appIsUnguarded: boolean,
 ): RouteAuthState {
-  if (isPublic(handlerPublic)) return 'public';
-  if (isPublic(classPublic)) return 'public-class';
+  if (handlerPublic) return 'public';
+  if (classPublic) return 'public-class';
   return appIsUnguarded ? 'unguarded-app' : 'guarded';
-}
-
-/**
- * Upstream `AuthPublic({ classLevel: true })` stores the sentinel string
- * rather than `true`, so its own guard can tell a deliberate class-wide
- * choice from an accidental one. Both disable the guard.
- */
-function isPublic(value: unknown): boolean {
-  return value === true || value === 'classLevel';
 }
 
 function readSession(target: object): unknown {
   return Reflect.getMetadata(ROCKETS_AUTH_SESSION_TOKEN, target);
 }
 
-/** Same `true | 'classLevel'` sentinel shape as `isPublic`. */
+/** Same `true | 'classLevel'` sentinel shape upstream `AuthPublic` uses. */
 function isSession(handlerValue: unknown, classValue: unknown): boolean {
   return (
     handlerValue === true ||
@@ -236,10 +227,6 @@ function readHost(target: object): string | undefined {
   if (value === undefined) return undefined;
   const list = Array.isArray(value) ? value : [value];
   return list.map(String).sort().join(',') || undefined;
-}
-
-function readPublic(target: object): unknown {
-  return Reflect.getMetadata(ROCKETS_DISABLE_GUARDS_TOKEN, target);
 }
 
 function readHandler(

@@ -130,10 +130,8 @@ export class RocketsCoreExceptionsFilter implements ExceptionFilter {
     // (raised by a hook or deeper layer to express an authorization or
     // validation failure), surface that exception directly so the client
     // sees the intended status (401/403/400) instead of an opaque 500.
-    //
-    // Upstream RuntimeException subclasses currently lose `originalError`
-    // while rebuilding their context. Guards and pipes avoid that wrapping for
-    // pre-handler validation that must preserve a 4xx response.
+    // Guards and pipes run before that wrapping, so pre-handler validation
+    // reaches here as its own 4xx already.
     const unwrapped =
       this.unwrapToHttpException(rawException) ??
       this.unwrapToClientRuntimeException(rawException);
@@ -143,11 +141,10 @@ export class RocketsCoreExceptionsFilter implements ExceptionFilter {
     let errorCode = 'ERROR_CODE_UNKNOWN';
     let statusCode = 500;
     let message: unknown = ERROR_MESSAGE_FALLBACK;
-    // Read for EVERY exception type, not only HttpException: the
-    // documented hook guidance is to throw RepositoryQueryException
-    // with an httpStatus, and a consumer following it would otherwise
-    // attach details this filter silently drops. Unwrapped first, raw
-    // second, so a wrapped hook 400 keeps its findings.
+    // Read for EVERY exception type, not only HttpException: a hook is
+    // free to throw a `RuntimeException` carrying its own httpStatus and
+    // details, which this filter would otherwise silently drop. Unwrapped
+    // first, raw second, so a wrapped hook 400 keeps its findings.
     let details: readonly RocketsErrorDetail[] | undefined =
       readErrorDetails(exception) ?? readErrorDetails(rawException);
 
@@ -250,14 +247,11 @@ export class RocketsCoreExceptionsFilter implements ExceptionFilter {
    * if the chain contains no `HttpException` (the original exception
    * already represents the right shape).
    *
-   * NOTE: upstream `RepositoryQueryException` loses `context.originalError`
-   * due to a constructor pattern bug (`Object.assign({}, super.context, …)`
-   * where `super.context` evaluates to undefined for instance properties).
-   * This is compensated by `defineHook` which pre-wraps `HttpException`s as
-   * `RepositoryQueryException` and grafts `originalError` onto context
-   * AFTER construction. Class-based hooks that cannot do this should throw
-   * a `RepositoryQueryException` directly with the appropriate `httpStatus`
-   * rather than throwing `HttpException` — those surface via
+   * A hook — functional or class-based — throws its own domain exception.
+   * The upstream membrane wraps it in `RepositoryQueryException` with the
+   * original on `context.originalError`, which is what this walk follows.
+   * A hook that prefers to carry its own status may still throw a
+   * `RuntimeException` with an `httpStatus`; those surface via
    * `unwrapToRuntimeException` below.
    */
   protected unwrapToHttpException(
@@ -268,9 +262,8 @@ export class RocketsCoreExceptionsFilter implements ExceptionFilter {
 
   /**
    * Walk the exception chain to find the innermost `RuntimeException` with
-   * a 4xx `httpStatus`. This surfaces domain exceptions thrown from
-   * repository hooks that cannot propagate `HttpException` through the
-   * membrane (upstream wrapping loses `originalError` — see above).
+   * a 4xx `httpStatus`. This surfaces a hook that carries its own status
+   * on a `RuntimeException` rather than throwing an `HttpException`.
    * Returns `undefined` if no 4xx `RuntimeException` is found.
    */
   protected unwrapToClientRuntimeException(

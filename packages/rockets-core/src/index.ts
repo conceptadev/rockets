@@ -23,7 +23,6 @@ export {
 // Auth tokens & guard
 export {
   AUTH_ADAPTERS_TOKEN,
-  ROCKETS_DISABLE_GUARDS_TOKEN,
   CSRF_GUARD_OPTIONS_TOKEN,
 } from './rockets-core.constants';
 export { AuthServerGuard } from './infrastructure/guards/auth-server.guard';
@@ -266,7 +265,6 @@ export {
 } from './infrastructure/resource/define-sub-resource';
 export type { RocketsSubResourceInput } from './infrastructure/resource/define-sub-resource';
 export { PathScopeHook } from './infrastructure/hooks/path-scope.hook';
-export { RocketsCrudAdapter } from './infrastructure/crud/rockets-crud.adapter';
 export type { RocketsUserMetadataConfig } from './domain/interfaces/rockets-user-metadata-config.interface';
 export {
   relation,

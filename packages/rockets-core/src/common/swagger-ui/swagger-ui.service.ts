@@ -7,8 +7,6 @@ import {
 } from '@nestjs/swagger';
 
 import { SwaggerUiSettingsInterface } from './interfaces/swagger-ui-settings.interface';
-import { liftInlineRequestBodyDefinitions } from './lift-inline-definitions';
-import { restoreNamedRequestBodies } from './restore-named-request-bodies';
 import { createRocketsStandardSchemaConverter } from './rockets-standard-schema.converter';
 import {
   SWAGGER_UI_MODULE_DOCUMENT_BUILDER_TOKEN,
@@ -53,24 +51,12 @@ export class SwaggerUiService {
     documentOptions?: SwaggerDocumentOptions,
   ): OpenAPIObject {
     const options = documentOptions ?? this.settings?.documentOptions;
-    // Generated CRUD bodies are stamped inline by upstream; drop that stamp
-    // wherever the route's own `@Body({ schema })` is named, so the body is
-    // documented through the converter like every other schema.
-    restoreNamedRequestBodies(app);
-    const document = SwaggerModule.createDocument(
-      app,
-      this.documentBuilder.build(),
-      {
-        ...options,
-        standardSchemaConverter:
-          options?.standardSchemaConverter ??
-          createRocketsStandardSchemaConverter(),
-      },
-    );
-    // A body that stayed inline (no named `@Body({ schema })` behind it —
-    // `validation: false`, an unnamed schema) can still carry raw
-    // `definitions`; lift them so no `#/definitions/*` ref dangles.
-    return liftInlineRequestBodyDefinitions(document);
+    return SwaggerModule.createDocument(app, this.documentBuilder.build(), {
+      ...options,
+      standardSchemaConverter:
+        options?.standardSchemaConverter ??
+        createRocketsStandardSchemaConverter(),
+    });
   }
 
   setup(app: INestApplication): void {

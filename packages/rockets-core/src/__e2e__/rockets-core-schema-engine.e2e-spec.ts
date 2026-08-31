@@ -407,11 +407,12 @@ describe('schema engine — validation, serialization, OpenAPI (e2e)', () => {
     });
 
     /**
-     * Upstream `CrudInitApiBody` stamps generated CRUD bodies as an INLINE
-     * `ApiBody({ schema })` that Swagger merges over the reflected
-     * `@Body({ schema })` (conceptadev/nestjs-modules#467). Rockets drops
-     * that stamp wherever the route's own body schema is named, so the
-     * body is `$ref`'d and its component exists like every response.
+     * Generated CRUD bodies go through the document converter like every
+     * response, so each is a `$ref` to its own component. Upstream
+     * stamped them as an INLINE `ApiBody({ schema })` that Swagger merged
+     * over the reflected `@Body({ schema })` until
+     * conceptadev/nestjs-modules#467; `8.0.0-alpha.10` stamps
+     * `ApiBody({ standardSchema })` instead.
      */
     it('generated CRUD request bodies are $ref components (create / update / replace)', () => {
       const document = app.get(SwaggerUiService).createDocument(app);

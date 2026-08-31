@@ -14,9 +14,9 @@
  *     projection that is deliberately thinner than the read one).
  *  3. The overrides reach the OpenAPI document, not just runtime
  *     behaviour, and the untouched operations keep the derived schemas.
- *     Output overrides are `$ref`'d components; request bodies are
- *     inlined on the route (upstream's `CrudInitApiBody` stamps the
- *     bridged JSON Schema directly), so body assertions read the route.
+ *     Both sides are `$ref`'d components — since nestjs-modules#467
+ *     upstream documents CRUD bodies through the converter like every
+ *     response — so body assertions resolve the ref into `components`.
  *
  * The last block covers the same behaviour on the CLASS path. Per-operation
  * `output` was accepted there but never reached the route: upstream reads
@@ -373,7 +373,11 @@ describe('zodResource per-operation input/output (e2e)', () => {
     readonly additionalProperties?: unknown;
   }
 
-  /** The inlined JSON Schema of a route's request body. */
+  /**
+   * The JSON Schema of a route's request body, resolved through its
+   * component. Upstream documents generated CRUD bodies as a `$ref` to
+   * `components/schemas/<id>` (nestjs-modules#467), the same as responses.
+   */
   const requestBody = (path: string, method: 'post' | 'patch' | 'put') => {
     const route = paths[path] as
       | Record<
@@ -386,7 +390,18 @@ describe('zodResource per-operation input/output (e2e)', () => {
     if (schema === undefined) {
       throw new Error(`no request body documented on ${method} ${path}`);
     }
-    return schema as JsonSchemaLike;
+    const ref = (schema as { $ref?: unknown }).$ref;
+    if (typeof ref !== 'string') {
+      throw new Error(
+        `request body on ${method} ${path} is inlined, expected a $ref`,
+      );
+    }
+    const id = ref.replace('#/components/schemas/', '');
+    const component = components[id];
+    if (component === undefined) {
+      throw new Error(`request body component "${id}" is not registered`);
+    }
+    return component as JsonSchemaLike;
   };
 
   beforeAll(async () => {

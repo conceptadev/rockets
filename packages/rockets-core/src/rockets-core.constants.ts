@@ -8,10 +8,6 @@ export const ROCKETS_CORE_SETTINGS_TOKEN =
  */
 export const AUTH_ADAPTERS_TOKEN = Symbol('ROCKETS_AUTH_ADAPTERS');
 
-/** Must match the upstream AuthPublic metadata key for interoperability. */
-export const ROCKETS_DISABLE_GUARDS_TOKEN =
-  'AUTHENTICATION_MODULE_DISABLE_GUARDS_TOKEN';
-
 export const USER_METADATA_MODULE_ENTITY_KEY = 'userMetadata';
 
 export const USER_MODULE_USER_ENTITY_KEY = 'user';
